@@ -13,6 +13,7 @@
 - src/engine is pure TypeScript: no React, no DOM, no browser APIs, no Math.random, no Date.now.
 - All randomness goes through the seeded rng stored in the life state.
 - Game content lives in src/content as YAML. Never hardcode events, jobs, names or other content in code or UI.
+- Exception: fixed interface words for built-in values (wealth levels, relationship labels such as Mother, Father or Parent, housing types) live in one file, src/ui/labels.ts. Anything story-like belongs in content.
 - Tuning numbers (rates, curves, budgets, prices, odds) live in src/content/balance as YAML, never inline in code.
 - The UI reads state through selectors and changes it only through store actions that call the engine.
 - Persistence code lives only in src/persistence.

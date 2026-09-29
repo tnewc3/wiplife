@@ -14,7 +14,7 @@ import { ScoreSlider } from '../../components/ScoreSlider';
 import { TextField } from '../../components/TextField';
 import { ATTRACTION_LABELS, STAT_LABELS, TRAIT_LABELS, WEALTH_LABELS } from '../../labels';
 import {
-  defaultPronounChoice,
+  changeCategory,
   draftPronouns,
   errorsForStep,
   initialDraft,
@@ -81,14 +81,7 @@ function IdentityStep({ draft, update, errors }: StepProps) {
         columns={3}
         error={errors['identity.genderCategory']}
         choices={GENDER_CATEGORIES.map((c) => ({ value: c, label: options.categories[c].label }))}
-        onChange={(genderCategory) =>
-          update({
-            genderCategory,
-            genderIdentity: draft.genderIdentity || (options.categories[genderCategory].identities[0] ?? ''),
-            genderExpression: draft.genderExpression || options.categories[genderCategory].defaultExpression,
-            pronounChoice: draft.pronounChoice ?? defaultPronounChoice(content, genderCategory),
-          })
-        }
+        onChange={(genderCategory) => update(changeCategory(draft, genderCategory, content))}
       />
       <p className="-mt-3 text-sm text-muted">This decides who you can be matched with romantically. Everything else is up to you.</p>
 

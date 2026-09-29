@@ -228,7 +228,7 @@ interface LifeState {
   scheduled: ScheduledEvent[];
   pending: EventInstance[];
   history: HistoryEntry[];
-  inputLog: InputRecord[];             // every player input, for exact replay
+  inputLog: InputRecord[];             // every player input, for exact replay; written by the engine
   lineage: { generation: number; parentLifeId?: Id };  // for heir play later
 }
 
@@ -238,6 +238,8 @@ interface InputRecord {
   payload: Record<string, unknown>;    // e.g. { instanceId, choiceId } or { actionId, params }
 }
 ```
+
+The input log is written by the engine, not the store: each engine function that takes a player input (`createLife`, and later age-ups, choices and actions) appends its own record, so a life can never be changed without its input being logged.
 
 #### Character
 
@@ -493,7 +495,7 @@ The other content types follow the same pattern:
 | Legal | Events | Career (hiring), housing, events, pacing |
 | Flags and event log | Events | Events (conditions, cooldowns) |
 | Scheduled and pending | Event engine | Pacing director, UI |
-| Input log | Store (every engine call from the player) | Replay tool, diagnostic report |
+| Input log | Engine (each engine function records its own input) | Replay tool, diagnostic report |
 | History | Event engine, systems (milestones) | Life history screen, obituary, archive |
 
 ### Ready for heir play
@@ -588,6 +590,7 @@ Every coding-AI prompt assumes this file exists at the repo root.
 - src/engine is pure TypeScript: no React, no DOM, no browser APIs, no Math.random, no Date.now.
 - All randomness goes through the seeded rng stored in the life state.
 - Game content lives in src/content as YAML. Never hardcode events, jobs, names or other content in code or UI.
+- Exception: fixed interface words for built-in values (wealth levels, relationship labels such as Mother, Father or Parent, housing types) live in one file, src/ui/labels.ts. Anything story-like belongs in content.
 - Tuning numbers (rates, curves, budgets, prices, odds) live in src/content/balance as YAML, never inline in code.
 - The UI reads state through selectors and changes it only through store actions that call the engine.
 - Persistence code lives only in src/persistence.
@@ -701,7 +704,7 @@ Meet every Stage 1 acceptance criterion and write the listed tests. When finishe
 - Name pools.
 - Rolls for hidden values, talent and latent traits (for both random and custom characters).
 - Store connection and autosave.
-- Input log recording from the first input.
+- Input log recording from the first input: `createLife` records its own options as the first entry.
 
 **Data:** `LifeState` (every later system's section present with empty defaults), `Character`, `Identity`, `Pronouns`, `Person`, `Relationship` (family only), `NamePool`.
 
@@ -743,7 +746,7 @@ Build only Stage 2:
 - Implement the family generator (parents, optional siblings) with believable ages and full identities.
 - Add name pools as YAML content with Zod schemas.
 - Roll hidden values, talent and latent traits for both random and custom characters.
-- Connect the store to the engine and autosave through the persistence module. Record every player input in the life's inputLog (section N).
+- Connect the store to the engine and autosave through the persistence module. Each engine function records its own player input in the life's inputLog (section N); the store does not write it.
 - Build the New Life screen, the multi-step Custom creation flow (free-text gender identity and expression, gender category, pronoun presets plus fully custom entry, attraction, family, city, family wealth, unrestricted stat and personality sliders), the Home screen with stat bars (no numbers), and Continue on the title screen.
 - Remove the Stage 1 "Preview the game layout" button from the New Life screen.
 

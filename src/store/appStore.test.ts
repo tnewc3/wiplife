@@ -91,6 +91,31 @@ describe('app store: lives', () => {
     expect(restarted.getState().life).toEqual(life);
   });
 
+  it('restores the backup when the saved life breaks an invariant', async () => {
+    const { db, options, store } = setup();
+    await store.getState().init();
+    await store.getState().startRandomLife();
+    const first = store.getState().life;
+    await store.getState().startRandomLife();
+
+    // Damage the active save so it is well-formed but impossible.
+    const active = (await db.lives.get('active'))!;
+    const data = active.envelope.data as { character: { age: number } };
+    data.character.age = 40;
+    await db.lives.put(active);
+
+    const restarted = createAppStore(options);
+    await restarted.getState().init();
+    expect(restarted.getState().savedLifeStatus).toBe('recovered');
+    expect(restarted.getState().life).toEqual(first);
+
+    // The restored life is saved again, so the next launch loads it normally.
+    const again = createAppStore(options);
+    await again.getState().init();
+    expect(again.getState().savedLifeStatus).toBe('ok');
+    expect(again.getState().life).toEqual(first);
+  });
+
   it('ignores a second start while the first is still running', async () => {
     const { db, store } = setup();
     await store.getState().init();

@@ -205,6 +205,8 @@ All stats run from 0 to 100.
 
 Name, gender identity, gender expression, pronouns (subject, object, possessive, reflexive), orientation, birth year, city, appearance descriptors, and family background. Each identity field has a current value and can also have a hidden latent value (see self-discovery below).
 
+Birth year is always the year the life starts; there is no birth-year picker.
+
 The game speaks to the player as "you," so the player's pronouns mainly appear when NPCs talk about them and in the obituary. NPCs always use their own pronouns.
 
 ### Core attributes (visible)

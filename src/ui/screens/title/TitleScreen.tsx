@@ -27,6 +27,13 @@ export function TitleScreen() {
           </Card>
         )}
 
+        {savedLifeStatus === 'recovered' && life && (
+          <Card className="w-full max-w-xs text-left text-sm" role="status">
+            <p className="font-semibold">Your last save was damaged.</p>
+            <p className="mt-1 text-muted">We restored an earlier backup, so you may have lost a little progress.</p>
+          </Card>
+        )}
+
         <nav className="flex w-full max-w-xs flex-col gap-3" aria-label="Main menu">
           {life && (
             <Button size="lg" block onClick={continueLife} aria-describedby="continue-who">

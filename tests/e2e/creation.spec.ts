@@ -130,3 +130,52 @@ test('reset all data removes the saved life', async ({ page }) => {
   await page.getByRole('button', { name: 'I’m 18 or older' }).click();
   await expect(page.getByRole('button', { name: 'Continue' })).toHaveCount(0);
 });
+
+test('a damaged save is restored from the backup, with a notice once', async ({ page }) => {
+  await passAgeGate(page);
+  await page.getByRole('button', { name: 'New Life' }).click();
+  await page.getByRole('button', { name: 'Start a random life' }).click();
+  const first = await homeName(page);
+
+  // A second life makes the first one the backup.
+  await page.getByRole('button', { name: 'More' }).click();
+  await page.getByRole('button', { name: 'Back to title' }).click();
+  await page.getByRole('button', { name: 'New Life' }).click();
+  await page.getByRole('button', { name: 'Start a random life' }).click();
+  await page.getByRole('dialog', { name: 'Start a new life?' }).getByRole('button', { name: 'Start a new life' }).click();
+  await expect(page.getByTestId('character-name')).toBeVisible();
+
+  // Damage the active save: an empty first name.
+  await page.evaluate(
+    () =>
+      new Promise<void>((resolve, reject) => {
+        const open = indexedDB.open('wiplife');
+        open.onerror = () => reject(open.error);
+        open.onsuccess = () => {
+          const store = open.result.transaction('lives', 'readwrite').objectStore('lives');
+          const get = store.get('active');
+          get.onsuccess = () => {
+            const row = get.result as { envelope: { data: { character: { name: { first: string } } } } };
+            row.envelope.data.character.name.first = '';
+            const put = store.put(row);
+            put.onsuccess = () => {
+              open.result.close();
+              resolve();
+            };
+            put.onerror = () => reject(put.error);
+          };
+        };
+      }),
+  );
+
+  await page.reload();
+  await expect(page.getByRole('status').filter({ hasText: 'Your last save was damaged.' })).toBeVisible();
+  await expect(page.getByText(`${first} · Newborn`)).toBeVisible();
+  await page.getByRole('button', { name: 'Continue' }).click();
+  expect(await homeName(page)).toBe(first);
+
+  // The restored life is saved, so the notice doesn't come back.
+  await page.reload();
+  await expect(page.getByRole('button', { name: 'Continue' })).toBeVisible();
+  await expect(page.getByText('Your last save was damaged.')).toHaveCount(0);
+});
