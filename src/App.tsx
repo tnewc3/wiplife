@@ -4,9 +4,10 @@ import { Button } from './ui/components/Button';
 import { Screen } from './ui/components/Screen';
 import { UpdatePrompt } from './ui/components/UpdatePrompt';
 import { AgeGateScreen } from './ui/screens/ageGate/AgeGateScreen';
+import { CustomLifeScreen } from './ui/screens/custom/CustomLifeScreen';
+import { GameScreen } from './ui/screens/game/GameScreen';
 import { NewLifeScreen } from './ui/screens/newLife/NewLifeScreen';
 import { SettingsScreen } from './ui/screens/settings/SettingsScreen';
-import { ShellScreen } from './ui/screens/shell/ShellScreen';
 import { TitleScreen } from './ui/screens/title/TitleScreen';
 import { useApplyTheme } from './ui/theme/useApplyTheme';
 
@@ -15,6 +16,7 @@ function CurrentScreen() {
   const error = useAppStore((s) => s.error);
   const ageConfirmed = useAppStore((s) => s.settings.ageConfirmed);
   const screen = useAppStore((s) => s.screen);
+  const life = useAppStore((s) => s.life);
 
   if (status === 'loading') return <div className="h-dvh bg-bg" aria-busy="true" />;
   if (status === 'error') {
@@ -39,8 +41,10 @@ function CurrentScreen() {
       return <NewLifeScreen />;
     case 'settings':
       return <SettingsScreen />;
-    case 'shell':
-      return <ShellScreen />;
+    case 'custom':
+      return <CustomLifeScreen />;
+    case 'game':
+      return life ? <GameScreen life={life} /> : <TitleScreen />;
   }
 }
 

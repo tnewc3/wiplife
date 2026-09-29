@@ -1,4 +1,4 @@
-import { mkdtemp, mkdir, rm, writeFile } from 'node:fs/promises';
+import { cp, mkdtemp, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -11,6 +11,7 @@ const validCity = `
 id: test_city
 countryId: us
 name: Test City
+blurb: A place for tests
 costOfLiving: 1.0
 baseRent: 12000
 baseHomePrice: 200000
@@ -24,8 +25,9 @@ jobMarket:
 let dir: string;
 
 beforeEach(async () => {
+  // Start from a copy of the real content, then break one thing per test.
   dir = await mkdtemp(path.join(os.tmpdir(), 'wiplife-content-'));
-  await mkdir(path.join(dir, 'cities'));
+  await cp(realContentDir, dir, { recursive: true, filter: (src) => !src.includes('compiled') });
 });
 
 afterEach(async () => {
@@ -49,12 +51,17 @@ async function expectErrors(): Promise<string> {
 }
 
 describe('content build with the real content', () => {
-  it('compiles the five cities from the design doc', async () => {
+  it('compiles every content type', async () => {
     const result = await compileContent({ contentDir: realContentDir, appVersion: '1.2.3' });
     if (!result.ok) throw new Error(formatErrors(result.errors));
     expect(Object.keys(result.bundle.cities)).toEqual(['chicago', 'houston', 'los_angeles', 'nyc', 'small_town']);
     expect(result.bundle.contentVersion).toMatch(/^1\.2\.3\+[0-9a-f]{10}$/);
     for (const city of Object.values(result.bundle.cities)) expect(city.countryId).toBe('us');
+    expect(Object.keys(result.bundle.names)).toEqual(['us']);
+    expect(Object.keys(result.bundle.pronouns)).toContain('they_them');
+    expect(Object.keys(result.bundle.talents).length).toBeGreaterThan(0);
+    expect(result.bundle.balance.creation.family.siblingWeights.length).toBeGreaterThan(0);
+    expect(result.bundle.character.appearance.groups.length).toBeGreaterThan(0);
   });
 });
 
@@ -159,6 +166,39 @@ describe('content build with fixture files', () => {
     const result = await compile();
     if (result.ok) throw new Error('expected failure');
     expect(new Set(result.errors.map((e) => e.file))).toEqual(new Set(['cities/test_city.yaml', 'cities/second.yaml']));
+  });
+
+  it('reports a missing required file', async () => {
+    await rm(path.join(dir, 'balance', 'creation.yaml'));
+    expect(await expectErrors()).toContain('balance/creation.yaml: required file is missing');
+  });
+
+  it('rejects unknown files in a single-file folder', async () => {
+    await write('balance/creatoin.yaml', 'a: 1\n');
+    expect(await expectErrors()).toContain('balance/creatoin.yaml: unknown file in balance/');
+  });
+
+  it('rejects a pronoun preset missing a form', async () => {
+    const file = path.join(dir, 'pronouns', 'xe_xem.yaml');
+    await writeFile(file, (await readFile(file, 'utf8')).replace(/^reflexive: .*$/m, ''));
+    expect(await expectErrors()).toContain('pronouns/xe_xem.yaml: reflexive');
+  });
+
+  it('rejects a balance reference to an unknown pronoun preset', async () => {
+    const file = path.join(dir, 'balance', 'creation.yaml');
+    await writeFile(file, (await readFile(file, 'utf8')).replace('he_him: 97', 'hee_him: 97'));
+    expect(await expectErrors()).toContain('pronouns.man: unknown pronoun preset "hee_him"');
+  });
+
+  it('rejects a city whose country has no name pool', async () => {
+    await rm(path.join(dir, 'names', 'us.yaml'));
+    expect(await expectErrors()).toContain('no name pool for country "us"');
+  });
+
+  it('rejects ranges whose min is above max', async () => {
+    const file = path.join(dir, 'balance', 'creation.yaml');
+    await writeFile(file, (await readFile(file, 'utf8')).replace('personalityShift: { min: 25, max: 50 }', 'personalityShift: { min: 60, max: 50 }'));
+    expect(await expectErrors()).toContain('latent.personalityShift: min (60) is greater than max (50)');
   });
 
   it('rejects aliases that collide with an existing id', async () => {

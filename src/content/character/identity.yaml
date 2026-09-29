@@ -1,0 +1,32 @@
+# Identity words. Random characters start with one of their category's
+# identities and its default expression. Custom creation offers the
+# suggestions below but accepts any text.
+categories:
+  man:
+    label: Man
+    identities: [man]
+    defaultExpression: masculine
+  woman:
+    label: Woman
+    identities: [woman]
+    defaultExpression: feminine
+  nonbinary:
+    label: Nonbinary
+    identities: [nonbinary, genderfluid, agender, genderqueer]
+    defaultExpression: androgynous
+identitySuggestions:
+  - man
+  - woman
+  - nonbinary
+  - trans man
+  - trans woman
+  - genderfluid
+  - agender
+  - genderqueer
+  - questioning
+expressions:
+  - masculine
+  - feminine
+  - androgynous
+  - gender-neutral
+  - fluid

@@ -3,6 +3,7 @@
 id: nyc
 countryId: us
 name: New York
+blurb: "Very expensive · Top professional jobs"
 costOfLiving: 1.6
 baseRent: 36000
 baseHomePrice: 780000

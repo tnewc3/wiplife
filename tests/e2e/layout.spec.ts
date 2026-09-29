@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-import { passAgeGate } from './helpers';
+import { createCustomLife, LONG_NAME_LIFE, passAgeGate } from './helpers';
 
 const sizes = [
   { name: 'small phone', width: 360, height: 640 },
@@ -47,7 +47,18 @@ for (const size of sizes) {
     await expectTouchTargets(page);
 
     await page.getByRole('button', { name: 'New Life' }).click();
-    await page.getByRole('button', { name: 'Preview the game layout' }).click();
+    await expectNoHorizontalScroll(page);
+    await expectTouchTargets(page);
+
+    // Every custom creation step fits, with a very long name and custom pronouns.
+    await createCustomLife(page, LONG_NAME_LIFE, async () => {
+      await expectNoHorizontalScroll(page);
+      await expectTouchTargets(page);
+    });
+    await expect(page.getByTestId('character-name')).toContainText(LONG_NAME_LIFE.last);
+    await expectNoHorizontalScroll(page);
+    await expectTouchTargets(page);
+
     const nav = page.getByRole('navigation', { name: 'Game sections' });
     await expect(nav).toBeInViewport({ ratio: 1 });
     const box = await nav.boundingBox();

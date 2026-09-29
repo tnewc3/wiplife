@@ -18,12 +18,12 @@ test('declining the age gate blocks the game and is not remembered', async ({ pa
   await expect(page.getByRole('heading', { name: 'Content notice' })).toBeVisible();
 });
 
-test('New Life shows coming soon and the placeholder game layout', async ({ page }) => {
+test('the game layout has five tabs and no preview button', async ({ page }) => {
   await passAgeGate(page);
   await page.getByRole('button', { name: 'New Life' }).click();
-  await expect(page.getByText('Coming soon')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Preview the game layout' })).toHaveCount(0);
 
-  await page.getByRole('button', { name: 'Preview the game layout' }).click();
+  await page.getByRole('button', { name: 'Start a random life' }).click();
   const nav = page.getByRole('navigation', { name: 'Game sections' });
   for (const tab of ['Life', 'People', 'Work/School', 'Money', 'More']) {
     await nav.getByRole('button', { name: tab }).click();

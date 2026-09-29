@@ -2,6 +2,7 @@
 id: chicago
 countryId: us
 name: Chicago
+blurb: "Moderate costs · Strong jobs across the board"
 costOfLiving: 1.1
 baseRent: 21600
 baseHomePrice: 330000

@@ -1,0 +1,33 @@
+# Appearance descriptors. A character gets one option from each group and
+# sometimes one extra feature. Written to read naturally after "You have".
+groups:
+  - id: hair
+    label: Hair
+    options:
+      - black hair
+      - dark brown hair
+      - brown hair
+      - light brown hair
+      - blond hair
+      - red hair
+      - auburn hair
+      - curly black hair
+      - wavy brown hair
+  - id: eyes
+    label: Eyes
+    options:
+      - dark brown eyes
+      - brown eyes
+      - hazel eyes
+      - green eyes
+      - blue eyes
+      - gray eyes
+      - amber eyes
+features:
+  - freckles
+  - dimples
+  - a birthmark
+  - long eyelashes
+  - a cowlick
+  - a crooked smile
+  - rosy cheeks
