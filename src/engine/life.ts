@@ -5,6 +5,7 @@
 import type { ContentBundle } from '../content/schemas';
 import {
   activeIds,
+  completeAppearance,
   rollAppearance,
   rollGenderCategory,
   rollHidden,
@@ -75,7 +76,7 @@ export function createLife(input: CreateLifeOptions, content: ContentBundle): Li
         attractedTo: [...custom.identity.attractedTo],
       },
       latent: {},
-      appearance: { descriptors: [...custom.appearance.descriptors] },
+      appearance: { descriptors: completeAppearance(rng, content, custom.appearance.descriptors) },
       stats: { ...custom.stats },
       personality: { ...custom.personality },
       hidden: rollHidden(rng, content),

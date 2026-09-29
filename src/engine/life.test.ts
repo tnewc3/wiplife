@@ -108,12 +108,27 @@ describe('createLife (custom)', () => {
     expect(c.personality).toEqual(input.personality);
     expect(c.cityId).toBe('chicago');
     expect(c.familyWealth).toBe('working');
-    expect(c.appearance.descriptors).toEqual(['red hair', 'freckles']);
+    const eyes = content.character.appearance.groups.find((g) => g.id === 'eyes')!.options;
+    // Hair was chosen; eyes were left to chance, so they are rolled.
+    expect(c.appearance.descriptors).toHaveLength(3);
+    expect(c.appearance.descriptors[0]).toBe('red hair');
+    expect(eyes).toContain(c.appearance.descriptors[1]);
+    expect(c.appearance.descriptors[2]).toBe('freckles');
     const family = getFamily(life);
     expect(family.filter((m) => m.relationship.kind === 'parent')).toHaveLength(2);
     expect(family.filter((m) => m.relationship.kind === 'sibling')).toHaveLength(2);
     for (const member of family) expect(member.person.name.last === 'Okafor' || member.relationship.kind === 'parent').toBe(true);
     expect(checkInvariants(life, content)).toEqual([]);
+  });
+
+  it('rolls every appearance group left to chance', () => {
+    const { groups } = content.character.appearance;
+    const life = createLife(
+      { mode: 'custom', seed: 'looks', birthYear: BIRTH_YEAR, custom: customInput({ appearance: { descriptors: [] } }) },
+      content,
+    );
+    expect(life.character.appearance.descriptors).toHaveLength(groups.length);
+    groups.forEach((g, i) => expect(g.options).toContain(life.character.appearance.descriptors[i]));
   });
 
   it('allows any stat from 0 to 100, including extremes', () => {
