@@ -114,6 +114,17 @@ export function rollAppearance(rng: RngState, content: ContentBundle): string[] 
 }
 
 /**
+ * A custom character's appearance: the option the player chose for each group,
+ * or a roll for any group left to chance ("Surprise me"), then any extras.
+ */
+export function completeAppearance(rng: RngState, content: ContentBundle, chosen: readonly string[]): string[] {
+  const fromGroups = content.character.appearance.groups.map(
+    (g) => chosen.find((d) => g.options.includes(d)) ?? pick(rng, g.options),
+  );
+  return [...fromGroups, ...chosen.filter((d) => !fromGroups.includes(d))];
+}
+
+/**
  * Rolls hidden traits that differ from how the character starts: another
  * orientation, gender, expression or personality tendency. Used for random
  * and custom characters alike, so any life can bring surprises.
