@@ -1,0 +1,12 @@
+# Houston — low-to-moderate cost of living, strong trades market.
+id: houston
+countryId: us
+name: Houston
+costOfLiving: 0.95
+baseRent: 16800
+baseHomePrice: 290000
+salaryMultiplier: 1.0
+jobMarket:
+  professional: 65
+  trade: 90
+  gig: 70

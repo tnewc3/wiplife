@@ -1,0 +1,63 @@
+/*
+ * Design tokens. Components use the Tailwind names defined in index.css
+ * (bg-bg, text-muted, bg-accent...), never raw colors, so both themes stay
+ * in sync. data-theme on <html> is set from Settings; before the app loads,
+ * the system preference applies.
+ */
+
+:root {
+  --wl-bg: #f7f5f2;
+  --wl-surface: #ffffff;
+  --wl-surface-2: #efebe6;
+  --wl-text: #1d1b19;
+  --wl-muted: #6a645d;
+  --wl-border: #e0dad3;
+  --wl-accent: #3f5bd9;
+  --wl-accent-hover: #3249b8;
+  --wl-accent-contrast: #ffffff;
+  --wl-danger: #c0392b;
+  --wl-danger-contrast: #ffffff;
+  --wl-bar-track: #e6e1db;
+  --wl-bar-fill: #3f5bd9;
+  --wl-scrim: rgb(20 18 16 / 0.45);
+  --wl-radius: 1rem;
+  color-scheme: light;
+}
+
+:root[data-theme='dark'] {
+  --wl-bg: #131315;
+  --wl-surface: #1d1d21;
+  --wl-surface-2: #26262b;
+  --wl-text: #f1efec;
+  --wl-muted: #a39e98;
+  --wl-border: #33333a;
+  --wl-accent: #8ea2ff;
+  --wl-accent-hover: #a8b7ff;
+  --wl-accent-contrast: #111325;
+  --wl-danger: #ff8a7a;
+  --wl-danger-contrast: #2a0d08;
+  --wl-bar-track: #2e2e34;
+  --wl-bar-fill: #8ea2ff;
+  --wl-scrim: rgb(0 0 0 / 0.6);
+  color-scheme: dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    --wl-bg: #131315;
+    --wl-surface: #1d1d21;
+    --wl-surface-2: #26262b;
+    --wl-text: #f1efec;
+    --wl-muted: #a39e98;
+    --wl-border: #33333a;
+    --wl-accent: #8ea2ff;
+    --wl-accent-hover: #a8b7ff;
+    --wl-accent-contrast: #111325;
+    --wl-danger: #ff8a7a;
+    --wl-danger-contrast: #2a0d08;
+    --wl-bar-track: #2e2e34;
+    --wl-bar-fill: #8ea2ff;
+    --wl-scrim: rgb(0 0 0 / 0.6);
+    color-scheme: dark;
+  }
+}

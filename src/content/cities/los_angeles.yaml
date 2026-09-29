@@ -1,0 +1,12 @@
+# Los Angeles — high cost of living, strong and varied job market.
+id: los_angeles
+countryId: us
+name: Los Angeles
+costOfLiving: 1.4
+baseRent: 31200
+baseHomePrice: 850000
+salaryMultiplier: 1.2
+jobMarket:
+  professional: 80
+  trade: 75
+  gig: 90

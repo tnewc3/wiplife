@@ -1,0 +1,19 @@
+import { createDb } from './db';
+
+export { createDb, DB_NAME, type WiplifeDb } from './db';
+export { CURRENT_SCHEMA_VERSION, envelopeSchema, makeEnvelope, type SaveEnvelope } from './envelope';
+export { assertMigrationChain, migrateEnvelope, MigrationError, migrations, type Migration } from './migrations';
+export { clearAllData } from './reset';
+export { readSave, writeSave, type LoadResult } from './saves';
+export {
+  DEFAULT_SETTINGS,
+  loadSettings,
+  settingsSchema,
+  themeSchema,
+  updateSettings,
+  type Settings,
+  type Theme,
+} from './settings';
+
+/** The app's database. Tests create their own with createDb(). */
+export const db = createDb();

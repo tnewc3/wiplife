@@ -1,0 +1,80 @@
+@import 'tailwindcss';
+@import './ui/theme/tokens.css';
+
+@custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
+
+@theme inline {
+  --color-bg: var(--wl-bg);
+  --color-surface: var(--wl-surface);
+  --color-surface-2: var(--wl-surface-2);
+  --color-text: var(--wl-text);
+  --color-muted: var(--wl-muted);
+  --color-border: var(--wl-border);
+  --color-accent: var(--wl-accent);
+  --color-accent-hover: var(--wl-accent-hover);
+  --color-accent-contrast: var(--wl-accent-contrast);
+  --color-danger: var(--wl-danger);
+  --color-danger-contrast: var(--wl-danger-contrast);
+  --color-bar-track: var(--wl-bar-track);
+  --color-bar-fill: var(--wl-bar-fill);
+  --color-scrim: var(--wl-scrim);
+  --radius-card: var(--wl-radius);
+  --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+
+/* Safe areas (notches, home bars). Requires viewport-fit=cover in index.html. */
+@utility pt-safe {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+@utility pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+@utility px-safe {
+  padding-left: max(env(safe-area-inset-left, 0px), 1rem);
+  padding-right: max(env(safe-area-inset-right, 0px), 1rem);
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--wl-bg);
+  color: var(--wl-text);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior-y: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@keyframes wl-sheet-in {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes wl-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}

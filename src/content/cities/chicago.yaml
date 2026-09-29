@@ -1,0 +1,12 @@
+# Chicago — moderate cost of living, strong job market.
+id: chicago
+countryId: us
+name: Chicago
+costOfLiving: 1.1
+baseRent: 21600
+baseHomePrice: 330000
+salaryMultiplier: 1.08
+jobMarket:
+  professional: 75
+  trade: 75
+  gig: 75

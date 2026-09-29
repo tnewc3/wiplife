@@ -1,0 +1,12 @@
+# A generic small town — low cost of living, limited job market.
+id: small_town
+countryId: us
+name: Small Town
+costOfLiving: 0.75
+baseRent: 10800
+baseHomePrice: 180000
+salaryMultiplier: 0.82
+jobMarket:
+  professional: 30
+  trade: 45
+  gig: 35
