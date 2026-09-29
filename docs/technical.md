@@ -606,6 +606,9 @@ Every coding-AI prompt assumes this file exists at the repo root.
 - Sexual violence is never a player choice.
 - The player is "you". Use pronoun placeholders for every NPC; never hardcode he or she.
 
+## Commands
+See README.md for build, test and check commands.
+
 ## When finished
 Report what you built, any deviations from the docs and why, anything left undone, and open questions.
 ```
@@ -707,6 +710,7 @@ Meet every Stage 1 acceptance criterion and write the listed tests. When finishe
 - Custom creation steps: name, gender identity (free text), gender category, expression, pronouns (presets plus fully custom entry for all five forms), attraction, appearance, family setup, city, family wealth, and sliders for every stat and personality trait with no restrictions.
 - Home screen: header, stat bars without numbers, empty history feed.
 - Continue on the title screen.
+- Remove the Stage 1 "Preview the game layout" button from the New Life screen.
 
 **Dependencies:** Stage 1.
 
@@ -741,6 +745,7 @@ Build only Stage 2:
 - Roll hidden values, talent and latent traits for both random and custom characters.
 - Connect the store to the engine and autosave through the persistence module. Record every player input in the life's inputLog (section N).
 - Build the New Life screen, the multi-step Custom creation flow (free-text gender identity and expression, gender category, pronoun presets plus fully custom entry, attraction, family, city, family wealth, unrestricted stat and personality sliders), the Home screen with stat bars (no numbers), and Continue on the title screen.
+- Remove the Stage 1 "Preview the game layout" button from the New Life screen.
 
 Do not implement aging, age-up, events or any yearly systems.
 
@@ -1264,6 +1269,7 @@ Meet every Stage 10 acceptance criterion. When finished, report the coverage sum
 - Accessibility: labels, focus order, AA contrast, and word descriptions of every bar for screen readers ("Health: good") while bars stay visual only.
 - First-life tips and install prompt timing.
 - Performance budget for bundle size and load time.
+- Remove the theme flash on load: cache the theme choice where it can be read before the first screen appears.
 
 **Dependencies:** Stage 10.
 
@@ -1294,6 +1300,7 @@ Build only Stage 11:
 - Accessibility: labels, focus order, AA contrast, and screen-reader word descriptions for every bar.
 - Three first-life tips, install prompt timing, empty and loading states.
 - A performance budget checked in CI.
+- Remove the theme flash on load by caching the theme choice where it can be read before the first screen appears.
 
 Meet every Stage 11 acceptance criterion. When finished, report Lighthouse scores, accessibility results, any deviations and why, and open questions.
 ```
