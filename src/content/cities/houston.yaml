@@ -2,6 +2,7 @@
 id: houston
 countryId: us
 name: Houston
+blurb: "Affordable · Strong for skilled trades"
 costOfLiving: 0.95
 baseRent: 16800
 baseHomePrice: 290000

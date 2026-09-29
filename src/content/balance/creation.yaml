@@ -1,0 +1,81 @@
+# Numbers used when a new life is created. Starting proposals; Stage 12
+# (balancing) tunes them against simulation runs.
+
+# Gender category of random characters and generated relatives.
+genderCategory: { man: 49, woman: 49, nonbinary: 2 }
+
+# Pronoun preset weights by gender category (random characters and relatives).
+pronouns:
+  man: { he_him: 97, they_them: 3 }
+  woman: { she_her: 97, they_them: 3 }
+  nonbinary: { they_them: 76, xe_xem: 8, ze_zir: 8, fae_faer: 4, she_her: 2, he_him: 2 }
+
+# Who random characters and relatives are attracted to. An empty list means
+# not attracted to anyone.
+attraction:
+  man:
+    - { to: [woman], weight: 88 }
+    - { to: [man], weight: 5 }
+    - { to: [man, woman, nonbinary], weight: 6 }
+    - { to: [], weight: 1 }
+  woman:
+    - { to: [man], weight: 84 }
+    - { to: [woman], weight: 5 }
+    - { to: [man, woman, nonbinary], weight: 10 }
+    - { to: [], weight: 1 }
+  nonbinary:
+    - { to: [man, woman, nonbinary], weight: 50 }
+    - { to: [man], weight: 18 }
+    - { to: [woman], weight: 18 }
+    - { to: [nonbinary], weight: 6 }
+    - { to: [], weight: 8 }
+
+# Starting stats for random characters (0–100).
+stats:
+  health: { mean: 78, sd: 12 }
+  happiness: { mean: 72, sd: 12 }
+  smarts: { mean: 50, sd: 18 }
+  looks: { mean: 50, sd: 18 }
+  fitness: { mean: 50, sd: 15 }
+  stress: { mean: 10, sd: 8 }
+
+# Every personality trait of a random character.
+personality: { mean: 50, sd: 18 }
+
+hidden:
+  luck: { mean: 50, sd: 15 }
+  reputation: { mean: 50, sd: 5 }
+  geneticRisk: { mean: 30, sd: 15 }
+  vice: { mean: 35, sd: 18 }
+
+talentChance: 0.7
+
+familyWealth: { poor: 15, working: 30, middle: 35, affluent: 15, rich: 5 }
+
+appearance:
+  featureChance: 0.35
+
+# Latent traits: things about a character that can surface later.
+latent:
+  orientationChance: 0.08
+  genderChance: 0.03
+  expressionChance: 0.05
+  personalityChance: 0.15
+  personalityShift: { min: 25, max: 50 }
+
+family:
+  singleParentChance: 0.2
+  sameGenderParentsChance: 0.05
+  parentAgeAtBirth: { min: 16, max: 48, mean: 29, sd: 6 }
+  partnerAgeGap: { sd: 3, max: 12 }
+  sharedLastNameChance: 0.7
+  # Weight of 0, 1, 2, 3, 4 older siblings at birth.
+  siblingWeights: [32, 38, 19, 8, 3]
+  siblingSpacing: { min: 1, max: 6 }
+  parentAffection: { mean: 75, sd: 12 }
+  parentTrust: { mean: 70, sd: 12 }
+  siblingAffection: { mean: 60, sd: 15 }
+  siblingTrust: { mean: 55, sd: 15 }
+  relativeTraitCount: 3
+  relativeLooks: { mean: 50, sd: 18 }
+  relativeSmarts: { mean: 50, sd: 18 }

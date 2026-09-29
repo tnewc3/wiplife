@@ -2,6 +2,7 @@
 id: small_town
 countryId: us
 name: Small Town
+blurb: "Cheap to live · Few job openings"
 costOfLiving: 0.75
 baseRent: 10800
 baseHomePrice: 180000

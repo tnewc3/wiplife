@@ -1,7 +1,9 @@
+import type { LifeState } from '../../../engine/types';
 import { useAppStore, type TabId } from '../../../store/appStore';
 import { Button } from '../../components/Button';
 import { Card } from '../../components/Card';
 import { Screen } from '../../components/Screen';
+import { HomeTab } from '../home/HomeTab';
 
 const tabs: { id: TabId; label: string; icon: string }[] = [
   { id: 'life', label: 'Life', icon: '◉' },
@@ -42,11 +44,8 @@ function BottomNav() {
   );
 }
 
-/**
- * The in-game layout with placeholder tabs. Game screens fill these tabs in
- * later stages; nothing here simulates game state.
- */
-export function ShellScreen() {
+/** The in-game layout. Tabs other than Life fill in with later stages. */
+export function GameScreen({ life }: { life: LifeState }) {
   const tab = useAppStore((s) => s.tab);
   const navigate = useAppStore((s) => s.navigate);
   const openSettings = useAppStore((s) => s.openSettings);
@@ -54,22 +53,26 @@ export function ShellScreen() {
 
   return (
     <Screen title={current.label} footer={<BottomNav />}>
-      <div className="flex flex-col gap-4">
-        <Card className="text-center">
-          <p className="text-sm font-semibold tracking-wide text-accent uppercase">Coming soon</p>
-          <p className="mt-1 text-muted">This part of your life isn’t written yet.</p>
-        </Card>
-        {tab === 'more' && (
-          <div className="flex flex-col gap-2">
-            <Button variant="secondary" block onClick={openSettings}>
-              Settings
-            </Button>
-            <Button variant="ghost" block onClick={() => navigate('title')}>
-              Back to title
-            </Button>
-          </div>
-        )}
-      </div>
+      {tab === 'life' ? (
+        <HomeTab life={life} />
+      ) : (
+        <div className="flex flex-col gap-4">
+          <Card className="text-center">
+            <p className="text-sm font-semibold tracking-wide text-accent uppercase">Coming soon</p>
+            <p className="mt-1 text-muted">This part of your life isn’t written yet.</p>
+          </Card>
+          {tab === 'more' && (
+            <div className="flex flex-col gap-2">
+              <Button variant="secondary" block onClick={openSettings}>
+                Settings
+              </Button>
+              <Button variant="ghost" block onClick={() => navigate('title')}>
+                Back to title
+              </Button>
+            </div>
+          )}
+        </div>
+      )}
     </Screen>
   );
 }

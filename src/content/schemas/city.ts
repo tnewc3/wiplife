@@ -16,6 +16,8 @@ export const citySchema = baseDefSchema.extend({
   /** Always "us" for now; kept so more countries can be added later. */
   countryId: countryIdSchema,
   name: z.string().trim().min(1).max(40),
+  /** One line shown when choosing a city. */
+  blurb: z.string().trim().min(1).max(80),
   /** Living-cost multiplier; 1.0 is the national average. */
   costOfLiving: z.number().positive().max(5),
   /** Yearly rent for a typical one-bedroom, in whole dollars. */

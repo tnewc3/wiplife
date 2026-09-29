@@ -2,6 +2,7 @@
 id: los_angeles
 countryId: us
 name: Los Angeles
+blurb: "Expensive · A big, varied job market"
 costOfLiving: 1.4
 baseRent: 31200
 baseHomePrice: 850000

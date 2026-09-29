@@ -1,0 +1,8 @@
+id: they_them
+label: they/them
+subject: they
+object: them
+possessive: their
+possessivePronoun: theirs
+reflexive: themself
+verbPlural: true
