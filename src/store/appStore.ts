@@ -42,7 +42,7 @@ function message(err: unknown): string {
 
 export function createAppStore(db: WiplifeDb = defaultDb) {
   return create<AppState>()(
-    immer((set, get) => ({
+    immer((set) => ({
       status: 'loading',
       error: null,
       settings: { ...DEFAULT_SETTINGS },
@@ -73,22 +73,12 @@ export function createAppStore(db: WiplifeDb = defaultDb) {
       },
 
       setTheme: async (theme) => {
-        // Apply immediately so the switch feels instant; the write follows.
-        const previous = get().settings.theme;
+        // Apply only once saved, so the screen never shows a setting that
+        // would be lost on reload. A local write takes milliseconds.
+        const settings = await updateSettings(db, { theme });
         set((s) => {
-          s.settings.theme = theme;
+          s.settings = settings;
         });
-        try {
-          const settings = await updateSettings(db, { theme });
-          set((s) => {
-            s.settings = settings;
-          });
-        } catch (err) {
-          set((s) => {
-            s.settings.theme = previous;
-          });
-          throw err;
-        }
       },
 
       resetAllData: async () => {
