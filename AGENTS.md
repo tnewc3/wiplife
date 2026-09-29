@@ -31,5 +31,8 @@
 - Sexual violence is never a player choice.
 - The player is "you". Use pronoun placeholders for every NPC; never hardcode he or she.
 
+## Commands
+See README.md for build, test and check commands.
+
 ## When finished
 Report what you built, any deviations from the docs and why, anything left undone, and open questions.
