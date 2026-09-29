@@ -1,243 +1,66 @@
-# Name pool for the United States. Characters and NPCs draw first names by
-# gender category; `nonbinary` holds names commonly used across genders.
+# Name pool for the United States, grouped by heritage so families' names
+# hang together. How often each heritage appears is set in
+# balance/creation.yaml (names.heritageWeights). `nonbinary` holds names
+# commonly used across genders. Names can repeat across heritages.
 id: us
-first:
-  man:
-    - Aaron
-    - Adrian
-    - Ahmed
-    - Alejandro
-    - Andre
-    - Anthony
-    - Arjun
-    - Ben
-    - Brandon
-    - Caleb
-    - Carlos
-    - Chris
-    - Daniel
-    - Darius
-    - David
-    - Diego
-    - Dmitri
-    - Elijah
-    - Ethan
-    - Gabriel
-    - Hassan
-    - Hiroshi
-    - Isaac
-    - Jamal
-    - James
-    - Javier
-    - Jin
-    - Jonah
-    - José
-    - Joshua
-    - Kenji
-    - Kevin
-    - Liam
-    - Luis
-    - Malik
-    - Marcus
-    - Mateo
-    - Michael
-    - Miguel
-    - Nathan
-    - Noah
-    - Omar
-    - Owen
-    - Patrick
-    - Rahul
-    - Ricardo
-    - Ryan
-    - Samuel
-    - Sean
-    - Terrence
-    - Thomas
-    - Tyler
-    - Victor
-    - Wei
-    - Xavier
-    - Yusuf
-    - Zachary
-  woman:
-    - Aaliyah
-    - Abigail
-    - Aisha
-    - Alejandra
-    - Amara
-    - Amelia
-    - Ana
-    - Ava
-    - Beatriz
-    - Brianna
-    - Camila
-    - Carmen
-    - Chloe
-    - Daniela
-    - Destiny
-    - Elena
-    - Emily
-    - Emma
-    - Fatima
-    - Grace
-    - Hana
-    - Imani
-    - Isabella
-    - Jasmine
-    - Jessica
-    - Keisha
-    - Kimberly
-    - Lauren
-    - Leah
-    - Lucía
-    - Maya
-    - Mei
-    - Megan
-    - Mia
-    - Monique
-    - Nadia
-    - Natalie
-    - Nia
-    - Olivia
-    - Priya
-    - Rachel
-    - Rosa
-    - Sakura
-    - Samantha
-    - Sara
-    - Sofia
-    - Tanya
-    - Valentina
-    - Vanessa
-    - Yasmin
-    - Zoe
-  nonbinary:
-    - Alex
-    - Ari
-    - Avery
-    - Blake
-    - Cameron
-    - Casey
-    - Charlie
-    - Dakota
-    - Drew
-    - Eden
-    - Emerson
-    - Finley
-    - Frankie
-    - Harper
-    - Hayden
-    - Jamie
-    - Jordan
-    - Jules
-    - Kai
-    - Kendall
-    - Logan
-    - Morgan
-    - Noor
-    - Parker
-    - Quinn
-    - Reese
-    - Riley
-    - River
-    - Rowan
-    - Sage
-    - Sam
-    - Skyler
-    - Taylor
-last:
-  - Adams
-  - Ahmed
-  - Alvarez
-  - Anderson
-  - Baker
-  - Bennett
-  - Brooks
-  - Brown
-  - Campbell
-  - Carter
-  - Castillo
-  - Chen
-  - Clark
-  - Collins
-  - Cruz
-  - Davis
-  - Diaz
-  - Evans
-  - Flores
-  - Foster
-  - Garcia
-  - Gomez
-  - Gonzalez
-  - Gray
-  - Green
-  - Gupta
-  - Hall
-  - Harris
-  - Hernandez
-  - Hill
-  - Howard
-  - Hughes
-  - Jackson
-  - Jenkins
-  - Johnson
-  - Jones
-  - Kaur
-  - Kelly
-  - Khan
-  - Kim
-  - King
-  - Kowalski
-  - Lee
-  - Lewis
-  - Lopez
-  - Martin
-  - Martinez
-  - Mendoza
-  - Miller
-  - Mitchell
-  - Moore
-  - Morales
-  - Morgan
-  - Murphy
-  - Nguyen
-  - Novak
-  - O'Brien
-  - Okafor
-  - Ortiz
-  - Patel
-  - Perez
-  - Phillips
-  - Ramirez
-  - Reed
-  - Reyes
-  - Rivera
-  - Roberts
-  - Robinson
-  - Rodriguez
-  - Rossi
-  - Russell
-  - Sanchez
-  - Scott
-  - Shah
-  - Singh
-  - Smith
-  - Stewart
-  - Sullivan
-  - Tanaka
-  - Taylor
-  - Thomas
-  - Thompson
-  - Torres
-  - Tran
-  - Turner
-  - Walker
-  - Washington
-  - Watson
-  - White
-  - Williams
-  - Wilson
-  - Wong
-  - Wright
-  - Young
+heritages:
+  general:
+    first:
+      man: [James, Michael, David, Ryan, Tyler, Ethan, Noah, Liam, Owen, Caleb, Nathan, Samuel, Thomas, Patrick, Sean, Zachary, Brandon, Kevin, Benjamin, Jacob, Luke, Henry, Wyatt, Connor]
+      woman: [Emily, Emma, Olivia, Abigail, Chloe, Grace, Lauren, Megan, Rachel, Samantha, Natalie, Sarah, Hannah, Madison, Claire, Kimberly, Jessica, Amelia, Katherine, Lily, Hailey, Molly]
+      nonbinary: [Alex, Avery, Casey, Charlie, Jordan, Morgan, Riley, Taylor, Quinn, Rowan, Sage, Parker, Jamie, Drew, Emerson, Finley, Reese, Skyler, River, Eden]
+    last: [Smith, Johnson, Miller, Davis, Wilson, Anderson, Taylor, Thomas, Moore, Martin, Thompson, White, Clark, Lewis, Walker, Hall, Young, King, Wright, Hill, Scott, Green, Adams, Baker, Nelson, Carter, Mitchell, Roberts, Turner, Phillips, Campbell, Evans, Collins, Stewart, Murphy, Cook, Rogers, Reed, Bell, Kelly, Howard, Ward, Cox, Brooks, Gray, Hughes, Price, Bennett, Wood, Foster, Sullivan, Russell, O'Brien, Kowalski, Novak, Rossi, Schmidt, Larsen, Fischer, Romano]
+  hispanic:
+    first:
+      man: [José, Luis, Carlos, Miguel, Javier, Diego, Mateo, Alejandro, Ricardo, Juan, Andrés, Santiago, Eduardo, Fernando, Emilio, Rafael, Adrian, Gabriel]
+      woman: [María, Sofia, Camila, Valentina, Lucía, Daniela, Isabella, Gabriela, Alejandra, Carmen, Rosa, Ana, Mariana, Ximena, Paola, Elena, Vanessa, Beatriz]
+      nonbinary: [Alex, Cruz, Guadalupe, Ariel, Noel, René, Sol, Dani, Angel, Reyes]
+    last: [Garcia, Rodriguez, Martinez, Hernandez, Lopez, Gonzalez, Perez, Sanchez, Ramirez, Torres, Flores, Rivera, Gomez, Diaz, Reyes, Morales, Cruz, Ortiz, Gutierrez, Chavez, Ramos, Mendoza, Castillo, Vargas, Romero, Herrera, Medina, Aguilar, Alvarez, Castro]
+  black:
+    first:
+      man: [Jamal, Darius, Malik, Terrence, Andre, Marcus, DeShawn, Jalen, Isaiah, Elijah, Xavier, Tyrone, Darnell, Jerome, Kendrick, Cedric, Michael, James]
+      woman: [Aaliyah, Imani, Keisha, Jasmine, Destiny, Nia, Monique, Tiana, Ebony, Brianna, Kiara, Shanice, Latoya, Jada, Ayanna, Zora, Maya, Alicia]
+      nonbinary: [Jordan, Kendall, Taylor, Jaden, Amari, Justice, Sky, London, Peyton, Kai]
+    last: [Washington, Jackson, Jefferson, Robinson, Harris, Williams, Johnson, Brown, Jones, Davis, Coleman, Banks, Freeman, Booker, Mosley, Gaines, Moore, Carter, Simmons, Bryant, Dixon, Hayes, Jenkins, Pierce]
+  chinese:
+    first:
+      man: [Wei, Jun, Hao, Ming, Jian, Lei, Yong, Kai, Zhen, Tao, Bo, Kevin, Eric, Justin]
+      woman: [Mei, Li, Xiu, Ying, Hua, Jing, Lan, Yan, Fang, Lin, Hui, Qing, Grace, Michelle]
+      nonbinary: [Jun, Ming, An, Yu, Xin, Ping, Le, Chen]
+    last: [Chen, Wang, Li, Zhang, Liu, Wong, Huang, Lin, Wu, Zhou, Yang, Zhao, Chan, Lee, Ho, Leung]
+  korean:
+    first:
+      man: [Min-jun, Ji-ho, Seo-jun, Hyun-woo, Jae-won, Dong-hyun, Sung-min, Joon, Daniel, Eugene, Brian]
+      woman: [Ji-woo, Seo-yeon, Min-ji, Ha-eun, Soo-jin, Eun-ji, Hye-jin, Yuna, Grace, Esther, Joy]
+      nonbinary: [Hae, Jin, Min, Sol, Yoon, Ji]
+    last: [Kim, Lee, Park, Choi, Jung, Kang, Cho, Yoon, Jang, Lim, Han, Shin]
+  vietnamese:
+    first:
+      man: [Minh, Anh, Duc, Huy, Khoa, Long, Nam, Phong, Quang, Thanh, Tuan, Bao]
+      woman: [Linh, Mai, Lan, Ngoc, Thao, Trang, Hoa, Huong, Vy, My, Nhung, Tien]
+      nonbinary: [An, Kim, Thanh, Minh, Xuan, Hai]
+    last: [Nguyen, Tran, Le, Pham, Hoang, Phan, Vu, Dang, Bui, Do, Ho, Ngo, Duong, Ly]
+  japanese:
+    first:
+      man: [Hiroshi, Kenji, Takeshi, Ryo, Daiki, Haruto, Kenta, Sho, Yuto, Kazuki, Kaito, Ken]
+      woman: [Sakura, Yuki, Hana, Aiko, Emi, Yumi, Mei, Rina, Naomi, Keiko, Aya, Mika]
+      nonbinary: [Akira, Hikaru, Makoto, Nao, Sora, Ren]
+    last: [Tanaka, Suzuki, Sato, Takahashi, Watanabe, Ito, Yamamoto, Nakamura, Kobayashi, Kato, Yoshida, Yamada, Sasaki, Inoue]
+  south_asian:
+    first:
+      man: [Arjun, Rahul, Rohan, Vikram, Aditya, Karan, Nikhil, Sanjay, Amit, Ravi, Dev, Harpreet, Imran, Aarav]
+      woman: [Priya, Ananya, Neha, Pooja, Divya, Kavya, Anjali, Riya, Meera, Sana, Simran, Aisha, Nisha, Shreya]
+      nonbinary: [Kiran, Jyoti, Arya, Noor, Sam, Ashwin]
+    last: [Patel, Shah, Singh, Kaur, Gupta, Sharma, Kumar, Reddy, Rao, Iyer, Mehta, Desai, Khan, Chowdhury, Joshi, Malhotra]
+  arab:
+    first:
+      man: [Ahmed, Omar, Yusuf, Hassan, Khalid, Ali, Karim, Tariq, Samir, Rami, Nabil, Ibrahim, Mustafa, Adam]
+      woman: [Fatima, Layla, Yasmin, Nadia, Mariam, Amira, Rania, Leila, Hana, Salma, Dina, Noor, Zainab, Sara]
+      nonbinary: [Noor, Salam, Rayan, Sami, Iman, Nour]
+    last: [Haddad, Khalil, Nasser, Saleh, Mansour, Aziz, Hamdan, Farah, Hassan, Ibrahim, Khoury, Abboud, Darwish, Saad]
+  west_african:
+    first:
+      man: [Chinedu, Emeka, Kwame, Kofi, Oluwaseun, Tunde, Ade, Obinna, Femi, Yaw, Ikenna, Segun]
+      woman: [Adaeze, Chioma, Ngozi, Amara, Folake, Abena, Ama, Ifeoma, Yewande, Nneka, Efua, Funmi]
+      nonbinary: [Ayo, Tobi, Dayo, Ife, Kelechi, Chidi]
+    last: [Okafor, Adeyemi, Okonkwo, Mensah, Asante, Obi, Eze, Nwosu, Balogun, Owusu, Adebayo, Boateng]

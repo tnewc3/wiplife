@@ -190,6 +190,12 @@ describe('content build with fixture files', () => {
     expect(await expectErrors()).toContain('pronouns.man: unknown pronoun preset "hee_him"');
   });
 
+  it('rejects a heritage weight for a heritage the name pool lacks', async () => {
+    const file = path.join(dir, 'balance', 'creation.yaml');
+    await writeFile(file, (await readFile(file, 'utf8')).replace('    general: 56', '    general: 56\n    atlantean: 3'));
+    expect(await expectErrors()).toContain('heritage "atlantean" is not in names/us.yaml');
+  });
+
   it('rejects a city whose country has no name pool', async () => {
     await rm(path.join(dir, 'names', 'us.yaml'));
     expect(await expectErrors()).toContain('no name pool for country "us"');

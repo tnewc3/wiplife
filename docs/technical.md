@@ -769,6 +769,7 @@ Meet every Stage 2 acceptance criterion and write the listed tests, including th
 - History entries for milestones (new life stage, family deaths).
 - Obituary generator, version 1 (templates).
 - Archive.
+- Starting a new life while one is in progress archives the current life, marked as unfinished, instead of discarding it.
 
 **Data:** `HistoryEntry`, `ArchivedLife`, phase handling.
 
@@ -780,6 +781,7 @@ Meet every Stage 2 acceptance criterion and write the listed tests, including th
 - Pipeline steps run in the order listed in section M.
 - Across 10,000 average lives, the median age at death is between 72 and 82, and no one lives past 120.
 - Death always ends the life and moves it into the archive.
+- Starting a new life over one in progress moves the old life into the archive, marked as unfinished.
 - The archive survives reloads and grows with each life.
 - Saving and reloading in the middle of a year is safe.
 - Rapid tapping of Age Up can't advance two years at once.
@@ -806,6 +808,7 @@ Build only Stage 3:
 - Age NPCs and let them die.
 - Write history entries for milestones.
 - Build obituary generation (template based, designed so later stages can add to it) and the archive, stored through the persistence module.
+- When the player starts a new life while one is in progress, archive the current life (marked as unfinished) instead of discarding it, and update the Stage 2 confirmation sheet to say so.
 - Build the Age Up button (guarded against double taps), the Home history feed, a simple year recap, the Life history screen, the Death and Obituary screen, and Archive list and detail screens.
 
 Do not implement events, relationships beyond aging family members, money, school or jobs.

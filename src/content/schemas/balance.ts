@@ -51,6 +51,12 @@ export const creationBalanceSchema = z.strictObject({
   /** Chance a character has a hidden talent at all. */
   talentChance: probabilitySchema,
   familyWealth: weightsSchema(familyWealthSchema),
+  names: z.strictObject({
+    /** How often each heritage in the name pools starts a family. */
+    heritageWeights: weightsSchema(z.string()),
+    /** Chance two parents share a heritage. */
+    sameHeritageParentsChance: probabilitySchema,
+  }),
   appearance: z.strictObject({
     /** Chance of one extra distinguishing feature. */
     featureChance: probabilitySchema,

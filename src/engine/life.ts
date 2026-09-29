@@ -37,19 +37,18 @@ export function createLife(input: CreateLifeOptions, content: ContentBundle): Li
   const nextId = (): Id => `p${++personCount}`;
 
   let character: Character;
-  let familyRequest: { parents?: 1 | 2; siblings?: number; lastName?: string };
+  let familyRequest: { parents?: 1 | 2; siblings?: number; lastName?: string; characterFirstName?: string };
 
   if (options.mode === 'random') {
     const cityId = pick(rng, activeIds(content.cities));
     const familyWealth = weightedKey(rng, creation.familyWealth);
     const identity = rollIdentity(rng, content, rollGenderCategory(rng, content));
-    const pool = namePool(content, cityId);
-    const first = pick(rng, pool.first[identity.genderCategory]);
     const stats = rollStats(rng, content);
     const personality = rollPersonality(rng, content);
     const descriptors = rollAppearance(rng, content);
     character = {
-      name: { first, last: '' },
+      // Named once the family (and its heritage) is known.
+      name: { first: '', last: '' },
       age: 0,
       lifeStage: 'early',
       identity,
@@ -83,7 +82,12 @@ export function createLife(input: CreateLifeOptions, content: ContentBundle): Li
       familyWealth: custom.familyWealth,
       custom: true,
     };
-    familyRequest = { parents: custom.family.parents, siblings: custom.family.siblings, lastName: custom.name.last };
+    familyRequest = {
+      parents: custom.family.parents,
+      siblings: custom.family.siblings,
+      lastName: custom.name.last,
+      characterFirstName: custom.name.first,
+    };
   }
 
   character.latent = rollLatent(rng, content, character.identity, character.personality);
@@ -92,11 +96,11 @@ export function createLife(input: CreateLifeOptions, content: ContentBundle): Li
     birthYear,
     cityId: character.cityId,
     pool: namePool(content, character.cityId),
-    characterFirstName: character.name.first,
+    characterCategory: character.identity.genderCategory,
     nextId,
     ...familyRequest,
   });
-  character.name.last = family.lastName;
+  character.name = { first: family.firstName, last: family.lastName };
 
   return {
     id: `life_${seed}`,
