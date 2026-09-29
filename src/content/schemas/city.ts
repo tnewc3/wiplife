@@ -6,6 +6,12 @@ export const countryIdSchema = z.enum(['us']);
 export const jobCategorySchema = z.enum(['professional', 'trade', 'gig']);
 export type JobCategory = z.infer<typeof jobCategorySchema>;
 
+/**
+ * Per-city numbers (cost multipliers, rent, home price, job market) live here
+ * in each city file, as CityDef in docs/technical.md section N specifies, so
+ * adding a city stays one file. Tuning shared by every city (tax curve,
+ * lifestyle costs, interest rates) goes in src/content/balance.
+ */
 export const citySchema = baseDefSchema.extend({
   /** Always "us" for now; kept so more countries can be added later. */
   countryId: countryIdSchema,
