@@ -1,0 +1,41 @@
+id: road_trip
+title: No plan, just snacks
+text: >-
+  {friend.name} wants to drive to the coast this weekend. No plan, just snacks
+  and a playlist {friend.they} {friend:has|have} been perfecting for months.
+tone: light
+category: friends
+rarity: common
+lifeStages: [youngAdult]
+weight: { base: 8 }
+cooldownYears: 3
+cast:
+  friend: { kind: friend, ageOffset: { min: -3, max: 3 }, createIfMissing: true, newChance: 0.3 }
+choices:
+  - id: go
+    label: Go
+    visibleIf: { money: { gte: 400 } }
+    outcome:
+      text: You watch the sun set over the water and argue about the playlist the whole way home.
+      effects:
+        - { type: money, delta: -400 }
+        - { type: stat, key: happiness, delta: 7 }
+        - { type: stat, key: stress, delta: -5 }
+        - { type: relationship, role: friend, affection: 5 }
+        - { type: memory, role: friend, tag: road_trip_together }
+  - id: cheap
+    label: Go, but sleep in the car
+    outcome:
+      text: Your back will never forgive you, but it's the best weekend in years.
+      effects:
+        - { type: money, delta: -80 }
+        - { type: stat, key: happiness, delta: 5 }
+        - { type: stat, key: health, delta: -1 }
+        - { type: relationship, role: friend, affection: 5 }
+        - { type: memory, role: friend, tag: road_trip_together }
+  - id: stay
+    label: Stay home and save
+    outcome:
+      text: '{friend.name} sends you photos all weekend. They look great.'
+      effects:
+        - { type: relationship, role: friend, affection: -2 }

@@ -18,6 +18,10 @@
   --color-bar-track: var(--wl-bar-track);
   --color-bar-fill: var(--wl-bar-fill);
   --color-scrim: var(--wl-scrim);
+  --color-tone-light: var(--wl-tone-light);
+  --color-tone-neutral: var(--wl-tone-neutral);
+  --color-tone-serious: var(--wl-tone-serious);
+  --color-tone-dark: var(--wl-tone-dark);
   --radius-card: var(--wl-radius);
   --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 }

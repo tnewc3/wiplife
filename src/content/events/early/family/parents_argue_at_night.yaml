@@ -1,0 +1,40 @@
+id: parents_argue_at_night
+title: Voices in the kitchen
+text: >-
+  You wake up to raised voices. {parentA.name} and {parentB.name} are arguing in
+  the kitchen again, the kind of arguing that makes the walls feel thin.
+tone: serious
+category: family
+rarity: common
+lifeStages: [early]
+weight: { base: 6 }
+cooldownYears: 2
+cast:
+  parentA: { kind: parent }
+  parentB: { kind: parent }
+choices:
+  - id: hide
+    label: Pull the blanket over your head
+    outcome:
+      text: You hum to yourself until the shouting stops. It takes a long time.
+      effects:
+        - { type: stat, key: stress, delta: 4 }
+        - { type: flag, key: parents_fought, value: true }
+  - id: go_to_them
+    label: Pad out to the kitchen
+    check:
+      base: 50
+      stats: [{ key: confidence, weight: 0.4 }]
+      success:
+        text: >-
+          {parentA.name} sees you in the doorway and scoops you up. The shouting
+          stops. {parentB.name} makes you warm milk, and nobody says anything else.
+        effects:
+          - { type: memory, role: parentA, tag: comforted_you }
+          - { type: relationship, role: parentA, affection: 5 }
+          - { type: flag, key: parents_fought, value: true }
+      failure:
+        text: Nobody notices you. You go back to bed and lie awake, listening.
+        effects:
+          - { type: stat, key: stress, delta: 6 }
+          - { type: flag, key: parents_fought, value: true }

@@ -1,0 +1,13 @@
+id: test_auto
+title: A sunny afternoon
+text: You spend the afternoon in the park. Nothing much happens, and it's lovely.
+tone: neutral
+category: family
+rarity: common
+lifeStages: [early]
+requires: { age: { eq: 3 } }
+weight: { base: 10 }
+once: true
+autoOutcome:
+  effects:
+    - { type: stat, key: stress, delta: -1 }

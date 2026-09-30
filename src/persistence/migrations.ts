@@ -18,6 +18,19 @@ export const migrations: readonly Migration[] = [
     migrate: (data) =>
       typeof data === 'object' && data !== null && !Array.isArray(data) ? { ...data, recap: null, death: null } : data,
   },
+  {
+    from: 2,
+    description:
+      'Stage 4: add lifetime happiness. Happiness never changed in Stage 3, so every finished year had the current value.',
+    migrate: (data) => {
+      if (typeof data !== 'object' || data === null || Array.isArray(data)) return data;
+      const life = data as { phase?: unknown; character?: { age?: unknown; stats?: { happiness?: unknown } } };
+      const age = typeof life.character?.age === 'number' ? life.character.age : 0;
+      const happiness = typeof life.character?.stats?.happiness === 'number' ? life.character.stats.happiness : 0;
+      const years = Math.max(0, life.phase === 'events' || life.phase === 'yearEnd' ? age - 1 : age);
+      return { ...data, lifetime: { happinessTotal: happiness * years, years } };
+    },
+  },
 ];
 
 export class MigrationError extends Error {

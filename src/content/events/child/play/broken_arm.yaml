@@ -1,0 +1,42 @@
+id: broken_arm
+title: The tallest tree
+text: >-
+  You're near the top of the tallest tree in the neighborhood, higher than
+  anyone has ever climbed. The branch under your hand creaks.
+tone: serious
+category: play
+rarity: common
+lifeStages: [child]
+weight: { base: 7 }
+once: true
+cast:
+  parent: { kind: parent }
+choices:
+  - id: higher
+    label: Climb higher
+    check:
+      base: 45
+      stats: [{ key: fitness, weight: 0.5 }]
+      success:
+        text: You touch the highest branch and climb down a legend.
+        effects:
+          - { type: stat, key: confidence, delta: 3 }
+          - { type: stat, key: riskTaking, delta: 2 }
+      failure:
+        text: >-
+          The branch gives way. You spend the summer in a cast covered in
+          signatures, and {parent.name} doesn't let you out of {parent.their}
+          sight for weeks.
+        effects:
+          - { type: stat, key: health, delta: -8 }
+          - { type: stat, key: fitness, delta: -2 }
+          - { type: flag, key: broke_arm, value: true }
+          - { type: memory, role: parent, tag: cared_for_you }
+          - { type: history, text: You broke your arm falling out of a tree., importance: 1 }
+  - id: down
+    label: Climb down carefully
+    outcome:
+      text: You climb down in one piece. Nobody believes how high you got.
+      effects:
+        - { type: stat, key: happiness, delta: 1 }
+        - { type: stat, key: riskTaking, delta: -1 }

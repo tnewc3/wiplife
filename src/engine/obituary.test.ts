@@ -24,7 +24,8 @@ describe('obituary', () => {
     expect(text).toContain(cause);
     expect(text).toContain(String(dead.character.age));
     expect(text).toMatch(/\bXe\b|\bxe\b|\bxem\b|\bxyr\b/);
-    expect(text).not.toMatch(/\b(he|she|him|her|they|them)\b/i);
+    // (Templates may use "them" for things, as in "met most of them head-on".)
+    expect(text).not.toMatch(/\b(he|she|him|her|his|hers|they)\b/i);
   });
 
   it('names parents and sorts relatives into survivors and predeceased', () => {
@@ -116,7 +117,7 @@ describe('archive entry', () => {
       causeOfDeath: content.causes[dead.death!.causeId]!.text,
       unfinished: false,
       cityId: 'chicago',
-      finalNetWorth: 0,
+      finalNetWorth: netWorth(dead),
       finalStats: dead.character.stats,
       seed: 'archive-done',
       generation: 1,

@@ -328,6 +328,8 @@ Events are data, not code. Here is an example:
 
 The director adds up to 2 more events when life is volatile (recent big changes, high Risk-taking, legal trouble, a new job or relationship) and caps the total at 6. It also orders events so their tones fit together.
 
+The yearly minimums are targets, never a reason to shorten cooldowns: seeing the same event again breaks "moments, not menus" far more than a calm year does. When not enough events fit, the year is quieter; the shortfall goes away as content grows.
+
 ### Mature content guidelines
 
 Adult and taboo themes are included and carry real consequences: affairs, hard drugs, heavy drinking, gambling, theft, violence, cheating, walking out on a family, and similar. Writing is frank and not sanitized, but suggestive rather than graphic. Heavy topics like addiction leave room for recovery as well as decline.

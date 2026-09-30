@@ -1,0 +1,46 @@
+id: house_party
+title: Parents out of town
+text: >-
+  There's a party at a house whose owners are definitely out of town. Someone
+  hands you a drink in a red plastic cup.
+tone: neutral
+category: mischief
+rarity: common
+lifeStages: [teen, youngAdult]
+requires: { age: { gte: 15 } }
+weight: { base: 8 }
+cooldownYears: 2
+choices:
+  - id: drink
+    label: Drink it
+    check:
+      base: 60
+      stats: [{ key: discipline, weight: 0.3 }]
+      success:
+        text: You have a great night, and you're home before anyone notices.
+        effects:
+          - { type: stat, key: happiness, delta: 5 }
+          - { type: stat, key: sociability, delta: 2 }
+          - { type: stat, key: vice, delta: 2 }
+      failure:
+        text: >-
+          You wake up on someone's bathroom floor with a pounding head and a lot
+          of explaining to do.
+        effects:
+          - { type: stat, key: health, delta: -2 }
+          - { type: stat, key: stress, delta: 5 }
+          - { type: stat, key: vice, delta: 3 }
+          - { type: stat, key: reputation, delta: -2 }
+  - id: soda
+    label: Stick to soda
+    outcome:
+      text: You have a good time anyway, and you remember all of it.
+      effects:
+        - { type: stat, key: happiness, delta: 3 }
+        - { type: stat, key: discipline, delta: 1 }
+  - id: leave
+    label: Head home early
+    outcome:
+      text: You're in bed by eleven. You hear all about it on Monday.
+      effects:
+        - { type: stat, key: stress, delta: -2 }

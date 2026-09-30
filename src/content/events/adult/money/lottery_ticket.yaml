@@ -1,0 +1,28 @@
+id: lottery_ticket
+title: Two dollars
+text: The jackpot is enormous this week, and a ticket costs two dollars.
+tone: light
+category: money
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+weight: { base: 6 }
+cooldownYears: 4
+choices:
+  - id: buy
+    label: Buy a ticket
+    check:
+      base: 0
+      stats: [{ key: luck, weight: 0.1 }]
+      success:
+        text: Not the jackpot, but you win $5,000. You check the numbers eleven times.
+        effects:
+          - { type: money, delta: 5000 }
+          - { type: stat, key: happiness, delta: 5 }
+      failure:
+        text: Not a single number. You knew it, but still.
+        effects:
+          - { type: money, delta: -2 }
+  - id: save
+    label: Keep your two dollars
+    outcome:
+      text: Your two dollars remain safe.

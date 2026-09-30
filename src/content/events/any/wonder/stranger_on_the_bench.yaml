@@ -1,0 +1,34 @@
+# Legendary: secret and rare. It is recorded only in life history.
+id: stranger_on_the_bench
+title: The stranger on the bench
+text: >-
+  An old stranger on a park bench says your name before you've said a word.
+  {stranger.They} {stranger:introduces|introduce} {stranger.themself} as
+  {stranger.name} and {stranger:offers|offer} to tell you how your story goes.
+tone: neutral
+category: wonder
+rarity: legendary
+lifeStages: [youngAdult, adult, senior]
+weight: { base: 2 }
+once: true
+cast:
+  stranger: { kind: acquaintance, age: { min: 75, max: 90 }, createIfMissing: true, newChance: 1 }
+choices:
+  - id: listen
+    label: Listen
+    outcome:
+      text: >-
+        {stranger.name} talks for an hour. Some of it has already happened. When
+        you look up from your hands, the bench is empty.
+      effects:
+        - { type: flag, key: met_the_stranger, value: true }
+        - { type: stat, key: luck, delta: 10 }
+        - { type: stat, key: happiness, delta: 3 }
+        - { type: history, text: '{stranger.name}, a stranger on a park bench, told you how your story goes. You never saw {stranger.them} again.', importance: 3 }
+  - id: walk_away
+    label: Walk away
+    outcome:
+      text: You walk faster than you mean to. When you glance back, the bench is empty.
+      effects:
+        - { type: stat, key: luck, delta: 2 }
+        - { type: history, text: 'A stranger on a park bench knew your name. You walked away, and you still wonder.', importance: 3 }

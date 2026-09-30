@@ -2,6 +2,7 @@ import type { LifeState } from '../../../engine/types';
 import { useAppStore, type TabId } from '../../../store/appStore';
 import { AgeUpButton } from '../../components/AgeUpButton';
 import { Button } from '../../components/Button';
+import { EventSheet } from '../../components/EventSheet';
 import { Card } from '../../components/Card';
 import { Screen } from '../../components/Screen';
 import { HomeTab } from '../home/HomeTab';
@@ -86,6 +87,7 @@ export function GameScreen({ life }: { life: LifeState }) {
           )}
         </div>
       )}
+      <EventSheet life={life} />
     </Screen>
   );
 }

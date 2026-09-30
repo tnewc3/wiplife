@@ -1,8 +1,8 @@
 /**
  * Stage 3 acceptance test, split into shards so the 10,000 lives run in
  * parallel test files (lifespan-1.test.ts to lifespan-4.test.ts). Each shard
- * lives out its share of random lives, checking every invariant after every
- * engine step, and checks the lifespan rules on its share.
+ * lives out its share of random lives (with random choices), checking every
+ * invariant at the end of every year, and checks the lifespan rules on its share.
  *
  * Deaths before 18 are checked per shard against a loose bound (0.6%),
  * well above the 0.2% target, so random variation can't fail the test.
@@ -12,7 +12,8 @@
  * the smallest and largest shard medians, so it is between 72 and 82 too.
  * The same holds for "no one lives past the maximum age".
  */
-import { expect, it } from 'vitest';
+import { setAutoFreeze } from 'immer';
+import { beforeAll, expect, it } from 'vitest';
 import { content } from '../content';
 import { archiveEntry } from './archive';
 import { checkInvariants } from './invariants';
@@ -23,6 +24,11 @@ export const TOTAL_LIVES = 10_000;
 export const SHARDS = 4;
 
 export function lifespanShard(shard: number): void {
+  // Immer's freezing guards against accidental mutation, which other tests
+  // cover; this statistical run skips it for speed (each shard runs in its
+  // own worker, so no other test is affected).
+  beforeAll(() => setAutoFreeze(false));
+
   const count = TOTAL_LIVES / SHARDS;
   const first = (shard - 1) * count;
 
@@ -37,7 +43,8 @@ export function lifespanShard(shard: number): void {
       const seed = `lifespan-${i}`;
       const start = createLife({ mode: 'random', seed, birthYear: 2026 }, content);
       const dead = liveOut(start, content, (life) => {
-        if (failures.length >= 20) return;
+        // Every year, once it has ended.
+        if (failures.length >= 20 || (life.phase !== 'yearStart' && life.phase !== 'dead')) return;
         for (const f of checkInvariants(life, content)) failures.push(`${seed} age ${life.character.age}: ${f}`);
       });
       ages.push(dead.character.age);

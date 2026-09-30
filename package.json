@@ -8,6 +8,7 @@
   },
   "scripts": {
     "content": "tsx tools/build-content.ts",
+    "simulate": "npm run content && tsx tools/simulate.ts",
     "dev": "npm run content && vite",
     "build": "npm run content && vite build",
     "preview": "vite preview",

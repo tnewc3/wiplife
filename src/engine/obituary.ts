@@ -39,6 +39,12 @@ function cityName(ctx: ObituaryContext): string {
   return ctx.content.cities[cityId]?.name ?? cityId;
 }
 
+/** Average Happiness over the finished years (current Happiness before the first). */
+export function lifetimeHappiness(life: LifeState): number {
+  const { happinessTotal, years } = life.lifetime;
+  return years > 0 ? Math.round(happinessTotal / years) : life.character.stats.happiness;
+}
+
 const fullName = (m: FamilyMember) => `${m.person.name.first} ${m.person.name.last}`;
 
 export const OBITUARY_SECTIONS: readonly ObituarySection[] = [
@@ -85,7 +91,7 @@ export const OBITUARY_SECTIONS: readonly ObituarySection[] = [
   {
     id: 'mood',
     write: (ctx) => {
-      const happiness = ctx.life.character.stats.happiness;
+      const happiness = lifetimeHappiness(ctx.life);
       const band = ctx.content.text.obituary.mood.find((b) => happiness >= b.minHappiness);
       return band ? ctx.write(band.variants) : null;
     },

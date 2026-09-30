@@ -264,6 +264,7 @@ export const lifeStateSchema: z.ZodType<LifeState> = z.strictObject({
     .strictObject({ year: int, age: int, statsBefore: stats, statsAfter: stats.nullable() })
     .nullable(),
   death: z.strictObject({ year: int, age: int, causeId: id }).nullable(),
+  lifetime: z.strictObject({ happinessTotal: int.min(0), years: int.min(0) }),
   lineage: z.strictObject({ generation: int.min(1), parentLifeId: id.exactOptional() }),
 });
 

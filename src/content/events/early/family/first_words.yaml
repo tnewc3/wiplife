@@ -1,0 +1,18 @@
+id: first_words
+title: First words
+text: >-
+  {parent.name} swears your first real word was "more." {parent.They}
+  {parent:tells|tell} everyone who will listen, and several people who won't.
+tone: light
+category: family
+rarity: common
+lifeStages: [early]
+requires: { age: { lte: 2 } }
+weight: { base: 12 }
+once: true
+cast:
+  parent: { kind: parent }
+autoOutcome:
+  effects:
+    - { type: stat, key: happiness, delta: 2 }
+    - { type: relationship, role: parent, affection: 3 }

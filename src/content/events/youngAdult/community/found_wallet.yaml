@@ -1,0 +1,31 @@
+id: found_wallet
+title: Finders keepers
+text: >-
+  You find a wallet on the sidewalk with $200 inside, and an ID with a face
+  that looks like it's had a rough week.
+tone: neutral
+category: community
+rarity: common
+lifeStages: [teen, youngAdult, adult, senior]
+weight:
+  base: 6
+  modifiers:
+    - { if: { flag: caught_shoplifting }, x: 0.5 }
+cooldownYears: 6
+choices:
+  - id: return
+    label: Return it
+    outcome:
+      text: The owner nearly cries, and insists on buying you lunch.
+      effects:
+        - { type: stat, key: kindness, delta: 2 }
+        - { type: stat, key: reputation, delta: 3 }
+        - { type: stat, key: happiness, delta: 2 }
+  - id: keep
+    label: Keep the cash, mail the wallet
+    outcome:
+      text: The money is gone in a week. The guilt lasts a bit longer.
+      effects:
+        - { type: money, delta: 200 }
+        - { type: stat, key: kindness, delta: -2 }
+        - { type: stat, key: stress, delta: 2 }

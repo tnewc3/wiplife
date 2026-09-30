@@ -1,0 +1,27 @@
+id: writing_memoir
+title: The story so far
+text: You've started writing down your life story, one memory at a time.
+tone: light
+category: home
+rarity: common
+lifeStages: [senior]
+weight: { base: 7 }
+once: true
+choices:
+  - id: truth
+    label: Tell the whole truth
+    outcome:
+      text: Some chapters are hard to write. You write them anyway.
+      effects:
+        - { type: flag, key: wrote_memoir, value: true }
+        - { type: stat, key: happiness, delta: 4 }
+        - { type: stat, key: stress, delta: -3 }
+        - { type: history, text: You wrote down the story of your life., importance: 2 }
+  - id: hero
+    label: Make yourself the hero
+    outcome:
+      text: It's a thrilling read. Several relatives dispute chapter four.
+      effects:
+        - { type: flag, key: wrote_memoir, value: true }
+        - { type: stat, key: happiness, delta: 5 }
+        - { type: history, text: 'You wrote down the story of your life, more or less.', importance: 2 }

@@ -71,7 +71,7 @@ export const obituaryTextSchema = z.strictObject({
   survivedBy: variantsSchema,
   /** Relatives who died first. Values: {predeceased}. Finished lives only. */
   predeceasedBy: variantsSchema,
-  /** By Happiness: the first band whose minHappiness it reaches. No values. */
+  /** By lifetime average Happiness: the first band whose minHappiness it reaches. No values. */
   mood: z.array(z.strictObject({ minHappiness: z.int().min(0).max(100), variants: variantsSchema })).min(1),
   /** No values. */
   closing: outcomeVariantsSchema,

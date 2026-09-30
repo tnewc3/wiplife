@@ -38,6 +38,7 @@ See README.md for build, test and check commands.
 ## Git workflow
 - Branch from the latest main. Open pull requests into main only, never into another feature branch.
 - One stage (or one follow-up task) per pull request. Don't bring in unrelated commits.
+- At the end of every stage, open its pull request into main without asking.
 - A pull request merges only when CI is green.
 
 ## When finished

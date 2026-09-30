@@ -1,0 +1,33 @@
+id: gym_resolution
+title: New year, new you
+text: It's January, and you've decided this is the year you finally get fit.
+tone: light
+category: health
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+weight: { base: 7 }
+cooldownYears: 4
+choices:
+  - id: commit
+    label: Commit to a routine
+    check:
+      base: 45
+      stats: [{ key: discipline, weight: 0.5 }]
+      success:
+        text: Three months later, you're still going. People have started to notice.
+        effects:
+          - { type: stat, key: fitness, delta: 6 }
+          - { type: stat, key: health, delta: 3 }
+          - { type: stat, key: stress, delta: -3 }
+      failure:
+        text: You go twice. The membership keeps charging you until June.
+        effects:
+          - { type: money, delta: -200 }
+          - { type: stat, key: stress, delta: 1 }
+  - id: walk
+    label: Start small and walk every day
+    outcome:
+      text: It's not glamorous, but it sticks.
+      effects:
+        - { type: stat, key: fitness, delta: 2 }
+        - { type: stat, key: health, delta: 1 }

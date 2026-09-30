@@ -1,0 +1,47 @@
+id: learning_to_drive
+title: The empty parking lot
+text: >-
+  {parent.name} takes you to an empty parking lot to teach you to drive.
+  {parent.They} {parent:grips|grip} the door handle the entire time.
+tone: neutral
+category: family
+rarity: common
+lifeStages: [teen]
+requires: { age: { gte: 15 } }
+weight: { base: 12 }
+once: true
+cast:
+  parent: { kind: parent }
+choices:
+  - id: slow
+    label: Take it slow
+    check:
+      base: 70
+      stats: [{ key: discipline, weight: 0.3 }]
+      success:
+        text: You pass your driving test on the first try.
+        effects:
+          - { type: flag, key: can_drive, value: true }
+          - { type: memory, role: parent, tag: taught_you_to_drive }
+          - { type: relationship, role: parent, affection: 4 }
+          - { type: stat, key: confidence, delta: 2 }
+      failure:
+        text: You fail the test for rolling through a stop sign. Next time.
+        effects:
+          - { type: stat, key: stress, delta: 3 }
+          - { type: memory, role: parent, tag: taught_you_to_drive }
+  - id: floor_it
+    label: Floor it
+    check:
+      base: 35
+      stats: [{ key: confidence, weight: 0.2 }, { key: discipline, weight: 0.2 }]
+      success:
+        text: You're a natural, apparently. {parent.name} needs a minute.
+        effects:
+          - { type: flag, key: can_drive, value: true }
+          - { type: stat, key: riskTaking, delta: 2 }
+      failure:
+        text: You clip a shopping cart return. {parent.name} drives home.
+        effects:
+          - { type: stat, key: stress, delta: 4 }
+          - { type: relationship, role: parent, affection: -3 }

@@ -1,0 +1,30 @@
+id: icy_steps
+title: Ice on the steps
+text: The front steps are glazed with ice, and you're already running late.
+tone: serious
+category: health
+rarity: common
+lifeStages: [senior]
+weight: { base: 7 }
+cooldownYears: 3
+choices:
+  - id: rail
+    label: Hold the rail and take your time
+    outcome:
+      text: You're late, and you're fine. Being late is underrated.
+      effects:
+        - { type: stat, key: stress, delta: 2 }
+  - id: hurry
+    label: Hurry
+    check:
+      base: 70
+      stats: [{ key: fitness, weight: 0.4 }]
+      success:
+        text: You make it down without a slip.
+      failure:
+        text: Your feet go out from under you. The hip takes months to heal.
+        effects:
+          - { type: stat, key: health, delta: -10 }
+          - { type: stat, key: fitness, delta: -4 }
+          - { type: stat, key: stress, delta: 5 }
+          - { type: history, text: You broke your hip on the icy front steps., importance: 2 }

@@ -1,0 +1,35 @@
+id: sibling_rivalry
+title: The hoodie
+text: >-
+  {sibling.name} borrowed your favorite hoodie without asking. Again.
+  {sibling.They} {sibling:swears|swear} {sibling.they} {sibling:was|were} about
+  to give it back.
+tone: light
+category: family
+rarity: common
+lifeStages: [child, teen]
+weight: { base: 8 }
+cooldownYears: 3
+cast:
+  sibling: { kind: sibling }
+choices:
+  - id: let_go
+    label: Let it go
+    outcome:
+      text: It comes back a week later, smelling faintly of someone else's shampoo.
+      effects:
+        - { type: relationship, role: sibling, affection: 3 }
+        - { type: stat, key: kindness, delta: 1 }
+  - id: revenge
+    label: Borrow something of {sibling.theirs}
+    outcome:
+      text: A cold war begins. It lasts until dinner.
+      effects:
+        - { type: relationship, role: sibling, affection: -2 }
+        - { type: stat, key: happiness, delta: 2 }
+  - id: tell
+    label: Tell on {sibling.them}
+    outcome:
+      text: '{sibling.name} gets in trouble and doesn''t speak to you for three days.'
+      effects:
+        - { type: relationship, role: sibling, affection: -5, trust: -3 }

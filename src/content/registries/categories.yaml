@@ -1,0 +1,13 @@
+# Event categories. An optional cooldownYears keeps other events of the
+# same category away for that many years after one fires.
+categories:
+  family: { label: Family }
+  play: { label: Play }
+  school: { label: School life }
+  friends: { label: Friends }
+  mischief: { label: Trouble }
+  health: { label: Health }
+  money: { label: Money }
+  home: { label: Home }
+  community: { label: Community }
+  wonder: { label: Strange and wonderful, cooldownYears: 10 }

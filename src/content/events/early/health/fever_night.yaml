@@ -1,0 +1,19 @@
+id: fever_night
+title: A long night
+text: >-
+  You wake up burning hot and miserable. {parent.name} sits up with you all
+  night, a cool cloth on your forehead, humming something you'll remember for
+  years.
+tone: serious
+category: health
+rarity: common
+lifeStages: [early, child]
+weight: { base: 7 }
+cooldownYears: 3
+cast:
+  parent: { kind: parent }
+autoOutcome:
+  effects:
+    - { type: stat, key: health, delta: -2 }
+    - { type: relationship, role: parent, affection: 5 }
+    - { type: memory, role: parent, tag: cared_for_you }

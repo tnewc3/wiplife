@@ -5,36 +5,22 @@ import { useAppStore } from '../../../store/appStore';
 import { Button } from '../../components/Button';
 import { Card } from '../../components/Card';
 import { StatBar } from '../../components/StatBar';
-import { ageLabel, LIFE_STAGE_LABELS, memberAgeLabel, relativeLabel, STAT_LABELS, statChangeLabel, timelineAgeLabel } from '../../labels';
+import { YearRecapList } from '../../components/YearRecapList';
+import { ageLabel, LIFE_STAGE_LABELS, memberAgeLabel, relativeLabel, STAT_LABELS, timelineAgeLabel } from '../../labels';
 
 /** How many recent history entries the Home feed shows. */
 const FEED_LENGTH = 12;
 
 /** A short summary of the year just lived. */
 function YearRecapCard({ life }: { life: LifeState }) {
-  const recap = getYearRecap(life);
+  const recap = getYearRecap(life, content);
   if (!recap) return null;
   return (
     <Card aria-labelledby="recap-title" role="region">
       <h3 id="recap-title" className="text-lg font-bold">
         {recap.year} · {ageLabel(recap.age)}
       </h3>
-      {recap.entries.length === 0 && recap.statChanges.length === 0 ? (
-        <p className="mt-1 text-muted">A quiet year.</p>
-      ) : (
-        <ul className="mt-1 flex flex-col gap-1">
-          {recap.entries.map((e, i) => (
-            <li key={`e${i}`} className="break-words [overflow-wrap:anywhere]">
-              {e.text}
-            </li>
-          ))}
-          {recap.statChanges.map((c) => (
-            <li key={c.stat} className="text-muted">
-              {STAT_LABELS[c.stat]} {statChangeLabel(c.change)}.
-            </li>
-          ))}
-        </ul>
-      )}
+      <YearRecapList recap={recap} />
     </Card>
   );
 }

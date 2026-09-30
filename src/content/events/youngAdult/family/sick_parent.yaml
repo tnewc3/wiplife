@@ -1,0 +1,37 @@
+id: sick_parent
+title: A phone call
+text: >-
+  {parent.name} calls with news: {parent.they} {parent:has|have} been in the
+  hospital for a week, and didn't want to worry you.
+tone: serious
+category: family
+rarity: common
+lifeStages: [youngAdult, adult]
+weight: { base: 7 }
+cooldownYears: 5
+cast:
+  parent: { kind: parent, age: { min: 55, max: 120 } }
+choices:
+  - id: go
+    label: Go and stay with {parent.them}
+    outcome:
+      text: You sleep on a fold-out couch for two weeks. {parent.name} pretends to hate the fuss.
+      effects:
+        - { type: relationship, role: parent, affection: 8 }
+        - { type: memory, role: parent, tag: was_there_for_them }
+        - { type: stat, key: stress, delta: 4 }
+        - { type: stat, key: happiness, delta: 1 }
+  - id: call
+    label: Call every day
+    outcome:
+      text: The calls get longer as {parent.name} gets better.
+      effects:
+        - { type: relationship, role: parent, affection: 3 }
+        - { type: stat, key: stress, delta: 2 }
+  - id: fine
+    label: Tell yourself {parent.they} will be fine
+    outcome:
+      text: '{parent.name} is fine, mostly. {parent.They} {parent:remembers|remember} that you didn''t come.'
+      effects:
+        - { type: relationship, role: parent, affection: -5 }
+        - { type: stat, key: stress, delta: 3 }

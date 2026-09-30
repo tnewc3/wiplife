@@ -1,0 +1,34 @@
+id: last_adventure
+title: Never too late
+text: >-
+  You see an ad: "Skydiving for seniors. It's never too late." You can't stop
+  thinking about it.
+tone: serious
+category: wonder
+rarity: rare
+lifeStages: [senior]
+requires: { trait: riskTaking, gte: 55 }
+weight: { base: 2 }
+once: true
+choices:
+  - id: jump
+    label: Jump
+    check:
+      base: 90
+      stats: [{ key: health, weight: 0.2 }]
+      success:
+        text: The ground rushes up, the chute opens, and you laugh the whole way down.
+        effects:
+          - { type: flag, key: jumped_from_plane, value: true }
+          - { type: stat, key: happiness, delta: 10 }
+          - { type: history, text: 'You went skydiving at {age}.', importance: 2 }
+      failure:
+        text: Something goes wrong on the way down.
+        effects:
+          - { type: death, cause: skydiving_accident }
+  - id: ground
+    label: Stay on the ground
+    outcome:
+      text: You watch the jumpers from the field, and that's thrilling enough.
+      effects:
+        - { type: stat, key: happiness, delta: 1 }

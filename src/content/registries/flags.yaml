@@ -1,0 +1,15 @@
+# Every flag an event can set, with a one-line description.
+flags:
+  parents_fought: Your parents argued a lot when you were small
+  parents_split: Your parents separated
+  has_dog: You have a dog
+  had_dog: You had a dog who has died
+  broke_arm: You broke your arm as a child
+  shoplifted: You have stolen from a store
+  caught_shoplifting: You were caught shoplifting
+  can_drive: You can drive
+  ran_marathon: You have run a marathon
+  volunteers: You volunteer at the animal shelter
+  wrote_memoir: You wrote your life story
+  jumped_from_plane: You have been skydiving
+  met_the_stranger: You met the stranger on the bench and listened

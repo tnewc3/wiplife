@@ -1,10 +1,109 @@
 /**
- * Pacing director (year pipeline step 9). Empty until Stage 4 builds this system.
+ * Pacing director (year pipeline step 9): queues due scheduled events first,
+ * then picks new events up to this year's budget, and orders them by tone.
+ * Numbers come from src/content/balance/pacing.yaml.
  */
-import type { ContentBundle } from '../../content/schemas';
-import type { LifeState } from '../types';
+import { isDraft, original } from 'immer';
+import type { ContentBundle, EventDef } from '../../content/schemas';
+import { evaluate } from '../conditions';
+import { castEvent, uncast } from '../events/casting';
+import { eventIndex, eventWeight } from '../events/selection';
+import { weightedPick } from '../random';
+import { nextFloat, nextInt } from '../rng';
+import type { EventInstance, Id, LifeState } from '../types';
 
-/** Step 9: queue due scheduled events first, then pick new events. Stage 4 fills this in; it does nothing yet. */
-export function runPacing(_state: LifeState, _content: ContentBundle): void {
-  // Intentionally empty until Stage 4.
+const FAMILY_KINDS = new Set(['parent', 'stepparent', 'sibling', 'grandparent']);
+
+/** Extra events this year: one per sign that life is volatile, up to the balance maximum. */
+export function volatilityBonus(state: LifeState, content: ContentBundle): number {
+  const v = content.balance.pacing.volatility;
+  const since = state.currentYear - v.recentYears;
+  const signs = [
+    state.character.personality.riskTaking > v.riskTakingAbove,
+    state.history.some((e) => e.importance === 3 && e.year >= since && e.year < state.currentYear),
+    Object.values(state.relationships).some((r) => !FAMILY_KINDS.has(r.kind) && r.since >= since && r.since < state.currentYear),
+  ].filter(Boolean).length;
+  return Math.min(v.maxBonus, signs);
+}
+
+/**
+ * How many events this year: the stage's range plus the volatility bonus,
+ * never above the cap. Draws from `state`'s generator; reads `view`.
+ */
+export function yearBudget(state: LifeState, content: ContentBundle, view: LifeState = state): number {
+  const { budgets, cap } = content.balance.pacing;
+  const range = budgets[view.character.lifeStage];
+  return Math.min(cap, nextInt(state.rng, range.min, range.max) + volatilityBonus(view, content));
+}
+
+interface Picked {
+  def: EventDef;
+  cast: Record<string, Id>;
+}
+
+/** Casts the event and checks its full requirements; undoes the cast if they fail. */
+function tryCast(state: LifeState, view: LifeState, def: EventDef, content: ContentBundle, preset?: Record<string, Id>): Picked | null {
+  const result = castEvent(state, def, state.rng, content, preset, view);
+  if (!result) return null;
+  if (!evaluate(def.requires, state, { cast: result.cast, roles: 'strict' })) {
+    uncast(state, result.created);
+    return null;
+  }
+  return { def, cast: result.cast };
+}
+
+/** Step 9: queue due scheduled events first, then pick new events. */
+export function runPacing(state: LifeState, content: ContentBundle): void {
+  const year = state.currentYear;
+  const { cap, toneOrder, minTotalWeight } = content.balance.pacing;
+  const picked: Picked[] = [];
+  // Reads go through the life as the earlier steps left it (beginYear gives
+  // each step its own draft), which is much faster than reading the draft.
+  // It stays accurate here: this step only writes the event log (at the end)
+  // and people created by casting, whom later picks don't need.
+  const view = isDraft(state) ? (original(state) as LifeState) : state;
+
+  // Due follow-ups first. One that can't happen any more (retired, missing,
+  // someone in it died, or its requirements fail) is dropped. Past the cap,
+  // the rest wait a year.
+  const due = state.scheduled.filter((s) => s.dueYear <= year);
+  state.scheduled = state.scheduled.filter((s) => s.dueYear > year);
+  for (const item of due) {
+    if (picked.length >= cap) {
+      state.scheduled.push({ ...item, dueYear: year + 1 });
+      continue;
+    }
+    const def = content.events[item.eventId];
+    if (!def || def.retired || picked.some((p) => p.def.id === def.id)) continue;
+    const result = tryCast(state, view, def, content, item.cast);
+    if (result) picked.push(result);
+  }
+
+  // New events, weighted, without repeats, until the budget is met or nothing
+  // (more) fits.
+  const budget = yearBudget(state, content, view);
+  const pool = [...(eventIndex(content).get(state.character.lifeStage) ?? [])].filter(
+    (def) => !picked.some((p) => p.def.id === def.id),
+  );
+  while (picked.length < budget && pool.length > 0) {
+    const options = pool.map((def) => [def, eventWeight(view, def, content)] as const);
+    const total = options.reduce((sum, [, w]) => sum + w, 0);
+    if (!(total > 0)) break;
+    // Too little fits: the shortfall is the chance the year stays quieter.
+    if (total < minTotalWeight && nextFloat(state.rng) >= total / minTotalWeight) break;
+    const def = weightedPick(state.rng, options);
+    pool.splice(pool.indexOf(def), 1);
+    const result = tryCast(state, view, def, content);
+    if (result) picked.push(result);
+  }
+
+  // Tone order, keeping the pick order within a tone.
+  const rank = (p: Picked) => toneOrder.indexOf(p.def.tone);
+  const ordered = picked.map((p, i) => ({ p, i })).sort((a, b) => rank(a.p) - rank(b.p) || a.i - b.i);
+
+  state.pending = ordered.map(({ p }, i): EventInstance => {
+    const log = state.eventLog[p.def.id];
+    state.eventLog[p.def.id] = { count: (log?.count ?? 0) + 1, lastYear: year };
+    return { instanceId: `e${year}-${i + 1}`, eventId: p.def.id, cast: p.cast };
+  });
 }

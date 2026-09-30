@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-import { createCustomLife, passAgeGate, type CustomLifeData } from './helpers';
+import { ageUp, createCustomLife, passAgeGate, type CustomLifeData } from './helpers';
 
 async function homeName(page: Page): Promise<string> {
   return (await page.getByTestId('character-name').textContent())?.trim() ?? '';
@@ -132,14 +132,14 @@ test('reset all data removes the saved life', async ({ page }) => {
 });
 
 test('a damaged save is restored from the backup, with a notice once', async ({ page }) => {
-  // A seed that survives its first year.
-  await passAgeGate(page, 'e2e-0');
+  // The test content pack, so the first year plays the same whatever real events exist.
+  await passAgeGate(page, { testPack: true, seed: 'e2e-pack' });
   await page.getByRole('button', { name: 'New Life' }).click();
   await page.getByRole('button', { name: 'Start a random life' }).click();
   const first = await homeName(page);
 
   // Aging up autosaves after each step of the year, so earlier saves become backups.
-  await page.getByRole('button', { name: 'Age Up' }).click();
+  await ageUp(page);
   await expect(page.getByText(/^1 year old · /)).toBeVisible();
 
   // Damage the active save: an empty first name.

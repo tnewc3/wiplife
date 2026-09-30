@@ -1,0 +1,45 @@
+id: shoplifting_dare
+title: The dare
+text: >-
+  At the mall, {friend.name} dares you to walk out of a store with a pair of
+  sunglasses without paying.
+tone: serious
+category: mischief
+rarity: common
+lifeStages: [teen]
+weight:
+  base: 7
+  modifiers:
+    - { if: { trait: riskTaking, gt: 60 }, x: 1.5 }
+cooldownYears: 3
+cast:
+  friend: { kind: friend, ageOffset: { min: -1, max: 1 }, createIfMissing: true, newChance: 0.3 }
+choices:
+  - id: do_it
+    label: Do it
+    check:
+      base: 60
+      stats: [{ key: confidence, weight: 0.2 }]
+      success:
+        text: Nobody stops you. The sunglasses feel less cool than you expected.
+        effects:
+          - { type: flag, key: shoplifted, value: true }
+          - { type: stat, key: riskTaking, delta: 3 }
+          - { type: relationship, role: friend, affection: 4 }
+          - { type: memory, role: friend, tag: dared_you }
+      failure:
+        text: A security guard stops you at the door, and your family has to come and get you.
+        effects:
+          - { type: flag, key: shoplifted, value: true }
+          - { type: flag, key: caught_shoplifting, value: true }
+          - { type: stat, key: stress, delta: 8 }
+          - { type: stat, key: reputation, delta: -5 }
+          - { type: memory, role: friend, tag: dared_you }
+          - { type: history, text: You were caught shoplifting at the mall., importance: 2 }
+  - id: refuse
+    label: Refuse
+    outcome:
+      text: '{friend.name} calls you a coward, then buys you a pretzel anyway.'
+      effects:
+        - { type: relationship, role: friend, affection: -2 }
+        - { type: stat, key: discipline, delta: 2 }

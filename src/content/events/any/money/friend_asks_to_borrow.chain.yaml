@@ -1,0 +1,77 @@
+# Chain: a friend asks to borrow money; a year or two later, you find out
+# whether you'll see it again.
+chain: friend_asks_to_borrow
+events:
+  - id: friend_asks_to_borrow
+    title: Short on rent
+    text: >-
+      {friend.name} is short on rent and asks if you can spot {friend.them} $300
+      until next month.
+    tone: neutral
+    category: money
+    rarity: common
+    lifeStages: [youngAdult, adult]
+    requires: { money: { gte: 300 } }
+    weight:
+      base: 8
+      modifiers:
+        - { if: { trait: kindness, gt: 60 }, x: 1.5 }
+    cooldownYears: 6
+    cast:
+      friend: { kind: friend, ageOffset: { min: -4, max: 4 }, createIfMissing: true }
+    choices:
+      - id: lend
+        label: Lend it
+        outcome:
+          text: '{friend.name} hugs you and swears {friend.they} will pay you back.'
+          effects:
+            - { type: money, delta: -300 }
+            - { type: relationship, role: friend, affection: 5 }
+            - { type: memory, role: friend, tag: lent_money }
+            - { type: schedule, eventId: friend_repays, inYears: [1, 2], cast: [friend] }
+      - id: excuse
+        label: Make an excuse
+        outcome:
+          text: '{friend.name} says it''s fine. It clearly isn''t.'
+          effects:
+            - { type: relationship, role: friend, affection: -3 }
+
+  - id: friend_repays
+    title: About that money
+    text: >-
+      It's been a while since you lent {friend.name} that $300, and {friend.they}
+      just posted photos from a beach vacation.
+    tone: neutral
+    category: money
+    rarity: common
+    lifeStages: [youngAdult, adult, senior]
+    requires: { memory: { role: friend, tag: lent_money } }
+    weight: { base: 10 }
+    followUpOnly: true
+    cast:
+      friend: { kind: friend }
+    choices:
+      - id: remind
+        label: Remind {friend.them} about the money
+        check:
+          base: 50
+          stats: [{ key: confidence, weight: 0.3 }]
+          success:
+            text: '{friend.name} pays you back that week, with a bottle of wine and an apology.'
+            effects:
+              - { type: money, delta: 300 }
+              - { type: memory, role: friend, tag: paid_you_back }
+              - { type: relationship, role: friend, affection: 3 }
+          failure:
+            text: '{friend.name} changes the subject. The money is gone.'
+            effects:
+              - { type: memory, role: friend, tag: never_paid_back }
+              - { type: relationship, role: friend, affection: -5, trust: -10 }
+      - id: let_slide
+        label: Let it slide
+        outcome:
+          text: You decide the friendship is worth more than $300. {friend.name} never mentions it.
+          effects:
+            - { type: memory, role: friend, tag: never_paid_back }
+            - { type: relationship, role: friend, trust: -3 }
+            - { type: stat, key: kindness, delta: 2 }

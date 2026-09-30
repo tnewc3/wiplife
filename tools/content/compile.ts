@@ -3,7 +3,10 @@ import { readdir, readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { LineCounter, parseDocument } from 'yaml';
 import {
+  chainFileSchema,
   collectionTypes,
+  eventSchema,
+  LIFE_STAGE_IDS,
   contentBundleSchema,
   singletonTypes,
   type CollectionKey,
@@ -28,6 +31,27 @@ export type CompileResult =
 export interface CompileOptions {
   contentDir: string;
   appVersion: string;
+  /**
+   * A folder laid over contentDir (the end-to-end test content pack): its
+   * files replace files at the same path, and if it has an events/ folder,
+   * that replaces every real event.
+   */
+  overlayDir?: string;
+}
+
+/** Content files by path relative to the content folder, after applying the overlay. */
+async function contentFiles(contentDir: string, overlayDir?: string): Promise<{ file: string; absolute: string }[]> {
+  const relative = (dir: string, absolute: string) => path.relative(dir, absolute).split(path.sep).join('/');
+  const byFile = new Map<string, string>();
+  for (const absolute of await listYamlFiles(contentDir)) byFile.set(relative(contentDir, absolute), absolute);
+  if (overlayDir) {
+    const overlay = (await listYamlFiles(overlayDir)).map((absolute) => ({ file: relative(overlayDir, absolute), absolute }));
+    if (overlay.some((o) => o.file.startsWith('events/'))) {
+      for (const file of [...byFile.keys()]) if (file.startsWith('events/')) byFile.delete(file);
+    }
+    for (const o of overlay) byFile.set(o.file, o.absolute);
+  }
+  return [...byFile.entries()].sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0)).map(([file, absolute]) => ({ file, absolute }));
 }
 
 /** Formats errors as one "file: message" line each. */
@@ -50,6 +74,49 @@ function formatIssuePath(issuePath: readonly PropertyKey[]): string {
     .join('');
 }
 
+const EVENT_STAGE_FOLDERS = new Set<string>([...LIFE_STAGE_IDS, 'any']);
+
+/**
+ * Event files live at events/<lifeStage or any>/<category>/<id>.yaml, or
+ * <chain>.chain.yaml for a chain's events together. Adds each event to the
+ * bucket and returns what is wrong.
+ */
+function collectEvents(
+  file: string,
+  raw: unknown,
+  bucket: Map<string, { file: string; def: { id: string; aliases?: string[] | undefined } }>,
+): string[] {
+  const errors: string[] = [];
+  const parts = file.split('/');
+  if (parts.length !== 4) return ['event files go in events/<lifeStage or any>/<category>/<file>.yaml'];
+  const [, stage, category, name] = parts as [string, string, string, string];
+  if (!EVENT_STAGE_FOLDERS.has(stage)) return [`unknown life stage folder "${stage}" (expected one of: ${[...EVENT_STAGE_FOLDERS].join(', ')})`];
+
+  const isChain = /\.chain\.ya?ml$/i.test(name);
+  const baseName = name.replace(/(\.chain)?\.ya?ml$/i, '');
+  const parsed = isChain ? chainFileSchema.safeParse(raw) : eventSchema.safeParse(raw);
+  if (!parsed.success) return parsed.error.issues.map((issue) => `${formatIssuePath(issue.path)} — ${issue.message}`);
+
+  let defs;
+  if ('chain' in parsed.data) {
+    if (parsed.data.chain !== baseName) errors.push(`chain "${parsed.data.chain}" must match the file name ("${baseName}")`);
+    defs = parsed.data.events;
+  } else {
+    if (parsed.data.id !== baseName) errors.push(`id "${parsed.data.id}" must match the file name ("${baseName}")`);
+    defs = [parsed.data];
+  }
+  for (const def of defs) {
+    if (def.category !== category) errors.push(`${def.id}: category "${def.category}" must match its folder ("${category}")`);
+    if (stage !== 'any' && !(def.lifeStages as string[]).includes(stage)) {
+      errors.push(`${def.id}: lifeStages must include its folder's stage "${stage}"`);
+    }
+    const clash = bucket.get(def.id);
+    if (clash) errors.push(`duplicate event id "${def.id}" (also defined in ${clash.file})`);
+    else if (errors.length === 0) bucket.set(def.id, { file, def });
+  }
+  return errors;
+}
+
 /** Locale-independent ordering, so the content version is the same on every machine. */
 function byKey([a]: [string, unknown], [b]: [string, unknown]): number {
   return a < b ? -1 : a > b ? 1 : 0;
@@ -61,7 +128,7 @@ function byKey([a]: [string, unknown], [b]: [string, unknown]): number {
  * bundle, or every error found. Collects all errors instead of stopping at
  * the first, so one run shows everything that needs fixing.
  */
-export async function compileContent({ contentDir, appVersion }: CompileOptions): Promise<CompileResult> {
+export async function compileContent({ contentDir, appVersion, overlayDir }: CompileOptions): Promise<CompileResult> {
   const errors: ContentError[] = [];
   const folderToCollection = new Map<string, CollectionKey>(
     (Object.keys(collectionTypes) as CollectionKey[]).map((key) => [collectionTypes[key].folder, key]),
@@ -72,9 +139,7 @@ export async function compileContent({ contentDir, appVersion }: CompileOptions)
   );
   const singletons = new Map<SingletonPath, unknown>();
 
-  const files = await listYamlFiles(contentDir);
-  for (const absolute of files) {
-    const file = path.relative(contentDir, absolute).split(path.sep).join('/');
+  for (const { file, absolute } of await contentFiles(contentDir, overlayDir)) {
     const [folder] = file.split('/');
     if (folder === undefined || NON_CONTENT_FOLDERS.has(folder)) continue;
 
@@ -104,6 +169,12 @@ export async function compileContent({ contentDir, appVersion }: CompileOptions)
     }
 
     const raw: unknown = doc.toJS();
+
+    if (collectionKey === 'events') {
+      for (const error of collectEvents(file, raw, collected.get('events')!)) errors.push({ file, message: error });
+      continue;
+    }
+
     const schema = isSingleton ? singletonTypes[singletonPath] : collectionTypes[collectionKey!].schema;
     const parsed = schema.safeParse(raw);
     if (!parsed.success) {

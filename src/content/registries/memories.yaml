@@ -1,0 +1,23 @@
+# Every memory tag an event can write on a relationship, with readable text
+# shown in the year recap ("Ana: Comforted you when you were scared").
+tags:
+  comforted_you: Comforted you when you were scared
+  read_to_you: Read you bedtime stories
+  cared_for_you: Took care of you when you were sick
+  left_you_alone: Left you alone when you were small
+  took_your_side: You took their side
+  spent_holidays_together: Spent the holidays with you
+  promised_to_write: You promised to write
+  kept_in_touch: You kept in touch
+  lost_touch: You lost touch
+  bullied_you: Bullied you at school
+  you_stood_up_to_them: You stood up to them
+  dared_you: Dared you into trouble
+  taught_you_to_drive: Taught you to drive
+  lent_money: You lent them money
+  paid_you_back: Paid you back
+  never_paid_back: Never paid you back
+  road_trip_together: Took a road trip with you
+  was_there_for_them: You were there when they were ill
+  fought_with_you: Got into a fight with you
+  made_peace: Made peace with you

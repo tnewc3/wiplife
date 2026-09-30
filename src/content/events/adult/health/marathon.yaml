@@ -1,0 +1,35 @@
+id: marathon
+title: Twenty-six miles
+text: Someone at the gym talks you into signing up for a marathon. It's in four months.
+tone: light
+category: health
+rarity: uncommon
+lifeStages: [youngAdult, adult]
+requires: { stat: fitness, gte: 55 }
+weight: { base: 8 }
+once: true
+choices:
+  - id: run
+    label: Train and run it
+    check:
+      base: 40
+      stats: [{ key: fitness, weight: 0.6 }, { key: discipline, weight: 0.3 }]
+      success:
+        text: You cross the finish line and cry a little. Nobody judges.
+        effects:
+          - { type: flag, key: ran_marathon, value: true }
+          - { type: stat, key: fitness, delta: 3 }
+          - { type: stat, key: happiness, delta: 6 }
+          - { type: history, text: You ran a marathon., importance: 2 }
+      failure:
+        text: You make it to mile eighteen before your knee gives out.
+        effects:
+          - { type: stat, key: health, delta: -3 }
+          - { type: stat, key: happiness, delta: -2 }
+          - { type: stat, key: fitness, delta: 1 }
+  - id: cheer
+    label: Cheer from the sidelines
+    outcome:
+      text: You bring a sign. It's very funny.
+      effects:
+        - { type: stat, key: happiness, delta: 1 }

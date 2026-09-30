@@ -3,6 +3,7 @@
  * each year every living NPC may die, and a relative's death is written to
  * the history.
  */
+import { isDraft, original } from 'immer';
 import type { ContentBundle } from '../../content/schemas';
 import { chance } from '../rng';
 import type { LifeState, Relationship } from '../types';
@@ -17,13 +18,16 @@ function isFamilyKind(kind: Relationship['kind'], content: ContentBundle): kind 
 
 /** Step 2: age NPCs, and check whether any die. People are checked in id order. */
 export function ageNpcs(state: LifeState, content: ContentBundle): void {
-  const ids = Object.keys(state.people).sort();
+  // Read through the life as the earlier steps left it (faster than the draft).
+  const view = isDraft(state) ? (original(state) as LifeState) : state;
+  const ids = Object.keys(view.people).sort();
   for (const id of ids) {
-    const person = state.people[id]!;
-    if (!person.alive) continue;
-    const age = state.currentYear - person.birthYear;
+    const seen = view.people[id]!;
+    if (!seen.alive) continue;
+    const age = state.currentYear - seen.birthYear;
     if (!chance(state.rng, npcDeathChance(age, content))) continue;
 
+    const person = state.people[id]!;
     person.alive = false;
     person.deathYear = state.currentYear;
 

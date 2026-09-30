@@ -1,0 +1,128 @@
+# Chain: your parents separate (childhood), the first holidays in two homes,
+# and years later, a moment of peace between them.
+chain: parents_separate
+events:
+  - id: parents_separate
+    title: Two homes
+    text: >-
+      {parentA.name} and {parentB.name} sit you down at the kitchen table. They
+      are separating, and {parentA.name} is moving out at the end of the month.
+    tone: serious
+    category: family
+    rarity: uncommon
+    lifeStages: [child]
+    requires: { flag: parents_fought }
+    weight: { base: 1.5 }
+    once: true
+    cast:
+      parentA: { kind: parent }
+      parentB: { kind: parent }
+    choices:
+      - id: beg
+        label: Beg them to stay together
+        outcome:
+          text: They hold your hands and tell you it isn't your fault. It happens anyway.
+          effects:
+            - { type: stat, key: stress, delta: 8 }
+            - { type: stat, key: happiness, delta: -5 }
+            - { type: flag, key: parents_split, value: true }
+            - { type: history, text: Your parents separated., importance: 3 }
+            - { type: schedule, eventId: parents_split_holidays, inYears: [1, 2], cast: [parentA, parentB] }
+            - { type: schedule, eventId: parents_years_later, inYears: [6, 10], cast: [parentA, parentB] }
+      - id: quiet
+        label: Say nothing
+        outcome:
+          text: You nod and go to your room. You don't cry until much later.
+          effects:
+            - { type: stat, key: stress, delta: 6 }
+            - { type: flag, key: parents_split, value: true }
+            - { type: history, text: Your parents separated., importance: 3 }
+            - { type: schedule, eventId: parents_split_holidays, inYears: [1, 2], cast: [parentA, parentB] }
+            - { type: schedule, eventId: parents_years_later, inYears: [6, 10], cast: [parentA, parentB] }
+      - id: blame
+        label: Tell {parentA.name} it's {parentA.their} fault
+        outcome:
+          text: >-
+            {parentA.name} flinches like you hit {parentA.them}. {parentB.name}
+            doesn't correct you.
+          effects:
+            - { type: relationship, role: parentA, affection: -8, trust: -10 }
+            - { type: relationship, role: parentB, affection: 5 }
+            - { type: memory, role: parentB, tag: took_your_side }
+            - { type: flag, key: parents_split, value: true }
+            - { type: history, text: Your parents separated., importance: 3 }
+            - { type: schedule, eventId: parents_split_holidays, inYears: [1, 2], cast: [parentA, parentB] }
+            - { type: schedule, eventId: parents_years_later, inYears: [6, 10], cast: [parentA, parentB] }
+
+  - id: parents_split_holidays
+    title: The first holidays
+    text: >-
+      It's your first holiday season with two homes. {parentA.name} and
+      {parentB.name} both want you on the big day, and both are trying very hard
+      not to make you choose.
+    tone: neutral
+    category: family
+    rarity: common
+    lifeStages: [child, teen]
+    weight: { base: 10 }
+    followUpOnly: true
+    cast:
+      parentA: { kind: parent }
+      parentB: { kind: parent }
+    choices:
+      - id: with_a
+        label: Spend it with {parentA.name}
+        outcome:
+          text: '{parentA.name} makes far too much food. You call {parentB.name} after dinner.'
+          effects:
+            - { type: relationship, role: parentA, affection: 6 }
+            - { type: relationship, role: parentB, affection: -4 }
+            - { type: memory, role: parentA, tag: spent_holidays_together }
+      - id: with_b
+        label: Spend it with {parentB.name}
+        outcome:
+          text: '{parentB.name} lets you open a present early. You call {parentA.name} after dinner.'
+          effects:
+            - { type: relationship, role: parentB, affection: 6 }
+            - { type: relationship, role: parentA, affection: -4 }
+            - { type: memory, role: parentB, tag: spent_holidays_together }
+      - id: split
+        label: Split the day in half
+        outcome:
+          text: You eat two dinners and spend the afternoon in the back seat of a car.
+          effects:
+            - { type: stat, key: stress, delta: 3 }
+            - { type: relationship, role: parentA, affection: 2 }
+            - { type: relationship, role: parentB, affection: 2 }
+
+  - id: parents_years_later
+    title: Side by side
+    text: >-
+      At a family barbecue, years after the split, {parentA.name} and
+      {parentB.name} end up side by side at the grill, laughing about something
+      from before you were born.
+    tone: neutral
+    category: family
+    rarity: common
+    lifeStages: [teen, youngAdult]
+    weight: { base: 10 }
+    followUpOnly: true
+    cast:
+      parentA: { kind: parent }
+      parentB: { kind: parent }
+    choices:
+      - id: join
+        label: Join them
+        outcome:
+          text: For an afternoon, it almost feels like it used to.
+          effects:
+            - { type: stat, key: happiness, delta: 5 }
+            - { type: stat, key: stress, delta: -4 }
+            - { type: relationship, role: parentA, affection: 3 }
+            - { type: relationship, role: parentB, affection: 3 }
+      - id: distance
+        label: Keep your distance
+        outcome:
+          text: You watch from across the yard. It's good to see, but it's not yours to fix.
+          effects:
+            - { type: stat, key: stress, delta: 2 }

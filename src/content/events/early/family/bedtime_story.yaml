@@ -1,0 +1,28 @@
+id: bedtime_story
+title: Just one more
+text: >-
+  {parent.name} closes the book and turns off the lamp. You are wide awake, and
+  there is a whole shelf of stories left.
+tone: light
+category: family
+rarity: common
+lifeStages: [early]
+weight: { base: 10 }
+cooldownYears: 2
+cast:
+  parent: { kind: parent }
+choices:
+  - id: one_more
+    label: Beg for one more story
+    outcome:
+      text: '{parent.name} sighs, smiles and reads it with all the voices.'
+      effects:
+        - { type: stat, key: happiness, delta: 3 }
+        - { type: memory, role: parent, tag: read_to_you }
+        - { type: relationship, role: parent, affection: 3 }
+  - id: sleep
+    label: Close your eyes
+    outcome:
+      text: You're asleep before {parent.name} reaches the door.
+      effects:
+        - { type: stat, key: stress, delta: -2 }

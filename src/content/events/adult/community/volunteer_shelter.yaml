@@ -1,0 +1,27 @@
+id: volunteer_shelter
+title: Weekend help wanted
+text: The animal shelter down the road is desperate for volunteers on weekends.
+tone: light
+category: community
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires: { not: { flag: volunteers } }
+weight:
+  base: 6
+  modifiers:
+    - { if: { flag: had_dog }, x: 2 }
+cooldownYears: 3
+choices:
+  - id: sign_up
+    label: Sign up
+    outcome:
+      text: You come home every Saturday covered in fur and strangely content.
+      effects:
+        - { type: flag, key: volunteers, value: true }
+        - { type: stat, key: kindness, delta: 3 }
+        - { type: stat, key: happiness, delta: 4 }
+        - { type: stat, key: stress, delta: -2 }
+  - id: busy
+    label: You're too busy
+    outcome:
+      text: Maybe next year.

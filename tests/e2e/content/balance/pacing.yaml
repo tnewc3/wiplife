@@ -1,0 +1,15 @@
+# Test pack: exactly one event per year whenever one fits.
+budgets:
+  early: { min: 1, max: 1 }
+  child: { min: 1, max: 1 }
+  teen: { min: 1, max: 1 }
+  youngAdult: { min: 1, max: 1 }
+  adult: { min: 1, max: 1 }
+  senior: { min: 1, max: 1 }
+volatility:
+  maxBonus: 0
+  riskTakingAbove: 100
+  recentYears: 1
+cap: 6
+minTotalWeight: 1
+toneOrder: [light, neutral, serious, dark]

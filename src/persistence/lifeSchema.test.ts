@@ -6,7 +6,7 @@ import { nextUint32 } from '../engine/rng';
 import { customInput, liveOut } from '../engine/testFixtures';
 import type { LifeState } from '../engine/types';
 import { createDb, type WiplifeDb } from './db';
-import { makeEnvelope, type SaveEnvelope } from './envelope';
+import { CURRENT_SCHEMA_VERSION, makeEnvelope, type SaveEnvelope } from './envelope';
 import { lifeStateSchema, loadedLifeSchema } from './lifeSchema';
 import { readSave, writeSave } from './saves';
 
@@ -135,7 +135,7 @@ describe('life save and load', () => {
 describe('lives from Stage 3 on', () => {
   it('round trip mid-year, after years of aging, and after death', async () => {
     const midYear = beginYear(random('stage3-mid'), content);
-    expect(midYear.phase).toBe('yearEnd');
+    expect(['events', 'yearEnd']).toContain(midYear.phase);
     expect(await roundTrip(midYear)).toEqual(midYear);
     const dead = liveOut(random('stage3-dead'));
     expect(await roundTrip(dead)).toEqual(dead);
@@ -143,13 +143,13 @@ describe('lives from Stage 3 on', () => {
 
   it('upgrades a Stage 2 (schema version 1) save while loading', async () => {
     const db = freshDb();
-    const { recap: _recap, death: _death, ...stage2 } = random('stage2');
+    const { recap: _recap, death: _death, lifetime: _lifetime, ...stage2 } = random('stage2');
     const old: SaveEnvelope = { ...makeEnvelope(stage2, content.contentVersion), schemaVersion: 1 };
     await db.lives.put({ id: 'active', envelope: old });
     const result = await readSave(db, loadedLifeSchema(content));
     expect(result.status).toBe('ok');
     if (result.status === 'ok') {
-      expect(result.envelope.schemaVersion).toBe(2);
+      expect(result.envelope.schemaVersion).toBe(CURRENT_SCHEMA_VERSION);
       expect(result.envelope.data).toEqual(random('stage2'));
     }
   });
@@ -159,5 +159,27 @@ describe('lives from Stage 3 on', () => {
     const schema = loadedLifeSchema(content);
     expect(schema.safeParse({ ...life, death: { year: 2026, age: 0, causeId: 'stroke' } }).success).toBe(false);
     expect(schema.safeParse({ ...life, phase: 'dead' }).success).toBe(false);
+  });
+});
+
+describe('lives from Stage 4 on', () => {
+  it('upgrade a Stage 3 (schema version 2) save with its lifetime happiness', async () => {
+    const db = freshDb();
+    // A Stage 3 life after five quiet years (Happiness never changed in Stage 3).
+    let life = random('stage3');
+    for (let i = 0; i < 5; i++) life = { ...life, currentYear: life.currentYear + 1 };
+    const stage3 = {
+      ...life,
+      character: { ...life.character, age: 5, lifeStage: 'child' as const },
+      inputLog: [...life.inputLog, ...Array.from({ length: 5 }, (_, i) => ({ year: 2026 + i, kind: 'ageUp' as const, payload: {} }))],
+      recap: { year: 2031, age: 5, statsBefore: life.character.stats, statsAfter: life.character.stats },
+    };
+    const { lifetime: _lifetime, ...withoutLifetime } = stage3;
+    await db.lives.put({ id: 'active', envelope: { ...makeEnvelope(withoutLifetime, content.contentVersion), schemaVersion: 2 } });
+    const result = await readSave(db, loadedLifeSchema(content));
+    expect(result.status).toBe('ok');
+    if (result.status === 'ok') {
+      expect(result.envelope.data.lifetime).toEqual({ happinessTotal: 5 * life.character.stats.happiness, years: 5 });
+    }
   });
 });
