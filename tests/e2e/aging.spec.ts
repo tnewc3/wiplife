@@ -1,79 +1,41 @@
-import { expect, test, type Page } from '@playwright/test';
-import { expectNoHorizontalScroll, expectTouchTargets, passAgeGate } from './helpers';
+/**
+ * Aging, events, death and the archive, played on the test content pack
+ * (tests/e2e/content) so these flows don't change when real events do.
+ * In the pack: an event with choices at 1, a quiet year at 2, an event
+ * without choices at 3, and at 4 a choice to live on or end the life.
+ */
+import { expect, test } from '@playwright/test';
+import {
+  ageUpButton,
+  ageUpTimes,
+  eventSheet,
+  expectNoHorizontalScroll,
+  expectTouchTargets,
+  passAgeGate,
+  settle,
+  startRandomLife,
+} from './helpers';
 
-/** Lives to 58 (always taking the first choice), with a quiet first year. */
-const LONG_LIFE_SEED = 'e2e-0';
-/** Dies at 33 (always taking the first choice), so a whole life plays quickly. */
-const SHORT_LIFE_SEED = 'e2e-53';
-/** Has events in its very first year. */
-const EVENTFUL_SEED = 'e2e-1';
+const PACK = { testPack: true, seed: 'e2e-pack' };
 
-async function startRandomLife(page: Page, seed = LONG_LIFE_SEED): Promise<string> {
-  await passAgeGate(page, seed);
-  await page.getByRole('button', { name: 'New Life' }).click();
-  await page.getByRole('button', { name: 'Start a random life' }).click();
-  return (await page.getByTestId('character-name').textContent())?.trim() ?? '';
-}
-
-const ageUpButton = (page: Page) => page.getByRole('button', { name: 'Age Up' });
-const eventSheet = (page: Page) => page.getByRole('dialog').filter({ has: page.getByTestId('event-card') });
-
-/** Waits until the screen is ready for the next tap: Age Up, an event card, or the Death screen. */
-async function settle(page: Page): Promise<void> {
-  await page.waitForFunction(() => {
-    if (document.body.textContent?.includes('In memoriam')) return true;
-    const sheet = document.querySelector('[aria-labelledby="event-title"]');
-    if (sheet) return [...sheet.querySelectorAll('button')].every((b) => !b.disabled);
-    const button = [...document.querySelectorAll('button')].find((b) => b.textContent?.trim() === 'Age Up');
-    return button !== undefined && !button.disabled;
-  });
-}
-
-/** Answers every event card with its first choice, through to the end of the recap. */
-async function playThroughEvents(page: Page): Promise<void> {
-  while (await eventSheet(page).isVisible()) {
-    const sheet = eventSheet(page);
-    const next = sheet.getByRole('button', { name: 'Continue' });
-    if (await next.isVisible()) await next.click();
-    else await sheet.getByRole('button').first().click();
-    await settle(page);
-  }
-}
-
-/** Taps Age Up and plays the year out (events answered with their first choice). */
-async function ageUp(page: Page): Promise<void> {
-  await ageUpButton(page).click();
-  await settle(page);
-  await playThroughEvents(page);
-}
-
-async function ageUpTimes(page: Page, times: number): Promise<void> {
-  for (let i = 0; i < times; i++) await ageUp(page);
-}
-
-async function liveToDeath(page: Page): Promise<void> {
-  for (let i = 0; i < 125 && !(await page.getByText('In memoriam').isVisible()); i++) await ageUp(page);
-  await expect(page.getByText('In memoriam')).toBeVisible();
-}
-
-test('Age Up advances a year with a recap, and life stages change', async ({ page }) => {
-  await startRandomLife(page);
+test('Age Up advances a year; quiet years show the recap on Home; life stages change', async ({ page }) => {
+  await startRandomLife(page, PACK);
   await expect(ageUpButton(page)).toBeInViewport({ ratio: 1 });
-  await ageUp(page);
-  await expect(page.getByText(/^1 year old · /)).toBeVisible();
-  await expect(page.getByRole('region', { name: /· 1 year old$/ })).toBeVisible();
+  await ageUpTimes(page, 2);
+  // Age 2 is quiet: no event sheet, and the recap is on Home.
+  await expect(page.getByText(/^2 years old · /)).toBeVisible();
+  await expect(page.getByRole('region', { name: /· 2 years old$/ })).toBeVisible();
 
-  await ageUpTimes(page, 12);
+  await ageUpTimes(page, 11);
   await expect(page.getByText(/^13 years old · /)).toBeVisible();
   await expect(page.getByText(/Teen years/)).toBeVisible();
-  const story = page.getByRole('list', { name: 'Your story' });
-  await expect(story).toContainText(/teenager/);
+  await expect(page.getByRole('list', { name: 'Your story' })).toContainText(/teenager/);
   await expectNoHorizontalScroll(page);
   await expectTouchTargets(page);
 });
 
 test('rapid taps on Age Up advance only one year', async ({ page }) => {
-  await startRandomLife(page);
+  await startRandomLife(page, PACK);
   // Three clicks in the same moment, before the screen can update.
   await page.evaluate(() => {
     const button = [...document.querySelectorAll('button')].find((b) => b.textContent?.trim() === 'Age Up')!;
@@ -81,35 +43,90 @@ test('rapid taps on Age Up advance only one year', async ({ page }) => {
     button.click();
     button.click();
   });
-  await expect(page.getByText(/^1 year old · /)).toBeVisible();
   await settle(page);
-  await expect(page.getByText(/^1 year old · /)).toBeVisible();
+  // The year-1 event is showing, and the character is 1.
+  await expect(eventSheet(page).getByRole('heading', { name: 'Hello there' })).toBeVisible();
+  await expect(page.getByText(/^1 year old · /)).toBeAttached();
+});
+
+test('a year with events shows each card and its outcome, then the recap as the last card', async ({ page }) => {
+  await startRandomLife(page, PACK);
+  await ageUpButton(page).click();
+  await settle(page);
+  const sheet = eventSheet(page);
+  await expect(sheet.getByRole('heading', { name: 'Hello there' })).toBeVisible();
+  await expect(sheet.getByTestId('event-card')).toHaveAttribute('data-tone', 'light');
+  await expect(sheet.getByRole('button', { name: 'Continue' })).toHaveCount(0);
+  await expectNoHorizontalScroll(page);
+  await expectTouchTargets(page);
+
+  await sheet.getByRole('button', { name: 'Wave back' }).click();
+  await settle(page);
+  await expect(sheet.getByTestId('event-outcome')).toContainText('laughs and waves again');
+  await sheet.getByRole('button', { name: 'Continue' }).click();
+  await settle(page);
+
+  await expect(sheet.getByText('Your year')).toBeVisible();
+  await expect(sheet.getByRole('heading', { name: /· 1 year old$/ })).toBeVisible();
+  await expect(sheet).toContainText('Happiness went up');
+  await sheet.getByRole('button', { name: 'Continue' }).click();
+  await expect(eventSheet(page)).toHaveCount(0);
+  await expect(ageUpButton(page)).toBeEnabled();
+});
+
+test('an event without choices takes one tap', async ({ page }) => {
+  await startRandomLife(page, PACK);
+  await ageUpTimes(page, 2);
+  await ageUpButton(page).click();
+  await settle(page);
+  const sheet = eventSheet(page);
+  await expect(sheet.getByRole('heading', { name: 'A sunny afternoon' })).toBeVisible();
+  await expect(sheet.getByRole('button')).toHaveCount(1);
+  await sheet.getByRole('button', { name: 'Continue' }).click();
+  await settle(page);
+  await expect(sheet.getByText('Your year')).toBeVisible();
+});
+
+test('reloading in the middle of a year keeps the same event waiting', async ({ page }) => {
+  await startRandomLife(page, PACK);
+  await ageUpButton(page).click();
+  await settle(page);
+  await expect(eventSheet(page).getByRole('heading', { name: 'Hello there' })).toBeVisible();
+
+  await page.reload();
+  await page.getByRole('button', { name: 'Continue' }).click();
+  await expect(eventSheet(page).getByRole('heading', { name: 'Hello there' })).toBeVisible();
 });
 
 test('the Life history screen shows the whole timeline', async ({ page }) => {
-  await startRandomLife(page);
+  await startRandomLife(page, PACK);
   await ageUpTimes(page, 6);
   await page.getByRole('button', { name: 'More' }).click();
   await page.getByRole('button', { name: 'Life history' }).click();
   await expect(page.getByRole('heading', { name: 'Life history' })).toBeVisible();
-  const timeline = page.getByRole('list', { name: 'Life history' });
-  await expect(timeline).toContainText('Age 5');
+  await expect(page.getByRole('list', { name: 'Life history' })).toContainText('Age 5');
   await expectNoHorizontalScroll(page);
   await expectTouchTargets(page);
   await page.getByRole('button', { name: 'Back' }).click();
   await expect(page.getByRole('heading', { name: 'More' })).toBeVisible();
 });
 
-test('a full life ends in an obituary, goes into the archive, and a new life starts', async ({ page }) => {
-  test.setTimeout(180_000);
-  const name = await startRandomLife(page, SHORT_LIFE_SEED);
-  await liveToDeath(page);
+test('a life ends in an obituary, goes into the archive, and a new life starts', async ({ page }) => {
+  const name = await startRandomLife(page, PACK);
+  await ageUpTimes(page, 3);
+  await ageUpButton(page).click();
+  await settle(page);
+  const sheet = eventSheet(page);
+  await sheet.getByRole('button', { name: 'End this test life' }).click();
+  await settle(page);
+  await expect(sheet.getByTestId('event-outcome')).toContainText('The test life ends here.');
+  await sheet.getByRole('button', { name: 'Continue' }).click();
 
   // Death and Obituary screen.
+  await expect(page.getByText('In memoriam')).toBeVisible();
   await expect(page.getByRole('heading', { name })).toBeVisible();
-  const obituary = page.getByTestId('obituary');
-  await expect(obituary).toContainText(name);
-  await expect(obituary).toContainText(/died/);
+  await expect(page.getByTestId('obituary')).toContainText(name);
+  await expect(page.getByTestId('obituary')).toContainText('natural causes');
   await expect(page.getByText('This life has been saved to your archive.')).toBeVisible();
   await expectNoHorizontalScroll(page);
   await expectTouchTargets(page);
@@ -119,10 +136,8 @@ test('a full life ends in an obituary, goes into the archive, and a new life sta
   const lives = page.getByRole('list', { name: 'Past lives' }).getByRole('listitem');
   await expect(lives).toHaveCount(1);
   await expect(lives.first()).toContainText(name);
-  await expect(lives.first()).toContainText('Age 33');
-  await expect(lives.first()).toContainText(/Died of /);
-  await expectNoHorizontalScroll(page);
-  await expectTouchTargets(page);
+  await expect(lives.first()).toContainText('Age 4');
+  await expect(lives.first()).toContainText('Died of natural causes');
   await lives.first().getByRole('button').click();
   await expect(page.getByRole('heading', { name: 'Past life' })).toBeVisible();
   await expect(page.getByTestId('obituary')).toContainText(name);
@@ -145,16 +160,16 @@ test('a full life ends in an obituary, goes into the archive, and a new life sta
 });
 
 test('starting over moves the current life into the archive, unfinished', async ({ page }) => {
-  const name = await startRandomLife(page);
+  const name = await startRandomLife(page, PACK);
   await ageUpTimes(page, 2);
 
   await page.getByRole('button', { name: 'More' }).click();
   await page.getByRole('button', { name: 'Back to title' }).click();
   await page.getByRole('button', { name: 'New Life' }).click();
   await page.getByRole('button', { name: 'Start a random life' }).click();
-  const sheet = page.getByRole('dialog', { name: 'Start a new life?' });
-  await expect(sheet).toContainText(`${name}’s life will move to your archive, marked unfinished.`);
-  await sheet.getByRole('button', { name: 'Start a new life' }).click();
+  const confirm = page.getByRole('dialog', { name: 'Start a new life?' });
+  await expect(confirm).toContainText(`${name}’s life will move to your archive, marked unfinished.`);
+  await confirm.getByRole('button', { name: 'Start a new life' }).click();
   await expect(page.getByText(/^Newborn · /)).toBeVisible();
 
   await page.getByRole('button', { name: 'More' }).click();
@@ -173,45 +188,3 @@ test('an empty archive says so', async ({ page }) => {
   await expect(page.getByText('No past lives yet.')).toBeVisible();
 });
 
-test('a year with events shows each card and its outcome, then the recap as the last card', async ({ page }) => {
-  await startRandomLife(page, EVENTFUL_SEED);
-  await ageUpButton(page).click();
-  await settle(page);
-  const sheet = eventSheet(page);
-  await expect(sheet).toBeVisible();
-  await expect(sheet.getByTestId('event-card')).toHaveAttribute('data-tone', /^(light|neutral|serious|dark)$/);
-  await expectNoHorizontalScroll(page);
-  await expectTouchTargets(page);
-
-  let cards = 0;
-  while (!(await sheet.getByText('Your year').isVisible())) {
-    const next = sheet.getByRole('button', { name: 'Continue' });
-    if (!(await next.isVisible())) {
-      // An unanswered card: its choices, and no Continue until one is picked.
-      cards++;
-      await sheet.getByRole('button').first().click();
-      await settle(page);
-      await expect(next).toBeVisible();
-    }
-    await next.click();
-    await settle(page);
-  }
-  expect(cards).toBeGreaterThan(0);
-  await expect(sheet.getByRole('heading', { name: /· 1 year old$/ })).toBeVisible();
-  await expectNoHorizontalScroll(page);
-  await sheet.getByRole('button', { name: 'Continue' }).click();
-  await expect(eventSheet(page)).toHaveCount(0);
-  await expect(page.getByText(/^1 year old · /)).toBeVisible();
-  await expect(ageUpButton(page)).toBeEnabled();
-});
-
-test('reloading in the middle of a year keeps the same event waiting', async ({ page }) => {
-  await startRandomLife(page, EVENTFUL_SEED);
-  await ageUpButton(page).click();
-  await settle(page);
-  const title = await eventSheet(page).getByRole('heading').textContent();
-
-  await page.reload();
-  await page.getByRole('button', { name: 'Continue' }).click();
-  await expect(eventSheet(page).getByRole('heading', { name: title ?? '' })).toBeVisible();
-});

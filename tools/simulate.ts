@@ -6,8 +6,12 @@
 import { writeFile } from 'node:fs/promises';
 import { parseArgs } from 'node:util';
 import { setAutoFreeze } from 'immer';
-import { content } from '../src/content';
+import compiled from '../src/content/compiled/content.json';
+import type { ContentBundle } from '../src/content/schemas';
 import { formatReport, runSimulation } from './simulate/run';
+
+// The compiled JSON directly: src/content/index.ts relies on Vite's import.meta.env.
+const content = compiled as ContentBundle;
 
 const { values } = parseArgs({
   options: {

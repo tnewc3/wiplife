@@ -4,7 +4,7 @@ import { content } from '../content';
 import type { ContentBundle } from '../content/schemas';
 import { archiveEntry } from '../engine/archive';
 import { assertInvariants } from '../engine/invariants';
-import { beginYear, createLife, endYear, resolveChoice, type CustomLifeInput } from '../engine/life';
+import { beginYear, CONTINUE_CHOICE, createLife, endYear, resolveChoice, type CustomLifeInput } from '../engine/life';
 import { canAgeUp, firstUnresolvedEvent, getYearRecap, type YearRecapView } from '../engine/selectors';
 import type { ArchivedLife, LifeState } from '../engine/types';
 import {
@@ -236,6 +236,28 @@ export function createAppStore({
         }
       };
 
+      /**
+       * Moves the sheet past the current (resolved) card: to the next event, or
+       * once every event is resolved, ends the year and shows the recap (or,
+       * after a death, the Death screen).
+       */
+      const advanceEvents = async () => {
+        const { life, eventSheet } = get();
+        if (!life || !eventSheet || eventSheet.recap) return;
+        if (life.pending[eventSheet.index]?.resolvedChoiceId === undefined) return;
+        const next = eventSheet.index + 1;
+        if (next < life.pending.length) {
+          set((s) => {
+            s.eventSheet = { index: next, recap: null };
+          });
+          return;
+        }
+        const ended = await finishYear(life);
+        set((s) => {
+          s.eventSheet = ended ? { index: next, recap: getYearRecap(ended, bundle) } : null;
+        });
+      };
+
       /** Opens the event sheet at the first event still waiting, if any. */
       const openEvents = (life: LifeState) => {
         const index = firstUnresolvedEvent(life);
@@ -432,7 +454,11 @@ export function createAppStore({
           busy(async () => {
             const life = get().life;
             if (!life || life.phase !== 'events') return;
-            await commit(resolveChoice(life, instanceId, choiceId, bundle));
+            const next = resolveChoice(life, instanceId, choiceId, bundle);
+            await commit(next);
+            // An event without choices and nothing more to say moves straight on.
+            const resolved = next.pending.find((p) => p.instanceId === instanceId);
+            if (choiceId === CONTINUE_CHOICE && !resolved?.outcomeText) await advanceEvents();
           }),
 
         continueEvents: () =>
@@ -445,19 +471,7 @@ export function createAppStore({
               });
               return;
             }
-            // The card showing must be resolved before moving on.
-            if (life.pending[eventSheet.index]?.resolvedChoiceId === undefined) return;
-            const next = eventSheet.index + 1;
-            if (next < life.pending.length) {
-              set((s) => {
-                s.eventSheet = { index: next, recap: null };
-              });
-              return;
-            }
-            const ended = await finishYear(life);
-            set((s) => {
-              s.eventSheet = ended ? { index: next, recap: getYearRecap(ended, bundle) } : null;
-            });
+            await advanceEvents();
           }),
 
         openLifeHistory: () =>

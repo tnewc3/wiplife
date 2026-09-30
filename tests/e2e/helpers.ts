@@ -1,14 +1,66 @@
 import { expect, type Page } from '@playwright/test';
 
-/**
- * Opens the app and confirms the age gate. `seed` makes the next new life use
- * that seed (test builds only), so a test can count on how long it lives.
- */
-export async function passAgeGate(page: Page, seed?: string): Promise<void> {
-  await page.goto(seed ? `/?seed=${encodeURIComponent(seed)}` : '/');
+export interface OpenOptions {
+  /** The next new life uses this seed (test builds only). */
+  seed?: string;
+  /** Load the test content pack (tests/e2e/content) instead of the real events. */
+  testPack?: boolean;
+}
+
+/** Opens the app and confirms the age gate. */
+export async function passAgeGate(page: Page, options: OpenOptions = {}): Promise<void> {
+  const params = new URLSearchParams();
+  if (options.testPack) params.set('content', 'test');
+  if (options.seed) params.set('seed', options.seed);
+  const query = params.toString();
+  await page.goto(query ? `/?${query}` : '/');
   await expect(page.getByRole('heading', { name: 'Content notice' })).toBeVisible();
   await page.getByRole('button', { name: 'I’m 18 or older' }).click();
   await expect(page.getByRole('button', { name: 'New Life' })).toBeVisible();
+}
+
+/** Starts a random life and returns the character's name. */
+export async function startRandomLife(page: Page, options: OpenOptions = {}): Promise<string> {
+  await passAgeGate(page, options);
+  await page.getByRole('button', { name: 'New Life' }).click();
+  await page.getByRole('button', { name: 'Start a random life' }).click();
+  return (await page.getByTestId('character-name').textContent())?.trim() ?? '';
+}
+
+export const ageUpButton = (page: Page) => page.getByRole('button', { name: 'Age Up' });
+export const eventSheet = (page: Page) => page.getByRole('dialog').filter({ has: page.getByTestId('event-card') });
+
+/** Waits until the screen is ready for the next tap: Age Up, an event card, or the Death screen. */
+export async function settle(page: Page): Promise<void> {
+  await page.waitForFunction(() => {
+    if (document.body.textContent?.includes('In memoriam')) return true;
+    const sheet = document.querySelector('[aria-labelledby="event-title"]');
+    if (sheet) return [...sheet.querySelectorAll('button')].every((b) => !b.disabled);
+    const button = [...document.querySelectorAll('button')].find((b) => b.textContent?.trim() === 'Age Up');
+    return button !== undefined && !button.disabled;
+  });
+}
+
+/** Answers every event card with its first choice, through to the end of the recap. */
+export async function playThroughEvents(page: Page): Promise<void> {
+  while (await eventSheet(page).isVisible()) {
+    const sheet = eventSheet(page);
+    const next = sheet.getByRole('button', { name: 'Continue' });
+    if (await next.isVisible()) await next.click();
+    else await sheet.getByRole('button').first().click();
+    await settle(page);
+  }
+}
+
+/** Taps Age Up and plays the year out (events answered with their first choice). */
+export async function ageUp(page: Page): Promise<void> {
+  await ageUpButton(page).click();
+  await settle(page);
+  await playThroughEvents(page);
+}
+
+export async function ageUpTimes(page: Page, times: number): Promise<void> {
+  for (let i = 0; i < times; i++) await ageUp(page);
 }
 
 export async function htmlTheme(page: Page): Promise<string | null> {

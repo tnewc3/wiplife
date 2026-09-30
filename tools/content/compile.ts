@@ -31,6 +31,27 @@ export type CompileResult =
 export interface CompileOptions {
   contentDir: string;
   appVersion: string;
+  /**
+   * A folder laid over contentDir (the end-to-end test content pack): its
+   * files replace files at the same path, and if it has an events/ folder,
+   * that replaces every real event.
+   */
+  overlayDir?: string;
+}
+
+/** Content files by path relative to the content folder, after applying the overlay. */
+async function contentFiles(contentDir: string, overlayDir?: string): Promise<{ file: string; absolute: string }[]> {
+  const relative = (dir: string, absolute: string) => path.relative(dir, absolute).split(path.sep).join('/');
+  const byFile = new Map<string, string>();
+  for (const absolute of await listYamlFiles(contentDir)) byFile.set(relative(contentDir, absolute), absolute);
+  if (overlayDir) {
+    const overlay = (await listYamlFiles(overlayDir)).map((absolute) => ({ file: relative(overlayDir, absolute), absolute }));
+    if (overlay.some((o) => o.file.startsWith('events/'))) {
+      for (const file of [...byFile.keys()]) if (file.startsWith('events/')) byFile.delete(file);
+    }
+    for (const o of overlay) byFile.set(o.file, o.absolute);
+  }
+  return [...byFile.entries()].sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0)).map(([file, absolute]) => ({ file, absolute }));
 }
 
 /** Formats errors as one "file: message" line each. */
@@ -107,7 +128,7 @@ function byKey([a]: [string, unknown], [b]: [string, unknown]): number {
  * bundle, or every error found. Collects all errors instead of stopping at
  * the first, so one run shows everything that needs fixing.
  */
-export async function compileContent({ contentDir, appVersion }: CompileOptions): Promise<CompileResult> {
+export async function compileContent({ contentDir, appVersion, overlayDir }: CompileOptions): Promise<CompileResult> {
   const errors: ContentError[] = [];
   const folderToCollection = new Map<string, CollectionKey>(
     (Object.keys(collectionTypes) as CollectionKey[]).map((key) => [collectionTypes[key].folder, key]),
@@ -118,9 +139,7 @@ export async function compileContent({ contentDir, appVersion }: CompileOptions)
   );
   const singletons = new Map<SingletonPath, unknown>();
 
-  const files = await listYamlFiles(contentDir);
-  for (const absolute of files) {
-    const file = path.relative(contentDir, absolute).split(path.sep).join('/');
+  for (const { file, absolute } of await contentFiles(contentDir, overlayDir)) {
     const [folder] = file.split('/');
     if (folder === undefined || NON_CONTENT_FOLDERS.has(folder)) continue;
 

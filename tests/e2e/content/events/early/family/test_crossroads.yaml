@@ -1,0 +1,21 @@
+id: test_crossroads
+title: The test crossroads
+text: This test life can go on, or end here.
+tone: serious
+category: family
+rarity: common
+lifeStages: [early]
+requires: { age: { eq: 4 } }
+weight: { base: 10 }
+once: true
+choices:
+  - id: live
+    label: Live on
+    outcome:
+      text: The test life goes on.
+  - id: end
+    label: End this test life
+    outcome:
+      text: The test life ends here.
+      effects:
+        - { type: death, cause: natural_causes }

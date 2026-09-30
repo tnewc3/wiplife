@@ -2,7 +2,7 @@ import 'fake-indexeddb/auto';
 import { afterEach, describe, expect, it } from 'vitest';
 import { InvalidInputError } from '../engine/creation/input';
 import { customInput } from '../engine/testFixtures';
-import { beginYear } from '../engine/life';
+import { beginYear, CONTINUE_CHOICE } from '../engine/life';
 import { getEventCard } from '../engine/selectors';
 import { createDb, DEFAULT_SETTINGS, lifeStateSchema, listArchive, loadSettings, makeEnvelope, readSave, writeSave, type WiplifeDb } from '../persistence';
 import { content } from '../content';
@@ -323,11 +323,17 @@ describe('app store: events', () => {
       await store.getState().continueEvents();
       expect(store.getState().eventSheet!.index).toBe(i);
       await store.getState().chooseEvent(card.instanceId, card.choices[0]!.id);
-      expect(store.getState().life!.pending[i]!.resolvedChoiceId).toBe(card.choices[0]!.id);
       // Each choice is saved at once.
       const saved = await readSave(db, lifeStateSchema);
-      expect(saved.status === 'ok' && saved.envelope.data).toEqual(store.getState().life);
-      await store.getState().continueEvents();
+      const current = store.getState().life;
+      if (current) expect(saved.status === 'ok' && saved.envelope.data).toEqual(current);
+      // An event without choices and without outcome text moves on by itself.
+      const autoAdvanced = card.choices[0]!.id === CONTINUE_CHOICE && !current?.pending[i]?.outcomeText;
+      if (!autoAdvanced) {
+        expect(current!.pending[i]!.resolvedChoiceId).toBe(card.choices[0]!.id);
+        await store.getState().continueEvents();
+      }
+      if (!store.getState().life || store.getState().eventSheet?.recap) break;
     }
     const state = store.getState();
     if (state.life) {

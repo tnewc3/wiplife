@@ -345,5 +345,26 @@ ${extra}`;
       expect(await expectErrors()).toContain('chain "right" must match the file name ("wrong")');
     });
   });
+
+  it('lays an overlay folder over the content: its events replace every real event', async () => {
+    const overlay = await mkdtemp(path.join(os.tmpdir(), 'wiplife-overlay-'));
+    try {
+      await mkdir(path.join(overlay, 'events/adult/family'), { recursive: true });
+      await writeFile(
+        path.join(overlay, 'events/adult/family/only_event.yaml'),
+        'id: only_event\ntitle: Only\ntext: Hi.\ntone: light\ncategory: family\nrarity: common\nlifeStages: [adult]\nweight: { base: 1 }\nautoOutcome: {}\n',
+      );
+      await mkdir(path.join(overlay, 'balance'), { recursive: true });
+      const pacing = (await readFile(path.join(dir, 'balance/pacing.yaml'), 'utf8')).replace('cap: 6', 'cap: 3');
+      await writeFile(path.join(overlay, 'balance/pacing.yaml'), pacing);
+      const result = await compileContent({ contentDir: dir, appVersion: '0.0.0', overlayDir: overlay });
+      if (!result.ok) throw new Error(formatErrors(result.errors));
+      expect(Object.keys(result.bundle.events)).toEqual(['only_event']);
+      expect(result.bundle.balance.pacing.cap).toBe(3);
+      expect(Object.keys(result.bundle.cities).length).toBeGreaterThan(0);
+    } finally {
+      await rm(overlay, { recursive: true, force: true });
+    }
+  });
 });
 

@@ -653,6 +653,7 @@ See README.md for build, test and check commands.
 ## Git workflow
 - Branch from the latest main. Open pull requests into main only, never into another feature branch.
 - One stage (or one follow-up task) per pull request. Don't bring in unrelated commits.
+- At the end of every stage, open its pull request into main without asking.
 - A pull request merges only when CI is green.
 
 ## When finished
@@ -1513,9 +1514,13 @@ When finished, report what you built, the simulation summary, any deviations and
 | Content | Content build + coverage report | Schemas, references, placeholders; every event rendered with four pronoun sets | Every pull request |
 | Scenario | Vitest + state builder | Specific situations set up directly (for example, age 45, broke, divorced) | Every pull request |
 | Golden lives | Vitest | Fixed seeds and scripted inputs; the final state must match a saved snapshot | Every pull request |
-| End-to-end | Playwright at phone size | Real screens: creation, age-up, events, actions, death, archive, settings | Every pull request |
+| End-to-end | Playwright at phone size | Real screens: creation, age-up, events, actions, death, archive, settings. Flow tests play a small fixed test content pack; one smoke test plays real content | Every pull request |
 | Simulation | `tools/simulate.ts` | Balance, frequency, exploits, diversity | 500 lives per pull request, 10,000 nightly, 100,000 before release |
 | Human gates | You | Writing quality, feel, balance | Stages 10, 11, 12 and before launch |
+
+### End-to-end test content pack
+
+Flow tests (events, death, archive) run on a small fixed content pack in `tests/e2e/content`, so adding or tuning real events never breaks unrelated tests. `npm run content` lays it over `src/content` (its `events/` replaces every real event; other files replace the file at the same path) and builds `src/content/compiled/test-content.json`. Test builds load it with `?content=test`; normal builds compile it away. One smoke test plays years of real content and only checks that nothing breaks.
 
 ### Scenario state builder
 
