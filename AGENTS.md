@@ -37,3 +37,4 @@ See README.md for build, test and check commands.
 
 ## When finished
 Report what you built, any deviations from the docs and why, anything left undone, and open questions.
+Only report facts you checked in the code, tests, files or CI logs. Label anything you didn't check as unverified.

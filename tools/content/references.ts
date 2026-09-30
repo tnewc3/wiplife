@@ -27,6 +27,16 @@ export function checkReferences(
   }
 
   const creation = bundle.balance.creation;
+  const countries = new Set(Object.values(bundle.cities).map((c) => c.countryId));
+  for (const country of countries) {
+    const pool = bundle.names[country];
+    if (!pool) continue;
+    for (const heritage of Object.keys(creation.names.heritageWeights)) {
+      if (!pool.heritages[heritage]) {
+        errors.push({ file: CREATION, message: `names.heritageWeights: heritage "${heritage}" is not in names/${country}.yaml` });
+      }
+    }
+  }
   for (const category of GENDER_CATEGORIES) {
     for (const [presetId, weight] of Object.entries(creation.pronouns[category])) {
       const preset = bundle.pronouns[presetId];

@@ -52,6 +52,21 @@ talentChance: 0.7
 
 familyWealth: { poor: 15, working: 30, middle: 35, affluent: 15, rich: 5 }
 
+# Name heritages (keys match names/us.yaml). Rough US proportions.
+names:
+  heritageWeights:
+    general: 56
+    hispanic: 19
+    black: 12
+    south_asian: 2.5
+    chinese: 2
+    vietnamese: 1.5
+    arab: 1.5
+    korean: 1
+    west_african: 1
+    japanese: 0.5
+  sameHeritageParentsChance: 0.85
+
 appearance:
   featureChance: 0.35
 

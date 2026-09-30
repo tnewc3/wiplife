@@ -7,14 +7,22 @@ export const GENDER_CATEGORIES = genderCategorySchema.options;
 
 const nameSchema = z.string().trim().min(1).max(30);
 
-/** First names by gender category, plus last names (one pool per country). */
-export const namePoolSchema = baseDefSchema.extend({
+/** First names by gender category, plus last names, for one heritage. */
+export const heritageNamesSchema = z.strictObject({
   first: z.strictObject({
     man: z.array(nameSchema).min(1),
     woman: z.array(nameSchema).min(1),
     nonbinary: z.array(nameSchema).min(1),
   }),
   last: z.array(nameSchema).min(1),
+});
+export type HeritageNames = z.infer<typeof heritageNamesSchema>;
+
+/** One pool per country, grouped by heritage so a family's names fit together. */
+export const namePoolSchema = baseDefSchema.extend({
+  heritages: z
+    .record(idSchema, heritageNamesSchema)
+    .refine((h) => Object.keys(h).length > 0, 'needs at least one heritage'),
 });
 export type NamePool = z.infer<typeof namePoolSchema>;
 

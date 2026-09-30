@@ -1,8 +1,15 @@
 /**
  * Generates the family a character is born into: one or two parents and any
- * older siblings, with believable ages and complete identities.
+ * older siblings, with believable ages, complete identities and names that
+ * fit the parents' heritages.
  */
-import { GENDER_CATEGORIES, type ContentBundle, type GenderCategory, type NamePool } from '../../content/schemas';
+import {
+  GENDER_CATEGORIES,
+  type ContentBundle,
+  type GenderCategory,
+  type HeritageNames,
+  type NamePool,
+} from '../../content/schemas';
 import { chance, nextInt, pick, type RngState } from '../rng';
 import { rollInRange, rollScore, weightedPick } from '../random';
 import type { Id, Person, Relationship } from '../types';
@@ -12,7 +19,9 @@ export interface FamilyRequest {
   birthYear: number;
   cityId: Id;
   pool: NamePool;
-  /** The character's own first name, so no relative shares it. */
+  /** The character's gender category, for picking their first name. */
+  characterCategory: GenderCategory;
+  /** Custom characters choose their first name; random ones get one from their family's heritage. */
   characterFirstName?: string;
   /** Custom characters choose their last name; the family takes it too. */
   lastName?: string;
@@ -24,6 +33,7 @@ export interface FamilyRequest {
 }
 
 export interface GeneratedFamily {
+  firstName: string;
   lastName: string;
   people: Person[];
   relationships: Relationship[];
@@ -36,6 +46,29 @@ function pickUnused(rng: RngState, options: readonly string[], used: Set<string>
   return name;
 }
 
+/** Heritages in this pool with their weights, in a fixed order. */
+function heritageOptions(content: ContentBundle, pool: NamePool, allowed?: readonly string[]): (readonly [string, number])[] {
+  const weights = content.balance.creation.names.heritageWeights;
+  return Object.keys(pool.heritages)
+    .sort()
+    .filter((id) => !allowed || allowed.includes(id))
+    .map((id) => [id, weights[id] ?? 0] as const);
+}
+
+function rollHeritage(rng: RngState, content: ContentBundle, pool: NamePool, allowed?: readonly string[]): string {
+  const options = heritageOptions(content, pool, allowed);
+  if (options.some(([, w]) => w > 0)) return weightedPick(rng, options);
+  return pick(rng, options.map(([id]) => id));
+}
+
+/** Heritages whose last names include this one (case-insensitive), for custom families. */
+export function heritagesForLastName(pool: NamePool, lastName: string): string[] {
+  const wanted = lastName.toLocaleLowerCase('en-US');
+  return Object.keys(pool.heritages)
+    .sort()
+    .filter((id) => pool.heritages[id]!.last.some((n) => n.toLocaleLowerCase('en-US') === wanted));
+}
+
 /** The second parent's category: usually a different one, sometimes the same. */
 function partnerCategory(rng: RngState, content: ContentBundle, first: GenderCategory): GenderCategory {
   if (chance(rng, content.balance.creation.family.sameGenderParentsChance)) return first;
@@ -45,9 +78,8 @@ function partnerCategory(rng: RngState, content: ContentBundle, first: GenderCat
 }
 
 export function generateFamily(rng: RngState, content: ContentBundle, request: FamilyRequest): GeneratedFamily {
-  const { family } = content.balance.creation;
+  const { family, names } = content.balance.creation;
   const { birthYear, cityId, pool } = request;
-  const usedFirst = new Set<string>(request.characterFirstName ? [request.characterFirstName] : []);
 
   const parentCount = request.parents ?? (chance(rng, family.singleParentChance) ? 1 : 2);
   const siblingCount = request.siblings ?? weightedPick(rng, family.siblingWeights.map((w, i) => [i, w] as const));
@@ -64,7 +96,25 @@ export function generateFamily(rng: RngState, content: ContentBundle, request: F
   const youngestParentAge = Math.min(family.parentAgeAtBirth.min + span, family.parentAgeAtBirth.max);
   const ageRange = family.parentAgeAtBirth;
 
-  const lastName = request.lastName ?? pick(rng, pool.last);
+  // Heritage: the family's last name comes from the first parent's heritage;
+  // a second parent usually shares it. A custom last name found in a heritage
+  // picks that heritage.
+  const matching = request.lastName ? heritagesForLastName(pool, request.lastName) : [];
+  const primary = rollHeritage(rng, content, pool, matching.length > 0 ? matching : undefined);
+  const otherHeritages = Object.keys(pool.heritages).filter((h) => h !== primary);
+  const partner =
+    parentCount === 2 && otherHeritages.length > 0 && !chance(rng, names.sameHeritageParentsChance)
+      ? rollHeritage(rng, content, pool, otherHeritages)
+      : primary;
+  const heritage = (id: string): HeritageNames => pool.heritages[id]!;
+  /** Children's first names come from either parent's heritage. */
+  const childHeritage = () => heritage(partner === primary ? primary : pick(rng, [primary, partner]));
+
+  const lastName = request.lastName ?? pick(rng, heritage(primary).last);
+  const usedFirst = new Set<string>();
+  const firstName = request.characterFirstName ?? pickUnused(rng, childHeritage().first[request.characterCategory], usedFirst);
+  usedFirst.add(firstName);
+
   const people: Person[] = [];
   const relationships: Relationship[] = [];
 
@@ -72,13 +122,14 @@ export function generateFamily(rng: RngState, content: ContentBundle, request: F
     kind: 'parent' | 'sibling',
     personBirthYear: number,
     category: GenderCategory,
+    nameSource: HeritageNames,
     personLastName: string,
     mustBeAttractedTo?: GenderCategory,
   ): Person => {
     const identity = rollIdentity(rng, content, category, mustBeAttractedTo);
     const person: Person = {
       id: request.nextId(),
-      name: { first: pickUnused(rng, pool.first[category], usedFirst), last: personLastName },
+      name: { first: pickUnused(rng, nameSource.first[category], usedFirst), last: personLastName },
       birthYear: personBirthYear,
       alive: true,
       identity,
@@ -107,7 +158,7 @@ export function generateFamily(rng: RngState, content: ContentBundle, request: F
   const firstAge = rollInRange(rng, ageRange, youngestParentAge, ageRange.max);
   const firstCategory = rollGenderCategory(rng, content);
   if (parentCount === 1) {
-    addRelative('parent', birthYear - firstAge, firstCategory, lastName);
+    addRelative('parent', birthYear - firstAge, firstCategory, heritage(primary), lastName);
   } else {
     const secondCategory = partnerCategory(rng, content, firstCategory);
     const secondAge = rollInRange(
@@ -116,19 +167,19 @@ export function generateFamily(rng: RngState, content: ContentBundle, request: F
       Math.max(youngestParentAge, firstAge - family.partnerAgeGap.max),
       Math.min(ageRange.max, firstAge + family.partnerAgeGap.max),
     );
-    const secondLastName = chance(rng, family.sharedLastNameChance)
-      ? lastName
-      : pick(rng, pool.last.filter((n) => n !== lastName).length > 0 ? pool.last.filter((n) => n !== lastName) : pool.last);
-    addRelative('parent', birthYear - firstAge, firstCategory, lastName, secondCategory);
-    addRelative('parent', birthYear - secondAge, secondCategory, secondLastName, firstCategory);
+    const otherLastNames = heritage(partner).last.filter((n) => n !== lastName);
+    const secondLastName =
+      chance(rng, family.sharedLastNameChance) || otherLastNames.length === 0 ? lastName : pick(rng, otherLastNames);
+    addRelative('parent', birthYear - firstAge, firstCategory, heritage(primary), lastName, secondCategory);
+    addRelative('parent', birthYear - secondAge, secondCategory, heritage(partner), secondLastName, firstCategory);
   }
 
   // Older siblings, nearest in age first.
   let siblingBirthYear = birthYear;
   for (const gap of gaps) {
     siblingBirthYear -= gap;
-    addRelative('sibling', siblingBirthYear, rollGenderCategory(rng, content), lastName);
+    addRelative('sibling', siblingBirthYear, rollGenderCategory(rng, content), childHeritage(), lastName);
   }
 
-  return { lastName, people, relationships };
+  return { firstName, lastName, people, relationships };
 }
