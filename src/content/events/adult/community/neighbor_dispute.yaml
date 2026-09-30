@@ -1,0 +1,44 @@
+id: neighbor_dispute
+title: The driveway
+text: >-
+  {neighbor.name} next door has started parking across your driveway, and
+  {neighbor.they} {neighbor:acts|act} surprised every time you mention it.
+tone: neutral
+category: community
+rarity: common
+lifeStages: [adult, senior]
+weight: { base: 7 }
+cooldownYears: 5
+cast:
+  neighbor: { kind: acquaintance, ageOffset: { min: -15, max: 15 }, createIfMissing: true, newChance: 0.5 }
+choices:
+  - id: cookies
+    label: Bake cookies and talk it out
+    check:
+      base: 55
+      stats: [{ key: kindness, weight: 0.3 }, { key: sociability, weight: 0.2 }]
+      success:
+        text: It turns out {neighbor.name} just didn't realize. You're on first-name terms now.
+        effects:
+          - { type: relationship, role: neighbor, affection: 10 }
+          - { type: memory, role: neighbor, tag: made_peace }
+          - { type: stat, key: stress, delta: -2 }
+      failure:
+        text: '{neighbor.name} takes the cookies and keeps parking there.'
+        effects:
+          - { type: relationship, role: neighbor, affection: -2 }
+          - { type: stat, key: stress, delta: 3 }
+  - id: note
+    label: Leave an angry note
+    outcome:
+      text: '{neighbor.name} leaves an angrier one. This could go on for years.'
+      effects:
+        - { type: relationship, role: neighbor, affection: -8 }
+        - { type: stat, key: stress, delta: 2 }
+  - id: city
+    label: Call the city
+    outcome:
+      text: A parking ticket appears. {neighbor.name} knows exactly who called.
+      effects:
+        - { type: relationship, role: neighbor, affection: -12 }
+        - { type: stat, key: stress, delta: -1 }

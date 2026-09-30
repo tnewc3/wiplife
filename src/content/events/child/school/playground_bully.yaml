@@ -1,0 +1,45 @@
+id: playground_bully
+title: The lunch line
+text: >-
+  {bully.name} has been shoving you in the lunch line all week, and today
+  {bully.they} {bully:knocks|knock} your tray to the floor. Everyone turns to look.
+tone: serious
+category: school
+rarity: common
+lifeStages: [child, teen]
+weight: { base: 8 }
+cooldownYears: 3
+cast:
+  bully: { kind: classmate, ageOffset: { min: 0, max: 2 }, createIfMissing: true, newChance: 0.5 }
+choices:
+  - id: stand_up
+    label: Stand up to {bully.them}
+    check:
+      base: 40
+      stats: [{ key: confidence, weight: 0.4 }, { key: fitness, weight: 0.2 }]
+      success:
+        text: Your voice doesn't even shake. {bully.name} backs off, and people notice.
+        effects:
+          - { type: stat, key: confidence, delta: 4 }
+          - { type: stat, key: reputation, delta: 3 }
+          - { type: memory, role: bully, tag: you_stood_up_to_them }
+      failure:
+        text: '{bully.name} just laughs, and now everyone is watching you.'
+        effects:
+          - { type: stat, key: stress, delta: 6 }
+          - { type: stat, key: confidence, delta: -3 }
+          - { type: memory, role: bully, tag: bullied_you }
+  - id: tell
+    label: Tell a teacher
+    outcome:
+      text: The teacher has a word with {bully.name}. It mostly stops.
+      effects:
+        - { type: stat, key: stress, delta: -2 }
+        - { type: memory, role: bully, tag: bullied_you }
+  - id: ignore
+    label: Keep your head down
+    outcome:
+      text: You pick up your lunch and say nothing. It happens again the next week.
+      effects:
+        - { type: stat, key: stress, delta: 4 }
+        - { type: memory, role: bully, tag: bullied_you }

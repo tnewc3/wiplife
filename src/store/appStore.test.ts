@@ -3,6 +3,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { InvalidInputError } from '../engine/creation/input';
 import { customInput } from '../engine/testFixtures';
 import { beginYear } from '../engine/life';
+import { getEventCard } from '../engine/selectors';
 import { createDb, DEFAULT_SETTINGS, lifeStateSchema, listArchive, loadSettings, makeEnvelope, readSave, writeSave, type WiplifeDb } from '../persistence';
 import { content } from '../content';
 import { createAppStore } from './appStore';
@@ -162,9 +163,26 @@ describe('app store: lives', () => {
   });
 });
 
-/** Ages up until the life ends (at most the maximum age). */
+/** Plays one year through the store: Age Up, then the first choice on every event card. */
+async function playYear(store: ReturnType<typeof setup>['store']): Promise<void> {
+  await store.getState().ageUp();
+  while (store.getState().eventSheet) {
+    const { life, eventSheet } = store.getState();
+    const card = !eventSheet!.recap && life ? getEventCard(life, eventSheet!.index, content) : null;
+    if (card && !card.resolved) await store.getState().chooseEvent(card.instanceId, card.choices[0]!.id);
+    else await store.getState().continueEvents();
+  }
+}
+
+/** Plays years until the life ends (at most the maximum age). */
 async function liveToDeath(store: ReturnType<typeof setup>['store']): Promise<void> {
-  for (let i = 0; i <= content.balance.mortality.maxAge && store.getState().life; i++) await store.getState().ageUp();
+  for (let i = 0; i <= content.balance.mortality.maxAge && store.getState().life; i++) await playYear(store);
+}
+
+/** Ages up until a year with events begins (the event sheet opens). */
+async function ageUpToEvents(store: ReturnType<typeof setup>['store']): Promise<void> {
+  for (let i = 0; i < 30 && store.getState().life && !store.getState().eventSheet; i++) await store.getState().ageUp();
+  expect(store.getState().eventSheet).not.toBeNull();
 }
 
 describe('app store: aging', () => {
@@ -175,7 +193,9 @@ describe('app store: aging', () => {
     await store.getState().ageUp();
 
     const life = store.getState().life!;
-    expect([life.character.age, life.currentYear, life.phase]).toEqual([1, 2027, 'yearStart']);
+    expect([life.character.age, life.currentYear]).toEqual([1, 2027]);
+    // A quiet year ends at once; a year with events waits in the event sheet.
+    expect(life.phase).toBe(store.getState().eventSheet ? 'events' : 'yearStart');
     expect(store.getState().aging).toBe(false);
     const saved = await readSave(db, lifeStateSchema);
     expect(saved.status === 'ok' && saved.envelope.data).toEqual(life);
@@ -284,5 +304,77 @@ describe('app store: aging', () => {
     expect(store.getState().screen).toBe('game');
     store.getState().openArchivedLife('life_x');
     expect([store.getState().screen, store.getState().archiveSelection]).toEqual(['archivedLife', 'life_x']);
+  });
+});
+
+describe('app store: events', () => {
+  it('shows each event, resolves choices, then shows the recap as the last card', async () => {
+    const { db, store } = setup();
+    await store.getState().init();
+    await store.getState().startRandomLife();
+    await ageUpToEvents(store);
+
+    const count = store.getState().life!.pending.length;
+    for (let i = 0; i < count; i++) {
+      const { life, eventSheet } = store.getState();
+      expect(eventSheet).toEqual({ index: i, recap: null });
+      const card = getEventCard(life!, i, content)!;
+      // Continue does nothing until the card is answered.
+      await store.getState().continueEvents();
+      expect(store.getState().eventSheet!.index).toBe(i);
+      await store.getState().chooseEvent(card.instanceId, card.choices[0]!.id);
+      expect(store.getState().life!.pending[i]!.resolvedChoiceId).toBe(card.choices[0]!.id);
+      // Each choice is saved at once.
+      const saved = await readSave(db, lifeStateSchema);
+      expect(saved.status === 'ok' && saved.envelope.data).toEqual(store.getState().life);
+      await store.getState().continueEvents();
+    }
+    const state = store.getState();
+    if (state.life) {
+      expect(state.life.phase).toBe('yearStart');
+      expect(state.eventSheet?.recap).toMatchObject({ year: state.life.currentYear, age: state.life.character.age });
+      await store.getState().continueEvents();
+      expect(store.getState().eventSheet).toBeNull();
+    } else {
+      expect(state.screen).toBe('death');
+    }
+  });
+
+  it('resolves only one choice when tapped twice at once', async () => {
+    const { store } = setup();
+    await store.getState().init();
+    await store.getState().startRandomLife();
+    await ageUpToEvents(store);
+    const { life, eventSheet } = store.getState();
+    const card = getEventCard(life!, eventSheet!.index, content)!;
+    await Promise.all([
+      store.getState().chooseEvent(card.instanceId, card.choices[0]!.id),
+      store.getState().chooseEvent(card.instanceId, card.choices.at(-1)!.id),
+    ]);
+    expect(store.getState().life!.inputLog.filter((r) => r.kind === 'choice')).toHaveLength(1);
+  });
+
+  it('keeps the same events after a reload in the middle of a year', async () => {
+    const { options, store } = setup();
+    await store.getState().init();
+    await store.getState().startRandomLife();
+    await ageUpToEvents(store);
+    const pending = store.getState().life!.pending;
+
+    const restarted = createAppStore(options);
+    await restarted.getState().init();
+    expect(restarted.getState().life!.pending).toEqual(pending);
+    restarted.getState().continueLife();
+    expect(restarted.getState().eventSheet).toEqual({ index: 0, recap: null });
+  });
+
+  it('ignores Age Up while the event sheet is open', async () => {
+    const { store } = setup();
+    await store.getState().init();
+    await store.getState().startRandomLife();
+    await ageUpToEvents(store);
+    const age = store.getState().life!.character.age;
+    await store.getState().ageUp();
+    expect(store.getState().life!.character.age).toBe(age);
   });
 });

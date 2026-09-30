@@ -24,7 +24,7 @@ survivedBy:
 predeceasedBy:
   - "{self.They} {self:was|were} predeceased by {predeceased}."
 
-# By Happiness at the end: the first band the character reaches.
+# By average Happiness over the whole life: the first band the character reaches.
 mood:
   - minHappiness: 70
     variants:

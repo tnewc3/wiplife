@@ -231,7 +231,9 @@ interface LifeState {
   history: HistoryEntry[];
   inputLog: InputRecord[];             // every player input, for exact replay; written by the engine
   recap: YearRecap | null;             // the current or last finished year; null before the first age-up
-  death: DeathRecord | null;           // set only in the 'dead' phase
+  death: DeathRecord | null;           // set in the 'dead' phase, or in 'yearEnd' when an event killed the
+                                       // character and endYear has yet to close the life
+  lifetime: { happinessTotal: number; years: number };  // happiness over finished years (obituary mood)
   lineage: { generation: number; parentLifeId?: Id };  // for heir play later
 }
 
@@ -442,13 +444,22 @@ interface EventDef {
   weight: { base: number; modifiers?: { if: Condition; x: number }[] };
   cooldownYears?: number;
   once?: boolean;
+  followUpOnly?: boolean;              // only happens when scheduled (later steps of a chain)
   cast?: Record<string, CastSpec>;     // how to find or create each role
   choices?: ChoiceDef[];               // none = automatic outcome
   autoOutcome?: Outcome;
 }
 
+interface CastSpec {
+  kind: RelationshipKind;              // who fills the role: an existing person with this relationship...
+  age?: { min; max };                  // ...of this age,
+  ageOffset?: { min; max };            // ...or this age relative to yours
+  createIfMissing?: boolean;           // create someone new if nobody fits (friend, classmate, acquaintance only)
+  newChance?: number;                  // chance of someone new even when someone fits
+}
+
 interface ChoiceDef {
-  id: Id; label: string;
+  id: Id; label: string;               // 'continue' is reserved for events without choices
   visibleIf?: Condition;               // e.g. only for risk-takers
   outcome?: Outcome;
   check?: {
@@ -475,7 +486,20 @@ type Effect =
   | { type: 'identity'; field: string; value: 'fromLatent' | string }
   | { type: 'innerConflict'; delta: number }
   | { type: 'history'; text: string; importance: 1 | 2 | 3 }
-  | { type: 'death'; cause: string };
+  | { type: 'death'; cause: Id };       // a cause from content/causes
+
+// Stage 4 builds these effect types: stat, money (savings only; never below zero), relationship,
+// memory, flag, schedule (inYears of at least 1), history and death. The rest arrive with their systems.
+
+type Condition =                       // structured, evaluated by src/engine/conditions.ts
+  | { all: Condition[] } | { any: Condition[] } | { not: Condition }
+  | { age: Compare } | { lifeStage: LifeStage[] } | { money: Compare }
+  | { stat: StatKey } & Compare | { trait: PersonalityKey } & Compare | { hidden: 'luck' | 'reputation' | 'vice' } & Compare
+  | { city: Id } | { familyWealth: FamilyWealth[] } | { flag: string; eq?: number | boolean | string }
+  | { fired: EventId } | { relative: { kind: RelationshipKind; alive?: boolean } }
+  | { memory: { role: string; tag: string } }       // about cast roles: checked once the event is cast
+  | { role: string; alive?: boolean; age?: Compare; affection?: Compare; trust?: Compare };
+// Compare = { gt?, gte?, lt?, lte?, eq? }
 ```
 
 The other content types follow the same pattern:
@@ -1596,8 +1620,9 @@ New careers, events, cities, majors, conditions, offenses and similar content ar
 
 ```text
 src/content/
-  balance/        creation.yaml, aging.yaml, mortality.yaml, economy.yaml, pacing.yaml,
-                  careers.yaml, education.yaml, health.yaml, legal.yaml, targets.yaml
+  balance/        creation.yaml, aging.yaml, mortality.yaml, pacing.yaml, events.yaml (weights by
+                  rarity, chance checks, people casting creates), economy.yaml, careers.yaml,
+                  education.yaml, health.yaml, legal.yaml, targets.yaml
   causes/         causes of death, one per file ("natural causes", "a stroke")
   cities/         nyc.yaml, los_angeles.yaml, chicago.yaml, houston.yaml, small_town.yaml
   events/

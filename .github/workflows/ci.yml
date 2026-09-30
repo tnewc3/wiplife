@@ -36,6 +36,9 @@ jobs:
       - name: Unit tests
         run: npm test
 
+      - name: Simulation (500 lives)
+        run: npm run simulate -- --lives 500
+
       - name: Production build
         run: npm run build
 

@@ -298,8 +298,13 @@ export interface LifeState {
   inputLog: InputRecord[];
   /** The current or last finished year's recap; null before the first age-up. */
   recap: YearRecap | null;
-  /** Set when the character dies. */
+  /**
+   * Set when the character dies: in the 'dead' phase, or in 'yearEnd' when an
+   * event killed them and endYear has yet to close the life.
+   */
   death: DeathRecord | null;
+  /** Happiness summed over every finished year, for the lifetime average. */
+  lifetime: { happinessTotal: number; years: number };
   /** For heir play later. */
   lineage: { generation: number; parentLifeId?: Id };
 }

@@ -1,5 +1,9 @@
 /** Read-only helpers the UI uses to show a life. */
-import type { ContentBundle } from '../content/schemas';
+import type { ContentBundle, Tone } from '../content/schemas';
+import { evaluate } from './conditions';
+import { textContext } from './events/text';
+import { CONTINUE_CHOICE } from './life';
+import { renderText } from './text';
 import type { HistoryEntry, LifeStage, LifeState, Person, Relationship, StatKey } from './types';
 
 export interface FamilyMember {
@@ -97,17 +101,78 @@ export interface YearRecapView {
   statChanges: { stat: StatKey; change: number }[];
   /** This year's history entries. */
   entries: HistoryEntry[];
+  /** Memories made this year, with the person and the memory's readable text. */
+  memories: { name: string; text: string }[];
+  /** People met this year. */
+  newPeople: { name: string; kind: Relationship['kind'] }[];
 }
 
 /** The last finished year's recap, or null before the first age-up or mid-year. */
-export function getYearRecap(state: LifeState): YearRecapView | null {
+export function getYearRecap(state: LifeState, content: ContentBundle): YearRecapView | null {
   const recap = state.recap;
   if (!recap || !recap.statsAfter) return null;
   const after = recap.statsAfter;
   const statChanges = (Object.keys(after) as StatKey[])
     .map((stat) => ({ stat, change: after[stat] - recap.statsBefore[stat] }))
     .filter((c) => c.change !== 0);
-  return { year: recap.year, age: recap.age, statChanges, entries: state.history.filter((e) => e.year === recap.year) };
+  const memories: YearRecapView['memories'] = [];
+  const newPeople: YearRecapView['newPeople'] = [];
+  for (const id of Object.keys(state.relationships).sort()) {
+    const rel = state.relationships[id]!;
+    const person = state.people[id];
+    if (!person) continue;
+    const name = `${person.name.first} ${person.name.last}`;
+    for (const m of rel.memories) {
+      if (m.year === recap.year) memories.push({ name, text: content.registries.memories.tags[m.tag] ?? m.tag });
+    }
+    if (rel.since === recap.year && rel.since !== state.birthYear) newPeople.push({ name, kind: rel.kind });
+  }
+  return {
+    year: recap.year,
+    age: recap.age,
+    statChanges,
+    entries: state.history.filter((e) => e.year === recap.year),
+    memories,
+    newPeople,
+  };
+}
+
+export interface EventCardView {
+  instanceId: string;
+  title: string;
+  text: string;
+  tone: Tone;
+  /** Choices the player can see now; an event without choices offers Continue. */
+  choices: { id: string; label: string }[];
+  resolved: boolean;
+  outcomeText: string | null;
+}
+
+/** One pending event as a card, with its text rendered for the cast. Null past the end. */
+export function getEventCard(state: LifeState, index: number, content: ContentBundle): EventCardView | null {
+  const instance = state.pending[index];
+  if (!instance) return null;
+  const def = content.events[instance.eventId];
+  const base = {
+    instanceId: instance.instanceId,
+    resolved: instance.resolvedChoiceId !== undefined,
+    outcomeText: instance.outcomeText ?? null,
+  };
+  // A definition removed by a content update: a card the player can dismiss.
+  if (!def) return { ...base, title: '…', text: '', tone: 'neutral', choices: [{ id: CONTINUE_CHOICE, label: 'Continue' }] };
+  const ctx = textContext(state, instance.cast);
+  const choices = def.choices
+    ? def.choices
+        .filter((c) => evaluate(c.visibleIf, state, { cast: instance.cast, roles: 'strict' }))
+        .map((c) => ({ id: c.id, label: renderText(c.label, ctx) }))
+    : [{ id: CONTINUE_CHOICE, label: 'Continue' }];
+  return { ...base, title: renderText(def.title, ctx), text: renderText(def.text, ctx), tone: def.tone, choices };
+}
+
+/** Index of the first pending event still waiting for the player, or null. */
+export function firstUnresolvedEvent(state: LifeState): number | null {
+  const i = state.pending.findIndex((p) => p.resolvedChoiceId === undefined);
+  return i < 0 ? null : i;
 }
 
 /** True when the player can age up right now. */

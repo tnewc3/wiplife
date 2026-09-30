@@ -4,8 +4,8 @@ import { content } from '../content';
 import type { ContentBundle } from '../content/schemas';
 import { archiveEntry } from '../engine/archive';
 import { assertInvariants } from '../engine/invariants';
-import { beginYear, createLife, endYear, type CustomLifeInput } from '../engine/life';
-import { canAgeUp } from '../engine/selectors';
+import { beginYear, createLife, endYear, resolveChoice, type CustomLifeInput } from '../engine/life';
+import { canAgeUp, firstUnresolvedEvent, getYearRecap, type YearRecapView } from '../engine/selectors';
 import type { ArchivedLife, LifeState } from '../engine/types';
 import {
   archiveLife,
@@ -42,6 +42,17 @@ export type ScreenId =
 /** Bottom navigation tabs (docs/design.md, section K). */
 export type TabId = 'life' | 'people' | 'work' | 'money' | 'more';
 
+/**
+ * The event sheet: which pending event card is showing, then (after a year
+ * with events) the recap as the last card. UI state only; the events
+ * themselves are in the saved life.
+ */
+export interface EventSheetState {
+  index: number;
+  /** Set once the year has ended: the sheet shows the recap. */
+  recap: YearRecapView | null;
+}
+
 /** What loading the saved life found at startup. */
 export type SavedLifeStatus = 'none' | 'ok' | 'recovered' | 'corrupt';
 
@@ -58,8 +69,10 @@ export interface AppState {
   savedLifeStatus: SavedLifeStatus;
   /** True while a new life is being created and saved. */
   creating: boolean;
-  /** True while a year is advancing; further Age Up taps are ignored. */
+  /** True while the engine is working (a year advancing, a choice resolving); further taps are ignored. */
   aging: boolean;
+  /** Open while the year's events (and then its recap) are showing. */
+  eventSheet: EventSheetState | null;
   /** The archive entry of the life that just ended, for the Death screen. */
   lastDeath: ArchivedLife | null;
   /** The archive, loaded when the Archive screen opens. */
@@ -80,6 +93,17 @@ export interface AppState {
   /** Starts a custom life. Throws InvalidInputError for bad input. */
   startCustomLife: (custom: CustomLifeInput) => Promise<void>;
   continueLife: () => void;
+  /**
+   * Resolves one pending event with the player's choice and autosaves. The
+   * card then shows the outcome. Ignored while the engine is working.
+   */
+  chooseEvent: (instanceId: string, choiceId: string) => Promise<void>;
+  /**
+   * Moves the event sheet on: to the next event, then (once every event is
+   * resolved) ends the year and shows the recap, then closes the sheet. A
+   * death ends the life and opens the Death screen instead of the recap.
+   */
+  continueEvents: () => Promise<void>;
   /**
    * Advances one year: begins it, and (with no events pending) ends it.
    * Autosaves after each step. A death moves the life into the archive and
@@ -186,11 +210,38 @@ export function createAppStore({
         });
       };
 
-      /** Ends a year whose events are all resolved. */
-      const finishYear = async (life: LifeState) => {
+      /** Ends a year whose events are all resolved. Returns the new life, or null if it ended. */
+      const finishYear = async (life: LifeState): Promise<LifeState | null> => {
         const next = endYear(life, bundle);
-        if (next.phase === 'dead') await endLife(next);
-        else await commit(next);
+        if (next.phase === 'dead') {
+          await endLife(next);
+          return null;
+        }
+        await commit(next);
+        return next;
+      };
+
+      /** Runs one engine step while blocking further taps. */
+      const busy = async (work: () => Promise<void>) => {
+        if (get().aging) return;
+        set((s) => {
+          s.aging = true;
+        });
+        try {
+          await work();
+        } finally {
+          set((s) => {
+            s.aging = false;
+          });
+        }
+      };
+
+      /** Opens the event sheet at the first event still waiting, if any. */
+      const openEvents = (life: LifeState) => {
+        const index = firstUnresolvedEvent(life);
+        set((s) => {
+          s.eventSheet = index === null ? null : { index, recap: null };
+        });
       };
 
       /** Asks the browser to keep saves once, when the first life starts. */
@@ -224,6 +275,7 @@ export function createAppStore({
           set((s) => {
             s.screen = 'game';
             s.tab = 'life';
+            s.eventSheet = null;
           });
           void requestPersistenceOnce().catch(() => undefined);
         } finally {
@@ -244,6 +296,7 @@ export function createAppStore({
         savedLifeStatus: 'none',
         creating: false,
         aging: false,
+        eventSheet: null,
         lastDeath: null,
         archive: null,
         archiveSelection: null,
@@ -318,6 +371,7 @@ export function createAppStore({
             s.lastDeath = null;
             s.archive = null;
             s.archiveSelection = null;
+            s.eventSheet = null;
           });
         },
 
@@ -348,31 +402,63 @@ export function createAppStore({
         startCustomLife: (custom) =>
           start(() => createLife({ mode: 'custom', seed: makeSeed(), birthYear: currentYear(), custom }, bundle)),
 
-        continueLife: () =>
+        continueLife: () => {
+          const life = get().life;
+          if (!life) return;
           set((s) => {
-            if (!s.life) return;
             s.screen = 'game';
             s.tab = 'life';
-          }),
-
-        ageUp: async () => {
-          const { life, aging } = get();
-          if (aging || !life || !(canAgeUp(life) || life.phase === 'yearEnd')) return;
-          set((s) => {
-            s.aging = true;
           });
-          try {
+          if (life.phase === 'events') openEvents(life);
+        },
+
+        ageUp: () => {
+          const life = get().life;
+          if (!life || !(canAgeUp(life) || life.phase === 'yearEnd') || get().eventSheet) return Promise.resolve();
+          return busy(async () => {
             // A year interrupted before it ended is finished instead.
-            if (life.phase === 'yearEnd') return await finishYear(life);
+            if (life.phase === 'yearEnd') {
+              await finishYear(life);
+              return;
+            }
             const begun = beginYear(life, bundle);
             await commit(begun);
-            if (begun.phase === 'yearEnd') await finishYear(begun);
-          } finally {
-            set((s) => {
-              s.aging = false;
-            });
-          }
+            if (begun.phase === 'events') openEvents(begun);
+            else await finishYear(begun);
+          });
         },
+
+        chooseEvent: (instanceId, choiceId) =>
+          busy(async () => {
+            const life = get().life;
+            if (!life || life.phase !== 'events') return;
+            await commit(resolveChoice(life, instanceId, choiceId, bundle));
+          }),
+
+        continueEvents: () =>
+          busy(async () => {
+            const { life, eventSheet } = get();
+            if (!eventSheet) return;
+            if (eventSheet.recap || !life) {
+              set((s) => {
+                s.eventSheet = null;
+              });
+              return;
+            }
+            // The card showing must be resolved before moving on.
+            if (life.pending[eventSheet.index]?.resolvedChoiceId === undefined) return;
+            const next = eventSheet.index + 1;
+            if (next < life.pending.length) {
+              set((s) => {
+                s.eventSheet = { index: next, recap: null };
+              });
+              return;
+            }
+            const ended = await finishYear(life);
+            set((s) => {
+              s.eventSheet = ended ? { index: next, recap: getYearRecap(ended, bundle) } : null;
+            });
+          }),
 
         openLifeHistory: () =>
           set((s) => {

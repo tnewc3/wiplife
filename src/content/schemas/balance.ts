@@ -15,7 +15,7 @@ export const distributionSchema = z.strictObject({
 });
 export type Distribution = z.infer<typeof distributionSchema>;
 
-const familyWealthSchema = z.enum(['poor', 'working', 'middle', 'affluent', 'rich']);
+export const familyWealthSchema = z.enum(['poor', 'working', 'middle', 'affluent', 'rich']);
 
 /** Numbers used when a new life is created (src/content/balance/creation.yaml). */
 export const creationBalanceSchema = z.strictObject({
@@ -158,3 +158,63 @@ export const mortalityBalanceSchema = z.strictObject({
   causes: z.array(z.strictObject({ maxAge: z.int().min(0), weights: weightsSchema(z.string()) })).min(1),
 });
 export type MortalityBalance = z.infer<typeof mortalityBalanceSchema>;
+
+const budgetSchema = z.strictObject({ min: z.int().min(0).max(6), max: z.int().min(0).max(6) });
+
+/** The pacing director (src/content/balance/pacing.yaml). */
+export const pacingBalanceSchema = z.strictObject({
+  /** Base events per year by life stage (docs/design.md, section G). */
+  budgets: z.strictObject({
+    early: budgetSchema,
+    child: budgetSchema,
+    teen: budgetSchema,
+    youngAdult: budgetSchema,
+    adult: budgetSchema,
+    senior: budgetSchema,
+  }),
+  /** Extra events when life is volatile: one per sign, up to maxBonus. */
+  volatility: z.strictObject({
+    maxBonus: z.int().min(0).max(6),
+    /** Risk-taking above this is a sign. */
+    riskTakingAbove: z.int().min(0).max(100),
+    /** A major history entry or a new relationship within this many years is a sign. */
+    recentYears: z.int().min(1).max(20),
+  }),
+  /** Never more events than this in one year. */
+  cap: z.int().min(1).max(6),
+  /**
+   * When the eligible events' weights add up to less than this, the rest is
+   * the chance that nothing more happens this year, so a rare event isn't
+   * picked just because nothing else fits.
+   */
+  minTotalWeight: z.number().positive(),
+  /** Events in a year are shown in this tone order, so a joke never follows a death. */
+  toneOrder: z.array(z.enum(['light', 'neutral', 'serious', 'dark'])).length(4),
+});
+export type PacingBalance = z.infer<typeof pacingBalanceSchema>;
+
+/** Event weights, chance checks and casting (src/content/balance/events.yaml). */
+export const eventsBalanceSchema = z.strictObject({
+  /** Multiplies an event's weight by rarity. */
+  rarityWeight: z.strictObject({
+    common: z.number().nonnegative(),
+    uncommon: z.number().nonnegative(),
+    rare: z.number().nonnegative(),
+    legendary: z.number().nonnegative(),
+  }),
+  checks: z.strictObject({
+    /** Success chances are clamped to this range, in percent. */
+    min: z.number().min(0).max(100),
+    max: z.number().min(0).max(100),
+    /** Luck adds this × (luck − 50) percentage points to every check. */
+    luckWeight: z.number().min(0).max(1),
+  }),
+  /** People created by casting. */
+  newPerson: z.strictObject({
+    /** Nobody older than this is introduced. */
+    maxAge: z.int().min(1).max(120),
+    affection: distributionSchema,
+    trust: distributionSchema,
+  }),
+});
+export type EventsBalance = z.infer<typeof eventsBalanceSchema>;

@@ -1,0 +1,97 @@
+# Chain: your childhood best friend moves away; years later a letter comes;
+# and if you wrote back, one day you meet again.
+chain: best_friend_moves_away
+events:
+  - id: best_friend_moves_away
+    title: A folded napkin
+    text: >-
+      {friend.name}, your best friend since forever, is moving across the
+      country. {friend.They} {friend:gives|give} you {friend.their} new address
+      on a folded-up napkin.
+    tone: serious
+    category: friends
+    rarity: common
+    lifeStages: [child]
+    weight: { base: 7 }
+    once: true
+    cast:
+      friend: { kind: friend, ageOffset: { min: -1, max: 1 }, createIfMissing: true }
+    choices:
+      - id: promise
+        label: Promise to write every week
+        outcome:
+          text: You keep the napkin in your sock drawer for years.
+          effects:
+            - { type: memory, role: friend, tag: promised_to_write }
+            - { type: relationship, role: friend, affection: 5 }
+            - { type: schedule, eventId: letter_from_old_friend, inYears: [3, 5], cast: [friend] }
+      - id: let_go
+        label: Say goodbye and let go
+        outcome:
+          text: You wave until the car turns the corner. The napkin goes through the wash.
+          effects:
+            - { type: stat, key: happiness, delta: -3 }
+            - { type: memory, role: friend, tag: lost_touch }
+
+  - id: letter_from_old_friend
+    title: A letter
+    text: >-
+      A letter arrives in handwriting you'd know anywhere. It's from
+      {friend.name}, years later, asking if you still remember {friend.them}.
+    tone: light
+    category: friends
+    rarity: common
+    lifeStages: [child, teen]
+    weight: { base: 10 }
+    followUpOnly: true
+    cast:
+      friend: { kind: friend }
+    choices:
+      - id: write_back
+        label: Write back
+        outcome:
+          text: You write four pages. {friend.name} writes back six.
+          effects:
+            - { type: memory, role: friend, tag: kept_in_touch }
+            - { type: relationship, role: friend, affection: 8 }
+            - { type: schedule, eventId: old_friend_reunion, inYears: [8, 14], cast: [friend] }
+      - id: ignore
+        label: Leave it unanswered
+        outcome:
+          text: You mean to answer. You never do.
+          effects:
+            - { type: memory, role: friend, tag: lost_touch }
+            - { type: relationship, role: friend, affection: -5 }
+            - { type: stat, key: happiness, delta: -1 }
+
+  - id: old_friend_reunion
+    title: One night in town
+    text: >-
+      {friend.name} is in town for one night. You meet at a diner and talk until
+      they start stacking the chairs.
+    tone: light
+    category: friends
+    rarity: common
+    lifeStages: [youngAdult, adult]
+    requires: { memory: { role: friend, tag: kept_in_touch } }
+    weight: { base: 10 }
+    followUpOnly: true
+    cast:
+      friend: { kind: friend }
+    choices:
+      - id: promise
+        label: Promise not to leave it so long
+        outcome:
+          text: You mean it this time.
+          effects:
+            - { type: stat, key: happiness, delta: 6 }
+            - { type: stat, key: stress, delta: -3 }
+            - { type: relationship, role: friend, affection: 6 }
+            - { type: history, text: 'You and {friend.name} picked up right where you left off.', importance: 2 }
+      - id: apart
+        label: Admit you've grown apart
+        outcome:
+          text: It's a good night anyway. You hug goodbye in the parking lot.
+          effects:
+            - { type: stat, key: happiness, delta: 1 }
+            - { type: relationship, role: friend, affection: -3 }

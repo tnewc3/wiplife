@@ -3,7 +3,8 @@ import { produce } from 'immer';
 import { content } from '../content';
 import type { ContentBundle } from '../content/schemas';
 import type { CustomLifeInput } from './creation/input';
-import { beginYear, createLife, endYear } from './life';
+import { playLife } from './autoplay';
+import { createLife } from './life';
 import { lifeStageForAge } from './systems/aging';
 import type { LifeState } from './types';
 
@@ -57,19 +58,13 @@ export function lifeAtAge(seed: string, age: number, contentBundle: ContentBundl
       const stats = { ...draft.character.stats };
       draft.recap = { year: draft.currentYear, age, statsBefore: stats, statsAfter: { ...stats } };
     }
+    draft.lifetime = { happinessTotal: draft.character.stats.happiness * age, years: age };
   });
 }
 
-/** Plays a life year by year until it ends, calling `onYear` after every engine step. */
+/** Plays a life with random choices until it ends, calling `onYear` after every engine step. */
 export function liveOut(life: LifeState, contentBundle: ContentBundle = content, onYear?: (life: LifeState) => void): LifeState {
-  let current = life;
-  while (current.phase !== 'dead') {
-    current = beginYear(current, contentBundle);
-    onYear?.(current);
-    current = endYear(current, contentBundle);
-    onYear?.(current);
-  }
-  return current;
+  return playLife(life, contentBundle, onYear ? { onStep: onYear } : {});
 }
 
 /** A deep copy through JSON (the engine has no structuredClone: it is type-checked without DOM or Node). */

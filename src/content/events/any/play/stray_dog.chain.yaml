@@ -1,0 +1,112 @@
+# Chain: a stray dog follows you home, grows up with you, and grows old.
+chain: stray_dog
+events:
+  - id: stray_dog
+    title: A scruffy visitor
+    text: >-
+      A scruffy dog follows you all the way home from the park and sits on the
+      doorstep, looking hopeful.
+    tone: light
+    category: play
+    rarity: common
+    lifeStages: [child]
+    weight: { base: 8 }
+    once: true
+    cast:
+      parent: { kind: parent }
+    choices:
+      - id: keep
+        label: Beg {parent.name} to keep it
+        check:
+          base: 50
+          stats: [{ key: kindness, weight: 0.3 }, { key: confidence, weight: 0.2 }]
+          success:
+            text: >-
+              After a long talk about responsibility, {parent.name} gives in. The
+              dog sleeps on your bed that night.
+            effects:
+              - { type: stat, key: happiness, delta: 8 }
+              - { type: flag, key: has_dog, value: true }
+              - { type: history, text: A stray dog followed you home and never left., importance: 2 }
+              - { type: schedule, eventId: dog_chews_shoes, inYears: [1, 2] }
+              - { type: schedule, eventId: dog_old_age, inYears: [9, 13] }
+          failure:
+            text: '{parent.name} says no and calls the shelter. You watch the van drive away.'
+            effects:
+              - { type: stat, key: happiness, delta: -4 }
+              - { type: relationship, role: parent, affection: -3 }
+      - id: leave
+        label: Close the door
+        outcome:
+          text: In the morning, the dog is gone.
+          effects:
+            - { type: stat, key: happiness, delta: -1 }
+
+  - id: dog_chews_shoes
+    title: The guilty look
+    text: >-
+      Your dog has chewed through your favorite shoes. The guilty look is almost
+      worth it.
+    tone: light
+    category: play
+    rarity: common
+    lifeStages: [child, teen]
+    requires: { flag: has_dog }
+    weight: { base: 10 }
+    followUpOnly: true
+    choices:
+      - id: forgive
+        label: Forgive and forget
+        outcome:
+          text: You buy cheaper shoes. The dog is thrilled.
+          effects:
+            - { type: stat, key: happiness, delta: 2 }
+      - id: train
+        label: Start training
+        check:
+          base: 50
+          stats: [{ key: discipline, weight: 0.4 }]
+          success:
+            text: Two weeks of treats later, your dog can sit, stay and leave shoes alone.
+            effects:
+              - { type: stat, key: discipline, delta: 2 }
+              - { type: stat, key: happiness, delta: 2 }
+          failure:
+            text: The dog learns nothing. You learn patience.
+            effects:
+              - { type: stat, key: discipline, delta: 1 }
+
+  - id: dog_old_age
+    title: Gray around the muzzle
+    text: >-
+      Your dog is old now: gray around the muzzle, slow on the stairs. The vet
+      says it's time.
+    tone: serious
+    category: play
+    rarity: common
+    lifeStages: [child, teen, youngAdult]
+    requires: { flag: has_dog }
+    weight: { base: 10 }
+    followUpOnly: true
+    choices:
+      - id: stay
+        label: Stay until the end
+        outcome:
+          text: You hold on the whole time. It's the hardest thing you've done.
+          effects:
+            - { type: stat, key: happiness, delta: -6 }
+            - { type: stat, key: stress, delta: 3 }
+            - { type: stat, key: kindness, delta: 2 }
+            - { type: flag, key: has_dog, value: false }
+            - { type: flag, key: had_dog, value: true }
+            - { type: history, text: You said goodbye to your old dog., importance: 2 }
+      - id: door
+        label: Say goodbye at the door
+        outcome:
+          text: You can't watch. You wonder for years if you should have.
+          effects:
+            - { type: stat, key: happiness, delta: -5 }
+            - { type: stat, key: stress, delta: 5 }
+            - { type: flag, key: has_dog, value: false }
+            - { type: flag, key: had_dog, value: true }
+            - { type: history, text: You said goodbye to your old dog., importance: 2 }

@@ -1,0 +1,50 @@
+id: bar_fight
+title: Last call
+text: >-
+  At a crowded bar, {stranger.name} shoves past you, spills a drink down your
+  shirt and laughs about it.
+tone: serious
+category: mischief
+rarity: common
+lifeStages: [youngAdult, adult]
+weight:
+  base: 5
+  modifiers:
+    - { if: { trait: riskTaking, gt: 60 }, x: 2 }
+cooldownYears: 5
+cast:
+  stranger: { kind: acquaintance, ageOffset: { min: -5, max: 5 }, createIfMissing: true, newChance: 1 }
+choices:
+  - id: punch
+    label: Throw a punch
+    check:
+      base: 45
+      stats: [{ key: fitness, weight: 0.4 }]
+      success:
+        text: '{stranger.name} goes down, and the bouncer throws you both out.'
+        effects:
+          - { type: stat, key: reputation, delta: -2 }
+          - { type: stat, key: riskTaking, delta: 2 }
+          - { type: memory, role: stranger, tag: fought_with_you }
+      failure:
+        text: You wake up with a black eye and no memory of the ride home.
+        effects:
+          - { type: stat, key: health, delta: -3 }
+          - { type: stat, key: stress, delta: 4 }
+          - { type: memory, role: stranger, tag: fought_with_you }
+  - id: walk
+    label: Walk away
+    outcome:
+      text: You leave with your dignity, damp but intact.
+      effects:
+        - { type: stat, key: stress, delta: 2 }
+        - { type: stat, key: discipline, delta: 2 }
+  - id: laugh
+    label: Laugh it off and buy {stranger.them} a drink
+    outcome:
+      text: '{stranger.name} is mortified, then delightful. You swap numbers at closing time.'
+      effects:
+        - { type: money, delta: -20 }
+        - { type: stat, key: sociability, delta: 2 }
+        - { type: relationship, role: stranger, affection: 10, kind: friend }
+        - { type: memory, role: stranger, tag: made_peace }

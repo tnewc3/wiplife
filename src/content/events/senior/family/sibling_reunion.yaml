@@ -1,0 +1,28 @@
+id: sibling_reunion
+title: Like old times
+text: >-
+  {sibling.name} calls out of the blue. {sibling.They} {sibling:wants|want} to
+  get together, just the two of you, like old times.
+tone: light
+category: family
+rarity: common
+lifeStages: [adult, senior]
+weight: { base: 7 }
+cooldownYears: 6
+cast:
+  sibling: { kind: sibling }
+choices:
+  - id: yes
+    label: Say yes
+    outcome:
+      text: You laugh at the same old jokes, and a few new ones.
+      effects:
+        - { type: relationship, role: sibling, affection: 8 }
+        - { type: stat, key: happiness, delta: 5 }
+        - { type: stat, key: stress, delta: -2 }
+  - id: busy
+    label: Say you're busy
+    outcome:
+      text: '{sibling.name} says {sibling.they} {sibling:understands|understand}. The call ends quickly.'
+      effects:
+        - { type: relationship, role: sibling, affection: -4 }

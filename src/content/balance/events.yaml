@@ -1,0 +1,22 @@
+# Event weights, chance checks and people created by events.
+# Starting proposals; Stage 12 tunes them.
+
+# Multiplies each event's weight by its rarity.
+rarityWeight:
+  common: 1
+  uncommon: 0.5
+  rare: 0.2
+  legendary: 0.0005
+
+checks:
+  # A choice's success chance is always between these, in percent.
+  min: 5
+  max: 95
+  # Luck nudges every check by this × (luck − 50) percentage points.
+  luckWeight: 0.1
+
+# Relationship starting values for someone an event introduces.
+newPerson:
+  maxAge: 90
+  affection: { mean: 50, sd: 10 }
+  trust: { mean: 45, sd: 10 }

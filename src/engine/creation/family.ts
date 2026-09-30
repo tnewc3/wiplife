@@ -39,7 +39,7 @@ export interface GeneratedFamily {
   relationships: Relationship[];
 }
 
-function pickUnused(rng: RngState, options: readonly string[], used: Set<string>): string {
+export function pickUnused(rng: RngState, options: readonly string[], used: Set<string>): string {
   const free = options.filter((o) => !used.has(o));
   const name = pick(rng, free.length > 0 ? free : options);
   used.add(name);
@@ -55,7 +55,7 @@ function heritageOptions(content: ContentBundle, pool: NamePool, allowed?: reado
     .map((id) => [id, weights[id] ?? 0] as const);
 }
 
-function rollHeritage(rng: RngState, content: ContentBundle, pool: NamePool, allowed?: readonly string[]): string {
+export function rollHeritage(rng: RngState, content: ContentBundle, pool: NamePool, allowed?: readonly string[]): string {
   const options = heritageOptions(content, pool, allowed);
   if (options.some(([, w]) => w > 0)) return weightedPick(rng, options);
   return pick(rng, options.map(([id]) => id));

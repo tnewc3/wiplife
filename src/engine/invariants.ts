@@ -164,7 +164,47 @@ export function checkInvariants(state: LifeState, content: ContentBundle): strin
   } else if (c.age > 0) {
     fail('a life that has aged has no recap');
   }
-  if ((state.phase === 'dead') !== (state.death !== null)) fail('only a dead character has a death record');
+  if (state.phase === 'dead' && !state.death) fail('a dead character has no death record');
+  if (state.death && state.phase !== 'dead' && state.phase !== 'yearEnd') fail(`a death record in the "${state.phase}" phase`);
+  const completedYears = state.phase === 'events' || state.phase === 'yearEnd' ? c.age - 1 : c.age;
+  const { happinessTotal, years } = state.lifetime;
+  if (years !== Math.max(0, completedYears)) fail(`lifetime.years is ${years}, expected ${completedYears}`);
+  if (!Number.isInteger(happinessTotal) || happinessTotal < 0 || happinessTotal > 100 * years) {
+    fail('lifetime.happinessTotal is out of range');
+  }
+
+  // Events.
+  const inYear = state.phase === 'events' || state.phase === 'yearEnd';
+  if (!inYear && state.pending.length > 0) fail(`pending events in the "${state.phase}" phase`);
+  if (state.phase === 'events' && state.pending.every((p) => p.resolvedChoiceId !== undefined)) fail('the events phase has nothing left to resolve');
+  if (state.phase === 'yearEnd' && state.pending.some((p) => p.resolvedChoiceId === undefined)) fail('the year ended with events unresolved');
+  const ids = new Set<string>();
+  for (const p of state.pending) {
+    if (ids.has(p.instanceId)) fail(`duplicate pending instance ${p.instanceId}`);
+    ids.add(p.instanceId);
+    if (!content.events[p.eventId]) fail(`pending event "${p.eventId}" is not known`);
+    for (const [role, id] of Object.entries(p.cast)) if (!state.people[id]) fail(`pending ${p.eventId} casts missing person ${id} as ${role}`);
+  }
+  const pendingEvents = state.pending.map((p) => p.eventId);
+  if (new Set(pendingEvents).size !== pendingEvents.length) fail('an event appears twice in one year');
+  for (const s of state.scheduled) {
+    if (!content.events[s.eventId]) fail(`scheduled event "${s.eventId}" is not known`);
+    // Follow-ups are always for a later year; due ones leave the list when the year begins.
+    if (s.dueYear <= state.currentYear) fail(`scheduled ${s.eventId} is due in the past (${s.dueYear})`);
+    for (const [role, id] of Object.entries(s.cast)) if (!state.people[id]) fail(`scheduled ${s.eventId} casts missing person ${id} as ${role}`);
+  }
+  for (const [id, log] of Object.entries(state.eventLog)) {
+    if (!(log.count >= 1) || log.lastYear > state.currentYear || log.lastYear < state.birthYear) fail(`event log for ${id} is invalid`);
+  }
+  const { tags } = content.registries.memories;
+  for (const [id, rel] of Object.entries(state.relationships)) {
+    for (const m of rel.memories) {
+      if (!tags[m.tag]) fail(`relationship ${id} has unregistered memory "${m.tag}"`);
+      if (m.year > state.currentYear) fail(`relationship ${id} has a memory from the future`);
+    }
+  }
+  for (const key of Object.keys(state.flags)) if (!content.registries.flags.flags[key]) fail(`flag "${key}" is not registered`);
+
   if (state.death) {
     if (state.death.year !== state.currentYear || state.death.age !== c.age) fail('the death record does not match the final year');
     if (!content.causes[state.death.causeId]) fail(`cause of death "${state.death.causeId}" is not known`);

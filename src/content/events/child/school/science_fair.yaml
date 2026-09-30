@@ -1,0 +1,36 @@
+id: science_fair
+title: The science fair
+text: >-
+  The science fair is next week. You could build a baking-soda volcano like
+  everybody else, or try something harder.
+tone: neutral
+category: school
+rarity: common
+lifeStages: [child, teen]
+weight: { base: 8 }
+cooldownYears: 2
+choices:
+  - id: ambitious
+    label: Try something ambitious
+    check:
+      base: 35
+      stats: [{ key: smarts, weight: 0.5 }, { key: discipline, weight: 0.3 }]
+      success:
+        text: Your project wins a ribbon, and a judge asks how you thought of it.
+        effects:
+          - { type: stat, key: smarts, delta: 3 }
+          - { type: stat, key: confidence, delta: 3 }
+          - { type: history, text: You won a ribbon at the science fair., importance: 1 }
+      failure:
+        text: >-
+          It collapses during judging. You explain what should have happened, and
+          one judge seems impressed anyway.
+        effects:
+          - { type: stat, key: stress, delta: 3 }
+          - { type: stat, key: smarts, delta: 1 }
+  - id: volcano
+    label: Build the volcano
+    outcome:
+      text: It fizzes. Everyone claps politely.
+      effects:
+        - { type: stat, key: happiness, delta: 1 }

@@ -1,0 +1,31 @@
+# The pacing director: how many events happen each year, and in what order.
+# Starting proposals from docs/design.md section G; Stage 12 tunes them.
+
+# Base events per year by life stage. The director picks a number in this
+# range, adds the volatility bonus, and never goes above the cap. A year can
+# have fewer when not enough events fit the character's situation.
+budgets:
+  early: { min: 0, max: 2 }
+  child: { min: 1, max: 2 }
+  teen: { min: 2, max: 4 }
+  youngAdult: { min: 2, max: 5 }
+  adult: { min: 1, max: 3 }
+  senior: { min: 1, max: 2 }
+
+# One extra event for each sign that life is volatile, up to maxBonus:
+# Risk-taking above riskTakingAbove, a major history entry in the last
+# recentYears, or someone new met in the last recentYears.
+volatility:
+  maxBonus: 2
+  riskTakingAbove: 70
+  recentYears: 2
+
+cap: 6
+
+# When the weights of the events that fit add up to less than this, the
+# difference is the chance that nothing more happens this year. Without it,
+# a rare or legendary event would be picked whenever nothing else fits.
+minTotalWeight: 8
+
+# Events in one year are shown in this order, so a joke never follows a death.
+toneOrder: [light, neutral, serious, dark]

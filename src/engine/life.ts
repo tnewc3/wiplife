@@ -9,7 +9,8 @@
  * and never changes the one it is given, so the game can be saved in any phase.
  */
 import { produce } from 'immer';
-import type { ContentBundle } from '../content/schemas';
+import type { ChoiceDef, ContentBundle, Outcome } from '../content/schemas';
+import { evaluate } from './conditions';
 import {
   activeIds,
   completeAppearance,
@@ -22,7 +23,11 @@ import {
   rollStats,
 } from './creation/character';
 import { generateFamily } from './creation/family';
-import { parseCreateLifeOptions, type CreateLifeOptions } from './creation/input';
+import { InvalidInputError, parseCreateLifeOptions, type CreateLifeOptions } from './creation/input';
+import { successChance } from './events/checks';
+import { applyEffects } from './events/effects';
+import { textContext } from './events/text';
+import { renderText } from './text';
 import { runPipeline, YEAR_PIPELINE, type PipelineStep } from './pipeline';
 import { weightedKey } from './random';
 import { chance, cloneRng, createRng, pick } from './rng';
@@ -137,6 +142,7 @@ export function createLife(input: CreateLifeOptions, content: ContentBundle): Li
     inputLog: [{ year: birthYear, kind: 'create', payload: structuredCloneJson(options) }],
     recap: null,
     death: null,
+    lifetime: { happinessTotal: 0, years: 0 },
     lineage: { generation: 1 },
   };
 }
@@ -177,11 +183,20 @@ function expectPhase(state: LifeState, phase: LifePhase, action: string): void {
  */
 export function beginYear(state: LifeState, content: ContentBundle, steps: readonly PipelineStep[] = YEAR_PIPELINE): LifeState {
   expectPhase(state, 'yearStart', 'age up');
-  return produce(state, (draft) => {
-    useFastRng(draft, state);
+  const statsBefore = { ...state.character.stats };
+  let next = produce(state, (draft) => {
     draft.inputLog.push({ year: draft.currentYear, kind: 'ageUp', payload: {} });
-    const statsBefore = { ...draft.character.stats };
-    runPipeline(draft, content, steps);
+  });
+  // Each step gets its own draft, so a step can read the life as the earlier
+  // steps left it through Immer's original() (fast) instead of the draft.
+  for (const step of steps) {
+    const before = next;
+    next = produce(next, (draft) => {
+      useFastRng(draft, before);
+      runPipeline(draft, content, [step]);
+    });
+  }
+  return produce(next, (draft) => {
     draft.recap = { year: draft.currentYear, age: draft.character.age, statsBefore, statsAfter: null };
     draft.phase = draft.pending.length > 0 ? 'events' : 'yearEnd';
   });
@@ -197,17 +212,76 @@ export function endYear(state: LifeState, content: ContentBundle): LifeState {
   return produce(state, (draft) => {
     useFastRng(draft, state);
     const c = draft.character;
-    const dies = chance(draft.rng, characterDeathChance(c.age, c.stats.health, c.hidden.geneticRisk, content));
-    if (dies) {
-      const causeId = pickCause(draft.rng, c.age, content);
+    // An event may already have killed the character this year.
+    const causeId =
+      draft.death?.causeId ??
+      (chance(draft.rng, characterDeathChance(c.age, c.stats.health, c.hidden.geneticRisk, content))
+        ? pickCause(draft.rng, c.age, content)
+        : null);
+    draft.pending = [];
+    draft.lifetime.happinessTotal += c.stats.happiness;
+    draft.lifetime.years += 1;
+    if (causeId !== null) {
       const cause = content.causes[causeId]?.text ?? causeId;
       writeFromGroup(draft, content.text.history.death, ['milestone', 'death'], { values: { age: c.age, cause } }, content);
       draft.death = { year: draft.currentYear, age: c.age, causeId };
-      draft.pending = [];
       draft.phase = 'dead';
     } else {
       draft.phase = 'yearStart';
     }
     if (draft.recap) draft.recap.statsAfter = { ...c.stats };
+  });
+}
+
+/** The choice id that resolves an event without choices (and a lost event whose definition is gone). */
+export const CONTINUE_CHOICE = 'continue';
+
+/**
+ * The player's answer to one pending event: records the input, applies the
+ * choice's outcome (rolling its chance check, if any) and keeps the outcome
+ * text on the instance for the event card. Events without choices take
+ * CONTINUE_CHOICE. When every event is resolved the phase moves to
+ * 'yearEnd'; if an outcome kills the character, the rest of the year's
+ * events are dropped. Throws PhaseError outside 'events' and
+ * InvalidInputError for an unknown, resolved or hidden choice.
+ */
+export function resolveChoice(state: LifeState, instanceId: Id, choiceId: Id, content: ContentBundle): LifeState {
+  expectPhase(state, 'events', 'choose');
+  const instance = state.pending.find((p) => p.instanceId === instanceId);
+  if (!instance) throw new InvalidInputError([{ path: 'choice', message: `No pending event "${instanceId}".` }]);
+  if (instance.resolvedChoiceId !== undefined) throw new InvalidInputError([{ path: 'choice', message: `Event "${instanceId}" is already resolved.` }]);
+  const def = content.events[instance.eventId];
+
+  let choice: ChoiceDef | undefined;
+  if (def?.choices) {
+    choice = def.choices.find((c) => c.id === choiceId);
+    if (!choice || !evaluate(choice.visibleIf, state, { cast: instance.cast, roles: 'strict' })) {
+      throw new InvalidInputError([{ path: 'choice', message: `"${choiceId}" is not a choice in event "${instance.eventId}".` }]);
+    }
+  } else if (choiceId !== CONTINUE_CHOICE) {
+    throw new InvalidInputError([{ path: 'choice', message: `Event "${instance.eventId}" has no choices; use "${CONTINUE_CHOICE}".` }]);
+  }
+
+  return produce(state, (draft) => {
+    useFastRng(draft, state);
+    draft.inputLog.push({ year: draft.currentYear, kind: 'choice', payload: { instanceId, choiceId } });
+    const target = draft.pending.find((p) => p.instanceId === instanceId)!;
+    target.resolvedChoiceId = choiceId;
+
+    if (def) {
+      let outcome: Outcome | undefined = def.autoOutcome;
+      if (choice?.outcome) outcome = choice.outcome;
+      else if (choice?.check) {
+        outcome = chance(draft.rng, successChance(draft, choice.check, content)) ? choice.check.success : choice.check.failure;
+      }
+      if (outcome) {
+        if (outcome.text) target.outcomeText = renderText(outcome.text, textContext(draft, instance.cast));
+        applyEffects(draft, outcome.effects, { def, cast: instance.cast, rng: draft.rng, content });
+      }
+    }
+
+    // A death ends the year's remaining events.
+    if (draft.death) draft.pending = draft.pending.filter((p) => p.resolvedChoiceId !== undefined);
+    draft.phase = draft.pending.every((p) => p.resolvedChoiceId !== undefined) ? 'yearEnd' : 'events';
   });
 }

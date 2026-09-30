@@ -1,6 +1,6 @@
 # Chance of death each year. Starting proposals, calibrated so that average
-# random lives die at a median age between 72 and 82 (checked by a 10,000-life
-# test); Stage 12 (balancing) tunes them further.
+# random lives, with events chosen at random, die at a median age between 72
+# and 82 (checked by a 10,000-life test); Stage 12 (balancing) tunes them further.
 #
 # The check runs at the end of each year, at the age reached that year.
 # Children can't make choices yet, so their deaths are kept rare: before
@@ -21,7 +21,7 @@ childhood:
 background: 0.0004
 
 ageCurve:
-  base: 0.00003
+  base: 0.000021
   growth: 1.1
 
 # By Health (0–100). Low health raises the chance sharply.

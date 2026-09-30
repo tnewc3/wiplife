@@ -1,4 +1,8 @@
 import { GENDER_CATEGORIES, type CollectionKey, type ContentBundle } from '../../src/content/schemas';
+import { CREATABLE_KINDS, type Effect, type EventDef, type Outcome } from '../../src/content/schemas';
+import { referencesIn, rolesIn } from '../../src/engine/conditions';
+import { EVENT_TEXT_VALUES } from '../../src/engine/events/text';
+import { CONTINUE_CHOICE } from '../../src/engine/life';
 import { checkTemplate } from '../../src/engine/text';
 import type { ContentError } from './compile';
 
@@ -83,6 +87,7 @@ export function checkReferences(
 
   errors.push(...checkAgingAndMortality(bundle, fileOf));
   errors.push(...checkTemplates(bundle));
+  errors.push(...checkEvents(bundle, fileOf));
 
   return errors;
 }
@@ -162,6 +167,91 @@ function checkTemplates(bundle: ContentBundle): ContentError[] {
   }
   if (obituary.opening.finished.length === 0 || obituary.opening.unfinished.length === 0) {
     errors.push({ file: OBITUARY, message: 'opening: finished and unfinished each need at least one variant' });
+  }
+  return errors;
+}
+
+/** Every outcome an event can produce. */
+function outcomesOf(def: EventDef): Outcome[] {
+  if (def.autoOutcome) return [def.autoOutcome];
+  return (def.choices ?? []).flatMap((c) => (c.outcome ? [c.outcome] : c.check ? [c.check.success, c.check.failure] : []));
+}
+
+/** Events: registries, references between events, roles and placeholders. */
+function checkEvents(bundle: ContentBundle, fileOf: (typeKey: CollectionKey, id: string) => string): ContentError[] {
+  const errors: ContentError[] = [];
+  const { tags } = bundle.registries.memories;
+  const { flags } = bundle.registries.flags;
+  const { categories } = bundle.registries.categories;
+  const scheduledIds = new Set<string>();
+
+  for (const [id, def] of Object.entries(bundle.events)) {
+    const file = fileOf('events', id);
+    const err = (message: string) => errors.push({ file, message: `${id}: ${message}` });
+    const roles = Object.keys(def.cast ?? {});
+    const allowed = { roles, values: [...EVENT_TEXT_VALUES] as string[] };
+    const template = (field: string, text: string) => {
+      for (const message of checkTemplate(text, allowed)) err(`${field}: ${message}`);
+    };
+    const condition = (field: string, cond: Parameters<typeof rolesIn>[0]) => {
+      for (const role of rolesIn(cond)) if (!roles.includes(role)) err(`${field}: role "${role}" is not in the cast`);
+      const refs = referencesIn(cond);
+      for (const f of refs.flags) if (!flags[f]) err(`${field}: flag "${f}" is not in registries/flags.yaml`);
+      for (const t of refs.memories) if (!tags[t]) err(`${field}: memory "${t}" is not in registries/memories.yaml`);
+      for (const e of refs.events) if (!bundle.events[e]) err(`${field}: unknown event "${e}"`);
+      for (const c of refs.cities) if (!bundle.cities[c]) err(`${field}: unknown city "${c}"`);
+    };
+
+    if (!categories[def.category]) err(`category "${def.category}" is not in registries/categories.yaml`);
+    template('title', def.title);
+    template('text', def.text);
+    condition('requires', def.requires);
+    (def.weight.modifiers ?? []).forEach((m, i) => condition(`weight.modifiers[${i}]`, m.if));
+    for (const [role, spec] of Object.entries(def.cast ?? {})) {
+      if ((spec.createIfMissing || spec.newChance !== undefined) && !(CREATABLE_KINDS as readonly string[]).includes(spec.kind)) {
+        err(`cast.${role}: only ${CREATABLE_KINDS.join(', ')} can be created`);
+      }
+    }
+    for (const choice of def.choices ?? []) {
+      if (choice.id === CONTINUE_CHOICE) err(`choice id "${CONTINUE_CHOICE}" is reserved`);
+      template(`choices.${choice.id}.label`, choice.label);
+      condition(`choices.${choice.id}.visibleIf`, choice.visibleIf);
+    }
+
+    let writesHistory = false;
+    outcomesOf(def).forEach((outcome, i) => {
+      if (outcome.text) template(`outcome[${i}].text`, outcome.text);
+      for (const effect of outcome.effects as Effect[]) {
+        const where = `outcome[${i}] ${effect.type}`;
+        if ('role' in effect && !roles.includes(effect.role)) err(`${where}: role "${effect.role}" is not in the cast`);
+        if (effect.type === 'memory' && !tags[effect.tag]) err(`${where}: memory "${effect.tag}" is not in registries/memories.yaml`);
+        if (effect.type === 'flag' && !flags[effect.key]) err(`${where}: flag "${effect.key}" is not in registries/flags.yaml`);
+        if (effect.type === 'death' && !bundle.causes[effect.cause]) err(`${where}: unknown cause "${effect.cause}"`);
+        if (effect.type === 'relationship' && effect.kind && !(CREATABLE_KINDS as readonly string[]).includes(effect.kind)) {
+          err(`${where}: kind can only become ${CREATABLE_KINDS.join(', ')}`);
+        }
+        if (effect.type === 'history') {
+          writesHistory = true;
+          template(`${where}.text`, effect.text);
+        }
+        if (effect.type === 'schedule') {
+          scheduledIds.add(effect.eventId);
+          const target = bundle.events[effect.eventId];
+          if (!target) err(`${where}: unknown event "${effect.eventId}"`);
+          for (const role of effect.cast ?? []) {
+            if (!roles.includes(role)) err(`${where}: role "${role}" is not in the cast`);
+            if (target && !(role in (target.cast ?? {}))) err(`${where}: "${effect.eventId}" has no role "${role}"`);
+          }
+        }
+      }
+    });
+    if (def.rarity === 'legendary' && !writesHistory) err('a legendary event must write a history entry (that is where it is recorded)');
+  }
+
+  for (const [id, def] of Object.entries(bundle.events)) {
+    if (def.followUpOnly && !def.retired && !scheduledIds.has(id)) {
+      errors.push({ file: fileOf('events', id), message: `${id}: followUpOnly, but no event schedules it` });
+    }
   }
   return errors;
 }

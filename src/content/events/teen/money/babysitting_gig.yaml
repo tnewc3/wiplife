@@ -1,0 +1,34 @@
+id: babysitting_gig
+title: Friday nights
+text: >-
+  A neighbor needs a babysitter every Friday night. The kids are, by all
+  reports, a handful.
+tone: neutral
+category: money
+rarity: common
+lifeStages: [teen]
+weight: { base: 8 }
+cooldownYears: 2
+choices:
+  - id: take
+    label: Take the job
+    check:
+      base: 55
+      stats: [{ key: discipline, weight: 0.3 }, { key: kindness, weight: 0.2 }]
+      success:
+        text: The kids adore you, and the cash adds up.
+        effects:
+          - { type: money, delta: 600 }
+          - { type: stat, key: discipline, delta: 2 }
+          - { type: stat, key: happiness, delta: 2 }
+      failure:
+        text: One of them locks you out of the house. You get paid, but you don't get asked back.
+        effects:
+          - { type: money, delta: 100 }
+          - { type: stat, key: stress, delta: 4 }
+  - id: decline
+    label: Keep your Friday nights
+    outcome:
+      text: You spend Fridays doing absolutely nothing, which is its own reward.
+      effects:
+        - { type: stat, key: happiness, delta: 2 }

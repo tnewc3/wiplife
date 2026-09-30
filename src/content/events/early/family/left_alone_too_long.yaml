@@ -1,0 +1,38 @@
+id: left_alone_too_long
+title: The long afternoon
+text: >-
+  {parent.name} goes out and doesn't come back for hours. The apartment gets
+  dark. You're hungry, and you don't know when {parent.they} will be home.
+tone: dark
+category: family
+rarity: uncommon
+lifeStages: [early]
+weight:
+  base: 1.5
+  modifiers:
+    - { if: { familyWealth: [poor] }, x: 2 }
+once: true
+cast:
+  parent: { kind: parent }
+choices:
+  - id: cry
+    label: Cry until someone hears
+    outcome:
+      text: >-
+        A neighbor knocks and sits with you until {parent.name} gets back.
+        Nobody talks about it afterwards.
+      effects:
+        - { type: stat, key: stress, delta: 6 }
+        - { type: relationship, role: parent, trust: -8 }
+        - { type: memory, role: parent, tag: left_you_alone }
+  - id: wait
+    label: Wait quietly by the door
+    outcome:
+      text: >-
+        You wait. When {parent.name} finally comes home, you pretend to be
+        asleep.
+      effects:
+        - { type: stat, key: stress, delta: 8 }
+        - { type: stat, key: happiness, delta: -3 }
+        - { type: relationship, role: parent, trust: -10 }
+        - { type: memory, role: parent, tag: left_you_alone }

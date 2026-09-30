@@ -1,0 +1,39 @@
+id: exam_all_nighter
+title: The night before
+text: Your big exam is tomorrow, and you've barely opened the book.
+tone: neutral
+category: school
+rarity: common
+lifeStages: [teen, youngAdult]
+weight: { base: 8 }
+cooldownYears: 2
+choices:
+  - id: all_nighter
+    label: Pull an all-nighter
+    check:
+      base: 50
+      stats: [{ key: smarts, weight: 0.4 }, { key: discipline, weight: 0.2 }]
+      success:
+        text: Somehow, it all sticks. You ace it and sleep for fourteen hours.
+        effects:
+          - { type: stat, key: smarts, delta: 2 }
+          - { type: stat, key: stress, delta: 3 }
+          - { type: stat, key: health, delta: -1 }
+      failure:
+        text: You fall asleep halfway through the exam.
+        effects:
+          - { type: stat, key: stress, delta: 6 }
+          - { type: stat, key: health, delta: -2 }
+  - id: sleep
+    label: Get some sleep and hope
+    check:
+      base: 40
+      stats: [{ key: smarts, weight: 0.5 }]
+      success:
+        text: You remember more than you thought you would.
+        effects:
+          - { type: stat, key: stress, delta: -2 }
+      failure:
+        text: You don't. At least you're well rested.
+        effects:
+          - { type: stat, key: stress, delta: 2 }

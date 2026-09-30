@@ -1,13 +1,21 @@
 import { z } from 'zod';
-import { agingBalanceSchema, creationBalanceSchema, mortalityBalanceSchema } from './balance';
+import {
+  agingBalanceSchema,
+  creationBalanceSchema,
+  eventsBalanceSchema,
+  mortalityBalanceSchema,
+  pacingBalanceSchema,
+} from './balance';
 import { appearanceOptionsSchema, identityOptionsSchema, namePoolSchema, pronounPresetSchema, talentSchema } from './character';
 import { citySchema } from './city';
+import { categoryRegistrySchema, eventSchema, flagRegistrySchema, memoryRegistrySchema } from './events';
 import { causeSchema, historyTextSchema, obituaryTextSchema, relationWordsSchema } from './text';
 
 export * from './balance';
 export * from './character';
 export * from './city';
 export * from './common';
+export * from './events';
 export * from './text';
 
 /**
@@ -18,6 +26,8 @@ export * from './text';
 export const collectionTypes = {
   causes: { folder: 'causes', schema: causeSchema },
   cities: { folder: 'cities', schema: citySchema },
+  /** Nested by life stage and category, and chain files hold several events (see compile.ts). */
+  events: { folder: 'events', schema: eventSchema },
   names: { folder: 'names', schema: namePoolSchema },
   pronouns: { folder: 'pronouns', schema: pronounPresetSchema },
   talents: { folder: 'talents', schema: talentSchema },
@@ -34,11 +44,16 @@ export const singletonTypes = {
   'balance/creation': creationBalanceSchema,
   'balance/aging': agingBalanceSchema,
   'balance/mortality': mortalityBalanceSchema,
+  'balance/pacing': pacingBalanceSchema,
+  'balance/events': eventsBalanceSchema,
   'character/identity': identityOptionsSchema,
   'character/appearance': appearanceOptionsSchema,
   'text/relations': relationWordsSchema,
   'text/history': historyTextSchema,
   'text/obituary': obituaryTextSchema,
+  'registries/memories': memoryRegistrySchema,
+  'registries/flags': flagRegistrySchema,
+  'registries/categories': categoryRegistrySchema,
 } as const;
 
 export type SingletonPath = keyof typeof singletonTypes;
@@ -47,6 +62,7 @@ export const contentBundleSchema = z.strictObject({
   contentVersion: z.string().min(1),
   causes: z.record(z.string(), causeSchema),
   cities: z.record(z.string(), citySchema),
+  events: z.record(z.string(), eventSchema),
   names: z.record(z.string(), namePoolSchema),
   pronouns: z.record(z.string(), pronounPresetSchema),
   talents: z.record(z.string(), talentSchema),
@@ -54,9 +70,16 @@ export const contentBundleSchema = z.strictObject({
     creation: creationBalanceSchema,
     aging: agingBalanceSchema,
     mortality: mortalityBalanceSchema,
+    pacing: pacingBalanceSchema,
+    events: eventsBalanceSchema,
   }),
   character: z.strictObject({ identity: identityOptionsSchema, appearance: appearanceOptionsSchema }),
   text: z.strictObject({ relations: relationWordsSchema, history: historyTextSchema, obituary: obituaryTextSchema }),
+  registries: z.strictObject({
+    memories: memoryRegistrySchema,
+    flags: flagRegistrySchema,
+    categories: categoryRegistrySchema,
+  }),
 });
 
 /** The compiled, validated content the app loads at runtime. */

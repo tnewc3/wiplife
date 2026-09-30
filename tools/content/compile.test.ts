@@ -252,4 +252,98 @@ describe('content build with fixture files', () => {
     await writeFile(file, text.replace('{ at: 10, x: 0.4 }', '{ at: 50, x: 0.4 }'));
     expect(await expectErrors()).toContain('lifeStages.youngAdult (18) must be after teen (19)');
   });
+
+  describe('events', () => {
+    const event = (extra = '') => `
+id: test_event
+title: A test
+text: '{npc.name} waves.'
+tone: light
+category: family
+rarity: common
+lifeStages: [adult]
+weight: { base: 5 }
+cast:
+  npc: { kind: friend, createIfMissing: true }
+choices:
+  - id: wave
+    label: Wave back
+    outcome:
+      effects:
+        - { type: memory, role: npc, tag: lent_money }
+  - id: ignore
+    label: Ignore {npc.them}
+    outcome: {}
+${extra}`;
+    const file = 'events/adult/family/test_event.yaml';
+
+    it('accepts a valid event', async () => {
+      await write(file, event());
+      const result = await compile();
+      if (!result.ok) throw new Error(formatErrors(result.errors));
+      expect(result.bundle.events.test_event?.title).toBe('A test');
+    });
+
+    it('rejects a placeholder for a role not in the cast', async () => {
+      await write(file, event().replace("'{npc.name} waves.'", "'{stranger.name} waves.'"));
+      expect(await expectErrors()).toContain('text: {stranger.name}: unknown role "stranger"');
+    });
+
+    it('rejects unregistered memories and flags, and unknown events and causes', async () => {
+      await write(
+        file,
+        event().replace('tag: lent_money', 'tag: made_up_memory') +
+          `requires: { all: [{ flag: made_up_flag }, { fired: made_up_event }] }
+`,
+      );
+      const text = await expectErrors();
+      expect(text).toContain('memory "made_up_memory" is not in registries/memories.yaml');
+      expect(text).toContain('flag "made_up_flag" is not in registries/flags.yaml');
+      expect(text).toContain('unknown event "made_up_event"');
+      await write(file, event().replace('{ type: memory, role: npc, tag: lent_money }', '{ type: death, cause: old_age_x }'));
+      expect(await expectErrors()).toContain('unknown cause "old_age_x"');
+    });
+
+    it('rejects unknown effect types and invalid conditions', async () => {
+      await write(file, event().replace('{ type: memory, role: npc, tag: lent_money }', '{ type: teleport, where: mars }'));
+      expect(await expectErrors()).toContain('test_event.yaml');
+      await write(file, `${event()}requires: { age: 18 }
+`);
+      expect(await expectErrors()).toContain('requires');
+    });
+
+    it('rejects a schedule of an unknown event or of roles the follow-up lacks', async () => {
+      await write(file, event().replace('{ type: memory, role: npc, tag: lent_money }', '{ type: schedule, eventId: friend_repays, inYears: [1, 2], cast: [npc] }'));
+      expect(await expectErrors()).toContain('"friend_repays" has no role "npc"');
+      await write(file, event().replace('{ type: memory, role: npc, tag: lent_money }', '{ type: schedule, eventId: nothing_here, inYears: [1, 2] }'));
+      expect(await expectErrors()).toContain('unknown event "nothing_here"');
+    });
+
+    it('rejects an event in the wrong folder or with the wrong id', async () => {
+      await write('events/teen/family/test_event.yaml', event());
+      expect(await expectErrors()).toContain('lifeStages must include its folder\'s stage "teen"');
+      await rm(path.join(dir, 'events/teen'), { recursive: true });
+      await write('events/adult/money/test_event.yaml', event());
+      expect(await expectErrors()).toContain('must match its folder ("money")');
+      await rm(path.join(dir, 'events/adult/money'), { recursive: true });
+      await write('events/adult/family/other_name.yaml', event());
+      expect(await expectErrors()).toContain('must match the file name ("other_name")');
+    });
+
+    it('rejects a follow-up nothing schedules, a legendary event without history, and creating family', async () => {
+      await write(file, `${event()}followUpOnly: true
+`);
+      expect(await expectErrors()).toContain('followUpOnly, but no event schedules it');
+      await write(file, event().replace('rarity: common', 'rarity: legendary'));
+      expect(await expectErrors()).toContain('a legendary event must write a history entry');
+      await write(file, event().replace('kind: friend, createIfMissing: true', 'kind: sibling, createIfMissing: true'));
+      expect(await expectErrors()).toContain('only friend, classmate, acquaintance can be created');
+    });
+
+    it('rejects a chain file whose name does not match its chain id', async () => {
+      await write('events/any/family/wrong.chain.yaml', `chain: right\nevents:\n${[event(), event().replace('id: test_event', 'id: test_event_2')].map((e) => e.trim().split('\n').map((l, i) => (i === 0 ? `  - ${l}` : `    ${l}`)).join('\n')).join('\n')}\n`);
+      expect(await expectErrors()).toContain('chain "right" must match the file name ("wrong")');
+    });
+  });
 });
+

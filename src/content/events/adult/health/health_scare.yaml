@@ -1,0 +1,41 @@
+id: health_scare
+title: More tests
+text: Your doctor finds something on a routine scan and wants to run more tests.
+tone: serious
+category: health
+rarity: common
+lifeStages: [adult, senior]
+weight: { base: 5 }
+cooldownYears: 8
+choices:
+  - id: now
+    label: Get the tests right away
+    check:
+      base: 70
+      stats: [{ key: health, weight: 0.3 }]
+      success:
+        text: It's nothing. You celebrate with a very large dinner.
+        effects:
+          - { type: stat, key: stress, delta: -3 }
+          - { type: stat, key: happiness, delta: 3 }
+      failure:
+        text: It's something, but they caught it early. Treatment is rough, and it works.
+        effects:
+          - { type: stat, key: health, delta: -6 }
+          - { type: stat, key: stress, delta: 8 }
+          - { type: history, text: You got through a serious health scare., importance: 2 }
+  - id: later
+    label: Put it off
+    check:
+      base: 50
+      stats: [{ key: health, weight: 0.3 }]
+      success:
+        text: Months later, the tests come back clear. You got lucky.
+        effects:
+          - { type: stat, key: stress, delta: 2 }
+      failure:
+        text: By the time you go back, it's worse. Treatment takes a year out of your life.
+        effects:
+          - { type: stat, key: health, delta: -12 }
+          - { type: stat, key: stress, delta: 10 }
+          - { type: history, text: A health scare you put off became a hard year of treatment., importance: 2 }
