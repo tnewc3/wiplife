@@ -6,7 +6,7 @@ import { Button } from '../../components/Button';
 import { Card } from '../../components/Card';
 import { StatBar } from '../../components/StatBar';
 import { YearRecapList } from '../../components/YearRecapList';
-import { ageLabel, LIFE_STAGE_LABELS, memberAgeLabel, relativeLabel, STAT_LABELS, timelineAgeLabel } from '../../labels';
+import { ageLabel, LIFE_STAGE_LABELS, memberAgeLabel, relativeLabel, romanceLine, STAT_LABELS, timelineAgeLabel } from '../../labels';
 
 /** How many recent history entries the Home feed shows. */
 const FEED_LENGTH = 12;
@@ -67,6 +67,7 @@ const HOUSING_LINES: Record<LifeState['housing']['kind'], string> = {
 export function HomeTab({ life }: { life: LifeState }) {
   const summary = getCharacterSummary(life, content);
   const family = getFamily(life);
+  const love = romanceLine(summary.romance.status, summary.romance.partnerName);
 
   return (
     <div className="flex flex-col gap-4">
@@ -80,6 +81,11 @@ export function HomeTab({ life }: { life: LifeState }) {
         <p className="mt-1 text-sm text-muted">
           {LIFE_STAGE_LABELS[summary.lifeStage]} · {HOUSING_LINES[summary.housing]}
         </p>
+        {love && (
+          <p className="mt-1 text-sm break-words text-muted [overflow-wrap:anywhere]" data-testid="romance-line">
+            {love}
+          </p>
+        )}
       </Card>
 
       <YearRecapCard life={life} />

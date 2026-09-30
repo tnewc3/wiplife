@@ -5,6 +5,7 @@
  */
 import type { ContentBundle, EventDef } from '../../content/schemas';
 import { evaluate } from '../conditions';
+import { isRomanceEvent } from '../relationships';
 import type { LifeStage, LifeState } from '../types';
 
 const indexCache = new WeakMap<ContentBundle, Map<LifeStage, EventDef[]>>();
@@ -39,10 +40,12 @@ function lastCategoryYear(state: LifeState, category: string, content: ContentBu
 
 /**
  * An event's weight this year: zero when it is on cooldown, already happened
- * (one-time events), or its requirements fail; otherwise base × rarity ×
- * matching modifiers. Requirements about cast roles are checked after casting.
+ * (one-time events), is a romance event and you're not an adult, or its
+ * requirements fail; otherwise base × rarity × matching modifiers.
+ * Requirements about cast roles are checked after casting.
  */
 export function eventWeight(state: LifeState, def: EventDef, content: ContentBundle): number {
+  if (state.character.age < content.balance.relationships.adultAge && isRomanceEvent(def, content)) return 0;
   const log = state.eventLog[def.id];
   if (def.once && log) return 0;
   if (def.cooldownYears && log && state.currentYear - log.lastYear < def.cooldownYears) return 0;

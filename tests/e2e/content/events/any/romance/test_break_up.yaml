@@ -1,0 +1,17 @@
+id: test_break_up
+title: Breaking up
+text: You break up with {person.name}.
+tone: serious
+category: romance
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires: { age: { gte: 18 } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  person: { kind: partner }
+autoOutcome:
+  text: It's over.
+  effects:
+    - { type: relationship, role: person, kind: ex }
+    - { type: memory, role: person, tag: you_broke_up }

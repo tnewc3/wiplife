@@ -4,6 +4,7 @@
  * conditionSchema in src/content/schemas/events.ts.
  */
 import type { Compare, Condition } from '../content/schemas';
+import { romanceStatus, yearsInKind } from './relationships';
 import type { Id, LifeState } from './types';
 
 export interface ConditionContext {
@@ -65,6 +66,7 @@ export function evaluate(condition: Condition | undefined, state: LifeState, ctx
       (r) => r.kind === condition.relative.kind && state.people[r.personId]?.alive === alive,
     );
   }
+  if ('romance' in condition) return condition.romance.includes(romanceStatus(state));
   if ('memory' in condition) {
     const { role, tag } = condition.memory;
     return roleCheck(role, (id) => state.relationships[id]?.memories.some((m) => m.tag === tag) ?? false);
@@ -78,6 +80,9 @@ export function evaluate(condition: Condition | undefined, state: LifeState, ctx
       if (condition.age && !compare((person.deathYear ?? state.currentYear) - person.birthYear, condition.age)) return false;
       if (condition.affection && !(rel && compare(rel.affection, condition.affection))) return false;
       if (condition.trust && !(rel && compare(rel.trust, condition.trust))) return false;
+      if (condition.kind && !(rel && condition.kind.includes(rel.kind))) return false;
+      if (condition.status && !(rel && condition.status.includes(rel.status))) return false;
+      if (condition.years && !(rel && compare(yearsInKind(state, rel), condition.years))) return false;
       return true;
     });
   }

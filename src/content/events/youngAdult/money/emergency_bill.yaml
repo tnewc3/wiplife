@@ -1,0 +1,41 @@
+# A crisis: whoever you trust most may step in with a loan (a support role).
+id: emergency_bill
+title: The quote
+text: >-
+  Your car dies on the highway. The mechanic's quote is more than you have,
+  and you need the car to get to work.
+tone: neutral
+category: money
+rarity: common
+lifeStages: [youngAdult, adult]
+requires: { money: { lt: 1500 } }
+weight: { base: 4 }
+cooldownYears: 5
+cast:
+  helper: { support: true, optional: true }
+choices:
+  - id: ask
+    label: Ask {helper.name} for a loan
+    visibleIf: { role: helper }
+    outcome:
+      text: '{helper.name} sends the money before you finish explaining. "Pay me back whenever," {helper.they} {helper:says|say}, and means it.'
+      effects:
+        - { type: memory, role: helper, tag: lent_you_money }
+        - { type: relationship, role: helper, affection: 3, trust: 3 }
+        - { type: stat, key: stress, delta: -4 }
+  - id: sell
+    label: Sell the car and take the bus
+    outcome:
+      text: The bus adds an hour to your day. You read a lot of books.
+      effects:
+        - { type: money, delta: 300 }
+        - { type: stat, key: stress, delta: 3 }
+        - { type: stat, key: happiness, delta: -2 }
+  - id: scrape
+    label: Scrape it together and skip everything else
+    outcome:
+      text: Every cent goes to the mechanic. You eat a lot of rice this month.
+      effects:
+        - { type: money, delta: -1500 }
+        - { type: stat, key: stress, delta: 6 }
+        - { type: stat, key: health, delta: -1 }

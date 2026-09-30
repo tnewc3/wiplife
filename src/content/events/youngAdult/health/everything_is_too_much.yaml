@@ -1,0 +1,48 @@
+# A crisis: whoever you trust most may step in (a support role).
+id: everything_is_too_much
+title: Too much
+text: >-
+  It's three in the morning and you're awake again. Everything feels too
+  heavy to carry, and you can't remember when it started feeling that way.
+tone: serious
+category: health
+rarity: common
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  any:
+    - { stat: stress, gte: 65 }
+    - { stat: happiness, lte: 30 }
+weight: { base: 5 }
+cooldownYears: 5
+cast:
+  helper: { support: true, optional: true }
+choices:
+  - id: call
+    label: Call {helper.name}, even though it's late
+    visibleIf: { role: helper }
+    outcome:
+      text: >-
+        {helper.name} picks up on the first ring and stays on the line until
+        the sky gets light. {helper.They} {helper:calls|call} again the next
+        night, and the next.
+      effects:
+        - { type: memory, role: helper, tag: stood_by_you }
+        - { type: relationship, role: helper, affection: 5, trust: 5 }
+        - { type: stat, key: stress, delta: -10 }
+        - { type: stat, key: happiness, delta: 5 }
+  - id: bottle
+    label: Keep it to yourself
+    outcome:
+      text: You get up, get through the day, and smile at people. Nobody notices a thing, which is somehow worse.
+      effects:
+        - { type: stat, key: stress, delta: 4 }
+        - { type: stat, key: happiness, delta: -2 }
+  - id: help
+    label: Find a therapist
+    visibleIf: { age: { gte: 18 } }
+    outcome:
+      text: It takes three tries to find the right one. The fourth session is the first time you cry in years.
+      effects:
+        - { type: money, delta: -600 }
+        - { type: stat, key: stress, delta: -8 }
+        - { type: stat, key: happiness, delta: 3 }

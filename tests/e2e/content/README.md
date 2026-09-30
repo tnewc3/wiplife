@@ -14,4 +14,11 @@ What a life in this pack does, for any seed (one event per year when one fits):
 | 2 | nothing (a quiet year) |
 | 3 | `test_auto`: no choices, just Continue |
 | 4 | `test_crossroads`: live on, or end the life here |
-| 5+ | nothing |
+| 5–17 | nothing |
+| 18 | `test_meet`: you meet someone you're attracted to (and who is attracted to you); no choices |
+| 19+ | nothing |
+
+Management actions on a person's page each answer with one predictable
+event (`registries/actions.yaml` here replaces the real one): asking out
+always gets a yes (or "Never mind"), proposing and marrying always succeed,
+and breaking up, divorcing, cutting contact and reconciling do just that.

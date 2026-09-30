@@ -1,0 +1,80 @@
+# Relationships: drift, pruning, management actions and support in a crisis.
+# Starting proposals; Stage 12 (balancing) tunes them against simulation runs.
+
+# Romance (dating, engagement, marriage) needs both people at least this old.
+# The schema refuses anything below 18.
+adultAge: 18
+
+drift:
+  # Affection lost each year with someone you made no new memory with.
+  # Gentle on purpose: there is no activities menu to top it back up.
+  perYear:
+    parent: 0.5
+    stepparent: 1
+    grandparent: 0.5
+    sibling: 0.7
+    friend: 1.5
+    partner: 1.2
+    fiance: 1
+    spouse: 1
+    ex: 1.5
+    coworker: 2
+    boss: 2
+    classmate: 2
+    acquaintance: 2
+  # Drift alone never takes affection below this.
+  floor:
+    parent: 40
+    stepparent: 25
+    grandparent: 40
+    sibling: 30
+    friend: 5
+    partner: 20
+    fiance: 25
+    spouse: 25
+    ex: 5
+    coworker: 5
+    boss: 5
+    classmate: 0
+    acquaintance: 0
+  # No drift with someone you made a memory with this year or in the last
+  # graceYears years.
+  graceYears: 2
+  # Multiplies drift by your Kindness.
+  kindness:
+    - { at: 0, x: 1.3 }
+    - { at: 50, x: 1 }
+    - { at: 100, x: 0.6 }
+
+prune:
+  # Acquaintances and classmates with no new memory for this long fade out of
+  # your life (they stop appearing on the People screen).
+  forgetAfterYears: 6
+  # Friends, coworkers and acquaintances whose affection falls this low drift apart.
+  driftApartAt: 8
+  # Most people outside family and romance who stay in your life.
+  maxPeople: 30
+
+actions:
+  # Youngest age to cut contact with (or reconcile with) family, and anyone else.
+  minAge: { family: 18, others: 13 }
+  proposeAfterYears: 1
+  marryAfterYears: 1
+
+# How much younger and older than you (in years) someone new you meet as a
+# potential partner can be, by your age. Between points the gap follows a
+# straight line; nobody is ever younger than adultAge.
+meeting:
+  younger:
+    - { at: 18, x: 2 }
+    - { at: 30, x: 6 }
+    - { at: 60, x: 12 }
+  older:
+    - { at: 18, x: 5 }
+    - { at: 30, x: 8 }
+    - { at: 60, x: 10 }
+
+# Someone steps in during a crisis when their trust and affection reach these.
+support:
+  minTrust: 65
+  minAffection: 50

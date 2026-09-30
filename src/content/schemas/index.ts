@@ -6,6 +6,7 @@ import {
   mortalityBalanceSchema,
   pacingBalanceSchema,
 } from './balance';
+import { actionRegistrySchema, relationshipsBalanceSchema } from './relationships';
 import { appearanceOptionsSchema, identityOptionsSchema, namePoolSchema, pronounPresetSchema, talentSchema } from './character';
 import { citySchema } from './city';
 import { categoryRegistrySchema, eventSchema, flagRegistrySchema, memoryRegistrySchema } from './events';
@@ -16,6 +17,7 @@ export * from './character';
 export * from './city';
 export * from './common';
 export * from './events';
+export * from './relationships';
 export * from './text';
 
 /**
@@ -46,6 +48,7 @@ export const singletonTypes = {
   'balance/mortality': mortalityBalanceSchema,
   'balance/pacing': pacingBalanceSchema,
   'balance/events': eventsBalanceSchema,
+  'balance/relationships': relationshipsBalanceSchema,
   'character/identity': identityOptionsSchema,
   'character/appearance': appearanceOptionsSchema,
   'text/relations': relationWordsSchema,
@@ -54,6 +57,7 @@ export const singletonTypes = {
   'registries/memories': memoryRegistrySchema,
   'registries/flags': flagRegistrySchema,
   'registries/categories': categoryRegistrySchema,
+  'registries/actions': actionRegistrySchema,
 } as const;
 
 export type SingletonPath = keyof typeof singletonTypes;
@@ -72,6 +76,7 @@ export const contentBundleSchema = z.strictObject({
     mortality: mortalityBalanceSchema,
     pacing: pacingBalanceSchema,
     events: eventsBalanceSchema,
+    relationships: relationshipsBalanceSchema,
   }),
   character: z.strictObject({ identity: identityOptionsSchema, appearance: appearanceOptionsSchema }),
   text: z.strictObject({ relations: relationWordsSchema, history: historyTextSchema, obituary: obituaryTextSchema }),
@@ -79,6 +84,7 @@ export const contentBundleSchema = z.strictObject({
     memories: memoryRegistrySchema,
     flags: flagRegistrySchema,
     categories: categoryRegistrySchema,
+    actions: actionRegistrySchema,
   }),
 });
 

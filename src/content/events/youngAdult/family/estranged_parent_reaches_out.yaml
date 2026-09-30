@@ -1,0 +1,40 @@
+id: estranged_parent_reaches_out
+title: A letter with a familiar hand
+text: >-
+  A letter from {parent.name}. You haven't spoken in a long time. It's two
+  pages long, and the handwriting gets shakier towards the end.
+tone: serious
+category: family
+rarity: uncommon
+lifeStages: [youngAdult, adult, senior]
+requires: { role: parent, status: [estranged] }
+weight: { base: 10 }
+cooldownYears: 6
+cast:
+  parent: { kind: parent }
+choices:
+  - id: write_back
+    label: Write back
+    outcome:
+      text: >-
+        Your reply is short. {parent.name}'s answer is shorter: "Thank you."
+        It's a start.
+      effects:
+        - { type: relationship, role: parent, status: active, affection: 10, trust: 6 }
+        - { type: memory, role: parent, tag: reached_out }
+        - { type: stat, key: stress, delta: -2 }
+        - { type: history, text: 'After years apart, you and {parent.name} started talking again.', importance: 2 }
+  - id: keep
+    label: Keep the letter, but don't answer
+    outcome:
+      text: You put it in a drawer. You take it out more often than you'd admit.
+      effects:
+        - { type: relationship, role: parent, affection: 3 }
+        - { type: stat, key: stress, delta: 2 }
+  - id: burn
+    label: Throw it away unread
+    outcome:
+      text: It goes in the trash. Some doors are closed for a reason.
+      effects:
+        - { type: relationship, role: parent, affection: -5 }
+        - { type: stat, key: stress, delta: -1 }

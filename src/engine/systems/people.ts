@@ -1,7 +1,8 @@
 /**
  * NPC aging (year pipeline step 2). NPC ages follow from their birth years;
- * each year every living NPC may die, and a relative's death is written to
- * the history.
+ * each year every living NPC may die, and the death of a relative, partner
+ * or friend (anyone with words in text/relations.yaml who is still in your
+ * life) is written to the history.
  */
 import { isDraft, original } from 'immer';
 import type { ContentBundle } from '../../content/schemas';
@@ -10,9 +11,9 @@ import type { LifeState, Relationship } from '../types';
 import { writeFromGroup } from './history';
 import { npcDeathChance } from './mortality';
 
-type FamilyKind = keyof ContentBundle['text']['relations'];
+type WordedKind = keyof ContentBundle['text']['relations'];
 
-function isFamilyKind(kind: Relationship['kind'], content: ContentBundle): kind is FamilyKind {
+function hasRelationWords(kind: Relationship['kind'], content: ContentBundle): kind is WordedKind {
   return kind in content.text.relations;
 }
 
@@ -32,7 +33,7 @@ export function ageNpcs(state: LifeState, content: ContentBundle): void {
     person.deathYear = state.currentYear;
 
     const rel = state.relationships[id];
-    if (rel && isFamilyKind(rel.kind, content)) {
+    if (rel && rel.status !== 'ended' && hasRelationWords(rel.kind, content)) {
       const relation = content.text.relations[rel.kind][person.identity.genderCategory];
       writeFromGroup(
         state,

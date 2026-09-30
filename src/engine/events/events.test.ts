@@ -199,7 +199,7 @@ describe('casting', () => {
 
   it('casts different people in different roles', () => {
     const life = cloneJson(adult('cast-two'));
-    const parents = castCandidates(life, { kind: 'parent' }).length;
+    const parents = castCandidates(life, { kind: 'parent' }, content).length;
     const result = castEvent(life, ev({ id: 'c', cast: { a: { kind: 'parent' }, b: { kind: 'parent' } } }), createRng('c'), content);
     if (parents >= 2) expect(result!.cast.a).not.toBe(result!.cast.b);
     else expect(result).toBeNull();
@@ -216,7 +216,7 @@ describe('casting', () => {
 
   it('filters by age', () => {
     const life = adult('cast-age');
-    for (const p of castCandidates(life, { kind: 'parent', age: { min: 0, max: 10 } })) throw new Error(`unexpected ${p.id}`);
+    for (const p of castCandidates(life, { kind: 'parent', age: { min: 0, max: 10 } }, content)) throw new Error(`unexpected ${p.id}`);
   });
 });
 

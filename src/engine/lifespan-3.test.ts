@@ -1,4 +1,4 @@
 import { describe } from 'vitest';
-import { lifespanShard } from './lifespanShard';
+import { lifespanShard, SHARDS, TOTAL_LIVES } from './lifespanShard';
 
-describe('10,000 random lives (shard 3 of 4)', () => lifespanShard(3));
+describe(`${TOTAL_LIVES.toLocaleString('en-US')} random lives (shard 3 of ${SHARDS})`, () => lifespanShard(3));

@@ -1,0 +1,17 @@
+id: test_propose
+title: Proposing
+text: You propose to {person.name}.
+tone: light
+category: romance
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires: { age: { gte: 18 } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  person: { kind: partner }
+autoOutcome:
+  text: '{person.name} says yes.'
+  effects:
+    - { type: relationship, role: person, kind: fiance }
+    - { type: memory, role: person, tag: engaged_to_you }

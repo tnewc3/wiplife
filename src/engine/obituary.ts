@@ -8,7 +8,7 @@
  */
 import type { ContentBundle } from '../content/schemas';
 import { createRng, pick, type RngState } from './rng';
-import { getFamily, type FamilyMember } from './selectors';
+import { getFamily, getSpouses, type FamilyMember } from './selectors';
 import { renderText, type TextRole } from './text';
 import type { LifeState } from './types';
 
@@ -75,7 +75,7 @@ export const OBITUARY_SECTIONS: readonly ObituarySection[] = [
   {
     id: 'survivedBy',
     write: (ctx) => {
-      const alive = getFamily(ctx.life).filter((m) => m.person.alive);
+      const alive = [...getSpouses(ctx.life), ...getFamily(ctx.life)].filter((m) => m.person.alive);
       if (!ctx.finished || alive.length === 0) return null;
       return ctx.write(ctx.content.text.obituary.survivedBy, { survivors: ctx.relatives(alive) });
     },
@@ -83,7 +83,7 @@ export const OBITUARY_SECTIONS: readonly ObituarySection[] = [
   {
     id: 'predeceasedBy',
     write: (ctx) => {
-      const dead = getFamily(ctx.life).filter((m) => !m.person.alive);
+      const dead = [...getSpouses(ctx.life), ...getFamily(ctx.life)].filter((m) => !m.person.alive);
       if (!ctx.finished || dead.length === 0) return null;
       return ctx.write(ctx.content.text.obituary.predeceasedBy, { predeceased: ctx.relatives(dead) });
     },

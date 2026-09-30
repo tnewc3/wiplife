@@ -1,14 +1,18 @@
 /**
- * Simulation runner, version 1: plays many random lives with random choices
- * and reports invariant failures, lifespans, events per year and how often
- * each event fired. Later stages add their own reports.
+ * Simulation runner: plays many random lives with random choices (and, from
+ * Stage 5, a simple player model for relationship actions) and reports
+ * invariant failures, lifespans, events per year, how often each event fired,
+ * and marriage and divorce rates. Later stages add their own reports.
  */
-import type { ContentBundle } from '../../src/content/schemas';
-import { resolveAll } from '../../src/engine/autoplay';
+import { ACTION_IDS, type ActionId, type ContentBundle } from '../../src/content/schemas';
+import { isActionAvailable } from '../../src/engine/actions';
+import { playAction, resolveAll } from '../../src/engine/autoplay';
 import { checkInvariants } from '../../src/engine/invariants';
 import { beginYear, createLife, endYear } from '../../src/engine/life';
+import { isFamilyKind, isPartnerKind } from '../../src/engine/relationships';
 import { createRng } from '../../src/engine/rng';
 import type { LifeStage, LifeState } from '../../src/engine/types';
+import { chooseActions } from './bot';
 
 export interface SimulationOptions {
   lives: number;
@@ -39,6 +43,58 @@ export interface SimulationReport {
   events: { id: string; fired: number; share: number; lives: number }[];
   totalEventsFired: number;
   deathsFromEvents: number;
+  relationships: RelationshipReport;
+}
+
+export interface RelationshipReport {
+  /** Lives that reached the adult age (the base for the shares below). */
+  adults: number;
+  everDated: number;
+  everMarried: number;
+  reached40: number;
+  marriedBy40: number;
+  marriages: number;
+  divorces: number;
+  /** Dating or engaged couples who split up. */
+  breakups: number;
+  /** Lives in which a spouse died during the marriage. */
+  widowed: number;
+  /** Median age at first marriage, over lives that married. */
+  medianFirstMarriageAge: number | null;
+  /** Lives that were married more than once. */
+  remarried: number;
+  actionsTaken: Record<ActionId, number>;
+  /** People outside family still in your life at the end (not faded): median and most. */
+  peopleAtEnd: { median: number; most: number };
+}
+
+/** What one life did in love, watched step by step. */
+class RomanceWatcher {
+  marriages = 0;
+  divorces = 0;
+  breakups = 0;
+  dated = false;
+  widowed = false;
+  firstMarriageAge: number | null = null;
+  private last: LifeState | null = null;
+
+  observe(life: LifeState): void {
+    const prev = this.last;
+    this.last = life;
+    if (!prev || prev.relationships === life.relationships) return;
+    for (const [id, rel] of Object.entries(life.relationships)) {
+      const before = prev.relationships[id];
+      if (before && before.kind === 'spouse' && rel.kind === 'spouse' && prev.people[id]?.alive && !life.people[id]?.alive) this.widowed = true;
+      if (before?.kind === rel.kind) continue;
+      if (rel.kind === 'partner') this.dated = true;
+      if (rel.kind === 'spouse') {
+        this.marriages++;
+        this.firstMarriageAge ??= life.character.age;
+      }
+      if (rel.kind === 'ex' && before?.kind === 'spouse') this.divorces++;
+      if (rel.kind === 'ex' && before && isPartnerKind(before.kind) && before.kind !== 'spouse') this.breakups++;
+    }
+  }
 }
 
 const STAGES: LifeStage[] = ['early', 'child', 'teen', 'youngAdult', 'adult', 'senior'];
@@ -57,6 +113,24 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
   const livesWith = new Map<string, number>();
   let deathsFromEvents = 0;
   const { budgets, cap } = content.balance.pacing;
+  const { adultAge } = content.balance.relationships;
+  const rel: RelationshipReport = {
+    adults: 0,
+    everDated: 0,
+    everMarried: 0,
+    reached40: 0,
+    marriedBy40: 0,
+    marriages: 0,
+    divorces: 0,
+    breakups: 0,
+    widowed: 0,
+    medianFirstMarriageAge: null,
+    remarried: 0,
+    actionsTaken: Object.fromEntries(ACTION_IDS.map((id) => [id, 0])) as Record<ActionId, number>,
+    peopleAtEnd: { median: 0, most: 0 },
+  };
+  const firstMarriageAges: number[] = [];
+  const peopleAtEnd: number[] = [];
 
   for (let i = 0; i < options.lives; i++) {
     const seed = `${options.seedPrefix}-${i}`;
@@ -66,12 +140,30 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
       for (const f of failures) if (failureMessages.length < maxMessages) failureMessages.push(`${seed} age ${life.character.age}: ${f}`);
     };
     const choices = createRng(`${seed}:choices`);
-    let life = createLife({ mode: 'random', seed, birthYear: 2026 }, content);
-    check(life);
+    const player = createRng(`${seed}:player`);
+    const romance = new RomanceWatcher();
     const seenThisLife = new Set<string>();
+    const watch = (l: LifeState) => {
+      check(l);
+      romance.observe(l);
+      // A management action's result event, just queued.
+      const queued = l.phase === 'action' && l.pending.length === 1 ? l.pending[0]! : null;
+      if (queued && queued.resolvedChoiceId === undefined) {
+        fired.set(queued.eventId, (fired.get(queued.eventId) ?? 0) + 1);
+        seenThisLife.add(queued.eventId);
+      }
+    };
+    let life = createLife({ mode: 'random', seed, birthYear: 2026 }, content);
+    watch(life);
     while (life.phase !== 'dead') {
+      // Between years, the simulated player may act on relationships.
+      for (const [actionId, personId] of chooseActions(life, content, player)) {
+        if (!isActionAvailable(life, actionId, personId, content)) continue;
+        life = playAction(life, content, actionId, personId, choices, watch);
+        rel.actionsTaken[actionId]++;
+      }
       life = beginYear(life, content);
-      check(life);
+      watch(life);
       const stage = perYear[life.character.lifeStage];
       const count = life.pending.length;
       stage.years++;
@@ -83,15 +175,37 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
         fired.set(p.eventId, (fired.get(p.eventId) ?? 0) + 1);
         seenThisLife.add(p.eventId);
       }
-      life = resolveAll(life, content, choices, check);
+      life = resolveAll(life, content, choices, watch);
       const diedFromEvent = life.death !== null;
       life = endYear(life, content);
-      check(life);
+      watch(life);
       if (diedFromEvent) deathsFromEvents++;
     }
     for (const id of seenThisLife) livesWith.set(id, (livesWith.get(id) ?? 0) + 1);
     ages.push(life.character.age);
+
+    const age = life.character.age;
+    if (age >= adultAge) {
+      rel.adults++;
+      if (romance.dated || romance.marriages > 0) rel.everDated++;
+      if (romance.marriages > 0) rel.everMarried++;
+    }
+    if (age >= 40) {
+      rel.reached40++;
+      if (romance.firstMarriageAge !== null && romance.firstMarriageAge <= 40) rel.marriedBy40++;
+    }
+    rel.marriages += romance.marriages;
+    rel.divorces += romance.divorces;
+    rel.breakups += romance.breakups;
+    if (romance.widowed) rel.widowed++;
+    if (romance.marriages > 1) rel.remarried++;
+    if (romance.firstMarriageAge !== null) firstMarriageAges.push(romance.firstMarriageAge);
+    peopleAtEnd.push(Object.values(life.relationships).filter((r) => !isFamilyKind(r.kind) && r.status !== 'ended').length);
   }
+  firstMarriageAges.sort((a, b) => a - b);
+  peopleAtEnd.sort((a, b) => a - b);
+  rel.medianFirstMarriageAge = firstMarriageAges.length > 0 ? firstMarriageAges[Math.floor(firstMarriageAges.length / 2)]! : null;
+  rel.peopleAtEnd = { median: peopleAtEnd[Math.floor(peopleAtEnd.length / 2)] ?? 0, most: peopleAtEnd.at(-1) ?? 0 };
 
   ages.sort((a, b) => a - b);
   const at = (p: number) => ages[Math.min(ages.length - 1, Math.floor(ages.length * p))] ?? 0;
@@ -122,6 +236,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
     events,
     totalEventsFired,
     deathsFromEvents,
+    relationships: rel,
   };
 }
 
@@ -147,6 +262,16 @@ export function formatReport(report: SimulationReport, content: ContentBundle): 
     );
   }
   lines.push(`Years over the cap of ${content.balance.pacing.cap}: ${report.yearsOverCap}`);
+  const r = report.relationships;
+  lines.push(`Relationships (${r.adults} lives reached ${content.balance.relationships.adultAge}):`);
+  lines.push(`  ever dated ${pct(r.everDated, r.adults)}; ever married ${pct(r.everMarried, r.adults)}; married by 40: ${pct(r.marriedBy40, r.reached40)} of ${r.reached40} lives that reached 40`);
+  lines.push(
+    `  marriages ${r.marriages}; divorces ${r.divorces} (${pct(r.divorces, r.marriages)} of marriages); married more than once ${pct(r.remarried, r.everMarried)} of married lives; ` +
+      `widowed ${pct(r.widowed, r.everMarried)} of married lives; breakups before marriage ${r.breakups}`,
+  );
+  lines.push(`  median age at first marriage: ${r.medianFirstMarriageAge ?? '—'}`);
+  lines.push(`  actions taken: ${ACTION_IDS.map((id) => `${id} ${r.actionsTaken[id]}`).join(', ')}`);
+  lines.push(`  people outside family still in your life at the end: median ${r.peopleAtEnd.median}, most ${r.peopleAtEnd.most}`);
   lines.push(`Events fired: ${report.totalEventsFired}`);
   lines.push('  event'.padEnd(30) + 'fired'.padStart(8) + 'share'.padStart(8) + 'lives'.padStart(9));
   for (const e of [...report.events].sort((a, b) => b.fired - a.fired)) {

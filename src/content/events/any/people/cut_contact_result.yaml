@@ -1,0 +1,35 @@
+# Answers the "cut contact" action (registries/actions.yaml).
+id: cut_contact_result
+title: Enough
+text: >-
+  You've decided {person.name} doesn't get a place in your life anymore. You
+  just have to do it.
+tone: serious
+category: people
+rarity: common
+lifeStages: [teen, youngAdult, adult, senior]
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  # Filled by the action: anyone who isn't your current partner.
+  person: { kind: acquaintance }
+choices:
+  - id: block
+    label: Block {person.their} number and move on
+    outcome:
+      text: It takes ten seconds. The quiet afterwards takes some getting used to.
+      effects:
+        - { type: relationship, role: person, status: estranged, affection: -20, trust: -20 }
+        - { type: memory, role: person, tag: you_cut_them_off }
+        - { type: stat, key: stress, delta: -4 }
+  - id: letter
+    label: Tell {person.them} why, one last time
+    outcome:
+      text: >-
+        You say everything you've been holding in. {person.name} listens, or
+        seems to. Then you leave, and you don't look back.
+      effects:
+        - { type: relationship, role: person, status: estranged, affection: -10, trust: -5 }
+        - { type: memory, role: person, tag: you_cut_them_off }
+        - { type: stat, key: stress, delta: -2 }
+        - { type: stat, key: happiness, delta: -1 }

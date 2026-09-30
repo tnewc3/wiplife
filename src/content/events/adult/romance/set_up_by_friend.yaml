@@ -1,0 +1,47 @@
+id: set_up_by_friend
+title: Perfect for each other
+text: >-
+  {friend.name} swears {friend.they} {friend:has|have} found your perfect
+  match: {date.name}, a friend from {friend.their} climbing gym. The blind
+  date is already booked.
+tone: light
+category: romance
+rarity: common
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { romance: [single] }
+weight: { base: 5 }
+cooldownYears: 4
+cast:
+  friend: { kind: friend, age: { min: 18, max: 120 } }
+  date: { kind: acquaintance, romantic: true, createIfMissing: true, newChance: 1 }
+choices:
+  - id: go
+    label: Go on the blind date
+    check:
+      base: 45
+      stats: [{ key: sociability, weight: 0.3 }, { key: looks, weight: 0.2 }]
+      success:
+        text: >-
+          {friend.name} was right, which {friend.they} will mention at every
+          opportunity for the rest of your life.
+        effects:
+          - { type: relationship, role: date, kind: partner, affection: 18 }
+          - { type: memory, role: date, tag: started_dating }
+          - { type: memory, role: friend, tag: set_you_up }
+          - { type: relationship, role: friend, affection: 6 }
+          - { type: stat, key: happiness, delta: 6 }
+          - { type: history, text: '{friend.name} set you up with {date.name}, and it stuck.', importance: 2 }
+      failure:
+        text: '{date.name} is lovely and there is absolutely nothing there. You split the check and a polite hug.'
+        effects:
+          - { type: memory, role: date, tag: bad_first_date }
+          - { type: relationship, role: friend, affection: 2 }
+  - id: decline
+    label: Tell {friend.name} to stay out of your love life
+    outcome:
+      text: '{friend.name} cancels the reservation, and sulks about it for a month.'
+      effects:
+        - { type: relationship, role: friend, affection: -4 }

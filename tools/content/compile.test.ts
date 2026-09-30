@@ -346,6 +346,146 @@ ${extra}`;
     });
   });
 
+  describe('relationships', () => {
+    const romance = (extra = '') => `
+id: test_romance
+title: A date
+text: '{date.name} smiles.'
+tone: light
+category: romance
+rarity: common
+lifeStages: [adult]
+weight: { base: 5 }
+cast:
+  date: { kind: acquaintance, romantic: true, createIfMissing: true }
+autoOutcome:
+  effects:
+    - { type: relationship, role: date, kind: partner }
+${extra}`;
+    const romanceFile = 'events/adult/romance/test_romance.yaml';
+    const adultOnly = 'requires: { age: { gte: 18 } }\n';
+
+    it('accepts a romance event that requires adults', async () => {
+      await write(romanceFile, romance(adultOnly));
+      const result = await compile();
+      if (!result.ok) throw new Error(formatErrors(result.errors));
+      expect(result.bundle.events.test_romance).toBeDefined();
+    });
+
+    it('rejects a romance event without an adult-only requirement', async () => {
+      await write(romanceFile, romance());
+      expect(await expectErrors()).toContain('a romance event must require { age: { gte: 18 } } in requires (adults only)');
+      await write(romanceFile, romance('requires: { age: { gte: 16 } }\n'));
+      expect(await expectErrors()).toContain('a romance event must require');
+      // Only in one branch of an "any" is not a requirement.
+      await write(romanceFile, romance('requires: { any: [{ age: { gte: 18 } }, { stat: happiness, gt: 10 }] }\n'));
+      expect(await expectErrors()).toContain('a romance event must require');
+    });
+
+    it('treats any event that starts a romance as a romance event, whatever its category', async () => {
+      await write(
+        'events/adult/family/test_romance.yaml',
+        romance().replace('category: romance', 'category: family').replace('romantic: true, ', ''),
+      );
+      const text = await expectErrors();
+      expect(text).toContain('a romance event must require');
+      expect(text).toContain('cast.date: in a romance event every role must be an adult');
+    });
+
+    it('rejects a romance event with a role that is not guaranteed to be an adult, or in a young life stage', async () => {
+      const withFriend = romance(adultOnly).replace(
+        '  date: { kind: acquaintance, romantic: true, createIfMissing: true }',
+        '  date: { kind: acquaintance, romantic: true, createIfMissing: true }\n  friend: { kind: friend }',
+      );
+      await write(romanceFile, withFriend);
+      expect(await expectErrors()).toContain('cast.friend: in a romance event every role must be an adult');
+      await write(romanceFile, withFriend.replace('friend: { kind: friend }', 'friend: { kind: friend, age: { min: 18, max: 90 } }'));
+      expect((await compile()).ok).toBe(true);
+      await write(
+        romanceFile,
+        withFriend.replace(adultOnly, 'requires: { all: [{ age: { gte: 18 } }, { role: friend, age: { gte: 18 } }] }\n'),
+      );
+      expect((await compile()).ok).toBe(true);
+      await write(romanceFile, romance(adultOnly).replace('lifeStages: [adult]', 'lifeStages: [teen, adult]'));
+      expect(await expectErrors()).toContain("a romance event can't be in life stages teen");
+    });
+
+    it('rejects a romantic role that is family, and a role with both or neither of kind and support', async () => {
+      await write(romanceFile, romance(adultOnly).replace('kind: acquaintance, romantic: true, createIfMissing: true', 'kind: sibling, romantic: true'));
+      expect(await expectErrors()).toContain('a romantic role finds a potential partner, never family');
+      await write(romanceFile, romance(adultOnly).replace('kind: acquaintance, romantic: true, createIfMissing: true', 'kind: friend, support: true'));
+      expect(await expectErrors()).toContain('exactly one of kind or support');
+      await write(romanceFile, romance(adultOnly).replace('kind: acquaintance, romantic: true, createIfMissing: true', 'romantic: true'));
+      expect(await expectErrors()).toContain('exactly one of kind or support');
+    });
+
+    it('only lets an optional role appear in choices that require it', async () => {
+      const crisis = (choiceExtra: string, text = 'Everything goes wrong.') => `
+id: test_crisis
+title: A crisis
+text: '${text}'
+tone: serious
+category: health
+rarity: common
+lifeStages: [adult]
+weight: { base: 5 }
+cast:
+  helper: { support: true, optional: true }
+choices:
+  - id: call
+    label: Call {helper.name}
+${choiceExtra}    outcome:
+      effects:
+        - { type: memory, role: helper, tag: stood_by_you }
+  - id: alone
+    label: Cope alone
+    outcome: {}
+`;
+      const crisisFile = 'events/adult/health/test_crisis.yaml';
+      await write(crisisFile, crisis('    visibleIf: { role: helper }\n'));
+      expect((await compile()).ok).toBe(true);
+      await write(crisisFile, crisis(''));
+      expect(await expectErrors()).toContain('choices.call: uses optional role "helper" without visibleIf: { role: helper }');
+      await write(crisisFile, crisis('    visibleIf: { role: helper }\n', '{helper.name} is worried.'));
+      expect(await expectErrors()).toContain('optional role "helper" can\'t appear in the title or text');
+    });
+
+    it('rejects a check that reads the feelings of a role not in the cast', async () => {
+      await write(
+        romanceFile,
+        romance(adultOnly).replace(
+          'autoOutcome:\n  effects:\n    - { type: relationship, role: date, kind: partner }',
+          'choices:\n  - id: ask\n    label: Ask\n    check:\n      base: 50\n      stats: [{ role: ghost, key: affection, weight: 0.5 }]\n      success: {}\n      failure: {}\n  - id: leave\n    label: Leave\n    outcome: {}',
+        ),
+      );
+      expect(await expectErrors()).toContain('choices.ask.check: role "ghost" is not in the cast');
+    });
+
+    it('checks memory texts as templates about {npc}', async () => {
+      const memories = await readFile(path.join(dir, 'registries/memories.yaml'), 'utf8');
+      await write('registries/memories.yaml', memories.replace('tags:', 'tags:\n  test_memory: You met {stranger.name}'));
+      expect(await expectErrors()).toContain('tags.test_memory: {stranger.name}: unknown role "stranger"');
+    });
+
+    it('checks the events that answer management actions', async () => {
+      const actions = await readFile(path.join(dir, 'registries/actions.yaml'), 'utf8');
+      await write('registries/actions.yaml', actions.replace('propose: { events: [proposal] }', 'propose: { events: [proposal, no_such_event] }'));
+      expect(await expectErrors()).toContain('propose: unknown event "no_such_event"');
+      // friend_repays is scheduled by another event, casts "friend" and happens on its own schedule.
+      await write('registries/actions.yaml', actions.replace('propose: { events: [proposal] }', 'propose: { events: [friend_repays] }'));
+      let text = await expectErrors();
+      expect(text).toContain('answers the "propose" action, so no event may schedule it');
+      expect(text).toContain('answers the "propose" action, so its cast is exactly the role "person"');
+      await write('registries/actions.yaml', actions.replace('propose: { events: [proposal] }', 'propose: { events: [road_trip] }'));
+      text = await expectErrors();
+      expect(text).toContain('so it must be followUpOnly');
+      await write('registries/actions.yaml', actions);
+      const proposal = await readFile(path.join(dir, 'events/any/romance/proposal.yaml'), 'utf8');
+      await write('events/any/romance/proposal.yaml', proposal.replace('- { type: money, delta: -200 }', '- { type: death, cause: natural_causes }'));
+      expect(await expectErrors()).toContain("a management action's result can't kill");
+    });
+  });
+
   it('lays an overlay folder over the content: its events replace every real event', async () => {
     const overlay = await mkdtemp(path.join(os.tmpdir(), 'wiplife-overlay-'));
     try {
@@ -354,12 +494,23 @@ ${extra}`;
         path.join(overlay, 'events/adult/family/only_event.yaml'),
         'id: only_event\ntitle: Only\ntext: Hi.\ntone: light\ncategory: family\nrarity: common\nlifeStages: [adult]\nweight: { base: 1 }\nautoOutcome: {}\n',
       );
+      // The overlay's events replace the real ones, so it brings its own action events too.
+      await mkdir(path.join(overlay, 'events/any/people'), { recursive: true });
+      await writeFile(
+        path.join(overlay, 'events/any/people/only_action.yaml'),
+        'id: only_action\ntitle: Act\ntext: You act.\ntone: light\ncategory: people\nrarity: common\nlifeStages: [adult]\nweight: { base: 1 }\nfollowUpOnly: true\ncast:\n  person: { kind: friend }\nautoOutcome: {}\n',
+      );
+      await mkdir(path.join(overlay, 'registries'), { recursive: true });
+      await writeFile(
+        path.join(overlay, 'registries/actions.yaml'),
+        `actions:\n${['ask_out', 'propose', 'marry', 'break_up', 'divorce', 'cut_contact', 'reconcile'].map((a) => `  ${a}: { events: [only_action] }`).join('\n')}\n`,
+      );
       await mkdir(path.join(overlay, 'balance'), { recursive: true });
       const pacing = (await readFile(path.join(dir, 'balance/pacing.yaml'), 'utf8')).replace('cap: 6', 'cap: 3');
       await writeFile(path.join(overlay, 'balance/pacing.yaml'), pacing);
       const result = await compileContent({ contentDir: dir, appVersion: '0.0.0', overlayDir: overlay });
       if (!result.ok) throw new Error(formatErrors(result.errors));
-      expect(Object.keys(result.bundle.events)).toEqual(['only_event']);
+      expect(Object.keys(result.bundle.events)).toEqual(['only_action', 'only_event']);
       expect(result.bundle.balance.pacing.cap).toBe(3);
       expect(Object.keys(result.bundle.cities).length).toBeGreaterThan(0);
     } finally {

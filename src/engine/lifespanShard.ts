@@ -1,16 +1,22 @@
 /**
- * Stage 3 acceptance test, split into shards so the 10,000 lives run in
- * parallel test files (lifespan-1.test.ts to lifespan-4.test.ts). Each shard
- * lives out its share of random lives (with random choices), checking every
- * invariant at the end of every year, and checks the lifespan rules on its share.
+ * Stage 3 acceptance test, split into shards so the lives run in parallel
+ * test files (lifespan-1.test.ts to lifespan-4.test.ts). Each shard lives out
+ * its share of random lives (with random choices), checking every invariant
+ * at the end of every year, and checks the lifespan rules on its share.
+ *
+ * How many lives: 2,500 in the regular test run (every pull request), and the
+ * full 10,000 in the nightly workflow (.github/workflows/nightly.yml), which
+ * sets LIFESPAN_LIVES=10000 (docs/technical.md, section Q: invariant fuzzing
+ * is small on every pull request, large nightly). The seeds are the same, so
+ * the regular run is the first quarter of the nightly one.
  *
  * Deaths before 18 are checked per shard against a loose bound (0.6%),
  * well above the 0.2% target, so random variation can't fail the test.
  *
  * Why shards are enough: when every equal-sized shard has its median age at
- * death between 72 and 82, the median across all 10,000 lives lies between
- * the smallest and largest shard medians, so it is between 72 and 82 too.
- * The same holds for "no one lives past the maximum age".
+ * death between 72 and 82, the median across all the lives lies between the
+ * smallest and largest shard medians, so it is between 72 and 82 too. The
+ * same holds for "no one lives past the maximum age".
  */
 import { setAutoFreeze } from 'immer';
 import { beforeAll, expect, it } from 'vitest';
@@ -20,8 +26,22 @@ import { checkInvariants } from './invariants';
 import { createLife } from './life';
 import { liveOut } from './testFixtures';
 
-export const TOTAL_LIVES = 10_000;
 export const SHARDS = 4;
+/** Lives in the regular test run. */
+export const REGULAR_LIVES = 2_500;
+
+/** LIFESPAN_LIVES from the environment (read without Node types: the engine is type-checked without them). */
+function livesFromEnvironment(): number {
+  const raw = (globalThis as { process?: { env?: Record<string, string | undefined> } }).process?.env?.LIFESPAN_LIVES;
+  if (raw === undefined || raw === '') return REGULAR_LIVES;
+  const lives = Number(raw);
+  if (!Number.isInteger(lives) || lives <= 0 || lives % SHARDS !== 0) {
+    throw new Error(`LIFESPAN_LIVES must be a positive multiple of ${SHARDS} (got "${raw}")`);
+  }
+  return lives;
+}
+
+export const TOTAL_LIVES = livesFromEnvironment();
 
 export function lifespanShard(shard: number): void {
   // Immer's freezing guards against accidental mutation, which other tests

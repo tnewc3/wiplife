@@ -1,0 +1,17 @@
+id: test_meet
+title: Someone new
+text: At a friend's party, you meet {date.name}. You talk all night.
+tone: light
+category: romance
+rarity: common
+lifeStages: [youngAdult]
+requires: { age: { eq: 18 } }
+weight: { base: 10 }
+once: true
+cast:
+  date: { kind: acquaintance, romantic: true, createIfMissing: true, newChance: 1, age: { min: 18, max: 24 } }
+autoOutcome:
+  text: You swap numbers before you leave.
+  effects:
+    - { type: relationship, role: date, affection: 30 }
+    - { type: memory, role: date, tag: swapped_numbers }

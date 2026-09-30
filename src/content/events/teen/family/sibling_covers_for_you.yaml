@@ -1,0 +1,36 @@
+id: sibling_covers_for_you
+title: The alibi
+text: >-
+  You got home two hours past curfew. {sibling.name} is sitting on the stairs
+  in the dark, and {sibling.they} {sibling:has|have} clearly already talked to
+  your parents.
+tone: light
+category: family
+rarity: common
+lifeStages: [teen]
+weight: { base: 7 }
+once: true
+cast:
+  sibling: { kind: sibling }
+choices:
+  - id: thank
+    label: Ask what {sibling.they} told them
+    outcome:
+      text: '"You were helping me with homework," {sibling.name} says. "You owe me forever."'
+      effects:
+        - { type: relationship, role: sibling, affection: 6, trust: 6 }
+        - { type: memory, role: sibling, tag: covered_for_you }
+  - id: confess
+    label: Go upstairs and confess anyway
+    outcome:
+      text: You're grounded for a month. {sibling.name} thinks you're an idiot, but a respectable one.
+      effects:
+        - { type: relationship, role: sibling, affection: 2, trust: 3 }
+        - { type: stat, key: discipline, delta: 2 }
+        - { type: stat, key: happiness, delta: -2 }
+  - id: deny
+    label: Tell {sibling.them} to mind {sibling.their} own business
+    outcome:
+      text: '{sibling.name} shrugs and goes to bed. The next time you need a favor, {sibling.they} {sibling:is|are} busy.'
+      effects:
+        - { type: relationship, role: sibling, affection: -5, trust: -4 }

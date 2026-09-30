@@ -1,7 +1,8 @@
 import 'fake-indexeddb/auto';
+import { produce } from 'immer';
 import { afterEach, describe, expect, it } from 'vitest';
 import { InvalidInputError } from '../engine/creation/input';
-import { customInput } from '../engine/testFixtures';
+import { customInput, lifeAtAge } from '../engine/testFixtures';
 import { beginYear, CONTINUE_CHOICE } from '../engine/life';
 import { getEventCard } from '../engine/selectors';
 import { createDb, DEFAULT_SETTINGS, lifeStateSchema, listArchive, loadSettings, makeEnvelope, readSave, writeSave, type WiplifeDb } from '../persistence';
@@ -382,5 +383,86 @@ describe('app store: events', () => {
     const age = store.getState().life!.character.age;
     await store.getState().ageUp();
     expect(store.getState().life!.character.age).toBe(age);
+  });
+});
+
+describe('app store: people and actions', () => {
+  /** A saved 30-year-old with a friend ("pal"), loaded by a fresh store. */
+  async function withFriend() {
+    const { db, options, store } = setup();
+    const life = produce(lifeAtAge('store-people', 30), (d) => {
+      const template = Object.values(d.people)[0]!;
+      d.people.pal = { ...template, id: 'pal', name: { first: 'Pal', last: 'Friend' }, birthYear: d.currentYear - 30, tags: [] };
+      d.relationships.pal = { personId: 'pal', kind: 'friend', status: 'active', affection: 60, trust: 60, memories: [], since: d.currentYear - 5 };
+    });
+    await writeSave(db, makeEnvelope(life, content.contentVersion));
+    await store.getState().init();
+    store.getState().continueLife();
+    return { db, options, store };
+  }
+
+  it('opens a person, takes an action, resolves its result and returns to the person', async () => {
+    const { db, store } = await withFriend();
+    store.getState().setTab('people');
+    store.getState().openPerson('pal');
+    expect(store.getState().personId).toBe('pal');
+    await store.getState().takeAction('cut_contact', 'pal');
+    const acting = store.getState();
+    expect(acting.life!.phase).toBe('action');
+    expect(acting.eventSheet).toEqual({ index: 0, recap: null });
+    const card = getEventCard(acting.life!, 0, content)!;
+    await store.getState().chooseEvent(card.instanceId, card.choices[0]!.id);
+    expect(store.getState().life!.pending[0]!.outcomeText).toBeTruthy();
+    await store.getState().continueEvents();
+    const done = store.getState();
+    expect(done.eventSheet).toBeNull();
+    expect(done.life!.phase).toBe('yearStart');
+    expect(done.life!.relationships.pal!.status).toBe('estranged');
+    expect([done.tab, done.personId]).toEqual(['people', 'pal']);
+    const saved = await readSave(db, lifeStateSchema);
+    expect(saved.status === 'ok' && saved.envelope.data).toEqual(done.life);
+  });
+
+  it('ignores Age Up while an action’s result is waiting, and keeps it across a reload', async () => {
+    const { options, store } = await withFriend();
+    await store.getState().takeAction('cut_contact', 'pal');
+    const acting = store.getState().life!;
+    await store.getState().ageUp();
+    expect(store.getState().life).toBe(acting);
+
+    const restarted = createAppStore(options);
+    await restarted.getState().init();
+    restarted.getState().continueLife();
+    expect(restarted.getState().life!.phase).toBe('action');
+    expect(restarted.getState().eventSheet).toEqual({ index: 0, recap: null });
+  });
+
+  it('closes an action whose result was already chosen when the game reopens', async () => {
+    const { options, store } = await withFriend();
+    await store.getState().takeAction('cut_contact', 'pal');
+    const card = getEventCard(store.getState().life!, 0, content)!;
+    await store.getState().chooseEvent(card.instanceId, card.choices[0]!.id);
+    const restarted = createAppStore(options);
+    await restarted.getState().init();
+    expect(restarted.getState().life!.phase).toBe('yearStart');
+    expect(restarted.getState().life!.relationships.pal!.status).toBe('estranged');
+  });
+
+  it('rejects an action that isn’t available without changing anything', async () => {
+    const { store } = await withFriend();
+    const before = store.getState().life;
+    await expect(store.getState().takeAction('divorce', 'pal')).rejects.toThrow(InvalidInputError);
+    expect(store.getState().life).toBe(before);
+    expect(store.getState().aging).toBe(false);
+  });
+
+  it('switching tabs closes the person', async () => {
+    const { store } = await withFriend();
+    store.getState().setTab('people');
+    store.getState().openPerson('pal');
+    store.getState().openPerson('nobody');
+    expect(store.getState().personId).toBe('pal');
+    store.getState().setTab('life');
+    expect(store.getState().personId).toBeNull();
   });
 });

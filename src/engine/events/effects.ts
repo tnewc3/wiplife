@@ -6,6 +6,7 @@
 import type { ContentBundle, Effect, EffectStatKey, EventDef } from '../../content/schemas';
 import { HIDDEN_KEYS, STAT_KEYS } from '../../content/schemas';
 import { clampInt } from '../random';
+import { canChangeKind, canSetStatus } from '../relationships';
 import { nextInt, type RngState } from '../rng';
 import { addHistory } from '../systems/history';
 import { renderText } from '../text';
@@ -45,12 +46,19 @@ const handlers: { [T in Effect['type']]: Handler<T> } = {
   },
 
   relationship: (state, effect, ctx) => {
-    const rel = state.relationships[ctx.cast[effect.role] ?? ''];
+    const id = ctx.cast[effect.role] ?? '';
+    const rel = state.relationships[id];
     if (!rel) return;
     if (effect.affection !== undefined) rel.affection = clampInt(rel.affection + effect.affection, 0, 100);
     if (effect.trust !== undefined) rel.trust = clampInt(rel.trust + effect.trust, 0, 100);
-    if (effect.status !== undefined) rel.status = effect.status;
-    if (effect.kind !== undefined) rel.kind = effect.kind;
+    // Kind and status changes that break the relationship rules (a minor in a
+    // romance, a second spouse, family becoming a partner...) are refused.
+    if (effect.kind !== undefined && effect.kind !== rel.kind && canChangeKind(state, id, effect.kind, ctx.content)) {
+      rel.kind = effect.kind;
+      rel.kindSince = state.currentYear;
+      if (effect.kind === 'spouse') rel.wasSpouse = true;
+    }
+    if (effect.status !== undefined && canSetStatus(state, id, effect.status)) rel.status = effect.status;
   },
 
   memory: (state, effect, ctx) => {
@@ -88,8 +96,10 @@ const handlers: { [T in Effect['type']]: Handler<T> } = {
   },
 
   death: (state, effect) => {
-    // endYear closes the life (history entry, recap, dead phase).
-    if (state.death) return;
+    // endYear closes the life (history entry, recap, dead phase). A
+    // management action's result happens between years and never kills
+    // (the content build forbids it); this is the engine's backstop.
+    if (state.death || state.phase === 'action') return;
     state.death = { year: state.currentYear, age: state.character.age, causeId: effect.cause };
   },
 };

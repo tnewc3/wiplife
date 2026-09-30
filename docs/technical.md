@@ -214,7 +214,9 @@ interface LifeState {
   rng: RngState;                       // continues across saves
   birthYear: number;
   currentYear: number;
-  phase: 'yearStart' | 'events' | 'yearEnd' | 'dead';
+  phase: 'yearStart' | 'events' | 'yearEnd' | 'dead' | 'action';
+                                       // 'action': between years, a management action's result event
+                                       // waits for the player (Stage 5); finishAction returns to 'yearStart'
   character: Character;
   people: Record<Id, Person>;
   relationships: Record<Id, Relationship>;   // keyed by person id
@@ -321,15 +323,20 @@ interface Person {
 interface Relationship {
   personId: Id;
   kind: 'parent' | 'stepparent' | 'sibling' | 'grandparent' | 'friend'
-      | 'partner' | 'spouse' | 'ex' | 'coworker' | 'boss'
+      | 'partner' | 'fiance' | 'spouse' | 'ex' | 'coworker' | 'boss'
       | 'classmate' | 'acquaintance';   // 'child' added with heir play
-  status: 'active' | 'estranged' | 'ended';
+  status: 'active' | 'estranged' | 'ended';   // 'ended': faded out of your life (pruned)
   affection: number;
   trust: number;
   memories: { tag: string; year: number }[];
   since: number;
+  kindSince?: number;                  // year it took its current kind (started dating, married...)
+  lastActionYear?: number;             // last management action with this person (one per year)
+  wasSpouse?: true;                    // has been your spouse; stays after a divorce (an "Ex-spouse")
 }
 ```
+
+Design H's statuses map onto kind and status: dating is `partner`, engaged is `fiance`, married is `spouse`, an ex is `ex`, and estranged is status `estranged`. A current partner is a living `partner`, `fiance` or `spouse` whose status is `active`; there is never more than one. A spouse who dies keeps the kind `spouse` (a late spouse), so the obituary can name them. The engine sets `wasSpouse` whenever someone becomes your spouse, and every spouse must have it; after a divorce it tells an ex-spouse from an ex you only dated (for the obituary, events about an ex-spouse, and co-parenting later). Save schema version 4 added it: the upgrade from version 3 marks every spouse, and every ex whose memories show the marriage (`married_you` or `divorced`).
 
 #### Education, career and money
 
@@ -451,11 +458,15 @@ interface EventDef {
 }
 
 interface CastSpec {
-  kind: RelationshipKind;              // who fills the role: an existing person with this relationship...
+  kind?: RelationshipKind;             // who fills the role: an existing person with this relationship...
   age?: { min; max };                  // ...of this age,
   ageOffset?: { min; max };            // ...or this age relative to yours
   createIfMissing?: boolean;           // create someone new if nobody fits (friend, classmate, acquaintance only)
   newChance?: number;                  // chance of someone new even when someone fits
+  romantic?: boolean;                  // the meeting pool: an adult with attraction both ways, never family;
+                                       // someone new is of a plausible age for yours (balance/relationships.yaml meeting)
+  support?: boolean;                   // instead of kind: the most trusted close person who would step in
+  optional?: boolean;                  // nobody fits: the event happens without this role
 }
 
 interface ChoiceDef {
@@ -463,7 +474,8 @@ interface ChoiceDef {
   visibleIf?: Condition;               // e.g. only for risk-takers
   outcome?: Outcome;
   check?: {
-    stats: { key: string; weight: number }[];
+    stats: ({ key: string; weight: number }                        // your stat, trait or hidden value
+          | { role: string; key: 'affection' | 'trust'; weight: number })[];  // how a cast person feels about you
     base: number;
     success: Outcome;
     failure: Outcome;
@@ -490,6 +502,8 @@ type Effect =
 
 // Stage 4 builds these effect types: stat, money (savings only; never below zero), relationship,
 // memory, flag, schedule (inYears of at least 1), history and death. The rest arrive with their systems.
+// Stage 5: a relationship effect's kind change is checked by the engine (adults only, one partner at a
+// time, dating before an engagement, family stays family); a change that breaks a rule is ignored.
 
 type Condition =                       // structured, evaluated by src/engine/conditions.ts
   | { all: Condition[] } | { any: Condition[] } | { not: Condition }
@@ -497,8 +511,10 @@ type Condition =                       // structured, evaluated by src/engine/co
   | { stat: StatKey } & Compare | { trait: PersonalityKey } & Compare | { hidden: 'luck' | 'reputation' | 'vice' } & Compare
   | { city: Id } | { familyWealth: FamilyWealth[] } | { flag: string; eq?: number | boolean | string }
   | { fired: EventId } | { relative: { kind: RelationshipKind; alive?: boolean } }
+  | { romance: ('single' | 'dating' | 'engaged' | 'married')[] }   // your current situation
   | { memory: { role: string; tag: string } }       // about cast roles: checked once the event is cast
-  | { role: string; alive?: boolean; age?: Compare; affection?: Compare; trust?: Compare };
+  | { role: string; alive?: boolean; age?: Compare; affection?: Compare; trust?: Compare;
+      kind?: RelationshipKind[]; status?: RelationshipStatus[]; years?: Compare };  // years: in its current kind
 // Compare = { gt?, gte?, lt?, lte?, eq? }
 ```
 
@@ -1610,7 +1626,7 @@ The same measures run separately for each strategy bot, so it's clear whether va
 | When | Runs |
 |---|---|
 | Every pull request | Lint, type check, unit, scenario and golden-life tests, content build, coverage report, phone-sized end-to-end tests, 500-life simulation |
-| Nightly | 10,000-life simulation, with the report saved |
+| Nightly | 10,000-life lifespan and invariant test (every pull request runs 2,500 of those lives), 10,000-life simulation, with the report saved (`.github/workflows/nightly.yml`) |
 | Before a release | 100,000-life simulation, the cross-browser test matrix, migration tests |
 
 ---
@@ -1626,7 +1642,8 @@ New careers, events, cities, majors, conditions, offenses and similar content ar
 ```text
 src/content/
   balance/        creation.yaml, aging.yaml, mortality.yaml, pacing.yaml, events.yaml (weights by
-                  rarity, chance checks, people casting creates), economy.yaml, careers.yaml,
+                  rarity, chance checks, people casting creates), relationships.yaml (adult age,
+                  drift, pruning, action timing, partner ages, support), economy.yaml, careers.yaml,
                   education.yaml, health.yaml, legal.yaml, targets.yaml
   causes/         causes of death, one per file ("natural causes", "a stroke")
   cities/         nyc.yaml, los_angeles.yaml, chicago.yaml, houston.yaml, small_town.yaml
@@ -1639,9 +1656,10 @@ src/content/
   text/           story text that isn't an event: history.yaml (milestone entries),
                   obituary.yaml (obituary sections), relations.yaml ("your mother")
   registries/
-    memories.yaml   every memory tag, with its readable text
+    memories.yaml   every memory tag, with its readable text (a template about {npc})
     flags.yaml      every flag, with a one-line description
-    categories.yaml event categories
+    categories.yaml event categories (romance: true marks adults-only categories)
+    actions.yaml    the events that answer each management action
 ```
 
 The registries let the content build catch typos. An effect that writes a memory tag or flag that isn't registered fails the build.

@@ -1,7 +1,8 @@
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
 import { content } from '../content';
-import type { ContentBundle } from '../content/schemas';
+import type { ActionId, ContentBundle } from '../content/schemas';
+import { finishAction, performAction } from '../engine/actions';
 import { archiveEntry } from '../engine/archive';
 import { assertInvariants } from '../engine/invariants';
 import { beginYear, CONTINUE_CHOICE, createLife, endYear, resolveChoice, type CustomLifeInput } from '../engine/life';
@@ -79,6 +80,8 @@ export interface AppState {
   archive: ArchiveListing | null;
   /** The archived life open on the Archived life screen. */
   archiveSelection: string | null;
+  /** The person open on the People tab, if any. */
+  personId: string | null;
 
   init: () => Promise<void>;
   confirmAge: () => Promise<void>;
@@ -115,6 +118,16 @@ export interface AppState {
   /** Loads the archive and opens the Archive screen. */
   openArchive: () => Promise<void>;
   openArchivedLife: (id: string) => void;
+  /** Opens a person's page on the People tab. */
+  openPerson: (id: string) => void;
+  /** Back from a person's page to the People list. */
+  closePerson: () => void;
+  /**
+   * Takes a management action with a person (between years) and opens its
+   * result event in the event sheet; Continue after the outcome returns to
+   * the person's page. Ignored while the engine is working.
+   */
+  takeAction: (actionId: ActionId, personId: string) => Promise<void>;
 }
 
 export interface StoreOptions {
@@ -252,6 +265,14 @@ export function createAppStore({
           });
           return;
         }
+        // A management action's result: close it, no recap (the year goes on).
+        if (life.phase === 'action') {
+          await commit(finishAction(life));
+          set((s) => {
+            s.eventSheet = null;
+          });
+          return;
+        }
         const ended = await finishYear(life);
         set((s) => {
           s.eventSheet = ended ? { index: next, recap: getYearRecap(ended, bundle) } : null;
@@ -298,6 +319,7 @@ export function createAppStore({
             s.screen = 'game';
             s.tab = 'life';
             s.eventSheet = null;
+            s.personId = null;
           });
           void requestPersistenceOnce().catch(() => undefined);
         } finally {
@@ -322,6 +344,7 @@ export function createAppStore({
         lastDeath: null,
         archive: null,
         archiveSelection: null,
+        personId: null,
 
         init: async () => {
           let loaded: SavedLifeStatus;
@@ -348,12 +371,14 @@ export function createAppStore({
             return;
           }
 
-          // A save from the middle of a year finishes that year now; if that
-          // fails, the loaded life is kept and the next Age Up tries again.
+          // A save from the middle of a year finishes that year now (and an
+          // action whose result was already chosen is closed); if that fails,
+          // the loaded life is kept and the next Age Up tries again.
           const life = get().life;
           try {
             if (life?.phase === 'yearEnd') await finishYear(life);
             else if (life?.phase === 'dead') await endLife(life);
+            else if (life?.phase === 'action' && firstUnresolvedEvent(life) === null) await commit(finishAction(life));
           } catch {
             // Keep the loaded life as it is.
           }
@@ -394,6 +419,7 @@ export function createAppStore({
             s.archive = null;
             s.archiveSelection = null;
             s.eventSheet = null;
+            s.personId = null;
           });
         },
 
@@ -416,6 +442,7 @@ export function createAppStore({
         setTab: (tab) =>
           set((s) => {
             s.tab = tab;
+            s.personId = null;
           }),
 
         startRandomLife: () =>
@@ -430,8 +457,9 @@ export function createAppStore({
           set((s) => {
             s.screen = 'game';
             s.tab = 'life';
+            s.personId = null;
           });
-          if (life.phase === 'events') openEvents(life);
+          if (life.phase === 'events' || life.phase === 'action') openEvents(life);
         },
 
         ageUp: () => {
@@ -453,7 +481,7 @@ export function createAppStore({
         chooseEvent: (instanceId, choiceId) =>
           busy(async () => {
             const life = get().life;
-            if (!life || life.phase !== 'events') return;
+            if (!life || (life.phase !== 'events' && life.phase !== 'action')) return;
             const next = resolveChoice(life, instanceId, choiceId, bundle);
             await commit(next);
             // An event without choices and nothing more to say moves straight on.
@@ -496,6 +524,25 @@ export function createAppStore({
           set((s) => {
             s.archiveSelection = id;
             s.screen = 'archivedLife';
+          }),
+
+        openPerson: (id) =>
+          set((s) => {
+            if (s.life?.people[id]) s.personId = id;
+          }),
+
+        closePerson: () =>
+          set((s) => {
+            s.personId = null;
+          }),
+
+        takeAction: (actionId, personId) =>
+          busy(async () => {
+            const life = get().life;
+            if (!life || life.phase !== 'yearStart' || get().eventSheet) return;
+            const next = performAction(life, actionId, { personId }, bundle);
+            await commit(next);
+            openEvents(next);
           }),
       };
     }),

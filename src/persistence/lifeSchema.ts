@@ -112,6 +112,7 @@ const relationship = z.strictObject({
     'grandparent',
     'friend',
     'partner',
+    'fiance',
     'spouse',
     'ex',
     'coworker',
@@ -124,6 +125,9 @@ const relationship = z.strictObject({
   trust: score,
   memories: z.array(z.strictObject({ tag: z.string(), year: int })),
   since: int,
+  kindSince: int.exactOptional(),
+  lastActionYear: int.exactOptional(),
+  wasSpouse: z.literal(true).exactOptional(),
 });
 
 const education = z.strictObject({
@@ -230,7 +234,7 @@ export const lifeStateSchema: z.ZodType<LifeState> = z.strictObject({
   rng: z.custom<RngState>(isRngState, 'invalid generator state'),
   birthYear: int,
   currentYear: int,
-  phase: z.enum(['yearStart', 'events', 'yearEnd', 'dead']),
+  phase: z.enum(['yearStart', 'events', 'yearEnd', 'dead', 'action']),
   character,
   people: z.record(z.string(), person),
   relationships: z.record(z.string(), relationship),

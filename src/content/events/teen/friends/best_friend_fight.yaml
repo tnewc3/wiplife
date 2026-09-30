@@ -1,0 +1,37 @@
+id: best_friend_fight
+title: Not speaking
+text: >-
+  You and {friend.name} had a stupid fight about something that seemed very
+  important at the time. It's been four days of silence.
+tone: neutral
+category: friends
+rarity: common
+lifeStages: [child, teen]
+weight: { base: 6 }
+cooldownYears: 3
+cast:
+  friend: { kind: friend, ageOffset: { min: -1, max: 1 }, createIfMissing: true, newChance: 0.2 }
+choices:
+  - id: first
+    label: Break the silence first
+    outcome:
+      text: You text a single emoji. {friend.name} replies with three. It's over.
+      effects:
+        - { type: relationship, role: friend, affection: 6, trust: 3 }
+        - { type: memory, role: friend, tag: made_peace }
+  - id: wait
+    label: Wait for {friend.them} to crack
+    check:
+      base: 45
+      stats: [{ role: friend, key: affection, weight: 0.4 }]
+      success:
+        text: '{friend.name} cracks first. You try not to look smug.'
+        effects:
+          - { type: relationship, role: friend, affection: 3 }
+          - { type: stat, key: confidence, delta: 1 }
+      failure:
+        text: Nobody cracks. By the end of the month, you sit at different lunch tables.
+        effects:
+          - { type: relationship, role: friend, affection: -15, trust: -5 }
+          - { type: memory, role: friend, tag: fought_with_you }
+          - { type: stat, key: happiness, delta: -3 }

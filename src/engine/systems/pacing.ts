@@ -9,10 +9,9 @@ import { evaluate } from '../conditions';
 import { castEvent, uncast } from '../events/casting';
 import { eventIndex, eventWeight } from '../events/selection';
 import { weightedPick } from '../random';
+import { isFamilyKind, kindSince, romanceAllowed } from '../relationships';
 import { nextFloat, nextInt } from '../rng';
 import type { EventInstance, Id, LifeState } from '../types';
-
-const FAMILY_KINDS = new Set(['parent', 'stepparent', 'sibling', 'grandparent']);
 
 /** Extra events this year: one per sign that life is volatile, up to the balance maximum. */
 export function volatilityBonus(state: LifeState, content: ContentBundle): number {
@@ -21,7 +20,8 @@ export function volatilityBonus(state: LifeState, content: ContentBundle): numbe
   const signs = [
     state.character.personality.riskTaking > v.riskTakingAbove,
     state.history.some((e) => e.importance === 3 && e.year >= since && e.year < state.currentYear),
-    Object.values(state.relationships).some((r) => !FAMILY_KINDS.has(r.kind) && r.since >= since && r.since < state.currentYear),
+    // Someone new, or a relationship that changed (started dating, married).
+    Object.values(state.relationships).some((r) => !isFamilyKind(r.kind) && kindSince(r) >= since && kindSince(r) < state.currentYear),
   ].filter(Boolean).length;
   return Math.min(v.maxBonus, signs);
 }
@@ -41,11 +41,14 @@ interface Picked {
   cast: Record<string, Id>;
 }
 
-/** Casts the event and checks its full requirements; undoes the cast if they fail. */
+/**
+ * Casts the event and checks its full requirements and the adults-only rule
+ * for romance; undoes the cast if they fail.
+ */
 function tryCast(state: LifeState, view: LifeState, def: EventDef, content: ContentBundle, preset?: Record<string, Id>): Picked | null {
   const result = castEvent(state, def, state.rng, content, preset, view);
   if (!result) return null;
-  if (!evaluate(def.requires, state, { cast: result.cast, roles: 'strict' })) {
+  if (!evaluate(def.requires, state, { cast: result.cast, roles: 'strict' }) || !romanceAllowed(state, def, result.cast, content)) {
     uncast(state, result.created);
     return null;
   }
@@ -85,8 +88,10 @@ export function runPacing(state: LifeState, content: ContentBundle): void {
   const pool = [...(eventIndex(content).get(state.character.lifeStage) ?? [])].filter(
     (def) => !picked.some((p) => p.def.id === def.id),
   );
+  // Weights read `view`, which doesn't change while picking: work them out once.
+  const weights = new Map(pool.map((def) => [def, eventWeight(view, def, content)]));
   while (picked.length < budget && pool.length > 0) {
-    const options = pool.map((def) => [def, eventWeight(view, def, content)] as const);
+    const options = pool.map((def) => [def, weights.get(def)!] as const);
     const total = options.reduce((sum, [, w]) => sum + w, 0);
     if (!(total > 0)) break;
     // Too little fits: the shortfall is the chance the year stays quieter.

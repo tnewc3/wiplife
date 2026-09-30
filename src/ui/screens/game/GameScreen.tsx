@@ -6,6 +6,8 @@ import { EventSheet } from '../../components/EventSheet';
 import { Card } from '../../components/Card';
 import { Screen } from '../../components/Screen';
 import { HomeTab } from '../home/HomeTab';
+import { PeopleTab } from '../people/PeopleTab';
+import { PersonScreen } from '../people/PersonScreen';
 
 const tabs: { id: TabId; label: string; icon: string }[] = [
   { id: 'life', label: 'Life', icon: '◉' },
@@ -46,17 +48,21 @@ function BottomNav() {
   );
 }
 
-/** The in-game layout, with Age Up above the navigation. Tabs other than Life fill in with later stages. */
+/** The in-game layout, with Age Up above the navigation. Work/School and Money fill in with later stages. */
 export function GameScreen({ life }: { life: LifeState }) {
   const tab = useAppStore((s) => s.tab);
   const navigate = useAppStore((s) => s.navigate);
   const openSettings = useAppStore((s) => s.openSettings);
   const openLifeHistory = useAppStore((s) => s.openLifeHistory);
+  const personId = useAppStore((s) => s.personId);
+  const closePerson = useAppStore((s) => s.closePerson);
   const current = tabs.find((t) => t.id === tab) ?? tabs[0]!;
+  const person = tab === 'people' && personId !== null && life.people[personId] ? personId : null;
 
   return (
     <Screen
       title={current.label}
+      {...(person ? { onBack: closePerson, backLabel: 'Back to People' } : {})}
       footer={
         <>
           <AgeUpButton />
@@ -66,6 +72,12 @@ export function GameScreen({ life }: { life: LifeState }) {
     >
       {tab === 'life' ? (
         <HomeTab life={life} />
+      ) : tab === 'people' ? (
+        person ? (
+          <PersonScreen key={person} life={life} personId={person} />
+        ) : (
+          <PeopleTab life={life} />
+        )
       ) : (
         <div className="flex flex-col gap-4">
           <Card className="text-center">

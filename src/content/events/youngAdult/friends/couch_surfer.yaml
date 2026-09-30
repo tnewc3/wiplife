@@ -1,0 +1,37 @@
+id: couch_surfer
+title: Just a few nights
+text: >-
+  {friend.name} just got kicked out by {friend.their} partner and needs
+  somewhere to stay. "Just a few nights," {friend.they} {friend:promises|promise}.
+tone: neutral
+category: friends
+rarity: common
+lifeStages: [youngAdult, adult]
+weight: { base: 4 }
+cooldownYears: 6
+cast:
+  friend: { kind: friend, ageOffset: { min: -5, max: 5 }, age: { min: 18, max: 120 } }
+choices:
+  - id: stay
+    label: Give {friend.them} the couch
+    outcome:
+      text: A few nights becomes two months. {friend.name} does all the dishes, and cries only sometimes.
+      effects:
+        - { type: relationship, role: friend, affection: 10, trust: 8 }
+        - { type: memory, role: friend, tag: let_them_stay }
+        - { type: stat, key: stress, delta: 5 }
+        - { type: schedule, eventId: favor_returned, inYears: [4, 12], cast: [friend] }
+  - id: hotel
+    label: Help {friend.them} pay for a motel
+    visibleIf: { money: { gte: 300 } }
+    outcome:
+      text: '{friend.name} is grateful. And a little hurt.'
+      effects:
+        - { type: money, delta: -300 }
+        - { type: relationship, role: friend, affection: 3 }
+  - id: no
+    label: Say you don't have room
+    outcome:
+      text: '{friend.name} says {friend.they} {friend:understands|understand}, and sleeps in {friend.their} car.'
+      effects:
+        - { type: relationship, role: friend, affection: -8, trust: -5 }

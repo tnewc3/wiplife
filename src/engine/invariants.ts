@@ -3,12 +3,13 @@
  * development and tests; each later stage adds the checks for its systems.
  */
 import type { ContentBundle } from '../content/schemas';
+import { ageOf, isCurrentPartner, isFamilyKind, isPartnerKind, isRomanticKind, kindSince } from './relationships';
 import { isRngState } from './rng';
 import { lifeStageForAge } from './systems/aging';
 import type { Identity, LifeState, Pronouns } from './types';
 
 const LIFE_STAGES = new Set(['early', 'child', 'teen', 'youngAdult', 'adult', 'senior']);
-const PHASES = new Set(['yearStart', 'events', 'yearEnd', 'dead']);
+const PHASES = new Set(['yearStart', 'events', 'yearEnd', 'dead', 'action']);
 const CATEGORIES = new Set(['man', 'woman', 'nonbinary']);
 
 export class InvariantError extends Error {
@@ -119,6 +120,14 @@ export function checkInvariants(state: LifeState, content: ContentBundle): strin
     score(`${label}.affection`, rel.affection);
     score(`${label}.trust`, rel.trust);
     if (rel.since > state.currentYear) fail(`${label} starts in the future`);
+    if (rel.kindSince !== undefined && (!Number.isInteger(rel.kindSince) || rel.kindSince < rel.since || rel.kindSince > state.currentYear)) {
+      fail(`${label}.kindSince is outside the relationship's years`);
+    }
+    if (rel.lastActionYear !== undefined && (!Number.isInteger(rel.lastActionYear) || rel.lastActionYear > state.currentYear)) {
+      fail(`${label}.lastActionYear is in the future`);
+    }
+    if (rel.wasSpouse !== undefined && rel.wasSpouse !== true) fail(`${label}.wasSpouse is only ever true (or absent)`);
+    if (rel.wasSpouse && isFamilyKind(rel.kind)) fail(`${label} is family but was your spouse`);
     if (rel.kind === 'parent') parents.push(person);
     if (rel.kind === 'sibling') siblings.push(person);
   }
@@ -142,6 +151,27 @@ export function checkInvariants(state: LifeState, content: ContentBundle): strin
     if (sibling.birthYear === state.birthYear) fail(`sibling ${sibling.id} has the same birth year as the character`);
   }
 
+  // Romance: adults only, one partner at a time, and a current partner is
+  // alive and in your life.
+  const { adultAge } = content.balance.relationships;
+  let partners = 0;
+  for (const [id, rel] of Object.entries(state.relationships)) {
+    const person = state.people[id];
+    if (!person || !isRomanticKind(rel.kind)) continue;
+    const label = `relationship ${id} (${rel.kind})`;
+    if (rel.kindSince === undefined) fail(`${label} has no kindSince`);
+    // When it took this kind (for an ex: when the romance ended), both were adults.
+    const at = kindSince(rel);
+    if (at - state.birthYear < adultAge) fail(`${label}: you were under ${adultAge}`);
+    if (at - person.birthYear < adultAge || ageOf(state, person) < adultAge) fail(`${label}: they were under ${adultAge}`);
+    if (rel.kind === 'spouse' && rel.wasSpouse !== true) fail(`${label} is a spouse without wasSpouse`);
+    if (isPartnerKind(rel.kind) && person.alive) {
+      if (rel.status !== 'active') fail(`${label} is a current partner but "${rel.status}"`);
+      if (isCurrentPartner(state, rel)) partners++;
+    }
+  }
+  if (partners > 1) fail(`the character has ${partners} current partners (no one is married to two people)`);
+
   // Logs.
   if (state.inputLog[0]?.kind !== 'create') fail('the input log must start with the create input');
   const ageUps = state.inputLog.filter((r) => r.kind === 'ageUp').length;
@@ -164,6 +194,10 @@ export function checkInvariants(state: LifeState, content: ContentBundle): strin
   } else if (c.age > 0) {
     fail('a life that has aged has no recap');
   }
+  if (state.phase === 'action') {
+    if (state.pending.length === 0) fail('the action phase has no result event');
+    if (state.death) fail('a death record in the "action" phase');
+  }
   if (state.phase === 'dead' && !state.death) fail('a dead character has no death record');
   if (state.death && state.phase !== 'dead' && state.phase !== 'yearEnd') fail(`a death record in the "${state.phase}" phase`);
   const completedYears = state.phase === 'events' || state.phase === 'yearEnd' ? c.age - 1 : c.age;
@@ -175,7 +209,7 @@ export function checkInvariants(state: LifeState, content: ContentBundle): strin
 
   // Events.
   const inYear = state.phase === 'events' || state.phase === 'yearEnd';
-  if (!inYear && state.pending.length > 0) fail(`pending events in the "${state.phase}" phase`);
+  if (!inYear && state.phase !== 'action' && state.pending.length > 0) fail(`pending events in the "${state.phase}" phase`);
   if (state.phase === 'events' && state.pending.every((p) => p.resolvedChoiceId !== undefined)) fail('the events phase has nothing left to resolve');
   if (state.phase === 'yearEnd' && state.pending.some((p) => p.resolvedChoiceId === undefined)) fail('the year ended with events unresolved');
   const ids = new Set<string>();

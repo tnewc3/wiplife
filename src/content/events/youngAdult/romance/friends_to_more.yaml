@@ -1,0 +1,42 @@
+id: friends_to_more
+title: Years, apparently
+text: >-
+  It's late, you're both a little drunk, and {friend.name} finally says it:
+  {friend.they} {friend:has|have} had feelings for you for years.
+tone: neutral
+category: romance
+rarity: common
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { romance: [single] }
+    - { role: friend, affection: { gte: 50 } }
+weight: { base: 5 }
+cooldownYears: 5
+cast:
+  friend: { kind: friend, romantic: true }
+choices:
+  - id: same
+    label: Admit you feel the same
+    outcome:
+      text: It turns out it's not weird at all. It's the least weird thing that's ever happened to you.
+      effects:
+        - { type: relationship, role: friend, kind: partner, affection: 15, trust: 5 }
+        - { type: memory, role: friend, tag: started_dating }
+        - { type: stat, key: happiness, delta: 7 }
+        - { type: history, text: 'You and {friend.name} went from friends to something more.', importance: 2 }
+  - id: time
+    label: Ask for time to think
+    outcome:
+      text: '{friend.name} says of course. {friend.They} also {friend:looks|look} like {friend.they} might be sick.'
+      effects:
+        - { type: memory, role: friend, tag: confessed_feelings }
+        - { type: relationship, role: friend, affection: -2 }
+  - id: no
+    label: Say you only see {friend.them} as a friend
+    outcome:
+      text: '{friend.name} nods too quickly. Things are strange between you for a long while.'
+      effects:
+        - { type: memory, role: friend, tag: turned_down_their_feelings }
+        - { type: relationship, role: friend, affection: -12, trust: -3 }

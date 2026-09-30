@@ -1,0 +1,50 @@
+# Follow-up of divorce_papers: a year on, who steps in (a support role).
+id: after_the_divorce
+title: The first year after
+text: >-
+  It's been a year since the divorce from {person.name}. Some nights the
+  apartment is too quiet to sleep in.
+tone: serious
+category: family
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { memory: { role: person, tag: divorced } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  person: { kind: ex }
+  # Whoever you trust most, if anyone: they may step in.
+  helper: { support: true, optional: true, age: { min: 18, max: 120 } }
+choices:
+  - id: lean
+    label: Let {helper.name} take you out of the house
+    visibleIf: { role: helper }
+    outcome:
+      text: >-
+        {helper.name} shows up with takeout and refuses to leave until you
+        laugh. It takes three hours. It works.
+      effects:
+        - { type: memory, role: helper, tag: stood_by_you }
+        - { type: relationship, role: helper, affection: 6, trust: 4 }
+        - { type: stat, key: stress, delta: -8 }
+        - { type: stat, key: happiness, delta: 6 }
+  - id: work
+    label: Throw yourself into work
+    outcome:
+      text: You get a lot done. You don't feel much better.
+      effects:
+        - { type: stat, key: stress, delta: 4 }
+        - { type: stat, key: ambition, delta: 3 }
+        - { type: stat, key: happiness, delta: -2 }
+  - id: drink
+    label: Drink until it stops hurting
+    outcome:
+      text: It doesn't stop hurting. It just gets blurrier, and the mornings get worse.
+      effects:
+        - { type: stat, key: health, delta: -4 }
+        - { type: stat, key: happiness, delta: -3 }
+        - { type: stat, key: vice, delta: 5 }
+        - { type: stat, key: stress, delta: -2 }

@@ -12,7 +12,11 @@ export type Id = string;
 
 export type LifeStage = 'early' | 'child' | 'teen' | 'youngAdult' | 'adult' | 'senior';
 export type FamilyWealth = 'poor' | 'working' | 'middle' | 'affluent' | 'rich';
-export type LifePhase = 'yearStart' | 'events' | 'yearEnd' | 'dead';
+/**
+ * 'action' is between years: a management action queued its result event,
+ * which the player resolves before the life returns to 'yearStart'.
+ */
+export type LifePhase = 'yearStart' | 'events' | 'yearEnd' | 'dead' | 'action';
 
 export interface Pronouns {
   subject: string;
@@ -110,6 +114,7 @@ export type RelationshipKind =
   | 'grandparent'
   | 'friend'
   | 'partner'
+  | 'fiance'
   | 'spouse'
   | 'ex'
   | 'coworker'
@@ -117,14 +122,24 @@ export type RelationshipKind =
   | 'classmate'
   | 'acquaintance';
 
+export type RelationshipStatus = 'active' | 'estranged' | 'ended';
+
 export interface Relationship {
   personId: Id;
   kind: RelationshipKind;
-  status: 'active' | 'estranged' | 'ended';
+  /** 'estranged': you cut contact (or they did). 'ended': they have faded out of your life. */
+  status: RelationshipStatus;
   affection: number;
   trust: number;
   memories: { tag: string; year: number }[];
+  /** The year you met (for family, the year you were born). */
   since: number;
+  /** The year the relationship took its current kind (started dating, married...); absent when it never changed. */
+  kindSince?: number;
+  /** The year of the last management action with this person (one per person per year). */
+  lastActionYear?: number;
+  /** True once they have been your spouse; it stays true after a divorce (an ex-spouse). */
+  wasSpouse?: boolean;
 }
 
 export interface EducationState {

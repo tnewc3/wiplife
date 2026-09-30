@@ -1,0 +1,34 @@
+# Follow-up of couch_surfer: years later, the friend you took in is there for you.
+id: favor_returned
+title: What goes around
+text: >-
+  You're having a rough stretch, and somehow {friend.name} hears about it.
+  {friend.They} {friend:shows|show} up at your door. "You let me stay once,"
+  {friend.they} {friend:says|say}. "My turn."
+tone: light
+category: friends
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires: { memory: { role: friend, tag: let_them_stay } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  friend: { kind: friend }
+choices:
+  - id: accept
+    label: Let {friend.them} help
+    outcome:
+      text: '{friend.name} cooks, cleans and lends you money you didn''t ask for. You''re not sure you deserve this friend.'
+      effects:
+        - { type: money, delta: 800 }
+        - { type: relationship, role: friend, affection: 8, trust: 8 }
+        - { type: memory, role: friend, tag: returned_the_favor }
+        - { type: stat, key: stress, delta: -6 }
+        - { type: history, text: '{friend.name} repaid an old kindness when you needed it most.', importance: 2 }
+  - id: proud
+    label: Insist you're fine
+    outcome:
+      text: '{friend.name} leaves a casserole on the step anyway.'
+      effects:
+        - { type: relationship, role: friend, affection: 2 }
+        - { type: stat, key: stress, delta: 2 }

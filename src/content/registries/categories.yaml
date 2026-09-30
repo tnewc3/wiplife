@@ -1,10 +1,14 @@
 # Event categories. An optional cooldownYears keeps other events of the
-# same category away for that many years after one fires.
+# same category away for that many years after one fires. Categories marked
+# romance are adults only: the engine blocks them for anyone under the adult
+# age, and the content build requires every such event to say so.
 categories:
   family: { label: Family }
   play: { label: Play }
   school: { label: School life }
   friends: { label: Friends }
+  romance: { label: Love and dating, romance: true }
+  people: { label: People }
   mischief: { label: Trouble }
   health: { label: Health }
   money: { label: Money }

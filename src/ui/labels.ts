@@ -1,6 +1,7 @@
 /** Player-facing words for engine values. UI copy only; no game rules here. */
-import type { FamilyMember } from '../engine/selectors';
-import type { FamilyWealth, GenderCategory, LifeStage, Personality, Stats } from '../engine/types';
+import type { ActionId, RomanceStatus } from '../content/schemas';
+import type { FamilyMember, PeopleGroupId, PersonRow } from '../engine/selectors';
+import type { FamilyWealth, GenderCategory, LifeStage, Personality, RelationshipKind, Stats } from '../engine/types';
 
 export const STAT_LABELS: Record<keyof Stats, string> = {
   health: 'Health',
@@ -43,15 +44,91 @@ export const LIFE_STAGE_LABELS: Record<LifeStage, string> = {
   senior: 'Senior',
 };
 
-const RELATIVE_LABELS: Record<string, Record<GenderCategory, string>> = {
+const same = (word: string): Record<GenderCategory, string> => ({ woman: word, man: word, nonbinary: word });
+
+const RELATIONSHIP_LABELS: Record<RelationshipKind, Record<GenderCategory, string>> = {
   parent: { woman: 'Mother', man: 'Father', nonbinary: 'Parent' },
   stepparent: { woman: 'Stepmother', man: 'Stepfather', nonbinary: 'Stepparent' },
   grandparent: { woman: 'Grandmother', man: 'Grandfather', nonbinary: 'Grandparent' },
   sibling: { woman: 'Sister', man: 'Brother', nonbinary: 'Sibling' },
+  partner: { woman: 'Girlfriend', man: 'Boyfriend', nonbinary: 'Partner' },
+  fiance: { woman: 'Fiancée', man: 'Fiancé', nonbinary: 'Fiancé' },
+  spouse: { woman: 'Wife', man: 'Husband', nonbinary: 'Spouse' },
+  ex: same('Ex'),
+  friend: same('Friend'),
+  coworker: same('Coworker'),
+  boss: same('Boss'),
+  classmate: same('Classmate'),
+  acquaintance: same('Acquaintance'),
 };
 
+/** "Mother", "Wife", "Friend"... An ex you were married to is an "Ex-spouse". */
+export function relationshipLabel(kind: RelationshipKind, category: GenderCategory, wasSpouse = false): string {
+  if (kind === 'ex' && wasSpouse) return 'Ex-spouse';
+  return RELATIONSHIP_LABELS[kind][category];
+}
+
 export function relativeLabel(member: FamilyMember): string {
-  return RELATIVE_LABELS[member.relationship.kind]?.[member.person.identity.genderCategory] ?? member.relationship.kind;
+  return relationshipLabel(member.relationship.kind, member.person.identity.genderCategory);
+}
+
+/** A person's line on the People screen: "Wife · 34 years old", "Friend · Died at 70 · Estranged". */
+export function personLine(row: PersonRow): string {
+  const parts = [relationshipLabel(row.kind, row.genderCategory, row.wasSpouse), row.alive ? ageLabel(row.age) : `Died at ${row.age}`];
+  if (row.status === 'estranged') parts.push('Estranged');
+  if (row.status === 'ended') parts.push('Lost touch');
+  return parts.join(' · ');
+}
+
+export const PEOPLE_GROUP_LABELS: Record<PeopleGroupId, string> = {
+  family: 'Family',
+  romance: 'Love',
+  friends: 'Friends',
+  work: 'Work',
+};
+
+/** Shown when a group has nobody in it. */
+export const PEOPLE_GROUP_EMPTY: Record<PeopleGroupId, string> = {
+  family: 'No family.',
+  romance: 'No one right now.',
+  friends: 'No friends yet.',
+  work: 'No one from work yet.',
+};
+
+export const BOND_LABELS = { affection: 'Affection', trust: 'Trust' } as const;
+
+/** The Home screen's romance line, or null when single. */
+export function romanceLine(status: RomanceStatus, partnerName: string | null): string | null {
+  if (!partnerName || status === 'single') return null;
+  return { dating: `Dating ${partnerName}`, engaged: `Engaged to ${partnerName}`, married: `Married to ${partnerName}` }[status];
+}
+
+export const ACTION_LABELS: Record<ActionId, string> = {
+  ask_out: 'Ask out',
+  propose: 'Propose',
+  marry: 'Get married',
+  break_up: 'Break up',
+  divorce: 'Divorce',
+  cut_contact: 'Cut contact',
+  reconcile: 'Try to reconcile',
+};
+
+/** Copy for the confirmation sheet of an action that can't be undone. */
+export function actionConfirmation(actionId: ActionId, firstName: string): { title: string; body: string; confirm: string } {
+  switch (actionId) {
+    case 'break_up':
+      return { title: `Break up with ${firstName}?`, body: 'You’ll be exes. This can’t be undone.', confirm: 'Break up' };
+    case 'divorce':
+      return { title: `Divorce ${firstName}?`, body: 'Your marriage will end. This can’t be undone.', confirm: 'Divorce' };
+    case 'cut_contact':
+      return {
+        title: `Cut ${firstName} out of your life?`,
+        body: 'You’ll stop speaking. You can try to reconcile later, but it may not work.',
+        confirm: 'Cut contact',
+      };
+    default:
+      return { title: `${ACTION_LABELS[actionId]}?`, body: '', confirm: ACTION_LABELS[actionId] };
+  }
 }
 
 export function ageLabel(age: number): string {

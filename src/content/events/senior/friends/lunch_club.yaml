@@ -1,0 +1,36 @@
+id: lunch_club
+title: The Thursday table
+text: >-
+  {friend.name} has started a lunch club: the same diner, the same booth,
+  every Thursday. Half the members are hard of hearing, so it's loud.
+tone: light
+category: friends
+rarity: common
+lifeStages: [senior]
+weight: { base: 7 }
+once: true
+cast:
+  friend: { kind: friend, ageOffset: { min: -8, max: 8 }, createIfMissing: true, newChance: 0.5 }
+choices:
+  - id: join
+    label: Become a regular
+    outcome:
+      text: You never miss a Thursday. The waitress knows your order and your whole life story.
+      effects:
+        - { type: relationship, role: friend, affection: 10, trust: 5 }
+        - { type: memory, role: friend, tag: spent_holidays_together }
+        - { type: stat, key: happiness, delta: 6 }
+        - { type: stat, key: stress, delta: -3 }
+  - id: sometimes
+    label: Go when you feel like it
+    outcome:
+      text: You drop in now and then. Everyone cheers when you do.
+      effects:
+        - { type: relationship, role: friend, affection: 3 }
+        - { type: stat, key: happiness, delta: 2 }
+  - id: no
+    label: You've never liked diners
+    outcome:
+      text: '{friend.name} keeps a seat for you anyway, just in case.'
+      effects:
+        - { type: relationship, role: friend, affection: -2 }

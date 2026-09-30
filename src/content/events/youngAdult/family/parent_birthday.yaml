@@ -1,0 +1,36 @@
+id: parent_birthday
+title: Another candle
+text: >-
+  It's {parent.name}'s birthday this weekend. {parent.They} {parent:says|say}
+  {parent.they} {parent:doesn't|don't} want a fuss, which is what
+  {parent.they} always {parent:says|say}.
+tone: light
+category: family
+rarity: common
+lifeStages: [youngAdult, adult]
+weight: { base: 5 }
+cooldownYears: 4
+cast:
+  parent: { kind: parent }
+choices:
+  - id: visit
+    label: Drive over with a cake
+    outcome:
+      text: '{parent.name} pretends to be annoyed about the cake and eats two slices.'
+      effects:
+        - { type: relationship, role: parent, affection: 6 }
+        - { type: memory, role: parent, tag: visited_for_birthday }
+        - { type: stat, key: happiness, delta: 3 }
+  - id: call
+    label: Call and sing badly
+    outcome:
+      text: You sing. {parent.name} laughs. It's not the same as being there, and you both know it.
+      effects:
+        - { type: relationship, role: parent, affection: 2 }
+  - id: forget
+    label: Mean to call, and forget
+    outcome:
+      text: You remember on Tuesday. {parent.name} says it's fine. {parent.They} {parent:has|have} mentioned it to three relatives.
+      effects:
+        - { type: relationship, role: parent, affection: -6, trust: -2 }
+        - { type: memory, role: parent, tag: forgot_birthday }
