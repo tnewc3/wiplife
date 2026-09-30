@@ -212,6 +212,18 @@ const legal = z.strictObject({
 
 const cast = z.record(z.string(), id);
 
+export const historyEntrySchema = z.strictObject({
+  year: int,
+  age: int,
+  text: z.string(),
+  tags: z.array(z.string()),
+  importance: z.union([z.literal(1), z.literal(2), z.literal(3)]),
+  legendary: z.boolean().exactOptional(),
+});
+const historyEntry = historyEntrySchema;
+
+export { pronouns as pronounsSchema, stats as statsSchema };
+
 export const lifeStateSchema: z.ZodType<LifeState> = z.strictObject({
   id,
   seed: z.string().min(1),
@@ -240,16 +252,7 @@ export const lifeStateSchema: z.ZodType<LifeState> = z.strictObject({
       outcomeText: z.string().exactOptional(),
     }),
   ),
-  history: z.array(
-    z.strictObject({
-      year: int,
-      age: int,
-      text: z.string(),
-      tags: z.array(z.string()),
-      importance: z.union([z.literal(1), z.literal(2), z.literal(3)]),
-      legendary: z.boolean().exactOptional(),
-    }),
-  ),
+  history: z.array(historyEntry),
   inputLog: z.array(
     z.strictObject({
       year: int,
@@ -257,6 +260,10 @@ export const lifeStateSchema: z.ZodType<LifeState> = z.strictObject({
       payload: z.record(z.string(), z.unknown()),
     }),
   ),
+  recap: z
+    .strictObject({ year: int, age: int, statsBefore: stats, statsAfter: stats.nullable() })
+    .nullable(),
+  death: z.strictObject({ year: int, age: int, causeId: id }).nullable(),
   lineage: z.strictObject({ generation: int.min(1), parentLifeId: id.exactOptional() }),
 });
 

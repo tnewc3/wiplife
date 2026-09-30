@@ -11,7 +11,14 @@ export interface Migration {
  * Every migration ever shipped, oldest first. Never edit or remove one that
  * has shipped: old saves on players' devices still depend on it.
  */
-export const migrations: readonly Migration[] = [];
+export const migrations: readonly Migration[] = [
+  {
+    from: 1,
+    description: 'Stage 3: add the year recap and death record (both empty for a Stage 2 life)',
+    migrate: (data) =>
+      typeof data === 'object' && data !== null && !Array.isArray(data) ? { ...data, recap: null, death: null } : data,
+  },
+];
 
 export class MigrationError extends Error {
   override name = 'MigrationError';

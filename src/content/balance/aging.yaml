@@ -1,0 +1,37 @@
+# Aging: life stages, age-related health decline and history limits.
+# Starting proposals; Stage 12 (balancing) tunes them against simulation runs.
+
+# The age each life stage starts at (docs/design.md, pacing director table).
+# Early childhood starts at birth.
+lifeStages:
+  child: 5
+  teen: 13
+  youngAdult: 18
+  adult: 30
+  senior: 65
+
+# Health points lost each year, by age. Between points the value follows a
+# straight line; a fraction of a point is lost with that chance.
+healthDecline:
+  - { at: 0, x: 0 }
+  - { at: 35, x: 0 }
+  - { at: 50, x: 0.4 }
+  - { at: 65, x: 0.8 }
+  - { at: 80, x: 1.2 }
+  - { at: 100, x: 1.5 }
+
+# Multiplies the yearly health decline, by Fitness: fit people decline slower.
+fitnessEffect:
+  - { at: 0, x: 1.4 }
+  - { at: 50, x: 1 }
+  - { at: 100, x: 0.6 }
+
+history:
+  # Past this many entries, the oldest entry of the lowest importance is dropped,
+  # so a long life's history never grows without limit.
+  maxEntries: 500
+
+archive:
+  # History entries kept as highlights when a life goes into the archive.
+  highlightMinImportance: 1
+  maxHighlights: 100

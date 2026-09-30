@@ -42,6 +42,7 @@ describe('createLife (random)', () => {
     expect([life.flags, life.eventLog]).toEqual([{}, {}]);
     expect([life.scheduled, life.pending, life.history]).toEqual([[], [], []]);
     expect(life.lineage).toEqual({ generation: 1 });
+    expect([life.recap, life.death]).toEqual([null, null]);
     expect(checkInvariants(life, content)).toEqual([]);
   });
 
@@ -73,23 +74,23 @@ describe('createLife (random)', () => {
       {
         "city": "chicago",
         "family": [
-          "parent Nadia 37",
-          "parent Caleb 36",
-          "sibling Aaron 8",
-          "sibling Hiroshi 4",
+          "parent Samantha 24",
+          "parent Ethan 24",
+          "sibling Owen 8",
+          "sibling Jessica 4",
         ],
         "identity": "man",
         "name": {
-          "first": "Chris",
-          "last": "Mendoza",
+          "first": "Thomas",
+          "last": "Sullivan",
         },
         "stats": {
-          "fitness": 50,
-          "happiness": 83,
-          "health": 68,
-          "looks": 46,
-          "smarts": 62,
-          "stress": 6,
+          "fitness": 66,
+          "happiness": 84,
+          "health": 69,
+          "looks": 55,
+          "smarts": 52,
+          "stress": 5,
         },
       }
     `);
@@ -148,6 +149,34 @@ describe('createLife (custom)', () => {
     const family = getFamily(life);
     expect(family).toHaveLength(1);
     expect(family[0]!.relationship.kind).toBe('parent');
+  });
+
+  it('gives relatives names from the heritage of a known custom last name', () => {
+    const pool = content.names.us!;
+    const vietnamese = pool.heritages.vietnamese!;
+    for (let i = 0; i < 50; i++) {
+      const life = createLife(
+        {
+          mode: 'custom',
+          seed: `heritage-${i}`,
+          birthYear: BIRTH_YEAR,
+          custom: customInput({ name: { first: 'Robin', last: 'nguyen' }, family: { parents: 1, siblings: 0 } }),
+        },
+        content,
+      );
+      const parent = getFamily(life)[0]!.person;
+      expect(vietnamese.first[parent.identity.genderCategory]).toContain(parent.name.first);
+      expect(life.character.name.last).toBe('nguyen');
+    }
+  });
+
+  it('still works with a last name no heritage has', () => {
+    const life = createLife(
+      { mode: 'custom', seed: 'unknown-last', birthYear: BIRTH_YEAR, custom: customInput({ name: { first: 'Robin', last: 'Zyxwv' } }) },
+      content,
+    );
+    expect(checkInvariants(life, content)).toEqual([]);
+    expect(getFamily(life).every((m) => m.relationship.kind !== 'parent' || m.person.name.last.length > 0)).toBe(true);
   });
 
   it('normalizes text input', () => {

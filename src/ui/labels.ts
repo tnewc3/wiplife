@@ -58,3 +58,25 @@ export function ageLabel(age: number): string {
   if (age <= 0) return 'Newborn';
   return age === 1 ? '1 year old' : `${age} years old`;
 }
+
+/** A relative's age line: their age, or the age they died at. */
+export function memberAgeLabel(member: FamilyMember): string {
+  return member.person.alive ? ageLabel(member.age) : `Died at ${member.age}`;
+}
+
+/** "Age 34" for timelines; "Birth" at 0. */
+export function timelineAgeLabel(age: number): string {
+  return age <= 0 ? 'Birth' : `Age ${age}`;
+}
+
+/** A stat change in words, never as a number (docs/design.md, section K). */
+export function statChangeLabel(change: number): string {
+  const size = Math.abs(change);
+  const amount = size <= 2 ? ' a little' : size >= 10 ? ' a lot' : '';
+  return `${change > 0 ? 'went up' : 'went down'}${amount}`;
+}
+
+/** "1990–2072" */
+export function lifespanLabel(birthYear: number, endYear: number): string {
+  return `${birthYear}–${endYear}`;
+}

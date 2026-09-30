@@ -14,6 +14,7 @@ function random(seed: string): LifeState {
 describe('10,000 random lives', () => {
   it('produce zero invariant failures and believable families', () => {
     const { parentAgeAtBirth, siblingWeights } = content.balance.creation.family;
+    const pool = content.names.us!;
     const failures: string[] = [];
     let singleParent = 0;
     let withSiblings = 0;
@@ -52,6 +53,24 @@ describe('10,000 random lives', () => {
       }
       const firstNames = [life.character.name.first, ...family.map((m) => m.person.name.first)];
       if (new Set(firstNames).size !== firstNames.length) failures.push(`seed inv-${i}: repeated first name in family`);
+
+      // Names hang together: a parent with the family's last name has a first
+      // name from a heritage that includes that last name; the character's
+      // first name comes from one of the parents' heritages.
+      const heritages = Object.values(pool.heritages);
+      const lastName = life.character.name.last;
+      const fits = parents.some(
+        ({ person: p }) =>
+          p.name.last === lastName &&
+          heritages.some((h) => h.last.includes(lastName) && h.first[p.identity.genderCategory].includes(p.name.first)),
+      );
+      if (!fits) failures.push(`seed inv-${i}: family names don't share a heritage`);
+      const parentHeritages = heritages.filter((h) =>
+        parents.some((p) => h.first[p.person.identity.genderCategory].includes(p.person.name.first)),
+      );
+      if (!parentHeritages.some((h) => h.first[life.character.identity.genderCategory].includes(life.character.name.first))) {
+        failures.push(`seed inv-${i}: character's first name fits neither parent's heritage`);
+      }
     }
 
     expect(failures.slice(0, 20)).toEqual([]);

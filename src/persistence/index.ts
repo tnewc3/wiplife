@@ -1,5 +1,15 @@
 import { createDb } from './db';
 
+export {
+  ARCHIVE_SCHEMA_VERSION,
+  archiveLife,
+  archiveMigrations,
+  archivedLifeSchema,
+  listArchive,
+  makeArchiveEnvelope,
+  readArchivedLife,
+  type ArchiveListing,
+} from './archive';
 export { createDb, DB_NAME, type WiplifeDb } from './db';
 export { CURRENT_SCHEMA_VERSION, envelopeSchema, makeEnvelope, type SaveEnvelope } from './envelope';
 export { assertMigrationChain, migrateEnvelope, MigrationError, migrations, type Migration } from './migrations';

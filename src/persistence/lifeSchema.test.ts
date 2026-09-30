@@ -1,12 +1,12 @@
 import 'fake-indexeddb/auto';
 import { afterEach, describe, expect, it } from 'vitest';
 import { content } from '../content';
-import { createLife } from '../engine/life';
+import { beginYear, createLife } from '../engine/life';
 import { nextUint32 } from '../engine/rng';
-import { customInput } from '../engine/testFixtures';
+import { customInput, liveOut } from '../engine/testFixtures';
 import type { LifeState } from '../engine/types';
 import { createDb, type WiplifeDb } from './db';
-import { makeEnvelope } from './envelope';
+import { makeEnvelope, type SaveEnvelope } from './envelope';
 import { lifeStateSchema, loadedLifeSchema } from './lifeSchema';
 import { readSave, writeSave } from './saves';
 
@@ -129,5 +129,35 @@ describe('life save and load', () => {
     const result = await readSave(db, lifeStateSchema);
     expect(result.status).toBe('recovered');
     if (result.status === 'recovered') expect(result.envelope.data).toEqual(older);
+  });
+});
+
+describe('lives from Stage 3 on', () => {
+  it('round trip mid-year, after years of aging, and after death', async () => {
+    const midYear = beginYear(random('stage3-mid'), content);
+    expect(midYear.phase).toBe('yearEnd');
+    expect(await roundTrip(midYear)).toEqual(midYear);
+    const dead = liveOut(random('stage3-dead'));
+    expect(await roundTrip(dead)).toEqual(dead);
+  });
+
+  it('upgrades a Stage 2 (schema version 1) save while loading', async () => {
+    const db = freshDb();
+    const { recap: _recap, death: _death, ...stage2 } = random('stage2');
+    const old: SaveEnvelope = { ...makeEnvelope(stage2, content.contentVersion), schemaVersion: 1 };
+    await db.lives.put({ id: 'active', envelope: old });
+    const result = await readSave(db, loadedLifeSchema(content));
+    expect(result.status).toBe('ok');
+    if (result.status === 'ok') {
+      expect(result.envelope.schemaVersion).toBe(2);
+      expect(result.envelope.data).toEqual(random('stage2'));
+    }
+  });
+
+  it('rejects a death record outside the dead phase and a dead life without one', () => {
+    const life = random('death-record');
+    const schema = loadedLifeSchema(content);
+    expect(schema.safeParse({ ...life, death: { year: 2026, age: 0, causeId: 'stroke' } }).success).toBe(false);
+    expect(schema.safeParse({ ...life, phase: 'dead' }).success).toBe(false);
   });
 });

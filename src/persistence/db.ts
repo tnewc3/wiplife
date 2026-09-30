@@ -16,7 +16,7 @@ export interface BackupRow {
   envelope: SaveEnvelope;
 }
 
-/** A finished life. The entry shape arrives in Stage 3 (ArchivedLife). */
+/** A finished (or unfinished, replaced) life: an ArchivedLife in its own envelope (see archive.ts). */
 export interface ArchiveRow {
   id: string;
   envelope: SaveEnvelope;

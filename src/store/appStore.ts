@@ -2,27 +2,42 @@ import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
 import { content } from '../content';
 import type { ContentBundle } from '../content/schemas';
+import { archiveEntry } from '../engine/archive';
 import { assertInvariants } from '../engine/invariants';
-import { createLife, type CustomLifeInput } from '../engine/life';
-import type { LifeState } from '../engine/types';
+import { beginYear, createLife, endYear, type CustomLifeInput } from '../engine/life';
+import { canAgeUp } from '../engine/selectors';
+import type { ArchivedLife, LifeState } from '../engine/types';
 import {
+  archiveLife,
   clearAllData,
   db as defaultDb,
   DEFAULT_SETTINGS,
+  listArchive,
   loadedLifeSchema,
   loadSettings,
+  makeArchiveEnvelope,
   makeEnvelope,
   readSave,
   requestPersistentStorage,
   updateSettings,
   writeSave,
+  type ArchiveListing,
   type Settings,
   type Theme,
   type WiplifeDb,
 } from '../persistence';
 
 /** Top-level screens. The age gate is not a screen: it shows until confirmed. */
-export type ScreenId = 'title' | 'newLife' | 'custom' | 'game' | 'settings';
+export type ScreenId =
+  | 'title'
+  | 'newLife'
+  | 'custom'
+  | 'game'
+  | 'lifeHistory'
+  | 'death'
+  | 'archive'
+  | 'archivedLife'
+  | 'settings';
 
 /** Bottom navigation tabs (docs/design.md, section K). */
 export type TabId = 'life' | 'people' | 'work' | 'money' | 'more';
@@ -43,6 +58,14 @@ export interface AppState {
   savedLifeStatus: SavedLifeStatus;
   /** True while a new life is being created and saved. */
   creating: boolean;
+  /** True while a year is advancing; further Age Up taps are ignored. */
+  aging: boolean;
+  /** The archive entry of the life that just ended, for the Death screen. */
+  lastDeath: ArchivedLife | null;
+  /** The archive, loaded when the Archive screen opens. */
+  archive: ArchiveListing | null;
+  /** The archived life open on the Archived life screen. */
+  archiveSelection: string | null;
 
   init: () => Promise<void>;
   confirmAge: () => Promise<void>;
@@ -57,6 +80,17 @@ export interface AppState {
   /** Starts a custom life. Throws InvalidInputError for bad input. */
   startCustomLife: (custom: CustomLifeInput) => Promise<void>;
   continueLife: () => void;
+  /**
+   * Advances one year: begins it, and (with no events pending) ends it.
+   * Autosaves after each step. A death moves the life into the archive and
+   * opens the Death screen. Ignored while a year is already advancing.
+   */
+  ageUp: () => Promise<void>;
+  openLifeHistory: () => void;
+  closeLifeHistory: () => void;
+  /** Loads the archive and opens the Archive screen. */
+  openArchive: () => Promise<void>;
+  openArchivedLife: (id: string) => void;
 }
 
 export interface StoreOptions {
@@ -79,10 +113,31 @@ function randomSeed(): string {
   return Array.from(words, (w) => w.toString(16).padStart(8, '0')).join('');
 }
 
+const TEST_SEED = /^[A-Za-z0-9_-]{1,64}$/;
+
+/**
+ * End-to-end test builds only (VITE_TEST_HOOKS=true): `?seed=abc` in the URL
+ * makes the next new life use that seed. The parameter is removed once used,
+ * so a reload can't start a second life with the same seed. In normal builds
+ * this check is compiled away and every seed is random.
+ */
+function testHookSeed(): string {
+  if (import.meta.env.VITE_TEST_HOOKS === 'true') {
+    const url = new URL(window.location.href);
+    const seed = url.searchParams.get('seed');
+    if (seed !== null) {
+      url.searchParams.delete('seed');
+      window.history.replaceState(window.history.state, '', url);
+      if (TEST_SEED.test(seed)) return seed;
+    }
+  }
+  return randomSeed();
+}
+
 export function createAppStore({
   db = defaultDb,
   content: bundle = content,
-  makeSeed = randomSeed,
+  makeSeed = testHookSeed,
   currentYear = () => new Date().getFullYear(),
   checkInvariants = import.meta.env.DEV,
 }: StoreOptions = {}) {
@@ -96,6 +151,46 @@ export function createAppStore({
           s.life = life;
           s.savedLifeStatus = 'ok';
         });
+      };
+
+      /**
+       * Moves the active life into the archive (finished if dead, unfinished
+       * otherwise) in the same transaction that saves `next` as the new
+       * active life, if given.
+       */
+      const archive = async (life: LifeState, next?: LifeState): Promise<ArchivedLife> => {
+        if (checkInvariants) {
+          assertInvariants(life, bundle);
+          if (next) assertInvariants(next, bundle);
+        }
+        const entry = archiveEntry(life, bundle);
+        await archiveLife(
+          db,
+          makeArchiveEnvelope(entry, bundle.contentVersion),
+          next && makeEnvelope(next, bundle.contentVersion),
+        );
+        set((s) => {
+          s.archive = null;
+        });
+        return entry;
+      };
+
+      /** A dead life goes straight into the archive; the Death screen shows its entry. */
+      const endLife = async (dead: LifeState) => {
+        const entry = await archive(dead);
+        set((s) => {
+          s.life = null;
+          s.savedLifeStatus = 'none';
+          s.lastDeath = entry;
+          s.screen = 'death';
+        });
+      };
+
+      /** Ends a year whose events are all resolved. */
+      const finishYear = async (life: LifeState) => {
+        const next = endYear(life, bundle);
+        if (next.phase === 'dead') await endLife(next);
+        else await commit(next);
       };
 
       /** Asks the browser to keep saves once, when the first life starts. */
@@ -114,7 +209,18 @@ export function createAppStore({
           s.creating = true;
         });
         try {
-          await commit(build());
+          const current = get().life;
+          const life = build();
+          if (current) {
+            // Starting over never discards a life: it goes into the archive, unfinished.
+            await archive(current, life);
+            set((s) => {
+              s.life = life;
+              s.savedLifeStatus = 'ok';
+            });
+          } else {
+            await commit(life);
+          }
           set((s) => {
             s.screen = 'game';
             s.tab = 'life';
@@ -137,11 +243,17 @@ export function createAppStore({
         life: null,
         savedLifeStatus: 'none',
         creating: false,
+        aging: false,
+        lastDeath: null,
+        archive: null,
+        archiveSelection: null,
 
         init: async () => {
+          let loaded: SavedLifeStatus;
           try {
             const settings = await loadSettings(db);
             const saved = await readSave(db, loadedLifeSchema(bundle));
+            loaded = saved.status;
             set((s) => {
               s.settings = settings;
               s.savedLifeStatus = saved.status;
@@ -157,6 +269,23 @@ export function createAppStore({
             set((s) => {
               s.status = 'error';
               s.error = message(err);
+            });
+            return;
+          }
+
+          // A save from the middle of a year finishes that year now; if that
+          // fails, the loaded life is kept and the next Age Up tries again.
+          const life = get().life;
+          try {
+            if (life?.phase === 'yearEnd') await finishYear(life);
+            else if (life?.phase === 'dead') await endLife(life);
+          } catch {
+            // Keep the loaded life as it is.
+          }
+          // The title screen keeps reporting how the save loaded.
+          if (get().life) {
+            set((s) => {
+              s.savedLifeStatus = loaded;
             });
           }
         },
@@ -186,6 +315,9 @@ export function createAppStore({
             s.screen = 'title';
             s.settingsReturnTo = 'title';
             s.tab = 'life';
+            s.lastDeath = null;
+            s.archive = null;
+            s.archiveSelection = null;
           });
         },
 
@@ -221,6 +353,49 @@ export function createAppStore({
             if (!s.life) return;
             s.screen = 'game';
             s.tab = 'life';
+          }),
+
+        ageUp: async () => {
+          const { life, aging } = get();
+          if (aging || !life || !(canAgeUp(life) || life.phase === 'yearEnd')) return;
+          set((s) => {
+            s.aging = true;
+          });
+          try {
+            // A year interrupted before it ended is finished instead.
+            if (life.phase === 'yearEnd') return await finishYear(life);
+            const begun = beginYear(life, bundle);
+            await commit(begun);
+            if (begun.phase === 'yearEnd') await finishYear(begun);
+          } finally {
+            set((s) => {
+              s.aging = false;
+            });
+          }
+        },
+
+        openLifeHistory: () =>
+          set((s) => {
+            if (s.life) s.screen = 'lifeHistory';
+          }),
+
+        closeLifeHistory: () =>
+          set((s) => {
+            s.screen = s.life ? 'game' : 'title';
+          }),
+
+        openArchive: async () => {
+          const listing = await listArchive(db);
+          set((s) => {
+            s.archive = listing;
+            s.screen = 'archive';
+          });
+        },
+
+        openArchivedLife: (id) =>
+          set((s) => {
+            s.archiveSelection = id;
+            s.screen = 'archivedLife';
           }),
       };
     }),

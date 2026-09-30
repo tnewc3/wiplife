@@ -1,9 +1,73 @@
 import { content } from '../../../content';
-import { getCharacterSummary, getFamily } from '../../../engine/selectors';
+import { getCharacterSummary, getFamily, getHistoryFeed, getYearRecap } from '../../../engine/selectors';
 import type { LifeState, Stats } from '../../../engine/types';
+import { useAppStore } from '../../../store/appStore';
+import { Button } from '../../components/Button';
 import { Card } from '../../components/Card';
 import { StatBar } from '../../components/StatBar';
-import { ageLabel, LIFE_STAGE_LABELS, relativeLabel, STAT_LABELS } from '../../labels';
+import { ageLabel, LIFE_STAGE_LABELS, memberAgeLabel, relativeLabel, STAT_LABELS, statChangeLabel, timelineAgeLabel } from '../../labels';
+
+/** How many recent history entries the Home feed shows. */
+const FEED_LENGTH = 12;
+
+/** A short summary of the year just lived. */
+function YearRecapCard({ life }: { life: LifeState }) {
+  const recap = getYearRecap(life);
+  if (!recap) return null;
+  return (
+    <Card aria-labelledby="recap-title" role="region">
+      <h3 id="recap-title" className="text-lg font-bold">
+        {recap.year} · {ageLabel(recap.age)}
+      </h3>
+      {recap.entries.length === 0 && recap.statChanges.length === 0 ? (
+        <p className="mt-1 text-muted">A quiet year.</p>
+      ) : (
+        <ul className="mt-1 flex flex-col gap-1">
+          {recap.entries.map((e, i) => (
+            <li key={`e${i}`} className="break-words [overflow-wrap:anywhere]">
+              {e.text}
+            </li>
+          ))}
+          {recap.statChanges.map((c) => (
+            <li key={c.stat} className="text-muted">
+              {STAT_LABELS[c.stat]} {statChangeLabel(c.change)}.
+            </li>
+          ))}
+        </ul>
+      )}
+    </Card>
+  );
+}
+
+/** The most recent moments of this life, newest first. */
+function StoryFeed({ life }: { life: LifeState }) {
+  const openLifeHistory = useAppStore((s) => s.openLifeHistory);
+  const feed = getHistoryFeed(life, FEED_LENGTH);
+  return (
+    <Card>
+      <h3 className="mb-2 text-lg font-bold">Your story</h3>
+      {feed.length === 0 ? (
+        <p className="text-muted">Your story starts here.</p>
+      ) : (
+        <>
+          <ol aria-label="Your story" className="flex flex-col divide-y divide-border">
+            {feed.map((e, i) => (
+              <li key={i} className="flex min-w-0 flex-col py-2">
+                <span className="text-sm text-muted">
+                  {timelineAgeLabel(e.age)} · {e.year}
+                </span>
+                <span className="break-words [overflow-wrap:anywhere]">{e.text}</span>
+              </li>
+            ))}
+          </ol>
+          <Button variant="ghost" block className="mt-2" onClick={openLifeHistory}>
+            See your whole life
+          </Button>
+        </>
+      )}
+    </Card>
+  );
+}
 
 const HOUSING_LINES: Record<LifeState['housing']['kind'], string> = {
   with_parents: 'Living with family',
@@ -32,6 +96,8 @@ export function HomeTab({ life }: { life: LifeState }) {
         </p>
       </Card>
 
+      <YearRecapCard life={life} />
+
       <Card>
         <h3 className="sr-only">Stats</h3>
         <div className="grid grid-cols-2 gap-x-4 gap-y-3" aria-label="Stats" role="group">
@@ -53,7 +119,7 @@ export function HomeTab({ life }: { life: LifeState }) {
                   {member.person.name.first} {member.person.name.last}
                 </span>
                 <span className="text-sm text-muted">
-                  {relativeLabel(member)} · {ageLabel(member.age)}
+                  {relativeLabel(member)} · {memberAgeLabel(member)}
                 </span>
               </li>
             ))}
@@ -61,10 +127,7 @@ export function HomeTab({ life }: { life: LifeState }) {
         )}
       </Card>
 
-      <Card>
-        <h3 className="mb-2 text-lg font-bold">Your story</h3>
-        <p className="text-muted">Your story starts here.</p>
-      </Card>
+      <StoryFeed life={life} />
     </div>
   );
 }

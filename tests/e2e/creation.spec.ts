@@ -132,18 +132,15 @@ test('reset all data removes the saved life', async ({ page }) => {
 });
 
 test('a damaged save is restored from the backup, with a notice once', async ({ page }) => {
-  await passAgeGate(page);
+  // A seed that survives its first year.
+  await passAgeGate(page, 'e2e-0');
   await page.getByRole('button', { name: 'New Life' }).click();
   await page.getByRole('button', { name: 'Start a random life' }).click();
   const first = await homeName(page);
 
-  // A second life makes the first one the backup.
-  await page.getByRole('button', { name: 'More' }).click();
-  await page.getByRole('button', { name: 'Back to title' }).click();
-  await page.getByRole('button', { name: 'New Life' }).click();
-  await page.getByRole('button', { name: 'Start a random life' }).click();
-  await page.getByRole('dialog', { name: 'Start a new life?' }).getByRole('button', { name: 'Start a new life' }).click();
-  await expect(page.getByTestId('character-name')).toBeVisible();
+  // Aging up autosaves after each step of the year, so earlier saves become backups.
+  await page.getByRole('button', { name: 'Age Up' }).click();
+  await expect(page.getByText(/^1 year old · /)).toBeVisible();
 
   // Damage the active save: an empty first name.
   await page.evaluate(
@@ -170,7 +167,7 @@ test('a damaged save is restored from the backup, with a notice once', async ({ 
 
   await page.reload();
   await expect(page.getByRole('status').filter({ hasText: 'Your last save was damaged.' })).toBeVisible();
-  await expect(page.getByText(`${first} · Newborn`)).toBeVisible();
+  await expect(page.getByText(`${first} · 1 year old`)).toBeVisible();
   await page.getByRole('button', { name: 'Continue' }).click();
   expect(await homeName(page)).toBe(first);
 

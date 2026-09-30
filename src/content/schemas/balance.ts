@@ -51,6 +51,12 @@ export const creationBalanceSchema = z.strictObject({
   /** Chance a character has a hidden talent at all. */
   talentChance: probabilitySchema,
   familyWealth: weightsSchema(familyWealthSchema),
+  names: z.strictObject({
+    /** How often each heritage in the name pools starts a family. */
+    heritageWeights: weightsSchema(z.string()),
+    /** Chance two parents share a heritage. */
+    sameHeritageParentsChance: probabilitySchema,
+  }),
   appearance: z.strictObject({
     /** Chance of one extra distinguishing feature. */
     featureChance: probabilitySchema,
@@ -94,3 +100,61 @@ export const creationBalanceSchema = z.strictObject({
   }),
 });
 export type CreationBalance = z.infer<typeof creationBalanceSchema>;
+
+/**
+ * A curve through points: the value at `at` is `x`, straight lines between
+ * points, flat beyond the ends. Points are listed in increasing `at` order.
+ */
+export const curveSchema = z
+  .array(z.strictObject({ at: z.number(), x: z.number().nonnegative() }))
+  .min(1)
+  .refine((points) => points.every((p, i) => i === 0 || p.at > points[i - 1]!.at), 'points must be in increasing "at" order');
+export type Curve = z.infer<typeof curveSchema>;
+
+/** Aging, life stages and history limits (src/content/balance/aging.yaml). */
+export const agingBalanceSchema = z.strictObject({
+  /** The age each life stage starts at; early childhood starts at birth. */
+  lifeStages: z.strictObject({
+    child: z.int().positive(),
+    teen: z.int().positive(),
+    youngAdult: z.int().positive(),
+    adult: z.int().positive(),
+    senior: z.int().positive(),
+  }),
+  /** Health points lost per year, by age. Fractions are rounded up by chance. */
+  healthDecline: curveSchema,
+  /** Multiplies the yearly health decline, by fitness. */
+  fitnessEffect: curveSchema,
+  history: z.strictObject({
+    /** Most entries one life keeps; past it, the oldest least important entry goes. */
+    maxEntries: z.int().min(10).max(5000),
+  }),
+  archive: z.strictObject({
+    /** History entries of at least this importance are kept in the archive. */
+    highlightMinImportance: z.union([z.literal(1), z.literal(2), z.literal(3)]),
+    /** Most highlights kept per archived life. */
+    maxHighlights: z.int().min(1).max(1000),
+  }),
+});
+export type AgingBalance = z.infer<typeof agingBalanceSchema>;
+
+/** Chance of death each year (src/content/balance/mortality.yaml). */
+export const mortalityBalanceSchema = z.strictObject({
+  /** No one lives past this age. */
+  maxAge: z.int().min(1).max(150),
+  /** Before `untilAge`, the yearly chance is `yearlyChance` instead of the age formula below. */
+  childhood: z.strictObject({ untilAge: z.int().min(1), yearlyChance: probabilitySchema }),
+  /** Chance of dying each year that does not grow with age. */
+  background: probabilitySchema,
+  /** Age-related chance each year: base × growth^age. */
+  ageCurve: z.strictObject({ base: probabilitySchema, growth: z.number().min(1).max(2) }),
+  /** Multiplies the character's chance, by Health. */
+  healthMultiplier: curveSchema,
+  /** Multiplies the character's chance, by genetic risk. */
+  geneticRiskMultiplier: curveSchema,
+  /** Multiplies an NPC's chance (NPCs have no Health stat yet). */
+  npcMultiplier: z.number().nonnegative(),
+  /** Which cause of death is recorded, by age: the first band whose maxAge is at least the age. */
+  causes: z.array(z.strictObject({ maxAge: z.int().min(0), weights: weightsSchema(z.string()) })).min(1),
+});
+export type MortalityBalance = z.infer<typeof mortalityBalanceSchema>;

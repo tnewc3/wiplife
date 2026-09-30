@@ -35,5 +35,11 @@
 ## Commands
 See README.md for build, test and check commands.
 
+## Git workflow
+- Branch from the latest main. Open pull requests into main only, never into another feature branch.
+- One stage (or one follow-up task) per pull request. Don't bring in unrelated commits.
+- A pull request merges only when CI is green.
+
 ## When finished
 Report what you built, any deviations from the docs and why, anything left undone, and open questions.
+Only report facts you checked in the code, tests, files or CI logs. Label anything you didn't check as unverified.

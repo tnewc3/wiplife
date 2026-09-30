@@ -1,5 +1,5 @@
-import { expect, test, type Page } from '@playwright/test';
-import { createCustomLife, LONG_NAME_LIFE, passAgeGate } from './helpers';
+import { expect, test } from '@playwright/test';
+import { createCustomLife, expectNoHorizontalScroll, expectTouchTargets, LONG_NAME_LIFE, passAgeGate } from './helpers';
 
 const sizes = [
   { name: 'small phone', width: 360, height: 640 },
@@ -7,26 +7,6 @@ const sizes = [
   { name: 'tablet', width: 768, height: 1024 },
   { name: 'desktop', width: 1440, height: 900 },
 ];
-
-async function expectNoHorizontalScroll(page: Page): Promise<void> {
-  const overflow = await page.evaluate(
-    () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
-  );
-  expect(overflow).toBeLessThanOrEqual(0);
-}
-
-async function expectTouchTargets(page: Page): Promise<void> {
-  const small = await page.evaluate(() =>
-    [...document.querySelectorAll('button')]
-      .filter((b) => b.offsetParent !== null)
-      .map((b) => {
-        const r = b.getBoundingClientRect();
-        return { text: b.textContent?.trim(), h: r.height, w: r.width };
-      })
-      .filter((b) => b.h < 44 || b.w < 44),
-  );
-  expect(small).toEqual([]);
-}
 
 test('opts into safe-area insets', async ({ page }) => {
   await page.goto('/');

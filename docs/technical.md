@@ -155,6 +155,7 @@ Conditions are structured data, not text formulas. They're safer, and the conten
 - **Save envelope:** `{ schemaVersion, contentVersion, savedAt, data }`. Older saves are upgraded by migration functions that run in order.
 - **Loading** validates the save with Zod. If it's invalid, the game tries the backup. If that fails too, it offers to export the raw data and start a new life.
 - **Protection against browser cleanup.** The game requests persistent storage when the first life starts, and suggests installing to the home screen at a natural moment (for example, after the first life ends).
+- **Archive entries** are stored in their own envelope with their own schema version and migration list, separate from the active life's. Moving a life into the archive removes the active life and its backups in the same transaction, so an archived life can never load again as active.
 - **Export and import:** a single JSON file containing the active life, the archive and settings.
 
 ### Content loading and updates
@@ -229,8 +230,18 @@ interface LifeState {
   pending: EventInstance[];
   history: HistoryEntry[];
   inputLog: InputRecord[];             // every player input, for exact replay; written by the engine
+  recap: YearRecap | null;             // the current or last finished year; null before the first age-up
+  death: DeathRecord | null;           // set only in the 'dead' phase
   lineage: { generation: number; parentLifeId?: Id };  // for heir play later
 }
+
+interface YearRecap {
+  year: number; age: number;
+  statsBefore: Character['stats'];     // when beginYear started
+  statsAfter: Character['stats'] | null;  // set by endYear; null mid-year
+}
+
+interface DeathRecord { year: number; age: number; causeId: Id }  // cause from content/causes
 
 interface InputRecord {
   year: number;
@@ -399,7 +410,10 @@ interface HistoryEntry {
 interface ArchivedLife {
   id: Id; name: string; pronouns: Pronouns;
   birthYear: number; deathYear: number; ageAtDeath: number;
-  causeOfDeath: string; cityId: Id;
+  causeOfDeath: string | null;         // readable text; null when unfinished
+  unfinished: boolean;                 // a new life was started before this one ended;
+                                       // deathYear and ageAtDeath then give when it was left
+  cityId: Id;
   obituary: string;
   highlights: HistoryEntry[];
   finalNetWorth: number;
@@ -612,8 +626,14 @@ Every coding-AI prompt assumes this file exists at the repo root.
 ## Commands
 See README.md for build, test and check commands.
 
+## Git workflow
+- Branch from the latest main. Open pull requests into main only, never into another feature branch.
+- One stage (or one follow-up task) per pull request. Don't bring in unrelated commits.
+- A pull request merges only when CI is green.
+
 ## When finished
 Report what you built, any deviations from the docs and why, anything left undone, and open questions.
+Only report facts you checked in the code, tests, files or CI logs. Label anything you didn't check as unverified.
 ```
 
 ---
@@ -772,6 +792,7 @@ Meet every Stage 2 acceptance criterion and write the listed tests, including th
 - History entries for milestones (new life stage, family deaths).
 - Obituary generator, version 1 (templates).
 - Archive.
+- Starting a new life while one is in progress archives the current life, marked as unfinished, instead of discarding it.
 
 **Data:** `HistoryEntry`, `ArchivedLife`, phase handling.
 
@@ -783,6 +804,7 @@ Meet every Stage 2 acceptance criterion and write the listed tests, including th
 - Pipeline steps run in the order listed in section M.
 - Across 10,000 average lives, the median age at death is between 72 and 82, and no one lives past 120.
 - Death always ends the life and moves it into the archive.
+- Starting a new life over one in progress moves the old life into the archive, marked as unfinished.
 - The archive survives reloads and grows with each life.
 - Saving and reloading in the middle of a year is safe.
 - Rapid tapping of Age Up can't advance two years at once.
@@ -809,6 +831,7 @@ Build only Stage 3:
 - Age NPCs and let them die.
 - Write history entries for milestones.
 - Build obituary generation (template based, designed so later stages can add to it) and the archive, stored through the persistence module.
+- When the player starts a new life while one is in progress, archive the current life (marked as unfinished) instead of discarding it, and update the Stage 2 confirmation sheet to say so.
 - Build the Age Up button (guarded against double taps), the Home history feed, a simple year recap, the Life history screen, the Death and Obituary screen, and Archive list and detail screens.
 
 Do not implement events, relationships beyond aging family members, money, school or jobs.
@@ -832,13 +855,14 @@ Meet every Stage 3 acceptance criterion, including the 10,000-life lifespan test
 - Casting: use existing people or create new ones.
 - Effect handlers: stat, money (savings number only for now), relationship, memory, flag, schedule, history, death, and chance checks.
 - Scheduled follow-up events and the event log.
+- Lifetime happiness tracking (a running average), used by the obituary's mood line.
 - Simulation runner, version 1 (`tools/simulate.ts`).
 
 **Content:** 40 starter events across every life stage, including early-childhood family events (parents fighting, divorce, neglect), 3 multi-step chains and 1 legendary event. All follow the content rules in `AGENTS.md`.
 
 **Data:** `EventDef`, `ChoiceDef`, `Outcome`, `Effect`, `Condition`, `CastSpec`, `EventInstance`, `ScheduledEvent`.
 
-**UI:** Event card sheet, outcome display, tone accent colors, year recap card.
+**UI:** Event card sheet, outcome display, tone accent colors. After a year with events, the year recap is the last card in the event sheet; after a quiet year, the Home recap card updates as in Stage 3.
 
 **Dependencies:** Stage 3.
 
@@ -875,9 +899,10 @@ Build only Stage 4:
 - The pacing director with the stage budgets from docs/design.md section G, a volatility bonus, a cap of 6, and tone ordering.
 - Casting (reuse existing people or create new ones) and effect handlers for stat, money (savings only), relationship, memory, flag, schedule, history and death, plus chance checks clamped to 5–95%.
 - Scheduled follow-up events and the event log.
+- Lifetime happiness tracking (a running average) for the obituary's mood line.
 - Extend the content build to validate events, including references and placeholders.
 - tools/simulate.ts: run N lives with random choices; report invariant failures, lifespans and how often each event fired.
-- UI: event card sheet, outcome display, tone accents, year recap.
+- UI: event card sheet, outcome display, tone accents. After a year with events, the recap is the last card in the event sheet; after a quiet year, the Home recap card updates as in Stage 3.
 - Write 40 starter events in YAML across all life stages, including early-childhood family events, 3 chains and 1 legendary event. Follow the content rules in AGENTS.md exactly.
 
 Do not implement relationship management, money systems, school, jobs, health conditions, crime or self-discovery.
@@ -963,6 +988,7 @@ Meet every Stage 5 acceptance criterion. When finished, run all checks plus a 1,
 - Missed-payment tracking that triggers event chains.
 - Housing: living with parents (with support based on family wealth), renting, owning, homeless.
 - Relocation to another city.
+- The birth city, stored separately from the current city, for the obituary and archive.
 - Gig work, as the first income source, inside the career module.
 - Lifestyle effects on happiness and stress.
 - A net worth selector.
@@ -1004,7 +1030,7 @@ Build only Stage 6:
 - The yearly ledger in the economy step of the year pipeline, using whole dollars. Put the tax function, living costs, lifestyle multipliers and interest rates in src/content/balance.
 - A debt system (student, personal, mortgage, medical, collections) that later stages will reuse. Shortfalls become debt.
 - Missed-payment tracking that triggers event chains, with recovery paths.
-- Housing: living with parents (support based on family wealth), renting, owning with a down payment and mortgage, homeless. Relocation between cities.
+- Housing: living with parents (support based on family wealth), renting, owning with a down payment and mortgage, homeless. Relocation between cities. Store the birth city separately from the current city, for the obituary and archive.
 - Gig work from age 16 as an income source in the career module, and lifestyle effects on happiness and stress.
 - UI: Money tab, More → Home, money line in the year recap, gig option on the Work tab.
 - 25 money and housing events in YAML, following AGENTS.md.
@@ -1570,8 +1596,9 @@ New careers, events, cities, majors, conditions, offenses and similar content ar
 
 ```text
 src/content/
-  balance/        economy.yaml, mortality.yaml, pacing.yaml, careers.yaml,
-                  education.yaml, health.yaml, legal.yaml, targets.yaml
+  balance/        creation.yaml, aging.yaml, mortality.yaml, economy.yaml, pacing.yaml,
+                  careers.yaml, education.yaml, health.yaml, legal.yaml, targets.yaml
+  causes/         causes of death, one per file ("natural causes", "a stroke")
   cities/         nyc.yaml, los_angeles.yaml, chicago.yaml, houston.yaml, small_town.yaml
   events/
     early/ child/ teen/ youngAdult/ adult/ senior/ any/
@@ -1579,6 +1606,8 @@ src/content/
       <category>/<chain_id>.chain.yaml  a chain's events together in one file
   jobs/ majors/ trades/ grad/ conditions/ offenses/
   names/          name pools
+  text/           story text that isn't an event: history.yaml (milestone entries),
+                  obituary.yaml (obituary sections), relations.yaml ("your mother")
   registries/
     memories.yaml   every memory tag, with its readable text
     flags.yaml      every flag, with a one-line description
