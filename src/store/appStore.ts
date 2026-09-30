@@ -113,10 +113,31 @@ function randomSeed(): string {
   return Array.from(words, (w) => w.toString(16).padStart(8, '0')).join('');
 }
 
+const TEST_SEED = /^[A-Za-z0-9_-]{1,64}$/;
+
+/**
+ * End-to-end test builds only (VITE_TEST_HOOKS=true): `?seed=abc` in the URL
+ * makes the next new life use that seed. The parameter is removed once used,
+ * so a reload can't start a second life with the same seed. In normal builds
+ * this check is compiled away and every seed is random.
+ */
+function testHookSeed(): string {
+  if (import.meta.env.VITE_TEST_HOOKS === 'true') {
+    const url = new URL(window.location.href);
+    const seed = url.searchParams.get('seed');
+    if (seed !== null) {
+      url.searchParams.delete('seed');
+      window.history.replaceState(window.history.state, '', url);
+      if (TEST_SEED.test(seed)) return seed;
+    }
+  }
+  return randomSeed();
+}
+
 export function createAppStore({
   db = defaultDb,
   content: bundle = content,
-  makeSeed = randomSeed,
+  makeSeed = testHookSeed,
   currentYear = () => new Date().getFullYear(),
   checkInvariants = import.meta.env.DEV,
 }: StoreOptions = {}) {

@@ -1,8 +1,13 @@
 import { expect, test, type Page } from '@playwright/test';
 import { expectNoHorizontalScroll, expectTouchTargets, passAgeGate } from './helpers';
 
-async function startRandomLife(page: Page): Promise<string> {
-  await passAgeGate(page);
+/** Lives to 67: long enough for every test that needs a child to grow up. */
+const LONG_LIFE_SEED = 'e2e-0';
+/** Dies at 22, so a whole life plays quickly. */
+const SHORT_LIFE_SEED = 'e2e-49';
+
+async function startRandomLife(page: Page, seed = LONG_LIFE_SEED): Promise<string> {
+  await passAgeGate(page, seed);
   await page.getByRole('button', { name: 'New Life' }).click();
   await page.getByRole('button', { name: 'Start a random life' }).click();
   return (await page.getByTestId('character-name').textContent())?.trim() ?? '';
@@ -21,10 +26,7 @@ async function ageUp(page: Page): Promise<void> {
 }
 
 async function ageUpTimes(page: Page, times: number): Promise<void> {
-  for (let i = 0; i < times; i++) {
-    if (await page.getByText('In memoriam').isVisible()) return;
-    await ageUp(page);
-  }
+  for (let i = 0; i < times; i++) await ageUp(page);
 }
 
 async function liveToDeath(page: Page): Promise<void> {
@@ -40,7 +42,6 @@ test('Age Up advances a year with a recap, and life stages change', async ({ pag
   await expect(page.getByRole('region', { name: /· 1 year old$/ })).toBeVisible();
 
   await ageUpTimes(page, 12);
-  if (await page.getByText('In memoriam').isVisible()) return; // A rare early death; covered below.
   await expect(page.getByText(/^13 years old · /)).toBeVisible();
   await expect(page.getByText(/Teen years/)).toBeVisible();
   const story = page.getByRole('list', { name: 'Your story' });
@@ -69,7 +70,6 @@ test('rapid taps on Age Up advance only one year', async ({ page }) => {
 test('the Life history screen shows the whole timeline', async ({ page }) => {
   await startRandomLife(page);
   await ageUpTimes(page, 6);
-  if (await page.getByText('In memoriam').isVisible()) return;
   await page.getByRole('button', { name: 'More' }).click();
   await page.getByRole('button', { name: 'Life history' }).click();
   await expect(page.getByRole('heading', { name: 'Life history' })).toBeVisible();
@@ -83,7 +83,7 @@ test('the Life history screen shows the whole timeline', async ({ page }) => {
 
 test('a full life ends in an obituary, goes into the archive, and a new life starts', async ({ page }) => {
   test.setTimeout(180_000);
-  const name = await startRandomLife(page);
+  const name = await startRandomLife(page, SHORT_LIFE_SEED);
   await liveToDeath(page);
 
   // Death and Obituary screen.
@@ -100,6 +100,7 @@ test('a full life ends in an obituary, goes into the archive, and a new life sta
   const lives = page.getByRole('list', { name: 'Past lives' }).getByRole('listitem');
   await expect(lives).toHaveCount(1);
   await expect(lives.first()).toContainText(name);
+  await expect(lives.first()).toContainText('Age 22');
   await expect(lives.first()).toContainText(/Died of /);
   await expectNoHorizontalScroll(page);
   await expectTouchTargets(page);
@@ -127,7 +128,6 @@ test('a full life ends in an obituary, goes into the archive, and a new life sta
 test('starting over moves the current life into the archive, unfinished', async ({ page }) => {
   const name = await startRandomLife(page);
   await ageUpTimes(page, 2);
-  if (await page.getByText('In memoriam').isVisible()) return;
 
   await page.getByRole('button', { name: 'More' }).click();
   await page.getByRole('button', { name: 'Back to title' }).click();

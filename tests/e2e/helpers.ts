@@ -1,7 +1,11 @@
 import { expect, type Page } from '@playwright/test';
 
-export async function passAgeGate(page: Page): Promise<void> {
-  await page.goto('/');
+/**
+ * Opens the app and confirms the age gate. `seed` makes the next new life use
+ * that seed (test builds only), so a test can count on how long it lives.
+ */
+export async function passAgeGate(page: Page, seed?: string): Promise<void> {
+  await page.goto(seed ? `/?seed=${encodeURIComponent(seed)}` : '/');
   await expect(page.getByRole('heading', { name: 'Content notice' })).toBeVisible();
   await page.getByRole('button', { name: 'I’m 18 or older' }).click();
   await expect(page.getByRole('button', { name: 'New Life' })).toBeVisible();

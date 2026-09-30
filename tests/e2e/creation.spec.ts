@@ -132,7 +132,8 @@ test('reset all data removes the saved life', async ({ page }) => {
 });
 
 test('a damaged save is restored from the backup, with a notice once', async ({ page }) => {
-  await passAgeGate(page);
+  // A seed that survives its first year.
+  await passAgeGate(page, 'e2e-0');
   await page.getByRole('button', { name: 'New Life' }).click();
   await page.getByRole('button', { name: 'Start a random life' }).click();
   const first = await homeName(page);
