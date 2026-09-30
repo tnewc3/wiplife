@@ -6,7 +6,17 @@ import { Button } from '../../components/Button';
 import { Card } from '../../components/Card';
 import { StatBar } from '../../components/StatBar';
 import { YearRecapList } from '../../components/YearRecapList';
-import { ageLabel, LIFE_STAGE_LABELS, memberAgeLabel, relativeLabel, romanceLine, STAT_LABELS, timelineAgeLabel } from '../../labels';
+import {
+  ageLabel,
+  HOUSING_LABELS,
+  LIFE_STAGE_LABELS,
+  memberAgeLabel,
+  money,
+  relativeLabel,
+  romanceLine,
+  STAT_LABELS,
+  timelineAgeLabel,
+} from '../../labels';
 
 /** How many recent history entries the Home feed shows. */
 const FEED_LENGTH = 12;
@@ -55,14 +65,6 @@ function StoryFeed({ life }: { life: LifeState }) {
   );
 }
 
-const HOUSING_LINES: Record<LifeState['housing']['kind'], string> = {
-  with_parents: 'Living with family',
-  renting: 'Renting',
-  owned: 'Homeowner',
-  homeless: 'Without a home',
-  incarcerated: 'In jail',
-};
-
 /** The Life tab: who you are, how you're doing, your family and your story. */
 export function HomeTab({ life }: { life: LifeState }) {
   const summary = getCharacterSummary(life, content);
@@ -79,7 +81,11 @@ export function HomeTab({ life }: { life: LifeState }) {
           {ageLabel(summary.age)} · {summary.cityName} · {summary.pronounLabel}
         </p>
         <p className="mt-1 text-sm text-muted">
-          {LIFE_STAGE_LABELS[summary.lifeStage]} · {HOUSING_LINES[summary.housing]}
+          {LIFE_STAGE_LABELS[summary.lifeStage]} · {HOUSING_LABELS[summary.housing]}
+        </p>
+        <p className="mt-1 text-sm text-muted" data-testid="money-line">
+          Savings {money(summary.savings)}
+          {summary.debt > 0 && ` · Debt ${money(summary.debt)}`}
         </p>
         {love && (
           <p className="mt-1 text-sm break-words text-muted [overflow-wrap:anywhere]" data-testid="romance-line">

@@ -1,0 +1,35 @@
+# A way out of debt that can't be paid: bankruptcy, with its costs.
+id: bankruptcy_lawyer
+title: A fresh start, for a fee
+text: >-
+  A late-night ad promises a fresh start. You add up what you owe for the
+  first time in months, and the lawyer's number doesn't seem so ridiculous.
+tone: serious
+category: money
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { finances: { debt: { gte: 20000 }, missed: { gte: 1 } } }
+    - { not: { finances: { bankruptWithin: 7 } } }
+weight: { base: 6 }
+cooldownYears: 5
+choices:
+  - id: file
+    label: File for bankruptcy
+    outcome:
+      text: The paperwork takes weeks, the hearing takes ten minutes. Most of what you owed is gone. Banks will remember for years.
+      effects:
+        - { type: debt, action: bankruptcy }
+        - { type: flag, key: filed_bankruptcy, value: true }
+        - { type: history, text: You filed for bankruptcy and started over., importance: 3 }
+        - { type: stat, key: stress, delta: -10 }
+        - { type: stat, key: reputation, delta: -3 }
+  - id: pay
+    label: Keep chipping away at it
+    outcome:
+      text: You tape a list of your debts to the fridge and cross out a line whenever you can.
+      effects:
+        - { type: stat, key: discipline, delta: 3 }
+        - { type: stat, key: stress, delta: 3 }

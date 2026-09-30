@@ -1,0 +1,46 @@
+# A hard stretch without a home, with ways back.
+id: homeless_night
+title: Another cold night
+text: >-
+  You've learned which benches get sun in the morning and which libraries
+  let you stay until close. Tonight is colder than the rest.
+tone: dark
+category: home
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { home: { kind: [homeless] } }
+weight: { base: 10 }
+cooldownYears: 2
+cast:
+  helper: { support: true, optional: true }
+choices:
+  - id: shelter
+    label: Line up for a shelter bed
+    outcome:
+      text: A cot, a blanket, a stranger coughing all night. A caseworker writes your name on a list for housing.
+      effects:
+        - { type: stat, key: health, delta: 1 }
+        - { type: stat, key: stress, delta: 2 }
+        - { type: schedule, eventId: shelter_program, inYears: [1, 2] }
+  - id: helper
+    label: Finally call {helper.name}
+    visibleIf: { role: helper }
+    outcome:
+      text: '{helper.name} picks you up within the hour and doesn''t ask a single question on the drive. You have a room until you''re back on your feet.'
+      effects:
+        - { type: housing, action: rent }
+        - { type: housing, action: roommate }
+        - { type: memory, role: helper, tag: took_you_in }
+        - { type: relationship, role: helper, affection: 5, trust: 5 }
+        - { type: stat, key: happiness, delta: 4 }
+  - id: work
+    label: Take any work you can find
+    outcome:
+      text: Day labor, cash in hand, no questions. Your back aches, but the savings start to grow.
+      effects:
+        - { type: money, delta: 1500 }
+        - { type: stat, key: health, delta: -2 }
+        - { type: stat, key: discipline, delta: 2 }

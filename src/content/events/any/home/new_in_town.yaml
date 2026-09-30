@@ -1,0 +1,33 @@
+id: new_in_town
+title: Block party
+text: >-
+  A flyer under your door: block party Saturday, bring a dish. It's signed
+  by {neighbor.name} from down the hall, with a smiley face.
+tone: light
+category: home
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { home: { kind: [renting, owned], years: { lte: 1 } } }
+weight: { base: 6 }
+cooldownYears: 4
+cast:
+  neighbor: { kind: acquaintance, age: { min: 18, max: 90 }, createIfMissing: true, newChance: 1 }
+choices:
+  - id: go
+    label: Bring a dish and go
+    outcome:
+      text: Your dish is gone in minutes. {neighbor.name} introduces you to half the street and makes you promise to come to the next one.
+      effects:
+        - { type: memory, role: neighbor, tag: welcomed_you }
+        - { type: relationship, role: neighbor, affection: 12, trust: 6 }
+        - { type: stat, key: happiness, delta: 3 }
+  - id: stay
+    label: Stay in and unpack
+    outcome:
+      text: You hear the music through the window all evening. The boxes don't unpack themselves any faster.
+      effects:
+        - { type: relationship, role: neighbor, affection: -6 }
+        - { type: stat, key: happiness, delta: -1 }

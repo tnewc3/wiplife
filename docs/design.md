@@ -401,10 +401,19 @@ Affection and trust move separately, so someone can love you without trusting yo
 
 1. Gross income (salary or gig pay).
 2. Subtract an estimated tax, using one simple function based on income.
-3. Subtract housing costs (rent or mortgage, scaled by city).
-4. Subtract living costs, set by lifestyle tier and city.
-5. Subtract minimum debt payments.
-6. The remainder is added to or taken from savings. Savings earn a small amount of interest.
+3. Add the retirement benefit, from the retirement age (untaxed).
+4. Subtract housing costs (rent or mortgage, scaled by city). A partner or spouse who lives with you pays their share.
+5. Subtract living costs, set by lifestyle tier and city.
+6. Subtract minimum debt payments.
+7. The remainder is added to or taken from savings. Savings earn a small amount of interest.
+
+### Retirement benefit
+
+A yearly benefit, like Social Security, paid from age 67 to anyone with at least 10 years of earned income. It is based on how many years you earned and your average yearly earnings in those years: lower earnings are replaced at a higher rate than higher ones, and fewer than 35 years pay a share of the full benefit. Every kind of earned income counts toward it: gig pay, and salaries once careers exist. All of its numbers live in the economy balance file.
+
+### Living together
+
+A partner, fiancé or spouse can move in with you ("Move in together" on their page, or when they ask). While you live together they pay half of the rent, or half of an owned home's upkeep (a mortgage stays yours). They move with you to a new rental or city. After a breakup or divorce they move out and you keep the home and its whole cost.
 
 ### Lifestyle tier
 

@@ -1,0 +1,50 @@
+# Money trouble chain, step 1 (trigger: missed_payment): you missed a payment.
+id: missed_payment_letter
+title: Past due
+text: >-
+  The envelope is red, and so is the word stamped across the letter inside:
+  PAST DUE. You missed a payment, and your lender would like to talk about it.
+tone: serious
+category: money
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { finances: { missed: { gte: 1 } } }
+weight: { base: 10 }
+cooldownYears: 3
+followUpOnly: true
+cast:
+  helper: { support: true, optional: true }
+choices:
+  - id: call
+    label: Call and ask for more time
+    check:
+      base: 45
+      stats: [{ key: confidence, weight: 0.3 }, { key: sociability, weight: 0.2 }]
+      success:
+        text: The person on the phone has heard every story there is, and likes yours. They waive the late fees and knock a little off.
+        effects:
+          - { type: debt, action: forgive, share: 0.1 }
+          - { type: stat, key: stress, delta: -3 }
+      failure:
+        text: Forty minutes on hold, and then a recording. The letter stays on the fridge.
+        effects:
+          - { type: stat, key: stress, delta: 3 }
+  - id: helper
+    label: Ask {helper.name} for help
+    visibleIf: { role: helper }
+    outcome:
+      text: '{helper.name} doesn''t lecture you, which is somehow worse. The money arrives the next morning.'
+      effects:
+        - { type: money, delta: 2000 }
+        - { type: memory, role: helper, tag: lent_you_money }
+        - { type: relationship, role: helper, trust: -2, affection: 2 }
+        - { type: stat, key: happiness, delta: -1 }
+  - id: drawer
+    label: Put the letter in a drawer
+    outcome:
+      text: Out of sight. Not out of mind.
+      effects:
+        - { type: stat, key: stress, delta: 4 }

@@ -1,0 +1,42 @@
+# Money trouble chain (trigger: foreclosure): the bank sold your home; you now rent.
+id: foreclosure_notice
+title: The bank's house now
+text: >-
+  After enough missed mortgage payments, the bank takes your home and sells
+  it for less than it's worth. You get a week to pack, and a list of rentals.
+tone: dark
+category: home
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { home: { kind: [renting] } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  parent: { kind: parent, optional: true }
+choices:
+  - id: roommate
+    label: Rent a room and share the costs
+    outcome:
+      text: Your new roommate labels the milk. It's fine. It's temporary.
+      effects:
+        - { type: housing, action: roommate }
+        - { type: stat, key: happiness, delta: -3 }
+  - id: home
+    label: Move back in with {parent.name}
+    visibleIf: { role: parent, alive: true, status: [active] }
+    outcome:
+      text: '{parent.name} helps you carry boxes into your childhood room and pretends not to notice how many there are.'
+      effects:
+        - { type: housing, action: move_home }
+        - { type: memory, role: parent, tag: took_you_in }
+        - { type: stat, key: happiness, delta: -2 }
+  - id: grieve
+    label: Let yourself grieve the house
+    outcome:
+      text: You drive past it once, then never again. The new owners painted the door.
+      effects:
+        - { type: stat, key: happiness, delta: -5 }
+        - { type: stat, key: stress, delta: -2 }

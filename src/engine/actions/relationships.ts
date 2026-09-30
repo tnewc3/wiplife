@@ -6,6 +6,7 @@
  * live in ./index.ts.
  */
 import type { ActionId, ContentBundle } from '../../content/schemas';
+import { canMoveInTogether } from '../housing';
 import {
   ASKABLE_KINDS,
   currentPartner,
@@ -47,6 +48,11 @@ export const RELATIONSHIP_ACTIONS: Record<ActionId, ActionRule> = {
       rel.kind === 'partner' &&
       isCurrentPartner(state, rel) &&
       yearsInKind(state, rel) >= content.balance.relationships.actions.proposeAfterYears,
+  },
+  move_in: {
+    irreversible: false,
+    // Your partner, fiancé or spouse, who doesn't live with you yet.
+    allowed: (state, rel, _person, content) => canMoveInTogether(state, rel.personId, content),
   },
   marry: {
     irreversible: false,

@@ -1,0 +1,43 @@
+id: payday_loan
+title: Cash today
+text: >-
+  Rent is due Friday and you're short. The storefront on the corner has a
+  sign in the window: CASH TODAY. NO CREDIT CHECK.
+tone: serious
+category: money
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { money: { lt: 500 } }
+    - { home: { kind: [renting] } }
+weight: { base: 5 }
+cooldownYears: 5
+cast:
+  helper: { support: true, optional: true }
+choices:
+  - id: borrow
+    label: Take the loan
+    outcome:
+      text: Ten minutes, one signature, $1,000 in your hand. You'll owe $1,600 of it back.
+      effects:
+        - { type: money, delta: 1000 }
+        - { type: debt, action: add, kind: personal, amount: 1600 }
+        - { type: stat, key: stress, delta: 2 }
+  - id: helper
+    label: Swallow your pride and ask {helper.name}
+    visibleIf: { role: helper }
+    outcome:
+      text: '{helper.name} lends you the money and makes you promise never to set foot in that place.'
+      effects:
+        - { type: money, delta: 800 }
+        - { type: memory, role: helper, tag: lent_you_money }
+        - { type: relationship, role: helper, trust: 2 }
+  - id: walk
+    label: Walk past and figure it out
+    outcome:
+      text: You skip meals and pay late. It works, barely.
+      effects:
+        - { type: stat, key: stress, delta: 4 }
+        - { type: stat, key: health, delta: -1 }

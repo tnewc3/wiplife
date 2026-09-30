@@ -1,0 +1,60 @@
+# Money trouble chain, step 2 (trigger: collections): a debt went to collections.
+id: collections_calls
+title: Unknown number
+text: >-
+  The same unknown number calls three times a day. When you finally pick up,
+  a cheerful voice says your debt now belongs to a collections agency, and
+  that they are very motivated to help you pay it.
+tone: serious
+category: money
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { finances: { collections: true } }
+weight: { base: 10 }
+cooldownYears: 3
+followUpOnly: true
+cast:
+  helper: { support: true, optional: true }
+choices:
+  - id: plan
+    label: Sit down with a debt counselor
+    visibleIf: { not: { finances: { planWithin: 4 } } }
+    outcome:
+      text: A nonprofit counselor rolls your debts into one plan with a lower rate. It will take years, but it's a plan.
+      effects:
+        - { type: debt, action: plan }
+        - { type: stat, key: stress, delta: -5 }
+        - { type: stat, key: discipline, delta: 2 }
+  - id: settle
+    label: Offer to settle for less
+    check:
+      base: 40
+      stats: [{ key: confidence, weight: 0.3 }, { key: discipline, weight: 0.2 }]
+      success:
+        text: The agency would rather have something than nothing. They take a deal, and you hang up shaking.
+        effects:
+          - { type: debt, action: forgive, kinds: [collections], share: 0.35 }
+          - { type: stat, key: stress, delta: -3 }
+      failure:
+        text: They laugh, politely, and keep calling.
+        effects:
+          - { type: stat, key: stress, delta: 4 }
+  - id: helper
+    label: Tell {helper.name} how bad it's gotten
+    visibleIf: { role: helper }
+    outcome:
+      text: '{helper.name} sits with you and the stack of letters and pays off half of it. "Don''t make it weird," {helper.they} {helper:says|say}.'
+      effects:
+        - { type: debt, action: forgive, kinds: [collections], share: 0.5 }
+        - { type: memory, role: helper, tag: covered_your_debt }
+        - { type: relationship, role: helper, affection: 3, trust: 3 }
+  - id: ignore
+    label: Let it ring
+    outcome:
+      text: You learn the ringtone by heart. It follows you into your dreams.
+      effects:
+        - { type: stat, key: stress, delta: 6 }
+        - { type: stat, key: happiness, delta: -2 }

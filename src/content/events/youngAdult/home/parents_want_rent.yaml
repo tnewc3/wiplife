@@ -1,0 +1,43 @@
+id: parents_want_rent
+title: Room and board
+text: >-
+  {parent.name} sits you down at the kitchen table with a cup of tea and a
+  piece of paper. It's a budget. Your name is on it.
+tone: neutral
+category: home
+rarity: common
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 21 } }
+    - { home: { kind: [with_parents] } }
+weight: { base: 7 }
+cooldownYears: 4
+cast:
+  parent: { kind: parent, age: { min: 30, max: 120 } }
+choices:
+  - id: pay
+    label: Agree to chip in
+    outcome:
+      text: '{parent.name} looks relieved, then a little embarrassed. The first envelope goes on the fridge.'
+      effects:
+        - { type: money, delta: -1800 }
+        - { type: relationship, role: parent, affection: 4, trust: 5 }
+        - { type: memory, role: parent, tag: asked_you_for_rent }
+  - id: move
+    label: Take the hint and move out
+    outcome:
+      text: You find a place across town within a month. {parent.name} cries a little on moving day, which surprises you both.
+      effects:
+        - { type: money, delta: -1500 }
+        - { type: housing, action: rent }
+        - { type: relationship, role: parent, affection: 3 }
+        - { type: history, text: 'You moved out of your family''s home.', importance: 2 }
+  - id: argue
+    label: Point out that you never asked to be born
+    outcome:
+      text: It does not go well. Dinner is quiet for a week.
+      effects:
+        - { type: memory, role: parent, tag: asked_you_for_rent }
+        - { type: relationship, role: parent, affection: -8, trust: -4 }
+        - { type: stat, key: stress, delta: 3 }

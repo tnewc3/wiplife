@@ -68,3 +68,8 @@ tags:
   you_apologized: You apologized to {npc.them}
   anniversary_trip: Took the trip of a lifetime with you
   lent_you_money: Lent you money when you were in a bind
+  # Money and home (Stage 6).
+  took_you_in: Took you in when you had nowhere to go
+  covered_your_debt: Helped you pay down a debt
+  welcomed_you: Welcomed you to the neighborhood
+  asked_you_for_rent: Asked you to start paying rent

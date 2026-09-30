@@ -1,10 +1,14 @@
 import type { YearRecapView } from '../../engine/selectors';
-import { STAT_LABELS, statChangeLabel } from '../labels';
+import { recapMoneyLine, STAT_LABELS, statChangeLabel } from '../labels';
 
 /** What changed in a year: history entries, memories, people met and stat changes. */
 export function YearRecapList({ recap }: { recap: YearRecapView }) {
   const empty =
-    recap.entries.length === 0 && recap.statChanges.length === 0 && recap.memories.length === 0 && recap.newPeople.length === 0;
+    recap.entries.length === 0 &&
+    recap.statChanges.length === 0 &&
+    recap.memories.length === 0 &&
+    recap.newPeople.length === 0 &&
+    recap.money === null;
   if (empty) return <p className="mt-1 text-muted">A quiet year.</p>;
   return (
     <ul className="mt-1 flex flex-col gap-1">
@@ -23,6 +27,11 @@ export function YearRecapList({ recap }: { recap: YearRecapView }) {
           {m.name}: {m.text}
         </li>
       ))}
+      {recap.money && (
+        <li className="break-words [overflow-wrap:anywhere]" data-testid="recap-money">
+          {recapMoneyLine(recap.money)}
+        </li>
+      )}
       {recap.statChanges.map((c) => (
         <li key={c.stat} className="text-muted">
           {STAT_LABELS[c.stat]} {statChangeLabel(c.change)}.

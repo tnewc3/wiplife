@@ -1,0 +1,48 @@
+# Money trouble chain, step 3 (trigger: garnishment): collections takes part of your pay.
+id: wage_garnishment
+title: A lighter paycheck
+text: >-
+  Your pay arrives short. A court order lets your creditors take their cut
+  before you ever see it, and they will keep taking it until you catch up.
+tone: dark
+category: money
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { finances: { collections: true } }
+weight: { base: 10 }
+cooldownYears: 4
+followUpOnly: true
+choices:
+  - id: bankrupt
+    label: File for bankruptcy
+    visibleIf:
+      all:
+        - { finances: { debt: { gte: 8000 } } }
+        - { not: { finances: { bankruptWithin: 7 } } }
+    outcome:
+      text: A tired lawyer, a lot of forms, one morning in court. Most of what you owed is gone. So is your credit, for a long time.
+      effects:
+        - { type: debt, action: bankruptcy }
+        - { type: flag, key: filed_bankruptcy, value: true }
+        - { type: history, text: You filed for bankruptcy and started over., importance: 3 }
+        - { type: stat, key: stress, delta: -10 }
+        - { type: stat, key: happiness, delta: -3 }
+        - { type: stat, key: reputation, delta: -3 }
+  - id: plan
+    label: Call a debt counselor
+    visibleIf: { not: { finances: { planWithin: 4 } } }
+    outcome:
+      text: The counselor gets the garnishment lifted in exchange for a steady plan. It's slow, but it's yours.
+      effects:
+        - { type: debt, action: plan }
+        - { type: stat, key: stress, delta: -4 }
+  - id: endure
+    label: Tighten your belt and endure it
+    outcome:
+      text: You learn exactly how little you can live on.
+      effects:
+        - { type: stat, key: stress, delta: 4 }
+        - { type: stat, key: discipline, delta: 2 }

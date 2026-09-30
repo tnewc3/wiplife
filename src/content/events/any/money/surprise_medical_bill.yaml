@@ -1,0 +1,43 @@
+id: surprise_medical_bill
+title: The bill
+text: >-
+  A bad fall, an ambulance you don't remember agreeing to, and four hours in
+  an emergency room. You're fine. The bill that arrives a month later is not.
+tone: serious
+category: money
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires: { age: { gte: 18 } }
+weight: { base: 3 }
+cooldownYears: 10
+choices:
+  - id: plan
+    label: Set up a payment plan
+    outcome:
+      text: The hospital is happy to let you pay it off slowly. Very slowly.
+      effects:
+        - { type: debt, action: add, kind: medical, amount: 4500 }
+        - { type: stat, key: stress, delta: 3 }
+  - id: pay
+    label: Pay it all now
+    visibleIf: { money: { gte: 4500 } }
+    outcome:
+      text: It stings, but it's gone.
+      effects:
+        - { type: money, delta: -4500 }
+        - { type: stat, key: stress, delta: 1 }
+  - id: negotiate
+    label: Call billing and fight every line
+    check:
+      base: 40
+      stats: [{ key: confidence, weight: 0.3 }, { key: discipline, weight: 0.2 }]
+      success:
+        text: Two duplicate charges, one test you never had. The bill shrinks by two thirds.
+        effects:
+          - { type: debt, action: add, kind: medical, amount: 1500 }
+          - { type: stat, key: confidence, delta: 2 }
+      failure:
+        text: Every department transfers you to another. You end up with the full bill and a headache.
+        effects:
+          - { type: debt, action: add, kind: medical, amount: 4500 }
+          - { type: stat, key: stress, delta: 5 }

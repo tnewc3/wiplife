@@ -34,9 +34,11 @@ export interface ObituarySection {
   write: (ctx: ObituaryContext) => string | null;
 }
 
-function cityName(ctx: ObituaryContext): string {
-  const { cityId } = ctx.life.character;
-  return ctx.content.cities[cityId]?.name ?? cityId;
+/** The city you lived in at the end, or (birth) the city you were born in. */
+function cityName(ctx: ObituaryContext, which: 'current' | 'birth' = 'current'): string {
+  const { cityId, birthCityId } = ctx.life.character;
+  const id = which === 'birth' ? birthCityId : cityId;
+  return ctx.content.cities[id]?.name ?? id;
 }
 
 /** Average Happiness over the finished years (current Happiness before the first). */
@@ -66,8 +68,7 @@ export const OBITUARY_SECTIONS: readonly ObituarySection[] = [
       if (parents.length === 0) return null;
       return ctx.write(ctx.content.text.obituary.origins, {
         birthYear: ctx.life.birthYear,
-        // Nobody moves city before Stage 6, which will record the birth city.
-        birthCity: cityName(ctx),
+        birthCity: cityName(ctx, 'birth'),
         parents: ctx.list(parents.map(fullName)),
       });
     },

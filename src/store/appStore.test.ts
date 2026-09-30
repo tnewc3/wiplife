@@ -4,7 +4,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { InvalidInputError } from '../engine/creation/input';
 import { customInput, lifeAtAge } from '../engine/testFixtures';
 import { beginYear, CONTINUE_CHOICE } from '../engine/life';
-import { getEventCard } from '../engine/selectors';
+import { getEventCard, getYearRecap } from '../engine/selectors';
 import { createDb, DEFAULT_SETTINGS, lifeStateSchema, listArchive, loadSettings, makeEnvelope, readSave, writeSave, type WiplifeDb } from '../persistence';
 import { content } from '../content';
 import { createAppStore } from './appStore';
@@ -464,5 +464,52 @@ describe('app store: people and actions', () => {
     expect(store.getState().personId).toBe('pal');
     store.getState().setTab('life');
     expect(store.getState().personId).toBeNull();
+  });
+});
+
+describe('app store: money and home', () => {
+  it('takes money and home actions between years and autosaves them', async () => {
+    const { db, store } = setup();
+    await store.getState().init();
+    await store.getState().startRandomLife();
+    const grown = produce(lifeAtAge('store-money', 25, content), (d) => {
+      d.finances.savings = 100_000;
+      d.housing = { kind: 'with_parents', cityId: d.character.cityId, annualCost: 0, since: d.birthYear };
+      for (const p of Object.values(d.people)) p.cityId = d.character.cityId;
+    });
+    await writeSave(db, makeEnvelope(grown, content.contentVersion));
+    const reopened = createAppStore({ db, makeSeed: () => 'x', currentYear: () => 2026, checkInvariants: true });
+    await reopened.getState().init();
+    reopened.getState().continueLife();
+
+    await reopened.getState().takeLifeAction('set_lifestyle', { lifestyle: 'lavish' });
+    await reopened.getState().takeLifeAction('start_gig');
+    await reopened.getState().takeLifeAction('rent_home');
+    const life = reopened.getState().life!;
+    expect([life.finances.lifestyle, life.career.gig, life.housing.kind]).toEqual(['lavish', true, 'renting']);
+    const saved = await readSave(db, lifeStateSchema);
+    expect(saved.status === 'ok' && saved.envelope.data).toEqual(life);
+
+    // More → Home opens and closes; switching tabs closes it.
+    reopened.getState().setTab('more');
+    reopened.getState().openHome();
+    expect(reopened.getState().moreView).toBe('home');
+    reopened.getState().setTab('money');
+    expect(reopened.getState().moreView).toBeNull();
+
+    // The next year's recap has a money line.
+    await reopened.getState().ageUp();
+    while (reopened.getState().eventSheet && !reopened.getState().eventSheet!.recap) {
+      const l = reopened.getState().life!;
+      const card = getEventCard(l, reopened.getState().eventSheet!.index, content)!;
+      if (!card.resolved) await reopened.getState().chooseEvent(card.instanceId, card.choices[0]!.id);
+      else await reopened.getState().continueEvents();
+    }
+    const after = reopened.getState().life;
+    if (after && after.phase === 'yearStart') {
+      const recap = getYearRecap(after, content)!;
+      expect(recap.money).not.toBeNull();
+      expect(recap.money!.savings).toBe(after.finances.savings);
+    }
   });
 });

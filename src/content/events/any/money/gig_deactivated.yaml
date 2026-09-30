@@ -1,0 +1,42 @@
+id: gig_deactivated
+title: Account under review
+text: >-
+  One angry customer, one bad rating, and the gig app locks your account
+  "pending review." There's no one to call.
+tone: serious
+category: money
+rarity: common
+lifeStages: [teen, youngAdult, adult, senior]
+requires: { finances: { gig: true } }
+weight: { base: 4 }
+cooldownYears: 6
+choices:
+  - id: appeal
+    label: Appeal, politely and relentlessly
+    check:
+      base: 45
+      stats: [{ key: confidence, weight: 0.2 }, { key: discipline, weight: 0.2 }]
+      success:
+        text: Your fourteenth email reaches a human. The account comes back with an apology nobody meant.
+        effects:
+          - { type: stat, key: confidence, delta: 2 }
+      failure:
+        text: Weeks of automated replies. By the time it's restored, you've lost a month of work.
+        effects:
+          - { type: money, delta: -2500 }
+          - { type: stat, key: stress, delta: 5 }
+  - id: switch
+    label: Sign up with a rival app
+    outcome:
+      text: A new app, a new bag, a new set of rules. You lose a couple of weeks of pay getting started.
+      effects:
+        - { type: money, delta: -900 }
+        - { type: stat, key: stress, delta: 2 }
+  - id: break
+    label: Take it as a sign to rest
+    outcome:
+      text: You sleep in, see friends, and realize how tired you'd been.
+      effects:
+        - { type: money, delta: -2000 }
+        - { type: stat, key: stress, delta: -5 }
+        - { type: stat, key: happiness, delta: 2 }

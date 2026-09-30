@@ -1,0 +1,31 @@
+id: first_gig
+title: Your first shift
+text: >-
+  Your first week of gig work: a borrowed bike, an insulated bag, and a
+  phone that won't stop buzzing. At the end of it there's money in your
+  account that you earned yourself.
+tone: light
+category: money
+rarity: common
+lifeStages: [teen]
+requires:
+  all:
+    - { age: { gte: 16 } }
+    - { finances: { gig: true } }
+weight: { base: 10 }
+once: true
+choices:
+  - id: save
+    label: Save every cent
+    outcome:
+      text: You open a savings account and check the balance more than is strictly healthy.
+      effects:
+        - { type: money, delta: 300 }
+        - { type: stat, key: discipline, delta: 3 }
+  - id: spend
+    label: Buy something you've wanted forever
+    outcome:
+      text: The sneakers are perfect. Nobody else knows you paid for them yourself, but you do.
+      effects:
+        - { type: stat, key: happiness, delta: 4 }
+        - { type: stat, key: confidence, delta: 2 }

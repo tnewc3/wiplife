@@ -11,6 +11,7 @@ requires:
   all:
     - { age: { gte: 18 } }
     - { role: partner, years: { gte: 1 } }
+    - { home: { partner: false } }
 weight: { base: 7 }
 cooldownYears: 5
 cast:
@@ -22,6 +23,7 @@ choices:
       text: One drawer becomes half the closet within a week. You discover {partner.name} hums while brushing {partner.their} teeth.
       effects:
         - { type: memory, role: partner, tag: moved_in_together }
+        - { type: housing, action: move_in_together, role: partner }
         - { type: relationship, role: partner, affection: 8, trust: 5 }
         - { type: stat, key: happiness, delta: 4 }
         - { type: stat, key: stress, delta: 2 }

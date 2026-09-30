@@ -5,6 +5,17 @@
  */
 import type { ContentBundle, Effect, EffectStatKey, EventDef } from '../../content/schemas';
 import { HIDDEN_KEYS, STAT_KEYS } from '../../content/schemas';
+import {
+  addDebt,
+  canStartDebtPlan,
+  declareBankruptcy,
+  earn,
+  forgiveDebts,
+  isIndependent,
+  spend,
+  startDebtPlan,
+} from '../finance';
+import { moveInTogether, moveTo, refreshHousingCost, sellHome, settleHousehold, supportingParent } from '../housing';
 import { clampInt } from '../random';
 import { canChangeKind, canSetStatus } from '../relationships';
 import { nextInt, type RngState } from '../rng';
@@ -39,10 +50,65 @@ function adjustScore(state: LifeState, key: EffectStatKey, delta: number): void 
 const handlers: { [T in Effect['type']]: Handler<T> } = {
   stat: (state, effect) => adjustScore(state, effect.key, effect.delta),
 
-  money: (state, effect) => {
-    // Savings only until Stage 6; a cost larger than savings stops at zero.
-    const next = state.finances.savings + effect.delta;
-    state.finances.savings = Math.max(0, Math.min(Number.MAX_SAFE_INTEGER, next));
+  money: (state, effect, ctx) => {
+    // Savings never go below zero: past the independence age the rest is debt.
+    if (effect.delta >= 0) earn(state, effect.delta);
+    else spend(state, -effect.delta, ctx.content);
+  },
+
+  debt: (state, effect, ctx) => {
+    // Children never take on debt.
+    if (!isIndependent(state, ctx.content)) return;
+    switch (effect.action) {
+      case 'add':
+        if (effect.kind && effect.amount) addDebt(state, effect.kind, effect.amount, ctx.content);
+        return;
+      case 'forgive':
+        forgiveDebts(state, effect.share ?? 0, ctx.content, effect.kinds);
+        return;
+      case 'bankruptcy':
+        declareBankruptcy(state);
+        return;
+      case 'plan':
+        if (canStartDebtPlan(state, ctx.content)) startDebtPlan(state, ctx.content);
+        return;
+    }
+  },
+
+  housing: (state, effect, ctx) => {
+    // Only an adult chooses where to live; a move that doesn't fit is ignored.
+    if (!isIndependent(state, ctx.content)) return;
+    const h = state.housing;
+    const city = state.character.cityId;
+    switch (effect.action) {
+      case 'move_home': {
+        const parent = supportingParent(state);
+        if (parent && h.kind !== 'owned' && h.kind !== 'with_parents' && h.kind !== 'incarcerated') {
+          moveTo(state, 'with_parents', parent.cityId, ctx.content);
+        }
+        return;
+      }
+      case 'rent':
+        if (h.kind === 'with_parents' || h.kind === 'homeless') moveTo(state, 'renting', city, ctx.content);
+        return;
+      case 'homeless':
+        if (h.kind === 'with_parents' || h.kind === 'renting') moveTo(state, 'homeless', city, ctx.content);
+        return;
+      case 'roommate':
+      case 'live_alone':
+        if (h.kind !== 'renting') return;
+        // You don't take in a roommate while living with your partner.
+        if (effect.action === 'roommate' && h.partnerId === undefined) h.roommate = true;
+        else delete h.roommate;
+        refreshHousingCost(state, ctx.content);
+        return;
+      case 'sell':
+        if (h.kind === 'owned') sellHome(state, ctx.content);
+        return;
+      case 'move_in_together':
+        moveInTogether(state, ctx.cast[effect.role ?? ''] ?? '', ctx.content);
+        return;
+    }
   },
 
   relationship: (state, effect, ctx) => {
@@ -59,6 +125,8 @@ const handlers: { [T in Effect['type']]: Handler<T> } = {
       if (effect.kind === 'spouse') rel.wasSpouse = true;
     }
     if (effect.status !== undefined && canSetStatus(state, id, effect.status)) rel.status = effect.status;
+    // A partner who lived with you and no longer is your partner moves out.
+    settleHousehold(state, ctx.content);
   },
 
   memory: (state, effect, ctx) => {

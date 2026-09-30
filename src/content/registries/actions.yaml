@@ -5,6 +5,7 @@
 actions:
   ask_out: { events: [ask_out_result, ask_ex_back] }
   propose: { events: [proposal] }
+  move_in: { events: [move_in_talk] }
   marry: { events: [wedding] }
   break_up: { events: [break_up_talk] }
   divorce: { events: [divorce_papers] }

@@ -1,0 +1,37 @@
+id: splurge_temptation
+title: You deserve it
+text: >-
+  A watch in a shop window. A week in Lisbon. A car with heated seats. You
+  have the money, and the lavish life has made you very good at wanting.
+tone: light
+category: money
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { money: { gte: 6000 } }
+    - { finances: { lifestyle: [lavish] } }
+weight: { base: 6 }
+cooldownYears: 3
+choices:
+  - id: buy
+    label: Buy it
+    outcome:
+      text: It's wonderful. For about a month, it's all you think about.
+      effects:
+        - { type: money, delta: -5000 }
+        - { type: stat, key: happiness, delta: 4 }
+  - id: small
+    label: Buy something smaller
+    outcome:
+      text: A nice dinner instead of a new car. It's a very nice dinner.
+      effects:
+        - { type: money, delta: -600 }
+        - { type: stat, key: happiness, delta: 1 }
+  - id: walk
+    label: Walk away
+    outcome:
+      text: You think about it for a week, then forget it entirely.
+      effects:
+        - { type: stat, key: discipline, delta: 2 }

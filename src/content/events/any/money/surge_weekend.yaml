@@ -1,0 +1,28 @@
+id: surge_weekend
+title: Surge pricing
+text: >-
+  A festival is in town and the gig app is lit up red: double pay, all
+  weekend, for anyone willing to drive until they drop.
+tone: light
+category: money
+rarity: common
+lifeStages: [teen, youngAdult, adult, senior]
+requires: { finances: { gig: true } }
+weight: { base: 4 }
+cooldownYears: 3
+choices:
+  - id: grind
+    label: Work every surge
+    outcome:
+      text: Forty-one hours, nine energy drinks, one very good weekend for your savings.
+      effects:
+        - { type: money, delta: 1500 }
+        - { type: stat, key: stress, delta: 5 }
+        - { type: stat, key: health, delta: -1 }
+  - id: rest
+    label: Keep your weekend
+    outcome:
+      text: You go to the festival instead, as a customer. It's great.
+      effects:
+        - { type: stat, key: happiness, delta: 3 }
+        - { type: money, delta: -100 }

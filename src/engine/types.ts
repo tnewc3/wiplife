@@ -3,10 +3,10 @@
  * JSON: no classes, no Dates, no functions. Money is whole dollars; stats are
  * integers from 0 to 100.
  */
-import type { GenderCategory } from '../content/schemas';
+import type { DebtKind, GenderCategory, HousingKind, Lifestyle } from '../content/schemas';
 import type { RngState } from './rng';
 
-export type { GenderCategory } from '../content/schemas';
+export type { DebtKind, GenderCategory, HousingKind, Lifestyle } from '../content/schemas';
 
 export type Id = string;
 
@@ -86,7 +86,10 @@ export interface Character {
   stats: Stats;
   personality: Personality;
   hidden: HiddenValues;
+  /** The city you live in now (where your home is). */
   cityId: Id;
+  /** The city you were born in; never changes (for the obituary and archive). */
+  birthCityId: Id;
   familyWealth: FamilyWealth;
   custom: boolean;
 }
@@ -174,34 +177,74 @@ export interface CareerState {
 
 export interface Debt {
   id: Id;
-  kind: 'student' | 'personal' | 'mortgage' | 'medical' | 'collections';
+  kind: DebtKind;
+  /** Whole dollars owed; a paid-off debt is removed. */
   balance: number;
+  /** Yearly interest, e.g. 0.065. */
   annualRate: number;
+  /** The yearly payment due (the balance, if less). */
   minPayment: number;
+  /** Missed payments in a row. */
   missed: number;
+}
+
+/** One year's money, from the ledger (docs/design.md, section J). */
+export interface Ledger {
+  year: number;
+  /** Earned income before tax (gig pay, and salaries from Stage 8). */
+  gross: number;
+  /** The retirement benefit (untaxed). */
+  retirement: number;
+  tax: number;
+  housing: number;
+  living: number;
+  /** Paid on debts, including anything garnished. */
+  debtPayments: number;
+  /** Interest earned on savings. */
+  interest: number;
+  /** Interest added to debts. */
+  debtInterest: number;
+  /** Costs savings couldn't cover, added to personal debt. */
+  borrowed: number;
+  /** Your share of costs at your parents' that your family covered because you couldn't. */
+  support: number;
+  /** gross + retirement + interest − tax − housing − living − debtPayments (savings change by net + borrowed). */
+  net: number;
 }
 
 export interface FinanceState {
   savings: number;
   debts: Debt[];
-  lifestyle: 'frugal' | 'comfortable' | 'lavish';
-  lastLedger?: {
-    year: number;
-    gross: number;
-    tax: number;
-    housing: number;
-    living: number;
-    debtPayments: number;
-    net: number;
-  };
+  lifestyle: Lifestyle;
+  lastLedger?: Ledger;
+  /**
+   * The earnings record the retirement benefit is based on: years with
+   * earned income and the total earned in them (each year capped).
+   */
+  earnings: { years: number; total: number };
+  /** Years in a row behind on your housing costs (borrowing for at least balance's evictionShare of them). */
+  hardshipYears: number;
+  /** The year you last filed for bankruptcy. */
+  bankruptcyYear?: number;
+  /** The year you last set up a debt plan. */
+  debtPlanYear?: number;
 }
 
 export interface HousingState {
-  kind: 'with_parents' | 'renting' | 'owned' | 'homeless' | 'incarcerated';
+  kind: HousingKind;
+  /** Always the city you live in (character.cityId). */
   cityId: Id;
+  /** Yearly cost of this home as the ledger charges it (a mortgage is paid as a debt). */
   annualCost: number;
+  /** An owned home's value. */
   homeValue?: number;
   mortgageDebtId?: Id;
+  /** The year you moved into this home. */
+  since: number;
+  /** Sharing a rental with a roommate. */
+  roommate?: true;
+  /** Your partner or spouse who lives with you (and pays their share). */
+  partnerId?: Id;
 }
 
 export interface HealthState {
@@ -269,7 +312,10 @@ export interface ArchivedLife {
   causeOfDeath: string | null;
   /** True when a new life was started before this one ended. */
   unfinished: boolean;
+  /** Where the life ended (or was set aside). */
   cityId: Id;
+  /** Where the life began. */
+  birthCityId: Id;
   obituary: string;
   highlights: HistoryEntry[];
   finalNetWorth: number;

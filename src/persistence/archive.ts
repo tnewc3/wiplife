@@ -12,10 +12,17 @@ import { migrateEnvelope, type Migration } from './migrations';
 import { writeSaveIn } from './saves';
 
 /** Version of the archive entry layout. Bump it with a migration below when ArchivedLife changes. */
-export const ARCHIVE_SCHEMA_VERSION = 1;
+export const ARCHIVE_SCHEMA_VERSION = 2;
 
 /** Every archive migration ever shipped, oldest first. Never edit or remove one. */
-export const archiveMigrations: readonly Migration[] = [];
+export const archiveMigrations: readonly Migration[] = [
+  {
+    from: 1,
+    description: 'Stage 6: the birth city. Nobody could move before, so it is the city the life ended in.',
+    migrate: (data) =>
+      typeof data === 'object' && data !== null && !Array.isArray(data) ? { ...data, birthCityId: (data as { cityId?: unknown }).cityId } : data,
+  },
+];
 
 export const archivedLifeSchema: z.ZodType<ArchivedLife> = z.strictObject({
   id: z.string().min(1),
@@ -27,6 +34,7 @@ export const archivedLifeSchema: z.ZodType<ArchivedLife> = z.strictObject({
   causeOfDeath: z.string().min(1).nullable(),
   unfinished: z.boolean(),
   cityId: z.string().min(1),
+  birthCityId: z.string().min(1),
   obituary: z.string().min(1),
   highlights: z.array(historyEntrySchema),
   finalNetWorth: z.int().refine(Number.isSafeInteger, 'must be a safe integer'),

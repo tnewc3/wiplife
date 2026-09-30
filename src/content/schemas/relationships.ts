@@ -34,7 +34,7 @@ export const romanceStatusSchema = z.enum(ROMANCE_STATUSES);
 export type RomanceStatus = z.infer<typeof romanceStatusSchema>;
 
 /** Management actions on a person's page (docs/design.md, section H). */
-export const ACTION_IDS = ['ask_out', 'propose', 'marry', 'break_up', 'divorce', 'cut_contact', 'reconcile'] as const;
+export const ACTION_IDS = ['ask_out', 'propose', 'move_in', 'marry', 'break_up', 'divorce', 'cut_contact', 'reconcile'] as const;
 export const actionIdSchema = z.enum(ACTION_IDS);
 export type ActionId = z.infer<typeof actionIdSchema>;
 

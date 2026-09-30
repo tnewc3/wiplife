@@ -8,6 +8,8 @@ tone: neutral
 category: family
 rarity: common
 lifeStages: [adult, senior]
+# Not while you still live with them: it's your home they'd be selling.
+requires: { not: { home: { kind: [with_parents] } } }
 weight: { base: 6 }
 once: true
 cast:

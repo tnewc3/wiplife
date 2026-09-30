@@ -1,0 +1,40 @@
+id: scam_call
+title: A very official voice
+text: >-
+  A very official voice on the phone says there's a warrant for your arrest
+  over unpaid taxes, but it can all be cleared up today with gift cards.
+tone: neutral
+category: money
+rarity: common
+lifeStages: [senior]
+weight: { base: 5 }
+cooldownYears: 8
+choices:
+  - id: hang_up
+    label: Hang up
+    outcome:
+      text: You hang up mid-sentence. It's the most satisfying thing you've done all week.
+      effects:
+        - { type: stat, key: happiness, delta: 2 }
+  - id: pay
+    label: Do as they say, just to be safe
+    check:
+      base: 30
+      stats: [{ key: smarts, weight: 0.4 }]
+      success:
+        text: At the store, the cashier asks who the gift cards are for, and the story falls apart as you explain it. You go home with your money.
+        effects:
+          - { type: stat, key: stress, delta: 3 }
+      failure:
+        text: The money is gone before you realize what happened. You tell no one for a long time.
+        effects:
+          - { type: money, delta: -3000 }
+          - { type: stat, key: happiness, delta: -5 }
+          - { type: stat, key: stress, delta: 5 }
+  - id: report
+    label: Keep them talking and report them
+    outcome:
+      text: You waste twenty minutes of a scammer's day and file a report. A small victory for everyone.
+      effects:
+        - { type: stat, key: reputation, delta: 1 }
+        - { type: stat, key: confidence, delta: 2 }

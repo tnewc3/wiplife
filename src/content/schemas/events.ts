@@ -6,6 +6,7 @@
 import { z } from 'zod';
 import { familyWealthSchema } from './balance';
 import { baseDefSchema, idSchema } from './common';
+import { debtKindSchema, housingKindSchema, lifestyleSchema } from './economy';
 import { relationshipKindSchema, relationshipStatusSchema, romanceStatusSchema } from './relationships';
 import { templateSchema } from './text';
 
@@ -71,6 +72,8 @@ export type Condition =
   | { fired: string }
   | { relative: { kind: z.infer<typeof relationshipKindSchema>; alive?: boolean } }
   | { romance: z.infer<typeof romanceStatusSchema>[] }
+  | { finances: FinancesCondition }
+  | { home: HomeCondition }
   | { memory: { role: string; tag: string } }
   | {
       role: string;
@@ -83,6 +86,42 @@ export type Condition =
       /** Years since the relationship took its current kind (dating, married...). */
       years?: Compare;
     };
+
+/** Your money situation. Every field given must hold. */
+export interface FinancesCondition {
+  /** Total debt balance. */
+  debt?: Compare;
+  /** Most missed payments in a row on any one debt. */
+  missed?: Compare;
+  /** True: a debt is in collections; false: none is. */
+  collections?: boolean;
+  /** You have a debt of one of these kinds. */
+  kinds?: z.infer<typeof debtKindSchema>[];
+  lifestyle?: z.infer<typeof lifestyleSchema>[];
+  /** Doing gig work (or not). */
+  gig?: boolean;
+  /** Filed for bankruptcy within this many years. */
+  bankruptWithin?: number;
+  /** Set up a debt plan within this many years. */
+  planWithin?: number;
+  /** Last year's gross income. */
+  income?: Compare;
+}
+
+/** Where you live. Every field given must hold. */
+export interface HomeCondition {
+  kind?: z.infer<typeof housingKindSchema>[];
+  /** Years since you moved into this home. */
+  years?: Compare;
+  /** Sharing a rental with a roommate (or not). */
+  roommate?: boolean;
+  /** Living in a different city from the one you were born in (or not). */
+  relocated?: boolean;
+  /** Your partner or spouse lives with you (or not). */
+  partner?: boolean;
+}
+
+const atLeastOneField = (c: Record<string, unknown>) => Object.values(c).some((v) => v !== undefined);
 
 export const conditionSchema: z.ZodType<Condition> = z.lazy(() =>
   z.union([
@@ -101,6 +140,32 @@ export const conditionSchema: z.ZodType<Condition> = z.lazy(() =>
     z.strictObject({ fired: idSchema }),
     z.strictObject({ relative: z.strictObject({ kind: relationshipKindSchema, alive: z.boolean().optional() }) }),
     z.strictObject({ romance: z.array(romanceStatusSchema).min(1) }),
+    z.strictObject({
+      finances: z
+        .strictObject({
+          debt: compareSchema.optional(),
+          missed: compareSchema.optional(),
+          collections: z.boolean().optional(),
+          kinds: z.array(debtKindSchema).min(1).optional(),
+          lifestyle: z.array(lifestyleSchema).min(1).optional(),
+          gig: z.boolean().optional(),
+          bankruptWithin: z.int().min(1).max(100).optional(),
+          planWithin: z.int().min(1).max(100).optional(),
+          income: compareSchema.optional(),
+        })
+        .refine(atLeastOneField, 'needs at least one field'),
+    }),
+    z.strictObject({
+      home: z
+        .strictObject({
+          kind: z.array(housingKindSchema).min(1).optional(),
+          years: compareSchema.optional(),
+          roommate: z.boolean().optional(),
+          relocated: z.boolean().optional(),
+          partner: z.boolean().optional(),
+        })
+        .refine(atLeastOneField, 'needs at least one field'),
+    }),
     z.strictObject({ memory: z.strictObject({ role: roleSchema, tag: idSchema }) }),
     z.strictObject({
       role: roleSchema,
@@ -162,8 +227,46 @@ export type EffectStatKey = z.infer<typeof statKeySchema>;
 /** Effect types. Adding one means a schema here and a handler in src/engine/events/effects.ts. */
 export const effectSchema = z.discriminatedUnion('type', [
   z.strictObject({ type: z.literal('stat'), key: statKeySchema, delta: z.int().min(-100).max(100) }),
-  /** Savings only until Stage 6; savings never go below zero. */
+  /**
+   * Savings. Savings never go below zero: from the independence age, a cost
+   * larger than your savings leaves the rest as personal debt (a child's
+   * family covers it).
+   */
   z.strictObject({ type: z.literal('money'), delta: z.int().min(-1_000_000_000).max(1_000_000_000) }),
+  /**
+   * Debt (adults only; refused before the independence age). add: a new
+   * student, personal or medical debt of `amount`. forgive: `share` of every
+   * debt of `kinds` (default: all but the mortgage) is written off.
+   * bankruptcy: personal, medical and collections debt is cleared. plan: a
+   * debt plan (personal, medical and collections debt rolled into one loan).
+   */
+  z
+    .strictObject({
+      type: z.literal('debt'),
+      action: z.enum(['add', 'forgive', 'bankruptcy', 'plan']),
+      kind: z.enum(['student', 'personal', 'medical']).optional(),
+      amount: z.int().min(1).max(100_000_000).optional(),
+      kinds: z.array(debtKindSchema).min(1).optional(),
+      share: z.number().gt(0).max(1).optional(),
+    })
+    .refine((e) => (e.action === 'add') === (e.kind !== undefined && e.amount !== undefined), 'add needs kind and amount (and only add has them)')
+    .refine((e) => (e.action === 'forgive') === (e.share !== undefined), 'forgive needs share (and only forgive has it)')
+    .refine((e) => e.kinds === undefined || e.action === 'forgive', 'only forgive takes kinds'),
+  /**
+   * Where you live (adults only). move_home: back in with a parent who would
+   * have you. rent: a rental in your city. homeless: out on the street.
+   * roommate / live_alone: share your rental or stop sharing. sell: sell your
+   * home and rent. move_in_together: `role` (your partner, fiancé or spouse)
+   * moves in with you and pays their share. The engine ignores a move that
+   * doesn't fit (no parent to go to, a home you own and haven't sold...).
+   */
+  z
+    .strictObject({
+      type: z.literal('housing'),
+      action: z.enum(['move_home', 'rent', 'homeless', 'roommate', 'live_alone', 'sell', 'move_in_together']),
+      role: roleSchema.optional(),
+    })
+    .refine((e) => (e.action === 'move_in_together') === (e.role !== undefined), 'move_in_together needs role (and only it has one)'),
   z.strictObject({
     type: z.literal('relationship'),
     role: roleSchema,

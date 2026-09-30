@@ -54,6 +54,31 @@ export const historyTextSchema = z.strictObject({
   familyDeath: historyGroupSchema,
   /** The character dies. Values: {age}, {cause}. */
   death: historyGroupSchema,
+  /** Changes of home (Stage 6). Values: {city}; relocated also {from}. */
+  home: z.strictObject({
+    /** Moved out of the family home into a rental. */
+    movedOut: historyGroupSchema,
+    /** Moved back in with a parent. */
+    movedHome: historyGroupSchema,
+    /** Moved to another city. Values: {city}, {from}. */
+    relocated: historyGroupSchema,
+    boughtHome: historyGroupSchema,
+    soldHome: historyGroupSchema,
+    /** No parent left to live with: you rent a place of your own. */
+    familyHomeGone: historyGroupSchema,
+    evicted: historyGroupSchema,
+    foreclosed: historyGroupSchema,
+    /** A partner who lived with you moves out after a breakup or divorce. Role: npc; no values. */
+    movedApart: historyGroupSchema,
+  }),
+  /** Money milestones (Stage 6). No values. */
+  money: z.strictObject({
+    /** A debt went to collections. */
+    collections: historyGroupSchema,
+    mortgagePaidOff: historyGroupSchema,
+    /** Started doing gig work. */
+    startedGig: historyGroupSchema,
+  }),
 });
 export type HistoryText = z.infer<typeof historyTextSchema>;
 

@@ -1,5 +1,13 @@
 import { GENDER_CATEGORIES, type CollectionKey, type ContentBundle } from '../../src/content/schemas';
-import { ACTION_IDS, CREATABLE_KINDS, type Condition, type Effect, type EventDef, type Outcome } from '../../src/content/schemas';
+import {
+  ACTION_IDS,
+  CREATABLE_KINDS,
+  TRIGGER_IDS,
+  type Condition,
+  type Effect,
+  type EventDef,
+  type Outcome,
+} from '../../src/content/schemas';
 import { ACTION_ROLE } from '../../src/engine/actions';
 import { referencesIn, rolesIn } from '../../src/engine/conditions';
 import { EFFECT_KINDS, FAMILY_KINDS, isPartnerKind, isRomanceEvent, isRomanticKind } from '../../src/engine/relationships';
@@ -15,6 +23,7 @@ const HISTORY = 'text/history.yaml';
 const OBITUARY = 'text/obituary.yaml';
 const MEMORIES = 'registries/memories.yaml';
 const ACTIONS = 'registries/actions.yaml';
+const TRIGGERS = 'registries/triggers.yaml';
 
 /** The conditions a condition always requires: itself, or every part of a top-level `all`. */
 function requiredParts(condition: Condition | undefined): Condition[] {
@@ -118,6 +127,7 @@ export function checkReferences(
   errors.push(...checkTemplates(bundle));
   errors.push(...checkEvents(bundle, fileOf));
   errors.push(...checkActions(bundle, fileOf));
+  errors.push(...checkTriggers(bundle, fileOf));
 
   return errors;
 }
@@ -178,6 +188,11 @@ function checkTemplates(bundle: ContentBundle): ContentError[] {
   }
   all(HISTORY, 'familyDeath.variants', history.familyDeath.variants, { roles: ['npc'], values: ['relation', 'age'] });
   all(HISTORY, 'death.variants', history.death.variants, { values: ['age', 'cause'] });
+  for (const [key, group] of Object.entries(history.home)) {
+    const allowed = key === 'movedApart' ? { roles: ['npc'] } : { values: key === 'relocated' ? ['city', 'from'] : ['city'] };
+    all(HISTORY, `home.${key}.variants`, group.variants, allowed);
+  }
+  for (const [key, group] of Object.entries(history.money)) all(HISTORY, `money.${key}.variants`, group.variants, {});
 
   const obituary = bundle.text.obituary;
   const self = ['self'];
@@ -212,7 +227,9 @@ function outcomesOf(def: EventDef): Outcome[] {
 
 /** Every role an effect or check in this outcome uses. */
 function outcomeRoles(outcome: Outcome): string[] {
-  return (outcome.effects as Effect[]).flatMap((e) => ('role' in e ? [e.role] : e.type === 'schedule' ? (e.cast ?? []) : []));
+  return (outcome.effects as Effect[]).flatMap((e) =>
+    'role' in e && e.role !== undefined ? [e.role] : e.type === 'schedule' ? (e.cast ?? []) : [],
+  );
 }
 
 /**
@@ -237,6 +254,23 @@ function checkRomance(def: EventDef, bundle: ContentBundle, err: (message: strin
   }
   const young = def.lifeStages.filter((stage) => stage === 'early' || stage === 'child' || stage === 'teen');
   if (young.length > 0) err(`a romance event can't be in life stages ${young.join(', ')}`);
+}
+
+/**
+ * Debt and housing effects are for adults: an event that has them must
+ * require the independence age, or happen only in life stages that start at
+ * it or later (the engine ignores them for a child anyway).
+ */
+function checkAdultMoney(def: EventDef, bundle: ContentBundle, err: (message: string) => void): void {
+  const used = outcomesOf(def).some((o) => (o.effects as Effect[]).some((e) => e.type === 'debt' || e.type === 'housing'));
+  if (!used) return;
+  const { independenceAge } = bundle.balance.economy;
+  const stages = bundle.balance.aging.lifeStages;
+  const start: Record<string, number> = { early: 0, ...stages };
+  const adultStages = def.lifeStages.every((stage) => (start[stage] ?? 0) >= independenceAge);
+  if (!requiresAge(def.requires, independenceAge) && !adultStages) {
+    err(`debt and housing effects are for adults: require { age: { gte: ${independenceAge} } } or use adult life stages only`);
+  }
 }
 
 /**
@@ -274,6 +308,7 @@ function checkEvents(bundle: ContentBundle, fileOf: (typeKey: CollectionKey, id:
   const { categories } = bundle.registries.categories;
   const scheduledIds = new Set<string>();
   const actionEvents = new Set(Object.values(bundle.registries.actions.actions).flatMap((a) => a.events));
+  const triggerEvents = new Set(Object.values(bundle.registries.triggers.triggers).flatMap((t) => t.events));
 
   for (const [id, def] of Object.entries(bundle.events)) {
     const file = fileOf('events', id);
@@ -315,6 +350,7 @@ function checkEvents(bundle: ContentBundle, fileOf: (typeKey: CollectionKey, id:
       }
     }
     checkRomance(def, bundle, err);
+    checkAdultMoney(def, bundle, err);
     checkOptionalRoles(def, err);
 
     let writesHistory = false;
@@ -322,7 +358,7 @@ function checkEvents(bundle: ContentBundle, fileOf: (typeKey: CollectionKey, id:
       if (outcome.text) template(`outcome[${i}].text`, outcome.text);
       for (const effect of outcome.effects as Effect[]) {
         const where = `outcome[${i}] ${effect.type}`;
-        if ('role' in effect && !roles.includes(effect.role)) err(`${where}: role "${effect.role}" is not in the cast`);
+        if ('role' in effect && effect.role !== undefined && !roles.includes(effect.role)) err(`${where}: role "${effect.role}" is not in the cast`);
         if (effect.type === 'memory' && !tags[effect.tag]) err(`${where}: memory "${effect.tag}" is not in registries/memories.yaml`);
         if (effect.type === 'flag' && !flags[effect.key]) err(`${where}: flag "${effect.key}" is not in registries/flags.yaml`);
         if (effect.type === 'death' && !bundle.causes[effect.cause]) err(`${where}: unknown cause "${effect.cause}"`);
@@ -349,8 +385,8 @@ function checkEvents(bundle: ContentBundle, fileOf: (typeKey: CollectionKey, id:
   }
 
   for (const [id, def] of Object.entries(bundle.events)) {
-    if (def.followUpOnly && !def.retired && !scheduledIds.has(id) && !actionEvents.has(id)) {
-      errors.push({ file: fileOf('events', id), message: `${id}: followUpOnly, but no event schedules it and no action uses it` });
+    if (def.followUpOnly && !def.retired && !scheduledIds.has(id) && !actionEvents.has(id) && !triggerEvents.has(id)) {
+      errors.push({ file: fileOf('events', id), message: `${id}: followUpOnly, but no event schedules it and no action or trigger uses it` });
     }
   }
   return errors;
@@ -380,6 +416,31 @@ function checkActions(bundle: ContentBundle, fileOf: (typeKey: CollectionKey, id
       if (scheduled.has(id)) err(`answers the "${actionId}" action, so no event may schedule it`);
       const roles = Object.keys(def.cast ?? {});
       if (roles.length !== 1 || roles[0] !== ACTION_ROLE) err(`answers the "${actionId}" action, so its cast is exactly the role "${ACTION_ROLE}"`);
+    }
+  }
+  return errors;
+}
+
+/** Money triggers: every event exists, only happens this way (followUpOnly) and isn't a management action's result. */
+function checkTriggers(bundle: ContentBundle, fileOf: (typeKey: CollectionKey, id: string) => string): ContentError[] {
+  const errors: ContentError[] = [];
+  const actionEvents = new Set(Object.values(bundle.registries.actions.actions).flatMap((a) => a.events));
+  for (const triggerId of TRIGGER_IDS) {
+    const { events } = bundle.registries.triggers.triggers[triggerId];
+    if (!events.some((id) => bundle.events[id] && !bundle.events[id].retired)) {
+      errors.push({ file: TRIGGERS, message: `${triggerId}: needs at least one active event` });
+    }
+    for (const id of events) {
+      const def = bundle.events[id];
+      if (!def) {
+        errors.push({ file: TRIGGERS, message: `${triggerId}: unknown event "${id}"` });
+        continue;
+      }
+      const err = (message: string) => errors.push({ file: fileOf('events', id), message: `${id}: ${message}` });
+      if (!def.followUpOnly) err(`answers the "${triggerId}" trigger, so it must be followUpOnly (it only happens when money trouble does)`);
+      if (actionEvents.has(id)) err(`answers the "${triggerId}" trigger, so it can't also answer a management action`);
+      const young = def.lifeStages.filter((stage) => stage === 'early' || stage === 'child' || stage === 'teen');
+      if (young.length > 0) err(`money trouble is for adults: it can't be in life stages ${young.join(', ')}`);
     }
   }
   return errors;

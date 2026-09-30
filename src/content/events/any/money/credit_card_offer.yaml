@@ -1,0 +1,40 @@
+id: credit_card_offer
+title: Pre-approved
+text: >-
+  A shiny envelope: you've been pre-approved for a credit card with a
+  generous limit and an interest rate printed in very small letters.
+tone: neutral
+category: money
+rarity: common
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { money: { lt: 3000 } }
+    - { finances: { collections: false } }
+weight:
+  base: 5
+  modifiers:
+    - { if: { flag: filed_bankruptcy }, x: 0.3 }
+cooldownYears: 6
+choices:
+  - id: shop
+    label: Activate it and treat yourself
+    outcome:
+      text: New clothes, a new phone, dinner out. The statement arrives a month later, and so does the interest.
+      effects:
+        - { type: debt, action: add, kind: personal, amount: 3000 }
+        - { type: stat, key: happiness, delta: 3 }
+        - { type: stat, key: stress, delta: 1 }
+  - id: emergencies
+    label: Keep it for emergencies only
+    outcome:
+      text: It lives in a drawer. It feels like a parachute.
+      effects:
+        - { type: stat, key: stress, delta: -1 }
+  - id: shred
+    label: Shred it
+    outcome:
+      text: Snip, snip, snip. You feel strangely powerful.
+      effects:
+        - { type: stat, key: discipline, delta: 2 }

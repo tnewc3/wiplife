@@ -84,6 +84,7 @@ const character = z.strictObject({
     talentDiscovered: z.boolean(),
   }),
   cityId: id,
+  birthCityId: id,
   familyWealth: z.enum(['poor', 'working', 'middle', 'affluent', 'rich']),
   custom: z.boolean(),
 });
@@ -175,9 +176,9 @@ const finances = z.strictObject({
       id,
       kind: z.enum(['student', 'personal', 'mortgage', 'medical', 'collections']),
       balance: dollars,
-      annualRate: z.number(),
+      annualRate: z.number().min(0).max(1),
       minPayment: dollars,
-      missed: int,
+      missed: int.min(0),
     }),
   ),
   lifestyle: z.enum(['frugal', 'comfortable', 'lavish']),
@@ -185,13 +186,22 @@ const finances = z.strictObject({
     .strictObject({
       year: int,
       gross: dollars,
+      retirement: dollars,
       tax: dollars,
       housing: dollars,
       living: dollars,
       debtPayments: dollars,
+      interest: dollars,
+      debtInterest: dollars,
+      borrowed: dollars,
+      support: dollars,
       net: dollars,
     })
     .exactOptional(),
+  earnings: z.strictObject({ years: int.min(0), total: dollars }),
+  hardshipYears: int.min(0),
+  bankruptcyYear: int.exactOptional(),
+  debtPlanYear: int.exactOptional(),
 });
 
 const housing = z.strictObject({
@@ -200,6 +210,9 @@ const housing = z.strictObject({
   annualCost: dollars,
   homeValue: dollars.exactOptional(),
   mortgageDebtId: id.exactOptional(),
+  since: int,
+  roommate: z.literal(true).exactOptional(),
+  partnerId: id.exactOptional(),
 });
 
 const health = z.strictObject({
