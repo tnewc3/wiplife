@@ -9,7 +9,7 @@ import {
   clearAllData,
   db as defaultDb,
   DEFAULT_SETTINGS,
-  lifeStateSchema,
+  loadedLifeSchema,
   loadSettings,
   makeEnvelope,
   readSave,
@@ -141,13 +141,18 @@ export function createAppStore({
         init: async () => {
           try {
             const settings = await loadSettings(db);
-            const saved = await readSave(db, lifeStateSchema);
+            const saved = await readSave(db, loadedLifeSchema(bundle));
             set((s) => {
               s.settings = settings;
               s.savedLifeStatus = saved.status;
               s.life = saved.status === 'ok' || saved.status === 'recovered' ? saved.envelope.data : null;
               s.status = 'ready';
             });
+            // Save the restored life as the active one, so the damaged save is
+            // not loaded (and the notice not shown) again on the next launch.
+            if (saved.status === 'recovered') {
+              await writeSave(db, makeEnvelope(saved.envelope.data, bundle.contentVersion)).catch(() => undefined);
+            }
           } catch (err) {
             set((s) => {
               s.status = 'error';

@@ -4,6 +4,8 @@
  * an unexpected field means the save needs a migration, not silent dropping.
  */
 import { z } from 'zod';
+import type { ContentBundle } from '../content/schemas';
+import { checkInvariants } from '../engine/invariants';
 import { isRngState, type RngState } from '../engine/rng';
 import type { LifeState } from '../engine/types';
 
@@ -12,6 +14,8 @@ const score = z.int().min(0).max(100);
 const dollars = z.int().refine(Number.isSafeInteger, 'must be a safe integer');
 const id = z.string().min(1);
 const category = z.enum(['man', 'woman', 'nonbinary']);
+/** Text that must hold more than spaces (names, pronoun forms). */
+const filled = z.string().refine((s) => s.trim().length > 0, 'must not be empty');
 
 /** Like .partial(), but keys may be absent, never present as undefined. */
 function exactPartial<S extends Record<string, z.ZodType>>(schema: z.ZodObject<S>) {
@@ -22,11 +26,11 @@ function exactPartial<S extends Record<string, z.ZodType>>(schema: z.ZodObject<S
 }
 
 const pronouns = z.strictObject({
-  subject: z.string(),
-  object: z.string(),
-  possessive: z.string(),
-  possessivePronoun: z.string(),
-  reflexive: z.string(),
+  subject: filled,
+  object: filled,
+  possessive: filled,
+  possessivePronoun: filled,
+  reflexive: filled,
   verbPlural: z.boolean(),
 });
 
@@ -56,7 +60,7 @@ const stats = z.strictObject({
   stress: score,
 });
 
-const name = z.strictObject({ first: z.string(), last: z.string() });
+const name = z.strictObject({ first: filled, last: filled });
 
 const character = z.strictObject({
   name,
@@ -255,3 +259,14 @@ export const lifeStateSchema: z.ZodType<LifeState> = z.strictObject({
   ),
   lineage: z.strictObject({ generation: int.min(1), parentLifeId: id.exactOptional() }),
 });
+
+/**
+ * The schema used when loading a life: the shape above plus every engine
+ * invariant. A save that fails either is treated as damaged, so loading falls
+ * back to a backup.
+ */
+export function loadedLifeSchema(content: ContentBundle): z.ZodType<LifeState> {
+  return lifeStateSchema.superRefine((life, ctx) => {
+    for (const failure of checkInvariants(life, content)) ctx.addIssue({ code: 'custom', message: failure });
+  });
+}

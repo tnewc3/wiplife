@@ -7,7 +7,7 @@ import { customInput } from '../engine/testFixtures';
 import type { LifeState } from '../engine/types';
 import { createDb, type WiplifeDb } from './db';
 import { makeEnvelope } from './envelope';
-import { lifeStateSchema } from './lifeSchema';
+import { lifeStateSchema, loadedLifeSchema } from './lifeSchema';
 import { readSave, writeSave } from './saves';
 
 let n = 0;
@@ -70,6 +70,52 @@ describe('life save and load', () => {
     const withoutRng = { ...structuredClone(life), rng: { a: 1 } };
     for (const bad of [withStat, withExtra, withoutRng]) {
       expect(lifeStateSchema.safeParse(bad).success).toBe(false);
+    }
+  });
+
+  it('rejects empty names and missing pronoun forms', () => {
+    const life = random('empty-text');
+    const personId = Object.keys(life.people)[0]!;
+    const breaks: ((l: LifeState) => void)[] = [
+      (l) => (l.character.name.first = ''),
+      (l) => (l.character.name.last = '   '),
+      (l) => (l.people[personId]!.name.first = ''),
+      ...(['subject', 'object', 'possessive', 'possessivePronoun', 'reflexive'] as const).flatMap((form) => [
+        (l: LifeState) => (l.character.identity.pronouns[form] = ''),
+        (l: LifeState) => (l.people[personId]!.identity.pronouns[form] = ' '),
+      ]),
+    ];
+    for (const breakIt of breaks) {
+      const bad = structuredClone(life);
+      breakIt(bad);
+      expect(lifeStateSchema.safeParse(bad).success).toBe(false);
+    }
+  });
+
+  it('runs the invariant checks when loading', () => {
+    const life = random('invariant-load');
+    expect(loadedLifeSchema(content).safeParse(life).success).toBe(true);
+    // Well-formed, but impossible: the character is older than the calendar allows.
+    const bad = structuredClone(life);
+    bad.character.age = 5;
+    expect(lifeStateSchema.safeParse(bad).success).toBe(true);
+    const result = loadedLifeSchema(content).safeParse(bad);
+    expect(result.success).toBe(false);
+    expect(result.error?.message).toContain('does not match birth year');
+  });
+
+  it('falls back to the backup when the autosave breaks an invariant', async () => {
+    const db = freshDb();
+    const older = random('inv-older');
+    await writeSave(db, makeEnvelope(older, content.contentVersion));
+    const broken = structuredClone(random('inv-newer'));
+    broken.inputLog = [];
+    await writeSave(db, makeEnvelope(broken, content.contentVersion));
+    const result = await readSave(db, loadedLifeSchema(content));
+    expect(result.status).toBe('recovered');
+    if (result.status === 'recovered') {
+      expect(result.envelope.data).toEqual(older);
+      expect(result.errors.join(' ')).toContain('input log');
     }
   });
 

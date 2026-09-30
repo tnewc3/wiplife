@@ -78,6 +78,34 @@ export function defaultPronounChoice(content: ContentBundle, category: GenderCat
   return presets[0]?.id ?? null;
 }
 
+/** What choosing a category fills in: its first identity word, usual expression and most-used pronouns. */
+export function categoryDefaults(content: ContentBundle, category: GenderCategory) {
+  const options = content.character.identity.categories[category];
+  return {
+    genderIdentity: options.identities[0] ?? '',
+    genderExpression: options.defaultExpression,
+    pronounChoice: defaultPronounChoice(content, category),
+  };
+}
+
+/**
+ * The draft changes for choosing a gender category. Identity, expression and
+ * pronouns follow the new category only while they are empty or still hold the
+ * previous category's auto-filled values; anything the player chose is kept.
+ */
+export function changeCategory(draft: Draft, category: GenderCategory, content: ContentBundle): Partial<Draft> {
+  const next = categoryDefaults(content, category);
+  const prev = draft.genderCategory ? categoryDefaults(content, draft.genderCategory) : null;
+  const isAuto = <K extends keyof typeof next>(key: K, empty: Draft[K]) =>
+    draft[key] === empty || (prev !== null && draft[key] === prev[key]);
+  return {
+    genderCategory: category,
+    genderIdentity: isAuto('genderIdentity', '') ? next.genderIdentity : draft.genderIdentity,
+    genderExpression: isAuto('genderExpression', '') ? next.genderExpression : draft.genderExpression,
+    pronounChoice: isAuto('pronounChoice', null) ? next.pronounChoice : draft.pronounChoice,
+  };
+}
+
 export function draftPronouns(draft: Draft, content: ContentBundle): Pronouns {
   if (draft.pronounChoice && draft.pronounChoice !== 'custom' && content.pronouns[draft.pronounChoice]) {
     return pronounsFromPreset(content, draft.pronounChoice);

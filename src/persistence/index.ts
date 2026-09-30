@@ -3,7 +3,7 @@ import { createDb } from './db';
 export { createDb, DB_NAME, type WiplifeDb } from './db';
 export { CURRENT_SCHEMA_VERSION, envelopeSchema, makeEnvelope, type SaveEnvelope } from './envelope';
 export { assertMigrationChain, migrateEnvelope, MigrationError, migrations, type Migration } from './migrations';
-export { lifeStateSchema } from './lifeSchema';
+export { lifeStateSchema, loadedLifeSchema } from './lifeSchema';
 export { clearAllData } from './reset';
 export { requestPersistentStorage } from './storage';
 export { readSave, writeSave, type LoadResult } from './saves';
