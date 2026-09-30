@@ -6,6 +6,7 @@
 import { z } from 'zod';
 import { familyWealthSchema } from './balance';
 import { baseDefSchema, idSchema } from './common';
+import { relationshipKindSchema, relationshipStatusSchema, romanceStatusSchema } from './relationships';
 import { templateSchema } from './text';
 
 export const LIFE_STAGE_IDS = ['early', 'child', 'teen', 'youngAdult', 'adult', 'senior'] as const;
@@ -16,20 +17,6 @@ export const TRAIT_KEYS = ['ambition', 'confidence', 'kindness', 'riskTaking', '
 /** Hidden values events may read or change (genetic risk and inner conflict belong to later systems). */
 export const HIDDEN_KEYS = ['luck', 'reputation', 'vice'] as const;
 
-export const relationshipKindSchema = z.enum([
-  'parent',
-  'stepparent',
-  'sibling',
-  'grandparent',
-  'friend',
-  'partner',
-  'spouse',
-  'ex',
-  'coworker',
-  'boss',
-  'classmate',
-  'acquaintance',
-]);
 /** Kinds casting may create; family, partners and work relationships come from other systems. */
 export const CREATABLE_KINDS = ['friend', 'classmate', 'acquaintance'] as const;
 
@@ -83,8 +70,19 @@ export type Condition =
   | { flag: string; eq?: number | boolean | string }
   | { fired: string }
   | { relative: { kind: z.infer<typeof relationshipKindSchema>; alive?: boolean } }
+  | { romance: z.infer<typeof romanceStatusSchema>[] }
   | { memory: { role: string; tag: string } }
-  | { role: string; alive?: boolean; age?: Compare; affection?: Compare; trust?: Compare };
+  | {
+      role: string;
+      alive?: boolean;
+      age?: Compare;
+      affection?: Compare;
+      trust?: Compare;
+      kind?: z.infer<typeof relationshipKindSchema>[];
+      status?: z.infer<typeof relationshipStatusSchema>[];
+      /** Years since the relationship took its current kind (dating, married...). */
+      years?: Compare;
+    };
 
 export const conditionSchema: z.ZodType<Condition> = z.lazy(() =>
   z.union([
@@ -102,6 +100,7 @@ export const conditionSchema: z.ZodType<Condition> = z.lazy(() =>
     z.strictObject({ flag: idSchema, eq: flagValueSchema.optional() }),
     z.strictObject({ fired: idSchema }),
     z.strictObject({ relative: z.strictObject({ kind: relationshipKindSchema, alive: z.boolean().optional() }) }),
+    z.strictObject({ romance: z.array(romanceStatusSchema).min(1) }),
     z.strictObject({ memory: z.strictObject({ role: roleSchema, tag: idSchema }) }),
     z.strictObject({
       role: roleSchema,
@@ -109,6 +108,9 @@ export const conditionSchema: z.ZodType<Condition> = z.lazy(() =>
       age: compareSchema.optional(),
       affection: compareSchema.optional(),
       trust: compareSchema.optional(),
+      kind: z.array(relationshipKindSchema).min(1).optional(),
+      status: z.array(relationshipStatusSchema).min(1).optional(),
+      years: compareSchema.optional(),
     }),
   ]),
 ) as z.ZodType<Condition>;
@@ -118,17 +120,40 @@ const rangeSchema = z
   .refine((r) => r.min <= r.max, 'min must not be greater than max');
 
 /** How an event finds (or creates) the person for one role. */
-export const castSpecSchema = z.strictObject({
-  kind: relationshipKindSchema,
-  /** Their age minus yours, for existing people and new ones. */
-  ageOffset: rangeSchema.optional(),
-  /** Their age in years, for existing people and new ones. */
-  age: rangeSchema.optional(),
-  /** Create someone new when nobody fits (friend, classmate or acquaintance only). */
-  createIfMissing: z.boolean().optional(),
-  /** Chance of creating someone new even when someone fits. */
-  newChance: z.number().min(0).max(1).optional(),
-});
+export const castSpecSchema = z
+  .strictObject({
+    /** Someone with this relationship to you. Every role needs a kind, unless it is a support role. */
+    kind: relationshipKindSchema.optional(),
+    /**
+     * A support role: the most trusted person who would step in for you
+     * (trust and affection from balance/relationships.yaml support), of any
+     * close kind. Never creates anyone.
+     */
+    support: z.boolean().optional(),
+    /**
+     * A potential partner: an adult you're attracted to who is attracted to
+     * you, found or (with createIfMissing) created. Never family.
+     */
+    romantic: z.boolean().optional(),
+    /**
+     * When nobody fits, the event still happens with this role empty. The role
+     * may then only be used in choices whose visibleIf requires it ({ role: name }).
+     */
+    optional: z.boolean().optional(),
+    /** Their age minus yours, for existing people and new ones. */
+    ageOffset: rangeSchema.optional(),
+    /** Their age in years, for existing people and new ones. */
+    age: rangeSchema.optional(),
+    /** Create someone new when nobody fits (friend, classmate or acquaintance only). */
+    createIfMissing: z.boolean().optional(),
+    /** Chance of creating someone new even when someone fits. */
+    newChance: z.number().min(0).max(1).optional(),
+  })
+  .refine((s) => (s.kind === undefined) !== (s.support !== true), 'a role needs exactly one of kind or support: true')
+  .refine(
+    (s) => s.support !== true || (!s.createIfMissing && s.newChance === undefined && !s.romantic),
+    'a support role finds someone you know: no createIfMissing, newChance or romantic',
+  );
 export type CastSpec = z.infer<typeof castSpecSchema>;
 
 const statKeySchema = z.enum([...STAT_KEYS, ...TRAIT_KEYS, ...HIDDEN_KEYS]);
@@ -144,7 +169,8 @@ export const effectSchema = z.discriminatedUnion('type', [
     role: roleSchema,
     affection: z.int().min(-100).max(100).optional(),
     trust: z.int().min(-100).max(100).optional(),
-    status: z.enum(['active', 'estranged', 'ended']).optional(),
+    status: relationshipStatusSchema.optional(),
+    /** Changes the kind (a friend becomes a partner); the engine refuses changes that break the relationship rules. */
     kind: relationshipKindSchema.optional(),
   }),
   z.strictObject({ type: z.literal('memory'), role: roleSchema, tag: idSchema }),
@@ -168,11 +194,19 @@ export const outcomeSchema = z.strictObject({
 });
 export type Outcome = z.infer<typeof outcomeSchema>;
 
+const checkWeightSchema = z.number().min(-2).max(2);
+/** A character stat, trait or hidden value; or how a cast person feels about you. */
+export const checkStatSchema = z.union([
+  z.strictObject({ key: statKeySchema, weight: checkWeightSchema }),
+  z.strictObject({ role: roleSchema, key: z.enum(['affection', 'trust']), weight: checkWeightSchema }),
+]);
+export type CheckStat = z.infer<typeof checkStatSchema>;
+
 export const checkSchema = z.strictObject({
   /** Success chance in percent before stats. */
   base: z.number().min(0).max(100),
   /** Each stat adds weight × (value − 50) percentage points. */
-  stats: z.array(z.strictObject({ key: statKeySchema, weight: z.number().min(-2).max(2) })).min(1),
+  stats: z.array(checkStatSchema).min(1),
   success: outcomeSchema,
   failure: outcomeSchema,
 });
@@ -204,7 +238,10 @@ export const eventSchema = baseDefSchema
     }),
     cooldownYears: z.int().min(1).optional(),
     once: z.boolean().optional(),
-    /** Only happens when scheduled by another event (the later steps of a chain). */
+    /**
+     * Only happens when scheduled by another event (the later steps of a
+     * chain) or queued by a management action (registries/actions.yaml).
+     */
     followUpOnly: z.boolean().optional(),
     cast: z.record(roleSchema, castSpecSchema).optional(),
     choices: z.array(choiceSchema).min(2).max(4).optional(),
@@ -220,7 +257,10 @@ export const chainFileSchema = z.strictObject({
   events: z.array(eventSchema).min(2),
 });
 
-/** Every memory tag, with readable text (registries/memories.yaml). */
+/**
+ * Every memory tag, with readable text (registries/memories.yaml). The text is
+ * a template: the person the memory is about is cast as {npc}.
+ */
 export const memoryRegistrySchema = z.strictObject({ tags: z.record(idSchema, z.string().trim().min(1).max(120)) });
 /** Every flag, with a one-line description (registries/flags.yaml). */
 export const flagRegistrySchema = z.strictObject({ flags: z.record(idSchema, z.string().trim().min(1).max(200)) });
@@ -232,6 +272,8 @@ export const categoryRegistrySchema = z.strictObject({
       label: z.string().trim().min(1).max(40),
       /** After an event of this category, others of it wait this many years. */
       cooldownYears: z.int().min(1).optional(),
+      /** Dating, sex and romance: adults only, enforced by the engine and the content build. */
+      romance: z.boolean().optional(),
     }),
   ),
 });

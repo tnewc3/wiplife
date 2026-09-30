@@ -1,0 +1,35 @@
+id: new_kid_lunch
+title: The new kid
+text: >-
+  There's a new kid at school, {newKid.name}, standing in the cafeteria with a
+  tray and nowhere to sit. Your table has one empty chair.
+tone: light
+category: friends
+rarity: common
+lifeStages: [child, teen]
+weight: { base: 7 }
+once: true
+cast:
+  newKid: { kind: classmate, ageOffset: { min: -1, max: 1 }, createIfMissing: true, newChance: 1 }
+choices:
+  - id: wave
+    label: Wave {newKid.them} over
+    outcome:
+      text: '{newKid.name} sits down, says almost nothing, and shows up at your table every day after that.'
+      effects:
+        - { type: relationship, role: newKid, kind: friend, affection: 15, trust: 8 }
+        - { type: memory, role: newKid, tag: you_sat_with_them }
+        - { type: stat, key: kindness, delta: 2 }
+  - id: friends_first
+    label: Check with your friends first
+    outcome:
+      text: By the time your friends shrug yes, {newKid.name} has found a seat somewhere else.
+      effects:
+        - { type: relationship, role: newKid, affection: -2 }
+  - id: look_away
+    label: Look busy with your sandwich
+    outcome:
+      text: You don't look up. Later you see {newKid.name} eating alone by the window.
+      effects:
+        - { type: relationship, role: newKid, affection: -4 }
+        - { type: stat, key: happiness, delta: -1 }

@@ -1,0 +1,36 @@
+id: drifting_friend
+title: Ages
+text: >-
+  You realize you haven't talked to {friend.name} in ages. You used to talk
+  every day. You scroll back through your messages to find the last one.
+tone: neutral
+category: friends
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires: { role: friend, affection: { lt: 45 } }
+weight: { base: 5 }
+cooldownYears: 4
+cast:
+  friend: { kind: friend }
+choices:
+  - id: call
+    label: Call {friend.them} right now
+    outcome:
+      text: '{friend.name} picks up on the second ring. "I was just thinking about you," {friend.they} {friend:says|say}.'
+      effects:
+        - { type: relationship, role: friend, affection: 12 }
+        - { type: memory, role: friend, tag: kept_in_touch }
+        - { type: stat, key: happiness, delta: 3 }
+  - id: later
+    label: Send a message and see
+    outcome:
+      text: '{friend.name} replies three days later with a thumbs-up.'
+      effects:
+        - { type: relationship, role: friend, affection: 2 }
+  - id: let_go
+    label: Let the friendship go
+    outcome:
+      text: Some friendships are for a season. You close the app.
+      effects:
+        - { type: relationship, role: friend, affection: -10 }
+        - { type: memory, role: friend, tag: lost_touch }

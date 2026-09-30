@@ -1,0 +1,50 @@
+id: meet_the_parents
+title: Meet the family
+text: >-
+  It's time for {partner.name} to meet {parent.name}. {partner.They}
+  {partner:has|have} changed shirts three times and practiced a joke in the car.
+tone: light
+category: romance
+rarity: common
+lifeStages: [youngAdult, adult]
+requires: { age: { gte: 18 } }
+weight: { base: 6 }
+cooldownYears: 10
+cast:
+  partner: { kind: partner }
+  parent: { kind: parent, age: { min: 18, max: 120 } }
+choices:
+  - id: dinner
+    label: Host a nice dinner
+    check:
+      base: 55
+      stats: [{ role: parent, key: affection, weight: 0.3 }, { key: sociability, weight: 0.2 }]
+      success:
+        text: '{parent.name} laughs at the joke. By dessert, {parent.they} {parent:is|are} showing {partner.name} your baby photos.'
+        effects:
+          - { type: memory, role: partner, tag: met_your_family }
+          - { type: relationship, role: partner, affection: 5 }
+          - { type: relationship, role: parent, affection: 3 }
+          - { type: stat, key: happiness, delta: 3 }
+      failure:
+        text: >-
+          {parent.name} asks {partner.name} about {partner.their} "plans for
+          the future" four separate times. The drive home is quiet.
+        effects:
+          - { type: memory, role: partner, tag: met_your_family }
+          - { type: relationship, role: partner, affection: -3 }
+          - { type: stat, key: stress, delta: 3 }
+  - id: warn
+    label: Brief {partner.them} on every family landmine first
+    outcome:
+      text: '{partner.name} steers around every single one. {parent.name} calls later just to say how nice {partner.they} {partner:is|are}.'
+      effects:
+        - { type: memory, role: partner, tag: met_your_family }
+        - { type: relationship, role: partner, trust: 5 }
+        - { type: stat, key: stress, delta: 2 }
+  - id: postpone
+    label: Postpone it again
+    outcome:
+      text: '{partner.name} says it''s fine. It''s the third time. It isn''t fine.'
+      effects:
+        - { type: relationship, role: partner, affection: -6, trust: -4 }

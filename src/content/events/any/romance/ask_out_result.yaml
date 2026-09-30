@@ -1,0 +1,88 @@
+# Answers the "ask out" action (registries/actions.yaml).
+id: ask_out_result
+title: The question
+text: >-
+  You've been working up to this for a while. You catch {person.name} alone
+  and ask if {person.they}'d like to go out sometime. Just the two of you.
+tone: light
+category: romance
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { not: { role: person, kind: [ex] } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  # Filled by the action: the person you're asking.
+  person: { kind: acquaintance, romantic: true }
+choices:
+  - id: coffee
+    label: Keep it simple and suggest coffee
+    check:
+      base: 45
+      stats:
+        - { role: person, key: affection, weight: 0.6 }
+        - { key: confidence, weight: 0.2 }
+        - { key: looks, weight: 0.15 }
+      success:
+        text: >-
+          Coffee turns into dinner, and dinner turns into a walk that lasts
+          until the streetlights come on.
+        effects:
+          - { type: relationship, role: person, kind: partner, affection: 8 }
+          - { type: memory, role: person, tag: started_dating }
+          - { type: stat, key: happiness, delta: 6 }
+          - { type: history, text: 'You started dating {person.name}.', importance: 2 }
+      failure:
+        text: '{person.name} says {person.they} would rather keep things as they are. You both pretend it was never awkward.'
+        effects:
+          - { type: memory, role: person, tag: turned_you_down }
+          - { type: relationship, role: person, affection: -4 }
+          - { type: stat, key: happiness, delta: -4 }
+          - { type: stat, key: confidence, delta: -2 }
+  - id: dinner
+    label: Go big with flowers and a dinner reservation
+    visibleIf: { money: { gte: 150 } }
+    check:
+      base: 40
+      stats:
+        - { role: person, key: affection, weight: 0.7 }
+        - { key: confidence, weight: 0.25 }
+      success:
+        text: '{person.name} laughs at the flowers, then keeps them on {person.their} table for two weeks.'
+        effects:
+          - { type: money, delta: -150 }
+          - { type: relationship, role: person, kind: partner, affection: 12 }
+          - { type: memory, role: person, tag: started_dating }
+          - { type: stat, key: happiness, delta: 8 }
+          - { type: history, text: 'You swept {person.name} off {person.their} feet, and the two of you started dating.', importance: 2 }
+      failure:
+        text: The reservation goes to waste. So do the flowers. You eat the bread basket alone and tip well.
+        effects:
+          - { type: money, delta: -150 }
+          - { type: memory, role: person, tag: turned_you_down }
+          - { type: relationship, role: person, affection: -6 }
+          - { type: stat, key: happiness, delta: -6 }
+          - { type: stat, key: confidence, delta: -4 }
+  - id: note
+    label: Slip {person.them} a note and let {person.them} decide
+    check:
+      base: 40
+      stats:
+        - { role: person, key: affection, weight: 0.6 }
+        - { key: kindness, weight: 0.2 }
+      success:
+        text: 'The note comes back the next day with one word on it: "Yes."'
+        effects:
+          - { type: relationship, role: person, kind: partner, affection: 6 }
+          - { type: memory, role: person, tag: started_dating }
+          - { type: stat, key: happiness, delta: 5 }
+          - { type: history, text: 'You started dating {person.name}.', importance: 2 }
+      failure:
+        text: The note never comes back. Neither of you mentions it again.
+        effects:
+          - { type: memory, role: person, tag: turned_you_down }
+          - { type: relationship, role: person, affection: -2 }
+          - { type: stat, key: happiness, delta: -3 }

@@ -29,7 +29,7 @@ lifeStage:
       - "You turned {age} and became a senior citizen."
       - "At {age}, you've reached your senior years."
 
-# A relative dies. Role: npc. Values: {relation}, {age}.
+# A relative, partner or friend dies. Role: npc. Values: {relation}, {age}.
 familyDeath:
   importance: 3
   variants:

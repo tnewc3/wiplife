@@ -1,0 +1,18 @@
+id: test_divorce
+title: Divorce
+text: You and {person.name} divorce.
+tone: serious
+category: romance
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires: { age: { gte: 18 } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  person: { kind: spouse }
+autoOutcome:
+  text: The papers are signed.
+  effects:
+    - { type: relationship, role: person, kind: ex }
+    - { type: memory, role: person, tag: divorced }
+    - { type: history, text: 'You and {person.name} divorced.', importance: 3 }

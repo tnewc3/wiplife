@@ -1,12 +1,15 @@
 /**
  * Casting: fills each role of an event with an existing person who fits, or
- * (for friends, classmates and acquaintances) someone new.
+ * (for friends, classmates and acquaintances) someone new. Romantic roles are
+ * the meeting pool: only adults with attraction both ways. Support roles find
+ * the most trusted person who would step in.
  */
-import type { CastSpec, ContentBundle, EventDef } from '../../content/schemas';
+import type { CastSpec, ContentBundle, EventDef, GenderCategory } from '../../content/schemas';
 import { CREATABLE_KINDS } from '../../content/schemas';
 import { rollGenderCategory, rollIdentity, rollRelativeTraits } from '../creation/character';
 import { pickUnused, rollHeritage } from '../creation/family';
-import { rollScore } from '../random';
+import { rollScore, weightedPick } from '../random';
+import { isRomanticMatch, partnerAgeRange, SUPPORT_KINDS } from '../relationships';
 import { chance, nextInt, pick, type RngState } from '../rng';
 import type { Id, LifeState, Person } from '../types';
 
@@ -23,16 +26,35 @@ function fitsAge(state: LifeState, spec: CastSpec, age: number): boolean {
   return true;
 }
 
-/** Living people with a relationship of the spec's kind who fit its ages, in id order. */
-export function castCandidates(state: LifeState, spec: CastSpec): Person[] {
-  return Object.keys(state.relationships)
+/**
+ * Living people who fit the spec, in id order: of its kind (not faded out of
+ * your life), of its ages, and for a romantic role a possible partner. For a
+ * support role: close people (not estranged) whose trust and affection reach
+ * the support thresholds, most trusted first.
+ */
+export function castCandidates(state: LifeState, spec: CastSpec, content: ContentBundle): Person[] {
+  const support = content.balance.relationships.support;
+  const found = Object.keys(state.relationships)
     .sort()
     .flatMap((id) => {
       const rel = state.relationships[id]!;
       const person = state.people[id];
-      if (!person || !person.alive || rel.kind !== spec.kind || rel.status === 'ended') return [];
+      if (!person || !person.alive || rel.status === 'ended') return [];
+      if (spec.support) {
+        if (rel.status !== 'active' || !SUPPORT_KINDS.includes(rel.kind)) return [];
+        if (rel.trust < support.minTrust || rel.affection < support.minAffection) return [];
+      } else if (rel.kind !== spec.kind) {
+        return [];
+      }
+      if (spec.romantic && !isRomanticMatch(state, person, content)) return [];
       return fitsAge(state, spec, personAge(state, person)) ? [person] : [];
     });
+  if (spec.support) {
+    const rel = (p: Person) => state.relationships[p.id]!;
+    // Stable sort: ties keep id order.
+    found.sort((a, b) => rel(b).trust - rel(a).trust || rel(b).affection - rel(a).affection);
+  }
+  return found;
 }
 
 function nextPersonId(state: LifeState): Id {
@@ -56,19 +78,42 @@ function newPersonAgeRange(state: LifeState, spec: CastSpec, content: ContentBun
     min = Math.max(min, state.character.age + spec.ageOffset.min);
     max = Math.min(max, state.character.age + spec.ageOffset.max);
   }
+  if (spec.romantic) {
+    const range = partnerAgeRange(state.character.age, content);
+    min = Math.max(min, range.min);
+    max = Math.min(max, range.max);
+  }
   return min <= max ? { min, max } : null;
 }
 
-/** Creates someone new for a role and adds them (and the relationship) to the life. */
+/** A new potential partner's gender: one you're attracted to, by the usual weights. Null if you're attracted to no one. */
+function romanticCategory(state: LifeState, rng: RngState, content: ContentBundle): GenderCategory | null {
+  const wanted = state.character.identity.attractedTo;
+  if (wanted.length === 0) return null;
+  const weights = content.balance.creation.genderCategory;
+  const options = wanted.map((c) => [c, weights[c] ?? 0] as const);
+  return options.some(([, w]) => w > 0) ? weightedPick(rng, options) : pick(rng, wanted);
+}
+
+/**
+ * Creates someone new for a role and adds them (and the relationship) to the
+ * life. A romantic role creates an adult you're attracted to who is attracted
+ * to you (and needs you to be an adult).
+ */
 function createPerson(state: LifeState, spec: CastSpec, rng: RngState, content: ContentBundle): Id | null {
+  const kind = spec.kind;
+  if (kind === undefined) return null;
+  if (spec.romantic && state.character.age < content.balance.relationships.adultAge) return null;
   const range = newPersonAgeRange(state, spec, content);
   if (!range) return null;
   const city = content.cities[state.character.cityId];
   const pool = city && content.names[city.countryId];
   if (!pool) return null;
+  const romantic = spec.romantic ? romanticCategory(state, rng, content) : null;
+  if (spec.romantic && romantic === null) return null;
 
   const age = nextInt(rng, range.min, range.max);
-  const category = rollGenderCategory(rng, content);
+  const category = romantic ?? rollGenderCategory(rng, content);
   const heritage = pool.heritages[rollHeritage(rng, content, pool)]!;
   const used = new Set([state.character.name.first, ...Object.values(state.people).map((p) => p.name.first)]);
   const family = content.balance.creation.family;
@@ -78,17 +123,17 @@ function createPerson(state: LifeState, spec: CastSpec, rng: RngState, content: 
     name: { first: pickUnused(rng, heritage.first[category], used), last: pick(rng, heritage.last) },
     birthYear: state.currentYear - age,
     alive: true,
-    identity: rollIdentity(rng, content, category),
+    identity: rollIdentity(rng, content, category, spec.romantic ? state.character.identity.genderCategory : undefined),
     traits: rollRelativeTraits(rng, content),
     looks: rollScore(rng, family.relativeLooks),
     smarts: rollScore(rng, family.relativeSmarts),
     cityId: state.character.cityId,
-    tags: [spec.kind],
+    tags: [kind],
   };
   const newPerson = content.balance.events.newPerson;
   state.relationships[id] = {
     personId: id,
-    kind: spec.kind,
+    kind,
     status: 'active',
     affection: rollScore(rng, newPerson.affection),
     trust: rollScore(rng, newPerson.trust),
@@ -107,7 +152,8 @@ export interface CastResult {
 /**
  * Casts every role of the event, in role-name order. `preset` roles (carried
  * over by a scheduled follow-up) are kept if that person is still alive.
- * Returns null when a role can't be filled; anyone created is removed again.
+ * Returns null when a role can't be filled (an optional role is left out
+ * instead); anyone created is removed again.
  */
 export function castEvent(
   state: LifeState,
@@ -134,16 +180,21 @@ export function castEvent(
   for (const role of Object.keys(def.cast ?? {}).sort()) {
     if (cast[role] !== undefined) continue;
     const spec = def.cast![role]!;
-    const options = castCandidates(view, spec).filter((p) => !used.has(p.id));
-    const canCreate = spec.createIfMissing === true && (CREATABLE_KINDS as readonly string[]).includes(spec.kind);
+    const options = castCandidates(view, spec, content).filter((p) => !used.has(p.id));
+    const canCreate =
+      spec.createIfMissing === true && spec.kind !== undefined && (CREATABLE_KINDS as readonly string[]).includes(spec.kind);
     const wantsNew = canCreate && spec.newChance !== undefined && chance(rng, spec.newChance);
     let id: Id | null = null;
-    if (options.length > 0 && !wantsNew) id = pick(rng, options).id;
+    // A support role goes to the most trusted person; others to anyone who fits.
+    if (options.length > 0 && !wantsNew) id = spec.support ? options[0]!.id : pick(rng, options).id;
     else if (canCreate) {
       id = createPerson(state, spec, rng, content);
       if (id) created.push(id);
     }
-    if (id === null) return fail();
+    if (id === null) {
+      if (spec.optional) continue;
+      return fail();
+    }
     cast[role] = id;
     used.add(id);
   }

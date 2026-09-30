@@ -1,0 +1,18 @@
+id: test_wedding
+title: Wedding
+text: You and {person.name} get married.
+tone: light
+category: romance
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires: { age: { gte: 18 } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  person: { kind: fiance }
+autoOutcome:
+  text: It's a lovely day.
+  effects:
+    - { type: relationship, role: person, kind: spouse }
+    - { type: memory, role: person, tag: married_you }
+    - { type: history, text: 'You married {person.name}.', importance: 3 }

@@ -242,11 +242,14 @@ export const CONTINUE_CHOICE = 'continue';
  * text on the instance for the event card. Events without choices take
  * CONTINUE_CHOICE. When every event is resolved the phase moves to
  * 'yearEnd'; if an outcome kills the character, the rest of the year's
- * events are dropped. Throws PhaseError outside 'events' and
- * InvalidInputError for an unknown, resolved or hidden choice.
+ * events are dropped. In the 'action' phase (a management action's result)
+ * the phase stays until finishAction. Throws PhaseError outside 'events' and
+ * 'action', and InvalidInputError for an unknown, resolved or hidden choice.
  */
 export function resolveChoice(state: LifeState, instanceId: Id, choiceId: Id, content: ContentBundle): LifeState {
-  expectPhase(state, 'events', 'choose');
+  if (state.phase !== 'events' && state.phase !== 'action') {
+    throw new PhaseError(`Can't choose in the "${state.phase}" phase (expected "events" or "action").`);
+  }
   const instance = state.pending.find((p) => p.instanceId === instanceId);
   if (!instance) throw new InvalidInputError([{ path: 'choice', message: `No pending event "${instanceId}".` }]);
   if (instance.resolvedChoiceId !== undefined) throw new InvalidInputError([{ path: 'choice', message: `Event "${instanceId}" is already resolved.` }]);
@@ -272,7 +275,7 @@ export function resolveChoice(state: LifeState, instanceId: Id, choiceId: Id, co
       let outcome: Outcome | undefined = def.autoOutcome;
       if (choice?.outcome) outcome = choice.outcome;
       else if (choice?.check) {
-        outcome = chance(draft.rng, successChance(draft, choice.check, content)) ? choice.check.success : choice.check.failure;
+        outcome = chance(draft.rng, successChance(draft, choice.check, content, instance.cast)) ? choice.check.success : choice.check.failure;
       }
       if (outcome) {
         if (outcome.text) target.outcomeText = renderText(outcome.text, textContext(draft, instance.cast));
@@ -280,6 +283,8 @@ export function resolveChoice(state: LifeState, instanceId: Id, choiceId: Id, co
       }
     }
 
+    // A management action's result stays on screen until finishAction.
+    if (draft.phase === 'action') return;
     // A death ends the year's remaining events.
     if (draft.death) draft.pending = draft.pending.filter((p) => p.resolvedChoiceId !== undefined);
     draft.phase = draft.pending.every((p) => p.resolvedChoiceId !== undefined) ? 'yearEnd' : 'events';

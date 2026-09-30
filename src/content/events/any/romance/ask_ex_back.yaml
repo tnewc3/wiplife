@@ -1,0 +1,82 @@
+# Answers the "ask out" action when the person is your ex (registries/actions.yaml).
+id: ask_ex_back
+title: Second time around
+text: >-
+  You and {person.name} have history. You ask anyway: would {person.they}
+  want to try again?
+tone: neutral
+category: romance
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { role: person, kind: [ex] }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  # Filled by the action: your ex.
+  person: { kind: ex }
+choices:
+  - id: honest
+    label: Say you've missed {person.them}
+    check:
+      base: 35
+      stats:
+        - { role: person, key: affection, weight: 0.6 }
+        - { role: person, key: trust, weight: 0.3 }
+      success:
+        text: '{person.name} is quiet for a long moment. Then {person.they} {person:says|say}, "Okay. Slowly this time."'
+        effects:
+          - { type: relationship, role: person, kind: partner, affection: 10, trust: 5 }
+          - { type: memory, role: person, tag: started_dating }
+          - { type: stat, key: happiness, delta: 6 }
+          - { type: history, text: 'You and {person.name} got back together.', importance: 2 }
+      failure:
+        text: '"We tried that," {person.name} says. {person.They} {person:isn''t|aren''t} wrong.'
+        effects:
+          - { type: memory, role: person, tag: turned_you_down }
+          - { type: relationship, role: person, affection: -5 }
+          - { type: stat, key: happiness, delta: -5 }
+  - id: apologize
+    label: Apologize for how you ended it
+    visibleIf: { memory: { role: person, tag: you_broke_up } }
+    check:
+      base: 45
+      stats:
+        - { role: person, key: affection, weight: 0.5 }
+        - { key: kindness, weight: 0.2 }
+      success:
+        text: 'The apology lands. {person.name} says {person.they} had been waiting years to hear it.'
+        effects:
+          - { type: relationship, role: person, kind: partner, affection: 12, trust: 10 }
+          - { type: memory, role: person, tag: started_dating }
+          - { type: stat, key: happiness, delta: 7 }
+          - { type: history, text: 'You apologized to {person.name}, and the two of you got back together.', importance: 2 }
+      failure:
+        text: '{person.name} accepts the apology. Just not the rest.'
+        effects:
+          - { type: memory, role: person, tag: turned_you_down }
+          - { type: relationship, role: person, affection: 3, trust: 3 }
+          - { type: stat, key: happiness, delta: -3 }
+  - id: cheated_confession
+    label: Swear you've changed since the affair
+    visibleIf: { memory: { role: person, tag: cheated_on_them } }
+    check:
+      base: 20
+      stats:
+        - { role: person, key: affection, weight: 0.5 }
+        - { key: confidence, weight: 0.2 }
+      success:
+        text: '{person.name} wants to believe you. Against {person.their} better judgment, {person.they} {person:does|do}.'
+        effects:
+          - { type: relationship, role: person, kind: partner, affection: 8 }
+          - { type: memory, role: person, tag: started_dating }
+          - { type: stat, key: happiness, delta: 5 }
+          - { type: history, text: 'You and {person.name} gave it another try.', importance: 2 }
+      failure:
+        text: '"People say that," {person.name} says, and walks away.'
+        effects:
+          - { type: memory, role: person, tag: turned_you_down }
+          - { type: relationship, role: person, affection: -8, trust: -5 }
+          - { type: stat, key: happiness, delta: -5 }

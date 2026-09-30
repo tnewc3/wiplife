@@ -1,7 +1,13 @@
-# Words for relatives in story text, such as history entries ("your mother")
-# and obituaries. Interface labels (Mother, Father, Parent) live in
+# Words for relatives, partners and friends in story text, such as history
+# entries ("your mother", "your wife") and obituaries. Someone whose kind is
+# listed here gets a history entry when they die. Interface labels (Mother, Father, Parent) live in
 # src/ui/labels.ts.
 parent: { man: father, woman: mother, nonbinary: parent }
 stepparent: { man: stepfather, woman: stepmother, nonbinary: stepparent }
 grandparent: { man: grandfather, woman: grandmother, nonbinary: grandparent }
 sibling: { man: brother, woman: sister, nonbinary: sibling }
+partner: { man: boyfriend, woman: girlfriend, nonbinary: partner }
+fiance: { man: fiancé, woman: fiancée, nonbinary: fiancé }
+spouse: { man: husband, woman: wife, nonbinary: spouse }
+ex: { man: ex, woman: ex, nonbinary: ex }
+friend: { man: friend, woman: friend, nonbinary: friend }

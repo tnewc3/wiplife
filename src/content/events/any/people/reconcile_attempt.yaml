@@ -1,0 +1,75 @@
+# Answers the "reconcile" action (registries/actions.yaml).
+id: reconcile_attempt
+title: Reaching out
+text: >-
+  It's been a long time since you and {person.name} spoke. You pick up the
+  phone and, before you can talk yourself out of it, you call.
+tone: neutral
+category: people
+rarity: common
+lifeStages: [teen, youngAdult, adult, senior]
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  # Filled by the action: someone you're estranged from.
+  person: { kind: acquaintance }
+choices:
+  - id: apologize
+    label: Apologize, and mean it
+    check:
+      base: 40
+      stats:
+        - { role: person, key: trust, weight: 0.4 }
+        - { role: person, key: affection, weight: 0.4 }
+        - { key: kindness, weight: 0.2 }
+      success:
+        text: There's a long silence on the line. Then {person.name} says, "I'm sorry too."
+        effects:
+          - { type: relationship, role: person, status: active, affection: 15, trust: 10 }
+          - { type: memory, role: person, tag: made_peace }
+          - { type: stat, key: happiness, delta: 5 }
+          - { type: history, text: 'You and {person.name} made peace.', importance: 2 }
+      failure:
+        text: '{person.name} lets you finish, says "okay," and hangs up.'
+        effects:
+          - { type: memory, role: person, tag: reconcile_refused }
+          - { type: relationship, role: person, affection: 2 }
+          - { type: stat, key: happiness, delta: -3 }
+  - id: own_it
+    label: Admit you were the one who walked away
+    visibleIf: { memory: { role: person, tag: you_cut_them_off } }
+    check:
+      base: 50
+      stats:
+        - { role: person, key: affection, weight: 0.4 }
+        - { key: kindness, weight: 0.2 }
+      success:
+        text: '"You did," {person.name} says. "Thank you for saying it." You talk for two hours.'
+        effects:
+          - { type: relationship, role: person, status: active, affection: 15, trust: 12 }
+          - { type: memory, role: person, tag: made_peace }
+          - { type: stat, key: happiness, delta: 6 }
+          - { type: history, text: 'You owned up to walking away, and {person.name} let you back in.', importance: 2 }
+      failure:
+        text: '"Yes, you did," {person.name} says, and that is the end of the call.'
+        effects:
+          - { type: memory, role: person, tag: reconcile_refused }
+          - { type: stat, key: happiness, delta: -4 }
+  - id: small
+    label: Skip the big speech and suggest coffee
+    check:
+      base: 35
+      stats:
+        - { role: person, key: affection, weight: 0.5 }
+        - { key: sociability, weight: 0.2 }
+      success:
+        text: Coffee is awkward for about ten minutes, then it isn't. You make plans for next week.
+        effects:
+          - { type: relationship, role: person, status: active, affection: 10, trust: 5 }
+          - { type: memory, role: person, tag: made_peace }
+          - { type: stat, key: happiness, delta: 4 }
+      failure:
+        text: '{person.name} says {person.they} {person:is|are} busy. For the foreseeable future.'
+        effects:
+          - { type: memory, role: person, tag: reconcile_refused }
+          - { type: stat, key: happiness, delta: -2 }

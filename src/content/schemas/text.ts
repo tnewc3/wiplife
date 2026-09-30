@@ -19,14 +19,21 @@ export const causeSchema = baseDefSchema.extend({
 export type CauseDef = z.infer<typeof causeSchema>;
 
 /**
- * Words for relatives in story text ("your mother"), by relationship kind and
- * gender category. Interface labels live in src/ui/labels.ts instead.
+ * Words for relatives, partners and friends in story text ("your mother",
+ * "your wife"), by relationship kind and gender category. Interface labels
+ * live in src/ui/labels.ts instead. A kind listed here gets a history entry
+ * when that person dies.
  */
 export const relationWordsSchema = z.strictObject({
   parent: byCategorySchema,
   stepparent: byCategorySchema,
   grandparent: byCategorySchema,
   sibling: byCategorySchema,
+  partner: byCategorySchema,
+  fiance: byCategorySchema,
+  spouse: byCategorySchema,
+  ex: byCategorySchema,
+  friend: byCategorySchema,
 });
 export type RelationWords = z.infer<typeof relationWordsSchema>;
 
@@ -43,7 +50,7 @@ export const historyTextSchema = z.strictObject({
     adult: historyGroupSchema,
     senior: historyGroupSchema,
   }),
-  /** A relative dies. Role: npc. Values: {relation}, {age}. */
+  /** A relative, partner or friend dies. Role: npc. Values: {relation}, {age}. */
   familyDeath: historyGroupSchema,
   /** The character dies. Values: {age}, {cause}. */
   death: historyGroupSchema,

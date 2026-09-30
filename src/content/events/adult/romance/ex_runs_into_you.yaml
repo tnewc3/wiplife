@@ -1,0 +1,48 @@
+id: ex_runs_into_you
+title: Aisle seven
+text: >-
+  You run into {ex.name} at the grocery store, both reaching for the last
+  carton of eggs. It's been a while.
+tone: neutral
+category: romance
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires: { age: { gte: 18 } }
+weight: { base: 3 }
+cooldownYears: 8
+cast:
+  ex: { kind: ex }
+choices:
+  - id: coffee
+    label: Suggest coffee, for old times' sake
+    outcome:
+      text: You talk for an hour about everyone you used to know. It's nicer than you expected.
+      effects:
+        - { type: relationship, role: ex, affection: 6 }
+        - { type: memory, role: ex, tag: kept_in_touch }
+  - id: nod
+    label: Let {ex.them} have the eggs and keep walking
+    outcome:
+      text: A nod, a smile, and you're past each other. Your heart rate takes the rest of the aisle to calm down.
+      effects:
+        - { type: stat, key: stress, delta: 1 }
+  - id: sorry
+    label: Apologize for how you ended it
+    visibleIf: { memory: { role: ex, tag: you_broke_up } }
+    outcome:
+      text: '{ex.name} blinks, then thanks you. "I really needed to hear that," {ex.they} {ex:says|say}.'
+      effects:
+        - { type: relationship, role: ex, affection: 10, trust: 8 }
+        - { type: memory, role: ex, tag: you_apologized }
+        - { type: stat, key: stress, delta: -3 }
+  - id: angry
+    label: Tell {ex.them} you're still angry
+    visibleIf:
+      any:
+        - { memory: { role: ex, tag: they_broke_up } }
+        - { memory: { role: ex, tag: cheated_on_them } }
+    outcome:
+      text: It all comes out, right there in aisle seven. You leave without the eggs, but lighter.
+      effects:
+        - { type: relationship, role: ex, affection: -6 }
+        - { type: stat, key: stress, delta: -4 }

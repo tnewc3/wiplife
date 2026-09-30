@@ -1,0 +1,50 @@
+id: dating_app
+title: It's a match
+text: >-
+  After weeks of swiping, you match with {match.name}. {match.Their} first
+  message is a terrible pun about your profile photo. You laugh anyway.
+tone: light
+category: romance
+rarity: common
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { romance: [single] }
+weight: { base: 7 }
+cooldownYears: 3
+cast:
+  match: { kind: acquaintance, romantic: true, createIfMissing: true, newChance: 1 }
+choices:
+  - id: date
+    label: Meet for a drink this week
+    check:
+      base: 45
+      stats: [{ key: looks, weight: 0.25 }, { key: sociability, weight: 0.25 }]
+      success:
+        text: One drink becomes three, then a walk, then a second date the very next night.
+        effects:
+          - { type: relationship, role: match, kind: partner, affection: 18 }
+          - { type: memory, role: match, tag: started_dating }
+          - { type: stat, key: happiness, delta: 6 }
+          - { type: history, text: 'You matched with {match.name} on an app, and it actually worked out.', importance: 2 }
+      failure:
+        text: '{match.name} spends the whole date talking about {match.their} ex. You fake a phone call.'
+        effects:
+          - { type: memory, role: match, tag: bad_first_date }
+          - { type: relationship, role: match, affection: -8 }
+          - { type: stat, key: happiness, delta: -2 }
+  - id: chat
+    label: Keep chatting for a while
+    outcome:
+      text: You text every night for two weeks. It's easy, which makes you suspicious.
+      effects:
+        - { type: relationship, role: match, affection: 10 }
+        - { type: memory, role: match, tag: swapped_numbers }
+  - id: delete
+    label: Delete the app for good
+    outcome:
+      text: You feel lighter immediately. Your thumb keeps looking for it anyway.
+      effects:
+        - { type: stat, key: stress, delta: -3 }
+        - { type: stat, key: happiness, delta: -1 }

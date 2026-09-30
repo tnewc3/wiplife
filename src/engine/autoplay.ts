@@ -4,7 +4,8 @@
  * the same as with a real player making those choices). Used by the
  * simulation runner (tools/simulate.ts) and by tests.
  */
-import type { ContentBundle } from '../content/schemas';
+import type { ActionId, ContentBundle } from '../content/schemas';
+import { finishAction, performAction } from './actions';
 import { beginYear, endYear, resolveChoice } from './life';
 import { createRng, pick, type RngState } from './rng';
 import { firstUnresolvedEvent, getEventCard } from './selectors';
@@ -17,10 +18,10 @@ export interface AutoplayOptions {
   onStep?: (life: LifeState) => void;
 }
 
-/** Resolves every pending event with random visible choices. */
+/** Resolves every pending event (of the year, or of a management action) with random visible choices. */
 export function resolveAll(life: LifeState, content: ContentBundle, choices: RngState, onStep?: (life: LifeState) => void): LifeState {
   let current = life;
-  while (current.phase === 'events') {
+  while (current.phase === 'events' || (current.phase === 'action' && firstUnresolvedEvent(current) !== null)) {
     const index = firstUnresolvedEvent(current)!;
     const card = getEventCard(current, index, content)!;
     current = resolveChoice(current, card.instanceId, pick(choices, card.choices).id, content);
@@ -45,5 +46,22 @@ export function playLife(life: LifeState, content: ContentBundle, options: Autop
   const choices = options.choices ?? createRng(`${life.seed}:choices`);
   let current = life;
   while (current.phase !== 'dead') current = playYear(current, content, { ...options, choices });
+  return current;
+}
+
+/** Takes a management action and resolves its result event with a random visible choice. */
+export function playAction(
+  life: LifeState,
+  content: ContentBundle,
+  actionId: ActionId,
+  personId: string,
+  choices: RngState,
+  onStep?: (life: LifeState) => void,
+): LifeState {
+  let current = performAction(life, actionId, { personId }, content);
+  onStep?.(current);
+  current = resolveAll(current, content, choices, onStep);
+  current = finishAction(current);
+  onStep?.(current);
   return current;
 }

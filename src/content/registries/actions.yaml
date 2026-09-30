@@ -1,0 +1,12 @@
+# Which events answer each management action on a person's page. When the
+# player takes an action, the engine picks one of its events that fits (by
+# weight and requirements) and casts the person acted on as {person}. These
+# events are followUpOnly: they never happen on their own.
+actions:
+  ask_out: { events: [ask_out_result, ask_ex_back] }
+  propose: { events: [proposal] }
+  marry: { events: [wedding] }
+  break_up: { events: [break_up_talk] }
+  divorce: { events: [divorce_papers] }
+  cut_contact: { events: [cut_contact_result] }
+  reconcile: { events: [reconcile_attempt] }

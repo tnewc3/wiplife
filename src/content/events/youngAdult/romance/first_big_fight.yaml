@@ -1,0 +1,45 @@
+id: first_big_fight
+title: The fight
+text: >-
+  It started with whose turn it was to do the dishes. Now you and
+  {partner.name} are shouting about everything either of you has ever done.
+tone: neutral
+category: romance
+rarity: common
+lifeStages: [youngAdult, adult]
+requires: { age: { gte: 18 } }
+weight: { base: 6 }
+cooldownYears: 4
+cast:
+  partner: { kind: partner }
+choices:
+  - id: sorry
+    label: Apologize first
+    outcome:
+      text: You say sorry. {partner.name} says sorry. You do the dishes together, badly.
+      effects:
+        - { type: relationship, role: partner, affection: 4, trust: 3 }
+        - { type: memory, role: partner, tag: made_up_after_fight }
+  - id: dig_in
+    label: Dig in; you're right
+    check:
+      base: 40
+      stats: [{ role: partner, key: affection, weight: 0.4 }, { key: confidence, weight: 0.2 }]
+      success:
+        text: '{partner.name} eventually admits you had a point. You try very hard not to gloat.'
+        effects:
+          - { type: relationship, role: partner, affection: -2 }
+          - { type: stat, key: confidence, delta: 2 }
+      failure:
+        text: Being right keeps you warm for about an hour. The cold shoulder lasts a week.
+        effects:
+          - { type: relationship, role: partner, affection: -12, trust: -6 }
+          - { type: memory, role: partner, tag: fought_with_you }
+          - { type: stat, key: stress, delta: 5 }
+  - id: walk_out
+    label: Walk out for the night
+    outcome:
+      text: You sleep on a friend's couch. When you get home, neither of you mentions it.
+      effects:
+        - { type: relationship, role: partner, affection: -6, trust: -4 }
+        - { type: stat, key: stress, delta: 3 }

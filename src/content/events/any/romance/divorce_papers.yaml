@@ -1,0 +1,71 @@
+# Answers the "divorce" action (registries/actions.yaml). A year later, the
+# aftermath (after_the_divorce) finds out who is there for you.
+id: divorce_papers
+title: Papers
+text: >-
+  You and {person.name} are getting divorced. The lawyers want to know how
+  this is going to go.
+tone: serious
+category: romance
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires: { age: { gte: 18 } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  # Filled by the action: your spouse.
+  person: { kind: spouse }
+choices:
+  - id: fair
+    label: Split everything down the middle
+    outcome:
+      text: >-
+        You divide the furniture, the photos and the friends. It's fair. It
+        still feels like losing.
+      effects:
+        - { type: money, delta: -3000 }
+        - { type: relationship, role: person, kind: ex, affection: -10, trust: -5 }
+        - { type: memory, role: person, tag: divorced }
+        - { type: stat, key: happiness, delta: -8 }
+        - { type: stat, key: stress, delta: 8 }
+        - { type: history, text: 'You and {person.name} divorced.', importance: 3 }
+        - { type: schedule, eventId: after_the_divorce, inYears: [1, 1], cast: [person] }
+  - id: lawyer
+    label: Hire a shark of a lawyer
+    check:
+      base: 50
+      stats: [{ key: confidence, weight: 0.3 }, { key: riskTaking, weight: 0.1 }]
+      success:
+        text: Your lawyer is terrifying. You keep more than you expected, and {person.name} will hate you for years.
+        effects:
+          - { type: money, delta: -2000 }
+          - { type: relationship, role: person, kind: ex, affection: -35, trust: -30 }
+          - { type: memory, role: person, tag: divorced }
+          - { type: stat, key: happiness, delta: -5 }
+          - { type: stat, key: stress, delta: 10 }
+          - { type: history, text: 'You and {person.name} went through a bitter divorce, and you came out ahead.', importance: 3 }
+          - { type: schedule, eventId: after_the_divorce, inYears: [1, 1], cast: [person] }
+      failure:
+        text: '{person.name}''s lawyer turns out to be scarier. It takes two years and most of your savings.'
+        effects:
+          - { type: money, delta: -12000 }
+          - { type: relationship, role: person, kind: ex, affection: -35, trust: -30 }
+          - { type: memory, role: person, tag: divorced }
+          - { type: stat, key: happiness, delta: -12 }
+          - { type: stat, key: stress, delta: 15 }
+          - { type: history, text: 'You and {person.name} went through a long, bitter divorce.', importance: 3 }
+          - { type: schedule, eventId: after_the_divorce, inYears: [1, 1], cast: [person] }
+  - id: mediation
+    label: Try mediation and stay civil
+    outcome:
+      text: >-
+        A patient mediator and a lot of tissues. You and {person.name} leave
+        the last session and, to your surprise, get coffee together.
+      effects:
+        - { type: money, delta: -1500 }
+        - { type: relationship, role: person, kind: ex, affection: 5, trust: 5 }
+        - { type: memory, role: person, tag: divorced }
+        - { type: stat, key: happiness, delta: -5 }
+        - { type: stat, key: stress, delta: 5 }
+        - { type: history, text: 'You and {person.name} divorced, and managed to stay kind about it.', importance: 3 }
+        - { type: schedule, eventId: after_the_divorce, inYears: [1, 1], cast: [person] }

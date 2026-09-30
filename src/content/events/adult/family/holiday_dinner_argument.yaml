@@ -1,0 +1,61 @@
+id: holiday_dinner_argument
+title: Pass the potatoes
+text: >-
+  Halfway through the holiday dinner, {relative.name} brings up the one topic
+  everyone agreed not to bring up. Heads turn to you.
+tone: neutral
+category: family
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+weight: { base: 6 }
+cooldownYears: 5
+cast:
+  relative: { kind: parent }
+choices:
+  - id: argue
+    label: Take the bait
+    outcome:
+      text: >-
+        Voices rise. Someone leaves the table. You win the argument and lose
+        the evening.
+      effects:
+        - { type: relationship, role: relative, affection: -8 }
+        - { type: memory, role: relative, tag: argued_at_dinner }
+        - { type: stat, key: stress, delta: 4 }
+        - { type: stat, key: confidence, delta: 2 }
+  - id: joke
+    label: Make a joke and change the subject
+    check:
+      base: 55
+      stats: [{ key: sociability, weight: 0.3 }]
+      success:
+        text: The table laughs. {relative.name} laughs too, eventually. Dessert is saved.
+        effects:
+          - { type: relationship, role: relative, affection: 3 }
+          - { type: stat, key: happiness, delta: 2 }
+      failure:
+        text: The joke lands badly. Now everyone is annoyed with you instead.
+        effects:
+          - { type: relationship, role: relative, affection: -2 }
+          - { type: stat, key: stress, delta: 2 }
+  - id: side
+    label: Hear {relative.them} out after dinner
+    outcome:
+      text: In the kitchen, you tell {relative.name} {relative.they} had a point. {relative.They} {relative:looks|look} surprised, then grateful.
+      effects:
+        - { type: relationship, role: relative, affection: 6, trust: 4 }
+        - { type: memory, role: relative, tag: took_your_side }
+  - id: walk_out
+    label: Walk out, and don't come back
+    # Only when things between you were already strained.
+    visibleIf: { role: relative, affection: { lt: 50 } }
+    outcome:
+      text: >-
+        You put your fork down, get your coat and leave. The phone rings for
+        a week. You don't answer it.
+      effects:
+        - { type: relationship, role: relative, status: estranged, affection: -15, trust: -10 }
+        - { type: memory, role: relative, tag: argued_at_dinner }
+        - { type: stat, key: stress, delta: -2 }
+        - { type: stat, key: happiness, delta: -3 }
+        - { type: history, text: 'You walked out of a holiday dinner and stopped speaking to {relative.name}.', importance: 2 }

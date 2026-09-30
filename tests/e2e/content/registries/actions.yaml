@@ -1,0 +1,9 @@
+# Test pack: every management action answers with one predictable event.
+actions:
+  ask_out: { events: [test_ask_out] }
+  propose: { events: [test_propose] }
+  marry: { events: [test_wedding] }
+  break_up: { events: [test_break_up] }
+  divorce: { events: [test_divorce] }
+  cut_contact: { events: [test_cut_contact] }
+  reconcile: { events: [test_reconcile] }

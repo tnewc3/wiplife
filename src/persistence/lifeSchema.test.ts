@@ -1,9 +1,11 @@
 import 'fake-indexeddb/auto';
+import { produce } from 'immer';
 import { afterEach, describe, expect, it } from 'vitest';
 import { content } from '../content';
+import { performAction } from '../engine/actions';
 import { beginYear, createLife } from '../engine/life';
 import { nextUint32 } from '../engine/rng';
-import { customInput, liveOut } from '../engine/testFixtures';
+import { customInput, lifeAtAge, liveOut } from '../engine/testFixtures';
 import type { LifeState } from '../engine/types';
 import { createDb, type WiplifeDb } from './db';
 import { CURRENT_SCHEMA_VERSION, makeEnvelope, type SaveEnvelope } from './envelope';
@@ -39,6 +41,23 @@ describe('life save and load', () => {
   it('gives an identical random life after saving and reloading', async () => {
     const life = random('save-1');
     expect(await roundTrip(life)).toEqual(life);
+  });
+
+  it('keeps relationship changes and a management action in progress', async () => {
+    const start = lifeAtAge('save-rel', 30);
+    // Every life has a parent; at 30 you can cut contact with them.
+    const parentId = Object.keys(start.relationships).find((id) => start.relationships[id]!.kind === 'parent')!;
+    const acted = performAction(start, 'cut_contact', { personId: parentId }, content);
+    expect(acted.phase).toBe('action');
+    expect(acted.relationships[parentId]!.lastActionYear).toBe(acted.currentYear);
+    expect(await roundTrip(acted)).toEqual(acted);
+    const wed = produce(start, (d) => {
+      const template = Object.values(d.people)[0]!;
+      d.people.w = { ...template, id: 'w', birthYear: d.currentYear - 30, tags: [] };
+      d.relationships.w = { personId: 'w', kind: 'fiance', status: 'active', affection: 70, trust: 70, memories: [], since: d.currentYear - 3, kindSince: d.currentYear - 1 };
+    });
+    expect(await roundTrip(wed)).toEqual(wed);
+    expect(lifeStateSchema.safeParse({ ...wed, phase: 'dating' }).success).toBe(false);
   });
 
   it('gives an identical custom life after saving and reloading', async () => {
@@ -159,6 +178,53 @@ describe('lives from Stage 3 on', () => {
     const schema = loadedLifeSchema(content);
     expect(schema.safeParse({ ...life, death: { year: 2026, age: 0, causeId: 'stroke' } }).success).toBe(false);
     expect(schema.safeParse({ ...life, phase: 'dead' }).success).toBe(false);
+  });
+});
+
+describe('lives from Stage 5 on', () => {
+  it('upgrade a schema version 3 save, marking spouses and ex-spouses', async () => {
+    const start = lifeAtAge('stage5-migrate', 50);
+    const template = Object.values(start.people)[0]!;
+    const person = (id: string) => ({ ...template, id, birthYear: start.currentYear - 48, tags: [] });
+    const rel = (id: string, kind: 'spouse' | 'ex', tags: string[]) => ({
+      personId: id,
+      kind,
+      status: 'active' as const,
+      affection: 50,
+      trust: 50,
+      memories: tags.map((tag) => ({ tag, year: start.currentYear - 1 })),
+      since: start.currentYear - 20,
+      kindSince: start.currentYear - 1,
+    });
+    // A version 3 save: no wasSpouse anywhere.
+    const v3 = {
+      ...start,
+      people: { ...start.people, w: person('w'), d: person('d'), x: person('x') },
+      relationships: {
+        ...start.relationships,
+        w: rel('w', 'spouse', ['married_you']),
+        d: rel('d', 'ex', ['married_you', 'divorced']),
+        x: rel('x', 'ex', ['started_dating', 'you_broke_up']),
+      },
+    };
+    const db = freshDb();
+    await db.lives.put({ id: 'active', envelope: { ...makeEnvelope(v3, content.contentVersion), schemaVersion: 3 } });
+    const result = await readSave(db, loadedLifeSchema(content));
+    expect(result.status).toBe('ok');
+    if (result.status !== 'ok') return;
+    expect(result.envelope.schemaVersion).toBe(CURRENT_SCHEMA_VERSION);
+    const upgraded = result.envelope.data.relationships;
+    expect(upgraded.w!.wasSpouse).toBe(true);
+    expect(upgraded.d!.wasSpouse).toBe(true);
+    expect(upgraded.x!.wasSpouse).toBeUndefined();
+    for (const id of Object.keys(start.relationships)) expect(upgraded[id]).toEqual(start.relationships[id]);
+  });
+
+  it('refuses a wasSpouse that is not true', () => {
+    const life = lifeAtAge('stage5-bad', 30);
+    const id = Object.keys(life.relationships)[0]!;
+    const bad = { ...life, relationships: { ...life.relationships, [id]: { ...life.relationships[id]!, wasSpouse: false } } };
+    expect(lifeStateSchema.safeParse(bad).success).toBe(false);
   });
 });
 

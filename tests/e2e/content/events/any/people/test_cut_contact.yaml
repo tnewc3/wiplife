@@ -1,0 +1,16 @@
+id: test_cut_contact
+title: Cutting contact
+text: You stop speaking to {person.name}.
+tone: serious
+category: people
+rarity: common
+lifeStages: [teen, youngAdult, adult, senior]
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  person: { kind: acquaintance }
+autoOutcome:
+  text: That's that.
+  effects:
+    - { type: relationship, role: person, status: estranged }
+    - { type: memory, role: person, tag: you_cut_them_off }

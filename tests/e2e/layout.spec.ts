@@ -54,6 +54,16 @@ for (const size of sizes) {
       expect(Math.abs(column!.x + column!.width / 2 - size.width / 2)).toBeLessThanOrEqual(2);
     }
 
+    // The People list and a person's page fit, with the long family name.
+    await nav.getByRole('button', { name: 'People', exact: true }).click();
+    await expect(page.getByRole('list', { name: 'Family' })).toContainText(LONG_NAME_LIFE.last);
+    await expectNoHorizontalScroll(page);
+    await expectTouchTargets(page);
+    await page.getByRole('list', { name: 'Family' }).getByRole('button', { name: LONG_NAME_LIFE.last }).first().click();
+    await expect(page.getByTestId('person-name')).toContainText(LONG_NAME_LIFE.last);
+    await expectNoHorizontalScroll(page);
+    await expectTouchTargets(page);
+
     await nav.getByRole('button', { name: 'More' }).click();
     await page.getByRole('button', { name: 'Settings' }).click();
     await expectNoHorizontalScroll(page);

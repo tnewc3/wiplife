@@ -31,6 +31,26 @@ export const migrations: readonly Migration[] = [
       return { ...data, lifetime: { happinessTotal: happiness * years, years } };
     },
   },
+  {
+    from: 3,
+    description:
+      'Stage 5: mark everyone who has been your spouse (wasSpouse). A spouse is marked; an ex is marked when a ' +
+      'memory shows the marriage ("married_you" or "divorced"). Saves from before Stage 5 have neither.',
+    migrate: (data) => {
+      if (typeof data !== 'object' || data === null || Array.isArray(data)) return data;
+      const life = data as { relationships?: unknown };
+      if (typeof life.relationships !== 'object' || life.relationships === null) return data;
+      const relationships: Record<string, unknown> = {};
+      for (const [id, value] of Object.entries(life.relationships as Record<string, unknown>)) {
+        const rel = value as { kind?: unknown; memories?: unknown };
+        const memories = Array.isArray(rel.memories) ? (rel.memories as { tag?: unknown }[]) : [];
+        const married =
+          rel.kind === 'spouse' || (rel.kind === 'ex' && memories.some((m) => m.tag === 'married_you' || m.tag === 'divorced'));
+        relationships[id] = married && typeof value === 'object' && value !== null ? { ...value, wasSpouse: true } : value;
+      }
+      return { ...data, relationships };
+    },
+  },
 ];
 
 export class MigrationError extends Error {

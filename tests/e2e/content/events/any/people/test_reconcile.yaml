@@ -1,0 +1,16 @@
+id: test_reconcile
+title: Reconciling
+text: You reach out to {person.name}.
+tone: neutral
+category: people
+rarity: common
+lifeStages: [teen, youngAdult, adult, senior]
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  person: { kind: acquaintance }
+autoOutcome:
+  text: You make peace.
+  effects:
+    - { type: relationship, role: person, status: active }
+    - { type: memory, role: person, tag: made_peace }

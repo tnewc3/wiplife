@@ -1,23 +1,70 @@
 # Every memory tag an event can write on a relationship, with readable text
-# shown in the year recap ("Ana: Comforted you when you were scared").
+# shown on the person's page and in the year recap ("Ana: Comforted you when
+# you were scared"). The text is a template: the person the memory is about
+# is {npc}, so use {npc.them}, {npc.their} and {npc:was|were}, never he or she.
 tags:
   comforted_you: Comforted you when you were scared
   read_to_you: Read you bedtime stories
   cared_for_you: Took care of you when you were sick
   left_you_alone: Left you alone when you were small
-  took_your_side: You took their side
+  took_your_side: You took {npc.their} side
   spent_holidays_together: Spent the holidays with you
   promised_to_write: You promised to write
   kept_in_touch: You kept in touch
   lost_touch: You lost touch
   bullied_you: Bullied you at school
-  you_stood_up_to_them: You stood up to them
+  you_stood_up_to_them: You stood up to {npc.them}
   dared_you: Dared you into trouble
   taught_you_to_drive: Taught you to drive
-  lent_money: You lent them money
+  lent_money: You lent {npc.them} money
   paid_you_back: Paid you back
   never_paid_back: Never paid you back
   road_trip_together: Took a road trip with you
-  was_there_for_them: You were there when they were ill
+  was_there_for_them: You were there when {npc.they} {npc:was|were} ill
   fought_with_you: Got into a fight with you
   made_peace: Made peace with you
+  # Relationships (Stage 5).
+  started_dating: Started dating you
+  turned_you_down: Turned you down when you asked {npc.them} out
+  engaged_to_you: Got engaged to you
+  refused_proposal: Said no when you proposed
+  married_you: Married you
+  called_off_wedding: You called off your wedding
+  you_broke_up: You broke up with {npc.them}
+  they_broke_up: Broke up with you
+  divorced: Divorced you
+  you_cut_them_off: You cut {npc.them} out of your life
+  reconcile_refused: Wasn't ready to make peace when you reached out
+  stood_by_you: Stood by you when things fell apart
+  visited_for_birthday: You came for {npc.their} birthday
+  forgot_birthday: You forgot {npc.their} birthday
+  argued_at_dinner: Argued with you at a family dinner
+  helped_them_move: You helped {npc.them} move out of the family home
+  apologized: Apologized for the past
+  reached_out: Reached out after years apart
+  covered_for_you: Covered for you when you missed curfew
+  you_sat_with_them: You sat with {npc.them} when {npc.they} {npc:was|were} new
+  kept_their_secret: You kept {npc.their} secret
+  spilled_their_secret: You told {npc.their} secret
+  in_their_wedding: You stood up at {npc.their} wedding
+  missed_wedding: You missed {npc.their} wedding
+  let_them_stay: You let {npc.them} stay on your couch
+  returned_the_favor: Returned the favor when you needed it
+  swapped_numbers: Swapped numbers with you
+  bad_first_date: Went on one awkward date with you
+  confessed_feelings: Told you {npc.they} had feelings for you
+  turned_down_their_feelings: You turned down {npc.their} feelings
+  set_you_up: Set you up on a blind date
+  made_up_after_fight: Made up with you after a big fight
+  met_your_family: Met your family
+  moved_in_together: Moved in with you
+  forgot_anniversary: You forgot your anniversary
+  cheated_on_them: You cheated on {npc.them}
+  affair_with_you: Had an affair with you
+  forgave_you: Forgave you for the affair
+  couples_therapy: Went to couples therapy with you
+  you_said_not_yet: You asked {npc.them} to wait when {npc.they} proposed
+  you_refused_them: You turned down {npc.their} proposal
+  you_apologized: You apologized to {npc.them}
+  anniversary_trip: Took the trip of a lifetime with you
+  lent_you_money: Lent you money when you were in a bind

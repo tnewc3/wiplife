@@ -1,0 +1,29 @@
+# Follow-up of friend_wedding_party: the wedding you skipped comes back up.
+id: missed_wedding_fallout
+title: The photo album
+text: >-
+  {friend.name} is showing everyone the wedding album. There's a page of
+  empty seats, and {friend.they} {friend:points|point} at one of them.
+tone: neutral
+category: friends
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires: { memory: { role: friend, tag: missed_wedding } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  friend: { kind: friend }
+choices:
+  - id: apologize
+    label: Finally say sorry
+    outcome:
+      text: '"It really hurt," {friend.name} says. "But thank you." Something between you loosens.'
+      effects:
+        - { type: relationship, role: friend, affection: 8, trust: 6 }
+        - { type: memory, role: friend, tag: made_peace }
+  - id: laugh
+    label: Laugh it off
+    outcome:
+      text: '{friend.name} laughs too, a beat too late.'
+      effects:
+        - { type: relationship, role: friend, affection: -5 }

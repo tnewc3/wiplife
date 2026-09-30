@@ -1,0 +1,61 @@
+id: meet_cute
+title: The last table
+text: >-
+  The coffee shop is packed, and the only free seat is across from
+  {stranger.name}, who moves {stranger.their} bag and smiles at you over a
+  paperback you've read twice.
+tone: light
+category: romance
+rarity: common
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { romance: [single] }
+weight:
+  base: 7
+  modifiers:
+    - { if: { trait: sociability, gt: 60 }, x: 1.4 }
+cooldownYears: 2
+cast:
+  stranger: { kind: acquaintance, romantic: true, createIfMissing: true, newChance: 1 }
+choices:
+  - id: number
+    label: Talk about the book, then ask for {stranger.their} number
+    check:
+      base: 50
+      stats: [{ key: looks, weight: 0.3 }, { key: confidence, weight: 0.3 }]
+      success:
+        text: '{stranger.name} writes {stranger.their} number on your cup. You don''t throw the cup away for a month.'
+        effects:
+          - { type: relationship, role: stranger, affection: 15 }
+          - { type: memory, role: stranger, tag: swapped_numbers }
+          - { type: stat, key: happiness, delta: 3 }
+      failure:
+        text: '{stranger.name} says {stranger.they} {stranger:is|are} seeing someone. It was a good book conversation, at least.'
+        effects:
+          - { type: stat, key: confidence, delta: -1 }
+  - id: ask_now
+    label: Ask {stranger.them} out right there
+    visibleIf: { trait: confidence, gte: 50 }
+    check:
+      base: 30
+      stats: [{ key: looks, weight: 0.3 }, { key: confidence, weight: 0.3 }]
+      success:
+        text: '"I was hoping you would," {stranger.name} says. Your coffee goes cold while you make plans.'
+        effects:
+          - { type: relationship, role: stranger, kind: partner, affection: 20 }
+          - { type: memory, role: stranger, tag: started_dating }
+          - { type: stat, key: happiness, delta: 6 }
+          - { type: history, text: 'You met {stranger.name} over a crowded coffee table, and started dating.', importance: 2 }
+      failure:
+        text: '{stranger.name} laughs, not unkindly, and goes back to {stranger.their} book. You finish your coffee very fast.'
+        effects:
+          - { type: memory, role: stranger, tag: turned_you_down }
+          - { type: stat, key: confidence, delta: -2 }
+  - id: read
+    label: Smile back and read your own book
+    outcome:
+      text: A nice hour of quiet company. Neither of you says a word.
+      effects:
+        - { type: stat, key: stress, delta: -2 }

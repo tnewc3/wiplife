@@ -3,7 +3,7 @@ import { content } from '../content';
 import { createLife } from '../engine/life';
 import { getFamily, type FamilyMember } from '../engine/selectors';
 import type { GenderCategory, RelationshipKind } from '../engine/types';
-import { relativeLabel } from './labels';
+import { relationshipLabel, relativeLabel } from './labels';
 
 function member(kind: RelationshipKind, genderCategory: GenderCategory): FamilyMember {
   return {
@@ -48,5 +48,17 @@ describe('relativeLabel', () => {
         expect(relativeLabel(m)).toBe(expected[m.relationship.kind]![m.person.identity.genderCategory]);
       }
     }
+  });
+});
+
+describe('relationshipLabel', () => {
+  it('labels partners by gender, and an ex you married as an ex-spouse', () => {
+    expect(relationshipLabel('partner', 'woman')).toBe('Girlfriend');
+    expect(relationshipLabel('fiance', 'man')).toBe('Fiancé');
+    expect(relationshipLabel('spouse', 'nonbinary')).toBe('Spouse');
+    expect(relationshipLabel('ex', 'woman')).toBe('Ex');
+    expect(relationshipLabel('ex', 'woman', true)).toBe('Ex-spouse');
+    expect(relationshipLabel('ex', 'man', true)).toBe('Ex-spouse');
+    expect(relationshipLabel('spouse', 'man', true)).toBe('Husband');
   });
 });

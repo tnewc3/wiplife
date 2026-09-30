@@ -1,0 +1,50 @@
+# A crisis: whoever you trust most may step in to care for you (a support role).
+id: hospital_stay
+title: A week in bed 4
+text: >-
+  A bad fall lands you in the hospital for a week. The food is terrible, the
+  days are long, and whoever is in the next bed snores like a chainsaw.
+tone: serious
+category: health
+rarity: common
+lifeStages: [adult, senior]
+requires: { stat: health, lte: 45 }
+weight: { base: 6 }
+cooldownYears: 6
+cast:
+  helper: { support: true, optional: true }
+choices:
+  - id: let_help
+    label: Let {helper.name} take care of you
+    visibleIf: { role: helper }
+    outcome:
+      text: >-
+        {helper.name} visits every day with real food and terrible jokes, and
+        drives you home when you're discharged.
+      effects:
+        - { type: memory, role: helper, tag: cared_for_you }
+        - { type: relationship, role: helper, affection: 5, trust: 4 }
+        - { type: stat, key: health, delta: 4 }
+        - { type: stat, key: stress, delta: -4 }
+  - id: fine
+    label: Tell everyone you're fine
+    outcome:
+      text: You're not fine. You get through it alone, and it takes a lot longer.
+      effects:
+        - { type: stat, key: health, delta: 1 }
+        - { type: stat, key: stress, delta: 3 }
+        - { type: stat, key: happiness, delta: -2 }
+  - id: charm
+    label: Charm the nurses
+    check:
+      base: 50
+      stats: [{ key: sociability, weight: 0.3 }]
+      success:
+        text: By day three you're getting extra pudding and the good blanket.
+        effects:
+          - { type: stat, key: happiness, delta: 3 }
+          - { type: stat, key: health, delta: 2 }
+      failure:
+        text: The nurses are polite and busy. The pudding stays standard issue.
+        effects:
+          - { type: stat, key: stress, delta: 1 }

@@ -1,0 +1,40 @@
+id: parent_downsizing
+title: Forty years of boxes
+text: >-
+  {parent.name} is selling the house you grew up in. {parent.They}
+  {parent:asks|ask} if you could help pack, and could you please not throw
+  anything away without asking first.
+tone: neutral
+category: family
+rarity: common
+lifeStages: [adult, senior]
+weight: { base: 6 }
+once: true
+cast:
+  parent: { kind: parent, age: { min: 60, max: 120 } }
+choices:
+  - id: help
+    label: Take a week off and help
+    outcome:
+      text: >-
+        You find your old report cards, a drawing of a horse, and a box of
+        letters {parent.name} won't let you read. It's a good week.
+      effects:
+        - { type: relationship, role: parent, affection: 8, trust: 4 }
+        - { type: memory, role: parent, tag: helped_them_move }
+        - { type: stat, key: happiness, delta: 3 }
+        - { type: stat, key: stress, delta: 3 }
+  - id: movers
+    label: Pay for movers instead
+    visibleIf: { money: { gte: 1200 } }
+    outcome:
+      text: The movers are fast and careful. {parent.name} thanks you, and spends moving day alone.
+      effects:
+        - { type: money, delta: -1200 }
+        - { type: relationship, role: parent, affection: 2 }
+  - id: busy
+    label: Say you're too busy
+    outcome:
+      text: '{parent.name} manages. {parent.They} {parent:doesn''t|don''t} ask you for help again for a long time.'
+      effects:
+        - { type: relationship, role: parent, affection: -6, trust: -4 }

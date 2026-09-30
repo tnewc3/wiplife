@@ -1,0 +1,47 @@
+id: friend_wedding_party
+title: Will you stand with me?
+text: >-
+  {friend.name} is getting married and wants you in the wedding party. It
+  means a suit or dress fitting, a weekend away, and a speech.
+tone: light
+category: friends
+rarity: common
+lifeStages: [youngAdult, adult]
+weight: { base: 5 }
+cooldownYears: 5
+cast:
+  friend: { kind: friend, ageOffset: { min: -4, max: 4 }, age: { min: 20, max: 120 } }
+choices:
+  - id: yes
+    label: Say yes and write a great speech
+    check:
+      base: 55
+      stats: [{ key: sociability, weight: 0.3 }, { key: confidence, weight: 0.2 }]
+      success:
+        text: The speech gets a standing ovation from an uncle. {friend.name} hugs you so hard your ribs hurt.
+        effects:
+          - { type: money, delta: -400 }
+          - { type: relationship, role: friend, affection: 10, trust: 4 }
+          - { type: memory, role: friend, tag: in_their_wedding }
+          - { type: stat, key: happiness, delta: 5 }
+      failure:
+        text: You forget half the speech and tell a story you definitely shouldn't have. {friend.name} forgives you. Eventually.
+        effects:
+          - { type: money, delta: -400 }
+          - { type: relationship, role: friend, affection: 3 }
+          - { type: memory, role: friend, tag: in_their_wedding }
+          - { type: stat, key: stress, delta: 3 }
+  - id: guest
+    label: Come as a guest instead
+    outcome:
+      text: You dance, you eat, you leave early. {friend.name} seems a little disappointed.
+      effects:
+        - { type: relationship, role: friend, affection: -2 }
+  - id: skip
+    label: Make an excuse and skip it
+    outcome:
+      text: You send a gift from the registry. It arrives a week late.
+      effects:
+        - { type: relationship, role: friend, affection: -10, trust: -5 }
+        - { type: memory, role: friend, tag: missed_wedding }
+        - { type: schedule, eventId: missed_wedding_fallout, inYears: [2, 6], cast: [friend] }
