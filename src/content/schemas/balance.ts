@@ -142,8 +142,8 @@ export type AgingBalance = z.infer<typeof agingBalanceSchema>;
 export const mortalityBalanceSchema = z.strictObject({
   /** No one lives past this age. */
   maxAge: z.int().min(1).max(150),
-  /** Chance of dying in the year you turn 1 (replaces the formula below). */
-  firstYearChance: probabilitySchema,
+  /** Before `untilAge`, the yearly chance is `yearlyChance` instead of the age formula below. */
+  childhood: z.strictObject({ untilAge: z.int().min(1), yearlyChance: probabilitySchema }),
   /** Chance of dying each year that does not grow with age. */
   background: probabilitySchema,
   /** Age-related chance each year: base × growth^age. */

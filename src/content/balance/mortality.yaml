@@ -3,14 +3,20 @@
 # test); Stage 12 (balancing) tunes them further.
 #
 # The check runs at the end of each year, at the age reached that year.
-# Character's chance at age a (from 2):
+# Children can't make choices yet, so their deaths are kept rare: before
+# childhood.untilAge the yearly chance is childhood.yearlyChance instead of
+# the age formula (still times the Health and genetic-risk multipliers).
+# About 0.2% of lives end before 18.
+#
+# From childhood.untilAge, the character's chance at age a is:
 #   (background + ageCurve.base × ageCurve.growth^a) × health × genetic risk
 # where the last two come from the multiplier curves below.
 
 maxAge: 120
 
-# Replaces the formula in the year you turn 1.
-firstYearChance: 0.001
+childhood:
+  untilAge: 18
+  yearlyChance: 0.00012
 
 background: 0.0004
 

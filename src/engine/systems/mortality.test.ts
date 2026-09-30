@@ -8,7 +8,7 @@ const { maxAge } = content.balance.mortality;
 describe('mortality curve', () => {
   it('rises with age after childhood until it becomes certain', () => {
     let previous = 0;
-    for (let age = 10; age <= maxAge; age += 5) {
+    for (let age = content.balance.mortality.childhood.untilAge; age <= maxAge; age += 5) {
       const p = characterDeathChance(age, 70, 30, content);
       if (previous < 1) expect(p, `age ${age}`).toBeGreaterThan(previous);
       else expect(p, `age ${age}`).toBe(1);
@@ -36,8 +36,12 @@ describe('mortality curve', () => {
     expect(characterDeathChance(60, 70, 90, content)).toBeGreaterThan(characterDeathChance(60, 70, 10, content));
   });
 
-  it('is low for children', () => {
-    for (let age = 1; age < 18; age++) expect(characterDeathChance(age, 70, 30, content)).toBeLessThan(0.005);
+  it('is kept low and flat for children, as set in balance', () => {
+    const { childhood } = content.balance.mortality;
+    for (let age = 1; age < childhood.untilAge; age++) {
+      expect(npcDeathChance(age, content) / content.balance.mortality.npcMultiplier).toBeCloseTo(childhood.yearlyChance, 10);
+      expect(characterDeathChance(age, 70, 30, content)).toBeLessThan(0.0003);
+    }
   });
 });
 

@@ -107,6 +107,9 @@ function checkAgingAndMortality(bundle: ContentBundle, fileOf: (typeKey: Collect
   if (lifeStages.senior >= mortality.maxAge) {
     errors.push({ file: AGING, message: `lifeStages.senior must start before mortality maxAge (${mortality.maxAge})` });
   }
+  if (mortality.childhood.untilAge >= mortality.maxAge) {
+    errors.push({ file: MORTALITY, message: `childhood.untilAge must be below maxAge (${mortality.maxAge})` });
+  }
   mortality.causes.forEach((band, i) => {
     const prev = mortality.causes[i - 1];
     if (prev && band.maxAge <= prev.maxAge) {

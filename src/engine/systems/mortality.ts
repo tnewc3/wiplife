@@ -1,7 +1,8 @@
 /**
- * Mortality model: an age-based curve (background plus a Gompertz-style
- * growth term), adjusted by Health and genetic risk for the character. All
- * numbers come from src/content/balance/mortality.yaml.
+ * Mortality model: a low flat chance for children, then an age-based curve
+ * (background plus a Gompertz-style growth term), adjusted by Health and
+ * genetic risk for the character. All numbers come from
+ * src/content/balance/mortality.yaml.
  */
 import type { ContentBundle } from '../../content/schemas';
 import { curveAt, powInt } from '../curve';
@@ -12,7 +13,7 @@ import type { Id } from '../types';
 function baseChance(age: number, content: ContentBundle): number {
   const m = content.balance.mortality;
   if (age >= m.maxAge) return 1;
-  if (age <= 1) return m.firstYearChance;
+  if (age < m.childhood.untilAge) return m.childhood.yearlyChance;
   return m.background + m.ageCurve.base * powInt(m.ageCurve.growth, age);
 }
 

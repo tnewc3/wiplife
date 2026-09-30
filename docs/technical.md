@@ -626,6 +626,11 @@ Every coding-AI prompt assumes this file exists at the repo root.
 ## Commands
 See README.md for build, test and check commands.
 
+## Git workflow
+- Branch from the latest main. Open pull requests into main only, never into another feature branch.
+- One stage (or one follow-up task) per pull request. Don't bring in unrelated commits.
+- A pull request merges only when CI is green.
+
 ## When finished
 Report what you built, any deviations from the docs and why, anything left undone, and open questions.
 Only report facts you checked in the code, tests, files or CI logs. Label anything you didn't check as unverified.
@@ -850,13 +855,14 @@ Meet every Stage 3 acceptance criterion, including the 10,000-life lifespan test
 - Casting: use existing people or create new ones.
 - Effect handlers: stat, money (savings number only for now), relationship, memory, flag, schedule, history, death, and chance checks.
 - Scheduled follow-up events and the event log.
+- Lifetime happiness tracking (a running average), used by the obituary's mood line.
 - Simulation runner, version 1 (`tools/simulate.ts`).
 
 **Content:** 40 starter events across every life stage, including early-childhood family events (parents fighting, divorce, neglect), 3 multi-step chains and 1 legendary event. All follow the content rules in `AGENTS.md`.
 
 **Data:** `EventDef`, `ChoiceDef`, `Outcome`, `Effect`, `Condition`, `CastSpec`, `EventInstance`, `ScheduledEvent`.
 
-**UI:** Event card sheet, outcome display, tone accent colors, year recap card.
+**UI:** Event card sheet, outcome display, tone accent colors. After a year with events, the year recap is the last card in the event sheet; after a quiet year, the Home recap card updates as in Stage 3.
 
 **Dependencies:** Stage 3.
 
@@ -893,9 +899,10 @@ Build only Stage 4:
 - The pacing director with the stage budgets from docs/design.md section G, a volatility bonus, a cap of 6, and tone ordering.
 - Casting (reuse existing people or create new ones) and effect handlers for stat, money (savings only), relationship, memory, flag, schedule, history and death, plus chance checks clamped to 5–95%.
 - Scheduled follow-up events and the event log.
+- Lifetime happiness tracking (a running average) for the obituary's mood line.
 - Extend the content build to validate events, including references and placeholders.
 - tools/simulate.ts: run N lives with random choices; report invariant failures, lifespans and how often each event fired.
-- UI: event card sheet, outcome display, tone accents, year recap.
+- UI: event card sheet, outcome display, tone accents. After a year with events, the recap is the last card in the event sheet; after a quiet year, the Home recap card updates as in Stage 3.
 - Write 40 starter events in YAML across all life stages, including early-childhood family events, 3 chains and 1 legendary event. Follow the content rules in AGENTS.md exactly.
 
 Do not implement relationship management, money systems, school, jobs, health conditions, crime or self-discovery.
@@ -981,6 +988,7 @@ Meet every Stage 5 acceptance criterion. When finished, run all checks plus a 1,
 - Missed-payment tracking that triggers event chains.
 - Housing: living with parents (with support based on family wealth), renting, owning, homeless.
 - Relocation to another city.
+- The birth city, stored separately from the current city, for the obituary and archive.
 - Gig work, as the first income source, inside the career module.
 - Lifestyle effects on happiness and stress.
 - A net worth selector.
@@ -1022,7 +1030,7 @@ Build only Stage 6:
 - The yearly ledger in the economy step of the year pipeline, using whole dollars. Put the tax function, living costs, lifestyle multipliers and interest rates in src/content/balance.
 - A debt system (student, personal, mortgage, medical, collections) that later stages will reuse. Shortfalls become debt.
 - Missed-payment tracking that triggers event chains, with recovery paths.
-- Housing: living with parents (support based on family wealth), renting, owning with a down payment and mortgage, homeless. Relocation between cities.
+- Housing: living with parents (support based on family wealth), renting, owning with a down payment and mortgage, homeless. Relocation between cities. Store the birth city separately from the current city, for the obituary and archive.
 - Gig work from age 16 as an income source in the career module, and lifestyle effects on happiness and stress.
 - UI: Money tab, More → Home, money line in the year recap, gig option on the Work tab.
 - 25 money and housing events in YAML, following AGENTS.md.

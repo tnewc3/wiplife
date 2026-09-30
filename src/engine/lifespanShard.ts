@@ -4,6 +4,9 @@
  * lives out its share of random lives, checking every invariant after every
  * engine step, and checks the lifespan rules on its share.
  *
+ * Deaths before 18 are checked per shard against a loose bound (0.6%),
+ * well above the 0.2% target, so random variation can't fail the test.
+ *
  * Why shards are enough: when every equal-sized shard has its median age at
  * death between 72 and 82, the median across all 10,000 lives lies between
  * the smallest and largest shard medians, so it is between 72 and 82 too.
@@ -51,6 +54,8 @@ export function lifespanShard(shard: number): void {
     expect(percentile(0.5)).toBeLessThanOrEqual(82);
     expect(ages[count - 1]).toBeLessThanOrEqual(maxAge);
     expect(longestHistory).toBeLessThanOrEqual(maxEntries);
+    // Children can't make choices, so deaths before 18 are kept rare (target about 0.2% of lives).
+    expect(ages.filter((a) => a < 18).length / count).toBeLessThan(0.006);
     // Sanity: lifespans vary.
     expect(percentile(0.9) - percentile(0.1)).toBeGreaterThan(10);
   }, 600_000);
