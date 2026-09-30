@@ -1,0 +1,34 @@
+# A way back after an eviction or a hard stretch without a home: transitional housing.
+id: shelter_program
+title: A key on a lanyard
+text: >-
+  The caseworker calls. A spot has opened in a transitional housing program:
+  a shared apartment, a small rent, and a counselor who checks in weekly.
+tone: neutral
+category: home
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { home: { kind: [homeless] } }
+weight: { base: 10 }
+followUpOnly: true
+choices:
+  - id: accept
+    label: Take the apartment
+    outcome:
+      text: A real door that locks, a bed that is yours, and a roommate who snores. You sleep eleven hours the first night.
+      effects:
+        - { type: housing, action: rent }
+        - { type: housing, action: roommate }
+        - { type: stat, key: stress, delta: -8 }
+        - { type: stat, key: happiness, delta: 5 }
+        - { type: history, text: You moved off the street into a shared apartment., importance: 2 }
+  - id: decline
+    label: Turn it down and do it your own way
+    outcome:
+      text: You thank the caseworker and hang up. The nights stay long.
+      effects:
+        - { type: stat, key: stress, delta: 3 }
+        - { type: stat, key: confidence, delta: 2 }

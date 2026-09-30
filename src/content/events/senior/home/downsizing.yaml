@@ -1,0 +1,28 @@
+id: downsizing
+title: Too many rooms
+text: >-
+  Your home has started to feel enormous: stairs you avoid, rooms you only
+  dust. A realtor leaves a card saying houses like yours sell fast.
+tone: neutral
+category: home
+rarity: common
+lifeStages: [senior]
+requires: { home: { kind: [owned], years: { gte: 5 } } }
+weight: { base: 6 }
+cooldownYears: 8
+choices:
+  - id: sell
+    label: Sell and rent somewhere smaller
+    outcome:
+      text: You give away most of your things and keep the best of them. The new place is small, bright and easy.
+      effects:
+        - { type: housing, action: sell }
+        - { type: stat, key: stress, delta: -4 }
+        - { type: stat, key: happiness, delta: -1 }
+        - { type: history, text: You sold the family home and moved somewhere smaller., importance: 2 }
+  - id: stay
+    label: Stay where your memories are
+    outcome:
+      text: You close off the rooms you don't use and keep the ones that matter.
+      effects:
+        - { type: stat, key: happiness, delta: 2 }

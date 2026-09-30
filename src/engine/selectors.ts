@@ -1,12 +1,38 @@
 /** Read-only helpers the UI uses to show a life. */
-import type { ContentBundle, RomanceStatus, Tone } from '../content/schemas';
-import { availableActions, type AvailableAction } from './actions';
+import { LIFESTYLES, type ContentBundle, type DebtKind, type Lifestyle, type RomanceStatus, type Tone } from '../content/schemas';
+import { availableActions, isLifeActionAvailable, type AvailableAction } from './actions';
 import { evaluate } from './conditions';
+import { canStartDebtPlan, isIndependent, netWorth, totalDebt } from './finance';
+import {
+  livingCost,
+  moveInCost,
+  mortgageBalance,
+  purchaseQuote,
+  rentIn,
+  saleProceeds,
+  supportingParent,
+  type PurchaseQuote,
+} from './housing';
+import { canGig, expectedGigPay } from './systems/career';
 import { textContext } from './events/text';
 import { CONTINUE_CHOICE } from './life';
 import { currentPartner, FAMILY_KINDS, isCurrentPartner, romanceStatus, ROMANTIC_KINDS, WORK_KINDS } from './relationships';
 import { renderText } from './text';
-import type { GenderCategory, HistoryEntry, Id, LifeStage, LifeState, Person, Relationship, RelationshipKind, StatKey } from './types';
+import type {
+  GenderCategory,
+  HistoryEntry,
+  HousingKind,
+  Id,
+  Ledger,
+  LifeStage,
+  LifeState,
+  Person,
+  Relationship,
+  RelationshipKind,
+  StatKey,
+} from './types';
+
+export { netWorth } from './finance';
 
 export interface FamilyMember {
   person: Person;
@@ -58,7 +84,9 @@ export interface CharacterSummary {
   cityName: string;
   /** e.g. "she/her" or "xe/xem". */
   pronounLabel: string;
-  housing: LifeState['housing']['kind'];
+  housing: HousingKind;
+  savings: number;
+  debt: number;
   /** Single, dating, engaged or married, and to whom. */
   romance: { status: RomanceStatus; partnerName: string | null };
 }
@@ -74,6 +102,8 @@ export function getCharacterSummary(state: LifeState, content: ContentBundle): C
     cityName: content.cities[c.cityId]?.name ?? c.cityId,
     pronounLabel: `${c.identity.pronouns.subject}/${c.identity.pronouns.object}`,
     housing: state.housing.kind,
+    savings: state.finances.savings,
+    debt: totalDebt(state),
     romance: { status: romanceStatus(state), partnerName: person ? `${person.name.first} ${person.name.last}` : null },
   };
 }
@@ -250,6 +280,8 @@ export interface YearRecapView {
   memories: { name: string; text: string }[];
   /** People met this year. */
   newPeople: { name: string; kind: Relationship['kind'] }[];
+  /** This year's money, when there was any to speak of. */
+  money: { net: number; borrowed: number; savings: number; debt: number } | null;
 }
 
 /** The last finished year's recap, or null before the first age-up or mid-year. */
@@ -279,6 +311,184 @@ export function getYearRecap(state: LifeState, content: ContentBundle): YearReca
     entries: state.history.filter((e) => e.year === recap.year),
     memories,
     newPeople,
+    money: recapMoney(state, recap.year),
+  };
+}
+
+/** The recap's money line: the year's ledger, left out when nothing happened (early childhood). */
+function recapMoney(state: LifeState, year: number): YearRecapView['money'] {
+  const ledger = state.finances.lastLedger;
+  const debt = totalDebt(state);
+  const savings = state.finances.savings;
+  if (!ledger || ledger.year !== year) return null;
+  if (ledger.net === 0 && ledger.borrowed === 0 && savings === 0 && debt === 0) return null;
+  return { net: ledger.net, borrowed: ledger.borrowed, savings, debt };
+}
+
+export interface DebtView {
+  id: string;
+  kind: DebtKind;
+  balance: number;
+  annualRate: number;
+  minPayment: number;
+  missed: number;
+  /** What paying it from savings now would pay: all of it, or as much as you have (0: can't pay now). */
+  canPay: number;
+}
+
+export interface MoneyView {
+  savings: number;
+  debt: number;
+  netWorth: number;
+  /** Old enough to choose a lifestyle and manage debt. */
+  independent: boolean;
+  lifestyle: Lifestyle;
+  /** Yearly living costs for each lifestyle, where you live now. */
+  lifestyleCosts: Record<Lifestyle, number>;
+  /** Last year's ledger, if one has run. */
+  ledger: Ledger | null;
+  debts: DebtView[];
+  /** A debt plan is available now. */
+  debtPlan: boolean;
+}
+
+/** The Money tab: savings, debts, last year's ledger and the lifestyle choice. */
+export function getMoneyView(state: LifeState, content: ContentBundle): MoneyView {
+  const f = state.finances;
+  const between = state.phase === 'yearStart';
+  const lifestyleCosts = Object.fromEntries(LIFESTYLES.map((l) => [l, livingCost(state, content, l)])) as Record<Lifestyle, number>;
+  return {
+    savings: f.savings,
+    debt: totalDebt(state),
+    netWorth: netWorth(state),
+    independent: isIndependent(state, content),
+    lifestyle: f.lifestyle,
+    lifestyleCosts,
+    ledger: f.lastLedger ?? null,
+    debts: f.debts.map((d) => ({
+      id: d.id,
+      kind: d.kind,
+      balance: d.balance,
+      annualRate: d.annualRate,
+      minPayment: Math.min(d.minPayment, d.balance),
+      missed: d.missed,
+      canPay: between && isLifeActionAvailable(state, 'pay_debt', { debtId: d.id }, content) ? Math.min(f.savings, d.balance) : 0,
+    })),
+    debtPlan: between && canStartDebtPlan(state, content),
+  };
+}
+
+export interface WorkView {
+  /** Old enough for gig work. */
+  canGig: boolean;
+  gigMinAge: number;
+  gig: boolean;
+  /** A typical year of gig pay now (full-time from the independence age). */
+  expectedGigPay: number;
+  /** Last year's gross income. */
+  lastIncome: number;
+  /** Actions can be taken now (between years). */
+  between: boolean;
+}
+
+/** The Work tab: gig work (jobs arrive with careers). */
+export function getWorkView(state: LifeState, content: ContentBundle): WorkView {
+  return {
+    canGig: canGig(state, content),
+    gigMinAge: content.balance.economy.gig.minAge,
+    gig: state.career.gig,
+    expectedGigPay: expectedGigPay(state, content),
+    lastIncome: state.finances.lastLedger?.gross ?? 0,
+    between: state.phase === 'yearStart',
+  };
+}
+
+export interface CityMove {
+  cityId: string;
+  name: string;
+  blurb: string;
+  /** A year's rent there. */
+  rent: number;
+  /** Comfortable living costs there. */
+  living: number;
+  /** Moving there and the deposit. */
+  moveInCost: number;
+  /** You can afford the move now. */
+  affordable: boolean;
+}
+
+export interface HomeView {
+  kind: HousingKind;
+  cityName: string;
+  /** This year's cost of your home. */
+  annualCost: number;
+  roommate: boolean;
+  homeValue: number | null;
+  mortgage: number;
+  independent: boolean;
+  /** Renting where you live now: the up-front cost and whether you can afford it. Null when not an option. */
+  rent: { rent: number; moveInCost: number; affordable: boolean } | null;
+  /** The parent who would take you in, if moving home is an option. */
+  moveHome: { name: string; cityName: string } | null;
+  /** 'find' or 'leave' a roommate, when renting. */
+  roommateAction: 'find' | 'leave' | null;
+  /** Buying a home here. Null when not an option (you own one, or you're a child). */
+  buy: (PurchaseQuote & { available: boolean }) | null;
+  /** What selling would bring in after costs, before the mortgage. Null when you don't own. */
+  sell: number | null;
+  /** Other cities you could move to. Empty when relocating isn't an option. */
+  cities: CityMove[];
+  between: boolean;
+}
+
+/** More → Home: where you live, what it costs, and where you could go. */
+export function getHomeView(state: LifeState, content: ContentBundle): HomeView {
+  const h = state.housing;
+  const between = state.phase === 'yearStart';
+  const independent = isIndependent(state, content);
+  const can = (id: Parameters<typeof isLifeActionAvailable>[1], params = {}) => between && isLifeActionAvailable(state, id, params, content);
+  const here = content.cities[state.character.cityId];
+  const renter = independent && (h.kind === 'with_parents' || h.kind === 'homeless');
+  const parent = supportingParent(state);
+  const mover = independent && (h.kind === 'with_parents' || h.kind === 'renting' || h.kind === 'homeless');
+  const living = (cityId: string) => livingCost({ ...state, character: { ...state.character, cityId }, housing: { ...h, kind: 'renting' } }, content, 'comfortable');
+  const cities: CityMove[] = mover
+    ? getCityOptions(content)
+        .filter((c) => c.id !== state.character.cityId)
+        .map((c) => {
+          const cost = moveInCost(state, c.id, content);
+          return {
+            cityId: c.id,
+            name: c.name,
+            blurb: c.blurb,
+            rent: rentIn(content.cities[c.id]!, false, content),
+            living: living(c.id),
+            moveInCost: cost,
+            affordable: can('relocate', { cityId: c.id }),
+          };
+        })
+    : [];
+  return {
+    kind: h.kind,
+    cityName: here?.name ?? state.character.cityId,
+    annualCost: h.annualCost,
+    roommate: h.roommate === true,
+    homeValue: h.homeValue ?? null,
+    mortgage: mortgageBalance(state),
+    independent,
+    rent:
+      renter && here
+        ? { rent: rentIn(here, false, content), moveInCost: moveInCost(state, state.character.cityId, content), affordable: can('rent_home') }
+        : null,
+    moveHome:
+      parent && can('move_home')
+        ? { name: `${parent.name.first} ${parent.name.last}`, cityName: content.cities[parent.cityId]?.name ?? parent.cityId }
+        : null,
+    roommateAction: can('find_roommate') ? 'find' : can('live_alone') ? 'leave' : null,
+    buy: independent && h.kind !== 'owned' && h.kind !== 'incarcerated' ? { ...purchaseQuote(state, content), available: can('buy_home') } : null,
+    sell: h.kind === 'owned' ? saleProceeds(state, content) : null,
+    cities,
+    between,
   };
 }
 

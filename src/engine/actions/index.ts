@@ -5,6 +5,9 @@
  * resolves with resolveChoice. finishAction then returns the life to
  * 'yearStart'. The events that answer each action are content
  * (registries/actions.yaml); the person acted on is cast as `person`.
+ *
+ * Money and home actions (./life.ts) take effect at once and stay in
+ * 'yearStart'; they are recorded in the input log the same way.
  */
 import { produce } from 'immer';
 import { ACTION_IDS, type ActionId, type ContentBundle, type EventDef } from '../../content/schemas';
@@ -15,9 +18,19 @@ import { weightedPick } from '../random';
 import { romanceAllowed } from '../relationships';
 import { cloneRng } from '../rng';
 import type { Id, LifeState } from '../types';
+import { isLifeActionAvailable, isLifeActionId, LIFE_ACTIONS, type LifeActionId } from './life';
 import { RELATIONSHIP_ACTIONS } from './relationships';
 
 export { RELATIONSHIP_ACTIONS } from './relationships';
+export {
+  HOME_ACTION_IDS,
+  isLifeActionAvailable,
+  isLifeActionId,
+  LIFE_ACTION_IDS,
+  MONEY_ACTION_IDS,
+  type LifeActionId,
+  type LifeActionParams,
+} from './life';
 
 /** The role a management action's result event casts the person in. */
 export const ACTION_ROLE = 'person';
@@ -82,6 +95,7 @@ export function availableActions(state: LifeState, personId: Id, content: Conten
  */
 export function performAction(state: LifeState, actionId: unknown, params: unknown, content: ContentBundle): LifeState {
   if (state.phase !== 'yearStart') throw new PhaseError(`Can't take an action in the "${state.phase}" phase (expected "yearStart").`);
+  if (isLifeActionId(actionId)) return performLifeAction(state, actionId, params, content);
   if (!isActionId(actionId)) throw new InvalidInputError([{ path: 'action', message: `Unknown action "${String(actionId)}".` }]);
   const personId = typeof params === 'object' && params !== null ? (params as { personId?: unknown }).personId : undefined;
   if (typeof personId !== 'string') throw new InvalidInputError([{ path: 'action.personId', message: 'An action needs a personId.' }]);
@@ -101,6 +115,24 @@ export function performAction(state: LifeState, actionId: unknown, params: unkno
     draft.eventLog[def.id] = { count: (log?.count ?? 0) + 1, lastYear: year };
     draft.pending = [{ instanceId: `a${year}-${draft.inputLog.length}`, eventId: def.id, cast: { [ACTION_ROLE]: personId } }];
     draft.phase = 'action';
+  });
+}
+
+/**
+ * A money or home action: validates the parameters, checks it is available,
+ * records the input and applies it. The life stays in 'yearStart'.
+ */
+function performLifeAction(state: LifeState, actionId: LifeActionId, params: unknown, content: ContentBundle): LifeState {
+  const rule = LIFE_ACTIONS[actionId];
+  const parsed = rule.parse(params, content);
+  if (!parsed) throw new InvalidInputError([{ path: 'action.params', message: `Invalid parameters for "${actionId}".` }]);
+  if (!isLifeActionAvailable(state, actionId, parsed, content)) {
+    throw new InvalidInputError([{ path: 'action', message: `"${actionId}" isn't available now.` }]);
+  }
+  return produce(state, (draft) => {
+    draft.rng = cloneRng(state.rng);
+    draft.inputLog.push({ year: draft.currentYear, kind: 'action', payload: { actionId, params: { ...parsed } } });
+    rule.apply(draft, parsed, content);
   });
 }
 

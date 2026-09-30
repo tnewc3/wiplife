@@ -92,3 +92,14 @@ describe('archive', () => {
     expect(archivedLifeSchema.safeParse(archiveEntry(random('schema-unfinished'), content)).success).toBe(true);
   });
 });
+
+describe('archive migrations', () => {
+  it('upgrade a version 1 entry with its birth city (where the life ended: nobody could move before)', async () => {
+    const db = freshDb();
+    const { birthCityId: _birth, ...v1 } = finished('archive-v1');
+    await db.archive.put({ id: v1.id, envelope: { ...makeArchiveEnvelope(v1 as ArchivedLife, content.contentVersion), schemaVersion: 1 } });
+    const read = await readArchivedLife(db, v1.id);
+    expect(read).toEqual({ ...v1, birthCityId: v1.cityId });
+    expect(archivedLifeSchema.safeParse(read).success).toBe(true);
+  });
+});

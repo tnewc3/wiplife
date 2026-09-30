@@ -484,6 +484,57 @@ ${choiceExtra}    outcome:
       await write('events/any/romance/proposal.yaml', proposal.replace('- { type: money, delta: -200 }', '- { type: death, cause: natural_causes }'));
       expect(await expectErrors()).toContain("a management action's result can't kill");
     });
+
+    it('checks the events that answer money trouble', async () => {
+      const triggers = await readFile(path.join(dir, 'registries/triggers.yaml'), 'utf8');
+      await write('registries/triggers.yaml', triggers.replace('eviction: { events: [eviction_notice] }', 'eviction: { events: [no_such_event] }'));
+      let text = await expectErrors();
+      expect(text).toContain('eviction: unknown event "no_such_event"');
+      expect(text).toContain('eviction: needs at least one active event');
+      await write('registries/triggers.yaml', triggers.replace('eviction: { events: [eviction_notice] }', 'eviction: { events: [eviction_notice, road_trip] }'));
+      text = await expectErrors();
+      expect(text).toContain('answers the "eviction" trigger, so it must be followUpOnly');
+      await write('registries/triggers.yaml', triggers);
+      // A trigger event doesn't need anything to schedule it.
+      expect((await compile()).ok).toBe(true);
+    });
+
+    it('keeps debt and housing effects to adults', async () => {
+      const file = 'events/teen/money/test_loan.yaml';
+      const loan = (requires: string) => `id: test_loan
+title: A loan
+text: Someone offers you a loan.
+tone: neutral
+category: money
+rarity: common
+lifeStages: [teen, youngAdult]
+${requires}weight: { base: 1 }
+choices:
+  - id: take
+    label: Take it
+    outcome:
+      effects:
+        - { type: debt, action: add, kind: personal, amount: 500 }
+  - id: leave
+    label: Leave it
+    outcome: {}
+`;
+      await write(file, loan(''));
+      expect(await expectErrors()).toContain('debt and housing effects are for adults');
+      await write(file, loan('requires: { age: { gte: 18 } }\n'));
+      expect((await compile()).ok).toBe(true);
+    });
+
+    it('rejects a malformed debt effect and an empty money condition', async () => {
+      const file = 'events/adult/money/test_debt.yaml';
+      await write(
+        file,
+        'id: test_debt\ntitle: Debt\ntext: Debt.\ntone: neutral\ncategory: money\nrarity: common\nlifeStages: [adult]\nrequires: { finances: {} }\nweight: { base: 1 }\nautoOutcome:\n  effects:\n    - { type: debt, action: add, kind: personal }\n',
+      );
+      const text = await expectErrors();
+      expect(text).toContain('add needs kind and amount');
+      expect(text).toContain('requires');
+    });
   });
 
   it('lays an overlay folder over the content: its events replace every real event', async () => {
@@ -494,7 +545,12 @@ ${choiceExtra}    outcome:
         path.join(overlay, 'events/adult/family/only_event.yaml'),
         'id: only_event\ntitle: Only\ntext: Hi.\ntone: light\ncategory: family\nrarity: common\nlifeStages: [adult]\nweight: { base: 1 }\nautoOutcome: {}\n',
       );
-      // The overlay's events replace the real ones, so it brings its own action events too.
+      // The overlay's events replace the real ones, so it brings its own action and trigger events too.
+      await mkdir(path.join(overlay, 'events/any/money'), { recursive: true });
+      await writeFile(
+        path.join(overlay, 'events/any/money/only_trouble.yaml'),
+        'id: only_trouble\ntitle: Trouble\ntext: Money is tight.\ntone: serious\ncategory: money\nrarity: common\nlifeStages: [adult]\nweight: { base: 1 }\nfollowUpOnly: true\nautoOutcome: {}\n',
+      );
       await mkdir(path.join(overlay, 'events/any/people'), { recursive: true });
       await writeFile(
         path.join(overlay, 'events/any/people/only_action.yaml'),
@@ -505,12 +561,16 @@ ${choiceExtra}    outcome:
         path.join(overlay, 'registries/actions.yaml'),
         `actions:\n${['ask_out', 'propose', 'marry', 'break_up', 'divorce', 'cut_contact', 'reconcile'].map((a) => `  ${a}: { events: [only_action] }`).join('\n')}\n`,
       );
+      await writeFile(
+        path.join(overlay, 'registries/triggers.yaml'),
+        `triggers:\n${['foreclosure', 'eviction', 'collections', 'garnishment', 'missed_payment'].map((t) => `  ${t}: { events: [only_trouble] }`).join('\n')}\n`,
+      );
       await mkdir(path.join(overlay, 'balance'), { recursive: true });
       const pacing = (await readFile(path.join(dir, 'balance/pacing.yaml'), 'utf8')).replace('cap: 6', 'cap: 3');
       await writeFile(path.join(overlay, 'balance/pacing.yaml'), pacing);
       const result = await compileContent({ contentDir: dir, appVersion: '0.0.0', overlayDir: overlay });
       if (!result.ok) throw new Error(formatErrors(result.errors));
-      expect(Object.keys(result.bundle.events)).toEqual(['only_action', 'only_event']);
+      expect(Object.keys(result.bundle.events)).toEqual(['only_action', 'only_event', 'only_trouble']);
       expect(result.bundle.balance.pacing.cap).toBe(3);
       expect(Object.keys(result.bundle.cities).length).toBeGreaterThan(0);
     } finally {

@@ -1,0 +1,15 @@
+# The events that answer money trouble. Each year the economy step checks
+# for these, most serious first, and queues one fitting event (by weight)
+# from the first trigger that has one, so a chain begins:
+#   foreclosure     the bank took your home (you now rent in the same city)
+#   eviction        you fell behind on rent too long (you are now homeless)
+#   collections     a debt went to collections
+#   garnishment     a collections debt is taking part of your income
+#   missed_payment  you missed a payment on a debt
+# Every event listed must be followUpOnly: it only happens this way.
+triggers:
+  foreclosure: { events: [foreclosure_notice] }
+  eviction: { events: [eviction_notice] }
+  collections: { events: [collections_calls] }
+  garnishment: { events: [wage_garnishment] }
+  missed_payment: { events: [missed_payment_letter, selling_things] }

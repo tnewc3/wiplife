@@ -4,14 +4,11 @@
  * it reads correctly even after the content that produced it changes.
  */
 import type { ContentBundle } from '../content/schemas';
+import { netWorth } from './finance';
 import { writeObituary } from './obituary';
 import type { ArchivedLife, HistoryEntry, LifeState } from './types';
 
-/** Savings plus home value, minus every debt. */
-export function netWorth(life: LifeState): number {
-  const debts = life.finances.debts.reduce((sum, d) => sum + d.balance, 0);
-  return life.finances.savings + (life.housing.homeValue ?? 0) - debts;
-}
+export { netWorth } from './finance';
 
 /**
  * The history entries kept in the archive: those of at least the balance
@@ -45,6 +42,7 @@ export function archiveEntry(life: LifeState, content: ContentBundle): ArchivedL
     causeOfDeath: finished && causeId ? (content.causes[causeId]?.text ?? causeId) : null,
     unfinished: !finished,
     cityId: c.cityId,
+    birthCityId: c.birthCityId,
     obituary: writeObituary(life, content),
     highlights: selectHighlights(life.history, content),
     finalNetWorth: netWorth(life),

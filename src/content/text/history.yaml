@@ -41,3 +41,59 @@ death:
   importance: 3
   variants:
     - "You died of {cause} at the age of {age}."
+
+# Changes of home. Values: {city}; relocated also has {from}.
+home:
+  movedOut:
+    importance: 2
+    variants:
+      - "You moved out and rented your own place in {city}."
+      - "You signed your first lease in {city} and moved out."
+  movedHome:
+    importance: 2
+    variants:
+      - "You moved back in with your family in {city}."
+      - "You packed up and moved back home to {city}."
+  relocated:
+    importance: 2
+    variants:
+      - "You left {from} and moved to {city}."
+      - "You packed your life into boxes and moved from {from} to {city}."
+  boughtHome:
+    importance: 3
+    variants:
+      - "You bought a home in {city}."
+      - "You got the keys to a home of your own in {city}."
+  soldHome:
+    importance: 2
+    variants:
+      - "You sold your home in {city}."
+  familyHomeGone:
+    importance: 2
+    variants:
+      - "With no family left to live with, you rented a place of your own in {city}."
+  evicted:
+    importance: 3
+    variants:
+      - "You were evicted from your apartment in {city}."
+      - "You fell too far behind on rent and were evicted in {city}."
+  foreclosed:
+    importance: 3
+    variants:
+      - "The bank foreclosed on your home in {city}."
+
+# Money milestones. No values.
+money:
+  collections:
+    importance: 1
+    variants:
+      - "One of your debts went to collections."
+  mortgagePaidOff:
+    importance: 3
+    variants:
+      - "You made the last payment on your mortgage. The house is yours."
+  startedGig:
+    importance: 1
+    variants:
+      - "You started picking up gig work."
+      - "You signed up for gig work: deliveries, rides, odd jobs."

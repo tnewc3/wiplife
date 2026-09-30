@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
 import { content } from '../content';
 import type { ActionId, ContentBundle } from '../content/schemas';
-import { finishAction, performAction } from '../engine/actions';
+import { finishAction, performAction, type LifeActionId, type LifeActionParams } from '../engine/actions';
 import { archiveEntry } from '../engine/archive';
 import { assertInvariants } from '../engine/invariants';
 import { beginYear, CONTINUE_CHOICE, createLife, endYear, resolveChoice, type CustomLifeInput } from '../engine/life';
@@ -82,6 +82,8 @@ export interface AppState {
   archiveSelection: string | null;
   /** The person open on the People tab, if any. */
   personId: string | null;
+  /** A page open on the More tab (More → Home), if any. */
+  moreView: 'home' | null;
 
   init: () => Promise<void>;
   confirmAge: () => Promise<void>;
@@ -128,6 +130,16 @@ export interface AppState {
    * the person's page. Ignored while the engine is working.
    */
   takeAction: (actionId: ActionId, personId: string) => Promise<void>;
+  /**
+   * Takes a money or home action (lifestyle, gig work, paying a debt, moving,
+   * buying or selling a home) between years and autosaves. Ignored while the
+   * engine is working or outside 'yearStart'.
+   */
+  takeLifeAction: (actionId: LifeActionId, params?: LifeActionParams) => Promise<void>;
+  /** Opens More → Home. */
+  openHome: () => void;
+  /** Back from More → Home to the More tab. */
+  closeHome: () => void;
 }
 
 export interface StoreOptions {
@@ -320,6 +332,7 @@ export function createAppStore({
             s.tab = 'life';
             s.eventSheet = null;
             s.personId = null;
+            s.moreView = null;
           });
           void requestPersistenceOnce().catch(() => undefined);
         } finally {
@@ -345,6 +358,7 @@ export function createAppStore({
         archive: null,
         archiveSelection: null,
         personId: null,
+        moreView: null,
 
         init: async () => {
           let loaded: SavedLifeStatus;
@@ -420,6 +434,7 @@ export function createAppStore({
             s.archiveSelection = null;
             s.eventSheet = null;
             s.personId = null;
+            s.moreView = null;
           });
         },
 
@@ -443,6 +458,7 @@ export function createAppStore({
           set((s) => {
             s.tab = tab;
             s.personId = null;
+            s.moreView = null;
           }),
 
         startRandomLife: () =>
@@ -458,6 +474,7 @@ export function createAppStore({
             s.screen = 'game';
             s.tab = 'life';
             s.personId = null;
+            s.moreView = null;
           });
           if (life.phase === 'events' || life.phase === 'action') openEvents(life);
         },
@@ -543,6 +560,23 @@ export function createAppStore({
             const next = performAction(life, actionId, { personId }, bundle);
             await commit(next);
             openEvents(next);
+          }),
+
+        takeLifeAction: (actionId, params = {}) =>
+          busy(async () => {
+            const life = get().life;
+            if (!life || life.phase !== 'yearStart' || get().eventSheet) return;
+            await commit(performAction(life, actionId, params, bundle));
+          }),
+
+        openHome: () =>
+          set((s) => {
+            if (s.life) s.moreView = 'home';
+          }),
+
+        closeHome: () =>
+          set((s) => {
+            s.moreView = null;
           }),
       };
     }),

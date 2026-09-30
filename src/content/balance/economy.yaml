@@ -1,0 +1,154 @@
+# The economy: the yearly ledger, debt, housing and gig work
+# (docs/design.md, section J). All money is whole dollars per year.
+# Starting proposals; Stage 12 (balancing) tunes them against simulation runs.
+#
+# The ledger runs once a year, as the year begins:
+#   gross income − estimated tax − housing − living costs − minimum debt
+#   payments + interest on savings. Anything left goes to savings. When
+#   savings can't cover the costs, the shortfall becomes personal debt, so
+#   savings never go below zero.
+
+# From this age you pay your own way (before it, your family covers your
+# costs), and you can move out, choose a lifestyle and take on debt.
+independenceAge: 18
+
+# Estimated tax: one simple function of gross income. Each rate applies to
+# the part of the income from its `from` amount up to the next bracket.
+tax:
+  brackets:
+    - { from: 0, rate: 0 }
+    - { from: 14000, rate: 0.1 }
+    - { from: 45000, rate: 0.2 }
+    - { from: 100000, rate: 0.28 }
+    - { from: 250000, rate: 0.35 }
+
+# Living costs (food, transport, bills) for a comfortable life at the
+# national average. Multiplied by the city's cost of living and the
+# lifestyle tier.
+livingCost: 16000
+
+# Lifestyle tiers, chosen on the Money screen. A higher tier costs more and
+# raises happiness; frugal living lowers stress but slowly lowers happiness.
+# Effects are yearly pulls: perYear points (a fraction happens by chance),
+# never past limit.
+lifestyle:
+  frugal:
+    living: 0.65
+    effects:
+      happiness: { perYear: -0.5, limit: 40 }
+      stress: { perYear: -1, limit: 10 }
+  comfortable:
+    living: 1
+    effects: {}
+  lavish:
+    living: 1.8
+    effects:
+      happiness: { perYear: 1, limit: 80 }
+
+# An adult living with parents chips in these shares; the family covers the
+# rest, depending on how well off they are.
+withParents:
+  rentShare: { poor: 0.25, working: 0.15, middle: 0.05, affluent: 0, rich: 0 }
+  livingShare: { poor: 0.8, working: 0.6, middle: 0.4, affluent: 0.2, rich: 0 }
+
+homeless:
+  # Share of normal living costs you still spend without a home.
+  livingShare: 0.35
+  effects:
+    health: { perYear: -0.7, limit: 35 }
+    happiness: { perYear: -3, limit: 15 }
+    stress: { perYear: 4, limit: 85 }
+
+interest:
+  savings: 0.02
+  debts:
+    student: 0.055
+    personal: 0.12
+    mortgage: 0.065
+    medical: 0.02
+    collections: 0.05
+
+debts:
+  # A debt's yearly minimum payment would pay it off in this many years.
+  termYears:
+    student: 10
+    personal: 5
+    mortgage: 30
+    medical: 3
+    collections: 4
+  # No minimum payment is smaller than this (or the balance, if less).
+  minPayment: 300
+
+# Missing payments starts a chain: collections, wage garnishment, and
+# eviction or foreclosure. Each step queues an event from registries/triggers.yaml.
+missed:
+  collectionsAfter: 2
+  collectionsFee: 0.15
+  garnishShare: 0.15
+  foreclosureAfter: 2
+  foreclosureSale: 0.8
+  evictionAfter: 2
+  # A year counts as behind on rent when what you had to borrow to cover
+  # your costs is at least this share of the year's housing cost.
+  evictionShare: 0.5
+  # A year with a missed payment.
+  effects:
+    stress: { perYear: 4, limit: 90 }
+    happiness: { perYear: -2, limit: 10 }
+
+bankruptcy:
+  # No bank gives you a mortgage for this long after filing.
+  noMortgageYears: 7
+
+# A debt plan rolls personal, medical and collections debt into one loan at
+# a lower rate, with a fee, and brings you back on track.
+debtPlan:
+  rate: 0.06
+  fee: 0.05
+  termYears: 6
+  cooldownYears: 5
+
+housing:
+  # One-time costs of moving: within a city, or to another city.
+  movingCost: 1500
+  relocationCost: 4000
+  # A deposit when you rent, as a share of a year's rent (about two months).
+  deposit: 0.17
+  # With a roommate you pay this share of the rent.
+  roommateShare: 0.55
+
+ownership:
+  # A home costs the city's base home price.
+  downPayment: 0.2
+  closingCosts: 0.03
+  sellingCosts: 0.06
+  # Property tax and upkeep each year.
+  upkeep: 0.015
+  appreciation: 0.02
+  # A bank lends only if the yearly mortgage payment is at most this share
+  # of last year's gross income.
+  maxPaymentShare: 0.35
+  # Buying puts down as much as your savings allow above this (never less
+  # than the down payment), so the mortgage is smaller.
+  cashReserve: 5000
+
+# Gig work: deliveries, rides and odd jobs. Low, unstable pay, no ladder.
+gig:
+  minAge: 16
+  pay: 30000
+  # By the city's gig job market (0–100).
+  market:
+    - { at: 0, x: 0.75 }
+    - { at: 35, x: 0.86 }
+    - { at: 70, x: 1 }
+    - { at: 100, x: 1.1 }
+  swing: { min: 0.8, max: 1.2 }
+  # Part-time around school as a teen; slowing down in old age. Until
+  # careers bring retirement (Stage 8), gig work is the only income a senior has.
+  byAge:
+    - { at: 16, x: 0.3 }
+    - { at: 17, x: 0.35 }
+    - { at: 18, x: 1 }
+    - { at: 65, x: 1 }
+    - { at: 80, x: 0.75 }
+    - { at: 95, x: 0.4 }

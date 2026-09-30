@@ -1,18 +1,26 @@
 /**
- * Simulation runner: plays many random lives with random choices (and, from
- * Stage 5, a simple player model for relationship actions) and reports
- * invariant failures, lifespans, events per year, how often each event fired,
- * and marriage and divorce rates. Later stages add their own reports.
+ * Simulation runner: plays many random lives with random choices (and a
+ * simple player model for relationship actions, and from Stage 6 for money
+ * and home actions) and reports invariant failures, lifespans, events per
+ * year, how often each event fired, marriage and divorce rates, and savings,
+ * debt and net worth over lifetimes. Later stages add their own reports.
  */
-import { ACTION_IDS, type ActionId, type ContentBundle } from '../../src/content/schemas';
-import { isActionAvailable } from '../../src/engine/actions';
+import { ACTION_IDS, type ActionId, type ContentBundle, type Effect } from '../../src/content/schemas';
+import {
+  isActionAvailable,
+  isLifeActionAvailable,
+  LIFE_ACTION_IDS,
+  performAction,
+  type LifeActionId,
+} from '../../src/engine/actions';
 import { playAction, resolveAll } from '../../src/engine/autoplay';
+import { netWorth, totalDebt } from '../../src/engine/finance';
 import { checkInvariants } from '../../src/engine/invariants';
 import { beginYear, createLife, endYear } from '../../src/engine/life';
 import { isFamilyKind, isPartnerKind } from '../../src/engine/relationships';
 import { createRng } from '../../src/engine/rng';
 import type { LifeStage, LifeState } from '../../src/engine/types';
-import { chooseActions } from './bot';
+import { chooseActions, chooseMoneyActions, rollMoneyProfile } from './bot';
 
 export interface SimulationOptions {
   lives: number;
@@ -44,6 +52,92 @@ export interface SimulationReport {
   totalEventsFired: number;
   deathsFromEvents: number;
   relationships: RelationshipReport;
+  money: MoneyReport;
+}
+
+/** Median and spread of an amount across lives. */
+export interface Spread {
+  lives: number;
+  p10: number;
+  median: number;
+  p90: number;
+  /** Share of those lives with any debt. */
+  inDebt: number;
+}
+
+export interface MoneyReport {
+  /** Savings, debt and net worth at these ages (lives that reached them), and at death. */
+  byAge: { age: number | 'death'; savings: Spread; debt: Spread; netWorth: Spread }[];
+  /** Largest values seen in any life at any point (must stay far below the safe integer limit). */
+  largest: { savings: number; debt: number; netWorth: number; netWorthSeed: string };
+  /** Lives (that reached the independence age) in which each happened. */
+  adults: number;
+  outcomes: Record<'gig' | 'movedOut' | 'relocated' | 'owned' | 'evicted' | 'homeless' | 'foreclosed' | 'bankrupt' | 'collections' | 'debtPlan', number>;
+  actionsTaken: Record<LifeActionId, number>;
+  /** Years renting on gig income only, by city: how many, and how many of them couldn't cover their costs. */
+  gigRenting: Record<string, { years: number; shortYears: number }>;
+  /**
+   * Repeatable money: for each event that can give money, the most times it
+   * fired in one life times its largest gain. A runaway would show up here.
+   */
+  repeatableGains: { eventId: string; mostInOneLife: number; largestGain: number; mostMoney: number }[];
+}
+
+/** What one life did with money, watched step by step. */
+class MoneyWatcher {
+  readonly at = new Map<number, { savings: number; debt: number; netWorth: number }>();
+  gig = false;
+  movedOut = false;
+  relocated = false;
+  owned = false;
+  homeless = false;
+  collections = false;
+  maxSavings = 0;
+  maxDebt = 0;
+  maxNetWorth = 0;
+
+  observe(life: LifeState, ages: readonly number[]): void {
+    const debt = totalDebt(life);
+    const worth = netWorth(life);
+    this.maxSavings = Math.max(this.maxSavings, life.finances.savings);
+    this.maxDebt = Math.max(this.maxDebt, debt);
+    this.maxNetWorth = Math.max(this.maxNetWorth, worth);
+    if (life.career.gig) this.gig = true;
+    const kind = life.housing.kind;
+    if (kind === 'renting' || kind === 'owned') this.movedOut = true;
+    if (kind === 'owned') this.owned = true;
+    if (kind === 'homeless') this.homeless = true;
+    if (life.character.cityId !== life.character.birthCityId) this.relocated = true;
+    if (life.finances.debts.some((d) => d.kind === 'collections')) this.collections = true;
+    if (life.phase === 'yearStart' && ages.includes(life.character.age)) {
+      this.at.set(life.character.age, { savings: life.finances.savings, debt, netWorth: worth });
+    }
+  }
+}
+
+const MONEY_AGES = [18, 25, 35, 45, 65, 80];
+
+function spread(values: number[], debts: number[]): Spread {
+  const sorted = [...values].sort((a, b) => a - b);
+  const at = (p: number) => sorted[Math.min(sorted.length - 1, Math.floor(sorted.length * p))] ?? 0;
+  return { lives: values.length, p10: at(0.1), median: at(0.5), p90: at(0.9), inDebt: debts.filter((d) => d > 0).length };
+}
+
+/** The largest money gain each event's outcomes can give. */
+function largestGains(content: ContentBundle): Map<string, number> {
+  const gains = new Map<string, number>();
+  for (const [id, def] of Object.entries(content.events)) {
+    const outcomes = def.autoOutcome
+      ? [def.autoOutcome]
+      : (def.choices ?? []).flatMap((c) => (c.outcome ? [c.outcome] : c.check ? [c.check.success, c.check.failure] : []));
+    let best = 0;
+    for (const o of outcomes) {
+      const total = (o.effects as Effect[]).reduce((sum, e) => sum + (e.type === 'money' && e.delta > 0 ? e.delta : 0), 0);
+      best = Math.max(best, total);
+    }
+    if (best > 0) gains.set(id, best);
+  }
+  return gains;
 }
 
 export interface RelationshipReport {
@@ -131,6 +225,21 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
   };
   const firstMarriageAges: number[] = [];
   const peopleAtEnd: number[] = [];
+  const { independenceAge } = content.balance.economy;
+  const money: MoneyReport = {
+    byAge: [],
+    largest: { savings: 0, debt: 0, netWorth: 0, netWorthSeed: '' },
+    adults: 0,
+    outcomes: { gig: 0, movedOut: 0, relocated: 0, owned: 0, evicted: 0, homeless: 0, foreclosed: 0, bankrupt: 0, collections: 0, debtPlan: 0 },
+    actionsTaken: Object.fromEntries(LIFE_ACTION_IDS.map((id) => [id, 0])) as Record<LifeActionId, number>,
+    gigRenting: {},
+    repeatableGains: [],
+  };
+  const atAge = new Map<number | 'death', { savings: number[]; debt: number[]; netWorth: number[] }>(
+    [...MONEY_AGES, 'death' as const].map((a) => [a, { savings: [], debt: [], netWorth: [] }]),
+  );
+  const gains = largestGains(content);
+  const mostFires = new Map<string, number>();
 
   for (let i = 0; i < options.lives; i++) {
     const seed = `${options.seedPrefix}-${i}`;
@@ -142,21 +251,33 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
     const choices = createRng(`${seed}:choices`);
     const player = createRng(`${seed}:player`);
     const romance = new RomanceWatcher();
+    const wallet = new MoneyWatcher();
+    const profile = rollMoneyProfile(player);
     const seenThisLife = new Set<string>();
+    const firesThisLife = new Map<string, number>();
     const watch = (l: LifeState) => {
       check(l);
       romance.observe(l);
+      wallet.observe(l, MONEY_AGES);
       // A management action's result event, just queued.
       const queued = l.phase === 'action' && l.pending.length === 1 ? l.pending[0]! : null;
       if (queued && queued.resolvedChoiceId === undefined) {
         fired.set(queued.eventId, (fired.get(queued.eventId) ?? 0) + 1);
         seenThisLife.add(queued.eventId);
+        firesThisLife.set(queued.eventId, (firesThisLife.get(queued.eventId) ?? 0) + 1);
       }
     };
     let life = createLife({ mode: 'random', seed, birthYear: 2026 }, content);
     watch(life);
     while (life.phase !== 'dead') {
-      // Between years, the simulated player may act on relationships.
+      // Between years, the simulated player may act on money and home...
+      for (const [actionId, params] of chooseMoneyActions(life, content, player, profile)) {
+        if (!isLifeActionAvailable(life, actionId, params, content)) continue;
+        life = performAction(life, actionId, params, content);
+        watch(life);
+        money.actionsTaken[actionId]++;
+      }
+      // ...and on relationships.
       for (const [actionId, personId] of chooseActions(life, content, player)) {
         if (!isActionAvailable(life, actionId, personId, content)) continue;
         life = playAction(life, content, actionId, personId, choices, watch);
@@ -174,6 +295,13 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
       for (const p of life.pending) {
         fired.set(p.eventId, (fired.get(p.eventId) ?? 0) + 1);
         seenThisLife.add(p.eventId);
+        firesThisLife.set(p.eventId, (firesThisLife.get(p.eventId) ?? 0) + 1);
+      }
+      const ledger = life.finances.lastLedger;
+      if (life.housing.kind === 'renting' && life.career.gig && life.career.job === null && ledger?.year === life.currentYear) {
+        const city = (money.gigRenting[life.character.cityId] ??= { years: 0, shortYears: 0 });
+        city.years++;
+        if (ledger.borrowed > 0) city.shortYears++;
       }
       life = resolveAll(life, content, choices, watch);
       const diedFromEvent = life.death !== null;
@@ -182,7 +310,37 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
       if (diedFromEvent) deathsFromEvents++;
     }
     for (const id of seenThisLife) livesWith.set(id, (livesWith.get(id) ?? 0) + 1);
+    for (const [id, n] of firesThisLife) if (gains.has(id)) mostFires.set(id, Math.max(mostFires.get(id) ?? 0, n));
     ages.push(life.character.age);
+
+    for (const [age, v] of wallet.at) {
+      const bucket = atAge.get(age)!;
+      bucket.savings.push(v.savings);
+      bucket.debt.push(v.debt);
+      bucket.netWorth.push(v.netWorth);
+    }
+    const end = atAge.get('death')!;
+    end.savings.push(life.finances.savings);
+    end.debt.push(totalDebt(life));
+    end.netWorth.push(netWorth(life));
+    money.largest.savings = Math.max(money.largest.savings, wallet.maxSavings);
+    money.largest.debt = Math.max(money.largest.debt, wallet.maxDebt);
+    if (wallet.maxNetWorth > money.largest.netWorth) money.largest = { ...money.largest, netWorth: wallet.maxNetWorth, netWorthSeed: seed };
+    if (life.character.age >= independenceAge) {
+      money.adults++;
+      const o = money.outcomes;
+      const tags = new Set(life.history.flatMap((e) => e.tags));
+      if (wallet.gig) o.gig++;
+      if (wallet.movedOut) o.movedOut++;
+      if (wallet.relocated) o.relocated++;
+      if (wallet.owned) o.owned++;
+      if (tags.has('evicted')) o.evicted++;
+      if (wallet.homeless) o.homeless++;
+      if (tags.has('foreclosed')) o.foreclosed++;
+      if (life.finances.bankruptcyYear !== undefined) o.bankrupt++;
+      if (wallet.collections) o.collections++;
+      if (life.finances.debtPlanYear !== undefined) o.debtPlan++;
+    }
 
     const age = life.character.age;
     if (age >= adultAge) {
@@ -206,6 +364,19 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
   peopleAtEnd.sort((a, b) => a - b);
   rel.medianFirstMarriageAge = firstMarriageAges.length > 0 ? firstMarriageAges[Math.floor(firstMarriageAges.length / 2)]! : null;
   rel.peopleAtEnd = { median: peopleAtEnd[Math.floor(peopleAtEnd.length / 2)] ?? 0, most: peopleAtEnd.at(-1) ?? 0 };
+
+  money.byAge = [...atAge.entries()].map(([age, v]) => ({
+    age,
+    savings: spread(v.savings, v.debt),
+    debt: spread(v.debt, v.debt),
+    netWorth: spread(v.netWorth, v.debt),
+  }));
+  money.repeatableGains = [...mostFires.entries()]
+    .map(([eventId, mostInOneLife]) => {
+      const largestGain = gains.get(eventId)!;
+      return { eventId, mostInOneLife, largestGain, mostMoney: mostInOneLife * largestGain };
+    })
+    .sort((a, b) => b.mostMoney - a.mostMoney);
 
   ages.sort((a, b) => a - b);
   const at = (p: number) => ages[Math.min(ages.length - 1, Math.floor(ages.length * p))] ?? 0;
@@ -237,8 +408,11 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
     totalEventsFired,
     deathsFromEvents,
     relationships: rel,
+    money,
   };
 }
+
+const dollars = (n: number) => `${n < 0 ? '-' : ''}$${Math.abs(n).toLocaleString('en-US')}`;
 
 const pct = (n: number, d: number) => (d > 0 ? `${((100 * n) / d).toFixed(1)}%` : '—');
 
@@ -272,6 +446,38 @@ export function formatReport(report: SimulationReport, content: ContentBundle): 
   lines.push(`  median age at first marriage: ${r.medianFirstMarriageAge ?? '—'}`);
   lines.push(`  actions taken: ${ACTION_IDS.map((id) => `${id} ${r.actionsTaken[id]}`).join(', ')}`);
   lines.push(`  people outside family still in your life at the end: median ${r.peopleAtEnd.median}, most ${r.peopleAtEnd.most}`);
+  const m = report.money;
+  lines.push(`Money (${m.adults} lives reached ${content.balance.economy.independenceAge}):`);
+  lines.push('  age      savings p10 / median / p90          debt p10 / median / p90     net worth p10 / median / p90   in debt');
+  for (const row of m.byAge) {
+    const three = (s: Spread) => `${dollars(s.p10)} / ${dollars(s.median)} / ${dollars(s.p90)}`;
+    lines.push(
+      `  ${String(row.age).padEnd(6)} ${three(row.savings).padEnd(33)} ${three(row.debt).padEnd(27)} ${three(row.netWorth).padEnd(30)} ${pct(row.debt.inDebt, row.debt.lives)} of ${row.debt.lives}`,
+    );
+  }
+  lines.push(
+    `  largest ever: savings ${dollars(m.largest.savings)}, debt ${dollars(m.largest.debt)}, net worth ${dollars(m.largest.netWorth)} (${m.largest.netWorthSeed}); ` +
+      `safe integer limit ${dollars(Number.MAX_SAFE_INTEGER)}`,
+  );
+  const o = m.outcomes;
+  lines.push(
+    `  gig work ${pct(o.gig, m.adults)}; moved out ${pct(o.movedOut, m.adults)}; relocated ${pct(o.relocated, m.adults)}; owned a home ${pct(o.owned, m.adults)}; ` +
+      `debt in collections ${pct(o.collections, m.adults)}; debt plan ${pct(o.debtPlan, m.adults)}; bankrupt ${pct(o.bankrupt, m.adults)}; ` +
+      `evicted ${pct(o.evicted, m.adults)}; homeless ${pct(o.homeless, m.adults)}; foreclosed ${pct(o.foreclosed, m.adults)}`,
+  );
+  lines.push(`  actions taken: ${LIFE_ACTION_IDS.map((id) => `${id} ${m.actionsTaken[id]}`).join(', ')}`);
+  lines.push(
+    `  gig-only renters who couldn't cover their costs, by city: ${Object.entries(m.gigRenting)
+      .sort(([a], [b]) => (a < b ? -1 : 1))
+      .map(([city, y]) => `${city} ${pct(y.shortYears, y.years)} of ${y.years} years`)
+      .join('; ')}`,
+  );
+  lines.push(
+    `  repeatable money (most times one life got it × largest gain): ${m.repeatableGains
+      .slice(0, 5)
+      .map((g) => `${g.eventId} ${g.mostInOneLife} × ${dollars(g.largestGain)} = ${dollars(g.mostMoney)}`)
+      .join('; ')}`,
+  );
   lines.push(`Events fired: ${report.totalEventsFired}`);
   lines.push('  event'.padEnd(30) + 'fired'.padStart(8) + 'share'.padStart(8) + 'lives'.padStart(9));
   for (const e of [...report.events].sort((a, b) => b.fired - a.fired)) {

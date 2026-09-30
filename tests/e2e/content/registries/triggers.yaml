@@ -1,0 +1,7 @@
+# Test pack: every kind of money trouble answers with one simple event.
+triggers:
+  foreclosure: { events: [test_money_trouble] }
+  eviction: { events: [test_money_trouble] }
+  collections: { events: [test_money_trouble] }
+  garnishment: { events: [test_money_trouble] }
+  missed_payment: { events: [test_money_trouble] }

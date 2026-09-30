@@ -1,0 +1,14 @@
+# Test pack: queued by the economy step when money goes wrong.
+id: test_money_trouble
+title: Money trouble
+text: Money is tight this year.
+tone: serious
+category: money
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires: { age: { gte: 18 } }
+weight: { base: 1 }
+followUpOnly: true
+autoOutcome:
+  text: You tighten your belt.
+  effects: []

@@ -1,11 +1,13 @@
 import type { LifeState } from '../../../engine/types';
 import { useAppStore, type TabId } from '../../../store/appStore';
 import { AgeUpButton } from '../../components/AgeUpButton';
-import { Button } from '../../components/Button';
 import { EventSheet } from '../../components/EventSheet';
-import { Card } from '../../components/Card';
 import { Screen } from '../../components/Screen';
 import { HomeTab } from '../home/HomeTab';
+import { MoneyTab } from '../money/MoneyTab';
+import { HousingScreen } from '../more/HousingScreen';
+import { MoreTab } from '../more/MoreTab';
+import { WorkTab } from '../work/WorkTab';
 import { PeopleTab } from '../people/PeopleTab';
 import { PersonScreen } from '../people/PersonScreen';
 
@@ -48,21 +50,22 @@ function BottomNav() {
   );
 }
 
-/** The in-game layout, with Age Up above the navigation. Work/School and Money fill in with later stages. */
+/** The in-game layout, with Age Up above the navigation. */
 export function GameScreen({ life }: { life: LifeState }) {
   const tab = useAppStore((s) => s.tab);
-  const navigate = useAppStore((s) => s.navigate);
-  const openSettings = useAppStore((s) => s.openSettings);
-  const openLifeHistory = useAppStore((s) => s.openLifeHistory);
   const personId = useAppStore((s) => s.personId);
   const closePerson = useAppStore((s) => s.closePerson);
+  const moreView = useAppStore((s) => s.moreView);
+  const closeHome = useAppStore((s) => s.closeHome);
   const current = tabs.find((t) => t.id === tab) ?? tabs[0]!;
   const person = tab === 'people' && personId !== null && life.people[personId] ? personId : null;
+  const home = tab === 'more' && moreView === 'home';
+  const back = person ? { onBack: closePerson, backLabel: 'Back to People' } : home ? { onBack: closeHome, backLabel: 'Back to More' } : {};
 
   return (
     <Screen
-      title={current.label}
-      {...(person ? { onBack: closePerson, backLabel: 'Back to People' } : {})}
+      title={home ? 'Home' : current.label}
+      {...back}
       footer={
         <>
           <AgeUpButton />
@@ -78,26 +81,14 @@ export function GameScreen({ life }: { life: LifeState }) {
         ) : (
           <PeopleTab life={life} />
         )
+      ) : tab === 'work' ? (
+        <WorkTab life={life} />
+      ) : tab === 'money' ? (
+        <MoneyTab life={life} />
+      ) : home ? (
+        <HousingScreen life={life} />
       ) : (
-        <div className="flex flex-col gap-4">
-          <Card className="text-center">
-            <p className="text-sm font-semibold tracking-wide text-accent uppercase">Coming soon</p>
-            <p className="mt-1 text-muted">This part of your life isn’t written yet.</p>
-          </Card>
-          {tab === 'more' && (
-            <div className="flex flex-col gap-2">
-              <Button variant="secondary" block onClick={openLifeHistory}>
-                Life history
-              </Button>
-              <Button variant="secondary" block onClick={openSettings}>
-                Settings
-              </Button>
-              <Button variant="ghost" block onClick={() => navigate('title')}>
-                Back to title
-              </Button>
-            </div>
-          )}
-        </div>
+        <MoreTab />
       )}
       <EventSheet life={life} />
     </Screen>

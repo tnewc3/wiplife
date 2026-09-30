@@ -1,5 +1,5 @@
 /** Player-facing words for engine values. UI copy only; no game rules here. */
-import type { ActionId, RomanceStatus } from '../content/schemas';
+import type { ActionId, DebtKind, HousingKind, Lifestyle, RomanceStatus } from '../content/schemas';
 import type { FamilyMember, PeopleGroupId, PersonRow } from '../engine/selectors';
 import type { FamilyWealth, GenderCategory, LifeStage, Personality, RelationshipKind, Stats } from '../engine/types';
 
@@ -157,3 +157,129 @@ export function statChangeLabel(change: number): string {
 export function lifespanLabel(birthYear: number, endYear: number): string {
   return `${birthYear}–${endYear}`;
 }
+
+/** Whole dollars as "$12,300" or "−$500". */
+export function money(amount: number): string {
+  const text = `$${Math.abs(amount).toLocaleString('en-US')}`;
+  return amount < 0 ? `−${text}` : text;
+}
+
+/** A change in money: "+$1,200" or "−$500". */
+export function moneyChange(amount: number): string {
+  return amount > 0 ? `+${money(amount)}` : money(amount);
+}
+
+/** An interest rate: 0.065 → "6.5%". */
+export function rateLabel(rate: number): string {
+  return `${Number((rate * 100).toFixed(2))}%`;
+}
+
+export const HOUSING_LABELS: Record<HousingKind, string> = {
+  with_parents: 'Living with family',
+  renting: 'Renting',
+  owned: 'Homeowner',
+  homeless: 'Without a home',
+  incarcerated: 'In jail',
+};
+
+/** "Renting in Chicago", "Living with family in Houston". */
+export function housingLine(kind: HousingKind, cityName: string): string {
+  return `${HOUSING_LABELS[kind]} in ${cityName}`;
+}
+
+export const DEBT_LABELS: Record<DebtKind, string> = {
+  student: 'Student loan',
+  personal: 'Personal loan',
+  mortgage: 'Mortgage',
+  medical: 'Medical bills',
+  collections: 'In collections',
+};
+
+/** How a debt is going: on track, missed payments, or in collections. */
+export function debtStatus(kind: DebtKind, missed: number): string {
+  if (missed === 0) return kind === 'collections' ? 'With a collections agency' : 'On track';
+  const missedText = missed === 1 ? '1 missed payment' : `${missed} missed payments in a row`;
+  return kind === 'collections' ? `With a collections agency · ${missedText}` : missedText;
+}
+
+export const LIFESTYLE_LABELS: Record<Lifestyle, string> = {
+  frugal: 'Frugal',
+  comfortable: 'Comfortable',
+  lavish: 'Lavish',
+};
+
+export const LIFESTYLE_BLURBS: Record<Lifestyle, string> = {
+  frugal: 'Less stress about money, but life feels smaller',
+  comfortable: 'A normal life',
+  lavish: 'Costly, and a lot of fun',
+};
+
+/** The ledger's lines, in order, for the Money tab. */
+export const LEDGER_LABELS = {
+  gross: 'Income',
+  tax: 'Taxes',
+  housing: 'Housing',
+  living: 'Living costs',
+  debtPayments: 'Debt payments',
+  interest: 'Interest earned',
+  net: 'Left over',
+  borrowed: 'Borrowed to cover costs',
+  support: 'Your family covered',
+  debtInterest: 'Interest added to debts',
+} as const;
+
+/** The year recap's money line. */
+export function recapMoneyLine(m: { net: number; borrowed: number; savings: number; debt: number }): string {
+  const parts = [`Money: ${moneyChange(m.net)} this year`, `savings ${money(m.savings)}`];
+  if (m.debt > 0) parts.push(`debt ${money(m.debt)}`);
+  if (m.borrowed > 0) parts.push(`borrowed ${money(m.borrowed)}`);
+  return `${parts.join(' · ')}.`;
+}
+
+/** Copy for the confirmation sheet of a move or home purchase. */
+export function homeConfirmation(
+  action: 'rent_home' | 'move_home' | 'relocate' | 'buy_home' | 'sell_home',
+  details: { city?: string; cost?: number; name?: string; price?: number; down?: number; payment?: number; proceeds?: number },
+): { title: string; body: string; confirm: string } {
+  switch (action) {
+    case 'rent_home':
+      return {
+        title: `Rent a place in ${details.city}?`,
+        body: `Moving and a deposit cost ${money(details.cost ?? 0)} now. Rent is paid each year from then on.`,
+        confirm: 'Rent a place',
+      };
+    case 'move_home':
+      return {
+        title: `Move in with ${details.name}?`,
+        body: `You’ll live with your family in ${details.city}. They’ll help cover your costs.`,
+        confirm: 'Move back home',
+      };
+    case 'relocate':
+      return {
+        title: `Move to ${details.city}?`,
+        body: `Moving and a deposit cost ${money(details.cost ?? 0)} now. You’ll rent there, and your costs change from next year.`,
+        confirm: `Move to ${details.city}`,
+      };
+    case 'buy_home':
+      return {
+        title: `Buy a home in ${details.city}?`,
+        body:
+          `The price is ${money(details.price ?? 0)}. You’ll put down ${money(details.down ?? 0)} plus closing costs` +
+          ((details.payment ?? 0) > 0 ? `, and pay ${money(details.payment ?? 0)} a year on the mortgage.` : ', and own it outright.'),
+        confirm: 'Buy it',
+      };
+    case 'sell_home':
+      return {
+        title: 'Sell your home?',
+        body: `After selling costs it brings in about ${money(details.proceeds ?? 0)}, which pays off the mortgage first. You’ll rent in ${details.city}.`,
+        confirm: 'Sell',
+      };
+  }
+}
+
+/** Why you can't buy a home yet. */
+export const PURCHASE_BLOCK_LABELS = {
+  savings: 'You need more saved for the down payment and closing costs.',
+  income: 'A bank won’t lend you that much on your income.',
+  bankruptcy: 'No bank will give you a mortgage so soon after a bankruptcy.',
+} as const;

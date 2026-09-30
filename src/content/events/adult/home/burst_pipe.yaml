@@ -1,0 +1,45 @@
+id: burst_pipe
+title: Water where water shouldn't be
+text: >-
+  A pipe bursts in the wall of your home overnight. The plumber's estimate
+  comes with a long, sympathetic pause.
+tone: neutral
+category: home
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { home: { kind: [owned] } }
+weight: { base: 6 }
+cooldownYears: 6
+choices:
+  - id: plumber
+    label: Pay for a proper repair
+    outcome:
+      text: The wall is open for a week and the bill is enormous, but it's done right.
+      effects:
+        - { type: money, delta: -7000 }
+        - { type: stat, key: stress, delta: 2 }
+  - id: diy
+    label: Watch some videos and fix it yourself
+    check:
+      base: 45
+      stats: [{ key: discipline, weight: 0.3 }, { key: smarts, weight: 0.2 }]
+      success:
+        text: Three trips to the hardware store and one flooded weekend later, it holds. You feel invincible.
+        effects:
+          - { type: money, delta: -1200 }
+          - { type: stat, key: confidence, delta: 3 }
+      failure:
+        text: It holds for a week. Then it very much doesn't, and now the ceiling below needs fixing too.
+        effects:
+          - { type: money, delta: -9500 }
+          - { type: stat, key: stress, delta: 6 }
+  - id: patch
+    label: Patch it and hope
+    outcome:
+      text: A bucket, some tape, and a lot of optimism. You check the wall every morning.
+      effects:
+        - { type: money, delta: -300 }
+        - { type: stat, key: stress, delta: 4 }

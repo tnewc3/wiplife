@@ -4,6 +4,7 @@
  * conditionSchema in src/content/schemas/events.ts.
  */
 import type { Compare, Condition } from '../content/schemas';
+import { mostMissed, totalDebt } from './finance';
 import { romanceStatus, yearsInKind } from './relationships';
 import type { Id, LifeState } from './types';
 
@@ -67,6 +68,29 @@ export function evaluate(condition: Condition | undefined, state: LifeState, ctx
     );
   }
   if ('romance' in condition) return condition.romance.includes(romanceStatus(state));
+  if ('finances' in condition) {
+    const q = condition.finances;
+    const f = state.finances;
+    if (q.debt && !compare(totalDebt(state), q.debt)) return false;
+    if (q.missed && !compare(mostMissed(state), q.missed)) return false;
+    if (q.collections !== undefined && f.debts.some((d) => d.kind === 'collections') !== q.collections) return false;
+    if (q.kinds && !f.debts.some((d) => q.kinds!.includes(d.kind))) return false;
+    if (q.lifestyle && !q.lifestyle.includes(f.lifestyle)) return false;
+    if (q.gig !== undefined && state.career.gig !== q.gig) return false;
+    if (q.bankruptWithin !== undefined && !(f.bankruptcyYear !== undefined && state.currentYear - f.bankruptcyYear <= q.bankruptWithin)) return false;
+    if (q.planWithin !== undefined && !(f.debtPlanYear !== undefined && state.currentYear - f.debtPlanYear <= q.planWithin)) return false;
+    if (q.income && !compare(f.lastLedger?.gross ?? 0, q.income)) return false;
+    return true;
+  }
+  if ('home' in condition) {
+    const q = condition.home;
+    const h = state.housing;
+    if (q.kind && !q.kind.includes(h.kind)) return false;
+    if (q.years && !compare(state.currentYear - h.since, q.years)) return false;
+    if (q.roommate !== undefined && (h.roommate === true) !== q.roommate) return false;
+    if (q.relocated !== undefined && (c.cityId !== c.birthCityId) !== q.relocated) return false;
+    return true;
+  }
   if ('memory' in condition) {
     const { role, tag } = condition.memory;
     return roleCheck(role, (id) => state.relationships[id]?.memories.some((m) => m.tag === tag) ?? false);

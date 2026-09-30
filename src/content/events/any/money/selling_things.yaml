@@ -1,0 +1,39 @@
+# Money trouble chain, step 1 (trigger: missed_payment): another way the month ends.
+id: selling_things
+title: Everything must go
+text: >-
+  Another payment slipped past you. You look around your place and start
+  mentally pricing everything you own.
+tone: serious
+category: money
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { finances: { missed: { gte: 1 } } }
+weight: { base: 8 }
+cooldownYears: 3
+followUpOnly: true
+choices:
+  - id: sell
+    label: Sell the things you love most
+    outcome:
+      text: A stranger drives off with your best things. The money helps. The empty shelf doesn't.
+      effects:
+        - { type: money, delta: 1200 }
+        - { type: stat, key: happiness, delta: -3 }
+  - id: shifts
+    label: Work every hour you can get
+    outcome:
+      text: You stop seeing daylight for a while. You catch up, mostly.
+      effects:
+        - { type: money, delta: 1800 }
+        - { type: stat, key: stress, delta: 5 }
+        - { type: stat, key: health, delta: -2 }
+  - id: wait
+    label: Hope next month is better
+    outcome:
+      text: Next month is about the same.
+      effects:
+        - { type: stat, key: stress, delta: 3 }

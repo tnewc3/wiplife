@@ -1,0 +1,47 @@
+id: roommate_trouble
+title: The dishes
+text: >-
+  Your roommate, {roommate.name}, has not washed a dish in three weeks. The
+  sink has developed an ecosystem.
+tone: light
+category: home
+rarity: common
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { home: { kind: [renting], roommate: true } }
+weight: { base: 7 }
+cooldownYears: 4
+cast:
+  roommate: { kind: acquaintance, age: { min: 18, max: 120 }, ageOffset: { min: -8, max: 8 }, createIfMissing: true, newChance: 0.8 }
+choices:
+  - id: talk
+    label: Have the talk
+    check:
+      base: 50
+      stats: [{ key: sociability, weight: 0.2 }, { key: kindness, weight: 0.2 }]
+      success:
+        text: '{roommate.name} is mortified, does every dish that night, and buys you a pizza by way of apology.'
+        effects:
+          - { type: relationship, role: roommate, affection: 8, trust: 5 }
+          - { type: stat, key: stress, delta: -2 }
+      failure:
+        text: '{roommate.name} points out your hair in the drain. Things get chilly.'
+        effects:
+          - { type: relationship, role: roommate, affection: -8 }
+          - { type: stat, key: stress, delta: 4 }
+  - id: alone
+    label: Decide it's time to live alone
+    outcome:
+      text: '{roommate.name} moves out. The rent doubles, and the sink is spotless.'
+      effects:
+        - { type: housing, action: live_alone }
+        - { type: stat, key: happiness, delta: 3 }
+  - id: quiet
+    label: Wash them yourself and say nothing
+    outcome:
+      text: Resentment, it turns out, is also a kind of cleaning product.
+      effects:
+        - { type: stat, key: stress, delta: 3 }
+        - { type: stat, key: kindness, delta: 1 }

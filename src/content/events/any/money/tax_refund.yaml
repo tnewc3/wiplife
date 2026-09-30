@@ -1,0 +1,40 @@
+id: tax_refund
+title: A check from the government
+text: >-
+  You did your own taxes for once, and the government owes you money. It
+  feels like finding cash in a winter coat.
+tone: light
+category: money
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { finances: { income: { gte: 15000 } } }
+weight: { base: 5 }
+cooldownYears: 5
+cast:
+  parent: { kind: parent, optional: true }
+choices:
+  - id: save
+    label: Put it straight into savings
+    outcome:
+      text: Future you sends their thanks.
+      effects:
+        - { type: money, delta: 900 }
+        - { type: stat, key: discipline, delta: 1 }
+  - id: trip
+    label: Spend it on a weekend away
+    outcome:
+      text: A cheap flight, a cheaper hotel, and two days of not checking your phone.
+      effects:
+        - { type: stat, key: happiness, delta: 4 }
+        - { type: stat, key: stress, delta: -3 }
+  - id: parent
+    label: Take {parent.name} out to a fancy dinner
+    visibleIf: { role: parent, alive: true, status: [active] }
+    outcome:
+      text: '{parent.name} orders the lobster and tells everyone at the next table that you''re paying.'
+      effects:
+        - { type: relationship, role: parent, affection: 6 }
+        - { type: stat, key: happiness, delta: 2 }

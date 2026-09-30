@@ -74,6 +74,7 @@ export function createLife(input: CreateLifeOptions, content: ContentBundle): Li
       personality,
       hidden: rollHidden(rng, content),
       cityId,
+      birthCityId: cityId,
       familyWealth,
       custom: false,
     };
@@ -95,6 +96,7 @@ export function createLife(input: CreateLifeOptions, content: ContentBundle): Li
       personality: { ...custom.personality },
       hidden: rollHidden(rng, content),
       cityId: custom.cityId,
+      birthCityId: custom.cityId,
       familyWealth: custom.familyWealth,
       custom: true,
     };
@@ -130,8 +132,8 @@ export function createLife(input: CreateLifeOptions, content: ContentBundle): Li
     relationships: Object.fromEntries(family.relationships.map((r) => [r.personId, r])),
     education: { current: null, credentials: [] },
     career: { job: null, gig: false, retired: false, history: [] },
-    finances: { savings: 0, debts: [], lifestyle: 'comfortable' },
-    housing: { kind: 'with_parents', cityId: character.cityId, annualCost: 0 },
+    finances: { savings: 0, debts: [], lifestyle: 'comfortable', hardshipYears: 0 },
+    housing: { kind: 'with_parents', cityId: character.cityId, annualCost: 0, since: birthYear },
     health: { conditions: [] },
     legal: { record: [] },
     flags: {},

@@ -9,6 +9,7 @@ import {
 import { actionRegistrySchema, relationshipsBalanceSchema } from './relationships';
 import { appearanceOptionsSchema, identityOptionsSchema, namePoolSchema, pronounPresetSchema, talentSchema } from './character';
 import { citySchema } from './city';
+import { economyBalanceSchema, triggerRegistrySchema } from './economy';
 import { categoryRegistrySchema, eventSchema, flagRegistrySchema, memoryRegistrySchema } from './events';
 import { causeSchema, historyTextSchema, obituaryTextSchema, relationWordsSchema } from './text';
 
@@ -16,6 +17,7 @@ export * from './balance';
 export * from './character';
 export * from './city';
 export * from './common';
+export * from './economy';
 export * from './events';
 export * from './relationships';
 export * from './text';
@@ -49,6 +51,7 @@ export const singletonTypes = {
   'balance/pacing': pacingBalanceSchema,
   'balance/events': eventsBalanceSchema,
   'balance/relationships': relationshipsBalanceSchema,
+  'balance/economy': economyBalanceSchema,
   'character/identity': identityOptionsSchema,
   'character/appearance': appearanceOptionsSchema,
   'text/relations': relationWordsSchema,
@@ -58,6 +61,7 @@ export const singletonTypes = {
   'registries/flags': flagRegistrySchema,
   'registries/categories': categoryRegistrySchema,
   'registries/actions': actionRegistrySchema,
+  'registries/triggers': triggerRegistrySchema,
 } as const;
 
 export type SingletonPath = keyof typeof singletonTypes;
@@ -77,6 +81,7 @@ export const contentBundleSchema = z.strictObject({
     pacing: pacingBalanceSchema,
     events: eventsBalanceSchema,
     relationships: relationshipsBalanceSchema,
+    economy: economyBalanceSchema,
   }),
   character: z.strictObject({ identity: identityOptionsSchema, appearance: appearanceOptionsSchema }),
   text: z.strictObject({ relations: relationWordsSchema, history: historyTextSchema, obituary: obituaryTextSchema }),
@@ -85,6 +90,7 @@ export const contentBundleSchema = z.strictObject({
     flags: flagRegistrySchema,
     categories: categoryRegistrySchema,
     actions: actionRegistrySchema,
+    triggers: triggerRegistrySchema,
   }),
 });
 

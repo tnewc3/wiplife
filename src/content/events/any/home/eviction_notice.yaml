@@ -1,0 +1,60 @@
+# Money trouble chain (trigger: eviction): you fell too far behind on rent and
+# have been evicted; you are homeless until you find somewhere to go.
+id: eviction_notice
+title: Locked out
+text: >-
+  The notice on your door gave you until Friday. On Friday there is a new
+  lock, and your things are in trash bags on the curb.
+tone: dark
+category: home
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { home: { kind: [homeless] } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  parent: { kind: parent, optional: true }
+  helper: { support: true, optional: true }
+choices:
+  - id: home
+    label: Call {parent.name} and ask to come home
+    visibleIf: { role: parent, alive: true, status: [active] }
+    outcome:
+      text: '{parent.name} is already making up your old bed before you finish asking. Nobody says the word "evicted" at dinner.'
+      effects:
+        - { type: housing, action: move_home }
+        - { type: relationship, role: parent, affection: 3 }
+        - { type: memory, role: parent, tag: took_you_in }
+        - { type: flag, key: was_evicted, value: true }
+        - { type: stat, key: happiness, delta: -2 }
+  - id: helper
+    label: Ask {helper.name} for a room
+    visibleIf: { role: helper }
+    outcome:
+      text: '{helper.name} clears out the spare room and won''t hear about rent until you''re back on your feet. You split it anyway.'
+      effects:
+        - { type: housing, action: rent }
+        - { type: housing, action: roommate }
+        - { type: memory, role: helper, tag: took_you_in }
+        - { type: relationship, role: helper, affection: 4, trust: 4 }
+        - { type: flag, key: was_evicted, value: true }
+  - id: shelter
+    label: Find a shelter bed
+    outcome:
+      text: The shelter is loud, bright and safe enough. A caseworker takes your name and says there's a waiting list for apartments.
+      effects:
+        - { type: flag, key: was_evicted, value: true }
+        - { type: stat, key: stress, delta: 5 }
+        - { type: schedule, eventId: shelter_program, inYears: [1, 2] }
+  - id: car
+    label: Sleep in your car and keep your pride
+    outcome:
+      text: You learn which parking lots the police leave alone. You don't tell anyone.
+      effects:
+        - { type: flag, key: was_evicted, value: true }
+        - { type: stat, key: stress, delta: 7 }
+        - { type: stat, key: health, delta: -2 }
+        - { type: stat, key: happiness, delta: -3 }

@@ -1,0 +1,46 @@
+id: first_apartment
+title: Your name on the lease
+text: >-
+  The apartment is small, the radiator clanks, and the kitchen is a hallway
+  with a stove in it. It's the first place that's entirely yours.
+tone: light
+category: home
+rarity: common
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { home: { kind: [renting], years: { lte: 1 } } }
+weight: { base: 8 }
+once: true
+choices:
+  - id: party
+    label: Throw a housewarming party
+    outcome:
+      text: Twelve people in a room meant for four. Someone breaks a glass; someone else brings a plant that outlives the lease.
+      effects:
+        - { type: money, delta: -300 }
+        - { type: stat, key: happiness, delta: 4 }
+        - { type: stat, key: sociability, delta: 2 }
+  - id: curb
+    label: Furnish it from the curb
+    outcome:
+      text: A perfectly good armchair, a lamp, a table with one short leg. Free is a beautiful price.
+      effects:
+        - { type: stat, key: happiness, delta: 2 }
+        - { type: stat, key: luck, delta: 1 }
+  - id: splurge
+    label: Buy real furniture, all at once
+    outcome:
+      text: The couch is gorgeous. You will be paying for it longer than you'll live here.
+      effects:
+        - { type: money, delta: -2500 }
+        - { type: stat, key: happiness, delta: 4 }
+  - id: frame
+    label: Frame the lease
+    visibleIf: { flag: was_evicted }
+    outcome:
+      text: After the eviction, a signed lease feels like a small miracle. You hang it by the door.
+      effects:
+        - { type: stat, key: happiness, delta: 6 }
+        - { type: stat, key: stress, delta: -3 }

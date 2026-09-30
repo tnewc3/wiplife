@@ -1,0 +1,28 @@
+id: generous_tip
+title: Keep the change
+text: >-
+  An elderly customer signs for the groceries, looks at you for a long
+  moment, and presses a folded $500 into your hand: "Somebody did this for
+  me once."
+tone: light
+category: money
+rarity: uncommon
+lifeStages: [teen, youngAdult, adult, senior]
+requires: { finances: { gig: true } }
+weight: { base: 5 }
+cooldownYears: 10
+choices:
+  - id: keep
+    label: Say thank you and keep it
+    outcome:
+      text: You think about that moment for the rest of the week.
+      effects:
+        - { type: money, delta: 500 }
+        - { type: stat, key: happiness, delta: 3 }
+  - id: pass
+    label: Pass it on to someone who needs it more
+    outcome:
+      text: You find someone who needs it more. It feels better than keeping it would have.
+      effects:
+        - { type: stat, key: kindness, delta: 3 }
+        - { type: stat, key: happiness, delta: 3 }

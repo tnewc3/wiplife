@@ -1,0 +1,40 @@
+id: homesick
+title: The wrong kind of quiet
+text: >-
+  The new city is exciting, mostly. But the coffee tastes wrong, nobody
+  knows your name, and some nights you'd give anything for your old street.
+tone: neutral
+category: home
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { home: { relocated: true, years: { lte: 2 } } }
+weight: { base: 7 }
+cooldownYears: 5
+cast:
+  parent: { kind: parent, optional: true }
+choices:
+  - id: call
+    label: Call {parent.name} every Sunday
+    visibleIf: { role: parent, alive: true, status: [active] }
+    outcome:
+      text: '{parent.name} starts saving up news all week for your calls. You look forward to them more than you''d admit.'
+      effects:
+        - { type: relationship, role: parent, affection: 5 }
+        - { type: stat, key: happiness, delta: 2 }
+  - id: visit
+    label: Book a trip home
+    outcome:
+      text: Three days of old friends and familiar streets. You fly back lighter, and a little sad.
+      effects:
+        - { type: money, delta: -700 }
+        - { type: stat, key: happiness, delta: 4 }
+  - id: dive
+    label: Throw yourself into the new city
+    outcome:
+      text: You say yes to every invitation for a month. It's exhausting, and it works.
+      effects:
+        - { type: stat, key: sociability, delta: 3 }
+        - { type: stat, key: stress, delta: 2 }

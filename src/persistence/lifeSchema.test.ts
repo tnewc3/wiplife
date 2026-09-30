@@ -249,3 +249,47 @@ describe('lives from Stage 4 on', () => {
     }
   });
 });
+
+describe('lives from Stage 6 on', () => {
+  it('upgrade a schema version 4 save with its birth city, home and money tracking', async () => {
+    const life = lifeAtAge('stage6-migrate', 30);
+    // A version 4 save: no birth city, no year you moved in, no hardship count.
+    const { birthCityId: _birth, ...character } = life.character;
+    const { since: _since, ...housing } = life.housing;
+    const { hardshipYears: _hardship, ...finances } = life.finances;
+    const v4 = { ...life, character, housing, finances: { ...finances, savings: 1_234 } };
+    const db = freshDb();
+    await db.lives.put({ id: 'active', envelope: { ...makeEnvelope(v4, content.contentVersion), schemaVersion: 4 } });
+    const result = await readSave(db, loadedLifeSchema(content));
+    expect(result.status).toBe('ok');
+    if (result.status !== 'ok') return;
+    expect(result.envelope.schemaVersion).toBe(CURRENT_SCHEMA_VERSION);
+    const upgraded = result.envelope.data;
+    expect(upgraded.character.birthCityId).toBe(life.character.cityId);
+    expect(upgraded.housing.since).toBe(life.birthYear);
+    expect(upgraded.finances).toEqual({ ...life.finances, savings: 1_234, hardshipYears: 0 });
+  });
+
+  it('round trip a life with debts, a mortgage and a move', async () => {
+    let life = produce(lifeAtAge('stage6-round', 30), (d) => {
+      d.finances.savings = 500_000;
+      d.finances.lastLedger = { year: d.currentYear, gross: 90_000, tax: 0, housing: 0, living: 0, debtPayments: 0, interest: 0, debtInterest: 0, borrowed: 0, support: 0, net: 90_000 };
+      d.finances.debts.push({ id: 'd1', kind: 'student', balance: 12_000, annualRate: 0.055, minPayment: 1_600, missed: 1 });
+    });
+    const other = life.character.cityId === 'nyc' ? 'houston' : 'nyc';
+    life = performAction(life, 'relocate', { cityId: other }, content);
+    life = performAction(life, 'buy_home', {}, content);
+    expect(life.housing.kind).toBe('owned');
+    expect(await roundTrip(life)).toEqual(life);
+  });
+
+  it('refuse negative savings, a mortgage without a home and a roommate outside a rental', () => {
+    const life = lifeAtAge('stage6-bad', 30);
+    const schema = loadedLifeSchema(content);
+    expect(schema.safeParse({ ...life, finances: { ...life.finances, savings: -1 } }).success).toBe(false);
+    const mortgage = { id: 'd1', kind: 'mortgage', balance: 1_000, annualRate: 0.06, minPayment: 300, missed: 0 };
+    expect(schema.safeParse({ ...life, finances: { ...life.finances, debts: [mortgage] } }).success).toBe(false);
+    expect(schema.safeParse({ ...life, housing: { ...life.housing, roommate: true } }).success).toBe(false);
+    expect(schema.safeParse({ ...life, character: { ...life.character, birthCityId: 'atlantis' } }).success).toBe(false);
+  });
+});

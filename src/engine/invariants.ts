@@ -79,13 +79,62 @@ export function checkInvariants(state: LifeState, content: ContentBundle): strin
   for (const [key, value] of Object.entries(c.latent.personality ?? {})) score(`character.latent.personality.${key}`, value);
   if (c.latent.identity?.pronouns) pronouns('character.latent.identity', c.latent.identity.pronouns);
   city('character.cityId', c.cityId);
+  city('character.birthCityId', c.birthCityId);
   city('housing.cityId', state.housing.cityId);
 
   // Money.
-  money('finances.savings', state.finances.savings);
-  if (state.finances.savings < 0) fail('finances.savings must not be negative');
-  for (const debt of state.finances.debts) money(`debt ${debt.id} balance`, debt.balance);
-  money('housing.annualCost', state.housing.annualCost);
+  const f = state.finances;
+  money('finances.savings', f.savings);
+  if (f.savings < 0) fail('finances.savings must not be negative');
+  const debtIds = new Set<string>();
+  const DEBT_KINDS = new Set(['student', 'personal', 'mortgage', 'medical', 'collections']);
+  for (const debt of f.debts) {
+    const label = `debt ${debt.id}`;
+    if (debtIds.has(debt.id)) fail(`${label} appears twice`);
+    debtIds.add(debt.id);
+    if (!DEBT_KINDS.has(debt.kind)) fail(`${label} has an unknown kind "${debt.kind}"`);
+    money(`${label} balance`, debt.balance);
+    money(`${label} minPayment`, debt.minPayment);
+    if (!(debt.balance > 0)) fail(`${label} is paid off but still listed`);
+    if (!(debt.minPayment >= 0)) fail(`${label} has a negative minimum payment`);
+    if (!Number.isFinite(debt.annualRate) || debt.annualRate < 0 || debt.annualRate > 1) fail(`${label} has an invalid rate`);
+    if (!Number.isInteger(debt.missed) || debt.missed < 0) fail(`${label}.missed must be a whole number of at least 0`);
+  }
+  if (!Number.isInteger(f.hardshipYears) || f.hardshipYears < 0) fail('finances.hardshipYears must be a whole number of at least 0');
+  for (const key of ['bankruptcyYear', 'debtPlanYear'] as const) {
+    const year = f[key];
+    if (year !== undefined && (!Number.isInteger(year) || year > state.currentYear || year < state.birthYear)) fail(`finances.${key} is outside the life`);
+  }
+  const independent = c.age >= content.balance.economy.independenceAge;
+  if (!independent && f.debts.length > 0) fail('a child has debt');
+  if (f.lastLedger) {
+    const l = f.lastLedger;
+    for (const key of ['gross', 'tax', 'housing', 'living', 'debtPayments', 'interest', 'debtInterest', 'borrowed', 'support'] as const) {
+      money(`lastLedger.${key}`, l[key]);
+      if (l[key] < 0) fail(`lastLedger.${key} must not be negative`);
+    }
+    money('lastLedger.net', l.net);
+    if (l.net !== l.gross + l.interest - l.tax - l.housing - l.living - l.debtPayments) fail('lastLedger.net does not add up');
+    if (l.year > state.currentYear || l.year <= state.birthYear) fail('lastLedger is for a year outside the life');
+  }
+  if (state.career.gig && c.age < content.balance.economy.gig.minAge) fail('gig work before the minimum age');
+
+  // Housing.
+  const h = state.housing;
+  money('housing.annualCost', h.annualCost);
+  if (h.cityId !== c.cityId) fail('housing.cityId is not the city you live in');
+  if (!Number.isInteger(h.since) || h.since < state.birthYear || h.since > state.currentYear) fail('housing.since is outside the life');
+  if (!independent && h.kind !== 'with_parents') fail(`a child is housed "${h.kind}"`);
+  if (h.roommate !== undefined && (h.roommate !== true || h.kind !== 'renting')) fail('only a rental has a roommate');
+  const mortgages = f.debts.filter((d) => d.kind === 'mortgage');
+  if (h.kind === 'owned') {
+    if (h.homeValue === undefined) fail('an owned home has no value');
+    else money('housing.homeValue', h.homeValue);
+  } else if (h.homeValue !== undefined || h.mortgageDebtId !== undefined) {
+    fail(`a "${h.kind}" home has a value or mortgage`);
+  }
+  if (h.mortgageDebtId !== undefined && !mortgages.some((d) => d.id === h.mortgageDebtId)) fail('housing.mortgageDebtId is not a mortgage');
+  if (mortgages.some((d) => d.id !== h.mortgageDebtId)) fail('a mortgage without a home');
 
   // People and relationships.
   const { parentAgeAtBirth } = content.balance.creation.family;

@@ -276,7 +276,8 @@ interface Character {
     talent: TalentId | null;
     talentDiscovered: boolean;
   };
-  cityId: Id;
+  cityId: Id;                          // the city you live in now
+  birthCityId: Id;                     // where you were born; never changes (Stage 6)
   familyWealth: 'poor' | 'working' | 'middle' | 'affluent' | 'rich';
   custom: boolean;
 }
@@ -363,16 +364,21 @@ interface CareerState {
 }
 
 interface FinanceState {
-  savings: number;
+  savings: number;                     // never below zero: shortfalls become personal debt
   debts: Debt[];
   lifestyle: 'frugal' | 'comfortable' | 'lavish';
-  lastLedger?: { year; gross; tax; housing; living; debtPayments; net };
+  lastLedger?: { year; gross; tax; housing; living; debtPayments; interest; debtInterest;
+                 borrowed; support; net };   // net = gross + interest − tax − housing − living − debtPayments
+  hardshipYears: number;               // years in a row behind on housing costs (eviction)
+  bankruptcyYear?: number;
+  debtPlanYear?: number;
 }
 
 interface Debt {
   id: Id;
   kind: 'student' | 'personal' | 'mortgage' | 'medical' | 'collections';
-  balance: number; annualRate: number; minPayment: number; missed: number;
+  balance: number; annualRate: number; minPayment: number;
+  missed: number;                      // missed payments in a row
 }
 ```
 
@@ -381,10 +387,12 @@ interface Debt {
 ```ts
 interface HousingState {
   kind: 'with_parents' | 'renting' | 'owned' | 'homeless' | 'incarcerated';
-  cityId: Id;
-  annualCost: number;
+  cityId: Id;                          // always character.cityId
+  annualCost: number;                  // the ledger's housing line (a mortgage is paid as a debt)
   homeValue?: number;
   mortgageDebtId?: Id;
+  since: number;                       // the year you moved in (Stage 6)
+  roommate?: true;                     // renting with a roommate (Stage 6)
 }
 
 interface HealthState {
@@ -422,7 +430,8 @@ interface ArchivedLife {
   causeOfDeath: string | null;         // readable text; null when unfinished
   unfinished: boolean;                 // a new life was started before this one ended;
                                        // deathYear and ageAtDeath then give when it was left
-  cityId: Id;
+  cityId: Id;                          // where the life ended
+  birthCityId: Id;                     // where it began (archive schema version 2)
   obituary: string;
   highlights: HistoryEntry[];
   finalNetWorth: number;
@@ -486,7 +495,9 @@ interface Outcome { text?: string; effects: Effect[] }
 
 type Effect =
   | { type: 'stat'; key: string; delta: number }
-  | { type: 'money'; delta: number }
+  | { type: 'money'; delta: number }   // Stage 6: a cost beyond savings becomes personal debt (adults)
+  | { type: 'debt'; action: 'add' | 'forgive' | 'bankruptcy' | 'plan'; kind?; amount?; kinds?; share? }
+  | { type: 'housing'; action: 'move_home' | 'rent' | 'homeless' | 'roommate' | 'live_alone' | 'sell' }
   | { type: 'relationship'; role: string; affection?: number; trust?: number; status?: string; kind?: string }
   | { type: 'memory'; role: string; tag: string }
   | { type: 'flag'; key: string; value: number | boolean | string }
@@ -502,6 +513,8 @@ type Effect =
 
 // Stage 4 builds these effect types: stat, money (savings only; never below zero), relationship,
 // memory, flag, schedule (inYears of at least 1), history and death. The rest arrive with their systems.
+// Stage 6: debt and housing effects are adults only (ignored before the independence age; the content
+// build requires an adult age or adult life stages).
 // Stage 5: a relationship effect's kind change is checked by the engine (adults only, one partner at a
 // time, dating before an engagement, family stays family); a change that breaks a rule is ignored.
 
@@ -512,6 +525,10 @@ type Condition =                       // structured, evaluated by src/engine/co
   | { city: Id } | { familyWealth: FamilyWealth[] } | { flag: string; eq?: number | boolean | string }
   | { fired: EventId } | { relative: { kind: RelationshipKind; alive?: boolean } }
   | { romance: ('single' | 'dating' | 'engaged' | 'married')[] }   // your current situation
+  | { finances: { debt?: Compare; missed?: Compare; collections?: boolean; kinds?: DebtKind[];
+                  lifestyle?: Lifestyle[]; gig?: boolean; bankruptWithin?: number; planWithin?: number;
+                  income?: Compare } }                         // Stage 6
+  | { home: { kind?: HousingKind[]; years?: Compare; roommate?: boolean; relocated?: boolean } }
   | { memory: { role: string; tag: string } }       // about cast roles: checked once the event is cast
   | { role: string; alive?: boolean; age?: Compare; affection?: Compare; trust?: Compare;
       kind?: RelationshipKind[]; status?: RelationshipStatus[]; years?: Compare };  // years: in its current kind
@@ -1643,7 +1660,9 @@ New careers, events, cities, majors, conditions, offenses and similar content ar
 src/content/
   balance/        creation.yaml, aging.yaml, mortality.yaml, pacing.yaml, events.yaml (weights by
                   rarity, chance checks, people casting creates), relationships.yaml (adult age,
-                  drift, pruning, action timing, partner ages, support), economy.yaml, careers.yaml,
+                  drift, pruning, action timing, partner ages, support), economy.yaml (tax brackets,
+                  living costs, lifestyle tiers, family support, interest, debt terms, missed payments,
+                  housing, ownership, gig pay), careers.yaml,
                   education.yaml, health.yaml, legal.yaml, targets.yaml
   causes/         causes of death, one per file ("natural causes", "a stroke")
   cities/         nyc.yaml, los_angeles.yaml, chicago.yaml, houston.yaml, small_town.yaml
@@ -1660,6 +1679,8 @@ src/content/
     flags.yaml      every flag, with a one-line description
     categories.yaml event categories (romance: true marks adults-only categories)
     actions.yaml    the events that answer each management action
+    triggers.yaml   the events that answer money trouble (missed payment, collections,
+                    garnishment, eviction, foreclosure); the economy step queues one
 ```
 
 The registries let the content build catch typos. An effect that writes a memory tag or flag that isn't registered fails the build.
