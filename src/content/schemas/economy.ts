@@ -144,6 +144,31 @@ export const economyBalanceSchema = z.strictObject({
     deposit: share,
     /** Share of the rent you pay when you live with a roommate. */
     roommateShare: share,
+    /** Share of the housing cost you pay when you live with your partner or spouse (they pay the rest). */
+    partnerShare: share,
+  }),
+  /**
+   * The retirement benefit (like Social Security): paid every year from `age`
+   * once you have `minYears` years with earned income, from your average
+   * yearly earnings over those years. Every kind of earned income counts
+   * (gig pay, and salaries from Stage 8).
+   */
+  retirement: z.strictObject({
+    age: z.int().min(40).max(100),
+    /** Years with earned income needed to qualify. */
+    minYears: z.int().min(1).max(60),
+    /** The full benefit needs this many years; fewer years pay a share (years ÷ fullYears). */
+    fullYears: z.int().min(1).max(60),
+    /** A year counts when earned income reaches this. */
+    creditIncome: dollarsSchema.positive(),
+    /** Earnings above this in one year don't count toward the average. */
+    earningsCap: dollarsSchema.positive(),
+    /** The yearly benefit: these rates on slices of average yearly earnings (like the tax brackets). */
+    formula: z
+      .array(z.strictObject({ from: dollarsSchema, rate }))
+      .min(1)
+      .refine((b) => b[0]!.from === 0, 'the first slice starts from 0')
+      .refine((b) => b.every((x, i) => i === 0 || x.from > b[i - 1]!.from), 'slices must be in increasing "from" order'),
   }),
   ownership: z.strictObject({
     /** Smallest down payment, as a share of the price. */

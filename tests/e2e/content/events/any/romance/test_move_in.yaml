@@ -1,0 +1,17 @@
+id: test_move_in
+title: Moving in
+text: You ask {person.name} to move in.
+tone: light
+category: romance
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires: { age: { gte: 18 } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  person: { kind: partner }
+autoOutcome:
+  text: '{person.name} moves in.'
+  effects:
+    - { type: housing, action: move_in_together, role: person }
+    - { type: memory, role: person, tag: moved_in_together }

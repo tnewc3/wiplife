@@ -189,7 +189,8 @@ function checkTemplates(bundle: ContentBundle): ContentError[] {
   all(HISTORY, 'familyDeath.variants', history.familyDeath.variants, { roles: ['npc'], values: ['relation', 'age'] });
   all(HISTORY, 'death.variants', history.death.variants, { values: ['age', 'cause'] });
   for (const [key, group] of Object.entries(history.home)) {
-    all(HISTORY, `home.${key}.variants`, group.variants, { values: key === 'relocated' ? ['city', 'from'] : ['city'] });
+    const allowed = key === 'movedApart' ? { roles: ['npc'] } : { values: key === 'relocated' ? ['city', 'from'] : ['city'] };
+    all(HISTORY, `home.${key}.variants`, group.variants, allowed);
   }
   for (const [key, group] of Object.entries(history.money)) all(HISTORY, `money.${key}.variants`, group.variants, {});
 
@@ -226,7 +227,9 @@ function outcomesOf(def: EventDef): Outcome[] {
 
 /** Every role an effect or check in this outcome uses. */
 function outcomeRoles(outcome: Outcome): string[] {
-  return (outcome.effects as Effect[]).flatMap((e) => ('role' in e ? [e.role] : e.type === 'schedule' ? (e.cast ?? []) : []));
+  return (outcome.effects as Effect[]).flatMap((e) =>
+    'role' in e && e.role !== undefined ? [e.role] : e.type === 'schedule' ? (e.cast ?? []) : [],
+  );
 }
 
 /**
@@ -355,7 +358,7 @@ function checkEvents(bundle: ContentBundle, fileOf: (typeKey: CollectionKey, id:
       if (outcome.text) template(`outcome[${i}].text`, outcome.text);
       for (const effect of outcome.effects as Effect[]) {
         const where = `outcome[${i}] ${effect.type}`;
-        if ('role' in effect && !roles.includes(effect.role)) err(`${where}: role "${effect.role}" is not in the cast`);
+        if ('role' in effect && effect.role !== undefined && !roles.includes(effect.role)) err(`${where}: role "${effect.role}" is not in the cast`);
         if (effect.type === 'memory' && !tags[effect.tag]) err(`${where}: memory "${effect.tag}" is not in registries/memories.yaml`);
         if (effect.type === 'flag' && !flags[effect.key]) err(`${where}: flag "${effect.key}" is not in registries/flags.yaml`);
         if (effect.type === 'death' && !bundle.causes[effect.cause]) err(`${where}: unknown cause "${effect.cause}"`);

@@ -3,10 +3,13 @@
  * J). Numbers come from src/content/balance/economy.yaml.
  *
  * As each year begins, in this order:
- * 1. An adult with no parent left to live with rents a place of their own.
+ * 1. An adult with no parent left to live with rents a place of their own;
+ *    a partner who is no longer your partner no longer lives with you.
  * 2. Interest: debts grow by their rate, savings earn interest, home values move.
- * 3. Gross income (salary and gig pay) and estimated tax. A collections debt
- *    that is behind garnishes a share of gross income.
+ * 3. Gross earned income (salary and gig pay) and estimated tax; the
+ *    retirement benefit from the retirement age (untaxed), from the earnings
+ *    record, which this year's earnings then join. A collections debt that
+ *    is behind garnishes a share of gross income.
  * 4. Housing and living costs (lifestyle × city). At your parents', the
  *    family covers whatever share of them you can't pay.
  * 5. Minimum debt payments from what is left. A payment savings can't cover
@@ -30,7 +33,8 @@ import {
   sendToCollections,
   wholeDollars,
 } from '../finance';
-import { housingCost, livingCost, moveTo, refreshHousingCost, sellHome, supportingParent } from '../housing';
+import { housingCost, livingCost, moveTo, refreshHousingCost, sellHome, settleHousehold, supportingParent } from '../housing';
+import { recordEarnings, retirementBenefit } from '../retirement';
 import { clampInt, weightedPick } from '../random';
 import { chance } from '../rng';
 import type { Debt, LifeState, StatKey } from '../types';
@@ -102,6 +106,7 @@ export function runEconomy(state: LifeState, content: ContentBundle): void {
   const history = content.text.history;
 
   // 1. Nobody left to live with.
+  settleHousehold(state, content);
   if (adult && state.housing.kind === 'with_parents' && !supportingParent(state)) {
     moveTo(state, 'renting', state.character.cityId, content);
     writeFromGroup(state, history.home.familyHomeGone, ['home', 'familyHomeGone'], { values: { city: cityName(state, content) } }, content);
@@ -119,9 +124,11 @@ export function runEconomy(state: LifeState, content: ContentBundle): void {
     state.housing.homeValue = Math.max(0, wholeDollars(state.housing.homeValue * (1 + eco.ownership.appreciation)));
   }
 
-  // 3. Income, tax and garnishment.
+  // 3. Income, tax and garnishment. The benefit comes from the record so far.
   const gross = yearIncome(state, content);
   const tax = taxOn(gross, content);
+  const retirement = retirementBenefit(state, content);
+  recordEarnings(state, gross, content);
   const garnishedOn = new Map<string, number>();
   let garnishable = f.debts.some((d) => d.kind === 'collections' && d.missed > 0) ? wholeDollars(gross * eco.missed.garnishShare) : 0;
   for (const debt of f.debts) {
@@ -137,7 +144,7 @@ export function runEconomy(state: LifeState, content: ContentBundle): void {
   // 4. Costs.
   let housing = housingCost(state, content);
   let living = livingCost(state, content);
-  const before = f.savings + interest + gross - tax - garnished;
+  const before = f.savings + interest + gross + retirement - tax - garnished;
   let support = 0;
   if (state.housing.kind === 'with_parents' && before < housing + living) {
     support = Math.min(housing + living, housing + living - Math.max(0, before));
@@ -165,7 +172,7 @@ export function runEconomy(state: LifeState, content: ContentBundle): void {
       debt.missed = 0;
     }
   }
-  const net = gross + interest - tax - housing - living - debtPayments;
+  const net = gross + retirement + interest - tax - housing - living - debtPayments;
   let borrowed = 0;
   if (available >= 0) {
     f.savings = wholeDollars(available);
@@ -207,6 +214,7 @@ export function runEconomy(state: LifeState, content: ContentBundle): void {
   f.lastLedger = {
     year: state.currentYear,
     gross,
+    retirement,
     tax,
     housing,
     living,

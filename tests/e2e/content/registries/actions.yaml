@@ -2,6 +2,7 @@
 actions:
   ask_out: { events: [test_ask_out] }
   propose: { events: [test_propose] }
+  move_in: { events: [test_move_in] }
   marry: { events: [test_wedding] }
   break_up: { events: [test_break_up] }
   divorce: { events: [test_divorce] }

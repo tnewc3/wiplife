@@ -55,12 +55,13 @@ export const migrations: readonly Migration[] = [
     from: 4,
     description:
       'Stage 6: the birth city (the city you lived in, since nobody could move before), the year you moved into your ' +
-      'home (birth), and money-trouble tracking (none yet). The ledger has never run, so there is no last ledger.',
+      'home (birth), money-trouble tracking (none yet) and the earnings record (empty: nobody earned before). The ' +
+      'ledger has never run, so there is no last ledger.',
     migrate: (data) => {
       if (typeof data !== 'object' || data === null || Array.isArray(data)) return data;
       const life = data as { birthYear?: unknown; character?: unknown; finances?: unknown; housing?: unknown };
       const character = isRecord(life.character) ? { ...life.character, birthCityId: life.character.cityId } : life.character;
-      const finances = isRecord(life.finances) ? { ...life.finances, hardshipYears: 0 } : life.finances;
+      const finances = isRecord(life.finances) ? { ...life.finances, earnings: { years: 0, total: 0 }, hardshipYears: 0 } : life.finances;
       const housing = isRecord(life.housing) ? { ...life.housing, since: life.birthYear } : life.housing;
       return { ...data, character, finances, housing };
     },

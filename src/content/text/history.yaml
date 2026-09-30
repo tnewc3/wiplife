@@ -81,6 +81,12 @@ home:
     importance: 3
     variants:
       - "The bank foreclosed on your home in {city}."
+  # Role: npc (the partner who moved out); no values.
+  movedApart:
+    importance: 2
+    variants:
+      - "{npc.name} moved out."
+      - "{npc.name} packed {npc.their} things and moved out."
 
 # Money milestones. No values.
 money:

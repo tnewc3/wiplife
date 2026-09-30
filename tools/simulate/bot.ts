@@ -16,6 +16,7 @@ import type { LifeState } from '../../src/engine/types';
 const POLICY: Record<ActionId, (affection: number) => number> = {
   ask_out: (a) => (a >= 55 ? 0.3 : 0.08),
   propose: (a) => (a >= 60 ? 0.35 : 0.05),
+  move_in: (a) => (a >= 55 ? 0.35 : 0.05),
   marry: () => 0.6,
   break_up: (a) => (a < 35 ? 0.35 : 0.03),
   divorce: (a) => (a < 25 ? 0.3 : 0.004),
@@ -69,6 +70,8 @@ const MONEY_POLICY = {
   moveHomeWhenStruggling: 0.5,
   roommateWhenStruggling: 0.7,
   debtPlan: 0.5,
+  /** Stops gig work each year once the retirement benefit is paid. */
+  retire: 0.5,
   /** Pays off a debt when savings exceed its balance by this much. */
   payOffCushion: 10_000,
 };
@@ -83,7 +86,9 @@ export function chooseMoneyActions(life: LifeState, content: ContentBundle, rng:
   const adult = age >= content.balance.economy.independenceAge;
   const struggling = (life.finances.lastLedger?.borrowed ?? 0) > 0 || life.finances.debts.some((d) => d.missed > 0);
 
-  if (profile.worker && can('start_gig') && (adult || chance(rng, MONEY_POLICY.teenGig))) out.push(['start_gig', {}]);
+  const retired = age >= content.balance.economy.retirement.age;
+  if (profile.worker && !retired && can('start_gig') && (adult || chance(rng, MONEY_POLICY.teenGig))) out.push(['start_gig', {}]);
+  if (retired && can('stop_gig') && chance(rng, MONEY_POLICY.retire)) out.push(['stop_gig', {}]);
   if (!adult) return out;
 
   const wanted: Lifestyle = struggling && profile.lifestyle !== 'frugal' ? 'frugal' : profile.lifestyle;

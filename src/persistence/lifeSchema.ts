@@ -186,6 +186,7 @@ const finances = z.strictObject({
     .strictObject({
       year: int,
       gross: dollars,
+      retirement: dollars,
       tax: dollars,
       housing: dollars,
       living: dollars,
@@ -197,6 +198,7 @@ const finances = z.strictObject({
       net: dollars,
     })
     .exactOptional(),
+  earnings: z.strictObject({ years: int.min(0), total: dollars }),
   hardshipYears: int.min(0),
   bankruptcyYear: int.exactOptional(),
   debtPlanYear: int.exactOptional(),
@@ -210,6 +212,7 @@ const housing = z.strictObject({
   mortgageDebtId: id.exactOptional(),
   since: int,
   roommate: z.literal(true).exactOptional(),
+  partnerId: id.exactOptional(),
 });
 
 const health = z.strictObject({

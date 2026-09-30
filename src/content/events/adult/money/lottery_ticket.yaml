@@ -6,7 +6,7 @@ category: money
 rarity: common
 lifeStages: [youngAdult, adult, senior]
 weight: { base: 6 }
-cooldownYears: 4
+cooldownYears: 12
 choices:
   - id: buy
     label: Buy a ticket

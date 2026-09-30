@@ -161,7 +161,7 @@ export const LIFE_ACTIONS: Record<LifeActionId, LifeActionRule> = {
   },
   find_roommate: {
     parse: none,
-    allowed: (state) => state.housing.kind === 'renting' && state.housing.roommate !== true,
+    allowed: (state) => state.housing.kind === 'renting' && state.housing.roommate !== true && state.housing.partnerId === undefined,
     apply: (state, _p, content) => {
       state.housing.roommate = true;
       refreshHousingCost(state, content);

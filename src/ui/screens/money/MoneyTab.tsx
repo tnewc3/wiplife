@@ -31,6 +31,7 @@ function LedgerCard({ life }: { life: LifeState }) {
       ) : (
         <dl className="flex flex-col" aria-label="Last year’s money">
           <Row label={LEDGER_LABELS.gross} value={money(ledger.gross)} />
+          {ledger.retirement > 0 && <Row label={LEDGER_LABELS.retirement} value={money(ledger.retirement)} />}
           <Row label={LEDGER_LABELS.tax} value={money(-ledger.tax)} />
           <Row label={LEDGER_LABELS.housing} value={money(-ledger.housing)} />
           <Row label={LEDGER_LABELS.living} value={money(-ledger.living)} />
@@ -87,6 +88,26 @@ function LifestyleCard({ life }: { life: LifeState }) {
           })}
         </div>
       )}
+    </Card>
+  );
+}
+
+/** The retirement benefit your earnings record adds up to. */
+function RetirementCard({ life }: { life: LifeState }) {
+  const { retirement: r } = getMoneyView(life, content);
+  const yearsText = r.years === 1 ? '1 year' : `${r.years} years`;
+  return (
+    <Card role="region" aria-labelledby="retirement-title">
+      <h2 id="retirement-title" className="mb-1 text-lg font-bold">
+        Retirement
+      </h2>
+      <p data-testid="retirement-line">
+        {r.receiving
+          ? `You receive a retirement benefit of ${money(r.yearlyBenefit)} a year.`
+          : r.years < r.minYears
+            ? `From ${r.age}, a retirement benefit is paid to anyone with ${r.minYears} years of work. You have ${yearsText}.`
+            : `From ${r.age}, your ${yearsText} of work would pay about ${money(r.yearlyBenefit)} a year.`}
+      </p>
     </Card>
   );
 }
@@ -164,6 +185,7 @@ export function MoneyTab({ life }: { life: LifeState }) {
 
       <LedgerCard life={life} />
       <LifestyleCard life={life} />
+      <RetirementCard life={life} />
 
       <Card role="region" aria-labelledby="debts-title">
         <h2 id="debts-title" className="mb-1 text-lg font-bold">

@@ -68,6 +68,8 @@ export const historyTextSchema = z.strictObject({
     familyHomeGone: historyGroupSchema,
     evicted: historyGroupSchema,
     foreclosed: historyGroupSchema,
+    /** A partner who lived with you moves out after a breakup or divorce. Role: npc; no values. */
+    movedApart: historyGroupSchema,
   }),
   /** Money milestones (Stage 6). No values. */
   money: z.strictObject({

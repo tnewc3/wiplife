@@ -367,8 +367,11 @@ interface FinanceState {
   savings: number;                     // never below zero: shortfalls become personal debt
   debts: Debt[];
   lifestyle: 'frugal' | 'comfortable' | 'lavish';
-  lastLedger?: { year; gross; tax; housing; living; debtPayments; interest; debtInterest;
-                 borrowed; support; net };   // net = gross + interest − tax − housing − living − debtPayments
+  lastLedger?: { year; gross; retirement; tax; housing; living; debtPayments; interest; debtInterest;
+                 borrowed; support; net };   // net = gross + retirement + interest − tax − housing − living − debtPayments
+  earnings: { years: number; total: number };  // the retirement benefit's record: years with earned income
+                                       // (at least creditIncome) and their total (each year capped). The ledger
+                                       // records all earned income (gig pay now, Stage 8 salaries) here
   hardshipYears: number;               // years in a row behind on housing costs (eviction)
   bankruptcyYear?: number;
   debtPlanYear?: number;
@@ -393,6 +396,9 @@ interface HousingState {
   mortgageDebtId?: Id;
   since: number;                       // the year you moved in (Stage 6)
   roommate?: true;                     // renting with a roommate (Stage 6)
+  partnerId?: Id;                      // your partner or spouse living with you (renting or owned); they pay
+                                       // economy.housing.partnerShare of the rent or upkeep; cleared when the
+                                       // romance ends
 }
 
 interface HealthState {
@@ -497,7 +503,8 @@ type Effect =
   | { type: 'stat'; key: string; delta: number }
   | { type: 'money'; delta: number }   // Stage 6: a cost beyond savings becomes personal debt (adults)
   | { type: 'debt'; action: 'add' | 'forgive' | 'bankruptcy' | 'plan'; kind?; amount?; kinds?; share? }
-  | { type: 'housing'; action: 'move_home' | 'rent' | 'homeless' | 'roommate' | 'live_alone' | 'sell' }
+  | { type: 'housing'; action: 'move_home' | 'rent' | 'homeless' | 'roommate' | 'live_alone' | 'sell'
+                     | 'move_in_together'; role?: string }   // role: the partner who moves in
   | { type: 'relationship'; role: string; affection?: number; trust?: number; status?: string; kind?: string }
   | { type: 'memory'; role: string; tag: string }
   | { type: 'flag'; key: string; value: number | boolean | string }
@@ -528,7 +535,7 @@ type Condition =                       // structured, evaluated by src/engine/co
   | { finances: { debt?: Compare; missed?: Compare; collections?: boolean; kinds?: DebtKind[];
                   lifestyle?: Lifestyle[]; gig?: boolean; bankruptWithin?: number; planWithin?: number;
                   income?: Compare } }                         // Stage 6
-  | { home: { kind?: HousingKind[]; years?: Compare; roommate?: boolean; relocated?: boolean } }
+  | { home: { kind?: HousingKind[]; years?: Compare; roommate?: boolean; relocated?: boolean; partner?: boolean } }
   | { memory: { role: string; tag: string } }       // about cast roles: checked once the event is cast
   | { role: string; alive?: boolean; age?: Compare; affection?: Compare; trust?: Compare;
       kind?: RelationshipKind[]; status?: RelationshipStatus[]; years?: Compare };  // years: in its current kind
@@ -1048,6 +1055,8 @@ Meet every Stage 5 acceptance criterion. When finished, run all checks plus a 1,
 - Relocation to another city.
 - The birth city, stored separately from the current city, for the obituary and archive.
 - Gig work, as the first income source, inside the career module.
+- Retirement benefit (like Social Security) from an earnings record every income source feeds, paid as its own ledger line.
+- Living together: a partner or spouse who moves in pays their share of the housing cost, and moves out on a breakup or divorce.
 - Lifestyle effects on happiness and stress.
 - A net worth selector.
 
@@ -1175,8 +1184,8 @@ Meet every Stage 7 acceptance criterion. When finished, run all checks plus a 1,
 - Application odds from qualifications, Confidence, Looks, reputation and luck.
 - Yearly performance from weighted stats, stress and events.
 - Promotion, raise, layoff and firing rules.
-- Salary by level times city multiplier, feeding the ledger.
-- Retirement and unemployment.
+- Salary by level times city multiplier, feeding the ledger. Salaries are earned income, so they go into the Stage 6 earnings record (`finances.earnings`) that the retirement benefit is based on; no second retirement calculation.
+- Retirement (leaving work) and unemployment. The retirement benefit itself already exists (Stage 6) and keeps paying from its earnings record.
 - Job requirements can check the criminal record (records themselves arrive in Stage 9).
 - Coworkers and bosses cast as people.
 

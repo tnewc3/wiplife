@@ -117,6 +117,8 @@ export interface HomeCondition {
   roommate?: boolean;
   /** Living in a different city from the one you were born in (or not). */
   relocated?: boolean;
+  /** Your partner or spouse lives with you (or not). */
+  partner?: boolean;
 }
 
 const atLeastOneField = (c: Record<string, unknown>) => Object.values(c).some((v) => v !== undefined);
@@ -160,6 +162,7 @@ export const conditionSchema: z.ZodType<Condition> = z.lazy(() =>
           years: compareSchema.optional(),
           roommate: z.boolean().optional(),
           relocated: z.boolean().optional(),
+          partner: z.boolean().optional(),
         })
         .refine(atLeastOneField, 'needs at least one field'),
     }),
@@ -253,13 +256,17 @@ export const effectSchema = z.discriminatedUnion('type', [
    * Where you live (adults only). move_home: back in with a parent who would
    * have you. rent: a rental in your city. homeless: out on the street.
    * roommate / live_alone: share your rental or stop sharing. sell: sell your
-   * home and rent. The engine ignores a move that doesn't fit (no parent to
-   * go to, a home you own and haven't sold...).
+   * home and rent. move_in_together: `role` (your partner, fiancé or spouse)
+   * moves in with you and pays their share. The engine ignores a move that
+   * doesn't fit (no parent to go to, a home you own and haven't sold...).
    */
-  z.strictObject({
-    type: z.literal('housing'),
-    action: z.enum(['move_home', 'rent', 'homeless', 'roommate', 'live_alone', 'sell']),
-  }),
+  z
+    .strictObject({
+      type: z.literal('housing'),
+      action: z.enum(['move_home', 'rent', 'homeless', 'roommate', 'live_alone', 'sell', 'move_in_together']),
+      role: roleSchema.optional(),
+    })
+    .refine((e) => (e.action === 'move_in_together') === (e.role !== undefined), 'move_in_together needs role (and only it has one)'),
   z.strictObject({
     type: z.literal('relationship'),
     role: roleSchema,

@@ -106,6 +106,7 @@ export function romanceLine(status: RomanceStatus, partnerName: string | null): 
 export const ACTION_LABELS: Record<ActionId, string> = {
   ask_out: 'Ask out',
   propose: 'Propose',
+  move_in: 'Move in together',
   marry: 'Get married',
   break_up: 'Break up',
   divorce: 'Divorce',
@@ -217,6 +218,7 @@ export const LIFESTYLE_BLURBS: Record<Lifestyle, string> = {
 /** The ledger's lines, in order, for the Money tab. */
 export const LEDGER_LABELS = {
   gross: 'Income',
+  retirement: 'Retirement benefit',
   tax: 'Taxes',
   housing: 'Housing',
   living: 'Living costs',

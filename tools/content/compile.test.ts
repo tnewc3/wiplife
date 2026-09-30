@@ -559,7 +559,7 @@ choices:
       await mkdir(path.join(overlay, 'registries'), { recursive: true });
       await writeFile(
         path.join(overlay, 'registries/actions.yaml'),
-        `actions:\n${['ask_out', 'propose', 'marry', 'break_up', 'divorce', 'cut_contact', 'reconcile'].map((a) => `  ${a}: { events: [only_action] }`).join('\n')}\n`,
+        `actions:\n${['ask_out', 'propose', 'move_in', 'marry', 'break_up', 'divorce', 'cut_contact', 'reconcile'].map((a) => `  ${a}: { events: [only_action] }`).join('\n')}\n`,
       );
       await writeFile(
         path.join(overlay, 'registries/triggers.yaml'),

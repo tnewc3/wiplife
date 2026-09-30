@@ -390,14 +390,19 @@ describe('management actions', () => {
   it('follow the partner rules: propose after a year together, marry after a year engaged, one partner at a time', () => {
     const year = lifeAtAge('rel', 30).currentYear;
     const dating = lifeWith(30, [...people, { id: 'gf', age: 30, kind: 'partner', kindSince: year }]);
-    expect(ids(dating, 'gf')).toEqual(['break_up']);
+    // Moving in together is open to any current partner who doesn't live with you yet.
+    expect(ids(dating, 'gf')).toEqual(['move_in', 'break_up']);
     expect(ids(dating, 'acq')).toEqual(['cut_contact']);
     const longer = lifeWith(30, [{ id: 'gf', age: 30, kind: 'partner', kindSince: year - 1 }]);
-    expect(ids(longer, 'gf')).toEqual(['propose', 'break_up']);
+    expect(ids(longer, 'gf')).toEqual(['propose', 'move_in', 'break_up']);
     const engaged = lifeWith(30, [{ id: 'gf', age: 30, kind: 'fiance', kindSince: year - 1 }]);
-    expect(ids(engaged, 'gf')).toEqual(['marry', 'break_up']);
+    expect(ids(engaged, 'gf')).toEqual(['move_in', 'marry', 'break_up']);
     const married = lifeWith(30, [{ id: 'w', age: 30, kind: 'spouse', kindSince: year - 3 }]);
-    expect(ids(married, 'w')).toEqual(['divorce']);
+    expect(ids(married, 'w')).toEqual(['move_in', 'divorce']);
+    const together = produce(married, (d) => {
+      d.housing = { kind: 'renting', cityId: d.character.cityId, annualCost: 0, since: d.currentYear, partnerId: 'w' };
+    });
+    expect(ids(together, 'w')).toEqual(['divorce']);
     expect(availableActions(married, 'w', content).find((a) => a.id === 'divorce')!.irreversible).toBe(true);
   });
 

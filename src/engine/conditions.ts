@@ -89,6 +89,7 @@ export function evaluate(condition: Condition | undefined, state: LifeState, ctx
     if (q.years && !compare(state.currentYear - h.since, q.years)) return false;
     if (q.roommate !== undefined && (h.roommate === true) !== q.roommate) return false;
     if (q.relocated !== undefined && (c.cityId !== c.birthCityId) !== q.relocated) return false;
+    if (q.partner !== undefined && (h.partnerId !== undefined) !== q.partner) return false;
     return true;
   }
   if ('memory' in condition) {

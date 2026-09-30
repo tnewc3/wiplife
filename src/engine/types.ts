@@ -191,8 +191,10 @@ export interface Debt {
 /** One year's money, from the ledger (docs/design.md, section J). */
 export interface Ledger {
   year: number;
-  /** Income before tax. */
+  /** Earned income before tax (gig pay, and salaries from Stage 8). */
   gross: number;
+  /** The retirement benefit (untaxed). */
+  retirement: number;
   tax: number;
   housing: number;
   living: number;
@@ -206,7 +208,7 @@ export interface Ledger {
   borrowed: number;
   /** Your share of costs at your parents' that your family covered because you couldn't. */
   support: number;
-  /** gross + interest − tax − housing − living − debtPayments (savings change by net + borrowed). */
+  /** gross + retirement + interest − tax − housing − living − debtPayments (savings change by net + borrowed). */
   net: number;
 }
 
@@ -215,6 +217,11 @@ export interface FinanceState {
   debts: Debt[];
   lifestyle: Lifestyle;
   lastLedger?: Ledger;
+  /**
+   * The earnings record the retirement benefit is based on: years with
+   * earned income and the total earned in them (each year capped).
+   */
+  earnings: { years: number; total: number };
   /** Years in a row behind on your housing costs (borrowing for at least balance's evictionShare of them). */
   hardshipYears: number;
   /** The year you last filed for bankruptcy. */
@@ -236,6 +243,8 @@ export interface HousingState {
   since: number;
   /** Sharing a rental with a roommate. */
   roommate?: true;
+  /** Your partner or spouse who lives with you (and pays their share). */
+  partnerId?: Id;
 }
 
 export interface HealthState {

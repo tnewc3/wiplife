@@ -59,6 +59,11 @@ export function HousingScreen({ life }: { life: LifeState }) {
           {housingLine(view.kind, view.cityName)}
         </h2>
         <p className="mt-1 text-muted">{costLine}</p>
+        {view.partnerName && (
+          <p className="mt-1 text-muted" data-testid="partner-line">
+            Living with {view.partnerName}, who pays their share
+          </p>
+        )}
         {view.homeValue !== null && (
           <p className="mt-1 text-muted">
             Worth about {money(view.homeValue)}

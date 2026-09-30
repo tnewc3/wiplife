@@ -256,7 +256,7 @@ describe('lives from Stage 6 on', () => {
     // A version 4 save: no birth city, no year you moved in, no hardship count.
     const { birthCityId: _birth, ...character } = life.character;
     const { since: _since, ...housing } = life.housing;
-    const { hardshipYears: _hardship, ...finances } = life.finances;
+    const { hardshipYears: _hardship, earnings: _earnings, ...finances } = life.finances;
     const v4 = { ...life, character, housing, finances: { ...finances, savings: 1_234 } };
     const db = freshDb();
     await db.lives.put({ id: 'active', envelope: { ...makeEnvelope(v4, content.contentVersion), schemaVersion: 4 } });
@@ -267,13 +267,13 @@ describe('lives from Stage 6 on', () => {
     const upgraded = result.envelope.data;
     expect(upgraded.character.birthCityId).toBe(life.character.cityId);
     expect(upgraded.housing.since).toBe(life.birthYear);
-    expect(upgraded.finances).toEqual({ ...life.finances, savings: 1_234, hardshipYears: 0 });
+    expect(upgraded.finances).toEqual({ ...life.finances, savings: 1_234, earnings: { years: 0, total: 0 }, hardshipYears: 0 });
   });
 
   it('round trip a life with debts, a mortgage and a move', async () => {
     let life = produce(lifeAtAge('stage6-round', 30), (d) => {
       d.finances.savings = 500_000;
-      d.finances.lastLedger = { year: d.currentYear, gross: 90_000, tax: 0, housing: 0, living: 0, debtPayments: 0, interest: 0, debtInterest: 0, borrowed: 0, support: 0, net: 90_000 };
+      d.finances.lastLedger = { year: d.currentYear, gross: 90_000, retirement: 0, tax: 0, housing: 0, living: 0, debtPayments: 0, interest: 0, debtInterest: 0, borrowed: 0, support: 0, net: 90_000 };
       d.finances.debts.push({ id: 'd1', kind: 'student', balance: 12_000, annualRate: 0.055, minPayment: 1_600, missed: 1 });
     });
     const other = life.character.cityId === 'nyc' ? 'houston' : 'nyc';

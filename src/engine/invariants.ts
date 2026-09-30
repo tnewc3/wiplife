@@ -109,15 +109,20 @@ export function checkInvariants(state: LifeState, content: ContentBundle): strin
   if (!independent && f.debts.length > 0) fail('a child has debt');
   if (f.lastLedger) {
     const l = f.lastLedger;
-    for (const key of ['gross', 'tax', 'housing', 'living', 'debtPayments', 'interest', 'debtInterest', 'borrowed', 'support'] as const) {
+    for (const key of ['gross', 'retirement', 'tax', 'housing', 'living', 'debtPayments', 'interest', 'debtInterest', 'borrowed', 'support'] as const) {
       money(`lastLedger.${key}`, l[key]);
       if (l[key] < 0) fail(`lastLedger.${key} must not be negative`);
     }
     money('lastLedger.net', l.net);
-    if (l.net !== l.gross + l.interest - l.tax - l.housing - l.living - l.debtPayments) fail('lastLedger.net does not add up');
+    if (l.net !== l.gross + l.retirement + l.interest - l.tax - l.housing - l.living - l.debtPayments) fail('lastLedger.net does not add up');
     if (l.year > state.currentYear || l.year <= state.birthYear) fail('lastLedger is for a year outside the life');
   }
   if (state.career.gig && c.age < content.balance.economy.gig.minAge) fail('gig work before the minimum age');
+  const { earnings } = f;
+  const { earningsCap } = content.balance.economy.retirement;
+  money('finances.earnings.total', earnings.total);
+  if (!Number.isInteger(earnings.years) || earnings.years < 0 || earnings.years > c.age) fail('finances.earnings.years is out of range');
+  if (earnings.total < 0 || earnings.total > earnings.years * earningsCap) fail('finances.earnings.total is out of range');
 
   // Housing.
   const h = state.housing;
@@ -126,6 +131,12 @@ export function checkInvariants(state: LifeState, content: ContentBundle): strin
   if (!Number.isInteger(h.since) || h.since < state.birthYear || h.since > state.currentYear) fail('housing.since is outside the life');
   if (!independent && h.kind !== 'with_parents') fail(`a child is housed "${h.kind}"`);
   if (h.roommate !== undefined && (h.roommate !== true || h.kind !== 'renting')) fail('only a rental has a roommate');
+  if (h.partnerId !== undefined) {
+    const rel = state.relationships[h.partnerId];
+    if (h.kind !== 'renting' && h.kind !== 'owned') fail(`a partner lives with you in a "${h.kind}" home`);
+    if (!rel || !isCurrentPartner(state, rel)) fail('housing.partnerId is not your current partner');
+    if (h.roommate) fail('a roommate and a partner in one home');
+  }
   const mortgages = f.debts.filter((d) => d.kind === 'mortgage');
   if (h.kind === 'owned') {
     if (h.homeValue === undefined) fail('an owned home has no value');

@@ -13,6 +13,7 @@ import {
   supportingParent,
   type PurchaseQuote,
 } from './housing';
+import { benefitFromRecord } from './retirement';
 import { canGig, expectedGigPay } from './systems/career';
 import { textContext } from './events/text';
 import { CONTINUE_CHOICE } from './life';
@@ -350,6 +351,8 @@ export interface MoneyView {
   debts: DebtView[];
   /** A debt plan is available now. */
   debtPlan: boolean;
+  /** The retirement benefit: from what age, the years of earnings so far, and what the record pays now. */
+  retirement: { age: number; years: number; minYears: number; yearlyBenefit: number; receiving: boolean };
 }
 
 /** The Money tab: savings, debts, last year's ledger and the lifestyle choice. */
@@ -375,6 +378,13 @@ export function getMoneyView(state: LifeState, content: ContentBundle): MoneyVie
       canPay: between && isLifeActionAvailable(state, 'pay_debt', { debtId: d.id }, content) ? Math.min(f.savings, d.balance) : 0,
     })),
     debtPlan: between && canStartDebtPlan(state, content),
+    retirement: {
+      age: content.balance.economy.retirement.age,
+      years: f.earnings.years,
+      minYears: content.balance.economy.retirement.minYears,
+      yearlyBenefit: benefitFromRecord(state, content),
+      receiving: state.character.age >= content.balance.economy.retirement.age && benefitFromRecord(state, content) > 0,
+    },
   };
 }
 
@@ -423,6 +433,8 @@ export interface HomeView {
   /** This year's cost of your home. */
   annualCost: number;
   roommate: boolean;
+  /** The partner or spouse who lives with you, if any. */
+  partnerName: string | null;
   homeValue: number | null;
   mortgage: number;
   independent: boolean;
@@ -473,6 +485,7 @@ export function getHomeView(state: LifeState, content: ContentBundle): HomeView 
     cityName: here?.name ?? state.character.cityId,
     annualCost: h.annualCost,
     roommate: h.roommate === true,
+    partnerName: h.partnerId && state.people[h.partnerId] ? `${state.people[h.partnerId]!.name.first} ${state.people[h.partnerId]!.name.last}` : null,
     homeValue: h.homeValue ?? null,
     mortgage: mortgageBalance(state),
     independent,

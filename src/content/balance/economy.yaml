@@ -116,6 +116,9 @@ housing:
   deposit: 0.17
   # With a roommate you pay this share of the rent.
   roommateShare: 0.55
+  # Living with your partner or spouse, they pay the rest of the housing
+  # cost (rent, or an owned home's upkeep; a mortgage stays yours).
+  partnerShare: 0.5
 
 ownership:
   # A home costs the city's base home price.
@@ -131,6 +134,23 @@ ownership:
   # Buying puts down as much as your savings allow above this (never less
   # than the down payment), so the mortgage is smaller.
   cashReserve: 5000
+
+# The retirement benefit, like Social Security: paid every year from `age`
+# to anyone with at least `minYears` years of earned income. It comes from
+# average yearly earnings over the years that count (each capped at
+# earningsCap), through the formula's slices, times years ÷ fullYears (at
+# most 1). Every kind of earned income counts: gig pay now, salaries later.
+# The benefit itself isn't taxed.
+retirement:
+  age: 67
+  minYears: 10
+  fullYears: 35
+  creditIncome: 6000
+  earningsCap: 170000
+  formula:
+    - { from: 0, rate: 0.9 }
+    - { from: 14000, rate: 0.32 }
+    - { from: 85000, rate: 0.15 }
 
 # Gig work: deliveries, rides and odd jobs. Low, unstable pay, no ladder.
 gig:

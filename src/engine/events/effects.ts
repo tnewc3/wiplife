@@ -15,7 +15,7 @@ import {
   spend,
   startDebtPlan,
 } from '../finance';
-import { moveTo, refreshHousingCost, sellHome, supportingParent } from '../housing';
+import { moveInTogether, moveTo, refreshHousingCost, sellHome, settleHousehold, supportingParent } from '../housing';
 import { clampInt } from '../random';
 import { canChangeKind, canSetStatus } from '../relationships';
 import { nextInt, type RngState } from '../rng';
@@ -97,12 +97,16 @@ const handlers: { [T in Effect['type']]: Handler<T> } = {
       case 'roommate':
       case 'live_alone':
         if (h.kind !== 'renting') return;
-        if (effect.action === 'roommate') h.roommate = true;
+        // You don't take in a roommate while living with your partner.
+        if (effect.action === 'roommate' && h.partnerId === undefined) h.roommate = true;
         else delete h.roommate;
         refreshHousingCost(state, ctx.content);
         return;
       case 'sell':
         if (h.kind === 'owned') sellHome(state, ctx.content);
+        return;
+      case 'move_in_together':
+        moveInTogether(state, ctx.cast[effect.role ?? ''] ?? '', ctx.content);
         return;
     }
   },
@@ -121,6 +125,8 @@ const handlers: { [T in Effect['type']]: Handler<T> } = {
       if (effect.kind === 'spouse') rel.wasSpouse = true;
     }
     if (effect.status !== undefined && canSetStatus(state, id, effect.status)) rel.status = effect.status;
+    // A partner who lived with you and no longer is your partner moves out.
+    settleHousehold(state, ctx.content);
   },
 
   memory: (state, effect, ctx) => {

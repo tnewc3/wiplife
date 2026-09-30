@@ -72,7 +72,18 @@ export interface MoneyReport {
   largest: { savings: number; debt: number; netWorth: number; netWorthSeed: string };
   /** Lives (that reached the independence age) in which each happened. */
   adults: number;
-  outcomes: Record<'gig' | 'movedOut' | 'relocated' | 'owned' | 'evicted' | 'homeless' | 'foreclosed' | 'bankrupt' | 'collections' | 'debtPlan', number>;
+  outcomes: Record<
+    'gig' | 'movedOut' | 'relocated' | 'owned' | 'livedTogether' | 'evicted' | 'homeless' | 'foreclosed' | 'bankrupt' | 'collections' | 'debtPlan',
+    number
+  >;
+  /** Lives that reached the retirement age: how many got a benefit, and its median in the first year it was paid. */
+  retirement: { reached: number; withBenefit: number; medianBenefit: number };
+  /**
+   * Years from the retirement age on: how many, and in how many the ledger
+   * couldn't cover costs (borrowed) or a payment was missed; lives that ever
+   * ran short then; lives evicted then.
+   */
+  seniors: { years: number; shortYears: number; livesShort: number; livesEvicted: number };
   actionsTaken: Record<LifeActionId, number>;
   /** Years renting on gig income only, by city: how many, and how many of them couldn't cover their costs. */
   gigRenting: Record<string, { years: number; shortYears: number }>;
@@ -90,6 +101,7 @@ class MoneyWatcher {
   movedOut = false;
   relocated = false;
   owned = false;
+  together = false;
   homeless = false;
   collections = false;
   maxSavings = 0;
@@ -106,6 +118,7 @@ class MoneyWatcher {
     const kind = life.housing.kind;
     if (kind === 'renting' || kind === 'owned') this.movedOut = true;
     if (kind === 'owned') this.owned = true;
+    if (life.housing.partnerId !== undefined) this.together = true;
     if (kind === 'homeless') this.homeless = true;
     if (life.character.cityId !== life.character.birthCityId) this.relocated = true;
     if (life.finances.debts.some((d) => d.kind === 'collections')) this.collections = true;
@@ -230,7 +243,21 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
     byAge: [],
     largest: { savings: 0, debt: 0, netWorth: 0, netWorthSeed: '' },
     adults: 0,
-    outcomes: { gig: 0, movedOut: 0, relocated: 0, owned: 0, evicted: 0, homeless: 0, foreclosed: 0, bankrupt: 0, collections: 0, debtPlan: 0 },
+    outcomes: {
+      gig: 0,
+      movedOut: 0,
+      relocated: 0,
+      owned: 0,
+      livedTogether: 0,
+      evicted: 0,
+      homeless: 0,
+      foreclosed: 0,
+      bankrupt: 0,
+      collections: 0,
+      debtPlan: 0,
+    },
+    retirement: { reached: 0, withBenefit: 0, medianBenefit: 0 },
+    seniors: { years: 0, shortYears: 0, livesShort: 0, livesEvicted: 0 },
     actionsTaken: Object.fromEntries(LIFE_ACTION_IDS.map((id) => [id, 0])) as Record<LifeActionId, number>,
     gigRenting: {},
     repeatableGains: [],
@@ -239,6 +266,8 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
     [...MONEY_AGES, 'death' as const].map((a) => [a, { savings: [], debt: [], netWorth: [] }]),
   );
   const gains = largestGains(content);
+  const retirementAge = content.balance.economy.retirement.age;
+  const firstBenefits: number[] = [];
   const mostFires = new Map<string, number>();
 
   for (let i = 0; i < options.lives; i++) {
@@ -255,6 +284,8 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
     const profile = rollMoneyProfile(player);
     const seenThisLife = new Set<string>();
     const firesThisLife = new Map<string, number>();
+    let firstBenefit: number | null = null;
+    let seniorShort = false;
     const watch = (l: LifeState) => {
       check(l);
       romance.observe(l);
@@ -298,6 +329,14 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
         firesThisLife.set(p.eventId, (firesThisLife.get(p.eventId) ?? 0) + 1);
       }
       const ledger = life.finances.lastLedger;
+      if (life.character.age >= retirementAge && ledger?.year === life.currentYear) {
+        money.seniors.years++;
+        if (ledger.retirement > 0) firstBenefit ??= ledger.retirement;
+        if (ledger.borrowed > 0 || life.finances.debts.some((d) => d.missed > 0)) {
+          money.seniors.shortYears++;
+          seniorShort = true;
+        }
+      }
       if (life.housing.kind === 'renting' && life.career.gig && life.career.job === null && ledger?.year === life.currentYear) {
         const city = (money.gigRenting[life.character.cityId] ??= { years: 0, shortYears: 0 });
         city.years++;
@@ -326,6 +365,15 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
     money.largest.savings = Math.max(money.largest.savings, wallet.maxSavings);
     money.largest.debt = Math.max(money.largest.debt, wallet.maxDebt);
     if (wallet.maxNetWorth > money.largest.netWorth) money.largest = { ...money.largest, netWorth: wallet.maxNetWorth, netWorthSeed: seed };
+    if (life.character.age >= retirementAge) {
+      money.retirement.reached++;
+      if (firstBenefit !== null) {
+        money.retirement.withBenefit++;
+        firstBenefits.push(firstBenefit);
+      }
+      if (seniorShort) money.seniors.livesShort++;
+      if (life.history.some((e) => e.tags.includes('evicted') && e.age >= retirementAge)) money.seniors.livesEvicted++;
+    }
     if (life.character.age >= independenceAge) {
       money.adults++;
       const o = money.outcomes;
@@ -334,6 +382,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
       if (wallet.movedOut) o.movedOut++;
       if (wallet.relocated) o.relocated++;
       if (wallet.owned) o.owned++;
+      if (wallet.together) o.livedTogether++;
       if (tags.has('evicted')) o.evicted++;
       if (wallet.homeless) o.homeless++;
       if (tags.has('foreclosed')) o.foreclosed++;
@@ -371,6 +420,8 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
     debt: spread(v.debt, v.debt),
     netWorth: spread(v.netWorth, v.debt),
   }));
+  firstBenefits.sort((a, b) => a - b);
+  money.retirement.medianBenefit = firstBenefits[Math.floor(firstBenefits.length / 2)] ?? 0;
   money.repeatableGains = [...mostFires.entries()]
     .map(([eventId, mostInOneLife]) => {
       const largestGain = gains.get(eventId)!;
@@ -462,8 +513,15 @@ export function formatReport(report: SimulationReport, content: ContentBundle): 
   const o = m.outcomes;
   lines.push(
     `  gig work ${pct(o.gig, m.adults)}; moved out ${pct(o.movedOut, m.adults)}; relocated ${pct(o.relocated, m.adults)}; owned a home ${pct(o.owned, m.adults)}; ` +
+      `lived with a partner ${pct(o.livedTogether, m.adults)}; ` +
       `debt in collections ${pct(o.collections, m.adults)}; debt plan ${pct(o.debtPlan, m.adults)}; bankrupt ${pct(o.bankrupt, m.adults)}; ` +
       `evicted ${pct(o.evicted, m.adults)}; homeless ${pct(o.homeless, m.adults)}; foreclosed ${pct(o.foreclosed, m.adults)}`,
+  );
+  const { retirement: ret, seniors } = m;
+  lines.push(
+    `  retirement (${ret.reached} lives reached ${content.balance.economy.retirement.age}): benefit paid to ${pct(ret.withBenefit, ret.reached)}, ` +
+      `median first-year benefit ${dollars(ret.medianBenefit)}; seniors ran short (borrowed or missed a payment) in ${pct(seniors.shortYears, seniors.years)} ` +
+      `of ${seniors.years} years, ${pct(seniors.livesShort, ret.reached)} of lives at least once; evicted after ${content.balance.economy.retirement.age}: ${pct(seniors.livesEvicted, ret.reached)}`,
   );
   lines.push(`  actions taken: ${LIFE_ACTION_IDS.map((id) => `${id} ${m.actionsTaken[id]}`).join(', ')}`);
   lines.push(
