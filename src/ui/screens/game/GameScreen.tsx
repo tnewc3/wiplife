@@ -1,5 +1,6 @@
 import type { LifeState } from '../../../engine/types';
 import { useAppStore, type TabId } from '../../../store/appStore';
+import { AgeUpButton } from '../../components/AgeUpButton';
 import { Button } from '../../components/Button';
 import { Card } from '../../components/Card';
 import { Screen } from '../../components/Screen';
@@ -44,15 +45,24 @@ function BottomNav() {
   );
 }
 
-/** The in-game layout. Tabs other than Life fill in with later stages. */
+/** The in-game layout, with Age Up above the navigation. Tabs other than Life fill in with later stages. */
 export function GameScreen({ life }: { life: LifeState }) {
   const tab = useAppStore((s) => s.tab);
   const navigate = useAppStore((s) => s.navigate);
   const openSettings = useAppStore((s) => s.openSettings);
+  const openLifeHistory = useAppStore((s) => s.openLifeHistory);
   const current = tabs.find((t) => t.id === tab) ?? tabs[0]!;
 
   return (
-    <Screen title={current.label} footer={<BottomNav />}>
+    <Screen
+      title={current.label}
+      footer={
+        <>
+          <AgeUpButton />
+          <BottomNav />
+        </>
+      }
+    >
       {tab === 'life' ? (
         <HomeTab life={life} />
       ) : (
@@ -63,6 +73,9 @@ export function GameScreen({ life }: { life: LifeState }) {
           </Card>
           {tab === 'more' && (
             <div className="flex flex-col gap-2">
+              <Button variant="secondary" block onClick={openLifeHistory}>
+                Life history
+              </Button>
               <Button variant="secondary" block onClick={openSettings}>
                 Settings
               </Button>

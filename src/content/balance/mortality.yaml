@@ -1,0 +1,51 @@
+# Chance of death each year. Starting proposals, calibrated so that average
+# random lives die at a median age between 72 and 82 (checked by a 10,000-life
+# test); Stage 12 (balancing) tunes them further.
+#
+# The check runs at the end of each year, at the age reached that year.
+# Character's chance at age a (from 2):
+#   (background + ageCurve.base × ageCurve.growth^a) × health × genetic risk
+# where the last two come from the multiplier curves below.
+
+maxAge: 120
+
+# Replaces the formula in the year you turn 1.
+firstYearChance: 0.001
+
+background: 0.0004
+
+ageCurve:
+  base: 0.00003
+  growth: 1.1
+
+# By Health (0–100). Low health raises the chance sharply.
+healthMultiplier:
+  - { at: 0, x: 4 }
+  - { at: 20, x: 2.5 }
+  - { at: 40, x: 1.6 }
+  - { at: 60, x: 1.15 }
+  - { at: 80, x: 0.9 }
+  - { at: 100, x: 0.75 }
+
+# By genetic health risk (0–100); 30 is the average roll.
+geneticRiskMultiplier:
+  - { at: 0, x: 0.8 }
+  - { at: 30, x: 1 }
+  - { at: 100, x: 1.6 }
+
+# NPCs have no Health stat yet, so their chance uses the age curve times this.
+npcMultiplier: 1.2
+
+# The recorded cause of death, by age (ids from src/content/causes).
+# Stage 9 adds deaths from health conditions; events add their own causes.
+causes:
+  - maxAge: 1
+    weights: { infant_illness: 1 }
+  - maxAge: 17
+    weights: { sudden_illness: 3, heart_condition: 1 }
+  - maxAge: 49
+    weights: { sudden_illness: 2, heart_condition: 2, long_illness: 1 }
+  - maxAge: 74
+    weights: { heart_failure: 3, stroke: 2, long_illness: 3 }
+  - maxAge: 120
+    weights: { natural_causes: 5, heart_failure: 2, stroke: 1, pneumonia: 1 }

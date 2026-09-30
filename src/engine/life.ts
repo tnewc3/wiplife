@@ -1,7 +1,14 @@
 /**
- * Life lifecycle (docs/technical.md, section M). Stage 2 adds createLife;
- * beginYear and endYear arrive with Stage 3.
+ * Life lifecycle (docs/technical.md, section M): createLife, then each year
+ * beginYear → (the player resolves pending events) → endYear.
+ *
+ * Phases: 'yearStart' waits for the player to age up. beginYear runs the year
+ * pipeline and moves to 'events' while events are pending, or straight to
+ * 'yearEnd' when none are. endYear runs the death check and returns to
+ * 'yearStart', or ends the life in 'dead'. Every function returns a new state
+ * and never changes the one it is given, so the game can be saved in any phase.
  */
+import { produce } from 'immer';
 import type { ContentBundle } from '../content/schemas';
 import {
   activeIds,
@@ -16,9 +23,12 @@ import {
 } from './creation/character';
 import { generateFamily } from './creation/family';
 import { parseCreateLifeOptions, type CreateLifeOptions } from './creation/input';
+import { runPipeline, YEAR_PIPELINE, type PipelineStep } from './pipeline';
 import { weightedKey } from './random';
-import { createRng, pick } from './rng';
-import type { Character, Id, LifeState } from './types';
+import { chance, cloneRng, createRng, pick } from './rng';
+import { writeFromGroup } from './systems/history';
+import { characterDeathChance, pickCause } from './systems/mortality';
+import type { Character, Id, LifePhase, LifeState } from './types';
 
 export type { CreateLifeOptions, CustomLifeInput } from './creation/input';
 
@@ -125,6 +135,8 @@ export function createLife(input: CreateLifeOptions, content: ContentBundle): Li
     pending: [],
     history: [],
     inputLog: [{ year: birthYear, kind: 'create', payload: structuredCloneJson(options) }],
+    recap: null,
+    death: null,
     lineage: { generation: 1 },
   };
 }
@@ -139,4 +151,63 @@ function namePool(content: ContentBundle, cityId: Id) {
 /** A deep copy through JSON, so the input log holds plain data only. */
 function structuredCloneJson<T>(value: T): Record<string, unknown> {
   return JSON.parse(JSON.stringify(value)) as Record<string, unknown>;
+}
+
+/** Thrown when an engine function is called in the wrong phase (for example, aging up twice). */
+export class PhaseError extends Error {
+  override name = 'PhaseError';
+}
+
+/**
+ * Swaps the draft's generator state for a plain copy, so the many small
+ * updates each draw makes skip Immer's proxy (several times faster).
+ */
+function useFastRng(draft: LifeState, original: LifeState): void {
+  draft.rng = cloneRng(original.rng);
+}
+
+function expectPhase(state: LifeState, phase: LifePhase, action: string): void {
+  if (state.phase !== phase) throw new PhaseError(`Can't ${action} in the "${state.phase}" phase (expected "${phase}").`);
+}
+
+/**
+ * The player ages up: records the input, runs every year pipeline step in
+ * order, and moves to 'events' (or 'yearEnd' when nothing is pending). Throws
+ * PhaseError unless the life is in 'yearStart', so a year can never advance twice.
+ */
+export function beginYear(state: LifeState, content: ContentBundle, steps: readonly PipelineStep[] = YEAR_PIPELINE): LifeState {
+  expectPhase(state, 'yearStart', 'age up');
+  return produce(state, (draft) => {
+    useFastRng(draft, state);
+    draft.inputLog.push({ year: draft.currentYear, kind: 'ageUp', payload: {} });
+    const statsBefore = { ...draft.character.stats };
+    runPipeline(draft, content, steps);
+    draft.recap = { year: draft.currentYear, age: draft.character.age, statsBefore, statsAfter: null };
+    draft.phase = draft.pending.length > 0 ? 'events' : 'yearEnd';
+  });
+}
+
+/**
+ * Closes the year once every pending event is resolved: runs the death check
+ * (writing the death to history) and completes the recap. Throws PhaseError
+ * unless the life is in 'yearEnd'.
+ */
+export function endYear(state: LifeState, content: ContentBundle): LifeState {
+  expectPhase(state, 'yearEnd', 'end the year');
+  return produce(state, (draft) => {
+    useFastRng(draft, state);
+    const c = draft.character;
+    const dies = chance(draft.rng, characterDeathChance(c.age, c.stats.health, c.hidden.geneticRisk, content));
+    if (dies) {
+      const causeId = pickCause(draft.rng, c.age, content);
+      const cause = content.causes[causeId]?.text ?? causeId;
+      writeFromGroup(draft, content.text.history.death, ['milestone', 'death'], { values: { age: c.age, cause } }, content);
+      draft.death = { year: draft.currentYear, age: c.age, causeId };
+      draft.pending = [];
+      draft.phase = 'dead';
+    } else {
+      draft.phase = 'yearStart';
+    }
+    if (draft.recap) draft.recap.statsAfter = { ...c.stats };
+  });
 }

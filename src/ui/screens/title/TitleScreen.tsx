@@ -4,13 +4,14 @@ import { Card } from '../../components/Card';
 import { Screen } from '../../components/Screen';
 import { ageLabel } from '../../labels';
 
-/** Entry point. Archive joins these once lives can end (Stage 3). */
+/** Entry point: Continue, New Life, Archive, Settings. */
 export function TitleScreen() {
   const navigate = useAppStore((s) => s.navigate);
   const openSettings = useAppStore((s) => s.openSettings);
   const continueLife = useAppStore((s) => s.continueLife);
   const life = useAppStore((s) => s.life);
   const savedLifeStatus = useAppStore((s) => s.savedLifeStatus);
+  const openArchive = useAppStore((s) => s.openArchive);
 
   return (
     <Screen centered>
@@ -48,7 +49,10 @@ export function TitleScreen() {
           <Button size={life ? 'md' : 'lg'} variant={life ? 'secondary' : 'primary'} block onClick={() => navigate('newLife')}>
             New Life
           </Button>
-          <Button variant={life ? 'ghost' : 'secondary'} block onClick={openSettings}>
+          <Button variant="secondary" block onClick={() => void openArchive()}>
+            Archive
+          </Button>
+          <Button variant="ghost" block onClick={openSettings}>
             Settings
           </Button>
         </nav>

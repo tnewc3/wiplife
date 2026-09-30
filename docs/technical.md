@@ -155,6 +155,7 @@ Conditions are structured data, not text formulas. They're safer, and the conten
 - **Save envelope:** `{ schemaVersion, contentVersion, savedAt, data }`. Older saves are upgraded by migration functions that run in order.
 - **Loading** validates the save with Zod. If it's invalid, the game tries the backup. If that fails too, it offers to export the raw data and start a new life.
 - **Protection against browser cleanup.** The game requests persistent storage when the first life starts, and suggests installing to the home screen at a natural moment (for example, after the first life ends).
+- **Archive entries** are stored in their own envelope with their own schema version and migration list, separate from the active life's. Moving a life into the archive removes the active life and its backups in the same transaction, so an archived life can never load again as active.
 - **Export and import:** a single JSON file containing the active life, the archive and settings.
 
 ### Content loading and updates
@@ -229,8 +230,18 @@ interface LifeState {
   pending: EventInstance[];
   history: HistoryEntry[];
   inputLog: InputRecord[];             // every player input, for exact replay; written by the engine
+  recap: YearRecap | null;             // the current or last finished year; null before the first age-up
+  death: DeathRecord | null;           // set only in the 'dead' phase
   lineage: { generation: number; parentLifeId?: Id };  // for heir play later
 }
+
+interface YearRecap {
+  year: number; age: number;
+  statsBefore: Character['stats'];     // when beginYear started
+  statsAfter: Character['stats'] | null;  // set by endYear; null mid-year
+}
+
+interface DeathRecord { year: number; age: number; causeId: Id }  // cause from content/causes
 
 interface InputRecord {
   year: number;
@@ -399,7 +410,10 @@ interface HistoryEntry {
 interface ArchivedLife {
   id: Id; name: string; pronouns: Pronouns;
   birthYear: number; deathYear: number; ageAtDeath: number;
-  causeOfDeath: string; cityId: Id;
+  causeOfDeath: string | null;         // readable text; null when unfinished
+  unfinished: boolean;                 // a new life was started before this one ended;
+                                       // deathYear and ageAtDeath then give when it was left
+  cityId: Id;
   obituary: string;
   highlights: HistoryEntry[];
   finalNetWorth: number;
@@ -1574,8 +1588,9 @@ New careers, events, cities, majors, conditions, offenses and similar content ar
 
 ```text
 src/content/
-  balance/        economy.yaml, mortality.yaml, pacing.yaml, careers.yaml,
-                  education.yaml, health.yaml, legal.yaml, targets.yaml
+  balance/        creation.yaml, aging.yaml, mortality.yaml, economy.yaml, pacing.yaml,
+                  careers.yaml, education.yaml, health.yaml, legal.yaml, targets.yaml
+  causes/         causes of death, one per file ("natural causes", "a stroke")
   cities/         nyc.yaml, los_angeles.yaml, chicago.yaml, houston.yaml, small_town.yaml
   events/
     early/ child/ teen/ youngAdult/ adult/ senior/ any/
@@ -1583,6 +1598,8 @@ src/content/
       <category>/<chain_id>.chain.yaml  a chain's events together in one file
   jobs/ majors/ trades/ grad/ conditions/ offenses/
   names/          name pools
+  text/           story text that isn't an event: history.yaml (milestone entries),
+                  obituary.yaml (obituary sections), relations.yaml ("your mother")
   registries/
     memories.yaml   every memory tag, with its readable text
     flags.yaml      every flag, with a one-line description

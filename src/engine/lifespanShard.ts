@@ -1,0 +1,57 @@
+/**
+ * Stage 3 acceptance test, split into shards so the 10,000 lives run in
+ * parallel test files (lifespan-1.test.ts to lifespan-4.test.ts). Each shard
+ * lives out its share of random lives, checking every invariant after every
+ * engine step, and checks the lifespan rules on its share.
+ *
+ * Why shards are enough: when every equal-sized shard has its median age at
+ * death between 72 and 82, the median across all 10,000 lives lies between
+ * the smallest and largest shard medians, so it is between 72 and 82 too.
+ * The same holds for "no one lives past the maximum age".
+ */
+import { expect, it } from 'vitest';
+import { content } from '../content';
+import { archiveEntry } from './archive';
+import { checkInvariants } from './invariants';
+import { createLife } from './life';
+import { liveOut } from './testFixtures';
+
+export const TOTAL_LIVES = 10_000;
+export const SHARDS = 4;
+
+export function lifespanShard(shard: number): void {
+  const count = TOTAL_LIVES / SHARDS;
+  const first = (shard - 1) * count;
+
+  it(`lives ${first + 1}–${first + count} of ${TOTAL_LIVES}: believable median age at death, never past the maximum, zero invariant failures`, () => {
+    const { maxAge } = content.balance.mortality;
+    const { maxEntries } = content.balance.aging.history;
+    const ages: number[] = [];
+    const failures: string[] = [];
+    let longestHistory = 0;
+
+    for (let i = first; i < first + count; i++) {
+      const seed = `lifespan-${i}`;
+      const start = createLife({ mode: 'random', seed, birthYear: 2026 }, content);
+      const dead = liveOut(start, content, (life) => {
+        if (failures.length >= 20) return;
+        for (const f of checkInvariants(life, content)) failures.push(`${seed} age ${life.character.age}: ${f}`);
+      });
+      ages.push(dead.character.age);
+      longestHistory = Math.max(longestHistory, dead.history.length);
+      // Death always produces a complete archive entry.
+      const entry = archiveEntry(dead, content);
+      if (entry.unfinished || !entry.causeOfDeath || entry.obituary.length === 0) failures.push(`${seed}: incomplete archive entry`);
+    }
+
+    ages.sort((a, b) => a - b);
+    const percentile = (p: number) => ages[Math.floor(count * p)]!;
+    expect(failures).toEqual([]);
+    expect(percentile(0.5)).toBeGreaterThanOrEqual(72);
+    expect(percentile(0.5)).toBeLessThanOrEqual(82);
+    expect(ages[count - 1]).toBeLessThanOrEqual(maxAge);
+    expect(longestHistory).toBeLessThanOrEqual(maxEntries);
+    // Sanity: lifespans vary.
+    expect(percentile(0.9) - percentile(0.1)).toBeGreaterThan(10);
+  }, 600_000);
+}

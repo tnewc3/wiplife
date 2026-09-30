@@ -1,0 +1,43 @@
+# Milestone entries the yearly systems write to a life's history.
+# The player is "you". Importance: 1 = minor, 2 = notable, 3 = major.
+
+# Entering a life stage. Values: {age}.
+lifeStage:
+  child:
+    importance: 1
+    variants:
+      - "You turned {age}. The baby years are behind you."
+      - "At {age}, you're a kid now, not a toddler."
+  teen:
+    importance: 2
+    variants:
+      - "You turned {age} and officially became a teenager."
+      - "At {age}, you're a teenager. Everything feels more dramatic."
+  youngAdult:
+    importance: 2
+    variants:
+      - "You turned {age}. You're an adult now, at least on paper."
+      - "At {age}, you're legally an adult."
+  adult:
+    importance: 1
+    variants:
+      - "You turned {age}. Your twenties are over."
+      - "At {age}, people have stopped calling you a kid."
+  senior:
+    importance: 2
+    variants:
+      - "You turned {age} and became a senior citizen."
+      - "At {age}, you've reached your senior years."
+
+# A relative dies. Role: npc. Values: {relation}, {age}.
+familyDeath:
+  importance: 3
+  variants:
+    - "Your {relation}, {npc.name}, died at the age of {age}."
+    - "{npc.name}, your {relation}, passed away at {age}."
+
+# You die. Values: {age}, {cause}.
+death:
+  importance: 3
+  variants:
+    - "You died of {cause} at the age of {age}."

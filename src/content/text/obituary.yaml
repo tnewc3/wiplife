@@ -1,0 +1,56 @@
+# Obituary, version 1: short and template based. The character is cast as
+# {self}, so {self.they}, {self.their} and {self:was|were} follow the
+# character's pronouns. One variant is picked per section; an empty list
+# skips the section. Stage 10 replaces this with richer, tone-matched writing.
+
+# Values: {age}, {year}, {city}; finished lives also get {cause}.
+opening:
+  finished:
+    - "{self.fullName} died of {cause} in {city} in {year}, at the age of {age}."
+    - "{self.fullName} died in {year} in {city}, at {age}, of {cause}."
+  unfinished:
+    - "The story of {self.fullName} was left unfinished in {year}, when {self.they} {self:was|were} {age}."
+
+# Values: {birthYear}, {birthCity}, {parents}.
+origins:
+  - "{self.They} {self:was|were} born in {birthCity} in {birthYear} to {parents}."
+  - "{self.They} came into the world in {birthYear} in {birthCity}, the child of {parents}."
+
+# Relatives still alive when the character died. Values: {survivors}.
+survivedBy:
+  - "{self.They} {self:is|are} survived by {survivors}."
+
+# Relatives who died before the character. Values: {predeceased}.
+predeceasedBy:
+  - "{self.They} {self:was|were} predeceased by {predeceased}."
+
+# By Happiness at the end: the first band the character reaches.
+mood:
+  - minHappiness: 70
+    variants:
+      - "Those who knew {self.them} remember a life lived with real joy."
+      - "{self.They} laughed easily and often."
+  - minHappiness: 40
+    variants:
+      - "{self.Their} life had its share of ups and downs, and {self.they} met most of them head-on."
+      - "{self.They} knew good years and hard ones."
+  - minHappiness: 0
+    variants:
+      - "Happiness rarely came easily to {self.them}."
+      - "{self.They} carried more sadness than most people ever saw."
+
+closing:
+  finished:
+    - "{self.They} will be missed."
+    - "May {self.they} rest in peace."
+  unfinished:
+    - "Where {self.their} life would have gone next, no one will ever know."
+
+# One relative in a list. Role: npc. Values: {relation}.
+relative: "{self.their} {relation} {npc.name}"
+
+# Joining names: two items, or three or more.
+list:
+  pair: "{first} and {second}"
+  serial: "{items}, and {last}"
+  separator: ", "

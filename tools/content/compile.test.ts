@@ -62,6 +62,9 @@ describe('content build with the real content', () => {
     expect(Object.keys(result.bundle.talents).length).toBeGreaterThan(0);
     expect(result.bundle.balance.creation.family.siblingWeights.length).toBeGreaterThan(0);
     expect(result.bundle.character.appearance.groups.length).toBeGreaterThan(0);
+    expect(Object.keys(result.bundle.causes)).toContain('natural_causes');
+    expect(result.bundle.balance.mortality.maxAge).toBe(120);
+    expect(result.bundle.text.obituary.opening.finished.length).toBeGreaterThan(0);
   });
 });
 
@@ -212,5 +215,41 @@ describe('content build with fixture files', () => {
     await write('cities/second.yaml', validCity.replace('id: test_city', 'id: second'));
     const text = await expectErrors();
     expect(text).toContain('alias "second"');
+  });
+
+  it('rejects a template placeholder its section does not provide', async () => {
+    const file = path.join(dir, 'text', 'obituary.yaml');
+    await writeFile(file, (await readFile(file, 'utf8')).replace('May {self.they} rest in peace.', 'May {npc.they} rest in {place}.'));
+    const text = await expectErrors();
+    expect(text).toContain('text/obituary.yaml: closing.finished[1]: {npc.they}: unknown role "npc"');
+    expect(text).toContain('{place}: unknown value');
+  });
+
+  it('rejects a malformed template placeholder', async () => {
+    const file = path.join(dir, 'text', 'history.yaml');
+    await writeFile(file, (await readFile(file, 'utf8')).replace('Your {relation}, {npc.name}', 'Your {relation}, {npc.nickname}'));
+    expect(await expectErrors()).toContain('unknown field "nickname"');
+  });
+
+  it('rejects an unknown cause of death in the mortality bands', async () => {
+    const file = path.join(dir, 'balance', 'mortality.yaml');
+    await writeFile(file, (await readFile(file, 'utf8')).replace('natural_causes: 5', 'old_age: 5'));
+    expect(await expectErrors()).toContain('unknown cause "old_age"');
+  });
+
+  it('rejects cause bands that stop before the maximum age', async () => {
+    const file = path.join(dir, 'balance', 'mortality.yaml');
+    await writeFile(file, (await readFile(file, 'utf8')).replace('\nmaxAge: 120\n', '\nmaxAge: 130\n'));
+    expect(await expectErrors()).toContain('the last causes band must reach maxAge (130)');
+  });
+
+  it('rejects life stages out of order and curves out of order', async () => {
+    const file = path.join(dir, 'balance', 'aging.yaml');
+    const text = (await readFile(file, 'utf8')).replace('teen: 13', 'teen: 19').replace('{ at: 50, x: 0.4 }', '{ at: 10, x: 0.4 }');
+    await writeFile(file, text);
+    const errors = await expectErrors();
+    expect(errors).toContain('points must be in increasing "at" order');
+    await writeFile(file, text.replace('{ at: 10, x: 0.4 }', '{ at: 50, x: 0.4 }'));
+    expect(await expectErrors()).toContain('lifeStages.youngAdult (18) must be after teen (19)');
   });
 });

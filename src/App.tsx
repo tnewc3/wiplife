@@ -4,8 +4,12 @@ import { Button } from './ui/components/Button';
 import { Screen } from './ui/components/Screen';
 import { UpdatePrompt } from './ui/components/UpdatePrompt';
 import { AgeGateScreen } from './ui/screens/ageGate/AgeGateScreen';
+import { ArchivedLifeScreen } from './ui/screens/archive/ArchivedLifeScreen';
+import { ArchiveScreen } from './ui/screens/archive/ArchiveScreen';
 import { CustomLifeScreen } from './ui/screens/custom/CustomLifeScreen';
+import { DeathScreen } from './ui/screens/death/DeathScreen';
 import { GameScreen } from './ui/screens/game/GameScreen';
+import { LifeHistoryScreen } from './ui/screens/history/LifeHistoryScreen';
 import { NewLifeScreen } from './ui/screens/newLife/NewLifeScreen';
 import { SettingsScreen } from './ui/screens/settings/SettingsScreen';
 import { TitleScreen } from './ui/screens/title/TitleScreen';
@@ -45,6 +49,14 @@ function CurrentScreen() {
       return <CustomLifeScreen />;
     case 'game':
       return life ? <GameScreen life={life} /> : <TitleScreen />;
+    case 'lifeHistory':
+      return life ? <LifeHistoryScreen life={life} /> : <TitleScreen />;
+    case 'death':
+      return <DeathScreen />;
+    case 'archive':
+      return <ArchiveScreen />;
+    case 'archivedLife':
+      return <ArchivedLifeScreen />;
   }
 }
 

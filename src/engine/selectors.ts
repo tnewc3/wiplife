@@ -1,6 +1,6 @@
 /** Read-only helpers the UI uses to show a life. */
 import type { ContentBundle } from '../content/schemas';
-import type { LifeStage, LifeState, Person, Relationship } from './types';
+import type { HistoryEntry, LifeStage, LifeState, Person, Relationship, StatKey } from './types';
 
 export interface FamilyMember {
   person: Person;
@@ -71,4 +71,46 @@ export function getPronounPresets(content: ContentBundle) {
   return Object.values(content.pronouns)
     .filter((p) => !p.retired)
     .sort((a, b) => usage(b.id) - usage(a.id) || (a.id < b.id ? -1 : 1));
+}
+
+/** History entries, newest first; `limit` keeps only the most recent. */
+export function getHistoryFeed(state: LifeState, limit?: number): HistoryEntry[] {
+  const newestFirst = [...state.history].reverse();
+  return limit === undefined ? newestFirst : newestFirst.slice(0, limit);
+}
+
+/** History grouped by year, oldest first, for the Life history screen. */
+export function getTimeline(history: readonly HistoryEntry[]): { year: number; age: number; entries: HistoryEntry[] }[] {
+  const groups: { year: number; age: number; entries: HistoryEntry[] }[] = [];
+  for (const entry of history) {
+    const last = groups[groups.length - 1];
+    if (last && last.year === entry.year) last.entries.push(entry);
+    else groups.push({ year: entry.year, age: entry.age, entries: [entry] });
+  }
+  return groups;
+}
+
+export interface YearRecapView {
+  year: number;
+  age: number;
+  /** Stats that changed, with their change (never zero). */
+  statChanges: { stat: StatKey; change: number }[];
+  /** This year's history entries. */
+  entries: HistoryEntry[];
+}
+
+/** The last finished year's recap, or null before the first age-up or mid-year. */
+export function getYearRecap(state: LifeState): YearRecapView | null {
+  const recap = state.recap;
+  if (!recap || !recap.statsAfter) return null;
+  const after = recap.statsAfter;
+  const statChanges = (Object.keys(after) as StatKey[])
+    .map((stat) => ({ stat, change: after[stat] - recap.statsBefore[stat] }))
+    .filter((c) => c.change !== 0);
+  return { year: recap.year, age: recap.age, statChanges, entries: state.history.filter((e) => e.year === recap.year) };
+}
+
+/** True when the player can age up right now. */
+export function canAgeUp(state: LifeState): boolean {
+  return state.phase === 'yearStart';
 }

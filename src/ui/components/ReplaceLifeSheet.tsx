@@ -32,7 +32,9 @@ export function ReplaceLifeSheet({
         </>
       }
     >
-      <p className="break-words">This ends the life of {name}. It can’t be continued afterwards.</p>
+      <p className="break-words">
+        {name}’s life will move to your archive, marked unfinished. It can’t be continued afterwards.
+      </p>
     </Sheet>
   );
 }

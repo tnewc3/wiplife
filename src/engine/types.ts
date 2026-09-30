@@ -223,6 +223,47 @@ export interface HistoryEntry {
   legendary?: boolean;
 }
 
+/** What changed over one year, for the year recap. */
+export interface YearRecap {
+  year: number;
+  age: number;
+  /** Stats when the year began. */
+  statsBefore: Stats;
+  /** Stats when the year ended; null while the year is still in progress. */
+  statsAfter: Stats | null;
+}
+
+/** How and when the character died. Set only in the dead phase. */
+export interface DeathRecord {
+  year: number;
+  age: number;
+  /** A cause id from src/content/causes. */
+  causeId: Id;
+}
+
+/** A life in the archive: kept for good, readable without the content that made it. */
+export interface ArchivedLife {
+  id: Id;
+  name: string;
+  pronouns: Pronouns;
+  birthYear: number;
+  /** The year the life ended (or, when unfinished, was set aside). */
+  deathYear: number;
+  ageAtDeath: number;
+  /** Readable cause, e.g. "natural causes"; null for an unfinished life. */
+  causeOfDeath: string | null;
+  /** True when a new life was started before this one ended. */
+  unfinished: boolean;
+  cityId: Id;
+  obituary: string;
+  highlights: HistoryEntry[];
+  finalNetWorth: number;
+  finalStats: Stats;
+  seed: string;
+  generation: number;
+  parentLifeId?: Id;
+}
+
 export interface InputRecord {
   year: number;
   kind: 'create' | 'ageUp' | 'choice' | 'action';
@@ -255,6 +296,10 @@ export interface LifeState {
   history: HistoryEntry[];
   /** Every player input, for exact replay. */
   inputLog: InputRecord[];
+  /** The current or last finished year's recap; null before the first age-up. */
+  recap: YearRecap | null;
+  /** Set when the character dies. */
+  death: DeathRecord | null;
   /** For heir play later. */
   lineage: { generation: number; parentLifeId?: Id };
 }

@@ -4,6 +4,7 @@
  */
 import type { ContentBundle } from '../content/schemas';
 import { isRngState } from './rng';
+import { lifeStageForAge } from './systems/aging';
 import type { Identity, LifeState, Pronouns } from './types';
 
 const LIFE_STAGES = new Set(['early', 'child', 'teen', 'youngAdult', 'adult', 'senior']);
@@ -64,6 +65,9 @@ export function checkInvariants(state: LifeState, content: ContentBundle): strin
   text('character.name.last', c.name.last);
   if (c.age !== state.currentYear - state.birthYear) fail(`character.age ${c.age} does not match birth year`);
   if (!LIFE_STAGES.has(c.lifeStage)) fail(`character.lifeStage "${c.lifeStage}" is invalid`);
+  else if (c.lifeStage !== lifeStageForAge(c.age, content)) fail(`character.lifeStage "${c.lifeStage}" does not match age ${c.age}`);
+  const { maxAge } = content.balance.mortality;
+  if (c.age > maxAge) fail(`character.age ${c.age} is past the maximum age ${maxAge}`);
   identity('character.identity', c.identity);
   for (const [key, value] of Object.entries(c.stats)) score(`character.stats.${key}`, value);
   for (const [key, value] of Object.entries(c.personality)) score(`character.personality.${key}`, value);
@@ -95,6 +99,10 @@ export function checkInvariants(state: LifeState, content: ContentBundle): strin
     for (const [key, value] of Object.entries(person.traits)) score(`${label}.traits.${key}`, value);
     if (person.birthYear > state.currentYear) fail(`${label} is born in the future`);
     if (person.alive === (person.deathYear !== undefined)) fail(`${label} alive flag and deathYear disagree`);
+    if (person.deathYear !== undefined && (person.deathYear < person.birthYear || person.deathYear > state.currentYear)) {
+      fail(`${label} has an impossible death year`);
+    }
+    if (person.alive && state.currentYear - person.birthYear >= maxAge) fail(`${label} is alive at or past the maximum age`);
     city(`${label}.cityId`, person.cityId);
   }
 
@@ -136,8 +144,30 @@ export function checkInvariants(state: LifeState, content: ContentBundle): strin
 
   // Logs.
   if (state.inputLog[0]?.kind !== 'create') fail('the input log must start with the create input');
+  const ageUps = state.inputLog.filter((r) => r.kind === 'ageUp').length;
+  if (ageUps !== c.age) fail(`the input log has ${ageUps} age-ups for age ${c.age}`);
   for (let i = 1; i < state.history.length; i++) {
     if (state.history[i]!.year < state.history[i - 1]!.year) fail('history years must only go forward');
+  }
+  for (const entry of state.history) {
+    if (entry.age !== entry.year - state.birthYear) fail(`history entry for ${entry.year} has age ${entry.age}`);
+    if (entry.year > state.currentYear) fail(`history entry for ${entry.year} is in the future`);
+  }
+  const { maxEntries } = content.balance.aging.history;
+  if (state.history.length > maxEntries) fail(`history has ${state.history.length} entries (limit ${maxEntries})`);
+
+  // Year progress.
+  if (state.recap) {
+    if (state.recap.year !== state.currentYear || state.recap.age !== c.age) fail('the recap is not for the current year');
+    const inProgress = state.phase === 'events' || state.phase === 'yearEnd';
+    if (inProgress !== (state.recap.statsAfter === null)) fail(`the recap's end stats don't match the "${state.phase}" phase`);
+  } else if (c.age > 0) {
+    fail('a life that has aged has no recap');
+  }
+  if ((state.phase === 'dead') !== (state.death !== null)) fail('only a dead character has a death record');
+  if (state.death) {
+    if (state.death.year !== state.currentYear || state.death.age !== c.age) fail('the death record does not match the final year');
+    if (!content.causes[state.death.causeId]) fail(`cause of death "${state.death.causeId}" is not known`);
   }
   if (!(state.lineage.generation >= 1)) fail('lineage.generation must be at least 1');
   if (state.phase === 'dead' && state.pending.length > 0) fail('a dead character has pending events');

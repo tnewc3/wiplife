@@ -11,16 +11,19 @@ const BACKUPS_KEPT = 2;
  * newest BACKUPS_KEPT backups are kept.
  */
 export async function writeSave(db: WiplifeDb, envelope: SaveEnvelope): Promise<void> {
-  await db.transaction('rw', db.lives, db.backups, async () => {
-    const previous = await db.lives.get(ACTIVE_SLOT);
-    if (previous) {
-      await db.backups.add({ envelope: previous.envelope });
-      const keys = await db.backups.orderBy('seq').primaryKeys();
-      const excess = keys.slice(0, Math.max(0, keys.length - BACKUPS_KEPT));
-      if (excess.length > 0) await db.backups.bulkDelete(excess);
-    }
-    await db.lives.put({ id: ACTIVE_SLOT, envelope });
-  });
+  await db.transaction('rw', db.lives, db.backups, () => writeSaveIn(db, envelope));
+}
+
+/** writeSave's body, for use inside a transaction that already covers lives and backups. */
+export async function writeSaveIn(db: WiplifeDb, envelope: SaveEnvelope): Promise<void> {
+  const previous = await db.lives.get(ACTIVE_SLOT);
+  if (previous) {
+    await db.backups.add({ envelope: previous.envelope });
+    const keys = await db.backups.orderBy('seq').primaryKeys();
+    const excess = keys.slice(0, Math.max(0, keys.length - BACKUPS_KEPT));
+    if (excess.length > 0) await db.backups.bulkDelete(excess);
+  }
+  await db.lives.put({ id: ACTIVE_SLOT, envelope });
 }
 
 export type LoadResult<T> =

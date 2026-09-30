@@ -42,6 +42,7 @@ describe('createLife (random)', () => {
     expect([life.flags, life.eventLog]).toEqual([{}, {}]);
     expect([life.scheduled, life.pending, life.history]).toEqual([[], [], []]);
     expect(life.lineage).toEqual({ generation: 1 });
+    expect([life.recap, life.death]).toEqual([null, null]);
     expect(checkInvariants(life, content)).toEqual([]);
   });
 
