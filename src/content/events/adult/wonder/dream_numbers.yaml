@@ -10,7 +10,7 @@ category: wonder
 rarity: legendary
 lifeStages: [youngAdult, adult, senior]
 requires: { age: { gte: 18 } }
-weight: { base: 2 }
+weight: { base: 8 }
 once: true
 choices:
   - id: play

@@ -211,23 +211,39 @@ export const historyTextSchema = z.strictObject({
 });
 export type HistoryText = z.infer<typeof historyTextSchema>;
 
-const outcomeVariantsSchema = z.strictObject({
-  /** Used when the character died. */
-  finished: z.array(templateSchema),
-  /** Used when the life was set aside unfinished. */
-  unfinished: z.array(templateSchema),
-});
+/** Variants by how the life went (src/engine/obituary.ts lifeTone; thresholds in balance/aging.yaml obituary). */
+export const OBITUARY_TONES = ['bright', 'mixed', 'heavy'] as const;
+export type ObituaryTone = (typeof OBITUARY_TONES)[number];
+const tonedSchema = z.strictObject({ bright: variantsSchema, mixed: variantsSchema, heavy: variantsSchema });
+
+/** The highest credential, as the obituary words it. */
+export const OBITUARY_EDUCATION_KEYS = ['none', 'highSchool', 'ged', 'trade', 'associate', 'bachelor', 'grad'] as const;
+export type ObituaryEducationKey = (typeof OBITUARY_EDUCATION_KEYS)[number];
 
 /**
- * Obituary, version 1. Each section offers variants; the obituary generator
- * (src/engine/obituary.ts) picks one per section and joins them. An empty list
- * skips the section. Later stages add sections here and in the generator.
+ * Obituary, version 2 (Stage 10). Each section offers variants; the obituary
+ * generator (src/engine/obituary.ts) picks one per section and joins them.
+ * Tone-matched sections have bright, mixed and heavy variants.
  */
 export const obituaryTextSchema = z.strictObject({
   /** Values: {age}, {year}, {city}, {cause} (finished only). */
-  opening: outcomeVariantsSchema,
+  opening: z.strictObject({ finished: tonedSchema, unfinished: variantsSchema }),
   /** Values: {birthYear}, {birthCity}, {parents}. */
   origins: variantsSchema,
+  /** The highest credential. Values: {subject}, {license} (trade), {degree} (grad). */
+  education: z.strictObject(
+    Object.fromEntries(OBITUARY_EDUCATION_KEYS.map((k) => [k, variantsSchema])) as Record<ObituaryEducationKey, typeof variantsSchema>,
+  ),
+  /** peak (above a first level) and worked (a first level): values {title}, {employer}, {years}. retired: {years}. never: none. */
+  career: z.strictObject({ peak: tonedSchema, worked: variantsSchema, retired: variantsSchema, never: variantsSchema }),
+  /** married and widowed: role npc, values {year}. divorced: {exes}. single: none. */
+  love: z.strictObject({ married: tonedSchema, widowed: variantsSchema, divorced: variantsSchema, single: variantsSchema }),
+  /** Notable events by event id, one line each. No values. */
+  moments: z.record(z.string(), templateSchema),
+  /** Things the life did, by flag, one line each. No values. */
+  deeds: z.record(z.string(), templateSchema),
+  /** prison: values {years}. bankrupt: values {year}. */
+  hardship: z.strictObject({ prison: variantsSchema, bankrupt: variantsSchema }),
   /** Relatives alive at the end. Values: {survivors}. Finished lives only. */
   survivedBy: variantsSchema,
   /** Relatives who died first. Values: {predeceased}. Finished lives only. */
@@ -235,7 +251,7 @@ export const obituaryTextSchema = z.strictObject({
   /** By lifetime average Happiness: the first band whose minHappiness it reaches. No values. */
   mood: z.array(z.strictObject({ minHappiness: z.int().min(0).max(100), variants: variantsSchema })).min(1),
   /** No values. */
-  closing: outcomeVariantsSchema,
+  closing: z.strictObject({ finished: tonedSchema, unfinished: variantsSchema }),
   /** One relative in a list. Role: npc. Values: {relation}. */
   relative: templateSchema,
   /** Joining lists of names. Values: {first}, {second} / {items}, {last}. */

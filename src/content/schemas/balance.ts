@@ -135,6 +135,18 @@ export const agingBalanceSchema = z.strictObject({
     /** Most highlights kept per archived life. */
     maxHighlights: z.int().min(1).max(1000),
   }),
+  /**
+   * Obituary version 2 (Stage 10): how the life's tone is judged. Heavy: a
+   * life that ended before youngAge, or lifetime Happiness below
+   * heavyHappiness; bright: lifetime Happiness of at least brightHappiness;
+   * otherwise mixed. At most maxMoments moments and deeds are mentioned.
+   */
+  obituary: z.strictObject({
+    brightHappiness: z.int().min(0).max(100),
+    heavyHappiness: z.int().min(0).max(100),
+    youngAge: z.int().min(0).max(120),
+    maxMoments: z.int().min(0).max(10),
+  }),
 });
 export type AgingBalance = z.infer<typeof agingBalanceSchema>;
 

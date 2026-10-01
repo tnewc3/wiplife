@@ -10,7 +10,7 @@ tone: light
 category: wonder
 rarity: legendary
 lifeStages: [senior]
-weight: { base: 6 }
+weight: { base: 40 }
 once: true
 cast:
   finder: { kind: acquaintance, age: { min: 20, max: 80 }, createIfMissing: true, newChance: 1 }

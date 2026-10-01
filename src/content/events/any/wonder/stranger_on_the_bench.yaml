@@ -9,7 +9,7 @@ tone: neutral
 category: wonder
 rarity: legendary
 lifeStages: [youngAdult, adult, senior]
-weight: { base: 2 }
+weight: { base: 6 }
 once: true
 cast:
   stranger: { kind: acquaintance, age: { min: 75, max: 90 }, createIfMissing: true, newChance: 1 }

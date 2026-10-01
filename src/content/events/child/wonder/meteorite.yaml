@@ -9,7 +9,7 @@ tone: light
 category: wonder
 rarity: legendary
 lifeStages: [child]
-weight: { base: 20 }
+weight: { base: 60 }
 once: true
 choices:
   - id: keep

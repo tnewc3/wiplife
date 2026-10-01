@@ -38,11 +38,17 @@ jobs:
       - name: Simulation (10,000 lives)
         run: npm run simulate -- --lives 10000 --json simulation-report.json
 
+      - name: Content coverage report (2,000 lives)
+        if: always()
+        run: npm run coverage -- --lives 2000 --json coverage-report.json
+
       - name: Upload simulation report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: simulation-report
-          path: simulation-report.json
+          path: |
+            simulation-report.json
+            coverage-report.json
           if-no-files-found: ignore
           retention-days: 30

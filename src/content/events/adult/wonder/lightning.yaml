@@ -9,7 +9,7 @@ tone: serious
 category: wonder
 rarity: legendary
 lifeStages: [youngAdult, adult, senior]
-weight: { base: 2 }
+weight: { base: 8 }
 once: true
 choices:
   - id: up

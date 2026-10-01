@@ -9,7 +9,7 @@ tone: light
 category: wonder
 rarity: legendary
 lifeStages: [youngAdult, adult]
-weight: { base: 3 }
+weight: { base: 10 }
 once: true
 cast:
   busker: { kind: acquaintance, age: { min: 25, max: 60 }, createIfMissing: true, newChance: 1 }
