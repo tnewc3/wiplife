@@ -1,0 +1,43 @@
+id: shop_floor_mistake
+title: On the shop floor
+text: >-
+  During a practical exam at trade school, you realize halfway through that
+  you skipped a step, and the instructor is two benches away.
+tone: neutral
+category: school
+rarity: common
+lifeStages: [youngAdult, adult]
+requires: { education: { program: [trade] } }
+weight: { base: 8 }
+cooldownYears: 2
+choices:
+  - id: start_over
+    label: Tear it down and start over
+    check:
+      base: 50
+      stats: [{ key: discipline, weight: 0.4 }, { key: fitness, weight: 0.1 }]
+      success:
+        text: You finish with a minute to spare. The instructor checks your work and grunts, which means good.
+        effects:
+          - { type: education, action: grades, value: 0.3 }
+          - { type: stat, key: confidence, delta: 3 }
+      failure:
+        text: You run out of time with it half rebuilt. Still better than handing in something unsafe.
+        effects:
+          - { type: education, action: grades, value: -0.1 }
+          - { type: stat, key: stress, delta: 2 }
+  - id: hide_it
+    label: Hope nobody checks that part
+    check:
+      base: 40
+      stats: [{ key: luck, weight: 0.4 }]
+      success:
+        text: Nobody checks that part. You go home and lie awake thinking about it anyway.
+        effects:
+          - { type: stat, key: stress, delta: 3 }
+      failure:
+        text: The instructor checks exactly that part, in front of everyone. "This is how people get hurt."
+        effects:
+          - { type: education, action: grades, value: -0.4 }
+          - { type: stat, key: reputation, delta: -2 }
+          - { type: stat, key: confidence, delta: -3 }

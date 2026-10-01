@@ -5,8 +5,9 @@ import { useAppStore } from '../../../store/appStore';
 import { Button } from '../../components/Button';
 import { Card } from '../../components/Card';
 import { money } from '../../labels';
+import { SchoolCard } from './SchoolCard';
 
-/** The Work tab: gig work for now (school and jobs arrive with their systems). */
+/** The Work/School tab: school (Stage 7) and gig work (jobs arrive with careers). */
 export function WorkTab({ life }: { life: LifeState }) {
   const view = getWorkView(life, content);
   const busy = useAppStore((s) => s.aging);
@@ -14,6 +15,7 @@ export function WorkTab({ life }: { life: LifeState }) {
 
   return (
     <div className="flex flex-col gap-4">
+      <SchoolCard life={life} />
       <Card role="region" aria-labelledby="gig-title">
         <h2 id="gig-title" className="text-lg font-bold">
           Gig work

@@ -1,0 +1,83 @@
+# Chain: the guidance counselor points you at a local scholarship; a year
+# later, the interview.
+chain: guidance_counselor
+events:
+  - id: guidance_counselor
+    title: The counselor's office
+    text: >-
+      {counselor.name}, the guidance counselor, slides a brochure across the
+      desk. "The Rotary Club gives one scholarship a year to a local student.
+      Almost nobody applies. You should."
+    tone: light
+    category: school
+    rarity: common
+    lifeStages: [teen]
+    requires:
+      all:
+        - { education: { program: [high], year: { gte: 2 }, final: false } }
+        - { education: { gpa: { gte: 2.5 } } }
+    weight:
+      base: 6
+      modifiers:
+        - { if: { familyWealth: [poor, working] }, x: 1.5 }
+    once: true
+    cast:
+      counselor: { kind: acquaintance, age: { min: 30, max: 64 }, createIfMissing: true, newChance: 1 }
+    choices:
+      - id: apply
+        label: Fill out the application
+        outcome:
+          text: It's four pages and two essays. You mail it the day before the deadline.
+          effects:
+            - { type: relationship, role: counselor, affection: 5 }
+            - { type: schedule, eventId: local_scholarship, inYears: [1, 1], cast: [counselor] }
+      - id: skip
+        label: Toss the brochure
+        outcome:
+          text: '{counselor.name} sighs the sigh of someone who has seen a lot of brochures tossed.'
+          effects: []
+
+  - id: local_scholarship
+    title: The interview
+    text: >-
+      Five members of the Rotary Club sit behind a folding table in the
+      library. {counselor.name} gives you a thumbs up from the doorway.
+    tone: neutral
+    category: school
+    rarity: common
+    lifeStages: [teen]
+    requires: { education: { program: [high] } }
+    weight: { base: 10 }
+    followUpOnly: true
+    cast:
+      counselor: { kind: acquaintance }
+    choices:
+      - id: be_yourself
+        label: Be yourself
+        check:
+          base: 40
+          stats: [{ key: confidence, weight: 0.3 }, { key: kindness, weight: 0.2 }, { key: smarts, weight: 0.2 }]
+          success:
+            text: They give you the scholarship. The check is huge and made of cardboard, and the real one follows in the mail.
+            effects:
+              - { type: education, action: scholarship, value: 5000 }
+              - { type: stat, key: confidence, delta: 4 }
+              - { type: history, text: You won a local scholarship for college., importance: 2 }
+          failure:
+            text: They give it to a kid who plays three instruments. You get a handshake and a pen.
+            effects:
+              - { type: stat, key: stress, delta: 2 }
+      - id: rehearsed
+        label: Stick to rehearsed answers
+        check:
+          base: 50
+          stats: [{ key: discipline, weight: 0.3 }, { key: smarts, weight: 0.2 }]
+          success:
+            text: You hit every point. They give you a smaller award, "for preparation." It still pays for books.
+            effects:
+              - { type: education, action: scholarship, value: 2000 }
+              - { type: stat, key: discipline, delta: 2 }
+          failure:
+            text: You sound like a brochure. They're polite about it.
+            effects:
+              - { type: stat, key: confidence, delta: -2 }

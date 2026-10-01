@@ -92,6 +92,22 @@ export function evaluate(condition: Condition | undefined, state: LifeState, ctx
     if (q.partner !== undefined && (h.partnerId !== undefined) !== q.partner) return false;
     return true;
   }
+  if ('education' in condition) {
+    const q = condition.education;
+    const edu = state.education;
+    const cur = edu.current;
+    if (q.program && !q.program.includes(cur?.program ?? 'none')) return false;
+    if (q.tier && !(cur?.tier !== undefined && q.tier.includes(cur.tier))) return false;
+    if (q.major && !(cur?.majorId !== undefined && q.major.includes(cur.majorId))) return false;
+    if (q.trade && !(cur?.tradeId !== undefined && q.trade.includes(cur.tradeId))) return false;
+    if (q.year && !(cur && compare(cur.year, q.year))) return false;
+    if (q.final !== undefined && (cur !== null && cur.year >= cur.lengthYears) !== q.final) return false;
+    if (q.gpa && !(cur && compare(cur.gpa, q.gpa))) return false;
+    if (q.credential && !edu.credentials.some((cr) => q.credential!.includes(cr.type))) return false;
+    if (q.left !== undefined && (edu.left !== null) !== q.left) return false;
+    if (q.admission !== undefined && (edu.admission !== null) !== q.admission) return false;
+    return true;
+  }
   if ('memory' in condition) {
     const { role, tag } = condition.memory;
     return roleCheck(role, (id) => state.relationships[id]?.memories.some((m) => m.tag === tag) ?? false);
@@ -135,8 +151,15 @@ export function rolesIn(condition: Condition | undefined): string[] {
 }
 
 /** Every flag, memory tag and event a condition refers to (for the content build). */
-export function referencesIn(condition: Condition | undefined): { flags: string[]; memories: string[]; events: string[]; cities: string[] } {
-  const out = { flags: [] as string[], memories: [] as string[], events: [] as string[], cities: [] as string[] };
+export function referencesIn(condition: Condition | undefined): {
+  flags: string[];
+  memories: string[];
+  events: string[];
+  cities: string[];
+  majors: string[];
+  trades: string[];
+} {
+  const out = { flags: [] as string[], memories: [] as string[], events: [] as string[], cities: [] as string[], majors: [] as string[], trades: [] as string[] };
   const walk = (cond: Condition | undefined) => {
     if (!cond) return;
     if ('all' in cond) cond.all.forEach(walk);
@@ -146,6 +169,10 @@ export function referencesIn(condition: Condition | undefined): { flags: string[
     else if ('memory' in cond) out.memories.push(cond.memory.tag);
     else if ('fired' in cond) out.events.push(cond.fired);
     else if ('city' in cond) out.cities.push(cond.city);
+    else if ('education' in cond) {
+      out.majors.push(...(cond.education.major ?? []));
+      out.trades.push(...(cond.education.trade ?? []));
+    }
   };
   walk(condition);
   return out;

@@ -73,3 +73,14 @@ tags:
   covered_your_debt: Helped you pay down a debt
   welcomed_you: Welcomed you to the neighborhood
   asked_you_for_rent: Asked you to start paying rent
+  # School (Stage 7).
+  helped_with_homework: Sat with you over your homework when reading was hard
+  believed_in_you: Believed in you at school
+  wrote_your_letter: Wrote you a letter of recommendation
+  copied_your_homework: Copied your homework
+  you_refused_homework: You wouldn't let {npc.them} copy your homework
+  slacked_on_project: Left you to do the group project alone
+  covered_on_project: You covered for {npc.them} on a group project
+  fought_for_them: You got into a fight for {npc.them}
+  roomed_together: Shared a dorm room with you
+  threw_graduation_party: Threw you a graduation party

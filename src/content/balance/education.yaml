@@ -1,0 +1,209 @@
+# Education: school years, grades, admissions, tuition and paying for school
+# (docs/design.md, section I). Starting proposals; Stage 12 (balancing) tunes
+# them against simulation runs.
+#
+# Each school year starts as a year begins (you're enrolled, tuition is paid)
+# and is graded as the next year begins. Elementary, middle and high school
+# are automatic; college, trade school and grad school are applied to.
+
+school:
+  # Kindergarten starts the year you turn this old.
+  startAge: 5
+  # Years of each automatic school: kindergarten to 5th grade, 6th to 8th,
+  # 9th to 12th. High school normally ends as you turn 18.
+  elementary: 6
+  middle: 3
+  high: 4
+  # From this age you can drop out of high school (or be expelled).
+  dropoutAge: 16
+  # A high school year graded below this is repeated, at most maxRepeats
+  # times (after that you're passed along), so school ends at 18 or 19.
+  repeatBelow: 1.0
+  maxRepeats: 1
+  # From this age (your last year of high school) you can apply to college,
+  # trade school or grad school.
+  applyAge: 17
+
+grades:
+  # Each school year's grade in GPA points (0–4):
+  #   (base + weight × (value − 50) for each stat) × stress factor
+  #   + family wealth + (difficulty − 3) × difficulty + college tier
+  #   + a random swing of up to `swing` either way + what events added.
+  base: 2.7
+  stats:
+    - { key: smarts, weight: 0.025 }
+    - { key: discipline, weight: 0.015 }
+  # Stress wears grades down once it's high.
+  stress:
+    - { at: 40, x: 1 }
+    - { at: 70, x: 0.9 }
+    - { at: 100, x: 0.7 }
+  wealth: { poor: -0.15, working: -0.05, middle: 0, affluent: 0.1, rich: 0.15 }
+  difficulty: -0.12
+  tier: { community: 0.15, state: 0, elite: -0.1 }
+  swing: 0.4
+  # Letter grades, best first. The GPA shows as the first letter it reaches.
+  letters:
+    - { min: 3.85, letter: A }
+    - { min: 3.5, letter: A- }
+    - { min: 3.15, letter: B+ }
+    - { min: 2.85, letter: B }
+    - { min: 2.5, letter: B- }
+    - { min: 2.15, letter: C+ }
+    - { min: 1.85, letter: C }
+    - { min: 1.5, letter: C- }
+    - { min: 1.15, letter: D+ }
+    - { min: 0.85, letter: D }
+    - { min: 0.7, letter: D- }
+    - { min: 0, letter: F }
+
+# What each year of school does to you: yearly pulls (perYear points, a
+# fraction happens by chance), never past limit.
+yearEffects:
+  elementary:
+    smarts: { perYear: 0.8, limit: 65 }
+  middle:
+    smarts: { perYear: 0.8, limit: 70 }
+  high:
+    smarts: { perYear: 1, limit: 80 }
+  college:
+    smarts: { perYear: 1.2, limit: 88 }
+  trade:
+    smarts: { perYear: 0.5, limit: 72 }
+    fitness: { perYear: 0.5, limit: 70 }
+  grad:
+    smarts: { perYear: 1.5, limit: 95 }
+    stress: { perYear: 1, limit: 50 }
+
+college:
+  # Community college earns an associate degree; state and elite
+  # universities a bachelor's.
+  years: { community: 2, state: 4, elite: 4 }
+  # An associate degree counts for this many years toward a bachelor's.
+  transferCredit: 2
+  # Switching majors in your first years is free; later each switch adds a year.
+  freeChangeYears: 2
+
+# Your chance of getting in, in percent:
+#   base + gpa × (GPA − gpaPivot) + weight × (value − 50) for each stat
+#   + luck (balance/events.yaml checks.luckWeight) + wealth + flags,
+# never below min or above max. The GPA is your high school GPA for college
+# and trade school (your current one in your last year of high school), your
+# bachelor's GPA for grad school.
+admission:
+  gpaPivot: 3.0
+  # A record without a GPA (a GED) counts as this.
+  noGpa: 2.5
+  # Each application costs this.
+  fee: 75
+  college:
+    # Open admission: almost everyone gets in.
+    community:
+      base: 94
+      gpa: 4
+      stats: [{ key: smarts, weight: 0.05 }]
+      min: 80
+      max: 98
+    state:
+      base: 58
+      gpa: 28
+      stats: [{ key: smarts, weight: 0.25 }, { key: ambition, weight: 0.1 }]
+      flags: { high_test_scores: 6, strong_essay: 4, teacher_recommendation: 4, recruited_athlete: 10, valedictorian: 6, caught_cheating: -8, suspended: -4 }
+      min: 5
+      max: 95
+    # Never guaranteed, never quite impossible.
+    elite:
+      base: 10
+      gpa: 30
+      stats: [{ key: smarts, weight: 0.35 }, { key: ambition, weight: 0.15 }, { key: confidence, weight: 0.05 }]
+      wealth: { affluent: 2, rich: 6 }
+      flags: { high_test_scores: 10, strong_essay: 8, teacher_recommendation: 6, recruited_athlete: 12, valedictorian: 10, caught_cheating: -15, suspended: -8 }
+      min: 2
+      max: 60
+  trade:
+    base: 92
+    gpa: 3
+    stats: [{ key: discipline, weight: 0.1 }]
+    min: 75
+    max: 98
+  # One per grad program (src/content/grad).
+  grad:
+    law:
+      base: 30
+      gpa: 30
+      stats: [{ key: smarts, weight: 0.3 }, { key: confidence, weight: 0.1 }]
+      flags: { research_assistant: 6, caught_cheating: -10 }
+      min: 3
+      max: 85
+    medicine:
+      base: 15
+      gpa: 35
+      stats: [{ key: smarts, weight: 0.35 }, { key: discipline, weight: 0.15 }]
+      flags: { research_assistant: 10, caught_cheating: -15 }
+      min: 2
+      max: 70
+    mba:
+      base: 35
+      gpa: 20
+      stats: [{ key: ambition, weight: 0.25 }, { key: confidence, weight: 0.15 }]
+      min: 5
+      max: 90
+    masters:
+      base: 55
+      gpa: 25
+      stats: [{ key: smarts, weight: 0.2 }]
+      flags: { research_assistant: 8 }
+      min: 10
+      max: 95
+
+# Yearly tuition, whole dollars: by college tier, by trade and by grad program.
+tuition:
+  college: { community: 4000, state: 11500, elite: 58000 }
+  trade:
+    electrician: 7500
+    plumber: 7500
+    welder: 9000
+    hvac_technician: 8500
+    auto_mechanic: 8000
+    cosmetologist: 9500
+  grad:
+    law: 48000
+    medicine: 56000
+    mba: 60000
+    masters: 25000
+
+# Paying for school, each year: scholarships take a share of tuition off;
+# your family pays a share of the rest; scholarship money from events pays
+# what it can; anything left is a student loan (balance/economy.yaml sets
+# its rate and term). Student loan payments pause while you're in school.
+scholarships:
+  # Merit aid, a share of tuition by the GPA you applied with.
+  merit:
+    - { at: 3.0, x: 0 }
+    - { at: 3.5, x: 0.15 }
+    - { at: 4.0, x: 0.35 }
+  # Need-based aid, a share of tuition by family wealth.
+  need: { poor: 0.6, working: 0.35, middle: 0.1, affluent: 0, rich: 0 }
+  # Grad programs give this share of the need-based aid.
+  gradNeed: 0.3
+  maxShare: 0.9
+
+familyHelp:
+  # Share of what's left after scholarships your family pays, while a
+  # parent is in your life to help.
+  share: { poor: 0, working: 0.15, middle: 0.4, affluent: 0.75, rich: 1 }
+  maxAge: 30
+
+# The GED: a high school equivalency exam for anyone without a diploma who
+# isn't in high school. One try a year.
+ged:
+  minAge: 16
+  fee: 150
+  pass:
+    base: 60
+    stats: [{ key: smarts, weight: 0.6 }, { key: discipline, weight: 0.2 }]
+    min: 10
+    max: 95
+
+# Gig work around college, trade school or grad school is part-time.
+studentGigShare: 0.5

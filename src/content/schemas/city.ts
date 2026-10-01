@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { baseDefSchema, dollarsSchema, scoreSchema } from './common';
+import { citySchoolsSchema } from './education';
 
 export const countryIdSchema = z.enum(['us']);
 
@@ -32,6 +33,8 @@ export const citySchema = baseDefSchema.extend({
     trade: scoreSchema,
     gig: scoreSchema,
   }),
+  /** The city's schools (fictional names), by program (Stage 7). */
+  schools: citySchoolsSchema,
 });
 
 export type CityDef = z.infer<typeof citySchema>;

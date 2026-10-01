@@ -37,6 +37,36 @@ export const relationWordsSchema = z.strictObject({
 });
 export type RelationWords = z.infer<typeof relationWordsSchema>;
 
+/**
+ * School milestones in text/history.yaml (education) and the values each may
+ * use: {school} is a school's name, {subject} what you study, {grade} a
+ * letter grade, {degree} a grad degree and {license} a trade license.
+ */
+export const EDUCATION_HISTORY_VALUES = {
+  startedSchool: [],
+  startedMiddle: [],
+  startedHigh: [],
+  heldBack: [],
+  graduatedHigh: ['grade'],
+  droppedOut: ['school'],
+  expelled: ['school'],
+  passedGed: [],
+  failedGed: [],
+  admitted: ['school'],
+  rejected: ['school'],
+  withdrawn: ['school'],
+  declined: ['school'],
+  enrolled: ['school', 'subject'],
+  returned: ['school', 'subject'],
+  returnedHigh: ['school'],
+  changedMajor: ['subject'],
+  graduatedAssociate: ['school', 'subject', 'grade'],
+  graduatedBachelor: ['school', 'subject', 'grade'],
+  graduatedGrad: ['school', 'degree', 'grade'],
+  licensed: ['school', 'license'],
+} as const satisfies Record<string, readonly string[]>;
+export type EducationHistoryKey = keyof typeof EDUCATION_HISTORY_VALUES;
+
 const importanceSchema = z.union([z.literal(1), z.literal(2), z.literal(3)]);
 const historyGroupSchema = z.strictObject({ importance: importanceSchema, variants: variantsSchema });
 
@@ -79,6 +109,13 @@ export const historyTextSchema = z.strictObject({
     /** Started doing gig work. */
     startedGig: historyGroupSchema,
   }),
+  /** School milestones (Stage 7). The values each one may use are in EDUCATION_HISTORY_VALUES. */
+  education: z.strictObject(
+    Object.fromEntries(Object.keys(EDUCATION_HISTORY_VALUES).map((k) => [k, historyGroupSchema])) as Record<
+      EducationHistoryKey,
+      typeof historyGroupSchema
+    >,
+  ),
 });
 export type HistoryText = z.infer<typeof historyTextSchema>;
 

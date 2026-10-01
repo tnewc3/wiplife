@@ -1,0 +1,40 @@
+id: grad_school_burnout
+title: Running on empty
+text: >-
+  It's 2 a.m. and you've been staring at the same page for an hour. Grad
+  school was supposed to be the hard part you chose. Lately it just feels hard.
+tone: serious
+category: school
+rarity: common
+lifeStages: [youngAdult, adult]
+requires: { education: { program: [grad] } }
+weight:
+  base: 8
+  modifiers:
+    - { if: { stat: stress, gt: 50 }, x: 2 }
+cooldownYears: 3
+choices:
+  - id: push
+    label: Push through
+    outcome:
+      text: You make it through the semester on caffeine and spite. Your grades hold. You don't feel great.
+      effects:
+        - { type: education, action: grades, value: 0.2 }
+        - { type: stat, key: stress, delta: 6 }
+        - { type: stat, key: health, delta: -2 }
+  - id: rest
+    label: Take a real week off
+    outcome:
+      text: You turn off your phone and sleep for most of a week. You come back slower, and saner.
+      effects:
+        - { type: education, action: grades, value: -0.2 }
+        - { type: stat, key: stress, delta: -8 }
+        - { type: stat, key: happiness, delta: 3 }
+  - id: leave
+    label: Walk away from the program
+    outcome:
+      text: You email your advisor at 3 a.m. and sleep better than you have in months. The regret comes later, or doesn't.
+      effects:
+        - { type: education, action: drop_out }
+        - { type: stat, key: stress, delta: -10 }
+        - { type: stat, key: ambition, delta: -3 }

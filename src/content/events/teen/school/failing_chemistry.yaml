@@ -1,0 +1,36 @@
+id: failing_chemistry
+title: Failing chemistry
+text: >-
+  It's official: you're failing chemistry. Your teacher's note says you can
+  still pass with summer school, or with a lot of work between now and the final.
+tone: serious
+category: school
+rarity: common
+lifeStages: [teen]
+requires: { education: { program: [high], gpa: { lt: 2.2 } } }
+weight: { base: 7 }
+cooldownYears: 3
+choices:
+  - id: summer
+    label: Sign up for summer school
+    outcome:
+      text: Six weeks of mornings in a hot classroom. You pass. You will never love the periodic table.
+      effects:
+        - { type: education, action: grades, value: 0.4 }
+        - { type: stat, key: happiness, delta: -3 }
+        - { type: stat, key: discipline, delta: 2 }
+  - id: tutor
+    label: Pay for a tutor
+    visibleIf: { money: { gte: 400 } }
+    outcome:
+      text: The tutor is a grad student who explains things like a human being. It costs $400 and it's worth it.
+      effects:
+        - { type: money, delta: -400 }
+        - { type: education, action: grades, value: 0.5 }
+  - id: let_it_go
+    label: Let it go
+    outcome:
+      text: You fail it. It's one class, you tell yourself. Your transcript disagrees.
+      effects:
+        - { type: education, action: grades, value: -0.4 }
+        - { type: stat, key: stress, delta: 3 }

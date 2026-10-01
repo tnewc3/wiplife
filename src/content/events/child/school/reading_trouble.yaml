@@ -1,0 +1,39 @@
+id: reading_trouble
+title: The letters won't sit still
+text: >-
+  Everyone else in your class is reading chapter books. You're still
+  sounding out words on the first page, and today the teacher sent a note
+  home. {parent.name} is reading it at the kitchen table.
+tone: serious
+category: school
+rarity: common
+lifeStages: [child]
+requires:
+  all:
+    - { education: { program: [elementary] } }
+    - { stat: smarts, lt: 50 }
+weight: { base: 6 }
+once: true
+cast:
+  parent: { kind: parent }
+choices:
+  - id: ask_help
+    label: Ask {parent.them} to read with you
+    outcome:
+      text: >-
+        Every night after dinner, {parent.name} sits with you for twenty
+        minutes. It's slow. By spring, you finish your first chapter book.
+      effects:
+        - { type: stat, key: smarts, delta: 3 }
+        - { type: education, action: grades, value: 0.3 }
+        - { type: relationship, role: parent, affection: 6, trust: 4 }
+        - { type: memory, role: parent, tag: helped_with_homework }
+  - id: hide_it
+    label: Say the note is no big deal
+    outcome:
+      text: >-
+        {parent.name} lets it go. You get very good at pretending to read,
+        which is its own kind of skill.
+      effects:
+        - { type: stat, key: stress, delta: 4 }
+        - { type: education, action: grades, value: -0.2 }

@@ -12,7 +12,8 @@
  *    is behind garnishes a share of gross income.
  * 4. Housing and living costs (lifestyle × city). At your parents', the
  *    family covers whatever share of them you can't pay.
- * 5. Minimum debt payments from what is left. A payment savings can't cover
+ * 5. Minimum debt payments from what is left (student loans are paused
+ *    while you're in college, trade school or grad school). A payment savings can't cover
  *    is missed; the costs savings can't cover become personal debt, so
  *    savings never go below zero.
  * 6. Missed payments add up: a debt missed often enough goes to collections,
@@ -24,6 +25,7 @@
  *    and health.
  */
 import { TRIGGER_IDS, type ContentBundle, type StatEffects, type TriggerId } from '../../content/schemas';
+import { studentLoansPaused } from '../education';
 import { eventWeight } from '../events/selection';
 import {
   borrow,
@@ -158,9 +160,11 @@ export function runEconomy(state: LifeState, content: ContentBundle): void {
   let debtPayments = garnished;
   let missedAny = false;
   const ordered = [...f.debts].sort((a, b) => PAYMENT_ORDER[a.kind] - PAYMENT_ORDER[b.kind]);
+  const paused = studentLoansPaused(state);
   for (const debt of ordered) {
     const already = garnishedOn.get(debt.id) ?? 0;
-    const due = Math.max(0, paymentDue({ ...debt, balance: debt.balance + already }) - already);
+    // Student loan payments pause while you're in school (interest still grows).
+    const due = paused && debt.kind === 'student' ? 0 : Math.max(0, paymentDue({ ...debt, balance: debt.balance + already }) - already);
     const paid = Math.max(0, Math.min(due, available));
     debt.balance -= paid;
     available -= paid;

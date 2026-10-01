@@ -2,8 +2,9 @@
  * Simulation runner: plays many random lives with random choices (and a
  * simple player model for relationship actions, and from Stage 6 for money
  * and home actions) and reports invariant failures, lifespans, events per
- * year, how often each event fired, marriage and divorce rates, and savings,
- * debt and net worth over lifetimes. Later stages add their own reports.
+ * year, how often each event fired, marriage and divorce rates, savings,
+ * debt and net worth over lifetimes, and (Stage 7) education outcomes by
+ * family wealth and GPA. Later stages add their own reports.
  */
 import { ACTION_IDS, type ActionId, type ContentBundle, type Effect } from '../../src/content/schemas';
 import {
@@ -19,8 +20,8 @@ import { checkInvariants } from '../../src/engine/invariants';
 import { beginYear, createLife, endYear } from '../../src/engine/life';
 import { isFamilyKind, isPartnerKind } from '../../src/engine/relationships';
 import { createRng } from '../../src/engine/rng';
-import type { LifeStage, LifeState } from '../../src/engine/types';
-import { chooseActions, chooseMoneyActions, rollMoneyProfile } from './bot';
+import type { FamilyWealth, LifeStage, LifeState } from '../../src/engine/types';
+import { chooseActions, chooseMoneyActions, chooseSchoolActions, rollMoneyProfile } from './bot';
 
 export interface SimulationOptions {
   lives: number;
@@ -53,6 +54,70 @@ export interface SimulationReport {
   deathsFromEvents: number;
   relationships: RelationshipReport;
   money: MoneyReport;
+  education: EducationReport;
+}
+
+/** Education outcomes in one group of lives (those that reached 30). */
+export interface EducationRow {
+  lives: number;
+  /** A high school diploma by 19. */
+  diplomaBy19: number;
+  ged: number;
+  /** Neither a diploma nor a GED at 30. */
+  noHighSchool: number;
+  /** Went to college by 30 (any tier). */
+  college: number;
+  /** An associate or bachelor's degree by 30. */
+  degree: number;
+  bachelor: number;
+  tradeLicense: number;
+  /** A grad degree, ever. */
+  grad: number;
+  /** Median high school GPA (of those with one). */
+  medianHsGpa: number;
+}
+
+export interface EducationReport {
+  byWealth: Record<FamilyWealth | 'all', EducationRow>;
+  /** College by 30, by high school GPA (lives that reached 30 with a diploma). */
+  collegeByGpa: { label: string; lives: number; college: number }[];
+  /** Ages at which the high school diploma came. */
+  diplomaAges: Record<number, number>;
+  /** Applications made and accepted, by option kind. */
+  applications: Record<'community' | 'state' | 'elite' | 'trade' | 'grad' | 'ged', { tried: number; accepted: number }>;
+  /** Student debt at 25 (lives that reached 25): how many had any, median and 90th percentile among them. */
+  studentDebtAt25: { lives: number; borrowers: number; median: number; p90: number };
+  largestStudentDebt: number;
+  /** Lives that started (or went back to) college, trade school or grad school at 25 or older. */
+  lateStudents: number;
+  /** Lives that left high school, and lives that left college, trade school or grad school, without finishing (by choice, an event or expulsion). */
+  dropouts: { highSchool: number; postSecondary: number };
+}
+
+const WEALTHS: FamilyWealth[] = ['poor', 'working', 'middle', 'affluent', 'rich'];
+
+/** What one life did at school, watched step by step. */
+class SchoolWatcher {
+  collegeAge: number | null = null;
+  lateStudent = false;
+  studentDebtAt25: number | null = null;
+  maxStudentDebt = 0;
+  credentialsAt30: string[] | null = null;
+  /** Programs left without finishing (dropping out or expelled), by when and what. */
+  readonly left = new Set<string>();
+
+  observe(life: LifeState): void {
+    const gone = life.education.left;
+    if (gone) this.left.add(`${gone.leftYear}:${gone.program}`);
+    const age = life.character.age;
+    const cur = life.education.current;
+    if (cur?.program === 'college') this.collegeAge ??= age;
+    if (cur && (cur.program === 'college' || cur.program === 'trade' || cur.program === 'grad') && cur.since - life.birthYear >= 25) this.lateStudent = true;
+    const student = life.finances.debts.filter((d) => d.kind === 'student').reduce((sum, d) => sum + d.balance, 0);
+    this.maxStudentDebt = Math.max(this.maxStudentDebt, student);
+    if (life.phase === 'yearStart' && age === 25) this.studentDebtAt25 = student;
+    if (life.phase === 'yearStart' && age === 30) this.credentialsAt30 = life.education.credentials.map((c) => c.type);
+  }
 }
 
 /** Median and spread of an amount across lives. */
@@ -266,6 +331,35 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
     [...MONEY_AGES, 'death' as const].map((a) => [a, { savings: [], debt: [], netWorth: [] }]),
   );
   const gains = largestGains(content);
+  const emptyRow = (): EducationRow & { gpas: number[] } => ({
+    lives: 0, diplomaBy19: 0, ged: 0, noHighSchool: 0, college: 0, degree: 0, bachelor: 0, tradeLicense: 0, grad: 0, medianHsGpa: 0, gpas: [],
+  });
+  const eduRows = Object.fromEntries([...WEALTHS, 'all'].map((w) => [w, emptyRow()])) as Record<FamilyWealth | 'all', ReturnType<typeof emptyRow>>;
+  const gpaBuckets = [
+    { label: 'below 2.0', below: 2, lives: 0, college: 0 },
+    { label: '2.0–2.5', below: 2.5, lives: 0, college: 0 },
+    { label: '2.5–3.0', below: 3, lives: 0, college: 0 },
+    { label: '3.0–3.5', below: 3.5, lives: 0, college: 0 },
+    { label: '3.5 and up', below: 5, lives: 0, college: 0 },
+  ];
+  const education: EducationReport = {
+    byWealth: {} as EducationReport['byWealth'],
+    collegeByGpa: [],
+    diplomaAges: {},
+    applications: {
+      community: { tried: 0, accepted: 0 },
+      state: { tried: 0, accepted: 0 },
+      elite: { tried: 0, accepted: 0 },
+      trade: { tried: 0, accepted: 0 },
+      grad: { tried: 0, accepted: 0 },
+      ged: { tried: 0, accepted: 0 },
+    },
+    studentDebtAt25: { lives: 0, borrowers: 0, median: 0, p90: 0 },
+    largestStudentDebt: 0,
+    lateStudents: 0,
+    dropouts: { highSchool: 0, postSecondary: 0 },
+  };
+  const studentDebts25: number[] = [];
   const retirementAge = content.balance.economy.retirement.age;
   const firstBenefits: number[] = [];
   const mostFires = new Map<string, number>();
@@ -281,6 +375,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
     const player = createRng(`${seed}:player`);
     const romance = new RomanceWatcher();
     const wallet = new MoneyWatcher();
+    const school = new SchoolWatcher();
     const profile = rollMoneyProfile(player);
     const seenThisLife = new Set<string>();
     const firesThisLife = new Map<string, number>();
@@ -290,6 +385,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
       check(l);
       romance.observe(l);
       wallet.observe(l, MONEY_AGES);
+      school.observe(l);
       // A management action's result event, just queued.
       const queued = l.phase === 'action' && l.pending.length === 1 ? l.pending[0]! : null;
       if (queued && queued.resolvedChoiceId === undefined) {
@@ -307,6 +403,20 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
         life = performAction(life, actionId, params, content);
         watch(life);
         money.actionsTaken[actionId]++;
+      }
+      // ...and on school...
+      for (const [actionId, params] of chooseSchoolActions(life, content, player)) {
+        if (!isLifeActionAvailable(life, actionId, params, content)) continue;
+        life = performAction(life, actionId, params, content);
+        watch(life);
+        money.actionsTaken[actionId]++;
+        const decision = actionId === 'apply_school' || actionId === 'take_ged' ? life.education.applied.at(-1) : undefined;
+        if (decision) {
+          const [kind, id] = decision.option.split(':') as [string, string | undefined];
+          const key = (kind === 'college' ? id : kind) as keyof EducationReport['applications'];
+          education.applications[key].tried++;
+          if (decision.accepted) education.applications[key].accepted++;
+        }
       }
       // ...and on relationships.
       for (const [actionId, personId] of chooseActions(life, content, player)) {
@@ -391,6 +501,40 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
       if (life.finances.debtPlanYear !== undefined) o.debtPlan++;
     }
 
+    const creds = life.education.credentials;
+    const diploma = creds.find((c) => c.type === 'hs_diploma');
+    if (diploma) education.diplomaAges[diploma.year - life.birthYear] = (education.diplomaAges[diploma.year - life.birthYear] ?? 0) + 1;
+    education.largestStudentDebt = Math.max(education.largestStudentDebt, school.maxStudentDebt);
+    if (school.lateStudent) education.lateStudents++;
+    const leftPrograms = [...school.left].map((k) => k.split(':')[1]);
+    if (leftPrograms.includes('high')) education.dropouts.highSchool++;
+    if (leftPrograms.some((p) => p !== 'high')) education.dropouts.postSecondary++;
+    if (school.studentDebtAt25 !== null) {
+      education.studentDebtAt25.lives++;
+      if (school.studentDebtAt25 > 0) studentDebts25.push(school.studentDebtAt25);
+    }
+    if (school.credentialsAt30) {
+      const at30 = school.credentialsAt30;
+      const wentToCollege = school.collegeAge !== null && school.collegeAge < 30;
+      for (const row of [eduRows[life.character.familyWealth], eduRows.all]) {
+        row.lives++;
+        if (diploma && diploma.year - life.birthYear <= 19) row.diplomaBy19++;
+        if (at30.includes('ged')) row.ged++;
+        if (!at30.includes('hs_diploma') && !at30.includes('ged')) row.noHighSchool++;
+        if (wentToCollege) row.college++;
+        if (at30.includes('associate') || at30.includes('bachelor')) row.degree++;
+        if (at30.includes('bachelor')) row.bachelor++;
+        if (at30.includes('trade_license')) row.tradeLicense++;
+        if (creds.some((c) => c.type === 'grad')) row.grad++;
+        if (diploma?.gpa !== undefined) row.gpas.push(diploma.gpa);
+      }
+      if (diploma?.gpa !== undefined) {
+        const bucket = gpaBuckets.find((b) => diploma.gpa! < b.below)!;
+        bucket.lives++;
+        if (wentToCollege) bucket.college++;
+      }
+    }
+
     const age = life.character.age;
     if (age >= adultAge) {
       rel.adults++;
@@ -429,6 +573,17 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
     })
     .sort((a, b) => b.mostMoney - a.mostMoney);
 
+  for (const [key, row] of Object.entries(eduRows)) {
+    const { gpas, ...rest } = row;
+    gpas.sort((a, b) => a - b);
+    education.byWealth[key as FamilyWealth | 'all'] = { ...rest, medianHsGpa: gpas[Math.floor(gpas.length / 2)] ?? 0 };
+  }
+  education.collegeByGpa = gpaBuckets.map(({ label, lives, college }) => ({ label, lives, college }));
+  studentDebts25.sort((a, b) => a - b);
+  education.studentDebtAt25.borrowers = studentDebts25.length;
+  education.studentDebtAt25.median = studentDebts25[Math.floor(studentDebts25.length / 2)] ?? 0;
+  education.studentDebtAt25.p90 = studentDebts25[Math.floor(studentDebts25.length * 0.9)] ?? 0;
+
   ages.sort((a, b) => a - b);
   const at = (p: number) => ages[Math.min(ages.length - 1, Math.floor(ages.length * p))] ?? 0;
   const totalEventsFired = [...fired.values()].reduce((a, b) => a + b, 0);
@@ -460,6 +615,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
     deathsFromEvents,
     relationships: rel,
     money,
+    education,
   };
 }
 
@@ -535,6 +691,28 @@ export function formatReport(report: SimulationReport, content: ContentBundle): 
       .slice(0, 5)
       .map((g) => `${g.eventId} ${g.mostInOneLife} × ${dollars(g.largestGain)} = ${dollars(g.mostMoney)}`)
       .join('; ')}`,
+  );
+  const e = report.education;
+  lines.push(`Education (lives that reached 30, by family wealth):`);
+  lines.push('  wealth      lives  diploma by 19   GED  no HS at 30  college by 30  degree by 30  bachelor  trade license  grad degree  median HS GPA');
+  for (const w of [...WEALTHS, 'all'] as const) {
+    const r = e.byWealth[w];
+    lines.push(
+      `  ${w.padEnd(10)} ${String(r.lives).padStart(6)} ${pct(r.diplomaBy19, r.lives).padStart(14)} ${pct(r.ged, r.lives).padStart(5)} ${pct(r.noHighSchool, r.lives).padStart(12)} ` +
+        `${pct(r.college, r.lives).padStart(14)} ${pct(r.degree, r.lives).padStart(13)} ${pct(r.bachelor, r.lives).padStart(9)} ${pct(r.tradeLicense, r.lives).padStart(14)} ` +
+        `${pct(r.grad, r.lives).padStart(12)} ${r.medianHsGpa.toFixed(2).padStart(14)}`,
+    );
+  }
+  lines.push(`  college by 30, by high school GPA: ${e.collegeByGpa.map((b) => `${b.label} ${pct(b.college, b.lives)} of ${b.lives}`).join('; ')}`);
+  lines.push(`  high school diploma at age: ${Object.entries(e.diplomaAges).map(([age, n]) => `${age}: ${n}`).join(', ')}`);
+  lines.push(`  applications (accepted / tried): ${Object.entries(e.applications).map(([k, v]) => `${k} ${v.accepted}/${v.tried} (${pct(v.accepted, v.tried)})`).join('; ')}`);
+  lines.push(
+    `  left without finishing: high school ${pct(e.dropouts.highSchool, report.lives)} of lives, college/trade/grad ${pct(e.dropouts.postSecondary, report.lives)}; ` +
+      `started or went back to school at 25+: ${pct(e.lateStudents, report.lives)}`,
+  );
+  const sd = e.studentDebtAt25;
+  lines.push(
+    `  student debt at 25: ${pct(sd.borrowers, sd.lives)} of ${sd.lives} lives owe any; median ${dollars(sd.median)}, 90th percentile ${dollars(sd.p90)} (of those who owe); largest ever ${dollars(e.largestStudentDebt)}`,
   );
   lines.push(`Events fired: ${report.totalEventsFired}`);
   lines.push('  event'.padEnd(30) + 'fired'.padStart(8) + 'share'.padStart(8) + 'lives'.padStart(9));

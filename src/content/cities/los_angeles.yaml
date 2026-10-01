@@ -11,3 +11,10 @@ jobMarket:
   professional: 80
   trade: 75
   gig: 90
+schools:
+  high: Sunset Park High School
+  community: Arroyo Community College
+  state: Pacific State University
+  elite: Halvorsen Institute
+  trade: Harbor Trades College
+  grad: Westwood Graduate School

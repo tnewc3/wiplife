@@ -1,0 +1,39 @@
+id: class_hamster
+title: The class hamster
+text: >-
+  It's your turn to take Peanut, the class hamster, home for the weekend.
+  On Saturday morning, the cage door is open and Peanut is gone.
+tone: light
+category: school
+rarity: common
+lifeStages: [child]
+requires: { education: { program: [elementary] } }
+weight: { base: 5 }
+once: true
+choices:
+  - id: search
+    label: Tear the house apart looking
+    check:
+      base: 55
+      stats: [{ key: discipline, weight: 0.3 }, { key: luck, weight: 0.3 }]
+      success:
+        text: You find Peanut asleep in a sock drawer on Sunday night. You tell no one how close it was.
+        effects:
+          - { type: stat, key: kindness, delta: 2 }
+          - { type: stat, key: happiness, delta: 2 }
+      failure:
+        text: >-
+          Peanut turns up a week later, fat and happy, behind the washing
+          machine. By then you've had to confess to the whole class.
+        effects:
+          - { type: stat, key: stress, delta: 3 }
+          - { type: stat, key: confidence, delta: -2 }
+  - id: tell_teacher
+    label: Call the teacher right away
+    outcome:
+      text: >-
+        The teacher tells you it happens every year. Peanut is found behind
+        the fridge. Honesty, it turns out, is less stressful.
+      effects:
+        - { type: stat, key: stress, delta: -1 }
+        - { type: stat, key: reputation, delta: 1 }

@@ -14,6 +14,7 @@ import {
   money,
   relativeLabel,
   romanceLine,
+  schoolStatusLine,
   STAT_LABELS,
   timelineAgeLabel,
 } from '../../labels';
@@ -83,6 +84,11 @@ export function HomeTab({ life }: { life: LifeState }) {
         <p className="mt-1 text-sm text-muted">
           {LIFE_STAGE_LABELS[summary.lifeStage]} · {HOUSING_LABELS[summary.housing]}
         </p>
+        {summary.school && (
+          <p className="mt-1 text-sm break-words text-muted [overflow-wrap:anywhere]" data-testid="school-line">
+            {schoolStatusLine(summary.school)}
+          </p>
+        )}
         <p className="mt-1 text-sm text-muted" data-testid="money-line">
           Savings {money(summary.savings)}
           {summary.debt > 0 && ` · Debt ${money(summary.debt)}`}

@@ -1,0 +1,33 @@
+id: advanced_classes
+title: Honors track
+text: >-
+  Course sign-ups are due. The counselor says you could handle the honors
+  classes: more homework, harder tests, and a transcript colleges notice.
+tone: neutral
+category: school
+rarity: common
+lifeStages: [teen]
+requires: { education: { program: [high], year: { lte: 2 } } }
+weight:
+  base: 6
+  modifiers:
+    - { if: { flag: gifted_program }, x: 2 }
+    - { if: { trait: ambition, gt: 60 }, x: 1.5 }
+once: true
+choices:
+  - id: honors
+    label: Take the honors classes
+    outcome:
+      text: The first month is brutal. Then something clicks, and you start to like being the one who's challenged.
+      effects:
+        - { type: flag, key: advanced_classes, value: true }
+        - { type: stat, key: smarts, delta: 3 }
+        - { type: stat, key: stress, delta: 5 }
+        - { type: stat, key: ambition, delta: 2 }
+  - id: regular
+    label: Keep your schedule manageable
+    outcome:
+      text: You take the regular classes and keep your afternoons. Your grades thank you.
+      effects:
+        - { type: education, action: grades, value: 0.2 }
+        - { type: stat, key: stress, delta: -2 }

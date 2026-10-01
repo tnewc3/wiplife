@@ -343,18 +343,41 @@ Design H's statuses map onto kind and status: dating is `partner`, engaged is `f
 
 ```ts
 interface EducationState {
-  current: null | {
-    program: 'elementary' | 'middle' | 'high' | 'college' | 'trade' | 'grad';
-    tier?: 'community' | 'state' | 'elite';
-    majorId?: Id; tradeId?: Id; gradProgramId?: Id;
-    year: number; lengthYears: number; gpa: number;
-  };
+  current: Enrollment | null;          // the program you're in now (Stage 7)
   credentials: {
     type: 'hs_diploma' | 'ged' | 'associate' | 'bachelor' | 'trade_license' | 'grad';
-    refId?: Id; year: number;
+    refId?: Id; year: number;          // refId: the major, trade or grad program
+    gpa?: number; tier?: 'community' | 'state' | 'elite';   // final GPA; a college degree's tier
   }[];
+  admission: null | (SchoolPlace & {   // a place you take up as the next year begins
+    scholarship: number; decided: number;
+    resume?: { year; lengthYears; gpa; repeats };   // going back to a program you left
+  });
+  left: null | (Enrollment & { leftYear: number });   // the last program left unfinished (you can go back)
+  applied: { option: string; accepted: boolean }[];   // this year's applications, GED tries and major change
+  fund: number;                        // scholarship money from events; pays tuition until used up
+  lastBill?: { year; tuition; scholarship; family; fund; loan };   // tuition = scholarship + family + fund + loan
 }
 
+interface SchoolPlace {
+  program: 'elementary' | 'middle' | 'high' | 'college' | 'trade' | 'grad';
+  tier?: 'community' | 'state' | 'elite';
+  majorId?: Id; tradeId?: Id; gradProgramId?: Id;
+}
+
+interface Enrollment extends SchoolPlace {
+  year: number; lengthYears: number;
+  gpa: number;                         // 0–4, average of the years graded; shown as a letter grade
+  boost: number;                       // GPA points events added to this year's grade
+  repeats: number;                     // years held back (high school only)
+  scholarship: number;                 // share of tuition scholarships cover, set at admission
+  since: number;
+}
+```
+
+A school year starts as a year begins (you enroll and pay tuition) and is graded as the next one begins, so the year's events shape its grade. Elementary, middle and high school follow on their own from the start age; high school ends as you turn 18, or 19 after being held back once. Tuition is paid through the Stage 6 debt system: scholarships (merit by GPA, need by family wealth) and family help take their share, scholarship money from events pays what it can, and the rest joins your student loan (one `student` debt). Student loan payments pause while you're in college, trade school or grad school (interest still grows). Save schema version 6 added `admission`, `left`, `applied`, `fund` and `lastBill`; the upgrade from version 5 gives an adult the high school diploma they would have earned at 18 (without a GPA).
+
+```ts
 interface CareerState {
   job: null | { jobId: Id; level: number; yearsAtLevel: number; performance: number; salary: number };
   gig: boolean;
@@ -510,7 +533,10 @@ type Effect =
   | { type: 'flag'; key: string; value: number | boolean | string }
   | { type: 'schedule'; eventId: Id; inYears: [number, number]; cast?: string[] }
   | { type: 'job'; action: 'fire' | 'promote' | 'offer'; jobId?: Id }
-  | { type: 'education'; action: 'expel' | 'scholarship' | 'accept'; value?: number }
+  | { type: 'education'; action: 'grades' | 'scholarship' | 'drop_out' | 'expel'; value?: number }
+      // Stage 7: grades adds value GPA points (−1 to 1) to this school year's grade; scholarship adds value
+      // dollars of scholarship money; drop_out and expel leave high school (from the dropout age; the content
+      // build requires that age), college, trade school or grad school
   | { type: 'legal'; offenseId: Id; outcome: string; years?: number }
   | { type: 'health'; conditionId: Id; severity: number }
   | { type: 'identity'; field: string; value: 'fromLatent' | string }
@@ -536,6 +562,8 @@ type Condition =                       // structured, evaluated by src/engine/co
                   lifestyle?: Lifestyle[]; gig?: boolean; bankruptWithin?: number; planWithin?: number;
                   income?: Compare } }                         // Stage 6
   | { home: { kind?: HousingKind[]; years?: Compare; roommate?: boolean; relocated?: boolean; partner?: boolean } }
+  | { education: { program?: (Program | 'none')[]; tier?: Tier[]; major?: Id[]; trade?: Id[]; year?: Compare;
+                   final?: boolean; gpa?: Compare; credential?: CredentialType[]; left?: boolean; admission?: boolean } }   // Stage 7
   | { memory: { role: string; tag: string } }       // about cast roles: checked once the event is cast
   | { role: string; alive?: boolean; age?: Compare; affection?: Compare; trust?: Compare;
       kind?: RelationshipKind[]; status?: RelationshipStatus[]; years?: Compare };  // years: in its current kind
@@ -547,10 +575,10 @@ The other content types follow the same pattern:
 | Type | Key fields |
 |---|---|
 | `JobDef` | id, title, category (professional, trade, gig), requires (condition), levels (title and base salary), performance stats |
-| `MajorDef` | id, name, difficulty, jobs it leads to |
-| `TradeDef` | id, name, school length, license, jobs it leads to |
-| `GradProgramDef` | id, name, requirements, length, cost |
-| `CityDef` | id, countryId (always "us" for now, so more countries can be added later), name, cost-of-living multiplier, base rent, base home price, salary multiplier, job market strength by category |
+| `MajorDef` | id, name, subject, blurb, careers (text), difficulty (1–5). Jobs point at majors (Stage 8), not the other way round |
+| `TradeDef` | id, name, subject, license, blurb, careers (text), years, difficulty |
+| `GradProgramDef` | id, name, subject, degree, blurb, careers (text), years, difficulty, majors (a bachelor's in one of these; any when left out). Tuition and admission odds live in `balance/education.yaml` |
+| `CityDef` | id, countryId (always "us" for now, so more countries can be added later), name, cost-of-living multiplier, base rent, base home price, salary multiplier, job market strength by category, school names by program (Stage 7) |
 | `ConditionDef` | id, name, who gets it and how often, yearly effects, treatable, mortality |
 | `OffenseDef` | id, name, severity, misdemeanor or felony, likely outcomes |
 | `NamePool` | first names by gender category, last names |
@@ -1672,7 +1700,9 @@ src/content/
                   drift, pruning, action timing, partner ages, support), economy.yaml (tax brackets,
                   living costs, lifestyle tiers, family support, interest, debt terms, missed payments,
                   housing, ownership, gig pay), careers.yaml,
-                  education.yaml, health.yaml, legal.yaml, targets.yaml
+                  education.yaml (school ages, grades and letter grades, admission
+                  odds, tuition, scholarships, family help, the GED), health.yaml,
+                  legal.yaml, targets.yaml
   causes/         causes of death, one per file ("natural causes", "a stroke")
   cities/         nyc.yaml, los_angeles.yaml, chicago.yaml, houston.yaml, small_town.yaml
   events/

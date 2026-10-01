@@ -121,10 +121,13 @@ function DebtRow({ debt, onPay }: { debt: DebtView; onPay: (debt: DebtView) => v
         <span className="tabular-nums">{money(debt.balance)}</span>
       </span>
       <span className="text-sm text-muted">
-        {rateLabel(debt.annualRate)} a year · {money(debt.minPayment)} due each year
+        {rateLabel(debt.annualRate)} a year · {money(debt.minPayment)} {debt.paused ? 'a year once you’re done with school' : 'due each year'}
       </span>
-      <span className={`text-sm ${debt.missed > 0 || debt.kind === 'collections' ? 'font-semibold text-danger' : 'text-muted'}`}>
-        {debtStatus(debt.kind, debt.missed)}
+      <span
+        className={`text-sm ${!debt.paused && (debt.missed > 0 || debt.kind === 'collections') ? 'font-semibold text-danger' : 'text-muted'}`}
+        data-testid={`debt-status-${debt.kind}`}
+      >
+        {debtStatus(debt.kind, debt.missed, debt.paused)}
       </span>
       {debt.canPay > 0 && (
         <Button variant="secondary" block disabled={busy} className="mt-1" onClick={() => onPay(debt)}>

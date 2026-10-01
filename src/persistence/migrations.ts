@@ -66,6 +66,24 @@ export const migrations: readonly Migration[] = [
       return { ...data, character, finances, housing };
     },
   },
+  {
+    from: 5,
+    description:
+      'Stage 7: education. Adds the admission, the program you left, this year’s applications and scholarship money ' +
+      '(all empty). Nobody went to school before, so an adult (18 or older) is given the high school diploma they ' +
+      'would have earned at 18, without a GPA; a child starts school at the next age-up.',
+    migrate: (data) => {
+      if (!isRecord(data)) return data;
+      const life = data as { birthYear?: unknown; currentYear?: unknown; education?: unknown };
+      if (!isRecord(life.education)) return data;
+      const credentials = Array.isArray(life.education.credentials) ? [...(life.education.credentials as unknown[])] : [];
+      const { birthYear, currentYear } = life;
+      if (typeof birthYear === 'number' && typeof currentYear === 'number' && currentYear - birthYear >= 18 && credentials.length === 0) {
+        credentials.push({ type: 'hs_diploma', year: birthYear + 18 });
+      }
+      return { ...data, education: { ...life.education, credentials, admission: null, left: null, applied: [], fund: 0 } };
+    },
+  },
 ];
 
 function isRecord(value: unknown): value is Record<string, unknown> {

@@ -1,0 +1,46 @@
+id: report_card_day
+title: Report card day
+text: >-
+  Your report card is in your backpack, and it isn't good. {parent.name}
+  asks how school went, the way {parent.they} always {parent:does|do}.
+tone: serious
+category: school
+rarity: common
+lifeStages: [child, teen]
+requires:
+  all:
+    - { age: { lte: 15 } }
+    - { education: { program: [elementary, middle, high], gpa: { lt: 2.5 } } }
+weight: { base: 7 }
+cooldownYears: 3
+cast:
+  parent: { kind: parent }
+choices:
+  - id: show_it
+    label: Hand it over
+    outcome:
+      text: >-
+        {parent.name} reads it twice, sighs, and makes you a study schedule
+        that you hate and mostly follow.
+      effects:
+        - { type: relationship, role: parent, trust: 5 }
+        - { type: stat, key: discipline, delta: 3 }
+        - { type: education, action: grades, value: 0.3 }
+        - { type: stat, key: stress, delta: 2 }
+  - id: hide_it
+    label: Forge a signature
+    check:
+      base: 45
+      stats: [{ key: riskTaking, weight: 0.3 }, { key: luck, weight: 0.2 }]
+      success:
+        text: Your signature is shaky but convincing. The teacher files it. You feel sick about it for a week.
+        effects:
+          - { type: stat, key: stress, delta: 4 }
+          - { type: stat, key: riskTaking, delta: 2 }
+      failure:
+        text: >-
+          The school calls home about the "interesting" signature. {parent.name}
+          is less angry about the grades than about the lie.
+        effects:
+          - { type: relationship, role: parent, affection: -5, trust: -10 }
+          - { type: stat, key: stress, delta: 5 }

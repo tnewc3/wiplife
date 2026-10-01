@@ -7,6 +7,7 @@
  */
 import type { ContentBundle } from '../../content/schemas';
 import { curveAt } from '../curve';
+import { inPostSecondary } from '../education';
 import { wholeDollars } from '../finance';
 import { nextFloat, type RngState } from '../rng';
 import type { LifeState } from '../types';
@@ -24,11 +25,15 @@ export function expectedGigPay(state: LifeState, content: ContentBundle, age = s
   return wholeDollars(gig.pay * city.salaryMultiplier * curveAt(gig.market, city.jobMarket.gig) * curveAt(gig.byAge, age));
 }
 
-/** This year's gig pay: the typical pay times a random swing (none if you don't do gig work). */
+/**
+ * This year's gig pay: the typical pay times a random swing (none if you
+ * don't do gig work); part-time around college, trade school or grad school.
+ */
 export function gigPay(state: LifeState, content: ContentBundle, rng: RngState): number {
   if (!state.career.gig || !canGig(state, content)) return 0;
   const { swing } = content.balance.economy.gig;
-  return wholeDollars(expectedGigPay(state, content) * (swing.min + nextFloat(rng) * (swing.max - swing.min)));
+  const share = inPostSecondary(state) ? content.balance.education.studentGigShare : 1;
+  return wholeDollars(expectedGigPay(state, content) * share * (swing.min + nextFloat(rng) * (swing.max - swing.min)));
 }
 
 /** This year's gross income: salary (from Stage 8) plus gig pay. Draws from the life's generator. */

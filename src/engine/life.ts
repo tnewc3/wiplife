@@ -130,7 +130,7 @@ export function createLife(input: CreateLifeOptions, content: ContentBundle): Li
     character,
     people: Object.fromEntries(family.people.map((p) => [p.id, p])),
     relationships: Object.fromEntries(family.relationships.map((r) => [r.personId, r])),
-    education: { current: null, credentials: [] },
+    education: { current: null, credentials: [], admission: null, left: null, applied: [], fund: 0 },
     career: { job: null, gig: false, retired: false, history: [] },
     finances: { savings: 0, debts: [], lifestyle: 'comfortable', earnings: { years: 0, total: 0 }, hardshipYears: 0 },
     housing: { kind: 'with_parents', cityId: character.cityId, annualCost: 0, since: birthYear },

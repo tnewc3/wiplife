@@ -1,22 +1,23 @@
 /**
- * Money and home management actions (docs/design.md, sections C and L): the
- * Money tab (lifestyle, paying off a debt, a debt plan), the Work tab (gig
- * work) and More → Home (move out, move back home, relocate, buy, sell, a
+ * Money, home and school management actions (docs/design.md, sections C and L): the
+ * Money tab (lifestyle, paying off a debt, a debt plan), the Work/School tab (gig
+ * work, and from Stage 7 school: ./education.ts) and More → Home (move out, move back home, relocate, buy, sell, a
  * roommate). Each takes effect at once, between years; costs that change
  * with them (rent, living costs) are charged by the next year's ledger, so
  * nothing is charged twice. The common checks (between years, input
  * validation, the input log) live in ./index.ts.
  */
-import { LIFESTYLES, type ContentBundle, type Lifestyle } from '../../content/schemas';
+import { LIFESTYLES, type ApplyProgram, type ContentBundle, type Lifestyle, type Tier } from '../../content/schemas';
 import { canStartDebtPlan, isIndependent, payDebt, spend, startDebtPlan } from '../finance';
 import { buyHome, moveInCost, moveTo, purchaseQuote, refreshHousingCost, sellHome, supportingParent } from '../housing';
 import { canGig } from '../systems/career';
 import { writeFromGroup } from '../systems/history';
 import type { LifeState } from '../types';
+import { EDUCATION_ACTION_IDS, EDUCATION_ACTIONS } from './education';
 
 export const MONEY_ACTION_IDS = ['set_lifestyle', 'start_gig', 'stop_gig', 'pay_debt', 'debt_plan'] as const;
 export const HOME_ACTION_IDS = ['rent_home', 'move_home', 'relocate', 'buy_home', 'sell_home', 'find_roommate', 'live_alone'] as const;
-export const LIFE_ACTION_IDS = [...MONEY_ACTION_IDS, ...HOME_ACTION_IDS] as const;
+export const LIFE_ACTION_IDS = [...MONEY_ACTION_IDS, ...HOME_ACTION_IDS, ...EDUCATION_ACTION_IDS] as const;
 export type LifeActionId = (typeof LIFE_ACTION_IDS)[number];
 
 /** Parameters, after validation. */
@@ -24,9 +25,15 @@ export interface LifeActionParams {
   lifestyle?: Lifestyle;
   debtId?: string;
   cityId?: string;
+  /** School applications (Stage 7). */
+  program?: ApplyProgram;
+  tier?: Tier;
+  majorId?: string;
+  tradeId?: string;
+  gradProgramId?: string;
 }
 
-interface LifeActionRule {
+export interface LifeActionRule {
   /** Validates the parameters; null when they are wrong. */
   parse: (params: unknown, content: ContentBundle) => LifeActionParams | null;
   /** True when the action can be taken now. */
@@ -175,6 +182,7 @@ export const LIFE_ACTIONS: Record<LifeActionId, LifeActionRule> = {
       refreshHousingCost(state, content);
     },
   },
+  ...EDUCATION_ACTIONS,
 };
 
 /** True when the action can be taken now with these (validated) parameters. */

@@ -5,18 +5,15 @@
  */
 import { z } from 'zod';
 import { familyWealthSchema } from './balance';
-import { baseDefSchema, idSchema } from './common';
+import { baseDefSchema, HIDDEN_KEYS, idSchema, scoreKeySchema, STAT_KEYS, TRAIT_KEYS } from './common';
 import { debtKindSchema, housingKindSchema, lifestyleSchema } from './economy';
+import { credentialTypeSchema, programSchema, tierSchema } from './education';
 import { relationshipKindSchema, relationshipStatusSchema, romanceStatusSchema } from './relationships';
 import { templateSchema } from './text';
 
 export const LIFE_STAGE_IDS = ['early', 'child', 'teen', 'youngAdult', 'adult', 'senior'] as const;
 export const lifeStageSchema = z.enum(LIFE_STAGE_IDS);
 
-export const STAT_KEYS = ['health', 'happiness', 'smarts', 'looks', 'fitness', 'stress'] as const;
-export const TRAIT_KEYS = ['ambition', 'confidence', 'kindness', 'riskTaking', 'discipline', 'sociability'] as const;
-/** Hidden values events may read or change (genetic risk and inner conflict belong to later systems). */
-export const HIDDEN_KEYS = ['luck', 'reputation', 'vice'] as const;
 
 /** Kinds casting may create; family, partners and work relationships come from other systems. */
 export const CREATABLE_KINDS = ['friend', 'classmate', 'acquaintance'] as const;
@@ -74,6 +71,7 @@ export type Condition =
   | { romance: z.infer<typeof romanceStatusSchema>[] }
   | { finances: FinancesCondition }
   | { home: HomeCondition }
+  | { education: EducationCondition }
   | { memory: { role: string; tag: string } }
   | {
       role: string;
@@ -121,6 +119,30 @@ export interface HomeCondition {
   partner?: boolean;
 }
 
+/** School and credentials (Stage 7). Every field given must hold. */
+export interface EducationCondition {
+  /** The program you're in now; 'none' when you're not in school. */
+  program?: (z.infer<typeof programSchema> | 'none')[];
+  /** College tier you're in now. */
+  tier?: z.infer<typeof tierSchema>[];
+  /** Your major now (college). */
+  major?: string[];
+  /** Your trade now (trade school). */
+  trade?: string[];
+  /** The year of your current program (1 is the first). */
+  year?: Compare;
+  /** In (or not in) the final year of your current program. */
+  final?: boolean;
+  /** GPA in your current program (0–4). */
+  gpa?: Compare;
+  /** You hold at least one of these credentials. */
+  credential?: z.infer<typeof credentialTypeSchema>[];
+  /** You left a program before finishing it (and could go back), or not. */
+  left?: boolean;
+  /** You have a place to start at next year, or not. */
+  admission?: boolean;
+}
+
 const atLeastOneField = (c: Record<string, unknown>) => Object.values(c).some((v) => v !== undefined);
 
 export const conditionSchema: z.ZodType<Condition> = z.lazy(() =>
@@ -163,6 +185,22 @@ export const conditionSchema: z.ZodType<Condition> = z.lazy(() =>
           roommate: z.boolean().optional(),
           relocated: z.boolean().optional(),
           partner: z.boolean().optional(),
+        })
+        .refine(atLeastOneField, 'needs at least one field'),
+    }),
+    z.strictObject({
+      education: z
+        .strictObject({
+          program: z.array(z.union([programSchema, z.literal('none')])).min(1).optional(),
+          tier: z.array(tierSchema).min(1).optional(),
+          major: z.array(idSchema).min(1).optional(),
+          trade: z.array(idSchema).min(1).optional(),
+          year: compareSchema.optional(),
+          final: z.boolean().optional(),
+          gpa: compareSchema.optional(),
+          credential: z.array(credentialTypeSchema).min(1).optional(),
+          left: z.boolean().optional(),
+          admission: z.boolean().optional(),
         })
         .refine(atLeastOneField, 'needs at least one field'),
     }),
@@ -221,8 +259,7 @@ export const castSpecSchema = z
   );
 export type CastSpec = z.infer<typeof castSpecSchema>;
 
-const statKeySchema = z.enum([...STAT_KEYS, ...TRAIT_KEYS, ...HIDDEN_KEYS]);
-export type EffectStatKey = z.infer<typeof statKeySchema>;
+const statKeySchema = scoreKeySchema;
 
 /** Effect types. Adding one means a schema here and a handler in src/engine/events/effects.ts. */
 export const effectSchema = z.discriminatedUnion('type', [
@@ -267,6 +304,28 @@ export const effectSchema = z.discriminatedUnion('type', [
       role: roleSchema.optional(),
     })
     .refine((e) => (e.action === 'move_in_together') === (e.role !== undefined), 'move_in_together needs role (and only it has one)'),
+  /**
+   * School (Stage 7). grades: `value` GPA points (−1 to 1) added to this
+   * school year's grade (while you're in school). scholarship: `value`
+   * dollars that pay future tuition. drop_out / expel: you leave high school
+   * (from the dropout age), college, trade school or grad school; you can go
+   * back later. The engine ignores what doesn't fit (no school, too young).
+   */
+  z
+    .strictObject({
+      type: z.literal('education'),
+      action: z.enum(['grades', 'scholarship', 'drop_out', 'expel']),
+      value: z.number().optional(),
+    })
+    .refine(
+      (e) =>
+        e.action === 'grades'
+          ? e.value !== undefined && e.value >= -1 && e.value <= 1 && e.value !== 0
+          : e.action === 'scholarship'
+            ? e.value !== undefined && Number.isInteger(e.value) && e.value >= 1 && e.value <= 1_000_000
+            : e.value === undefined,
+      'grades needs a value from -1 to 1; scholarship a whole-dollar value from 1 to 1,000,000; drop_out and expel take no value',
+    ),
   z.strictObject({
     type: z.literal('relationship'),
     role: roleSchema,

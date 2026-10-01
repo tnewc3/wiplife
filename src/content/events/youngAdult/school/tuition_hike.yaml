@@ -1,0 +1,47 @@
+id: tuition_hike
+title: A letter from the bursar
+text: >-
+  The school is raising fees mid-year, and your financial aid isn't moving
+  with them. The letter calls it an "adjustment." Your budget calls it a hole.
+tone: serious
+category: school
+rarity: common
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { education: { program: [college, trade, grad] } }
+    - { familyWealth: [poor, working, middle] }
+weight: { base: 5 }
+cooldownYears: 5
+choices:
+  - id: work_more
+    label: Pick up extra work
+    outcome:
+      text: You cover it with weekend shifts. You sleep less and study on the bus.
+      effects:
+        - { type: money, delta: 1500 }
+        - { type: stat, key: stress, delta: 5 }
+        - { type: education, action: grades, value: -0.2 }
+  - id: appeal
+    label: Appeal to financial aid
+    check:
+      base: 45
+      stats: [{ key: confidence, weight: 0.3 }, { key: discipline, weight: 0.2 }]
+      success:
+        text: Three forms, two meetings and one very tired aid officer later, you get an emergency grant.
+        effects:
+          - { type: education, action: scholarship, value: 3000 }
+          - { type: stat, key: stress, delta: -2 }
+      failure:
+        text: The answer is a polite, photocopied no. You borrow the difference.
+        effects:
+          - { type: money, delta: -1500 }
+          - { type: stat, key: stress, delta: 3 }
+  - id: quit
+    label: Take a break from school
+    outcome:
+      text: You withdraw. It's supposed to be temporary. Everyone says that.
+      effects:
+        - { type: education, action: drop_out }
+        - { type: stat, key: stress, delta: -3 }
+        - { type: stat, key: happiness, delta: -3 }

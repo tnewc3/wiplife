@@ -1,0 +1,37 @@
+id: field_trip_museum
+title: Field trip
+text: >-
+  The class is at the natural history museum. Your group is heading to the
+  gift shop, but down a roped-off hallway you can see the edge of a giant
+  skeleton nobody's talking about.
+tone: light
+category: school
+rarity: common
+lifeStages: [child]
+requires: { education: { program: [elementary, middle] } }
+weight: { base: 6 }
+cooldownYears: 4
+choices:
+  - id: explore
+    label: Slip under the rope
+    check:
+      base: 50
+      stats: [{ key: riskTaking, weight: 0.3 }, { key: luck, weight: 0.2 }]
+      success:
+        text: >-
+          It's a whale, hanging from the ceiling in the dark, and you have it
+          all to yourself for five whole minutes. You think about it for years.
+        effects:
+          - { type: stat, key: happiness, delta: 4 }
+          - { type: stat, key: smarts, delta: 2 }
+      failure:
+        text: A guard walks you back to your group. You spend the bus ride next to the teacher.
+        effects:
+          - { type: stat, key: stress, delta: 2 }
+          - { type: stat, key: reputation, delta: -1 }
+  - id: gift_shop
+    label: Stick with the group
+    outcome:
+      text: You buy a pencil shaped like a dinosaur bone. It breaks by Tuesday.
+      effects:
+        - { type: stat, key: happiness, delta: 1 }

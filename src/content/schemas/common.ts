@@ -19,3 +19,12 @@ export const dollarsSchema = z.int().nonnegative();
 
 /** A 0–100 score. */
 export const scoreSchema = z.int().min(0).max(100);
+
+export const STAT_KEYS = ['health', 'happiness', 'smarts', 'looks', 'fitness', 'stress'] as const;
+export const TRAIT_KEYS = ['ambition', 'confidence', 'kindness', 'riskTaking', 'discipline', 'sociability'] as const;
+/** Hidden values events may read or change (genetic risk and inner conflict belong to later systems). */
+export const HIDDEN_KEYS = ['luck', 'reputation', 'vice'] as const;
+
+/** A character stat, personality trait or readable hidden value. */
+export const scoreKeySchema = z.enum([...STAT_KEYS, ...TRAIT_KEYS, ...HIDDEN_KEYS]);
+export type EffectStatKey = z.infer<typeof scoreKeySchema>;

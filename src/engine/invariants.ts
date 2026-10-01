@@ -6,7 +6,8 @@ import type { ContentBundle } from '../content/schemas';
 import { ageOf, isCurrentPartner, isFamilyKind, isPartnerKind, isRomanticKind, kindSince } from './relationships';
 import { isRngState } from './rng';
 import { lifeStageForAge } from './systems/aging';
-import type { Identity, LifeState, Pronouns } from './types';
+import { finishedHighSchool, hasCredential, isPostSecondary, schoolAges } from './education';
+import type { Enrollment, Identity, LifeState, Pronouns, SchoolPlace } from './types';
 
 const LIFE_STAGES = new Set(['early', 'child', 'teen', 'youngAdult', 'adult', 'senior']);
 const PHASES = new Set(['yearStart', 'events', 'yearEnd', 'dead', 'action']);
@@ -146,6 +147,10 @@ export function checkInvariants(state: LifeState, content: ContentBundle): strin
   }
   if (h.mortgageDebtId !== undefined && !mortgages.some((d) => d.id === h.mortgageDebtId)) fail('housing.mortgageDebtId is not a mortgage');
   if (mortgages.some((d) => d.id !== h.mortgageDebtId)) fail('a mortgage without a home');
+
+  // Education: the right school for your age, programs that fit their
+  // rules (grad school after a bachelor's...), credentials that exist.
+  failures.push(...educationFailures(state, content));
 
   // People and relationships.
   const { parentAgeAtBirth } = content.balance.creation.family;
@@ -313,4 +318,93 @@ export function checkInvariants(state: LifeState, content: ContentBundle): strin
 export function assertInvariants(state: LifeState, content: ContentBundle): void {
   const failures = checkInvariants(state, content);
   if (failures.length > 0) throw new InvariantError(failures);
+}
+
+/** Education invariants (Stage 7): school matches age and credentials. */
+function educationFailures(state: LifeState, content: ContentBundle): string[] {
+  const failures: string[] = [];
+  const fail = (message: string) => failures.push(message);
+  const edu = state.education;
+  const age = state.character.age;
+  const ages = schoolAges(content);
+  const known = (label: string, place: SchoolPlace) => {
+    const needs = {
+      tier: place.program === 'college',
+      majorId: place.program === 'college',
+      tradeId: place.program === 'trade',
+      gradProgramId: place.program === 'grad',
+    };
+    for (const [key, needed] of Object.entries(needs) as [keyof typeof needs, boolean][]) {
+      if ((place[key] !== undefined) !== needed) fail(`${label}: ${key} ${needed ? 'is missing' : 'does not belong'} in ${place.program}`);
+    }
+    if (place.majorId !== undefined && !content.majors[place.majorId]) fail(`${label}: unknown major "${place.majorId}"`);
+    if (place.tradeId !== undefined && !content.trades[place.tradeId]) fail(`${label}: unknown trade "${place.tradeId}"`);
+    if (place.gradProgramId !== undefined && !content.gradPrograms[place.gradProgramId]) fail(`${label}: unknown grad program "${place.gradProgramId}"`);
+  };
+  const enrollment = (label: string, e: Enrollment) => {
+    known(label, e);
+    if (!Number.isInteger(e.year) || !Number.isInteger(e.lengthYears) || e.year < 1 || e.year > e.lengthYears) fail(`${label}: year ${e.year} of ${e.lengthYears}`);
+    if (!(e.gpa >= 0 && e.gpa <= 4)) fail(`${label}: GPA ${e.gpa} is outside 0–4`);
+    if (!(e.boost >= -2 && e.boost <= 2)) fail(`${label}: grade boost ${e.boost} is out of range`);
+    if (!(e.scholarship >= 0 && e.scholarship <= 1)) fail(`${label}: scholarship share is out of range`);
+    if (!Number.isInteger(e.repeats) || e.repeats < 0 || e.repeats > (e.program === 'high' ? content.balance.education.school.maxRepeats : 0)) {
+      fail(`${label}: ${e.repeats} repeated years`);
+    }
+    if (e.since > state.currentYear || e.since < state.birthYear) fail(`${label}: started outside the life`);
+  };
+
+  const cur = edu.current;
+  if (cur) {
+    enrollment('education.current', cur);
+    if (cur.program === 'elementary' && cur.year !== age - ages.startAge + 1) fail(`elementary school year ${cur.year} at age ${age}`);
+    if (cur.program === 'middle' && cur.year !== age - ages.middleStart + 1) fail(`middle school year ${cur.year} at age ${age}`);
+    if (cur.program === 'high' && (age < ages.highStart || age >= ages.lastDiplomaAge)) fail(`in high school at age ${age}`);
+    if ((cur.program === 'college' || cur.program === 'trade') && !finishedHighSchool(state)) fail(`in ${cur.program} without finishing high school`);
+    if (cur.program === 'grad' && !hasCredential(state, ['bachelor'])) fail('in grad school without a bachelor’s degree');
+    if (cur.program === 'high' && finishedHighSchool(state)) fail('in high school after finishing it');
+  }
+
+  let highSchool = 0;
+  for (const [i, c] of edu.credentials.entries()) {
+    const label = `credential ${i} (${c.type})`;
+    if (!Number.isInteger(c.year) || c.year < state.birthYear || c.year > state.currentYear) fail(`${label} is from outside the life`);
+    if (c.gpa !== undefined && !(c.gpa >= 0 && c.gpa <= 4)) fail(`${label} has GPA ${c.gpa}`);
+    const ref = c.refId;
+    if (c.type === 'hs_diploma' || c.type === 'ged') {
+      highSchool++;
+      if (ref !== undefined) fail(`${label} has a refId`);
+    } else if (c.type === 'associate' || c.type === 'bachelor') {
+      if (ref === undefined || !content.majors[ref]) fail(`${label} is for an unknown major`);
+      if (c.tier === undefined || (c.type === 'associate') !== (c.tier === 'community')) fail(`${label} has the wrong tier`);
+    } else if (c.type === 'trade_license') {
+      if (ref === undefined || !content.trades[ref]) fail(`${label} is for an unknown trade`);
+    } else if (ref === undefined || !content.gradPrograms[ref]) {
+      fail(`${label} is for an unknown grad program`);
+    }
+    if (c.type !== 'hs_diploma' && c.type !== 'ged' && c.year - state.birthYear < ages.highEnd - 1) fail(`${label} earned at ${c.year - state.birthYear}`);
+  }
+  if (highSchool > 1) fail('more than one high school diploma or GED');
+
+  if (edu.admission) {
+    known('education.admission', edu.admission);
+    if (edu.admission.program !== 'high' && !isPostSecondary(edu.admission.program)) fail(`a place in ${edu.admission.program}`);
+    if (edu.admission.decided > state.currentYear) fail('an admission decided in the future');
+    const r = edu.admission.resume;
+    if (r && (r.year < 1 || r.year > r.lengthYears)) fail('an admission resumes past the end of its program');
+  }
+  if (edu.left) {
+    enrollment('education.left', edu.left);
+    if (edu.left.program !== 'high' && !isPostSecondary(edu.left.program)) fail(`left ${edu.left.program}, which can't be left`);
+    if (edu.left.leftYear > state.currentYear) fail('left school in the future');
+  }
+  if (!Number.isSafeInteger(edu.fund) || edu.fund < 0) fail('education.fund must be a whole-dollar amount of at least 0');
+  const bill = edu.lastBill;
+  if (bill) {
+    for (const key of ['tuition', 'scholarship', 'family', 'fund', 'loan'] as const) {
+      if (!Number.isSafeInteger(bill[key]) || bill[key] < 0) fail(`lastBill.${key} must be a whole-dollar amount of at least 0`);
+    }
+    if (bill.tuition !== bill.scholarship + bill.family + bill.fund + bill.loan) fail('lastBill does not add up');
+    if (bill.year > state.currentYear) fail('lastBill is from the future');
+  }
+  return failures;
 }

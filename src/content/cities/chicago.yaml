@@ -11,3 +11,10 @@ jobMarket:
   professional: 75
   trade: 75
   gig: 75
+schools:
+  high: Lakeview High School
+  community: Lakeshore Community College
+  state: Prairie State University
+  elite: Ashcombe University
+  trade: Midway Trade Institute
+  grad: Lakefront Graduate School

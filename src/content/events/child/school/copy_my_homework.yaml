@@ -1,0 +1,38 @@
+id: copy_my_homework
+title: Can I copy?
+text: >-
+  {classmate.name} leans over before first period. "You did the math
+  homework, right? Just let me see it. Two minutes. I'll owe you."
+tone: neutral
+category: school
+rarity: common
+lifeStages: [child, teen]
+requires: { education: { program: [middle, high] } }
+weight: { base: 6 }
+cooldownYears: 4
+cast:
+  classmate: { kind: classmate, ageOffset: { min: -1, max: 1 }, createIfMissing: true, newChance: 0.4 }
+choices:
+  - id: let_them
+    label: Slide it over
+    outcome:
+      text: '{classmate.name} copies it so fast it''s almost impressive. {classmate.They} {classmate:gets|get} the same grade you did.'
+      effects:
+        - { type: relationship, role: classmate, affection: 6 }
+        - { type: memory, role: classmate, tag: copied_your_homework }
+        - { type: stat, key: kindness, delta: 1 }
+  - id: help_them
+    label: Offer to explain it at lunch instead
+    outcome:
+      text: '{classmate.name} rolls {classmate.their} eyes, but shows up at lunch. It takes twenty minutes. {classmate.They} actually {classmate:gets|get} it.'
+      effects:
+        - { type: relationship, role: classmate, affection: 3, trust: 5 }
+        - { type: stat, key: smarts, delta: 1 }
+  - id: refuse
+    label: Say no
+    outcome:
+      text: '"Wow. Okay." {classmate.name} asks someone else, and doesn''t save you a seat for a while.'
+      effects:
+        - { type: relationship, role: classmate, affection: -5 }
+        - { type: memory, role: classmate, tag: you_refused_homework }
+        - { type: stat, key: discipline, delta: 1 }
