@@ -1,0 +1,44 @@
+id: grandparent_hospital
+title: Visiting hours
+text: >-
+  {grandparent.name} is in the hospital. The room smells like cleaning
+  fluid, and {grandparent.they} {grandparent:looks|look} smaller in the bed than
+  you've ever seen {grandparent.them}.
+tone: serious
+category: family
+rarity: common
+lifeStages: [child, teen]
+requires: { role: grandparent, age: { gte: 65 } }
+weight: { base: 4 }
+once: true
+cast:
+  grandparent: { kind: grandparent }
+choices:
+  - id: card
+    label: Bring the card you made
+    outcome:
+      text: >-
+        It has glitter on it, which gets everywhere. {grandparent.name} props
+        it on the tray table and shows it to every nurse.
+      effects:
+        - { type: relationship, role: grandparent, affection: 8 }
+        - { type: stat, key: kindness, delta: 2 }
+  - id: remember
+    label: Remind {grandparent.them} of your week together
+    visibleIf: { memory: { role: grandparent, tag: spoiled_you } }
+    outcome:
+      text: >-
+        "Cookies for breakfast," {grandparent.name} says, and laughs until
+        {grandparent.they} {grandparent:coughs|cough}. "Don't tell your parents."
+        The nurse says it's the best {grandparent.they} {grandparent:has|have} looked all week.
+      effects:
+        - { type: relationship, role: grandparent, affection: 12, trust: 6 }
+        - { type: stat, key: happiness, delta: 3 }
+        - { type: stat, key: kindness, delta: 2 }
+  - id: wait
+    label: Wait in the hallway; it's too scary
+    outcome:
+      text: You read every poster in the corridor twice. You wish, later, that you'd gone in.
+      effects:
+        - { type: stat, key: stress, delta: 3 }
+        - { type: relationship, role: grandparent, affection: -2 }

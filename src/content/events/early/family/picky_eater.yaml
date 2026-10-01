@@ -1,0 +1,43 @@
+id: picky_eater
+title: The broccoli standoff
+text: >-
+  There are three pieces of broccoli on your plate. {parent.name} says nobody
+  leaves the table until they're gone. You have nowhere to be.
+tone: light
+category: family
+rarity: common
+lifeStages: [early]
+requires: { age: { gte: 2 } }
+weight: { base: 5 }
+once: true
+cast:
+  parent: { kind: parent }
+choices:
+  - id: wait
+    label: Wait {parent.them} out
+    check:
+      base: 45
+      stats: [{ key: discipline, weight: 0.3 }, { key: confidence, weight: 0.2 }]
+      success:
+        text: Forty minutes later, {parent.name} sighs and clears your plate. Victory tastes like nothing at all.
+        effects:
+          - { type: stat, key: confidence, delta: 2 }
+          - { type: relationship, role: parent, affection: -1 }
+      failure:
+        text: You fall asleep at the table. The broccoli is there at breakfast.
+        effects:
+          - { type: stat, key: discipline, delta: 2 }
+  - id: dog
+    label: Feed it to the dog under the table
+    outcome:
+      text: The dog doesn't want it either. It spits it out on {parent.name}'s foot.
+      effects:
+        - { type: stat, key: riskTaking, delta: 1 }
+        - { type: stat, key: happiness, delta: 1 }
+  - id: eat
+    label: Eat it in one heroic bite
+    outcome:
+      text: It's actually fine. You will never admit this to anyone.
+      effects:
+        - { type: stat, key: health, delta: 1 }
+        - { type: relationship, role: parent, affection: 2 }

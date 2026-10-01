@@ -1,0 +1,54 @@
+id: treehouse
+title: The treehouse
+text: >-
+  {friend.name} has found a stack of old planks and a tree that's perfect.
+  The only question is how high to build.
+tone: light
+category: play
+rarity: common
+lifeStages: [child]
+weight: { base: 5 }
+once: true
+cast:
+  friend: { kind: friend, ageOffset: { min: -2, max: 2 }, createIfMissing: true }
+choices:
+  - id: high
+    label: As high as the branches go
+    check:
+      base: 60
+      stats: [{ key: fitness, weight: 0.3 }, { key: luck, weight: 0.2 }]
+      success:
+        text: >-
+          It leans a little, and you can see three streets from the door. You
+          and {friend.name} spend the whole summer up there.
+        effects:
+          - { type: relationship, role: friend, affection: 8 }
+          - { type: stat, key: riskTaking, delta: 2 }
+          - { type: stat, key: happiness, delta: 4 }
+      failure:
+        text: >-
+          The floor gives way on the first afternoon. You land in a bush,
+          scratched and furious, and {friend.name} laughs until {friend.they} {friend:cries|cry}.
+        effects:
+          - { type: stat, key: health, delta: -3 }
+          - { type: relationship, role: friend, affection: 3 }
+  - id: careful
+    label: Low and sturdy, after last time
+    visibleIf: { flag: broke_arm }
+    outcome:
+      text: >-
+        You remember the cast and the itching. Four feet up, braced twice. It
+        isn't impressive, but it's still standing when you're twelve.
+      effects:
+        - { type: stat, key: discipline, delta: 2 }
+        - { type: relationship, role: friend, affection: 5 }
+        - { type: stat, key: happiness, delta: 2 }
+  - id: fort
+    label: Build a fort on the ground instead
+    outcome:
+      text: >-
+        {friend.name} calls it a shed. You call it headquarters. It has a
+        password, which you both forget.
+      effects:
+        - { type: relationship, role: friend, affection: 5 }
+        - { type: stat, key: smarts, delta: 1 }

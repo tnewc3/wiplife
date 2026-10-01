@@ -23,6 +23,7 @@ choices:
       effects:
         - { type: relationship, role: cellmate, affection: 15, trust: 10, kind: friend }
         - { type: memory, role: cellmate, tag: shared_a_cell }
+        - { type: schedule, eventId: cellmate_outside, inYears: [3, 8], cast: [cellmate] }
         - { type: stat, key: happiness, delta: 3 }
   - id: rules
     label: Learn the rules from {cellmate.them}
@@ -31,6 +32,7 @@ choices:
       effects:
         - { type: relationship, role: cellmate, affection: 6 }
         - { type: memory, role: cellmate, tag: shared_a_cell }
+        - { type: schedule, eventId: cellmate_outside, inYears: [3, 8], cast: [cellmate] }
         - { type: stat, key: stress, delta: -3 }
   - id: alone
     label: Keep to yourself

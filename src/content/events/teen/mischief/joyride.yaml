@@ -26,6 +26,7 @@ choices:
         effects:
           - { type: flag, key: joyrode, value: true }
           - { type: memory, role: friend, tag: joyride_together }
+          - { type: schedule, eventId: joyride_buddy, inYears: [8, 15], cast: [friend] }
           - { type: relationship, role: friend, affection: 5 }
           - { type: stat, key: riskTaking, delta: 3 }
       failure:
@@ -36,6 +37,7 @@ choices:
           - { type: legal, offenseId: car_theft, outcome: sentence }
           - { type: flag, key: joyrode, value: true }
           - { type: memory, role: friend, tag: joyride_together }
+          - { type: schedule, eventId: joyride_buddy, inYears: [8, 15], cast: [friend] }
           - { type: stat, key: stress, delta: 8 }
           - { type: stat, key: reputation, delta: -4 }
   - id: talk_down

@@ -32,6 +32,7 @@ choices:
         text: '{match.name} spends the whole date talking about {match.their} ex. You fake a phone call.'
         effects:
           - { type: memory, role: match, tag: bad_first_date }
+          - { type: schedule, eventId: bad_date_redux, inYears: [1, 4], cast: [match] }
           - { type: relationship, role: match, affection: -8 }
           - { type: stat, key: happiness, delta: -2 }
   - id: chat

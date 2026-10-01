@@ -1,0 +1,43 @@
+id: lost_tooth
+title: The wobbly tooth
+text: >-
+  Your front tooth has been hanging by a thread for a week. At dinner it
+  finally comes out in a bread roll, and the whole table cheers.
+tone: light
+category: family
+rarity: common
+lifeStages: [child]
+requires: { age: { lte: 8 } }
+weight: { base: 5 }
+once: true
+cast:
+  parent: { kind: parent }
+choices:
+  - id: pillow
+    label: Put it under your pillow and go straight to sleep
+    outcome:
+      text: >-
+        In the morning there's a crisp five-dollar bill and a note in very
+        small, very familiar handwriting. You decide not to ask.
+      effects:
+        - { type: money, delta: 5 }
+        - { type: stat, key: happiness, delta: 2 }
+        - { type: relationship, role: parent, affection: 2 }
+  - id: stakeout
+    label: Stay up to catch the tooth fairy
+    check:
+      base: 40
+      stats: [{ key: discipline, weight: 0.3 }, { key: riskTaking, weight: 0.2 }]
+      success:
+        text: >-
+          At midnight the door creaks and you see exactly who the tooth fairy
+          is. {parent.name} puts a finger to {parent.their} lips. You never tell.
+        effects:
+          - { type: money, delta: 5 }
+          - { type: relationship, role: parent, affection: 4, trust: 4 }
+          - { type: stat, key: smarts, delta: 1 }
+      failure:
+        text: You fall asleep at 9:14 p.m. The fairy wins again.
+        effects:
+          - { type: money, delta: 5 }
+          - { type: stat, key: happiness, delta: 1 }

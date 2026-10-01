@@ -23,12 +23,14 @@ choices:
           - { type: stat, key: confidence, delta: 4 }
           - { type: stat, key: reputation, delta: 3 }
           - { type: memory, role: bully, tag: you_stood_up_to_them }
+          - { type: schedule, eventId: bully_grown_up, inYears: [15, 25], cast: [bully] }
       failure:
         text: '{bully.name} just laughs, and now everyone is watching you.'
         effects:
           - { type: stat, key: stress, delta: 6 }
           - { type: stat, key: confidence, delta: -3 }
           - { type: memory, role: bully, tag: bullied_you }
+          - { type: schedule, eventId: bully_grown_up, inYears: [15, 25], cast: [bully] }
   - id: tell
     label: Tell a teacher
     outcome:
@@ -36,6 +38,7 @@ choices:
       effects:
         - { type: stat, key: stress, delta: -2 }
         - { type: memory, role: bully, tag: bullied_you }
+        - { type: schedule, eventId: bully_grown_up, inYears: [15, 25], cast: [bully] }
   - id: ignore
     label: Keep your head down
     outcome:
@@ -43,3 +46,4 @@ choices:
       effects:
         - { type: stat, key: stress, delta: 4 }
         - { type: memory, role: bully, tag: bullied_you }
+        - { type: schedule, eventId: bully_grown_up, inYears: [15, 25], cast: [bully] }

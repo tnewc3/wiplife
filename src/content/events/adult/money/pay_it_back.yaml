@@ -1,0 +1,49 @@
+id: pay_it_back
+title: What you owe
+text: >-
+  You're doing all right these days, and you keep thinking about
+  {helper.name}, who was there when you weren't.
+tone: light
+category: money
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { money: { gte: 5000 } }
+    - any:
+        - { memory: { role: helper, tag: lent_you_money } }
+        - { memory: { role: helper, tag: covered_your_debt } }
+        - { memory: { role: helper, tag: took_you_in } }
+        - { memory: { role: helper, tag: stood_by_you } }
+        - { memory: { role: helper, tag: visited_you_inside } }
+        - { memory: { role: helper, tag: staged_intervention } }
+weight: { base: 6 }
+cooldownYears: 10
+cast:
+  helper: { support: true }
+choices:
+  - id: money
+    label: Pay {helper.them} back, with interest
+    outcome:
+      text: >-
+        {helper.name} tries to refuse the check. You mail it. {helper.They}
+        {helper:frames|frame} the envelope.
+      effects:
+        - { type: money, delta: -3000 }
+        - { type: relationship, role: helper, affection: 10, trust: 8 }
+        - { type: stat, key: happiness, delta: 3 }
+  - id: dinner
+    label: Take {helper.them} somewhere wildly expensive
+    outcome:
+      text: Two hours, four courses, one waiter who cries when you explain why you're there. Worth every dollar.
+      effects:
+        - { type: money, delta: -600 }
+        - { type: relationship, role: helper, affection: 12 }
+        - { type: stat, key: happiness, delta: 4 }
+  - id: words
+    label: Tell {helper.them} what it meant
+    outcome:
+      text: '{helper.name} waves it away, then has to look out the window for a while.'
+      effects:
+        - { type: relationship, role: helper, affection: 8, trust: 5 }
+        - { type: stat, key: kindness, delta: 1 }

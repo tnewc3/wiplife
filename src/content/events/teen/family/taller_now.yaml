@@ -1,0 +1,51 @@
+# Follow-up to hard_grip: years later, the memory comes back.
+id: taller_now
+title: Taller now
+text: >-
+  {parent.name} raises {parent.their} voice at you over something small, and
+  you notice, all at once, that you're taller than {parent.them} now. You
+  also notice that you've flinched.
+tone: serious
+category: family
+rarity: common
+lifeStages: [teen, youngAdult]
+requires: { memory: { role: parent, tag: lost_temper_with_you } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  parent: { kind: parent }
+choices:
+  - id: say_it
+    label: Tell {parent.them} you still remember the juice
+    check:
+      base: 40
+      stats: [{ role: parent, key: affection, weight: 0.4 }, { key: confidence, weight: 0.3 }]
+      success:
+        text: >-
+          {parent.name} goes pale, then sits down. "I think about that," {parent.they}
+          {parent:says|say}. "I'm sorry." It's the first time either of you has said it out loud.
+        effects:
+          - { type: relationship, role: parent, trust: 12, affection: 6 }
+          - { type: memory, role: parent, tag: apologized }
+          - { type: stat, key: stress, delta: -5 }
+      failure:
+        text: '"I don''t know what you''re talking about," {parent.name} says, and leaves the room. Maybe {parent.they} really {parent:doesn''t|don''t}.'
+        effects:
+          - { type: relationship, role: parent, trust: -5 }
+          - { type: stat, key: stress, delta: 3 }
+  - id: stand
+    label: Stand your ground and say nothing
+    outcome:
+      text: >-
+        You just stand there, taller. {parent.name} trails off mid-sentence and
+        never raises {parent.their} voice at you again.
+      effects:
+        - { type: stat, key: confidence, delta: 4 }
+        - { type: relationship, role: parent, affection: -3 }
+  - id: leave
+    label: Walk out and slam the door
+    outcome:
+      text: You walk until it's dark. When you come back, there's a plate of food covered in foil on the counter, and nobody says anything.
+      effects:
+        - { type: stat, key: stress, delta: 2 }
+        - { type: relationship, role: parent, affection: -2 }

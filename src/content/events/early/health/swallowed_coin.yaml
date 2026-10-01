@@ -1,0 +1,42 @@
+id: swallowed_coin
+title: The coin
+text: >-
+  There was a shiny coin on the floor, and now there isn't, because it's
+  inside you. It went down easier than you expected.
+tone: serious
+category: health
+rarity: uncommon
+lifeStages: [early]
+requires: { age: { gte: 1 } }
+weight: { base: 3 }
+once: true
+cast:
+  parent: { kind: parent }
+choices:
+  - id: tell
+    label: Tell {parent.name} right away
+    outcome:
+      text: >-
+        A very long afternoon at the emergency room, an X-ray with a perfect
+        little circle in it, and a doctor who says to wait it out. You do.
+      effects:
+        - { type: relationship, role: parent, trust: 3 }
+        - { type: memory, role: parent, tag: cared_for_you }
+        - { type: stat, key: stress, delta: 2 }
+  - id: secret
+    label: Keep it to yourself
+    check:
+      base: 70
+      stats: [{ key: luck, weight: 0.3 }]
+      success:
+        text: Nobody ever finds out. You keep the secret for twenty years.
+        effects:
+          - { type: stat, key: riskTaking, delta: 2 }
+      failure:
+        text: >-
+          A stomachache that won't quit gives you away. The doctor is not
+          impressed, and neither is {parent.name}.
+        effects:
+          - { type: stat, key: health, delta: -6 }
+          - { type: stat, key: stress, delta: 4 }
+          - { type: relationship, role: parent, trust: -2 }

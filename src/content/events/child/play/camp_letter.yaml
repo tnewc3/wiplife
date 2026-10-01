@@ -1,0 +1,34 @@
+id: camp_letter
+title: Postmarked from the lake
+text: >-
+  A letter from {friend.name}, your bunkmate from camp. Inside is a photo of
+  the two of you, sunburned and grinning, and a question: are you going back
+  this summer?
+tone: light
+category: play
+rarity: common
+lifeStages: [child, teen]
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  friend: { kind: friend }
+choices:
+  - id: kept
+    label: Write back, like you promised
+    visibleIf: { memory: { role: friend, tag: promised_to_write } }
+    outcome:
+      text: >-
+        You never missed a week, and {friend.name} knows it. You go back to
+        the lake together for three more summers.
+      effects:
+        - { type: relationship, role: friend, affection: 10, trust: 8 }
+        - { type: memory, role: friend, tag: kept_in_touch }
+        - { type: stat, key: happiness, delta: 4 }
+  - id: later
+    label: Put it on the pile to answer later
+    outcome:
+      text: The pile gets taller. The photo stays on your mirror for years.
+      effects:
+        - { type: memory, role: friend, tag: lost_touch }
+        - { type: schedule, eventId: friend_found_online, inYears: [8, 15], cast: [friend] }
+        - { type: relationship, role: friend, affection: -4 }

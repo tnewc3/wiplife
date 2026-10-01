@@ -29,6 +29,24 @@ events:
             - { type: relationship, role: friend, affection: 5 }
             - { type: memory, role: friend, tag: lent_money }
             - { type: schedule, eventId: friend_repays, inYears: [1, 2], cast: [friend] }
+      - id: again
+        label: Lend it; {friend.they} paid you back last time
+        visibleIf: { memory: { role: friend, tag: paid_you_back } }
+        outcome:
+          text: You don't even hesitate. {friend.name} paid you back last time, with wine. You're hoping for wine again.
+          effects:
+            - { type: money, delta: -300 }
+            - { type: relationship, role: friend, affection: 5, trust: 4 }
+            - { type: memory, role: friend, tag: lent_money }
+            - { type: schedule, eventId: friend_repays, inYears: [1, 2], cast: [friend] }
+      - id: last_time
+        label: Remind {friend.them} about last time
+        visibleIf: { memory: { role: friend, tag: never_paid_back } }
+        outcome:
+          text: '"Right," {friend.name} says, going red. "Right. Forget I asked." {friend.They} never {friend:asks|ask} again.'
+          effects:
+            - { type: relationship, role: friend, affection: -4, trust: -2 }
+            - { type: stat, key: confidence, delta: 2 }
       - id: excuse
         label: Make an excuse
         outcome:

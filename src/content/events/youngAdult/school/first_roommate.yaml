@@ -20,6 +20,7 @@ choices:
       effects:
         - { type: relationship, role: roommate, kind: friend, affection: 15, trust: 8 }
         - { type: memory, role: roommate, tag: roomed_together }
+        - { type: schedule, eventId: roommate_reunion, inYears: [6, 15], cast: [roommate] }
         - { type: stat, key: happiness, delta: 3 }
   - id: rules
     label: Suggest some ground rules
@@ -27,4 +28,5 @@ choices:
       text: '{roommate.name} agrees to all of them and breaks most within a month. It''s a peaceful, distant year.'
       effects:
         - { type: memory, role: roommate, tag: roomed_together }
+        - { type: schedule, eventId: roommate_reunion, inYears: [6, 15], cast: [roommate] }
         - { type: stat, key: discipline, delta: 1 }

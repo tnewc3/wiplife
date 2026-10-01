@@ -1,0 +1,63 @@
+id: lunch_money
+title: Lunch money
+text: >-
+  {bully.name} blocks the bathroom door and holds out a hand. "Lunch money.
+  Every Monday. Or else." You've got three dollars in your sock.
+tone: serious
+category: school
+rarity: common
+lifeStages: [child]
+requires: { education: { program: [elementary, middle] } }
+weight: { base: 4 }
+once: true
+cast:
+  bully: { kind: classmate, ageOffset: { min: 0, max: 2 }, createIfMissing: true }
+choices:
+  - id: pay
+    label: Hand it over
+    outcome:
+      text: It's three dollars every Monday until the end of the year. You eat a lot of free crackers from the nurse.
+      effects:
+        - { type: money, delta: -3 }
+        - { type: stat, key: confidence, delta: -3 }
+        - { type: stat, key: stress, delta: 4 }
+        - { type: memory, role: bully, tag: bullied_you }
+  - id: teacher
+    label: Tell a teacher
+    outcome:
+      text: >-
+        {bully.name} gets a week of detention and a long talk. You get a
+        nickname you don't like. The Mondays stop, though.
+      effects:
+        - { type: stat, key: discipline, delta: 1 }
+        - { type: stat, key: stress, delta: 1 }
+        - { type: relationship, role: bully, affection: -10 }
+  - id: again
+    label: Stand up to {bully.them} again
+    visibleIf: { memory: { role: bully, tag: you_stood_up_to_them } }
+    outcome:
+      text: >-
+        "We did this already," you say, and walk past. {bully.name} looks at
+        your face, remembers the lunch line, and lets you go.
+      effects:
+        - { type: stat, key: confidence, delta: 4 }
+        - { type: relationship, role: bully, trust: 5 }
+  - id: not_again
+    label: Not again. Not this year
+    visibleIf: { memory: { role: bully, tag: bullied_you } }
+    check:
+      base: 40
+      stats: [{ key: confidence, weight: 0.4 }, { key: fitness, weight: 0.2 }]
+      success:
+        text: >-
+          "No," you say. It comes out loud. {bully.name} blinks, says
+          something about your shoes, and leaves. It's over.
+        effects:
+          - { type: stat, key: confidence, delta: 6 }
+          - { type: memory, role: bully, tag: you_stood_up_to_them }
+      failure:
+        text: Your voice cracks. {bully.name} takes the three dollars and your sock.
+        effects:
+          - { type: money, delta: -3 }
+          - { type: stat, key: confidence, delta: -4 }
+          - { type: stat, key: stress, delta: 4 }

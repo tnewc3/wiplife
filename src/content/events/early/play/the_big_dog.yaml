@@ -1,0 +1,32 @@
+id: the_big_dog
+title: The big dog
+text: >-
+  The neighbors' dog is the size of a pony. It's ambling toward you across
+  the yard with its tongue out and its tail going like a windshield wiper.
+tone: light
+category: play
+rarity: common
+lifeStages: [early]
+requires: { age: { gte: 2 } }
+weight: { base: 5 }
+once: true
+choices:
+  - id: pet
+    label: Hold out your hand like you were shown
+    outcome:
+      text: >-
+        The dog sniffs your hand, sighs, and lies down on your feet. You've
+        never been so happy to be trapped.
+      effects:
+        - { type: stat, key: confidence, delta: 2 }
+        - { type: stat, key: happiness, delta: 3 }
+        - { type: stat, key: kindness, delta: 1 }
+  - id: run
+    label: Run screaming for the door
+    outcome:
+      text: >-
+        The dog thinks it's a game and chases you, delighted. You are afraid of
+        dogs for several years, and you can't quite say why.
+      effects:
+        - { type: stat, key: stress, delta: 3 }
+        - { type: stat, key: confidence, delta: -2 }

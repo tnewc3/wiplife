@@ -1,0 +1,40 @@
+# Follow-up to new_in_town.
+id: neighbor_moving_away
+title: The moving truck next door
+text: >-
+  There's a moving truck outside {neighbor.name}'s place. {neighbor.They}
+  {neighbor:is|are} leaving town: a new job, a smaller place, a fresh start.
+tone: neutral
+category: community
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  neighbor: { kind: acquaintance }
+choices:
+  - id: party
+    label: Throw {neighbor.them} a goodbye party
+    visibleIf: { memory: { role: neighbor, tag: welcomed_you } }
+    outcome:
+      text: >-
+        {neighbor.name} welcomed you to the block with a flyer and a casserole.
+        You return the favor: a backyard full of neighbors and a cake that says
+        DON'T GO. {neighbor.They} {neighbor:cries|cry} into it.
+      effects:
+        - { type: relationship, role: neighbor, affection: 12, trust: 6 }
+        - { type: stat, key: happiness, delta: 3 }
+        - { type: stat, key: sociability, delta: 2 }
+  - id: help
+    label: Help carry boxes
+    outcome:
+      text: Three hours, one couch stuck in a doorway, and a promise to visit that you both half mean.
+      effects:
+        - { type: relationship, role: neighbor, affection: 6 }
+        - { type: stat, key: fitness, delta: 1 }
+  - id: wave
+    label: Wave from the window
+    outcome:
+      text: The new neighbors play drums. You think about {neighbor.name} fondly, and often.
+      effects:
+        - { type: stat, key: happiness, delta: -1 }

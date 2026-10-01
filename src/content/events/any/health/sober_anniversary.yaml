@@ -1,0 +1,53 @@
+# Follow-up to intervention: a few years on.
+id: sober_anniversary
+title: A few years on
+text: >-
+  It's been a few years since {family.name} sat on your couch with a folder of
+  brochures. You still think about that afternoon more than you'd admit.
+tone: serious
+category: health
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  family: { support: true }
+choices:
+  - id: chip
+    label: Show {family.them} your sobriety chip
+    visibleIf:
+      all:
+        - { flag: in_recovery }
+        - { memory: { role: family, tag: staged_intervention } }
+    outcome:
+      text: >-
+        {family.name} turns the chip over in {family.their} fingers for a long
+        time. "I didn't know if you'd forgive me," {family.they} {family:says|say}.
+        You've been meaning to say thank you for three years.
+      effects:
+        - { type: relationship, role: family, affection: 12, trust: 12 }
+        - { type: stat, key: happiness, delta: 5 }
+        - { type: stat, key: vice, delta: -3 }
+        - { type: history, text: 'You marked a few years in recovery, and thanked {family.name} for the intervention.', importance: 2 }
+  - id: call
+    label: Finally call {family.them} back
+    visibleIf: { memory: { role: family, tag: walked_out_on_them } }
+    check:
+      base: 45
+      stats: [{ role: family, key: affection, weight: 0.4 }, { key: kindness, weight: 0.2 }]
+      success:
+        text: '"You slammed the door so hard," {family.name} says. "I''m glad you called." Neither of you hangs up for an hour.'
+        effects:
+          - { type: relationship, role: family, affection: 12, trust: 8 }
+          - { type: memory, role: family, tag: made_peace }
+          - { type: stat, key: stress, delta: -4 }
+      failure:
+        text: It goes to voicemail. You hang up before the beep, and think about it all week.
+        effects:
+          - { type: stat, key: stress, delta: 3 }
+  - id: nothing
+    label: Let the day pass quietly
+    outcome:
+      text: You go for a long walk. Some anniversaries are just for you.
+      effects:
+        - { type: stat, key: stress, delta: -1 }

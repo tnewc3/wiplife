@@ -32,6 +32,7 @@ events:
           effects:
             - { type: stat, key: happiness, delta: -3 }
             - { type: memory, role: friend, tag: lost_touch }
+            - { type: schedule, eventId: friend_found_online, inYears: [10, 20], cast: [friend] }
 
   - id: letter_from_old_friend
     title: A letter
@@ -61,6 +62,7 @@ events:
           text: You mean to answer. You never do.
           effects:
             - { type: memory, role: friend, tag: lost_touch }
+            - { type: schedule, eventId: friend_found_online, inYears: [10, 20], cast: [friend] }
             - { type: relationship, role: friend, affection: -5 }
             - { type: stat, key: happiness, delta: -1 }
 

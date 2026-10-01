@@ -1,0 +1,41 @@
+# Follow-up to graffiti_crew.
+id: bridge_painted_over
+title: The bridge
+text: >-
+  The town is finally repainting the railroad bridge. Under the old gray
+  coats, the paint you and {friend.name} put there all those years ago is
+  still faintly visible, and someone has posted a photo of it online.
+tone: light
+category: community
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires: { flag: tagged_bridge }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  friend: { kind: friend }
+choices:
+  - id: confess
+    label: Comment "that was us"
+    outcome:
+      text: >-
+        Two hundred likes and one very formal message from the town council.
+        {friend.name} calls, laughing so hard {friend.they} can't talk.
+      effects:
+        - { type: relationship, role: friend, status: active, affection: 10 }
+        - { type: stat, key: happiness, delta: 4 }
+        - { type: stat, key: reputation, delta: 1 }
+  - id: send
+    label: Send the photo to {friend.name} only
+    visibleIf: { memory: { role: friend, tag: tagged_with_you } }
+    outcome:
+      text: '"We were legends," {friend.name} writes back. "Terrible, illegal legends." You keep the photo.'
+      effects:
+        - { type: relationship, role: friend, status: active, affection: 8, trust: 4 }
+        - { type: stat, key: happiness, delta: 3 }
+  - id: quiet
+    label: Say nothing. The statute of limitations is a mystery to you
+    outcome:
+      text: You drive past it slowly on the day they paint over the last of it.
+      effects:
+        - { type: stat, key: happiness, delta: -1 }

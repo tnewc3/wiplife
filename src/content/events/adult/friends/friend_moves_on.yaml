@@ -1,0 +1,44 @@
+# Follow-up to friends_to_more, when one of you said no.
+id: friend_moves_on
+title: Save the date
+text: >-
+  {friend.name} is getting married. The invitation has your name written in
+  {friend.their} handwriting, and a sticky note: "It wouldn't be right without you."
+tone: neutral
+category: friends
+rarity: common
+lifeStages: [youngAdult, adult]
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  friend: { kind: friend }
+choices:
+  - id: happy
+    label: Go, and be genuinely happy for {friend.them}
+    visibleIf: { memory: { role: friend, tag: turned_down_their_feelings } }
+    outcome:
+      text: >-
+        You said no once, and you'd say it again, and that's exactly why you
+        can dance at this wedding without a single knot in your stomach.
+        {friend.name} hugs you twice.
+      effects:
+        - { type: relationship, role: friend, affection: 8, trust: 5 }
+        - { type: stat, key: happiness, delta: 3 }
+  - id: what_if
+    label: Go, and wonder what might have been
+    visibleIf: { memory: { role: friend, tag: confessed_feelings } }
+    outcome:
+      text: >-
+        {friend.name} told you once how {friend.they} felt. Watching {friend.them}
+        say "I do" to someone else is harder than you thought. You leave before the cake.
+      effects:
+        - { type: relationship, role: friend, affection: 2 }
+        - { type: stat, key: happiness, delta: -4 }
+        - { type: stat, key: stress, delta: 3 }
+  - id: decline
+    label: Send a gift and stay home
+    outcome:
+      text: The gift is very nice. {friend.name} writes a thank-you card that's a little shorter than it could be.
+      effects:
+        - { type: money, delta: -150 }
+        - { type: relationship, role: friend, affection: -4 }

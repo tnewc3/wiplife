@@ -34,3 +34,4 @@ choices:
       effects:
         - { type: relationship, role: friend, affection: -10 }
         - { type: memory, role: friend, tag: lost_touch }
+        - { type: schedule, eventId: friend_found_online, inYears: [6, 15], cast: [friend] }

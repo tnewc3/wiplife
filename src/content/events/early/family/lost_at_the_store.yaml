@@ -1,0 +1,46 @@
+id: lost_at_the_store
+title: Lost
+text: >-
+  One minute {parent.name} is right there by the cereal. The next minute the
+  aisle is full of strangers' legs, and none of them belong to {parent.them}.
+tone: serious
+category: family
+rarity: common
+lifeStages: [early]
+requires: { age: { gte: 3 } }
+weight: { base: 4 }
+once: true
+cast:
+  parent: { kind: parent }
+choices:
+  - id: stay
+    label: Stay right where you are, like you were told
+    outcome:
+      text: >-
+        It feels like an hour. It's four minutes. {parent.name} comes around
+        the corner at a run and holds on to you so tightly it hurts.
+      effects:
+        - { type: relationship, role: parent, trust: 5 }
+        - { type: memory, role: parent, tag: comforted_you }
+        - { type: stat, key: discipline, delta: 2 }
+        - { type: stat, key: stress, delta: 2 }
+  - id: search
+    label: Go looking on your own
+    check:
+      base: 50
+      stats: [{ key: luck, weight: 0.4 }, { key: confidence, weight: 0.2 }]
+      success:
+        text: >-
+          You find {parent.name} two aisles over, looking at shampoo, and
+          tell {parent.them} very sternly not to wander off again.
+        effects:
+          - { type: stat, key: confidence, delta: 3 }
+          - { type: stat, key: riskTaking, delta: 1 }
+      failure:
+        text: >-
+          You end up by the loading doors, sobbing. A cashier finds you and
+          calls your name over the speakers. The whole store hears it.
+        effects:
+          - { type: stat, key: stress, delta: 5 }
+          - { type: stat, key: confidence, delta: -2 }
+          - { type: relationship, role: parent, trust: 2 }

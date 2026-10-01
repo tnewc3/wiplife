@@ -1,0 +1,45 @@
+id: talent_show
+title: The talent show
+text: >-
+  The school talent show sign-up sheet has one line left. Everyone else is
+  doing the same dance from the same video.
+tone: light
+category: school
+rarity: common
+lifeStages: [child]
+requires: { education: { program: [elementary, middle] } }
+weight: { base: 4 }
+once: true
+choices:
+  - id: secret
+    label: Do the thing you practice when no one's looking
+    visibleIf: { discovery: { talent: hidden } }
+    outcome:
+      text: >-
+        It turns out the thing you do alone in your room is {talent}, and it
+        turns out you're good at it. The gym goes quiet, then loud.
+      effects:
+        - { type: talent }
+        - { type: stat, key: confidence, delta: 4 }
+        - { type: stat, key: happiness, delta: 3 }
+  - id: magic
+    label: Do a magic trick
+    check:
+      base: 50
+      stats: [{ key: discipline, weight: 0.3 }, { key: confidence, weight: 0.2 }]
+      success:
+        text: The coin vanishes. The coin reappears behind the principal's ear. You are, briefly, famous.
+        effects:
+          - { type: stat, key: confidence, delta: 3 }
+          - { type: stat, key: reputation, delta: 1 }
+      failure:
+        text: The coin falls out of your sleeve and rolls, slowly, across the entire stage.
+        effects:
+          - { type: stat, key: confidence, delta: -2 }
+          - { type: stat, key: stress, delta: 2 }
+  - id: skip
+    label: Watch from the audience
+    outcome:
+      text: You clap for eleven versions of the same dance. Nobody claps for you, but nobody laughs either.
+      effects:
+        - { type: stat, key: stress, delta: -1 }

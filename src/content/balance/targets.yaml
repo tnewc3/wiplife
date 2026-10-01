@@ -86,3 +86,19 @@ discovery:
     expression: { min: 0.025, max: 0.08 }
     personality: { min: 0.08, max: 0.2 }
     talent: { min: 0.5, max: 0.8 }
+
+# Stage 10: the content coverage report (npm run coverage) and the 10,000-life
+# simulation. docs/technical.md, Stage 10 acceptance criteria.
+coverage:
+  minEvents: 300
+  legendary: { min: 5, max: 10 }
+  # "In most simulated years, at least 15 events are eligible": events whose
+  # requirements, cooldowns and one-time rules let them happen that year
+  # (prison years, with their own small set of events, aren't counted).
+  minEligible: 15
+  minCoveredYears: 0.5
+  maxEventShare: 0.03
+  # Section Q: legendary events are rare but reachable.
+  legendaryLives: { min: 0.001, max: 0.02 }
+  # Design section G: about 300 events at launch.
+  launch: { childhood: 50, teen: 70, youngAdult: 70, adult: 70, senior: 40 }

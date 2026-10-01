@@ -1,0 +1,42 @@
+id: crayon_wall
+title: The mural
+text: >-
+  The hallway wall was so big and so empty. Now it has a sun, a dog, three
+  people with very long arms, and most of a purple crayon on it.
+tone: light
+category: family
+rarity: common
+lifeStages: [early]
+requires: { age: { gte: 2 } }
+weight: { base: 5 }
+once: true
+cast:
+  parent: { kind: parent }
+choices:
+  - id: proud
+    label: Show {parent.name} your masterpiece
+    check:
+      base: 50
+      stats: [{ role: parent, key: affection, weight: 0.4 }, { key: looks, weight: 0.1 }]
+      success:
+        text: >-
+          {parent.name} opens {parent.their} mouth to yell, looks at the dog,
+          and takes a photo instead. The mural stays up for a year.
+        effects:
+          - { type: stat, key: confidence, delta: 3 }
+          - { type: stat, key: happiness, delta: 2 }
+          - { type: relationship, role: parent, affection: 3 }
+      failure:
+        text: You spend the afternoon scrubbing purple off the wall with a sponge bigger than your head.
+        effects:
+          - { type: stat, key: discipline, delta: 2 }
+          - { type: stat, key: happiness, delta: -1 }
+  - id: hide
+    label: Hide the crayon and look innocent
+    outcome:
+      text: >-
+        You are the only person in the house who can reach that part of the
+        wall. Nobody believes the dog did it.
+      effects:
+        - { type: relationship, role: parent, trust: -2 }
+        - { type: stat, key: riskTaking, delta: 1 }

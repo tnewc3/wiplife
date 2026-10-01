@@ -1,0 +1,32 @@
+# Follow-up to dance_floor_moment.
+id: slow_song_again
+title: The same song
+text: >-
+  At another wedding, a different town, years on, the DJ plays the same slow
+  song. Across the room, {admirer.name} hears it too, and looks straight at you.
+tone: light
+category: people
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires: { memory: { role: admirer, tag: danced_with_you } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  admirer: { kind: acquaintance }
+choices:
+  - id: dance
+    label: Cross the room and hold out your hand
+    outcome:
+      text: >-
+        You don't talk. You don't have to. When the song ends, {admirer.name}
+        says, "Same time next wedding?" and you say yes.
+      effects:
+        - { type: relationship, role: admirer, status: active, affection: 10 }
+        - { type: stat, key: happiness, delta: 4 }
+  - id: raise
+    label: Raise your glass from across the room
+    outcome:
+      text: '{admirer.name} raises {admirer.theirs} back. Some moments are better left where they were.'
+      effects:
+        - { type: relationship, role: admirer, affection: 3 }
+        - { type: stat, key: happiness, delta: 1 }

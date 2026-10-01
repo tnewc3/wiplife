@@ -1,0 +1,38 @@
+id: chore_chart
+title: The chore chart
+text: >-
+  {parent.name} has made a chore chart with gold stars and a promise: a dollar
+  a star. The chart has a lot of boxes.
+tone: light
+category: family
+rarity: common
+lifeStages: [child]
+weight: { base: 4 }
+once: true
+cast:
+  parent: { kind: parent }
+choices:
+  - id: earn
+    label: Fill every box
+    outcome:
+      text: You fill the chart three weeks running. Your piggy bank becomes a serious financial institution.
+      effects:
+        - { type: money, delta: 60 }
+        - { type: stat, key: discipline, delta: 3 }
+        - { type: relationship, role: parent, affection: 2 }
+  - id: negotiate
+    label: Negotiate two dollars a star
+    check:
+      base: 35
+      stats: [{ key: confidence, weight: 0.4 }, { key: smarts, weight: 0.2 }]
+      success:
+        text: '{parent.name} laughs and agrees, "for the dishes only." You do a lot of dishes.'
+        effects:
+          - { type: money, delta: 80 }
+          - { type: stat, key: confidence, delta: 2 }
+          - { type: stat, key: ambition, delta: 2 }
+      failure:
+        text: The chart comes down. Chores are now free, and mandatory.
+        effects:
+          - { type: stat, key: discipline, delta: 1 }
+          - { type: stat, key: happiness, delta: -1 }

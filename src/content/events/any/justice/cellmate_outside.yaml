@@ -1,0 +1,36 @@
+# Follow-up to prison_cellmate.
+id: cellmate_outside
+title: Out here
+text: >-
+  {cellmate.name}, your old cellmate, is out, and somehow has your number.
+  {cellmate.They} {cellmate:wants|want} to get a coffee "somewhere with real cups."
+tone: neutral
+category: justice
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { memory: { role: cellmate, tag: shared_a_cell } }
+    - { legal: { incarcerated: false } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  cellmate: { kind: acquaintance }
+choices:
+  - id: coffee
+    label: Meet for coffee in real cups
+    outcome:
+      text: >-
+        {cellmate.name} has a job at a bakery and a photo of {cellmate.their}
+        kids on {cellmate.their} phone. It's good to see someone who knows
+        exactly where you've been and doesn't need it explained.
+      effects:
+        - { type: relationship, role: cellmate, status: active, kind: friend, affection: 10, trust: 8 }
+        - { type: stat, key: happiness, delta: 3 }
+        - { type: stat, key: stress, delta: -2 }
+  - id: past
+    label: Leave that part of your life behind
+    outcome:
+      text: You don't answer. You wish {cellmate.name} well, quietly, and mean it.
+      effects:
+        - { type: relationship, role: cellmate, affection: -4 }

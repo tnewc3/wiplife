@@ -1,0 +1,53 @@
+id: curfew_fight
+title: Curfew
+text: >-
+  Your curfew is ten. Everyone else's is midnight, or so you've told
+  {parent.name} several times. Tonight there's a party that starts at ten.
+tone: neutral
+category: family
+rarity: common
+lifeStages: [teen]
+requires: { age: { gte: 14 } }
+weight: { base: 5 }
+cooldownYears: 2
+cast:
+  parent: { kind: parent }
+choices:
+  - id: negotiate
+    label: Negotiate like a lawyer
+    check:
+      base: 40
+      stats: [{ role: parent, key: trust, weight: 0.4 }, { key: confidence, weight: 0.2 }]
+      success:
+        text: Eleven-thirty, with a text at eleven. You shake on it. It feels like being promoted.
+        effects:
+          - { type: relationship, role: parent, trust: 4 }
+          - { type: stat, key: confidence, delta: 2 }
+          - { type: stat, key: happiness, delta: 2 }
+      failure:
+        text: '"Ten," {parent.name} says. "And now we''re talking about your room."'
+        effects:
+          - { type: stat, key: stress, delta: 2 }
+  - id: sneak
+    label: Agree to ten, then climb out the window at ten-fifteen
+    check:
+      base: 50
+      stats: [{ key: riskTaking, weight: 0.3 }, { key: luck, weight: 0.3 }]
+      success:
+        text: The party is fine. The thrill of the window is better.
+        effects:
+          - { type: stat, key: riskTaking, delta: 2 }
+          - { type: stat, key: happiness, delta: 2 }
+          - { type: relationship, role: parent, trust: -2 }
+      failure:
+        text: '{parent.name} is sitting on your bed in the dark when you climb back in. Grounded until spring.'
+        effects:
+          - { type: relationship, role: parent, trust: -8 }
+          - { type: stat, key: stress, delta: 4 }
+  - id: home
+    label: Stay home and complain about it
+    outcome:
+      text: You hear about the party for weeks. It sounds mostly like people standing in a kitchen.
+      effects:
+        - { type: relationship, role: parent, trust: 3 }
+        - { type: stat, key: happiness, delta: -1 }

@@ -1,0 +1,54 @@
+id: first_place_drive
+title: The old place
+text: >-
+  Driving through the old neighborhood, {partner.name} points at a window:
+  your first place together. Someone has put flowers on the fire escape.
+tone: light
+category: romance
+rarity: common
+lifeStages: [adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { role: partner, years: { gte: 5 } }
+    - any:
+        - { memory: { role: partner, tag: moved_in_together } }
+        - { memory: { role: partner, tag: engaged_to_you } }
+        - { memory: { role: partner, tag: anniversary_trip } }
+weight: { base: 5 }
+once: true
+cast:
+  partner: { kind: spouse }
+choices:
+  - id: knock
+    label: Knock on the door and ask to look inside
+    check:
+      base: 40
+      stats: [{ key: confidence, weight: 0.3 }, { key: looks, weight: 0.1 }, { key: luck, weight: 0.2 }]
+      success:
+        text: >-
+          The young couple who live there let you in. The radiator still clanks.
+          {partner.name} stands in the kitchen and laughs at how small it is.
+        effects:
+          - { type: relationship, role: partner, affection: 10 }
+          - { type: stat, key: happiness, delta: 5 }
+      failure:
+        text: Nobody answers. You stand on the sidewalk anyway, pointing at windows, until a neighbor asks if you're lost.
+        effects:
+          - { type: relationship, role: partner, affection: 5 }
+          - { type: stat, key: happiness, delta: 2 }
+  - id: trip
+    label: Plan another trip like that first one
+    visibleIf: { memory: { role: partner, tag: anniversary_trip } }
+    outcome:
+      text: You book it that night. It's not the same, and it doesn't need to be.
+      effects:
+        - { type: money, delta: -3000 }
+        - { type: relationship, role: partner, affection: 12 }
+        - { type: stat, key: happiness, delta: 5 }
+  - id: drive
+    label: Keep driving
+    outcome:
+      text: '{partner.name} squeezes your knee. You keep driving.'
+      effects:
+        - { type: relationship, role: partner, affection: 3 }

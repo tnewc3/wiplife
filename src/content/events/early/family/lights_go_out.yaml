@@ -1,0 +1,43 @@
+id: lights_go_out
+title: The lights go out
+text: >-
+  The lights go out in the middle of dinner and don't come back on. It isn't
+  a storm. {parent.name} sits very still at the table for a moment, holding a
+  letter, before {parent.they} {parent:finds|find} the candles.
+tone: serious
+category: family
+rarity: uncommon
+lifeStages: [early, child]
+requires:
+  all:
+    - { age: { gte: 3, lte: 8 } }
+    - { familyWealth: [poor, working] }
+weight:
+  base: 4
+  modifiers:
+    - { if: { familyWealth: [poor] }, x: 2 }
+once: true
+cast:
+  parent: { kind: parent }
+choices:
+  - id: fort
+    label: Help build a blanket fort
+    outcome:
+      text: >-
+        {parent.name} calls it camping. You eat cold beans by flashlight in a
+        fort made of every blanket you own, and for years you think it was one
+        of the best nights of your life.
+      effects:
+        - { type: relationship, role: parent, affection: 6, trust: 4 }
+        - { type: memory, role: parent, tag: comforted_you }
+        - { type: stat, key: happiness, delta: 2 }
+  - id: ask
+    label: Ask why the lights won't work
+    outcome:
+      text: >-
+        "We'll sort it out," {parent.name} says, in a voice that isn't sure.
+        The power comes back a week later. You start noticing the red envelopes.
+      effects:
+        - { type: stat, key: stress, delta: 4 }
+        - { type: stat, key: discipline, delta: 2 }
+        - { type: relationship, role: parent, trust: 2 }

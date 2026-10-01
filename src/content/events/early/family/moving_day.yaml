@@ -1,0 +1,32 @@
+id: moving_day
+title: Moving day
+text: >-
+  Everything you own is in boxes, and the boxes are in a truck. Your room is
+  just a room now, with a square on the wall where your nightlight was.
+tone: neutral
+category: family
+rarity: common
+lifeStages: [early, child]
+requires: { age: { gte: 3, lte: 9 } }
+weight: { base: 3 }
+once: true
+cast:
+  parent: { kind: parent }
+choices:
+  - id: goodbye
+    label: Say goodbye to every room
+    outcome:
+      text: >-
+        {parent.name} waits while you say goodbye to the bathtub, the
+        hallway and the crack in the ceiling shaped like a rabbit.
+      effects:
+        - { type: relationship, role: parent, affection: 3 }
+        - { type: stat, key: kindness, delta: 1 }
+        - { type: stat, key: stress, delta: -1 }
+  - id: excited
+    label: Ask if the new place has stairs
+    outcome:
+      text: It does. You are on them before the truck is unpacked, and you fall down three of them. Worth it.
+      effects:
+        - { type: stat, key: riskTaking, delta: 1 }
+        - { type: stat, key: happiness, delta: 2 }

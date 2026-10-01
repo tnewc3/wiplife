@@ -27,6 +27,7 @@ choices:
         effects:
           - { type: flag, key: tagged_bridge, value: true }
           - { type: memory, role: friend, tag: tagged_with_you }
+          - { type: schedule, eventId: bridge_painted_over, inYears: [15, 25], cast: [friend] }
           - { type: stat, key: happiness, delta: 4 }
           - { type: stat, key: riskTaking, delta: 2 }
       failure:
@@ -37,6 +38,7 @@ choices:
           - { type: legal, offenseId: vandalism, outcome: sentence }
           - { type: flag, key: tagged_bridge, value: true }
           - { type: memory, role: friend, tag: tagged_with_you }
+          - { type: schedule, eventId: bridge_painted_over, inYears: [15, 25], cast: [friend] }
           - { type: stat, key: stress, delta: 6 }
   - id: lookout
     label: Keep watch from the road

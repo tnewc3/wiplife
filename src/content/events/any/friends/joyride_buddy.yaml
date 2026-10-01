@@ -1,0 +1,34 @@
+# Follow-up to joyride.
+id: joyride_buddy
+title: The uncle's car
+text: >-
+  {friend.name} turns up with a new car, an actual one, with an actual title in
+  {friend.their} own name. "Want to go for a drive?" {friend.they} {friend:asks|ask},
+  grinning. "Legally, this time."
+tone: light
+category: friends
+rarity: common
+lifeStages: [youngAdult, adult]
+requires: { flag: joyrode }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  friend: { kind: friend }
+choices:
+  - id: drive
+    label: Get in, for old times' sake
+    visibleIf: { memory: { role: friend, tag: joyride_together } }
+    outcome:
+      text: >-
+        Same roads, same playlist, the speed limit this time. You talk about
+        who you were that night, and how lucky you both got.
+      effects:
+        - { type: relationship, role: friend, status: active, affection: 10, trust: 6 }
+        - { type: stat, key: happiness, delta: 3 }
+  - id: lecture
+    label: Make {friend.them} show you the paperwork first
+    outcome:
+      text: '{friend.name} produces the title, the registration and a laminated insurance card, and makes you read all three.'
+      effects:
+        - { type: relationship, role: friend, affection: 4 }
+        - { type: stat, key: happiness, delta: 2 }

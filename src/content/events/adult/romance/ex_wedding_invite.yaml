@@ -1,0 +1,63 @@
+id: ex_wedding_invite
+title: Your ex is getting married
+text: >-
+  You hear it from a mutual friend: {ex.name} is getting married. To someone
+  nice, apparently. You're invited, which is either very mature or a trap.
+tone: neutral
+category: romance
+rarity: common
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { role: ex, age: { gte: 20 } }
+weight: { base: 3 }
+cooldownYears: 6
+cast:
+  ex: { kind: ex }
+choices:
+  - id: go
+    label: Go, and dance at the wedding
+    outcome:
+      text: >-
+        It's strange for exactly one song, and then it's a wedding. {ex.name}
+        thanks you for coming, and means it.
+      effects:
+        - { type: relationship, role: ex, affection: 6 }
+        - { type: stat, key: confidence, delta: 2 }
+        - { type: stat, key: happiness, delta: 1 }
+  - id: no_to_you
+    label: Remember when you said no to {ex.them}
+    visibleIf:
+      any:
+        - { memory: { role: ex, tag: you_refused_them } }
+        - { memory: { role: ex, tag: you_said_not_yet } }
+        - { memory: { role: ex, tag: called_off_wedding } }
+    outcome:
+      text: >-
+        {ex.name} once asked you this exact question, or you once walked away
+        from this exact day. Now {ex.they}'ll say yes to someone else. You send a
+        card that says you're glad, and you are.
+      effects:
+        - { type: relationship, role: ex, affection: 4, trust: 4 }
+        - { type: stat, key: stress, delta: -2 }
+  - id: no_to_me
+    label: Remember when {ex.they} said no to you
+    visibleIf:
+      any:
+        - { memory: { role: ex, tag: refused_proposal } }
+        - { memory: { role: ex, tag: turned_you_down } }
+    outcome:
+      text: >-
+        {ex.name} said no to you once. You were sure you'd never recover. You
+        read the invitation twice, laugh, and RSVP with a plus-one.
+      effects:
+        - { type: stat, key: confidence, delta: 3 }
+        - { type: stat, key: happiness, delta: 2 }
+  - id: decline
+    label: Decline politely and eat ice cream
+    outcome:
+      text: A gift off the registry. A pint of ice cream. A night of not checking anyone's photos. Mostly.
+      effects:
+        - { type: stat, key: happiness, delta: -1 }
+        - { type: money, delta: -100 }

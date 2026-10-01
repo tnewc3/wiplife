@@ -1,0 +1,34 @@
+id: sibling_blame
+title: The broken vase
+text: >-
+  {sibling.name} knocked the good vase off the shelf, and now {sibling.they}
+  {sibling:is|are} pointing at you with a very convincing face.
+tone: neutral
+category: family
+rarity: common
+lifeStages: [child]
+weight: { base: 4 }
+once: true
+cast:
+  sibling: { kind: sibling, ageOffset: { min: -5, max: 5 } }
+choices:
+  - id: take_it
+    label: Take the blame
+    outcome:
+      text: >-
+        You're grounded for a week. {sibling.name} sneaks you candy every night
+        of it and never, ever forgets.
+      effects:
+        - { type: relationship, role: sibling, affection: 10, trust: 10 }
+        - { type: memory, role: sibling, tag: took_the_blame }
+        - { type: stat, key: kindness, delta: 2 }
+        - { type: stat, key: happiness, delta: -2 }
+  - id: truth
+    label: Tell the truth, loudly
+    outcome:
+      text: >-
+        The truth wins. {sibling.name} is grounded, and doesn't talk to you
+        until the weekend.
+      effects:
+        - { type: relationship, role: sibling, affection: -4 }
+        - { type: stat, key: confidence, delta: 2 }

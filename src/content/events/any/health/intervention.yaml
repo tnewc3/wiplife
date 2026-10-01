@@ -32,6 +32,7 @@ choices:
         - { type: debt, action: add, kind: medical, amount: 6000 }
         - { type: relationship, role: family, affection: 8, trust: 10 }
         - { type: memory, role: family, tag: staged_intervention }
+        - { type: schedule, eventId: sober_anniversary, inYears: [2, 4], cast: [family] }
         - { type: flag, key: in_recovery, value: true }
         - { type: stat, key: vice, delta: -10 }
         - { type: history, text: You went into treatment for your addiction., importance: 3 }
@@ -63,4 +64,5 @@ choices:
       effects:
         - { type: relationship, role: family, affection: -12, trust: -15 }
         - { type: memory, role: family, tag: walked_out_on_them }
+        - { type: schedule, eventId: sober_anniversary, inYears: [2, 4], cast: [family] }
         - { type: stat, key: stress, delta: 5 }

@@ -1,0 +1,46 @@
+# Follow-up to parent_drinks: the way back, years later.
+id: parent_gets_sober
+title: One year sober
+text: >-
+  {parent.name} calls and asks to meet for coffee. {parent.They}
+  {parent:has|have} been sober for a year, {parent.they} {parent:says|say}, and part
+  of the program is making amends. {parent.They} {parent:has|have} a list. You're
+  at the top of it.
+tone: serious
+category: family
+rarity: common
+lifeStages: [teen, youngAdult, adult]
+requires: { memory: { role: parent, tag: drank_too_much } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  parent: { kind: parent }
+choices:
+  - id: listen
+    label: Go, and listen
+    outcome:
+      text: >-
+        {parent.name} doesn't make excuses. {parent.They} just names things,
+        one by one, things you thought only you remembered. You don't forgive
+        everything that afternoon. But you agree to coffee next month.
+      effects:
+        - { type: relationship, role: parent, trust: 15, affection: 10 }
+        - { type: memory, role: parent, tag: apologized }
+        - { type: stat, key: stress, delta: -6 }
+        - { type: stat, key: happiness, delta: 3 }
+        - { type: history, text: '{parent.name} got sober and came to make amends, and you listened.', importance: 2 }
+  - id: not_ready
+    label: Say you're not ready
+    outcome:
+      text: '"That''s fair," {parent.name} says. "The offer doesn''t expire." You think about it more than you expected to.'
+      effects:
+        - { type: relationship, role: parent, trust: 3 }
+        - { type: stat, key: stress, delta: 2 }
+  - id: anger
+    label: Tell {parent.them} it's twenty years too late
+    outcome:
+      text: '{parent.name} takes it without flinching. "I know," {parent.they} {parent:says|say}. You both sit there with that.'
+      effects:
+        - { type: relationship, role: parent, affection: -3 }
+        - { type: stat, key: stress, delta: -2 }
+        - { type: stat, key: confidence, delta: 2 }

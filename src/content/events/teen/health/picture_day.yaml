@@ -1,0 +1,27 @@
+id: picture_day
+title: Picture day
+text: >-
+  It's school picture day, and overnight a pimple the size of a planet has
+  appeared on the end of your nose.
+tone: light
+category: health
+rarity: common
+lifeStages: [teen]
+requires: { education: { program: [middle, high] } }
+weight: { base: 4 }
+once: true
+choices:
+  - id: own
+    label: Smile big anyway
+    outcome:
+      text: It's in the yearbook forever. So is your smile, which is genuinely great.
+      effects:
+        - { type: stat, key: confidence, delta: 2 }
+        - { type: stat, key: happiness, delta: 1 }
+  - id: sick
+    label: Fake sick for the day
+    outcome:
+      text: You end up in the retake photo, which is worse in a completely different way.
+      effects:
+        - { type: stat, key: looks, delta: -1 }
+        - { type: stat, key: stress, delta: 1 }

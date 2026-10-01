@@ -23,6 +23,7 @@ choices:
           - { type: money, delta: -400 }
           - { type: relationship, role: friend, affection: 10, trust: 4 }
           - { type: memory, role: friend, tag: in_their_wedding }
+          - { type: schedule, eventId: friend_divorce_call, inYears: [4, 15], cast: [friend] }
           - { type: stat, key: happiness, delta: 5 }
       failure:
         text: You forget half the speech and tell a story you definitely shouldn't have. {friend.name} forgives you. Eventually.
@@ -30,6 +31,7 @@ choices:
           - { type: money, delta: -400 }
           - { type: relationship, role: friend, affection: 3 }
           - { type: memory, role: friend, tag: in_their_wedding }
+          - { type: schedule, eventId: friend_divorce_call, inYears: [4, 15], cast: [friend] }
           - { type: stat, key: stress, delta: 3 }
   - id: guest
     label: Come as a guest instead
@@ -44,4 +46,5 @@ choices:
       effects:
         - { type: relationship, role: friend, affection: -10, trust: -5 }
         - { type: memory, role: friend, tag: missed_wedding }
+        - { type: schedule, eventId: friend_divorce_call, inYears: [4, 15], cast: [friend] }
         - { type: schedule, eventId: missed_wedding_fallout, inYears: [2, 6], cast: [friend] }
