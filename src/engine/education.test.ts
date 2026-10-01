@@ -442,6 +442,8 @@ describe('dropping out, the GED and going back', () => {
     expect(back.education.left).toBeNull();
     const late = years(out, ages.lastDiplomaAge - out.character.age);
     expect(isLifeActionAvailable(late, 'return_to_school', {}, content)).toBe(false);
+    // Going back, or a GED: not both (found by the Stage 9 careless-player simulation).
+    expect(isLifeActionAvailable(act(out, 'return_to_school'), 'take_ged', {}, content)).toBe(false);
   });
 
   it('give a GED to those who pass it, once a year', () => {

@@ -562,6 +562,8 @@ export function canTakeGed(state: LifeState, content: ContentBundle): boolean {
     state.character.age >= content.balance.education.ged.minAge &&
     !finishedHighSchool(state) &&
     edu.current?.program !== 'high' &&
+    // Going back to high school next year, or a GED: not both.
+    edu.admission?.program !== 'high' &&
     !edu.applied.some((a) => a.option === 'ged')
   );
 }
