@@ -89,9 +89,9 @@ promotion:
   minYears: 2
   # Yearly chance once you've been at a level long enough, by performance.
   chance:
-    - { at: 40, x: 0.02 }
-    - { at: 50, x: 0.18 }
-    - { at: 60, x: 0.3 }
+    - { at: 40, x: 0.04 }
+    - { at: 50, x: 0.22 }
+    - { at: 60, x: 0.33 }
     - { at: 75, x: 0.42 }
     - { at: 90, x: 0.58 }
     - { at: 100, x: 0.65 }
@@ -115,10 +115,10 @@ raises:
 
 # Yearly chance of being fired, by performance.
 firing:
-  - { at: 15, x: 0.3 }
-  - { at: 25, x: 0.08 }
-  - { at: 35, x: 0.02 }
-  - { at: 45, x: 0.003 }
+  - { at: 15, x: 0.25 }
+  - { at: 25, x: 0.06 }
+  - { at: 35, x: 0.015 }
+  - { at: 45, x: 0.002 }
   - { at: 55, x: 0 }
 
 # Yearly chance of being laid off, by the city's job market for the category.

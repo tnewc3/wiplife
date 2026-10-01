@@ -442,6 +442,16 @@ function credentialFor(cur: Enrollment, year: number): Credential | null {
 }
 
 /**
+ * The credential your current program will earn when the next year begins,
+ * if you're in its final year (job applications count it, Stage 8).
+ */
+export function finishingCredential(state: LifeState): Credential | null {
+  const cur = state.education.current;
+  if (!cur || cur.year < cur.lengthYears) return null;
+  return credentialFor(cur, state.currentYear + 1);
+}
+
+/**
  * You finished your program: its credential, a history entry, and the next
  * automatic school (elementary → middle → high).
  */

@@ -93,7 +93,7 @@ export function runCareer(state: LifeState, content: ContentBundle): void {
   c.applied = [];
   if (c.gig && !canGig(state, content)) c.gig = false;
   if (c.job) {
-    // School started (a place you took up): you leave work for it.
+    // Still in school as the year begins (a new program, or held back): you leave work for it.
     if (inSchool(state)) endJob(state, 'quit', content, 'leftForSchool');
     // Reviewed once you've worked a full year (hired last year or earlier, paid from the year after).
     else if (state.currentYear - c.job.since >= 2) review(state, content);

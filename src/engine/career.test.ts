@@ -27,7 +27,7 @@ import { evaluate } from './conditions';
 import { InvalidInputError } from './creation/input';
 import { applyEffects } from './events/effects';
 import { checkInvariants } from './invariants';
-import { resolveChoice } from './life';
+import { beginYear, resolveChoice } from './life';
 import { createRng } from './rng';
 import { getCareerHistory, getJobSearch, getWorkView } from './selectors';
 import { runCareer } from './systems/career';
@@ -136,6 +136,40 @@ describe('who can be hired', () => {
       expect(reachable, def.id).toBe(true);
     }
     expect(Object.keys(content.jobs).length).toBeGreaterThanOrEqual(30);
+  });
+});
+
+describe('lining up a job in your final year of school', () => {
+  /** A computer science senior: the bachelor's comes as the next year begins. */
+  const senior = () =>
+    produce(adult(['hs_diploma'], () => {}, 21), (d) => {
+      d.education.current = { program: 'college', tier: 'state', majorId: 'computer_science', year: 4, lengthYears: 4, gpa: 3.2, boost: 0, repeats: 0, scholarship: 0, since: d.currentYear - 3 };
+    });
+
+  it('counts the degree you are finishing, and keeps the job as you graduate', () => {
+    const life = senior();
+    expect(searchBlock(life, content)).toBeNull();
+    expect(getJobSearch(life, content).options.some((o) => o.jobId === 'software_engineer')).toBe(true);
+    const hired = produce(life, (d) => startJob(d, 'software_engineer', content));
+    expect(checkInvariants(hired, content)).toEqual([]);
+    // As the year begins: the degree, then the job, paid by the ledger.
+    const next = beginYear(hired, content);
+    expect(next.education.credentials.some((c) => c.type === 'bachelor' && c.refId === 'computer_science')).toBe(true);
+    expect(next.career.job?.jobId).toBe('software_engineer');
+    expect(next.finances.lastLedger!.gross).toBeGreaterThanOrEqual(hired.career.job!.salary);
+  });
+
+  it('falls through if you drop out instead', () => {
+    const hired = produce(senior(), (d) => startJob(d, 'software_engineer', content));
+    const dropped = performAction(hired, 'drop_out', {}, content);
+    expect(dropped.career.job).toBeNull();
+    expect(dropped.history.at(-1)!.tags).toEqual(['career', 'fellThrough']);
+    expect(checkInvariants(dropped, content)).toEqual([]);
+  });
+
+  it('keeps students out of work before the final year', () => {
+    const junior = produce(senior(), (d) => void (d.education.current!.year = 3));
+    expect(searchBlock(junior, content)).toBe('school');
   });
 });
 

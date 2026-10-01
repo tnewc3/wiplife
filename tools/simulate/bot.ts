@@ -89,6 +89,8 @@ const MONEY_POLICY = {
   debtPlan: 0.5,
   /** Stops gig work each year once the retirement benefit is paid. */
   retire: 0.5,
+  /** Lives lavishly (if that's their taste) only with at least this much saved (Stage 8). */
+  lavishCushion: 20_000,
   /** Pays off a debt when savings exceed its balance by this much. */
   payOffCushion: 10_000,
 };
@@ -108,7 +110,9 @@ export function chooseMoneyActions(life: LifeState, content: ContentBundle, rng:
   if (retired && can('stop_gig') && chance(rng, MONEY_POLICY.retire)) out.push(['stop_gig', {}]);
   if (!adult) return out;
 
-  const wanted: Lifestyle = struggling && profile.lifestyle !== 'frugal' ? 'frugal' : profile.lifestyle;
+  // Lavish living only with a cushion of savings; frugal while struggling.
+  const cushioned = profile.lifestyle !== 'lavish' || life.finances.savings >= MONEY_POLICY.lavishCushion;
+  const wanted: Lifestyle = struggling && profile.lifestyle !== 'frugal' ? 'frugal' : cushioned ? profile.lifestyle : 'comfortable';
   if (can('set_lifestyle', { lifestyle: wanted })) out.push(['set_lifestyle', { lifestyle: wanted }]);
 
   const kind = life.housing.kind;

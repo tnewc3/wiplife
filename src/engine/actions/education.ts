@@ -24,6 +24,7 @@ import {
   schoolName,
   type ApplyTarget,
 } from '../education';
+import { checkJobFits } from '../career';
 import { spend } from '../finance';
 import { chance } from '../rng';
 import type { LifeState } from '../types';
@@ -111,12 +112,17 @@ export const EDUCATION_ACTIONS: Record<EducationActionId, LifeActionRule> = {
       cur.majorId = p.majorId!;
       decide(state, 'major', true);
       schoolHistory(state, 'changedMajor', { subject: content.majors[p.majorId!]!.subject }, content);
+      checkJobFits(state, content);
     },
   },
   drop_out: {
     parse: none,
     allowed: (state, _p, content) => canLeaveSchool(state, content),
-    apply: (state, _p, content) => leaveSchool(state, 'droppedOut', content),
+    apply: (state, _p, content) => {
+      leaveSchool(state, 'droppedOut', content);
+      // A job lined up for after school falls through.
+      checkJobFits(state, content);
+    },
   },
   return_to_school: {
     parse: none,

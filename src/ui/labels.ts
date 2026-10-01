@@ -404,7 +404,7 @@ export const JOB_END_LABELS: Record<JobEnd, string> = {
 /** Why you can't look for work now. */
 export const SEARCH_BLOCK_LABELS: Record<SearchBlock, string> = {
   age: 'You’re too young for a full-time job.',
-  school: 'You can look for work once you’re out of school. Gig work fits around classes.',
+  school: 'You can line up a job in your last year of school. Until then, gig work fits around classes.',
   away: 'You can’t work right now.',
 };
 

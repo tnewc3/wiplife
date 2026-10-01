@@ -16,7 +16,7 @@
 import type { CareerHistoryKey, ContentBundle, JobDef } from '../content/schemas';
 import { evaluate } from './conditions';
 import { curveAt } from './curve';
-import { modelChance } from './education';
+import { finishingCredential, inFinalYear, modelChance } from './education';
 import { createPerson } from './events/casting';
 import { scoreOf } from './events/checks';
 import { wholeDollars } from './finance';
@@ -48,7 +48,11 @@ export function levelPay(state: LifeState, def: JobDef, level: number, content: 
   return wholeDollars(base * (city?.salaryMultiplier ?? 1));
 }
 
-/** In any school program now (jobs and school don't mix: gig work is the student's option). */
+/**
+ * In any school program now (jobs and school don't mix: gig work is the
+ * student's option). In your final year you can already line up a job: it
+ * starts paying as you finish.
+ */
 export function inSchool(state: LifeState): boolean {
   return state.education.current !== null;
 }
@@ -58,14 +62,33 @@ export type SearchBlock = 'age' | 'school' | 'away';
 
 export function searchBlock(state: LifeState, content: ContentBundle): SearchBlock | null {
   if (state.character.age < content.balance.careers.minAge) return 'age';
-  if (inSchool(state)) return 'school';
+  if (inSchool(state) && !inFinalYear(state)) return 'school';
   if (state.housing.kind === 'incarcerated') return 'away';
   return null;
 }
 
-/** You meet the job's requirements (and are old enough to be hired at all). */
+/**
+ * You meet the job's requirements (and are old enough to be hired at all),
+ * counting the credential you're finishing this year.
+ */
 export function meetsJobRequirements(state: LifeState, def: JobDef, content: ContentBundle): boolean {
-  return state.character.age >= content.balance.careers.minAge && evaluate(def.requires, state, { roles: 'strict' });
+  if (state.character.age < content.balance.careers.minAge) return false;
+  const finishing = finishingCredential(state);
+  const view = finishing ? { ...state, education: { ...state.education, credentials: [...state.education.credentials, finishing] } } : state;
+  return evaluate(def.requires, view, { roles: 'strict' });
+}
+
+/**
+ * Your job still fits: you meet its requirements, and you're not in school
+ * (or only in its final year). A job lined up in your final year falls
+ * through when that changes: you leave school, or a change of major adds a
+ * year or changes the degree.
+ */
+export function checkJobFits(state: LifeState, content: ContentBundle): void {
+  const job = state.career.job;
+  const def = job && content.jobs[job.jobId];
+  if (!job || !def) return;
+  if ((inSchool(state) && !inFinalYear(state)) || !meetsJobRequirements(state, def, content)) endJob(state, 'quit', content, 'fellThrough');
 }
 
 /** Why you can't apply for this job now, or null when you can. */

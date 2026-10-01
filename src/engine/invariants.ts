@@ -6,8 +6,8 @@ import type { ContentBundle } from '../content/schemas';
 import { ageOf, isCurrentPartner, isFamilyKind, isPartnerKind, isRomanticKind, kindSince } from './relationships';
 import { isRngState } from './rng';
 import { lifeStageForAge } from './systems/aging';
-import { finishedHighSchool, hasCredential, isPostSecondary, schoolAges } from './education';
-import { evaluate } from './conditions';
+import { meetsJobRequirements } from './career';
+import { finishedHighSchool, hasCredential, inFinalYear, isPostSecondary, schoolAges } from './education';
 import type { Enrollment, Identity, LifeState, Pronouns, SchoolPlace } from './types';
 
 const LIFE_STAGES = new Set(['early', 'child', 'teen', 'youngAdult', 'adult', 'senior']);
@@ -425,7 +425,7 @@ function careerFailures(state: LifeState, content: ContentBundle): string[] {
     if (!def) fail(`job "${job.jobId}" is not known`);
     else {
       if (!Number.isInteger(job.level) || job.level < 1 || job.level > def.levels.length) fail(`job level ${job.level} is outside ${job.jobId}'s levels`);
-      if (!evaluate(def.requires, state, { roles: 'strict' })) fail(`job ${job.jobId}: its requirements are not met`);
+      if (!meetsJobRequirements(state, def, content)) fail(`job ${job.jobId}: its requirements are not met`);
     }
     if (!Number.isInteger(job.yearsAtLevel) || job.yearsAtLevel < 0) fail('job.yearsAtLevel must be a whole number of at least 0');
     if (!Number.isInteger(job.performance) || job.performance < 0 || job.performance > 100) fail('job.performance must be an integer from 0 to 100');
@@ -436,7 +436,7 @@ function careerFailures(state: LifeState, content: ContentBundle): string[] {
     if (state.character.age < b.minAge) fail('a job before the minimum age');
     if (c.gig) fail('gig work and a job at once');
     if (c.retired) fail('retired with a job');
-    if (state.education.current) fail('a job while in school');
+    if (state.education.current && !inFinalYear(state)) fail('a job while in school (before its final year)');
     if (state.housing.kind === 'incarcerated') fail('a job while in jail');
   }
   let lastTo = -Infinity;

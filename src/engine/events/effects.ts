@@ -15,7 +15,7 @@ import {
   spend,
   startDebtPlan,
 } from '../finance';
-import { afterMove, canTakeJob, endJob, giveRaise, promote, startJob } from '../career';
+import { afterMove, canTakeJob, checkJobFits, endJob, giveRaise, promote, startJob } from '../career';
 import { addScholarshipFund, leaveSchool } from '../education';
 import { moveInTogether, moveTo, refreshHousingCost, sellHome, settleHousehold, supportingParent } from '../housing';
 import { clampInt } from '../random';
@@ -126,9 +126,11 @@ const handlers: { [T in Effect['type']]: Handler<T> } = {
         return;
       case 'drop_out':
         leaveSchool(state, 'droppedOut', ctx.content);
+        checkJobFits(state, ctx.content);
         return;
       case 'expel':
         leaveSchool(state, 'expelled', ctx.content);
+        checkJobFits(state, ctx.content);
         return;
     }
   },

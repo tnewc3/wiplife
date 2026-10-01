@@ -79,6 +79,7 @@ export const CAREER_HISTORY_VALUES = {
   laidOff: ['title', 'employer'],
   quit: ['title', 'employer'],
   leftForSchool: ['title', 'employer'],
+  fellThrough: ['title', 'employer'],
   moved: ['title', 'employer'],
   retired: ['years'],
 } as const satisfies Record<string, readonly string[]>;

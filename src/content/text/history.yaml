@@ -232,6 +232,12 @@ career:
     importance: 2
     variants:
       - "You left your job at {employer} to go back to school."
+  # A job lined up in your last year of school that fell through when your
+  # plans changed (you left school, or your degree changed).
+  fellThrough:
+    importance: 2
+    variants:
+      - "Your plans changed, and the job lined up at {employer} fell through."
   moved:
     importance: 2
     variants:
