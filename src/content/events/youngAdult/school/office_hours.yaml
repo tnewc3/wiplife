@@ -1,0 +1,37 @@
+id: office_hours
+title: Office hours
+text: >-
+  You went to {professor.name}'s office hours to argue about a grade and
+  ended up talking for an hour. Now {professor.they} {professor:wants|want}
+  to know if you'd like to work in {professor.their} lab.
+tone: neutral
+category: school
+rarity: common
+lifeStages: [youngAdult, adult]
+requires: { education: { program: [college, grad], gpa: { gte: 2.8 } } }
+weight:
+  base: 6
+  modifiers:
+    - { if: { stat: smarts, gt: 70 }, x: 1.5 }
+once: true
+cast:
+  professor: { kind: acquaintance, age: { min: 32, max: 72 }, createIfMissing: true, newChance: 1 }
+choices:
+  - id: join
+    label: Join the lab
+    outcome:
+      text: >-
+        It's long nights, bad coffee and the strange thrill of finding out
+        something nobody knew. Your name ends up on a paper, eighth of nine.
+      effects:
+        - { type: flag, key: research_assistant, value: true }
+        - { type: relationship, role: professor, affection: 10, trust: 8 }
+        - { type: memory, role: professor, tag: believed_in_you }
+        - { type: stat, key: smarts, delta: 3 }
+        - { type: stat, key: stress, delta: 3 }
+  - id: decline
+    label: Say you're too busy
+    outcome:
+      text: '{professor.name} understands. Most people are. You get your grade bumped anyway.'
+      effects:
+        - { type: education, action: grades, value: 0.1 }

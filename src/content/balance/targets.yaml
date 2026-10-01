@@ -1,0 +1,24 @@
+# Target numbers the simulation is judged against (docs/technical.md,
+# section Q). Stage acceptance criteria point here; Stage 12 (balancing)
+# adds the rest of section Q's targets and tunes them.
+#
+# Shares are of simulated lives (npm run simulate), counting only lives
+# that reach the age the target is about.
+
+# Stage 8 (careers) acceptance. Until careers bring salaries, gig work is
+# the only income and these are not met.
+money:
+  # Bankruptcy in no more than about 15% of lives that reach adulthood.
+  maxBankruptLives: 0.15
+  # Roughly half or more of adults have owned a home by 50.
+  minHomeOwners: 0.5
+  homeOwnershipAge: 50
+
+careers:
+  # A bachelor's degree pays clearly more over a lifetime on average: at
+  # least 1.3 times the average lifetime earnings of lives that stopped at
+  # high school.
+  minBachelorEarningsRatio: 1.3
+  # ...but isn't a guarantee: at least 10% of bachelor's holders earn less
+  # over their lifetime than the median high-school-only life.
+  minBachelorBelowHighSchoolMedian: 0.1

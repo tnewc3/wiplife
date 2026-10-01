@@ -16,3 +16,16 @@ flags:
   # Money and home (Stage 6).
   filed_bankruptcy: You have filed for bankruptcy
   was_evicted: You have been evicted
+  # School (Stage 7). Several count for or against applications
+  # (balance/education.yaml admission flags).
+  high_test_scores: You did very well on a college entrance exam
+  strong_essay: You wrote a college essay that stood out
+  teacher_recommendation: A teacher wrote you a glowing recommendation
+  recruited_athlete: College coaches recruited you to play
+  valedictorian: You were valedictorian of your class
+  caught_cheating: You were caught cheating at school
+  suspended: You were suspended from school
+  research_assistant: You worked as a professor's research assistant
+  gifted_program: You were in the gifted program at school
+  advanced_classes: You took advanced classes in high school
+  studied_abroad: You spent a semester studying abroad

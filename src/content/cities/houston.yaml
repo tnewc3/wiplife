@@ -11,3 +11,10 @@ jobMarket:
   professional: 65
   trade: 90
   gig: 70
+schools:
+  high: Bayou Heights High School
+  community: Gulf Coast Community College
+  state: Texas Plains State University
+  elite: Whitlock University
+  trade: Ship Channel Technical College
+  grad: Magnolia Graduate School

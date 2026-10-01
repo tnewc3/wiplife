@@ -117,6 +117,21 @@ export function borrow(state: LifeState, amount: number, content: ContentBundle)
   return owed;
 }
 
+/**
+ * Tuition you borrow for school (Stage 7): added to your student loan (one at
+ * the usual student rate, created if needed), like any other debt. The
+ * caller checks you are independent. Returns the amount borrowed.
+ */
+export function takeStudentLoan(state: LifeState, amount: number, content: ContentBundle): number {
+  const owed = wholeDollars(Math.max(0, amount));
+  if (owed === 0) return 0;
+  const rate = content.balance.economy.interest.debts.student;
+  const existing = state.finances.debts.find((d) => d.kind === 'student' && d.annualRate === rate);
+  if (existing) grow(existing, owed, content);
+  else addDebt(state, 'student', owed, content);
+  return owed;
+}
+
 /** Adds to savings (never past the money limit). */
 export function earn(state: LifeState, amount: number): void {
   state.finances.savings = wholeDollars(Math.min(MAX_MONEY, state.finances.savings + Math.max(0, amount)));

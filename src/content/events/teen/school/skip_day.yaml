@@ -1,0 +1,45 @@
+id: skip_day
+title: Perfect beach weather
+text: >-
+  {friend.name} pulls up outside school with the windows down. "Nobody's
+  learning anything today. Get in."
+tone: light
+category: school
+rarity: common
+lifeStages: [teen]
+requires:
+  all:
+    - { age: { gte: 16 } }
+    - { education: { program: [high] } }
+weight: { base: 6 }
+cooldownYears: 3
+cast:
+  friend: { kind: friend, ageOffset: { min: -1, max: 2 }, createIfMissing: true }
+choices:
+  - id: go
+    label: Get in the car
+    check:
+      base: 60
+      stats: [{ key: luck, weight: 0.3 }]
+      success:
+        text: A perfect, stolen day. Sand in everything. Nobody calls home.
+        effects:
+          - { type: stat, key: happiness, delta: 5 }
+          - { type: relationship, role: friend, affection: 6 }
+          - { type: education, action: grades, value: -0.1 }
+      failure:
+        text: >-
+          The school calls home about the "absence." You spend the next two
+          Saturdays in detention, and {friend.name} spends them in the seat next to you.
+        effects:
+          - { type: stat, key: happiness, delta: 2 }
+          - { type: relationship, role: friend, affection: 4 }
+          - { type: education, action: grades, value: -0.2 }
+          - { type: stat, key: stress, delta: 3 }
+  - id: stay
+    label: Go to class
+    outcome:
+      text: '{friend.name} shrugs and drives off. The photos are unbearable. You learn about the Treaty of Versailles.'
+      effects:
+        - { type: education, action: grades, value: 0.1 }
+        - { type: relationship, role: friend, affection: -2 }

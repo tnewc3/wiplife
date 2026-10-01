@@ -1,0 +1,42 @@
+id: school_play
+title: Auditions
+text: >-
+  The school is putting on a play, and sign-ups for auditions close today.
+  The lead has a song. A solo song. In front of everyone.
+tone: light
+category: school
+rarity: common
+lifeStages: [child, teen]
+requires: { education: { program: [elementary, middle, high] } }
+weight: { base: 6 }
+once: true
+choices:
+  - id: lead
+    label: Go for the lead
+    check:
+      base: 35
+      stats: [{ key: confidence, weight: 0.4 }, { key: looks, weight: 0.1 }]
+      success:
+        text: You get it. Opening night, your voice cracks once and nobody cares. The applause is real.
+        effects:
+          - { type: stat, key: confidence, delta: 6 }
+          - { type: stat, key: happiness, delta: 4 }
+          - { type: stat, key: sociability, delta: 2 }
+          - { type: history, text: You played the lead in the school play., importance: 1 }
+      failure:
+        text: You get cast as Tree Number Three. You are, everyone agrees, a very committed tree.
+        effects:
+          - { type: stat, key: happiness, delta: 1 }
+          - { type: stat, key: confidence, delta: 1 }
+  - id: crew
+    label: Sign up for the stage crew
+    outcome:
+      text: You paint the sets and run the curtain. Backstage has its own kind of friends.
+      effects:
+        - { type: stat, key: sociability, delta: 2 }
+        - { type: stat, key: discipline, delta: 1 }
+  - id: skip
+    label: Don't sign up
+    outcome:
+      text: You watch from the audience. It's fine. You clap for everyone.
+      effects: []

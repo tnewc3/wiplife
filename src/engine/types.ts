@@ -3,10 +3,10 @@
  * JSON: no classes, no Dates, no functions. Money is whole dollars; stats are
  * integers from 0 to 100.
  */
-import type { DebtKind, GenderCategory, HousingKind, Lifestyle } from '../content/schemas';
+import type { CredentialType, DebtKind, GenderCategory, HousingKind, Lifestyle, Program, Tier } from '../content/schemas';
 import type { RngState } from './rng';
 
-export type { DebtKind, GenderCategory, HousingKind, Lifestyle } from '../content/schemas';
+export type { CredentialType, DebtKind, GenderCategory, HousingKind, Lifestyle, Program, Tier } from '../content/schemas';
 
 export type Id = string;
 
@@ -145,22 +145,80 @@ export interface Relationship {
   wasSpouse?: boolean;
 }
 
+/** A school program and what you study there. */
+export interface SchoolPlace {
+  program: Program;
+  /** College only. */
+  tier?: Tier;
+  /** College only. */
+  majorId?: Id;
+  /** Trade school only. */
+  tradeId?: Id;
+  /** Grad school only. */
+  gradProgramId?: Id;
+}
+
+/** A program you're in. */
+export interface Enrollment extends SchoolPlace {
+  /** The year of the program you're in (1 is the first). */
+  year: number;
+  lengthYears: number;
+  /** Average of the years graded so far (0–4); before the first grade, what your record points to. */
+  gpa: number;
+  /** GPA points events added to this year's grade (applied when the year is graded). */
+  boost: number;
+  /** Years repeated (held back) in this program. */
+  repeats: number;
+  /** Share of tuition scholarships cover (0–1), set when you were accepted. */
+  scholarship: number;
+  /** The calendar year you started (or went back to) this program. */
+  since: number;
+}
+
+/** A place you take up when the next year begins: an admission, or going back to a program you left. */
+export interface Admission extends SchoolPlace {
+  scholarship: number;
+  /** The year you were accepted (or decided to go back). */
+  decided: number;
+  /** Going back to a program you left: where you pick up. */
+  resume?: { year: number; lengthYears: number; gpa: number; repeats: number };
+}
+
+export interface Credential {
+  type: CredentialType;
+  /** The major (associate, bachelor), trade (trade license) or grad program (grad). */
+  refId?: Id;
+  year: number;
+  /** Final GPA, where there was one. */
+  gpa?: number;
+  /** College degrees: the tier. */
+  tier?: Tier;
+}
+
+/** One school year's tuition and who paid it (whole dollars; tuition = scholarship + family + fund + loan). */
+export interface SchoolBill {
+  year: number;
+  tuition: number;
+  scholarship: number;
+  family: number;
+  /** Paid from scholarship money won in events. */
+  fund: number;
+  /** Borrowed as a student loan (through the debt system). */
+  loan: number;
+}
+
 export interface EducationState {
-  current: null | {
-    program: 'elementary' | 'middle' | 'high' | 'college' | 'trade' | 'grad';
-    tier?: 'community' | 'state' | 'elite';
-    majorId?: Id;
-    tradeId?: Id;
-    gradProgramId?: Id;
-    year: number;
-    lengthYears: number;
-    gpa: number;
-  };
-  credentials: {
-    type: 'hs_diploma' | 'ged' | 'associate' | 'bachelor' | 'trade_license' | 'grad';
-    refId?: Id;
-    year: number;
-  }[];
+  current: Enrollment | null;
+  credentials: Credential[];
+  admission: Admission | null;
+  /** The last program you left without finishing it, which you can go back to. */
+  left: (Enrollment & { leftYear: number }) | null;
+  /** This year's applications, GED attempts and major changes ('college:state', 'trade:welder', 'grad:law', 'ged', 'major'). */
+  applied: { option: string; accepted: boolean }[];
+  /** Scholarship money won in events; it pays tuition until it runs out. */
+  fund: number;
+  /** The current (or last) school year's tuition. */
+  lastBill?: SchoolBill;
 }
 
 export interface CareerState {

@@ -1,0 +1,30 @@
+id: first_roommate
+title: Your first roommate
+text: >-
+  Your first-year roommate, {roommate.name}, has already covered half the
+  room in posters, plugged in a mini fridge and named it.
+tone: light
+category: school
+rarity: common
+lifeStages: [youngAdult]
+requires: { education: { program: [college], year: { eq: 1 } } }
+weight: { base: 8 }
+once: true
+cast:
+  roommate: { kind: classmate, ageOffset: { min: -1, max: 1 }, createIfMissing: true, newChance: 1 }
+choices:
+  - id: befriend
+    label: Ask what the fridge is called
+    outcome:
+      text: It's called Gerald. By October, you and {roommate.name} have a dozen inside jokes and a shared grudge against the dining hall.
+      effects:
+        - { type: relationship, role: roommate, kind: friend, affection: 15, trust: 8 }
+        - { type: memory, role: roommate, tag: roomed_together }
+        - { type: stat, key: happiness, delta: 3 }
+  - id: rules
+    label: Suggest some ground rules
+    outcome:
+      text: '{roommate.name} agrees to all of them and breaks most within a month. It''s a peaceful, distant year.'
+      effects:
+        - { type: memory, role: roommate, tag: roomed_together }
+        - { type: stat, key: discipline, delta: 1 }

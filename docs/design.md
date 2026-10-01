@@ -399,7 +399,7 @@ Affection and trust move separately, so someone can love you without trusting yo
 
 ### Yearly ledger
 
-1. Gross income (salary or gig pay).
+1. Gross income (salary or gig pay). Gig pay is halved while you're enrolled in college, trade school or grad school, since gig work is part-time around classes (`studentGigShare` in the education balance file).
 2. Subtract an estimated tax, using one simple function based on income.
 3. Add the retirement benefit, from the retirement age (untaxed).
 4. Subtract housing costs (rent or mortgage, scaled by city). A partner or spouse who lives with you pays their share.

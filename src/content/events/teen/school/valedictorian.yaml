@@ -1,0 +1,51 @@
+id: valedictorian
+title: Top of the class
+text: >-
+  The principal calls you in. You have the highest grades in your class,
+  which means you're valedictorian, which means a speech. In front of everyone.
+tone: light
+category: school
+rarity: uncommon
+lifeStages: [teen]
+requires: { education: { program: [high], final: true, gpa: { gte: 3.8 } } }
+weight: { base: 20 }
+once: true
+choices:
+  - id: heartfelt
+    label: Write something heartfelt
+    check:
+      base: 50
+      stats: [{ key: confidence, weight: 0.3 }, { key: kindness, weight: 0.2 }]
+      success:
+        text: Half the auditorium cries. Your family films the whole thing, badly, and watches it for years.
+        effects:
+          - { type: flag, key: valedictorian, value: true }
+          - { type: education, action: scholarship, value: 2000 }
+          - { type: stat, key: happiness, delta: 5 }
+          - { type: history, text: You gave the valedictorian speech at your graduation., importance: 3 }
+      failure:
+        text: You lose your place on the second page and wing the rest. People clap anyway. It still counts.
+        effects:
+          - { type: flag, key: valedictorian, value: true }
+          - { type: education, action: scholarship, value: 2000 }
+          - { type: stat, key: stress, delta: 3 }
+          - { type: history, text: You were valedictorian of your class., importance: 3 }
+  - id: funny
+    label: Go for laughs
+    check:
+      base: 40
+      stats: [{ key: confidence, weight: 0.4 }, { key: sociability, weight: 0.2 }]
+      success:
+        text: The joke about the cafeteria pizza kills. Even the principal laughs. It's the speech people quote at reunions.
+        effects:
+          - { type: flag, key: valedictorian, value: true }
+          - { type: education, action: scholarship, value: 2000 }
+          - { type: stat, key: confidence, delta: 5 }
+          - { type: history, text: You gave a valedictorian speech people still quote., importance: 3 }
+      failure:
+        text: The joke about the cafeteria pizza does not land. The silence is long and very well lit.
+        effects:
+          - { type: flag, key: valedictorian, value: true }
+          - { type: education, action: scholarship, value: 2000 }
+          - { type: stat, key: confidence, delta: -3 }
+          - { type: history, text: You were valedictorian of your class. The speech is best forgotten., importance: 3 }

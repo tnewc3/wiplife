@@ -103,3 +103,99 @@ money:
     variants:
       - "You started picking up gig work."
       - "You signed up for gig work: deliveries, rides, odd jobs."
+
+# School (Stage 7). Values: {school} a school's name, {subject} what you
+# study, {grade} a letter grade, {degree} a grad degree, {license} a trade
+# license.
+education:
+  startedSchool:
+    importance: 1
+    variants:
+      - "You started kindergarten, with a new backpack and very strong opinions about it."
+      - "You started school. The first day involved some crying, not all of it yours."
+  startedMiddle:
+    importance: 1
+    variants:
+      - "You started middle school: lockers, bells and a lot of new hallways."
+  startedHigh:
+    importance: 1
+    variants:
+      - "You started high school."
+      - "You walked into high school as a freshman."
+  heldBack:
+    importance: 2
+    variants:
+      - "You failed too many classes and had to repeat a year of high school."
+      - "You were held back a year in high school."
+  graduatedHigh:
+    importance: 3
+    variants:
+      - "You graduated from high school, with grades averaging {grade}."
+      - "You crossed the stage and got your high school diploma. Final grades: {grade}."
+  droppedOut:
+    importance: 3
+    variants:
+      - "You dropped out of {school}."
+      - "You walked away from {school} without finishing."
+  expelled:
+    importance: 3
+    variants:
+      - "You were expelled from {school}."
+  passedGed:
+    importance: 2
+    variants:
+      - "You passed the GED and earned your high school equivalency."
+  failedGed:
+    importance: 1
+    variants:
+      - "You took the GED and didn't pass."
+  admitted:
+    importance: 2
+    variants:
+      - "You were accepted to {school}."
+      - "The letter from {school} said yes."
+  rejected:
+    importance: 1
+    variants:
+      - "{school} turned down your application."
+  withdrawn:
+    importance: 2
+    variants:
+      - "Without a diploma, you lost your place at {school}."
+  declined:
+    importance: 1
+    variants:
+      - "You turned down your place at {school}."
+  enrolled:
+    importance: 2
+    variants:
+      - "You started at {school}, studying {subject}."
+  returned:
+    importance: 2
+    variants:
+      - "You went back to {school} to finish studying {subject}."
+  returnedHigh:
+    importance: 2
+    variants:
+      - "You went back to {school} to finish what you started."
+  changedMajor:
+    importance: 1
+    variants:
+      - "You switched your major to {subject}."
+  graduatedAssociate:
+    importance: 3
+    variants:
+      - "You graduated from {school} with an associate degree in {subject}. Final grades: {grade}."
+  graduatedBachelor:
+    importance: 3
+    variants:
+      - "You graduated from {school} with a bachelor's degree in {subject}. Final grades: {grade}."
+      - "You earned your bachelor's degree in {subject} from {school}. Final grades: {grade}."
+  graduatedGrad:
+    importance: 3
+    variants:
+      - "You finished at {school} with {degree}. Final grades: {grade}."
+  licensed:
+    importance: 3
+    variants:
+      - "You finished at {school} and earned your {license}."

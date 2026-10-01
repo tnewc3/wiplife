@@ -3,14 +3,17 @@
  * years it sometimes asks someone out, proposes, gets married, or ends
  * things when affection has run low; and (from Stage 6) takes gig work,
  * picks a lifestyle, moves out, rents, relocates, buys a home, and reaches
- * for a roommate, home or a debt plan when money gets tight. These chances describe
+ * for a roommate, home or a debt plan when money gets tight; and (from
+ * Stage 7) applies to school, drops out, gets a GED or goes back. These chances describe
  * the simulated player, not the game, so they live here rather than in the
  * balance files; Stage 12's strategy bots replace this.
  */
 import type { ActionId, ContentBundle, Lifestyle } from '../../src/content/schemas';
 import { availableActions, isLifeActionAvailable, type LifeActionId, type LifeActionParams } from '../../src/engine/actions';
+import { applicationGpa } from '../../src/engine/education';
 import { chance, nextFloat, pick, type RngState } from '../../src/engine/rng';
-import type { LifeState } from '../../src/engine/types';
+import { getApplicationOptions } from '../../src/engine/selectors';
+import type { FamilyWealth, LifeState } from '../../src/engine/types';
 
 /** Yearly chance the bot takes each action when it can, by how the person feels about you. */
 const POLICY: Record<ActionId, (affection: number) => number> = {
@@ -118,5 +121,110 @@ export function chooseMoneyActions(life: LifeState, content: ContentBundle, rng:
     .filter((d) => d.kind !== 'mortgage' && life.finances.savings >= d.balance + MONEY_POLICY.payOffCushion)
     .sort((a, b) => b.annualRate - a.annualRate)[0];
   if (target) out.push(['pay_debt', { debtId: target.id }]);
+  return out;
+}
+
+/**
+ * How the simulated player handles school (Stage 7). Like the policies
+ * above, these chances describe the simulated player, not the game. The
+ * wish to go to college grows with family wealth and grades; the cost
+ * (what's left to borrow) puts some off.
+ */
+const SCHOOL_POLICY = {
+  /** Chance of applying to college in the last year of high school, by family wealth. */
+  college: { poor: 0.45, working: 0.55, middle: 0.7, affluent: 0.85, rich: 0.92 } as Record<FamilyWealth, number>,
+  /** Multiplies that chance by high school GPA. */
+  byGpa: [
+    { below: 2.0, x: 0.3 },
+    { below: 2.5, x: 0.6 },
+    { below: 3.0, x: 0.9 },
+    { below: 5, x: 1.1 },
+  ],
+  /** Shies away from a year's loan above this. */
+  loanWorry: 20_000,
+  /** Tries an elite university too, with a GPA at least this. */
+  eliteGpa: 3.5,
+  elite: 0.6,
+  /** Trade school, when not going to college. */
+  trade: 0.3,
+  /** Drops out of high school each year with a GPA below this... */
+  dropoutGpa: 2.6,
+  dropout: 0.1,
+  /** ...or out of college, trade or grad school. */
+  collegeDropoutGpa: 1.8,
+  collegeDropout: 0.25,
+  ged: 0.25,
+  /** Each year, an adult without a degree goes back to school (or applies late). */
+  returnLater: 0.02,
+  /** ...up to this age. */
+  returnLaterUntil: 40,
+  goBack: 0.15,
+  /** Grad school after a bachelor's with a GPA at least this. */
+  gradGpa: 3.2,
+  grad: 0.25,
+  /** ...within this many years of finishing it, and only one grad degree. */
+  gradWithin: 3,
+  changeMajor: 0.05,
+};
+
+export function chooseSchoolActions(life: LifeState, content: ContentBundle, rng: RngState): MoneyAction[] {
+  const out: MoneyAction[] = [];
+  const can = (id: LifeActionId, params: LifeActionParams = {}) => isLifeActionAvailable(life, id, params, content);
+  const edu = life.education;
+  const cur = edu.current;
+  const age = life.character.age;
+  const majors = Object.keys(content.majors).sort();
+  const gpaFactor = (gpa: number) => SCHOOL_POLICY.byGpa.find((b) => gpa < b.below)!.x;
+  const applyCollege = (tier: 'community' | 'state' | 'elite') => {
+    const params: LifeActionParams = { program: 'college', tier, majorId: pick(rng, majors) };
+    if (can('apply_school', params)) out.push(['apply_school', params]);
+  };
+
+  if (cur && can('drop_out')) {
+    const limit = cur.program === 'high' ? SCHOOL_POLICY.dropoutGpa : SCHOOL_POLICY.collegeDropoutGpa;
+    const odds = cur.program === 'high' ? SCHOOL_POLICY.dropout : SCHOOL_POLICY.collegeDropout;
+    if (cur.gpa < limit && chance(rng, odds)) return [['drop_out', {}]];
+  }
+  if (cur?.program === 'college' && chance(rng, SCHOOL_POLICY.changeMajor)) {
+    const majorId = pick(rng, majors);
+    if (can('choose_major', { majorId })) out.push(['choose_major', { majorId }]);
+  }
+  if (can('take_ged') && chance(rng, SCHOOL_POLICY.ged)) out.push(['take_ged', {}]);
+  if (can('return_to_school') && chance(rng, SCHOOL_POLICY.goBack)) return [...out, ['return_to_school', {}]];
+
+  const options = getApplicationOptions(life, content);
+  // Last year of high school (or later, now and then): college or trade school.
+  const hsSenior = cur?.program === 'high' && cur.year >= cur.lengthYears;
+  const lateStarter = !cur && !edu.admission && age >= 19 && age <= SCHOOL_POLICY.returnLaterUntil && !edu.credentials.some((c) => c.type !== 'hs_diploma' && c.type !== 'ged');
+  if ((hsSenior || (lateStarter && chance(rng, SCHOOL_POLICY.returnLater))) && !edu.admission) {
+    const gpa = applicationGpa(life, 'college', content);
+    const state = options.college.find((o) => o.tier === 'state')!;
+    const wants = SCHOOL_POLICY.college[life.character.familyWealth] * gpaFactor(gpa) * (state.bill.loan > SCHOOL_POLICY.loanWorry ? 0.5 : 1);
+    if (chance(rng, Math.min(0.97, hsSenior ? wants : 1))) {
+      applyCollege(gpa >= 2.6 ? 'state' : 'community');
+      if (gpa >= SCHOOL_POLICY.eliteGpa && chance(rng, SCHOOL_POLICY.elite)) applyCollege('elite');
+    } else if (chance(rng, SCHOOL_POLICY.trade)) {
+      const trade = pick(rng, options.trade.filter((o) => o.block === null));
+      if (trade) out.push(['apply_school', { program: 'trade', tradeId: trade.id! }]);
+    }
+  }
+  // State university after community college.
+  if (cur?.program === 'college' && cur.tier === 'community' && cur.year >= cur.lengthYears && chance(rng, 0.4)) {
+    const params: LifeActionParams = { program: 'college', tier: 'state', majorId: cur.majorId! };
+    if (can('apply_school', params)) out.push(['apply_school', params]);
+  }
+  // A rejected student tries community college the next year.
+  const rejected = life.history.some((e) => e.year === life.currentYear - 1 && e.tags.includes('rejected'));
+  if (!cur && !edu.admission && rejected && age <= 21 && chance(rng, 0.6)) applyCollege('community');
+  // Grad school after a good bachelor's.
+  const bachelor = edu.credentials.find((c) => c.type === 'bachelor');
+  const finishing = cur?.program === 'college' && cur.tier !== 'community' && cur.year >= cur.lengthYears;
+  const recent = finishing || (bachelor !== undefined && life.currentYear - bachelor.year <= SCHOOL_POLICY.gradWithin);
+  const firstGrad = !edu.credentials.some((c) => c.type === 'grad');
+  const gpa = finishing ? cur.gpa : (bachelor?.gpa ?? 0);
+  if (recent && firstGrad && gpa >= SCHOOL_POLICY.gradGpa && !edu.admission && (!cur || finishing) && chance(rng, SCHOOL_POLICY.grad)) {
+    const grad = options.grad.filter((o) => o.block === null);
+    if (grad.length > 0) out.push(['apply_school', { program: 'grad', gradProgramId: pick(rng, grad).id! }]);
+  }
   return out;
 }

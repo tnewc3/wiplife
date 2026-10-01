@@ -1,8 +1,39 @@
 /** Read-only helpers the UI uses to show a life. */
-import { LIFESTYLES, type ContentBundle, type DebtKind, type Lifestyle, type RomanceStatus, type Tone } from '../content/schemas';
+import {
+  LIFESTYLES,
+  TIERS,
+  type ApplyProgram,
+  type ContentBundle,
+  type CredentialType,
+  type DebtKind,
+  type Lifestyle,
+  type Program,
+  type RomanceStatus,
+  type Tier,
+  type Tone,
+} from '../content/schemas';
 import { availableActions, isLifeActionAvailable, type AvailableAction } from './actions';
 import { evaluate } from './conditions';
-import { canStartDebtPlan, isIndependent, netWorth, totalDebt } from './finance';
+import {
+  admissionChance,
+  applyBlock,
+  billFor,
+  canLeaveSchool,
+  canReturn,
+  canTakeGed,
+  finishedHighSchool,
+  inPostSecondary,
+  isPostSecondary,
+  letterGrade,
+  majorChangeAddsYear,
+  programLength,
+  schoolName,
+  scholarshipShare,
+  studentLoansPaused,
+  type ApplyBlock,
+  type ApplyTarget,
+} from './education';
+import { canStartDebtPlan, isIndependent, netWorth, totalDebt, wholeDollars } from './finance';
 import {
   livingCost,
   moveInCost,
@@ -30,6 +61,8 @@ import type {
   Person,
   Relationship,
   RelationshipKind,
+  SchoolBill,
+  SchoolPlace,
   StatKey,
 } from './types';
 
@@ -90,6 +123,18 @@ export interface CharacterSummary {
   debt: number;
   /** Single, dating, engaged or married, and to whom. */
   romance: { status: RomanceStatus; partnerName: string | null };
+  /** Where you're at school now, if you are. */
+  school: SchoolLine | null;
+}
+
+/** Your school now, for one-line summaries. */
+export interface SchoolLine {
+  program: Program;
+  /** Kindergarten to 12th grade (0 is kindergarten); null after high school. */
+  gradeLevel: number | null;
+  schoolName: string;
+  /** Your major, trade or grad program (null in automatic school). */
+  studying: string | null;
 }
 
 export function getCharacterSummary(state: LifeState, content: ContentBundle): CharacterSummary {
@@ -106,8 +151,251 @@ export function getCharacterSummary(state: LifeState, content: ContentBundle): C
     savings: state.finances.savings,
     debt: totalDebt(state),
     romance: { status: romanceStatus(state), partnerName: person ? `${person.name.first} ${person.name.last}` : null },
+    school: state.education.current ? schoolLine(state, state.education.current, content) : null,
   };
 }
+
+/** Kindergarten (0) to 12th grade for a year of automatic school; null otherwise. */
+export function gradeLevel(program: Program, year: number, content: ContentBundle): number | null {
+  const s = content.balance.education.school;
+  if (program === 'elementary') return year - 1;
+  if (program === 'middle') return s.elementary + year - 1;
+  if (program === 'high') return s.elementary + s.middle + year - 1;
+  return null;
+}
+
+/** The name of what you study in a program: a major, trade or grad program (null in automatic school). */
+export function studyingName(place: SchoolPlace, content: ContentBundle): string | null {
+  if (place.program === 'college') return content.majors[place.majorId ?? '']?.name ?? null;
+  if (place.program === 'trade') return content.trades[place.tradeId ?? '']?.name ?? null;
+  if (place.program === 'grad') return content.gradPrograms[place.gradProgramId ?? '']?.name ?? null;
+  return null;
+}
+
+function schoolLine(state: LifeState, place: SchoolPlace & { year?: number }, content: ContentBundle): SchoolLine {
+  return {
+    program: place.program,
+    gradeLevel: place.year === undefined ? null : gradeLevel(place.program, place.year, content),
+    schoolName: schoolName(state, place, content),
+    studying: studyingName(place, content),
+  };
+}
+
+export interface CredentialView {
+  type: CredentialType;
+  /** The major, trade license or grad degree it is for (null for a diploma or GED). */
+  field: string | null;
+  year: number;
+  /** Final grades as a letter, where there was a GPA. */
+  letter: string | null;
+  tier: Tier | null;
+}
+
+export interface EnrollmentView extends SchoolLine {
+  tier: Tier | null;
+  year: number;
+  lengthYears: number;
+  /** Your GPA as a letter grade. */
+  letter: string;
+  final: boolean;
+  /** Years you were held back. */
+  repeats: number;
+  canDropOut: boolean;
+  /** College: you can change your major now (not yet changed this year). */
+  canChangeMajor: boolean;
+  majorId: string | null;
+  /** Changing major now adds a year. */
+  changeAddsYear: boolean;
+  /** This school year's tuition and who paid it (college, trade school and grad school). */
+  bill: SchoolBill | null;
+}
+
+export interface SchoolView {
+  between: boolean;
+  age: number;
+  /** School starts at this age. */
+  startAge: number;
+  /** High school can be left from this age. */
+  dropoutAge: number;
+  current: EnrollmentView | null;
+  /** A place you start at when the next year begins. */
+  admission: (SchoolLine & { tier: Tier | null; returning: boolean; scholarship: number }) | null;
+  /** The program you left, and whether you can go back to it now. */
+  left: (SchoolLine & { tier: Tier | null; canReturn: boolean }) | null;
+  credentials: CredentialView[];
+  /** You're at a point where you could apply somewhere (not in school, or in your last year). */
+  canApply: boolean;
+  /** The GED, if you haven't finished high school: can you take it now, its fee, and this year's result. */
+  ged: { available: boolean; fee: number; result: boolean | null } | null;
+  /** This year's applications: the option, the school and the answer. */
+  decisions: { option: string; name: string; accepted: boolean }[];
+  /** Scholarship money won in events, waiting to pay tuition. */
+  fund: number;
+}
+
+/** The school part of the Work/School tab. */
+export function getSchoolView(state: LifeState, content: ContentBundle): SchoolView {
+  const edu = state.education;
+  const between = state.phase === 'yearStart';
+  const cur = edu.current;
+  const school = content.balance.education.school;
+  const current: EnrollmentView | null = cur
+    ? {
+        ...schoolLine(state, cur, content),
+        tier: cur.tier ?? null,
+        year: cur.year,
+        lengthYears: cur.lengthYears,
+        letter: letterGrade(cur.gpa, content),
+        final: cur.year >= cur.lengthYears,
+        repeats: cur.repeats,
+        canDropOut: between && canLeaveSchool(state, content),
+        canChangeMajor: between && cur.program === 'college' && !edu.applied.some((a) => a.option === 'major'),
+        majorId: cur.majorId ?? null,
+        changeAddsYear: majorChangeAddsYear(state, content),
+        bill: isPostSecondary(cur.program) && edu.lastBill?.year === state.currentYear ? edu.lastBill : null,
+      }
+    : null;
+  const credentials: CredentialView[] = edu.credentials.map((c) => ({
+    type: c.type,
+    field:
+      c.type === 'associate' || c.type === 'bachelor'
+        ? (content.majors[c.refId ?? '']?.subject ?? null)
+        : c.type === 'trade_license'
+          ? (content.trades[c.refId ?? '']?.license ?? null)
+          : c.type === 'grad'
+            ? (content.gradPrograms[c.refId ?? '']?.degree ?? null)
+            : null,
+    year: c.year,
+    letter: c.gpa === undefined ? null : letterGrade(c.gpa, content),
+    tier: c.tier ?? null,
+  }));
+  const gedTry = edu.applied.find((a) => a.option === 'ged');
+  const options = getApplicationOptions(state, content);
+  return {
+    between,
+    age: state.character.age,
+    startAge: school.startAge,
+    dropoutAge: school.dropoutAge,
+    current,
+    admission: edu.admission
+      ? { ...schoolLine(state, edu.admission, content), tier: edu.admission.tier ?? null, returning: edu.admission.resume !== undefined, scholarship: edu.admission.scholarship }
+      : null,
+    left: edu.left ? { ...schoolLine(state, edu.left, content), tier: edu.left.tier ?? null, canReturn: between && canReturn(state, content) } : null,
+    credentials,
+    canApply:
+      state.character.age >= school.applyAge &&
+      (!cur || (cur.year >= cur.lengthYears && cur.program !== 'elementary' && cur.program !== 'middle')) &&
+      [...options.college, ...options.trade, ...options.grad].some((o) => o.block === null || o.block === 'tried' || o.block === 'holding'),
+    ged: finishedHighSchool(state)
+      ? null
+      : { available: between && canTakeGed(state, content), fee: content.balance.education.ged.fee, result: gedTry ? gedTry.accepted : null },
+    decisions: edu.applied
+      .filter((a) => a.option.includes(':'))
+      .map((a) => ({ option: a.option, name: optionName(state, a.option, content), accepted: a.accepted })),
+    fund: edu.fund,
+  };
+}
+
+/** A readable name for an application option: the school, or the trade or grad program. */
+function optionName(state: LifeState, option: string, content: ContentBundle): string {
+  const [program, id] = option.split(':') as [string, string];
+  if (program === 'college') return schoolName(state, { program: 'college', tier: id as Tier }, content);
+  if (program === 'trade') return content.trades[id]?.name ?? id;
+  return content.gradPrograms[id]?.name ?? id;
+}
+
+export interface ApplyOptionView {
+  /** 'college:state', 'trade:welder', 'grad:law'. */
+  key: string;
+  program: ApplyProgram;
+  /** College tier. */
+  tier: Tier | null;
+  /** Trade or grad program id. */
+  id: string | null;
+  /** The school (college), or the trade or grad program. */
+  name: string;
+  schoolName: string;
+  blurb: string | null;
+  careers: string | null;
+  years: number;
+  /** A first year's bill if you were accepted now (as you'd be next year, when it starts): tuition, and who would pay it. */
+  bill: Omit<SchoolBill, 'year'>;
+  /** Your chance of getting in (0–1); the UI shows it in words. */
+  chance: number;
+  /** Why you can't apply now (null: you can). */
+  block: ApplyBlock | null;
+  /** This year's answer, if you applied. */
+  result: boolean | null;
+}
+
+export interface MajorOption {
+  id: string;
+  name: string;
+  blurb: string;
+  careers: string;
+  difficulty: number;
+}
+
+export interface ApplicationOptions {
+  /** One per college tier; the major is picked when applying. */
+  college: ApplyOptionView[];
+  trade: ApplyOptionView[];
+  grad: ApplyOptionView[];
+  majors: MajorOption[];
+  /** Each application costs this. */
+  fee: number;
+}
+
+const byName = <T extends { name: string }>(a: T, b: T) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0);
+
+/** Majors you can study, by name. */
+export function getMajorOptions(content: ContentBundle): MajorOption[] {
+  return Object.values(content.majors)
+    .filter((m) => !m.retired)
+    .map((m) => ({ id: m.id, name: m.name, blurb: m.blurb, careers: m.careers, difficulty: m.difficulty }))
+    .sort(byName);
+}
+
+/** Everywhere you could apply, with what it would cost, your odds and whether you can apply now. */
+export function getApplicationOptions(state: LifeState, content: ContentBundle): ApplicationOptions {
+  const majors = getMajorOptions(content);
+  const between = state.phase === 'yearStart';
+  const view = (target: ApplyTarget, name: string, blurb: string | null, careers: string | null): ApplyOptionView => {
+    const key = target.program === 'college' ? `college:${target.tier}` : target.program === 'trade' ? `trade:${target.tradeId}` : `grad:${target.gradProgramId}`;
+    const decision = state.education.applied.find((a) => a.option === key);
+    const block = applyBlock(state, target, content);
+    return {
+      key,
+      program: target.program,
+      tier: target.program === 'college' ? target.tier : null,
+      id: target.program === 'trade' ? target.tradeId : target.program === 'grad' ? target.gradProgramId : null,
+      name,
+      schoolName: schoolName(state, target, content),
+      blurb,
+      careers,
+      years: programLength(target, content),
+      bill: billFor(state, target, scholarshipShare(state, target.program, content), content, true),
+      chance: admissionChance(state, target, content),
+      block: !between && block === null ? 'enrolled' : block,
+      result: decision ? decision.accepted : null,
+    };
+  };
+  const firstMajor = majors[0]?.id ?? '';
+  return {
+    college: TIERS.map((tier) => view({ program: 'college', tier, majorId: firstMajor }, schoolName(state, { program: 'college', tier }, content), null, null)),
+    trade: Object.values(content.trades)
+      .filter((t) => !t.retired)
+      .sort(byName)
+      .map((t) => view({ program: 'trade', tradeId: t.id }, t.name, t.blurb, t.careers)),
+    grad: Object.values(content.gradPrograms)
+      .filter((g) => !g.retired && content.balance.education.admission.grad[g.id])
+      .sort(byName)
+      .map((g) => view({ program: 'grad', gradProgramId: g.id }, g.name, g.blurb, g.careers)),
+    majors,
+    fee: content.balance.education.admission.fee,
+  };
+}
+
 
 /** Groups on the People screen (docs/design.md, section L). */
 export type PeopleGroupId = 'family' | 'romance' | 'friends' | 'work';
@@ -333,6 +621,8 @@ export interface DebtView {
   annualRate: number;
   minPayment: number;
   missed: number;
+  /** A student loan whose payments are paused while you're in school. */
+  paused: boolean;
   /** What paying it from savings now would pay: all of it, or as much as you have (0: can't pay now). */
   canPay: number;
 }
@@ -375,6 +665,7 @@ export function getMoneyView(state: LifeState, content: ContentBundle): MoneyVie
       annualRate: d.annualRate,
       minPayment: Math.min(d.minPayment, d.balance),
       missed: d.missed,
+      paused: d.kind === 'student' && studentLoansPaused(state),
       canPay: between && isLifeActionAvailable(state, 'pay_debt', { debtId: d.id }, content) ? Math.min(f.savings, d.balance) : 0,
     })),
     debtPlan: between && canStartDebtPlan(state, content),
@@ -393,7 +684,7 @@ export interface WorkView {
   canGig: boolean;
   gigMinAge: number;
   gig: boolean;
-  /** A typical year of gig pay now (full-time from the independence age). */
+  /** A typical year of gig pay now (full-time from the independence age; part-time while you're a student). */
   expectedGigPay: number;
   /** Last year's gross income. */
   lastIncome: number;
@@ -407,7 +698,7 @@ export function getWorkView(state: LifeState, content: ContentBundle): WorkView 
     canGig: canGig(state, content),
     gigMinAge: content.balance.economy.gig.minAge,
     gig: state.career.gig,
-    expectedGigPay: expectedGigPay(state, content),
+    expectedGigPay: wholeDollars(expectedGigPay(state, content) * (inPostSecondary(state) ? content.balance.education.studentGigShare : 1)),
     lastIncome: state.finances.lastLedger?.gross ?? 0,
     between: state.phase === 'yearStart',
   };

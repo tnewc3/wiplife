@@ -1,0 +1,61 @@
+id: answer_key
+title: The answer key
+text: >-
+  Someone photographed the answer key for tomorrow's chemistry final, and
+  it's making its way around the group chat. It just landed on your phone.
+tone: serious
+category: school
+rarity: common
+lifeStages: [teen, youngAdult]
+requires: { education: { program: [high, college] } }
+weight:
+  base: 5
+  modifiers:
+    - { if: { education: { gpa: { lt: 2.5 } } }, x: 1.5 }
+cooldownYears: 5
+choices:
+  - id: use_it
+    label: Memorize the answers
+    visibleIf: { trait: riskTaking, gt: 30 }
+    check:
+      base: 60
+      stats: [{ key: luck, weight: 0.3 }, { key: riskTaking, weight: -0.1 }]
+      success:
+        text: You ace it. So do eleven other people, which the teacher finds interesting but can't prove.
+        effects:
+          - { type: education, action: grades, value: 0.4 }
+          - { type: stat, key: stress, delta: 3 }
+      failure:
+        text: >-
+          The teacher changed the questions. Everyone who wrote the old answers
+          gets a zero and a meeting with the principal. You're one of them.
+        effects:
+          - { type: flag, key: caught_cheating, value: true }
+          - { type: education, action: grades, value: -0.6 }
+          - { type: stat, key: reputation, delta: -5 }
+          - { type: stat, key: stress, delta: 8 }
+          - { type: history, text: You were caught cheating on a final exam., importance: 2 }
+  - id: delete
+    label: Delete it and study
+    check:
+      base: 45
+      stats: [{ key: smarts, weight: 0.4 }, { key: discipline, weight: 0.3 }]
+      success:
+        text: You pull a solid grade on your own. When the scandal breaks, your name isn't anywhere near it.
+        effects:
+          - { type: education, action: grades, value: 0.1 }
+          - { type: stat, key: discipline, delta: 2 }
+      failure:
+        text: You do badly, honestly. It stings more watching the cheaters celebrate, at least until the zeros come out.
+        effects:
+          - { type: education, action: grades, value: -0.2 }
+          - { type: stat, key: stress, delta: 3 }
+  - id: report
+    label: Tell a teacher
+    outcome:
+      text: >-
+        The test is rewritten overnight. Nobody knows it was you, officially.
+        Unofficially, a few people have guesses.
+      effects:
+        - { type: stat, key: reputation, delta: 2 }
+        - { type: stat, key: sociability, delta: -2 }

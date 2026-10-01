@@ -1,0 +1,36 @@
+id: gifted_program
+title: The gifted program
+text: >-
+  Your teacher wants to move you into the gifted program: harder work, a
+  different classroom, and a bus to another school twice a week. Your
+  friends are staying where they are.
+tone: neutral
+category: school
+rarity: uncommon
+lifeStages: [child]
+requires:
+  all:
+    - { education: { program: [elementary, middle] } }
+    - { stat: smarts, gte: 70 }
+weight: { base: 8 }
+once: true
+choices:
+  - id: join
+    label: Join the program
+    outcome:
+      text: >-
+        The work is hard in a way school has never been hard before. You
+        love it, mostly. You see your old friends at recess.
+      effects:
+        - { type: flag, key: gifted_program, value: true }
+        - { type: stat, key: smarts, delta: 4 }
+        - { type: stat, key: stress, delta: 4 }
+        - { type: stat, key: ambition, delta: 3 }
+        - { type: history, text: You were placed in the gifted program at school., importance: 2 }
+  - id: stay
+    label: Stay with your friends
+    outcome:
+      text: You stay. You finish your work early and draw in the margins. Nobody minds.
+      effects:
+        - { type: stat, key: happiness, delta: 2 }
+        - { type: stat, key: sociability, delta: 2 }

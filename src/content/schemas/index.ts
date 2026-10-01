@@ -5,11 +5,13 @@ import {
   eventsBalanceSchema,
   mortalityBalanceSchema,
   pacingBalanceSchema,
+  targetsBalanceSchema,
 } from './balance';
 import { actionRegistrySchema, relationshipsBalanceSchema } from './relationships';
 import { appearanceOptionsSchema, identityOptionsSchema, namePoolSchema, pronounPresetSchema, talentSchema } from './character';
 import { citySchema } from './city';
 import { economyBalanceSchema, triggerRegistrySchema } from './economy';
+import { educationBalanceSchema, gradProgramSchema, majorSchema, tradeSchema } from './education';
 import { categoryRegistrySchema, eventSchema, flagRegistrySchema, memoryRegistrySchema } from './events';
 import { causeSchema, historyTextSchema, obituaryTextSchema, relationWordsSchema } from './text';
 
@@ -18,6 +20,7 @@ export * from './character';
 export * from './city';
 export * from './common';
 export * from './economy';
+export * from './education';
 export * from './events';
 export * from './relationships';
 export * from './text';
@@ -32,9 +35,12 @@ export const collectionTypes = {
   cities: { folder: 'cities', schema: citySchema },
   /** Nested by life stage and category, and chain files hold several events (see compile.ts). */
   events: { folder: 'events', schema: eventSchema },
+  gradPrograms: { folder: 'grad', schema: gradProgramSchema },
+  majors: { folder: 'majors', schema: majorSchema },
   names: { folder: 'names', schema: namePoolSchema },
   pronouns: { folder: 'pronouns', schema: pronounPresetSchema },
   talents: { folder: 'talents', schema: talentSchema },
+  trades: { folder: 'trades', schema: tradeSchema },
 } as const;
 
 export type CollectionKey = keyof typeof collectionTypes;
@@ -52,6 +58,8 @@ export const singletonTypes = {
   'balance/events': eventsBalanceSchema,
   'balance/relationships': relationshipsBalanceSchema,
   'balance/economy': economyBalanceSchema,
+  'balance/education': educationBalanceSchema,
+  'balance/targets': targetsBalanceSchema,
   'character/identity': identityOptionsSchema,
   'character/appearance': appearanceOptionsSchema,
   'text/relations': relationWordsSchema,
@@ -71,9 +79,12 @@ export const contentBundleSchema = z.strictObject({
   causes: z.record(z.string(), causeSchema),
   cities: z.record(z.string(), citySchema),
   events: z.record(z.string(), eventSchema),
+  gradPrograms: z.record(z.string(), gradProgramSchema),
+  majors: z.record(z.string(), majorSchema),
   names: z.record(z.string(), namePoolSchema),
   pronouns: z.record(z.string(), pronounPresetSchema),
   talents: z.record(z.string(), talentSchema),
+  trades: z.record(z.string(), tradeSchema),
   balance: z.strictObject({
     creation: creationBalanceSchema,
     aging: agingBalanceSchema,
@@ -82,6 +93,8 @@ export const contentBundleSchema = z.strictObject({
     events: eventsBalanceSchema,
     relationships: relationshipsBalanceSchema,
     economy: economyBalanceSchema,
+    education: educationBalanceSchema,
+    targets: targetsBalanceSchema,
   }),
   character: z.strictObject({ identity: identityOptionsSchema, appearance: appearanceOptionsSchema }),
   text: z.strictObject({ relations: relationWordsSchema, history: historyTextSchema, obituary: obituaryTextSchema }),

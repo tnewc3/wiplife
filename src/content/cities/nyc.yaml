@@ -12,3 +12,10 @@ jobMarket:
   professional: 95
   trade: 60
   gig: 85
+schools:
+  high: Riverside High School
+  community: Five Boroughs Community College
+  state: Empire State University
+  elite: Carrow University
+  trade: Hudson Technical Institute
+  grad: Morningside Graduate School

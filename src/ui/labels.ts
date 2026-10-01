@@ -1,6 +1,7 @@
 /** Player-facing words for engine values. UI copy only; no game rules here. */
-import type { ActionId, DebtKind, HousingKind, Lifestyle, RomanceStatus } from '../content/schemas';
-import type { FamilyMember, PeopleGroupId, PersonRow } from '../engine/selectors';
+import type { ActionId, CredentialType, DebtKind, HousingKind, Lifestyle, Program, RomanceStatus, Tier } from '../content/schemas';
+import type { ApplyBlock } from '../engine/education';
+import type { CredentialView, FamilyMember, PeopleGroupId, PersonRow, SchoolLine } from '../engine/selectors';
 import type { FamilyWealth, GenderCategory, LifeStage, Personality, RelationshipKind, Stats } from '../engine/types';
 
 export const STAT_LABELS: Record<keyof Stats, string> = {
@@ -196,8 +197,9 @@ export const DEBT_LABELS: Record<DebtKind, string> = {
   collections: 'In collections',
 };
 
-/** How a debt is going: on track, missed payments, or in collections. */
-export function debtStatus(kind: DebtKind, missed: number): string {
+/** How a debt is going: on track, paused while you study, missed payments, or in collections. */
+export function debtStatus(kind: DebtKind, missed: number, paused = false): string {
+  if (paused) return 'Payments paused while you’re in school';
   if (missed === 0) return kind === 'collections' ? 'With a collections agency' : 'On track';
   const missedText = missed === 1 ? '1 missed payment' : `${missed} missed payments in a row`;
   return kind === 'collections' ? `With a collections agency · ${missedText}` : missedText;
@@ -285,3 +287,94 @@ export const PURCHASE_BLOCK_LABELS = {
   income: 'A bank won’t lend you that much on your income.',
   bankruptcy: 'No bank will give you a mortgage so soon after a bankruptcy.',
 } as const;
+
+/** College tiers. */
+export const TIER_LABELS: Record<Tier, string> = {
+  community: 'Community college',
+  state: 'State university',
+  elite: 'Elite university',
+};
+
+export const PROGRAM_LABELS: Record<Program, string> = {
+  elementary: 'Elementary school',
+  middle: 'Middle school',
+  high: 'High school',
+  college: 'College',
+  trade: 'Trade school',
+  grad: 'Grad school',
+};
+
+const ordinal = (n: number) => {
+  const suffix = n % 100 >= 11 && n % 100 <= 13 ? 'th' : ({ 1: 'st', 2: 'nd', 3: 'rd' } as Record<number, string>)[n % 10] ?? 'th';
+  return `${n}${suffix}`;
+};
+
+/** "Kindergarten", "3rd grade", "12th grade". */
+export function gradeLevelLabel(level: number): string {
+  return level <= 0 ? 'Kindergarten' : `${ordinal(level)} grade`;
+}
+
+/** "Year 2 of 4". */
+export function programYearLabel(year: number, lengthYears: number): string {
+  return `Year ${year} of ${lengthYears}`;
+}
+
+/** Where you are in school, for the Life tab: "In 10th grade", "Studying Nursing at Prairie State University". */
+export function schoolStatusLine(school: SchoolLine): string {
+  if (school.gradeLevel !== null) return school.gradeLevel <= 0 ? 'In kindergarten' : `In ${gradeLevelLabel(school.gradeLevel)}`;
+  if (school.program === 'trade') return `Training as ${articled(school.studying ?? 'a tradesperson')} at ${school.schoolName}`;
+  if (school.program === 'grad') return `In ${(school.studying ?? 'grad school').toLowerCase()} at ${school.schoolName}`;
+  return `Studying ${school.studying ?? ''} at ${school.schoolName}`;
+}
+
+function articled(noun: string): string {
+  return `${/^[AEIOU]/i.test(noun) ? 'an' : 'a'} ${noun}`;
+}
+
+/** Sentence text as a label: "a law degree" → "Law degree". */
+function asLabel(text: string): string {
+  const bare = text.replace(/^(a|an) /i, '');
+  return bare.charAt(0).toUpperCase() + bare.slice(1);
+}
+
+const CREDENTIAL_LABELS: Record<CredentialType, string> = {
+  hs_diploma: 'High school diploma',
+  ged: 'GED',
+  associate: 'Associate degree',
+  bachelor: 'Bachelor’s degree',
+  trade_license: 'Trade license',
+  grad: 'Graduate degree',
+};
+
+/** "Bachelor’s degree in nursing", "Electrician's license", "Law degree". */
+export function credentialLabel(c: CredentialView): string {
+  if ((c.type === 'associate' || c.type === 'bachelor') && c.field) return `${CREDENTIAL_LABELS[c.type]} in ${c.field}`;
+  if ((c.type === 'trade_license' || c.type === 'grad') && c.field) return asLabel(c.field);
+  return CREDENTIAL_LABELS[c.type];
+}
+
+/** Your odds of getting in, in words (never an exact percentage). */
+export function oddsLabel(chance: number): string {
+  if (chance >= 0.9) return 'Almost certain';
+  if (chance >= 0.65) return 'Likely';
+  if (chance >= 0.4) return 'A fair chance';
+  if (chance >= 0.15) return 'A long shot';
+  return 'A reach';
+}
+
+/** Why you can't apply somewhere now. */
+export const APPLY_BLOCK_LABELS: Record<ApplyBlock, string> = {
+  age: 'You can apply in your last year of high school.',
+  enrolled: 'You can apply when you’re in your last year, or out of school.',
+  highSchool: 'Needs a high school diploma or GED.',
+  bachelor: 'Needs a bachelor’s degree.',
+  major: 'Needs a bachelor’s in a related major.',
+  tried: 'You already applied this year.',
+  holding: 'You already have a place here.',
+  unknown: 'Not available.',
+};
+
+/** How hard a major, trade or grad program is (1–5). */
+export function difficultyLabel(difficulty: number): string {
+  return ['Easygoing', 'Manageable', 'Challenging', 'Demanding', 'Grueling'][Math.min(4, Math.max(0, difficulty - 1))]!;
+}

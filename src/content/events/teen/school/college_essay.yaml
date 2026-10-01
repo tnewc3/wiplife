@@ -1,0 +1,49 @@
+id: college_essay
+title: The personal essay
+text: >-
+  The application asks for 650 words on "a challenge you overcame." You've
+  been staring at the blinking cursor for an hour.
+tone: neutral
+category: school
+rarity: common
+lifeStages: [teen]
+requires: { education: { program: [high], final: true } }
+weight: { base: 8 }
+once: true
+choices:
+  - id: honest
+    label: Write about something real
+    check:
+      base: 45
+      stats: [{ key: smarts, weight: 0.3 }, { key: confidence, weight: 0.2 }]
+      success:
+        text: >-
+          You write about the hardest year of your life, plainly. Reading it
+          back, you cry a little. It's the best thing you've ever written.
+        effects:
+          - { type: flag, key: strong_essay, value: true }
+          - { type: stat, key: confidence, delta: 3 }
+          - { type: stat, key: stress, delta: -2 }
+      failure:
+        text: It's honest, and it's fine. Admissions officers read ten thousand fine essays a year.
+        effects:
+          - { type: stat, key: stress, delta: 2 }
+  - id: impressive
+    label: Make yourself sound impressive
+    outcome:
+      text: >-
+        You write about a volunteer trip you went on for four days, as if it
+        changed your life. It reads exactly like what it is.
+      effects:
+        - { type: stat, key: stress, delta: 1 }
+  - id: pay_someone
+    label: Pay a "consultant" to write it
+    visibleIf: { money: { gte: 500 } }
+    outcome:
+      text: >-
+        It costs you $500 and it's polished to a shine. It sounds like
+        nobody in particular. You try not to think about it.
+      effects:
+        - { type: money, delta: -500 }
+        - { type: flag, key: strong_essay, value: true }
+        - { type: stat, key: happiness, delta: -2 }

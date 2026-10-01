@@ -1,0 +1,49 @@
+id: class_reunion
+title: The reunion
+text: >-
+  Your high school reunion is in the gym, which smells exactly the same.
+  {classmate.name} spots you across the room and waves.
+tone: light
+category: school
+rarity: common
+lifeStages: [adult]
+requires:
+  all:
+    - { age: { gte: 28, lte: 40 } }
+    - { education: { credential: [hs_diploma] } }
+weight: { base: 6 }
+once: true
+cast:
+  classmate: { kind: classmate, ageOffset: { min: -1, max: 1 }, createIfMissing: true, newChance: 0.3 }
+choices:
+  - id: homework
+    label: Bring up the math homework
+    visibleIf: { memory: { role: classmate, tag: copied_your_homework } }
+    outcome:
+      text: '{classmate.name} laughs so hard {classmate.they} {classmate:has|have} to sit down. "I owe you about four years of algebra." You swap numbers.'
+      effects:
+        - { type: relationship, role: classmate, kind: friend, affection: 12, trust: 6 }
+        - { type: stat, key: happiness, delta: 4 }
+  - id: project
+    label: Ask if {classmate.they} ever finished that group project
+    visibleIf: { memory: { role: classmate, tag: slacked_on_project } }
+    outcome:
+      text: '{classmate.name} goes red, then apologizes, fifteen years late and completely sincere. It''s weirdly nice.'
+      effects:
+        - { type: relationship, role: classmate, affection: 8, trust: 8 }
+        - { type: stat, key: happiness, delta: 3 }
+  - id: catch_up
+    label: Catch up
+    outcome:
+      text: You trade the short versions of your lives. It's nice. Neither of you mentions keeping in touch.
+      effects:
+        - { type: relationship, role: classmate, affection: 4 }
+        - { type: stat, key: happiness, delta: 2 }
+  - id: abroad
+    label: Tell the Lisbon stories
+    visibleIf: { flag: studied_abroad }
+    outcome:
+      text: A small crowd gathers. You may be embellishing. Nobody minds.
+      effects:
+        - { type: stat, key: confidence, delta: 3 }
+        - { type: stat, key: happiness, delta: 3 }

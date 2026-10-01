@@ -1,4 +1,12 @@
-import { GENDER_CATEGORIES, type CollectionKey, type ContentBundle } from '../../src/content/schemas';
+import {
+  EDUCATION_HISTORY_VALUES,
+  GENDER_CATEGORIES,
+  TIERS,
+  type ChanceModel,
+  type CollectionKey,
+  type ContentBundle,
+  type EducationHistoryKey,
+} from '../../src/content/schemas';
 import {
   ACTION_IDS,
   CREATABLE_KINDS,
@@ -24,6 +32,7 @@ const OBITUARY = 'text/obituary.yaml';
 const MEMORIES = 'registries/memories.yaml';
 const ACTIONS = 'registries/actions.yaml';
 const TRIGGERS = 'registries/triggers.yaml';
+const EDUCATION = 'balance/education.yaml';
 
 /** The conditions a condition always requires: itself, or every part of a top-level `all`. */
 function requiredParts(condition: Condition | undefined): Condition[] {
@@ -128,6 +137,7 @@ export function checkReferences(
   errors.push(...checkEvents(bundle, fileOf));
   errors.push(...checkActions(bundle, fileOf));
   errors.push(...checkTriggers(bundle, fileOf));
+  errors.push(...checkEducation(bundle, fileOf));
 
   return errors;
 }
@@ -193,6 +203,9 @@ function checkTemplates(bundle: ContentBundle): ContentError[] {
     all(HISTORY, `home.${key}.variants`, group.variants, allowed);
   }
   for (const [key, group] of Object.entries(history.money)) all(HISTORY, `money.${key}.variants`, group.variants, {});
+  for (const [key, group] of Object.entries(history.education)) {
+    all(HISTORY, `education.${key}.variants`, group.variants, { values: [...EDUCATION_HISTORY_VALUES[key as EducationHistoryKey]] });
+  }
 
   const obituary = bundle.text.obituary;
   const self = ['self'];
@@ -274,6 +287,22 @@ function checkAdultMoney(def: EventDef, bundle: ContentBundle, err: (message: st
 }
 
 /**
+ * Dropping out and expulsion only happen from the dropout age: an event with
+ * them must require it, or happen only in life stages that start at it or later.
+ */
+function checkLeavingSchool(def: EventDef, bundle: ContentBundle, err: (message: string) => void): void {
+  const used = outcomesOf(def).some((o) =>
+    (o.effects as Effect[]).some((e) => e.type === 'education' && (e.action === 'drop_out' || e.action === 'expel')),
+  );
+  if (!used) return;
+  const { dropoutAge } = bundle.balance.education.school;
+  const start: Record<string, number> = { early: 0, ...bundle.balance.aging.lifeStages };
+  if (!requiresAge(def.requires, dropoutAge) && !def.lifeStages.every((stage) => (start[stage] ?? 0) >= dropoutAge)) {
+    err(`drop_out and expel happen from the dropout age: require { age: { gte: ${dropoutAge} } } or use later life stages only`);
+  }
+}
+
+/**
  * An optional role may be missing, so it may only appear in choices whose
  * visibleIf requires it (and in conditions, which fail without it).
  */
@@ -325,6 +354,8 @@ function checkEvents(bundle: ContentBundle, fileOf: (typeKey: CollectionKey, id:
       for (const t of refs.memories) if (!tags[t]) err(`${field}: memory "${t}" is not in registries/memories.yaml`);
       for (const e of refs.events) if (!bundle.events[e]) err(`${field}: unknown event "${e}"`);
       for (const c of refs.cities) if (!bundle.cities[c]) err(`${field}: unknown city "${c}"`);
+      for (const m of refs.majors) if (!bundle.majors[m]) err(`${field}: unknown major "${m}"`);
+      for (const t of refs.trades) if (!bundle.trades[t]) err(`${field}: unknown trade "${t}"`);
     };
 
     if (!categories[def.category]) err(`category "${def.category}" is not in registries/categories.yaml`);
@@ -351,6 +382,7 @@ function checkEvents(bundle: ContentBundle, fileOf: (typeKey: CollectionKey, id:
     }
     checkRomance(def, bundle, err);
     checkAdultMoney(def, bundle, err);
+    checkLeavingSchool(def, bundle, err);
     checkOptionalRoles(def, err);
 
     let writesHistory = false;
@@ -441,6 +473,59 @@ function checkTriggers(bundle: ContentBundle, fileOf: (typeKey: CollectionKey, i
       if (actionEvents.has(id)) err(`answers the "${triggerId}" trigger, so it can't also answer a management action`);
       const young = def.lifeStages.filter((stage) => stage === 'early' || stage === 'child' || stage === 'teen');
       if (young.length > 0) err(`money trouble is for adults: it can't be in life stages ${young.join(', ')}`);
+    }
+  }
+  return errors;
+}
+
+/**
+ * Education: the school years fit together, every trade and grad program has
+ * its tuition (and every grad program an admission model), nothing in the
+ * balance file points at a trade, grad program or flag that doesn't exist,
+ * grad programs only name real majors, and every city names its schools.
+ */
+function checkEducation(bundle: ContentBundle, fileOf: (typeKey: CollectionKey, id: string) => string): ContentError[] {
+  const errors: ContentError[] = [];
+  const edu = bundle.balance.education;
+  const { flags } = bundle.registries.flags;
+  const activeIds = <T extends { retired?: boolean | undefined }>(record: Record<string, T>) =>
+    Object.entries(record)
+      .filter(([, def]) => !def.retired)
+      .map(([id]) => id);
+
+  if (activeIds(bundle.majors).length === 0) errors.push({ file: 'majors/', message: 'at least one active major is required' });
+  const { school } = edu;
+  const highEnds = school.startAge + school.elementary + school.middle + school.high;
+  if (school.dropoutAge >= highEnds) errors.push({ file: EDUCATION, message: `school.dropoutAge must be before high school ends (${highEnds})` });
+  if (school.applyAge < highEnds - 1) errors.push({ file: EDUCATION, message: `school.applyAge can't be before the last year of high school (${highEnds - 1})` });
+  if (bundle.balance.economy.independenceAge > highEnds) {
+    errors.push({ file: EDUCATION, message: 'high school must end at or after the independence age (balance/economy.yaml), so students can take out loans' });
+  }
+  if (edu.college.transferCredit >= Math.min(edu.college.years.state, edu.college.years.elite)) {
+    errors.push({ file: EDUCATION, message: 'college.transferCredit must leave at least one year of a bachelor’s' });
+  }
+
+  const model = (field: string, m: ChanceModel) => {
+    for (const flag of Object.keys(m.flags ?? {})) if (!flags[flag]) errors.push({ file: EDUCATION, message: `${field}.flags: flag "${flag}" is not in registries/flags.yaml` });
+  };
+  for (const tier of TIERS) model(`admission.college.${tier}`, edu.admission.college[tier]);
+  model('admission.trade', edu.admission.trade);
+  model('ged.pass', edu.ged.pass);
+  for (const [id, m] of Object.entries(edu.admission.grad)) {
+    if (!bundle.gradPrograms[id]) errors.push({ file: EDUCATION, message: `admission.grad: unknown grad program "${id}"` });
+    model(`admission.grad.${id}`, m);
+  }
+  for (const id of Object.keys(edu.tuition.trade)) if (!bundle.trades[id]) errors.push({ file: EDUCATION, message: `tuition.trade: unknown trade "${id}"` });
+  for (const id of Object.keys(edu.tuition.grad)) if (!bundle.gradPrograms[id]) errors.push({ file: EDUCATION, message: `tuition.grad: unknown grad program "${id}"` });
+  for (const id of activeIds(bundle.trades)) {
+    if (edu.tuition.trade[id] === undefined) errors.push({ file: fileOf('trades', id), message: `${id}: no tuition in balance/education.yaml (tuition.trade.${id})` });
+  }
+  for (const id of activeIds(bundle.gradPrograms)) {
+    const file = fileOf('gradPrograms', id);
+    if (edu.tuition.grad[id] === undefined) errors.push({ file, message: `${id}: no tuition in balance/education.yaml (tuition.grad.${id})` });
+    if (!edu.admission.grad[id]) errors.push({ file, message: `${id}: no admission model in balance/education.yaml (admission.grad.${id})` });
+    for (const major of bundle.gradPrograms[id]!.majors ?? []) {
+      if (!bundle.majors[major]) errors.push({ file, message: `${id}: unknown major "${major}"` });
     }
   }
   return errors;

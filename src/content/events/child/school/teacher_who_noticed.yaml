@@ -1,0 +1,41 @@
+id: teacher_who_noticed
+title: After class
+text: >-
+  {teacher.name}, your teacher, asks you to stay after the bell. "You've
+  seemed tired lately. Is everything okay at home?"
+tone: serious
+category: school
+rarity: common
+lifeStages: [child]
+requires:
+  all:
+    - { education: { program: [elementary, middle] } }
+    - any:
+        - { familyWealth: [poor] }
+        - { flag: parents_fought }
+        - { flag: parents_split }
+        - { stat: stress, gt: 40 }
+weight: { base: 7 }
+once: true
+cast:
+  teacher: { kind: acquaintance, age: { min: 26, max: 62 }, createIfMissing: true, newChance: 1 }
+choices:
+  - id: open_up
+    label: Tell {teacher.them} the truth
+    outcome:
+      text: >-
+        {teacher.name} listens without interrupting. After that there's always
+        a granola bar in {teacher.their} desk drawer, and {teacher.they} never
+        {teacher:makes|make} a thing of it.
+      effects:
+        - { type: relationship, role: teacher, affection: 12, trust: 12 }
+        - { type: memory, role: teacher, tag: believed_in_you }
+        - { type: stat, key: stress, delta: -5 }
+        - { type: education, action: grades, value: 0.2 }
+  - id: fine
+    label: Say you're fine
+    outcome:
+      text: '"Okay. My door''s open." {teacher.name} means it. You don''t knock.'
+      effects:
+        - { type: relationship, role: teacher, affection: 3 }
+        - { type: stat, key: stress, delta: 1 }

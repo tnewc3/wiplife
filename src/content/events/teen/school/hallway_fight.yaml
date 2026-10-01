@@ -1,0 +1,56 @@
+id: hallway_fight
+title: In the hallway
+text: >-
+  A senior has {friend.name} pinned against the lockers, and a crowd is
+  forming with their phones out. {friend.name} looks at you.
+tone: serious
+category: school
+rarity: common
+lifeStages: [teen]
+requires: { education: { program: [high] } }
+weight: { base: 5 }
+once: true
+cast:
+  friend: { kind: friend, ageOffset: { min: -1, max: 1 }, createIfMissing: true }
+choices:
+  - id: fight
+    label: Shove the senior off {friend.them}
+    visibleIf: { trait: riskTaking, gt: 35 }
+    check:
+      base: 40
+      stats: [{ key: fitness, weight: 0.4 }, { key: confidence, weight: 0.2 }]
+      success:
+        text: >-
+          It's over in seconds. The senior backs off, and a vice principal
+          suspends all three of you anyway. {friend.name} never forgets it.
+        effects:
+          - { type: flag, key: suspended, value: true }
+          - { type: relationship, role: friend, affection: 15, trust: 15 }
+          - { type: memory, role: friend, tag: fought_for_them }
+          - { type: stat, key: reputation, delta: 3 }
+          - { type: education, action: grades, value: -0.2 }
+      failure:
+        text: >-
+          You end up with a black eye, a three-day suspension and a video that
+          goes around school for a week. {friend.name} visits with ice cream.
+        effects:
+          - { type: flag, key: suspended, value: true }
+          - { type: relationship, role: friend, affection: 10, trust: 10 }
+          - { type: memory, role: friend, tag: fought_for_them }
+          - { type: stat, key: health, delta: -3 }
+          - { type: stat, key: stress, delta: 5 }
+          - { type: education, action: grades, value: -0.3 }
+  - id: get_help
+    label: Run for a teacher
+    outcome:
+      text: A teacher breaks it up. {friend.name} is grateful, mostly. Someone calls you a snitch on the way to class.
+      effects:
+        - { type: relationship, role: friend, affection: 4 }
+        - { type: stat, key: stress, delta: 2 }
+  - id: freeze
+    label: Freeze
+    outcome:
+      text: The bell rings and it breaks up on its own. {friend.name} doesn't bring it up. Neither do you.
+      effects:
+        - { type: relationship, role: friend, affection: -8, trust: -8 }
+        - { type: stat, key: happiness, delta: -3 }

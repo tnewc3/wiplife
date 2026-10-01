@@ -7,7 +7,8 @@ import type { Check, CheckStat, ContentBundle, EffectStatKey } from '../../conte
 import { HIDDEN_KEYS, STAT_KEYS } from '../../content/schemas';
 import type { Id, LifeState } from '../types';
 
-function score(state: LifeState, key: EffectStatKey): number {
+/** Your value for a stat, personality trait or readable hidden value. */
+export function scoreOf(state: LifeState, key: EffectStatKey): number {
   const c = state.character;
   if ((STAT_KEYS as readonly string[]).includes(key)) return c.stats[key as keyof typeof c.stats];
   if ((HIDDEN_KEYS as readonly string[]).includes(key)) return c.hidden[key as (typeof HIDDEN_KEYS)[number]];
@@ -20,7 +21,7 @@ function statValue(state: LifeState, stat: CheckStat, cast: Record<string, Id>):
     const rel = state.relationships[cast[stat.role] ?? ''];
     return rel ? rel[stat.key] : 50;
   }
-  return score(state, stat.key);
+  return scoreOf(state, stat.key);
 }
 
 /** Success chance from 0 to 1. `cast` gives the people a check may read (affection or trust). */

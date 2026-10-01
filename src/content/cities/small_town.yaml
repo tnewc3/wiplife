@@ -11,3 +11,10 @@ jobMarket:
   professional: 30
   trade: 45
   gig: 35
+schools:
+  high: Millbrook High School
+  community: County Community College
+  state: Heartland State University
+  elite: Whitmore College
+  trade: Valley Trade School
+  grad: Heartland Graduate School

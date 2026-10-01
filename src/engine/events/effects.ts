@@ -15,6 +15,7 @@ import {
   spend,
   startDebtPlan,
 } from '../finance';
+import { addScholarshipFund, leaveSchool } from '../education';
 import { moveInTogether, moveTo, refreshHousingCost, sellHome, settleHousehold, supportingParent } from '../housing';
 import { clampInt } from '../random';
 import { canChangeKind, canSetStatus } from '../relationships';
@@ -107,6 +108,25 @@ const handlers: { [T in Effect['type']]: Handler<T> } = {
         return;
       case 'move_in_together':
         moveInTogether(state, ctx.cast[effect.role ?? ''] ?? '', ctx.content);
+        return;
+    }
+  },
+
+  education: (state, effect, ctx) => {
+    const edu = state.education;
+    switch (effect.action) {
+      case 'grades':
+        // Only while you're in school; it counts toward this year's grade.
+        if (edu.current) edu.current.boost = Math.min(2, Math.max(-2, edu.current.boost + (effect.value ?? 0)));
+        return;
+      case 'scholarship':
+        addScholarshipFund(state, effect.value ?? 0);
+        return;
+      case 'drop_out':
+        leaveSchool(state, 'droppedOut', ctx.content);
+        return;
+      case 'expel':
+        leaveSchool(state, 'expelled', ctx.content);
         return;
     }
   },

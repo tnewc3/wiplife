@@ -1,0 +1,48 @@
+id: spelling_bee
+title: The spelling bee
+text: >-
+  You made it to the final round of the school spelling bee. The gym is
+  silent. The word is "onomatopoeia," and every parent in the bleachers is
+  holding their breath.
+tone: light
+category: school
+rarity: common
+lifeStages: [child]
+requires: { education: { program: [elementary, middle] } }
+weight:
+  base: 6
+  modifiers:
+    - { if: { stat: smarts, gt: 65 }, x: 1.5 }
+once: true
+choices:
+  - id: spell_it
+    label: Sound it out, slowly
+    check:
+      base: 40
+      stats: [{ key: smarts, weight: 0.5 }, { key: discipline, weight: 0.2 }]
+      success:
+        text: O-N-O-M-A-T-O-P-O-E-I-A. The judge nods. The gym erupts. You get a trophy taller than your arm.
+        effects:
+          - { type: stat, key: confidence, delta: 4 }
+          - { type: stat, key: happiness, delta: 3 }
+          - { type: education, action: grades, value: 0.2 }
+          - { type: history, text: You won the school spelling bee., importance: 1 }
+      failure:
+        text: You forget the second O. The runner-up gets it right, and you get a certificate and a juice box.
+        effects:
+          - { type: stat, key: stress, delta: 2 }
+          - { type: stat, key: smarts, delta: 1 }
+  - id: guess_fast
+    label: Rattle it off and hope
+    check:
+      base: 25
+      stats: [{ key: smarts, weight: 0.4 }, { key: confidence, weight: 0.3 }]
+      success:
+        text: You fire it off so fast nobody is sure what you said. The judge checks. You're right.
+        effects:
+          - { type: stat, key: confidence, delta: 5 }
+          - { type: history, text: You won the school spelling bee in about two seconds flat., importance: 1 }
+      failure:
+        text: It comes out as a sneeze with vowels in it. People laugh, but not unkindly.
+        effects:
+          - { type: stat, key: confidence, delta: -2 }

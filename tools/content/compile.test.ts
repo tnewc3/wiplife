@@ -20,6 +20,13 @@ jobMarket:
   professional: 50
   trade: 50
   gig: 50
+schools:
+  high: Test High School
+  community: Test Community College
+  state: Test State University
+  elite: Test University
+  trade: Test Trade School
+  grad: Test Graduate School
 `;
 
 let dir: string;
@@ -534,6 +541,68 @@ choices:
       const text = await expectErrors();
       expect(text).toContain('add needs kind and amount');
       expect(text).toContain('requires');
+    });
+  });
+
+  describe('education', () => {
+    it('keeps dropping out to the dropout age, and checks education conditions and effects', async () => {
+      const file = 'events/teen/school/test_quit.yaml';
+      const quit = (requires: string, effect = '{ type: education, action: drop_out }') => `id: test_quit
+title: Quit
+text: You could quit school.
+tone: serious
+category: school
+rarity: common
+lifeStages: [teen]
+${requires}weight: { base: 1 }
+choices:
+  - id: quit
+    label: Quit
+    outcome:
+      effects:
+        - ${effect}
+  - id: stay
+    label: Stay
+    outcome: {}
+`;
+      await write(file, quit('requires: { education: { program: [high] } }\n'));
+      expect(await expectErrors()).toContain('drop_out and expel happen from the dropout age');
+      await write(file, quit('requires: { all: [{ age: { gte: 16 } }, { education: { program: [high], major: [alchemy] } }] }\n'));
+      expect(await expectErrors()).toContain('unknown major "alchemy"');
+      await write(file, quit('requires: { age: { gte: 16 } }\n', '{ type: education, action: grades, value: 3 }'));
+      expect(await expectErrors()).toContain('grades needs a value from -1 to 1');
+      await write(file, quit('requires: { all: [{ age: { gte: 16 } }, { education: { program: [high], final: false } }] }\n'));
+      expect((await compile()).ok).toBe(true);
+    });
+
+    it('needs tuition and an admission model for every trade and grad program, and real majors', async () => {
+      await write('trades/stonemason.yaml', 'id: stonemason\nname: Stonemason\nsubject: stonework\nlicense: mason card\nblurb: Stone.\ncareers: Building\nyears: 2\ndifficulty: 2\n');
+      await write(
+        'grad/divinity.yaml',
+        'id: divinity\nname: Divinity school\nsubject: divinity\ndegree: a divinity degree\nblurb: Faith.\ncareers: Ministry\nyears: 3\ndifficulty: 3\nmajors: [theology]\n',
+      );
+      const text = await expectErrors();
+      expect(text).toContain('stonemason: no tuition in balance/education.yaml');
+      expect(text).toContain('divinity: no tuition in balance/education.yaml');
+      expect(text).toContain('divinity: no admission model');
+      expect(text).toContain('divinity: unknown major "theology"');
+    });
+
+    it('rejects balance entries for unknown programs and flags', async () => {
+      const balance = await readFile(path.join(dir, 'balance/education.yaml'), 'utf8');
+      await write(
+        'balance/education.yaml',
+        balance.replace('    electrician: 7500', '    electrician: 7500\n    juggler: 100').replace('{ research_assistant: 8 }', '{ research_assistant: 8, made_up_flag: 3 }'),
+      );
+      const text = await expectErrors();
+      expect(text).toContain('tuition.trade: unknown trade "juggler"');
+      expect(text).toContain('flag "made_up_flag" is not in registries/flags.yaml');
+    });
+
+    it('requires every city to name its schools', async () => {
+      const chicago = await readFile(path.join(dir, 'cities/chicago.yaml'), 'utf8');
+      await write('cities/chicago.yaml', chicago.replace(/schools:[\s\S]*$/, ''));
+      expect(await expectErrors()).toContain('schools');
     });
   });
 

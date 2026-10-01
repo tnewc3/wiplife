@@ -131,26 +131,53 @@ const relationship = z.strictObject({
   wasSpouse: z.literal(true).exactOptional(),
 });
 
+const program = z.enum(['elementary', 'middle', 'high', 'college', 'trade', 'grad']);
+const tier = z.enum(['community', 'state', 'elite']);
+const gpa = z.number().min(0).max(4);
+const share = z.number().min(0).max(1);
+const placeFields = {
+  program,
+  tier: tier.exactOptional(),
+  majorId: id.exactOptional(),
+  tradeId: id.exactOptional(),
+  gradProgramId: id.exactOptional(),
+};
+const enrollmentFields = {
+  ...placeFields,
+  year: int.min(1),
+  lengthYears: int.min(1),
+  gpa,
+  boost: z.number().min(-2).max(2),
+  repeats: int.min(0),
+  scholarship: share,
+  since: int,
+};
+
 const education = z.strictObject({
-  current: z
-    .strictObject({
-      program: z.enum(['elementary', 'middle', 'high', 'college', 'trade', 'grad']),
-      tier: z.enum(['community', 'state', 'elite']).exactOptional(),
-      majorId: id.exactOptional(),
-      tradeId: id.exactOptional(),
-      gradProgramId: id.exactOptional(),
-      year: int,
-      lengthYears: int,
-      gpa: z.number(),
-    })
-    .nullable(),
+  current: z.strictObject(enrollmentFields).nullable(),
   credentials: z.array(
     z.strictObject({
       type: z.enum(['hs_diploma', 'ged', 'associate', 'bachelor', 'trade_license', 'grad']),
       refId: id.exactOptional(),
       year: int,
+      gpa: gpa.exactOptional(),
+      tier: tier.exactOptional(),
     }),
   ),
+  admission: z
+    .strictObject({
+      ...placeFields,
+      scholarship: share,
+      decided: int,
+      resume: z.strictObject({ year: int.min(1), lengthYears: int.min(1), gpa, repeats: int.min(0) }).exactOptional(),
+    })
+    .nullable(),
+  left: z.strictObject({ ...enrollmentFields, leftYear: int }).nullable(),
+  applied: z.array(z.strictObject({ option: z.string().min(1), accepted: z.boolean() })),
+  fund: dollars.min(0),
+  lastBill: z
+    .strictObject({ year: int, tuition: dollars, scholarship: dollars, family: dollars, fund: dollars, loan: dollars })
+    .exactOptional(),
 });
 
 const career = z.strictObject({

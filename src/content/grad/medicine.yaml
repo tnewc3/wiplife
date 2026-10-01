@@ -1,0 +1,9 @@
+id: medicine
+name: Medical school
+subject: medicine
+degree: a medical degree
+blurb: Four years of anatomy, hospitals and exams.
+careers: Doctor, surgeon, research
+years: 4
+difficulty: 5
+majors: [biology, nursing, engineering, psychology]

@@ -1,0 +1,74 @@
+# Chain: a teacher sees something in your writing; a year or two later, the
+# college recommendation letter.
+chain: english_teacher
+events:
+  - id: english_teacher
+    title: Red ink
+    text: >-
+      Your essay comes back covered in red ink, and at the bottom
+      {teacher.name} has written: "This is good. Come see me. You could be
+      much better than this."
+    tone: neutral
+    category: school
+    rarity: common
+    lifeStages: [teen]
+    requires: { education: { program: [high], year: { lte: 3 } } }
+    weight: { base: 6 }
+    once: true
+    cast:
+      teacher: { kind: acquaintance, age: { min: 26, max: 64 }, createIfMissing: true, newChance: 1 }
+    choices:
+      - id: go_see
+        label: Go see {teacher.them}
+        outcome:
+          text: >-
+            {teacher.name} gives you a stack of books and a hard deadline.
+            You start staying after school twice a week.
+          effects:
+            - { type: relationship, role: teacher, affection: 12, trust: 10 }
+            - { type: memory, role: teacher, tag: believed_in_you }
+            - { type: stat, key: smarts, delta: 2 }
+            - { type: education, action: grades, value: 0.2 }
+            - { type: schedule, eventId: recommendation_letter, inYears: [1, 2], cast: [teacher] }
+      - id: ignore
+        label: Leave it
+        outcome:
+          text: You toss the essay in your locker. The note stays with you longer than you'd like.
+          effects:
+            - { type: relationship, role: teacher, affection: -2 }
+
+  - id: recommendation_letter
+    title: The letter
+    text: >-
+      College applications are due, and {teacher.name} catches you in the
+      hallway. "I'd like to write you a recommendation. If you'll let me."
+    tone: light
+    category: school
+    rarity: common
+    lifeStages: [teen]
+    requires:
+      all:
+        - { education: { program: [high] } }
+        - { memory: { role: teacher, tag: believed_in_you } }
+    weight: { base: 10 }
+    followUpOnly: true
+    cast:
+      teacher: { kind: acquaintance }
+    choices:
+      - id: accept
+        label: Say yes, gratefully
+        outcome:
+          text: >-
+            You never see the letter. You don't need to. {teacher.name} tells
+            you {teacher.they} wrote it three times before it was good enough.
+          effects:
+            - { type: flag, key: teacher_recommendation, value: true }
+            - { type: memory, role: teacher, tag: wrote_your_letter }
+            - { type: relationship, role: teacher, affection: 5 }
+            - { type: stat, key: confidence, delta: 3 }
+      - id: decline
+        label: Tell {teacher.them} you're not applying
+        outcome:
+          text: '"That''s a choice too," {teacher.name} says. "The offer stands."'
+          effects:
+            - { type: relationship, role: teacher, affection: -2 }

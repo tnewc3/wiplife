@@ -1,0 +1,46 @@
+id: group_project
+title: The group project
+text: >-
+  The project is due Friday. You've done your part. {partner.name} has done
+  nothing at all, and just texted "hey sorry been busy, what's left?"
+tone: neutral
+category: school
+rarity: common
+lifeStages: [teen, youngAdult, adult]
+requires: { education: { program: [high, college, grad] } }
+weight: { base: 6 }
+cooldownYears: 3
+cast:
+  partner: { kind: classmate, ageOffset: { min: -2, max: 2 }, createIfMissing: true, newChance: 0.6 }
+choices:
+  - id: do_it_all
+    label: Finish it yourself, quietly
+    outcome:
+      text: You pull an all-nighter and put both names on it. {partner.name} thanks you like {partner.they} helped.
+      effects:
+        - { type: education, action: grades, value: 0.2 }
+        - { type: stat, key: stress, delta: 4 }
+        - { type: memory, role: partner, tag: slacked_on_project }
+  - id: confront
+    label: Tell {partner.them} to pull {partner.their} weight
+    check:
+      base: 45
+      stats: [{ key: confidence, weight: 0.4 }]
+      success:
+        text: '{partner.name} actually shows up. The project is better for it, and so is the next one.'
+        effects:
+          - { type: relationship, role: partner, trust: 5 }
+          - { type: education, action: grades, value: 0.1 }
+      failure:
+        text: '{partner.name} gets defensive and turns in something terrible at the last minute. You both lose points.'
+        effects:
+          - { type: relationship, role: partner, affection: -6 }
+          - { type: memory, role: partner, tag: slacked_on_project }
+          - { type: education, action: grades, value: -0.2 }
+  - id: report
+    label: Tell the teacher who did what
+    outcome:
+      text: You get your grade. {partner.name} gets a lecture and stops saying hi.
+      effects:
+        - { type: relationship, role: partner, affection: -10 }
+        - { type: education, action: grades, value: 0.1 }

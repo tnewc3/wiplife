@@ -1,0 +1,27 @@
+id: first_day_middle_school
+title: A locker of your own
+text: >-
+  First day of middle school. Seven classes, four minutes between them, and
+  a locker whose combination you have already forgotten.
+tone: light
+category: school
+rarity: common
+lifeStages: [child]
+requires: { education: { program: [middle], year: { eq: 1 } } }
+weight: { base: 8 }
+once: true
+choices:
+  - id: ask
+    label: Ask the kid at the next locker for help
+    outcome:
+      text: "The kid next door shows you the trick: pull up on the handle. You're both late for homeroom anyway."
+      effects:
+        - { type: stat, key: sociability, delta: 2 }
+        - { type: stat, key: happiness, delta: 1 }
+  - id: carry
+    label: Carry everything all day
+    outcome:
+      text: You haul every book to every class. By Friday your shoulders hate you, but you're never late.
+      effects:
+        - { type: stat, key: discipline, delta: 2 }
+        - { type: stat, key: stress, delta: 1 }

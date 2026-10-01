@@ -1,0 +1,32 @@
+id: semester_abroad
+title: A semester away
+text: >-
+  The study abroad office has one spot left for a semester in Lisbon. It
+  would cost about $4,000 on top of tuition, and you'd miss a semester of
+  everything here.
+tone: light
+category: school
+rarity: common
+lifeStages: [youngAdult]
+requires: { education: { program: [college], tier: [state, elite], year: { gte: 2 }, final: false } }
+weight: { base: 6 }
+once: true
+choices:
+  - id: go
+    label: Go
+    outcome:
+      text: >-
+        You come back with a little Portuguese, a lot of photos and a sense
+        that the world is much bigger than you'd been told.
+      effects:
+        - { type: money, delta: -4000 }
+        - { type: flag, key: studied_abroad, value: true }
+        - { type: stat, key: happiness, delta: 6 }
+        - { type: stat, key: confidence, delta: 3 }
+        - { type: history, text: You spent a semester studying in Lisbon., importance: 2 }
+  - id: stay
+    label: Stay and save the money
+    outcome:
+      text: You stay. Your friends' photos are gorgeous. Your bank balance is intact.
+      effects:
+        - { type: stat, key: happiness, delta: -1 }

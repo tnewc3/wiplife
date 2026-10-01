@@ -1,0 +1,37 @@
+id: entrance_exam
+title: Test day
+text: >-
+  Saturday, 7:45 a.m., a gym full of number-two pencils. The college
+  entrance exam is three hours and fifty minutes long, and you're already tired.
+tone: neutral
+category: school
+rarity: common
+lifeStages: [teen]
+requires: { education: { program: [high], year: { gte: 3 } } }
+weight:
+  base: 7
+  modifiers:
+    - { if: { flag: advanced_classes }, x: 1.5 }
+once: true
+choices:
+  - id: focus
+    label: Settle in and take it seriously
+    check:
+      base: 30
+      stats: [{ key: smarts, weight: 0.6 }, { key: discipline, weight: 0.2 }]
+      success:
+        text: Weeks later, the score comes back high enough that your counselor reads it twice.
+        effects:
+          - { type: flag, key: high_test_scores, value: true }
+          - { type: stat, key: confidence, delta: 4 }
+          - { type: history, text: You aced the college entrance exam., importance: 2 }
+      failure:
+        text: The score is ordinary. You could retake it. You don't want to.
+        effects:
+          - { type: stat, key: stress, delta: 3 }
+  - id: wing_it
+    label: Fill in bubbles and get it over with
+    outcome:
+      text: You finish forty minutes early and nap on the desk. The score is about what you'd expect.
+      effects:
+        - { type: stat, key: stress, delta: -1 }

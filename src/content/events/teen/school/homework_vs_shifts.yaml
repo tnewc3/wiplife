@@ -1,0 +1,31 @@
+id: homework_vs_shifts
+title: Too many hours
+text: >-
+  Between delivery shifts and homework, you're running on four hours of
+  sleep. Your grades are slipping, and your boss wants you for the weekend rush.
+tone: neutral
+category: school
+rarity: common
+lifeStages: [teen, youngAdult]
+requires:
+  all:
+    - { education: { program: [high, college, trade] } }
+    - { finances: { gig: true } }
+weight: { base: 7 }
+cooldownYears: 3
+choices:
+  - id: work
+    label: Take the shifts
+    outcome:
+      text: The money's good. The C on your next test is not.
+      effects:
+        - { type: money, delta: 800 }
+        - { type: education, action: grades, value: -0.3 }
+        - { type: stat, key: stress, delta: 4 }
+  - id: study
+    label: Turn down the extra hours
+    outcome:
+      text: You catch up on sleep and on reading. Your bank account notices. So does your report card.
+      effects:
+        - { type: education, action: grades, value: 0.2 }
+        - { type: stat, key: stress, delta: -2 }

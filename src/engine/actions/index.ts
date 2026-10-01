@@ -22,6 +22,7 @@ import { isLifeActionAvailable, isLifeActionId, LIFE_ACTIONS, type LifeActionId 
 import { RELATIONSHIP_ACTIONS } from './relationships';
 
 export { RELATIONSHIP_ACTIONS } from './relationships';
+export { EDUCATION_ACTION_IDS, targetOf, type EducationActionId } from './education';
 export {
   HOME_ACTION_IDS,
   isLifeActionAvailable,

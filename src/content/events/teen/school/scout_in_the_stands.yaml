@@ -1,0 +1,39 @@
+id: scout_in_the_stands
+title: Someone's watching
+text: >-
+  There's a college coach in the stands with a clipboard, and your team's
+  coach says, quietly, that the scout is there for you.
+tone: light
+category: school
+rarity: uncommon
+lifeStages: [teen]
+requires:
+  all:
+    - { education: { program: [high], year: { gte: 2 } } }
+    - { stat: fitness, gte: 70 }
+weight: { base: 8 }
+once: true
+choices:
+  - id: play_hard
+    label: Leave everything on the field
+    check:
+      base: 35
+      stats: [{ key: fitness, weight: 0.5 }, { key: confidence, weight: 0.2 }]
+      success:
+        text: Two weeks later, a letter. They want you, and they're offering money to get you.
+        effects:
+          - { type: flag, key: recruited_athlete, value: true }
+          - { type: education, action: scholarship, value: 8000 }
+          - { type: stat, key: confidence, delta: 5 }
+          - { type: history, text: A college coach recruited you to play., importance: 2 }
+      failure:
+        text: You play the best game of your life. The scout leaves at halftime to watch someone else.
+        effects:
+          - { type: stat, key: happiness, delta: -2 }
+          - { type: stat, key: fitness, delta: 1 }
+  - id: play_normal
+    label: Play your normal game
+    outcome:
+      text: You play like you always do. The scout writes something down. You never find out what.
+      effects:
+        - { type: stat, key: stress, delta: -1 }

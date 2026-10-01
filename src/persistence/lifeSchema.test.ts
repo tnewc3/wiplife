@@ -293,3 +293,61 @@ describe('lives from Stage 6 on', () => {
     expect(schema.safeParse({ ...life, character: { ...life.character, birthCityId: 'atlantis' } }).success).toBe(false);
   });
 });
+
+describe('lives from Stage 7 on', () => {
+  /** A version 5 save: education has only current and credentials. */
+  const v5 = (life: LifeState) => ({ ...life, education: { current: null, credentials: [] } });
+
+  it('upgrade a schema version 5 adult with the high school diploma they would have earned', async () => {
+    const life = lifeAtAge('stage7-migrate', 30);
+    const db = freshDb();
+    await db.lives.put({ id: 'active', envelope: { ...makeEnvelope(v5(life), content.contentVersion), schemaVersion: 5 } });
+    const result = await readSave(db, loadedLifeSchema(content));
+    expect(result.status).toBe('ok');
+    if (result.status !== 'ok') return;
+    expect(result.envelope.schemaVersion).toBe(CURRENT_SCHEMA_VERSION);
+    expect(result.envelope.data.education).toEqual({
+      current: null,
+      credentials: [{ type: 'hs_diploma', year: life.birthYear + 18 }],
+      admission: null,
+      left: null,
+      applied: [],
+      fund: 0,
+    });
+  });
+
+  it('upgrade a schema version 5 child, who starts school at the next age-up', async () => {
+    const life = lifeAtAge('stage7-child', 9);
+    const db = freshDb();
+    await db.lives.put({ id: 'active', envelope: { ...makeEnvelope(v5(life), content.contentVersion), schemaVersion: 5 } });
+    const result = await readSave(db, loadedLifeSchema(content));
+    expect(result.status).toBe('ok');
+    if (result.status !== 'ok') return;
+    expect(result.envelope.data.education.credentials).toEqual([]);
+    const next = beginYear(result.envelope.data, content);
+    expect(next.education.current).toMatchObject({ program: 'elementary', year: 11 - 5 });
+  });
+
+  it('round trip a life in college with a place, a program left behind and scholarship money', async () => {
+    const life = produce(lifeAtAge('stage7-round', 22), (d) => {
+      d.education.credentials.push({ type: 'hs_diploma', year: d.currentYear - 4, gpa: 3.25 });
+      d.education.current = { program: 'college', tier: 'state', majorId: 'nursing', year: 4, lengthYears: 4, gpa: 3.1, boost: 0.25, repeats: 0, scholarship: 0.3, since: d.currentYear - 3 };
+      d.education.admission = { program: 'grad', gradProgramId: 'medicine', scholarship: 0.1, decided: d.currentYear };
+      d.education.left = { program: 'trade', tradeId: 'welder', year: 1, lengthYears: 1, gpa: 2.5, boost: 0, repeats: 0, scholarship: 0, since: d.currentYear - 4, leftYear: d.currentYear - 4 };
+      d.education.applied = [{ option: 'grad:medicine', accepted: true }];
+      d.education.fund = 2_500;
+      d.education.lastBill = { year: d.currentYear, tuition: 11_500, scholarship: 3_450, family: 3_220, fund: 0, loan: 4_830 };
+    });
+    expect(await roundTrip(life)).toEqual(life);
+  });
+
+  it('refuse school that breaks the rules', () => {
+    const life = lifeAtAge('stage7-bad', 20);
+    const schema = loadedLifeSchema(content);
+    const enrollment = { program: 'grad', gradProgramId: 'law', year: 1, lengthYears: 3, gpa: 3, boost: 0, repeats: 0, scholarship: 0, since: life.currentYear };
+    expect(schema.safeParse({ ...life, education: { ...life.education, current: enrollment } }).success).toBe(false);
+    expect(schema.safeParse({ ...life, education: { ...life.education, current: { ...enrollment, gpa: 5 } } }).success).toBe(false);
+    expect(schema.safeParse({ ...life, education: { ...life.education, fund: -1 } }).success).toBe(false);
+    expect(schema.safeParse({ ...life, education: { ...life.education, credentials: [{ type: 'bachelor', refId: 'alchemy', year: life.currentYear, tier: 'state' }] } }).success).toBe(false);
+  });
+});

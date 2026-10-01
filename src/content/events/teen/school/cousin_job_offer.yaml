@@ -1,0 +1,46 @@
+id: cousin_job_offer
+title: Real money
+text: >-
+  Your cousin's friend runs a body shop and needs another pair of hands,
+  full-time, cash, starting Monday. School feels like it isn't going
+  anywhere anyway.
+tone: serious
+category: school
+rarity: common
+lifeStages: [teen]
+requires:
+  all:
+    - { age: { gte: 16 } }
+    - { education: { program: [high], gpa: { lt: 2.6 } } }
+weight:
+  base: 6
+  modifiers:
+    - { if: { familyWealth: [poor, working] }, x: 1.5 }
+once: true
+choices:
+  - id: take_it
+    label: Drop out and take the job
+    outcome:
+      text: >-
+        The work is hard and the money is real. Some nights you drive past
+        the school and don't feel anything at all. Other nights you do.
+      effects:
+        - { type: education, action: drop_out }
+        - { type: money, delta: 6000 }
+        - { type: stat, key: happiness, delta: 2 }
+        - { type: stat, key: ambition, delta: -3 }
+  - id: weekends
+    label: Ask for weekends only
+    outcome:
+      text: 'The shop says sure, but weekend hours pay weekend money. It''s still more than you had.'
+      effects:
+        - { type: money, delta: 1500 }
+        - { type: stat, key: stress, delta: 3 }
+        - { type: education, action: grades, value: -0.1 }
+  - id: no
+    label: Stay in school
+    outcome:
+      text: You say no. Graduation is a long way off, but it's a little closer now that you've chosen it.
+      effects:
+        - { type: stat, key: discipline, delta: 3 }
+        - { type: education, action: grades, value: 0.2 }
