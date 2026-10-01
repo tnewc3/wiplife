@@ -19,6 +19,7 @@ import { curveAt } from './curve';
 import { finishingCredential, inFinalYear, modelChance } from './education';
 import { createPerson } from './events/casting';
 import { talentHelpsJob } from './discovery';
+import { countedRecord } from './record';
 import { scoreOf } from './events/checks';
 import { wholeDollars } from './finance';
 import { clampInt } from './random';
@@ -75,7 +76,13 @@ export function searchBlock(state: LifeState, content: ContentBundle): SearchBlo
 export function meetsJobRequirements(state: LifeState, def: JobDef, content: ContentBundle): boolean {
   if (state.character.age < content.balance.careers.minAge) return false;
   const finishing = finishingCredential(state);
-  const view = finishing ? { ...state, education: { ...state.education, credentials: [...state.education.credentials, finishing] } } : state;
+  // Employers see the record that counts: from 18, offenses from before 18 don't (Stage 9).
+  const record = countedRecord(state, content);
+  const view = {
+    ...state,
+    ...(finishing ? { education: { ...state.education, credentials: [...state.education.credentials, finishing] } } : {}),
+    ...(record !== state.legal.record ? { legal: { ...state.legal, record } } : {}),
+  };
   return evaluate(def.requires, view, { roles: 'strict' });
 }
 
@@ -130,8 +137,8 @@ export function hireChance(state: LifeState, def: JobDef, content: ContentBundle
   const tiers = degrees.flatMap((c) => (c.type === 'bachelor' || c.type === 'associate') && c.tier ? [h.tier[c.tier]] : []);
   if (tiers.length > 0) points += Math.max(...tiers);
   if (degrees.some((c) => c.type === 'grad')) points += h.grad;
-  // A conviction counts against you; a warning (Stage 9) does not.
-  if (state.legal.record.some((r) => r.outcome !== 'warning')) points += h.record;
+  // A conviction counts against you; a warning does not, nor (from 18) anything from before 18 (Stage 9).
+  if (countedRecord(state, content).some((r) => r.outcome !== 'warning')) points += h.record;
   const multiplier = curveAt(h.market, marketStrength(state, def, content));
   return modelChance(state, h.odds[def.category], undefined, content, { points, multiplier });
 }

@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { content } from '../../src/content';
+import { produce } from 'immer';
+import { lifeAtAge } from '../../src/engine/testFixtures';
+import { choiceTraits, choiceWeight } from './bot';
 import { formatComparison, formatReport, runSimulation, stage9Targets, targetResults } from './run';
 
 describe('simulation runner', () => {
@@ -74,5 +77,28 @@ describe('simulation runner', () => {
 
   it('is deterministic', { timeout: 60_000 }, () => {
     expect(runSimulation(content, { lives: 5, seedPrefix: 'same' })).toEqual(runSimulation(content, { lives: 5, seedPrefix: 'same' }));
+  });
+
+  it('lets personality weigh the careful player’s event choices', () => {
+    const choices = content.events.one_more_for_the_road!.choices!;
+    const drive = choiceTraits(choices.find((c) => c.id === 'drive')!);
+    const ride = choiceTraits(choices.find((c) => c.id === 'ride')!);
+    expect(drive.illegal).toBe(true);
+    expect(ride).toEqual({ illegal: false, risky: false, vice: false, kind: false, unkind: false });
+    const person = (riskTaking: number, discipline: number) =>
+      produce(lifeAtAge('choices', 30), (d) => {
+        Object.assign(d.character.personality, { riskTaking, discipline });
+        d.character.hidden.vice = 50;
+      });
+    expect(choiceWeight(person(50, 50), ride)).toBe(1);
+    expect(choiceWeight(person(50, 50), drive)).toBeCloseTo(1);
+    expect(choiceWeight(person(100, 0), drive)).toBeGreaterThan(2);
+    expect(choiceWeight(person(0, 100), drive)).toBeLessThan(0.2);
+  });
+
+  it('reports the events that offer an illegal choice, and how often one was offered and taken', { timeout: 60_000 }, () => {
+    const report = runSimulation(content, { lives: 10, seedPrefix: 'sim-illegal' });
+    expect(report.legal.illegalChoices.events).toContain('one_more_for_the_road');
+    expect(report.legal.illegalChoices.taken).toBeLessThanOrEqual(report.legal.illegalChoices.offered);
   });
 });

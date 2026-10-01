@@ -10,6 +10,7 @@
  */
 import type { CityDef, ContentBundle, HousingKind, Lifestyle } from '../content/schemas';
 import { addDebt, amortizedPayment, borrow, isIndependent, wholeDollars } from './finance';
+import { countedRecord } from './record';
 import { isCurrentPartner } from './relationships';
 import { writeFromGroup } from './systems/history';
 import type { Id, LifeState, Person } from './types';
@@ -55,6 +56,8 @@ export function housingCost(state: LifeState, content: ContentBundle): number {
   const h = state.housing;
   const city = cityOf(state, content, h.cityId);
   const shared = h.partnerId !== undefined ? eco.housing.partnerShare : 1;
+  // In prison you keep a home you own (Stage 9): its upkeep is still due.
+  if (h.kind === 'incarcerated') return h.homeValue !== undefined ? wholeDollars(h.homeValue * eco.ownership.upkeep * shared) : 0;
   switch (h.kind) {
     case 'with_parents':
       return isIndependent(state, content) ? wholeDollars(city.baseRent * eco.withParents.rentShare[state.character.familyWealth]) : 0;
@@ -63,9 +66,13 @@ export function housingCost(state: LifeState, content: ContentBundle): number {
     case 'owned':
       return wholeDollars((h.homeValue ?? 0) * eco.ownership.upkeep * shared);
     case 'homeless':
-    case 'incarcerated':
       return 0;
   }
+}
+
+/** You own a home: one you live in, or one waiting for you while you're in prison (Stage 9). */
+export function ownsHome(state: LifeState): boolean {
+  return state.housing.homeValue !== undefined;
 }
 
 /**
@@ -173,13 +180,14 @@ export function settleHousehold(state: LifeState, content: ContentBundle): void 
 /**
  * Up-front cost of renting in a city: moving (across town or to another city)
  * plus a deposit. Landlords ask more of someone with probation or prison on
- * their record recently (balance/legal.yaml record, Stage 9).
+ * their record recently (balance/legal.yaml record, Stage 9); from 18,
+ * offenses from before 18 don't count.
  */
 export function moveInCost(state: LifeState, cityId: Id, content: ContentBundle): number {
   const { housing } = content.balance.economy;
   const { record } = content.balance.legal;
   const moving = cityId === state.character.cityId ? housing.movingCost : housing.relocationCost;
-  const flagged = state.legal.record.some((r) => (r.outcome === 'probation' || r.outcome === 'jail') && state.currentYear - r.year <= record.recentYears);
+  const flagged = countedRecord(state, content).some((r) => (r.outcome === 'probation' || r.outcome === 'jail') && state.currentYear - r.year <= record.recentYears);
   const deposit = housing.deposit * (flagged ? record.depositMultiplier : 1);
   return wholeDollars(moving + rentIn(cityOf(state, content, cityId), false, content) * deposit);
 }
@@ -248,7 +256,9 @@ export function saleProceeds(state: LifeState, content: ContentBundle, share = 1
  * Sells your home (at `share` of its value; a foreclosure sale brings in
  * less): the mortgage is paid from the proceeds and the rest goes to savings.
  * Proceeds that fall short leave the rest of the mortgage as personal debt.
- * You then rent in the same city.
+ * You then rent in the same city; in prison (a foreclosure while you're
+ * inside) you stay where you are, with no home to go back to, and a partner
+ * who lived there no longer lives with you.
  */
 export function sellHome(state: LifeState, content: ContentBundle, share?: number): void {
   const proceeds = saleProceeds(state, content, share);
@@ -256,6 +266,13 @@ export function sellHome(state: LifeState, content: ContentBundle, share?: numbe
   state.finances.debts = state.finances.debts.filter((d) => d.id !== state.housing.mortgageDebtId);
   if (proceeds >= owed) state.finances.savings = wholeDollars(state.finances.savings + proceeds - owed);
   else borrow(state, owed - proceeds, content);
+  if (state.housing.kind === 'incarcerated') {
+    delete state.housing.homeValue;
+    delete state.housing.mortgageDebtId;
+    delete state.housing.partnerId;
+    refreshHousingCost(state, content);
+    return;
+  }
   moveTo(state, 'renting', state.character.cityId, content);
 }
 

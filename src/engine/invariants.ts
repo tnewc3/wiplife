@@ -135,7 +135,9 @@ export function checkInvariants(state: LifeState, content: ContentBundle): strin
   if (h.roommate !== undefined && (h.roommate !== true || h.kind !== 'renting')) fail('only a rental has a roommate');
   if (h.partnerId !== undefined) {
     const rel = state.relationships[h.partnerId];
-    if (h.kind !== 'renting' && h.kind !== 'owned') fail(`a partner lives with you in a "${h.kind}" home`);
+    // In prison, a partner can keep living in the home you own (Stage 9).
+    const home = h.kind === 'renting' || h.kind === 'owned' || (h.kind === 'incarcerated' && h.homeValue !== undefined);
+    if (!home) fail(`a partner lives with you in a "${h.kind}" home`);
     if (!rel || !isCurrentPartner(state, rel)) fail('housing.partnerId is not your current partner');
     if (h.roommate) fail('a roommate and a partner in one home');
   }
@@ -143,6 +145,9 @@ export function checkInvariants(state: LifeState, content: ContentBundle): strin
   if (h.kind === 'owned') {
     if (h.homeValue === undefined) fail('an owned home has no value');
     else money('housing.homeValue', h.homeValue);
+  } else if (h.kind === 'incarcerated' && h.homeValue !== undefined) {
+    // A home you own, waiting for you while you're in prison (Stage 9).
+    money('housing.homeValue', h.homeValue);
   } else if (h.homeValue !== undefined || h.mortgageDebtId !== undefined) {
     fail(`a "${h.kind}" home has a value or mortgage`);
   }

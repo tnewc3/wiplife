@@ -9,7 +9,9 @@
  * track, all against src/content/balance/targets.yaml; and (Stage 9) health
  * conditions and causes of death, doctor visits, criminal records, prison and
  * probation, and self-discovery (what surfaced, was accepted or pushed down),
- * against the Stage 9 targets in the same file. Later stages add their own reports.
+ * against the Stage 9 targets in the same file. From Stage 9 the careful
+ * player picks event choices by personality (./bot.ts); the careless one
+ * picks at random. Later stages add their own reports.
  */
 import { ACTION_IDS, DISCOVERY_KINDS, type ActionId, type ContentBundle, type DiscoveryKind, type Effect } from '../../src/content/schemas';
 import { hasLatent } from '../../src/engine/discovery';
@@ -22,12 +24,12 @@ import {
   type LifeActionId,
   type LifeActionParams,
 } from '../../src/engine/actions';
-import { playAction, resolveAll } from '../../src/engine/autoplay';
+import { playAction, resolveAll, type ChoicePicker } from '../../src/engine/autoplay';
 import { netWorth, totalDebt } from '../../src/engine/finance';
 import { checkInvariants } from '../../src/engine/invariants';
 import { beginYear, createLife, endYear } from '../../src/engine/life';
 import { isFamilyKind, isPartnerKind } from '../../src/engine/relationships';
-import { createRng } from '../../src/engine/rng';
+import { createRng, pick } from '../../src/engine/rng';
 import type { FamilyWealth, LifeStage, LifeState, RecordOutcome } from '../../src/engine/types';
 import {
   chooseActions,
@@ -36,6 +38,8 @@ import {
   chooseCareerActions,
   chooseHealthActions,
   chooseMoneyActions,
+  choiceTraits,
+  personalityChoice,
   chooseSchoolActions,
   rollMoneyProfile,
 } from './bot';
@@ -118,6 +122,12 @@ export interface LegalReport {
   /** Lives released from prison, and of them, those who were sentenced again after release. */
   released: number;
   reoffended: number;
+  /**
+   * Choices that can put an offense on your record (a legal effect): the
+   * events that offer one, how many times a card offered one, and how many
+   * times one was taken.
+   */
+  illegalChoices: { events: string[]; offered: number; taken: number };
 }
 
 /** Self-discovery (Stage 9), per kind. */
@@ -646,7 +656,16 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
     mostYearsInside: 0,
     released: 0,
     reoffended: 0,
+    illegalChoices: {
+      events: Object.values(content.events)
+        .filter((def) => !def.retired && (def.choices ?? []).some((c) => choiceTraits(c).illegal))
+        .map((def) => def.id)
+        .sort(),
+      offered: 0,
+      taken: 0,
+    },
   };
+  const carefulChoice = personalityChoice(content);
   const offenseRows = new Map(Object.keys(content.offenses).sort().map((id) => [id, { id, lives: 0 }]));
   const discovery: DiscoveryReport = {
     kinds: Object.fromEntries(DISCOVERY_KINDS.map((k) => [k, { latent: 0, surfaced: 0, accepted: 0, resurfaced: 0, heldBack: 0 }])) as DiscoveryReport['kinds'],
@@ -674,6 +693,19 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
     const work = new CareerWatcher();
     const nine = new Stage9Watcher();
     const profile = rollMoneyProfile(player);
+    // Event choices: the careful player by personality, the careless one at random (Stage 9).
+    const picker: ChoicePicker = (l, card, rng) => {
+      const def = content.events[l.pending.find((p) => p.instanceId === card.instanceId)?.eventId ?? ''];
+      const illegal = new Set(
+        (def?.choices ?? []).filter((c) => card.choices.some((v) => v.id === c.id) && choiceTraits(c).illegal).map((c) => c.id),
+      );
+      const id = careless ? pick(rng, card.choices).id : carefulChoice(l, card, rng);
+      if (illegal.size > 0) {
+        legal.illegalChoices.offered++;
+        if (illegal.has(id)) legal.illegalChoices.taken++;
+      }
+      return id;
+    };
     const seenThisLife = new Set<string>();
     const firesThisLife = new Map<string, number>();
     let firstBenefit: number | null = null;
@@ -698,7 +730,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
       let next = performAction(current, actionId, params, content);
       watch(next);
       if (next.phase === 'action') {
-        next = resolveAll(next, content, choices, watch);
+        next = resolveAll(next, content, choices, watch, picker);
         next = finishAction(next);
         watch(next);
       }
@@ -756,7 +788,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
       // ...and on relationships.
       for (const [actionId, personId] of careless ? chooseCarelessActions(life, content, player) : chooseActions(life, content, player)) {
         if (!isActionAvailable(life, actionId, personId, content)) continue;
-        life = playAction(life, content, actionId, personId, choices, watch);
+        life = playAction(life, content, actionId, personId, choices, watch, picker);
         rel.actionsTaken[actionId]++;
       }
       life = beginYear(life, content);
@@ -787,7 +819,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
         city.years++;
         if (ledger.borrowed > 0) city.shortYears++;
       }
-      life = resolveAll(life, content, choices, watch);
+      life = resolveAll(life, content, choices, watch, picker);
       const diedFromEvent = life.death !== null;
       life = endYear(life, content);
       watch(life);
@@ -1372,7 +1404,9 @@ export function formatComparison(careful: SimulationReport, careless: Simulation
   both((r) => median(r, t.money.netWorthAge), `median net worth at ${t.money.netWorthAge}`);
   both((r) => median(r, 'death'), 'median net worth at death');
   both((r) => pct(r.health.sawDoctor, r.lives), 'ever saw a doctor');
+  both((r) => pct(r.legal.recordLives, r.lives), 'any criminal record');
   both((r) => pct(r.legal.convictedLives, r.lives), 'convicted (more than a warning)');
+  both((r) => pct(r.legal.illegalChoices.taken, r.legal.illegalChoices.offered), 'illegal choices taken when offered');
   both((r) => pct(r.legal.jailedLives, r.lives), 'went to prison');
   both((r) => pct(r.discovery.identityChanged, r.lives), 'identity changed through self-discovery');
   lines.push('  targets (src/content/balance/targets.yaml; judged on the careful player):');
@@ -1411,6 +1445,10 @@ function formatStage9(report: SimulationReport, content: ContentBundle): string[
     `  years in prison: ${l.yearsInside} in all, most in one life ${l.mostYearsInside}; released ${l.released}, sentenced again after release ${pct(l.reoffended, l.released)}`,
   );
   lines.push(`  offenses (lives with it on record): ${l.offenses.map((o) => `${o.id} ${pct(o.lives, n)}`).join(', ')}`);
+  const ic = l.illegalChoices;
+  lines.push(
+    `  illegal choices: ${ic.events.length} events offer one (${ic.events.join(', ')}); offered ${ic.offered} times, taken ${ic.taken} (${pct(ic.taken, ic.offered)})`,
+  );
   const d = report.discovery;
   lines.push('Self-discovery (lives born with it; surfaced; accepted; came back after being pushed down; died holding it back):');
   for (const kind of DISCOVERY_KINDS) {

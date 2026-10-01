@@ -15,7 +15,7 @@ import { endJob, meetsJobRequirements } from './career';
 import { eventWeight } from './events/selection';
 import { isIndependent, spend } from './finance';
 import { leaveSchool } from './education';
-import { moveInCost, moveTo, sellHome, supportingParent } from './housing';
+import { moveInCost, moveTo, ownsHome, refreshHousingCost, supportingParent } from './housing';
 import { weightedPick } from './random';
 import { nextInt, type RngState } from './rng';
 import { writeFromGroup } from './systems/history';
@@ -30,11 +30,6 @@ export function isIncarcerated(state: LifeState): boolean {
 export function onProbation(state: LifeState): boolean {
   const until = state.legal.probationUntil;
   return until !== undefined && until >= state.currentYear && !isIncarcerated(state);
-}
-
-/** Probation or prison on your record within this many years. */
-export function seriousRecordWithin(state: LifeState, years: number): boolean {
-  return state.legal.record.some((r) => (r.outcome === 'probation' || r.outcome === 'jail') && state.currentYear - r.year <= years);
 }
 
 /** An active (not retired) offense, or undefined. */
@@ -100,9 +95,12 @@ export function queueLegalEvent(state: LifeState, trigger: LegalTrigger, dueYear
 /**
  * You go to prison for `years` years (the caller has written the record):
  * your job ends, you leave school (and any place you were to take up), gig
- * work stops, a home you own is sold, a partner living with you stays where
- * you lived, and probation is served inside. You're inside for the rest of
- * this year and `years` full years; the first one begins with a prison event.
+ * work stops, and probation is served inside. A home you own stays yours:
+ * its mortgage and upkeep keep running through the ledger (a partner who
+ * lives there pays their share as usual), and missed payments can still end
+ * in foreclosure. A rental's lease ends, and a partner who lived there stays
+ * behind. You're inside for the rest of this year and `years` full years;
+ * the first one begins with a prison event.
  */
 export function incarcerate(state: LifeState, years: number, content: ContentBundle): void {
   const year = state.currentYear;
@@ -116,8 +114,12 @@ export function incarcerate(state: LifeState, years: number, content: ContentBun
     if (state.education.current) state.education.current = null;
   }
   state.education.admission = null;
-  if (state.housing.kind === 'owned') sellHome(state, content);
-  moveTo(state, 'incarcerated', state.character.cityId, content);
+  if (state.housing.kind === 'owned') {
+    state.housing.kind = 'incarcerated';
+    refreshHousingCost(state, content);
+  } else {
+    moveTo(state, 'incarcerated', state.character.cityId, content);
+  }
   queueLegalEvent(state, 'jailed', year + 1, content);
 }
 
@@ -200,16 +202,19 @@ export function sentenceText(state: LifeState, content: ContentBundle): string {
 }
 
 /**
- * Your sentence is served (as a year begins): you're released to a parent
- * who would take you in, else a rental if your savings cover moving in, else
- * the street. Parole follows (balance release.paroleYears), and a release
- * event is queued for this year.
+ * Your sentence is served (as a year begins): you go home to a home you
+ * still own, else to a parent who would take you in, else a rental if your
+ * savings cover moving in, else the street. Parole follows (balance
+ * release.paroleYears), and a release event is queued for this year.
  */
 export function release(state: LifeState, content: ContentBundle): void {
   delete state.legal.incarceratedUntil;
   const city = state.character.cityId;
   const parent = supportingParent(state);
-  if (parent) moveTo(state, 'with_parents', parent.cityId, content);
+  if (ownsHome(state)) {
+    state.housing.kind = 'owned';
+    refreshHousingCost(state, content);
+  } else if (parent) moveTo(state, 'with_parents', parent.cityId, content);
   else if (state.finances.savings >= moveInCost(state, city, content)) {
     spend(state, moveInCost(state, city, content), content);
     moveTo(state, 'renting', city, content);

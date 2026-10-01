@@ -51,7 +51,9 @@ export function HousingScreen({ life }: { life: LifeState }) {
             ? `You chip in ${money(view.annualCost)} a year toward rent`
             : 'Your family covers your rent'
           : view.kind === 'incarcerated'
-            ? 'A cell, a bunk and a locker, until your release'
+            ? view.homeValue !== null
+              ? `Your home waits for you. Property tax and upkeep: ${money(view.annualCost)} a year`
+              : 'A cell, a bunk and a locker, until your release'
             : 'No rent, no roof';
 
   return (
@@ -63,7 +65,9 @@ export function HousingScreen({ life }: { life: LifeState }) {
         <p className="mt-1 text-muted">{costLine}</p>
         {view.partnerName && (
           <p className="mt-1 text-muted" data-testid="partner-line">
-            Living with {view.partnerName}, who pays their share
+            {view.kind === 'incarcerated'
+              ? `${view.partnerName} still lives there and pays their share`
+              : `Living with ${view.partnerName}, who pays their share`}
           </p>
         )}
         {view.homeValue !== null && (

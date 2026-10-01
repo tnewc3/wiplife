@@ -8,7 +8,7 @@ import type { ActionId, ContentBundle } from '../content/schemas';
 import { finishAction, performAction } from './actions';
 import { beginYear, endYear, resolveChoice } from './life';
 import { createRng, pick, type RngState } from './rng';
-import { firstUnresolvedEvent, getEventCard } from './selectors';
+import { firstUnresolvedEvent, getEventCard, type EventCardView } from './selectors';
 import type { LifeState } from './types';
 
 export interface AutoplayOptions {
@@ -18,13 +18,27 @@ export interface AutoplayOptions {
   onStep?: (life: LifeState) => void;
 }
 
-/** Resolves every pending event (of the year, or of a management action) with random visible choices. */
-export function resolveAll(life: LifeState, content: ContentBundle, choices: RngState, onStep?: (life: LifeState) => void): LifeState {
+/**
+ * Picks one of a card's visible choices: the simulation's player models pass
+ * their own (Stage 9); the default is a random visible choice.
+ */
+export type ChoicePicker = (life: LifeState, card: EventCardView, rng: RngState) => string;
+
+const randomChoice: ChoicePicker = (_life, card, rng) => pick(rng, card.choices).id;
+
+/** Resolves every pending event (of the year, or of a management action) with random visible choices, or `picker`'s. */
+export function resolveAll(
+  life: LifeState,
+  content: ContentBundle,
+  choices: RngState,
+  onStep?: (life: LifeState) => void,
+  picker: ChoicePicker = randomChoice,
+): LifeState {
   let current = life;
   while (current.phase === 'events' || (current.phase === 'action' && firstUnresolvedEvent(current) !== null)) {
     const index = firstUnresolvedEvent(current)!;
     const card = getEventCard(current, index, content)!;
-    current = resolveChoice(current, card.instanceId, pick(choices, card.choices).id, content);
+    current = resolveChoice(current, card.instanceId, picker(current, card, choices), content);
     onStep?.(current);
   }
   return current;
@@ -57,10 +71,11 @@ export function playAction(
   personId: string,
   choices: RngState,
   onStep?: (life: LifeState) => void,
+  picker?: ChoicePicker,
 ): LifeState {
   let current = performAction(life, actionId, { personId }, content);
   onStep?.(current);
-  current = resolveAll(current, content, choices, onStep);
+  current = resolveAll(current, content, choices, onStep, picker);
   current = finishAction(current);
   onStep?.(current);
   return current;

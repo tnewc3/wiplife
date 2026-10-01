@@ -35,7 +35,7 @@ import {
   sendToCollections,
   wholeDollars,
 } from '../finance';
-import { housingCost, livingCost, moveTo, refreshHousingCost, sellHome, settleHousehold, supportingParent } from '../housing';
+import { housingCost, livingCost, moveTo, ownsHome, refreshHousingCost, sellHome, settleHousehold, supportingParent } from '../housing';
 import { recordEarnings, retirementBenefit } from '../retirement';
 import { clampInt, weightedPick } from '../random';
 import { chance } from '../rng';
@@ -122,7 +122,8 @@ export function runEconomy(state: LifeState, content: ContentBundle): void {
     debt.balance = wholeDollars(debt.balance + added);
     debtInterest += added;
   }
-  if (state.housing.kind === 'owned' && state.housing.homeValue !== undefined) {
+  // A home you own keeps its value while you're in prison (Stage 9).
+  if (state.housing.homeValue !== undefined) {
     state.housing.homeValue = Math.max(0, wholeDollars(state.housing.homeValue * (1 + eco.ownership.appreciation)));
   }
 
@@ -196,7 +197,7 @@ export function runEconomy(state: LifeState, content: ContentBundle): void {
     triggers.add('collections');
   }
   const mortgage = f.debts.find((d) => d.id === state.housing.mortgageDebtId);
-  if (state.housing.kind === 'owned' && mortgage && mortgage.missed >= eco.missed.foreclosureAfter) {
+  if (ownsHome(state) && mortgage && mortgage.missed >= eco.missed.foreclosureAfter) {
     sellHome(state, content, eco.missed.foreclosureSale);
     triggers.add('foreclosure');
     writeFromGroup(state, history.home.foreclosed, ['home', 'foreclosed'], { values: { city: cityName(state, content) } }, content);
