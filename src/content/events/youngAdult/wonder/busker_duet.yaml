@@ -1,0 +1,39 @@
+# Legendary: secret and rare. It is recorded only in life history.
+id: busker_duet
+title: The busker
+text: >-
+  A busker in a hooded sweatshirt is playing in the subway, and the song is
+  one you know every word to. {busker.They} {busker:catches|catch} your eye and
+  {busker:nods|nod} at the empty half of the bench.
+tone: light
+category: wonder
+rarity: legendary
+lifeStages: [youngAdult, adult]
+weight: { base: 3 }
+once: true
+cast:
+  busker: { kind: acquaintance, age: { min: 25, max: 60 }, createIfMissing: true, newChance: 1 }
+choices:
+  - id: sing
+    label: Sit down and sing
+    outcome:
+      text: >-
+        You sing the whole thing. A crowd forms. At the end, {busker.name}
+        pushes back the hood, and the crowd screams: it's the famous one, the
+        one from the record. {busker.They} {busker:shakes|shake} your hand and
+        {busker:vanishes|vanish} up the stairs.
+      effects:
+        - { type: stat, key: confidence, delta: 8 }
+        - { type: stat, key: happiness, delta: 8 }
+        - { type: history, text: 'You sang a duet in the subway with a famous musician in disguise. Someone filmed it, and millions watched.', importance: 3 }
+  - id: listen
+    label: Drop a few dollars and listen
+    outcome:
+      text: >-
+        You listen to the whole song. The next day the video is everywhere:
+        a famous singer, busking in disguise, and there you are at the edge of
+        the frame, eyes closed.
+      effects:
+        - { type: money, delta: -5 }
+        - { type: stat, key: happiness, delta: 5 }
+        - { type: history, text: 'You stood and listened to a famous musician busking in disguise in the subway. You only found out the next day.', importance: 3 }

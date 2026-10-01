@@ -1,0 +1,64 @@
+id: pride_march
+title: The march
+text: >-
+  It's the city's pride march this weekend. The first year after you came
+  out, you watched it from a coffee shop window. This year someone has handed
+  you a flag.
+tone: light
+category: identity
+rarity: common
+lifeStages: [teen, youngAdult, adult, senior]
+requires: { flag: came_out }
+weight: { base: 5 }
+cooldownYears: 12
+cast:
+  parent: { kind: parent, optional: true }
+choices:
+  - id: march
+    label: March in it
+    outcome:
+      text: Six miles, a sunburn, a stranger who hugs you for no reason. You have never felt less alone in a crowd.
+      effects:
+        - { type: stat, key: happiness, delta: 5 }
+        - { type: stat, key: confidence, delta: 3 }
+        - { type: innerConflict, delta: -5 }
+  - id: invite
+    label: Invite {parent.name} to march with you
+    visibleIf:
+      all:
+        - { role: parent }
+        - { memory: { role: parent, tag: accepted_you } }
+    outcome:
+      text: >-
+        {parent.name} shows up in a homemade T-shirt that says PROUD OF MY KID,
+        which is mortifying and perfect. Strangers keep taking {parent.their} picture.
+      effects:
+        - { type: relationship, role: parent, affection: 12, trust: 6 }
+        - { type: stat, key: happiness, delta: 6 }
+        - { type: history, text: '{parent.name} marched beside you at pride in a homemade T-shirt.', importance: 2 }
+  - id: try_again
+    label: Ask {parent.name} to come, even after last time
+    visibleIf:
+      all:
+        - { role: parent }
+        - { memory: { role: parent, tag: struggled_with_it } }
+    check:
+      base: 35
+      stats: [{ role: parent, key: affection, weight: 0.5 }]
+      success:
+        text: '{parent.name} comes. {parent.They} {parent:stands|stand} at the edge of the crowd, stiff, and then, by the end, waves.'
+        effects:
+          - { type: relationship, role: parent, affection: 10, trust: 10 }
+          - { type: memory, role: parent, tag: accepted_you }
+          - { type: stat, key: happiness, delta: 4 }
+      failure:
+        text: '"Not this year," {parent.name} says. You march anyway, a little lighter than you expected.'
+        effects:
+          - { type: stat, key: happiness, delta: 1 }
+          - { type: relationship, role: parent, affection: -2 }
+  - id: watch
+    label: Watch from the sidewalk
+    outcome:
+      text: You cheer for every float. Next year, maybe.
+      effects:
+        - { type: stat, key: happiness, delta: 2 }

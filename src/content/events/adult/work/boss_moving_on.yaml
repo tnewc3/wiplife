@@ -1,0 +1,70 @@
+id: boss_moving_on
+title: The boss is leaving
+text: >-
+  {boss.name} closes the door and tells you before anyone else: {boss.they}
+  {boss:is|are} leaving for another company at the end of the month.
+  {boss.They} {boss:wants|want} to know what you think.
+tone: neutral
+category: work
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires: { career: { employed: true, years: { gte: 2 } } }
+weight: { base: 4 }
+cooldownYears: 6
+cast:
+  boss: { kind: boss }
+choices:
+  - id: grateful
+    label: Thank {boss.them} for everything {boss.they} did for you
+    visibleIf:
+      any:
+        - { memory: { role: boss, tag: hired_you } }
+        - { memory: { role: boss, tag: mentored_you } }
+        - { memory: { role: boss, tag: gave_you_a_chance } }
+        - { memory: { role: boss, tag: gave_you_raise } }
+        - { memory: { role: boss, tag: went_to_bat_for_you } }
+    outcome:
+      text: >-
+        You list it all: the chance, the raise, the time {boss.they} went to bat
+        for you upstairs. {boss.name} looks embarrassed and pleased. "Keep my
+        number," {boss.they} {boss:says|say}. "I'll want you on my team again."
+      effects:
+        - { type: relationship, role: boss, affection: 10, trust: 8 }
+        - { type: job, action: performance, value: 5 }
+        - { type: stat, key: happiness, delta: 2 }
+  - id: relief
+    label: Wish {boss.them} well, and mean it more than you show
+    visibleIf:
+      any:
+        - { memory: { role: boss, tag: caught_you_lying } }
+        - { memory: { role: boss, tag: reported_them } }
+        - { memory: { role: boss, tag: you_stood_up_to_them } }
+        - { memory: { role: boss, tag: refused_raise } }
+    outcome:
+      text: >-
+        There's history between you, and you both know it. You shake hands
+        like professionals. On the last day, the whole floor seems to breathe out.
+      effects:
+        - { type: relationship, role: boss, affection: 2 }
+        - { type: stat, key: stress, delta: -5 }
+  - id: job
+    label: Ask if {boss.they} could take you along
+    check:
+      base: 30
+      stats: [{ role: boss, key: trust, weight: 0.4 }, { job: performance, weight: 0.3 }]
+      success:
+        text: '{boss.name} makes a call that afternoon. Your new salary is better, and you know at least one person there.'
+        effects:
+          - { type: job, action: raise }
+          - { type: relationship, role: boss, trust: 5 }
+          - { type: stat, key: ambition, delta: 2 }
+      failure:
+        text: '"Let me get settled first," {boss.name} says. You both know what that means.'
+        effects:
+          - { type: stat, key: confidence, delta: -1 }
+  - id: shrug
+    label: Say congratulations and get back to work
+    outcome:
+      text: The new boss starts in a month. You spend it wondering who it'll be.
+      effects:
+        - { type: stat, key: stress, delta: 1 }

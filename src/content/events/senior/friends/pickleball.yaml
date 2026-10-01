@@ -1,0 +1,38 @@
+id: pickleball
+title: Pickleball
+text: >-
+  {friend.name} has discovered pickleball and will not stop talking about it.
+  There's a league at the community center, Tuesdays and Thursdays, and
+  {friend.they} {friend:needs|need} a partner.
+tone: light
+category: friends
+rarity: common
+lifeStages: [senior]
+weight: { base: 4 }
+once: true
+cast:
+  friend: { kind: friend, ageOffset: { min: -10, max: 10 }, createIfMissing: true }
+choices:
+  - id: play
+    label: Grab a paddle
+    check:
+      base: 50
+      stats: [{ key: fitness, weight: 0.4 }, { key: riskTaking, weight: 0.1 }]
+      success:
+        text: You're a natural. By spring you and {friend.name} are feared across three community centers.
+        effects:
+          - { type: stat, key: fitness, delta: 4 }
+          - { type: relationship, role: friend, affection: 8 }
+          - { type: stat, key: happiness, delta: 4 }
+      failure:
+        text: You lunge for a ball and your hamstring files a formal complaint. You spend the season keeping score.
+        effects:
+          - { type: stat, key: health, delta: -2 }
+          - { type: relationship, role: friend, affection: 5 }
+  - id: no
+    label: Say you'll come and watch
+    outcome:
+      text: You bring folding chairs and a thermos. Watching is underrated.
+      effects:
+        - { type: relationship, role: friend, affection: 3 }
+        - { type: stat, key: happiness, delta: 1 }

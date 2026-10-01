@@ -1,0 +1,33 @@
+id: attic
+title: The attic
+text: >-
+  You finally go through the attic. Forty years of boxes: tax returns,
+  report cards, a ceramic ashtray you made in third grade, and a coat you
+  swore you'd fit into again.
+tone: neutral
+category: home
+rarity: common
+lifeStages: [senior]
+weight: { base: 4 }
+once: true
+choices:
+  - id: all
+    label: Get rid of almost everything
+    outcome:
+      text: Seventeen bags to the curb. The house feels lighter, and so, oddly, do you.
+      effects:
+        - { type: stat, key: stress, delta: -4 }
+        - { type: stat, key: happiness, delta: 1 }
+  - id: sort
+    label: Read every single thing first
+    outcome:
+      text: It takes all summer. You cry twice and laugh much more than that. You keep one box.
+      effects:
+        - { type: stat, key: happiness, delta: 3 }
+        - { type: stat, key: stress, delta: 1 }
+  - id: close
+    label: Close the hatch. Next year
+    outcome:
+      text: The boxes wait, patient as ever.
+      effects:
+        - { type: stat, key: stress, delta: 1 }

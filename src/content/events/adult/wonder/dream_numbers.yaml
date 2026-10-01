@@ -1,0 +1,36 @@
+# Legendary: secret and rare. It is recorded only in life history.
+id: dream_numbers
+title: The numbers in the dream
+text: >-
+  Three nights in a row you dream the same six numbers, written in chalk on
+  your childhood bedroom wall. On the fourth morning, you walk past a lottery
+  sign on the way to work.
+tone: light
+category: wonder
+rarity: legendary
+lifeStages: [youngAdult, adult, senior]
+requires: { age: { gte: 18 } }
+weight: { base: 2 }
+once: true
+choices:
+  - id: play
+    label: Play the numbers
+    outcome:
+      text: >-
+        Five of six. Not the jackpot, but $150,000 and a photo with an
+        enormous check. You never dream the numbers again.
+      effects:
+        - { type: money, delta: 150000 }
+        - { type: stat, key: happiness, delta: 8 }
+        - { type: stat, key: luck, delta: 5 }
+        - { type: history, text: 'You dreamed six numbers three nights running, played them, and won $150,000.', importance: 3 }
+  - id: ignore
+    label: Keep walking; dreams are dreams
+    outcome:
+      text: >-
+        That Saturday, all six numbers come up. Somebody else wins it. You
+        write the numbers on a card and keep it in your wallet forever.
+      effects:
+        - { type: stat, key: happiness, delta: -4 }
+        - { type: stat, key: discipline, delta: 2 }
+        - { type: history, text: 'You dreamed the winning lottery numbers, and didn''t play them.', importance: 3 }

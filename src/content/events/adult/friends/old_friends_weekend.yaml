@@ -42,6 +42,7 @@ choices:
         - { memory: { role: friend, tag: set_you_up } }
         - { memory: { role: friend, tag: in_their_wedding } }
         - { memory: { role: friend, tag: spent_holidays_together } }
+        - { memory: { role: friend, tag: was_there_for_them } }
     outcome:
       text: >-
         Out on the dock, it comes out of you: all the times. {friend.name} is

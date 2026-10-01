@@ -1,0 +1,29 @@
+id: skydive_photo
+title: The photo on the fridge
+text: >-
+  A young neighbor notices the photo on your fridge: you, in a jumpsuit and
+  goggles, falling out of the sky. "Is that you?" they ask, appalled.
+tone: light
+category: family
+rarity: common
+lifeStages: [senior]
+requires: { flag: jumped_from_plane }
+weight: { base: 5 }
+once: true
+choices:
+  - id: tell
+    label: Tell the whole story, slowly
+    outcome:
+      text: >-
+        The instructor, the door, the moment you stopped thinking. By the end
+        the neighbor wants to go. You offer to drive.
+      effects:
+        - { type: stat, key: happiness, delta: 4 }
+        - { type: stat, key: confidence, delta: 2 }
+  - id: again
+    label: Say you're thinking of doing it again
+    outcome:
+      text: You're not, probably. But the look on their face is worth everything.
+      effects:
+        - { type: stat, key: riskTaking, delta: 2 }
+        - { type: stat, key: happiness, delta: 3 }

@@ -1,0 +1,35 @@
+# Legendary: secret and rare. It is recorded only in life history.
+id: message_in_a_bottle
+title: A letter from the sea
+text: >-
+  An envelope with foreign stamps. Inside is a faded note in a child's
+  handwriting, your handwriting, from a bottle you threw off a pier
+  sixty years ago, and a letter from {finder.name}, who found it on a beach
+  across the ocean.
+tone: light
+category: wonder
+rarity: legendary
+lifeStages: [senior]
+weight: { base: 6 }
+once: true
+cast:
+  finder: { kind: acquaintance, age: { min: 20, max: 80 }, createIfMissing: true, newChance: 1 }
+choices:
+  - id: write
+    label: Write back
+    outcome:
+      text: >-
+        Letters cross the ocean for years after that. {finder.name} sends
+        photos of the beach. You send the pier. You never meet, and it's one of
+        the great friendships of your life.
+      effects:
+        - { type: relationship, role: finder, kind: friend, affection: 20, trust: 10 }
+        - { type: stat, key: happiness, delta: 8 }
+        - { type: history, text: 'A message in a bottle you threw into the sea as a child was found sixty years later, and its finder became your friend.', importance: 3 }
+  - id: frame
+    label: Frame the note on your wall
+    outcome:
+      text: You read your own seven-year-old handwriting every morning. "To whoever finds this. I hope you're happy." You mostly are.
+      effects:
+        - { type: stat, key: happiness, delta: 6 }
+        - { type: history, text: 'A message in a bottle you threw into the sea as a child came back to you sixty years later.', importance: 3 }

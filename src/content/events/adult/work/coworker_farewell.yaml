@@ -1,0 +1,71 @@
+id: coworker_farewell
+title: Farewell drinks
+text: >-
+  {npc.name} is leaving the company, and there's a sheet cake in the break
+  room and drinks after work. Someone has to say a few words. Everyone is
+  looking at you.
+tone: light
+category: work
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires: { career: { employed: true, years: { gte: 1 } } }
+weight: { base: 4 }
+cooldownYears: 4
+cast:
+  npc: { kind: coworker }
+choices:
+  - id: story
+    label: Tell the story everyone's waiting for
+    visibleIf:
+      any:
+        - { memory: { role: npc, tag: danced_at_party } }
+        - { memory: { role: npc, tag: drinking_buddy } }
+        - { memory: { role: npc, tag: union_together } }
+        - { memory: { role: npc, tag: you_backed_them } }
+        - { memory: { role: npc, tag: you_covered_shift } }
+        - { memory: { role: npc, tag: returned_the_favor } }
+    outcome:
+      text: >-
+        You tell it, the one from the holiday party or the break room or the
+        night shift, and the whole bar howls. {npc.name} hugs you on the
+        sidewalk afterwards and says you'd better stay in touch.
+      effects:
+        - { type: relationship, role: npc, affection: 10, kind: friend }
+        - { type: stat, key: happiness, delta: 4 }
+        - { type: stat, key: reputation, delta: 1 }
+  - id: short
+    label: Keep it short. There's history
+    visibleIf:
+      any:
+        - { memory: { role: npc, tag: took_credit } }
+        - { memory: { role: npc, tag: beat_you_to_promotion } }
+        - { memory: { role: npc, tag: stayed_out_of_it } }
+        - { memory: { role: npc, tag: you_reported_union } }
+        - { memory: { role: npc, tag: reported_them } }
+    outcome:
+      text: >-
+        Two sentences, perfectly polite. {npc.name} raises a glass at you from
+        across the room. Some things are better left in the break room.
+      effects:
+        - { type: stat, key: stress, delta: -2 }
+        - { type: relationship, role: npc, affection: -2 }
+  - id: speech
+    label: Wing a speech
+    check:
+      base: 50
+      stats: [{ key: confidence, weight: 0.3 }, { key: sociability, weight: 0.3 }]
+      success:
+        text: Short, warm and funny. People quote it for weeks.
+        effects:
+          - { type: relationship, role: npc, affection: 6 }
+          - { type: stat, key: reputation, delta: 1 }
+      failure:
+        text: You call {npc.name} by the wrong last name. Twice. The cake is good, at least.
+        effects:
+          - { type: stat, key: confidence, delta: -2 }
+  - id: card
+    label: Sign the card and slip out early
+    outcome:
+      text: You write "Good luck!" and go home. Nobody notices, which is its own kind of answer.
+      effects:
+        - { type: relationship, role: npc, affection: -1 }

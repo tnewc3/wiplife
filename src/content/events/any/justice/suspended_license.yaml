@@ -1,0 +1,38 @@
+id: suspended_license
+title: No car
+text: >-
+  Since the DUI, you've been riding the bus. Tonight a friend at the bar
+  tosses you their keys: "You're fine. It's four blocks." It is four blocks.
+tone: serious
+category: justice
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { flag: dui_arrest }
+    - { legal: { incarcerated: false } }
+weight: { base: 5 }
+once: true
+choices:
+  - id: walk
+    label: Toss the keys back and walk
+    outcome:
+      text: Four blocks in the rain. You count them like steps in a program. You make it home, sober and soaked.
+      effects:
+        - { type: stat, key: discipline, delta: 3 }
+        - { type: stat, key: vice, delta: -2 }
+  - id: drive
+    label: Drive the four blocks
+    check:
+      base: 60
+      stats: [{ key: luck, weight: 0.4 }, { key: vice, weight: -0.2 }]
+      success:
+        text: Nobody sees. You park, turn off the engine and sit there shaking for ten minutes. You don't do it again.
+        effects:
+          - { type: stat, key: stress, delta: 4 }
+          - { type: stat, key: riskTaking, delta: 2 }
+      failure:
+        text: Three blocks in, blue lights. A second DUI, on a suspended license. The judge is not interested in the four blocks. The court hands down {sentence}.
+        effects:
+          - { type: legal, offenseId: dui, outcome: sentence }
+          - { type: stat, key: stress, delta: 10 }

@@ -1,0 +1,38 @@
+# Legendary: secret and rare. It is recorded only in life history.
+id: lightning
+title: Struck
+text: >-
+  You're crossing an empty parking lot when the storm comes in, and then
+  there's a white sound and you're on your back, looking at the sky, with
+  your shoes ten feet away.
+tone: serious
+category: wonder
+rarity: legendary
+lifeStages: [youngAdult, adult, senior]
+weight: { base: 2 }
+once: true
+choices:
+  - id: up
+    label: Get up and find your shoes
+    outcome:
+      text: >-
+        You walk into the emergency room barefoot. The doctors can't stop
+        talking about you. The fern-shaped scar on your arm fades over a year;
+        the feeling that you've been given something never does.
+      effects:
+        - { type: stat, key: health, delta: -8 }
+        - { type: stat, key: luck, delta: 15 }
+        - { type: stat, key: riskTaking, delta: 4 }
+        - { type: history, text: 'You were struck by lightning in a parking lot, and walked away.', importance: 3 }
+  - id: lie_still
+    label: Lie still and wait for help
+    outcome:
+      text: >-
+        A stranger calls an ambulance. Two days in the hospital, a lot of tests,
+        and a nurse who keeps saying "nobody's this lucky." You decide to live
+        as if that's true.
+      effects:
+        - { type: stat, key: health, delta: -10 }
+        - { type: stat, key: luck, delta: 10 }
+        - { type: stat, key: happiness, delta: 4 }
+        - { type: history, text: 'You were struck by lightning and lived to tell everyone about it.', importance: 3 }

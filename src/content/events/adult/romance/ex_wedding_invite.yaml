@@ -27,17 +27,18 @@ choices:
         - { type: stat, key: confidence, delta: 2 }
         - { type: stat, key: happiness, delta: 1 }
   - id: no_to_you
-    label: Remember when you said no to {ex.them}
+    label: Remember how things ended between you
     visibleIf:
       any:
         - { memory: { role: ex, tag: you_refused_them } }
         - { memory: { role: ex, tag: you_said_not_yet } }
         - { memory: { role: ex, tag: called_off_wedding } }
+        - { memory: { role: ex, tag: you_apologized } }
     outcome:
       text: >-
-        {ex.name} once asked you this exact question, or you once walked away
-        from this exact day. Now {ex.they}'ll say yes to someone else. You send a
-        card that says you're glad, and you are.
+        You weren't ready for this with {ex.name}, and you both know it. Now
+        {ex.they}'ll say yes to someone who is. You send a card that says
+        you're glad, and you are.
       effects:
         - { type: relationship, role: ex, affection: 4, trust: 4 }
         - { type: stat, key: stress, delta: -2 }

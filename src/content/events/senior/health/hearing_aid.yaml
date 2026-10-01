@@ -1,0 +1,30 @@
+id: hearing_aid
+title: Pardon?
+text: >-
+  You've been saying "pardon?" a lot lately, and nodding at things you didn't
+  hear. At dinner, someone tells a joke and the whole table laughs, and you
+  laugh a second too late.
+tone: light
+category: health
+rarity: common
+lifeStages: [senior]
+weight: { base: 4 }
+once: true
+choices:
+  - id: test
+    label: Get your hearing tested
+    outcome:
+      text: >-
+        Two tiny devices, a lot of money, and suddenly birds. You'd forgotten
+        about birds. Also, the refrigerator hums. Who knew.
+      effects:
+        - { type: money, delta: -2500 }
+        - { type: stat, key: happiness, delta: 4 }
+        - { type: stat, key: sociability, delta: 2 }
+  - id: nod
+    label: Keep nodding; it's mostly small talk
+    outcome:
+      text: You agree to things you didn't hear, including, it turns out, hosting the next book club.
+      effects:
+        - { type: stat, key: sociability, delta: -2 }
+        - { type: stat, key: stress, delta: 2 }

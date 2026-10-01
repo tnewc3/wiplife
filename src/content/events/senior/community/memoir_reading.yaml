@@ -1,0 +1,37 @@
+id: memoir_reading
+title: The reading
+text: >-
+  The librarian read your memoir, the one you wrote one memory at a time, and
+  wants you to read a chapter aloud on Thursday night. There will be folding
+  chairs.
+tone: light
+category: community
+rarity: common
+lifeStages: [senior]
+requires: { flag: wrote_memoir }
+weight: { base: 6 }
+once: true
+choices:
+  - id: read
+    label: Read the chapter you're proudest of
+    outcome:
+      text: >-
+        Eleven people, two of them asleep, one of them crying. Afterwards, a
+        stranger tells you that your story is their story too.
+      effects:
+        - { type: stat, key: happiness, delta: 6 }
+        - { type: stat, key: reputation, delta: 2 }
+        - { type: history, text: 'You read from your memoir at the public library, to eleven folding chairs.', importance: 2 }
+  - id: hard
+    label: Read the hardest chapter instead
+    outcome:
+      text: Your voice shakes on the second page. Nobody moves. When you finish, the room stays quiet for a long time, and then they clap.
+      effects:
+        - { type: stat, key: happiness, delta: 4 }
+        - { type: stat, key: stress, delta: -4 }
+  - id: no
+    label: Say it's just for you
+    outcome:
+      text: You give the library a copy for the shelf. Someone checks it out every few months. You never find out who.
+      effects:
+        - { type: stat, key: happiness, delta: 1 }

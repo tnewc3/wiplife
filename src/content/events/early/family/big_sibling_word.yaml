@@ -1,0 +1,33 @@
+id: big_sibling_word
+title: A new word
+text: >-
+  {sibling.name} has taught you a word. It's a very short word, and
+  {sibling.they} {sibling:swears|swear} it means "pass the potatoes." Tonight is
+  family dinner.
+tone: light
+category: family
+rarity: common
+lifeStages: [early]
+requires: { age: { gte: 2 } }
+weight: { base: 5 }
+once: true
+cast:
+  sibling: { kind: sibling, ageOffset: { min: 2, max: 12 } }
+choices:
+  - id: say_it
+    label: Ask for the potatoes, nicely
+    outcome:
+      text: >-
+        The table goes silent. {sibling.name} chokes on {sibling.their} milk.
+        You get the potatoes. {sibling.name} gets sent to {sibling.their} room.
+      effects:
+        - { type: relationship, role: sibling, affection: 4 }
+        - { type: stat, key: happiness, delta: 2 }
+        - { type: stat, key: riskTaking, delta: 1 }
+  - id: tell
+    label: Ask a parent what the word means first
+    outcome:
+      text: '{sibling.name} is in trouble before dinner even starts. You get extra potatoes for honesty.'
+      effects:
+        - { type: relationship, role: sibling, affection: -3 }
+        - { type: stat, key: discipline, delta: 1 }

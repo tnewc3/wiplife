@@ -1,0 +1,36 @@
+id: senior_dance
+title: Thursday dance night
+text: >-
+  The senior center has a dance every Thursday, with a real band that plays
+  the songs from when you were young. {partner.name} asks if you'd like to
+  try the foxtrot.
+tone: light
+category: romance
+rarity: common
+lifeStages: [senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { romance: [single] }
+weight: { base: 4 }
+cooldownYears: 5
+cast:
+  partner: { kind: acquaintance, romantic: true, createIfMissing: true }
+choices:
+  - id: dance
+    label: Say yes
+    outcome:
+      text: >-
+        You step on {partner.name}'s foot twice. {partner.They} {partner:steps|step}
+        on yours three times. You agree to keep practicing, every Thursday, indefinitely.
+      effects:
+        - { type: relationship, role: partner, affection: 12 }
+        - { type: memory, role: partner, tag: danced_with_you }
+        - { type: stat, key: happiness, delta: 5 }
+  - id: sit
+    label: Say your dancing days are over
+    outcome:
+      text: '{partner.name} sits with you instead, and you talk through two sets. Dancing days, it turns out, are overrated.'
+      effects:
+        - { type: relationship, role: partner, affection: 6 }
+        - { type: stat, key: happiness, delta: 2 }

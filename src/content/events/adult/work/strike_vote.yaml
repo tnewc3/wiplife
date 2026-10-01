@@ -1,0 +1,63 @@
+id: strike_vote
+title: The strike vote
+text: >-
+  Contract talks have broken down. The union you helped build is voting on
+  whether to strike, and {npc.name} wants to know which way you're going.
+tone: serious
+category: work
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { flag: union_member }
+    - { career: { employed: true } }
+weight: { base: 6 }
+once: true
+cast:
+  npc: { kind: coworker }
+choices:
+  - id: strike
+    label: Vote to strike and walk the line
+    check:
+      base: 50
+      stats: [{ key: confidence, weight: 0.2 }, { key: luck, weight: 0.3 }]
+      success:
+        text: >-
+          Three cold weeks on the picket line, and then a contract with real
+          raises in it. You keep your sign in the garage forever.
+        effects:
+          - { type: money, delta: -2000 }
+          - { type: job, action: raise }
+          - { type: stat, key: confidence, delta: 3 }
+          - { type: history, text: 'You walked the picket line and won a better contract.', importance: 2 }
+      failure:
+        text: Six weeks without pay, and a contract barely better than the old one. Some people never speak to each other again.
+        effects:
+          - { type: money, delta: -4000 }
+          - { type: stat, key: stress, delta: 8 }
+  - id: together
+    label: Stand with {npc.name}, whatever it costs
+    visibleIf: { memory: { role: npc, tag: union_together } }
+    outcome:
+      text: >-
+        You signed the first cards together in the break room. You walk the
+        line together now. The contract comes in March, and it's a good one.
+      effects:
+        - { type: money, delta: -2000 }
+        - { type: job, action: raise }
+        - { type: relationship, role: npc, affection: 10, trust: 10 }
+  - id: guilt
+    label: Vote no, quietly
+    visibleIf: { memory: { role: npc, tag: you_reported_union } }
+    outcome:
+      text: You told the boss about the union once. You vote no again, and you can't look at {npc.name} in the parking lot.
+      effects:
+        - { type: stat, key: stress, delta: 4 }
+        - { type: relationship, role: npc, trust: -5 }
+  - id: no
+    label: Vote against it; you can't afford a strike
+    outcome:
+      text: The vote passes anyway. You walk the line with everyone else, doing the math every night.
+      effects:
+        - { type: money, delta: -3000 }
+        - { type: stat, key: stress, delta: 5 }

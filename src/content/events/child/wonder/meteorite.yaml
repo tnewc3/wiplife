@@ -1,0 +1,34 @@
+# Legendary: secret and rare. It is recorded only in life history.
+id: meteorite
+title: Something fell from the sky
+text: >-
+  A boom wakes the whole street. In the morning there's a small, smoking
+  crater in your backyard, and at the bottom of it a black rock the size of
+  a fist, still warm.
+tone: light
+category: wonder
+rarity: legendary
+lifeStages: [child]
+weight: { base: 20 }
+once: true
+choices:
+  - id: keep
+    label: Keep it under your bed
+    outcome:
+      text: >-
+        You tell no one. For years you sleep above a piece of another world,
+        and you're sure it's the reason you dream the way you do.
+      effects:
+        - { type: stat, key: luck, delta: 10 }
+        - { type: stat, key: smarts, delta: 3 }
+        - { type: history, text: 'A meteorite landed in your backyard when you were a child. You kept it under your bed.', importance: 3 }
+  - id: museum
+    label: Give it to the natural history museum
+    outcome:
+      text: >-
+        A scientist in a cardigan nearly faints. There's a small card next to
+        it in a glass case, with your name on it, spelled right.
+      effects:
+        - { type: stat, key: smarts, delta: 4 }
+        - { type: stat, key: reputation, delta: 4 }
+        - { type: history, text: 'A meteorite landed in your backyard when you were a child. It''s in a museum now, with your name on the card.', importance: 3 }
