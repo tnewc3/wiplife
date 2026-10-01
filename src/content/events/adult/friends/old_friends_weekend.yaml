@@ -60,7 +60,7 @@ choices:
       base: 50
       stats: [{ role: friend, key: affection, weight: 0.4 }, { key: kindness, weight: 0.2 }]
       success:
-        text: Twenty years late, you both apologize at once and then argue about who was more wrong. It's the best argument you've had.
+        text: All this time later, you both apologize at once and then argue about who was more wrong. It's the best argument you've had.
         effects:
           - { type: relationship, role: friend, affection: 8, trust: 8 }
           - { type: memory, role: friend, tag: made_peace }

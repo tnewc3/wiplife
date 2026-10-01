@@ -8,8 +8,11 @@ tone: light
 category: health
 rarity: common
 lifeStages: [senior]
+requires: { age: { gte: 18 } }
 weight: { base: 4 }
 once: true
+cast:
+  partner: { kind: spouse, optional: true }
 choices:
   - id: test
     label: Get your hearing tested
@@ -21,6 +24,21 @@ choices:
         - { type: money, delta: -2500 }
         - { type: stat, key: happiness, delta: 4 }
         - { type: stat, key: sociability, delta: 2 }
+  - id: partner
+    label: Let {partner.name} book the appointment
+    visibleIf:
+      all:
+        - { role: partner }
+        - { home: { partner: true } }
+    outcome:
+      text: >-
+        {partner.name} has been repeating things for a year and is very
+        polite about how relieved {partner.they} {partner:is|are}. The first
+        thing you hear clearly is {partner.their} laugh.
+      effects:
+        - { type: money, delta: -2500 }
+        - { type: relationship, role: partner, affection: 5 }
+        - { type: stat, key: happiness, delta: 4 }
   - id: nod
     label: Keep nodding; it's mostly small talk
     outcome:

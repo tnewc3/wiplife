@@ -8,7 +8,10 @@ tone: serious
 category: work
 rarity: common
 lifeStages: [youngAdult, adult]
-requires: { flag: burned_out }
+requires:
+  all:
+    - { flag: burned_out }
+    - { career: { employed: true, retired: false } }
 weight: { base: 5 }
 once: true
 choices:

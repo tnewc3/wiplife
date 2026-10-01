@@ -3,7 +3,7 @@
 id: neighbor_sitter
 title: A week with {sitter.name}
 text: >-
-  Your parents are working double shifts, so you're spending the week with
+  Your family needs a hand this week, so you're spending it with
   {sitter.name} from downstairs. {sitter.They} {sitter:has|have} a cookie jar
   with no rules attached and a balcony full of plants you're allowed to dig in.
 tone: light

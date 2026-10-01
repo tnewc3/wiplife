@@ -10,7 +10,7 @@ lifeStages: [youngAdult, adult, senior]
 requires:
   all:
     - { flag: union_member }
-    - { career: { employed: true } }
+    - { career: { employed: true, retired: false } }
 weight: { base: 6 }
 once: true
 cast:

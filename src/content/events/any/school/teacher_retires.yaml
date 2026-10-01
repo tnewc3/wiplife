@@ -8,10 +8,7 @@ tone: light
 category: school
 rarity: common
 lifeStages: [youngAdult, adult, senior]
-requires:
-  any:
-    - { memory: { role: teacher, tag: wrote_your_letter } }
-    - { memory: { role: teacher, tag: believed_in_you } }
+requires: { memory: { role: teacher, tag: wrote_your_letter } }
 weight: { base: 10 }
 followUpOnly: true
 cast:

@@ -2,7 +2,7 @@ id: leftover_pills
 title: The orange bottle
 text: >-
   Cleaning out the medicine cabinet, you find the old bottle of painkillers
-  from years ago. There are eleven left. You remember exactly how they felt.
+  you were once prescribed. There are eleven left. You remember exactly how they felt.
 tone: dark
 category: health
 rarity: common
@@ -13,6 +13,8 @@ requires:
     - { age: { gte: 18 } }
 weight: { base: 4 }
 once: true
+cast:
+  partner: { kind: spouse, optional: true }
 choices:
   - id: dispose
     label: Take them to the pharmacy drop box
@@ -20,6 +22,17 @@ choices:
       text: The drop box clanks. You stand there a second longer than you need to, then walk out into the sun.
       effects:
         - { type: stat, key: discipline, delta: 2 }
+        - { type: stat, key: vice, delta: -3 }
+  - id: tell
+    label: Give the bottle to {partner.name} and say why
+    visibleIf:
+      all:
+        - { role: partner }
+        - { home: { partner: true } }
+    outcome:
+      text: '{partner.name} doesn''t ask questions. {partner.They} just {partner:takes|take} the bottle, and later, your hand.'
+      effects:
+        - { type: relationship, role: partner, trust: 6, affection: 4 }
         - { type: stat, key: vice, delta: -3 }
   - id: keep
     label: Keep them, just in case

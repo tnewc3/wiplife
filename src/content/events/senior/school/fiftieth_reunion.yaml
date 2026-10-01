@@ -8,7 +8,10 @@ tone: light
 category: school
 rarity: common
 lifeStages: [senior]
-requires: { age: { gte: 66, lte: 70 } }
+requires:
+  all:
+    - { age: { gte: 66, lte: 70 } }
+    - { education: { credential: [hs_diploma] } }
 weight: { base: 6 }
 once: true
 cast:

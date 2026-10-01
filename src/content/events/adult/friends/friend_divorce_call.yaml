@@ -2,7 +2,7 @@
 id: friend_divorce_call
 title: The call after the wedding
 text: >-
-  {friend.name} calls at midnight. The marriage you watched begin is over.
+  {friend.name} calls at midnight. {friend.Their} marriage is falling apart.
   {friend.They} {friend:doesn't|don't} really want advice. {friend.They} just
   {friend:doesn't|don't} want to be alone with it.
 tone: serious

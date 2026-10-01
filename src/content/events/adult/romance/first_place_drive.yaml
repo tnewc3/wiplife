@@ -11,10 +11,7 @@ requires:
   all:
     - { age: { gte: 18 } }
     - { role: partner, years: { gte: 5 } }
-    - any:
-        - { memory: { role: partner, tag: moved_in_together } }
-        - { memory: { role: partner, tag: engaged_to_you } }
-        - { memory: { role: partner, tag: anniversary_trip } }
+    - { memory: { role: partner, tag: moved_in_together } }
 weight: { base: 5 }
 once: true
 cast:

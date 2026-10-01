@@ -38,6 +38,7 @@ choices:
         - { memory: { role: spouse, tag: danced_with_you } }
         - { memory: { role: spouse, tag: kissed_you } }
         - { memory: { role: spouse, tag: met_your_family } }
+        - { memory: { role: spouse, tag: engaged_to_you } }
     outcome:
       text: >-
         You tell it at dinner, the way you always do, with the parts

@@ -8,7 +8,7 @@ tone: neutral
 category: work
 rarity: common
 lifeStages: [youngAdult, adult, senior]
-requires: { career: { employed: true, years: { gte: 2 } } }
+requires: { career: { employed: true, retired: false, years: { gte: 2 } } }
 weight: { base: 4 }
 cooldownYears: 6
 cast:

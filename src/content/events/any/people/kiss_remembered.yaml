@@ -2,7 +2,7 @@
 id: kiss_remembered
 title: That night on the porch
 text: >-
-  At a friend's birthday, years later, you turn around and there's
+  At a friend's birthday, you turn around and there's
   {admirer.name}. {admirer.They} {admirer:recognizes|recognize} you in the same
   second, and you both laugh, because you both remember the porch.
 tone: light

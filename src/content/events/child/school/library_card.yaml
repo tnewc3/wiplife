@@ -7,7 +7,7 @@ tone: light
 category: school
 rarity: common
 lifeStages: [child]
-requires: { age: { lte: 10 } }
+requires: { education: { program: [elementary] } }
 weight: { base: 4 }
 once: true
 choices:

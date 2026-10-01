@@ -3,8 +3,8 @@ id: bridge_painted_over
 title: The bridge
 text: >-
   The town is finally repainting the railroad bridge. Under the old gray
-  coats, the paint you and {friend.name} put there all those years ago is
-  still faintly visible, and someone has posted a photo of it online.
+  coats, the paint you and {friend.name} put there is still faintly
+  visible, and someone has posted a photo of it online.
 tone: light
 category: community
 rarity: common

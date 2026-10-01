@@ -3,8 +3,8 @@
 id: friend_found_online
 title: A message out of nowhere
 text: >-
-  A message request from {friend.name}. Years have passed. The profile photo
-  is a grown-up with your old friend's exact grin. "Is this really you?"
+  A message request from {friend.name}. The profile photo is older than you
+  remember, but it's your old friend's exact grin. "Is this really you?"
 tone: light
 category: friends
 rarity: common

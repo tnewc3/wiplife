@@ -1,11 +1,10 @@
 # Legendary: secret and rare. It is recorded only in life history.
 id: message_in_a_bottle
-title: A letter from the sea
+title: A message in a bottle
 text: >-
-  An envelope with foreign stamps. Inside is a faded note in a child's
-  handwriting, your handwriting, from a bottle you threw off a pier
-  sixty years ago, and a letter from {finder.name}, who found it on a beach
-  across the ocean.
+  Walking the beach after a storm, you find a green glass bottle half buried
+  in the sand. Inside is a note in a child's handwriting, signed {writer.name}
+  and dated sixty years ago: "To whoever finds this. I hope you're happy."
 tone: light
 category: wonder
 rarity: legendary
@@ -13,23 +12,23 @@ lifeStages: [senior]
 weight: { base: 40 }
 once: true
 cast:
-  finder: { kind: acquaintance, age: { min: 20, max: 80 }, createIfMissing: true, newChance: 1 }
+  writer: { kind: acquaintance, age: { min: 66, max: 80 }, createIfMissing: true, newChance: 1 }
 choices:
-  - id: write
-    label: Write back
+  - id: find
+    label: Track down whoever wrote it
     outcome:
       text: >-
-        Letters cross the ocean for years after that. {finder.name} sends
-        photos of the beach. You send the pier. You never meet, and it's one of
-        the great friendships of your life.
+        It takes three months, two librarians and one very patient post office.
+        {writer.name} is in {writer.their} seventies now, and cries when you
+        read the note aloud over the phone. You talk every Sunday after that.
       effects:
-        - { type: relationship, role: finder, kind: friend, affection: 20, trust: 10 }
+        - { type: relationship, role: writer, kind: friend, affection: 20, trust: 10 }
         - { type: stat, key: happiness, delta: 8 }
-        - { type: history, text: 'A message in a bottle you threw into the sea as a child was found sixty years later, and its finder became your friend.', importance: 3 }
+        - { type: history, text: 'You found a message in a bottle on the beach, and tracked down {writer.name}, who threw it into the sea sixty years before. You became friends.', importance: 3 }
   - id: frame
     label: Frame the note on your wall
     outcome:
-      text: You read your own seven-year-old handwriting every morning. "To whoever finds this. I hope you're happy." You mostly are.
+      text: You read a stranger's sixty-year-old wish every morning. "I hope you're happy." You mostly are.
       effects:
         - { type: stat, key: happiness, delta: 6 }
-        - { type: history, text: 'A message in a bottle you threw into the sea as a child came back to you sixty years later.', importance: 3 }
+        - { type: history, text: 'You found a sixty-year-old message in a bottle on the beach, and framed it.', importance: 3 }

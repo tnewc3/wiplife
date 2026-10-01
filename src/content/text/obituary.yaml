@@ -115,12 +115,12 @@ love:
 # was made.
 moments:
   stranger_on_the_bench: "{self.They} once met a stranger on a park bench who knew {self.their} name, and never quite explained it."
-  stranger_returns: "Decades later, {self.they} swore {self.they} saw that same stranger again."
+  stranger_returns: "Later in life, {self.they} swore {self.they} saw that same stranger again."
   meteorite: "As a child, {self.they} found a meteorite in {self.their} own backyard."
   busker_duet: "{self.They} once shared a subway platform, and a song, with a famous musician in disguise."
   lightning: "{self.They} {self:was|were} struck by lightning once, and walked away from it."
   dream_numbers: "{self.They} once dreamed the winning lottery numbers, and told the story for the rest of {self.their} life."
-  message_in_a_bottle: "A message in a bottle {self.they} threw into the sea as a child came back to {self.them} sixty years later."
+  message_in_a_bottle: "{self.They} once found a message in a bottle on a beach, and tracked down the child, now old, who threw it."
 
 # Deeds: things the life did (by flag), kept to ones that set a life apart.
 # Values: none.

@@ -11,7 +11,7 @@ lifeStages: [youngAdult, adult]
 requires:
   all:
     - { flag: office_romance }
-    - { career: { employed: true } }
+    - { career: { employed: true, retired: false } }
 weight: { base: 4 }
 once: true
 choices:

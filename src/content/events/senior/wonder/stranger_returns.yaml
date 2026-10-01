@@ -2,7 +2,7 @@
 id: stranger_returns
 title: The bench, again
 text: >-
-  The same park, decades later. The bench is new, but the stranger on it is
+  The same park. The bench is new, but the stranger on it is
   not. "You're older now," the stranger says, "and right on schedule."
 tone: neutral
 category: wonder
@@ -21,7 +21,7 @@ choices:
       effects:
         - { type: stat, key: happiness, delta: 5 }
         - { type: stat, key: stress, delta: -5 }
-        - { type: history, text: 'Decades later, you saw the stranger on the bench again. You didn''t need to ask.', importance: 3 }
+        - { type: history, text: 'You saw the stranger on the bench again. You didn''t need to ask.', importance: 3 }
   - id: thank
     label: Say thank you
     outcome:

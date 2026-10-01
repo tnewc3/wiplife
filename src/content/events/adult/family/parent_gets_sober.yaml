@@ -37,7 +37,7 @@ choices:
         - { type: relationship, role: parent, trust: 3 }
         - { type: stat, key: stress, delta: 2 }
   - id: anger
-    label: Tell {parent.them} it's twenty years too late
+    label: Tell {parent.them} it's too late
     outcome:
       text: '{parent.name} takes it without flinching. "I know," {parent.they} {parent:says|say}. You both sit there with that.'
       effects:

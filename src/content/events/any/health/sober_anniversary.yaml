@@ -1,9 +1,9 @@
 # Follow-up to intervention: a few years on.
 id: sober_anniversary
-title: A few years on
+title: The folder of brochures
 text: >-
-  It's been a few years since {family.name} sat on your couch with a folder of
-  brochures. You still think about that afternoon more than you'd admit.
+  You still think about the afternoon {family.name} sat on your couch with a
+  folder of brochures, more often than you'd admit.
 tone: serious
 category: health
 rarity: common
@@ -28,10 +28,13 @@ choices:
         - { type: relationship, role: family, affection: 12, trust: 12 }
         - { type: stat, key: happiness, delta: 5 }
         - { type: stat, key: vice, delta: -3 }
-        - { type: history, text: 'You marked a few years in recovery, and thanked {family.name} for the intervention.', importance: 2 }
+        - { type: history, text: 'You showed {family.name} your sobriety chip and thanked {family.them} for the intervention.', importance: 2 }
   - id: call
     label: Finally call {family.them} back
-    visibleIf: { memory: { role: family, tag: walked_out_on_them } }
+    visibleIf:
+      all:
+        - { memory: { role: family, tag: walked_out_on_them } }
+        - { not: { role: family, kind: [partner, fiance, spouse] } }
     check:
       base: 45
       stats: [{ role: family, key: affection, weight: 0.4 }, { key: kindness, weight: 0.2 }]

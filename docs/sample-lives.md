@@ -1,14 +1,14 @@
 # Sample lives
 
-20 lives played by the simulation's careful player (seeds `sample-0` to `sample-19`), content version `0.1.0+1afd24f4c3`, for the Stage 10 writing review. Regenerate with `npm run samples`.
+20 lives played by the simulation's careful player (seeds `sample-0` to `sample-19`), content version `0.1.0+4acc974f16`, for the Stage 10 writing review. Regenerate with `npm run samples`.
 
 Each life shows its obituary as the archive keeps it, then its life history. Lines marked ★ come from legendary events.
 
-## 1. Samantha Aguilar (2026–2115)
+## 1. Samantha Aguilar (2026–2096)
 
-*she/her · Chicago → Houston · died at 89 of natural causes · obituary tone: mixed · seed `sample-0`*
+*she/her · Chicago → Houston · died at 70 of cancer · obituary tone: mixed · seed `sample-0`*
 
-> Samantha Aguilar died of natural causes at 89, in Houston, in 2115. She was born in Chicago in 2026 to Ximena Aguilar and Kevin Aguilar. She earned an MBA, which she brought up more often than strictly necessary. At her working peak, she was consultant at Northpoint Consulting. She retired after 46 working years and never once set an alarm again. She married Zachary Brooks in 2069, and outlived him. She jumped out of a plane, on purpose, well past the age most people would. Money was hard; she filed for bankruptcy in 2053, and kept going. She was predeceased by her husband Zachary, her mother Ximena, her father Kevin, her brother Santiago, and her brother Juan. Her life had its share of ups and downs, and she met most of them head-on. May she rest in peace.
+> Samantha Aguilar died of cancer in Houston in 2096, at the age of 70. She was born in Chicago in 2026 to Ximena Aguilar and Kevin Aguilar. She earned an MBA, which she brought up more often than strictly necessary. At her working peak, she was consultant at Northpoint Consulting. In 2069, she married Zachary Brooks, and the two of them made a life together. Money was hard; she filed for bankruptcy in 2053, and kept going. She leaves behind her husband Zachary, her brother Santiago, and her brother Juan. She was preceded in death by her mother Ximena and her father Kevin. She took the good years with the bad, and kept going. She did her best, and that counts for a great deal.
 
 <details><summary>Life history</summary>
 
@@ -81,32 +81,10 @@ Each life shows its obituary as the archive keeps it, then its life history. Lin
 - 2091 (age 65): You turned 65 and became a senior citizen.
 - 2091 (age 65): You made the last payment on your mortgage. The house is yours.
 - 2092 (age 66): Blackfern Partners made you associate.
-- 2092 (age 66): You handed in your notice at Blackfern Partners.
-- 2092 (age 66): You started picking up gig work.
 - 2092 (age 66): You hung up your work clothes for good after 46 working years.
-- 2094 (age 68): You were diagnosed with heart disease.
 - 2094 (age 68): A health scare you put off became a hard year of treatment.
-- 2094 (age 68): You owned up to walking away, and Patrick let you back in.
-- 2095 (age 69): You started treatment for cancer.
-- 2095 (age 69): You started treatment for heart disease.
-- 2096 (age 70): You wrote down the story of your life, more or less.
-- 2099 (age 73): A doctor put a name to it: dementia.
-- 2100 (age 74): You got over cancer.
-- 2102 (age 76): You and Zachary finally took the trip you had always talked about.
-- 2105 (age 79): You sold the family home and moved somewhere smaller.
-- 2105 (age 79): You got the keys to a home of your own in Houston.
-- 2106 (age 80): Juan, your brother, passed away at 82.
-- 2107 (age 81): You were diagnosed with pneumonia.
-- 2107 (age 81): You survived a heart attack because you called for help in time.
-- 2109 (age 83): Your brother, Santiago, died at the age of 90.
-- 2109 (age 83): You finally shook off pneumonia.
-- 2111 (age 85): Your husband, Zachary, died at the age of 82.
-- 2111 (age 85): Megan, your friend, passed away at 84.
-- 2113 (age 87): You broke your hip on the icy front steps.
-- 2113 (age 87): A heart attack nearly killed you.
-- 2114 (age 88): You went skydiving at 88.
-- 2115 (age 89): You were diagnosed with a bad back.
-- 2115 (age 89): You died of natural causes at the age of 89.
+- 2095 (age 69): You started at Corner Threads as their new sales associate.
+- 2096 (age 70): You died of cancer at the age of 70.
 
 </details>
 
@@ -199,9 +177,9 @@ Each life shows its obituary as the archive keeps it, then its life history. Lin
 
 ## 3. Connor Rossi (2026–2111)
 
-*he/him · Small Town → Small Town · died at 85 of natural causes · obituary tone: mixed · seed `sample-2`*
+*he/him · Small Town → Small Town · died at 85 of cancer · obituary tone: mixed · seed `sample-2`*
 
-> Connor Rossi died of natural causes at 85, in Small Town, in 2111. He came into the world in 2026 in Small Town, the child of Ethan Rossi. He studied English in college and earned his degree. He worked 48 years in all, the best of them as editor-in-chief at The Daily Ledger. Retirement, after 48 years of work, suited him. He married Emily Murphy in 2070, and outlived her. He spent 3 years in prison, and walked out determined to do better. He was preceded in death by his wife Emily and his father Ethan. He knew good years and hard ones. May he rest in peace.
+> Connor Rossi died of cancer at 85, in Small Town, in 2111. He came into the world in 2026 in Small Town, the child of Ethan Rossi. He studied English in college and earned his degree. He worked 48 years in all, the best of them as editor-in-chief at The Daily Ledger. Retirement, after 48 years of work, suited him. He married Destiny Moore in 2108. He once found a message in a bottle on a beach, and tracked down the child, now old, who threw it. His life included 3 years behind bars, a chapter he never hid. He is survived by his wife Destiny. He was predeceased by his wife Emily and his father Ethan. He knew good years and hard ones. May he rest in peace.
 
 <details><summary>Life history</summary>
 
@@ -268,24 +246,30 @@ Each life shows its obituary as the archive keeps it, then its life history. Lin
 - 2096 (age 70): You hung up your work clothes for good after 48 working years.
 - 2098 (age 72): You sold the family home and moved somewhere smaller.
 - 2102 (age 76): You bought a home in Small Town.
-- 2106 (age 80): You wrote down the story of your life, more or less.
-- 2109 (age 83): You broke your hip on the icy front steps.
-- 2110 (age 84): Your wife, Emily, died at the age of 85.
-- 2110 (age 84): A doctor put a name to it: an anxiety disorder.
-- 2110 (age 84): You started treatment for an anxiety disorder.
-- 2111 (age 85): Fernando, your friend, passed away at 86.
-- 2111 (age 85): You were diagnosed with cancer.
-- 2111 (age 85): A doctor put a name to it: high blood pressure.
-- 2111 (age 85): A heart attack nearly killed you.
-- 2111 (age 85): You died of natural causes at the age of 85.
+- 2104 (age 78): You wrote down the story of your life, more or less.
+- 2105 (age 79): Emily, your wife, passed away at 80.
+- 2105 (age 79): You were diagnosed with cancer.
+- 2105 (age 79): You started dating Destiny.
+- 2106 (age 80): You started treatment for cancer.
+- 2107 (age 81): Katherine, your ex, passed away at 82.
+- 2107 (age 81): You proposed to Destiny in front of a room full of people, and she said yes.
+- 2108 (age 82): A doctor put a name to it: dementia.
+- 2108 (age 82): You sold the family home and moved somewhere smaller.
+- 2108 (age 82): You married Destiny at the courthouse on a Tuesday.
+- 2109 (age 83): You got over cancer.
+- 2109 (age 83): ★ You found a message in a bottle on the beach, and tracked down Owen, who threw it into the sea sixty years before. You became friends.
+- 2109 (age 83): You got the keys to a home of your own in Small Town.
+- 2110 (age 84): Fernando, your friend, passed away at 85.
+- 2110 (age 84): A doctor put a name to it: cancer.
+- 2111 (age 85): You died of cancer at the age of 85.
 
 </details>
 
-## 4. Thomas Evans (2026–2112)
+## 4. Thomas Evans (2026–2111)
 
-*he/him · Small Town → Small Town · died at 86 of heart failure · obituary tone: mixed · seed `sample-3`*
+*he/him · Small Town → Small Town · died at 85 of natural causes · obituary tone: mixed · seed `sample-3`*
 
-> Thomas Evans died of heart failure at 86, in Small Town, in 2112. Born in Small Town in 2026, he was raised by Lily Evans and Patrick Murphy. He earned an associate degree in engineering. At his working peak, he was bar manager at Velvet Lounge. He retired after 49 working years and never once set an alarm again. His spouse, Madison Taylor, whom he married in 2068, died before him. He was preceded in death by his wife Madison, his mother Lily, and his father Patrick. He took the good years with the bad, and kept going. May he rest in peace.
+> Thomas Evans died of natural causes in Small Town in 2111, at the age of 85. Born in Small Town in 2026, he was raised by Lily Evans and Patrick Murphy. He earned an associate degree in engineering. At his working peak, he was bar manager at Velvet Lounge. Retirement, after 49 years of work, suited him. His spouse, Madison Taylor, whom he married in 2068, died before him. He was preceded in death by his wife Madison, his mother Lily, and his father Patrick. He took the good years with the bad, and kept going. He will be missed.
 
 <details><summary>Life history</summary>
 
@@ -376,18 +360,15 @@ Each life shows its obituary as the archive keeps it, then its life history. Lin
 - 2109 (age 83): You got over cancer.
 - 2110 (age 84): A doctor put a name to it: pneumonia.
 - 2110 (age 84): You sold the family home and moved somewhere smaller.
-- 2111 (age 85): You broke your hip on the icy front steps.
-- 2111 (age 85): You started treatment for pneumonia.
-- 2112 (age 86): You finally shook off pneumonia.
-- 2112 (age 86): You died of heart failure at the age of 86.
+- 2111 (age 85): You died of natural causes at the age of 85.
 
 </details>
 
-## 5. Miguel Medina (2026–2110)
+## 5. Miguel Medina (2026–2108)
 
-*he/him · Chicago → New York · died at 84 of a skydiving accident · obituary tone: mixed · seed `sample-4`*
+*he/him · Chicago → New York · died at 82 of pneumonia · obituary tone: mixed · seed `sample-4`*
 
-> Miguel Medina died of a skydiving accident in New York in 2110, at the age of 84. He came into the world in 2026 in Chicago, the child of Andrés Medina and Daniela Reyes. He earned an MBA, which he brought up more often than strictly necessary. He worked 44 years in all, the best of them as consultant at Kingsley Strategy Group. Retirement, after 44 years of work, suited him. He married Megan Davis in 2080. He is survived by his wife Megan. He was predeceased by his wife Rachel, his father Andrés, his mother Daniela, and his brother Mateo. He took the good years with the bad, and kept going. May he rest in peace.
+> Miguel Medina died of pneumonia in New York in 2108, at the age of 82. He was born in Chicago in 2026 to Andrés Medina and Daniela Reyes. He went on to earn an MBA. At his working peak, he was consultant at Kingsley Strategy Group. Retirement, after 44 years of work, suited him. His spouse, Megan Davis, whom he married in 2080, died before him. He jumped out of a plane, on purpose, well past the age most people would. He was preceded in death by his wife Rachel, his wife Megan, his father Andrés, his mother Daniela, and his brother Mateo. He took the good years with the bad, and kept going. He will be missed.
 
 <details><summary>Life history</summary>
 
@@ -457,20 +438,22 @@ Each life shows its obituary as the archive keeps it, then its life history. Lin
 - 2091 (age 65): At 65, you've reached your senior years.
 - 2091 (age 65): A doctor put a name to it: cancer.
 - 2091 (age 65): You started treatment for cancer.
-- 2092 (age 66): You finally shook off cancer.
-- 2094 (age 68): Mateo, your brother, passed away at 74.
-- 2096 (age 70): Mariana, your ex, passed away at 70.
-- 2096 (age 70): A doctor put a name to it: high blood pressure.
-- 2096 (age 70): You started treatment for high blood pressure.
-- 2098 (age 72): You wrote down the story of your life, more or less.
-- 2098 (age 72): A doctor put a name to it: heart disease.
-- 2098 (age 72): You started treatment for heart disease.
-- 2101 (age 75): You got through a serious health scare.
+- 2092 (age 66): You got over cancer.
+- 2093 (age 67): You wrote down the story of your life.
+- 2095 (age 69): A doctor put a name to it: heart disease.
+- 2095 (age 69): You started treatment for heart disease.
+- 2098 (age 72): Your wife, Megan, died at the age of 83.
+- 2098 (age 72): A health scare you put off became a hard year of treatment.
+- 2099 (age 73): You went skydiving at 73.
+- 2100 (age 74): Your friend, Caleb, died at the age of 72.
+- 2101 (age 75): You started dating Madison.
+- 2102 (age 76): Hannah, your friend, passed away at 76.
 - 2102 (age 76): Brandon repaid an old kindness when you needed it most.
-- 2105 (age 79): You were diagnosed with cancer.
-- 2106 (age 80): You started treatment for cancer.
-- 2109 (age 83): You finally shook off cancer.
-- 2110 (age 84): You died of a skydiving accident at the age of 84.
+- 2103 (age 77): Madison moved in with you.
+- 2106 (age 80): Madison proposed, and you said yes.
+- 2107 (age 81): A heart attack nearly killed you.
+- 2108 (age 82): Your brother, Mateo, died at the age of 88.
+- 2108 (age 82): You died of pneumonia at the age of 82.
 
 </details>
 
@@ -624,11 +607,11 @@ Each life shows its obituary as the archive keeps it, then its life history. Lin
 
 </details>
 
-## 8. Maya Brown (2026–2113)
+## 8. Maya Brown (2026–2128)
 
-*she/her · Houston → New York · died at 87 of natural causes · obituary tone: bright · seed `sample-7`*
+*she/her · Houston → New York · died at 102 of natural causes · obituary tone: bright · seed `sample-7`*
 
-> Maya Brown died of natural causes in New York in 2113, at the age of 87, after a long and full life. She was born in Houston in 2026 to Jamal Brown and Keisha Brown. She earned her high school equivalency the hard way, after leaving school. She worked 50 years in all, and rose to security manager at Ironclad Protection. Retirement, after 50 years of work, suited her. She married Kevin Miller in 2052, and outlived him. She was predeceased by her husband Kevin, her father Jamal, her mother Keisha, and her sister Aaliyah. People remember her as the one who made a room feel lighter. She will be missed, and laughed about, for a long time.
+> Maya Brown, who seemed to enjoy nearly every one of her 102 years, died of natural causes in New York in 2128. She was born in Houston in 2026 to Jamal Brown and Keisha Brown. She earned her high school equivalency the hard way, after leaving school. She worked 50 years in all, and rose to security manager at Ironclad Protection. She retired after 50 working years and never once set an alarm again. She married Kevin Miller in 2052, and outlived him. She jumped out of a plane, on purpose, well past the age most people would. She was predeceased by her husband Kevin, her father Jamal, her mother Keisha, and her sister Aaliyah. Those who knew her remember a life lived with real joy. She would want you to have dessert first.
 
 <details><summary>Life history</summary>
 
@@ -680,24 +663,42 @@ Each life shows its obituary as the archive keeps it, then its life history. Lin
 - 2093 (age 67): A doctor put a name to it: high blood pressure.
 - 2093 (age 67): You started treatment for high blood pressure.
 - 2094 (age 68): You retired after 50 years of work.
-- 2095 (age 69): You and Kevin finally took the trip you had always talked about.
 - 2097 (age 71): You sold the family home and moved somewhere smaller.
 - 2097 (age 71): You packed your life into boxes and moved from Houston to New York.
 - 2100 (age 74): You bought a home in New York.
+- 2102 (age 76): Your friend, Camila, died at the age of 77.
 - 2102 (age 76): You got over high blood pressure.
-- 2105 (age 79): You sold the family home and moved somewhere smaller.
-- 2106 (age 80): You got the keys to a home of your own in New York.
-- 2113 (age 87): Your husband, Kevin, died at the age of 88.
-- 2113 (age 87): You sold the family home and moved somewhere smaller.
-- 2113 (age 87): You died of natural causes at the age of 87.
+- 2107 (age 81): Your husband, Kevin, died at the age of 82.
+- 2114 (age 88): A doctor put a name to it: dementia.
+- 2115 (age 89): A doctor put a name to it: high blood pressure.
+- 2115 (age 89): You were diagnosed with heart disease.
+- 2115 (age 89): A heart attack nearly killed you.
+- 2115 (age 89): You started treatment for high blood pressure.
+- 2115 (age 89): You started treatment for heart disease.
+- 2117 (age 91): One of your debts went to collections.
+- 2118 (age 92): One of your debts went to collections.
+- 2118 (age 92): You sold the family home and moved somewhere smaller.
+- 2120 (age 94): You bought a home in New York.
+- 2120 (age 94): You owned up to walking away, and Patrick let you back in.
+- 2122 (age 96): Your friend, Patrick, died at the age of 95.
+- 2122 (age 96): Your friend, Alejandro, died at the age of 98.
+- 2123 (age 97): You survived a heart attack because you called for help in time.
+- 2123 (age 97): You swept Zachary off his feet, and the two of you started dating.
+- 2125 (age 99): Zachary proposed. You said no, and the two of you split up.
+- 2125 (age 99): You went skydiving at 99.
+- 2126 (age 100): You sold the family home and moved somewhere smaller.
+- 2126 (age 100): You and Zachary got back together.
+- 2127 (age 101): Zachary moved in with you.
+- 2128 (age 102): You were diagnosed with cancer.
+- 2128 (age 102): You died of natural causes at the age of 102.
 
 </details>
 
-## 9. Lauren Walker (2026–2091)
+## 9. Lauren Walker (2026–2100)
 
-*she/her · Los Angeles → Los Angeles · died at 65 of a long illness · obituary tone: mixed · seed `sample-8`*
+*she/her · Los Angeles → Chicago · died at 74 of heart failure · obituary tone: mixed · seed `sample-8`*
 
-> Lauren Walker died of a long illness at 65, in Los Angeles, in 2091. She was born in Los Angeles in 2026 to Connor Walker and Ryan Walker. She finished high school and went straight out into the world. She worked 44 years in all, the best of them as lead driver at Doorstep Delivery Co. She retired after 44 working years and never once set an alarm again. In 2051, she married Layla Farah, and the two of them made a life together. She loved a scruffy dog who followed her home one day. She is survived by her wife Layla and her father Ryan. She was predeceased by her father Connor. Her life had its share of ups and downs, and she met most of them head-on. She will be missed.
+> Lauren Walker died of heart failure in Chicago in 2100, at the age of 74. She was born in Los Angeles in 2026 to Connor Walker and Ryan Walker. A high school diploma was all the schooling she needed, or so she always said. At her working peak, she was lead driver at Doorstep Delivery Co. She retired after 44 working years and never once set an alarm again. She married Layla Farah in 2051. She loved a scruffy dog who followed her home one day. She is survived by her wife Layla. She was preceded in death by her father Connor and her father Ryan. She knew good years and hard ones. May she rest in peace.
 
 <details><summary>Life history</summary>
 
@@ -750,15 +751,20 @@ Each life shows its obituary as the archive keeps it, then its life history. Lin
 - 2090 (age 64): A health scare you put off became a hard year of treatment.
 - 2091 (age 65): You turned 65 and became a senior citizen.
 - 2091 (age 65): You wrote down the story of your life.
-- 2091 (age 65): You died of a long illness at the age of 65.
+- 2096 (age 70): Your father, Ryan, died at the age of 99.
+- 2096 (age 70): Your friend, Amara, died at the age of 65.
+- 2097 (age 71): You read from your memoir at the public library, to eleven folding chairs.
+- 2097 (age 71): You packed your life into boxes and moved from Los Angeles to Chicago.
+- 2098 (age 72): You broke your hip on the icy front steps.
+- 2100 (age 74): You died of heart failure at the age of 74.
 
 </details>
 
-## 10. Jessica Nelson (2026–2109)
+## 10. Jessica Nelson (2026–2104)
 
-*she/her · Los Angeles → Los Angeles · died at 83 of natural causes · obituary tone: heavy · seed `sample-9`*
+*she/her · Los Angeles → Los Angeles · died at 78 of heart failure · obituary tone: heavy · seed `sample-9`*
 
-> Jessica Nelson died of natural causes in Los Angeles in 2109. She was 83. Born in Los Angeles in 2026, she was raised by Patrick Nelson and Samantha Nelson. A high school diploma was all the schooling she needed, or so she always said. She worked as team lead at Midway Distribution. She retired after 54 working years and never once set an alarm again. She married Sean Evans in 2089. She ran a marathon, and kept the medal. Money was hard; she filed for bankruptcy in 2080, and kept going. She leaves behind her husband Sean and her sister Emily. She was predeceased by her father Patrick, her mother Samantha, and her sister Chloe. Happiness rarely came easily to her. May she rest in peace.
+> In 2104, Jessica Nelson died of heart failure in Los Angeles, at only 78. She was born in Los Angeles in 2026 to Patrick Nelson and Samantha Nelson. She finished high school and went straight out into the world. For a time, she was team lead at Midway Distribution. She and Sean Evans married in 2089, and stayed together through the hard years. She ran a marathon, and kept the medal. She went bankrupt in 2080 and rebuilt from nothing. She is survived by her husband Sean and her sister Chloe. She was preceded in death by her father Patrick, her mother Samantha, and her sister Emily. Those closest to her knew how heavy some years were. May she rest in peace.
 
 <details><summary>Life history</summary>
 
@@ -829,31 +835,26 @@ Each life shows its obituary as the archive keeps it, then its life history. Lin
 - 2090 (age 64): You handed in your notice at Hearthside Home Health.
 - 2090 (age 64): You started at Parcelpoint Fulfillment as their new team lead.
 - 2091 (age 65): You turned 65 and became a senior citizen.
+- 2093 (age 67): You wrote down the story of your life.
 - 2094 (age 68): You hung up your work clothes for good after 50 working years.
-- 2097 (age 71): You got a job at Value City Goods, starting as sales associate.
-- 2101 (age 75): You retired after 54 years of work.
-- 2102 (age 76): You wrote down the story of your life, more or less.
-- 2103 (age 77): You owned up to walking away, and Lily let you back in.
-- 2104 (age 78): One of your debts went to collections.
-- 2105 (age 79): You were evicted from your apartment in Los Angeles.
-- 2105 (age 79): Sean moved in with you.
-- 2106 (age 80): Your ex, Marcus, died at the age of 82.
-- 2106 (age 80): Lily, your friend, passed away at 80.
-- 2106 (age 80): One of your debts went to collections.
-- 2107 (age 81): One of your debts went to collections.
-- 2107 (age 81): You fell too far behind on rent and were evicted in Los Angeles.
-- 2107 (age 81): Sean moved in with you.
-- 2109 (age 83): Your sister, Chloe, died at the age of 87.
-- 2109 (age 83): A doctor put a name to it: pneumonia.
-- 2109 (age 83): You died of natural causes at the age of 83.
+- 2098 (age 72): One of your debts went to collections.
+- 2100 (age 74): Andre, your friend, passed away at 80.
+- 2100 (age 74): You fell too far behind on rent and were evicted in Los Angeles.
+- 2101 (age 75): A doctor put a name to it: heart disease.
+- 2102 (age 76): You started at Home & Hearth Store as their new sales associate.
+- 2102 (age 76): You started treatment for heart disease.
+- 2102 (age 76): You survived a heart attack because you called for help in time.
+- 2103 (age 77): Your friend, Taylor, died at the age of 76.
+- 2104 (age 78): Your sister, Emily, died at the age of 86.
+- 2104 (age 78): You died of heart failure at the age of 78.
 
 </details>
 
-## 11. Peyton Banks (2026–2116)
+## 11. Peyton Banks (2026–2113)
 
-*they/them · Chicago → Small Town · died at 90 of heart failure · obituary tone: mixed · seed `sample-10`*
+*they/them · Chicago → Small Town · died at 87 of natural causes · obituary tone: mixed · seed `sample-10`*
 
-> Peyton Banks died of heart failure at 90, in Small Town, in 2116. They came into the world in 2026 in Chicago, the child of Zora Banks and Marcus Harris. They went to trade school for electrical work, and were proud of the electrician's license on the wall. At their working peak, they were branch manager at Harborview Credit Union. Retirement, after 51 years of work, suited them. They married Nathan Howard in 2100, and outlived him. They were preceded in death by their husband Nathan, their mother Zora, and their father Marcus. They took the good years with the bad, and kept going. May they rest in peace.
+> Peyton Banks died in 2113 in Small Town, at 87, of natural causes. They came into the world in 2026 in Chicago, the child of Zora Banks and Marcus Harris. They trained in electrical work and earned their electrician's license. They worked 51 years in all, the best of them as branch manager at Harborview Credit Union. Retirement, after 51 years of work, suited them. They married Nathan Howard in 2100, and outlived him. They were predeceased by their husband Nathan, their mother Zora, and their father Marcus. They knew good years and hard ones. May they rest in peace.
 
 <details><summary>Life history</summary>
 
@@ -906,24 +907,25 @@ Each life shows its obituary as the archive keeps it, then its life history. Lin
 - 2099 (age 73): You asked Nathan to marry you, and he said yes.
 - 2100 (age 74): You finally shook off pneumonia.
 - 2100 (age 74): You and Nathan ran off and got married.
-- 2104 (age 78): You were diagnosed with a bad back.
-- 2104 (age 78): Nathan moved in with you.
-- 2105 (age 79): You started treatment for a bad back.
-- 2108 (age 82): Your husband, Nathan, died at the age of 87.
-- 2109 (age 83): Rosa, your friend, passed away at 83.
-- 2109 (age 83): You sold the family home and moved somewhere smaller.
-- 2110 (age 84): You got the keys to a home of your own in Small Town.
-- 2111 (age 85): You got over a bad back.
-- 2116 (age 90): You were diagnosed with pneumonia.
-- 2116 (age 90): You died of heart failure at the age of 90.
+- 2103 (age 77): Your husband, Nathan, died at the age of 82.
+- 2104 (age 78): Your ex, Jamal, died at the age of 78.
+- 2104 (age 78): Your friend, Rosa, died at the age of 78.
+- 2107 (age 81): You were diagnosed with pneumonia.
+- 2107 (age 81): A doctor put a name to it: a bad back.
+- 2107 (age 81): You started treatment for pneumonia.
+- 2107 (age 81): You started treatment for a bad back.
+- 2108 (age 82): You finally shook off pneumonia.
+- 2111 (age 85): You sold your home in Small Town.
+- 2112 (age 86): You got over a bad back.
+- 2113 (age 87): You died of natural causes at the age of 87.
 
 </details>
 
-## 12. Abigail Wright (2026–2095)
+## 12. Abigail Wright (2026–2109)
 
-*she/her · Houston → Houston · died at 69 of cancer · obituary tone: bright · seed `sample-11`*
+*she/her · Houston → Houston · died at 83 of heart failure · obituary tone: bright · seed `sample-11`*
 
-> Abigail Wright died of cancer in Houston in 2095, at the age of 69, after a long and full life. She was born in Houston in 2026 to Megan Wright and Kevin Wright. She earned a bachelor's degree in English. Her working life took her as far as lead driver at Doorstep Delivery Co., and she loved most of it. Retirement, after 45 years of work, suited her. In 2046, she married Michael Jones. Friends say the two of them still held hands at the grocery store. She blew the whistle when it cost her something. Money was hard; she filed for bankruptcy in 2048, and kept going. She leaves behind her husband Michael. She was preceded in death by her mother Megan, her father Kevin, and her brother Samuel. People remember her as the one who made a room feel lighter. She will be missed, and laughed about, for a long time.
+> Abigail Wright died in 2109 in Houston, at 83, of heart failure, and by most accounts had a wonderful time getting there. She was born in Houston in 2026 to Megan Wright and Kevin Wright. She studied English in college and earned her degree. She worked 49 years in all, and rose to lead driver at Doorstep Delivery Co. Retirement, after 49 years of work, suited her. She never married. She blew the whistle when it cost her something. She went bankrupt in 2048 and rebuilt from nothing. She was predeceased by her mother Megan, her father Kevin, and her brother Samuel. Those who knew her remember a life lived with real joy. She would want you to have dessert first.
 
 <details><summary>Life history</summary>
 
@@ -1007,17 +1009,34 @@ Each life shows its obituary as the archive keeps it, then its life history. Lin
 - 2091 (age 65): You finally shook off a broken bone.
 - 2092 (age 66): You retired after 45 years of work.
 - 2093 (age 67): A doctor put a name to it: cancer.
-- 2094 (age 68): Your brother, Samuel, died at the age of 73.
-- 2095 (age 69): A health scare you put off became a hard year of treatment.
-- 2095 (age 69): You died of cancer at the age of 69.
+- 2093 (age 67): You started treatment for cancer.
+- 2094 (age 68): You finally shook off cancer.
+- 2098 (age 72): Samuel, your brother, passed away at 77.
+- 2098 (age 72): You wrote down the story of your life, more or less.
+- 2098 (age 72): Michael moved out.
+- 2098 (age 72): You and Michael divorced, and managed to stay kind about it.
+- 2099 (age 73): You got a job at MegaMart, starting as sales associate.
+- 2099 (age 73): You and Michael got back together.
+- 2100 (age 74): Your friend, Latoya, died at the age of 74.
+- 2100 (age 74): You read from your memoir at the public library, to eleven folding chairs.
+- 2103 (age 77): You retired after 49 years of work.
+- 2104 (age 78): A health scare you put off became a hard year of treatment.
+- 2106 (age 80): You were diagnosed with a bad back.
+- 2106 (age 80): Michael moved in with you.
+- 2107 (age 81): A doctor put a name to it: a broken bone.
+- 2107 (age 81): Michael proposed, and you said yes.
+- 2107 (age 81): You started treatment for a bad back.
+- 2109 (age 83): You finally shook off a broken bone.
+- 2109 (age 83): You were fined $4,227 for driving under the influence.
+- 2109 (age 83): You died of heart failure at the age of 83.
 
 </details>
 
-## 13. Natalie Campbell (2026–2117)
+## 13. Natalie Campbell (2026–2100)
 
-*she/her · Los Angeles → Chicago · died at 91 of natural causes · obituary tone: bright · seed `sample-12`*
+*she/her · Los Angeles → Los Angeles · died at 74 of heart failure · obituary tone: bright · seed `sample-12`*
 
-> Natalie Campbell, who seemed to enjoy nearly every one of her 91 years, died of natural causes in Chicago in 2117. She was born in Los Angeles in 2026 to Michael Campbell. She earned an associate degree in education. Her working life took her as far as branch manager at Harborview Credit Union, and she loved most of it. She retired after 49 working years and never once set an alarm again. An earlier marriage, to Tyler Romano, ended in divorce. She was preceded in death by her father Michael, her brother Brandon, and her brother Noah. People remember her as the one who made a room feel lighter. She would want you to have dessert first.
+> Natalie Campbell, who seemed to enjoy nearly every one of her 74 years, died of heart failure in Los Angeles in 2100. She came into the world in 2026 in Los Angeles, the child of Michael Campbell. She earned an associate degree in education. Her working life took her as far as branch manager at Harborview Credit Union, and she loved most of it. She retired after 53 working years and never once set an alarm again. Her marriage to Tyler Romano ended in divorce. She blew the whistle when it cost her something. She is survived by her brother Brandon and her brother Noah. She was predeceased by her father Michael. Those who knew her remember a life lived with real joy. She will be missed, and laughed about, for a long time.
 
 <details><summary>Life history</summary>
 
@@ -1086,31 +1105,29 @@ Each life shows its obituary as the archive keeps it, then its life history. Lin
 - 2088 (age 62): Midway Distribution made you warehouse supervisor.
 - 2090 (age 64): Michael, your father, passed away at 87.
 - 2091 (age 65): You turned 65 and became a senior citizen.
-- 2092 (age 66): Connor, your friend, passed away at 65.
-- 2093 (age 67): You retired after 49 years of work.
-- 2095 (age 69): You wrote down the story of your life.
-- 2097 (age 71): You broke your hip on the icy front steps.
-- 2097 (age 71): You ended things with Caleb in a letter.
-- 2098 (age 72): A doctor put a name to it: dementia.
-- 2100 (age 74): You packed your life into boxes and moved from Los Angeles to Chicago.
-- 2101 (age 75): You read from your memoir at the public library, to eleven folding chairs.
-- 2102 (age 76): Your brother, Brandon, died at the age of 82.
-- 2103 (age 77): You broke your hip on the icy front steps.
-- 2105 (age 79): Noah, your brother, passed away at 84.
-- 2105 (age 79): You got the keys to a home of your own in Chicago.
-- 2113 (age 87): You sold the family home and moved somewhere smaller.
-- 2115 (age 89): You got the keys to a home of your own in Chicago.
-- 2117 (age 91): You were diagnosed with cancer.
-- 2117 (age 91): A health scare you put off became a hard year of treatment.
-- 2117 (age 91): You died of natural causes at the age of 91.
+- 2091 (age 65): You were fired from your job at Midway Distribution.
+- 2091 (age 65): You blew the whistle on safety failures and lost your job for it.
+- 2091 (age 65): You started picking up gig work.
+- 2091 (age 65): You got a job at Noodle Express, starting as crew member.
+- 2092 (age 66): A doctor put a name to it: type 2 diabetes.
+- 2092 (age 66): You started treatment for type 2 diabetes.
+- 2092 (age 66): Caleb turned down your proposal in front of everyone, and the two of you split up.
+- 2093 (age 67): You quit your job at Noodle Express.
+- 2093 (age 67): You started at Keystone Builders as their new laborer.
+- 2096 (age 70): Keystone Builders made you carpenter.
+- 2097 (age 71): You bought a home in Los Angeles.
+- 2097 (age 71): You retired after 53 years of work.
+- 2099 (age 73): The bank foreclosed on your home in Los Angeles.
+- 2100 (age 74): You wrote down the story of your life.
+- 2100 (age 74): You died of heart failure at the age of 74.
 
 </details>
 
-## 14. Olivia Davis (2026–2110)
+## 14. Olivia Davis (2026–2102)
 
-*she/her · Los Angeles → Chicago · died at 84 of natural causes · obituary tone: bright · seed `sample-13`*
+*she/her · Los Angeles → Chicago · died at 76 of a stroke · obituary tone: bright · seed `sample-13`*
 
-> Olivia Davis, who seemed to enjoy nearly every one of her 84 years, died of natural causes in Chicago in 2110. She came into the world in 2026 in Los Angeles, the child of David Davis. A high school diploma was all the schooling she needed, or so she always said. She worked 45 years in all, and rose to warehouse supervisor at Midway Distribution. She retired after 45 working years and never once set an alarm again. She married Luis Torres in 2047, and never stopped saying it was the best thing she ever did. She is survived by her husband Luis and her sister Amelia. She was predeceased by her father David. Those who knew her remember a life lived with real joy. She will be missed, and laughed about, for a long time.
+> Olivia Davis died of a stroke in Chicago in 2102, at the age of 76, after a long and full life. Born in Los Angeles in 2026, she was raised by David Davis. She finished high school and went straight out into the world. She worked 45 years in all, and rose to warehouse supervisor at Midway Distribution. She retired after 45 working years and never once set an alarm again. She married Luis Torres in 2047, and never stopped saying it was the best thing she ever did. She is survived by her husband Luis and her sister Amelia. She was predeceased by her father David. People remember her as the one who made a room feel lighter. She would want you to have dessert first.
 
 <details><summary>Life history</summary>
 
@@ -1165,22 +1182,15 @@ Each life shows its obituary as the archive keeps it, then its life history. Lin
 - 2094 (age 68): You made the last payment on your mortgage. The house is yours.
 - 2095 (age 69): You started treatment for high blood pressure.
 - 2102 (age 76): A doctor put a name to it: an anxiety disorder.
-- 2103 (age 77): Connor, your friend, passed away at 76.
-- 2105 (age 79): A doctor put a name to it: a bad back.
-- 2106 (age 80): You were diagnosed with heart disease.
-- 2106 (age 80): You started treatment for an anxiety disorder.
-- 2106 (age 80): You started treatment for a bad back.
-- 2106 (age 80): You started treatment for heart disease.
-- 2109 (age 83): You got over an anxiety disorder.
-- 2110 (age 84): You died of natural causes at the age of 84.
+- 2102 (age 76): You died of a stroke at the age of 76.
 
 </details>
 
-## 15. Maya Simmons (2026–2119)
+## 15. Maya Simmons (2026–2103)
 
-*she/her · Los Angeles → Houston · died at 93 of heart failure · obituary tone: mixed · seed `sample-14`*
+*she/her · Los Angeles → Los Angeles · died at 77 of natural causes · obituary tone: mixed · seed `sample-14`*
 
-> Maya Simmons died of heart failure at 93, in Houston, in 2119. She came into the world in 2026 in Los Angeles, the child of Kiara Simmons and Andre Simmons. She finished high school and went straight out into the world. At her working peak, she was detective at Metro Transit Police. She retired after 50 working years and never once set an alarm again. She married Ethan Ward in 2114, and outlived him. She is survived by her sister Alicia. She was preceded in death by her husband Ethan, her mother Kiara, her father Andre, and her brother Tyrone. She took the good years with the bad, and kept going. She did her best, and that counts for a great deal.
+> Maya Simmons died of natural causes in Los Angeles in 2103, at the age of 77. Born in Los Angeles in 2026, she was raised by Kiara Simmons and Andre Simmons. She finished high school and went straight out into the world. She worked 50 years in all, the best of them as detective at Metro Transit Police. Retirement, after 50 years of work, suited her. She never married. She leaves behind her brother Tyrone and her sister Alicia. She was preceded in death by her mother Kiara and her father Andre. She knew good years and hard ones. May she rest in peace.
 
 <details><summary>Life history</summary>
 
@@ -1240,36 +1250,13 @@ Each life shows its obituary as the archive keeps it, then its life history. Lin
 - 2091 (age 65): Your friend, Katherine, died at the age of 64.
 - 2091 (age 65): Metro Transit Police made you detective.
 - 2091 (age 65): You retired after 46 years of work.
-- 2096 (age 70): You started at Corner Threads as their new sales associate.
-- 2096 (age 70): You got through a serious health scare.
+- 2092 (age 66): You got a job at MegaMart, starting as sales associate.
+- 2095 (age 69): You wrote down the story of your life, more or less.
+- 2096 (age 70): You hung up your work clothes for good after 50 working years.
 - 2097 (age 71): You got the keys to a home of your own in Los Angeles.
-- 2099 (age 73): You wrote down the story of your life.
-- 2100 (age 74): You hung up your work clothes for good after 50 working years.
-- 2101 (age 75): Thomas repaid an old kindness when you needed it most.
-- 2104 (age 78): Eric moved out.
-- 2104 (age 78): You broke up with Eric by text.
-- 2105 (age 79): You got through a serious health scare.
-- 2107 (age 81): Your ex, Eric, died at the age of 91.
-- 2107 (age 81): You sold the family home and moved somewhere smaller.
-- 2107 (age 81): You swept Thomas off his feet, and the two of you started dating.
-- 2108 (age 82): You broke your hip on the icy front steps.
-- 2108 (age 82): You asked Thomas to marry you, and he said yes.
-- 2109 (age 83): Your fiancé, Thomas, died at the age of 84.
-- 2109 (age 83): You were diagnosed with high blood pressure.
-- 2109 (age 83): You packed your life into boxes and moved from Los Angeles to Houston.
-- 2111 (age 85): You started dating Ethan.
-- 2112 (age 86): Your ex, Malik, died at the age of 89.
-- 2112 (age 86): You got the keys to a home of your own in Houston.
-- 2112 (age 86): You started treatment for high blood pressure.
-- 2113 (age 87): Your brother, Tyrone, died at the age of 94.
-- 2113 (age 87): A doctor put a name to it: heart disease.
-- 2113 (age 87): You started treatment for heart disease.
-- 2113 (age 87): You asked Ethan to marry you, and he said yes.
-- 2114 (age 88): You married Ethan in front of everyone you love.
-- 2117 (age 91): Your friend, Hailey, died at the age of 93.
-- 2117 (age 91): A doctor put a name to it: dementia.
-- 2119 (age 93): Your husband, Ethan, died at the age of 93.
-- 2119 (age 93): You died of heart failure at the age of 93.
+- 2102 (age 76): A doctor put a name to it: heart disease.
+- 2102 (age 76): You started treatment for heart disease.
+- 2103 (age 77): You died of natural causes at the age of 77.
 
 </details>
 
@@ -1339,11 +1326,11 @@ Each life shows its obituary as the archive keeps it, then its life history. Lin
 
 </details>
 
-## 17. Megan Brooks (2026–2104)
+## 17. Megan Brooks (2026–2102)
 
-*she/her · New York → Small Town · died at 78 of pneumonia · obituary tone: bright · seed `sample-16`*
+*she/her · New York → New York · died at 76 of a skydiving accident · obituary tone: bright · seed `sample-16`*
 
-> Megan Brooks died in 2104 in Small Town, at 78, of pneumonia, and by most accounts had a wonderful time getting there. She came into the world in 2026 in New York, the child of Ryan Brooks. She studied English in college and earned her degree. For most of her working life, she was trainee driver at Interstate Freight. Retirement, after 53 years of work, suited her. Her spouse, Sean Mitchell, whom she married in 2051, died before her. She ran a marathon, and kept the medal. She blew the whistle when it cost her something. She is survived by her brother Ethan and her sister Amelia. She was predeceased by her husband Sean and her father Ryan. People remember her as the one who made a room feel lighter. She would want you to have dessert first.
+> Megan Brooks, who seemed to enjoy nearly every one of her 76 years, died of a skydiving accident in New York in 2102. She was born in New York in 2026 to Ryan Brooks. She earned a bachelor's degree in education. Her working life took her as far as principal at Oakmont Academy, and she loved most of it. Retirement, after 49 years of work, suited her. In 2053, she married Ricardo Romero. Friends say the two of them still held hands at the grocery store. As a child, she found a meteorite in her own backyard. She was valedictorian of her high school class. She leaves behind her husband Ricardo, her brother Ethan, and her sister Amelia. She was predeceased by her father Ryan. Those who knew her remember a life lived with real joy. She will be missed, and laughed about, for a long time.
 
 <details><summary>Life history</summary>
 
@@ -1351,84 +1338,63 @@ Each life shows its obituary as the archive keeps it, then its life history. Lin
 - 2031 (age 5): You turned 5. The baby years are behind you.
 - 2031 (age 5): You started kindergarten, with a new backpack and very strong opinions about it.
 - 2031 (age 5): You played the lead in the school play.
+- 2036 (age 10): ★ A meteorite landed in your backyard when you were a child. It's in a museum now, with your name on the card.
 - 2036 (age 10): You won the school spelling bee in about two seconds flat.
 - 2037 (age 11): You started middle school: lockers, bells and a lot of new hallways.
 - 2039 (age 13): You turned 13 and officially became a teenager.
-- 2039 (age 13): A doctor put a name to it: a broken bone.
+- 2039 (age 13): You were diagnosed with a broken bone.
 - 2039 (age 13): You broke your ankle and played on it anyway.
 - 2040 (age 14): You walked into high school as a freshman.
-- 2040 (age 14): You started treatment for a broken bone.
-- 2041 (age 15): You finally shook off a broken bone.
+- 2041 (age 15): You started treatment for a broken bone.
+- 2042 (age 16): You got over a broken bone.
+- 2042 (age 16): You spent a summer as a lifeguard and pulled a kid out of the deep end.
 - 2042 (age 16): You started picking up gig work.
+- 2043 (age 17): You gave a valedictorian speech people still quote.
 - 2043 (age 17): You were accepted to Empire State University.
 - 2044 (age 18): At 18, you're legally an adult.
-- 2044 (age 18): You crossed the stage and got your high school diploma. Final grades: A-.
-- 2044 (age 18): You started at Empire State University, studying English.
-- 2047 (age 21): You got a job at Interstate Freight, starting as trainee driver.
-- 2048 (age 22): You earned your bachelor's degree in English from Empire State University. Final grades: A-.
-- 2048 (age 22): Interstate Freight fired you.
-- 2048 (age 22): You blew the whistle on safety failures and lost your job for it.
-- 2048 (age 22): You signed up for gig work: deliveries, rides, odd jobs.
-- 2048 (age 22): You started at The Last Call as their new bartender.
-- 2048 (age 22): You started dating Sean.
-- 2049 (age 23): You were sentenced to 2 years of probation for drug dealing.
-- 2050 (age 24): You were diagnosed with an alcohol addiction.
-- 2050 (age 24): You asked Sean to marry you, and he said yes.
-- 2051 (age 25): You were sentenced to 2 years of probation for drug dealing.
-- 2051 (age 25): You married Sean in front of everyone you love.
-- 2052 (age 26): You testified in court about the wrongdoing you exposed at work.
-- 2053 (age 27): You moved out and rented your own place in New York.
-- 2053 (age 27): You started treatment for an alcohol addiction.
-- 2054 (age 28): Your probation ended.
-- 2054 (age 28): Ryan got sober and came to make amends, and you listened.
-- 2055 (age 29): Sean moved in with you.
+- 2044 (age 18): You crossed the stage and got your high school diploma. Final grades: A.
+- 2044 (age 18): You started at Empire State University, studying education.
+- 2045 (age 19): You discovered a real gift for writing.
+- 2046 (age 20): Ryan, your father, passed away at 43.
+- 2046 (age 20): With no family left to live with, you rented a place of your own in New York.
+- 2047 (age 21): You started at Oakmont Academy as their new student teacher.
+- 2048 (age 22): You graduated from Empire State University with a bachelor's degree in education. Final grades: A-.
+- 2049 (age 23): Half of your student debt was forgiven after years of public service work.
+- 2051 (age 25): You swept Ricardo off his feet, and the two of you started dating.
+- 2052 (age 26): You were promoted to teacher at Oakmont Academy.
+- 2052 (age 26): You asked Ricardo to marry you, and he said yes.
+- 2053 (age 27): You and Ricardo ran off and got married.
 - 2056 (age 30): At 30, people have stopped calling you a kid.
-- 2058 (age 32): You finally shook off an alcohol addiction.
-- 2059 (age 33): You were laid off from The Last Call.
-- 2059 (age 33): You started picking up gig work.
-- 2059 (age 33): You got a job at Gentle Hands Home Care, starting as home health aide.
-- 2063 (age 37): Gentle Hands Home Care made you senior aide.
-- 2065 (age 39): You were sentenced to a year of probation for drug possession.
-- 2067 (age 41): Your probation ended.
-- 2067 (age 41): A health scare you put off became a hard year of treatment.
-- 2069 (age 43): Gentle Hands Home Care made you care coordinator.
-- 2069 (age 43): You packed your life into boxes and moved from New York to Small Town.
-- 2069 (age 43): Moving away meant leaving your job at Gentle Hands Home Care.
-- 2069 (age 43): You got a job at Golden Years Care, starting as care coordinator.
-- 2070 (age 44): You got the keys to a home of your own in Small Town.
-- 2072 (age 46): You discovered a real gift for writing.
-- 2080 (age 54): Ryan, your father, passed away at 77.
-- 2081 (age 55): You ran a marathon.
-- 2083 (age 57): Hua repaid an old kindness when you needed it most.
-- 2083 (age 57): You and Sean finally took the trip you had always talked about.
-- 2085 (age 59): Golden Years Care cut jobs, and yours was one of them.
-- 2085 (age 59): You started picking up gig work.
-- 2085 (age 59): You started at Redline Construction as their new laborer.
-- 2091 (age 65): At 65, you've reached your senior years.
+- 2058 (age 32): You were promoted to senior teacher at Oakmont Academy.
+- 2058 (age 32): You and Owen made peace.
+- 2060 (age 34): Ricardo moved in with you.
+- 2061 (age 35): You were promoted to assistant principal at Oakmont Academy.
+- 2063 (age 37): You were promoted to principal at Oakmont Academy.
+- 2063 (age 37): You bought a home in New York.
+- 2079 (age 53): You and Ricardo finally took the trip you had always talked about.
+- 2084 (age 58): You were diagnosed with depression.
+- 2086 (age 60): You started treatment for depression.
+- 2091 (age 65): You turned 65 and became a senior citizen.
+- 2091 (age 65): You finally shook off depression.
+- 2091 (age 65): You wrote down the story of your life.
 - 2091 (age 65): You hung up your work clothes for good after 49 working years.
-- 2092 (age 66): You got a job at Home & Hearth Store, starting as sales associate.
-- 2093 (age 67): You wrote down the story of your life, more or less.
-- 2094 (age 68): Your husband, Sean, died at the age of 98.
-- 2095 (age 69): You were diagnosed with cancer.
-- 2095 (age 69): You swept Long off his feet, and the two of you started dating.
-- 2096 (age 70): You hung up your work clothes for good after 53 working years.
-- 2097 (age 71): You broke up with Long.
-- 2098 (age 72): You got through a serious health scare.
-- 2099 (age 73): You started dating James.
-- 2100 (age 74): James moved in with you.
-- 2102 (age 76): James packed his things and moved out.
-- 2102 (age 76): You broke up with James by text.
-- 2103 (age 77): You sold the family home and moved somewhere smaller.
-- 2103 (age 77): You started treatment for cancer.
-- 2104 (age 78): You died of pneumonia at the age of 78.
+- 2093 (age 67): You made the last payment on your mortgage. The house is yours.
+- 2094 (age 68): A doctor put a name to it: a bad back.
+- 2097 (age 71): You started treatment for a bad back.
+- 2099 (age 73): A health scare you put off became a hard year of treatment.
+- 2100 (age 74): Michael, your friend, passed away at 72.
+- 2100 (age 74): You and Ricardo renewed your vows.
+- 2101 (age 75): Your friend, Hua, died at the age of 76.
+- 2102 (age 76): You got over a bad back.
+- 2102 (age 76): You died of a skydiving accident at the age of 76.
 
 </details>
 
-## 18. Lily Cook (2026–2111)
+## 18. Lily Cook (2026–2108)
 
-*she/her · Los Angeles → Los Angeles · died at 85 of natural causes · obituary tone: mixed · seed `sample-17`*
+*she/her · Los Angeles → Los Angeles · died at 82 of natural causes · obituary tone: mixed · seed `sample-17`*
 
-> Lily Cook died in 2111 in Los Angeles, at 85, of natural causes. Born in Los Angeles in 2026, she was raised by Ethan Cook and Grace King. She went on to earn a master's degree. At her working peak, she was research director at Clearwater Genomics. Retirement, after 48 years of work, suited her. Her spouse, Mateo Garcia, whom she married in 2071, died before her. She leaves behind her sister Samantha. She was predeceased by her husband Mateo, her father Ethan, and her mother Grace. Her life had its share of ups and downs, and she met most of them head-on. May she rest in peace.
+> Lily Cook died in 2108 in Los Angeles, at 82, of natural causes. She was born in Los Angeles in 2026 to Ethan Cook and Grace King. She earned a master's degree, which she brought up more often than strictly necessary. She worked 48 years in all, the best of them as research director at Clearwater Genomics. Retirement, after 48 years of work, suited her. In 2071, she married Mateo Garcia, and the two of them made a life together. She is survived by her husband Mateo and her sister Samantha. She was preceded in death by her father Ethan and her mother Grace. She knew good years and hard ones. May she rest in peace.
 
 <details><summary>Life history</summary>
 
@@ -1516,31 +1482,20 @@ Each life shows its obituary as the archive keeps it, then its life history. Lin
 - 2095 (age 69): You retired after 48 years of work.
 - 2095 (age 69): You started treatment for pneumonia.
 - 2096 (age 70): You finally shook off pneumonia.
-- 2097 (age 71): Paola, your friend, passed away at 72.
-- 2098 (age 72): Mateo, your husband, passed away at 82.
 - 2098 (age 72): You made the last payment on your mortgage. The house is yours.
-- 2098 (age 72): A health scare you put off became a hard year of treatment.
-- 2100 (age 74): You were diagnosed with high blood pressure.
-- 2100 (age 74): You sold the family home and moved somewhere smaller.
-- 2100 (age 74): You bought a home in Los Angeles.
-- 2100 (age 74): You started treatment for high blood pressure.
-- 2101 (age 75): Luke, your friend, passed away at 76.
-- 2102 (age 76): A doctor put a name to it: pneumonia.
-- 2102 (age 76): You started treatment for pneumonia.
-- 2102 (age 76): You started dating Rafael.
-- 2104 (age 78): You got over pneumonia.
-- 2106 (age 80): You broke up with Rafael.
-- 2107 (age 81): Olivia, your friend, passed away at 81.
-- 2107 (age 81): A health scare you put off became a hard year of treatment.
-- 2111 (age 85): You died of natural causes at the age of 85.
+- 2099 (age 73): Olivia, your friend, passed away at 73.
+- 2100 (age 74): Your friend, Parker, died at the age of 77.
+- 2106 (age 80): Your friend, Kimberly, died at the age of 80.
+- 2107 (age 81): You sold the family home and moved somewhere smaller.
+- 2108 (age 82): You died of natural causes at the age of 82.
 
 </details>
 
-## 19. Emily Bell (2026–2108)
+## 19. Emily Bell (2026–2115)
 
-*she/her · Chicago → Small Town · died at 82 of natural causes · obituary tone: mixed · seed `sample-18`*
+*she/her · Chicago → Small Town · died at 89 of natural causes · obituary tone: mixed · seed `sample-18`*
 
-> Emily Bell died of natural causes in Small Town in 2108, at the age of 82. She came into the world in 2026 in Chicago, the child of Jessica Bell. She earned a bachelor's degree in psychology. She worked 49 years in all, the best of them as office assistant at Halverson Group. She retired after 49 working years and never once set an alarm again. She married Jacob Davis in 2063. She leaves behind her husband Jacob. She was predeceased by her mother Jessica. She knew good years and hard ones. She did her best, and that counts for a great deal.
+> Emily Bell died of natural causes at 89, in Small Town, in 2115. Born in Chicago in 2026, she was raised by Jessica Bell. She earned a bachelor's degree in psychology. She worked 49 years in all, the best of them as senior officer at Metro Transit Police. She retired after 49 working years and never once set an alarm again. In 2063, she married Jacob Davis, and the two of them made a life together. She blew the whistle when it cost her something. She found the courage to tell the people she loved who she really was. She is survived by her husband Jacob. She was predeceased by her mother Jessica. Her life had its share of ups and downs, and she met most of them head-on. May she rest in peace.
 
 <details><summary>Life history</summary>
 
@@ -1591,39 +1546,52 @@ Each life shows its obituary as the archive keeps it, then its life history. Lin
 - 2071 (age 45): A health scare you put off became a hard year of treatment.
 - 2074 (age 48): Bluebell Insurance made you office manager.
 - 2075 (age 49): Bluebell Insurance cut jobs, and yours was one of them.
-- 2075 (age 49): You started picking up gig work.
-- 2075 (age 49): You started at Swift Parcel as their new courier.
-- 2077 (age 51): Swift Parcel cut jobs, and yours was one of them.
-- 2077 (age 51): You started picking up gig work.
-- 2077 (age 51): You got a job at Golden Years Care, starting as senior aide.
-- 2078 (age 52): You got the keys to a home of your own in Small Town.
-- 2082 (age 56): Golden Years Care cut jobs, and yours was one of them.
-- 2082 (age 56): You started picking up gig work.
-- 2083 (age 57): You got a job at Watchtower Services, starting as security guard.
-- 2085 (age 59): You were promoted to senior guard at Watchtower Services.
+- 2075 (age 49): You signed up for gig work: deliveries, rides, odd jobs.
+- 2075 (age 49): You got a job at Doorstep Delivery Co., starting as courier.
+- 2078 (age 52): You came to understand that you're attracted to men, women, and nonbinary people.
+- 2078 (age 52): You quit your job at Doorstep Delivery Co..
+- 2078 (age 52): You got a job at Open Door Community Center, starting as case worker.
+- 2080 (age 54): You were fired from your job at Open Door Community Center.
+- 2080 (age 54): You blew the whistle on safety failures and lost your job for it.
+- 2080 (age 54): You started picking up gig work.
+- 2081 (age 55): Jessica marched beside you at pride in a homemade T-shirt.
+- 2081 (age 55): You bought a home in Small Town.
+- 2081 (age 55): You got a job at New Leaf Outreach, starting as case worker.
+- 2082 (age 56): You and Jacob renewed your vows.
+- 2083 (age 57): New Leaf Outreach fired you.
+- 2083 (age 57): You signed up for gig work: deliveries, rides, odd jobs.
+- 2083 (age 57): You got a job at Metro Transit Police, starting as patrol officer.
 - 2088 (age 62): Sean repaid an old kindness when you needed it most.
-- 2089 (age 63): Jessica, your mother, passed away at 100.
-- 2089 (age 63): You were promoted to security supervisor at Watchtower Services.
-- 2090 (age 64): You came to understand that you're attracted to men, women, and nonbinary people.
+- 2088 (age 62): You and Jacob finally took the trip you had always talked about.
+- 2090 (age 64): You were promoted to senior officer at Metro Transit Police.
 - 2091 (age 65): You turned 65 and became a senior citizen.
-- 2091 (age 65): You retired after 45 years of work.
-- 2093 (age 67): You wrote down the story of your life.
-- 2093 (age 67): You sold the family home and moved somewhere smaller.
-- 2094 (age 68): You read from your memoir at the public library, to eleven folding chairs.
-- 2095 (age 69): You got the keys to a home of your own in Small Town.
-- 2096 (age 70): Aarav, your ex, passed away at 72.
-- 2096 (age 70): You got a job at Home & Hearth Store, starting as key holder.
-- 2100 (age 74): You hung up your work clothes for good after 49 working years.
-- 2103 (age 77): You broke your hip on the icy front steps.
-- 2108 (age 82): You died of natural causes at the age of 82.
+- 2091 (age 65): You hung up your work clothes for good after 45 working years.
+- 2092 (age 66): Your mother, Jessica, died at the age of 103.
+- 2092 (age 66): You wrote down the story of your life.
+- 2092 (age 66): A health scare you put off became a hard year of treatment.
+- 2095 (age 69): You started at Value City Goods as their new key holder.
+- 2099 (age 73): You hung up your work clothes for good after 49 working years.
+- 2100 (age 74): You sold the family home and moved somewhere smaller.
+- 2100 (age 74): You bought a home in Small Town.
+- 2103 (age 77): Your friend, Sean, died at the age of 75.
+- 2104 (age 78): A health scare you put off became a hard year of treatment.
+- 2108 (age 82): You were diagnosed with cancer.
+- 2108 (age 82): You sold the family home and moved somewhere smaller.
+- 2109 (age 83): You read from your memoir at the public library, to eleven folding chairs.
+- 2109 (age 83): You got the keys to a home of your own in Small Town.
+- 2110 (age 84): You started treatment for cancer.
+- 2112 (age 86): A health scare you put off became a hard year of treatment.
+- 2113 (age 87): You got over cancer.
+- 2113 (age 87): You and Jacob renewed your vows.
+- 2115 (age 89): You died of natural causes at the age of 89.
 
 </details>
 
-## 20. Emily Hill (2026–2097)
+## 20. Emily Hill (2026–2105)
 
-*she/her · Houston → Houston · died at 71 of heart failure · obituary tone: mixed · seed `sample-19`*
+*she/her · Houston → Houston · died at 79 of heart failure · obituary tone: mixed · seed `sample-19`*
 
-> Emily Hill died of heart failure in Houston in 2097, at the age of 71. Born in Houston in 2026, she was raised by Mariana Hill and Ethan Hill. She finished high school and went straight out into the world. At her working peak, she was restaurant manager at Burger Barn. She retired after 49 working years and never once set an alarm again. In 2096, she married Owen Moore, and the two of them made a life together. She is survived by her husband Owen. She was preceded in death by her husband Patrick, her mother Mariana, her father Ethan, and her brother Carlos. She took the good years with the bad, and kept going. She did her best, and that counts for a great deal.
+> Emily Hill died in 2105 in Houston, at 79, of heart failure. She was born in Houston in 2026 to Mariana Hill and Ethan Hill. She finished high school and went straight out into the world. At her working peak, she was lieutenant at State Highway Patrol. Retirement, after 49 years of work, suited her. Her spouse, Patrick Roberts, whom she married in 2049, died before her. She blew the whistle when it cost her something. She was predeceased by her husband Patrick, her mother Mariana, her father Ethan, and her brother Carlos. She knew good years and hard ones. May she rest in peace.
 
 <details><summary>Life history</summary>
 
@@ -1648,35 +1616,47 @@ Each life shows its obituary as the archive keeps it, then its life history. Lin
 - 2056 (age 30): You were promoted to assistant manager at Burger Barn.
 - 2057 (age 31): You got the keys to a home of your own in Houston.
 - 2059 (age 33): Burger Barn made you restaurant manager.
-- 2060 (age 34): Patrick moved in with you.
-- 2068 (age 42): You were diagnosed with a bad back.
-- 2069 (age 43): You started treatment for a bad back.
-- 2072 (age 46): You were diagnosed with an anxiety disorder.
-- 2073 (age 47): You finally shook off a bad back.
-- 2073 (age 47): You started treatment for an anxiety disorder.
-- 2077 (age 51): Your father, Ethan, died at the age of 84.
-- 2077 (age 51): You finally shook off an anxiety disorder.
-- 2078 (age 52): You and Patrick renewed your vows.
-- 2082 (age 56): A health scare you put off became a hard year of treatment.
-- 2083 (age 57): Your mother, Mariana, died at the age of 93.
-- 2084 (age 58): Carlos, your brother, passed away at 63.
+- 2063 (age 37): A doctor put a name to it: type 2 diabetes.
+- 2064 (age 38): Burger Barn cut jobs, and yours was one of them.
+- 2064 (age 38): You signed up for gig work: deliveries, rides, odd jobs.
+- 2064 (age 38): You got a job at MegaMart, starting as sales associate.
+- 2065 (age 39): Your father, Ethan, died at the age of 72.
+- 2065 (age 39): You started treatment for type 2 diabetes.
+- 2067 (age 41): MegaMart fired you.
+- 2067 (age 41): You blew the whistle on safety failures and lost your job for it.
+- 2067 (age 41): You started picking up gig work.
+- 2067 (age 41): You got a job at The Last Call, starting as bartender.
+- 2068 (age 42): Patrick moved in with you.
+- 2070 (age 44): Jada repaid an old kindness when you needed it most.
+- 2070 (age 44): You quit your job at The Last Call.
+- 2070 (age 44): You got a job at State Highway Patrol, starting as patrol officer.
+- 2071 (age 45): You started treatment for type 2 diabetes.
+- 2074 (age 48): You were promoted to senior officer at State Highway Patrol.
+- 2074 (age 48): You and Patrick finally took the trip you had always talked about.
+- 2078 (age 52): State Highway Patrol made you detective.
+- 2084 (age 58): You discovered a real gift for cooking.
+- 2085 (age 59): Your mother, Mariana, died at the age of 95.
 - 2087 (age 61): You made the last payment on your mortgage. The house is yours.
-- 2088 (age 62): You and Patrick finally took the trip you had always talked about.
-- 2091 (age 65): You turned 65 and became a senior citizen.
-- 2091 (age 65): You hung up your work clothes for good after 49 working years.
-- 2092 (age 66): Patrick, your husband, passed away at 100.
-- 2092 (age 66): You were diagnosed with high blood pressure.
-- 2093 (age 67): You wrote down the story of your life.
-- 2094 (age 68): You sold the family home and moved somewhere smaller.
-- 2094 (age 68): A doctor put a name to it: heart disease.
-- 2094 (age 68): A heart attack nearly killed you.
-- 2094 (age 68): You swept Owen off his feet, and the two of you started dating.
-- 2095 (age 69): You asked Owen to marry you, and he said yes.
-- 2096 (age 70): You got the keys to a home of your own in Houston.
-- 2096 (age 70): You started treatment for heart disease.
-- 2096 (age 70): You married Owen in front of everyone you love.
-- 2097 (age 71): You discovered a real gift for cooking.
-- 2097 (age 71): You died of heart failure at the age of 71.
+- 2088 (age 62): State Highway Patrol made you sergeant.
+- 2090 (age 64): You were promoted to lieutenant at State Highway Patrol.
+- 2090 (age 64): You got through a serious health scare.
+- 2091 (age 65): At 65, you've reached your senior years.
+- 2091 (age 65): You retired after 49 years of work.
+- 2092 (age 66): You wrote down the story of your life.
+- 2095 (age 69): Patrick, your husband, passed away at 103.
+- 2095 (age 69): You broke your hip on the icy front steps.
+- 2095 (age 69): You swept Owen off his feet, and the two of you started dating.
+- 2097 (age 71): You read from your memoir at the public library, to eleven folding chairs.
+- 2098 (age 72): Your brother, Carlos, died at the age of 77.
+- 2099 (age 73): Jada, your friend, passed away at 75.
+- 2099 (age 73): A doctor put a name to it: cancer.
+- 2099 (age 73): You started treatment for cancer.
+- 2100 (age 74): You ended things with Owen in a letter.
+- 2102 (age 76): You got over cancer.
+- 2103 (age 77): You sold the family home and moved somewhere smaller.
+- 2103 (age 77): You bought a home in Houston.
+- 2104 (age 78): You broke your hip on the icy front steps.
+- 2105 (age 79): You died of heart failure at the age of 79.
 
 </details>
 

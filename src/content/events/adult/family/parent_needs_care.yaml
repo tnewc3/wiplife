@@ -26,7 +26,7 @@ choices:
         - { type: memory, role: parent, tag: was_there_for_them }
         - { type: stat, key: stress, delta: 4 }
   - id: every_day
-    label: Go over every day after work
+    label: Go over every day
     outcome:
       text: >-
         Groceries, pills, the remote control that never works. You're tired in
