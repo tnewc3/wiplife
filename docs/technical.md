@@ -377,13 +377,21 @@ interface Enrollment extends SchoolPlace {
 
 A school year starts as a year begins (you enroll and pay tuition) and is graded as the next one begins, so the year's events shape its grade. Elementary, middle and high school follow on their own from the start age; high school ends as you turn 18, or 19 after being held back once. Tuition is paid through the Stage 6 debt system: scholarships (merit by GPA, need by family wealth) and family help take their share, scholarship money from events pays what it can, and the rest joins your student loan (one `student` debt). Student loan payments pause while you're in college, trade school or grad school (interest still grows). Gig pay is halved while you're enrolled in college, trade school or grad school (`studentGigShare` in `balance/education.yaml`; `gigPay` in the career module applies it). Save schema version 6 added `admission`, `left`, `applied`, `fund` and `lastBill`; the upgrade from version 5 gives an adult the high school diploma they would have earned at 18 (without a GPA).
 
+Careers (Stage 8): each year (from the hiring age) and whenever you move city, each job track is hiring in your city with a chance set by the city's job market for its category (`openings`). Job search lists only openings you qualify for. You can apply while you're out of school, or in the final year of a program (its credential counts; the job falls through if your plans change before you finish). The employer decides by the balance odds (category base, Confidence, Looks, Smarts, reputation, luck, experience in the track, degree tier, a criminal record, the city's market), and the interview is a result event from `registries/work.yaml`. Hired between years, your first year of pay is the next year's ledger; the yearly review comes after a full year worked: performance (the job's stat weights, stress, health, a swing, part of last year's), then a layoff (by market), firing (by performance), a promotion (by performance and Ambition, after a level's minimum years) or a merit raise. Salaries are a level's base salary × the city's salary multiplier, capped above the level's pay for raises. The year you lose a job at the review you're still paid a share of it (`jobLoss`). Gig work and a job don't mix; school and a job don't either (the job ends when school starts). You can quit, ask for a raise once a year (a result event with a stat check), and retire from `retireAge`. Moving city ends the job. Your boss and coworkers are people (relationship kinds `boss` and `coworker`); your current boss is never pruned; when the job ends they become acquaintances. Save schema version 7 added `since`, `employer`, `raiseYear`, the history's `employer`, `level` and `salary`, `applied` and `openings`; nobody could have a job before, so the upgrade from version 6 only adds empty applications and openings.
+
 ```ts
 interface CareerState {
-  job: null | { jobId: Id; level: number; yearsAtLevel: number; performance: number; salary: number };
+  job: null | { jobId: Id; level: number; yearsAtLevel: number; performance: number; salary: number;
+                since: number;                 // the year you were hired; your first year of pay is the next one
+                employer: string;              // a fictional employer from the job's content
+                raiseYear?: number };          // the last year you asked for a raise (Stage 8)
   gig: boolean;
   retired: boolean;
-  history: { jobId: Id; fromYear: number; toYear: number;
+  history: { jobId: Id; employer: string; fromYear: number; toYear: number;
+             level: number; salary: number;   // when it ended (Stage 8)
              endedBy: 'quit' | 'fired' | 'laid_off' | 'retired' | 'moved' }[];
+  applied: { jobId: Id; hired: boolean }[];   // this year's job applications (Stage 8)
+  openings: Id[];                      // job tracks hiring in your city this year (Stage 8)
 }
 
 interface FinanceState {
@@ -394,7 +402,7 @@ interface FinanceState {
                  borrowed; support; net };   // net = gross + retirement + interest − tax − housing − living − debtPayments
   earnings: { years: number; total: number };  // the retirement benefit's record: years with earned income
                                        // (at least creditIncome) and their total (each year capped). The ledger
-                                       // records all earned income (gig pay now, Stage 8 salaries) here
+                                       // records all earned income (gig pay and salaries) here
   hardshipYears: number;               // years in a row behind on housing costs (eviction)
   bankruptcyYear?: number;
   debtPlanYear?: number;
@@ -513,7 +521,8 @@ interface ChoiceDef {
   outcome?: Outcome;
   check?: {
     stats: ({ key: string; weight: number }                        // your stat, trait or hidden value
-          | { role: string; key: 'affection' | 'trust'; weight: number })[];  // how a cast person feels about you
+          | { role: string; key: 'affection' | 'trust'; weight: number }  // how a cast person feels about you
+          | { job: 'performance'; weight: number })[];   // your job performance; 50 without a job (Stage 8)
     base: number;
     success: Outcome;
     failure: Outcome;
@@ -532,7 +541,11 @@ type Effect =
   | { type: 'memory'; role: string; tag: string }
   | { type: 'flag'; key: string; value: number | boolean | string }
   | { type: 'schedule'; eventId: Id; inYears: [number, number]; cast?: string[] }
-  | { type: 'job'; action: 'fire' | 'promote' | 'offer'; jobId?: Id }
+  | { type: 'job'; action: 'performance' | 'raise' | 'promote' | 'fire' | 'quit' | 'offer'; value?: number; jobId?: Id }
+      // Stage 8: performance moves job performance by value (−50 to 50); raise gives the asked-for raise
+      // (balance careers.yaml raises.asked); promote goes up a level; fire and quit end the job; offer
+      // takes job track jobId if you could (old enough, out of school or in its final year, qualified).
+      // All but offer need a job.
   | { type: 'education'; action: 'grades' | 'scholarship' | 'drop_out' | 'expel'; value?: number }
       // Stage 7: grades adds value GPA points (−1 to 1) to this school year's grade; scholarship adds value
       // dollars of scholarship money; drop_out and expel leave high school (from the dropout age; the content
@@ -563,7 +576,12 @@ type Condition =                       // structured, evaluated by src/engine/co
                   income?: Compare } }                         // Stage 6
   | { home: { kind?: HousingKind[]; years?: Compare; roommate?: boolean; relocated?: boolean; partner?: boolean } }
   | { education: { program?: (Program | 'none')[]; tier?: Tier[]; major?: Id[]; trade?: Id[]; year?: Compare;
-                   final?: boolean; gpa?: Compare; credential?: CredentialType[]; left?: boolean; admission?: boolean } }   // Stage 7
+                   final?: boolean; gpa?: Compare; credential?: CredentialType[]; left?: boolean; admission?: boolean;
+                   field?: Id[] } }   // Stage 7; field (Stage 8): a credential (of a type in credential) in one of these majors, trades or grad programs
+  | { career: { employed?: boolean; job?: Id[]; level?: Compare; years?: Compare; performance?: Compare;
+                retired?: boolean; lostWithin?: number } }    // Stage 8; lostWithin: fired or laid off within this many years
+  | { record: { outcome?: ('warning' | 'fine' | 'probation' | 'jail')[]; within?: number } }
+      // Stage 8: an entry on your criminal record (records arrive in Stage 9); { record: {} } is any record
   | { memory: { role: string; tag: string } }       // about cast roles: checked once the event is cast
   | { role: string; alive?: boolean; age?: Compare; affection?: Compare; trust?: Compare;
       kind?: RelationshipKind[]; status?: RelationshipStatus[]; years?: Compare };  // years: in its current kind
@@ -574,7 +592,7 @@ The other content types follow the same pattern:
 
 | Type | Key fields |
 |---|---|
-| `JobDef` | id, title, category (professional, trade, gig), requires (condition), levels (title and base salary), performance stats |
+| `JobDef` | id, name, category (professional, trade, gig), blurb, requires (condition: degrees and their fields, licenses, age, criminal record), levels (3–6: title as in a sentence, base salary, optional minimum years before promotion), performance (stat weights), employers (fictional). The gig category is hourly and service work anyone can get, with a short ladder; plain gig work (Stage 6) stays the no-ladder fallback |
 | `MajorDef` | id, name, subject, blurb, careers (text), difficulty (1–5). Jobs point at majors (Stage 8), not the other way round |
 | `TradeDef` | id, name, subject, license, blurb, careers (text), years, difficulty |
 | `GradProgramDef` | id, name, subject, degree, blurb, careers (text), years, difficulty, majors (a bachelor's in one of these; any when left out). Tuition and admission odds live in `balance/education.yaml` |
@@ -1705,7 +1723,9 @@ src/content/
                   rarity, chance checks, people casting creates), relationships.yaml (adult age,
                   drift, pruning, action timing, partner ages, support), economy.yaml (tax brackets,
                   living costs, lifestyle tiers, family support, interest, debt terms, missed payments,
-                  housing, ownership, gig pay), careers.yaml,
+                  housing, ownership, gig pay), careers.yaml (hiring age, openings, hiring odds,
+                  performance, promotions, raises, firing, layoffs, pay when a job ends, the
+                  workplace, the retirement age),
                   education.yaml (school ages, grades and letter grades, admission
                   odds, tuition, scholarships, family help, the GED), health.yaml,
                   legal.yaml, targets.yaml
@@ -1726,6 +1746,8 @@ src/content/
     actions.yaml    the events that answer each management action
     triggers.yaml   the events that answer money trouble (missed payment, collections,
                     garnishment, eviction, foreclosure); the economy step queues one
+    work.yaml       the events that answer work actions: hired and rejected (a job
+                    application), raise (asking for a raise)
 ```
 
 The registries let the content build catch typos. An effect that writes a memory tag or flag that isn't registered fails the build.

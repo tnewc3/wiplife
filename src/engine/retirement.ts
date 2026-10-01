@@ -6,7 +6,7 @@
  * (retirement).
  *
  * The record counts whatever the ledger calls earned income (yearIncome in
- * ./systems/career.ts): gig pay now, and salaries once careers exist, so
+ * ./systems/career.ts): gig pay and salaries (and pay from a job lost as the year began), so
  * every income source feeds the same calculation.
  */
 import type { ContentBundle } from '../content/schemas';

@@ -389,7 +389,8 @@ Affection and trust move separately, so someone can love you without trusting yo
 
 - **About 30 job tracks,** each with requirements (degree, major, license, clean record), 3–6 levels, and a pay range per level adjusted by city.
 - **Performance** is set each year from relevant stats, stress and events. It drives promotions, raises and firing.
-- **Gig work** is always available, with low, unstable pay and no ladder. It's a safety net.
+- **Gig work** is always available, with low, unstable pay and no ladder. It's a safety net. (Hourly service jobs such as food service, retail and warehouse work are job tracks of their own, with a short ladder.)
+- **Students** can line up a job in their last year of school; it starts paying as they finish.
 - **Management actions:** job search (lists openings you qualify for), apply, quit, and ask for a raise (an event with a stat check).
 - **Workplace events:** coworkers, bosses, office politics, and chances for growth.
 
@@ -409,7 +410,7 @@ Affection and trust move separately, so someone can love you without trusting yo
 
 ### Retirement benefit
 
-A yearly benefit, like Social Security, paid from age 67 to anyone with at least 10 years of earned income. It is based on how many years you earned and your average yearly earnings in those years: lower earnings are replaced at a higher rate than higher ones, and fewer than 35 years pay a share of the full benefit. Every kind of earned income counts toward it: gig pay, and salaries once careers exist. All of its numbers live in the economy balance file.
+A yearly benefit, like Social Security, paid from age 67 to anyone with at least 10 years of earned income. It is based on how many years you earned and your average yearly earnings in those years: lower earnings are replaced at a higher rate than higher ones, and fewer than 35 years pay a share of the full benefit. Every kind of earned income counts toward it: gig pay and salaries. All of its numbers live in the economy balance file.
 
 ### Living together
 

@@ -26,3 +26,10 @@ and breaking up, divorcing, cutting contact and reconciling do just that.
 Money trouble (a missed payment, collections, garnishment, eviction or
 foreclosure) answers with `test_money_trouble`, a single card with no
 choices (`registries/triggers.yaml` here replaces the real one).
+
+Work is predictable (`balance/careers.yaml` here replaces the real one):
+every job track is hiring every year, every application is accepted,
+nobody is fired or laid off, and the yearly review promotes you after a
+year at a level. A job application answers with `test_hired` (or
+`test_rejected`), and asking for a raise with `test_raise`, which always
+gives it (`registries/work.yaml` here replaces the real one).

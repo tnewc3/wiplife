@@ -139,7 +139,7 @@ ownership:
 # to anyone with at least `minYears` years of earned income. It comes from
 # average yearly earnings over the years that count (each capped at
 # earningsCap), through the formula's slices, times years ÷ fullYears (at
-# most 1). Every kind of earned income counts: gig pay now, salaries later.
+# most 1). Every kind of earned income counts: gig pay and salaries.
 # The benefit itself isn't taxed.
 retirement:
   age: 67
@@ -163,8 +163,7 @@ gig:
     - { at: 70, x: 1 }
     - { at: 100, x: 1.1 }
   swing: { min: 0.8, max: 1.2 }
-  # Part-time around school as a teen; slowing down in old age. Until
-  # careers bring retirement (Stage 8), gig work is the only income a senior has.
+  # Part-time around school as a teen; slowing down in old age.
   byAge:
     - { at: 16, x: 0.3 }
     - { at: 17, x: 0.35 }

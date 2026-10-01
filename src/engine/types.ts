@@ -283,7 +283,7 @@ export interface Debt {
 /** One year's money, from the ledger (docs/design.md, section J). */
 export interface Ledger {
   year: number;
-  /** Earned income before tax (gig pay, and salaries from Stage 8). */
+  /** Earned income before tax (salaries and gig pay). */
   gross: number;
   /** The retirement benefit (untaxed). */
   retirement: number;
