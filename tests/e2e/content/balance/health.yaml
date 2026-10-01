@@ -1,0 +1,16 @@
+# Test pack: no condition ever starts on its own, so flow tests stay
+# predictable. (Events could still give one; the pack's events don't.)
+maxConditions: 0
+treated:
+  effects: 0.35
+  mortality: 0.25
+doctor:
+  visitCost: 300
+  treatChance:
+    - { at: 0, x: 1 }
+  checkupHealth: 2
+  checkupLimit: 90
+  manageSeverity: 10
+vice:
+  untreatedPerYear: 2
+  treatedPerYear: 3

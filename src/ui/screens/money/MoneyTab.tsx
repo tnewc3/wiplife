@@ -54,7 +54,6 @@ function LifestyleCard({ life }: { life: LifeState }) {
   const view = getMoneyView(life, content);
   const busy = useAppStore((s) => s.aging);
   const act = useAppStore((s) => s.takeLifeAction);
-  const between = life.phase === 'yearStart';
   return (
     <Card role="region" aria-labelledby="lifestyle-title">
       <h2 id="lifestyle-title" className="mb-1 text-lg font-bold">
@@ -72,7 +71,7 @@ function LifestyleCard({ life }: { life: LifeState }) {
                 type="button"
                 role="radio"
                 aria-checked={checked}
-                disabled={busy || !between}
+                disabled={busy || !view.canChangeLifestyle}
                 onClick={() => !checked && void act('set_lifestyle', { lifestyle: l })}
                 className={`flex min-h-11 w-full flex-col rounded-xl border px-4 py-2 text-left disabled:opacity-60 ${
                   checked ? 'border-accent bg-surface-2' : 'border-border'

@@ -1,3 +1,8 @@
 id: mechanics
 name: Mechanics
+noun: fixing machines
 description: A feel for how machines work and how to fix them.
+# What finding it does: stat changes once, and a performance bonus in these jobs.
+boost:
+  stats: [{ key: smarts, delta: 2 }, { key: discipline, delta: 3 }]
+  jobs: [auto_mechanic, hvac_technician, electrician, plumber, welder]

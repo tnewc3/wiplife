@@ -33,10 +33,12 @@ choices:
       failure:
         text: >-
           Someone did start counting. There's a meeting with HR, a security
-          guard walking you out, and a box of your things. Word gets around.
+          guard walking you out, and a box of your things. Word gets around,
+          and so does the police report: you get {sentence}.
         effects:
           - { type: flag, key: stole_from_work, value: true }
           - { type: job, action: fire }
+          - { type: legal, offenseId: theft, outcome: sentence }
           - { type: stat, key: reputation, delta: -15 }
           - { type: stat, key: stress, delta: 8 }
           - { type: history, text: You were fired for stealing from work., importance: 3 }

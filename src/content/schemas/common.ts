@@ -28,3 +28,20 @@ export const HIDDEN_KEYS = ['luck', 'reputation', 'vice'] as const;
 /** A character stat, personality trait or readable hidden value. */
 export const scoreKeySchema = z.enum([...STAT_KEYS, ...TRAIT_KEYS, ...HIDDEN_KEYS]);
 export type EffectStatKey = z.infer<typeof scoreKeySchema>;
+
+/** Kinds of health condition (Stage 9). */
+export const CONDITION_KINDS = ['illness', 'chronic', 'injury', 'mental', 'addiction'] as const;
+export const conditionKindSchema = z.enum(CONDITION_KINDS);
+export type ConditionKind = z.infer<typeof conditionKindSchema>;
+
+/**
+ * What self-discovery can bring to the surface (Stage 9): who you're
+ * attracted to, your gender, how you express it, a personality tendency, or
+ * a hidden talent.
+ */
+export const DISCOVERY_KINDS = ['attraction', 'gender', 'expression', 'personality', 'talent'] as const;
+export const discoveryKindSchema = z.enum(DISCOVERY_KINDS);
+export type DiscoveryKind = z.infer<typeof discoveryKindSchema>;
+/** The discovery kinds that are latent traits (everything but a talent). */
+export const LATENT_KINDS = ['attraction', 'gender', 'expression', 'personality'] as const satisfies readonly DiscoveryKind[];
+export type LatentKind = (typeof LATENT_KINDS)[number];

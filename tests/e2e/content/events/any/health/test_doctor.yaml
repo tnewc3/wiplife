@@ -1,0 +1,12 @@
+id: test_doctor
+title: The doctor's office
+text: The doctor checks you over.
+tone: neutral
+category: health
+rarity: common
+lifeStages: [early, child, teen, youngAdult, adult, senior]
+weight: { base: 1 }
+followUpOnly: true
+autoOutcome:
+  text: You leave with a lollipop and a clean bill of health.
+  effects: []

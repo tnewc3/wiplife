@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { content } from '../../src/content';
-import { formatComparison, formatReport, runSimulation, targetResults } from './run';
+import { formatComparison, formatReport, runSimulation, stage9Targets, targetResults } from './run';
 
 describe('simulation runner', () => {
   // Whole lives with every system: give them time.
@@ -64,7 +64,7 @@ describe('simulation runner', () => {
       expect(t.jobIds.length).toBeGreaterThan(0);
     }
     expect(careless.careers.tradeMinded).toBe(0);
-    const targets = targetResults(careful, content);
+    const targets = [...targetResults(careful, content), ...stage9Targets(careful, content)];
     expect(targets.map((r) => r.label)).toContain(`median net worth at ${content.balance.targets.money.netWorthAge}`);
     const text = formatComparison(careful, careless, content);
     expect(text).toContain('careless');

@@ -1,0 +1,56 @@
+id: cooking_the_books
+title: Rounding errors
+text: >-
+  You've noticed the company's numbers never get checked closely. Moving a
+  few of them, quietly, into an account only you know about would be very
+  easy.
+tone: serious
+category: justice
+rarity: rare
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { career: { employed: true, years: { gte: 2 } } }
+    - { not: { flag: cooked_books } }
+weight:
+  base: 3
+  modifiers:
+    - { if: { finances: { debt: { gt: 20000 } } }, x: 2 }
+    - { if: { trait: kindness, lt: 40 }, x: 1.5 }
+once: true
+choices:
+  - id: move
+    label: Move the numbers
+    check:
+      base: 45
+      stats: [{ key: smarts, weight: 0.4 }, { key: luck, weight: 0.2 }]
+      success:
+        text: Small amounts, over months. Nobody notices. You check your phone every time it buzzes, for years.
+        effects:
+          - { type: money, delta: 15000 }
+          - { type: flag, key: cooked_books, value: true }
+          - { type: stat, key: stress, delta: 6 }
+          - { type: stat, key: kindness, delta: -3 }
+      failure:
+        text: >-
+          An auditor with a highlighter finds it in an afternoon. You're walked
+          out by security, and later, in court, you get {sentence}.
+        effects:
+          - { type: flag, key: cooked_books, value: true }
+          - { type: job, action: fire }
+          - { type: legal, offenseId: fraud, outcome: sentence }
+          - { type: stat, key: reputation, delta: -15 }
+          - { type: stat, key: stress, delta: 10 }
+  - id: report
+    label: Tell someone how easy it would be
+    outcome:
+      text: Finance adds two new checks and thanks you in a meeting. Your boss looks at you differently, in a good way.
+      effects:
+        - { type: job, action: performance, value: 6 }
+        - { type: stat, key: reputation, delta: 3 }
+  - id: leave
+    label: Put it out of your mind
+    outcome:
+      text: It stays in your mind anyway, but your hands stay clean.
+      effects:
+        - { type: stat, key: discipline, delta: 1 }

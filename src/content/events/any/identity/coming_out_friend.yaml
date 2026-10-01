@@ -1,0 +1,61 @@
+# Telling a friend, or everyone (registries/discovery.yaml comingOut).
+# Never forced: "Not yet" is always there.
+id: coming_out_friend
+title: Out loud
+text: >-
+  You're tired of editing yourself in every conversation. Maybe it's time
+  someone besides you knows.
+tone: serious
+category: identity
+rarity: common
+lifeStages: [teen, youngAdult, adult, senior]
+weight: { base: 5 }
+followUpOnly: true
+cast:
+  friend: { kind: friend, optional: true }
+choices:
+  - id: tell_friend
+    label: Tell {friend.name}
+    visibleIf: { role: friend }
+    check:
+      base: 60
+      stats: [{ role: friend, key: affection, weight: 0.5 }, { role: friend, key: trust, weight: 0.3 }]
+      success:
+        text: '{friend.name} listens, then grins. "Okay. Tell me everything." You talk until the coffee shop closes.'
+        effects:
+          - { type: memory, role: friend, tag: accepted_you }
+          - { type: relationship, role: friend, affection: 8, trust: 8 }
+          - { type: innerConflict, delta: -10 }
+          - { type: flag, key: came_out, value: true }
+          - { type: stat, key: happiness, delta: 4 }
+      failure:
+        text: '{friend.name} says {friend.they} {friend:needs|need} time. Some friendships bend. You''ll find out if this one does.'
+        effects:
+          - { type: memory, role: friend, tag: struggled_with_it }
+          - { type: relationship, role: friend, affection: -10, trust: -6 }
+          - { type: flag, key: came_out, value: true }
+          - { type: stat, key: stress, delta: 4 }
+  - id: everyone
+    label: Tell everyone at once
+    check:
+      base: 50
+      stats: [{ key: confidence, weight: 0.4 }, { key: luck, weight: 0.2 }]
+      success:
+        text: You post it, put your phone in a drawer, and come back to more love than you knew you had.
+        effects:
+          - { type: innerConflict, delta: -12 }
+          - { type: flag, key: came_out, value: true }
+          - { type: stat, key: happiness, delta: 6 }
+          - { type: stat, key: reputation, delta: 2 }
+      failure:
+        text: Most replies are kind. A few are cruel, and those are the ones you read at three in the morning.
+        effects:
+          - { type: innerConflict, delta: -6 }
+          - { type: flag, key: came_out, value: true }
+          - { type: stat, key: stress, delta: 6 }
+  - id: not_yet
+    label: Not yet
+    outcome:
+      text: It can wait. You get to decide when.
+      effects:
+        - { type: stat, key: stress, delta: 1 }

@@ -1,0 +1,8 @@
+id: car_theft
+name: car theft
+class: felony
+severity: 3
+outcomes: { warning: 1, fine: 2, probation: 4, jail: 2 }
+fine: { min: 1000, max: 3000 }
+probationYears: { min: 1, max: 3 }
+jailYears: { min: 1, max: 2 }

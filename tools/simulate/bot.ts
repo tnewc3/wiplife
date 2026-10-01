@@ -241,8 +241,9 @@ export function chooseSchoolActions(life: LifeState, content: ContentBundle, rng
       applyCollege(gpa >= 2.6 ? 'state' : 'community');
       if (gpa >= SCHOOL_POLICY.eliteGpa && chance(rng, SCHOOL_POLICY.elite)) applyCollege('elite');
     } else if (chance(rng, SCHOOL_POLICY.trade)) {
-      const trade = pick(rng, options.trade.filter((o) => o.block === null));
-      if (trade) out.push(['apply_school', { program: 'trade', tradeId: trade.id! }]);
+      // Nothing may be open (a record or prison can block every option).
+      const open = options.trade.filter((o) => o.block === null);
+      if (open.length > 0) out.push(['apply_school', { program: 'trade', tradeId: pick(rng, open).id! }]);
     }
   }
   // State university after community college.
@@ -400,4 +401,22 @@ export function chooseCarelessActions(life: LifeState, content: ContentBundle, r
     }
   }
   return out;
+}
+
+/**
+ * How the simulated player looks after their health (Stage 9). Like the
+ * policies above, these chances describe the simulated player, not the game.
+ */
+const HEALTH_POLICY = {
+  /** Sees a doctor in a year with an untreated condition... */
+  untreated: 0.5,
+  /** ...and for a checkup otherwise. */
+  checkup: 0.1,
+};
+
+/** The doctor visit the careful player makes this year, if any, drawing from `rng`. */
+export function chooseHealthActions(life: LifeState, content: ContentBundle, rng: RngState): MoneyAction[] {
+  if (!isLifeActionAvailable(life, 'see_doctor', {}, content)) return [];
+  const untreated = life.health.conditions.some((c) => !c.treated);
+  return chance(rng, untreated ? HEALTH_POLICY.untreated : HEALTH_POLICY.checkup) ? [['see_doctor', {}]] : [];
 }

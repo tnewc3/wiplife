@@ -1,0 +1,30 @@
+# Answers seeing a doctor with nothing to treat (registries/health.yaml clean).
+id: doctor_all_clear
+title: A clean bill of health
+text: >-
+  The doctor listens to your heart, peers into your ears, presses on your
+  stomach and frowns at nothing in particular. Then the verdict: you're in
+  good shape.
+tone: light
+category: health
+rarity: common
+lifeStages: [early, child, teen, youngAdult, adult, senior]
+weight: { base: 1 }
+followUpOnly: true
+choices:
+  - id: relief
+    label: Leave feeling ten years younger
+    outcome:
+      text: You take the stairs on the way out, just because you can.
+      effects:
+        - { type: stat, key: stress, delta: -2 }
+        - { type: stat, key: happiness, delta: 1 }
+  - id: questions
+    label: Ask about every twinge you've ever had
+    outcome:
+      text: >-
+        The doctor answers all eleven questions with remarkable patience and
+        suggests, gently, that you might worry a little less.
+      effects:
+        - { type: stat, key: stress, delta: -1 }
+        - { type: stat, key: discipline, delta: 1 }

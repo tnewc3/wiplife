@@ -29,10 +29,11 @@ import { applyEffects } from './events/effects';
 import { textContext } from './events/text';
 import { renderText } from './text';
 import { runPipeline, YEAR_PIPELINE, type PipelineStep } from './pipeline';
-import { weightedKey } from './random';
+import { weightedKey, weightedPick } from './random';
 import { chance, cloneRng, createRng, pick } from './rng';
 import { writeFromGroup } from './systems/history';
 import { characterDeathChance, pickCause } from './systems/mortality';
+import { deadlyConditions } from './health';
 import type { Character, Id, LifePhase, LifeState } from './types';
 
 export type { CreateLifeOptions, CustomLifeInput } from './creation/input';
@@ -136,6 +137,7 @@ export function createLife(input: CreateLifeOptions, content: ContentBundle): Li
     housing: { kind: 'with_parents', cityId: character.cityId, annualCost: 0, since: birthYear },
     health: { conditions: [] },
     legal: { record: [] },
+    discovery: { surfaced: {} },
     flags: {},
     eventLog: {},
     scheduled: [],
@@ -214,12 +216,17 @@ export function endYear(state: LifeState, content: ContentBundle): LifeState {
   return produce(state, (draft) => {
     useFastRng(draft, state);
     const c = draft.character;
-    // An event may already have killed the character this year.
-    const causeId =
-      draft.death?.causeId ??
-      (chance(draft.rng, characterDeathChance(c.age, c.stats.health, c.hidden.geneticRisk, content))
-        ? pickCause(draft.rng, c.age, content)
-        : null);
+    // An event may already have killed the character this year. Otherwise
+    // age, Health and genetic risk set the chance, and each health condition
+    // adds its own; a death is put down to one of them by its share.
+    const base = characterDeathChance(c.age, c.stats.health, c.hidden.geneticRisk, content);
+    const deadly = deadlyConditions(draft, content);
+    const total = Math.min(1, deadly.reduce((sum, [, p]) => sum + p, base));
+    let causeId = draft.death?.causeId ?? null;
+    if (causeId === null && chance(draft.rng, total)) {
+      const from = deadly.length === 0 ? null : weightedPick(draft.rng, [[null, base] as const, ...deadly]);
+      causeId = from === null ? pickCause(draft.rng, c.age, content) : (content.conditions[from]?.cause ?? pickCause(draft.rng, c.age, content));
+    }
     draft.pending = [];
     draft.lifetime.happinessTotal += c.stats.happiness;
     draft.lifetime.years += 1;
@@ -280,15 +287,17 @@ export function resolveChoice(state: LifeState, instanceId: Id, choiceId: Id, co
         outcome = chance(draft.rng, successChance(draft, choice.check, content, instance.cast)) ? choice.check.success : choice.check.failure;
       }
       if (outcome) {
-        if (outcome.text) target.outcomeText = renderText(outcome.text, textContext(draft, instance.cast));
         applyEffects(draft, outcome.effects, { def, cast: instance.cast, rng: draft.rng, content });
+        // Written after the effects, so it can tell what they did ({sentence}, new pronouns).
+        if (outcome.text) target.outcomeText = renderText(outcome.text, textContext(draft, instance.cast, content));
       }
     }
 
     // A management action's result stays on screen until finishAction.
     if (draft.phase === 'action') return;
-    // A death ends the year's remaining events.
-    if (draft.death) draft.pending = draft.pending.filter((p) => p.resolvedChoiceId !== undefined);
+    // A death, or being taken to prison, ends the year's remaining events.
+    const jailed = state.housing.kind !== 'incarcerated' && draft.housing.kind === 'incarcerated';
+    if (draft.death || jailed) draft.pending = draft.pending.filter((p) => p.resolvedChoiceId !== undefined);
     draft.phase = draft.pending.every((p) => p.resolvedChoiceId !== undefined) ? 'yearEnd' : 'events';
   });
 }

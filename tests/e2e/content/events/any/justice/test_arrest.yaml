@@ -1,0 +1,23 @@
+# At 27, a chance to go to prison for two years (only the arrest test gets this old).
+id: test_arrest
+title: The getaway car
+text: A friend needs a getaway driver.
+tone: serious
+category: justice
+rarity: common
+lifeStages: [youngAdult, adult]
+requires: { age: { eq: 27 } }
+weight: { base: 100 }
+once: true
+choices:
+  - id: no
+    label: Stay home
+    outcome:
+      text: You stay home.
+      effects: []
+  - id: drive
+    label: Drive the car
+    outcome:
+      text: You're caught. You get {sentence}.
+      effects:
+        - { type: legal, offenseId: theft, outcome: jail, years: 2 }

@@ -1,0 +1,37 @@
+# A gender you pushed down comes back (registries/discovery.yaml resurfacing.gender).
+id: resurface_reflection
+title: The same reflection
+text: >-
+  Another year of answering to a version of yourself that doesn't fit. The
+  word "{latentGender}" hasn't gone anywhere. It's waiting.
+tone: serious
+category: identity
+rarity: common
+lifeStages: [teen, youngAdult, adult, senior]
+weight: { base: 5 }
+followUpOnly: true
+choices:
+  - id: accept_pronouns
+    label: This is who I am, new pronouns too
+    outcome:
+      text: It took you a while to get here. You're here.
+      effects:
+        - { type: identity, field: gender, value: fromLatent }
+        - { type: identity, field: pronouns, value: fromLatent }
+        - { type: stat, key: happiness, delta: 6 }
+        - { type: schedule, eventId: coming_out_family, inYears: [1, 1] }
+  - id: accept
+    label: This is who I am, same pronouns
+    outcome:
+      text: You stop arguing with yourself. The quiet afterward is wonderful.
+      effects:
+        - { type: identity, field: gender, value: fromLatent }
+        - { type: stat, key: happiness, delta: 5 }
+        - { type: schedule, eventId: coming_out_family, inYears: [1, 1] }
+  - id: push_down
+    label: Push it down again
+    outcome:
+      text: You can do this. You have been doing this. You're so tired.
+      effects:
+        - { type: innerConflict, delta: 12 }
+        - { type: stat, key: stress, delta: 4 }

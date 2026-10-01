@@ -1,0 +1,41 @@
+id: sports_injury
+title: Landing wrong
+text: >-
+  Late in the game you go up for the ball, come down on someone's foot, and
+  hear a sound your body is not supposed to make.
+tone: serious
+category: health
+rarity: common
+lifeStages: [teen, youngAdult]
+weight:
+  base: 3
+  modifiers:
+    - { if: { stat: fitness, gt: 60 }, x: 1.5 }
+cooldownYears: 10
+choices:
+  - id: play_on
+    label: Tape it up and finish the game
+    check:
+      base: 45
+      stats: [{ key: fitness, weight: 0.4 }, { key: luck, weight: 0.2 }]
+      success:
+        text: It's only a bad sprain. You limp for a week and tell the story for a year.
+        effects:
+          - { type: stat, key: confidence, delta: 3 }
+          - { type: stat, key: health, delta: -2 }
+      failure:
+        text: >-
+          By halftime your ankle is the size of a grapefruit. The X-ray shows a
+          clean break, made worse by every step you took on it.
+        effects:
+          - { type: health, conditionId: broken_bone, severity: 55 }
+          - { type: stat, key: stress, delta: 4 }
+          - { type: history, text: You broke your ankle and played on it anyway., importance: 2 }
+  - id: sit_out
+    label: Sit out and get it looked at
+    outcome:
+      text: It's only a bad sprain, caught early. Two weeks on the bench, and a lot of time to think.
+      effects:
+        - { type: stat, key: health, delta: -1 }
+        - { type: stat, key: discipline, delta: 2 }
+        - { type: stat, key: happiness, delta: -2 }

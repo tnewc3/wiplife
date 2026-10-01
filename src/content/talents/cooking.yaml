@@ -1,3 +1,8 @@
 id: cooking
 name: Cooking
+noun: cooking
 description: An instinct for flavor that turns simple food into something memorable.
+# What finding it does: stat changes once, and a performance bonus in these jobs.
+boost:
+  stats: [{ key: happiness, delta: 4 }]
+  jobs: [food_service]

@@ -8,10 +8,10 @@ category: mischief
 rarity: common
 lifeStages: [youngAdult, adult]
 weight:
-  base: 5
+  base: 2
   modifiers:
     - { if: { trait: riskTaking, gt: 60 }, x: 2 }
-cooldownYears: 5
+cooldownYears: 15
 cast:
   stranger: { kind: acquaintance, ageOffset: { min: -5, max: 5 }, createIfMissing: true, newChance: 1 }
 choices:
@@ -27,8 +27,9 @@ choices:
           - { type: stat, key: riskTaking, delta: 2 }
           - { type: memory, role: stranger, tag: fought_with_you }
       failure:
-        text: You wake up with a black eye and no memory of the ride home.
+        text: You wake up with a black eye, no memory of the ride home, and a citation on the nightstand. You get {sentence}.
         effects:
+          - { type: legal, offenseId: disorderly_conduct, outcome: sentence }
           - { type: stat, key: health, delta: -3 }
           - { type: stat, key: stress, delta: 4 }
           - { type: memory, role: stranger, tag: fought_with_you }

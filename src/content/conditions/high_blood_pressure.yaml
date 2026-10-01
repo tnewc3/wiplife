@@ -1,0 +1,26 @@
+id: high_blood_pressure
+name: High blood pressure
+noun: high blood pressure
+kind: chronic
+blurb: No symptoms most days, which is exactly the problem.
+onset:
+  chance:
+    - { at: 34, x: 0 }
+    - { at: 35, x: 0.003 }
+    - { at: 50, x: 0.01 }
+    - { at: 70, x: 0.013 }
+  factors:
+    - key: stress
+      curve: [{ at: 0, x: 0.6 }, { at: 50, x: 1 }, { at: 100, x: 2 }]
+    - key: fitness
+      curve: [{ at: 0, x: 1.8 }, { at: 50, x: 1 }, { at: 100, x: 0.5 }]
+    - key: geneticRisk
+      curve: [{ at: 0, x: 0.7 }, { at: 30, x: 1 }, { at: 100, x: 1.8 }]
+  severity: { min: 15, max: 40 }
+course: { untreated: 3, treated: -2 }
+effects:
+  health: { perYear: -1, limit: 35 }
+treatable: true
+costs: { treatment: 400, yearlyTreated: 500 }
+mortality: 0.004
+cause: stroke

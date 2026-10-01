@@ -16,3 +16,8 @@ categories:
   community: { label: Community }
   work: { label: Work }
   wonder: { label: Strange and wonderful, cooldownYears: 10 }
+  # Stage 9.
+  justice: { label: The law }
+  prison: { label: Prison, prison: true }
+  identity: { label: Who you are }
+  vice: { label: Vices }

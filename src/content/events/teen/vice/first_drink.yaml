@@ -1,0 +1,52 @@
+id: first_drink
+title: Somebody's older brother
+text: >-
+  At a party in a basement that smells like carpet cleaner, someone's older
+  brother is handing out cans of beer from a cooler.
+tone: neutral
+category: vice
+rarity: common
+lifeStages: [teen]
+requires: { age: { gte: 15 } }
+weight:
+  base: 5
+  modifiers:
+    - { if: { trait: sociability, gt: 60 }, x: 1.5 }
+once: true
+choices:
+  - id: one
+    label: Have one, to fit in
+    outcome:
+      text: It tastes awful. You drink it slowly and hold the can all night like a prop.
+      effects:
+        - { type: flag, key: tried_alcohol, value: true }
+        - { type: stat, key: vice, delta: 3 }
+        - { type: stat, key: sociability, delta: 2 }
+  - id: several
+    label: Keep up with the older kids
+    visibleIf: { trait: riskTaking, gt: 55 }
+    check:
+      base: 40
+      stats: [{ key: luck, weight: 0.3 }]
+      success:
+        text: You're the funniest person in the room, by your own account. The morning is less funny.
+        effects:
+          - { type: flag, key: tried_alcohol, value: true }
+          - { type: stat, key: vice, delta: 7 }
+          - { type: stat, key: sociability, delta: 3 }
+      failure:
+        text: >-
+          You're sick in the bushes, and then sick in your parents' car on the
+          way home. Nobody yells. That is somehow worse.
+        effects:
+          - { type: flag, key: tried_alcohol, value: true }
+          - { type: stat, key: vice, delta: 5 }
+          - { type: stat, key: stress, delta: 6 }
+          - { type: stat, key: health, delta: -2 }
+  - id: pass
+    label: Grab a soda instead
+    outcome:
+      text: Someone calls you boring. Someone else asks for a soda too.
+      effects:
+        - { type: stat, key: discipline, delta: 2 }
+        - { type: stat, key: confidence, delta: 1 }

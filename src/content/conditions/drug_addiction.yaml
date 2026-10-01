@@ -1,0 +1,27 @@
+id: drug_addiction
+name: Drug addiction
+noun: a drug addiction
+kind: addiction
+blurb: The high gets shorter and the need gets longer. People do come back from this.
+onset:
+  chance:
+    - { at: 17, x: 0 }
+    - { at: 18, x: 0.0009 }
+    - { at: 25, x: 0.001 }
+    - { at: 45, x: 0.0005 }
+    - { at: 60, x: 0.0003 }
+  factors:
+    - key: vice
+      curve: [{ at: 0, x: 0.01 }, { at: 40, x: 0.3 }, { at: 70, x: 2 }, { at: 100, x: 5 }]
+    - key: riskTaking
+      curve: [{ at: 0, x: 0.5 }, { at: 50, x: 1 }, { at: 100, x: 2 }]
+  severity: { min: 25, max: 50 }
+course: { untreated: 8, treated: -12 }
+effects:
+  health: { perYear: -3, limit: 20 }
+  happiness: { perYear: -3, limit: 20 }
+  stress: { perYear: 3, limit: 85 }
+treatable: true
+costs: { treatment: 8000, yearlyUntreated: 6000 }
+mortality: 0.03
+cause: overdose

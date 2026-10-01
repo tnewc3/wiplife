@@ -1,3 +1,8 @@
 id: art
 name: Art
+noun: art
 description: A natural eye for drawing, painting and design.
+# What finding it does: stat changes once, and a performance bonus in these jobs.
+boost:
+  stats: [{ key: happiness, delta: 4 }, { key: looks, delta: 2 }]
+  jobs: [graphic_designer]

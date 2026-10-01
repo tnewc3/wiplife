@@ -1,0 +1,47 @@
+id: chest_pains
+title: A tight band
+text: >-
+  Climbing the stairs, a tight band settles across your chest and stays. Your
+  left arm feels strange, like it belongs to someone else.
+tone: dark
+category: health
+rarity: uncommon
+lifeStages: [adult, senior]
+requires:
+  all:
+    - { age: { gte: 40 } }
+    - { health: { conditions: [heart_disease, high_blood_pressure] } }
+weight: { base: 6 }
+cooldownYears: 6
+choices:
+  - id: ambulance
+    label: Call an ambulance
+    outcome:
+      text: >-
+        Sirens, wires, a very calm nurse. A blocked artery, caught in time.
+        You wake up with a stent, a bill, and a strong opinion about stairs.
+      effects:
+        - { type: health, conditionId: heart_disease, severity: 10 }
+        - { type: health, conditionId: heart_disease, treated: true }
+        - { type: debt, action: add, kind: medical, amount: 6000 }
+        - { type: stat, key: stress, delta: 5 }
+        - { type: history, text: You survived a heart attack because you called for help in time., importance: 3 }
+  - id: wait
+    label: Sit down and wait for it to pass
+    check:
+      base: 50
+      stats: [{ key: health, weight: 0.4 }, { key: luck, weight: 0.2 }]
+      success:
+        text: After twenty frightening minutes, it eases. You tell no one, which is its own kind of mistake.
+        effects:
+          - { type: stat, key: stress, delta: 4 }
+          - { type: health, conditionId: heart_disease, severity: 10 }
+      failure:
+        text: >-
+          It doesn't pass. A neighbor finds you on the landing. You live, but
+          your heart will never be the same.
+        effects:
+          - { type: health, conditionId: heart_disease, severity: 35 }
+          - { type: stat, key: health, delta: -12 }
+          - { type: debt, action: add, kind: medical, amount: 9000 }
+          - { type: history, text: A heart attack nearly killed you., importance: 3 }

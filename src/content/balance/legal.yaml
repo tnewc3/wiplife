@@ -1,0 +1,39 @@
+# The law: sentencing, probation, prison and the record (Stage 9). Each
+# offense's own likely outcomes, fines and years live in src/content/offenses.
+# Starting proposals; Stage 12 (balancing) tunes them.
+
+sentencing:
+  # Each entry already on your record multiplies the outcome weights by
+  # these: a repeat offender gets fewer warnings and more time.
+  priorRecord: { warning: 0.5, fine: 1, probation: 1.3, jail: 1.5 }
+  # Before the independence age the weights are multiplied by these, and
+  # jail is never possible (it becomes probation).
+  juvenile: { warning: 3, fine: 1, probation: 1, jail: 0 }
+
+probation:
+  # Chance each year on probation that a probation event happens (a check-in,
+  # a temptation), by Risk-taking.
+  eventChance:
+    - { at: 0, x: 0.15 }
+    - { at: 50, x: 0.3 }
+    - { at: 100, x: 0.5 }
+
+prison:
+  # Prison events each year inside (instead of the life stage's budget). The
+  # first year inside always begins with an intake event (registries/legal.yaml jailed).
+  budget: { min: 0, max: 1 }
+  # Yearly pulls on stats while inside.
+  effects:
+    happiness: { perYear: -4, limit: 25 }
+    stress: { perYear: 4, limit: 80 }
+    health: { perYear: -1, limit: 40 }
+
+release:
+  # Years of parole (probation) after release; 0 for none.
+  paroleYears: 1
+
+record:
+  # With probation or prison on your record within recentYears, landlords
+  # ask this many times the usual deposit.
+  depositMultiplier: 2
+  recentYears: 7

@@ -1,0 +1,24 @@
+id: dementia
+name: Dementia
+noun: dementia
+kind: chronic
+blurb: Names slip away first, then whole afternoons. No doctor can stop it, only slow the slide a little.
+onset:
+  chance:
+    - { at: 64, x: 0 }
+    - { at: 65, x: 0.003 }
+    - { at: 75, x: 0.012 }
+    - { at: 85, x: 0.03 }
+  factors:
+    - key: geneticRisk
+      curve: [{ at: 0, x: 0.6 }, { at: 30, x: 1 }, { at: 100, x: 2 }]
+    - key: smarts
+      curve: [{ at: 0, x: 1.4 }, { at: 50, x: 1 }, { at: 100, x: 0.7 }]
+  severity: { min: 15, max: 35 }
+course: { untreated: 6, treated: 6 }
+effects:
+  smarts: { perYear: -4, limit: 10 }
+  happiness: { perYear: -2, limit: 25 }
+treatable: false
+mortality: 0.05
+cause: dementia

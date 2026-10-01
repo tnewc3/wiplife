@@ -1,0 +1,4 @@
+doctor:
+  clean: { events: [test_doctor] }
+  treated: { events: [test_doctor] }
+  managed: { events: [test_doctor] }

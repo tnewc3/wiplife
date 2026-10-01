@@ -81,9 +81,55 @@ export const CAREER_HISTORY_VALUES = {
   leftForSchool: ['title', 'employer'],
   fellThrough: ['title', 'employer'],
   moved: ['title', 'employer'],
+  /** Lost to a prison sentence (Stage 9). */
+  jailed: ['title', 'employer'],
   retired: ['years'],
 } as const satisfies Record<string, readonly string[]>;
 export type CareerHistoryKey = keyof typeof CAREER_HISTORY_VALUES;
+
+/**
+ * Health milestones in text/history.yaml (health, Stage 9): {condition} is a
+ * condition as it reads in a sentence ("type 2 diabetes").
+ */
+export const HEALTH_HISTORY_VALUES = {
+  diagnosed: ['condition'],
+  treated: ['condition'],
+  recovered: ['condition'],
+} as const satisfies Record<string, readonly string[]>;
+export type HealthHistoryKey = keyof typeof HEALTH_HISTORY_VALUES;
+
+/**
+ * Legal milestones in text/history.yaml (legal, Stage 9): {offense} as it
+ * reads in a sentence ("shoplifting"), {amount} a fine, {years} a length of
+ * time ("two years").
+ */
+export const LEGAL_HISTORY_VALUES = {
+  warning: ['offense'],
+  fine: ['offense', 'amount'],
+  probation: ['offense', 'years'],
+  jail: ['offense', 'years'],
+  released: [],
+  probationEnded: [],
+} as const satisfies Record<string, readonly string[]>;
+export type LegalHistoryKey = keyof typeof LEGAL_HISTORY_VALUES;
+
+/**
+ * Self-discovery milestones in text/history.yaml (discovery, Stage 9):
+ * accepting a change, or editing your identity in the Profile sheet.
+ * {people} who you're attracted to now ("men and women"), {gender} your
+ * gender identity, {expression} your gender expression, {pronouns} your
+ * pronouns ("she/her"), {trait} the personality tendency you found, {talent}
+ * your talent ("music").
+ */
+export const DISCOVERY_HISTORY_VALUES = {
+  attraction: ['people'],
+  gender: ['gender'],
+  expression: ['expression'],
+  pronouns: ['pronouns'],
+  personality: ['trait'],
+  talent: ['talent'],
+} as const satisfies Record<string, readonly string[]>;
+export type DiscoveryHistoryKey = keyof typeof DISCOVERY_HISTORY_VALUES;
 
 const importanceSchema = z.union([z.literal(1), z.literal(2), z.literal(3)]);
 const historyGroupSchema = z.strictObject({ importance: importanceSchema, variants: variantsSchema });
@@ -141,6 +187,27 @@ export const historyTextSchema = z.strictObject({
       typeof historyGroupSchema
     >,
   ),
+  /** Health milestones (Stage 9). The values each one may use are in HEALTH_HISTORY_VALUES. */
+  health: z.strictObject(
+    Object.fromEntries(Object.keys(HEALTH_HISTORY_VALUES).map((k) => [k, historyGroupSchema])) as Record<
+      HealthHistoryKey,
+      typeof historyGroupSchema
+    >,
+  ),
+  /** Legal milestones (Stage 9). The values each one may use are in LEGAL_HISTORY_VALUES. */
+  legal: z.strictObject(
+    Object.fromEntries(Object.keys(LEGAL_HISTORY_VALUES).map((k) => [k, historyGroupSchema])) as Record<
+      LegalHistoryKey,
+      typeof historyGroupSchema
+    >,
+  ),
+  /** Self-discovery milestones (Stage 9). The values each one may use are in DISCOVERY_HISTORY_VALUES. */
+  discovery: z.strictObject(
+    Object.fromEntries(Object.keys(DISCOVERY_HISTORY_VALUES).map((k) => [k, historyGroupSchema])) as Record<
+      DiscoveryHistoryKey,
+      typeof historyGroupSchema
+    >,
+  ),
 });
 export type HistoryText = z.infer<typeof historyTextSchema>;
 
@@ -175,3 +242,14 @@ export const obituaryTextSchema = z.strictObject({
   list: z.strictObject({ pair: templateSchema, serial: templateSchema, separator: z.string().min(1).max(5) }),
 });
 export type ObituaryText = z.infer<typeof obituaryTextSchema>;
+
+/**
+ * Words for the law (text/legal.yaml, Stage 9): a sentence as it reads inside
+ * event outcome text ({sentence}: "a $500 fine", "two years in prison"),
+ * with {amount} and {years}; and a number of years ({n}).
+ */
+export const legalTextSchema = z.strictObject({
+  sentence: z.strictObject({ warning: templateSchema, fine: templateSchema, probation: templateSchema, jail: templateSchema }),
+  years: z.strictObject({ one: templateSchema, many: templateSchema }),
+});
+export type LegalText = z.infer<typeof legalTextSchema>;

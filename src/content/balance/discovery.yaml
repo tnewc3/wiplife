@@ -1,0 +1,94 @@
+# Self-discovery: latent traits and hidden talents coming to light, and the
+# inner conflict of holding them back (docs/design.md, section F; Stage 9).
+# Starting proposals; Stage 12 (balancing) tunes them.
+
+# A latent trait (or hidden talent) you haven't noticed yet: the yearly
+# chance it comes to the surface, by age, from minAge. Questions of
+# self-understanding come from the teen years; a talent can show early.
+# At most one discovery happens in a year, and none in prison.
+surfacing:
+  attraction:
+    minAge: 13
+    chance:
+      - { at: 13, x: 0.05 }
+      - { at: 18, x: 0.12 }
+      - { at: 30, x: 0.1 }
+      - { at: 50, x: 0.05 }
+      - { at: 70, x: 0.02 }
+  gender:
+    minAge: 13
+    chance:
+      - { at: 13, x: 0.06 }
+      - { at: 25, x: 0.1 }
+      - { at: 50, x: 0.05 }
+  expression:
+    minAge: 13
+    chance:
+      - { at: 13, x: 0.05 }
+      - { at: 30, x: 0.08 }
+      - { at: 60, x: 0.03 }
+  personality:
+    minAge: 13
+    chance:
+      - { at: 13, x: 0.04 }
+      - { at: 30, x: 0.06 }
+      - { at: 60, x: 0.03 }
+  talent:
+    minAge: 6
+    chance:
+      - { at: 6, x: 0.05 }
+      - { at: 12, x: 0.09 }
+      - { at: 25, x: 0.07 }
+      - { at: 50, x: 0.04 }
+      - { at: 70, x: 0.02 }
+
+# A trait you noticed and didn't accept comes back: no sooner than
+# afterYears after it last surfaced, then each year with this chance, by
+# inner conflict. (A talent you shrugged off can catch your eye again with
+# its surfacing chance.)
+resurfacing:
+  afterYears: 3
+  chance:
+    - { at: 0, x: 0.1 }
+    - { at: 30, x: 0.25 }
+    - { at: 60, x: 0.45 }
+    - { at: 100, x: 0.7 }
+
+# At or above minConflict, a resurfacing year can bring a crisis instead,
+# with this chance, at most once every cooldownYears.
+crisis:
+  minConflict: 60
+  chance: 0.35
+  cooldownYears: 8
+
+innerConflict:
+  # Gained each year for each trait you know about and haven't accepted, plus
+  # perSuppression for each time beyond the first it came back; at most
+  # maxPerYear a year. With nothing held back it fades by decay a year.
+  perYear: 4
+  perSuppression: 2
+  maxPerYear: 10
+  decay: 3
+  # Stress gained each year by inner conflict (never past stressLimit)...
+  stress:
+    - { at: 0, x: 0 }
+    - { at: 20, x: 0.5 }
+    - { at: 50, x: 1.5 }
+    - { at: 100, x: 4 }
+  stressLimit: 85
+  # ...and Happiness lost each year (never below happinessLimit).
+  happiness:
+    - { at: 0, x: 0 }
+    - { at: 20, x: 0.3 }
+    - { at: 50, x: 1 }
+    - { at: 100, x: 2.5 }
+  happinessLimit: 15
+  # Lost when you accept a trait through an event...
+  acceptRelief: 30
+  # ...or edit your identity in the Profile sheet to match a latent trait.
+  editRelief: 20
+
+talent:
+  # Job performance points (the yearly review's aim) in a job that uses the
+  # talent you've found (talents list their jobs).
+  performanceBonus: 6

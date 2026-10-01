@@ -82,6 +82,18 @@ export function isRomanticMatch(state: LifeState, person: Person, content: Conte
   return bothAdults(state, person, content) && mutualAttraction(state, person);
 }
 
+/**
+ * A possible admirer for a "try it and decide" moment (Stage 9): a living
+ * adult (you an adult too), not family, attracted to you, of a gender you're
+ * not attracted to (yet).
+ */
+export function isAdmirerMatch(state: LifeState, person: Person, content: ContentBundle): boolean {
+  const rel = state.relationships[person.id];
+  if (!person.alive || (rel && isFamilyKind(rel.kind))) return false;
+  const me = state.character.identity;
+  return bothAdults(state, person, content) && attractedTo(person.identity, me) && !attractedTo(me, person.identity);
+}
+
 /** True when this relationship is a current romance (living, active partner, fiancé or spouse). */
 export function isCurrentPartner(state: LifeState, rel: Relationship): boolean {
   return isPartnerKind(rel.kind) && rel.status === 'active' && state.people[rel.personId]?.alive === true;
@@ -151,7 +163,7 @@ const romanceCache = new WeakMap<EventDef, boolean>();
 
 /**
  * A romance event: its category is marked romance, it casts a partner,
- * fiancé, spouse, ex or potential partner, or it can turn someone into one.
+ * fiancé, spouse, ex, potential partner or admirer, or it can turn someone into one.
  * Romance events are for adults only.
  */
 export function isRomanceEvent(def: EventDef, content: ContentBundle): boolean {
@@ -159,7 +171,9 @@ export function isRomanceEvent(def: EventDef, content: ContentBundle): boolean {
   if (cached === undefined) {
     cached =
       content.registries.categories.categories[def.category]?.romance === true ||
-      Object.values(def.cast ?? {}).some((spec) => spec.romantic === true || (spec.kind !== undefined && isRomanticKind(spec.kind))) ||
+      Object.values(def.cast ?? {}).some(
+        (spec) => spec.romantic === true || spec.admirer === true || (spec.kind !== undefined && isRomanticKind(spec.kind)),
+      ) ||
       outcomesOf(def).some((o) => o.effects.some((e) => e.type === 'relationship' && e.kind !== undefined && isRomanticKind(e.kind)));
     romanceCache.set(def, cached);
   }

@@ -1,3 +1,8 @@
 id: athletics
 name: Athletics
+noun: athletics
 description: Speed, coordination and stamina beyond the usual.
+# What finding it does: stat changes once, and a performance bonus in these jobs.
+boost:
+  stats: [{ key: fitness, delta: 8 }, { key: health, delta: 3 }]
+  jobs: [construction_worker, police_officer]

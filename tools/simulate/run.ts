@@ -6,9 +6,13 @@
  * debt and net worth over lifetimes, (Stage 7) education outcomes by
  * family wealth and GPA, and (Stage 8) income by education path,
  * promotion, firing and layoff rates, and how far people get in each job
- * track, all against src/content/balance/targets.yaml. Later stages add their own reports.
+ * track, all against src/content/balance/targets.yaml; and (Stage 9) health
+ * conditions and causes of death, doctor visits, criminal records, prison and
+ * probation, and self-discovery (what surfaced, was accepted or pushed down),
+ * against the Stage 9 targets in the same file. Later stages add their own reports.
  */
-import { ACTION_IDS, type ActionId, type ContentBundle, type Effect } from '../../src/content/schemas';
+import { ACTION_IDS, DISCOVERY_KINDS, type ActionId, type ContentBundle, type DiscoveryKind, type Effect } from '../../src/content/schemas';
+import { hasLatent } from '../../src/engine/discovery';
 import {
   finishAction,
   isActionAvailable,
@@ -24,12 +28,13 @@ import { checkInvariants } from '../../src/engine/invariants';
 import { beginYear, createLife, endYear } from '../../src/engine/life';
 import { isFamilyKind, isPartnerKind } from '../../src/engine/relationships';
 import { createRng } from '../../src/engine/rng';
-import type { FamilyWealth, LifeStage, LifeState } from '../../src/engine/types';
+import type { FamilyWealth, LifeStage, LifeState, RecordOutcome } from '../../src/engine/types';
 import {
   chooseActions,
   chooseCarelessActions,
   chooseCarelessLifeActions,
   chooseCareerActions,
+  chooseHealthActions,
   chooseMoneyActions,
   chooseSchoolActions,
   rollMoneyProfile,
@@ -78,6 +83,104 @@ export interface SimulationReport {
   money: MoneyReport;
   education: EducationReport;
   careers: CareerReport;
+  health: HealthReport;
+  legal: LegalReport;
+  discovery: DiscoveryReport;
+}
+
+/** Health (Stage 9): who got each condition, who was treated, what killed people. */
+export interface HealthReport {
+  /** Per condition: lives that ever had it, were treated for it, and died of its cause while having it. */
+  conditions: { id: string; lives: number; treated: number; diedOf: number }[];
+  /** Causes of death across all lives. */
+  causes: { id: string; lives: number }[];
+  doctorVisits: number;
+  /** Lives that ever saw a doctor. */
+  sawDoctor: number;
+  /** Lives that reached 65 with medical debt, and the median of it among them. */
+  medicalDebtAt65: { reached: number; owing: number; median: number };
+}
+
+/** The law (Stage 9). */
+export interface LegalReport {
+  /** Per offense: lives with it on their record. */
+  offenses: { id: string; lives: number }[];
+  /** Record entries by outcome, across all lives. */
+  outcomes: Record<RecordOutcome, number>;
+  /** Lives with any record, any conviction (not just warnings), probation, prison. */
+  recordLives: number;
+  convictedLives: number;
+  probationLives: number;
+  jailedLives: number;
+  /** Years spent in prison across all lives (year-starts inside), and the longest single life's total. */
+  yearsInside: number;
+  mostYearsInside: number;
+  /** Lives released from prison, and of them, those who were sentenced again after release. */
+  released: number;
+  reoffended: number;
+}
+
+/** Self-discovery (Stage 9), per kind. */
+export interface DiscoveryReport {
+  kinds: Record<
+    DiscoveryKind,
+    {
+      /** Lives born with the latent trait (or a hidden talent). */
+      latent: number;
+      /** Lives in which it surfaced at least once. */
+      surfaced: number;
+      /** Lives that accepted it (or found the talent). */
+      accepted: number;
+      /** Lives in which it came back after being pushed down. */
+      resurfaced: number;
+      /** Lives that died knowing it and holding it back. */
+      heldBack: number;
+    }
+  >;
+  crisisLives: number;
+  comingOutLives: number;
+  /** Lives whose identity changed through self-discovery (a history entry). */
+  identityChanged: number;
+  /** Inner conflict at death: median, and the share of lives above 50. */
+  innerConflictAtDeath: { median: number; above50: number };
+}
+
+/** What one life did with its health, the law and self-discovery, watched step by step. */
+class Stage9Watcher {
+  readonly conditions = new Set<string>();
+  readonly treated = new Set<string>();
+  readonly surfaced = new Set<DiscoveryKind>();
+  readonly resurfaced = new Set<DiscoveryKind>();
+  readonly latentAtBirth = new Set<DiscoveryKind>();
+  yearsInside = 0;
+  sawDoctor = false;
+  medicalDebtAt65: number | null = null;
+  private lastInsideYear = -1;
+  private started = false;
+
+  observe(life: LifeState): void {
+    if (!this.started) {
+      this.started = true;
+      for (const k of DISCOVERY_KINDS) if (hasLatent(life, k)) this.latentAtBirth.add(k);
+    }
+    for (const c of life.health.conditions) {
+      this.conditions.add(c.conditionId);
+      if (c.treated) this.treated.add(c.conditionId);
+    }
+    if (life.health.lastVisit !== undefined) this.sawDoctor = true;
+    if (life.phase === 'yearStart' && life.housing.kind === 'incarcerated' && life.currentYear !== this.lastInsideYear) {
+      this.lastInsideYear = life.currentYear;
+      this.yearsInside++;
+    }
+    for (const [kind, entry] of Object.entries(life.discovery.surfaced) as [DiscoveryKind, { times: number } | undefined][]) {
+      if (!entry) continue;
+      this.surfaced.add(kind);
+      if (entry.times > 1) this.resurfaced.add(kind);
+    }
+    if (life.phase === 'yearStart' && life.character.age === 65) {
+      this.medicalDebtAt65 = life.finances.debts.filter((d) => d.kind === 'medical').reduce((sum, d) => sum + d.balance, 0);
+    }
+  }
 }
 
 /** How far education went, for income by education path. */
@@ -522,6 +625,37 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
     homeOwners: { reached: 0, owned: 0 },
   };
   const trackRows: Record<string, CareerReport['tracks'][number]> = {};
+  const health: HealthReport = {
+    conditions: [],
+    causes: [],
+    doctorVisits: 0,
+    sawDoctor: 0,
+    medicalDebtAt65: { reached: 0, owing: 0, median: 0 },
+  };
+  const conditionRows = new Map(Object.keys(content.conditions).sort().map((id) => [id, { id, lives: 0, treated: 0, diedOf: 0 }]));
+  const causeCounts = new Map<string, number>();
+  const medicalDebts: number[] = [];
+  const legal: LegalReport = {
+    offenses: [],
+    outcomes: { warning: 0, fine: 0, probation: 0, jail: 0 },
+    recordLives: 0,
+    convictedLives: 0,
+    probationLives: 0,
+    jailedLives: 0,
+    yearsInside: 0,
+    mostYearsInside: 0,
+    released: 0,
+    reoffended: 0,
+  };
+  const offenseRows = new Map(Object.keys(content.offenses).sort().map((id) => [id, { id, lives: 0 }]));
+  const discovery: DiscoveryReport = {
+    kinds: Object.fromEntries(DISCOVERY_KINDS.map((k) => [k, { latent: 0, surfaced: 0, accepted: 0, resurfaced: 0, heldBack: 0 }])) as DiscoveryReport['kinds'],
+    crisisLives: 0,
+    comingOutLives: 0,
+    identityChanged: 0,
+    innerConflictAtDeath: { median: 0, above50: 0 },
+  };
+  const conflictsAtDeath: number[] = [];
   const earningsByPath = Object.fromEntries(EDUCATION_PATHS.map((p) => [p, [] as number[]])) as Record<EducationPath, number[]>;
   const bachelorEarnings: number[] = [];
 
@@ -538,6 +672,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
     const wallet = new MoneyWatcher();
     const school = new SchoolWatcher();
     const work = new CareerWatcher();
+    const nine = new Stage9Watcher();
     const profile = rollMoneyProfile(player);
     const seenThisLife = new Set<string>();
     const firesThisLife = new Map<string, number>();
@@ -549,6 +684,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
       wallet.observe(l, moneyAges);
       school.observe(l);
       work.observe(l, content);
+      nine.observe(l);
       // A management action's result event, just queued.
       const queued = l.phase === 'action' && l.pending.length === 1 ? l.pending[0]! : null;
       if (queued && queued.resolvedChoiceId === undefined) {
@@ -578,6 +714,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
         if (!isLifeActionAvailable(life, actionId, params, content)) continue;
         life = takeLifeAction(life, actionId, params);
         money.actionsTaken[actionId]++;
+        if (actionId === 'see_doctor') health.doctorVisits++;
       }
       // ...and on work...
       for (const [actionId, params] of careless ? [] : chooseCareerActions(life, content, player, profile)) {
@@ -608,6 +745,13 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
           education.applications[key].tried++;
           if (decision.accepted) education.applications[key].accepted++;
         }
+      }
+      // ...and on health (Stage 9; the careless player's doctor visits are among its random life actions)...
+      for (const [actionId, params] of careless ? [] : chooseHealthActions(life, content, player)) {
+        if (!isLifeActionAvailable(life, actionId, params, content)) continue;
+        life = takeLifeAction(life, actionId, params);
+        money.actionsTaken[actionId]++;
+        health.doctorVisits++;
       }
       // ...and on relationships.
       for (const [actionId, personId] of careless ? chooseCarelessActions(life, content, player) : chooseActions(life, content, player)) {
@@ -736,6 +880,59 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
       if (life.education.credentials.some((c) => c.type === 'bachelor')) bachelorEarnings.push(work.earnings);
     }
 
+    // Health, the law and self-discovery (Stage 9).
+    for (const id of nine.conditions) {
+      const row = conditionRows.get(id);
+      if (!row) continue;
+      row.lives++;
+      if (nine.treated.has(id)) row.treated++;
+    }
+    const causeId = life.death!.causeId;
+    causeCounts.set(causeId, (causeCounts.get(causeId) ?? 0) + 1);
+    for (const c of life.health.conditions) {
+      const def = content.conditions[c.conditionId];
+      if (def?.cause === causeId) {
+        conditionRows.get(c.conditionId)!.diedOf++;
+        break;
+      }
+    }
+    if (nine.sawDoctor) health.sawDoctor++;
+    if (nine.medicalDebtAt65 !== null) {
+      health.medicalDebtAt65.reached++;
+      if (nine.medicalDebtAt65 > 0) medicalDebts.push(nine.medicalDebtAt65);
+    }
+    const record = life.legal.record;
+    for (const r of record) legal.outcomes[r.outcome]++;
+    for (const id of new Set(record.map((r) => r.offenseId))) {
+      const row = offenseRows.get(id);
+      if (row) row.lives++;
+    }
+    if (record.length > 0) legal.recordLives++;
+    if (record.some((r) => r.outcome !== 'warning')) legal.convictedLives++;
+    if (record.some((r) => r.outcome === 'probation')) legal.probationLives++;
+    if (record.some((r) => r.outcome === 'jail')) legal.jailedLives++;
+    legal.yearsInside += nine.yearsInside;
+    legal.mostYearsInside = Math.max(legal.mostYearsInside, nine.yearsInside);
+    const releases = life.history.filter((e) => e.tags.includes('legal') && e.tags.includes('released'));
+    if (releases.length > 0) {
+      legal.released++;
+      if (record.some((r) => r.year > releases[0]!.year)) legal.reoffended++;
+    }
+    for (const kind of DISCOVERY_KINDS) {
+      const row = discovery.kinds[kind];
+      const born = nine.latentAtBirth.has(kind);
+      if (born) row.latent++;
+      if (nine.surfaced.has(kind)) row.surfaced++;
+      if (nine.resurfaced.has(kind)) row.resurfaced++;
+      const accepted = born && !hasLatent(life, kind) && (kind === 'talent' ? life.character.hidden.talentDiscovered : true);
+      if (accepted && (nine.surfaced.has(kind) || kind !== 'talent')) row.accepted++;
+      if (kind !== 'talent' && life.discovery.surfaced[kind] !== undefined && hasLatent(life, kind)) row.heldBack++;
+    }
+    if (life.discovery.crisisYear !== undefined) discovery.crisisLives++;
+    if (life.flags.came_out) discovery.comingOutLives++;
+    if (life.history.some((e) => e.tags[0] === 'discovery' && e.tags[1] !== 'talent')) discovery.identityChanged++;
+    conflictsAtDeath.push(life.character.hidden.innerConflict);
+
     const creds = life.education.credentials;
     const diploma = creds.find((c) => c.type === 'hs_diploma');
     if (diploma) education.diplomaAges[diploma.year - life.birthYear] = (education.diplomaAges[diploma.year - life.birthYear] ?? 0) + 1;
@@ -832,6 +1029,18 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
     .sort()
     .map((jobId) => trackRows[jobId] ?? { jobId, entered: 0, reachedLevel2: 0, reachedTop: 0, years: 0 });
 
+  health.conditions = [...conditionRows.values()];
+  health.causes = [...causeCounts.entries()].map(([id, lives]) => ({ id, lives })).sort((a, b) => b.lives - a.lives);
+  medicalDebts.sort((a, b) => a - b);
+  health.medicalDebtAt65.owing = medicalDebts.length;
+  health.medicalDebtAt65.median = medicalDebts[Math.floor(medicalDebts.length / 2)] ?? 0;
+  legal.offenses = [...offenseRows.values()];
+  conflictsAtDeath.sort((a, b) => a - b);
+  discovery.innerConflictAtDeath = {
+    median: conflictsAtDeath[Math.floor(conflictsAtDeath.length / 2)] ?? 0,
+    above50: conflictsAtDeath.filter((c) => c > 50).length,
+  };
+
   ages.sort((a, b) => a - b);
   const at = (p: number) => ages[Math.min(ages.length - 1, Math.floor(ages.length * p))] ?? 0;
   const totalEventsFired = [...fired.values()].reduce((a, b) => a + b, 0);
@@ -866,6 +1075,9 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
     money,
     education,
     careers,
+    health,
+    legal,
+    discovery,
   };
 }
 
@@ -972,6 +1184,7 @@ export function formatReport(report: SimulationReport, content: ContentBundle): 
     `  student debt at 25: ${pct(sd.borrowers, sd.lives)} of ${sd.lives} lives owe any; median ${dollars(sd.median)}, 90th percentile ${dollars(sd.p90)} (of those who owe); largest ever ${dollars(e.largestStudentDebt)}`,
   );
   lines.push(...formatCareers(report, content));
+  lines.push(...formatStage9(report, content));
   lines.push(`Events fired: ${report.totalEventsFired}`);
   lines.push('  event'.padEnd(30) + 'fired'.padStart(8) + 'share'.padStart(8) + 'lives'.padStart(9));
   for (const e of [...report.events].sort((a, b) => b.fired - a.fired)) {
@@ -1158,13 +1371,94 @@ export function formatComparison(careful: SimulationReport, careless: Simulation
   both((r) => pct(r.money.outcomes.evicted, r.money.adults), 'ever evicted');
   both((r) => median(r, t.money.netWorthAge), `median net worth at ${t.money.netWorthAge}`);
   both((r) => median(r, 'death'), 'median net worth at death');
+  both((r) => pct(r.health.sawDoctor, r.lives), 'ever saw a doctor');
+  both((r) => pct(r.legal.convictedLives, r.lives), 'convicted (more than a warning)');
+  both((r) => pct(r.legal.jailedLives, r.lives), 'went to prison');
+  both((r) => pct(r.discovery.identityChanged, r.lives), 'identity changed through self-discovery');
   lines.push('  targets (src/content/balance/targets.yaml; judged on the careful player):');
-  const a = targetResults(careful, content);
-  const b = targetResults(careless, content);
+  const a = [...targetResults(careful, content), ...stage9Targets(careful, content)];
+  const b = [...targetResults(careless, content), ...stage9Targets(careless, content)];
   a.forEach((x, i) => {
     const y = b[i]!;
     lines.push(row(x.label.length > 46 ? `${x.label.slice(0, 45)}…` : x.label, `${x.met ? 'MET' : 'NOT MET'}`, `${y.met ? 'MET' : 'NOT MET'}`));
     lines.push(row(`    target ${x.goal}`, x.short, y.short));
   });
   return lines.join('\n');
+}
+
+/** Health, the law and self-discovery (Stage 9). */
+function formatStage9(report: SimulationReport, content: ContentBundle): string[] {
+  const lines: string[] = [];
+  const n = report.lives;
+  const h = report.health;
+  lines.push(`Health (all ${n} lives):`);
+  lines.push('    condition                 lives   treated   died of it');
+  for (const c of h.conditions) {
+    lines.push(`    ${c.id.padEnd(24)} ${pct(c.lives, n).padStart(6)} ${pct(c.treated, c.lives).padStart(9)} ${pct(c.diedOf, n).padStart(12)}`);
+  }
+  lines.push(`  doctor visits ${h.doctorVisits} (${(h.doctorVisits / Math.max(1, n)).toFixed(1)} a life); lives that ever saw a doctor ${pct(h.sawDoctor, n)}`);
+  lines.push(
+    `  medical debt at 65: ${pct(h.medicalDebtAt65.owing, h.medicalDebtAt65.reached)} of ${h.medicalDebtAt65.reached} lives owe any; median ${dollars(h.medicalDebtAt65.median)} (of those who owe)`,
+  );
+  lines.push(`  causes of death: ${h.causes.map((c) => `${content.causes[c.id]?.text ?? c.id} ${pct(c.lives, n)}`).join(', ')}`);
+  const l = report.legal;
+  lines.push('The law:');
+  lines.push(
+    `  any record ${pct(l.recordLives, n)}; convicted (more than a warning) ${pct(l.convictedLives, n)}; probation ${pct(l.probationLives, n)}; prison ${pct(l.jailedLives, n)}`,
+  );
+  lines.push(`  record entries: ${(Object.keys(l.outcomes) as RecordOutcome[]).map((k) => `${k} ${l.outcomes[k]}`).join(', ')}`);
+  lines.push(
+    `  years in prison: ${l.yearsInside} in all, most in one life ${l.mostYearsInside}; released ${l.released}, sentenced again after release ${pct(l.reoffended, l.released)}`,
+  );
+  lines.push(`  offenses (lives with it on record): ${l.offenses.map((o) => `${o.id} ${pct(o.lives, n)}`).join(', ')}`);
+  const d = report.discovery;
+  lines.push('Self-discovery (lives born with it; surfaced; accepted; came back after being pushed down; died holding it back):');
+  for (const kind of DISCOVERY_KINDS) {
+    const k = d.kinds[kind];
+    lines.push(
+      `    ${kind.padEnd(12)} ${pct(k.latent, n).padStart(6)} ${pct(k.surfaced, n).padStart(7)} ${pct(k.accepted, n).padStart(7)} ${pct(k.resurfaced, n).padStart(7)} ${pct(k.heldBack, n).padStart(7)}`,
+    );
+  }
+  lines.push(
+    `  identity changed ${pct(d.identityChanged, n)}; crisis ${pct(d.crisisLives, n)}; came out ${pct(d.comingOutLives, n)}; inner conflict at death: median ${d.innerConflictAtDeath.median}, above 50 in ${pct(d.innerConflictAtDeath.above50, n)}`,
+  );
+  lines.push('  targets (src/content/balance/targets.yaml):');
+  for (const r of stage9Targets(report, content)) lines.push(target(r.label, r.value, r.goal, r.met));
+  return lines;
+}
+
+/** The Stage 9 targets (and the lifespan target), measured on this report. */
+export function stage9Targets(report: SimulationReport, content: ContentBundle): TargetResult[] {
+  const t = content.balance.targets;
+  const n = report.lives;
+  const share = (x: number) => (n > 0 ? x / n : 0);
+  const pct1 = (x: number) => `${(100 * x).toFixed(1)}%`;
+  const inRange = (x: number, r: { min: number; max: number }) => x >= r.min && x <= r.max;
+  const row = (label: string, value: number, range: { min: number; max: number }): TargetResult => ({
+    label,
+    value: pct1(value),
+    short: pct1(value),
+    goal: `${pct1(range.min)}–${pct1(range.max)}`,
+    met: inRange(value, range),
+  });
+  const out: TargetResult[] = [
+    {
+      label: 'median lifespan',
+      value: String(report.lifespan.median),
+      short: String(report.lifespan.median),
+      goal: `${t.lifespan.median.min}–${t.lifespan.median.max}`,
+      met: inRange(report.lifespan.median, t.lifespan.median),
+    },
+  ];
+  for (const c of report.health.conditions) {
+    const range = t.health.conditions[c.id];
+    if (range) out.push(row(`lives with ${c.id}`, share(c.lives), range));
+  }
+  for (const o of report.legal.offenses) {
+    const range = t.legal.offenses[o.id];
+    if (range) out.push(row(`lives with ${o.id} on record`, share(o.lives), range));
+  }
+  out.push(row('lives that go to prison', share(report.legal.jailedLives), t.legal.jailed));
+  for (const kind of DISCOVERY_KINDS) out.push(row(`lives where ${kind} surfaced`, share(report.discovery.kinds[kind].surfaced), t.discovery.surfaced[kind]));
+  return out;
 }

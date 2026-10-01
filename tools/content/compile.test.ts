@@ -544,6 +544,82 @@ choices:
     });
   });
 
+  describe('health, legal and self-discovery (Stage 9)', () => {
+    const event = (category: string, stages: string, effects: string, text = 'It happens.') => `
+id: test_event
+title: A test
+text: Something happens.
+tone: serious
+category: ${category}
+rarity: common
+lifeStages: [${stages}]
+weight: { base: 5 }
+choices:
+  - id: one
+    label: One
+    outcome:
+      text: '${text}'
+      effects: [${effects}]
+  - id: two
+    label: Two
+    outcome: {}
+`;
+
+    it('accepts legal, health, identity, inner conflict and talent effects', async () => {
+      await write(
+        'events/adult/justice/test_event.yaml',
+        event(
+          'justice',
+          'adult',
+          '{ type: legal, offenseId: theft, outcome: sentence }, { type: health, conditionId: depression, severity: 10 }, { type: identity, field: attraction, value: fromLatent }, { type: innerConflict, delta: 5 }, { type: talent }',
+          'You get {sentence}, {self.name}.',
+        ),
+      );
+      const result = await compile();
+      if (!result.ok) throw new Error(formatErrors(result.errors));
+    });
+
+    it('rejects unknown offenses, conditions and pronoun presets, and {sentence} without a legal effect', async () => {
+      await write(
+        'events/adult/justice/test_event.yaml',
+        event(
+          'justice',
+          'adult',
+          '{ type: legal, offenseId: jaywalking, outcome: sentence }, { type: health, conditionId: the_vapors, severity: 10 }, { type: identity, field: pronouns, value: zz_zim }',
+        ).replace("outcome: {}", "outcome: { text: 'You get {sentence}.', effects: [] }"),
+      );
+      const text = await expectErrors();
+      expect(text).toContain('unknown offense "jaywalking"');
+      expect(text).toContain('unknown health condition "the_vapors"');
+      expect(text).toContain('unknown pronoun preset "zz_zim"');
+      expect(text).toContain('{sentence} needs a legal effect in the same outcome');
+    });
+
+    it('keeps prison events for adults, and "self" for you', async () => {
+      await write('events/teen/prison/test_event.yaml', event('prison', 'teen', ''));
+      expect(await expectErrors()).toContain('a prison event can’t be in life stages'.replace('’', "'"));
+      await rm(path.join(dir, 'events/teen/prison/test_event.yaml'));
+      await write('events/adult/justice/test_event.yaml', `${event('justice', 'adult', '')}cast:\n  self: { kind: friend }\n`);
+      expect(await expectErrors()).toContain('"self" is always you in event text');
+    });
+
+    it('requires a target rate for every condition and offense, and registry events that only happen that way', async () => {
+      const targets = path.join(dir, 'balance', 'targets.yaml');
+      await writeFile(targets, (await readFile(targets, 'utf8')).replace(/\n {4}cancer: \{[^}]*\}/, ''));
+      const file = path.join(dir, 'events', 'any', 'justice', 'release_day.yaml');
+      await writeFile(file, (await readFile(file, 'utf8')).replace('followUpOnly: true\n', ''));
+      const text = await expectErrors();
+      expect(text).toContain('health.conditions: no target for "cancer"');
+      expect(text).toContain('release_day: answers triggers.released, so it must be followUpOnly');
+    });
+
+    it('treats an admirer as a romance role: adults only', async () => {
+      const kiss = path.join(dir, 'events', 'youngAdult', 'romance', 'unexpected_kiss.yaml');
+      await writeFile(kiss, (await readFile(kiss, 'utf8')).replace('    - { age: { gte: 18 } }\n', ''));
+      expect(await expectErrors()).toContain('unexpected_kiss: a romance event must require { age: { gte: 18 } }');
+    });
+  });
+
   describe('education', () => {
     it('keeps dropping out to the dropout age, and checks education conditions and effects', async () => {
       const file = 'events/teen/school/test_quit.yaml';
@@ -647,12 +723,40 @@ choices:
         path.join(overlay, 'registries/work.yaml'),
         'results:\n  hired: { events: [only_boss] }\n  rejected: { events: [only_work] }\n  raise: { events: [only_boss] }\n',
       );
+      // ...and its own health, legal and self-discovery events (Stage 9).
+      const followUp = (id: string, category: string) =>
+        `id: ${id}\ntitle: ${id}\ntext: Hi.\ntone: light\ncategory: ${category}\nrarity: common\nlifeStages: [adult]\nweight: { base: 1 }\nfollowUpOnly: true\nautoOutcome: {}\n`;
+      for (const [folder, id, category] of [
+        ['health', 'only_doctor', 'health'],
+        ['prison', 'only_prison', 'prison'],
+        ['justice', 'only_justice', 'justice'],
+        ['identity', 'only_identity', 'identity'],
+      ] as const) {
+        await mkdir(path.join(overlay, `events/any/${folder}`), { recursive: true });
+        await writeFile(path.join(overlay, `events/any/${folder}/${id}.yaml`), followUp(id, category));
+      }
+      await writeFile(
+        path.join(overlay, 'registries/health.yaml'),
+        'doctor:\n  clean: { events: [only_doctor] }\n  treated: { events: [only_doctor] }\n  managed: { events: [only_doctor] }\n',
+      );
+      await writeFile(
+        path.join(overlay, 'registries/legal.yaml'),
+        'triggers:\n  jailed: { events: [only_prison] }\n  released: { events: [only_justice] }\n  probation: { events: [only_justice] }\n',
+      );
+      const kinds = ['attraction', 'gender', 'expression', 'personality'];
+      const each = (list: string[]) => list.map((k) => `  ${k}: { events: [only_identity] }`).join('\n');
+      await writeFile(
+        path.join(overlay, 'registries/discovery.yaml'),
+        `surfacing:\n${each([...kinds, 'talent'])}\nresurfacing:\n${each(kinds)}\ncrisis: { events: [only_identity] }\ncomingOut: { events: [only_identity] }\n`,
+      );
       await mkdir(path.join(overlay, 'balance'), { recursive: true });
       const pacing = (await readFile(path.join(dir, 'balance/pacing.yaml'), 'utf8')).replace('cap: 6', 'cap: 3');
       await writeFile(path.join(overlay, 'balance/pacing.yaml'), pacing);
       const result = await compileContent({ contentDir: dir, appVersion: '0.0.0', overlayDir: overlay });
       if (!result.ok) throw new Error(formatErrors(result.errors));
-      expect(Object.keys(result.bundle.events)).toEqual(['only_action', 'only_boss', 'only_event', 'only_trouble', 'only_work']);
+      expect(Object.keys(result.bundle.events).sort()).toEqual(
+        ['only_action', 'only_boss', 'only_doctor', 'only_event', 'only_identity', 'only_justice', 'only_prison', 'only_trouble', 'only_work'].sort(),
+      );
       expect(result.bundle.balance.pacing.cap).toBe(3);
       expect(Object.keys(result.bundle.cities).length).toBeGreaterThan(0);
     } finally {

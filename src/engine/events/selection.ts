@@ -38,14 +38,25 @@ function lastCategoryYear(state: LifeState, category: string, content: ContentBu
   return last;
 }
 
+/** A prison event (its category is marked prison): it happens only while you're in prison, and only these happen then (Stage 9). */
+export function isPrisonEvent(def: EventDef, content: ContentBundle): boolean {
+  return content.registries.categories.categories[def.category]?.prison === true;
+}
+
+/** The event fits where you are: prison events in prison, every other event outside it. */
+export function fitsSetting(state: LifeState, def: EventDef, content: ContentBundle): boolean {
+  return isPrisonEvent(def, content) === (state.housing.kind === 'incarcerated');
+}
+
 /**
  * An event's weight this year: zero when it is on cooldown, already happened
- * (one-time events), is a romance event and you're not an adult, or its
- * requirements fail; otherwise base × rarity × matching modifiers.
- * Requirements about cast roles are checked after casting.
+ * (one-time events), is a romance event and you're not an adult, doesn't fit
+ * where you are (prison), or its requirements fail; otherwise base × rarity
+ * × matching modifiers. Requirements about cast roles are checked after casting.
  */
 export function eventWeight(state: LifeState, def: EventDef, content: ContentBundle): number {
   if (state.character.age < content.balance.relationships.adultAge && isRomanceEvent(def, content)) return 0;
+  if (!fitsSetting(state, def, content)) return 0;
   const log = state.eventLog[def.id];
   if (def.once && log) return 0;
   if (def.cooldownYears && log && state.currentYear - log.lastYear < def.cooldownYears) return 0;

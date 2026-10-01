@@ -1,0 +1,26 @@
+id: type_2_diabetes
+name: Type 2 diabetes
+noun: type 2 diabetes
+kind: chronic
+blurb: Blood sugar that needs watching for the rest of your life.
+onset:
+  chance:
+    - { at: 29, x: 0 }
+    - { at: 30, x: 0.001 }
+    - { at: 45, x: 0.004 }
+    - { at: 60, x: 0.007 }
+    - { at: 80, x: 0.006 }
+  factors:
+    - key: fitness
+      curve: [{ at: 0, x: 2.5 }, { at: 50, x: 1 }, { at: 100, x: 0.3 }]
+    - key: geneticRisk
+      curve: [{ at: 0, x: 0.6 }, { at: 30, x: 1 }, { at: 100, x: 2 }]
+  severity: { min: 20, max: 45 }
+course: { untreated: 4, treated: 0 }
+effects:
+  health: { perYear: -1.5, limit: 30 }
+  fitness: { perYear: -1, limit: 20 }
+treatable: true
+costs: { treatment: 1000, yearlyTreated: 1200 }
+mortality: 0.005
+cause: long_illness

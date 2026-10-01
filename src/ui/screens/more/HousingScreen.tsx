@@ -50,7 +50,9 @@ export function HousingScreen({ life }: { life: LifeState }) {
           ? view.annualCost > 0
             ? `You chip in ${money(view.annualCost)} a year toward rent`
             : 'Your family covers your rent'
-          : 'No rent, no roof';
+          : view.kind === 'incarcerated'
+            ? 'A cell, a bunk and a locker, until your release'
+            : 'No rent, no roof';
 
   return (
     <div className="flex flex-col gap-4">

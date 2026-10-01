@@ -1,0 +1,29 @@
+# Test pack: nothing surfaces before 26 (no flow test reaches that age), and
+# from 26 a latent trait surfaces at once; a trait pushed down comes back the
+# next year. Hidden talents never surface, and there are no crises.
+surfacing:
+  attraction: { minAge: 26, chance: [{ at: 0, x: 1 }] }
+  gender: { minAge: 26, chance: [{ at: 0, x: 1 }] }
+  expression: { minAge: 26, chance: [{ at: 0, x: 1 }] }
+  personality: { minAge: 26, chance: [{ at: 0, x: 1 }] }
+  talent: { minAge: 120, chance: [{ at: 0, x: 0 }] }
+resurfacing:
+  afterYears: 1
+  chance: [{ at: 0, x: 1 }]
+crisis:
+  minConflict: 100
+  chance: 0
+  cooldownYears: 10
+innerConflict:
+  perYear: 4
+  perSuppression: 2
+  maxPerYear: 10
+  decay: 3
+  stress: [{ at: 0, x: 0 }, { at: 100, x: 4 }]
+  stressLimit: 85
+  happiness: [{ at: 0, x: 0 }, { at: 100, x: 2.5 }]
+  happinessLimit: 15
+  acceptRelief: 30
+  editRelief: 20
+talent:
+  performanceBonus: 6

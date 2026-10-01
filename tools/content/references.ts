@@ -1,5 +1,15 @@
 import {
   CAREER_HISTORY_VALUES,
+  DISCOVERY_HISTORY_VALUES,
+  DISCOVERY_KINDS,
+  DOCTOR_RESULTS,
+  HEALTH_HISTORY_VALUES,
+  LATENT_KINDS,
+  LEGAL_HISTORY_VALUES,
+  LEGAL_TRIGGERS,
+  type DiscoveryHistoryKey,
+  type HealthHistoryKey,
+  type LegalHistoryKey,
   WORK_RESULT_ROLES,
   WORK_RESULTS,
   type CareerHistoryKey,
@@ -23,7 +33,7 @@ import {
 import { ACTION_ROLE } from '../../src/engine/actions';
 import { referencesIn, rolesIn } from '../../src/engine/conditions';
 import { EFFECT_KINDS, FAMILY_KINDS, isPartnerKind, isRomanceEvent, isRomanticKind } from '../../src/engine/relationships';
-import { EVENT_TEXT_VALUES } from '../../src/engine/events/text';
+import { EVENT_TEXT_VALUES, SELF_ROLE } from '../../src/engine/events/text';
 import { CONTINUE_CHOICE } from '../../src/engine/life';
 import { checkTemplate } from '../../src/engine/text';
 import type { ContentError } from './compile';
@@ -39,6 +49,10 @@ const TRIGGERS = 'registries/triggers.yaml';
 const EDUCATION = 'balance/education.yaml';
 const CAREERS = 'balance/careers.yaml';
 const WORK = 'registries/work.yaml';
+const HEALTH_REGISTRY = 'registries/health.yaml';
+const LEGAL_REGISTRY = 'registries/legal.yaml';
+const DISCOVERY_REGISTRY = 'registries/discovery.yaml';
+const TARGETS = 'balance/targets.yaml';
 
 /** The conditions a condition always requires: itself, or every part of a top-level `all`. */
 function requiredParts(condition: Condition | undefined): Condition[] {
@@ -145,6 +159,9 @@ export function checkReferences(
   errors.push(...checkTriggers(bundle, fileOf));
   errors.push(...checkEducation(bundle, fileOf));
   errors.push(...checkCareers(bundle, fileOf));
+  errors.push(...checkHealth(bundle, fileOf));
+  errors.push(...checkLegal(bundle, fileOf));
+  errors.push(...checkDiscovery(bundle, fileOf));
 
   return errors;
 }
@@ -216,6 +233,21 @@ function checkTemplates(bundle: ContentBundle): ContentError[] {
   for (const [key, group] of Object.entries(history.career)) {
     all(HISTORY, `career.${key}.variants`, group.variants, { values: [...CAREER_HISTORY_VALUES[key as CareerHistoryKey]] });
   }
+  for (const [key, group] of Object.entries(history.health)) {
+    all(HISTORY, `health.${key}.variants`, group.variants, { values: [...HEALTH_HISTORY_VALUES[key as HealthHistoryKey]] });
+  }
+  for (const [key, group] of Object.entries(history.legal)) {
+    all(HISTORY, `legal.${key}.variants`, group.variants, { values: [...LEGAL_HISTORY_VALUES[key as LegalHistoryKey]] });
+  }
+  for (const [key, group] of Object.entries(history.discovery)) {
+    all(HISTORY, `discovery.${key}.variants`, group.variants, { values: [...DISCOVERY_HISTORY_VALUES[key as DiscoveryHistoryKey]] });
+  }
+  const legalText = bundle.text.legal;
+  for (const [key, template] of Object.entries(legalText.sentence)) {
+    check('text/legal.yaml', `sentence.${key}`, template, { values: ['amount', 'years'] });
+  }
+  check('text/legal.yaml', 'years.one', legalText.years.one, {});
+  check('text/legal.yaml', 'years.many', legalText.years.many, { values: ['n'] });
 
   const obituary = bundle.text.obituary;
   const self = ['self'];
@@ -270,6 +302,7 @@ function checkRomance(def: EventDef, bundle: ContentBundle, err: (message: strin
   for (const [role, spec] of Object.entries(def.cast ?? {})) {
     const adult =
       spec.romantic === true ||
+      spec.admirer === true ||
       (spec.kind !== undefined && isRomanticKind(spec.kind)) ||
       (spec.age !== undefined && spec.age.min >= adultAge) ||
       requiresRole(def.requires, role, adultAge);
@@ -349,12 +382,22 @@ function checkEvents(bundle: ContentBundle, fileOf: (typeKey: CollectionKey, id:
   const actionEvents = new Set(Object.values(bundle.registries.actions.actions).flatMap((a) => a.events));
   const triggerEvents = new Set(Object.values(bundle.registries.triggers.triggers).flatMap((t) => t.events));
   const workEvents = new Set(Object.values(bundle.registries.work.results).flatMap((r) => r.events));
+  const doctorEvents = new Set(Object.values(bundle.registries.health.doctor).flatMap((r) => r.events));
+  const systemEvents = new Set([
+    ...doctorEvents,
+    ...Object.values(bundle.registries.legal.triggers).flatMap((r) => r.events),
+    ...Object.values(bundle.registries.discovery.surfacing).flatMap((r) => r.events),
+    ...Object.values(bundle.registries.discovery.resurfacing).flatMap((r) => r.events),
+    ...bundle.registries.discovery.crisis.events,
+    ...bundle.registries.discovery.comingOut.events,
+  ]);
 
   for (const [id, def] of Object.entries(bundle.events)) {
     const file = fileOf('events', id);
     const err = (message: string) => errors.push({ file, message: `${id}: ${message}` });
     const roles = Object.keys(def.cast ?? {});
-    const allowed = { roles, values: [...EVENT_TEXT_VALUES] as string[] };
+    // {sentence} only where a legal effect has just handed one down (checked per outcome below).
+    const allowed = { roles: [...roles, SELF_ROLE], values: EVENT_TEXT_VALUES.filter((v) => v !== 'sentence') as string[] };
     const template = (field: string, text: string) => {
       for (const message of checkTemplate(text, allowed)) err(`${field}: ${message}`);
     };
@@ -369,6 +412,7 @@ function checkEvents(bundle: ContentBundle, fileOf: (typeKey: CollectionKey, id:
       for (const t of refs.trades) if (!bundle.trades[t]) err(`${field}: unknown trade "${t}"`);
       for (const f of refs.fields) if (!knownField(bundle, f)) err(`${field}: "${f}" is not a major, trade or grad program`);
       for (const j of refs.jobs) if (!bundle.jobs[j]) err(`${field}: unknown job "${j}"`);
+      for (const c of refs.conditions) if (!bundle.conditions[c]) err(`${field}: unknown health condition "${c}"`);
     };
 
     if (!categories[def.category]) err(`category "${def.category}" is not in registries/categories.yaml`);
@@ -381,9 +425,10 @@ function checkEvents(bundle: ContentBundle, fileOf: (typeKey: CollectionKey, id:
       if ((spec.createIfMissing || spec.newChance !== undefined) && !(kind && (CREATABLE_KINDS as readonly string[]).includes(kind))) {
         err(`cast.${role}: only ${CREATABLE_KINDS.join(', ')} can be created`);
       }
-      if (spec.romantic && kind && (FAMILY_KINDS.includes(kind) || isPartnerKind(kind))) {
+      if ((spec.romantic || spec.admirer) && kind && (FAMILY_KINDS.includes(kind) || isPartnerKind(kind))) {
         err(`cast.${role}: a romantic role finds a potential partner, never family or a current partner (kind "${kind}")`);
       }
+      if (role === SELF_ROLE) err(`cast.${role}: "${SELF_ROLE}" is always you in event text, so it can't be a cast role`);
     }
     for (const choice of def.choices ?? []) {
       if (choice.id === CONTINUE_CHOICE) err(`choice id "${CONTINUE_CHOICE}" is reserved`);
@@ -400,7 +445,13 @@ function checkEvents(bundle: ContentBundle, fileOf: (typeKey: CollectionKey, id:
 
     let writesHistory = false;
     outcomesOf(def).forEach((outcome, i) => {
-      if (outcome.text) template(`outcome[${i}].text`, outcome.text);
+      const sentenced = (outcome.effects as Effect[]).some((e) => e.type === 'legal');
+      if (outcome.text) {
+        const values = [...allowed.values, ...(sentenced ? ['sentence'] : [])];
+        for (const message of checkTemplate(outcome.text, { roles: allowed.roles, values })) {
+          err(`outcome[${i}].text: ${message}${message.includes('{sentence}') ? ' ({sentence} needs a legal effect in the same outcome)' : ''}`);
+        }
+      }
       for (const effect of outcome.effects as Effect[]) {
         const where = `outcome[${i}] ${effect.type}`;
         if ('role' in effect && effect.role !== undefined && !roles.includes(effect.role)) err(`${where}: role "${effect.role}" is not in the cast`);
@@ -410,10 +461,21 @@ function checkEvents(bundle: ContentBundle, fileOf: (typeKey: CollectionKey, id:
         if (effect.type === 'relationship' && effect.kind && !EFFECT_KINDS.includes(effect.kind)) {
           err(`${where}: kind can only become ${EFFECT_KINDS.join(', ')}`);
         }
-        if (effect.type === 'death' && (actionEvents.has(id) || workEvents.has(id))) {
+        if (effect.type === 'death' && (actionEvents.has(id) || workEvents.has(id) || doctorEvents.has(id))) {
           err(`${where}: a management action's result can't kill (it happens between years)`);
         }
         if (effect.type === 'job' && effect.jobId !== undefined && !bundle.jobs[effect.jobId]) err(`${where}: unknown job "${effect.jobId}"`);
+        if (effect.type === 'health' && !bundle.conditions[effect.conditionId]) err(`${where}: unknown health condition "${effect.conditionId}"`);
+        if (effect.type === 'legal') {
+          const offense = bundle.offenses[effect.offenseId];
+          if (!offense) err(`${where}: unknown offense "${effect.offenseId}"`);
+          else if (effect.outcome === 'fine' && !offense.fine) err(`${where}: "${effect.offenseId}" has no fine range for a fine`);
+          else if (effect.outcome === 'probation' && effect.years === undefined && !offense.probationYears) err(`${where}: "${effect.offenseId}" has no probationYears; give years`);
+          else if (effect.outcome === 'jail' && effect.years === undefined && !offense.jailYears) err(`${where}: "${effect.offenseId}" has no jailYears; give years`);
+        }
+        if (effect.type === 'identity' && effect.field === 'pronouns' && effect.value !== 'fromLatent' && !bundle.pronouns[effect.value]) {
+          err(`${where}: unknown pronoun preset "${effect.value}"`);
+        }
         if (effect.type === 'history') {
           writesHistory = true;
           template(`${where}.text`, effect.text);
@@ -433,7 +495,15 @@ function checkEvents(bundle: ContentBundle, fileOf: (typeKey: CollectionKey, id:
   }
 
   for (const [id, def] of Object.entries(bundle.events)) {
-    if (def.followUpOnly && !def.retired && !scheduledIds.has(id) && !actionEvents.has(id) && !triggerEvents.has(id) && !workEvents.has(id)) {
+    if (
+      def.followUpOnly &&
+      !def.retired &&
+      !scheduledIds.has(id) &&
+      !actionEvents.has(id) &&
+      !triggerEvents.has(id) &&
+      !workEvents.has(id) &&
+      !systemEvents.has(id)
+    ) {
       errors.push({ file: fileOf('events', id), message: `${id}: followUpOnly, but no event schedules it and no action or trigger uses it` });
     }
   }
@@ -607,5 +677,105 @@ function checkCareers(bundle: ContentBundle, fileOf: (typeKey: CollectionKey, id
       if (Object.keys(def.cast ?? {}).sort().join(', ') !== roles) err(`answers the "${result}" work result, so its cast is exactly: ${roles || 'nobody'}`);
     }
   }
+  return errors;
+}
+
+/** A registry's events: each exists and is followUpOnly (plus any extra rule). */
+function checkRegistryEvents(
+  bundle: ContentBundle,
+  fileOf: (typeKey: CollectionKey, id: string) => string,
+  file: string,
+  label: string,
+  events: readonly string[],
+  extra: (def: EventDef, err: (message: string) => void) => void = () => undefined,
+): ContentError[] {
+  const errors: ContentError[] = [];
+  if (!events.some((id) => bundle.events[id] && !bundle.events[id].retired)) errors.push({ file, message: `${label}: needs at least one active event` });
+  for (const id of events) {
+    const def = bundle.events[id];
+    if (!def) {
+      errors.push({ file, message: `${label}: unknown event "${id}"` });
+      continue;
+    }
+    const err = (message: string) => errors.push({ file: fileOf('events', id), message: `${id}: ${message}` });
+    if (!def.followUpOnly) err(`answers ${label}, so it must be followUpOnly`);
+    extra(def, err);
+  }
+  return errors;
+}
+
+/** Each target names something that exists, and every active definition has one. */
+function checkTargets(record: Record<string, unknown>, defs: Record<string, { retired?: boolean | undefined }>, field: string): ContentError[] {
+  const errors: ContentError[] = [];
+  for (const id of Object.keys(record)) if (!defs[id]) errors.push({ file: TARGETS, message: `${field}: unknown "${id}"` });
+  for (const [id, def] of Object.entries(defs)) if (!def.retired && record[id] === undefined) errors.push({ file: TARGETS, message: `${field}: no target for "${id}"` });
+  return errors;
+}
+
+/**
+ * Health (Stage 9): conditions point at real causes and flags, doctor
+ * results exist (followUpOnly, nobody cast, never a death: a visit happens
+ * between years), and every condition has a target rate.
+ */
+function checkHealth(bundle: ContentBundle, fileOf: (typeKey: CollectionKey, id: string) => string): ContentError[] {
+  const errors: ContentError[] = [];
+  const { flags } = bundle.registries.flags;
+  for (const [id, def] of Object.entries(bundle.conditions)) {
+    const file = fileOf('conditions', id);
+    if (def.cause !== undefined && !bundle.causes[def.cause]) errors.push({ file, message: `${id}: unknown cause "${def.cause}"` });
+    const refs = referencesIn(def.onset?.requires);
+    for (const f of refs.flags) if (!flags[f]) errors.push({ file, message: `${id}: flag "${f}" is not in registries/flags.yaml` });
+    if (rolesIn(def.onset?.requires).length > 0 || refs.memories.length > 0) errors.push({ file, message: `${id}: onset can't depend on cast roles or memories` });
+  }
+  for (const result of DOCTOR_RESULTS) {
+    errors.push(
+      ...checkRegistryEvents(bundle, fileOf, HEALTH_REGISTRY, `doctor.${result}`, bundle.registries.health.doctor[result].events, (def, err) => {
+        if (Object.keys(def.cast ?? {}).length > 0) err('answers a doctor visit, so it casts nobody');
+      }),
+    );
+  }
+  errors.push(...checkTargets(bundle.balance.targets.health.conditions, bundle.conditions, 'health.conditions'));
+  return errors;
+}
+
+/**
+ * The law (Stage 9): legal registry events exist and are followUpOnly; the
+ * first year in prison is a prison event and release and probation events
+ * aren't; prison events are for adults; every offense has a target rate.
+ */
+function checkLegal(bundle: ContentBundle, fileOf: (typeKey: CollectionKey, id: string) => string): ContentError[] {
+  const errors: ContentError[] = [];
+  const prison = (def: EventDef) => bundle.registries.categories.categories[def.category]?.prison === true;
+  for (const trigger of LEGAL_TRIGGERS) {
+    errors.push(
+      ...checkRegistryEvents(bundle, fileOf, LEGAL_REGISTRY, `triggers.${trigger}`, bundle.registries.legal.triggers[trigger].events, (def, err) => {
+        if ((trigger === 'jailed') !== prison(def)) {
+          err(trigger === 'jailed' ? 'begins a prison sentence, so it must be a prison event' : `answers ${trigger}, which happens outside prison, so it can't be a prison event`);
+        }
+      }),
+    );
+  }
+  for (const [id, def] of Object.entries(bundle.events)) {
+    if (prison(def) && def.lifeStages.some((s) => s === 'early' || s === 'child' || s === 'teen')) {
+      errors.push({ file: fileOf('events', id), message: `${id}: prison is for adults: a prison event can't be in life stages early, child or teen` });
+    }
+  }
+  errors.push(...checkTargets(bundle.balance.targets.legal.offenses, bundle.offenses, 'legal.offenses'));
+  return errors;
+}
+
+/** Self-discovery (Stage 9): registry events exist and are followUpOnly, and talents name real jobs. */
+function checkDiscovery(bundle: ContentBundle, fileOf: (typeKey: CollectionKey, id: string) => string): ContentError[] {
+  const errors: ContentError[] = [];
+  const r = bundle.registries.discovery;
+  for (const kind of DISCOVERY_KINDS) errors.push(...checkRegistryEvents(bundle, fileOf, DISCOVERY_REGISTRY, `surfacing.${kind}`, r.surfacing[kind].events));
+  for (const kind of LATENT_KINDS) errors.push(...checkRegistryEvents(bundle, fileOf, DISCOVERY_REGISTRY, `resurfacing.${kind}`, r.resurfacing[kind].events));
+  errors.push(...checkRegistryEvents(bundle, fileOf, DISCOVERY_REGISTRY, 'crisis', r.crisis.events));
+  errors.push(...checkRegistryEvents(bundle, fileOf, DISCOVERY_REGISTRY, 'comingOut', r.comingOut.events));
+  for (const [id, talent] of Object.entries(bundle.talents)) {
+    for (const job of talent.boost.jobs) if (!bundle.jobs[job]) errors.push({ file: fileOf('talents', id), message: `${id}: unknown job "${job}"` });
+  }
+  const t = bundle.balance.targets.lifespan.median;
+  if (t.min > t.max) errors.push({ file: TARGETS, message: 'lifespan.median: min is greater than max' });
   return errors;
 }

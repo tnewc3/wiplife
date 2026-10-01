@@ -219,6 +219,11 @@ export const eventsBalanceSchema = z.strictObject({
 });
 export type EventsBalance = z.infer<typeof eventsBalanceSchema>;
 
+/** A range of shares, from min to max. */
+const shareRangeSchema = z
+  .strictObject({ min: probabilitySchema, max: probabilitySchema })
+  .refine((r) => r.min <= r.max, 'min must not be greater than max');
+
 /**
  * Target numbers simulation runs are judged against (docs/technical.md,
  * section Q, "What the simulation looks for"). Each stage's acceptance
@@ -259,6 +264,25 @@ export const targetsBalanceSchema = z.strictObject({
     firingRate: z.strictObject({ min: probabilitySchema, max: probabilitySchema }),
     /** Layoffs per year worked in a job fall in this range. */
     layoffRate: z.strictObject({ min: probabilitySchema, max: probabilitySchema }),
+  }),
+  /** The median age at death of all simulated lives falls in this range (Stages 3 and 9). */
+  lifespan: z.strictObject({ median: z.strictObject({ min: z.int().min(1), max: z.int().min(1) }) }),
+  /** Share of all simulated lives that ever have each health condition (every active condition needs one; Stage 9). */
+  health: z.strictObject({ conditions: z.record(z.string(), shareRangeSchema) }),
+  /** Share of all simulated lives with each offense on their record (every active offense needs one), and that ever go to prison (Stage 9). */
+  legal: z.strictObject({ offenses: z.record(z.string(), shareRangeSchema), jailed: shareRangeSchema }),
+  /**
+   * Share of all simulated lives in which each kind of discovery surfaced at
+   * least once (a latent trait or a hidden talent coming to light; Stage 9).
+   */
+  discovery: z.strictObject({
+    surfaced: z.strictObject({
+      attraction: shareRangeSchema,
+      gender: shareRangeSchema,
+      expression: shareRangeSchema,
+      personality: shareRangeSchema,
+      talent: shareRangeSchema,
+    }),
   }),
 });
 export type TargetsBalance = z.infer<typeof targetsBalanceSchema>;

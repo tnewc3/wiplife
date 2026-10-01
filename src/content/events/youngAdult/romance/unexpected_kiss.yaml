@@ -1,0 +1,50 @@
+# Try it and decide (docs/design.md, section F): adults only.
+id: unexpected_kiss
+title: Out on the porch
+text: >-
+  At a friend's party, {admirer.name} has been next to you all night,
+  laughing at your jokes. Out on the porch, away from the noise,
+  {admirer.they} {admirer:asks|ask}, quietly, if {admirer.they} can kiss you.
+tone: light
+category: romance
+rarity: rare
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { romance: [single] }
+weight:
+  base: 1
+  modifiers:
+    - { if: { discovery: { latent: [attraction] } }, x: 8 }
+once: true
+cast:
+  admirer: { kind: acquaintance, admirer: true, createIfMissing: true, newChance: 0.7 }
+choices:
+  - id: yes_right
+    label: Say yes. It feels right.
+    outcome:
+      text: >-
+        It's a good kiss. A surprising one. You walk home turning it over and
+        over, realizing it's opened a door you didn't know was there.
+      effects:
+        - { type: identity, field: attraction, value: withRole, role: admirer }
+        - { type: relationship, role: admirer, affection: 10, trust: 4 }
+        - { type: memory, role: admirer, tag: kissed_you }
+        - { type: stat, key: happiness, delta: 4 }
+  - id: yes_not
+    label: Say yes. It's nice, but it's not you.
+    outcome:
+      text: >-
+        It's sweet, and it answers a question you'd never quite asked. You
+        tell {admirer.name} so, gently. {admirer.They} {admirer:takes|take} it well.
+      effects:
+        - { type: relationship, role: admirer, affection: 2 }
+        - { type: memory, role: admirer, tag: kissed_not_for_you }
+  - id: no
+    label: Say no, kindly
+    outcome:
+      text: '{admirer.name} nods, a little embarrassed, and you go back inside together as friends.'
+      effects:
+        - { type: relationship, role: admirer, affection: -2 }
+        - { type: memory, role: admirer, tag: turned_them_down }

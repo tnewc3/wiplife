@@ -1,0 +1,16 @@
+# Test pack: no probation events; exactly one prison event each year inside.
+sentencing:
+  priorRecord: { warning: 0.5, fine: 1, probation: 1.4, jail: 1.8 }
+  juvenile: { warning: 3, fine: 1, probation: 1, jail: 0 }
+probation:
+  eventChance:
+    - { at: 0, x: 0 }
+prison:
+  budget: { min: 1, max: 1 }
+  effects:
+    happiness: { perYear: -4, limit: 25 }
+release:
+  paroleYears: 1
+record:
+  depositMultiplier: 2
+  recentYears: 7

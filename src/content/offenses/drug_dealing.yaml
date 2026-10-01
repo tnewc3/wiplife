@@ -1,0 +1,8 @@
+id: drug_dealing
+name: drug dealing
+class: felony
+severity: 4
+outcomes: { warning: 0, fine: 1, probation: 4, jail: 2 }
+fine: { min: 5000, max: 20000 }
+probationYears: { min: 2, max: 3 }
+jailYears: { min: 1, max: 4 }

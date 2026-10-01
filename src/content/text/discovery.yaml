@@ -1,0 +1,30 @@
+# Words for self-discovery event text (Stage 9).
+
+# Who a latent attraction is to ({latentPeople}), joined into a list.
+people:
+  man: men
+  woman: women
+  nonbinary: nonbinary people
+  nobody: no one at all
+
+# A latent personality tendency ({latentTrait}): higher or lower than the
+# self you've shown. Each reads after "you found" or "it shows you".
+traits:
+  ambition:
+    higher: a hunger to make something of yourself
+    lower: that you don't need to win to be happy
+  confidence:
+    higher: a nerve you never knew you had
+    lower: how much of your confidence was an act
+  kindness:
+    higher: a soft heart you used to hide
+    lower: a hard edge you can't pretend away
+  riskTaking:
+    higher: a taste for risk you never let yourself have
+    lower: how much you crave safe ground
+  discipline:
+    higher: a steady, stubborn focus
+    lower: how badly you want to stop following the rules
+  sociability:
+    higher: how much you love a crowd
+    lower: how much you need to be alone

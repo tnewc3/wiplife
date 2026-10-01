@@ -1,0 +1,69 @@
+id: easy_money_package
+title: Don't open it
+text: >-
+  {contact.name}, someone you know from around, offers you $2,000 to drive a
+  backpack across town. The only rule is that you don't open it.
+tone: dark
+category: justice
+rarity: rare
+lifeStages: [youngAdult, adult]
+requires: { age: { gte: 18 } }
+weight:
+  base: 1.5
+  modifiers:
+    - { if: { finances: { missed: { gte: 1 } } }, x: 2.5 }
+    - { if: { trait: riskTaking, gt: 60 }, x: 1.5 }
+once: true
+cast:
+  contact: { kind: acquaintance, ageOffset: { min: -5, max: 10 }, createIfMissing: true, newChance: 0.6 }
+choices:
+  - id: once
+    label: Do it once
+    check:
+      base: 65
+      stats: [{ key: luck, weight: 0.4 }]
+      success:
+        text: Twenty nervous minutes and a handshake. The money is real. So is the knot in your stomach.
+        effects:
+          - { type: money, delta: 2000 }
+          - { type: flag, key: ran_package, value: true }
+          - { type: memory, role: contact, tag: gave_you_package }
+          - { type: stat, key: stress, delta: 4 }
+      failure:
+        text: >-
+          A broken taillight, a traffic stop, a dog that gets very excited about
+          the backpack. You get {sentence}.
+        effects:
+          - { type: legal, offenseId: drug_dealing, outcome: sentence }
+          - { type: flag, key: ran_package, value: true }
+          - { type: memory, role: contact, tag: gave_you_package }
+          - { type: stat, key: reputation, delta: -10 }
+  - id: regular
+    label: Make it a regular thing
+    visibleIf: { trait: riskTaking, gt: 60 }
+    check:
+      base: 40
+      stats: [{ key: luck, weight: 0.4 }, { key: smarts, weight: 0.2 }]
+      success:
+        text: Every week for a year. The money is very good, and you stop asking yourself what's in the bags.
+        effects:
+          - { type: money, delta: 9000 }
+          - { type: flag, key: ran_package, value: true }
+          - { type: memory, role: contact, tag: gave_you_package }
+          - { type: stat, key: stress, delta: 6 }
+          - { type: stat, key: kindness, delta: -3 }
+      failure:
+        text: >-
+          It was always going to end with a door coming off its hinges at dawn.
+          The court is not impressed: {sentence}.
+        effects:
+          - { type: legal, offenseId: drug_dealing, outcome: jail, years: 3 }
+          - { type: flag, key: ran_package, value: true }
+          - { type: memory, role: contact, tag: gave_you_package }
+          - { type: stat, key: reputation, delta: -15 }
+  - id: no
+    label: Say no
+    outcome:
+      text: '{contact.name} shrugs and asks someone else. You think about that someone else for a long time.'
+      effects:
+        - { type: stat, key: discipline, delta: 2 }

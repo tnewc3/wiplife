@@ -1,0 +1,20 @@
+id: test_coming_out
+title: Telling people
+text: You've decided to tell the people close to you.
+tone: serious
+category: identity
+rarity: common
+lifeStages: [early, child, teen, youngAdult, adult, senior]
+weight: { base: 1 }
+followUpOnly: true
+choices:
+  - id: tell
+    label: Tell them
+    outcome:
+      text: "They listen. By dinner, your family is practicing: {self.they}, {self.them}, {self.their}."
+      effects: []
+  - id: not_yet
+    label: Not yet
+    outcome:
+      text: Not yet.
+      effects: []

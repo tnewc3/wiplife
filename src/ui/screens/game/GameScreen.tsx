@@ -6,6 +6,8 @@ import { Screen } from '../../components/Screen';
 import { HomeTab } from '../home/HomeTab';
 import { MoneyTab } from '../money/MoneyTab';
 import { HousingScreen } from '../more/HousingScreen';
+import { HealthScreen } from '../more/HealthScreen';
+import { LegalBanner } from '../../components/LegalBanner';
 import { MoreTab } from '../more/MoreTab';
 import { WorkTab } from '../work/WorkTab';
 import { PeopleTab } from '../people/PeopleTab';
@@ -60,11 +62,16 @@ export function GameScreen({ life }: { life: LifeState }) {
   const current = tabs.find((t) => t.id === tab) ?? tabs[0]!;
   const person = tab === 'people' && personId !== null && life.people[personId] ? personId : null;
   const home = tab === 'more' && moreView === 'home';
-  const back = person ? { onBack: closePerson, backLabel: 'Back to People' } : home ? { onBack: closeHome, backLabel: 'Back to More' } : {};
+  const health = tab === 'more' && moreView === 'health';
+  const back = person
+    ? { onBack: closePerson, backLabel: 'Back to People' }
+    : home || health
+      ? { onBack: closeHome, backLabel: 'Back to More' }
+      : {};
 
   return (
     <Screen
-      title={home ? 'Home' : current.label}
+      title={home ? 'Home' : health ? 'Health' : current.label}
       {...back}
       footer={
         <>
@@ -73,6 +80,7 @@ export function GameScreen({ life }: { life: LifeState }) {
         </>
       }
     >
+      <LegalBanner life={life} />
       {tab === 'life' ? (
         <HomeTab life={life} />
       ) : tab === 'people' ? (
@@ -87,6 +95,8 @@ export function GameScreen({ life }: { life: LifeState }) {
         <MoneyTab life={life} />
       ) : home ? (
         <HousingScreen life={life} />
+      ) : health ? (
+        <HealthScreen life={life} />
       ) : (
         <MoreTab />
       )}

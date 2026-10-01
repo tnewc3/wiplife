@@ -33,3 +33,19 @@ nobody is fired or laid off, and the yearly review promotes you after a
 year at a level. A job application answers with `test_hired` (or
 `test_rejected`), and asking for a raise with `test_raise`, which always
 gives it (`registries/work.yaml` here replaces the real one).
+
+Health, the law and self-discovery (Stage 9) stay out of the way of the
+flows above (`balance/health.yaml`, `balance/legal.yaml` and
+`balance/discovery.yaml` here replace the real ones):
+
+- No condition ever starts on its own. Seeing a doctor answers with
+  `test_doctor`, a single card (`registries/health.yaml`).
+- At 27, `test_arrest` offers a getaway drive: "Stay home", or two years in
+  prison. The first year inside begins with `test_prison_intake`, every
+  year inside has one `test_prison_day`, and release answers with
+  `test_release`, followed by a year of parole. No probation events.
+- From 26 (no other flow gets that old), a latent trait surfaces at once
+  with `test_discovery` (accept or push it down), and one pushed down comes
+  back the next year with `test_resurface`. Hidden talents never surface,
+  and there are no crises. Asking to tell people in the Profile sheet
+  answers the next year with `test_coming_out`.

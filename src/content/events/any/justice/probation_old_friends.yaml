@@ -1,0 +1,38 @@
+# Queued now and then while you're on probation (registries/legal.yaml probation).
+id: probation_old_friends
+title: The old crowd
+text: >-
+  {friend.name} is throwing a party, and half the people on the guest list
+  are exactly who your probation officer told you to stay away from.
+tone: neutral
+category: justice
+rarity: common
+lifeStages: [teen, youngAdult, adult, senior]
+requires: { legal: { probation: true } }
+weight: { base: 5 }
+followUpOnly: true
+cast:
+  friend: { kind: friend, ageOffset: { min: -5, max: 5 }, createIfMissing: true }
+choices:
+  - id: go
+    label: Go, just for an hour
+    check:
+      base: 50
+      stats: [{ key: discipline, weight: 0.4 }]
+      success:
+        text: One hour, one soda, home by ten. {friend.name} is impressed. So are you.
+        effects:
+          - { type: relationship, role: friend, affection: 4 }
+          - { type: stat, key: happiness, delta: 2 }
+      failure:
+        text: The hour becomes a night, and the night ends with a police raid. Your officer hears about it first. You get {sentence}.
+        effects:
+          - { type: legal, offenseId: probation_violation, outcome: sentence }
+          - { type: stat, key: stress, delta: 6 }
+  - id: stay
+    label: Stay home
+    outcome:
+      text: '{friend.name} texts photos all night. You turn your phone face down and watch a movie.'
+      effects:
+        - { type: relationship, role: friend, affection: -2 }
+        - { type: stat, key: discipline, delta: 2 }

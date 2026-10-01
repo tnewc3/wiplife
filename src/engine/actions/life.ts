@@ -16,10 +16,16 @@ import { writeFromGroup } from '../systems/history';
 import type { LifeState } from '../types';
 import { CAREER_ACTION_IDS, CAREER_ACTIONS } from './career';
 import { EDUCATION_ACTION_IDS, EDUCATION_ACTIONS } from './education';
+import { PERSONAL_ACTION_IDS, PERSONAL_ACTIONS } from './personal';
+import type { IdentityEdit } from '../discovery';
+import { isIncarcerated, onProbation } from '../legal';
 
 export const MONEY_ACTION_IDS = ['set_lifestyle', 'start_gig', 'stop_gig', 'pay_debt', 'debt_plan'] as const;
 export const HOME_ACTION_IDS = ['rent_home', 'move_home', 'relocate', 'buy_home', 'sell_home', 'find_roommate', 'live_alone'] as const;
-export const LIFE_ACTION_IDS = [...MONEY_ACTION_IDS, ...HOME_ACTION_IDS, ...EDUCATION_ACTION_IDS, ...CAREER_ACTION_IDS] as const;
+export const LIFE_ACTION_IDS = [...MONEY_ACTION_IDS, ...HOME_ACTION_IDS, ...EDUCATION_ACTION_IDS, ...CAREER_ACTION_IDS, ...PERSONAL_ACTION_IDS] as const;
+
+/** The only money, home, school, work and personal actions you can take in prison (Stage 9). */
+export const PRISON_LIFE_ACTIONS: readonly LifeActionId[] = ['pay_debt', 'debt_plan', 'stop_gig', 'edit_identity'];
 export type LifeActionId = (typeof LIFE_ACTION_IDS)[number];
 
 /** Parameters, after validation. */
@@ -35,6 +41,8 @@ export interface LifeActionParams {
   gradProgramId?: string;
   /** Job applications (Stage 8). */
   jobId?: string;
+  /** An identity edit from the Profile sheet (Stage 9). */
+  identity?: IdentityEdit;
 }
 
 export interface LifeActionRule {
@@ -144,6 +152,8 @@ export const LIFE_ACTIONS: Record<LifeActionId, LifeActionRule> = {
     allowed: (state, p, content) =>
       independent(state, content) &&
       ['with_parents', 'renting', 'homeless'].includes(state.housing.kind) &&
+      // Probation keeps you where you are (Stage 9).
+      !onProbation(state) &&
       p.cityId !== state.character.cityId &&
       state.finances.savings >= moveInCost(state, p.cityId!, content),
     apply: (state, p, content) => {
@@ -193,9 +203,12 @@ export const LIFE_ACTIONS: Record<LifeActionId, LifeActionRule> = {
   },
   ...EDUCATION_ACTIONS,
   ...CAREER_ACTIONS,
+  ...PERSONAL_ACTIONS,
 };
 
-/** True when the action can be taken now with these (validated) parameters. */
+/** True when the action can be taken now with these (validated) parameters. In prison, only a few can. */
 export function isLifeActionAvailable(state: LifeState, actionId: LifeActionId, params: LifeActionParams, content: ContentBundle): boolean {
-  return state.phase === 'yearStart' && LIFE_ACTIONS[actionId].allowed(state, params, content);
+  if (state.phase !== 'yearStart') return false;
+  if (isIncarcerated(state) && !PRISON_LIFE_ACTIONS.includes(actionId)) return false;
+  return LIFE_ACTIONS[actionId].allowed(state, params, content);
 }

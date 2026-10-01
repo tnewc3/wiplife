@@ -384,3 +384,45 @@ describe('lives from Stage 8 on', () => {
     expect(lifeStateSchema.safeParse(bad).success).toBe(false);
   });
 });
+
+describe('lives from Stage 9 on', () => {
+  it('upgrade a schema version 7 life with an empty self-discovery record', async () => {
+    const life = lifeAtAge('stage9-migrate', 30);
+    const { discovery: _discovery, ...v7 } = life;
+    const db = freshDb();
+    await db.lives.put({ id: 'active', envelope: { ...makeEnvelope(v7, content.contentVersion), schemaVersion: 7 } });
+    const result = await readSave(db, loadedLifeSchema(content));
+    expect(result.status).toBe('ok');
+    if (result.status !== 'ok') return;
+    expect(result.envelope.schemaVersion).toBe(CURRENT_SCHEMA_VERSION);
+    expect(result.envelope.data.discovery).toEqual({ surfaced: {} });
+    expect(result.envelope.data.health).toEqual(life.health);
+  });
+
+  it('round trip a life with conditions, a doctor visit, a record, prison and things that surfaced', async () => {
+    const life = produce(lifeAtAge('stage9-round', 30), (d) => {
+      d.health = { conditions: [{ conditionId: 'depression', since: d.currentYear - 2, severity: 35, treated: true }], lastVisit: d.currentYear - 1 };
+      d.legal = {
+        record: [
+          { offenseId: 'shoplifting', year: d.currentYear - 15, outcome: 'warning' },
+          { offenseId: 'theft', year: d.currentYear, outcome: 'jail', years: 2 },
+        ],
+        incarceratedUntil: d.currentYear + 2,
+      };
+      d.housing = { kind: 'incarcerated', cityId: d.character.cityId, annualCost: 0, since: d.currentYear };
+      d.discovery = { surfaced: { personality: { year: d.currentYear - 3, times: 2 } }, crisisYear: d.currentYear - 1 };
+      d.character.latent = { personality: { riskTaking: 90 } };
+      d.character.hidden.innerConflict = 33;
+    });
+    expect(loadedLifeSchema(content).safeParse(life).success).toBe(true);
+    expect(await roundTrip(life)).toEqual(life);
+  });
+
+  it('refuse prison without a sentence, an unknown condition, or a bad severity', () => {
+    const life = lifeAtAge('stage9-bad', 30);
+    const schema = loadedLifeSchema(content);
+    expect(schema.safeParse({ ...life, housing: { ...life.housing, kind: 'incarcerated' } }).success).toBe(false);
+    expect(schema.safeParse({ ...life, health: { conditions: [{ conditionId: 'the_vapors', since: life.currentYear, severity: 10, treated: false }] } }).success).toBe(false);
+    expect(lifeStateSchema.safeParse({ ...life, health: { conditions: [{ conditionId: 'cancer', since: life.currentYear, severity: 0, treated: false }] } }).success).toBe(false);
+  });
+});

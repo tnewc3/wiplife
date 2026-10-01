@@ -1,0 +1,66 @@
+# A crisis: whoever trusts and loves you most steps in (a support role).
+id: intervention
+title: The living room
+text: >-
+  You come home to find {family.name} on your couch, along with people you
+  haven't seen in months and a folder of brochures. Nobody is smiling.
+  {family.They} {family:says|say} {family.they} {family:loves|love} you, and
+  that this has to stop.
+tone: dark
+category: health
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { health: { conditions: [alcohol_addiction, drug_addiction, gambling_addiction], treated: false } }
+weight: { base: 7 }
+cooldownYears: 5
+cast:
+  family: { support: true }
+choices:
+  - id: rehab
+    label: Go to treatment
+    outcome:
+      text: >-
+        Twenty-eight days, a lot of crying, a lot of bad coffee. You come out
+        shaky and clear. {family.name} is waiting in the parking lot.
+      effects:
+        - { type: health, conditionId: alcohol_addiction, treated: true }
+        - { type: health, conditionId: drug_addiction, treated: true }
+        - { type: health, conditionId: gambling_addiction, treated: true }
+        - { type: debt, action: add, kind: medical, amount: 6000 }
+        - { type: relationship, role: family, affection: 8, trust: 10 }
+        - { type: memory, role: family, tag: staged_intervention }
+        - { type: flag, key: in_recovery, value: true }
+        - { type: stat, key: vice, delta: -10 }
+        - { type: history, text: You went into treatment for your addiction., importance: 3 }
+  - id: own_way
+    label: Promise to cut back on your own
+    check:
+      base: 30
+      stats: [{ key: discipline, weight: 0.5 }, { key: vice, weight: -0.3 }]
+      success:
+        text: >-
+          You do it, white-knuckled and alone. It's slower and uglier than
+          treatment, but it holds.
+        effects:
+          - { type: health, conditionId: alcohol_addiction, severity: -15 }
+          - { type: health, conditionId: drug_addiction, severity: -15 }
+          - { type: health, conditionId: gambling_addiction, severity: -15 }
+          - { type: stat, key: discipline, delta: 3 }
+          - { type: relationship, role: family, trust: 3 }
+      failure:
+        text: The promise lasts nine days. {family.name} stops asking how you're doing.
+        effects:
+          - { type: stat, key: vice, delta: 6 }
+          - { type: stat, key: stress, delta: 4 }
+          - { type: relationship, role: family, trust: -10 }
+  - id: walk_out
+    label: Walk out
+    outcome:
+      text: You slam the door hard enough to rattle the windows. Nobody follows you.
+      effects:
+        - { type: relationship, role: family, affection: -12, trust: -15 }
+        - { type: memory, role: family, tag: walked_out_on_them }
+        - { type: stat, key: stress, delta: 5 }

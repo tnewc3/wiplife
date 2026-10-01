@@ -1,0 +1,27 @@
+# Answers seeing a doctor when a condition gets treated (registries/health.yaml treated).
+id: doctor_treatment
+title: A plan
+text: >-
+  The doctor writes for a long time, then hands you a printed plan: a
+  prescription, a follow-up date and a list of things to change. "It works,"
+  the doctor says, "if you work it."
+tone: neutral
+category: health
+rarity: common
+lifeStages: [early, child, teen, youngAdult, adult, senior]
+weight: { base: 1 }
+followUpOnly: true
+choices:
+  - id: commit
+    label: Follow the plan to the letter
+    outcome:
+      text: Alarms on your phone, pills in a little box, the works. It feels like taking yourself seriously.
+      effects:
+        - { type: stat, key: discipline, delta: 2 }
+        - { type: stat, key: stress, delta: -2 }
+  - id: mostly
+    label: Do the parts that fit your life
+    outcome:
+      text: You take the pills. The rest of the list goes on the fridge, where it slowly curls at the corners.
+      effects:
+        - { type: stat, key: stress, delta: -1 }

@@ -170,11 +170,18 @@ export function settleHousehold(state: LifeState, content: ContentBundle): void 
   }
 }
 
-/** Up-front cost of renting in a city: moving (across town or to another city) plus a deposit. */
+/**
+ * Up-front cost of renting in a city: moving (across town or to another city)
+ * plus a deposit. Landlords ask more of someone with probation or prison on
+ * their record recently (balance/legal.yaml record, Stage 9).
+ */
 export function moveInCost(state: LifeState, cityId: Id, content: ContentBundle): number {
   const { housing } = content.balance.economy;
+  const { record } = content.balance.legal;
   const moving = cityId === state.character.cityId ? housing.movingCost : housing.relocationCost;
-  return wholeDollars(moving + rentIn(cityOf(state, content, cityId), false, content) * housing.deposit);
+  const flagged = state.legal.record.some((r) => (r.outcome === 'probation' || r.outcome === 'jail') && state.currentYear - r.year <= record.recentYears);
+  const deposit = housing.deposit * (flagged ? record.depositMultiplier : 1);
+  return wholeDollars(moving + rentIn(cityOf(state, content, cityId), false, content) * deposit);
 }
 
 export type PurchaseBlock = 'savings' | 'income' | 'bankruptcy';

@@ -1,0 +1,12 @@
+id: test_probation
+title: Check-in
+text: Your probation officer wants to see you.
+tone: neutral
+category: justice
+rarity: common
+lifeStages: [teen, youngAdult, adult, senior]
+weight: { base: 1 }
+followUpOnly: true
+autoOutcome:
+  text: It goes fine.
+  effects: []

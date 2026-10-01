@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { content } from '../../../content';
 import { getCharacterSummary, getFamily, getHistoryFeed, getYearRecap } from '../../../engine/selectors';
 import type { LifeState, Stats } from '../../../engine/types';
@@ -6,6 +7,7 @@ import { Button } from '../../components/Button';
 import { Card } from '../../components/Card';
 import { StatBar } from '../../components/StatBar';
 import { YearRecapList } from '../../components/YearRecapList';
+import { ProfileSheet } from './ProfileSheet';
 import {
   ageLabel,
   HOUSING_LABELS,
@@ -72,13 +74,19 @@ export function HomeTab({ life }: { life: LifeState }) {
   const summary = getCharacterSummary(life, content);
   const family = getFamily(life);
   const love = romanceLine(summary.romance.status, summary.romance.partnerName);
+  const [profileOpen, setProfileOpen] = useState(false);
 
   return (
     <div className="flex flex-col gap-4">
       <Card>
-        <h2 className="text-2xl leading-tight font-bold break-words [overflow-wrap:anywhere]" data-testid="character-name">
-          {summary.fullName}
-        </h2>
+        <div className="flex items-start justify-between gap-3">
+          <h2 className="min-w-0 text-2xl leading-tight font-bold break-words [overflow-wrap:anywhere]" data-testid="character-name">
+            {summary.fullName}
+          </h2>
+          <Button variant="secondary" className="shrink-0" onClick={() => setProfileOpen(true)}>
+            Profile
+          </Button>
+        </div>
         <p className="mt-1 break-words text-muted [overflow-wrap:anywhere]">
           {ageLabel(summary.age)} · {summary.cityName} · {summary.pronounLabel}
         </p>
@@ -138,6 +146,7 @@ export function HomeTab({ life }: { life: LifeState }) {
       </Card>
 
       <StoryFeed life={life} />
+      <ProfileSheet life={life} open={profileOpen} onClose={() => setProfileOpen(false)} />
     </div>
   );
 }

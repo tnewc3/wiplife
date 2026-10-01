@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { baseDefSchema, idSchema } from './common';
+import { baseDefSchema, idSchema, scoreKeySchema } from './common';
 
 export const genderCategorySchema = z.enum(['man', 'woman', 'nonbinary']);
 export type GenderCategory = z.infer<typeof genderCategorySchema>;
@@ -45,7 +45,17 @@ export type PronounPreset = z.infer<typeof pronounPresetSchema>;
 /** A hidden talent area, discovered through events later. */
 export const talentSchema = baseDefSchema.extend({
   name: z.string().trim().min(1).max(40),
+  /** As it reads inside a sentence ("music"), for {talent} in event text (Stage 9). */
+  noun: z.string().trim().min(1).max(40),
   description: z.string().trim().min(1).max(200),
+  /**
+   * What finding it does (Stage 9): stat changes once, when you discover it,
+   * and a performance bonus (balance/discovery.yaml talent) in these job tracks.
+   */
+  boost: z.strictObject({
+    stats: z.array(z.strictObject({ key: scoreKeySchema, delta: z.int().min(-20).max(20) })).default([]),
+    jobs: z.array(idSchema).default([]),
+  }),
 });
 export type TalentDef = z.infer<typeof talentSchema>;
 
