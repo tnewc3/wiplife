@@ -1,0 +1,40 @@
+id: client_dinner
+title: The big client
+text: >-
+  {boss.name} needs you at dinner with the company's biggest client: steak,
+  wine, and a contract nobody has signed yet.
+tone: neutral
+category: work
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  career:
+    employed: true
+    job: [accountant, financial_analyst, marketing_specialist, management_consultant, lawyer, software_engineer, civil_engineer, bank_teller]
+weight: { base: 5 }
+cooldownYears: 5
+cast:
+  boss: { kind: boss }
+choices:
+  - id: charm
+    label: Turn on the charm
+    check:
+      base: 40
+      stats: [{ key: sociability, weight: 0.3 }, { key: confidence, weight: 0.2 }, { key: looks, weight: 0.1 }]
+      success:
+        text: By dessert the client is telling you about their divorce. The contract is signed the next morning.
+        effects:
+          - { type: job, action: performance, value: 8 }
+          - { type: relationship, role: boss, affection: 6, trust: 4 }
+          - { type: stat, key: confidence, delta: 2 }
+      failure:
+        text: You laugh at the wrong moment, and the client checks their watch twice. They "need time to think."
+        effects:
+          - { type: job, action: performance, value: -4 }
+          - { type: relationship, role: boss, affection: -3 }
+  - id: numbers
+    label: Stick to the numbers
+    outcome:
+      text: Solid, careful, a little dull. The client signs a smaller deal.
+      effects:
+        - { type: job, action: performance, value: 2 }

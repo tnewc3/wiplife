@@ -1,0 +1,37 @@
+id: recruiter_call
+title: A recruiter calls
+text: >-
+  A recruiter with a very bright voice says a competitor is "very excited"
+  about you and would pay more. Much more, if you're open to talking.
+tone: light
+category: work
+rarity: common
+lifeStages: [youngAdult, adult]
+requires: { career: { employed: true, performance: { gte: 60 }, years: { gte: 2 } } }
+weight: { base: 4 }
+cooldownYears: 5
+cast:
+  boss: { kind: boss }
+choices:
+  - id: leverage
+    label: Tell {boss.name} about the offer
+    check:
+      base: 45
+      stats: [{ job: performance, weight: 0.3 }, { role: boss, key: affection, weight: 0.3 }, { key: confidence, weight: 0.1 }]
+      success:
+        text: '{boss.name} matches it on the spot. "We''re not losing you to them."'
+        effects:
+          - { type: job, action: raise }
+          - { type: memory, role: boss, tag: gave_you_raise }
+      failure:
+        text: '{boss.name} says {boss.they} {boss:hopes|hope} you''ll stay, but the budget is the budget. Now you both know you''re looking.'
+        effects:
+          - { type: relationship, role: boss, trust: -8 }
+          - { type: stat, key: stress, delta: 2 }
+  - id: flattered
+    label: Say you're happy where you are
+    outcome:
+      text: You hang up feeling ten feet tall. It's nice to be wanted.
+      effects:
+        - { type: stat, key: confidence, delta: 3 }
+        - { type: stat, key: happiness, delta: 2 }

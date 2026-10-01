@@ -1,0 +1,33 @@
+id: sabbatical
+title: Walk away?
+text: >-
+  You look up from your desk one ordinary afternoon and think, very
+  clearly: I could just leave. Your savings could carry you for a while.
+tone: neutral
+category: work
+rarity: uncommon
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { career: { employed: true, years: { gte: 3 } } }
+    - { money: { gte: 25000 } }
+    - { stat: happiness, lt: 50 }
+weight: { base: 3 }
+cooldownYears: 10
+choices:
+  - id: leave
+    label: Quit and take a year for yourself
+    outcome:
+      text: You hand in your notice, buy a backpack and don't set an alarm for a long time. You'll figure out the rest later.
+      effects:
+        - { type: job, action: quit }
+        - { type: money, delta: -6000 }
+        - { type: stat, key: happiness, delta: 8 }
+        - { type: stat, key: stress, delta: -10 }
+        - { type: history, text: You walked away from a steady job to take a year for yourself., importance: 2 }
+  - id: stay
+    label: Stay, it's a good job
+    outcome:
+      text: The feeling passes. Mostly. You book a long weekend instead.
+      effects:
+        - { type: stat, key: stress, delta: -2 }

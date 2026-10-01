@@ -29,3 +29,9 @@ flags:
   gifted_program: You were in the gifted program at school
   advanced_classes: You took advanced classes in high school
   studied_abroad: You spent a semester studying abroad
+  # Work (Stage 8).
+  office_romance: You dated someone you worked with
+  stole_from_work: You stole from an employer
+  whistleblower: You blew the whistle on wrongdoing at work
+  burned_out: You worked yourself into burnout
+  union_member: You helped unionize a workplace

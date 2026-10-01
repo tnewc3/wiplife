@@ -84,6 +84,18 @@ export const migrations: readonly Migration[] = [
       return { ...data, education: { ...life.education, credentials, admission: null, left: null, applied: [], fund: 0 } };
     },
   },
+  {
+    from: 6,
+    description:
+      'Stage 8: careers. Adds this year’s job applications and job openings (both empty: the openings are rolled as ' +
+      'the next year begins). Nobody could hold a job before, so there is no job and no career history to upgrade.',
+    migrate: (data) => {
+      if (!isRecord(data)) return data;
+      const life = data as { career?: unknown };
+      if (!isRecord(life.career)) return data;
+      return { ...data, career: { ...life.career, job: null, history: [], applied: [], openings: [] } };
+    },
+  },
 ];
 
 function isRecord(value: unknown): value is Record<string, unknown> {

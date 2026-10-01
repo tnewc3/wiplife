@@ -8,6 +8,7 @@ import {
   targetsBalanceSchema,
 } from './balance';
 import { actionRegistrySchema, relationshipsBalanceSchema } from './relationships';
+import { careersBalanceSchema, jobSchema, workRegistrySchema } from './careers';
 import { appearanceOptionsSchema, identityOptionsSchema, namePoolSchema, pronounPresetSchema, talentSchema } from './character';
 import { citySchema } from './city';
 import { economyBalanceSchema, triggerRegistrySchema } from './economy';
@@ -16,6 +17,7 @@ import { categoryRegistrySchema, eventSchema, flagRegistrySchema, memoryRegistry
 import { causeSchema, historyTextSchema, obituaryTextSchema, relationWordsSchema } from './text';
 
 export * from './balance';
+export * from './careers';
 export * from './character';
 export * from './city';
 export * from './common';
@@ -36,6 +38,7 @@ export const collectionTypes = {
   /** Nested by life stage and category, and chain files hold several events (see compile.ts). */
   events: { folder: 'events', schema: eventSchema },
   gradPrograms: { folder: 'grad', schema: gradProgramSchema },
+  jobs: { folder: 'jobs', schema: jobSchema },
   majors: { folder: 'majors', schema: majorSchema },
   names: { folder: 'names', schema: namePoolSchema },
   pronouns: { folder: 'pronouns', schema: pronounPresetSchema },
@@ -59,6 +62,7 @@ export const singletonTypes = {
   'balance/relationships': relationshipsBalanceSchema,
   'balance/economy': economyBalanceSchema,
   'balance/education': educationBalanceSchema,
+  'balance/careers': careersBalanceSchema,
   'balance/targets': targetsBalanceSchema,
   'character/identity': identityOptionsSchema,
   'character/appearance': appearanceOptionsSchema,
@@ -70,6 +74,7 @@ export const singletonTypes = {
   'registries/categories': categoryRegistrySchema,
   'registries/actions': actionRegistrySchema,
   'registries/triggers': triggerRegistrySchema,
+  'registries/work': workRegistrySchema,
 } as const;
 
 export type SingletonPath = keyof typeof singletonTypes;
@@ -80,6 +85,7 @@ export const contentBundleSchema = z.strictObject({
   cities: z.record(z.string(), citySchema),
   events: z.record(z.string(), eventSchema),
   gradPrograms: z.record(z.string(), gradProgramSchema),
+  jobs: z.record(z.string(), jobSchema),
   majors: z.record(z.string(), majorSchema),
   names: z.record(z.string(), namePoolSchema),
   pronouns: z.record(z.string(), pronounPresetSchema),
@@ -94,6 +100,7 @@ export const contentBundleSchema = z.strictObject({
     relationships: relationshipsBalanceSchema,
     economy: economyBalanceSchema,
     education: educationBalanceSchema,
+    careers: careersBalanceSchema,
     targets: targetsBalanceSchema,
   }),
   character: z.strictObject({ identity: identityOptionsSchema, appearance: appearanceOptionsSchema }),
@@ -104,6 +111,7 @@ export const contentBundleSchema = z.strictObject({
     categories: categoryRegistrySchema,
     actions: actionRegistrySchema,
     triggers: triggerRegistrySchema,
+    work: workRegistrySchema,
   }),
 });
 

@@ -67,6 +67,24 @@ export const EDUCATION_HISTORY_VALUES = {
 } as const satisfies Record<string, readonly string[]>;
 export type EducationHistoryKey = keyof typeof EDUCATION_HISTORY_VALUES;
 
+/**
+ * Work milestones in text/history.yaml (career, Stage 8) and the values each
+ * may use: {title} is a job title ("junior developer"), {employer} where you
+ * work, {years} how long you worked.
+ */
+export const CAREER_HISTORY_VALUES = {
+  hired: ['title', 'employer'],
+  promoted: ['title', 'employer'],
+  fired: ['title', 'employer'],
+  laidOff: ['title', 'employer'],
+  quit: ['title', 'employer'],
+  leftForSchool: ['title', 'employer'],
+  fellThrough: ['title', 'employer'],
+  moved: ['title', 'employer'],
+  retired: ['years'],
+} as const satisfies Record<string, readonly string[]>;
+export type CareerHistoryKey = keyof typeof CAREER_HISTORY_VALUES;
+
 const importanceSchema = z.union([z.literal(1), z.literal(2), z.literal(3)]);
 const historyGroupSchema = z.strictObject({ importance: importanceSchema, variants: variantsSchema });
 
@@ -113,6 +131,13 @@ export const historyTextSchema = z.strictObject({
   education: z.strictObject(
     Object.fromEntries(Object.keys(EDUCATION_HISTORY_VALUES).map((k) => [k, historyGroupSchema])) as Record<
       EducationHistoryKey,
+      typeof historyGroupSchema
+    >,
+  ),
+  /** Work milestones (Stage 8). The values each one may use are in CAREER_HISTORY_VALUES. */
+  career: z.strictObject(
+    Object.fromEntries(Object.keys(CAREER_HISTORY_VALUES).map((k) => [k, historyGroupSchema])) as Record<
+      CareerHistoryKey,
       typeof historyGroupSchema
     >,
   ),

@@ -15,8 +15,9 @@ export function scoreOf(state: LifeState, key: EffectStatKey): number {
   return c.personality[key as keyof typeof c.personality];
 }
 
-/** A check stat's value: your own, or how a cast person feels about you (50 when nobody is cast). */
+/** A check stat's value: your own, how a cast person feels about you (50 when nobody is cast), or your job performance (50 without a job). */
 function statValue(state: LifeState, stat: CheckStat, cast: Record<string, Id>): number {
+  if ('job' in stat) return state.career.job?.performance ?? 50;
   if ('role' in stat) {
     const rel = state.relationships[cast[stat.role] ?? ''];
     return rel ? rel[stat.key] : 50;

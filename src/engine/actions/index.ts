@@ -6,23 +6,24 @@
  * 'yearStart'. The events that answer each action are content
  * (registries/actions.yaml); the person acted on is cast as `person`.
  *
- * Money and home actions (./life.ts) take effect at once and stay in
- * 'yearStart'; they are recorded in the input log the same way.
+ * Money, home and school actions (./life.ts) take effect at once and stay in
+ * 'yearStart'; they are recorded in the input log the same way. Work actions
+ * (./career.ts) go through the same path; applying for a job and asking for
+ * a raise also queue a result event (registries/work.yaml), moving to 'action'.
  */
 import { produce } from 'immer';
 import { ACTION_IDS, type ActionId, type ContentBundle, type EventDef } from '../../content/schemas';
-import { evaluate } from '../conditions';
 import { InvalidInputError } from '../creation/input';
 import { PhaseError } from '../life';
-import { weightedPick } from '../random';
-import { romanceAllowed } from '../relationships';
 import { cloneRng } from '../rng';
 import type { Id, LifeState } from '../types';
 import { isLifeActionAvailable, isLifeActionId, LIFE_ACTIONS, type LifeActionId } from './life';
 import { RELATIONSHIP_ACTIONS } from './relationships';
+import { fittingResults, queueResult } from './result';
 
 export { RELATIONSHIP_ACTIONS } from './relationships';
 export { EDUCATION_ACTION_IDS, targetOf, type EducationActionId } from './education';
+export { CAREER_ACTION_IDS, type CareerActionId } from './career';
 export {
   HOME_ACTION_IDS,
   isLifeActionAvailable,
@@ -52,16 +53,7 @@ function isActionId(value: unknown): value is ActionId {
 
 /** The action's result events that fit now, with their weights. */
 function resultEvents(state: LifeState, actionId: ActionId, personId: Id, content: ContentBundle): (readonly [EventDef, number])[] {
-  const cast = { [ACTION_ROLE]: personId };
-  const ctx = { cast, roles: 'strict' as const };
-  return content.registries.actions.actions[actionId].events.flatMap((id) => {
-    const def = content.events[id];
-    if (!def || def.retired) return [];
-    if (!evaluate(def.requires, state, ctx) || !romanceAllowed(state, def, cast, content)) return [];
-    let weight = def.weight.base * content.balance.events.rarityWeight[def.rarity];
-    for (const modifier of def.weight.modifiers ?? []) if (evaluate(modifier.if, state, ctx)) weight *= modifier.x;
-    return weight > 0 ? [[def, weight] as const] : [];
-  });
+  return fittingResults(state, content.registries.actions.actions[actionId].events, { [ACTION_ROLE]: personId }, content);
 }
 
 /**
@@ -111,11 +103,7 @@ export function performAction(state: LifeState, actionId: unknown, params: unkno
     const year = draft.currentYear;
     draft.inputLog.push({ year, kind: 'action', payload: { actionId, params: { personId } } });
     draft.relationships[personId]!.lastActionYear = year;
-    const def = weightedPick(draft.rng, options);
-    const log = draft.eventLog[def.id];
-    draft.eventLog[def.id] = { count: (log?.count ?? 0) + 1, lastYear: year };
-    draft.pending = [{ instanceId: `a${year}-${draft.inputLog.length}`, eventId: def.id, cast: { [ACTION_ROLE]: personId } }];
-    draft.phase = 'action';
+    queueResult(draft, options, { [ACTION_ROLE]: personId });
   });
 }
 

@@ -1,0 +1,15 @@
+id: auto_mechanic
+name: "Auto repair"
+category: trade
+blurb: "Engines, diagnostics, and greasy hands that know their stuff."
+requires: {"education": {"credential": ["trade_license"], "field": ["auto_mechanic"]}}
+levels:
+  - { title: "lube technician", salary: 31000 }
+  - { title: "mechanic", salary: 44000 }
+  - { title: "master mechanic", salary: 57000 }
+  - { title: "shop foreman", salary: 68000 }
+performance:
+  - { key: smarts, weight: 0.2 }
+  - { key: discipline, weight: 0.3 }
+  - { key: fitness, weight: 0.2 }
+employers: ["Torque Auto Repair", "Main Street Garage", "Gearhead Motors", "Precision Auto Care"]

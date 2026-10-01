@@ -1,0 +1,17 @@
+id: police_officer
+name: "Policing"
+category: professional
+blurb: "Long nights, hard calls, and a badge that weighs more than it looks."
+requires: {"all": [{"education": {"credential": ["hs_diploma", "ged"]}}, {"age": {"gte": 21}}, {"not": {"record": {}}}]}
+levels:
+  - { title: "patrol officer", salary: 48000 }
+  - { title: "senior officer", salary: 55000 }
+  - { title: "detective", salary: 63000 }
+  - { title: "sergeant", salary: 71000 }
+  - { title: "lieutenant", salary: 82000 }
+performance:
+  - { key: fitness, weight: 0.25 }
+  - { key: discipline, weight: 0.25 }
+  - { key: confidence, weight: 0.15 }
+  - { key: kindness, weight: 0.05 }
+employers: ["City Police Department", "County Sheriff's Office", "Metro Transit Police", "State Highway Patrol"]

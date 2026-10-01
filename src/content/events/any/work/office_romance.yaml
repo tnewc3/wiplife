@@ -1,0 +1,45 @@
+id: office_romance
+title: Overtime
+text: >-
+  Somewhere between the late nights and the shared takeout, you've started
+  looking forward to seeing {npc.name} a little too much. Tonight {npc.they}
+  {npc:lingers|linger} by your desk long after everyone else has gone.
+tone: neutral
+category: work
+rarity: uncommon
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { career: { employed: true } }
+    - { romance: [single] }
+weight: { base: 3 }
+cooldownYears: 8
+cast:
+  npc: { kind: coworker, romantic: true }
+choices:
+  - id: ask_out
+    label: Ask {npc.them} to dinner
+    check:
+      base: 45
+      stats: [{ key: confidence, weight: 0.3 }, { role: npc, key: affection, weight: 0.3 }]
+      success:
+        text: '{npc.name} says yes before you finish the sentence. You agree to keep it quiet at work. It doesn''t stay quiet for long.'
+        effects:
+          - { type: relationship, role: npc, kind: partner, affection: 15, trust: 5 }
+          - { type: memory, role: npc, tag: started_dating }
+          - { type: flag, key: office_romance, value: true }
+          - { type: stat, key: happiness, delta: 6 }
+      failure:
+        text: '"I don''t think that''s a good idea," {npc.name} says gently, "with work and everything." Monday is very awkward.'
+        effects:
+          - { type: memory, role: npc, tag: turned_you_down }
+          - { type: relationship, role: npc, affection: -4 }
+          - { type: stat, key: confidence, delta: -3 }
+  - id: professional
+    label: Keep it professional
+    outcome:
+      text: You say goodnight and mean only goodnight. It's probably wiser. It doesn't feel wiser.
+      effects:
+        - { type: stat, key: discipline, delta: 2 }
+        - { type: stat, key: happiness, delta: -1 }

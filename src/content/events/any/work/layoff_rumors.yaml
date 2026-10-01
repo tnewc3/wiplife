@@ -1,0 +1,35 @@
+id: layoff_rumors
+title: Rumors
+text: >-
+  Doors are closing for meetings that used to happen in the open. Someone
+  from corporate is "just visiting." Everyone's whispering the same word:
+  layoffs.
+tone: serious
+category: work
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires: { career: { employed: true, years: { gte: 1 } } }
+weight: { base: 4 }
+cooldownYears: 6
+choices:
+  - id: work_harder
+    label: Make yourself impossible to cut
+    outcome:
+      text: First in, last out, every report early. If they cut anyone, it won't be because of you.
+      effects:
+        - { type: job, action: performance, value: 7 }
+        - { type: stat, key: stress, delta: 5 }
+  - id: savings
+    label: Cut back and build a cushion
+    outcome:
+      text: You pack lunches and cancel subscriptions. Whatever happens, you'll be ready.
+      effects:
+        - { type: money, delta: 1500 }
+        - { type: stat, key: happiness, delta: -2 }
+        - { type: stat, key: discipline, delta: 2 }
+  - id: ignore
+    label: Ignore the gossip
+    outcome:
+      text: There are always rumors. You keep your head down and your blood pressure low.
+      effects:
+        - { type: stat, key: stress, delta: -1 }

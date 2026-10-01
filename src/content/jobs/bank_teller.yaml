@@ -1,0 +1,15 @@
+id: bank_teller
+name: "Banking"
+category: professional
+blurb: "Counting other people's money, very carefully."
+requires: {"education": {"credential": ["hs_diploma", "ged"]}}
+levels:
+  - { title: "bank teller", salary: 33000 }
+  - { title: "personal banker", salary: 40000 }
+  - { title: "loan officer", salary: 54000 }
+  - { title: "branch manager", salary: 70000 }
+performance:
+  - { key: discipline, weight: 0.3 }
+  - { key: sociability, weight: 0.2 }
+  - { key: smarts, weight: 0.15 }
+employers: ["First Prairie Bank", "Harborview Credit Union", "Keystone Savings", "Union Square Bank"]

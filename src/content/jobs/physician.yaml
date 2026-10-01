@@ -1,0 +1,16 @@
+id: physician
+name: "Medicine"
+category: professional
+blurb: "Long training, longer hours, and lives in your hands."
+requires: {"education": {"credential": ["grad"], "field": ["medicine"]}}
+levels:
+  - { title: "resident physician", salary: 64000, years: 3 }
+  - { title: "attending physician", salary: 225000 }
+  - { title: "senior physician", salary: 270000 }
+  - { title: "chief of medicine", salary: 330000 }
+performance:
+  - { key: smarts, weight: 0.35 }
+  - { key: discipline, weight: 0.25 }
+  - { key: kindness, weight: 0.1 }
+  - { key: fitness, weight: 0.05 }
+employers: ["Mercy Ridge Hospital", "St. Albans Medical Center", "Lakeside Health", "University Medical Center"]

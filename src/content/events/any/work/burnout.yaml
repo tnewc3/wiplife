@@ -1,0 +1,51 @@
+id: burnout
+title: Running on empty
+text: >-
+  You've read the same email four times and still don't know what it says.
+  Sunday nights feel like dread. Your body has started sending warnings.
+tone: serious
+category: work
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { career: { employed: true } }
+    - { stat: stress, gte: 65 }
+weight: { base: 6 }
+cooldownYears: 5
+cast:
+  boss: { kind: boss }
+choices:
+  - id: time_off
+    label: Take a week off, unpaid if you have to
+    outcome:
+      text: A week of sleeping, walking and not checking email. It isn't a cure, but you remember who you are.
+      effects:
+        - { type: stat, key: stress, delta: -12 }
+        - { type: money, delta: -800 }
+        - { type: job, action: performance, value: -3 }
+  - id: push
+    label: Push through
+    outcome:
+      text: You get everything done. You also get headaches, a twitching eye and a cold that lasts a month.
+      effects:
+        - { type: job, action: performance, value: 4 }
+        - { type: stat, key: stress, delta: 6 }
+        - { type: stat, key: health, delta: -4 }
+        - { type: flag, key: burned_out, value: true }
+  - id: talk
+    label: Tell {boss.name} the truth
+    check:
+      base: 40
+      stats: [{ role: boss, key: affection, weight: 0.4 }, { key: confidence, weight: 0.1 }]
+      success:
+        text: '{boss.name} takes two projects off your plate without being asked twice. "Why didn''t you say something sooner?"'
+        effects:
+          - { type: stat, key: stress, delta: -10 }
+          - { type: memory, role: boss, tag: went_to_bat_for_you }
+          - { type: relationship, role: boss, trust: 5 }
+      failure:
+        text: '"Everyone''s stretched," {boss.name} says. "We all have to dig deep." You dig. There''s not much left down there.'
+        effects:
+          - { type: stat, key: stress, delta: 3 }
+          - { type: relationship, role: boss, affection: -5 }

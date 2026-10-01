@@ -1,9 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import { content } from '../../src/content';
-import { formatReport, runSimulation } from './run';
+import { formatComparison, formatReport, runSimulation, targetResults } from './run';
 
 describe('simulation runner', () => {
-  it('plays lives and reports invariants, lifespans, events per year and event frequency', () => {
+  // Whole lives with every system: give them time.
+  it('plays lives and reports invariants, lifespans, events per year and event frequency', { timeout: 60_000 }, () => {
     const report = runSimulation(content, { lives: 20, seedPrefix: 'sim-test' });
     expect(report.lives).toBe(20);
     expect(report.invariantFailures).toBe(0);
@@ -17,7 +18,7 @@ describe('simulation runner', () => {
     expect(text).toContain('lottery_ticket');
   });
 
-  it('reports marriage and divorce rates, with the simulated player taking relationship actions', () => {
+  it('reports marriage and divorce rates, with the simulated player taking relationship actions', { timeout: 60_000 }, () => {
     const report = runSimulation(content, { lives: 30, seedPrefix: 'sim-rel' });
     const r = report.relationships;
     expect(report.invariantFailures).toBe(0);
@@ -37,7 +38,41 @@ describe('simulation runner', () => {
     expect(text).toContain('median age at first marriage');
   });
 
-  it('is deterministic', () => {
+  it('reports careers: income by education path, promotions, firings and job tracks against the targets', { timeout: 60_000 }, () => {
+    const report = runSimulation(content, { lives: 30, seedPrefix: 'sim-work' });
+    const c = report.careers;
+    expect(report.invariantFailures).toBe(0);
+    expect(c.everEmployed).toBeGreaterThan(0);
+    expect(c.jobYears).toBeGreaterThan(0);
+    expect(c.applications.hired).toBeLessThanOrEqual(c.applications.tried);
+    expect(c.tracks.map((t) => t.jobId)).toEqual(Object.keys(content.jobs).sort());
+    for (const t of c.tracks) expect(t.reachedLevel2).toBeLessThanOrEqual(t.entered);
+    const text = formatReport(report, content);
+    expect(text).toContain('lifetime earnings by education path');
+    expect(text).toMatch(/promotions \d+(\.\d)?%, firings \d+(\.\d)?%, layoffs \d+(\.\d)?%/);
+    expect(text).toContain("bachelor's vs high school lifetime earnings");
+  });
+
+  it('reports trades and the net worth target, and runs a careless player beside the careful one', { timeout: 120_000 }, () => {
+    const careful = runSimulation(content, { lives: 20, seedPrefix: 'sim-two' });
+    const careless = runSimulation(content, { lives: 20, seedPrefix: 'sim-two', player: 'careless' });
+    expect([careful.player, careless.player]).toEqual(['careful', 'careless']);
+    expect(careless.invariantFailures).toBe(0);
+    expect(careful.careers.trades.map((t) => t.tradeId)).toEqual(Object.keys(content.trades).sort());
+    for (const t of careful.careers.trades) {
+      expect(t.licensed).toBeLessThanOrEqual(t.enrolled);
+      expect(t.jobIds.length).toBeGreaterThan(0);
+    }
+    expect(careless.careers.tradeMinded).toBe(0);
+    const targets = targetResults(careful, content);
+    expect(targets.map((r) => r.label)).toContain(`median net worth at ${content.balance.targets.money.netWorthAge}`);
+    const text = formatComparison(careful, careless, content);
+    expect(text).toContain('careless');
+    expect(text.split('\n').filter((l) => /^ {2}\S/.test(l) && (l.includes('MET') || l.includes('NOT MET'))).length).toBe(targets.length);
+    expect(formatReport(careful, content)).toContain('trades (');
+  });
+
+  it('is deterministic', { timeout: 60_000 }, () => {
     expect(runSimulation(content, { lives: 5, seedPrefix: 'same' })).toEqual(runSimulation(content, { lives: 5, seedPrefix: 'same' }));
   });
 });

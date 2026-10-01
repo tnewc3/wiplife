@@ -1,0 +1,16 @@
+id: graphic_designer
+name: "Design"
+category: professional
+blurb: "Making things look effortless, which takes a lot of effort."
+requires: {"education": {"credential": ["bachelor"], "field": ["fine_arts", "communications"]}}
+levels:
+  - { title: "junior designer", salary: 42000 }
+  - { title: "designer", salary: 54000 }
+  - { title: "senior designer", salary: 70000 }
+  - { title: "art director", salary: 92000 }
+performance:
+  - { key: smarts, weight: 0.15 }
+  - { key: discipline, weight: 0.25 }
+  - { key: confidence, weight: 0.15 }
+  - { key: ambition, weight: 0.1 }
+employers: ["Pixel & Pine Studio", "Foxglove Design", "Studio Marrow", "Bright Ink Agency"]

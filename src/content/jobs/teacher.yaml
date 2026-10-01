@@ -1,0 +1,17 @@
+id: teacher
+name: "Teaching"
+category: professional
+blurb: "Thirty kids, one classroom, and a coffee that's always cold."
+requires: {"any": [{"education": {"credential": ["bachelor"], "field": ["education"]}}, {"education": {"credential": ["grad"], "field": ["masters"]}}]}
+levels:
+  - { title: "student teacher", salary: 40000 }
+  - { title: "teacher", salary: 48000 }
+  - { title: "senior teacher", salary: 58000 }
+  - { title: "assistant principal", salary: 72000 }
+  - { title: "principal", salary: 88000 }
+performance:
+  - { key: kindness, weight: 0.25 }
+  - { key: discipline, weight: 0.25 }
+  - { key: smarts, weight: 0.15 }
+  - { key: sociability, weight: 0.1 }
+employers: ["Riverside Unified Schools", "Oakmont Academy", "Lincoln Park District Schools", "Bayview Charter School"]

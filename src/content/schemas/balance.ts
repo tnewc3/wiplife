@@ -231,6 +231,11 @@ export const targetsBalanceSchema = z.strictObject({
     /** At least this share of lives that reach homeOwnershipAge have owned a home by then. */
     minHomeOwners: probabilitySchema,
     homeOwnershipAge: z.int().min(18).max(120),
+    /** The median net worth of lives that reach netWorthAge falls in this range (whole dollars). */
+    medianNetWorth: z
+      .strictObject({ min: z.int(), max: z.int() })
+      .refine((r) => r.min <= r.max, 'min must not be greater than max'),
+    netWorthAge: z.int().min(18).max(120),
   }),
   careers: z.strictObject({
     /**
@@ -244,6 +249,16 @@ export const targetsBalanceSchema = z.strictObject({
      * doesn't guarantee anything.
      */
     minBachelorBelowHighSchoolMedian: probabilitySchema,
+    /** Lifetime earnings are compared over lives that reach this age (a full working life). */
+    earningsAge: z.int().min(18).max(120),
+    /** At least this share of the lives that enter each job track reach its second level (no dead-end careers). */
+    minReachLevel2: probabilitySchema,
+    /** Promotions per year worked in a job (all tracks together) fall in this range. */
+    promotionRate: z.strictObject({ min: probabilitySchema, max: probabilitySchema }),
+    /** Firings per year worked in a job fall in this range. */
+    firingRate: z.strictObject({ min: probabilitySchema, max: probabilitySchema }),
+    /** Layoffs per year worked in a job fall in this range. */
+    layoffRate: z.strictObject({ min: probabilitySchema, max: probabilitySchema }),
   }),
 });
 export type TargetsBalance = z.infer<typeof targetsBalanceSchema>;

@@ -1,0 +1,15 @@
+id: lawyer
+name: "Law"
+category: professional
+blurb: "Billable hours, high stakes and very nice suits."
+requires: {"education": {"credential": ["grad"], "field": ["law"]}}
+levels:
+  - { title: "junior associate", salary: 88000, years: 3 }
+  - { title: "senior associate", salary: 128000 }
+  - { title: "counsel", salary: 165000 }
+  - { title: "partner", salary: 235000 }
+performance:
+  - { key: smarts, weight: 0.35 }
+  - { key: confidence, weight: 0.2 }
+  - { key: discipline, weight: 0.25 }
+employers: ["Whitaker Lane LLP", "Harrow & Sloane", "Beacon Legal Partners", "Castellan Law Group"]

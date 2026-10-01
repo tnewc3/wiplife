@@ -1,0 +1,38 @@
+id: boss_mentor
+title: Under the wing
+text: >-
+  {boss.name} stops by your desk. "You've got something," {boss.they}
+  {boss:says|say}. "If you want, let's have lunch once a month. I'll teach you
+  what nobody taught me."
+tone: light
+category: work
+rarity: uncommon
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { career: { employed: true, performance: { gte: 50 } } }
+    - { role: boss, affection: { gte: 45 } }
+weight:
+  base: 5
+  modifiers:
+    - { if: { trait: ambition, gt: 60 }, x: 1.5 }
+once: true
+cast:
+  boss: { kind: boss }
+choices:
+  - id: yes
+    label: Say yes
+    outcome:
+      text: The lunches are the best part of your month. You learn how decisions really get made.
+      effects:
+        - { type: job, action: performance, value: 6 }
+        - { type: memory, role: boss, tag: mentored_you }
+        - { type: relationship, role: boss, affection: 6, trust: 6 }
+        - { type: stat, key: ambition, delta: 3 }
+        - { type: stat, key: smarts, delta: 1 }
+  - id: no
+    label: Politely decline
+    outcome:
+      text: '"Offer stands," {boss.name} says, and never mentions it again.'
+      effects:
+        - { type: relationship, role: boss, affection: -2 }

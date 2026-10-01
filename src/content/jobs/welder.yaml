@@ -1,0 +1,15 @@
+id: welder
+name: "Welding"
+category: trade
+blurb: "Joining steel, one bright seam at a time."
+requires: {"education": {"credential": ["trade_license"], "field": ["welder"]}}
+levels:
+  - { title: "welder's helper", salary: 36000 }
+  - { title: "welder", salary: 48000 }
+  - { title: "certified welder", salary: 60000 }
+  - { title: "welding supervisor", salary: 72000 }
+performance:
+  - { key: fitness, weight: 0.3 }
+  - { key: discipline, weight: 0.3 }
+  - { key: smarts, weight: 0.1 }
+employers: ["Anvil Fabrication", "Steelhead Works", "Midway Ironworks", "Blue Arc Welding"]

@@ -1,0 +1,14 @@
+id: retail_associate
+name: "Retail"
+category: gig
+blurb: "Folding the same sweaters, forever."
+levels:
+  - { title: "sales associate", salary: 28000, years: 1 }
+  - { title: "key holder", salary: 31000 }
+  - { title: "assistant store manager", salary: 39000 }
+  - { title: "store manager", salary: 50000 }
+performance:
+  - { key: sociability, weight: 0.3 }
+  - { key: discipline, weight: 0.25 }
+  - { key: looks, weight: 0.05 }
+employers: ["MegaMart", "Corner Threads", "Value City Goods", "Home & Hearth Store"]

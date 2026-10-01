@@ -1,0 +1,36 @@
+id: coworker_short_on_cash
+title: Short on cash
+text: >-
+  {npc.name} from work catches you by the coffee machine and asks, very
+  quietly, if you could spot {npc.them} $200 until payday.
+tone: neutral
+category: work
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { career: { employed: true } }
+    - { money: { gte: 200 } }
+weight:
+  base: 5
+  modifiers:
+    - { if: { trait: kindness, gt: 60 }, x: 1.5 }
+cooldownYears: 6
+cast:
+  npc: { kind: coworker }
+choices:
+  - id: lend
+    label: Lend it
+    outcome:
+      text: '{npc.name} looks so relieved it''s almost embarrassing. "Payday. I promise."'
+      effects:
+        - { type: money, delta: -200 }
+        - { type: relationship, role: npc, affection: 5 }
+        - { type: memory, role: npc, tag: lent_money }
+        - { type: schedule, eventId: coworker_payday, inYears: [1, 2], cast: [npc] }
+  - id: excuse
+    label: Make an excuse
+    outcome:
+      text: You mumble something about rent. {npc.name} says it's fine. It's a little awkward at the coffee machine for a while.
+      effects:
+        - { type: relationship, role: npc, affection: -3 }

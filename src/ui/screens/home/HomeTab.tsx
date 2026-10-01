@@ -9,6 +9,7 @@ import { YearRecapList } from '../../components/YearRecapList';
 import {
   ageLabel,
   HOUSING_LABELS,
+  jobLine,
   LIFE_STAGE_LABELS,
   memberAgeLabel,
   money,
@@ -87,6 +88,11 @@ export function HomeTab({ life }: { life: LifeState }) {
         {summary.school && (
           <p className="mt-1 text-sm break-words text-muted [overflow-wrap:anywhere]" data-testid="school-line">
             {schoolStatusLine(summary.school)}
+          </p>
+        )}
+        {(summary.job || summary.retired) && (
+          <p className="mt-1 text-sm break-words text-muted [overflow-wrap:anywhere]" data-testid="job-line">
+            {summary.job ? jobLine(summary.job.title, summary.job.employer) : 'Retired'}
           </p>
         )}
         <p className="mt-1 text-sm text-muted" data-testid="money-line">

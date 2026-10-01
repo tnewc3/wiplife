@@ -4,7 +4,9 @@ import { citySchoolsSchema } from './education';
 
 export const countryIdSchema = z.enum(['us']);
 
-export const jobCategorySchema = z.enum(['professional', 'trade', 'gig']);
+/** Job categories (Stage 8): professional work, skilled trades, and gig and service work. */
+export const JOB_CATEGORIES = ['professional', 'trade', 'gig'] as const;
+export const jobCategorySchema = z.enum(JOB_CATEGORIES);
 export type JobCategory = z.infer<typeof jobCategorySchema>;
 
 /**

@@ -1,0 +1,49 @@
+id: petty_cash
+title: Nobody counts it
+text: >-
+  The cash box at work has been off by a few hundred dollars for months and
+  nobody has noticed. You're alone with it now, and rent is due.
+tone: serious
+category: work
+rarity: uncommon
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { career: { employed: true } }
+    - { not: { flag: stole_from_work } }
+weight:
+  base: 3
+  modifiers:
+    - { if: { trait: riskTaking, gt: 60 }, x: 2 }
+    - { if: { finances: { missed: { gte: 1 } } }, x: 2 }
+once: true
+choices:
+  - id: take
+    label: Take $600
+    check:
+      base: 55
+      stats: [{ key: luck, weight: 0.3 }, { key: discipline, weight: 0.2 }]
+      success:
+        text: Nobody notices. You notice, every time you walk past that box.
+        effects:
+          - { type: money, delta: 600 }
+          - { type: flag, key: stole_from_work, value: true }
+          - { type: stat, key: stress, delta: 4 }
+          - { type: stat, key: kindness, delta: -2 }
+      failure:
+        text: >-
+          Someone did start counting. There's a meeting with HR, a security
+          guard walking you out, and a box of your things. Word gets around.
+        effects:
+          - { type: flag, key: stole_from_work, value: true }
+          - { type: job, action: fire }
+          - { type: stat, key: reputation, delta: -15 }
+          - { type: stat, key: stress, delta: 8 }
+          - { type: history, text: You were fired for stealing from work., importance: 3 }
+  - id: leave
+    label: Close the box and walk away
+    outcome:
+      text: You lock it and put the key back. You feel oddly proud of yourself, and still broke.
+      effects:
+        - { type: stat, key: discipline, delta: 2 }
+        - { type: stat, key: stress, delta: 1 }

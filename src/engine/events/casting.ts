@@ -98,9 +98,10 @@ function romanticCategory(state: LifeState, rng: RngState, content: ContentBundl
 /**
  * Creates someone new for a role and adds them (and the relationship) to the
  * life. A romantic role creates an adult you're attracted to who is attracted
- * to you (and needs you to be an adult).
+ * to you (and needs you to be an adult). The career system also uses it to
+ * staff your workplace (bosses and coworkers).
  */
-function createPerson(state: LifeState, spec: CastSpec, rng: RngState, content: ContentBundle): Id | null {
+export function createPerson(state: LifeState, spec: CastSpec, rng: RngState, content: ContentBundle): Id | null {
   const kind = spec.kind;
   if (kind === undefined) return null;
   if (spec.romantic && state.character.age < content.balance.relationships.adultAge) return null;

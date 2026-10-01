@@ -1,8 +1,9 @@
 /** Player-facing words for engine values. UI copy only; no game rules here. */
-import type { ActionId, CredentialType, DebtKind, HousingKind, Lifestyle, Program, RomanceStatus, Tier } from '../content/schemas';
+import type { ActionId, CredentialType, DebtKind, HousingKind, JobCategory, Lifestyle, Program, RomanceStatus, Tier } from '../content/schemas';
+import type { JobApplyBlock, SearchBlock } from '../engine/career';
 import type { ApplyBlock } from '../engine/education';
 import type { CredentialView, FamilyMember, PeopleGroupId, PersonRow, SchoolLine } from '../engine/selectors';
-import type { FamilyWealth, GenderCategory, LifeStage, Personality, RelationshipKind, Stats } from '../engine/types';
+import type { FamilyWealth, GenderCategory, JobEnd, LifeStage, Personality, RelationshipKind, Stats } from '../engine/types';
 
 export const STAT_LABELS: Record<keyof Stats, string> = {
   health: 'Health',
@@ -377,4 +378,87 @@ export const APPLY_BLOCK_LABELS: Record<ApplyBlock, string> = {
 /** How hard a major, trade or grad program is (1–5). */
 export function difficultyLabel(difficulty: number): string {
   return ['Easygoing', 'Manageable', 'Challenging', 'Demanding', 'Grueling'][Math.min(4, Math.max(0, difficulty - 1))]!;
+}
+
+/** Sentence text as a label: "junior developer" → "Junior developer". */
+export function capitalized(text: string): string {
+  return text.charAt(0).toUpperCase() + text.slice(1);
+}
+
+/** Job categories in job search. */
+export const JOB_CATEGORY_LABELS: Record<JobCategory, string> = {
+  professional: 'Professional',
+  trade: 'Trades',
+  gig: 'Service jobs',
+};
+
+/** How a job ended, for career history. */
+export const JOB_END_LABELS: Record<JobEnd, string> = {
+  quit: 'You quit',
+  fired: 'Fired',
+  laid_off: 'Laid off',
+  retired: 'Retired',
+  moved: 'Moved away',
+};
+
+/** Why you can't look for work now. */
+export const SEARCH_BLOCK_LABELS: Record<SearchBlock, string> = {
+  age: 'You’re too young for a full-time job.',
+  school: 'You can line up a job in your last year of school. Until then, gig work fits around classes.',
+  away: 'You can’t work right now.',
+};
+
+/** Why you can't apply for an opening now. */
+export const JOB_APPLY_BLOCK_LABELS: Record<JobApplyBlock, string> = {
+  ...SEARCH_BLOCK_LABELS,
+  unknown: 'Not available.',
+  closed: 'Not hiring this year.',
+  current: 'That’s your job.',
+  requirements: 'You don’t meet the requirements.',
+  tried: 'You applied this year.',
+  limit: 'No applications left this year.',
+};
+
+/** How your work is going, in words (never a number). */
+export function performanceLabel(performance: number): string {
+  if (performance >= 80) return 'Outstanding';
+  if (performance >= 65) return 'Doing well';
+  if (performance >= 45) return 'Steady';
+  if (performance >= 30) return 'Slipping';
+  return 'On thin ice';
+}
+
+/** "Junior developer at Brightline Systems". */
+export function jobLine(title: string, employer: string): string {
+  return `${capitalized(title)} at ${employer}`;
+}
+
+/** "3 years", "1 year", "New". */
+export function yearsLabel(years: number): string {
+  if (years <= 0) return 'Just started';
+  return years === 1 ? '1 year' : `${years} years`;
+}
+
+/** Copy for the confirmation sheet of a work action that can't be undone. */
+export function workConfirmation(action: 'quit_job' | 'retire', details: { employer?: string; retirementAge: number; age: number }): {
+  title: string;
+  body: string;
+  confirm: string;
+} {
+  if (action === 'quit_job') {
+    return {
+      title: `Quit your job at ${details.employer}?`,
+      body: 'You’ll stop getting paid from next year. You can look for another job, or do gig work.',
+      confirm: 'Quit',
+    };
+  }
+  const early = details.age < details.retirementAge;
+  return {
+    title: 'Retire?',
+    body:
+      (details.employer ? `You’ll leave ${details.employer} and stop working. ` : 'You’ll stop working. ') +
+      (early ? `Your retirement benefit starts at ${details.retirementAge}, so until then you’ll live on your savings.` : 'Your retirement benefit keeps paying every year.') +
+      ' You can always go back to work.',
+    confirm: 'Retire',
+  };
 }

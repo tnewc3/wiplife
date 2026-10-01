@@ -1,0 +1,33 @@
+# Answers a job application that didn't work (registries/work.yaml rejected).
+id: interview_rejection_letter
+title: We regret to inform you
+text: >-
+  "After careful consideration, we've decided to move forward with other
+  candidates." You read it twice, looking for a hidden yes. There isn't one.
+tone: neutral
+category: work
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+weight: { base: 10 }
+followUpOnly: true
+choices:
+  - id: feedback
+    label: Write back and ask why
+    check:
+      base: 40
+      stats: [{ key: confidence, weight: 0.3 }, { key: sociability, weight: 0.1 }]
+      success:
+        text: The hiring manager actually answers, kindly and specifically. It stings, and it helps.
+        effects:
+          - { type: stat, key: smarts, delta: 1 }
+          - { type: stat, key: confidence, delta: 2 }
+      failure:
+        text: Nobody writes back. You check your email more often than you'd like to admit.
+        effects:
+          - { type: stat, key: stress, delta: 2 }
+  - id: shrug
+    label: Shake it off
+    outcome:
+      text: Their loss. You mostly believe that.
+      effects:
+        - { type: stat, key: happiness, delta: -1 }

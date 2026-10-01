@@ -1,0 +1,5 @@
+# Test pack: one predictable event for each work result.
+results:
+  hired: { events: [test_hired] }
+  rejected: { events: [test_rejected] }
+  raise: { events: [test_raise] }

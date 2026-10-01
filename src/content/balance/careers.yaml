@@ -1,0 +1,145 @@
+# Careers (docs/design.md, section I; docs/technical.md, Stage 8): the job
+# market, hiring, performance, promotions, raises and losing a job.
+# Starting proposals; Stage 12 (balancing) tunes them against simulation runs.
+#
+# Pay: a job level's base salary (src/content/jobs) × the city's salary
+# multiplier. Salaries are earned income: the yearly ledger pays them and
+# they count toward the retirement benefit.
+
+# The youngest age you can be hired.
+minAge: 18
+
+# Most job applications in one year.
+maxApplications: 3
+
+# Each year (and when you move city), each job track is hiring in your city
+# with this chance, by the city's job market for its category (0–100).
+openings:
+  - { at: 0, x: 0.3 }
+  - { at: 30, x: 0.5 }
+  - { at: 75, x: 0.75 }
+  - { at: 100, x: 0.9 }
+
+hiring:
+  # Your chance of being hired, in percent: base + each stat's weight ×
+  # (value − 50) + luck + the extras below, then × the market multiplier,
+  # never outside min–max.
+  odds:
+    professional:
+      base: 48
+      stats:
+        - { key: confidence, weight: 0.25 }
+        - { key: smarts, weight: 0.15 }
+        - { key: looks, weight: 0.08 }
+        - { key: reputation, weight: 0.15 }
+      min: 5
+      max: 92
+    trade:
+      base: 58
+      stats:
+        - { key: confidence, weight: 0.15 }
+        - { key: fitness, weight: 0.15 }
+        - { key: reputation, weight: 0.1 }
+      min: 10
+      max: 95
+    gig:
+      base: 78
+      stats:
+        - { key: confidence, weight: 0.1 }
+        - { key: sociability, weight: 0.1 }
+        - { key: looks, weight: 0.05 }
+        - { key: reputation, weight: 0.1 }
+      min: 20
+      max: 97
+  # Multiplies the chance, by the city's job market for the category.
+  market:
+    - { at: 0, x: 0.7 }
+    - { at: 50, x: 0.95 }
+    - { at: 75, x: 1.05 }
+    - { at: 100, x: 1.15 }
+  # Points per year you've already worked in this track, up to max.
+  experience: { perYear: 2, max: 16 }
+  # Points for your best college degree's tier, and for a grad degree.
+  tier: { community: 0, state: 3, elite: 10 }
+  grad: 5
+  # Points for any criminal record.
+  record: -25
+
+performance:
+  # Each year performance aims at base + each of the job's stat weights ×
+  # (value − 50), minus the stress and health penalties, plus a random
+  # swing. `carry` of last year's performance carries over.
+  base: 56
+  stress:
+    - { at: 0, x: 0 }
+    - { at: 50, x: 2 }
+    - { at: 75, x: 8 }
+    - { at: 100, x: 18 }
+  health:
+    - { at: 0, x: 25 }
+    - { at: 30, x: 12 }
+    - { at: 60, x: 2 }
+    - { at: 100, x: 0 }
+  swing: 12
+  carry: 0.5
+  # A new hire is still learning the ropes.
+  start: -4
+
+promotion:
+  minYears: 2
+  # Yearly chance once you've been at a level long enough, by performance.
+  chance:
+    - { at: 40, x: 0.04 }
+    - { at: 50, x: 0.22 }
+    - { at: 60, x: 0.33 }
+    - { at: 75, x: 0.42 }
+    - { at: 90, x: 0.58 }
+    - { at: 100, x: 0.65 }
+  # Multiplies it, by Ambition.
+  ambition:
+    - { at: 0, x: 0.6 }
+    - { at: 50, x: 1 }
+    - { at: 100, x: 1.4 }
+  # Your salary rises to the new level's pay, and by at least this share.
+  bump: 0.05
+
+raises:
+  # A year without a promotion brings a raise of this share, by performance.
+  merit:
+    - { at: 30, x: 0 }
+    - { at: 50, x: 0.015 }
+    - { at: 75, x: 0.03 }
+    - { at: 100, x: 0.045 }
+  asked: 0.06
+  maxAboveLevel: 0.3
+
+# Yearly chance of being fired, by performance.
+firing:
+  - { at: 15, x: 0.25 }
+  - { at: 25, x: 0.06 }
+  - { at: 35, x: 0.015 }
+  - { at: 45, x: 0.002 }
+  - { at: 55, x: 0 }
+
+# Yearly chance of being laid off, by the city's job market for the category.
+layoffs:
+  - { at: 30, x: 0.035 }
+  - { at: 75, x: 0.02 }
+  - { at: 100, x: 0.012 }
+
+# The year you lose a job, you're still paid this share of its salary (the
+# months before it ended, and severance).
+jobLoss:
+  fired: 0.3
+  laid_off: 0.6
+
+workplace:
+  coworkers: 2
+  newCoworkerChance: 0.3
+  maxCoworkers: 4
+  coworkerAgeOffset: { min: -10, max: 12 }
+  bossAge: { min: 28, max: 64 }
+
+# The youngest age you can retire (the retirement benefit itself starts at
+# economy.yaml retirement.age).
+retireAge: 55

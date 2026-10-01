@@ -1,0 +1,32 @@
+# Answers a job application that worked (registries/work.yaml hired).
+id: interview_probation
+title: Ninety days
+text: >-
+  The job is yours, {boss.name} says, "on a ninety-day trial, like
+  everyone." {boss.They} {boss:smiles|smile} when {boss.they} {boss:says|say}
+  it, but {boss.they} {boss:doesn't|don't} look like {boss.they} {boss:is|are} joking.
+tone: neutral
+category: work
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+weight: { base: 8 }
+followUpOnly: true
+cast:
+  boss: { kind: boss }
+choices:
+  - id: grind
+    label: Work late every night
+    outcome:
+      text: Ninety days of takeout at your desk. You pass with room to spare, and you're exhausted.
+      effects:
+        - { type: job, action: performance, value: 8 }
+        - { type: stat, key: stress, delta: 5 }
+        - { type: stat, key: happiness, delta: -2 }
+        - { type: memory, role: boss, tag: hired_you }
+  - id: pace
+    label: Do good work and go home on time
+    outcome:
+      text: You do the job well and keep your evenings. The trial ends without anyone mentioning it.
+      effects:
+        - { type: stat, key: stress, delta: -2 }
+        - { type: memory, role: boss, tag: hired_you }

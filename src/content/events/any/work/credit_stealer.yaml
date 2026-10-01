@@ -1,0 +1,51 @@
+id: credit_stealer
+title: Your idea
+text: >-
+  In the big meeting, {npc.name} presents a plan that sounds very familiar,
+  because it's yours. {boss.name} loves it. {npc.name} doesn't look at you.
+tone: serious
+category: work
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires: { career: { employed: true } }
+weight: { base: 5 }
+cooldownYears: 8
+cast:
+  npc: { kind: coworker }
+  boss: { kind: boss }
+choices:
+  - id: call_out
+    label: Speak up in the meeting
+    check:
+      base: 40
+      stats: [{ key: confidence, weight: 0.4 }, { role: boss, key: trust, weight: 0.2 }]
+      success:
+        text: '"I''m glad you like it. I sent the first draft around last month." {boss.name} checks, and the room shifts.'
+        effects:
+          - { type: job, action: performance, value: 6 }
+          - { type: memory, role: npc, tag: took_credit }
+          - { type: memory, role: npc, tag: you_stood_up_to_them }
+          - { type: relationship, role: npc, affection: -10 }
+          - { type: relationship, role: boss, trust: 5 }
+      failure:
+        text: It comes out sounding petty. {boss.name} says "let's keep this constructive," and everyone looks at the table.
+        effects:
+          - { type: job, action: performance, value: -3 }
+          - { type: memory, role: npc, tag: took_credit }
+          - { type: relationship, role: boss, affection: -5 }
+          - { type: stat, key: stress, delta: 3 }
+  - id: private
+    label: Have a word with {npc.them} later
+    outcome:
+      text: '{npc.name} says it was "a team effort." You both know it wasn''t. You''ll never share an idea with {npc.them} again.'
+      effects:
+        - { type: memory, role: npc, tag: took_credit }
+        - { type: relationship, role: npc, affection: -8, trust: -15 }
+  - id: let_slide
+    label: Let it go
+    outcome:
+      text: You say nothing. You think about it in the shower for weeks.
+      effects:
+        - { type: memory, role: npc, tag: took_credit }
+        - { type: stat, key: stress, delta: 3 }
+        - { type: stat, key: happiness, delta: -2 }

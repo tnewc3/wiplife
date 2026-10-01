@@ -1,0 +1,13 @@
+id: delivery_driver
+name: "Delivery driving"
+category: gig
+blurb: "Every street in the city, twice a day."
+levels:
+  - { title: "courier", salary: 32000, years: 1 }
+  - { title: "route driver", salary: 38000 }
+  - { title: "lead driver", salary: 43000 }
+performance:
+  - { key: discipline, weight: 0.35 }
+  - { key: fitness, weight: 0.15 }
+  - { key: health, weight: 0.1 }
+employers: ["Swift Parcel", "Citywide Couriers", "Doorstep Delivery Co.", "Express Lane Shipping"]

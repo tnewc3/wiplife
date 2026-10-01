@@ -1,0 +1,15 @@
+id: civil_engineer
+name: "Civil engineering"
+category: professional
+blurb: "Roads, bridges and the paperwork that keeps them standing."
+requires: {"education": {"credential": ["bachelor"], "field": ["engineering"]}}
+levels:
+  - { title: "engineer in training", salary: 64000 }
+  - { title: "project engineer", salary: 78000 }
+  - { title: "senior engineer", salary: 96000 }
+  - { title: "principal engineer", salary: 120000 }
+performance:
+  - { key: smarts, weight: 0.35 }
+  - { key: discipline, weight: 0.3 }
+  - { key: ambition, weight: 0.1 }
+employers: ["Granite & Hale Engineering", "Ridgeway Civil", "Meridian Infrastructure", "Copperline Design Group"]

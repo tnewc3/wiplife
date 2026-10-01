@@ -1,0 +1,45 @@
+id: liquid_lunch
+title: Liquid lunch
+text: >-
+  {npc.name} has a standing order at the bar across the street: two drinks
+  at lunch, three on Fridays. "It's the only way to get through the
+  afternoon," {npc.they} {npc:says|say}, and {npc.they} {npc:is|are} buying.
+tone: serious
+category: work
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires: { all: [{ age: { gte: 21 } }, { career: { employed: true } }] }
+weight:
+  base: 4
+  modifiers:
+    - { if: { hidden: vice, gt: 60 }, x: 2 }
+cooldownYears: 6
+cast:
+  npc: { kind: coworker, age: { min: 21, max: 120 } }
+choices:
+  - id: habit
+    label: Make it a daily thing
+    outcome:
+      text: >-
+        The afternoons do get easier. Your work gets sloppier. Some mornings
+        you need the lunch drink more than you'd like.
+      effects:
+        - { type: relationship, role: npc, affection: 8 }
+        - { type: memory, role: npc, tag: drinking_buddy }
+        - { type: stat, key: vice, delta: 6 }
+        - { type: stat, key: health, delta: -3 }
+        - { type: stat, key: happiness, delta: 2 }
+        - { type: job, action: performance, value: -6 }
+  - id: once
+    label: Just this once
+    outcome:
+      text: One drink, a lot of laughs, and back to your desk a little warmer.
+      effects:
+        - { type: relationship, role: npc, affection: 3 }
+        - { type: stat, key: happiness, delta: 1 }
+  - id: pass
+    label: Pass, and get a sandwich
+    outcome:
+      text: '{npc.name} shrugs and goes alone. {npc.They} {npc:goes|go} alone a lot.'
+      effects:
+        - { type: stat, key: discipline, delta: 1 }

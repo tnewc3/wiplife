@@ -1,0 +1,39 @@
+id: new_boss
+title: The new boss
+text: >-
+  {boss.name} has been your boss for less than a year and has already
+  reorganized everything twice. Today {boss.they} {boss:wants|want} to "get
+  to know the team" over drinks.
+tone: light
+category: work
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { career: { employed: true } }
+    - { role: boss, years: { lte: 1 } }
+weight: { base: 4 }
+cooldownYears: 4
+cast:
+  boss: { kind: boss }
+choices:
+  - id: charm
+    label: Make a good first impression
+    check:
+      base: 50
+      stats: [{ key: sociability, weight: 0.3 }, { key: looks, weight: 0.1 }]
+      success:
+        text: You find out you grew up an hour apart and like the same terrible band. {boss.name} likes you.
+        effects:
+          - { type: relationship, role: boss, affection: 10, trust: 4 }
+      failure:
+        text: Your joke about the reorganization lands badly. {boss.name} laughs a beat too late.
+        effects:
+          - { type: relationship, role: boss, affection: -5 }
+  - id: skip
+    label: Skip it and go home
+    outcome:
+      text: You have a life. {boss.name} has a list of who came.
+      effects:
+        - { type: relationship, role: boss, affection: -2 }
+        - { type: stat, key: stress, delta: -1 }

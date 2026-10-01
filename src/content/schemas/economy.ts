@@ -151,7 +151,7 @@ export const economyBalanceSchema = z.strictObject({
    * The retirement benefit (like Social Security): paid every year from `age`
    * once you have `minYears` years with earned income, from your average
    * yearly earnings over those years. Every kind of earned income counts
-   * (gig pay, and salaries from Stage 8).
+   * (gig pay and salaries).
    */
   retirement: z.strictObject({
     age: z.int().min(40).max(100),

@@ -1,0 +1,49 @@
+id: performance_warning
+title: A word in private
+text: >-
+  {boss.name} closes the office door behind you, which is never good.
+  "Your numbers have been slipping," {boss.they} {boss:says|say}. "I need to
+  see a change, or this conversation gets more formal."
+tone: serious
+category: work
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires: { career: { employed: true, performance: { lt: 40 } } }
+weight: { base: 12 }
+cooldownYears: 3
+cast:
+  boss: { kind: boss }
+choices:
+  - id: plan
+    label: Ask for a plan to turn it around
+    outcome:
+      text: You leave with a list of goals and a meeting every Friday. It's humbling. It works.
+      effects:
+        - { type: job, action: performance, value: 10 }
+        - { type: memory, role: boss, tag: gave_you_a_chance }
+        - { type: stat, key: stress, delta: 3 }
+        - { type: stat, key: discipline, delta: 2 }
+  - id: defend
+    label: Push back
+    check:
+      base: 30
+      stats: [{ key: confidence, weight: 0.3 }, { role: boss, key: trust, weight: 0.3 }]
+      success:
+        text: You explain what's been going on, and {boss.name} actually listens. "Okay. That changes things."
+        effects:
+          - { type: job, action: performance, value: 4 }
+          - { type: relationship, role: boss, trust: 4 }
+      failure:
+        text: '{boss.name} writes something down while you talk. You realize, too late, that it''s going in a file.'
+        effects:
+          - { type: job, action: performance, value: -6 }
+          - { type: relationship, role: boss, affection: -8 }
+          - { type: stat, key: stress, delta: 5 }
+  - id: resign
+    label: Quit before they fire you
+    outcome:
+      text: You hand in your notice that afternoon. It feels like jumping before you're pushed, because it is.
+      effects:
+        - { type: job, action: quit }
+        - { type: stat, key: stress, delta: -3 }
+        - { type: stat, key: confidence, delta: -2 }

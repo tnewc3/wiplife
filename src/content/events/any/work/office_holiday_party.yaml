@@ -1,0 +1,51 @@
+id: office_holiday_party
+title: The holiday party
+text: >-
+  The company rented a function room with an open bar and a DJ who is trying
+  very hard. {npc.name} hands you a drink. "To surviving another year."
+tone: light
+category: work
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires: { career: { employed: true } }
+weight: { base: 5 }
+cooldownYears: 5
+cast:
+  npc: { kind: coworker }
+choices:
+  - id: dance
+    label: Get everyone dancing
+    check:
+      base: 45
+      stats: [{ key: sociability, weight: 0.3 }, { key: confidence, weight: 0.2 }]
+      success:
+        text: It's the best party the company has ever had, and people know it was you.
+        effects:
+          - { type: relationship, role: npc, affection: 6 }
+          - { type: memory, role: npc, tag: danced_at_party }
+          - { type: stat, key: happiness, delta: 4 }
+          - { type: stat, key: reputation, delta: 3 }
+      failure:
+        text: You dance alone for one very long song. {npc.name} films it. It's on the group chat by morning.
+        effects:
+          - { type: stat, key: confidence, delta: -3 }
+          - { type: stat, key: happiness, delta: 1 }
+  - id: drink
+    label: Make the most of the open bar
+    outcome:
+      text: >-
+        You remember the first half of the night. Everyone else remembers the
+        second half, including the part where you told {npc.name} what you
+        really think of management.
+      effects:
+        - { type: stat, key: happiness, delta: 3 }
+        - { type: stat, key: reputation, delta: -5 }
+        - { type: stat, key: vice, delta: 3 }
+        - { type: job, action: performance, value: -4 }
+        - { type: relationship, role: npc, affection: 3 }
+  - id: early
+    label: Stay an hour and slip out
+    outcome:
+      text: You say the right things to the right people and are home by nine. Perfect.
+      effects:
+        - { type: stat, key: stress, delta: -2 }

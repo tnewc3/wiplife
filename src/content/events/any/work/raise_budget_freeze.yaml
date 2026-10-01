@@ -1,0 +1,42 @@
+# Answers asking for a raise (registries/work.yaml raise) when your work
+# has been slipping.
+id: raise_budget_freeze
+title: Budget season
+text: >-
+  {boss.name} hears you out, then slides a printout across the desk. Budgets
+  are frozen, {boss.they} {boss:says|say}. Also, {boss.they}'d like to talk
+  about some missed deadlines while you're both here.
+tone: serious
+category: work
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires: { career: { performance: { lt: 45 } } }
+weight: { base: 14 }
+followUpOnly: true
+cast:
+  boss: { kind: boss }
+choices:
+  - id: push
+    label: Push for it anyway
+    check:
+      base: 10
+      stats: [{ key: confidence, weight: 0.3 }, { role: boss, key: affection, weight: 0.3 }]
+      success:
+        text: Against all odds, {boss.name} finds a little money somewhere. "Don't make me regret it."
+        effects:
+          - { type: job, action: raise }
+          - { type: memory, role: boss, tag: gave_you_raise }
+      failure:
+        text: '{boss.name}''s face closes like a door. The conversation about deadlines gets longer.'
+        effects:
+          - { type: relationship, role: boss, affection: -8 }
+          - { type: memory, role: boss, tag: refused_raise }
+          - { type: stat, key: stress, delta: 4 }
+  - id: listen
+    label: Listen to the feedback
+    outcome:
+      text: It's a hard twenty minutes. You leave with no raise and a clear idea of what's wrong.
+      effects:
+        - { type: job, action: performance, value: 5 }
+        - { type: memory, role: boss, tag: gave_you_a_chance }
+        - { type: stat, key: stress, delta: 2 }

@@ -5,14 +5,18 @@
 # Shares are of simulated lives (npm run simulate), counting only lives
 # that reach the age the target is about.
 
-# Stage 8 (careers) acceptance. Until careers bring salaries, gig work is
-# the only income and these are not met.
+# Stage 8 (careers) acceptance.
 money:
   # Bankruptcy in no more than about 15% of lives that reach adulthood.
   maxBankruptLives: 0.15
   # Roughly half or more of adults have owned a home by 50.
   minHomeOwners: 0.5
   homeOwnershipAge: 50
+  # The median net worth at 65 (savings plus home value, minus debts) falls in
+  # this range. Added with Stage 8, when salaries arrived; Stage 12 tunes the
+  # economy toward it (until then it shows as not met).
+  medianNetWorth: { min: 200000, max: 600000 }
+  netWorthAge: 65
 
 careers:
   # A bachelor's degree pays clearly more over a lifetime on average: at
@@ -22,3 +26,12 @@ careers:
   # ...but isn't a guarantee: at least 10% of bachelor's holders earn less
   # over their lifetime than the median high-school-only life.
   minBachelorBelowHighSchoolMedian: 0.1
+  # Lifetime earnings are compared over lives that reach this age.
+  earningsAge: 65
+  # No dead-end careers: at least 30% of the lives that enter each job track
+  # reach its second level.
+  minReachLevel2: 0.3
+  # Per year worked in a job (all tracks together).
+  promotionRate: { min: 0.05, max: 0.25 }
+  firingRate: { min: 0.005, max: 0.05 }
+  layoffRate: { min: 0.01, max: 0.05 }

@@ -72,6 +72,8 @@ export type Condition =
   | { finances: FinancesCondition }
   | { home: HomeCondition }
   | { education: EducationCondition }
+  | { career: CareerCondition }
+  | { record: RecordCondition }
   | { memory: { role: string; tag: string } }
   | {
       role: string;
@@ -137,10 +139,45 @@ export interface EducationCondition {
   gpa?: Compare;
   /** You hold at least one of these credentials. */
   credential?: z.infer<typeof credentialTypeSchema>[];
+  /**
+   * You hold a credential in one of these majors, trades or grad programs
+   * (Stage 8; of a type in `credential`, when that is given too).
+   */
+  field?: string[];
   /** You left a program before finishing it (and could go back), or not. */
   left?: boolean;
   /** You have a place to start at next year, or not. */
   admission?: boolean;
+}
+
+/** Your work (Stage 8). Every field given must hold. */
+export interface CareerCondition {
+  /** You have a job (or not). Gig work doesn't count. */
+  employed?: boolean;
+  /** Your job is in one of these tracks. */
+  job?: string[];
+  /** Your level in your job (1 is the first). */
+  level?: Compare;
+  /** Whole years since you were hired. */
+  years?: Compare;
+  /** Your job performance (0–100). */
+  performance?: Compare;
+  /** You're retired (or not). */
+  retired?: boolean;
+  /** You were fired or laid off within this many years. */
+  lostWithin?: number;
+}
+
+export const RECORD_OUTCOMES = ['warning', 'fine', 'probation', 'jail'] as const;
+
+/**
+ * Your criminal record (records themselves arrive in Stage 9): you have an
+ * entry on it (with one of these outcomes, from within this many years).
+ * `{ record: {} }` is any record at all.
+ */
+export interface RecordCondition {
+  outcome?: (typeof RECORD_OUTCOMES)[number][];
+  within?: number;
 }
 
 const atLeastOneField = (c: Record<string, unknown>) => Object.values(c).some((v) => v !== undefined);
@@ -199,10 +236,30 @@ export const conditionSchema: z.ZodType<Condition> = z.lazy(() =>
           final: z.boolean().optional(),
           gpa: compareSchema.optional(),
           credential: z.array(credentialTypeSchema).min(1).optional(),
+          field: z.array(idSchema).min(1).optional(),
           left: z.boolean().optional(),
           admission: z.boolean().optional(),
         })
         .refine(atLeastOneField, 'needs at least one field'),
+    }),
+    z.strictObject({
+      career: z
+        .strictObject({
+          employed: z.boolean().optional(),
+          job: z.array(idSchema).min(1).optional(),
+          level: compareSchema.optional(),
+          years: compareSchema.optional(),
+          performance: compareSchema.optional(),
+          retired: z.boolean().optional(),
+          lostWithin: z.int().min(1).max(100).optional(),
+        })
+        .refine(atLeastOneField, 'needs at least one field'),
+    }),
+    z.strictObject({
+      record: z.strictObject({
+        outcome: z.array(z.enum(RECORD_OUTCOMES)).min(1).optional(),
+        within: z.int().min(1).max(120).optional(),
+      }),
     }),
     z.strictObject({ memory: z.strictObject({ role: roleSchema, tag: idSchema }) }),
     z.strictObject({
@@ -326,6 +383,23 @@ export const effectSchema = z.discriminatedUnion('type', [
             : e.value === undefined,
       'grades needs a value from -1 to 1; scholarship a whole-dollar value from 1 to 1,000,000; drop_out and expel take no value',
     ),
+  /**
+   * Work (Stage 8), while you have a job (offer: also without one).
+   * performance: `value` points (−50 to 50) on your job performance. raise:
+   * the raise you'd get for asking (balance careers.yaml raises.asked).
+   * promote: up a level (not past the top). fire: you're fired. quit: you
+   * walk away. offer: you take a job in track `jobId`, if you're old enough,
+   * out of school and meet its requirements (leaving any job you have).
+   */
+  z
+    .strictObject({
+      type: z.literal('job'),
+      action: z.enum(['performance', 'raise', 'promote', 'fire', 'quit', 'offer']),
+      value: z.int().min(-50).max(50).optional(),
+      jobId: idSchema.optional(),
+    })
+    .refine((e) => (e.action === 'performance') === (e.value !== undefined && e.value !== 0), 'performance needs a non-zero value (and only it has one)')
+    .refine((e) => (e.action === 'offer') === (e.jobId !== undefined), 'offer needs jobId (and only it has one)'),
   z.strictObject({
     type: z.literal('relationship'),
     role: roleSchema,
@@ -357,10 +431,11 @@ export const outcomeSchema = z.strictObject({
 export type Outcome = z.infer<typeof outcomeSchema>;
 
 const checkWeightSchema = z.number().min(-2).max(2);
-/** A character stat, trait or hidden value; or how a cast person feels about you. */
+/** A character stat, trait or hidden value; how a cast person feels about you; or your job performance (50 without a job). */
 export const checkStatSchema = z.union([
   z.strictObject({ key: statKeySchema, weight: checkWeightSchema }),
   z.strictObject({ role: roleSchema, key: z.enum(['affection', 'trust']), weight: checkWeightSchema }),
+  z.strictObject({ job: z.literal('performance'), weight: checkWeightSchema }),
 ]);
 export type CheckStat = z.infer<typeof checkStatSchema>;
 

@@ -1,0 +1,16 @@
+id: management_consultant
+name: "Consulting"
+category: professional
+blurb: "Telling companies what they already suspected, for a fee."
+requires: {"education": {"credential": ["grad"], "field": ["mba"]}}
+levels:
+  - { title: "associate consultant", salary: 92000 }
+  - { title: "consultant", salary: 118000 }
+  - { title: "engagement manager", salary: 148000 }
+  - { title: "principal", salary: 185000 }
+  - { title: "partner", salary: 250000 }
+performance:
+  - { key: smarts, weight: 0.3 }
+  - { key: confidence, weight: 0.25 }
+  - { key: ambition, weight: 0.2 }
+employers: ["Ashgrove Advisory", "Kingsley Strategy Group", "Northpoint Consulting", "Delacroix & Webb"]

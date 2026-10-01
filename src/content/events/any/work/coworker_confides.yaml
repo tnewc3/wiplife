@@ -1,0 +1,40 @@
+id: coworker_confides
+title: Something's wrong
+text: >-
+  {npc.name} pulls you aside, shaking. {npc.They} {npc:says|say} {boss.name}
+  has been making {npc.them} deeply uncomfortable for months, the comments,
+  the closed doors, and {npc.they} {npc:is|are} thinking of going to HR. "Would you back me up?"
+tone: dark
+category: work
+rarity: uncommon
+lifeStages: [youngAdult, adult, senior]
+requires: { career: { employed: true } }
+weight: { base: 2 }
+once: true
+cast:
+  npc: { kind: coworker }
+  boss: { kind: boss }
+choices:
+  - id: back
+    label: Go to HR with {npc.them}
+    outcome:
+      text: >-
+        It's a hard few months. {boss.name} is investigated and the office
+        splits into sides. {npc.name} tells you {npc.they} couldn't have
+        done it alone.
+      effects:
+        - { type: memory, role: npc, tag: you_backed_them }
+        - { type: relationship, role: npc, affection: 12, trust: 15 }
+        - { type: memory, role: boss, tag: reported_them }
+        - { type: relationship, role: boss, affection: -20, trust: -15 }
+        - { type: job, action: performance, value: -2 }
+        - { type: stat, key: kindness, delta: 3 }
+        - { type: stat, key: stress, delta: 5 }
+  - id: listen
+    label: Listen, but stay out of it
+    outcome:
+      text: You tell {npc.name} you're sorry and that you can't risk it. {npc.They} {npc:nods|nod}. {npc.They} {npc:doesn't|don't} ask you for anything again.
+      effects:
+        - { type: memory, role: npc, tag: stayed_out_of_it }
+        - { type: relationship, role: npc, affection: -10, trust: -15 }
+        - { type: stat, key: stress, delta: 2 }

@@ -1,0 +1,14 @@
+id: food_service
+name: "Food service"
+category: gig
+blurb: "Orders up, shifts long, staff meal free."
+levels:
+  - { title: "crew member", salary: 27000, years: 1 }
+  - { title: "shift lead", salary: 31000 }
+  - { title: "assistant manager", salary: 38000 }
+  - { title: "restaurant manager", salary: 50000 }
+performance:
+  - { key: discipline, weight: 0.3 }
+  - { key: sociability, weight: 0.2 }
+  - { key: fitness, weight: 0.15 }
+employers: ["Burger Barn", "Sunny Side Diner", "Noodle Express", "Tasty Taco"]

@@ -1,0 +1,15 @@
+id: hvac_technician
+name: "Heating and cooling"
+category: trade
+blurb: "Keeping everyone warm in winter and cool in summer."
+requires: {"education": {"credential": ["trade_license"], "field": ["hvac_technician"]}}
+levels:
+  - { title: "HVAC helper", salary: 36000 }
+  - { title: "HVAC technician", salary: 51000 }
+  - { title: "senior HVAC technician", salary: 63000 }
+  - { title: "service manager", salary: 76000 }
+performance:
+  - { key: discipline, weight: 0.3 }
+  - { key: smarts, weight: 0.2 }
+  - { key: fitness, weight: 0.2 }
+employers: ["Polar Air Services", "Comfort Zone Heating", "Northstar Mechanical", "Kelvin & Co."]

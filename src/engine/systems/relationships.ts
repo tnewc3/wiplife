@@ -7,6 +7,7 @@
  * outside family and romance fade out of your life (status 'ended') when you
  * drift apart, when an acquaintance leaves no memory for years, when they
  * die (friends are remembered), or when too many people crowd the list.
+ * Your current boss stays while you have the job.
  */
 import { isDraft, original } from 'immer';
 import type { ContentBundle } from '../../content/schemas';
@@ -76,6 +77,8 @@ function prune(state: LifeState, view: LifeState, drifted: Map<string, number>, 
   for (const id of Object.keys(view.relationships).sort()) {
     const seen = view.relationships[id]!;
     if (!prunable(seen) || seen.status === 'ended') continue;
+    // Your boss stays in your life while you work there (Stage 8).
+    if (seen.kind === 'boss' && view.career.job !== null && view.people[id]?.alive) continue;
     const rel = drifted.has(id) ? { ...seen, affection: drifted.get(id)! } : seen;
     const person = view.people[id];
     const forgettable = rel.kind === 'acquaintance' || rel.kind === 'classmate';

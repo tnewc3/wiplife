@@ -1,0 +1,31 @@
+id: night_shift
+title: The night shift
+text: >-
+  There's an opening on nights: better pay, empty roads, and a sleep
+  schedule that will never feel normal again.
+tone: neutral
+category: work
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  career:
+    employed: true
+    job: [registered_nurse, physician, police_officer, security_guard, warehouse_worker, food_service, home_health_aide, truck_driver, bartender]
+weight: { base: 4 }
+cooldownYears: 6
+choices:
+  - id: take
+    label: Take it for the money
+    outcome:
+      text: Blackout curtains, coffee at midnight, and a bigger paycheck. Your friends forget what you look like.
+      effects:
+        - { type: money, delta: 3500 }
+        - { type: stat, key: health, delta: -3 }
+        - { type: stat, key: stress, delta: 3 }
+        - { type: stat, key: happiness, delta: -2 }
+  - id: pass
+    label: Stay on days
+    outcome:
+      text: You like seeing the sun. Someone else can have nights.
+      effects:
+        - { type: stat, key: happiness, delta: 1 }

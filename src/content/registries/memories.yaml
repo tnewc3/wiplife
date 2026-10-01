@@ -84,3 +84,22 @@ tags:
   fought_for_them: You got into a fight for {npc.them}
   roomed_together: Shared a dorm room with you
   threw_graduation_party: Threw you a graduation party
+  # Work (Stage 8).
+  hired_you: Hired you
+  gave_you_raise: Gave you a raise
+  refused_raise: Turned down your request for a raise
+  gave_you_a_chance: Gave you a chance to turn things around
+  mentored_you: Mentored you
+  took_credit: Took credit for your idea
+  went_to_bat_for_you: Went to bat for you when you were burning out
+  lunch_buddy: Had lunch with you every week
+  danced_at_party: Danced with you at the holiday party
+  reported_them: You reported {npc.them} to HR
+  you_covered_shift: You covered {npc.their} shift
+  drinking_buddy: Went drinking with you at lunch
+  you_backed_them: You backed {npc.them} up when {npc.they} went to HR
+  stayed_out_of_it: You stayed out of it when {npc.they} needed backup
+  beat_you_to_promotion: Got the promotion you wanted
+  caught_you_lying: Caught you faking a sick day
+  union_together: Organized a union with you
+  you_reported_union: You told the boss {npc.they} {npc:was|were} organizing a union

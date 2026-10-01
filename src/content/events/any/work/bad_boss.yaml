@@ -1,0 +1,51 @@
+id: bad_boss
+title: In front of everyone
+text: >-
+  {boss.name} tears into you in the middle of the office over a mistake
+  that wasn't even yours. The whole floor goes quiet to listen.
+tone: serious
+category: work
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { career: { employed: true } }
+    - { role: boss, affection: { lte: 45 } }
+weight: { base: 5 }
+cooldownYears: 6
+cast:
+  boss: { kind: boss }
+choices:
+  - id: stand
+    label: Stand your ground, calmly
+    check:
+      base: 40
+      stats: [{ key: confidence, weight: 0.4 }, { key: discipline, weight: 0.1 }]
+      success:
+        text: You lay out what actually happened, quietly and clearly. {boss.name} backs down. Several people buy you coffee.
+        effects:
+          - { type: relationship, role: boss, trust: 6 }
+          - { type: memory, role: boss, tag: you_stood_up_to_them }
+          - { type: stat, key: confidence, delta: 4 }
+      failure:
+        text: Your voice cracks halfway through. {boss.name} talks right over you, and you have to sit back down.
+        effects:
+          - { type: relationship, role: boss, affection: -10 }
+          - { type: job, action: performance, value: -4 }
+          - { type: stat, key: stress, delta: 5 }
+  - id: hr
+    label: Go to HR
+    outcome:
+      text: HR takes notes and promises to "look into it." {boss.name} is very polite to you from then on, and very cold.
+      effects:
+        - { type: memory, role: boss, tag: reported_them }
+        - { type: relationship, role: boss, affection: -15 }
+        - { type: stat, key: stress, delta: 2 }
+  - id: swallow
+    label: Take it and say nothing
+    outcome:
+      text: You go back to your desk and stare at the screen until your face stops burning.
+      effects:
+        - { type: stat, key: stress, delta: 5 }
+        - { type: stat, key: happiness, delta: -3 }
+        - { type: stat, key: confidence, delta: -2 }

@@ -1,0 +1,39 @@
+id: commute
+title: The commute
+text: >-
+  Ninety minutes each way: a train that's always late, then a bus that's
+  always full. You've started calculating how many years of your life this is.
+tone: neutral
+category: work
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires: { career: { employed: true } }
+weight:
+  base: 3
+  modifiers:
+    - { if: { any: [{ city: nyc }, { city: los_angeles }] }, x: 2.5 }
+cooldownYears: 8
+cast:
+  boss: { kind: boss }
+choices:
+  - id: remote
+    label: Ask {boss.name} to work from home twice a week
+    check:
+      base: 40
+      stats: [{ role: boss, key: trust, weight: 0.3 }, { job: performance, weight: 0.3 }]
+      success:
+        text: '"As long as the work gets done." Two mornings a week, your commute is the hallway.'
+        effects:
+          - { type: stat, key: stress, delta: -6 }
+          - { type: stat, key: happiness, delta: 3 }
+      failure:
+        text: '"We''re a team that likes to be together," {boss.name} says. The train is late again.'
+        effects:
+          - { type: stat, key: stress, delta: 2 }
+  - id: audiobooks
+    label: Make it your reading time
+    outcome:
+      text: You get through forty audiobooks this year. The commute is still awful, but you're well read.
+      effects:
+        - { type: stat, key: smarts, delta: 2 }
+        - { type: stat, key: stress, delta: -1 }

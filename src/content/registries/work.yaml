@@ -1,0 +1,10 @@
+# The events that answer the work actions on the Work tab. The engine picks
+# one that fits (by weight and requirements). Every event listed must be
+# followUpOnly: it only happens this way.
+#   hired     you applied and got the job (you're already hired); cast: boss (your new boss)
+#   rejected  you applied and didn't get it; no cast
+#   raise     you asked for a raise: the event decides (a raise effect); cast: boss
+results:
+  hired: { events: [interview_offer_call, interview_first_day, interview_probation] }
+  rejected: { events: [interview_rejection_letter, interview_blanked] }
+  raise: { events: [raise_conversation, raise_budget_freeze] }

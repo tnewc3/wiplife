@@ -131,9 +131,12 @@ export interface AppState {
    */
   takeAction: (actionId: ActionId, personId: string) => Promise<void>;
   /**
-   * Takes a money or home action (lifestyle, gig work, paying a debt, moving,
-   * buying or selling a home) between years and autosaves. Ignored while the
-   * engine is working or outside 'yearStart'.
+   * Takes a money, home, school or work action (lifestyle, gig work, paying a
+   * debt, moving, buying or selling a home, applying to school or for a job,
+   * asking for a raise, quitting, retiring) between years and autosaves. An
+   * action that answers with an event (a job application, a raise request)
+   * opens it in the event sheet. Ignored while the engine is working or
+   * outside 'yearStart'.
    */
   takeLifeAction: (actionId: LifeActionId, params?: LifeActionParams) => Promise<void>;
   /** Opens More → Home. */
@@ -566,7 +569,10 @@ export function createAppStore({
           busy(async () => {
             const life = get().life;
             if (!life || life.phase !== 'yearStart' || get().eventSheet) return;
-            await commit(performAction(life, actionId, params, bundle));
+            const next = performAction(life, actionId, params, bundle);
+            await commit(next);
+            // A job application or a raise request answers with an event.
+            if (next.phase === 'action') openEvents(next);
           }),
 
         openHome: () =>

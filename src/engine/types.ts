@@ -221,16 +221,50 @@ export interface EducationState {
   lastBill?: SchoolBill;
 }
 
+/** The job you have now (Stage 8). */
+export interface Job {
+  /** The job track (src/content/jobs). */
+  jobId: Id;
+  /** Your level in the track (1 is the first). */
+  level: number;
+  /** Years worked at this level (counted at each yearly review). */
+  yearsAtLevel: number;
+  /** How well you're doing (0–100), set at each yearly review and moved by events. */
+  performance: number;
+  /** Yearly salary in whole dollars. */
+  salary: number;
+  /** The year you were hired. Your first year of pay is the next one. */
+  since: number;
+  /** Where you work (a fictional employer from the job's content). */
+  employer: string;
+  /** The last year you asked for a raise. */
+  raiseYear?: number;
+}
+
+/** How a job ended. */
+export type JobEnd = 'quit' | 'fired' | 'laid_off' | 'retired' | 'moved';
+
+/** A job you used to have. */
+export interface PastJob {
+  jobId: Id;
+  employer: string;
+  fromYear: number;
+  toYear: number;
+  /** Your level and salary when it ended. */
+  level: number;
+  salary: number;
+  endedBy: JobEnd;
+}
+
 export interface CareerState {
-  job: null | { jobId: Id; level: number; yearsAtLevel: number; performance: number; salary: number };
+  job: Job | null;
   gig: boolean;
   retired: boolean;
-  history: {
-    jobId: Id;
-    fromYear: number;
-    toYear: number;
-    endedBy: 'quit' | 'fired' | 'laid_off' | 'retired' | 'moved';
-  }[];
+  history: PastJob[];
+  /** This year's job applications (cleared as each year begins). */
+  applied: { jobId: Id; hired: boolean }[];
+  /** Job tracks hiring in your city this year (rolled as each year begins, and when you move city). */
+  openings: Id[];
 }
 
 export interface Debt {
@@ -249,7 +283,7 @@ export interface Debt {
 /** One year's money, from the ledger (docs/design.md, section J). */
 export interface Ledger {
   year: number;
-  /** Earned income before tax (gig pay, and salaries from Stage 8). */
+  /** Earned income before tax (salaries and gig pay). */
   gross: number;
   /** The retirement benefit (untaxed). */
   retirement: number;

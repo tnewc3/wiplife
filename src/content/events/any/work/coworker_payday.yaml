@@ -1,0 +1,39 @@
+# Follow-up of coworker_short_on_cash.
+id: coworker_payday
+title: About that $200
+text: >-
+  It's been a while since you lent {npc.name} that $200. Payday has come and
+  gone several times.
+tone: neutral
+category: work
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires: { memory: { role: npc, tag: lent_money } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  npc: { kind: coworker }
+choices:
+  - id: remind
+    label: Remind {npc.them}
+    check:
+      base: 45
+      stats: [{ role: npc, key: trust, weight: 0.4 }, { key: confidence, weight: 0.2 }]
+      success:
+        text: '{npc.name} goes red and pays you back that afternoon, with a coffee on top.'
+        effects:
+          - { type: money, delta: 200 }
+          - { type: memory, role: npc, tag: paid_you_back }
+          - { type: relationship, role: npc, trust: 4 }
+      failure:
+        text: '"Right, right, next week," {npc.name} says. Next week never comes.'
+        effects:
+          - { type: memory, role: npc, tag: never_paid_back }
+          - { type: relationship, role: npc, affection: -6, trust: -10 }
+  - id: forget
+    label: Let it go
+    outcome:
+      text: Two hundred dollars is the price of never having to bring it up. You decide it's worth it.
+      effects:
+        - { type: memory, role: npc, tag: never_paid_back }
+        - { type: stat, key: kindness, delta: 2 }

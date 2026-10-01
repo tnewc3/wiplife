@@ -1,0 +1,16 @@
+id: registered_nurse
+name: "Nursing"
+category: professional
+blurb: "Twelve-hour shifts, real emergencies, and patients who remember you."
+requires: {"education": {"credential": ["associate", "bachelor"], "field": ["nursing"]}}
+levels:
+  - { title: "staff nurse", salary: 62000 }
+  - { title: "registered nurse", salary: 71000 }
+  - { title: "charge nurse", salary: 82000 }
+  - { title: "nurse manager", salary: 96000 }
+performance:
+  - { key: smarts, weight: 0.2 }
+  - { key: kindness, weight: 0.25 }
+  - { key: discipline, weight: 0.25 }
+  - { key: fitness, weight: 0.1 }
+employers: ["Mercy Ridge Hospital", "St. Albans Medical Center", "Lakeside Health", "Unity Care Clinics"]

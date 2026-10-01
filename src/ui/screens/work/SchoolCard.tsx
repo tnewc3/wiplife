@@ -139,6 +139,7 @@ export function SchoolCard({ life }: { life: LifeState }) {
       {view.ged?.result === false && <p className="mt-2 text-sm">You didn’t pass the GED this year.</p>}
       {view.fund > 0 && <p className="mt-2 text-sm text-muted">Scholarship money waiting for tuition: {money(view.fund)}</p>}
 
+      {view.canApply && life.career.job && <p className="mt-3 text-sm text-muted">Starting school means leaving your job when the year begins.</p>}
       <div className="mt-3 flex flex-col gap-2" role="group" aria-label="School actions">
         {view.canApply && (
           <Button block disabled={disabled} onClick={() => setApplying(true)}>

@@ -1,0 +1,16 @@
+id: hair_stylist
+name: "Hair and beauty"
+category: trade
+blurb: "Cuts, color, and hearing everyone's secrets."
+requires: {"education": {"credential": ["trade_license"], "field": ["cosmetologist"]}}
+levels:
+  - { title: "assistant stylist", salary: 26000 }
+  - { title: "stylist", salary: 36000 }
+  - { title: "senior stylist", salary: 47000 }
+  - { title: "salon manager", salary: 58000 }
+performance:
+  - { key: sociability, weight: 0.3 }
+  - { key: looks, weight: 0.15 }
+  - { key: discipline, weight: 0.2 }
+  - { key: confidence, weight: 0.1 }
+employers: ["Shear Genius Salon", "The Mane Room", "Velvet & Vine", "Studio Bloom"]

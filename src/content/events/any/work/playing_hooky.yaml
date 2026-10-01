@@ -1,0 +1,42 @@
+id: playing_hooky
+title: A sick day
+text: >-
+  It's the first warm day of the year and your friends are going to the
+  beach. You feel a sudden, very convenient cough coming on.
+tone: light
+category: work
+rarity: common
+lifeStages: [youngAdult, adult]
+requires: { career: { employed: true } }
+weight:
+  base: 4
+  modifiers:
+    - { if: { trait: riskTaking, gt: 60 }, x: 1.5 }
+cooldownYears: 5
+cast:
+  boss: { kind: boss }
+choices:
+  - id: call_in
+    label: Call in "sick"
+    check:
+      base: 65
+      stats: [{ key: luck, weight: 0.3 }]
+      success:
+        text: Sand, sun and absolutely no email. The best Tuesday of the year.
+        effects:
+          - { type: stat, key: happiness, delta: 5 }
+          - { type: stat, key: stress, delta: -4 }
+      failure:
+        text: '{boss.name} sees your sunburned face in a friend''s beach photo online. Your cough is not mentioned, loudly.'
+        effects:
+          - { type: memory, role: boss, tag: caught_you_lying }
+          - { type: relationship, role: boss, trust: -12 }
+          - { type: job, action: performance, value: -5 }
+          - { type: stat, key: happiness, delta: 2 }
+  - id: work
+    label: Go to work like an adult
+    outcome:
+      text: You watch the sun through the office window and hear about the beach all week.
+      effects:
+        - { type: stat, key: discipline, delta: 2 }
+        - { type: stat, key: happiness, delta: -1 }

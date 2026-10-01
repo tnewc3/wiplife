@@ -1,0 +1,29 @@
+id: retirement_countdown
+title: How many more years?
+text: >-
+  {npc.name}, who started long after you did, asks at lunch when you plan
+  to retire. You realize you've never actually done the math.
+tone: neutral
+category: work
+rarity: common
+lifeStages: [adult, senior]
+requires: { all: [{ age: { gte: 58 } }, { career: { employed: true } }] }
+weight: { base: 5 }
+cooldownYears: 8
+cast:
+  npc: { kind: coworker }
+choices:
+  - id: countdown
+    label: Start a countdown calendar
+    outcome:
+      text: It's on the wall by your desk now. Crossing off days is deeply satisfying.
+      effects:
+        - { type: stat, key: happiness, delta: 3 }
+        - { type: stat, key: ambition, delta: -2 }
+  - id: never
+    label: '"Retire? And do what?"'
+    outcome:
+      text: '{npc.name} laughs. You weren''t joking. Work is where your people are.'
+      effects:
+        - { type: relationship, role: npc, affection: 4 }
+        - { type: stat, key: ambition, delta: 2 }

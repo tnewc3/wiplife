@@ -1,0 +1,44 @@
+id: workplace_injury
+title: Hurt on the job
+text: >-
+  One wrong lift, one wet floor, and something in your back goes with a
+  sound you feel more than hear. You're on the ground before you know it.
+tone: serious
+category: work
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  career:
+    employed: true
+    job: [construction_worker, electrician, plumber, hvac_technician, welder, auto_mechanic, warehouse_worker, delivery_driver, food_service, truck_driver, home_health_aide, registered_nurse]
+weight:
+  base: 4
+  modifiers:
+    - { if: { stat: fitness, lt: 35 }, x: 1.5 }
+cooldownYears: 8
+cast:
+  boss: { kind: boss }
+choices:
+  - id: claim
+    label: File for workers' comp
+    outcome:
+      text: The paperwork takes months, but the checks come. {boss.name} acts like you did something wrong.
+      effects:
+        - { type: money, delta: 2500 }
+        - { type: stat, key: health, delta: -5 }
+        - { type: relationship, role: boss, affection: -4 }
+  - id: tough
+    label: Tough it out
+    outcome:
+      text: You're back the next day, moving carefully. The pain settles into something you just live with.
+      effects:
+        - { type: stat, key: health, delta: -9 }
+        - { type: job, action: performance, value: 2 }
+        - { type: stat, key: stress, delta: 3 }
+  - id: doctor
+    label: See a doctor on your own dime
+    outcome:
+      text: Physical therapy, twice a week, out of your own pocket. It helps.
+      effects:
+        - { type: money, delta: -900 }
+        - { type: stat, key: health, delta: -2 }
