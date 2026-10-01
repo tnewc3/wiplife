@@ -231,6 +231,11 @@ export const targetsBalanceSchema = z.strictObject({
     /** At least this share of lives that reach homeOwnershipAge have owned a home by then. */
     minHomeOwners: probabilitySchema,
     homeOwnershipAge: z.int().min(18).max(120),
+    /** The median net worth of lives that reach netWorthAge falls in this range (whole dollars). */
+    medianNetWorth: z
+      .strictObject({ min: z.int(), max: z.int() })
+      .refine((r) => r.min <= r.max, 'min must not be greater than max'),
+    netWorthAge: z.int().min(18).max(120),
   }),
   careers: z.strictObject({
     /**

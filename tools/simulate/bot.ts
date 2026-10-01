@@ -9,9 +9,10 @@
  * the simulated player, not the game, so they live here rather than in the
  * balance files; Stage 12's strategy bots replace this.
  */
-import type { ActionId, ContentBundle, Lifestyle } from '../../src/content/schemas';
-import { availableActions, isLifeActionAvailable, type LifeActionId, type LifeActionParams } from '../../src/engine/actions';
+import { ACTION_IDS, LIFESTYLES, type ActionId, type ContentBundle, type JobDef, type Lifestyle } from '../../src/content/schemas';
+import { availableActions, isLifeActionAvailable, LIFE_ACTION_IDS, type LifeActionId, type LifeActionParams } from '../../src/engine/actions';
 import { activeJob, canAskRaise, canRetire, jobApplyBlock, levelPay, startLevel } from '../../src/engine/career';
+import { referencesIn } from '../../src/engine/conditions';
 import { applicationGpa } from '../../src/engine/education';
 import { livingCost, rentIn } from '../../src/engine/housing';
 import { weightedPick } from '../../src/engine/random';
@@ -65,14 +66,17 @@ export interface MoneyProfile {
   lifestyle: Lifestyle;
   /** The age they'd like to retire at (Stage 8). */
   retireAge: number;
+  /** Goes to trade school when eligible instead of college (Stage 8 follow-up: so trades get played). */
+  tradeMinded: boolean;
 }
 
 export function rollMoneyProfile(rng: RngState): MoneyProfile {
   const roll = nextFloat(rng);
-  const lifestyle = roll < 0.25 ? 'frugal' : roll < 0.8 ? 'comfortable' : 'lavish';
+  const lifestyle: Lifestyle = roll < 0.25 ? 'frugal' : roll < 0.8 ? 'comfortable' : 'lavish';
   // With jobs to apply for (Stage 8), nearly every simulated player works; a
   // few never do, and some stick to gig work.
-  return { worker: chance(rng, 0.97), jobSeeker: chance(rng, 0.95), lifestyle, retireAge: 60 + Math.floor(nextFloat(rng) * 11) };
+  const profile = { worker: chance(rng, 0.97), jobSeeker: chance(rng, 0.95), lifestyle, retireAge: 60 + Math.floor(nextFloat(rng) * 11) };
+  return { ...profile, tradeMinded: chance(rng, SCHOOL_POLICY.tradeMinded) };
 }
 
 /** Yearly chances for the money player model. */
@@ -168,6 +172,8 @@ const SCHOOL_POLICY = {
   elite: 0.6,
   /** Trade school, when not going to college. */
   trade: 0.3,
+  /** Share of players who go to trade school whenever eligible, instead of college (until licensed, up to returnLaterUntil). */
+  tradeMinded: 0.15,
   /** Drops out of high school each year with a GPA below this... */
   dropoutGpa: 2.6,
   dropout: 0.1,
@@ -188,7 +194,7 @@ const SCHOOL_POLICY = {
   changeMajor: 0.05,
 };
 
-export function chooseSchoolActions(life: LifeState, content: ContentBundle, rng: RngState): MoneyAction[] {
+export function chooseSchoolActions(life: LifeState, content: ContentBundle, rng: RngState, profile: MoneyProfile): MoneyAction[] {
   const out: MoneyAction[] = [];
   const can = (id: LifeActionId, params: LifeActionParams = {}) => isLifeActionAvailable(life, id, params, content);
   const edu = life.education;
@@ -214,6 +220,16 @@ export function chooseSchoolActions(life: LifeState, content: ContentBundle, rng
   if (can('return_to_school') && chance(rng, SCHOOL_POLICY.goBack)) return [...out, ['return_to_school', {}]];
 
   const options = getApplicationOptions(life, content);
+  // A trade-minded player applies to trade school whenever eligible, until licensed.
+  if (profile.tradeMinded) {
+    const licensed = edu.credentials.some((c) => c.type === 'trade_license');
+    const eligible = (cur === null || (cur.program === 'high' && cur.year >= cur.lengthYears)) && !edu.admission;
+    if (!licensed && eligible && age <= SCHOOL_POLICY.returnLaterUntil) {
+      const open = options.trade.filter((o) => o.block === null);
+      if (open.length > 0) return [...out, ['apply_school', { program: 'trade', tradeId: pick(rng, open).id! }]];
+    }
+    if (!licensed) return out;
+  }
   // Last year of high school (or later, now and then): college or trade school.
   const hsSenior = cur?.program === 'high' && cur.year >= cur.lengthYears;
   const lateStarter = !cur && !edu.admission && age >= 19 && age <= SCHOOL_POLICY.returnLaterUntil && !edu.credentials.some((c) => c.type !== 'hs_diploma' && c.type !== 'ged');
@@ -267,6 +283,8 @@ const CAREER_POLICY = {
   askRaise: 0.2,
   /** Quits for no reason in particular. */
   quit: 0.01,
+  /** Leans this much more toward a job that uses their degree or license. */
+  trainingPull: 4,
 };
 
 /** The work actions the bot takes this year, drawing from `rng`. */
@@ -294,13 +312,92 @@ export function chooseCareerActions(life: LifeState, content: ContentBundle, rng
       const def = activeJob(content, id)!;
       const start = levelPay(life, def, startLevel(life, def), content);
       const average = def.levels.reduce((sum, _l, i) => sum + levelPay(life, def, i + 1, content), 0) / def.levels.length;
-      return { id, start, weight: (average / 10_000) ** 2 };
+      // A job that uses your degree or license appeals more.
+      const uses = usesTraining(life, def) ? CAREER_POLICY.trainingPull : 1;
+      return { id, start, weight: (average / 10_000) ** 2 * uses };
     })
     .filter((o) => !job || o.start >= job.salary * CAREER_POLICY.switchGain);
   while (options.length > 0 && out.filter(([a]) => a === 'apply_job').length < content.balance.careers.maxApplications) {
     const picked = weightedPick(rng, options.map((o) => [o, o.weight] as const));
     out.push(['apply_job', { jobId: picked.id }]);
     options = options.filter((o) => o !== picked);
+  }
+  return out;
+}
+
+/** The job needs a degree or license in a field you hold (or are finishing). */
+export function usesTraining(life: LifeState, def: JobDef): boolean {
+  const fields = referencesIn(def.requires).fields;
+  return fields.length > 0 && life.education.credentials.some((c) => c.refId !== undefined && fields.includes(c.refId));
+}
+
+/**
+ * The careless player (a second simulation run, shown beside the one
+ * above): no caution rules and no plans. Each year it takes each kind of
+ * money, home, school and work action that's available with a flat chance,
+ * with parameters picked at random, and each relationship action with a
+ * smaller one. Event choices are random for both players. Like the policies
+ * above, these chances describe the simulated player, not the game.
+ */
+const CARELESS = {
+  /** Chance of each kind of money, home, school or work action a year. */
+  lifeAction: 0.15,
+  /** Chance of each relationship action with each person a year. */
+  personAction: 0.05,
+};
+
+/** Every parameter set worth trying for an action. */
+function paramOptions(life: LifeState, content: ContentBundle, actionId: LifeActionId): LifeActionParams[] {
+  switch (actionId) {
+    case 'set_lifestyle':
+      return LIFESTYLES.map((lifestyle) => ({ lifestyle }));
+    case 'pay_debt':
+      return life.finances.debts.map((d) => ({ debtId: d.id }));
+    case 'relocate':
+      return Object.keys(content.cities)
+        .sort()
+        .map((cityId) => ({ cityId }));
+    case 'choose_major':
+      return Object.keys(content.majors)
+        .sort()
+        .map((majorId) => ({ majorId }));
+    case 'apply_school': {
+      const majors = Object.keys(content.majors).sort();
+      return [
+        ...(['community', 'state', 'elite'] as const).flatMap((tier) => majors.map((majorId) => ({ program: 'college' as const, tier, majorId }))),
+        ...Object.keys(content.trades)
+          .sort()
+          .map((tradeId) => ({ program: 'trade' as const, tradeId })),
+        ...Object.keys(content.gradPrograms)
+          .sort()
+          .map((gradProgramId) => ({ program: 'grad' as const, gradProgramId })),
+      ];
+    }
+    case 'apply_job':
+      return life.career.openings.map((jobId) => ({ jobId }));
+    default:
+      return [{}];
+  }
+}
+
+/** The money, home, school and work actions the careless player takes this year, drawing from `rng`. */
+export function chooseCarelessLifeActions(life: LifeState, content: ContentBundle, rng: RngState): MoneyAction[] {
+  const out: MoneyAction[] = [];
+  for (const actionId of LIFE_ACTION_IDS) {
+    if (!chance(rng, CARELESS.lifeAction)) continue;
+    const available = paramOptions(life, content, actionId).filter((params) => isLifeActionAvailable(life, actionId, params, content));
+    if (available.length > 0) out.push([actionId, pick(rng, available)]);
+  }
+  return out;
+}
+
+/** The relationship actions the careless player takes this year, drawing from `rng`. */
+export function chooseCarelessActions(life: LifeState, content: ContentBundle, rng: RngState): [ActionId, string][] {
+  const out: [ActionId, string][] = [];
+  for (const id of Object.keys(life.relationships).sort()) {
+    for (const action of availableActions(life, id, content)) {
+      if (ACTION_IDS.includes(action.id) && chance(rng, CARELESS.personAction)) out.push([action.id, id]);
+    }
   }
   return out;
 }

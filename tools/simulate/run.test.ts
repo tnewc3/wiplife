@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { content } from '../../src/content';
-import { formatReport, runSimulation } from './run';
+import { formatComparison, formatReport, runSimulation, targetResults } from './run';
 
 describe('simulation runner', () => {
   // Whole lives with every system: give them time.
@@ -51,6 +51,25 @@ describe('simulation runner', () => {
     expect(text).toContain('lifetime earnings by education path');
     expect(text).toMatch(/promotions \d+(\.\d)?%, firings \d+(\.\d)?%, layoffs \d+(\.\d)?%/);
     expect(text).toContain("bachelor's vs high school lifetime earnings");
+  });
+
+  it('reports trades and the net worth target, and runs a careless player beside the careful one', { timeout: 120_000 }, () => {
+    const careful = runSimulation(content, { lives: 20, seedPrefix: 'sim-two' });
+    const careless = runSimulation(content, { lives: 20, seedPrefix: 'sim-two', player: 'careless' });
+    expect([careful.player, careless.player]).toEqual(['careful', 'careless']);
+    expect(careless.invariantFailures).toBe(0);
+    expect(careful.careers.trades.map((t) => t.tradeId)).toEqual(Object.keys(content.trades).sort());
+    for (const t of careful.careers.trades) {
+      expect(t.licensed).toBeLessThanOrEqual(t.enrolled);
+      expect(t.jobIds.length).toBeGreaterThan(0);
+    }
+    expect(careless.careers.tradeMinded).toBe(0);
+    const targets = targetResults(careful, content);
+    expect(targets.map((r) => r.label)).toContain(`median net worth at ${content.balance.targets.money.netWorthAge}`);
+    const text = formatComparison(careful, careless, content);
+    expect(text).toContain('careless');
+    expect(text.split('\n').filter((l) => /^ {2}\S/.test(l) && (l.includes('MET') || l.includes('NOT MET'))).length).toBe(targets.length);
+    expect(formatReport(careful, content)).toContain('trades (');
   });
 
   it('is deterministic', { timeout: 60_000 }, () => {

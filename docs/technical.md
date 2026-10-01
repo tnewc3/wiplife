@@ -1686,6 +1686,8 @@ Target numbers live in `src/content/balance/targets.yaml`, so they can be adjust
 | Legendary events | Lives in which the event fires | Rare but reachable: in roughly 0.1–2% of lives |
 | Money exploits | Repeatable choices with guaranteed positive money; outlier net worth growth | None found |
 | Unbalanced outcomes | Distributions of lifespan, net worth, education and marriage | Within the ranges in `targets.yaml` |
+| Runaway or thin wealth | Median net worth at 65 (`money.medianNetWorth`, added with Stage 8; Stage 12 tunes the economy toward it) | $200k–$600k |
+| Careless play | The same seeds played by a careless player (random actions, no caution rules), reported beside the careful player; the targets are judged on the careful player, and the game isn't tuned for the careless one | Reported, not a target |
 
 ### Measuring life diversity
 

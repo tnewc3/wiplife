@@ -25,7 +25,16 @@ import { beginYear, createLife, endYear } from '../../src/engine/life';
 import { isFamilyKind, isPartnerKind } from '../../src/engine/relationships';
 import { createRng } from '../../src/engine/rng';
 import type { FamilyWealth, LifeStage, LifeState } from '../../src/engine/types';
-import { chooseActions, chooseCareerActions, chooseMoneyActions, chooseSchoolActions, rollMoneyProfile } from './bot';
+import {
+  chooseActions,
+  chooseCarelessActions,
+  chooseCarelessLifeActions,
+  chooseCareerActions,
+  chooseMoneyActions,
+  chooseSchoolActions,
+  rollMoneyProfile,
+} from './bot';
+import { referencesIn } from '../../src/engine/conditions';
 
 export interface SimulationOptions {
   lives: number;
@@ -33,7 +42,15 @@ export interface SimulationOptions {
   seedPrefix: string;
   /** Stops collecting invariant failure messages past this many (they are still counted). */
   maxFailureMessages?: number;
+  /**
+   * The simulated player: 'careful' (the player model in ./bot.ts, the one
+   * the targets are judged on) or 'careless' (random actions, no caution
+   * rules). Defaults to careful.
+   */
+  player?: SimulatedPlayer;
 }
+
+export type SimulatedPlayer = 'careful' | 'careless';
 
 export interface StageYears {
   years: number;
@@ -46,6 +63,7 @@ export interface StageYears {
 
 export interface SimulationReport {
   lives: number;
+  player: SimulatedPlayer;
   invariantFailures: number;
   failureMessages: string[];
   lifespan: { median: number; p10: number; p90: number; youngest: number; oldest: number; under18: number };
@@ -110,6 +128,10 @@ export interface CareerReport {
   tracks: { jobId: string; entered: number; reachedLevel2: number; reachedTop: number; years: number }[];
   /** Lives that reached adulthood that ever filed for bankruptcy; lives that reached targets.money.homeOwnershipAge and owned a home by then. */
   bankrupt: { adults: number; bankrupt: number; neverWorked: number; neverWorkedBankrupt: number };
+  /** Lives whose careful player was set on trade school. */
+  tradeMinded: number;
+  /** Per trade: lives that started trade school for it, earned its license, and worked in a job track that needs that license. */
+  trades: { tradeId: string; enrolled: number; licensed: number; worked: number; jobIds: string[] }[];
   homeOwners: { reached: number; owned: number };
 }
 
@@ -202,6 +224,8 @@ class SchoolWatcher {
   credentialsAt30: string[] | null = null;
   /** Programs left without finishing (dropping out or expelled), by when and what. */
   readonly left = new Set<string>();
+  /** Trades you started trade school for. */
+  readonly trades = new Set<string>();
 
   observe(life: LifeState): void {
     const gone = life.education.left;
@@ -209,6 +233,7 @@ class SchoolWatcher {
     const age = life.character.age;
     const cur = life.education.current;
     if (cur?.program === 'college') this.collegeAge ??= age;
+    if (cur?.program === 'trade' && cur.tradeId) this.trades.add(cur.tradeId);
     if (cur && (cur.program === 'college' || cur.program === 'trade' || cur.program === 'grad') && cur.since - life.birthYear >= 25) this.lateStudent = true;
     const student = life.finances.debts.filter((d) => d.kind === 'student').reduce((sum, d) => sum + d.balance, 0);
     this.maxStudentDebt = Math.max(this.maxStudentDebt, student);
@@ -369,6 +394,10 @@ class RomanceWatcher {
 const STAGES: LifeStage[] = ['early', 'child', 'teen', 'youngAdult', 'adult', 'senior'];
 
 export function runSimulation(content: ContentBundle, options: SimulationOptions): SimulationReport {
+  const playerKind: SimulatedPlayer = options.player ?? 'careful';
+  const careless = playerKind === 'careless';
+  // The money ages, and the age the net worth target is about.
+  const moneyAges = [...new Set([...MONEY_AGES, content.balance.targets.money.netWorthAge])].sort((a, b) => a - b);
   const maxMessages = options.maxFailureMessages ?? 20;
   const failureMessages: string[] = [];
   let invariantFailures = 0;
@@ -425,7 +454,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
     repeatableGains: [],
   };
   const atAge = new Map<number | 'death', { savings: number[]; debt: number[]; netWorth: number[] }>(
-    [...MONEY_AGES, 'death' as const].map((a) => [a, { savings: [], debt: [], netWorth: [] }]),
+    [...moneyAges, 'death' as const].map((a) => [a, { savings: [], debt: [], netWorth: [] }]),
   );
   const gains = largestGains(content);
   const emptyRow = (): EducationRow & { gpas: number[] } => ({
@@ -477,6 +506,19 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
     idleYears: { years: 0, idle: 0 },
     tracks: [],
     bankrupt: { adults: 0, bankrupt: 0, neverWorked: 0, neverWorkedBankrupt: 0 },
+    tradeMinded: 0,
+    // Each trade, and the job tracks that need its license.
+    trades: Object.keys(content.trades)
+      .sort()
+      .map((tradeId) => ({
+        tradeId,
+        enrolled: 0,
+        licensed: 0,
+        worked: 0,
+        jobIds: Object.keys(content.jobs)
+          .sort()
+          .filter((jobId) => referencesIn(content.jobs[jobId]!.requires).fields.includes(tradeId)),
+      })),
     homeOwners: { reached: 0, owned: 0 },
   };
   const trackRows: Record<string, CareerReport['tracks'][number]> = {};
@@ -504,7 +546,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
     const watch = (l: LifeState) => {
       check(l);
       romance.observe(l);
-      wallet.observe(l, MONEY_AGES);
+      wallet.observe(l, moneyAges);
       school.observe(l);
       work.observe(l, content);
       // A management action's result event, just queued.
@@ -530,13 +572,15 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
     watch(life);
     while (life.phase !== 'dead') {
       // Between years, the simulated player may act on money and home...
-      for (const [actionId, params] of chooseMoneyActions(life, content, player, profile)) {
+      for (const [actionId, params] of careless ? chooseCarelessLifeActions(life, content, player) : chooseMoneyActions(life, content, player, profile)) {
+        // One new job a year is enough.
+        if (actionId === 'apply_job' && life.career.applied.some((a) => a.hired)) continue;
         if (!isLifeActionAvailable(life, actionId, params, content)) continue;
         life = takeLifeAction(life, actionId, params);
         money.actionsTaken[actionId]++;
       }
       // ...and on work...
-      for (const [actionId, params] of chooseCareerActions(life, content, player, profile)) {
+      for (const [actionId, params] of careless ? [] : chooseCareerActions(life, content, player, profile)) {
         // One new job a year is enough.
         if (actionId === 'apply_job' && life.career.applied.some((a) => a.hired)) continue;
         if (!isLifeActionAvailable(life, actionId, params, content)) continue;
@@ -553,7 +597,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
         }
       }
       // ...and on school...
-      for (const [actionId, params] of chooseSchoolActions(life, content, player)) {
+      for (const [actionId, params] of careless ? [] : chooseSchoolActions(life, content, player, profile)) {
         if (!isLifeActionAvailable(life, actionId, params, content)) continue;
         life = takeLifeAction(life, actionId, params);
         money.actionsTaken[actionId]++;
@@ -566,7 +610,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
         }
       }
       // ...and on relationships.
-      for (const [actionId, personId] of chooseActions(life, content, player)) {
+      for (const [actionId, personId] of careless ? chooseCarelessActions(life, content, player) : chooseActions(life, content, player)) {
         if (!isActionAvailable(life, actionId, personId, content)) continue;
         life = playAction(life, content, actionId, personId, choices, watch);
         rel.actionsTaken[actionId]++;
@@ -659,7 +703,8 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
       if (life.career.retired) cr.retired++;
       cr.bankrupt.adults++;
       if (life.finances.bankruptcyYear !== undefined) cr.bankrupt.bankrupt++;
-      if (!profile.worker) {
+      if (!careless && profile.tradeMinded) cr.tradeMinded++;
+      if (!careless && !profile.worker) {
         cr.bankrupt.neverWorked++;
         if (life.finances.bankruptcyYear !== undefined) cr.bankrupt.neverWorkedBankrupt++;
       }
@@ -681,6 +726,11 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
       if (best >= (content.jobs[jobId]?.levels.length ?? Infinity)) row.reachedTop++;
     }
     for (const h of life.career.history) if (trackRows[h.jobId]) trackRows[h.jobId]!.years += Math.max(0, h.toYear - h.fromYear);
+    for (const row of cr.trades) {
+      if (school.trades.has(row.tradeId)) row.enrolled++;
+      if (life.education.credentials.some((c) => c.type === 'trade_license' && c.refId === row.tradeId)) row.licensed++;
+      if (row.jobIds.some((jobId) => work.tracks.has(jobId))) row.worked++;
+    }
     if (life.character.age >= t.careers.earningsAge) {
       earningsByPath[educationPath(life)].push(work.earnings);
       if (life.education.credentials.some((c) => c.type === 'bachelor')) bachelorEarnings.push(work.earnings);
@@ -796,6 +846,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
 
   return {
     lives: options.lives,
+    player: playerKind,
     invariantFailures,
     failureMessages,
     lifespan: {
@@ -973,56 +1024,147 @@ function formatCareers(report: SimulationReport, content: ContentBundle): string
   for (const tr of c.tracks) {
     lines.push(`    ${tr.jobId.padEnd(24)} ${String(tr.entered).padStart(5)} ${pct(tr.reachedLevel2, tr.entered).padStart(7)} ${pct(tr.reachedTop, tr.entered).padStart(7)} ${String(tr.years).padStart(6)}`);
   }
-  const b = c.bachelorVsHighSchool;
-  const ct = t.careers;
-  const dead = c.tracks.filter((tr) => tr.entered >= 10 && tr.reachedLevel2 / tr.entered < ct.minReachLevel2);
+  lines.push(`  trades (${c.tradeMinded} careful players set on trade school; lives that started trade school for it, earned the license, worked in a job that needs it):`);
+  for (const tr of c.trades) {
+    lines.push(`    ${tr.tradeId.padEnd(24)} ${String(tr.enrolled).padStart(5)} ${String(tr.licensed).padStart(5)} ${String(tr.worked).padStart(5)}  (${tr.jobIds.join(', ') || 'no job needs it'})`);
+  }
   const unentered = c.tracks.filter((tr) => tr.entered === 0).map((tr) => tr.jobId);
   lines.push('  targets (src/content/balance/targets.yaml):');
-  const bk = c.bankrupt;
-  lines.push(
-    target(
-      'bankruptcy',
-      `${pct(bk.bankrupt, bk.adults)}; ${pct(bk.neverWorkedBankrupt, bk.neverWorked)} of the ${bk.neverWorked} simulated players who never work`,
-      `at most ${pct1(t.money.maxBankruptLives)}`,
-      bk.bankrupt <= t.money.maxBankruptLives * bk.adults,
-    ),
-  );
-  lines.push(
-    target(
-      `owned a home by ${t.money.homeOwnershipAge}`,
-      pct(c.homeOwners.owned, c.homeOwners.reached),
-      `at least ${pct1(t.money.minHomeOwners)}`,
-      c.homeOwners.owned >= t.money.minHomeOwners * c.homeOwners.reached,
-    ),
-  );
-  lines.push(
-    target(
-      "bachelor's vs high school lifetime earnings",
-      `${b.ratio.toFixed(2)}× (${dollars(b.bachelorMean)} vs ${dollars(b.highSchoolMean)})`,
-      `at least ${ct.minBachelorEarningsRatio}×`,
-      b.ratio >= ct.minBachelorEarningsRatio,
-    ),
-  );
-  lines.push(
-    target(
-      "bachelor's holders earning less than the median high-school life",
-      pct1(b.bachelorBelowHighSchoolMedian),
-      `at least ${pct1(ct.minBachelorBelowHighSchoolMedian)}`,
-      b.bachelorBelowHighSchoolMedian >= ct.minBachelorBelowHighSchoolMedian,
-    ),
-  );
-  lines.push(
-    target(
-      'job tracks where under the target share reach level 2 (tracks with 10+ lives)',
-      dead.length === 0 ? 'none' : dead.map((tr) => `${tr.jobId} ${pct(tr.reachedLevel2, tr.entered)}`).join(', '),
-      `at least ${pct1(ct.minReachLevel2)} in every track`,
-      dead.length === 0,
-    ),
-  );
-  const inRange = (x: number, r: { min: number; max: number }) => x >= r.min && x <= r.max;
-  lines.push(target('promotions per year worked', pct1(rate(c.promotions)), `${pct1(ct.promotionRate.min)}–${pct1(ct.promotionRate.max)}`, inRange(rate(c.promotions), ct.promotionRate)));
-  lines.push(target('firings per year worked', pct1(rate(c.firings)), `${pct1(ct.firingRate.min)}–${pct1(ct.firingRate.max)}`, inRange(rate(c.firings), ct.firingRate)));
-  lines.push(target('layoffs per year worked', pct1(rate(c.layoffs)), `${pct1(ct.layoffRate.min)}–${pct1(ct.layoffRate.max)}`, inRange(rate(c.layoffs), ct.layoffRate)));
+  for (const r of targetResults(report, content)) lines.push(target(r.label, r.value, r.goal, r.met));
   if (unentered.length > 0) lines.push(`  job tracks nobody entered: ${unentered.join(', ')}`);
   return lines;
+}
+
+export interface TargetResult {
+  label: string;
+  value: string;
+  /** The value in a few characters, for the side-by-side comparison. */
+  short: string;
+  goal: string;
+  met: boolean;
+}
+
+/** Each target in balance/targets.yaml, measured on this report. */
+export function targetResults(report: SimulationReport, content: ContentBundle): TargetResult[] {
+  const c = report.careers;
+  const t = content.balance.targets;
+  const ct = t.careers;
+  const pct1 = (x: number) => `${(100 * x).toFixed(1)}%`;
+  const rate = (n: number) => (c.jobYears > 0 ? n / c.jobYears : 0);
+  const inRange = (x: number, r: { min: number; max: number }) => x >= r.min && x <= r.max;
+  const bk = c.bankrupt;
+  const b = c.bachelorVsHighSchool;
+  const dead = c.tracks.filter((tr) => tr.entered >= 10 && tr.reachedLevel2 / tr.entered < ct.minReachLevel2);
+  const worth = report.money.byAge.find((row) => row.age === t.money.netWorthAge)?.netWorth;
+  const nw = t.money.medianNetWorth;
+  return [
+    {
+      label: 'bankruptcy',
+      value:
+        pct(bk.bankrupt, bk.adults) +
+        (bk.neverWorked > 0 ? `; ${pct(bk.neverWorkedBankrupt, bk.neverWorked)} of the ${bk.neverWorked} simulated players who never work` : ''),
+      short: pct(bk.bankrupt, bk.adults),
+      goal: `at most ${pct1(t.money.maxBankruptLives)}`,
+      met: bk.bankrupt <= t.money.maxBankruptLives * bk.adults,
+    },
+    {
+      label: `owned a home by ${t.money.homeOwnershipAge}`,
+      value: pct(c.homeOwners.owned, c.homeOwners.reached),
+      short: pct(c.homeOwners.owned, c.homeOwners.reached),
+      goal: `at least ${pct1(t.money.minHomeOwners)}`,
+      met: c.homeOwners.owned >= t.money.minHomeOwners * c.homeOwners.reached,
+    },
+    {
+      label: `median net worth at ${t.money.netWorthAge}`,
+      value: worth ? `${dollars(worth.median)} (of ${worth.lives} lives)` : '—',
+      short: worth ? dollars(worth.median) : '—',
+      goal: `${dollars(nw.min)}–${dollars(nw.max)}`,
+      met: worth !== undefined && worth.lives > 0 && inRange(worth.median, nw),
+    },
+    {
+      label: "bachelor's vs high school lifetime earnings",
+      value: `${b.ratio.toFixed(2)}× (${dollars(b.bachelorMean)} vs ${dollars(b.highSchoolMean)})`,
+      short: `${b.ratio.toFixed(2)}×`,
+      goal: `at least ${ct.minBachelorEarningsRatio}×`,
+      met: b.ratio >= ct.minBachelorEarningsRatio,
+    },
+    {
+      label: "bachelor's holders earning less than the median high-school life",
+      value: pct1(b.bachelorBelowHighSchoolMedian),
+      short: pct1(b.bachelorBelowHighSchoolMedian),
+      goal: `at least ${pct1(ct.minBachelorBelowHighSchoolMedian)}`,
+      met: b.bachelorBelowHighSchoolMedian >= ct.minBachelorBelowHighSchoolMedian,
+    },
+    {
+      label: 'job tracks where under the target share reach level 2 (tracks with 10+ lives)',
+      value: dead.length === 0 ? 'none' : dead.map((tr) => `${tr.jobId} ${pct(tr.reachedLevel2, tr.entered)}`).join(', '),
+      short: dead.length === 0 ? 'none' : `${dead.length} tracks`,
+      goal: `at least ${pct1(ct.minReachLevel2)} in every track`,
+      met: dead.length === 0,
+    },
+    {
+      label: 'promotions per year worked',
+      value: pct1(rate(c.promotions)),
+      short: pct1(rate(c.promotions)),
+      goal: `${pct1(ct.promotionRate.min)}–${pct1(ct.promotionRate.max)}`,
+      met: inRange(rate(c.promotions), ct.promotionRate),
+    },
+    {
+      label: 'firings per year worked',
+      value: pct1(rate(c.firings)),
+      short: pct1(rate(c.firings)),
+      goal: `${pct1(ct.firingRate.min)}–${pct1(ct.firingRate.max)}`,
+      met: inRange(rate(c.firings), ct.firingRate),
+    },
+    {
+      label: 'layoffs per year worked',
+      value: pct1(rate(c.layoffs)),
+      short: pct1(rate(c.layoffs)),
+      goal: `${pct1(ct.layoffRate.min)}–${pct1(ct.layoffRate.max)}`,
+      met: inRange(rate(c.layoffs), ct.layoffRate),
+    },
+  ];
+}
+
+/**
+ * Two runs side by side (the same seeds): the careful player the targets are
+ * judged on, and the careless one (random actions, no caution rules), whose
+ * column shows how the game treats a player who takes no care. The game is
+ * not tuned for the careless player.
+ */
+export function formatComparison(careful: SimulationReport, careless: SimulationReport, content: ContentBundle): string {
+  const lines: string[] = [];
+  const t = content.balance.targets;
+  const row = (label: string, a: string, b: string) => `  ${label.padEnd(48)} ${a.padStart(22)}   ${b.padStart(22)}`;
+  const rate = (r: SimulationReport, n: (c: CareerReport) => number) => (r.careers.jobYears > 0 ? `${((100 * n(r.careers)) / r.careers.jobYears).toFixed(1)}%` : '—');
+  const median = (r: SimulationReport, age: number | 'death') => {
+    const s = r.money.byAge.find((x) => x.age === age)?.netWorth;
+    return s ? dollars(s.median) : '—';
+  };
+  lines.push(`Careful vs careless player (${careful.lives} lives each, the same seeds; the careless player takes random actions with no caution rules):`);
+  lines.push(row('', 'careful', 'careless'));
+  lines.push(row('invariant failures', String(careful.invariantFailures), String(careless.invariantFailures)));
+  lines.push(row('median lifespan', String(careful.lifespan.median), String(careless.lifespan.median)));
+  const both = (f: (r: SimulationReport) => string, label: string) => lines.push(row(label, f(careful), f(careless)));
+  both((r) => pct(r.relationships.everMarried, r.relationships.adults), 'ever married');
+  both((r) => pct(r.relationships.divorces, r.relationships.marriages), 'divorces per marriage');
+  both((r) => pct(r.education.byWealth.all.diplomaBy19, r.education.byWealth.all.lives), 'high school diploma by 19 (lives that reached 30)');
+  both((r) => pct(r.education.byWealth.all.degree, r.education.byWealth.all.lives), 'college degree by 30');
+  both((r) => pct(r.careers.everEmployed, r.careers.adults), 'ever had a job');
+  both((r) => pct(r.careers.everFired, r.careers.adults), 'ever fired');
+  both((r) => pct(r.careers.idleYears.idle, r.careers.idleYears.years), 'working-age years with no job or gig work');
+  both((r) => rate(r, (c) => c.promotions), 'promotions per year worked');
+  both((r) => pct(r.money.outcomes.homeless, r.money.adults), 'ever homeless');
+  both((r) => pct(r.money.outcomes.evicted, r.money.adults), 'ever evicted');
+  both((r) => median(r, t.money.netWorthAge), `median net worth at ${t.money.netWorthAge}`);
+  both((r) => median(r, 'death'), 'median net worth at death');
+  lines.push('  targets (src/content/balance/targets.yaml; judged on the careful player):');
+  const a = targetResults(careful, content);
+  const b = targetResults(careless, content);
+  a.forEach((x, i) => {
+    const y = b[i]!;
+    lines.push(row(x.label.length > 46 ? `${x.label.slice(0, 45)}…` : x.label, `${x.met ? 'MET' : 'NOT MET'}`, `${y.met ? 'MET' : 'NOT MET'}`));
+    lines.push(row(`    target ${x.goal}`, x.short, y.short));
+  });
+  return lines.join('\n');
 }
