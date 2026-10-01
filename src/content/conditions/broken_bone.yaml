@@ -1,0 +1,25 @@
+id: broken_bone
+name: Broken bone
+noun: a broken bone
+kind: injury
+blurb: A cast, a lot of itching, and slow healing.
+onset:
+  chance:
+    - { at: 4, x: 0 }
+    - { at: 5, x: 0.004 }
+    - { at: 15, x: 0.006 }
+    - { at: 30, x: 0.003 }
+    - { at: 70, x: 0.004 }
+    - { at: 90, x: 0.008 }
+  factors:
+    - key: riskTaking
+      curve: [{ at: 0, x: 0.6 }, { at: 50, x: 1 }, { at: 100, x: 1.8 }]
+    - key: fitness
+      curve: [{ at: 0, x: 1.3 }, { at: 50, x: 1 }, { at: 100, x: 0.8 }]
+  severity: { min: 30, max: 60 }
+course: { untreated: -25, treated: -50 }
+effects:
+  health: { perYear: -3, limit: 50 }
+  fitness: { perYear: -4, limit: 20 }
+treatable: true
+costs: { treatment: 1500 }

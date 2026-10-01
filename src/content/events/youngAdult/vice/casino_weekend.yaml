@@ -1,0 +1,52 @@
+id: casino_weekend
+title: House rules
+text: >-
+  A weekend away lands you in a casino with no clocks, free drinks, and a
+  craps table where a stranger keeps calling you "lucky."
+tone: light
+category: vice
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 21 } }
+    - { money: { gte: 500 } }
+weight:
+  base: 4
+  modifiers:
+    - { if: { trait: riskTaking, gt: 60 }, x: 1.8 }
+    - { if: { hidden: vice, gt: 50 }, x: 1.5 }
+cooldownYears: 4
+choices:
+  - id: limit
+    label: Set a limit and stick to it
+    outcome:
+      text: You lose exactly what you planned to lose, and have a wonderful time doing it.
+      effects:
+        - { type: money, delta: -200 }
+        - { type: stat, key: happiness, delta: 3 }
+        - { type: stat, key: discipline, delta: 1 }
+  - id: chase
+    label: Ride the hot streak
+    check:
+      base: 35
+      stats: [{ key: luck, weight: 0.5 }]
+      success:
+        text: The dice love you. You walk out at sunrise with a fat envelope and a dangerous feeling.
+        effects:
+          - { type: money, delta: 2500 }
+          - { type: stat, key: vice, delta: 6 }
+          - { type: stat, key: happiness, delta: 4 }
+      failure:
+        text: The streak ends. You keep going to win it back. The ATM stops letting you around four in the morning.
+        effects:
+          - { type: money, delta: -3000 }
+          - { type: stat, key: vice, delta: 8 }
+          - { type: stat, key: stress, delta: 6 }
+  - id: pool
+    label: Spend the weekend by the pool
+    outcome:
+      text: You get a sunburn and an excellent nap. The casino never gets a cent.
+      effects:
+        - { type: stat, key: happiness, delta: 2 }
+        - { type: stat, key: stress, delta: -2 }

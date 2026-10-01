@@ -242,8 +242,90 @@ career:
     importance: 2
     variants:
       - "Moving away meant leaving your job at {employer}."
+  # Lost to a prison sentence (Stage 9).
+  jailed:
+    importance: 2
+    variants:
+      - "Going to prison cost you your job at {employer}."
   retired:
     importance: 3
     variants:
       - "You retired after {years} years of work."
       - "You hung up your work clothes for good after {years} working years."
+
+# Health milestones (Stage 9). Values: {condition}, as it reads in a
+# sentence ("type 2 diabetes", "a bad back").
+health:
+  diagnosed:
+    importance: 2
+    variants:
+      - "You were diagnosed with {condition}."
+      - "A doctor put a name to it: {condition}."
+  treated:
+    importance: 1
+    variants:
+      - "You started treatment for {condition}."
+  recovered:
+    importance: 2
+    variants:
+      - "You got over {condition}."
+      - "You finally shook off {condition}."
+
+# The law (Stage 9). Values: {offense} ("shoplifting"), {amount} (a fine),
+# {years} ("two years").
+legal:
+  warning:
+    importance: 2
+    variants:
+      - "You got off with a warning for {offense}."
+  fine:
+    importance: 2
+    variants:
+      - "You were fined {amount} for {offense}."
+  probation:
+    importance: 3
+    variants:
+      - "You were sentenced to {years} of probation for {offense}."
+  jail:
+    importance: 3
+    variants:
+      - "You were sentenced to {years} in prison for {offense}."
+      - "A judge sent you to prison for {years} for {offense}."
+  released:
+    importance: 3
+    variants:
+      - "You walked out of prison a free person."
+      - "You were released from prison."
+  probationEnded:
+    importance: 1
+    variants:
+      - "Your probation ended."
+
+# Self-discovery (Stage 9): accepting something about yourself, or changing
+# how you describe yourself. Values: {people} ("men and women"), {gender},
+# {expression}, {pronouns} ("she/her"), {trait} (a phrase), {talent} ("music").
+discovery:
+  attraction:
+    importance: 3
+    variants:
+      - "You came to understand that you're attracted to {people}."
+  gender:
+    importance: 3
+    variants:
+      - "You came to know yourself as {gender}."
+  expression:
+    importance: 2
+    variants:
+      - "You started presenting in a more {expression} way."
+  pronouns:
+    importance: 2
+    variants:
+      - "You started going by {pronouns}."
+  personality:
+    importance: 2
+    variants:
+      - "You found {trait}."
+  talent:
+    importance: 2
+    variants:
+      - "You discovered a real gift for {talent}."

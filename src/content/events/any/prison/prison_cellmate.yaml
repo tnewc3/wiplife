@@ -1,0 +1,40 @@
+id: prison_cellmate
+title: Bunkmate
+text: >-
+  Your new cellmate, {cellmate.name}, has been inside longer than you, snores
+  like a leaf blower, and knows how everything here really works.
+tone: neutral
+category: prison
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires: { legal: { incarcerated: true } }
+weight: { base: 5 }
+once: true
+cast:
+  cellmate: { kind: acquaintance, age: { min: 18, max: 70 }, createIfMissing: true, newChance: 1 }
+choices:
+  - id: stories
+    label: Trade life stories
+    outcome:
+      text: >-
+        {cellmate.name} talks about {cellmate.their} kids until the lights go
+        out. By the end of the year you know {cellmate.them} better than most
+        people outside.
+      effects:
+        - { type: relationship, role: cellmate, affection: 15, trust: 10, kind: friend }
+        - { type: memory, role: cellmate, tag: shared_a_cell }
+        - { type: stat, key: happiness, delta: 3 }
+  - id: rules
+    label: Learn the rules from {cellmate.them}
+    outcome:
+      text: Which guards are fair, which tables to avoid, what a stamp is worth. It makes the days easier.
+      effects:
+        - { type: relationship, role: cellmate, affection: 6 }
+        - { type: memory, role: cellmate, tag: shared_a_cell }
+        - { type: stat, key: stress, delta: -3 }
+  - id: alone
+    label: Keep to yourself
+    outcome:
+      text: You perfect the art of being in a tiny room with someone without ever really being there.
+      effects:
+        - { type: stat, key: stress, delta: 2 }

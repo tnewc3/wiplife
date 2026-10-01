@@ -1,0 +1,8 @@
+id: fraud
+name: fraud
+class: felony
+severity: 4
+outcomes: { warning: 0, fine: 3, probation: 3, jail: 3 }
+fine: { min: 10000, max: 50000 }
+probationYears: { min: 2, max: 3 }
+jailYears: { min: 1, max: 4 }

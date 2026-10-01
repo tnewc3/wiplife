@@ -18,6 +18,8 @@ import { evaluate } from './conditions';
 import { curveAt } from './curve';
 import { finishingCredential, inFinalYear, modelChance } from './education';
 import { createPerson } from './events/casting';
+import { talentHelpsJob } from './discovery';
+import { countedRecord } from './record';
 import { scoreOf } from './events/checks';
 import { wholeDollars } from './finance';
 import { clampInt } from './random';
@@ -74,7 +76,13 @@ export function searchBlock(state: LifeState, content: ContentBundle): SearchBlo
 export function meetsJobRequirements(state: LifeState, def: JobDef, content: ContentBundle): boolean {
   if (state.character.age < content.balance.careers.minAge) return false;
   const finishing = finishingCredential(state);
-  const view = finishing ? { ...state, education: { ...state.education, credentials: [...state.education.credentials, finishing] } } : state;
+  // Employers see the record that counts: from 18, offenses from before 18 don't (Stage 9).
+  const record = countedRecord(state, content);
+  const view = {
+    ...state,
+    ...(finishing ? { education: { ...state.education, credentials: [...state.education.credentials, finishing] } } : {}),
+    ...(record !== state.legal.record ? { legal: { ...state.legal, record } } : {}),
+  };
   return evaluate(def.requires, view, { roles: 'strict' });
 }
 
@@ -129,19 +137,22 @@ export function hireChance(state: LifeState, def: JobDef, content: ContentBundle
   const tiers = degrees.flatMap((c) => (c.type === 'bachelor' || c.type === 'associate') && c.tier ? [h.tier[c.tier]] : []);
   if (tiers.length > 0) points += Math.max(...tiers);
   if (degrees.some((c) => c.type === 'grad')) points += h.grad;
-  if (state.legal.record.length > 0) points += h.record;
+  // A conviction counts against you; a warning does not, nor (from 18) anything from before 18 (Stage 9).
+  if (countedRecord(state, content).some((r) => r.outcome !== 'warning')) points += h.record;
   const multiplier = curveAt(h.market, marketStrength(state, def, content));
   return modelChance(state, h.odds[def.category], undefined, content, { points, multiplier });
 }
 
 /**
  * Rolls which job tracks are hiring in your city this year (none before
- * you're old enough to be hired). Draws from the life's generator.
+ * you're old enough to be hired, or while you're in prison). Draws from the
+ * life's generator.
  */
 export function rollOpenings(state: LifeState, content: ContentBundle): void {
   const city = content.cities[state.character.cityId];
   const open: Id[] = [];
-  if (state.character.age < content.balance.careers.minAge) {
+  // Too young to be hired, or in prison (Stage 9): nothing is open to you.
+  if (state.character.age < content.balance.careers.minAge || state.housing.kind === 'incarcerated') {
     state.career.openings = open;
     return;
   }
@@ -214,6 +225,7 @@ const END_HISTORY: Record<JobEnd, CareerHistoryKey> = {
   laid_off: 'laidOff',
   retired: 'retired',
   moved: 'moved',
+  jailed: 'jailed',
 };
 
 /**
@@ -287,6 +299,8 @@ export function performanceAim(state: LifeState, def: JobDef, content: ContentBu
   for (const stat of def.performance) aim += stat.weight * (scoreOf(state, stat.key) - 50);
   aim -= curveAt(p.stress, state.character.stats.stress);
   aim -= curveAt(p.health, state.character.stats.health);
+  // A talent you've found that suits the work (Stage 9).
+  if (talentHelpsJob(state, def.id, content)) aim += content.balance.discovery.talent.performanceBonus;
   return aim;
 }
 

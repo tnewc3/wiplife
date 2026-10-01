@@ -19,6 +19,7 @@ describe('year pipeline', () => {
     expect(YEAR_PIPELINE.map((s) => s.id)).toEqual([
       'aging',
       'npcs',
+      'legal',
       'education',
       'career',
       'economy',

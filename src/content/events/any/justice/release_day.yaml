@@ -1,0 +1,35 @@
+# The year you get out of prison (registries/legal.yaml released).
+id: release_day
+title: Outside
+text: >-
+  The gate buzzes, and then you're standing on a sidewalk with a plastic bag
+  of your things and a bus schedule. The sky looks enormous.
+tone: serious
+category: justice
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+weight: { base: 5 }
+followUpOnly: true
+choices:
+  - id: program
+    label: Go straight to a reentry program
+    outcome:
+      text: Help with a résumé, an ID, a counselor who has been exactly where you are. It's a start.
+      effects:
+        - { type: stat, key: discipline, delta: 3 }
+        - { type: stat, key: stress, delta: -3 }
+        - { type: stat, key: reputation, delta: 2 }
+  - id: celebrate
+    label: Find your old friends and celebrate
+    outcome:
+      text: It's a great night. The old crowd hasn't changed, which is the problem.
+      effects:
+        - { type: stat, key: happiness, delta: 4 }
+        - { type: stat, key: vice, delta: 4 }
+  - id: walk
+    label: Walk until you feel like a person again
+    outcome:
+      text: You walk for hours, buy a coffee you can barely afford, and taste every sip.
+      effects:
+        - { type: stat, key: happiness, delta: 3 }
+        - { type: stat, key: stress, delta: -2 }

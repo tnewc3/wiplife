@@ -12,6 +12,7 @@ import {
   type RomanceStatus,
   type Tier,
   type Tone,
+  type ConditionKind,
 } from '../content/schemas';
 import { availableActions, isLifeActionAvailable, type AvailableAction } from './actions';
 import { evaluate } from './conditions';
@@ -65,9 +66,13 @@ import { textContext } from './events/text';
 import { CONTINUE_CHOICE } from './life';
 import { currentPartner, FAMILY_KINDS, isCurrentPartner, romanceStatus, ROMANTIC_KINDS, WORK_KINDS } from './relationships';
 import { renderText } from './text';
+import { doctorQuote } from './health';
 import type {
   GenderCategory,
   HistoryEntry,
+  Identity,
+  Personality,
+  RecordOutcome,
   HousingKind,
   Id,
   JobEnd,
@@ -257,7 +262,8 @@ export interface SchoolView {
 /** The school part of the Work/School tab. */
 export function getSchoolView(state: LifeState, content: ContentBundle): SchoolView {
   const edu = state.education;
-  const between = state.phase === 'yearStart';
+  // School actions happen between years, and never from prison (Stage 9).
+  const between = state.phase === 'yearStart' && state.housing.kind !== 'incarcerated';
   const cur = edu.current;
   const school = content.balance.education.school;
   const current: EnrollmentView | null = cur
@@ -304,6 +310,7 @@ export function getSchoolView(state: LifeState, content: ContentBundle): SchoolV
     left: edu.left ? { ...schoolLine(state, edu.left, content), tier: edu.left.tier ?? null, canReturn: between && canReturn(state, content) } : null,
     credentials,
     canApply:
+      state.housing.kind !== 'incarcerated' &&
       state.character.age >= school.applyAge &&
       (!cur || (cur.year >= cur.lengthYears && cur.program !== 'elementary' && cur.program !== 'middle')) &&
       [...options.college, ...options.trade, ...options.grad].some((o) => o.block === null || o.block === 'tried' || o.block === 'holding'),
@@ -662,6 +669,8 @@ export interface MoneyView {
   debts: DebtView[];
   /** A debt plan is available now. */
   debtPlan: boolean;
+  /** The lifestyle can change now: between years, and not from prison (Stage 9). */
+  canChangeLifestyle: boolean;
   /** The retirement benefit: from what age, the years of earnings so far, and what the record pays now. */
   retirement: { age: number; years: number; minYears: number; yearlyBenefit: number; receiving: boolean };
 }
@@ -690,6 +699,7 @@ export function getMoneyView(state: LifeState, content: ContentBundle): MoneyVie
       canPay: between && isLifeActionAvailable(state, 'pay_debt', { debtId: d.id }, content) ? Math.min(f.savings, d.balance) : 0,
     })),
     debtPlan: between && canStartDebtPlan(state, content),
+    canChangeLifestyle: between && state.housing.kind !== 'incarcerated',
     retirement: {
       age: content.balance.economy.retirement.age,
       years: f.earnings.years,
@@ -779,7 +789,7 @@ export function getWorkView(state: LifeState, content: ContentBundle): WorkView 
     between: state.phase === 'yearStart',
     job,
     retired: c.retired,
-    canRetire: canRetire(state, content),
+    canRetire: canRetire(state, content) && state.housing.kind !== 'incarcerated',
     retireAge: b.retireAge,
     searchBlock: searchBlock(state, content),
     minAge: b.minAge,
@@ -1010,7 +1020,7 @@ export function getEventCard(state: LifeState, index: number, content: ContentBu
   };
   // A definition removed by a content update: a card the player can dismiss.
   if (!def) return { ...base, title: '…', text: '', tone: 'neutral', choices: [{ id: CONTINUE_CHOICE, label: 'Continue' }] };
-  const ctx = textContext(state, instance.cast);
+  const ctx = textContext(state, instance.cast, content);
   const choices = def.choices
     ? def.choices
         .filter((c) => evaluate(c.visibleIf, state, { cast: instance.cast, roles: 'strict' }))
@@ -1028,4 +1038,112 @@ export function firstUnresolvedEvent(state: LifeState): number | null {
 /** True when the player can age up right now. */
 export function canAgeUp(state: LifeState): boolean {
   return state.phase === 'yearStart';
+}
+
+/** One health condition on More → Health (Stage 9). */
+export interface ConditionView {
+  id: string;
+  name: string;
+  blurb: string;
+  kind: ConditionKind;
+  /** 1–100, shown as a bar. */
+  severity: number;
+  treated: boolean;
+  treatable: boolean;
+  since: number;
+}
+
+/** Why you can't see a doctor now, or null when you can. */
+export type DoctorBlock = 'visited' | 'prison' | 'busy';
+
+export interface HealthView {
+  conditions: ConditionView[];
+  /** A visit now: what it costs (the visit, plus treating what can be treated) and whether you can go. */
+  doctor: { visitCost: number; treatmentCost: number; block: DoctorBlock | null };
+  /** Your family pays for your visits while you're a child. */
+  familyPays: boolean;
+  /** Medical debt you owe. */
+  medicalDebt: number;
+}
+
+/** More → Health: your conditions, worst first, and seeing a doctor. */
+export function getHealthView(state: LifeState, content: ContentBundle): HealthView {
+  const conditions = state.health.conditions
+    .flatMap((c): ConditionView[] => {
+      const def = content.conditions[c.conditionId];
+      if (!def) return [];
+      return [{ id: def.id, name: def.name, blurb: def.blurb, kind: def.kind, severity: c.severity, treated: c.treated, treatable: def.treatable, since: c.since }];
+    })
+    .sort((a, b) => b.severity - a.severity || a.name.localeCompare(b.name));
+  const quote = doctorQuote(state, content);
+  const block: DoctorBlock | null =
+    state.housing.kind === 'incarcerated'
+      ? 'prison'
+      : state.health.lastVisit === state.currentYear
+        ? 'visited'
+        : !isLifeActionAvailable(state, 'see_doctor', {}, content)
+          ? 'busy'
+          : null;
+  return {
+    conditions,
+    doctor: { visitCost: quote.visit, treatmentCost: quote.treatment, block },
+    familyPays: !isIndependent(state, content),
+    medicalDebt: wholeDollars(state.finances.debts.filter((d) => d.kind === 'medical').reduce((sum, d) => sum + d.balance, 0)),
+  };
+}
+
+/** Prison or probation, for the status banner (Stage 9). Null when neither. */
+export type LegalStatus =
+  /** Released as the year after `lastYear` begins: `yearsLeft` more age-ups. */
+  | { kind: 'prison'; lastYear: number; yearsLeft: number }
+  /** On probation through `lastYear`. */
+  | { kind: 'probation'; lastYear: number; yearsLeft: number };
+
+export function getLegalStatus(state: LifeState): LegalStatus | null {
+  const l = state.legal;
+  if (state.housing.kind === 'incarcerated' && l.incarceratedUntil !== undefined) {
+    return { kind: 'prison', lastYear: l.incarceratedUntil, yearsLeft: l.incarceratedUntil + 1 - state.currentYear };
+  }
+  if (l.probationUntil !== undefined && l.probationUntil >= state.currentYear) {
+    return { kind: 'probation', lastYear: l.probationUntil, yearsLeft: l.probationUntil + 1 - state.currentYear };
+  }
+  return null;
+}
+
+/** One entry on your criminal record (Stage 9). */
+export interface RecordRow {
+  offense: string;
+  year: number;
+  age: number;
+  outcome: RecordOutcome;
+  amount?: number;
+  years?: number;
+}
+
+/** The Profile sheet (Stage 9): who you are, your personality, your record, and whether you can edit now. */
+export interface ProfileView {
+  fullName: string;
+  identity: Identity;
+  personality: Personality;
+  record: RecordRow[];
+  /** Edits happen between years. */
+  canEdit: boolean;
+}
+
+export function getProfileView(state: LifeState, content: ContentBundle): ProfileView {
+  const c = state.character;
+  return {
+    fullName: `${c.name.first} ${c.name.last}`,
+    identity: c.identity,
+    personality: c.personality,
+    record: [...state.legal.record].reverse().map((r) => ({
+      offense: content.offenses[r.offenseId]?.name ?? r.offenseId,
+      year: r.year,
+      age: r.year - state.birthYear,
+      outcome: r.outcome,
+      ...(r.amount !== undefined ? { amount: r.amount } : {}),
+      ...(r.years !== undefined ? { years: r.years } : {}),
+    })),
+    canEdit: state.phase === 'yearStart',
+  };
 }

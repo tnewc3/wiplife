@@ -1,0 +1,43 @@
+id: blood_sugar_warning
+title: The numbers
+text: >-
+  Your doctor slides your latest blood work across the desk and taps one
+  number with a pen. Your diabetes is getting worse.
+tone: serious
+category: health
+rarity: common
+lifeStages: [adult, senior]
+requires: { health: { conditions: [type_2_diabetes] } }
+weight: { base: 6 }
+cooldownYears: 5
+choices:
+  - id: overhaul
+    label: Overhaul how you eat and move
+    check:
+      base: 45
+      stats: [{ key: discipline, weight: 0.5 }]
+      success:
+        text: Vegetables, walks after dinner, a scale you've made peace with. The next numbers are better.
+        effects:
+          - { type: health, conditionId: type_2_diabetes, severity: -15 }
+          - { type: stat, key: fitness, delta: 4 }
+          - { type: stat, key: discipline, delta: 2 }
+      failure:
+        text: You last three weeks. The cookies were waiting for you the whole time.
+        effects:
+          - { type: stat, key: happiness, delta: -2 }
+          - { type: stat, key: stress, delta: 2 }
+  - id: medication
+    label: Take the medication and change nothing else
+    outcome:
+      text: The pills hold the line. Your doctor sighs, but writes the prescription.
+      effects:
+        - { type: health, conditionId: type_2_diabetes, treated: true }
+        - { type: debt, action: add, kind: medical, amount: 600 }
+  - id: ignore
+    label: Decide the doctor is overreacting
+    outcome:
+      text: You feel fine. You feel fine for a while.
+      effects:
+        - { type: health, conditionId: type_2_diabetes, severity: 10 }
+        - { type: health, conditionId: type_2_diabetes, treated: false }

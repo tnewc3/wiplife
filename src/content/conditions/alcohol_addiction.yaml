@@ -1,0 +1,28 @@
+id: alcohol_addiction
+name: Alcohol addiction
+noun: an alcohol addiction
+kind: addiction
+blurb: One drink is never one drink. Recovery is possible, and it is work.
+onset:
+  chance:
+    - { at: 17, x: 0 }
+    - { at: 18, x: 0.0018 }
+    - { at: 25, x: 0.0025 }
+    - { at: 50, x: 0.0015 }
+    - { at: 70, x: 0.0008 }
+  factors:
+    - key: vice
+      curve: [{ at: 0, x: 0.02 }, { at: 35, x: 0.4 }, { at: 60, x: 1.5 }, { at: 100, x: 4 }]
+    - key: stress
+      curve: [{ at: 0, x: 0.7 }, { at: 100, x: 1.6 }]
+  severity: { min: 20, max: 45 }
+course: { untreated: 5, treated: -10 }
+effects:
+  health: { perYear: -1.5, limit: 25 }
+  happiness: { perYear: -2, limit: 25 }
+  stress: { perYear: 2, limit: 80 }
+  looks: { perYear: -1, limit: 25 }
+treatable: true
+costs: { treatment: 6000, yearlyUntreated: 3000 }
+mortality: 0.015
+cause: liver_failure

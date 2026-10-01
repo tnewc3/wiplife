@@ -1,0 +1,53 @@
+# Inner conflict boils over (registries/discovery.yaml crisis). Whoever you
+# trust most may be there (a support role).
+id: identity_crisis
+title: Breaking point
+text: >-
+  You've been holding something down for years, and it's pushing back:
+  sleepless nights, a short temper, the feeling of living someone else's
+  life. Something has to give.
+tone: dark
+category: identity
+rarity: common
+lifeStages: [teen, youngAdult, adult, senior]
+weight: { base: 5 }
+followUpOnly: true
+cast:
+  confidant: { support: true, optional: true }
+choices:
+  - id: stop_fighting
+    label: Stop fighting who you are
+    outcome:
+      text: >-
+        You let it all in at once. It's terrifying for a week, and then it's
+        the most honest you've felt in your life.
+      effects:
+        - { type: identity, field: attraction, value: fromLatent }
+        - { type: identity, field: gender, value: fromLatent }
+        - { type: identity, field: expression, value: fromLatent }
+        - { type: identity, field: personality, value: fromLatent }
+        - { type: innerConflict, delta: -20 }
+        - { type: stat, key: stress, delta: -6 }
+        - { type: schedule, eventId: coming_out_family, inYears: [1, 1] }
+        - { type: history, text: You stopped fighting who you are., importance: 3 }
+  - id: confide
+    label: Talk to {confidant.name}
+    visibleIf: { role: confidant }
+    outcome:
+      text: >-
+        {confidant.name} listens without flinching and doesn't tell you what to
+        do. Just saying it out loud takes some of the pressure off.
+      effects:
+        - { type: innerConflict, delta: -15 }
+        - { type: relationship, role: confidant, trust: 5, affection: 3 }
+        - { type: stat, key: stress, delta: -3 }
+  - id: hold_on
+    label: Hold on a little longer
+    outcome:
+      text: >-
+        You hold on. Your body keeps score: headaches, a cold that won't quit,
+        a jaw you clench in your sleep.
+      effects:
+        - { type: innerConflict, delta: 5 }
+        - { type: stat, key: stress, delta: 8 }
+        - { type: stat, key: health, delta: -4 }

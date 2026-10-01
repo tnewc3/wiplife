@@ -1,0 +1,9 @@
+# The events the legal system queues. Every event listed must be
+# followUpOnly: it only happens this way.
+#   jailed     your first year in prison (a prison event)
+#   released   the year you get out
+#   probation  a year on probation, now and then
+triggers:
+  jailed: { events: [prison_first_night] }
+  released: { events: [release_day] }
+  probation: { events: [probation_check_in, probation_old_friends] }

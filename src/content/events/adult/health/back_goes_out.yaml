@@ -1,0 +1,55 @@
+id: back_goes_out
+title: The sock
+text: >-
+  You bend down to pick up a sock and your back simply stops cooperating. You
+  spend a long minute on the floor, reconsidering every decision that led here.
+tone: light
+category: health
+rarity: rare
+lifeStages: [adult, senior]
+requires: { age: { gte: 30 } }
+weight:
+  base: 3
+  modifiers:
+    - { if: { stat: fitness, lt: 40 }, x: 2 }
+once: true
+choices:
+  - id: therapy
+    label: Go to physical therapy
+    outcome:
+      text: >-
+        A cheerful therapist bends you into shapes you didn't know you had. It
+        hurts, it's not cheap, and it works.
+      effects:
+        - { type: health, conditionId: back_injury, severity: 15 }
+        - { type: health, conditionId: back_injury, treated: true }
+        - { type: debt, action: add, kind: medical, amount: 900 }
+        - { type: stat, key: fitness, delta: 2 }
+  - id: push_through
+    label: Push through it
+    outcome:
+      text: You walk it off, mostly sideways. It never quite goes away.
+      effects:
+        - { type: health, conditionId: back_injury, severity: 30 }
+        - { type: stat, key: stress, delta: 3 }
+  - id: pills
+    label: Ask for something strong for the pain
+    check:
+      base: 70
+      stats: [{ key: discipline, weight: 0.4 }, { key: vice, weight: -0.4 }]
+      success:
+        text: The pills work. You take them exactly as long as you need them, and then you stop.
+        effects:
+          - { type: health, conditionId: back_injury, severity: 20 }
+          - { type: flag, key: painkillers, value: true }
+          - { type: stat, key: vice, delta: 3 }
+      failure:
+        text: >-
+          The pills work, and then you need them to work on days your back is
+          fine. The prescription runs out before the wanting does.
+        effects:
+          - { type: health, conditionId: back_injury, severity: 20 }
+          - { type: health, conditionId: drug_addiction, severity: 25 }
+          - { type: flag, key: painkillers, value: true }
+          - { type: stat, key: vice, delta: 8 }
+          - { type: history, text: A prescription for your back turned into a habit you couldn't shake., importance: 3 }

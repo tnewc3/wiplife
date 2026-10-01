@@ -1,0 +1,26 @@
+# A latent personality tendency surfaces (registries/discovery.yaml surfacing.personality).
+id: discovery_surprise_self
+title: Who knew
+text: >-
+  A week that doesn't go to plan shows you something about yourself you
+  never expected: {latentTrait}.
+tone: light
+category: identity
+rarity: common
+lifeStages: [teen, youngAdult, adult, senior]
+weight: { base: 5 }
+followUpOnly: true
+choices:
+  - id: lean_in
+    label: Lean into it
+    outcome:
+      text: It's strange, being a slightly different person. Strange and good.
+      effects:
+        - { type: identity, field: personality, value: fromLatent }
+        - { type: stat, key: happiness, delta: 2 }
+  - id: shake_off
+    label: Shake it off
+    outcome:
+      text: You go back to being who everyone expects. It takes more effort than it used to.
+      effects:
+        - { type: innerConflict, delta: 6 }

@@ -16,6 +16,8 @@ import { castCandidates, castEvent, uncast } from './casting';
 import { successChance } from './checks';
 import { applyEffects } from './effects';
 import { eventIndex, eventWeight } from './selection';
+import type { EVENT_TEXT_VALUES} from './text';
+import { SELF_ROLE } from './text';
 
 /** An event with test defaults; override anything. */
 function ev(overrides: Record<string, unknown>): EventDef {
@@ -451,8 +453,17 @@ describe('event text', () => {
     for (const preset of presets) {
       const person = { name: { first: 'Ana', last: 'Ruiz' }, pronouns: preset };
       for (const def of Object.values(content.events)) {
-        const roles = Object.fromEntries(Object.keys(def.cast ?? {}).map((r) => [r, person]));
-        const context = { roles, values: { age: 40 } };
+        const roles = Object.fromEntries([...Object.keys(def.cast ?? {}), SELF_ROLE].map((r) => [r, person]));
+        const values = {
+          age: 40,
+          talent: 'music',
+          latentPeople: 'men and women',
+          latentGender: 'genderqueer',
+          latentExpression: 'androgynous',
+          latentTrait: 'a taste for risk you never let yourself have',
+          sentence: 'a year in prison',
+        } satisfies Record<(typeof EVENT_TEXT_VALUES)[number], string | number>;
+        const context = { roles, values };
         const texts = [def.title, def.text, ...(def.choices ?? []).map((c) => c.label)];
         const outcomes = def.autoOutcome ? [def.autoOutcome] : (def.choices ?? []).flatMap((c) => (c.outcome ? [c.outcome] : [c.check!.success, c.check!.failure]));
         for (const o of outcomes) {

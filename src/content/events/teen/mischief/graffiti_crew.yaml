@@ -1,0 +1,53 @@
+id: graffiti_crew
+title: The bridge
+text: >-
+  {friend.name} wants to paint something enormous on the railroad bridge,
+  where the whole town will see it on the way to work.
+tone: light
+category: mischief
+rarity: common
+lifeStages: [teen]
+requires: { age: { gte: 14 } }
+weight:
+  base: 3
+  modifiers:
+    - { if: { trait: riskTaking, gt: 55 }, x: 1.5 }
+    - { if: { discovery: { talent: found } }, x: 1.3 }
+once: true
+cast:
+  friend: { kind: friend, ageOffset: { min: -1, max: 2 }, createIfMissing: true, newChance: 0.3 }
+choices:
+  - id: paint
+    label: Bring the paint
+    check:
+      base: 55
+      stats: [{ key: luck, weight: 0.3 }, { key: fitness, weight: 0.2 }]
+      success:
+        text: By sunrise the bridge says something huge in letters nobody can read. People talk about it for weeks.
+        effects:
+          - { type: flag, key: tagged_bridge, value: true }
+          - { type: memory, role: friend, tag: tagged_with_you }
+          - { type: stat, key: happiness, delta: 4 }
+          - { type: stat, key: riskTaking, delta: 2 }
+      failure:
+        text: >-
+          A railroad cop with a flashlight and no sense of humor. Your hands are
+          still green when your family picks you up. You get {sentence}.
+        effects:
+          - { type: legal, offenseId: vandalism, outcome: sentence }
+          - { type: flag, key: tagged_bridge, value: true }
+          - { type: memory, role: friend, tag: tagged_with_you }
+          - { type: stat, key: stress, delta: 6 }
+  - id: lookout
+    label: Keep watch from the road
+    outcome:
+      text: Nobody comes. You spend three cold hours whistling a warning that's never needed.
+      effects:
+        - { type: relationship, role: friend, affection: 2 }
+        - { type: stat, key: stress, delta: 1 }
+  - id: no
+    label: Sleep in instead
+    outcome:
+      text: You see it on the way to school. It's honestly not bad.
+      effects:
+        - { type: relationship, role: friend, affection: -1 }

@@ -9,7 +9,7 @@ import { CREATABLE_KINDS } from '../../content/schemas';
 import { rollGenderCategory, rollIdentity, rollRelativeTraits } from '../creation/character';
 import { pickUnused, rollHeritage } from '../creation/family';
 import { rollScore, weightedPick } from '../random';
-import { isRomanticMatch, partnerAgeRange, SUPPORT_KINDS } from '../relationships';
+import { isAdmirerMatch, isRomanticMatch, partnerAgeRange, SUPPORT_KINDS } from '../relationships';
 import { chance, nextInt, pick, type RngState } from '../rng';
 import type { Id, LifeState, Person } from '../types';
 
@@ -47,6 +47,7 @@ export function castCandidates(state: LifeState, spec: CastSpec, content: Conten
         return [];
       }
       if (spec.romantic && !isRomanticMatch(state, person, content)) return [];
+      if (spec.admirer && !isAdmirerMatch(state, person, content)) return [];
       return fitsAge(state, spec, personAge(state, person)) ? [person] : [];
     });
   if (spec.support) {
@@ -78,7 +79,7 @@ function newPersonAgeRange(state: LifeState, spec: CastSpec, content: ContentBun
     min = Math.max(min, state.character.age + spec.ageOffset.min);
     max = Math.min(max, state.character.age + spec.ageOffset.max);
   }
-  if (spec.romantic) {
+  if (spec.romantic || spec.admirer) {
     const range = partnerAgeRange(state.character.age, content);
     min = Math.max(min, range.min);
     max = Math.min(max, range.max);
@@ -96,6 +97,21 @@ function romanticCategory(state: LifeState, rng: RngState, content: ContentBundl
 }
 
 /**
+ * A new admirer's gender (Stage 9): one you're not attracted to (yet),
+ * leaning toward one your latent attraction includes. Null if you're
+ * attracted to everyone.
+ */
+function admirerCategory(state: LifeState, rng: RngState, content: ContentBundle): GenderCategory | null {
+  const mine = state.character.identity.attractedTo;
+  const latent = state.character.latent.identity?.attractedTo ?? [];
+  const weights = content.balance.creation.genderCategory;
+  const options = (['man', 'woman', 'nonbinary'] as const)
+    .filter((c) => !mine.includes(c))
+    .map((c) => [c, Math.max(1, weights[c] ?? 0) * (latent.includes(c) ? 10 : 1)] as const);
+  return options.length === 0 ? null : weightedPick(rng, options);
+}
+
+/**
  * Creates someone new for a role and adds them (and the relationship) to the
  * life. A romantic role creates an adult you're attracted to who is attracted
  * to you (and needs you to be an adult). The career system also uses it to
@@ -104,14 +120,14 @@ function romanticCategory(state: LifeState, rng: RngState, content: ContentBundl
 export function createPerson(state: LifeState, spec: CastSpec, rng: RngState, content: ContentBundle): Id | null {
   const kind = spec.kind;
   if (kind === undefined) return null;
-  if (spec.romantic && state.character.age < content.balance.relationships.adultAge) return null;
+  if ((spec.romantic || spec.admirer) && state.character.age < content.balance.relationships.adultAge) return null;
   const range = newPersonAgeRange(state, spec, content);
   if (!range) return null;
   const city = content.cities[state.character.cityId];
   const pool = city && content.names[city.countryId];
   if (!pool) return null;
-  const romantic = spec.romantic ? romanticCategory(state, rng, content) : null;
-  if (spec.romantic && romantic === null) return null;
+  const romantic = spec.romantic ? romanticCategory(state, rng, content) : spec.admirer ? admirerCategory(state, rng, content) : null;
+  if ((spec.romantic || spec.admirer) && romantic === null) return null;
 
   const age = nextInt(rng, range.min, range.max);
   const category = romantic ?? rollGenderCategory(rng, content);
@@ -124,7 +140,7 @@ export function createPerson(state: LifeState, spec: CastSpec, rng: RngState, co
     name: { first: pickUnused(rng, heritage.first[category], used), last: pick(rng, heritage.last) },
     birthYear: state.currentYear - age,
     alive: true,
-    identity: rollIdentity(rng, content, category, spec.romantic ? state.character.identity.genderCategory : undefined),
+    identity: rollIdentity(rng, content, category, spec.romantic || spec.admirer ? state.character.identity.genderCategory : undefined),
     traits: rollRelativeTraits(rng, content),
     looks: rollScore(rng, family.relativeLooks),
     smarts: rollScore(rng, family.relativeSmarts),

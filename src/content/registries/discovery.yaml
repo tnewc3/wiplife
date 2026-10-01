@@ -1,0 +1,19 @@
+# The events the self-discovery step queues (one a year at most). Every
+# event listed must be followUpOnly: it only happens this way.
+#   surfacing    a latent trait (or hidden talent) comes to light for the first time
+#   resurfacing  a trait you pushed down comes back
+#   crisis       inner conflict boils over
+#   comingOut    telling people (after accepting a change, or asking to in the Profile sheet)
+surfacing:
+  attraction: { events: [discovery_feelings] }
+  gender: { events: [discovery_mirror] }
+  expression: { events: [discovery_wardrobe] }
+  personality: { events: [discovery_surprise_self] }
+  talent: { events: [talent_spark] }
+resurfacing:
+  attraction: { events: [resurface_feelings] }
+  gender: { events: [resurface_reflection] }
+  expression: { events: [resurface_closet] }
+  personality: { events: [resurface_old_self] }
+crisis: { events: [identity_crisis] }
+comingOut: { events: [coming_out_family, coming_out_friend] }

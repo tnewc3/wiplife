@@ -135,7 +135,9 @@ export function checkInvariants(state: LifeState, content: ContentBundle): strin
   if (h.roommate !== undefined && (h.roommate !== true || h.kind !== 'renting')) fail('only a rental has a roommate');
   if (h.partnerId !== undefined) {
     const rel = state.relationships[h.partnerId];
-    if (h.kind !== 'renting' && h.kind !== 'owned') fail(`a partner lives with you in a "${h.kind}" home`);
+    // In prison, a partner can keep living in the home you own (Stage 9).
+    const home = h.kind === 'renting' || h.kind === 'owned' || (h.kind === 'incarcerated' && h.homeValue !== undefined);
+    if (!home) fail(`a partner lives with you in a "${h.kind}" home`);
     if (!rel || !isCurrentPartner(state, rel)) fail('housing.partnerId is not your current partner');
     if (h.roommate) fail('a roommate and a partner in one home');
   }
@@ -143,6 +145,9 @@ export function checkInvariants(state: LifeState, content: ContentBundle): strin
   if (h.kind === 'owned') {
     if (h.homeValue === undefined) fail('an owned home has no value');
     else money('housing.homeValue', h.homeValue);
+  } else if (h.kind === 'incarcerated' && h.homeValue !== undefined) {
+    // A home you own, waiting for you while you're in prison (Stage 9).
+    money('housing.homeValue', h.homeValue);
   } else if (h.homeValue !== undefined || h.mortgageDebtId !== undefined) {
     fail(`a "${h.kind}" home has a value or mortgage`);
   }
@@ -155,6 +160,9 @@ export function checkInvariants(state: LifeState, content: ContentBundle): strin
 
   // Work: jobs that exist and fit their rules (every job's requirements are met).
   failures.push(...careerFailures(state, content));
+
+  // Health, the law and self-discovery (Stage 9).
+  failures.push(...stage9Failures(state, content));
 
   // People and relationships.
   const { parentAgeAtBirth } = content.balance.creation.family;
@@ -465,5 +473,65 @@ function careerFailures(state: LifeState, content: ContentBundle): string[] {
   const bosses = work.filter((r) => r.kind === 'boss').length;
   if (bosses > 1) fail(`${bosses} current bosses`);
   if (!job && work.length > 0) fail('a boss or coworker without a job');
+  return failures;
+}
+
+/**
+ * Health, legal and self-discovery invariants (Stage 9): conditions that
+ * exist with a sound severity, a record of real offenses, prison that means
+ * an incarcerated home and no job, school or gig work, and a sound
+ * self-discovery record.
+ */
+function stage9Failures(state: LifeState, content: ContentBundle): string[] {
+  const failures: string[] = [];
+  const fail = (message: string) => failures.push(message);
+  const inLife = (year: number) => Number.isInteger(year) && year >= state.birthYear && year <= state.currentYear;
+
+  const seen = new Set<string>();
+  for (const c of state.health.conditions) {
+    const label = `condition ${c.conditionId}`;
+    if (!content.conditions[c.conditionId]) fail(`${label} is not known`);
+    if (seen.has(c.conditionId)) fail(`${label} appears twice`);
+    seen.add(c.conditionId);
+    if (!Number.isInteger(c.severity) || c.severity < 1 || c.severity > 100) fail(`${label} has severity ${c.severity}`);
+    if (!inLife(c.since)) fail(`${label} started outside the life`);
+    if (typeof c.treated !== 'boolean') fail(`${label}.treated must be a boolean`);
+  }
+  if (state.health.lastVisit !== undefined && !inLife(state.health.lastVisit)) fail('health.lastVisit is outside the life');
+
+  const legal = state.legal;
+  let lastYear = -Infinity;
+  for (const [i, r] of legal.record.entries()) {
+    const label = `record ${i} (${r.offenseId})`;
+    if (!content.offenses[r.offenseId]) fail(`${label}: unknown offense`);
+    if (!inLife(r.year)) fail(`${label}: from outside the life`);
+    if (r.year < lastYear) fail(`${label}: out of order`);
+    lastYear = r.year;
+    if (r.amount !== undefined && (!Number.isSafeInteger(r.amount) || r.amount < 0)) fail(`${label}: invalid fine`);
+    if (r.years !== undefined && (!Number.isInteger(r.years) || r.years < 1)) fail(`${label}: invalid years`);
+    if (r.outcome === 'jail' && r.year - state.birthYear < content.balance.economy.independenceAge) fail(`${label}: jail for a minor`);
+  }
+  const inside = state.housing.kind === 'incarcerated';
+  if (inside !== (legal.incarceratedUntil !== undefined)) fail('prison and incarceratedUntil disagree');
+  if (inside) {
+    if (legal.incarceratedUntil! < state.currentYear) fail('still in prison after the sentence ended');
+    if (state.career.job) fail('a job in prison');
+    if (state.career.gig) fail('gig work in prison');
+    if (state.education.current) fail('in school in prison');
+    if (legal.probationUntil !== undefined) fail('on probation in prison');
+    if (!legal.record.some((r) => r.outcome === 'jail')) fail('in prison without a jail sentence on the record');
+  }
+  if (legal.probationUntil !== undefined && legal.probationUntil < state.currentYear) fail('probation that has ended is still listed');
+
+  for (const [kind, entry] of Object.entries(state.discovery.surfaced)) {
+    if (!entry) continue;
+    if (!['attraction', 'gender', 'expression', 'personality', 'talent'].includes(kind)) fail(`discovery.surfaced has unknown kind "${kind}"`);
+    if (!inLife(entry.year)) fail(`discovery.surfaced.${kind} is from outside the life`);
+    if (!Number.isInteger(entry.times) || entry.times < 1) fail(`discovery.surfaced.${kind}.times must be at least 1`);
+  }
+  if (state.discovery.crisisYear !== undefined && !inLife(state.discovery.crisisYear)) fail('discovery.crisisYear is outside the life');
+  if (state.discovery.surfaced.talent && (state.character.hidden.talent === null || state.character.hidden.talentDiscovered)) {
+    fail('a talent surfaced that is not hidden');
+  }
   return failures;
 }

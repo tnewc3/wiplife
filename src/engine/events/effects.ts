@@ -17,6 +17,9 @@ import {
 } from '../finance';
 import { afterMove, canTakeJob, checkJobFits, endJob, giveRaise, promote, startJob } from '../career';
 import { addScholarshipFund, leaveSchool } from '../education';
+import { applyIdentity, discoverTalent } from '../discovery';
+import { changeSeverity, setTreated } from '../health';
+import { sentence } from '../legal';
 import { moveInTogether, moveTo, refreshHousingCost, sellHome, settleHousehold, supportingParent } from '../housing';
 import { clampInt } from '../random';
 import { canChangeKind, canSetStatus } from '../relationships';
@@ -198,7 +201,7 @@ const handlers: { [T in Effect['type']]: Handler<T> } = {
   },
 
   history: (state, effect, ctx) => {
-    const text = renderText(effect.text, textContext(state, ctx.cast));
+    const text = renderText(effect.text, textContext(state, ctx.cast, ctx.content));
     const legendary = ctx.def.rarity === 'legendary';
     addHistory(
       state,
@@ -219,6 +222,26 @@ const handlers: { [T in Effect['type']]: Handler<T> } = {
     if (state.death || state.phase === 'action') return;
     state.death = { year: state.currentYear, age: state.character.age, causeId: effect.cause };
   },
+
+  legal: (state, effect, ctx) => {
+    sentence(state, effect.offenseId, effect.outcome, effect.years, ctx.content);
+  },
+
+  health: (state, effect, ctx) => {
+    if (effect.severity !== undefined) changeSeverity(state, effect.conditionId, effect.severity, ctx.content);
+    if (effect.treated !== undefined) setTreated(state, effect.conditionId, effect.treated, ctx.content);
+  },
+
+  identity: (state, effect, ctx) => {
+    applyIdentity(state, effect.field, effect.value, effect.role === undefined ? undefined : ctx.cast[effect.role], ctx.content);
+  },
+
+  innerConflict: (state, effect) => {
+    const h = state.character.hidden;
+    h.innerConflict = clampInt(h.innerConflict + effect.delta, 0, 100);
+  },
+
+  talent: (state, _effect, ctx) => discoverTalent(state, ctx.content),
 };
 
 /** Applies effects in order. */

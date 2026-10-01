@@ -1,0 +1,26 @@
+id: test_discovery
+title: Something comes to light
+text: You notice something new about yourself.
+tone: serious
+category: identity
+rarity: common
+lifeStages: [child, teen, youngAdult, adult, senior]
+weight: { base: 1 }
+followUpOnly: true
+choices:
+  - id: accept
+    label: Accept it
+    outcome:
+      text: You accept it.
+      effects:
+        - { type: identity, field: attraction, value: fromLatent }
+        - { type: identity, field: gender, value: fromLatent }
+        - { type: identity, field: expression, value: fromLatent }
+        - { type: identity, field: personality, value: fromLatent }
+        - { type: talent }
+  - id: push_down
+    label: Push it down
+    outcome:
+      text: You push it down.
+      effects:
+        - { type: innerConflict, delta: 12 }

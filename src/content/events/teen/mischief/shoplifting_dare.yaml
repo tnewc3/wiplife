@@ -28,8 +28,9 @@ choices:
           - { type: relationship, role: friend, affection: 4 }
           - { type: memory, role: friend, tag: dared_you }
       failure:
-        text: A security guard stops you at the door, and your family has to come and get you.
+        text: A security guard stops you at the door, and your family has to come and get you. You get {sentence}.
         effects:
+          - { type: legal, offenseId: shoplifting, outcome: sentence }
           - { type: flag, key: shoplifted, value: true }
           - { type: flag, key: caught_shoplifting, value: true }
           - { type: stat, key: stress, delta: 8 }

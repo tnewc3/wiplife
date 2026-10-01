@@ -1,0 +1,44 @@
+# A latent gender surfaces (registries/discovery.yaml surfacing.gender).
+id: discovery_mirror
+title: The mirror
+text: >-
+  Some mornings the person in the mirror doesn't feel like you. The word
+  "{latentGender}" keeps coming back to you, and every time, it fits a
+  little better.
+tone: serious
+category: identity
+rarity: common
+lifeStages: [teen, youngAdult, adult, senior]
+weight: { base: 5 }
+followUpOnly: true
+choices:
+  - id: accept_pronouns
+    label: This is who I am, new pronouns too
+    outcome:
+      text: You try the new words on, alone in your room, and they fit like they were always yours.
+      effects:
+        - { type: identity, field: gender, value: fromLatent }
+        - { type: identity, field: pronouns, value: fromLatent }
+        - { type: stat, key: happiness, delta: 5 }
+        - { type: schedule, eventId: coming_out_family, inYears: [1, 1] }
+  - id: accept
+    label: This is who I am, same pronouns
+    outcome:
+      text: You know who you are. The pronouns can stay as they are; the rest of you can finally breathe.
+      effects:
+        - { type: identity, field: gender, value: fromLatent }
+        - { type: stat, key: happiness, delta: 4 }
+        - { type: schedule, eventId: coming_out_family, inYears: [1, 1] }
+  - id: not_yet
+    label: Not yet
+    outcome:
+      text: You put the thought somewhere safe, for later.
+      effects:
+        - { type: innerConflict, delta: 4 }
+  - id: push_down
+    label: Bury it
+    outcome:
+      text: You throw yourself into everything else. The feeling waits.
+      effects:
+        - { type: innerConflict, delta: 12 }
+        - { type: stat, key: stress, delta: 3 }

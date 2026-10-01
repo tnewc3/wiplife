@@ -3,6 +3,7 @@ import { immer } from 'zustand/middleware/immer';
 import { content } from '../content';
 import type { ActionId, ContentBundle } from '../content/schemas';
 import { finishAction, performAction, type LifeActionId, type LifeActionParams } from '../engine/actions';
+import type { IdentityEditInput } from '../engine/discovery';
 import { archiveEntry } from '../engine/archive';
 import { assertInvariants } from '../engine/invariants';
 import { beginYear, CONTINUE_CHOICE, createLife, endYear, resolveChoice, type CustomLifeInput } from '../engine/life';
@@ -82,8 +83,8 @@ export interface AppState {
   archiveSelection: string | null;
   /** The person open on the People tab, if any. */
   personId: string | null;
-  /** A page open on the More tab (More → Home), if any. */
-  moreView: 'home' | null;
+  /** A page open on the More tab (More → Home, More → Health), if any. */
+  moreView: 'home' | 'health' | null;
 
   init: () => Promise<void>;
   confirmAge: () => Promise<void>;
@@ -141,8 +142,16 @@ export interface AppState {
   takeLifeAction: (actionId: LifeActionId, params?: LifeActionParams) => Promise<void>;
   /** Opens More → Home. */
   openHome: () => void;
-  /** Back from More → Home to the More tab. */
+  /** Back from More → Home (or More → Health) to the More tab. */
   closeHome: () => void;
+  /** Opens More → Health (Stage 9). */
+  openHealth: () => void;
+  /**
+   * Edits your identity from the Profile sheet (between years) and autosaves.
+   * Throws InvalidInputError for an edit that isn't valid. Ignored while the
+   * engine is working.
+   */
+  editIdentity: (edit: IdentityEditInput) => Promise<void>;
 }
 
 export interface StoreOptions {
@@ -578,6 +587,18 @@ export function createAppStore({
         openHome: () =>
           set((s) => {
             if (s.life) s.moreView = 'home';
+          }),
+
+        openHealth: () =>
+          set((s) => {
+            if (s.life) s.moreView = 'health';
+          }),
+
+        editIdentity: (edit) =>
+          busy(async () => {
+            const life = get().life;
+            if (!life || life.phase !== 'yearStart' || get().eventSheet) return;
+            await commit(performAction(life, 'edit_identity', edit, bundle));
           }),
 
         closeHome: () =>

@@ -20,8 +20,11 @@ childhood:
 
 background: 0.0004
 
+# Stage 9: health conditions (src/content/conditions) now carry part of the
+# age-related risk (heart disease, cancer, pneumonia...), so the age curve's
+# base came down from 0.000021 to 0.000013 to keep the median lifespan where it was.
 ageCurve:
-  base: 0.000021
+  base: 0.000013
   growth: 1.1
 
 # By Health (0–100). Low health raises the chance sharply.
@@ -43,7 +46,8 @@ geneticRiskMultiplier:
 npcMultiplier: 1.2
 
 # The recorded cause of death, by age (ids from src/content/causes).
-# Stage 9 adds deaths from health conditions; events add their own causes.
+# A health condition that kills records its own cause (Stage 9); events add
+# their own causes.
 causes:
   - maxAge: 1
     weights: { infant_illness: 1 }

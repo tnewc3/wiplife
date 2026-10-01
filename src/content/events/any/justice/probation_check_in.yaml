@@ -1,0 +1,35 @@
+# Queued now and then while you're on probation (registries/legal.yaml probation).
+id: probation_check_in
+title: Check-in
+text: >-
+  Your probation officer wants a drug test, proof of where you've been
+  working, and twenty minutes of your full attention on Thursday morning.
+tone: neutral
+category: justice
+rarity: common
+lifeStages: [teen, youngAdult, adult, senior]
+requires: { legal: { probation: true } }
+weight: { base: 5 }
+followUpOnly: true
+choices:
+  - id: early
+    label: Show up early, papers in hand
+    outcome:
+      text: 'Your officer actually smiles. "Keep this up and we''ll barely see each other."'
+      effects:
+        - { type: stat, key: discipline, delta: 3 }
+        - { type: stat, key: stress, delta: -1 }
+  - id: skip
+    label: Skip it, you've got a shift
+    check:
+      base: 45
+      stats: [{ key: luck, weight: 0.4 }, { key: confidence, weight: 0.2 }]
+      success:
+        text: A stern voicemail and a rescheduled appointment. You make that one.
+        effects:
+          - { type: stat, key: stress, delta: 3 }
+      failure:
+        text: Missing a check-in is a violation, and the judge treats it like one. You get {sentence}.
+        effects:
+          - { type: legal, offenseId: probation_violation, outcome: sentence }
+          - { type: stat, key: stress, delta: 6 }

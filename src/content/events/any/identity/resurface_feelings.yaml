@@ -1,0 +1,28 @@
+# An attraction you pushed down comes back (registries/discovery.yaml resurfacing.attraction).
+id: resurface_feelings
+title: Still there
+text: >-
+  It's back, and louder. You're drawn to {latentPeople}, no matter how many
+  times you've told yourself otherwise.
+tone: serious
+category: identity
+rarity: common
+lifeStages: [teen, youngAdult, adult, senior]
+weight: { base: 5 }
+followUpOnly: true
+choices:
+  - id: stop_pretending
+    label: Stop pretending
+    outcome:
+      text: The relief is so sudden you laugh out loud, alone in the kitchen.
+      effects:
+        - { type: identity, field: attraction, value: fromLatent }
+        - { type: stat, key: happiness, delta: 5 }
+        - { type: schedule, eventId: coming_out_family, inYears: [1, 1] }
+  - id: push_down
+    label: Push it down again
+    outcome:
+      text: It's harder this time. It takes more out of you.
+      effects:
+        - { type: innerConflict, delta: 12 }
+        - { type: stat, key: stress, delta: 4 }

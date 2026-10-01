@@ -10,6 +10,7 @@ import type { ContentBundle } from '../content/schemas';
 import { createRng, pick, type RngState } from './rng';
 import { getFamily, getSpouses, type FamilyMember } from './selectors';
 import { renderText, type TextRole } from './text';
+import { listText } from './words';
 import type { LifeState } from './types';
 
 export interface ObituaryContext {
@@ -117,13 +118,7 @@ export function writeObituary(
   const rng = createRng(`${life.seed}:obituary:${life.currentYear}`);
   const self: TextRole = { name: life.character.name, pronouns: life.character.identity.pronouns };
 
-  const list = (items: string[]): string => {
-    if (items.length <= 1) return items[0] ?? '';
-    if (items.length === 2) return renderText(text.list.pair, { values: { first: items[0]!, second: items[1]! } });
-    return renderText(text.list.serial, {
-      values: { items: items.slice(0, -1).join(text.list.separator), last: items[items.length - 1]! },
-    });
-  };
+  const list = (items: string[]): string => listText(items, content);
 
   const ctx: ObituaryContext = {
     life,

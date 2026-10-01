@@ -106,15 +106,18 @@ Because a year is split into begin, choices and end, the game can be saved and r
 
 1. Increase age and update life stage.
 2. Age NPCs, and check whether any die.
-3. Education: update GPA, handle graduation or dropping out.
-4. Career: set performance, then check for promotion, raise or firing.
-5. Economy: run the yearly ledger.
-6. Health: progress conditions and roll for new ones.
-7. Relationships: apply drift.
-8. Self-discovery: grow inner conflict and check whether latent traits surface.
-9. Pacing director: queue due scheduled events first, then pick new events.
+3. Legal (Stage 9): release from prison when the sentence is served, prison's toll on stats, the end of probation, and now and then a probation event.
+4. Education: update GPA, handle graduation or dropping out.
+5. Career: set performance, then check for promotion, raise or firing.
+6. Economy: run the yearly ledger.
+7. Health: progress conditions and roll for new ones.
+8. Relationships: apply drift.
+9. Self-discovery: grow inner conflict and check whether latent traits surface.
+10. Pacing director: queue due scheduled events first, then pick new events.
 
-After the player resolves every pending event, `endYear` runs the death check, writes history, builds the recap and triggers an autosave.
+After the player resolves every pending event, `endYear` runs the death check (age, Health and genetic risk, plus each health condition's own chance), writes history, builds the recap and triggers an autosave.
+
+**Prison is a reduced year (Stage 9).** The legal step comes before school and work, so a release opens them again in the same year. While you're in prison the same steps run with less to do: no school, no job or gig work and no job openings, no housing or living costs (debts still grow), no discoveries surfacing, and the pacing director picks from prison events only (a prison budget from `balance/legal.yaml`); follow-ups that fall due inside wait for your release. Only a few actions are available (paying debts, a debt plan, editing your identity; on a person's page, breaking up, divorcing, cutting contact and reconciling).
 
 ### Event engine internals
 
@@ -142,7 +145,8 @@ Conditions are structured data, not text formulas. They're safer, and the conten
 
 ### Text templates and pronouns
 
-- The player is always "you."
+- The player is always "you." Event text can also use `{self.they}` and the other forms (Stage 9), for what others say about you; they follow your pronouns as they are now.
+- Event text values: `{age}`; from Stage 9 `{talent}`, `{latentPeople}`, `{latentGender}`, `{latentExpression}`, `{latentTrait}` (self-discovery) and `{sentence}` (what a court just handed down, only in an outcome with a legal effect).
 - NPC fields use a role name: `{npc.name}`, `{npc.they}`, `{npc.them}`, `{npc.their}`, `{npc.theirs}`, `{npc.themself}`. Capitalized versions like `{npc.They}` start a sentence.
 - Verb agreement: `{npc:is|are}` and `{npc:swears|swear}` pick the form that matches the NPC's pronouns.
 - The obituary uses `{self.they}` and the other forms for the player character.
@@ -433,15 +437,27 @@ interface HousingState {
 }
 
 interface HealthState {
-  conditions: { conditionId: Id; since: number; severity: number; treated: boolean }[];
+  conditions: { conditionId: Id; since: number;
+                severity: number;              // 1–100 (Stage 9); a condition at 0 is gone
+                treated: boolean }[];
+  lastVisit?: number;                  // the last year you saw a doctor (once a year; Stage 9)
 }
 
 interface LegalState {
-  record: { offenseId: Id; year: number; outcome: 'warning' | 'fine' | 'probation' | 'jail' }[];
-  probationUntil?: number;
-  incarceratedUntil?: number;
+  record: { offenseId: Id; year: number; outcome: 'warning' | 'fine' | 'probation' | 'jail';
+            amount?: number; years?: number }[];   // a fine's amount; years of probation or prison (Stage 9)
+  probationUntil?: number;             // the last year of probation
+  incarceratedUntil?: number;          // the last year inside; released as the next year begins
+}
+
+interface DiscoveryState {             // Stage 9
+  surfaced: Partial<Record<'attraction' | 'gender' | 'expression' | 'personality' | 'talent',
+                           { year: number; times: number }>>;   // came to the surface: last year, how often
+  crisisYear?: number;                 // the last inner crisis
 }
 ```
+
+Health, legal and self-discovery (Stage 9). Health conditions are content (`ConditionDef`): each year a condition runs its course (severity moves by its untreated or treated rate; at 0 it is gone), pulls on stats by its severity (treatment softens it), costs money (medication through medical debt, an addiction's habit as ordinary spending), and new ones start by their onset chance (age curve × factors such as genetic risk, Fitness, vice or stress, while their requirements hold, up to `maxConditions`). An untreated addiction raises vice each year; treatment lowers it (vice escalation). Seeing a doctor (More → Health, once a year, not from prison) costs a visit plus treatment, paid through the debt system as medical debt (a child's family pays), treats each treatable condition with a chance by its severity, eases untreatable ones, or is a checkup that does Health a little good; its result is an event from `registries/health.yaml`. Each condition adds its own yearly chance of death (mortality × severity, less when treated), and a death from it records its cause. The `legal` effect puts an offense on your record: the court decides (`sentence`: the offense's likely outcomes, ×`priorRecord` for each earlier entry, ×`juvenile` before the independence age) or the event does. A fine is paid (debt for what savings can't cover), probation keeps you from moving city, and jail sends you to prison: your job ends (`jailed`), you leave school, and housing is `incarcerated` until `incarceratedUntil`. A home you own stays yours (housing keeps its value, mortgage and live-in partner while `incarcerated`): its mortgage and upkeep keep running through the ledger, a partner who lives there pays their share as usual, and missed payments follow the usual foreclosure chain (a foreclosure inside leaves you with no home to return to). A rental's lease ends, and a partner who lived there stays behind. You are released to a home you still own, else a parent, a rental or the street, then on parole. A minor never goes to prison (jail becomes probation). A conviction (not a warning) counts against you when hiring, probation or prison makes landlords ask a larger deposit, and a record that breaks your job's requirements costs you the job. From the independence age, offenses from before it stop counting for hiring (job requirements included) and renting; they stay on the record, in life history and in event conditions. Self-discovery: each year a latent trait (or a hidden talent) can surface from its minimum age (registries/discovery.yaml), at most one a year and never in prison; a trait you know about and haven't accepted grows inner conflict (more for each time it came back), which raises Stress and lowers Happiness and fades when you hold nothing back; a trait you pushed down comes back after `afterYears`, more likely the higher your inner conflict, and at high conflict a crisis can come instead. Accepting takes the latent trait (`identity` effects with `fromLatent`), clears it and eases inner conflict; accepting usually schedules a coming-out event (family reactions by affection and trust; "Not yet" is always a choice). "Try it and decide" events cast an `admirer` (an adult attracted to you, of a gender you're not attracted to yet) and are romance events, so the Stage 5 adults-only rule blocks them for anyone under 18. Finding a hidden talent applies its boosts and helps job performance in the jobs it lists. The Profile sheet (from the Home header) edits pronouns, gender identity (and its category, used for matching) and expression at any age, between years: it takes effect at once, an edit that matches a latent trait clears it and eases inner conflict, and a coming-out event is queued for next year only when the player asks. Save schema version 8 added `discovery` (the upgrade from version 7 adds an empty one), `lastVisit`, a record entry's `amount` and `years`, and the job end `jailed`.
 
 #### Events, history and archive
 
@@ -512,6 +528,8 @@ interface CastSpec {
   romantic?: boolean;                  // the meeting pool: an adult with attraction both ways, never family;
                                        // someone new is of a plausible age for yours (balance/relationships.yaml meeting)
   support?: boolean;                   // instead of kind: the most trusted close person who would step in
+  admirer?: boolean;                   // Stage 9: an adult attracted to you, of a gender you're not attracted to
+                                       // (yet; leaning toward a latent one): "try it and decide". A romance role
   optional?: boolean;                  // nobody fits: the event happens without this role
 }
 
@@ -563,6 +581,11 @@ type Effect =
 // build requires an adult age or adult life stages).
 // Stage 5: a relationship effect's kind change is checked by the engine (adults only, one partner at a
 // time, dating before an engagement, family stays family); a change that breaks a rule is ignored.
+// Stage 9: legal (outcome warning, fine, probation, jail or 'sentence': the court decides; years for
+// probation or jail), health ({ conditionId, severity?: −100..100, treated?: boolean }), identity (field
+// attraction | gender | expression | pronouns | personality; value 'fromLatent', 'withRole' with a role
+// for attraction, a pronoun preset id, or free-text expression), innerConflict and talent ({ type: 'talent' }:
+// you find your hidden talent). An outcome's text is written after its effects, so it can use {sentence}.
 
 type Condition =                       // structured, evaluated by src/engine/conditions.ts
   | { all: Condition[] } | { any: Condition[] } | { not: Condition }
@@ -582,6 +605,10 @@ type Condition =                       // structured, evaluated by src/engine/co
                 retired?: boolean; lostWithin?: number } }    // Stage 8; lostWithin: fired or laid off within this many years
   | { record: { outcome?: ('warning' | 'fine' | 'probation' | 'jail')[]; within?: number } }
       // Stage 8: an entry on your criminal record (records arrive in Stage 9); { record: {} } is any record
+  | { health: { conditions?: Id[]; treated?: boolean; severity?: Compare } }      // Stage 9: one condition matching all
+  | { legal: { incarcerated?: boolean; probation?: boolean } }                    // Stage 9
+  | { discovery: { latent?: LatentKind[]; known?: LatentKind[]; innerConflict?: Compare;
+                   talent?: 'hidden' | 'found' | 'none' } }   // Stage 9; known: surfaced and not accepted
   | { memory: { role: string; tag: string } }       // about cast roles: checked once the event is cast
   | { role: string; alive?: boolean; age?: Compare; affection?: Compare; trust?: Compare;
       kind?: RelationshipKind[]; status?: RelationshipStatus[]; years?: Compare };  // years: in its current kind
@@ -597,8 +624,8 @@ The other content types follow the same pattern:
 | `TradeDef` | id, name, subject, license, blurb, careers (text), years, difficulty |
 | `GradProgramDef` | id, name, subject, degree, blurb, careers (text), years, difficulty, majors (a bachelor's in one of these; any when left out). Tuition and admission odds live in `balance/education.yaml` |
 | `CityDef` | id, countryId (always "us" for now, so more countries can be added later), name, cost-of-living multiplier, base rent, base home price, salary multiplier, job market strength by category, school names by program (Stage 7) |
-| `ConditionDef` | id, name, who gets it and how often, yearly effects, treatable, mortality |
-| `OffenseDef` | id, name, severity, misdemeanor or felony, likely outcomes |
+| `ConditionDef` | id, name, noun, kind (illness, chronic, injury, mental, addiction), blurb, onset (chance by age, factors, requires, starting severity), course (severity per year untreated and treated), effects (stat pulls at full severity), treatable, costs (treatment, yearly treated, yearly untreated), mortality (extra yearly chance of death at full severity), cause |
+| `OffenseDef` | id, name, class (misdemeanor or felony), severity (1–5), likely outcomes (weights for warning, fine, probation, jail), fine range, probation years, jail years |
 | `NamePool` | first names by gender category, last names |
 
 ### Which systems write and read each part
@@ -1729,27 +1756,35 @@ src/content/
                   performance, promotions, raises, firing, layoffs, pay when a job ends, the
                   workplace, the retirement age),
                   education.yaml (school ages, grades and letter grades, admission
-                  odds, tuition, scholarships, family help, the GED), health.yaml,
-                  legal.yaml, targets.yaml
+                  odds, tuition, scholarships, family help, the GED), health.yaml
+                  (treatment, doctors, vice escalation), legal.yaml (sentencing,
+                  probation, prison, release, the record), discovery.yaml
+                  (surfacing, resurfacing, crises, inner conflict, talents), targets.yaml
   causes/         causes of death, one per file ("natural causes", "a stroke")
   cities/         nyc.yaml, los_angeles.yaml, chicago.yaml, houston.yaml, small_town.yaml
   events/
     early/ child/ teen/ youngAdult/ adult/ senior/ any/
       <category>/<event_id>.yaml      one event per file
       <category>/<chain_id>.chain.yaml  a chain's events together in one file
-  jobs/ majors/ trades/ grad/ conditions/ offenses/
+  jobs/ majors/ trades/ grad/ conditions/ offenses/ talents/
   names/          name pools
   text/           story text that isn't an event: history.yaml (milestone entries),
-                  obituary.yaml (obituary sections), relations.yaml ("your mother")
+                  obituary.yaml (obituary sections), relations.yaml ("your mother"),
+                  legal.yaml (a sentence in words), discovery.yaml (self-discovery words)
   registries/
     memories.yaml   every memory tag, with its readable text (a template about {npc})
     flags.yaml      every flag, with a one-line description
-    categories.yaml event categories (romance: true marks adults-only categories)
+    categories.yaml event categories (romance: true marks adults-only categories;
+                    prison: true marks the only events that happen in prison)
     actions.yaml    the events that answer each management action
     triggers.yaml   the events that answer money trouble (missed payment, collections,
                     garnishment, eviction, foreclosure); the economy step queues one
     work.yaml       the events that answer work actions: hired and rejected (a job
                     application), raise (asking for a raise)
+    health.yaml     the events that answer seeing a doctor (clean, treated, managed)
+    legal.yaml      the events the legal system queues (jailed, released, probation)
+    discovery.yaml  the events the self-discovery step queues (surfacing and resurfacing
+                    by kind, crisis, coming out)
 ```
 
 The registries let the content build catch typos. An effect that writes a memory tag or flag that isn't registered fails the build.

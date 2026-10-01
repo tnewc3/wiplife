@@ -1,0 +1,34 @@
+# A latent expression surfaces (registries/discovery.yaml surfacing.expression).
+id: discovery_wardrobe
+title: The fitting room
+text: >-
+  Shopping for something else entirely, you catch yourself holding clothes
+  that are far more {latentExpression} than anything you own, and wanting
+  them badly.
+tone: light
+category: identity
+rarity: common
+lifeStages: [teen, youngAdult, adult, senior]
+weight: { base: 5 }
+followUpOnly: true
+choices:
+  - id: wear
+    label: Buy them and wear them out the door
+    outcome:
+      text: A stranger compliments you on the street. You grin for the rest of the day.
+      effects:
+        - { type: identity, field: expression, value: fromLatent }
+        - { type: stat, key: happiness, delta: 4 }
+        - { type: stat, key: confidence, delta: 2 }
+  - id: home
+    label: Buy them for home only
+    outcome:
+      text: They hang at the back of your closet. You try them on more often than you'd admit.
+      effects:
+        - { type: innerConflict, delta: 3 }
+  - id: put_back
+    label: Put them back
+    outcome:
+      text: You hang them up neatly and walk out without buying anything.
+      effects:
+        - { type: innerConflict, delta: 8 }

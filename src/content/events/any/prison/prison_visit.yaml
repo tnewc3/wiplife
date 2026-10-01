@@ -1,0 +1,42 @@
+# Whoever you trust most may come to see you (a support role).
+id: prison_visit
+title: Visiting day
+text: >-
+  Visiting day: plastic chairs, a vending machine, and a guard who calls time
+  far too early. Other people's families fill the room.
+tone: serious
+category: prison
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires: { legal: { incarcerated: true } }
+weight: { base: 5 }
+cooldownYears: 2
+cast:
+  visitor: { support: true, optional: true }
+choices:
+  - id: ask
+    label: Ask {visitor.name} to come
+    visibleIf: { role: visitor }
+    outcome:
+      text: >-
+        {visitor.name} comes, every month, with gossip and quarters for the
+        vending machine. {visitor.They} never once {visitor:asks|ask} why.
+      effects:
+        - { type: relationship, role: visitor, affection: 6, trust: 4 }
+        - { type: memory, role: visitor, tag: visited_you_inside }
+        - { type: stat, key: happiness, delta: 4 }
+        - { type: stat, key: stress, delta: -3 }
+  - id: letters
+    label: Write letters instead
+    outcome:
+      text: It's easier on paper. You write more honestly than you ever talked.
+      effects:
+        - { type: stat, key: happiness, delta: 1 }
+        - { type: stat, key: smarts, delta: 1 }
+  - id: nobody
+    label: Tell everyone not to come
+    outcome:
+      text: You don't want them to see you here. On visiting days, you stay in your cell and listen.
+      effects:
+        - { type: stat, key: happiness, delta: -3 }
+        - { type: stat, key: stress, delta: 2 }

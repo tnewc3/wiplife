@@ -1,0 +1,22 @@
+id: pneumonia
+name: Pneumonia
+noun: pneumonia
+kind: illness
+blurb: Every breath is work. Rest and treatment usually clear it.
+onset:
+  chance:
+    - { at: 54, x: 0 }
+    - { at: 55, x: 0.002 }
+    - { at: 70, x: 0.006 }
+    - { at: 85, x: 0.014 }
+  factors:
+    - key: health
+      curve: [{ at: 0, x: 3 }, { at: 50, x: 1.5 }, { at: 100, x: 0.6 }]
+  severity: { min: 30, max: 70 }
+course: { untreated: -25, treated: -60 }
+effects:
+  health: { perYear: -6, limit: 20 }
+treatable: true
+costs: { treatment: 3000 }
+mortality: 0.1
+cause: pneumonia

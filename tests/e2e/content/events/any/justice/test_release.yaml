@@ -1,0 +1,12 @@
+id: test_release
+title: Released
+text: The gate buzzes, and you're outside.
+tone: serious
+category: justice
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+weight: { base: 1 }
+followUpOnly: true
+autoOutcome:
+  text: You're free.
+  effects: []

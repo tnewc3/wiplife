@@ -1,0 +1,26 @@
+id: cancer
+name: Cancer
+noun: cancer
+kind: illness
+blurb: A word that changes every conversation. Caught early and treated, it can be beaten.
+onset:
+  chance:
+    - { at: 39, x: 0 }
+    - { at: 40, x: 0.0025 }
+    - { at: 55, x: 0.006 }
+    - { at: 70, x: 0.012 }
+    - { at: 85, x: 0.015 }
+  factors:
+    - key: geneticRisk
+      curve: [{ at: 0, x: 0.5 }, { at: 30, x: 1 }, { at: 100, x: 2.5 }]
+    - key: vice
+      curve: [{ at: 0, x: 0.8 }, { at: 50, x: 1 }, { at: 100, x: 1.8 }]
+  severity: { min: 15, max: 50 }
+course: { untreated: 8, treated: -20 }
+effects:
+  health: { perYear: -4, limit: 15 }
+  stress: { perYear: 3, limit: 85 }
+treatable: true
+costs: { treatment: 25000 }
+mortality: 0.1
+cause: cancer

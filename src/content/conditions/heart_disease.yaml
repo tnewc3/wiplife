@@ -1,0 +1,28 @@
+id: heart_disease
+name: Heart disease
+noun: heart disease
+kind: chronic
+blurb: Your heart works harder than it should. Every habit counts now.
+onset:
+  chance:
+    - { at: 44, x: 0 }
+    - { at: 45, x: 0.0015 }
+    - { at: 60, x: 0.004 }
+    - { at: 75, x: 0.008 }
+    - { at: 90, x: 0.012 }
+  factors:
+    - key: geneticRisk
+      curve: [{ at: 0, x: 0.5 }, { at: 30, x: 1 }, { at: 100, x: 2.5 }]
+    - key: fitness
+      curve: [{ at: 0, x: 1.8 }, { at: 50, x: 1 }, { at: 100, x: 0.5 }]
+    - key: vice
+      curve: [{ at: 0, x: 0.8 }, { at: 50, x: 1 }, { at: 100, x: 1.8 }]
+  severity: { min: 20, max: 50 }
+course: { untreated: 3, treated: 1 }
+effects:
+  health: { perYear: -1.5, limit: 25 }
+  fitness: { perYear: -2, limit: 15 }
+treatable: true
+costs: { treatment: 15000, yearlyTreated: 1500 }
+mortality: 0.015
+cause: heart_failure

@@ -1,0 +1,4 @@
+triggers:
+  jailed: { events: [test_prison_intake] }
+  released: { events: [test_release] }
+  probation: { events: [test_probation] }

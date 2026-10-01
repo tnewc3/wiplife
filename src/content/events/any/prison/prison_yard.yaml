@@ -1,0 +1,43 @@
+id: prison_yard
+title: The yard
+text: >-
+  A fight breaks out by the weight benches. A kid who can't be more than
+  twenty is losing badly, and the guards are taking their time.
+tone: dark
+category: prison
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires: { legal: { incarcerated: true } }
+weight: { base: 5 }
+cooldownYears: 2
+choices:
+  - id: step_in
+    label: Step in
+    check:
+      base: 40
+      stats: [{ key: fitness, weight: 0.4 }, { key: confidence, weight: 0.2 }]
+      success:
+        text: You pull the kid out before it gets worse. People nod at you differently after that.
+        effects:
+          - { type: stat, key: reputation, delta: 4 }
+          - { type: stat, key: kindness, delta: 2 }
+      failure:
+        text: You get the kid out, and take a beating for it. A month in solitary for "fighting" follows.
+        effects:
+          - { type: stat, key: health, delta: -8 }
+          - { type: stat, key: stress, delta: 6 }
+          - { type: stat, key: kindness, delta: 2 }
+  - id: walk_away
+    label: Walk away
+    outcome:
+      text: You keep walking. You don't sleep well that night, or for a few after it.
+      effects:
+        - { type: stat, key: stress, delta: 3 }
+        - { type: stat, key: kindness, delta: -2 }
+  - id: guard
+    label: Wave a guard over
+    outcome:
+      text: The fight ends. Some people saw you do it. That will matter, one way or another.
+      effects:
+        - { type: stat, key: reputation, delta: -3 }
+        - { type: stat, key: kindness, delta: 1 }

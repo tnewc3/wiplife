@@ -1,0 +1,25 @@
+id: test_resurface
+title: It comes back
+text: The feeling you pushed down is back.
+tone: serious
+category: identity
+rarity: common
+lifeStages: [teen, youngAdult, adult, senior]
+weight: { base: 1 }
+followUpOnly: true
+choices:
+  - id: accept
+    label: Accept it
+    outcome:
+      text: You accept it.
+      effects:
+        - { type: identity, field: attraction, value: fromLatent }
+        - { type: identity, field: gender, value: fromLatent }
+        - { type: identity, field: expression, value: fromLatent }
+        - { type: identity, field: personality, value: fromLatent }
+  - id: push_down
+    label: Push it down again
+    outcome:
+      text: You push it down again.
+      effects:
+        - { type: innerConflict, delta: 12 }

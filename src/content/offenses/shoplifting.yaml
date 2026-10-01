@@ -1,0 +1,7 @@
+id: shoplifting
+name: shoplifting
+class: misdemeanor
+severity: 1
+outcomes: { warning: 5, fine: 4, probation: 1, jail: 0 }
+fine: { min: 200, max: 800 }
+probationYears: { min: 1, max: 1 }

@@ -1,3 +1,8 @@
 id: math
 name: Math
+noun: math
 description: Numbers and patterns click without much effort.
+# What finding it does: stat changes once, and a performance bonus in these jobs.
+boost:
+  stats: [{ key: smarts, delta: 6 }]
+  jobs: [accountant, financial_analyst, software_engineer, civil_engineer, research_scientist]

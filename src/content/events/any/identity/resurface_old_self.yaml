@@ -1,0 +1,27 @@
+# A personality tendency you pushed down comes back (registries/discovery.yaml resurfacing.personality).
+id: resurface_old_self
+title: It keeps showing up
+text: >-
+  Whether you like it or not, it keeps showing up in the way you act and the
+  choices you almost make: {latentTrait}.
+tone: neutral
+category: identity
+rarity: common
+lifeStages: [teen, youngAdult, adult, senior]
+weight: { base: 5 }
+followUpOnly: true
+choices:
+  - id: accept
+    label: Let it be part of you
+    outcome:
+      text: People notice you've changed. Most of them like it.
+      effects:
+        - { type: identity, field: personality, value: fromLatent }
+        - { type: stat, key: happiness, delta: 3 }
+  - id: push_down
+    label: Keep it in check
+    outcome:
+      text: You hold the line, again. It's starting to feel like a job.
+      effects:
+        - { type: innerConflict, delta: 6 }
+        - { type: stat, key: stress, delta: 2 }

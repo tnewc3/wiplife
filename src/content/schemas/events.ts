@@ -5,7 +5,15 @@
  */
 import { z } from 'zod';
 import { familyWealthSchema } from './balance';
-import { baseDefSchema, HIDDEN_KEYS, idSchema, scoreKeySchema, STAT_KEYS, TRAIT_KEYS } from './common';
+import {
+  baseDefSchema,
+  HIDDEN_KEYS,
+  idSchema,
+  LATENT_KINDS,
+  scoreKeySchema,
+  STAT_KEYS,
+  TRAIT_KEYS,
+} from './common';
 import { debtKindSchema, housingKindSchema, lifestyleSchema } from './economy';
 import { credentialTypeSchema, programSchema, tierSchema } from './education';
 import { relationshipKindSchema, relationshipStatusSchema, romanceStatusSchema } from './relationships';
@@ -74,6 +82,9 @@ export type Condition =
   | { education: EducationCondition }
   | { career: CareerCondition }
   | { record: RecordCondition }
+  | { health: HealthCondition }
+  | { legal: LegalCondition }
+  | { discovery: DiscoveryCondition }
   | { memory: { role: string; tag: string } }
   | {
       role: string;
@@ -180,7 +191,38 @@ export interface RecordCondition {
   within?: number;
 }
 
+/**
+ * Your health (Stage 9): you have one of these conditions (any, when left
+ * out), treated or not and of this severity, as given. Every field given
+ * must hold for the same condition.
+ */
+export interface HealthCondition {
+  conditions?: string[];
+  treated?: boolean;
+  severity?: Compare;
+}
+
+/** The law (Stage 9): in prison, on probation (or not). */
+export interface LegalCondition {
+  incarcerated?: boolean;
+  probation?: boolean;
+}
+
+/**
+ * Self-discovery (Stage 9). latent: you have a latent trait of one of these
+ * kinds; known: one of these latent traits has surfaced and you haven't
+ * accepted it; innerConflict: how much you hold back; talent: a hidden talent
+ * you haven't found ('hidden'), one you have ('found') or none at all.
+ */
+export interface DiscoveryCondition {
+  latent?: (typeof LATENT_KINDS)[number][];
+  known?: (typeof LATENT_KINDS)[number][];
+  innerConflict?: Compare;
+  talent?: 'hidden' | 'found' | 'none';
+}
+
 const atLeastOneField = (c: Record<string, unknown>) => Object.values(c).some((v) => v !== undefined);
+const latentKindSchema = z.enum(LATENT_KINDS);
 
 export const conditionSchema: z.ZodType<Condition> = z.lazy(() =>
   z.union([
@@ -261,6 +303,30 @@ export const conditionSchema: z.ZodType<Condition> = z.lazy(() =>
         within: z.int().min(1).max(120).optional(),
       }),
     }),
+    z.strictObject({
+      health: z
+        .strictObject({
+          conditions: z.array(idSchema).min(1).optional(),
+          treated: z.boolean().optional(),
+          severity: compareSchema.optional(),
+        })
+        .refine(atLeastOneField, 'needs at least one field'),
+    }),
+    z.strictObject({
+      legal: z
+        .strictObject({ incarcerated: z.boolean().optional(), probation: z.boolean().optional() })
+        .refine(atLeastOneField, 'needs at least one field'),
+    }),
+    z.strictObject({
+      discovery: z
+        .strictObject({
+          latent: z.array(latentKindSchema).min(1).optional(),
+          known: z.array(latentKindSchema).min(1).optional(),
+          innerConflict: compareSchema.optional(),
+          talent: z.enum(['hidden', 'found', 'none']).optional(),
+        })
+        .refine(atLeastOneField, 'needs at least one field'),
+    }),
     z.strictObject({ memory: z.strictObject({ role: roleSchema, tag: idSchema }) }),
     z.strictObject({
       role: roleSchema,
@@ -296,6 +362,14 @@ export const castSpecSchema = z
      */
     romantic: z.boolean().optional(),
     /**
+     * Someone who is attracted to you, of a gender you're not (yet) attracted
+     * to: the other person in a "try it and decide" moment (Stage 9). An
+     * adult, never family; found or (with createIfMissing) created, leaning
+     * toward a gender your latent attraction includes. A romance role: the
+     * event is adults only.
+     */
+    admirer: z.boolean().optional(),
+    /**
      * When nobody fits, the event still happens with this role empty. The role
      * may then only be used in choices whose visibleIf requires it ({ role: name }).
      */
@@ -311,12 +385,17 @@ export const castSpecSchema = z
   })
   .refine((s) => (s.kind === undefined) !== (s.support !== true), 'a role needs exactly one of kind or support: true')
   .refine(
-    (s) => s.support !== true || (!s.createIfMissing && s.newChance === undefined && !s.romantic),
-    'a support role finds someone you know: no createIfMissing, newChance or romantic',
-  );
+    (s) => s.support !== true || (!s.createIfMissing && s.newChance === undefined && !s.romantic && !s.admirer),
+    'a support role finds someone you know: no createIfMissing, newChance, romantic or admirer',
+  )
+  .refine((s) => !(s.romantic && s.admirer), 'a role is romantic or an admirer, not both');
 export type CastSpec = z.infer<typeof castSpecSchema>;
 
 const statKeySchema = scoreKeySchema;
+
+/** What an identity effect can change (Stage 9). */
+export const IDENTITY_FIELDS = ['attraction', 'gender', 'expression', 'pronouns', 'personality'] as const;
+export type IdentityField = (typeof IDENTITY_FIELDS)[number];
 
 /** Effect types. Adding one means a schema here and a handler in src/engine/events/effects.ts. */
 export const effectSchema = z.discriminatedUnion('type', [
@@ -421,6 +500,60 @@ export const effectSchema = z.discriminatedUnion('type', [
   }),
   z.strictObject({ type: z.literal('history'), text: templateSchema, importance: z.union([z.literal(1), z.literal(2), z.literal(3)]) }),
   z.strictObject({ type: z.literal('death'), cause: idSchema }),
+  /**
+   * The law (Stage 9): an entry on your record for `offenseId`. `sentence`
+   * lets the court decide (the offense's likely outcomes, your record, your
+   * age); warning, fine, probation and jail hand down that outcome. `years`
+   * sets the years of probation or prison (otherwise the offense's range).
+   * Before the independence age, jail becomes probation.
+   */
+  z
+    .strictObject({
+      type: z.literal('legal'),
+      offenseId: idSchema,
+      outcome: z.enum([...RECORD_OUTCOMES, 'sentence']),
+      years: z.int().min(1).max(50).optional(),
+    })
+    .refine((e) => e.years === undefined || e.outcome === 'probation' || e.outcome === 'jail', 'only probation and jail take years'),
+  /**
+   * Health (Stage 9): `severity` points on a condition (a positive change
+   * gives it to you if you don't have it; it is gone at 0). `treated` marks
+   * it treated or not (rehab, stopping your medication).
+   */
+  z
+    .strictObject({
+      type: z.literal('health'),
+      conditionId: idSchema,
+      severity: z.int().min(-100).max(100).optional(),
+      treated: z.boolean().optional(),
+    })
+    .refine((e) => (e.severity !== undefined && e.severity !== 0) || e.treated !== undefined, 'needs a non-zero severity or treated'),
+  /**
+   * Who you are (Stage 9). field: attraction, gender (identity and
+   * category), expression, pronouns or personality. value 'fromLatent'
+   * takes your latent trait (and clears it; nothing happens without one).
+   * Attraction can also take value 'withRole' and a role: you're attracted
+   * to their gender too (a "try it and decide" moment). Pronouns can take a
+   * pronoun preset id; 'fromLatent' takes the usual pronouns of your latent
+   * gender. Expression can take a free-text value.
+   */
+  z
+    .strictObject({
+      type: z.literal('identity'),
+      field: z.enum(IDENTITY_FIELDS),
+      value: z.string().trim().min(1).max(40),
+      role: roleSchema.optional(),
+    })
+    .refine((e) => (e.value === 'withRole') === (e.role !== undefined), "value 'withRole' needs a role (and only it has one)")
+    .refine((e) => e.value !== 'withRole' || e.field === 'attraction', "only attraction takes value 'withRole'")
+    .refine(
+      (e) => e.value === 'fromLatent' || e.value === 'withRole' || e.field === 'pronouns' || e.field === 'expression',
+      "attraction, gender and personality take value 'fromLatent' (attraction also 'withRole')",
+    ),
+  /** Inner conflict (Stage 9): pushing something down raises it; making peace lowers it. */
+  z.strictObject({ type: z.literal('innerConflict'), delta: z.int().min(-100).max(100) }),
+  /** You discover your hidden talent, if you have one you haven't found (Stage 9). */
+  z.strictObject({ type: z.literal('talent') }),
 ]);
 export type Effect = z.infer<typeof effectSchema>;
 
@@ -511,6 +644,11 @@ export const categoryRegistrySchema = z.strictObject({
       cooldownYears: z.int().min(1).optional(),
       /** Dating, sex and romance: adults only, enforced by the engine and the content build. */
       romance: z.boolean().optional(),
+      /**
+       * Prison (Stage 9): events of this category happen only while you're
+       * in prison, and while you are, only these happen.
+       */
+      prison: z.boolean().optional(),
     }),
   ),
 });

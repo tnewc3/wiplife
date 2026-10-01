@@ -135,6 +135,42 @@ export function evaluate(condition: Condition | undefined, state: LifeState, ctx
       (r) => (!q.outcome || q.outcome.includes(r.outcome)) && (q.within === undefined || state.currentYear - r.year <= q.within),
     );
   }
+  if ('health' in condition) {
+    const q = condition.health;
+    return state.health.conditions.some((had) => {
+      if (q.conditions && !q.conditions.includes(had.conditionId)) return false;
+      if (q.treated !== undefined && had.treated !== q.treated) return false;
+      if (q.severity && !compare(had.severity, q.severity)) return false;
+      return true;
+    });
+  }
+  if ('legal' in condition) {
+    const q = condition.legal;
+    const inside = state.housing.kind === 'incarcerated';
+    const until = state.legal.probationUntil;
+    const probation = !inside && until !== undefined && until >= state.currentYear;
+    if (q.incarcerated !== undefined && inside !== q.incarcerated) return false;
+    if (q.probation !== undefined && probation !== q.probation) return false;
+    return true;
+  }
+  if ('discovery' in condition) {
+    const q = condition.discovery;
+    const latent = c.latent.identity;
+    const has = {
+      attraction: latent?.attractedTo !== undefined,
+      gender: latent?.genderCategory !== undefined,
+      expression: latent?.genderExpression !== undefined,
+      personality: c.latent.personality !== undefined && Object.keys(c.latent.personality).length > 0,
+    };
+    if (q.latent && !q.latent.some((k) => has[k])) return false;
+    if (q.known && !q.known.some((k) => has[k] && state.discovery.surfaced[k] !== undefined)) return false;
+    if (q.innerConflict && !compare(c.hidden.innerConflict, q.innerConflict)) return false;
+    if (q.talent !== undefined) {
+      const talent = c.hidden.talent === null ? 'none' : c.hidden.talentDiscovered ? 'found' : 'hidden';
+      if (talent !== q.talent) return false;
+    }
+    return true;
+  }
   if ('memory' in condition) {
     const { role, tag } = condition.memory;
     return roleCheck(role, (id) => state.relationships[id]?.memories.some((m) => m.tag === tag) ?? false);
@@ -188,6 +224,8 @@ export function referencesIn(condition: Condition | undefined): {
   /** Majors, trades or grad programs a credential is in (education field). */
   fields: string[];
   jobs: string[];
+  /** Health conditions (Stage 9). */
+  conditions: string[];
 } {
   const out = {
     flags: [] as string[],
@@ -198,6 +236,7 @@ export function referencesIn(condition: Condition | undefined): {
     trades: [] as string[],
     fields: [] as string[],
     jobs: [] as string[],
+    conditions: [] as string[],
   };
   const walk = (cond: Condition | undefined) => {
     if (!cond) return;
@@ -213,6 +252,7 @@ export function referencesIn(condition: Condition | undefined): {
       out.trades.push(...(cond.education.trade ?? []));
       out.fields.push(...(cond.education.field ?? []));
     } else if ('career' in cond) out.jobs.push(...(cond.career.job ?? []));
+    else if ('health' in cond) out.conditions.push(...(cond.health.conditions ?? []));
   };
   walk(condition);
   return out;

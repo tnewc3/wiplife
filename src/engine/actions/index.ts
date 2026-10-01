@@ -24,15 +24,20 @@ import { fittingResults, queueResult } from './result';
 export { RELATIONSHIP_ACTIONS } from './relationships';
 export { EDUCATION_ACTION_IDS, targetOf, type EducationActionId } from './education';
 export { CAREER_ACTION_IDS, type CareerActionId } from './career';
+export { PERSONAL_ACTION_IDS, type PersonalActionId } from './personal';
 export {
   HOME_ACTION_IDS,
   isLifeActionAvailable,
   isLifeActionId,
   LIFE_ACTION_IDS,
   MONEY_ACTION_IDS,
+  PRISON_LIFE_ACTIONS,
   type LifeActionId,
   type LifeActionParams,
 } from './life';
+
+/** The only actions on a person's page you can take from prison (Stage 9): letters and calls, not dates. */
+export const PRISON_PERSON_ACTIONS: readonly ActionId[] = ['break_up', 'divorce', 'cut_contact', 'reconcile'];
 
 /** The role a management action's result event casts the person in. */
 export const ACTION_ROLE = 'person';
@@ -67,6 +72,7 @@ export function isActionAvailable(state: LifeState, actionId: ActionId, personId
   const person = state.people[personId];
   if (!rel || !person || !person.alive) return false;
   if (rel.lastActionYear === state.currentYear) return false;
+  if (state.housing.kind === 'incarcerated' && !PRISON_PERSON_ACTIONS.includes(actionId)) return false;
   if (!RELATIONSHIP_ACTIONS[actionId].allowed(state, rel, person, content)) return false;
   return resultEvents(state, actionId, personId, content).length > 0;
 }

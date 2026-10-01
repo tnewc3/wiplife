@@ -1,0 +1,7 @@
+id: probation_violation
+name: violating probation
+class: misdemeanor
+severity: 2
+outcomes: { warning: 3, fine: 0, probation: 4, jail: 1.5 }
+probationYears: { min: 1, max: 2 }
+jailYears: { min: 1, max: 2 }

@@ -1,0 +1,52 @@
+id: one_more_for_the_road
+title: One more for the road
+text: >-
+  It's late at a friend's place and you've had four, maybe five. Your car is
+  parked right outside. Home is only ten minutes away.
+tone: serious
+category: justice
+rarity: rare
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 21 } }
+    - { hidden: vice, gt: 40 }
+weight:
+  base: 3
+  modifiers:
+    - { if: { hidden: vice, gt: 55 }, x: 2 }
+    - { if: { trait: riskTaking, gt: 60 }, x: 1.5 }
+cooldownYears: 12
+choices:
+  - id: drive
+    label: Drive home
+    check:
+      base: 65
+      stats: [{ key: luck, weight: 0.3 }, { key: vice, weight: -0.2 }]
+      success:
+        text: You make it home, hands tight on the wheel. You don't feel lucky. You feel sick about it.
+        effects:
+          - { type: stat, key: stress, delta: 3 }
+          - { type: stat, key: vice, delta: 2 }
+      failure:
+        text: >-
+          A checkpoint, a breathalyzer, a long night in a holding cell. You
+          lose your license for a while and get {sentence}.
+        effects:
+          - { type: legal, offenseId: dui, outcome: sentence }
+          - { type: flag, key: dui_arrest, value: true }
+          - { type: stat, key: stress, delta: 8 }
+          - { type: stat, key: reputation, delta: -5 }
+  - id: ride
+    label: Call a ride
+    outcome:
+      text: Forty dollars and a driver with strong opinions about jazz. Worth every cent.
+      effects:
+        - { type: money, delta: -40 }
+        - { type: stat, key: discipline, delta: 2 }
+  - id: couch
+    label: Sleep on the couch
+    outcome:
+      text: You wake up with a crick in your neck and the cat sitting on your chest. Fair enough.
+      effects:
+        - { type: stat, key: happiness, delta: 1 }

@@ -9,7 +9,8 @@
  * the simulated player, not the game, so they live here rather than in the
  * balance files; Stage 12's strategy bots replace this.
  */
-import { ACTION_IDS, LIFESTYLES, type ActionId, type ContentBundle, type JobDef, type Lifestyle } from '../../src/content/schemas';
+import { ACTION_IDS, LIFESTYLES, type ActionId, type ChoiceDef, type ContentBundle, type JobDef, type Lifestyle } from '../../src/content/schemas';
+import type { ChoicePicker } from '../../src/engine/autoplay';
 import { availableActions, isLifeActionAvailable, LIFE_ACTION_IDS, type LifeActionId, type LifeActionParams } from '../../src/engine/actions';
 import { activeJob, canAskRaise, canRetire, jobApplyBlock, levelPay, startLevel } from '../../src/engine/career';
 import { referencesIn } from '../../src/engine/conditions';
@@ -241,8 +242,9 @@ export function chooseSchoolActions(life: LifeState, content: ContentBundle, rng
       applyCollege(gpa >= 2.6 ? 'state' : 'community');
       if (gpa >= SCHOOL_POLICY.eliteGpa && chance(rng, SCHOOL_POLICY.elite)) applyCollege('elite');
     } else if (chance(rng, SCHOOL_POLICY.trade)) {
-      const trade = pick(rng, options.trade.filter((o) => o.block === null));
-      if (trade) out.push(['apply_school', { program: 'trade', tradeId: trade.id! }]);
+      // Nothing may be open (a record or prison can block every option).
+      const open = options.trade.filter((o) => o.block === null);
+      if (open.length > 0) out.push(['apply_school', { program: 'trade', tradeId: pick(rng, open).id! }]);
     }
   }
   // State university after community college.
@@ -400,4 +402,98 @@ export function chooseCarelessActions(life: LifeState, content: ContentBundle, r
     }
   }
   return out;
+}
+
+/**
+ * How the simulated player looks after their health (Stage 9). Like the
+ * policies above, these chances describe the simulated player, not the game.
+ */
+const HEALTH_POLICY = {
+  /** Sees a doctor in a year with an untreated condition... */
+  untreated: 0.5,
+  /** ...and for a checkup otherwise. */
+  checkup: 0.1,
+};
+
+/** The doctor visit the careful player makes this year, if any, drawing from `rng`. */
+export function chooseHealthActions(life: LifeState, content: ContentBundle, rng: RngState): MoneyAction[] {
+  if (!isLifeActionAvailable(life, 'see_doctor', {}, content)) return [];
+  const untreated = life.health.conditions.some((c) => !c.treated);
+  return chance(rng, untreated ? HEALTH_POLICY.untreated : HEALTH_POLICY.checkup) ? [['see_doctor', {}]] : [];
+}
+
+/** What a choice can lead to, for the player model below (Stage 9). */
+export interface ChoiceTraits {
+  /** Some outcome puts an offense on your record (a legal effect). */
+  illegal: boolean;
+  /** It rolls a chance check (and isn't illegal). */
+  risky: boolean;
+  /** Some outcome feeds a vice (raises vice). */
+  vice: boolean;
+  /** Its outcomes, all told, raise or lower how someone feels about you. */
+  kind: boolean;
+  unkind: boolean;
+}
+
+const traitsCache = new WeakMap<ChoiceDef, ChoiceTraits>();
+
+export function choiceTraits(choice: ChoiceDef): ChoiceTraits {
+  let traits = traitsCache.get(choice);
+  if (!traits) {
+    const outcomes = choice.outcome ? [choice.outcome] : choice.check ? [choice.check.success, choice.check.failure] : [];
+    const effects = outcomes.flatMap((o) => o.effects);
+    const affection = effects.reduce((sum, e) => sum + (e.type === 'relationship' ? (e.affection ?? 0) : 0), 0);
+    const illegal = effects.some((e) => e.type === 'legal');
+    traits = {
+      illegal,
+      risky: !illegal && choice.check !== undefined,
+      vice: effects.some((e) => e.type === 'stat' && e.key === 'vice' && e.delta > 0),
+      kind: affection > 0,
+      unkind: affection < 0,
+    };
+    traitsCache.set(choice, traits);
+  }
+  return traits;
+}
+
+/**
+ * How the careful player picks event choices (Stage 9): weighted by
+ * personality. Risk-taking draws them to risky and illegal choices,
+ * Discipline holds them back from illegal ones and vices, vice
+ * susceptibility pulls toward vices, and Kindness toward choices that leave
+ * people feeling better about them. Like the policies above, these numbers
+ * describe the simulated player, not the game.
+ */
+const CHOICE_POLICY = {
+  illegal: { base: 0.2, riskTaking: 1.6, discipline: 0.8 },
+  risky: { base: 0.5, riskTaking: 1 },
+  vice: { base: 0.4, vice: 1.2, discipline: 0.6 },
+  kind: { base: 0.5, kindness: 1 },
+};
+
+/** The careful player's weight for a choice: 1 for a plain one, more or less by personality. */
+export function choiceWeight(life: LifeState, traits: ChoiceTraits): number {
+  const p = life.character.personality;
+  const share = (v: number) => v / 100;
+  const c = CHOICE_POLICY;
+  let w = 1;
+  // Each factor is 1 for an average personality (50) and moves either way from there.
+  if (traits.illegal) w *= (c.illegal.base + c.illegal.riskTaking * share(p.riskTaking)) * (1 + c.illegal.discipline * (0.5 - share(p.discipline)));
+  if (traits.risky) w *= c.risky.base + c.risky.riskTaking * share(p.riskTaking);
+  if (traits.vice) w *= (c.vice.base + c.vice.vice * share(life.character.hidden.vice)) * (1 + c.vice.discipline * (0.5 - share(p.discipline)));
+  if (traits.kind) w *= c.kind.base + c.kind.kindness * share(p.kindness);
+  if (traits.unkind) w *= c.kind.base + c.kind.kindness * (1 - share(p.kindness));
+  return Math.max(0.01, w);
+}
+
+/** The careful player's choice on a card, by personality (drawing from `rng`). */
+export function personalityChoice(content: ContentBundle): ChoicePicker {
+  return (life, card, rng) => {
+    const def = content.events[life.pending.find((p) => p.instanceId === card.instanceId)?.eventId ?? ''];
+    const options = card.choices.map((c) => {
+      const choice = def?.choices?.find((d) => d.id === c.id);
+      return [c.id, choice ? choiceWeight(life, choiceTraits(choice)) : 1] as const;
+    });
+    return weightedPick(rng, options);
+  };
 }

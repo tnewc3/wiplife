@@ -1,0 +1,59 @@
+id: caught_holding
+title: Pull over
+text: >-
+  Blue lights fill your rearview mirror. You remember, with perfect clarity,
+  what's in your glove compartment.
+tone: serious
+category: justice
+rarity: rare
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { hidden: vice, gt: 60 }
+weight:
+  base: 3
+  modifiers:
+    - { if: { health: { conditions: [drug_addiction] } }, x: 2.5 }
+cooldownYears: 20
+choices:
+  - id: cooperate
+    label: Stay calm and cooperate
+    outcome:
+      text: The officer is polite, thorough and unmoved. You get {sentence}.
+      effects:
+        - { type: legal, offenseId: drug_possession, outcome: sentence }
+        - { type: stat, key: stress, delta: 5 }
+  - id: talk
+    label: Talk your way out of the search
+    check:
+      base: 35
+      stats: [{ key: confidence, weight: 0.4 }, { key: looks, weight: 0.2 }, { key: luck, weight: 0.2 }]
+      success:
+        text: A warning about your taillight and a "drive safe." You sit in the car for ten minutes before you can drive.
+        effects:
+          - { type: stat, key: stress, delta: 4 }
+          - { type: stat, key: confidence, delta: 2 }
+      failure:
+        text: The more you talk, the more interested the officer gets. You get {sentence}.
+        effects:
+          - { type: legal, offenseId: drug_possession, outcome: sentence }
+          - { type: stat, key: stress, delta: 6 }
+          - { type: stat, key: reputation, delta: -3 }
+  - id: run
+    label: Floor it
+    visibleIf: { trait: riskTaking, gt: 65 }
+    check:
+      base: 20
+      stats: [{ key: luck, weight: 0.3 }, { key: riskTaking, weight: 0.2 }]
+      success:
+        text: Three turns, an alley, gone. Your heart doesn't slow down until morning.
+        effects:
+          - { type: stat, key: stress, delta: 8 }
+          - { type: stat, key: riskTaking, delta: 3 }
+      failure:
+        text: Running made a small problem a very large one. The judge gives you {sentence}.
+        effects:
+          - { type: legal, offenseId: drug_possession, outcome: jail, years: 1 }
+          - { type: stat, key: reputation, delta: -8 }
+          - { type: stat, key: health, delta: -3 }

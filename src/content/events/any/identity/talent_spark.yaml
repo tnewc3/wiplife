@@ -1,0 +1,34 @@
+# A hidden talent comes to light (registries/discovery.yaml surfacing.talent).
+id: talent_spark
+title: Something clicks
+text: >-
+  You try your hand at {talent}, mostly by accident, and it comes easier than
+  anything ever has, like you've known how all along and only just found out.
+tone: light
+category: identity
+rarity: common
+lifeStages: [child, teen, youngAdult, adult, senior]
+weight: { base: 5 }
+followUpOnly: true
+choices:
+  - id: chase
+    label: Throw yourself into it
+    outcome:
+      text: You lose whole weekends to it. People start to notice, and so do you.
+      effects:
+        - { type: talent }
+        - { type: stat, key: happiness, delta: 3 }
+        - { type: stat, key: discipline, delta: 1 }
+  - id: hobby
+    label: Keep it as a quiet joy
+    outcome:
+      text: It becomes the thing you do when the rest of the day has been too much.
+      effects:
+        - { type: talent }
+        - { type: stat, key: stress, delta: -2 }
+  - id: shrug
+    label: Shrug it off
+    outcome:
+      text: Beginner's luck, probably. You move on to other things.
+      effects:
+        - { type: stat, key: happiness, delta: 1 }

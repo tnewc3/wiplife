@@ -1,0 +1,32 @@
+# Health conditions: treatment, doctors and vice escalation (Stage 9).
+# Each condition's own onset, course, effects, costs and mortality live in
+# src/content/conditions. Starting proposals; Stage 12 (balancing) tunes them.
+
+# No new condition starts while you have this many.
+maxConditions: 4
+
+# Treatment softens a condition: its yearly stat pulls and its chance of
+# killing are multiplied by these.
+treated:
+  effects: 0.5
+  mortality: 0.7
+
+doctor:
+  # A visit, times the city's cost of living (each treatment adds its own cost).
+  visitCost: 300
+  # Chance a treatable condition is treated at a visit, by its severity.
+  treatChance:
+    - { at: 0, x: 0.85 }
+    - { at: 50, x: 0.65 }
+    - { at: 100, x: 0.4 }
+  # Nothing to treat: a checkup does Health this much good, never past checkupLimit.
+  checkupHealth: 2
+  checkupLimit: 90
+  # A condition no doctor can treat is eased this much by a visit.
+  manageSeverity: 10
+
+# Vice escalation (docs/design.md, section F: vice susceptibility). An
+# untreated addiction feeds the habit; with only treated ones it fades.
+vice:
+  untreatedPerYear: 2
+  treatedPerYear: 3

@@ -1,0 +1,12 @@
+id: test_prison_intake
+title: Intake
+text: The door closes behind you.
+tone: dark
+category: prison
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+weight: { base: 1 }
+followUpOnly: true
+autoOutcome:
+  text: Your first year inside begins.
+  effects: []

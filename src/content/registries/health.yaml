@@ -1,0 +1,10 @@
+# The events that answer seeing a doctor (More → Health). The engine picks
+# one that fits (by weight and requirements). Every event listed must be
+# followUpOnly: it only happens this way.
+#   clean    nothing to treat: a checkup
+#   treated  at least one condition treated
+#   managed  only conditions a doctor can ease, or treatment didn't take
+doctor:
+  clean: { events: [doctor_all_clear] }
+  treated: { events: [doctor_treatment] }
+  managed: { events: [doctor_no_cure] }

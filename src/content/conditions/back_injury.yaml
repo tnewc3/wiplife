@@ -1,0 +1,21 @@
+id: back_injury
+name: Back injury
+noun: a bad back
+kind: injury
+blurb: Some mornings you get up fine. Some mornings you don't.
+onset:
+  chance:
+    - { at: 24, x: 0 }
+    - { at: 25, x: 0.0012 }
+    - { at: 60, x: 0.0025 }
+  factors:
+    - key: fitness
+      curve: [{ at: 0, x: 2 }, { at: 50, x: 1 }, { at: 100, x: 0.5 }]
+  severity: { min: 20, max: 50 }
+course: { untreated: 2, treated: -6 }
+effects:
+  happiness: { perYear: -1.5, limit: 30 }
+  fitness: { perYear: -2, limit: 20 }
+  stress: { perYear: 1, limit: 70 }
+treatable: true
+costs: { treatment: 2500, yearlyTreated: 400 }

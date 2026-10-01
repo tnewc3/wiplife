@@ -1,0 +1,47 @@
+id: dark_season
+title: The gray months
+text: >-
+  For weeks now, getting out of bed has felt like lifting a car. Food tastes
+  like nothing. The things you used to love sit there, waiting, and you can't
+  make yourself care.
+tone: dark
+category: health
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { health: { conditions: [depression], treated: false } }
+weight: { base: 7 }
+cooldownYears: 4
+cast:
+  helper: { support: true, optional: true }
+choices:
+  - id: tell
+    label: Tell {helper.name} how bad it's gotten
+    visibleIf: { role: helper }
+    outcome:
+      text: >-
+        {helper.name} doesn't try to fix it. {helper.They} just {helper:shows|show}
+        up, every day, with soup and terrible television. It helps more than
+        you can say.
+      effects:
+        - { type: health, conditionId: depression, severity: -15 }
+        - { type: relationship, role: helper, affection: 6, trust: 6 }
+        - { type: memory, role: helper, tag: cared_for_you }
+        - { type: stat, key: happiness, delta: 3 }
+  - id: therapist
+    label: Find a therapist
+    outcome:
+      text: It takes three tries to find the right one. The fourth session is the first good day in months.
+      effects:
+        - { type: health, conditionId: depression, treated: true }
+        - { type: debt, action: add, kind: medical, amount: 1200 }
+        - { type: stat, key: stress, delta: -3 }
+  - id: hide
+    label: Keep it to yourself
+    outcome:
+      text: You get very good at saying "just tired." Nobody asks twice.
+      effects:
+        - { type: health, conditionId: depression, severity: 10 }
+        - { type: stat, key: stress, delta: 3 }

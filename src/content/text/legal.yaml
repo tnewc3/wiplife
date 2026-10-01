@@ -1,0 +1,14 @@
+# Words for the law (Stage 9).
+
+# A sentence as it reads inside event outcome text ({sentence}).
+# Values: {amount} (a fine, "$500"), {years} (from years below).
+sentence:
+  warning: "a warning"
+  fine: "a {amount} fine"
+  probation: "{years} of probation"
+  jail: "{years} in prison"
+
+# A number of years. Values: {n}.
+years:
+  one: "a year"
+  many: "{n} years"

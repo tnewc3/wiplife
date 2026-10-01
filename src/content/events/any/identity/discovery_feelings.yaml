@@ -1,0 +1,36 @@
+# A latent attraction surfaces (registries/discovery.yaml surfacing.attraction).
+# Noticing feelings, from the teen years: self-understanding, never romance.
+id: discovery_feelings
+title: Something you can't un-notice
+text: >-
+  It's been building for a while. The way you notice {latentPeople}, the way
+  certain people stay on your mind long after they've gone. It isn't who you
+  thought you were. Or maybe it is.
+tone: serious
+category: identity
+rarity: common
+lifeStages: [teen, youngAdult, adult, senior]
+weight: { base: 5 }
+followUpOnly: true
+choices:
+  - id: accept
+    label: That's who I am
+    outcome:
+      text: Saying it to yourself, even silently, feels like setting down something heavy.
+      effects:
+        - { type: identity, field: attraction, value: fromLatent }
+        - { type: stat, key: happiness, delta: 4 }
+        - { type: schedule, eventId: coming_out_family, inYears: [1, 1] }
+  - id: wait
+    label: Give it time
+    outcome:
+      text: You don't need an answer today. The question stays with you, quietly.
+      effects:
+        - { type: innerConflict, delta: 3 }
+  - id: push_down
+    label: Push the feeling down
+    outcome:
+      text: You decide it's a phase. You decide it very firmly, many times a day.
+      effects:
+        - { type: innerConflict, delta: 12 }
+        - { type: stat, key: stress, delta: 3 }

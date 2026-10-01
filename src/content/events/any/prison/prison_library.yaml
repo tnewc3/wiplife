@@ -1,0 +1,40 @@
+id: prison_library
+title: The library cart
+text: >-
+  A volunteer from the community college has started teaching classes in the
+  library on Tuesday nights. There's a sign-up sheet by the door.
+tone: light
+category: prison
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires: { legal: { incarcerated: true } }
+weight: { base: 5 }
+once: true
+choices:
+  - id: sign_up
+    label: Sign up
+    outcome:
+      text: >-
+        Essays, algebra, a book you'd never have picked up outside. Tuesdays
+        become the night of the week that feels like yours.
+      effects:
+        - { type: flag, key: studied_inside, value: true }
+        - { type: stat, key: smarts, delta: 4 }
+        - { type: stat, key: discipline, delta: 3 }
+        - { type: stat, key: happiness, delta: 2 }
+  - id: teach
+    label: Offer to help teach
+    visibleIf: { stat: smarts, gt: 65 }
+    outcome:
+      text: You end up running the reading group. A man three times your size cries at the end of a novel and thanks you.
+      effects:
+        - { type: flag, key: studied_inside, value: true }
+        - { type: stat, key: kindness, delta: 3 }
+        - { type: stat, key: happiness, delta: 4 }
+        - { type: stat, key: reputation, delta: 2 }
+  - id: skip
+    label: Not interested
+    outcome:
+      text: You spend Tuesdays the way you spend every other night, staring at the ceiling.
+      effects:
+        - { type: stat, key: happiness, delta: -1 }

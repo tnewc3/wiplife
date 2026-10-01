@@ -3,10 +3,10 @@
  * JSON: no classes, no Dates, no functions. Money is whole dollars; stats are
  * integers from 0 to 100.
  */
-import type { CredentialType, DebtKind, GenderCategory, HousingKind, Lifestyle, Program, Tier } from '../content/schemas';
+import type { CredentialType, DebtKind, DiscoveryKind, GenderCategory, HousingKind, Lifestyle, Program, Tier } from '../content/schemas';
 import type { RngState } from './rng';
 
-export type { CredentialType, DebtKind, GenderCategory, HousingKind, Lifestyle, Program, Tier } from '../content/schemas';
+export type { CredentialType, DebtKind, DiscoveryKind, GenderCategory, HousingKind, LatentKind, Lifestyle, Program, Tier } from '../content/schemas';
 
 export type Id = string;
 
@@ -241,8 +241,8 @@ export interface Job {
   raiseYear?: number;
 }
 
-/** How a job ended. */
-export type JobEnd = 'quit' | 'fired' | 'laid_off' | 'retired' | 'moved';
+/** How a job ended ('jailed': you went to prison, Stage 9). */
+export type JobEnd = 'quit' | 'fired' | 'laid_off' | 'retired' | 'moved' | 'jailed';
 
 /** A job you used to have. */
 export interface PastJob {
@@ -339,14 +339,44 @@ export interface HousingState {
   partnerId?: Id;
 }
 
-export interface HealthState {
-  conditions: { conditionId: Id; since: number; severity: number; treated: boolean }[];
+/** A health condition you have (Stage 9). */
+export interface HealthCondition {
+  conditionId: Id;
+  /** The year it started. */
+  since: number;
+  /** How bad it is, 1–100 (gone at 0). */
+  severity: number;
+  /** A doctor (or rehab) is treating it. */
+  treated: boolean;
 }
 
+export interface HealthState {
+  conditions: HealthCondition[];
+  /** The last year you saw a doctor (once a year). */
+  lastVisit?: number;
+}
+
+export type RecordOutcome = 'warning' | 'fine' | 'probation' | 'jail';
+
 export interface LegalState {
-  record: { offenseId: Id; year: number; outcome: 'warning' | 'fine' | 'probation' | 'jail' }[];
+  /** Entries on your criminal record: a fine's amount, and the years of probation or prison handed down. */
+  record: { offenseId: Id; year: number; outcome: RecordOutcome; amount?: number; years?: number }[];
+  /** The last year of your probation. */
   probationUntil?: number;
+  /** The last year you spend in prison; you're released as the year after begins. */
   incarceratedUntil?: number;
+}
+
+/** Self-discovery (Stage 9). */
+export interface DiscoveryState {
+  /**
+   * Latent traits (and a hidden talent) that have come to the surface: the
+   * year they last did and how many times. Accepting a trait (or finding the
+   * talent) removes it, along with the latent trait itself.
+   */
+  surfaced: Partial<Record<DiscoveryKind, { year: number; times: number }>>;
+  /** The last year an inner crisis came. */
+  crisisYear?: number;
 }
 
 export interface EventInstance {
@@ -442,6 +472,7 @@ export interface LifeState {
   housing: HousingState;
   health: HealthState;
   legal: LegalState;
+  discovery: DiscoveryState;
   flags: Record<string, number | boolean | string>;
   eventLog: Record<Id, { count: number; lastYear: number }>;
   scheduled: ScheduledEvent[];

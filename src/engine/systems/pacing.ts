@@ -7,7 +7,7 @@ import { isDraft, original } from 'immer';
 import type { ContentBundle, EventDef } from '../../content/schemas';
 import { evaluate } from '../conditions';
 import { castEvent, uncast } from '../events/casting';
-import { eventIndex, eventWeight } from '../events/selection';
+import { eventIndex, eventWeight, fitsSetting } from '../events/selection';
 import { weightedPick } from '../random';
 import { isFamilyKind, kindSince, romanceAllowed } from '../relationships';
 import { nextFloat, nextInt } from '../rng';
@@ -68,23 +68,33 @@ export function runPacing(state: LifeState, content: ContentBundle): void {
 
   // Due follow-ups first. One that can't happen any more (retired, missing,
   // someone in it died, or its requirements fail) is dropped. Past the cap,
-  // the rest wait a year.
+  // the rest wait a year. In prison, only prison events happen: the rest wait
+  // for your release (once each); outside, a prison event is dropped.
+  const inside = state.housing.kind === 'incarcerated';
   const due = state.scheduled.filter((s) => s.dueYear <= year);
   state.scheduled = state.scheduled.filter((s) => s.dueYear > year);
   for (const item of due) {
+    const def = content.events[item.eventId];
+    if (def && !fitsSetting(view, def, content)) {
+      const releaseYear = (state.legal.incarceratedUntil ?? year) + 1;
+      if (inside && !state.scheduled.some((s) => s.eventId === item.eventId && s.dueYear === releaseYear)) {
+        state.scheduled.push({ ...item, dueYear: releaseYear });
+      }
+      continue;
+    }
     if (picked.length >= cap) {
       state.scheduled.push({ ...item, dueYear: year + 1 });
       continue;
     }
-    const def = content.events[item.eventId];
     if (!def || def.retired || picked.some((p) => p.def.id === def.id)) continue;
     const result = tryCast(state, view, def, content, item.cast);
     if (result) picked.push(result);
   }
 
   // New events, weighted, without repeats, until the budget is met or nothing
-  // (more) fits.
-  const budget = yearBudget(state, content, view);
+  // (more) fits. Prison has its own, smaller budget (balance/legal.yaml).
+  const prison = content.balance.legal.prison.budget;
+  const budget = inside ? Math.min(cap, nextInt(state.rng, prison.min, prison.max)) : yearBudget(state, content, view);
   const pool = [...(eventIndex(content).get(state.character.lifeStage) ?? [])].filter(
     (def) => !picked.some((p) => p.def.id === def.id),
   );

@@ -1,0 +1,26 @@
+# An expression you pushed down comes back (registries/discovery.yaml resurfacing.expression).
+id: resurface_closet
+title: The back of the closet
+text: >-
+  You keep thinking about those clothes you didn't let yourself have, and
+  the person you might look like in them.
+tone: light
+category: identity
+rarity: common
+lifeStages: [teen, youngAdult, adult, senior]
+weight: { base: 5 }
+followUpOnly: true
+choices:
+  - id: wear
+    label: Go back and get them
+    outcome:
+      text: They still have them. It feels like the store was waiting for you.
+      effects:
+        - { type: identity, field: expression, value: fromLatent }
+        - { type: stat, key: happiness, delta: 4 }
+  - id: push_down
+    label: Talk yourself out of it again
+    outcome:
+      text: Same jeans, same shirt, same nagging feeling.
+      effects:
+        - { type: innerConflict, delta: 8 }

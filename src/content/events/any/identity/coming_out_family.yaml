@@ -1,0 +1,76 @@
+# Telling family who you are: after accepting a change, or after an identity
+# edit in the Profile sheet when you ask to (registries/discovery.yaml
+# comingOut). Never forced: "Not yet" is always there.
+id: coming_out_family
+title: Telling them
+text: >-
+  You've decided the people closest to you should hear it from you, not from
+  anyone else. The words are ready. Your heart is less ready.
+tone: serious
+category: identity
+rarity: common
+lifeStages: [teen, youngAdult, adult, senior]
+weight: { base: 5 }
+followUpOnly: true
+cast:
+  parent: { kind: parent, optional: true }
+  sibling: { kind: sibling, optional: true }
+choices:
+  - id: tell_parent
+    label: Tell {parent.name}
+    visibleIf: { role: parent }
+    check:
+      base: 50
+      stats: [{ role: parent, key: affection, weight: 0.5 }, { role: parent, key: trust, weight: 0.4 }]
+      success:
+        text: >-
+          {parent.name} is quiet for a long moment. Then {parent.they}
+          {parent:hugs|hug} you hard and {parent:tells|tell} you nothing could
+          change how much you're loved. By dinner, {parent.they}
+          {parent:is|are} practicing: {self.they}, {self.them}, {self.their}.
+        effects:
+          - { type: memory, role: parent, tag: accepted_you }
+          - { type: relationship, role: parent, affection: 8, trust: 6 }
+          - { type: innerConflict, delta: -10 }
+          - { type: flag, key: came_out, value: true }
+          - { type: stat, key: happiness, delta: 5 }
+      failure:
+        text: >-
+          {parent.name} doesn't yell. {parent.They} just {parent:goes|go} very
+          quiet, and the quiet lasts for months. It isn't the end of the
+          conversation, but it's a hard start.
+        effects:
+          - { type: memory, role: parent, tag: struggled_with_it }
+          - { type: relationship, role: parent, affection: -12, trust: -4 }
+          - { type: flag, key: came_out, value: true }
+          - { type: stat, key: stress, delta: 6 }
+  - id: tell_sibling
+    label: Tell {sibling.name}
+    visibleIf: { role: sibling }
+    check:
+      base: 60
+      stats: [{ role: sibling, key: affection, weight: 0.5 }, { role: sibling, key: trust, weight: 0.4 }]
+      success:
+        text: >-
+          "Honestly? I kind of figured," {sibling.name} says, and steals a fry
+          off your plate. "Do you want me to tell everyone else, or do you
+          want to watch their faces?"
+        effects:
+          - { type: memory, role: sibling, tag: accepted_you }
+          - { type: relationship, role: sibling, affection: 8, trust: 8 }
+          - { type: innerConflict, delta: -10 }
+          - { type: flag, key: came_out, value: true }
+          - { type: stat, key: happiness, delta: 4 }
+      failure:
+        text: '{sibling.name} says all the right words in the wrong voice. Things between you are careful for a long time.'
+        effects:
+          - { type: memory, role: sibling, tag: struggled_with_it }
+          - { type: relationship, role: sibling, affection: -10, trust: -5 }
+          - { type: flag, key: came_out, value: true }
+          - { type: stat, key: stress, delta: 5 }
+  - id: not_yet
+    label: Not yet
+    outcome:
+      text: You'll know when it's time. This isn't it, and that's allowed.
+      effects:
+        - { type: stat, key: stress, delta: 1 }

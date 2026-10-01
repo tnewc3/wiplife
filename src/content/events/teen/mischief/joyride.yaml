@@ -1,0 +1,60 @@
+id: joyride
+title: The keys
+text: >-
+  {friend.name} has {friend.their} uncle's car keys, an empty Saturday night
+  and a plan that is mostly just the word "drive."
+tone: serious
+category: mischief
+rarity: common
+lifeStages: [teen]
+requires: { age: { gte: 15 } }
+weight:
+  base: 3
+  modifiers:
+    - { if: { trait: riskTaking, gt: 60 }, x: 1.8 }
+once: true
+cast:
+  friend: { kind: friend, ageOffset: { min: -1, max: 2 }, createIfMissing: true, newChance: 0.3 }
+choices:
+  - id: ride
+    label: Get in
+    check:
+      base: 55
+      stats: [{ key: luck, weight: 0.4 }]
+      success:
+        text: Windows down, music up, home before anyone notices. The best and dumbest night of the year.
+        effects:
+          - { type: flag, key: joyrode, value: true }
+          - { type: memory, role: friend, tag: joyride_together }
+          - { type: relationship, role: friend, affection: 5 }
+          - { type: stat, key: riskTaking, delta: 3 }
+      failure:
+        text: >-
+          Blue lights in the mirror twenty minutes in. The car was reported
+          stolen before anyone thought to ask its owner. You get {sentence}.
+        effects:
+          - { type: legal, offenseId: car_theft, outcome: sentence }
+          - { type: flag, key: joyrode, value: true }
+          - { type: memory, role: friend, tag: joyride_together }
+          - { type: stat, key: stress, delta: 8 }
+          - { type: stat, key: reputation, delta: -4 }
+  - id: talk_down
+    label: Talk {friend.them} out of it
+    check:
+      base: 40
+      stats: [{ key: confidence, weight: 0.3 }, { role: friend, key: trust, weight: 0.3 }]
+      success:
+        text: You end up at a diner instead, splitting fries and laughing about the plan.
+        effects:
+          - { type: relationship, role: friend, trust: 4 }
+          - { type: stat, key: discipline, delta: 2 }
+      failure:
+        text: '{friend.name} goes without you. On Monday, {friend.they} {friend:is|are} grounded for a month and not speaking to you.'
+        effects:
+          - { type: relationship, role: friend, affection: -5 }
+  - id: home
+    label: Go home
+    outcome:
+      text: You watch TV with your family and feel very old for fifteen minutes.
+      effects:
+        - { type: stat, key: discipline, delta: 1 }

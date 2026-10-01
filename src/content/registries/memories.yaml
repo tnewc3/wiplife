@@ -103,3 +103,17 @@ tags:
   caught_you_lying: Caught you faking a sick day
   union_together: Organized a union with you
   you_reported_union: You told the boss {npc.they} {npc:was|were} organizing a union
+  # Health, the law and self-discovery (Stage 9).
+  staged_intervention: Got you into treatment when you needed it
+  walked_out_on_them: You walked out on {npc.their} intervention
+  joyride_together: Took a joyride with you in a car that wasn't {npc.theirs}
+  tagged_with_you: Spray-painted a bridge with you
+  gave_you_package: Paid you to drive a package across town
+  shared_a_cell: Shared a cell with you
+  visited_you_inside: Visited you in prison
+  accepted_you: Stood by you when you told {npc.them} who you are
+  struggled_with_it: Struggled when you told {npc.them} who you are
+  kissed_you: Shared a kiss with you that changed how you see yourself
+  kissed_not_for_you: Shared a kiss with you that told you something
+  turned_them_down: You turned down {npc.their} kiss
+  danced_with_you: Danced with you all night

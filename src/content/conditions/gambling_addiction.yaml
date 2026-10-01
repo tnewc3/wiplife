@@ -1,0 +1,23 @@
+id: gambling_addiction
+name: Gambling addiction
+noun: a gambling problem
+kind: addiction
+blurb: The next bet will fix the last one. It never does.
+onset:
+  chance:
+    - { at: 17, x: 0 }
+    - { at: 18, x: 0.0004 }
+    - { at: 40, x: 0.0006 }
+    - { at: 70, x: 0.0004 }
+  factors:
+    - key: vice
+      curve: [{ at: 0, x: 0.05 }, { at: 40, x: 0.6 }, { at: 70, x: 2 }, { at: 100, x: 4 }]
+    - key: riskTaking
+      curve: [{ at: 0, x: 0.4 }, { at: 50, x: 1 }, { at: 100, x: 2.2 }]
+  severity: { min: 20, max: 45 }
+course: { untreated: 5, treated: -10 }
+effects:
+  stress: { perYear: 4, limit: 85 }
+  happiness: { perYear: -2, limit: 25 }
+treatable: true
+costs: { treatment: 3000, yearlyUntreated: 8000 }

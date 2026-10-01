@@ -1,0 +1,58 @@
+id: relapse
+title: Just this once
+text: >-
+  A brutal week, and then there it is, within easy reach: the thing you swore
+  off. Nobody would ever know.
+tone: serious
+category: health
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { health: { conditions: [alcohol_addiction, drug_addiction, gambling_addiction], treated: true } }
+weight:
+  base: 6
+  modifiers:
+    - { if: { stat: stress, gt: 60 }, x: 1.8 }
+cooldownYears: 3
+choices:
+  - id: call
+    label: Call someone from your meetings
+    check:
+      base: 60
+      stats: [{ key: discipline, weight: 0.4 }, { key: sociability, weight: 0.2 }]
+      success:
+        text: They pick up on the second ring and stay on the phone until the feeling passes. It passes.
+        effects:
+          - { type: stat, key: stress, delta: -3 }
+          - { type: stat, key: happiness, delta: 2 }
+          - { type: stat, key: discipline, delta: 2 }
+      failure:
+        text: >-
+          Voicemail. You hang up and do the thing anyway. In the morning you
+          start counting days again, from one.
+        effects:
+          - { type: health, conditionId: alcohol_addiction, treated: false }
+          - { type: health, conditionId: drug_addiction, treated: false }
+          - { type: health, conditionId: gambling_addiction, treated: false }
+          - { type: stat, key: vice, delta: 5 }
+          - { type: stat, key: happiness, delta: -4 }
+  - id: once
+    label: Just this once
+    outcome:
+      text: It's never once. You knew that. It takes months to climb back to where you were.
+      effects:
+        - { type: health, conditionId: alcohol_addiction, treated: false }
+        - { type: health, conditionId: drug_addiction, treated: false }
+        - { type: health, conditionId: gambling_addiction, treated: false }
+        - { type: stat, key: vice, delta: 6 }
+        - { type: history, text: You relapsed after a long stretch of recovery., importance: 2 }
+  - id: meeting
+    label: Go to a meeting tonight
+    outcome:
+      text: Folding chairs, burnt coffee, a stranger's story that sounds exactly like yours. You walk home lighter.
+      effects:
+        - { type: stat, key: discipline, delta: 2 }
+        - { type: stat, key: stress, delta: -2 }
+        - { type: stat, key: vice, delta: -2 }

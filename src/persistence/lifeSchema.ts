@@ -203,7 +203,7 @@ const career = z.strictObject({
       toYear: int,
       level: int.min(1),
       salary: dollars,
-      endedBy: z.enum(['quit', 'fired', 'laid_off', 'retired', 'moved']),
+      endedBy: z.enum(['quit', 'fired', 'laid_off', 'retired', 'moved', 'jailed']),
     }),
   ),
   applied: z.array(z.strictObject({ jobId: id, hired: z.boolean() })),
@@ -257,15 +257,34 @@ const housing = z.strictObject({
 });
 
 const health = z.strictObject({
-  conditions: z.array(z.strictObject({ conditionId: id, since: int, severity: z.number(), treated: z.boolean() })),
+  conditions: z.array(z.strictObject({ conditionId: id, since: int, severity: z.int().min(1).max(100), treated: z.boolean() })),
+  lastVisit: int.exactOptional(),
 });
 
 const legal = z.strictObject({
   record: z.array(
-    z.strictObject({ offenseId: id, year: int, outcome: z.enum(['warning', 'fine', 'probation', 'jail']) }),
+    z.strictObject({
+      offenseId: id,
+      year: int,
+      outcome: z.enum(['warning', 'fine', 'probation', 'jail']),
+      amount: dollars.exactOptional(),
+      years: int.min(1).exactOptional(),
+    }),
   ),
   probationUntil: int.exactOptional(),
   incarceratedUntil: int.exactOptional(),
+});
+
+const surfacedEntry = z.strictObject({ year: int, times: int.min(1) });
+const discovery = z.strictObject({
+  surfaced: z.strictObject({
+    attraction: surfacedEntry.exactOptional(),
+    gender: surfacedEntry.exactOptional(),
+    expression: surfacedEntry.exactOptional(),
+    personality: surfacedEntry.exactOptional(),
+    talent: surfacedEntry.exactOptional(),
+  }),
+  crisisYear: int.exactOptional(),
 });
 
 const cast = z.record(z.string(), id);
@@ -298,6 +317,7 @@ export const lifeStateSchema: z.ZodType<LifeState> = z.strictObject({
   housing,
   health,
   legal,
+  discovery,
   flags: z.record(z.string(), z.union([z.number(), z.boolean(), z.string()])),
   eventLog: z.record(z.string(), z.strictObject({ count: int, lastYear: int })),
   scheduled: z.array(z.strictObject({ eventId: id, dueYear: int, cast })),

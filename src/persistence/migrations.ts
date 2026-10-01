@@ -96,6 +96,17 @@ export const migrations: readonly Migration[] = [
       return { ...data, career: { ...life.career, job: null, history: [], applied: [], openings: [] } };
     },
   },
+  {
+    from: 7,
+    description:
+      'Stage 9: health, legal and self-discovery. Adds the self-discovery record (nothing has surfaced yet: latent ' +
+      'traits could not surface before). Health conditions, the criminal record, probation and prison already had ' +
+      'their (empty) places, and nothing could fill them before, so they need no upgrade.',
+    migrate: (data) => {
+      if (!isRecord(data)) return data;
+      return { ...data, discovery: { surfaced: {} } };
+    },
+  },
 ];
 
 function isRecord(value: unknown): value is Record<string, unknown> {

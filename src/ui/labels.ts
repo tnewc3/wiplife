@@ -1,9 +1,9 @@
 /** Player-facing words for engine values. UI copy only; no game rules here. */
-import type { ActionId, CredentialType, DebtKind, HousingKind, JobCategory, Lifestyle, Program, RomanceStatus, Tier } from '../content/schemas';
+import type { ActionId, ConditionKind, CredentialType, DebtKind, HousingKind, JobCategory, Lifestyle, Program, RomanceStatus, Tier } from '../content/schemas';
 import type { JobApplyBlock, SearchBlock } from '../engine/career';
 import type { ApplyBlock } from '../engine/education';
-import type { CredentialView, FamilyMember, PeopleGroupId, PersonRow, SchoolLine } from '../engine/selectors';
-import type { FamilyWealth, GenderCategory, JobEnd, LifeStage, Personality, RelationshipKind, Stats } from '../engine/types';
+import type { CredentialView, DoctorBlock, FamilyMember, LegalStatus, PeopleGroupId, PersonRow, RecordRow, SchoolLine } from '../engine/selectors';
+import type { FamilyWealth, GenderCategory, JobEnd, LifeStage, Personality, RecordOutcome, RelationshipKind, Stats } from '../engine/types';
 
 export const STAT_LABELS: Record<keyof Stats, string> = {
   health: 'Health',
@@ -182,7 +182,7 @@ export const HOUSING_LABELS: Record<HousingKind, string> = {
   renting: 'Renting',
   owned: 'Homeowner',
   homeless: 'Without a home',
-  incarcerated: 'In jail',
+  incarcerated: 'In prison',
 };
 
 /** "Renting in Chicago", "Living with family in Houston". */
@@ -399,13 +399,14 @@ export const JOB_END_LABELS: Record<JobEnd, string> = {
   laid_off: 'Laid off',
   retired: 'Retired',
   moved: 'Moved away',
+  jailed: 'Went to prison',
 };
 
 /** Why you can't look for work now. */
 export const SEARCH_BLOCK_LABELS: Record<SearchBlock, string> = {
   age: 'You’re too young for a full-time job.',
   school: 'You can line up a job in your last year of school. Until then, gig work fits around classes.',
-  away: 'You can’t work right now.',
+  away: 'You can’t work while you’re in prison.',
 };
 
 /** Why you can't apply for an opening now. */
@@ -460,5 +461,67 @@ export function workConfirmation(action: 'quit_job' | 'retire', details: { emplo
       (early ? `Your retirement benefit starts at ${details.retirementAge}, so until then you’ll live on your savings.` : 'Your retirement benefit keeps paying every year.') +
       ' You can always go back to work.',
     confirm: 'Retire',
+  };
+}
+
+/** How bad a condition is, in words (Stage 9). */
+export function severityLabel(severity: number): string {
+  if (severity < 34) return 'Mild';
+  if (severity < 67) return 'Moderate';
+  return 'Severe';
+}
+
+export const CONDITION_KIND_LABELS: Record<ConditionKind, string> = {
+  illness: 'Illness',
+  chronic: 'Chronic condition',
+  injury: 'Injury',
+  mental: 'Mental health',
+  addiction: 'Addiction',
+};
+
+/** A condition's treatment status (Stage 9). */
+export function treatmentLabel(treated: boolean, treatable: boolean): string {
+  if (treated) return 'Being treated';
+  return treatable ? 'Not treated' : 'No cure; a doctor can ease it';
+}
+
+export const DOCTOR_BLOCK_LABELS: Record<DoctorBlock, string> = {
+  visited: 'You saw a doctor this year. You can go again next year.',
+  prison: 'In prison, the prison doctor is the only one you can see.',
+  busy: 'Finish what’s in front of you first.',
+};
+
+export const RECORD_OUTCOME_LABELS: Record<RecordOutcome, string> = {
+  warning: 'Warning',
+  fine: 'Fine',
+  probation: 'Probation',
+  jail: 'Prison',
+};
+
+/** One line of the criminal record ("Shoplifting · Fine of $400 · 2041, age 15"). */
+export function recordLine(row: RecordRow): string {
+  const what =
+    row.outcome === 'fine' && row.amount !== undefined
+      ? `Fine of ${money(row.amount)}`
+      : (row.outcome === 'probation' || row.outcome === 'jail') && row.years !== undefined
+        ? `${RECORD_OUTCOME_LABELS[row.outcome]}, ${yearsLabel(row.years)}`
+        : RECORD_OUTCOME_LABELS[row.outcome];
+  return `${capitalized(row.offense)} · ${what} · ${row.year}, age ${row.age}`;
+}
+
+/** The status banner for prison or probation (Stage 9). */
+export function legalBanner(status: LegalStatus): { title: string; body: string } {
+  if (status.kind === 'prison') {
+    return {
+      title: 'In prison',
+      body:
+        status.yearsLeft <= 1
+          ? 'You’re released next year. Until then, only a few things are up to you.'
+          : `You’re released in ${status.yearsLeft} years. Until then, only a few things are up to you.`,
+    };
+  }
+  return {
+    title: 'On probation',
+    body: status.yearsLeft <= 1 ? 'Through this year. Stay out of trouble, and you can’t move away.' : `Through ${status.lastYear}. Stay out of trouble, and you can’t move away.`,
   };
 }

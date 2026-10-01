@@ -1,0 +1,8 @@
+id: drug_possession
+name: drug possession
+class: misdemeanor
+severity: 2
+outcomes: { warning: 3, fine: 4, probation: 3, jail: 0.3 }
+fine: { min: 500, max: 2500 }
+probationYears: { min: 1, max: 2 }
+jailYears: { min: 1, max: 1 }

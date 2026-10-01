@@ -1,0 +1,37 @@
+# Your first year in prison begins here (registries/legal.yaml jailed).
+id: prison_first_night
+title: Intake
+text: >-
+  Your clothes go in a bag with your name on it. Someone hands you a thin
+  blanket and walks you down a corridor that never gets quiet. The door
+  closes behind you with a sound you'll hear for years.
+tone: dark
+category: prison
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires: { legal: { incarcerated: true } }
+weight: { base: 5 }
+followUpOnly: true
+choices:
+  - id: head_down
+    label: Keep your head down
+    outcome:
+      text: You learn the rules fast, most of them unwritten. Nobody bothers you much. Nobody notices you at all.
+      effects:
+        - { type: stat, key: stress, delta: 4 }
+        - { type: stat, key: discipline, delta: 2 }
+  - id: stand_tall
+    label: Make it clear you're not an easy mark
+    check:
+      base: 45
+      stats: [{ key: confidence, weight: 0.3 }, { key: fitness, weight: 0.3 }]
+      success:
+        text: Word gets around that you're best left alone. It's a strange kind of comfort.
+        effects:
+          - { type: stat, key: confidence, delta: 3 }
+          - { type: stat, key: stress, delta: 2 }
+      failure:
+        text: Someone decides to test that. You spend your first week in the infirmary.
+        effects:
+          - { type: stat, key: health, delta: -8 }
+          - { type: stat, key: stress, delta: 6 }
