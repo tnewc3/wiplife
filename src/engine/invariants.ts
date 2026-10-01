@@ -7,6 +7,7 @@ import { ageOf, isCurrentPartner, isFamilyKind, isPartnerKind, isRomanticKind, k
 import { isRngState } from './rng';
 import { lifeStageForAge } from './systems/aging';
 import { finishedHighSchool, hasCredential, isPostSecondary, schoolAges } from './education';
+import { evaluate } from './conditions';
 import type { Enrollment, Identity, LifeState, Pronouns, SchoolPlace } from './types';
 
 const LIFE_STAGES = new Set(['early', 'child', 'teen', 'youngAdult', 'adult', 'senior']);
@@ -151,6 +152,9 @@ export function checkInvariants(state: LifeState, content: ContentBundle): strin
   // Education: the right school for your age, programs that fit their
   // rules (grad school after a bachelor's...), credentials that exist.
   failures.push(...educationFailures(state, content));
+
+  // Work: jobs that exist and fit their rules (every job's requirements are met).
+  failures.push(...careerFailures(state, content));
 
   // People and relationships.
   const { parentAgeAtBirth } = content.balance.creation.family;
@@ -406,5 +410,60 @@ function educationFailures(state: LifeState, content: ContentBundle): string[] {
     if (bill.tuition !== bill.scholarship + bill.family + bill.fund + bill.loan) fail('lastBill does not add up');
     if (bill.year > state.currentYear) fail('lastBill is from the future');
   }
+  return failures;
+}
+
+/** Career invariants (Stage 8): a real job you qualify for, out of school, no gig work beside it, a sound history. */
+function careerFailures(state: LifeState, content: ContentBundle): string[] {
+  const failures: string[] = [];
+  const fail = (message: string) => failures.push(message);
+  const c = state.career;
+  const job = c.job;
+  const b = content.balance.careers;
+  if (job) {
+    const def = content.jobs[job.jobId];
+    if (!def) fail(`job "${job.jobId}" is not known`);
+    else {
+      if (!Number.isInteger(job.level) || job.level < 1 || job.level > def.levels.length) fail(`job level ${job.level} is outside ${job.jobId}'s levels`);
+      if (!evaluate(def.requires, state, { roles: 'strict' })) fail(`job ${job.jobId}: its requirements are not met`);
+    }
+    if (!Number.isInteger(job.yearsAtLevel) || job.yearsAtLevel < 0) fail('job.yearsAtLevel must be a whole number of at least 0');
+    if (!Number.isInteger(job.performance) || job.performance < 0 || job.performance > 100) fail('job.performance must be an integer from 0 to 100');
+    if (!Number.isSafeInteger(job.salary) || job.salary <= 0) fail('job.salary must be a positive whole-dollar amount');
+    if (!Number.isInteger(job.since) || job.since > state.currentYear || job.since - state.birthYear < b.minAge) fail('job.since is outside the working years');
+    if (job.employer.trim().length === 0) fail('job.employer must not be empty');
+    if (job.raiseYear !== undefined && (job.raiseYear < job.since || job.raiseYear > state.currentYear)) fail('job.raiseYear is outside the job');
+    if (state.character.age < b.minAge) fail('a job before the minimum age');
+    if (c.gig) fail('gig work and a job at once');
+    if (c.retired) fail('retired with a job');
+    if (state.education.current) fail('a job while in school');
+    if (state.housing.kind === 'incarcerated') fail('a job while in jail');
+  }
+  let lastTo = -Infinity;
+  for (const [i, h] of c.history.entries()) {
+    const label = `career history ${i}`;
+    const def = content.jobs[h.jobId];
+    if (!def) fail(`${label}: job "${h.jobId}" is not known`);
+    else if (!Number.isInteger(h.level) || h.level < 1 || h.level > def.levels.length) fail(`${label}: level ${h.level} is out of range`);
+    if (h.fromYear > h.toYear || h.toYear > state.currentYear || h.fromYear < state.birthYear) fail(`${label}: years ${h.fromYear}–${h.toYear} are out of order`);
+    if (h.toYear < lastTo) fail(`${label}: ends before the job before it`);
+    lastTo = h.toYear;
+    if (!Number.isSafeInteger(h.salary) || h.salary <= 0) fail(`${label}: salary must be a positive whole-dollar amount`);
+    if (h.employer.trim().length === 0) fail(`${label}: employer must not be empty`);
+  }
+  if (job && c.history.length > 0 && job.since < c.history.at(-1)!.toYear) fail('the current job started before the last one ended');
+  if (c.applied.length > b.maxApplications) fail(`${c.applied.length} job applications this year (limit ${b.maxApplications})`);
+  if (new Set(c.applied.map((a) => a.jobId)).size !== c.applied.length) fail('applied for the same job twice this year');
+  for (const a of c.applied) if (!content.jobs[a.jobId]) fail(`applied for unknown job "${a.jobId}"`);
+  if (new Set(c.openings).size !== c.openings.length) fail('a job opening is listed twice');
+  for (const id of c.openings) if (!content.jobs[id]) fail(`opening for unknown job "${id}"`);
+
+  // The people at work: one boss while you have a job, nobody from work without one.
+  const work = Object.values(state.relationships).filter(
+    (r) => (r.kind === 'boss' || r.kind === 'coworker') && r.status !== 'ended' && state.people[r.personId]?.alive,
+  );
+  const bosses = work.filter((r) => r.kind === 'boss').length;
+  if (bosses > 1) fail(`${bosses} current bosses`);
+  if (!job && work.length > 0) fail('a boss or coworker without a job');
   return failures;
 }

@@ -1,0 +1,52 @@
+id: union_drive
+title: Sign the card?
+text: >-
+  {npc.name} is quietly passing around union cards in the break room. "If
+  enough of us sign, they have to listen," {npc.they} {npc:says|say}.
+  Management has already started holding "informational meetings."
+tone: serious
+category: work
+rarity: uncommon
+lifeStages: [youngAdult, adult, senior]
+requires:
+  career:
+    employed: true
+    job: [warehouse_worker, food_service, retail_associate, delivery_driver, home_health_aide, security_guard, registered_nurse, teacher, construction_worker, truck_driver, hair_stylist]
+weight: { base: 4 }
+once: true
+cast:
+  npc: { kind: coworker }
+  boss: { kind: boss }
+choices:
+  - id: sign
+    label: Sign the card
+    outcome:
+      text: >-
+        The vote is close, and it passes. The raise everyone gets is small
+        but real, and {boss.name} hasn't smiled at you since.
+      effects:
+        - { type: flag, key: union_member, value: true }
+        - { type: memory, role: npc, tag: union_together }
+        - { type: relationship, role: npc, affection: 8, trust: 8 }
+        - { type: relationship, role: boss, affection: -6 }
+        - { type: job, action: raise }
+  - id: stay_out
+    label: Keep your head down
+    outcome:
+      text: You don't sign and you don't argue. Both sides think you're on the other one.
+      effects:
+        - { type: relationship, role: npc, affection: -4 }
+  - id: tell
+    label: Tell {boss.name} who's organizing
+    visibleIf: { trait: kindness, lt: 50 }
+    outcome:
+      text: >-
+        {npc.name} is let go within the month for "attendance issues." The
+        drive falls apart. {boss.name} is very friendly to you now. Nobody
+        else is.
+      effects:
+        - { type: memory, role: npc, tag: you_reported_union }
+        - { type: relationship, role: npc, affection: -40, trust: -40 }
+        - { type: relationship, role: boss, affection: 10, trust: 8 }
+        - { type: stat, key: reputation, delta: -8 }
+        - { type: stat, key: kindness, delta: -4 }

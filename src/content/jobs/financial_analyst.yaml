@@ -1,0 +1,16 @@
+id: financial_analyst
+name: "Finance"
+category: professional
+blurb: "Spreadsheets with very large numbers in them."
+requires: {"any": [{"education": {"credential": ["bachelor"], "field": ["business", "computer_science", "engineering"]}}, {"education": {"credential": ["grad"], "field": ["mba"]}}]}
+levels:
+  - { title: "financial analyst", salary: 66000 }
+  - { title: "senior analyst", salary: 84000 }
+  - { title: "associate", salary: 108000 }
+  - { title: "vice president", salary: 145000 }
+  - { title: "managing director", salary: 210000 }
+performance:
+  - { key: smarts, weight: 0.35 }
+  - { key: ambition, weight: 0.2 }
+  - { key: discipline, weight: 0.2 }
+employers: ["Sterling Crest Capital", "Harborview Financial", "Blackfern Partners", "Union Square Securities"]

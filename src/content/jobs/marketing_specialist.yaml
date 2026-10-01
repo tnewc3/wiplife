@@ -1,0 +1,16 @@
+id: marketing_specialist
+name: "Marketing"
+category: professional
+blurb: "Convincing people they needed something all along."
+requires: {"education": {"credential": ["bachelor"], "field": ["business", "communications"]}}
+levels:
+  - { title: "marketing coordinator", salary: 46000 }
+  - { title: "marketing specialist", salary: 57000 }
+  - { title: "marketing manager", salary: 76000 }
+  - { title: "marketing director", salary: 108000 }
+performance:
+  - { key: sociability, weight: 0.25 }
+  - { key: confidence, weight: 0.2 }
+  - { key: smarts, weight: 0.15 }
+  - { key: ambition, weight: 0.1 }
+employers: ["Brightside Media", "Lumen & Co.", "Vantage Brands", "Copper Kettle Creative"]

@@ -634,12 +634,25 @@ choices:
         path.join(overlay, 'registries/triggers.yaml'),
         `triggers:\n${['foreclosure', 'eviction', 'collections', 'garnishment', 'missed_payment'].map((t) => `  ${t}: { events: [only_trouble] }`).join('\n')}\n`,
       );
+      await mkdir(path.join(overlay, 'events/any/work'), { recursive: true });
+      await writeFile(
+        path.join(overlay, 'events/any/work/only_work.yaml'),
+        'id: only_work\ntitle: Work\ntext: Work.\ntone: light\ncategory: work\nrarity: common\nlifeStages: [adult]\nweight: { base: 1 }\nfollowUpOnly: true\nautoOutcome: {}\n',
+      );
+      await writeFile(
+        path.join(overlay, 'events/any/work/only_boss.yaml'),
+        'id: only_boss\ntitle: Boss\ntext: Boss.\ntone: light\ncategory: work\nrarity: common\nlifeStages: [adult]\nweight: { base: 1 }\nfollowUpOnly: true\ncast:\n  boss: { kind: boss }\nautoOutcome: {}\n',
+      );
+      await writeFile(
+        path.join(overlay, 'registries/work.yaml'),
+        'results:\n  hired: { events: [only_boss] }\n  rejected: { events: [only_work] }\n  raise: { events: [only_boss] }\n',
+      );
       await mkdir(path.join(overlay, 'balance'), { recursive: true });
       const pacing = (await readFile(path.join(dir, 'balance/pacing.yaml'), 'utf8')).replace('cap: 6', 'cap: 3');
       await writeFile(path.join(overlay, 'balance/pacing.yaml'), pacing);
       const result = await compileContent({ contentDir: dir, appVersion: '0.0.0', overlayDir: overlay });
       if (!result.ok) throw new Error(formatErrors(result.errors));
-      expect(Object.keys(result.bundle.events)).toEqual(['only_action', 'only_event', 'only_trouble']);
+      expect(Object.keys(result.bundle.events)).toEqual(['only_action', 'only_boss', 'only_event', 'only_trouble', 'only_work']);
       expect(result.bundle.balance.pacing.cap).toBe(3);
       expect(Object.keys(result.bundle.cities).length).toBeGreaterThan(0);
     } finally {

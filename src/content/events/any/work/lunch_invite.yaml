@@ -1,0 +1,33 @@
+id: lunch_invite
+title: Lunch?
+text: >-
+  {npc.name} leans over the cubicle wall. "I'm going to the taco place.
+  You've been eating at your desk all week. Come on."
+tone: light
+category: work
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires: { career: { employed: true } }
+weight:
+  base: 5
+  modifiers:
+    - { if: { trait: sociability, gt: 60 }, x: 1.5 }
+cooldownYears: 4
+cast:
+  npc: { kind: coworker }
+choices:
+  - id: go
+    label: Make it a standing date
+    outcome:
+      text: Tuesday tacos become the best hour of your work week. {npc.name} knows all the office gossip.
+      effects:
+        - { type: relationship, role: npc, affection: 8, trust: 4 }
+        - { type: memory, role: npc, tag: lunch_buddy }
+        - { type: stat, key: happiness, delta: 3 }
+  - id: desk
+    label: Too busy, maybe next time
+    outcome:
+      text: You get a lot done. {npc.name} stops asking eventually.
+      effects:
+        - { type: job, action: performance, value: 2 }
+        - { type: stat, key: happiness, delta: -1 }

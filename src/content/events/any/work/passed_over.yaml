@@ -1,0 +1,52 @@
+id: passed_over
+title: Passed over
+text: >-
+  The promotion you've been working toward goes to {npc.name}, who started
+  after you did. The announcement email is very cheerful.
+tone: serious
+category: work
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires: { career: { employed: true, years: { gte: 3 }, performance: { gte: 50 } } }
+weight:
+  base: 4
+  modifiers:
+    - { if: { trait: ambition, gt: 60 }, x: 1.5 }
+cooldownYears: 6
+cast:
+  npc: { kind: coworker }
+  boss: { kind: boss }
+choices:
+  - id: congrats
+    label: Congratulate {npc.them} and mean it
+    outcome:
+      text: It costs you something to say it. {npc.name} notices, and remembers.
+      effects:
+        - { type: relationship, role: npc, affection: 6, trust: 4 }
+        - { type: memory, role: npc, tag: beat_you_to_promotion }
+        - { type: stat, key: kindness, delta: 2 }
+        - { type: stat, key: happiness, delta: -2 }
+  - id: explain
+    label: Ask {boss.name} why
+    check:
+      base: 40
+      stats: [{ role: boss, key: trust, weight: 0.3 }, { key: confidence, weight: 0.2 }]
+      success:
+        text: '{boss.name} is straight with you about what you''re missing, and promises you''re next in line.'
+        effects:
+          - { type: job, action: performance, value: 5 }
+          - { type: memory, role: npc, tag: beat_you_to_promotion }
+      failure:
+        text: You get a speech about "fit" and "timing" that means nothing at all.
+        effects:
+          - { type: relationship, role: boss, affection: -6 }
+          - { type: memory, role: npc, tag: beat_you_to_promotion }
+          - { type: stat, key: stress, delta: 3 }
+  - id: sulk
+    label: Quietly stop trying so hard
+    outcome:
+      text: You do exactly what's asked and not one thing more. It shows.
+      effects:
+        - { type: job, action: performance, value: -6 }
+        - { type: memory, role: npc, tag: beat_you_to_promotion }
+        - { type: stat, key: ambition, delta: -3 }

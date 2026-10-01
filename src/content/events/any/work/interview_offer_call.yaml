@@ -1,0 +1,42 @@
+# Answers a job application that worked (registries/work.yaml hired). The
+# engine has already hired you; {boss} is your new boss.
+id: interview_offer_call
+title: The offer
+text: >-
+  The phone rings before you've even made it home from the interview. It's
+  {boss.name}, who will be your boss: the job is yours, if you want it.
+  {boss.They} {boss:sounds|sound} genuinely glad.
+tone: light
+category: work
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  boss: { kind: boss }
+choices:
+  - id: negotiate
+    label: Push for more money
+    check:
+      base: 40
+      stats: [{ key: confidence, weight: 0.4 }, { key: luck, weight: 0.1 }]
+      success:
+        text: 'There''s a pause, then a laugh. "Fine. You drive a hard bargain." The number on the offer goes up.'
+        effects:
+          - { type: job, action: raise }
+          - { type: relationship, role: boss, trust: 3 }
+          - { type: memory, role: boss, tag: hired_you }
+          - { type: stat, key: confidence, delta: 3 }
+      failure:
+        text: '"That''s the offer," {boss.name} says, a little cooler now. You take it anyway.'
+        effects:
+          - { type: relationship, role: boss, affection: -5 }
+          - { type: memory, role: boss, tag: hired_you }
+  - id: accept
+    label: Say yes on the spot
+    outcome:
+      text: You say yes before {boss.they} can change {boss.their} mind. {boss.name} sounds delighted.
+      effects:
+        - { type: relationship, role: boss, affection: 6 }
+        - { type: memory, role: boss, tag: hired_you }
+        - { type: stat, key: happiness, delta: 3 }

@@ -1,0 +1,31 @@
+id: work_friend
+title: More than work
+text: >-
+  After a year of Tuesday tacos, {npc.name} mentions a barbecue at
+  {npc.their} place this weekend. "Bring whoever. It's not a work thing."
+tone: light
+category: work
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { memory: { role: npc, tag: lunch_buddy } }
+    - { role: npc, affection: { gte: 55 } }
+weight: { base: 8 }
+once: true
+cast:
+  npc: { kind: coworker }
+choices:
+  - id: go
+    label: Go, and bring dessert
+    outcome:
+      text: You stay until midnight. Somewhere along the way, {npc.name} stopped being a coworker and became a friend.
+      effects:
+        - { type: relationship, role: npc, kind: friend, affection: 8, trust: 6 }
+        - { type: stat, key: happiness, delta: 4 }
+  - id: skip
+    label: Keep work and life separate
+    outcome:
+      text: You make an excuse. Tacos continue as usual. It's nice. It stays just nice.
+      effects:
+        - { type: relationship, role: npc, affection: -2 }

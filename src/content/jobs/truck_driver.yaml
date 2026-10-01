@@ -1,0 +1,15 @@
+id: truck_driver
+name: "Trucking"
+category: trade
+blurb: "Long highways, truck stops and a lot of podcasts."
+requires: {"all": [{"age": {"gte": 21}}, {"not": {"record": {"outcome": ["probation", "jail"]}}}]}
+levels:
+  - { title: "trainee driver", salary: 40000 }
+  - { title: "truck driver", salary: 52000 }
+  - { title: "senior driver", salary: 62000 }
+  - { title: "fleet trainer", salary: 70000 }
+performance:
+  - { key: discipline, weight: 0.35 }
+  - { key: fitness, weight: 0.15 }
+  - { key: health, weight: 0.1 }
+employers: ["Interstate Freight", "Long Haul Logistics", "Bluewater Trucking", "Crossroads Carriers"]

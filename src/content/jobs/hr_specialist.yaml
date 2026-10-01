@@ -1,0 +1,15 @@
+id: hr_specialist
+name: "Human resources"
+category: professional
+blurb: "Hiring, firing and refereeing everyone in between."
+requires: {"education": {"credential": ["bachelor"]}}
+levels:
+  - { title: "HR assistant", salary: 42000 }
+  - { title: "HR specialist", salary: 54000 }
+  - { title: "HR manager", salary: 74000 }
+  - { title: "HR director", salary: 102000 }
+performance:
+  - { key: sociability, weight: 0.25 }
+  - { key: kindness, weight: 0.15 }
+  - { key: discipline, weight: 0.25 }
+employers: ["Pinnacle Staffing", "Crestwood Industries", "Allied People Services", "Summit Workforce"]

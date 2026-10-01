@@ -1,0 +1,16 @@
+id: software_engineer
+name: "Software engineering"
+category: professional
+blurb: "Building the apps everyone complains about."
+requires: {"education": {"credential": ["bachelor"], "field": ["computer_science", "engineering"]}}
+levels:
+  - { title: "junior developer", salary: 72000 }
+  - { title: "software engineer", salary: 92000 }
+  - { title: "senior engineer", salary: 120000 }
+  - { title: "staff engineer", salary: 150000 }
+  - { title: "engineering director", salary: 185000 }
+performance:
+  - { key: smarts, weight: 0.4 }
+  - { key: discipline, weight: 0.25 }
+  - { key: ambition, weight: 0.1 }
+employers: ["Brightline Systems", "Northwind Software", "Kestrel Labs", "Halcyon Data"]

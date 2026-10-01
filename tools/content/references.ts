@@ -1,4 +1,8 @@
 import {
+  CAREER_HISTORY_VALUES,
+  WORK_RESULT_ROLES,
+  WORK_RESULTS,
+  type CareerHistoryKey,
   EDUCATION_HISTORY_VALUES,
   GENDER_CATEGORIES,
   TIERS,
@@ -33,6 +37,8 @@ const MEMORIES = 'registries/memories.yaml';
 const ACTIONS = 'registries/actions.yaml';
 const TRIGGERS = 'registries/triggers.yaml';
 const EDUCATION = 'balance/education.yaml';
+const CAREERS = 'balance/careers.yaml';
+const WORK = 'registries/work.yaml';
 
 /** The conditions a condition always requires: itself, or every part of a top-level `all`. */
 function requiredParts(condition: Condition | undefined): Condition[] {
@@ -138,6 +144,7 @@ export function checkReferences(
   errors.push(...checkActions(bundle, fileOf));
   errors.push(...checkTriggers(bundle, fileOf));
   errors.push(...checkEducation(bundle, fileOf));
+  errors.push(...checkCareers(bundle, fileOf));
 
   return errors;
 }
@@ -205,6 +212,9 @@ function checkTemplates(bundle: ContentBundle): ContentError[] {
   for (const [key, group] of Object.entries(history.money)) all(HISTORY, `money.${key}.variants`, group.variants, {});
   for (const [key, group] of Object.entries(history.education)) {
     all(HISTORY, `education.${key}.variants`, group.variants, { values: [...EDUCATION_HISTORY_VALUES[key as EducationHistoryKey]] });
+  }
+  for (const [key, group] of Object.entries(history.career)) {
+    all(HISTORY, `career.${key}.variants`, group.variants, { values: [...CAREER_HISTORY_VALUES[key as CareerHistoryKey]] });
   }
 
   const obituary = bundle.text.obituary;
@@ -338,6 +348,7 @@ function checkEvents(bundle: ContentBundle, fileOf: (typeKey: CollectionKey, id:
   const scheduledIds = new Set<string>();
   const actionEvents = new Set(Object.values(bundle.registries.actions.actions).flatMap((a) => a.events));
   const triggerEvents = new Set(Object.values(bundle.registries.triggers.triggers).flatMap((t) => t.events));
+  const workEvents = new Set(Object.values(bundle.registries.work.results).flatMap((r) => r.events));
 
   for (const [id, def] of Object.entries(bundle.events)) {
     const file = fileOf('events', id);
@@ -356,6 +367,8 @@ function checkEvents(bundle: ContentBundle, fileOf: (typeKey: CollectionKey, id:
       for (const c of refs.cities) if (!bundle.cities[c]) err(`${field}: unknown city "${c}"`);
       for (const m of refs.majors) if (!bundle.majors[m]) err(`${field}: unknown major "${m}"`);
       for (const t of refs.trades) if (!bundle.trades[t]) err(`${field}: unknown trade "${t}"`);
+      for (const f of refs.fields) if (!knownField(bundle, f)) err(`${field}: "${f}" is not a major, trade or grad program`);
+      for (const j of refs.jobs) if (!bundle.jobs[j]) err(`${field}: unknown job "${j}"`);
     };
 
     if (!categories[def.category]) err(`category "${def.category}" is not in registries/categories.yaml`);
@@ -397,7 +410,10 @@ function checkEvents(bundle: ContentBundle, fileOf: (typeKey: CollectionKey, id:
         if (effect.type === 'relationship' && effect.kind && !EFFECT_KINDS.includes(effect.kind)) {
           err(`${where}: kind can only become ${EFFECT_KINDS.join(', ')}`);
         }
-        if (effect.type === 'death' && actionEvents.has(id)) err(`${where}: a management action's result can't kill (it happens between years)`);
+        if (effect.type === 'death' && (actionEvents.has(id) || workEvents.has(id))) {
+          err(`${where}: a management action's result can't kill (it happens between years)`);
+        }
+        if (effect.type === 'job' && effect.jobId !== undefined && !bundle.jobs[effect.jobId]) err(`${where}: unknown job "${effect.jobId}"`);
         if (effect.type === 'history') {
           writesHistory = true;
           template(`${where}.text`, effect.text);
@@ -417,7 +433,7 @@ function checkEvents(bundle: ContentBundle, fileOf: (typeKey: CollectionKey, id:
   }
 
   for (const [id, def] of Object.entries(bundle.events)) {
-    if (def.followUpOnly && !def.retired && !scheduledIds.has(id) && !actionEvents.has(id) && !triggerEvents.has(id)) {
+    if (def.followUpOnly && !def.retired && !scheduledIds.has(id) && !actionEvents.has(id) && !triggerEvents.has(id) && !workEvents.has(id)) {
       errors.push({ file: fileOf('events', id), message: `${id}: followUpOnly, but no event schedules it and no action or trigger uses it` });
     }
   }
@@ -526,6 +542,69 @@ function checkEducation(bundle: ContentBundle, fileOf: (typeKey: CollectionKey, 
     if (!edu.admission.grad[id]) errors.push({ file, message: `${id}: no admission model in balance/education.yaml (admission.grad.${id})` });
     for (const major of bundle.gradPrograms[id]!.majors ?? []) {
       if (!bundle.majors[major]) errors.push({ file, message: `${id}: unknown major "${major}"` });
+    }
+  }
+  return errors;
+}
+
+/** A major, trade or grad program id (what a credential can be in). */
+function knownField(bundle: ContentBundle, id: string): boolean {
+  return bundle.majors[id] !== undefined || bundle.trades[id] !== undefined || bundle.gradPrograms[id] !== undefined;
+}
+
+/**
+ * Careers: every job's requirements point at real majors, trades, grad
+ * programs and flags, the careers balance numbers fit together, and every
+ * work result event exists, only happens through its action, and casts
+ * exactly the roles its result provides.
+ */
+function checkCareers(bundle: ContentBundle, fileOf: (typeKey: CollectionKey, id: string) => string): ContentError[] {
+  const errors: ContentError[] = [];
+  const { flags } = bundle.registries.flags;
+  const active = Object.entries(bundle.jobs).filter(([, def]) => !def.retired);
+  if (active.length === 0) errors.push({ file: 'jobs/', message: 'at least one active job is required' });
+  for (const [id, def] of Object.entries(bundle.jobs)) {
+    const file = fileOf('jobs', id);
+    const refs = referencesIn(def.requires);
+    for (const f of refs.fields) if (!knownField(bundle, f)) errors.push({ file, message: `${id}: requires "${f}", which is not a major, trade or grad program` });
+    for (const m of refs.majors) if (!bundle.majors[m]) errors.push({ file, message: `${id}: unknown major "${m}"` });
+    for (const t of refs.trades) if (!bundle.trades[t]) errors.push({ file, message: `${id}: unknown trade "${t}"` });
+    for (const f of refs.flags) if (!flags[f]) errors.push({ file, message: `${id}: flag "${f}" is not in registries/flags.yaml` });
+    for (const c of refs.cities) if (!bundle.cities[c]) errors.push({ file, message: `${id}: unknown city "${c}"` });
+    if (refs.jobs.length > 0 || refs.events.length > 0 || refs.memories.length > 0 || rolesIn(def.requires).length > 0) {
+      errors.push({ file, message: `${id}: job requirements may not depend on jobs, events, memories or cast roles` });
+    }
+    if (new Set(def.employers).size !== def.employers.length) errors.push({ file, message: `${id}: employers must be distinct` });
+  }
+
+  const w = bundle.balance.careers.workplace;
+  if (w.coworkers > w.maxCoworkers) errors.push({ file: CAREERS, message: 'workplace.coworkers must not be more than maxCoworkers' });
+  if (w.bossAge.max < bundle.balance.careers.minAge) errors.push({ file: CAREERS, message: 'workplace.bossAge.max must reach minAge' });
+
+  const scheduled = new Set(
+    Object.values(bundle.events).flatMap((def) =>
+      outcomesOf(def).flatMap((o) => (o.effects as Effect[]).flatMap((e) => (e.type === 'schedule' ? [e.eventId] : []))),
+    ),
+  );
+  const elsewhere = new Set([
+    ...Object.values(bundle.registries.actions.actions).flatMap((a) => a.events),
+    ...Object.values(bundle.registries.triggers.triggers).flatMap((t) => t.events),
+  ]);
+  for (const result of WORK_RESULTS) {
+    const { events } = bundle.registries.work.results[result];
+    const roles = [...WORK_RESULT_ROLES[result]].sort().join(', ');
+    if (!events.some((id) => bundle.events[id] && !bundle.events[id].retired)) errors.push({ file: WORK, message: `${result}: needs at least one active event` });
+    for (const id of events) {
+      const def = bundle.events[id];
+      if (!def) {
+        errors.push({ file: WORK, message: `${result}: unknown event "${id}"` });
+        continue;
+      }
+      const err = (message: string) => errors.push({ file: fileOf('events', id), message: `${id}: ${message}` });
+      if (!def.followUpOnly) err(`answers the "${result}" work result, so it must be followUpOnly`);
+      if (scheduled.has(id)) err(`answers the "${result}" work result, so no event may schedule it`);
+      if (elsewhere.has(id)) err(`answers the "${result}" work result, so it can't also answer another action or trigger`);
+      if (Object.keys(def.cast ?? {}).sort().join(', ') !== roles) err(`answers the "${result}" work result, so its cast is exactly: ${roles || 'nobody'}`);
     }
   }
   return errors;

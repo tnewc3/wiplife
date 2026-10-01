@@ -12,6 +12,8 @@ requires:
   all:
     - { age: { gte: 18 } }
     - { finances: { debt: { gte: 20000 }, missed: { gte: 1 } } }
+    # Bankruptcy clears personal, medical and collections debt: only worth it with some.
+    - { finances: { kinds: [personal, medical, collections] } }
     - { not: { finances: { bankruptWithin: 7 } } }
 weight: { base: 6 }
 cooldownYears: 5

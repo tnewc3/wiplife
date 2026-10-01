@@ -14,4 +14,5 @@ categories:
   money: { label: Money }
   home: { label: Home }
   community: { label: Community }
+  work: { label: Work }
   wonder: { label: Strange and wonderful, cooldownYears: 10 }

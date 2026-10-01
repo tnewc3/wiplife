@@ -1,0 +1,15 @@
+id: office_administrator
+name: "Office work"
+category: professional
+blurb: "Phones, schedules and knowing where everything is."
+requires: {"education": {"credential": ["hs_diploma", "ged"]}}
+levels:
+  - { title: "receptionist", salary: 32000 }
+  - { title: "office assistant", salary: 36000 }
+  - { title: "office manager", salary: 47000 }
+  - { title: "operations coordinator", salary: 57000 }
+performance:
+  - { key: discipline, weight: 0.35 }
+  - { key: sociability, weight: 0.2 }
+  - { key: smarts, weight: 0.1 }
+employers: ["Crestwood Industries", "Halverson Group", "Bluebell Insurance", "Marigold Property Management"]

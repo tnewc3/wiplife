@@ -199,3 +199,45 @@ education:
     importance: 3
     variants:
       - "You finished at {school} and earned your {license}."
+
+# Work (Stage 8). Values: {title} a job title ("junior developer"),
+# {employer} where you work, {years} how many years you worked.
+career:
+  hired:
+    importance: 2
+    variants:
+      - "You started at {employer} as their new {title}."
+      - "You got a job at {employer}, starting as {title}."
+  promoted:
+    importance: 2
+    variants:
+      - "You were promoted to {title} at {employer}."
+      - "{employer} made you {title}."
+  fired:
+    importance: 3
+    variants:
+      - "{employer} fired you."
+      - "You were fired from your job at {employer}."
+  laidOff:
+    importance: 3
+    variants:
+      - "You were laid off from {employer}."
+      - "{employer} cut jobs, and yours was one of them."
+  quit:
+    importance: 2
+    variants:
+      - "You quit your job at {employer}."
+      - "You handed in your notice at {employer}."
+  leftForSchool:
+    importance: 2
+    variants:
+      - "You left your job at {employer} to go back to school."
+  moved:
+    importance: 2
+    variants:
+      - "Moving away meant leaving your job at {employer}."
+  retired:
+    importance: 3
+    variants:
+      - "You retired after {years} years of work."
+      - "You hung up your work clothes for good after {years} working years."

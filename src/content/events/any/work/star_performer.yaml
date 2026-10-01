@@ -1,0 +1,39 @@
+id: star_performer
+title: Noticed
+text: >-
+  At the all-hands meeting, {boss.name} singles you out by name for the work
+  you did this quarter. People you've never spoken to nod at you in the hallway.
+tone: light
+category: work
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires: { career: { employed: true, performance: { gte: 75 }, years: { gte: 2 } } }
+weight: { base: 6 }
+cooldownYears: 5
+cast:
+  boss: { kind: boss }
+choices:
+  - id: more
+    label: Ask {boss.name} for a bigger role
+    check:
+      base: 35
+      stats: [{ key: ambition, weight: 0.3 }, { job: performance, weight: 0.3 }, { role: boss, key: affection, weight: 0.2 }]
+      success:
+        text: '"Funny you should ask," {boss.name} says. A week later, you have a new title.'
+        effects:
+          - { type: job, action: promote }
+          - { type: relationship, role: boss, trust: 5 }
+          - { type: stat, key: happiness, delta: 4 }
+      failure:
+        text: '"Let''s talk about it at review time," {boss.name} says. The glow fades a little.'
+        effects:
+          - { type: job, action: performance, value: 2 }
+          - { type: stat, key: ambition, delta: 1 }
+  - id: enjoy
+    label: Just enjoy the moment
+    outcome:
+      text: You take the compliment, call your family, and buy yourself something nice.
+      effects:
+        - { type: stat, key: happiness, delta: 5 }
+        - { type: stat, key: confidence, delta: 3 }
+        - { type: stat, key: reputation, delta: 2 }

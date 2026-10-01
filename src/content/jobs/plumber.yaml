@@ -1,0 +1,15 @@
+id: plumber
+name: "Plumbing"
+category: trade
+blurb: "Pipes, pressure, and people very happy to see you."
+requires: {"education": {"credential": ["trade_license"], "field": ["plumber"]}}
+levels:
+  - { title: "apprentice plumber", salary: 38000 }
+  - { title: "journeyman plumber", salary: 58000 }
+  - { title: "master plumber", salary: 76000 }
+  - { title: "plumbing contractor", salary: 94000 }
+performance:
+  - { key: discipline, weight: 0.3 }
+  - { key: fitness, weight: 0.25 }
+  - { key: smarts, weight: 0.15 }
+employers: ["Clearflow Plumbing", "Dalton Pipe & Drain", "Ironwood Contracting", "Rivera Plumbing Co."]

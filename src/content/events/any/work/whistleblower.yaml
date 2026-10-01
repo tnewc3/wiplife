@@ -1,0 +1,57 @@
+id: whistleblower
+title: What you found
+text: >-
+  Buried in a spreadsheet you weren't supposed to see: safety inspections
+  that never happened, signed off anyway. People could get hurt. People
+  above you know.
+tone: dark
+category: work
+rarity: rare
+lifeStages: [youngAdult, adult, senior]
+requires: { career: { employed: true, years: { gte: 1 } } }
+weight:
+  base: 3
+  modifiers:
+    - { if: { trait: kindness, gt: 65 }, x: 1.5 }
+once: true
+choices:
+  - id: report
+    label: Report it to the authorities
+    check:
+      base: 45
+      stats: [{ key: confidence, weight: 0.2 }, { key: reputation, weight: 0.2 }, { key: luck, weight: 0.2 }]
+      success:
+        text: >-
+          Inspectors arrive within the month. Your name stays out of the
+          papers, mostly. It's lonely at work afterward, but you sleep fine.
+        effects:
+          - { type: flag, key: whistleblower, value: true }
+          - { type: stat, key: reputation, delta: 10 }
+          - { type: stat, key: stress, delta: 5 }
+          - { type: stat, key: happiness, delta: 3 }
+          - { type: history, text: You blew the whistle on safety failures at work., importance: 3 }
+      failure:
+        text: >-
+          The investigation goes nowhere, and three weeks later you're let go
+          for "restructuring." Nobody believes that, including the people who
+          signed the papers.
+        effects:
+          - { type: flag, key: whistleblower, value: true }
+          - { type: job, action: fire }
+          - { type: stat, key: reputation, delta: 5 }
+          - { type: stat, key: stress, delta: 8 }
+          - { type: history, text: You blew the whistle on safety failures and lost your job for it., importance: 3 }
+  - id: ignore
+    label: Close the spreadsheet
+    outcome:
+      text: It's not your job. You tell yourself that a lot over the next year.
+      effects:
+        - { type: stat, key: stress, delta: 4 }
+        - { type: stat, key: kindness, delta: -3 }
+  - id: leave
+    label: Start looking for a new job
+    outcome:
+      text: You can't fix it, but you don't have to be part of it. You start updating your résumé that night.
+      effects:
+        - { type: stat, key: stress, delta: 2 }
+        - { type: stat, key: ambition, delta: 2 }

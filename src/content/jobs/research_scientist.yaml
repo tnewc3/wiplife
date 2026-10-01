@@ -1,0 +1,15 @@
+id: research_scientist
+name: "Science"
+category: professional
+blurb: "Experiments, grant deadlines, and the occasional discovery."
+requires: {"any": [{"education": {"credential": ["bachelor"], "field": ["biology"]}}, {"education": {"credential": ["grad"], "field": ["masters"]}}]}
+levels:
+  - { title: "lab technician", salary: 44000 }
+  - { title: "research associate", salary: 56000 }
+  - { title: "scientist", salary: 76000 }
+  - { title: "senior scientist", salary: 98000 }
+  - { title: "research director", salary: 128000 }
+performance:
+  - { key: smarts, weight: 0.45 }
+  - { key: discipline, weight: 0.25 }
+employers: ["Helix Biosciences", "Fairmont Research Institute", "Arden Labs", "Clearwater Genomics"]

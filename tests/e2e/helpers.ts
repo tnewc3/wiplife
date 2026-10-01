@@ -114,7 +114,7 @@ export async function createCustomLife(page: Page, data: CustomLifeData, onStep?
   await next();
 
   await expect(page.getByText('Step 2 of 6')).toBeVisible();
-  await page.getByRole('radiogroup', { name: 'Which fits best?' }).getByRole('radio', { name: data.category }).click();
+  await page.getByRole('radiogroup', { name: 'Which fits best?' }).getByRole('radio', { name: data.category, exact: true }).click();
   const pronouns = page.getByRole('radiogroup', { name: 'Pronouns' });
   if (typeof data.pronouns === 'string') {
     await pronouns.getByRole('radio', { name: data.pronouns, exact: true }).click();

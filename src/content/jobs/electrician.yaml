@@ -1,0 +1,15 @@
+id: electrician
+name: "Electrical work"
+category: trade
+blurb: "Wiring homes and buildings, and not getting shocked."
+requires: {"education": {"credential": ["trade_license"], "field": ["electrician"]}}
+levels:
+  - { title: "apprentice electrician", salary: 40000 }
+  - { title: "journeyman electrician", salary: 60000 }
+  - { title: "master electrician", salary: 78000 }
+  - { title: "electrical contractor", salary: 96000 }
+performance:
+  - { key: discipline, weight: 0.3 }
+  - { key: smarts, weight: 0.2 }
+  - { key: fitness, weight: 0.2 }
+employers: ["Volt Brothers Electric", "Bright Spark Electrical", "Ironwood Contracting", "Current & Sons"]

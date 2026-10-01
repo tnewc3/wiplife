@@ -4,13 +4,17 @@
  * things when affection has run low; and (from Stage 6) takes gig work,
  * picks a lifestyle, moves out, rents, relocates, buys a home, and reaches
  * for a roommate, home or a debt plan when money gets tight; and (from
- * Stage 7) applies to school, drops out, gets a GED or goes back. These chances describe
+ * Stage 7) applies to school, drops out, gets a GED or goes back; and (from
+ * Stage 8) looks for work, changes jobs, asks for raises and retires. These chances describe
  * the simulated player, not the game, so they live here rather than in the
  * balance files; Stage 12's strategy bots replace this.
  */
 import type { ActionId, ContentBundle, Lifestyle } from '../../src/content/schemas';
 import { availableActions, isLifeActionAvailable, type LifeActionId, type LifeActionParams } from '../../src/engine/actions';
+import { activeJob, canAskRaise, canRetire, jobApplyBlock, levelPay, startLevel } from '../../src/engine/career';
 import { applicationGpa } from '../../src/engine/education';
+import { livingCost, rentIn } from '../../src/engine/housing';
+import { weightedPick } from '../../src/engine/random';
 import { chance, nextFloat, pick, type RngState } from '../../src/engine/rng';
 import { getApplicationOptions } from '../../src/engine/selectors';
 import type { FamilyWealth, LifeState } from '../../src/engine/types';
@@ -54,19 +58,29 @@ export function chooseActions(life: LifeState, content: ContentBundle, rng: RngS
  * like. Like POLICY above, these chances describe the simulated player.
  */
 export interface MoneyProfile {
+  /** Works at all (gig work, and jobs if a job seeker). */
   worker: boolean;
+  /** Applies for jobs (Stage 8); the rest stick to gig work. */
+  jobSeeker: boolean;
   lifestyle: Lifestyle;
+  /** The age they'd like to retire at (Stage 8). */
+  retireAge: number;
 }
 
 export function rollMoneyProfile(rng: RngState): MoneyProfile {
   const roll = nextFloat(rng);
-  return { worker: chance(rng, 0.85), lifestyle: roll < 0.25 ? 'frugal' : roll < 0.8 ? 'comfortable' : 'lavish' };
+  const lifestyle = roll < 0.25 ? 'frugal' : roll < 0.8 ? 'comfortable' : 'lavish';
+  // With jobs to apply for (Stage 8), nearly every simulated player works; a
+  // few never do, and some stick to gig work.
+  return { worker: chance(rng, 0.97), jobSeeker: chance(rng, 0.95), lifestyle, retireAge: 60 + Math.floor(nextFloat(rng) * 11) };
 }
 
 /** Yearly chances for the money player model. */
 const MONEY_POLICY = {
   teenGig: 0.35,
   moveOut: 0.25,
+  /** Moves out only on income at least this many times a year's rent and living costs there (Stage 8: jobs make it possible). */
+  moveOutIncome: 1.3,
   relocate: 0.03,
   buy: 0.3,
   sell: 0.01,
@@ -89,7 +103,7 @@ export function chooseMoneyActions(life: LifeState, content: ContentBundle, rng:
   const adult = age >= content.balance.economy.independenceAge;
   const struggling = (life.finances.lastLedger?.borrowed ?? 0) > 0 || life.finances.debts.some((d) => d.missed > 0);
 
-  const retired = age >= content.balance.economy.retirement.age;
+  const retired = age >= content.balance.economy.retirement.age || life.career.retired;
   if (profile.worker && !retired && can('start_gig') && (adult || chance(rng, MONEY_POLICY.teenGig))) out.push(['start_gig', {}]);
   if (retired && can('stop_gig') && chance(rng, MONEY_POLICY.retire)) out.push(['stop_gig', {}]);
   if (!adult) return out;
@@ -102,7 +116,10 @@ export function chooseMoneyActions(life: LifeState, content: ContentBundle, rng:
     if (can('move_home') && chance(rng, MONEY_POLICY.moveHomeWhenStruggling)) out.push(['move_home', {}]);
     else if (can('rent_home')) out.push(['rent_home', {}]);
   } else if (kind === 'with_parents') {
-    if (can('rent_home') && age >= 19 && chance(rng, MONEY_POLICY.moveOut)) out.push(['rent_home', {}]);
+    const city = content.cities[life.character.cityId]!;
+    const costs = rentIn(city, false, content) + livingCost({ ...life, housing: { ...life.housing, kind: 'renting' } }, content);
+    const income = (life.finances.lastLedger?.gross ?? 0) + (life.career.job?.salary ?? 0);
+    if (can('rent_home') && age >= 19 && income >= costs * MONEY_POLICY.moveOutIncome && chance(rng, MONEY_POLICY.moveOut)) out.push(['rent_home', {}]);
   } else if (kind === 'renting' && struggling) {
     if (can('find_roommate') && chance(rng, MONEY_POLICY.roommateWhenStruggling)) out.push(['find_roommate', {}]);
     else if (can('move_home') && chance(rng, MONEY_POLICY.moveHomeWhenStruggling)) out.push(['move_home', {}]);
@@ -225,6 +242,61 @@ export function chooseSchoolActions(life: LifeState, content: ContentBundle, rng
   if (recent && firstGrad && gpa >= SCHOOL_POLICY.gradGpa && !edu.admission && (!cur || finishing) && chance(rng, SCHOOL_POLICY.grad)) {
     const grad = options.grad.filter((o) => o.block === null);
     if (grad.length > 0) out.push(['apply_school', { program: 'grad', gradProgramId: pick(rng, grad).id! }]);
+  }
+  return out;
+}
+
+/**
+ * How the simulated player works (Stage 8). Like the policies above, these
+ * chances describe the simulated player, not the game.
+ */
+const CAREER_POLICY = {
+  /** Each year with a job, looks for a better-paying one... */
+  switchLook: 0.08,
+  /** ...paying at least this much more. */
+  switchGain: 1.2,
+  /** Doesn't retire (again) from a job started this recently. */
+  settleYears: 4,
+  /** Retires before the retirement benefit starts only with savings of this many years of costs. */
+  earlyRetireYears: 12,
+  /** Asks for a raise when it can. */
+  askRaise: 0.2,
+  /** Quits for no reason in particular. */
+  quit: 0.01,
+};
+
+/** The work actions the bot takes this year, drawing from `rng`. */
+export function chooseCareerActions(life: LifeState, content: ContentBundle, rng: RngState, profile: MoneyProfile): MoneyAction[] {
+  const out: MoneyAction[] = [];
+  const c = life.career;
+  if (!profile.worker || !profile.jobSeeker || c.retired) return out;
+  const job = c.job;
+  const settled = !job || life.currentYear - job.since >= CAREER_POLICY.settleYears;
+  const ledger = life.finances.lastLedger;
+  const yearlyCosts = ledger ? ledger.housing + ledger.living + ledger.debtPayments : 0;
+  const affordable =
+    life.character.age >= content.balance.economy.retirement.age || life.finances.savings >= yearlyCosts * CAREER_POLICY.earlyRetireYears;
+  if (life.character.age >= profile.retireAge && settled && affordable && canRetire(life, content)) return [['retire', {}]];
+  if (job) {
+    if (chance(rng, CAREER_POLICY.quit)) return [['quit_job', {}]];
+    if (canAskRaise(life) && chance(rng, CAREER_POLICY.askRaise)) out.push(['ask_raise', {}]);
+    if (!chance(rng, CAREER_POLICY.switchLook)) return out;
+  }
+  // Openings it can apply for, up to the yearly limit, picked with a lean
+  // toward better pay (a track's average level pay, squared).
+  let options = c.openings
+    .filter((id) => jobApplyBlock(life, id, content) === null)
+    .map((id) => {
+      const def = activeJob(content, id)!;
+      const start = levelPay(life, def, startLevel(life, def), content);
+      const average = def.levels.reduce((sum, _l, i) => sum + levelPay(life, def, i + 1, content), 0) / def.levels.length;
+      return { id, start, weight: (average / 10_000) ** 2 };
+    })
+    .filter((o) => !job || o.start >= job.salary * CAREER_POLICY.switchGain);
+  while (options.length > 0 && out.filter(([a]) => a === 'apply_job').length < content.balance.careers.maxApplications) {
+    const picked = weightedPick(rng, options.map((o) => [o, o.weight] as const));
+    out.push(['apply_job', { jobId: picked.id }]);
+    options = options.filter((o) => o !== picked);
   }
   return out;
 }

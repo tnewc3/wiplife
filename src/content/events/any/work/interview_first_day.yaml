@@ -1,0 +1,40 @@
+# Answers a job application that worked (registries/work.yaml hired).
+id: interview_first_day
+title: First day
+text: >-
+  You got the job. On your first morning {boss.name} walks you around, says
+  a lot of names you immediately forget, and leaves you at a desk with a
+  password that doesn't work.
+tone: light
+category: work
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  boss: { kind: boss }
+choices:
+  - id: early
+    label: Come in early all week
+    outcome:
+      text: By Friday you know where everything is, including the good coffee. {boss.name} notices.
+      effects:
+        - { type: job, action: performance, value: 5 }
+        - { type: relationship, role: boss, affection: 4 }
+        - { type: memory, role: boss, tag: hired_you }
+        - { type: stat, key: stress, delta: 2 }
+  - id: questions
+    label: Ask a hundred questions
+    outcome:
+      text: Some people roll their eyes. You learn twice as fast as they did.
+      effects:
+        - { type: job, action: performance, value: 3 }
+        - { type: stat, key: smarts, delta: 1 }
+        - { type: memory, role: boss, tag: hired_you }
+  - id: cool
+    label: Play it cool
+    outcome:
+      text: You nod a lot and figure things out as you go. Nobody seems worried. Yet.
+      effects:
+        - { type: stat, key: stress, delta: -2 }
+        - { type: memory, role: boss, tag: hired_you }

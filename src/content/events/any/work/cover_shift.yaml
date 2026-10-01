@@ -1,0 +1,31 @@
+id: cover_shift
+title: Can you cover?
+text: >-
+  {npc.name} texts you late on a Friday. A family thing came up, and
+  {npc.they} {npc:needs|need} someone to cover {npc.their} Saturday shift.
+  You had plans.
+tone: neutral
+category: work
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires: { career: { employed: true } }
+weight: { base: 5 }
+cooldownYears: 5
+cast:
+  npc: { kind: coworker }
+choices:
+  - id: cover
+    label: Cover for {npc.them}
+    outcome:
+      text: You give up your Saturday. {npc.name} sends a very long thank-you text with a lot of emojis.
+      effects:
+        - { type: relationship, role: npc, affection: 7, trust: 5 }
+        - { type: memory, role: npc, tag: you_covered_shift }
+        - { type: stat, key: stress, delta: 2 }
+        - { type: schedule, eventId: shift_returned, inYears: [1, 4], cast: [npc] }
+  - id: refuse
+    label: Tell {npc.them} you can't
+    outcome:
+      text: '{npc.name} finds someone else. Things are a little cooler between you.'
+      effects:
+        - { type: relationship, role: npc, affection: -3 }

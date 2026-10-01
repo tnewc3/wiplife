@@ -1,7 +1,7 @@
 /**
- * Money, home and school management actions (docs/design.md, sections C and L): the
+ * Money, home, school and work management actions (docs/design.md, sections C and L): the
  * Money tab (lifestyle, paying off a debt, a debt plan), the Work/School tab (gig
- * work, and from Stage 7 school: ./education.ts) and More → Home (move out, move back home, relocate, buy, sell, a
+ * work, from Stage 7 school: ./education.ts, and from Stage 8 jobs: ./career.ts) and More → Home (move out, move back home, relocate, buy, sell, a
  * roommate). Each takes effect at once, between years; costs that change
  * with them (rent, living costs) are charged by the next year's ledger, so
  * nothing is charged twice. The common checks (between years, input
@@ -10,14 +10,16 @@
 import { LIFESTYLES, type ApplyProgram, type ContentBundle, type Lifestyle, type Tier } from '../../content/schemas';
 import { canStartDebtPlan, isIndependent, payDebt, spend, startDebtPlan } from '../finance';
 import { buyHome, moveInCost, moveTo, purchaseQuote, refreshHousingCost, sellHome, supportingParent } from '../housing';
+import { afterMove } from '../career';
 import { canGig } from '../systems/career';
 import { writeFromGroup } from '../systems/history';
 import type { LifeState } from '../types';
+import { CAREER_ACTION_IDS, CAREER_ACTIONS } from './career';
 import { EDUCATION_ACTION_IDS, EDUCATION_ACTIONS } from './education';
 
 export const MONEY_ACTION_IDS = ['set_lifestyle', 'start_gig', 'stop_gig', 'pay_debt', 'debt_plan'] as const;
 export const HOME_ACTION_IDS = ['rent_home', 'move_home', 'relocate', 'buy_home', 'sell_home', 'find_roommate', 'live_alone'] as const;
-export const LIFE_ACTION_IDS = [...MONEY_ACTION_IDS, ...HOME_ACTION_IDS, ...EDUCATION_ACTION_IDS] as const;
+export const LIFE_ACTION_IDS = [...MONEY_ACTION_IDS, ...HOME_ACTION_IDS, ...EDUCATION_ACTION_IDS, ...CAREER_ACTION_IDS] as const;
 export type LifeActionId = (typeof LIFE_ACTION_IDS)[number];
 
 /** Parameters, after validation. */
@@ -31,6 +33,8 @@ export interface LifeActionParams {
   majorId?: string;
   tradeId?: string;
   gradProgramId?: string;
+  /** Job applications (Stage 8). */
+  jobId?: string;
 }
 
 export interface LifeActionRule {
@@ -78,6 +82,7 @@ export const LIFE_ACTIONS: Record<LifeActionId, LifeActionRule> = {
     allowed: (state, _p, content) => !state.career.gig && canGig(state, content),
     apply: (state, _p, content) => {
       state.career.gig = true;
+      state.career.retired = false;
       writeFromGroup(state, content.text.history.money.startedGig, ['money', 'startedGig'], {}, content);
     },
   },
@@ -125,8 +130,10 @@ export const LIFE_ACTIONS: Record<LifeActionId, LifeActionRule> = {
       supportingParent(state) !== null,
     // Your family helps you move; it costs you nothing.
     apply: (state, _p, content) => {
+      const from = state.character.cityId;
       moveTo(state, 'with_parents', supportingParent(state)!.cityId, content);
       history(state, content, 'movedHome', { city: cityName(state, content) });
+      afterMove(state, from, content);
     },
   },
   relocate: {
@@ -142,8 +149,10 @@ export const LIFE_ACTIONS: Record<LifeActionId, LifeActionRule> = {
     apply: (state, p, content) => {
       const from = cityName(state, content);
       spend(state, moveInCost(state, p.cityId!, content), content);
+      const fromCity = state.character.cityId;
       moveTo(state, 'renting', p.cityId!, content);
       history(state, content, 'relocated', { city: cityName(state, content), from });
+      afterMove(state, fromCity, content);
     },
   },
   buy_home: {
@@ -183,6 +192,7 @@ export const LIFE_ACTIONS: Record<LifeActionId, LifeActionRule> = {
     },
   },
   ...EDUCATION_ACTIONS,
+  ...CAREER_ACTIONS,
 };
 
 /** True when the action can be taken now with these (validated) parameters. */

@@ -1,0 +1,15 @@
+id: social_worker
+name: "Social work"
+category: professional
+blurb: "Helping people through the worst years of their lives."
+requires: {"any": [{"education": {"credential": ["bachelor"], "field": ["psychology"]}}, {"education": {"credential": ["grad"], "field": ["masters"]}}]}
+levels:
+  - { title: "case worker", salary: 40000 }
+  - { title: "social worker", salary: 50000 }
+  - { title: "senior social worker", salary: 60000 }
+  - { title: "program director", salary: 76000 }
+performance:
+  - { key: kindness, weight: 0.35 }
+  - { key: discipline, weight: 0.2 }
+  - { key: sociability, weight: 0.15 }
+employers: ["County Family Services", "Open Door Community Center", "Harbor House", "New Leaf Outreach"]

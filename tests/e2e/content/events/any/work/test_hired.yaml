@@ -1,0 +1,14 @@
+id: test_hired
+title: You got the job
+text: '{boss.name} calls: the job is yours.'
+tone: light
+category: work
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+weight: { base: 1 }
+followUpOnly: true
+cast:
+  boss: { kind: boss }
+autoOutcome:
+  text: You start right away.
+  effects: []

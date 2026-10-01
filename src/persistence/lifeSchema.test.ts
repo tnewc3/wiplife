@@ -351,3 +351,36 @@ describe('lives from Stage 7 on', () => {
     expect(schema.safeParse({ ...life, education: { ...life.education, credentials: [{ type: 'bachelor', refId: 'alchemy', year: life.currentYear, tier: 'state' }] } }).success).toBe(false);
   });
 });
+
+describe('lives from Stage 8 on', () => {
+  it('upgrade a schema version 6 life with empty applications and openings', async () => {
+    const life = lifeAtAge('stage8-migrate', 30);
+    const v6 = { ...life, career: { job: null, gig: true, retired: false, history: [] } };
+    const db = freshDb();
+    await db.lives.put({ id: 'active', envelope: { ...makeEnvelope(v6, content.contentVersion), schemaVersion: 6 } });
+    const result = await readSave(db, loadedLifeSchema(content));
+    expect(result.status).toBe('ok');
+    if (result.status !== 'ok') return;
+    expect(result.envelope.schemaVersion).toBe(CURRENT_SCHEMA_VERSION);
+    expect(result.envelope.data.career).toEqual({ job: null, gig: true, retired: false, history: [], applied: [], openings: [] });
+    // The next year rolls the openings.
+    expect(beginYear(result.envelope.data, content).career.openings.length).toBeGreaterThan(0);
+  });
+
+  it('round trip a life with a job, a past job, applications and openings', async () => {
+    const life = produce(lifeAtAge('stage8-round', 30), (d) => {
+      d.education.credentials.push({ type: 'hs_diploma', year: d.currentYear - 12 });
+      d.career.job = { jobId: 'bank_teller', level: 2, yearsAtLevel: 1, performance: 61, salary: 43_200, since: d.currentYear - 3, employer: 'Keystone Savings', raiseYear: d.currentYear };
+      d.career.history = [{ jobId: 'retail_associate', employer: 'MegaMart', fromYear: d.currentYear - 8, toYear: d.currentYear - 3, level: 2, salary: 33_000, endedBy: 'quit' }];
+      d.career.applied = [{ jobId: 'bank_teller', hired: true }];
+      d.career.openings = ['bank_teller', 'warehouse_worker'];
+    });
+    expect(await roundTrip(life)).toEqual(life);
+  });
+
+  it('refuse a job with an unknown end or a bad level', () => {
+    const life = lifeAtAge('stage8-bad', 30);
+    const bad = { ...life, career: { ...life.career, history: [{ jobId: 'bank_teller', employer: 'X', fromYear: 2020, toYear: 2021, level: 0, salary: 1, endedBy: 'vanished' }] } };
+    expect(lifeStateSchema.safeParse(bad).success).toBe(false);
+  });
+});

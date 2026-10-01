@@ -1,0 +1,16 @@
+id: journalist
+name: "Journalism"
+category: professional
+blurb: "Chasing the story, and the deadline, every day."
+requires: {"education": {"credential": ["bachelor"], "field": ["english", "communications"]}}
+levels:
+  - { title: "staff writer", salary: 40000 }
+  - { title: "reporter", salary: 50000 }
+  - { title: "senior editor", salary: 68000 }
+  - { title: "editor-in-chief", salary: 95000 }
+performance:
+  - { key: smarts, weight: 0.25 }
+  - { key: confidence, weight: 0.2 }
+  - { key: discipline, weight: 0.2 }
+  - { key: sociability, weight: 0.1 }
+employers: ["The Daily Ledger", "Metro Standard", "Signal Press", "The Weekly Courier"]

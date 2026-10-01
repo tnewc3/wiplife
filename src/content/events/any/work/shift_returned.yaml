@@ -1,0 +1,31 @@
+# Follow-up of cover_shift.
+id: shift_returned
+title: Returning the favor
+text: >-
+  You're sick, it's your weekend shift, and you were about to drag yourself
+  in anyway. Then {npc.name} calls: "I've got it. You covered me once."
+tone: light
+category: work
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires: { memory: { role: npc, tag: you_covered_shift } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  npc: { kind: coworker }
+choices:
+  - id: accept
+    label: Let {npc.them} take it
+    outcome:
+      text: You spend the weekend in bed with soup. Monday, you bring {npc.name} coffee.
+      effects:
+        - { type: memory, role: npc, tag: returned_the_favor }
+        - { type: relationship, role: npc, affection: 5, trust: 5 }
+        - { type: stat, key: stress, delta: -4 }
+  - id: go_anyway
+    label: Go in anyway
+    outcome:
+      text: You make it through the shift and spend the next week sicker than before.
+      effects:
+        - { type: stat, key: health, delta: -3 }
+        - { type: job, action: performance, value: 2 }

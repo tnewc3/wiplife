@@ -6,6 +6,7 @@ import {
   type ContentBundle,
   type CredentialType,
   type DebtKind,
+  type JobCategory,
   type Lifestyle,
   type Program,
   type RomanceStatus,
@@ -45,6 +46,20 @@ import {
   type PurchaseQuote,
 } from './housing';
 import { benefitFromRecord } from './retirement';
+import {
+  activeJob,
+  canRetire,
+  currentBoss,
+  hireChance,
+  jobApplyBlock,
+  levelPay,
+  levelTitle,
+  meetsJobRequirements,
+  searchBlock,
+  startLevel,
+  type JobApplyBlock,
+  type SearchBlock,
+} from './career';
 import { canGig, expectedGigPay } from './systems/career';
 import { textContext } from './events/text';
 import { CONTINUE_CHOICE } from './life';
@@ -55,6 +70,7 @@ import type {
   HistoryEntry,
   HousingKind,
   Id,
+  JobEnd,
   Ledger,
   LifeStage,
   LifeState,
@@ -125,6 +141,9 @@ export interface CharacterSummary {
   romance: { status: RomanceStatus; partnerName: string | null };
   /** Where you're at school now, if you are. */
   school: SchoolLine | null;
+  /** Your job now, if you have one: your title and employer. */
+  job: { title: string; employer: string } | null;
+  retired: boolean;
 }
 
 /** Your school now, for one-line summaries. */
@@ -152,6 +171,8 @@ export function getCharacterSummary(state: LifeState, content: ContentBundle): C
     debt: totalDebt(state),
     romance: { status: romanceStatus(state), partnerName: person ? `${person.name.first} ${person.name.last}` : null },
     school: state.education.current ? schoolLine(state, state.education.current, content) : null,
+    job: state.career.job ? { title: levelTitle(content.jobs[state.career.job.jobId], state.career.job.level), employer: state.career.job.employer } : null,
+    retired: state.career.retired,
   };
 }
 
@@ -679,29 +700,199 @@ export function getMoneyView(state: LifeState, content: ContentBundle): MoneyVie
   };
 }
 
+/** Your job, for the Work tab's job card. */
+export interface JobView {
+  jobId: Id;
+  /** The track's name ("Software engineering"). */
+  trackName: string;
+  category: JobCategory;
+  /** Your title, as in a sentence ("junior developer"). */
+  title: string;
+  level: number;
+  levels: number;
+  /** The next title up, or null at the top. */
+  nextTitle: string | null;
+  employer: string;
+  salary: number;
+  /** 0–100, shown as a bar. */
+  performance: number;
+  /** Whole years since you were hired. */
+  years: number;
+  /** Your boss's full name, or null. */
+  bossName: string | null;
+  /** True once you've asked for a raise this year. */
+  askedRaise: boolean;
+  canAskRaise: boolean;
+}
+
 export interface WorkView {
-  /** Old enough for gig work. */
   canGig: boolean;
   gigMinAge: number;
   gig: boolean;
-  /** A typical year of gig pay now (full-time from the independence age; part-time while you're a student). */
   expectedGigPay: number;
-  /** Last year's gross income. */
   lastIncome: number;
-  /** Actions can be taken now (between years). */
   between: boolean;
+  /** Your job, if you have one. */
+  job: JobView | null;
+  retired: boolean;
+  canRetire: boolean;
+  retireAge: number;
+  /** Why you can't look for work now, or null. */
+  searchBlock: SearchBlock | null;
+  minAge: number;
+  /** Openings you could apply for now. */
+  openings: number;
+  applicationsLeft: number;
 }
 
-/** The Work tab: gig work (jobs arrive with careers). */
 export function getWorkView(state: LifeState, content: ContentBundle): WorkView {
+  const c = state.career;
+  const b = content.balance.careers;
+  let job: JobView | null = null;
+  if (c.job) {
+    const def = content.jobs[c.job.jobId];
+    const boss = currentBoss(state);
+    const bossPerson = boss ? state.people[boss] : undefined;
+    job = {
+      jobId: c.job.jobId,
+      trackName: def?.name ?? c.job.jobId,
+      category: def?.category ?? 'gig',
+      title: levelTitle(def, c.job.level),
+      level: c.job.level,
+      levels: def?.levels.length ?? c.job.level,
+      nextTitle: def && c.job.level < def.levels.length ? levelTitle(def, c.job.level + 1) : null,
+      employer: c.job.employer,
+      salary: c.job.salary,
+      performance: c.job.performance,
+      years: Math.max(0, state.currentYear - c.job.since),
+      bossName: bossPerson ? `${bossPerson.name.first} ${bossPerson.name.last}` : null,
+      askedRaise: c.job.raiseYear === state.currentYear,
+      canAskRaise: state.phase === 'yearStart' && isLifeActionAvailable(state, 'ask_raise', {}, content),
+    };
+  }
   return {
     canGig: canGig(state, content),
     gigMinAge: content.balance.economy.gig.minAge,
-    gig: state.career.gig,
+    gig: c.gig,
     expectedGigPay: wholeDollars(expectedGigPay(state, content) * (inPostSecondary(state) ? content.balance.education.studentGigShare : 1)),
     lastIncome: state.finances.lastLedger?.gross ?? 0,
     between: state.phase === 'yearStart',
+    job,
+    retired: c.retired,
+    canRetire: canRetire(state, content),
+    retireAge: b.retireAge,
+    searchBlock: searchBlock(state, content),
+    minAge: b.minAge,
+    openings: getJobSearch(state, content).options.filter((o) => o.block === null).length,
+    applicationsLeft: Math.max(0, b.maxApplications - c.applied.length),
   };
+}
+
+/** One opening in job search. */
+export interface JobOption {
+  jobId: Id;
+  name: string;
+  category: JobCategory;
+  blurb: string;
+  /** The title you'd start with, and its pay in your city. */
+  title: string;
+  level: number;
+  levels: number;
+  salary: number;
+  /** Top level's pay in your city (where the track can lead). */
+  topSalary: number;
+  /** Your chance of being hired (0–1), shown in words. */
+  chance: number;
+  /** Why you can't apply now (applied already, no applications left), or null. */
+  block: JobApplyBlock | null;
+  /** This year's answer, if you applied. */
+  result: boolean | null;
+}
+
+export interface JobSearch {
+  /** Why you can't look for work now, or null. */
+  block: SearchBlock | null;
+  /** Openings in your city that you qualify for (never one you couldn't get), best pay first. */
+  options: JobOption[];
+  applicationsLeft: number;
+  cityName: string;
+}
+
+/** Job search: the openings in your city this year that you qualify for. */
+export function getJobSearch(state: LifeState, content: ContentBundle): JobSearch {
+  const c = state.career;
+  const block = searchBlock(state, content);
+  const options: JobOption[] =
+    block !== null
+      ? []
+      : c.openings.flatMap((jobId) => {
+          const def = activeJob(content, jobId);
+          if (!def || c.job?.jobId === jobId || !meetsJobRequirements(state, def, content)) return [];
+          const level = startLevel(state, def);
+          const applied = c.applied.find((a) => a.jobId === jobId);
+          return [
+            {
+              jobId,
+              name: def.name,
+              category: def.category,
+              blurb: def.blurb,
+              title: levelTitle(def, level),
+              level,
+              levels: def.levels.length,
+              salary: levelPay(state, def, level, content),
+              topSalary: levelPay(state, def, def.levels.length, content),
+              chance: hireChance(state, def, content),
+              block: jobApplyBlock(state, jobId, content),
+              result: applied ? applied.hired : null,
+            },
+          ];
+        });
+  options.sort((a, b) => b.salary - a.salary || (a.name < b.name ? -1 : 1));
+  return {
+    block,
+    options,
+    applicationsLeft: Math.max(0, content.balance.careers.maxApplications - c.applied.length),
+    cityName: content.cities[state.character.cityId]?.name ?? state.character.cityId,
+  };
+}
+
+/** One job in your career history (your current job first). */
+export interface CareerRow {
+  trackName: string;
+  /** Your title when it ended (or now). */
+  title: string;
+  employer: string;
+  fromYear: number;
+  /** Null for your current job. */
+  toYear: number | null;
+  endedBy: JobEnd | null;
+  salary: number;
+}
+
+/** Your career history, newest first, starting with the job you have now. */
+export function getCareerHistory(state: LifeState, content: ContentBundle): CareerRow[] {
+  const rows: CareerRow[] = state.career.history.map((h) => ({
+    trackName: content.jobs[h.jobId]?.name ?? h.jobId,
+    title: levelTitle(content.jobs[h.jobId], h.level),
+    employer: h.employer,
+    fromYear: h.fromYear,
+    toYear: h.toYear,
+    endedBy: h.endedBy,
+    salary: h.salary,
+  }));
+  const job = state.career.job;
+  if (job) {
+    rows.push({
+      trackName: content.jobs[job.jobId]?.name ?? job.jobId,
+      title: levelTitle(content.jobs[job.jobId], job.level),
+      employer: job.employer,
+      fromYear: job.since,
+      toYear: null,
+      endedBy: null,
+      salary: job.salary,
+    });
+  }
+  return rows.reverse();
 }
 
 export interface CityMove {

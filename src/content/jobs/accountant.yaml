@@ -1,0 +1,15 @@
+id: accountant
+name: "Accounting"
+category: professional
+blurb: "Making the numbers add up, especially in April."
+requires: {"education": {"credential": ["bachelor"], "field": ["business"]}}
+levels:
+  - { title: "staff accountant", salary: 56000 }
+  - { title: "senior accountant", salary: 70000 }
+  - { title: "accounting manager", salary: 88000 }
+  - { title: "controller", salary: 112000 }
+  - { title: "chief financial officer", salary: 150000 }
+performance:
+  - { key: smarts, weight: 0.3 }
+  - { key: discipline, weight: 0.4 }
+employers: ["Pemberton & Cole", "Ledgerwise Partners", "Ashford Accounting Group", "Marlowe Tax Advisors"]

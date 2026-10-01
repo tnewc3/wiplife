@@ -1,0 +1,31 @@
+id: training_course
+title: On the company's dime
+text: >-
+  Your employer will pay for an evening course to sharpen your skills. It's
+  twice a week for three months, after full days at work.
+tone: neutral
+category: work
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires: { career: { employed: true } }
+weight:
+  base: 4
+  modifiers:
+    - { if: { trait: ambition, gt: 60 }, x: 1.5 }
+cooldownYears: 6
+choices:
+  - id: sign_up
+    label: Sign up
+    outcome:
+      text: Tired evenings, cold dinners, and by the end you're noticeably better at your job.
+      effects:
+        - { type: job, action: performance, value: 6 }
+        - { type: stat, key: smarts, delta: 2 }
+        - { type: stat, key: stress, delta: 3 }
+  - id: skip
+    label: Your evenings are yours
+    outcome:
+      text: You spend those evenings with people you love, or on the couch. Both are valid.
+      effects:
+        - { type: stat, key: stress, delta: -2 }
+        - { type: stat, key: happiness, delta: 1 }

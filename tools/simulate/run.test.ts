@@ -3,7 +3,8 @@ import { content } from '../../src/content';
 import { formatReport, runSimulation } from './run';
 
 describe('simulation runner', () => {
-  it('plays lives and reports invariants, lifespans, events per year and event frequency', () => {
+  // Whole lives with every system: give them time.
+  it('plays lives and reports invariants, lifespans, events per year and event frequency', { timeout: 60_000 }, () => {
     const report = runSimulation(content, { lives: 20, seedPrefix: 'sim-test' });
     expect(report.lives).toBe(20);
     expect(report.invariantFailures).toBe(0);
@@ -17,7 +18,7 @@ describe('simulation runner', () => {
     expect(text).toContain('lottery_ticket');
   });
 
-  it('reports marriage and divorce rates, with the simulated player taking relationship actions', () => {
+  it('reports marriage and divorce rates, with the simulated player taking relationship actions', { timeout: 60_000 }, () => {
     const report = runSimulation(content, { lives: 30, seedPrefix: 'sim-rel' });
     const r = report.relationships;
     expect(report.invariantFailures).toBe(0);
@@ -37,7 +38,22 @@ describe('simulation runner', () => {
     expect(text).toContain('median age at first marriage');
   });
 
-  it('is deterministic', () => {
+  it('reports careers: income by education path, promotions, firings and job tracks against the targets', { timeout: 60_000 }, () => {
+    const report = runSimulation(content, { lives: 30, seedPrefix: 'sim-work' });
+    const c = report.careers;
+    expect(report.invariantFailures).toBe(0);
+    expect(c.everEmployed).toBeGreaterThan(0);
+    expect(c.jobYears).toBeGreaterThan(0);
+    expect(c.applications.hired).toBeLessThanOrEqual(c.applications.tried);
+    expect(c.tracks.map((t) => t.jobId)).toEqual(Object.keys(content.jobs).sort());
+    for (const t of c.tracks) expect(t.reachedLevel2).toBeLessThanOrEqual(t.entered);
+    const text = formatReport(report, content);
+    expect(text).toContain('lifetime earnings by education path');
+    expect(text).toMatch(/promotions \d+(\.\d)?%, firings \d+(\.\d)?%, layoffs \d+(\.\d)?%/);
+    expect(text).toContain("bachelor's vs high school lifetime earnings");
+  });
+
+  it('is deterministic', { timeout: 60_000 }, () => {
     expect(runSimulation(content, { lives: 5, seedPrefix: 'same' })).toEqual(runSimulation(content, { lives: 5, seedPrefix: 'same' }));
   });
 });

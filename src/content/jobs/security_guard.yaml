@@ -1,0 +1,15 @@
+id: security_guard
+name: "Security"
+category: gig
+blurb: "Watching the cameras so nobody else has to."
+requires: {"not": {"record": {"outcome": ["probation", "jail"]}}}
+levels:
+  - { title: "security guard", salary: 31000, years: 1 }
+  - { title: "senior guard", salary: 35000 }
+  - { title: "security supervisor", salary: 42000 }
+  - { title: "security manager", salary: 55000 }
+performance:
+  - { key: fitness, weight: 0.25 }
+  - { key: discipline, weight: 0.3 }
+  - { key: confidence, weight: 0.1 }
+employers: ["Sentinel Security", "Ironclad Protection", "Watchtower Services", "Guardian Patrol"]

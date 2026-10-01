@@ -103,10 +103,37 @@ export function evaluate(condition: Condition | undefined, state: LifeState, ctx
     if (q.year && !(cur && compare(cur.year, q.year))) return false;
     if (q.final !== undefined && (cur !== null && cur.year >= cur.lengthYears) !== q.final) return false;
     if (q.gpa && !(cur && compare(cur.gpa, q.gpa))) return false;
-    if (q.credential && !edu.credentials.some((cr) => q.credential!.includes(cr.type))) return false;
+    if (q.credential && !q.field && !edu.credentials.some((cr) => q.credential!.includes(cr.type))) return false;
+    if (q.field && !edu.credentials.some((cr) => cr.refId !== undefined && q.field!.includes(cr.refId) && (!q.credential || q.credential.includes(cr.type)))) {
+      return false;
+    }
     if (q.left !== undefined && (edu.left !== null) !== q.left) return false;
     if (q.admission !== undefined && (edu.admission !== null) !== q.admission) return false;
     return true;
+  }
+  if ('career' in condition) {
+    const q = condition.career;
+    const career = state.career;
+    const job = career.job;
+    if (q.employed !== undefined && (job !== null) !== q.employed) return false;
+    if (q.job && !(job && q.job.includes(job.jobId))) return false;
+    if (q.level && !(job && compare(job.level, q.level))) return false;
+    if (q.years && !(job && compare(state.currentYear - job.since, q.years))) return false;
+    if (q.performance && !(job && compare(job.performance, q.performance))) return false;
+    if (q.retired !== undefined && career.retired !== q.retired) return false;
+    if (
+      q.lostWithin !== undefined &&
+      !career.history.some((h) => (h.endedBy === 'fired' || h.endedBy === 'laid_off') && state.currentYear - h.toYear <= q.lostWithin!)
+    ) {
+      return false;
+    }
+    return true;
+  }
+  if ('record' in condition) {
+    const q = condition.record;
+    return state.legal.record.some(
+      (r) => (!q.outcome || q.outcome.includes(r.outcome)) && (q.within === undefined || state.currentYear - r.year <= q.within),
+    );
   }
   if ('memory' in condition) {
     const { role, tag } = condition.memory;
@@ -158,8 +185,20 @@ export function referencesIn(condition: Condition | undefined): {
   cities: string[];
   majors: string[];
   trades: string[];
+  /** Majors, trades or grad programs a credential is in (education field). */
+  fields: string[];
+  jobs: string[];
 } {
-  const out = { flags: [] as string[], memories: [] as string[], events: [] as string[], cities: [] as string[], majors: [] as string[], trades: [] as string[] };
+  const out = {
+    flags: [] as string[],
+    memories: [] as string[],
+    events: [] as string[],
+    cities: [] as string[],
+    majors: [] as string[],
+    trades: [] as string[],
+    fields: [] as string[],
+    jobs: [] as string[],
+  };
   const walk = (cond: Condition | undefined) => {
     if (!cond) return;
     if ('all' in cond) cond.all.forEach(walk);
@@ -172,7 +211,8 @@ export function referencesIn(condition: Condition | undefined): {
     else if ('education' in cond) {
       out.majors.push(...(cond.education.major ?? []));
       out.trades.push(...(cond.education.trade ?? []));
-    }
+      out.fields.push(...(cond.education.field ?? []));
+    } else if ('career' in cond) out.jobs.push(...(cond.career.job ?? []));
   };
   walk(condition);
   return out;

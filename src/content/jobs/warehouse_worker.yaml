@@ -1,0 +1,13 @@
+id: warehouse_worker
+name: "Warehouse work"
+category: gig
+blurb: "Boxes, scanners and a step counter that never stops."
+levels:
+  - { title: "warehouse associate", salary: 34000, years: 1 }
+  - { title: "forklift operator", salary: 38000 }
+  - { title: "team lead", salary: 43000 }
+  - { title: "warehouse supervisor", salary: 53000 }
+performance:
+  - { key: fitness, weight: 0.35 }
+  - { key: discipline, weight: 0.3 }
+employers: ["Parcelpoint Fulfillment", "Midway Distribution", "Rapid Freight Warehouse", "Northgate Logistics"]

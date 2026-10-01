@@ -83,13 +83,13 @@ describe('the ledger and retirement', () => {
     expect(checkInvariants({ ...after, scheduled: [] }, content)).toEqual([]);
   });
 
-  it('counts every kind of earned income: gig pay now, and a salary (Stage 8) the same way', () => {
+  it('counts every kind of earned income: gig pay and a salary the same way', () => {
     const gig = ledger(produce(lifeAtAge('earn-gig', 30), (d) => void (d.career.gig = true)), steady);
     expect(gig.finances.earnings.years).toBe(1);
     expect(gig.finances.earnings.total).toBe(gig.finances.lastLedger!.gross);
     const salaried = ledger(
       produce(lifeAtAge('earn-job', 30), (d) => {
-        d.career.job = { jobId: 'any', level: 1, yearsAtLevel: 0, performance: 50, salary: 55_000 };
+        d.career.job = { jobId: 'any', level: 1, yearsAtLevel: 0, performance: 50, salary: 55_000, since: 2029, employer: 'Acme' };
       }),
     );
     expect(salaried.finances.lastLedger!.gross).toBe(55_000);

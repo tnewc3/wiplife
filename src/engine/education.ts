@@ -125,8 +125,18 @@ export function yearGrade(state: LifeState, enrollment: Enrollment, content: Con
   return roundGpa(expectedGrade(state, enrollment, content) + (nextFloat(rng) * 2 - 1) * swing + enrollment.boost);
 }
 
-/** A chance (0–1) from a balance chance model: base, GPA, stats, luck, family wealth and flags, clamped. */
-export function modelChance(state: LifeState, model: ChanceModel, gpa: number | undefined, content: ContentBundle): number {
+/**
+ * A chance (0–1) from a balance chance model: base, GPA, stats, luck, family
+ * wealth and flags, clamped. `adjust` adds points and then multiplies, before
+ * the clamp (job applications: experience, degrees, the job market).
+ */
+export function modelChance(
+  state: LifeState,
+  model: ChanceModel,
+  gpa: number | undefined,
+  content: ContentBundle,
+  adjust: { points?: number; multiplier?: number } = {},
+): number {
   const { gpaPivot } = content.balance.education.admission;
   let percent = model.base;
   if (model.gpa !== undefined && gpa !== undefined) percent += model.gpa * (gpa - gpaPivot);
@@ -137,6 +147,7 @@ export function modelChance(state: LifeState, model: ChanceModel, gpa: number | 
     const value = state.flags[flag];
     if (value !== undefined && value !== false && value !== 0 && value !== '') percent += points;
   }
+  percent = (percent + (adjust.points ?? 0)) * (adjust.multiplier ?? 1);
   return Math.min(model.max, Math.max(model.min, percent)) / 100;
 }
 

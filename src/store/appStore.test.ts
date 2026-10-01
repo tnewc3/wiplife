@@ -513,3 +513,33 @@ describe('app store: money and home', () => {
     }
   });
 });
+
+describe('app store: work', () => {
+  it('opens a job application’s interview in the event sheet, and closes it back to the year', async () => {
+    const { db, store } = setup();
+    await store.getState().init();
+    await store.getState().startRandomLife();
+    const grown = produce(lifeAtAge('store-work', 25, content), (d) => {
+      d.education.credentials = [{ type: 'hs_diploma', year: d.birthYear + 18 }];
+      d.career.openings = ['retail_associate'];
+    });
+    await writeSave(db, makeEnvelope(grown, content.contentVersion));
+    const reopened = createAppStore({ db, makeSeed: () => 'x', currentYear: () => 2026, checkInvariants: true });
+    await reopened.getState().init();
+    reopened.getState().continueLife();
+
+    await reopened.getState().takeLifeAction('apply_job', { jobId: 'retail_associate' });
+    expect(reopened.getState().life!.phase).toBe('action');
+    expect(reopened.getState().eventSheet).toEqual({ index: 0, recap: null });
+    while (reopened.getState().eventSheet) {
+      const l = reopened.getState().life!;
+      const card = getEventCard(l, reopened.getState().eventSheet!.index, content)!;
+      if (!card.resolved) await reopened.getState().chooseEvent(card.instanceId, card.choices[0]!.id);
+      else await reopened.getState().continueEvents();
+    }
+    const life = reopened.getState().life!;
+    expect(life.phase).toBe('yearStart');
+    expect(life.career.applied).toHaveLength(1);
+    expect(life.career.job?.jobId ?? null).toBe(life.career.applied[0]!.hired ? 'retail_associate' : null);
+  });
+});

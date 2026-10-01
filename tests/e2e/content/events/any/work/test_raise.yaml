@@ -1,0 +1,15 @@
+id: test_raise
+title: The ask
+text: You ask {boss.name} for a raise.
+tone: neutral
+category: work
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+weight: { base: 1 }
+followUpOnly: true
+cast:
+  boss: { kind: boss }
+autoOutcome:
+  text: '{boss.name} says yes.'
+  effects:
+    - { type: job, action: raise }

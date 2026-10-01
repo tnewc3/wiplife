@@ -1,0 +1,68 @@
+# Answers asking for a raise (registries/work.yaml raise). Your work counts.
+id: raise_conversation
+title: The ask
+text: >-
+  You've rehearsed it in the shower all week. Now you're sitting across from
+  {boss.name}, who has just asked what this meeting is about.
+tone: neutral
+category: work
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+weight:
+  base: 10
+  modifiers:
+    - { if: { memory: { role: boss, tag: refused_raise } }, x: 0.5 }
+followUpOnly: true
+cast:
+  boss: { kind: boss }
+choices:
+  - id: numbers
+    label: Walk {boss.them} through what you've done
+    check:
+      base: 40
+      stats:
+        - { job: performance, weight: 0.6 }
+        - { key: confidence, weight: 0.2 }
+        - { role: boss, key: affection, weight: 0.2 }
+      success:
+        text: '{boss.name} listens, nods, and doesn''t argue. "You''ve earned it." The raise shows up next paycheck.'
+        effects:
+          - { type: job, action: raise }
+          - { type: memory, role: boss, tag: gave_you_raise }
+          - { type: stat, key: happiness, delta: 4 }
+          - { type: stat, key: confidence, delta: 2 }
+      failure:
+        text: '"Not this year," {boss.name} says. "Show me more and we''ll talk." You''re not sure what more looks like.'
+        effects:
+          - { type: memory, role: boss, tag: refused_raise }
+          - { type: stat, key: happiness, delta: -3 }
+  - id: bluff
+    label: Say you have another offer
+    visibleIf: { trait: riskTaking, gte: 40 }
+    check:
+      base: 35
+      stats:
+        - { key: confidence, weight: 0.3 }
+        - { key: luck, weight: 0.2 }
+        - { job: performance, weight: 0.3 }
+      success:
+        text: '{boss.name} doesn''t want to lose you. The counteroffer comes the same day.'
+        effects:
+          - { type: job, action: raise }
+          - { type: memory, role: boss, tag: gave_you_raise }
+          - { type: stat, key: confidence, delta: 3 }
+      failure:
+        text: '"Then you should probably take it," {boss.name} says. There is no other offer. You stay, and {boss.they} {boss:knows|know} it.'
+        effects:
+          - { type: relationship, role: boss, trust: -12, affection: -6 }
+          - { type: memory, role: boss, tag: refused_raise }
+          - { type: job, action: performance, value: -5 }
+          - { type: stat, key: confidence, delta: -3 }
+  - id: ask_how
+    label: Ask what it would take
+    outcome:
+      text: '{boss.name} gives you a list. It''s long, but it''s a list. You leave with a plan instead of a raise.'
+      effects:
+        - { type: job, action: performance, value: 4 }
+        - { type: relationship, role: boss, affection: 3 }
+        - { type: stat, key: discipline, delta: 1 }

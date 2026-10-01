@@ -15,6 +15,7 @@ import {
   spend,
   startDebtPlan,
 } from '../finance';
+import { afterMove, canTakeJob, endJob, giveRaise, promote, startJob } from '../career';
 import { addScholarshipFund, leaveSchool } from '../education';
 import { moveInTogether, moveTo, refreshHousingCost, sellHome, settleHousehold, supportingParent } from '../housing';
 import { clampInt } from '../random';
@@ -86,6 +87,7 @@ const handlers: { [T in Effect['type']]: Handler<T> } = {
         const parent = supportingParent(state);
         if (parent && h.kind !== 'owned' && h.kind !== 'with_parents' && h.kind !== 'incarcerated') {
           moveTo(state, 'with_parents', parent.cityId, ctx.content);
+          afterMove(state, city, ctx.content);
         }
         return;
       }
@@ -127,6 +129,31 @@ const handlers: { [T in Effect['type']]: Handler<T> } = {
         return;
       case 'expel':
         leaveSchool(state, 'expelled', ctx.content);
+        return;
+    }
+  },
+
+  job: (state, effect, ctx) => {
+    const job = state.career.job;
+    switch (effect.action) {
+      case 'performance':
+        if (job) job.performance = clampInt(job.performance + (effect.value ?? 0), 0, 100);
+        return;
+      case 'raise':
+        giveRaise(state, ctx.content.balance.careers.raises.asked, ctx.content);
+        return;
+      case 'promote':
+        promote(state, ctx.content);
+        return;
+      case 'fire':
+        endJob(state, 'fired', ctx.content);
+        return;
+      case 'quit':
+        endJob(state, 'quit', ctx.content);
+        return;
+      case 'offer':
+        // Only a job you could take now: old enough, out of school, qualified.
+        if (canTakeJob(state, effect.jobId ?? '', ctx.content)) startJob(state, effect.jobId!, ctx.content);
         return;
     }
   },

@@ -182,18 +182,32 @@ const education = z.strictObject({
 
 const career = z.strictObject({
   job: z
-    .strictObject({ jobId: id, level: int, yearsAtLevel: int, performance: score, salary: dollars })
+    .strictObject({
+      jobId: id,
+      level: int.min(1),
+      yearsAtLevel: int.min(0),
+      performance: score,
+      salary: dollars,
+      since: int,
+      employer: filled,
+      raiseYear: int.exactOptional(),
+    })
     .nullable(),
   gig: z.boolean(),
   retired: z.boolean(),
   history: z.array(
     z.strictObject({
       jobId: id,
+      employer: filled,
       fromYear: int,
       toYear: int,
+      level: int.min(1),
+      salary: dollars,
       endedBy: z.enum(['quit', 'fired', 'laid_off', 'retired', 'moved']),
     }),
   ),
+  applied: z.array(z.strictObject({ jobId: id, hired: z.boolean() })),
+  openings: z.array(id),
 });
 
 const finances = z.strictObject({

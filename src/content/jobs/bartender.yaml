@@ -1,0 +1,15 @@
+id: bartender
+name: "Bar work"
+category: gig
+blurb: "Pouring drinks and listening to everyone's problems."
+requires: {"age": {"gte": 21}}
+levels:
+  - { title: "bartender", salary: 30000, years: 1 }
+  - { title: "head bartender", salary: 36000 }
+  - { title: "bar manager", salary: 48000 }
+performance:
+  - { key: sociability, weight: 0.35 }
+  - { key: looks, weight: 0.1 }
+  - { key: confidence, weight: 0.15 }
+  - { key: fitness, weight: 0.05 }
+employers: ["The Rusty Anchor", "Velvet Lounge", "Hops & Barley", "The Last Call"]

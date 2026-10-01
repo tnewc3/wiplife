@@ -1,0 +1,13 @@
+id: construction_worker
+name: "Construction"
+category: trade
+blurb: "Building things you can drive past for decades."
+levels:
+  - { title: "laborer", salary: 34000 }
+  - { title: "carpenter", salary: 44000 }
+  - { title: "crew lead", salary: 55000 }
+  - { title: "site supervisor", salary: 70000 }
+performance:
+  - { key: fitness, weight: 0.35 }
+  - { key: discipline, weight: 0.25 }
+employers: ["Ironwood Contracting", "Keystone Builders", "Redline Construction", "Hollis & Grant Builders"]
