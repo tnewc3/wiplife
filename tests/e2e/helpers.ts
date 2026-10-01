@@ -156,15 +156,27 @@ export async function expectNoHorizontalScroll(page: Page): Promise<void> {
   expect(overflow).toBeLessThanOrEqual(0);
 }
 
+/** Touch targets are at least 44px (docs/design.md, section K). */
+const MIN_TOUCH_TARGET = 44;
+/**
+ * Measured sizes can come out a hair under their CSS size (43.9999px) from
+ * subpixel rounding, for example while a sheet slides in; that's not a
+ * smaller target.
+ */
+const SUBPIXEL_TOLERANCE = 0.5;
+
 export async function expectTouchTargets(page: Page): Promise<void> {
-  const small = await page.evaluate(() =>
-    [...document.querySelectorAll('button')]
-      .filter((b) => b.offsetParent !== null)
-      .map((b) => {
-        const r = b.getBoundingClientRect();
-        return { text: b.textContent?.trim(), h: r.height, w: r.width };
-      })
-      .filter((b) => b.h < 44 || b.w < 44),
+  const min = MIN_TOUCH_TARGET - SUBPIXEL_TOLERANCE;
+  const small = await page.evaluate(
+    (limit) =>
+      [...document.querySelectorAll('button')]
+        .filter((b) => b.offsetParent !== null)
+        .map((b) => {
+          const r = b.getBoundingClientRect();
+          return { text: b.textContent?.trim(), h: r.height, w: r.width };
+        })
+        .filter((b) => b.h < limit || b.w < limit),
+    min,
   );
   expect(small).toEqual([]);
 }

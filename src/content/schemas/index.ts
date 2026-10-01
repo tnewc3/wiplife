@@ -5,6 +5,7 @@ import {
   eventsBalanceSchema,
   mortalityBalanceSchema,
   pacingBalanceSchema,
+  targetsBalanceSchema,
 } from './balance';
 import { actionRegistrySchema, relationshipsBalanceSchema } from './relationships';
 import { appearanceOptionsSchema, identityOptionsSchema, namePoolSchema, pronounPresetSchema, talentSchema } from './character';
@@ -58,6 +59,7 @@ export const singletonTypes = {
   'balance/relationships': relationshipsBalanceSchema,
   'balance/economy': economyBalanceSchema,
   'balance/education': educationBalanceSchema,
+  'balance/targets': targetsBalanceSchema,
   'character/identity': identityOptionsSchema,
   'character/appearance': appearanceOptionsSchema,
   'text/relations': relationWordsSchema,
@@ -92,6 +94,7 @@ export const contentBundleSchema = z.strictObject({
     relationships: relationshipsBalanceSchema,
     economy: economyBalanceSchema,
     education: educationBalanceSchema,
+    targets: targetsBalanceSchema,
   }),
   character: z.strictObject({ identity: identityOptionsSchema, appearance: appearanceOptionsSchema }),
   text: z.strictObject({ relations: relationWordsSchema, history: historyTextSchema, obituary: obituaryTextSchema }),

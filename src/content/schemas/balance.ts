@@ -218,3 +218,32 @@ export const eventsBalanceSchema = z.strictObject({
   }),
 });
 export type EventsBalance = z.infer<typeof eventsBalanceSchema>;
+
+/**
+ * Target numbers simulation runs are judged against (docs/technical.md,
+ * section Q, "What the simulation looks for"). Each stage's acceptance
+ * criteria point here, so targets change without code changes.
+ */
+export const targetsBalanceSchema = z.strictObject({
+  money: z.strictObject({
+    /** At most this share of lives that reach adulthood ever file for bankruptcy. */
+    maxBankruptLives: probabilitySchema,
+    /** At least this share of lives that reach homeOwnershipAge have owned a home by then. */
+    minHomeOwners: probabilitySchema,
+    homeOwnershipAge: z.int().min(18).max(120),
+  }),
+  careers: z.strictObject({
+    /**
+     * Average lifetime earnings of lives with a bachelor's degree, divided by
+     * those whose education stopped at high school (a diploma or GED): at least this.
+     */
+    minBachelorEarningsRatio: z.number().min(1).max(10),
+    /**
+     * At least this share of bachelor's degree holders earn less over their
+     * lifetime than the median high-school-only life: a degree helps, but
+     * doesn't guarantee anything.
+     */
+    minBachelorBelowHighSchoolMedian: probabilitySchema,
+  }),
+});
+export type TargetsBalance = z.infer<typeof targetsBalanceSchema>;

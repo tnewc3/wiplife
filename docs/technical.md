@@ -375,7 +375,7 @@ interface Enrollment extends SchoolPlace {
 }
 ```
 
-A school year starts as a year begins (you enroll and pay tuition) and is graded as the next one begins, so the year's events shape its grade. Elementary, middle and high school follow on their own from the start age; high school ends as you turn 18, or 19 after being held back once. Tuition is paid through the Stage 6 debt system: scholarships (merit by GPA, need by family wealth) and family help take their share, scholarship money from events pays what it can, and the rest joins your student loan (one `student` debt). Student loan payments pause while you're in college, trade school or grad school (interest still grows). Save schema version 6 added `admission`, `left`, `applied`, `fund` and `lastBill`; the upgrade from version 5 gives an adult the high school diploma they would have earned at 18 (without a GPA).
+A school year starts as a year begins (you enroll and pay tuition) and is graded as the next one begins, so the year's events shape its grade. Elementary, middle and high school follow on their own from the start age; high school ends as you turn 18, or 19 after being held back once. Tuition is paid through the Stage 6 debt system: scholarships (merit by GPA, need by family wealth) and family help take their share, scholarship money from events pays what it can, and the rest joins your student loan (one `student` debt). Student loan payments pause while you're in college, trade school or grad school (interest still grows). Gig pay is halved while you're enrolled in college, trade school or grad school (`studentGigShare` in `balance/education.yaml`; `gigPay` in the career module applies it). Save schema version 6 added `admission`, `left`, `applied`, `fund` and `lastBill`; the upgrade from version 5 gives an adult the high school diploma they would have earned at 18 (without a GPA).
 
 ```ts
 interface CareerState {
@@ -1150,6 +1150,7 @@ Meet every Stage 6 acceptance criterion. When finished, run all checks plus a 1,
 - Admission model (GPA, stats, luck) for each tier.
 - Tuition by tier and program, stored in `balance`.
 - Paying for school: family help, scholarships and student loans through the Stage 6 debt system.
+- While enrolled in college, trade school or grad school, gig work is part-time: gig pay × `studentGigShare` (0.5).
 - Majors, trades and grad programs as content.
 - Credentials record.
 - Education actions: apply, choose a major, drop out, go back.
@@ -1231,6 +1232,11 @@ Meet every Stage 7 acceptance criterion. When finished, run all checks plus a 1,
 - Every job track has at least 3 reachable levels, and no job has requirements that can't be met.
 - Relocating ends the current job and opens the new city's market.
 - A 1,000-life run shows degrees raising average income without guaranteeing it, and promotion and firing rates within the targets set in `balance`.
+- With careers in place, a 1,000-life run meets the targets in `src/content/balance/targets.yaml`:
+  - Bankruptcy in no more than about 15% of lives that reach adulthood (`money.maxBankruptLives`).
+  - Roughly half or more of adults have owned a home by 50 (`money.minHomeOwners`, `money.homeOwnershipAge`).
+  - Bachelor's degree holders earn clearly more over a lifetime on average (`careers.minBachelorEarningsRatio`: at least 1.3 times lives that stopped at high school), but it isn't guaranteed (`careers.minBachelorBelowHighSchoolMedian`: at least 10% of them earn less than the median high-school-only life).
+  - `tools/simulate.ts` reports each of these against its target.
 
 **Testing:** Unit tests for eligibility, application odds, performance and promotion; end-to-end test of search, apply, promotion and quitting; simulation report on income by education path.
 
