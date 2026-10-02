@@ -13,6 +13,7 @@ import {
   type ContentBundle,
   type SingletonPath,
 } from '../../src/content/schemas';
+import { consistencyWarnings, type ContentWarning } from './consistency';
 import { checkReferences } from './references';
 
 /** Folders under src/content that hold code or build output, not content. */
@@ -25,7 +26,8 @@ export interface ContentError {
 }
 
 export type CompileResult =
-  | { ok: true; bundle: ContentBundle; definitionCount: number }
+  /** warnings: C1 wording checks for review (tools/content/consistency.ts); none for a stand-in event set. */
+  | { ok: true; bundle: ContentBundle; definitionCount: number; warnings: ContentWarning[] }
   | { ok: false; errors: ContentError[] };
 
 export interface CompileOptions {
@@ -248,8 +250,9 @@ export async function compileContent({ contentDir, appVersion, overlayDir }: Com
 
   const fileOf = (typeKey: CollectionKey, id: string) => collected.get(typeKey)?.get(id)?.file ?? `${typeKey}/${id}.yaml`;
   const referenceErrors = checkReferences(bundle, fileOf, { partialEvents: eventsReplaced });
-  if (referenceErrors.length > 0) return { ok: false, errors: referenceErrors };
+  const consistency = eventsReplaced ? { warnings: [], errors: [] } : consistencyWarnings(bundle, (id) => fileOf('events', id));
+  if (referenceErrors.length > 0 || consistency.errors.length > 0) return { ok: false, errors: [...referenceErrors, ...consistency.errors] };
 
   const definitionCount = [...collected.values()].reduce((sum, bucket) => sum + bucket.size, 0) + singletons.size;
-  return { ok: true, bundle, definitionCount };
+  return { ok: true, bundle, definitionCount, warnings: consistency.warnings };
 }

@@ -14,6 +14,9 @@ requires:
     - { health: { conditions: [depression], treated: false } }
 weight: { base: 7 }
 cooldownYears: 4
+# C1: reviewed build warnings kept on purpose (docs/consistency-review.md).
+justified:
+  past: "\"The things you used to love\" describes depression in general, not a specific claim about your history."
 cast:
   helper: { support: true, optional: true, presence: anywhere }
 choices:

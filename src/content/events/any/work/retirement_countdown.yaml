@@ -2,7 +2,7 @@ id: retirement_countdown
 title: How many more years?
 text: >-
   {npc.name}, who started long after you did, asks at lunch when you plan
-  to retire. You realize you've never actually done the math.
+  to retire. You realize you don't actually know.
 tone: neutral
 category: work
 rarity: common

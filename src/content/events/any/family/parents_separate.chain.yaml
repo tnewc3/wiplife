@@ -98,13 +98,14 @@ events:
   - id: parents_years_later
     title: Side by side
     text: >-
-      At a family barbecue, years after the split, {parentA.name} and
+      Your parents split up {since}. At a family barbecue, {parentA.name} and
       {parentB.name} end up side by side at the grill, laughing about something
       from before you were born.
     tone: neutral
     category: family
     rarity: common
     lifeStages: [teen, youngAdult]
+    requires: { flag: parents_split }
     weight: { base: 10 }
     followUpOnly: true
     cast:

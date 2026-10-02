@@ -10,6 +10,9 @@ lifeStages: [youngAdult, adult, senior]
 requires: { age: { gte: 18 } }
 weight: { base: 3 }
 cooldownYears: 8
+# C1: reviewed build warnings kept on purpose (docs/consistency-review.md).
+justified:
+  past: "Having an ex proves the shared past; \"everyone you used to know\" is the people you both knew then."
 cast:
   ex: { kind: ex, presence: anywhere }
 choices:

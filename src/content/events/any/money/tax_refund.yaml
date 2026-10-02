@@ -1,8 +1,8 @@
 id: tax_refund
 title: A check from the government
 text: >-
-  You did your own taxes for once, and the government owes you money. It
-  feels like finding cash in a winter coat.
+  Your tax return comes back with good news: the government owes you money.
+  It feels like finding cash in a winter coat.
 tone: light
 category: money
 rarity: common
@@ -15,8 +15,12 @@ weight: { base: 5 }
 cooldownYears: 5
 # C1: meant to come back now and then (repeats are kept rare otherwise).
 recurring: true
+# C1: reviewed build warnings kept on purpose (docs/consistency-review.md).
+justified:
+  money: "The refund pays for the dinner (and the trip): received and spent, so savings don't change."
 cast:
-  parent: { kind: parent, optional: true, presence: anywhere }
+  # Taken out to dinner in person.
+  parent: { kind: parent, optional: true, presence: nearby }
 choices:
   - id: save
     label: Put it straight into savings

@@ -14,6 +14,9 @@ requires:
     - { finances: { gig: true } }
 weight: { base: 10 }
 once: true
+# C1: reviewed build warnings kept on purpose (docs/consistency-review.md).
+justified:
+  money: "The week's pay goes straight on the sneakers: earned and spent, so savings don't change."
 choices:
   - id: save
     label: Save every cent

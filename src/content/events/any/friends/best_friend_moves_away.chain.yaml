@@ -40,11 +40,14 @@ events:
     title: A letter
     text: >-
       A letter arrives in handwriting you'd know anywhere. It's from
-      {friend.name}, years later, asking if you still remember {friend.them}.
+      {friend.name}, who moved away {since}, asking if you still remember
+      {friend.them}.
     tone: light
     category: friends
     rarity: common
     lifeStages: [child, teen]
+    # C1: the promise to write is what this answers.
+    requires: { memory: { role: friend, tag: promised_to_write } }
     weight: { base: 10 }
     followUpOnly: true
     cast:

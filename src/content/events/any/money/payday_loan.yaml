@@ -37,7 +37,9 @@ choices:
   - id: walk
     label: Walk past and figure it out
     outcome:
-      text: You skip meals and pay late. It works, barely.
+      text: You skip meals and pay late, with a late fee on top. It works, barely.
       effects:
+        # C1: paying late costs a late fee, scaled to your rent.
+        - { type: rentMonths, months: -0.1 }
         - { type: stat, key: stress, delta: 4 }
         - { type: stat, key: health, delta: -1 }

@@ -10,6 +10,9 @@ rarity: common
 lifeStages: [teen]
 weight: { base: 7 }
 once: true
+# C1: reviewed build warnings kept on purpose (docs/consistency-review.md).
+justified:
+  money: "\"You owe me forever\" is a figure of speech."
 cast:
   sibling: { kind: sibling, presence: household }
 choices:

@@ -17,6 +17,9 @@ requires:
     - { not: { finances: { bankruptWithin: 7 } } }
 weight: { base: 6 }
 cooldownYears: 5
+# C1: reviewed build warnings kept on purpose (docs/consistency-review.md).
+justified:
+  money: "Keeping on paying means the yearly ledger keeps taking the minimum payments; nothing changes at once."
 choices:
   - id: file
     label: File for bankruptcy
@@ -24,6 +27,8 @@ choices:
       text: The paperwork takes weeks, the hearing takes ten minutes. Most of what you owed is gone. Banks will remember for years.
       effects:
         - { type: debt, action: bankruptcy }
+        # C1: the lawyer's fee ("for a fee"), after the old debts are cleared.
+        - { type: money, delta: -1500 }
         - { type: flag, key: filed_bankruptcy, value: true }
         - { type: history, text: You filed for bankruptcy and started over., importance: 3 }
         - { type: stat, key: stress, delta: -10 }

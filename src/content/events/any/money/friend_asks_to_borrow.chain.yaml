@@ -59,8 +59,8 @@ events:
   - id: friend_repays
     title: About that money
     text: >-
-      It's been a while since you lent {friend.name} that $300, and {friend.they}
-      just posted photos from a beach vacation.
+      You lent {friend.name} $300 {since}, and {friend.they} just posted photos
+      from a beach vacation.
     tone: neutral
     category: money
     rarity: common
@@ -70,6 +70,9 @@ events:
     # C1: meant to come back now and then (repeats are kept rare otherwise).
     recurring: true
     followUpOnly: true
+    # C1: reviewed build warnings kept on purpose (docs/consistency-review.md).
+    justified:
+      money: "The $300 left your savings when you lent it (friend_asks_to_borrow); not getting it back changes nothing now."
     cast:
       friend: { kind: friend, presence: anywhere }
     choices:

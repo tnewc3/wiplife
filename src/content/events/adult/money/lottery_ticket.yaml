@@ -9,6 +9,9 @@ weight: { base: 6 }
 cooldownYears: 12
 # C1: meant to come back now and then (repeats are kept rare otherwise).
 recurring: true
+# C1: reviewed build warnings kept on purpose (docs/consistency-review.md).
+justified:
+  money: "Keeping your two dollars is the point: nothing is spent."
 choices:
   - id: buy
     label: Buy a ticket

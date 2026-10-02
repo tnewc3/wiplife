@@ -17,6 +17,9 @@ weight:
     - { if: { flag: parents_fought }, x: 2 }
     - { if: { familyWealth: [poor] }, x: 1.5 }
 once: true
+# C1: reviewed build warnings kept on purpose (docs/consistency-review.md).
+justified:
+  money: "\"Cost you something\" is a figure of speech."
 cast:
   parent: { kind: parent, presence: household }
 choices:

@@ -654,6 +654,13 @@ export const eventSchema = baseDefSchema
      */
     recurring: z.literal(true).optional(),
     /**
+     * C1: content-build warnings that were reviewed and kept, with the reason
+     * (tools/content/consistency.ts; docs/consistency-review.md).
+     */
+    justified: z
+      .strictObject({ time: z.string().trim().min(10).optional(), money: z.string().trim().min(10).optional(), past: z.string().trim().min(10).optional() })
+      .optional(),
+    /**
      * Only happens when scheduled by another event (the later steps of a
      * chain) or queued by a management action (registries/actions.yaml).
      */

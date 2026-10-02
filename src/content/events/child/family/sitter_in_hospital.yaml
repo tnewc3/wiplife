@@ -9,6 +9,8 @@ tone: serious
 category: family
 rarity: common
 lifeStages: [child, teen]
+# C1: the week with the sitter is what this remembers.
+requires: { fired: neighbor_sitter }
 weight: { base: 10 }
 followUpOnly: true
 cast:

@@ -2,8 +2,8 @@
 id: coworker_payday
 title: About that $200
 text: >-
-  It's been a while since you lent {npc.name} that $200. Payday has come and
-  gone several times.
+  You lent {npc.name} $200 {since}. Payday has come and gone more than once
+  since then.
 tone: neutral
 category: work
 rarity: common
@@ -14,6 +14,9 @@ requires:
     - { career: { employed: true } }
 weight: { base: 10 }
 followUpOnly: true
+# C1: reviewed build warnings kept on purpose (docs/consistency-review.md).
+justified:
+  money: "The $200 left your savings when you lent it (coworker_short_on_cash); letting it go changes nothing now."
 cast:
   npc: { kind: coworker, presence: city }
 choices:

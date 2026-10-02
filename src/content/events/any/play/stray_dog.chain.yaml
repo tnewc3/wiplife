@@ -60,6 +60,7 @@ events:
         outcome:
           text: You buy cheaper shoes. The dog is thrilled.
           effects:
+            - { type: money, delta: -40 }
             - { type: stat, key: happiness, delta: 2 }
       - id: train
         label: Start training

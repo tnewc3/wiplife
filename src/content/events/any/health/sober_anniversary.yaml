@@ -8,6 +8,8 @@ tone: serious
 category: health
 rarity: common
 lifeStages: [youngAdult, adult, senior]
+# C1: the intervention is what this remembers.
+requires: { fired: intervention }
 weight: { base: 10 }
 followUpOnly: true
 cast:
@@ -23,7 +25,7 @@ choices:
       text: >-
         {family.name} turns the chip over in {family.their} fingers for a long
         time. "I didn't know if you'd forgive me," {family.they} {family:says|say}.
-        You've been meaning to say thank you for three years.
+        You've been meaning to say thank you ever since.
       effects:
         - { type: relationship, role: family, affection: 12, trust: 12 }
         - { type: stat, key: happiness, delta: 5 }

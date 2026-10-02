@@ -29,7 +29,7 @@ choices:
       base: 40
       stats: [{ key: confidence, weight: 0.3 }, { key: sociability, weight: 0.2 }]
       success:
-        text: You point out you've never been late and the unit next door has sat empty for months. The increase shrinks to two percent.
+        text: You point out that the unit next door has sat empty for months. The increase shrinks to two percent.
         effects:
           - { type: housing, action: rent_change, percent: 2 }
           - { type: stat, key: confidence, delta: 2 }

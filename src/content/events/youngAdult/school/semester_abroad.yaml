@@ -11,6 +11,9 @@ lifeStages: [youngAdult]
 requires: { education: { program: [college], tier: [state, elite], year: { gte: 2 }, final: false } }
 weight: { base: 6 }
 once: true
+# C1: reviewed build warnings kept on purpose (docs/consistency-review.md).
+justified:
+  money: "Staying means not spending the $4,000; your savings stay as they are."
 choices:
   - id: go
     label: Go

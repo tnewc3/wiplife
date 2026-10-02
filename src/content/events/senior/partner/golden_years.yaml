@@ -14,6 +14,9 @@ requires:
     - { romance: [married] }
 weight: { base: 8 }
 once: true
+# C1: reviewed build warnings kept on purpose (docs/consistency-review.md).
+justified:
+  past: "The event requires 25 years of marriage, which makes a long-promised \"someday\" trip and slower walking plausible for any couple."
 cast:
   spouse: { kind: spouse, presence: anywhere }
 choices:

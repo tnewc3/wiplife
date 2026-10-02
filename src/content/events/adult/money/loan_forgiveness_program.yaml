@@ -1,8 +1,10 @@
 id: loan_forgiveness_program
 title: The forgiveness program
+# C1: about the job you have (it no longer offers one it never gives you).
 text: >-
-  A nonprofit clinic is hiring, and the job posting has a line in bold:
-  "Qualifies for student loan forgiveness." It pays less than you'd like.
+  A letter from your loan servicer says your job may qualify for a student
+  loan forgiveness program. The catch: a mountain of forms, every one of them
+  due on time.
 tone: neutral
 category: money
 rarity: common
@@ -11,23 +13,27 @@ requires:
   all:
     - { finances: { kinds: [student] } }
     - { education: { program: [none] } }
+    - { career: { employed: true } }
 weight:
   base: 6
   modifiers:
     - { if: { trait: kindness, gt: 60 }, x: 1.5 }
 once: true
+# C1: reviewed build warnings kept on purpose (docs/consistency-review.md).
+justified:
+  money: "Ignoring the program leaves the loan to the yearly ledger's minimum payments; nothing changes at once."
 choices:
   - id: apply
-    label: Take the job and do the paperwork
+    label: Fill in every form
     outcome:
       text: >-
-        The work is meaningful and the paperwork is endless. Years later, a
-        letter arrives: half of your student debt is gone.
+        The forms are endless, and you fill in every one of them. It works:
+        half of your student debt is forgiven.
       effects:
         - { type: debt, action: forgive, share: 0.5, kinds: [student] }
-        - { type: stat, key: kindness, delta: 3 }
+        - { type: stat, key: discipline, delta: 3 }
         - { type: stat, key: happiness, delta: 3 }
-        - { type: history, text: Half of your student debt was forgiven after years of public service work., importance: 2 }
+        - { type: history, text: Half of your student debt was forgiven through a loan forgiveness program., importance: 2 }
   - id: pay_down
     label: Throw your savings at the loan instead
     visibleIf: { money: { gte: 3000 } }

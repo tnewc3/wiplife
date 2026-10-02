@@ -13,6 +13,9 @@ lifeStages: [youngAdult, adult, senior]
 requires: { career: { employed: true } }
 weight: { base: 10 }
 followUpOnly: true
+# C1: reviewed build warnings kept on purpose (docs/consistency-review.md).
+justified:
+  money: "The failed negotiation leaves the offer as it was: no raise is the outcome."
 cast:
   boss: { kind: boss, presence: city }
 choices:

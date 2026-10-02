@@ -13,6 +13,9 @@ requires:
     - { role: boss, affection: { lte: 45 } }
 weight: { base: 5 }
 cooldownYears: 6
+# C1: reviewed build warnings kept on purpose (docs/consistency-review.md).
+justified:
+  money: "Your coworkers buy the coffee, not you."
 cast:
   boss: { kind: boss, presence: city }
 choices:

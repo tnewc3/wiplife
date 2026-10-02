@@ -3,7 +3,7 @@
  * src/content/compiled/content.json, validating every file with Zod, and the
  * end-to-end test content pack (tests/e2e/content laid over it) into
  * src/content/compiled/test-content.json. Exits with code 1 and a list of
- * errors if anything is invalid.
+ * errors if anything is invalid. C1 wording checks print as warnings.
  */
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
@@ -38,5 +38,10 @@ for (const build of builds) {
   console.log(
     `${build.label} OK: ${result.definitionCount} definition(s), version ${result.bundle.contentVersion} → ${path.relative(root, build.out)}`,
   );
+  // C1 wording checks: warnings for review, not failures (tools/content/consistency.ts).
+  if (result.warnings.length > 0) {
+    console.warn(`${build.label}: ${result.warnings.length} consistency warning(s) to review (or justify in the event's "justified"):`);
+    console.warn(formatErrors(result.warnings));
+  }
 }
 if (failed) process.exit(1);

@@ -1,8 +1,8 @@
 id: drifting_friend
 title: Ages
 text: >-
-  You realize you haven't talked to {friend.name} in ages. You used to talk
-  every day. You scroll back through your messages to find the last one.
+  You realize you haven't talked to {friend.name} in ages. You scroll back
+  through your messages to find the last one.
 tone: neutral
 category: friends
 rarity: common

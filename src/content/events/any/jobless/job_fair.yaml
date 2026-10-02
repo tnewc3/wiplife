@@ -10,6 +10,9 @@ lifeStages: [youngAdult, adult, senior]
 requires: { career: { employed: false, retired: false, lostWithin: 3 } }
 weight: { base: 6 }
 cooldownYears: 3
+# C1: reviewed build warnings kept on purpose (docs/consistency-review.md).
+justified:
+  money: "\"Never need to buy a pen again\" is a joke about free pens; nothing is bought."
 choices:
   - id: work_room
     label: Work the room

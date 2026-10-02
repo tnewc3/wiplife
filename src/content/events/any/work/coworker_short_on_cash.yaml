@@ -16,6 +16,9 @@ weight:
   modifiers:
     - { if: { trait: kindness, gt: 60 }, x: 1.5 }
 cooldownYears: 6
+# C1: reviewed build warnings kept on purpose (docs/consistency-review.md).
+justified:
+  money: "The excuse keeps your money where it is; rent is only what you mumble."
 cast:
   npc: { kind: coworker, presence: city }
 choices:

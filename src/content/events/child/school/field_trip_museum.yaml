@@ -34,4 +34,5 @@ choices:
     outcome:
       text: You buy a pencil shaped like a dinosaur bone. It breaks by Tuesday.
       effects:
+        - { type: money, delta: -3 }
         - { type: stat, key: happiness, delta: 1 }

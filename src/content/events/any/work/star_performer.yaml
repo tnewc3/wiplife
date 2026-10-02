@@ -34,6 +34,7 @@ choices:
     outcome:
       text: You take the compliment, call your family, and buy yourself something nice.
       effects:
+        - { type: money, delta: -250 }
         - { type: stat, key: happiness, delta: 5 }
         - { type: stat, key: confidence, delta: 3 }
         - { type: stat, key: reputation, delta: 2 }

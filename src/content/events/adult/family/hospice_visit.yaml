@@ -14,6 +14,9 @@ weight:
   modifiers:
     - { if: { age: { gte: 55 } }, x: 1.5 }
 once: true
+# C1: reviewed build warnings kept on purpose (docs/consistency-review.md).
+justified:
+  money: "\"The price of eggs\" is small talk, not a purchase."
 cast:
   parent: { kind: parent, presence: anywhere }
 choices:

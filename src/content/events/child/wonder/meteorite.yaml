@@ -11,6 +11,9 @@ rarity: legendary
 lifeStages: [child]
 weight: { base: 60 }
 once: true
+# C1: reviewed build warnings kept on purpose (docs/consistency-review.md).
+justified:
+  past: "The history line records this very event, written as you'll remember it."
 choices:
   - id: keep
     label: Keep it under your bed
