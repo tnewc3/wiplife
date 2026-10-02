@@ -5,8 +5,8 @@ tone: light
 category: health
 rarity: common
 lifeStages: [youngAdult, adult, senior]
-weight: { base: 7 }
-cooldownYears: 4
+weight: { base: 4 }
+cooldownYears: 5
 # C1: meant to come back now and then (repeats are kept rare otherwise).
 recurring: true
 choices:

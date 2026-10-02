@@ -277,6 +277,7 @@ interface Character {
   personality: Personality;
   hidden: {
     luck; reputation; geneticRisk; vice; innerConflict;
+    happinessBaseline;                 // C1: Happiness drifts toward it each year (balance/aging.yaml happinessDrift)
     talent: TalentId | null;
     talentDiscovered: boolean;
   };
@@ -434,6 +435,8 @@ interface HousingState {
   partnerId?: Id;                      // your partner or spouse living with you (renting or owned); they pay
                                        // economy.housing.partnerShare of the rent or upkeep; cleared when the
                                        // romance ends
+  rentFactor?: number;                 // C1: a rental's rent as a multiple of the city's base rent after rent
+                                       // changes (rent_change); within economy.housing.rentFactor; reset by a move
 }
 
 interface HealthState {
@@ -468,9 +471,12 @@ interface EventInstance {
   cast: Record<string, Id>;            // role name -> person id
   resolvedChoiceId?: Id;
   outcomeText?: string;
+  since?: number;                      // C1: a follow-up: the year the event that scheduled it happened ({since})
+  money?: { change: number; balance: number; debtChange: number;   // C1: what the chosen outcome did to your
+            familyHelp?: number; housing?: { change: number; annual: number } };  // money, for the outcome card
 }
 
-interface ScheduledEvent { eventId: Id; dueYear: number; cast: Record<string, Id> }
+interface ScheduledEvent { eventId: Id; dueYear: number; cast: Record<string, Id>; since?: number }
 
 interface HistoryEntry {
   year: number; age: number; text: string;
@@ -513,6 +519,9 @@ interface EventDef {
   weight: { base: number; modifiers?: { if: Condition; x: number }[] };
   cooldownYears?: number;
   once?: boolean;
+  recurring?: true;                    // C1: meant to come back; other events are repeatWeight less likely each
+                                       // time they come back (balance/events.yaml)
+  justified?: { time?: string; money?: string; past?: string };   // C1: reviewed content-build warnings kept, with why
   followUpOnly?: boolean;              // only happens when scheduled (later steps of a chain)
   cast?: Record<string, CastSpec>;     // how to find or create each role
   choices?: ChoiceDef[];               // none = automatic outcome
@@ -531,6 +540,11 @@ interface CastSpec {
   admirer?: boolean;                   // Stage 9: an adult attracted to you, of a gender you're not attracted to
                                        // (yet; leaning toward a latent one): "try it and decide". A romance role
   optional?: boolean;                  // nobody fits: the event happens without this role
+  presence: 'household' | 'city' | 'nearby' | 'elsewhere' | 'anywhere';
+                                       // C1, required: where the person must be. household: lives with you (a
+                                       // partner you live with; parents and young siblings while you live with your
+                                       // parents); city: in your city, not with you; nearby: either; elsewhere:
+                                       // another city. Nobody new is created for household
 }
 
 interface ChoiceDef {
@@ -552,9 +566,14 @@ interface Outcome { text?: string; effects: Effect[] }
 type Effect =
   | { type: 'stat'; key: string; delta: number }
   | { type: 'money'; delta: number }   // Stage 6: a cost beyond savings becomes personal debt (adults)
+  | { type: 'rentMonths'; months: number }   // C1: money worth that many months of your housing cost
+  | { type: 'cost'; item: Id }         // C1: a cost item (balance/economy.yaml costs, scaled by city), less
+                                       // family help (economy.familyHelp); the rest from savings, then debt
+  | { type: 'moveAway'; role: string } // C1: that person moves to another city (not someone who lives with you)
   | { type: 'debt'; action: 'add' | 'forgive' | 'bankruptcy' | 'plan'; kind?; amount?; kinds?; share? }
   | { type: 'housing'; action: 'move_home' | 'rent' | 'homeless' | 'roommate' | 'live_alone' | 'sell'
-                     | 'move_in_together'; role?: string }   // role: the partner who moves in
+                     | 'move_in_together' | 'rent_change'; role?: string; percent?: number }
+                                       // role: the partner who moves in; percent (rent_change, C1): of the current rent
   | { type: 'relationship'; role: string; affection?: number; trust?: number; status?: string; kind?: string }
   | { type: 'memory'; role: string; tag: string }
   | { type: 'flag'; key: string; value: number | boolean | string }
@@ -611,7 +630,8 @@ type Condition =                       // structured, evaluated by src/engine/co
                    talent?: 'hidden' | 'found' | 'none' } }   // Stage 9; known: surfaced and not accepted
   | { memory: { role: string; tag: string } }       // about cast roles: checked once the event is cast
   | { role: string; alive?: boolean; age?: Compare; affection?: Compare; trust?: Compare;
-      kind?: RelationshipKind[]; status?: RelationshipStatus[]; years?: Compare };  // years: in its current kind
+      kind?: RelationshipKind[]; status?: RelationshipStatus[]; years?: Compare;   // years: in its current kind
+      where?: ('household' | 'city' | 'elsewhere')[] };   // C1: where the person is now
 // Compare = { gt?, gte?, lt?, lte?, eq? }
 ```
 
@@ -761,13 +781,14 @@ Every coding-AI prompt assumes this file exists at the repo root.
 - The player is "you". Use pronoun placeholders for every NPC; never hardcode he or she.
 
 ## Consistency rules (if it doesn't make sense, it doesn't happen)
-- Category contracts: every event category has required conditions, enforced by the content build (school events need enrollment; work events need a current job and no retirement; partner events need a partner).
-- Presence: every cast role declares where the person must be (your household, your city, or anywhere). Casting respects where people live and who lives with you. In-person actions need the same city.
-- Evidence: any text that states something about your past (a sport you played, a habit, a debt) must require the flag or memory that proves it.
-- Time: never write fixed gaps like "years later" in follow-ups. Use the elapsed-time placeholder, or no time phrase.
-- Money: any event or interaction that mentions money must change money, and any money change must be shown with the amount and your new balance. Amounts that depend on your situation (rent, wages) scale with it.
+- Category contracts: every event category has required conditions, enforced by the content build (school events need enrollment; work events need a current job and no retirement; partner events need a partner). See src/content/registries/categories.yaml.
+- Presence: every cast role declares where the person must be (household, city, nearby, elsewhere or anywhere). Casting respects where people live and who lives with you. Never cast a live-in partner as visiting. In-person actions need the same city.
+- Evidence: any text that states something about your past (a sport you played, a habit, a debt) must require the flag, memory or earlier event that proves it.
+- Time: never write fixed gaps like "years later" in follow-ups. Use the elapsed-time placeholder {since}, or no time phrase.
+- Money: any event or interaction that mentions money must change money, and any money change must be shown with the amount and your new balance. Amounts that depend on your situation (rent, wages, big costs) scale with it.
 - Household: if you live with a partner, events about your home and wellbeing must account for them (cast them, or branch the text).
 - Status-aware text: text that depends on relationship status, job or school must branch on it or require it.
+- The content build warns on wording it can't judge exactly (fixed time gaps in follow-ups, money words without money effects, claims about your past without evidence). Fix each warning, or give the reason in the event's `justified` field.
 
 ## Commands
 See README.md for build, test and check commands.
@@ -1419,7 +1440,7 @@ Meet every Stage 9 acceptance criterion. When finished, run all checks plus a 10
 - **Event sandbox** (`src/engine/sandbox.ts`, `src/ui/screens/sandbox/`): development and test builds open it with `/?sandbox` (production builds compile it away). It builds a throwaway life from a seed at the chosen age, stats and personality, creates someone for every role with the chosen pronoun set, and shows the card, every choice (marking those the state hides) and the outcome of a visible one. It never touches the saved life.
 - **Sample lives:** `npm run samples` writes 20 lives with their obituaries and life histories to `docs/sample-lives.md` for the human gate.
 - **Text checks:** the event text test also checks verb agreement after pronoun placeholders, double spaces, and contractions that don't work for every pronoun set ("{npc.they}'s").
-- Lives have parents and older siblings only (no grandparents, no younger siblings), so content never casts those.
+- Lives have parents and older siblings only (no grandparents, no younger siblings), so content never casts those. (C1 added grandparents.)
 
 **Common failure modes**
 - Rushed filler events that all read the same.
@@ -1447,6 +1468,24 @@ Meet every Stage 10 acceptance criterion. When finished, report the coverage sum
 ```
 
 ---
+
+### C1 — Consistency Pass (as built)
+
+The plan is in docs/expansion.md (C1); these notes say how it was built. The seven consistency rules are in AGENTS.md and its copy above.
+
+- **Category contracts:** `requires` on a category in `registries/categories.yaml` (school: enrolled; work: a job and not retired; jobless: no job and not retired; retirement: retired; partner: dating, engaged or married; prison: incarcerated). New categories: `career` (finding work), `jobless`, `retirement`, `partner`. The content build rejects an event whose `requires` doesn't imply its category's contract (`tools/content/references.ts`, `meetsContract`).
+- **Presence** (`src/engine/presence.ts`): every cast role declares `presence` (household, city, nearby, elsewhere or anywhere). `whereabouts` places a person: elsewhere when they live in another city; household for a partner you live with, and for parents and siblings under the independence age while you live with your parents; city otherwise. People keep their city when you move; a partner you live with moves with you; the `moveAway` effect moves someone to another city. Casting only picks people who fit, never creates someone for household, and creates someone for elsewhere in another city. A role condition can ask `where`. In-person management actions (asking someone out, proposing, marrying) answer with result events whose role needs the person in your city, so they aren't offered for someone who lives elsewhere; the rest (moving in, which brings them to you, breaking up, divorcing, cutting contact, reconciling) work from anywhere.
+- **Household:** categories marked `household: true` (home, health, partner) put a partner you live with first for support roles, even below the support thresholds. Wellbeing texts that call or visit someone branch on `where`.
+- **Runtime checks:** `consistencyProblems` (contract and presence) is checked when events are picked, when an action queues a result and when a follow-up comes due (one that no longer fits is dropped); `checkInvariants` reports any pending event that breaks them as `consistency:` failures, so development builds and the simulation catch them. The simulation reports them separately (`consistency violations`).
+- **Content-build warnings** (`tools/content/consistency.ts`): fixed time phrases in follow-ups, money words in a choice or text whose outcome changes no money, and claims about your past ("you used to", "remember when") without a required flag, memory or earlier event. `npm run content` prints them; an event keeps flagged wording only with a reason in `justified` (a stale one is an error). The test suite fails if any warning is left. The review is in `docs/consistency-review.md`.
+- **{since}** (`sinceText`): in a follow-up's text, when the event that scheduled it happened ("last year", "three years ago"; `text/time.yaml`). Scheduled events and their instances carry `since`; the build allows `{since}` only in follow-ups that another event schedules.
+- **Money on cards:** `resolveChoice` records `money` on the instance when an outcome changes savings, debt, family help or the yearly housing cost; the outcome card shows the amount and the new balance (`src/ui/labels.ts`). Choice buttons show what they cost or pay when it's known before choosing (a fixed outcome, or a check whose outcomes cost the same), with family help, the part that would go on credit, and rent changes (`knownChoiceMoney`).
+- **Costs and rent** (`src/engine/costs.ts`, `housing.ts`): the `cost` effect charges a `balance/economy.yaml` cost item scaled by the city's cost of living, less family help (the share for your family's wealth times your closeness to your closest living parent); savings pay first and the rest becomes personal debt. Weddings offer courthouse, small and big. `rent_change` multiplies a rental's `rentFactor`, which `housingCost` uses every year until you move; `rentMonths` pays or refunds months of your housing cost.
+- **Report a problem:** development and test builds show a button on event cards that copies (and shows) the event ID, choice, cast with where each person is, and a short state summary (`problemReport`).
+- **Happiness drift:** each year Happiness moves `happinessDrift.rate` of the way toward the life's `happinessBaseline` (rolled at birth; `balance/creation.yaml`). Obituary tone thresholds are back to 70 (bright) and 40 (heavy), mood bands 70 and 40. Target: `consistency.lifetimeHappiness` in `balance/targets.yaml`.
+- **Grandparents:** `generateFamily` creates each parent's two parents, a generation older; whether they died before you were born follows the NPC mortality odds; a living one lives in your city by `grandparents.sameCityChance`. The three grandparent events are back.
+- **Repeats:** events marked `recurring` may come back freely; any other event is `repeatWeight` (balance/events.yaml) times less likely for each earlier time. Answers to your own actions and to system triggers count as recurring. Target: `consistency.maxRepeatShare`, measured by the simulation and the coverage report.
+- **Saves:** schema version 9. The migration from 8 gives an older life the average Happiness baseline (50); the other new fields are optional.
 
 ### Stage 11 — Polish
 

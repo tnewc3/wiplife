@@ -32,6 +32,16 @@
 - Sexual violence is never a player choice.
 - The player is "you". Use pronoun placeholders for every NPC; never hardcode he or she.
 
+## Consistency rules (if it doesn't make sense, it doesn't happen)
+- Category contracts: every event category has required conditions, enforced by the content build (school events need enrollment; work events need a current job and no retirement; partner events need a partner). See src/content/registries/categories.yaml.
+- Presence: every cast role declares where the person must be (household, city, nearby, elsewhere or anywhere). Casting respects where people live and who lives with you. Never cast a live-in partner as visiting. In-person actions need the same city.
+- Evidence: any text that states something about your past (a sport you played, a habit, a debt) must require the flag, memory or earlier event that proves it.
+- Time: never write fixed gaps like "years later" in follow-ups. Use the elapsed-time placeholder {since}, or no time phrase.
+- Money: any event or interaction that mentions money must change money, and any money change must be shown with the amount and your new balance. Amounts that depend on your situation (rent, wages, big costs) scale with it.
+- Household: if you live with a partner, events about your home and wellbeing must account for them (cast them, or branch the text).
+- Status-aware text: text that depends on relationship status, job or school must branch on it or require it.
+- The content build warns on wording it can't judge exactly (fixed time gaps in follow-ups, money words without money effects, claims about your past without evidence). Fix each warning, or give the reason in the event's `justified` field.
+
 ## Commands
 See README.md for build, test and check commands.
 
