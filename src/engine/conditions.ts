@@ -3,7 +3,8 @@
  * are structured data from content; each case below matches one entry of
  * conditionSchema in src/content/schemas/events.ts.
  */
-import type { Compare, Condition } from '../content/schemas';
+import type { Compare, Condition, ContentBundle } from '../content/schemas';
+import { whereabouts } from './presence';
 import { mostMissed, totalDebt } from './finance';
 import { romanceStatus, yearsInKind } from './relationships';
 import type { Id, LifeState } from './types';
@@ -17,6 +18,8 @@ export interface ConditionContext {
    * them when the role is missing.
    */
   roles?: 'strict' | 'assumeTrue';
+  /** The content, for conditions on where someone is (C1); without it they fail. */
+  content?: ContentBundle;
 }
 
 export function compare(value: number, c: Compare): boolean {
@@ -187,6 +190,7 @@ export function evaluate(condition: Condition | undefined, state: LifeState, ctx
       if (condition.kind && !(rel && condition.kind.includes(rel.kind))) return false;
       if (condition.status && !(rel && condition.status.includes(rel.status))) return false;
       if (condition.years && !(rel && compare(yearsInKind(state, rel), condition.years))) return false;
+      if (condition.where && !(ctx.content && condition.where.includes(whereabouts(state, id, ctx.content)))) return false;
       return true;
     });
   }

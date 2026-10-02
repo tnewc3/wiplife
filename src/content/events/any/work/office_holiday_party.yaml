@@ -11,7 +11,7 @@ requires: { career: { employed: true } }
 weight: { base: 5 }
 cooldownYears: 5
 cast:
-  npc: { kind: coworker }
+  npc: { kind: coworker, presence: city }
 choices:
   - id: dance
     label: Get everyone dancing

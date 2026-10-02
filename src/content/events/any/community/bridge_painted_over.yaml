@@ -13,7 +13,7 @@ requires: { flag: tagged_bridge }
 weight: { base: 10 }
 followUpOnly: true
 cast:
-  friend: { kind: friend }
+  friend: { kind: friend, presence: anywhere }
 choices:
   - id: confess
     label: Comment "that was us"

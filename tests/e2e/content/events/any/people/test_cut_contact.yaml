@@ -8,7 +8,7 @@ lifeStages: [teen, youngAdult, adult, senior]
 weight: { base: 10 }
 followUpOnly: true
 cast:
-  person: { kind: acquaintance }
+  person: { kind: acquaintance, presence: anywhere }
 autoOutcome:
   text: That's that.
   effects:

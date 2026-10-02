@@ -9,6 +9,7 @@ import { evaluate } from '../conditions';
 import { castEvent, uncast } from '../events/casting';
 import { eventIndex, eventWeight, fitsSetting } from '../events/selection';
 import { weightedPick } from '../random';
+import { consistencyProblems } from '../presence';
 import { isFamilyKind, kindSince, romanceAllowed } from '../relationships';
 import { nextFloat, nextInt } from '../rng';
 import type { EventInstance, Id, LifeState } from '../types';
@@ -48,7 +49,11 @@ interface Picked {
 function tryCast(state: LifeState, view: LifeState, def: EventDef, content: ContentBundle, preset?: Record<string, Id>): Picked | null {
   const result = castEvent(state, def, state.rng, content, preset, view);
   if (!result) return null;
-  if (!evaluate(def.requires, state, { cast: result.cast, roles: 'strict' }) || !romanceAllowed(state, def, result.cast, content)) {
+  if (
+    !evaluate(def.requires, state, { cast: result.cast, roles: 'strict', content }) ||
+    !romanceAllowed(state, def, result.cast, content) ||
+    consistencyProblems(state, def, result.cast, content).length > 0
+  ) {
     uncast(state, result.created);
     return null;
   }

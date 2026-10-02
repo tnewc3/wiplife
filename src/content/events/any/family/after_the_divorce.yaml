@@ -15,9 +15,9 @@ requires:
 weight: { base: 10 }
 followUpOnly: true
 cast:
-  person: { kind: ex }
+  person: { kind: ex, presence: anywhere }
   # Whoever you trust most, if anyone: they may step in.
-  helper: { support: true, optional: true, age: { min: 18, max: 120 } }
+  helper: { support: true, optional: true, age: { min: 18, max: 120 }, presence: anywhere }
 choices:
   - id: lean
     label: Let {helper.name} take you out of the house

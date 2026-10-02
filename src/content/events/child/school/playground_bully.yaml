@@ -7,10 +7,11 @@ tone: serious
 category: school
 rarity: common
 lifeStages: [child, teen]
+requires: { education: { program: [elementary, middle] } }
 weight: { base: 8 }
 cooldownYears: 3
 cast:
-  bully: { kind: classmate, ageOffset: { min: 0, max: 2 }, createIfMissing: true, newChance: 0.5 }
+  bully: { kind: classmate, ageOffset: { min: 0, max: 2 }, createIfMissing: true, newChance: 0.5, presence: city }
 choices:
   - id: stand_up
     label: Stand up to {bully.them}

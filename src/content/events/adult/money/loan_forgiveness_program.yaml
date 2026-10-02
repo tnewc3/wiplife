@@ -1,0 +1,45 @@
+id: loan_forgiveness_program
+title: The forgiveness program
+text: >-
+  A nonprofit clinic is hiring, and the job posting has a line in bold:
+  "Qualifies for student loan forgiveness." It pays less than you'd like.
+tone: neutral
+category: money
+rarity: common
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { finances: { kinds: [student] } }
+    - { education: { program: [none] } }
+weight:
+  base: 6
+  modifiers:
+    - { if: { trait: kindness, gt: 60 }, x: 1.5 }
+once: true
+choices:
+  - id: apply
+    label: Take the job and do the paperwork
+    outcome:
+      text: >-
+        The work is meaningful and the paperwork is endless. Years later, a
+        letter arrives: half of your student debt is gone.
+      effects:
+        - { type: debt, action: forgive, share: 0.5, kinds: [student] }
+        - { type: stat, key: kindness, delta: 3 }
+        - { type: stat, key: happiness, delta: 3 }
+        - { type: history, text: Half of your student debt was forgiven after years of public service work., importance: 2 }
+  - id: pay_down
+    label: Throw your savings at the loan instead
+    visibleIf: { money: { gte: 3000 } }
+    outcome:
+      text: You make a big payment and feel lighter for about a week.
+      effects:
+        - { type: money, delta: -3000 }
+        - { type: debt, action: forgive, share: 0.1, kinds: [student] }
+        - { type: stat, key: stress, delta: -3 }
+  - id: ignore
+    label: Keep things as they are
+    outcome:
+      text: You close the tab. The loan keeps doing what loans do.
+      effects:
+        - { type: stat, key: stress, delta: 1 }

@@ -13,7 +13,7 @@ events:
     weight: { base: 8 }
     once: true
     cast:
-      parent: { kind: parent }
+      parent: { kind: parent, presence: household }
     choices:
       - id: keep
         label: Beg {parent.name} to keep it

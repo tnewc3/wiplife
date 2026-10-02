@@ -13,7 +13,7 @@ requires: { flag: joyrode }
 weight: { base: 10 }
 followUpOnly: true
 cast:
-  friend: { kind: friend }
+  friend: { kind: friend, presence: city }
 choices:
   - id: drive
     label: Get in, for old times' sake

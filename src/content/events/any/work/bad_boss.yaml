@@ -14,7 +14,7 @@ requires:
 weight: { base: 5 }
 cooldownYears: 6
 cast:
-  boss: { kind: boss }
+  boss: { kind: boss, presence: city }
 choices:
   - id: stand
     label: Stand your ground, calmly

@@ -11,7 +11,7 @@ requires: { age: { gte: 2 } }
 weight: { base: 5 }
 cooldownYears: 3
 cast:
-  parent: { kind: parent }
+  parent: { kind: parent, presence: household }
 choices:
   - id: run
     label: Run to {parent.name}'s bed

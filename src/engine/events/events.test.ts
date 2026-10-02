@@ -176,14 +176,14 @@ describe('chance checks', () => {
 describe('casting', () => {
   it('reuses someone who fits', () => {
     const life = adult('cast-existing');
-    const result = castEvent(cloneJson(life), ev({ id: 'c', cast: { p: { kind: 'parent' } } }), createRng('c'), content);
+    const result = castEvent(cloneJson(life), ev({ id: 'c', cast: { p: { kind: 'parent', presence: 'anywhere' } } }), createRng('c'), content);
     expect(life.relationships[result!.cast.p!]!.kind).toBe('parent');
     expect(result!.created).toEqual([]);
   });
 
   it('creates a friend when none fits, with a relationship starting this year', () => {
     const life = cloneJson(adult('cast-new'));
-    const def = ev({ id: 'c', cast: { f: { kind: 'friend', ageOffset: { min: -2, max: 2 }, createIfMissing: true } } });
+    const def = ev({ id: 'c', cast: { f: { kind: 'friend', ageOffset: { min: -2, max: 2 }, createIfMissing: true, presence: 'city' } } });
     const result = castEvent(life, def, createRng('c'), content)!;
     const id = result.cast.f!;
     expect(result.created).toEqual([id]);
@@ -196,13 +196,13 @@ describe('casting', () => {
 
   it('never creates family, and fails when a role can’t be filled', () => {
     const life = cloneJson(adult('cast-fail'));
-    expect(castEvent(life, ev({ id: 'c', cast: { s: { kind: 'spouse', createIfMissing: true } } }), createRng('c'), content)).toBeNull();
+    expect(castEvent(life, ev({ id: 'c', cast: { s: { kind: 'spouse', createIfMissing: true, presence: 'anywhere' } } }), createRng('c'), content)).toBeNull();
   });
 
   it('casts different people in different roles', () => {
     const life = cloneJson(adult('cast-two'));
-    const parents = castCandidates(life, { kind: 'parent' }, content).length;
-    const result = castEvent(life, ev({ id: 'c', cast: { a: { kind: 'parent' }, b: { kind: 'parent' } } }), createRng('c'), content);
+    const parents = castCandidates(life, { kind: 'parent', presence: 'anywhere' }, content).length;
+    const result = castEvent(life, ev({ id: 'c', cast: { a: { kind: 'parent', presence: 'anywhere' }, b: { kind: 'parent', presence: 'anywhere' } } }), createRng('c'), content);
     if (parents >= 2) expect(result!.cast.a).not.toBe(result!.cast.b);
     else expect(result).toBeNull();
   });
@@ -213,12 +213,12 @@ describe('casting', () => {
       d.people[pid]!.alive = false;
       d.people[pid]!.deathYear = d.currentYear;
     });
-    expect(castEvent(cloneJson(life), ev({ id: 'c', cast: { p: { kind: 'parent' } } }), createRng('c'), content, { p: parentOf(life) })).toBeNull();
+    expect(castEvent(cloneJson(life), ev({ id: 'c', cast: { p: { kind: 'parent', presence: 'anywhere' } } }), createRng('c'), content, { p: parentOf(life) })).toBeNull();
   });
 
   it('filters by age', () => {
     const life = adult('cast-age');
-    for (const p of castCandidates(life, { kind: 'parent', age: { min: 0, max: 10 } }, content)) throw new Error(`unexpected ${p.id}`);
+    for (const p of castCandidates(life, { kind: 'parent', age: { min: 0, max: 10 }, presence: 'anywhere' }, content)) throw new Error(`unexpected ${p.id}`);
   });
 });
 
@@ -309,7 +309,7 @@ describe('pacing director', () => {
   });
 
   it('queues due follow-ups first and drops ones that can no longer happen', () => {
-    const follow = ev({ id: 'follow', followUpOnly: true, cast: { p: { kind: 'parent' } } });
+    const follow = ev({ id: 'follow', followUpOnly: true, cast: { p: { kind: 'parent', presence: 'anywhere' } } });
     const bundle = withEvents(follow, ev({ id: 'filler' }));
     const life = produce(adult('due'), (d) => {
       const pid = parentOf(d);
@@ -360,7 +360,7 @@ describe('pacing director', () => {
 describe('resolveChoice', () => {
   const choiceEvent = ev({
     id: 'pick',
-    cast: { p: { kind: 'parent' } },
+    cast: { p: { kind: 'parent', presence: 'anywhere' } },
     autoOutcome: undefined,
     choices: [
       { id: 'hug', label: 'Hug {p.name}', outcome: { text: '{p.They} {p:smiles|smile}.', effects: [{ type: 'stat', key: 'happiness', delta: 1 }] } },

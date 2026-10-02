@@ -10,7 +10,7 @@ lifeStages: [child]
 weight: { base: 4 }
 once: true
 cast:
-  sibling: { kind: sibling, ageOffset: { min: -5, max: 5 } }
+  sibling: { kind: sibling, ageOffset: { min: -5, max: 5 }, presence: household }
 choices:
   - id: take_it
     label: Take the blame

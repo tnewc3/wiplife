@@ -23,6 +23,10 @@ export const LIFE_STAGE_IDS = ['early', 'child', 'teen', 'youngAdult', 'adult', 
 export const lifeStageSchema = z.enum(LIFE_STAGE_IDS);
 
 
+/** Where a cast person must be (C1, the presence rule). */
+export const PRESENCE_VALUES = ['household', 'city', 'nearby', 'elsewhere', 'anywhere'] as const;
+export type Presence = (typeof PRESENCE_VALUES)[number];
+
 /** Kinds casting may create; family, partners and work relationships come from other systems. */
 export const CREATABLE_KINDS = ['friend', 'classmate', 'acquaintance'] as const;
 
@@ -96,6 +100,8 @@ export type Condition =
       status?: z.infer<typeof relationshipStatusSchema>[];
       /** Years since the relationship took its current kind (dating, married...). */
       years?: Compare;
+      /** C1: where they are: living with you, elsewhere in your city, or in another city. */
+      where?: ('household' | 'city' | 'elsewhere')[];
     };
 
 /** Your money situation. Every field given must hold. */
@@ -337,6 +343,7 @@ export const conditionSchema: z.ZodType<Condition> = z.lazy(() =>
       kind: z.array(relationshipKindSchema).min(1).optional(),
       status: z.array(relationshipStatusSchema).min(1).optional(),
       years: compareSchema.optional(),
+      where: z.array(z.enum(['household', 'city', 'elsewhere'])).min(1).optional(),
     }),
   ]),
 ) as z.ZodType<Condition>;
@@ -382,6 +389,15 @@ export const castSpecSchema = z
     createIfMissing: z.boolean().optional(),
     /** Chance of creating someone new even when someone fits. */
     newChance: z.number().min(0).max(1).optional(),
+    /**
+     * Where the person must be (C1, the presence rule): living with you
+     * (household), in your city but not with you (city), either of those
+     * (nearby, for in-person moments), in another city (elsewhere), or
+     * anywhere at all. Casting picks only people who fit,
+     * a scheduled follow-up whose person no longer fits doesn't happen, and
+     * someone new is created in your city (so never for elsewhere or household).
+     */
+    presence: z.enum(PRESENCE_VALUES),
   })
   .refine((s) => (s.kind === undefined) !== (s.support !== true), 'a role needs exactly one of kind or support: true')
   .refine(
@@ -554,6 +570,11 @@ export const effectSchema = z.discriminatedUnion('type', [
   z.strictObject({ type: z.literal('innerConflict'), delta: z.int().min(-100).max(100) }),
   /** You discover your hidden talent, if you have one you haven't found (Stage 9). */
   z.strictObject({ type: z.literal('talent') }),
+  /**
+   * C1: the person cast in `role` moves to another city (a friend moving
+   * across the country). Nobody who lives with you moves this way.
+   */
+  z.strictObject({ type: z.literal('moveAway'), role: roleSchema }),
 ]);
 export type Effect = z.infer<typeof effectSchema>;
 
@@ -649,6 +670,18 @@ export const categoryRegistrySchema = z.strictObject({
        * in prison, and while you are, only these happen.
        */
       prison: z.boolean().optional(),
+      /**
+       * C1, the category contract: conditions every event of this category
+       * must require. The content build rejects an event whose requirements
+       * don't include them, and an event that fires without them is an
+       * invariant failure.
+       */
+      requires: conditionSchema.optional(),
+      /**
+       * Home, health and wellbeing (C1, the household rule): a partner who
+       * lives with you is preferred for the event's support and partner roles.
+       */
+      household: z.boolean().optional(),
     }),
   ),
 });

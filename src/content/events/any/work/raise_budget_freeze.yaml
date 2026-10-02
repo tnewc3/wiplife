@@ -10,11 +10,14 @@ tone: serious
 category: work
 rarity: common
 lifeStages: [youngAdult, adult, senior]
-requires: { career: { performance: { lt: 45 } } }
+requires:
+  all:
+    - { career: { performance: { lt: 45 } } }
+    - { career: { employed: true } }
 weight: { base: 14 }
 followUpOnly: true
 cast:
-  boss: { kind: boss }
+  boss: { kind: boss, presence: city }
 choices:
   - id: push
     label: Push for it anyway

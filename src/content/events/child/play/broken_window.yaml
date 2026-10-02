@@ -11,7 +11,7 @@ requires: { age: { gte: 7 } }
 weight: { base: 4 }
 once: true
 cast:
-  neighbor: { kind: acquaintance, age: { min: 55, max: 85 }, createIfMissing: true }
+  neighbor: { kind: acquaintance, age: { min: 55, max: 85 }, createIfMissing: true, presence: city }
 choices:
   - id: knock
     label: Knock on the door and confess

@@ -15,7 +15,7 @@ requires:
 weight: { base: 4 }
 cooldownYears: 5
 cast:
-  partner: { kind: acquaintance, romantic: true, createIfMissing: true }
+  partner: { kind: acquaintance, romantic: true, createIfMissing: true, presence: city }
 choices:
   - id: dance
     label: Say yes

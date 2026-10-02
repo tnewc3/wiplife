@@ -12,7 +12,7 @@ requires: { age: { lte: 2 } }
 weight: { base: 6 }
 once: true
 cast:
-  parent: { kind: parent }
+  parent: { kind: parent, presence: household }
 choices:
   - id: go
     label: Let go and wobble over

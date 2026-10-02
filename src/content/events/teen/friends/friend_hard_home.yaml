@@ -11,8 +11,8 @@ lifeStages: [teen]
 weight: { base: 2 }
 once: true
 cast:
-  friend: { kind: friend, ageOffset: { min: -2, max: 2 } }
-  parent: { kind: parent }
+  friend: { kind: friend, ageOffset: { min: -2, max: 2 }, presence: city }
+  parent: { kind: parent, presence: household }
 choices:
   - id: stay
     label: Let {friend.them} in and wake {parent.name}

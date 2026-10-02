@@ -1023,7 +1023,7 @@ export function getEventCard(state: LifeState, index: number, content: ContentBu
   const ctx = textContext(state, instance.cast, content);
   const choices = def.choices
     ? def.choices
-        .filter((c) => evaluate(c.visibleIf, state, { cast: instance.cast, roles: 'strict' }))
+        .filter((c) => evaluate(c.visibleIf, state, { cast: instance.cast, roles: 'strict', content }))
         .map((c) => ({ id: c.id, label: renderText(c.label, ctx) }))
     : [{ id: CONTINUE_CHOICE, label: 'Continue' }];
   return { ...base, title: renderText(def.title, ctx), text: renderText(def.text, ctx), tone: def.tone, choices };

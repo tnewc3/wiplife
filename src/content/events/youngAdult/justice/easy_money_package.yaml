@@ -15,7 +15,7 @@ weight:
     - { if: { trait: riskTaking, gt: 60 }, x: 1.5 }
 once: true
 cast:
-  contact: { kind: acquaintance, ageOffset: { min: -5, max: 10 }, createIfMissing: true, newChance: 0.6 }
+  contact: { kind: acquaintance, ageOffset: { min: -5, max: 10 }, createIfMissing: true, newChance: 0.6, presence: city }
 choices:
   - id: once
     label: Do it once

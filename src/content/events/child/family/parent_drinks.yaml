@@ -18,7 +18,7 @@ weight:
     - { if: { familyWealth: [poor] }, x: 1.5 }
 once: true
 cast:
-  parent: { kind: parent }
+  parent: { kind: parent, presence: household }
 choices:
   - id: hide_bottles
     label: Hide the bottles

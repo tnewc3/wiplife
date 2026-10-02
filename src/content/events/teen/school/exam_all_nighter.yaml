@@ -5,6 +5,7 @@ tone: neutral
 category: school
 rarity: common
 lifeStages: [teen, youngAdult]
+requires: { education: { program: [high, college, trade, grad] } }
 weight: { base: 8 }
 cooldownYears: 2
 choices:

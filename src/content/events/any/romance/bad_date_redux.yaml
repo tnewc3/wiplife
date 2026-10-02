@@ -15,7 +15,7 @@ requires:
 weight: { base: 10 }
 followUpOnly: true
 cast:
-  match: { kind: acquaintance, age: { min: 18, max: 120 } }
+  match: { kind: acquaintance, age: { min: 18, max: 120 }, presence: city }
 choices:
   - id: retry
     label: Suggest a do-over, no apps this time

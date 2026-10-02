@@ -10,8 +10,8 @@ lifeStages: [early]
 weight: { base: 6 }
 cooldownYears: 2
 cast:
-  parentA: { kind: parent }
-  parentB: { kind: parent }
+  parentA: { kind: parent, presence: household }
+  parentB: { kind: parent, presence: household }
 choices:
   - id: hide
     label: Pull the blanket over your head

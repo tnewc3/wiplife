@@ -4,6 +4,7 @@
  */
 import type { ContentBundle } from '../content/schemas';
 import { ageOf, isCurrentPartner, isFamilyKind, isPartnerKind, isRomanticKind, kindSince } from './relationships';
+import { consistencyProblems } from './presence';
 import { isRngState } from './rng';
 import { lifeStageForAge } from './systems/aging';
 import { meetsJobRequirements } from './career';
@@ -296,6 +297,15 @@ export function checkInvariants(state: LifeState, content: ContentBundle): strin
     if (!content.events[p.eventId]) fail(`pending event "${p.eventId}" is not known`);
     for (const [role, id] of Object.entries(p.cast)) if (!state.people[id]) fail(`pending ${p.eventId} casts missing person ${id} as ${role}`);
   }
+  // C1: while nothing has been chosen yet (the state is as it was when the
+  // events were picked), every pending event keeps its category contract and
+  // everyone in it is where the role needs them.
+  if ((state.phase === 'events' || state.phase === 'action') && state.pending.every((p) => p.resolvedChoiceId === undefined)) {
+    for (const p of state.pending) {
+      const def = content.events[p.eventId];
+      if (def) for (const problem of consistencyProblems(state, def, p.cast, content)) fail(`consistency: ${problem}`);
+    }
+  }
   const pendingEvents = state.pending.map((p) => p.eventId);
   if (new Set(pendingEvents).size !== pendingEvents.length) fail('an event appears twice in one year');
   for (const s of state.scheduled) {
@@ -511,6 +521,8 @@ function stage9Failures(state: LifeState, content: ContentBundle): string[] {
     if (r.years !== undefined && (!Number.isInteger(r.years) || r.years < 1)) fail(`${label}: invalid years`);
     if (r.outcome === 'jail' && r.year - state.birthYear < content.balance.economy.independenceAge) fail(`${label}: jail for a minor`);
   }
+  // C1: the work contract relies on this (a job always means not retired).
+  if (state.career.job && state.career.retired) fail('retired with a job');
   const inside = state.housing.kind === 'incarcerated';
   if (inside !== (legal.incarceratedUntil !== undefined)) fail('prison and incarceratedUntil disagree');
   if (inside) {

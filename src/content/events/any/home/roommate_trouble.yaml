@@ -14,7 +14,7 @@ requires:
 weight: { base: 7 }
 cooldownYears: 4
 cast:
-  roommate: { kind: acquaintance, age: { min: 18, max: 120 }, ageOffset: { min: -8, max: 8 }, createIfMissing: true, newChance: 0.8 }
+  roommate: { kind: acquaintance, age: { min: 18, max: 120 }, ageOffset: { min: -8, max: 8 }, createIfMissing: true, newChance: 0.8, presence: city }
 choices:
   - id: talk
     label: Have the talk

@@ -11,7 +11,7 @@ lifeStages: [teen]
 weight: { base: 7 }
 once: true
 cast:
-  sibling: { kind: sibling }
+  sibling: { kind: sibling, presence: household }
 choices:
   - id: thank
     label: Ask what {sibling.they} told them

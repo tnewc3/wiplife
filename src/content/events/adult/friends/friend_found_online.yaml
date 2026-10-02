@@ -16,7 +16,7 @@ requires:
 weight: { base: 10 }
 followUpOnly: true
 cast:
-  friend: { kind: friend }
+  friend: { kind: friend, presence: anywhere }
 choices:
   - id: call
     label: Call right now

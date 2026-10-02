@@ -5,6 +5,7 @@ tone: neutral
 category: prison
 rarity: common
 lifeStages: [youngAdult, adult, senior]
+requires: { legal: { incarcerated: true } }
 weight: { base: 10 }
 autoOutcome:
   text: Another day done.

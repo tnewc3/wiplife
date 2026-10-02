@@ -18,7 +18,7 @@ events:
         - { if: { trait: kindness, gt: 60 }, x: 1.5 }
     cooldownYears: 6
     cast:
-      friend: { kind: friend, ageOffset: { min: -4, max: 4 }, createIfMissing: true }
+      friend: { kind: friend, ageOffset: { min: -4, max: 4 }, createIfMissing: true, presence: anywhere }
     choices:
       - id: lend
         label: Lend it
@@ -67,7 +67,7 @@ events:
     weight: { base: 10 }
     followUpOnly: true
     cast:
-      friend: { kind: friend }
+      friend: { kind: friend, presence: anywhere }
     choices:
       - id: remind
         label: Remind {friend.them} about the money

@@ -12,7 +12,7 @@ lifeStages: [youngAdult, adult, senior]
 weight: { base: 10 }
 followUpOnly: true
 cast:
-  admirer: { kind: acquaintance }
+  admirer: { kind: acquaintance, presence: anywhere }
 choices:
   - id: thank
     label: Tell {admirer.them} that kiss changed things for you

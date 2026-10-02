@@ -10,7 +10,7 @@ lifeStages: [senior]
 weight: { base: 7 }
 once: true
 cast:
-  friend: { kind: friend, ageOffset: { min: -8, max: 8 }, createIfMissing: true, newChance: 0.5 }
+  friend: { kind: friend, ageOffset: { min: -8, max: 8 }, createIfMissing: true, newChance: 0.5, presence: city }
 choices:
   - id: join
     label: Become a regular

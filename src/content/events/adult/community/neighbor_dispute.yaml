@@ -10,7 +10,7 @@ lifeStages: [adult, senior]
 weight: { base: 7 }
 cooldownYears: 5
 cast:
-  neighbor: { kind: acquaintance, ageOffset: { min: -15, max: 15 }, createIfMissing: true, newChance: 0.5 }
+  neighbor: { kind: acquaintance, ageOffset: { min: -15, max: 15 }, createIfMissing: true, newChance: 0.5, presence: city }
 choices:
   - id: cookies
     label: Bake cookies and talk it out

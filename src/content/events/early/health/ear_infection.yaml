@@ -10,7 +10,7 @@ lifeStages: [early]
 weight: { base: 3 }
 cooldownYears: 2
 cast:
-  parent: { kind: parent }
+  parent: { kind: parent, presence: household }
 choices:
   - id: walk
     label: Let {parent.name} walk you up and down the hall

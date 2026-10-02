@@ -11,7 +11,7 @@ requires: { age: { gte: 15 } }
 weight: { base: 12 }
 once: true
 cast:
-  parent: { kind: parent }
+  parent: { kind: parent, presence: household }
 choices:
   - id: slow
     label: Take it slow

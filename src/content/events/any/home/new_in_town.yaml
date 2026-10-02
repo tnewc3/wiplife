@@ -14,7 +14,7 @@ requires:
 weight: { base: 6 }
 cooldownYears: 4
 cast:
-  neighbor: { kind: acquaintance, age: { min: 18, max: 90 }, createIfMissing: true, newChance: 1 }
+  neighbor: { kind: acquaintance, age: { min: 18, max: 90 }, createIfMissing: true, newChance: 1, presence: city }
 choices:
   - id: go
     label: Bring a dish and go

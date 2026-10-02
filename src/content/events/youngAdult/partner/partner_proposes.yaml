@@ -1,0 +1,44 @@
+id: partner_proposes
+title: One knee
+text: >-
+  {partner.name} has been acting strange all evening. Then, in the middle of
+  the kitchen, {partner.they} {partner:gets|get} down on one knee.
+tone: light
+category: partner
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { role: partner, years: { gte: 2 }, affection: { gte: 60 } }
+    - { romance: [dating] }
+weight: { base: 7 }
+cooldownYears: 3
+cast:
+  partner: { kind: partner, presence: anywhere }
+choices:
+  - id: yes
+    label: Say yes
+    outcome:
+      text: You say yes. {partner.name} drops the ring, and you both crawl around under the table looking for it.
+      effects:
+        - { type: relationship, role: partner, kind: fiance, affection: 10, trust: 5 }
+        - { type: memory, role: partner, tag: engaged_to_you }
+        - { type: stat, key: happiness, delta: 10 }
+        - { type: history, text: '{partner.name} proposed, and you said yes.', importance: 2 }
+  - id: not_yet
+    label: Say you need more time
+    outcome:
+      text: '{partner.name} gets up slowly and puts the ring back in {partner.their} pocket. "Okay," {partner.they} {partner:says|say}. "Okay."'
+      effects:
+        - { type: relationship, role: partner, affection: -8, trust: -3 }
+        - { type: memory, role: partner, tag: you_said_not_yet }
+  - id: no
+    label: Say no, and mean it
+    outcome:
+      text: You both know what the answer means. By the end of the week, {partner.name} has moved out.
+      effects:
+        - { type: relationship, role: partner, kind: ex, affection: -25, trust: -10 }
+        - { type: memory, role: partner, tag: you_refused_them }
+        - { type: stat, key: happiness, delta: -5 }
+        - { type: history, text: '{partner.name} proposed. You said no, and the two of you split up.', importance: 2 }

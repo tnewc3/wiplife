@@ -12,7 +12,7 @@ requires: { stat: health, lte: 45 }
 weight: { base: 6 }
 cooldownYears: 6
 cast:
-  helper: { support: true, optional: true }
+  helper: { support: true, optional: true, presence: anywhere }
 choices:
   - id: let_help
     label: Let {helper.name} take care of you

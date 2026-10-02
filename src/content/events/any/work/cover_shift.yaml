@@ -12,7 +12,7 @@ requires: { career: { employed: true } }
 weight: { base: 5 }
 cooldownYears: 5
 cast:
-  npc: { kind: coworker }
+  npc: { kind: coworker, presence: city }
 choices:
   - id: cover
     label: Cover for {npc.them}

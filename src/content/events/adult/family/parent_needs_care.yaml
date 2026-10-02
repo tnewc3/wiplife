@@ -12,7 +12,7 @@ requires: { role: parent, age: { gte: 75 } }
 weight: { base: 5 }
 cooldownYears: 8
 cast:
-  parent: { kind: parent }
+  parent: { kind: parent, presence: anywhere }
 choices:
   - id: care_home
     label: Find a good care home and pay your share
@@ -27,6 +27,7 @@ choices:
         - { type: stat, key: stress, delta: 4 }
   - id: every_day
     label: Go over every day
+    visibleIf: { role: parent, where: [household, city] }
     outcome:
       text: >-
         Groceries, pills, the remote control that never works. You're tired in

@@ -16,7 +16,7 @@ weight: { base: 10 }
 followUpOnly: true
 cast:
   # Filled by the action: your ex.
-  person: { kind: ex }
+  person: { kind: ex, presence: anywhere }
 choices:
   - id: honest
     label: Say you've missed {person.them}

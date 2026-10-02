@@ -11,7 +11,7 @@ requires: { age: { gte: 18 } }
 weight: { base: 3 }
 cooldownYears: 8
 cast:
-  ex: { kind: ex }
+  ex: { kind: ex, presence: anywhere }
 choices:
   - id: coffee
     label: Suggest coffee, for old times' sake

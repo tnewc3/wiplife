@@ -14,7 +14,7 @@ requires:
 weight: { base: 6 }
 cooldownYears: 5
 cast:
-  boss: { kind: boss }
+  boss: { kind: boss, presence: city }
 choices:
   - id: time_off
     label: Take a week off, unpaid if you have to

@@ -12,7 +12,7 @@ lifeStages: [teen, youngAdult, adult, senior]
 weight: { base: 5 }
 followUpOnly: true
 cast:
-  friend: { kind: friend, optional: true }
+  friend: { kind: friend, optional: true, presence: anywhere }
 choices:
   - id: tell_friend
     label: Tell {friend.name}

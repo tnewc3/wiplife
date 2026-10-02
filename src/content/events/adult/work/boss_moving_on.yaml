@@ -12,7 +12,7 @@ requires: { career: { employed: true, retired: false, years: { gte: 2 } } }
 weight: { base: 4 }
 cooldownYears: 6
 cast:
-  boss: { kind: boss }
+  boss: { kind: boss, presence: city }
 choices:
   - id: grateful
     label: Thank {boss.them} for everything {boss.they} did for you

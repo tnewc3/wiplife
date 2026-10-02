@@ -14,8 +14,8 @@ weight:
     - { if: { trait: ambition, gt: 60 }, x: 1.5 }
 cooldownYears: 6
 cast:
-  npc: { kind: coworker }
-  boss: { kind: boss }
+  npc: { kind: coworker, presence: city }
+  boss: { kind: boss, presence: city }
 choices:
   - id: congrats
     label: Congratulate {npc.them} and mean it

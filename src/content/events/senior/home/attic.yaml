@@ -15,7 +15,7 @@ requires:
 weight: { base: 4 }
 once: true
 cast:
-  partner: { kind: spouse, optional: true }
+  partner: { kind: spouse, optional: true, presence: anywhere }
 choices:
   - id: all
     label: Get rid of almost everything

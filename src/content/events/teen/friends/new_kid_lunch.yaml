@@ -10,7 +10,7 @@ lifeStages: [child, teen]
 weight: { base: 7 }
 once: true
 cast:
-  newKid: { kind: classmate, ageOffset: { min: -1, max: 1 }, createIfMissing: true, newChance: 1 }
+  newKid: { kind: classmate, ageOffset: { min: -1, max: 1 }, createIfMissing: true, newChance: 1, presence: city }
 choices:
   - id: wave
     label: Wave {newKid.them} over

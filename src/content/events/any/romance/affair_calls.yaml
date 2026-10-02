@@ -16,7 +16,7 @@ requires:
 weight: { base: 10 }
 followUpOnly: true
 cast:
-  other: { kind: acquaintance, age: { min: 18, max: 120 } }
+  other: { kind: acquaintance, age: { min: 18, max: 120 }, presence: anywhere }
 choices:
   - id: end
     label: End it, clearly and for good

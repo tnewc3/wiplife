@@ -1,0 +1,63 @@
+id: strangers_at_dinner
+title: Two strangers
+text: >-
+  Dinner with {spouse.name} is silent again. You try to remember the last
+  time either of you laughed at home, and you can't.
+tone: serious
+category: partner
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { role: spouse, affection: { lt: 35 } }
+    - { romance: [married] }
+weight: { base: 9 }
+cooldownYears: 3
+cast:
+  spouse: { kind: spouse, presence: household }
+choices:
+  - id: therapy
+    label: Suggest couples therapy
+    check:
+      base: 50
+      stats: [{ role: spouse, key: affection, weight: 0.5 }, { key: kindness, weight: 0.2 }]
+      success:
+        text: >-
+          The therapist's office smells like lavender. Week by week, you start
+          talking again, and then laughing.
+        effects:
+          - { type: money, delta: -800 }
+          - { type: relationship, role: spouse, affection: 18, trust: 8 }
+          - { type: memory, role: spouse, tag: couples_therapy }
+      failure:
+        text: '{spouse.name} goes to two sessions and stops. "What''s the point?" {spouse.they} {spouse:asks|ask}.'
+        effects:
+          - { type: money, delta: -300 }
+          - { type: relationship, role: spouse, affection: -3 }
+  - id: ask
+    label: Ask if you're still in love
+    check:
+      base: 40
+      stats: [{ role: spouse, key: affection, weight: 0.6 }]
+      success:
+        text: '"I don''t know," {spouse.name} says. "But I want to be." It''s the first honest thing either of you has said in months.'
+        effects:
+          - { type: relationship, role: spouse, affection: 10, trust: 6 }
+      failure:
+        text: '{spouse.name} doesn''t answer, which is an answer. Within the month, you agree to end the marriage.'
+        effects:
+          - { type: relationship, role: spouse, kind: ex, affection: -5 }
+          - { type: memory, role: spouse, tag: divorced }
+          - { type: money, delta: -2500 }
+          - { type: stat, key: happiness, delta: -8 }
+          - { type: stat, key: stress, delta: 6 }
+          - { type: history, text: 'You and {spouse.name} agreed to end your marriage.', importance: 3 }
+  - id: endure
+    label: Keep your head down and wait for it to pass
+    outcome:
+      text: It doesn't pass. It just becomes normal.
+      effects:
+        - { type: relationship, role: spouse, affection: -4 }
+        - { type: stat, key: happiness, delta: -3 }
+        - { type: stat, key: stress, delta: 4 }

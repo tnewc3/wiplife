@@ -11,10 +11,11 @@ requires:
   all:
     - { memory: { role: npc, tag: lunch_buddy } }
     - { role: npc, affection: { gte: 55 } }
+    - { career: { employed: true } }
 weight: { base: 8 }
 once: true
 cast:
-  npc: { kind: coworker }
+  npc: { kind: coworker, presence: city }
 choices:
   - id: go
     label: Go, and bring dessert

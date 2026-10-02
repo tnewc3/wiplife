@@ -12,7 +12,7 @@ weight: { base: 10 }
 followUpOnly: true
 cast:
   # Filled by the action: anyone who isn't your current partner.
-  person: { kind: acquaintance }
+  person: { kind: acquaintance, presence: anywhere }
 choices:
   - id: block
     label: Block {person.their} number and move on

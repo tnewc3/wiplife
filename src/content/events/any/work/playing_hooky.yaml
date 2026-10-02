@@ -14,7 +14,7 @@ weight:
     - { if: { trait: riskTaking, gt: 60 }, x: 1.5 }
 cooldownYears: 5
 cast:
-  boss: { kind: boss }
+  boss: { kind: boss, presence: city }
 choices:
   - id: call_in
     label: Call in "sick"

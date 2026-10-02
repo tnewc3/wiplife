@@ -11,7 +11,7 @@ requires: { career: { employed: true, performance: { gte: 60 }, years: { gte: 2 
 weight: { base: 4 }
 cooldownYears: 5
 cast:
-  boss: { kind: boss }
+  boss: { kind: boss, presence: city }
 choices:
   - id: leverage
     label: Tell {boss.name} about the offer

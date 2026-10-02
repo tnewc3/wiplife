@@ -14,7 +14,7 @@ requires: { age: { gte: 3, lte: 8 } }
 weight: { base: 5 }
 once: true
 cast:
-  sitter: { kind: acquaintance, age: { min: 60, max: 78 }, createIfMissing: true, newChance: 1 }
+  sitter: { kind: acquaintance, age: { min: 60, max: 78 }, createIfMissing: true, newChance: 1, presence: city }
 choices:
   - id: spoil
     label: Let {sitter.name} spoil you rotten

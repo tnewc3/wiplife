@@ -22,7 +22,7 @@ events:
         - { if: { familyWealth: [poor, working] }, x: 1.5 }
     once: true
     cast:
-      counselor: { kind: acquaintance, age: { min: 30, max: 64 }, createIfMissing: true, newChance: 1 }
+      counselor: { kind: acquaintance, age: { min: 30, max: 64 }, createIfMissing: true, newChance: 1, presence: city }
     choices:
       - id: apply
         label: Fill out the application
@@ -50,7 +50,7 @@ events:
     weight: { base: 10 }
     followUpOnly: true
     cast:
-      counselor: { kind: acquaintance }
+      counselor: { kind: acquaintance, presence: city }
     choices:
       - id: be_yourself
         label: Be yourself

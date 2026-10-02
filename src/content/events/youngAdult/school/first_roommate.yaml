@@ -11,7 +11,7 @@ requires: { education: { program: [college], year: { eq: 1 } } }
 weight: { base: 8 }
 once: true
 cast:
-  roommate: { kind: classmate, ageOffset: { min: -1, max: 1 }, createIfMissing: true, newChance: 1 }
+  roommate: { kind: classmate, ageOffset: { min: -1, max: 1 }, createIfMissing: true, newChance: 1, presence: city }
 choices:
   - id: befriend
     label: Ask what the fridge is called

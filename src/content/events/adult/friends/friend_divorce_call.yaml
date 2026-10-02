@@ -12,7 +12,7 @@ lifeStages: [youngAdult, adult, senior]
 weight: { base: 10 }
 followUpOnly: true
 cast:
-  friend: { kind: friend }
+  friend: { kind: friend, presence: anywhere }
 choices:
   - id: stood_up
     label: Remind {friend.them} you stood up there with {friend.them}

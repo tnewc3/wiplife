@@ -12,7 +12,7 @@ requires: { memory: { role: admirer, tag: danced_with_you } }
 weight: { base: 10 }
 followUpOnly: true
 cast:
-  admirer: { kind: acquaintance }
+  admirer: { kind: acquaintance, presence: anywhere }
 choices:
   - id: dance
     label: Cross the room and hold out your hand

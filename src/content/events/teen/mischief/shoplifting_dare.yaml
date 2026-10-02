@@ -13,7 +13,7 @@ weight:
     - { if: { trait: riskTaking, gt: 60 }, x: 1.5 }
 cooldownYears: 3
 cast:
-  friend: { kind: friend, ageOffset: { min: -1, max: 1 }, createIfMissing: true, newChance: 0.3 }
+  friend: { kind: friend, ageOffset: { min: -1, max: 1 }, createIfMissing: true, newChance: 0.3, presence: city }
 choices:
   - id: do_it
     label: Do it

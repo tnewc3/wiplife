@@ -11,7 +11,7 @@ requires: { role: friend, affection: { lt: 45 } }
 weight: { base: 5 }
 cooldownYears: 4
 cast:
-  friend: { kind: friend }
+  friend: { kind: friend, presence: anywhere }
 choices:
   - id: call
     label: Call {friend.them} right now

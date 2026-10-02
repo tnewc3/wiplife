@@ -271,7 +271,7 @@ rarity: common
 lifeStages: [adult]
 weight: { base: 5 }
 cast:
-  npc: { kind: friend, createIfMissing: true }
+  npc: { kind: friend, createIfMissing: true, presence: city }
 choices:
   - id: wave
     label: Wave back
@@ -364,7 +364,7 @@ rarity: common
 lifeStages: [adult]
 weight: { base: 5 }
 cast:
-  date: { kind: acquaintance, romantic: true, createIfMissing: true }
+  date: { kind: acquaintance, romantic: true, createIfMissing: true, presence: city }
 autoOutcome:
   effects:
     - { type: relationship, role: date, kind: partner }
@@ -401,12 +401,12 @@ ${extra}`;
 
     it('rejects a romance event with a role that is not guaranteed to be an adult, or in a young life stage', async () => {
       const withFriend = romance(adultOnly).replace(
-        '  date: { kind: acquaintance, romantic: true, createIfMissing: true }',
-        '  date: { kind: acquaintance, romantic: true, createIfMissing: true }\n  friend: { kind: friend }',
+        '  date: { kind: acquaintance, romantic: true, createIfMissing: true, presence: city }',
+        '  date: { kind: acquaintance, romantic: true, createIfMissing: true, presence: city }\n  friend: { kind: friend, presence: city }',
       );
       await write(romanceFile, withFriend);
       expect(await expectErrors()).toContain('cast.friend: in a romance event every role must be an adult');
-      await write(romanceFile, withFriend.replace('friend: { kind: friend }', 'friend: { kind: friend, age: { min: 18, max: 90 } }'));
+      await write(romanceFile, withFriend.replace('friend: { kind: friend, presence: city }', 'friend: { kind: friend, age: { min: 18, max: 90 }, presence: city }'));
       expect((await compile()).ok).toBe(true);
       await write(
         romanceFile,
@@ -437,7 +437,7 @@ rarity: common
 lifeStages: [adult]
 weight: { base: 5 }
 cast:
-  helper: { support: true, optional: true }
+  helper: { support: true, optional: true, presence: anywhere }
 choices:
   - id: call
     label: Call {helper.name}
@@ -487,8 +487,8 @@ ${choiceExtra}    outcome:
       text = await expectErrors();
       expect(text).toContain('so it must be followUpOnly');
       await write('registries/actions.yaml', actions);
-      const proposal = await readFile(path.join(dir, 'events/any/romance/proposal.yaml'), 'utf8');
-      await write('events/any/romance/proposal.yaml', proposal.replace('- { type: money, delta: -200 }', '- { type: death, cause: natural_causes }'));
+      const proposal = await readFile(path.join(dir, 'events/any/partner/proposal.yaml'), 'utf8');
+      await write('events/any/partner/proposal.yaml', proposal.replace('- { type: money, delta: -200 }', '- { type: death, cause: natural_causes }'));
       expect(await expectErrors()).toContain("a management action's result can't kill");
     });
 
@@ -599,7 +599,7 @@ choices:
       await write('events/teen/prison/test_event.yaml', event('prison', 'teen', ''));
       expect(await expectErrors()).toContain('a prison event can’t be in life stages'.replace('’', "'"));
       await rm(path.join(dir, 'events/teen/prison/test_event.yaml'));
-      await write('events/adult/justice/test_event.yaml', `${event('justice', 'adult', '')}cast:\n  self: { kind: friend }\n`);
+      await write('events/adult/justice/test_event.yaml', `${event('justice', 'adult', '')}cast:\n  self: { kind: friend, presence: city }\n`);
       expect(await expectErrors()).toContain('"self" is always you in event text');
     });
 
@@ -699,7 +699,7 @@ choices:
       await mkdir(path.join(overlay, 'events/any/people'), { recursive: true });
       await writeFile(
         path.join(overlay, 'events/any/people/only_action.yaml'),
-        'id: only_action\ntitle: Act\ntext: You act.\ntone: light\ncategory: people\nrarity: common\nlifeStages: [adult]\nweight: { base: 1 }\nfollowUpOnly: true\ncast:\n  person: { kind: friend }\nautoOutcome: {}\n',
+        'id: only_action\ntitle: Act\ntext: You act.\ntone: light\ncategory: people\nrarity: common\nlifeStages: [adult]\nweight: { base: 1 }\nfollowUpOnly: true\ncast:\n  person: { kind: friend, presence: anywhere }\nautoOutcome: {}\n',
       );
       await mkdir(path.join(overlay, 'registries'), { recursive: true });
       await writeFile(
@@ -711,13 +711,14 @@ choices:
         `triggers:\n${['foreclosure', 'eviction', 'collections', 'garnishment', 'missed_payment'].map((t) => `  ${t}: { events: [only_trouble] }`).join('\n')}\n`,
       );
       await mkdir(path.join(overlay, 'events/any/work'), { recursive: true });
+      await mkdir(path.join(overlay, 'events/any/career'), { recursive: true });
       await writeFile(
-        path.join(overlay, 'events/any/work/only_work.yaml'),
-        'id: only_work\ntitle: Work\ntext: Work.\ntone: light\ncategory: work\nrarity: common\nlifeStages: [adult]\nweight: { base: 1 }\nfollowUpOnly: true\nautoOutcome: {}\n',
+        path.join(overlay, 'events/any/career/only_work.yaml'),
+        'id: only_work\ntitle: Work\ntext: Work.\ntone: light\ncategory: career\nrarity: common\nlifeStages: [adult]\nweight: { base: 1 }\nfollowUpOnly: true\nautoOutcome: {}\n',
       );
       await writeFile(
         path.join(overlay, 'events/any/work/only_boss.yaml'),
-        'id: only_boss\ntitle: Boss\ntext: Boss.\ntone: light\ncategory: work\nrarity: common\nlifeStages: [adult]\nweight: { base: 1 }\nfollowUpOnly: true\ncast:\n  boss: { kind: boss }\nautoOutcome: {}\n',
+        'id: only_boss\ntitle: Boss\ntext: Boss.\ntone: light\ncategory: work\nrarity: common\nlifeStages: [adult]\nrequires: { career: { employed: true } }\nweight: { base: 1 }\nfollowUpOnly: true\ncast:\n  boss: { kind: boss, presence: city }\nautoOutcome: {}\n',
       );
       await writeFile(
         path.join(overlay, 'registries/work.yaml'),
@@ -725,7 +726,9 @@ choices:
       );
       // ...and its own health, legal and self-discovery events (Stage 9).
       const followUp = (id: string, category: string) =>
-        `id: ${id}\ntitle: ${id}\ntext: Hi.\ntone: light\ncategory: ${category}\nrarity: common\nlifeStages: [adult]\nweight: { base: 1 }\nfollowUpOnly: true\nautoOutcome: {}\n`;
+        `id: ${id}\ntitle: ${id}\ntext: Hi.\ntone: light\ncategory: ${category}\nrarity: common\nlifeStages: [adult]\n${
+          category === 'prison' ? 'requires: { legal: { incarcerated: true } }\n' : ''
+        }weight: { base: 1 }\nfollowUpOnly: true\nautoOutcome: {}\n`;
       for (const [folder, id, category] of [
         ['health', 'only_doctor', 'health'],
         ['prison', 'only_prison', 'prison'],

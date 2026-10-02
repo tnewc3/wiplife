@@ -11,7 +11,7 @@ requires: { role: parent, status: [estranged] }
 weight: { base: 10 }
 cooldownYears: 6
 cast:
-  parent: { kind: parent }
+  parent: { kind: parent, presence: anywhere }
 choices:
   - id: write_back
     label: Write back

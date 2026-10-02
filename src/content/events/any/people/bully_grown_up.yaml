@@ -11,7 +11,7 @@ lifeStages: [youngAdult, adult]
 weight: { base: 10 }
 followUpOnly: true
 cast:
-  bully: { kind: classmate }
+  bully: { kind: classmate, presence: city }
 choices:
   - id: remind
     label: Say you remember the lunch line

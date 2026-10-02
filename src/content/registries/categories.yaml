@@ -2,22 +2,48 @@
 # same category away for that many years after one fires. Categories marked
 # romance are adults only: the engine blocks them for anyone under the adult
 # age, and the content build requires every such event to say so.
+#
+# C1, category contracts: requires lists what every event of the category
+# must require (the content build rejects one that doesn't, and one that
+# fires without it is an invariant failure). household marks home, health
+# and wellbeing: a partner who lives with you is preferred for their roles.
 categories:
   family: { label: Family }
   play: { label: Play }
-  school: { label: School life }
+  school:
+    label: School life
+    requires: { education: { program: [elementary, middle, high, college, trade, grad] } }
   friends: { label: Friends }
   romance: { label: Love and dating, romance: true }
   people: { label: People }
   mischief: { label: Trouble }
-  health: { label: Health }
+  health: { label: Health, household: true }
   money: { label: Money }
-  home: { label: Home }
+  home: { label: Home, household: true }
   community: { label: Community }
-  work: { label: Work }
+  work:
+    label: Work
+    requires: { career: { employed: true, retired: false } }
+  # C1: work events that aren't about a current job.
+  career: { label: Finding work }
+  jobless:
+    label: Out of work
+    requires: { career: { employed: false, retired: false } }
+  retirement:
+    label: Retirement
+    requires: { career: { retired: true } }
+  # C1: you and the partner you have now (dating, engaged or married).
+  partner:
+    label: You and your partner
+    romance: true
+    household: true
+    requires: { romance: [dating, engaged, married] }
   wonder: { label: Strange and wonderful, cooldownYears: 10 }
   # Stage 9.
   justice: { label: The law }
-  prison: { label: Prison, prison: true }
+  prison:
+    label: Prison
+    prison: true
+    requires: { legal: { incarcerated: true } }
   identity: { label: Who you are }
   vice: { label: Vices }

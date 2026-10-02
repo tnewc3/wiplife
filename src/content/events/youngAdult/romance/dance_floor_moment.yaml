@@ -18,7 +18,7 @@ weight:
     - { if: { discovery: { latent: [attraction] } }, x: 8 }
 once: true
 cast:
-  admirer: { kind: acquaintance, admirer: true, createIfMissing: true, newChance: 0.7 }
+  admirer: { kind: acquaintance, admirer: true, createIfMissing: true, newChance: 0.7, presence: city }
 choices:
   - id: stay_close
     label: Stay close. You like this.

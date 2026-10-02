@@ -10,7 +10,7 @@ lifeStages: [early]
 weight: { base: 10 }
 cooldownYears: 2
 cast:
-  parent: { kind: parent }
+  parent: { kind: parent, presence: household }
 choices:
   - id: one_more
     label: Beg for one more story

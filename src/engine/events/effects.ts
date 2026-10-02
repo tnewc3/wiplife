@@ -21,7 +21,9 @@ import { applyIdentity, discoverTalent } from '../discovery';
 import { changeSeverity, setTreated } from '../health';
 import { sentence } from '../legal';
 import { moveInTogether, moveTo, refreshHousingCost, sellHome, settleHousehold, supportingParent } from '../housing';
+import { whereabouts } from '../presence';
 import { clampInt } from '../random';
+import { otherCity } from './casting';
 import { canChangeKind, canSetStatus } from '../relationships';
 import { nextInt, type RngState } from '../rng';
 import { addHistory } from '../systems/history';
@@ -242,6 +244,14 @@ const handlers: { [T in Effect['type']]: Handler<T> } = {
   },
 
   talent: (state, _effect, ctx) => discoverTalent(state, ctx.content),
+
+  // C1: someone moves to another city (never someone who lives with you).
+  moveAway: (state, effect, ctx) => {
+    const id = ctx.cast[effect.role];
+    const person = id === undefined ? undefined : state.people[id];
+    if (!person || !person.alive || whereabouts(state, id!, ctx.content) === 'household') return;
+    person.cityId = otherCity(state, ctx.rng, ctx.content);
+  },
 };
 
 /** Applies effects in order. */

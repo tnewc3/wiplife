@@ -11,7 +11,7 @@ lifeStages: [youngAdult, adult]
 weight: { base: 5 }
 cooldownYears: 4
 cast:
-  parent: { kind: parent }
+  parent: { kind: parent, presence: anywhere }
 choices:
   - id: visit
     label: Drive over with a cake

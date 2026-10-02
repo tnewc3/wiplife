@@ -15,7 +15,7 @@ weight:
     - { if: { stat: smarts, gt: 70 }, x: 1.5 }
 once: true
 cast:
-  professor: { kind: acquaintance, age: { min: 32, max: 72 }, createIfMissing: true, newChance: 1 }
+  professor: { kind: acquaintance, age: { min: 32, max: 72 }, createIfMissing: true, newChance: 1, presence: city }
 choices:
   - id: join
     label: Join the lab

@@ -15,7 +15,7 @@ weight:
     - { if: { hidden: vice, gt: 60 }, x: 2 }
 cooldownYears: 6
 cast:
-  npc: { kind: coworker, age: { min: 21, max: 120 } }
+  npc: { kind: coworker, age: { min: 21, max: 120 }, presence: city }
 choices:
   - id: habit
     label: Make it a daily thing

@@ -10,7 +10,7 @@ lifeStages: [youngAdult, adult]
 weight: { base: 7 }
 cooldownYears: 5
 cast:
-  parent: { kind: parent, age: { min: 55, max: 120 } }
+  parent: { kind: parent, age: { min: 55, max: 120 }, presence: anywhere }
 choices:
   - id: go
     label: Go and stay with {parent.them}

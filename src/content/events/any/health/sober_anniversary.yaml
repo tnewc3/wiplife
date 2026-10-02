@@ -11,7 +11,7 @@ lifeStages: [youngAdult, adult, senior]
 weight: { base: 10 }
 followUpOnly: true
 cast:
-  family: { support: true }
+  family: { support: true, presence: anywhere }
 choices:
   - id: chip
     label: Show {family.them} your sobriety chip

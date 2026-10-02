@@ -9,7 +9,7 @@ requires: { age: { eq: 1 } }
 weight: { base: 10 }
 once: true
 cast:
-  parent: { kind: parent }
+  parent: { kind: parent, presence: household }
 choices:
   - id: wave
     label: Wave back

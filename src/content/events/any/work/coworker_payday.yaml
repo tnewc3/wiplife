@@ -8,11 +8,14 @@ tone: neutral
 category: work
 rarity: common
 lifeStages: [youngAdult, adult, senior]
-requires: { memory: { role: npc, tag: lent_money } }
+requires:
+  all:
+    - { memory: { role: npc, tag: lent_money } }
+    - { career: { employed: true } }
 weight: { base: 10 }
 followUpOnly: true
 cast:
-  npc: { kind: coworker }
+  npc: { kind: coworker, presence: city }
 choices:
   - id: remind
     label: Remind {npc.them}

@@ -16,7 +16,7 @@ requires:
 weight: { base: 3 }
 cooldownYears: 8
 cast:
-  npc: { kind: coworker, romantic: true }
+  npc: { kind: coworker, romantic: true, presence: city }
 choices:
   - id: ask_out
     label: Ask {npc.them} to dinner

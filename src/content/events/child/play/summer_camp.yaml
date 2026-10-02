@@ -15,7 +15,7 @@ requires:
 weight: { base: 4 }
 once: true
 cast:
-  friend: { kind: friend, ageOffset: { min: -1, max: 1 }, createIfMissing: true, newChance: 1 }
+  friend: { kind: friend, ageOffset: { min: -1, max: 1 }, createIfMissing: true, newChance: 1, presence: elsewhere }
 choices:
   - id: promise
     label: Promise to write every week

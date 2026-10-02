@@ -12,7 +12,7 @@ lifeStages: [child, teen]
 weight: { base: 10 }
 followUpOnly: true
 cast:
-  sitter: { kind: acquaintance }
+  sitter: { kind: acquaintance, presence: city }
 choices:
   - id: card
     label: Bring the card you made

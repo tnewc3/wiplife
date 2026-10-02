@@ -17,7 +17,7 @@ weight:
     - { if: { trait: kindness, gt: 60 }, x: 1.5 }
 cooldownYears: 6
 cast:
-  npc: { kind: coworker }
+  npc: { kind: coworker, presence: city }
 choices:
   - id: lend
     label: Lend it

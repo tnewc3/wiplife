@@ -9,10 +9,11 @@ tone: neutral
 category: work
 rarity: common
 lifeStages: [youngAdult, adult, senior]
+requires: { career: { employed: true } }
 weight: { base: 8 }
 followUpOnly: true
 cast:
-  boss: { kind: boss }
+  boss: { kind: boss, presence: city }
 choices:
   - id: grind
     label: Work late every night

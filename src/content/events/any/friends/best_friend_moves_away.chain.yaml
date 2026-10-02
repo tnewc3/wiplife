@@ -15,7 +15,7 @@ events:
     weight: { base: 7 }
     once: true
     cast:
-      friend: { kind: friend, ageOffset: { min: -1, max: 1 }, createIfMissing: true }
+      friend: { kind: friend, ageOffset: { min: -1, max: 1 }, createIfMissing: true, presence: city }
     choices:
       - id: promise
         label: Promise to write every week
@@ -23,6 +23,7 @@ events:
           text: You keep the napkin in your sock drawer for years.
           effects:
             - { type: memory, role: friend, tag: promised_to_write }
+            - { type: moveAway, role: friend }
             - { type: relationship, role: friend, affection: 5 }
             - { type: schedule, eventId: letter_from_old_friend, inYears: [3, 5], cast: [friend] }
       - id: let_go
@@ -32,6 +33,7 @@ events:
           effects:
             - { type: stat, key: happiness, delta: -3 }
             - { type: memory, role: friend, tag: lost_touch }
+            - { type: moveAway, role: friend }
             - { type: schedule, eventId: friend_found_online, inYears: [10, 20], cast: [friend] }
 
   - id: letter_from_old_friend
@@ -46,7 +48,7 @@ events:
     weight: { base: 10 }
     followUpOnly: true
     cast:
-      friend: { kind: friend }
+      friend: { kind: friend, presence: anywhere }
     choices:
       - id: write_back
         label: Write back
@@ -79,7 +81,7 @@ events:
     weight: { base: 10 }
     followUpOnly: true
     cast:
-      friend: { kind: friend }
+      friend: { kind: friend, presence: elsewhere }
     choices:
       - id: promise
         label: Promise not to leave it so long

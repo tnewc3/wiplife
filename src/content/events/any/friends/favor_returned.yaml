@@ -13,7 +13,7 @@ requires: { memory: { role: friend, tag: let_them_stay } }
 weight: { base: 10 }
 followUpOnly: true
 cast:
-  friend: { kind: friend }
+  friend: { kind: friend, presence: city }
 choices:
   - id: accept
     label: Let {friend.them} help

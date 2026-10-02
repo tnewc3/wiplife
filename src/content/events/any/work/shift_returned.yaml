@@ -8,11 +8,14 @@ tone: light
 category: work
 rarity: common
 lifeStages: [youngAdult, adult, senior]
-requires: { memory: { role: npc, tag: you_covered_shift } }
+requires:
+  all:
+    - { memory: { role: npc, tag: you_covered_shift } }
+    - { career: { employed: true } }
 weight: { base: 10 }
 followUpOnly: true
 cast:
-  npc: { kind: coworker }
+  npc: { kind: coworker, presence: city }
 choices:
   - id: accept
     label: Let {npc.them} take it

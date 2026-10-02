@@ -15,8 +15,8 @@ events:
     weight: { base: 1.5 }
     once: true
     cast:
-      parentA: { kind: parent }
-      parentB: { kind: parent }
+      parentA: { kind: parent, presence: household }
+      parentB: { kind: parent, presence: household }
     choices:
       - id: beg
         label: Beg them to stay together
@@ -67,8 +67,8 @@ events:
     weight: { base: 10 }
     followUpOnly: true
     cast:
-      parentA: { kind: parent }
-      parentB: { kind: parent }
+      parentA: { kind: parent, presence: household }
+      parentB: { kind: parent, presence: household }
     choices:
       - id: with_a
         label: Spend it with {parentA.name}
@@ -108,8 +108,8 @@ events:
     weight: { base: 10 }
     followUpOnly: true
     cast:
-      parentA: { kind: parent }
-      parentB: { kind: parent }
+      parentA: { kind: parent, presence: anywhere }
+      parentB: { kind: parent, presence: anywhere }
     choices:
       - id: join
         label: Join them

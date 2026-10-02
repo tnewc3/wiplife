@@ -14,7 +14,7 @@ weight:
     - { if: { flag: can_drive }, x: 1.5 }
 once: true
 cast:
-  parent: { kind: parent }
+  parent: { kind: parent, presence: anywhere }
 choices:
   - id: lot
     label: Take {parent.them} back to the old parking lot
@@ -45,6 +45,7 @@ choices:
           - { type: stat, key: stress, delta: 3 }
   - id: drive
     label: Offer to drive {parent.them} everywhere instead
+    visibleIf: { role: parent, where: [household, city] }
     outcome:
       text: >-
         Tuesday groceries, Thursday doctor, Saturday nowhere in particular. The

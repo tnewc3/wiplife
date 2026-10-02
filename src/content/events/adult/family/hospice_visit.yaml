@@ -15,7 +15,7 @@ weight:
     - { if: { age: { gte: 55 } }, x: 1.5 }
 once: true
 cast:
-  parent: { kind: parent }
+  parent: { kind: parent, presence: anywhere }
 choices:
   - id: hold
     label: Hold {parent.their} hand and talk about nothing

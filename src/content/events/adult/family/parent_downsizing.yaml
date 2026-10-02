@@ -13,7 +13,7 @@ requires: { not: { home: { kind: [with_parents] } } }
 weight: { base: 6 }
 once: true
 cast:
-  parent: { kind: parent, age: { min: 60, max: 120 } }
+  parent: { kind: parent, age: { min: 60, max: 120 }, presence: anywhere }
 choices:
   - id: help
     label: Take a week off and help

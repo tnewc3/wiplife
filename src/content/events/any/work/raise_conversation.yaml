@@ -8,13 +8,14 @@ tone: neutral
 category: work
 rarity: common
 lifeStages: [youngAdult, adult, senior]
+requires: { career: { employed: true } }
 weight:
   base: 10
   modifiers:
     - { if: { memory: { role: boss, tag: refused_raise } }, x: 0.5 }
 followUpOnly: true
 cast:
-  boss: { kind: boss }
+  boss: { kind: boss, presence: city }
 choices:
   - id: numbers
     label: Walk {boss.them} through what you've done

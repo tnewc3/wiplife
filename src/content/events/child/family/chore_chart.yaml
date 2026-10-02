@@ -10,7 +10,7 @@ lifeStages: [child]
 weight: { base: 4 }
 once: true
 cast:
-  parent: { kind: parent }
+  parent: { kind: parent, presence: household }
 choices:
   - id: earn
     label: Fill every box

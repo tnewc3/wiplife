@@ -11,7 +11,7 @@ requires: { career: { employed: true, performance: { gte: 75 }, years: { gte: 2 
 weight: { base: 6 }
 cooldownYears: 5
 cast:
-  boss: { kind: boss }
+  boss: { kind: boss, presence: city }
 choices:
   - id: more
     label: Ask {boss.name} for a bigger role

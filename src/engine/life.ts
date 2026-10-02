@@ -267,7 +267,7 @@ export function resolveChoice(state: LifeState, instanceId: Id, choiceId: Id, co
   let choice: ChoiceDef | undefined;
   if (def?.choices) {
     choice = def.choices.find((c) => c.id === choiceId);
-    if (!choice || !evaluate(choice.visibleIf, state, { cast: instance.cast, roles: 'strict' })) {
+    if (!choice || !evaluate(choice.visibleIf, state, { cast: instance.cast, roles: 'strict', content })) {
       throw new InvalidInputError([{ path: 'choice', message: `"${choiceId}" is not a choice in event "${instance.eventId}".` }]);
     }
   } else if (choiceId !== CONTINUE_CHOICE) {

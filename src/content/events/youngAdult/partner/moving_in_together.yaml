@@ -1,0 +1,43 @@
+id: moving_in_together
+title: One key
+text: >-
+  {partner.name}'s lease is up. {partner.They} {partner:asks|ask}, very
+  casually, whether it would be crazy for the two of you to move in together.
+tone: light
+category: partner
+rarity: common
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { role: partner, years: { gte: 1 } }
+    - { home: { partner: false } }
+    - { romance: [dating, engaged] }
+weight: { base: 7 }
+cooldownYears: 5
+cast:
+  partner: { kind: partner, presence: anywhere }
+choices:
+  - id: yes
+    label: Say yes and clear out a drawer
+    outcome:
+      text: One drawer becomes half the closet within a week. You discover {partner.name} hums while brushing {partner.their} teeth.
+      effects:
+        - { type: memory, role: partner, tag: moved_in_together }
+        - { type: housing, action: move_in_together, role: partner }
+        - { type: relationship, role: partner, affection: 8, trust: 5 }
+        - { type: stat, key: happiness, delta: 4 }
+        - { type: stat, key: stress, delta: 2 }
+        - { type: history, text: 'You and {partner.name} moved in together.', importance: 1 }
+  - id: too_soon
+    label: Say it's too soon
+    outcome:
+      text: '{partner.name} says {partner.they} {partner:understands|understand}, and signs a lease across town.'
+      effects:
+        - { type: relationship, role: partner, affection: -5 }
+  - id: space
+    label: Admit you like having your own space
+    outcome:
+      text: It's an honest answer. {partner.name} respects it, and is hurt by it, both at once.
+      effects:
+        - { type: relationship, role: partner, affection: -4, trust: 3 }

@@ -9,7 +9,9 @@ import { produce } from 'immer';
 import type { CastSpec, ContentBundle, Tone } from '../content/schemas';
 import { evaluate } from './conditions';
 import { pronounsFromPreset } from './creation/character';
-import { createPerson } from './events/casting';
+import { createPerson, otherCity } from './events/casting';
+import { consistencyProblems } from './presence';
+import { isPartnerKind } from './relationships';
 import { createLife, resolveChoice } from './life';
 import { createRng } from './rng';
 import { getEventCard } from './selectors';
@@ -40,6 +42,8 @@ export interface SandboxPreview {
   choices: { id: string; label: string; visible: boolean }[];
   /** False when the event's requirements wouldn't hold in this state (it is previewed anyway). */
   requirementsMet: boolean;
+  /** C1: the category contract or presence rules this preview breaks (it is previewed anyway). */
+  consistency: string[];
 }
 
 const clamp = (n: number) => Math.max(0, Math.min(100, Math.round(n)));
@@ -66,11 +70,21 @@ export function previewEvent(content: ContentBundle, options: SandboxOptions): S
     const cast: Record<string, Id> = {};
     for (const role of Object.keys(def.cast ?? {}).sort()) {
       const spec = def.cast![role]!;
-      const plain: CastSpec = { kind: spec.kind ?? 'friend', ...(spec.age ? { age: spec.age } : {}), ...(spec.ageOffset ? { ageOffset: spec.ageOffset } : {}) };
+      const kind = spec.kind ?? 'friend';
+      const plain: CastSpec = { kind, presence: 'city', ...(spec.age ? { age: spec.age } : {}), ...(spec.ageOffset ? { ageOffset: spec.ageOffset } : {}) };
       // A romantic role needs someone you'd match with; fall back to anyone of the kind and ages.
-      const id = createPerson(d, { ...spec, kind: spec.kind ?? 'friend', support: undefined }, rng, content) ?? createPerson(d, plain, rng, content) ?? createPerson(d, { kind: plain.kind }, rng, content);
+      const id =
+        createPerson(d, { ...spec, kind, support: undefined, presence: 'city' }, rng, content) ??
+        createPerson(d, plain, rng, content) ??
+        createPerson(d, { kind, presence: 'city' }, rng, content);
       if (!id) continue;
       d.people[id]!.identity.pronouns = others;
+      // Put them where the role needs them (C1, presence).
+      if (spec.presence === 'elsewhere') d.people[id]!.cityId = otherCity(d, rng, content);
+      if (spec.presence === 'household') {
+        if (isPartnerKind(kind)) d.housing.partnerId = id;
+        else d.housing.kind = 'with_parents';
+      }
       cast[role] = id;
     }
     d.phase = 'events';
@@ -93,7 +107,8 @@ export function previewEvent(content: ContentBundle, options: SandboxOptions): S
     choices: def.choices
       ? def.choices.map((c) => ({ id: c.id, label: labels.get(c.id) ?? c.label, visible: visible.has(c.id) }))
       : card.choices.map((c) => ({ ...c, visible: true })),
-    requirementsMet: evaluate(def.requires, life, { cast: instance.cast, roles: 'strict' }),
+    requirementsMet: evaluate(def.requires, life, { cast: instance.cast, roles: 'strict', content }),
+    consistency: consistencyProblems(life, def, instance.cast, content),
   };
 }
 

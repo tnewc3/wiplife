@@ -13,7 +13,7 @@ requires: { memory: { role: parent, tag: left_you_alone } }
 weight: { base: 8 }
 once: true
 cast:
-  parent: { kind: parent }
+  parent: { kind: parent, presence: anywhere }
 choices:
   - id: forgive
     label: Tell {parent.them} you forgive {parent.them}

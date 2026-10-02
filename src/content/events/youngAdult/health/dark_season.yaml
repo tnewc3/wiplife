@@ -15,7 +15,7 @@ requires:
 weight: { base: 7 }
 cooldownYears: 4
 cast:
-  helper: { support: true, optional: true }
+  helper: { support: true, optional: true, presence: anywhere }
 choices:
   - id: tell
     label: Tell {helper.name} how bad it's gotten

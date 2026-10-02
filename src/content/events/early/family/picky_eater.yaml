@@ -11,7 +11,7 @@ requires: { age: { gte: 2 } }
 weight: { base: 5 }
 once: true
 cast:
-  parent: { kind: parent }
+  parent: { kind: parent, presence: household }
 choices:
   - id: wait
     label: Wait {parent.them} out

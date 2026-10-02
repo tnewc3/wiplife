@@ -9,7 +9,7 @@ requires: { age: { gte: 18 } }
 weight: { base: 10 }
 followUpOnly: true
 cast:
-  person: { kind: partner }
+  person: { kind: partner, presence: anywhere }
 autoOutcome:
   text: '{person.name} moves in.'
   effects:

@@ -1,0 +1,36 @@
+id: retired_restless
+title: Too much free time
+text: >-
+  Retirement was supposed to be golf and grandkids. Mostly it's been
+  reorganizing the garage. Twice.
+tone: light
+category: retirement
+rarity: common
+lifeStages: [adult, senior]
+requires: { career: { retired: true, employed: false } }
+weight: { base: 6 }
+once: true
+choices:
+  - id: volunteer
+    label: Volunteer
+    outcome:
+      text: The animal shelter is thrilled. The dogs are even more thrilled. You have somewhere to be again.
+      effects:
+        - { type: flag, key: volunteers, value: true }
+        - { type: stat, key: happiness, delta: 5 }
+        - { type: stat, key: kindness, delta: 2 }
+  - id: greeter
+    label: Take a part-time job at the store
+    outcome:
+      text: You greet shoppers at the door and know half of them by name within a month.
+      effects:
+        - { type: job, action: offer, jobId: retail_associate }
+        - { type: stat, key: happiness, delta: 3 }
+        - { type: stat, key: sociability, delta: 2 }
+  - id: hobby
+    label: Take up woodworking
+    outcome:
+      text: Your first birdhouse is crooked. Your fifth is beautiful. The birds don't care either way.
+      effects:
+        - { type: stat, key: happiness, delta: 4 }
+        - { type: stat, key: stress, delta: -3 }

@@ -14,7 +14,7 @@ weight:
     - { if: { trait: sociability, gt: 60 }, x: 1.5 }
 cooldownYears: 4
 cast:
-  npc: { kind: coworker }
+  npc: { kind: coworker, presence: city }
 choices:
   - id: go
     label: Make it a standing date

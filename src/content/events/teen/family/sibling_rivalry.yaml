@@ -11,7 +11,7 @@ lifeStages: [child, teen]
 weight: { base: 8 }
 cooldownYears: 3
 cast:
-  sibling: { kind: sibling }
+  sibling: { kind: sibling, presence: household }
 choices:
   - id: let_go
     label: Let it go

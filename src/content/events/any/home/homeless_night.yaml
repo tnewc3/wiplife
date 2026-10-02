@@ -15,7 +15,7 @@ requires:
 weight: { base: 10 }
 cooldownYears: 2
 cast:
-  helper: { support: true, optional: true }
+  helper: { support: true, optional: true, presence: anywhere }
 choices:
   - id: shelter
     label: Line up for a shelter bed

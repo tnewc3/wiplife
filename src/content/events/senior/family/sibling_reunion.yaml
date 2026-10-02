@@ -10,7 +10,7 @@ lifeStages: [adult, senior]
 weight: { base: 7 }
 cooldownYears: 6
 cast:
-  sibling: { kind: sibling }
+  sibling: { kind: sibling, presence: anywhere }
 choices:
   - id: yes
     label: Say yes

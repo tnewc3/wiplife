@@ -10,7 +10,7 @@ lifeStages: [youngAdult]
 weight: { base: 8 }
 cooldownYears: 3
 cast:
-  friend: { kind: friend, ageOffset: { min: -3, max: 3 }, createIfMissing: true, newChance: 0.3 }
+  friend: { kind: friend, ageOffset: { min: -3, max: 3 }, createIfMissing: true, newChance: 0.3, presence: city }
 choices:
   - id: go
     label: Go

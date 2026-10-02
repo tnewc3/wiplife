@@ -12,7 +12,7 @@ requires: { role: friend, years: { gte: 8 } }
 weight: { base: 4 }
 cooldownYears: 8
 cast:
-  friend: { kind: friend }
+  friend: { kind: friend, presence: anywhere }
 choices:
   - id: legend
     label: Tell the story everyone's waiting for

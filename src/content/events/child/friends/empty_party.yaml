@@ -11,7 +11,7 @@ requires: { trait: sociability, lt: 50 }
 weight: { base: 3 }
 once: true
 cast:
-  parent: { kind: parent }
+  parent: { kind: parent, presence: household }
 choices:
   - id: best_party
     label: Have the best party three people ever had

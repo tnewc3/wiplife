@@ -14,7 +14,7 @@ requires:
 weight: { base: 7 }
 cooldownYears: 4
 cast:
-  parent: { kind: parent, age: { min: 30, max: 120 } }
+  parent: { kind: parent, age: { min: 30, max: 120 }, presence: household }
 choices:
   - id: pay
     label: Agree to chip in

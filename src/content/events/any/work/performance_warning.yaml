@@ -12,7 +12,7 @@ requires: { career: { employed: true, performance: { lt: 40 } } }
 weight: { base: 12 }
 cooldownYears: 3
 cast:
-  boss: { kind: boss }
+  boss: { kind: boss, presence: city }
 choices:
   - id: plan
     label: Ask for a plan to turn it around

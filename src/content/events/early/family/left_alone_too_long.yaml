@@ -13,7 +13,7 @@ weight:
     - { if: { familyWealth: [poor] }, x: 2 }
 once: true
 cast:
-  parent: { kind: parent }
+  parent: { kind: parent, presence: household }
 choices:
   - id: cry
     label: Cry until someone hears

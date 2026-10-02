@@ -12,7 +12,7 @@ requires: { legal: { probation: true } }
 weight: { base: 5 }
 followUpOnly: true
 cast:
-  friend: { kind: friend, ageOffset: { min: -5, max: 5 }, createIfMissing: true }
+  friend: { kind: friend, ageOffset: { min: -5, max: 5 }, createIfMissing: true, presence: city }
 choices:
   - id: go
     label: Go, just for an hour

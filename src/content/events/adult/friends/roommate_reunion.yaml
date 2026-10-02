@@ -13,7 +13,7 @@ requires: { memory: { role: roommate, tag: roomed_together } }
 weight: { base: 10 }
 followUpOnly: true
 cast:
-  roommate: { kind: classmate }
+  roommate: { kind: classmate, presence: anywhere }
 choices:
   - id: visit
     label: Book the trip

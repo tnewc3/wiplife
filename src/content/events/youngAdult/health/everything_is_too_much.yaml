@@ -15,7 +15,7 @@ requires:
 weight: { base: 5 }
 cooldownYears: 5
 cast:
-  helper: { support: true, optional: true }
+  helper: { support: true, optional: true, presence: anywhere }
 choices:
   - id: call
     label: Call {helper.name}, even though it's late

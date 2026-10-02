@@ -1,0 +1,30 @@
+id: subpoena
+title: The subpoena
+text: >-
+  The case you blew the whistle on has finally reached a courtroom, and a
+  lawyer hands you a subpoena. They'd like you to tell it all again, under oath.
+tone: serious
+category: justice
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires: { flag: whistleblower }
+weight: { base: 8 }
+once: true
+choices:
+  - id: testify
+    label: Testify, and don't soften a word
+    outcome:
+      text: >-
+        Four hours on the stand, two of them hostile. The verdict comes three
+        weeks later. Your name is in the paper, spelled right, for once.
+      effects:
+        - { type: stat, key: reputation, delta: 6 }
+        - { type: stat, key: stress, delta: 6 }
+        - { type: stat, key: confidence, delta: 3 }
+        - { type: history, text: 'You testified in court about the wrongdoing you exposed at work.', importance: 2 }
+  - id: written
+    label: Ask to give a written statement instead
+    outcome:
+      text: The lawyers grumble and accept it. The case goes on without your face in it.
+      effects:
+        - { type: stat, key: stress, delta: 2 }

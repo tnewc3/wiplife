@@ -14,7 +14,7 @@ requires:
 weight: { base: 7 }
 cooldownYears: 3
 cast:
-  parent: { kind: parent }
+  parent: { kind: parent, presence: household }
 choices:
   - id: show_it
     label: Hand it over

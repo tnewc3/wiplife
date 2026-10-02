@@ -398,6 +398,42 @@ function checkOptionalRoles(def: EventDef, err: (message: string) => void): void
   }
 }
 
+/**
+ * True when `required` always implies `part` (C1, category contracts): the
+ * same condition, or a narrower one of the kinds contracts use (school
+ * programs, work, romance status, prison).
+ */
+function implies(required: Condition, part: Condition): boolean {
+  if (JSON.stringify(required) === JSON.stringify(part)) return true;
+  const subset = <T,>(a: readonly T[] | undefined, b: readonly T[] | undefined) => a !== undefined && b !== undefined && a.every((x) => b.includes(x));
+  if ('education' in part && 'education' in required) {
+    const want = part.education.program;
+    const have = required.education.program;
+    return want === undefined || (subset(have, want) && !have!.includes('none'));
+  }
+  if ('career' in part && 'career' in required) {
+    const want = part.career;
+    const have = required.career;
+    // A job always means not retired (taking one ends retirement; retiring ends the job).
+    const employed = have.employed === true || have.job !== undefined;
+    if (want.employed !== undefined && !(want.employed ? employed : have.employed === false)) return false;
+    if (want.retired !== undefined && !(have.retired === want.retired || (want.retired === false && employed))) return false;
+    return true;
+  }
+  if ('romance' in part && 'romance' in required) return subset(required.romance, part.romance);
+  if ('legal' in part && 'legal' in required) {
+    return (part.legal.incarcerated === undefined || part.legal.incarcerated === required.legal.incarcerated) &&
+      (part.legal.probation === undefined || part.legal.probation === required.legal.probation);
+  }
+  return false;
+}
+
+/** C1: the event requires its category's contract, part by part. */
+function meetsContract(def: EventDef, contract: Condition): boolean {
+  const required = requiredParts(def.requires);
+  return requiredParts(contract).every((part) => required.some((r) => implies(r, part)));
+}
+
 /** Events: registries, references between events, roles and placeholders. */
 function checkEvents(bundle: ContentBundle, fileOf: (typeKey: CollectionKey, id: string) => string): ContentError[] {
   const errors: ContentError[] = [];
@@ -442,6 +478,11 @@ function checkEvents(bundle: ContentBundle, fileOf: (typeKey: CollectionKey, id:
     };
 
     if (!categories[def.category]) err(`category "${def.category}" is not in registries/categories.yaml`);
+    // C1, category contracts: every event of a category requires what the category does.
+    const contract = categories[def.category]?.requires;
+    if (contract && !meetsContract(def, contract)) {
+      err(`category "${def.category}" requires ${JSON.stringify(contract)}; add it to requires (C1, category contracts)`);
+    }
     template('title', def.title);
     template('text', def.text);
     condition('requires', def.requires);
@@ -455,6 +496,10 @@ function checkEvents(bundle: ContentBundle, fileOf: (typeKey: CollectionKey, id:
         err(`cast.${role}: a romantic role finds a potential partner, never family or a current partner (kind "${kind}")`);
       }
       if (role === SELF_ROLE) err(`cast.${role}: "${SELF_ROLE}" is always you in event text, so it can't be a cast role`);
+      // C1, presence: nobody new joins your household, and a support role finds someone you know.
+      if (spec.presence === 'household' && (spec.createIfMissing || spec.newChance !== undefined)) {
+        err(`cast.${role}: presence household can't create someone new (nobody new moves in with you)`);
+      }
     }
     for (const choice of def.choices ?? []) {
       if (choice.id === CONTINUE_CHOICE) err(`choice id "${CONTINUE_CHOICE}" is reserved`);

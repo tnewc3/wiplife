@@ -9,7 +9,7 @@ requires: { age: { gte: 18 } }
 weight: { base: 10 }
 followUpOnly: true
 cast:
-  person: { kind: spouse }
+  person: { kind: spouse, presence: anywhere }
 autoOutcome:
   text: The papers are signed.
   effects:
