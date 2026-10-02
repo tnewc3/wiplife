@@ -17,6 +17,8 @@ weight:
     - { if: { trait: riskTaking, gt: 60 }, x: 1.8 }
     - { if: { hidden: vice, gt: 50 }, x: 1.5 }
 cooldownYears: 4
+# C1: meant to come back now and then (repeats are kept rare otherwise).
+recurring: true
 choices:
   - id: limit
     label: Set a limit and stick to it

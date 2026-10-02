@@ -5,6 +5,7 @@
 import type { ContentBundle } from '../../src/content/schemas';
 import type { LifeStage } from '../../src/engine/types';
 import { LIFE_STAGE_IDS } from '../../src/content/schemas';
+import { consistencyTargets } from '../simulate/run';
 import type { DynamicCoverage, EligibleSpread } from './dynamic';
 import type { StaticCoverage } from './static';
 
@@ -62,6 +63,8 @@ export function coverageChecks(s: StaticCoverage, d: DynamicCoverage | null, con
         met: over.length === 0,
       },
       { label: 'invariant failures', value: String(sim.invariantFailures), goal: '0', met: sim.invariantFailures === 0 },
+      // C1: consistency violations, lifetime Happiness, repeats.
+      ...consistencyTargets(sim, content).map((r) => ({ label: r.label, value: r.value, goal: r.goal, met: r.met })),
     );
   }
   return checks;

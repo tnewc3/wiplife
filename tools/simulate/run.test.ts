@@ -3,7 +3,7 @@ import { content } from '../../src/content';
 import { produce } from 'immer';
 import { lifeAtAge } from '../../src/engine/testFixtures';
 import { choiceTraits, choiceWeight } from './bot';
-import { formatComparison, formatReport, runSimulation, stage9Targets, targetResults } from './run';
+import { consistencyTargets, recurringEvents, formatComparison, formatReport, runSimulation, stage9Targets, targetResults } from './run';
 
 describe('simulation runner', () => {
   // Whole lives with every system: give them time.
@@ -67,7 +67,7 @@ describe('simulation runner', () => {
       expect(t.jobIds.length).toBeGreaterThan(0);
     }
     expect(careless.careers.tradeMinded).toBe(0);
-    const targets = [...targetResults(careful, content), ...stage9Targets(careful, content)];
+    const targets = [...targetResults(careful, content), ...stage9Targets(careful, content), ...consistencyTargets(careful, content)];
     expect(targets.map((r) => r.label)).toContain(`median net worth at ${content.balance.targets.money.netWorthAge}`);
     const text = formatComparison(careful, careless, content);
     expect(text).toContain('careless');
@@ -100,5 +100,27 @@ describe('simulation runner', () => {
     const report = runSimulation(content, { lives: 10, seedPrefix: 'sim-illegal' });
     expect(report.legal.illegalChoices.events).toContain('one_more_for_the_road');
     expect(report.legal.illegalChoices.taken).toBeLessThanOrEqual(report.legal.illegalChoices.offered);
+  });
+});
+
+describe('consistency report (C1)', () => {
+  it('measures violations, lifetime Happiness and repeats, and judges them against the targets', { timeout: 120_000 }, () => {
+    const report = runSimulation(content, { lives: 30, seedPrefix: 'c1', player: 'careful' });
+    const c = report.consistency;
+    expect(c.violations).toBe(0);
+    expect(c.happiness.mean).toBeGreaterThan(0);
+    expect(c.happiness.mean).toBeLessThan(100);
+    expect(c.repeats.mean).toBeGreaterThanOrEqual(0);
+    expect(c.repeats.mean).toBeLessThan(1);
+    const labels = consistencyTargets(report, content).map((r) => r.label);
+    expect(labels).toEqual(['consistency violations', 'average lifetime Happiness', 'repeats of events not marked recurring, per life']);
+    expect(formatReport(report, content)).toContain('Consistency (C1):');
+  });
+
+  it('counts answers to actions and system triggers as recurring', () => {
+    const recurring = recurringEvents(content);
+    expect(recurring.has('ask_out_result')).toBe(true);
+    expect(recurring.has('gym_resolution')).toBe(true);
+    expect(recurring.has('found_wallet')).toBe(false);
   });
 });

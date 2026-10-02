@@ -97,6 +97,43 @@ export interface SimulationReport {
   health: HealthReport;
   legal: LegalReport;
   discovery: DiscoveryReport;
+  consistency: ConsistencyReport;
+}
+
+/** C1: the consistency pass, measured. */
+export interface ConsistencyReport {
+  /** Invariant failures from the consistency rules (category contracts, presence). */
+  violations: number;
+  /** Each life's average Happiness over its years, across lives. */
+  happiness: { mean: number; median: number; p10: number; p90: number };
+  /**
+   * Per life, the share of the events fired (each year's events) that repeat
+   * an event the life already had and that isn't recurring (isRecurring);
+   * mean and 90th percentile across lives. top: the events that repeat most.
+   */
+  repeats: { mean: number; p90: number; top: { id: string; repeats: number }[] };
+}
+
+/**
+ * C1: an event meant to come back: marked recurring, or answering something
+ * that can happen again: your own actions (asking someone out, asking for a
+ * raise) or a system trigger (money trouble, the law, self-discovery, a
+ * doctor visit).
+ */
+export function recurringEvents(content: ContentBundle): Set<string> {
+  const r = content.registries;
+  return new Set([
+    ...Object.values(content.events).filter((def) => def.recurring).map((def) => def.id),
+    ...Object.values(r.actions.actions).flatMap((a) => a.events),
+    ...Object.values(r.work.results).flatMap((w) => w.events),
+    ...Object.values(r.triggers.triggers).flatMap((t) => t.events),
+    ...Object.values(r.health.doctor).flatMap((t) => t.events),
+    ...Object.values(r.legal.triggers).flatMap((t) => t.events),
+    ...Object.values(r.discovery.surfacing).flatMap((t) => t.events),
+    ...Object.values(r.discovery.resurfacing).flatMap((t) => t.events),
+    ...r.discovery.crisis.events,
+    ...r.discovery.comingOut.events,
+  ]);
 }
 
 /** Health (Stage 9): who got each condition, who was treated, what killed people. */
@@ -685,11 +722,18 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
   const earningsByPath = Object.fromEntries(EDUCATION_PATHS.map((p) => [p, [] as number[]])) as Record<EducationPath, number[]>;
   const bachelorEarnings: number[] = [];
 
+  const recurring = recurringEvents(content);
+  let violations = 0;
+  const lifetimeHappiness: number[] = [];
+  const repeatShares: number[] = [];
+  const repeatsByEvent = new Map<string, number>();
+
   for (let i = 0; i < options.lives; i++) {
     const seed = `${options.seedPrefix}-${i}`;
     const check = (life: LifeState) => {
       const failures = checkInvariants(life, content);
       invariantFailures += failures.length;
+      violations += failures.filter((f) => f.startsWith('consistency:')).length;
       for (const f of failures) if (failureMessages.length < maxMessages) failureMessages.push(`${seed} age ${life.character.age}: ${f}`);
     };
     const choices = createRng(`${seed}:choices`);
@@ -834,6 +878,18 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
       if (diedFromEvent) deathsFromEvents++;
     }
     options.onLife?.(life);
+    // C1: lifetime Happiness and repeats of events that aren't recurring.
+    if (life.lifetime.years > 0) lifetimeHappiness.push(life.lifetime.happinessTotal / life.lifetime.years);
+    let firesTotal = 0;
+    let repeats = 0;
+    for (const [id, n] of firesThisLife) {
+      firesTotal += n;
+      if (n > 1 && !recurring.has(id)) {
+        repeats += n - 1;
+        repeatsByEvent.set(id, (repeatsByEvent.get(id) ?? 0) + n - 1);
+      }
+    }
+    if (firesTotal > 0) repeatShares.push(repeats / firesTotal);
     for (const id of seenThisLife) livesWith.set(id, (livesWith.get(id) ?? 0) + 1);
     for (const [id, n] of firesThisLife) if (gains.has(id)) mostFires.set(id, Math.max(mostFires.get(id) ?? 0, n));
     ages.push(life.character.age);
@@ -1119,7 +1175,27 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
     health,
     legal,
     discovery,
+    consistency: {
+      violations,
+      happiness: spreadOf(lifetimeHappiness),
+      repeats: {
+        mean: repeatShares.length > 0 ? repeatShares.reduce((a, b) => a + b, 0) / repeatShares.length : 0,
+        p90: spreadOf(repeatShares).p90,
+        top: [...repeatsByEvent.entries()]
+          .sort(([a, x], [b, y]) => y - x || (a < b ? -1 : 1))
+          .slice(0, 15)
+          .map(([id, n]) => ({ id, repeats: n })),
+      },
+    },
   };
+}
+
+/** Mean, median and 10th/90th percentiles. */
+function spreadOf(values: number[]): { mean: number; median: number; p10: number; p90: number } {
+  const sorted = [...values].sort((a, b) => a - b);
+  const at = (p: number) => sorted[Math.min(sorted.length - 1, Math.floor(sorted.length * p))] ?? 0;
+  const mean = sorted.length > 0 ? sorted.reduce((a, b) => a + b, 0) / sorted.length : 0;
+  return { mean, median: at(0.5), p10: at(0.1), p90: at(0.9) };
 }
 
 function earningsRow(values: number[]): EarningsRow {
@@ -1226,6 +1302,7 @@ export function formatReport(report: SimulationReport, content: ContentBundle): 
   );
   lines.push(...formatCareers(report, content));
   lines.push(...formatStage9(report, content));
+  lines.push(...formatConsistency(report, content));
   lines.push(`Events fired: ${report.totalEventsFired}`);
   lines.push('  event'.padEnd(30) + 'fired'.padStart(8) + 'share'.padStart(8) + 'lives'.padStart(9));
   for (const e of [...report.events].sort((a, b) => b.fired - a.fired)) {
@@ -1419,14 +1496,53 @@ export function formatComparison(careful: SimulationReport, careless: Simulation
   both((r) => pct(r.legal.jailedLives, r.lives), 'went to prison');
   both((r) => pct(r.discovery.identityChanged, r.lives), 'identity changed through self-discovery');
   lines.push('  targets (src/content/balance/targets.yaml; judged on the careful player):');
-  const a = [...targetResults(careful, content), ...stage9Targets(careful, content)];
-  const b = [...targetResults(careless, content), ...stage9Targets(careless, content)];
+  const a = [...targetResults(careful, content), ...stage9Targets(careful, content), ...consistencyTargets(careful, content)];
+  const b = [...targetResults(careless, content), ...stage9Targets(careless, content), ...consistencyTargets(careless, content)];
   a.forEach((x, i) => {
     const y = b[i]!;
     lines.push(row(x.label.length > 46 ? `${x.label.slice(0, 45)}…` : x.label, `${x.met ? 'MET' : 'NOT MET'}`, `${y.met ? 'MET' : 'NOT MET'}`));
     lines.push(row(`    target ${x.goal}`, x.short, y.short));
   });
   return lines.join('\n');
+}
+
+/** C1: consistency violations, lifetime Happiness and repeats. */
+function formatConsistency(report: SimulationReport, content: ContentBundle): string[] {
+  const c = report.consistency;
+  const pct1 = (x: number) => `${(100 * x).toFixed(1)}%`;
+  return [
+    'Consistency (C1):',
+    `  consistency violations (category contracts, presence): ${c.violations}`,
+    `  lifetime Happiness: mean ${c.happiness.mean.toFixed(1)}, median ${c.happiness.median.toFixed(1)}, 10th percentile ${c.happiness.p10.toFixed(1)}, 90th ${c.happiness.p90.toFixed(1)}`,
+    `  repeats of events not marked recurring: ${pct1(c.repeats.mean)} of events fired per life on average (90th percentile ${pct1(c.repeats.p90)})`,
+    `  most repeated (not recurring): ${c.repeats.top.map((t) => `${t.id} ${t.repeats}`).join(', ') || 'none'}`,
+    '  targets (src/content/balance/targets.yaml):',
+    ...consistencyTargets(report, content).map((r) => target(r.label, r.value, r.goal, r.met)),
+  ];
+}
+
+/** The C1 targets, measured on this report. */
+export function consistencyTargets(report: SimulationReport, content: ContentBundle): TargetResult[] {
+  const t = content.balance.targets.consistency;
+  const c = report.consistency;
+  const pct1 = (x: number) => `${(100 * x).toFixed(1)}%`;
+  return [
+    { label: 'consistency violations', value: String(c.violations), short: String(c.violations), goal: '0', met: c.violations === 0 },
+    {
+      label: 'average lifetime Happiness',
+      value: c.happiness.mean.toFixed(1),
+      short: c.happiness.mean.toFixed(1),
+      goal: `${t.lifetimeHappiness.min}–${t.lifetimeHappiness.max}`,
+      met: c.happiness.mean >= t.lifetimeHappiness.min && c.happiness.mean <= t.lifetimeHappiness.max,
+    },
+    {
+      label: 'repeats of events not marked recurring, per life',
+      value: pct1(c.repeats.mean),
+      short: pct1(c.repeats.mean),
+      goal: `under ${pct1(t.maxRepeatShare)}`,
+      met: c.repeats.mean < t.maxRepeatShare,
+    },
+  ];
 }
 
 /** Health, the law and self-discovery (Stage 9). */

@@ -171,7 +171,7 @@ describe('lives from Stage 3 on', () => {
       expect(result.envelope.schemaVersion).toBe(CURRENT_SCHEMA_VERSION);
       // A life from before C1 gets the average Happiness baseline (the C1 migration).
       const expected = produce(random('stage2'), (d) => {
-        d.character.hidden.happinessBaseline = 58;
+        d.character.hidden.happinessBaseline = 50;
       });
       expect(result.envelope.data).toEqual(expected);
     }
@@ -442,7 +442,7 @@ describe('lives from C1 on', () => {
     expect(result.status).toBe('ok');
     if (result.status !== 'ok') return;
     expect(result.envelope.schemaVersion).toBe(CURRENT_SCHEMA_VERSION);
-    expect(result.envelope.data.character.hidden.happinessBaseline).toBe(58);
+    expect(result.envelope.data.character.hidden.happinessBaseline).toBe(50);
   });
 
   it('round trip a follow-up and its time, outcome money and a changed rent', async () => {

@@ -48,7 +48,7 @@ hidden:
   geneticRisk: { mean: 30, sd: 15 }
   vice: { mean: 35, sd: 18 }
   # C1: the Happiness a life drifts back toward each year (aging.yaml).
-  happinessBaseline: { mean: 58, sd: 12 }
+  happinessBaseline: { mean: 50, sd: 12 }
 
 talentChance: 0.7
 

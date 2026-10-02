@@ -9,6 +9,8 @@ rarity: common
 lifeStages: [youngAdult, adult]
 weight: { base: 5 }
 cooldownYears: 5
+# C1: meant to come back now and then (repeats are kept rare otherwise).
+recurring: true
 cast:
   friend: { kind: friend, ageOffset: { min: -4, max: 4 }, age: { min: 20, max: 120 }, presence: anywhere }
 choices:

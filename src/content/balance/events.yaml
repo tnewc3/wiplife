@@ -8,6 +8,11 @@ rarityWeight:
   rare: 0.2
   legendary: 0.0005
 
+# C1: an event not marked recurring that a life already had is this much
+# less likely, again for every earlier time, so repeats stay rare (target:
+# targets.yaml consistency.maxRepeatShare). Recurring events are exempt.
+repeatWeight: 0.1
+
 checks:
   # A choice's success chance is always between these, in percent.
   min: 5

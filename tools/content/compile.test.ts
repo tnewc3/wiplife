@@ -367,6 +367,8 @@ ${extra}`;
       expect(await expectErrors()).toContain('{since} is only for follow-ups another event schedules');
       await write(file, event().replace('tag: lent_money }', 'tag: lent_money }\n        - { type: cost, item: yacht }'));
       expect(await expectErrors()).toContain('unknown cost item "yacht"');
+      await write(file, `${event()}once: true\nrecurring: true\n`);
+      expect(await expectErrors()).toContain('a recurring event can’t also be once');
     });
 
     it('rejects a chain file whose name does not match its chain id', async () => {

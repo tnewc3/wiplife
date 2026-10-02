@@ -17,6 +17,8 @@ events:
       modifiers:
         - { if: { trait: kindness, gt: 60 }, x: 1.5 }
     cooldownYears: 6
+    # C1: meant to come back now and then (repeats are kept rare otherwise).
+    recurring: true
     cast:
       friend: { kind: friend, ageOffset: { min: -4, max: 4 }, createIfMissing: true, presence: anywhere }
     choices:
@@ -65,6 +67,8 @@ events:
     lifeStages: [youngAdult, adult, senior]
     requires: { memory: { role: friend, tag: lent_money } }
     weight: { base: 10 }
+    # C1: meant to come back now and then (repeats are kept rare otherwise).
+    recurring: true
     followUpOnly: true
     cast:
       friend: { kind: friend, presence: anywhere }

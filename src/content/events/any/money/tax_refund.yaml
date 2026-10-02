@@ -13,6 +13,8 @@ requires:
     - { finances: { income: { gte: 15000 } } }
 weight: { base: 5 }
 cooldownYears: 5
+# C1: meant to come back now and then (repeats are kept rare otherwise).
+recurring: true
 cast:
   parent: { kind: parent, optional: true, presence: anywhere }
 choices:

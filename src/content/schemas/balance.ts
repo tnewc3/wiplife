@@ -233,6 +233,11 @@ export const eventsBalanceSchema = z.strictObject({
     rare: z.number().nonnegative(),
     legendary: z.number().nonnegative(),
   }),
+  /**
+   * C1: an event not marked recurring that this life already had: its weight
+   * is multiplied by this once for every earlier time, so repeats are rare.
+   */
+  repeatWeight: z.number().min(0).max(1),
   checks: z.strictObject({
     /** Success chances are clamped to this range, in percent. */
     min: z.number().min(0).max(100),
@@ -319,6 +324,11 @@ export const targetsBalanceSchema = z.strictObject({
    * The content coverage report (tools/coverage.ts, Stage 10): how much
    * content there is and how well it covers simulated lives.
    */
+  /** C1: Happiness that means something, and few repeats of events not marked recurring. */
+  consistency: z.strictObject({
+    lifetimeHappiness: z.strictObject({ min: z.number().min(0).max(100), max: z.number().min(0).max(100) }).refine((r) => r.min <= r.max, 'min must not be greater than max'),
+    maxRepeatShare: probabilitySchema,
+  }),
   coverage: z.strictObject({
     /** At least this many events (not retired). */
     minEvents: z.int().min(1),

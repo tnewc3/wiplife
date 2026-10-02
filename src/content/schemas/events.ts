@@ -647,6 +647,13 @@ export const eventSchema = baseDefSchema
     cooldownYears: z.int().min(1).optional(),
     once: z.boolean().optional(),
     /**
+     * C1: meant to come back in the same life (a holiday, a checkup, a
+     * yearly ritual). Repeats of events not marked recurring are kept rare
+     * (balance/targets.yaml consistency.maxRepeatShare); a recurring event
+     * can't also be once.
+     */
+    recurring: z.literal(true).optional(),
+    /**
      * Only happens when scheduled by another event (the later steps of a
      * chain) or queued by a management action (registries/actions.yaml).
      */
@@ -656,7 +663,8 @@ export const eventSchema = baseDefSchema
     autoOutcome: outcomeSchema.optional(),
   })
   .refine((e) => (e.choices === undefined) !== (e.autoOutcome === undefined), 'an event needs either choices or autoOutcome')
-  .refine((e) => !e.choices || new Set(e.choices.map((c) => c.id)).size === e.choices.length, 'choice ids must be unique');
+  .refine((e) => !e.choices || new Set(e.choices.map((c) => c.id)).size === e.choices.length, 'choice ids must be unique')
+  .refine((e) => !(e.recurring && e.once), 'a recurring event can’t also be once');
 export type EventDef = z.infer<typeof eventSchema>;
 
 /** A chain file: several events written together. */

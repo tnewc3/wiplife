@@ -255,8 +255,20 @@ describe('selection', () => {
     expect(eventWeight(life, once, content)).toBe(10);
     expect(eventWeight(logged, once, content)).toBe(0);
     expect(eventWeight(logged, cool, content)).toBe(0);
-    expect(eventWeight(produce(logged, (d) => void (d.currentYear += 1)), cool, content)).toBe(10);
+    // Off cooldown, a repeat is less likely (C1): repeatWeight for each earlier time.
+    const { repeatWeight } = content.balance.events;
+    expect(eventWeight(produce(logged, (d) => void (d.currentYear += 1)), cool, content)).toBeCloseTo(10 * repeatWeight);
     expect(eventWeight(life, req, content)).toBe(0);
+  });
+
+  it('keeps full weight for recurring events that happened before (C1)', () => {
+    const life = produce(adult('recurring'), (d) => {
+      d.eventLog.yearly = { count: 3, lastYear: d.currentYear - 5 };
+      d.eventLog.plain = { count: 2, lastYear: d.currentYear - 5 };
+    });
+    const { repeatWeight } = content.balance.events;
+    expect(eventWeight(life, ev({ id: 'yearly', recurring: true }), content)).toBe(10);
+    expect(eventWeight(life, ev({ id: 'plain' }), content)).toBeCloseTo(10 * repeatWeight * repeatWeight);
   });
 
   it('applies category cooldowns, rarity and modifiers', () => {

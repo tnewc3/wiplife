@@ -111,11 +111,11 @@ export const migrations: readonly Migration[] = [
     from: 8,
     description:
       'C1: the Happiness baseline each year drifts toward (a hidden value rolled at birth). A life from before C1 ' +
-      'gets the average baseline, 58 (balance/creation.yaml when C1 shipped). Follow-ups, outcome money and rent ' +
+      'gets the average baseline, 50 (balance/creation.yaml when C1 shipped). Follow-ups, outcome money and rent ' +
       'changes are new optional fields, so they need no upgrade.',
     migrate: (data) => {
       if (!isRecord(data) || !isRecord(data.character) || !isRecord(data.character.hidden)) return data;
-      const hidden = { ...data.character.hidden, happinessBaseline: 58 };
+      const hidden = { ...data.character.hidden, happinessBaseline: 50 };
       return { ...data, character: { ...data.character, hidden } };
     },
   },
