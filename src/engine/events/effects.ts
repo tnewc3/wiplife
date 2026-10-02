@@ -20,7 +20,8 @@ import { addScholarshipFund, leaveSchool } from '../education';
 import { applyIdentity, discoverTalent } from '../discovery';
 import { changeSeverity, setTreated } from '../health';
 import { sentence } from '../legal';
-import { moveInTogether, moveTo, refreshHousingCost, sellHome, settleHousehold, supportingParent } from '../housing';
+import { changeRent, moveInTogether, moveTo, refreshHousingCost, sellHome, settleHousehold, supportingParent } from '../housing';
+import { payCost, rentMonthsAmount } from '../costs';
 import { whereabouts } from '../presence';
 import { clampInt } from '../random';
 import { otherCity } from './casting';
@@ -64,6 +65,14 @@ const handlers: { [T in Effect['type']]: Handler<T> } = {
     if (effect.delta >= 0) earn(state, effect.delta);
     else spend(state, -effect.delta, ctx.content);
   },
+
+  rentMonths: (state, effect, ctx) => {
+    const amount = rentMonthsAmount(state, effect.months);
+    if (amount >= 0) earn(state, amount);
+    else spend(state, -amount, ctx.content);
+  },
+
+  cost: (state, effect, ctx) => payCost(state, effect.item, ctx.content),
 
   debt: (state, effect, ctx) => {
     // Children never take on debt.
@@ -117,6 +126,9 @@ const handlers: { [T in Effect['type']]: Handler<T> } = {
         return;
       case 'move_in_together':
         moveInTogether(state, ctx.cast[effect.role ?? ''] ?? '', ctx.content);
+        return;
+      case 'rent_change':
+        if (h.kind === 'renting') changeRent(state, effect.percent ?? 0, ctx.content);
         return;
     }
   },

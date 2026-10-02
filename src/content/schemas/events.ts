@@ -423,6 +423,18 @@ export const effectSchema = z.discriminatedUnion('type', [
    */
   z.strictObject({ type: z.literal('money'), delta: z.int().min(-1_000_000_000).max(1_000_000_000) }),
   /**
+   * C1: money that scales with your rent: `months` months of your current
+   * yearly housing cost (negative to pay, positive to get back), through
+   * savings like money. Nothing when you pay no rent.
+   */
+  z.strictObject({ type: z.literal('rentMonths'), months: z.number().min(-24).max(24).refine((n) => n !== 0, 'months must not be 0') }),
+  /**
+   * C1: a one-time cost from balance/economy.yaml costs (a wedding), scaled
+   * by your city; your family may chip in; savings pay first and the rest
+   * becomes personal debt.
+   */
+  z.strictObject({ type: z.literal('cost'), item: idSchema }),
+  /**
    * Debt (adults only; refused before the independence age). add: a new
    * student, personal or medical debt of `amount`. forgive: `share` of every
    * debt of `kinds` (default: all but the mortgage) is written off.
@@ -448,14 +460,19 @@ export const effectSchema = z.discriminatedUnion('type', [
    * home and rent. move_in_together: `role` (your partner, fiancé or spouse)
    * moves in with you and pays their share. The engine ignores a move that
    * doesn't fit (no parent to go to, a home you own and haven't sold...).
+   * rent_change (C1): your rent changes by `percent` of the current rent
+   * from now on (renting only).
    */
   z
     .strictObject({
       type: z.literal('housing'),
-      action: z.enum(['move_home', 'rent', 'homeless', 'roommate', 'live_alone', 'sell', 'move_in_together']),
+      action: z.enum(['move_home', 'rent', 'homeless', 'roommate', 'live_alone', 'sell', 'move_in_together', 'rent_change']),
       role: roleSchema.optional(),
+      /** rent_change (C1): the rent goes up (or down) by this percentage of your current rent, for as long as you stay. */
+      percent: z.number().min(-50).max(100).refine((n) => n !== 0, 'percent must not be 0').optional(),
     })
-    .refine((e) => (e.action === 'move_in_together') === (e.role !== undefined), 'move_in_together needs role (and only it has one)'),
+    .refine((e) => (e.action === 'move_in_together') === (e.role !== undefined), 'move_in_together needs role (and only it has one)')
+    .refine((e) => (e.action === 'rent_change') === (e.percent !== undefined), 'rent_change needs percent (and only it has one)'),
   /**
    * School (Stage 7). grades: `value` GPA points (−1 to 1) added to this
    * school year's grade (while you're in school). scholarship: `value`

@@ -360,8 +360,13 @@ ${extra}`;
       expect(await expectErrors()).toContain('presence');
       await write(file, event().replace('presence: city', 'presence: household'));
       expect(await expectErrors()).toContain("presence household can't create someone new");
+    });
+
+    it('keeps {since} to scheduled follow-ups and checks cost items (C1)', async () => {
       await write(file, event().replace("'{npc.name} waves.'", "'{npc.name} waves, {since} on.'"));
       expect(await expectErrors()).toContain('{since} is only for follow-ups another event schedules');
+      await write(file, event().replace('tag: lent_money }', 'tag: lent_money }\n        - { type: cost, item: yacht }'));
+      expect(await expectErrors()).toContain('unknown cost item "yacht"');
     });
 
     it('rejects a chain file whose name does not match its chain id', async () => {

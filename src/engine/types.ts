@@ -337,6 +337,8 @@ export interface HousingState {
   roommate?: true;
   /** Your partner or spouse who lives with you (and pays their share). */
   partnerId?: Id;
+  /** A rental's rent as a multiple of the city's base rent, after rent changes (C1); 1 when absent. Reset by a move. */
+  rentFactor?: number;
 }
 
 /** A health condition you have (Stage 9). */
@@ -392,11 +394,17 @@ export interface EventInstance {
   money?: MoneyChange;
 }
 
-/** A change to your money from one outcome: savings up or down, the new balance, and debt taken on (or paid off). */
+/**
+ * A change to your money from one outcome (C1): savings up or down, the new
+ * balance, debt taken on (or paid off), what your family covered, and a
+ * change to your yearly housing cost with the new cost.
+ */
 export interface MoneyChange {
   change: number;
   balance: number;
   debtChange: number;
+  familyHelp?: number;
+  housing?: { change: number; annual: number };
 }
 
 export interface ScheduledEvent {

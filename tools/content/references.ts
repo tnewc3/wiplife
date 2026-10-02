@@ -533,6 +533,7 @@ function checkEvents(bundle: ContentBundle, fileOf: (typeKey: CollectionKey, id:
         if (effect.type === 'memory' && !tags[effect.tag]) err(`${where}: memory "${effect.tag}" is not in registries/memories.yaml`);
         if (effect.type === 'flag' && !flags[effect.key]) err(`${where}: flag "${effect.key}" is not in registries/flags.yaml`);
         if (effect.type === 'death' && !bundle.causes[effect.cause]) err(`${where}: unknown cause "${effect.cause}"`);
+        if (effect.type === 'cost' && !bundle.balance.economy.costs[effect.item]) err(`${where}: unknown cost item "${effect.item}" (balance/economy.yaml costs)`);
         if (effect.type === 'relationship' && effect.kind && !EFFECT_KINDS.includes(effect.kind)) {
           err(`${where}: kind can only become ${EFFECT_KINDS.join(', ')}`);
         }

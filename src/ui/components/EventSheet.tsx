@@ -4,7 +4,7 @@ import type { Tone } from '../../content/schemas';
 import { getEventCard, problemReport } from '../../engine/selectors';
 import type { LifeState } from '../../engine/types';
 import { useAppStore } from '../../store/appStore';
-import { ageLabel, choiceMoneyLabel, outcomeDebtLabel, outcomeMoneyLabel } from '../labels';
+import { ageLabel, choiceMoneyLabel, familyHelpLabel, housingChangeLabel, outcomeDebtLabel, outcomeMoneyLabel } from '../labels';
 import { Button } from './Button';
 import { YearRecapList } from './YearRecapList';
 
@@ -111,6 +111,8 @@ export function EventSheet({ life }: { life: LifeState }) {
                       <p className="text-sm font-semibold" data-testid="event-money">
                         {card.money.change !== 0 && <span className="block">{outcomeMoneyLabel(card.money.change, card.money.balance)}</span>}
                         {card.money.debtChange !== 0 && <span className="block">{outcomeDebtLabel(card.money.debtChange)}</span>}
+                        {card.money.familyHelp !== undefined && <span className="block">{familyHelpLabel(card.money.familyHelp)}</span>}
+                        {card.money.housing && <span className="block">{housingChangeLabel(card.money.housing.change, card.money.housing.annual)}</span>}
                       </p>
                     )}
                   </>
@@ -133,9 +135,9 @@ export function EventSheet({ life }: { life: LifeState }) {
               >
                 <span className="flex w-full flex-col">
                   <span>{choice.label}</span>
-                  {choice.money !== undefined && (
+                  {(choice.money !== undefined || choice.familyHelp !== undefined || choice.rent !== undefined) && (
                     <span className="text-sm font-normal text-muted" data-testid="choice-money">
-                      {choiceMoneyLabel(choice.money)}
+                      {choiceMoneyLabel(choice)}
                     </span>
                   )}
                 </span>

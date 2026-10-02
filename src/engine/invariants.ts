@@ -134,6 +134,11 @@ export function checkInvariants(state: LifeState, content: ContentBundle): strin
   if (!Number.isInteger(h.since) || h.since < state.birthYear || h.since > state.currentYear) fail('housing.since is outside the life');
   if (!independent && h.kind !== 'with_parents') fail(`a child is housed "${h.kind}"`);
   if (h.roommate !== undefined && (h.roommate !== true || h.kind !== 'renting')) fail('only a rental has a roommate');
+  if (h.rentFactor !== undefined) {
+    const { min, max } = content.balance.economy.housing.rentFactor;
+    if (h.kind !== 'renting') fail('housing.rentFactor is only for a rental');
+    if (!(h.rentFactor >= min && h.rentFactor <= max)) fail(`housing.rentFactor ${h.rentFactor} is outside ${min}–${max}`);
+  }
   if (h.partnerId !== undefined) {
     const rel = state.relationships[h.partnerId];
     // In prison, a partner can keep living in the home you own (Stage 9).

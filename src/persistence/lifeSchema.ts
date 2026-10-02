@@ -254,6 +254,7 @@ const housing = z.strictObject({
   since: int,
   roommate: z.literal(true).exactOptional(),
   partnerId: id.exactOptional(),
+  rentFactor: z.number().positive().max(10).exactOptional(),
 });
 
 const health = z.strictObject({
@@ -329,7 +330,15 @@ export const lifeStateSchema: z.ZodType<LifeState> = z.strictObject({
       resolvedChoiceId: id.exactOptional(),
       outcomeText: z.string().exactOptional(),
       since: int.exactOptional(),
-      money: z.strictObject({ change: int, balance: int.min(0), debtChange: int }).exactOptional(),
+      money: z
+        .strictObject({
+          change: int,
+          balance: int.min(0),
+          debtChange: int,
+          familyHelp: int.min(1).exactOptional(),
+          housing: z.strictObject({ change: int, annual: int.min(0) }).exactOptional(),
+        })
+        .exactOptional(),
     }),
   ),
   history: z.array(historyEntry),

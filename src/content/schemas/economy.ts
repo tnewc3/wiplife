@@ -146,7 +146,27 @@ export const economyBalanceSchema = z.strictObject({
     roommateShare: share,
     /** Share of the housing cost you pay when you live with your partner or spouse (they pay the rest). */
     partnerShare: share,
+    /**
+     * C1: rent changes are a share of your current rent and last while you
+     * stay in the home; the rent stays within these multiples of the city's
+     * base rent.
+     */
+    rentFactor: z
+      .strictObject({ min: z.number().positive().max(1), max: z.number().min(1).max(10) })
+      .refine((r) => r.min <= r.max, 'min must not be greater than max'),
   }),
+  /**
+   * C1: big one-time costs events charge through the finance module (the cost
+   * effect): amount at the national average, times the city's cost of
+   * living; familyHelp: your family may chip in.
+   */
+  costs: z.record(idSchema, z.strictObject({ amount: dollarsSchema.positive(), familyHelp: z.boolean() })),
+  /**
+   * C1: how much of a cost your family covers: share by family wealth, times
+   * how close you are to your closest living parent (affection ÷ 100), and
+   * nothing below minAffection.
+   */
+  familyHelp: z.strictObject({ share: perWealth(share), minAffection: scoreSchema }),
   /**
    * The retirement benefit (like Social Security): paid every year from `age`
    * once you have `minYears` years with earned income, from your average

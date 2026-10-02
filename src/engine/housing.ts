@@ -62,7 +62,7 @@ export function housingCost(state: LifeState, content: ContentBundle): number {
     case 'with_parents':
       return isIndependent(state, content) ? wholeDollars(city.baseRent * eco.withParents.rentShare[state.character.familyWealth]) : 0;
     case 'renting':
-      return wholeDollars(rentIn(city, h.roommate === true, content) * shared);
+      return wholeDollars(rentIn(city, h.roommate === true, content) * (h.rentFactor ?? 1) * shared);
     case 'owned':
       return wholeDollars((h.homeValue ?? 0) * eco.ownership.upkeep * shared);
     case 'homeless':
@@ -94,6 +94,32 @@ export function livingCost(state: LifeState, content: ContentBundle, lifestyle: 
     default:
       return wholeDollars(base * eco.lifestyle[lifestyle].living);
   }
+}
+
+/** The rent factor after a change of `percent` (C1): within the balance limits, kept to four decimals so saves stay tidy. */
+function nextRentFactor(state: LifeState, percent: number, content: ContentBundle): number {
+  const { min, max } = content.balance.economy.housing.rentFactor;
+  const factor = Math.min(max, Math.max(min, (state.housing.rentFactor ?? 1) * (1 + percent / 100)));
+  return Math.round(factor * 10000) / 10000;
+}
+
+/**
+ * Your rent changes by `percent` of the current rent (C1), for as long as
+ * you stay in this rental; it stays within the balance limits of the
+ * city's base rent. Renting only.
+ */
+export function changeRent(state: LifeState, percent: number, content: ContentBundle): void {
+  if (state.housing.kind !== 'renting') return;
+  state.housing.rentFactor = nextRentFactor(state, percent, content);
+  refreshHousingCost(state, content);
+}
+
+/** How much your yearly housing cost would change with a rent change of `percent` (C1); 0 when not renting. */
+export function rentChangeAmount(state: LifeState, percent: number, content: ContentBundle): number {
+  const h = state.housing;
+  if (h.kind !== 'renting') return 0;
+  const next: LifeState = { ...state, housing: { ...h, rentFactor: nextRentFactor(state, percent, content) } };
+  return housingCost(next, content) - housingCost(state, content);
 }
 
 /** Recomputes the home's yearly cost shown on the Home screen. */
