@@ -306,12 +306,16 @@ export function checkInvariants(state: LifeState, content: ContentBundle): strin
       if (def) for (const problem of consistencyProblems(state, def, p.cast, content)) fail(`consistency: ${problem}`);
     }
   }
+  for (const p of state.pending) {
+    if (p.since !== undefined && (p.since < state.birthYear || p.since >= state.currentYear)) fail(`pending ${p.eventId} was set up outside the past years`);
+  }
   const pendingEvents = state.pending.map((p) => p.eventId);
   if (new Set(pendingEvents).size !== pendingEvents.length) fail('an event appears twice in one year');
   for (const s of state.scheduled) {
     if (!content.events[s.eventId]) fail(`scheduled event "${s.eventId}" is not known`);
     // Follow-ups are always for a later year; due ones leave the list when the year begins.
     if (s.dueYear <= state.currentYear) fail(`scheduled ${s.eventId} is due in the past (${s.dueYear})`);
+    if (s.since !== undefined && (s.since < state.birthYear || s.since > state.currentYear)) fail(`scheduled ${s.eventId} was set up outside the life`);
     for (const [role, id] of Object.entries(s.cast)) if (!state.people[id]) fail(`scheduled ${s.eventId} casts missing person ${id} as ${role}`);
   }
   for (const [id, log] of Object.entries(state.eventLog)) {

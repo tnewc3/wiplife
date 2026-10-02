@@ -36,6 +36,8 @@ export interface EffectContext {
   cast: Record<string, Id>;
   rng: RngState;
   content: ContentBundle;
+  /** A follow-up: the year the event that scheduled it happened ({since}). */
+  since?: number;
 }
 
 type Handler<T extends Effect['type']> = (state: LifeState, effect: Extract<Effect, { type: T }>, ctx: EffectContext) => void;
@@ -199,11 +201,11 @@ const handlers: { [T in Effect['type']]: Handler<T> } = {
       if (id !== undefined) cast[role] = id;
     }
     const [min, max] = effect.inYears;
-    state.scheduled.push({ eventId: effect.eventId, dueYear: state.currentYear + nextInt(ctx.rng, min, max), cast });
+    state.scheduled.push({ eventId: effect.eventId, dueYear: state.currentYear + nextInt(ctx.rng, min, max), cast, since: state.currentYear });
   },
 
   history: (state, effect, ctx) => {
-    const text = renderText(effect.text, textContext(state, ctx.cast, ctx.content));
+    const text = renderText(effect.text, textContext(state, ctx.cast, ctx.content, ctx.since));
     const legendary = ctx.def.rarity === 'legendary';
     addHistory(
       state,

@@ -287,9 +287,9 @@ export function resolveChoice(state: LifeState, instanceId: Id, choiceId: Id, co
         outcome = chance(draft.rng, successChance(draft, choice.check, content, instance.cast)) ? choice.check.success : choice.check.failure;
       }
       if (outcome) {
-        applyEffects(draft, outcome.effects, { def, cast: instance.cast, rng: draft.rng, content });
+        applyEffects(draft, outcome.effects, { def, cast: instance.cast, rng: draft.rng, content, ...(instance.since !== undefined ? { since: instance.since } : {}) });
         // Written after the effects, so it can tell what they did ({sentence}, new pronouns).
-        if (outcome.text) target.outcomeText = renderText(outcome.text, textContext(draft, instance.cast, content));
+        if (outcome.text) target.outcomeText = renderText(outcome.text, textContext(draft, instance.cast, content, instance.since));
       }
     }
 

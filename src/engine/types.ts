@@ -386,12 +386,16 @@ export interface EventInstance {
   cast: Record<string, Id>;
   resolvedChoiceId?: Id;
   outcomeText?: string;
+  /** A follow-up: the year the event that scheduled it happened (C1, {since}). */
+  since?: number;
 }
 
 export interface ScheduledEvent {
   eventId: Id;
   dueYear: number;
   cast: Record<string, Id>;
+  /** The year the event that scheduled it happened (C1, {since}). */
+  since?: number;
 }
 
 export interface HistoryEntry {

@@ -1020,7 +1020,7 @@ export function getEventCard(state: LifeState, index: number, content: ContentBu
   };
   // A definition removed by a content update: a card the player can dismiss.
   if (!def) return { ...base, title: '…', text: '', tone: 'neutral', choices: [{ id: CONTINUE_CHOICE, label: 'Continue' }] };
-  const ctx = textContext(state, instance.cast, content);
+  const ctx = textContext(state, instance.cast, content, instance.since);
   const choices = def.choices
     ? def.choices
         .filter((c) => evaluate(c.visibleIf, state, { cast: instance.cast, roles: 'strict', content }))

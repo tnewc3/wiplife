@@ -320,7 +320,7 @@ export const lifeStateSchema: z.ZodType<LifeState> = z.strictObject({
   discovery,
   flags: z.record(z.string(), z.union([z.number(), z.boolean(), z.string()])),
   eventLog: z.record(z.string(), z.strictObject({ count: int, lastYear: int })),
-  scheduled: z.array(z.strictObject({ eventId: id, dueYear: int, cast })),
+  scheduled: z.array(z.strictObject({ eventId: id, dueYear: int, cast, since: int.exactOptional() })),
   pending: z.array(
     z.strictObject({
       instanceId: id,
@@ -328,6 +328,7 @@ export const lifeStateSchema: z.ZodType<LifeState> = z.strictObject({
       cast,
       resolvedChoiceId: id.exactOptional(),
       outcomeText: z.string().exactOptional(),
+      since: int.exactOptional(),
     }),
   ),
   history: z.array(historyEntry),

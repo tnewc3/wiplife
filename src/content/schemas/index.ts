@@ -14,7 +14,7 @@ import { citySchema } from './city';
 import { economyBalanceSchema, triggerRegistrySchema } from './economy';
 import { educationBalanceSchema, gradProgramSchema, majorSchema, tradeSchema } from './education';
 import { categoryRegistrySchema, eventSchema, flagRegistrySchema, memoryRegistrySchema } from './events';
-import { causeSchema, historyTextSchema, legalTextSchema, obituaryTextSchema, relationWordsSchema } from './text';
+import { causeSchema, historyTextSchema, legalTextSchema, obituaryTextSchema, relationWordsSchema, timeTextSchema } from './text';
 import { conditionDefSchema, healthBalanceSchema, healthRegistrySchema } from './health';
 import { legalBalanceSchema, legalRegistrySchema, offenseSchema } from './legal';
 import { discoveryBalanceSchema, discoveryRegistrySchema, discoveryTextSchema } from './discovery';
@@ -82,6 +82,7 @@ export const singletonTypes = {
   'text/obituary': obituaryTextSchema,
   'text/legal': legalTextSchema,
   'text/discovery': discoveryTextSchema,
+  'text/time': timeTextSchema,
   'registries/memories': memoryRegistrySchema,
   'registries/flags': flagRegistrySchema,
   'registries/categories': categoryRegistrySchema,
@@ -131,6 +132,7 @@ export const contentBundleSchema = z.strictObject({
     obituary: obituaryTextSchema,
     legal: legalTextSchema,
     discovery: discoveryTextSchema,
+    time: timeTextSchema,
   }),
   registries: z.strictObject({
     memories: memoryRegistrySchema,

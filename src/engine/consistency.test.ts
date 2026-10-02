@@ -12,6 +12,7 @@ import { applyEffects } from './events/effects';
 import { checkInvariants } from './invariants';
 import { consistencyProblems, fitsPresence, whereabouts } from './presence';
 import { createRng } from './rng';
+import { getEventCard } from './selectors';
 import { runPacing } from './systems/pacing';
 import { cloneJson, lifeAtAge } from './testFixtures';
 import type { LifeState, Person, Relationship, RelationshipKind } from './types';
@@ -201,6 +202,22 @@ describe('runtime enforcement', () => {
     const moved = scheduled(true);
     expect(moved.scheduled).toEqual([]);
     expect(moved.pending.map((p) => p.eventId)).not.toContain('visit_again');
+  });
+
+  it('carries when a follow-up was set up into its card text ({since})', () => {
+    const followUp = ev({ id: 'visit_again', followUpOnly: true, text: 'It has been {since} since {pal.name} left.', cast: { pal: { kind: 'friend', presence: 'anywhere' } } });
+    const bundle = withEvents(followUp);
+    const life = produce(
+      lifeWith(30, [{ id: 'pal', kind: 'friend' }], (d) => {
+        d.scheduled = [{ eventId: 'visit_again', dueYear: d.currentYear, cast: { pal: 'pal' }, since: d.currentYear - 2 }];
+      }),
+      (d) => {
+        runPacing(d, bundle);
+        d.phase = 'events';
+      },
+    );
+    expect(life.pending[0]?.since).toBe(life.currentYear - 2);
+    expect(getEventCard(life, 0, bundle)?.text).toBe(`It has been two years since ${life.people.pal!.name.first} left.`);
   });
 
   it('makes an in-person action unavailable with someone who lives elsewhere', () => {

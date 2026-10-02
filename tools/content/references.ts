@@ -253,6 +253,10 @@ function checkTemplates(bundle: ContentBundle, partialEvents: boolean): ContentE
   }
   check('text/legal.yaml', 'years.one', legalText.years.one, {});
   check('text/legal.yaml', 'years.many', legalText.years.many, { values: ['n'] });
+  const time = bundle.text.time.since;
+  check('text/time.yaml', 'since.one', time.one, {});
+  check('text/time.yaml', 'since.many', time.many, { values: ['n'] });
+  check('text/time.yaml', 'since.unknown', time.unknown, {});
 
   const obituary = bundle.text.obituary;
   const self = ['self'];
@@ -576,6 +580,10 @@ function checkEvents(bundle: ContentBundle, fileOf: (typeKey: CollectionKey, id:
       !systemEvents.has(id)
     ) {
       errors.push({ file: fileOf('events', id), message: `${id}: followUpOnly, but no event schedules it and no action or trigger uses it` });
+    }
+    // C1: {since} says how long ago the event that scheduled this one was.
+    if (JSON.stringify(def).includes('{since}') && !(def.followUpOnly && scheduledIds.has(id))) {
+      errors.push({ file: fileOf('events', id), message: `${id}: {since} is only for follow-ups another event schedules (C1)` });
     }
   }
   return errors;

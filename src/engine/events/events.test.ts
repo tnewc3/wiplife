@@ -16,8 +16,7 @@ import { castCandidates, castEvent, uncast } from './casting';
 import { successChance } from './checks';
 import { applyEffects } from './effects';
 import { eventIndex, eventWeight } from './selection';
-import type { EVENT_TEXT_VALUES} from './text';
-import { SELF_ROLE } from './text';
+import { SELF_ROLE, sinceText, type EVENT_TEXT_VALUES } from './text';
 
 /** An event with test defaults; override anything. */
 function ev(overrides: Record<string, unknown>): EventDef {
@@ -102,7 +101,17 @@ describe('effect handlers', () => {
       expect(item!.dueYear - start.currentYear).toBeGreaterThanOrEqual(2);
       expect(item!.dueYear - start.currentYear).toBeLessThanOrEqual(4);
       expect(item!.cast).toEqual({ npc: pid });
+      expect(item!.since).toBe(start.currentYear);
     }
+  });
+
+  it('{since}: says how long ago a follow-up was set up, in words (C1)', () => {
+    const life = adult();
+    const at = (since: number | undefined) => sinceText(life, since, content);
+    expect(at(life.currentYear - 1)).toBe('a year');
+    expect(at(life.currentYear - 3)).toBe('three years');
+    expect(at(life.currentYear - 14)).toBe('14 years');
+    expect(at(undefined)).toBe('a while');
   });
 
   it('history: writes a rendered entry; a legendary event marks it legendary', () => {
@@ -462,6 +471,7 @@ describe('event text', () => {
           latentExpression: 'androgynous',
           latentTrait: 'a taste for risk you never let yourself have',
           sentence: 'a year in prison',
+          since: 'two years',
         } satisfies Record<(typeof EVENT_TEXT_VALUES)[number], string | number>;
         const context = { roles, values };
         const texts = [def.title, def.text, ...(def.choices ?? []).map((c) => c.label)];
