@@ -11,8 +11,11 @@ lifeStages: [youngAdult, adult]
 requires: { money: { lt: 1500 } }
 weight: { base: 4 }
 cooldownYears: 5
+# C1: reviewed build warnings kept on purpose (docs/consistency-review.md).
+justified:
+  money: "The loan goes straight to the mechanic, so your savings don't change; you owe the helper informally (the lent_you_money memory)."
 cast:
-  helper: { support: true, optional: true }
+  helper: { support: true, optional: true, presence: anywhere }
 choices:
   - id: ask
     label: Ask {helper.name} for a loan

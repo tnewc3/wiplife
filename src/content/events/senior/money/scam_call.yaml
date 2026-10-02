@@ -9,6 +9,9 @@ rarity: common
 lifeStages: [senior]
 weight: { base: 5 }
 cooldownYears: 8
+# C1: reviewed build warnings kept on purpose (docs/consistency-review.md).
+justified:
+  money: "You see through the scam in time: keeping your money is the outcome."
 choices:
   - id: hang_up
     label: Hang up

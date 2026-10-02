@@ -2,7 +2,7 @@ id: first_apartment
 title: Your name on the lease
 text: >-
   The apartment is small, the radiator clanks, and the kitchen is a hallway
-  with a stove in it. It's the first place that's entirely yours.
+  with a stove in it. It's the first place with your name on the lease.
 tone: light
 category: home
 rarity: common
@@ -13,6 +13,9 @@ requires:
     - { home: { kind: [renting], years: { lte: 1 } } }
 weight: { base: 8 }
 once: true
+# C1: reviewed build warnings kept on purpose (docs/consistency-review.md).
+justified:
+  money: "The furniture is free from the curb; \"price\" is a figure of speech."
 choices:
   - id: party
     label: Throw a housewarming party

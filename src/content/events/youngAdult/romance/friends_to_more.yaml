@@ -15,7 +15,7 @@ requires:
 weight: { base: 5 }
 cooldownYears: 5
 cast:
-  friend: { kind: friend, romantic: true }
+  friend: { kind: friend, romantic: true, presence: city }
 choices:
   - id: same
     label: Admit you feel the same

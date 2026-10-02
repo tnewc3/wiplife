@@ -1,0 +1,76 @@
+# Answers the "marry" action (registries/actions.yaml).
+id: wedding
+title: The big day
+text: >-
+  You and {person.name} have set a date. Now you just have to agree on what
+  kind of wedding it's going to be, and whether you're really doing this.
+tone: light
+category: partner
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { romance: [engaged] }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  # Filled by the action: your fiancé.
+  person: { kind: fiance, presence: nearby }
+# C1, wedding costs: the size you choose sets the price (balance/economy.yaml
+# costs, scaled by your city), your family may chip in, and whatever your
+# savings can't cover goes on credit (personal debt). The buttons show the
+# cost, the family's share and any part on credit.
+choices:
+  - id: courthouse
+    label: The courthouse, then a nice lunch
+    outcome:
+      text: >-
+        Ten minutes in front of a clerk, two strangers as witnesses, and the
+        best sandwich of your life afterwards.
+      effects:
+        - { type: cost, item: wedding_courthouse }
+        - { type: relationship, role: person, kind: spouse, affection: 8, trust: 5 }
+        - { type: memory, role: person, tag: married_you }
+        - { type: stat, key: happiness, delta: 9 }
+        - { type: history, text: 'You married {person.name} at the courthouse on a Tuesday.', importance: 3 }
+  - id: small
+    label: A small wedding, family and close friends
+    outcome:
+      text: >-
+        Thirty folding chairs in a backyard, a cake somebody's cousin made,
+        and everyone who matters close enough to hug.
+      effects:
+        - { type: cost, item: wedding_small }
+        - { type: relationship, role: person, kind: spouse, affection: 9, trust: 5 }
+        - { type: memory, role: person, tag: married_you }
+        - { type: stat, key: happiness, delta: 10 }
+        - { type: stat, key: stress, delta: 2 }
+        - { type: history, text: 'You married {person.name} with your closest people around you.', importance: 3 }
+  - id: big
+    label: A big wedding with everyone you know
+    outcome:
+      text: >-
+        Your uncle gives a speech nobody asked for. {person.name} cries during
+        the vows. It's perfect, and it costs a fortune.
+      effects:
+        - { type: cost, item: wedding_big }
+        - { type: relationship, role: person, kind: spouse, affection: 10, trust: 5 }
+        - { type: memory, role: person, tag: married_you }
+        - { type: stat, key: happiness, delta: 12 }
+        - { type: stat, key: stress, delta: 4 }
+        - { type: history, text: 'You married {person.name} in front of everyone you love.', importance: 3 }
+  - id: call_off
+    label: Call it off
+    # Offered when things between you have been rocky.
+    visibleIf: { role: person, affection: { lt: 50 } }
+    outcome:
+      text: >-
+        You say it out loud before you can stop yourself. {person.name} takes
+        off the ring and puts it on the table between you.
+      effects:
+        - { type: relationship, role: person, kind: ex, affection: -30, trust: -30 }
+        - { type: memory, role: person, tag: called_off_wedding }
+        - { type: stat, key: happiness, delta: -8 }
+        - { type: stat, key: stress, delta: 6 }
+        - { type: history, text: 'You called off your wedding to {person.name}.', importance: 2 }

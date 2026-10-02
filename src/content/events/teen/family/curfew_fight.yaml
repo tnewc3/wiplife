@@ -11,7 +11,7 @@ requires: { age: { gte: 14 } }
 weight: { base: 5 }
 cooldownYears: 2
 cast:
-  parent: { kind: parent }
+  parent: { kind: parent, presence: household }
 choices:
   - id: negotiate
     label: Negotiate like a lawyer

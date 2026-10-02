@@ -11,6 +11,9 @@ rarity: common
 lifeStages: [early, child, teen, youngAdult, adult, senior]
 weight: { base: 1 }
 followUpOnly: true
+# C1: reviewed build warnings kept on purpose (docs/consistency-review.md).
+justified:
+  money: "\"A clean bill of health\" is an idiom; the doctor visit was already charged by the doctor action."
 choices:
   - id: relief
     label: Leave feeling ten years younger

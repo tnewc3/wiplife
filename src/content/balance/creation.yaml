@@ -47,6 +47,8 @@ hidden:
   reputation: { mean: 50, sd: 5 }
   geneticRisk: { mean: 30, sd: 15 }
   vice: { mean: 35, sd: 18 }
+  # C1: the Happiness a life drifts back toward each year (aging.yaml).
+  happinessBaseline: { mean: 50, sd: 12 }
 
 talentChance: 0.7
 
@@ -94,3 +96,10 @@ family:
   relativeTraitCount: 3
   relativeLooks: { mean: 50, sd: 18 }
   relativeSmarts: { mean: 50, sd: 18 }
+  # C1: each parent's own two parents, alive or not by the time you're born
+  # (NPC mortality odds). A living grandparent lives in your city by this
+  # chance, otherwise somewhere else.
+  grandparents:
+    sameCityChance: 0.6
+    affection: { mean: 65, sd: 15 }
+    trust: { mean: 60, sd: 15 }

@@ -1,0 +1,27 @@
+id: old_employer_calls
+title: One more project
+text: >-
+  Your old workplace calls. Nobody else understands the system you built,
+  and they'll pay well for a few weeks of help.
+tone: light
+category: retirement
+rarity: common
+lifeStages: [senior]
+requires: { career: { retired: true } }
+weight: { base: 4 }
+cooldownYears: 10
+choices:
+  - id: help
+    label: Help out, for a price
+    outcome:
+      text: It's fun to be needed, and the check is very nice. You're glad to leave again when it's done.
+      effects:
+        - { type: money, delta: 5000 }
+        - { type: stat, key: happiness, delta: 2 }
+  - id: decline
+    label: '"I''m retired."'
+    outcome:
+      text: You say it with enormous satisfaction and hang up to go fishing.
+      effects:
+        - { type: stat, key: happiness, delta: 3 }
+        - { type: stat, key: stress, delta: -2 }

@@ -12,7 +12,7 @@ lifeStages: [youngAdult, adult, senior]
 weight: { base: 6 }
 once: true
 cast:
-  stranger: { kind: acquaintance, age: { min: 75, max: 90 }, createIfMissing: true, newChance: 1 }
+  stranger: { kind: acquaintance, age: { min: 75, max: 90 }, createIfMissing: true, newChance: 1, presence: city }
 choices:
   - id: listen
     label: Listen

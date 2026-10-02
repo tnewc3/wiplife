@@ -27,6 +27,8 @@ import { InvalidInputError, parseCreateLifeOptions, type CreateLifeOptions } fro
 import { successChance } from './events/checks';
 import { applyEffects } from './events/effects';
 import { textContext } from './events/text';
+import { familyHelp } from './costs';
+import { totalDebt } from './finance';
 import { renderText } from './text';
 import { runPipeline, YEAR_PIPELINE, type PipelineStep } from './pipeline';
 import { weightedKey, weightedPick } from './random';
@@ -267,7 +269,7 @@ export function resolveChoice(state: LifeState, instanceId: Id, choiceId: Id, co
   let choice: ChoiceDef | undefined;
   if (def?.choices) {
     choice = def.choices.find((c) => c.id === choiceId);
-    if (!choice || !evaluate(choice.visibleIf, state, { cast: instance.cast, roles: 'strict' })) {
+    if (!choice || !evaluate(choice.visibleIf, state, { cast: instance.cast, roles: 'strict', content })) {
       throw new InvalidInputError([{ path: 'choice', message: `"${choiceId}" is not a choice in event "${instance.eventId}".` }]);
     }
   } else if (choiceId !== CONTINUE_CHOICE) {
@@ -287,9 +289,26 @@ export function resolveChoice(state: LifeState, instanceId: Id, choiceId: Id, co
         outcome = chance(draft.rng, successChance(draft, choice.check, content, instance.cast)) ? choice.check.success : choice.check.failure;
       }
       if (outcome) {
-        applyEffects(draft, outcome.effects, { def, cast: instance.cast, rng: draft.rng, content });
+        const savings = draft.finances.savings;
+        const debt = totalDebt(draft);
+        const housing = draft.housing.annualCost;
+        const help = outcome.effects.reduce((sum, e) => sum + (e.type === 'cost' ? familyHelp(draft, e.item, content) : 0), 0);
+        applyEffects(draft, outcome.effects, { def, cast: instance.cast, rng: draft.rng, content, ...(instance.since !== undefined ? { since: instance.since } : {}) });
         // Written after the effects, so it can tell what they did ({sentence}, new pronouns).
-        if (outcome.text) target.outcomeText = renderText(outcome.text, textContext(draft, instance.cast, content));
+        if (outcome.text) target.outcomeText = renderText(outcome.text, textContext(draft, instance.cast, content, instance.since));
+        // Every money change shows on the outcome card, with the new balance (C1).
+        const change = draft.finances.savings - savings;
+        const debtChange = totalDebt(draft) - debt;
+        const housingChange = draft.housing.annualCost - housing;
+        if (change !== 0 || debtChange !== 0 || help !== 0 || housingChange !== 0) {
+          target.money = {
+            change,
+            balance: draft.finances.savings,
+            debtChange,
+            ...(help !== 0 ? { familyHelp: help } : {}),
+            ...(housingChange !== 0 ? { housing: { change: housingChange, annual: draft.housing.annualCost } } : {}),
+          };
+        }
       }
     }
 

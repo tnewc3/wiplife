@@ -11,7 +11,7 @@ lifeStages: [senior]
 weight: { base: 4 }
 once: true
 cast:
-  friend: { kind: friend, ageOffset: { min: -10, max: 10 }, createIfMissing: true }
+  friend: { kind: friend, ageOffset: { min: -10, max: 10 }, createIfMissing: true, presence: city }
 choices:
   - id: play
     label: Grab a paddle

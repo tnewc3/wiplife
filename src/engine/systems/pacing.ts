@@ -9,6 +9,7 @@ import { evaluate } from '../conditions';
 import { castEvent, uncast } from '../events/casting';
 import { eventIndex, eventWeight, fitsSetting } from '../events/selection';
 import { weightedPick } from '../random';
+import { consistencyProblems } from '../presence';
 import { isFamilyKind, kindSince, romanceAllowed } from '../relationships';
 import { nextFloat, nextInt } from '../rng';
 import type { EventInstance, Id, LifeState } from '../types';
@@ -39,6 +40,7 @@ export function yearBudget(state: LifeState, content: ContentBundle, view: LifeS
 interface Picked {
   def: EventDef;
   cast: Record<string, Id>;
+  since?: number;
 }
 
 /**
@@ -48,7 +50,11 @@ interface Picked {
 function tryCast(state: LifeState, view: LifeState, def: EventDef, content: ContentBundle, preset?: Record<string, Id>): Picked | null {
   const result = castEvent(state, def, state.rng, content, preset, view);
   if (!result) return null;
-  if (!evaluate(def.requires, state, { cast: result.cast, roles: 'strict' }) || !romanceAllowed(state, def, result.cast, content)) {
+  if (
+    !evaluate(def.requires, state, { cast: result.cast, roles: 'strict', content }) ||
+    !romanceAllowed(state, def, result.cast, content) ||
+    consistencyProblems(state, def, result.cast, content).length > 0
+  ) {
     uncast(state, result.created);
     return null;
   }
@@ -88,7 +94,7 @@ export function runPacing(state: LifeState, content: ContentBundle): void {
     }
     if (!def || def.retired || picked.some((p) => p.def.id === def.id)) continue;
     const result = tryCast(state, view, def, content, item.cast);
-    if (result) picked.push(result);
+    if (result) picked.push(item.since !== undefined ? { ...result, since: item.since } : result);
   }
 
   // New events, weighted, without repeats, until the budget is met or nothing
@@ -119,6 +125,6 @@ export function runPacing(state: LifeState, content: ContentBundle): void {
   state.pending = ordered.map(({ p }, i): EventInstance => {
     const log = state.eventLog[p.def.id];
     state.eventLog[p.def.id] = { count: (log?.count ?? 0) + 1, lastYear: year };
-    return { instanceId: `e${year}-${i + 1}`, eventId: p.def.id, cast: p.cast };
+    return { instanceId: `e${year}-${i + 1}`, eventId: p.def.id, cast: p.cast, ...(p.since !== undefined ? { since: p.since } : {}) };
   });
 }

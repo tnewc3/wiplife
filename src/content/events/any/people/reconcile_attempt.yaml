@@ -12,7 +12,7 @@ weight: { base: 10 }
 followUpOnly: true
 cast:
   # Filled by the action: someone you're estranged from.
-  person: { kind: acquaintance }
+  person: { kind: acquaintance, presence: anywhere }
 choices:
   - id: apologize
     label: Apologize, and mean it

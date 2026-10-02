@@ -23,6 +23,10 @@ export const LIFE_STAGE_IDS = ['early', 'child', 'teen', 'youngAdult', 'adult', 
 export const lifeStageSchema = z.enum(LIFE_STAGE_IDS);
 
 
+/** Where a cast person must be (C1, the presence rule). */
+export const PRESENCE_VALUES = ['household', 'city', 'nearby', 'elsewhere', 'anywhere'] as const;
+export type Presence = (typeof PRESENCE_VALUES)[number];
+
 /** Kinds casting may create; family, partners and work relationships come from other systems. */
 export const CREATABLE_KINDS = ['friend', 'classmate', 'acquaintance'] as const;
 
@@ -96,6 +100,8 @@ export type Condition =
       status?: z.infer<typeof relationshipStatusSchema>[];
       /** Years since the relationship took its current kind (dating, married...). */
       years?: Compare;
+      /** C1: where they are: living with you, elsewhere in your city, or in another city. */
+      where?: ('household' | 'city' | 'elsewhere')[];
     };
 
 /** Your money situation. Every field given must hold. */
@@ -337,6 +343,7 @@ export const conditionSchema: z.ZodType<Condition> = z.lazy(() =>
       kind: z.array(relationshipKindSchema).min(1).optional(),
       status: z.array(relationshipStatusSchema).min(1).optional(),
       years: compareSchema.optional(),
+      where: z.array(z.enum(['household', 'city', 'elsewhere'])).min(1).optional(),
     }),
   ]),
 ) as z.ZodType<Condition>;
@@ -382,6 +389,15 @@ export const castSpecSchema = z
     createIfMissing: z.boolean().optional(),
     /** Chance of creating someone new even when someone fits. */
     newChance: z.number().min(0).max(1).optional(),
+    /**
+     * Where the person must be (C1, the presence rule): living with you
+     * (household), in your city but not with you (city), either of those
+     * (nearby, for in-person moments), in another city (elsewhere), or
+     * anywhere at all. Casting picks only people who fit,
+     * a scheduled follow-up whose person no longer fits doesn't happen, and
+     * someone new is created in your city (so never for elsewhere or household).
+     */
+    presence: z.enum(PRESENCE_VALUES),
   })
   .refine((s) => (s.kind === undefined) !== (s.support !== true), 'a role needs exactly one of kind or support: true')
   .refine(
@@ -406,6 +422,18 @@ export const effectSchema = z.discriminatedUnion('type', [
    * family covers it).
    */
   z.strictObject({ type: z.literal('money'), delta: z.int().min(-1_000_000_000).max(1_000_000_000) }),
+  /**
+   * C1: money that scales with your rent: `months` months of your current
+   * yearly housing cost (negative to pay, positive to get back), through
+   * savings like money. Nothing when you pay no rent.
+   */
+  z.strictObject({ type: z.literal('rentMonths'), months: z.number().min(-24).max(24).refine((n) => n !== 0, 'months must not be 0') }),
+  /**
+   * C1: a one-time cost from balance/economy.yaml costs (a wedding), scaled
+   * by your city; your family may chip in; savings pay first and the rest
+   * becomes personal debt.
+   */
+  z.strictObject({ type: z.literal('cost'), item: idSchema }),
   /**
    * Debt (adults only; refused before the independence age). add: a new
    * student, personal or medical debt of `amount`. forgive: `share` of every
@@ -432,14 +460,19 @@ export const effectSchema = z.discriminatedUnion('type', [
    * home and rent. move_in_together: `role` (your partner, fiancé or spouse)
    * moves in with you and pays their share. The engine ignores a move that
    * doesn't fit (no parent to go to, a home you own and haven't sold...).
+   * rent_change (C1): your rent changes by `percent` of the current rent
+   * from now on (renting only).
    */
   z
     .strictObject({
       type: z.literal('housing'),
-      action: z.enum(['move_home', 'rent', 'homeless', 'roommate', 'live_alone', 'sell', 'move_in_together']),
+      action: z.enum(['move_home', 'rent', 'homeless', 'roommate', 'live_alone', 'sell', 'move_in_together', 'rent_change']),
       role: roleSchema.optional(),
+      /** rent_change (C1): the rent goes up (or down) by this percentage of your current rent, for as long as you stay. */
+      percent: z.number().min(-50).max(100).refine((n) => n !== 0, 'percent must not be 0').optional(),
     })
-    .refine((e) => (e.action === 'move_in_together') === (e.role !== undefined), 'move_in_together needs role (and only it has one)'),
+    .refine((e) => (e.action === 'move_in_together') === (e.role !== undefined), 'move_in_together needs role (and only it has one)')
+    .refine((e) => (e.action === 'rent_change') === (e.percent !== undefined), 'rent_change needs percent (and only it has one)'),
   /**
    * School (Stage 7). grades: `value` GPA points (−1 to 1) added to this
    * school year's grade (while you're in school). scholarship: `value`
@@ -554,6 +587,11 @@ export const effectSchema = z.discriminatedUnion('type', [
   z.strictObject({ type: z.literal('innerConflict'), delta: z.int().min(-100).max(100) }),
   /** You discover your hidden talent, if you have one you haven't found (Stage 9). */
   z.strictObject({ type: z.literal('talent') }),
+  /**
+   * C1: the person cast in `role` moves to another city (a friend moving
+   * across the country). Nobody who lives with you moves this way.
+   */
+  z.strictObject({ type: z.literal('moveAway'), role: roleSchema }),
 ]);
 export type Effect = z.infer<typeof effectSchema>;
 
@@ -609,6 +647,20 @@ export const eventSchema = baseDefSchema
     cooldownYears: z.int().min(1).optional(),
     once: z.boolean().optional(),
     /**
+     * C1: meant to come back in the same life (a holiday, a checkup, a
+     * yearly ritual). Repeats of events not marked recurring are kept rare
+     * (balance/targets.yaml consistency.maxRepeatShare); a recurring event
+     * can't also be once.
+     */
+    recurring: z.literal(true).optional(),
+    /**
+     * C1: content-build warnings that were reviewed and kept, with the reason
+     * (tools/content/consistency.ts; docs/consistency-review.md).
+     */
+    justified: z
+      .strictObject({ time: z.string().trim().min(10).optional(), money: z.string().trim().min(10).optional(), past: z.string().trim().min(10).optional() })
+      .optional(),
+    /**
      * Only happens when scheduled by another event (the later steps of a
      * chain) or queued by a management action (registries/actions.yaml).
      */
@@ -618,7 +670,8 @@ export const eventSchema = baseDefSchema
     autoOutcome: outcomeSchema.optional(),
   })
   .refine((e) => (e.choices === undefined) !== (e.autoOutcome === undefined), 'an event needs either choices or autoOutcome')
-  .refine((e) => !e.choices || new Set(e.choices.map((c) => c.id)).size === e.choices.length, 'choice ids must be unique');
+  .refine((e) => !e.choices || new Set(e.choices.map((c) => c.id)).size === e.choices.length, 'choice ids must be unique')
+  .refine((e) => !(e.recurring && e.once), 'a recurring event can’t also be once');
 export type EventDef = z.infer<typeof eventSchema>;
 
 /** A chain file: several events written together. */
@@ -649,6 +702,18 @@ export const categoryRegistrySchema = z.strictObject({
        * in prison, and while you are, only these happen.
        */
       prison: z.boolean().optional(),
+      /**
+       * C1, the category contract: conditions every event of this category
+       * must require. The content build rejects an event whose requirements
+       * don't include them, and an event that fires without them is an
+       * invariant failure.
+       */
+      requires: conditionSchema.optional(),
+      /**
+       * Home, health and wellbeing (C1, the household rule): a partner who
+       * lives with you is preferred for the event's support and partner roles.
+       */
+      household: z.boolean().optional(),
     }),
   ),
 });

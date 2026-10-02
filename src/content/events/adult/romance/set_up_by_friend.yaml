@@ -15,8 +15,8 @@ requires:
 weight: { base: 5 }
 cooldownYears: 4
 cast:
-  friend: { kind: friend, age: { min: 18, max: 120 } }
-  date: { kind: acquaintance, romantic: true, createIfMissing: true, newChance: 1 }
+  friend: { kind: friend, age: { min: 18, max: 120 }, presence: city }
+  date: { kind: acquaintance, romantic: true, createIfMissing: true, newChance: 1, presence: city }
 choices:
   - id: go
     label: Go on the blind date

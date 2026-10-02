@@ -5,6 +5,7 @@ tone: dark
 category: prison
 rarity: common
 lifeStages: [youngAdult, adult, senior]
+requires: { legal: { incarcerated: true } }
 weight: { base: 1 }
 followUpOnly: true
 autoOutcome:

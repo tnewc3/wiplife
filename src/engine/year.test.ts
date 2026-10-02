@@ -161,8 +161,8 @@ describe('NPCs', () => {
     // Parents are at least a generation older, so they are dead by the time a long life ends.
     const family = new Set(['parent', 'sibling', 'stepparent', 'grandparent']);
     for (const person of people) {
-      if (!person.alive && family.has(dead.relationships[person.id]!.kind)) {
-        expect(person.deathYear).toBeGreaterThanOrEqual(dead.birthYear);
+      // Grandparents who died before you were born (C1) have no history entry.
+      if (!person.alive && family.has(dead.relationships[person.id]!.kind) && person.deathYear! >= dead.birthYear) {
         const entry = dead.history.find((e) => e.tags.includes(`person:${person.id}`));
         expect(entry?.year).toBe(person.deathYear);
         expect(entry?.text).toContain(person.name.first);

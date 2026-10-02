@@ -10,7 +10,7 @@ lifeStages: [child]
 weight: { base: 5 }
 once: true
 cast:
-  friend: { kind: friend, ageOffset: { min: -2, max: 2 }, createIfMissing: true }
+  friend: { kind: friend, ageOffset: { min: -2, max: 2 }, createIfMissing: true, presence: city }
 choices:
   - id: high
     label: As high as the branches go

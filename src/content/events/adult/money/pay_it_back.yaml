@@ -20,7 +20,7 @@ requires:
 weight: { base: 6 }
 cooldownYears: 10
 cast:
-  helper: { support: true }
+  helper: { support: true, presence: anywhere }
 choices:
   - id: money
     label: Pay {helper.them} back, with interest

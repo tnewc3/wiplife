@@ -91,8 +91,10 @@ function lifeWith(age: number, people: PersonSpec[], seed = 'rel'): LifeState {
   });
 }
 
-/** An event with test defaults; override anything. */
+/** An event with test defaults; override anything. Cast roles default to presence anywhere (C1). */
 function ev(overrides: Record<string, unknown>): EventDef {
+  const cast = overrides.cast as Record<string, Record<string, unknown>> | undefined;
+  if (cast) overrides = { ...overrides, cast: Object.fromEntries(Object.entries(cast).map(([r, s]) => [r, { presence: 'anywhere', ...s }])) };
   return eventSchema.parse({
     title: 'Test',
     text: 'Something happens.',
@@ -144,7 +146,7 @@ describe('two-way attraction', () => {
       { id: 'b', age: 30, kind: 'acquaintance' },
       { id: 'c', age: 16, kind: 'acquaintance' },
     ]);
-    expect(castCandidates(life, { kind: 'acquaintance', romantic: true }, content).map((p) => p.id)).toEqual(['b']);
+    expect(castCandidates(life, { kind: 'acquaintance', romantic: true, presence: 'city' }, content).map((p) => p.id)).toEqual(['b']);
   });
 
   it('the meeting pool creates adults who are attracted to you, of a gender you are attracted to', () => {
@@ -696,7 +698,7 @@ describe('support in a crisis', () => {
       ] as PersonSpec[])
         addPerson(d, spec);
     });
-    expect(castCandidates(life, { support: true }, content).map((p) => p.id)).toEqual(['best', 'mom']);
+    expect(castCandidates(life, { support: true, presence: 'anywhere' }, content).map((p) => p.id)).toEqual(['best', 'mom']);
     const result = castEvent(cloneJson(life), crisis, createRng('s'), content)!;
     expect(result.cast).toEqual({ helper: 'best' });
   });

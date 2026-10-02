@@ -1,7 +1,9 @@
 /**
- * Generates the family a character is born into: one or two parents and any
- * older siblings, with believable ages, complete identities and names that
- * fit the parents' heritages.
+ * Generates the family a character is born into: one or two parents, any
+ * older siblings and (C1) each parent's two parents, with believable ages,
+ * complete identities and names that fit the parents' heritages.
+ * Grandparents may have died before you were born (the NPC mortality odds),
+ * and some live in another city.
  */
 import {
   GENDER_CATEGORIES,
@@ -10,8 +12,9 @@ import {
   type HeritageNames,
   type NamePool,
 } from '../../content/schemas';
-import { chance, nextInt, pick, type RngState } from '../rng';
+import { chance, nextFloat, nextInt, pick, type RngState } from '../rng';
 import { rollInRange, rollScore, weightedPick } from '../random';
+import { npcDeathChance } from '../systems/mortality';
 import type { Id, Person, Relationship } from '../types';
 import { rollGenderCategory, rollIdentity, rollRelativeTraits } from './character';
 
@@ -119,7 +122,7 @@ export function generateFamily(rng: RngState, content: ContentBundle, request: F
   const relationships: Relationship[] = [];
 
   const addRelative = (
-    kind: 'parent' | 'sibling',
+    kind: 'parent' | 'sibling' | 'grandparent',
     personBirthYear: number,
     category: GenderCategory,
     nameSource: HeritageNames,
@@ -139,8 +142,13 @@ export function generateFamily(rng: RngState, content: ContentBundle, request: F
       cityId,
       tags: ['family'],
     };
-    const affection = rollScore(rng, kind === 'parent' ? family.parentAffection : family.siblingAffection);
-    const trust = rollScore(rng, kind === 'parent' ? family.parentTrust : family.siblingTrust);
+    const scores = {
+      parent: [family.parentAffection, family.parentTrust],
+      sibling: [family.siblingAffection, family.siblingTrust],
+      grandparent: [family.grandparents.affection, family.grandparents.trust],
+    } as const;
+    const affection = rollScore(rng, scores[kind][0]);
+    const trust = rollScore(rng, scores[kind][1]);
     people.push(person);
     relationships.push({
       personId: person.id,
@@ -155,10 +163,11 @@ export function generateFamily(rng: RngState, content: ContentBundle, request: F
   };
 
   // Parents.
+  const parents: { person: Person; heritage: string }[] = [];
   const firstAge = rollInRange(rng, ageRange, youngestParentAge, ageRange.max);
   const firstCategory = rollGenderCategory(rng, content);
   if (parentCount === 1) {
-    addRelative('parent', birthYear - firstAge, firstCategory, heritage(primary), lastName);
+    parents.push({ person: addRelative('parent', birthYear - firstAge, firstCategory, heritage(primary), lastName), heritage: primary });
   } else {
     const secondCategory = partnerCategory(rng, content, firstCategory);
     const secondAge = rollInRange(
@@ -170,8 +179,10 @@ export function generateFamily(rng: RngState, content: ContentBundle, request: F
     const otherLastNames = heritage(partner).last.filter((n) => n !== lastName);
     const secondLastName =
       chance(rng, family.sharedLastNameChance) || otherLastNames.length === 0 ? lastName : pick(rng, otherLastNames);
-    addRelative('parent', birthYear - firstAge, firstCategory, heritage(primary), lastName, secondCategory);
-    addRelative('parent', birthYear - secondAge, secondCategory, heritage(partner), secondLastName, firstCategory);
+    parents.push(
+      { person: addRelative('parent', birthYear - firstAge, firstCategory, heritage(primary), lastName, secondCategory), heritage: primary },
+      { person: addRelative('parent', birthYear - secondAge, secondCategory, heritage(partner), secondLastName, firstCategory), heritage: partner },
+    );
   }
 
   // Older siblings, nearest in age first.
@@ -181,5 +192,52 @@ export function generateFamily(rng: RngState, content: ContentBundle, request: F
     addRelative('sibling', siblingBirthYear, rollGenderCategory(rng, content), childHeritage(), lastName);
   }
 
+  // Grandparents (C1): each parent's two parents.
+  const otherCities = Object.keys(content.cities)
+    .sort()
+    .filter((id) => id !== cityId && !content.cities[id]!.retired);
+  for (const { person: parent, heritage: parentHeritage } of parents) {
+    const names = heritage(parentHeritage);
+    const age = rollInRange(rng, ageRange, ageRange.min, ageRange.max);
+    const category = rollGenderCategory(rng, content);
+    const otherCategory = partnerCategory(rng, content, category);
+    const otherAge = rollInRange(
+      rng,
+      { mean: age, sd: family.partnerAgeGap.sd },
+      Math.max(ageRange.min, age - family.partnerAgeGap.max),
+      Math.min(ageRange.max, age + family.partnerAgeGap.max),
+    );
+    const otherLastNames = names.last.filter((n) => n !== parent.name.last);
+    const otherLastName = chance(rng, family.sharedLastNameChance) || otherLastNames.length === 0 ? parent.name.last : pick(rng, otherLastNames);
+    for (const [gpAge, gpCategory, gpLastName, partnerOf] of [
+      [age, category, parent.name.last, otherCategory],
+      [otherAge, otherCategory, otherLastName, category],
+    ] as const) {
+      const gp = addRelative('grandparent', parent.birthYear - gpAge, gpCategory, names, gpLastName, partnerOf);
+      const died = yearOfDeathBefore(rng, content, gp.birthYear, parent.birthYear, birthYear);
+      if (died !== null) {
+        gp.alive = false;
+        gp.deathYear = died;
+      } else if (otherCities.length > 0 && !chance(rng, family.grandparents.sameCityChance)) {
+        gp.cityId = pick(rng, otherCities);
+      }
+    }
+  }
+
   return { firstName, lastName, people, relationships };
+}
+
+/**
+ * The year someone born in `born` died between `from` (alive then) and
+ * `before` (exclusive), by the NPC mortality odds; null if they lived. One
+ * draw: the year where the chance of having died reaches it.
+ */
+function yearOfDeathBefore(rng: RngState, content: ContentBundle, born: number, from: number, before: number): number | null {
+  const roll = nextFloat(rng);
+  let survived = 1;
+  for (let year = from + 1; year < before; year++) {
+    survived *= 1 - npcDeathChance(year - born, content);
+    if (1 - survived > roll) return year;
+  }
+  return null;
 }

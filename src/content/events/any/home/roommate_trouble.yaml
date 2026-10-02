@@ -13,8 +13,11 @@ requires:
     - { home: { kind: [renting], roommate: true } }
 weight: { base: 7 }
 cooldownYears: 4
+# C1: reviewed build warnings kept on purpose (docs/consistency-review.md).
+justified:
+  money: "Your roommate buys the pizza, not you."
 cast:
-  roommate: { kind: acquaintance, age: { min: 18, max: 120 }, ageOffset: { min: -8, max: 8 }, createIfMissing: true, newChance: 0.8 }
+  roommate: { kind: acquaintance, age: { min: 18, max: 120 }, ageOffset: { min: -8, max: 8 }, createIfMissing: true, newChance: 0.8, presence: city }
 choices:
   - id: talk
     label: Have the talk

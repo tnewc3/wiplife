@@ -10,8 +10,10 @@ lifeStages: [youngAdult, adult, senior]
 requires: { career: { employed: true } }
 weight: { base: 5 }
 cooldownYears: 5
+# C1: meant to come back now and then (repeats are kept rare otherwise).
+recurring: true
 cast:
-  npc: { kind: coworker }
+  npc: { kind: coworker, presence: city }
 choices:
   - id: dance
     label: Get everyone dancing

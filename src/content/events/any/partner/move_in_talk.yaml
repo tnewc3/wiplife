@@ -1,0 +1,60 @@
+# Answers the "move in together" action (registries/actions.yaml): you ask
+# your partner, fiancé or spouse to share a home. Living together, they pay
+# their share of the housing cost.
+id: move_in_talk
+title: Your place or mine
+text: >-
+  You've been splitting your nights between two places for long enough. You
+  want to ask {person.name} to move in with you for real.
+tone: light
+category: partner
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { romance: [dating, engaged, married] }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  # Filled by the action: your partner, fiancé or spouse.
+  person: { kind: partner, presence: anywhere }
+choices:
+  - id: key
+    label: Hand {person.them} a key
+    check:
+      base: 55
+      stats:
+        - { role: person, key: affection, weight: 0.6 }
+        - { role: person, key: trust, weight: 0.3 }
+      success:
+        text: '{person.name} turns the key over in {person.their} hand, then puts it on {person.their} keyring next to {person.their} own. The boxes arrive that weekend.'
+        effects:
+          - { type: housing, action: move_in_together, role: person }
+          - { type: memory, role: person, tag: moved_in_together }
+          - { type: relationship, role: person, affection: 6, trust: 4 }
+          - { type: stat, key: happiness, delta: 3 }
+          - { type: history, text: '{person.name} moved in with you.', importance: 2 }
+      failure:
+        text: '{person.name} says {person.they} {person:loves|love} you, and {person:isn''t|aren''t} ready to give up {person.their} own place. Not yet.'
+        effects:
+          - { type: relationship, role: person, affection: -3 }
+          - { type: stat, key: happiness, delta: -2 }
+  - id: budget
+    label: Make the case with a spreadsheet
+    check:
+      base: 50
+      stats:
+        - { role: person, key: trust, weight: 0.5 }
+        - { key: smarts, weight: 0.2 }
+      success:
+        text: 'Half the rent, half the bills, one couch. {person.name} is sold by the second tab.'
+        effects:
+          - { type: housing, action: move_in_together, role: person }
+          - { type: memory, role: person, tag: moved_in_together }
+          - { type: relationship, role: person, trust: 5 }
+          - { type: history, text: '{person.name} moved in with you.', importance: 2 }
+      failure:
+        text: '"Did you just try to close me like a business deal?" {person.name} asks. It becomes a family story, but not a move.'
+        effects:
+          - { type: relationship, role: person, affection: -2 }

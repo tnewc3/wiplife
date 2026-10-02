@@ -15,7 +15,7 @@ requires:
 weight: { base: 10 }
 followUpOnly: true
 cast:
-  cellmate: { kind: acquaintance }
+  cellmate: { kind: acquaintance, presence: city }
 choices:
   - id: coffee
     label: Meet for coffee in real cups

@@ -12,6 +12,9 @@ weight:
   modifiers:
     - { if: { flag: caught_shoplifting }, x: 0.5 }
 cooldownYears: 6
+# C1: reviewed build warnings kept on purpose (docs/consistency-review.md).
+justified:
+  money: "The owner buys the lunch, not you."
 choices:
   - id: return
     label: Return it

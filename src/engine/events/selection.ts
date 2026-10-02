@@ -5,6 +5,7 @@
  */
 import type { ContentBundle, EventDef } from '../../content/schemas';
 import { evaluate } from '../conditions';
+import { powInt } from '../curve';
 import { isRomanceEvent } from '../relationships';
 import type { LifeStage, LifeState } from '../types';
 
@@ -52,7 +53,9 @@ export function fitsSetting(state: LifeState, def: EventDef, content: ContentBun
  * An event's weight this year: zero when it is on cooldown, already happened
  * (one-time events), is a romance event and you're not an adult, doesn't fit
  * where you are (prison), or its requirements fail; otherwise base × rarity
- * × matching modifiers. Requirements about cast roles are checked after casting.
+ * × matching modifiers, and (C1) × repeatWeight for each earlier time a
+ * non-recurring event happened. Requirements about cast roles are checked
+ * after casting.
  */
 export function eventWeight(state: LifeState, def: EventDef, content: ContentBundle): number {
   if (state.character.age < content.balance.relationships.adultAge && isRomanceEvent(def, content)) return 0;
@@ -70,5 +73,7 @@ export function eventWeight(state: LifeState, def: EventDef, content: ContentBun
   for (const modifier of def.weight.modifiers ?? []) {
     if (evaluate(modifier.if, state, { roles: 'assumeTrue' })) weight *= modifier.x;
   }
+  // C1: repeats of events not meant to recur are rare.
+  if (log && !def.recurring) weight *= powInt(content.balance.events.repeatWeight, log.count);
   return weight;
 }

@@ -17,7 +17,7 @@ weight:
     - { if: { flag: parents_fought }, x: 2 }
 once: true
 cast:
-  parent: { kind: parent }
+  parent: { kind: parent, presence: household }
 choices:
   - id: quiet
     label: Stay very quiet around {parent.them} for a while

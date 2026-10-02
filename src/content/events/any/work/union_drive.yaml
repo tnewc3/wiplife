@@ -15,8 +15,8 @@ requires:
 weight: { base: 4 }
 once: true
 cast:
-  npc: { kind: coworker }
-  boss: { kind: boss }
+  npc: { kind: coworker, presence: city }
+  boss: { kind: boss, presence: city }
 choices:
   - id: sign
     label: Sign the card

@@ -16,8 +16,7 @@ import { castCandidates, castEvent, uncast } from './casting';
 import { successChance } from './checks';
 import { applyEffects } from './effects';
 import { eventIndex, eventWeight } from './selection';
-import type { EVENT_TEXT_VALUES} from './text';
-import { SELF_ROLE } from './text';
+import { SELF_ROLE, sinceText, type EVENT_TEXT_VALUES } from './text';
 
 /** An event with test defaults; override anything. */
 function ev(overrides: Record<string, unknown>): EventDef {
@@ -102,7 +101,17 @@ describe('effect handlers', () => {
       expect(item!.dueYear - start.currentYear).toBeGreaterThanOrEqual(2);
       expect(item!.dueYear - start.currentYear).toBeLessThanOrEqual(4);
       expect(item!.cast).toEqual({ npc: pid });
+      expect(item!.since).toBe(start.currentYear);
     }
+  });
+
+  it('{since}: says how long ago a follow-up was set up, in words (C1)', () => {
+    const life = adult();
+    const at = (since: number | undefined) => sinceText(life, since, content);
+    expect(at(life.currentYear - 1)).toBe('last year');
+    expect(at(life.currentYear - 3)).toBe('three years ago');
+    expect(at(life.currentYear - 14)).toBe('14 years ago');
+    expect(at(undefined)).toBe('a while ago');
   });
 
   it('history: writes a rendered entry; a legendary event marks it legendary', () => {
@@ -176,14 +185,14 @@ describe('chance checks', () => {
 describe('casting', () => {
   it('reuses someone who fits', () => {
     const life = adult('cast-existing');
-    const result = castEvent(cloneJson(life), ev({ id: 'c', cast: { p: { kind: 'parent' } } }), createRng('c'), content);
+    const result = castEvent(cloneJson(life), ev({ id: 'c', cast: { p: { kind: 'parent', presence: 'anywhere' } } }), createRng('c'), content);
     expect(life.relationships[result!.cast.p!]!.kind).toBe('parent');
     expect(result!.created).toEqual([]);
   });
 
   it('creates a friend when none fits, with a relationship starting this year', () => {
     const life = cloneJson(adult('cast-new'));
-    const def = ev({ id: 'c', cast: { f: { kind: 'friend', ageOffset: { min: -2, max: 2 }, createIfMissing: true } } });
+    const def = ev({ id: 'c', cast: { f: { kind: 'friend', ageOffset: { min: -2, max: 2 }, createIfMissing: true, presence: 'city' } } });
     const result = castEvent(life, def, createRng('c'), content)!;
     const id = result.cast.f!;
     expect(result.created).toEqual([id]);
@@ -196,13 +205,13 @@ describe('casting', () => {
 
   it('never creates family, and fails when a role can’t be filled', () => {
     const life = cloneJson(adult('cast-fail'));
-    expect(castEvent(life, ev({ id: 'c', cast: { s: { kind: 'spouse', createIfMissing: true } } }), createRng('c'), content)).toBeNull();
+    expect(castEvent(life, ev({ id: 'c', cast: { s: { kind: 'spouse', createIfMissing: true, presence: 'anywhere' } } }), createRng('c'), content)).toBeNull();
   });
 
   it('casts different people in different roles', () => {
     const life = cloneJson(adult('cast-two'));
-    const parents = castCandidates(life, { kind: 'parent' }, content).length;
-    const result = castEvent(life, ev({ id: 'c', cast: { a: { kind: 'parent' }, b: { kind: 'parent' } } }), createRng('c'), content);
+    const parents = castCandidates(life, { kind: 'parent', presence: 'anywhere' }, content).length;
+    const result = castEvent(life, ev({ id: 'c', cast: { a: { kind: 'parent', presence: 'anywhere' }, b: { kind: 'parent', presence: 'anywhere' } } }), createRng('c'), content);
     if (parents >= 2) expect(result!.cast.a).not.toBe(result!.cast.b);
     else expect(result).toBeNull();
   });
@@ -213,12 +222,12 @@ describe('casting', () => {
       d.people[pid]!.alive = false;
       d.people[pid]!.deathYear = d.currentYear;
     });
-    expect(castEvent(cloneJson(life), ev({ id: 'c', cast: { p: { kind: 'parent' } } }), createRng('c'), content, { p: parentOf(life) })).toBeNull();
+    expect(castEvent(cloneJson(life), ev({ id: 'c', cast: { p: { kind: 'parent', presence: 'anywhere' } } }), createRng('c'), content, { p: parentOf(life) })).toBeNull();
   });
 
   it('filters by age', () => {
     const life = adult('cast-age');
-    for (const p of castCandidates(life, { kind: 'parent', age: { min: 0, max: 10 } }, content)) throw new Error(`unexpected ${p.id}`);
+    for (const p of castCandidates(life, { kind: 'parent', age: { min: 0, max: 10 }, presence: 'anywhere' }, content)) throw new Error(`unexpected ${p.id}`);
   });
 });
 
@@ -246,8 +255,20 @@ describe('selection', () => {
     expect(eventWeight(life, once, content)).toBe(10);
     expect(eventWeight(logged, once, content)).toBe(0);
     expect(eventWeight(logged, cool, content)).toBe(0);
-    expect(eventWeight(produce(logged, (d) => void (d.currentYear += 1)), cool, content)).toBe(10);
+    // Off cooldown, a repeat is less likely (C1): repeatWeight for each earlier time.
+    const { repeatWeight } = content.balance.events;
+    expect(eventWeight(produce(logged, (d) => void (d.currentYear += 1)), cool, content)).toBeCloseTo(10 * repeatWeight);
     expect(eventWeight(life, req, content)).toBe(0);
+  });
+
+  it('keeps full weight for recurring events that happened before (C1)', () => {
+    const life = produce(adult('recurring'), (d) => {
+      d.eventLog.yearly = { count: 3, lastYear: d.currentYear - 5 };
+      d.eventLog.plain = { count: 2, lastYear: d.currentYear - 5 };
+    });
+    const { repeatWeight } = content.balance.events;
+    expect(eventWeight(life, ev({ id: 'yearly', recurring: true }), content)).toBe(10);
+    expect(eventWeight(life, ev({ id: 'plain' }), content)).toBeCloseTo(10 * repeatWeight * repeatWeight);
   });
 
   it('applies category cooldowns, rarity and modifiers', () => {
@@ -309,7 +330,7 @@ describe('pacing director', () => {
   });
 
   it('queues due follow-ups first and drops ones that can no longer happen', () => {
-    const follow = ev({ id: 'follow', followUpOnly: true, cast: { p: { kind: 'parent' } } });
+    const follow = ev({ id: 'follow', followUpOnly: true, cast: { p: { kind: 'parent', presence: 'anywhere' } } });
     const bundle = withEvents(follow, ev({ id: 'filler' }));
     const life = produce(adult('due'), (d) => {
       const pid = parentOf(d);
@@ -360,7 +381,7 @@ describe('pacing director', () => {
 describe('resolveChoice', () => {
   const choiceEvent = ev({
     id: 'pick',
-    cast: { p: { kind: 'parent' } },
+    cast: { p: { kind: 'parent', presence: 'anywhere' } },
     autoOutcome: undefined,
     choices: [
       { id: 'hug', label: 'Hug {p.name}', outcome: { text: '{p.They} {p:smiles|smile}.', effects: [{ type: 'stat', key: 'happiness', delta: 1 }] } },
@@ -462,6 +483,7 @@ describe('event text', () => {
           latentExpression: 'androgynous',
           latentTrait: 'a taste for risk you never let yourself have',
           sentence: 'a year in prison',
+          since: 'two years ago',
         } satisfies Record<(typeof EVENT_TEXT_VALUES)[number], string | number>;
         const context = { roles, values };
         const texts = [def.title, def.text, ...(def.choices ?? []).map((c) => c.label)];

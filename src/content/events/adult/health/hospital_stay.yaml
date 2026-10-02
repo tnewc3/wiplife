@@ -12,7 +12,8 @@ requires: { stat: health, lte: 45 }
 weight: { base: 6 }
 cooldownYears: 6
 cast:
-  helper: { support: true, optional: true }
+  # Visits every day: someone nearby; a partner you live with comes first.
+  helper: { support: true, optional: true, presence: nearby }
 choices:
   - id: let_help
     label: Let {helper.name} take care of you
@@ -29,7 +30,7 @@ choices:
   - id: fine
     label: Tell everyone you're fine
     outcome:
-      text: You're not fine. You get through it alone, and it takes a lot longer.
+      text: You're not fine. You insist on doing everything yourself, and it takes a lot longer.
       effects:
         - { type: stat, key: health, delta: 1 }
         - { type: stat, key: stress, delta: 3 }

@@ -2,8 +2,10 @@ id: rent_hike
 title: The new lease
 text: >-
   Your lease renewal arrives with a new number on it, and it's a lot bigger
-  than the old one.
+  than the old one: eight percent more, every month, from now on.
 tone: neutral
+# C1: rent changes are a percentage of your current rent and last as long as
+# you stay (the rent_change housing effect).
 category: home
 rarity: common
 lifeStages: [youngAdult, adult, senior]
@@ -19,7 +21,7 @@ choices:
     outcome:
       text: You sign. The landlord's new car is very nice.
       effects:
-        - { type: money, delta: -2400 }
+        - { type: housing, action: rent_change, percent: 8 }
         - { type: stat, key: stress, delta: 2 }
   - id: negotiate
     label: Negotiate
@@ -27,20 +29,21 @@ choices:
       base: 40
       stats: [{ key: confidence, weight: 0.3 }, { key: sociability, weight: 0.2 }]
       success:
-        text: You point out you've never been late and the unit next door has sat empty for months. The increase shrinks to almost nothing.
+        text: You point out that the unit next door has sat empty for months. The increase shrinks to two percent.
         effects:
-          - { type: money, delta: -500 }
+          - { type: housing, action: rent_change, percent: 2 }
           - { type: stat, key: confidence, delta: 2 }
       failure:
-        text: '"Plenty of people want this apartment," says the landlord. You sign.'
+        text: '"Plenty of people want this apartment," says the landlord. You sign at the full eight percent.'
         effects:
-          - { type: money, delta: -2400 }
+          - { type: housing, action: rent_change, percent: 8 }
           - { type: stat, key: stress, delta: 3 }
   - id: roommate
     label: Find a roommate to split it
-    visibleIf: { home: { roommate: false } }
+    visibleIf: { home: { roommate: false, partner: false } }
     outcome:
-      text: A friend of a friend moves into the second bedroom, which used to be your office. Rent gets a lot easier.
+      text: You sign at the new rent, and a friend of a friend moves into the second bedroom, which used to be your office. Your share gets a lot easier.
       effects:
+        - { type: housing, action: rent_change, percent: 8 }
         - { type: housing, action: roommate }
         - { type: stat, key: happiness, delta: -1 }

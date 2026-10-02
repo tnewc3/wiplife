@@ -1,0 +1,28 @@
+id: unemployment_office
+title: Take a number
+text: >-
+  The unemployment office has fluorescent lights, a broken vending machine
+  and a line that wraps around the room twice. Benefits are yours, if you
+  can survive the forms.
+tone: neutral
+category: jobless
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires: { career: { employed: false, retired: false, lostWithin: 1 } }
+weight: { base: 8 }
+cooldownYears: 3
+choices:
+  - id: line
+    label: Wait in line all day
+    outcome:
+      text: Six hours, four forms and one very tired clerk later, the checks start coming. They help.
+      effects:
+        - { type: money, delta: 3000 }
+        - { type: stat, key: stress, delta: 2 }
+  - id: proud
+    label: Walk out, too proud for this
+    outcome:
+      text: You'd rather figure it out yourself. Your bank account would rather you hadn't.
+      effects:
+        - { type: stat, key: confidence, delta: 2 }
+        - { type: stat, key: stress, delta: 2 }

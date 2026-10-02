@@ -172,6 +172,42 @@ export function moneyChange(amount: number): string {
   return amount > 0 ? `+${money(amount)}` : money(amount);
 }
 
+/**
+ * What a choice will do to your money, on its button (C1): "Costs $500",
+ * "Pays $200", "Costs $9,000 after $3,000 from family", "$6,000 on credit",
+ * "Rent +$1,100 a year".
+ */
+export function choiceMoneyLabel(m: { money?: number; familyHelp?: number; credit?: number; rent?: number }): string {
+  const parts: string[] = [];
+  if (m.money !== undefined) {
+    const main = m.money < 0 ? `Costs ${money(-m.money)}` : `Pays ${money(m.money)}`;
+    parts.push(m.familyHelp ? `${main} after ${money(m.familyHelp)} from family` : main);
+  } else if (m.familyHelp) parts.push(`Family covers ${money(m.familyHelp)}`);
+  if (m.credit) parts.push(`${money(m.credit)} on credit`);
+  if (m.rent !== undefined) parts.push(`Rent ${moneyChange(m.rent)} a year`);
+  return parts.join(' · ');
+}
+
+/** An outcome's money change with the new balance (C1): "−$500 · Savings now $1,200". */
+export function outcomeMoneyLabel(change: number, balance: number): string {
+  return `${moneyChange(change)} · Savings now ${money(balance)}`;
+}
+
+/** Debt an outcome took on or paid off (C1): "+$3,000 debt" or "−$3,000 debt". */
+export function outcomeDebtLabel(change: number): string {
+  return `${moneyChange(change)} debt`;
+}
+
+/** What your family paid toward a cost (C1). */
+export function familyHelpLabel(amount: number): string {
+  return `Your family chipped in ${money(amount)}`;
+}
+
+/** A change to your yearly housing cost (C1): "Housing +$1,100 a year · now $14,900". */
+export function housingChangeLabel(change: number, annual: number): string {
+  return `Housing ${moneyChange(change)} a year · now ${money(annual)}`;
+}
+
 /** An interest rate: 0.065 → "6.5%". */
 export function rateLabel(rate: number): string {
   return `${Number((rate * 100).toFixed(2))}%`;

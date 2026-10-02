@@ -68,6 +68,8 @@ export interface HiddenValues {
   geneticRisk: number;
   vice: number;
   innerConflict: number;
+  /** C1: the Happiness this life drifts back toward each year. */
+  happinessBaseline: number;
   talent: Id | null;
   talentDiscovered: boolean;
 }
@@ -337,6 +339,8 @@ export interface HousingState {
   roommate?: true;
   /** Your partner or spouse who lives with you (and pays their share). */
   partnerId?: Id;
+  /** A rental's rent as a multiple of the city's base rent, after rent changes (C1); 1 when absent. Reset by a move. */
+  rentFactor?: number;
 }
 
 /** A health condition you have (Stage 9). */
@@ -386,12 +390,31 @@ export interface EventInstance {
   cast: Record<string, Id>;
   resolvedChoiceId?: Id;
   outcomeText?: string;
+  /** A follow-up: the year the event that scheduled it happened (C1, {since}). */
+  since?: number;
+  /** What the chosen outcome did to your money (C1): shown on the outcome card. */
+  money?: MoneyChange;
+}
+
+/**
+ * A change to your money from one outcome (C1): savings up or down, the new
+ * balance, debt taken on (or paid off), what your family covered, and a
+ * change to your yearly housing cost with the new cost.
+ */
+export interface MoneyChange {
+  change: number;
+  balance: number;
+  debtChange: number;
+  familyHelp?: number;
+  housing?: { change: number; annual: number };
 }
 
 export interface ScheduledEvent {
   eventId: Id;
   dueYear: number;
   cast: Record<string, Id>;
+  /** The year the event that scheduled it happened (C1, {since}). */
+  since?: number;
 }
 
 export interface HistoryEntry {

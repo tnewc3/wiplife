@@ -7,16 +7,19 @@
 import type { ContentBundle, EventDef } from '../../content/schemas';
 import { evaluate } from '../conditions';
 import { weightedPick } from '../random';
+import { consistencyProblems } from '../presence';
 import { romanceAllowed } from '../relationships';
 import type { Id, LifeState } from '../types';
 
 /** The listed events that fit now with this cast, with their weights. */
 export function fittingResults(state: LifeState, eventIds: readonly Id[], cast: Record<string, Id>, content: ContentBundle): (readonly [EventDef, number])[] {
-  const ctx = { cast, roles: 'strict' as const };
+  const ctx = { cast, roles: 'strict' as const, content };
   return eventIds.flatMap((id) => {
     const def = content.events[id];
     if (!def || def.retired) return [];
     if (!evaluate(def.requires, state, ctx) || !romanceAllowed(state, def, cast, content)) return [];
+    // C1: the category contract and where everyone is.
+    if (consistencyProblems(state, def, cast, content).length > 0) return [];
     let weight = def.weight.base * content.balance.events.rarityWeight[def.rarity];
     for (const modifier of def.weight.modifiers ?? []) if (evaluate(modifier.if, state, ctx)) weight *= modifier.x;
     return weight > 0 ? [[def, weight] as const] : [];

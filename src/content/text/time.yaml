@@ -1,0 +1,11 @@
+# Elapsed time in follow-up text (C1): {since} is when the event that set up
+# this follow-up happened ("last year", "three years ago"), so follow-ups
+# never state a fixed gap like "years later". Values: {n}, from numbers below.
+since:
+  one: "last year"
+  many: "{n} years ago"
+  # When the follow-up wasn't scheduled by an earlier event.
+  unknown: "a while ago"
+
+# Small numbers in words; larger ones are written as digits. Index 0 is zero.
+numbers: [zero, one, two, three, four, five, six, seven, eight, nine, ten]

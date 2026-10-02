@@ -11,7 +11,7 @@ lifeStages: [child, teen]
 weight: { base: 10 }
 followUpOnly: true
 cast:
-  friend: { kind: friend }
+  friend: { kind: friend, presence: anywhere }
 choices:
   - id: kept
     label: Write back, like you promised

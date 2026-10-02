@@ -159,7 +159,7 @@ describe('obituary version 2', () => {
         { jobId: 'accountant', employer: 'Ledgerwise Partners', fromYear: 2050, toYear: 2060, level: 2, salary: 70000, endedBy: 'quit' },
         { jobId: 'bank_teller', employer: 'First Harbor', fromYear: 2049, toYear: 2050, level: 1, salary: 30000, endedBy: 'quit' },
       );
-      d.legal.record.push({ offenseId: 'theft', year: 2047, outcome: 'jail', years: 2 });
+      d.legal.record = [{ offenseId: 'theft', year: 2047, outcome: 'jail', years: 2 }];
       d.finances.bankruptcyYear = 2070;
     });
     const text = writeObituary(life, content);

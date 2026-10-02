@@ -89,6 +89,19 @@ discovery:
 
 # Stage 10: the content coverage report (npm run coverage) and the 10,000-life
 # simulation. docs/technical.md, Stage 10 acceptance criteria.
+# C1 (consistency pass). Judged on the careful player (npm run simulate and
+# npm run coverage).
+consistency:
+  # Average Happiness over a whole life, averaged across lives: well below
+  # the maximum, so Happiness means something.
+  lifetimeHappiness: { min: 45, max: 72 }
+  # Per life, the share of the events fired that repeat an event the life
+  # already had and that isn't marked recurring (averaged across lives).
+  # Events that answer your own actions (asking someone out, asking for a
+  # raise) or a system trigger (money trouble, the law, self-discovery, a
+  # doctor visit) count as recurring.
+  maxRepeatShare: 0.15
+
 coverage:
   minEvents: 300
   legendary: { min: 5, max: 10 }

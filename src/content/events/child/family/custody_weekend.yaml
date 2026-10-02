@@ -12,8 +12,8 @@ requires: { flag: parents_split }
 weight: { base: 4 }
 cooldownYears: 3
 cast:
-  parentA: { kind: parent }
-  parentB: { kind: parent }
+  parentA: { kind: parent, presence: household }
+  parentB: { kind: parent, presence: household }
 choices:
   - id: both
     label: Make each home feel like yours

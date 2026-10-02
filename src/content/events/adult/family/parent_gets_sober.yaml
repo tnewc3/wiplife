@@ -14,7 +14,7 @@ requires: { memory: { role: parent, tag: drank_too_much } }
 weight: { base: 10 }
 followUpOnly: true
 cast:
-  parent: { kind: parent }
+  parent: { kind: parent, presence: anywhere }
 choices:
   - id: listen
     label: Go, and listen

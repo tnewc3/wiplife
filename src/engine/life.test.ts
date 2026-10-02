@@ -75,10 +75,12 @@ describe('createLife (random)', () => {
       {
         "city": "chicago",
         "family": [
-          "parent Samantha 24",
-          "parent Ethan 24",
-          "sibling Owen 8",
-          "sibling Jessica 4",
+          "parent Samantha 20",
+          "parent Ethan 19",
+          "grandparent Samuel 61",
+          "grandparent Lily 60",
+          "grandparent Ryan 51",
+          "grandparent Molly 49",
         ],
         "identity": "man",
         "name": {
@@ -119,7 +121,9 @@ describe('createLife (custom)', () => {
     const family = getFamily(life);
     expect(family.filter((m) => m.relationship.kind === 'parent')).toHaveLength(2);
     expect(family.filter((m) => m.relationship.kind === 'sibling')).toHaveLength(2);
-    for (const member of family) expect(member.person.name.last === 'Okafor' || member.relationship.kind === 'parent').toBe(true);
+    // C1: each parent's two parents.
+    expect(family.filter((m) => m.relationship.kind === 'grandparent')).toHaveLength(4);
+    for (const member of family) expect(member.person.name.last === 'Okafor' || ['parent', 'grandparent'].includes(member.relationship.kind)).toBe(true);
     expect(checkInvariants(life, content)).toEqual([]);
   });
 
@@ -147,9 +151,10 @@ describe('createLife (custom)', () => {
       { mode: 'custom', seed: 'solo', birthYear: BIRTH_YEAR, custom: customInput({ family: { parents: 1, siblings: 0 } }) },
       content,
     );
-    const family = getFamily(life);
-    expect(family).toHaveLength(1);
-    expect(family[0]!.relationship.kind).toBe('parent');
+    const kinds = getFamily(life).map((m) => m.relationship.kind);
+    expect(kinds.filter((k) => k === 'parent')).toHaveLength(1);
+    expect(kinds.filter((k) => k === 'sibling')).toHaveLength(0);
+    expect(kinds.filter((k) => k === 'grandparent')).toHaveLength(2);
   });
 
   it('gives relatives names from the heritage of a known custom last name', () => {
@@ -274,3 +279,47 @@ describe('input validation', () => {
     expect(() => createLife({ mode: 'random', seed: '', birthYear: 2026 }, content)).toThrow(InvalidInputError);
   });
 });
+
+describe('grandparents (C1)', () => {
+  it('are each parent’s two parents, a generation older, alive or not depending on their ages', () => {
+    const { parentAgeAtBirth } = content.balance.creation.family;
+    let alive = 0;
+    let dead = 0;
+    let elsewhere = 0;
+    for (let i = 0; i < 200; i++) {
+      const life = createLife({ mode: 'random', seed: `gp-${i}`, birthYear: BIRTH_YEAR }, content);
+      const family = getFamily(life);
+      const parents = family.filter((m) => m.relationship.kind === 'parent');
+      const grandparents = family.filter((m) => m.relationship.kind === 'grandparent');
+      expect(grandparents).toHaveLength(2 * parents.length);
+      // A grandparent is at least parentAgeAtBirth.min older than their own child, one of your parents.
+      const youngestParent = Math.max(...parents.map((p) => p.person.birthYear));
+      for (const { person } of grandparents) {
+        expect(youngestParent - person.birthYear).toBeGreaterThanOrEqual(parentAgeAtBirth.min);
+        if (person.alive) {
+          alive++;
+          if (person.cityId !== life.character.cityId) elsewhere++;
+        } else {
+          dead++;
+          // Died before you were born, after their child was.
+          expect(person.deathYear!).toBeLessThan(life.birthYear);
+          expect(person.deathYear!).toBeGreaterThan(person.birthYear + parentAgeAtBirth.min);
+          expect(person.cityId).toBe(life.character.cityId);
+        }
+      }
+      expect(checkInvariants(life, content)).toEqual([]);
+    }
+    expect(alive).toBeGreaterThan(dead);
+    expect(dead).toBeGreaterThan(0);
+    expect(elsewhere).toBeGreaterThan(0);
+  });
+
+  it('appear in events: the grandparent events are back and can cast them', () => {
+    for (const id of ['grandparent_visit', 'grandparent_hospital', 'grandparent_stories']) {
+      const def = content.events[id]!;
+      expect(def.retired).toBeFalsy();
+      expect(Object.values(def.cast ?? {}).some((spec) => spec.kind === 'grandparent')).toBe(true);
+    }
+  });
+});
+

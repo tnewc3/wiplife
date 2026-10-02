@@ -9,10 +9,12 @@ tone: serious
 category: family
 rarity: common
 lifeStages: [child, teen]
+# C1: the week with the sitter is what this remembers.
+requires: { fired: neighbor_sitter }
 weight: { base: 10 }
 followUpOnly: true
 cast:
-  sitter: { kind: acquaintance }
+  sitter: { kind: acquaintance, presence: city }
 choices:
   - id: card
     label: Bring the card you made

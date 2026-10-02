@@ -73,6 +73,12 @@ describe('content build with the real content', () => {
     expect(result.bundle.balance.mortality.maxAge).toBe(120);
     expect(result.bundle.text.obituary.opening.finished.mixed.length).toBeGreaterThan(0);
   });
+
+  it('has no consistency warnings left unreviewed (C1, docs/consistency-review.md)', async () => {
+    const result = await compileContent({ contentDir: realContentDir, appVersion: '1.2.3' });
+    if (!result.ok) throw new Error(formatErrors(result.errors));
+    expect(result.warnings.map((w) => w.message)).toEqual([]);
+  });
 });
 
 describe('content build with fixture files', () => {
@@ -271,7 +277,7 @@ rarity: common
 lifeStages: [adult]
 weight: { base: 5 }
 cast:
-  npc: { kind: friend, createIfMissing: true }
+  npc: { kind: friend, createIfMissing: true, presence: city }
 choices:
   - id: wave
     label: Wave back
@@ -347,6 +353,64 @@ ${extra}`;
       expect(await expectErrors()).toContain('only friend, classmate, acquaintance can be created');
     });
 
+    it('enforces category contracts and presence declarations (C1)', async () => {
+      const schoolFile = 'events/teen/school/test_event.yaml';
+      const school = event().replace('category: family', 'category: school').replace('lifeStages: [adult]', 'lifeStages: [teen]');
+      await write(schoolFile, school);
+      expect(await expectErrors()).toContain('category "school" requires');
+      await write(schoolFile, school.replace('weight:', 'requires: { education: { program: [high] } }\nweight:'));
+      const result = await compile();
+      if (!result.ok) throw new Error(formatErrors(result.errors));
+      await rm(path.join(dir, schoolFile));
+      await write(file, event().replace(', presence: city', ''));
+      expect(await expectErrors()).toContain('presence');
+      await write(file, event().replace('presence: city', 'presence: household'));
+      expect(await expectErrors()).toContain("presence household can't create someone new");
+    });
+
+    it('warns on money talk without money, past claims without evidence, and fixed gaps in follow-ups (C1)', async () => {
+      // Money: the label lends money, the outcome changes none.
+      await write(file, event().replace('label: Wave back', 'label: Lend {npc.them} $50'));
+      let result = await compile();
+      if (!result.ok) throw new Error(formatErrors(result.errors));
+      expect(result.warnings.map((w) => [w.eventId, w.kind])).toEqual([['test_event', 'money']]);
+      // Justified: no warning.
+      await write(file, `${event().replace('label: Wave back', 'label: Lend {npc.them} $50')}justified: { money: "A test of the justification field." }\n`);
+      result = await compile();
+      if (!result.ok) throw new Error(formatErrors(result.errors));
+      expect(result.warnings).toEqual([]);
+      // Past: a claim with no flag, memory or earlier event behind it.
+      await write(file, event().replace("'{npc.name} waves.'", "'{npc.name} waves, the way you used to.'"));
+      result = await compile();
+      if (!result.ok) throw new Error(formatErrors(result.errors));
+      expect(result.warnings.map((w) => w.kind)).toEqual(['past']);
+      // A justification nothing needs is an error.
+      await write(file, `${event()}justified: { past: "Nothing here needs this at all." }\n`);
+      expect(await expectErrors()).toContain('justified.past is set, but nothing is flagged');
+    });
+
+    it('warns on a fixed time gap in a follow-up (C1)', async () => {
+      await write(
+        file,
+        event()
+          .replace("'{npc.name} waves.'", "'Years later, {npc.name} waves.'")
+          .replace('weight: { base: 5 }', 'weight: { base: 5 }\nfollowUpOnly: true')
+          .replace('tag: lent_money }', 'tag: lent_money }\n        - { type: schedule, eventId: test_event, inYears: [1, 2], cast: [npc] }'),
+      );
+      const result = await compile();
+      if (!result.ok) throw new Error(formatErrors(result.errors));
+      expect(result.warnings.map((w) => w.message)).toEqual([expect.stringContaining('fixed time phrase "Years later"')]);
+    });
+
+    it('keeps {since} to scheduled follow-ups and checks cost items (C1)', async () => {
+      await write(file, event().replace("'{npc.name} waves.'", "'{npc.name} waves, {since} on.'"));
+      expect(await expectErrors()).toContain('{since} is only for follow-ups another event schedules');
+      await write(file, event().replace('tag: lent_money }', 'tag: lent_money }\n        - { type: cost, item: yacht }'));
+      expect(await expectErrors()).toContain('unknown cost item "yacht"');
+      await write(file, `${event()}once: true\nrecurring: true\n`);
+      expect(await expectErrors()).toContain('a recurring event can’t also be once');
+    });
+
     it('rejects a chain file whose name does not match its chain id', async () => {
       await write('events/any/family/wrong.chain.yaml', `chain: right\nevents:\n${[event(), event().replace('id: test_event', 'id: test_event_2')].map((e) => e.trim().split('\n').map((l, i) => (i === 0 ? `  - ${l}` : `    ${l}`)).join('\n')).join('\n')}\n`);
       expect(await expectErrors()).toContain('chain "right" must match the file name ("wrong")');
@@ -364,7 +428,7 @@ rarity: common
 lifeStages: [adult]
 weight: { base: 5 }
 cast:
-  date: { kind: acquaintance, romantic: true, createIfMissing: true }
+  date: { kind: acquaintance, romantic: true, createIfMissing: true, presence: city }
 autoOutcome:
   effects:
     - { type: relationship, role: date, kind: partner }
@@ -401,12 +465,12 @@ ${extra}`;
 
     it('rejects a romance event with a role that is not guaranteed to be an adult, or in a young life stage', async () => {
       const withFriend = romance(adultOnly).replace(
-        '  date: { kind: acquaintance, romantic: true, createIfMissing: true }',
-        '  date: { kind: acquaintance, romantic: true, createIfMissing: true }\n  friend: { kind: friend }',
+        '  date: { kind: acquaintance, romantic: true, createIfMissing: true, presence: city }',
+        '  date: { kind: acquaintance, romantic: true, createIfMissing: true, presence: city }\n  friend: { kind: friend, presence: city }',
       );
       await write(romanceFile, withFriend);
       expect(await expectErrors()).toContain('cast.friend: in a romance event every role must be an adult');
-      await write(romanceFile, withFriend.replace('friend: { kind: friend }', 'friend: { kind: friend, age: { min: 18, max: 90 } }'));
+      await write(romanceFile, withFriend.replace('friend: { kind: friend, presence: city }', 'friend: { kind: friend, age: { min: 18, max: 90 }, presence: city }'));
       expect((await compile()).ok).toBe(true);
       await write(
         romanceFile,
@@ -437,7 +501,7 @@ rarity: common
 lifeStages: [adult]
 weight: { base: 5 }
 cast:
-  helper: { support: true, optional: true }
+  helper: { support: true, optional: true, presence: anywhere }
 choices:
   - id: call
     label: Call {helper.name}
@@ -487,8 +551,8 @@ ${choiceExtra}    outcome:
       text = await expectErrors();
       expect(text).toContain('so it must be followUpOnly');
       await write('registries/actions.yaml', actions);
-      const proposal = await readFile(path.join(dir, 'events/any/romance/proposal.yaml'), 'utf8');
-      await write('events/any/romance/proposal.yaml', proposal.replace('- { type: money, delta: -200 }', '- { type: death, cause: natural_causes }'));
+      const proposal = await readFile(path.join(dir, 'events/any/partner/proposal.yaml'), 'utf8');
+      await write('events/any/partner/proposal.yaml', proposal.replace('- { type: money, delta: -200 }', '- { type: death, cause: natural_causes }'));
       expect(await expectErrors()).toContain("a management action's result can't kill");
     });
 
@@ -599,7 +663,7 @@ choices:
       await write('events/teen/prison/test_event.yaml', event('prison', 'teen', ''));
       expect(await expectErrors()).toContain('a prison event can’t be in life stages'.replace('’', "'"));
       await rm(path.join(dir, 'events/teen/prison/test_event.yaml'));
-      await write('events/adult/justice/test_event.yaml', `${event('justice', 'adult', '')}cast:\n  self: { kind: friend }\n`);
+      await write('events/adult/justice/test_event.yaml', `${event('justice', 'adult', '')}cast:\n  self: { kind: friend, presence: city }\n`);
       expect(await expectErrors()).toContain('"self" is always you in event text');
     });
 
@@ -699,7 +763,7 @@ choices:
       await mkdir(path.join(overlay, 'events/any/people'), { recursive: true });
       await writeFile(
         path.join(overlay, 'events/any/people/only_action.yaml'),
-        'id: only_action\ntitle: Act\ntext: You act.\ntone: light\ncategory: people\nrarity: common\nlifeStages: [adult]\nweight: { base: 1 }\nfollowUpOnly: true\ncast:\n  person: { kind: friend }\nautoOutcome: {}\n',
+        'id: only_action\ntitle: Act\ntext: You act.\ntone: light\ncategory: people\nrarity: common\nlifeStages: [adult]\nweight: { base: 1 }\nfollowUpOnly: true\ncast:\n  person: { kind: friend, presence: anywhere }\nautoOutcome: {}\n',
       );
       await mkdir(path.join(overlay, 'registries'), { recursive: true });
       await writeFile(
@@ -711,13 +775,14 @@ choices:
         `triggers:\n${['foreclosure', 'eviction', 'collections', 'garnishment', 'missed_payment'].map((t) => `  ${t}: { events: [only_trouble] }`).join('\n')}\n`,
       );
       await mkdir(path.join(overlay, 'events/any/work'), { recursive: true });
+      await mkdir(path.join(overlay, 'events/any/career'), { recursive: true });
       await writeFile(
-        path.join(overlay, 'events/any/work/only_work.yaml'),
-        'id: only_work\ntitle: Work\ntext: Work.\ntone: light\ncategory: work\nrarity: common\nlifeStages: [adult]\nweight: { base: 1 }\nfollowUpOnly: true\nautoOutcome: {}\n',
+        path.join(overlay, 'events/any/career/only_work.yaml'),
+        'id: only_work\ntitle: Work\ntext: Work.\ntone: light\ncategory: career\nrarity: common\nlifeStages: [adult]\nweight: { base: 1 }\nfollowUpOnly: true\nautoOutcome: {}\n',
       );
       await writeFile(
         path.join(overlay, 'events/any/work/only_boss.yaml'),
-        'id: only_boss\ntitle: Boss\ntext: Boss.\ntone: light\ncategory: work\nrarity: common\nlifeStages: [adult]\nweight: { base: 1 }\nfollowUpOnly: true\ncast:\n  boss: { kind: boss }\nautoOutcome: {}\n',
+        'id: only_boss\ntitle: Boss\ntext: Boss.\ntone: light\ncategory: work\nrarity: common\nlifeStages: [adult]\nrequires: { career: { employed: true } }\nweight: { base: 1 }\nfollowUpOnly: true\ncast:\n  boss: { kind: boss, presence: city }\nautoOutcome: {}\n',
       );
       await writeFile(
         path.join(overlay, 'registries/work.yaml'),
@@ -725,7 +790,9 @@ choices:
       );
       // ...and its own health, legal and self-discovery events (Stage 9).
       const followUp = (id: string, category: string) =>
-        `id: ${id}\ntitle: ${id}\ntext: Hi.\ntone: light\ncategory: ${category}\nrarity: common\nlifeStages: [adult]\nweight: { base: 1 }\nfollowUpOnly: true\nautoOutcome: {}\n`;
+        `id: ${id}\ntitle: ${id}\ntext: Hi.\ntone: light\ncategory: ${category}\nrarity: common\nlifeStages: [adult]\n${
+          category === 'prison' ? 'requires: { legal: { incarcerated: true } }\n' : ''
+        }weight: { base: 1 }\nfollowUpOnly: true\nautoOutcome: {}\n`;
       for (const [folder, id, category] of [
         ['health', 'only_doctor', 'health'],
         ['prison', 'only_prison', 'prison'],

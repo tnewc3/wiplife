@@ -1,0 +1,38 @@
+# C1: restored now that lives have grandparents (creation/family.ts).
+id: grandparent_visit
+title: A week with {grandparent.name}
+text: >-
+  You're staying with {grandparent.name} for a whole week. {grandparent.They}
+  {grandparent:has|have} a cookie jar with no rules attached and a garden full of
+  things you're allowed to dig up.
+tone: light
+category: family
+rarity: common
+lifeStages: [early, child]
+requires: { age: { gte: 3, lte: 8 } }
+weight: { base: 5 }
+once: true
+cast:
+  # You go to stay with them, wherever they live.
+  grandparent: { kind: grandparent, presence: anywhere }
+choices:
+  - id: spoil
+    label: Let {grandparent.name} spoil you rotten
+    outcome:
+      text: >-
+        Cookies for breakfast, cartoons until late, and a new toy "just
+        because." You go home three pounds heavier and deeply in love.
+      effects:
+        - { type: relationship, role: grandparent, affection: 10 }
+        - { type: memory, role: grandparent, tag: spoiled_you }
+        - { type: stat, key: happiness, delta: 4 }
+  - id: garden
+    label: Help in the garden every morning
+    outcome:
+      text: >-
+        {grandparent.name} teaches you which shoots are weeds and which are
+        tomatoes, and lets you take home a pot of your own.
+      effects:
+        - { type: relationship, role: grandparent, affection: 8, trust: 5 }
+        - { type: memory, role: grandparent, tag: spoiled_you }
+        - { type: stat, key: discipline, delta: 2 }

@@ -13,7 +13,7 @@ requires: { memory: { role: parent, tag: lost_temper_with_you } }
 weight: { base: 10 }
 followUpOnly: true
 cast:
-  parent: { kind: parent }
+  parent: { kind: parent, presence: household }
 choices:
   - id: say_it
     label: Tell {parent.them} you still remember the juice

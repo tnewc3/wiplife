@@ -5,10 +5,11 @@ tone: light
 category: work
 rarity: common
 lifeStages: [youngAdult, adult, senior]
+requires: { career: { employed: true } }
 weight: { base: 1 }
 followUpOnly: true
 cast:
-  boss: { kind: boss }
+  boss: { kind: boss, presence: city }
 autoOutcome:
   text: You start right away.
   effects: []

@@ -4,6 +4,7 @@
  */
 import type { ContentBundle } from '../content/schemas';
 import { ageOf, isCurrentPartner, isFamilyKind, isPartnerKind, isRomanticKind, kindSince } from './relationships';
+import { consistencyProblems } from './presence';
 import { isRngState } from './rng';
 import { lifeStageForAge } from './systems/aging';
 import { meetsJobRequirements } from './career';
@@ -74,7 +75,7 @@ export function checkInvariants(state: LifeState, content: ContentBundle): strin
   identity('character.identity', c.identity);
   for (const [key, value] of Object.entries(c.stats)) score(`character.stats.${key}`, value);
   for (const [key, value] of Object.entries(c.personality)) score(`character.personality.${key}`, value);
-  for (const key of ['luck', 'reputation', 'geneticRisk', 'vice', 'innerConflict'] as const) {
+  for (const key of ['luck', 'reputation', 'geneticRisk', 'vice', 'innerConflict', 'happinessBaseline'] as const) {
     score(`character.hidden.${key}`, c.hidden[key]);
   }
   if (c.hidden.talent !== null && !content.talents[c.hidden.talent]) fail(`talent "${c.hidden.talent}" is not known`);
@@ -133,6 +134,11 @@ export function checkInvariants(state: LifeState, content: ContentBundle): strin
   if (!Number.isInteger(h.since) || h.since < state.birthYear || h.since > state.currentYear) fail('housing.since is outside the life');
   if (!independent && h.kind !== 'with_parents') fail(`a child is housed "${h.kind}"`);
   if (h.roommate !== undefined && (h.roommate !== true || h.kind !== 'renting')) fail('only a rental has a roommate');
+  if (h.rentFactor !== undefined) {
+    const { min, max } = content.balance.economy.housing.rentFactor;
+    if (h.kind !== 'renting') fail('housing.rentFactor is only for a rental');
+    if (!(h.rentFactor >= min && h.rentFactor <= max)) fail(`housing.rentFactor ${h.rentFactor} is outside ${min}–${max}`);
+  }
   if (h.partnerId !== undefined) {
     const rel = state.relationships[h.partnerId];
     // In prison, a partner can keep living in the home you own (Stage 9).
@@ -296,12 +302,25 @@ export function checkInvariants(state: LifeState, content: ContentBundle): strin
     if (!content.events[p.eventId]) fail(`pending event "${p.eventId}" is not known`);
     for (const [role, id] of Object.entries(p.cast)) if (!state.people[id]) fail(`pending ${p.eventId} casts missing person ${id} as ${role}`);
   }
+  // C1: while nothing has been chosen yet (the state is as it was when the
+  // events were picked), every pending event keeps its category contract and
+  // everyone in it is where the role needs them.
+  if ((state.phase === 'events' || state.phase === 'action') && state.pending.every((p) => p.resolvedChoiceId === undefined)) {
+    for (const p of state.pending) {
+      const def = content.events[p.eventId];
+      if (def) for (const problem of consistencyProblems(state, def, p.cast, content)) fail(`consistency: ${problem}`);
+    }
+  }
+  for (const p of state.pending) {
+    if (p.since !== undefined && (p.since < state.birthYear || p.since >= state.currentYear)) fail(`pending ${p.eventId} was set up outside the past years`);
+  }
   const pendingEvents = state.pending.map((p) => p.eventId);
   if (new Set(pendingEvents).size !== pendingEvents.length) fail('an event appears twice in one year');
   for (const s of state.scheduled) {
     if (!content.events[s.eventId]) fail(`scheduled event "${s.eventId}" is not known`);
     // Follow-ups are always for a later year; due ones leave the list when the year begins.
     if (s.dueYear <= state.currentYear) fail(`scheduled ${s.eventId} is due in the past (${s.dueYear})`);
+    if (s.since !== undefined && (s.since < state.birthYear || s.since > state.currentYear)) fail(`scheduled ${s.eventId} was set up outside the life`);
     for (const [role, id] of Object.entries(s.cast)) if (!state.people[id]) fail(`scheduled ${s.eventId} casts missing person ${id} as ${role}`);
   }
   for (const [id, log] of Object.entries(state.eventLog)) {
@@ -511,6 +530,8 @@ function stage9Failures(state: LifeState, content: ContentBundle): string[] {
     if (r.years !== undefined && (!Number.isInteger(r.years) || r.years < 1)) fail(`${label}: invalid years`);
     if (r.outcome === 'jail' && r.year - state.birthYear < content.balance.economy.independenceAge) fail(`${label}: jail for a minor`);
   }
+  // C1: the work contract relies on this (a job always means not retired).
+  if (state.career.job && state.career.retired) fail('retired with a job');
   const inside = state.housing.kind === 'incarcerated';
   if (inside !== (legal.incarceratedUntil !== undefined)) fail('prison and incarceratedUntil disagree');
   if (inside) {

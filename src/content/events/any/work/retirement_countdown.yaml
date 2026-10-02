@@ -2,7 +2,7 @@ id: retirement_countdown
 title: How many more years?
 text: >-
   {npc.name}, who started long after you did, asks at lunch when you plan
-  to retire. You realize you've never actually done the math.
+  to retire. You realize you don't actually know.
 tone: neutral
 category: work
 rarity: common
@@ -11,7 +11,7 @@ requires: { all: [{ age: { gte: 58 } }, { career: { employed: true } }] }
 weight: { base: 5 }
 cooldownYears: 8
 cast:
-  npc: { kind: coworker }
+  npc: { kind: coworker, presence: city }
 choices:
   - id: countdown
     label: Start a countdown calendar

@@ -13,7 +13,7 @@ events:
     weight: { base: 8 }
     once: true
     cast:
-      parent: { kind: parent }
+      parent: { kind: parent, presence: household }
     choices:
       - id: keep
         label: Beg {parent.name} to keep it
@@ -60,6 +60,7 @@ events:
         outcome:
           text: You buy cheaper shoes. The dog is thrilled.
           effects:
+            - { type: money, delta: -40 }
             - { type: stat, key: happiness, delta: 2 }
       - id: train
         label: Start training

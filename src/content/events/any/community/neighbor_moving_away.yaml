@@ -11,7 +11,7 @@ lifeStages: [youngAdult, adult, senior]
 weight: { base: 10 }
 followUpOnly: true
 cast:
-  neighbor: { kind: acquaintance }
+  neighbor: { kind: acquaintance, presence: city }
 choices:
   - id: party
     label: Throw {neighbor.them} a goodbye party
@@ -22,6 +22,7 @@ choices:
         You return the favor: a backyard full of neighbors and a cake that says
         DON'T GO. {neighbor.They} {neighbor:cries|cry} into it.
       effects:
+        - { type: moveAway, role: neighbor }
         - { type: relationship, role: neighbor, affection: 12, trust: 6 }
         - { type: stat, key: happiness, delta: 3 }
         - { type: stat, key: sociability, delta: 2 }
@@ -30,6 +31,7 @@ choices:
     outcome:
       text: Three hours, one couch stuck in a doorway, and a promise to visit that you both half mean.
       effects:
+        - { type: moveAway, role: neighbor }
         - { type: relationship, role: neighbor, affection: 6 }
         - { type: stat, key: fitness, delta: 1 }
   - id: wave
@@ -37,4 +39,5 @@ choices:
     outcome:
       text: The new neighbors play drums. You think about {neighbor.name} fondly, and often.
       effects:
+        - { type: moveAway, role: neighbor }
         - { type: stat, key: happiness, delta: -1 }

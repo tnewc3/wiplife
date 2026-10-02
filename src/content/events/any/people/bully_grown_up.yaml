@@ -11,7 +11,7 @@ lifeStages: [youngAdult, adult]
 weight: { base: 10 }
 followUpOnly: true
 cast:
-  bully: { kind: classmate }
+  bully: { kind: classmate, presence: city }
 choices:
   - id: remind
     label: Say you remember the lunch line
@@ -42,7 +42,7 @@ choices:
         - { type: relationship, role: bully, affection: 6, trust: 6 }
         - { type: stat, key: confidence, delta: 2 }
   - id: nothing
-    label: Pay and leave
+    label: Bag your groceries and go
     outcome:
       text: You say nothing. It's strange how small {bully.name} seems now.
       effects:

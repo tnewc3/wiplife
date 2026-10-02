@@ -11,7 +11,7 @@ requires: { flag: came_out }
 weight: { base: 5 }
 cooldownYears: 12
 cast:
-  parent: { kind: parent, optional: true }
+  parent: { kind: parent, optional: true, presence: anywhere }
 choices:
   - id: march
     label: March in it
@@ -25,7 +25,7 @@ choices:
     label: Invite {parent.name} to march with you
     visibleIf:
       all:
-        - { role: parent }
+        - { role: parent, where: [household, city] }
         - { memory: { role: parent, tag: accepted_you } }
     outcome:
       text: >-
@@ -39,7 +39,7 @@ choices:
     label: Ask {parent.name} to come, even after last time
     visibleIf:
       all:
-        - { role: parent }
+        - { role: parent, where: [household, city] }
         - { memory: { role: parent, tag: struggled_with_it } }
     check:
       base: 35

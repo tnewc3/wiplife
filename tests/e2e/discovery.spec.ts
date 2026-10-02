@@ -7,7 +7,7 @@
 import { expect, test, type Page } from '@playwright/test';
 import { ageUp, ageUpButton, ageUpTimes, eventSheet, expectNoHorizontalScroll, expectTouchTargets, playThroughEvents, settle, startRandomLife } from './helpers';
 
-const DISCOVERY = { testPack: true, seed: 'e2e-discovery-19' };
+const DISCOVERY = { testPack: true, seed: 'e2e-discovery-87' };
 
 const profile = (page: Page) => page.getByRole('dialog', { name: /^(Profile|Who you are)$/ });
 const identityValue = (page: Page, label: string) =>

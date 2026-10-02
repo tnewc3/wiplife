@@ -11,7 +11,7 @@ requires: { career: { employed: true, performance: { gte: 75 }, years: { gte: 2 
 weight: { base: 6 }
 cooldownYears: 5
 cast:
-  boss: { kind: boss }
+  boss: { kind: boss, presence: city }
 choices:
   - id: more
     label: Ask {boss.name} for a bigger role
@@ -34,6 +34,7 @@ choices:
     outcome:
       text: You take the compliment, call your family, and buy yourself something nice.
       effects:
+        - { type: money, delta: -250 }
         - { type: stat, key: happiness, delta: 5 }
         - { type: stat, key: confidence, delta: 3 }
         - { type: stat, key: reputation, delta: 2 }

@@ -26,6 +26,12 @@ fitnessEffect:
   - { at: 50, x: 1 }
   - { at: 100, x: 0.6 }
 
+# C1: each year Happiness moves this share of the way back toward the life's
+# personal baseline (creation.yaml hidden.happinessBaseline), so good and bad
+# years fade instead of piling up.
+happinessDrift:
+  rate: 0.2
+
 history:
   # Past this many entries, the oldest entry of the lowest importance is dropped,
   # so a long life's history never grows without limit.
@@ -39,10 +45,10 @@ archive:
 # Obituary version 2 (Stage 10). The life's tone picks the phrasing: heavy
 # for a life that ended before youngAge or averaged below heavyHappiness,
 # bright from brightHappiness, mixed otherwise. maxMoments: how many notable
-# moments and deeds the obituary mentions. The Happiness lines sit around how
-# simulated lives go now (lifetime median about 93); Stage 12 retunes them.
+# moments and deeds the obituary mentions. C1: with Happiness drifting toward
+# a personal baseline, these are back to normal values.
 obituary:
-  brightHappiness: 95
-  heavyHappiness: 85
+  brightHappiness: 70
+  heavyHappiness: 40
   youngAge: 45
   maxMoments: 3

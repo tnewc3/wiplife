@@ -11,7 +11,7 @@ requires: { education: { program: [high, college, grad] } }
 weight: { base: 6 }
 cooldownYears: 3
 cast:
-  partner: { kind: classmate, ageOffset: { min: -2, max: 2 }, createIfMissing: true, newChance: 0.6 }
+  partner: { kind: classmate, ageOffset: { min: -2, max: 2 }, createIfMissing: true, newChance: 0.6, presence: city }
 choices:
   - id: do_it_all
     label: Finish it yourself, quietly

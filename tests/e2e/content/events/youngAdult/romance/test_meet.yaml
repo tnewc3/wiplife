@@ -9,7 +9,7 @@ requires: { age: { eq: 18 } }
 weight: { base: 10 }
 once: true
 cast:
-  date: { kind: acquaintance, romantic: true, createIfMissing: true, newChance: 1, age: { min: 18, max: 24 } }
+  date: { kind: acquaintance, romantic: true, createIfMissing: true, newChance: 1, age: { min: 18, max: 24 }, presence: city }
 autoOutcome:
   text: You swap numbers before you leave.
   effects:

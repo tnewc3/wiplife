@@ -19,7 +19,7 @@ weight:
     - { if: { discovery: { latent: [attraction] } }, x: 8 }
 once: true
 cast:
-  admirer: { kind: acquaintance, admirer: true, createIfMissing: true, newChance: 0.7 }
+  admirer: { kind: acquaintance, admirer: true, createIfMissing: true, newChance: 0.7, presence: city }
 choices:
   - id: yes_right
     label: Say yes. It feels right.

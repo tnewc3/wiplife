@@ -10,6 +10,9 @@ lifeStages: [child]
 requires: { education: { program: [elementary, middle] } }
 weight: { base: 4 }
 once: true
+# C1: reviewed build warnings kept on purpose (docs/consistency-review.md).
+justified:
+  money: "The money is the school's and your family's, not yours: a child's family pays for the chocolate."
 choices:
   - id: door
     label: Knock on every door on the street

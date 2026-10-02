@@ -191,7 +191,7 @@ export function currentCoworkers(state: LifeState): Id[] {
 function addCoworker(state: LifeState, content: ContentBundle): void {
   const w = content.balance.careers.workplace;
   const min = content.balance.careers.minAge;
-  createPerson(state, { kind: 'coworker', age: { min, max: 120 }, ageOffset: w.coworkerAgeOffset }, state.rng, content);
+  createPerson(state, { kind: 'coworker', age: { min, max: 120 }, ageOffset: w.coworkerAgeOffset, presence: 'city' }, state.rng, content);
 }
 
 /**
@@ -201,7 +201,7 @@ function addCoworker(state: LifeState, content: ContentBundle): void {
  */
 export function staffWorkplace(state: LifeState, content: ContentBundle, newJob: boolean): void {
   const w = content.balance.careers.workplace;
-  if (currentBoss(state) === null) createPerson(state, { kind: 'boss', age: w.bossAge }, state.rng, content);
+  if (currentBoss(state) === null) createPerson(state, { kind: 'boss', age: w.bossAge, presence: 'city' }, state.rng, content);
   if (newJob) {
     for (let i = 0; i < w.coworkers; i++) addCoworker(state, content);
   } else if (currentCoworkers(state).length < w.maxCoworkers && chance(state.rng, w.newCoworkerChance)) {

@@ -9,6 +9,7 @@ import { CREATABLE_KINDS } from '../../content/schemas';
 import { rollGenderCategory, rollIdentity, rollRelativeTraits } from '../creation/character';
 import { pickUnused, rollHeritage } from '../creation/family';
 import { rollScore, weightedPick } from '../random';
+import { fitsPresence } from '../presence';
 import { isAdmirerMatch, isRomanticMatch, partnerAgeRange, SUPPORT_KINDS } from '../relationships';
 import { chance, nextInt, pick, type RngState } from '../rng';
 import type { Id, LifeState, Person } from '../types';
@@ -30,9 +31,11 @@ function fitsAge(state: LifeState, spec: CastSpec, age: number): boolean {
  * Living people who fit the spec, in id order: of its kind (not faded out of
  * your life), of its ages, and for a romantic role a possible partner. For a
  * support role: close people (not estranged) whose trust and affection reach
- * the support thresholds, most trusted first.
+ * the support thresholds, most trusted first. With preferHousehold (C1, home
+ * and wellbeing events), a partner who lives with you is always a candidate,
+ * first, whatever the thresholds: they are there, so they notice.
  */
-export function castCandidates(state: LifeState, spec: CastSpec, content: ContentBundle): Person[] {
+export function castCandidates(state: LifeState, spec: CastSpec, content: ContentBundle, preferHousehold = false): Person[] {
   const support = content.balance.relationships.support;
   const found = Object.keys(state.relationships)
     .sort()
@@ -42,18 +45,22 @@ export function castCandidates(state: LifeState, spec: CastSpec, content: Conten
       if (!person || !person.alive || rel.status === 'ended') return [];
       if (spec.support) {
         if (rel.status !== 'active' || !SUPPORT_KINDS.includes(rel.kind)) return [];
-        if (rel.trust < support.minTrust || rel.affection < support.minAffection) return [];
+        const housePartner = preferHousehold && state.housing.partnerId === id;
+        if (!housePartner && (rel.trust < support.minTrust || rel.affection < support.minAffection)) return [];
       } else if (rel.kind !== spec.kind) {
         return [];
       }
       if (spec.romantic && !isRomanticMatch(state, person, content)) return [];
       if (spec.admirer && !isAdmirerMatch(state, person, content)) return [];
+      if (!fitsPresence(state, id, spec.presence, content)) return [];
       return fitsAge(state, spec, personAge(state, person)) ? [person] : [];
     });
   if (spec.support) {
     const rel = (p: Person) => state.relationships[p.id]!;
-    // Stable sort: ties keep id order.
-    found.sort((a, b) => rel(b).trust - rel(a).trust || rel(b).affection - rel(a).affection);
+    // A partner who lives with you comes first for home and wellbeing (C1,
+    // the household rule); otherwise the most trusted. Stable sort: ties keep id order.
+    const first = (p: Person) => (preferHousehold && state.housing.partnerId === p.id ? 1 : 0);
+    found.sort((a, b) => first(b) - first(a) || rel(b).trust - rel(a).trust || rel(b).affection - rel(a).affection);
   }
   return found;
 }
@@ -121,6 +128,9 @@ export function createPerson(state: LifeState, spec: CastSpec, rng: RngState, co
   const kind = spec.kind;
   if (kind === undefined) return null;
   if ((spec.romantic || spec.admirer) && state.character.age < content.balance.relationships.adultAge) return null;
+  // New people live in your city, or (a role that needs someone who lives
+  // elsewhere) in another one; nobody new joins your household.
+  if (spec.presence === 'household') return null;
   const range = newPersonAgeRange(state, spec, content);
   if (!range) return null;
   const city = content.cities[state.character.cityId];
@@ -144,7 +154,7 @@ export function createPerson(state: LifeState, spec: CastSpec, rng: RngState, co
     traits: rollRelativeTraits(rng, content),
     looks: rollScore(rng, family.relativeLooks),
     smarts: rollScore(rng, family.relativeSmarts),
-    cityId: state.character.cityId,
+    cityId: spec.presence === 'elsewhere' ? otherCity(state, rng, content) : state.character.cityId,
     tags: [kind],
   };
   const newPerson = content.balance.events.newPerson;
@@ -197,7 +207,8 @@ export function castEvent(
   for (const role of Object.keys(def.cast ?? {}).sort()) {
     if (cast[role] !== undefined) continue;
     const spec = def.cast![role]!;
-    const options = castCandidates(view, spec, content).filter((p) => !used.has(p.id));
+    const preferHousehold = content.registries.categories.categories[def.category]?.household === true;
+    const options = castCandidates(view, spec, content, preferHousehold).filter((p) => !used.has(p.id));
     const canCreate =
       spec.createIfMissing === true && spec.kind !== undefined && (CREATABLE_KINDS as readonly string[]).includes(spec.kind);
     const wantsNew = canCreate && spec.newChance !== undefined && chance(rng, spec.newChance);
@@ -216,6 +227,14 @@ export function castEvent(
     used.add(id);
   }
   return { cast, created };
+}
+
+/** A city other than yours (for someone who lives elsewhere), from the active cities. */
+export function otherCity(state: LifeState, rng: RngState, content: ContentBundle): Id {
+  const options = Object.keys(content.cities)
+    .sort()
+    .filter((id) => id !== state.character.cityId && !content.cities[id]!.retired);
+  return options.length > 0 ? pick(rng, options) : state.character.cityId;
 }
 
 /** Removes people created for a cast that was then rejected. */

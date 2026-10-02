@@ -10,8 +10,11 @@ lifeStages: [child, teen]
 requires: { education: { program: [middle, high] } }
 weight: { base: 6 }
 cooldownYears: 4
+# C1: reviewed build warnings kept on purpose (docs/consistency-review.md).
+justified:
+  money: "\"I'll owe you\" is a figure of speech here, not a debt."
 cast:
-  classmate: { kind: classmate, ageOffset: { min: -1, max: 1 }, createIfMissing: true, newChance: 0.4 }
+  classmate: { kind: classmate, ageOffset: { min: -1, max: 1 }, createIfMissing: true, newChance: 0.4, presence: city }
 choices:
   - id: let_them
     label: Slide it over

@@ -9,10 +9,11 @@ tone: light
 category: work
 rarity: common
 lifeStages: [youngAdult, adult, senior]
+requires: { career: { employed: true } }
 weight: { base: 10 }
 followUpOnly: true
 cast:
-  boss: { kind: boss }
+  boss: { kind: boss, presence: city }
 choices:
   - id: early
     label: Come in early all week

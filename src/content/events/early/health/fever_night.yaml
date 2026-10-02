@@ -11,7 +11,7 @@ lifeStages: [early, child]
 weight: { base: 7 }
 cooldownYears: 3
 cast:
-  parent: { kind: parent }
+  parent: { kind: parent, presence: household }
 autoOutcome:
   effects:
     - { type: stat, key: health, delta: -2 }

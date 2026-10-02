@@ -13,8 +13,10 @@ weight:
   modifiers:
     - { if: { trait: riskTaking, gt: 60 }, x: 1.5 }
 cooldownYears: 5
+# C1: meant to come back now and then (repeats are kept rare otherwise).
+recurring: true
 cast:
-  boss: { kind: boss }
+  boss: { kind: boss, presence: city }
 choices:
   - id: call_in
     label: Call in "sick"

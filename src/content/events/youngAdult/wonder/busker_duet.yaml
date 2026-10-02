@@ -12,7 +12,7 @@ lifeStages: [youngAdult, adult]
 weight: { base: 10 }
 once: true
 cast:
-  busker: { kind: acquaintance, age: { min: 25, max: 60 }, createIfMissing: true, newChance: 1 }
+  busker: { kind: acquaintance, age: { min: 25, max: 60 }, createIfMissing: true, newChance: 1, presence: city }
 choices:
   - id: sing
     label: Sit down and sing

@@ -14,8 +14,8 @@ requires:
 weight: { base: 5 }
 once: true
 cast:
-  parent: { kind: parent }
-  newPartner: { kind: acquaintance, age: { min: 30, max: 60 }, createIfMissing: true, newChance: 1 }
+  parent: { kind: parent, presence: household }
+  newPartner: { kind: acquaintance, age: { min: 30, max: 60 }, createIfMissing: true, newChance: 1, presence: city }
 choices:
   - id: chance
     label: Give {newPartner.name} a chance

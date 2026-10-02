@@ -15,7 +15,7 @@ requires:
 weight: { base: 4 }
 once: true
 cast:
-  parent: { kind: parent }
+  parent: { kind: parent, presence: household }
 choices:
   - id: wait_up
     label: Get up early to have breakfast together
@@ -30,8 +30,7 @@ choices:
     label: Leave {parent.them} a drawing on the table every night
     outcome:
       text: >-
-        {parent.name} keeps every one of them in a shoebox. You'll find it,
-        decades later.
+        {parent.name} keeps every one of them in a shoebox.
       effects:
         - { type: relationship, role: parent, affection: 5 }
         - { type: stat, key: kindness, delta: 2 }

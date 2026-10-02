@@ -16,7 +16,7 @@ events:
     weight: { base: 6 }
     once: true
     cast:
-      teacher: { kind: acquaintance, age: { min: 26, max: 64 }, createIfMissing: true, newChance: 1 }
+      teacher: { kind: acquaintance, age: { min: 26, max: 64 }, createIfMissing: true, newChance: 1, presence: city }
     choices:
       - id: go_see
         label: Go see {teacher.them}
@@ -53,7 +53,7 @@ events:
     weight: { base: 10 }
     followUpOnly: true
     cast:
-      teacher: { kind: acquaintance }
+      teacher: { kind: acquaintance, presence: city }
     choices:
       - id: accept
         label: Say yes, gratefully

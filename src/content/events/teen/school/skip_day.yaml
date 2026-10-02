@@ -14,7 +14,7 @@ requires:
 weight: { base: 6 }
 cooldownYears: 3
 cast:
-  friend: { kind: friend, ageOffset: { min: -1, max: 2 }, createIfMissing: true }
+  friend: { kind: friend, ageOffset: { min: -1, max: 2 }, createIfMissing: true, presence: city }
 choices:
   - id: go
     label: Get in the car

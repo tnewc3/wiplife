@@ -11,8 +11,8 @@ requires: { career: { employed: true } }
 weight: { base: 5 }
 cooldownYears: 8
 cast:
-  npc: { kind: coworker }
-  boss: { kind: boss }
+  npc: { kind: coworker, presence: city }
+  boss: { kind: boss, presence: city }
 choices:
   - id: call_out
     label: Speak up in the meeting

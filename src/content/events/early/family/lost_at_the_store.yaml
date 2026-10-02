@@ -11,7 +11,7 @@ requires: { age: { gte: 3 } }
 weight: { base: 4 }
 once: true
 cast:
-  parent: { kind: parent }
+  parent: { kind: parent, presence: household }
 choices:
   - id: stay
     label: Stay right where you are, like you were told

@@ -11,7 +11,7 @@ requires: { legal: { incarcerated: true } }
 weight: { base: 5 }
 once: true
 cast:
-  cellmate: { kind: acquaintance, age: { min: 18, max: 70 }, createIfMissing: true, newChance: 1 }
+  cellmate: { kind: acquaintance, age: { min: 18, max: 70 }, createIfMissing: true, newChance: 1, presence: city }
 choices:
   - id: stories
     label: Trade life stories

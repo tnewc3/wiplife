@@ -1,0 +1,39 @@
+id: golden_years
+title: Someday
+text: >-
+  For your anniversary, {spouse.name} hands you two tickets to the place the
+  two of you always said you'd go "someday."
+tone: light
+category: partner
+rarity: common
+lifeStages: [adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { role: spouse, years: { gte: 25 } }
+    - { romance: [married] }
+weight: { base: 8 }
+once: true
+# C1: reviewed build warnings kept on purpose (docs/consistency-review.md).
+justified:
+  past: "The event requires 25 years of marriage, which makes a long-promised \"someday\" trip and slower walking plausible for any couple."
+cast:
+  spouse: { kind: spouse, presence: anywhere }
+choices:
+  - id: go
+    label: Go, bad knees and all
+    outcome:
+      text: You walk slower than you used to, and hold hands the whole time.
+      effects:
+        - { type: money, delta: -2500 }
+        - { type: relationship, role: spouse, affection: 10, trust: 4 }
+        - { type: memory, role: spouse, tag: anniversary_trip }
+        - { type: stat, key: happiness, delta: 8 }
+        - { type: history, text: 'You and {spouse.name} finally took the trip you had always talked about.', importance: 2 }
+  - id: home
+    label: Suggest a quiet dinner at home instead
+    outcome:
+      text: '{spouse.name} cooks the meal from your first date. You both pretend not to notice the tickets on the counter.'
+      effects:
+        - { type: relationship, role: spouse, affection: 3 }
+        - { type: stat, key: happiness, delta: 2 }

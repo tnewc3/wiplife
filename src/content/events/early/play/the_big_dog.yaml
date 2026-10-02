@@ -10,6 +10,9 @@ lifeStages: [early]
 requires: { age: { gte: 2 } }
 weight: { base: 5 }
 once: true
+# C1: reviewed build warnings kept on purpose (docs/consistency-review.md).
+justified:
+  past: "\"You've never been so happy to be trapped\" is an idiom about this moment."
 choices:
   - id: pet
     label: Hold out your hand like you were shown

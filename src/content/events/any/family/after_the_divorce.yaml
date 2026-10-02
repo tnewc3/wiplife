@@ -1,9 +1,11 @@
-# Follow-up of divorce_papers: a year on, who steps in (a support role).
+# Follow-up of divorce_papers: some time on, who steps in (a support role).
+# C1: the gap is {since} (a follow-up can be late), and it needs a home
+# without a partner in it ("too quiet").
 id: after_the_divorce
-title: The first year after
+title: After the divorce
 text: >-
-  It's been a year since the divorce from {person.name}. Some nights the
-  apartment is too quiet to sleep in.
+  You and {person.name} divorced {since}. Some nights home is too quiet to
+  sleep in.
 tone: serious
 category: family
 rarity: common
@@ -12,12 +14,13 @@ requires:
   all:
     - { age: { gte: 18 } }
     - { memory: { role: person, tag: divorced } }
+    - { home: { partner: false } }
 weight: { base: 10 }
 followUpOnly: true
 cast:
-  person: { kind: ex }
+  person: { kind: ex, presence: anywhere }
   # Whoever you trust most, if anyone: they may step in.
-  helper: { support: true, optional: true, age: { min: 18, max: 120 } }
+  helper: { support: true, optional: true, age: { min: 18, max: 120 }, presence: nearby }
 choices:
   - id: lean
     label: Let {helper.name} take you out of the house

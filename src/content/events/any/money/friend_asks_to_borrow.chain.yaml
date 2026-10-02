@@ -17,8 +17,10 @@ events:
       modifiers:
         - { if: { trait: kindness, gt: 60 }, x: 1.5 }
     cooldownYears: 6
+    # C1: meant to come back now and then (repeats are kept rare otherwise).
+    recurring: true
     cast:
-      friend: { kind: friend, ageOffset: { min: -4, max: 4 }, createIfMissing: true }
+      friend: { kind: friend, ageOffset: { min: -4, max: 4 }, createIfMissing: true, presence: anywhere }
     choices:
       - id: lend
         label: Lend it
@@ -57,17 +59,22 @@ events:
   - id: friend_repays
     title: About that money
     text: >-
-      It's been a while since you lent {friend.name} that $300, and {friend.they}
-      just posted photos from a beach vacation.
+      You lent {friend.name} $300 {since}, and {friend.they} just posted photos
+      from a beach vacation.
     tone: neutral
     category: money
     rarity: common
     lifeStages: [youngAdult, adult, senior]
     requires: { memory: { role: friend, tag: lent_money } }
     weight: { base: 10 }
+    # C1: meant to come back now and then (repeats are kept rare otherwise).
+    recurring: true
     followUpOnly: true
+    # C1: reviewed build warnings kept on purpose (docs/consistency-review.md).
+    justified:
+      money: "The $300 left your savings when you lent it (friend_asks_to_borrow); not getting it back changes nothing now."
     cast:
-      friend: { kind: friend }
+      friend: { kind: friend, presence: anywhere }
     choices:
       - id: remind
         label: Remind {friend.them} about the money

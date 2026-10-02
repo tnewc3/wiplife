@@ -1,0 +1,28 @@
+# Answers a job application that didn't work (registries/work.yaml rejected).
+id: interview_blanked
+title: The question
+text: >-
+  "Tell us about a time you failed." Your mind goes perfectly, beautifully
+  blank. You hear yourself talking about a houseplant. They don't call back.
+tone: light
+category: career
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+weight: { base: 8 }
+followUpOnly: true
+choices:
+  - id: laugh
+    label: Laugh about it
+    outcome:
+      text: The houseplant story becomes your best story at parties.
+      effects:
+        - { type: stat, key: happiness, delta: 2 }
+        - { type: stat, key: stress, delta: -1 }
+  - id: practice
+    label: Practice answers in the mirror for a week
+    outcome:
+      text: You'll never be caught without a failure story again. You have several now.
+      effects:
+        - { type: stat, key: confidence, delta: 3 }
+        - { type: stat, key: discipline, delta: 1 }
+        - { type: stat, key: stress, delta: 1 }

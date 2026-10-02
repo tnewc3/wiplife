@@ -10,7 +10,7 @@ lifeStages: [child]
 weight: { base: 7 }
 once: true
 cast:
-  parent: { kind: parent }
+  parent: { kind: parent, presence: household }
 choices:
   - id: higher
     label: Climb higher

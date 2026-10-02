@@ -12,8 +12,8 @@ requires: { career: { employed: true } }
 weight: { base: 2 }
 once: true
 cast:
-  npc: { kind: coworker }
-  boss: { kind: boss }
+  npc: { kind: coworker, presence: city }
+  boss: { kind: boss, presence: city }
 choices:
   - id: back
     label: Go to HR with {npc.them}

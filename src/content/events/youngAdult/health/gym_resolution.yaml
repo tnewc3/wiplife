@@ -5,8 +5,10 @@ tone: light
 category: health
 rarity: common
 lifeStages: [youngAdult, adult, senior]
-weight: { base: 7 }
-cooldownYears: 4
+weight: { base: 4 }
+cooldownYears: 5
+# C1: meant to come back now and then (repeats are kept rare otherwise).
+recurring: true
 choices:
   - id: commit
     label: Commit to a routine
@@ -14,8 +16,10 @@ choices:
       base: 45
       stats: [{ key: discipline, weight: 0.5 }]
       success:
-        text: Three months later, you're still going. People have started to notice.
+        text: Three months in, you're still going. People have started to notice.
         effects:
+          # C1: the membership costs money either way.
+          - { type: money, delta: -300 }
           - { type: stat, key: fitness, delta: 6 }
           - { type: stat, key: health, delta: 3 }
           - { type: stat, key: stress, delta: -3 }

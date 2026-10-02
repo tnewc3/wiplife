@@ -47,6 +47,8 @@ export const creationBalanceSchema = z.strictObject({
     reputation: distributionSchema,
     geneticRisk: distributionSchema,
     vice: distributionSchema,
+    /** C1: the Happiness each life drifts back toward (aging.yaml happinessDrift). */
+    happinessBaseline: distributionSchema,
   }),
   /** Chance a character has a hidden talent at all. */
   talentChance: probabilitySchema,
@@ -97,6 +99,17 @@ export const creationBalanceSchema = z.strictObject({
     relativeTraitCount: z.int().min(0).max(6),
     relativeLooks: distributionSchema,
     relativeSmarts: distributionSchema,
+    /**
+     * C1: each parent's own two parents. Their ages when that parent was born
+     * follow parentAgeAtBirth and partnerAgeGap; whether they are still alive
+     * when you are born follows the NPC mortality odds. sameCityChance: a
+     * living grandparent lives in your city (otherwise in another one).
+     */
+    grandparents: z.strictObject({
+      sameCityChance: probabilitySchema,
+      affection: distributionSchema,
+      trust: distributionSchema,
+    }),
   }),
 });
 export type CreationBalance = z.infer<typeof creationBalanceSchema>;
@@ -125,6 +138,12 @@ export const agingBalanceSchema = z.strictObject({
   healthDecline: curveSchema,
   /** Multiplies the yearly health decline, by fitness. */
   fitnessEffect: curveSchema,
+  /**
+   * C1: each year Happiness moves this share of the way back toward your
+   * personal baseline (a hidden value rolled at birth), so good and bad
+   * years fade and Happiness keeps meaning something.
+   */
+  happinessDrift: z.strictObject({ rate: z.number().min(0).max(1) }),
   history: z.strictObject({
     /** Most entries one life keeps; past it, the oldest least important entry goes. */
     maxEntries: z.int().min(10).max(5000),
@@ -214,6 +233,11 @@ export const eventsBalanceSchema = z.strictObject({
     rare: z.number().nonnegative(),
     legendary: z.number().nonnegative(),
   }),
+  /**
+   * C1: an event not marked recurring that this life already had: its weight
+   * is multiplied by this once for every earlier time, so repeats are rare.
+   */
+  repeatWeight: z.number().min(0).max(1),
   checks: z.strictObject({
     /** Success chances are clamped to this range, in percent. */
     min: z.number().min(0).max(100),
@@ -300,6 +324,11 @@ export const targetsBalanceSchema = z.strictObject({
    * The content coverage report (tools/coverage.ts, Stage 10): how much
    * content there is and how well it covers simulated lives.
    */
+  /** C1: Happiness that means something, and few repeats of events not marked recurring. */
+  consistency: z.strictObject({
+    lifetimeHappiness: z.strictObject({ min: z.number().min(0).max(100), max: z.number().min(0).max(100) }).refine((r) => r.min <= r.max, 'min must not be greater than max'),
+    maxRepeatShare: probabilitySchema,
+  }),
   coverage: z.strictObject({
     /** At least this many events (not retired). */
     minEvents: z.int().min(1),

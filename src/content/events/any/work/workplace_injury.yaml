@@ -17,7 +17,7 @@ weight:
     - { if: { stat: fitness, lt: 35 }, x: 1.5 }
 cooldownYears: 8
 cast:
-  boss: { kind: boss }
+  boss: { kind: boss, presence: city }
 choices:
   - id: claim
     label: File for workers' comp

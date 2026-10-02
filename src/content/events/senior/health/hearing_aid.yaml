@@ -12,7 +12,7 @@ requires: { age: { gte: 18 } }
 weight: { base: 4 }
 once: true
 cast:
-  partner: { kind: spouse, optional: true }
+  partner: { kind: spouse, optional: true, presence: anywhere }
 choices:
   - id: test
     label: Get your hearing tested

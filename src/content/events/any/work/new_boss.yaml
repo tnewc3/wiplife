@@ -15,7 +15,7 @@ requires:
 weight: { base: 4 }
 cooldownYears: 4
 cast:
-  boss: { kind: boss }
+  boss: { kind: boss, presence: city }
 choices:
   - id: charm
     label: Make a good first impression

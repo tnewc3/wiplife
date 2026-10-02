@@ -119,6 +119,26 @@ housing:
   # Living with your partner or spouse, they pay the rest of the housing
   # cost (rent, or an owned home's upkeep; a mortgage stays yours).
   partnerShare: 0.5
+  # C1: rent changes (the rent_change housing effect) are a percentage of
+  # your current rent and stick until you move. The rent stays within these
+  # multiples of the city's base rent.
+  rentFactor: { min: 0.6, max: 2.5 }
+
+# C1: one-time costs events charge with the cost effect. Amounts are at the
+# national average and scale with the city's cost of living; savings pay
+# first and the rest becomes personal debt. familyHelp: your family may chip
+# in (see familyHelp below).
+costs:
+  wedding_courthouse: { amount: 300, familyHelp: false }
+  wedding_small: { amount: 10000, familyHelp: true }
+  wedding_big: { amount: 32000, familyHelp: true }
+
+# C1: the share of a cost your family covers, by family wealth, times how
+# close you are to your closest living parent (affection ÷ 100). Nothing
+# when that closeness is below minAffection, or with no living parent.
+familyHelp:
+  share: { poor: 0, working: 0.1, middle: 0.3, affluent: 0.5, rich: 0.8 }
+  minAffection: 40
 
 ownership:
   # A home costs the city's base home price.

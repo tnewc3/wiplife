@@ -16,7 +16,7 @@ weight: { base: 10 }
 followUpOnly: true
 cast:
   # Filled by the action: the person you're asking.
-  person: { kind: acquaintance, romantic: true }
+  person: { kind: acquaintance, romantic: true, presence: city }
 choices:
   - id: coffee
     label: Keep it simple and suggest coffee

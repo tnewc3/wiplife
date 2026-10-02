@@ -1,10 +1,10 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { content } from '../../content';
 import type { Tone } from '../../content/schemas';
-import { getEventCard } from '../../engine/selectors';
+import { getEventCard, problemReport } from '../../engine/selectors';
 import type { LifeState } from '../../engine/types';
 import { useAppStore } from '../../store/appStore';
-import { ageLabel } from '../labels';
+import { ageLabel, choiceMoneyLabel, familyHelpLabel, housingChangeLabel, outcomeDebtLabel, outcomeMoneyLabel } from '../labels';
 import { Button } from './Button';
 import { YearRecapList } from './YearRecapList';
 
@@ -15,6 +15,45 @@ const TONE_ACCENT: Record<Tone, string> = {
   serious: 'bg-tone-serious',
   dark: 'bg-tone-dark',
 };
+
+/** Development and test builds only (C1): the "Report a problem" button on event cards. */
+const REPORTS_ENABLED = import.meta.env.DEV || import.meta.env.VITE_TEST_HOOKS === 'true';
+
+/**
+ * Development only (C1): copies the event ID, the choice and a short state
+ * summary, and shows the same text so it can be copied by hand too.
+ */
+function ReportProblem({ life, index }: { life: LifeState; index: number }) {
+  const [report, setReport] = useState<{ text: string; copied: boolean } | null>(null);
+  const copy = async () => {
+    const text = problemReport(life, index, content);
+    let copied = false;
+    try {
+      await navigator.clipboard.writeText(text);
+      copied = true;
+    } catch {
+      // No clipboard (an insecure page, or permission refused): the text below can be copied by hand.
+    }
+    setReport({ text, copied });
+  };
+  return (
+    <div className="flex flex-col gap-2" data-testid="report-problem">
+      <Button variant="ghost" onClick={() => void copy()}>
+        Report a problem
+      </Button>
+      {report && (
+        <>
+          <p className="text-sm text-muted" role="status">
+            {report.copied ? 'Copied to the clipboard.' : 'Copy this report:'}
+          </p>
+          <pre className="max-h-40 overflow-auto rounded-xl bg-surface-2 p-3 text-xs whitespace-pre-wrap [overflow-wrap:anywhere]" data-testid="problem-report">
+            {report.text}
+          </pre>
+        </>
+      )}
+    </div>
+  );
+}
 
 /**
  * A full-screen sheet showing the year's events one card at a time: the text
@@ -68,6 +107,14 @@ export function EventSheet({ life }: { life: LifeState }) {
                         {card.outcomeText}
                       </p>
                     )}
+                    {card.resolved && card.money && (
+                      <p className="text-sm font-semibold" data-testid="event-money">
+                        {card.money.change !== 0 && <span className="block">{outcomeMoneyLabel(card.money.change, card.money.balance)}</span>}
+                        {card.money.debtChange !== 0 && <span className="block">{outcomeDebtLabel(card.money.debtChange)}</span>}
+                        {card.money.familyHelp !== undefined && <span className="block">{familyHelpLabel(card.money.familyHelp)}</span>}
+                        {card.money.housing && <span className="block">{housingChangeLabel(card.money.housing.change, card.money.housing.annual)}</span>}
+                      </p>
+                    )}
                   </>
                 )
               )}
@@ -86,7 +133,14 @@ export function EventSheet({ life }: { life: LifeState }) {
                 className="whitespace-normal text-left"
                 onClick={() => void choose(card.instanceId, choice.id)}
               >
-                {choice.label}
+                <span className="flex w-full flex-col">
+                  <span>{choice.label}</span>
+                  {(choice.money !== undefined || choice.familyHelp !== undefined || choice.rent !== undefined) && (
+                    <span className="text-sm font-normal text-muted" data-testid="choice-money">
+                      {choiceMoneyLabel(choice)}
+                    </span>
+                  )}
+                </span>
               </Button>
             ))
           ) : (
@@ -94,6 +148,8 @@ export function EventSheet({ life }: { life: LifeState }) {
               Continue
             </Button>
           )}
+          {/* After the choices, so the choices stay first. */}
+          {REPORTS_ENABLED && card && <ReportProblem key={key} life={life} index={sheet.index} />}
         </div>
       </div>
     </div>

@@ -15,7 +15,7 @@ requires:
 weight: { base: 5 }
 cooldownYears: 5
 cast:
-  helper: { support: true, optional: true }
+  helper: { support: true, optional: true, presence: anywhere }
 choices:
   - id: borrow
     label: Take the loan
@@ -37,7 +37,9 @@ choices:
   - id: walk
     label: Walk past and figure it out
     outcome:
-      text: You skip meals and pay late. It works, barely.
+      text: You skip meals and pay late, with a late fee on top. It works, barely.
       effects:
+        # C1: paying late costs a late fee, scaled to your rent.
+        - { type: rentMonths, months: -0.1 }
         - { type: stat, key: stress, delta: 4 }
         - { type: stat, key: health, delta: -1 }

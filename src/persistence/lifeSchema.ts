@@ -80,6 +80,7 @@ const character = z.strictObject({
     geneticRisk: score,
     vice: score,
     innerConflict: score,
+    happinessBaseline: score,
     talent: id.nullable(),
     talentDiscovered: z.boolean(),
   }),
@@ -254,6 +255,7 @@ const housing = z.strictObject({
   since: int,
   roommate: z.literal(true).exactOptional(),
   partnerId: id.exactOptional(),
+  rentFactor: z.number().positive().max(10).exactOptional(),
 });
 
 const health = z.strictObject({
@@ -320,7 +322,7 @@ export const lifeStateSchema: z.ZodType<LifeState> = z.strictObject({
   discovery,
   flags: z.record(z.string(), z.union([z.number(), z.boolean(), z.string()])),
   eventLog: z.record(z.string(), z.strictObject({ count: int, lastYear: int })),
-  scheduled: z.array(z.strictObject({ eventId: id, dueYear: int, cast })),
+  scheduled: z.array(z.strictObject({ eventId: id, dueYear: int, cast, since: int.exactOptional() })),
   pending: z.array(
     z.strictObject({
       instanceId: id,
@@ -328,6 +330,16 @@ export const lifeStateSchema: z.ZodType<LifeState> = z.strictObject({
       cast,
       resolvedChoiceId: id.exactOptional(),
       outcomeText: z.string().exactOptional(),
+      since: int.exactOptional(),
+      money: z
+        .strictObject({
+          change: int,
+          balance: int.min(0),
+          debtChange: int,
+          familyHelp: int.min(1).exactOptional(),
+          housing: z.strictObject({ change: int, annual: int.min(0) }).exactOptional(),
+        })
+        .exactOptional(),
     }),
   ),
   history: z.array(historyEntry),

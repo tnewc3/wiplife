@@ -9,7 +9,7 @@ requires: { age: { gte: 18 } }
 weight: { base: 10 }
 followUpOnly: true
 cast:
-  person: { kind: fiance }
+  person: { kind: fiance, presence: nearby }
 autoOutcome:
   text: It's a lovely day.
   effects:

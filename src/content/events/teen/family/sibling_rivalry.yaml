@@ -10,8 +10,11 @@ rarity: common
 lifeStages: [child, teen]
 weight: { base: 8 }
 cooldownYears: 3
+# C1: reviewed build warnings kept on purpose (docs/consistency-review.md).
+justified:
+  money: "Borrowing a hoodie, not money."
 cast:
-  sibling: { kind: sibling }
+  sibling: { kind: sibling, presence: household }
 choices:
   - id: let_go
     label: Let it go

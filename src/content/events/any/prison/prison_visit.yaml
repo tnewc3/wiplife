@@ -12,7 +12,7 @@ requires: { legal: { incarcerated: true } }
 weight: { base: 5 }
 cooldownYears: 2
 cast:
-  visitor: { support: true, optional: true }
+  visitor: { support: true, optional: true, presence: anywhere }
 choices:
   - id: ask
     label: Ask {visitor.name} to come

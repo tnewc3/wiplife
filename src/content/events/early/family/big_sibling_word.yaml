@@ -12,7 +12,7 @@ requires: { age: { gte: 2 } }
 weight: { base: 5 }
 once: true
 cast:
-  sibling: { kind: sibling, ageOffset: { min: 2, max: 12 } }
+  sibling: { kind: sibling, ageOffset: { min: 2, max: 12 }, presence: household }
 choices:
   - id: say_it
     label: Ask for the potatoes, nicely

@@ -13,8 +13,8 @@ lifeStages: [teen, youngAdult, adult, senior]
 weight: { base: 5 }
 followUpOnly: true
 cast:
-  parent: { kind: parent, optional: true }
-  sibling: { kind: sibling, optional: true }
+  parent: { kind: parent, optional: true, presence: anywhere }
+  sibling: { kind: sibling, optional: true, presence: anywhere }
 choices:
   - id: tell_parent
     label: Tell {parent.name}

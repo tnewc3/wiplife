@@ -14,8 +14,11 @@ requires:
     - { romance: [single] }
 weight: { base: 4 }
 cooldownYears: 5
+# C1: reviewed build warnings kept on purpose (docs/consistency-review.md).
+justified:
+  past: "\"The songs from when you were young\" is true of every senior; it claims nothing specific."
 cast:
-  partner: { kind: acquaintance, romantic: true, createIfMissing: true }
+  partner: { kind: acquaintance, romantic: true, createIfMissing: true, presence: city }
 choices:
   - id: dance
     label: Say yes

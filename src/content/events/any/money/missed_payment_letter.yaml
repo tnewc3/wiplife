@@ -16,7 +16,7 @@ weight: { base: 10 }
 cooldownYears: 3
 followUpOnly: true
 cast:
-  helper: { support: true, optional: true }
+  helper: { support: true, optional: true, presence: anywhere }
 choices:
   - id: call
     label: Call and ask for more time

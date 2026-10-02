@@ -17,7 +17,7 @@ requires:
 weight: { base: 7 }
 cooldownYears: 5
 cast:
-  family: { support: true }
+  family: { support: true, presence: anywhere }
 choices:
   - id: rehab
     label: Go to treatment

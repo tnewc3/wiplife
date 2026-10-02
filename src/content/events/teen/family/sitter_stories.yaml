@@ -12,7 +12,7 @@ lifeStages: [child, teen, youngAdult]
 weight: { base: 10 }
 followUpOnly: true
 cast:
-  sitter: { kind: acquaintance }
+  sitter: { kind: acquaintance, presence: city }
 choices:
   - id: record
     label: Record it on your phone

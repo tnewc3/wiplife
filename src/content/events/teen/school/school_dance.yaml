@@ -11,7 +11,7 @@ requires: { education: { program: [high] } }
 weight: { base: 4 }
 once: true
 cast:
-  friend: { kind: friend, ageOffset: { min: -1, max: 1 }, createIfMissing: true }
+  friend: { kind: friend, ageOffset: { min: -1, max: 1 }, createIfMissing: true, presence: city }
 choices:
   - id: dance
     label: Go and dance like nobody's watching

@@ -10,8 +10,10 @@ rarity: common
 lifeStages: [youngAdult, adult]
 weight: { base: 5 }
 cooldownYears: 4
+# C1: meant to come back now and then (repeats are kept rare otherwise).
+recurring: true
 cast:
-  parent: { kind: parent }
+  parent: { kind: parent, presence: anywhere }
 choices:
   - id: visit
     label: Drive over with a cake

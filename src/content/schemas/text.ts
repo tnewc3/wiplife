@@ -269,3 +269,10 @@ export const legalTextSchema = z.strictObject({
   years: z.strictObject({ one: templateSchema, many: templateSchema }),
 });
 export type LegalText = z.infer<typeof legalTextSchema>;
+
+/** Elapsed time in follow-up text, {since} (C1). Small numbers are written out. */
+export const timeTextSchema = z.strictObject({
+  since: z.strictObject({ one: templateSchema, many: templateSchema, unknown: templateSchema }),
+  numbers: z.array(z.string().min(1)).min(2),
+});
+export type TimeText = z.infer<typeof timeTextSchema>;

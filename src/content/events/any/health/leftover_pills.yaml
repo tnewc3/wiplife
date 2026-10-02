@@ -14,7 +14,7 @@ requires:
 weight: { base: 4 }
 once: true
 cast:
-  partner: { kind: spouse, optional: true }
+  partner: { kind: spouse, optional: true, presence: anywhere }
 choices:
   - id: dispose
     label: Take them to the pharmacy drop box

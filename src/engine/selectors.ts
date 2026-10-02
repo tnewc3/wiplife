@@ -3,11 +3,13 @@ import {
   LIFESTYLES,
   TIERS,
   type ApplyProgram,
+  type ChoiceDef,
   type ContentBundle,
   type CredentialType,
   type DebtKind,
   type JobCategory,
   type Lifestyle,
+  type Outcome,
   type Program,
   type RomanceStatus,
   type Tier,
@@ -41,11 +43,14 @@ import {
   moveInCost,
   mortgageBalance,
   purchaseQuote,
+  rentChangeAmount,
   rentIn,
   saleProceeds,
   supportingParent,
   type PurchaseQuote,
 } from './housing';
+import { costToYou, familyHelp, rentMonthsAmount } from './costs';
+import { consistencyProblems, whereabouts } from './presence';
 import { benefitFromRecord } from './retirement';
 import {
   activeJob,
@@ -79,6 +84,7 @@ import type {
   Ledger,
   LifeStage,
   LifeState,
+  MoneyChange,
   Person,
   Relationship,
   RelationshipKind,
@@ -1002,10 +1008,59 @@ export interface EventCardView {
   title: string;
   text: string;
   tone: Tone;
-  /** Choices the player can see now; an event without choices offers Continue. */
-  choices: { id: string; label: string }[];
+  /**
+   * Choices the player can see now; an event without choices offers Continue.
+   * With money known up front (C1; a fixed outcome, or a check whose outcomes
+   * cost the same): money, the change to your savings (negative: a cost);
+   * familyHelp, what your family covers of it; credit, the part of a cost
+   * your savings can't cover, which becomes debt; rent, the change to your
+   * yearly housing cost.
+   */
+  choices: ({ id: string; label: string } & ChoiceMoney)[];
   resolved: boolean;
   outcomeText: string | null;
+  /** What the chosen outcome did to your money, with the new balance (C1). */
+  money: MoneyChange | null;
+}
+
+export interface ChoiceMoney {
+  money?: number;
+  familyHelp?: number;
+  credit?: number;
+  rent?: number;
+}
+
+/** What an outcome will do to your money in this state (C1). */
+function outcomeMoney(state: LifeState, outcome: Outcome | undefined, content: ContentBundle): Required<Omit<ChoiceMoney, 'credit'>> {
+  const out = { money: 0, familyHelp: 0, rent: 0 };
+  for (const e of outcome?.effects ?? []) {
+    if (e.type === 'money') out.money += e.delta;
+    else if (e.type === 'rentMonths') out.money += rentMonthsAmount(state, e.months);
+    else if (e.type === 'cost') {
+      out.money -= costToYou(state, e.item, content);
+      out.familyHelp += familyHelp(state, e.item, content);
+    } else if (e.type === 'housing' && e.action === 'rent_change') out.rent += rentChangeAmount(state, e.percent ?? 0, content);
+  }
+  return out;
+}
+
+/** What a choice will do to your money, when that is known before choosing (C1); empty otherwise or when nothing. */
+export function knownChoiceMoney(state: LifeState, choice: ChoiceDef, content: ContentBundle): ChoiceMoney {
+  let known: Required<Omit<ChoiceMoney, 'credit'>>;
+  if (choice.outcome) known = outcomeMoney(state, choice.outcome, content);
+  else if (choice.check) {
+    known = outcomeMoney(state, choice.check.success, content);
+    const failure = outcomeMoney(state, choice.check.failure, content);
+    if (known.money !== failure.money || known.familyHelp !== failure.familyHelp || known.rent !== failure.rent) return {};
+  } else return {};
+  // Past the independence age, what savings can't cover becomes debt (spend); a child's family pays it.
+  const credit = isIndependent(state, content) ? Math.max(0, -known.money - state.finances.savings) : 0;
+  return {
+    ...(known.money !== 0 ? { money: known.money } : {}),
+    ...(known.familyHelp !== 0 ? { familyHelp: known.familyHelp } : {}),
+    ...(credit > 0 ? { credit } : {}),
+    ...(known.rent !== 0 ? { rent: known.rent } : {}),
+  };
 }
 
 /** One pending event as a card, with its text rendered for the cast. Null past the end. */
@@ -1017,14 +1072,15 @@ export function getEventCard(state: LifeState, index: number, content: ContentBu
     instanceId: instance.instanceId,
     resolved: instance.resolvedChoiceId !== undefined,
     outcomeText: instance.outcomeText ?? null,
+    money: instance.money ?? null,
   };
   // A definition removed by a content update: a card the player can dismiss.
   if (!def) return { ...base, title: '…', text: '', tone: 'neutral', choices: [{ id: CONTINUE_CHOICE, label: 'Continue' }] };
-  const ctx = textContext(state, instance.cast, content);
+  const ctx = textContext(state, instance.cast, content, instance.since);
   const choices = def.choices
     ? def.choices
-        .filter((c) => evaluate(c.visibleIf, state, { cast: instance.cast, roles: 'strict' }))
-        .map((c) => ({ id: c.id, label: renderText(c.label, ctx) }))
+        .filter((c) => evaluate(c.visibleIf, state, { cast: instance.cast, roles: 'strict', content }))
+        .map((c) => ({ id: c.id, label: renderText(c.label, ctx), ...knownChoiceMoney(state, c, content) }))
     : [{ id: CONTINUE_CHOICE, label: 'Continue' }];
   return { ...base, title: renderText(def.title, ctx), text: renderText(def.text, ctx), tone: def.tone, choices };
 }
@@ -1146,4 +1202,37 @@ export function getProfileView(state: LifeState, content: ContentBundle): Profil
     })),
     canEdit: state.phase === 'yearStart',
   };
+}
+
+/**
+ * A short plain-text report on one event card (C1, development only: the
+ * "Report a problem" button): the event, the choice made, who was cast and
+ * where they are, and the state the consistency rules depend on.
+ */
+export function problemReport(state: LifeState, index: number, content: ContentBundle): string {
+  const instance = state.pending[index];
+  const c = state.character;
+  const job = state.career.job;
+  const school = state.education.current;
+  const lines = [
+    `event: ${instance?.eventId ?? 'none'} (${instance?.instanceId ?? '-'})`,
+    `choice: ${instance?.resolvedChoiceId ?? 'not chosen yet'}`,
+    ...Object.entries(instance?.cast ?? {}).map(([role, id]) => {
+      const person = state.people[id];
+      const rel = state.relationships[id];
+      return `cast ${role}: ${id} ${rel?.kind ?? 'unknown'}, age ${person ? state.currentYear - person.birthYear : '?'}, ${whereabouts(state, id, content)}${person?.alive === false ? ', dead' : ''}`;
+    }),
+    `life: seed ${state.seed}, year ${state.currentYear}, age ${c.age}, ${c.lifeStage}, phase ${state.phase}`,
+    `home: ${state.housing.kind} in ${c.cityId}${state.housing.partnerId ? `, with partner ${state.housing.partnerId}` : ''}`,
+    `romance: ${romanceStatus(state)}`,
+    `work: ${job ? `${job.jobId} level ${job.level}` : 'no job'}${state.career.retired ? ', retired' : ''}`,
+    `school: ${school ? `${school.program} year ${school.year}` : 'not enrolled'}`,
+    `money: savings ${state.finances.savings}, debt ${totalDebt(state)}`,
+    `content: ${content.contentVersion}`,
+  ];
+  if (instance && content.events[instance.eventId]) {
+    const problems = consistencyProblems(state, content.events[instance.eventId]!, instance.cast, content);
+    if (problems.length > 0) lines.push(`consistency: ${problems.join('; ')}`);
+  }
+  return lines.join('\n');
 }

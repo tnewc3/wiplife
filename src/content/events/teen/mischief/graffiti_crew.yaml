@@ -15,7 +15,7 @@ weight:
     - { if: { discovery: { talent: found } }, x: 1.3 }
 once: true
 cast:
-  friend: { kind: friend, ageOffset: { min: -1, max: 2 }, createIfMissing: true, newChance: 0.3 }
+  friend: { kind: friend, ageOffset: { min: -1, max: 2 }, createIfMissing: true, newChance: 0.3, presence: city }
 choices:
   - id: paint
     label: Bring the paint

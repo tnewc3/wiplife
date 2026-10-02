@@ -9,8 +9,11 @@ rarity: common
 lifeStages: [child]
 weight: { base: 4 }
 once: true
+# C1: reviewed build warnings kept on purpose (docs/consistency-review.md).
+justified:
+  money: "The failed negotiation pays nothing: that is the point of the outcome."
 cast:
-  parent: { kind: parent }
+  parent: { kind: parent, presence: household }
 choices:
   - id: earn
     label: Fill every box

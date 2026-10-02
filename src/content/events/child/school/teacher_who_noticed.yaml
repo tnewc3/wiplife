@@ -18,7 +18,7 @@ requires:
 weight: { base: 7 }
 once: true
 cast:
-  teacher: { kind: acquaintance, age: { min: 26, max: 62 }, createIfMissing: true, newChance: 1 }
+  teacher: { kind: acquaintance, age: { min: 26, max: 62 }, createIfMissing: true, newChance: 1, presence: city }
 choices:
   - id: open_up
     label: Tell {teacher.them} the truth

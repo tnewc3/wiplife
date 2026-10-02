@@ -15,7 +15,7 @@ requires:
 weight: { base: 6 }
 once: true
 cast:
-  parent: { kind: parent }
+  parent: { kind: parent, presence: household }
 choices:
   - id: ask_help
     label: Ask {parent.them} to read with you

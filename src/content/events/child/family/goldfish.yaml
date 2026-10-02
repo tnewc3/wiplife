@@ -12,7 +12,7 @@ requires: { age: { lte: 10 } }
 weight: { base: 4 }
 once: true
 cast:
-  parent: { kind: parent }
+  parent: { kind: parent, presence: household }
 choices:
   - id: funeral
     label: Hold a proper funeral in the yard

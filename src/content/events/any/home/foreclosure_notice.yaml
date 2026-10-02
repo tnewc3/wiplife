@@ -15,7 +15,7 @@ requires:
 weight: { base: 10 }
 followUpOnly: true
 cast:
-  parent: { kind: parent, optional: true }
+  parent: { kind: parent, optional: true, presence: anywhere }
 choices:
   - id: roommate
     label: Rent a room and share the costs

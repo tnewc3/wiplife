@@ -1,9 +1,10 @@
+import { produce } from 'immer';
 import { describe, expect, it } from 'vitest';
 import { content } from '../../content';
 import { curveAt, powInt } from '../curve';
 import { beginYear } from '../life';
 import { cloneJson, lifeAtAge } from '../testFixtures';
-import { lifeStageForAge, yearlyHealthDecline } from './aging';
+import { advanceAge, happinessAfterDrift, lifeStageForAge, yearlyHealthDecline } from './aging';
 import { addHistory } from './history';
 
 describe('curves', () => {
@@ -89,5 +90,25 @@ describe('history', () => {
     expect(life.history.at(-1)!.text).toBe('notable');
     expect(life.history.map((e) => e.text)).toContain('minor 11');
     expect(life.history.map((e) => e.text)).not.toContain('minor 0');
+  });
+});
+
+describe('Happiness drift (C1)', () => {
+  const { rate } = content.balance.aging.happinessDrift;
+
+  it('moves Happiness part of the way back toward the baseline each year, from above or below', () => {
+    expect(happinessAfterDrift(100, 50, content)).toBe(100 - Math.round(50 * rate));
+    expect(happinessAfterDrift(10, 60, content)).toBe(10 + Math.round(50 * rate));
+    expect(happinessAfterDrift(55, 55, content)).toBe(55);
+  });
+
+  it('pulls a run of good years back down over time', () => {
+    let life = produce(lifeAtAge('drift', 30), (d) => {
+      d.character.stats.happiness = 100;
+      d.character.hidden.happinessBaseline = 50;
+    });
+    for (let i = 0; i < 15; i++) life = produce(life, (d) => advanceAge(d, content));
+    expect(life.character.stats.happiness).toBeLessThan(60);
+    expect(life.character.stats.happiness).toBeGreaterThanOrEqual(50);
   });
 });

@@ -11,12 +11,16 @@ rarity: common
 lifeStages: [teen, youngAdult, adult, senior]
 weight: { base: 5 }
 followUpOnly: true
+# C1: reviewed build warnings kept on purpose (docs/consistency-review.md).
+justified:
+  money: "Putting the clothes back means buying nothing; the two choices that buy them cost money."
 choices:
   - id: wear
     label: Buy them and wear them out the door
     outcome:
       text: A stranger compliments you on the street. You grin for the rest of the day.
       effects:
+        - { type: money, delta: -120 }
         - { type: identity, field: expression, value: fromLatent }
         - { type: stat, key: happiness, delta: 4 }
         - { type: stat, key: confidence, delta: 2 }
@@ -25,6 +29,7 @@ choices:
     outcome:
       text: They hang at the back of your closet. You try them on more often than you'd admit.
       effects:
+        - { type: money, delta: -120 }
         - { type: innerConflict, delta: 3 }
   - id: put_back
     label: Put them back

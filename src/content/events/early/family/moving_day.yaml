@@ -11,7 +11,7 @@ requires: { age: { gte: 3, lte: 9 } }
 weight: { base: 3 }
 once: true
 cast:
-  parent: { kind: parent }
+  parent: { kind: parent, presence: household }
 choices:
   - id: goodbye
     label: Say goodbye to every room

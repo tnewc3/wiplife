@@ -60,15 +60,20 @@ test('a year with events shows each card and its outcome, then the recap as the 
   await expectNoHorizontalScroll(page);
   await expectTouchTargets(page);
 
+  // A known money change shows on the choice, and the outcome shows it with the new balance (C1).
+  await expect(sheet.getByRole('button', { name: 'Wave back' }).getByTestId('choice-money')).toHaveText('Pays $1');
+  await expect(sheet.getByRole('button', { name: 'Hide behind the couch' }).getByTestId('choice-money')).toHaveCount(0);
   await sheet.getByRole('button', { name: 'Wave back' }).click();
   await settle(page);
   await expect(sheet.getByTestId('event-outcome')).toContainText('laughs and waves again');
+  await expect(sheet.getByTestId('event-money')).toHaveText(/^\+\$1 · Savings now \$[\d,]+$/);
   await sheet.getByRole('button', { name: 'Continue' }).click();
   await settle(page);
 
   await expect(sheet.getByText('Your year')).toBeVisible();
   await expect(sheet.getByRole('heading', { name: /· 1 year old$/ })).toBeVisible();
-  await expect(sheet).toContainText('Happiness went up');
+  // The recap names the change; the yearly drift toward the baseline (C1) can outweigh the event's +2.
+  await expect(sheet).toContainText(/Happiness went (up|down)/);
   await sheet.getByRole('button', { name: 'Continue' }).click();
   await expect(eventSheet(page)).toHaveCount(0);
   await expect(ageUpButton(page)).toBeEnabled();
@@ -81,7 +86,7 @@ test('an event without choices takes one tap', async ({ page }) => {
   await settle(page);
   const sheet = eventSheet(page);
   await expect(sheet.getByRole('heading', { name: 'A sunny afternoon' })).toBeVisible();
-  await expect(sheet.getByRole('button')).toHaveCount(1);
+  await expect(sheet.getByRole('button').filter({ hasNotText: 'Report a problem' })).toHaveCount(1);
   await sheet.getByRole('button', { name: 'Continue' }).click();
   await settle(page);
   await expect(sheet.getByText('Your year')).toBeVisible();
@@ -188,3 +193,19 @@ test('an empty archive says so', async ({ page }) => {
   await expect(page.getByText('No past lives yet.')).toBeVisible();
 });
 
+test('development builds can report a problem with an event card (C1)', async ({ page }) => {
+  await startRandomLife(page, PACK);
+  await ageUpButton(page).click();
+  await settle(page);
+  const sheet = eventSheet(page);
+  await sheet.getByRole('button', { name: 'Wave back' }).click();
+  await settle(page);
+  await sheet.getByRole('button', { name: 'Report a problem' }).click();
+  const report = sheet.getByTestId('problem-report');
+  await expect(report).toContainText('event: test_hello');
+  await expect(report).toContainText('choice: wave');
+  await expect(report).toContainText(/cast parent: \S+ parent, age \d+, household/);
+  await expect(report).toContainText('home: with_parents');
+  await expectNoHorizontalScroll(page);
+  await expectTouchTargets(page);
+});

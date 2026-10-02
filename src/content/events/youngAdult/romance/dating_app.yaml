@@ -14,7 +14,7 @@ requires:
 weight: { base: 7 }
 cooldownYears: 3
 cast:
-  match: { kind: acquaintance, romantic: true, createIfMissing: true, newChance: 1 }
+  match: { kind: acquaintance, romantic: true, createIfMissing: true, newChance: 1, presence: city }
 choices:
   - id: date
     label: Meet for a drink this week

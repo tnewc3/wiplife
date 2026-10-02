@@ -10,7 +10,7 @@ lifeStages: [youngAdult, adult]
 weight: { base: 4 }
 cooldownYears: 6
 cast:
-  friend: { kind: friend, ageOffset: { min: -5, max: 5 }, age: { min: 18, max: 120 } }
+  friend: { kind: friend, ageOffset: { min: -5, max: 5 }, age: { min: 18, max: 120 }, presence: city }
 choices:
   - id: stay
     label: Give {friend.them} the couch

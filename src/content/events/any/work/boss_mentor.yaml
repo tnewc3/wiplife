@@ -18,7 +18,7 @@ weight:
     - { if: { trait: ambition, gt: 60 }, x: 1.5 }
 once: true
 cast:
-  boss: { kind: boss }
+  boss: { kind: boss, presence: city }
 choices:
   - id: yes
     label: Say yes

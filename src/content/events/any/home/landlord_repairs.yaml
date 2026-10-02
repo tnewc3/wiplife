@@ -45,10 +45,10 @@ choices:
       success:
         text: The heater is fixed within a week, and the landlord knocks a month off the rent to make it go away.
         effects:
-          - { type: money, delta: 1500 }
+          - { type: rentMonths, months: 1 }
           - { type: stat, key: stress, delta: 2 }
       failure:
         text: The landlord hits you with late fees and a formal warning. The heater stays broken.
         effects:
-          - { type: debt, action: add, kind: personal, amount: 1200 }
+          - { type: rentMonths, months: -1 }
           - { type: stat, key: stress, delta: 5 }

@@ -14,7 +14,7 @@ requires:
 weight: { base: 7 }
 cooldownYears: 5
 cast:
-  parent: { kind: parent, optional: true }
+  parent: { kind: parent, optional: true, presence: anywhere }
 choices:
   - id: call
     label: Call {parent.name} every Sunday

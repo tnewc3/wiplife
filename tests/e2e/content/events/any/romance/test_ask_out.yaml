@@ -9,7 +9,7 @@ requires: { age: { gte: 18 } }
 weight: { base: 10 }
 followUpOnly: true
 cast:
-  person: { kind: acquaintance, romantic: true }
+  person: { kind: acquaintance, romantic: true, presence: city }
 choices:
   - id: ask
     label: Ask

@@ -13,7 +13,7 @@ lifeStages: [teen, youngAdult, adult, senior]
 weight: { base: 5 }
 followUpOnly: true
 cast:
-  confidant: { support: true, optional: true }
+  confidant: { support: true, optional: true, presence: anywhere }
 choices:
   - id: stop_fighting
     label: Stop fighting who you are

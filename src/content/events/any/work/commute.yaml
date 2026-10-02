@@ -13,8 +13,10 @@ weight:
   modifiers:
     - { if: { any: [{ city: nyc }, { city: los_angeles }] }, x: 2.5 }
 cooldownYears: 8
+# C1: meant to come back now and then (repeats are kept rare otherwise).
+recurring: true
 cast:
-  boss: { kind: boss }
+  boss: { kind: boss, presence: city }
 choices:
   - id: remote
     label: Ask {boss.name} to work from home twice a week

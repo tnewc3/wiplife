@@ -11,8 +11,10 @@ lifeStages: [adult, senior]
 requires: { role: friend, years: { gte: 8 } }
 weight: { base: 4 }
 cooldownYears: 8
+# C1: meant to come back now and then (repeats are kept rare otherwise).
+recurring: true
 cast:
-  friend: { kind: friend }
+  friend: { kind: friend, presence: anywhere }
 choices:
   - id: legend
     label: Tell the story everyone's waiting for

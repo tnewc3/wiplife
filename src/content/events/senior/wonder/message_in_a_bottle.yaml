@@ -12,7 +12,7 @@ lifeStages: [senior]
 weight: { base: 40 }
 once: true
 cast:
-  writer: { kind: acquaintance, age: { min: 66, max: 80 }, createIfMissing: true, newChance: 1 }
+  writer: { kind: acquaintance, age: { min: 66, max: 80 }, createIfMissing: true, newChance: 1, presence: elsewhere }
 choices:
   - id: find
     label: Track down whoever wrote it

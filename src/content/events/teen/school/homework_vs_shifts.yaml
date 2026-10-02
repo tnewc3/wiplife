@@ -2,7 +2,7 @@ id: homework_vs_shifts
 title: Too many hours
 text: >-
   Between delivery shifts and homework, you're running on four hours of
-  sleep. Your grades are slipping, and your boss wants you for the weekend rush.
+  sleep. Your grades are slipping, and the app wants you for the weekend rush.
 tone: neutral
 category: school
 rarity: common
@@ -25,7 +25,7 @@ choices:
   - id: study
     label: Turn down the extra hours
     outcome:
-      text: You catch up on sleep and on reading. Your bank account notices. So does your report card.
+      text: You catch up on sleep and on reading. Your bank account notices. So do your grades.
       effects:
         - { type: education, action: grades, value: 0.2 }
         - { type: stat, key: stress, delta: -2 }

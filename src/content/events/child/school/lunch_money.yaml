@@ -11,7 +11,7 @@ requires: { education: { program: [elementary, middle] } }
 weight: { base: 4 }
 once: true
 cast:
-  bully: { kind: classmate, ageOffset: { min: 0, max: 2 }, createIfMissing: true }
+  bully: { kind: classmate, ageOffset: { min: 0, max: 2 }, createIfMissing: true, presence: city }
 choices:
   - id: pay
     label: Hand it over
