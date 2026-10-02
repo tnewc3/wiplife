@@ -347,6 +347,21 @@ ${extra}`;
       expect(await expectErrors()).toContain('only friend, classmate, acquaintance can be created');
     });
 
+    it('enforces category contracts and presence declarations (C1)', async () => {
+      const schoolFile = 'events/teen/school/test_event.yaml';
+      const school = event().replace('category: family', 'category: school').replace('lifeStages: [adult]', 'lifeStages: [teen]');
+      await write(schoolFile, school);
+      expect(await expectErrors()).toContain('category "school" requires');
+      await write(schoolFile, school.replace('weight:', 'requires: { education: { program: [high] } }\nweight:'));
+      const result = await compile();
+      if (!result.ok) throw new Error(formatErrors(result.errors));
+      await rm(path.join(dir, schoolFile));
+      await write(file, event().replace(', presence: city', ''));
+      expect(await expectErrors()).toContain('presence');
+      await write(file, event().replace('presence: city', 'presence: household'));
+      expect(await expectErrors()).toContain("presence household can't create someone new");
+    });
+
     it('rejects a chain file whose name does not match its chain id', async () => {
       await write('events/any/family/wrong.chain.yaml', `chain: right\nevents:\n${[event(), event().replace('id: test_event', 'id: test_event_2')].map((e) => e.trim().split('\n').map((l, i) => (i === 0 ? `  - ${l}` : `    ${l}`)).join('\n')).join('\n')}\n`);
       expect(await expectErrors()).toContain('chain "right" must match the file name ("wrong")');

@@ -91,8 +91,7 @@ function lifeWith(age: number, people: PersonSpec[], seed = 'rel'): LifeState {
   });
 }
 
-/** An event with test defaults; override anything. */
-/** A test event; cast roles default to presence anywhere (C1). */
+/** An event with test defaults; override anything. Cast roles default to presence anywhere (C1). */
 function ev(overrides: Record<string, unknown>): EventDef {
   const cast = overrides.cast as Record<string, Record<string, unknown>> | undefined;
   if (cast) overrides = { ...overrides, cast: Object.fromEntries(Object.entries(cast).map(([r, s]) => [r, { presence: 'anywhere', ...s }])) };
