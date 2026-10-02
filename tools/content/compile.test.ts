@@ -57,6 +57,28 @@ async function expectErrors(): Promise<string> {
   return formatErrors(result.errors);
 }
 
+/** A small valid interaction, to break one thing at a time (E1). */
+const interaction = (id = 'test_move') => `id: ${id}
+name: Test move
+blurb: A move for tests.
+group: everyday
+profile: warm
+inPerson: false
+availability:
+  kinds: [friend]
+  you: { min: 8 }
+  them: { min: 8 }
+outcomes:
+  good:
+    text: ["{person.name} smiles.", "{person.name} nods and {person:smiles|smile}."]
+    affection: 2
+  neutral:
+    text: ["Nothing much.", "{person.name} shrugs."]
+  bad:
+    text: ["{person.name} frowns.", "{person.name} looks away."]
+    affection: -2
+`;
+
 describe('content build with the real content', () => {
   it('compiles every content type', async () => {
     const result = await compileContent({ contentDir: realContentDir, appVersion: '1.2.3' });
@@ -803,6 +825,10 @@ choices:
         await writeFile(path.join(overlay, `events/any/${folder}/${id}.yaml`), followUp(id, category));
       }
       await writeFile(
+        path.join(overlay, 'registries/interactions.yaml'),
+        'infidelity:\n  flirt: { events: [only_identity] }\n  intimate: { events: [only_identity] }\n',
+      );
+      await writeFile(
         path.join(overlay, 'registries/health.yaml'),
         'doctor:\n  clean: { events: [only_doctor] }\n  treated: { events: [only_doctor] }\n  managed: { events: [only_doctor] }\n',
       );
@@ -829,6 +855,112 @@ choices:
     } finally {
       await rm(overlay, { recursive: true, force: true });
     }
+  });
+});
+
+describe('interactions (E1)', () => {
+  const file = 'interactions/test_move.yaml';
+
+  it('accepts a valid interaction, and the real content has about twenty with enough variants', { timeout: 90_000 }, async () => {
+    await write(file, interaction());
+    const result = await compile();
+    if (!result.ok) throw new Error(formatErrors(result.errors));
+    expect(Object.keys(result.bundle.interactions)).toContain('test_move');
+    const real = await compileContent({ contentDir: realContentDir, appVersion: '1.2.3' });
+    if (!real.ok) throw new Error(formatErrors(real.errors));
+    const defs = Object.values(real.bundle.interactions);
+    expect(defs.length).toBeGreaterThanOrEqual(19);
+    expect(defs.length).toBeLessThanOrEqual(24);
+    for (const def of defs) {
+      for (const tier of Object.values(def.outcomes)) {
+        if (!tier) continue;
+        expect(tier.text.length).toBeGreaterThanOrEqual(2);
+        expect(tier.text.length).toBeLessThanOrEqual(3);
+      }
+    }
+  });
+
+  it('has at least ten events that check memories written by interactions', { timeout: 90_000 }, async () => {
+    const real = await compileContent({ contentDir: realContentDir, appVersion: '1.2.3' });
+    if (!real.ok) throw new Error(formatErrors(real.errors));
+    const written = new Set<string>();
+    for (const def of Object.values(real.bundle.interactions)) {
+      const walk = (node: unknown): void => {
+        if (Array.isArray(node)) node.forEach(walk);
+        else if (typeof node === 'object' && node !== null) {
+          const o = node as Record<string, unknown>;
+          if (o.type === 'memory' && typeof o.tag === 'string') written.add(o.tag);
+          if (o.type === 'moneyFromPerson') ['lent_you_money', 'gave_you_money'].forEach((t) => written.add(t));
+          if (o.type === 'infidelity') ['cheated_on_them', 'affair_with_you', 'flirted_behind_their_back'].forEach((t) => written.add(t));
+          Object.values(o).forEach(walk);
+        }
+      };
+      walk(def.outcomes);
+    }
+    const checking = Object.values(real.bundle.events).filter((def) => {
+      const text = JSON.stringify(def.requires ?? {});
+      return [...written].some((tag) => text.includes(`"tag":"${tag}"`)) && !def.retired;
+    });
+    expect(checking.length).toBeGreaterThanOrEqual(10);
+  });
+
+  it('rejects a romance interaction that does not require both people to be adults', { timeout: 90_000 }, async () => {
+    const romance = interaction().replace('group: everyday', 'group: romance\nromance: true');
+    await write(file, romance);
+    expect(await expectErrors()).toContain('romance: availability.you.min must be at least 18');
+    await write(file, romance.replace('you: { min: 8 }', 'you: { min: 18 }'));
+    expect(await expectErrors()).toContain('romance: availability.them.min must be at least 18');
+    await write(file, romance.replace('you: { min: 8 }', 'you: { min: 18 }').replace('them: { min: 8 }', 'them: { min: 17 }'));
+    expect(await expectErrors()).toContain('availability.them.min must be at least 18');
+    // Adults on both sides is fine.
+    await write(file, romance.replace('you: { min: 8 }', 'you: { min: 18 }').replace('them: { min: 8 }', 'them: { min: 18 }'));
+    const result = await compile();
+    if (!result.ok) throw new Error(formatErrors(result.errors));
+  });
+
+  it('rejects romance or intimacy with family, and romance that is not marked', { timeout: 90_000 }, async () => {
+    const adults = interaction().replace('you: { min: 8 }', 'you: { min: 18 }').replace('them: { min: 8 }', 'them: { min: 18 }');
+    const romance = adults.replace('group: everyday', 'group: romance\nromance: true');
+    await write(file, romance.replace('kinds: [friend]', 'kinds: [friend, sibling]'));
+    expect(await expectErrors()).toContain("romance: can't be available with family (sibling)");
+    await write(file, romance.replace('kinds: [friend]', 'kinds: [parent]'));
+    expect(await expectErrors()).toContain("can't be available with family (parent)");
+    // The romance group, and being intimate, must be marked romance: true (the schema says so).
+    await write(file, adults.replace('group: everyday', 'group: romance'));
+    expect(await expectErrors()).toContain('must be marked romance: true');
+    await write(file, adults.replace('group: everyday', 'group: everyday\nintimate: true'));
+    expect(await expectErrors()).toContain('an intimate interaction must be marked romance: true');
+    // Nothing else may be unfaithful or change a relationship kind.
+    await write(file, adults.replace('affection: 2', 'affection: 2\n    effects: [{ type: infidelity, role: person, act: flirt }]'));
+    expect(await expectErrors()).toContain('only a romance interaction can be unfaithful');
+  });
+
+  it('rejects bad references, hardcoded pronouns, money talk without money and the wrong roles', { timeout: 90_000 }, async () => {
+    await write(file, interaction().replace('profile: warm', 'profile: nonsense'));
+    expect(await expectErrors()).toContain('unknown reaction profile "nonsense"');
+    await write(file, interaction().replace('affection: 2', 'affection: 2\n    effects: [{ type: memory, role: person, tag: no_such_memory }]'));
+    expect(await expectErrors()).toContain('memory "no_such_memory" is not in registries/memories.yaml');
+    await write(file, interaction().replace('affection: 2', 'affection: 2\n    effects: [{ type: flag, key: no_such_flag, value: true }]'));
+    expect(await expectErrors()).toContain('flag "no_such_flag" is not in registries/flags.yaml');
+    await write(file, interaction().replace('affection: 2', 'affection: 2\n    effects: [{ type: health, conditionId: no_such_condition, severity: 5 }]'));
+    expect(await expectErrors()).toContain('unknown health condition "no_such_condition"');
+    await write(file, interaction().replace('"{person.name} smiles."', '"She smiles at {person.name}."'));
+    expect(await expectErrors()).toContain('hardcoded pronoun');
+    await write(file, interaction().replace('"Nothing much."', '"{person.name} lends you some money."'));
+    expect(await expectErrors()).toContain('mentions money');
+    await write(file, interaction().replace('"Nothing much."', '"{stranger.name} waves."'));
+    expect(await expectErrors()).toContain('unknown role "stranger"');
+    await write(file, interaction().replace('affection: 2', 'affection: 2\n    effects: [{ type: memory, role: other, tag: apologized }]'));
+    expect(await expectErrors()).toContain('the only role is "person"');
+    await write(file, interaction().replace('affection: 2', 'affection: 2\n    effects: [{ type: job, action: fire }]'));
+    expect(await expectErrors()).toContain('interactions may only use these effects');
+  });
+
+  it('needs 2–3 wordings per tier and the three tiers every interaction has', { timeout: 90_000 }, async () => {
+    await write(file, interaction().replace('["Nothing much.", "{person.name} shrugs."]', '["Nothing much."]'));
+    expect(await expectErrors()).toContain('text');
+    await write(file, interaction().replace(/ {2}bad:[\s\S]*$/, ''));
+    expect(await expectErrors()).toContain('outcomes.bad');
   });
 });
 

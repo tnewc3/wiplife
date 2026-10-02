@@ -4,6 +4,7 @@
  */
 import type { ContentBundle } from '../content/schemas';
 import { ageOf, isCurrentPartner, isFamilyKind, isPartnerKind, isRomanticKind, kindSince } from './relationships';
+import { interactionFailures } from './interactions/invariants';
 import { consistencyProblems } from './presence';
 import { isRngState } from './rng';
 import { lifeStageForAge } from './systems/aging';
@@ -169,6 +170,9 @@ export function checkInvariants(state: LifeState, content: ContentBundle): strin
 
   // Health, the law and self-discovery (Stage 9).
   failures.push(...stage9Failures(state, content));
+
+  // Interactions (E1).
+  failures.push(...interactionFailures(state, content));
 
   // People and relationships.
   const { parentAgeAtBirth } = content.balance.creation.family;

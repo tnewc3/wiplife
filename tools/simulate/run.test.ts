@@ -3,7 +3,7 @@ import { content } from '../../src/content';
 import { produce } from 'immer';
 import { lifeAtAge } from '../../src/engine/testFixtures';
 import { choiceTraits, choiceWeight } from './bot';
-import { consistencyTargets, recurringEvents, formatComparison, formatReport, runSimulation, stage9Targets, targetResults } from './run';
+import { consistencyTargets, formatComparison, formatReport, interactionTargets, recurringEvents, runSimulation, stage9Targets, targetResults } from './run';
 
 describe('simulation runner', () => {
   // Whole lives with every system: give them time.
@@ -67,7 +67,7 @@ describe('simulation runner', () => {
       expect(t.jobIds.length).toBeGreaterThan(0);
     }
     expect(careless.careers.tradeMinded).toBe(0);
-    const targets = [...targetResults(careful, content), ...stage9Targets(careful, content), ...consistencyTargets(careful, content)];
+    const targets = [...targetResults(careful, content), ...stage9Targets(careful, content), ...consistencyTargets(careful, content), ...interactionTargets(careful, content)];
     expect(targets.map((r) => r.label)).toContain(`median net worth at ${content.balance.targets.money.netWorthAge}`);
     const text = formatComparison(careful, careless, content);
     expect(text).toContain('careless');
@@ -124,3 +124,41 @@ describe('consistency report (C1)', () => {
     expect(recurring.has('found_wallet')).toBe(false);
   });
 });
+
+describe('interactions report (E1)', () => {
+  it('measures interactions for every player: tiers, repeats, affection, money, fights, health and replay', { timeout: 180_000 }, () => {
+    const careful = runSimulation(content, { lives: 12, seedPrefix: 'e1', player: 'careful' });
+    const careless = runSimulation(content, { lives: 12, seedPrefix: 'e1', player: 'careless' });
+    const spammer = runSimulation(content, { lives: 12, seedPrefix: 'e1', player: 'spammer' });
+    for (const report of [careful, careless, spammer]) {
+      const i = report.interactions;
+      expect(report.invariantFailures).toBe(0);
+      expect(i.player).toBe(report.player);
+      expect(i.lives).toBe(12);
+      expect(i.interactions).toBeGreaterThan(0);
+      expect(Object.values(i.tiers).reduce((a, b) => a + b, 0)).toBe(i.interactions);
+      expect(i.byInteraction.reduce((sum, row) => sum + row.count, 0)).toBe(i.interactions);
+      expect(i.byRepeat.reduce((sum, b) => sum + b.interactions, 0)).toBe(i.interactions);
+      // Repeating can't take a neutral relationship to maximum affection within a year, or gain past the cap.
+      expect(i.affection.neutralToMax).toBe(0);
+      expect(i.affection.mostGainedInYear).toBeLessThanOrEqual(content.balance.interactions.returns.yearlyCap.affection);
+      expect(i.replay.checked).toBeGreaterThan(0);
+      expect(i.replay.mismatches).toBe(0);
+      const text = formatReport(report, content);
+      expect(text).toContain(`Interactions (E1; ${report.player} player)`);
+      expect(text).toContain('outcome tiers:');
+      expect(text).toContain('replay:');
+    }
+    // The careful player is kind to close people and starts no fights; the careless one does.
+    expect(careful.interactions.fights.picked).toBe(0);
+    expect(careless.interactions.byInteraction.some((row) => row.count > 0 && content.interactions[row.id]!.group === 'conflict')).toBe(true);
+    // The spammer repeats one interaction with one person, and it goes worse each time.
+    expect(spammer.interactions.byInteraction.filter((row) => row.count > 0).map((row) => row.id)).toEqual(['compliment']);
+    const [first, , , many] = spammer.interactions.byRepeat;
+    expect(many!.interactions).toBeGreaterThan(0);
+    const bad = (b: { interactions: number; bad: number; backfire: number }) => (b.interactions > 0 ? (b.bad + b.backfire) / b.interactions : 0);
+    expect(bad(many!)).toBeGreaterThan(bad(first!));
+    expect(interactionTargets(spammer, content).find((t) => t.label.startsWith('neutral relationships'))!.met).toBe(true);
+  });
+});
+

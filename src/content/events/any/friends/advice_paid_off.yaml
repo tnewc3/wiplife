@@ -1,0 +1,35 @@
+# E1: reacts to asking a friend for advice.
+id: advice_paid_off
+title: Their voice in your head
+text: >-
+  You catch yourself saying something {friend.name} once told you, back when
+  you asked {friend.them} for advice. It turns out to be exactly what the
+  moment needed.
+tone: light
+category: friends
+rarity: uncommon
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 12 } }
+    - { memory: { role: friend, tag: gave_you_advice } }
+weight: { base: 4 }
+cooldownYears: 8
+cast:
+  friend: { kind: friend, presence: anywhere }
+choices:
+  - id: tell_them
+    label: Let {friend.them} know it worked
+    outcome:
+      text: >-
+        {friend.name} is delighted, and a little embarrassed. 'Wait, I said
+        something smart? Write that down.'
+      effects:
+        - { type: relationship, role: friend, affection: 6, trust: 4, mood: 6 }
+        - { type: stat, key: smarts, delta: 1 }
+  - id: keep_it
+    label: Keep it to yourself
+    outcome:
+      text: It stays a quiet little thing between you and your own better judgment.
+      effects:
+        - { type: stat, key: confidence, delta: 1 }

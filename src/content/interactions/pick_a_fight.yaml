@@ -1,0 +1,121 @@
+id: pick_a_fight
+name: Pick a fight
+blurb: Settle it with your fists. Someone gets hurt.
+group: conflict
+profile: hostile
+inPerson: true
+availability:
+  kinds: [sibling, friend, ex, coworker, classmate, acquaintance]
+  you: { min: 8 }
+  them: { min: 8, max: 70 }
+outcomes:
+  great:
+    text:
+      - "You square up, and {person.name} backs down before a single punch is thrown. You walk away unmarked, feeling strangely hollow."
+      - "One look is enough. {person.name} puts both hands up and leaves. You win, and it feels like nothing."
+    affection: -5
+    trust: -4
+    mood: -6
+    effects:
+      - { type: stat, key: confidence, delta: 1 }
+  good:
+    text:
+      - "Shoving, shouting, one clean punch. It's over in seconds, and you both stand there breathing hard."
+      - "A scuffle that ends as quickly as it started. {person.name} has a split lip and a long list of things to say about it."
+    affection: -6
+    trust: -5
+    mood: -8
+    effects:
+      - { type: memory, role: person, tag: fought_with_you }
+  neutral:
+    text:
+      - "You stand nose to nose. Neither of you wants to throw the first punch, and neither of you will back down."
+      - "The air goes tight. It would take one shove to start it, or one deep breath to end it."
+    choice:
+      prompt: "It could go either way."
+      options:
+        - id: swing
+          label: Throw the first punch
+          text: "You swing. It connects, and everything after is noise and adrenaline."
+          affection: -8
+          trust: -6
+          mood: -10
+          effects:
+            - { type: stat, key: stress, delta: 3 }
+            - { type: memory, role: person, tag: big_fight }
+            - { type: history, text: "You got into a real fight with {person.name}.", importance: 2 }
+          extras:
+            - chance: fightInjury
+              effects: [{ type: health, conditionId: broken_bone, severity: 40 }]
+              note: "You broke a bone in the fight."
+            - if: { age: { gte: 18 } }
+              chance: fightCharge
+              effects: [{ type: legal, offenseId: assault, outcome: sentence }]
+              note: "Someone called the police, and you were charged with assault."
+            - if: { all: [{ age: { lt: 18 } }, { education: { program: [elementary, middle, high] } }] }
+              chance: fightDiscipline
+              effects:
+                - { type: education, action: grades, value: -0.5 }
+                - { type: flag, key: suspended, value: true }
+                - { type: history, text: "You were suspended from school for fighting.", importance: 2 }
+              note: "The school suspended you for fighting."
+        - id: back_down
+          label: Back down
+          text: "You step back, shaking. 'Not worth it.' {person.name} watches you go, and neither of you says anything."
+          affection: -1
+          mood: -2
+          effects:
+            - { type: stat, key: stress, delta: -1 }
+  bad:
+    text:
+      - "{person.name} swings first. After that it's a blur of elbows and gravel."
+      - "It turns into a real fight, ugly and fast, and you come off worse."
+    affection: -8
+    trust: -6
+    mood: -10
+    effects:
+      - { type: stat, key: stress, delta: 3 }
+      - { type: memory, role: person, tag: big_fight }
+      - { type: history, text: "You got into a real fight with {person.name}.", importance: 2 }
+    extras:
+      - chance: fightInjury
+        effects: [{ type: health, conditionId: broken_bone, severity: 40 }]
+        note: "You broke a bone in the fight."
+      - if: { age: { gte: 18 } }
+        chance: fightCharge
+        effects: [{ type: legal, offenseId: assault, outcome: sentence }]
+        note: "Someone called the police, and you were charged with assault."
+      - if: { all: [{ age: { lt: 18 } }, { education: { program: [elementary, middle, high] } }] }
+        chance: fightDiscipline
+        effects:
+          - { type: education, action: grades, value: -0.5 }
+          - { type: flag, key: suspended, value: true }
+          - { type: history, text: "You were suspended from school for fighting.", importance: 2 }
+        note: "The school suspended you for fighting."
+  backfire:
+    text:
+      - "It gets ugly, and it gets loud. By the time it's over, other people are involved and one of them is calling for help."
+      - "You wanted a fight and you got a brawl. Somebody is bleeding, and nobody is sure who started it."
+    affection: -12
+    trust: -10
+    mood: -16
+    effects:
+      - { type: stat, key: stress, delta: 5 }
+      - { type: stat, key: reputation, delta: -3 }
+      - { type: memory, role: person, tag: big_fight }
+      - { type: history, text: "A fight with {person.name} got badly out of hand.", importance: 3 }
+    extras:
+      - chance: fightInjury
+        effects: [{ type: health, conditionId: broken_bone, severity: 45 }]
+        note: "You broke a bone in the fight."
+      - if: { age: { gte: 18 } }
+        chance: fightCharge
+        effects: [{ type: legal, offenseId: assault, outcome: sentence }]
+        note: "The police arrived, and you were charged with assault."
+      - if: { all: [{ age: { lt: 18 } }, { education: { program: [elementary, middle, high] } }] }
+        chance: fightDiscipline
+        effects:
+          - { type: education, action: grades, value: -0.5 }
+          - { type: flag, key: suspended, value: true }
+          - { type: history, text: "You were suspended from school for fighting.", importance: 2 }
+        note: "The school suspended you for fighting."

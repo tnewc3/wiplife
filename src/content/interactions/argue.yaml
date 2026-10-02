@@ -1,0 +1,72 @@
+id: argue
+name: Argue
+blurb: Say what you've been holding back.
+group: conflict
+profile: sharp
+inPerson: false
+availability:
+  kinds: [parent, stepparent, sibling, grandparent, friend, partner, fiance, spouse, ex, coworker, boss, classmate, acquaintance]
+  you: { min: 6 }
+  them: { min: 4 }
+outcomes:
+  great:
+    text:
+      - "You finally say it, and {person.name} actually listens. The air between you clears."
+      - "It starts as an argument and ends as a conversation. {person.name} even admits {person.they} {person:was|were} partly wrong."
+    affection: 3
+    trust: 3
+    mood: 2
+    effects:
+      - { type: memory, role: person, tag: made_peace }
+  good:
+    text:
+      - "It gets heated, then honest, then quiet. Nobody wins, but you both understand more than when you started."
+      - "{person.name} pushes back, hard, but fairly. You leave with something settled."
+    affection: 1
+    trust: 1
+    mood: -1
+  neutral:
+    text:
+      - "The same old argument, in the same old circles. You agree to stop before it goes anywhere."
+      - "Neither of you gives an inch. It ends with a shrug and a change of subject."
+    mood: -3
+  bad:
+    text:
+      - "Voices rise. {person.name} says something that stings, and you say something worse."
+      - "It escalates in a few sentences. {person.name} is still talking when you realize your hands are shaking."
+    affection: -4
+    trust: -2
+    mood: -8
+    effects:
+      - { type: stat, key: stress, delta: 2 }
+    choice:
+      prompt: "{person.name} isn't finished, and neither are you."
+      options:
+        - id: walk_away
+          label: Walk away
+          text: "You leave before it gets worse. It stings, but it ends there."
+          mood: 3
+          effects:
+            - { type: stat, key: stress, delta: -1 }
+        - id: keep_going
+          label: Keep going
+          text: "You don't stop. By the end neither of you can remember how it started, only how it felt."
+          affection: -5
+          trust: -4
+          mood: -8
+          effects:
+            - { type: stat, key: stress, delta: 3 }
+            - { type: memory, role: person, tag: big_fight }
+            - { type: history, text: "You and {person.name} had a fight that neither of you forgot.", importance: 2 }
+  backfire:
+    text:
+      - "It blows up. Accusations, old grievances, a door that closes harder than it should."
+      - "Years of resentment come out in ten minutes. {person.name} says {person.they} {person:needs|need} space, and means it."
+    affection: -8
+    trust: -6
+    mood: -14
+    effects:
+      - { type: stat, key: stress, delta: 4 }
+      - { type: stat, key: happiness, delta: -2 }
+      - { type: memory, role: person, tag: big_fight }
+      - { type: history, text: "You and {person.name} had a terrible fight.", importance: 2 }

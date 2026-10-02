@@ -29,7 +29,7 @@ const TIME =
   /\b(?:(?:years?|months?|decades?|weeks?) (?:later|ago|on|after|have passed|went by|go by)|(?:a|one|two|three|four|five|six|seven|eight|nine|ten|a few|a couple of|several|many|some) (?:years?|months?|decades?|weeks?) (?:later|ago|on|after|since|have passed|went by)|last (?:year|month|summer|winter|spring|fall|week)|(?:for|in|after|over) (?:two|three|four|five|six|seven|eight|nine|ten|a few|a couple of|several|many) (?:years|months|decades)|this time last year|all these years|after all this time|it'?s been (?:\w+ )?(?:years|months|a year|a decade|a while))\b/i;
 
 /** Money talk, including buying and spending. ("Fine", "check" and "tip" mean too many other things to flag; spending time, or spending "it", "the afternoon" and so on, isn't money.) */
-const MONEY =
+export const MONEY =
   /(?:\$\d|\bdollars?\b|\bbucks\b|\bcash\b|\bmoney\b|\bpaid\b|\bpays?\b(?! attention)|\bpaying\b(?! attention)|\blend\b|\blent\b|\bloan\b|\bborrow\w*|\brent\b|\bprice\b|\bcosts?\b|\brefund\b|\bsalary\b|\bwages?\b|\bfees?\b|\bbills?\b|\bdebts?\b|\bowes?\b|\bowed\b|\bbuy(?:s|ing)?\b|\bbought\b|\bspend(?:s|ing)?\b(?!\s+(?:it|them|the|a|an|this|that|these|those|all|every|most|time)\b)(?!(?:\s+\S+){0,3}?\s+(?:time|hours?|days?|weeks?|months?|years?|nights?|evenings?|weekends?|summers?|mornings?|afternoons?|(?:mon|tues|wednes|thurs|fri|satur|sun)days?)\b)|\bspent\b(?!\s+(?:it|them|the|a|an|this|that|these|those|all|every|most|time)\b)(?!(?:\s+\S+){0,3}?\s+(?:time|hours?|days?|weeks?|months?|years?|nights?|evenings?|weekends?|summers?|mornings?|afternoons?|(?:mon|tues|wednes|thurs|fri|satur|sun)days?)\b)|\bfortune\b|\bbabysit\w*|\bfor a price\b)/i;
 
 /** Statements about your past. */

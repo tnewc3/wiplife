@@ -517,6 +517,8 @@ export const effectSchema = z.discriminatedUnion('type', [
     role: roleSchema,
     affection: z.int().min(-100).max(100).optional(),
     trust: z.int().min(-100).max(100).optional(),
+    /** E1: their mood (0–100) moves by this much. */
+    mood: z.int().min(-100).max(100).optional(),
     status: relationshipStatusSchema.optional(),
     /** Changes the kind (a friend becomes a partner); the engine refuses changes that break the relationship rules. */
     kind: relationshipKindSchema.optional(),
@@ -592,6 +594,22 @@ export const effectSchema = z.discriminatedUnion('type', [
    * across the country). Nobody who lives with you moves this way.
    */
   z.strictObject({ type: z.literal('moveAway'), role: roleSchema }),
+  /**
+   * E1: the person cast in `role` gives or lends you money when you ask
+   * (interactions only). The amount comes from their wealth level
+   * (balance/interactions.yaml money), scaled to your city. A gift is yours;
+   * a loan is a personal debt through the finance module (a child is always
+   * given it). It leaves a memory of the loan.
+   */
+  z.strictObject({ type: z.literal('moneyFromPerson'), role: roleSchema, mode: z.enum(['gift', 'loan']) }),
+  /**
+   * E1: an act with the person cast in `role` that is unfaithful when you
+   * have a partner who isn't them (interactions only): the partner gets a
+   * memory of it, it may be found out later (registries/interactions.yaml),
+   * and the `cheated` flag is set. Nothing happens when you're single or the
+   * person is your partner.
+   */
+  z.strictObject({ type: z.literal('infidelity'), role: roleSchema, act: z.enum(['flirt', 'intimate']) }),
 ]);
 export type Effect = z.infer<typeof effectSchema>;
 

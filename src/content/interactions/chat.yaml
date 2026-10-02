@@ -1,0 +1,51 @@
+id: chat
+name: Chat
+blurb: Catch up, in person or on the phone.
+group: everyday
+profile: warm
+inPerson: false
+visit: true
+availability:
+  kinds: [parent, stepparent, sibling, grandparent, friend, partner, fiance, spouse, ex, coworker, boss, classmate, acquaintance]
+  you: { min: 4 }
+  them: { min: 3 }
+outcomes:
+  great:
+    text:
+      - "You and {person.name} talk for hours, about nothing and about everything. You hang up feeling lighter."
+      - "{person.name} says something that makes you both laugh until it hurts, and the conversation wanders happily on."
+      - "It's one of those talks you didn't know you needed. {person.They} {person:listens|listen} like there's nowhere else to be."
+    affection: 4
+    trust: 2
+    mood: 8
+    effects:
+      - { type: stat, key: happiness, delta: 2 }
+      - { type: memory, role: person, tag: great_time_together }
+  good:
+    text:
+      - "A good, easy catch-up. {person.name} fills you in on everything, and you do the same."
+      - "{person.name} is in a talkative mood, and you leave the conversation warmer than you started it."
+    affection: 3
+    trust: 1
+    mood: 5
+    effects:
+      - { type: stat, key: happiness, delta: 1 }
+  neutral:
+    text:
+      - "Small talk: the weather, work, who is driving where. Pleasant enough."
+      - "You trade the usual updates. Nothing new, nothing wrong."
+    affection: 1
+    mood: 1
+  bad:
+    text:
+      - "{person.name} is distracted and gives one-word answers. You can hear the phone being checked."
+      - "The conversation never gets going. {person.They} {person:keeps|keep} looking for a way out of it."
+    affection: -2
+    mood: -4
+  backfire:
+    text:
+      - "You catch {person.name} at a terrible moment. It goes sideways: a snapped sentence, a long silence, a click."
+      - "A harmless question hits a nerve, and {person.name} lets you have it before you can explain."
+    affection: -4
+    trust: -2
+    mood: -8

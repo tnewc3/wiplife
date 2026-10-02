@@ -1,0 +1,48 @@
+id: compliment
+name: Compliment
+blurb: Say something kind.
+group: everyday
+profile: admiring
+inPerson: false
+availability:
+  kinds: [parent, stepparent, sibling, grandparent, friend, partner, fiance, spouse, ex, coworker, boss, classmate, acquaintance]
+  you: { min: 6 }
+  them: { min: 5 }
+outcomes:
+  great:
+    text:
+      - "{person.name} lights up. 'Honestly? I needed to hear that today.'"
+      - "{person.They} {person:looks|look} caught off guard, then genuinely moved. It lands exactly where you meant it to."
+      - "{person.name} grins and {person:tells|tell} you that you've made {person.their} whole week."
+    affection: 4
+    trust: 2
+    mood: 8
+    effects:
+      - { type: stat, key: confidence, delta: 1 }
+  good:
+    text:
+      - "{person.name} smiles. 'Thank you. That's really nice of you.'"
+      - "{person.They} {person:blushes|blush} a little and {person:waves|wave} it off, clearly pleased."
+    affection: 3
+    mood: 5
+  neutral:
+    text:
+      - "'Thanks,' says {person.name}, and moves on to something else."
+      - "{person.name} nods politely. It doesn't seem to stick."
+    affection: 1
+    mood: 1
+  bad:
+    text:
+      - "{person.name} gives you a long look. 'That's a strange thing to say.'"
+      - "It comes out stiffer than you meant. {person.name} seems to wonder what you're after."
+    affection: -2
+    mood: -3
+  backfire:
+    text:
+      - "{person.name} takes it as sarcasm and bristles. 'Wow. Okay. Thanks for that.'"
+      - "You've said it so often that it rings hollow. {person.name} says so, not gently."
+    affection: -4
+    trust: -3
+    mood: -7
+    effects:
+      - { type: memory, role: person, tag: wore_thin }

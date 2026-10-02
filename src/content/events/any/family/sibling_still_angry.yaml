@@ -1,0 +1,57 @@
+# E1: reacts to a big fight with a sibling.
+id: sibling_still_angry
+title: Family dinner, again
+text: >-
+  The whole family is at the table, and {sibling.name} is carefully looking
+  at everyone except you. Everyone knows why.
+tone: serious
+category: family
+rarity: uncommon
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 14 } }
+    - { memory: { role: sibling, tag: big_fight } }
+weight: { base: 4 }
+cooldownYears: 6
+cast:
+  sibling: { kind: sibling, presence: anywhere }
+choices:
+  - id: apologize
+    label: Say it in front of everyone
+    check:
+      base: 45
+      stats:
+        - { role: sibling, key: affection, weight: 0.4 }
+        - { role: sibling, key: trust, weight: 0.2 }
+      success:
+        text: >-
+          The table goes silent. Then {sibling.name} puts down {sibling.their}
+          fork and says, 'Yeah. Me too.' Somebody passes the potatoes.
+        effects:
+          - { type: relationship, role: sibling, affection: 12, trust: 8, mood: 8 }
+          - { type: memory, role: sibling, tag: made_peace }
+          - { type: stat, key: stress, delta: -3 }
+      failure:
+        text: >-
+          It goes over badly. {sibling.name} leaves before dessert, and
+          everyone else has a view on whose fault it is.
+        effects:
+          - { type: relationship, role: sibling, affection: -5, mood: -6 }
+          - { type: stat, key: stress, delta: 4 }
+  - id: corner
+    label: Catch {sibling.them} alone afterwards
+    outcome:
+      text: >-
+        On the porch, after the dishes, you finally have the conversation. It
+        isn't fixed, but it's moving.
+      effects:
+        - { type: relationship, role: sibling, affection: 5, trust: 3, mood: 3 }
+  - id: ignore
+    label: Pretend it didn't happen
+    outcome:
+      text: >-
+        You talk to everyone else with great enthusiasm. {sibling.name}
+        notices exactly what you're doing.
+      effects:
+        - { type: relationship, role: sibling, affection: -4, trust: -2 }

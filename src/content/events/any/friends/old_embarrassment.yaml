@@ -1,0 +1,49 @@
+# E1: reacts to humiliating someone (an insult or a prank that went too far).
+id: old_embarrassment
+title: A long memory
+text: >-
+  At a party, {friend.name} tells a story about the time you humiliated
+  {friend.them}. It's told as a joke. {friend.They} {friend:isn't|aren't}
+  laughing.
+tone: serious
+category: friends
+rarity: uncommon
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 14 } }
+    - { memory: { role: friend, tag: humiliated_them } }
+weight: { base: 4 }
+cooldownYears: 8
+cast:
+  friend: { kind: friend, presence: city }
+choices:
+  - id: own_it
+    label: Apologize, properly, on the spot
+    check:
+      base: 50
+      stats:
+        - { role: friend, key: trust, weight: 0.3 }
+        - { key: kindness, weight: 0.3 }
+      success:
+        text: >-
+          The room goes quiet. {friend.name} looks at you for a long moment,
+          then nods. It doesn't fix it, but it ends it.
+        effects:
+          - { type: relationship, role: friend, affection: 8, trust: 8, mood: 6 }
+          - { type: memory, role: friend, tag: made_peace }
+          - { type: stat, key: kindness, delta: 1 }
+      failure:
+        text: >-
+          'Don't do this here,' says {friend.name}, and leaves. Everyone
+          else suddenly has somewhere to be.
+        effects:
+          - { type: relationship, role: friend, affection: -4, mood: -6 }
+          - { type: stat, key: reputation, delta: -1 }
+  - id: laugh_along
+    label: Laugh along, and hope it passes
+    outcome:
+      text: It does not pass. {friend.name} notices who laughed hardest.
+      effects:
+        - { type: relationship, role: friend, affection: -8, trust: -6, mood: -8 }
+        - { type: stat, key: kindness, delta: -1 }

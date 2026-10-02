@@ -15,7 +15,7 @@ import {
 import { chance, nextFloat, nextInt, pick, type RngState } from '../rng';
 import { rollInRange, rollScore, weightedPick } from '../random';
 import { npcDeathChance } from '../systems/mortality';
-import type { Id, Person, Relationship } from '../types';
+import type { FamilyWealth, Id, Person, Relationship } from '../types';
 import { rollGenderCategory, rollIdentity, rollRelativeTraits } from './character';
 
 export interface FamilyRequest {
@@ -31,6 +31,8 @@ export interface FamilyRequest {
   /** Custom characters choose these; random ones roll them. */
   parents?: 1 | 2;
   siblings?: number;
+  /** E1: relatives share the family's background (their wealth level). */
+  familyWealth: FamilyWealth;
   /** Assigns ids to new people, in order. */
   nextId: () => Id;
 }
@@ -141,6 +143,10 @@ export function generateFamily(rng: RngState, content: ContentBundle, request: F
       smarts: rollScore(rng, family.relativeSmarts),
       cityId,
       tags: ['family'],
+      // E1: set from their personality and circumstances once the life is assembled (createLife).
+      mood: 50,
+      moodBase: 50,
+      wealthLevel: request.familyWealth,
     };
     const scores = {
       parent: [family.parentAffection, family.parentTrust],

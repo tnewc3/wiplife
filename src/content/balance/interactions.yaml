@@ -1,0 +1,207 @@
+# Interactions (E1): the reaction roll, diminishing returns, moods, wealth,
+# gifts, asking for money and the chances behind fights, health risks and
+# infidelity. Starting proposals; Stage 12 (balancing) tunes them against
+# simulation runs.
+#
+# How a reaction is rolled: a score is built from the interaction's profile
+# (below), how the person feels about you (affection, trust, mood), their
+# personality, your own stats, the memories between you and how often you've
+# already done this (and anything else) with them this year. A roll
+# (noiseSd) is added, and the total picks the tier.
+
+reaction:
+  noiseSd: 17
+  # The score a roll must reach for each tier, from the bottom up.
+  thresholds: { backfire: -34, bad: -14, good: 12, great: 34 }
+  # Points per point of affection, trust and mood above 50.
+  weights: { affection: 0.32, trust: 0.15, mood: 0.25 }
+  # Memories in profiles count for this long, and never more than cap points.
+  memory: { years: 5, cap: 18 }
+  # The same interaction this many times in a year leaves them annoyed with you.
+  annoyedAfter: 3
+
+# Each interaction names one profile. base is the starting score; their and
+# you are points per point of that trait or stat above 50; repeat is the
+# points lost for each earlier use of this interaction with this person this
+# year (same) and for each earlier interaction of any kind (total);
+# repeatTrust is trust lost per earlier use, whatever the outcome; memories
+# are points while that memory is recent.
+profiles:
+  warm:
+    base: 7
+    their: { kindness: 0.12, sociability: 0.15 }
+    you: { kindness: 0.1, confidence: 0.06, happiness: 0.05 }
+    repeat: { same: 8, total: 1.5 }
+    memories: { humiliated_them: -12, big_fight: -6, great_time_together: 4 }
+  admiring:
+    base: 3
+    their: { kindness: 0.1, confidence: 0.05 }
+    you: { looks: 0.12, confidence: 0.1, kindness: 0.05 }
+    repeat: { same: 11, total: 1.5 }
+    memories: { humiliated_them: -14, great_time_together: 3 }
+  gift:
+    base: 3
+    their: { sociability: 0.05 }
+    you: { kindness: 0.05 }
+    repeat: { same: 5, total: 1 }
+    memories: { humiliated_them: -8, generous_gift: 2 }
+  sharp:
+    base: -6
+    their: { kindness: 0.15, discipline: 0.1 }
+    you: { confidence: 0.1, kindness: 0.1 }
+    repeat: { same: 10, total: 2 }
+    memories: { big_fight: -10, made_peace: 6, humiliated_them: -8 }
+  hostile:
+    base: -20
+    their: { kindness: 0.12, riskTaking: -0.08 }
+    you: { confidence: 0.1, fitness: 0.1 }
+    repeat: { same: 12, total: 2 }
+    memories: { big_fight: -8, humiliated_them: -8 }
+  prank:
+    base: -4
+    their: { sociability: 0.15, kindness: 0.1 }
+    you: { confidence: 0.08 }
+    repeat: { same: 12, total: 2 }
+    memories: { humiliated_them: -14, pranked_them: -4 }
+  romantic:
+    base: -3
+    their: { sociability: 0.1, confidence: 0.05 }
+    you: { looks: 0.18, confidence: 0.14, kindness: 0.06 }
+    repeat: { same: 9, total: 1.5 }
+    memories: { romantic_date: 6, bad_first_date: -6, humiliated_them: -14, cheated_on_them: -20 }
+  intimate:
+    base: -6
+    their: { confidence: 0.05, sociability: 0.05 }
+    you: { looks: 0.1, confidence: 0.1, kindness: 0.05 }
+    repeat: { same: 8, total: 1.5 }
+    memories: { romantic_date: 4, cheated_on_them: -20, big_fight: -6 }
+  request:
+    base: -12
+    their: { kindness: 0.12 }
+    you: { kindness: 0.05 }
+    repeat: { same: 16, total: 2 }
+    repeatTrust: 5
+    memories: { lent_you_money: -10, gave_you_money: -8, you_helped_them: 6 }
+  counsel:
+    base: 6
+    their: { kindness: 0.12 }
+    you: { kindness: 0.05, smarts: 0.04 }
+    repeat: { same: 6, total: 1.5 }
+    memories: { gave_you_advice: 2 }
+  contrite:
+    base: -4
+    their: { kindness: 0.2, discipline: 0.05 }
+    you: { kindness: 0.1, confidence: 0.05 }
+    repeat: { same: 6, total: 1.5 }
+    memories: { big_fight: 4, humiliated_them: -10, cheated_on_them: -25 }
+  favor:
+    base: 0
+    their: { kindness: 0.12 }
+    you: { kindness: 0.05 }
+    repeat: { same: 12, total: 2 }
+    repeatTrust: 3
+    memories: { helped_you_out: -3, you_helped_them: 6 }
+  helpful:
+    base: 5
+    their: { kindness: 0.1 }
+    you: { kindness: 0.1, smarts: 0.04 }
+    repeat: { same: 7, total: 1.5 }
+    memories: { you_helped_them: 3 }
+
+# Diminishing returns. Gains (affection, trust, mood, and your own stat
+# gains) are multiplied by `same` for each earlier use of the same
+# interaction with the person this year and by `total` for each earlier
+# interaction of any kind. Losses are never reduced. However often you try,
+# one person can't gain more than yearlyCap from you in a year.
+returns:
+  same: 0.62
+  total: 0.94
+  # ...and by how high affection (or trust) already is: it gets harder to
+  # push a relationship toward the very top.
+  byLevel:
+    - { at: 60, x: 1 }
+    - { at: 85, x: 0.4 }
+    - { at: 100, x: 0.1 }
+  yearlyCap: { affection: 22, trust: 14 }
+
+mood:
+  # Each person's mood starts the year from their baseline: this plus their
+  # personality, wealth, age and circumstances, with a swing each year.
+  baseline:
+    base: 55
+    traits: { kindness: 0.12, sociability: 0.1, discipline: 0.05 }
+    wealth: { poor: -9, working: -3, middle: 0, affluent: 4, rich: 5 }
+    age:
+      - { at: 8, x: 8 }
+      - { at: 25, x: 1 }
+      - { at: 45, x: -2 }
+      - { at: 70, x: -1 }
+      - { at: 90, x: -6 }
+    estranged: -12
+    yourPrison: -5
+    affection: 0.08
+    noiseSd: 8
+  # Each year their mood closes this share of the gap to their baseline.
+  drift: 0.5
+  # Friends and others show a mood word from this affection; family and your partner always do.
+  closeAffection: 55
+  # The bands behind the mood words: at or above great, good, okay, low; below low is bad.
+  bands: { great: 78, good: 62, okay: 42, low: 25 }
+
+wealth:
+  # How much their job counts against their family background.
+  occupationWeight: 0.65
+  # A job track's starting pay to wealth: the first bracket the pay is under.
+  salaryBrackets:
+    - { upTo: 32000, level: poor }
+    - { upTo: 55000, level: working }
+    - { upTo: 90000, level: middle }
+    - { upTo: 140000, level: affluent }
+    - { level: rich }
+  # Share of adults you meet (not family) who have a job.
+  employedShare: 0.75
+  # Chance someone you meet has your family background; otherwise it's rolled from the usual family-wealth odds.
+  peerChance: 0.5
+
+gifts:
+  # price: at the national average (scaled to your city). score: how well it lands.
+  # warmth: multiplies the good feelings (affection, trust, mood) it adds.
+  tiers:
+    small: { price: 25, score: 3, warmth: 0.7 }
+    medium: { price: 80, score: 9, warmth: 1.1 }
+    big: { price: 300, score: 18, warmth: 1.7 }
+  # A gift means more to someone with less.
+  wealthValue: { poor: 1.5, working: 1.2, middle: 1, affluent: 0.8, rich: 0.6 }
+  # Before the independence age, prices are multiplied by this.
+  childShare: 0.2
+  # How far past your savings (as debt) you may go on a gift once independent.
+  maxBorrow: 200
+
+money:
+  # What someone gives or lends when you ask, by their wealth (dollars at the national average).
+  ask:
+    poor: { min: 20, max: 80 }
+    working: { min: 50, max: 250 }
+    middle: { min: 150, max: 800 }
+    affluent: { min: 500, max: 3000 }
+    rich: { min: 1500, max: 10000 }
+  # Before the independence age, what you're given is multiplied by this (pocket money).
+  childShare: 0.15
+  # A loan from a person is a personal debt through the finance module.
+  loan: { annualRate: 0, termYears: 3 }
+
+# Chances named by interactions.
+chances:
+  fightInjury: 0.22
+  fightCharge: 0.3
+  fightDiscipline: 0.6
+  intimacyTreatable: 0.05
+  intimacyChronic: 0.01
+  intimacyTreatableCareful: 0.012
+  intimacyChronicCareful: 0.002
+
+# Being unfaithful (flirting or being intimate with someone who isn't your
+# partner while you have one): the chance it's found out, and when.
+infidelity:
+  discovery: { flirt: 0.12, intimate: 0.45 }
+  inYears: { min: 1, max: 3 }

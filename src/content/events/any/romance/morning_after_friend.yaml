@@ -1,0 +1,59 @@
+# E1: reacts to a night with a friend (an interaction), when you're single.
+id: morning_after_friend
+title: The morning after, a while later
+text: >-
+  Things have been different between you and {friend.name} ever since that
+  night. A friend who is also something else. Neither of you has named it.
+tone: neutral
+category: romance
+rarity: uncommon
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { romance: [single] }
+    - { memory: { role: friend, tag: night_together } }
+weight: { base: 4 }
+cooldownYears: 5
+cast:
+  friend: { kind: friend, age: { min: 18, max: 120 }, presence: city }
+choices:
+  - id: ask_out
+    label: Ask {friend.them} out, properly
+    check:
+      base: 45
+      stats:
+        - { role: friend, key: affection, weight: 0.4 }
+        - { key: confidence, weight: 0.2 }
+      success:
+        text: >-
+          {friend.name} grins and says that took you long enough. It starts
+          with dinner, and neither of you pretends it's only dinner.
+        effects:
+          - { type: relationship, role: friend, kind: partner, affection: 8, trust: 4, mood: 8 }
+          - { type: memory, role: friend, tag: started_dating }
+          - { type: history, text: 'You and {friend.name} turned a friendship into something more.', importance: 2 }
+      failure:
+        text: >-
+          {friend.name} takes a breath. 'I don't want to lose you as a
+          friend.' It's gentle, and it still lands.
+        effects:
+          - { type: relationship, role: friend, affection: -3, mood: -4 }
+          - { type: stat, key: happiness, delta: -3 }
+  - id: talk
+    label: Say you should talk about it
+    outcome:
+      text: >-
+        You talk for hours and conclude almost nothing, except that you're
+        both glad it happened and not sorry you're friends.
+      effects:
+        - { type: relationship, role: friend, affection: 3, trust: 4, mood: 3 }
+  - id: pretend
+    label: Pretend it never happened
+    outcome:
+      text: >-
+        It works for a while. Then every conversation has a small, careful
+        edge that wasn't there before.
+      effects:
+        - { type: relationship, role: friend, affection: -3, trust: -2 }
+        - { type: stat, key: stress, delta: 2 }

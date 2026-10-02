@@ -46,3 +46,6 @@ flags:
   cooked_books: You moved numbers at work that shouldn't have moved
   studied_inside: You took classes in prison
   came_out: You told people close to you who you are
+  # Interactions (E1).
+  unfaithful: You were unfaithful to a partner
+  was_infected: You caught an infection from an intimate night

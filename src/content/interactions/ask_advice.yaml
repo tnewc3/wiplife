@@ -1,0 +1,56 @@
+id: ask_advice
+name: Ask for advice
+blurb: Get their take on something that's weighing on you.
+group: practical
+profile: counsel
+inPerson: false
+visit: true
+availability:
+  kinds: [parent, stepparent, sibling, grandparent, friend, partner, fiance, spouse, ex, coworker, boss, classmate]
+  you: { min: 8 }
+  them: { min: 14 }
+outcomes:
+  great:
+    text:
+      - "{person.name} listens, really listens, and then says exactly the thing you needed to hear."
+      - "The advice is so clear and so kind that you wonder why you didn't ask sooner."
+    affection: 3
+    trust: 4
+    mood: 5
+    effects:
+      - { type: stat, key: stress, delta: -3 }
+      - { type: stat, key: smarts, delta: 1 }
+      - { type: memory, role: person, tag: gave_you_advice }
+  good:
+    text:
+      - "{person.name} gives it some thought and offers a few sensible ideas. You feel a little better."
+      - "It isn't life-changing, but {person.name}'s advice is solid, and you appreciate being asked what you think."
+    affection: 2
+    trust: 2
+    mood: 3
+    effects:
+      - { type: stat, key: stress, delta: -2 }
+  neutral:
+    text:
+      - "'Honestly? I don't know,' says {person.name}. 'But I'm glad you asked.'"
+      - "{person.name} shrugs and gives a safe, general answer. It doesn't help much."
+    affection: 0
+    mood: 0
+  bad:
+    text:
+      - "The advice is confident and completely wrong, and you realize it only after you've thought about it for a day."
+      - "{person.name} makes it about {person.themself}. You hang up with less than you started."
+    affection: -1
+    trust: -1
+    mood: -2
+    effects:
+      - { type: stat, key: stress, delta: 1 }
+  backfire:
+    text:
+      - "{person.name} says you should have known better, and lists the reasons. It makes everything worse."
+      - "You get a lecture. A long one. It's clear you won't be asking for advice here again."
+    affection: -3
+    trust: -3
+    mood: -6
+    effects:
+      - { type: stat, key: stress, delta: 2 }

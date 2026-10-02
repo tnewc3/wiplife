@@ -13,7 +13,7 @@ jobs:
   checks:
     name: Lint, typecheck, tests, content, build
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
 
@@ -38,6 +38,9 @@ jobs:
 
       - name: Simulation (500 lives)
         run: npm run simulate -- --lives 500
+
+      - name: Simulation, spamming player (100 lives)
+        run: npm run simulate -- --lives 100 --player spammer
 
       - name: Content coverage report (300 lives)
         run: npm run coverage -- --lives 300

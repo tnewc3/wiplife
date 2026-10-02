@@ -8,6 +8,8 @@ import type { CastSpec, ContentBundle, EventDef, GenderCategory } from '../../co
 import { CREATABLE_KINDS } from '../../content/schemas';
 import { rollGenderCategory, rollIdentity, rollRelativeTraits } from '../creation/character';
 import { pickUnused, rollHeritage } from '../creation/family';
+import { moodBaseline } from '../interactions/mood';
+import { rollWealth } from '../interactions/wealth';
 import { rollScore, weightedPick } from '../random';
 import { fitsPresence } from '../presence';
 import { isAdmirerMatch, isRomanticMatch, partnerAgeRange, SUPPORT_KINDS } from '../relationships';
@@ -156,6 +158,10 @@ export function createPerson(state: LifeState, spec: CastSpec, rng: RngState, co
     smarts: rollScore(rng, family.relativeSmarts),
     cityId: spec.presence === 'elsewhere' ? otherCity(state, rng, content) : state.character.cityId,
     tags: [kind],
+    // E1: set below, once they're in your life.
+    mood: 50,
+    moodBase: 50,
+    wealthLevel: 'middle',
   };
   const newPerson = content.balance.events.newPerson;
   state.relationships[id] = {
@@ -167,6 +173,12 @@ export function createPerson(state: LifeState, spec: CastSpec, rng: RngState, co
     memories: [],
     since: state.currentYear,
   };
+  // E1: their occupation and wealth level, and the mood they start in.
+  const person = state.people[id]!;
+  const wealth = rollWealth(state, kind, age, rng, content);
+  if (wealth.occupation !== undefined) person.occupation = wealth.occupation;
+  person.wealthLevel = wealth.wealthLevel;
+  person.mood = person.moodBase = moodBaseline(state, person, content);
   return id;
 }
 

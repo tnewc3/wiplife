@@ -1,8 +1,33 @@
 /** Player-facing words for engine values. UI copy only; no game rules here. */
-import type { ActionId, ConditionKind, CredentialType, DebtKind, HousingKind, JobCategory, Lifestyle, Program, RomanceStatus, Tier } from '../content/schemas';
+import type {
+  ActionId,
+  ConditionKind,
+  CredentialType,
+  DebtKind,
+  GiftTier,
+  HousingKind,
+  InteractionGroup,
+  JobCategory,
+  Lifestyle,
+  OutcomeTier,
+  Program,
+  RomanceStatus,
+  Tier,
+} from '../content/schemas';
 import type { JobApplyBlock, SearchBlock } from '../engine/career';
 import type { ApplyBlock } from '../engine/education';
-import type { CredentialView, DoctorBlock, FamilyMember, LegalStatus, PeopleGroupId, PersonRow, RecordRow, SchoolLine } from '../engine/selectors';
+import type {
+  CredentialView,
+  DoctorBlock,
+  FamilyMember,
+  LegalStatus,
+  MoodBand,
+  MoodView,
+  PeopleGroupId,
+  PersonRow,
+  RecordRow,
+  SchoolLine,
+} from '../engine/selectors';
 import type { FamilyWealth, GenderCategory, JobEnd, LifeStage, Personality, RecordOutcome, RelationshipKind, Stats } from '../engine/types';
 
 export const STAT_LABELS: Record<keyof Stats, string> = {
@@ -561,3 +586,61 @@ export function legalBanner(status: LegalStatus): { title: string; body: string 
     body: status.yearsLeft <= 1 ? 'Through this year. Stay out of trouble, and you can’t move away.' : `Through ${status.lastYear}. Stay out of trouble, and you can’t move away.`,
   };
 }
+
+/** Interaction groups on the Interact sheet (E1). */
+export const INTERACTION_GROUP_LABELS: Record<InteractionGroup, string> = {
+  everyday: 'Everyday',
+  conflict: 'Conflict',
+  romance: 'Romance',
+  practical: 'Practical',
+};
+
+export const GIFT_TIER_LABELS: Record<GiftTier, string> = {
+  small: 'Small gift',
+  medium: 'Medium gift',
+  big: 'Big gift',
+};
+
+/** A close person's mood as a phrase after their name (E1): "in a great mood", "annoyed with you". */
+export const MOOD_LABELS: Record<MoodBand, string> = {
+  great: 'in a great mood',
+  good: 'in good spirits',
+  okay: 'doing okay',
+  low: 'stressed',
+  bad: 'having a rough time',
+};
+
+export function moodPhrase(mood: MoodView): string {
+  return mood.annoyed ? 'annoyed with you' : MOOD_LABELS[mood.band];
+}
+
+/** How an outcome moved them, in words (E1): never numbers. Empty lines are left out. */
+export function interactionChangeLines(name: string, changes: { affection: number; trust: number; mood: number }): string[] {
+  const lines: string[] = [];
+  if (changes.affection >= 6) lines.push(`${name} feels much closer to you.`);
+  else if (changes.affection >= 1) lines.push(`${name} feels closer to you.`);
+  else if (changes.affection <= -6) lines.push(`${name} is much less fond of you.`);
+  else if (changes.affection <= -1) lines.push(`${name} is less fond of you.`);
+  if (changes.trust >= 1) lines.push(`${name} trusts you more.`);
+  else if (changes.trust <= -1) lines.push(`${name} trusts you less.`);
+  if (changes.mood >= 1) lines.push(`${name}'s mood lifted.`);
+  else if (changes.mood <= -1) lines.push(`${name}'s mood dropped.`);
+  return lines;
+}
+
+/** The stripe color of an outcome card by how it went (the event tones' tokens). */
+export const OUTCOME_TIER_TONE: Record<OutcomeTier, 'light' | 'neutral' | 'serious' | 'dark'> = {
+  great: 'light',
+  good: 'light',
+  neutral: 'neutral',
+  bad: 'serious',
+  backfire: 'dark',
+};
+
+export const OUTCOME_TIER_LABELS: Record<OutcomeTier, string> = {
+  great: 'It went great',
+  good: 'It went well',
+  neutral: 'It was fine',
+  bad: 'It went badly',
+  backfire: 'It backfired',
+};

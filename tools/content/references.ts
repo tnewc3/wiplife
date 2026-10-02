@@ -34,12 +34,14 @@ import {
   type Outcome,
 } from '../../src/content/schemas';
 import { ACTION_ROLE } from '../../src/engine/actions';
+import { INTERACTION_ROLE } from '../../src/engine/interactions/availability';
 import { referencesIn, rolesIn } from '../../src/engine/conditions';
 import { EFFECT_KINDS, FAMILY_KINDS, isPartnerKind, isRomanceEvent, isRomanticKind } from '../../src/engine/relationships';
 import { EVENT_TEXT_VALUES, SELF_ROLE } from '../../src/engine/events/text';
 import { CONTINUE_CHOICE } from '../../src/engine/life';
 import { checkTemplate } from '../../src/engine/text';
 import type { ContentError } from './compile';
+import { MONEY } from './consistency';
 
 const CREATION = 'balance/creation.yaml';
 const AGING = 'balance/aging.yaml';
@@ -167,6 +169,7 @@ export function checkReferences(
   errors.push(...checkHealth(bundle, fileOf));
   errors.push(...checkLegal(bundle, fileOf));
   errors.push(...checkDiscovery(bundle, fileOf));
+  errors.push(...checkInteractions(bundle, fileOf));
 
   return errors;
 }
@@ -456,6 +459,8 @@ function checkEvents(bundle: ContentBundle, fileOf: (typeKey: CollectionKey, id:
     ...Object.values(bundle.registries.discovery.resurfacing).flatMap((r) => r.events),
     ...bundle.registries.discovery.crisis.events,
     ...bundle.registries.discovery.comingOut.events,
+    ...bundle.registries.interactions.infidelity.flirt.events,
+    ...bundle.registries.interactions.infidelity.intimate.events,
   ]);
 
   for (const [id, def] of Object.entries(bundle.events)) {
@@ -857,5 +862,164 @@ function checkDiscovery(bundle: ContentBundle, fileOf: (typeKey: CollectionKey, 
   }
   const t = bundle.balance.targets.lifespan.median;
   if (t.min > t.max) errors.push({ file: TARGETS, message: 'lifespan.median: min is greater than max' });
+  return errors;
+}
+
+const INTERACTIONS = 'balance/interactions.yaml';
+const INTERACTION_REGISTRY = 'registries/interactions.yaml';
+
+/** An interaction's tiers that exist (great and backfire are optional). */
+function tiersOf(def: ContentBundle['interactions'][string]) {
+  return Object.entries(def.outcomes).flatMap(([id, tier]) => (tier ? [[id, tier] as const] : []));
+}
+
+/**
+ * Interactions (E1): profiles, romance rules, references, text and money.
+ * Romance interactions need an adult age (the adult age or more) for both
+ * people and never include family; being intimate is romance too.
+ */
+function checkInteractions(bundle: ContentBundle, fileOf: (typeKey: CollectionKey, id: string) => string): ContentError[] {
+  const errors: ContentError[] = [];
+  const balance = bundle.balance.interactions;
+  const { tags } = bundle.registries.memories;
+  const { flags } = bundle.registries.flags;
+  const { adultAge } = bundle.balance.relationships;
+
+  // Balance.
+  for (const [profileId, profile] of Object.entries(balance.profiles)) {
+    for (const tag of Object.keys(profile.memories)) {
+      if (!tags[tag]) errors.push({ file: INTERACTIONS, message: `profiles.${profileId}.memories: "${tag}" is not in registries/memories.yaml` });
+    }
+  }
+  const brackets = balance.wealth.salaryBrackets;
+  brackets.forEach((b, i) => {
+    const last = i === brackets.length - 1;
+    if (last !== (b.upTo === undefined)) errors.push({ file: INTERACTIONS, message: 'wealth.salaryBrackets: only the last bracket has no upTo' });
+    if (i > 0 && b.upTo !== undefined && brackets[i - 1]!.upTo !== undefined && b.upTo <= brackets[i - 1]!.upTo!) {
+      errors.push({ file: INTERACTIONS, message: 'wealth.salaryBrackets: upTo must rise' });
+    }
+  });
+  const { bands } = balance.mood;
+  if (!(bands.great > bands.good && bands.good > bands.okay && bands.okay > bands.low)) {
+    errors.push({ file: INTERACTIONS, message: 'mood.bands: must fall from great to low' });
+  }
+  const { small, medium, big } = balance.gifts.tiers;
+  if (!(small.price < medium.price && medium.price < big.price)) errors.push({ file: INTERACTIONS, message: 'gifts.tiers: prices must rise from small to big' });
+
+  // The registry.
+  for (const act of ['flirt', 'intimate'] as const) {
+    errors.push(
+      ...checkRegistryEvents(bundle, fileOf, INTERACTION_REGISTRY, `infidelity.${act}`, bundle.registries.interactions.infidelity[act].events),
+    );
+  }
+
+  for (const [id, def] of Object.entries(bundle.interactions)) {
+    if (def.retired) continue;
+    const file = fileOf('interactions', id);
+    const err = (message: string) => errors.push({ file, message: `${id}: ${message}` });
+    if (!balance.profiles[def.profile]) err(`unknown reaction profile "${def.profile}" (balance/interactions.yaml profiles)`);
+    const a = def.availability;
+
+    // Romance: adults only, never family; intimacy likewise.
+    const allEffects: Effect[] = [];
+    const texts: string[] = [];
+    for (const [tierId, tier] of tiersOf(def)) {
+      const groups = [
+        { where: tierId, effects: tier.effects as Effect[], extras: tier.extras, text: tier.text },
+        ...(tier.choice?.options ?? []).map((o) => ({ where: `${tierId}.${o.id}`, effects: o.effects as Effect[], extras: o.extras, text: [o.text, o.label] })),
+      ];
+      for (const g of groups) {
+        const extras = g.extras.flatMap((x) => x.effects as Effect[]);
+        const here = [...g.effects, ...extras];
+        allEffects.push(...here);
+        const sentenced = here.some((e) => e.type === 'legal');
+        const values = sentenced ? ['age', 'sentence'] : ['age'];
+        const template = (field: string, text: string) => {
+          for (const message of checkTemplate(text, { roles: [INTERACTION_ROLE, SELF_ROLE], values })) err(`${tierId} ${field}: ${message}`);
+        };
+        for (const text of g.text) {
+          template(g.where, text);
+          texts.push(text);
+        }
+        for (const x of g.extras) {
+          if (x.note) {
+            template(`${g.where} note`, x.note);
+            texts.push(x.note);
+          }
+        }
+        // Money: text that talks about money needs a money change in the same part (a gift always costs money).
+        const moves = here.some((e) => e.type === 'moneyFromPerson' || e.type === 'money' || e.type === 'cost');
+        const said = [...g.text, ...g.extras.flatMap((x) => (x.note ? [x.note] : []))].find((t) => MONEY.test(t));
+        if (said !== undefined && !moves && def.gift !== true) err(`${g.where}: mentions money ("${said.match(MONEY)![0]}") without a money effect`);
+      }
+      if (tier.choice) {
+        const prompt = tier.choice.prompt;
+        for (const message of checkTemplate(prompt, { roles: [INTERACTION_ROLE, SELF_ROLE], values: ['age'] })) err(`${tierId} choice.prompt: ${message}`);
+      }
+    }
+    for (const [tierId, tier] of tiersOf(def)) {
+      for (const o of tier.choice?.options ?? []) {
+        for (const message of checkTemplate(o.label, { roles: [INTERACTION_ROLE, SELF_ROLE], values: ['age'] })) err(`${tierId} ${o.id}.label: ${message}`);
+      }
+    }
+
+    const romantic = def.romance === true;
+    if (def.romance === true) {
+      if ((a.you.min ?? 0) < adultAge) err(`romance: availability.you.min must be at least ${adultAge} (adults only)`);
+      if ((a.them.min ?? 0) < adultAge) err(`romance: availability.them.min must be at least ${adultAge} (adults only)`);
+      const family = a.kinds.filter((k) => FAMILY_KINDS.includes(k));
+      if (family.length > 0) err(`romance: can't be available with family (${family.join(', ')})`);
+    }
+    if (!romantic && allEffects.some((e) => e.type === 'infidelity' || (e.type === 'relationship' && e.kind !== undefined))) {
+      err('only a romance interaction can be unfaithful or change a relationship kind');
+    }
+    if (allEffects.some((e) => e.type === 'relationship' && e.kind !== undefined)) err('an interaction can\'t change a relationship kind (events do that)');
+
+    // Effects.
+    for (const effect of allEffects) {
+      const where = `${effect.type} effect`;
+      if ('role' in effect && effect.role !== undefined && effect.role !== INTERACTION_ROLE) err(`${where}: the only role is "${INTERACTION_ROLE}"`);
+      if (effect.type === 'memory' && !tags[effect.tag]) err(`${where}: memory "${effect.tag}" is not in registries/memories.yaml`);
+      if (effect.type === 'flag' && !flags[effect.key]) err(`${where}: flag "${effect.key}" is not in registries/flags.yaml`);
+      if (effect.type === 'health' && !bundle.conditions[effect.conditionId]) err(`${where}: unknown health condition "${effect.conditionId}"`);
+      if (effect.type === 'education' && effect.action !== 'grades') err(`${where}: only grades`);
+      if (effect.type === 'legal') {
+        const offense = bundle.offenses[effect.offenseId];
+        if (!offense) err(`${where}: unknown offense "${effect.offenseId}"`);
+      }
+      if (effect.type === 'history') {
+        for (const message of checkTemplate(effect.text, { roles: [INTERACTION_ROLE, SELF_ROLE], values: ['age'] })) err(`history text: ${message}`);
+      }
+      if (effect.type === 'schedule') {
+        const target = bundle.events[effect.eventId];
+        if (!target) err(`${where}: unknown event "${effect.eventId}"`);
+        else if (!target.followUpOnly) err(`${where}: "${effect.eventId}" must be followUpOnly`);
+        for (const role of effect.cast ?? []) {
+          if (role !== INTERACTION_ROLE) err(`${where}: the only role is "${INTERACTION_ROLE}"`);
+          if (target && !(role in (target.cast ?? {}))) err(`${where}: "${effect.eventId}" has no role "${role}"`);
+        }
+      }
+    }
+    for (const text of texts) {
+      if (/\b(he|she|him|her|his|hers)\b/i.test(text.replace(/\{[^}]*\}/g, ''))) err(`text uses a hardcoded pronoun; use placeholders: "${text.slice(0, 50)}"`);
+    }
+
+    // Conditions: the only role is the person; flags, memories, conditions exist.
+    const condition = (field: string, cond: Parameters<typeof rolesIn>[0]) => {
+      for (const role of rolesIn(cond)) if (role !== INTERACTION_ROLE) err(`${field}: the only role is "${INTERACTION_ROLE}" (got "${role}")`);
+      const refs = referencesIn(cond);
+      for (const f of refs.flags) if (!flags[f]) err(`${field}: flag "${f}" is not in registries/flags.yaml`);
+      for (const t of refs.memories) if (!tags[t]) err(`${field}: memory "${t}" is not in registries/memories.yaml`);
+      for (const c of refs.conditions) if (!bundle.conditions[c]) err(`${field}: unknown health condition "${c}"`);
+    };
+    condition('availability.requires', a.requires);
+    for (const [tierId, tier] of tiersOf(def)) {
+      const extraConditions = [...tier.extras, ...(tier.choice?.options ?? []).flatMap((o) => o.extras)];
+      extraConditions.forEach((x, i) => condition(`${tierId} extras[${i}].if`, x.if));
+    }
+
+    if (a.status.includes('ended')) err('availability.status: "ended" people have faded out of your life');
+    if (def.gift && def.intimate) err('a gift can\'t be intimate');
+  }
   return errors;
 }

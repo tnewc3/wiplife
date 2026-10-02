@@ -1,0 +1,8 @@
+id: assault
+name: assault
+class: misdemeanor
+severity: 2
+outcomes: { warning: 2, fine: 5, probation: 3, jail: 0.5 }
+fine: { min: 500, max: 2500 }
+probationYears: { min: 1, max: 2 }
+jailYears: { min: 1, max: 1 }

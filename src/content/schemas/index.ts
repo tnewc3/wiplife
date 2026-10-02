@@ -18,6 +18,7 @@ import { causeSchema, historyTextSchema, legalTextSchema, obituaryTextSchema, re
 import { conditionDefSchema, healthBalanceSchema, healthRegistrySchema } from './health';
 import { legalBalanceSchema, legalRegistrySchema, offenseSchema } from './legal';
 import { discoveryBalanceSchema, discoveryRegistrySchema, discoveryTextSchema } from './discovery';
+import { interactionRegistrySchema, interactionSchema, interactionsBalanceSchema } from './interactions';
 
 export * from './balance';
 export * from './careers';
@@ -32,6 +33,7 @@ export * from './text';
 export * from './health';
 export * from './legal';
 export * from './discovery';
+export * from './interactions';
 
 /**
  * Collections: a folder under src/content with one YAML file per definition,
@@ -45,6 +47,7 @@ export const collectionTypes = {
   /** Nested by life stage and category, and chain files hold several events (see compile.ts). */
   events: { folder: 'events', schema: eventSchema },
   gradPrograms: { folder: 'grad', schema: gradProgramSchema },
+  interactions: { folder: 'interactions', schema: interactionSchema },
   jobs: { folder: 'jobs', schema: jobSchema },
   majors: { folder: 'majors', schema: majorSchema },
   names: { folder: 'names', schema: namePoolSchema },
@@ -74,6 +77,7 @@ export const singletonTypes = {
   'balance/health': healthBalanceSchema,
   'balance/legal': legalBalanceSchema,
   'balance/discovery': discoveryBalanceSchema,
+  'balance/interactions': interactionsBalanceSchema,
   'balance/targets': targetsBalanceSchema,
   'character/identity': identityOptionsSchema,
   'character/appearance': appearanceOptionsSchema,
@@ -92,6 +96,7 @@ export const singletonTypes = {
   'registries/health': healthRegistrySchema,
   'registries/legal': legalRegistrySchema,
   'registries/discovery': discoveryRegistrySchema,
+  'registries/interactions': interactionRegistrySchema,
 } as const;
 
 export type SingletonPath = keyof typeof singletonTypes;
@@ -103,6 +108,7 @@ export const contentBundleSchema = z.strictObject({
   conditions: z.record(z.string(), conditionDefSchema),
   events: z.record(z.string(), eventSchema),
   gradPrograms: z.record(z.string(), gradProgramSchema),
+  interactions: z.record(z.string(), interactionSchema),
   jobs: z.record(z.string(), jobSchema),
   majors: z.record(z.string(), majorSchema),
   names: z.record(z.string(), namePoolSchema),
@@ -123,6 +129,7 @@ export const contentBundleSchema = z.strictObject({
     health: healthBalanceSchema,
     legal: legalBalanceSchema,
     discovery: discoveryBalanceSchema,
+    interactions: interactionsBalanceSchema,
     targets: targetsBalanceSchema,
   }),
   character: z.strictObject({ identity: identityOptionsSchema, appearance: appearanceOptionsSchema }),
@@ -144,6 +151,7 @@ export const contentBundleSchema = z.strictObject({
     health: healthRegistrySchema,
     legal: legalRegistrySchema,
     discovery: discoveryRegistrySchema,
+    interactions: interactionRegistrySchema,
   }),
 });
 

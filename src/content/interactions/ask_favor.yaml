@@ -1,0 +1,53 @@
+id: ask_favor
+name: Ask a favor
+blurb: A ride, a hand, a little cover.
+group: practical
+profile: favor
+inPerson: false
+availability:
+  kinds: [parent, stepparent, sibling, grandparent, friend, partner, fiance, spouse, coworker, classmate]
+  you: { min: 8 }
+  them: { min: 14 }
+outcomes:
+  great:
+    text:
+      - "{person.name} doesn't hesitate. 'Of course.' {person.name} goes out of {person.their} way and makes it look easy."
+      - "Not only does {person.name} say yes, {person.they} {person:takes|take} care of a few things you hadn't even thought to ask about."
+    affection: 3
+    trust: 4
+    mood: 4
+    effects:
+      - { type: stat, key: stress, delta: -3 }
+      - { type: memory, role: person, tag: helped_you_out }
+  good:
+    text:
+      - "{person.name} says yes, with the faint sigh of someone who always does."
+      - "'Sure,' says {person.name}. 'But I'm calling this one in someday.' It's said with a smile."
+    affection: 2
+    trust: 2
+    mood: 1
+    effects:
+      - { type: stat, key: stress, delta: -2 }
+      - { type: memory, role: person, tag: helped_you_out }
+  neutral:
+    text:
+      - "'I'm swamped,' says {person.name}. 'Maybe next time.' It sounds true."
+      - "{person.name} can't help, and says so kindly."
+    trust: -1
+    mood: -1
+  bad:
+    text:
+      - "{person.name} says no, and adds that it's the third time this year. It isn't kind."
+      - "'Ask someone else,' says {person.name}. It stings more than it should."
+    affection: -2
+    trust: -3
+    mood: -4
+  backfire:
+    text:
+      - "{person.name} takes it badly. 'Everything is always about what you need.' The call ends there."
+      - "{person.name} says yes and does it badly, then spends a week letting you know exactly how much trouble it was."
+    affection: -4
+    trust: -6
+    mood: -8
+    effects:
+      - { type: memory, role: person, tag: wore_thin }

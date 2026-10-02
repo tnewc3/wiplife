@@ -1,0 +1,50 @@
+id: flirt
+name: Flirt
+blurb: Show some interest. Adults only.
+group: romance
+romance: true
+profile: romantic
+inPerson: false
+availability:
+  kinds: [friend, acquaintance, classmate, coworker, ex, partner, fiance, spouse]
+  you: { min: 18 }
+  them: { min: 18 }
+outcomes:
+  great:
+    text:
+      - "Your message lands exactly right. {person.name} replies fast, and the banter turns warm, then something more than warm."
+      - "{person.name} holds your eyes a beat too long, then smiles like you've said something only the two of you understand."
+      - "It's easy, suddenly. {person.name} laughs, leans in, and keeps the conversation going long after it should have ended."
+    affection: 5
+    trust: 1
+    mood: 9
+    effects:
+      - { type: infidelity, role: person, act: flirt }
+      - { type: stat, key: confidence, delta: 1 }
+  good:
+    text:
+      - "{person.name} flirts back, a little shy, a little pleased with itself."
+      - "A good spark. {person.name} plays along, and you both pretend not to notice how long it goes on."
+    affection: 3
+    mood: 6
+    effects:
+      - { type: infidelity, role: person, act: flirt }
+  neutral:
+    text:
+      - "{person.name} smiles politely, and the moment passes."
+      - "It might have been flirting. It might have been nothing. {person.name} doesn't say."
+    affection: 0
+    mood: 0
+  bad:
+    text:
+      - "An awkward silence. {person.name} clearly isn't playing along."
+      - "{person.name} changes the subject so smoothly it hurts."
+    affection: -2
+    mood: -4
+  backfire:
+    text:
+      - "{person.name} tells you, flatly, that you've misread things. It's the longest ten seconds of your week."
+      - "{person.name} doesn't just decline. {person.They} {person:makes|make} it clear you've crossed a line."
+    affection: -5
+    trust: -4
+    mood: -9

@@ -1,0 +1,46 @@
+# E1: reacts to a loan a friend made you (asking for money).
+id: loan_thanks
+title: The debt you can't repay
+text: >-
+  It's been on your mind for a while: {friend.name} lent you money when you
+  were in a bind, and never once brought it up. The loan is being paid back,
+  but the favor itself is something else.
+tone: serious
+category: friends
+rarity: uncommon
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 16 } }
+    - { memory: { role: friend, tag: lent_you_money } }
+weight: { base: 4 }
+cooldownYears: 8
+cast:
+  friend: { kind: friend, presence: city }
+choices:
+  - id: dinner
+    label: Take {friend.them} out for a thank-you meal
+    outcome:
+      text: >-
+        You pick up the whole thing. {friend.name} protests, then lets you,
+        and says that's the only thanks {friend.they} {friend:needs|need}.
+      effects:
+        - { type: cost, item: thank_you_meal }
+        - { type: relationship, role: friend, affection: 6, trust: 5, mood: 6 }
+        - { type: stat, key: happiness, delta: 2 }
+  - id: say_it
+    label: Just say thank you, properly
+    outcome:
+      text: >-
+        It takes you three tries to say it without joking. {friend.name}
+        says it was nothing, which both of you know is not true.
+      effects:
+        - { type: relationship, role: friend, affection: 4, trust: 4, mood: 4 }
+  - id: leave_it
+    label: Leave it alone, like always
+    outcome:
+      text: >-
+        The unspoken thing stays unspoken. It's not a problem. It just sits
+        there, between you, every time you meet.
+      effects:
+        - { type: relationship, role: friend, trust: -2 }

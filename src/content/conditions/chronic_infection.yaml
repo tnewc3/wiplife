@@ -1,0 +1,10 @@
+id: chronic_infection
+name: Lifelong infection
+noun: a lifelong infection
+kind: chronic
+blurb: There's no clearing it for good, only managing it, and telling the people who need to know.
+course: { untreated: 3, treated: 0 }
+effects:
+  health: { perYear: -1, limit: 35 }
+treatable: true
+costs: { treatment: 400, yearlyTreated: 900 }

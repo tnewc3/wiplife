@@ -1,0 +1,53 @@
+id: kiss
+name: Kiss
+blurb: Lean in. Adults only.
+group: romance
+romance: true
+profile: romantic
+inPerson: true
+availability:
+  kinds: [friend, acquaintance, classmate, coworker, ex, partner, fiance, spouse]
+  you: { min: 18 }
+  them: { min: 18 }
+  requires: { role: person, affection: { gte: 45 } }
+outcomes:
+  great:
+    text:
+      - "{person.name} kisses back like it's been waiting all night. When you finally pull apart, neither of you can stop smiling."
+      - "The kind of kiss that makes the rest of the world go quiet for a while."
+    affection: 6
+    trust: 2
+    mood: 10
+    effects:
+      - { type: infidelity, role: person, act: flirt }
+      - { type: stat, key: happiness, delta: 3 }
+      - { type: memory, role: person, tag: shared_a_kiss }
+  good:
+    text:
+      - "A sweet, certain kiss. {person.name} smiles against your mouth."
+      - "{person.name} meets you halfway. It's warm and unhurried, and it feels right."
+    affection: 4
+    mood: 7
+    effects:
+      - { type: infidelity, role: person, act: flirt }
+      - { type: stat, key: happiness, delta: 2 }
+      - { type: memory, role: person, tag: shared_a_kiss }
+  neutral:
+    text:
+      - "It's a nice kiss. It's also a little hesitant, like you're both still working something out."
+      - "{person.name} kisses you back, then steps away and smiles, saying nothing."
+    affection: 1
+    mood: 1
+  bad:
+    text:
+      - "{person.name} turns away at the last second. 'I don't think we should.'"
+      - "The kiss is awkward and brief, and you both pretend it didn't happen."
+    affection: -3
+    mood: -5
+  backfire:
+    text:
+      - "{person.name} steps back, stung. 'I didn't ask for that.' The silence afterwards is a long one."
+      - "You've read it completely wrong. {person.name} is upset, and says so, and keeps saying so."
+    affection: -7
+    trust: -6
+    mood: -11

@@ -2,6 +2,7 @@ import type { LifeState } from '../../../engine/types';
 import { useAppStore, type TabId } from '../../../store/appStore';
 import { AgeUpButton } from '../../components/AgeUpButton';
 import { EventSheet } from '../../components/EventSheet';
+import { InteractionCard } from '../../components/InteractionCard';
 import { Screen } from '../../components/Screen';
 import { HomeTab } from '../home/HomeTab';
 import { MoneyTab } from '../money/MoneyTab';
@@ -101,6 +102,7 @@ export function GameScreen({ life }: { life: LifeState }) {
         <MoreTab />
       )}
       <EventSheet life={life} />
+      <InteractionCard life={life} />
     </Screen>
   );
 }

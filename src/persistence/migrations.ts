@@ -119,6 +119,25 @@ export const migrations: readonly Migration[] = [
       return { ...data, character: { ...data.character, hidden } };
     },
   },
+  {
+    from: 9,
+    description:
+      'E1: moods, wealth and interactions. Everyone in your life gets a mood (50, drifting to a baseline from the ' +
+      'next year on), a baseline of 50 and a wealth level: your family background for everyone, since nothing ' +
+      'recorded who anyone was before (family wealth is the one background the life has). Interaction counters ' +
+      'start empty (an optional field), and there is no outcome card waiting.',
+    migrate: (data) => {
+      if (!isRecord(data)) return data;
+      const wealth = isRecord(data.character) && typeof data.character.familyWealth === 'string' ? data.character.familyWealth : 'middle';
+      const people: Record<string, unknown> = {};
+      if (isRecord(data.people)) {
+        for (const [id, value] of Object.entries(data.people)) {
+          people[id] = isRecord(value) ? { ...value, mood: 50, moodBase: 50, wealthLevel: wealth } : value;
+        }
+      }
+      return { ...data, people, pendingInteraction: null };
+    },
+  },
 ];
 
 function isRecord(value: unknown): value is Record<string, unknown> {

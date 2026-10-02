@@ -1,0 +1,48 @@
+id: give_gift
+name: Give a gift
+blurb: Small, medium or big. It costs real money.
+group: everyday
+profile: gift
+gift: true
+inPerson: true
+availability:
+  kinds: [parent, stepparent, sibling, grandparent, friend, partner, fiance, spouse, coworker, classmate]
+  you: { min: 5 }
+  them: { min: 3 }
+outcomes:
+  great:
+    text:
+      - "{person.name} stares at the gift, then at you. 'You remembered. You actually remembered.'"
+      - "{person.name} tears the wrapping off and goes quiet. Then {person.they} {person:hugs|hug} you, hard."
+      - "It's exactly what {person.name} wanted, and {person.they} {person:doesn't|don't} bother hiding how much it means."
+    affection: 5
+    trust: 3
+    mood: 10
+    effects:
+      - { type: memory, role: person, tag: generous_gift }
+  good:
+    text:
+      - "{person.name} opens it with a smile. 'This is really thoughtful. Thank you.'"
+      - "{person.name} turns the gift over in {person.their} hands, pleased. 'You didn't have to.'"
+    affection: 3
+    trust: 1
+    mood: 6
+  neutral:
+    text:
+      - "{person.name} thanks you politely and sets the gift aside."
+      - "'Oh. Thank you,' says {person.name}. It's clearly not quite {person.their} taste."
+    affection: 1
+    mood: 1
+  bad:
+    text:
+      - "{person.name} forces a smile. The gift goes back in its wrapping before the conversation is over."
+      - "'You shouldn't have,' says {person.name}, and it doesn't sound like a compliment."
+    affection: -2
+    mood: -3
+  backfire:
+    text:
+      - "{person.name} looks at the gift, then at you, and says it feels like you're trying to buy something."
+      - "It lands as an insult. {person.name} hands it back, and the evening goes cold."
+    affection: -4
+    trust: -3
+    mood: -7

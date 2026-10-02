@@ -49,3 +49,10 @@ flows above (`balance/health.yaml`, `balance/legal.yaml` and
   back the next year with `test_resurface`. Hidden talents never surface,
   and there are no crises. Asking to tell people in the Profile sheet
   answers the next year with `test_coming_out`.
+
+Interactions (E1) are the real ones, but `balance/interactions.yaml` here
+replaces the real balance so every interaction goes the same way: neutral,
+with no roll. A fight (picking one, then throwing the first punch) always
+ends in an injury and a charge (for a minor, a suspension).
+`registries/interactions.yaml` here answers being found out with two
+predictable events (`test_flirting_found_out`, `test_cheating_found_out`).

@@ -22,7 +22,7 @@ function setup(seed?: string) {
 }
 
 /** A seed whose first year has no events (so a year runs straight through to its end). */
-const QUIET_SEED = 'test-seed-7';
+const QUIET_SEED = 'test-seed-5';
 
 afterEach(async () => {
   for (const db of opened.splice(0)) await db.delete();

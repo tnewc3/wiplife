@@ -1,0 +1,4 @@
+# Test pack: being found out is answered by one predictable event each.
+infidelity:
+  flirt: { events: [test_flirting_found_out] }
+  intimate: { events: [test_cheating_found_out] }

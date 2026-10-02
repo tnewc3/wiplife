@@ -1,0 +1,53 @@
+# E1: reacts to saying something cruel to a parent.
+id: cruel_words_echo
+title: What you said
+text: >-
+  {parent.name} is quiet over the phone. After a while, {parent.they}
+  {parent:says|say}, 'I keep thinking about what you said to me.'
+tone: serious
+category: family
+rarity: uncommon
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 14 } }
+    - { memory: { role: parent, tag: cruel_words } }
+weight: { base: 4 }
+cooldownYears: 8
+cast:
+  parent: { kind: parent, presence: anywhere }
+choices:
+  - id: take_it_back
+    label: Tell {parent.them} you didn't mean it
+    check:
+      base: 55
+      stats:
+        - { role: parent, key: affection, weight: 0.3 }
+        - { key: kindness, weight: 0.3 }
+      success:
+        text: >-
+          There's a long breath on the line. 'I know,' says {parent.name},
+          not quite steadily. 'Thank you for saying so.'
+        effects:
+          - { type: relationship, role: parent, affection: 9, trust: 6, mood: 8 }
+          - { type: memory, role: parent, tag: made_peace }
+      failure:
+        text: >-
+          {parent.name} says that it sounded like you meant it at the time.
+          You can't really argue with that.
+        effects:
+          - { type: relationship, role: parent, affection: -3, mood: -4 }
+          - { type: stat, key: stress, delta: 3 }
+  - id: stand_by_it
+    label: Say you meant what you said
+    outcome:
+      text: It goes quiet in a different way. The call ends soon after.
+      effects:
+        - { type: relationship, role: parent, affection: -10, trust: -6, mood: -10 }
+        - { type: stat, key: stress, delta: 4 }
+  - id: change_subject
+    label: Change the subject
+    outcome:
+      text: You talk about the weather. You both know what you're not talking about.
+      effects:
+        - { type: relationship, role: parent, affection: -2 }

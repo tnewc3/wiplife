@@ -1,0 +1,59 @@
+id: ask_money
+name: Ask for money
+blurb: Ask for a gift or a loan. Asking again and again costs trust.
+group: practical
+profile: request
+inPerson: false
+availability:
+  kinds: [parent, stepparent, sibling, grandparent, friend]
+  you: { min: 6 }
+  them: { min: 18 }
+  requires:
+    any:
+      - { role: person, kind: [parent, stepparent, grandparent] }
+      - { age: { gte: 16 } }
+outcomes:
+  great:
+    text:
+      - "{person.name} doesn't even ask why. The money is in your hand before you finish explaining, and {person.they} won't hear thanks."
+      - "'Don't worry about it,' says {person.name}, pressing the money into your palm. 'Just take it.'"
+    affection: 2
+    trust: 2
+    mood: 3
+    effects:
+      - { type: moneyFromPerson, role: person, mode: gift }
+  good:
+    text:
+      - "{person.name} thinks about it, then agrees to help. 'I'll cover it, just don't make a habit of it.'"
+      - "After a long pause, {person.name} nods. 'Okay. I can do this one time.'"
+    affection: 1
+    mood: -1
+    extras:
+      - if: { age: { gte: 18 } }
+        effects: [{ type: moneyFromPerson, role: person, mode: loan }]
+        note: "It's a loan, and you'll pay it back over time."
+      - if: { age: { lt: 18 } }
+        effects: [{ type: moneyFromPerson, role: person, mode: gift }]
+        note: "It's pocket money."
+  neutral:
+    text:
+      - "{person.name} shakes {person.their} head. 'Not right now. I'm sorry.'"
+      - "'I wish I could,' says {person.name}, and looks like {person.they} {person:means|mean} it."
+    trust: -1
+    mood: -2
+  bad:
+    text:
+      - "{person.name} sighs, long and tired. 'Again? I can't keep doing this.'"
+      - "The answer is no, and the way {person.name} says it makes you feel about two inches tall."
+    affection: -2
+    trust: -4
+    mood: -6
+  backfire:
+    text:
+      - "{person.name} lectures you for ten minutes, and the worst part is some of it is fair."
+      - "'Is that all I am to you?' says {person.name}. The call ends without a goodbye."
+    affection: -5
+    trust: -7
+    mood: -10
+    effects:
+      - { type: memory, role: person, tag: wore_thin }

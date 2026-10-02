@@ -1,0 +1,69 @@
+id: apologize
+name: Apologize
+blurb: Say you're sorry. Works even when you're not speaking.
+group: practical
+profile: contrite
+inPerson: false
+visit: true
+availability:
+  kinds: [parent, stepparent, sibling, grandparent, friend, partner, fiance, spouse, ex, coworker, boss, classmate, acquaintance]
+  status: [active, estranged]
+  you: { min: 5 }
+  them: { min: 3 }
+  requires:
+    any:
+      - { role: person, status: [estranged] }
+      - { memory: { role: person, tag: big_fight } }
+      - { memory: { role: person, tag: fought_with_you } }
+      - { memory: { role: person, tag: cruel_words } }
+      - { memory: { role: person, tag: humiliated_them } }
+      - { memory: { role: person, tag: pranked_them } }
+      - { memory: { role: person, tag: wore_thin } }
+      - { memory: { role: person, tag: cheated_on_them } }
+      - { memory: { role: person, tag: forgot_birthday } }
+      - { memory: { role: person, tag: forgot_anniversary } }
+      - { memory: { role: person, tag: argued_at_dinner } }
+      - { memory: { role: person, tag: spilled_their_secret } }
+outcomes:
+  great:
+    text:
+      - "The words come out right. {person.name} meets them halfway, and something that had been heavy for a long time lifts."
+      - "'Thank you for saying that,' says {person.name}, and means it. It's the beginning of something better."
+    affection: 6
+    trust: 6
+    mood: 6
+    effects:
+      - { type: relationship, role: person, status: active }
+      - { type: memory, role: person, tag: made_peace }
+      - { type: stat, key: stress, delta: -3 }
+  good:
+    text:
+      - "{person.name} is quiet for a moment. 'Okay. I appreciate that.' It's not everything, but it's a start."
+      - "{person.name} nods slowly. 'I'm still hurt,' {person.they} {person:says|say}, 'but I'm glad you said it.'"
+    affection: 3
+    trust: 3
+    mood: 3
+    effects:
+      - { type: stat, key: stress, delta: -1 }
+  neutral:
+    text:
+      - "'I know,' says {person.name}, and nothing else. It's impossible to tell whether it helped."
+      - "{person.name} accepts the words without accepting much else."
+    trust: 1
+    mood: 0
+  bad:
+    text:
+      - "'It's too late for that,' says {person.name}. It stings, because it might be true."
+      - "{person.name} listens, then says an apology doesn't undo anything. {person.They} {person:isn't|aren't} wrong."
+    affection: -2
+    trust: -1
+    mood: -3
+  backfire:
+    text:
+      - "{person.name} takes the apology as an excuse and tears into you all over again."
+      - "It comes out all wrong, and {person.name} hears an accusation. The fight starts again, worse."
+    affection: -5
+    trust: -4
+    mood: -8
+    effects:
+      - { type: stat, key: stress, delta: 3 }

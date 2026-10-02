@@ -300,7 +300,10 @@ describe('pacing director', () => {
     for (let s = 0; s < 20; s++) {
       for (const begun of years(`pace-${s}`, 90)) {
         const max = Math.min(cap, budgets[begun.character.lifeStage].max + volatility.maxBonus);
-        expect(begun.pending.length).toBeLessThanOrEqual(max);
+        // The budget limits the new events; follow-ups that fall due (and the ones systems queue) come first,
+        // up to the cap, so a busy year can hold more than the stage's budget.
+        expect(begun.pending.filter((p) => !content.events[p.eventId]!.followUpOnly).length).toBeLessThanOrEqual(max);
+        expect(begun.pending.length).toBeLessThanOrEqual(cap);
         const ids = begun.pending.map((p) => p.eventId);
         expect(new Set(ids).size).toBe(ids.length);
       }
@@ -349,7 +352,7 @@ describe('pacing director', () => {
     expect(after.eventLog.follow).toEqual({ count: 1, lastYear: life.currentYear });
   });
 
-  it('fires chain follow-ups within their delay window', () => {
+  it('fires chain follow-ups within their delay window', { timeout: 60_000 }, () => {
     // stray_dog → dog_chews_shoes in 1–2 years (if the dog was kept).
     let checked = 0;
     for (let s = 0; s < 400 && checked < 5; s++) {

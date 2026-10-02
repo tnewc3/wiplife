@@ -1,0 +1,58 @@
+id: go_on_date
+name: Go on a date
+blurb: An evening out, just the two of you.
+group: romance
+romance: true
+profile: romantic
+inPerson: true
+availability:
+  kinds: [friend, acquaintance, classmate, coworker, ex, partner, fiance, spouse]
+  you: { min: 18 }
+  them: { min: 18 }
+  requires: { role: person, affection: { gte: 30 } }
+outcomes:
+  great:
+    text:
+      - "Dinner turns into a walk turns into the last train home. Neither of you wants the night to end."
+      - "The conversation never runs out. By the time you say goodnight, you're both a little dizzy."
+      - "{person.name} reaches for your hand somewhere between the first and second hour, and you don't let go."
+    affection: 6
+    trust: 3
+    mood: 10
+    effects:
+      - { type: infidelity, role: person, act: flirt }
+      - { type: stat, key: happiness, delta: 3 }
+      - { type: memory, role: person, tag: romantic_date }
+  good:
+    text:
+      - "A lovely evening. Good food, easy talk, and a goodnight that lingers."
+      - "You make {person.name} laugh more than once, and you leave wanting to do this again."
+    affection: 4
+    trust: 1
+    mood: 7
+    effects:
+      - { type: infidelity, role: person, act: flirt }
+      - { type: stat, key: happiness, delta: 2 }
+  neutral:
+    text:
+      - "A pleasant, forgettable evening. Nothing wrong with it. Nothing much right with it either."
+      - "You go through the motions. It's fine."
+    affection: 1
+    mood: 1
+  bad:
+    text:
+      - "The evening drags. The conversation keeps stalling, and you both watch the clock."
+      - "{person.name} is on the phone for half the date. By dessert, you've stopped pretending."
+    affection: -3
+    mood: -5
+    effects:
+      - { type: memory, role: person, tag: bad_first_date }
+  backfire:
+    text:
+      - "It ends early and badly: an argument, an exit, a very quiet ride home."
+      - "Something you say lands wrong, and {person.name} leaves before the evening is over."
+    affection: -6
+    trust: -4
+    mood: -10
+    effects:
+      - { type: memory, role: person, tag: bad_first_date }

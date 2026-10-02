@@ -1,0 +1,38 @@
+# E1: reacts to a gift that meant a lot.
+id: gift_remembered
+title: Still got it
+text: >-
+  {friend.name} pulls out the gift you gave {friend.them} and says it's the
+  one thing {friend.they} {friend:grabs|grab} first when {friend.they}
+  {friend:leaves|leave} the house.
+tone: light
+category: friends
+rarity: uncommon
+lifeStages: [child, teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 8 } }
+    - { memory: { role: friend, tag: generous_gift } }
+weight: { base: 4 }
+cooldownYears: 8
+cast:
+  friend: { kind: friend, presence: city }
+choices:
+  - id: touched
+    label: Admit it means a lot to you that it matters
+    outcome:
+      text: >-
+        You say it out loud, which is rare. {friend.name} blinks, then
+        laughs to cover it, and the two of you stay up too late.
+      effects:
+        - { type: relationship, role: friend, affection: 6, trust: 4, mood: 6 }
+        - { type: stat, key: happiness, delta: 3 }
+  - id: tease
+    label: Tease {friend.them} about it
+    outcome:
+      text: >-
+        'You're going to get buried with that, aren't you?' {friend.name}
+        doesn't deny it.
+      effects:
+        - { type: relationship, role: friend, affection: 3, mood: 4 }
+        - { type: stat, key: happiness, delta: 1 }

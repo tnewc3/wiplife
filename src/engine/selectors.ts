@@ -50,6 +50,11 @@ import {
   type PurchaseQuote,
 } from './housing';
 import { costToYou, familyHelp, rentMonthsAmount } from './costs';
+import { availableInteractions } from './interactions/availability';
+import { moodView, type MoodView } from './interactions/mood';
+export { getInteractionMenu, getInteractionOutcome } from './interactions/views';
+export type { InteractionMenuGroup, InteractionMenuItem, InteractionOutcomeView } from './interactions/views';
+export type { MoodBand, MoodView } from './interactions/mood';
 import { consistencyProblems, whereabouts } from './presence';
 import { benefitFromRecord } from './retirement';
 import {
@@ -450,6 +455,8 @@ export interface PersonRow {
   current: boolean;
   /** Has been your spouse (an ex-spouse, once divorced). */
   wasSpouse: boolean;
+  /** E1: how they're feeling, for people close to you only (family, your partner, close friends); null otherwise. */
+  mood: MoodView | null;
 }
 
 function groupOf(kind: RelationshipKind): PeopleGroupId {
@@ -459,7 +466,7 @@ function groupOf(kind: RelationshipKind): PeopleGroupId {
   return 'friends';
 }
 
-function personRow(state: LifeState, person: Person, rel: Relationship): PersonRow {
+function personRow(state: LifeState, person: Person, rel: Relationship, content: ContentBundle): PersonRow {
   return {
     id: person.id,
     fullName: `${person.name.first} ${person.name.last}`,
@@ -472,6 +479,7 @@ function personRow(state: LifeState, person: Person, rel: Relationship): PersonR
     trust: rel.trust,
     current: isCurrentPartner(state, rel),
     wasSpouse: rel.wasSpouse === true,
+    mood: moodView(state, person.id, content),
   };
 }
 
@@ -497,7 +505,7 @@ const KIND_ORDER: RelationshipKind[] = [
  * (status 'ended') is left out. Within a group: the living first, then by
  * kind, then (family) oldest first or (others) closest first.
  */
-export function getPeople(state: LifeState): Record<PeopleGroupId, PersonRow[]> {
+export function getPeople(state: LifeState, content: ContentBundle): Record<PeopleGroupId, PersonRow[]> {
   const groups: Record<PeopleGroupId, PersonRow[]> = { family: [], romance: [], friends: [], work: [] };
   for (const id of Object.keys(state.relationships).sort()) {
     const rel = state.relationships[id]!;
@@ -505,7 +513,7 @@ export function getPeople(state: LifeState): Record<PeopleGroupId, PersonRow[]> 
     if (!person) continue;
     const group = groupOf(rel.kind);
     if (group !== 'family' && rel.status === 'ended') continue;
-    groups[group].push(personRow(state, person, rel));
+    groups[group].push(personRow(state, person, rel, content));
   }
   const birthYear = (row: PersonRow) => state.people[row.id]!.birthYear;
   for (const group of PEOPLE_GROUPS) {
@@ -533,6 +541,8 @@ export interface PersonDetail {
   memories: MemoryView[];
   /** Management actions available now (none for the dead). */
   actions: AvailableAction[];
+  /** E1: you can interact with them now (the Interact button shows). */
+  canInteract: boolean;
 }
 
 /** A memory's readable text for this person (registries/memories.yaml). */
@@ -551,10 +561,11 @@ export function getPersonDetail(state: LifeState, personId: Id, content: Content
     .map((m) => ({ year: m.year, age: m.year - state.birthYear, text: memoryText(m.tag, person, content) }))
     .reverse();
   return {
-    row: personRow(state, person, rel),
+    row: personRow(state, person, rel, content),
     pronounLabel: `${person.identity.pronouns.subject}/${person.identity.pronouns.object}`,
     memories,
     actions: availableActions(state, personId, content),
+    canInteract: availableInteractions(state, personId, content).length > 0,
   };
 }
 

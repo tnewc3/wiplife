@@ -1,0 +1,51 @@
+id: offer_help
+name: Offer help
+blurb: Lend a hand with whatever they're dealing with.
+group: practical
+profile: helpful
+inPerson: true
+availability:
+  kinds: [parent, stepparent, sibling, grandparent, friend, partner, fiance, spouse, coworker, classmate]
+  you: { min: 8 }
+  them: { min: 4 }
+outcomes:
+  great:
+    text:
+      - "You turn up exactly when it matters. {person.name} says it's the nicest thing anyone has done for {person.them} in a long time."
+      - "You take over, sleeves rolled up, and {person.name} watches in disbelief. 'I didn't even have to ask.'"
+    affection: 5
+    trust: 4
+    mood: 8
+    effects:
+      - { type: stat, key: kindness, delta: 1 }
+      - { type: stat, key: happiness, delta: 2 }
+      - { type: memory, role: person, tag: you_helped_them }
+  good:
+    text:
+      - "{person.name} accepts the help with obvious relief. Between you, it's done in half the time."
+      - "You spend the afternoon helping out. It's a bit tedious and entirely worth it."
+    affection: 3
+    trust: 2
+    mood: 5
+    effects:
+      - { type: stat, key: happiness, delta: 1 }
+      - { type: memory, role: person, tag: you_helped_them }
+  neutral:
+    text:
+      - "'I've got it,' says {person.name}, but lets you stay anyway."
+      - "You help for a while. It isn't clear it changed much."
+    affection: 1
+    mood: 1
+  bad:
+    text:
+      - "You make it worse. {person.name} is polite about it, which is somehow worse."
+      - "{person.name} would rather do it alone, and says so in a dozen small ways."
+    affection: -2
+    mood: -3
+  backfire:
+    text:
+      - "You break something in the middle of helping. {person.name} is furious, and not quietly."
+      - "{person.name} takes the offer as an insult: 'You think I can't handle my own life?'"
+    affection: -4
+    trust: -3
+    mood: -7

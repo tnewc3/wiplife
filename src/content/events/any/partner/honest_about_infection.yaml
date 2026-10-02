@@ -1,0 +1,55 @@
+# E1: reacts to an infection picked up from an intimate night (an interaction).
+id: honest_about_infection
+title: A conversation you can't put off
+text: >-
+  Things with {partner.name} are getting serious. There's something about your
+  health that {partner.they} deserve to know before they go any further, and
+  you've been rehearsing how to say it for weeks.
+tone: serious
+category: partner
+rarity: uncommon
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { romance: [dating, engaged] }
+    - { flag: was_infected, eq: true }
+    - { health: { conditions: [chronic_infection] } }
+weight: { base: 5 }
+cooldownYears: 10
+cast:
+  partner: { kind: partner, presence: nearby }
+choices:
+  - id: tell
+    label: Tell {partner.them} tonight
+    check:
+      base: 60
+      stats:
+        - { role: partner, key: trust, weight: 0.3 }
+        - { role: partner, key: affection, weight: 0.3 }
+      success:
+        text: >-
+          {partner.name} is quiet, then holds your hand. 'Thank you for
+          telling me. Let's work out what this means for us, together.'
+        effects:
+          - { type: relationship, role: partner, affection: 6, trust: 10, mood: 2 }
+          - { type: stat, key: stress, delta: -4 }
+          - { type: stat, key: confidence, delta: 1 }
+      failure:
+        text: >-
+          {partner.name} needs a few days. When {partner.they} {partner:calls|call},
+          it's to say that {partner.they} can't do this. At least it was honest.
+        effects:
+          - { type: relationship, role: partner, kind: ex, affection: -10, trust: -5 }
+          - { type: memory, role: partner, tag: they_broke_up }
+          - { type: stat, key: happiness, delta: -6 }
+          - { type: history, text: 'You told {partner.name} about your health, and {partner.they} ended it.', importance: 2 }
+  - id: put_off
+    label: Put it off a little longer
+    outcome:
+      text: >-
+        Every day it gets harder to say. {partner.name} senses there's
+        something wrong and doesn't know what.
+      effects:
+        - { type: relationship, role: partner, affection: -2, trust: -4 }
+        - { type: stat, key: stress, delta: 5 }
