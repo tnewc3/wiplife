@@ -18,7 +18,7 @@ choices:
     outcome:
       text: >-
         More cake each. Every game is a tournament. {parent.name} makes up
-        prizes on the spot. Years later, those two are the ones you remember.
+        prizes on the spot. Those two are the ones you'll remember.
       effects:
         - { type: stat, key: happiness, delta: 2 }
         - { type: stat, key: sociability, delta: 2 }

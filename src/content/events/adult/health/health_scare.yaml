@@ -30,7 +30,7 @@ choices:
       base: 50
       stats: [{ key: health, weight: 0.3 }]
       success:
-        text: Months later, the tests come back clear. You got lucky.
+        text: When you finally go, the tests come back clear. You got lucky.
         effects:
           - { type: stat, key: stress, delta: 2 }
       failure:

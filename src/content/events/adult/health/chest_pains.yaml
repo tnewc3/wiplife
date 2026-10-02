@@ -38,7 +38,7 @@ choices:
           - { type: health, conditionId: heart_disease, severity: 10 }
       failure:
         text: >-
-          It doesn't pass. A neighbor finds you on the landing. You live, but
+          It doesn't pass. Someone finds you on the landing. You live, but
           your heart will never be the same.
         effects:
           - { type: health, conditionId: heart_disease, severity: 35 }

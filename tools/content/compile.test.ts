@@ -73,6 +73,12 @@ describe('content build with the real content', () => {
     expect(result.bundle.balance.mortality.maxAge).toBe(120);
     expect(result.bundle.text.obituary.opening.finished.mixed.length).toBeGreaterThan(0);
   });
+
+  it('has no consistency warnings left unreviewed (C1, docs/consistency-review.md)', async () => {
+    const result = await compileContent({ contentDir: realContentDir, appVersion: '1.2.3' });
+    if (!result.ok) throw new Error(formatErrors(result.errors));
+    expect(result.warnings.map((w) => w.message)).toEqual([]);
+  });
 });
 
 describe('content build with fixture files', () => {
@@ -360,6 +366,40 @@ ${extra}`;
       expect(await expectErrors()).toContain('presence');
       await write(file, event().replace('presence: city', 'presence: household'));
       expect(await expectErrors()).toContain("presence household can't create someone new");
+    });
+
+    it('warns on money talk without money, past claims without evidence, and fixed gaps in follow-ups (C1)', async () => {
+      // Money: the label lends money, the outcome changes none.
+      await write(file, event().replace('label: Wave back', 'label: Lend {npc.them} $50'));
+      let result = await compile();
+      if (!result.ok) throw new Error(formatErrors(result.errors));
+      expect(result.warnings.map((w) => [w.eventId, w.kind])).toEqual([['test_event', 'money']]);
+      // Justified: no warning.
+      await write(file, `${event().replace('label: Wave back', 'label: Lend {npc.them} $50')}justified: { money: "A test of the justification field." }\n`);
+      result = await compile();
+      if (!result.ok) throw new Error(formatErrors(result.errors));
+      expect(result.warnings).toEqual([]);
+      // Past: a claim with no flag, memory or earlier event behind it.
+      await write(file, event().replace("'{npc.name} waves.'", "'{npc.name} waves, the way you used to.'"));
+      result = await compile();
+      if (!result.ok) throw new Error(formatErrors(result.errors));
+      expect(result.warnings.map((w) => w.kind)).toEqual(['past']);
+      // A justification nothing needs is an error.
+      await write(file, `${event()}justified: { past: "Nothing here needs this at all." }\n`);
+      expect(await expectErrors()).toContain('justified.past is set, but nothing is flagged');
+    });
+
+    it('warns on a fixed time gap in a follow-up (C1)', async () => {
+      await write(
+        file,
+        event()
+          .replace("'{npc.name} waves.'", "'Years later, {npc.name} waves.'")
+          .replace('weight: { base: 5 }', 'weight: { base: 5 }\nfollowUpOnly: true')
+          .replace('tag: lent_money }', 'tag: lent_money }\n        - { type: schedule, eventId: test_event, inYears: [1, 2], cast: [npc] }'),
+      );
+      const result = await compile();
+      if (!result.ok) throw new Error(formatErrors(result.errors));
+      expect(result.warnings.map((w) => w.message)).toEqual([expect.stringContaining('fixed time phrase "Years later"')]);
     });
 
     it('keeps {since} to scheduled follow-ups and checks cost items (C1)', async () => {

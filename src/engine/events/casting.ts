@@ -31,7 +31,9 @@ function fitsAge(state: LifeState, spec: CastSpec, age: number): boolean {
  * Living people who fit the spec, in id order: of its kind (not faded out of
  * your life), of its ages, and for a romantic role a possible partner. For a
  * support role: close people (not estranged) whose trust and affection reach
- * the support thresholds, most trusted first.
+ * the support thresholds, most trusted first. With preferHousehold (C1, home
+ * and wellbeing events), a partner who lives with you is always a candidate,
+ * first, whatever the thresholds: they are there, so they notice.
  */
 export function castCandidates(state: LifeState, spec: CastSpec, content: ContentBundle, preferHousehold = false): Person[] {
   const support = content.balance.relationships.support;
@@ -43,7 +45,8 @@ export function castCandidates(state: LifeState, spec: CastSpec, content: Conten
       if (!person || !person.alive || rel.status === 'ended') return [];
       if (spec.support) {
         if (rel.status !== 'active' || !SUPPORT_KINDS.includes(rel.kind)) return [];
-        if (rel.trust < support.minTrust || rel.affection < support.minAffection) return [];
+        const housePartner = preferHousehold && state.housing.partnerId === id;
+        if (!housePartner && (rel.trust < support.minTrust || rel.affection < support.minAffection)) return [];
       } else if (rel.kind !== spec.kind) {
         return [];
       }

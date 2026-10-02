@@ -12,6 +12,8 @@ requires:
   all:
     - { age: { gte: 18 } }
     - { romance: [married] }
+    # C1: the conference is for work.
+    - { career: { employed: true } }
 weight:
   base: 1.2
   modifiers:

@@ -15,11 +15,12 @@ requires:
 weight: { base: 5 }
 cooldownYears: 5
 cast:
+  # C1: whoever you trust most; a partner you live with comes first.
   helper: { support: true, optional: true, presence: anywhere }
 choices:
   - id: call
     label: Call {helper.name}, even though it's late
-    visibleIf: { role: helper }
+    visibleIf: { role: helper, where: [city, elsewhere] }
     outcome:
       text: >-
         {helper.name} picks up on the first ring and stays on the line until
@@ -30,10 +31,24 @@ choices:
         - { type: relationship, role: helper, affection: 5, trust: 5 }
         - { type: stat, key: stress, delta: -10 }
         - { type: stat, key: happiness, delta: 5 }
+  # C1: a partner you live with is in the next room, not on the phone.
+  - id: wake
+    label: Wake {helper.name}, even though it's late
+    visibleIf: { role: helper, where: [household] }
+    outcome:
+      text: >-
+        {helper.name} sits up, switches on the lamp and listens until the sky
+        gets light. The next night {helper.they} {helper:stays|stay} up with you
+        again, and the next.
+      effects:
+        - { type: memory, role: helper, tag: stood_by_you }
+        - { type: relationship, role: helper, affection: 5, trust: 5 }
+        - { type: stat, key: stress, delta: -10 }
+        - { type: stat, key: happiness, delta: 5 }
   - id: bottle
     label: Keep it to yourself
     outcome:
-      text: You get up, get through the day, and smile at people. Nobody notices a thing, which is somehow worse.
+      text: You get up, get through the day, and smile at people. If anyone notices, they don't say, which is somehow worse.
       effects:
         - { type: stat, key: stress, delta: 4 }
         - { type: stat, key: happiness, delta: -2 }

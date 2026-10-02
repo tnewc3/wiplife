@@ -296,3 +296,52 @@ describe('problem reports', () => {
     expect(report).toContain('consistency: visit: pal must be city but is elsewhere');
   });
 });
+
+describe('household awareness in wellbeing events (C1 playtesting)', () => {
+  const partnered = (trust: number) =>
+    lifeWith(30, [{ id: 'spouse', kind: 'spouse', trust }, { id: 'pal', kind: 'friend', trust: 95 }], (d) => {
+      d.housing.partnerId = 'spouse';
+      d.character.stats.stress = 80;
+    });
+
+  it('casts a partner you live with as the helper, even below the usual trust, and offers to wake them instead of calling', () => {
+    const def = content.events.everything_is_too_much!;
+    const life = partnered(10);
+    const cast = castEvent(cloneJson(life), def, createRng('w'), content)!.cast;
+    expect(cast.helper).toBe('spouse');
+    const card = getEventCard(
+      produce(life, (d) => {
+        d.phase = 'events';
+        d.pending = [{ instanceId: 'x', eventId: def.id, cast }];
+      }),
+      0,
+      content,
+    )!;
+    const ids = card.choices.map((c) => c.id);
+    expect(ids).toContain('wake');
+    expect(ids).not.toContain('call');
+  });
+
+  it('calls a friend who is not at home instead', () => {
+    const def = content.events.everything_is_too_much!;
+    const life = lifeWith(30, [{ id: 'pal', kind: 'friend', trust: 95 }], (d) => {
+      d.character.stats.stress = 80;
+      d.phase = 'events';
+      d.pending = [{ instanceId: 'x', eventId: def.id, cast: { helper: 'pal' } }];
+    });
+    const ids = getEventCard(life, 0, content)!.choices.map((c) => c.id);
+    expect(ids).toContain('call');
+    expect(ids).not.toContain('wake');
+  });
+});
+
+describe('a partner you live with is never cast as visiting (C1 playtesting)', () => {
+  it('rejects "in town for one night" for an old friend who now lives with you', () => {
+    const def = content.events.old_friend_reunion!;
+    const life = lifeWith(30, [{ id: 'old', kind: 'partner' }], (d) => {
+      d.housing.partnerId = 'old';
+    });
+    expect(def.cast!.friend!.presence).toBe('elsewhere');
+    expect(consistencyProblems(life, def, { friend: 'old' }, content)).toEqual(['old_friend_reunion: friend must be elsewhere but is household']);
+  });
+});

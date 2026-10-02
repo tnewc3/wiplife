@@ -18,16 +18,31 @@ cooldownYears: 4
 justified:
   past: "\"The things you used to love\" describes depression in general, not a specific claim about your history."
 cast:
-  helper: { support: true, optional: true, presence: anywhere }
+  # C1: whoever you trust most nearby; a partner you live with comes first.
+  helper: { support: true, optional: true, presence: nearby }
 choices:
   - id: tell
     label: Tell {helper.name} how bad it's gotten
-    visibleIf: { role: helper }
+    visibleIf: { role: helper, where: [city] }
     outcome:
       text: >-
         {helper.name} doesn't try to fix it. {helper.They} just {helper:shows|show}
         up, every day, with soup and terrible television. It helps more than
         you can say.
+      effects:
+        - { type: health, conditionId: depression, severity: -15 }
+        - { type: relationship, role: helper, affection: 6, trust: 6 }
+        - { type: memory, role: helper, tag: cared_for_you }
+        - { type: stat, key: happiness, delta: 3 }
+  # C1: a partner you live with is already there.
+  - id: tell_home
+    label: Tell {helper.name} how bad it's gotten
+    visibleIf: { role: helper, where: [household] }
+    outcome:
+      text: >-
+        {helper.name} doesn't try to fix it. {helper.They} just {helper:makes|make}
+        soup every night and {helper:sits|sit} through terrible television with
+        you. It helps more than you can say.
       effects:
         - { type: health, conditionId: depression, severity: -15 }
         - { type: relationship, role: helper, affection: 6, trust: 6 }
