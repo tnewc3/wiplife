@@ -1,0 +1,44 @@
+# C1: restored now that lives have grandparents (creation/family.ts).
+id: grandparent_stories
+title: How it used to be
+text: >-
+  {grandparent.name} has started telling the same stories, but there's one
+  you've never heard: the year {grandparent.they} ran away from home and how
+  far {grandparent.they} got.
+tone: light
+category: family
+rarity: common
+lifeStages: [teen, youngAdult]
+requires: { role: grandparent, age: { gte: 70 } }
+weight: { base: 4 }
+once: true
+cast:
+  # Told in person: they live nearby.
+  grandparent: { kind: grandparent, presence: nearby }
+choices:
+  - id: record
+    label: Record it on your phone
+    outcome:
+      text: >-
+        Forty minutes of {grandparent.name} laughing at {grandparent.themself}.
+        You'll play it again someday, when you need to hear that voice.
+      effects:
+        - { type: relationship, role: grandparent, affection: 8 }
+        - { type: stat, key: kindness, delta: 2 }
+  - id: cookies
+    label: Ask for the cookie recipe too
+    visibleIf: { memory: { role: grandparent, tag: spoiled_you } }
+    outcome:
+      text: >-
+        "There's no recipe," {grandparent.name} says. "There's just
+        enough butter." {grandparent.They} {grandparent:writes|write} it down anyway, on
+        a card you'll keep for the rest of your life.
+      effects:
+        - { type: relationship, role: grandparent, affection: 10, trust: 5 }
+        - { type: stat, key: happiness, delta: 3 }
+  - id: phone
+    label: Nod along while texting
+    outcome:
+      text: You catch the end of it. Something about a train. You mean to ask again.
+      effects:
+        - { type: relationship, role: grandparent, affection: -2 }

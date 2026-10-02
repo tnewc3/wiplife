@@ -1,6 +1,7 @@
 /**
  * Time and aging (year pipeline step 1): the year and age advance, the life
- * stage updates with a history entry, and Health slowly declines with age.
+ * stage updates with a history entry, Health slowly declines with age, and
+ * (C1) Happiness drifts back toward the life's personal baseline.
  */
 import type { ContentBundle } from '../../content/schemas';
 import { curveAt } from '../curve';
@@ -43,4 +44,12 @@ export function advanceAge(state: LifeState, content: ContentBundle): void {
   const whole = Math.floor(decline);
   const lost = whole + (decline > whole && chance(state.rng, decline - whole) ? 1 : 0);
   c.stats.health = Math.max(0, c.stats.health - lost);
+
+  c.stats.happiness = happinessAfterDrift(c.stats.happiness, c.hidden.happinessBaseline, content);
+}
+
+/** C1: Happiness moved part of the way back toward the baseline (balance aging.yaml happinessDrift). */
+export function happinessAfterDrift(happiness: number, baseline: number, content: ContentBundle): number {
+  const moved = happiness + Math.round((baseline - happiness) * content.balance.aging.happinessDrift.rate);
+  return Math.max(0, Math.min(100, moved));
 }

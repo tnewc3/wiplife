@@ -169,7 +169,11 @@ describe('lives from Stage 3 on', () => {
     expect(result.status).toBe('ok');
     if (result.status === 'ok') {
       expect(result.envelope.schemaVersion).toBe(CURRENT_SCHEMA_VERSION);
-      expect(result.envelope.data).toEqual(random('stage2'));
+      // A life from before C1 gets the average Happiness baseline (the C1 migration).
+      const expected = produce(random('stage2'), (d) => {
+        d.character.hidden.happinessBaseline = 58;
+      });
+      expect(result.envelope.data).toEqual(expected);
     }
   });
 
@@ -424,5 +428,40 @@ describe('lives from Stage 9 on', () => {
     expect(schema.safeParse({ ...life, housing: { ...life.housing, kind: 'incarcerated' } }).success).toBe(false);
     expect(schema.safeParse({ ...life, health: { conditions: [{ conditionId: 'the_vapors', since: life.currentYear, severity: 10, treated: false }] } }).success).toBe(false);
     expect(lifeStateSchema.safeParse({ ...life, health: { conditions: [{ conditionId: 'cancer', since: life.currentYear, severity: 0, treated: false }] } }).success).toBe(false);
+  });
+});
+
+describe('lives from C1 on', () => {
+  it('upgrade a schema version 8 life with the average Happiness baseline', async () => {
+    const life = lifeAtAge('c1-migrate', 30);
+    const { happinessBaseline: _dropped, ...hidden } = life.character.hidden;
+    const v8 = { ...life, character: { ...life.character, hidden } };
+    const db = freshDb();
+    await db.lives.put({ id: 'active', envelope: { ...makeEnvelope(v8, content.contentVersion), schemaVersion: 8 } });
+    const result = await readSave(db, loadedLifeSchema(content));
+    expect(result.status).toBe('ok');
+    if (result.status !== 'ok') return;
+    expect(result.envelope.schemaVersion).toBe(CURRENT_SCHEMA_VERSION);
+    expect(result.envelope.data.character.hidden.happinessBaseline).toBe(58);
+  });
+
+  it('round trip a follow-up and its time, outcome money and a changed rent', async () => {
+    const life = produce(lifeAtAge('c1-round', 30), (d) => {
+      d.housing = { kind: 'renting', cityId: d.character.cityId, annualCost: 15_000, since: d.currentYear - 2, rentFactor: 1.08 };
+      d.scheduled = [{ eventId: 'rent_hike', dueYear: d.currentYear + 2, cast: {}, since: d.currentYear }];
+      d.phase = 'events';
+      d.pending = [
+        { instanceId: 'e1', eventId: 'rent_hike', cast: {}, since: d.currentYear - 1, resolvedChoiceId: 'pay', money: { change: 0, balance: 10, debtChange: 0, housing: { change: 1_100, annual: 15_000 } } },
+      ];
+    });
+    expect(await roundTrip(life)).toEqual(life);
+  });
+
+  it('refuse a broken outcome record or rent factor', () => {
+    const life = lifeAtAge('c1-bad', 30);
+    const schema = loadedLifeSchema(content);
+    expect(schema.safeParse({ ...life, housing: { ...life.housing, rentFactor: -1 } }).success).toBe(false);
+    const pending = [{ instanceId: 'e1', eventId: 'rent_hike', cast: {}, money: { change: 1, balance: -5, debtChange: 0 } }];
+    expect(schema.safeParse({ ...life, phase: 'events', pending }).success).toBe(false);
   });
 });

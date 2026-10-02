@@ -41,6 +41,7 @@ describe('relativeLabel', () => {
     const expected: Record<string, Record<GenderCategory, string>> = {
       parent: { woman: 'Mother', man: 'Father', nonbinary: 'Parent' },
       sibling: { woman: 'Sister', man: 'Brother', nonbinary: 'Sibling' },
+      grandparent: { woman: 'Grandmother', man: 'Grandfather', nonbinary: 'Grandparent' },
     };
     for (let i = 0; i < 300; i++) {
       const life = createLife({ mode: 'random', seed: `labels-${i}`, birthYear: 2026 }, content);

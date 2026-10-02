@@ -157,15 +157,13 @@ predeceasedBy:
   - "{self.They} {self:was|were} preceded in death by {predeceased}."
 
 # By average Happiness over the whole life: the first band the character reaches.
-# The bands sit around how simulated lives actually go (median about 93 before
-# Stage 12 balancing); Stage 12 retunes them with Happiness.
 mood:
-  - minHappiness: 95
+  - minHappiness: 70
     variants:
       - "Those who knew {self.them} remember a life lived with real joy."
       - "{self.They} laughed easily and often."
       - "People remember {self.them} as the one who made a room feel lighter."
-  - minHappiness: 85
+  - minHappiness: 40
     variants:
       - "{self.Their} life had its share of ups and downs, and {self.they} met most of them head-on."
       - "{self.They} knew good years and hard ones."

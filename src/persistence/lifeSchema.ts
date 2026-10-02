@@ -80,6 +80,7 @@ const character = z.strictObject({
     geneticRisk: score,
     vice: score,
     innerConflict: score,
+    happinessBaseline: score,
     talent: id.nullable(),
     talentDiscovered: z.boolean(),
   }),

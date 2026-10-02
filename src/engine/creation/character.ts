@@ -103,7 +103,8 @@ export function rollHidden(rng: RngState, content: ContentBundle): HiddenValues 
   const vice = rollScore(rng, hidden.vice);
   const talents = activeIds(content.talents);
   const talent = chance(rng, talentChance) && talents.length > 0 ? pick(rng, talents) : null;
-  return { luck, reputation, geneticRisk, vice, innerConflict: 0, talent, talentDiscovered: false };
+  const happinessBaseline = rollScore(rng, hidden.happinessBaseline);
+  return { luck, reputation, geneticRisk, vice, innerConflict: 0, happinessBaseline, talent, talentDiscovered: false };
 }
 
 export function rollAppearance(rng: RngState, content: ContentBundle): string[] {

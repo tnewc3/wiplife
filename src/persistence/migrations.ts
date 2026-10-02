@@ -107,6 +107,18 @@ export const migrations: readonly Migration[] = [
       return { ...data, discovery: { surfaced: {} } };
     },
   },
+  {
+    from: 8,
+    description:
+      'C1: the Happiness baseline each year drifts toward (a hidden value rolled at birth). A life from before C1 ' +
+      'gets the average baseline, 58 (balance/creation.yaml when C1 shipped). Follow-ups, outcome money and rent ' +
+      'changes are new optional fields, so they need no upgrade.',
+    migrate: (data) => {
+      if (!isRecord(data) || !isRecord(data.character) || !isRecord(data.character.hidden)) return data;
+      const hidden = { ...data.character.hidden, happinessBaseline: 58 };
+      return { ...data, character: { ...data.character, hidden } };
+    },
+  },
 ];
 
 function isRecord(value: unknown): value is Record<string, unknown> {

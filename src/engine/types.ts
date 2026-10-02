@@ -68,6 +68,8 @@ export interface HiddenValues {
   geneticRisk: number;
   vice: number;
   innerConflict: number;
+  /** C1: the Happiness this life drifts back toward each year. */
+  happinessBaseline: number;
   talent: Id | null;
   talentDiscovered: boolean;
 }

@@ -75,7 +75,7 @@ export function checkInvariants(state: LifeState, content: ContentBundle): strin
   identity('character.identity', c.identity);
   for (const [key, value] of Object.entries(c.stats)) score(`character.stats.${key}`, value);
   for (const [key, value] of Object.entries(c.personality)) score(`character.personality.${key}`, value);
-  for (const key of ['luck', 'reputation', 'geneticRisk', 'vice', 'innerConflict'] as const) {
+  for (const key of ['luck', 'reputation', 'geneticRisk', 'vice', 'innerConflict', 'happinessBaseline'] as const) {
     score(`character.hidden.${key}`, c.hidden[key]);
   }
   if (c.hidden.talent !== null && !content.talents[c.hidden.talent]) fail(`talent "${c.hidden.talent}" is not known`);

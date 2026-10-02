@@ -12,13 +12,17 @@ import { createAppStore } from './appStore';
 let n = 0;
 const opened: WiplifeDb[] = [];
 
-function setup() {
+/** `seed`: every new life uses it (a seed whose first year has no events, for tests that need a quiet year). */
+function setup(seed?: string) {
   const db = createDb(`wiplife-store-test-${++n}`);
   opened.push(db);
   let seeds = 0;
-  const options = { db, makeSeed: () => `test-seed-${++seeds}`, currentYear: () => 2026, checkInvariants: true };
+  const options = { db, makeSeed: () => seed ?? `test-seed-${++seeds}`, currentYear: () => 2026, checkInvariants: true };
   return { db, options, store: createAppStore(options) };
 }
+
+/** A seed whose first year has no events (so a year runs straight through to its end). */
+const QUIET_SEED = 'test-seed-7';
 
 afterEach(async () => {
   for (const db of opened.splice(0)) await db.delete();
@@ -96,7 +100,7 @@ describe('app store: lives', () => {
   });
 
   it('restores the backup when the saved life breaks an invariant', async () => {
-    const { db, options, store } = setup();
+    const { db, options, store } = setup(QUIET_SEED);
     await store.getState().init();
     await store.getState().startRandomLife();
     // Aging up autosaves twice (after beginYear and endYear), so the newest
@@ -212,7 +216,7 @@ describe('app store: aging', () => {
   });
 
   it('finishes a year that was saved in the middle when the game reopens', async () => {
-    const { db, options, store } = setup();
+    const { db, options, store } = setup(QUIET_SEED);
     await store.getState().init();
     await store.getState().startRandomLife();
     const midYear = beginYear(store.getState().life!, content);
@@ -230,7 +234,7 @@ describe('app store: aging', () => {
   });
 
   it('finishes an interrupted year on Age Up instead of starting another', async () => {
-    const { store } = setup();
+    const { store } = setup(QUIET_SEED);
     await store.getState().init();
     await store.getState().startRandomLife();
     store.setState({ life: beginYear(store.getState().life!, content) });
