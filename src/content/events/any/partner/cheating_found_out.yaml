@@ -1,0 +1,69 @@
+# E1: follow-up of a night with someone who isn't your partner
+# (registries/interactions.yaml): your partner or fiancé finds out. (For a
+# spouse, affair_discovered answers instead.)
+id: cheating_found_out
+title: The wrong name
+text: >-
+  {partner.name} is sitting very still when you get home. 'I know about
+  {other.name},' {partner.they} {partner:says|say}. 'I need you to tell me
+  the truth.'
+tone: dark
+category: partner
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { romance: [dating, engaged] }
+    - { role: partner, kind: [partner, fiance] }
+    - { memory: { role: partner, tag: cheated_on_them } }
+    - { memory: { role: other, tag: affair_with_you } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  partner: { kind: partner, presence: anywhere }
+  other: { kind: acquaintance, age: { min: 18, max: 120 }, presence: anywhere }
+choices:
+  - id: confess
+    label: Tell the truth
+    check:
+      base: 25
+      stats:
+        - { role: partner, key: affection, weight: 0.4 }
+        - { role: partner, key: trust, weight: 0.3 }
+      success:
+        text: >-
+          It takes everything you have. {partner.name} cries, then goes
+          silent, then, eventually, says {partner.they} {partner:wants|want}
+          to try.
+        effects:
+          - { type: relationship, role: partner, affection: -15, trust: -35 }
+          - { type: memory, role: partner, tag: forgave_you }
+          - { type: stat, key: stress, delta: 10 }
+          - { type: history, text: '{partner.name} found out about {other.name}, and, somehow, stayed.', importance: 3 }
+      failure:
+        text: '{partner.name} listens to every word, nods once, and leaves.'
+        effects:
+          - { type: relationship, role: partner, kind: ex, affection: -40, trust: -60 }
+          - { type: memory, role: partner, tag: they_broke_up }
+          - { type: stat, key: happiness, delta: -12 }
+          - { type: stat, key: stress, delta: 12 }
+          - { type: history, text: '{partner.name} found out about {other.name} and left you.', importance: 3 }
+  - id: deny
+    label: Deny it
+    check:
+      base: 20
+      stats: [{ key: confidence, weight: 0.3 }]
+      success:
+        text: '{partner.name} can''t prove anything. {partner.They} {partner:doesn''t|don''t} believe you, either.'
+        effects:
+          - { type: relationship, role: partner, affection: -10, trust: -40 }
+          - { type: stat, key: stress, delta: 8 }
+      failure:
+        text: There are messages. {partner.name} is gone by the weekend.
+        effects:
+          - { type: relationship, role: partner, kind: ex, affection: -50, trust: -70 }
+          - { type: memory, role: partner, tag: they_broke_up }
+          - { type: stat, key: happiness, delta: -12 }
+          - { type: stat, key: reputation, delta: -4 }
+          - { type: history, text: 'You lied about {other.name}, and {partner.name} left.', importance: 3 }

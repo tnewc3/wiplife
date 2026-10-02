@@ -1,0 +1,47 @@
+id: joke_around
+name: Joke around
+blurb: Make them laugh. Or try to.
+group: everyday
+profile: warm
+inPerson: false
+availability:
+  kinds: [parent, stepparent, sibling, friend, partner, fiance, spouse, coworker, classmate, acquaintance]
+  you: { min: 5 }
+  them: { min: 5 }
+outcomes:
+  great:
+    text:
+      - "{person.name} laughs so hard {person.they} {person:has|have} to sit down. For a minute you're the funniest person alive."
+      - "The joke lands, and then the next one does too. You trade bits until you're both wheezing."
+    affection: 4
+    trust: 1
+    mood: 9
+    effects:
+      - { type: stat, key: happiness, delta: 2 }
+      - { type: memory, role: person, tag: great_time_together }
+  good:
+    text:
+      - "{person.name} laughs, properly. 'Okay, that was good.'"
+      - "A few good lines, a few groans. {person.name} is smiling by the end."
+    affection: 3
+    mood: 6
+    effects:
+      - { type: stat, key: happiness, delta: 1 }
+  neutral:
+    text:
+      - "{person.name} gives you a polite half-laugh."
+      - "'Ha,' says {person.name}, deadpan. Tough room."
+    mood: 0
+  bad:
+    text:
+      - "Nobody laughs. {person.name} looks at you the way you'd look at a flat tire."
+      - "The joke dies in the air, and {person.name} lets it."
+    affection: -2
+    mood: -3
+  backfire:
+    text:
+      - "It turns out the joke was about something {person.name} is touchy about. The laughter stops."
+      - "{person.name} doesn't find it funny at all, and tells you exactly why."
+    affection: -4
+    trust: -3
+    mood: -7

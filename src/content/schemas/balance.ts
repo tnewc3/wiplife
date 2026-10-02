@@ -329,6 +329,17 @@ export const targetsBalanceSchema = z.strictObject({
     lifetimeHappiness: z.strictObject({ min: z.number().min(0).max(100), max: z.number().min(0).max(100) }).refine((r) => r.min <= r.max, 'min must not be greater than max'),
     maxRepeatShare: probabilitySchema,
   }),
+  /**
+   * E1: interactions. Outcome tiers aren't a grind and aren't a coin toss: the share of
+   * interactions that go great or backfire is kept in a range (judged on the careful player),
+   * and repeating never takes a neutral relationship to maximum affection within a year.
+   */
+  interactions: z.strictObject({
+    great: z.strictObject({ min: probabilitySchema, max: probabilitySchema }).refine((r) => r.min <= r.max, 'min must not be greater than max'),
+    backfire: z.strictObject({ min: probabilitySchema, max: probabilitySchema }).refine((r) => r.min <= r.max, 'min must not be greater than max'),
+    /** The most that go well (good or great): interactions that nearly always succeed are a grind. */
+    maxGoodShare: probabilitySchema,
+  }),
   coverage: z.strictObject({
     /** At least this many events (not retired). */
     minEvents: z.int().min(1),

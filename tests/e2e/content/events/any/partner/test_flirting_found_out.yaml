@@ -1,0 +1,22 @@
+id: test_flirting_found_out
+title: Found out
+text: "{partner.name} found out about {other.name}."
+tone: serious
+category: partner
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { romance: [dating, engaged, married] }
+    - { memory: { role: partner, tag: cheated_on_them } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  partner: { kind: partner, presence: anywhere }
+  other: { kind: acquaintance, age: { min: 18, max: 120 }, presence: anywhere }
+autoOutcome:
+  text: It's over.
+  effects:
+    - { type: relationship, role: partner, kind: ex }
+    - { type: memory, role: partner, tag: they_broke_up }

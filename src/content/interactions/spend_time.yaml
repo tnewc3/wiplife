@@ -1,0 +1,52 @@
+id: spend_time
+name: Spend time together
+blurb: Do something together, in person.
+group: everyday
+profile: warm
+inPerson: true
+availability:
+  kinds: [parent, stepparent, sibling, grandparent, friend, partner, fiance, spouse, coworker, classmate]
+  you: { min: 4 }
+  them: { min: 3 }
+outcomes:
+  great:
+    text:
+      - "A perfect afternoon. You and {person.name} lose track of time and don't want it to end."
+      - "Nothing special happens, and it's wonderful. {person.name} keeps looking over and grinning."
+      - "{person.name} turns the day into an adventure, and you end up somewhere neither of you planned."
+    affection: 5
+    trust: 2
+    mood: 9
+    effects:
+      - { type: stat, key: happiness, delta: 3 }
+      - { type: stat, key: stress, delta: -3 }
+      - { type: memory, role: person, tag: great_time_together }
+  good:
+    text:
+      - "You spend a pleasant few hours with {person.name}. Easy company, easy conversation."
+      - "A relaxed day together. You leave feeling closer than when you arrived."
+    affection: 3
+    trust: 1
+    mood: 5
+    effects:
+      - { type: stat, key: happiness, delta: 2 }
+      - { type: stat, key: stress, delta: -2 }
+  neutral:
+    text:
+      - "You spend a few hours together. It's fine. Nobody is unhappy."
+      - "The time passes without much to say about it."
+    affection: 1
+    mood: 1
+  bad:
+    text:
+      - "{person.name} keeps checking the time. You both pretend it isn't awkward."
+      - "It's a long afternoon. {person.They} clearly {person:wishes|wish} {person.they} {person:was|were} somewhere else."
+    affection: -2
+    mood: -4
+  backfire:
+    text:
+      - "Small irritations pile up until {person.name} snaps, and the day ends early and badly."
+      - "Somewhere between the first awkward silence and the last, {person.name} decides this was a mistake and says so."
+    affection: -4
+    trust: -2
+    mood: -8

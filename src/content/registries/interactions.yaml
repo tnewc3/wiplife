@@ -1,0 +1,8 @@
+# The follow-up events that answer being unfaithful (E1). When you flirt with,
+# or are intimate with, someone who isn't your partner while you have one,
+# the engine may schedule one of these (picked by weight among those that
+# fit), found out one to three years later (balance/interactions.yaml
+# infidelity). Every event listed must be followUpOnly.
+infidelity:
+  flirt: { events: [flirting_found_out] }
+  intimate: { events: [affair_discovered, cheating_found_out] }

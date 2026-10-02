@@ -3,10 +3,10 @@
  * JSON: no classes, no Dates, no functions. Money is whole dollars; stats are
  * integers from 0 to 100.
  */
-import type { CredentialType, DebtKind, DiscoveryKind, GenderCategory, HousingKind, Lifestyle, Program, Tier } from '../content/schemas';
+import type { CredentialType, DebtKind, DiscoveryKind, GenderCategory, GiftTier, HousingKind, Lifestyle, OutcomeTier, Program, Tier } from '../content/schemas';
 import type { RngState } from './rng';
 
-export type { CredentialType, DebtKind, DiscoveryKind, GenderCategory, HousingKind, LatentKind, Lifestyle, Program, Tier } from '../content/schemas';
+export type { CredentialType, DebtKind, DiscoveryKind, GenderCategory, GiftTier, HousingKind, LatentKind, Lifestyle, OutcomeTier, Program, Tier } from '../content/schemas';
 
 export type Id = string;
 
@@ -107,9 +107,16 @@ export interface Person {
   looks: number;
   smarts: number;
   cityId: Id;
+  /** E1: the job track they work in (src/content/jobs), if they have a job. */
   occupation?: string;
   /** e.g. 'coworker', 'classmate', 'neighbor'. */
   tags: string[];
+  /** E1: how they're feeling now (0–100); moved by interactions and events, and drifts back toward `moodBase` each year. */
+  mood: number;
+  /** E1: the mood this year started from (their personality and circumstances). */
+  moodBase: number;
+  /** E1: how well off they are, from their occupation and family background. */
+  wealthLevel: FamilyWealth;
 }
 
 export type RelationshipKind =
@@ -145,6 +152,24 @@ export interface Relationship {
   lastActionYear?: number;
   /** True once they have been your spouse; it stays true after a divorce (an ex-spouse). */
   wasSpouse?: boolean;
+  /**
+   * E1: what you've done with them through the interaction menu. `year` is
+   * the year of the last interaction; the rest counts that year only (a new
+   * year starts from nothing).
+   */
+  interactions?: InteractionCounters;
+}
+
+/** E1: a person's interaction counters for one year. */
+export interface InteractionCounters {
+  /** The year of the last interaction; the counters below are for that year. */
+  year: number;
+  /** Times each interaction (by id) was used that year. */
+  counts: Record<Id, number>;
+  /** Affection and trust their interactions gained that year (against the yearly cap). */
+  gained: { affection: number; trust: number };
+  /** They're annoyed with you this year: you overdid it, or it went badly. */
+  annoyed: boolean;
 }
 
 /** A school program and what you study there. */
@@ -472,9 +497,32 @@ export interface ArchivedLife {
 
 export interface InputRecord {
   year: number;
-  kind: 'create' | 'ageUp' | 'choice' | 'action';
-  /** e.g. { instanceId, choiceId } or { actionId, params }. */
+  kind: 'create' | 'ageUp' | 'choice' | 'action' | 'interact' | 'interactChoice' | 'interactClose';
+  /** e.g. { instanceId, choiceId }, { actionId, params }, or (E1) { interactionId, personId, giftTier? }, { choiceId }, {}. */
   payload: Record<string, unknown>;
+}
+
+/**
+ * E1: what an interaction did, kept in the saved life so the outcome card
+ * survives a reload. It stays until you close it (or, with a choice waiting,
+ * until you choose).
+ */
+export interface PendingInteraction {
+  interactionId: Id;
+  personId: Id;
+  tier: OutcomeTier;
+  giftTier?: GiftTier;
+  /** The outcome text, written (pronouns filled in) when it happened. */
+  text: string;
+  /** Extra lines: an injury, a charge, a school suspension. */
+  notes: string[];
+  /** How it moved them toward you (after diminishing returns), their mood included. */
+  changes: { affection: number; trust: number; mood: number };
+  /** They've had enough of this interaction this year. */
+  annoyed: boolean;
+  money?: MoneyChange;
+  /** A choice the moment opens: waiting (no `chosen`) or made. */
+  choice?: { prompt: string; options: { id: Id; label: string }[]; chosen?: Id; /** What the chosen option led to. */ result?: string };
 }
 
 export interface LifeState {
@@ -500,6 +548,8 @@ export interface LifeState {
   eventLog: Record<Id, { count: number; lastYear: number }>;
   scheduled: ScheduledEvent[];
   pending: EventInstance[];
+  /** E1: the outcome card of the last interaction, until it is closed. */
+  pendingInteraction: PendingInteraction | null;
   history: HistoryEntry[];
   /** Every player input, for exact replay. */
   inputLog: InputRecord[];

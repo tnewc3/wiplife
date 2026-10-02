@@ -1,0 +1,51 @@
+id: prank
+name: Prank
+blurb: A harmless joke on someone. Mostly harmless.
+group: conflict
+profile: prank
+inPerson: true
+availability:
+  kinds: [sibling, friend, classmate, coworker, acquaintance, partner, fiance, spouse]
+  you: { min: 6 }
+  them: { min: 5 }
+outcomes:
+  great:
+    text:
+      - "{person.name} shrieks, then laughs until {person.they} can't breathe. It becomes a story you'll tell for years."
+      - "The prank works perfectly. {person.name} swears revenge, grinning the whole time."
+    affection: 4
+    trust: 1
+    mood: 8
+    effects:
+      - { type: stat, key: happiness, delta: 2 }
+      - { type: memory, role: person, tag: pranked_them }
+  good:
+    text:
+      - "{person.name} yelps, glares, and then laughs. 'You're the worst.'"
+      - "It goes about as well as these things go. {person.name} is annoyed for about ten seconds."
+    affection: 2
+    mood: 4
+    effects:
+      - { type: memory, role: person, tag: pranked_them }
+  neutral:
+    text:
+      - "{person.name} sees it coming and just looks at you. 'Really?'"
+      - "The prank fizzles. Nobody laughs, nobody minds."
+    mood: -1
+  bad:
+    text:
+      - "{person.name} doesn't find it funny. Not even a little. 'Grow up.'"
+      - "It goes too far, a little. {person.name} is genuinely annoyed, and stays that way."
+    affection: -3
+    trust: -2
+    mood: -6
+  backfire:
+    text:
+      - "The prank ruins something that mattered to {person.name}. It was meant as a joke; it doesn't feel like one."
+      - "Other people see it, and {person.name} is the punchline. {person.They} won't forget who made it so."
+    affection: -7
+    trust: -6
+    mood: -12
+    effects:
+      - { type: memory, role: person, tag: humiliated_them }
+      - { type: memory, role: person, tag: pranked_them }

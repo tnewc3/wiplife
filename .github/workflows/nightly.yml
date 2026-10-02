@@ -16,7 +16,7 @@ jobs:
   large-runs:
     name: 10,000 lives
     runs-on: ubuntu-latest
-    timeout-minutes: 90
+    timeout-minutes: 150
     steps:
       - uses: actions/checkout@v4
 
@@ -38,6 +38,9 @@ jobs:
       - name: Simulation (10,000 lives)
         run: npm run simulate -- --lives 10000 --json simulation-report.json
 
+      - name: Simulation, spamming player (1,000 lives)
+        run: npm run simulate -- --lives 1000 --player spammer --json spammer-report.json
+
       - name: Content coverage report (2,000 lives)
         if: always()
         run: npm run coverage -- --lives 2000 --json coverage-report.json
@@ -49,6 +52,7 @@ jobs:
           name: simulation-report
           path: |
             simulation-report.json
+            spammer-report.json
             coverage-report.json
           if-no-files-found: ignore
           retention-days: 30

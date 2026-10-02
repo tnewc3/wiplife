@@ -22,6 +22,8 @@ import { changeSeverity, setTreated } from '../health';
 import { sentence } from '../legal';
 import { changeRent, moveInTogether, moveTo, refreshHousingCost, sellHome, settleHousehold, supportingParent } from '../housing';
 import { payCost, rentMonthsAmount } from '../costs';
+import { betray, giveMoney } from '../interactions/links';
+import { shiftMood } from '../interactions/mood';
 import { whereabouts } from '../presence';
 import { clampInt } from '../random';
 import { otherCity } from './casting';
@@ -33,7 +35,8 @@ import type { Id, LifeState } from '../types';
 import { textContext } from './text';
 
 export interface EffectContext {
-  def: EventDef;
+  /** The event (or, for E1 interactions, the interaction) the effects come from: its id and rarity. */
+  def: Pick<EventDef, 'id' | 'rarity'>;
   cast: Record<string, Id>;
   rng: RngState;
   content: ContentBundle;
@@ -185,6 +188,8 @@ const handlers: { [T in Effect['type']]: Handler<T> } = {
     if (!rel) return;
     if (effect.affection !== undefined) rel.affection = clampInt(rel.affection + effect.affection, 0, 100);
     if (effect.trust !== undefined) rel.trust = clampInt(rel.trust + effect.trust, 0, 100);
+    const person = state.people[id];
+    if (effect.mood !== undefined && person) shiftMood(person, effect.mood);
     // Kind and status changes that break the relationship rules (a minor in a
     // romance, a second spouse, family becoming a partner...) are refused.
     if (effect.kind !== undefined && effect.kind !== rel.kind && canChangeKind(state, id, effect.kind, ctx.content)) {
@@ -265,6 +270,18 @@ const handlers: { [T in Effect['type']]: Handler<T> } = {
     const person = id === undefined ? undefined : state.people[id];
     if (!person || !person.alive || whereabouts(state, id!, ctx.content) === 'household') return;
     person.cityId = otherCity(state, ctx.rng, ctx.content);
+  },
+
+  // E1: money a person gives or lends you when you ask.
+  moneyFromPerson: (state, effect, ctx) => {
+    const id = ctx.cast[effect.role];
+    if (id !== undefined) giveMoney(state, id, effect.mode, ctx.rng, ctx.content);
+  },
+
+  // E1: an unfaithful act with the person, when you have a partner who isn't them.
+  infidelity: (state, effect, ctx) => {
+    const id = ctx.cast[effect.role];
+    if (id !== undefined) betray(state, id, effect.act, ctx.rng, ctx.content);
   },
 };
 

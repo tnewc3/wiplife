@@ -1,0 +1,38 @@
+# E1: reacts to a kiss that meant something (an interaction), with your spouse.
+id: kiss_in_the_kitchen
+title: Still got it
+text: >-
+  {spouse.name} is making coffee, and you walk into the kitchen and kiss
+  {spouse.them}, because you can. {spouse.They} {spouse:looks|look} up, a
+  little startled, and grins.
+tone: light
+category: partner
+rarity: uncommon
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { romance: [married] }
+    - { memory: { role: spouse, tag: shared_a_kiss } }
+weight: { base: 4 }
+cooldownYears: 5
+cast:
+  spouse: { kind: spouse, presence: household }
+choices:
+  - id: linger
+    label: Linger
+    outcome:
+      text: The coffee goes cold. Nobody minds.
+      effects:
+        - { type: relationship, role: spouse, affection: 5, trust: 2, mood: 7 }
+        - { type: stat, key: happiness, delta: 3 }
+        - { type: stat, key: stress, delta: -2 }
+  - id: joke
+    label: Make a joke of it
+    outcome:
+      text: >-
+        'You're going to be late,' says {spouse.name}, and kisses you again
+        anyway.
+      effects:
+        - { type: relationship, role: spouse, affection: 3, mood: 5 }
+        - { type: stat, key: happiness, delta: 2 }

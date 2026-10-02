@@ -1,0 +1,10 @@
+id: treatable_infection
+name: Treatable infection
+noun: a treatable infection
+kind: illness
+blurb: Picked up on a careless night. Clears up with treatment, and worse without it.
+course: { untreated: 6, treated: -60 }
+effects:
+  health: { perYear: -1, limit: 40 }
+treatable: true
+costs: { treatment: 250 }

@@ -122,3 +122,19 @@ tags:
   lost_temper_with_you: Lost {npc.their} temper with you when you were small
   drank_too_much: Drank too much when you were a child
   took_the_blame: You took the blame for {npc.them} when you were kids
+  # Interactions (E1).
+  big_fight: Had a huge fight with you
+  cruel_words: You said something cruel to {npc.them}
+  humiliated_them: You humiliated {npc.them}
+  pranked_them: You pulled a prank on {npc.them}
+  generous_gift: You gave {npc.them} a gift that meant a lot
+  gave_you_money: Gave you money when you asked
+  great_time_together: Had a really good time with you
+  gave_you_advice: Gave you advice when you needed it
+  you_helped_them: You helped {npc.them} out
+  helped_you_out: Did you a favor when you asked
+  romantic_date: Went on a date with you that went well
+  shared_a_kiss: Shared a kiss with you
+  night_together: Spent a night with you
+  flirted_behind_their_back: You flirted with {npc.them} while you were with someone else
+  wore_thin: Said you were wearing {npc.them} thin

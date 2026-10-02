@@ -1,0 +1,81 @@
+# E1: follow-up of flirting with someone else while you have a partner
+# (registries/interactions.yaml): your partner finds out.
+id: flirting_found_out
+title: A message you shouldn't have sent
+text: >-
+  {partner.name} has seen the messages between you and {other.name}. Not
+  explicit, not innocent either, and {partner.they} {partner:wants|want} to
+  know exactly what they were.
+tone: serious
+category: partner
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { romance: [dating, engaged, married] }
+    - { memory: { role: partner, tag: cheated_on_them } }
+    - { memory: { role: other, tag: flirted_behind_their_back } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  partner: { kind: partner, presence: anywhere }
+  other: { kind: acquaintance, age: { min: 18, max: 120 }, presence: anywhere }
+choices:
+  - id: honest
+    label: Be honest about it
+    check:
+      base: 45
+      stats:
+        - { role: partner, key: affection, weight: 0.4 }
+        - { role: partner, key: trust, weight: 0.3 }
+      success:
+        text: >-
+          It's a hard conversation and a long night. {partner.name} stays,
+          on the condition that it never happens again.
+        effects:
+          - { type: relationship, role: partner, affection: -6, trust: -20 }
+          - { type: stat, key: stress, delta: 5 }
+          - { type: memory, role: partner, tag: forgave_you }
+      failure:
+        text: >-
+          'Honest' turns out to be the last straw. {partner.name} is gone by
+          the end of the week.
+        effects:
+          - { type: relationship, role: partner, kind: ex, affection: -35, trust: -50 }
+          - { type: memory, role: partner, tag: they_broke_up }
+          - { type: stat, key: happiness, delta: -8 }
+          - { type: stat, key: stress, delta: 8 }
+          - { type: history, text: 'Your flirting with {other.name} ended things with {partner.name}.', importance: 3 }
+  - id: nothing
+    label: Say it was nothing
+    check:
+      base: 35
+      stats:
+        - { key: confidence, weight: 0.3 }
+        - { role: partner, key: trust, weight: 0.2 }
+      success:
+        text: >-
+          {partner.name} wants to believe you, and, for now, does. It doesn't
+          quite settle.
+        effects:
+          - { type: relationship, role: partner, affection: -4, trust: -12 }
+          - { type: stat, key: stress, delta: 5 }
+      failure:
+        text: >-
+          'Nothing,' says {partner.name}, 'is a funny word for it.' It ends
+          quickly after that.
+        effects:
+          - { type: relationship, role: partner, kind: ex, affection: -30, trust: -45 }
+          - { type: memory, role: partner, tag: they_broke_up }
+          - { type: stat, key: happiness, delta: -8 }
+          - { type: history, text: 'You lied about flirting with {other.name}, and {partner.name} left.', importance: 3 }
+  - id: leave
+    label: Say you need to think about whether this is working
+    outcome:
+      text: It's the cruelest thing you could have said at the time, and somehow also the truest.
+      effects:
+        - { type: relationship, role: partner, kind: ex, affection: -30, trust: -40 }
+        - { type: memory, role: partner, tag: you_broke_up }
+        - { type: stat, key: happiness, delta: -5 }
+        - { type: history, text: 'You and {partner.name} ended things after {partner.they} found out about your flirting.', importance: 2 }

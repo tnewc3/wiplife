@@ -3,6 +3,7 @@ import { produce } from 'immer';
 import { afterEach, describe, expect, it } from 'vitest';
 import { content } from '../content';
 import { performAction } from '../engine/actions';
+import { performInteraction } from '../engine/interactions/perform';
 import { beginYear, createLife } from '../engine/life';
 import { nextUint32 } from '../engine/rng';
 import { customInput, lifeAtAge, liveOut } from '../engine/testFixtures';
@@ -172,6 +173,12 @@ describe('lives from Stage 3 on', () => {
       // A life from before C1 gets the average Happiness baseline (the C1 migration).
       const expected = produce(random('stage2'), (d) => {
         d.character.hidden.happinessBaseline = 50;
+        // E1: everyone has a plain mood and your family's background (the E1 migration).
+        for (const person of Object.values(d.people)) {
+          person.mood = 50;
+          person.moodBase = 50;
+          person.wealthLevel = d.character.familyWealth;
+        }
       });
       expect(result.envelope.data).toEqual(expected);
     }
@@ -463,5 +470,84 @@ describe('lives from C1 on', () => {
     expect(schema.safeParse({ ...life, housing: { ...life.housing, rentFactor: -1 } }).success).toBe(false);
     const pending = [{ instanceId: 'e1', eventId: 'rent_hike', cast: {}, money: { change: 1, balance: -5, debtChange: 0 } }];
     expect(schema.safeParse({ ...life, phase: 'events', pending }).success).toBe(false);
+  });
+});
+
+describe('lives from E1 on', () => {
+  it('upgrade a schema version 9 life: a plain mood, your family’s background for everyone, and no outcome card', async () => {
+    const life = lifeAtAge('e1-migrate', 30);
+    const v9 = {
+      ...life,
+      people: Object.fromEntries(
+        Object.entries(life.people).map(([id, p]) => {
+          const { mood: _m, moodBase: _b, wealthLevel: _w, ...rest } = p;
+          return [id, rest];
+        }),
+      ),
+    } as Record<string, unknown>;
+    delete v9.pendingInteraction;
+    const db = freshDb();
+    await db.lives.put({ id: 'active', envelope: { ...makeEnvelope(v9, content.contentVersion), schemaVersion: 9 } });
+    const result = await readSave(db, loadedLifeSchema(content));
+    expect(result.status).toBe('ok');
+    if (result.status !== 'ok') return;
+    expect(result.envelope.schemaVersion).toBe(CURRENT_SCHEMA_VERSION);
+    const upgraded = result.envelope.data;
+    expect(upgraded.pendingInteraction).toBeNull();
+    for (const person of Object.values(upgraded.people)) {
+      expect([person.mood, person.moodBase, person.wealthLevel]).toEqual([50, 50, life.character.familyWealth]);
+    }
+    expect(upgraded.relationships).toEqual(life.relationships);
+  });
+
+  it('round trip counters, an outcome card with a choice waiting, and the interaction inputs', async () => {
+    const start = lifeAtAge('e1-round', 30);
+    const withFriend = produce(start, (d) => {
+      const template = Object.values(d.people)[0]!;
+      d.people.f1 = { ...JSON.parse(JSON.stringify(template)), id: 'f1', birthYear: d.currentYear - 30 };
+      d.relationships.f1 = { personId: 'f1', kind: 'friend', status: 'active', affection: 60, trust: 60, memories: [], since: d.currentYear - 2 };
+      d.finances.savings = 1000;
+    });
+    const waiting = performInteraction(withFriend, { interactionId: 'give_gift', personId: 'f1', giftTier: 'small' }, content);
+    expect(waiting.pendingInteraction?.money).toBeDefined();
+    expect(await roundTrip(waiting)).toEqual(waiting);
+    expect(loadedLifeSchema(content).safeParse(waiting).success).toBe(true);
+
+    const fight = produce(withFriend, (d) => {
+      d.pendingInteraction = {
+        interactionId: 'pick_a_fight',
+        personId: 'f1',
+        tier: 'neutral',
+        text: 'You stand nose to nose.',
+        notes: ['You broke a bone in the fight.'],
+        changes: { affection: -8, trust: -6, mood: -10 },
+        annoyed: true,
+        choice: { prompt: 'It could go either way.', options: [{ id: 'swing', label: 'Throw the first punch' }, { id: 'back_down', label: 'Back down' }] },
+      };
+    });
+    expect(await roundTrip(fight)).toEqual(fight);
+    const chosen = produce(fight, (d) => {
+      d.pendingInteraction!.choice!.chosen = 'swing';
+      d.pendingInteraction!.choice!.result = 'You swing.';
+    });
+    expect(await roundTrip(chosen)).toEqual(chosen);
+    expect(waiting.inputLog.some((r) => r.kind === 'interact')).toBe(true);
+  });
+
+  it('refuse a bad mood, wealth level, counter or outcome card', () => {
+    const life = lifeAtAge('e1-bad', 30);
+    const id = Object.keys(life.people)[0]!;
+    const schema = loadedLifeSchema(content);
+    const person = (patch: object) => ({ ...life, people: { ...life.people, [id]: { ...life.people[id]!, ...patch } } });
+    expect(schema.safeParse(person({ mood: 101 })).success).toBe(false);
+    expect(schema.safeParse(person({ moodBase: -1 })).success).toBe(false);
+    expect(schema.safeParse(person({ wealthLevel: 'billionaire' })).success).toBe(false);
+    const rel = (patch: object) => ({ ...life, relationships: { ...life.relationships, [id]: { ...life.relationships[id]!, ...patch } } });
+    expect(schema.safeParse(rel({ interactions: { year: life.currentYear, counts: { chat: 0 }, gained: { affection: 0, trust: 0 }, annoyed: false } })).success).toBe(false);
+    // Gains past the yearly cap can't have happened.
+    expect(schema.safeParse(rel({ interactions: { year: life.currentYear, counts: { chat: 1 }, gained: { affection: 999, trust: 0 }, annoyed: false } })).success).toBe(false);
+    expect(schema.safeParse({ ...life, pendingInteraction: { interactionId: 'chat', personId: id, tier: 'amazing', text: 'x', notes: [], changes: { affection: 0, trust: 0, mood: 0 }, annoyed: false } }).success).toBe(false);
+    expect(schema.safeParse({ ...life, pendingInteraction: { interactionId: 'nope', personId: id, tier: 'good', text: 'x', notes: [], changes: { affection: 0, trust: 0, mood: 0 }, annoyed: false } }).success).toBe(false);
+    expect(schema.safeParse({ ...life, pendingInteraction: { interactionId: 'chat', personId: 'ghost', tier: 'good', text: 'x', notes: [], changes: { affection: 0, trust: 0, mood: 0 }, annoyed: false } }).success).toBe(false);
   });
 });

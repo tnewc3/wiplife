@@ -132,6 +132,8 @@ costs:
   wedding_courthouse: { amount: 300, familyHelp: false }
   wedding_small: { amount: 10000, familyHelp: true }
   wedding_big: { amount: 32000, familyHelp: true }
+  # E1: a thank-you meal for someone who helped you.
+  thank_you_meal: { amount: 60, familyHelp: false }
 
 # C1: the share of a cost your family covers, by family wealth, times how
 # close you are to your closest living parent (affection ÷ 100). Nothing

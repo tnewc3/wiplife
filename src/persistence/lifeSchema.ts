@@ -103,6 +103,9 @@ const person = z.strictObject({
   cityId: id,
   occupation: z.string().exactOptional(),
   tags: z.array(z.string()),
+  mood: score,
+  moodBase: score,
+  wealthLevel: z.enum(['poor', 'working', 'middle', 'affluent', 'rich']),
 });
 
 const relationship = z.strictObject({
@@ -130,6 +133,14 @@ const relationship = z.strictObject({
   kindSince: int.exactOptional(),
   lastActionYear: int.exactOptional(),
   wasSpouse: z.literal(true).exactOptional(),
+  interactions: z
+    .strictObject({
+      year: int,
+      counts: z.record(z.string(), int.min(1)),
+      gained: z.strictObject({ affection: int.min(0), trust: int.min(0) }),
+      annoyed: z.boolean(),
+    })
+    .exactOptional(),
 });
 
 const program = z.enum(['elementary', 'middle', 'high', 'college', 'trade', 'grad']);
@@ -291,6 +302,34 @@ const discovery = z.strictObject({
 
 const cast = z.record(z.string(), id);
 
+const moneyChange = z.strictObject({
+  change: int,
+  balance: int.min(0),
+  debtChange: int,
+  familyHelp: int.min(1).exactOptional(),
+  housing: z.strictObject({ change: int, annual: int.min(0) }).exactOptional(),
+});
+
+const pendingInteraction = z.strictObject({
+  interactionId: id,
+  personId: id,
+  tier: z.enum(['great', 'good', 'neutral', 'bad', 'backfire']),
+  giftTier: z.enum(['small', 'medium', 'big']).exactOptional(),
+  text: filled,
+  notes: z.array(filled),
+  changes: z.strictObject({ affection: int, trust: int, mood: int }),
+  annoyed: z.boolean(),
+  money: moneyChange.exactOptional(),
+  choice: z
+    .strictObject({
+      prompt: filled,
+      options: z.array(z.strictObject({ id, label: filled })).min(2),
+      chosen: id.exactOptional(),
+      result: filled.exactOptional(),
+    })
+    .exactOptional(),
+});
+
 export const historyEntrySchema = z.strictObject({
   year: int,
   age: int,
@@ -331,22 +370,15 @@ export const lifeStateSchema: z.ZodType<LifeState> = z.strictObject({
       resolvedChoiceId: id.exactOptional(),
       outcomeText: z.string().exactOptional(),
       since: int.exactOptional(),
-      money: z
-        .strictObject({
-          change: int,
-          balance: int.min(0),
-          debtChange: int,
-          familyHelp: int.min(1).exactOptional(),
-          housing: z.strictObject({ change: int, annual: int.min(0) }).exactOptional(),
-        })
-        .exactOptional(),
+      money: moneyChange.exactOptional(),
     }),
   ),
+  pendingInteraction: pendingInteraction.nullable(),
   history: z.array(historyEntry),
   inputLog: z.array(
     z.strictObject({
       year: int,
-      kind: z.enum(['create', 'ageUp', 'choice', 'action']),
+      kind: z.enum(['create', 'ageUp', 'choice', 'action', 'interact', 'interactChoice', 'interactClose']),
       payload: z.record(z.string(), z.unknown()),
     }),
   ),

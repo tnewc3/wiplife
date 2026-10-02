@@ -319,7 +319,7 @@ describe('relationship changes', () => {
       expect(checkInvariants(state, content)).toEqual([]);
     }
     expect(romanceStatus(state)).toBe('single');
-    expect(getPeople(state).romance.find((r) => r.id === 'p')).toMatchObject({ kind: 'ex', wasSpouse: true });
+    expect(getPeople(state, content).romance.find((r) => r.id === 'p')).toMatchObject({ kind: 'ex', wasSpouse: true });
     // An ex you only dated was never your spouse.
     const dated = produce(lifeWith(30, [{ id: 'q', age: 29, kind: 'partner' }]), (d) =>
       applyEffects(d, [{ type: 'relationship', role: 'p', kind: 'ex' }], ctx({ p: 'q' })),
@@ -514,7 +514,7 @@ describe('dating to marriage to divorce through actions', () => {
     expect(life.relationships.amy!.kind).toBe('spouse');
     expect(romanceStatus(life)).toBe('married');
     expect(currentPartner(life)?.personId).toBe('amy');
-    expect(getPeople(life).romance.map((r) => [r.id, r.kind, r.current])).toEqual([['amy', 'spouse', true]]);
+    expect(getPeople(life, content).romance.map((r) => [r.id, r.kind, r.current])).toEqual([['amy', 'spouse', true]]);
     expect(checkInvariants(life, content)).toEqual([]);
     // One action per person per year: the divorce waits a year.
     expect(availableActions(life, 'amy', bundle)).toEqual([]);
@@ -526,7 +526,7 @@ describe('dating to marriage to divorce through actions', () => {
     expect(romanceStatus(life)).toBe('single');
     expect(currentPartner(life)).toBeNull();
     expect(life.relationships.amy).toMatchObject({ kind: 'ex', status: 'active', kindSince: life.currentYear });
-    expect(getPeople(life).romance.map((r) => [r.id, r.kind, r.current])).toEqual([['amy', 'ex', false]]);
+    expect(getPeople(life, content).romance.map((r) => [r.id, r.kind, r.current])).toEqual([['amy', 'ex', false]]);
     expect(getPersonDetail(life, 'amy', bundle)!.memories.map((m) => m.text)).toEqual(['Divorced you', 'Married you', 'Started dating you']);
     expect(checkInvariants(life, content)).toEqual([]);
     // Next year, you could ask your ex out again.
@@ -649,7 +649,7 @@ describe('pruning', () => {
     expect(aged.relationships.mom!.status).toBe('active');
     expect(aged.relationships.ex!.status).toBe('active');
     expect(aged.relationships.pal!.status).toBe('active');
-    const groups = getPeople(aged);
+    const groups = getPeople(aged, content);
     expect(groups.friends.map((r) => r.id)).toEqual(['pal', 'dead_friend']);
     expect(groups.family.map((r) => r.id)).toContain('mom');
   });

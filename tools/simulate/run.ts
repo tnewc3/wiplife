@@ -15,6 +15,10 @@
  */
 import { ACTION_IDS, DISCOVERY_KINDS, type ActionId, type ContentBundle, type DiscoveryKind, type Effect } from '../../src/content/schemas';
 import { hasLatent } from '../../src/engine/discovery';
+import { canAffordGift } from '../../src/engine/interactions/links';
+import { isInteractionAvailable } from '../../src/engine/interactions/availability';
+import { replayLife } from '../../src/engine/replay';
+import { isDeepStrictEqual } from 'node:util';
 import {
   finishAction,
   isActionAvailable,
@@ -44,6 +48,18 @@ import {
   rollMoneyProfile,
 } from './bot';
 import { referencesIn } from '../../src/engine/conditions';
+import {
+  chooseInteractions,
+  emptyInteractionReport,
+  formatInteractions,
+  InteractionWatcher,
+  playInteraction,
+  type InteractionPlayer,
+  type InteractionReport,
+} from './interactions';
+
+/** One life in this many is rebuilt from its input log and compared with the life as played (E1). */
+const REPLAY_EVERY = 100;
 
 export interface SimulationOptions {
   lives: number;
@@ -53,8 +69,9 @@ export interface SimulationOptions {
   maxFailureMessages?: number;
   /**
    * The simulated player: 'careful' (the player model in ./bot.ts, the one
-   * the targets are judged on) or 'careless' (random actions, no caution
-   * rules). Defaults to careful.
+   * the targets are judged on), 'careless' (random actions, no caution
+   * rules), or (E1) 'spammer': a careful player who also repeats one
+   * interaction with one person over and over, every year. Defaults to careful.
    */
   player?: SimulatedPlayer;
   /**
@@ -66,7 +83,7 @@ export interface SimulationOptions {
   onLife?: (life: LifeState) => void;
 }
 
-export type SimulatedPlayer = 'careful' | 'careless';
+export type SimulatedPlayer = 'careful' | 'careless' | 'spammer';
 
 export interface StageYears {
   years: number;
@@ -98,6 +115,8 @@ export interface SimulationReport {
   legal: LegalReport;
   discovery: DiscoveryReport;
   consistency: ConsistencyReport;
+  /** E1: the interaction menu, measured. */
+  interactions: InteractionReport;
 }
 
 /** C1: the consistency pass, measured. */
@@ -723,6 +742,11 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
   const bachelorEarnings: number[] = [];
 
   const recurring = recurringEvents(content);
+  const interactions = emptyInteractionReport(playerKind as InteractionPlayer, content);
+  // Found out: the follow-ups only this system schedules (affair_discovered also answers an older chain, so it counts only for an unfaithful life).
+  const infidelityEvents = new Set(
+    [...content.registries.interactions.infidelity.flirt.events, ...content.registries.interactions.infidelity.intimate.events].filter((id) => id !== 'affair_discovered'),
+  );
   let violations = 0;
   const lifetimeHappiness: number[] = [];
   const repeatShares: number[] = [];
@@ -743,6 +767,8 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
     const school = new SchoolWatcher();
     const work = new CareerWatcher();
     const nine = new Stage9Watcher();
+    const interactionRng = createRng(`${seed}:interactions`);
+    const interactionWatcher = new InteractionWatcher();
     const profile = rollMoneyProfile(player);
     // Event choices: the careful player by personality, the careless one at random (Stage 9).
     const picker: ChoicePicker = (l, card, rng) => {
@@ -842,6 +868,19 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
         life = playAction(life, content, actionId, personId, choices, watch, picker);
         rel.actionsTaken[actionId]++;
       }
+      // ...and with the people in your life (E1: the interaction menu).
+      if (life.phase === 'yearStart' && life.character.age >= 4) {
+        interactions.years++;
+        interactionWatcher.beginYear(life);
+        for (const plan of chooseInteractions(life, content, interactionRng, playerKind)) {
+          const def = content.interactions[plan.interactionId]!;
+          if (!isInteractionAvailable(life, def, plan.personId, content)) continue;
+          if (plan.giftTier && !canAffordGift(life, plan.giftTier, content)) continue;
+          life = playInteraction(life, content, plan, playerKind, interactionRng, interactionWatcher, interactions);
+        }
+        interactionWatcher.endInteractions(life, interactions);
+        check(life);
+      }
       life = beginYear(life, content);
       watch(life);
       options.onYear?.(life);
@@ -875,9 +914,30 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
       const diedFromEvent = life.death !== null;
       life = endYear(life, content);
       watch(life);
+      interactionWatcher.observe(life);
       if (diedFromEvent) deathsFromEvents++;
     }
     options.onLife?.(life);
+    // E1: who reached maximum affection, being found out, and a sample of lives rebuilt from their input logs.
+    interactions.lives++;
+    interactions.affection.reachedMax += interactionWatcher.reachedMax.size;
+    interactions.affection.reachedMaxByInteractions += interactionWatcher.reachedByInteractions.size;
+    for (const id of infidelityEvents) interactions.cheating.foundOut += firesThisLife.get(id) ?? 0;
+    if (life.flags.unfaithful === true) interactions.cheating.foundOut += firesThisLife.get('affair_discovered') ?? 0;
+    if (i % REPLAY_EVERY === 0) {
+      interactions.replay.checked++;
+      let same = false;
+      try {
+        same = isDeepStrictEqual(replayLife(life.inputLog, content), life);
+      } catch (err) {
+        if (failureMessages.length < maxMessages) failureMessages.push(`${seed}: replay threw: ${err instanceof Error ? err.message : String(err)}`);
+      }
+      if (!same) {
+        interactions.replay.mismatches++;
+        invariantFailures++;
+        if (failureMessages.length < maxMessages) failureMessages.push(`${seed}: the life rebuilt from its input log is not the life that was played`);
+      }
+    }
     // C1: lifetime Happiness and repeats of events that aren't recurring.
     if (life.lifetime.years > 0) lifetimeHappiness.push(life.lifetime.happinessTotal / life.lifetime.years);
     let firesTotal = 0;
@@ -1175,6 +1235,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
     health,
     legal,
     discovery,
+    interactions,
     consistency: {
       violations,
       happiness: spreadOf(lifetimeHappiness),
@@ -1303,6 +1364,7 @@ export function formatReport(report: SimulationReport, content: ContentBundle): 
   lines.push(...formatCareers(report, content));
   lines.push(...formatStage9(report, content));
   lines.push(...formatConsistency(report, content));
+  lines.push(...formatInteractions(report.interactions, content), '  targets (src/content/balance/targets.yaml):', ...interactionTargets(report, content).map((r) => target(r.label, r.value, r.goal, r.met)));
   lines.push(`Events fired: ${report.totalEventsFired}`);
   lines.push('  event'.padEnd(30) + 'fired'.padStart(8) + 'share'.padStart(8) + 'lives'.padStart(9));
   for (const e of [...report.events].sort((a, b) => b.fired - a.fired)) {
@@ -1496,8 +1558,8 @@ export function formatComparison(careful: SimulationReport, careless: Simulation
   both((r) => pct(r.legal.jailedLives, r.lives), 'went to prison');
   both((r) => pct(r.discovery.identityChanged, r.lives), 'identity changed through self-discovery');
   lines.push('  targets (src/content/balance/targets.yaml; judged on the careful player):');
-  const a = [...targetResults(careful, content), ...stage9Targets(careful, content), ...consistencyTargets(careful, content)];
-  const b = [...targetResults(careless, content), ...stage9Targets(careless, content), ...consistencyTargets(careless, content)];
+  const a = [...targetResults(careful, content), ...stage9Targets(careful, content), ...consistencyTargets(careful, content), ...interactionTargets(careful, content)];
+  const b = [...targetResults(careless, content), ...stage9Targets(careless, content), ...consistencyTargets(careless, content), ...interactionTargets(careless, content)];
   a.forEach((x, i) => {
     const y = b[i]!;
     lines.push(row(x.label.length > 46 ? `${x.label.slice(0, 45)}…` : x.label, `${x.met ? 'MET' : 'NOT MET'}`, `${y.met ? 'MET' : 'NOT MET'}`));
@@ -1624,4 +1686,43 @@ export function stage9Targets(report: SimulationReport, content: ContentBundle):
   out.push(row('lives that go to prison', share(report.legal.jailedLives), t.legal.jailed));
   for (const kind of DISCOVERY_KINDS) out.push(row(`lives where ${kind} surfaced`, share(report.discovery.kinds[kind].surfaced), t.discovery.surfaced[kind]));
   return out;
+}
+
+/** E1: how interactions go (judged on the careful player) and that repeating never maxes out a neutral relationship. */
+export function interactionTargets(report: SimulationReport, content: ContentBundle): TargetResult[] {
+  const t = content.balance.targets.interactions;
+  const r = report.interactions;
+  const share = (n: number) => (r.interactions > 0 ? n / r.interactions : 0);
+  const pct1 = (x: number) => `${(100 * x).toFixed(1)}%`;
+  const range = (x: { min: number; max: number }) => `${pct1(x.min)}–${pct1(x.max)}`;
+  const great = share(r.tiers.great);
+  const backfire = share(r.tiers.backfire);
+  const good = share(r.tiers.great + r.tiers.good);
+  const cap = content.balance.interactions.returns;
+  return [
+    { label: 'interactions that go great', value: pct1(great), short: pct1(great), goal: range(t.great), met: great >= t.great.min && great <= t.great.max },
+    { label: 'interactions that backfire', value: pct1(backfire), short: pct1(backfire), goal: range(t.backfire), met: backfire >= t.backfire.min && backfire <= t.backfire.max },
+    { label: 'interactions that go well (good or great)', value: pct1(good), short: pct1(good), goal: `under ${pct1(t.maxGoodShare)}`, met: good < t.maxGoodShare },
+    {
+      label: 'neutral relationships taken to maximum affection in a year',
+      value: String(r.affection.neutralToMax),
+      short: String(r.affection.neutralToMax),
+      goal: '0',
+      met: r.affection.neutralToMax === 0,
+    },
+    {
+      label: 'most affection gained from interactions in a year',
+      value: String(r.affection.mostGainedInYear),
+      short: String(r.affection.mostGainedInYear),
+      goal: `at most ${cap.yearlyCap.affection}`,
+      met: r.affection.mostGainedInYear <= cap.yearlyCap.affection,
+    },
+    {
+      label: 'lives rebuilt exactly from their input logs',
+      value: `${r.replay.checked - r.replay.mismatches} of ${r.replay.checked}`,
+      short: `${r.replay.checked - r.replay.mismatches}/${r.replay.checked}`,
+      goal: 'all',
+      met: r.replay.mismatches === 0,
+    },
+  ];
 }

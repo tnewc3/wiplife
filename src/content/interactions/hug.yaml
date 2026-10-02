@@ -1,0 +1,50 @@
+id: hug
+name: Hug
+blurb: A hug, in person.
+group: everyday
+profile: warm
+inPerson: true
+visit: true
+availability:
+  kinds: [parent, stepparent, sibling, grandparent, friend, partner, fiance, spouse]
+  you: { min: 3 }
+  them: { min: 2 }
+outcomes:
+  great:
+    text:
+      - "{person.name} holds on a long time. When {person.they} finally {person:lets|let} go, {person.their} eyes are wet."
+      - "It's the kind of hug that fixes a bad week. Neither of you says anything, and you don't need to."
+    affection: 4
+    trust: 3
+    mood: 9
+    effects:
+      - { type: stat, key: stress, delta: -3 }
+      - { type: stat, key: happiness, delta: 2 }
+  good:
+    text:
+      - "{person.name} hugs you back, warm and solid."
+      - "A good, long hug. {person.name} sighs and relaxes into it."
+    affection: 3
+    trust: 1
+    mood: 6
+    effects:
+      - { type: stat, key: stress, delta: -2 }
+  neutral:
+    text:
+      - "A quick, polite hug, over almost before it starts."
+      - "{person.name} pats your back twice and steps away."
+    affection: 1
+    mood: 1
+  bad:
+    text:
+      - "{person.name} goes stiff in your arms and {person:waits|wait} for it to be over."
+      - "{person.They} {person:leans|lean} away. It isn't the moment for this."
+    affection: -2
+    mood: -4
+  backfire:
+    text:
+      - "{person.name} pulls back sharply. 'Please don't,' {person.they} {person:says|say}, and the room goes quiet."
+      - "You misjudge the moment completely. {person.name} shrugs you off, visibly uncomfortable."
+    affection: -4
+    trust: -3
+    mood: -8

@@ -1,0 +1,64 @@
+# E1: reacts to being unfaithful (an interaction) that hasn't come out.
+id: guilty_conscience
+title: What you haven't said
+text: >-
+  {partner.name} laughs at something on TV, and you realize you've barely
+  watched it. Something you did is sitting on your chest, and {partner.they}
+  {partner:doesn't|don't} know.
+tone: serious
+category: partner
+rarity: uncommon
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { romance: [dating, engaged, married] }
+    - { flag: unfaithful, eq: true }
+    - { memory: { role: partner, tag: cheated_on_them } }
+weight: { base: 5 }
+cooldownYears: 8
+cast:
+  partner: { kind: partner, presence: nearby }
+choices:
+  - id: confess
+    label: Tell {partner.them} the truth
+    check:
+      base: 40
+      stats:
+        - { role: partner, key: affection, weight: 0.4 }
+        - { role: partner, key: trust, weight: 0.3 }
+      success:
+        text: >-
+          It's the worst night of your relationship, and the start of
+          something honest. {partner.name} doesn't forgive you yet, but
+          {partner.they} {partner:stays|stay} in the room.
+        effects:
+          - { type: relationship, role: partner, affection: -12, trust: -25 }
+          - { type: memory, role: partner, tag: forgave_you }
+          - { type: stat, key: stress, delta: 6 }
+          - { type: stat, key: discipline, delta: 2 }
+      failure:
+        text: >-
+          {partner.name} listens, goes white, and leaves with a bag. It's
+          over before the evening is.
+        effects:
+          - { type: relationship, role: partner, kind: ex, affection: -40, trust: -60 }
+          - { type: memory, role: partner, tag: they_broke_up }
+          - { type: stat, key: happiness, delta: -10 }
+          - { type: history, text: 'You confessed to {partner.name}, and {partner.they} left.', importance: 3 }
+  - id: keep_quiet
+    label: Keep it to yourself
+    outcome:
+      text: It stays a quiet weight, carried everywhere and mentioned nowhere.
+      effects:
+        - { type: stat, key: stress, delta: 4 }
+        - { type: stat, key: happiness, delta: -2 }
+  - id: make_it_up
+    label: Be extra good to {partner.them} instead
+    outcome:
+      text: >-
+        You cook, you clean, you remember things. {partner.name} is
+        delighted and a little suspicious.
+      effects:
+        - { type: relationship, role: partner, affection: 2, trust: -2 }
+        - { type: stat, key: stress, delta: 2 }

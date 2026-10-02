@@ -1,0 +1,54 @@
+# E1: reacts to a prank (an interaction).
+id: prank_war
+title: Payback
+text: >-
+  Your car, your locker, your desk: {friend.name} has been planning this for
+  weeks, and the result is a very elaborate, very personal revenge.
+tone: light
+category: friends
+rarity: uncommon
+lifeStages: [child, teen, youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 8 } }
+    - { memory: { role: friend, tag: pranked_them } }
+weight: { base: 4 }
+cooldownYears: 6
+cast:
+  friend: { kind: friend, presence: city }
+choices:
+  - id: laugh
+    label: Take it like a champion
+    outcome:
+      text: >-
+        You laugh until you can't breathe. {friend.name} looks incredibly
+        pleased with {friend.themself}.
+      effects:
+        - { type: relationship, role: friend, affection: 6, mood: 8 }
+        - { type: stat, key: happiness, delta: 3 }
+  - id: escalate
+    label: Go bigger
+    check:
+      base: 45
+      stats:
+        - { key: confidence, weight: 0.3 }
+        - { role: friend, key: affection, weight: 0.3 }
+      success:
+        text: >-
+          Your counter-prank is legendary. People are still talking about it.
+          {friend.name} bows, and concedes.
+        effects:
+          - { type: relationship, role: friend, affection: 5, mood: 6 }
+          - { type: stat, key: confidence, delta: 2 }
+      failure:
+        text: >-
+          It goes one step too far. {friend.name} isn't laughing, and you're
+          the one who has to say sorry first.
+        effects:
+          - { type: relationship, role: friend, affection: -5, trust: -4, mood: -6 }
+  - id: truce
+    label: Call a truce
+    outcome:
+      text: A handshake, a grudging grin, and a promise neither of you plans to keep.
+      effects:
+        - { type: relationship, role: friend, affection: 3, mood: 3 }

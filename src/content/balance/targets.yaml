@@ -52,6 +52,7 @@ health:
     back_injury: { min: 0.4, max: 0.8 }
     broken_bone: { min: 0.3, max: 0.65 }
     cancer: { min: 0.2, max: 0.45 }
+    chronic_infection: { min: 0, max: 0.1 }
     dementia: { min: 0.06, max: 0.2 }
     depression: { min: 0.08, max: 0.25 }
     drug_addiction: { min: 0.04, max: 0.14 }
@@ -59,11 +60,13 @@ health:
     heart_disease: { min: 0.25, max: 0.55 }
     high_blood_pressure: { min: 0.3, max: 0.6 }
     pneumonia: { min: 0.12, max: 0.35 }
+    treatable_infection: { min: 0, max: 0.25 }
     type_2_diabetes: { min: 0.1, max: 0.25 }
 
 legal:
   # Lives with each offense on their record (every active offense needs one).
   offenses:
+    assault: { min: 0, max: 0.2 }
     car_theft: { min: 0.02, max: 0.1 }
     disorderly_conduct: { min: 0.12, max: 0.35 }
     drug_dealing: { min: 0.03, max: 0.12 }
@@ -101,6 +104,13 @@ consistency:
   # raise) or a system trigger (money trouble, the law, self-discovery, a
   # doctor visit) count as recurring.
   maxRepeatShare: 0.15
+
+# E1: how interactions go for the careful player.
+interactions:
+  great: { min: 0.02, max: 0.35 }
+  backfire: { min: 0.003, max: 0.15 }
+  # Good and great together: well short of every time.
+  maxGoodShare: 0.85
 
 coverage:
   minEvents: 300

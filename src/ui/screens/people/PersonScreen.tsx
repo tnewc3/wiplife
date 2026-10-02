@@ -8,7 +8,8 @@ import { BondBars } from '../../components/BondBars';
 import { Button } from '../../components/Button';
 import { Card } from '../../components/Card';
 import { ConfirmSheet } from '../../components/ConfirmSheet';
-import { ACTION_LABELS, actionConfirmation, personLine, timelineAgeLabel } from '../../labels';
+import { InteractSheet } from '../../components/InteractSheet';
+import { ACTION_LABELS, actionConfirmation, moodPhrase, personLine, timelineAgeLabel } from '../../labels';
 
 /**
  * One person's page: who they are to you, how they feel about you (bars, no
@@ -18,6 +19,7 @@ import { ACTION_LABELS, actionConfirmation, personLine, timelineAgeLabel } from 
 export function PersonScreen({ life, personId }: { life: LifeState; personId: string }) {
   const busy = useAppStore((s) => s.aging);
   const takeAction = useAppStore((s) => s.takeAction);
+  const openInteractions = useAppStore((s) => s.openInteractions);
   const [confirming, setConfirming] = useState<ActionId | null>(null);
   const detail = getPersonDetail(life, personId, content);
   if (!detail) return null;
@@ -39,11 +41,22 @@ export function PersonScreen({ life, personId }: { life: LifeState; personId: st
         <p className="mt-1 text-muted" data-testid="person-line">
           {personLine(row)} · {detail.pronounLabel}
         </p>
+        {row.mood && (
+          <p className="mt-1 font-semibold" data-testid="person-mood">
+            {firstName} is {moodPhrase(row.mood)}.
+          </p>
+        )}
       </Card>
 
       <Card>
         <BondBars affection={row.affection} trust={row.trust} label={`How ${row.fullName} feels about you`} />
       </Card>
+
+      {detail.canInteract && (
+        <Button size="lg" block disabled={busy} data-testid="interact-button" onClick={() => openInteractions(personId)}>
+          Interact
+        </Button>
+      )}
 
       {detail.actions.length > 0 && (
         <div className="flex flex-col gap-2" role="group" aria-label="Actions">
@@ -72,6 +85,8 @@ export function PersonScreen({ life, personId }: { life: LifeState; personId: st
           </ol>
         )}
       </Card>
+
+      <InteractSheet life={life} />
 
       <ConfirmSheet
         open={confirmation !== null}

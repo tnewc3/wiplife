@@ -75,6 +75,8 @@ export function rootEvents(content: ContentBundle): Set<string> {
     ...Object.values(r.discovery.resurfacing),
     r.discovery.crisis,
     r.discovery.comingOut,
+    r.interactions.infidelity.flirt,
+    r.interactions.infidelity.intimate,
   ];
   for (const list of lists) for (const id of list.events) roots.add(id);
   return roots;
@@ -133,6 +135,33 @@ export function analyzeContent(content: ContentBundle): StaticCoverage {
         if (effect.type === 'flag') addTo(flagWrites, effect.key, def.id);
       }
     }
+  }
+  // Interactions (E1): the memories and flags their outcomes write, and what their
+  // availability, extras and reaction profiles read. The engine writes a few
+  // itself (money from a person, being unfaithful).
+  for (const def of Object.values(content.interactions)) {
+    if (def.retired) continue;
+    const who = `interactions/${def.id}`;
+    const tiers = Object.values(def.outcomes).flatMap((t) => (t ? [t] : []));
+    const parts = tiers.flatMap((t) => [t, ...(t.choice?.options ?? [])]);
+    for (const effect of parts.flatMap((p) => [...p.effects, ...p.extras.flatMap((x) => x.effects)])) {
+      if (effect.type === 'memory') addTo(memoryWrites, effect.tag, who);
+      if (effect.type === 'flag') addTo(flagWrites, effect.key, who);
+      if (effect.type === 'moneyFromPerson') for (const tag of ['lent_you_money', 'gave_you_money']) addTo(memoryWrites, tag, `${who} (engine)`);
+      if (effect.type === 'infidelity') {
+        for (const tag of ['cheated_on_them', 'affair_with_you', 'flirted_behind_their_back']) addTo(memoryWrites, tag, `${who} (engine)`);
+        addTo(flagWrites, 'unfaithful', `${who} (engine)`);
+      }
+    }
+    const conditions = [def.availability.requires, ...parts.flatMap((p) => p.extras.map((x) => x.if))];
+    for (const cond of conditions) {
+      const refs = referencesIn(cond);
+      for (const tag of refs.memories) addTo(memoryReads, tag, who);
+      for (const flag of refs.flags) addTo(flagReads, flag, who);
+    }
+  }
+  for (const profile of Object.values(content.balance.interactions.profiles)) {
+    for (const tag of Object.keys(profile.memories)) addTo(memoryReads, tag, 'balance/interactions.yaml');
   }
   // Other content that checks flags: job requirements, condition onsets, and
   // the admission odds in balance/education.yaml.

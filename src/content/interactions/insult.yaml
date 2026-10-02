@@ -1,0 +1,57 @@
+id: insult
+name: Insult
+blurb: Say something cruel. It will have consequences.
+group: conflict
+profile: hostile
+inPerson: false
+availability:
+  kinds: [parent, stepparent, sibling, friend, ex, coworker, boss, classmate, acquaintance]
+  you: { min: 8 }
+  them: { min: 8 }
+outcomes:
+  great:
+    text:
+      - "{person.name} bursts out laughing. 'Okay, that was fair.' It turns into banter, and the sting never lands."
+      - "{person.name} fires one back, and you both end up grinning. Somehow it made you closer."
+    affection: 1
+    trust: 0
+    mood: 2
+    effects:
+      - { type: stat, key: confidence, delta: 1 }
+  good:
+    text:
+      - "{person.name} rolls {person.their} eyes. 'Real mature.' It blows over fast."
+      - "{person.They} {person:shrugs|shrug} it off, though a muscle in {person.their} jaw says it landed a little."
+    affection: -1
+    mood: -2
+  neutral:
+    text:
+      - "{person.name} goes quiet. You can tell it landed, and that {person.they} won't say so."
+      - "A long pause. 'Okay,' says {person.name}, in a voice with nothing in it."
+    affection: -3
+    trust: -2
+    mood: -6
+    effects:
+      - { type: memory, role: person, tag: cruel_words }
+  bad:
+    text:
+      - "{person.name} looks hurt first, then furious. 'You don't get to talk to me like that.'"
+      - "The words hang there. {person.name}'s face closes like a door."
+    affection: -6
+    trust: -4
+    mood: -10
+    effects:
+      - { type: stat, key: kindness, delta: -1 }
+      - { type: memory, role: person, tag: cruel_words }
+  backfire:
+    text:
+      - "{person.name} says nothing at all. Later you hear that {person.they} {person:told|told} everyone what you said."
+      - "It lands in front of other people. {person.name} is humiliated, and you can see the exact moment it turns into hate."
+    affection: -9
+    trust: -7
+    mood: -14
+    effects:
+      - { type: stat, key: kindness, delta: -2 }
+      - { type: stat, key: reputation, delta: -2 }
+      - { type: memory, role: person, tag: humiliated_them }
+      - { type: history, text: "You said something to {person.name} that you couldn't take back.", importance: 2 }

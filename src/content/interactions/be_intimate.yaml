@@ -1,0 +1,137 @@
+id: be_intimate
+name: Be intimate
+blurb: Take it further. Adults only; it carries real risks.
+group: romance
+romance: true
+intimate: true
+profile: intimate
+inPerson: true
+availability:
+  kinds: [friend, ex, partner, fiance, spouse]
+  you: { min: 18 }
+  them: { min: 18 }
+  requires:
+    all:
+      - { role: person, affection: { gte: 45 } }
+      - any:
+          - { role: person, kind: [partner, fiance, spouse] }
+          - { role: person, affection: { gte: 60 } }
+outcomes:
+  great:
+    text:
+      - "The night is slow, then not. By morning neither of you is in any hurry to leave the room."
+      - "{person.name} pulls you closer, the lights go out, and the rest is the kind of night you remember."
+      - "You lose track of everything but each other. Later, in the dark, {person.name} laughs softly and doesn't say why."
+    affection: 6
+    trust: 3
+    mood: 11
+    effects:
+      - { type: infidelity, role: person, act: intimate }
+      - { type: stat, key: happiness, delta: 3 }
+      - { type: stat, key: stress, delta: -3 }
+      - { type: memory, role: person, tag: night_together }
+    choice:
+      prompt: "Things are getting serious, and the moment is waiting for you to decide."
+      options:
+        - id: careful
+          label: Stop and take precautions
+          text: "You pause, you both laugh at the interruption, and then it goes on, safer for it."
+          extras:
+            - chance: intimacyTreatableCareful
+              effects: [{ type: health, conditionId: treatable_infection, severity: 35 }, { type: flag, key: was_infected, value: true }]
+              note: "A few weeks later, a doctor finds an infection."
+            - chance: intimacyChronicCareful
+              effects: [{ type: health, conditionId: chronic_infection, severity: 30 }, { type: flag, key: was_infected, value: true }]
+              note: "A few weeks later, a doctor finds a lifelong infection."
+        - id: carefree
+          label: Don't stop
+          text: "You don't stop. The night is wonderful, and you don't think about the morning."
+          extras:
+            - chance: intimacyTreatable
+              effects: [{ type: health, conditionId: treatable_infection, severity: 35 }, { type: flag, key: was_infected, value: true }]
+              note: "A few weeks later, a doctor finds an infection."
+            - chance: intimacyChronic
+              effects: [{ type: health, conditionId: chronic_infection, severity: 30 }, { type: flag, key: was_infected, value: true }]
+              note: "A few weeks later, a doctor finds a lifelong infection."
+  good:
+    text:
+      - "A warm, easy night. You fall asleep tangled up, and wake up still smiling."
+      - "It's tender and a little clumsy and exactly right. {person.name} stays until morning."
+    affection: 4
+    trust: 2
+    mood: 8
+    effects:
+      - { type: infidelity, role: person, act: intimate }
+      - { type: stat, key: happiness, delta: 2 }
+      - { type: stat, key: stress, delta: -2 }
+      - { type: memory, role: person, tag: night_together }
+    choice:
+      prompt: "Things are getting serious, and the moment is waiting for you to decide."
+      options:
+        - id: careful
+          label: Stop and take precautions
+          text: "You pause, you reach for protection, and you both laugh about it. It makes the night easier."
+          extras:
+            - chance: intimacyTreatableCareful
+              effects: [{ type: health, conditionId: treatable_infection, severity: 35 }, { type: flag, key: was_infected, value: true }]
+              note: "A few weeks later, a doctor finds an infection."
+            - chance: intimacyChronicCareful
+              effects: [{ type: health, conditionId: chronic_infection, severity: 30 }, { type: flag, key: was_infected, value: true }]
+              note: "A few weeks later, a doctor finds a lifelong infection."
+        - id: carefree
+          label: Don't stop
+          text: "You don't stop, and you don't think about it until the next morning."
+          extras:
+            - chance: intimacyTreatable
+              effects: [{ type: health, conditionId: treatable_infection, severity: 35 }, { type: flag, key: was_infected, value: true }]
+              note: "A few weeks later, a doctor finds an infection."
+            - chance: intimacyChronic
+              effects: [{ type: health, conditionId: chronic_infection, severity: 30 }, { type: flag, key: was_infected, value: true }]
+              note: "A few weeks later, a doctor finds a lifelong infection."
+  neutral:
+    text:
+      - "It's pleasant and a little distant. You both seem to be thinking about something else."
+      - "A quiet night that doesn't quite connect. Neither of you says so."
+    affection: 1
+    mood: 1
+    effects:
+      - { type: infidelity, role: person, act: intimate }
+      - { type: memory, role: person, tag: night_together }
+    choice:
+      prompt: "Things are getting serious, and the moment is waiting for you to decide."
+      options:
+        - id: careful
+          label: Stop and take precautions
+          text: "You pause, you both laugh at the interruption, and then it goes on, safer for it."
+          extras:
+            - chance: intimacyTreatableCareful
+              effects: [{ type: health, conditionId: treatable_infection, severity: 35 }, { type: flag, key: was_infected, value: true }]
+              note: "A few weeks later, a doctor finds an infection."
+            - chance: intimacyChronicCareful
+              effects: [{ type: health, conditionId: chronic_infection, severity: 30 }, { type: flag, key: was_infected, value: true }]
+              note: "A few weeks later, a doctor finds a lifelong infection."
+        - id: carefree
+          label: Don't stop
+          text: "You don't stop, and you don't think about the morning until it arrives."
+          extras:
+            - chance: intimacyTreatable
+              effects: [{ type: health, conditionId: treatable_infection, severity: 35 }, { type: flag, key: was_infected, value: true }]
+              note: "A few weeks later, a doctor finds an infection."
+            - chance: intimacyChronic
+              effects: [{ type: health, conditionId: chronic_infection, severity: 30 }, { type: flag, key: was_infected, value: true }]
+              note: "A few weeks later, a doctor finds a lifelong infection."
+  bad:
+    text:
+      - "It's awkward, and short, and a little sad. You both lie there afterwards not talking."
+      - "Halfway through, it's clear neither of you is where you want to be. {person.name} gets dressed in silence."
+    affection: -3
+    mood: -6
+  backfire:
+    text:
+      - "Something you say ruins the mood and then some. {person.name} leaves, and the door stays closed behind {person.them}."
+      - "It goes badly wrong. {person.name} is hurt, then angry, and says things that hurt you in return."
+    affection: -7
+    trust: -6
+    mood: -12
+    effects:
+      - { type: stat, key: stress, delta: 3 }

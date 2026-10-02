@@ -1,9 +1,10 @@
+import { content } from '../../../content';
 import { getPeople, PEOPLE_GROUPS, type PeopleGroupId, type PersonRow } from '../../../engine/selectors';
 import type { LifeState } from '../../../engine/types';
 import { useAppStore } from '../../../store/appStore';
 import { BondBars } from '../../components/BondBars';
 import { Card } from '../../components/Card';
-import { PEOPLE_GROUP_EMPTY, PEOPLE_GROUP_LABELS, personLine } from '../../labels';
+import { moodPhrase, PEOPLE_GROUP_EMPTY, PEOPLE_GROUP_LABELS, personLine } from '../../labels';
 
 /** Groups always shown, even when empty; the others appear once someone is in them. */
 const ALWAYS_SHOWN: readonly PeopleGroupId[] = ['family', 'friends'];
@@ -19,6 +20,11 @@ function PersonButton({ row }: { row: PersonRow }) {
       <span className="flex min-w-0 flex-col">
         <span className={`font-semibold break-words [overflow-wrap:anywhere] ${row.alive ? '' : 'text-muted'}`}>{row.fullName}</span>
         <span className="text-sm text-muted">{personLine(row)}</span>
+        {row.mood && (
+          <span className="text-sm font-medium" data-testid="person-row-mood">
+            {moodPhrase(row.mood)}
+          </span>
+        )}
       </span>
       {row.alive && <BondBars affection={row.affection} trust={row.trust} label={`How ${row.fullName} feels about you`} />}
     </button>
@@ -27,7 +33,7 @@ function PersonButton({ row }: { row: PersonRow }) {
 
 /** The People tab: everyone in your life, grouped into family, love, friends and work. */
 export function PeopleTab({ life }: { life: LifeState }) {
-  const groups = getPeople(life);
+  const groups = getPeople(life, content);
   return (
     <div className="flex flex-col gap-4">
       {PEOPLE_GROUPS.filter((g) => groups[g].length > 0 || ALWAYS_SHOWN.includes(g)).map((group) => (

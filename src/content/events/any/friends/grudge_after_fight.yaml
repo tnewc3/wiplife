@@ -1,0 +1,58 @@
+# E1: reacts to a big fight with a friend (an interaction: argue, pick a fight).
+id: grudge_after_fight
+title: The silence
+text: >-
+  You and {friend.name} haven't really spoken since the fight. Mutual friends
+  have started to notice, and so has everyone's calendar.
+tone: serious
+category: friends
+rarity: uncommon
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 14 } }
+    - { memory: { role: friend, tag: big_fight } }
+weight: { base: 4 }
+cooldownYears: 6
+cast:
+  friend: { kind: friend, presence: anywhere }
+choices:
+  - id: reach_out
+    label: Reach out first
+    check:
+      base: 50
+      stats:
+        - { role: friend, key: affection, weight: 0.4 }
+        - { key: kindness, weight: 0.3 }
+      success:
+        text: >-
+          {friend.name} answers on the second ring. It's stiff for a few
+          minutes, then it isn't. By the end you're both laughing at how
+          stupid it was.
+        effects:
+          - { type: relationship, role: friend, affection: 10, trust: 6, mood: 8 }
+          - { type: memory, role: friend, tag: made_up_after_fight }
+          - { type: stat, key: stress, delta: -4 }
+      failure:
+        text: >-
+          {friend.name} lets it ring, and the text you send gets a single
+          word back. You're not sure which one is worse.
+        effects:
+          - { type: relationship, role: friend, affection: -3, mood: -3 }
+          - { type: stat, key: stress, delta: 3 }
+  - id: wait
+    label: Wait for them to come around
+    outcome:
+      text: Weeks go by. The silence settles in and starts to look like a decision.
+      effects:
+        - { type: relationship, role: friend, affection: -5, trust: -3 }
+        - { type: stat, key: stress, delta: 2 }
+  - id: write_off
+    label: Decide that's the end of it
+    outcome:
+      text: >-
+        It's easier than you expected, and sadder. You delete the number,
+        then spend the evening going through old photos.
+      effects:
+        - { type: relationship, role: friend, affection: -15, status: estranged }
+        - { type: stat, key: happiness, delta: -3 }

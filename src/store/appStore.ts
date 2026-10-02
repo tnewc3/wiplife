@@ -1,10 +1,11 @@
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
 import { content } from '../content';
-import type { ActionId, ContentBundle } from '../content/schemas';
+import type { ActionId, ContentBundle, GiftTier } from '../content/schemas';
 import { finishAction, performAction, type LifeActionId, type LifeActionParams } from '../engine/actions';
 import type { IdentityEditInput } from '../engine/discovery';
 import { archiveEntry } from '../engine/archive';
+import { closeInteraction, performInteraction, resolveInteractionChoice } from '../engine/interactions/perform';
 import { assertInvariants } from '../engine/invariants';
 import { beginYear, CONTINUE_CHOICE, createLife, endYear, resolveChoice, type CustomLifeInput } from '../engine/life';
 import { canAgeUp, firstUnresolvedEvent, getYearRecap, type YearRecapView } from '../engine/selectors';
@@ -85,6 +86,8 @@ export interface AppState {
   personId: string | null;
   /** A page open on the More tab (More → Home, More → Health), if any. */
   moreView: 'home' | 'health' | null;
+  /** E1: the Interact sheet open on a person's page: the grouped menu, or the gift price tiers. */
+  interactSheet: { personId: string; view: 'menu' | 'gift' } | null;
 
   init: () => Promise<void>;
   confirmAge: () => Promise<void>;
@@ -146,6 +149,21 @@ export interface AppState {
   closeHome: () => void;
   /** Opens More → Health (Stage 9). */
   openHealth: () => void;
+  /** E1: opens the Interact sheet for a person. */
+  openInteractions: (personId: string) => void;
+  /** E1: from the Interact sheet to the gift price tiers, and back. */
+  setInteractView: (view: 'menu' | 'gift') => void;
+  closeInteractions: () => void;
+  /**
+   * E1: does an interaction with a person (between years) and autosaves. The
+   * outcome card then shows from the saved life, so it is still there after a
+   * reload. Ignored while the engine is working.
+   */
+  interact: (interactionId: string, personId: string, giftTier?: GiftTier) => Promise<void>;
+  /** E1: answers the choice an outcome card opened (walk away, keep going) and autosaves. */
+  chooseInteractionOption: (choiceId: string) => Promise<void>;
+  /** E1: closes the outcome card and autosaves. */
+  dismissInteraction: () => Promise<void>;
   /**
    * Edits your identity from the Profile sheet (between years) and autosaves.
    * Throws InvalidInputError for an edit that isn't valid. Ignored while the
@@ -345,6 +363,7 @@ export function createAppStore({
             s.eventSheet = null;
             s.personId = null;
             s.moreView = null;
+            s.interactSheet = null;
           });
           void requestPersistenceOnce().catch(() => undefined);
         } finally {
@@ -371,6 +390,7 @@ export function createAppStore({
         archiveSelection: null,
         personId: null,
         moreView: null,
+        interactSheet: null,
 
         init: async () => {
           let loaded: SavedLifeStatus;
@@ -447,6 +467,7 @@ export function createAppStore({
             s.eventSheet = null;
             s.personId = null;
             s.moreView = null;
+            s.interactSheet = null;
           });
         },
 
@@ -471,6 +492,7 @@ export function createAppStore({
             s.tab = tab;
             s.personId = null;
             s.moreView = null;
+            s.interactSheet = null;
           }),
 
         startRandomLife: () =>
@@ -563,6 +585,7 @@ export function createAppStore({
         closePerson: () =>
           set((s) => {
             s.personId = null;
+            s.interactSheet = null;
           }),
 
         takeAction: (actionId, personId) =>
@@ -582,6 +605,46 @@ export function createAppStore({
             await commit(next);
             // A job application or a raise request answers with an event.
             if (next.phase === 'action') openEvents(next);
+          }),
+
+        openInteractions: (personId) =>
+          set((s) => {
+            if (s.life?.people[personId] && s.life.phase === 'yearStart') s.interactSheet = { personId, view: 'menu' };
+          }),
+
+        setInteractView: (view) =>
+          set((s) => {
+            if (s.interactSheet) s.interactSheet.view = view;
+          }),
+
+        closeInteractions: () =>
+          set((s) => {
+            s.interactSheet = null;
+          }),
+
+        interact: (interactionId, personId, giftTier) =>
+          busy(async () => {
+            const life = get().life;
+            if (!life || life.phase !== 'yearStart' || get().eventSheet) return;
+            const next = performInteraction(life, { interactionId, personId, ...(giftTier ? { giftTier } : {}) }, bundle);
+            await commit(next);
+            set((s) => {
+              s.interactSheet = null;
+            });
+          }),
+
+        chooseInteractionOption: (choiceId) =>
+          busy(async () => {
+            const life = get().life;
+            if (!life) return;
+            await commit(resolveInteractionChoice(life, choiceId, bundle));
+          }),
+
+        dismissInteraction: () =>
+          busy(async () => {
+            const life = get().life;
+            if (!life?.pendingInteraction) return;
+            await commit(closeInteraction(life));
           }),
 
         openHome: () =>

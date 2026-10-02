@@ -7,6 +7,7 @@
  * functions in src/engine/systems, filled in by later stages.
  */
 import type { ContentBundle } from '../content/schemas';
+import { runMoods } from './interactions/mood';
 import { advanceAge } from './systems/aging';
 import { runCareer } from './systems/career';
 import { runEconomy } from './systems/economy';
@@ -34,6 +35,7 @@ export const YEAR_PIPELINE: readonly PipelineStep[] = [
   { id: 'economy', run: runEconomy },
   { id: 'health', run: runHealth },
   { id: 'relationships', run: runRelationships },
+  { id: 'moods', run: runMoods },
   { id: 'selfDiscovery', run: runSelfDiscovery },
   { id: 'pacing', run: runPacing },
 ];

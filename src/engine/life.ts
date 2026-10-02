@@ -28,6 +28,7 @@ import { successChance } from './events/checks';
 import { applyEffects } from './events/effects';
 import { textContext } from './events/text';
 import { familyHelp } from './costs';
+import { moodBaseline } from './interactions/mood';
 import { totalDebt } from './finance';
 import { renderText } from './text';
 import { runPipeline, YEAR_PIPELINE, type PipelineStep } from './pipeline';
@@ -118,12 +119,13 @@ export function createLife(input: CreateLifeOptions, content: ContentBundle): Li
     cityId: character.cityId,
     pool: namePool(content, character.cityId),
     characterCategory: character.identity.genderCategory,
+    familyWealth: character.familyWealth,
     nextId,
     ...familyRequest,
   });
   character.name = { first: family.firstName, last: family.lastName };
 
-  return {
+  const life: LifeState = {
     id: `life_${seed}`,
     seed,
     rng,
@@ -144,6 +146,7 @@ export function createLife(input: CreateLifeOptions, content: ContentBundle): Li
     eventLog: {},
     scheduled: [],
     pending: [],
+    pendingInteraction: null,
     history: [],
     inputLog: [{ year: birthYear, kind: 'create', payload: structuredCloneJson(options) }],
     recap: null,
@@ -151,6 +154,9 @@ export function createLife(input: CreateLifeOptions, content: ContentBundle): Li
     lifetime: { happinessTotal: 0, years: 0 },
     lineage: { generation: 1 },
   };
+  // E1: everyone starts the life in their baseline mood (no randomness: the yearly swing comes with the first year).
+  for (const person of Object.values(life.people)) person.mood = person.moodBase = moodBaseline(life, person, content);
+  return life;
 }
 
 function namePool(content: ContentBundle, cityId: Id) {
@@ -189,9 +195,14 @@ function expectPhase(state: LifeState, phase: LifePhase, action: string): void {
  */
 export function beginYear(state: LifeState, content: ContentBundle, steps: readonly PipelineStep[] = YEAR_PIPELINE): LifeState {
   expectPhase(state, 'yearStart', 'age up');
+  // E1: an outcome card still waiting for a choice has to be answered first; a finished one is just dismissed.
+  if (state.pendingInteraction?.choice && state.pendingInteraction.choice.chosen === undefined) {
+    throw new PhaseError('Finish the interaction first: its outcome card is waiting for a choice.');
+  }
   const statsBefore = { ...state.character.stats };
   let next = produce(state, (draft) => {
     draft.inputLog.push({ year: draft.currentYear, kind: 'ageUp', payload: {} });
+    draft.pendingInteraction = null;
   });
   // Each step gets its own draft, so a step can read the life as the earlier
   // steps left it through Immer's original() (fast) instead of the draft.
