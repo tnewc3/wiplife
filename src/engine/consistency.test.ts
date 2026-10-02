@@ -12,7 +12,8 @@ import { applyEffects } from './events/effects';
 import { checkInvariants } from './invariants';
 import { consistencyProblems, fitsPresence, whereabouts } from './presence';
 import { createRng } from './rng';
-import { getEventCard } from './selectors';
+import { resolveChoice } from './life';
+import { getEventCard, problemReport } from './selectors';
 import { runPacing } from './systems/pacing';
 import { cloneJson, lifeAtAge } from './testFixtures';
 import type { LifeState, Person, Relationship, RelationshipKind } from './types';
@@ -228,5 +229,70 @@ describe('runtime enforcement', () => {
     });
     expect(isActionAvailable(life, 'ask_out', 'near', content)).toBe(true);
     expect(isActionAvailable(life, 'ask_out', 'far', content)).toBe(false);
+  });
+});
+
+describe('money on event cards', () => {
+  const paid = ev({
+    id: 'paid',
+    autoOutcome: undefined,
+    choices: [
+      { id: 'buy', label: 'Buy it', outcome: { effects: [{ type: 'money', delta: -500 }, { type: 'money', delta: 100 }] } },
+      {
+        id: 'gamble',
+        label: 'Gamble',
+        check: { base: 50, stats: [{ key: 'smarts', weight: 1 }], success: { effects: [{ type: 'money', delta: 200 }] }, failure: { effects: [{ type: 'money', delta: -200 }] } },
+      },
+      {
+        id: 'ticket',
+        label: 'Pay the ticket',
+        check: { base: 50, stats: [{ key: 'smarts', weight: 1 }], success: { effects: [{ type: 'money', delta: -50 }] }, failure: { effects: [{ type: 'money', delta: -50 }] } },
+      },
+      { id: 'skip', label: 'Skip it', outcome: {} },
+    ],
+  });
+  const bundle = withEvents(paid);
+  const pendingLife = (savings: number) =>
+    lifeWith(30, [], (d) => {
+      d.finances.savings = savings;
+      d.phase = 'events';
+      d.pending = [{ instanceId: 'a', eventId: 'paid', cast: {} }];
+    });
+
+  it('shows known costs on choice buttons, and nothing when the cost depends on luck', () => {
+    const card = getEventCard(pendingLife(1000), 0, bundle)!;
+    expect(card.choices.map((c) => [c.id, c.money])).toEqual([
+      ['buy', -400],
+      ['gamble', undefined],
+      ['ticket', -50],
+      ['skip', undefined],
+    ]);
+  });
+
+  it('records each money change with the new balance, and any debt it left', () => {
+    const after = resolveChoice(pendingLife(1000), 'a', 'buy', bundle);
+    expect(getEventCard(after, 0, bundle)!.money).toEqual({ change: -400, balance: 600, debtChange: 0 });
+    // Short of the cost: savings run out and the rest becomes debt; the $100 back lands in savings.
+    const short = resolveChoice(pendingLife(100), 'a', 'buy', bundle);
+    expect(getEventCard(short, 0, bundle)!.money).toEqual({ change: 0, balance: 100, debtChange: 400 });
+    const none = resolveChoice(pendingLife(100), 'a', 'skip', bundle);
+    expect(getEventCard(none, 0, bundle)!.money).toBeNull();
+  });
+});
+
+describe('problem reports', () => {
+  it('names the event, the choice, the cast and where they are, and the state the rules depend on', () => {
+    const visit = ev({ id: 'visit', cast: { pal: { kind: 'friend', presence: 'city' } } });
+    const bundle = withEvents(visit);
+    const life = lifeWith(30, [{ id: 'far', kind: 'friend', away: true }], (d) => {
+      d.phase = 'events';
+      d.pending = [{ instanceId: 'a', eventId: 'visit', cast: { pal: 'far' }, resolvedChoiceId: 'continue' }];
+    });
+    const report = problemReport(life, 0, bundle);
+    expect(report).toContain('event: visit (a)');
+    expect(report).toContain('choice: continue');
+    expect(report).toContain('cast pal: far friend, age 30, elsewhere');
+    expect(report).toContain('home: renting in chicago');
+    expect(report).toContain('consistency: visit: pal must be city but is elsewhere');
   });
 });

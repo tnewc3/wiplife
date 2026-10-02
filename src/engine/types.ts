@@ -388,6 +388,15 @@ export interface EventInstance {
   outcomeText?: string;
   /** A follow-up: the year the event that scheduled it happened (C1, {since}). */
   since?: number;
+  /** What the chosen outcome did to your money (C1): shown on the outcome card. */
+  money?: MoneyChange;
+}
+
+/** A change to your money from one outcome: savings up or down, the new balance, and debt taken on (or paid off). */
+export interface MoneyChange {
+  change: number;
+  balance: number;
+  debtChange: number;
 }
 
 export interface ScheduledEvent {

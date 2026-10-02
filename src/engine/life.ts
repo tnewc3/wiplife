@@ -27,6 +27,7 @@ import { InvalidInputError, parseCreateLifeOptions, type CreateLifeOptions } fro
 import { successChance } from './events/checks';
 import { applyEffects } from './events/effects';
 import { textContext } from './events/text';
+import { totalDebt } from './finance';
 import { renderText } from './text';
 import { runPipeline, YEAR_PIPELINE, type PipelineStep } from './pipeline';
 import { weightedKey, weightedPick } from './random';
@@ -287,9 +288,15 @@ export function resolveChoice(state: LifeState, instanceId: Id, choiceId: Id, co
         outcome = chance(draft.rng, successChance(draft, choice.check, content, instance.cast)) ? choice.check.success : choice.check.failure;
       }
       if (outcome) {
+        const savings = draft.finances.savings;
+        const debt = totalDebt(draft);
         applyEffects(draft, outcome.effects, { def, cast: instance.cast, rng: draft.rng, content, ...(instance.since !== undefined ? { since: instance.since } : {}) });
         // Written after the effects, so it can tell what they did ({sentence}, new pronouns).
         if (outcome.text) target.outcomeText = renderText(outcome.text, textContext(draft, instance.cast, content, instance.since));
+        // Every money change shows on the outcome card, with the new balance (C1).
+        const change = draft.finances.savings - savings;
+        const debtChange = totalDebt(draft) - debt;
+        if (change !== 0 || debtChange !== 0) target.money = { change, balance: draft.finances.savings, debtChange };
       }
     }
 

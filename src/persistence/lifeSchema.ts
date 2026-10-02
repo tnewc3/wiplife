@@ -329,6 +329,7 @@ export const lifeStateSchema: z.ZodType<LifeState> = z.strictObject({
       resolvedChoiceId: id.exactOptional(),
       outcomeText: z.string().exactOptional(),
       since: int.exactOptional(),
+      money: z.strictObject({ change: int, balance: int.min(0), debtChange: int }).exactOptional(),
     }),
   ),
   history: z.array(historyEntry),

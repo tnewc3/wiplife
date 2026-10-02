@@ -3,11 +3,13 @@ import {
   LIFESTYLES,
   TIERS,
   type ApplyProgram,
+  type ChoiceDef,
   type ContentBundle,
   type CredentialType,
   type DebtKind,
   type JobCategory,
   type Lifestyle,
+  type Outcome,
   type Program,
   type RomanceStatus,
   type Tier,
@@ -46,6 +48,7 @@ import {
   supportingParent,
   type PurchaseQuote,
 } from './housing';
+import { consistencyProblems, whereabouts } from './presence';
 import { benefitFromRecord } from './retirement';
 import {
   activeJob,
@@ -79,6 +82,7 @@ import type {
   Ledger,
   LifeStage,
   LifeState,
+  MoneyChange,
   Person,
   Relationship,
   RelationshipKind,
@@ -1002,10 +1006,33 @@ export interface EventCardView {
   title: string;
   text: string;
   tone: Tone;
-  /** Choices the player can see now; an event without choices offers Continue. */
-  choices: { id: string; label: string }[];
+  /**
+   * Choices the player can see now; an event without choices offers Continue.
+   * money: what the choice will do to your savings when that is known up
+   * front (C1): a fixed outcome, or a check whose outcomes cost the same.
+   */
+  choices: { id: string; label: string; money?: number }[];
   resolved: boolean;
   outcomeText: string | null;
+  /** What the chosen outcome did to your money, with the new balance (C1). */
+  money: MoneyChange | null;
+}
+
+/** The money effects of an outcome, added up. */
+function outcomeMoney(outcome: Outcome | undefined): number {
+  return (outcome?.effects ?? []).reduce((sum, e) => sum + (e.type === 'money' ? e.delta : 0), 0);
+}
+
+/** What a choice will do to your money, when that is known before choosing (C1); undefined otherwise or when nothing. */
+export function knownChoiceMoney(choice: ChoiceDef): number | undefined {
+  let amount: number;
+  if (choice.outcome) amount = outcomeMoney(choice.outcome);
+  else if (choice.check) {
+    const success = outcomeMoney(choice.check.success);
+    if (success !== outcomeMoney(choice.check.failure)) return undefined;
+    amount = success;
+  } else return undefined;
+  return amount === 0 ? undefined : amount;
 }
 
 /** One pending event as a card, with its text rendered for the cast. Null past the end. */
@@ -1017,6 +1044,7 @@ export function getEventCard(state: LifeState, index: number, content: ContentBu
     instanceId: instance.instanceId,
     resolved: instance.resolvedChoiceId !== undefined,
     outcomeText: instance.outcomeText ?? null,
+    money: instance.money ?? null,
   };
   // A definition removed by a content update: a card the player can dismiss.
   if (!def) return { ...base, title: '…', text: '', tone: 'neutral', choices: [{ id: CONTINUE_CHOICE, label: 'Continue' }] };
@@ -1024,7 +1052,10 @@ export function getEventCard(state: LifeState, index: number, content: ContentBu
   const choices = def.choices
     ? def.choices
         .filter((c) => evaluate(c.visibleIf, state, { cast: instance.cast, roles: 'strict', content }))
-        .map((c) => ({ id: c.id, label: renderText(c.label, ctx) }))
+        .map((c) => {
+          const money = knownChoiceMoney(c);
+          return { id: c.id, label: renderText(c.label, ctx), ...(money !== undefined ? { money } : {}) };
+        })
     : [{ id: CONTINUE_CHOICE, label: 'Continue' }];
   return { ...base, title: renderText(def.title, ctx), text: renderText(def.text, ctx), tone: def.tone, choices };
 }
@@ -1146,4 +1177,37 @@ export function getProfileView(state: LifeState, content: ContentBundle): Profil
     })),
     canEdit: state.phase === 'yearStart',
   };
+}
+
+/**
+ * A short plain-text report on one event card (C1, development only: the
+ * "Report a problem" button): the event, the choice made, who was cast and
+ * where they are, and the state the consistency rules depend on.
+ */
+export function problemReport(state: LifeState, index: number, content: ContentBundle): string {
+  const instance = state.pending[index];
+  const c = state.character;
+  const job = state.career.job;
+  const school = state.education.current;
+  const lines = [
+    `event: ${instance?.eventId ?? 'none'} (${instance?.instanceId ?? '-'})`,
+    `choice: ${instance?.resolvedChoiceId ?? 'not chosen yet'}`,
+    ...Object.entries(instance?.cast ?? {}).map(([role, id]) => {
+      const person = state.people[id];
+      const rel = state.relationships[id];
+      return `cast ${role}: ${id} ${rel?.kind ?? 'unknown'}, age ${person ? state.currentYear - person.birthYear : '?'}, ${whereabouts(state, id, content)}${person?.alive === false ? ', dead' : ''}`;
+    }),
+    `life: seed ${state.seed}, year ${state.currentYear}, age ${c.age}, ${c.lifeStage}, phase ${state.phase}`,
+    `home: ${state.housing.kind} in ${c.cityId}${state.housing.partnerId ? `, with partner ${state.housing.partnerId}` : ''}`,
+    `romance: ${romanceStatus(state)}`,
+    `work: ${job ? `${job.jobId} level ${job.level}` : 'no job'}${state.career.retired ? ', retired' : ''}`,
+    `school: ${school ? `${school.program} year ${school.year}` : 'not enrolled'}`,
+    `money: savings ${state.finances.savings}, debt ${totalDebt(state)}`,
+    `content: ${content.contentVersion}`,
+  ];
+  if (instance && content.events[instance.eventId]) {
+    const problems = consistencyProblems(state, content.events[instance.eventId]!, instance.cast, content);
+    if (problems.length > 0) lines.push(`consistency: ${problems.join('; ')}`);
+  }
+  return lines.join('\n');
 }

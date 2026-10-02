@@ -172,6 +172,21 @@ export function moneyChange(amount: number): string {
   return amount > 0 ? `+${money(amount)}` : money(amount);
 }
 
+/** What a choice will cost or pay, on its button (C1): "Costs $500" or "Pays $200". */
+export function choiceMoneyLabel(amount: number): string {
+  return amount < 0 ? `Costs ${money(-amount)}` : `Pays ${money(amount)}`;
+}
+
+/** An outcome's money change with the new balance (C1): "−$500 · Savings now $1,200". */
+export function outcomeMoneyLabel(change: number, balance: number): string {
+  return `${moneyChange(change)} · Savings now ${money(balance)}`;
+}
+
+/** Debt an outcome took on or paid off (C1): "+$3,000 debt" or "−$3,000 debt". */
+export function outcomeDebtLabel(change: number): string {
+  return `${moneyChange(change)} debt`;
+}
+
 /** An interest rate: 0.065 → "6.5%". */
 export function rateLabel(rate: number): string {
   return `${Number((rate * 100).toFixed(2))}%`;
