@@ -1,0 +1,50 @@
+# Follow-up to friend_wedding_party.
+id: friend_divorce_call
+title: The call after the wedding
+text: >-
+  {friend.name} calls at midnight. {friend.Their} marriage is falling apart.
+  {friend.They} {friend:doesn't|don't} really want advice. {friend.They} just
+  {friend:doesn't|don't} want to be alone with it.
+tone: serious
+category: friends
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  friend: { kind: friend }
+choices:
+  - id: stood_up
+    label: Remind {friend.them} you stood up there with {friend.them}
+    visibleIf: { memory: { role: friend, tag: in_their_wedding } }
+    outcome:
+      text: >-
+        "You were there at the start," {friend.name} says. "I guess you should
+        be here for this part too." You drive over with ice cream at 1 a.m.
+      effects:
+        - { type: relationship, role: friend, affection: 10, trust: 10 }
+        - { type: memory, role: friend, tag: was_there_for_them }
+        - { type: stat, key: kindness, delta: 2 }
+  - id: make_up
+    label: Make up for missing the wedding
+    visibleIf: { memory: { role: friend, tag: missed_wedding } }
+    outcome:
+      text: >-
+        You missed the beginning. You show up for the end: the lawyer's office,
+        the moving truck, the first awful weekend. {friend.name} notices.
+      effects:
+        - { type: relationship, role: friend, affection: 12, trust: 8 }
+        - { type: memory, role: friend, tag: was_there_for_them }
+  - id: listen
+    label: Listen until {friend.they} {friend:runs|run} out of words
+    outcome:
+      text: It's three in the morning when {friend.name} finally says thank you and hangs up. You're exhausted and glad.
+      effects:
+        - { type: relationship, role: friend, affection: 6, trust: 5 }
+        - { type: stat, key: stress, delta: 2 }
+  - id: tired
+    label: Say you'll call back tomorrow
+    outcome:
+      text: You call back tomorrow. {friend.name} is fine, {friend.they} {friend:says|say}. {friend.They} {friend:sounds|sound} fine. You aren't sure.
+      effects:
+        - { type: relationship, role: friend, affection: -3 }

@@ -1,0 +1,39 @@
+# Follow-up to the english_teacher chain.
+id: teacher_retires
+title: The last class
+text: >-
+  {teacher.name}, the teacher who covered your essays in red ink and wrote
+  your recommendation, is retiring. The school is collecting letters from old students.
+tone: light
+category: school
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires: { memory: { role: teacher, tag: wrote_your_letter } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  teacher: { kind: acquaintance }
+choices:
+  - id: letter
+    label: Write {teacher.them} a long letter
+    outcome:
+      text: >-
+        You tell {teacher.name} what that letter of recommendation did, and
+        everything after it. {teacher.They} {teacher:writes|write} back by hand:
+        "This is why I did it. All of it."
+      effects:
+        - { type: relationship, role: teacher, status: active, affection: 12, trust: 6 }
+        - { type: stat, key: happiness, delta: 4 }
+  - id: party
+    label: Show up to the retirement party
+    outcome:
+      text: '{teacher.name} spots you in the crowd of former students and points at you, then at {teacher.their} eyes, then at you. Still watching your grammar.'
+      effects:
+        - { type: relationship, role: teacher, status: active, affection: 8 }
+        - { type: stat, key: happiness, delta: 3 }
+  - id: card
+    label: Sign the group card
+    outcome:
+      text: You write "Thank you for everything" and mean considerably more than that.
+      effects:
+        - { type: relationship, role: teacher, affection: 2 }

@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
 import { useAppStore } from './store/appStore';
 import { Button } from './ui/components/Button';
 import { Screen } from './ui/components/Screen';
@@ -15,6 +15,16 @@ import { SettingsScreen } from './ui/screens/settings/SettingsScreen';
 import { TitleScreen } from './ui/screens/title/TitleScreen';
 import { useApplyTheme } from './ui/theme/useApplyTheme';
 
+/**
+ * The event sandbox (Stage 10): development and test builds only, opened with
+ * `?sandbox`. Production builds compile it away.
+ */
+const SANDBOX_ENABLED = import.meta.env.DEV || import.meta.env.VITE_TEST_HOOKS === 'true';
+const EventSandboxScreen = SANDBOX_ENABLED
+  ? lazy(() => import('./ui/screens/sandbox/EventSandboxScreen').then((m) => ({ default: m.EventSandboxScreen })))
+  : null;
+const wantsSandbox = () => /[?&]sandbox(=|&|$)/.test(window.location.search);
+
 function CurrentScreen() {
   const status = useAppStore((s) => s.status);
   const error = useAppStore((s) => s.error);
@@ -22,6 +32,13 @@ function CurrentScreen() {
   const screen = useAppStore((s) => s.screen);
   const life = useAppStore((s) => s.life);
 
+  if (EventSandboxScreen && wantsSandbox()) {
+    return (
+      <Suspense fallback={<div className="h-dvh bg-bg" aria-busy="true" />}>
+        <EventSandboxScreen />
+      </Suspense>
+    );
+  }
   if (status === 'loading') return <div className="h-dvh bg-bg" aria-busy="true" />;
   if (status === 'error') {
     return (

@@ -1,0 +1,49 @@
+# Follow-up to playground_bully.
+id: bully_grown_up
+title: Small world
+text: >-
+  The person ringing up your groceries looks familiar. It takes you a second:
+  {bully.name}, from the lunch line, all grown up, wearing a name tag.
+tone: neutral
+category: people
+rarity: common
+lifeStages: [youngAdult, adult]
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  bully: { kind: classmate }
+choices:
+  - id: remind
+    label: Say you remember the lunch line
+    visibleIf: { memory: { role: bully, tag: bullied_you } }
+    check:
+      base: 50
+      stats: [{ key: confidence, weight: 0.3 }, { key: kindness, weight: 0.2 }]
+      success:
+        text: >-
+          {bully.name} goes red to the ears. "I was a jerk," {bully.they}
+          {bully:says|say}. "My dad was... anyway. I'm sorry." You believe {bully.them}.
+        effects:
+          - { type: relationship, role: bully, status: active, affection: 10, trust: 8 }
+          - { type: memory, role: bully, tag: apologized }
+          - { type: stat, key: stress, delta: -4 }
+      failure:
+        text: '"Don''t remember that," {bully.name} says, and scans your milk twice. Some people don''t change.'
+        effects:
+          - { type: stat, key: stress, delta: 2 }
+  - id: nod
+    label: Nod, like equals
+    visibleIf: { memory: { role: bully, tag: you_stood_up_to_them } }
+    outcome:
+      text: >-
+        {bully.name} remembers the day you stood up to {bully.them}. You can
+        see it. {bully.They} {bully:nods|nod} back, and gives you the employee discount.
+      effects:
+        - { type: relationship, role: bully, affection: 6, trust: 6 }
+        - { type: stat, key: confidence, delta: 2 }
+  - id: nothing
+    label: Pay and leave
+    outcome:
+      text: You say nothing. It's strange how small {bully.name} seems now.
+      effects:
+        - { type: stat, key: confidence, delta: 1 }

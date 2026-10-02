@@ -1,0 +1,43 @@
+id: broken_window
+title: Through the window
+text: >-
+  Your best hit ever sails over the fence and straight through
+  {neighbor.name}'s kitchen window. Everyone else has already scattered.
+tone: light
+category: play
+rarity: common
+lifeStages: [child]
+requires: { age: { gte: 7 } }
+weight: { base: 4 }
+once: true
+cast:
+  neighbor: { kind: acquaintance, age: { min: 55, max: 85 }, createIfMissing: true }
+choices:
+  - id: knock
+    label: Knock on the door and confess
+    outcome:
+      text: >-
+        {neighbor.name} looks at the glass, then at you, then hands you the
+        ball back. "Good hit," {neighbor.they} {neighbor:says|say}. You pay for
+        it out of your allowance for two months, and get cookies every Saturday.
+      effects:
+        - { type: money, delta: -40 }
+        - { type: relationship, role: neighbor, affection: 12, trust: 10 }
+        - { type: stat, key: kindness, delta: 2 }
+        - { type: stat, key: reputation, delta: 2 }
+  - id: run
+    label: Run like everyone else
+    check:
+      base: 55
+      stats: [{ key: fitness, weight: 0.3 }, { key: luck, weight: 0.3 }]
+      success:
+        text: Nobody ever finds out whose ball it was. The window gets fixed. You feel bad about it for an unreasonably long time.
+        effects:
+          - { type: stat, key: riskTaking, delta: 2 }
+          - { type: stat, key: stress, delta: 2 }
+      failure:
+        text: The ball has your name on it in marker. {neighbor.name} is at your door before dinner.
+        effects:
+          - { type: money, delta: -40 }
+          - { type: relationship, role: neighbor, affection: -8, trust: -10 }
+          - { type: stat, key: reputation, delta: -2 }

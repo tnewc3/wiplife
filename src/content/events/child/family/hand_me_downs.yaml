@@ -1,0 +1,43 @@
+id: hand_me_downs
+title: Hand-me-downs
+text: >-
+  Your jacket used to belong to your cousin, and before that to someone else.
+  {classmate.name} notices the name written inside the collar, and it isn't
+  yours.
+tone: neutral
+category: family
+rarity: common
+lifeStages: [child]
+requires:
+  all:
+    - { familyWealth: [poor, working] }
+    - { education: { program: [elementary, middle] } }
+weight: { base: 4 }
+once: true
+cast:
+  classmate: { kind: classmate, ageOffset: { min: -1, max: 1 }, createIfMissing: true }
+choices:
+  - id: own_it
+    label: Say it's vintage
+    check:
+      base: 45
+      stats: [{ key: confidence, weight: 0.4 }, { key: looks, weight: 0.2 }]
+      success:
+        text: '"Vintage," {classmate.name} repeats, impressed. By spring, two other kids have written names in their collars.'
+        effects:
+          - { type: stat, key: confidence, delta: 4 }
+          - { type: stat, key: reputation, delta: 1 }
+      failure:
+        text: It doesn't land. The jacket gets a nickname. You stop wearing it to school.
+        effects:
+          - { type: stat, key: confidence, delta: -3 }
+          - { type: stat, key: stress, delta: 2 }
+  - id: ignore
+    label: Shrug and say nothing
+    outcome:
+      text: >-
+        {classmate.name} forgets about it by lunch. You don't. You start keeping
+        a careful list of what other kids have.
+      effects:
+        - { type: stat, key: ambition, delta: 2 }
+        - { type: stat, key: happiness, delta: -1 }

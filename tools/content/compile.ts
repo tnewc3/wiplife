@@ -139,6 +139,10 @@ export async function compileContent({ contentDir, appVersion, overlayDir }: Com
   );
   const singletons = new Map<SingletonPath, unknown>();
 
+  // The test pack's events replace every real event (see contentFiles).
+  const eventsReplaced =
+    overlayDir !== undefined &&
+    (await listYamlFiles(overlayDir)).some((absolute) => path.relative(overlayDir, absolute).split(path.sep)[0] === 'events');
   for (const { file, absolute } of await contentFiles(contentDir, overlayDir)) {
     const [folder] = file.split('/');
     if (folder === undefined || NON_CONTENT_FOLDERS.has(folder)) continue;
@@ -243,7 +247,7 @@ export async function compileContent({ contentDir, appVersion, overlayDir }: Com
   const bundle = contentBundleSchema.parse({ contentVersion: `${appVersion}+${hash}`, ...body });
 
   const fileOf = (typeKey: CollectionKey, id: string) => collected.get(typeKey)?.get(id)?.file ?? `${typeKey}/${id}.yaml`;
-  const referenceErrors = checkReferences(bundle, fileOf);
+  const referenceErrors = checkReferences(bundle, fileOf, { partialEvents: eventsReplaced });
   if (referenceErrors.length > 0) return { ok: false, errors: referenceErrors };
 
   const definitionCount = [...collected.values()].reduce((sum, bucket) => sum + bucket.size, 0) + singletons.size;

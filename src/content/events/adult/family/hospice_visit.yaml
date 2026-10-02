@@ -1,0 +1,71 @@
+id: hospice_visit
+title: The last visit
+text: >-
+  The hospice nurse says {parent.name} has days, maybe a week. {parent.They}
+  {parent:drifts|drift} in and out, but right now {parent.their} eyes are open,
+  and {parent.they} {parent:knows|know} it's you.
+tone: dark
+category: family
+rarity: common
+lifeStages: [adult, senior]
+requires: { role: parent, age: { gte: 80 } }
+weight:
+  base: 3
+  modifiers:
+    - { if: { age: { gte: 55 } }, x: 1.5 }
+once: true
+cast:
+  parent: { kind: parent }
+choices:
+  - id: hold
+    label: Hold {parent.their} hand and talk about nothing
+    outcome:
+      text: >-
+        The weather, the neighbor's dog, the price of eggs. {parent.name}
+        squeezes your hand at the funny parts. It's the best conversation you've had in years.
+      effects:
+        - { type: relationship, role: parent, affection: 10 }
+        - { type: stat, key: happiness, delta: -2 }
+        - { type: stat, key: stress, delta: -2 }
+  - id: thank
+    label: Thank {parent.them} for standing by you
+    visibleIf: { memory: { role: parent, tag: accepted_you } }
+    outcome:
+      text: >-
+        "When you told me who you were," {parent.name} whispers, "I was so proud
+        of you." You didn't know. You stay until the nurse makes you leave.
+      effects:
+        - { type: relationship, role: parent, affection: 12, trust: 8 }
+        - { type: stat, key: happiness, delta: 2 }
+        - { type: innerConflict, delta: -5 }
+  - id: unfinished
+    label: Ask if {parent.they} ever understood you
+    visibleIf:
+      any:
+        - { memory: { role: parent, tag: struggled_with_it } }
+        - { memory: { role: parent, tag: you_cut_them_off } }
+        - { memory: { role: parent, tag: reconcile_refused } }
+        - { memory: { role: parent, tag: made_peace } }
+    check:
+      base: 40
+      stats: [{ role: parent, key: affection, weight: 0.5 }]
+      success:
+        text: >-
+          "Not at first," {parent.name} says. "Then I did. I should have said so."
+          It's late, and it's enough.
+        effects:
+          - { type: relationship, role: parent, affection: 15, trust: 15 }
+          - { type: stat, key: stress, delta: -6 }
+          - { type: history, text: 'At the very end, {parent.name} told you {parent.they} understood.', importance: 2 }
+      failure:
+        text: '{parent.name} looks at you for a long moment and then closes {parent.their} eyes. You never find out.'
+        effects:
+          - { type: stat, key: stress, delta: 4 }
+          - { type: stat, key: happiness, delta: -4 }
+  - id: cant
+    label: Stay in the hallway; you can't do this
+    outcome:
+      text: You sit in a plastic chair outside the door for three hours. You'll wonder, for a long time, what you would have said.
+      effects:
+        - { type: stat, key: stress, delta: 5 }
+        - { type: stat, key: happiness, delta: -3 }

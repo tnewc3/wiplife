@@ -1,0 +1,37 @@
+id: summer_camp
+title: Summer camp
+text: >-
+  Two weeks at a lake camp: canoes, bug juice, a cabin of strangers, and a
+  counselor with a guitar who knows exactly four songs. On the last night,
+  your bunkmate {friend.name} asks if you'll write.
+tone: light
+category: play
+rarity: common
+lifeStages: [child]
+requires:
+  all:
+    - { age: { gte: 8 } }
+    - { familyWealth: [middle, affluent, rich] }
+weight: { base: 4 }
+once: true
+cast:
+  friend: { kind: friend, ageOffset: { min: -1, max: 1 }, createIfMissing: true, newChance: 1 }
+choices:
+  - id: promise
+    label: Promise to write every week
+    outcome:
+      text: You trade addresses on the back of a canoe safety card. The first letter arrives before you've unpacked.
+      effects:
+        - { type: relationship, role: friend, affection: 10, trust: 5 }
+        - { type: memory, role: friend, tag: promised_to_write }
+        - { type: stat, key: happiness, delta: 3 }
+        - { type: schedule, eventId: camp_letter, inYears: [2, 4], cast: [friend] }
+  - id: wave
+    label: Say camp friends are camp friends
+    outcome:
+      text: '{friend.name} shrugs and agrees, and you both cry a little on the bus anyway.'
+      effects:
+        - { type: relationship, role: friend, affection: 3 }
+        - { type: stat, key: happiness, delta: 2 }
+        - { type: memory, role: friend, tag: lost_touch }
+        - { type: schedule, eventId: friend_found_online, inYears: [10, 20], cast: [friend] }

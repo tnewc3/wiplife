@@ -1,0 +1,45 @@
+# Follow-up to drifting apart (drifting_friend, best_friend_moves_away,
+# summer_camp): someone you lost touch with finds you again.
+id: friend_found_online
+title: A message out of nowhere
+text: >-
+  A message request from {friend.name}. The profile photo is older than you
+  remember, but it's your old friend's exact grin. "Is this really you?"
+tone: light
+category: friends
+rarity: common
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  any:
+    - { memory: { role: friend, tag: lost_touch } }
+    - { memory: { role: friend, tag: promised_to_write } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  friend: { kind: friend }
+choices:
+  - id: call
+    label: Call right now
+    outcome:
+      text: >-
+        Three hours. You catch up on a decade and then talk about nothing, the
+        way you used to. You make plans and, amazingly, keep them.
+      effects:
+        - { type: relationship, role: friend, status: active, affection: 12, trust: 6 }
+        - { type: memory, role: friend, tag: kept_in_touch }
+        - { type: stat, key: happiness, delta: 4 }
+  - id: sorry
+    label: Apologize for the letters you never sent
+    visibleIf: { memory: { role: friend, tag: promised_to_write } }
+    outcome:
+      text: '"I never wrote either," {friend.name} admits. "I still have your address on a napkin somewhere."'
+      effects:
+        - { type: relationship, role: friend, status: active, affection: 10, trust: 8 }
+        - { type: memory, role: friend, tag: kept_in_touch }
+        - { type: stat, key: happiness, delta: 3 }
+  - id: like
+    label: Like a photo and leave it there
+    outcome:
+      text: You see each other's posts for years. Birthdays get a heart. It's something.
+      effects:
+        - { type: relationship, role: friend, affection: 2 }

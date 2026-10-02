@@ -1,50 +1,198 @@
-# Obituary, version 1: short and template based. The character is cast as
-# {self}, so {self.they}, {self.their} and {self:was|were} follow the
-# character's pronouns. One variant is picked per section; an empty list
-# skips the section. Stage 10 replaces this with richer, tone-matched writing.
+# Obituary, version 2 (Stage 10). The character is cast as {self}, so
+# {self.they}, {self.their} and {self:was|were} follow the character's
+# pronouns. The obituary is written in sections (src/engine/obituary.ts); one
+# variant is picked per section, and a section without anything to say is
+# left out.
+#
+# Tone-matched sections offer three sets of variants, chosen by how the life
+# went (thresholds in balance/aging.yaml, obituary):
+#   bright  a long life, mostly happy
+#   mixed   most lives: good years and hard ones
+#   heavy   a life cut short, or one that carried more sadness than most
 
 # Values: {age}, {year}, {city}; finished lives also get {cause}.
 opening:
   finished:
-    - "{self.fullName} died of {cause} in {city} in {year}, at the age of {age}."
-    - "{self.fullName} died in {year} in {city}, at {age}, of {cause}."
+    bright:
+      - "{self.fullName} died of {cause} in {city} in {year}, at the age of {age}, after a long and full life."
+      - "{self.fullName}, who seemed to enjoy nearly every one of {self.their} {age} years, died of {cause} in {city} in {year}."
+      - "{self.fullName} died in {year} in {city}, at {age}, of {cause}, and by most accounts had a wonderful time getting there."
+    mixed:
+      - "{self.fullName} died of {cause} in {city} in {year}, at the age of {age}."
+      - "{self.fullName} died in {year} in {city}, at {age}, of {cause}."
+      - "{self.fullName} died of {cause} at {age}, in {city}, in {year}."
+    heavy:
+      - "{self.fullName} died of {cause} in {city} in {year}. {self.They} {self:was|were} {age}."
+      - "{self.fullName} was {age} when {self.they} died of {cause} in {city}, in {year}: too soon, by any measure."
+      - "In {year}, {self.fullName} died of {cause} in {city}, at only {age}."
   unfinished:
     - "The story of {self.fullName} was left unfinished in {year}, when {self.they} {self:was|were} {age}."
+    - "{self.fullName}'s story was left unfinished in {year}, in {city}, at the age of {age}."
 
 # Values: {birthYear}, {birthCity}, {parents}.
 origins:
   - "{self.They} {self:was|were} born in {birthCity} in {birthYear} to {parents}."
   - "{self.They} came into the world in {birthYear} in {birthCity}, the child of {parents}."
+  - "Born in {birthCity} in {birthYear}, {self.they} {self:was|were} raised by {parents}."
+
+# The highest credential (adults only). Values: {subject} what was studied
+# (college, trade school and grad school), {license} a trade license, {degree}
+# a grad degree.
+education:
+  none:
+    - "{self.They} never finished school, and never let that stop {self.them} from having opinions."
+    - "School and {self.they} never quite got along."
+  highSchool:
+    - "{self.They} finished high school and went straight out into the world."
+    - "A high school diploma was all the schooling {self.they} needed, or so {self.they} always said."
+  ged:
+    - "{self.They} earned {self.their} high school equivalency the hard way, after leaving school."
+  trade:
+    - "{self.They} trained in {subject} and earned {self.their} {license}."
+    - "{self.They} went to trade school for {subject}, and {self:was|were} proud of the {license} on the wall."
+  associate:
+    - "{self.They} earned an associate degree in {subject}."
+  bachelor:
+    - "{self.They} studied {subject} in college and earned {self.their} degree."
+    - "{self.They} earned a bachelor's degree in {subject}."
+  grad:
+    - "{self.They} went on to earn {degree}."
+    - "{self.They} earned {degree}, which {self.they} brought up more often than strictly necessary."
+
+# Work. peak: the best job held, when it was above a track's first level;
+# worked: the best job held was a first level. Values: {title} ("senior
+# accountant"), {employer}, {years} years worked in all. retired: values {years}.
+career:
+  peak:
+    bright:
+      - "{self.They} worked {years} years in all, and rose to {title} at {employer}."
+      - "{self.Their} working life took {self.them} as far as {title} at {employer}, and {self.they} loved most of it."
+    mixed:
+      - "{self.They} worked {years} years in all, the best of them as {title} at {employer}."
+      - "At {self.their} working peak, {self.they} {self:was|were} {title} at {employer}."
+    heavy:
+      - "{self.They} worked as {title} at {employer}."
+      - "For a time, {self.they} {self:was|were} {title} at {employer}."
+  worked:
+    - "{self.They} worked as {title} at {employer}."
+    - "For most of {self.their} working life, {self.they} {self:was|were} {title} at {employer}."
+  retired:
+    - "{self.They} retired after {years} working years and never once set an alarm again."
+    - "Retirement, after {years} years of work, suited {self.them}."
+  never:
+    - "{self.They} never held a steady job, and got by on gig work and nerve."
+    - "Steady work never quite found {self.them}."
+
+# Marriage. married: the last spouse, still living or not (role npc).
+# Values: {year} the wedding year. widowed: the spouse died first (role npc),
+# values {year}. divorced: values {exes} ("Ana Ruiz and Sam Lee").
+# single: never married (adults over 30 only).
+love:
+  married:
+    bright:
+      - "{self.They} married {npc.fullName} in {year}, and never stopped saying it was the best thing {self.they} ever did."
+      - "In {year}, {self.they} married {npc.fullName}. Friends say the two of them still held hands at the grocery store."
+    mixed:
+      - "{self.They} married {npc.fullName} in {year}."
+      - "In {year}, {self.they} married {npc.fullName}, and the two of them made a life together."
+    heavy:
+      - "{self.They} married {npc.fullName} in {year}."
+      - "{self.They} and {npc.fullName} married in {year}, and stayed together through the hard years."
+  widowed:
+    - "{self.They} married {npc.fullName} in {year}, and outlived {npc.them}."
+    - "{self.Their} spouse, {npc.fullName}, whom {self.they} married in {year}, died before {self.them}."
+  divorced:
+    - "An earlier marriage, to {exes}, ended in divorce."
+    - "{self.Their} marriage to {exes} ended in divorce."
+  single:
+    - "{self.They} never married, and never seemed to mind."
+    - "{self.They} never married."
+
+# Moments: notable events from the life (by event id), as a line each, kept to
+# events rare enough to set a life apart. The
+# obituary mentions up to balance aging.yaml obituary.maxMoments of these and
+# the deeds below, legendary moments first. Each line holds whatever choice
+# was made.
+moments:
+  stranger_on_the_bench: "{self.They} once met a stranger on a park bench who knew {self.their} name, and never quite explained it."
+  stranger_returns: "Later in life, {self.they} swore {self.they} saw that same stranger again."
+  meteorite: "As a child, {self.they} found a meteorite in {self.their} own backyard."
+  busker_duet: "{self.They} once shared a subway platform, and a song, with a famous musician in disguise."
+  lightning: "{self.They} {self:was|were} struck by lightning once, and walked away from it."
+  dream_numbers: "{self.They} once dreamed the winning lottery numbers, and told the story for the rest of {self.their} life."
+  message_in_a_bottle: "{self.They} once found a message in a bottle on a beach, and tracked down the child, now old, who threw it."
+
+# Deeds: things the life did (by flag), kept to ones that set a life apart.
+# Values: none.
+deeds:
+  ran_marathon: "{self.They} ran a marathon, and kept the medal."
+  jumped_from_plane: "{self.They} jumped out of a plane, on purpose, well past the age most people would."
+  whistleblower: "{self.They} blew the whistle when it cost {self.them} something."
+  valedictorian: "{self.They} {self:was|were} valedictorian of {self.their} high school class."
+  studied_abroad: "{self.They} spent a semester studying abroad and talked about it for years."
+  came_out: "{self.They} found the courage to tell the people {self.they} loved who {self.they} really {self:was|were}."
+  in_recovery: "{self.They} fought an addiction and got into recovery."
+  recruited_athlete: "{self.They} {self:was|were} a recruited athlete in {self.their} school days."
+  studied_inside: "{self.They} took classes in prison and came out with more than {self.they} went in with."
+  had_dog: "{self.They} loved a scruffy dog who followed {self.them} home one day."
+
+# Hard chapters, written frankly. prison: values {years} ("two years").
+# bankrupt: values {year}.
+hardship:
+  prison:
+    - "{self.They} spent {years} in prison, and walked out determined to do better."
+    - "{self.Their} life included {years} behind bars, a chapter {self.they} never hid."
+  bankrupt:
+    - "{self.They} went bankrupt in {year} and rebuilt from nothing."
+    - "Money was hard; {self.they} filed for bankruptcy in {year}, and kept going."
 
 # Relatives still alive when the character died. Values: {survivors}.
 survivedBy:
   - "{self.They} {self:is|are} survived by {survivors}."
+  - "{self.They} {self:leaves|leave} behind {survivors}."
 
 # Relatives who died before the character. Values: {predeceased}.
 predeceasedBy:
   - "{self.They} {self:was|were} predeceased by {predeceased}."
+  - "{self.They} {self:was|were} preceded in death by {predeceased}."
 
 # By average Happiness over the whole life: the first band the character reaches.
+# The bands sit around how simulated lives actually go (median about 93 before
+# Stage 12 balancing); Stage 12 retunes them with Happiness.
 mood:
-  - minHappiness: 70
+  - minHappiness: 95
     variants:
       - "Those who knew {self.them} remember a life lived with real joy."
       - "{self.They} laughed easily and often."
-  - minHappiness: 40
+      - "People remember {self.them} as the one who made a room feel lighter."
+  - minHappiness: 85
     variants:
       - "{self.Their} life had its share of ups and downs, and {self.they} met most of them head-on."
       - "{self.They} knew good years and hard ones."
+      - "{self.They} took the good years with the bad, and kept going."
   - minHappiness: 0
     variants:
       - "Happiness rarely came easily to {self.them}."
       - "{self.They} carried more sadness than most people ever saw."
+      - "Those closest to {self.them} knew how heavy some years were."
 
 closing:
   finished:
-    - "{self.They} will be missed."
-    - "May {self.they} rest in peace."
+    bright:
+      - "{self.They} will be missed, and laughed about, for a long time."
+      - "It was a good life, and {self.they} knew it."
+      - "{self.They} would want you to have dessert first."
+    mixed:
+      - "{self.They} will be missed."
+      - "May {self.they} rest in peace."
+      - "{self.They} did {self.their} best, and that counts for a great deal."
+    heavy:
+      - "May {self.they} rest in peace."
+      - "{self.They} deserved more time."
+      - "{self.They} {self:is|are} at rest now."
   unfinished:
     - "Where {self.their} life would have gone next, no one will ever know."
+    - "The rest of {self.their} story was never written."
 
 # One relative in a list. Role: npc. Values: {relation}.
 relative: "{self.their} {relation} {npc.name}"

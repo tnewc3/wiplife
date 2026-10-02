@@ -117,3 +117,8 @@ tags:
   kissed_not_for_you: Shared a kiss with you that told you something
   turned_them_down: You turned down {npc.their} kiss
   danced_with_you: Danced with you all night
+  # Content completion (Stage 10).
+  spoiled_you: Spoiled you rotten when you were small
+  lost_temper_with_you: Lost {npc.their} temper with you when you were small
+  drank_too_much: Drank too much when you were a child
+  took_the_blame: You took the blame for {npc.them} when you were kids

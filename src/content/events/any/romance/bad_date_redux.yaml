@@ -1,0 +1,42 @@
+# Follow-up to dating_app, when the first date went badly.
+id: bad_date_redux
+title: The worst date, part two
+text: >-
+  The worst first date of your life is standing behind you in line at the
+  pharmacy. {match.name} sees you, winces, and then, unbelievably, laughs.
+tone: light
+category: romance
+rarity: common
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { memory: { role: match, tag: bad_first_date } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  match: { kind: acquaintance, age: { min: 18, max: 120 } }
+choices:
+  - id: retry
+    label: Suggest a do-over, no apps this time
+    check:
+      base: 40
+      stats: [{ key: confidence, weight: 0.3 }, { key: sociability, weight: 0.2 }]
+      success:
+        text: >-
+          The second date is the opposite of the first: no lies about your
+          hobbies, no spilled anything. You make a third.
+        effects:
+          - { type: relationship, role: match, affection: 12, trust: 6 }
+          - { type: stat, key: happiness, delta: 4 }
+      failure:
+        text: '"Let''s quit while we''re ahead," {match.name} says, kindly. You agree. You are not ahead.'
+        effects:
+          - { type: stat, key: confidence, delta: -1 }
+  - id: laugh
+    label: Laugh about it and part as legends
+    outcome:
+      text: You both agree it was historically bad. You trade the story at parties for years, with credit.
+      effects:
+        - { type: relationship, role: match, affection: 5 }
+        - { type: stat, key: happiness, delta: 2 }

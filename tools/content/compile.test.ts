@@ -71,7 +71,7 @@ describe('content build with the real content', () => {
     expect(result.bundle.character.appearance.groups.length).toBeGreaterThan(0);
     expect(Object.keys(result.bundle.causes)).toContain('natural_causes');
     expect(result.bundle.balance.mortality.maxAge).toBe(120);
-    expect(result.bundle.text.obituary.opening.finished.length).toBeGreaterThan(0);
+    expect(result.bundle.text.obituary.opening.finished.mixed.length).toBeGreaterThan(0);
   });
 });
 
@@ -228,7 +228,7 @@ describe('content build with fixture files', () => {
     const file = path.join(dir, 'text', 'obituary.yaml');
     await writeFile(file, (await readFile(file, 'utf8')).replace('May {self.they} rest in peace.', 'May {npc.they} rest in {place}.'));
     const text = await expectErrors();
-    expect(text).toContain('text/obituary.yaml: closing.finished[1]: {npc.they}: unknown role "npc"');
+    expect(text).toContain('text/obituary.yaml: closing.finished.mixed[1]: {npc.they}: unknown role "npc"');
     expect(text).toContain('{place}: unknown value');
   });
 

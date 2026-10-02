@@ -20,6 +20,9 @@ import {
   type CollectionKey,
   type ContentBundle,
   type EducationHistoryKey,
+  OBITUARY_EDUCATION_KEYS,
+  OBITUARY_TONES,
+  type ObituaryTone,
 } from '../../src/content/schemas';
 import {
   ACTION_IDS,
@@ -87,6 +90,8 @@ function requiresRole(condition: Condition | undefined, role: string, minAge?: n
 export function checkReferences(
   bundle: ContentBundle,
   fileOf: (typeKey: CollectionKey, id: string) => string,
+  /** The events are a stand-in set (the end-to-end test pack): text that names real events isn't checked against them. */
+  options: { partialEvents?: boolean } = {},
 ): ContentError[] {
   const errors: ContentError[] = [];
   const active = <T extends { retired?: boolean | undefined }>(record: Record<string, T>) =>
@@ -153,7 +158,7 @@ export function checkReferences(
   if (dupe) errors.push({ file: 'character/appearance.yaml', message: `duplicate group id "${dupe}"` });
 
   errors.push(...checkAgingAndMortality(bundle, fileOf));
-  errors.push(...checkTemplates(bundle));
+  errors.push(...checkTemplates(bundle, options.partialEvents === true));
   errors.push(...checkEvents(bundle, fileOf));
   errors.push(...checkActions(bundle, fileOf));
   errors.push(...checkTriggers(bundle, fileOf));
@@ -208,7 +213,7 @@ function checkAgingAndMortality(bundle: ContentBundle, fileOf: (typeKey: Collect
 }
 
 /** Every template may only use the roles and values its section provides. */
-function checkTemplates(bundle: ContentBundle): ContentError[] {
+function checkTemplates(bundle: ContentBundle, partialEvents: boolean): ContentError[] {
   const errors: ContentError[] = [];
   const check = (file: string, field: string, template: string, allowed: { roles?: string[]; values?: string[] }) => {
     for (const message of checkTemplate(template, allowed)) errors.push({ file, message: `${field}: ${message}` });
@@ -251,13 +256,37 @@ function checkTemplates(bundle: ContentBundle): ContentError[] {
 
   const obituary = bundle.text.obituary;
   const self = ['self'];
-  all(OBITUARY, 'opening.finished', obituary.opening.finished, { roles: self, values: ['age', 'year', 'city', 'cause'] });
+  const toned = (field: string, group: Record<ObituaryTone, string[]>, allowed: { roles?: string[]; values?: string[] }) => {
+    for (const tone of OBITUARY_TONES) all(OBITUARY, `${field}.${tone}`, group[tone], allowed);
+  };
+  toned('opening.finished', obituary.opening.finished, { roles: self, values: ['age', 'year', 'city', 'cause'] });
   all(OBITUARY, 'opening.unfinished', obituary.opening.unfinished, { roles: self, values: ['age', 'year', 'city'] });
   all(OBITUARY, 'origins', obituary.origins, { roles: self, values: ['birthYear', 'birthCity', 'parents'] });
+  for (const key of OBITUARY_EDUCATION_KEYS) {
+    all(OBITUARY, `education.${key}`, obituary.education[key], { roles: self, values: ['subject', 'license', 'degree'] });
+  }
+  toned('career.peak', obituary.career.peak, { roles: self, values: ['title', 'employer', 'years'] });
+  all(OBITUARY, 'career.worked', obituary.career.worked, { roles: self, values: ['title', 'employer', 'years'] });
+  all(OBITUARY, 'career.retired', obituary.career.retired, { roles: self, values: ['years'] });
+  all(OBITUARY, 'career.never', obituary.career.never, { roles: self });
+  toned('love.married', obituary.love.married, { roles: ['self', 'npc'], values: ['year'] });
+  all(OBITUARY, 'love.widowed', obituary.love.widowed, { roles: ['self', 'npc'], values: ['year'] });
+  all(OBITUARY, 'love.divorced', obituary.love.divorced, { roles: self, values: ['exes'] });
+  all(OBITUARY, 'love.single', obituary.love.single, { roles: self });
+  for (const [eventId, line] of Object.entries(obituary.moments)) {
+    if (!partialEvents && !bundle.events[eventId]) errors.push({ file: OBITUARY, message: `moments.${eventId}: unknown event` });
+    check(OBITUARY, `moments.${eventId}`, line, { roles: self });
+  }
+  for (const [flag, line] of Object.entries(obituary.deeds)) {
+    if (!bundle.registries.flags.flags[flag]) errors.push({ file: OBITUARY, message: `deeds.${flag}: flag is not in registries/flags.yaml` });
+    check(OBITUARY, `deeds.${flag}`, line, { roles: self });
+  }
+  all(OBITUARY, 'hardship.prison', obituary.hardship.prison, { roles: self, values: ['years'] });
+  all(OBITUARY, 'hardship.bankrupt', obituary.hardship.bankrupt, { roles: self, values: ['year'] });
   all(OBITUARY, 'survivedBy', obituary.survivedBy, { roles: self, values: ['survivors'] });
   all(OBITUARY, 'predeceasedBy', obituary.predeceasedBy, { roles: self, values: ['predeceased'] });
   obituary.mood.forEach((band, i) => all(OBITUARY, `mood[${i}].variants`, band.variants, { roles: self }));
-  all(OBITUARY, 'closing.finished', obituary.closing.finished, { roles: self });
+  toned('closing.finished', obituary.closing.finished, { roles: self });
   all(OBITUARY, 'closing.unfinished', obituary.closing.unfinished, { roles: self });
   check(OBITUARY, 'relative', obituary.relative, { roles: ['self', 'npc'], values: ['relation'] });
   check(OBITUARY, 'list.pair', obituary.list.pair, { values: ['first', 'second'] });
@@ -267,9 +296,6 @@ function checkTemplates(bundle: ContentBundle): ContentError[] {
   check(OBITUARY, 'list.serial', obituary.list.serial, { values: ['items', 'last'] });
   if (!obituary.mood.some((band) => band.minHappiness === 0)) {
     errors.push({ file: OBITUARY, message: 'mood: one band must have minHappiness 0, so every character gets one' });
-  }
-  if (obituary.opening.finished.length === 0 || obituary.opening.unfinished.length === 0) {
-    errors.push({ file: OBITUARY, message: 'opening: finished and unfinished each need at least one variant' });
   }
   return errors;
 }

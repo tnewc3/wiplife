@@ -1,0 +1,45 @@
+# Early mistreatment: never graphic, never sexual; it is about trust and what
+# it leaves behind. Years later, taller_now returns to it.
+id: hard_grip
+title: Spilled juice
+text: >-
+  {parent.name} has had a terrible day. When you knock your juice across the
+  couch, {parent.they} {parent:grabs|grab} your arm too hard and {parent:yells|yell}
+  until you cry. Then {parent.they} {parent:goes|go} very quiet, and so do you.
+tone: dark
+category: family
+rarity: uncommon
+lifeStages: [early]
+requires: { age: { gte: 2 } }
+weight:
+  base: 1.5
+  modifiers:
+    - { if: { flag: parents_fought }, x: 2 }
+once: true
+cast:
+  parent: { kind: parent }
+choices:
+  - id: quiet
+    label: Stay very quiet around {parent.them} for a while
+    outcome:
+      text: >-
+        You learn to read the way {parent.name} closes the front door, and to
+        disappear when it's the wrong way. {parent.They} never {parent:mentions|mention} it.
+      effects:
+        - { type: relationship, role: parent, trust: -10, affection: -4 }
+        - { type: memory, role: parent, tag: lost_temper_with_you }
+        - { type: stat, key: stress, delta: 6 }
+        - { type: stat, key: confidence, delta: -2 }
+        - { type: schedule, eventId: taller_now, inYears: [10, 13], cast: [parent] }
+  - id: hug
+    label: Climb into {parent.name}'s lap anyway
+    outcome:
+      text: >-
+        {parent.name} holds you and says sorry into your hair, over and over.
+        You don't know what for. You remember it anyway.
+      effects:
+        - { type: relationship, role: parent, trust: -5 }
+        - { type: memory, role: parent, tag: lost_temper_with_you }
+        - { type: stat, key: stress, delta: 4 }
+        - { type: stat, key: kindness, delta: 2 }
+        - { type: schedule, eventId: taller_now, inYears: [10, 13], cast: [parent] }

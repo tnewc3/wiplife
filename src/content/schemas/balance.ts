@@ -135,6 +135,18 @@ export const agingBalanceSchema = z.strictObject({
     /** Most highlights kept per archived life. */
     maxHighlights: z.int().min(1).max(1000),
   }),
+  /**
+   * Obituary version 2 (Stage 10): how the life's tone is judged. Heavy: a
+   * life that ended before youngAge, or lifetime Happiness below
+   * heavyHappiness; bright: lifetime Happiness of at least brightHappiness;
+   * otherwise mixed. At most maxMoments moments and deeds are mentioned.
+   */
+  obituary: z.strictObject({
+    brightHappiness: z.int().min(0).max(100),
+    heavyHappiness: z.int().min(0).max(100),
+    youngAge: z.int().min(0).max(120),
+    maxMoments: z.int().min(0).max(10),
+  }),
 });
 export type AgingBalance = z.infer<typeof agingBalanceSchema>;
 
@@ -282,6 +294,36 @@ export const targetsBalanceSchema = z.strictObject({
       expression: shareRangeSchema,
       personality: shareRangeSchema,
       talent: shareRangeSchema,
+    }),
+  }),
+  /**
+   * The content coverage report (tools/coverage.ts, Stage 10): how much
+   * content there is and how well it covers simulated lives.
+   */
+  coverage: z.strictObject({
+    /** At least this many events (not retired). */
+    minEvents: z.int().min(1),
+    /** Legendary events (not retired): this many in all. */
+    legendary: z.strictObject({ min: z.int().min(0), max: z.int().min(0) }).refine((r) => r.min <= r.max, 'min must not be greater than max'),
+    /** A year is well covered when at least this many events could happen in it. */
+    minEligible: z.int().min(1),
+    /** At least this share of simulated years (outside prison) are well covered. */
+    minCoveredYears: probabilitySchema,
+    /** No event that isn't legendary makes up more than this share of all events fired. */
+    maxEventShare: probabilitySchema,
+    /** Lives in which each legendary event fires: rare but reachable (judged on the 10,000-life simulation). */
+    legendaryLives: shareRangeSchema,
+    /**
+     * The launch content targets by life stage (docs/design.md, section G):
+     * events that can happen in each stage. Reported, not enforced; early
+     * childhood and childhood count together.
+     */
+    launch: z.strictObject({
+      childhood: z.int().min(0),
+      teen: z.int().min(0),
+      youngAdult: z.int().min(0),
+      adult: z.int().min(0),
+      senior: z.int().min(0),
     }),
   }),
 });

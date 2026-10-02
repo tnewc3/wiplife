@@ -1,0 +1,35 @@
+id: old_knees
+title: The knees remember
+text: >-
+  You ran a marathon once. Your knees would like a word about that. A
+  charity race is coming up, and your old running shoes are in the closet.
+tone: light
+category: health
+rarity: common
+lifeStages: [adult, senior]
+requires: { flag: ran_marathon }
+weight: { base: 4 }
+once: true
+choices:
+  - id: run
+    label: Sign up for the 10K
+    check:
+      base: 50
+      stats: [{ key: fitness, weight: 0.5 }, { key: health, weight: 0.2 }]
+      success:
+        text: Slower than last time, smiling the whole way. Your medal goes next to the old one.
+        effects:
+          - { type: stat, key: fitness, delta: 3 }
+          - { type: stat, key: happiness, delta: 4 }
+      failure:
+        text: You walk the last three kilometers, and limp for a week. You'd do it again.
+        effects:
+          - { type: stat, key: health, delta: -2 }
+          - { type: stat, key: happiness, delta: 1 }
+  - id: cheer
+    label: Volunteer at the water table instead
+    outcome:
+      text: You hand out cups and shout encouragement at strangers. It's almost as good, and much better for your knees.
+      effects:
+        - { type: stat, key: kindness, delta: 1 }
+        - { type: stat, key: happiness, delta: 2 }

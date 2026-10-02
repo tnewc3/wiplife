@@ -1,0 +1,32 @@
+# Follow-up to the legendary stranger_on_the_bench (when you listened).
+id: stranger_returns
+title: The bench, again
+text: >-
+  The same park. The bench is new, but the stranger on it is
+  not. "You're older now," the stranger says, "and right on schedule."
+tone: neutral
+category: wonder
+rarity: rare
+lifeStages: [youngAdult, adult, senior]
+requires: { flag: met_the_stranger }
+weight: { base: 10 }
+followUpOnly: true
+choices:
+  - id: ask
+    label: Ask how the story ends
+    outcome:
+      text: >-
+        "You already know," the stranger says, and smiles. You look down at
+        your hands, and when you look up, there's only a pigeon.
+      effects:
+        - { type: stat, key: happiness, delta: 5 }
+        - { type: stat, key: stress, delta: -5 }
+        - { type: history, text: 'You saw the stranger on the bench again. You didn''t need to ask.', importance: 3 }
+  - id: thank
+    label: Say thank you
+    outcome:
+      text: '"For what?" the stranger asks. You find you can''t say exactly. The stranger seems to know anyway.'
+      effects:
+        - { type: stat, key: happiness, delta: 4 }
+        - { type: stat, key: luck, delta: 5 }
+        - { type: history, text: 'You met the stranger from the park bench a second time, and said thank you.', importance: 3 }

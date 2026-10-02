@@ -1,0 +1,40 @@
+id: old_store
+title: Going out of business
+text: >-
+  The store you once stole from is closing for good. The same owner
+  is behind the counter, much older, marking everything down to half price.
+tone: neutral
+category: community
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { flag: shoplifted }
+    - { age: { gte: 20 } }
+weight: { base: 4 }
+once: true
+choices:
+  - id: pay
+    label: Pay for what you took, years late
+    outcome:
+      text: >-
+        You put some cash on the counter and explain. The owner stares, then
+        laughs a big, wheezing laugh. "Do you know how many of you there
+        were?" Nobody has ever said that to you so kindly.
+      effects:
+        - { type: money, delta: -50 }
+        - { type: stat, key: kindness, delta: 2 }
+        - { type: stat, key: happiness, delta: 3 }
+  - id: buy
+    label: Buy something, full price
+    outcome:
+      text: You insist on paying the old price. The owner thinks you're strange. You feel lighter anyway.
+      effects:
+        - { type: money, delta: -30 }
+        - { type: stat, key: happiness, delta: 1 }
+  - id: walk_past
+    label: Walk past without going in
+    outcome:
+      text: By next month it's a phone store. You never did say anything.
+      effects:
+        - { type: stat, key: stress, delta: 1 }

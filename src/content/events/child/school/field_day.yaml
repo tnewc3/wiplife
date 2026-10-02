@@ -1,0 +1,35 @@
+id: field_day
+title: Field day
+text: >-
+  Field day: sack races, a tug-of-war, and a blue ribbon for the fifty-yard
+  dash that you have been thinking about since March.
+tone: light
+category: school
+rarity: common
+lifeStages: [child]
+requires: { education: { program: [elementary, middle] } }
+weight: { base: 4 }
+cooldownYears: 3
+choices:
+  - id: dash
+    label: Go all out in the dash
+    check:
+      base: 35
+      stats: [{ key: fitness, weight: 0.5 }]
+      success:
+        text: You win by a nose. The ribbon stays pinned to your bulletin board until it fades to white.
+        effects:
+          - { type: stat, key: confidence, delta: 4 }
+          - { type: stat, key: fitness, delta: 2 }
+      failure:
+        text: You come fourth, which is not a ribbon. You start running around the block after school.
+        effects:
+          - { type: stat, key: fitness, delta: 2 }
+          - { type: stat, key: ambition, delta: 1 }
+  - id: tug
+    label: Anchor the tug-of-war team
+    outcome:
+      text: Your side loses spectacularly, all fourteen of you in the mud. It's the best part of the day.
+      effects:
+        - { type: stat, key: sociability, delta: 2 }
+        - { type: stat, key: happiness, delta: 3 }

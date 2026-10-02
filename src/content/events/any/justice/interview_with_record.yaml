@@ -1,0 +1,41 @@
+id: interview_with_record
+title: The box on the form
+text: >-
+  The application has a box: "Have you ever been convicted of a crime?" The
+  interviewer is friendly, your form is on the desk, and the box is checked.
+tone: serious
+category: justice
+rarity: common
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { record: { outcome: [jail] } }
+    - { legal: { incarcerated: false } }
+weight: { base: 5 }
+once: true
+choices:
+  - id: certificate
+    label: Show them the certificate you earned inside
+    visibleIf: { flag: studied_inside }
+    outcome:
+      text: >-
+        The interviewer reads it twice, then puts down the pen. "Tell me about
+        the classes." You talk for twenty minutes. They call you back.
+      effects:
+        - { type: stat, key: confidence, delta: 4 }
+        - { type: stat, key: reputation, delta: 2 }
+        - { type: job, action: performance, value: 5 }
+  - id: honest
+    label: Explain it plainly and move on
+    check:
+      base: 45
+      stats: [{ key: confidence, weight: 0.3 }, { key: sociability, weight: 0.2 }]
+      success:
+        text: '"Thank you for being straight with me," the interviewer says. It doesn''t get you this job. It gets you the next one.'
+        effects:
+          - { type: stat, key: confidence, delta: 2 }
+      failure:
+        text: The temperature in the room drops. You don't hear back.
+        effects:
+          - { type: stat, key: stress, delta: 4 }
+          - { type: stat, key: happiness, delta: -2 }

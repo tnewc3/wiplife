@@ -1,0 +1,59 @@
+id: leftover_pills
+title: The orange bottle
+text: >-
+  Cleaning out the medicine cabinet, you find the old bottle of painkillers
+  you were once prescribed. There are eleven left. You remember exactly how they felt.
+tone: dark
+category: health
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { flag: painkillers }
+    - { age: { gte: 18 } }
+weight: { base: 4 }
+once: true
+cast:
+  partner: { kind: spouse, optional: true }
+choices:
+  - id: dispose
+    label: Take them to the pharmacy drop box
+    outcome:
+      text: The drop box clanks. You stand there a second longer than you need to, then walk out into the sun.
+      effects:
+        - { type: stat, key: discipline, delta: 2 }
+        - { type: stat, key: vice, delta: -3 }
+  - id: tell
+    label: Give the bottle to {partner.name} and say why
+    visibleIf:
+      all:
+        - { role: partner }
+        - { home: { partner: true } }
+    outcome:
+      text: '{partner.name} doesn''t ask questions. {partner.They} just {partner:takes|take} the bottle, and later, your hand.'
+      effects:
+        - { type: relationship, role: partner, trust: 6, affection: 4 }
+        - { type: stat, key: vice, delta: -3 }
+  - id: keep
+    label: Keep them, just in case
+    outcome:
+      text: They go in the back of a drawer. You know exactly which drawer, at all times.
+      effects:
+        - { type: stat, key: vice, delta: 3 }
+        - { type: stat, key: stress, delta: 2 }
+  - id: one
+    label: Take one, just tonight
+    check:
+      base: 55
+      stats: [{ key: discipline, weight: 0.3 }, { key: vice, weight: -0.4 }]
+      success:
+        text: One, and a long warm night, and then the bottle goes in the trash in the morning. A close call, and you know it.
+        effects:
+          - { type: stat, key: vice, delta: 2 }
+          - { type: stat, key: stress, delta: -2 }
+      failure:
+        text: One becomes the bottle, and the bottle becomes a phone number you shouldn't have.
+        effects:
+          - { type: health, conditionId: drug_addiction, severity: 25 }
+          - { type: stat, key: vice, delta: 8 }
+          - { type: stat, key: happiness, delta: -4 }

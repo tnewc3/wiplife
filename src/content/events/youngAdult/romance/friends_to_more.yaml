@@ -32,6 +32,7 @@ choices:
       text: '{friend.name} says of course. {friend.They} also {friend:looks|look} like {friend.they} might be sick.'
       effects:
         - { type: memory, role: friend, tag: confessed_feelings }
+        - { type: schedule, eventId: friend_moves_on, inYears: [2, 6], cast: [friend] }
         - { type: relationship, role: friend, affection: -2 }
   - id: no
     label: Say you only see {friend.them} as a friend
@@ -39,4 +40,5 @@ choices:
       text: '{friend.name} nods too quickly. Things are strange between you for a long while.'
       effects:
         - { type: memory, role: friend, tag: turned_down_their_feelings }
+        - { type: schedule, eventId: friend_moves_on, inYears: [2, 6], cast: [friend] }
         - { type: relationship, role: friend, affection: -12, trust: -3 }

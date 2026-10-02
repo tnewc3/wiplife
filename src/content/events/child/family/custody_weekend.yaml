@@ -1,0 +1,48 @@
+id: custody_weekend
+title: Every other weekend
+text: >-
+  Friday afternoon, a backpack by the door: it's your weekend with
+  {parentB.name}. {parentA.name} hugs you a beat too long, and asks you to
+  call at bedtime.
+tone: serious
+category: family
+rarity: common
+lifeStages: [child]
+requires: { flag: parents_split }
+weight: { base: 4 }
+cooldownYears: 3
+cast:
+  parentA: { kind: parent }
+  parentB: { kind: parent }
+choices:
+  - id: both
+    label: Make each home feel like yours
+    outcome:
+      text: >-
+        Two toothbrushes, two sets of rules, two bedrooms. You get good at
+        living in both, and at not reporting on either.
+      effects:
+        - { type: relationship, role: parentA, affection: 3 }
+        - { type: relationship, role: parentB, affection: 3 }
+        - { type: stat, key: stress, delta: 2 }
+        - { type: stat, key: kindness, delta: 1 }
+  - id: stay
+    label: Ask to skip this weekend
+    outcome:
+      text: >-
+        {parentB.name} says it's fine, in a voice that makes it clear it isn't.
+        You spend the weekend feeling guilty in your own room.
+      effects:
+        - { type: relationship, role: parentA, affection: 3 }
+        - { type: relationship, role: parentB, affection: -6, trust: -3 }
+        - { type: memory, role: parentA, tag: took_your_side }
+        - { type: stat, key: stress, delta: 3 }
+  - id: messenger
+    label: Carry messages between them
+    outcome:
+      text: >-
+        "Tell {parentB.name} that..." "Tell {parentA.name} that..." You're a
+        kid, and you're a diplomat. It wears you out.
+      effects:
+        - { type: stat, key: stress, delta: 5 }
+        - { type: stat, key: sociability, delta: 2 }

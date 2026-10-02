@@ -1,0 +1,37 @@
+id: night_shift_parent
+title: Morning person
+text: >-
+  {parent.name} works nights now. You see {parent.them} for twenty minutes in
+  the morning, when {parent.they} {parent:comes|come} home tired and you're
+  eating cereal.
+tone: neutral
+category: family
+rarity: common
+lifeStages: [early, child]
+requires:
+  all:
+    - { age: { gte: 3, lte: 9 } }
+    - { familyWealth: [poor, working, middle] }
+weight: { base: 4 }
+once: true
+cast:
+  parent: { kind: parent }
+choices:
+  - id: wait_up
+    label: Get up early to have breakfast together
+    outcome:
+      text: >-
+        Twenty minutes, every morning, for two years. {parent.name} hears about
+        every single thing that happened at school.
+      effects:
+        - { type: relationship, role: parent, affection: 6, trust: 4 }
+        - { type: stat, key: discipline, delta: 2 }
+  - id: drawing
+    label: Leave {parent.them} a drawing on the table every night
+    outcome:
+      text: >-
+        {parent.name} keeps every one of them in a shoebox. You'll find it,
+        decades later.
+      effects:
+        - { type: relationship, role: parent, affection: 5 }
+        - { type: stat, key: kindness, delta: 2 }

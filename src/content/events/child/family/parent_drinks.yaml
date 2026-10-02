@@ -1,0 +1,58 @@
+# Hardship at home: written plainly, without graphic detail, with a way back
+# years later (parent_gets_sober).
+id: parent_drinks
+title: The bottle in the cupboard
+text: >-
+  {parent.name} has started drinking in the evenings, then in the afternoons.
+  Some nights {parent.they} {parent:forgets|forget} dinner. Some nights
+  {parent.they} {parent:is|are} too loud and then too quiet.
+tone: dark
+category: family
+rarity: uncommon
+lifeStages: [child]
+requires: { age: { gte: 7 } }
+weight:
+  base: 2
+  modifiers:
+    - { if: { flag: parents_fought }, x: 2 }
+    - { if: { familyWealth: [poor] }, x: 1.5 }
+once: true
+cast:
+  parent: { kind: parent }
+choices:
+  - id: hide_bottles
+    label: Hide the bottles
+    outcome:
+      text: >-
+        {parent.name} finds them, every time, and doesn't say anything, every
+        time. You keep hiding them anyway.
+      effects:
+        - { type: memory, role: parent, tag: drank_too_much }
+        - { type: relationship, role: parent, trust: -8 }
+        - { type: stat, key: stress, delta: 6 }
+        - { type: stat, key: discipline, delta: 2 }
+        - { type: schedule, eventId: parent_gets_sober, inYears: [8, 20], cast: [parent] }
+  - id: tell
+    label: Tell a teacher what it's like at home
+    outcome:
+      text: >-
+        The teacher listens and makes some calls. Nothing changes overnight,
+        but an aunt starts coming by, and there is dinner most nights.
+      effects:
+        - { type: memory, role: parent, tag: drank_too_much }
+        - { type: relationship, role: parent, trust: -4 }
+        - { type: stat, key: stress, delta: 3 }
+        - { type: stat, key: confidence, delta: 2 }
+        - { type: schedule, eventId: parent_gets_sober, inYears: [8, 20], cast: [parent] }
+  - id: pretend
+    label: Pretend everything is normal
+    outcome:
+      text: >-
+        You get very good at pretending: at school, at dinner, at home. It's a
+        skill that will cost you something to unlearn.
+      effects:
+        - { type: memory, role: parent, tag: drank_too_much }
+        - { type: relationship, role: parent, trust: -10 }
+        - { type: stat, key: stress, delta: 8 }
+        - { type: stat, key: happiness, delta: -3 }
+        - { type: schedule, eventId: parent_gets_sober, inYears: [8, 20], cast: [parent] }

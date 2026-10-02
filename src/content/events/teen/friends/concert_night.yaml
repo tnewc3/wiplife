@@ -1,0 +1,41 @@
+id: concert_night
+title: The concert
+text: >-
+  Your favorite band is playing two towns over on a school night.
+  {friend.name} has tickets, but no ride.
+tone: light
+category: friends
+rarity: common
+lifeStages: [teen, youngAdult]
+requires: { age: { gte: 15, lte: 21 } }
+weight: { base: 4 }
+once: true
+cast:
+  friend: { kind: friend, ageOffset: { min: -2, max: 2 }, createIfMissing: true }
+choices:
+  - id: drive
+    label: Drive everyone yourself
+    visibleIf: { flag: can_drive }
+    outcome:
+      text: >-
+        Four of you in the car, the album on repeat, singing badly both ways.
+        You get home at 1 a.m. with no voice and no regrets.
+      effects:
+        - { type: relationship, role: friend, affection: 10 }
+        - { type: stat, key: happiness, delta: 5 }
+        - { type: stat, key: confidence, delta: 2 }
+  - id: bus
+    label: Take two buses and a train
+    outcome:
+      text: You miss the opening act and the last train home. It's still the best night of the year.
+      effects:
+        - { type: relationship, role: friend, affection: 6 }
+        - { type: stat, key: happiness, delta: 3 }
+        - { type: stat, key: stress, delta: 2 }
+  - id: no
+    label: Sell your ticket and study
+    outcome:
+      text: You ace the test. {friend.name} sends you a blurry video of your favorite song.
+      effects:
+        - { type: education, action: grades, value: 0.1 }
+        - { type: relationship, role: friend, affection: -2 }

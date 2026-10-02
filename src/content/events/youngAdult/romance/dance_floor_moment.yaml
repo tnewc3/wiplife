@@ -28,6 +28,7 @@ choices:
         - { type: identity, field: attraction, value: withRole, role: admirer }
         - { type: relationship, role: admirer, affection: 10 }
         - { type: memory, role: admirer, tag: danced_with_you }
+        - { type: schedule, eventId: slow_song_again, inYears: [3, 8], cast: [admirer] }
         - { type: stat, key: happiness, delta: 4 }
   - id: one_dance
     label: Enjoy the dance, then say goodnight
@@ -36,6 +37,7 @@ choices:
       effects:
         - { type: relationship, role: admirer, affection: 3 }
         - { type: memory, role: admirer, tag: danced_with_you }
+        - { type: schedule, eventId: slow_song_again, inYears: [3, 8], cast: [admirer] }
   - id: excuse
     label: Make an excuse and slip away
     outcome:

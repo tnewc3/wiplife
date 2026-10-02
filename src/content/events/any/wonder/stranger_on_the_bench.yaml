@@ -9,7 +9,7 @@ tone: neutral
 category: wonder
 rarity: legendary
 lifeStages: [youngAdult, adult, senior]
-weight: { base: 2 }
+weight: { base: 6 }
 once: true
 cast:
   stranger: { kind: acquaintance, age: { min: 75, max: 90 }, createIfMissing: true, newChance: 1 }
@@ -22,6 +22,7 @@ choices:
         you look up from your hands, the bench is empty.
       effects:
         - { type: flag, key: met_the_stranger, value: true }
+        - { type: schedule, eventId: stranger_returns, inYears: [15, 30] }
         - { type: stat, key: luck, delta: 10 }
         - { type: stat, key: happiness, delta: 3 }
         - { type: history, text: '{stranger.name}, a stranger on a park bench, told you how your story goes. You never saw {stranger.them} again.', importance: 3 }

@@ -1,0 +1,63 @@
+id: parent_needs_care
+title: Who looks after the parents
+text: >-
+  {parent.name} fell again. The doctor says {parent.they} shouldn't be living
+  alone anymore, and everyone is looking at you as if you're supposed to
+  know what happens next.
+tone: serious
+category: family
+rarity: common
+lifeStages: [adult, senior]
+requires: { role: parent, age: { gte: 75 } }
+weight: { base: 5 }
+cooldownYears: 8
+cast:
+  parent: { kind: parent }
+choices:
+  - id: care_home
+    label: Find a good care home and pay your share
+    outcome:
+      text: >-
+        You tour six places that smell like soup. The seventh has a garden and
+        a nurse who knows everyone's name. You visit on Sundays.
+      effects:
+        - { type: money, delta: -6000 }
+        - { type: relationship, role: parent, affection: 4, trust: 4 }
+        - { type: memory, role: parent, tag: was_there_for_them }
+        - { type: stat, key: stress, delta: 4 }
+  - id: every_day
+    label: Go over every day
+    outcome:
+      text: >-
+        Groceries, pills, the remote control that never works. You're tired in
+        a way that sleep doesn't touch, and closer to {parent.name} than you've been in years.
+      effects:
+        - { type: relationship, role: parent, affection: 10, trust: 8 }
+        - { type: memory, role: parent, tag: was_there_for_them }
+        - { type: stat, key: stress, delta: 8 }
+        - { type: stat, key: health, delta: -2 }
+        - { type: job, action: performance, value: -5 }
+  - id: read
+    label: Read to {parent.them}, like {parent.they} read to you
+    visibleIf:
+      any:
+        - { memory: { role: parent, tag: read_to_you } }
+        - { memory: { role: parent, tag: comforted_you } }
+        - { memory: { role: parent, tag: cared_for_you } }
+    outcome:
+      text: >-
+        You bring the same old book. {parent.name} falls asleep by chapter two,
+        the way you used to, and wakes up asking for chapter three.
+      effects:
+        - { type: relationship, role: parent, affection: 12, trust: 6 }
+        - { type: memory, role: parent, tag: was_there_for_them }
+        - { type: stat, key: happiness, delta: 3 }
+        - { type: stat, key: stress, delta: 3 }
+  - id: siblings
+    label: Leave it to the rest of the family
+    outcome:
+      text: Someone else steps up. At holidays, nobody quite says it, but everybody knows.
+      effects:
+        - { type: relationship, role: parent, affection: -6 }
+        - { type: stat, key: stress, delta: -2 }
+        - { type: stat, key: reputation, delta: -1 }

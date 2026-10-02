@@ -1,0 +1,57 @@
+# Follow-up to tempting_offer: the affair doesn't stay at the conference.
+id: affair_calls
+title: Unknown number
+text: >-
+  {other.name} calls. Then texts. Then calls again. {other.They}
+  {other:wants|want} to know when you're coming back to that city, and whether
+  you've told anyone.
+tone: dark
+category: romance
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { memory: { role: other, tag: affair_with_you } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  other: { kind: acquaintance, age: { min: 18, max: 120 } }
+choices:
+  - id: end
+    label: End it, clearly and for good
+    outcome:
+      text: >-
+        You say it's over, and you mean it. {other.name} is quiet, then angry,
+        then gone. The secret stays where it is, heavy as ever.
+      effects:
+        - { type: relationship, role: other, affection: -15, status: estranged }
+        - { type: stat, key: stress, delta: 4 }
+        - { type: stat, key: discipline, delta: 2 }
+  - id: keep_going
+    label: Keep it going
+    check:
+      base: 45
+      stats: [{ key: discipline, weight: 0.3 }, { key: luck, weight: 0.3 }]
+      success:
+        text: Two phones, a lot of lies, and a year of feeling alive and sick in equal measure. Nobody finds out. Yet.
+        effects:
+          - { type: relationship, role: other, affection: 8 }
+          - { type: stat, key: stress, delta: 8 }
+          - { type: stat, key: happiness, delta: 2 }
+          - { type: stat, key: reputation, delta: -2 }
+      failure:
+        text: >-
+          A receipt, a name in a phone, a friend who saw you in the wrong
+          restaurant. It doesn't stay secret. It never really does.
+        effects:
+          - { type: stat, key: stress, delta: 12 }
+          - { type: stat, key: reputation, delta: -5 }
+          - { type: stat, key: happiness, delta: -6 }
+  - id: ignore
+    label: Ignore every call
+    outcome:
+      text: The calls stop eventually. Every unknown number makes your heart skip for a year.
+      effects:
+        - { type: stat, key: stress, delta: 5 }
+        - { type: relationship, role: other, affection: -8 }

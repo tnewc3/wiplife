@@ -1,0 +1,52 @@
+id: sibling_needs_help
+title: A favor between siblings
+text: >-
+  {sibling.name} calls late, voice tight. {sibling.They} {sibling:is|are} in a
+  hole: behind on rent, a car repossessed, the works. {sibling.They}
+  {sibling:needs|need} $3,000 and {sibling:hates|hate} asking.
+tone: serious
+category: family
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires: { age: { gte: 22 } }
+weight: { base: 4 }
+cooldownYears: 8
+cast:
+  sibling: { kind: sibling }
+choices:
+  - id: send
+    label: Send it, no questions
+    outcome:
+      text: '{sibling.name} cries on the phone. It takes {sibling.them} three years to pay you back, and {sibling.they} {sibling:does|do}, every cent.'
+      effects:
+        - { type: money, delta: -3000 }
+        - { type: relationship, role: sibling, affection: 10, trust: 10 }
+        - { type: stat, key: kindness, delta: 2 }
+  - id: owed
+    label: Send it. {sibling.They} covered for you once
+    visibleIf:
+      any:
+        - { memory: { role: sibling, tag: covered_for_you } }
+        - { memory: { role: sibling, tag: took_the_blame } }
+    outcome:
+      text: >-
+        "This is for when we were kids," you say. "You know what for."
+        {sibling.name} laughs for the first time in weeks. The money is the
+        least of it.
+      effects:
+        - { type: money, delta: -3000 }
+        - { type: relationship, role: sibling, affection: 15, trust: 12 }
+        - { type: stat, key: happiness, delta: 3 }
+  - id: half
+    label: Offer half, and help with a budget
+    outcome:
+      text: '{sibling.name} takes the money and ignores the budget. Mostly.'
+      effects:
+        - { type: money, delta: -1500 }
+        - { type: relationship, role: sibling, affection: 4, trust: 2 }
+  - id: no
+    label: Say you can't this time
+    outcome:
+      text: '{sibling.name} says {sibling.they} {sibling:understands|understand}. The next holiday is very polite.'
+      effects:
+        - { type: relationship, role: sibling, affection: -8, trust: -6 }

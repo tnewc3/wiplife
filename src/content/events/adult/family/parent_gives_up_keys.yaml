@@ -1,0 +1,54 @@
+id: parent_gives_up_keys
+title: The car keys
+text: >-
+  {parent.name} backed into a mailbox last week, and the week before that, a
+  neighbor's fence. Someone has to talk to {parent.them} about the car keys.
+tone: neutral
+category: family
+rarity: common
+lifeStages: [adult, senior]
+requires: { role: parent, age: { gte: 78 } }
+weight:
+  base: 4
+  modifiers:
+    - { if: { flag: can_drive }, x: 1.5 }
+once: true
+cast:
+  parent: { kind: parent }
+choices:
+  - id: lot
+    label: Take {parent.them} back to the old parking lot
+    visibleIf: { memory: { role: parent, tag: taught_you_to_drive } }
+    outcome:
+      text: >-
+        The same empty lot where {parent.name} taught you, decades ago. This
+        time you're in the passenger seat, gripping the dashboard. At the end,
+        {parent.they} {parent:hands|hand} you the keys without a word.
+      effects:
+        - { type: relationship, role: parent, affection: 10, trust: 8 }
+        - { type: stat, key: kindness, delta: 2 }
+        - { type: history, text: 'You took {parent.name} back to the parking lot where {parent.they} taught you to drive, and {parent.they} gave you the keys.', importance: 2 }
+  - id: talk
+    label: Have the hard conversation
+    check:
+      base: 45
+      stats: [{ role: parent, key: trust, weight: 0.4 }, { key: kindness, weight: 0.2 }]
+      success:
+        text: '{parent.name} is quiet for a long time, then says {parent.they} {parent:was|were} waiting for someone to say it.'
+        effects:
+          - { type: relationship, role: parent, trust: 5 }
+          - { type: stat, key: stress, delta: -1 }
+      failure:
+        text: '"I was driving before you were born," {parent.name} says, and drives off. The fence gets fixed twice more.'
+        effects:
+          - { type: relationship, role: parent, affection: -5 }
+          - { type: stat, key: stress, delta: 3 }
+  - id: drive
+    label: Offer to drive {parent.them} everywhere instead
+    outcome:
+      text: >-
+        Tuesday groceries, Thursday doctor, Saturday nowhere in particular. The
+        car becomes the place you actually talk.
+      effects:
+        - { type: relationship, role: parent, affection: 8 }
+        - { type: stat, key: stress, delta: 3 }

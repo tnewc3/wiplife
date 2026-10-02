@@ -1,0 +1,35 @@
+id: first_steps
+title: First steps
+text: >-
+  You've been cruising along the furniture for weeks. Now {parent.name} is
+  kneeling across the room with {parent.their} arms out, and there is nothing
+  to hold on to.
+tone: light
+category: family
+rarity: common
+lifeStages: [early]
+requires: { age: { lte: 2 } }
+weight: { base: 6 }
+once: true
+cast:
+  parent: { kind: parent }
+choices:
+  - id: go
+    label: Let go and wobble over
+    outcome:
+      text: >-
+        Four steps, a lurch, a fifth, and you land in {parent.name}'s arms.
+        {parent.They} {parent:cries|cry} a little. You don't see what the fuss is about.
+      effects:
+        - { type: stat, key: confidence, delta: 2 }
+        - { type: relationship, role: parent, affection: 4 }
+        - { type: history, text: 'You took your first steps, straight into {parent.name}''s arms.', importance: 1 }
+  - id: sit
+    label: Sit down hard and laugh about it
+    outcome:
+      text: >-
+        You plop onto your diaper and laugh so hard you tip over. Walking can
+        wait. {parent.name} laughs too.
+      effects:
+        - { type: stat, key: happiness, delta: 2 }
+        - { type: relationship, role: parent, affection: 2 }

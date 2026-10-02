@@ -1,0 +1,44 @@
+id: friend_hard_home
+title: A bag by the door
+text: >-
+  {friend.name} shows up at your door at eleven at night with a backpack and a
+  bruise {friend.they} {friend:doesn't|don't} want to talk about. Things are bad at
+  home, {friend.they} {friend:says|say}. Can {friend.they} stay?
+tone: dark
+category: friends
+rarity: uncommon
+lifeStages: [teen]
+weight: { base: 2 }
+once: true
+cast:
+  friend: { kind: friend, ageOffset: { min: -2, max: 2 } }
+  parent: { kind: parent }
+choices:
+  - id: stay
+    label: Let {friend.them} in and wake {parent.name}
+    outcome:
+      text: >-
+        {parent.name} makes up the couch, makes some calls in the morning, and
+        makes sure {friend.name} has somewhere safe to be. It takes weeks. It works.
+      effects:
+        - { type: relationship, role: friend, affection: 15, trust: 15 }
+        - { type: relationship, role: parent, trust: 5 }
+        - { type: memory, role: friend, tag: was_there_for_them }
+        - { type: stat, key: kindness, delta: 3 }
+  - id: secret
+    label: Sneak {friend.them} into your room and tell no one
+    outcome:
+      text: >-
+        Three nights, then {friend.name} goes home because there's nowhere else.
+        You both know it isn't fixed. You both pretend.
+      effects:
+        - { type: relationship, role: friend, affection: 10, trust: 8 }
+        - { type: stat, key: stress, delta: 6 }
+  - id: no
+    label: Say you can't
+    outcome:
+      text: '{friend.name} nods like {friend.they} expected it. You don''t sleep that night.'
+      effects:
+        - { type: relationship, role: friend, affection: -10, trust: -12 }
+        - { type: stat, key: stress, delta: 4 }
+        - { type: stat, key: happiness, delta: -3 }

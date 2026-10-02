@@ -67,8 +67,8 @@ describe('health decline with age', () => {
     let life = start;
     for (let i = 0; i < 20; i++) {
       life = beginYear(life, content);
-      // Skip the death check to follow Health alone.
-      life = { ...life, phase: 'yearStart' };
+      // Skip the death check, and clear any illness the year brought, to follow aging alone.
+      life = { ...life, phase: 'yearStart', health: { ...life.health, conditions: [] } };
     }
     const lost = start.character.stats.health - life.character.stats.health;
     expect(lost).toBeGreaterThan(5);

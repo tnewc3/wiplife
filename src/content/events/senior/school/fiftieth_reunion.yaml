@@ -1,0 +1,60 @@
+id: fiftieth_reunion
+title: Fifty years on
+text: >-
+  The fiftieth class reunion is in a hotel ballroom. Everyone wears a name
+  tag with their senior photo on it, which is cruel. {classmate.name} finds
+  you by the cheese plate.
+tone: light
+category: school
+rarity: common
+lifeStages: [senior]
+requires:
+  all:
+    - { age: { gte: 66, lte: 70 } }
+    - { education: { credential: [hs_diploma] } }
+weight: { base: 6 }
+once: true
+cast:
+  classmate: { kind: classmate, ageOffset: { min: -1, max: 1 }, createIfMissing: true }
+choices:
+  - id: thanks
+    label: Thank {classmate.them} for being there back then
+    visibleIf:
+      any:
+        - { memory: { role: classmate, tag: you_sat_with_them } }
+        - { memory: { role: classmate, tag: fought_for_them } }
+        - { memory: { role: classmate, tag: covered_on_project } }
+    outcome:
+      text: >-
+        "You remember that?" {classmate.name} says. "I've told that story to my
+        whole family." It turns out you were someone's good memory all these years.
+      effects:
+        - { type: relationship, role: classmate, status: active, kind: friend, affection: 12 }
+        - { type: stat, key: happiness, delta: 5 }
+  - id: homework
+    label: Bring up the homework
+    visibleIf:
+      any:
+        - { memory: { role: classmate, tag: copied_your_homework } }
+        - { memory: { role: classmate, tag: you_refused_homework } }
+        - { memory: { role: classmate, tag: slacked_on_project } }
+    outcome:
+      text: >-
+        {classmate.name} laughs so hard {classmate.they} {classmate:has|have} to
+        sit down. Fifty years, and you both still remember that math homework.
+      effects:
+        - { type: relationship, role: classmate, status: active, affection: 8 }
+        - { type: stat, key: happiness, delta: 3 }
+  - id: dance
+    label: Dance to the songs from senior year
+    outcome:
+      text: Your hips have opinions. You ignore them. It's the best night you've had in years.
+      effects:
+        - { type: stat, key: happiness, delta: 4 }
+        - { type: stat, key: health, delta: -1 }
+  - id: leave
+    label: Have one drink and slip out
+    outcome:
+      text: You've seen enough name tags. You drive home past your old school, which is a parking lot now.
+      effects:
+        - { type: stat, key: happiness, delta: -1 }

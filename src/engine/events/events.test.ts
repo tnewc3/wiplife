@@ -474,7 +474,13 @@ describe('event text', () => {
           const out = renderText(t, context);
           expect(out, `${def.id}: ${t}`).not.toMatch(/[{}]/);
           if (preset.id === 'xe_xem') expect(out, `${def.id}: hardcoded pronoun in "${out}"`).not.toMatch(/\b(he|she|him|her|his|hers|himself|herself)\b/i);
+          // Verb agreement (Stage 10 editing pass): a pronoun placeholder needs {role:singular|plural} for its verb.
+          if (preset.id === 'they_them') expect(out, `${def.id}: "they" with a singular verb in "${out}"`).not.toMatch(/\b[Tt]hey (is|was|has|does|doesn't|isn't|wasn't|hasn't)\b/);
+          if (preset.id === 'he_him') expect(out, `${def.id}: "he" with a plural verb in "${out}"`).not.toMatch(/\b[Hh]e (are|were|have|don't|aren't|weren't|haven't)\b/);
+          expect(out, `${def.id}: double space in "${out}"`).not.toMatch(/ {2}/);
         }
+        // Contractions only after a pronoun that works for every pronoun set ("they'd", "she'll"; never "they're" or "she's").
+        for (const t of texts) expect(t, `${def.id}: contraction after a pronoun placeholder`).not.toMatch(/\{\w+\.[Tt]hey\}'(s|re|ve|m)\b/);
       }
     }
   });

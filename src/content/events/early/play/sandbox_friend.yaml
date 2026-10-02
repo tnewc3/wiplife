@@ -1,0 +1,35 @@
+id: sandbox_friend
+title: The sandbox
+text: >-
+  At the park, a kid named {friend.name} has the only good shovel. You have
+  the only bucket. It's a standoff.
+tone: light
+category: play
+rarity: common
+lifeStages: [early]
+requires: { age: { gte: 2 } }
+weight: { base: 6 }
+once: true
+cast:
+  friend: { kind: friend, ageOffset: { min: -1, max: 1 }, createIfMissing: true, newChance: 1 }
+choices:
+  - id: share
+    label: Offer to share the bucket
+    outcome:
+      text: >-
+        Together you build a castle with a moat, a road and a worm. You ask
+        {friend.name}'s parent if {friend.they} can come over, every day, forever.
+      effects:
+        - { type: relationship, role: friend, affection: 12, trust: 6 }
+        - { type: stat, key: sociability, delta: 3 }
+        - { type: stat, key: kindness, delta: 1 }
+  - id: grab
+    label: Grab the shovel and run
+    outcome:
+      text: >-
+        You get eleven steps. Both of you cry. Both parents apologize. You
+        end up sharing anyway, sulkily.
+      effects:
+        - { type: relationship, role: friend, affection: 3 }
+        - { type: stat, key: kindness, delta: -1 }
+        - { type: stat, key: riskTaking, delta: 1 }

@@ -1,0 +1,61 @@
+id: bike_crash
+title: No hands
+text: >-
+  The hill behind the school is steep and smooth, and you've just learned to
+  ride with no hands. It's the fastest you've ever gone.
+tone: serious
+category: play
+rarity: common
+lifeStages: [child]
+requires: { age: { gte: 7 } }
+weight:
+  base: 4
+  modifiers:
+    - { if: { trait: riskTaking, gt: 60 }, x: 1.5 }
+once: true
+choices:
+  - id: brake
+    label: Grab the handlebars and brake
+    check:
+      base: 60
+      stats: [{ key: fitness, weight: 0.3 }, { key: discipline, weight: 0.2 }]
+      success:
+        text: You skid to a stop at the bottom, heart pounding, knees intact. You do it again the next day.
+        effects:
+          - { type: stat, key: confidence, delta: 2 }
+          - { type: stat, key: riskTaking, delta: 1 }
+      failure:
+        text: >-
+          The front wheel catches and you go over the handlebars. Gravel in
+          both palms, a chipped tooth and a story for the rest of the year.
+        effects:
+          - { type: stat, key: health, delta: -4 }
+          - { type: stat, key: looks, delta: -1 }
+          - { type: stat, key: stress, delta: 2 }
+  - id: slow
+    label: Get off and walk, like after the cast
+    visibleIf: { flag: broke_arm }
+    outcome:
+      text: You know exactly how a bone sounds when it breaks. You walk the bike down. Nobody laughs; you check.
+      effects:
+        - { type: stat, key: discipline, delta: 2 }
+        - { type: stat, key: riskTaking, delta: -1 }
+  - id: faster
+    label: Pedal faster and whoop
+    check:
+      base: 35
+      stats: [{ key: fitness, weight: 0.3 }, { key: luck, weight: 0.4 }]
+      success:
+        text: You fly. For a second at the bottom, both wheels leave the ground. Legends are born this way.
+        effects:
+          - { type: stat, key: riskTaking, delta: 3 }
+          - { type: stat, key: happiness, delta: 4 }
+          - { type: stat, key: reputation, delta: 1 }
+      failure:
+        text: >-
+          You meet the curb at full speed. Six stitches above your eyebrow and
+          a scar you'll point to for the rest of your life.
+        effects:
+          - { type: stat, key: health, delta: -6 }
+          - { type: stat, key: riskTaking, delta: 1 }
+          - { type: history, text: 'You crashed your bike on the school hill and got six stitches and a scar.', importance: 1 }

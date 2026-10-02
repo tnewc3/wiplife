@@ -1,0 +1,78 @@
+id: old_friends_weekend
+title: The old crowd
+text: >-
+  {friend.name} has rented a cabin for the weekend and invited the old crowd.
+  By the second night, the stories are coming out, the ones you all agreed
+  never to tell.
+tone: light
+category: friends
+rarity: common
+lifeStages: [adult, senior]
+requires: { role: friend, years: { gte: 8 } }
+weight: { base: 4 }
+cooldownYears: 8
+cast:
+  friend: { kind: friend }
+choices:
+  - id: legend
+    label: Tell the story everyone's waiting for
+    visibleIf:
+      any:
+        - { memory: { role: friend, tag: road_trip_together } }
+        - { memory: { role: friend, tag: joyride_together } }
+        - { memory: { role: friend, tag: tagged_with_you } }
+        - { memory: { role: friend, tag: dared_you } }
+        - { memory: { role: friend, tag: roomed_together } }
+    outcome:
+      text: >-
+        You tell it. {friend.name} keeps interrupting to say that's not how it
+        happened, and it's funnier every time {friend.they} {friend:does|do}. Someone falls off the porch laughing.
+      effects:
+        - { type: relationship, role: friend, affection: 10 }
+        - { type: stat, key: happiness, delta: 5 }
+        - { type: stat, key: stress, delta: -4 }
+  - id: thanks
+    label: Thank {friend.them}, finally, for having your back
+    visibleIf:
+      any:
+        - { memory: { role: friend, tag: fought_for_them } }
+        - { memory: { role: friend, tag: kept_their_secret } }
+        - { memory: { role: friend, tag: you_sat_with_them } }
+        - { memory: { role: friend, tag: returned_the_favor } }
+        - { memory: { role: friend, tag: set_you_up } }
+        - { memory: { role: friend, tag: in_their_wedding } }
+        - { memory: { role: friend, tag: spent_holidays_together } }
+        - { memory: { role: friend, tag: was_there_for_them } }
+    outcome:
+      text: >-
+        Out on the dock, it comes out of you: all the times. {friend.name} is
+        quiet, then says, "You did the same for me, idiot." You both look at the lake.
+      effects:
+        - { type: relationship, role: friend, affection: 8, trust: 10 }
+        - { type: stat, key: happiness, delta: 3 }
+  - id: old_fight
+    label: Clear the air about the old fight
+    visibleIf:
+      any:
+        - { memory: { role: friend, tag: fought_with_you } }
+        - { memory: { role: friend, tag: made_peace } }
+    check:
+      base: 50
+      stats: [{ role: friend, key: affection, weight: 0.4 }, { key: kindness, weight: 0.2 }]
+      success:
+        text: All this time later, you both apologize at once and then argue about who was more wrong. It's the best argument you've had.
+        effects:
+          - { type: relationship, role: friend, affection: 8, trust: 8 }
+          - { type: memory, role: friend, tag: made_peace }
+      failure:
+        text: It turns out some of it still stings. You drive home a day early.
+        effects:
+          - { type: relationship, role: friend, affection: -6 }
+          - { type: stat, key: stress, delta: 3 }
+  - id: early
+    label: Go to bed early with a book
+    outcome:
+      text: You hear them laughing through the wall until three. You're the only one who isn't hungover on Sunday.
+      effects:
+        - { type: stat, key: health, delta: 1 }
+        - { type: relationship, role: friend, affection: -2 }

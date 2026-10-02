@@ -1,0 +1,34 @@
+id: daycare_first_day
+title: First day at preschool
+text: >-
+  The preschool smells like paint and apple juice. There's a sand table, a
+  hamster and twenty kids you don't know. {parent.name} is already edging
+  toward the door.
+tone: light
+category: school
+rarity: common
+lifeStages: [early]
+requires: { age: { gte: 3 } }
+weight: { base: 6 }
+once: true
+cast:
+  parent: { kind: parent }
+choices:
+  - id: cling
+    label: Grab {parent.name}'s leg and hold on
+    outcome:
+      text: >-
+        It takes two teachers and a promise about the hamster to get you off.
+        By snack time you've forgotten you were ever upset.
+      effects:
+        - { type: stat, key: stress, delta: 2 }
+        - { type: relationship, role: parent, affection: 2 }
+  - id: wave
+    label: Wave goodbye and head for the sand table
+    outcome:
+      text: >-
+        You don't look back. {parent.name} cries in the car, and tells everyone
+        later that you didn't even look back.
+      effects:
+        - { type: stat, key: confidence, delta: 3 }
+        - { type: stat, key: sociability, delta: 2 }

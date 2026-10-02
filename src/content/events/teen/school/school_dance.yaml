@@ -1,0 +1,39 @@
+id: school_dance
+title: The winter formal
+text: >-
+  The winter formal is Saturday: a gym, a disco ball, punch in a bowl.
+  {friend.name} says your whole group should go together, no dates, no drama.
+tone: light
+category: school
+rarity: common
+lifeStages: [teen]
+requires: { education: { program: [high] } }
+weight: { base: 4 }
+once: true
+cast:
+  friend: { kind: friend, ageOffset: { min: -1, max: 1 }, createIfMissing: true }
+choices:
+  - id: dance
+    label: Go and dance like nobody's watching
+    outcome:
+      text: >-
+        Everybody's watching. You don't care. You and {friend.name} invent a
+        dance that half the school is doing by spring.
+      effects:
+        - { type: relationship, role: friend, affection: 8 }
+        - { type: stat, key: confidence, delta: 3 }
+        - { type: stat, key: happiness, delta: 4 }
+  - id: wall
+    label: Go, and hold up the wall
+    outcome:
+      text: You and the punch bowl get to know each other. {friend.name} drags you out for the last song.
+      effects:
+        - { type: relationship, role: friend, affection: 4 }
+        - { type: stat, key: sociability, delta: 1 }
+  - id: skip
+    label: Stay home and watch a movie
+    outcome:
+      text: The photos the next day make it look like the best night ever. It probably wasn't.
+      effects:
+        - { type: stat, key: happiness, delta: -1 }
+        - { type: relationship, role: friend, affection: -2 }

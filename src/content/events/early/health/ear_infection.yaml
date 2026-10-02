@@ -1,0 +1,31 @@
+id: ear_infection
+title: Earache
+text: >-
+  Your ear hurts so much you can't explain it with the words you have, so you
+  just pull at it and wail. It's two in the morning.
+tone: serious
+category: health
+rarity: common
+lifeStages: [early]
+weight: { base: 3 }
+cooldownYears: 2
+cast:
+  parent: { kind: parent }
+choices:
+  - id: walk
+    label: Let {parent.name} walk you up and down the hall
+    outcome:
+      text: >-
+        Up and down, up and down, humming, until the medicine kicks in and you
+        fall asleep on {parent.their} shoulder.
+      effects:
+        - { type: relationship, role: parent, affection: 3, trust: 3 }
+        - { type: memory, role: parent, tag: cared_for_you }
+        - { type: stat, key: health, delta: -2 }
+  - id: scream
+    label: Scream until the whole building is awake
+    outcome:
+      text: The neighbors bang on the wall. By morning you're fine, and everyone else is exhausted.
+      effects:
+        - { type: stat, key: health, delta: -2 }
+        - { type: stat, key: stress, delta: 2 }

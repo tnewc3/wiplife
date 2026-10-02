@@ -1,0 +1,64 @@
+id: old_family_photos
+title: The shoebox of photos
+text: >-
+  {parent.name} pulls a shoebox of old photos out of the closet and dumps it
+  on the table. There you are at six, at twelve, at nineteen, looking like a
+  stranger in every one.
+tone: light
+category: family
+rarity: common
+lifeStages: [adult, senior]
+requires: { role: parent, age: { gte: 60 } }
+weight: { base: 4 }
+cooldownYears: 10
+cast:
+  parent: { kind: parent }
+choices:
+  - id: good_times
+    label: Laugh about the good times
+    visibleIf:
+      any:
+        - { memory: { role: parent, tag: threw_graduation_party } }
+        - { memory: { role: parent, tag: visited_for_birthday } }
+        - { memory: { role: parent, tag: helped_them_move } }
+        - { memory: { role: parent, tag: spent_holidays_together } }
+        - { memory: { role: parent, tag: took_your_side } }
+    outcome:
+      text: >-
+        The graduation cake with your name spelled wrong. The birthday you
+        drove all night for. {parent.name} laughs until {parent.they}
+        {parent:has|have} to take {parent.their} glasses off.
+      effects:
+        - { type: relationship, role: parent, affection: 8 }
+        - { type: stat, key: happiness, delta: 4 }
+  - id: hard_years
+    label: Bring up the hard years
+    visibleIf:
+      any:
+        - { memory: { role: parent, tag: argued_at_dinner } }
+        - { memory: { role: parent, tag: forgot_birthday } }
+        - { memory: { role: parent, tag: asked_you_for_rent } }
+        - { memory: { role: parent, tag: reached_out } }
+        - { memory: { role: parent, tag: apologized } }
+    check:
+      base: 45
+      stats: [{ role: parent, key: trust, weight: 0.4 }, { key: kindness, weight: 0.2 }]
+      success:
+        text: >-
+          It isn't easy, but it's honest. "We were both doing our best," {parent.name}
+          says, "and our best was sometimes terrible." You both laugh at that.
+        effects:
+          - { type: relationship, role: parent, trust: 8, affection: 5 }
+          - { type: stat, key: stress, delta: -4 }
+      failure:
+        text: '{parent.name} closes the box. "Some things are better in the box," {parent.they} {parent:says|say}.'
+        effects:
+          - { type: relationship, role: parent, affection: -4 }
+          - { type: stat, key: stress, delta: 2 }
+  - id: take
+    label: Take a few home with you
+    outcome:
+      text: You pick five. One of them, a blurry one of the two of you laughing, goes on your fridge for good.
+      effects:
+        - { type: relationship, role: parent, affection: 4 }
+        - { type: stat, key: happiness, delta: 2 }

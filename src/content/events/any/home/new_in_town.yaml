@@ -22,6 +22,7 @@ choices:
       text: Your dish is gone in minutes. {neighbor.name} introduces you to half the street and makes you promise to come to the next one.
       effects:
         - { type: memory, role: neighbor, tag: welcomed_you }
+        - { type: schedule, eventId: neighbor_moving_away, inYears: [3, 10], cast: [neighbor] }
         - { type: relationship, role: neighbor, affection: 12, trust: 6 }
         - { type: stat, key: happiness, delta: 3 }
   - id: stay

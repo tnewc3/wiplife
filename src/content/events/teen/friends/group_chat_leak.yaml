@@ -1,0 +1,48 @@
+id: group_chat_leak
+title: Screenshot
+text: >-
+  Someone screenshotted the group chat, and now a message {friend.name} wrote
+  about another kid is everywhere. {friend.They} {friend:is|are} getting
+  destroyed, and {friend.they} {friend:thinks|think} it was you.
+tone: serious
+category: friends
+rarity: common
+lifeStages: [teen]
+weight: { base: 4 }
+once: true
+cast:
+  friend: { kind: friend, ageOffset: { min: -2, max: 2 } }
+choices:
+  - id: proof
+    label: Show {friend.them} your phone
+    check:
+      base: 50
+      stats: [{ role: friend, key: trust, weight: 0.4 }, { key: confidence, weight: 0.2 }]
+      success:
+        text: '{friend.name} scrolls through it, then hugs you. You find the real leaker together by Friday.'
+        effects:
+          - { type: relationship, role: friend, trust: 8, affection: 5 }
+      failure:
+        text: '"You could have deleted it," {friend.name} says. It takes months before {friend.they} {friend:sits|sit} with you again.'
+        effects:
+          - { type: relationship, role: friend, trust: -10, affection: -6 }
+          - { type: stat, key: stress, delta: 4 }
+  - id: trusted
+    label: Remind {friend.them} you kept {friend.their} secret before
+    visibleIf: { memory: { role: friend, tag: kept_their_secret } }
+    outcome:
+      text: >-
+        "You never told anyone," {friend.name} says slowly. "You wouldn't
+        start now." {friend.They} {friend:apologizes|apologize} before lunch.
+      effects:
+        - { type: relationship, role: friend, trust: 12, affection: 6 }
+  - id: defend
+    label: Stand up for {friend.them} in front of everyone
+    outcome:
+      text: >-
+        You say it was a stupid thing to write and it isn't the whole of who
+        {friend.name} is. Half the school turns on you for a week. {friend.name} doesn't forget.
+      effects:
+        - { type: relationship, role: friend, affection: 10, trust: 6 }
+        - { type: stat, key: reputation, delta: -1 }
+        - { type: stat, key: kindness, delta: 2 }

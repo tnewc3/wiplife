@@ -106,18 +106,15 @@ Because a year is split into begin, choices and end, the game can be saved and r
 
 1. Increase age and update life stage.
 2. Age NPCs, and check whether any die.
-3. Legal (Stage 9): release from prison when the sentence is served, prison's toll on stats, the end of probation, and now and then a probation event.
-4. Education: update GPA, handle graduation or dropping out.
-5. Career: set performance, then check for promotion, raise or firing.
-6. Economy: run the yearly ledger.
-7. Health: progress conditions and roll for new ones.
-8. Relationships: apply drift.
-9. Self-discovery: grow inner conflict and check whether latent traits surface.
-10. Pacing director: queue due scheduled events first, then pick new events.
+3. Education: update GPA, handle graduation or dropping out.
+4. Career: set performance, then check for promotion, raise or firing.
+5. Economy: run the yearly ledger.
+6. Health: progress conditions and roll for new ones.
+7. Relationships: apply drift.
+8. Self-discovery: grow inner conflict and check whether latent traits surface.
+9. Pacing director: queue due scheduled events first, then pick new events.
 
-After the player resolves every pending event, `endYear` runs the death check (age, Health and genetic risk, plus each health condition's own chance), writes history, builds the recap and triggers an autosave.
-
-**Prison is a reduced year (Stage 9).** The legal step comes before school and work, so a release opens them again in the same year. While you're in prison the same steps run with less to do: no school, no job or gig work and no job openings, no housing or living costs (debts still grow), no discoveries surfacing, and the pacing director picks from prison events only (a prison budget from `balance/legal.yaml`); follow-ups that fall due inside wait for your release. Only a few actions are available (paying debts, a debt plan, editing your identity; on a person's page, breaking up, divorcing, cutting contact and reconciling).
+After the player resolves every pending event, `endYear` runs the death check, writes history, builds the recap and triggers an autosave.
 
 ### Event engine internals
 
@@ -145,8 +142,7 @@ Conditions are structured data, not text formulas. They're safer, and the conten
 
 ### Text templates and pronouns
 
-- The player is always "you." Event text can also use `{self.they}` and the other forms (Stage 9), for what others say about you; they follow your pronouns as they are now.
-- Event text values: `{age}`; from Stage 9 `{talent}`, `{latentPeople}`, `{latentGender}`, `{latentExpression}`, `{latentTrait}` (self-discovery) and `{sentence}` (what a court just handed down, only in an outcome with a legal effect).
+- The player is always "you."
 - NPC fields use a role name: `{npc.name}`, `{npc.they}`, `{npc.them}`, `{npc.their}`, `{npc.theirs}`, `{npc.themself}`. Capitalized versions like `{npc.They}` start a sentence.
 - Verb agreement: `{npc:is|are}` and `{npc:swears|swear}` pick the form that matches the NPC's pronouns.
 - The obituary uses `{self.they}` and the other forms for the player character.
@@ -159,14 +155,13 @@ Conditions are structured data, not text formulas. They're safer, and the conten
 - **Save envelope:** `{ schemaVersion, contentVersion, savedAt, data }`. Older saves are upgraded by migration functions that run in order.
 - **Loading** validates the save with Zod. If it's invalid, the game tries the backup. If that fails too, it offers to export the raw data and start a new life.
 - **Protection against browser cleanup.** The game requests persistent storage when the first life starts, and suggests installing to the home screen at a natural moment (for example, after the first life ends).
-- **Archive entries** are stored in their own envelope with their own schema version and migration list, separate from the active life's. Moving a life into the archive removes the active life and its backups in the same transaction, so an archived life can never load again as active.
 - **Export and import:** a single JSON file containing the active life, the archive and settings.
 
 ### Content loading and updates
 
 - Content is written as YAML. `npm run content` compiles it to JSON and validates it; this runs in CI and when the dev server starts. The app only ever loads the compiled JSON. The YAML 1.2 parser is used, so values like `no` or `on` aren't accidentally read as true or false.
 - Examples in these documents are shown as JSON; the same structure is written in YAML.
-- Every save records the content version. If an update removes an event that a save still has scheduled, the engine skips it and logs a warning instead of crashing.
+- Every save records the content version. If an update removes an event that a save still has scheduled, the engine skips it silently instead of crashing, and the simulation report counts skipped follow-ups.
 
 ### Error handling
 
@@ -218,9 +213,7 @@ interface LifeState {
   rng: RngState;                       // continues across saves
   birthYear: number;
   currentYear: number;
-  phase: 'yearStart' | 'events' | 'yearEnd' | 'dead' | 'action';
-                                       // 'action': between years, a management action's result event
-                                       // waits for the player (Stage 5); finishAction returns to 'yearStart'
+  phase: 'yearStart' | 'events' | 'yearEnd' | 'dead';
   character: Character;
   people: Record<Id, Person>;
   relationships: Record<Id, Relationship>;   // keyed by person id
@@ -235,21 +228,9 @@ interface LifeState {
   scheduled: ScheduledEvent[];
   pending: EventInstance[];
   history: HistoryEntry[];
-  inputLog: InputRecord[];             // every player input, for exact replay; written by the engine
-  recap: YearRecap | null;             // the current or last finished year; null before the first age-up
-  death: DeathRecord | null;           // set in the 'dead' phase, or in 'yearEnd' when an event killed the
-                                       // character and endYear has yet to close the life
-  lifetime: { happinessTotal: number; years: number };  // happiness over finished years (obituary mood)
+  inputLog: InputRecord[];             // every player input, for exact replay
   lineage: { generation: number; parentLifeId?: Id };  // for heir play later
 }
-
-interface YearRecap {
-  year: number; age: number;
-  statsBefore: Character['stats'];     // when beginYear started
-  statsAfter: Character['stats'] | null;  // set by endYear; null mid-year
-}
-
-interface DeathRecord { year: number; age: number; causeId: Id }  // cause from content/causes
 
 interface InputRecord {
   year: number;
@@ -257,8 +238,6 @@ interface InputRecord {
   payload: Record<string, unknown>;    // e.g. { instanceId, choiceId } or { actionId, params }
 }
 ```
-
-The input log is written by the engine, not the store: each engine function that takes a player input (`createLife`, and later age-ups, choices and actions) appends its own record, so a life can never be changed without its input being logged.
 
 #### Character
 
@@ -280,8 +259,7 @@ interface Character {
     talent: TalentId | null;
     talentDiscovered: boolean;
   };
-  cityId: Id;                          // the city you live in now
-  birthCityId: Id;                     // where you were born; never changes (Stage 6)
+  cityId: Id;
   familyWealth: 'poor' | 'working' | 'middle' | 'affluent' | 'rich';
   custom: boolean;
 }
@@ -328,95 +306,51 @@ interface Person {
 interface Relationship {
   personId: Id;
   kind: 'parent' | 'stepparent' | 'sibling' | 'grandparent' | 'friend'
-      | 'partner' | 'fiance' | 'spouse' | 'ex' | 'coworker' | 'boss'
+      | 'partner' | 'spouse' | 'ex' | 'coworker' | 'boss'
       | 'classmate' | 'acquaintance';   // 'child' added with heir play
-  status: 'active' | 'estranged' | 'ended';   // 'ended': faded out of your life (pruned)
+  status: 'active' | 'estranged' | 'ended';
   affection: number;
   trust: number;
   memories: { tag: string; year: number }[];
   since: number;
-  kindSince?: number;                  // year it took its current kind (started dating, married...)
-  lastActionYear?: number;             // last management action with this person (one per year)
-  wasSpouse?: true;                    // has been your spouse; stays after a divorce (an "Ex-spouse")
 }
 ```
-
-Design H's statuses map onto kind and status: dating is `partner`, engaged is `fiance`, married is `spouse`, an ex is `ex`, and estranged is status `estranged`. A current partner is a living `partner`, `fiance` or `spouse` whose status is `active`; there is never more than one. A spouse who dies keeps the kind `spouse` (a late spouse), so the obituary can name them. The engine sets `wasSpouse` whenever someone becomes your spouse, and every spouse must have it; after a divorce it tells an ex-spouse from an ex you only dated (for the obituary, events about an ex-spouse, and co-parenting later). Save schema version 4 added it: the upgrade from version 3 marks every spouse, and every ex whose memories show the marriage (`married_you` or `divorced`).
 
 #### Education, career and money
 
 ```ts
 interface EducationState {
-  current: Enrollment | null;          // the program you're in now (Stage 7)
+  current: null | {
+    program: 'elementary' | 'middle' | 'high' | 'college' | 'trade' | 'grad';
+    tier?: 'community' | 'state' | 'elite';
+    majorId?: Id; tradeId?: Id; gradProgramId?: Id;
+    year: number; lengthYears: number; gpa: number;
+  };
   credentials: {
     type: 'hs_diploma' | 'ged' | 'associate' | 'bachelor' | 'trade_license' | 'grad';
-    refId?: Id; year: number;          // refId: the major, trade or grad program
-    gpa?: number; tier?: 'community' | 'state' | 'elite';   // final GPA; a college degree's tier
+    refId?: Id; year: number;
   }[];
-  admission: null | (SchoolPlace & {   // a place you take up as the next year begins
-    scholarship: number; decided: number;
-    resume?: { year; lengthYears; gpa; repeats };   // going back to a program you left
-  });
-  left: null | (Enrollment & { leftYear: number });   // the last program left unfinished (you can go back)
-  applied: { option: string; accepted: boolean }[];   // this year's applications, GED tries and major change
-  fund: number;                        // scholarship money from events; pays tuition until used up
-  lastBill?: { year; tuition; scholarship; family; fund; loan };   // tuition = scholarship + family + fund + loan
 }
 
-interface SchoolPlace {
-  program: 'elementary' | 'middle' | 'high' | 'college' | 'trade' | 'grad';
-  tier?: 'community' | 'state' | 'elite';
-  majorId?: Id; tradeId?: Id; gradProgramId?: Id;
-}
-
-interface Enrollment extends SchoolPlace {
-  year: number; lengthYears: number;
-  gpa: number;                         // 0–4, average of the years graded; shown as a letter grade
-  boost: number;                       // GPA points events added to this year's grade
-  repeats: number;                     // years held back (high school only)
-  scholarship: number;                 // share of tuition scholarships cover, set at admission
-  since: number;
-}
-```
-
-A school year starts as a year begins (you enroll and pay tuition) and is graded as the next one begins, so the year's events shape its grade. Elementary, middle and high school follow on their own from the start age; high school ends as you turn 18, or 19 after being held back once. Tuition is paid through the Stage 6 debt system: scholarships (merit by GPA, need by family wealth) and family help take their share, scholarship money from events pays what it can, and the rest joins your student loan (one `student` debt). Student loan payments pause while you're in college, trade school or grad school (interest still grows). Gig pay is halved while you're enrolled in college, trade school or grad school (`studentGigShare` in `balance/education.yaml`; `gigPay` in the career module applies it). Save schema version 6 added `admission`, `left`, `applied`, `fund` and `lastBill`; the upgrade from version 5 gives an adult the high school diploma they would have earned at 18 (without a GPA).
-
-Careers (Stage 8): each year (from the hiring age) and whenever you move city, each job track is hiring in your city with a chance set by the city's job market for its category (`openings`). Job search lists only openings you qualify for. You can apply while you're out of school, or in the final year of a program (its credential counts; the job falls through if your plans change before you finish). The employer decides by the balance odds (category base, Confidence, Looks, Smarts, reputation, luck, experience in the track, degree tier, a criminal record, the city's market), and the interview is a result event from `registries/work.yaml`. Hired between years, your first year of pay is the next year's ledger; the yearly review comes after a full year worked: performance (the job's stat weights, stress, health, a swing, part of last year's), then a layoff (by market), firing (by performance), a promotion (by performance and Ambition, after a level's minimum years) or a merit raise. Salaries are a level's base salary × the city's salary multiplier, capped above the level's pay for raises. The year you lose a job at the review you're still paid a share of it (`jobLoss`). Gig work and a job don't mix; school and a job don't either (the job ends when school starts). You can quit, ask for a raise once a year (a result event with a stat check), and retire from `retireAge`. Moving city ends the job. Your boss and coworkers are people (relationship kinds `boss` and `coworker`); your current boss is never pruned; when the job ends they become acquaintances. Save schema version 7 added `since`, `employer`, `raiseYear`, the history's `employer`, `level` and `salary`, `applied` and `openings`; nobody could have a job before, so the upgrade from version 6 only adds empty applications and openings.
-
-```ts
 interface CareerState {
-  job: null | { jobId: Id; level: number; yearsAtLevel: number; performance: number; salary: number;
-                since: number;                 // the year you were hired; your first year of pay is the next one
-                employer: string;              // a fictional employer from the job's content
-                raiseYear?: number };          // the last year you asked for a raise (Stage 8)
+  job: null | { jobId: Id; level: number; yearsAtLevel: number; performance: number; salary: number };
   gig: boolean;
   retired: boolean;
-  history: { jobId: Id; employer: string; fromYear: number; toYear: number;
-             level: number; salary: number;   // when it ended (Stage 8)
+  history: { jobId: Id; fromYear: number; toYear: number;
              endedBy: 'quit' | 'fired' | 'laid_off' | 'retired' | 'moved' }[];
-  applied: { jobId: Id; hired: boolean }[];   // this year's job applications (Stage 8)
-  openings: Id[];                      // job tracks hiring in your city this year (Stage 8)
 }
 
 interface FinanceState {
-  savings: number;                     // never below zero: shortfalls become personal debt
+  savings: number;
   debts: Debt[];
   lifestyle: 'frugal' | 'comfortable' | 'lavish';
-  lastLedger?: { year; gross; retirement; tax; housing; living; debtPayments; interest; debtInterest;
-                 borrowed; support; net };   // net = gross + retirement + interest − tax − housing − living − debtPayments
-  earnings: { years: number; total: number };  // the retirement benefit's record: years with earned income
-                                       // (at least creditIncome) and their total (each year capped). The ledger
-                                       // records all earned income (gig pay and salaries) here
-  hardshipYears: number;               // years in a row behind on housing costs (eviction)
-  bankruptcyYear?: number;
-  debtPlanYear?: number;
+  lastLedger?: { year; gross; tax; housing; living; debtPayments; net };
 }
 
 interface Debt {
   id: Id;
   kind: 'student' | 'personal' | 'mortgage' | 'medical' | 'collections';
-  balance: number; annualRate: number; minPayment: number;
-  missed: number;                      // missed payments in a row
+  balance: number; annualRate: number; minPayment: number; missed: number;
 }
 ```
 
@@ -425,39 +359,22 @@ interface Debt {
 ```ts
 interface HousingState {
   kind: 'with_parents' | 'renting' | 'owned' | 'homeless' | 'incarcerated';
-  cityId: Id;                          // always character.cityId
-  annualCost: number;                  // the ledger's housing line (a mortgage is paid as a debt)
+  cityId: Id;
+  annualCost: number;
   homeValue?: number;
   mortgageDebtId?: Id;
-  since: number;                       // the year you moved in (Stage 6)
-  roommate?: true;                     // renting with a roommate (Stage 6)
-  partnerId?: Id;                      // your partner or spouse living with you (renting or owned); they pay
-                                       // economy.housing.partnerShare of the rent or upkeep; cleared when the
-                                       // romance ends
 }
 
 interface HealthState {
-  conditions: { conditionId: Id; since: number;
-                severity: number;              // 1–100 (Stage 9); a condition at 0 is gone
-                treated: boolean }[];
-  lastVisit?: number;                  // the last year you saw a doctor (once a year; Stage 9)
+  conditions: { conditionId: Id; since: number; severity: number; treated: boolean }[];
 }
 
 interface LegalState {
-  record: { offenseId: Id; year: number; outcome: 'warning' | 'fine' | 'probation' | 'jail';
-            amount?: number; years?: number }[];   // a fine's amount; years of probation or prison (Stage 9)
-  probationUntil?: number;             // the last year of probation
-  incarceratedUntil?: number;          // the last year inside; released as the next year begins
-}
-
-interface DiscoveryState {             // Stage 9
-  surfaced: Partial<Record<'attraction' | 'gender' | 'expression' | 'personality' | 'talent',
-                           { year: number; times: number }>>;   // came to the surface: last year, how often
-  crisisYear?: number;                 // the last inner crisis
+  record: { offenseId: Id; year: number; outcome: 'warning' | 'fine' | 'probation' | 'jail' }[];
+  probationUntil?: number;
+  incarceratedUntil?: number;
 }
 ```
-
-Health, legal and self-discovery (Stage 9). Health conditions are content (`ConditionDef`): each year a condition runs its course (severity moves by its untreated or treated rate; at 0 it is gone), pulls on stats by its severity (treatment softens it), costs money (medication through medical debt, an addiction's habit as ordinary spending), and new ones start by their onset chance (age curve × factors such as genetic risk, Fitness, vice or stress, while their requirements hold, up to `maxConditions`). An untreated addiction raises vice each year; treatment lowers it (vice escalation). Seeing a doctor (More → Health, once a year, not from prison) costs a visit plus treatment, paid through the debt system as medical debt (a child's family pays), treats each treatable condition with a chance by its severity, eases untreatable ones, or is a checkup that does Health a little good; its result is an event from `registries/health.yaml`. Each condition adds its own yearly chance of death (mortality × severity, less when treated), and a death from it records its cause. The `legal` effect puts an offense on your record: the court decides (`sentence`: the offense's likely outcomes, ×`priorRecord` for each earlier entry, ×`juvenile` before the independence age) or the event does. A fine is paid (debt for what savings can't cover), probation keeps you from moving city, and jail sends you to prison: your job ends (`jailed`), you leave school, and housing is `incarcerated` until `incarceratedUntil`. A home you own stays yours (housing keeps its value, mortgage and live-in partner while `incarcerated`): its mortgage and upkeep keep running through the ledger, a partner who lives there pays their share as usual, and missed payments follow the usual foreclosure chain (a foreclosure inside leaves you with no home to return to). A rental's lease ends, and a partner who lived there stays behind. You are released to a home you still own, else a parent, a rental or the street, then on parole. A minor never goes to prison (jail becomes probation). A conviction (not a warning) counts against you when hiring, probation or prison makes landlords ask a larger deposit, and a record that breaks your job's requirements costs you the job. From the independence age, offenses from before it stop counting for hiring (job requirements included) and renting; they stay on the record, in life history and in event conditions. Self-discovery: each year a latent trait (or a hidden talent) can surface from its minimum age (registries/discovery.yaml), at most one a year and never in prison; a trait you know about and haven't accepted grows inner conflict (more for each time it came back), which raises Stress and lowers Happiness and fades when you hold nothing back; a trait you pushed down comes back after `afterYears`, more likely the higher your inner conflict, and at high conflict a crisis can come instead. Accepting takes the latent trait (`identity` effects with `fromLatent`), clears it and eases inner conflict; accepting usually schedules a coming-out event (family reactions by affection and trust; "Not yet" is always a choice). "Try it and decide" events cast an `admirer` (an adult attracted to you, of a gender you're not attracted to yet) and are romance events, so the Stage 5 adults-only rule blocks them for anyone under 18. Finding a hidden talent applies its boosts and helps job performance in the jobs it lists. The Profile sheet (from the Home header) edits pronouns, gender identity (and its category, used for matching) and expression at any age, between years: it takes effect at once, an edit that matches a latent trait clears it and eases inner conflict, and a coming-out event is queued for next year only when the player asks. Save schema version 8 added `discovery` (the upgrade from version 7 adds an empty one), `lastVisit`, a record entry's `amount` and `years`, and the job end `jailed`.
 
 #### Events, history and archive
 
@@ -480,11 +397,7 @@ interface HistoryEntry {
 interface ArchivedLife {
   id: Id; name: string; pronouns: Pronouns;
   birthYear: number; deathYear: number; ageAtDeath: number;
-  causeOfDeath: string | null;         // readable text; null when unfinished
-  unfinished: boolean;                 // a new life was started before this one ended;
-                                       // deathYear and ageAtDeath then give when it was left
-  cityId: Id;                          // where the life ended
-  birthCityId: Id;                     // where it began (archive schema version 2)
+  causeOfDeath: string; cityId: Id;
   obituary: string;
   highlights: HistoryEntry[];
   finalNetWorth: number;
@@ -513,34 +426,17 @@ interface EventDef {
   weight: { base: number; modifiers?: { if: Condition; x: number }[] };
   cooldownYears?: number;
   once?: boolean;
-  followUpOnly?: boolean;              // only happens when scheduled (later steps of a chain)
   cast?: Record<string, CastSpec>;     // how to find or create each role
   choices?: ChoiceDef[];               // none = automatic outcome
   autoOutcome?: Outcome;
 }
 
-interface CastSpec {
-  kind?: RelationshipKind;             // who fills the role: an existing person with this relationship...
-  age?: { min; max };                  // ...of this age,
-  ageOffset?: { min; max };            // ...or this age relative to yours
-  createIfMissing?: boolean;           // create someone new if nobody fits (friend, classmate, acquaintance only)
-  newChance?: number;                  // chance of someone new even when someone fits
-  romantic?: boolean;                  // the meeting pool: an adult with attraction both ways, never family;
-                                       // someone new is of a plausible age for yours (balance/relationships.yaml meeting)
-  support?: boolean;                   // instead of kind: the most trusted close person who would step in
-  admirer?: boolean;                   // Stage 9: an adult attracted to you, of a gender you're not attracted to
-                                       // (yet; leaning toward a latent one): "try it and decide". A romance role
-  optional?: boolean;                  // nobody fits: the event happens without this role
-}
-
 interface ChoiceDef {
-  id: Id; label: string;               // 'continue' is reserved for events without choices
+  id: Id; label: string;
   visibleIf?: Condition;               // e.g. only for risk-takers
   outcome?: Outcome;
   check?: {
-    stats: ({ key: string; weight: number }                        // your stat, trait or hidden value
-          | { role: string; key: 'affection' | 'trust'; weight: number }  // how a cast person feels about you
-          | { job: 'performance'; weight: number })[];   // your job performance; 50 without a job (Stage 8)
+    stats: { key: string; weight: number }[];
     base: number;
     success: Outcome;
     failure: Outcome;
@@ -551,81 +447,32 @@ interface Outcome { text?: string; effects: Effect[] }
 
 type Effect =
   | { type: 'stat'; key: string; delta: number }
-  | { type: 'money'; delta: number }   // Stage 6: a cost beyond savings becomes personal debt (adults)
-  | { type: 'debt'; action: 'add' | 'forgive' | 'bankruptcy' | 'plan'; kind?; amount?; kinds?; share? }
-  | { type: 'housing'; action: 'move_home' | 'rent' | 'homeless' | 'roommate' | 'live_alone' | 'sell'
-                     | 'move_in_together'; role?: string }   // role: the partner who moves in
+  | { type: 'money'; delta: number }
   | { type: 'relationship'; role: string; affection?: number; trust?: number; status?: string; kind?: string }
   | { type: 'memory'; role: string; tag: string }
   | { type: 'flag'; key: string; value: number | boolean | string }
   | { type: 'schedule'; eventId: Id; inYears: [number, number]; cast?: string[] }
-  | { type: 'job'; action: 'performance' | 'raise' | 'promote' | 'fire' | 'quit' | 'offer'; value?: number; jobId?: Id }
-      // Stage 8: performance moves job performance by value (−50 to 50); raise gives the asked-for raise
-      // (balance careers.yaml raises.asked); promote goes up a level; fire and quit end the job; offer
-      // takes job track jobId if you could (old enough, out of school or in its final year, qualified).
-      // All but offer need a job.
-  | { type: 'education'; action: 'grades' | 'scholarship' | 'drop_out' | 'expel'; value?: number }
-      // Stage 7: grades adds value GPA points (−1 to 1) to this school year's grade; scholarship adds value
-      // dollars of scholarship money; drop_out and expel leave high school (from the dropout age; the content
-      // build requires that age), college, trade school or grad school
+  | { type: 'job'; action: 'fire' | 'promote' | 'offer'; jobId?: Id }
+  | { type: 'education'; action: 'expel' | 'scholarship' | 'accept'; value?: number }
   | { type: 'legal'; offenseId: Id; outcome: string; years?: number }
   | { type: 'health'; conditionId: Id; severity: number }
   | { type: 'identity'; field: string; value: 'fromLatent' | string }
   | { type: 'innerConflict'; delta: number }
   | { type: 'history'; text: string; importance: 1 | 2 | 3 }
-  | { type: 'death'; cause: Id };       // a cause from content/causes
-
-// Stage 4 builds these effect types: stat, money (savings only; never below zero), relationship,
-// memory, flag, schedule (inYears of at least 1), history and death. The rest arrive with their systems.
-// Stage 6: debt and housing effects are adults only (ignored before the independence age; the content
-// build requires an adult age or adult life stages).
-// Stage 5: a relationship effect's kind change is checked by the engine (adults only, one partner at a
-// time, dating before an engagement, family stays family); a change that breaks a rule is ignored.
-// Stage 9: legal (outcome warning, fine, probation, jail or 'sentence': the court decides; years for
-// probation or jail), health ({ conditionId, severity?: −100..100, treated?: boolean }), identity (field
-// attraction | gender | expression | pronouns | personality; value 'fromLatent', 'withRole' with a role
-// for attraction, a pronoun preset id, or free-text expression), innerConflict and talent ({ type: 'talent' }:
-// you find your hidden talent). An outcome's text is written after its effects, so it can use {sentence}.
-
-type Condition =                       // structured, evaluated by src/engine/conditions.ts
-  | { all: Condition[] } | { any: Condition[] } | { not: Condition }
-  | { age: Compare } | { lifeStage: LifeStage[] } | { money: Compare }
-  | { stat: StatKey } & Compare | { trait: PersonalityKey } & Compare | { hidden: 'luck' | 'reputation' | 'vice' } & Compare
-  | { city: Id } | { familyWealth: FamilyWealth[] } | { flag: string; eq?: number | boolean | string }
-  | { fired: EventId } | { relative: { kind: RelationshipKind; alive?: boolean } }
-  | { romance: ('single' | 'dating' | 'engaged' | 'married')[] }   // your current situation
-  | { finances: { debt?: Compare; missed?: Compare; collections?: boolean; kinds?: DebtKind[];
-                  lifestyle?: Lifestyle[]; gig?: boolean; bankruptWithin?: number; planWithin?: number;
-                  income?: Compare } }                         // Stage 6
-  | { home: { kind?: HousingKind[]; years?: Compare; roommate?: boolean; relocated?: boolean; partner?: boolean } }
-  | { education: { program?: (Program | 'none')[]; tier?: Tier[]; major?: Id[]; trade?: Id[]; year?: Compare;
-                   final?: boolean; gpa?: Compare; credential?: CredentialType[]; left?: boolean; admission?: boolean;
-                   field?: Id[] } }   // Stage 7; field (Stage 8): a credential (of a type in credential) in one of these majors, trades or grad programs
-  | { career: { employed?: boolean; job?: Id[]; level?: Compare; years?: Compare; performance?: Compare;
-                retired?: boolean; lostWithin?: number } }    // Stage 8; lostWithin: fired or laid off within this many years
-  | { record: { outcome?: ('warning' | 'fine' | 'probation' | 'jail')[]; within?: number } }
-      // Stage 8: an entry on your criminal record (records arrive in Stage 9); { record: {} } is any record
-  | { health: { conditions?: Id[]; treated?: boolean; severity?: Compare } }      // Stage 9: one condition matching all
-  | { legal: { incarcerated?: boolean; probation?: boolean } }                    // Stage 9
-  | { discovery: { latent?: LatentKind[]; known?: LatentKind[]; innerConflict?: Compare;
-                   talent?: 'hidden' | 'found' | 'none' } }   // Stage 9; known: surfaced and not accepted
-  | { memory: { role: string; tag: string } }       // about cast roles: checked once the event is cast
-  | { role: string; alive?: boolean; age?: Compare; affection?: Compare; trust?: Compare;
-      kind?: RelationshipKind[]; status?: RelationshipStatus[]; years?: Compare };  // years: in its current kind
-// Compare = { gt?, gte?, lt?, lte?, eq? }
+  | { type: 'death'; cause: string };
 ```
 
 The other content types follow the same pattern:
 
 | Type | Key fields |
 |---|---|
-| `JobDef` | id, name, category (professional, trade, gig), blurb, requires (condition: degrees and their fields, licenses, age, criminal record), levels (3–6: title as in a sentence, base salary, optional minimum years before promotion), performance (stat weights), employers (fictional). The gig category is hourly and service work anyone can get, with a short ladder; plain gig work (Stage 6) stays the no-ladder fallback |
-| `MajorDef` | id, name, subject, blurb, careers (text), difficulty (1–5). Jobs point at majors (Stage 8), not the other way round |
-| `TradeDef` | id, name, subject, license, blurb, careers (text), years, difficulty |
-| `GradProgramDef` | id, name, subject, degree, blurb, careers (text), years, difficulty, majors (a bachelor's in one of these; any when left out). Tuition and admission odds live in `balance/education.yaml` |
-| `CityDef` | id, countryId (always "us" for now, so more countries can be added later), name, cost-of-living multiplier, base rent, base home price, salary multiplier, job market strength by category, school names by program (Stage 7) |
-| `ConditionDef` | id, name, noun, kind (illness, chronic, injury, mental, addiction), blurb, onset (chance by age, factors, requires, starting severity), course (severity per year untreated and treated), effects (stat pulls at full severity), treatable, costs (treatment, yearly treated, yearly untreated), mortality (extra yearly chance of death at full severity), cause |
-| `OffenseDef` | id, name, class (misdemeanor or felony), severity (1–5), likely outcomes (weights for warning, fine, probation, jail), fine range, probation years, jail years |
+| `JobDef` | id, title, category (professional, trade, gig), requires (condition), levels (title and base salary), performance stats |
+| `MajorDef` | id, name, difficulty, jobs it leads to |
+| `TradeDef` | id, name, school length, license, jobs it leads to |
+| `GradProgramDef` | id, name, requirements, length, cost |
+| `CityDef` | id, countryId (always "us" for now, so more countries can be added later), name, cost-of-living multiplier, base rent, base home price, salary multiplier, job market strength by category |
+| `ConditionDef` | id, name, who gets it and how often, yearly effects, treatable, mortality |
+| `OffenseDef` | id, name, severity, misdemeanor or felony, likely outcomes |
 | `NamePool` | first names by gender category, last names |
 
 ### Which systems write and read each part
@@ -760,14 +607,23 @@ Every coding-AI prompt assumes this file exists at the repo root.
 - Sexual violence is never a player choice.
 - The player is "you". Use pronoun placeholders for every NPC; never hardcode he or she.
 
+## Consistency rules (if it doesn't make sense, it doesn't happen)
+- Category contracts: every event category has required conditions, enforced by the content build (school events need enrollment; work events need a current job and no retirement; partner events need a partner).
+- Presence: every cast role declares where the person must be (your household, your city, or anywhere). Casting respects where people live and who lives with you. In-person actions need the same city.
+- Evidence: any text that states something about your past (a sport you played, a habit, a debt) must require the flag or memory that proves it.
+- Time: never write fixed gaps like "years later" in follow-ups. Use the elapsed-time placeholder, or no time phrase.
+- Money: any event or interaction that mentions money must change money, and any money change must be shown with the amount and your new balance. Amounts that depend on your situation (rent, wages) scale with it.
+- Household: if you live with a partner, events about your home and wellbeing must account for them (cast them, or branch the text).
+- Status-aware text: text that depends on relationship status, job or school must branch on it or require it.
+
 ## Commands
 See README.md for build, test and check commands.
 
 ## Git workflow
 - Branch from the latest main. Open pull requests into main only, never into another feature branch.
 - One stage (or one follow-up task) per pull request. Don't bring in unrelated commits.
-- At the end of every stage, open its pull request into main without asking.
 - A pull request merges only when CI is green.
+- At the end of every stage or task, open the pull request into main yourself and report the CI result. Don't wait to be asked.
 
 ## When finished
 Report what you built, any deviations from the docs and why, anything left undone, and open questions.
@@ -862,7 +718,7 @@ Meet every Stage 1 acceptance criterion and write the listed tests. When finishe
 - Name pools.
 - Rolls for hidden values, talent and latent traits (for both random and custom characters).
 - Store connection and autosave.
-- Input log recording from the first input: `createLife` records its own options as the first entry.
+- Input log recording from the first input, written by the engine.
 
 **Data:** `LifeState` (every later system's section present with empty defaults), `Character`, `Identity`, `Pronouns`, `Person`, `Relationship` (family only), `NamePool`.
 
@@ -871,7 +727,7 @@ Meet every Stage 1 acceptance criterion and write the listed tests. When finishe
 - Custom creation steps: name, gender identity (free text), gender category, expression, pronouns (presets plus fully custom entry for all five forms), attraction, appearance, family setup, city, family wealth, and sliders for every stat and personality trait with no restrictions.
 - Home screen: header, stat bars without numbers, empty history feed.
 - Continue on the title screen.
-- Remove the Stage 1 "Preview the game layout" button from the New Life screen.
+- Remove the Stage 1 "Preview the game layout" button from New Life; the real Home screen replaces it.
 
 **Dependencies:** Stage 1.
 
@@ -904,9 +760,8 @@ Build only Stage 2:
 - Implement the family generator (parents, optional siblings) with believable ages and full identities.
 - Add name pools as YAML content with Zod schemas.
 - Roll hidden values, talent and latent traits for both random and custom characters.
-- Connect the store to the engine and autosave through the persistence module. Each engine function records its own player input in the life's inputLog (section N); the store does not write it.
-- Build the New Life screen, the multi-step Custom creation flow (free-text gender identity and expression, gender category, pronoun presets plus fully custom entry, attraction, family, city, family wealth, unrestricted stat and personality sliders), the Home screen with stat bars (no numbers), and Continue on the title screen.
-- Remove the Stage 1 "Preview the game layout" button from the New Life screen.
+- Connect the store to the engine and autosave through the persistence module. The engine records every player input in the life's inputLog (section N).
+- Build the New Life screen, the multi-step Custom creation flow (free-text gender identity and expression, gender category, pronoun presets plus fully custom entry, attraction, family, city, family wealth, unrestricted stat and personality sliders), the Home screen with stat bars (no numbers), and Continue on the title screen. Remove the Stage 1 "Preview the game layout" button.
 
 Do not implement aging, age-up, events or any yearly systems.
 
@@ -930,7 +785,6 @@ Meet every Stage 2 acceptance criterion and write the listed tests, including th
 - History entries for milestones (new life stage, family deaths).
 - Obituary generator, version 1 (templates).
 - Archive.
-- Starting a new life while one is in progress archives the current life, marked as unfinished, instead of discarding it.
 
 **Data:** `HistoryEntry`, `ArchivedLife`, phase handling.
 
@@ -942,7 +796,6 @@ Meet every Stage 2 acceptance criterion and write the listed tests, including th
 - Pipeline steps run in the order listed in section M.
 - Across 10,000 average lives, the median age at death is between 72 and 82, and no one lives past 120.
 - Death always ends the life and moves it into the archive.
-- Starting a new life over one in progress moves the old life into the archive, marked as unfinished.
 - The archive survives reloads and grows with each life.
 - Saving and reloading in the middle of a year is safe.
 - Rapid tapping of Age Up can't advance two years at once.
@@ -969,7 +822,6 @@ Build only Stage 3:
 - Age NPCs and let them die.
 - Write history entries for milestones.
 - Build obituary generation (template based, designed so later stages can add to it) and the archive, stored through the persistence module.
-- When the player starts a new life while one is in progress, archive the current life (marked as unfinished) instead of discarding it, and update the Stage 2 confirmation sheet to say so.
 - Build the Age Up button (guarded against double taps), the Home history feed, a simple year recap, the Life history screen, the Death and Obituary screen, and Archive list and detail screens.
 
 Do not implement events, relationships beyond aging family members, money, school or jobs.
@@ -993,14 +845,14 @@ Meet every Stage 3 acceptance criterion, including the 10,000-life lifespan test
 - Casting: use existing people or create new ones.
 - Effect handlers: stat, money (savings number only for now), relationship, memory, flag, schedule, history, death, and chance checks.
 - Scheduled follow-up events and the event log.
-- Lifetime happiness tracking (a running average), used by the obituary's mood line.
+- Lifetime happiness tracking (a running average), so the obituary's mood line reflects the whole life instead of the final year.
 - Simulation runner, version 1 (`tools/simulate.ts`).
 
 **Content:** 40 starter events across every life stage, including early-childhood family events (parents fighting, divorce, neglect), 3 multi-step chains and 1 legendary event. All follow the content rules in `AGENTS.md`.
 
 **Data:** `EventDef`, `ChoiceDef`, `Outcome`, `Effect`, `Condition`, `CastSpec`, `EventInstance`, `ScheduledEvent`.
 
-**UI:** Event card sheet, outcome display, tone accent colors. After a year with events, the year recap is the last card in the event sheet; after a quiet year, the Home recap card updates as in Stage 3.
+**UI:** Event card sheet, outcome display, tone accent colors, year recap. After a year with events, the recap is the last card in the event sheet. After a quiet year, the recap card on Home updates as it does in Stage 3.
 
 **Dependencies:** Stage 3.
 
@@ -1037,10 +889,10 @@ Build only Stage 4:
 - The pacing director with the stage budgets from docs/design.md section G, a volatility bonus, a cap of 6, and tone ordering.
 - Casting (reuse existing people or create new ones) and effect handlers for stat, money (savings only), relationship, memory, flag, schedule, history and death, plus chance checks clamped to 5–95%.
 - Scheduled follow-up events and the event log.
-- Lifetime happiness tracking (a running average) for the obituary's mood line.
 - Extend the content build to validate events, including references and placeholders.
 - tools/simulate.ts: run N lives with random choices; report invariant failures, lifespans and how often each event fired.
-- UI: event card sheet, outcome display, tone accents. After a year with events, the recap is the last card in the event sheet; after a quiet year, the Home recap card updates as in Stage 3.
+- Lifetime happiness tracking (running average) for the obituary's mood line.
+- UI: event card sheet, outcome display, tone accents. After a year with events, show the recap as the last card in the event sheet; after a quiet year, keep the existing Home recap card.
 - Write 40 starter events in YAML across all life stages, including early-childhood family events, 3 chains and 1 legendary event. Follow the content rules in AGENTS.md exactly.
 
 Do not implement relationship management, money systems, school, jobs, health conditions, crime or self-discovery.
@@ -1125,11 +977,8 @@ Meet every Stage 5 acceptance criterion. When finished, run all checks plus a 1,
 - Shortfalls become debt, so savings never go below zero.
 - Missed-payment tracking that triggers event chains.
 - Housing: living with parents (with support based on family wealth), renting, owning, homeless.
-- Relocation to another city.
-- The birth city, stored separately from the current city, for the obituary and archive.
+- Relocation to another city. Store the birth city separately from the current city, for the obituary and archive.
 - Gig work, as the first income source, inside the career module.
-- Retirement benefit (like Social Security) from an earnings record every income source feeds, paid as its own ledger line.
-- Living together: a partner or spouse who moves in pays their share of the housing cost, and moves out on a breakup or divorce.
 - Lifestyle effects on happiness and stress.
 - A net worth selector.
 
@@ -1170,7 +1019,7 @@ Build only Stage 6:
 - The yearly ledger in the economy step of the year pipeline, using whole dollars. Put the tax function, living costs, lifestyle multipliers and interest rates in src/content/balance.
 - A debt system (student, personal, mortgage, medical, collections) that later stages will reuse. Shortfalls become debt.
 - Missed-payment tracking that triggers event chains, with recovery paths.
-- Housing: living with parents (support based on family wealth), renting, owning with a down payment and mortgage, homeless. Relocation between cities. Store the birth city separately from the current city, for the obituary and archive.
+- Housing: living with parents (support based on family wealth), renting, owning with a down payment and mortgage, homeless. Relocation between cities, with the birth city stored separately from the current city.
 - Gig work from age 16 as an income source in the career module, and lifestyle effects on happiness and stress.
 - UI: Money tab, More → Home, money line in the year recap, gig option on the Work tab.
 - 25 money and housing events in YAML, following AGENTS.md.
@@ -1195,7 +1044,6 @@ Meet every Stage 6 acceptance criterion. When finished, run all checks plus a 1,
 - Admission model (GPA, stats, luck) for each tier.
 - Tuition by tier and program, stored in `balance`.
 - Paying for school: family help, scholarships and student loans through the Stage 6 debt system.
-- While enrolled in college, trade school or grad school, gig work is part-time: gig pay × `studentGigShare` (0.5).
 - Majors, trades and grad programs as content.
 - Credentials record.
 - Education actions: apply, choose a major, drop out, go back.
@@ -1258,8 +1106,8 @@ Meet every Stage 7 acceptance criterion. When finished, run all checks plus a 1,
 - Application odds from qualifications, Confidence, Looks, reputation and luck.
 - Yearly performance from weighted stats, stress and events.
 - Promotion, raise, layoff and firing rules.
-- Salary by level times city multiplier, feeding the ledger. Salaries are earned income, so they go into the Stage 6 earnings record (`finances.earnings`) that the retirement benefit is based on; no second retirement calculation.
-- Retirement (leaving work) and unemployment. The retirement benefit itself already exists (Stage 6) and keeps paying from its earnings record.
+- Salary by level times city multiplier, feeding the ledger.
+- Retirement and unemployment.
 - Job requirements can check the criminal record (records themselves arrive in Stage 9).
 - Coworkers and bosses cast as people.
 
@@ -1277,11 +1125,6 @@ Meet every Stage 7 acceptance criterion. When finished, run all checks plus a 1,
 - Every job track has at least 3 reachable levels, and no job has requirements that can't be met.
 - Relocating ends the current job and opens the new city's market.
 - A 1,000-life run shows degrees raising average income without guaranteeing it, and promotion and firing rates within the targets set in `balance`.
-- With careers in place, a 1,000-life run meets the targets in `src/content/balance/targets.yaml`:
-  - Bankruptcy in no more than about 15% of lives that reach adulthood (`money.maxBankruptLives`).
-  - Roughly half or more of adults have owned a home by 50 (`money.minHomeOwners`, `money.homeOwnershipAge`).
-  - Bachelor's degree holders earn clearly more over a lifetime on average (`careers.minBachelorEarningsRatio`: at least 1.3 times lives that stopped at high school), but it isn't guaranteed (`careers.minBachelorBelowHighSchoolMedian`: at least 10% of them earn less than the median high-school-only life).
-  - `tools/simulate.ts` reports each of these against its target.
 
 **Testing:** Unit tests for eligibility, application odds, performance and promotion; end-to-end test of search, apply, promotion and quitting; simulation report on income by education path.
 
@@ -1443,8 +1286,8 @@ Meet every Stage 10 acceptance criterion. When finished, report the coverage sum
 - Light haptics where the device supports them.
 - Accessibility: labels, focus order, AA contrast, and word descriptions of every bar for screen readers ("Health: good") while bars stay visual only.
 - First-life tips and install prompt timing.
+- No theme flash on load: cache the theme choice where it can be read before the first screen appears.
 - Performance budget for bundle size and load time.
-- Remove the theme flash on load: cache the theme choice where it can be read before the first screen appears.
 
 **Dependencies:** Stage 10.
 
@@ -1474,8 +1317,8 @@ Build only Stage 11:
 - Card transitions and animated bar changes that respect reduced motion, and light haptics where supported.
 - Accessibility: labels, focus order, AA contrast, and screen-reader word descriptions for every bar.
 - Three first-life tips, install prompt timing, empty and loading states.
+- Remove the brief theme flash on load by caching the theme choice where it can be read before the first screen appears.
 - A performance budget checked in CI.
-- Remove the theme flash on load by caching the theme choice where it can be read before the first screen appears.
 
 Meet every Stage 11 acceptance criterion. When finished, report Lighthouse scores, accessibility results, any deviations and why, and open questions.
 ```
@@ -1635,13 +1478,9 @@ When finished, report what you built, the simulation summary, any deviations and
 | Content | Content build + coverage report | Schemas, references, placeholders; every event rendered with four pronoun sets | Every pull request |
 | Scenario | Vitest + state builder | Specific situations set up directly (for example, age 45, broke, divorced) | Every pull request |
 | Golden lives | Vitest | Fixed seeds and scripted inputs; the final state must match a saved snapshot | Every pull request |
-| End-to-end | Playwright at phone size | Real screens: creation, age-up, events, actions, death, archive, settings. Flow tests play a small fixed test content pack; one smoke test plays real content | Every pull request |
+| End-to-end | Playwright at phone size | Real screens: creation, age-up, events, actions, death, archive, settings. Flow tests use a small fixed test content pack, so content changes can't break them. One smoke test plays real content for many years and only checks nothing breaks | Every pull request |
 | Simulation | `tools/simulate.ts` | Balance, frequency, exploits, diversity | 500 lives per pull request, 10,000 nightly, 100,000 before release |
 | Human gates | You | Writing quality, feel, balance | Stages 10, 11, 12 and before launch |
-
-### End-to-end test content pack
-
-Flow tests (events, death, archive) run on a small fixed content pack in `tests/e2e/content`, so adding or tuning real events never breaks unrelated tests. `npm run content` lays it over `src/content` (its `events/` replaces every real event; other files replace the file at the same path) and builds `src/content/compiled/test-content.json`. Test builds load it with `?content=test`; normal builds compile it away. One smoke test plays years of real content and only checks that nothing breaks.
 
 ### Scenario state builder
 
@@ -1713,8 +1552,6 @@ Target numbers live in `src/content/balance/targets.yaml`, so they can be adjust
 | Legendary events | Lives in which the event fires | Rare but reachable: in roughly 0.1–2% of lives |
 | Money exploits | Repeatable choices with guaranteed positive money; outlier net worth growth | None found |
 | Unbalanced outcomes | Distributions of lifespan, net worth, education and marriage | Within the ranges in `targets.yaml` |
-| Runaway or thin wealth | Median net worth at 65 (`money.medianNetWorth`, added with Stage 8; Stage 12 tunes the economy toward it) | $200k–$600k |
-| Careless play | The same seeds played by a careless player (random actions, no caution rules), reported beside the careful player; the targets are judged on the careful player, and the game isn't tuned for the careless one | Reported, not a target |
 
 ### Measuring life diversity
 
@@ -1733,7 +1570,7 @@ The same measures run separately for each strategy bot, so it's clear whether va
 | When | Runs |
 |---|---|
 | Every pull request | Lint, type check, unit, scenario and golden-life tests, content build, coverage report, phone-sized end-to-end tests, 500-life simulation |
-| Nightly | 10,000-life lifespan and invariant test (every pull request runs 2,500 of those lives), 10,000-life simulation, with the report saved (`.github/workflows/nightly.yml`) |
+| Nightly | 10,000-life simulation, with the report saved |
 | Before a release | 100,000-life simulation, the cross-browser test matrix, migration tests |
 
 ---
@@ -1748,43 +1585,19 @@ New careers, events, cities, majors, conditions, offenses and similar content ar
 
 ```text
 src/content/
-  balance/        creation.yaml, aging.yaml, mortality.yaml, pacing.yaml, events.yaml (weights by
-                  rarity, chance checks, people casting creates), relationships.yaml (adult age,
-                  drift, pruning, action timing, partner ages, support), economy.yaml (tax brackets,
-                  living costs, lifestyle tiers, family support, interest, debt terms, missed payments,
-                  housing, ownership, gig pay), careers.yaml (hiring age, openings, hiring odds,
-                  performance, promotions, raises, firing, layoffs, pay when a job ends, the
-                  workplace, the retirement age),
-                  education.yaml (school ages, grades and letter grades, admission
-                  odds, tuition, scholarships, family help, the GED), health.yaml
-                  (treatment, doctors, vice escalation), legal.yaml (sentencing,
-                  probation, prison, release, the record), discovery.yaml
-                  (surfacing, resurfacing, crises, inner conflict, talents), targets.yaml
-  causes/         causes of death, one per file ("natural causes", "a stroke")
+  balance/        economy.yaml, mortality.yaml, pacing.yaml, careers.yaml,
+                  education.yaml, health.yaml, legal.yaml, targets.yaml
   cities/         nyc.yaml, los_angeles.yaml, chicago.yaml, houston.yaml, small_town.yaml
   events/
     early/ child/ teen/ youngAdult/ adult/ senior/ any/
       <category>/<event_id>.yaml      one event per file
       <category>/<chain_id>.chain.yaml  a chain's events together in one file
-  jobs/ majors/ trades/ grad/ conditions/ offenses/ talents/
+  jobs/ majors/ trades/ grad/ conditions/ offenses/
   names/          name pools
-  text/           story text that isn't an event: history.yaml (milestone entries),
-                  obituary.yaml (obituary sections), relations.yaml ("your mother"),
-                  legal.yaml (a sentence in words), discovery.yaml (self-discovery words)
   registries/
-    memories.yaml   every memory tag, with its readable text (a template about {npc})
+    memories.yaml   every memory tag, with its readable text
     flags.yaml      every flag, with a one-line description
-    categories.yaml event categories (romance: true marks adults-only categories;
-                    prison: true marks the only events that happen in prison)
-    actions.yaml    the events that answer each management action
-    triggers.yaml   the events that answer money trouble (missed payment, collections,
-                    garnishment, eviction, foreclosure); the economy step queues one
-    work.yaml       the events that answer work actions: hired and rejected (a job
-                    application), raise (asking for a raise)
-    health.yaml     the events that answer seeing a doctor (clean, treated, managed)
-    legal.yaml      the events the legal system queues (jailed, released, probation)
-    discovery.yaml  the events the self-discovery step queues (surfacing and resurfacing
-                    by kind, crisis, coming out)
+    categories.yaml event categories
 ```
 
 The registries let the content build catch typos. An effect that writes a memory tag or flag that isn't registered fails the build.

@@ -39,6 +39,9 @@ jobs:
       - name: Simulation (500 lives)
         run: npm run simulate -- --lives 500
 
+      - name: Content coverage report (300 lives)
+        run: npm run coverage -- --lives 300
+
       - name: Production build
         run: npm run build
 

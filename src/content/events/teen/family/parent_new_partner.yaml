@@ -1,0 +1,39 @@
+id: parent_new_partner
+title: Someone new
+text: >-
+  {parent.name} is seeing someone. {newPartner.name} comes to dinner, laughs
+  too loudly, and tries very hard to be cool about your music.
+tone: neutral
+category: family
+rarity: common
+lifeStages: [child, teen]
+requires:
+  all:
+    - { flag: parents_split }
+    - { age: { gte: 10 } }
+weight: { base: 5 }
+once: true
+cast:
+  parent: { kind: parent }
+  newPartner: { kind: acquaintance, age: { min: 30, max: 60 }, createIfMissing: true, newChance: 1 }
+choices:
+  - id: chance
+    label: Give {newPartner.name} a chance
+    outcome:
+      text: >-
+        {newPartner.name} turns out to be decent: shows up to things, doesn't
+        try to be your parent. {parent.name} hums while doing the dishes now.
+      effects:
+        - { type: relationship, role: newPartner, affection: 10, trust: 5 }
+        - { type: relationship, role: parent, affection: 4 }
+        - { type: stat, key: kindness, delta: 1 }
+  - id: cold
+    label: Be polite and very, very cold
+    outcome:
+      text: >-
+        It works. {newPartner.name} stops coming to dinner. {parent.name} stops
+        humming, and you're not sure whether you won.
+      effects:
+        - { type: relationship, role: newPartner, affection: -10 }
+        - { type: relationship, role: parent, affection: -5, trust: -3 }
+        - { type: stat, key: stress, delta: 2 }

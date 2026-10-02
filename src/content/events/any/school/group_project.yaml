@@ -21,6 +21,7 @@ choices:
         - { type: education, action: grades, value: 0.2 }
         - { type: stat, key: stress, delta: 4 }
         - { type: memory, role: partner, tag: slacked_on_project }
+        - { type: memory, role: partner, tag: covered_on_project }
   - id: confront
     label: Tell {partner.them} to pull {partner.their} weight
     check:

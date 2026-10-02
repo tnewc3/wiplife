@@ -35,3 +35,14 @@ archive:
   # History entries kept as highlights when a life goes into the archive.
   highlightMinImportance: 1
   maxHighlights: 100
+
+# Obituary version 2 (Stage 10). The life's tone picks the phrasing: heavy
+# for a life that ended before youngAge or averaged below heavyHappiness,
+# bright from brightHappiness, mixed otherwise. maxMoments: how many notable
+# moments and deeds the obituary mentions. The Happiness lines sit around how
+# simulated lives go now (lifetime median about 93); Stage 12 retunes them.
+obituary:
+  brightHappiness: 95
+  heavyHappiness: 85
+  youngAge: 45
+  maxMoments: 3

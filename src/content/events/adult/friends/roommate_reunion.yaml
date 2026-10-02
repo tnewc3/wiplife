@@ -1,0 +1,34 @@
+# Follow-up to first_roommate.
+id: roommate_reunion
+title: Gerald the fridge
+text: >-
+  A package arrives from {roommate.name}, your first-year roommate. Inside is
+  a photo of a battered mini fridge and a note: "Still running. Still named
+  Gerald. Come visit."
+tone: light
+category: friends
+rarity: common
+lifeStages: [youngAdult, adult]
+requires: { memory: { role: roommate, tag: roomed_together } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  roommate: { kind: classmate }
+choices:
+  - id: visit
+    label: Book the trip
+    outcome:
+      text: >-
+        A weekend of the same inside jokes, older bodies, worse hangovers.
+        {roommate.name} toasts "to Gerald," and you realize you've missed this.
+      effects:
+        - { type: relationship, role: roommate, status: active, kind: friend, affection: 12, trust: 6 }
+        - { type: stat, key: happiness, delta: 5 }
+        - { type: money, delta: -400 }
+  - id: send_photo
+    label: Send back a photo of your own fridge
+    outcome:
+      text: It's not named. {roommate.name} is deeply disappointed in you and says so, at length, for years.
+      effects:
+        - { type: relationship, role: roommate, affection: 4 }
+        - { type: stat, key: happiness, delta: 2 }

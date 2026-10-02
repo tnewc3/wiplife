@@ -28,6 +28,7 @@ choices:
           - { type: money, delta: 2000 }
           - { type: flag, key: ran_package, value: true }
           - { type: memory, role: contact, tag: gave_you_package }
+          - { type: schedule, eventId: package_returns, inYears: [2, 6], cast: [contact] }
           - { type: stat, key: stress, delta: 4 }
       failure:
         text: >-
@@ -37,6 +38,7 @@ choices:
           - { type: legal, offenseId: drug_dealing, outcome: sentence }
           - { type: flag, key: ran_package, value: true }
           - { type: memory, role: contact, tag: gave_you_package }
+          - { type: schedule, eventId: package_returns, inYears: [2, 6], cast: [contact] }
           - { type: stat, key: reputation, delta: -10 }
   - id: regular
     label: Make it a regular thing
@@ -50,6 +52,7 @@ choices:
           - { type: money, delta: 9000 }
           - { type: flag, key: ran_package, value: true }
           - { type: memory, role: contact, tag: gave_you_package }
+          - { type: schedule, eventId: package_returns, inYears: [2, 6], cast: [contact] }
           - { type: stat, key: stress, delta: 6 }
           - { type: stat, key: kindness, delta: -3 }
       failure:
@@ -60,6 +63,7 @@ choices:
           - { type: legal, offenseId: drug_dealing, outcome: jail, years: 3 }
           - { type: flag, key: ran_package, value: true }
           - { type: memory, role: contact, tag: gave_you_package }
+          - { type: schedule, eventId: package_returns, inYears: [2, 6], cast: [contact] }
           - { type: stat, key: reputation, delta: -15 }
   - id: no
     label: Say no

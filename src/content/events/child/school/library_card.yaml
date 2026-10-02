@@ -1,0 +1,27 @@
+id: library_card
+title: Your own library card
+text: >-
+  The librarian types your name into the computer and hands you a card with
+  your name on it. You're allowed to take home ten books. Ten.
+tone: light
+category: school
+rarity: common
+lifeStages: [child]
+requires: { education: { program: [elementary] } }
+weight: { base: 4 }
+once: true
+choices:
+  - id: ten
+    label: Take the full ten, every week
+    outcome:
+      text: You read under the covers with a flashlight until the batteries die. The librarian starts saving books for you.
+      effects:
+        - { type: stat, key: smarts, delta: 4 }
+        - { type: stat, key: happiness, delta: 2 }
+  - id: comics
+    label: Head straight for the comics
+    outcome:
+      text: It counts as reading. You argue this point successfully for years.
+      effects:
+        - { type: stat, key: smarts, delta: 1 }
+        - { type: stat, key: happiness, delta: 3 }

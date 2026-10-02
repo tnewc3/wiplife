@@ -1,0 +1,34 @@
+id: thunderstorm
+title: Thunder
+text: >-
+  A storm rolls in after bedtime. The thunder is so loud the windows hum, and
+  every flash turns the coat on the back of your door into a monster.
+tone: light
+category: family
+rarity: common
+lifeStages: [early]
+requires: { age: { gte: 2 } }
+weight: { base: 5 }
+cooldownYears: 3
+cast:
+  parent: { kind: parent }
+choices:
+  - id: run
+    label: Run to {parent.name}'s bed
+    outcome:
+      text: >-
+        {parent.name} lifts the blanket without fully waking up. You count the
+        seconds between the flash and the boom together until you're asleep.
+      effects:
+        - { type: relationship, role: parent, affection: 4, trust: 4 }
+        - { type: memory, role: parent, tag: comforted_you }
+        - { type: stat, key: stress, delta: -2 }
+  - id: brave
+    label: Stay put and glare at the monster
+    outcome:
+      text: >-
+        You glare at the coat until the storm gives up. In the morning it's
+        just a coat. You feel enormous.
+      effects:
+        - { type: stat, key: confidence, delta: 2 }
+        - { type: stat, key: stress, delta: 1 }

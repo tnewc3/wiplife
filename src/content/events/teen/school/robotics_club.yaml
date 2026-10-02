@@ -1,0 +1,35 @@
+id: robotics_club
+title: The robot
+text: >-
+  The robotics club has a competition in three weeks and a robot that, so
+  far, can only drive in circles. The club advisor looks desperate.
+tone: light
+category: school
+rarity: common
+lifeStages: [teen]
+requires: { education: { program: [high] } }
+weight: { base: 4 }
+once: true
+choices:
+  - id: join
+    label: Join and fix the wiring
+    check:
+      base: 40
+      stats: [{ key: smarts, weight: 0.4 }, { key: discipline, weight: 0.2 }]
+      success:
+        text: The robot drives in a straight line, picks up a ball and wins third place. You've found your people.
+        effects:
+          - { type: stat, key: smarts, delta: 3 }
+          - { type: stat, key: sociability, delta: 2 }
+          - { type: education, action: grades, value: 0.15 }
+      failure:
+        text: The robot now drives in squares. The club loves you anyway.
+        effects:
+          - { type: stat, key: smarts, delta: 1 }
+          - { type: stat, key: sociability, delta: 2 }
+  - id: no
+    label: Wish them luck and keep walking
+    outcome:
+      text: They come in last. The robot drives in circles all the way off the stage.
+      effects:
+        - { type: stat, key: happiness, delta: 1 }

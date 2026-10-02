@@ -1,0 +1,43 @@
+id: sports_tryouts
+title: Tryouts
+text: >-
+  Tryouts for the team are on Thursday. Thirty kids, twelve spots, and a coach
+  who writes everything down and says nothing.
+tone: neutral
+category: school
+rarity: common
+lifeStages: [teen]
+requires: { education: { program: [high] } }
+weight: { base: 5 }
+once: true
+choices:
+  - id: try
+    label: Train every day until Thursday
+    check:
+      base: 40
+      stats: [{ key: fitness, weight: 0.4 }, { key: discipline, weight: 0.2 }]
+      success:
+        text: Your name is on the list taped to the gym door. You read it four times.
+        effects:
+          - { type: stat, key: fitness, delta: 4 }
+          - { type: stat, key: confidence, delta: 3 }
+          - { type: stat, key: sociability, delta: 2 }
+          - { type: history, text: 'You made the team.', importance: 1 }
+      failure:
+        text: Your name isn't on the list. The coach says to come back next year. You might.
+        effects:
+          - { type: stat, key: fitness, delta: 2 }
+          - { type: stat, key: confidence, delta: -2 }
+  - id: manager
+    label: Ask to be team manager instead
+    outcome:
+      text: Clipboards, water bottles and every bus ride. You know more about the team than the coach does by October.
+      effects:
+        - { type: stat, key: discipline, delta: 2 }
+        - { type: stat, key: sociability, delta: 2 }
+  - id: skip
+    label: Skip it; you have other plans
+    outcome:
+      text: Thursday comes and goes. You don't think about it much.
+      effects:
+        - { type: stat, key: stress, delta: -1 }

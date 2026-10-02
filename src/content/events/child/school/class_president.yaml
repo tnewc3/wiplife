@@ -1,0 +1,37 @@
+id: class_president
+title: Vote for you
+text: >-
+  The class is electing a president. The job comes with no power at all and
+  a badge. You want the badge very badly.
+tone: light
+category: school
+rarity: common
+lifeStages: [child]
+requires: { education: { program: [elementary, middle] } }
+weight: { base: 4 }
+once: true
+choices:
+  - id: speech
+    label: Give a big speech promising longer recess
+    check:
+      base: 40
+      stats: [{ key: confidence, weight: 0.3 }, { key: sociability, weight: 0.3 }]
+      success:
+        text: You win in a landslide. Recess does not get longer. Nobody seems to mind.
+        effects:
+          - { type: stat, key: confidence, delta: 4 }
+          - { type: stat, key: ambition, delta: 2 }
+          - { type: stat, key: reputation, delta: 2 }
+          - { type: history, text: 'You were elected class president on a platform of longer recess.', importance: 1 }
+      failure:
+        text: You lose by two votes to a kid who promised a class pet. You demand a recount. There isn't one.
+        effects:
+          - { type: stat, key: confidence, delta: -2 }
+          - { type: stat, key: ambition, delta: 1 }
+  - id: campaign_manager
+    label: Run a friend's campaign instead
+    outcome:
+      text: You make the posters, write the slogan and win. Being the power behind the badge suits you.
+      effects:
+        - { type: stat, key: smarts, delta: 1 }
+        - { type: stat, key: sociability, delta: 2 }

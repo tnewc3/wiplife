@@ -1,0 +1,33 @@
+id: writing_a_will
+title: The will
+text: >-
+  A lawyer with a soothing voice and a very large desk asks who should get
+  what. It's a strange question to answer about your own life.
+tone: serious
+category: money
+rarity: common
+lifeStages: [senior]
+weight: { base: 4 }
+once: true
+choices:
+  - id: careful
+    label: Take your time and get it right
+    outcome:
+      text: Three meetings, a lot of signatures, and a folder in a fireproof box. You sleep better than you expected.
+      effects:
+        - { type: money, delta: -1500 }
+        - { type: stat, key: stress, delta: -5 }
+  - id: charity
+    label: Leave a good share to a cause you care about
+    outcome:
+      text: You pick the animal shelter, or the library, or the school. It feels like planting a tree you won't sit under.
+      effects:
+        - { type: money, delta: -1500 }
+        - { type: stat, key: kindness, delta: 3 }
+        - { type: stat, key: happiness, delta: 3 }
+  - id: later
+    label: Say you'll come back next year
+    outcome:
+      text: The lawyer has heard that before. So have you.
+      effects:
+        - { type: stat, key: stress, delta: 2 }

@@ -1,0 +1,38 @@
+id: lifeguard_job
+title: Summer at the pool
+text: >-
+  The public pool is hiring lifeguards for the summer: a red swimsuit, a
+  whistle, a tall chair and $12 an hour. There's a swim test first.
+tone: light
+category: money
+rarity: common
+lifeStages: [teen]
+requires: { age: { gte: 15 } }
+weight: { base: 4 }
+once: true
+choices:
+  - id: test
+    label: Take the swim test
+    check:
+      base: 45
+      stats: [{ key: fitness, weight: 0.5 }]
+      success:
+        text: >-
+          Ten laps and a rescue dummy. You get the whistle. By August you're
+          tan, rich by your standards, and you've pulled one kid out of the deep end.
+        effects:
+          - { type: money, delta: 1800 }
+          - { type: stat, key: fitness, delta: 3 }
+          - { type: stat, key: confidence, delta: 3 }
+          - { type: history, text: 'You spent a summer as a lifeguard and pulled a kid out of the deep end.', importance: 1 }
+      failure:
+        text: You run out of breath on lap eight. The snack bar is hiring, though.
+        effects:
+          - { type: money, delta: 900 }
+          - { type: stat, key: fitness, delta: 1 }
+  - id: no
+    label: Spend the summer at the pool for free instead
+    outcome:
+      text: Long, lazy and broke. You'll miss summers like this one day.
+      effects:
+        - { type: stat, key: happiness, delta: 3 }

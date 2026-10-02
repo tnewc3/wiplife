@@ -64,6 +64,7 @@ events:
           effects:
             - { type: flag, key: teacher_recommendation, value: true }
             - { type: memory, role: teacher, tag: wrote_your_letter }
+            - { type: schedule, eventId: teacher_retires, inYears: [10, 25], cast: [teacher] }
             - { type: relationship, role: teacher, affection: 5 }
             - { type: stat, key: confidence, delta: 3 }
       - id: decline

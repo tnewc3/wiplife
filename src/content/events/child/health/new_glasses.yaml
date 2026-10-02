@@ -1,0 +1,30 @@
+id: new_glasses
+title: The board is blurry
+text: >-
+  You've been squinting at the board all year. The school nurse holds up a
+  chart, and the bottom four lines are just smudges.
+tone: neutral
+category: health
+rarity: common
+lifeStages: [child]
+requires: { education: { program: [elementary, middle] } }
+weight: { base: 3 }
+once: true
+choices:
+  - id: glasses
+    label: Pick the boldest frames in the shop
+    outcome:
+      text: >-
+        You put them on and see individual leaves on a tree across the street.
+        You had no idea. Your grades jump by spring.
+      effects:
+        - { type: stat, key: smarts, delta: 2 }
+        - { type: education, action: grades, value: 0.2 }
+        - { type: stat, key: confidence, delta: 1 }
+  - id: hide
+    label: Keep squinting so nobody calls you four-eyes
+    outcome:
+      text: The headaches start in October. By the time you give in, you've lost a semester to the blur.
+      effects:
+        - { type: education, action: grades, value: -0.2 }
+        - { type: stat, key: stress, delta: 3 }

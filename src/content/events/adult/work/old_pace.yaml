@@ -1,0 +1,39 @@
+id: old_pace
+title: The old pace
+text: >-
+  A recruiter calls about a job just like the one that burned you out: more
+  money, a better title, and "a fast-paced, high-energy environment." Your
+  chest tightens just hearing it.
+tone: serious
+category: work
+rarity: common
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { flag: burned_out }
+    - { career: { employed: true, retired: false } }
+weight: { base: 5 }
+once: true
+choices:
+  - id: no
+    label: Say no, and mean it
+    outcome:
+      text: You hang up and go for a walk at lunch, which you can do now. It feels like money in the bank.
+      effects:
+        - { type: stat, key: stress, delta: -4 }
+        - { type: stat, key: happiness, delta: 2 }
+  - id: yes
+    label: Take the meeting; you're stronger now
+    check:
+      base: 45
+      stats: [{ key: discipline, weight: 0.3 }, { key: health, weight: 0.2 }]
+      success:
+        text: You go in with boundaries this time and actually keep them. The money helps.
+        effects:
+          - { type: money, delta: 3000 }
+          - { type: stat, key: ambition, delta: 2 }
+      failure:
+        text: Three months in, the Sunday dread is back, right on schedule.
+        effects:
+          - { type: stat, key: stress, delta: 10 }
+          - { type: stat, key: health, delta: -3 }

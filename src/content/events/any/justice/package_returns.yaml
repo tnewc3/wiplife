@@ -1,0 +1,55 @@
+# Follow-up to easy_money_package.
+id: package_returns
+title: Another backpack
+text: >-
+  {contact.name} finds you again. There's another backpack, and this time the
+  money is better, and {contact.they} {contact:mentions|mention} that you already
+  know how it works.
+tone: dark
+category: justice
+rarity: common
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { flag: ran_package }
+    - { memory: { role: contact, tag: gave_you_package } }
+    - { legal: { incarcerated: false } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  contact: { kind: acquaintance }
+choices:
+  - id: out
+    label: Tell {contact.them} you're out, for good
+    check:
+      base: 55
+      stats: [{ key: confidence, weight: 0.3 }, { key: discipline, weight: 0.2 }]
+      success:
+        text: '{contact.name} shrugs. "Your loss." You don''t see {contact.them} again, and you sleep better than you have in years.'
+        effects:
+          - { type: relationship, role: contact, affection: -10, status: estranged }
+          - { type: stat, key: stress, delta: -4 }
+      failure:
+        text: >-
+          {contact.name} reminds you, pleasantly, how much {contact.they}
+          {contact:knows|know} about you. You say no anyway. You check your
+          mirrors for months.
+        effects:
+          - { type: relationship, role: contact, affection: -10, status: estranged }
+          - { type: stat, key: stress, delta: 8 }
+  - id: once_more
+    label: One more time, then never again
+    check:
+      base: 55
+      stats: [{ key: luck, weight: 0.4 }, { key: discipline, weight: 0.2 }]
+      success:
+        text: Same drive, same nod at the other end, $3,000 in an envelope. You tell yourself it was the last time.
+        effects:
+          - { type: money, delta: 3000 }
+          - { type: stat, key: stress, delta: 5 }
+          - { type: stat, key: riskTaking, delta: 2 }
+      failure:
+        text: A traffic stop, a dog, a backpack. The officer reads you your rights. The court hands down {sentence}.
+        effects:
+          - { type: legal, offenseId: drug_dealing, outcome: sentence }
+          - { type: stat, key: stress, delta: 12 }

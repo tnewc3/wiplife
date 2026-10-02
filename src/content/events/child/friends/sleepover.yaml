@@ -1,0 +1,35 @@
+id: sleepover
+title: The sleepover
+text: >-
+  It's your first sleepover at {friend.name}'s house. There are sleeping bags
+  on the floor, a flashlight, and a ghost story that {friend.name} swears is
+  true and happened in this very house.
+tone: light
+category: friends
+rarity: common
+lifeStages: [child]
+requires: { age: { gte: 6 } }
+weight: { base: 5 }
+once: true
+cast:
+  friend: { kind: friend, ageOffset: { min: -1, max: 1 }, createIfMissing: true }
+choices:
+  - id: brave
+    label: Tell an even scarier one
+    outcome:
+      text: >-
+        Your story has a hook, a lake and a voice on the phone. {friend.name}
+        sleeps with the light on. You do too, secretly.
+      effects:
+        - { type: relationship, role: friend, affection: 6 }
+        - { type: stat, key: confidence, delta: 2 }
+  - id: home
+    label: Call home at midnight to be picked up
+    outcome:
+      text: >-
+        You're in your own bed by 12:30, embarrassed and very relieved.
+        {friend.name} is nice about it on Monday. Mostly.
+      effects:
+        - { type: relationship, role: friend, affection: 1 }
+        - { type: stat, key: stress, delta: 2 }
+        - { type: stat, key: confidence, delta: -1 }

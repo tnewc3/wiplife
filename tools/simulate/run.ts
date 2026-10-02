@@ -57,6 +57,13 @@ export interface SimulationOptions {
    * rules). Defaults to careful.
    */
   player?: SimulatedPlayer;
+  /**
+   * Called with each life just after a year begins (its events picked), and
+   * with each life once it has ended: the content coverage report
+   * (tools/coverage.ts) watches lives through these.
+   */
+  onYear?: (life: LifeState) => void;
+  onLife?: (life: LifeState) => void;
 }
 
 export type SimulatedPlayer = 'careful' | 'careless';
@@ -793,6 +800,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
       }
       life = beginYear(life, content);
       watch(life);
+      options.onYear?.(life);
       const stage = perYear[life.character.lifeStage];
       const count = life.pending.length;
       stage.years++;
@@ -825,6 +833,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
       watch(life);
       if (diedFromEvent) deathsFromEvents++;
     }
+    options.onLife?.(life);
     for (const id of seenThisLife) livesWith.set(id, (livesWith.get(id) ?? 0) + 1);
     for (const [id, n] of firesThisLife) if (gains.has(id)) mostFires.set(id, Math.max(mostFires.get(id) ?? 0, n));
     ages.push(life.character.age);

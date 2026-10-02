@@ -1,0 +1,38 @@
+id: hr_training
+title: Mandatory training
+text: >-
+  Everyone has to watch a new HR training video about workplace
+  relationships. Five minutes in, it becomes clear that someone in HR has
+  heard about you.
+tone: light
+category: work
+rarity: common
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { flag: office_romance }
+    - { career: { employed: true, retired: false } }
+weight: { base: 4 }
+once: true
+choices:
+  - id: straight_face
+    label: Keep a perfectly straight face
+    check:
+      base: 50
+      stats: [{ key: discipline, weight: 0.4 }]
+      success:
+        text: You take notes. You ask a question. Nobody suspects a thing, except everybody.
+        effects:
+          - { type: stat, key: confidence, delta: 2 }
+      failure:
+        text: The actor in the video says your exact line. You laugh out loud in a silent room.
+        effects:
+          - { type: stat, key: reputation, delta: -1 }
+          - { type: stat, key: happiness, delta: 2 }
+  - id: own_it
+    label: Joke that you should get royalties
+    outcome:
+      text: Half the room laughs. HR does not. You get a follow-up email with the subject line "Quick chat?"
+      effects:
+        - { type: stat, key: sociability, delta: 2 }
+        - { type: job, action: performance, value: -3 }

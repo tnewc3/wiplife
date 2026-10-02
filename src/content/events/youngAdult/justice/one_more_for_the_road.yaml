@@ -16,6 +16,7 @@ weight:
   modifiers:
     - { if: { hidden: vice, gt: 55 }, x: 2 }
     - { if: { trait: riskTaking, gt: 60 }, x: 1.5 }
+    - { if: { flag: tried_alcohol }, x: 1.2 }
 cooldownYears: 12
 choices:
   - id: drive

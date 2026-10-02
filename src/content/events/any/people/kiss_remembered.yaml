@@ -1,0 +1,48 @@
+# Follow-up to unexpected_kiss: years later, you run into them again.
+id: kiss_remembered
+title: That night on the porch
+text: >-
+  At a friend's birthday, you turn around and there's
+  {admirer.name}. {admirer.They} {admirer:recognizes|recognize} you in the same
+  second, and you both laugh, because you both remember the porch.
+tone: light
+category: people
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  admirer: { kind: acquaintance }
+choices:
+  - id: thank
+    label: Tell {admirer.them} that kiss changed things for you
+    visibleIf: { memory: { role: admirer, tag: kissed_you } }
+    outcome:
+      text: >-
+        "Really?" {admirer.name} says, delighted. "Me? I'm going to be
+        insufferable about this." {admirer.They} {admirer:is|are}, and you don't mind.
+      effects:
+        - { type: relationship, role: admirer, status: active, affection: 10, trust: 5 }
+        - { type: stat, key: happiness, delta: 3 }
+        - { type: innerConflict, delta: -3 }
+  - id: knew
+    label: Joke that it told you something, just not that
+    visibleIf: { memory: { role: admirer, tag: kissed_not_for_you } }
+    outcome:
+      text: '"Story of my life," {admirer.name} says, grinning. You end up talking until the party empties out. A friendship, of all things.'
+      effects:
+        - { type: relationship, role: admirer, status: active, kind: friend, affection: 10 }
+        - { type: stat, key: happiness, delta: 2 }
+  - id: sorry
+    label: Say you were sorry you turned {admirer.them} down so fast
+    visibleIf: { memory: { role: admirer, tag: turned_them_down } }
+    outcome:
+      text: '"You were kind about it," {admirer.name} says. "That''s rarer than you''d think." You raise your glasses to that.'
+      effects:
+        - { type: relationship, role: admirer, status: active, affection: 8, trust: 6 }
+  - id: wave
+    label: Wave and find the snacks
+    outcome:
+      text: You wave. {admirer.name} waves. The snacks are excellent.
+      effects:
+        - { type: stat, key: happiness, delta: 1 }

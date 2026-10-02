@@ -1,0 +1,78 @@
+id: vow_renewal
+title: All these years
+text: >-
+  Your anniversary is coming up, and it's a big one. {spouse.name} asks,
+  half-joking, whether you'd marry {spouse.them} all over again.
+tone: light
+category: romance
+rarity: common
+lifeStages: [adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { role: spouse, years: { gte: 15 } }
+    - { memory: { role: spouse, tag: married_you } }
+weight: { base: 4 }
+cooldownYears: 10
+cast:
+  spouse: { kind: spouse }
+choices:
+  - id: renew
+    label: Renew your vows in front of everyone
+    outcome:
+      text: >-
+        Same words, older faces, better food. {spouse.name} cries before you
+        even get to "I do." You do too.
+      effects:
+        - { type: money, delta: -2500 }
+        - { type: relationship, role: spouse, affection: 12, trust: 6 }
+        - { type: stat, key: happiness, delta: 5 }
+        - { type: history, text: 'You and {spouse.name} renewed your vows.', importance: 2 }
+  - id: how_it_started
+    label: Tell the story of how it all started
+    visibleIf:
+      any:
+        - { memory: { role: spouse, tag: started_dating } }
+        - { memory: { role: spouse, tag: swapped_numbers } }
+        - { memory: { role: spouse, tag: confessed_feelings } }
+        - { memory: { role: spouse, tag: danced_with_you } }
+        - { memory: { role: spouse, tag: kissed_you } }
+        - { memory: { role: spouse, tag: met_your_family } }
+        - { memory: { role: spouse, tag: engaged_to_you } }
+    outcome:
+      text: >-
+        You tell it at dinner, the way you always do, with the parts
+        {spouse.name} says you get wrong. Yes. You'd do it all again.
+      effects:
+        - { type: relationship, role: spouse, affection: 10 }
+        - { type: stat, key: happiness, delta: 4 }
+  - id: hard_parts
+    label: Admit the hard years out loud
+    visibleIf:
+      any:
+        - { memory: { role: spouse, tag: forgot_anniversary } }
+        - { memory: { role: spouse, tag: couples_therapy } }
+        - { memory: { role: spouse, tag: forgave_you } }
+        - { memory: { role: spouse, tag: made_up_after_fight } }
+        - { memory: { role: spouse, tag: you_said_not_yet } }
+    check:
+      base: 55
+      stats: [{ role: spouse, key: trust, weight: 0.4 }, { key: kindness, weight: 0.2 }]
+      success:
+        text: >-
+          "There were years I didn't know if we'd make it," you say. "Me
+          neither," {spouse.name} says, and takes your hand. "But here we are."
+        effects:
+          - { type: relationship, role: spouse, affection: 8, trust: 12 }
+          - { type: stat, key: stress, delta: -4 }
+      failure:
+        text: It opens something you'd both sealed shut. The anniversary dinner ends early and quiet.
+        effects:
+          - { type: relationship, role: spouse, affection: -5, trust: -3 }
+          - { type: stat, key: stress, delta: 4 }
+  - id: joke
+    label: Say you'll think about it
+    outcome:
+      text: '{spouse.name} throws a dish towel at you. You''ve still got it.'
+      effects:
+        - { type: relationship, role: spouse, affection: 3 }

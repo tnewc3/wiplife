@@ -1,0 +1,49 @@
+# The start of a small chain: an older neighbor who looks after you
+# (sitter_in_hospital, sitter_stories).
+id: neighbor_sitter
+title: A week with {sitter.name}
+text: >-
+  Your family needs a hand this week, so you're spending it with
+  {sitter.name} from downstairs. {sitter.They} {sitter:has|have} a cookie jar
+  with no rules attached and a balcony full of plants you're allowed to dig in.
+tone: light
+category: family
+rarity: common
+lifeStages: [early, child]
+requires: { age: { gte: 3, lte: 8 } }
+weight: { base: 5 }
+once: true
+cast:
+  sitter: { kind: acquaintance, age: { min: 60, max: 78 }, createIfMissing: true, newChance: 1 }
+choices:
+  - id: spoil
+    label: Let {sitter.name} spoil you rotten
+    outcome:
+      text: >-
+        Cookies for breakfast, cartoons until late, and a new toy "just
+        because." You go home three pounds heavier and deeply in love.
+      effects:
+        - { type: relationship, role: sitter, affection: 15, trust: 8 }
+        - { type: memory, role: sitter, tag: spoiled_you }
+        - { type: stat, key: happiness, delta: 4 }
+        - { type: schedule, eventId: sitter_in_hospital, inYears: [3, 6], cast: [sitter] }
+        - { type: schedule, eventId: sitter_stories, inYears: [8, 11], cast: [sitter] }
+  - id: garden
+    label: Help with the plants every morning
+    outcome:
+      text: >-
+        {sitter.name} teaches you which shoots are weeds and which are
+        tomatoes, and lets you take home a pot of your own.
+      effects:
+        - { type: relationship, role: sitter, affection: 12, trust: 10 }
+        - { type: memory, role: sitter, tag: spoiled_you }
+        - { type: stat, key: discipline, delta: 2 }
+        - { type: schedule, eventId: sitter_in_hospital, inYears: [3, 6], cast: [sitter] }
+        - { type: schedule, eventId: sitter_stories, inYears: [8, 11], cast: [sitter] }
+  - id: homesick
+    label: Cry for your own bed every night
+    outcome:
+      text: '{sitter.name} sits on the edge of the couch and hums until you fall asleep, every night, without complaint.'
+      effects:
+        - { type: relationship, role: sitter, affection: 6 }
+        - { type: stat, key: stress, delta: 2 }
