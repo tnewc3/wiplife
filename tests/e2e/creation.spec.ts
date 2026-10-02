@@ -59,9 +59,11 @@ test('a custom life uses every choice and persists', async ({ page }) => {
   expect(await homeName(page)).toBe('Zoë Nguyễn');
   await expect(page.getByText('Newborn · New York · she/her')).toBeVisible();
   const family = page.getByRole('list', { name: 'Family' }).getByRole('listitem');
-  await expect(family).toHaveCount(3);
+  // One parent, two siblings and (C1) the parent's two parents.
+  await expect(family).toHaveCount(5);
   await expect(family.filter({ hasText: /Sister|Brother|Sibling/ })).toHaveCount(2);
-  await expect(family.filter({ hasText: 'Nguyễn' })).toHaveCount(3);
+  await expect(family.filter({ hasText: /Grand/ })).toHaveCount(2);
+  await expect(family.filter({ hasNotText: /Grand/ }).filter({ hasText: 'Nguyễn' })).toHaveCount(3);
 
   await page.reload();
   await page.getByRole('button', { name: 'Continue' }).click();

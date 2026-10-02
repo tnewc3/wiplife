@@ -72,7 +72,8 @@ test('a year with events shows each card and its outcome, then the recap as the 
 
   await expect(sheet.getByText('Your year')).toBeVisible();
   await expect(sheet.getByRole('heading', { name: /· 1 year old$/ })).toBeVisible();
-  await expect(sheet).toContainText('Happiness went up');
+  // The recap names the change; the yearly drift toward the baseline (C1) can outweigh the event's +2.
+  await expect(sheet).toContainText(/Happiness went (up|down)/);
   await sheet.getByRole('button', { name: 'Continue' }).click();
   await expect(eventSheet(page)).toHaveCount(0);
   await expect(ageUpButton(page)).toBeEnabled();
