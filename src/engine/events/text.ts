@@ -11,7 +11,7 @@ import type { Id, LifeState } from '../types';
 /** The role that is always you in event text (Stage 9): {self.they}, {self.name}. Never a cast role. */
 export const SELF_ROLE = 'self';
 
-/** How long ago `since` was, in words ("two years"); "a while" without one (C1). */
+/** When `since` was, in words ("last year", "two years ago"); "a while ago" without one (C1). */
 export function sinceText(state: LifeState, since: number | undefined, content: ContentBundle): string {
   const t = content.text.time;
   if (since === undefined) return t.since.unknown;
@@ -37,6 +37,6 @@ export function textContext(state: LifeState, cast: Record<string, Id>, content:
  * current one without a latent trait), and {sentence} (what a court just
  * handed down, "two years in prison"; only in an outcome with a legal effect);
  * (C1) {since}, how long ago the event that scheduled a follow-up happened
- * ("two years"; only in follow-ups).
+ * ("last year", "two years ago"; only in follow-ups).
  */
 export const EVENT_TEXT_VALUES = ['age', 'talent', 'latentPeople', 'latentGender', 'latentExpression', 'latentTrait', 'sentence', 'since'] as const;

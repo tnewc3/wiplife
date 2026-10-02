@@ -108,10 +108,10 @@ describe('effect handlers', () => {
   it('{since}: says how long ago a follow-up was set up, in words (C1)', () => {
     const life = adult();
     const at = (since: number | undefined) => sinceText(life, since, content);
-    expect(at(life.currentYear - 1)).toBe('a year');
-    expect(at(life.currentYear - 3)).toBe('three years');
-    expect(at(life.currentYear - 14)).toBe('14 years');
-    expect(at(undefined)).toBe('a while');
+    expect(at(life.currentYear - 1)).toBe('last year');
+    expect(at(life.currentYear - 3)).toBe('three years ago');
+    expect(at(life.currentYear - 14)).toBe('14 years ago');
+    expect(at(undefined)).toBe('a while ago');
   });
 
   it('history: writes a rendered entry; a legendary event marks it legendary', () => {
@@ -471,7 +471,7 @@ describe('event text', () => {
           latentExpression: 'androgynous',
           latentTrait: 'a taste for risk you never let yourself have',
           sentence: 'a year in prison',
-          since: 'two years',
+          since: 'two years ago',
         } satisfies Record<(typeof EVENT_TEXT_VALUES)[number], string | number>;
         const context = { roles, values };
         const texts = [def.title, def.text, ...(def.choices ?? []).map((c) => c.label)];

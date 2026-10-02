@@ -206,7 +206,7 @@ describe('runtime enforcement', () => {
   });
 
   it('carries when a follow-up was set up into its card text ({since})', () => {
-    const followUp = ev({ id: 'visit_again', followUpOnly: true, text: 'It has been {since} since {pal.name} left.', cast: { pal: { kind: 'friend', presence: 'anywhere' } } });
+    const followUp = ev({ id: 'visit_again', followUpOnly: true, text: '{pal.name} left {since}.', cast: { pal: { kind: 'friend', presence: 'anywhere' } } });
     const bundle = withEvents(followUp);
     const life = produce(
       lifeWith(30, [{ id: 'pal', kind: 'friend' }], (d) => {
@@ -218,7 +218,7 @@ describe('runtime enforcement', () => {
       },
     );
     expect(life.pending[0]?.since).toBe(life.currentYear - 2);
-    expect(getEventCard(life, 0, bundle)?.text).toBe(`It has been two years since ${life.people.pal!.name.first} left.`);
+    expect(getEventCard(life, 0, bundle)?.text).toBe(`${life.people.pal!.name.first} left two years ago.`);
   });
 
   it('makes an in-person action unavailable with someone who lives elsewhere', () => {
