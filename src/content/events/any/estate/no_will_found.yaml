@@ -1,0 +1,51 @@
+id: no_will_found
+title: No will
+text: >-
+  There is no will. Nobody looked harder than the lawyer did, who opened
+  every drawer in {parent.name}'s desk and found only the things people keep:
+  stamps, takeout menus, and a spare key to a lock nobody remembers. The law
+  will decide who gets what, and the law does not know anyone's name.
+tone: serious
+category: estate
+rarity: common
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { family: { heir: true } }
+    - { flag: estate_no_will }
+    - { age: { gte: 12 } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  parent: { kind: parent, presence: anywhere, deceased: true }
+choices:
+  - id: accept
+    label: Accept it. The rules are the rules
+    outcome:
+      text: >-
+        You sign what you are asked to sign. It is a relief not to have to
+        guess what {parent.name} would have wanted, and a loss not to know.
+      effects:
+        - { type: stat, key: stress, delta: -2 }
+        - { type: innerConflict, delta: 2 }
+  - id: wonder
+    label: Wonder what {parent.name} would have chosen
+    outcome:
+      text: >-
+        You do not come to an answer. You come to a lot of questions, and a
+        lot of old photographs, and a decision to ask the people who knew
+        {parent.them} best.
+      effects:
+        - { type: stat, key: happiness, delta: -1 }
+        - { type: stat, key: stress, delta: 2 }
+  - id: write_yours
+    label: Decide that you will not leave anyone guessing
+    visibleIf: { age: { gte: 18 } }
+    outcome:
+      text: >-
+        You put a reminder on your phone. The reminder says the word "will".
+        It is the most grown-up thing you have ever done, and you are not
+        sure you will follow through.
+      effects:
+        - { type: stat, key: stress, delta: 1 }
+        - { type: stat, key: discipline, delta: 2 }

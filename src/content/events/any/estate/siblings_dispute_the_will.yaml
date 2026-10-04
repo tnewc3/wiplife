@@ -1,0 +1,54 @@
+id: siblings_dispute_the_will
+title: Not what was fair
+text: >-
+  {sibling.name} calls you, and the first word is your name, said the way
+  people say it before an argument. The shares in {parent.name}'s will were not
+  equal, and {sibling.they} {sibling:has|have} decided that means something. It
+  is not about the amounts anymore. It is about who {parent.name} loved best.
+tone: dark
+category: estate
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { family: { heir: true } }
+    - { flag: estate_will }
+    - { age: { gte: 18 } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  parent: { kind: parent, presence: anywhere, deceased: true }
+  sibling: { kind: sibling, presence: anywhere, age: { min: 18, max: 120 } }
+choices:
+  - id: hold
+    label: Hold your ground. It was {parent.their} choice
+    outcome:
+      text: >-
+        You say it kindly, and it does not help. {sibling.name} hangs up
+        first. The will stays as it was, and so does the silence afterwards.
+      effects:
+        - { type: relationship, role: sibling, affection: -10, trust: -8 }
+        - { type: flag, key: parent_will_dispute, value: true }
+        - { type: stat, key: stress, delta: 4 }
+  - id: meet_halfway
+    label: Offer to meet in the middle
+    outcome:
+      text: >-
+        You say you would rather have a sibling than be right. There is a long
+        pause, and then {sibling.name} says, quietly, that {sibling.they} would
+        too. It takes weeks to sort out. It gets sorted
+        out.
+      effects:
+        - { type: relationship, role: sibling, affection: 8, trust: 6 }
+        - { type: flag, key: reconciled_over_estate, value: true }
+        - { type: stat, key: happiness, delta: 2 }
+  - id: let_lawyers
+    label: Tell {sibling.them} to talk to the lawyers
+    outcome:
+      text: >-
+        You make the call short, and the lawyers do the rest. It is clean, and
+        correct, and cold, and the two of you do not speak at the next holiday.
+      effects:
+        - { type: relationship, role: sibling, affection: -6, trust: -10 }
+        - { type: flag, key: parent_will_dispute, value: true }
+        - { type: stat, key: stress, delta: 2 }

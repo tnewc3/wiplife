@@ -1,0 +1,52 @@
+id: name_closes_doors
+title: A name that travels ahead of you
+text: >-
+  The person across the desk reads your name, and something in their face
+  changes. It is small and fast: a pause, a recalculation. They are not
+  rude about it. They do not have to be. Your family name arrived before you
+  did, and it did not make a good first impression.
+tone: dark
+category: legacy
+rarity: uncommon
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { family: { heir: true, reputation: { lte: 38 } } }
+    - { age: { gte: 14 } }
+weight: { base: 8 }
+cooldownYears: 8
+cast:
+  person: { kind: acquaintance, presence: city, createIfMissing: true, age: { min: 25, max: 90 } }
+choices:
+  - id: speak_up
+    label: Say that you are not your family's reputation
+    outcome:
+      text: >-
+        {person.name} listens, and nods slowly. You can see {person.them}
+        recalibrating, and it takes something out of {person.them} to admit it. The
+        door does not slam. It does not open fully either.
+      effects:
+        - { type: relationship, role: person, affection: 4, trust: 4 }
+        - { type: stat, key: confidence, delta: 2 }
+        - { type: stat, key: stress, delta: 2 }
+  - id: prove_it
+    label: Quietly do better than they expected
+    outcome:
+      text: >-
+        You are early, prepared, and so polite it is almost a dare.
+        {person.name} cannot find anything to hold against you. By the end of
+        the day, the name is just a name again, for one person at least.
+      effects:
+        - { type: relationship, role: person, affection: 8, trust: 8 }
+        - { type: stat, key: discipline, delta: 2 }
+        - { type: stat, key: reputation, delta: 2 }
+  - id: bitter
+    label: Walk away, and let the bitterness settle
+    outcome:
+      text: >-
+        You do not argue. You leave, and the bitterness walks beside you the
+        whole way home. It is not fair. It is also exactly how it was always
+        going to go.
+      effects:
+        - { type: stat, key: happiness, delta: -3 }
+        - { type: stat, key: stress, delta: 3 }

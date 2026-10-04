@@ -223,6 +223,7 @@ export type RelationshipKind =
   | 'stepparent'
   | 'sibling'
   | 'grandparent'
+  | 'relative'
   | 'child'
   | 'stepchild'
   | 'friend'
@@ -439,6 +440,84 @@ export interface Ledger {
   net: number;
 }
 
+/** E2b: inherited money held for a minor heir; released into savings at `releaseAge`. */
+export interface Trust {
+  balance: number;
+  releaseAge: number;
+}
+
+/** E2b: one person (or cause) the will leaves a share to; shares add up to 100. */
+export interface WillShare {
+  kind: 'person' | 'cause';
+  /** A person's id, or a cause's id (registries/estate.yaml). */
+  id: Id;
+  /** Whole percent, 1–100. */
+  percent: number;
+}
+
+/** E2b: your will: who gets what share of the estate. Without one, the default shares apply. */
+export interface Will {
+  shares: WillShare[];
+  /** The year it was last written. */
+  year: number;
+}
+
+/** E2b: what one beneficiary of the estate receives. */
+export interface EstateLine {
+  kind: 'person' | 'cause';
+  id: Id;
+  /** Their name, kept so the settlement reads correctly later. */
+  name: string;
+  /** How you were related (a relationship kind), or 'cause'; for the Death screen. */
+  relation: RelationshipKind | 'cause';
+  percent: number;
+  /** Cash they receive (whole dollars). */
+  cash: number;
+  /** The home that passes to them, with its mortgage. */
+  property?: { value: number; mortgage: number };
+}
+
+/** E2b: how the estate was settled at death. All money is whole dollars; see src/engine/estate/settle.ts. */
+export interface Settlement {
+  year: number;
+  source: 'will' | 'default';
+  savings: number;
+  homeValue: number;
+  /** The mortgage when you died. */
+  mortgage: number;
+  /** Funeral and settlement costs, paid first. */
+  costs: number;
+  /** Debts other than the mortgage that the estate paid. */
+  debtsPaid: number;
+  /** Estate tax, paid from the cash left after costs and debts (the home is sold if that falls short). */
+  tax: number;
+  /** Debts the estate couldn't pay: written off, never passed on. */
+  writtenOff: number;
+  home: 'none' | 'passes' | 'sold' | 'surrendered';
+  /** What the lender took when the home was sold or surrendered, and the selling costs. */
+  mortgagePaid: number;
+  saleCosts: number;
+  /** Cash and property equity left to share out (never negative). */
+  netEstate: number;
+  lines: EstateLine[];
+  /** Cash nobody was left to receive. */
+  unclaimed: number;
+  /** E5 hook: possessions passing on (src/engine/estate/possessions.ts); empty until E5. */
+  possessions: PossessionTransfer[];
+}
+
+/** E5 hook: one possession passing to a person (not used before E5). */
+export interface PossessionTransfer {
+  possessionId: Id;
+  toPersonId: Id;
+}
+
+/** E2b: the short "Previously" card an heir's life starts with. */
+export interface Previously {
+  parentName: string;
+  lines: string[];
+}
+
 export interface FinanceState {
   savings: number;
   debts: Debt[];
@@ -451,6 +530,8 @@ export interface FinanceState {
   earnings: { years: number; total: number };
   /** Years in a row behind on your housing costs (borrowing for at least balance's evictionShare of them). */
   hardshipYears: number;
+  /** E2b: money an heir under 18 inherited, held until they reach `releaseAge`. */
+  trust?: Trust;
   /** The year you last filed for bankruptcy. */
   bankruptcyYear?: number;
   /** The year you last set up a debt plan. */
@@ -474,6 +555,10 @@ export interface HousingState {
   partnerId?: Id;
   /** A rental's rent as a multiple of the city's base rent, after rent changes (C1); 1 when absent. Reset by a move. */
   rentFactor?: number;
+  /** E2b: an heir under 18 lives with this person: a surviving parent, a stepparent, a grandparent, a relative or an older sibling. */
+  guardianId?: Id;
+  /** E2b: an heir under 18 with no one to live with is in foster care (no guardian of their own). */
+  foster?: true;
 }
 
 /** A health condition you have (Stage 9). */
@@ -601,6 +686,13 @@ export interface ArchivedLife {
   seed: string;
   generation: number;
   parentLifeId?: Id;
+  /** E2b: the family line (archive schema version 3). */
+  lineId: Id;
+  familyName: string;
+  /** The family's reputation when this life ended. */
+  familyReputation: number;
+  /** E2b: the heir who carried on, if one did. */
+  heirName?: string;
 }
 
 export interface InputRecord {
@@ -672,6 +764,27 @@ export interface LifeState {
   death: DeathRecord | null;
   /** Happiness summed over every finished year, for the lifetime average. */
   lifetime: { happinessTotal: number; years: number };
-  /** For heir play later. */
-  lineage: { generation: number; parentLifeId?: Id };
+  /** E2b: your will, if you've written one. */
+  will: Will | null;
+  /** E2b: how the estate was settled; set when you die. */
+  estate: Settlement | null;
+  /** E2b: where this life sits in its family line. */
+  lineage: Lineage;
+}
+
+/** E2b: the family line a life belongs to. Family reputation sits on the line and passes to each heir. */
+export interface Lineage {
+  generation: number;
+  /** The life this one continued from (an heir's parent). */
+  parentLifeId?: Id;
+  /** The family line: the first life's id, kept by every heir. */
+  lineId: Id;
+  /** The family name the line was started with. */
+  familyName: string;
+  /** What the family is known for, 0–100 (50 is unremarkable). */
+  reputation: number;
+  /** Notable deeds the family is known for (ids in text/heir.yaml deeds), newest last. */
+  deeds: string[];
+  /** The card an heir sees at the start; cleared at their first age-up. */
+  previously?: Previously;
 }

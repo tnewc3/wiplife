@@ -23,6 +23,8 @@ export function whereabouts(state: LifeState, personId: Id, content: ContentBund
   if (state.housing.partnerId === personId) return 'household';
   // E2a: children (and a stepchild of the partner who lives with you) in your home.
   if (livesWithYou(state, personId)) return 'household';
+  // E2b: a minor heir lives with their guardian.
+  if (state.housing.guardianId === personId) return 'household';
   if (state.housing.kind === 'with_parents' && rel && person) {
     if (rel.kind === 'parent' || rel.kind === 'stepparent') return 'household';
     if (rel.kind === 'sibling' && state.currentYear - person.birthYear < content.balance.economy.independenceAge) return 'household';

@@ -61,3 +61,15 @@ flags:
   gave_up_custody: You gave up custody of your children
   shared_custody: You share custody of your children
   stepfamily: You married into a family with children
+  # E2b: heirs and inheritance.
+  estate_will: Your parent left a will
+  estate_no_will: Your parent left no will
+  left_out_of_will: Your parent's will left you out
+  inherited_a_home: You inherited a home
+  in_foster_care: You are in foster care
+  grew_up_in_foster_care: You grew up in foster care
+  contested_will: You contested a will
+  kept_the_family_home: You kept the family home
+  sold_the_family_home: You sold the family home
+  reconciled_over_estate: You settled things with a sibling after your parent died
+  parent_will_dispute: You and a sibling fell out over your parent's will

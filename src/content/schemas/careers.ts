@@ -77,6 +77,8 @@ export const careersBalanceSchema = z.strictObject({
     grad: z.number().min(-30).max(30),
     /** Percentage points for any criminal record. */
     record: z.number().min(-60).max(0),
+    /** E2b: percentage points per point your family's reputation stands above or below 50. */
+    familyReputation: z.number().min(0).max(1),
   }),
   performance: z.strictObject({
     /** Yearly performance aims at base + each of the job's stat weights × (value − 50)... */

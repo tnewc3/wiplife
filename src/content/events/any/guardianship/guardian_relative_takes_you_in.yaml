@@ -1,0 +1,52 @@
+id: guardian_relative_takes_you_in
+title: Family you barely knew
+text: >-
+  {guardian.name} is family, and you have met {guardian.them} at three
+  weddings and a funeral. Now {guardian.they} {guardian:is|are} the person
+  who knows how you take your eggs, because {guardian.they} asked.
+  It is awkward in a way that has a lot of effort under it.
+tone: neutral
+category: guardianship
+rarity: common
+lifeStages: [child, teen]
+requires:
+  all:
+    - { family: { heir: true, guardian: [relative] } }
+    - { age: { gte: 6, lt: 18 } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  guardian: { kind: relative, presence: household }
+choices:
+  - id: meet_them
+    label: Make an effort to get to know {guardian.them}
+    outcome:
+      text: >-
+        You ask questions and listen to the answers. {guardian.name} turns out
+        to be funnier than the weddings suggested. By the end of the week, you
+        have a running joke, and a place at the table.
+      effects:
+        - { type: relationship, role: guardian, affection: 10, trust: 8 }
+        - { type: memory, role: guardian, tag: took_you_in }
+        - { type: stat, key: happiness, delta: 2 }
+        - { type: stat, key: sociability, delta: 1 }
+  - id: stay_polite
+    label: Stay polite and keep your distance
+    outcome:
+      text: >-
+        You say please and thank you. You close the door gently. {guardian.name}
+        does not push, which is generous, and a little lonely.
+      effects:
+        - { type: relationship, role: guardian, affection: 2, trust: 2 }
+        - { type: stat, key: stress, delta: 2 }
+  - id: ask_to_go_home
+    label: Ask when you can go back to how things were
+    outcome:
+      text: >-
+        {guardian.name} takes a breath. {guardian.They} {guardian:tells|tell} you
+        the truth, gently: not soon. It is not the answer you wanted, and it is
+        the first honest one anyone has given you in weeks.
+      effects:
+        - { type: relationship, role: guardian, trust: 6 }
+        - { type: stat, key: happiness, delta: -2 }
+        - { type: stat, key: stress, delta: 2 }

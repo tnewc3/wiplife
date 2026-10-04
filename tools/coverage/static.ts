@@ -6,7 +6,7 @@
  */
 import type { ContentBundle, EventDef, Outcome, Rarity, Tone } from '../../src/content/schemas';
 import type { LifeStage } from '../../src/engine/types';
-import { familyResults, LIFE_STAGE_IDS } from '../../src/content/schemas';
+import { familyResults, heirResults, HEIR_MEMORY_MAP, LIFE_STAGE_IDS } from '../../src/content/schemas';
 import { referencesIn } from '../../src/engine/conditions';
 
 export interface StaticCoverage {
@@ -79,6 +79,8 @@ export function rootEvents(content: ContentBundle): Set<string> {
     r.interactions.infidelity.intimate,
     // E2a: what the family system queues (births, losses, adoption, custody...).
     ...familyResults(r.family).map((result) => ({ events: [...result.events] })),
+    // E2b: what the heir system schedules (the will read, disputes, a guardian's first year, foster care, memories).
+    ...heirResults(r.heir).map((result) => ({ events: [...result.events] })),
   ];
   for (const list of lists) for (const id of list.events) roots.add(id);
   return roots;
@@ -187,6 +189,11 @@ export function analyzeContent(content: ContentBundle): StaticCoverage {
     addTo(memoryWrites, tag, 'family (engine)');
   }
   for (const flag of Object.keys(content.text.obituary.deeds)) addTo(flagReads, flag, 'text/obituary.yaml deeds');
+  // E2b: the heir conversion writes the memories of how the heir was raised and of who stood by them, and the flags
+  // that tell how the estate went; family reputation reads the flags that make a family known for a deed.
+  for (const tag of [...Object.values(HEIR_MEMORY_MAP), 'lost_the_same_parent', 'took_you_in', 'foster_carer']) addTo(memoryWrites, tag, 'heir (engine)');
+  for (const flag of ['estate_will', 'estate_no_will', 'left_out_of_will', 'inherited_a_home', 'in_foster_care', 'grew_up_in_foster_care']) addTo(flagWrites, flag, 'heir (engine)');
+  for (const flag of Object.keys(content.balance.family.heir.reputation.flags)) addTo(flagReads, flag, 'balance/family.yaml heir.reputation.flags');
 
   const sorted = (xs: Iterable<string>) => [...xs].sort();
   const reachable = reachableEvents(content);

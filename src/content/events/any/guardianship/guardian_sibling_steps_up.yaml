@@ -1,0 +1,52 @@
+id: guardian_sibling_steps_up
+title: Your sibling, in charge
+text: >-
+  {guardian.name} is your sibling, and has taken you in. {guardian.They}
+  {guardian:is|are} learning to be a parent and a sibling at the same time,
+  and is not very good at either yet. There is a note on the fridge about
+  chores, signed with a heart, and a stack of forms with sticky tabs.
+tone: serious
+category: guardianship
+rarity: common
+lifeStages: [child, teen]
+requires:
+  all:
+    - { family: { heir: true, guardian: [sibling] } }
+    - { age: { gte: 6, lt: 18 } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  guardian: { kind: sibling, presence: household }
+choices:
+  - id: help_out
+    label: "Help carry the load: chores, forms, all of it"
+    outcome:
+      text: >-
+        You learn how the forms work. {guardian.name} learns how you like your
+        lunches. It is a lot to ask of two people, and the two of you manage
+        it, quietly, together.
+      effects:
+        - { type: relationship, role: guardian, affection: 10, trust: 10 }
+        - { type: memory, role: guardian, tag: took_you_in }
+        - { type: stat, key: discipline, delta: 2 }
+        - { type: stat, key: stress, delta: 1 }
+  - id: be_kid
+    label: Be a kid and let {guardian.them} be the grown-up
+    outcome:
+      text: >-
+        You leave the shoes in the hall and the homework to the last minute.
+        {guardian.name} sighs, and does the thing a parent does, and makes
+        dinner anyway. It is exactly the thing you needed, and a lot to need.
+      effects:
+        - { type: relationship, role: guardian, affection: 4, trust: 3 }
+        - { type: stat, key: happiness, delta: 2 }
+  - id: argue
+    label: Fight about who is in charge
+    outcome:
+      text: >-
+        "You're not my parent," you say, or something close to it. It lands.
+        {guardian.name} goes quiet, and the apology on both sides takes until
+        the next morning.
+      effects:
+        - { type: relationship, role: guardian, affection: -6, trust: -4 }
+        - { type: stat, key: stress, delta: 3 }

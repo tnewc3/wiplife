@@ -57,6 +57,7 @@ import {
   type InteractionPlayer,
   type InteractionReport,
 } from './interactions';
+import { chooseWillActions, rollWillProfile } from './heirs';
 import { chooseFamilyActions, chooseParentingPlans, emptyFamilyReport, FamilyWatcher, formatFamily, familyTargets, rollFamilyProfile, type FamilyReport } from './family';
 
 /** One life in this many is rebuilt from its input log and compared with the life as played (E1). */
@@ -82,6 +83,11 @@ export interface SimulationOptions {
    */
   onYear?: (life: LifeState) => void;
   onLife?: (life: LifeState) => void;
+  /**
+   * E2b: lives to play instead of new ones (the heirs of the generation before): `lives` is how
+   * many there are, and each is played with the usual player model, seeded by its own seed.
+   */
+  starts?: readonly LifeState[];
 }
 
 export type SimulatedPlayer = 'careful' | 'careless' | 'spammer';
@@ -757,7 +763,8 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
   const repeatsByEvent = new Map<string, number>();
 
   for (let i = 0; i < options.lives; i++) {
-    const seed = `${options.seedPrefix}-${i}`;
+    const startLife = options.starts?.[i];
+    const seed = startLife ? startLife.seed : `${options.seedPrefix}-${i}`;
     const check = (life: LifeState) => {
       const failures = checkInvariants(life, content);
       invariantFailures += failures.length;
@@ -778,6 +785,9 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
     const familyProfile = { ...rollFamilyProfile(familyRng), ...(playerKind === 'spammer' ? { wantsKids: false } : {}) };
     const familyWatcher = new FamilyWatcher(family, familyProfile, playerKind === 'careful');
     const profile = rollMoneyProfile(player);
+    // E2b: whether this life writes a will, and who it names.
+    const willRng = createRng(`${seed}:will`);
+    const willProfile = rollWillProfile(willRng);
     // Event choices: the careful player by personality, the careless one at random (Stage 9).
     const picker: ChoicePicker = (l, card, rng) => {
       const def = content.events[l.pending.find((p) => p.instanceId === card.instanceId)?.eventId ?? ''];
@@ -825,7 +835,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
       }
       return next;
     };
-    let life = createLife({ mode: 'random', seed, birthYear: 2026 }, content);
+    let life = startLife ?? createLife({ mode: 'random', seed, birthYear: 2026 }, content);
     watch(life);
     while (life.phase !== 'dead') {
       // Between years, the simulated player may act on money and home...
@@ -836,6 +846,12 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
         life = takeLifeAction(life, actionId, params);
         money.actionsTaken[actionId]++;
         if (actionId === 'see_doctor') health.doctorVisits++;
+      }
+      // ...and on a will (E2b)...
+      for (const [actionId, params] of careless ? [] : chooseWillActions(life, content, willRng, willProfile)) {
+        if (!isLifeActionAvailable(life, actionId, params, content)) continue;
+        life = takeLifeAction(life, actionId, params);
+        money.actionsTaken[actionId]++;
       }
       // ...and on work...
       for (const [actionId, params] of careless ? [] : chooseCareerActions(life, content, player, profile)) {

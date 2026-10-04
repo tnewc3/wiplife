@@ -1,0 +1,43 @@
+id: foster_family_dinner
+title: Dinner, and the empty chair
+text: >-
+  {guardian.name} makes dinner for everyone in the house, and you have a
+  chair at the table. Somewhere between the second helping and the dishes you
+  notice that you have stopped counting the days. It sneaks up on you: a
+  house where people say your name without being careful.
+tone: light
+category: guardianship
+rarity: common
+lifeStages: [child, teen]
+requires:
+  all:
+    - { family: { heir: true, guardian: [foster] } }
+    - { flag: in_foster_care }
+    - { age: { gte: 6, lt: 18 } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  guardian: { kind: stepparent, presence: household }
+choices:
+  - id: help_clear
+    label: Help clear the table without being asked
+    outcome:
+      text: >-
+        {guardian.name} does not make a fuss. {guardian.They} {guardian:hands|hand}
+        you a towel, and for the next ten minutes the two of you dry plates in
+        a comfortable quiet. It is the smallest belonging you have felt in a
+        long while.
+      effects:
+        - { type: relationship, role: guardian, affection: 10, trust: 10 }
+        - { type: stat, key: happiness, delta: 4 }
+        - { type: stat, key: stress, delta: -4 }
+  - id: stay_guarded
+    label: Eat, say thank you, and go to your room
+    outcome:
+      text: >-
+        Not yet. You have been told that you would be loved by people before,
+        and then you were moved. {guardian.name} lets you go without a word and
+        leaves your door open an inch on the way past.
+      effects:
+        - { type: relationship, role: guardian, affection: 3, trust: 3 }
+        - { type: stat, key: stress, delta: 1 }

@@ -125,6 +125,13 @@ moments:
 # Deeds: things the life did (by flag), kept to ones that set a life apart.
 # Values: none.
 deeds:
+  # E2b: a family and what it passed on.
+  contested_will: "{self.They} went to court over a parent's will, and said it was never about the money."
+  kept_the_family_home: "{self.They} kept the family home, and filled it with new life."
+  sold_the_family_home: "{self.They} sold the family home, and kept one box of what was in it."
+  reconciled_over_estate: "{self.They} settled things with a sibling after a parent died, and were glad of it."
+  parent_will_dispute: "{self.They} fell out with a sibling over a parent's will, and carried it for years."
+  grew_up_in_foster_care: "{self.They} grew up in foster care, and never lost the habit of making a home."
   # E2a: children, and what it cost.
   adopted_a_child: "{self.They} opened {self.their} home and family to an adopted child."
   used_ivf: "{self.They} went through IVF to build a family, and did not give up."

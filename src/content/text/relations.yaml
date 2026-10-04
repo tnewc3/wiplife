@@ -5,6 +5,7 @@
 parent: { man: father, woman: mother, nonbinary: parent }
 stepparent: { man: stepfather, woman: stepmother, nonbinary: stepparent }
 grandparent: { man: grandfather, woman: grandmother, nonbinary: grandparent }
+relative: { man: uncle, woman: aunt, nonbinary: relative }
 sibling: { man: brother, woman: sister, nonbinary: sibling }
 child: { man: son, woman: daughter, nonbinary: child }
 stepchild: { man: stepson, woman: stepdaughter, nonbinary: stepchild }

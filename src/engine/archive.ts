@@ -27,8 +27,11 @@ export function selectHighlights(history: readonly HistoryEntry[], content: Cont
   return kept;
 }
 
-/** The archive entry for a life: finished if it is in the dead phase, unfinished otherwise. */
-export function archiveEntry(life: LifeState, content: ContentBundle): ArchivedLife {
+/**
+ * The archive entry for a life: finished if it is in the dead phase,
+ * unfinished otherwise. `heirName` (E2b): the heir who carried on from it.
+ */
+export function archiveEntry(life: LifeState, content: ContentBundle, heirName?: string): ArchivedLife {
   const c = life.character;
   const finished = life.phase === 'dead';
   const causeId = life.death?.causeId;
@@ -49,7 +52,11 @@ export function archiveEntry(life: LifeState, content: ContentBundle): ArchivedL
     finalStats: { ...c.stats },
     seed: life.seed,
     generation: life.lineage.generation,
+    lineId: life.lineage.lineId,
+    familyName: life.lineage.familyName,
+    familyReputation: life.lineage.reputation,
   };
   if (life.lineage.parentLifeId !== undefined) entry.parentLifeId = life.lineage.parentLifeId;
+  if (heirName !== undefined) entry.heirName = heirName;
   return entry;
 }

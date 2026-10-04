@@ -1,0 +1,37 @@
+id: generous_family_name
+title: What your family gave
+text: >-
+  At a community event, a volunteer in a bright vest stops to shake your
+  hand. Your family gave to this place, and people remember. It is not about
+  gratitude, exactly. It is about the way a kindness can outlive the person
+  who did it, and arrive on a Tuesday in front of you.
+tone: light
+category: legacy
+rarity: uncommon
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { family: { heir: true, deeds: [generous] } }
+    - { age: { gte: 12 } }
+weight: { base: 8 }
+cooldownYears: 10
+choices:
+  - id: join_in
+    label: Pitch in for the afternoon
+    outcome:
+      text: >-
+        You hand out flyers, fold chairs and carry boxes. By the end of the
+        day your arms ache and your name is on a sign-in sheet beside your
+        family's. It feels like belonging to something older than you.
+      effects:
+        - { type: stat, key: happiness, delta: 3 }
+        - { type: stat, key: kindness, delta: 2 }
+        - { type: stat, key: reputation, delta: 2 }
+  - id: say_thanks
+    label: Thank them, and move on
+    outcome:
+      text: >-
+        You shake the hand, smile, and slip away. You are glad of it, and not
+        ready to be a person who gets thanked on someone else's behalf.
+      effects:
+        - { type: stat, key: happiness, delta: 1 }

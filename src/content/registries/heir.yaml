@@ -1,0 +1,26 @@
+# The events the heir system schedules when a life continues as an heir
+# (E2b). Each is followUpOnly. Where an event casts the parent who died, the
+# engine passes them in as the deceased role `parent`; every other role is
+# cast when the event comes due.
+will: [will_is_read]
+noWill: [no_will_found]
+siblingDispute: [siblings_dispute_the_will]
+noWillDispute: [siblings_argue_over_the_estate]
+estrangedContest: [estranged_sibling_contests]
+unexpectedBeneficiary: [stranger_named_in_will]
+causeLetter: [charity_writes_back]
+leftOut: [left_out_of_the_will]
+guardian:
+  parent: [guardian_parent_new_normal]
+  stepparent: [guardian_stepparent_house_rules]
+  grandparent: [guardian_grandparent_spare_room]
+  relative: [guardian_relative_takes_you_in]
+  sibling: [guardian_sibling_steps_up]
+foster: [foster_placement]
+memories:
+  parent_warm_home: [remember_warm_home]
+  parent_cold_home: [remember_cold_home]
+  parent_always_there: [remember_always_there]
+  parent_never_around: [remember_empty_chair]
+  parent_strict_rules: [remember_the_rules]
+  parent_no_rules: [remember_no_rules]

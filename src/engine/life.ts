@@ -23,6 +23,8 @@ import {
   rollStats,
 } from './creation/character';
 import { generateFamily } from './creation/family';
+import { settleEstate } from './estate/settle';
+import { lineageAfter } from './estate/reputation';
 import { defaultCanCarry, rollCanCarry } from './family/carrying';
 import { InvalidInputError, parseCreateLifeOptions, type CreateLifeOptions } from './creation/input';
 import { successChance } from './events/checks';
@@ -158,7 +160,9 @@ export function createLife(input: CreateLifeOptions, content: ContentBundle): Li
     recap: null,
     death: null,
     lifetime: { happinessTotal: 0, years: 0 },
-    lineage: { generation: 1 },
+    will: null,
+    estate: null,
+    lineage: { generation: 1, lineId: `life_${seed}`, familyName: character.name.last, reputation: 50, deeds: [] },
   };
   // E1: everyone starts the life in their baseline mood (no randomness: the yearly swing comes with the first year).
   for (const person of Object.values(life.people)) person.mood = person.moodBase = moodBaseline(life, person, content);
@@ -213,6 +217,8 @@ export function beginYear(state: LifeState, content: ContentBundle, steps: reado
   let next = produce(state, (draft) => {
     draft.inputLog.push({ year: draft.currentYear, kind: 'ageUp', payload: {} });
     draft.pendingInteraction = null;
+    // E2b: an heir's "Previously" card is only there until their first year begins.
+    delete draft.lineage.previously;
   });
   // Each step gets its own draft, so a step can read the life as the earlier
   // steps left it through Immer's original() (fast) instead of the draft.
@@ -258,6 +264,9 @@ export function endYear(state: LifeState, content: ContentBundle): LifeState {
       writeFromGroup(draft, content.text.history.death, ['milestone', 'death'], { values: { age: c.age, cause } }, content);
       draft.death = { year: draft.currentYear, age: c.age, causeId };
       draft.phase = 'dead';
+      // E2b: the estate is settled and the family's reputation updated; an heir can then carry on.
+      draft.estate = settleEstate(draft as LifeState, content);
+      Object.assign(draft.lineage, lineageAfter(draft as LifeState, draft.estate, content));
     } else {
       draft.phase = 'yearStart';
     }

@@ -1,0 +1,57 @@
+id: estranged_sibling_contests
+title: A letter from the court
+text: >-
+  {sibling.name}, who stopped speaking to you, has not stopped speaking to
+  the court. A letter arrives that says {sibling.they} {sibling:is|are}
+  contesting {parent.name}'s estate. The letter is formal. What is underneath
+  it is not.
+tone: dark
+category: estate
+rarity: uncommon
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { family: { heir: true } }
+    - { age: { gte: 18 } }
+    - { role: sibling, status: [estranged] }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  parent: { kind: parent, presence: anywhere, deceased: true }
+  sibling: { kind: sibling, presence: anywhere, age: { min: 18, max: 120 } }
+choices:
+  - id: fight
+    label: Fight it
+    outcome:
+      text: >-
+        You hire someone who sounds sure of themselves. It takes most of a
+        year, and {sibling.name} does not look at you in the hallway once.
+        When it is over, you are right, and alone with it.
+      effects:
+        - { type: flag, key: contested_will, value: true }
+        - { type: relationship, role: sibling, affection: -10, trust: -10 }
+        - { type: cost, item: legal_help }
+        - { type: stat, key: stress, delta: 6 }
+  - id: reach_out
+    label: Write back, and not through a lawyer
+    visibleIf: { memory: { role: sibling, tag: lost_the_same_parent } }
+    outcome:
+      text: >-
+        It is the longest letter you have ever written. It does not say sorry
+        for anything in particular. It says you would like to talk. Then
+        {sibling.name} calls, and the first sentence is a quiet one.
+      effects:
+        - { type: relationship, role: sibling, status: active, affection: 10, trust: 8 }
+        - { type: flag, key: reconciled_over_estate, value: true }
+        - { type: stat, key: happiness, delta: 3 }
+  - id: concede
+    label: Concede, and be done with it
+    outcome:
+      text: >-
+        You sign. You tell yourself it is only things. It is only things.
+        {sibling.name} sends no thanks, and you are surprised how much that
+        stings.
+      effects:
+        - { type: stat, key: stress, delta: -2 }
+        - { type: stat, key: happiness, delta: -2 }
+        - { type: innerConflict, delta: 3 }

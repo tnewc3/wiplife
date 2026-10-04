@@ -1,0 +1,42 @@
+id: name_opens_doors
+title: Your family name
+text: >-
+  The person at the counter reads your name off the form, looks up, and
+  smiles. They knew your family. Everyone seems to have a story about
+  someone who was fair to them, once, and the story has your last name in it.
+  It is a nice thing to be handed, and a strange one to have to live up to.
+tone: light
+category: legacy
+rarity: uncommon
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { family: { heir: true, reputation: { gte: 62 } } }
+    - { age: { gte: 14 } }
+weight: { base: 8 }
+cooldownYears: 8
+cast:
+  person: { kind: acquaintance, presence: city, createIfMissing: true, age: { min: 25, max: 90 } }
+choices:
+  - id: use_it
+    label: Let it open the door
+    outcome:
+      text: >-
+        {person.name} fast-tracks the form and wishes you luck. The door opens.
+        You walk through it feeling grateful, and slightly like a fraud, and
+        mostly like someone who has been given a chance.
+      effects:
+        - { type: relationship, role: person, affection: 8, trust: 4 }
+        - { type: stat, key: confidence, delta: 2 }
+        - { type: stat, key: reputation, delta: 1 }
+  - id: earn_it
+    label: Thank {person.them}, and say you'd rather earn it
+    outcome:
+      text: >-
+        {person.name} raises an eyebrow, then grins. You go through the usual
+        line, and it takes longer, and you remember every minute. When it is
+        over, it is yours alone.
+      effects:
+        - { type: relationship, role: person, affection: 10, trust: 8 }
+        - { type: stat, key: discipline, delta: 2 }
+        - { type: stat, key: reputation, delta: 2 }

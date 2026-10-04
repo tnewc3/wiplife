@@ -1,0 +1,53 @@
+id: remember_empty_chair
+title: The empty chair
+text: >-
+  There was always a chair that {parent.name} did not sit in: at the dinner
+  table, at the school play, at the end of the day. It was empty so often that
+  you stopped pulling it out. Now it is empty for good, and you find that
+  you are grieving someone you were already used to missing.
+tone: dark
+category: legacy
+rarity: common
+lifeStages: [child, teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { family: { heir: true } }
+    - { memory: { role: parent, tag: heir_never_around } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  parent: { kind: parent, presence: anywhere, deceased: true }
+choices:
+  - id: grieve_both
+    label: Grieve the person, and the parent you wanted
+    outcome:
+      text: >-
+        There are two losses, and you let yourself feel both: the one that
+        happened and the one that never did. It is messy. It is, for the first
+        time, honest.
+      effects:
+        - { type: innerConflict, delta: -4 }
+        - { type: stat, key: stress, delta: 1 }
+        - { type: stat, key: happiness, delta: -1 }
+  - id: forgive
+    label: Decide to forgive the absences
+    outcome:
+      text: >-
+        You do not excuse them. You decide you will not carry them either.
+        It takes more than one evening. The first evening is the hardest, and
+        you are surprised at how much lighter your shoulders are.
+      effects:
+        - { type: innerConflict, delta: -3 }
+        - { type: stat, key: happiness, delta: 2 }
+        - { type: stat, key: kindness, delta: 2 }
+  - id: stay_angry
+    label: Stay angry, because it is easier
+    outcome:
+      text: >-
+        Anger is warm and a good deal easier to hold than grief. You hold it
+        close for another season. It protects you, and it eats a little more of
+        you than it saves.
+      effects:
+        - { type: stat, key: stress, delta: 3 }
+        - { type: stat, key: happiness, delta: -2 }
+        - { type: innerConflict, delta: 2 }

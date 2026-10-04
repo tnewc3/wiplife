@@ -169,6 +169,21 @@ export const migrations: readonly Migration[] = [
       return { ...data, character, people, finances, family };
     },
   },
+  {
+    from: 11,
+    description:
+      'E2b: heir play and inheritance. A life gets no will, no estate settlement and a family line of its own: the ' +
+      'line is the life (its id), named after the character\'s family name, with an unremarkable reputation (50) ' +
+      'and no deeds. Trust, guardians and foster care are optional fields: nobody had any before. Relatives in ' +
+      'the kind "relative" (aunts and uncles) only arrive with heirs.',
+    migrate: (data) => {
+      if (!isRecord(data)) return data;
+      const lineage = isRecord(data.lineage) ? data.lineage : { generation: 1 };
+      const familyName = isRecord(data.character) && isRecord(data.character.name) && typeof data.character.name.last === 'string' ? data.character.name.last : 'Family';
+      const lineId = typeof lineage.parentLifeId === 'string' ? lineage.parentLifeId : data.id;
+      return { ...data, will: null, estate: null, lineage: { ...lineage, lineId, familyName, reputation: 50, deeds: [] } };
+    },
+  },
 ];
 
 function isRecord(value: unknown): value is Record<string, unknown> {

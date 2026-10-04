@@ -1,0 +1,42 @@
+id: teacher_knew_your_parent
+title: Someone who knew your family
+text: >-
+  A teacher stops you in the hallway, studies your face, and asks if you are
+  related to someone with your last name. When you say yes, {teacher.name}
+  breaks into a warm, complicated smile. {teacher.They} taught
+  your parent once, and has opinions, most of them fond.
+tone: neutral
+category: legacy
+rarity: uncommon
+lifeStages: [child, teen]
+requires:
+  all:
+    - { family: { heir: true } }
+    - { age: { gte: 8, lt: 18 } }
+    - { education: { program: [elementary, middle, high] } }
+weight: { base: 8 }
+once: true
+cast:
+  teacher: { kind: acquaintance, presence: city, createIfMissing: true, age: { min: 35, max: 75 } }
+choices:
+  - id: ask_stories
+    label: Ask what your parent was like at your age
+    outcome:
+      text: >-
+        {teacher.name} leans on the locker. Your parent was stubborn,
+        funny, easily bored, and brilliant at one thing no one expected. You
+        walk to class a little taller, carrying a stranger's version of someone
+        you miss.
+      effects:
+        - { type: relationship, role: teacher, affection: 8, trust: 6 }
+        - { type: stat, key: happiness, delta: 3 }
+        - { type: stat, key: stress, delta: -2 }
+  - id: change_subject
+    label: Say thanks and hurry to class
+    outcome:
+      text: >-
+        {teacher.name} lets you go, and watches you walk off. It is too soon.
+        Maybe next year it will not be. The smile fades a little as you turn the
+        corner.
+      effects:
+        - { type: stat, key: stress, delta: 1 }

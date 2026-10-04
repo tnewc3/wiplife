@@ -368,6 +368,27 @@ export const targetsBalanceSchema = z.strictObject({
     /** The most (as a share of children) whose starting smarts fall outside the range of their parents' by more than the noise: values sit between the parents with variation. */
     maxOutsideParents: probabilitySchema,
   }),
+  /**
+   * E2b: heirs and inheritance, judged on the careful player continuing as heirs for several
+   * generations (tools/simulate/heirs.ts).
+   */
+  heirs: z.strictObject({
+    /** The generations a run plays (a chain of lives that continue as heirs). */
+    generations: z.int().min(1).max(10),
+    /** Heirs who are under 18, as a share of all heirs. */
+    minors: shareRangeSchema,
+    /**
+     * Family wealth doesn't snowball or vanish: the median net worth at death of the third generation
+     * divided by the first's, over the families that lived three generations.
+     */
+    familyWealth: z.strictObject({ min: z.number().min(0), max: z.number().min(0) }).refine((r) => r.min <= r.max, 'min must not be greater than max'),
+    /** ...and not even for the luckiest families: the 90th percentile of third ÷ first generation is at most this. */
+    maxP90Growth: z.number().min(1),
+    /** Family reputation reaches the heir: the correlation of the family's reputation with the heir's own at the start (at least). */
+    reputationCorrelation: z.number().min(0).max(1),
+    /** Of the heirs who begin with a memory of how they were raised, at least this share see an event about it in their life. */
+    memoryEvents: probabilitySchema,
+  }),
   coverage: z.strictObject({
     /** At least this many events (not retired). */
     minEvents: z.int().min(1),

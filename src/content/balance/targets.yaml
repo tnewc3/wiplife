@@ -131,6 +131,17 @@ family:
   # Children whose starting smarts fall outside their parents' range by more than the spread allows.
   maxOutsideParents: 0.3
 
+# E2b: heirs and inheritance, judged on the careful player continuing as heirs.
+heirs:
+  generations: 3
+  minors: { min: 0.03, max: 0.6 }
+  # Median net worth at death, generation 3 over generation 1. Set above 1.0 because the
+  # economy is generous (Stage 12 tunes it); the estate tax in balance/family.yaml keeps it from snowballing.
+  familyWealth: { min: 0.2, max: 2.0 }
+  maxP90Growth: 3
+  reputationCorrelation: 0.3
+  memoryEvents: 0.3
+
 coverage:
   minEvents: 300
   legendary: { min: 5, max: 10 }

@@ -1,0 +1,51 @@
+id: remember_cold_home
+title: The quiet house
+text: >-
+  You catch yourself walking softly on a floor that does not creak. It is a
+  habit from a house where the loudest thing was the refrigerator, and where
+  {parent.name} seemed to live behind a door that was never quite closed
+  and never quite open. {parent.They} {parent:is|are} gone now, and you
+  are still tiptoeing.
+tone: dark
+category: legacy
+rarity: common
+lifeStages: [child, teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { family: { heir: true } }
+    - { memory: { role: parent, tag: heir_cold_home } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  parent: { kind: parent, presence: anywhere, deceased: true }
+choices:
+  - id: choose_warmer
+    label: Decide the home you build will be louder
+    outcome:
+      text: >-
+        You put on music, too loud on purpose. It feels like a small rebellion
+        against a ghost. The floor creaks. Nothing bad happens. You do it again
+        the next night.
+      effects:
+        - { type: stat, key: happiness, delta: 2 }
+        - { type: stat, key: stress, delta: -2 }
+        - { type: stat, key: kindness, delta: 1 }
+  - id: sit_with_it
+    label: Sit with it
+    outcome:
+      text: >-
+        You let yourself feel exactly how it was: the loneliness, the careful
+        steps, the wish that something would be said. It does not resolve. It
+        gets named, and a named thing is a smaller thing.
+      effects:
+        - { type: innerConflict, delta: -3 }
+        - { type: stat, key: stress, delta: 1 }
+  - id: push_down
+    label: Push it down. It is over
+    outcome:
+      text: >-
+        You busy yourself with something. It works until the evening, when the
+        quiet comes back and sits down beside you without being asked.
+      effects:
+        - { type: innerConflict, delta: 3 }
+        - { type: stat, key: happiness, delta: -2 }

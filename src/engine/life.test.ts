@@ -42,7 +42,8 @@ describe('createLife (random)', () => {
     expect(life.legal).toEqual({ record: [] });
     expect([life.flags, life.eventLog]).toEqual([{}, {}]);
     expect([life.scheduled, life.pending, life.history]).toEqual([[], [], []]);
-    expect(life.lineage).toEqual({ generation: 1 });
+    expect(life.lineage).toEqual({ generation: 1, lineId: life.id, familyName: life.character.name.last, reputation: 50, deeds: [] });
+    expect([life.will, life.estate]).toEqual([null, null]);
     expect([life.recap, life.death]).toEqual([null, null]);
     expect(checkInvariants(life, content)).toEqual([]);
   });

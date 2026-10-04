@@ -1,0 +1,60 @@
+id: guardian_parent_resurfaces
+title: A parent at the door
+text: >-
+  {parent.name} turns up unannounced, after being gone long enough that
+  you had stopped listening for the car. {parent.They} {parent:says|say}
+  {parent.they} {parent:wants|want} to be part of your life again. You do not
+  know if that is a promise, a request, or a mistake.
+tone: serious
+category: guardianship
+rarity: uncommon
+lifeStages: [child, teen]
+requires:
+  all:
+    - { family: { heir: true } }
+    - { age: { gte: 8, lt: 18 } }
+    - { family: { guardian: [stepparent, grandparent, relative, sibling, foster] } }
+    - { role: parent, status: [estranged] }
+weight: { base: 6 }
+once: true
+cast:
+  parent: { kind: parent, presence: city }
+  guardian: { kind: stepparent, presence: household, optional: true }
+choices:
+  - id: let_in
+    label: Let {parent.them} in, for an hour
+    outcome:
+      text: >-
+        It is awkward, and long, and honest in places. {parent.name} says some
+        things that are true and some that are not, and you cannot always tell
+        which. You do not forgive anyone. You do not close the door either.
+      effects:
+        - { type: relationship, role: parent, status: active, affection: 8, trust: 4 }
+        - { type: stat, key: stress, delta: 4 }
+        - { type: stat, key: happiness, delta: 1 }
+  - id: send_away
+    label: Say you are not ready, and ask {parent.them} to leave
+    outcome:
+      text: >-
+        {parent.name} does not argue. {parent.They} {parent:nods|nod}, once,
+        and {parent:walks|walk} back to the car. It is the hardest thing you have said, and
+        for a while it feels like winning, and then it just feels hard.
+      effects:
+        - { type: relationship, role: parent, affection: -5, trust: -3 }
+        - { type: stat, key: stress, delta: 3 }
+        - { type: stat, key: confidence, delta: 2 }
+  - id: ask_for_help
+    label: Ask the people looking after you what you should do
+    visibleIf:
+      all:
+        - { role: guardian }
+        - { any: [{ memory: { role: guardian, tag: took_you_in } }, { memory: { role: guardian, tag: foster_carer } }] }
+    outcome:
+      text: >-
+        {guardian.name} takes the question seriously, and does not tell you
+        what to feel. {guardian.They} {guardian:says|say} it is your choice,
+        and that you do not have to make it today. You find that that is what
+        you needed to hear.
+      effects:
+        - { type: relationship, role: guardian, affection: 6, trust: 8 }
+        - { type: stat, key: stress, delta: -2 }

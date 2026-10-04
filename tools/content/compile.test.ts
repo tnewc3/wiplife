@@ -1013,3 +1013,63 @@ describe('children and parenting (E2a)', () => {
     expect(await expectErrors()).toContain('must be cast as an ex');
   });
 });
+
+describe('heir play and inheritance (E2b)', () => {
+  it('accepts the real content, with its causes, heir events and heir text', { timeout: 90_000 }, async () => {
+    const result = await compile();
+    if (!result.ok) throw new Error(formatErrors(result.errors));
+    expect(Object.keys(result.bundle.registries.estate.causes).length).toBeGreaterThan(0);
+    expect(result.bundle.registries.heir.will).toEqual(['will_is_read']);
+    expect(result.bundle.text.heir.previously.died.length).toBeGreaterThan(0);
+    expect(result.bundle.balance.family.estate.default.spouseWithChildren).toBeLessThanOrEqual(100);
+  });
+
+  it('only lets a heir event happen for heirs: its category needs it, and so does anything casting a dead parent', { timeout: 90_000 }, async () => {
+    const real = await readFile(path.join(dir, 'events/any/legacy/name_opens_doors.yaml'), 'utf8');
+    await write('events/any/legacy/name_opens_doors.yaml', real.replace('    - { family: { heir: true, reputation: { gte: 62 } } }', '    - { family: { reputation: { gte: 62 } } }'));
+    expect(await expectErrors()).toContain('category "legacy" requires {"family":{"heir":true}}');
+    const remember = await readFile(path.join(dir, 'events/any/legacy/remember_warm_home.yaml'), 'utf8');
+    await write('events/any/legacy/remember_warm_home.yaml', remember.replace('    - { family: { heir: true } }\n', ''));
+    const errors = await expectErrors();
+    expect(errors).toContain('category "legacy" requires');
+    expect(errors).toContain('which only heirs have, so it must require { family: { heir: true } }');
+  });
+
+  it('keeps the heir registry to follow-up events that cast what the engine passes in', { timeout: 90_000 }, async () => {
+    const real = await readFile(path.join(dir, 'events/any/estate/will_is_read.yaml'), 'utf8');
+    await write('events/any/estate/will_is_read.yaml', real.replace('followUpOnly: true\n', ''));
+    expect(await expectErrors()).toContain('answers will, so it must be followUpOnly');
+    await write('events/any/estate/will_is_read.yaml', real.replace('parent: { kind: parent, presence: anywhere, deceased: true }', 'parent: { kind: parent, presence: anywhere }'));
+    expect(await expectErrors()).toContain('must cast "parent" as a deceased role');
+    const dispute = await readFile(path.join(dir, 'events/any/estate/siblings_dispute_the_will.yaml'), 'utf8');
+    await write('events/any/estate/siblings_dispute_the_will.yaml', dispute.replace('sibling: { kind: sibling,', 'sibling: { kind: friend,'));
+    expect(await expectErrors()).toContain('must cast "sibling" as a sibling');
+    const guardian = await readFile(path.join(dir, 'events/any/guardianship/guardian_parent_new_normal.yaml'), 'utf8');
+    await write('events/any/guardianship/guardian_parent_new_normal.yaml', guardian.replace('guardian: { kind: parent, presence: household }', 'guardian: { kind: parent, presence: household }\n  gone: { kind: parent, presence: anywhere, deceased: true }'));
+    expect(await expectErrors()).toContain('a deceased role is only passed in for guardian.parent');
+  });
+
+  it('checks the heir balance, the memories and flags the engine writes, and the heir text', { timeout: 90_000 }, async () => {
+    const family = await readFile(path.join(dir, 'balance/family.yaml'), 'utf8');
+    await write('balance/family.yaml', family.replace('    minAge: 21\n    maxAge: 78', '    minAge: 55\n    maxAge: 45'));
+    expect(await expectErrors()).toContain('heir.guardian: minAge is greater than maxAge');
+    await write('balance/family.yaml', family.replace('filed_bankruptcy: { delta: -3, deed: bankruptcy }', 'not_a_flag: { delta: -3, deed: bankruptcy }'));
+    expect(await expectErrors()).toContain('unknown flag "not_a_flag"');
+    await write('balance/family.yaml', family.replace('deed: bankruptcy }\n      unfaithful', 'deed: mystery }\n      unfaithful'));
+    expect(await expectErrors()).toContain('unknown deed "mystery"');
+    await write('balance/family.yaml', family);
+    const memories = await readFile(path.join(dir, 'registries/memories.yaml'), 'utf8');
+    await write('registries/memories.yaml', memories.replace('  heir_warm_home: Made a warm home for you\n', ''));
+    expect(await expectErrors()).toContain('heir_warm_home: the heir system writes this memory');
+    await write('registries/memories.yaml', memories);
+    const text = await readFile(path.join(dir, 'text/heir.yaml'), 'utf8');
+    await write('text/heir.yaml', text.replace('{parent.name} died at {age}, of {cause}. It is {year}', '{stranger.name} died at {age}, of {cause}. It is {year}'));
+    expect(await expectErrors()).toContain('unknown role "stranger"');
+  });
+
+  it('requires a memory event to read the memory its registry slot answers', { timeout: 90_000 }, async () => {
+    const real = await readFile(path.join(dir, 'events/any/legacy/remember_warm_home.yaml'), 'utf8');
+    await write('events/any/legacy/remember_warm_home.yaml', real.replace('tag: heir_warm_home', 'tag: heir_cold_home'));
+    expect(await expectErrors()).toContain('so it must require the memory "heir_warm_home" from the parent');
+  });
+});

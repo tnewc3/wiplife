@@ -32,9 +32,9 @@ export function totalDebt(state: LifeState): number {
   return wholeDollars(state.finances.debts.reduce((sum, d) => sum + d.balance, 0));
 }
 
-/** Savings plus the value of your home, minus every debt. */
+/** Savings (and any money held in trust) plus the value of your home, minus every debt. */
 export function netWorth(state: LifeState): number {
-  return wholeDollars(state.finances.savings + (state.housing.homeValue ?? 0) - totalDebt(state));
+  return wholeDollars(state.finances.savings + (state.finances.trust?.balance ?? 0) + (state.housing.homeValue ?? 0) - totalDebt(state));
 }
 
 /** The most payments in a row missed on any one debt. */

@@ -1,0 +1,55 @@
+id: guardian_grandparent_spare_room
+title: The spare room
+text: >-
+  {guardian.name} has made up the spare room with the good sheets and a lamp
+  that smells faintly of dust. There are photographs on the dresser that
+  were not there before: your parent as a child, grinning with no teeth.
+  {guardian.They} lost a child, and took in another, and does
+  not talk about it.
+tone: serious
+category: guardianship
+rarity: common
+lifeStages: [child, teen]
+requires:
+  all:
+    - { family: { heir: true, guardian: [grandparent] } }
+    - { age: { gte: 6, lt: 18 } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  guardian: { kind: grandparent, presence: household }
+choices:
+  - id: ask_stories
+    label: Ask {guardian.them} about the photographs
+    outcome:
+      text: >-
+        {guardian.name} sits on the edge of the bed. The stories come slowly
+        and then all at once: the mischief, the report cards, the first
+        bicycle. By the end, you are both laughing and crying about the same
+        person.
+      effects:
+        - { type: relationship, role: guardian, affection: 10, trust: 8 }
+        - { type: memory, role: guardian, tag: took_you_in }
+        - { type: stat, key: happiness, delta: 3 }
+        - { type: stat, key: stress, delta: -3 }
+  - id: keep_busy
+    label: Keep busy, so neither of you has to talk about it
+    outcome:
+      text: >-
+        You help with the dishes, the garden, the crossword. The house runs
+        like a clock. It is peaceful, and it is a kind of hiding, and you
+        both know it.
+      effects:
+        - { type: relationship, role: guardian, affection: 3 }
+        - { type: stat, key: discipline, delta: 1 }
+        - { type: stat, key: stress, delta: 1 }
+  - id: miss_home
+    label: Tell {guardian.them} you miss your old room
+    outcome:
+      text: >-
+        {guardian.name} nods slowly. There is no fix for it, and {guardian.they}
+        {guardian:doesn't|don't} pretend there is. The next day there is a
+        poster on the wall of something you like.
+      effects:
+        - { type: relationship, role: guardian, affection: 5, trust: 6 }
+        - { type: stat, key: happiness, delta: 1 }

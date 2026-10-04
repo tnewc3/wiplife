@@ -1,0 +1,57 @@
+id: foster_placement
+title: A new house, a new set of rules
+text: >-
+  Nobody in the family could take you in, so a caseworker with a kind voice
+  and a heavy folder drives you to {guardian.name}'s house. Your things fit in
+  two bags. {guardian.name} is waiting on the porch, hands in {guardian.their}
+  pockets, trying hard not to look like someone who is waiting.
+tone: serious
+category: guardianship
+rarity: common
+lifeStages: [child, teen]
+requires:
+  all:
+    - { family: { heir: true, guardian: [foster] } }
+    - { flag: in_foster_care }
+    - { age: { gte: 5, lt: 18 } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  guardian: { kind: stepparent, presence: household }
+choices:
+  - id: give_chance
+    label: Give it a real chance
+    outcome:
+      text: >-
+        You say hello. You eat what is put in front of you. {guardian.name}
+        shows you a room that is clean and plain and, at the end of the
+        hallway, yours. It is not home. It is a place you can begin.
+      effects:
+        - { type: relationship, role: guardian, affection: 8, trust: 8 }
+        - { type: memory, role: guardian, tag: foster_carer }
+        - { type: schedule, eventId: foster_family_dinner, inYears: [1, 2], cast: [guardian] }
+        - { type: stat, key: stress, delta: -2 }
+  - id: keep_to_yourself
+    label: Keep to yourself and wait for it to end
+    outcome:
+      text: >-
+        You are polite, and you do not unpack. The bags stay at the foot of
+        the bed. {guardian.name} notices, and does not make a speech about it,
+        which you are quietly grateful for.
+      effects:
+        - { type: relationship, role: guardian, affection: 2, trust: 2 }
+        - { type: memory, role: guardian, tag: foster_carer }
+        - { type: schedule, eventId: foster_family_dinner, inYears: [1, 2], cast: [guardian] }
+        - { type: stat, key: stress, delta: 3 }
+  - id: ask_caseworker
+    label: Ask the caseworker if there is anyone else
+    outcome:
+      text: >-
+        The caseworker looks at you for a long moment. There is no one else
+        right now, and that is not your fault. It is also not something that
+        can be fixed on a porch. You say thank you. You go inside.
+      effects:
+        - { type: relationship, role: guardian, trust: 3 }
+        - { type: memory, role: guardian, tag: foster_carer }
+        - { type: schedule, eventId: foster_family_dinner, inYears: [1, 2], cast: [guardian] }
+        - { type: stat, key: happiness, delta: -2 }

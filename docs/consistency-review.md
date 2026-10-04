@@ -170,3 +170,15 @@ Repeats of events not marked recurring were about 45% of the events fired per li
 | Happiness averages about 93 | Yearly drift toward a personal baseline; obituary thresholds back to 70/40 | `aging.test.ts` "Happiness drift"; simulation target `consistency.lifetimeHappiness` |
 | About half of all events fired are repeats | `recurring` events; repeat penalty for the rest | `events.test.ts` "keeps full weight for recurring events"; simulation and coverage target `consistency.maxRepeatShare` |
 | No grandparents in any life | Generated at creation, alive or not; grandparent events restored | `life.test.ts` "grandparents (C1)" |
+
+## E2b (heirs and inheritance)
+
+The 30 heir events (categories `estate`, `guardianship` and `legacy`) were written against the same rules, and `npm run content` prints no warnings for them.
+
+- **Category contracts:** each of the three categories requires `family: { heir: true }` (`registries/categories.yaml`); any event that casts a parent who has died must require it too (`checkHeir`).
+- **Presence:** a guardian is always `household` (a minor heir lives with them: `whereabouts` treats `housing.guardianId` as the household), siblings in disputes are `anywhere` (a phone call or a letter), and the people the heir meets in the legacy events are `city`.
+- **Evidence:** the memory events require the memory of how the heir was raised (`heir_warm_home`...) from the parent, the foster events require `in_foster_care`, the "left out" event requires `left_out_of_will`, the will events require `estate_will` or `estate_no_will`, the family-home event requires `inherited_a_home`, and the guardian events require who the guardian is. Claims about the past that the heir can't know are avoided (the family-home text doesn't say the heir grew up there).
+- **Time:** the follow-ups use no fixed gaps ("a week later" and "last week" were reworded).
+- **Money:** the contested estate and the contested will charge `legal_help` (scaled by city), and selling the family home goes through the `housing` effect; no other heir event mentions money, and the amounts an heir inherits are on the "Previously" card and the Money tab, not in event text.
+- **Household:** the family-home decision doesn't happen while a partner lives with the heir (it would have to account for them).
+- **Adults only:** the guardianship events are about a minor's family and use no romantic wording; nothing in them casts a partner.

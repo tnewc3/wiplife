@@ -1,0 +1,42 @@
+id: remember_always_there
+title: Front row
+text: >-
+  You are halfway through something that matters, and without thinking you
+  look for {parent.name} in the crowd. There is nobody there. It was always
+  the first place you looked: the seat on the aisle, the wave that was a
+  little too big. {parent.They} showed up every time. The habit of looking has
+  nobody to find, and you are surprised how much that weighs.
+tone: serious
+category: legacy
+rarity: common
+lifeStages: [child, teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { family: { heir: true } }
+    - { memory: { role: parent, tag: heir_always_there } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  parent: { kind: parent, presence: anywhere, deceased: true }
+choices:
+  - id: do_it_for_them
+    label: Do it anyway, for the person who always came
+    outcome:
+      text: >-
+        You give the moment everything you have. In your head, there is a
+        wave from the aisle. It is not the same. It is enough to get you to
+        the end.
+      effects:
+        - { type: stat, key: confidence, delta: 2 }
+        - { type: stat, key: happiness, delta: 2 }
+        - { type: stat, key: stress, delta: 1 }
+  - id: let_it_hurt
+    label: Let it hurt for a minute, and then carry on
+    outcome:
+      text: >-
+        You swallow it, then breathe, then carry on. Afterward, someone
+        you do not know well asks if you are okay, and you decide to tell them
+        the truth.
+      effects:
+        - { type: stat, key: stress, delta: 2 }
+        - { type: innerConflict, delta: -2 }

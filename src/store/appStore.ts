@@ -5,6 +5,8 @@ import type { ActionId, ContentBundle, GiftTier } from '../content/schemas';
 import { finishAction, performAction, type LifeActionId, type LifeActionParams } from '../engine/actions';
 import type { IdentityEditInput } from '../engine/discovery';
 import { archiveEntry } from '../engine/archive';
+import { continueAsHeir, heirCandidates } from '../engine/estate/heir';
+import { getDeathView, type DeathView } from '../engine/estate/views';
 import { closeInteraction, performInteraction, resolveInteractionChoice } from '../engine/interactions/perform';
 import { assertInvariants } from '../engine/invariants';
 import { beginYear, CONTINUE_CHOICE, createLife, endYear, resolveChoice, type CustomLifeInput } from '../engine/life';
@@ -78,6 +80,13 @@ export interface AppState {
   eventSheet: EventSheetState | null;
   /** The archive entry of the life that just ended, for the Death screen. */
   lastDeath: ArchivedLife | null;
+  /**
+   * E2b: the life that just ended while it has living children who could carry on. It is
+   * kept saved (not yet in the archive) until the player chooses an heir or leaves the Death screen.
+   */
+  deadLife: LifeState | null;
+  /** E2b: how the estate of the life that just ended was settled, and who could carry on, for the Death screen. */
+  deathView: DeathView | null;
   /** The archive, loaded when the Archive screen opens. */
   archive: ArchiveListing | null;
   /** The archived life open on the Archived life screen. */
@@ -85,7 +94,7 @@ export interface AppState {
   /** The person open on the People tab, if any. */
   personId: string | null;
   /** A page open on the More tab (More → Home, More → Health), if any. */
-  moreView: 'home' | 'health' | 'family' | null;
+  moreView: 'home' | 'health' | 'family' | 'will' | null;
   /** E1: the Interact sheet open on a person's page: the grouped menu, or the gift price tiers. */
   interactSheet: { personId: string; view: 'menu' | 'gift' } | null;
 
@@ -151,6 +160,15 @@ export interface AppState {
   openHealth: () => void;
   /** E2a: opens More → Family. */
   openFamily: () => void;
+  /** E2b: opens More → Write a will. */
+  openWill: () => void;
+  /**
+   * E2b: continues as one of the dead life's children (any age) and archives the dead life in the
+   * same step. Ignored while the engine is working or when no life is waiting for an heir.
+   */
+  chooseHeir: (heirId: string) => Promise<void>;
+  /** E2b: leaves the Death screen; a life still waiting for an heir goes into the archive first. */
+  leaveDeath: (to: 'newLife' | 'archive' | 'title') => Promise<void>;
   /** E1: opens the Interact sheet for a person. */
   openInteractions: (personId: string) => void;
   /** E1: from the Interact sheet to the gift price tiers, and back. */
@@ -239,12 +257,12 @@ export function createAppStore({
        * otherwise) in the same transaction that saves `next` as the new
        * active life, if given.
        */
-      const archive = async (life: LifeState, next?: LifeState): Promise<ArchivedLife> => {
+      const archive = async (life: LifeState, next?: LifeState, heirName?: string): Promise<ArchivedLife> => {
         if (checkInvariants) {
           assertInvariants(life, bundle);
           if (next) assertInvariants(next, bundle);
         }
-        const entry = archiveEntry(life, bundle);
+        const entry = archiveEntry(life, bundle, heirName);
         await archiveLife(
           db,
           makeArchiveEnvelope(entry, bundle.contentVersion),
@@ -256,13 +274,32 @@ export function createAppStore({
         return entry;
       };
 
-      /** A dead life goes straight into the archive; the Death screen shows its entry. */
+      /**
+       * A dead life goes into the archive and the Death screen shows its entry, or (E2b), when it
+       * has living children who could carry on, it stays saved until an heir is chosen.
+       */
       const endLife = async (dead: LifeState) => {
+        if (heirCandidates(dead).length > 0) {
+          if (checkInvariants) assertInvariants(dead, bundle);
+          await writeSave(db, makeEnvelope(dead, bundle.contentVersion));
+          set((s) => {
+            s.life = null;
+            s.deadLife = dead;
+            s.savedLifeStatus = 'none';
+            s.lastDeath = archiveEntry(dead, bundle);
+            s.deathView = getDeathView(dead, bundle);
+            s.screen = 'death';
+            s.eventSheet = null;
+          });
+          return;
+        }
         const entry = await archive(dead);
         set((s) => {
           s.life = null;
+          s.deadLife = null;
           s.savedLifeStatus = 'none';
           s.lastDeath = entry;
+          s.deathView = getDeathView(dead, bundle);
           s.screen = 'death';
         });
       };
@@ -388,6 +425,8 @@ export function createAppStore({
         aging: false,
         eventSheet: null,
         lastDeath: null,
+        deadLife: null,
+        deathView: null,
         archive: null,
         archiveSelection: null,
         personId: null,
@@ -464,6 +503,8 @@ export function createAppStore({
             s.settingsReturnTo = 'title';
             s.tab = 'life';
             s.lastDeath = null;
+            s.deadLife = null;
+            s.deathView = null;
             s.archive = null;
             s.archiveSelection = null;
             s.eventSheet = null;
@@ -672,6 +713,55 @@ export function createAppStore({
         openFamily: () =>
           set((s) => {
             if (s.life) s.moreView = 'family';
+          }),
+
+        openWill: () =>
+          set((s) => {
+            if (s.life) s.moreView = 'will';
+          }),
+
+        chooseHeir: (heirId) =>
+          busy(async () => {
+            const dead = get().deadLife;
+            if (!dead) return;
+            const heir = continueAsHeir(dead, heirId, bundle);
+            const person = dead.people[heirId]!;
+            await archive(dead, heir, `${person.name.first} ${person.name.last}`);
+            set((s) => {
+              s.life = heir;
+              s.savedLifeStatus = 'ok';
+              s.deadLife = null;
+              s.deathView = null;
+              s.lastDeath = null;
+              s.screen = 'game';
+              s.tab = 'life';
+              s.eventSheet = null;
+              s.personId = null;
+              s.moreView = null;
+              s.interactSheet = null;
+            });
+          }),
+
+        leaveDeath: (to) =>
+          busy(async () => {
+            const dead = get().deadLife;
+            if (dead) {
+              await archive(dead);
+              set((s) => {
+                s.deadLife = null;
+              });
+            }
+            if (to === 'archive') {
+              const listing = await listArchive(db);
+              set((s) => {
+                s.archive = listing;
+                s.screen = 'archive';
+              });
+            } else {
+              set((s) => {
+                s.screen = to;
+              });
+            }
           }),
 
         editIdentity: (edit) =>

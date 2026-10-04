@@ -1,0 +1,55 @@
+id: left_out_of_the_will
+title: Not in the will
+text: >-
+  You read the page twice. Your name is not on it. It is on the pages
+  after it, in the family tree and the photographs, but it is not where it
+  would have mattered. Someone says it is only things. Someone else says
+  nothing, which is worse.
+tone: dark
+category: estate
+rarity: uncommon
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { family: { heir: true } }
+    - { flag: left_out_of_will }
+    - { age: { gte: 12 } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  parent: { kind: parent, presence: anywhere, deceased: true }
+choices:
+  - id: ask
+    label: Ask someone why
+    outcome:
+      text: >-
+        The answer is smaller than the hurt: an old argument, a clerical
+        mistake, a change of mind that was never written down. You do not get
+        the full story. You get enough to stop imagining the worst.
+      effects:
+        - { type: stat, key: stress, delta: -2 }
+        - { type: stat, key: happiness, delta: -1 }
+        - { type: innerConflict, delta: -2 }
+  - id: let_it_go
+    label: Let it go, and keep what you have of {parent.them}
+    outcome:
+      text: >-
+        You decide that the will is a piece of paper and not a verdict. You
+        keep the stories, and the photographs, and the way {parent.they}
+        laughed. It does not fix it. It does not need to.
+      effects:
+        - { type: stat, key: happiness, delta: 1 }
+        - { type: stat, key: stress, delta: -2 }
+        - { type: innerConflict, delta: -3 }
+  - id: contest
+    label: Contest it, to be heard
+    visibleIf: { age: { gte: 18 } }
+    outcome:
+      text: >-
+        You are not sure you want to win. You are very sure you want someone
+        to have to explain it. The process is slow, and the answer is the
+        same as before, and by the end you are lighter anyway.
+      effects:
+        - { type: flag, key: contested_will, value: true }
+        - { type: cost, item: legal_help }
+        - { type: stat, key: stress, delta: 4 }

@@ -138,7 +138,7 @@ test('a life ends in an obituary, goes into the archive, and a new life starts',
 
   // Archive list and detail.
   await page.getByRole('button', { name: 'Open the archive' }).click();
-  const lives = page.getByRole('list', { name: 'Past lives' }).getByRole('listitem');
+  const lives = page.getByRole('list', { name: /^Generations of the/ }).getByRole('listitem');
   await expect(lives).toHaveCount(1);
   await expect(lives.first()).toContainText(name);
   await expect(lives.first()).toContainText('Age 4');
@@ -155,7 +155,7 @@ test('a life ends in an obituary, goes into the archive, and a new life starts',
   await page.reload();
   await expect(page.getByRole('button', { name: 'Continue' })).toHaveCount(0);
   await page.getByRole('button', { name: 'Archive' }).click();
-  await expect(page.getByRole('list', { name: 'Past lives' }).getByRole('listitem')).toHaveCount(1);
+  await expect(page.getByRole('list', { name: /^Generations of the/ }).getByRole('listitem')).toHaveCount(1);
 
   // Start again.
   await page.getByRole('button', { name: 'Back' }).click();
@@ -180,7 +180,7 @@ test('starting over moves the current life into the archive, unfinished', async 
   await page.getByRole('button', { name: 'More' }).click();
   await page.getByRole('button', { name: 'Back to title' }).click();
   await page.getByRole('button', { name: 'Archive' }).click();
-  const item = page.getByRole('list', { name: 'Past lives' }).getByRole('listitem').first();
+  const item = page.getByRole('list', { name: /^Generations of the/ }).getByRole('listitem').first();
   await expect(item).toContainText(name);
   await expect(item).toContainText('Unfinished');
   await item.getByRole('button').click();

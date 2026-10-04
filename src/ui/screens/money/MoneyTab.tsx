@@ -218,6 +218,18 @@ export function MoneyTab({ life }: { life: LifeState }) {
         </dl>
       </Card>
 
+      {view.trust && (
+        <Card role="region" aria-labelledby="trust-title" data-testid="trust-card">
+          <h2 id="trust-title" className="text-lg font-bold">
+            Held in trust
+          </h2>
+          <p className="mt-1 tabular-nums" data-testid="trust-balance">
+            {money(view.trust.balance)}
+          </p>
+          <p className="mt-1 text-sm text-muted">What you inherited is kept for you until you turn {view.trust.releaseAge}, then it becomes yours.</p>
+        </Card>
+      )}
+
       <LedgerCard life={life} />
       <CustodyCard life={life} />
       <LifestyleCard life={life} />

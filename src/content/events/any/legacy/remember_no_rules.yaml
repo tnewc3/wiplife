@@ -1,0 +1,39 @@
+id: remember_no_rules
+title: Nobody to tell you no
+text: >-
+  You made most of your own rules growing up, with {parent.name} nodding
+  from the other room. It felt like freedom for a long time. Today you notice
+  you are the one who has to say no, to yourself, with nobody to hear it
+  and nobody to blame.
+tone: neutral
+category: legacy
+rarity: common
+lifeStages: [child, teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { family: { heir: true } }
+    - { memory: { role: parent, tag: heir_no_rules } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  parent: { kind: parent, presence: anywhere, deceased: true }
+choices:
+  - id: set_own
+    label: Set your own rules, and keep them
+    outcome:
+      text: >-
+        You write a short list on the back of an envelope. It is shorter than
+        you expected, and it holds. You feel a little more like an adult, and
+        a little more like someone who raised themself.
+      effects:
+        - { type: stat, key: discipline, delta: 3 }
+        - { type: stat, key: confidence, delta: 1 }
+  - id: keep_drifting
+    label: Keep doing what you have always done
+    outcome:
+      text: >-
+        It has worked well enough so far. You keep going, and the freedom is
+        still freedom, though a little lonelier than it used to look.
+      effects:
+        - { type: stat, key: riskTaking, delta: 1 }
+        - { type: stat, key: happiness, delta: 1 }

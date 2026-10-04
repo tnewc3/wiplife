@@ -1,0 +1,51 @@
+id: stranger_named_in_will
+title: Someone you've never heard of
+text: >-
+  {stranger.name} is named in {parent.name}'s will, and nobody in the family
+  has ever heard the name. {stranger.They} {stranger:turns|turn} up at the
+  lawyer's office with the look of someone who has rehearsed what to say, and
+  who is already regretting it.
+tone: neutral
+category: estate
+rarity: uncommon
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { family: { heir: true } }
+    - { flag: estate_will }
+    - { age: { gte: 16 } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  parent: { kind: parent, presence: anywhere, deceased: true }
+  stranger: { kind: acquaintance, presence: city, createIfMissing: true, age: { min: 18, max: 90 } }
+choices:
+  - id: meet
+    label: Ask {stranger.them} how {stranger.they} knew {parent.name}
+    outcome:
+      text: >-
+        {stranger.name} talks for an hour. {stranger.They} knew a side of
+        {parent.name} you only half suspected: patient, funny, a little
+        reckless. You leave with more questions, and an odd gladness.
+      effects:
+        - { type: relationship, role: stranger, affection: 12, trust: 8 }
+        - { type: stat, key: happiness, delta: 2 }
+  - id: lawyers
+    label: Let the lawyers handle it
+    outcome:
+      text: >-
+        You nod across the room, and the paperwork does the introductions. It
+        is polite and quick. You will think about the name for a long time.
+      effects:
+        - { type: relationship, role: stranger, affection: -2 }
+        - { type: stat, key: stress, delta: 1 }
+  - id: suspicious
+    label: Wonder what {stranger.they} {stranger:wants|want}
+    outcome:
+      text: >-
+        You ask for proof of everything. {stranger.name} has all of it, and is
+        so patient about handing it over that you feel small. It does not stop
+        you asking.
+      effects:
+        - { type: relationship, role: stranger, affection: -6, trust: -6 }
+        - { type: stat, key: stress, delta: 3 }

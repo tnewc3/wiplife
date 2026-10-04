@@ -1,0 +1,54 @@
+id: guardian_parent_new_normal
+title: Just the two of you
+text: >-
+  The house is a different shape now. {guardian.name} sets the table, stops,
+  and counts the places again, as though someone might still be coming. Then
+  {guardian.they} {guardian:puts|put} a plate back in the cupboard and stays
+  there a minute with {guardian.their} back to you. You are both trying to
+  work out how to be a family with a piece missing.
+tone: serious
+category: guardianship
+rarity: common
+lifeStages: [child, teen]
+requires:
+  all:
+    - { family: { heir: true, guardian: [parent] } }
+    - { age: { gte: 5, lt: 18 } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  guardian: { kind: parent, presence: household }
+choices:
+  - id: talk
+    label: Say that you miss them too
+    outcome:
+      text: >-
+        {guardian.name} turns around. For a moment neither of you is the
+        grown-up. Then {guardian.they} {guardian:pulls|pull} out a chair and
+        you both sit, and talk about the one who is gone until the food gets
+        cold.
+      effects:
+        - { type: relationship, role: guardian, affection: 8, trust: 8 }
+        - { type: stat, key: stress, delta: -4 }
+        - { type: stat, key: happiness, delta: 2 }
+  - id: be_strong
+    label: Be the strong one, so {guardian.name} doesn't have to
+    outcome:
+      text: >-
+        You put on a brave face and keep it on. {guardian.name} thanks you
+        too quickly, and the thank-you has a worry in it. You are too young to
+        be this tired.
+      effects:
+        - { type: relationship, role: guardian, trust: -3 }
+        - { type: stat, key: stress, delta: 5 }
+        - { type: stat, key: confidence, delta: 1 }
+  - id: give_space
+    label: Go to your room and give {guardian.them} space
+    outcome:
+      text: >-
+        The door closes softly. Through the wall you hear the dishes, then
+        nothing, then the dishes again. Both of you are alone in the same
+        house, being considerate.
+      effects:
+        - { type: stat, key: stress, delta: 2 }
+        - { type: stat, key: happiness, delta: -2 }

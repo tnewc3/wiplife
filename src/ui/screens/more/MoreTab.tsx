@@ -1,3 +1,5 @@
+import { content } from '../../../content';
+import { canPlanEstate } from '../../../engine/selectors';
 import { useAppStore } from '../../../store/appStore';
 import { Button } from '../../components/Button';
 
@@ -9,6 +11,8 @@ export function MoreTab() {
   const openHome = useAppStore((s) => s.openHome);
   const openHealth = useAppStore((s) => s.openHealth);
   const openFamily = useAppStore((s) => s.openFamily);
+  const openWill = useAppStore((s) => s.openWill);
+  const adult = useAppStore((s) => s.life !== null && canPlanEstate(s.life, content));
   return (
     <div className="flex flex-col gap-2">
       <Button variant="secondary" block onClick={openHome}>
@@ -20,6 +24,11 @@ export function MoreTab() {
       <Button variant="secondary" block onClick={openFamily}>
         Family
       </Button>
+      {adult && (
+        <Button variant="secondary" block onClick={openWill} data-testid="more-will">
+          Write a will
+        </Button>
+      )}
       <Button variant="secondary" block onClick={openLifeHistory}>
         Life history
       </Button>

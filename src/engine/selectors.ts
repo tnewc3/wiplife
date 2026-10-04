@@ -53,6 +53,21 @@ import { costToYou, familyHelp, rentMonthsAmount } from './costs';
 import { availableInteractions } from './interactions/availability';
 import { moodView, type MoodView } from './interactions/mood';
 export { getInteractionMenu, getInteractionOutcome } from './interactions/views';
+export {
+  canPlanEstate,
+  getDeathView,
+  getFamilyLineView,
+  getPreviously,
+  getWillView,
+  groupArchiveByLine,
+  type ArchiveFamilyLine,
+  type DeathView,
+  type EstateLineView,
+  type FamilyLineView,
+  type HeirOptionView,
+  type WillRowView,
+  type WillView,
+} from './estate/views';
 export { getChildView, getFamilyView, type ChildView, type FamilyOptionView, type FamilyView, type PregnancyView } from './family/views';
 import { getChildView, type ChildView } from './family/views';
 export type { InteractionMenuGroup, InteractionMenuItem, InteractionOutcomeView } from './interactions/views';
@@ -117,9 +132,10 @@ const FAMILY_ORDER: Partial<Record<Relationship['kind'], number>> = {
   parent: 0,
   stepparent: 1,
   grandparent: 2,
-  sibling: 3,
-  child: 4,
-  stepchild: 5,
+  relative: 3,
+  sibling: 4,
+  child: 5,
+  stepchild: 6,
 };
 
 /** Your spouses, current and late (not exes), longest married first. */
@@ -164,6 +180,8 @@ export interface CharacterSummary {
   /** Your job now, if you have one: your title and employer. */
   job: { title: string; employer: string } | null;
   retired: boolean;
+  /** E2b: who a minor heir lives with, and whether that is foster care. */
+  guardian: { name: string; relation: Relationship['kind']; foster: boolean } | null;
 }
 
 /** Your school now, for one-line summaries. */
@@ -193,6 +211,14 @@ export function getCharacterSummary(state: LifeState, content: ContentBundle): C
     school: state.education.current ? schoolLine(state, state.education.current, content) : null,
     job: state.career.job ? { title: levelTitle(content.jobs[state.career.job.jobId], state.career.job.level), employer: state.career.job.employer } : null,
     retired: state.career.retired,
+    guardian:
+      state.housing.guardianId !== undefined && state.people[state.housing.guardianId]
+        ? {
+            name: `${state.people[state.housing.guardianId]!.name.first} ${state.people[state.housing.guardianId]!.name.last}`,
+            relation: state.relationships[state.housing.guardianId]?.kind ?? 'relative',
+            foster: state.housing.foster === true,
+          }
+        : null,
   };
 }
 
@@ -492,6 +518,7 @@ const KIND_ORDER: RelationshipKind[] = [
   'parent',
   'stepparent',
   'grandparent',
+  'relative',
   'sibling',
   'child',
   'stepchild',
@@ -700,6 +727,8 @@ export interface MoneyView {
   canChangeLifestyle: boolean;
   /** The retirement benefit: from what age, the years of earnings so far, and what the record pays now. */
   retirement: { age: number; years: number; minYears: number; yearlyBenefit: number; receiving: boolean };
+  /** E2b: money an heir under 18 inherited, held until `releaseAge`. */
+  trust: { balance: number; releaseAge: number } | null;
 }
 
 /** The Money tab: savings, debts, last year's ledger and the lifestyle choice. */
@@ -734,6 +763,7 @@ export function getMoneyView(state: LifeState, content: ContentBundle): MoneyVie
       yearlyBenefit: benefitFromRecord(state, content),
       receiving: state.character.age >= content.balance.economy.retirement.age && benefitFromRecord(state, content) > 0,
     },
+    trust: f.trust ? { balance: f.trust.balance, releaseAge: f.trust.releaseAge } : null,
   };
 }
 

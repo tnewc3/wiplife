@@ -1,0 +1,43 @@
+id: family_home_decision
+title: The house
+text: >-
+  The house still smells like the people who lived in it. You walk through
+  it with a cup of tea you do not drink. Every room holds someone's habits:
+  the lamp left on in the hall, the chair nobody moved. Someone has to decide
+  what happens next, and the someone is you.
+tone: serious
+category: estate
+rarity: uncommon
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { family: { heir: true } }
+    - { flag: inherited_a_home }
+    - { home: { kind: [owned], partner: false } }
+    - { age: { gte: 18 } }
+weight: { base: 12 }
+once: true
+choices:
+  - id: keep
+    label: Keep it, and live in it
+    outcome:
+      text: >-
+        You stay. You paint one room, then another, and leave the kitchen
+        exactly as it was. The house stops being a museum and starts being a
+        home that has a new person in it.
+      effects:
+        - { type: flag, key: kept_the_family_home, value: true }
+        - { type: stat, key: happiness, delta: 3 }
+        - { type: stat, key: stress, delta: -2 }
+  - id: sell
+    label: Sell it, and start fresh
+    outcome:
+      text: >-
+        You hire an agent, empty the closets, and keep one box. The new
+        owners send a card at the holidays. You tell yourself you will answer
+        it.
+      effects:
+        - { type: housing, action: sell }
+        - { type: flag, key: sold_the_family_home, value: true }
+        - { type: stat, key: stress, delta: -3 }
+        - { type: stat, key: happiness, delta: 1 }
