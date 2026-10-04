@@ -1,0 +1,55 @@
+id: brush_off
+name: Brush them off
+blurb: Not now. You have things to do.
+group: parenting
+profile: neglect
+inPerson: true
+availability:
+  kinds: [child, stepchild]
+  you: { min: 18 }
+  them: { min: 2, max: 17 }
+outcomes:
+  great:
+    text:
+      - "{person.name} shrugs and goes off to build something. Sometimes a kid just needs some room."
+      - "You say 'not now', and {person.name} finds a way to be busy without you. It is not nothing, but it is not the worst."
+    affection: 0
+    mood: 1
+    effects:
+      - { type: parenting, role: person, involvement: -2 }
+      - { type: childTrait, role: person, key: confidence, delta: 1 }
+  good:
+    text:
+      - "{person.name} accepts it. A little too easily, maybe."
+      - "{person.name} nods and goes to {person.their} room. The door closes softly."
+    affection: -1
+    mood: -2
+    effects:
+      - { type: parenting, role: person, involvement: -3, warmth: -1 }
+  neutral:
+    text:
+      - "You wave {person.name} off. The question was not that important. You do not ask what it was."
+      - "'Later,' you say. Later does not come that day."
+    affection: -1
+    mood: -3
+    effects:
+      - { type: parenting, role: person, involvement: -4, warmth: -2 }
+  bad:
+    text:
+      - "{person.name} stands there a moment longer than {person.they} {person:needs|need} to, and then leaves."
+      - "{person.name} asks again. You say no again, louder."
+    affection: -3
+    trust: -2
+    mood: -6
+    effects:
+      - { type: parenting, role: person, involvement: -5, warmth: -3 }
+  backfire:
+    text:
+      - "It was the thing that mattered, and you did not know it until {person.name} stopped asking."
+      - "'You never have time,' {person.name} says. It is quiet, which is worse."
+    affection: -5
+    trust: -4
+    mood: -9
+    effects:
+      - { type: parenting, role: person, involvement: -6, warmth: -4 }
+      - { type: memory, role: person, tag: parent_broke_a_promise }

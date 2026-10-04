@@ -23,6 +23,7 @@ import {
   rollStats,
 } from './creation/character';
 import { generateFamily } from './creation/family';
+import { defaultCanCarry, rollCanCarry } from './family/carrying';
 import { InvalidInputError, parseCreateLifeOptions, type CreateLifeOptions } from './creation/input';
 import { successChance } from './events/checks';
 import { applyEffects } from './events/effects';
@@ -63,6 +64,8 @@ export function createLife(input: CreateLifeOptions, content: ContentBundle): Li
     const cityId = pick(rng, activeIds(content.cities));
     const familyWealth = weightedKey(rng, creation.familyWealth);
     const identity = rollIdentity(rng, content, rollGenderCategory(rng, content));
+    // E2a: women can carry a pregnancy, men can't; a nonbinary character rolls it (only that draws a number).
+    const canCarry = rollCanCarry(rng, identity.genderCategory, content);
     const stats = rollStats(rng, content);
     const personality = rollPersonality(rng, content);
     const descriptors = rollAppearance(rng, content);
@@ -81,6 +84,7 @@ export function createLife(input: CreateLifeOptions, content: ContentBundle): Li
       birthCityId: cityId,
       familyWealth,
       custom: false,
+      canCarry,
     };
     familyRequest = {};
   } else {
@@ -103,6 +107,7 @@ export function createLife(input: CreateLifeOptions, content: ContentBundle): Li
       birthCityId: custom.cityId,
       familyWealth: custom.familyWealth,
       custom: true,
+      canCarry: custom.canCarry ?? defaultCanCarry(custom.identity.genderCategory),
     };
     familyRequest = {
       parents: custom.family.parents,
@@ -147,6 +152,7 @@ export function createLife(input: CreateLifeOptions, content: ContentBundle): Li
     scheduled: [],
     pending: [],
     pendingInteraction: null,
+    family: { pregnancy: null, process: null, support: null, attempts: 0, lostChildren: 0, miscarriages: 0 },
     history: [],
     inputLog: [{ year: birthYear, kind: 'create', payload: structuredCloneJson(options) }],
     recap: null,
@@ -198,6 +204,10 @@ export function beginYear(state: LifeState, content: ContentBundle, steps: reado
   // E1: an outcome card still waiting for a choice has to be answered first; a finished one is just dismissed.
   if (state.pendingInteraction?.choice && state.pendingInteraction.choice.chosen === undefined) {
     throw new PhaseError('Finish the interaction first: its outcome card is waiting for a choice.');
+  }
+  // E2a: an unplanned pregnancy waits for its decision (the outcome card's close opens it).
+  if (state.family.pregnancy?.decision === 'pending') {
+    throw new PhaseError('Decide first: an unplanned pregnancy is waiting for your decision.');
   }
   const statsBefore = { ...state.character.stats };
   let next = produce(state, (draft) => {

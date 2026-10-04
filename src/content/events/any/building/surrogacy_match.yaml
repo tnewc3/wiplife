@@ -1,0 +1,27 @@
+# Registry: surrogacy.match. A match comes through: a pregnancy begins.
+id: surrogacy_match
+title: A match
+text: >-
+  The agency calls with a name, a photograph, and a nervous sort of joy. A match
+  has come through, and after the first meeting the transfer goes ahead.
+  The pregnancy begins.
+tone: light
+category: building
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires: { age: { gte: 18 } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  other: { kind: spouse, presence: anywhere, optional: true }
+autoOutcome:
+  text: >-
+    You pay the agency's balance the same week, and start learning how to be
+    close to someone who was a stranger not long before. Eventually they stop being
+    a stranger, and become something between a friend and family.
+  effects:
+    - { type: cost, item: surrogacy_balance }
+    - { type: flag, key: used_surrogate, value: true }
+    - { type: stat, key: happiness, delta: 9 }
+    - { type: stat, key: stress, delta: 4 }
+    - { type: history, text: 'A surrogate began carrying a baby for you.', importance: 3 }

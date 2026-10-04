@@ -1,0 +1,39 @@
+id: stepchild_comes_around
+title: Pass the salt
+text: >-
+  It is a small thing: {kid.name} asks you to pass the salt, then stays
+  to ask about your day. It is the longest conversation the two of you have
+  had without anyone prompting it.
+tone: light
+category: stepfamily
+rarity: uncommon
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { family: { steps: { gte: 1 } } }
+    - { role: kid, affection: { gte: 50 } }
+weight: { base: 6 }
+cooldownYears: 4
+cast:
+  kid: { kind: stepchild, presence: household, age: { min: 4, max: 20 } }
+choices:
+  - id: listen
+    label: Put down your fork and listen
+    outcome:
+      text: >-
+        {kid.name} talks for twenty minutes about something you do not
+        understand and will remember for years.
+      effects:
+        - { type: relationship, role: kid, affection: 5, trust: 6, mood: 5 }
+        - { type: parenting, role: kid, warmth: 4, involvement: 4 }
+        - { type: stat, key: happiness, delta: 3 }
+  - id: tease
+    label: Tease {kid.them} a little
+    outcome:
+      text: >-
+        {kid.name} rolls {kid.their} eyes and smiles. It is, you realize, the
+        first time the teasing has gone the right way.
+      effects:
+        - { type: relationship, role: kid, affection: 3, mood: 4 }
+        - { type: stat, key: happiness, delta: 2 }

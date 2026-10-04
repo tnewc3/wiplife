@@ -1,0 +1,43 @@
+id: after_child_death_sibling
+title: The one who is left
+text: >-
+  {kid.name} has not been the same since. Quiet at the table, jumpy at the
+  door, and asking questions that you cannot answer. There was a brother or
+  sister in this house, and now there is a gap {kid.they} {kid:can't|can't}
+  fill.
+tone: dark
+category: grief
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { flag: lost_a_child }
+    - { family: { minors: { gte: 1 } } }
+weight: { base: 9 }
+followUpOnly: true
+cast:
+  child: { kind: child, presence: anywhere, deceased: true }
+  kid: { kind: child, presence: household, age: { min: 2, max: 17 } }
+choices:
+  - id: talk
+    label: Talk about {child.name} whenever {kid.name} asks
+    outcome:
+      text: >-
+        It hurts, and it helps. {kid.name} learns that missing someone out loud
+        is allowed in this house, and that you will not break.
+      effects:
+        - { type: parenting, role: kid, warmth: 5, involvement: 5 }
+        - { type: relationship, role: kid, affection: 6, trust: 8 }
+        - { type: memory, role: kid, tag: lost_their_sibling }
+        - { type: childStat, role: kid, key: stress, delta: -3 }
+  - id: protect
+    label: Try to keep things as normal as possible
+    outcome:
+      text: >-
+        You keep the routines, the dinners, the bedtimes. {kid.name} follows them
+        with a stiff politeness, and does not say what is underneath.
+      effects:
+        - { type: parenting, role: kid, strictness: 3, warmth: -2 }
+        - { type: memory, role: kid, tag: lost_their_sibling }
+        - { type: childStat, role: kid, key: stress, delta: 5 }

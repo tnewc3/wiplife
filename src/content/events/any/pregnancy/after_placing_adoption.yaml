@@ -1,0 +1,37 @@
+# Follow-up of the placement events. Weighty, and neither right nor wrong.
+id: after_placing_adoption
+title: A letter, or not
+text: >-
+  It was {since}, and the agency sends a form: whether you want to be
+  reachable, if the child ever asks. There is a line for a letter. You have
+  been looking at the blank part of the page for some time.
+tone: serious
+category: pregnancy
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { flag: placed_baby_for_adoption }
+weight: { base: 10 }
+followUpOnly: true
+choices:
+  - id: letter
+    label: Write the letter
+    outcome:
+      text: >-
+        It takes six drafts and most of a night. The last one is short, and
+        true, and you seal it before you can change it.
+      effects:
+        - { type: stat, key: happiness, delta: 3 }
+        - { type: stat, key: stress, delta: -3 }
+        - { type: history, text: 'You wrote a letter to the child you placed for adoption.', importance: 2 }
+  - id: later
+    label: Leave it blank for now
+    outcome:
+      text: >-
+        You sign the form without the letter. There is time. There is, you tell
+        yourself, always time.
+      effects:
+        - { type: stat, key: stress, delta: 2 }
+        - { type: innerConflict, delta: 3 }

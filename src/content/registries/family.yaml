@@ -1,0 +1,45 @@
+# The events the family system queues by itself (E2a): births, miscarriages,
+# adoption, IVF, surrogacy, custody hearings and a child's death. Each is
+# followUpOnly. The engine casts the people in them (docs/technical.md, E2a):
+#   birth.you, birth.surrogate     baby (the new child); other (the other parent, if any)
+#   birth.partner, birth.coparent  baby; carrier (who carried: your partner, or someone who isn't)
+#   birth.placedYou                other (optional); the baby is placed for adoption
+#   birth.placedOther              carrier
+#   miscarriage.you / .surrogate   other (optional)
+#   miscarriage.carried            carrier
+#   decision                       other (the unplanned pregnancy's other parent)
+#   adoption.match                 child (the child who has come to you)
+#   adoption.start / ivf.start / surrogacy.start   other (your partner, if you have one)
+#   ivf.success, ivf.failed, surrogacy.match, surrogacy.fellThrough   other (optional)
+#   childDeath.*                   child (who has died: a deceased role)
+#   custody                        other (their other parent, now your ex)
+birth:
+  you: [birth_you]
+  partner: [birth_partner]
+  coparent: [birth_coparent]
+  surrogate: [birth_surrogate]
+  placedYou: [placed_for_adoption_you]
+  placedOther: [placed_for_adoption_other]
+miscarriage:
+  you: [miscarriage_you]
+  carried: [miscarriage_carried]
+  surrogate: [miscarriage_surrogate]
+decision: [unplanned_pregnancy]
+adoption:
+  start: [adoption_apply]
+  match: [adoption_match]
+  declined: [adoption_declined]
+ivf:
+  start: [ivf_start]
+  success: [ivf_success]
+  failed: [ivf_failed]
+surrogacy:
+  start: [surrogacy_start]
+  match: [surrogacy_match]
+  fellThrough: [surrogacy_fell_through]
+childDeath:
+  infant: [child_dies_infant]
+  young: [child_dies_young]
+  teen: [child_dies_teen]
+  adult: [child_dies_adult]
+custody: [custody_hearing]

@@ -24,7 +24,8 @@ export function ageNpcs(state: LifeState, content: ContentBundle): void {
   const ids = Object.keys(view.people).sort();
   for (const id of ids) {
     const seen = view.people[id]!;
-    if (!seen.alive) continue;
+    // E2a: your children and stepchildren are handled by the family step (a death there leads to its own events).
+    if (!seen.alive || seen.child) continue;
     const age = state.currentYear - seen.birthYear;
     if (!chance(state.rng, npcDeathChance(age, content))) continue;
 

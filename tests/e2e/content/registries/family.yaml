@@ -1,0 +1,31 @@
+# Test pack: every family result answers with one predictable event.
+birth:
+  you: [test_f_birth_you]
+  partner: [test_f_birth_partner]
+  coparent: [test_f_birth_coparent]
+  surrogate: [test_f_birth_surrogate]
+  placedYou: [test_f_placed_you]
+  placedOther: [test_f_placed_other]
+miscarriage:
+  you: [test_f_miscarriage_you]
+  carried: [test_f_miscarriage_carried]
+  surrogate: [test_f_miscarriage_surrogate]
+decision: [test_f_decision]
+adoption:
+  start: [test_f_adoption_start]
+  match: [test_f_adoption_match]
+  declined: [test_f_adoption_declined]
+ivf:
+  start: [test_f_ivf_start]
+  success: [test_f_ivf_success]
+  failed: [test_f_ivf_failed]
+surrogacy:
+  start: [test_f_surrogacy_start]
+  match: [test_f_surrogacy_match]
+  fellThrough: [test_f_surrogacy_failed]
+childDeath:
+  infant: [test_f_child_dies_infant]
+  young: [test_f_child_dies_young]
+  teen: [test_f_child_dies_teen]
+  adult: [test_f_child_dies_adult]
+custody: [test_f_custody]

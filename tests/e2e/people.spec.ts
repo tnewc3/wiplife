@@ -87,7 +87,7 @@ test('dating, engagement, moving in, marriage and divorce from the person page',
   await tab(page, 'People').click();
   await expect(page.getByRole('region', { name: 'Love' })).toContainText(name);
   await page.getByRole('list', { name: 'Love' }).getByRole('button').first().click();
-  await expect(actions(page).getByRole('button')).toHaveText(['Propose', 'Move in together', 'Break up']);
+  await expect(actions(page).getByRole('button')).toHaveText(['Propose', 'Move in together', 'Break up', 'Try for a baby']);
   await act(page, 'Propose');
   await expect(line).toContainText(/^Fiancé · /);
   await expectNoHorizontalScroll(page);
@@ -95,7 +95,7 @@ test('dating, engagement, moving in, marriage and divorce from the person page',
 
   // A year later: move in together. They pay their share of your home.
   await ageUp(page);
-  await expect(actions(page).getByRole('button')).toHaveText(['Move in together', 'Get married', 'Break up']);
+  await expect(actions(page).getByRole('button')).toHaveText(['Move in together', 'Get married', 'Break up', 'Try for a baby']);
   await act(page, 'Move in together');
   await tab(page, 'More').click();
   await page.getByRole('button', { name: 'Home', exact: true }).click();
@@ -106,7 +106,7 @@ test('dating, engagement, moving in, marriage and divorce from the person page',
 
   // A year later: the wedding → married.
   await ageUp(page);
-  await expect(actions(page).getByRole('button')).toHaveText(['Get married', 'Break up']);
+  await expect(actions(page).getByRole('button')).toHaveText(['Get married', 'Break up', 'Try for a baby']);
   await act(page, 'Get married');
   await expect(line).toContainText(/^Husband · /);
   await expect(page.getByRole('list', { name: 'Memories' })).toContainText('Married you');
@@ -117,7 +117,7 @@ test('dating, engagement, moving in, marriage and divorce from the person page',
   await ageUp(page);
   await tab(page, 'People').click();
   await page.getByRole('list', { name: 'Love' }).getByRole('button').first().click();
-  await expect(actions(page).getByRole('button')).toHaveText(['Divorce']);
+  await expect(actions(page).getByRole('button')).toHaveText(['Divorce', 'Try for a baby']);
   await actions(page).getByRole('button', { name: 'Divorce' }).click();
   const confirm = page.getByRole('dialog', { name: `Divorce ${first}?` });
   await expect(confirm).toContainText('This can’t be undone.');

@@ -1,0 +1,50 @@
+id: teen_quits_team
+title: Done with the team
+text: >-
+  {kid.name} says it at dinner, between bites, as though it were nothing: the
+  team is done. {kid.They} {kid:is|are} not going back. The cleats stay in the
+  hall closet, and the closet door stays shut.
+tone: neutral
+category: parenting
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { family: { minors: { gte: 1 } } }
+weight: { base: 6 }
+cooldownYears: 5
+cast:
+  kid: { kind: child, presence: household, age: { min: 11, max: 17 } }
+choices:
+  - id: let
+    label: Say it is {kid.their} call
+    outcome:
+      text: >-
+        {kid.name} blinks, expecting a fight. You ask what {kid.they}
+        {kid:wants|want} to do instead. It is the first time in weeks that
+        {kid.they} {kid:talks|talk} for more than a sentence.
+      effects:
+        - { type: parenting, role: kid, warmth: 3, strictness: -3 }
+        - { type: relationship, role: kid, trust: 5 }
+        - { type: memory, role: kid, tag: parent_let_them_choose }
+  - id: finish
+    label: Make {kid.them} finish the season
+    outcome:
+      text: >-
+        You say commitments are commitments. {kid.name} finishes the season
+        with stony determination and no joy, and does not sign up for the next one.
+      effects:
+        - { type: parenting, role: kid, strictness: 5, warmth: -2 }
+        - { type: childTrait, role: kid, key: discipline, delta: 1 }
+        - { type: relationship, role: kid, affection: -3 }
+  - id: why
+    label: Dig into why, quietly
+    outcome:
+      text: >-
+        It is not the sport. It is a coach, a teammate and a bad week that
+        got worse. You talk to the right people, and {kid.name} decides, on
+        {kid.their} own, to give it another try.
+      effects:
+        - { type: parenting, role: kid, involvement: 5, warmth: 2 }
+        - { type: relationship, role: kid, trust: 5 }

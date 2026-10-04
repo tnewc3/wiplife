@@ -1,0 +1,33 @@
+# Registry: adoption.start. Answers More → Family → Adopt.
+id: adoption_apply
+title: The agency
+text: >-
+  The agency's office has a waiting room full of kids' drawings and a woman at
+  a desk who has seen every kind of hope. There are forms about your home, your
+  work and your history, and a visit. After that, a wait, and no promises.
+tone: neutral
+category: building
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires: { age: { gte: 18 } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  other: { kind: spouse, presence: anywhere, optional: true }
+choices:
+  - id: sign
+    label: Sign the papers and pay the agency's fee
+    outcome:
+      text: >-
+        The fee is the smaller of the two the agency will ask for. You sign
+        everything twice, shake the caseworker's hand, and walk out into the
+        weather feeling several things at once. Now it is a waiting game.
+      effects:
+        - { type: cost, item: adoption_fee }
+        - { type: process, action: start, process: adoption }
+        - { type: history, text: 'You applied to adopt a child.', importance: 2 }
+  - id: back
+    label: Not yet
+    outcome:
+      text: >-
+        You take the folder home and leave it on the table. It will keep.

@@ -1,0 +1,50 @@
+id: custody_first_weekend
+title: Your weekend
+text: >-
+  It is your weekend with {kid.name}, and the apartment feels both too small
+  and too empty. There is a list of things you planned, and a quiet worry
+  that none of them will be enough.
+tone: neutral
+category: custody
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { role: kid, custody: [shared], alive: true }
+weight: { base: 8 }
+cooldownYears: 4
+cast:
+  kid: { kind: child, presence: nearby, age: { min: 3, max: 17 } }
+choices:
+  - id: plan
+    label: Stick to the plan, and make it fun
+    outcome:
+      text: >-
+        The zoo, the pizza place, and an hour at the park. {kid.name} goes
+        home tired and happy, and says "see you next time" at the door like it
+        is a promise.
+      effects:
+        - { type: parenting, role: kid, warmth: 3, involvement: 5 }
+        - { type: relationship, role: kid, affection: 5, trust: 3 }
+        - { type: memory, role: kid, tag: shared_custody_weekends }
+  - id: ordinary
+    label: "Do nothing special, just be together"
+    outcome:
+      text: >-
+        You make pancakes and watch cartoons and fold laundry together. It is
+        the kind of ordinary day that, years from now, {kid.name} will remember as
+        home.
+      effects:
+        - { type: parenting, role: kid, warmth: 4, involvement: 4 }
+        - { type: relationship, role: kid, affection: 4, trust: 5 }
+        - { type: memory, role: kid, tag: shared_custody_weekends }
+  - id: work
+    label: Work through the weekend, with {kid.them} in the next room
+    outcome:
+      text: >-
+        You get a lot done. {kid.name} gets very good at entertaining
+        {kid.themself}, and slightly worse at believing you will be there.
+      effects:
+        - { type: parenting, role: kid, involvement: -4, warmth: -2 }
+        - { type: relationship, role: kid, affection: -3, trust: -3 }

@@ -112,6 +112,25 @@ interactions:
   # Good and great together: well short of every time.
   maxGoodShare: 0.85
 
+# E2a: children and parenting, judged on the careful player. Shares are of
+# lives reaching 50 (parents, adoption, ivf, surrogacy), of pregnancies
+# (miscarriage) and of children (childDeath).
+family:
+  parents: { min: 0.5, max: 0.9 }
+  adoption: { min: 0.005, max: 0.1 }
+  ivf: { min: 0.005, max: 0.12 }
+  surrogacy: { min: 0, max: 0.04 }
+  miscarriage: { min: 0.04, max: 0.16 }
+  childDeath: { min: 0.01, max: 0.08 }
+  # Raised warm vs cold (kindness at 18), strict vs relaxed (discipline at
+  # 18), involved vs absent (grades at 16-17): the difference between the
+  # means must be at least this, in points (grades: in GPA points).
+  styleEffect: { grades: 0.2, personality: 4 }
+  # The correlation of a child's starting smarts with their parents' mean.
+  inheritance: 0.3
+  # Children whose starting smarts fall outside their parents' range by more than the spread allows.
+  maxOutsideParents: 0.3
+
 coverage:
   minEvents: 300
   legendary: { min: 5, max: 10 }

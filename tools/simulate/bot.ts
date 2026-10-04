@@ -31,6 +31,8 @@ const POLICY: Record<ActionId, (affection: number) => number> = {
   divorce: (a) => (a < 25 ? 0.3 : 0.004),
   cut_contact: (a) => (a < 15 ? 0.05 : 0),
   reconcile: () => 0.1,
+  // E2a: couples who can try for a baby sometimes do.
+  try_for_baby: () => 0,
 };
 
 /** Asking out, at most one person a year. */

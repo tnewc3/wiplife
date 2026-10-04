@@ -47,7 +47,7 @@ export function replayLife(log: readonly InputRecord[], content: ContentBundle):
         state = resolveInteractionChoice(state, p.choiceId, content);
         break;
       case 'interactClose':
-        state = closeInteraction(state);
+        state = closeInteraction(state, content);
         break;
       case 'create':
         throw new Error('The input log has a second create input.');

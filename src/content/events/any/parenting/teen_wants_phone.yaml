@@ -1,0 +1,52 @@
+id: teen_wants_phone
+title: Everyone has one
+text: >-
+  {kid.name} makes the case with the calm of an expert witness: everyone has a
+  phone. Everyone. It is a safety issue, a social issue, and, in a pinch, a
+  human rights issue.
+tone: light
+category: parenting
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { family: { minors: { gte: 1 } } }
+weight: { base: 7 }
+cooldownYears: 4
+cast:
+  kid: { kind: child, presence: household, age: { min: 9, max: 14 } }
+choices:
+  - id: buy
+    label: Get {kid.them} one, with rules attached ($250)
+    visibleIf: { money: { gte: 250 } }
+    outcome:
+      text: >-
+        There is a written agreement, signed in two colors of pen, about
+        bedtime, charging and what happens at the dinner table. {kid.name}
+        reads none of it, and keeps all of it, mostly.
+      effects:
+        - { type: money, delta: -250 }
+        - { type: parenting, role: kid, strictness: 2, warmth: 2 }
+        - { type: relationship, role: kid, affection: 5, mood: 8 }
+  - id: wait
+    label: Say wait another year
+    outcome:
+      text: >-
+        {kid.name} accepts this in the spirit of a hostage negotiation. The
+        topic returns every few weeks, with new evidence.
+      effects:
+        - { type: parenting, role: kid, strictness: 4 }
+        - { type: childTrait, role: kid, key: discipline, delta: 1 }
+        - { type: relationship, role: kid, mood: -4 }
+  - id: earn
+    label: Offer to match what {kid.they} {kid:saves|save}
+    outcome:
+      text: >-
+        {kid.name} sets up a chart on the refrigerator and works at it with a
+        discipline you had not seen before. In three months, the phone is
+        earned, and {kid.they} {kid:knows|know} it.
+      effects:
+        - { type: parenting, role: kid, strictness: 2, involvement: 3 }
+        - { type: childTrait, role: kid, key: ambition, delta: 2 }
+        - { type: relationship, role: kid, trust: 4 }

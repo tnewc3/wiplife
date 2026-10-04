@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { content } from '../../../content';
-import { getCharacterSummary, getFamily, getHistoryFeed, getYearRecap } from '../../../engine/selectors';
+import { getCharacterSummary, getFamilyView, getFamily, getHistoryFeed, getYearRecap } from '../../../engine/selectors';
 import type { LifeState, Stats } from '../../../engine/types';
 import { useAppStore } from '../../../store/appStore';
 import { Button } from '../../components/Button';
@@ -15,6 +15,8 @@ import {
   LIFE_STAGE_LABELS,
   memberAgeLabel,
   money,
+  PROCESS_LABELS,
+  pregnancyLine,
   relativeLabel,
   romanceLine,
   schoolStatusLine,
@@ -75,6 +77,7 @@ export function HomeTab({ life }: { life: LifeState }) {
   const family = getFamily(life);
   const love = romanceLine(summary.romance.status, summary.romance.partnerName);
   const [profileOpen, setProfileOpen] = useState(false);
+  const familyView = getFamilyView(life, content);
 
   return (
     <div className="flex flex-col gap-4">
@@ -113,6 +116,23 @@ export function HomeTab({ life }: { life: LifeState }) {
           </p>
         )}
       </Card>
+
+      {(familyView.pregnancy || familyView.process) && (
+        <Card role="region" aria-labelledby="expecting-title">
+          <h3 id="expecting-title" className="text-lg font-bold">
+            {familyView.pregnancy ? 'Expecting' : PROCESS_LABELS[familyView.process!.kind].name}
+          </h3>
+          <p className="mt-1 break-words" data-testid="pregnancy-line">
+            {familyView.pregnancy
+              ? pregnancyLine(familyView.pregnancy, life.currentYear)
+              : familyView.process!.yearsLeft <= 0
+                ? 'An answer is due any day now.'
+                : familyView.process!.yearsLeft === 1
+                  ? 'In progress. An answer is due next year.'
+                  : `In progress. An answer is due in ${familyView.process!.yearsLeft} years.`}
+          </p>
+        </Card>
+      )}
 
       <YearRecapCard life={life} />
 

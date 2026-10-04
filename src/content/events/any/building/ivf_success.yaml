@@ -1,0 +1,24 @@
+# Registry: ivf.success. The cycle worked: a pregnancy begins.
+id: ivf_success
+title: Two lines
+text: >-
+  The call comes in the afternoon, from a nurse with good news in the nurse’s voice.
+  The cycle worked. The pregnancy has begun, and there is a date to circle.
+tone: light
+category: building
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires: { age: { gte: 18 } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  other: { kind: spouse, presence: anywhere, optional: true }
+autoOutcome:
+  text: >-
+    It took so much to get here that the joy comes late, and then in a rush.
+    You tell no one for a week, then everyone at once.
+  effects:
+    - { type: flag, key: used_ivf, value: true }
+    - { type: stat, key: happiness, delta: 11 }
+    - { type: stat, key: stress, delta: 3 }
+    - { type: history, text: 'IVF worked, and a baby was on the way.', importance: 3 }

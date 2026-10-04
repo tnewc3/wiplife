@@ -37,7 +37,7 @@ profiles:
     their: { kindness: 0.12, sociability: 0.15 }
     you: { kindness: 0.1, confidence: 0.06, happiness: 0.05 }
     repeat: { same: 8, total: 1.5 }
-    memories: { humiliated_them: -12, big_fight: -6, great_time_together: 4 }
+    memories: { humiliated_them: -12, big_fight: -6, great_time_together: 4, stepfamily_welcomed: 4, stepfamily_kept_distance: -4, expecting_together: 3, placed_a_baby: -3 }
   admiring:
     base: 3
     their: { kindness: 0.1, confidence: 0.05 }
@@ -98,7 +98,7 @@ profiles:
     their: { kindness: 0.2, discipline: 0.05 }
     you: { kindness: 0.1, confidence: 0.05 }
     repeat: { same: 6, total: 1.5 }
-    memories: { big_fight: 4, humiliated_them: -10, cheated_on_them: -25 }
+    memories: { big_fight: 4, humiliated_them: -10, cheated_on_them: -25, custody_fought: -6 }
   favor:
     base: 0
     their: { kindness: 0.12 }
@@ -112,6 +112,32 @@ profiles:
     you: { kindness: 0.1, smarts: 0.04 }
     repeat: { same: 7, total: 1.5 }
     memories: { you_helped_them: 3 }
+
+  # E2a: parenting.
+  nurture:
+    base: 10
+    their: { kindness: 0.08, sociability: 0.1 }
+    you: { kindness: 0.1, happiness: 0.05 }
+    repeat: { same: 7, total: 1.2 }
+    memories: { parent_cold_home: -6, parent_never_around: -6, parent_warm_home: 4, parent_in_front_row: 3, parent_sat_up_all_night: 3, parent_listened: 3, parent_kept_a_promise: 3, parent_stood_up_for_them: 3, parent_made_light_of_it: -5, shared_custody_weekends: 2, lost_their_sibling: -3 }
+  guide:
+    base: 4
+    their: { discipline: 0.1, ambition: 0.06 }
+    you: { smarts: 0.08, kindness: 0.06 }
+    repeat: { same: 7, total: 1.2 }
+    memories: { parent_never_around: -6, parent_always_there: 4, parent_listened: 2 }
+  firm:
+    base: -4
+    their: { discipline: 0.12, kindness: 0.05, riskTaking: -0.12 }
+    you: { confidence: 0.1, kindness: 0.08 }
+    repeat: { same: 9, total: 1.5 }
+    memories: { parent_cold_home: -8, parent_strict_rules: -4, parent_warm_home: 5, parent_lost_temper: -6, parent_let_them_choose: 3, parent_no_rules: -4 }
+  neglect:
+    base: 2
+    their: { sociability: -0.05 }
+    you: {}
+    repeat: { same: 5, total: 1 }
+    memories: {}
 
 # Diminishing returns. Gains (affection, trust, mood, and your own stat
 # gains) are multiplied by `same` for each earlier use of the same

@@ -11,3 +11,4 @@ actions:
   divorce: { events: [divorce_papers] }
   cut_contact: { events: [cut_contact_result] }
   reconcile: { events: [reconcile_attempt] }
+  try_for_baby: { events: [try_for_baby_talk] }

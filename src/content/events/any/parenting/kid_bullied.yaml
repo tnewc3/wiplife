@@ -1,0 +1,50 @@
+id: kid_bullied
+title: The kid in the hallway
+text: >-
+  {kid.name} comes home with a torn backpack and a story that has several
+  holes in it. After a few careful questions, it comes out: another kid at
+  school has been making {kid.their} life miserable.
+tone: serious
+category: parenting
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { family: { minors: { gte: 1 } } }
+weight: { base: 7 }
+cooldownYears: 4
+cast:
+  kid: { kind: child, presence: household, age: { min: 7, max: 15 } }
+choices:
+  - id: stand_up
+    label: Go to the school and make some noise
+    outcome:
+      text: >-
+        You sit in a small office until somebody with authority listens. The
+        bullying does not stop overnight, but it stops being allowed.
+      effects:
+        - { type: parenting, role: kid, involvement: 5, warmth: 3 }
+        - { type: relationship, role: kid, affection: 4, trust: 7 }
+        - { type: memory, role: kid, tag: parent_stood_up_for_them }
+        - { type: stat, key: stress, delta: 3 }
+  - id: coach
+    label: Teach {kid.them} how to handle it
+    outcome:
+      text: >-
+        You practice what to say in the kitchen, over and over, until it sounds
+        like a person and not a script. It works, partly.
+      effects:
+        - { type: parenting, role: kid, involvement: 3, strictness: 1 }
+        - { type: childTrait, role: kid, key: confidence, delta: 2 }
+  - id: toughen
+    label: Tell {kid.them} to toughen up
+    outcome:
+      text: >-
+        {kid.name} nods and goes quiet. It does not come up again, which you
+        take as a good sign, and which is not one.
+      effects:
+        - { type: parenting, role: kid, warmth: -4, involvement: -2 }
+        - { type: relationship, role: kid, trust: -6 }
+        - { type: memory, role: kid, tag: parent_made_light_of_it }
+        - { type: childStat, role: kid, key: stress, delta: 4 }

@@ -1,0 +1,16 @@
+id: test_f_adoption_match
+title: Test F Adoption Match
+text: A family moment.
+tone: neutral
+category: family
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires: { age: { gte: 18 } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  child: { kind: child, presence: anywhere }
+autoOutcome:
+  text: It happens.
+  effects:
+    - { type: flag, key: adopted_a_child, value: true }

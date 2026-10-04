@@ -12,6 +12,8 @@ drift:
     parent: 0.5
     stepparent: 1
     grandparent: 0.5
+    child: 0.4
+    stepchild: 1
     sibling: 0.7
     friend: 1.5
     partner: 1.2
@@ -27,6 +29,8 @@ drift:
     parent: 40
     stepparent: 25
     grandparent: 40
+    child: 45
+    stepchild: 20
     sibling: 30
     friend: 5
     partner: 20

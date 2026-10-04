@@ -4,6 +4,7 @@
  * conditionSchema in src/content/schemas/events.ts.
  */
 import type { Compare, Condition, ContentBundle } from '../content/schemas';
+import { familyHolds } from './family/query';
 import { whereabouts } from './presence';
 import { mostMissed, totalDebt } from './finance';
 import { romanceStatus, yearsInKind } from './relationships';
@@ -174,6 +175,7 @@ export function evaluate(condition: Condition | undefined, state: LifeState, ctx
     }
     return true;
   }
+  if ('family' in condition) return familyHolds(condition.family, state, ctx.content?.balance.relationships.adultAge);
   if ('memory' in condition) {
     const { role, tag } = condition.memory;
     return roleCheck(role, (id) => state.relationships[id]?.memories.some((m) => m.tag === tag) ?? false);
@@ -191,6 +193,15 @@ export function evaluate(condition: Condition | undefined, state: LifeState, ctx
       if (condition.status && !(rel && condition.status.includes(rel.status))) return false;
       if (condition.years && !(rel && compare(yearsInKind(state, rel), condition.years))) return false;
       if (condition.where && !(ctx.content && condition.where.includes(whereabouts(state, id, ctx.content)))) return false;
+      if (condition.gpa && !(person.child && compare(person.child.gpa, condition.gpa))) return false;
+      if (condition.style) {
+        for (const [line, bound] of Object.entries(condition.style)) {
+          const value = rel?.parenting?.[line as 'warmth' | 'strictness' | 'involvement'];
+          if (value === undefined || !compare(value, bound)) return false;
+        }
+      }
+      if (condition.custody && !(person.child && condition.custody.includes(person.child.custody))) return false;
+      if (condition.movedOut !== undefined && (person.child?.movedOutYear !== undefined) !== condition.movedOut) return false;
       return true;
     });
   }

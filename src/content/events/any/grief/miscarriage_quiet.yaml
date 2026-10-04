@@ -1,0 +1,52 @@
+# Follow-up of a miscarriage: the quiet that comes after.
+id: miscarriage_quiet
+title: The quiet room
+text: >-
+  It was {since}, and the grief has settled into the house like furniture.
+  There is a drawer you have not opened. Some days nobody mentions it, and some
+  days it is the only thing anyone can hear.
+tone: dark
+category: grief
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { flag: had_miscarriage }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  helper: { support: true, optional: true, age: { min: 18, max: 120 }, presence: nearby }
+choices:
+  - id: talk
+    label: Tell {helper.name} what it has been like
+    visibleIf: { role: helper }
+    outcome:
+      text: >-
+        {helper.name} does not try to fix it. {helper.They} {helper:sits|sit}
+        with you, and that turns out to be exactly the right thing.
+      effects:
+        - { type: memory, role: helper, tag: stood_by_you }
+        - { type: relationship, role: helper, affection: 5, trust: 6 }
+        - { type: stat, key: stress, delta: -6 }
+        - { type: stat, key: happiness, delta: 5 }
+  - id: work
+    label: Put it away, and get on with things
+    outcome:
+      text: >-
+        You get through the week by being very busy. It does not go away. It
+        waits, politely, for you to run out of tasks.
+      effects:
+        - { type: stat, key: stress, delta: 3 }
+        - { type: stat, key: ambition, delta: 2 }
+        - { type: innerConflict, delta: 3 }
+  - id: say_name
+    label: Give the loss a name, and say it out loud
+    outcome:
+      text: >-
+        It is strange to say, and then it is not. The word makes the loss
+        smaller and more real at the same time, and you can finally hold it.
+      effects:
+        - { type: stat, key: happiness, delta: 4 }
+        - { type: stat, key: stress, delta: -4 }
+        - { type: innerConflict, delta: -3 }

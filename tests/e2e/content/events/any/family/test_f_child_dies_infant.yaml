@@ -1,0 +1,17 @@
+id: test_f_child_dies_infant
+title: Test F Child Dies Infant
+text: A family moment.
+tone: neutral
+category: family
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires: { age: { gte: 18 } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  child: { kind: child, presence: anywhere, deceased: true }
+autoOutcome:
+  text: It happens.
+  effects:
+    - { type: flag, key: lost_a_child, value: true }
+    - { type: history, text: 'You lost your child.', importance: 3 }

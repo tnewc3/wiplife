@@ -1,0 +1,33 @@
+# Registry: ivf.start. Answers More → Family → IVF.
+id: ivf_start
+title: The clinic
+text: >-
+  The clinic is calm in a way that costs something. A specialist walks you
+  through the schedule: injections, appointments, the retrieval, and then the
+  wait. There are numbers, and the numbers are honest. Nothing is promised.
+tone: neutral
+category: building
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires: { age: { gte: 18 } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  other: { kind: spouse, presence: anywhere, optional: true }
+choices:
+  - id: begin
+    label: Begin a cycle and pay the clinic
+    outcome:
+      text: >-
+        You sign the consent forms, and the first appointment goes in the
+        calendar. The cycle will take a year to come to its answer, one way or the other.
+      effects:
+        - { type: cost, item: ivf_cycle }
+        - { type: process, action: start, process: ivf }
+        - { type: history, text: 'You began an IVF cycle.', importance: 2 }
+  - id: back
+    label: Not right now
+    outcome:
+      text: >-
+        You take the folder and the numbers home. The clinic says there is no
+        hurry, and is, as far as it can be, kind about it.

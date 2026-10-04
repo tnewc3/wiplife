@@ -1,0 +1,52 @@
+id: grown_child_asks_for_money
+title: A call from {kid.name}
+text: >-
+  {kid.name} calls, and spends a long time not getting to the point. When
+  {kid.they} finally {kid:does|do}, it comes out fast: a rough stretch, a
+  car that will not start, and a number that {kid.they} {kid:hates|hate} saying
+  out loud.
+tone: neutral
+category: grownkids
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { family: { children: { gte: 1 } } }
+    - { money: { gte: 1500 } }
+weight: { base: 7 }
+cooldownYears: 4
+cast:
+  kid: { kind: child, presence: anywhere, age: { min: 18, max: 60 } }
+choices:
+  - id: give
+    label: Send what {kid.they} {kid:needs|need} ($800)
+    outcome:
+      text: >-
+        You send it that afternoon, with a note that says it is not a loan. The
+        reply comes in four words, and it is the nicest thing anyone says to you
+        all week.
+      effects:
+        - { type: money, delta: -800 }
+        - { type: relationship, role: kid, affection: 6, trust: 6 }
+        - { type: parenting, role: kid, warmth: 3, involvement: 3 }
+  - id: loan
+    label: Offer a small loan, with a plan to repay ($300)
+    outcome:
+      text: >-
+        You work out a plan on the phone. {kid.name} is quiet at first, and
+        then grateful, and then determined to do it right.
+      effects:
+        - { type: money, delta: -300 }
+        - { type: relationship, role: kid, trust: 4 }
+        - { type: childTrait, role: kid, key: discipline, delta: 1 }
+  - id: decline
+    label: Say you cannot, and help in other ways
+    outcome:
+      text: >-
+        You say you cannot, honestly. Then you spend the evening on the phone
+        with {kid.name} helping to map out another way through. It is not what
+        was asked for, and it is something.
+      effects:
+        - { type: relationship, role: kid, affection: -1, trust: 2 }
+        - { type: parenting, role: kid, involvement: 3 }

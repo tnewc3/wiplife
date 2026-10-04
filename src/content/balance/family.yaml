@@ -1,0 +1,224 @@
+# Children and parenting (E2a): who can carry a pregnancy, fertility,
+# pregnancy, miscarriage, IVF, surrogacy, adoption, genetics, parenting
+# style, how children grow, what they cost and child support. Starting
+# proposals; Stage 12 (balancing) tunes them against simulation runs.
+# Everything is at the national average and scales with your city's cost of
+# living where it is money.
+
+carrying:
+  # Random nonbinary characters, relatives and the people you meet can carry a
+  # pregnancy with this chance. Women can, men can't; a custom nonbinary
+  # character chooses at creation.
+  nonbinaryChance: 0.5
+
+# Trying for a baby for a year. The chance is tryChance × the carrier's age
+# factor × the other parent's age factor × the carrier's health factor,
+# plus planBonus when you plan around it.
+fertility:
+  tryChance: 0.6
+  carrierAge:
+    - { at: 18, x: 1 }
+    - { at: 28, x: 1 }
+    - { at: 33, x: 0.85 }
+    - { at: 36, x: 0.65 }
+    - { at: 40, x: 0.35 }
+    - { at: 44, x: 0.1 }
+    - { at: 48, x: 0.02 }
+    - { at: 52, x: 0 }
+  otherAge:
+    - { at: 18, x: 1 }
+    - { at: 50, x: 0.95 }
+    - { at: 65, x: 0.7 }
+    - { at: 80, x: 0.4 }
+  # By the carrier's Health stat.
+  health:
+    - { at: 0, x: 0.45 }
+    - { at: 50, x: 0.9 }
+    - { at: 100, x: 1 }
+  # Other people count as having this Health.
+  npcHealth: 70
+  # Trying for a baby is offered only when a year of it has at least this chance.
+  minTryChance: 0.06
+  planBonus: 0.1
+
+# An intimate night between a pair where one can carry a pregnancy: the
+# chance of conceiving by the protection you chose, times the same age and
+# health factors.
+unplanned:
+  carefree: 0.14
+  careful: 0.012
+
+pregnancy:
+  miscarriage:
+    base: 0.075
+    # Multiplies the base, by the carrier's age and Health.
+    carrierAge:
+      - { at: 20, x: 0.9 }
+      - { at: 30, x: 1 }
+      - { at: 35, x: 1.6 }
+      - { at: 40, x: 2.8 }
+      - { at: 45, x: 4 }
+    health:
+      - { at: 0, x: 2 }
+      - { at: 50, x: 1.1 }
+      - { at: 100, x: 0.85 }
+
+ivf:
+  minAge: 21
+  maxAge: 45
+  # Chance a cycle works, by the carrier's age.
+  success:
+    - { at: 20, x: 0.5 }
+    - { at: 30, x: 0.45 }
+    - { at: 35, x: 0.35 }
+    - { at: 38, x: 0.25 }
+    - { at: 40, x: 0.15 }
+    - { at: 42, x: 0.08 }
+    - { at: 45, x: 0.02 }
+  waitYears: 1
+
+surrogacy:
+  minAge: 25
+  maxAge: 65
+  success: 0.75
+  waitYears: 1
+
+adoption:
+  minAge: 21
+  maxAge: 70
+  waitYears: { min: 1, max: 3 }
+  declineChance: 0.12
+  # Weights by the child's age at placement (index = years old).
+  childAgeWeights: [4, 4, 3, 3, 2, 2, 1.5, 1.5, 1, 1, 1, 0.5, 0.5]
+  # A conviction that brought probation or prison within this many years rules you out.
+  recordYears: 10
+  # What savings must still hold after the fees.
+  reserve: 3000
+
+genetics:
+  # A child's starting stats and personality: the mean of the biological
+  # parents' values, plus this spread.
+  noiseSd: 9
+  riskSd: 10
+  talentInherit: 0.35
+  newborn:
+    health: { mean: 88, sd: 7 }
+    happiness: { mean: 75, sd: 8 }
+    stress: { mean: 8, sd: 5 }
+  # With only one biological parent known (a stepchild's, or a donor), the
+  # other half comes from the general population.
+  populationShare: 0.5
+
+parenting:
+  start: { warmth: 50, strictness: 50, involvement: 50 }
+  # Each year the style moves this share of the way back to its baseline:
+  # it describes how you've been lately.
+  drift: 0.15
+  involvementBaseline: { household: 52, shared: 45, other: 30 }
+  inactivity: 4
+  stepShare: 0.5
+  # How a child feels about you when they arrive.
+  bond:
+    birth: { affection: { mean: 62, sd: 8 }, trust: { mean: 58, sd: 8 } }
+    adopted: { affection: { mean: 45, sd: 12 }, trust: { mean: 35, sd: 12 } }
+  words: { high: 62, low: 38 }
+  memories: { high: 75, low: 25, years: 3 }
+
+children:
+  # How much your style weighs on a child's growth, by their age.
+  ageWeight:
+    - { at: 0, x: 0.4 }
+    - { at: 3, x: 1 }
+    - { at: 12, x: 1 }
+    - { at: 17, x: 0.6 }
+    - { at: 22, x: 0.15 }
+    - { at: 26, x: 0 }
+  # Points a year at the extreme of a style line (ages 3–12), by trait.
+  personality:
+    kindness: { warmth: 1.6 }
+    confidence: { warmth: 1, involvement: 0.6, strictness: -0.4 }
+    discipline: { strictness: 1.5, involvement: 0.5 }
+    riskTaking: { strictness: -1, warmth: -0.5, involvement: -0.5 }
+    ambition: { involvement: 0.8, strictness: 0.5 }
+    sociability: { warmth: 0.7 }
+  smarts: { involvement: 0.8, warmth: 0.3 }
+  grades:
+    base: 2.7
+    smarts: 0.018
+    discipline: 0.012
+    happiness: 0.004
+    style: { warmth: 0.15, strictness: 0.25, involvement: 0.55 }
+    noiseSd: 0.3
+  happiness:
+    base: 64
+    style: { warmth: 22, strictness: -6, involvement: 6 }
+    rate: 0.45
+    noiseSd: 5
+  stress:
+    base: 14
+    style: { warmth: -10, strictness: 8, involvement: -3 }
+    rate: 0.45
+    noiseSd: 4
+  health: { base: 86, fitnessBase: 55, noiseSd: 3, rate: 0.12 }
+  affection:
+    base: 52
+    style: { warmth: 32, strictness: -6, involvement: 10 }
+    rate: 0.18
+  trust:
+    style: { warmth: 2, strictness: -0.8, involvement: 1.5 }
+  moodWarmth: 0.2
+  leaving: { age: 18, chance: 0.4, latest: 24, elsewhere: 0.3 }
+  career: { age: 21, employed: 0.8 }
+  # Yearly chance a child dies, by age. From 30, the usual odds for people
+  # you know apply (mortality.yaml).
+  death:
+    byAge:
+      - { at: 0, x: 0.004 }
+      - { at: 1, x: 0.0006 }
+      - { at: 5, x: 0.0002 }
+      - { at: 12, x: 0.0003 }
+      - { at: 17, x: 0.0007 }
+      - { at: 29, x: 0.0009 }
+    usualFrom: 30
+
+costs:
+  # Yearly, at the national average, by the child's age.
+  perChild:
+    - { at: 0, x: 7000 }
+    - { at: 3, x: 8500 }
+    - { at: 6, x: 6500 }
+    - { at: 12, x: 7500 }
+    - { at: 17, x: 9500 }
+  lifestyle: { frugal: 0.7, comfortable: 1, lavish: 1.7 }
+  # Your share when the child's other parent lives with you.
+  partnerShare: 0.55
+  sharedShare: 0.5
+
+custody:
+  case: { involvement: 0.45, warmth: 0.25, housing: 0.15, work: 0.15 }
+
+support:
+  # What you pay (share of your gross income, by how many children) when
+  # they live with their other parent, and never less than payMin.
+  pay: [0.14, 0.2, 0.25]
+  payMin: 1200
+  # Multiplies what you receive for two, and for three or more, children.
+  receiveMore: [1.6, 2.1]
+  # What you receive when they live with you, by the other parent's wealth.
+  receive: { poor: 800, working: 2000, middle: 4000, affluent: 7000, rich: 11000 }
+  untilAge: 18
+
+stepchildren:
+  # The chance someone you meet as a potential partner already has children, by their age.
+  chance:
+    - { at: 24, x: 0.03 }
+    - { at: 30, x: 0.12 }
+    - { at: 38, x: 0.3 }
+    - { at: 48, x: 0.4 }
+    - { at: 60, x: 0.25 }
+    - { at: 75, x: 0.05 }
+  # Weights for one, two or three children.
+  count: [6, 3, 1]
+  maxAge: 24
+  affection: { mean: 45, sd: 12 }
+  trust: { mean: 40, sd: 12 }

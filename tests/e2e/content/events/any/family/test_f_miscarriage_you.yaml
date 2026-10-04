@@ -1,0 +1,14 @@
+id: test_f_miscarriage_you
+title: Test F Miscarriage You
+text: A family moment.
+tone: neutral
+category: family
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires: { age: { gte: 18 } }
+weight: { base: 10 }
+followUpOnly: true
+autoOutcome:
+  text: It happens.
+  effects:
+    - { type: flag, key: had_miscarriage, value: true }

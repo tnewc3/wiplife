@@ -1,0 +1,52 @@
+id: baby_wont_sleep
+title: Three in the morning
+text: >-
+  It is three in the morning, and {kid.name} has been crying for an hour. You
+  have tried everything on the list, and several things that are not on it.
+  The house is dark, and very, very quiet apart from that.
+tone: neutral
+category: parenting
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { family: { minors: { gte: 1 } } }
+weight: { base: 8 }
+cooldownYears: 3
+cast:
+  kid: { kind: child, presence: household, age: { min: 0, max: 1 } }
+  helper: { support: true, optional: true, age: { min: 18, max: 120 }, presence: nearby }
+choices:
+  - id: comfort
+    label: Pick {kid.them} up, every time
+    outcome:
+      text: >-
+        You walk the hallway for two hours. {kid.name} falls asleep on your
+        shoulder at dawn, and you are afraid to put {kid.them} down.
+      effects:
+        - { type: parenting, role: kid, warmth: 4, involvement: 4 }
+        - { type: stat, key: stress, delta: 4 }
+        - { type: stat, key: health, delta: -1 }
+        - { type: memory, role: kid, tag: parent_sat_up_all_night }
+  - id: routine
+    label: Try the firm sleep routine
+    outcome:
+      text: >-
+        It is the longest hour of your life, and you listen to every second of
+        it. Two nights later, {kid.name} sleeps through. Nobody is certain it
+        was worth it, but everybody is asleep.
+      effects:
+        - { type: parenting, role: kid, strictness: 4, warmth: -2 }
+        - { type: stat, key: stress, delta: 2 }
+  - id: help
+    label: Ask {helper.name} to take a night
+    visibleIf: { role: helper }
+    outcome:
+      text: >-
+        {helper.name} comes over with earplugs and a thermos of coffee. You sleep
+        for eight hours straight, and wake up feeling like a person.
+      effects:
+        - { type: relationship, role: helper, affection: 4, trust: 3 }
+        - { type: stat, key: stress, delta: -5 }
+        - { type: stat, key: health, delta: 1 }

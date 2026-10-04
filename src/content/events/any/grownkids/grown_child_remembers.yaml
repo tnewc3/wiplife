@@ -1,0 +1,47 @@
+id: grown_child_remembers
+title: "I remember"
+text: >-
+  It comes up over coffee, out of nowhere: {kid.name} brings up the recital.
+  The one you missed. {kid.They} {kid:says|say} it lightly, and the lightness
+  does not hide anything.
+tone: serious
+category: grownkids
+rarity: uncommon
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { family: { children: { gte: 1 } } }
+    - { memory: { role: kid, tag: parent_missed_recital } }
+weight: { base: 8 }
+cooldownYears: 8
+cast:
+  kid: { kind: child, presence: anywhere, age: { min: 18, max: 60 } }
+choices:
+  - id: apologize
+    label: Say you are sorry, and mean it
+    outcome:
+      text: >-
+        You do not defend yourself. {kid.name} listens, and nods, and says that
+        it matters that you said it. Something that was stuck begins to move.
+      effects:
+        - { type: relationship, role: kid, affection: 6, trust: 8 }
+        - { type: stat, key: stress, delta: -3 }
+        - { type: memory, role: kid, tag: parent_listened }
+  - id: explain
+    label: Explain what was going on then
+    outcome:
+      text: >-
+        You explain, and it is all true, and {kid.name} says that {kid.they}
+        {kid:knows|know}. It is not the same as being sorry, and you both
+        notice.
+      effects:
+        - { type: relationship, role: kid, affection: -1, trust: -2 }
+  - id: deflect
+    label: Say it was a long time ago
+    outcome:
+      text: >-
+        {kid.name} nods slowly, and puts the topic away, and for the rest of
+        the coffee, you talk about the weather.
+      effects:
+        - { type: relationship, role: kid, affection: -5, trust: -6 }

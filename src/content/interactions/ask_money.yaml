@@ -5,7 +5,7 @@ group: practical
 profile: request
 inPerson: false
 availability:
-  kinds: [parent, stepparent, sibling, grandparent, friend]
+  kinds: [parent, stepparent, sibling, grandparent, child, stepchild, friend]
   you: { min: 6 }
   them: { min: 18 }
   requires:

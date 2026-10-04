@@ -3,7 +3,20 @@
  * JSON: no classes, no Dates, no functions. Money is whole dollars; stats are
  * integers from 0 to 100.
  */
-import type { CredentialType, DebtKind, DiscoveryKind, GenderCategory, GiftTier, HousingKind, Lifestyle, OutcomeTier, Program, Tier } from '../content/schemas';
+import type {
+  CredentialType,
+  DebtKind,
+  DiscoveryKind,
+  FamilyProcessKind,
+  GenderCategory,
+  GiftTier,
+  HousingKind,
+  Lifestyle,
+  OutcomeTier,
+  PregnancyHow,
+  Program,
+  Tier,
+} from '../content/schemas';
 import type { RngState } from './rng';
 
 export type { CredentialType, DebtKind, DiscoveryKind, GenderCategory, GiftTier, HousingKind, LatentKind, Lifestyle, OutcomeTier, Program, Tier } from '../content/schemas';
@@ -94,6 +107,8 @@ export interface Character {
   birthCityId: Id;
   familyWealth: FamilyWealth;
   custom: boolean;
+  /** E2a: you can carry a pregnancy (women can, men can't; nonbinary characters choose). It stays as it was at birth. */
+  canCarry: boolean;
 }
 
 export interface Person {
@@ -117,6 +132,90 @@ export interface Person {
   moodBase: number;
   /** E1: how well off they are, from their occupation and family background. */
   wealthLevel: FamilyWealth;
+  /** E2a: they can carry a pregnancy. */
+  canCarry: boolean;
+  /** E2a: a potential partner's children from before, by birth year; they become your stepchildren if you marry. */
+  priorChildren?: number[];
+  /** E2a: set for your children and stepchildren: the fuller data a child has. */
+  child?: ChildData;
+}
+
+export type ChildOrigin = 'birth' | 'adopted' | 'ivf' | 'surrogacy' | 'step';
+/** Where a child lives: with you, in shared custody, or with their other parent. */
+export type Custody = 'you' | 'shared' | 'other';
+
+/**
+ * E2a: a child's fuller data. Looks and smarts are on the Person (like every
+ * relative's), the personality is the Person's `traits` (all six for a
+ * child); the rest is here.
+ */
+export interface ChildData {
+  origin: ChildOrigin;
+  /** The other parent: your partner or ex; for a stepchild, the partner whose child they are. */
+  otherParentId?: Id;
+  custody: Custody;
+  /** A custody decision has been made (or none is needed: you were never apart from them). */
+  custodyDecided: boolean;
+  health: number;
+  happiness: number;
+  fitness: number;
+  stress: number;
+  geneticRisk: number;
+  talent: Id | null;
+  /** Grades this school year (0–4); 0 before school age. */
+  gpa: number;
+  /** Hidden identity and personality traits, rolled independently of their parents (for heir play). */
+  latent: Character['latent'];
+  /** The year a grown child moved out. */
+  movedOutYear?: number;
+}
+
+/** E2a: three lines, each 0–100, on a parent-child relationship (50 is even). */
+export interface ParentingStyle {
+  warmth: number;
+  strictness: number;
+  involvement: number;
+}
+
+/** E2a: a pregnancy and who it belongs to. */
+export interface Pregnancy {
+  startYear: number;
+  how: PregnancyHow;
+  /** Who carries it: you, a surrogate, or the person (their id). */
+  carrier: 'you' | 'surrogate' | Id;
+  /** The other parent (the person you conceived with; absent with a donor or surrogate). */
+  otherParentId?: Id;
+  /** An unplanned pregnancy waits for the decision event; the choice is kept here. */
+  decision: 'pending' | 'keep' | 'adoption';
+}
+
+/** E2a: an adoption, IVF cycle or surrogacy under way. */
+export interface FamilyProcess {
+  kind: FamilyProcessKind;
+  startYear: number;
+  /** The year it comes to an answer. */
+  dueYear: number;
+  /** IVF: who will carry. */
+  carrier?: 'you' | Id;
+  otherParentId?: Id;
+}
+
+/** E2a: child support through the ledger: you pay or receive it for children with this person. */
+export interface ChildSupport {
+  direction: 'pay' | 'receive';
+  personId: Id;
+}
+
+export interface FamilyState {
+  pregnancy: Pregnancy | null;
+  process: FamilyProcess | null;
+  support: ChildSupport | null;
+  /** Years of trying for a baby that haven't worked (reset by a pregnancy). */
+  attempts: number;
+  /** Children (born, adopted or step) who died before you. */
+  lostChildren: number;
+  /** Pregnancies that ended in miscarriage. */
+  miscarriages: number;
 }
 
 export type RelationshipKind =
@@ -124,6 +223,8 @@ export type RelationshipKind =
   | 'stepparent'
   | 'sibling'
   | 'grandparent'
+  | 'child'
+  | 'stepchild'
   | 'friend'
   | 'partner'
   | 'fiance'
@@ -158,6 +259,8 @@ export interface Relationship {
    * year starts from nothing).
    */
   interactions?: InteractionCounters;
+  /** E2a: your parenting style with this child (children and stepchildren only). */
+  parenting?: ParentingStyle;
 }
 
 /** E1: a person's interaction counters for one year. */
@@ -327,7 +430,12 @@ export interface Ledger {
   borrowed: number;
   /** Your share of costs at your parents' that your family covered because you couldn't. */
   support: number;
-  /** gross + retirement + interest − tax − housing − living − debtPayments (savings change by net + borrowed). */
+  /** E2a: what your children cost this year. */
+  children: number;
+  /** E2a: child support you paid and received this year. */
+  supportPaid: number;
+  supportReceived: number;
+  /** gross + retirement + interest + supportReceived − tax − housing − living − children − supportPaid − debtPayments (savings change by net + borrowed). */
   net: number;
 }
 
@@ -550,6 +658,8 @@ export interface LifeState {
   pending: EventInstance[];
   /** E1: the outcome card of the last interaction, until it is closed. */
   pendingInteraction: PendingInteraction | null;
+  /** E2a: pregnancy, adoption and other processes, child support and losses. */
+  family: FamilyState;
   history: HistoryEntry[];
   /** Every player input, for exact replay. */
   inputLog: InputRecord[];

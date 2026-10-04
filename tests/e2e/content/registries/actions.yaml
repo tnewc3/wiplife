@@ -8,3 +8,4 @@ actions:
   divorce: { events: [test_divorce] }
   cut_contact: { events: [test_cut_contact] }
   reconcile: { events: [test_reconcile] }
+  try_for_baby: { events: [test_try_for_baby] }

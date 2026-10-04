@@ -1,0 +1,111 @@
+# Registry: decision. Queued when an intimate night began a pregnancy nobody
+# planned. Always offers all three choices, written without judgment: every
+# one of them is a way people go on. {other} is the other parent (any kind of
+# person you were with); the engine passes them in.
+id: unplanned_pregnancy
+title: A test, and then another
+text: >-
+  The first test says one thing. You take a second to be sure, and it says the
+  same. There is going to be a baby, unless something is decided otherwise,
+  and the decision, in the end, is a short list: keep the pregnancy, carry it
+  and place the baby for adoption, or end it. You and {other.name} have not
+  said any of it out loud yet.
+tone: serious
+category: pregnancy
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { family: { pregnant: true } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  # Passed in by the engine: the person you conceived with.
+  other: { kind: friend, presence: anywhere }
+choices:
+  - id: keep
+    label: Keep the pregnancy
+    check:
+      base: 55
+      stats:
+        - { role: other, key: affection, weight: 0.3 }
+        - { role: other, key: trust, weight: 0.3 }
+        - { key: kindness, weight: 0.1 }
+      success:
+        text: >-
+          {other.name} takes a long breath, and then, slowly, smiles. It is not
+          what either of you planned. It is what you are going to do.
+        effects:
+          - { type: pregnancy, action: decide, choice: keep }
+          - { type: relationship, role: other, affection: 6, trust: 4, mood: 4 }
+          - { type: stat, key: happiness, delta: 4 }
+          - { type: stat, key: stress, delta: 6 }
+          - { type: history, text: 'You found out a baby was on the way, and decided to keep the pregnancy.', importance: 3 }
+      failure:
+        text: >-
+          {other.name} goes quiet, and stays quiet for a long time. When
+          {other.they} {other:speaks|speak}, it is to say that {other.they}
+          {other:needs|need} time. The decision is yours anyway, and you make it.
+        effects:
+          - { type: pregnancy, action: decide, choice: keep }
+          - { type: relationship, role: other, affection: -4, trust: -3, mood: -6 }
+          - { type: stat, key: stress, delta: 9 }
+          - { type: history, text: 'You found out a baby was on the way, and decided to keep the pregnancy, though it was not easy to hear.', importance: 3 }
+  - id: adoption
+    label: Carry it and place the baby for adoption
+    check:
+      base: 50
+      stats:
+        - { role: other, key: trust, weight: 0.3 }
+        - { key: kindness, weight: 0.1 }
+      success:
+        text: >-
+          You and {other.name} talk it through until the light changes. Someone
+          out there is waiting for exactly this. It does not make it easy,
+          only possible.
+        effects:
+          - { type: pregnancy, action: decide, choice: adoption }
+          - { type: relationship, role: other, trust: 3, mood: -2 }
+          - { type: stat, key: stress, delta: 6 }
+          - { type: history, text: 'You decided to place a baby for adoption.', importance: 3 }
+      failure:
+        text: >-
+          {other.name} does not know what to say, and says several wrong things
+          before saying nothing. You decide anyway.
+        effects:
+          - { type: pregnancy, action: decide, choice: adoption }
+          - { type: relationship, role: other, affection: -3, mood: -5 }
+          - { type: stat, key: stress, delta: 8 }
+          - { type: history, text: 'You decided to place a baby for adoption.', importance: 3 }
+  - id: end
+    label: End the pregnancy
+    check:
+      base: 55
+      stats:
+        - { role: other, key: trust, weight: 0.3 }
+        - { role: other, key: affection, weight: 0.2 }
+      success:
+        text: >-
+          You make the appointment, and {other.name} makes it easier to keep.
+          It is a decision, and it is yours, and afterward you are both quieter
+          than usual for a while.
+        effects:
+          - { type: pregnancy, action: decide, choice: end }
+          - { type: flag, key: ended_a_pregnancy, value: true }
+          - { type: relationship, role: other, trust: 3 }
+          - { type: stat, key: stress, delta: 4 }
+          - { type: history, text: 'You ended a pregnancy.', importance: 3 }
+          - { type: schedule, eventId: after_ending_pregnancy, inYears: [1, 1], cast: [other] }
+      failure:
+        text: >-
+          {other.name} has feelings about it that do not match yours, and says
+          so. It is a hard conversation, and it does not change the
+          decision.
+        effects:
+          - { type: pregnancy, action: decide, choice: end }
+          - { type: flag, key: ended_a_pregnancy, value: true }
+          - { type: relationship, role: other, affection: -6, trust: -5, mood: -8 }
+          - { type: stat, key: stress, delta: 8 }
+          - { type: history, text: 'You ended a pregnancy.', importance: 3 }
+          - { type: schedule, eventId: after_ending_pregnancy, inYears: [1, 1], cast: [other] }

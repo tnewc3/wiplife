@@ -1,0 +1,58 @@
+id: help_homework
+name: Help with homework
+blurb: Sit down with the schoolwork.
+group: parenting
+profile: guide
+inPerson: true
+availability:
+  kinds: [child, stepchild]
+  you: { min: 18 }
+  them: { min: 5, max: 17 }
+outcomes:
+  great:
+    text:
+      - "Something clicks for {person.name} halfway through the page, and {person.they} {person:finishes|finish} the rest alone, grinning."
+      - "You find a way to explain it that finally works. {person.name} announces that school is not that bad."
+    affection: 3
+    trust: 4
+    mood: 6
+    effects:
+      - { type: parenting, role: person, involvement: 6, warmth: 2, strictness: 1 }
+      - { type: childStat, role: person, key: smarts, delta: 2 }
+  good:
+    text:
+      - "You work through the problems together. {person.name} gets most of them right, and some of them wrong in interesting ways."
+      - "An hour at the kitchen table, and the homework is done. {person.name} even says thanks."
+    affection: 2
+    trust: 3
+    mood: 4
+    effects:
+      - { type: parenting, role: person, involvement: 5, strictness: 1 }
+      - { type: childStat, role: person, key: smarts, delta: 1 }
+  neutral:
+    text:
+      - "You sit nearby while {person.name} does the work. You mostly say 'mm-hm'."
+      - "It is mostly {person.name}'s work. You check it, and it is fine."
+    affection: 1
+    mood: 1
+    effects:
+      - { type: parenting, role: person, involvement: 3 }
+  bad:
+    text:
+      - "You do not remember how to do this either. {person.name} notices, and the evening gets tense."
+      - "You push too hard. {person.name} gets the answers right and the mood wrong."
+    affection: -2
+    trust: -1
+    mood: -4
+    effects:
+      - { type: parenting, role: person, involvement: 1, warmth: -2, strictness: 2 }
+  backfire:
+    text:
+      - "It turns into a shouting match about fractions. {person.name} storms off, and the homework stays unfinished."
+      - "You do the whole assignment for {person.name}, and the teacher notices. It is an awkward conversation."
+    affection: -4
+    trust: -3
+    mood: -8
+    effects:
+      - { type: parenting, role: person, warmth: -3, strictness: 3 }
+      - { type: childStat, role: person, key: stress, delta: 2 }

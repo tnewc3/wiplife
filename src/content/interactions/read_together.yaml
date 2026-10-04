@@ -1,0 +1,57 @@
+id: read_together
+name: Read together
+blurb: A book, a lap, a bedtime story.
+group: parenting
+profile: nurture
+inPerson: true
+availability:
+  kinds: [child, stepchild]
+  you: { min: 18 }
+  them: { min: 1, max: 11 }
+outcomes:
+  great:
+    text:
+      - "{person.name} makes you read the same page three times, then falls asleep on your arm before the ending."
+      - "You do all the voices. {person.name} laughs so hard {person.they} {person:gets|get} the hiccups, and asks for one more chapter."
+    affection: 4
+    trust: 3
+    mood: 8
+    effects:
+      - { type: parenting, role: person, warmth: 4, involvement: 5 }
+      - { type: childStat, role: person, key: smarts, delta: 1 }
+      - { type: stat, key: stress, delta: -2 }
+  good:
+    text:
+      - "{person.name} picks the book, and you read it twice. It is not the worst way to spend an evening."
+      - "{person.name} points at the pictures and tells you what happens next, mostly correctly."
+    affection: 3
+    trust: 2
+    mood: 5
+    effects:
+      - { type: parenting, role: person, warmth: 3, involvement: 4 }
+      - { type: stat, key: stress, delta: -1 }
+  neutral:
+    text:
+      - "{person.name} wriggles through the whole story and asks about dinner before the end."
+      - "You get through the book. {person.name} is more interested in the dog."
+    affection: 1
+    mood: 2
+    effects:
+      - { type: parenting, role: person, involvement: 2 }
+  bad:
+    text:
+      - "You are tired, and {person.name} can tell. The story ends early and not kindly."
+      - "{person.name} wants a different book. Then another. You run out of patience before {person.they} run out of books."
+    affection: -1
+    mood: -3
+    effects:
+      - { type: parenting, role: person, warmth: -1 }
+  backfire:
+    text:
+      - "You snap at {person.name} over a torn page. {person.They} {person:goes|go} very quiet, and the book stays closed."
+      - "Halfway through, you check your phone. {person.name} notices, and does not ask you to read anything again tonight."
+    affection: -3
+    trust: -2
+    mood: -6
+    effects:
+      - { type: parenting, role: person, warmth: -3, involvement: -2 }

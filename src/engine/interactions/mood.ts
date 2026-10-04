@@ -25,6 +25,8 @@ export function moodBaseline(state: LifeState, person: Person, content: ContentB
   if (rel) {
     value += b.affection * (rel.affection - 50);
     if (rel.status === 'estranged') value += b.estranged;
+    // E2a: a child's mood follows how warm their home is.
+    if (person.child) value += content.balance.family.children.moodWarmth * ((rel.parenting?.warmth ?? 50) - 50);
   }
   if (state.housing.kind === 'incarcerated') value += b.yourPrison;
   return clampInt(value, 0, 100);

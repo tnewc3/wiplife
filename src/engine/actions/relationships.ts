@@ -6,6 +6,7 @@
  * live in ./index.ts.
  */
 import type { ActionId, ContentBundle } from '../../content/schemas';
+import { canConceiveWith, tryChance } from '../family/carrying';
 import { canMoveInTogether } from '../housing';
 import {
   ASKABLE_KINDS,
@@ -68,6 +69,15 @@ export const RELATIONSHIP_ACTIONS: Record<ActionId, ActionRule> = {
   divorce: {
     irreversible: true,
     allowed: (state, rel) => rel.kind === 'spouse' && isCurrentPartner(state, rel),
+  },
+  try_for_baby: {
+    irreversible: false,
+    // E2a: your partner, fiancé or spouse, when exactly one of you can carry a
+    // pregnancy and a year of trying has a real chance.
+    allowed: (state, rel, person, content) =>
+      isCurrentPartner(state, rel) &&
+      canConceiveWith(state, person.id, content) &&
+      tryChance(state, person.id, false, content) >= content.balance.family.fertility.minTryChance,
   },
   cut_contact: {
     irreversible: true,

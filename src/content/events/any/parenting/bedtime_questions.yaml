@@ -1,0 +1,46 @@
+id: bedtime_questions
+title: One more question
+text: >-
+  The light is off, and {kid.name} is supposed to be asleep. Instead, in the
+  dark, comes a question about death, or the sky, or whether the dog has
+  feelings. It is a good question, and it is nine thirty.
+tone: light
+category: parenting
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { family: { minors: { gte: 1 } } }
+weight: { base: 7 }
+cooldownYears: 3
+cast:
+  kid: { kind: child, presence: household, age: { min: 4, max: 9 } }
+choices:
+  - id: honest
+    label: Answer as honestly as you can
+    outcome:
+      text: >-
+        You say you do not know, and that nobody does, and that it is a
+        wonderful thing to wonder about. {kid.name} thinks about this in the
+        dark, and says, "okay", and falls asleep.
+      effects:
+        - { type: parenting, role: kid, warmth: 4, involvement: 4 }
+        - { type: childStat, role: kid, key: smarts, delta: 1 }
+        - { type: memory, role: kid, tag: parent_listened }
+  - id: tomorrow
+    label: Say tomorrow, and mean it
+    outcome:
+      text: >-
+        {kid.name} accepts this, and will absolutely hold you to it. Tomorrow,
+        you realize, is going to be a long conversation.
+      effects:
+        - { type: parenting, role: kid, strictness: 2, involvement: 1 }
+  - id: sleep
+    label: Say it is time to sleep
+    outcome:
+      text: >-
+        The door closes, and the hallway is very quiet. In the morning,
+        {kid.name} does not mention it, and neither do you.
+      effects:
+        - { type: parenting, role: kid, strictness: 3, warmth: -2 }

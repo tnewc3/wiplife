@@ -1,0 +1,26 @@
+# Registry: birth.you. You carried the baby.
+id: birth_you
+title: Welcome
+text: >-
+  It is a long night, and then, all at once, it is a short one. {baby.name}
+  arrives loud, furious and perfect, and is put in your arms. For a while
+  there is nothing else in the world.
+tone: light
+category: pregnancy
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires: { age: { gte: 18 } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  baby: { kind: child, presence: anywhere }
+autoOutcome:
+  text: >-
+    Days blur. {baby.name} sleeps in short pieces and so do you. Everything
+    you owned is now arranged around someone who weighs less than a bag of
+    flour.
+  effects:
+    - { type: stat, key: happiness, delta: 10 }
+    - { type: stat, key: stress, delta: 6 }
+    - { type: parenting, role: baby, warmth: 6, involvement: 8 }
+    - { type: history, text: 'You had a baby, {baby.name}.', importance: 3 }

@@ -22,6 +22,11 @@ import { changeSeverity, setTreated } from '../health';
 import { sentence } from '../legal';
 import { changeRent, moveInTogether, moveTo, refreshHousingCost, sellHome, settleHousehold, supportingParent } from '../housing';
 import { payCost, rentMonthsAmount } from '../costs';
+import { createStepchildren } from '../family/children';
+import { applyCustody } from '../family/custody';
+import { shiftParenting } from '../family/parenting';
+import { beginPregnancy, decidePregnancy, failAttempt } from '../family/pregnancy';
+import { startProcess } from '../family/process';
 import { betray, giveMoney } from '../interactions/links';
 import { shiftMood } from '../interactions/mood';
 import { whereabouts } from '../presence';
@@ -195,7 +200,11 @@ const handlers: { [T in Effect['type']]: Handler<T> } = {
     if (effect.kind !== undefined && effect.kind !== rel.kind && canChangeKind(state, id, effect.kind, ctx.content)) {
       rel.kind = effect.kind;
       rel.kindSince = state.currentYear;
-      if (effect.kind === 'spouse') rel.wasSpouse = true;
+      if (effect.kind === 'spouse') {
+        rel.wasSpouse = true;
+        // E2a: marrying someone with children makes them your stepchildren.
+        createStepchildren(state, ctx.rng, id, ctx.content);
+      }
     }
     if (effect.status !== undefined && canSetStatus(state, id, effect.status)) rel.status = effect.status;
     // A partner who lived with you and no longer is your partner moves out.
@@ -283,6 +292,49 @@ const handlers: { [T in Effect['type']]: Handler<T> } = {
     const id = ctx.cast[effect.role];
     if (id !== undefined) betray(state, id, effect.act, ctx.rng, ctx.content);
   },
+
+  // E2a: a pregnancy begins, is decided on, or a year of trying didn't work.
+  pregnancy: (state, effect, ctx) => {
+    if (effect.action === 'begin') {
+      const id = ctx.cast[effect.role ?? ''];
+      if (id !== undefined && effect.how !== undefined) beginPregnancy(state, effect.how, id, ctx.content);
+    } else if (effect.action === 'decide') {
+      if (effect.choice !== undefined) decidePregnancy(state, effect.choice);
+    } else {
+      failAttempt(state);
+    }
+  },
+
+  // E2a: your parenting style with a child.
+  parenting: (state, effect, ctx) => {
+    const rel = state.relationships[ctx.cast[effect.role] ?? ''];
+    if (!rel || (rel.kind !== 'child' && rel.kind !== 'stepchild')) return;
+    shiftParenting(rel, { ...(effect.warmth !== undefined ? { warmth: effect.warmth } : {}), ...(effect.strictness !== undefined ? { strictness: effect.strictness } : {}), ...(effect.involvement !== undefined ? { involvement: effect.involvement } : {}) }, ctx.content);
+  },
+
+  // E2a: a child's own stats and traits.
+  childStat: (state, effect, ctx) => {
+    const person = state.people[ctx.cast[effect.role] ?? ''];
+    const kid = person?.child;
+    if (!person || !kid || !person.alive) return;
+    if (effect.key === 'smarts') person.smarts = clampInt(person.smarts + effect.delta, 0, 100);
+    else if (effect.key === 'looks') person.looks = clampInt(person.looks + effect.delta, 0, 100);
+    else kid[effect.key] = clampInt(kid[effect.key] + effect.delta, 0, 100);
+  },
+  childTrait: (state, effect, ctx) => {
+    const person = state.people[ctx.cast[effect.role] ?? ''];
+    if (!person?.child || !person.alive) return;
+    person.traits[effect.key] = clampInt((person.traits[effect.key] ?? 50) + effect.delta, 0, 100);
+  },
+
+  // E2a: where the children you had with the other parent live.
+  custody: (state, effect, ctx) => {
+    const id = ctx.cast[effect.role];
+    if (id !== undefined) applyCustody(state, id, effect.choice, ctx.content);
+  },
+
+  // E2a: an adoption, IVF cycle or surrogacy begins (its fees are cost effects beside this one).
+  process: (state, effect, ctx) => startProcess(state, ctx.rng, effect.process, ctx.content),
 };
 
 /** Applies effects in order. */

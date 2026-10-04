@@ -1,0 +1,27 @@
+# Registry: birth.placedYou. You carried the baby and placed them for adoption.
+id: placed_for_adoption_you
+title: Goodbye, for now
+text: >-
+  The baby is born, and healthy, and yours for a few hours. You hold the baby
+  until it is time. You have decided, and you still do not know how you will
+  walk out of this room.
+tone: dark
+category: pregnancy
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires: { age: { gte: 18 } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  other: { kind: friend, presence: anywhere, optional: true }
+autoOutcome:
+  text: >-
+    A family is waiting down the hall. You hand over the baby, and they thank
+    you in the way people do when thanks is not big enough. It is the right
+    decision, and it breaks something in you anyway.
+  effects:
+    - { type: flag, key: placed_baby_for_adoption, value: true }
+    - { type: stat, key: happiness, delta: -12 }
+    - { type: stat, key: stress, delta: 12 }
+    - { type: history, text: 'You gave birth and placed the baby for adoption.', importance: 3 }
+    - { type: schedule, eventId: after_placing_adoption, inYears: [1, 2] }

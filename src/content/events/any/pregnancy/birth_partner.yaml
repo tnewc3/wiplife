@@ -1,0 +1,28 @@
+# Registry: birth.partner. Your partner carried the baby.
+id: birth_partner
+title: The longest night
+text: >-
+  You hold {carrier.name}'s hand for what feels like a day. Then there is a
+  sound you have never heard, and a nurse says your name, and {baby.name} is
+  here.
+tone: light
+category: pregnancy
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires: { age: { gte: 18 } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  baby: { kind: child, presence: anywhere }
+  # Passed in by the engine: the partner who carried the baby.
+  carrier: { kind: friend, presence: anywhere }
+autoOutcome:
+  text: >-
+    {carrier.name} is exhausted and radiant and not taking questions.
+    {baby.name} sleeps through all of it. You do not stop looking.
+  effects:
+    - { type: relationship, role: carrier, affection: 8, trust: 5, mood: 10 }
+    - { type: stat, key: happiness, delta: 10 }
+    - { type: stat, key: stress, delta: 5 }
+    - { type: parenting, role: baby, warmth: 6, involvement: 8 }
+    - { type: history, text: '{carrier.name} gave birth to {baby.name}, your child.', importance: 3 }

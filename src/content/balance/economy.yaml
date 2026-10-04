@@ -134,6 +134,13 @@ costs:
   wedding_big: { amount: 32000, familyHelp: true }
   # E1: a thank-you meal for someone who helped you.
   thank_you_meal: { amount: 60, familyHelp: false }
+  # E2a: building a family. Adoption fees (the agency's, then the placement's),
+  # an IVF cycle, and surrogacy (the agency's, then the rest at the match).
+  adoption_fee: { amount: 6000, familyHelp: true }
+  adoption_placement: { amount: 9000, familyHelp: true }
+  ivf_cycle: { amount: 15000, familyHelp: true }
+  surrogacy_agency: { amount: 35000, familyHelp: true }
+  surrogacy_balance: { amount: 60000, familyHelp: true }
 
 # C1: the share of a cost your family covers, by family wealth, times how
 # close you are to your closest living parent (affection ÷ 100). Nothing

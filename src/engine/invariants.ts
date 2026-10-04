@@ -4,6 +4,7 @@
  */
 import type { ContentBundle } from '../content/schemas';
 import { ageOf, isCurrentPartner, isFamilyKind, isPartnerKind, isRomanticKind, kindSince } from './relationships';
+import { familyFailures } from './family/invariants';
 import { interactionFailures } from './interactions/invariants';
 import { consistencyProblems } from './presence';
 import { isRngState } from './rng';
@@ -113,12 +114,12 @@ export function checkInvariants(state: LifeState, content: ContentBundle): strin
   if (!independent && f.debts.length > 0) fail('a child has debt');
   if (f.lastLedger) {
     const l = f.lastLedger;
-    for (const key of ['gross', 'retirement', 'tax', 'housing', 'living', 'debtPayments', 'interest', 'debtInterest', 'borrowed', 'support'] as const) {
+    for (const key of ['gross', 'retirement', 'tax', 'housing', 'living', 'debtPayments', 'interest', 'debtInterest', 'borrowed', 'support', 'children', 'supportPaid', 'supportReceived'] as const) {
       money(`lastLedger.${key}`, l[key]);
       if (l[key] < 0) fail(`lastLedger.${key} must not be negative`);
     }
     money('lastLedger.net', l.net);
-    if (l.net !== l.gross + l.retirement + l.interest - l.tax - l.housing - l.living - l.debtPayments) fail('lastLedger.net does not add up');
+    if (l.net !== l.gross + l.retirement + l.interest + l.supportReceived - l.tax - l.housing - l.living - l.children - l.supportPaid - l.debtPayments) fail('lastLedger.net does not add up');
     if (l.year > state.currentYear || l.year <= state.birthYear) fail('lastLedger is for a year outside the life');
   }
   if (state.career.gig && c.age < content.balance.economy.gig.minAge) fail('gig work before the minimum age');
@@ -173,6 +174,9 @@ export function checkInvariants(state: LifeState, content: ContentBundle): strin
 
   // Interactions (E1).
   failures.push(...interactionFailures(state, content));
+
+  // Children and parenting (E2a).
+  failures.push(...familyFailures(state, content));
 
   // People and relationships.
   const { parentAgeAtBirth } = content.balance.creation.family;

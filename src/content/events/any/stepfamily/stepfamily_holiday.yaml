@@ -1,0 +1,47 @@
+id: stepfamily_holiday
+title: Whose tradition
+text: >-
+  The holidays are coming, and with them an argument nobody wants: two sets of
+  traditions, two sets of expectations, and {kid.name}, who has opinions about
+  all of them.
+tone: neutral
+category: stepfamily
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { family: { steps: { gte: 1 } } }
+weight: { base: 6 }
+cooldownYears: 3
+cast:
+  kid: { kind: stepchild, presence: household, age: { min: 3, max: 17 } }
+choices:
+  - id: blend
+    label: "Blend them, with one tradition from each side"
+    outcome:
+      text: >-
+        It takes two hours of negotiation and one rewritten recipe. {kid.name}
+        decides the new version is the real one, and defends it fiercely.
+      effects:
+        - { type: relationship, role: kid, affection: 4, trust: 3 }
+        - { type: stat, key: happiness, delta: 3 }
+        - { type: memory, role: kid, tag: stepfamily_welcomed }
+  - id: theirs
+    label: Let {kid.name} choose
+    outcome:
+      text: >-
+        {kid.name} chooses with the gravity of a judge. You do exactly as
+        ordered, and {kid.they} {kid:seems|seem} to notice that you did.
+      effects:
+        - { type: relationship, role: kid, affection: 5, trust: 5 }
+        - { type: parenting, role: kid, warmth: 3, strictness: -3 }
+  - id: yours
+    label: Stick with what you know
+    outcome:
+      text: >-
+        The day goes the way your days always go. {kid.name} is polite,
+        and a little bored, and makes a point of saying so.
+      effects:
+        - { type: relationship, role: kid, affection: -3, mood: -3 }
+        - { type: memory, role: kid, tag: stepfamily_kept_distance }

@@ -3,10 +3,13 @@
  * in this fixed order. The legal step (Stage 9) comes before school and work,
  * so a release from prison opens them again in the same year; while you're
  * in prison, the later steps do their reduced share (no school, no work, no
- * housing or living costs, no discoveries, prison events only). Steps for systems that don't exist yet are empty
+ * housing or living costs, no discoveries, prison events only). The family
+ * step (E2a) comes right after NPCs age, so a newborn or a child's death counts
+ * in the same year's ledger and events. Steps for systems that don't exist yet are empty
  * functions in src/engine/systems, filled in by later stages.
  */
 import type { ContentBundle } from '../content/schemas';
+import { runFamily } from './family/step';
 import { runMoods } from './interactions/mood';
 import { advanceAge } from './systems/aging';
 import { runCareer } from './systems/career';
@@ -29,6 +32,7 @@ export interface PipelineStep {
 export const YEAR_PIPELINE: readonly PipelineStep[] = [
   { id: 'aging', run: advanceAge },
   { id: 'npcs', run: ageNpcs },
+  { id: 'family', run: runFamily },
   { id: 'legal', run: runLegal },
   { id: 'education', run: runEducation },
   { id: 'career', run: runCareer },

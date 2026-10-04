@@ -1,0 +1,26 @@
+# Registry: birth.surrogate. A surrogate carried the baby.
+id: birth_surrogate
+title: The call
+text: >-
+  The phone rings in the middle of the night, and the voice on it is the
+  surrogate's: it is time. You are in the room when {baby.name} is born, and
+  the surrogate is the first to smile at you.
+tone: light
+category: pregnancy
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires: { age: { gte: 18 } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  baby: { kind: child, presence: anywhere }
+autoOutcome:
+  text: >-
+    You carry {baby.name} out of the hospital in a car seat that took you two
+    hours to install. Someone gave you a great gift, and you will say so
+    for the rest of your life.
+  effects:
+    - { type: stat, key: happiness, delta: 11 }
+    - { type: stat, key: stress, delta: 4 }
+    - { type: parenting, role: baby, warmth: 6, involvement: 8 }
+    - { type: history, text: 'Your child {baby.name} was born through surrogacy.', importance: 3 }

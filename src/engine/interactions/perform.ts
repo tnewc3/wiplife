@@ -19,6 +19,7 @@ import {
   type InteractionTier,
   type OutcomeTier,
 } from '../../content/schemas';
+import { fittingResults, queueResult } from '../actions/result';
 import { InvalidInputError } from '../creation/input';
 import { curveAt } from '../curve';
 import { evaluate } from '../conditions';
@@ -31,7 +32,7 @@ import { chance, cloneRng, nextInt } from '../rng';
 import { renderText } from '../text';
 import type { Id, InteractionCounters, LifeState, MoneyChange, PendingInteraction } from '../types';
 import { INTERACTION_ROLE, isInteractionAvailable } from './availability';
-import { canAffordGift, giftPrice } from './links';
+import { canAffordGift, extraChance, giftPrice } from './links';
 import { shiftMood } from './mood';
 import { availableTier, reactionScore, repeatsThisYear, returnsFactor, rollTier, type Repeats } from './reaction';
 
@@ -80,6 +81,12 @@ function counters(rel: { interactions?: InteractionCounters }, year: number): In
 /** Your own stat gains shrink with repeats too (a hug that cheers you up less each time); losses don't. */
 function scaleEffects(effects: readonly Effect[], factor: number): Effect[] {
   return effects.flatMap((e): Effect[] => {
+    // E2a: parenting gains (a warm or involved moment) shrink with repeats too; losses don't.
+    if (e.type === 'parenting') {
+      const scale = (v: number | undefined) => (v !== undefined && v > 0 ? Math.round(v * factor) : v);
+      const next = { ...e, ...(e.warmth !== undefined ? { warmth: scale(e.warmth) } : {}), ...(e.strictness !== undefined ? { strictness: scale(e.strictness) } : {}), ...(e.involvement !== undefined ? { involvement: scale(e.involvement) } : {}) };
+      return next.warmth || next.strictness || next.involvement ? [next as Effect] : [];
+    }
     if (e.type !== 'stat') return [e];
     const gain = e.key === 'stress' ? e.delta < 0 : e.delta > 0;
     if (!gain) return [e];
@@ -119,7 +126,7 @@ function applyConsequence(draft: Draft<LifeState>, moment: Moment, c: Consequenc
   const textCtx = () => textContext(draft, cast(personId), content);
   for (const extra of c.extras) {
     if (extra.if && !evaluate(extra.if, draft, { cast: cast(personId), roles: 'strict', content })) continue;
-    if (extra.chance && !chance(draft.rng, content.balance.interactions.chances[extra.chance])) continue;
+    if (extra.chance && !chance(draft.rng, extraChance(draft, extra.chance, personId, content))) continue;
     applyEffects(draft, extra.effects as Effect[], effectCtx);
     if (extra.note) pending.notes.push(renderText(extra.note, textCtx()));
   }
@@ -259,14 +266,29 @@ export function resolveInteractionChoice(state: LifeState, choiceId: unknown, co
   });
 }
 
-/** Closes the outcome card. Throws InvalidInputError when there is none, or its choice is still waiting. */
-export function closeInteraction(state: LifeState): LifeState {
+/**
+ * Closes the outcome card. An intimate night that began an unplanned
+ * pregnancy then opens its decision event (keep it, place the baby for
+ * adoption, or end it), moving to the 'action' phase like a management
+ * action's result. Throws InvalidInputError when there is no card, or its
+ * choice is still waiting.
+ */
+export function closeInteraction(state: LifeState, content: ContentBundle): LifeState {
   const pending = state.pendingInteraction;
   const bad = (message: string) => new InvalidInputError([{ path: 'interaction', message }]);
   if (!pending) throw bad('No outcome card is open.');
   if (pending.choice && pending.choice.chosen === undefined) throw bad('The moment is waiting for a choice.');
   return produce(state, (draft) => {
+    draft.rng = cloneRng(state.rng);
     draft.inputLog.push({ year: draft.currentYear, kind: 'interactClose', payload: {} });
     draft.pendingInteraction = null;
+    const pregnancy = draft.family.pregnancy;
+    if (pregnancy?.decision === 'pending') {
+      const cast: Record<Id, Id> = pregnancy.otherParentId !== undefined ? { other: pregnancy.otherParentId } : {};
+      const options = fittingResults(draft, content.registries.family.decision, cast, content);
+      // The decision always has an event (the content build checks); without one the pregnancy simply goes on.
+      if (options.length > 0) queueResult(draft, options, cast);
+      else pregnancy.decision = 'keep';
+    }
   });
 }

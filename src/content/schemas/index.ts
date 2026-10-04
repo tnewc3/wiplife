@@ -19,6 +19,7 @@ import { conditionDefSchema, healthBalanceSchema, healthRegistrySchema } from '.
 import { legalBalanceSchema, legalRegistrySchema, offenseSchema } from './legal';
 import { discoveryBalanceSchema, discoveryRegistrySchema, discoveryTextSchema } from './discovery';
 import { interactionRegistrySchema, interactionSchema, interactionsBalanceSchema } from './interactions';
+import { familyBalanceSchema, familyRegistrySchema } from './family';
 
 export * from './balance';
 export * from './careers';
@@ -34,6 +35,7 @@ export * from './health';
 export * from './legal';
 export * from './discovery';
 export * from './interactions';
+export * from './family';
 
 /**
  * Collections: a folder under src/content with one YAML file per definition,
@@ -78,6 +80,7 @@ export const singletonTypes = {
   'balance/legal': legalBalanceSchema,
   'balance/discovery': discoveryBalanceSchema,
   'balance/interactions': interactionsBalanceSchema,
+  'balance/family': familyBalanceSchema,
   'balance/targets': targetsBalanceSchema,
   'character/identity': identityOptionsSchema,
   'character/appearance': appearanceOptionsSchema,
@@ -97,6 +100,7 @@ export const singletonTypes = {
   'registries/legal': legalRegistrySchema,
   'registries/discovery': discoveryRegistrySchema,
   'registries/interactions': interactionRegistrySchema,
+  'registries/family': familyRegistrySchema,
 } as const;
 
 export type SingletonPath = keyof typeof singletonTypes;
@@ -130,6 +134,7 @@ export const contentBundleSchema = z.strictObject({
     legal: legalBalanceSchema,
     discovery: discoveryBalanceSchema,
     interactions: interactionsBalanceSchema,
+    family: familyBalanceSchema,
     targets: targetsBalanceSchema,
   }),
   character: z.strictObject({ identity: identityOptionsSchema, appearance: appearanceOptionsSchema }),
@@ -152,6 +157,7 @@ export const contentBundleSchema = z.strictObject({
     legal: legalRegistrySchema,
     discovery: discoveryRegistrySchema,
     interactions: interactionRegistrySchema,
+    family: familyRegistrySchema,
   }),
 });
 

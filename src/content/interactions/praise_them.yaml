@@ -1,0 +1,53 @@
+id: praise_them
+name: Praise
+blurb: Tell them what they did well.
+group: parenting
+profile: nurture
+inPerson: false
+availability:
+  kinds: [child, stepchild]
+  you: { min: 18 }
+  them: { min: 2, max: 40 }
+outcomes:
+  great:
+    text:
+      - "{person.name} stands a little taller. {person.They} {person:tells|tell} you about it again at dinner, and again at breakfast."
+      - "You say exactly the right thing. {person.name} looks at you for a moment, then hugs you hard."
+    affection: 4
+    trust: 3
+    mood: 9
+    effects:
+      - { type: parenting, role: person, warmth: 5, strictness: -1 }
+      - { type: childTrait, role: person, key: confidence, delta: 1 }
+  good:
+    text:
+      - "{person.name} beams. Proud is a good look on a kid."
+      - "{person.name} shrugs it off, but you catch the smile afterwards."
+    affection: 3
+    trust: 2
+    mood: 6
+    effects:
+      - { type: parenting, role: person, warmth: 4 }
+  neutral:
+    text:
+      - "{person.name} says 'thanks' the way kids do when they are thinking about something else."
+      - "{person.name} nods. It does not seem to register, this time."
+    affection: 1
+    mood: 2
+    effects:
+      - { type: parenting, role: person, warmth: 1 }
+  bad:
+    text:
+      - "{person.name} gives you a look. It sounded like you were reading from a card."
+      - "{person.name} says that is not even the part {person.they} {person:cares|care} about."
+    affection: -1
+    mood: -2
+  backfire:
+    text:
+      - "You praise the wrong thing. {person.name} hears a comparison, and gets quiet."
+      - "'You always say that,' {person.name} says, and walks out of the room."
+    affection: -3
+    trust: -2
+    mood: -5
+    effects:
+      - { type: parenting, role: person, warmth: -1 }

@@ -1,0 +1,14 @@
+id: test_f_surrogacy_match
+title: Test F Surrogacy Match
+text: A family moment.
+tone: neutral
+category: family
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires: { age: { gte: 18 } }
+weight: { base: 10 }
+followUpOnly: true
+autoOutcome:
+  text: It happens.
+  effects:
+    - { type: flag, key: used_surrogate, value: true }

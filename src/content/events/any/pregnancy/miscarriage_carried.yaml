@@ -1,0 +1,49 @@
+# Registry: miscarriage.carried. Someone you were having a baby with lost the
+# pregnancy.
+id: miscarriage_carried
+title: The phone call
+text: >-
+  {carrier.name} calls, and the first thing you hear is the pause. The
+  pregnancy is over. {carrier.They} {carrier:is|are} home, and not hurt, and
+  {carrier.their} voice does not sound like {carrier.theirs}.
+tone: dark
+category: pregnancy
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires: { age: { gte: 18 } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  carrier: { kind: spouse, presence: anywhere }
+choices:
+  - id: go
+    label: Go to {carrier.name} right away
+    outcome:
+      text: >-
+        You do not say much. You do the dishes, and make tea, and sit on the
+        floor of the bedroom until it is dark. It is, you will think later,
+        the most useful thing you did all year.
+      effects:
+        - { type: flag, key: had_miscarriage, value: true }
+        - { type: relationship, role: carrier, affection: 6, trust: 8, mood: -4 }
+        - { type: stat, key: happiness, delta: -14 }
+        - { type: stat, key: stress, delta: 10 }
+        - { type: history, text: 'You and {carrier.name} lost a pregnancy.', importance: 3 }
+        - { type: schedule, eventId: miscarriage_partner_talk_spouse, inYears: [1, 1] }
+        - { type: schedule, eventId: miscarriage_partner_talk_partner, inYears: [1, 1] }
+        - { type: schedule, eventId: miscarriage_anniversary, inYears: [3, 5] }
+  - id: space
+    label: Give {carrier.name} space
+    outcome:
+      text: >-
+        {carrier.name} said {carrier.they} needed room, so you give it, and
+        nobody is sure whether that was right.
+      effects:
+        - { type: flag, key: had_miscarriage, value: true }
+        - { type: relationship, role: carrier, affection: -4, trust: -3, mood: -8 }
+        - { type: stat, key: happiness, delta: -14 }
+        - { type: stat, key: stress, delta: 10 }
+        - { type: history, text: 'You and {carrier.name} lost a pregnancy.', importance: 3 }
+        - { type: schedule, eventId: miscarriage_partner_talk_spouse, inYears: [1, 1] }
+        - { type: schedule, eventId: miscarriage_partner_talk_partner, inYears: [1, 1] }
+        - { type: schedule, eventId: miscarriage_anniversary, inYears: [3, 5] }

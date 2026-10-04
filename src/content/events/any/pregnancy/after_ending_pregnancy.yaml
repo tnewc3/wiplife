@@ -1,0 +1,40 @@
+# Follow-up of unplanned_pregnancy (when you ended the pregnancy). Written
+# without judgment: people feel relief, grief, both, or neither.
+id: after_ending_pregnancy
+title: Afterward
+text: >-
+  It was {since}, and some days it is behind you and some days it is right
+  there. Today it is somewhere in between. {other.name} knows, and you wonder
+  whether to bring it up.
+tone: neutral
+category: pregnancy
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { flag: ended_a_pregnancy }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  other: { kind: friend, presence: anywhere }
+choices:
+  - id: talk
+    label: Talk about it with {other.name}
+    outcome:
+      text: >-
+        You say what you are feeling, and it turns out to be several things at
+        once. {other.name} listens, and says a few of the same ones back.
+      effects:
+        - { type: relationship, role: other, affection: 3, trust: 5 }
+        - { type: stat, key: stress, delta: -4 }
+        - { type: stat, key: happiness, delta: 2 }
+  - id: alone
+    label: Keep it to yourself
+    outcome:
+      text: >-
+        You do not need to explain it to anyone. It is yours to carry, or to
+        put down, whenever you are ready.
+      effects:
+        - { type: stat, key: stress, delta: -1 }
+        - { type: innerConflict, delta: 2 }

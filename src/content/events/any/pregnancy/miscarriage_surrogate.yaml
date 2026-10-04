@@ -1,0 +1,29 @@
+# Registry: miscarriage.surrogate. The surrogate's pregnancy ended.
+id: miscarriage_surrogate
+title: No heartbeat
+text: >-
+  The agency calls, and gently. The pregnancy has ended. The surrogate is
+  well, and so sorry, and so are you. You hang up and look at the room you
+  have been getting ready.
+tone: dark
+category: pregnancy
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires: { age: { gte: 18 } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  other: { kind: spouse, presence: anywhere, optional: true }
+autoOutcome:
+  text: >-
+    It is grief with no body to put it in. People say they are sorry, and
+    ask if you will try again, and you do not know yet.
+  effects:
+    - { type: flag, key: had_miscarriage, value: true }
+    - { type: stat, key: happiness, delta: -18 }
+    - { type: stat, key: stress, delta: 12 }
+    - { type: history, text: 'A pregnancy carried by your surrogate ended in loss.', importance: 3 }
+    - { type: schedule, eventId: miscarriage_quiet, inYears: [1, 1] }
+    - { type: schedule, eventId: miscarriage_partner_talk_spouse, inYears: [1, 1] }
+    - { type: schedule, eventId: miscarriage_partner_talk_partner, inYears: [1, 1] }
+    - { type: schedule, eventId: miscarriage_anniversary, inYears: [3, 5] }

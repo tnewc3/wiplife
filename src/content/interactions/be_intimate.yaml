@@ -37,6 +37,9 @@ outcomes:
           label: Stop and take precautions
           text: "You pause, you both laugh at the interruption, and then it goes on, safer for it."
           extras:
+            - chance: conceiveCareful
+              effects: [{ type: pregnancy, action: begin, how: unplanned, role: person }]
+              note: "A few weeks later, you find out a baby is on the way."
             - chance: intimacyTreatableCareful
               effects: [{ type: health, conditionId: treatable_infection, severity: 35 }, { type: flag, key: was_infected, value: true }]
               note: "A few weeks later, a doctor finds an infection."
@@ -47,6 +50,9 @@ outcomes:
           label: Don't stop
           text: "You don't stop. The night is wonderful, and you don't think about the morning."
           extras:
+            - chance: conceiveCarefree
+              effects: [{ type: pregnancy, action: begin, how: unplanned, role: person }]
+              note: "A few weeks later, you find out a baby is on the way."
             - chance: intimacyTreatable
               effects: [{ type: health, conditionId: treatable_infection, severity: 35 }, { type: flag, key: was_infected, value: true }]
               note: "A few weeks later, a doctor finds an infection."
@@ -72,6 +78,9 @@ outcomes:
           label: Stop and take precautions
           text: "You pause, you reach for protection, and you both laugh about it. It makes the night easier."
           extras:
+            - chance: conceiveCareful
+              effects: [{ type: pregnancy, action: begin, how: unplanned, role: person }]
+              note: "A few weeks later, you find out a baby is on the way."
             - chance: intimacyTreatableCareful
               effects: [{ type: health, conditionId: treatable_infection, severity: 35 }, { type: flag, key: was_infected, value: true }]
               note: "A few weeks later, a doctor finds an infection."
@@ -82,6 +91,9 @@ outcomes:
           label: Don't stop
           text: "You don't stop, and you don't think about it until the next morning."
           extras:
+            - chance: conceiveCarefree
+              effects: [{ type: pregnancy, action: begin, how: unplanned, role: person }]
+              note: "A few weeks later, you find out a baby is on the way."
             - chance: intimacyTreatable
               effects: [{ type: health, conditionId: treatable_infection, severity: 35 }, { type: flag, key: was_infected, value: true }]
               note: "A few weeks later, a doctor finds an infection."
@@ -104,6 +116,9 @@ outcomes:
           label: Stop and take precautions
           text: "You pause, you both laugh at the interruption, and then it goes on, safer for it."
           extras:
+            - chance: conceiveCareful
+              effects: [{ type: pregnancy, action: begin, how: unplanned, role: person }]
+              note: "A few weeks later, you find out a baby is on the way."
             - chance: intimacyTreatableCareful
               effects: [{ type: health, conditionId: treatable_infection, severity: 35 }, { type: flag, key: was_infected, value: true }]
               note: "A few weeks later, a doctor finds an infection."
@@ -114,6 +129,9 @@ outcomes:
           label: Don't stop
           text: "You don't stop, and you don't think about the morning until it arrives."
           extras:
+            - chance: conceiveCarefree
+              effects: [{ type: pregnancy, action: begin, how: unplanned, role: person }]
+              note: "A few weeks later, you find out a baby is on the way."
             - chance: intimacyTreatable
               effects: [{ type: health, conditionId: treatable_infection, severity: 35 }, { type: flag, key: was_infected, value: true }]
               note: "A few weeks later, a doctor finds an infection."

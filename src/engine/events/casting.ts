@@ -8,6 +8,8 @@ import type { CastSpec, ContentBundle, EventDef, GenderCategory } from '../../co
 import { CREATABLE_KINDS } from '../../content/schemas';
 import { rollGenderCategory, rollIdentity, rollRelativeTraits } from '../creation/character';
 import { pickUnused, rollHeritage } from '../creation/family';
+import { rollCanCarry } from '../family/carrying';
+import { rollPriorChildren } from '../family/children';
 import { moodBaseline } from '../interactions/mood';
 import { rollWealth } from '../interactions/wealth';
 import { rollScore, weightedPick } from '../random';
@@ -39,6 +41,8 @@ function fitsAge(state: LifeState, spec: CastSpec, age: number): boolean {
  */
 export function castCandidates(state: LifeState, spec: CastSpec, content: ContentBundle, preferHousehold = false): Person[] {
   const support = content.balance.relationships.support;
+  // E2a: someone who has died is only ever passed in, never found.
+  if (spec.deceased) return [];
   const found = Object.keys(state.relationships)
     .sort()
     .flatMap((id) => {
@@ -67,7 +71,8 @@ export function castCandidates(state: LifeState, spec: CastSpec, content: Conten
   return found;
 }
 
-function nextPersonId(state: LifeState): Id {
+/** The next free person id (p1, p2...). */
+export function nextPersonId(state: LifeState): Id {
   let max = 0;
   for (const id of Object.keys(state.people)) {
     const n = Number(id.slice(1));
@@ -162,6 +167,7 @@ export function createPerson(state: LifeState, spec: CastSpec, rng: RngState, co
     mood: 50,
     moodBase: 50,
     wealthLevel: 'middle',
+    canCarry: rollCanCarry(rng, category, content),
   };
   const newPerson = content.balance.events.newPerson;
   state.relationships[id] = {
@@ -179,6 +185,11 @@ export function createPerson(state: LifeState, spec: CastSpec, rng: RngState, co
   if (wealth.occupation !== undefined) person.occupation = wealth.occupation;
   person.wealthLevel = wealth.wealthLevel;
   person.mood = person.moodBase = moodBaseline(state, person, content);
+  // E2a: a potential partner may have children from before (they become your stepchildren if you marry).
+  if (spec.romantic || spec.admirer) {
+    const prior = rollPriorChildren(rng, age, state.currentYear, content);
+    if (prior.length > 0) person.priorChildren = prior;
+  }
   return id;
 }
 
@@ -212,7 +223,9 @@ export function castEvent(
   };
 
   for (const [role, id] of Object.entries(preset)) {
-    if (!view.people[id]?.alive) return fail();
+    const known = view.people[id];
+    // Someone who has died can only fill a role that says so (E2a: the grief events).
+    if (!known || (!known.alive && def.cast?.[role]?.deceased !== true)) return fail();
     cast[role] = id;
     used.add(id);
   }

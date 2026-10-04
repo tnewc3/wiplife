@@ -9,6 +9,7 @@
  */
 import type { ContentBundle, EventDef, Presence } from '../content/schemas';
 import { evaluate } from './conditions';
+import { livesWithYou } from './family/household';
 import type { Id, LifeState } from './types';
 
 export type Whereabouts = 'household' | 'city' | 'elsewhere';
@@ -20,6 +21,8 @@ export function whereabouts(state: LifeState, personId: Id, content: ContentBund
   const sameCity = person !== undefined && person.cityId === state.character.cityId;
   if (!sameCity) return 'elsewhere';
   if (state.housing.partnerId === personId) return 'household';
+  // E2a: children (and a stepchild of the partner who lives with you) in your home.
+  if (livesWithYou(state, personId)) return 'household';
   if (state.housing.kind === 'with_parents' && rel && person) {
     if (rel.kind === 'parent' || rel.kind === 'stepparent') return 'household';
     if (rel.kind === 'sibling' && state.currentYear - person.birthYear < content.balance.economy.independenceAge) return 'household';
