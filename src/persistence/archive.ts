@@ -12,7 +12,7 @@ import { migrateEnvelope, type Migration } from './migrations';
 import { writeSaveIn } from './saves';
 
 /** Version of the archive entry layout. Bump it with a migration below when ArchivedLife changes. */
-export const ARCHIVE_SCHEMA_VERSION = 2;
+export const ARCHIVE_SCHEMA_VERSION = 3;
 
 /** Every archive migration ever shipped, oldest first. Never edit or remove one. */
 export const archiveMigrations: readonly Migration[] = [
@@ -21,6 +21,18 @@ export const archiveMigrations: readonly Migration[] = [
     description: 'Stage 6: the birth city. Nobody could move before, so it is the city the life ended in.',
     migrate: (data) =>
       typeof data === 'object' && data !== null && !Array.isArray(data) ? { ...data, birthCityId: (data as { cityId?: unknown }).cityId } : data,
+  },
+  {
+    from: 2,
+    description:
+      'E2b: family lines. An older life is a line of its own (its id), named after the last word of its name, with an ' +
+      'unremarkable reputation (50); no heir carried on from it.',
+    migrate: (data) => {
+      if (typeof data !== 'object' || data === null || Array.isArray(data)) return data;
+      const entry = data as { id?: unknown; name?: unknown };
+      const words = typeof entry.name === 'string' ? entry.name.trim().split(/\s+/) : [];
+      return { ...data, lineId: entry.id, familyName: words.at(-1) ?? 'Family', familyReputation: 50 };
+    },
   },
 ];
 
@@ -42,6 +54,10 @@ export const archivedLifeSchema: z.ZodType<ArchivedLife> = z.strictObject({
   seed: z.string().min(1),
   generation: z.int().min(1),
   parentLifeId: z.string().min(1).exactOptional(),
+  lineId: z.string().min(1),
+  familyName: z.string().min(1),
+  familyReputation: z.int().min(0).max(100),
+  heirName: z.string().min(1).exactOptional(),
 });
 
 export interface ArchiveListing {

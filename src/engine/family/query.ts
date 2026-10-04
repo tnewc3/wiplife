@@ -45,5 +45,18 @@ export function familyHolds(q: FamilyCondition, state: LifeState, adultAge = 18)
   if (q.canCarry !== undefined && state.character.canCarry !== q.canCarry) return false;
   if (q.support && !q.support.includes(f.support?.direction ?? 'none')) return false;
   if (q.lost !== undefined && f.lostChildren > 0 !== q.lost) return false;
+  // E2b: heirs, the family line, guardians, trust and wills.
+  const line = state.lineage;
+  if (q.heir !== undefined && (line.parentLifeId !== undefined) !== q.heir) return false;
+  if (q.generation && !compare(line.generation, q.generation)) return false;
+  if (q.reputation && !compare(line.reputation, q.reputation)) return false;
+  if (q.deeds && !q.deeds.some((d) => line.deeds.includes(d))) return false;
+  if (q.guardian) {
+    const h = state.housing;
+    const kind = h.guardianId === undefined ? 'none' : h.foster ? 'foster' : (state.relationships[h.guardianId]?.kind ?? 'none');
+    if (!(q.guardian as readonly string[]).includes(kind)) return false;
+  }
+  if (q.trust !== undefined && (state.finances.trust !== undefined) !== q.trust) return false;
+  if (q.will !== undefined && (state.will !== null) !== q.will) return false;
   return true;
 }

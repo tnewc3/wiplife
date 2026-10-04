@@ -12,6 +12,7 @@ openings:
   - { at: 0, x: 1 }
 
 hiring:
+  familyReputation: 0.15
   # Your chance of being hired, in percent: base + each stat's weight ×
   # (value − 50) + luck + the extras below, then × the market multiplier,
   # never outside min–max.

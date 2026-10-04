@@ -1,18 +1,19 @@
 import { useState } from 'react';
 import { content } from '../../../content';
-import { getFamilyView, type FamilyOptionView } from '../../../engine/selectors';
+import { getFamilyLineView, getFamilyView, type FamilyOptionView } from '../../../engine/selectors';
 import type { LifeState } from '../../../engine/types';
 import { useAppStore } from '../../../store/appStore';
 import { Button } from '../../components/Button';
 import { Card } from '../../components/Card';
 import { ConfirmSheet } from '../../components/ConfirmSheet';
-import { CUSTODY_LABELS, money, oddsWords, PROCESS_BLOCK_LABELS, PROCESS_LABELS, pregnancyLine, waitWords } from '../../labels';
+import { CUSTODY_LABELS, money, oddsWords, PROCESS_BLOCK_LABELS, PROCESS_LABELS, pregnancyLine, reputationWords, waitWords } from '../../labels';
 
 const ACTION = { adoption: 'start_adoption', ivf: 'start_ivf', surrogacy: 'start_surrogacy' } as const;
 
 /** More → Family: where your family stands, and adoption, IVF and surrogacy with their costs and odds in words. */
 export function FamilyScreen({ life }: { life: LifeState }) {
   const view = getFamilyView(life, content);
+  const line = getFamilyLineView(life, content);
   const busy = useAppStore((s) => s.aging);
   const act = useAppStore((s) => s.takeLifeAction);
   const [confirming, setConfirming] = useState<FamilyOptionView | null>(null);
@@ -51,6 +52,17 @@ export function FamilyScreen({ life }: { life: LifeState }) {
         <p className="mt-3 text-sm text-muted">
           To try for a baby, open your partner’s page in People. A natural pregnancy needs a couple where one of you can carry one.
         </p>
+      </Card>
+
+      <Card role="region" aria-labelledby="family-line" data-testid="family-line">
+        <h3 id="family-line" className="text-lg font-bold">
+          The {line.familyName} family
+        </h3>
+        <p className="mt-1" data-testid="family-line-facts">
+          Generation {line.generation} · {reputationWords(line.reputation)}
+        </p>
+        {line.deeds.length > 0 && <p className="mt-1 text-sm text-muted">Known for {line.deeds.join(', ')}.</p>}
+        <p className="mt-2 text-sm text-muted">Your family’s name goes before you: it shapes how people treat you, and it passes to whoever carries on.</p>
       </Card>
 
       {view.options.map((o) => {

@@ -9,7 +9,7 @@ import type { ContentBundle, EventDef, Outcome, RomanceStatus } from '../content
 import { curveAt } from './curve';
 import type { Id, Identity, LifeState, Person, Relationship, RelationshipKind, RelationshipStatus } from './types';
 
-export const FAMILY_KINDS: readonly RelationshipKind[] = ['parent', 'stepparent', 'grandparent', 'sibling', 'child', 'stepchild'];
+export const FAMILY_KINDS: readonly RelationshipKind[] = ['parent', 'stepparent', 'grandparent', 'relative', 'sibling', 'child', 'stepchild'];
 /** E2a: your children and stepchildren. */
 export const CHILD_KINDS: readonly RelationshipKind[] = ['child', 'stepchild'];
 /** A current romance: dating, engaged or married. */

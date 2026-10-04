@@ -131,6 +131,15 @@ family:
   # Children whose starting smarts fall outside their parents' range by more than the spread allows.
   maxOutsideParents: 0.3
 
+# E2b: heirs and inheritance, judged on the careful player continuing as heirs.
+heirs:
+  generations: 3
+  minors: { min: 0.03, max: 0.6 }
+  familyWealth: { min: 0.2, max: 1.6 }
+  maxP90Growth: 6
+  reputationCorrelation: 0.3
+  memoryEvents: 0.3
+
 coverage:
   minEvents: 300
   legendary: { min: 5, max: 10 }

@@ -5,10 +5,13 @@
  * in prison, the later steps do their reduced share (no school, no work, no
  * housing or living costs, no discoveries, prison events only). The family
  * step (E2a) comes right after NPCs age, so a newborn or a child's death counts
- * in the same year's ledger and events. Steps for systems that don't exist yet are empty
+ * in the same year's ledger and events. The heritage step (E2b) follows it: an
+ * heir's trust is released and a minor's guardian is looked after before the
+ * ledger runs. Steps for systems that don't exist yet are empty
  * functions in src/engine/systems, filled in by later stages.
  */
 import type { ContentBundle } from '../content/schemas';
+import { runHeritage } from './estate/heritage';
 import { runFamily } from './family/step';
 import { runMoods } from './interactions/mood';
 import { advanceAge } from './systems/aging';
@@ -33,6 +36,7 @@ export const YEAR_PIPELINE: readonly PipelineStep[] = [
   { id: 'aging', run: advanceAge },
   { id: 'npcs', run: ageNpcs },
   { id: 'family', run: runFamily },
+  { id: 'heritage', run: runHeritage },
   { id: 'legal', run: runLegal },
   { id: 'education', run: runEducation },
   { id: 'career', run: runCareer },

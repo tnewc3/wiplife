@@ -1,0 +1,52 @@
+id: will_is_read
+title: The will
+text: >-
+  A lawyer reads {parent.name}'s will in a quiet office with a bowl of mints
+  on the desk. It is shorter than you expected. It is also the first time
+  anyone has said {parent.their} wishes out loud since the funeral, and the
+  room goes still around each name.
+tone: serious
+category: estate
+rarity: common
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { family: { heir: true } }
+    - { flag: estate_will }
+    - { age: { gte: 12 } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  parent: { kind: parent, presence: anywhere, deceased: true }
+choices:
+  - id: listen
+    label: Listen to every word
+    outcome:
+      text: >-
+        You do not miss a name, or a comma. When it is over, you know what
+        {parent.name} wanted, and that it was thought through. It is a kind of
+        company.
+      effects:
+        - { type: stat, key: stress, delta: -3 }
+        - { type: stat, key: happiness, delta: 1 }
+        - { type: innerConflict, delta: -2 }
+  - id: step_out
+    label: Step out for air in the middle
+    outcome:
+      text: >-
+        You sit on the bench outside until your hands stop shaking. Somebody
+        else can tell you the rest. You hear most of it anyway, and it lands
+        just as hard.
+      effects:
+        - { type: stat, key: stress, delta: 3 }
+        - { type: stat, key: happiness, delta: -2 }
+  - id: ask_lawyer
+    label: Ask the lawyer what {parent.name} said about you
+    outcome:
+      text: >-
+        The lawyer takes off {parent.their} glasses. There was a note, set
+        aside for you, in {parent.their} own handwriting. It is not long. You
+        keep it in your pocket for a week before you read it.
+      effects:
+        - { type: stat, key: happiness, delta: 3 }
+        - { type: stat, key: stress, delta: -2 }

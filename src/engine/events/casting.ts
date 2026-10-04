@@ -12,7 +12,7 @@ import { rollCanCarry } from '../family/carrying';
 import { rollPriorChildren } from '../family/children';
 import { moodBaseline } from '../interactions/mood';
 import { rollWealth } from '../interactions/wealth';
-import { rollScore, weightedPick } from '../random';
+import { clampInt, rollScore, weightedPick } from '../random';
 import { fitsPresence } from '../presence';
 import { isAdmirerMatch, isRomanticMatch, partnerAgeRange, SUPPORT_KINDS } from '../relationships';
 import { chance, nextInt, pick, type RngState } from '../rng';
@@ -174,7 +174,8 @@ export function createPerson(state: LifeState, spec: CastSpec, rng: RngState, co
     personId: id,
     kind,
     status: 'active',
-    affection: rollScore(rng, newPerson.affection),
+    // E2b: your family's name goes before you: people start fonder (or cooler) by its reputation.
+    affection: clampInt(rollScore(rng, newPerson.affection) + Math.round((state.lineage.reputation - 50) * content.balance.family.heir.newPersonAffection), 0, 100),
     trust: rollScore(rng, newPerson.trust),
     memories: [],
     since: state.currentYear,

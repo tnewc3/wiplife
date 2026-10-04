@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { content } from '../../../content';
-import { getCharacterSummary, getFamilyView, getFamily, getHistoryFeed, getYearRecap } from '../../../engine/selectors';
+import { getCharacterSummary, getFamilyView, getFamily, getHistoryFeed, getPreviously, getYearRecap } from '../../../engine/selectors';
 import type { LifeState, Stats } from '../../../engine/types';
 import { useAppStore } from '../../../store/appStore';
 import { Button } from '../../components/Button';
@@ -10,6 +10,7 @@ import { YearRecapList } from '../../components/YearRecapList';
 import { ProfileSheet } from './ProfileSheet';
 import {
   ageLabel,
+  guardianHousingLine,
   HOUSING_LABELS,
   jobLine,
   LIFE_STAGE_LABELS,
@@ -71,6 +72,27 @@ function StoryFeed({ life }: { life: LifeState }) {
   );
 }
 
+/** E2b: the card an heir's life starts with, until their first year begins. */
+function PreviouslyCard({ life }: { life: LifeState }) {
+  const previously = getPreviously(life);
+  if (!previously) return null;
+  return (
+    <Card role="region" aria-labelledby="previously-title" data-testid="previously-card">
+      <h3 id="previously-title" className="text-lg font-bold">
+        Previously
+      </h3>
+      <p className="mt-1 text-sm text-muted">The life of {previously.parentName}, and what it left you.</p>
+      <ul className="mt-2 flex flex-col gap-2" aria-label="Previously">
+        {previously.lines.map((line, i) => (
+          <li key={i} className="break-words [overflow-wrap:anywhere]">
+            {line}
+          </li>
+        ))}
+      </ul>
+    </Card>
+  );
+}
+
 /** The Life tab: who you are, how you're doing, your family and your story. */
 export function HomeTab({ life }: { life: LifeState }) {
   const summary = getCharacterSummary(life, content);
@@ -81,6 +103,7 @@ export function HomeTab({ life }: { life: LifeState }) {
 
   return (
     <div className="flex flex-col gap-4">
+      <PreviouslyCard life={life} />
       <Card>
         <div className="flex items-start justify-between gap-3">
           <h2 className="min-w-0 text-2xl leading-tight font-bold break-words [overflow-wrap:anywhere]" data-testid="character-name">
@@ -94,7 +117,7 @@ export function HomeTab({ life }: { life: LifeState }) {
           {ageLabel(summary.age)} · {summary.cityName} · {summary.pronounLabel}
         </p>
         <p className="mt-1 text-sm text-muted">
-          {LIFE_STAGE_LABELS[summary.lifeStage]} · {HOUSING_LABELS[summary.housing]}
+          {LIFE_STAGE_LABELS[summary.lifeStage]} · {summary.guardian ? guardianHousingLine(summary.guardian, summary.cityName) : HOUSING_LABELS[summary.housing]}
         </p>
         {summary.school && (
           <p className="mt-1 text-sm break-words text-muted [overflow-wrap:anywhere]" data-testid="school-line">

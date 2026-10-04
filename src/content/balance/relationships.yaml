@@ -12,6 +12,7 @@ drift:
     parent: 0.5
     stepparent: 1
     grandparent: 0.5
+    relative: 0.8
     child: 0.4
     stepchild: 1
     sibling: 0.7
@@ -29,6 +30,7 @@ drift:
     parent: 40
     stepparent: 25
     grandparent: 40
+    relative: 30
     child: 45
     stepchild: 20
     sibling: 30

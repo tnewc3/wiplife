@@ -4,6 +4,7 @@
  */
 import type { ContentBundle } from '../content/schemas';
 import { ageOf, isCurrentPartner, isFamilyKind, isPartnerKind, isRomanticKind, kindSince } from './relationships';
+import { estateFailures } from './estate/invariants';
 import { familyFailures } from './family/invariants';
 import { interactionFailures } from './interactions/invariants';
 import { consistencyProblems } from './presence';
@@ -178,6 +179,9 @@ export function checkInvariants(state: LifeState, content: ContentBundle): strin
   // Children and parenting (E2a).
   failures.push(...familyFailures(state, content));
 
+  // Wills, estates, family lines and heirs (E2b).
+  failures.push(...estateFailures(state, content));
+
   // People and relationships.
   const { parentAgeAtBirth } = content.balance.creation.family;
   for (const [id, person] of Object.entries(state.people)) {
@@ -230,7 +234,9 @@ export function checkInvariants(state: LifeState, content: ContentBundle): strin
     { label: 'character', year: state.birthYear },
     ...siblings.map((s) => ({ label: `sibling ${s.id}`, year: s.birthYear })),
   ];
-  for (const parent of parents) {
+  // An heir's family comes from the life they continued, not from the generator: skip these checks for them.
+  const generated = state.lineage.parentLifeId === undefined;
+  for (const parent of generated ? parents : []) {
     for (const child of childBirthYears) {
       const parentAge = child.year - parent.birthYear;
       if (parentAge < parentAgeAtBirth.min || parentAge > parentAgeAtBirth.max) {
@@ -238,7 +244,7 @@ export function checkInvariants(state: LifeState, content: ContentBundle): strin
       }
     }
   }
-  for (const sibling of siblings) {
+  for (const sibling of generated ? siblings : []) {
     if (sibling.birthYear === state.birthYear) fail(`sibling ${sibling.id} has the same birth year as the character`);
   }
 
@@ -265,8 +271,10 @@ export function checkInvariants(state: LifeState, content: ContentBundle): strin
 
   // Logs.
   if (state.inputLog[0]?.kind !== 'create') fail('the input log must start with the create input');
+  // An heir's log starts from the age they continued at (E2b).
+  const startAge = typeof state.inputLog[0]?.payload.startAge === 'number' ? state.inputLog[0].payload.startAge : 0;
   const ageUps = state.inputLog.filter((r) => r.kind === 'ageUp').length;
-  if (ageUps !== c.age) fail(`the input log has ${ageUps} age-ups for age ${c.age}`);
+  if (ageUps !== c.age - startAge) fail(`the input log has ${ageUps} age-ups for age ${c.age} (started at ${startAge})`);
   for (let i = 1; i < state.history.length; i++) {
     if (state.history[i]!.year < state.history[i - 1]!.year) fail('history years must only go forward');
   }

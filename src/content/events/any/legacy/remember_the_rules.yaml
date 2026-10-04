@@ -1,0 +1,42 @@
+id: remember_the_rules
+title: The rules in your head
+text: >-
+  You are about to do something harmless, and you hear {parent.name}'s voice
+  explaining why you should not. It is so exact that you look up. The house
+  rules had edges, and you learned where each one was. They got into you the
+  way a handwriting does, and {parent.they} {parent:is|are} gone, and the
+  rules are not.
+tone: neutral
+category: legacy
+rarity: common
+lifeStages: [child, teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { family: { heir: true } }
+    - { memory: { role: parent, tag: heir_strict_rules } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  parent: { kind: parent, presence: anywhere, deceased: true }
+choices:
+  - id: keep_rule
+    label: Keep the rule. It was a good one
+    outcome:
+      text: >-
+        The rule turns out to be right, which would have annoyed you in
+        person. You follow it, and the day goes smoothly, and you almost say
+        thank you to the empty room.
+      effects:
+        - { type: stat, key: discipline, delta: 2 }
+        - { type: stat, key: stress, delta: -1 }
+  - id: break_rule
+    label: Break it, just to see what happens
+    outcome:
+      text: >-
+        You do it. Nothing happens. No voice, no frown. You feel free and a
+        little bit sick, the way you do after you step off a ledge that turned
+        out to be one inch high.
+      effects:
+        - { type: stat, key: riskTaking, delta: 3 }
+        - { type: stat, key: happiness, delta: 1 }
+        - { type: innerConflict, delta: -1 }

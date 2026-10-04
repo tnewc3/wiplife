@@ -6,7 +6,7 @@ profile: counsel
 inPerson: false
 visit: true
 availability:
-  kinds: [parent, stepparent, sibling, grandparent, child, stepchild, friend, partner, fiance, spouse, ex, coworker, boss, classmate]
+  kinds: [parent, stepparent, sibling, grandparent, relative, child, stepchild, friend, partner, fiance, spouse, ex, coworker, boss, classmate]
   you: { min: 8 }
   them: { min: 14 }
 outcomes:

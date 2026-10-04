@@ -8,6 +8,7 @@
 import { z } from 'zod';
 import { curveSchema, distributionSchema } from './balance';
 import { idSchema, TRAIT_KEYS } from './common';
+import { templateSchema, variantsSchema } from './text';
 
 const probability = z.number().min(0).max(1);
 const traitKey = z.enum(TRAIT_KEYS);
@@ -36,6 +37,118 @@ const styleEffect = z.partialRecord(parentingKeySchema, z.number().min(-60).max(
 const range = z
   .strictObject({ min: z.int().min(0).max(120), max: z.int().min(0).max(120) })
   .refine((r) => r.min <= r.max, 'min must not be greater than max');
+
+const wealthLevels = z.strictObject({ poor: z.int().min(0), working: z.int().min(0), middle: z.int().min(0), affluent: z.int().min(0), rich: z.int().min(0) });
+const percent = z.int().min(0).max(100);
+
+/**
+ * E2b: how an estate is settled (docs/expansion.md, E2b). Costs come off
+ * the estate first, then debts other than the mortgage; a home passes with
+ * its mortgage; what is left is shared by the will, or by these default
+ * shares. Nothing is ever inherited as debt beyond the home it is attached to.
+ */
+const estateBalanceSchema = z.strictObject({
+  /** The funeral, at the national average (scaled to the city you lived in). */
+  funeral: z.int().min(0),
+  /** Legal and settlement costs: this share of savings plus the home's value. */
+  settlementShare: z.number().min(0).max(0.5),
+  /**
+   * Estate tax: the share of what is left to share out (cash and the home's equity, after costs and
+   * debts) that goes in tax, by the size of that estate (whole dollars): straight lines between the
+   * points, flat beyond the ends. Nothing is owed on a small estate, and a very large one can't pass
+   * whole from one generation to the next, so family wealth can't snowball.
+   */
+  tax: curveSchema,
+  /** The most one person can put in a will's shares: every share is at least 1%, and the shares add up to 100. */
+  maxShares: z.int().min(1).max(20),
+  /** Without a will. Percent of the estate (the rest is split by the rules below). */
+  default: z.strictObject({
+    /** With a spouse and children: the spouse's percent; the children split the rest equally. */
+    spouseWithChildren: percent,
+    /** With a spouse and no children: the spouse's percent; living parents and siblings split the rest (the spouse takes it all when there are none). */
+    spouseOnly: percent,
+    /** With no spouse and no children: living parents' percent; living siblings split the rest (whichever exists takes it all). */
+    parents: percent,
+  }),
+});
+
+/**
+ * E2b: continuing as an heir (docs/expansion.md, E2b): how the family you
+ * left behind is seen from the heir's side, who takes a minor in, how
+ * family reputation is earned and carried, and the inheritance dramas that
+ * follow.
+ */
+const heirBalanceSchema = z.strictObject({
+  /** An heir's money stays in trust until this age. */
+  trustReleaseAge: z.int().min(18).max(30),
+  /** Savings an heir of 18 or older has, from a life of their own that isn't played (by their wealth level; before any inheritance). */
+  adultSavings: wealthLevels,
+  /** A grown heir's job starts at this level if they work, and they hold only a high school diploma. */
+  guardian: z.strictObject({
+    /** Relatives and older siblings must be at least this old, and no older than maxAge, to take a minor in. */
+    minAge: z.int().min(18).max(60),
+    maxAge: z.int().min(40).max(100),
+    /** And be at least this fond of the heir (a surviving parent always does). */
+    minAffection: z.int().min(0).max(100),
+  }),
+  /** How the heir feels about the family around them at the start. */
+  bonds: z.strictObject({
+    parent: z.strictObject({ affection: distributionSchema, trust: distributionSchema }),
+    stepparent: z.strictObject({ affection: distributionSchema, trust: distributionSchema }),
+    sibling: z.strictObject({ affection: distributionSchema, trust: distributionSchema }),
+    grandparent: z.strictObject({ affection: distributionSchema, trust: distributionSchema }),
+    relative: z.strictObject({ affection: distributionSchema, trust: distributionSchema }),
+    /** The foster family. */
+    foster: z.strictObject({ affection: distributionSchema, trust: distributionSchema }),
+  }),
+  /** A grown heir under this age who hadn't moved out lives with a surviving parent, if there is one. */
+  livesHomeUntil: z.int().min(18).max(30),
+  /** The most memories of how they were raised the childhood recap tells. */
+  recapMemories: z.int().min(0).max(8),
+  /** The foster carer's age range. */
+  fosterAge: z.strictObject({ min: z.int().min(25).max(60), max: z.int().min(25).max(80) }),
+  /** Heirs start from their parent's final wealth level and may inherit a home: a minor's is sold into trust, losing this share of its value as selling costs (balance/economy.yaml ownership.sellingCosts). */
+  reputation: z.strictObject({
+    /** The family's reputation moves this share of the way back to 50 with each generation... */
+    retention: z.number().min(0).max(1),
+    /** ...before your own life adds to it: points per point your own reputation stands above or below 50. */
+    personal: z.number().min(0).max(2),
+    /** Points a criminal record adds, by outcome. */
+    record: z.strictObject({ warning: z.number().min(-30).max(30), fine: z.number().min(-30).max(30), probation: z.number().min(-30).max(30), jail: z.number().min(-30).max(30) }),
+    /** Points from what you left behind: the net worth (whole dollars) points at the left, interpolated. */
+    wealth: curveSchema,
+    /** Points per percent of the estate you left to a cause, up to max. */
+    generosity: z.strictObject({ perPercent: z.number().min(0).max(1), max: z.number().min(0).max(30), deedAt: z.int().min(1).max(100) }),
+    /** Notable deeds you did, by the flag that proves them: the points and the deed the family is known for. */
+    flags: z.record(idSchema, z.strictObject({ delta: z.number().min(-30).max(30), deed: idSchema })),
+    /** Wealth and a record also make the family known for these deeds: from this net worth, and from this many convictions. */
+    deedWealth: z.int().min(0),
+    deedConvictions: z.int().min(1).max(10),
+    /** The most deeds the family is known for. */
+    maxDeeds: z.int().min(1).max(10),
+    /** The heir's own reputation starts at 50 plus this share of the family's distance from 50. */
+    carry: z.number().min(0).max(1),
+  }),
+  /** How people treat the heir: a new person who joins their life starts this many affection points higher per point of family reputation above 50 (lower below). */
+  newPersonAffection: z.number().min(0).max(1),
+  /** Chances that a will or its absence leads to a dispute event. */
+  drama: z.strictObject({
+    /** A sibling disputes the will when it left the heir and a sibling unequal shares. */
+    siblingDispute: probability,
+    /** A sibling the heir is estranged from contests the estate. */
+    estrangedContest: probability,
+    /** A person who wasn't family got a share, and turns up. */
+    unexpectedBeneficiary: probability,
+    /** A cause got a share, and writes. */
+    causeLetter: probability,
+    /** Without a will: the family settles things badly. */
+    noWillDispute: probability,
+    /** Years after the death that a dispute or a letter comes. */
+    inYears: range,
+  }),
+  /** Memories of the previous generation: the chance each style memory brings an event, and when. */
+  memoryEvent: z.strictObject({ chance: probability, inYears: range, max: z.int().min(0).max(6) }),
+});
 
 export const familyBalanceSchema = z.strictObject({
   /** Who can carry a pregnancy: women can, men can't; nonbinary random characters and relatives roll this chance (custom characters choose). */
@@ -209,6 +322,11 @@ export const familyBalanceSchema = z.strictObject({
     affection: distributionSchema,
     trust: distributionSchema,
   }),
+
+  /** E2b: settling an estate at death. */
+  estate: estateBalanceSchema,
+  /** E2b: continuing as an heir. */
+  heir: heirBalanceSchema,
 });
 export type FamilyBalance = z.infer<typeof familyBalanceSchema>;
 
@@ -299,3 +417,131 @@ export function familyResults(r: FamilyRegistry): { id: FamilyResultId; where: s
   ];
 }
 
+
+
+/** E2b: what a family can be known for (text/heir.yaml deeds, balance family.yaml heir.reputation.flags). */
+export const FAMILY_DEEDS = ['wealth', 'conviction', 'bankruptcy', 'scandal', 'honored', 'generous'] as const;
+export type FamilyDeed = (typeof FAMILY_DEEDS)[number];
+
+/** E2b: the memories of how an heir was raised that can bring an event later (the E2a parenting style memories). */
+export const HEIR_MEMORY_TAGS = ['parent_warm_home', 'parent_cold_home', 'parent_always_there', 'parent_never_around', 'parent_strict_rules', 'parent_no_rules'] as const;
+export type HeirMemoryTag = (typeof HEIR_MEMORY_TAGS)[number];
+/**
+ * The same memories from the heir's side: what the parent who died did, on the
+ * heir's relationship with them (the E2a tags are the child's memories, on the
+ * parent's side, and read "Remembers a warm home").
+ */
+export const HEIR_MEMORY_MAP: Record<HeirMemoryTag, string> = {
+  parent_warm_home: 'heir_warm_home',
+  parent_cold_home: 'heir_cold_home',
+  parent_always_there: 'heir_always_there',
+  parent_never_around: 'heir_never_around',
+  parent_strict_rules: 'heir_strict_rules',
+  parent_no_rules: 'heir_no_rules',
+};
+
+/** E2b: who takes a minor heir in. 'foster' is the foster care path (a foster carer is created). */
+export const GUARDIAN_KINDS = ['parent', 'stepparent', 'grandparent', 'relative', 'sibling'] as const;
+export type GuardianKind = (typeof GUARDIAN_KINDS)[number];
+
+/** E2b: causes a will can name (registries/estate.yaml). */
+export const estateRegistrySchema = z.strictObject({
+  causes: z.record(
+    idSchema,
+    z.strictObject({ name: z.string().trim().min(1).max(60), blurb: z.string().trim().min(1).max(120) }),
+  ),
+});
+export type EstateRegistry = z.infer<typeof estateRegistrySchema>;
+
+/**
+ * E2b: the events the heir system schedules when a life continues as an
+ * heir (registries/heir.yaml). Each is followUpOnly. The engine picks one
+ * from each list that applies and schedules it, passing the parent who died
+ * as the `parent` role (a deceased role) where an event casts one; every other
+ * role is cast when the event comes due, so an event whose people aren't
+ * there any more simply doesn't happen.
+ */
+export const heirRegistrySchema = z.strictObject({
+  /** You left a will: it is read. */
+  will: eventList,
+  /** You left no will. */
+  noWill: eventList,
+  /** The will left the heir and a sibling unequal shares. Cast: sibling. */
+  siblingDispute: eventList,
+  /** No will: the family settles things badly. Cast: sibling. */
+  noWillDispute: eventList,
+  /** A sibling the heir is estranged from contests the estate. Cast: sibling. */
+  estrangedContest: eventList,
+  /** Someone who wasn't family was named in the will. Cast: stranger (an acquaintance, created if needed). */
+  unexpectedBeneficiary: eventList,
+  /** A cause was named in the will. */
+  causeLetter: eventList,
+  /** The will left the heir out. */
+  leftOut: eventList,
+  /** A minor heir's first year with whoever took them in. Cast: guardian. */
+  guardian: z.strictObject({ parent: eventList, stepparent: eventList, grandparent: eventList, relative: eventList, sibling: eventList }),
+  /** A minor heir with no one to live with: foster care. Cast: guardian (the foster carer). */
+  foster: eventList,
+  /** A memory of how the heir was raised, years later. Cast: parent (deceased). */
+  memories: z.strictObject(Object.fromEntries(HEIR_MEMORY_TAGS.map((t) => [t, eventList])) as Record<HeirMemoryTag, typeof eventList>),
+});
+export type HeirRegistry = z.infer<typeof heirRegistrySchema>;
+
+/** Every heir result with its events and the roles the engine passes in (a deceased `parent`, or nobody), for the content build. */
+export function heirResults(r: HeirRegistry): { where: string; events: readonly string[]; passes: readonly string[] }[] {
+  return [
+    { where: 'will', events: r.will, passes: ['parent'] },
+    { where: 'noWill', events: r.noWill, passes: ['parent'] },
+    { where: 'siblingDispute', events: r.siblingDispute, passes: ['parent', 'sibling'] },
+    { where: 'noWillDispute', events: r.noWillDispute, passes: ['parent', 'sibling'] },
+    { where: 'estrangedContest', events: r.estrangedContest, passes: ['parent', 'sibling'] },
+    { where: 'unexpectedBeneficiary', events: r.unexpectedBeneficiary, passes: ['parent'] },
+    { where: 'causeLetter', events: r.causeLetter, passes: ['parent'] },
+    { where: 'leftOut', events: r.leftOut, passes: ['parent'] },
+    ...GUARDIAN_KINDS.map((k) => ({ where: `guardian.${k}`, events: r.guardian[k], passes: [] as string[] })),
+    { where: 'foster', events: r.foster, passes: [] },
+    ...HEIR_MEMORY_TAGS.map((t) => ({ where: `memories.${t}`, events: r.memories[t], passes: ['parent'] })),
+  ];
+}
+
+/**
+ * E2b: the words an heir's start is written in (text/heir.yaml). Roles: parent
+ * (the parent who died: {parent.name}, {parent.they}...), guardian (who took
+ * the heir in: {guardian.name}...). Values: {age} (the parent's age at death),
+ * {year}, {cause}, {heirAge}, {amount}, {value}, {city}, {releaseAge}.
+ */
+export const heirTextSchema = z.strictObject({
+  previously: z.strictObject({
+    /** Values: {age}, {year}, {cause}. */
+    died: variantsSchema,
+    /** Who took a minor heir in (role guardian). */
+    guardian: z.strictObject({
+      parent: variantsSchema,
+      stepparent: variantsSchema,
+      grandparent: variantsSchema,
+      relative: variantsSchema,
+      sibling: variantsSchema,
+      foster: variantsSchema,
+    }),
+    /** A grown heir on their own: values {heirAge}. */
+    grown: variantsSchema,
+    /** What was inherited. cash: {amount}; trust: {amount}, {releaseAge}; home: {value}, {city}. */
+    inherited: z.strictObject({ cash: templateSchema, trust: templateSchema, home: templateSchema, nothing: variantsSchema, leftOut: variantsSchema }),
+  }),
+  /** Childhood recap entries for the start of the heir's life history. Role: parent. */
+  recap: z.strictObject({
+    /** Values: {age} (how old the heir was when they joined, for an adopted child). */
+    origin: z.strictObject({ birth: variantsSchema, adopted: variantsSchema }),
+    /** One line for each memory of how the heir was raised. */
+    memories: z.strictObject(Object.fromEntries(HEIR_MEMORY_TAGS.map((t) => [t, templateSchema])) as Record<HeirMemoryTag, typeof templateSchema>),
+    /** The heir had moved out before the death. */
+    movedOut: variantsSchema,
+    /** The parent's death: values {age}, {heirAge}. */
+    loss: variantsSchema,
+    /** Foster care begins and ends. */
+    foster: z.strictObject({ began: variantsSchema, ended: variantsSchema }),
+  }),
+  /** What a family is known for, as a phrase: "a family known for {deed}". */
+  deeds: z.strictObject(Object.fromEntries(FAMILY_DEEDS.map((d) => [d, templateSchema])) as Record<FamilyDeed, typeof templateSchema>),
+});
+export type HeirText = z.infer<typeof heirTextSchema>;

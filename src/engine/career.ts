@@ -139,6 +139,8 @@ export function hireChance(state: LifeState, def: JobDef, content: ContentBundle
   if (degrees.some((c) => c.type === 'grad')) points += h.grad;
   // A conviction counts against you; a warning does not, nor (from 18) anything from before 18 (Stage 9).
   if (countedRecord(state, content).some((r) => r.outcome !== 'warning')) points += h.record;
+  // E2b: your family's name goes before you.
+  points += (state.lineage.reputation - 50) * h.familyReputation;
   const multiplier = curveAt(h.market, marketStrength(state, def, content));
   return modelChance(state, h.odds[def.category], undefined, content, { points, multiplier });
 }

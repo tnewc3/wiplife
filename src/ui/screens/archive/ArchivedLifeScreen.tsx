@@ -5,7 +5,7 @@ import { HistoryTimeline } from '../../components/HistoryTimeline';
 import { Obituary } from '../../components/Obituary';
 import { Screen } from '../../components/Screen';
 import { StatBar } from '../../components/StatBar';
-import { STAT_LABELS } from '../../labels';
+import { reputationWords, STAT_LABELS } from '../../labels';
 
 /** One past life: obituary, final stats and timeline. */
 export function ArchivedLifeScreen() {
@@ -18,6 +18,13 @@ export function ArchivedLifeScreen() {
       {life ? (
         <div className="flex flex-col gap-4">
           <Obituary life={life} />
+          <Card data-testid="archived-line">
+            <h3 className="text-lg font-bold">The {life.familyName} family</h3>
+            <p className="mt-1 text-muted">
+              Generation {life.generation} · {reputationWords(life.familyReputation)}
+              {life.heirName ? ` · Carried on by ${life.heirName}` : ''}
+            </p>
+          </Card>
           <Card>
             <h3 className="mb-2 text-lg font-bold">{life.unfinished ? 'Where things stood' : 'At the end'}</h3>
             <div className="grid grid-cols-2 gap-x-4 gap-y-3" aria-label="Final stats" role="group">

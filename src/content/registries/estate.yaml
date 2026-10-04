@@ -1,0 +1,21 @@
+# Causes a will can leave a share to (E2b). A cause has a name and a line
+# that says what it does; the share is a percent of the estate like any other.
+causes:
+  food_bank:
+    name: The community food bank
+    blurb: Feeds families in the city you lived in.
+  animal_shelter:
+    name: The animal shelter
+    blurb: Takes in strays and finds them homes.
+  scholarship_fund:
+    name: A scholarship fund for local students
+    blurb: Pays tuition for students who couldn't otherwise afford it.
+  hospice:
+    name: The hospice
+    blurb: Cares for people at the end of their lives.
+  library:
+    name: The public library
+    blurb: Keeps its doors open and its shelves full.
+  disaster_relief:
+    name: A disaster relief charity
+    blurb: Sends help to people after floods, fires and storms.

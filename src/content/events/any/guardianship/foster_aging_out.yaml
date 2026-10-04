@@ -1,0 +1,55 @@
+id: foster_aging_out
+title: Almost eighteen
+text: >-
+  The caseworker brings a folder with your name on it and a checklist that
+  has fourteen things on it. Soon, the system that has housed you will stop
+  doing it. {guardian.name} says you are welcome to visit. It sounds like a
+  promise, and also like a door that is about to close politely.
+tone: serious
+category: guardianship
+rarity: common
+lifeStages: [teen]
+requires:
+  all:
+    - { family: { heir: true, guardian: [foster] } }
+    - { flag: in_foster_care }
+    - { age: { gte: 16, lt: 18 } }
+weight: { base: 14 }
+once: true
+cast:
+  guardian: { kind: stepparent, presence: household }
+choices:
+  - id: plan
+    label: Work through the checklist, one item at a time
+    outcome:
+      text: >-
+        It is a lot, and you do it. By the end you have a plan, a list of
+        people who will answer the phone, and a quiet pride that nobody gave
+        you a head start.
+      effects:
+        - { type: stat, key: discipline, delta: 3 }
+        - { type: stat, key: stress, delta: 3 }
+        - { type: stat, key: confidence, delta: 2 }
+  - id: lean_on
+    label: Ask {guardian.name} what happens after you leave
+    visibleIf: { memory: { role: guardian, tag: foster_carer } }
+    outcome:
+      text: >-
+        {guardian.name} thinks about it for longer than you expect. There is
+        a room, {guardian.they} {guardian:says|say}, if you need one, and a
+        phone number that is not the agency's. It is not a family. It is not
+        nothing.
+      effects:
+        - { type: relationship, role: guardian, affection: 10, trust: 10 }
+        - { type: stat, key: happiness, delta: 3 }
+        - { type: stat, key: stress, delta: -3 }
+  - id: avoid
+    label: Put the folder in a drawer and avoid thinking about it
+    outcome:
+      text: >-
+        You are seventeen, and tired of the future. The drawer holds the
+        folder, and the folder holds the checklist, and eventually the drawer
+        has to open. For now, it does not.
+      effects:
+        - { type: stat, key: stress, delta: 4 }
+        - { type: stat, key: happiness, delta: -2 }

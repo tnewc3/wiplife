@@ -56,7 +56,10 @@ export function chooseFamilyActions(
 ): { person: [ActionId, string][]; life: [LifeActionId, LifeActionParams][] } {
   const out = { person: [] as [ActionId, string][], life: [] as [LifeActionId, LifeActionParams][] };
   const age = life.character.age;
-  if (!profile.wantsKids || age < FAMILY_YEARS.min || age > FAMILY_YEARS.max) return out;
+  // An heir (E2b) begins mid-life: their window to raise a family starts and runs on from where they began.
+  const startAge = typeof life.inputLog[0]?.payload.startAge === 'number' ? life.inputLog[0].payload.startAge : 0;
+  const window = { min: Math.max(FAMILY_YEARS.min, startAge), max: Math.max(FAMILY_YEARS.max, startAge + 12) };
+  if (!profile.wantsKids || age < window.min || age > window.max) return out;
   if (kidsSoFar(life) >= profile.maxKids || life.family.pregnancy || life.family.process) return out;
   const partners = Object.values(life.relationships).filter((r) => ['spouse', 'fiance', 'partner'].includes(r.kind) && r.status === 'active' && life.people[r.personId]?.alive);
   const stuck = life.family.attempts >= 2;

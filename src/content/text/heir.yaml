@@ -1,0 +1,77 @@
+# The words an heir's start is written in (E2b): the "Previously" card and
+# the childhood recap that opens an heir's life history. Roles: parent (the
+# parent who died), guardian (who took a minor in). Values: {age} (the
+# parent's age at death), {year}, {cause}, {heirAge}, {amount}, {value},
+# {city}, {releaseAge}.
+
+previously:
+  died:
+    - "{parent.name} died at {age}, of {cause}. It is {year}, and you are {heirAge}."
+    - "{parent.name} is gone: {age} years, and then {cause}. You are {heirAge}, and the story is yours now."
+    - "{parent.name} died in {year}, at {age}, of {cause}. You are {heirAge}, and you carry on from here."
+  guardian:
+    parent:
+      - "{guardian.name} is still here, and you are going home with {guardian.them}."
+      - "You will live with {guardian.name}, who is grieving too, and who is still here."
+    stepparent:
+      - "{guardian.name} was married to {parent.name}, and has said {guardian.they} will keep you."
+      - "You will stay with {guardian.name}, who isn't blood and is staying anyway."
+    grandparent:
+      - "{guardian.name}, your grandparent, has made up the spare room."
+      - "You will live with {guardian.name}, who has already lost a child this year."
+    relative:
+      - "{guardian.name}, your aunt or uncle, has taken you in."
+      - "You will live with {guardian.name}, who is family and also a stranger to most of your days."
+    sibling:
+      - "{guardian.name}, your brother or sister, is old enough to take you in, and has."
+      - "{guardian.name} has signed the papers to take you in. You are not alone in this."
+    foster:
+      - "No one in the family could take you in. You are going into foster care with {guardian.name}."
+      - "There was no one left to take you in, so you will stay with {guardian.name}, a foster carer."
+  grown:
+    - "You are {heirAge}, and you stand where {parent.name} stood."
+    - "You are {heirAge}, and the house, the people and the questions are yours to deal with."
+  inherited:
+    cash: "You inherited {amount}."
+    trust: "{amount} is held in trust for you until you turn {releaseAge}."
+    home: "You inherited the home in {city}, worth {value}, with what is still owed on it."
+    nothing:
+      - "There was nothing left to inherit."
+      - "After the bills, there was nothing to pass on."
+    leftOut:
+      - "The will left you nothing."
+      - "Your name wasn't in the will."
+
+recap:
+  origin:
+    birth:
+      - "You were born, and {parent.name} was there."
+      - "You came into the world with {parent.name} waiting."
+    adopted:
+      - "You came to {parent.name} at {age}, and you became a family."
+      - "You were {age} when {parent.name} brought you home for good."
+  memories:
+    parent_warm_home: "You grew up in a warm house, and {parent.name} was a big part of it."
+    parent_cold_home: "The house you grew up in was cold, and you learned early how to be quiet in it."
+    parent_always_there: "{parent.name} was always there: the school gate, the bad days, the small ones."
+    parent_never_around: "{parent.name} was rarely there. You learned how to wait."
+    parent_strict_rules: "{parent.name} ran a strict house, and you knew where every line was."
+    parent_no_rules: "{parent.name} gave you almost no rules, and you made most of your own."
+  movedOut:
+    - "You moved out and started a life of your own."
+  loss:
+    - "{parent.name} died at {age}, and you were {heirAge}."
+    - "You lost {parent.name}. {parent.They} {parent:was|were} {age}, and you were {heirAge}."
+  foster:
+    began:
+      - "You went into foster care."
+    ended:
+      - "You aged out of foster care."
+
+deeds:
+  wealth: "a family that did well"
+  conviction: "a conviction in the family"
+  bankruptcy: "money troubles"
+  scandal: "a scandal"
+  honored: "good works"
+  generous: "its generosity"

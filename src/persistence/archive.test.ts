@@ -99,7 +99,17 @@ describe('archive migrations', () => {
     const { birthCityId: _birth, ...v1 } = finished('archive-v1');
     await db.archive.put({ id: v1.id, envelope: { ...makeArchiveEnvelope(v1 as ArchivedLife, content.contentVersion), schemaVersion: 1 } });
     const read = await readArchivedLife(db, v1.id);
-    expect(read).toEqual({ ...v1, birthCityId: v1.cityId });
+    // E2b: and, on the way to version 3, a family line of its own.
+    expect(read).toEqual({ ...v1, birthCityId: v1.cityId, lineId: v1.id, familyName: v1.name.split(' ').at(-1), familyReputation: 50 });
+    expect(archivedLifeSchema.safeParse(read).success).toBe(true);
+  });
+
+  it('upgrade a version 2 entry into a family line of its own (E2b)', async () => {
+    const db = freshDb();
+    const { lineId: _line, familyName: _family, familyReputation: _rep, ...v2 } = finished('archive-v2');
+    await db.archive.put({ id: v2.id, envelope: { ...makeArchiveEnvelope(v2 as ArchivedLife, content.contentVersion), schemaVersion: 2 } });
+    const read = await readArchivedLife(db, v2.id);
+    expect(read).toEqual({ ...v2, lineId: v2.id, familyName: v2.name.split(' ').at(-1), familyReputation: 50 });
     expect(archivedLifeSchema.safeParse(read).success).toBe(true);
   });
 });

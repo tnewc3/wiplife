@@ -1,0 +1,46 @@
+id: box_of_your_parents_things
+title: The box
+text: >-
+  In the back of a closet there is a box with your parent's handwriting on
+  the side. It holds the kind of things people keep: letters, ticket stubs, a
+  watch that does not run. You are looking at the small pile of someone's
+  life that did not fit into a will.
+tone: serious
+category: legacy
+rarity: rare
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { family: { heir: true } }
+    - { age: { gte: 16 } }
+weight: { base: 2 }
+once: true
+choices:
+  - id: read_everything
+    label: Sit down and go through all of it
+    outcome:
+      text: >-
+        It takes the whole afternoon. There is a stranger in the letters, and
+        a friend, and someone brave. You put it all back in the right order, and
+        for a while the house is not as empty as before.
+      effects:
+        - { type: stat, key: happiness, delta: 3 }
+        - { type: stat, key: stress, delta: -2 }
+  - id: keep_one
+    label: Keep the watch, and pass the rest on
+    outcome:
+      text: >-
+        You wind the watch even though it does not run. It is a small ritual.
+        The rest goes to people who will love it, and you find that giving it
+        away is a way of keeping it.
+      effects:
+        - { type: stat, key: kindness, delta: 1 }
+        - { type: stat, key: happiness, delta: 2 }
+  - id: close_lid
+    label: Close the lid. Not yet
+    outcome:
+      text: >-
+        You tape the box shut and put it back. It is not forever. It is just
+        today, and today is allowed to be enough.
+      effects:
+        - { type: stat, key: stress, delta: 1 }

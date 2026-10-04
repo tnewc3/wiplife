@@ -23,8 +23,12 @@ import {
   OBITUARY_EDUCATION_KEYS,
   OBITUARY_TONES,
   type ObituaryTone,
+  FAMILY_DEEDS,
   FAMILY_RESULT_ROLES,
+  HEIR_MEMORY_MAP,
+  HEIR_MEMORY_TAGS,
   familyResults,
+  heirResults,
 } from '../../src/content/schemas';
 import {
   ACTION_IDS,
@@ -173,6 +177,7 @@ export function checkReferences(
   errors.push(...checkDiscovery(bundle, fileOf));
   errors.push(...checkInteractions(bundle, fileOf));
   errors.push(...checkFamily(bundle, fileOf, options.partialEvents === true));
+  errors.push(...checkHeir(bundle, fileOf, options.partialEvents === true));
 
   return errors;
 }
@@ -432,6 +437,10 @@ function implies(required: Condition, part: Condition): boolean {
     return true;
   }
   if ('romance' in part && 'romance' in required) return subset(required.romance, part.romance);
+  if ('family' in part && 'family' in required) {
+    // E2b: every field the contract names must be asked for the same way.
+    return Object.entries(part.family).every(([key, value]) => JSON.stringify((required.family as Record<string, unknown>)[key]) === JSON.stringify(value));
+  }
   if ('legal' in part && 'legal' in required) {
     return (part.legal.incarcerated === undefined || part.legal.incarcerated === required.legal.incarcerated) &&
       (part.legal.probation === undefined || part.legal.probation === required.legal.probation);
@@ -466,6 +475,7 @@ function checkEvents(bundle: ContentBundle, fileOf: (typeKey: CollectionKey, id:
     ...bundle.registries.interactions.infidelity.flirt.events,
     ...bundle.registries.interactions.infidelity.intimate.events,
     ...familyResults(bundle.registries.family).flatMap((r) => r.events),
+    ...heirResults(bundle.registries.heir).flatMap((r) => r.events),
   ]);
 
   for (const [id, def] of Object.entries(bundle.events)) {
@@ -1164,6 +1174,117 @@ function checkFamily(bundle: ContentBundle, fileOf: (typeKey: CollectionKey, id:
         if (hit) e(`is available with a child but uses romantic or sexual wording ("${hit[0]}")`);
       }
     }
+  }
+  return errors;
+}
+
+
+const HEIR_REGISTRY = 'registries/heir.yaml';
+const HEIR_TEXT = 'text/heir.yaml';
+
+/** True when the condition always requires you to be an heir. */
+function requiresHeir(condition: Condition | undefined): boolean {
+  return requiredParts(condition).some((c) => 'family' in c && c.family.heir === true);
+}
+
+/**
+ * Heir play and inheritance (E2b): the balance numbers agree, the memories
+ * and flags the engine writes exist, the registry's events fit their
+ * results (followUpOnly, only for heirs, a deceased `parent` only where the
+ * engine passes one in), and the text for the heir's start only uses the
+ * roles and values it is given.
+ */
+function checkHeir(bundle: ContentBundle, fileOf: (typeKey: CollectionKey, id: string) => string, partialEvents: boolean): ContentError[] {
+  const errors: ContentError[] = [];
+  const err = (file: string, message: string) => errors.push({ file, message });
+  const h = bundle.balance.family.heir;
+  const e = bundle.balance.family.estate;
+
+  // Balance.
+  if (h.guardian.minAge > h.guardian.maxAge) err(FAMILY_BALANCE, 'heir.guardian: minAge is greater than maxAge');
+  if (h.fosterAge.min > h.fosterAge.max) err(FAMILY_BALANCE, 'heir.fosterAge: min is greater than max');
+  if (h.drama.inYears.min > h.drama.inYears.max) err(FAMILY_BALANCE, 'heir.drama.inYears: min is greater than max');
+  if (h.memoryEvent.inYears.min > h.memoryEvent.inYears.max) err(FAMILY_BALANCE, 'heir.memoryEvent.inYears: min is greater than max');
+  if (h.drama.inYears.min < 1 || h.memoryEvent.inYears.min < 1) err(FAMILY_BALANCE, 'heir: follow-up events are due in at least one year');
+  if (h.trustReleaseAge < bundle.balance.economy.independenceAge) err(FAMILY_BALANCE, 'heir.trustReleaseAge: below the independence age');
+  for (const [flag, deed] of Object.entries(h.reputation.flags)) {
+    if (!bundle.registries.flags.flags[flag]) err(FAMILY_BALANCE, `heir.reputation.flags: unknown flag "${flag}"`);
+    if (!(FAMILY_DEEDS as readonly string[]).includes(deed.deed)) err(FAMILY_BALANCE, `heir.reputation.flags.${flag}: unknown deed "${deed.deed}" (one of ${FAMILY_DEEDS.join(', ')})`);
+  }
+  for (const [name, percent] of Object.entries(e.default)) if (percent > 100) err(FAMILY_BALANCE, `estate.default.${name}: more than 100 percent`);
+  if (Object.keys(bundle.registries.estate.causes).length === 0) err('registries/estate.yaml', 'causes: a will needs at least one cause to name');
+  for (const item of ['legal_help']) if (!bundle.balance.economy.costs[item]) err('balance/economy.yaml', `costs.${item}: the estate events need this item`);
+
+  // What the engine writes.
+  for (const tag of [...Object.values(HEIR_MEMORY_MAP), 'lost_the_same_parent', 'took_you_in', 'foster_carer']) {
+    if (!bundle.registries.memories.tags[tag]) err('registries/memories.yaml', `tags.${tag}: the heir system writes this memory`);
+  }
+  for (const flag of ['estate_will', 'estate_no_will', 'left_out_of_will', 'inherited_a_home', 'in_foster_care', 'grew_up_in_foster_care']) {
+    if (!bundle.registries.flags.flags[flag]) err('registries/flags.yaml', `flags.${flag}: the heir system sets this flag`);
+  }
+
+  // Registry events.
+  for (const result of heirResults(bundle.registries.heir)) {
+    for (const id of result.events) {
+      const def = bundle.events[id];
+      if (!def) {
+        if (!partialEvents) err(HEIR_REGISTRY, `${result.where}: unknown event "${id}"`);
+        continue;
+      }
+      const eventErr = (message: string) => err(fileOf('events', id), `${id}: ${message}`);
+      if (!def.followUpOnly) eventErr(`answers ${result.where}, so it must be followUpOnly`);
+      if (!requiresHeir(def.requires)) eventErr(`answers ${result.where}, so it requires { family: { heir: true } }`);
+      for (const [role, spec] of Object.entries(def.cast ?? {})) {
+        if (spec.deceased === true && !result.passes.includes(role)) eventErr(`cast.${role}: a deceased role is only passed in for ${result.where} as: ${result.passes.join(', ') || 'nobody'}`);
+      }
+      for (const role of result.passes) {
+        const spec = def.cast?.[role];
+        if (role === 'parent' && !spec?.deceased) eventErr(`answers ${result.where}, so it must cast "parent" as a deceased role`);
+        if (role === 'sibling' && (!spec || spec.kind !== 'sibling')) eventErr(`answers ${result.where}, so it must cast "sibling" as a sibling`);
+      }
+    }
+  }
+  for (const tag of HEIR_MEMORY_TAGS) {
+    const mapped = HEIR_MEMORY_MAP[tag];
+    for (const id of bundle.registries.heir.memories[tag]) {
+      const def = bundle.events[id];
+      if (def && !JSON.stringify(def.requires).includes(`"tag":"${mapped}"`)) err(fileOf('events', id), `${id}: answers memories.${tag}, so it must require the memory "${mapped}" from the parent`);
+    }
+  }
+
+  // A parent who has died only exists for heirs, so every event that casts one is for heirs only.
+  for (const [id, def] of Object.entries(bundle.events)) {
+    if (def.retired) continue;
+    if (Object.values(def.cast ?? {}).some((c) => c.deceased === true && c.kind === 'parent') && !requiresHeir(def.requires)) {
+      err(fileOf('events', id), `${id}: casts a parent who has died, which only heirs have, so it must require { family: { heir: true } }`);
+    }
+  }
+
+  // Heir text: only the roles and values the start is written with.
+  const allowed = {
+    roles: ['parent', 'guardian'],
+    values: ['age', 'year', 'cause', 'heirAge', 'amount', 'value', 'city', 'releaseAge'],
+  };
+  const text = bundle.text.heir;
+  const templates: [string, string][] = [
+    ...text.previously.died.map((t): [string, string] => ['previously.died', t]),
+    ...Object.entries(text.previously.guardian).flatMap(([k, list]) => list.map((t): [string, string] => [`previously.guardian.${k}`, t])),
+    ...text.previously.grown.map((t): [string, string] => ['previously.grown', t]),
+    ['previously.inherited.cash', text.previously.inherited.cash],
+    ['previously.inherited.trust', text.previously.inherited.trust],
+    ['previously.inherited.home', text.previously.inherited.home],
+    ...text.previously.inherited.nothing.map((t): [string, string] => ['previously.inherited.nothing', t]),
+    ...text.previously.inherited.leftOut.map((t): [string, string] => ['previously.inherited.leftOut', t]),
+    ...text.recap.origin.birth.map((t): [string, string] => ['recap.origin.birth', t]),
+    ...text.recap.origin.adopted.map((t): [string, string] => ['recap.origin.adopted', t]),
+    ...Object.entries(text.recap.memories).map(([k, t]): [string, string] => [`recap.memories.${k}`, t]),
+    ...text.recap.movedOut.map((t): [string, string] => ['recap.movedOut', t]),
+    ...text.recap.loss.map((t): [string, string] => ['recap.loss', t]),
+    ...text.recap.foster.began.map((t): [string, string] => ['recap.foster.began', t]),
+    ...text.recap.foster.ended.map((t): [string, string] => ['recap.foster.ended', t]),
+  ];
+  for (const [where, template] of templates) {
+    for (const message of checkTemplate(template, allowed)) err(HEIR_TEXT, `${where}: ${message}`);
   }
   return errors;
 }

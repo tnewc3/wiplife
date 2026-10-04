@@ -2,6 +2,8 @@ import 'fake-indexeddb/auto';
 import { produce } from 'immer';
 import { afterEach, describe, expect, it } from 'vitest';
 import { InvalidInputError } from '../engine/creation/input';
+import { die, parentLife } from '../engine/estate/fixtures';
+import { heirCandidates } from '../engine/estate/heir';
 import { customInput, lifeAtAge } from '../engine/testFixtures';
 import { beginYear, CONTINUE_CHOICE } from '../engine/life';
 import { getEventCard, getYearRecap } from '../engine/selectors';
@@ -545,5 +547,104 @@ describe('app store: work', () => {
     expect(life.phase).toBe('yearStart');
     expect(life.career.applied).toHaveLength(1);
     expect(life.career.job?.jobId ?? null).toBe(life.career.applied[0]!.hired ? 'retail_associate' : null);
+  });
+});
+
+describe('app store: heirs and wills (E2b)', () => {
+  async function waiting(seed = 'store-heir') {
+    const { db, options, store } = setup();
+    const dead = die(parentLife({ kids: [9, 30], spouse: true, seed }));
+    await writeSave(db, makeEnvelope(dead, content.contentVersion));
+    await store.getState().init();
+    return { db, options, store, dead };
+  }
+
+  it('keeps a life with living children saved, not archived, until an heir is chosen', async () => {
+    const { db, store, dead } = await waiting();
+    const state = store.getState();
+    expect(state.life).toBeNull();
+    expect(state.screen).toBe('death');
+    expect(state.deadLife?.id).toBe(dead.id);
+    expect(state.deathView!.heirs.map((h) => h.id).sort()).toEqual([...heirCandidates(dead)].sort());
+    expect(state.deathView!.lines.length).toBeGreaterThan(0);
+    expect(state.lastDeath).toMatchObject({ unfinished: false, generation: 1 });
+    expect((await listArchive(db)).lives).toEqual([]);
+    expect((await readSave(db, lifeStateSchema)).status).toBe('ok');
+  });
+
+  it('shows the Death screen again after a restart, with the same choice', async () => {
+    const { options, dead } = await waiting();
+    const restarted = createAppStore(options);
+    await restarted.getState().init();
+    expect(restarted.getState().screen).toBe('death');
+    expect(restarted.getState().deadLife?.id).toBe(dead.id);
+    expect(restarted.getState().deathView!.heirs).toHaveLength(2);
+  });
+
+  it('continues as the chosen child, archiving the parent in the same step', async () => {
+    const { db, options, store, dead } = await waiting();
+    const minor = store.getState().deathView!.heirs.find((h) => h.minor)!;
+    await store.getState().chooseHeir(minor.id);
+    const state = store.getState();
+    expect(state.screen).toBe('game');
+    expect(state.deadLife).toBeNull();
+    expect(state.life).toMatchObject({ phase: 'yearStart' });
+    expect(state.life!.lineage).toMatchObject({ generation: 2, parentLifeId: dead.id });
+    expect(state.life!.character.name.first).toBe(dead.people[minor.id]!.name.first);
+    const { lives } = await listArchive(db);
+    expect(lives).toHaveLength(1);
+    expect(lives[0]).toMatchObject({ id: dead.id, heirName: minor.name, generation: 1 });
+    // The heir is the active life now, and survives a restart.
+    const restarted = createAppStore(options);
+    await restarted.getState().init();
+    expect(restarted.getState().life?.id).toBe(state.life!.id);
+    expect(restarted.getState().life?.lineage.previously).toBeDefined();
+  });
+
+  it('archives the life when the player leaves the Death screen instead', async () => {
+    const { db, store } = await waiting();
+    await store.getState().leaveDeath('newLife');
+    expect(store.getState().screen).toBe('newLife');
+    expect(store.getState().deadLife).toBeNull();
+    const { lives } = await listArchive(db);
+    expect(lives).toHaveLength(1);
+    expect(lives[0]!.heirName).toBeUndefined();
+    expect((await readSave(db, lifeStateSchema)).status).toBe('none');
+  });
+
+  it('ignores choosing an heir when no life is waiting', async () => {
+    const { store } = setup();
+    await store.getState().init();
+    await store.getState().chooseHeir('p1');
+    expect(store.getState().life).toBeNull();
+  });
+
+  it('archives a life with no living children at once, and still shows its estate', async () => {
+    const { db, store } = setup();
+    const dead = die(parentLife({ kids: [], spouse: true, seed: 'store-childless' }));
+    await writeSave(db, makeEnvelope(dead, content.contentVersion));
+    await store.getState().init();
+    expect(store.getState().screen).toBe('death');
+    expect(store.getState().deadLife).toBeNull();
+    expect(store.getState().deathView!.heirs).toEqual([]);
+    expect(store.getState().deathView!.lines[0]!.relation).toBe('spouse');
+    expect((await listArchive(db)).lives).toHaveLength(1);
+  });
+
+  it('writes a will under More and keeps it', async () => {
+    const { db, options, store } = setup();
+    await store.getState().init();
+    const life = parentLife({ kids: [9], seed: 'store-will' });
+    await writeSave(db, makeEnvelope(life, content.contentVersion));
+    const restarted = createAppStore(options);
+    await restarted.getState().init();
+    restarted.getState().setTab('more');
+    restarted.getState().openWill();
+    expect(restarted.getState().moreView).toBe('will');
+    const [kid] = heirCandidates({ ...life, phase: 'dead' } as typeof life);
+    await restarted.getState().takeLifeAction('write_will', { shares: [{ kind: 'person', id: kid!, percent: 100 }] });
+    expect(restarted.getState().life!.will!.shares).toEqual([{ kind: 'person', id: kid, percent: 100 }]);
+    const saved = await readSave(db, lifeStateSchema);
+    expect(saved.status === 'ok' && saved.envelope.data.will?.shares).toHaveLength(1);
   });
 });

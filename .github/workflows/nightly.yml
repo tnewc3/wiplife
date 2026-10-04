@@ -2,7 +2,9 @@ name: Nightly
 
 # The large runs from docs/technical.md, section Q: the 10,000-life lifespan
 # and invariant test (every pull request runs 2,500 of those lives) and a
-# 10,000-life simulation, with its report saved.
+# 10,000-life simulation, with its report saved. The simulation also continues
+# the careful player's lives as heirs for three generations (E2b), which adds
+# the heirs' generations to the run, so the job is given more time.
 on:
   schedule:
     - cron: '17 7 * * *'
@@ -16,7 +18,7 @@ jobs:
   large-runs:
     name: 10,000 lives
     runs-on: ubuntu-latest
-    timeout-minutes: 150
+    timeout-minutes: 300
     steps:
       - uses: actions/checkout@v4
 

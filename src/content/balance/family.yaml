@@ -222,3 +222,106 @@ stepchildren:
   maxAge: 24
   affection: { mean: 45, sd: 12 }
   trust: { mean: 40, sd: 12 }
+
+# E2b: settling an estate at death. Costs come off first (the funeral at the
+# national average, scaled to the city you lived in, then legal and
+# settlement costs as a share of savings plus the home), then debts other than
+# the mortgage; a home passes with its mortgage, or is sold when it can't
+# pass whole; what is left is shared out by the will, or by these defaults.
+# Debts are never inherited beyond the home they are attached to.
+estate:
+  funeral: 9000
+  settlementShare: 0.03
+  # Estate tax, as a share of the whole estate by its size (dollars): nothing
+  # on a small estate, rising to 70% on a very large one.
+  tax:
+    - { at: 0, x: 0 }
+    - { at: 600000, x: 0 }
+    - { at: 1200000, x: 0.2 }
+    - { at: 2500000, x: 0.4 }
+    - { at: 6000000, x: 0.55 }
+    - { at: 12000000, x: 0.7 }
+  # A will has between one and this many shares.
+  maxShares: 8
+  default:
+    # A spouse and children: the spouse's percent; children split the rest equally.
+    spouseWithChildren: 50
+    # A spouse and no children: the spouse's percent; living parents and
+    # siblings split the rest (the spouse takes it all when there are none).
+    spouseOnly: 80
+    # Nobody but parents and siblings: the parents' percent; the siblings split the rest.
+    parents: 70
+
+# E2b: continuing as an heir.
+heir:
+  # Money an heir under this age inherits is held in trust until they reach it.
+  trustReleaseAge: 18
+  # What a grown heir has from a life of their own that isn't played (before
+  # any inheritance), by their wealth level.
+  adultSavings: { poor: 600, working: 2500, middle: 7000, affluent: 20000, rich: 45000 }
+  # Who can take a minor heir in when no parent can (a surviving parent always can).
+  guardian:
+    minAge: 21
+    maxAge: 78
+    minAffection: 25
+  # How the heir feels about the family around them at the start.
+  bonds:
+    parent: { affection: { mean: 62, sd: 10 }, trust: { mean: 58, sd: 10 } }
+    stepparent: { affection: { mean: 48, sd: 12 }, trust: { mean: 45, sd: 12 } }
+    sibling: { affection: { mean: 58, sd: 14 }, trust: { mean: 52, sd: 14 } }
+    grandparent: { affection: { mean: 64, sd: 10 }, trust: { mean: 58, sd: 10 } }
+    relative: { affection: { mean: 52, sd: 12 }, trust: { mean: 46, sd: 12 } }
+    foster: { affection: { mean: 38, sd: 12 }, trust: { mean: 30, sd: 12 } }
+  # A grown heir under this age who hadn't moved out lives with a surviving parent.
+  livesHomeUntil: 21
+  # The most memories of how they were raised that the childhood recap tells.
+  recapMemories: 4
+  fosterAge: { min: 32, max: 58 }
+  # Family reputation, 0–100 (50 is unremarkable). When a life ends it
+  # becomes 50 + (the old value - 50) × retention, plus what the life added.
+  reputation:
+    retention: 0.7
+    # Points per point your own reputation stood above or below 50.
+    personal: 0.35
+    record: { warning: 0, fine: -0.5, probation: -2, jail: -6 }
+    # Points for what you left behind: net worth at death (dollars) -> points.
+    wealth:
+      - { at: 0, x: 0 }
+      - { at: 250000, x: 1 }
+      - { at: 750000, x: 3 }
+      - { at: 2000000, x: 6 }
+    # Percent of the estate left to a cause, per percent; a gift of at least deedAt percent makes the family known for it.
+    generosity: { perPercent: 0.12, max: 7, deedAt: 20 }
+    # Deeds proven by a flag: the points they add or cost, and what the family becomes known for.
+    flags:
+      filed_bankruptcy: { delta: -3, deed: bankruptcy }
+      unfaithful: { delta: -2, deed: scandal }
+      stole_from_work: { delta: -4, deed: scandal }
+      cooked_books: { delta: -6, deed: scandal }
+      dui_arrest: { delta: -3, deed: scandal }
+      caught_shoplifting: { delta: -1, deed: scandal }
+      was_evicted: { delta: -1.5, deed: bankruptcy }
+      whistleblower: { delta: 4, deed: honored }
+      volunteers: { delta: 2.5, deed: honored }
+      wrote_memoir: { delta: 1.5, deed: honored }
+      union_member: { delta: 2, deed: honored }
+      valedictorian: { delta: 1.5, deed: honored }
+    # Wealth makes the family known for it from this net worth, and a record from this many convictions.
+    deedWealth: 600000
+    deedConvictions: 1
+    maxDeeds: 5
+    # The heir's own reputation starts at 50 plus this share of the family's distance from 50.
+    carry: 0.6
+  # A new person who joins the heir's life starts this many affection points
+  # higher for each point of family reputation above 50 (lower below).
+  newPersonAffection: 0.25
+  # After a death, how often a will (or its absence) leads to a dispute.
+  drama:
+    siblingDispute: 0.35
+    estrangedContest: 0.6
+    unexpectedBeneficiary: 0.5
+    causeLetter: 0.7
+    noWillDispute: 0.3
+    inYears: { min: 1, max: 3 }
+  # Memories of how the heir was raised bring an event this often, and when.
+  memoryEvent: { chance: 0.6, inYears: { min: 2, max: 7 }, max: 2 }

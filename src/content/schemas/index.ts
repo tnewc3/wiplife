@@ -19,7 +19,7 @@ import { conditionDefSchema, healthBalanceSchema, healthRegistrySchema } from '.
 import { legalBalanceSchema, legalRegistrySchema, offenseSchema } from './legal';
 import { discoveryBalanceSchema, discoveryRegistrySchema, discoveryTextSchema } from './discovery';
 import { interactionRegistrySchema, interactionSchema, interactionsBalanceSchema } from './interactions';
-import { familyBalanceSchema, familyRegistrySchema } from './family';
+import { estateRegistrySchema, familyBalanceSchema, familyRegistrySchema, heirRegistrySchema, heirTextSchema } from './family';
 
 export * from './balance';
 export * from './careers';
@@ -90,6 +90,7 @@ export const singletonTypes = {
   'text/legal': legalTextSchema,
   'text/discovery': discoveryTextSchema,
   'text/time': timeTextSchema,
+  'text/heir': heirTextSchema,
   'registries/memories': memoryRegistrySchema,
   'registries/flags': flagRegistrySchema,
   'registries/categories': categoryRegistrySchema,
@@ -101,6 +102,8 @@ export const singletonTypes = {
   'registries/discovery': discoveryRegistrySchema,
   'registries/interactions': interactionRegistrySchema,
   'registries/family': familyRegistrySchema,
+  'registries/estate': estateRegistrySchema,
+  'registries/heir': heirRegistrySchema,
 } as const;
 
 export type SingletonPath = keyof typeof singletonTypes;
@@ -145,6 +148,7 @@ export const contentBundleSchema = z.strictObject({
     legal: legalTextSchema,
     discovery: discoveryTextSchema,
     time: timeTextSchema,
+    heir: heirTextSchema,
   }),
   registries: z.strictObject({
     memories: memoryRegistrySchema,
@@ -158,6 +162,8 @@ export const contentBundleSchema = z.strictObject({
     discovery: discoveryRegistrySchema,
     interactions: interactionRegistrySchema,
     family: familyRegistrySchema,
+    estate: estateRegistrySchema,
+    heir: heirRegistrySchema,
   }),
 });
 

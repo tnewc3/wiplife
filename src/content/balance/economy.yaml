@@ -141,6 +141,8 @@ costs:
   ivf_cycle: { amount: 15000, familyHelp: true }
   surrogacy_agency: { amount: 35000, familyHelp: true }
   surrogacy_balance: { amount: 60000, familyHelp: true }
+  # E2b: a lawyer for an estate that is contested.
+  legal_help: { amount: 3500, familyHelp: false }
 
 # C1: the share of a cost your family covers, by family wealth, times how
 # close you are to your closest living parent (affection ÷ 100). Nothing

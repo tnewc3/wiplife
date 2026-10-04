@@ -6,6 +6,8 @@ import { performAction } from '../engine/actions';
 import { performInteraction } from '../engine/interactions/perform';
 import { beginYear, createLife } from '../engine/life';
 import { nextUint32 } from '../engine/rng';
+import { die, parentLife } from '../engine/estate/fixtures';
+import { continueAsHeir, heirCandidates } from '../engine/estate/heir';
 import { customInput, lifeAtAge, liveOut } from '../engine/testFixtures';
 import type { LifeState } from '../engine/types';
 import { createDb, type WiplifeDb } from './db';
@@ -619,5 +621,66 @@ describe('lives from E2a on', () => {
       d.relationships[first]!.parenting = { warmth: 120, strictness: 50, involvement: 50 };
     });
     expect(lifeStateSchema.safeParse(style).success).toBe(false);
+  });
+});
+
+describe('heirs, wills and estates (E2b)', () => {
+  it('upgrades a version 11 life with a family line of its own, no will and no estate', async () => {
+    const life = lifeAtAge('e2b-v11', 30);
+    const v11 = JSON.parse(JSON.stringify(life)) as Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any -- stripping fields from plain JSON to build an old save
+    delete v11.will;
+    delete v11.estate;
+    v11.lineage = { generation: 1 };
+    const db = freshDb();
+    await db.lives.put({ id: 'active', envelope: { ...makeEnvelope(v11, content.contentVersion), schemaVersion: 11 } });
+    const result = await readSave(db, loadedLifeSchema(content));
+    expect(result.status).toBe('ok');
+    if (result.status !== 'ok') return;
+    const upgraded = result.envelope.data;
+    expect(result.envelope.schemaVersion).toBe(CURRENT_SCHEMA_VERSION);
+    expect([upgraded.will, upgraded.estate]).toEqual([null, null]);
+    expect(upgraded.lineage).toEqual({ generation: 1, lineId: life.id, familyName: life.character.name.last, reputation: 50, deeds: [] });
+    expect(upgraded).toEqual(life);
+  });
+
+  it('round trips a will, an estate settlement, and heirs: a minor in trust with a guardian, one in foster care, a grown one with a home', async () => {
+    const base = parentLife({ kids: [9, 30], spouse: true, home: { value: 300_000, mortgage: 100_000 }, seed: 'e2b-round' });
+    const [a] = heirCandidates({ ...base, phase: 'dead' } as LifeState);
+    const withWill = performAction(base, 'write_will', { shares: [{ kind: 'person', id: a!, percent: 70 }, { kind: 'cause', id: 'library', percent: 30 }] }, content);
+    expect(await roundTrip(withWill)).toEqual(withWill);
+    const dead = die(withWill);
+    expect(await roundTrip(dead)).toEqual(dead);
+    for (const id of heirCandidates(dead)) {
+      const heir = continueAsHeir(dead, id, content);
+      expect(loadedLifeSchema(content).safeParse(heir).success, id).toBe(true);
+      expect(await roundTrip(heir)).toEqual(heir);
+    }
+    const orphan = die(parentLife({ kids: [10], noRelatives: true, seed: 'e2b-foster' }));
+    const fostered = continueAsHeir(orphan, heirCandidates(orphan)[0]!, content);
+    expect(fostered.housing.foster).toBe(true);
+    expect(await roundTrip(fostered)).toEqual(fostered);
+  });
+
+  it('rejects a will that does not add up, a trust past its release age, and a minor with no one to live with', () => {
+    const base = parentLife({ kids: [10], seed: 'e2b-bad' });
+    const [kid] = heirCandidates({ ...base, phase: 'dead' } as LifeState);
+    const badWill = produce(base, (d) => {
+      d.will = { year: d.currentYear, shares: [{ kind: 'person', id: kid!, percent: 60 }] };
+    });
+    expect(loadedLifeSchema(content).safeParse(badWill).success).toBe(false);
+    const dead = die(parentLife({ kids: [10], noRelatives: true, seed: 'e2b-bad-heir' }));
+    const heir = continueAsHeir(dead, heirCandidates(dead)[0]!, content);
+    const noGuardian = produce(heir, (d) => {
+      delete d.housing.guardianId;
+      delete d.housing.foster;
+      delete d.flags.in_foster_care;
+    });
+    expect(loadedLifeSchema(content).safeParse(noGuardian).success).toBe(false);
+    const stale = produce(heir, (d) => {
+      d.finances.trust = { balance: 5_000, releaseAge: 5 };
+    });
+    expect(loadedLifeSchema(content).safeParse(stale).success).toBe(false);
+    const extra = { ...heir, lineage: { ...heir.lineage, mystery: true } };
+    expect(lifeStateSchema.safeParse(extra).success).toBe(false);
   });
 });

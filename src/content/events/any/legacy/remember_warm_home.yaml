@@ -1,0 +1,42 @@
+id: remember_warm_home
+title: The kitchen light
+text: >-
+  It is something small that does it: a smell from a stranger's kitchen, a
+  song on a radio in a shop. For a moment you are in the house you grew up
+  in, and the light is the right shade of yellow, and {parent.name} is at the
+  stove saying something you will never remember word for word. It was warm,
+  that house. It was warm because of {parent.them}.
+tone: light
+category: legacy
+rarity: common
+lifeStages: [child, teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { family: { heir: true } }
+    - { memory: { role: parent, tag: heir_warm_home } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  parent: { kind: parent, presence: anywhere, deceased: true }
+choices:
+  - id: hold_on
+    label: Stand there and let the memory last
+    outcome:
+      text: >-
+        You do not move for a minute. A stranger asks if you are all right,
+        and you say yes, and it is nearly true. You walk away lighter than
+        you came, carrying a warmth you did not have to earn twice.
+      effects:
+        - { type: stat, key: happiness, delta: 4 }
+        - { type: stat, key: stress, delta: -3 }
+        - { type: innerConflict, delta: -2 }
+  - id: tell_someone
+    label: Tell someone about it later
+    outcome:
+      text: >-
+        You tell the story over dinner, and the people you love laugh in the
+        right places. {parent.name} is in the room for a little while,
+        the way people are when they are well remembered.
+      effects:
+        - { type: stat, key: happiness, delta: 3 }
+        - { type: stat, key: sociability, delta: 1 }

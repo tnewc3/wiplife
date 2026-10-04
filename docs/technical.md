@@ -240,7 +240,20 @@ interface LifeState {
   death: DeathRecord | null;           // set in the 'dead' phase, or in 'yearEnd' when an event killed the
                                        // character and endYear has yet to close the life
   lifetime: { happinessTotal: number; years: number };  // happiness over finished years (obituary mood)
-  lineage: { generation: number; parentLifeId?: Id };  // for heir play later
+  will: Will | null;                   // E2b: who the estate goes to, as percentage shares
+  estate: Settlement | null;           // E2b: how the estate was settled; set at death
+  lineage: Lineage;                    // E2b: generation, the parent's life, the family line, reputation, deeds
+}
+
+interface Will { shares: { kind: 'person' | 'cause'; id: Id; percent: number }[]; year: number }  // shares add up to 100
+
+interface Lineage {
+  generation: number; parentLifeId?: Id;
+  lineId: Id;                          // the first life's id, kept by every heir
+  familyName: string;
+  reputation: number;                  // what the family is known for, 0–100 (50 unremarkable)
+  deeds: string[];                     // the deeds it is known for (newest last)
+  previously?: { parentName: string; lines: string[] };  // an heir's card, until their first age-up
 }
 
 interface YearRecap {
@@ -496,6 +509,9 @@ interface ArchivedLife {
   finalNetWorth: number;
   finalStats: Character['stats'];
   seed: string; generation: number; parentLifeId?: Id;
+  lineId: Id; familyName: string;      // E2b: the family line (archive schema version 3)
+  familyReputation: number;            // the line's reputation when this life ended
+  heirName?: string;                   // the heir who carried on from it
 }
 
 interface Settings {
@@ -671,7 +687,7 @@ The other content types follow the same pattern:
 
 ### Ready for heir play
 
-Heir play comes after the MVP, but the model already allows for it. `lineage` records the generation and the parent's life. Adding children only requires a new relationship kind. When a character dies, the game will be able to start a new `LifeState` from one of their children as a `Person`, carrying over money, assets and relationships.
+Heir play (E2b) is built: `lineage` records the generation and the parent's life, and when a character dies the game starts a new `LifeState` from one of their children as a `Person`, carrying over money, assets and relationships (see "E2b — Heir Play & Inheritance (as built)").
 
 ---
 
@@ -1507,7 +1523,7 @@ The plan is in docs/expansion.md (E1); these notes say how it was built.
 
 ### E2a — Children & Parenting (as built)
 
-The plan is in docs/expansion.md (E2a); these notes say how it was built. Heir play, wills and inheritance are E2b and are not built.
+The plan is in docs/expansion.md (E2a); these notes say how it was built. Heir play, wills and inheritance are E2b (below).
 
 - **Who can carry a pregnancy:** `Character.canCarry` and `Person.canCarry`, set at creation from the gender category (women can, men can't) and never changed afterwards. A nonbinary custom character chooses it (a step in custom creation; a woman or man who sends the opposite value is refused); random nonbinary characters, relatives and people you meet roll `carrying.nonbinaryChance` (only a nonbinary person draws a number, so every other life's random stream is unchanged by this). A natural pregnancy needs a pair in which exactly one can carry (`naturalCarrier`); every other route is a process below.
 - **Data:** `LifeState.family` (`pregnancy`, `process`, `support`, `attempts`, `lostChildren`, `miscarriages`); a child is a `Person` with `child` (`ChildData`: origin, other parent, custody, health, happiness, fitness, stress, genetic risk, talent, grades, hidden latent traits, the year they moved out) and a `Relationship` of the new kind `child` (or `stepchild`) with `parenting` (warmth, strictness, involvement, each 0–100). A potential partner's children from before are `Person.priorChildren` (birth years) until you marry them. `Ledger` gained `children`, `supportPaid` and `supportReceived`. Children and stepchildren are family kinds (never romantic, never a support role), and the year pipeline has a new step `family` right after `npcs`; NPC aging skips them, because their deaths belong to the family step.
@@ -1523,6 +1539,23 @@ The plan is in docs/expansion.md (E2a); these notes say how it was built. Heir p
 - **UI:** a creation choice for nonbinary characters; a Children group in People and a child's page (style in words, grades, where they live); parenting in the Interact sheet; Home shows a pregnancy or a process under way; More → Family lists adoption, IVF and surrogacy with costs, odds (in words) and why one is blocked; the Money tab shows child costs, child support and custody.
 - **Saves:** schema version 11. The migration from 10 gives everyone `canCarry` (women can, men can't; a nonbinary person by the parity of their id number, and a nonbinary character by the parity of their year of birth, since nothing recorded a choice), an empty family record and a ledger with zero child costs and support.
 - **Simulation** (`tools/simulate/family.ts`): each simulated life wants children or not and brings a fixed style (warm or cold, strict or relaxed, involved or absent); the careful player acts on it with the parenting interactions, tries for a baby, and sometimes starts an adoption, IVF or surrogacy. The report counts births per life, children by origin, pregnancies and miscarriages, processes started and worked, children lost and whether each loss reached a grief event, custody outcomes, child costs, what each style line did to grades, kindness and discipline, and how starting smarts follow the parents', with targets in `balance/targets.yaml` (`family`).
+
+### E2b — Heir Play & Inheritance (as built)
+
+The plan is in docs/expansion.md (E2b); these notes say how it was built.
+
+- **Data:** `LifeState.will` (`Will`: shares of whole percents that add up to 100, each to a person or a cause), `LifeState.estate` (the `Settlement`, set when the character dies), `LifeState.lineage` (generation, parent's life, `lineId`, `familyName`, `reputation`, `deeds`, and the heir's `previously` card), `FinanceState.trust` (an heir under 18's inherited money, with its release age), and `HousingState.guardianId` and `foster` (who a minor heir lives with). A new relationship kind, `relative` (aunts and uncles), exists only in an heir's life. `ArchivedLife` gained `lineId`, `familyName`, `familyReputation` and `heirName`. The year pipeline has a new step `heritage` right after `family`.
+- **Will** (`src/engine/estate/will.ts`, `actions/estate.ts`): the life action `write_will` (More → Write a will; adults, between years, also from prison) takes `shares`; `parseShares` checks them against the people you know (alive, in your life) and the causes in `registries/estate.yaml`: whole percents of 1–100, nobody twice, at most `estate.maxShares`, adding up to 100. An empty list clears it. Shares to people who have died when you do are dropped and the rest scaled up (largest remainder) to 100; with nothing left the default shares apply.
+- **Estate settlement** (`src/engine/estate/settle.ts`, run by `endYear` when the character dies, no randomness): funeral (scaled to the city) and settlement costs come off savings (and any money held in trust) first, then debts other than the mortgage; if savings fall short the home is sold (selling costs, then the mortgage, then the shortfall), and what is still owed is written off, never passed on. A home worth less than its mortgage goes back to the lender. Estate tax (`estate.tax`, a share of the whole estate by its size; nothing under $600,000) comes off the cash that is left (a home that would have to be sold to pay it is sold). The home passes with its mortgage to one beneficiary, your spouse first and then the largest share, if their share covers its equity; otherwise it is sold and the equity joins the cash. The rest, cash and equity, is shared by the will, or by the default shares (`estate.default`: spouse and children 50/50 split among children, spouse and nothing else 80 with parents and siblings sharing the rest, children equally, then parents and siblings). `invariants` check that nothing is created or lost (`savings + home − assumed mortgage = costs + debts paid + tax + mortgage paid + selling costs + every share + what nobody received`).
+- **E5 extension point** (`src/engine/estate/possessions.ts`): `passPossessions` is called once the cash and home are shared out, with the lines, and its transfers are kept in `Settlement.possessions`; `receivePossessions` gives the heir theirs. Both do nothing until E5 fills them in.
+- **Heir conversion** (`src/engine/estate/heir.ts`, `continueAsHeir`): any living child (`heirCandidates`; stepchildren aren't offered) becomes the new character at the age they are, in the same year; their stats, personality, identity, hidden traits and talent are kept and the rest is rolled from a generator seeded from the parent's seed and the child's id (`seed.pN`). Relationships are rebuilt from the heir's side: the parent who died is `parent` (dead, with how they raised the heir as memories `heir_*`), the other biological parent is `parent`, a spouse who isn't their parent is `stepparent`, your other children and your spouse's children are `sibling`, your parents are `grandparent`, your siblings are `relative`; friends and coworkers don't carry over. A grown heir gets savings (the usual start for their wealth level plus their share), a home with its mortgage if the estate passed it to them, a high school diploma and, if they have an occupation they qualify for, that job. A minor's share (and a home sold on their behalf, less selling costs) is held in trust until `heir.trustReleaseAge`, released into savings by the heritage step; they live with a guardian (`chooseGuardian`: a surviving parent, then a stepparent, a grandparent, a relative or an older sibling, within the age and affection limits in `heir.guardian`), or go into foster care: a foster carer is created, `in_foster_care` is set and the foster events follow; foster care ends at 18 with a rental of their own. If a guardian dies, the heritage step finds another or foster care. The input log starts with a snapshot of the life as it began (`payload.snapshot`, `startAge`), so `replayLife` rebuilds an heir exactly.
+- **"Previously" and the childhood recap:** the conversion writes the card (`text/heir.yaml` previously: how the parent died, who took the heir in, what they inherited) into `lineage.previously`, shown on Home until the first age-up, and opens the heir's history with the recap (where they came from, how they were raised from their memories, moving out, the loss).
+- **Family reputation** (`src/engine/estate/reputation.ts`, `balance/family.yaml` `heir.reputation`): on the line, 0–100. When a life ends it becomes 50 + (old − 50) × `retention` + the life's own reputation (× `personal`), its criminal record, its wealth, generosity in the will and the deeds proven by flags (`reputation.flags`); the deeds the family is known for are kept (at most `maxDeeds`). The heir's own reputation starts at the usual roll plus `carry` of the line's distance from 50; hiring adds `familyReputation` points per point above or below 50 (`balance/careers.yaml`), and a new person joins the heir's life `newPersonAffection` points warmer (or cooler) per point.
+- **Events** (30, in the new categories `estate`, `guardianship` and `legacy`, each requiring `family: { heir: true }`): the will read, no will, sibling disputes (with and without a will), an estranged sibling contesting, a stranger named in the will, a charity writing back, being left out, the family home, who took you in (one per kind of guardian), foster care (placement, a dinner, aging out), a parent who resurfaces, the family's name opening or closing doors, being asked about the family, a teacher who knew your parent, a generous family, memories of how you were raised, and a box of your parent's things. `registries/heir.yaml` lists which the conversion schedules; the parent who died is passed in as the deceased role `parent`, and a sibling by id for the disputes. New conditions under `family`: `heir`, `generation`, `reputation`, `deeds`, `guardian`, `trust` and `will`. The content build (`checkHeir`) checks the registry, the roles, the memories and flags the engine writes, the heir text and the balance.
+- **UI:** More → Write a will (steps of 5%, a total that must reach 100, split evenly, clear); the Death screen shows the estate being settled and, with living children, who can carry on (any age, with what each would inherit) or a new life; Home shows the "Previously" card and where a minor heir lives; the Money tab shows money held in trust; More → Family shows the family line (generation, reputation in words, deeds); the archive groups lives into family lines with their generations and heirs. A life with living children stays saved (not archived) on the Death screen until an heir is chosen or the player leaves, which archives it; a reload shows the same choice.
+- **Saves:** schema version 12 (the migration gives a life no will, no estate and a family line of its own named for its family name, with reputation 50 and no deeds) and archive schema version 3 (each older life is a line of its own).
+- **Simulation** (`tools/simulate/heirs.ts`, `generations.ts`): the careful player writes a will in four lives in ten (naming its spouse and children, sometimes a cause or another relative) and, when a life ends with a living child, continues as one of them (the youngest, six times in ten, otherwise any), then again, for `--generations` generations (default 3), each a full simulation of its own. The report counts how often heirs are minors, who took minors in, what heirs inherit, estates by will or default, family wealth at death by generation over the families that lived three generations, how family reputation reaches heirs, and how many heirs see a memory event; targets are in `balance/targets.yaml` (`heirs`).
+- **Not built (open questions):** an adult heir's own partner and children aren't modelled before the conversion (a grown heir starts without them), possessions wait for E5, and stepchildren can't be chosen as heirs.
 
 ### Stage 11 — Polish
 
@@ -1682,7 +1715,7 @@ Each feature below is its own mini-stage using the same gate format (objective, 
 | Order | Feature | Why here |
 |---|---|---|
 | 14a | Children and parenting | Needed for heir play |
-| 14b | Heir play and inheritance | Uses the lineage fields already in the data model |
+| 14b | Heir play and inheritance | Uses the lineage fields already in the data model (built as E2b) |
 | 14c | Playable prison | Builds on the Stage 9 incarceration pipeline |
 | 14d | Criminal careers | Builds on legal and careers |
 | 14e | Entertainment, sports and fame | New career type plus a fame value |

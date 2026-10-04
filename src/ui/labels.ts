@@ -78,6 +78,7 @@ const RELATIONSHIP_LABELS: Record<RelationshipKind, Record<GenderCategory, strin
   parent: { woman: 'Mother', man: 'Father', nonbinary: 'Parent' },
   stepparent: { woman: 'Stepmother', man: 'Stepfather', nonbinary: 'Stepparent' },
   grandparent: { woman: 'Grandmother', man: 'Grandfather', nonbinary: 'Grandparent' },
+  relative: { woman: 'Aunt', man: 'Uncle', nonbinary: 'Relative' },
   sibling: { woman: 'Sister', man: 'Brother', nonbinary: 'Sibling' },
   child: { woman: 'Daughter', man: 'Son', nonbinary: 'Child' },
   stepchild: { woman: 'Stepdaughter', man: 'Stepson', nonbinary: 'Stepchild' },
@@ -738,4 +739,55 @@ export function pregnancyLine(p: { carrier: 'you' | 'surrogate' | { name: string
   const who = p.carrier === 'you' ? 'You’re expecting' : p.carrier === 'surrogate' ? 'Your surrogate is expecting your baby' : `${p.carrier.name} is expecting`;
   const plan = p.plan === 'adoption' ? ', and the baby will be placed for adoption' : '';
   return `${who}${plan}: ${when}.`;
+}
+
+// ── E2b: wills, estates, heirs and family lines ────────────────────────────
+
+/** How you were related to someone named in an estate (no gender: the estate lists only what's kept). */
+export const ESTATE_RELATION_LABELS: Record<RelationshipKind | 'cause', string> = {
+  parent: 'Parent',
+  stepparent: 'Stepparent',
+  grandparent: 'Grandparent',
+  relative: 'Aunt or uncle',
+  sibling: 'Sibling',
+  child: 'Child',
+  stepchild: 'Stepchild',
+  partner: 'Partner',
+  fiance: 'Fiancé(e)',
+  spouse: 'Spouse',
+  ex: 'Ex',
+  friend: 'Friend',
+  coworker: 'Coworker',
+  boss: 'Boss',
+  classmate: 'Classmate',
+  acquaintance: 'Acquaintance',
+  cause: 'Cause',
+};
+
+/** A family's reputation (0–100, 50 unremarkable) in words. */
+export function reputationWords(reputation: number): string {
+  if (reputation >= 80) return 'Honored';
+  if (reputation >= 62) return 'Well regarded';
+  if (reputation > 38) return 'Unremarkable';
+  if (reputation > 20) return 'Poorly regarded';
+  return 'Notorious';
+}
+
+/** Where a minor heir lives (the Home screen's line). */
+export function guardianHousingLine(guardian: { name: string; foster: boolean }, cityName: string): string {
+  return guardian.foster ? `In foster care with ${guardian.name} in ${cityName}` : `Living with ${guardian.name} in ${cityName}`;
+}
+
+/** The estate's home line on the Death screen. */
+export function estateHomeLine(home: 'none' | 'passes' | 'sold' | 'surrendered', value: number, mortgagePaid: number): string | null {
+  switch (home) {
+    case 'none':
+      return null;
+    case 'passes':
+      return `The home, worth ${money(value)}, passes to one person with what is still owed on it.`;
+    case 'sold':
+      return `The home was sold for ${money(value)}; ${money(mortgagePaid)} went to the lender.`;
+    case 'surrendered':
+      return 'The home was worth less than its mortgage, so the lender took it. No one inherits the difference.';
+  }
 }

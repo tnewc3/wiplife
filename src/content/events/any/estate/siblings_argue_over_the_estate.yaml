@@ -1,0 +1,52 @@
+id: siblings_argue_over_the_estate
+title: Who gets what
+text: >-
+  Without a will, everything is left to talk. {sibling.name} wants to sell the
+  things that cannot be split. You want to keep some of them. Neither of you
+  wants to be the one who says "I'm not talking about this anymore," so you
+  keep talking, and the talking is getting worse.
+tone: dark
+category: estate
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { family: { heir: true } }
+    - { flag: estate_no_will }
+    - { age: { gte: 18 } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  parent: { kind: parent, presence: anywhere, deceased: true }
+  sibling: { kind: sibling, presence: anywhere, age: { min: 18, max: 120 } }
+choices:
+  - id: draw_straws
+    label: Suggest taking turns choosing, one thing at a time
+    outcome:
+      text: >-
+        It is almost silly, two grown people choosing lamps like children
+        picking teams. Halfway through, you are both laughing, and neither of
+        you is sure when it started.
+      effects:
+        - { type: relationship, role: sibling, affection: 8, trust: 5 }
+        - { type: flag, key: reconciled_over_estate, value: true }
+        - { type: stat, key: happiness, delta: 2 }
+  - id: dig_in
+    label: Dig in on the things that matter to you
+    outcome:
+      text: >-
+        You keep what you wanted. {sibling.name} keeps the grudge. It is not a
+        fair trade, but nobody is keeping score out loud.
+      effects:
+        - { type: relationship, role: sibling, affection: -9, trust: -7 }
+        - { type: flag, key: parent_will_dispute, value: true }
+  - id: give_in
+    label: Give in and let {sibling.them} have it
+    outcome:
+      text: >-
+        It takes a clock you loved. It gets you a sibling who calls on
+        Sundays. You are surprised at how fair that feels.
+      effects:
+        - { type: relationship, role: sibling, affection: 10, trust: 8 }
+        - { type: stat, key: happiness, delta: 1 }
+        - { type: stat, key: stress, delta: -3 }

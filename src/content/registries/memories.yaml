@@ -167,3 +167,13 @@ tags:
   custody_fought: You went to court over custody
   stepfamily_welcomed: You welcomed {npc.them} into the family
   stepfamily_kept_distance: You kept your distance from {npc.them}
+  # E2b: heirs. The same memories from the heir's side, on their relationship
+  # with the parent who died, and the people who stood by them.
+  heir_warm_home: Made a warm home for you
+  heir_cold_home: Kept a cold house
+  heir_always_there: Was always there
+  heir_never_around: Was never around
+  heir_strict_rules: Ran a strict house
+  heir_no_rules: Gave you almost no rules
+  lost_the_same_parent: You and {npc.them} lost the same person
+  foster_carer: Looked after you in foster care

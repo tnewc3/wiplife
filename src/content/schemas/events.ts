@@ -15,7 +15,7 @@ import {
   TRAIT_KEYS,
 } from './common';
 import { debtKindSchema, housingKindSchema, lifestyleSchema } from './economy';
-import { familyProcessSchema, parentingKeySchema } from './family';
+import { FAMILY_DEEDS, GUARDIAN_KINDS, familyProcessSchema, parentingKeySchema } from './family';
 import { credentialTypeSchema, programSchema, tierSchema } from './education';
 import { relationshipKindSchema, relationshipStatusSchema, romanceStatusSchema } from './relationships';
 import { templateSchema } from './text';
@@ -245,6 +245,12 @@ export interface DiscoveryCondition {
  * process); attempts the years of trying that haven't worked yet; canCarry
  * you can carry a pregnancy; support child support you 'pay' or 'receive'
  * (or 'none'); steps your living stepchildren; lost: you have lost a child.
+ * E2b: heir: you carried on from a parent's life; generation: which one in your
+ * family line (1 is the first); reputation: your family's reputation (0–100,
+ * 50 is unremarkable); deeds: the family is known for one of these; guardian:
+ * who a minor lives with (a parent, stepparent, grandparent, relative, older
+ * sibling, 'foster' care or 'none'); trust: money is held in trust for you;
+ * will: you have written a will.
  */
 export interface FamilyCondition {
   pregnant?: boolean;
@@ -258,6 +264,13 @@ export interface FamilyCondition {
   canCarry?: boolean;
   support?: ('pay' | 'receive' | 'none')[];
   lost?: boolean;
+  heir?: boolean;
+  generation?: Compare;
+  reputation?: Compare;
+  deeds?: (typeof FAMILY_DEEDS)[number][];
+  guardian?: ((typeof GUARDIAN_KINDS)[number] | 'foster' | 'none')[];
+  trust?: boolean;
+  will?: boolean;
 }
 
 const atLeastOneField = (c: Record<string, unknown>) => Object.values(c).some((v) => v !== undefined);
@@ -380,6 +393,13 @@ export const conditionSchema: z.ZodType<Condition> = z.lazy(() =>
           canCarry: z.boolean().optional(),
           support: z.array(z.enum(['pay', 'receive', 'none'])).min(1).optional(),
           lost: z.boolean().optional(),
+          heir: z.boolean().optional(),
+          generation: compareSchema.optional(),
+          reputation: compareSchema.optional(),
+          deeds: z.array(z.enum(FAMILY_DEEDS)).min(1).optional(),
+          guardian: z.array(z.enum([...GUARDIAN_KINDS, 'foster', 'none'])).min(1).optional(),
+          trust: z.boolean().optional(),
+          will: z.boolean().optional(),
         })
         .refine(atLeastOneField, 'needs at least one field'),
     }),

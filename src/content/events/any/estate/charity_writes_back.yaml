@@ -1,0 +1,50 @@
+id: charity_writes_back
+title: A thank-you note
+text: >-
+  A letter comes for you in careful handwriting. It is from a charity that
+  {parent.name} named in {parent.their} will, and it says what the gift
+  will do: a few more beds, a few more meals. It ends with two lines that
+  were obviously written by a person and not a template.
+tone: light
+category: estate
+rarity: uncommon
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { family: { heir: true } }
+    - { flag: estate_will }
+    - { age: { gte: 12 } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  parent: { kind: parent, presence: anywhere, deceased: true }
+choices:
+  - id: write_back
+    label: Write back and say who {parent.name} was
+    outcome:
+      text: >-
+        You write about {parent.name}: the stubbornness, the kindness, the way
+        {parent.they} always carried something for someone. You mail it
+        before you can change your mind. A reply comes within the week.
+      effects:
+        - { type: stat, key: happiness, delta: 3 }
+        - { type: innerConflict, delta: -3 }
+  - id: visit
+    label: Visit them and see what the gift became
+    outcome:
+      text: >-
+        There is a small plaque by the door, and a woman who shows you around
+        as though you are an old friend. You stay for tea. It is the first
+        time in weeks you have not felt hollow.
+      effects:
+        - { type: stat, key: happiness, delta: 4 }
+        - { type: stat, key: stress, delta: -3 }
+        - { type: stat, key: kindness, delta: 1 }
+  - id: file_away
+    label: Put it in a drawer
+    outcome:
+      text: >-
+        It is a nice letter. You are not ready for nice letters yet. The
+        drawer closes, and the letter stays right where it is.
+      effects:
+        - { type: stat, key: stress, delta: 1 }

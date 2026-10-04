@@ -26,7 +26,11 @@ function settle(state: LifeState, content: ContentBundle): LifeState {
 export function replayLife(log: readonly InputRecord[], content: ContentBundle): LifeState {
   const first = log[0];
   if (first?.kind !== 'create') throw new Error('The input log must start with the create input.');
-  let state = createLife(first.payload as unknown as CreateLifeOptions, content);
+  // E2b: an heir's log starts with a snapshot of the life they began as (the parent's life isn't there to rebuild it from).
+  const snapshot = first.payload.snapshot;
+  let state: LifeState = first.payload.heir === true && typeof snapshot === 'object' && snapshot !== null
+    ? { ...(JSON.parse(JSON.stringify(snapshot)) as LifeState), inputLog: [first] }
+    : createLife(first.payload as unknown as CreateLifeOptions, content);
   for (const record of log.slice(1)) {
     state = settle(state, content);
     const p = record.payload;

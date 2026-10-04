@@ -21,6 +21,9 @@ openings:
   - { at: 100, x: 0.9 }
 
 hiring:
+  # E2b: percentage points per point your family's reputation stands above
+  # or below 50, on top of your own reputation (a stat).
+  familyReputation: 0.15
   # Your chance of being hired, in percent: base + each stat's weight ×
   # (value − 50) + luck + the extras below, then × the market multiplier,
   # never outside min–max.

@@ -61,3 +61,13 @@ categories:
     requires: { family: { steps: { gte: 1 } } }
   grief: { label: Grief }
   custody: { label: Custody }
+  # E2b: heirs. Every one of these needs you to be an heir (you carried on from a parent).
+  estate:
+    label: The estate
+    requires: { family: { heir: true } }
+  guardianship:
+    label: Who took you in
+    requires: { family: { heir: true } }
+  legacy:
+    label: Your family's name
+    requires: { family: { heir: true } }

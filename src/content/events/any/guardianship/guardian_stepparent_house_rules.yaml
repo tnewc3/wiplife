@@ -1,0 +1,52 @@
+id: guardian_stepparent_house_rules
+title: Whose house is this?
+text: >-
+  {guardian.name} was married to your parent, and has kept you. It is not
+  the same thing as being yours by blood, and neither of you pretends it is.
+  Tonight there is a disagreement about a curfew, and under the curfew is a
+  harder question: who gets to decide things in this house now?
+tone: neutral
+category: guardianship
+rarity: common
+lifeStages: [child, teen]
+requires:
+  all:
+    - { family: { heir: true, guardian: [stepparent] } }
+    - { age: { gte: 8, lt: 18 } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  guardian: { kind: stepparent, presence: household }
+choices:
+  - id: meet
+    label: Agree, and say you're glad {guardian.they} stayed
+    outcome:
+      text: >-
+        {guardian.name} did not expect that. {guardian.They} {guardian:sits|sit}
+        down on the stairs next to you. The curfew stays the same, and
+        something else gets a little easier.
+      effects:
+        - { type: relationship, role: guardian, affection: 10, trust: 8 }
+        - { type: memory, role: guardian, tag: took_you_in }
+        - { type: stat, key: stress, delta: -2 }
+  - id: push_back
+    label: Push back hard
+    outcome:
+      text: >-
+        You say {guardian.they} {guardian:isn't|aren't} your parent. The words come out harder than you meant. {guardian.name} takes it
+        quietly, which is almost worse. The rule stays. So does the sentence
+        you said, lingering over the dinner table.
+      effects:
+        - { type: relationship, role: guardian, affection: -8, trust: -6 }
+        - { type: stat, key: stress, delta: 4 }
+        - { type: stat, key: riskTaking, delta: 2 }
+  - id: slip_out
+    label: Say nothing, and slip out later anyway
+    outcome:
+      text: >-
+        You make it back before the clock strikes, and nobody finds out. It is
+        a small lie in a house that is full of unspoken things. It will get
+        bigger if you let it.
+      effects:
+        - { type: relationship, role: guardian, trust: -4 }
+        - { type: stat, key: riskTaking, delta: 2 }

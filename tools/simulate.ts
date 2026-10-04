@@ -13,6 +13,8 @@ import { setAutoFreeze } from 'immer';
 import compiled from '../src/content/compiled/content.json';
 import type { ContentBundle } from '../src/content/schemas';
 import { formatInteractions } from './simulate/interactions';
+import { continueAsHeirs, startChains } from './simulate/generations';
+import { formatHeirs, heirTargets } from './simulate/heirs';
 import { formatComparison, formatReport, interactionTargets, runSimulation, type SimulatedPlayer } from './simulate/run';
 
 // The compiled JSON directly: src/content/index.ts relies on Vite's import.meta.env.
@@ -24,6 +26,7 @@ const { values } = parseArgs({
     seed: { type: 'string', default: 'sim' },
     json: { type: 'string' },
     player: { type: 'string', default: 'both' },
+    generations: { type: 'string', default: '3' },
   },
 });
 
@@ -45,11 +48,39 @@ if (!players.every((p) => p === 'careful' || p === 'careless' || p === 'spammer'
   console.error('--player must be all, both, careful, careless or spammer');
   process.exit(2);
 }
-const reports = players.map((player) => runSimulation(content, { lives, seedPrefix: values.seed, player }));
+const generations = Number(values.generations);
+if (!Number.isInteger(generations) || generations < 1) {
+  console.error('--generations must be a positive whole number');
+  process.exit(2);
+}
+// E2b: the careful player's lives that end with a living child continue as heirs, for `generations` generations.
+const chains = startChains(content);
+const reports = players.map((player) =>
+  runSimulation(content, { lives, seedPrefix: values.seed, player, ...(player === 'careful' && generations > 1 ? { onLife: chains.onLife } : {}) }),
+);
 console.log(formatReport(reports[0]!, content));
 if (reports.length >= 2 && reports[0]!.player === 'careful' && reports[1]!.player === 'careless') {
   console.log('');
   console.log(formatComparison(reports[0]!, reports[1]!, content));
+}
+// E2b: heirs, generation after generation.
+const careful = reports.find((r) => r.player === 'careful');
+const heirRun =
+  careful && generations > 1
+    ? continueAsHeirs(content, generations, { report: careful, collector: chains.collector, chains: chains.chains }, { seedPrefix: values.seed, player: 'careful' })
+    : null;
+if (heirRun) {
+  heirRun.reports.forEach((r, i) => {
+    if (r.failureMessages.length > 0) console.log(`\nGeneration ${i + 2} invariant failures (first ${r.failureMessages.length} of ${r.invariantFailures}):\n  ${r.failureMessages.join('\n  ')}`);
+  });
+  console.log('');
+  console.log(
+    [
+      ...formatHeirs(heirRun.report),
+      '  targets (src/content/balance/targets.yaml):',
+      ...heirTargets(heirRun.report, content).map((r) => `  ${r.met ? 'MET    ' : 'NOT MET'} ${r.label}: ${r.value} (target ${r.goal})`),
+    ].join('\n'),
+  );
 }
 // E1: the other players' interactions, beside the careful player's.
 for (const report of reports.slice(1)) {
@@ -63,5 +94,8 @@ for (const report of reports.slice(1)) {
   );
 }
 console.log(`Finished in ${((Date.now() - started) / 1000).toFixed(1)}s.`);
-if (values.json) await writeFile(values.json, `${JSON.stringify(reports.length > 1 ? Object.fromEntries(reports.map((r) => [r.player, r])) : reports[0], null, 2)}\n`);
-if (reports.some((r) => r.invariantFailures > 0)) process.exit(1);
+if (values.json) {
+  const body = reports.length > 1 ? Object.fromEntries(reports.map((r) => [r.player, r])) : reports[0];
+  await writeFile(values.json, `${JSON.stringify(heirRun ? { ...body, heirs: heirRun.report } : body, null, 2)}\n`);
+}
+if (reports.some((r) => r.invariantFailures > 0) || (heirRun?.reports ?? []).some((r) => r.invariantFailures > 0)) process.exit(1);
