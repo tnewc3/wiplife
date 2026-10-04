@@ -23,6 +23,8 @@ import {
   OBITUARY_EDUCATION_KEYS,
   OBITUARY_TONES,
   type ObituaryTone,
+  FAMILY_RESULT_ROLES,
+  familyResults,
 } from '../../src/content/schemas';
 import {
   ACTION_IDS,
@@ -36,7 +38,7 @@ import {
 import { ACTION_ROLE } from '../../src/engine/actions';
 import { INTERACTION_ROLE } from '../../src/engine/interactions/availability';
 import { referencesIn, rolesIn } from '../../src/engine/conditions';
-import { EFFECT_KINDS, FAMILY_KINDS, isPartnerKind, isRomanceEvent, isRomanticKind } from '../../src/engine/relationships';
+import { CHILD_KINDS, EFFECT_KINDS, FAMILY_KINDS, isPartnerKind, isRomanceEvent, isRomanticKind } from '../../src/engine/relationships';
 import { EVENT_TEXT_VALUES, SELF_ROLE } from '../../src/engine/events/text';
 import { CONTINUE_CHOICE } from '../../src/engine/life';
 import { checkTemplate } from '../../src/engine/text';
@@ -170,6 +172,7 @@ export function checkReferences(
   errors.push(...checkLegal(bundle, fileOf));
   errors.push(...checkDiscovery(bundle, fileOf));
   errors.push(...checkInteractions(bundle, fileOf));
+  errors.push(...checkFamily(bundle, fileOf, options.partialEvents === true));
 
   return errors;
 }
@@ -235,6 +238,7 @@ function checkTemplates(bundle: ContentBundle, partialEvents: boolean): ContentE
     all(HISTORY, `home.${key}.variants`, group.variants, allowed);
   }
   for (const [key, group] of Object.entries(history.money)) all(HISTORY, `money.${key}.variants`, group.variants, {});
+  for (const [key, group] of Object.entries(history.family)) all(HISTORY, `family.${key}.variants`, group.variants, { roles: ['npc'] });
   for (const [key, group] of Object.entries(history.education)) {
     all(HISTORY, `education.${key}.variants`, group.variants, { values: [...EDUCATION_HISTORY_VALUES[key as EducationHistoryKey]] });
   }
@@ -461,6 +465,7 @@ function checkEvents(bundle: ContentBundle, fileOf: (typeKey: CollectionKey, id:
     ...bundle.registries.discovery.comingOut.events,
     ...bundle.registries.interactions.infidelity.flirt.events,
     ...bundle.registries.interactions.infidelity.intimate.events,
+    ...familyResults(bundle.registries.family).flatMap((r) => r.events),
   ]);
 
   for (const [id, def] of Object.entries(bundle.events)) {
@@ -1020,6 +1025,145 @@ function checkInteractions(bundle: ContentBundle, fileOf: (typeKey: CollectionKe
 
     if (a.status.includes('ended')) err('availability.status: "ended" people have faded out of your life');
     if (def.gift && def.intimate) err('a gift can\'t be intimate');
+  }
+  return errors;
+}
+
+const FAMILY_BALANCE = 'balance/family.yaml';
+const FAMILY_REGISTRY = 'registries/family.yaml';
+
+/**
+ * Words that make text romantic or sexual. No event or interaction that
+ * involves a child (anyone under 18 in your family) may use them: the
+ * content rules say there is never romance or sexual content involving a
+ * child (AGENTS.md), and the build enforces it.
+ */
+export const ROMANCE_WORDS =
+  /\b(?:dat(?:e|es|ed|ing)|kiss\w*|romanc\w*|romantic|crush(?:es)?|boyfriend|girlfriend|sex|sexy|sexual\w*|naked|nude|flirt\w*|lover|seduc\w*|intimate|intimacy|attractive|desire)\b/i;
+
+/** Every text an event shows (title, text, labels, outcome texts, history lines). */
+function eventTexts(def: EventDef): string[] {
+  const texts = [def.title, def.text];
+  const outcomes = def.autoOutcome ? [def.autoOutcome] : (def.choices ?? []).flatMap((c) => (c.outcome ? [c.outcome] : c.check ? [c.check.success, c.check.failure] : []));
+  for (const c of def.choices ?? []) texts.push(c.label);
+  for (const o of outcomes) {
+    if (o.text) texts.push(o.text);
+    for (const e of o.effects as Effect[]) if (e.type === 'history') texts.push(e.text);
+  }
+  return texts;
+}
+
+/**
+ * Children and parenting (E2a): the family registry's events fit their
+ * results (followUpOnly, only the roles each result passes in), family effects
+ * name the right kind of role, the processes start from the right events, and
+ * no romance or sexual content ever involves a child: events that cast a
+ * child or stepchild, and interactions available with one, can't be romance
+ * and can't use romantic or sexual words.
+ */
+function checkFamily(bundle: ContentBundle, fileOf: (typeKey: CollectionKey, id: string) => string, partialEvents: boolean): ContentError[] {
+  const errors: ContentError[] = [];
+  const f = bundle.balance.family;
+  const err = (file: string, message: string) => errors.push({ file, message });
+
+  // Balance.
+  if (f.ivf.minAge > f.ivf.maxAge) err(FAMILY_BALANCE, 'ivf: minAge is greater than maxAge');
+  if (f.surrogacy.minAge > f.surrogacy.maxAge) err(FAMILY_BALANCE, 'surrogacy: minAge is greater than maxAge');
+  if (f.adoption.minAge > f.adoption.maxAge) err(FAMILY_BALANCE, 'adoption: minAge is greater than maxAge');
+  const { case: weights } = f.custody;
+  if (Math.abs(weights.involvement + weights.warmth + weights.housing + weights.work - 1) > 0.001) err(FAMILY_BALANCE, 'custody.case: the weights must add up to 1');
+  if (!f.stepchildren.count.some((w) => w > 0)) err(FAMILY_BALANCE, 'stepchildren.count: needs a positive weight');
+  if (f.parenting.words.low >= f.parenting.words.high) err(FAMILY_BALANCE, 'parenting.words: low must be below high');
+  if (f.parenting.memories.low >= f.parenting.memories.high) err(FAMILY_BALANCE, 'parenting.memories: low must be below high');
+  const costs = bundle.balance.economy.costs;
+  for (const item of ['adoption_fee', 'adoption_placement', 'ivf_cycle', 'surrogacy_agency', 'surrogacy_balance']) {
+    if (!costs[item]) err('balance/economy.yaml', `costs.${item}: the family processes need this item`);
+  }
+  for (const tag of ['parent_always_there', 'parent_never_around', 'parent_warm_home', 'parent_cold_home', 'parent_strict_rules', 'parent_no_rules', 'expecting_together', 'lost_a_pregnancy', 'placed_a_baby']) {
+    if (!bundle.registries.memories.tags[tag]) err('registries/memories.yaml', `tags.${tag}: the family system writes this memory`);
+  }
+
+  // Registry events.
+  const scheduled = new Set(
+    Object.values(bundle.events).flatMap((def) => outcomesOf(def).flatMap((o) => (o.effects as Effect[]).flatMap((e) => (e.type === 'schedule' ? [e.eventId] : [])))),
+  );
+  const processOf = new Map<string, string>();
+  for (const result of familyResults(bundle.registries.family)) {
+    const roles = FAMILY_RESULT_ROLES[result.id];
+    for (const id of result.events) {
+      const def = bundle.events[id];
+      if (!def) {
+        // A stand-in event set (the test pack) answers only what it needs to.
+        if (!partialEvents) err(FAMILY_REGISTRY, `${result.where}: unknown event "${id}"`);
+        continue;
+      }
+      const e = (message: string) => err(fileOf('events', id), `${id}: ${message}`);
+      if (!def.followUpOnly) e(`answers ${result.where}, so it must be followUpOnly`);
+      if (scheduled.has(id)) e(`answers ${result.where}, so no event may schedule it`);
+      const cast = def.cast ?? {};
+      for (const role of Object.keys(cast)) if (!(roles.allowed as readonly string[]).includes(role)) e(`answers ${result.where}, so its cast can only be: ${roles.allowed.join(', ') || 'nobody'} (not "${role}")`);
+      for (const role of roles.required) if (!(role in cast) || cast[role]!.optional) e(`answers ${result.where}, so it must cast "${role}" (not optional)`);
+      if (result.id === 'childDeath' !== Object.values(cast).some((c) => c.deceased === true) && result.id === 'childDeath') e('a child\'s death casts the child as a deceased role');
+      if (result.where.endsWith('.start')) processOf.set(id, result.where.split('.')[0]!);
+    }
+  }
+  for (const eventId of bundle.registries.family.decision) {
+    const def = bundle.events[eventId];
+    if (!def) continue;
+    // Always all three choices, written neutrally.
+    const choices = (def.choices ?? []).flatMap((c) => (c.outcome ? [c.outcome] : c.check ? [c.check.success, c.check.failure] : []));
+    for (const choice of ['keep', 'adoption', 'end'] as const) {
+      const offered = (def.choices ?? []).some((c) => {
+        const outs = c.outcome ? [c.outcome] : c.check ? [c.check.success, c.check.failure] : [];
+        return !c.visibleIf && outs.length > 0 && outs.every((o) => (o.effects as Effect[]).some((x) => x.type === 'pregnancy' && x.action === 'decide' && x.choice === choice));
+      });
+      if (!offered) err(fileOf('events', eventId), `${eventId}: an unplanned pregnancy always offers all three choices, and "${choice}" is missing (or hidden)`);
+    }
+    void choices;
+  }
+
+  // Effects name the right kind of role; processes start from their own events.
+  for (const [id, def] of Object.entries(bundle.events)) {
+    if (def.retired) continue;
+    const e = (message: string) => err(fileOf('events', id), `${id}: ${message}`);
+    const kindOf = (role: string) => def.cast?.[role]?.kind;
+    for (const outcome of outcomesOf(def)) {
+      for (const effect of outcome.effects as Effect[]) {
+        if ((effect.type === 'parenting' || effect.type === 'childStat' || effect.type === 'childTrait') && !(kindOf(effect.role) && CHILD_KINDS.includes(kindOf(effect.role)!))) {
+          e(`${effect.type} effect: role "${effect.role}" must be cast as a child or stepchild`);
+        }
+        if (effect.type === 'custody' && kindOf(effect.role) !== 'ex') e(`custody effect: role "${effect.role}" must be cast as an ex`);
+        if (effect.type === 'process' && processOf.get(id) !== effect.process) e(`process effect: only the ${effect.process} start event in registries/family.yaml may start it`);
+        if (effect.type === 'pregnancy' && effect.action === 'decide' && !bundle.registries.family.decision.includes(id)) e('pregnancy decide effects belong to the unplanned pregnancy event in registries/family.yaml');
+      }
+    }
+    // A pregnancy effect or a cost the processes use must sit in an event that can happen.
+  }
+
+  // No romance or sexual content involving a child.
+  for (const [id, def] of Object.entries(bundle.events)) {
+    if (def.retired) continue;
+    const childRoles = Object.entries(def.cast ?? {}).filter(([, spec]) => spec.kind !== undefined && CHILD_KINDS.includes(spec.kind));
+    if (childRoles.length === 0) continue;
+    const e = (message: string) => err(fileOf('events', id), `${id}: ${message}`);
+    if (isRomanceEvent(def, bundle)) e('involves a child, so it can\'t be a romance event: there is never romance or sexual content involving a child');
+    for (const text of eventTexts(def)) {
+      const hit = text.match(ROMANCE_WORDS);
+      if (hit) e(`involves a child but uses romantic or sexual wording ("${hit[0]}"): there is never romance or sexual content involving a child`);
+    }
+  }
+  for (const [id, def] of Object.entries(bundle.interactions)) {
+    if (def.retired || !def.availability.kinds.some((k) => CHILD_KINDS.includes(k))) continue;
+    const e = (message: string) => err(fileOf('interactions', id), `${id}: ${message}`);
+    if (def.romance || def.intimate) e('is available with a child, so it can\'t be romance: never romance or sexual content involving a child');
+    for (const tier of Object.values(def.outcomes)) {
+      if (!tier) continue;
+      const texts = [...tier.text, ...(tier.choice ? [tier.choice.prompt, ...tier.choice.options.flatMap((o) => [o.label, o.text])] : []), ...tier.extras.flatMap((x) => (x.note ? [x.note] : []))];
+      for (const text of texts) {
+        const hit = text.match(ROMANCE_WORDS);
+        if (hit) e(`is available with a child but uses romantic or sexual wording ("${hit[0]}")`);
+      }
+    }
   }
   return errors;
 }

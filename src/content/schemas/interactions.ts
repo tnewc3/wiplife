@@ -10,11 +10,12 @@ import { z } from 'zod';
 import { curveSchema, familyWealthSchema } from './balance';
 import { baseDefSchema, idSchema, scoreKeySchema, TRAIT_KEYS } from './common';
 import { conditionSchema, effectSchema } from './events';
+import { FAMILY_CHANCE_KEYS } from './family';
 import { relationshipKindSchema, relationshipStatusSchema } from './relationships';
 import { templateSchema } from './text';
 
 /** Groups on the Interact sheet. */
-export const INTERACTION_GROUPS = ['everyday', 'conflict', 'romance', 'practical'] as const;
+export const INTERACTION_GROUPS = ['everyday', 'conflict', 'romance', 'practical', 'parenting'] as const;
 export type InteractionGroup = (typeof INTERACTION_GROUPS)[number];
 
 /** Outcome tiers, best first. */
@@ -39,7 +40,8 @@ export const INTERACTION_CHANCE_KEYS = [
   'intimacyChronicCareful',
 ] as const;
 export type InteractionChanceKey = (typeof INTERACTION_CHANCE_KEYS)[number];
-const chanceKeySchema = z.enum(INTERACTION_CHANCE_KEYS);
+/** Chances in the interactions balance, and (E2a) those the family rules work out (conceiving, from balance/family.yaml). */
+const chanceKeySchema = z.enum([...INTERACTION_CHANCE_KEYS, ...FAMILY_CHANCE_KEYS]);
 
 /** What interactions may do: the effect types that make sense for a moment between two people. */
 export const INTERACTION_EFFECT_TYPES = [
@@ -55,6 +57,10 @@ export const INTERACTION_EFFECT_TYPES = [
   'schedule',
   'moneyFromPerson',
   'infidelity',
+  'pregnancy',
+  'parenting',
+  'childStat',
+  'childTrait',
 ] as const;
 
 const interactionEffectSchema = effectSchema.refine(

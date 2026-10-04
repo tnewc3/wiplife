@@ -5,6 +5,8 @@
  */
 import type { Check, CheckStat, ContentBundle, EffectStatKey } from '../../content/schemas';
 import { HIDDEN_KEYS, STAT_KEYS } from '../../content/schemas';
+import { custodyCase } from '../family/custody';
+import { tryChance } from '../family/carrying';
 import type { Id, LifeState } from '../types';
 
 /** Your value for a stat, personality trait or readable hidden value. */
@@ -16,7 +18,11 @@ export function scoreOf(state: LifeState, key: EffectStatKey): number {
 }
 
 /** A check stat's value: your own, how a cast person feels about you (50 when nobody is cast), or your job performance (50 without a job). */
-function statValue(state: LifeState, stat: CheckStat, cast: Record<string, Id>): number {
+function statValue(state: LifeState, stat: CheckStat, cast: Record<string, Id>, content: ContentBundle): number {
+  if ('family' in stat) {
+    const id = cast[stat.role] ?? '';
+    return stat.family === 'custody' ? custodyCase(state, id, content) : Math.round(100 * tryChance(state, id, stat.family === 'fertilityPlanned', content));
+  }
   if ('job' in stat) return state.career.job?.performance ?? 50;
   if ('role' in stat) {
     const rel = state.relationships[cast[stat.role] ?? ''];
@@ -29,7 +35,7 @@ function statValue(state: LifeState, stat: CheckStat, cast: Record<string, Id>):
 export function successChance(state: LifeState, check: Check, content: ContentBundle, cast: Record<string, Id> = {}): number {
   const { min, max, luckWeight } = content.balance.events.checks;
   let percent = check.base;
-  for (const stat of check.stats) percent += stat.weight * (statValue(state, stat, cast) - 50);
+  for (const stat of check.stats) percent += stat.weight * (statValue(state, stat, cast, content) - 50);
   percent += luckWeight * (state.character.hidden.luck - 50);
   return Math.min(max, Math.max(min, percent)) / 100;
 }

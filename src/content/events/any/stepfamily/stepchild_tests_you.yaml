@@ -1,0 +1,49 @@
+id: stepchild_tests_you
+title: You're not my parent
+text: >-
+  It was bound to come. {kid.name} looks you in the eye over a small, ordinary
+  request, and says that you are not {kid.their} parent. The room goes quiet.
+tone: neutral
+category: stepfamily
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { family: { steps: { gte: 1 } } }
+    - { role: kid, affection: { lt: 55 } }
+weight: { base: 7 }
+cooldownYears: 3
+cast:
+  kid: { kind: stepchild, presence: household, age: { min: 5, max: 17 } }
+choices:
+  - id: agree
+    label: Say that is true, and that you are here anyway
+    outcome:
+      text: >-
+        {kid.name} was ready for a fight and gets none. {kid.They}
+        {kid:stares|stare} at you for a second, then goes back to what
+        {kid.they} {kid:was|were} doing. Something has loosened, a little.
+      effects:
+        - { type: relationship, role: kid, affection: 5, trust: 6 }
+        - { type: parenting, role: kid, warmth: 3 }
+        - { type: memory, role: kid, tag: stepfamily_welcomed }
+  - id: firm
+    label: Hold the line, kindly
+    outcome:
+      text: >-
+        You say that in this house, the rules are the same for everyone.
+        {kid.name} slams a door. It is not a win, but it is not a loss either.
+      effects:
+        - { type: relationship, role: kid, affection: -3, trust: 2, mood: -5 }
+        - { type: parenting, role: kid, strictness: 4 }
+  - id: step_back
+    label: Leave it to {kid.their} parent
+    outcome:
+      text: >-
+        You let it go, and the other adult in the house handles it. It is
+        the easier way, and it is also a little further away.
+      effects:
+        - { type: relationship, role: kid, affection: -2, mood: -1 }
+        - { type: parenting, role: kid, involvement: -3 }
+        - { type: memory, role: kid, tag: stepfamily_kept_distance }

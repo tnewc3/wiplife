@@ -49,3 +49,15 @@ flags:
   # Interactions (E1).
   unfaithful: You were unfaithful to a partner
   was_infected: You caught an infection from an intimate night
+  # E2a: children and parenting.
+  ended_a_pregnancy: You ended a pregnancy
+  had_miscarriage: You went through a miscarriage
+  placed_baby_for_adoption: You placed a baby for adoption
+  lost_a_child: You lost a child
+  adopted_a_child: You adopted a child
+  used_ivf: You went through IVF
+  used_surrogate: You had a child through surrogacy
+  fought_for_custody: You fought for custody of your children
+  gave_up_custody: You gave up custody of your children
+  shared_custody: You share custody of your children
+  stepfamily: You married into a family with children

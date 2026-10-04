@@ -6,7 +6,7 @@
  */
 import type { ContentBundle, EventDef, Outcome, Rarity, Tone } from '../../src/content/schemas';
 import type { LifeStage } from '../../src/engine/types';
-import { LIFE_STAGE_IDS } from '../../src/content/schemas';
+import { familyResults, LIFE_STAGE_IDS } from '../../src/content/schemas';
 import { referencesIn } from '../../src/engine/conditions';
 
 export interface StaticCoverage {
@@ -77,6 +77,8 @@ export function rootEvents(content: ContentBundle): Set<string> {
     r.discovery.comingOut,
     r.interactions.infidelity.flirt,
     r.interactions.infidelity.intimate,
+    // E2a: what the family system queues (births, losses, adoption, custody...).
+    ...familyResults(r.family).map((result) => ({ events: [...result.events] })),
   ];
   for (const list of lists) for (const id of list.events) roots.add(id);
   return roots;
@@ -178,6 +180,13 @@ export function analyzeContent(content: ContentBundle): StaticCoverage {
     }
   };
   admissionFlags(content.balance.education.admission, 'admission');
+
+  // E2a: the family step writes these memories itself (a pregnancy, a loss, and the
+  // style a child remembers), and the obituary reads a flag for each deed it tells.
+  for (const tag of ['expecting_together', 'lost_a_pregnancy', 'placed_a_baby', 'parent_always_there', 'parent_never_around', 'parent_warm_home', 'parent_cold_home', 'parent_strict_rules', 'parent_no_rules']) {
+    addTo(memoryWrites, tag, 'family (engine)');
+  }
+  for (const flag of Object.keys(content.text.obituary.deeds)) addTo(flagReads, flag, 'text/obituary.yaml deeds');
 
   const sorted = (xs: Iterable<string>) => [...xs].sort();
   const reachable = reachableEvents(content);

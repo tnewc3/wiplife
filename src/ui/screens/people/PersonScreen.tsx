@@ -9,7 +9,7 @@ import { Button } from '../../components/Button';
 import { Card } from '../../components/Card';
 import { ConfirmSheet } from '../../components/ConfirmSheet';
 import { InteractSheet } from '../../components/InteractSheet';
-import { ACTION_LABELS, actionConfirmation, moodPhrase, personLine, timelineAgeLabel } from '../../labels';
+import { ACTION_LABELS, actionConfirmation, CUSTODY_LABELS, gradesPhrase, moodPhrase, ORIGIN_LABELS, parentingStyleLine, personLine, timelineAgeLabel } from '../../labels';
 
 /**
  * One person's page: who they are to you, how they feel about you (bars, no
@@ -47,6 +47,28 @@ export function PersonScreen({ life, personId }: { life: LifeState; personId: st
           </p>
         )}
       </Card>
+
+      {detail.child && (
+        <Card role="region" aria-labelledby="child-title">
+          <h3 id="child-title" className="text-lg font-bold">
+            {detail.child.stepchild ? 'Your stepchild' : 'Your child'}
+          </h3>
+          <p className="mt-1 text-sm text-muted" data-testid="child-origin">
+            {ORIGIN_LABELS[detail.child.origin]}
+            {detail.child.stepchild ? '' : ` · ${detail.child.movedOut ? 'Lives on their own' : CUSTODY_LABELS[detail.child.custody]}`}
+          </p>
+          {row.alive && !detail.child.movedOut && (
+            <p className="mt-2" data-testid="parenting-style">
+              {parentingStyleLine(detail.child.style)}
+            </p>
+          )}
+          {row.alive && detail.child.gpa !== null && (
+            <p className="mt-1" data-testid="child-school">
+              {gradesPhrase(detail.child.gpa)}.
+            </p>
+          )}
+        </Card>
+      )}
 
       <Card>
         <BondBars affection={row.affection} trust={row.trust} label={`How ${row.fullName} feels about you`} />

@@ -1,0 +1,47 @@
+id: teen_curfew_clash
+title: One in the morning
+text: >-
+  The clock says one. The curfew was eleven. {kid.name} comes through the door
+  at ten past, shoes in hand, as though that were a plan.
+tone: neutral
+category: parenting
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { family: { minors: { gte: 1 } } }
+weight: { base: 8 }
+cooldownYears: 3
+cast:
+  kid: { kind: child, presence: household, age: { min: 13, max: 17 } }
+choices:
+  - id: talk
+    label: Wait up, and talk about it in the morning
+    outcome:
+      text: >-
+        You say nothing at the door. At breakfast, over cereal, you ask what
+        happened. The answer is a flat tire, a dead phone and bad luck, and you
+        believe about two thirds of it.
+      effects:
+        - { type: parenting, role: kid, warmth: 3, involvement: 3, strictness: 1 }
+        - { type: relationship, role: kid, trust: 4 }
+  - id: ground
+    label: Ground {kid.them} for a month
+    outcome:
+      text: >-
+        {kid.name} says you are the strictest parent in the history of
+        parents. The month is long. The curfew, from now on, is observed.
+      effects:
+        - { type: parenting, role: kid, strictness: 6, warmth: -3 }
+        - { type: relationship, role: kid, affection: -5, trust: -2, mood: -6 }
+        - { type: childTrait, role: kid, key: discipline, delta: 1 }
+  - id: shrug
+    label: Let it go this once
+    outcome:
+      text: >-
+        You say nothing, and {kid.name} says nothing back, and you both
+        understand that the line has quietly moved.
+      effects:
+        - { type: parenting, role: kid, strictness: -5 }
+        - { type: childTrait, role: kid, key: riskTaking, delta: 1 }

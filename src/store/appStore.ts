@@ -85,7 +85,7 @@ export interface AppState {
   /** The person open on the People tab, if any. */
   personId: string | null;
   /** A page open on the More tab (More → Home, More → Health), if any. */
-  moreView: 'home' | 'health' | null;
+  moreView: 'home' | 'health' | 'family' | null;
   /** E1: the Interact sheet open on a person's page: the grouped menu, or the gift price tiers. */
   interactSheet: { personId: string; view: 'menu' | 'gift' } | null;
 
@@ -149,6 +149,8 @@ export interface AppState {
   closeHome: () => void;
   /** Opens More → Health (Stage 9). */
   openHealth: () => void;
+  /** E2a: opens More → Family. */
+  openFamily: () => void;
   /** E1: opens the Interact sheet for a person. */
   openInteractions: (personId: string) => void;
   /** E1: from the Interact sheet to the gift price tiers, and back. */
@@ -517,6 +519,13 @@ export function createAppStore({
           const life = get().life;
           if (!life || !(canAgeUp(life) || life.phase === 'yearEnd') || get().eventSheet) return Promise.resolve();
           return busy(async () => {
+            // E2a: close an outcome card that began an unplanned pregnancy first: its decision comes before the year.
+            if (life.phase === 'yearStart' && life.family.pregnancy?.decision === 'pending' && life.pendingInteraction) {
+              const closed = closeInteraction(life, bundle);
+              await commit(closed);
+              if (closed.phase === 'action') openEvents(closed);
+              return;
+            }
             // A year interrupted before it ended is finished instead.
             if (life.phase === 'yearEnd') {
               await finishYear(life);
@@ -644,7 +653,10 @@ export function createAppStore({
           busy(async () => {
             const life = get().life;
             if (!life?.pendingInteraction) return;
-            await commit(closeInteraction(life));
+            const next = closeInteraction(life, bundle);
+            await commit(next);
+            // E2a: an unplanned pregnancy opens its decision right after the card closes.
+            if (next.phase === 'action') openEvents(next);
           }),
 
         openHome: () =>
@@ -655,6 +667,11 @@ export function createAppStore({
         openHealth: () =>
           set((s) => {
             if (s.life) s.moreView = 'health';
+          }),
+
+        openFamily: () =>
+          set((s) => {
+            if (s.life) s.moreView = 'family';
           }),
 
         editIdentity: (edit) =>

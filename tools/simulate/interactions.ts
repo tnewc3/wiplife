@@ -72,6 +72,8 @@ export function chooseInteractions(life: LifeState, content: ContentBundle, rng:
       if ((done.get(`${def.id}:${personId}`) ?? 0) >= 2) return false;
       if (player === 'careless') return true;
       if (def.group === 'conflict') return false;
+      // E2a: parenting has its own plan (tools/simulate/family.ts), with a style per life.
+      if (def.group === 'parenting') return false;
       if (def.romance && !isPartnerKind(life.relationships[personId]!.kind)) return false;
       if (def.id === 'ask_money') return life.finances.savings < 200 && life.character.age >= content.balance.economy.independenceAge;
       if (def.id === 'apologize') return true;
@@ -207,7 +209,7 @@ export function playInteraction(
   const outcome = next.pendingInteraction!;
   if (outcome.choice) next = resolveInteractionChoice(next, chooseOption(outcome.choice.options, player, rng), content);
   const card = next.pendingInteraction!;
-  next = closeInteraction(next);
+  next = closeInteraction(next, content);
 
   report.interactions++;
   report.tiers[card.tier]++;

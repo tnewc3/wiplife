@@ -8,6 +8,7 @@ import { HomeTab } from '../home/HomeTab';
 import { MoneyTab } from '../money/MoneyTab';
 import { HousingScreen } from '../more/HousingScreen';
 import { HealthScreen } from '../more/HealthScreen';
+import { FamilyScreen } from '../more/FamilyScreen';
 import { LegalBanner } from '../../components/LegalBanner';
 import { MoreTab } from '../more/MoreTab';
 import { WorkTab } from '../work/WorkTab';
@@ -64,15 +65,16 @@ export function GameScreen({ life }: { life: LifeState }) {
   const person = tab === 'people' && personId !== null && life.people[personId] ? personId : null;
   const home = tab === 'more' && moreView === 'home';
   const health = tab === 'more' && moreView === 'health';
+  const family = tab === 'more' && moreView === 'family';
   const back = person
     ? { onBack: closePerson, backLabel: 'Back to People' }
-    : home || health
+    : home || health || family
       ? { onBack: closeHome, backLabel: 'Back to More' }
       : {};
 
   return (
     <Screen
-      title={home ? 'Home' : health ? 'Health' : current.label}
+      title={home ? 'Home' : health ? 'Health' : family ? 'Family' : current.label}
       {...back}
       footer={
         <>
@@ -98,6 +100,8 @@ export function GameScreen({ life }: { life: LifeState }) {
         <HousingScreen life={life} />
       ) : health ? (
         <HealthScreen life={life} />
+      ) : family ? (
+        <FamilyScreen life={life} />
       ) : (
         <MoreTab />
       )}

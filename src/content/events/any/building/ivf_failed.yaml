@@ -1,0 +1,26 @@
+# Registry: ivf.failed. The cycle didn't work.
+id: ivf_failed
+title: Not this time
+text: >-
+  The call comes in the afternoon, and the nurse does not have to say it: the
+  cycle did not work. The nurse says everything people say, and means every word.
+  You thank the nurse, and hang up, and stand in the kitchen for a long time.
+tone: dark
+category: building
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires: { age: { gte: 18 } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  other: { kind: spouse, presence: anywhere, optional: true }
+autoOutcome:
+  text: >-
+    Nothing about the house has changed, and everything has. You can
+    try another cycle, when you are ready, or do something else. Tonight you
+    are just tired.
+  effects:
+    - { type: stat, key: happiness, delta: -10 }
+    - { type: stat, key: stress, delta: 8 }
+    - { type: pregnancy, action: attempt }
+    - { type: history, text: 'An IVF cycle did not work.', importance: 2 }

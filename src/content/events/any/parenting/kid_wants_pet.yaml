@@ -1,0 +1,51 @@
+id: kid_wants_pet
+title: A puppy, please
+text: >-
+  {kid.name} has made a presentation. It has slides, a budget of sorts, and a
+  photograph of a very specific dog. The argument is a good one. The dog
+  would be yours, in every way that counts.
+tone: light
+category: parenting
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { family: { minors: { gte: 1 } } }
+    - { not: { flag: has_dog } }
+weight: { base: 6 }
+cooldownYears: 5
+cast:
+  kid: { kind: child, presence: household, age: { min: 5, max: 12 } }
+choices:
+  - id: yes
+    label: Say yes, and adopt a dog from the shelter ($300)
+    visibleIf: { money: { gte: 300 } }
+    outcome:
+      text: >-
+        The dog's name is Biscuit, by unanimous and immediate decision. {kid.name}
+        is on the floor before the leash is off. Biscuit chews through three
+        shoes before the end of the week.
+      effects:
+        - { type: money, delta: -300 }
+        - { type: flag, key: has_dog, value: true }
+        - { type: parenting, role: kid, warmth: 5, strictness: -2 }
+        - { type: relationship, role: kid, affection: 8, trust: 4, mood: 10 }
+        - { type: stat, key: happiness, delta: 4 }
+  - id: no
+    label: Say no, and explain why
+    outcome:
+      text: >-
+        You say no, kindly, with reasons, and {kid.name} takes it better than
+        expected. There is a brief, formal negotiation about hamsters.
+      effects:
+        - { type: parenting, role: kid, strictness: 3 }
+        - { type: childTrait, role: kid, key: discipline, delta: 1 }
+  - id: later
+    label: Say maybe, when {kid.they} {kid:is|are} older
+    outcome:
+      text: >-
+        {kid.name} accepts this as a contract, and will bring it up again,
+        with citations, at every birthday for the next five years.
+      effects:
+        - { type: parenting, role: kid, involvement: 1 }

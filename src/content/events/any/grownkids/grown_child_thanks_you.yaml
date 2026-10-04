@@ -1,0 +1,39 @@
+id: grown_child_thanks_you
+title: A thank-you
+text: >-
+  {kid.name} says it plainly, without a speech: that {kid.they}
+  {kid:remembers|remember} how often you were there. It is not what you
+  expected to hear today, and it is, you realize, what you wanted to hear
+  for a long time.
+tone: light
+category: grownkids
+rarity: uncommon
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { family: { children: { gte: 1 } } }
+    - { memory: { role: kid, tag: parent_always_there } }
+weight: { base: 8 }
+cooldownYears: 8
+cast:
+  kid: { kind: child, presence: anywhere, age: { min: 18, max: 60 } }
+choices:
+  - id: accept
+    label: Say that it was the best part of your life
+    outcome:
+      text: >-
+        You say it, and it is true, and you both look at the floor for a
+        moment because there is a lot of feeling in the room.
+      effects:
+        - { type: relationship, role: kid, affection: 6, trust: 4, mood: 8 }
+        - { type: stat, key: happiness, delta: 6 }
+  - id: joke
+    label: Make a joke to hide how much it means
+    outcome:
+      text: >-
+        You make a joke, and {kid.name} laughs, and sees right through it, and
+        lets you have it.
+      effects:
+        - { type: relationship, role: kid, affection: 3, mood: 5 }
+        - { type: stat, key: happiness, delta: 4 }

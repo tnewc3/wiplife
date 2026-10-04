@@ -1,0 +1,73 @@
+# Registry: custody. Queued when the other parent of your minor children is
+# now your ex and nothing has been decided. Fight, share or give up: the
+# choice sets where the children live and (through the ledger) child support.
+id: custody_hearing
+title: Who the children live with
+text: >-
+  The mediator's office has a box of tissues on every table and a clock nobody
+  looks at. You and {other.name} are no longer together, and the children need
+  to live somewhere. There are three honest answers, and none of them is easy.
+tone: serious
+category: custody
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires: { age: { gte: 18 } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  other: { kind: ex, presence: anywhere }
+choices:
+  - id: fight
+    label: Fight for custody
+    check:
+      base: 40
+      stats:
+        - { family: custody, role: other, weight: 0.8 }
+      success:
+        text: >-
+          The court sees what the children's days have actually looked like, and
+          rules for you. It is a win, and it does not feel like one. {other.name}
+          will not forgive it soon.
+        effects:
+          - { type: custody, role: other, choice: full }
+          - { type: flag, key: fought_for_custody, value: true }
+          - { type: memory, role: other, tag: custody_fought }
+          - { type: relationship, role: other, affection: -12, trust: -10 }
+          - { type: stat, key: stress, delta: 8 }
+          - { type: history, text: 'You won custody of your children after a court fight with {other.name}.', importance: 3 }
+      failure:
+        text: >-
+          The judge splits the difference, with a long and careful speech. You
+          will share the children, and the fight has made that harder.
+        effects:
+          - { type: custody, role: other, choice: shared }
+          - { type: flag, key: shared_custody, value: true }
+          - { type: memory, role: other, tag: custody_fought }
+          - { type: relationship, role: other, affection: -10, trust: -8 }
+          - { type: stat, key: stress, delta: 10 }
+          - { type: history, text: 'A custody fight with {other.name} ended in shared custody.', importance: 3 }
+  - id: share
+    label: Share custody
+    outcome:
+      text: >-
+        Alternating weeks, with a shared calendar and a lot of goodwill that
+        will, from time to time, run out. The children will have two homes.
+      effects:
+        - { type: custody, role: other, choice: shared }
+        - { type: flag, key: shared_custody, value: true }
+        - { type: relationship, role: other, trust: 2 }
+        - { type: stat, key: stress, delta: 3 }
+        - { type: history, text: 'You and {other.name} agreed to share custody of your children.', importance: 3 }
+  - id: give_up
+    label: Let the children live with {other.name}
+    outcome:
+      text: >-
+        You say it quietly, and it is the hardest thing you have ever done: the
+        children will live with {other.name}, and you will be a part of their
+        lives in the ways you can. It is not an ending. It does feel like one.
+      effects:
+        - { type: custody, role: other, choice: other }
+        - { type: flag, key: gave_up_custody, value: true }
+        - { type: stat, key: happiness, delta: -10 }
+        - { type: stat, key: stress, delta: 6 }
+        - { type: history, text: 'You agreed that your children would live with {other.name}.', importance: 3 }

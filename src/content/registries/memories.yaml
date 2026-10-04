@@ -138,3 +138,32 @@ tags:
   night_together: Spent a night with you
   flirted_behind_their_back: You flirted with {npc.them} while you were with someone else
   wore_thin: Said you were wearing {npc.them} thin
+  # E2a: children and parenting. Memories about your own children are on their
+  # side: what they remember of how you raised them.
+  expecting_together: Was expecting a baby with you
+  lost_a_pregnancy: You lost a pregnancy together
+  placed_a_baby: You placed a baby for adoption together
+  parent_always_there: Remembers how often you were there
+  parent_never_around: Remembers you never being around
+  parent_warm_home: Remembers a warm home
+  parent_cold_home: Remembers a cold home
+  parent_strict_rules: Remembers the strict rules
+  parent_no_rules: Remembers having almost no rules
+  parent_missed_recital: Remembers you missing {npc.their} recital
+  parent_in_front_row: Remembers you in the front row
+  parent_stood_up_for_them: Remembers you standing up for {npc.them}
+  parent_made_light_of_it: Remembers you brushing off something that mattered
+  parent_sat_up_all_night: Remembers you sitting up with {npc.them}
+  parent_broke_a_promise: Remembers a promise you broke
+  parent_kept_a_promise: Remembers a promise you kept
+  parent_listened: Remembers you listening
+  parent_lost_temper: Remembers you losing your temper
+  parent_let_them_choose: Remembers you letting {npc.them} choose
+  parent_took_their_side: Remembers you taking {npc.their} side
+  parent_helped_them_start: Remembers you helping {npc.them} get started
+  lost_a_child_together: You lost a child together
+  lost_their_sibling: Lost a brother or sister
+  shared_custody_weekends: Spent weekends with you in shared custody
+  custody_fought: You went to court over custody
+  stepfamily_welcomed: You welcomed {npc.them} into the family
+  stepfamily_kept_distance: You kept your distance from {npc.them}

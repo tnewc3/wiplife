@@ -1,0 +1,38 @@
+id: after_child_death_milestone
+title: The birthday
+text: >-
+  It was {since}, and today would have been {child.name}'s birthday. You wake
+  before the alarm and lie still. The day is quiet in the world, and
+  enormous in this house.
+tone: dark
+category: grief
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { flag: lost_a_child }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  child: { kind: child, presence: anywhere, deceased: true }
+choices:
+  - id: remember
+    label: Spend the day remembering {child.them}, on purpose
+    outcome:
+      text: >-
+        You look at the photographs, and tell the stories, and bake the
+        cake nobody will eat. It is a heavy day, and it is a kind one.
+      effects:
+        - { type: stat, key: happiness, delta: 3 }
+        - { type: stat, key: stress, delta: -4 }
+        - { type: innerConflict, delta: -3 }
+  - id: avoid
+    label: Get through it by not thinking about it
+    outcome:
+      text: >-
+        You fill the day with tasks. By evening, you are exhausted, and the
+        feeling has not gone anywhere. It never does. It waits.
+      effects:
+        - { type: stat, key: happiness, delta: -4 }
+        - { type: stat, key: stress, delta: 4 }

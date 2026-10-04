@@ -1,0 +1,48 @@
+id: kid_science_fair
+title: The volcano
+text: >-
+  The science fair is next week, and {kid.name} has a plan, a poster board
+  and absolutely no idea how to make a volcano that does not also flood the
+  kitchen.
+tone: light
+category: parenting
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { family: { minors: { gte: 1 } } }
+weight: { base: 6 }
+cooldownYears: 4
+cast:
+  kid: { kind: child, presence: household, age: { min: 8, max: 13 } }
+choices:
+  - id: together
+    label: Build it together
+    outcome:
+      text: >-
+        You spend the weekend on the garage floor, covered in baking soda and
+        food coloring. It erupts at exactly the right moment, and so do you.
+      effects:
+        - { type: parenting, role: kid, warmth: 3, involvement: 6 }
+        - { type: childStat, role: kid, key: smarts, delta: 1 }
+        - { type: relationship, role: kid, affection: 5, trust: 3 }
+  - id: guide
+    label: Point to the instructions and let {kid.them} figure it out
+    outcome:
+      text: >-
+        {kid.name} gets it wrong twice and right on the third try. It is a
+        small, messy triumph, entirely {kid.their} own.
+      effects:
+        - { type: parenting, role: kid, involvement: 2, strictness: 2 }
+        - { type: childTrait, role: kid, key: confidence, delta: 2 }
+        - { type: childStat, role: kid, key: smarts, delta: 1 }
+  - id: no_time
+    label: Say you are too busy
+    outcome:
+      text: >-
+        {kid.name} builds a tiny, lopsided volcano alone. It does not erupt.
+        {kid.They} {kid:says|say} it was fine, and goes up to bed.
+      effects:
+        - { type: parenting, role: kid, involvement: -5, warmth: -2 }
+        - { type: relationship, role: kid, affection: -3, mood: -5 }

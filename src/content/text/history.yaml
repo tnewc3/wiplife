@@ -301,6 +301,15 @@ legal:
     variants:
       - "Your probation ended."
 
+# Your children (E2a). Role: npc, the child. No values.
+family:
+  childMovedOut:
+    importance: 2
+    variants:
+      - "{npc.name} moved out. The house got quieter, and so did you."
+      - "{npc.name} packed up and moved out on {npc.their} own."
+      - "{npc.name} left home. You helped carry the boxes and tried not to say much."
+
 # Self-discovery (Stage 9): accepting something about yourself, or changing
 # how you describe yourself. Values: {people} ("men and women"), {gender},
 # {expression}, {pronouns} ("she/her"), {trait} (a phrase), {talent} ("music").

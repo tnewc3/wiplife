@@ -1,0 +1,58 @@
+id: play_together
+name: Play
+blurb: Get down on the floor, or out in the yard.
+group: parenting
+profile: nurture
+inPerson: true
+availability:
+  kinds: [child, stepchild]
+  you: { min: 18 }
+  them: { min: 2, max: 14 }
+outcomes:
+  great:
+    text:
+      - "You play until the light goes. {person.name} tells everyone it was the best day ever, and means it."
+      - "A pillow fort, a rescue mission, a very serious tea party. You are the villain, then the hero, then the horse."
+    affection: 4
+    trust: 3
+    mood: 9
+    effects:
+      - { type: parenting, role: person, warmth: 3, involvement: 5 }
+      - { type: childStat, role: person, key: fitness, delta: 1 }
+      - { type: stat, key: happiness, delta: 2 }
+      - { type: stat, key: stress, delta: -3 }
+  good:
+    text:
+      - "An hour of tag, then catch, then an argument about the rules of catch."
+      - "{person.name} teaches you a game. You lose, repeatedly, and are told it is very close."
+    affection: 3
+    trust: 2
+    mood: 6
+    effects:
+      - { type: parenting, role: person, warmth: 2, involvement: 4 }
+      - { type: stat, key: stress, delta: -2 }
+  neutral:
+    text:
+      - "You play for a while. {person.name} keeps changing the game, and you keep losing track of it."
+      - "It is more watching than playing, but {person.name} seems content."
+    affection: 1
+    mood: 2
+    effects:
+      - { type: parenting, role: person, involvement: 2 }
+  bad:
+    text:
+      - "You are distracted, and {person.name} calls you on it. The game ends early."
+      - "Someone gets a scraped knee, and the fun goes out of it."
+    affection: -1
+    mood: -3
+    effects:
+      - { type: parenting, role: person, involvement: 1 }
+  backfire:
+    text:
+      - "You play too rough, and {person.name} ends up in tears. It was an accident. It still counts."
+      - "You let {person.name} win so obviously that {person.they} {person:notices|notice}, and are furious about it."
+    affection: -3
+    trust: -2
+    mood: -6
+    effects:
+      - { type: parenting, role: person, warmth: -2 }

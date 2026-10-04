@@ -5,7 +5,7 @@ group: everyday
 profile: warm
 inPerson: false
 availability:
-  kinds: [parent, stepparent, sibling, friend, partner, fiance, spouse, coworker, classmate, acquaintance]
+  kinds: [parent, stepparent, sibling, child, stepchild, friend, partner, fiance, spouse, coworker, classmate, acquaintance]
   you: { min: 5 }
   them: { min: 5 }
 outcomes:

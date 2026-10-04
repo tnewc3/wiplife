@@ -1,0 +1,23 @@
+id: test_try_for_baby
+title: Test Try For Baby
+text: A family moment.
+tone: neutral
+category: family
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires: { age: { gte: 18 } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  person: { kind: partner, presence: nearby }
+choices:
+  - id: try
+    label: Try
+    outcome:
+      text: A positive test.
+      effects:
+        - { type: pregnancy, action: begin, how: trying, role: person }
+  - id: wait
+    label: Wait
+    outcome:
+      text: Not yet.

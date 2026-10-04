@@ -1,0 +1,16 @@
+id: test_f_miscarriage_carried
+title: Test F Miscarriage Carried
+text: A family moment.
+tone: neutral
+category: family
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires: { age: { gte: 18 } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  carrier: { kind: friend, presence: anywhere }
+autoOutcome:
+  text: It happens.
+  effects:
+    - { type: flag, key: had_miscarriage, value: true }

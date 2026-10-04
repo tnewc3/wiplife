@@ -1,0 +1,27 @@
+# Registry: birth.coparent. The baby was carried by someone who isn't your
+# partner, and lives with them.
+id: birth_coparent
+title: Two households
+text: >-
+  {carrier.name} calls from the hospital. {baby.name} is here, and healthy.
+  The two of you have an arrangement, and for the first time it is a real one.
+tone: neutral
+category: pregnancy
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires: { age: { gte: 18 } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  baby: { kind: child, presence: anywhere }
+  carrier: { kind: friend, presence: anywhere }
+autoOutcome:
+  text: >-
+    You visit the next morning. {baby.name} lives with {carrier.name}, and you
+    will be there as much as the two of you can make work. It is a start.
+  effects:
+    - { type: relationship, role: carrier, affection: 3, trust: 3 }
+    - { type: stat, key: happiness, delta: 6 }
+    - { type: stat, key: stress, delta: 5 }
+    - { type: parenting, role: baby, warmth: 4, involvement: 4 }
+    - { type: history, text: '{baby.name} was born. {baby.They} {baby:lives|live} with {carrier.name}, and you are {baby.their} parent.', importance: 3 }

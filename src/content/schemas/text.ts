@@ -29,6 +29,8 @@ export const relationWordsSchema = z.strictObject({
   stepparent: byCategorySchema,
   grandparent: byCategorySchema,
   sibling: byCategorySchema,
+  child: byCategorySchema,
+  stepchild: byCategorySchema,
   partner: byCategorySchema,
   fiance: byCategorySchema,
   spouse: byCategorySchema,
@@ -201,6 +203,11 @@ export const historyTextSchema = z.strictObject({
       typeof historyGroupSchema
     >,
   ),
+  /** Your children (E2a). Role: npc, the child. No values. */
+  family: z.strictObject({
+    /** A grown child moves out. */
+    childMovedOut: historyGroupSchema,
+  }),
   /** Self-discovery milestones (Stage 9). The values each one may use are in DISCOVERY_HISTORY_VALUES. */
   discovery: z.strictObject(
     Object.fromEntries(Object.keys(DISCOVERY_HISTORY_VALUES).map((k) => [k, historyGroupSchema])) as Record<

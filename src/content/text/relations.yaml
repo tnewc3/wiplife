@@ -6,6 +6,8 @@ parent: { man: father, woman: mother, nonbinary: parent }
 stepparent: { man: stepfather, woman: stepmother, nonbinary: stepparent }
 grandparent: { man: grandfather, woman: grandmother, nonbinary: grandparent }
 sibling: { man: brother, woman: sister, nonbinary: sibling }
+child: { man: son, woman: daughter, nonbinary: child }
+stepchild: { man: stepson, woman: stepdaughter, nonbinary: stepchild }
 partner: { man: boyfriend, woman: girlfriend, nonbinary: partner }
 fiance: { man: fiancé, woman: fiancée, nonbinary: fiancé }
 spouse: { man: husband, woman: wife, nonbinary: spouse }

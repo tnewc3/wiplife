@@ -1,0 +1,22 @@
+id: test_f_surrogacy_start
+title: Test F Surrogacy Start
+text: A family moment.
+tone: neutral
+category: family
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires: { age: { gte: 18 } }
+weight: { base: 10 }
+followUpOnly: true
+choices:
+  - id: begin
+    label: Begin
+    outcome:
+      text: It begins.
+      effects:
+        - { type: cost, item: surrogacy_agency }
+        - { type: process, action: start, process: surrogacy }
+  - id: back
+    label: Not now
+    outcome:
+      text: Another time.

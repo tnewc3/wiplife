@@ -1,0 +1,14 @@
+id: test_f_ivf_success
+title: Test F Ivf Success
+text: A family moment.
+tone: neutral
+category: family
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires: { age: { gte: 18 } }
+weight: { base: 10 }
+followUpOnly: true
+autoOutcome:
+  text: It happens.
+  effects:
+    - { type: flag, key: used_ivf, value: true }

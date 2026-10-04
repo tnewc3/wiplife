@@ -1,0 +1,16 @@
+id: test_f_birth_surrogate
+title: Test F Birth Surrogate
+text: A family moment.
+tone: neutral
+category: family
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires: { age: { gte: 18 } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  baby: { kind: child, presence: anywhere }
+autoOutcome:
+  text: It happens.
+  effects:
+    - { type: history, text: 'A baby was born.', importance: 3 }

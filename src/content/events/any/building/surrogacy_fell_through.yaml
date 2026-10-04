@@ -1,0 +1,24 @@
+# Registry: surrogacy.fellThrough. The match didn't come through.
+id: surrogacy_fell_through
+title: No match
+text: >-
+  The agency calls, with that careful voice. The match did not come through:
+  there is a medical reason, or a personal one, and either way it is no one's
+  fault. You can begin again, if you want to.
+tone: dark
+category: building
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires: { age: { gte: 18 } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  other: { kind: spouse, presence: anywhere, optional: true }
+autoOutcome:
+  text: >-
+    The people at the agency are kind, and none of it helps. You thank them,
+    and hang up, and look for a long time at nothing.
+  effects:
+    - { type: stat, key: happiness, delta: -10 }
+    - { type: stat, key: stress, delta: 8 }
+    - { type: history, text: 'A surrogacy did not come through.', importance: 2 }

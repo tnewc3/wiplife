@@ -1,0 +1,76 @@
+# Answers the "try_for_baby" action (registries/actions.yaml). The chance
+# comes from the ages and health of you both (balance/family.yaml fertility).
+id: try_for_baby_talk
+title: Trying
+text: >-
+  You and {person.name} have been talking about it for a while, and tonight the
+  talk turns into a decision. You are going to try for a baby. The only
+  question left is how.
+tone: light
+category: building
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { romance: [dating, engaged, married] }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  person: { kind: partner, presence: nearby }
+choices:
+  - id: relax
+    label: Take it as it comes
+    check:
+      base: 50
+      stats:
+        - { family: fertility, role: person, weight: 1 }
+      success:
+        text: >-
+          Soon enough, there is a test on the bathroom shelf with two lines
+          on it. {person.name} looks at it, and then at you, and neither of you
+          can stop smiling.
+        effects:
+          - { type: pregnancy, action: begin, how: trying, role: person }
+          - { type: relationship, role: person, affection: 8, trust: 4, mood: 8 }
+          - { type: stat, key: happiness, delta: 10 }
+          - { type: history, text: 'You and {person.name} found out a baby was on the way.', importance: 3 }
+      failure:
+        text: >-
+          Nothing yet. It is early, and you tell each other so. The waiting
+          has a way of making the calendar loud.
+        effects:
+          - { type: pregnancy, action: attempt }
+          - { type: stat, key: stress, delta: 2 }
+  - id: plan
+    label: Plan around the calendar
+    check:
+      base: 50
+      stats:
+        - { family: fertilityPlanned, role: person, weight: 1 }
+      success:
+        text: >-
+          The spreadsheet works. The test is positive, and {person.name}
+          laughs, and says that for once the planning was worth it.
+        effects:
+          - { type: pregnancy, action: begin, how: trying, role: person }
+          - { type: relationship, role: person, affection: 6, trust: 4, mood: 8 }
+          - { type: stat, key: happiness, delta: 9 }
+          - { type: stat, key: stress, delta: 3 }
+          - { type: history, text: 'You and {person.name} found out a baby was on the way.', importance: 3 }
+      failure:
+        text: >-
+          Not this time, and the planning made it feel like an exam. You and
+          {person.name} are a little shorter with each other than you meant to be.
+        effects:
+          - { type: pregnancy, action: attempt }
+          - { type: relationship, role: person, mood: -3 }
+          - { type: stat, key: stress, delta: 5 }
+  - id: wait
+    label: Decide to wait a while
+    outcome:
+      text: >-
+        You and {person.name} agree it is not quite time. Saying it out loud
+        is a relief, for both of you, and you do not look away from each other.
+      effects:
+        - { type: relationship, role: person, trust: 3 }

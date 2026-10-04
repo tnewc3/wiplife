@@ -1,0 +1,38 @@
+# Follow-up of a miscarriage: you and the person you lost the pregnancy with.
+id: miscarriage_partner_talk_partner
+title: What neither of you said
+text: >-
+  It was {since}, and you and {person.name} have been careful around each
+  other. Tonight the careful runs out. {person.name} says the thing you have
+  both been walking around.
+tone: dark
+category: grief
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { memory: { role: person, tag: lost_a_pregnancy } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  person: { kind: partner, presence: anywhere }
+choices:
+  - id: together
+    label: Stay up and talk it through
+    outcome:
+      text: >-
+        You say it is not anyone's fault, then say it again until it
+        starts to sound true. By morning you are on the same side of the table.
+      effects:
+        - { type: relationship, role: person, affection: 6, trust: 8, mood: 4 }
+        - { type: stat, key: stress, delta: -5 }
+  - id: pull_back
+    label: Say it is fine, and change the subject
+    outcome:
+      text: >-
+        You change the subject. {person.name} lets you, and you both pretend it
+        worked.
+      effects:
+        - { type: relationship, role: person, affection: -5, trust: -4, mood: -4 }
+        - { type: stat, key: stress, delta: 3 }

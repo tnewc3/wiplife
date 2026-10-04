@@ -1,13 +1,13 @@
 import { useState } from 'react';
 import { content } from '../../../content';
 import { LIFESTYLES, type Lifestyle } from '../../../content/schemas';
-import { getMoneyView, type DebtView } from '../../../engine/selectors';
+import { getFamilyView, getMoneyView, type DebtView } from '../../../engine/selectors';
 import type { LifeState } from '../../../engine/types';
 import { useAppStore } from '../../../store/appStore';
 import { Button } from '../../components/Button';
 import { Card } from '../../components/Card';
 import { ConfirmSheet } from '../../components/ConfirmSheet';
-import { DEBT_LABELS, debtStatus, LEDGER_LABELS, LIFESTYLE_BLURBS, LIFESTYLE_LABELS, money, rateLabel } from '../../labels';
+import { CUSTODY_LABELS, DEBT_LABELS, debtStatus, LEDGER_LABELS, LIFESTYLE_BLURBS, LIFESTYLE_LABELS, money, rateLabel } from '../../labels';
 
 function Row({ label, value, strong = false }: { label: string; value: string; strong?: boolean }) {
   return (
@@ -35,6 +35,9 @@ function LedgerCard({ life }: { life: LifeState }) {
           <Row label={LEDGER_LABELS.tax} value={money(-ledger.tax)} />
           <Row label={LEDGER_LABELS.housing} value={money(-ledger.housing)} />
           <Row label={LEDGER_LABELS.living} value={money(-ledger.living)} />
+          {ledger.children > 0 && <Row label={LEDGER_LABELS.children} value={money(-ledger.children)} />}
+          {ledger.supportPaid > 0 && <Row label={LEDGER_LABELS.supportPaid} value={money(-ledger.supportPaid)} />}
+          {ledger.supportReceived > 0 && <Row label={LEDGER_LABELS.supportReceived} value={money(ledger.supportReceived)} />}
           <Row label={LEDGER_LABELS.debtPayments} value={money(-ledger.debtPayments)} />
           <Row label={LEDGER_LABELS.interest} value={money(ledger.interest)} />
           <div className="mt-1 border-t border-border pt-1">
@@ -44,6 +47,36 @@ function LedgerCard({ life }: { life: LifeState }) {
           {ledger.borrowed > 0 && <Row label={LEDGER_LABELS.borrowed} value={money(ledger.borrowed)} />}
           {ledger.debtInterest > 0 && <Row label={LEDGER_LABELS.debtInterest} value={money(ledger.debtInterest)} />}
         </dl>
+      )}
+    </Card>
+  );
+}
+
+/** E2a: where your children live, and child support. Only shown once a custody matter or child support exists. */
+function CustodyCard({ life }: { life: LifeState }) {
+  const view = getFamilyView(life, content);
+  const apart = view.children.filter((c) => c.custody !== 'you' && !c.stepchild);
+  if (apart.length === 0 && view.support === null && view.hearingsWaiting === 0) return null;
+  return (
+    <Card role="region" aria-labelledby="custody-title">
+      <h2 id="custody-title" className="mb-1 text-lg font-bold">
+        Custody and child support
+      </h2>
+      {view.hearingsWaiting > 0 && <p className="text-muted">A custody decision comes with the next year.</p>}
+      {apart.length > 0 && (
+        <ul className="flex flex-col divide-y divide-border" aria-label="Where your children live">
+          {apart.map((c) => (
+            <li key={c.id} className="flex justify-between gap-3 py-2">
+              <span className="min-w-0 font-semibold break-words">{c.name}</span>
+              <span className="text-sm text-muted">{CUSTODY_LABELS[c.custody]}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+      {view.support && (
+        <p className="mt-2" data-testid="support-line">
+          {view.support.direction === 'pay' ? `You pay child support to ${view.support.name}.` : `${view.support.name} pays you child support.`}
+        </p>
       )}
     </Card>
   );
@@ -186,6 +219,7 @@ export function MoneyTab({ life }: { life: LifeState }) {
       </Card>
 
       <LedgerCard life={life} />
+      <CustodyCard life={life} />
       <LifestyleCard life={life} />
       <RetirementCard life={life} />
 

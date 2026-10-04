@@ -21,6 +21,8 @@ export interface Draft {
   pronounChoice: string | null;
   customPronouns: Pronouns;
   attractedTo: GenderCategory[];
+  /** E2a: a nonbinary character chooses whether they can carry a pregnancy; null until chosen. */
+  canCarry: boolean | null;
   parents: 1 | 2;
   siblings: number;
   familyWealth: FamilyWealth | null;
@@ -31,7 +33,7 @@ export interface Draft {
 
 export const STEPS = [
   { id: 'name', title: 'Name and looks', fields: ['name', 'appearance'] },
-  { id: 'identity', title: 'Identity', fields: ['identity'] },
+  { id: 'identity', title: 'Identity', fields: ['identity', 'canCarry'] },
   { id: 'family', title: 'Family', fields: ['family', 'familyWealth'] },
   { id: 'city', title: 'City', fields: ['cityId'] },
   { id: 'traits', title: 'Stats and personality', fields: ['stats', 'personality'] },
@@ -54,6 +56,7 @@ export function initialDraft(content: ContentBundle): Draft {
     pronounChoice: null,
     customPronouns: { subject: '', object: '', possessive: '', possessivePronoun: '', reflexive: '', verbPlural: false },
     attractedTo: [],
+    canCarry: null,
     parents: 2,
     siblings: 0,
     familyWealth: null,
@@ -126,6 +129,8 @@ export function toCustomInput(draft: Draft, content: ContentBundle): CustomLifeI
       pronouns: draftPronouns(draft, content),
       attractedTo: draft.attractedTo,
     },
+    // Women can carry a pregnancy and men can't; only a nonbinary character chooses.
+    ...(draft.genderCategory === 'nonbinary' && draft.canCarry !== null ? { canCarry: draft.canCarry } : {}),
     appearance: { descriptors },
     cityId: draft.cityId ?? '',
     familyWealth: draft.familyWealth ?? 'middle',
@@ -140,6 +145,7 @@ export function validateDraft(draft: Draft, content: ContentBundle): Errors {
   const errors: Errors = {};
   if (!draft.genderCategory) errors['identity.genderCategory'] = 'Choose the one that fits best';
   if (!draft.pronounChoice) errors['identity.pronouns'] = 'Choose pronouns';
+  if (draft.genderCategory === 'nonbinary' && draft.canCarry === null) errors.canCarry = 'Choose whether you can carry a pregnancy';
   if (!draft.familyWealth) errors.familyWealth = 'Choose how well off your family is';
   if (!draft.cityId || !content.cities[draft.cityId]) errors.cityId = 'Choose a city';
 

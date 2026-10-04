@@ -60,6 +60,11 @@ function addPerson(d: LifeState, spec: Spec): void {
     moodBase: 60,
     wealthLevel: 'middle',
   };
+  if (spec.kind === 'child' || spec.kind === 'stepchild') {
+    const person = d.people[spec.id]!;
+    person.traits = { ambition: 50, confidence: 50, kindness: 50, riskTaking: 50, discipline: 50, sociability: 50 };
+    person.child = { origin: spec.kind === 'child' ? 'birth' : 'step', custody: 'you', custodyDecided: true, health: 80, happiness: 70, fitness: 50, stress: 10, geneticRisk: 30, talent: null, gpa: 0, latent: {} };
+  }
   if (spec.alive === false) d.people[spec.id]!.deathYear = d.currentYear;
   d.relationships[spec.id] = {
     personId: spec.id,
@@ -193,7 +198,7 @@ describe('diminishing returns', () => {
       const before = life.relationships.f1!.affection;
       life = performInteraction(life, { interactionId: 'compliment', personId: 'f1' }, good);
       gains.push(life.relationships.f1!.affection - before);
-      life = closeInteraction(life);
+      life = closeInteraction(life, content);
     }
     expect(gains[0]!).toBeGreaterThan(gains[3]!);
     expect(gains[0]!).toBeGreaterThan(gains[10]!);
@@ -208,8 +213,8 @@ describe('diminishing returns', () => {
   it('resets the counters each year', () => {
     const good = forced('good');
     let life = lifeWith(30, [friend()]);
-    life = closeInteraction(performInteraction(life, { interactionId: 'chat', personId: 'f1' }, good));
-    life = closeInteraction(performInteraction(life, { interactionId: 'chat', personId: 'f1' }, good));
+    life = closeInteraction(performInteraction(life, { interactionId: 'chat', personId: 'f1' }, good), content);
+    life = closeInteraction(performInteraction(life, { interactionId: 'chat', personId: 'f1' }, good), content);
     expect(repeatsThisYear(life, life.relationships.f1!, 'chat')).toEqual({ same: 2, total: 2 });
     life = produce(life, (d) => {
       d.currentYear += 1;
@@ -223,7 +228,7 @@ describe('diminishing returns', () => {
   it('leaves them annoyed after repeats or a bad outcome', () => {
     let life = lifeWith(30, [friend()]);
     const good = forced('good');
-    for (let i = 0; i < balance.reaction.annoyedAfter; i++) life = closeInteraction(performInteraction(life, { interactionId: 'chat', personId: 'f1' }, good));
+    for (let i = 0; i < balance.reaction.annoyedAfter; i++) life = closeInteraction(performInteraction(life, { interactionId: 'chat', personId: 'f1' }, good), content);
     expect(life.relationships.f1!.interactions?.annoyed).toBe(true);
     const fresh = lifeWith(30, [friend()]);
     expect(performInteraction(fresh, { interactionId: 'chat', personId: 'f1' }, good).relationships.f1!.interactions?.annoyed).toBe(false);
@@ -233,9 +238,9 @@ describe('diminishing returns', () => {
   it('costs trust for each repeated ask, whatever the outcome', () => {
     const neutral = forced('neutral');
     let life = lifeWith(30, [{ id: 'm', age: 55, kind: 'parent', trust: 80 }]);
-    life = closeInteraction(performInteraction(life, { interactionId: 'ask_money', personId: 'm' }, neutral));
+    life = closeInteraction(performInteraction(life, { interactionId: 'ask_money', personId: 'm' }, neutral), content);
     const afterFirst = life.relationships.m!.trust;
-    life = closeInteraction(performInteraction(life, { interactionId: 'ask_money', personId: 'm' }, neutral));
+    life = closeInteraction(performInteraction(life, { interactionId: 'ask_money', personId: 'm' }, neutral), content);
     const firstLoss = 80 - afterFirst;
     const secondLoss = afterFirst - life.relationships.m!.trust;
     expect(secondLoss).toBeGreaterThan(firstLoss);
@@ -492,10 +497,10 @@ describe('doing an interaction', () => {
     expect(life.pendingInteraction!.text.length).toBeGreaterThan(10);
     expect(life.pendingInteraction!.text).not.toMatch(/[{}]/);
     expect(checkInvariants(life, content)).toEqual([]);
-    const closed = closeInteraction(life);
+    const closed = closeInteraction(life, content);
     expect(closed.pendingInteraction).toBeNull();
     expect(closed.inputLog.at(-1)?.kind).toBe('interactClose');
-    expect(() => closeInteraction(closed)).toThrow(InvalidInputError);
+    expect(() => closeInteraction(closed, content)).toThrow(InvalidInputError);
     // The start life was not changed.
     expect(start.pendingInteraction).toBeNull();
   });
@@ -542,7 +547,7 @@ describe('doing an interaction', () => {
         life = performInteraction(life, { interactionId: def.id, personId: id, ...(giftTier ? { giftTier } : {}) }, content);
         const choice = life.pendingInteraction?.choice;
         if (choice) life = resolveInteractionChoice(life, choice.options[nextInt(rng, 0, choice.options.length - 1)]!.id, content);
-        if (nextInt(rng, 0, 1) === 0) life = closeInteraction(life);
+        if (nextInt(rng, 0, 1) === 0) life = closeInteraction(life, content);
       }
       life = beginYear(life, content);
       life = resolveAll(life, content, choices);
@@ -559,7 +564,7 @@ describe('big moments: a choice inside the outcome card', () => {
     const start = lifeWith(30, [friend()]);
     let life = performInteraction(start, { interactionId: 'pick_a_fight', personId: 'f1' }, neutral);
     expect(life.pendingInteraction?.choice?.options.map((o) => o.id)).toEqual(['swing', 'back_down']);
-    expect(() => closeInteraction(life)).toThrow(InvalidInputError);
+    expect(() => closeInteraction(life, content)).toThrow(InvalidInputError);
     expect(() => performInteraction(life, { interactionId: 'chat', personId: 'f1' }, neutral)).toThrow(InvalidInputError);
     expect(() => beginYear(life, neutral)).toThrow(PhaseError);
     expect(() => resolveInteractionChoice(life, 'nope', neutral)).toThrow(InvalidInputError);
@@ -571,7 +576,7 @@ describe('big moments: a choice inside the outcome card', () => {
     expect(life.relationships.f1!.memories.some((m) => m.tag === 'big_fight')).toBe(true);
     expect(life.pendingInteraction?.changes.affection).toBeLessThan(-5);
     expect(() => resolveInteractionChoice(life, 'swing', neutral)).toThrow(InvalidInputError);
-    expect(closeInteraction(life).pendingInteraction).toBeNull();
+    expect(closeInteraction(life, content).pendingInteraction).toBeNull();
     expect(checkInvariants(life, neutral)).toEqual([]);
   });
 
@@ -795,7 +800,7 @@ describe('every interaction', () => {
   it('has a profile, 2–3 wordings per tier, and fills in cleanly for people of any pronouns', () => {
     const defs = Object.values(content.interactions).filter((d) => !d.retired);
     expect(defs.length).toBeGreaterThanOrEqual(19);
-    expect(new Set(defs.map((d) => d.group))).toEqual(new Set(['everyday', 'conflict', 'romance', 'practical']));
+    expect(new Set(defs.map((d) => d.group))).toEqual(new Set(['everyday', 'conflict', 'romance', 'practical', 'parenting']));
     for (const def of defs) {
       expect(balance.profiles[def.profile], def.id).toBeDefined();
       for (const [tier, outcome] of Object.entries(def.outcomes)) {
@@ -813,7 +818,7 @@ describe('every interaction', () => {
         const age = def.availability.you.min !== undefined ? Math.max(30, def.availability.you.min) : 30;
         const start = lifeWith(
           age,
-          [{ id: 'x', age: Math.max(def.availability.them.min ?? 20, 24) + (['parent', 'stepparent'].includes(kind) ? 30 : kind === 'grandparent' ? 55 : 0), kind, affection: 80, trust: 80, status: def.availability.status[0] === 'estranged' ? 'estranged' : 'active', memories: [{ tag: 'big_fight', year: 2020 }] }],
+          [{ id: 'x', age: kind === 'child' || kind === 'stepchild' ? Math.max(def.availability.them.min ?? 5, 5) : Math.max(def.availability.them.min ?? 20, 24) + (['parent', 'stepparent'].includes(kind) ? 30 : kind === 'grandparent' ? 55 : 0), kind, affection: 80, trust: 80, status: def.availability.status[0] === 'estranged' ? 'estranged' : 'active', memories: [{ tag: 'big_fight', year: 2020 }] }],
           20000,
         );
         if (!isInteractionAvailable(start, def, 'x', content)) continue;

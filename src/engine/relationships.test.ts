@@ -372,7 +372,7 @@ describe('management actions', () => {
     { id: 'foe', age: 29, kind: 'friend', status: 'estranged' },
     { id: 'gone', age: 60, kind: 'friend', alive: false },
   ];
-  const ids = (life: LifeState, personId: string) => availableActions(life, personId, content).map((a) => a.id);
+  const ids = (life: LifeState, personId: string) => availableActions(life, personId, content).map((a) => a.id).filter((id) => id !== 'try_for_baby');
 
   it('appear only when valid, and the dead have none', () => {
     const life = lifeWith(30, people);

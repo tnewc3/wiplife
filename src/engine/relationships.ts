@@ -9,7 +9,9 @@ import type { ContentBundle, EventDef, Outcome, RomanceStatus } from '../content
 import { curveAt } from './curve';
 import type { Id, Identity, LifeState, Person, Relationship, RelationshipKind, RelationshipStatus } from './types';
 
-export const FAMILY_KINDS: readonly RelationshipKind[] = ['parent', 'stepparent', 'grandparent', 'sibling'];
+export const FAMILY_KINDS: readonly RelationshipKind[] = ['parent', 'stepparent', 'grandparent', 'sibling', 'child', 'stepchild'];
+/** E2a: your children and stepchildren. */
+export const CHILD_KINDS: readonly RelationshipKind[] = ['child', 'stepchild'];
 /** A current romance: dating, engaged or married. */
 export const PARTNER_KINDS: readonly RelationshipKind[] = ['partner', 'fiance', 'spouse'];
 /** Every romantic kind, including exes. */
@@ -18,11 +20,12 @@ export const WORK_KINDS: readonly RelationshipKind[] = ['coworker', 'boss'];
 /** Kinds a content effect may turn a relationship into (family and work come from their own systems). */
 export const EFFECT_KINDS: readonly RelationshipKind[] = ['friend', 'classmate', 'acquaintance', 'partner', 'fiance', 'spouse', 'ex'];
 /** Kinds that can step in during a crisis (support roles). */
-export const SUPPORT_KINDS: readonly RelationshipKind[] = [...FAMILY_KINDS, 'friend', ...PARTNER_KINDS];
+export const SUPPORT_KINDS: readonly RelationshipKind[] = [...FAMILY_KINDS.filter((k) => !CHILD_KINDS.includes(k)), 'friend', ...PARTNER_KINDS];
 /** Kinds you can ask out: people you know who aren't family and aren't already your partner. */
 export const ASKABLE_KINDS: readonly RelationshipKind[] = ['friend', 'acquaintance', 'classmate', 'coworker', 'boss', 'ex'];
 
 export const isFamilyKind = (kind: RelationshipKind) => FAMILY_KINDS.includes(kind);
+export const isChildKind = (kind: RelationshipKind) => CHILD_KINDS.includes(kind);
 export const isPartnerKind = (kind: RelationshipKind) => PARTNER_KINDS.includes(kind);
 export const isRomanticKind = (kind: RelationshipKind) => ROMANTIC_KINDS.includes(kind);
 

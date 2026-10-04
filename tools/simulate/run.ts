@@ -57,6 +57,7 @@ import {
   type InteractionPlayer,
   type InteractionReport,
 } from './interactions';
+import { chooseFamilyActions, chooseParentingPlans, emptyFamilyReport, FamilyWatcher, formatFamily, familyTargets, rollFamilyProfile, type FamilyReport } from './family';
 
 /** One life in this many is rebuilt from its input log and compared with the life as played (E1). */
 const REPLAY_EVERY = 100;
@@ -117,6 +118,8 @@ export interface SimulationReport {
   consistency: ConsistencyReport;
   /** E1: the interaction menu, measured. */
   interactions: InteractionReport;
+  /** E2a: children and parenting, measured. */
+  family: FamilyReport;
 }
 
 /** C1: the consistency pass, measured. */
@@ -743,6 +746,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
 
   const recurring = recurringEvents(content);
   const interactions = emptyInteractionReport(playerKind as InteractionPlayer, content);
+  const family = emptyFamilyReport();
   // Found out: the follow-ups only this system schedules (affair_discovered also answers an older chain, so it counts only for an unfaithful life).
   const infidelityEvents = new Set(
     [...content.registries.interactions.infidelity.flirt.events, ...content.registries.interactions.infidelity.intimate.events].filter((id) => id !== 'affair_discovered'),
@@ -769,6 +773,10 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
     const nine = new Stage9Watcher();
     const interactionRng = createRng(`${seed}:interactions`);
     const interactionWatcher = new InteractionWatcher();
+    // E2a: whether this life wants children, and the parenting style it brings (the spammer has no family plans).
+    const familyRng = createRng(`${seed}:family`);
+    const familyProfile = { ...rollFamilyProfile(familyRng), ...(playerKind === 'spammer' ? { wantsKids: false } : {}) };
+    const familyWatcher = new FamilyWatcher(family, familyProfile, playerKind === 'careful');
     const profile = rollMoneyProfile(player);
     // Event choices: the careful player by personality, the careless one at random (Stage 9).
     const picker: ChoicePicker = (l, card, rng) => {
@@ -776,7 +784,10 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
       const illegal = new Set(
         (def?.choices ?? []).filter((c) => card.choices.some((v) => v.id === c.id) && choiceTraits(c).illegal).map((c) => c.id),
       );
-      const id = careless ? pick(rng, card.choices).id : carefulChoice(l, card, rng);
+      const eventId = l.pending.find((p) => p.instanceId === card.instanceId)?.eventId ?? '';
+      // Starting an adoption, IVF cycle or surrogacy: the player came here to begin.
+      const starts = [...content.registries.family.adoption.start, ...content.registries.family.ivf.start, ...content.registries.family.surrogacy.start];
+      const id = starts.includes(eventId) ? card.choices[0]!.id : careless ? pick(rng, card.choices).id : carefulChoice(l, card, rng);
       if (illegal.size > 0) {
         legal.illegalChoices.offered++;
         if (illegal.has(id)) legal.illegalChoices.taken++;
@@ -789,6 +800,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
     let seniorShort = false;
     const watch = (l: LifeState) => {
       check(l);
+      familyWatcher.observe(l, content);
       romance.observe(l);
       wallet.observe(l, moneyAges);
       school.observe(l);
@@ -868,15 +880,36 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
         life = playAction(life, content, actionId, personId, choices, watch, picker);
         rel.actionsTaken[actionId]++;
       }
+      // ...and on the family (E2a): trying for a baby, adoption, IVF and surrogacy.
+      if (familyProfile.wantsKids) {
+        const plans = chooseFamilyActions(life, familyRng, familyProfile);
+        for (const [actionId, personId] of plans.person) {
+          if (!isActionAvailable(life, actionId, personId, content)) continue;
+          life = playAction(life, content, actionId, personId, choices, watch, picker);
+          rel.actionsTaken[actionId]++;
+        }
+        for (const [actionId, params] of plans.life) {
+          if (!isLifeActionAvailable(life, actionId, params, content)) continue;
+          life = takeLifeAction(life, actionId, params);
+          money.actionsTaken[actionId]++;
+        }
+      }
       // ...and with the people in your life (E1: the interaction menu).
       if (life.phase === 'yearStart' && life.character.age >= 4) {
         interactions.years++;
         interactionWatcher.beginYear(life);
-        for (const plan of chooseInteractions(life, content, interactionRng, playerKind)) {
+        const parenting = playerKind === 'spammer' ? [] : chooseParentingPlans(life, content, familyRng, familyProfile, careless);
+        for (const plan of [...chooseInteractions(life, content, interactionRng, playerKind), ...parenting]) {
           const def = content.interactions[plan.interactionId]!;
           if (!isInteractionAvailable(life, def, plan.personId, content)) continue;
           if (plan.giftTier && !canAffordGift(life, plan.giftTier, content)) continue;
           life = playInteraction(life, content, plan, playerKind, interactionRng, interactionWatcher, interactions);
+          // E2a: an intimate night that began an unplanned pregnancy opens its decision.
+          if (life.phase === 'action') {
+            life = resolveAll(life, content, choices, watch, picker);
+            life = finishAction(life);
+            watch(life);
+          }
         }
         interactionWatcher.endInteractions(life, interactions);
         check(life);
@@ -918,6 +951,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
       if (diedFromEvent) deathsFromEvents++;
     }
     options.onLife?.(life);
+    familyWatcher.finish(life, firesThisLife);
     // E1: who reached maximum affection, being found out, and a sample of lives rebuilt from their input logs.
     interactions.lives++;
     interactions.affection.reachedMax += interactionWatcher.reachedMax.size;
@@ -1236,6 +1270,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
     legal,
     discovery,
     interactions,
+    family,
     consistency: {
       violations,
       happiness: spreadOf(lifetimeHappiness),
@@ -1365,6 +1400,7 @@ export function formatReport(report: SimulationReport, content: ContentBundle): 
   lines.push(...formatStage9(report, content));
   lines.push(...formatConsistency(report, content));
   lines.push(...formatInteractions(report.interactions, content), '  targets (src/content/balance/targets.yaml):', ...interactionTargets(report, content).map((r) => target(r.label, r.value, r.goal, r.met)));
+  lines.push(...formatFamily(report.family, content), '  targets (src/content/balance/targets.yaml):', ...familyTargets(report.family, content).map((r) => target(r.label, r.value, r.goal, r.met)));
   lines.push(`Events fired: ${report.totalEventsFired}`);
   lines.push('  event'.padEnd(30) + 'fired'.padStart(8) + 'share'.padStart(8) + 'lives'.padStart(9));
   for (const e of [...report.events].sort((a, b) => b.fired - a.fired)) {

@@ -1,0 +1,39 @@
+id: empty_nest
+title: The quiet house
+text: >-
+  {kid.name}'s room is a guest room now, with a clean bedspread and nothing on
+  the walls. The house is cleaner, and louder in its silence, and you
+  keep catching yourself setting an extra place.
+tone: neutral
+category: grownkids
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { family: { children: { gte: 1 } } }
+    - { family: { minors: { lt: 1 } } }
+    - { role: kid, movedOut: true }
+weight: { base: 7 }
+once: true
+cast:
+  kid: { kind: child, presence: anywhere, age: { min: 18, max: 30 } }
+choices:
+  - id: call
+    label: Call {kid.name}, just to talk
+    outcome:
+      text: >-
+        {kid.name} is busy, and glad you called, and says so. The call
+        runs forty minutes, and you both end up laughing.
+      effects:
+        - { type: relationship, role: kid, affection: 4, trust: 3 }
+        - { type: stat, key: happiness, delta: 3 }
+  - id: reinvent
+    label: Take up something that is only yours
+    outcome:
+      text: >-
+        You sign up for a class, and a walking group, and a whole new set of
+        Tuesdays. The house is quiet, but you are less so.
+      effects:
+        - { type: stat, key: happiness, delta: 4 }
+        - { type: stat, key: stress, delta: -3 }

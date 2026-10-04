@@ -47,3 +47,17 @@ categories:
     requires: { legal: { incarcerated: true } }
   identity: { label: Who you are }
   vice: { label: Vices }
+  # E2a: children and parenting.
+  pregnancy: { label: Expecting }
+  building: { label: Building a family }
+  parenting:
+    label: Raising children
+    requires: { family: { minors: { gte: 1 } } }
+  grownkids:
+    label: Grown children
+    requires: { family: { children: { gte: 1 } } }
+  stepfamily:
+    label: Stepfamily
+    requires: { family: { steps: { gte: 1 } } }
+  grief: { label: Grief }
+  custody: { label: Custody }

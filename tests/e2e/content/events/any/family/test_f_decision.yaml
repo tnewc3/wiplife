@@ -1,0 +1,31 @@
+id: test_f_decision
+title: Test F Decision
+text: A family moment.
+tone: neutral
+category: family
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires: { age: { gte: 18 } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  other: { kind: friend, presence: anywhere }
+choices:
+  - id: keep
+    label: Keep the pregnancy
+    outcome:
+      text: Decided.
+      effects:
+        - { type: pregnancy, action: decide, choice: keep }
+  - id: adoption
+    label: Place for adoption
+    outcome:
+      text: Decided.
+      effects:
+        - { type: pregnancy, action: decide, choice: adoption }
+  - id: end
+    label: End the pregnancy
+    outcome:
+      text: Decided.
+      effects:
+        - { type: pregnancy, action: decide, choice: end }

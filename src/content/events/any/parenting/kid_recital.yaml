@@ -1,0 +1,51 @@
+id: kid_recital
+title: The recital
+text: >-
+  {kid.name} has been practicing for weeks, in the bedroom, in the bathroom,
+  once in the car. The recital is on Thursday night. There is also a lot going
+  on at work.
+tone: neutral
+category: parenting
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { family: { minors: { gte: 1 } } }
+weight: { base: 8 }
+cooldownYears: 3
+cast:
+  kid: { kind: child, presence: household, age: { min: 5, max: 14 } }
+choices:
+  - id: go
+    label: Be there, in the front row
+    outcome:
+      text: >-
+        {kid.name} finds you in the crowd within three seconds and plays the
+        entire piece to you. It has several wrong notes. It is the best thing
+        you have heard all year.
+      effects:
+        - { type: parenting, role: kid, warmth: 4, involvement: 6 }
+        - { type: relationship, role: kid, affection: 6, trust: 5, mood: 8 }
+        - { type: memory, role: kid, tag: parent_in_front_row }
+        - { type: stat, key: happiness, delta: 4 }
+  - id: late
+    label: Slip in at the back, a little late
+    outcome:
+      text: >-
+        You catch the last two minutes. {kid.name} spots you, and the smile is
+        real, but it is a half-second slower than it would have been.
+      effects:
+        - { type: parenting, role: kid, involvement: 2 }
+        - { type: relationship, role: kid, affection: 2 }
+  - id: skip
+    label: Skip it. Work comes first
+    outcome:
+      text: >-
+        You tell {kid.name} you will watch the video. There is no video. {kid.They}
+        {kid:says|say} it is fine, in the voice that means it is not.
+      effects:
+        - { type: parenting, role: kid, warmth: -3, involvement: -6 }
+        - { type: relationship, role: kid, affection: -5, trust: -6, mood: -8 }
+        - { type: memory, role: kid, tag: parent_missed_recital }
+        - { type: stat, key: ambition, delta: 1 }

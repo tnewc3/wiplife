@@ -84,6 +84,12 @@ export const familyWealthSchema = z.enum(['poor', 'working', 'middle', 'affluent
 export const customLifeInputSchema = z.strictObject({
   name: z.strictObject({ first: personNameSchema('a first name'), last: personNameSchema('a last name') }),
   identity: identityInputSchema,
+  /**
+   * E2a: whether you can carry a pregnancy. Women can and men can't, so for
+   * them this may be left out (or must say so); a nonbinary character chooses
+   * (left out means no).
+   */
+  canCarry: z.boolean().optional(),
   appearance: z.strictObject({
     descriptors: z.array(freeTextSchema('a description')).max(DESCRIPTOR_COUNT_MAX),
   }),
@@ -150,6 +156,10 @@ export function parseCreateLifeOptions(input: unknown, content: ContentBundle): 
     const issues: InputIssue[] = [];
     const city = content.cities[options.custom.cityId];
     if (!city || city.retired) issues.push({ path: 'custom.cityId', message: 'Choose a city' });
+    const category = options.custom.identity.genderCategory;
+    if (options.custom.canCarry !== undefined && category !== 'nonbinary' && options.custom.canCarry !== (category === 'woman')) {
+      issues.push({ path: 'custom.canCarry', message: 'Who can carry a pregnancy follows from gender category for women and men; only nonbinary characters choose' });
+    }
     if (options.custom.family.siblings > maxSiblings(content)) {
       issues.push({ path: 'custom.family.siblings', message: `Choose up to ${maxSiblings(content)} siblings` });
     }

@@ -1,0 +1,59 @@
+id: grown_child_distance
+title: The phone that doesn't ring
+text: >-
+  You realize it has been a long while since {kid.name} called. The texts have
+  gotten shorter, and the visits have gotten rarer, and there is a politeness
+  to the distance that makes you think it is not an accident.
+tone: serious
+category: grownkids
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { family: { children: { gte: 1 } } }
+    - { role: kid, affection: { lt: 38 } }
+weight: { base: 7 }
+cooldownYears: 4
+cast:
+  kid: { kind: child, presence: anywhere, age: { min: 18, max: 60 } }
+choices:
+  - id: reach
+    label: Reach out, with no agenda
+    check:
+      base: 40
+      stats:
+        - { role: kid, key: trust, weight: 0.4 }
+        - { key: kindness, weight: 0.2 }
+      success:
+        text: >-
+          {kid.name} answers. The call is awkward and short and kind, and it
+          ends with a plan to meet. It is a start.
+        effects:
+          - { type: relationship, role: kid, affection: 7, trust: 6 }
+          - { type: stat, key: happiness, delta: 3 }
+      failure:
+        text: >-
+          The call goes to voicemail, and the callback does not come. You
+          leave one more message, and then stop.
+        effects:
+          - { type: relationship, role: kid, trust: -2 }
+          - { type: stat, key: stress, delta: 3 }
+  - id: write
+    label: Write a letter, and say what you need to say
+    outcome:
+      text: >-
+        You write the letter and rewrite it, and send it. A week later, a
+        short reply arrives. It is not forgiveness, but it is a door left open.
+      effects:
+        - { type: relationship, role: kid, affection: 4, trust: 4 }
+        - { type: stat, key: stress, delta: -2 }
+  - id: wait
+    label: Give {kid.them} the space that seems wanted
+    outcome:
+      text: >-
+        You respect the silence, and the silence grows. It is, you hope, the
+        right call, and it is also very lonely.
+      effects:
+        - { type: relationship, role: kid, affection: -3 }
+        - { type: stat, key: happiness, delta: -3 }

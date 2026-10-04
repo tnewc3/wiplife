@@ -1,0 +1,41 @@
+id: kid_sick_night
+title: A fever at midnight
+text: >-
+  {kid.name} stands at the side of your bed in the dark, hot and miserable,
+  and says that {kid.they} {kid:doesn't|don't} feel good. The thermometer says
+  more than it should.
+tone: serious
+category: parenting
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { family: { minors: { gte: 1 } } }
+weight: { base: 7 }
+cooldownYears: 3
+cast:
+  kid: { kind: child, presence: household, age: { min: 1, max: 10 } }
+choices:
+  - id: sit_up
+    label: Sit up with {kid.them} until it breaks
+    outcome:
+      text: >-
+        You sponge a forehead and read the same book four times. The fever
+        breaks at four, and {kid.name} sleeps, and you watch.
+      effects:
+        - { type: parenting, role: kid, warmth: 5, involvement: 5 }
+        - { type: memory, role: kid, tag: parent_sat_up_all_night }
+        - { type: childStat, role: kid, key: health, delta: 3 }
+        - { type: stat, key: stress, delta: 4 }
+  - id: urgent_care
+    label: Take {kid.them} to urgent care
+    outcome:
+      text: >-
+        It is nothing serious, a doctor says, and gives you a leaflet and a
+        reassuring look. You drive home as the sun comes up, with {kid.name}
+        asleep in the back seat.
+      effects:
+        - { type: parenting, role: kid, involvement: 4 }
+        - { type: childStat, role: kid, key: health, delta: 2 }
+        - { type: stat, key: stress, delta: 2 }

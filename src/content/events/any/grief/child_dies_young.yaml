@@ -1,0 +1,30 @@
+# Registry: childDeath.young. Rare, and never casual: it starts a grief chain
+# (after_child_death_*), leaves its mark on the history and the obituary, and
+# is told without anything graphic.
+id: child_dies_young
+title: The phone call
+text: >-
+  There is a call in the middle of the day, from a number you do not recognize, and a voice that is trying very hard to be calm. {child.name} is gone. There was no time, and nothing anyone could have done. You hear the words, and they are only sounds.
+tone: dark
+category: grief
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires: { age: { gte: 18 } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  # Passed in by the engine: your child, who has died.
+  child: { kind: child, presence: anywhere, deceased: true }
+autoOutcome:
+  text: >-
+    The days after are a blur of people and casseroles and decisions nobody should ever have to make. {child.name}'s room is exactly as it was left, and you cannot make yourself open the door.
+  effects:
+    - { type: flag, key: lost_a_child, value: true }
+    - { type: stat, key: happiness, delta: -30 }
+    - { type: stat, key: stress, delta: 25 }
+    - { type: stat, key: health, delta: -5 }
+    - { type: history, text: 'You lost your child, {child.name}.', importance: 3 }
+    - { type: schedule, eventId: after_child_death_numb, inYears: [1, 1], cast: [child] }
+    - { type: schedule, eventId: after_child_death_together, inYears: [1, 2] }
+    - { type: schedule, eventId: after_child_death_sibling, inYears: [1, 2], cast: [child] }
+    - { type: schedule, eventId: after_child_death_milestone, inYears: [4, 7], cast: [child] }

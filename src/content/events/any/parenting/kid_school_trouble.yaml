@@ -1,0 +1,50 @@
+id: kid_school_trouble
+title: A note from the teacher
+text: >-
+  The email is polite and unmistakable: {kid.name}'s grades have slipped, and
+  the teacher would like to talk. You open the report card. There are more red
+  marks than you would like.
+tone: serious
+category: parenting
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { family: { minors: { gte: 1 } } }
+    - { role: kid, gpa: { gt: 0, lt: 2 } }
+weight: { base: 9 }
+cooldownYears: 3
+cast:
+  kid: { kind: child, presence: household, age: { min: 6, max: 17 } }
+choices:
+  - id: help
+    label: Sit down with {kid.name} every evening
+    outcome:
+      text: >-
+        It is slow, and dull, and you both complain. By the end of term the red
+        marks are fewer, and {kid.name} has stopped dreading the kitchen table.
+      effects:
+        - { type: parenting, role: kid, involvement: 6, warmth: 2 }
+        - { type: childStat, role: kid, key: smarts, delta: 2 }
+        - { type: stat, key: stress, delta: 3 }
+  - id: punish
+    label: Ground {kid.them} until the grades come up
+    outcome:
+      text: >-
+        {kid.name} spends a month in {kid.their} room doing homework with a
+        face like thunder. The grades improve a little. So does the silence.
+      effects:
+        - { type: parenting, role: kid, strictness: 6, warmth: -3 }
+        - { type: childStat, role: kid, key: stress, delta: 4 }
+        - { type: relationship, role: kid, affection: -4, trust: -2 }
+  - id: teacher
+    label: Meet with the teacher first
+    outcome:
+      text: >-
+        The teacher has noticed something you had not: {kid.name} cannot see the
+        board from the back. You get {kid.them} a new seat, and a pair of glasses.
+      effects:
+        - { type: parenting, role: kid, involvement: 4 }
+        - { type: childStat, role: kid, key: smarts, delta: 1 }
+        - { type: relationship, role: kid, trust: 4 }

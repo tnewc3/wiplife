@@ -1,0 +1,59 @@
+id: toddler_tantrum
+title: The checkout line
+text: >-
+  {kid.name} wants the shiny thing at the end of the aisle, and has said so,
+  loudly, six times. A woman behind you is smiling in that way that means
+  "I remember". Everyone is watching to see what you do next.
+tone: neutral
+category: parenting
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { family: { minors: { gte: 1 } } }
+weight: { base: 8 }
+cooldownYears: 3
+cast:
+  kid: { kind: child, presence: household, age: { min: 2, max: 5 } }
+choices:
+  - id: calm
+    label: Crouch down and talk it through
+    check:
+      base: 50
+      stats:
+        - { key: kindness, weight: 0.3 }
+        - { key: discipline, weight: 0.2 }
+      success:
+        text: >-
+          {kid.name} sobs once, hard, and then points out the thing {kid.they}
+          {kid:wants|want} instead. A small crowd silently applauds.
+        effects:
+          - { type: parenting, role: kid, warmth: 4, strictness: 2 }
+          - { type: relationship, role: kid, trust: 4 }
+      failure:
+        text: >-
+          It does not work. {kid.name} lies down on the floor and you carry
+          {kid.them} out like a sack of potatoes, with great dignity.
+        effects:
+          - { type: parenting, role: kid, warmth: 1 }
+          - { type: stat, key: stress, delta: 3 }
+  - id: firm
+    label: Say no, and stick to it
+    outcome:
+      text: >-
+        You say no once, calmly, and do not say it again. The storm lasts four
+        minutes. In the parking lot, {kid.name} is asking for a snack as though
+        nothing happened.
+      effects:
+        - { type: parenting, role: kid, strictness: 5 }
+        - { type: childTrait, role: kid, key: discipline, delta: 1 }
+  - id: give_in
+    label: Hand over the shiny thing
+    outcome:
+      text: >-
+        The tears stop like a tap. You will hear about this at every checkout from
+        now on, and you both know it.
+      effects:
+        - { type: parenting, role: kid, strictness: -5, warmth: 1 }
+        - { type: childTrait, role: kid, key: discipline, delta: -1 }

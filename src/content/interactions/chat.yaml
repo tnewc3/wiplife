@@ -6,7 +6,7 @@ profile: warm
 inPerson: false
 visit: true
 availability:
-  kinds: [parent, stepparent, sibling, grandparent, friend, partner, fiance, spouse, ex, coworker, boss, classmate, acquaintance]
+  kinds: [parent, stepparent, sibling, grandparent, child, stepchild, friend, partner, fiance, spouse, ex, coworker, boss, classmate, acquaintance]
   you: { min: 4 }
   them: { min: 3 }
 outcomes:

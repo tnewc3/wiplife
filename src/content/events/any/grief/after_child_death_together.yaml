@@ -1,0 +1,38 @@
+id: after_child_death_together
+title: Two people in a house
+text: >-
+  It was {since}, and {person.name} is sitting at the end of the table with
+  an untouched cup of tea. The two of you have been so careful with each other
+  that there is hardly any of you left in the room.
+tone: dark
+category: grief
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { flag: lost_a_child }
+weight: { base: 9 }
+followUpOnly: true
+cast:
+  person: { support: true, age: { min: 18, max: 120 }, presence: nearby }
+choices:
+  - id: say_it
+    label: Say the name, and say that you miss {person.them} too
+    outcome:
+      text: >-
+        {person.name} breaks first. You hold on to each other the way you
+        would in a flood. There is not a lot to say, and neither of you needs
+        to say it.
+      effects:
+        - { type: relationship, role: person, affection: 8, trust: 8, mood: 5 }
+        - { type: stat, key: stress, delta: -5 }
+  - id: separate
+    label: Retreat into your own grief
+    outcome:
+      text: >-
+        You have not got room for anyone else's. {person.name} does not
+        push. The distance between the two of you quietly grows.
+      effects:
+        - { type: relationship, role: person, affection: -8, trust: -6, mood: -6 }
+        - { type: stat, key: stress, delta: 3 }

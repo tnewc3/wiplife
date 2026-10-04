@@ -1,0 +1,22 @@
+# Registry: adoption.declined. A placement falls through.
+id: adoption_declined
+title: Not this one
+text: >-
+  The caseworker's voice is careful. The placement will not go ahead: it is no
+  one's fault, and it is not what anyone wanted. The agency says you can apply
+  again when you are ready.
+tone: dark
+category: building
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires: { age: { gte: 18 } }
+weight: { base: 10 }
+followUpOnly: true
+autoOutcome:
+  text: >-
+    You put down the phone. There was a room you had started to think of as
+    someone's. You close its door, and it is a long time before you open it.
+  effects:
+    - { type: stat, key: happiness, delta: -10 }
+    - { type: stat, key: stress, delta: 8 }
+    - { type: history, text: 'An adoption you hoped for fell through.', importance: 2 }

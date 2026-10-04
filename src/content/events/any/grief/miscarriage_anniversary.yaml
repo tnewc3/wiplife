@@ -1,0 +1,37 @@
+# Follow-up of a miscarriage: the date comes round.
+id: miscarriage_anniversary
+title: The due date
+text: >-
+  It was {since}, and the calendar has a date on it that nobody else would
+  notice. It would have been a birthday. You wake up early, knowing before you
+  open your eyes.
+tone: dark
+category: grief
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { flag: had_miscarriage }
+weight: { base: 10 }
+followUpOnly: true
+choices:
+  - id: mark
+    label: Mark the day, quietly
+    outcome:
+      text: >-
+        You light a candle, or take a walk, or just sit for a while. It does
+        not fix anything. It is the right size of acknowledgement.
+      effects:
+        - { type: stat, key: happiness, delta: 2 }
+        - { type: stat, key: stress, delta: -3 }
+        - { type: innerConflict, delta: -2 }
+  - id: ignore
+    label: Let it pass like any other day
+    outcome:
+      text: >-
+        You get through it by not looking at it. By evening, you are tired in
+        a way that does not match the day.
+      effects:
+        - { type: stat, key: happiness, delta: -3 }
+        - { type: stat, key: stress, delta: 3 }

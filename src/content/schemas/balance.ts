@@ -340,6 +340,34 @@ export const targetsBalanceSchema = z.strictObject({
     /** The most that go well (good or great): interactions that nearly always succeed are a grind. */
     maxGoodShare: probabilitySchema,
   }),
+  /**
+   * E2a: children and parenting (judged on the careful player). Shares are of
+   * lives that reach the age the target is about, or (miscarriage) of
+   * pregnancies, (childDeath) of children.
+   */
+  family: z.strictObject({
+    /** Lives that reach 50 and have a child (born, adopted or step) by then. */
+    parents: shareRangeSchema,
+    /** Lives (reaching 50) in which an adoption, an IVF cycle or a surrogacy was completed or tried. */
+    adoption: shareRangeSchema,
+    ivf: shareRangeSchema,
+    surrogacy: shareRangeSchema,
+    /** Share of pregnancies that end in miscarriage. */
+    miscarriage: shareRangeSchema,
+    /** Share of children (born, adopted, step) who die before their parent. */
+    childDeath: shareRangeSchema,
+    /** Parenting style measurably shapes children: the difference between children raised at the high and low end of a style line, in each direction. */
+    styleEffect: z.strictObject({
+      /** Children's grades (0–4 points) at 16–17, warm vs cold, involved vs absent. */
+      grades: z.number().min(0).max(4),
+      /** Children's personality at 18, in points: kindness (warm vs cold) and discipline (strict vs relaxed). */
+      personality: z.number().min(0).max(100),
+    }),
+    /** The correlation between a child's starting smarts and the mean of their biological parents' (at least). */
+    inheritance: z.number().min(0).max(1),
+    /** The most (as a share of children) whose starting smarts fall outside the range of their parents' by more than the noise: values sit between the parents with variation. */
+    maxOutsideParents: probabilitySchema,
+  }),
   coverage: z.strictObject({
     /** At least this many events (not retired). */
     minEvents: z.int().min(1),

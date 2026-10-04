@@ -1,0 +1,37 @@
+id: baby_first_steps
+title: Wobble
+text: >-
+  {kid.name} lets go of the coffee table, looks at it, looks at you, and takes
+  one step. Then another. Then sits down very suddenly, with an expression of
+  great surprise.
+tone: light
+category: parenting
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { family: { minors: { gte: 1 } } }
+weight: { base: 7 }
+once: true
+cast:
+  kid: { kind: child, presence: household, age: { min: 1, max: 2 } }
+choices:
+  - id: film
+    label: Film it, and send it to everyone
+    outcome:
+      text: >-
+        The video gets nine hundred views from relatives. {kid.name} has no
+        idea, and has already moved on to the stairs.
+      effects:
+        - { type: stat, key: happiness, delta: 4 }
+        - { type: parenting, role: kid, involvement: 2 }
+  - id: present
+    label: Put the phone down and just watch
+    outcome:
+      text: >-
+        You do not film it. You see all of it, with your actual eyes, and keep
+        it in a place no one can scroll.
+      effects:
+        - { type: stat, key: happiness, delta: 5 }
+        - { type: parenting, role: kid, warmth: 3, involvement: 3 }

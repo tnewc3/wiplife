@@ -1,0 +1,30 @@
+# Registry: miscarriage.you. Rare. It leads to a grief chain.
+id: miscarriage_you
+title: The appointment
+text: >-
+  The technician stops talking. Then the doctor comes in, and sits down, which
+  is how you know. There is no heartbeat. There is nothing you did, and
+  nothing you could have done, and the words sound very far away.
+tone: dark
+category: pregnancy
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires: { age: { gte: 18 } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  other: { kind: spouse, presence: anywhere, optional: true }
+autoOutcome:
+  text: >-
+    You go home with a folder of leaflets and an emptiness that has no
+    instructions. There is a nursery in your head that nobody else can see.
+  effects:
+    - { type: flag, key: had_miscarriage, value: true }
+    - { type: stat, key: happiness, delta: -20 }
+    - { type: stat, key: stress, delta: 14 }
+    - { type: stat, key: health, delta: -3 }
+    - { type: history, text: 'You lost a pregnancy.', importance: 3 }
+    - { type: schedule, eventId: miscarriage_quiet, inYears: [1, 1] }
+    - { type: schedule, eventId: miscarriage_partner_talk_spouse, inYears: [1, 1] }
+    - { type: schedule, eventId: miscarriage_partner_talk_partner, inYears: [1, 1] }
+    - { type: schedule, eventId: miscarriage_anniversary, inYears: [3, 5] }

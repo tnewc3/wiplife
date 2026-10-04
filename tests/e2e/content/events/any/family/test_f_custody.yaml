@@ -1,0 +1,31 @@
+id: test_f_custody
+title: Test F Custody
+text: A family moment.
+tone: neutral
+category: family
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires: { age: { gte: 18 } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  other: { kind: ex, presence: anywhere }
+choices:
+  - id: full
+    label: Fight for custody
+    outcome:
+      text: Decided.
+      effects:
+        - { type: custody, role: other, choice: full }
+  - id: shared
+    label: Share custody
+    outcome:
+      text: Decided.
+      effects:
+        - { type: custody, role: other, choice: shared }
+  - id: other
+    label: Give up custody
+    outcome:
+      text: Decided.
+      effects:
+        - { type: custody, role: other, choice: other }

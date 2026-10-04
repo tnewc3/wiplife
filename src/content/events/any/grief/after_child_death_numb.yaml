@@ -1,0 +1,54 @@
+id: after_child_death_numb
+title: The first year
+text: >-
+  It was {since}, and you are still in the first year, which is a place and not
+  a length of time. People have stopped bringing food. The calendar is full of
+  days that no one told you how to get through.
+tone: dark
+category: grief
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { flag: lost_a_child }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  child: { kind: child, presence: anywhere, deceased: true }
+  helper: { support: true, optional: true, age: { min: 18, max: 120 }, presence: nearby }
+choices:
+  - id: lean
+    label: Let {helper.name} in
+    visibleIf: { role: helper }
+    outcome:
+      text: >-
+        {helper.name} does not say anything wise. {helper.They}
+        {helper:shows|show} up, and sits, and says {child.name}'s name when
+        nobody else will. It matters more than anything else anyone has done.
+      effects:
+        - { type: memory, role: helper, tag: stood_by_you }
+        - { type: relationship, role: helper, affection: 6, trust: 8 }
+        - { type: stat, key: stress, delta: -8 }
+        - { type: stat, key: happiness, delta: 5 }
+  - id: work
+    label: Bury yourself in work
+    outcome:
+      text: >-
+        Work is a place where nobody says the name. You are there early, and
+        late, and nobody has the heart to tell you to go home.
+      effects:
+        - { type: stat, key: stress, delta: 5 }
+        - { type: stat, key: health, delta: -2 }
+        - { type: innerConflict, delta: 5 }
+  - id: counselor
+    label: Find someone who knows how to help with this
+    outcome:
+      text: >-
+        The counselor has a quiet room and a lot of patience. The first month,
+        you say almost nothing. The second, you say {child.name}'s name,
+        and cannot stop.
+      effects:
+        - { type: stat, key: happiness, delta: 4 }
+        - { type: stat, key: stress, delta: -6 }
+        - { type: innerConflict, delta: -5 }

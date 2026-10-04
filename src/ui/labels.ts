@@ -28,6 +28,7 @@ import type {
   RecordRow,
   SchoolLine,
 } from '../engine/selectors';
+import type { StyleLevel } from '../engine/family/parenting';
 import type { FamilyWealth, GenderCategory, JobEnd, LifeStage, Personality, RecordOutcome, RelationshipKind, Stats } from '../engine/types';
 
 export const STAT_LABELS: Record<keyof Stats, string> = {
@@ -78,6 +79,8 @@ const RELATIONSHIP_LABELS: Record<RelationshipKind, Record<GenderCategory, strin
   stepparent: { woman: 'Stepmother', man: 'Stepfather', nonbinary: 'Stepparent' },
   grandparent: { woman: 'Grandmother', man: 'Grandfather', nonbinary: 'Grandparent' },
   sibling: { woman: 'Sister', man: 'Brother', nonbinary: 'Sibling' },
+  child: { woman: 'Daughter', man: 'Son', nonbinary: 'Child' },
+  stepchild: { woman: 'Stepdaughter', man: 'Stepson', nonbinary: 'Stepchild' },
   partner: { woman: 'Girlfriend', man: 'Boyfriend', nonbinary: 'Partner' },
   fiance: { woman: 'Fiancée', man: 'Fiancé', nonbinary: 'Fiancé' },
   spouse: { woman: 'Wife', man: 'Husband', nonbinary: 'Spouse' },
@@ -109,6 +112,7 @@ export function personLine(row: PersonRow): string {
 
 export const PEOPLE_GROUP_LABELS: Record<PeopleGroupId, string> = {
   family: 'Family',
+  children: 'Children',
   romance: 'Love',
   friends: 'Friends',
   work: 'Work',
@@ -117,6 +121,7 @@ export const PEOPLE_GROUP_LABELS: Record<PeopleGroupId, string> = {
 /** Shown when a group has nobody in it. */
 export const PEOPLE_GROUP_EMPTY: Record<PeopleGroupId, string> = {
   family: 'No family.',
+  children: 'No children.',
   romance: 'No one right now.',
   friends: 'No friends yet.',
   work: 'No one from work yet.',
@@ -139,6 +144,7 @@ export const ACTION_LABELS: Record<ActionId, string> = {
   divorce: 'Divorce',
   cut_contact: 'Cut contact',
   reconcile: 'Try to reconcile',
+  try_for_baby: 'Try for a baby',
 };
 
 /** Copy for the confirmation sheet of an action that can't be undone. */
@@ -286,6 +292,9 @@ export const LEDGER_LABELS = {
   tax: 'Taxes',
   housing: 'Housing',
   living: 'Living costs',
+  children: 'Your children',
+  supportPaid: 'Child support you paid',
+  supportReceived: 'Child support you received',
   debtPayments: 'Debt payments',
   interest: 'Interest earned',
   net: 'Left over',
@@ -593,6 +602,7 @@ export const INTERACTION_GROUP_LABELS: Record<InteractionGroup, string> = {
   conflict: 'Conflict',
   romance: 'Romance',
   practical: 'Practical',
+  parenting: 'Parenting',
 };
 
 export const GIFT_TIER_LABELS: Record<GiftTier, string> = {
@@ -644,3 +654,88 @@ export const OUTCOME_TIER_LABELS: Record<OutcomeTier, string> = {
   bad: 'It went badly',
   backfire: 'It backfired',
 };
+
+// E2a: children and parenting.
+
+/** Where a child lives, in words. */
+export const CUSTODY_LABELS: Record<'you' | 'shared' | 'other', string> = {
+  you: 'Lives with you',
+  shared: 'Shared custody',
+  other: 'Lives with their other parent',
+};
+
+export const ORIGIN_LABELS: Record<'birth' | 'adopted' | 'ivf' | 'surrogacy' | 'step', string> = {
+  birth: 'Your child',
+  adopted: 'Adopted',
+  ivf: 'Your child, through IVF',
+  surrogacy: 'Your child, through surrogacy',
+  step: 'Stepchild',
+};
+
+/**
+ * Your parenting style with a child in words: "You've been warm but strict,
+ * and involved." Lines in between say nothing; an even style says so.
+ */
+export function parentingStyleLine(style: { warmth: StyleLevel; strictness: StyleLevel; involvement: StyleLevel }): string {
+  const warm = style.warmth === 'high' ? 'warm' : style.warmth === 'low' ? 'cold' : null;
+  const strict = style.strictness === 'high' ? 'strict' : style.strictness === 'low' ? 'relaxed' : null;
+  const involved = style.involvement === 'high' ? 'involved' : style.involvement === 'low' ? 'hands-off' : null;
+  const first = [warm, strict].filter((w): w is string => w !== null);
+  if (first.length === 0 && involved === null) return 'You’ve been an even-handed parent so far.';
+  const lead = first.length === 2 ? `${first[0]} but ${first[1]}` : (first[0] ?? null);
+  const tail = involved === null ? '' : lead === null ? involved : `, and ${involved}`;
+  return `You’ve been ${lead ?? ''}${tail}.`;
+}
+
+/** A child's grades in words. */
+export function gradesPhrase(gpa: number): string {
+  if (gpa >= 3.5) return 'Top of the class';
+  if (gpa >= 3) return 'Doing well in school';
+  if (gpa >= 2.3) return 'Getting by in school';
+  if (gpa >= 1.5) return 'Struggling at school';
+  return 'Failing at school';
+}
+
+/** A 0–100 value as a short word. */
+export function levelWord(value: number, words: [string, string, string, string]): string {
+  return value >= 75 ? words[0] : value >= 50 ? words[1] : value >= 30 ? words[2] : words[3];
+}
+
+export const PROCESS_LABELS: Record<'adoption' | 'ivf' | 'surrogacy', { name: string; blurb: string; confirm: string }> = {
+  adoption: { name: 'Adopt a child', blurb: 'Apply through an agency. There is a home visit and a wait.', confirm: 'Apply to adopt' },
+  ivf: { name: 'IVF', blurb: 'A clinic helps with a pregnancy. Each cycle can work, or not.', confirm: 'Start a cycle' },
+  surrogacy: { name: 'Surrogacy', blurb: 'Someone carries a baby for you. It costs a lot and takes time.', confirm: 'Begin surrogacy' },
+};
+
+/** Why you can't start a process now, in words. */
+export const PROCESS_BLOCK_LABELS: Record<'busy' | 'prison' | 'age' | 'record' | 'money' | 'housing' | 'carrier', string> = {
+  busy: 'A pregnancy or another process is already under way.',
+  prison: 'Not from prison.',
+  age: 'Your age (or your partner’s) doesn’t fit what this allows.',
+  record: 'A recent conviction rules this out for now.',
+  money: 'You don’t have enough saved.',
+  housing: 'You need a stable home first.',
+  carrier: 'Neither of you can carry a pregnancy.',
+};
+
+/** The odds of something working, in words (never a number). */
+export function oddsWords(chance: number): string {
+  if (chance >= 0.65) return 'good odds';
+  if (chance >= 0.4) return 'about even odds';
+  if (chance >= 0.2) return 'long odds';
+  return 'very long odds';
+}
+
+/** How long a wait is, in words. */
+export function waitWords(wait: { min: number; max: number }): string {
+  const years = (n: number) => (n === 1 ? '1 year' : `${n} years`);
+  return wait.min === wait.max ? `about ${years(wait.min)}` : `${wait.min} to ${wait.max} years`;
+}
+
+/** The Home screen's line about a pregnancy. */
+export function pregnancyLine(p: { carrier: 'you' | 'surrogate' | { name: string }; plan: 'keep' | 'adoption' | 'pending'; dueYear: number }, year: number): string {
+  const when = p.dueYear <= year ? 'any day now' : 'due next year';
+  const who = p.carrier === 'you' ? 'You’re expecting' : p.carrier === 'surrogate' ? 'Your surrogate is expecting your baby' : `${p.carrier.name} is expecting`;
+  const plan = p.plan === 'adoption' ? ', and the baby will be placed for adoption' : '';
+  return `${who}${plan}: ${when}.`;
+}

@@ -155,6 +155,25 @@ function IdentityStep({ draft, update, errors }: StepProps) {
         onChange={(attractedTo) => update({ attractedTo })}
       />
       <p className="-mt-3 text-sm text-muted">Choose none if you’re not attracted to anyone. Who you are can change over a lifetime.</p>
+
+      {draft.genderCategory === 'nonbinary' && (
+        <>
+          <SingleChoice<'yes' | 'no'>
+            label="Can you carry a pregnancy?"
+            value={draft.canCarry === null ? null : draft.canCarry ? 'yes' : 'no'}
+            columns={2}
+            error={errors.canCarry}
+            choices={[
+              { value: 'yes', label: 'Yes' },
+              { value: 'no', label: 'No' },
+            ]}
+            onChange={(v) => update({ canCarry: v === 'yes' })}
+          />
+          <p className="-mt-3 text-sm text-muted">
+            This only decides who in a couple could be pregnant. Women can, men can’t, and nonbinary characters choose.
+          </p>
+        </>
+      )}
     </div>
   );
 }
@@ -254,6 +273,7 @@ function ReviewStep({ draft }: StepProps) {
     ['Name', `${draft.first} ${draft.last}`],
     ['Identity', `${draft.genderIdentity} · ${draft.genderExpression}`],
     ['Pronouns', `${pronouns.subject}/${pronouns.object}/${pronouns.possessivePronoun}`],
+    ...(draft.genderCategory === 'nonbinary' ? ([['Can carry a pregnancy', draft.canCarry ? 'Yes' : 'No']] as [string, string][]) : []),
     ['Attracted to', draft.attractedTo.length ? draft.attractedTo.map((c) => ATTRACTION_LABELS[c]).join(', ') : 'No one'],
     ['Family', `${draft.parents === 1 ? 'One parent' : 'Two parents'}, ${draft.siblings === 0 ? 'no' : draft.siblings} older sibling${draft.siblings === 1 ? '' : 's'}`],
     ['Wealth', draft.familyWealth ? WEALTH_LABELS[draft.familyWealth] : ''],
@@ -288,6 +308,7 @@ const ERROR_PATHS: Record<keyof Draft, string> = {
   pronounChoice: 'identity.pronouns',
   customPronouns: 'identity.pronouns',
   attractedTo: 'identity.attractedTo',
+  canCarry: 'canCarry',
   parents: 'family.parents',
   siblings: 'family.siblings',
   familyWealth: 'familyWealth',

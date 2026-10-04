@@ -1,0 +1,50 @@
+id: teen_grades_slip
+title: The report card
+text: >-
+  {kid.name} slides the report card across the table without looking up. It is
+  not the usual shape. The numbers have fallen, and so, you think, has something
+  else.
+tone: serious
+category: parenting
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { family: { minors: { gte: 1 } } }
+    - { role: kid, gpa: { gt: 0, lt: 2.3 } }
+weight: { base: 8 }
+cooldownYears: 3
+cast:
+  kid: { kind: child, presence: household, age: { min: 13, max: 17 } }
+choices:
+  - id: ask
+    label: Ask what is going on, and mean the question
+    outcome:
+      text: >-
+        It takes ten minutes of silence. Then it comes out: it is not the
+        classes, it is everything around them. You listen. You do not fix it,
+        but you stay.
+      effects:
+        - { type: parenting, role: kid, warmth: 4, involvement: 4 }
+        - { type: relationship, role: kid, trust: 6 }
+        - { type: memory, role: kid, tag: parent_listened }
+  - id: tutor
+    label: Set up a study plan with firm rules
+    outcome:
+      text: >-
+        Two hours every evening, phone in the drawer. {kid.name} complies
+        with the quiet fury of a prisoner. The grades start to climb.
+      effects:
+        - { type: parenting, role: kid, strictness: 5, involvement: 3 }
+        - { type: childStat, role: kid, key: smarts, delta: 1 }
+        - { type: childStat, role: kid, key: stress, delta: 3 }
+  - id: leave
+    label: "Leave it to {kid.them}, it is {kid.their} life"
+    outcome:
+      text: >-
+        You say you trust {kid.them} to figure it out. {kid.name} nods, with
+        something that is half relief and half hurt.
+      effects:
+        - { type: parenting, role: kid, strictness: -4, involvement: -3 }
+        - { type: memory, role: kid, tag: parent_let_them_choose }

@@ -5,9 +5,10 @@
  * follow-up event that finds you out. Gifts, fights, health risks and
  * charges use the finance, health and legal modules through the effects.
  */
-import type { ContentBundle, GiftTier } from '../../content/schemas';
+import type { ContentBundle, FamilyChanceKey, GiftTier, InteractionChanceKey } from '../../content/schemas';
 import { fittingResults } from '../actions/result';
 import { addDebt, earn, isIndependent, wholeDollars } from '../finance';
+import { conceiveChance } from '../family/carrying';
 import { weightedPick } from '../random';
 import { currentPartner, isPartnerKind } from '../relationships';
 import { chance, nextInt, type RngState } from '../rng';
@@ -88,4 +89,15 @@ export function giftPrice(state: LifeState, tier: GiftTier, content: ContentBund
 export function canAffordGift(state: LifeState, tier: GiftTier, content: ContentBundle): boolean {
   const reach = state.finances.savings + (isIndependent(state, content) ? content.balance.interactions.gifts.maxBorrow : 0);
   return giftPrice(state, tier, content) <= reach;
+}
+
+/**
+ * The chance behind a named chance in an interaction's extras: a number in
+ * balance/interactions.yaml, or (E2a) a pregnancy chance the family rules work
+ * out for this person (0 when no pregnancy is possible with them).
+ */
+export function extraChance(state: LifeState, key: InteractionChanceKey | FamilyChanceKey, personId: Id, content: ContentBundle): number {
+  if (key === 'conceiveCareful') return conceiveChance(state, personId, 'careful', content);
+  if (key === 'conceiveCarefree') return conceiveChance(state, personId, 'carefree', content);
+  return content.balance.interactions.chances[key];
 }

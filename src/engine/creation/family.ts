@@ -16,6 +16,7 @@ import { chance, nextFloat, nextInt, pick, type RngState } from '../rng';
 import { rollInRange, rollScore, weightedPick } from '../random';
 import { npcDeathChance } from '../systems/mortality';
 import type { FamilyWealth, Id, Person, Relationship } from '../types';
+import { rollCanCarry } from '../family/carrying';
 import { rollGenderCategory, rollIdentity, rollRelativeTraits } from './character';
 
 export interface FamilyRequest {
@@ -147,6 +148,7 @@ export function generateFamily(rng: RngState, content: ContentBundle, request: F
       mood: 50,
       moodBase: 50,
       wealthLevel: request.familyWealth,
+      canCarry: rollCanCarry(rng, category, content),
     };
     const scores = {
       parent: [family.parentAffection, family.parentTrust],

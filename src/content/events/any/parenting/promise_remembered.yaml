@@ -1,0 +1,50 @@
+id: promise_remembered
+title: You said
+text: >-
+  "You said," {kid.name} begins, and you already know how the sentence ends.
+  It was a small promise, and it was months ago, and {kid.they}
+  {kid:has|have} remembered every word.
+tone: serious
+category: parenting
+rarity: uncommon
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { family: { minors: { gte: 1 } } }
+    - { memory: { role: kid, tag: parent_broke_a_promise } }
+weight: { base: 8 }
+cooldownYears: 5
+cast:
+  kid: { kind: child, presence: household, age: { min: 6, max: 17 } }
+choices:
+  - id: sorry
+    label: Say sorry, and make it right
+    outcome:
+      text: >-
+        You do not make excuses. You clear a whole Saturday and do what you said
+        you would. {kid.name} does not say it is okay, but {kid.they}
+        {kid:comes|come} along.
+      effects:
+        - { type: parenting, role: kid, warmth: 4, involvement: 5 }
+        - { type: relationship, role: kid, affection: 6, trust: 8 }
+        - { type: memory, role: kid, tag: parent_kept_a_promise }
+  - id: explain
+    label: Explain why it happened
+    outcome:
+      text: >-
+        You have reasons, and good ones. {kid.name} listens to all of them, and
+        says that they are still reasons, not a Saturday.
+      effects:
+        - { type: relationship, role: kid, trust: -3 }
+        - { type: parenting, role: kid, involvement: -1 }
+  - id: brush
+    label: Say you do not remember saying it
+    outcome:
+      text: >-
+        {kid.name} looks at you for a long moment, and then, politely,
+        stops asking you for anything.
+      effects:
+        - { type: parenting, role: kid, warmth: -5, involvement: -5 }
+        - { type: relationship, role: kid, affection: -6, trust: -9 }
+        - { type: memory, role: kid, tag: parent_made_light_of_it }

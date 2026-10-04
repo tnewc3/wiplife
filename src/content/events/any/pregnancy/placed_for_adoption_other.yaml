@@ -1,0 +1,44 @@
+# Registry: birth.placedOther. Someone else carried the baby and placed them
+# for adoption.
+id: placed_for_adoption_other
+title: A decision kept
+text: >-
+  {carrier.name} calls. The baby is born, and the plan holds: a family is
+  waiting, and {carrier.they} {carrier:is|are} going through with it. You are
+  asked whether you want to see the baby first.
+tone: dark
+category: pregnancy
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires: { age: { gte: 18 } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  carrier: { kind: friend, presence: anywhere }
+choices:
+  - id: see
+    label: See the baby once
+    outcome:
+      text: >-
+        You hold the baby for a minute, and then give the baby back. It is
+        the shortest, longest minute you have lived.
+      effects:
+        - { type: flag, key: placed_baby_for_adoption, value: true }
+        - { type: relationship, role: carrier, trust: 4, mood: -4 }
+        - { type: stat, key: happiness, delta: -8 }
+        - { type: stat, key: stress, delta: 8 }
+        - { type: history, text: 'A baby you conceived with {carrier.name} was placed for adoption.', importance: 3 }
+        - { type: schedule, eventId: after_placing_adoption, inYears: [1, 2] }
+  - id: wait
+    label: Stay away
+    outcome:
+      text: >-
+        It is easier not to. You tell yourself so, and {carrier.name} does not
+        argue.
+      effects:
+        - { type: flag, key: placed_baby_for_adoption, value: true }
+        - { type: relationship, role: carrier, mood: -3 }
+        - { type: stat, key: happiness, delta: -5 }
+        - { type: stat, key: stress, delta: 5 }
+        - { type: history, text: 'A baby you conceived with {carrier.name} was placed for adoption.', importance: 3 }
+        - { type: schedule, eventId: after_placing_adoption, inYears: [1, 2] }

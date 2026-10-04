@@ -1,0 +1,59 @@
+id: discipline
+name: Set a limit
+blurb: Rules, consequences, a firm no.
+group: parenting
+profile: firm
+inPerson: true
+availability:
+  kinds: [child, stepchild]
+  you: { min: 18 }
+  them: { min: 3, max: 17 }
+outcomes:
+  great:
+    text:
+      - "You say no, calmly, and mean it. {person.name} grumbles, then hands over the tablet without a fight."
+      - "{person.name} argues, then stops, then admits {person.they} {person:was|were} wrong. You both go to dinner."
+    affection: 1
+    trust: 3
+    mood: 2
+    effects:
+      - { type: parenting, role: person, strictness: 6, warmth: 1 }
+      - { type: childTrait, role: person, key: discipline, delta: 1 }
+  good:
+    text:
+      - "{person.name} sulks in the bedroom for an hour, and comes out knowing where the line is."
+      - "The consequence is clear and fair, and {person.name} takes it. It is not fun for either of you."
+    affection: -1
+    trust: 1
+    mood: -2
+    effects:
+      - { type: parenting, role: person, strictness: 5 }
+  neutral:
+    text:
+      - "You set the rule. {person.name} rolls {person.their} eyes, and you both suspect it will come up again."
+      - "{person.name} negotiates the rule down by half. You let it stand."
+    affection: 0
+    mood: -1
+    effects:
+      - { type: parenting, role: person, strictness: 3 }
+  bad:
+    text:
+      - "{person.name} slams the door. The rule stands. So does the silence."
+      - "You make the rule too big for the offence, and {person.name} knows it."
+    affection: -3
+    trust: -2
+    mood: -6
+    effects:
+      - { type: parenting, role: person, strictness: 4, warmth: -3 }
+      - { type: childStat, role: person, key: stress, delta: 2 }
+  backfire:
+    text:
+      - "It turns into a shouting match you will both remember. {person.name} says something that lands hard, and so do you."
+      - "You lose your temper, and {person.name} goes very still, the way kids do when they are being careful around you."
+    affection: -6
+    trust: -5
+    mood: -10
+    effects:
+      - { type: parenting, role: person, strictness: 4, warmth: -6 }
+      - { type: memory, role: person, tag: parent_lost_temper }
+      - { type: childStat, role: person, key: stress, delta: 4 }

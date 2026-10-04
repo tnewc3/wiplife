@@ -10,6 +10,7 @@
  */
 import type { CityDef, ContentBundle, HousingKind, Lifestyle } from '../content/schemas';
 import { addDebt, amortizedPayment, borrow, isIndependent, wholeDollars } from './finance';
+import { relocateChildren } from './family/household';
 import { countedRecord } from './record';
 import { isCurrentPartner } from './relationships';
 import { writeFromGroup } from './systems/history';
@@ -140,6 +141,8 @@ export function moveTo(state: LifeState, kind: Exclude<HousingKind, 'owned'>, ci
   state.finances.hardshipYears = 0;
   state.housing = { kind, cityId, annualCost: 0, since: state.currentYear };
   if (partnerId !== undefined) livingTogether(state, partnerId);
+  // E2a: children who live with you come along.
+  relocateChildren(state);
   refreshHousingCost(state, content);
 }
 

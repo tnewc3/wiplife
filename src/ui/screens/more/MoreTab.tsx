@@ -8,6 +8,7 @@ export function MoreTab() {
   const openLifeHistory = useAppStore((s) => s.openLifeHistory);
   const openHome = useAppStore((s) => s.openHome);
   const openHealth = useAppStore((s) => s.openHealth);
+  const openFamily = useAppStore((s) => s.openFamily);
   return (
     <div className="flex flex-col gap-2">
       <Button variant="secondary" block onClick={openHome}>
@@ -15,6 +16,9 @@ export function MoreTab() {
       </Button>
       <Button variant="secondary" block onClick={openHealth}>
         Health
+      </Button>
+      <Button variant="secondary" block onClick={openFamily}>
+        Family
       </Button>
       <Button variant="secondary" block onClick={openLifeHistory}>
         Life history

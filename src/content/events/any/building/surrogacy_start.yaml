@@ -1,0 +1,33 @@
+# Registry: surrogacy.start. Answers More → Family → Surrogacy.
+id: surrogacy_start
+title: The agency's list
+text: >-
+  The surrogacy agency has a long first meeting. There are contracts,
+  counselling, medical screening, and a careful process for matching you with
+  someone you will come to know very well. It is a lot of trust, put on paper.
+tone: neutral
+category: building
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires: { age: { gte: 18 } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  other: { kind: spouse, presence: anywhere, optional: true }
+choices:
+  - id: begin
+    label: Sign on and pay the agency
+    outcome:
+      text: >-
+        The agency's fee is only the first part. You sign, and the matching
+        begins. A year from now, it will have an answer.
+      effects:
+        - { type: cost, item: surrogacy_agency }
+        - { type: process, action: start, process: surrogacy }
+        - { type: history, text: 'You began the process of having a child through surrogacy.', importance: 2 }
+  - id: back
+    label: Think about it longer
+    outcome:
+      text: >-
+        You take the contracts home. They will be there when you are ready, and
+        so, the agency says, will they.

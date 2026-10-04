@@ -138,6 +138,37 @@ export const migrations: readonly Migration[] = [
       return { ...data, people, pendingInteraction: null };
     },
   },
+  {
+    from: 10,
+    description:
+      'E2a: children and parenting. Everyone gets the ability to carry a pregnancy from their gender category (women ' +
+      'can, men can\'t; nonbinary people by a fixed rule, since nothing recorded a choice: they can when the number ' +
+      'in their id is even, and you can if you are nonbinary only when the last digit of the life\'s year of birth is ' +
+      'even). The life gets an empty family record. A saved ledger gets zero child costs and support. Children, ' +
+      'parenting styles and prior children are optional fields: nobody had any before.',
+    migrate: (data) => {
+      if (!isRecord(data)) return data;
+      const carries = (category: unknown, seed: number) => (category === 'woman' ? true : category === 'man' ? false : seed % 2 === 0);
+      const birthYear = typeof data.birthYear === 'number' ? data.birthYear : 0;
+      const character = isRecord(data.character)
+        ? { ...data.character, canCarry: carries(isRecord(data.character.identity) ? data.character.identity.genderCategory : undefined, birthYear) }
+        : data.character;
+      const people: Record<string, unknown> = {};
+      if (isRecord(data.people)) {
+        for (const [id, value] of Object.entries(data.people)) {
+          const category = isRecord(value) && isRecord(value.identity) ? value.identity.genderCategory : undefined;
+          const n = Number(id.replace(/\D/g, '')) || 0;
+          people[id] = isRecord(value) ? { ...value, canCarry: carries(category, n) } : value;
+        }
+      }
+      let finances = data.finances;
+      if (isRecord(finances) && isRecord(finances.lastLedger)) {
+        finances = { ...finances, lastLedger: { ...finances.lastLedger, children: 0, supportPaid: 0, supportReceived: 0 } };
+      }
+      const family = { pregnancy: null, process: null, support: null, attempts: 0, lostChildren: 0, miscarriages: 0 };
+      return { ...data, character, people, finances, family };
+    },
+  },
 ];
 
 function isRecord(value: unknown): value is Record<string, unknown> {

@@ -1,0 +1,29 @@
+# Registry: adoption.match. A child comes to you.
+id: adoption_match
+title: A child for you
+text: >-
+  The caseworker calls on a Tuesday. There is a match: {child.name}. There is a
+  photo, a file, and a first meeting set for tomorrow. You read the file three
+  times, and then stop, because the real thing is about to begin.
+tone: light
+category: building
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires: { age: { gte: 18 } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  child: { kind: child, presence: anywhere }
+autoOutcome:
+  text: >-
+    {child.name} comes home with a small bag and a very careful way of
+    looking around. The placement fee is the last of the paperwork. After that,
+    a whole life of beginnings.
+  effects:
+    - { type: cost, item: adoption_placement }
+    - { type: flag, key: adopted_a_child, value: true }
+    - { type: stat, key: happiness, delta: 10 }
+    - { type: stat, key: stress, delta: 6 }
+    - { type: parenting, role: child, warmth: 4, involvement: 6 }
+    - { type: history, text: 'You adopted {child.name}.', importance: 3 }
+    - { type: schedule, eventId: adoption_first_year, inYears: [1, 1], cast: [child] }

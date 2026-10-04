@@ -1,0 +1,30 @@
+# Registry: childDeath.adult. Rare, and never casual: it starts a grief chain
+# (after_child_death_*), leaves its mark on the history and the obituary, and
+# is told without anything graphic.
+id: child_dies_adult
+title: Out of order
+text: >-
+  The call comes while you are doing something ordinary. {child.name} is gone, and the order of things has been broken. A parent is not supposed to be the one who is left. You sit down on the kitchen floor, and stay there.
+tone: dark
+category: grief
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires: { age: { gte: 18 } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  # Passed in by the engine: your child, who has died.
+  child: { kind: child, presence: anywhere, deceased: true }
+autoOutcome:
+  text: >-
+    You make arrangements you never imagined making. People say that {child.they} {child:lived|live} a good life, and you want to scream, and instead you thank them. A child should outlive a parent. Everything you know tells you so.
+  effects:
+    - { type: flag, key: lost_a_child, value: true }
+    - { type: stat, key: happiness, delta: -30 }
+    - { type: stat, key: stress, delta: 25 }
+    - { type: stat, key: health, delta: -5 }
+    - { type: history, text: 'You lost your child, {child.name}.', importance: 3 }
+    - { type: schedule, eventId: after_child_death_numb, inYears: [1, 1], cast: [child] }
+    - { type: schedule, eventId: after_child_death_together, inYears: [1, 2] }
+    - { type: schedule, eventId: after_child_death_sibling, inYears: [1, 2], cast: [child] }
+    - { type: schedule, eventId: after_child_death_milestone, inYears: [4, 7], cast: [child] }

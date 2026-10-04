@@ -1,0 +1,40 @@
+id: grown_child_offers_help
+title: The envelope
+text: >-
+  {kid.name} comes by with a casserole you did not ask for and an envelope
+  you did not expect. {kid.They} {kid:has|have} noticed that things are tight,
+  and is not going to discuss it.
+tone: light
+category: grownkids
+rarity: uncommon
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { family: { children: { gte: 1 } } }
+    - { money: { lt: 3000 } }
+    - { role: kid, affection: { gte: 55 } }
+weight: { base: 6 }
+cooldownYears: 5
+cast:
+  kid: { kind: child, presence: nearby, age: { min: 21, max: 60 } }
+choices:
+  - id: accept
+    label: Accept it with thanks
+    outcome:
+      text: >-
+        You take it, and it is hard, and you say thank you anyway. {kid.name}
+        hugs you for a long time on the porch.
+      effects:
+        - { type: money, delta: 400 }
+        - { type: relationship, role: kid, affection: 5, trust: 5 }
+        - { type: stat, key: stress, delta: -4 }
+  - id: refuse
+    label: Refuse, gently, and keep the casserole
+    outcome:
+      text: >-
+        You push the envelope back, and {kid.name} pushes it forward, and you
+        reach a compromise involving dinner twice a month.
+      effects:
+        - { type: relationship, role: kid, affection: 4, trust: 3 }
+        - { type: stat, key: happiness, delta: 2 }

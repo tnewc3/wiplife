@@ -1,0 +1,48 @@
+# Trying for a baby without success.
+id: fertility_struggles
+title: Month after month
+text: >-
+  Another test, another single line. You and {spouse.name} have been trying
+  for a while now, and the hope has worn down into something quieter and
+  more careful.
+tone: serious
+category: building
+rarity: uncommon
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 24 } }
+    - { romance: [married] }
+    - { family: { pregnant: false, attempts: { gte: 3 }, process: [none] } }
+weight: { base: 6 }
+cooldownYears: 4
+cast:
+  spouse: { kind: spouse, presence: household }
+choices:
+  - id: talk
+    label: Sit down and talk about what to do next
+    outcome:
+      text: >-
+        You lay it out: more time, a doctor's help, other roads to a family.
+        {spouse.name} has thought about all of them too. You do not decide
+        anything tonight, but you decide it together.
+      effects:
+        - { type: relationship, role: spouse, affection: 5, trust: 6 }
+        - { type: stat, key: stress, delta: -3 }
+  - id: keep_trying
+    label: Keep trying, and stop talking about it
+    outcome:
+      text: >-
+        You make a pact not to mention the calendar. It lasts a week.
+      effects:
+        - { type: stat, key: stress, delta: 4 }
+        - { type: relationship, role: spouse, mood: -3 }
+  - id: let_go
+    label: Let the idea of it go, for now
+    outcome:
+      text: >-
+        It hurts to say, and then it lifts a little. You and {spouse.name} make
+        plans that are only about the two of you, and find that they are good ones.
+      effects:
+        - { type: relationship, role: spouse, affection: 3, trust: 3 }
+        - { type: stat, key: happiness, delta: -2 }

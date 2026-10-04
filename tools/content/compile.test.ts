@@ -790,7 +790,7 @@ choices:
       await mkdir(path.join(overlay, 'registries'), { recursive: true });
       await writeFile(
         path.join(overlay, 'registries/actions.yaml'),
-        `actions:\n${['ask_out', 'propose', 'move_in', 'marry', 'break_up', 'divorce', 'cut_contact', 'reconcile'].map((a) => `  ${a}: { events: [only_action] }`).join('\n')}\n`,
+        `actions:\n${['ask_out', 'propose', 'move_in', 'marry', 'break_up', 'divorce', 'cut_contact', 'reconcile', 'try_for_baby'].map((a) => `  ${a}: { events: [only_action] }`).join('\n')}\n`,
       );
       await writeFile(
         path.join(overlay, 'registries/triggers.yaml'),
@@ -870,7 +870,7 @@ describe('interactions (E1)', () => {
     if (!real.ok) throw new Error(formatErrors(real.errors));
     const defs = Object.values(real.bundle.interactions);
     expect(defs.length).toBeGreaterThanOrEqual(19);
-    expect(defs.length).toBeLessThanOrEqual(24);
+    expect(defs.length).toBeLessThanOrEqual(32);
     for (const def of defs) {
       for (const tier of Object.values(def.outcomes)) {
         if (!tier) continue;
@@ -964,3 +964,52 @@ describe('interactions (E1)', () => {
   });
 });
 
+
+describe('children and parenting (E2a)', () => {
+  it('accepts the real content', { timeout: 90_000 }, async () => {
+    const result = await compile();
+    if (!result.ok) throw new Error(formatErrors(result.errors));
+    expect(result.bundle.registries.family.decision).toEqual(['unplanned_pregnancy']);
+  });
+
+  it('never allows romance or sexual wording in an event that involves a child', { timeout: 90_000 }, async () => {
+    const real = await readFile(path.join(dir, 'events/any/parenting/kid_recital.yaml'), 'utf8');
+    await write('events/any/parenting/kid_recital.yaml', real.replace('{kid.name} finds you in the crowd', '{kid.name} has a crush, and finds you in the crowd'));
+    expect(await expectErrors()).toContain('involves a child but uses romantic or sexual wording ("crush")');
+    await write('events/any/parenting/kid_recital.yaml', real.replace('  kid: { kind: child, presence: household, age: { min: 5, max: 14 } }', '  kid: { kind: child, presence: household, age: { min: 5, max: 14 } }\n  mate: { kind: partner, presence: nearby, optional: true }'));
+    expect(await expectErrors()).toContain("involves a child, so it can't be a romance event");
+  });
+
+  it('never allows a romance interaction with a child, or romantic wording in one a child can have', { timeout: 90_000 }, async () => {
+    const real = await readFile(path.join(dir, 'interactions/hug.yaml'), 'utf8');
+    await write('interactions/hug.yaml', real.replace('A good, long hug.', 'A good, long kiss.'));
+    expect(await expectErrors()).toContain('is available with a child but uses romantic or sexual wording ("kiss")');
+    const flirt = await readFile(path.join(dir, 'interactions/flirt.yaml'), 'utf8');
+    await write('interactions/flirt.yaml', flirt.replace('kinds: [friend,', 'kinds: [child, friend,'));
+    expect(await expectErrors()).toContain("can't be available with family (child)");
+  });
+
+  it('requires an unplanned pregnancy to offer all three choices', { timeout: 90_000 }, async () => {
+    const real = await readFile(path.join(dir, 'events/any/pregnancy/unplanned_pregnancy.yaml'), 'utf8');
+    await write('events/any/pregnancy/unplanned_pregnancy.yaml', real.replace('choice: end', 'choice: keep'));
+    expect(await expectErrors()).toContain('"end" is missing');
+  });
+
+  it('keeps registry events to the roles the engine passes in, and a child’s death to a deceased role', { timeout: 90_000 }, async () => {
+    const real = await readFile(path.join(dir, 'events/any/pregnancy/birth_you.yaml'), 'utf8');
+    await write('events/any/pregnancy/birth_you.yaml', real.replace('cast:\n  baby:', 'cast:\n  friend: { kind: friend, presence: city }\n  baby:'));
+    expect(await expectErrors()).toContain('its cast can only be');
+    const death = await readFile(path.join(dir, 'events/any/grief/child_dies_young.yaml'), 'utf8');
+    await write('events/any/grief/child_dies_young.yaml', death.replace(', deceased: true', ''));
+    expect(await expectErrors()).toContain('casts the child as a deceased role');
+  });
+
+  it('only lets the right event start each process, and custody effects name an ex', { timeout: 90_000 }, async () => {
+    const real = await readFile(path.join(dir, 'events/any/building/ivf_start.yaml'), 'utf8');
+    await write('events/any/building/ivf_start.yaml', real.replace('process: ivf', 'process: adoption'));
+    expect(await expectErrors()).toContain('only the adoption start event');
+    const custody = await readFile(path.join(dir, 'events/any/custody/custody_hearing.yaml'), 'utf8');
+    await write('events/any/custody/custody_hearing.yaml', custody.replace('other: { kind: ex,', 'other: { kind: friend,'));
+    expect(await expectErrors()).toContain('must be cast as an ex');
+  });
+});

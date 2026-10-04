@@ -62,3 +62,13 @@ export function rollWealth(state: LifeState, kind: RelationshipKindId, age: numb
   const level = levels[kind === 'boss' ? nextInt(rng, Math.floor(top / 2), top) : nextInt(rng, 0, top)]!;
   return { occupation: jobId, wealthLevel: blendWealth(wealthFromSalary(level.salary, content), background, content) };
 }
+
+/**
+ * Your own wealth level (E2a: what your children grow up with): your pay last
+ * year, as the usual brackets read it, blended with your family's background.
+ */
+export function yourWealth(state: LifeState, content: ContentBundle): FamilyWealth {
+  const income = (state.finances.lastLedger?.gross ?? 0) + (state.finances.lastLedger?.retirement ?? 0);
+  if (income <= 0) return state.character.familyWealth;
+  return blendWealth(wealthFromSalary(income, content), state.character.familyWealth, content);
+}

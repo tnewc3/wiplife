@@ -1,0 +1,49 @@
+# Follow-up of adoption_match: the first stretch together.
+id: adoption_first_year
+title: Learning each other
+text: >-
+  It was {since}, and {child.name} is still learning your house and its rules,
+  and you are learning {child.their}. There are good days and days when
+  {child.they} {child:keeps|keep} a careful distance, and you are not sure
+  which you are meant to take personally.
+tone: neutral
+category: building
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { role: child, alive: true }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  child: { kind: child, presence: anywhere }
+choices:
+  - id: space
+    label: Give {child.name} time and room
+    outcome:
+      text: >-
+        You stop pushing, and one afternoon {child.name} sits down next to you
+        on the couch without saying why. You do not say anything either.
+      effects:
+        - { type: parenting, role: child, warmth: 4, strictness: -2 }
+        - { type: relationship, role: child, affection: 6, trust: 6 }
+  - id: routine
+    label: Keep a steady, firm routine
+    outcome:
+      text: >-
+        Dinner at six, bed at eight, the same song every night. It is
+        boring, and it is the thing {child.name} seems to need most.
+      effects:
+        - { type: parenting, role: child, strictness: 4, involvement: 3 }
+        - { type: relationship, role: child, trust: 8 }
+  - id: share
+    label: Tell {child.name} about your own life
+    outcome:
+      text: >-
+        You tell {child.name} about your first day in a new place. {child.They}
+        {child:listens|listen} very hard, and asks three questions you did not see coming.
+      effects:
+        - { type: parenting, role: child, warmth: 3, involvement: 3 }
+        - { type: relationship, role: child, affection: 5, trust: 4 }
+        - { type: memory, role: child, tag: parent_listened }

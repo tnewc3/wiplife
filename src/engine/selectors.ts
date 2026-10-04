@@ -53,6 +53,8 @@ import { costToYou, familyHelp, rentMonthsAmount } from './costs';
 import { availableInteractions } from './interactions/availability';
 import { moodView, type MoodView } from './interactions/mood';
 export { getInteractionMenu, getInteractionOutcome } from './interactions/views';
+export { getChildView, getFamilyView, type ChildView, type FamilyOptionView, type FamilyView, type PregnancyView } from './family/views';
+import { getChildView, type ChildView } from './family/views';
 export type { InteractionMenuGroup, InteractionMenuItem, InteractionOutcomeView } from './interactions/views';
 export type { MoodBand, MoodView } from './interactions/mood';
 import { consistencyProblems, whereabouts } from './presence';
@@ -116,6 +118,8 @@ const FAMILY_ORDER: Partial<Record<Relationship['kind'], number>> = {
   stepparent: 1,
   grandparent: 2,
   sibling: 3,
+  child: 4,
+  stepchild: 5,
 };
 
 /** Your spouses, current and late (not exes), longest married first. */
@@ -437,8 +441,8 @@ export function getApplicationOptions(state: LifeState, content: ContentBundle):
 
 
 /** Groups on the People screen (docs/design.md, section L). */
-export type PeopleGroupId = 'family' | 'romance' | 'friends' | 'work';
-export const PEOPLE_GROUPS: readonly PeopleGroupId[] = ['family', 'romance', 'friends', 'work'];
+export type PeopleGroupId = 'family' | 'children' | 'romance' | 'friends' | 'work';
+export const PEOPLE_GROUPS: readonly PeopleGroupId[] = ['family', 'children', 'romance', 'friends', 'work'];
 
 export interface PersonRow {
   id: Id;
@@ -460,6 +464,7 @@ export interface PersonRow {
 }
 
 function groupOf(kind: RelationshipKind): PeopleGroupId {
+  if (kind === 'child' || kind === 'stepchild') return 'children';
   if (FAMILY_KINDS.includes(kind)) return 'family';
   if (ROMANTIC_KINDS.includes(kind)) return 'romance';
   if (WORK_KINDS.includes(kind)) return 'work';
@@ -488,6 +493,8 @@ const KIND_ORDER: RelationshipKind[] = [
   'stepparent',
   'grandparent',
   'sibling',
+  'child',
+  'stepchild',
   'spouse',
   'fiance',
   'partner',
@@ -506,7 +513,7 @@ const KIND_ORDER: RelationshipKind[] = [
  * kind, then (family) oldest first or (others) closest first.
  */
 export function getPeople(state: LifeState, content: ContentBundle): Record<PeopleGroupId, PersonRow[]> {
-  const groups: Record<PeopleGroupId, PersonRow[]> = { family: [], romance: [], friends: [], work: [] };
+  const groups: Record<PeopleGroupId, PersonRow[]> = { family: [], children: [], romance: [], friends: [], work: [] };
   for (const id of Object.keys(state.relationships).sort()) {
     const rel = state.relationships[id]!;
     const person = state.people[id];
@@ -521,7 +528,7 @@ export function getPeople(state: LifeState, content: ContentBundle): Record<Peop
       (a, b) =>
         Number(b.alive) - Number(a.alive) ||
         KIND_ORDER.indexOf(a.kind) - KIND_ORDER.indexOf(b.kind) ||
-        (group === 'family' ? birthYear(a) - birthYear(b) : b.affection - a.affection),
+        (group === 'family' || group === 'children' ? birthYear(a) - birthYear(b) : b.affection - a.affection),
     );
   }
   return groups;
@@ -543,6 +550,8 @@ export interface PersonDetail {
   actions: AvailableAction[];
   /** E1: you can interact with them now (the Interact button shows). */
   canInteract: boolean;
+  /** E2a: set for your children and stepchildren. */
+  child: ChildView | null;
 }
 
 /** A memory's readable text for this person (registries/memories.yaml). */
@@ -566,6 +575,7 @@ export function getPersonDetail(state: LifeState, personId: Id, content: Content
     memories,
     actions: availableActions(state, personId, content),
     canInteract: availableInteractions(state, personId, content).length > 0,
+    child: getChildView(state, personId, content),
   };
 }
 

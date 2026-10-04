@@ -1,0 +1,47 @@
+id: kid_lies_homework
+title: "It's done"
+text: >-
+  {kid.name} says the homework is done, in the tone of voice that suggests it
+  is not. You ask to see it. There is a long silence, and then the sound of
+  a backpack being opened very slowly.
+tone: light
+category: parenting
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { family: { minors: { gte: 1 } } }
+weight: { base: 7 }
+cooldownYears: 3
+cast:
+  kid: { kind: child, presence: household, age: { min: 6, max: 12 } }
+choices:
+  - id: calm
+    label: Ask why, and listen to the answer
+    outcome:
+      text: >-
+        It turns out the assignment is about fractions, and {kid.name} was
+        scared of getting it wrong. You work through the first one together.
+      effects:
+        - { type: parenting, role: kid, warmth: 3, involvement: 3 }
+        - { type: relationship, role: kid, trust: 4 }
+        - { type: memory, role: kid, tag: parent_listened }
+  - id: consequence
+    label: Take away the screen until it's finished
+    outcome:
+      text: >-
+        It is finished in forty minutes, and perfectly. Amazing, what a deadline
+        will do. {kid.name} does not speak to you until dinner.
+      effects:
+        - { type: parenting, role: kid, strictness: 4 }
+        - { type: childTrait, role: kid, key: discipline, delta: 1 }
+  - id: laugh
+    label: Laugh, and let it slide
+    outcome:
+      text: >-
+        You cannot help it: the face {kid.name} makes when caught is the best
+        face. The homework is done the next day, mostly. Nobody learns much.
+      effects:
+        - { type: parenting, role: kid, strictness: -4, warmth: 2 }
+        - { type: childTrait, role: kid, key: discipline, delta: -1 }

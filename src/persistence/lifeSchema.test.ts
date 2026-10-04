@@ -284,7 +284,7 @@ describe('lives from Stage 6 on', () => {
   it('round trip a life with debts, a mortgage and a move', async () => {
     let life = produce(lifeAtAge('stage6-round', 30), (d) => {
       d.finances.savings = 500_000;
-      d.finances.lastLedger = { year: d.currentYear, gross: 90_000, retirement: 0, tax: 0, housing: 0, living: 0, debtPayments: 0, interest: 0, debtInterest: 0, borrowed: 0, support: 0, net: 90_000 };
+      d.finances.lastLedger = { year: d.currentYear, gross: 90_000, retirement: 0, tax: 0, housing: 0, living: 0, debtPayments: 0, interest: 0, debtInterest: 0, borrowed: 0, support: 0, children: 0, supportPaid: 0, supportReceived: 0, net: 90_000 };
       d.finances.debts.push({ id: 'd1', kind: 'student', balance: 12_000, annualRate: 0.055, minPayment: 1_600, missed: 1 });
     });
     const other = life.character.cityId === 'nyc' ? 'houston' : 'nyc';
@@ -549,5 +549,75 @@ describe('lives from E1 on', () => {
     expect(schema.safeParse({ ...life, pendingInteraction: { interactionId: 'chat', personId: id, tier: 'amazing', text: 'x', notes: [], changes: { affection: 0, trust: 0, mood: 0 }, annoyed: false } }).success).toBe(false);
     expect(schema.safeParse({ ...life, pendingInteraction: { interactionId: 'nope', personId: id, tier: 'good', text: 'x', notes: [], changes: { affection: 0, trust: 0, mood: 0 }, annoyed: false } }).success).toBe(false);
     expect(schema.safeParse({ ...life, pendingInteraction: { interactionId: 'chat', personId: 'ghost', tier: 'good', text: 'x', notes: [], changes: { affection: 0, trust: 0, mood: 0 }, annoyed: false } }).success).toBe(false);
+  });
+});
+
+describe('lives from E2a on', () => {
+  it('upgrade a schema version 10 life: who can carry follows the gender category, an empty family, and a ledger without children', async () => {
+    const base = lifeAtAge('e2a-migrate', 30);
+    const life = produce(base, (d) => {
+      d.finances.lastLedger = { year: d.currentYear, gross: 40_000, retirement: 0, tax: 3_000, housing: 5_000, living: 12_000, debtPayments: 0, interest: 0, debtInterest: 0, borrowed: 0, support: 0, children: 0, supportPaid: 0, supportReceived: 0, net: 20_000 };
+    });
+    const v10 = JSON.parse(JSON.stringify(life)) as Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any -- stripping fields from plain JSON to build an old save
+    delete v10.family;
+    delete v10.character.canCarry;
+    for (const p of Object.values<Record<string, unknown>>(v10.people)) delete p.canCarry;
+    for (const key of ['children', 'supportPaid', 'supportReceived']) delete v10.finances.lastLedger[key];
+    const db = freshDb();
+    await db.lives.put({ id: 'active', envelope: { ...makeEnvelope(v10, content.contentVersion), schemaVersion: 10 } });
+    const result = await readSave(db, loadedLifeSchema(content));
+    expect(result.status).toBe('ok');
+    if (result.status !== 'ok') return;
+    const upgraded = result.envelope.data;
+    expect(upgraded.family).toEqual({ pregnancy: null, process: null, support: null, attempts: 0, lostChildren: 0, miscarriages: 0 });
+    for (const person of Object.values(upgraded.people)) {
+      if (person.identity.genderCategory === 'woman') expect(person.canCarry).toBe(true);
+      if (person.identity.genderCategory === 'man') expect(person.canCarry).toBe(false);
+    }
+    expect(upgraded.finances.lastLedger).toMatchObject({ children: 0, supportPaid: 0, supportReceived: 0 });
+  });
+
+  it('round trip a pregnancy, a process, children with parenting styles, custody and child support', async () => {
+    const start = lifeAtAge('e2a-round', 34);
+    const life = produce(start, (d) => {
+      const template = JSON.parse(JSON.stringify(Object.values(d.people)[0]!));
+      d.people.x1 = { ...template, id: 'x1', birthYear: d.currentYear - 33, canCarry: true, name: { first: 'Ex', last: 'Test' } };
+      d.relationships.x1 = { personId: 'x1', kind: 'ex', status: 'active', affection: 40, trust: 40, memories: [], since: d.currentYear - 6, kindSince: d.currentYear - 2, wasSpouse: true };
+      d.people.k1 = {
+        ...template,
+        id: 'k1',
+        birthYear: d.currentYear - 6,
+        canCarry: false,
+        name: { first: 'Kid', last: 'Test' },
+        traits: { ambition: 50, confidence: 50, kindness: 55, riskTaking: 40, discipline: 60, sociability: 50 },
+        child: { origin: 'birth', otherParentId: 'x1', custody: 'shared', custodyDecided: true, health: 90, happiness: 70, fitness: 50, stress: 12, geneticRisk: 30, talent: null, gpa: 3.1, latent: {} },
+      };
+      d.relationships.k1 = { personId: 'k1', kind: 'child', status: 'active', affection: 70, trust: 65, memories: [{ tag: 'parent_in_front_row', year: d.currentYear - 1 }], since: d.currentYear - 6, parenting: { warmth: 70, strictness: 40, involvement: 66 } };
+      d.family = { pregnancy: { startYear: d.currentYear, how: 'ivf', carrier: 'you', decision: 'keep' }, process: null, support: null, attempts: 1, lostChildren: 0, miscarriages: 1 };
+      d.character.canCarry = true;
+    });
+    expect(loadedLifeSchema(content).safeParse(life).success).toBe(true);
+    expect(await roundTrip(life)).toEqual(life);
+    const withProcess = produce(life, (d) => {
+      d.family.pregnancy = null;
+      d.family.process = { kind: 'adoption', startYear: d.currentYear, dueYear: d.currentYear + 2, otherParentId: 'x1' };
+      d.family.support = { direction: 'pay', personId: 'x1' };
+    });
+    expect(await roundTrip(withProcess)).toEqual(withProcess);
+  });
+
+  it('rejects a save with a child who has no child data, or a parenting style out of range', () => {
+    const base = lifeAtAge('e2a-bad', 34);
+    const broken = produce(base, (d) => {
+      const template = JSON.parse(JSON.stringify(Object.values(d.people)[0]!));
+      d.people.k1 = { ...template, id: 'k1', birthYear: d.currentYear - 6, name: { first: 'Kid', last: 'Test' } };
+      d.relationships.k1 = { personId: 'k1', kind: 'child', status: 'active', affection: 70, trust: 65, memories: [], since: d.currentYear - 6 };
+    });
+    expect(loadedLifeSchema(content).safeParse(broken).success).toBe(false);
+    const style = produce(base, (d) => {
+      const first = Object.keys(d.relationships)[0]!;
+      d.relationships[first]!.parenting = { warmth: 120, strictness: 50, involvement: 50 };
+    });
+    expect(lifeStateSchema.safeParse(style).success).toBe(false);
   });
 });

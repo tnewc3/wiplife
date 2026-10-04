@@ -125,6 +125,16 @@ moments:
 # Deeds: things the life did (by flag), kept to ones that set a life apart.
 # Values: none.
 deeds:
+  # E2a: children, and what it cost.
+  adopted_a_child: "{self.They} opened {self.their} home and family to an adopted child."
+  used_ivf: "{self.They} went through IVF to build a family, and did not give up."
+  used_surrogate: "{self.They} built a family with the help of a surrogate, and never stopped being grateful."
+  had_miscarriage: "{self.They} carried the quiet grief of a pregnancy that did not last."
+  lost_a_child: "{self.They} outlived a child, and carried that loss for the rest of {self.their} life."
+  placed_baby_for_adoption: "{self.They} placed a baby for adoption, and did not forget."
+  fought_for_custody: "{self.They} went to court to keep {self.their} children close."
+  shared_custody: "{self.They} shared the raising of {self.their} children across two homes."
+  gave_up_custody: "{self.They} let {self.their} children live with someone else, for their sake."
   ran_marathon: "{self.They} ran a marathon, and kept the medal."
   jumped_from_plane: "{self.They} jumped out of a plane, on purpose, well past the age most people would."
   whistleblower: "{self.They} blew the whistle when it cost {self.them} something."

@@ -15,6 +15,7 @@ import {
   TRAIT_KEYS,
 } from './common';
 import { debtKindSchema, housingKindSchema, lifestyleSchema } from './economy';
+import { familyProcessSchema, parentingKeySchema } from './family';
 import { credentialTypeSchema, programSchema, tierSchema } from './education';
 import { relationshipKindSchema, relationshipStatusSchema, romanceStatusSchema } from './relationships';
 import { templateSchema } from './text';
@@ -89,6 +90,7 @@ export type Condition =
   | { health: HealthCondition }
   | { legal: LegalCondition }
   | { discovery: DiscoveryCondition }
+  | { family: FamilyCondition }
   | { memory: { role: string; tag: string } }
   | {
       role: string;
@@ -102,6 +104,14 @@ export type Condition =
       years?: Compare;
       /** C1: where they are: living with you, elsewhere in your city, or in another city. */
       where?: ('household' | 'city' | 'elsewhere')[];
+      /** E2a: a child's grades this school year (0–4). */
+      gpa?: Compare;
+      /** E2a: your parenting style with this child (each line 0–100). */
+      style?: Partial<Record<'warmth' | 'strictness' | 'involvement', Compare>>;
+      /** E2a: where a child lives: with you, in shared custody, or with their other parent. */
+      custody?: ('you' | 'shared' | 'other')[];
+      /** E2a: a grown child has moved out (or not). */
+      movedOut?: boolean;
     };
 
 /** Your money situation. Every field given must hold. */
@@ -227,6 +237,29 @@ export interface DiscoveryCondition {
   talent?: 'hidden' | 'found' | 'none';
 }
 
+/**
+ * Children and family (E2a). Every field given must hold. pregnant: you or
+ * someone carrying your child is pregnant; children counts your living
+ * children (not stepchildren), minors those under 18; youngest and oldest
+ * their ages; process the adoption, IVF or surrogacy under way ('none': no
+ * process); attempts the years of trying that haven't worked yet; canCarry
+ * you can carry a pregnancy; support child support you 'pay' or 'receive'
+ * (or 'none'); steps your living stepchildren; lost: you have lost a child.
+ */
+export interface FamilyCondition {
+  pregnant?: boolean;
+  children?: Compare;
+  minors?: Compare;
+  youngest?: Compare;
+  oldest?: Compare;
+  steps?: Compare;
+  process?: (z.infer<typeof familyProcessSchema> | 'none')[];
+  attempts?: Compare;
+  canCarry?: boolean;
+  support?: ('pay' | 'receive' | 'none')[];
+  lost?: boolean;
+}
+
 const atLeastOneField = (c: Record<string, unknown>) => Object.values(c).some((v) => v !== undefined);
 const latentKindSchema = z.enum(LATENT_KINDS);
 
@@ -333,6 +366,23 @@ export const conditionSchema: z.ZodType<Condition> = z.lazy(() =>
         })
         .refine(atLeastOneField, 'needs at least one field'),
     }),
+    z.strictObject({
+      family: z
+        .strictObject({
+          pregnant: z.boolean().optional(),
+          children: compareSchema.optional(),
+          minors: compareSchema.optional(),
+          youngest: compareSchema.optional(),
+          oldest: compareSchema.optional(),
+          steps: compareSchema.optional(),
+          process: z.array(z.union([familyProcessSchema, z.literal('none')])).min(1).optional(),
+          attempts: compareSchema.optional(),
+          canCarry: z.boolean().optional(),
+          support: z.array(z.enum(['pay', 'receive', 'none'])).min(1).optional(),
+          lost: z.boolean().optional(),
+        })
+        .refine(atLeastOneField, 'needs at least one field'),
+    }),
     z.strictObject({ memory: z.strictObject({ role: roleSchema, tag: idSchema }) }),
     z.strictObject({
       role: roleSchema,
@@ -344,6 +394,10 @@ export const conditionSchema: z.ZodType<Condition> = z.lazy(() =>
       status: z.array(relationshipStatusSchema).min(1).optional(),
       years: compareSchema.optional(),
       where: z.array(z.enum(['household', 'city', 'elsewhere'])).min(1).optional(),
+      gpa: compareSchema.optional(),
+      style: z.partialRecord(parentingKeySchema, compareSchema).optional(),
+      custody: z.array(z.enum(['you', 'shared', 'other'])).min(1).optional(),
+      movedOut: z.boolean().optional(),
     }),
   ]),
 ) as z.ZodType<Condition>;
@@ -398,8 +452,16 @@ export const castSpecSchema = z
      * someone new is created in your city (so never for elsewhere or household).
      */
     presence: z.enum(PRESENCE_VALUES),
+    /**
+     * E2a: someone who has died (a child, in the events about losing them).
+     * Never found by casting: the engine (or a scheduled follow-up) passes
+     * them in. Needs presence anywhere, and the role can't be used in the
+     * conditions or choices of someone alive.
+     */
+    deceased: z.literal(true).optional(),
   })
   .refine((s) => (s.kind === undefined) !== (s.support !== true), 'a role needs exactly one of kind or support: true')
+  .refine((s) => s.deceased !== true || (s.presence === 'anywhere' && s.support !== true && !s.romantic && !s.admirer && !s.createIfMissing && s.newChance === undefined), 'a deceased role has presence anywhere and is only passed in')
   .refine(
     (s) => s.support !== true || (!s.createIfMissing && s.newChance === undefined && !s.romantic && !s.admirer),
     'a support role finds someone you know: no createIfMissing, newChance, romantic or admirer',
@@ -610,6 +672,46 @@ export const effectSchema = z.discriminatedUnion('type', [
    * person is your partner.
    */
   z.strictObject({ type: z.literal('infidelity'), role: roleSchema, act: z.enum(['flirt', 'intimate']) }),
+  /**
+   * E2a: a pregnancy. begin: one begins, how 'trying' (from a try-for-a-baby
+   * moment) or 'unplanned' (from an intimate night), with `role` the other
+   * parent; the carrier is whichever of you two can carry (the engine
+   * ignores it when neither or both can, or when someone is already
+   * pregnant). decide (the unplanned pregnancy event): keep it, place the
+   * baby for adoption, or end the pregnancy. attempt: a year of trying that
+   * didn't work.
+   */
+  z
+    .strictObject({
+      type: z.literal('pregnancy'),
+      action: z.enum(['begin', 'decide', 'attempt']),
+      how: z.enum(['trying', 'unplanned']).optional(),
+      role: roleSchema.optional(),
+      choice: z.enum(['keep', 'adoption', 'end']).optional(),
+    })
+    .refine((e) => (e.action === 'begin') === (e.how !== undefined && e.role !== undefined), 'begin needs how and role (and only begin has them)')
+    .refine((e) => (e.action === 'decide') === (e.choice !== undefined), 'decide needs choice (and only decide has it)'),
+  /** E2a: your parenting style with a child moves (each line by up to ±50; style lines stay 0–100). */
+  z
+    .strictObject({
+      type: z.literal('parenting'),
+      role: roleSchema,
+      warmth: z.int().min(-50).max(50).optional(),
+      strictness: z.int().min(-50).max(50).optional(),
+      involvement: z.int().min(-50).max(50).optional(),
+    })
+    .refine((e) => e.warmth !== undefined || e.strictness !== undefined || e.involvement !== undefined, 'needs at least one style line'),
+  /** E2a: a child's own stat or personality trait moves (the person cast in `role` must be your child or stepchild). */
+  z.strictObject({ type: z.literal('childStat'), role: roleSchema, key: z.enum(STAT_KEYS), delta: z.int().min(-30).max(30) }),
+  z.strictObject({ type: z.literal('childTrait'), role: roleSchema, key: z.enum(TRAIT_KEYS), delta: z.int().min(-30).max(30) }),
+  /**
+   * E2a: custody of the children you had with the person cast in `role` (the
+   * other parent): they live with you (full), you share (shared) or they
+   * live with that parent (other). Sets child support to match.
+   */
+  z.strictObject({ type: z.literal('custody'), role: roleSchema, choice: z.enum(['full', 'shared', 'other']) }),
+  /** E2a: start an adoption, IVF or surrogacy process (its fees are a separate cost effect). */
+  z.strictObject({ type: z.literal('process'), action: z.literal('start'), process: familyProcessSchema }),
 ]);
 export type Effect = z.infer<typeof effectSchema>;
 
@@ -625,6 +727,14 @@ export const checkStatSchema = z.union([
   z.strictObject({ key: statKeySchema, weight: checkWeightSchema }),
   z.strictObject({ role: roleSchema, key: z.enum(['affection', 'trust']), weight: checkWeightSchema }),
   z.strictObject({ job: z.literal('performance'), weight: checkWeightSchema }),
+  /**
+   * E2a: your chance of having a baby with the person in `role` this year
+   * (fertility, or fertilityPlanned when you plan around it: from the ages
+   * and health of you both, in percent; each point above 50 adds weight), or
+   * how strong your custody case is for the children you had with them
+   * (custody: 0–100).
+   */
+  z.strictObject({ family: z.enum(['fertility', 'fertilityPlanned', 'custody']), role: roleSchema, weight: checkWeightSchema }),
 ]);
 export type CheckStat = z.infer<typeof checkStatSchema>;
 

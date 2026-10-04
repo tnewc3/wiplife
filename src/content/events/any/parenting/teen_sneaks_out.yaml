@@ -1,0 +1,52 @@
+id: teen_sneaks_out
+title: The empty bed
+text: >-
+  The bedroom door is shut, the light is off, and when you finally look in, the
+  bed holds a rolled-up blanket and a note that says nothing at all.
+tone: serious
+category: parenting
+rarity: uncommon
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { family: { minors: { gte: 1 } } }
+weight: { base: 5 }
+cooldownYears: 5
+cast:
+  kid: { kind: child, presence: household, age: { min: 14, max: 17 } }
+choices:
+  - id: call
+    label: Call, and keep your voice calm
+    check:
+      base: 50
+      stats:
+        - { role: kid, key: trust, weight: 0.4 }
+        - { key: kindness, weight: 0.1 }
+      success:
+        text: >-
+          {kid.name} picks up on the second ring, whispers an address, and is
+          home in twenty minutes. You do not shout. {kid.They} {kid:notices|notice}.
+        effects:
+          - { type: parenting, role: kid, warmth: 3, strictness: 1 }
+          - { type: relationship, role: kid, trust: 6 }
+      failure:
+        text: >-
+          The call goes straight to voicemail. You drive around town for two
+          hours, and find {kid.them} at a friend's, entirely fine, and entirely
+          unrepentant.
+        effects:
+          - { type: parenting, role: kid, strictness: 3 }
+          - { type: relationship, role: kid, trust: -4 }
+          - { type: stat, key: stress, delta: 5 }
+  - id: wait
+    label: Wait at the door
+    outcome:
+      text: >-
+        {kid.name} comes in at dawn, sees you in the hallway, and stops. Neither
+        of you speaks for a while. It is the longest silence you have ever
+        shared with someone you love.
+      effects:
+        - { type: parenting, role: kid, strictness: 4, involvement: 3 }
+        - { type: relationship, role: kid, trust: -2 }
+        - { type: stat, key: stress, delta: 4 }
