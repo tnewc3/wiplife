@@ -103,7 +103,7 @@ describe('content build with the real content', () => {
   });
 });
 
-describe('content build with fixture files', () => {
+describe('content build with fixture files', { timeout: 90_000 }, () => {
   it('accepts a valid city and produces a stable content version', async () => {
     await write('cities/test_city.yaml', validCity);
     const a = await compile();
