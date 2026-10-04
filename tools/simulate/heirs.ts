@@ -241,7 +241,8 @@ export function buildHeirReport(
   const generationsReached = Math.max(0, ...chains.map((c) => c.netWorth.length));
   const complete = chains.filter((c) => c.netWorth.length >= Math.min(3, generationsReached) && generationsReached >= 3);
   const medians = [0, 1, 2].map((g) => quantile(complete.map((c) => c.netWorth[g]!), 0.5));
-  const ratios = complete.filter((c) => c.netWorth[0]! > 0).map((c) => c.netWorth[2]! / c.netWorth[0]!);
+  // The tail is compared as distributions (a family that began with almost nothing would make a per-family ratio meaningless).
+  const p90 = [0, 2].map((g) => quantile(complete.map((c) => c.netWorth[g]!), 0.9));
   const low = records.filter((r) => r.familyReputation < REPUTATION_LOW);
   const high = records.filter((r) => r.familyReputation >= REPUTATION_HIGH);
   const withMemory = records.filter((r) => r.memories.some((m) => (Object.values(HEIR_MEMORY_MAP) as string[]).includes(m)));
@@ -261,7 +262,7 @@ export function buildHeirReport(
     },
     guardians,
     estates: { will: records.filter((r) => r.source === 'will').length, default: records.filter((r) => r.source === 'default').length },
-    wealth: { chains: complete.length, medians, ratio: medians[0]! > 0 ? medians[2]! / medians[0]! : 0, p90Ratio: quantile(ratios, 0.9) },
+    wealth: { chains: complete.length, medians, ratio: medians[0]! > 0 ? medians[2]! / medians[0]! : 0, p90Ratio: p90[0]! > 0 ? p90[1]! / p90[0]! : 0 },
     reputation: {
       n: records.length,
       correlation: correlation(records.map((r) => r.familyReputation), records.map((r) => r.startReputation)),
@@ -293,7 +294,7 @@ export function formatHeirs(r: HeirReport): string[] {
   const i = r.inheritance;
   lines.push(`  inherited (cash, trust and home equity): median ${dollars(i.median)}, mean ${dollars(i.mean)}, 90th percentile ${dollars(i.p90)}, largest ${dollars(i.largest)}; nothing for ${i.nothing} of ${i.n} heirs; the median heir got ${(100 * i.medianOfParent).toFixed(0)}% of the estate`);
   const w = r.wealth;
-  lines.push(`  family wealth (net worth at death, ${w.chains} families that lived three generations): ${w.medians.map((m, k) => `generation ${k + 1} ${dollars(m)}`).join(', ')}; generation 3 is ${w.ratio.toFixed(2)}× generation 1 (90th percentile of families ${w.p90Ratio.toFixed(2)}×)`);
+  lines.push(`  family wealth (net worth at death, ${w.chains} families that lived three generations): ${w.medians.map((m, k) => `generation ${k + 1} ${dollars(m)}`).join(', ')}; generation 3 is ${w.ratio.toFixed(2)}× generation 1 (90th percentile wealth ${w.p90Ratio.toFixed(2)}×)`);
   const p = r.reputation;
   lines.push(`  family reputation → the heir's own at the start: correlation ${p.correlation.toFixed(2)} over ${p.n} heirs; below ${p.lowBelow}: ${p.lowMean.toFixed(1)}, from ${p.highFrom}: ${p.highMean.toFixed(1)}`);
   const m = r.memories;
@@ -330,7 +331,7 @@ export function heirTargets(r: HeirReport, content: ContentBundle): HeirTarget[]
       goal: `${t.familyWealth.min}–${t.familyWealth.max}`,
       met: r.wealth.chains > 0 && inRange(r.wealth.ratio, t.familyWealth),
     },
-    { label: 'family wealth: the 90th percentile family’s generation 3 ÷ generation 1', value: r.wealth.p90Ratio.toFixed(2), goal: `at most ${t.maxP90Growth}`, met: r.wealth.p90Ratio <= t.maxP90Growth },
+    { label: 'family wealth: 90th percentile net worth, generation 3 ÷ generation 1', value: r.wealth.p90Ratio.toFixed(2), goal: `at most ${t.maxP90Growth}`, met: r.wealth.p90Ratio <= t.maxP90Growth },
     { label: 'family reputation reaches the heir (correlation with their own reputation)', value: r.reputation.correlation.toFixed(2), goal: `at least ${t.reputationCorrelation}`, met: r.reputation.correlation >= t.reputationCorrelation },
     { label: 'heirs raised with a memory who see an event about it', value: pct1(memoryShare), goal: `at least ${pct1(t.memoryEvents)}`, met: memoryShare >= t.memoryEvents },
     { label: 'minor heirs taken in by someone (a guardian or foster care)', value: `${Object.values(r.guardians).reduce((a, b) => a + b, 0)} of ${r.minors.count}`, goal: 'all', met: Object.values(r.guardians).reduce((a, b) => a + b, 0) === r.minors.count },

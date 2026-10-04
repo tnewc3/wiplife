@@ -135,8 +135,10 @@ family:
 heirs:
   generations: 3
   minors: { min: 0.03, max: 0.6 }
-  familyWealth: { min: 0.2, max: 1.6 }
-  maxP90Growth: 6
+  # Median net worth at death, generation 3 over generation 1. Set above 1.0 because the
+  # economy is generous (Stage 12 tunes it); the estate tax in balance/family.yaml keeps it from snowballing.
+  familyWealth: { min: 0.2, max: 2.0 }
+  maxP90Growth: 3
   reputationCorrelation: 0.3
   memoryEvents: 0.3
 
