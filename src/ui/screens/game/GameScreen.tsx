@@ -10,6 +10,8 @@ import { HousingScreen } from '../more/HousingScreen';
 import { HealthScreen } from '../more/HealthScreen';
 import { FamilyScreen } from '../more/FamilyScreen';
 import { WillScreen } from '../more/WillScreen';
+import { BelongingsScreen } from '../more/BelongingsScreen';
+import { PetScreen } from '../people/PetScreen';
 import { LegalBanner } from '../../components/LegalBanner';
 import { MoreTab } from '../more/MoreTab';
 import { WorkTab } from '../work/WorkTab';
@@ -68,15 +70,17 @@ export function GameScreen({ life }: { life: LifeState }) {
   const health = tab === 'more' && moreView === 'health';
   const family = tab === 'more' && moreView === 'family';
   const will = tab === 'more' && moreView === 'will';
-  const back = person
+  const belongings = tab === 'more' && moreView === 'belongings';
+  const pet = tab === 'people' && personId !== null && life.possessions.items.some((p) => p.id === personId && p.kind === 'pet') ? personId : null;
+  const back = person || pet
     ? { onBack: closePerson, backLabel: 'Back to People' }
-    : home || health || family || will
+    : home || health || family || will || belongings
       ? { onBack: closeHome, backLabel: 'Back to More' }
       : {};
 
   return (
     <Screen
-      title={home ? 'Home' : health ? 'Health' : family ? 'Family' : will ? 'Your will' : current.label}
+      title={home ? 'Home' : health ? 'Health' : family ? 'Family' : will ? 'Your will' : belongings ? 'Belongings' : current.label}
       {...back}
       footer={
         <>
@@ -91,6 +95,8 @@ export function GameScreen({ life }: { life: LifeState }) {
       ) : tab === 'people' ? (
         person ? (
           <PersonScreen key={person} life={life} personId={person} />
+        ) : pet ? (
+          <PetScreen key={pet} life={life} petId={pet} />
         ) : (
           <PeopleTab life={life} />
         )
@@ -106,6 +112,8 @@ export function GameScreen({ life }: { life: LifeState }) {
         <FamilyScreen life={life} />
       ) : will ? (
         <WillScreen life={life} />
+      ) : belongings ? (
+        <BelongingsScreen life={life} />
       ) : (
         <MoreTab />
       )}

@@ -1,0 +1,43 @@
+id: friend_borrows_car
+title: Can I borrow your car
+text: >-
+  {friend.name} has the look of someone with a favor to ask. It is the {vehicle},
+  and only for the weekend, and nothing is going to happen to it.
+tone: neutral
+category: vehicles
+rarity: common
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { belongings: { vehicles: { gte: 1 } } }
+weight: { base: 6 }
+cooldownYears: 4
+bind: [vehicle]
+cast:
+  friend: { kind: friend, presence: city }
+choices:
+  - id: lend
+    label: Hand over the keys
+    check:
+      base: 65
+      stats: [{ role: friend, key: trust, weight: 0.3 }]
+      success:
+        text: "{friend.name} brings it back Sunday night with a full tank and a thank-you note on the dashboard."
+        effects:
+          - { type: memory, role: friend, tag: borrowed_your_car }
+          - { type: relationship, role: friend, affection: 5, trust: 6 }
+      failure:
+        text: >-
+          Sunday night, {friend.name} stands in your doorway with the keys and a
+          sentence that starts with "so, funny story." There is a dent.
+        effects:
+          - { type: possession, action: vehicle_damage, severity: minor }
+          - { type: memory, role: friend, tag: borrowed_your_car }
+          - { type: relationship, role: friend, affection: -4, trust: -4 }
+  - id: refuse
+    label: Say no, and mean it
+    outcome:
+      text: "{friend.name} says that is fine and means about half of it. It is quieter between you for a while."
+      effects:
+        - { type: relationship, role: friend, affection: -4, trust: 1 }
+        - { type: stat, key: confidence, delta: 1 }

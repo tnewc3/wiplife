@@ -1,0 +1,36 @@
+# Queued by the possessions step (registries/possessions.yaml accidents.minor).
+id: fender_bender
+title: A second too late
+text: >-
+  The light turned and you did not stop in time. It is a small noise, really, and
+  then a long silence while you sit in the {vehicle} with both hands on the wheel.
+tone: neutral
+category: vehicles
+rarity: common
+lifeStages: [teen, youngAdult, adult, senior]
+requires: { belongings: { vehicles: { gte: 1 } } }
+weight: { base: 10 }
+followUpOnly: true
+bind: [vehicle]
+choices:
+  - id: report
+    label: Exchange information and report it
+    outcome:
+      text: >-
+        Names, plates, a photo of the bumper. The other driver is polite about it,
+        which almost makes it worse. You file a report before you get home.
+      effects:
+        - { type: possession, action: vehicle_damage, severity: minor }
+        - { type: flag, key: had_car_accident, value: true }
+        - { type: stat, key: stress, delta: 4 }
+  - id: settle
+    label: Settle it between you, with no report
+    outcome:
+      text: >-
+        You shake hands over the dent and hand over what you owe to fix it. It
+        feels like the grown-up thing to do, and nothing goes on any record.
+      effects:
+        - { type: cost, item: car_repair_small }
+        - { type: possession, action: vehicle_condition, delta: -3 }
+        - { type: flag, key: had_car_accident, value: true }
+        - { type: stat, key: stress, delta: 3 }

@@ -7,7 +7,7 @@
  * nothing is charged twice. The common checks (between years, input
  * validation, the input log) live in ./index.ts.
  */
-import { LIFESTYLES, type ApplyProgram, type ContentBundle, type Lifestyle, type MentalCareId, type Tier } from '../../content/schemas';
+import { LIFESTYLES, type ApplyProgram, type ContentBundle, type Lifestyle, type MentalCareId, type PetSourceId, type Tier } from '../../content/schemas';
 import { canStartDebtPlan, isIndependent, payDebt, spend, startDebtPlan } from '../finance';
 import { buyHome, moveInCost, moveTo, purchaseQuote, refreshHousingCost, sellHome, supportingParent } from '../housing';
 import { afterMove } from '../career';
@@ -19,12 +19,13 @@ import { EDUCATION_ACTION_IDS, EDUCATION_ACTIONS } from './education';
 import { ESTATE_ACTION_IDS, ESTATE_ACTIONS } from './estate';
 import { FAMILY_ACTION_IDS, FAMILY_ACTIONS } from './family';
 import { PERSONAL_ACTION_IDS, PERSONAL_ACTIONS } from './personal';
+import { POSSESSION_ACTION_IDS, POSSESSION_ACTIONS } from './possessions';
 import type { IdentityEdit } from '../discovery';
 import { isIncarcerated, onProbation } from '../legal';
 
 export const MONEY_ACTION_IDS = ['set_lifestyle', 'start_gig', 'stop_gig', 'pay_debt', 'debt_plan'] as const;
 export const HOME_ACTION_IDS = ['rent_home', 'move_home', 'relocate', 'buy_home', 'sell_home', 'find_roommate', 'live_alone'] as const;
-export const LIFE_ACTION_IDS = [...MONEY_ACTION_IDS, ...HOME_ACTION_IDS, ...EDUCATION_ACTION_IDS, ...CAREER_ACTION_IDS, ...PERSONAL_ACTION_IDS, ...FAMILY_ACTION_IDS, ...ESTATE_ACTION_IDS] as const;
+export const LIFE_ACTION_IDS = [...MONEY_ACTION_IDS, ...HOME_ACTION_IDS, ...EDUCATION_ACTION_IDS, ...CAREER_ACTION_IDS, ...PERSONAL_ACTION_IDS, ...FAMILY_ACTION_IDS, ...ESTATE_ACTION_IDS, ...POSSESSION_ACTION_IDS] as const;
 
 /** The only money, home, school, work and personal actions you can take in prison (Stage 9). */
 export const PRISON_LIFE_ACTIONS: readonly LifeActionId[] = ['pay_debt', 'debt_plan', 'stop_gig', 'edit_identity', 'write_will'];
@@ -51,6 +52,16 @@ export interface LifeActionParams {
   conditionId?: string;
   care?: MentalCareId;
   on?: boolean;
+  /** E5: belongings. A pet's species or a vehicle's type, where a pet comes from, its name; a vehicle bought used, with a loan; a possession; insurance; a renovation and where it's done ('main' or a vacation home). */
+  defId?: string;
+  source?: PetSourceId;
+  name?: string;
+  used?: boolean;
+  loan?: boolean;
+  possessionId?: string;
+  insured?: boolean;
+  renovationId?: string;
+  target?: string;
 }
 
 export interface LifeActionRule {
@@ -214,6 +225,7 @@ export const LIFE_ACTIONS: Record<LifeActionId, LifeActionRule> = {
   ...PERSONAL_ACTIONS,
   ...FAMILY_ACTIONS,
   ...ESTATE_ACTIONS,
+  ...POSSESSION_ACTIONS,
 };
 
 /** True when the action can be taken now with these (validated) parameters. In prison, only a few can. */

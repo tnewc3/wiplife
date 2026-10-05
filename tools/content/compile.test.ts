@@ -15,6 +15,7 @@ blurb: A place for tests
 costOfLiving: 1.0
 baseRent: 12000
 baseHomePrice: 200000
+carDependence: 0.5
 salaryMultiplier: 1.0
 jobMarket:
   professional: 50
@@ -1217,5 +1218,75 @@ describe('the social web (E4)', () => {
     const straight = await readFile(path.join(dir, 'interactions/set_record_straight.yaml'), 'utf8');
     await write('interactions/set_record_straight.yaml', straight.replace('topic: distorted\n', ''));
     expect(await expectErrors()).toContain('knowledge effects are for an interaction with a topic');
+  });
+});
+
+describe('pets, vehicles and homes (E5)', () => {
+  it('accepts the real content: eight pets, eight vehicles, six renovations, four pet interactions and about forty events, with no warnings', { timeout: 90_000 }, async () => {
+    const result = await compile();
+    if (!result.ok) throw new Error(formatErrors(result.errors));
+    expect(Object.keys(result.bundle.pets)).toHaveLength(8);
+    expect(Object.keys(result.bundle.vehicles)).toHaveLength(8);
+    expect(Object.keys(result.bundle.renovations)).toHaveLength(6);
+    expect(Object.keys(result.bundle.petInteractions)).toHaveLength(4);
+    const events = Object.values(result.bundle.events).filter((e) => !e.retired && ['pets', 'vehicles', 'property'].includes(e.category));
+    expect(events.length).toBeGreaterThanOrEqual(35);
+    expect(events.length).toBeLessThanOrEqual(45);
+    expect(result.warnings).toEqual([]);
+  });
+
+  it('needs an event that binds a pet to require that you own one, and an effect on a pet to bind it', { timeout: 90_000 }, async () => {
+    const real = await readFile(path.join(dir, 'events/any/pets/pet_bond_moment.yaml'), 'utf8');
+    await write('events/any/pets/pet_bond_moment.yaml', real.replace('    - { belongings: { pets: { gte: 1 }, petBond: { gte: 70 } } }\n', '    - { age: { gte: 18 } }\n'));
+    expect(await expectErrors()).toContain('binds a pet, so it must require that you own one');
+    const ill = await readFile(path.join(dir, 'events/any/pets/pet_falls_ill.yaml'), 'utf8');
+    await write('events/any/pets/pet_falls_ill.yaml', ill.replace('bind: [pet]\n', ''));
+    expect(await expectErrors()).toContain('acts on a pet, so the event must bind it');
+  });
+
+  it('keeps the events the possessions step queues followUpOnly and bound to what they are about', { timeout: 90_000 }, async () => {
+    const real = await readFile(path.join(dir, 'events/any/vehicles/fender_bender.yaml'), 'utf8');
+    await write('events/any/vehicles/fender_bender.yaml', real.replace('followUpOnly: true\n', ''));
+    expect(await expectErrors()).toContain('so it must be followUpOnly');
+    await write('events/any/vehicles/fender_bender.yaml', real.replace('bind: [vehicle]\n', ''));
+    expect(await expectErrors()).toContain('so it must bind a vehicle');
+  });
+
+  it('checks species, vehicles and the roles an event may use', { timeout: 90_000 }, async () => {
+    const real = await readFile(path.join(dir, 'events/any/pets/pet_chews_something.yaml'), 'utf8');
+    await write('events/any/pets/pet_chews_something.yaml', real.replace('species: [dog, cat, rabbit, guinea_pig]', 'species: [dog, unicorn]'));
+    expect(await expectErrors()).toContain('unknown pet "unicorn"');
+    await write('events/any/pets/pet_chews_something.yaml', real.replace('bind: [pet]\n', 'bind: [pet]\ncast:\n  pet: { kind: friend, presence: city }\n'));
+    expect(await expectErrors()).toContain('is for the possession an event binds');
+    await write('events/any/pets/pet_chews_something.yaml', real.replace('{pet.name}', '{pet.nickname}'));
+    expect(await expectErrors()).toContain('unknown field');
+  });
+
+  it('checks the possessions balance against the offenses and conditions it names', { timeout: 90_000 }, async () => {
+    const real = await readFile(path.join(dir, 'balance/possessions.yaml'), 'utf8');
+    await write('balance/possessions.yaml', real.replace('offenseId: dui', 'offenseId: not_an_offense'));
+    expect(await expectErrors()).toContain('unknown offense "not_an_offense"');
+    await write('balance/possessions.yaml', real.replace('conditions: [alcohol_addiction]', 'conditions: [not_a_condition]'));
+    expect(await expectErrors()).toContain('unknown condition "not_a_condition"');
+  });
+
+  it('keeps pet interactions to the pet’s role, a real profile and no hardcoded pronoun', { timeout: 90_000 }, async () => {
+    const real = await readFile(path.join(dir, 'petInteractions/play.yaml'), 'utf8');
+    await write('petInteractions/play.yaml', real.replace('profile: play', 'profile: nap'));
+    expect(await expectErrors()).toContain('unknown profile "nap"');
+    await write('petInteractions/play.yaml', real.replace('{pet.name} is wild with joy.', 'She is wild with joy.'));
+    expect(await expectErrors()).toContain('never a hardcoded pronoun');
+    await write('petInteractions/play.yaml', real.replace('{ type: stat, key: happiness, delta: 2 }', '{ type: money, delta: 5 }'));
+    expect(await expectErrors()).toContain('pet interactions may only use these effects');
+  });
+
+  it('needs a jobs vehicle number in range and a city car dependence', { timeout: 90_000 }, async () => {
+    const job = await readFile(path.join(dir, 'jobs/delivery_driver.yaml'), 'utf8');
+    await write('jobs/delivery_driver.yaml', job.replace('vehicle: 1', 'vehicle: 3'));
+    expect(await expectErrors()).toContain('vehicle');
+    const city = await readFile(path.join(dir, 'cities/nyc.yaml'), 'utf8');
+    await write('jobs/delivery_driver.yaml', job);
+    await write('cities/nyc.yaml', city.replace(/carDependence: .*\n/, ''));
+    expect(await expectErrors()).toContain('carDependence');
   });
 });

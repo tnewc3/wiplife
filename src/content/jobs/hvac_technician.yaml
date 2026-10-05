@@ -3,6 +3,7 @@ name: "Heating and cooling"
 category: trade
 blurb: "Keeping everyone warm in winter and cool in summer."
 requires: {"education": {"credential": ["trade_license"], "field": ["hvac_technician"]}}
+vehicle: 0.85
 levels:
   - { title: "HVAC helper", salary: 36000 }
   - { title: "HVAC technician", salary: 51000 }

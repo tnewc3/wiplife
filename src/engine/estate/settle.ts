@@ -26,7 +26,8 @@ import type { ContentBundle } from '../../content/schemas';
 import { curveAt } from '../curve';
 import { wholeDollars } from '../finance';
 import type { EstateLine, Id, LifeState, Settlement, WillShare } from '../types';
-import { passPossessions } from './possessions';
+import { attachedDebtIds } from '../possessions/query';
+import { planPossessions } from './possessions';
 import { fullName, livingWill } from './will';
 
 /** A beneficiary before money: who, how related, and their percent. */
@@ -127,16 +128,24 @@ export function settleEstate(life: LifeState, content: ContentBundle): Settlemen
   const { estate } = content.balance.family;
   const selling = content.balance.economy.ownership.sellingCosts;
   const f = life.finances;
-  const savings = wholeDollars(f.savings + (f.trust?.balance ?? 0));
+  // E5: what the estate holds in pets, vehicles and vacation homes passes in kind (or is sold: see ./possessions.ts).
+  const { source, shares } = estateShares(life, content);
+  const attached = attachedDebtIds(life);
+  const cashOnHand = wholeDollars(f.savings + (f.trust?.balance ?? 0));
   const homeValue = wholeDollars(life.housing.homeValue ?? 0);
   const mortgageDebt = life.finances.debts.find((d) => d.id === life.housing.mortgageDebtId);
   const mortgage = wholeDollars(mortgageDebt?.balance ?? 0);
-  const debts = wholeDollars(f.debts.filter((d) => d.id !== life.housing.mortgageDebtId).reduce((sum, d) => sum + d.balance, 0));
+  const debts = wholeDollars(f.debts.filter((d) => d.id !== life.housing.mortgageDebtId && !attached.has(d.id)).reduce((sum, d) => sum + d.balance, 0));
   const costOfLiving = content.cities[life.character.cityId]?.costOfLiving ?? 1;
-  const costsDue = wholeDollars(estate.funeral * costOfLiving) + wholeDollars((savings + homeValue) * estate.settlementShare);
+  const costsDue0 = wholeDollars(estate.funeral * costOfLiving) + wholeDollars((cashOnHand + homeValue) * estate.settlementShare);
+  // A vehicle or vacation home is sold, not passed on, when the cash can't pay the costs and debts.
+  const plan = planPossessions(life, shares, cashOnHand < costsDue0 + debts, content);
+  const savings = cashOnHand;
+  const possessionSales = plan.sold;
+  const costsDue = wholeDollars(estate.funeral * costOfLiving) + wholeDollars((savings + possessionSales + homeValue) * estate.settlementShare);
 
   // Costs, then debts, from savings.
-  let cash = savings;
+  let cash = savings + possessionSales;
   const costsFromCash = Math.min(cash, costsDue);
   cash -= costsFromCash;
   const debtsFromCash = Math.min(cash, debts);
@@ -185,7 +194,6 @@ export function settleEstate(life: LifeState, content: ContentBundle): Settlemen
   const tax = Math.min(taxDue, cash);
   cash -= tax;
 
-  const { source, shares } = estateShares(life, content);
   let lines: EstateLine[] = [];
   let unclaimed = 0;
 
@@ -220,7 +228,7 @@ export function settleEstate(life: LifeState, content: ContentBundle): Settlemen
     if (shares.length === 0) unclaimed = cash;
   }
 
-  const possessions = passPossessions(life, lines, content);
+  const possessions = plan.transfers;
   const netEstate = lines.reduce((sum, l) => sum + l.cash + (l.property ? l.property.value - l.property.mortgage : 0), 0) + unclaimed;
   return {
     year: life.currentYear,
@@ -231,7 +239,7 @@ export function settleEstate(life: LifeState, content: ContentBundle): Settlemen
     costs,
     debtsPaid,
     tax,
-    writtenOff: owedDebts + (home === 'sold' || home === 'surrendered' ? mortgage - mortgagePaid : 0),
+    writtenOff: owedDebts + plan.writtenOff + (home === 'sold' || home === 'surrendered' ? mortgage - mortgagePaid : 0),
     home,
     mortgagePaid,
     saleCosts,
@@ -239,5 +247,6 @@ export function settleEstate(life: LifeState, content: ContentBundle): Settlemen
     lines,
     unclaimed,
     possessions,
+    possessionSales,
   };
 }

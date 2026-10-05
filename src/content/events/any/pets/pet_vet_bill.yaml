@@ -1,0 +1,42 @@
+id: pet_vet_bill
+title: The estimate
+text: >-
+  The vet turns the screen toward you. {pet.name} needs more than a checkup, and
+  the number at the bottom is the kind you read twice. {pet.They} {pet:is|are}
+  looking at you the way {petKind}s look at the person who decides.
+tone: serious
+category: pets
+rarity: uncommon
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { belongings: { pets: { gte: 1 }, petHealth: { lt: 55 } } }
+weight: { base: 7 }
+cooldownYears: 4
+bind: [pet]
+choices:
+  - id: full
+    label: Pay for the full treatment
+    outcome:
+      text: It takes your savings, or most of them. {pet.name} comes home sore, shaved in patches, and plainly on the mend.
+      effects:
+        - { type: cost, item: vet_emergency }
+        - { type: possession, action: pet_health, delta: 28 }
+        - { type: possession, action: pet_bond, delta: 4 }
+  - id: cheaper
+    label: Pick the cheaper option
+    outcome:
+      text: The cheaper plan helps, a little. The vet says it kindly and does not say anything more.
+      effects:
+        - { type: cost, item: vet_routine }
+        - { type: possession, action: pet_health, delta: 10 }
+        - { type: stat, key: stress, delta: 3 }
+  - id: wait
+    label: Say you'll think about it
+    outcome:
+      text: You go home to think about it. {pet.name} does not improve, and neither do you.
+      effects:
+        - { type: possession, action: pet_health, delta: -8 }
+        - { type: stat, key: stress, delta: 4 }
+        - { type: stat, key: happiness, delta: -2 }

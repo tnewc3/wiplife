@@ -9,7 +9,7 @@ import type { ContentBundle } from '../../content/schemas';
 import { homeSaleNet, heirCandidates } from './heir';
 import { defaultShares } from './settle';
 import { willCandidates } from './will';
-import type { ArchivedLife, EstateLine, Id, LifeState, Previously, RelationshipKind, Settlement } from '../types';
+import type { ArchivedLife, EstateLine, Id, LifeState, Possession, Previously, RelationshipKind, Settlement } from '../types';
 
 export interface WillRowView {
   kind: 'person' | 'cause';
@@ -75,6 +75,18 @@ export interface HeirOptionView {
   cash: number;
   trust: number;
   home: { value: number; mortgage: number } | null;
+  /** E5: what would come to them in kind: a pet, a car, a vacation home ("Biscuit the dog", "a sedan"). */
+  possessions: string[];
+}
+
+/** E5: a pet, vehicle or vacation home that passed to someone. */
+export interface PassedPossessionView {
+  /** "Biscuit the dog", "a sedan", "a vacation home in Chicago". */
+  what: string;
+  /** Who it went to. */
+  to: string;
+  /** What was still owed on it, which went with it. */
+  loan: number;
 }
 
 export interface DeathView {
@@ -93,6 +105,16 @@ export interface DeathView {
   unclaimed: number;
   lines: EstateLineView[];
   heirs: HeirOptionView[];
+  /** E5: pets, vehicles and vacation homes that passed on in kind, and the cash from those that were sold instead. */
+  possessions: PassedPossessionView[];
+  possessionSales: number;
+}
+
+/** A possession as a phrase. */
+function possessionPhrase(p: Possession, content: ContentBundle): string {
+  if (p.kind === 'pet') return `${p.name ?? 'A pet'} the ${content.pets[p.defId]?.name ?? 'pet'}`;
+  if (p.kind === 'vehicle') return `a ${content.vehicles[p.defId]?.name ?? 'vehicle'}`;
+  return `a vacation home in ${content.cities[p.home?.cityId ?? '']?.name ?? 'the city'}`;
 }
 
 /** The Death screen's estate and heir choice, for a life in the dead phase; null before death. */
@@ -129,8 +151,15 @@ export function getDeathView(state: LifeState, content: ContentBundle): DeathVie
         cash: minor ? 0 : cash,
         trust: minor ? cash + (property ? homeSaleNet(property.value, property.mortgage, content) : 0) : 0,
         home: minor ? null : property,
+        possessions: e.possessions.filter((t) => t.toPersonId === id).map((t) => possessionPhrase(t.item, content)),
       };
     }),
+    possessions: e.possessions.map((t) => ({
+      what: possessionPhrase(t.item, content),
+      to: state.people[t.toPersonId] ? `${state.people[t.toPersonId]!.name.first} ${state.people[t.toPersonId]!.name.last}` : 'someone',
+      loan: t.loan,
+    })),
+    possessionSales: e.possessionSales,
   };
 }
 

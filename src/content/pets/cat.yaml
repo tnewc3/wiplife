@@ -1,0 +1,11 @@
+id: cat
+name: cat
+blurb: "Independent, until it is dinnertime."
+lifespan: { min: 12, max: 18 }
+adoptCost: 150
+buyCost: 900
+yearlyCost: 450
+vetCost: 180
+sickChance: 0.1
+attention: 0.5
+personalities: { playful: 3, anxious: 3, stubborn: 4, lazy: 4 }

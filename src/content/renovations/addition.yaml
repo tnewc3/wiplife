@@ -1,0 +1,8 @@
+id: addition
+name: Room addition
+blurb: "Another bedroom, or a studio, or a very nice office."
+cost: 0.2
+value: 0.17
+comfort: 4
+happiness: 9
+cooldownYears: 15

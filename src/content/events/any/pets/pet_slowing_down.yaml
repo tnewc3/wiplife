@@ -1,0 +1,37 @@
+id: pet_slowing_down
+title: Slower on the stairs
+text: >-
+  {pet.name} has gone gray around the face, and the stairs are a decision now.
+  You catch yourself matching {pet.their} pace without thinking about it.
+tone: serious
+category: pets
+rarity: common
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { belongings: { pets: { gte: 1 }, petAge: { gte: 8 }, petHealth: { lt: 60 }, species: [dog, cat, rabbit] } }
+weight: { base: 8 }
+cooldownYears: 3
+bind: [pet]
+choices:
+  - id: comfort
+    label: "Make it easy: a softer bed, shorter walks"
+    outcome:
+      text: A new bed by the window and a slower routine. {pet.name} spends the best hours of the day in the sun.
+      effects:
+        - { type: cost, item: pet_supplies }
+        - { type: possession, action: pet_health, delta: 6 }
+        - { type: possession, action: pet_bond, delta: 4 }
+  - id: normal
+    label: Keep things the way they have always been
+    outcome:
+      text: "{pet.name} keeps up, mostly, and gives you a look whenever the stairs win."
+      effects:
+        - { type: possession, action: pet_health, delta: -3 }
+  - id: savor
+    label: Spend every evening at home with {pet.them}
+    outcome:
+      text: The evenings are quiet and slow and exactly what you want to remember.
+      effects:
+        - { type: possession, action: pet_bond, delta: 6 }
+        - { type: stat, key: happiness, delta: 2 }

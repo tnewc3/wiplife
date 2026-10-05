@@ -40,15 +40,20 @@ export function interactionFailures(state: LifeState, content: ContentBundle): s
   const pending = state.pendingInteraction;
   if (pending) {
     if (state.phase !== 'yearStart') fail(`an interaction outcome card in the "${state.phase}" phase`);
-    if (!state.people[pending.personId]) fail('the interaction outcome card is about someone missing');
-    const def = content.interactions[pending.interactionId];
-    if (!def) fail(`the interaction outcome card is for an unknown interaction "${pending.interactionId}"`);
-    else {
-      const tier = def.outcomes[pending.tier];
-      if (!tier) fail(`the outcome card's tier "${pending.tier}" doesn't exist for "${def.id}"`);
-      else if (pending.choice && !tier.choice) fail('the outcome card has a choice its interaction does not');
-      if (pending.choice?.chosen !== undefined && !pending.choice.options.some((o) => o.id === pending.choice!.chosen)) fail('the outcome card chose an option it does not have');
-      if ((def.gift === true) !== (pending.giftTier !== undefined)) fail('the outcome card and its interaction disagree about a gift');
+    if (pending.pet) {
+      if (!state.possessions.items.some((q) => q.id === pending.personId && q.kind === 'pet')) fail('the interaction outcome card is about a pet you no longer have');
+      if (!content.petInteractions[pending.interactionId]) fail(`the interaction outcome card is for an unknown pet interaction "${pending.interactionId}"`);
+    } else {
+      if (!state.people[pending.personId]) fail('the interaction outcome card is about someone missing');
+      const def = content.interactions[pending.interactionId];
+      if (!def) fail(`the interaction outcome card is for an unknown interaction "${pending.interactionId}"`);
+      else {
+        const tier = def.outcomes[pending.tier];
+        if (!tier) fail(`the outcome card's tier "${pending.tier}" doesn't exist for "${def.id}"`);
+        else if (pending.choice && !tier.choice) fail('the outcome card has a choice its interaction does not');
+        if (pending.choice?.chosen !== undefined && !pending.choice.options.some((o) => o.id === pending.choice!.chosen)) fail('the outcome card chose an option it does not have');
+        if ((def.gift === true) !== (pending.giftTier !== undefined)) fail('the outcome card and its interaction disagree about a gift');
+      }
     }
   }
 

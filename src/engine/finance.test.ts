@@ -185,7 +185,7 @@ describe('money and home conditions', () => {
     d.character.birthCityId = 'houston';
     d.career.gig = true;
     d.finances.lifestyle = 'frugal';
-    d.finances.lastLedger = { year: d.currentYear, gross: 20_000, retirement: 0, tax: 600, housing: 0, living: 0, debtPayments: 0, interest: 0, debtInterest: 0, borrowed: 0, support: 0, children: 0, care: 0, supportPaid: 0, supportReceived: 0, net: 19_400 };
+    d.finances.lastLedger = { year: d.currentYear, gross: 20_000, retirement: 0, tax: 600, housing: 0, living: 0, debtPayments: 0, interest: 0, debtInterest: 0, borrowed: 0, support: 0, children: 0, care: 0, upkeep: 0, insurance: 0, supportPaid: 0, supportReceived: 0, net: 19_400 };
     addDebt(d, 'collections', 5_000, content).missed = 2;
     d.finances.bankruptcyYear = d.currentYear - 3;
   });

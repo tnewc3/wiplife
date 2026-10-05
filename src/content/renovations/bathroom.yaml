@@ -1,0 +1,8 @@
+id: bathroom
+name: Bathroom update
+blurb: "Tile, a new tub, and water pressure you can count on."
+cost: 0.035
+value: 0.028
+comfort: 2
+happiness: 4
+cooldownYears: 10

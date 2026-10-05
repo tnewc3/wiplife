@@ -7,6 +7,7 @@ blurb: "Very expensive · Top professional jobs"
 costOfLiving: 1.6
 baseRent: 36000
 baseHomePrice: 780000
+carDependence: 0.15
 salaryMultiplier: 1.3
 jobMarket:
   professional: 95

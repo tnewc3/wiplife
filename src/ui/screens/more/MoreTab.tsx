@@ -12,6 +12,7 @@ export function MoreTab() {
   const openHealth = useAppStore((s) => s.openHealth);
   const openFamily = useAppStore((s) => s.openFamily);
   const openWill = useAppStore((s) => s.openWill);
+  const openBelongings = useAppStore((s) => s.openBelongings);
   const adult = useAppStore((s) => s.life !== null && canPlanEstate(s.life, content));
   return (
     <div className="flex flex-col gap-2">
@@ -23,6 +24,9 @@ export function MoreTab() {
       </Button>
       <Button variant="secondary" block onClick={openFamily}>
         Family
+      </Button>
+      <Button variant="secondary" block onClick={openBelongings} data-testid="more-belongings">
+        Belongings
       </Button>
       {adult && (
         <Button variant="secondary" block onClick={openWill} data-testid="more-will">

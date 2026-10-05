@@ -1,0 +1,47 @@
+id: pet_noise_complaint
+title: A note on the door
+text: >-
+  The note is polite and underlined twice. {neighbor.name}, your neighbor, has
+  heard {pet.name} while you were out, and would like to talk about it.
+tone: neutral
+category: pets
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { home: { kind: [renting, owned] } }
+    - { belongings: { pets: { gte: 1 }, species: [dog, parakeet, cat], personality: [anxious, playful] } }
+weight:
+  base: 6
+  modifiers:
+    - { if: { belongings: { personality: [anxious] } }, x: 1.6 }
+cooldownYears: 5
+bind: [pet]
+cast:
+  neighbor: { kind: acquaintance, presence: city, createIfMissing: true }
+choices:
+  - id: apologize
+    label: Apologize and find a way to help {pet.them} settle
+    outcome:
+      text: >-
+        {neighbor.name} turns out to like animals. A few weeks of exercise and a
+        quieter routine later, the notes stop.
+      effects:
+        - { type: cost, item: pet_supplies }
+        - { type: relationship, role: neighbor, affection: 4, trust: 3 }
+        - { type: possession, action: pet_bond, delta: 3 }
+  - id: ignore
+    label: Ignore it
+    outcome:
+      text: The notes continue, shorter and sharper. {neighbor.name} stops saying hello in the hallway.
+      effects:
+        - { type: relationship, role: neighbor, affection: -8, trust: -5 }
+        - { type: stat, key: stress, delta: 3 }
+  - id: argue
+    label: Say animals make noise, and leave it there
+    outcome:
+      text: Technically true. It does not help. {neighbor.name} files a complaint with the landlord.
+      effects:
+        - { type: relationship, role: neighbor, affection: -12, trust: -8 }
+        - { type: stat, key: stress, delta: 4 }

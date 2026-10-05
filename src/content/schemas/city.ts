@@ -35,6 +35,12 @@ export const citySchema = baseDefSchema.extend({
     trade: scoreSchema,
     gig: scoreSchema,
   }),
+  /**
+   * E5: how much life in this city depends on a vehicle (0–1): near 0 where
+   * transit and walking do (a big dense city), near 1 where everything is far.
+   * A job's own need for a vehicle is weighted by it.
+   */
+  carDependence: z.number().min(0).max(1),
   /** The city's schools (fictional names), by program (Stage 7). */
   schools: citySchoolsSchema,
 });

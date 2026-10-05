@@ -1,0 +1,11 @@
+id: goldfish
+name: goldfish
+blurb: "Calm company, and it never needs a walk."
+lifespan: { min: 5, max: 10 }
+adoptCost: 15
+buyCost: 20
+yearlyCost: 60
+vetCost: 60
+sickChance: 0.05
+attention: 0.1
+personalities: { playful: 1, anxious: 2, stubborn: 1, lazy: 5 }

@@ -73,7 +73,7 @@ describe('conditions', () => {
   it('list the roles and references a condition uses', () => {
     const c: Condition = { all: [{ memory: { role: 'friend', tag: 'kept_in_touch' } }, { not: { flag: 'x' } }, { fired: 'y' }] };
     expect(rolesIn(c)).toEqual(['friend']);
-    expect(referencesIn(c)).toEqual({ flags: ['x'], memories: ['kept_in_touch'], events: ['y'], cities: [], majors: [], trades: [], fields: [], jobs: [], conditions: [] });
+    expect(referencesIn(c)).toEqual({ flags: ['x'], memories: ['kept_in_touch'], events: ['y'], cities: [], majors: [], trades: [], fields: [], jobs: [], conditions: [], pets: [], vehicles: [] });
   });
 
   it('agree with the content: every event requirement parses and evaluates', () => {

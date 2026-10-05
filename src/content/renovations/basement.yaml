@@ -1,0 +1,8 @@
+id: basement
+name: Finished basement
+blurb: "From storage and spiders to a place you actually live in."
+cost: 0.09
+value: 0.07
+comfort: 3
+happiness: 5
+cooldownYears: 15

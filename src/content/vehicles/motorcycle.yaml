@@ -1,0 +1,10 @@
+id: motorcycle
+name: motorcycle
+blurb: "Freedom, wind, and a lot more risk."
+kind: motorcycle
+price: 14000
+upkeep: 1400
+service: 300
+insurance: 650
+risk: 2.2
+used: true

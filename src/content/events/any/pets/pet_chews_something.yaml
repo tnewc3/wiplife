@@ -1,0 +1,47 @@
+id: pet_chews_something
+title: The evidence
+text: >-
+  You come home to a trail of stuffing and one very guilty {petKind}. {pet.name}
+  has found something of yours and made it into something else.
+tone: light
+category: pets
+rarity: common
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { belongings: { pets: { gte: 1 }, personality: [playful, anxious, stubborn], species: [dog, cat, rabbit, guinea_pig] } }
+weight:
+  base: 8
+  modifiers:
+    - { if: { belongings: { personality: [playful] } }, x: 1.8 }
+cooldownYears: 3
+bind: [pet]
+choices:
+  - id: replace
+    label: Replace it and move on
+    outcome:
+      text: It was a good pair of shoes. {pet.name} looks nothing but pleased with how things turned out.
+      effects:
+        - { type: cost, item: pet_supplies }
+        - { type: stat, key: happiness, delta: 1 }
+  - id: train
+    label: Make it a training day
+    check:
+      base: 50
+      stats: [{ key: discipline, weight: 0.4 }]
+      success:
+        text: An afternoon of patience, treats and a firm voice. By evening {pet.name} has made the connection. Mostly.
+        effects:
+          - { type: possession, action: pet_bond, delta: 4 }
+          - { type: stat, key: discipline, delta: 2 }
+      failure:
+        text: "{pet.name} learns nothing except that a raised voice means a snack is on the way."
+        effects:
+          - { type: stat, key: stress, delta: 2 }
+  - id: laugh
+    label: Laugh, take a photo, and clean it up
+    outcome:
+      text: The photo is, in fact, the best thing on your phone. The mess takes an hour. Nobody learns anything.
+      effects:
+        - { type: possession, action: pet_bond, delta: 3 }
+        - { type: stat, key: happiness, delta: 2 }

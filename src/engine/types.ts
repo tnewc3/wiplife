@@ -14,6 +14,7 @@ import type {
   Lifestyle,
   OutcomeTier,
   PregnancyHow,
+  PetPersonalityId,
   Program,
   Tier,
 } from '../content/schemas';
@@ -521,7 +522,11 @@ export interface Ledger {
   /** E2a: child support you paid and received this year. */
   supportPaid: number;
   supportReceived: number;
-  /** gross + retirement + interest + supportReceived − tax − housing − living − children − care − supportPaid − debtPayments (savings change by net + borrowed). */
+  /** E5: what your pets, vehicles and vacation homes cost to keep this year (food, vet care, fuel, parking, upkeep, property tax). */
+  upkeep: number;
+  /** E5: insurance premiums on your vehicles and vacation homes this year. */
+  insurance: number;
+  /** gross + retirement + interest + supportReceived − tax − housing − living − children − care − supportPaid − upkeep − insurance − debtPayments (savings change by net + borrowed). */
   net: number;
 }
 
@@ -587,14 +592,23 @@ export interface Settlement {
   lines: EstateLine[];
   /** Cash nobody was left to receive. */
   unclaimed: number;
-  /** E5 hook: possessions passing on (src/engine/estate/possessions.ts); empty until E5. */
+  /** E5: possessions passing on in kind (src/engine/estate/possessions.ts). */
   possessions: PossessionTransfer[];
+  /** E5: cash from vehicles and vacation homes nobody could take (sold, less selling costs and what was owed on them); part of the cash the estate settles. */
+  possessionSales: number;
 }
 
-/** E5 hook: one possession passing to a person (not used before E5). */
+/**
+ * E5: one possession passing to a person in an estate. `item` is the
+ * possession as it was (its own id belongs to the life that ended); `loan` is
+ * the balance of the loan or mortgage attached to it, which passes with it
+ * (never more than the item is worth).
+ */
 export interface PossessionTransfer {
   possessionId: Id;
   toPersonId: Id;
+  item: Possession;
+  loan: number;
 }
 
 /** E2b: the short "Previously" card an heir's life starts with. */
@@ -644,6 +658,84 @@ export interface HousingState {
   guardianId?: Id;
   /** E2b: an heir under 18 with no one to live with is in foster care (no guardian of their own). */
   foster?: true;
+  /** E5: renovations done to the home you own and live in (a move or sale starts afresh). */
+  renovations?: Renovation[];
+}
+
+/** E5: a renovation done, and the year. */
+export interface Renovation {
+  id: Id;
+  year: number;
+}
+
+/** E5: a pet's own record. */
+export interface PetState {
+  personality: PetPersonalityId;
+  /** How close it is to you (0–100). */
+  bond: number;
+  /** How old it was when it came to you, in years. */
+  startAge: number;
+  /** The age it dies at (rolled within its species' range; illness can cut it short, never below the shortest). */
+  lifespan: number;
+  /** Ill now: it needs a vet. */
+  ill: boolean;
+  /** The last year it saw a vet. */
+  vetYear?: number;
+  /** The year it died (it is removed the year after). */
+  died?: number;
+  /** This year's interactions with it (a new year starts from nothing). */
+  interactions?: { year: number; counts: Record<Id, number>; gained: number; annoyed: boolean };
+}
+
+/** E5: a vehicle's own record. */
+export interface VehicleState {
+  /** How old it was when you got it, in years. */
+  startAge: number;
+  insured: boolean;
+  /** The last year it had a full service. */
+  serviceYear?: number;
+  /** The car loan on it, if you're still paying one. */
+  loanDebtId?: Id;
+}
+
+/** E5: a vacation home's own record. */
+export interface VacationState {
+  cityId: Id;
+  insured: boolean;
+  mortgageDebtId?: Id;
+  renovations: Renovation[];
+}
+
+/** E5: anything you own that isn't money or the home you live in: a pet, a vehicle, a vacation home. */
+export interface Possession {
+  id: Id;
+  kind: PossessionKind;
+  /** The pet's, vehicle's or (for a vacation home) always 'vacation_home' definition. */
+  defId: Id;
+  /** The year it became yours. */
+  acquired: number;
+  /** What it is worth now (whole dollars); a pet is worth nothing. */
+  value: number;
+  /** A vehicle's or a home's condition, or a pet's health (0–100). */
+  condition: number;
+  /** A pet's name. */
+  name?: string;
+  pet?: PetState;
+  vehicle?: VehicleState;
+  home?: VacationState;
+}
+
+export type PossessionKind = 'pet' | 'vehicle' | 'home';
+
+/** E5: what you own. */
+export interface PossessionsState {
+  items: Possession[];
+  /** The next possession number (q1, q2...). */
+  nextId: number;
+  /** The years of insurance claims you made (the recent ones raise your premiums). */
+  claims: number[];
+  /** Years in a row you've held a job that needs a vehicle without having one. */
+  noVehicleYears: number;
 }
 
 /** M1: the ways of caring for a mental health condition. */
@@ -750,6 +842,8 @@ export interface EventInstance {
   cast: Record<string, Id>;
   resolvedChoiceId?: Id;
   outcomeText?: string;
+  /** E5: the card's own text, kept when the outcome removed the pet, car or home it is about (so it can still be shown). */
+  card?: { title: string; text: string };
   /** A follow-up: the year the event that scheduled it happened (C1, {since}). */
   since?: number;
   /** What the chosen outcome did to your money (C1): shown on the outcome card. */
@@ -851,7 +945,10 @@ export interface InputRecord {
  */
 export interface PendingInteraction {
   interactionId: Id;
+  /** Who it was with; for a pet interaction (`pet`), the pet's possession id. */
   personId: Id;
+  /** E5: it was with a pet: `personId` is the pet, `changes.affection` is how its bond moved. */
+  pet?: true;
   /** E4: the second person (an introduction) or the story (a knowledge item) the interaction was about. */
   otherId?: Id;
   itemId?: string;
@@ -919,6 +1016,8 @@ export interface LifeState {
   news: NewsYear[];
   /** E4: the ties between the people you know, and what each of them has heard. */
   web: WebState;
+  /** E5: pets, vehicles and vacation homes. */
+  possessions: PossessionsState;
 }
 
 /** E4: how two people you know are connected to each other. */

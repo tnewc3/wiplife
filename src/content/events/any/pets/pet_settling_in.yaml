@@ -1,0 +1,46 @@
+id: pet_settling_in
+title: Getting to know each other
+text: >-
+  {pet.name} still keeps one eye on you wherever you go. The {petKind} has
+  claimed a corner of the home, and you have started to learn its habits.
+tone: light
+category: pets
+rarity: common
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { belongings: { pets: { gte: 1 }, petBond: { lt: 55 } } }
+weight:
+  base: 8
+  modifiers:
+    - { if: { belongings: { personality: [anxious] } }, x: 1.5 }
+cooldownYears: 4
+bind: [pet]
+choices:
+  - id: patience
+    label: Give {pet.name} space and let {pet.them} come to you
+    outcome:
+      text: >-
+        You sit on the floor and pretend not to care. After a long while {pet.name}
+        comes over and leans against your leg, as if it was {pet.their} idea.
+      effects:
+        - { type: possession, action: pet_bond, delta: 8 }
+        - { type: stat, key: stress, delta: -2 }
+  - id: routine
+    label: Build a routine and stick to it
+    outcome:
+      text: >-
+        Same time, same place, same dull little ritual. {pet.name} starts waiting
+        at the door before you get there.
+      effects:
+        - { type: possession, action: pet_bond, delta: 6 }
+        - { type: stat, key: discipline, delta: 1 }
+  - id: spoil
+    label: Spoil {pet.them} with treats
+    outcome:
+      text: >-
+        {pet.name} learns exactly where the treats live, and where you are
+        weakest. It works, in its way.
+      effects:
+        - { type: cost, item: pet_treat }
+        - { type: possession, action: pet_bond, delta: 5 }

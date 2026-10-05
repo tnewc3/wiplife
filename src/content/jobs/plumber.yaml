@@ -3,6 +3,7 @@ name: "Plumbing"
 category: trade
 blurb: "Pipes, pressure, and people very happy to see you."
 requires: {"education": {"credential": ["trade_license"], "field": ["plumber"]}}
+vehicle: 0.85
 levels:
   - { title: "apprentice plumber", salary: 38000 }
   - { title: "journeyman plumber", salary: 58000 }

@@ -1,0 +1,53 @@
+id: long_drive
+title: The open road
+text: >-
+  Some mornings you wake up wanting to be anywhere but here. The {vehicle} is in
+  the driveway, the roads are open, and for once there is nothing in your day
+  that cannot wait.
+tone: light
+category: vehicles
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { belongings: { vehicles: { gte: 1 }, vehicleCondition: { gte: 40 } } }
+weight:
+  base: 6
+  modifiers:
+    - { if: { stat: stress, gt: 60 }, x: 2 }
+cooldownYears: 3
+bind: [vehicle]
+cast:
+  buddy: { kind: friend, presence: city, optional: true }
+choices:
+  - id: go
+    label: Pack a bag and go for a few days
+    outcome:
+      text: >-
+        You see a lake you will never find again, eat in a diner with a menu in
+        two languages and come home with sand in the floor mats and a looser grip on things.
+      effects:
+        - { type: cost, item: vacation_week }
+        - { type: possession, action: vehicle_condition, delta: -2 }
+        - { type: stat, key: happiness, delta: 6 }
+        - { type: stat, key: stress, delta: -8 }
+  - id: together
+    label: Ask {buddy.name} along
+    visibleIf: { role: buddy }
+    outcome:
+      text: >-
+        {buddy.name} brings snacks, music and strong opinions about both. Four hours in,
+        you are both laughing at something you will never be able to explain.
+      effects:
+        - { type: cost, item: vacation_week }
+        - { type: relationship, role: buddy, affection: 8, trust: 4 }
+        - { type: possession, action: vehicle_condition, delta: -2 }
+        - { type: stat, key: happiness, delta: 6 }
+        - { type: stat, key: stress, delta: -6 }
+  - id: stay
+    label: Stay put
+    outcome:
+      text: You make coffee, look at the keys for a while and then do the dishes instead.
+      effects:
+        - { type: stat, key: discipline, delta: 1 }

@@ -77,6 +77,8 @@ import { getChildView, type ChildView } from './family/views';
 export type { InteractionMenuGroup, InteractionMenuItem, InteractionOutcomeView } from './interactions/views';
 export type { MoodBand, MoodView } from './interactions/mood';
 export { getNews, getPersonLifeView } from './lives/views';
+export { getBelongingsView, getPetDetail, getPets } from './possessions/views';
+export type { AdoptOption, BelongingsView, MainHomeView, PetDetailView, PetView, RenovationOption, VacationHomeView, VacationOption, VehicleOption, VehicleView } from './possessions/views';
 export type { NewsFeedView, NewsItem, PersonLifeView, TroubleView } from './lives/views';
 import { consistencyProblems, whereabouts } from './presence';
 import { benefitFromRecord } from './retirement';
@@ -1147,6 +1149,8 @@ export function getEventCard(state: LifeState, index: number, content: ContentBu
   };
   // A definition removed by a content update: a card the player can dismiss.
   if (!def) return { ...base, title: '…', text: '', tone: 'neutral', choices: [{ id: CONTINUE_CHOICE, label: 'Continue' }] };
+  // E5: a resolved card about a pet, car or home the outcome removed shows the text it had.
+  if (instance.card && base.resolved) return { ...base, title: instance.card.title, text: instance.card.text, tone: def.tone, choices: [{ id: CONTINUE_CHOICE, label: 'Continue' }] };
   const ctx = textContext(state, instance.cast, content, instance.since);
   const choices = def.choices
     ? def.choices

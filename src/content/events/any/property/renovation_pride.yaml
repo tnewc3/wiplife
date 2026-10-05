@@ -1,0 +1,32 @@
+id: renovation_pride
+title: The finished room
+text: >-
+  The work is done. The contractor's truck is gone, the floors are bare and
+  clean, and for the first time in months the place feels like a decision you made on purpose.
+tone: light
+category: property
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { belongings: { renovated: true } }
+    - { home: { kind: [owned] } }
+weight: { base: 6 }
+cooldownYears: 6
+choices:
+  - id: party
+    label: Throw a housewarming
+    outcome:
+      text: Every friend you have comes through the door, and at least one cries a little at the kitchen. The cake does not survive.
+      effects:
+        - { type: cost, item: celebration_dinner }
+        - { type: stat, key: happiness, delta: 5 }
+        - { type: stat, key: sociability, delta: 1 }
+  - id: quiet
+    label: Savor it quietly
+    outcome:
+      text: You sit on the floor in the middle of the room with a cup of tea and look at the light on the new walls for a long time.
+      effects:
+        - { type: stat, key: stress, delta: -5 }
+        - { type: stat, key: happiness, delta: 3 }

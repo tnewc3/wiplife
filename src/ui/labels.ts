@@ -17,7 +17,11 @@ import type {
   TieKindId,
   TieStatusId,
 } from '../content/schemas';
+import type { PetPersonalityId } from '../content/schemas';
 import type { JobApplyBlock, SearchBlock } from '../engine/career';
+import type { PetBlock } from '../engine/possessions/pets';
+import type { RenovationBlock, VacationBlock } from '../engine/possessions/homes';
+import type { LoanBlock, VehicleBlock } from '../engine/possessions/vehicles';
 import type { ApplyBlock } from '../engine/education';
 import type { PersonLifeView, TroubleView } from '../engine/lives/views';
 import type {
@@ -270,6 +274,7 @@ export const DEBT_LABELS: Record<DebtKind, string> = {
   mortgage: 'Mortgage',
   medical: 'Medical bills',
   collections: 'In collections',
+  auto: 'Car loan',
 };
 
 /** How a debt is going: on track, paused while you study, missed payments, or in collections. */
@@ -301,6 +306,8 @@ export const LEDGER_LABELS = {
   living: 'Living costs',
   children: 'Your children',
   care: 'Care for a relative',
+  upkeep: 'Upkeep: pets, vehicles, vacation homes',
+  insurance: 'Insurance',
   supportPaid: 'Child support you paid',
   supportReceived: 'Child support you received',
   debtPayments: 'Debt payments',
@@ -494,6 +501,7 @@ export const JOB_APPLY_BLOCK_LABELS: Record<JobApplyBlock, string> = {
   closed: 'Not hiring this year.',
   current: 'That’s your job.',
   requirements: 'You don’t meet the requirements.',
+  vehicle: 'You’d need a car to get to this job.',
   tried: 'You applied this year.',
   limit: 'No applications left this year.',
 };
@@ -916,3 +924,88 @@ export function heardLine(name: string, h: HeardView): { text: string; note: str
   const how = h.learned === 'you' ? 'You told them' : h.learned === 'saw' ? 'They saw it for themselves' : 'They heard it from someone else';
   return { text: `${name} has heard ${h.text}.`, note: h.distorted ? `${how}, and it isn't how it was.` : `${how}.` };
 }
+
+
+// ── E5: pets, vehicles and homes ───────────────────────────────────────────
+
+
+export const PET_PERSONALITY_LABELS: Record<PetPersonalityId, string> = {
+  playful: 'Playful',
+  anxious: 'Anxious',
+  stubborn: 'Stubborn',
+  lazy: 'Lazy',
+};
+
+/** A pet's health, in words (never a number). */
+export function petHealthWords(health: number, ill: boolean): string {
+  if (ill) return 'Ill';
+  if (health >= 80) return 'Thriving';
+  if (health >= 60) return 'Healthy';
+  if (health >= 40) return 'Getting by';
+  if (health >= 20) return 'Frail';
+  return 'Failing';
+}
+
+/** How close a pet is to you, in words. */
+export function bondWords(bond: number): string {
+  if (bond >= 85) return 'Inseparable';
+  if (bond >= 65) return 'Devoted';
+  if (bond >= 45) return 'Fond of you';
+  if (bond >= 25) return 'Getting used to you';
+  return 'Wary';
+}
+
+/** A vehicle's or a home's condition, in words. */
+export function conditionWords(condition: number): string {
+  if (condition >= 85) return 'Like new';
+  if (condition >= 65) return 'Good';
+  if (condition >= 45) return 'Fair';
+  if (condition >= 25) return 'Rough';
+  return 'Falling apart';
+}
+
+export function yearsOld(age: number): string {
+  return age <= 0 ? 'Under a year old' : age === 1 ? '1 year old' : `${age} years old`;
+}
+
+export const PET_BLOCK_LABELS: Record<PetBlock, string> = {
+  age: 'You’re too young to take a pet in yourself.',
+  limit: 'You have as many pets as you can look after.',
+  savings: 'You can’t afford that yet.',
+  unknown: 'Not available.',
+};
+
+export const VEHICLE_BLOCK_LABELS: Record<VehicleBlock | LoanBlock, string> = {
+  age: 'You’re too young to drive.',
+  limit: 'You own as many vehicles as you can keep.',
+  savings: 'You don’t have enough saved.',
+  unknown: 'Not available.',
+  used: 'This one isn’t sold used.',
+  independent: 'You have to be old enough to borrow.',
+  bankruptcy: 'Lenders won’t say yes so soon after a bankruptcy.',
+  income: 'The payments would be more than a lender will allow for your income.',
+};
+
+export const VACATION_BLOCK_LABELS: Record<VacationBlock, string> = {
+  age: 'You have to be old enough to own a home.',
+  limit: 'You own as many vacation homes as you can keep.',
+  savings: 'You don’t have enough saved for the down payment and closing costs.',
+  bankruptcy: 'Lenders won’t say yes so soon after a bankruptcy.',
+  income: 'Your payments on both homes would be more than a lender will allow for your income.',
+  prison: 'Not while you are in prison.',
+  unknown: 'Not available.',
+};
+
+export const RENOVATION_BLOCK_LABELS: Record<RenovationBlock, string> = {
+  nowhere: 'No home to do it in.',
+  savings: 'You don’t have enough saved.',
+  cooldown: 'You did this not long ago.',
+  limit: 'Your home has all the work it can take at once.',
+  prison: 'Not while you are in prison.',
+  unknown: 'Not available.',
+};
+
+export const INSURANCE_WORDS = {
+  on: 'Insured',
+  off: 'Not insured',
+} as const;

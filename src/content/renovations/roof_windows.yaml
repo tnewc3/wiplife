@@ -1,0 +1,8 @@
+id: roof_windows
+name: New roof and windows
+blurb: "Nobody throws a party for it, but the house will keep dry and warm."
+cost: 0.045
+value: 0.035
+comfort: 2
+happiness: 2
+cooldownYears: 20

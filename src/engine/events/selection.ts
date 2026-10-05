@@ -55,9 +55,10 @@ export function fitsSetting(state: LifeState, def: EventDef, content: ContentBun
  * where you are (prison), or its requirements fail; otherwise base × rarity
  * × matching modifiers, and (C1) × repeatWeight for each earlier time a
  * non-recurring event happened. Requirements about cast roles are checked
- * after casting.
+ * after casting. With `cast` (the possessions an event was queued about, E5),
+ * conditions on them are checked against those.
  */
-export function eventWeight(state: LifeState, def: EventDef, content: ContentBundle): number {
+export function eventWeight(state: LifeState, def: EventDef, content: ContentBundle, cast?: Record<string, string>): number {
   if (state.character.age < content.balance.relationships.adultAge && isRomanceEvent(def, content)) return 0;
   if (!fitsSetting(state, def, content)) return 0;
   const log = state.eventLog[def.id];
@@ -68,10 +69,11 @@ export function eventWeight(state: LifeState, def: EventDef, content: ContentBun
     const last = lastCategoryYear(state, def.category, content);
     if (last !== undefined && state.currentYear - last < categoryCooldown) return 0;
   }
-  if (!evaluate(def.requires, state, { roles: 'assumeTrue' })) return 0;
+  const ctx = { roles: 'assumeTrue' as const, ...(cast ? { cast } : {}) };
+  if (!evaluate(def.requires, state, ctx)) return 0;
   let weight = def.weight.base * content.balance.events.rarityWeight[def.rarity];
   for (const modifier of def.weight.modifiers ?? []) {
-    if (evaluate(modifier.if, state, { roles: 'assumeTrue' })) weight *= modifier.x;
+    if (evaluate(modifier.if, state, ctx)) weight *= modifier.x;
   }
   // C1: repeats of events not meant to recur are rare.
   if (log && !def.recurring) weight *= powInt(content.balance.events.repeatWeight, log.count);

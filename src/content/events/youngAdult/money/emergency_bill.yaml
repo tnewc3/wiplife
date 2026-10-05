@@ -8,9 +8,13 @@ tone: neutral
 category: money
 rarity: common
 lifeStages: [youngAdult, adult]
-requires: { money: { lt: 1500 } }
+requires:
+  all:
+    - { money: { lt: 1500 } }
+    - { belongings: { vehicles: { gte: 1 } } }
 weight: { base: 4 }
 cooldownYears: 5
+bind: [vehicle]
 # C1: reviewed build warnings kept on purpose (docs/consistency-review.md).
 justified:
   money: "The loan goes straight to the mechanic, so your savings don't change; you owe the helper informally (the lent_you_money memory)."
@@ -23,6 +27,7 @@ choices:
     outcome:
       text: '{helper.name} sends the money before you finish explaining. "Pay me back whenever," {helper.they} {helper:says|say}, and means it.'
       effects:
+        - { type: possession, action: vehicle_condition, delta: 25 }
         - { type: memory, role: helper, tag: lent_you_money }
         - { type: relationship, role: helper, affection: 3, trust: 3 }
         - { type: stat, key: stress, delta: -4 }
@@ -31,7 +36,7 @@ choices:
     outcome:
       text: The bus adds an hour to your day. You read a lot of books.
       effects:
-        - { type: money, delta: 300 }
+        - { type: possession, action: vehicle_sell }
         - { type: stat, key: stress, delta: 3 }
         - { type: stat, key: happiness, delta: -2 }
   - id: scrape
@@ -40,5 +45,6 @@ choices:
       text: Every cent goes to the mechanic. You eat a lot of rice this month.
       effects:
         - { type: money, delta: -1500 }
+        - { type: possession, action: vehicle_condition, delta: 25 }
         - { type: stat, key: stress, delta: 6 }
         - { type: stat, key: health, delta: -1 }

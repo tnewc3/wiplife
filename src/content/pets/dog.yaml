@@ -1,0 +1,11 @@
+id: dog
+name: dog
+blurb: "Loyal, loud and always glad to see you."
+lifespan: { min: 10, max: 15 }
+adoptCost: 250
+buyCost: 1800
+yearlyCost: 750
+vetCost: 220
+sickChance: 0.12
+attention: 1.0
+personalities: { playful: 5, anxious: 3, stubborn: 4, lazy: 2 }

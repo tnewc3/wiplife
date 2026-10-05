@@ -1,0 +1,11 @@
+id: guinea_pig
+name: guinea pig
+blurb: "Chatty, gentle, and always hungry."
+lifespan: { min: 5, max: 7 }
+adoptCost: 40
+buyCost: 60
+yearlyCost: 200
+vetCost: 100
+sickChance: 0.09
+attention: 0.6
+personalities: { playful: 4, anxious: 4, stubborn: 2, lazy: 3 }

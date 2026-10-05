@@ -205,6 +205,18 @@ mental:
   secretKnown: { min: 0.3, max: 1 }
   eventShare: { max: 0.1 }
 
+# E5: pets, vehicles and homes (tools/simulate/possessions.ts), on the careful player's lives.
+possessions:
+  petOwners: { min: 0.3, max: 0.85 }
+  vehicleOwners: { min: 0.6, max: 0.99 }
+  petLifespanInRange: { min: 1, max: 1 }
+  accidentsPer100Years: { min: 2, max: 14 }
+  insurancePerYear: { min: 900, max: 4500 }
+  carCostShare: { min: 0.01, max: 0.25 }
+  vacationHomeLives: { min: 0.002, max: 0.08 }
+  renovationLives: { min: 0.05, max: 0.85 }
+  illShare: { min: 0.02, max: 0.25 }
+
 coverage:
   minEvents: 300
   legendary: { min: 5, max: 10 }

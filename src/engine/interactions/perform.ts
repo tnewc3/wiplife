@@ -34,6 +34,7 @@ import { chance, cloneRng, nextInt } from '../rng';
 import { renderText } from '../text';
 import type { Id, InteractionCounters, LifeState, MoneyChange, PendingInteraction } from '../types';
 import { INTERACTION_ROLE, isInteractionAvailable } from './availability';
+import { isPetInteractionInput, performPetInteraction } from '../possessions/interact';
 import { canAffordGift, extraChance, giftPrice } from './links';
 import { shiftMood } from './mood';
 import { availableTier, reactionScore, repeatsThisYear, returnsFactor, rollTier, type Repeats } from './reaction';
@@ -176,6 +177,8 @@ function addMoney(pending: PendingInteraction, now: MoneyChange | undefined): vo
  */
 export function performInteraction(state: LifeState, params: unknown, content: ContentBundle): LifeState {
   if (state.phase !== 'yearStart') throw new PhaseError(`Can't interact in the "${state.phase}" phase (expected "yearStart").`);
+  // E5: a pet interaction names a pet, not a person.
+  if (isPetInteractionInput(params)) return performPetInteraction(state, params, content);
   const p = parseInteractParams(params);
   const def = content.interactions[p.interactionId];
   const bad = (message: string) => new InvalidInputError([{ path: 'interaction', message }]);

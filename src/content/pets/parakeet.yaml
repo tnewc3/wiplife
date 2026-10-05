@@ -1,0 +1,11 @@
+id: parakeet
+name: parakeet
+blurb: "A small bird with a lot to say."
+lifespan: { min: 6, max: 10 }
+adoptCost: 40
+buyCost: 60
+yearlyCost: 120
+vetCost: 100
+sickChance: 0.07
+attention: 0.6
+personalities: { playful: 4, anxious: 3, stubborn: 3, lazy: 2 }

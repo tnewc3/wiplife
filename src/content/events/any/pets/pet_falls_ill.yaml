@@ -1,0 +1,49 @@
+id: pet_falls_ill
+title: Not eating
+text: >-
+  {pet.name} has left the bowl full for two days, and moves like it hurts. You
+  know your {petKind} well enough to be worried.
+tone: serious
+category: pets
+rarity: common
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { belongings: { pets: { gte: 1 }, petIll: true } }
+weight: { base: 14 }
+cooldownYears: 2
+bind: [pet]
+choices:
+  - id: vet
+    label: Take {pet.them} to the vet now
+    outcome:
+      text: >-
+        The vet doesn't make any promises, but {pet.name} is better within days. You
+        leave with a diagnosis, a bill and a very clear instruction to come back.
+      effects:
+        - { type: possession, action: pet_vet }
+        - { type: possession, action: pet_bond, delta: 4 }
+        - { type: stat, key: stress, delta: -2 }
+  - id: wait
+    label: Wait it out and watch closely
+    check:
+      base: 45
+      stats: [{ key: luck, weight: 0.3 }]
+      success:
+        text: By the next morning {pet.name} is eating again, as if nothing had happened. You do not stop checking.
+        effects:
+          - { type: stat, key: stress, delta: 2 }
+      failure:
+        text: "{pet.name} gets worse. You feel it in your stomach as much as in your head."
+        effects:
+          - { type: possession, action: pet_health, delta: -12 }
+          - { type: stat, key: stress, delta: 5 }
+          - { type: stat, key: happiness, delta: -2 }
+  - id: ask
+    label: Call a friend who knows animals
+    outcome:
+      text: You get advice, a few home tricks and a promise that it is probably nothing. It might be.
+      effects:
+        - { type: possession, action: pet_health, delta: -4 }
+        - { type: stat, key: stress, delta: 1 }

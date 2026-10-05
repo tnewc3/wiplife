@@ -2,6 +2,7 @@ id: home_health_aide
 name: "Home care"
 category: gig
 blurb: "Helping people stay in their own homes a little longer."
+vehicle: 0.8
 levels:
   - { title: "home health aide", salary: 29000, years: 1 }
   - { title: "senior aide", salary: 33000 }

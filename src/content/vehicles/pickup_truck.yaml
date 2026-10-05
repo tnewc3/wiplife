@@ -1,0 +1,10 @@
+id: pickup_truck
+name: pickup truck
+blurb: "Hauls anything, and gets asked to."
+kind: truck
+price: 46000
+upkeep: 3800
+service: 750
+insurance: 1200
+risk: 1.0
+used: true

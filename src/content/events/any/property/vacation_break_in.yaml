@@ -1,0 +1,33 @@
+id: vacation_break_in
+title: Nobody home in {homeCity}
+text: >-
+  The sheriff's call comes while you are at work: someone has been through your
+  place in {homeCity}. The door is broken, and the empty rooms have been taken
+  apart for anything small enough to carry.
+tone: dark
+category: property
+rarity: uncommon
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { belongings: { vacationHomes: { gte: 1 } } }
+weight: { base: 3 }
+cooldownYears: 10
+bind: [home]
+choices:
+  - id: repair
+    label: Fix the door and replace what's gone
+    outcome:
+      text: The locksmith is kind and the list is long. You leave with new locks, a new door and a quiet sense of being watched.
+      effects:
+        - { type: cost, item: theft_loss }
+        - { type: stat, key: stress, delta: 4 }
+  - id: alarm
+    label: Fix everything, and put in an alarm and cameras
+    outcome:
+      text: You spend more than the thieves ever took. The place is safer, and a little less free.
+      effects:
+        - { type: cost, item: theft_loss }
+        - { type: cost, item: home_repair }
+        - { type: stat, key: stress, delta: 2 }

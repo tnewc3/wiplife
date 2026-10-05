@@ -495,6 +495,29 @@ export const targetsBalanceSchema = z.strictObject({
     secretKnown: shareRangeSchema,
     eventShare: z.strictObject({ max: probabilitySchema }),
   }),
+  /**
+   * E5: pets, vehicles and homes (tools/simulate/possessions.ts), judged on the
+   * careful player's lives. Ranges may leave out min or max.
+   */
+  possessions: z.strictObject({
+    /** Of lives reaching 30, the share that ever had a pet; and the share that ever owned a vehicle. */
+    petOwners: shareRangeSchema,
+    vehicleOwners: shareRangeSchema,
+    /** Of the pets that died, the share that died within their species' lifespan range (all of them). */
+    petLifespanInRange: shareRangeSchema,
+    /** Accidents per 100 vehicle-years. */
+    accidentsPer100Years: numberRangeSchema,
+    /** The yearly insurance an insured vehicle costs (whole dollars), on average. */
+    insurancePerYear: numberRangeSchema,
+    /** Vehicle upkeep and insurance together, as a share of income in the years a vehicle is owned. */
+    carCostShare: shareRangeSchema,
+    /** Of all lives, the share that ever owned a vacation home. */
+    vacationHomeLives: shareRangeSchema,
+    /** Of the lives that owned a home (or a vacation home), the share that ever renovated one. */
+    renovationLives: shareRangeSchema,
+    /** The share of pet-years a pet is ill. */
+    illShare: shareRangeSchema,
+  }),
   coverage: z.strictObject({
     /** At least this many events (not retired). */
     minEvents: z.int().min(1),

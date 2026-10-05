@@ -3,6 +3,7 @@ name: "Security"
 category: gig
 blurb: "Watching the cameras so nobody else has to."
 requires: {"not": {"record": {"outcome": ["probation", "jail"]}}}
+vehicle: 0.4
 levels:
   - { title: "security guard", salary: 31000, years: 1 }
   - { title: "senior guard", salary: 35000 }

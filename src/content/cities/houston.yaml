@@ -6,6 +6,7 @@ blurb: "Affordable · Strong for skilled trades"
 costOfLiving: 0.95
 baseRent: 16800
 baseHomePrice: 290000
+carDependence: 0.9
 salaryMultiplier: 1.0
 jobMarket:
   professional: 65

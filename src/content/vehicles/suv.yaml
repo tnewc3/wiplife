@@ -1,0 +1,10 @@
+id: suv
+name: SUV
+blurb: "Room for everyone and everything."
+kind: car
+price: 42000
+upkeep: 3300
+service: 700
+insurance: 1150
+risk: 0.95
+used: true

@@ -45,7 +45,7 @@ export function estateFailures(state: LifeState, content: ContentBundle): string
   if (state.phase === 'dead' && !e) fail('a dead character has no estate settlement');
   if (e && state.phase !== 'dead') fail('an estate settlement before death');
   if (e) {
-    for (const key of ['savings', 'homeValue', 'mortgage', 'costs', 'debtsPaid', 'tax', 'writtenOff', 'mortgagePaid', 'saleCosts', 'netEstate', 'unclaimed'] as const) money(`estate.${key}`, e[key]);
+    for (const key of ['savings', 'homeValue', 'mortgage', 'costs', 'debtsPaid', 'tax', 'writtenOff', 'mortgagePaid', 'saleCosts', 'netEstate', 'unclaimed', 'possessionSales'] as const) money(`estate.${key}`, e[key]);
     let cash = 0;
     let equity = 0;
     let percent = 0;
@@ -65,10 +65,20 @@ export function estateFailures(state: LifeState, content: ContentBundle): string
     if (e.netEstate !== cash + equity + e.unclaimed) fail('estate.netEstate does not match the shares');
     // Nothing created or lost.
     const passesMortgage = e.home === 'passes' ? e.mortgage : 0;
-    const left = e.savings + e.homeValue - passesMortgage;
+    const left = e.savings + e.possessionSales + e.homeValue - passesMortgage;
     const used = e.costs + e.debtsPaid + e.tax + e.mortgagePaid + e.saleCosts + e.netEstate;
     if (left !== used) fail(`the estate held ${left} but ${used} was accounted for`);
     if (e.unclaimed > 0 && e.lines.length > 0) fail('cash is unclaimed although someone inherits');
+    // E5: possessions pass in kind to a beneficiary who is a person, each once, and never with more loan than they are worth.
+    const passed = new Set<string>();
+    for (const t of e.possessions) {
+      if (passed.has(t.possessionId)) fail(`possession ${t.possessionId} passes twice`);
+      passed.add(t.possessionId);
+      if (!e.lines.some((l) => l.kind === 'person' && l.id === t.toPersonId)) fail(`possession ${t.possessionId} passes to someone who is not a beneficiary`);
+      if (t.item.id !== t.possessionId) fail(`possession ${t.possessionId} is recorded as ${t.item.id}`);
+      if (t.item.kind !== 'pet' && t.loan > t.item.value) fail(`possession ${t.possessionId} passes with more owed (${t.loan}) than it is worth (${t.item.value})`);
+      if (t.item.kind === 'pet' && t.loan !== 0) fail('a pet passes with a loan');
+    }
   }
 
   // The family line.

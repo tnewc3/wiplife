@@ -1,0 +1,39 @@
+id: stray_at_the_door
+title: A thin cat at the door
+text: >-
+  The cat has been on your doorstep three evenings in a row. It is thin, it is
+  unafraid, and it is looking at you like the matter is already decided.
+tone: light
+category: pets
+rarity: uncommon
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { belongings: { pets: { lt: 4 } } }
+weight: { base: 4 }
+cooldownYears: 6
+choices:
+  - id: keep
+    label: Let it in, and take it to the vet
+    outcome:
+      text: >-
+        The vet says it is a healthy, well-fed troublemaker, and the cat spends
+        the drive home complaining about the carrier. By midnight it has taken
+        over the bed.
+      effects:
+        - { type: cost, item: vet_routine }
+        - { type: possession, action: pet_adopt, species: cat, source: stray }
+        - { type: stat, key: happiness, delta: 4 }
+  - id: shelter
+    label: Call the shelter and let them take it
+    outcome:
+      text: The shelter says they'll find it a place. You watch the carrier go down the steps and try not to feel like you lost something.
+      effects:
+        - { type: stat, key: kindness, delta: 1 }
+  - id: food
+    label: Leave out some food and see what happens
+    outcome:
+      text: The food is gone each morning. The cat never comes in. Some arrangements are simply what they are.
+      effects:
+        - { type: stat, key: happiness, delta: 1 }

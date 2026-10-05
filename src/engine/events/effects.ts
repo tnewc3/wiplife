@@ -4,7 +4,7 @@
  * src/content/schemas/events.ts and a handler here, without touching events.
  */
 import type { ContentBundle, Effect, EffectStatKey, EventDef } from '../../content/schemas';
-import { HIDDEN_KEYS, STAT_KEYS } from '../../content/schemas';
+import { HIDDEN_KEYS, POSSESSION_ROLES, STAT_KEYS } from '../../content/schemas';
 import {
   addDebt,
   canStartDebtPlan,
@@ -33,15 +33,16 @@ import { betray, giveMoney } from '../interactions/links';
 import { lifeHelp } from '../lives/help';
 import { applyIntroduce, applyKnowledge, applyTie, noteIdentityAccepted } from '../web/actions';
 import { shiftMood } from '../interactions/mood';
+import { applyPossessionEffect } from '../possessions/effects';
 import { whereabouts } from '../presence';
 import { clampInt } from '../random';
 import { otherCity } from './casting';
 import { canChangeKind, canSetStatus } from '../relationships';
 import { nextInt, type RngState } from '../rng';
 import { addHistory } from '../systems/history';
-import { renderText } from '../text';
+import { renderText, type TextContext } from '../text';
 import type { Id, LifeState } from '../types';
-import { textContext } from './text';
+import { keepPossessionText, textContext } from './text';
 
 export interface EffectContext {
   /** The event (or, for E1 interactions, the interaction) the effects come from: its id and rarity. */
@@ -51,6 +52,8 @@ export interface EffectContext {
   content: ContentBundle;
   /** A follow-up: the year the event that scheduled it happened ({since}). */
   since?: number;
+  /** E5: the text context made before the effects ran, so a possession an earlier effect removed is still named. */
+  named?: TextContext;
 }
 
 type Handler<T extends Effect['type']> = (state: LifeState, effect: Extract<Effect, { type: T }>, ctx: EffectContext) => void;
@@ -229,13 +232,17 @@ const handlers: { [T in Effect['type']]: Handler<T> } = {
     for (const role of effect.cast ?? []) {
       const id = ctx.cast[role];
       if (id !== undefined) cast[role] = id;
+      // E5: the pet, vehicle or vacation home the event is about travels as its pseudo-role.
+      const kept = role in POSSESSION_ROLES ? ctx.cast[POSSESSION_ROLES[role as keyof typeof POSSESSION_ROLES]] : undefined;
+      if (kept !== undefined) cast[POSSESSION_ROLES[role as keyof typeof POSSESSION_ROLES]] = kept;
     }
     const [min, max] = effect.inYears;
     state.scheduled.push({ eventId: effect.eventId, dueYear: state.currentYear + nextInt(ctx.rng, min, max), cast, since: state.currentYear });
   },
 
   history: (state, effect, ctx) => {
-    const text = renderText(effect.text, textContext(state, ctx.cast, ctx.content, ctx.since));
+    const now = textContext(state, ctx.cast, ctx.content, ctx.since);
+    const text = renderText(effect.text, ctx.named ? keepPossessionText(now, ctx.named) : now);
     const legendary = ctx.def.rarity === 'legendary';
     addHistory(
       state,
@@ -355,6 +362,9 @@ const handlers: { [T in Effect['type']]: Handler<T> } = {
   tie: (state, effect, ctx) => applyTie(state, effect, ctx.cast, ctx.content),
   knowledge: (state, effect, ctx) => applyKnowledge(state, effect, ctx.cast, ctx.rng, ctx.content),
   introduce: (state, effect, ctx) => applyIntroduce(state, effect, ctx.cast, ctx.rng, ctx.content),
+
+  // E5: what you own: damage, theft, a pet turning up, a vet visit, insurance.
+  possession: (state, effect, ctx) => applyPossessionEffect(state, effect, ctx.cast, ctx.content),
 
   // E3: money paid back to you, sized like the cost it repays.
   repay: (state, effect, ctx) => earn(state, wholeDollars(costPrice(state, effect.item, ctx.content) * effect.share)),

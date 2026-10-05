@@ -91,10 +91,10 @@ export interface AppState {
   archive: ArchiveListing | null;
   /** The archived life open on the Archived life screen. */
   archiveSelection: string | null;
-  /** The person open on the People tab, if any. */
+  /** The person open on the People tab, if any (E5: or a pet, by its possession id). */
   personId: string | null;
   /** A page open on the More tab (More → Home, More → Health), if any. */
-  moreView: 'home' | 'health' | 'family' | 'will' | null;
+  moreView: 'home' | 'health' | 'family' | 'will' | 'belongings' | null;
   /** E1: the Interact sheet open on a person's page: the grouped menu, or the gift price tiers. */
   /** The Interact sheet: the menu, a gift's price tiers, or (E4) the picker for an interaction that needs another person or a story first. */
   interactSheet: { personId: string; view: 'menu' | 'gift' | 'pick'; /** The interaction a picker is for. */ pick?: string } | null;
@@ -136,6 +136,8 @@ export interface AppState {
   openArchivedLife: (id: string) => void;
   /** Opens a person's page on the People tab. */
   openPerson: (id: string) => void;
+  /** E5: opens a pet's page on the People tab. */
+  openPet: (id: string) => void;
   /** Back from a person's page to the People list. */
   closePerson: () => void;
   /**
@@ -163,6 +165,8 @@ export interface AppState {
   openFamily: () => void;
   /** E2b: opens More → Write a will. */
   openWill: () => void;
+  /** E5: More → Belongings. */
+  openBelongings: () => void;
   /**
    * E2b: continues as one of the dead life's children (any age) and archives the dead life in the
    * same step. Ignored while the engine is working or when no life is waiting for an heir.
@@ -175,6 +179,10 @@ export interface AppState {
   /** E1: from the Interact sheet to the gift price tiers, and back. */
   setInteractView: (view: 'menu' | 'gift' | 'pick', pick?: string) => void;
   closeInteractions: () => void;
+  /** E5: opens the Interact sheet for a pet. */
+  openPetInteractions: (petId: string) => void;
+  /** E5: spends time with a pet (between years) and autosaves; the outcome card opens like any interaction's. */
+  interactPet: (interactionId: string, petId: string) => Promise<void>;
   /**
    * E1: does an interaction with a person (between years) and autosaves. The
    * outcome card then shows from the saved life, so it is still there after a
@@ -634,6 +642,11 @@ export function createAppStore({
             if (s.life?.people[id]) s.personId = id;
           }),
 
+        openPet: (id) =>
+          set((s) => {
+            if (s.life?.possessions.items.some((p) => p.id === id && p.kind === 'pet')) s.personId = id;
+          }),
+
         closePerson: () =>
           set((s) => {
             s.personId = null;
@@ -657,6 +670,22 @@ export function createAppStore({
             await commit(next);
             // A job application or a raise request answers with an event.
             if (next.phase === 'action') openEvents(next);
+          }),
+
+        openPetInteractions: (petId) =>
+          set((s) => {
+            if (s.life?.phase === 'yearStart' && s.life.possessions.items.some((p) => p.id === petId && p.kind === 'pet')) s.interactSheet = { personId: petId, view: 'menu' };
+          }),
+
+        interactPet: (interactionId, petId) =>
+          busy(async () => {
+            const life = get().life;
+            if (!life || life.phase !== 'yearStart' || get().eventSheet) return;
+            const next = performInteraction(life, { interactionId, petId }, bundle);
+            await commit(next);
+            set((s) => {
+              s.interactSheet = null;
+            });
           }),
 
         openInteractions: (personId) =>
@@ -723,6 +752,11 @@ export function createAppStore({
         openWill: () =>
           set((s) => {
             if (s.life) s.moreView = 'will';
+          }),
+
+        openBelongings: () =>
+          set((s) => {
+            if (s.life) s.moreView = 'belongings';
           }),
 
         chooseHeir: (heirId) =>

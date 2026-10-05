@@ -22,6 +22,7 @@ import { interactionRegistrySchema, interactionSchema, interactionsBalanceSchema
 import { newsTextSchema, peopleBalanceSchema, peopleRegistrySchema } from './people';
 import { webBalanceSchema, webRegistrySchema } from './web';
 import { mentalHealthBalanceSchema, mentalRegistrySchema } from './mental';
+import { petInteractionSchema, petSchema, possessionsBalanceSchema, possessionsRegistrySchema, possessionsTextSchema, renovationSchema, vehicleSchema } from './possessions';
 import { estateRegistrySchema, familyBalanceSchema, familyRegistrySchema, heirRegistrySchema, heirTextSchema } from './family';
 
 export * from './balance';
@@ -42,6 +43,7 @@ export * from './family';
 export * from './people';
 export * from './web';
 export * from './mental';
+export * from './possessions';
 
 /**
  * Collections: a folder under src/content with one YAML file per definition,
@@ -60,9 +62,13 @@ export const collectionTypes = {
   majors: { folder: 'majors', schema: majorSchema },
   names: { folder: 'names', schema: namePoolSchema },
   offenses: { folder: 'offenses', schema: offenseSchema },
+  petInteractions: { folder: 'petInteractions', schema: petInteractionSchema },
+  pets: { folder: 'pets', schema: petSchema },
   pronouns: { folder: 'pronouns', schema: pronounPresetSchema },
+  renovations: { folder: 'renovations', schema: renovationSchema },
   talents: { folder: 'talents', schema: talentSchema },
   trades: { folder: 'trades', schema: tradeSchema },
+  vehicles: { folder: 'vehicles', schema: vehicleSchema },
 } as const;
 
 export type CollectionKey = keyof typeof collectionTypes;
@@ -90,6 +96,7 @@ export const singletonTypes = {
   'balance/people': peopleBalanceSchema,
   'balance/web': webBalanceSchema,
   'balance/mental-health': mentalHealthBalanceSchema,
+  'balance/possessions': possessionsBalanceSchema,
   'balance/targets': targetsBalanceSchema,
   'character/identity': identityOptionsSchema,
   'character/appearance': appearanceOptionsSchema,
@@ -101,6 +108,7 @@ export const singletonTypes = {
   'text/time': timeTextSchema,
   'text/heir': heirTextSchema,
   'text/news': newsTextSchema,
+  'text/possessions': possessionsTextSchema,
   'registries/memories': memoryRegistrySchema,
   'registries/flags': flagRegistrySchema,
   'registries/categories': categoryRegistrySchema,
@@ -117,6 +125,7 @@ export const singletonTypes = {
   'registries/people': peopleRegistrySchema,
   'registries/web': webRegistrySchema,
   'registries/mental': mentalRegistrySchema,
+  'registries/possessions': possessionsRegistrySchema,
 } as const;
 
 export type SingletonPath = keyof typeof singletonTypes;
@@ -133,9 +142,13 @@ export const contentBundleSchema = z.strictObject({
   majors: z.record(z.string(), majorSchema),
   names: z.record(z.string(), namePoolSchema),
   offenses: z.record(z.string(), offenseSchema),
+  petInteractions: z.record(z.string(), petInteractionSchema),
+  pets: z.record(z.string(), petSchema),
   pronouns: z.record(z.string(), pronounPresetSchema),
+  renovations: z.record(z.string(), renovationSchema),
   talents: z.record(z.string(), talentSchema),
   trades: z.record(z.string(), tradeSchema),
+  vehicles: z.record(z.string(), vehicleSchema),
   balance: z.strictObject({
     creation: creationBalanceSchema,
     aging: agingBalanceSchema,
@@ -154,6 +167,7 @@ export const contentBundleSchema = z.strictObject({
     people: peopleBalanceSchema,
     web: webBalanceSchema,
     mentalHealth: mentalHealthBalanceSchema,
+    possessions: possessionsBalanceSchema,
     targets: targetsBalanceSchema,
   }),
   character: z.strictObject({ identity: identityOptionsSchema, appearance: appearanceOptionsSchema }),
@@ -166,6 +180,7 @@ export const contentBundleSchema = z.strictObject({
     time: timeTextSchema,
     heir: heirTextSchema,
     news: newsTextSchema,
+    possessions: possessionsTextSchema,
   }),
   registries: z.strictObject({
     memories: memoryRegistrySchema,
@@ -184,6 +199,7 @@ export const contentBundleSchema = z.strictObject({
     people: peopleRegistrySchema,
     web: webRegistrySchema,
     mental: mentalRegistrySchema,
+    possessions: possessionsRegistrySchema,
   }),
 });
 

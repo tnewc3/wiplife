@@ -1,0 +1,36 @@
+id: vacation_storm
+title: The call from {homeCity}
+text: >-
+  A neighbor in {homeCity} calls with a storm still raging behind the voice. A tree is down, and the roof of your place is not where it ought to be.
+tone: neutral
+category: property
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { belongings: { vacationHomes: { gte: 1 } } }
+weight: { base: 5 }
+cooldownYears: 6
+bind: [home]
+choices:
+  - id: repair
+    label: Hire someone to fix it right away
+    outcome:
+      text: A roofer you have never met sends photographs of your own ceiling. Within the week it is dry, patched and quietly better than before.
+      effects:
+        - { type: possession, action: home_damage, severity: minor }
+  - id: wait
+    label: Wait until you can get out there
+    check:
+      base: 50
+      stats: [{ key: luck, weight: 0.3 }]
+      success:
+        text: The damage is smaller than you feared. A bucket, a tarp and a long afternoon are enough.
+        effects:
+          - { type: possession, action: home_damage, severity: minor }
+      failure:
+        text: By the time you arrive the water has been through the walls, the floor and your patience.
+        effects:
+          - { type: possession, action: home_damage, severity: major }
+          - { type: stat, key: stress, delta: 6 }

@@ -1,0 +1,69 @@
+# Queued by the possessions step (registries/possessions.yaml accidents.drunk), by Vice and addiction.
+id: drove_home_drunk
+title: The keys
+text: >-
+  It is late, the room is warm, and you have had far more than you should. The
+  keys to the {vehicle} are in your hand. This is the part of the night where
+  you decide, and it already feels like you have.
+tone: dark
+category: vehicles
+rarity: uncommon
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { belongings: { vehicles: { gte: 1 } } }
+    - { hidden: vice, gt: 40 }
+weight: { base: 10 }
+followUpOnly: true
+bind: [vehicle]
+choices:
+  - id: drive
+    label: Drive home
+    check:
+      base: 50
+      stats: [{ key: luck, weight: 0.3 }, { key: discipline, weight: 0.2 }]
+      success:
+        text: You make it home with the radio too loud and the road too narrow, and you do not remember the last turn. You sit in the driveway shaking.
+        effects:
+          - { type: stat, key: vice, delta: 2 }
+          - { type: stat, key: stress, delta: 4 }
+      failure:
+        text: >-
+          You see the pole a moment too late. The {vehicle} is wrecked, you are in a
+          hospital bed with a police officer at the door, and the court hands down {sentence}.
+        effects:
+          - { type: possession, action: vehicle_damage, severity: major }
+          - { type: health, conditionId: broken_bone, severity: 30 }
+          - { type: legal, offenseId: dui, outcome: sentence }
+          - { type: mental, action: trauma, amount: 14 }
+          - { type: flag, key: drove_drunk_crash, value: true }
+          - { type: flag, key: dui_arrest, value: true }
+          - { type: flag, key: had_car_accident, value: true }
+          - { type: history, text: 'You crashed your {vehicle} after drinking, and were charged for it.', importance: 3 }
+          - { type: stat, key: reputation, delta: -8 }
+          - { type: stat, key: stress, delta: 10 }
+  - id: ride
+    label: Call a ride and leave the {vehicle} where it is
+    outcome:
+      text: The driver has opinions about everything and you listen to all of them. In the morning, you take a bus back for the {vehicle} and feel, for once, like an adult.
+      effects:
+        - { type: money, delta: -45 }
+        - { type: stat, key: discipline, delta: 3 }
+  - id: sleep
+    label: Sleep it off in the back seat
+    check:
+      base: 70
+      stats: [{ key: luck, weight: 0.3 }]
+      success:
+        text: A cold, uncomfortable night. In the morning, the sun comes up on a parking lot and a headache with nobody else involved.
+        effects:
+          - { type: stat, key: stress, delta: 3 }
+          - { type: stat, key: health, delta: -1 }
+      failure:
+        text: A knock on the glass at 2 a.m. The officer is polite, the field test is not, and the court hands down {sentence}.
+        effects:
+          - { type: legal, offenseId: dui, outcome: sentence }
+          - { type: flag, key: dui_arrest, value: true }
+          - { type: stat, key: reputation, delta: -4 }
+          - { type: stat, key: stress, delta: 6 }

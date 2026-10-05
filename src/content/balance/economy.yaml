@@ -67,6 +67,8 @@ interest:
     mortgage: 0.065
     medical: 0.02
     collections: 0.05
+    # E5: a car loan.
+    auto: 0.07
 
 debts:
   # A debt's yearly minimum payment would pay it off in this many years.
@@ -76,6 +78,7 @@ debts:
     mortgage: 30
     medical: 3
     collections: 4
+    auto: 5
   # No minimum payment is smaller than this (or the balance, if less).
   minPayment: 300
 
@@ -165,6 +168,20 @@ costs:
   flowers: { amount: 80, familyHelp: false }
   care_setup: { amount: 2000, familyHelp: false }
   care_extras: { amount: 500, familyHelp: false }
+  # E5: pets, vehicles and homes. A treat, a vet in an emergency, a small and a big car repair, a tow, what a
+  # break-in takes, and a repair to the home you live in.
+  pet_treat: { amount: 8, familyHelp: false }
+  pet_supplies: { amount: 90, familyHelp: false }
+  vet_emergency: { amount: 900, familyHelp: false }
+  vet_routine: { amount: 140, familyHelp: false }
+  car_repair_small: { amount: 450, familyHelp: false }
+  car_repair_big: { amount: 2400, familyHelp: false }
+  towing: { amount: 180, familyHelp: false }
+  traffic_fine: { amount: 240, familyHelp: false }
+  theft_loss: { amount: 650, familyHelp: false }
+  home_repair: { amount: 1800, familyHelp: false }
+  storm_repair: { amount: 4200, familyHelp: false }
+  vacation_week: { amount: 1400, familyHelp: false }
 
 # C1: the share of a cost your family covers, by family wealth, times how
 # close you are to your closest living parent (affection ÷ 100). Nothing

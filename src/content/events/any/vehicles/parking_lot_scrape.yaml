@@ -1,0 +1,36 @@
+# Queued by the possessions step (registries/possessions.yaml accidents.minor).
+id: parking_lot_scrape
+title: No note on the windshield
+text: >-
+  You come out of the store and find a long white scrape down the side of your
+  {vehicle}. Nobody left a note. Nobody ever does.
+tone: neutral
+category: vehicles
+rarity: common
+lifeStages: [teen, youngAdult, adult, senior]
+requires: { belongings: { vehicles: { gte: 1 } } }
+weight: { base: 8 }
+followUpOnly: true
+bind: [vehicle]
+choices:
+  - id: claim
+    label: File a claim
+    outcome:
+      text: The adjuster is brisk and kind. The body shop does the job in a week, and the claim goes on your record.
+      effects:
+        - { type: possession, action: vehicle_damage, severity: minor }
+        - { type: stat, key: stress, delta: 1 }
+  - id: fix
+    label: Pay a body shop yourself
+    outcome:
+      text: A man in a gray apron buffs it out in an afternoon and says it was not as bad as it looked.
+      effects:
+        - { type: cost, item: car_repair_small }
+        - { type: possession, action: vehicle_condition, delta: -1 }
+  - id: live
+    label: Live with it
+    outcome:
+      text: The scrape stays. After a while you stop seeing it, except at night, in parking lots.
+      effects:
+        - { type: possession, action: vehicle_condition, delta: -3 }
+        - { type: stat, key: stress, delta: 1 }

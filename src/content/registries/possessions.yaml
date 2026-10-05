@@ -1,0 +1,8 @@
+# The events the possessions step queues. Every event here is followUpOnly and
+# binds the possession it is about.
+accidents:
+  minor: { events: [fender_bender, parking_lot_scrape] }
+  major: { events: [highway_collision, black_ice] }
+  total: { events: [totaled_on_the_road] }
+  drunk: { events: [drove_home_drunk] }
+petDied: { events: [pet_passed_away, dog_passed_away] }

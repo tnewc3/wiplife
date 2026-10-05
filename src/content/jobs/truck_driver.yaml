@@ -3,6 +3,7 @@ name: "Trucking"
 category: trade
 blurb: "Long highways, truck stops and a lot of podcasts."
 requires: {"all": [{"age": {"gte": 21}}, {"not": {"record": {"outcome": ["probation", "jail"]}}}]}
+vehicle: 1.0
 levels:
   - { title: "trainee driver", salary: 40000 }
   - { title: "truck driver", salary: 52000 }

@@ -846,7 +846,7 @@ describe('events from the web', () => {
 
 describe('the web over whole lives', () => {
   it('keeps every invariant and replays exactly from the input log', () => {
-    let life = lifeAtAge('web-whole', 0);
+    let life = lifeAtAge('web-whole-2', 0);
     for (let y = 0; y < 50 && life.phase !== 'dead'; y++) {
       life = playYear(life, content);
       expect(webFailures(life, content), `age ${life.character.age}`).toEqual([]);

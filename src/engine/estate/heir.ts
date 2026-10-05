@@ -58,6 +58,7 @@ import { PhaseError } from '../life';
 import { receivePossessions } from './possessions';
 import { ensureStructure } from '../web/structure';
 import { emptyWeb } from '../web/ties';
+import { emptyPossessions } from '../possessions/query';
 
 /** A deep copy through JSON: the life holds plain data only (the engine has no structuredClone). */
 export function cloneJson<T>(value: T): T {
@@ -364,6 +365,7 @@ export function continueAsHeir(dead: LifeState, heirId: Id, content: ContentBund
     },
     news: [],
     web: emptyWeb(),
+    possessions: emptyPossessions(),
   };
 
   // ── What they inherit ────────────────────────────────────────────────────

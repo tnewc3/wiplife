@@ -1613,6 +1613,21 @@ The plan is in docs/expansion.md (M1); these notes say how it was built. It exte
 - **Saves:** schema version 15 (`mental` record added; depression and anxiety stay named, treated ones are in therapy; lives from before have no born-with conditions).
 - **Simulation** (`tools/simulate/mental.ts`): prevalence, naming (path and delay), inheritance, treatment choices and outcomes, the effect of care and of support on a year, noticing by where people live, crises and where they lead, and the diagnosis as a secret, with `mental` targets in `balance/targets.yaml`. The simulated player sees a therapist when stress is high or happiness low and starts care in its own preferred way.
 
+### E5 — Pets, Vehicles & Homes (as built)
+
+The plan is in docs/expansion.md (E5); these notes say how it was built. It extends finance and debt, housing, health, legal, careers, E1's interaction menu and E2b's estate hook; nothing was duplicated.
+
+- **Possessions** (`src/engine/possessions`, `LifeState.possessions`): one record of items (kind, definition, acquired year, value, condition, pet name) plus vacation homes and insurance claims. The `possessions` year step runs after `economy` and charges yearly upkeep through the ledger (`Ledger.upkeep`, `Ledger.insurance`); `netWorth` counts what you own.
+- **Pets** (`src/content/pets`, eight species): personality, health, bond, care costs, vet visits, aging and death. A lifespan is rolled at adoption within the species range; illness can shorten it only to the species minimum. A pet that dies stays one year, then is removed, and `pet_passed_away` or `dog_passed_away` (`registries/possessions.yaml`) is queued with it cast. People tab → Pets; pet interactions live in a separate `petInteractions` collection (play, walk, treat, train) routed through `performInteraction` when the payload has `petId`. Who keeps a pet in a divorce is the event `pet_after_divorce`, scheduled by each `divorce_papers` outcome.
+- **Vehicles** (`src/content/vehicles`, eight kinds): buy new or used, with cash or a car loan (new debt kind `auto`), depreciation and condition, maintenance, insurance premiums and claims, accidents (minor, major, total; drunk driving reuses the `dui` offense and links to health and legal), theft and selling. Premiums and accident odds come from `balance/possessions.yaml`.
+- **Jobs and cars:** `JobDef.vehicle` (0–1) times `CityDef.carDependence` (0–1) is the dependence. At or above `jobs.requireAt` the job needs a vehicle: applications are blocked (`JobApplyBlock 'vehicle'`), working without one lowers performance, and after `graceYears` the job is lost. This is deliberately outside `meetsJobRequirements`.
+- **Homes:** vacation homes are extra owned properties with their own `mortgage` debt; renovations (six kinds) raise value and comfort.
+- **Events bind possessions** through pseudo-roles `@pet`, `@vehicle`, `@home` in `cast` (`EventDef.bind`). `belongings` conditions check the bound possession (or any, if none is bound). Text gets `{pet.name}`, `{petKind}`, `{vehicle}`, `{homeCity}`. When an outcome removes the possession, the card keeps its own text (`EventInstance.card`) and the outcome and history text keep the name.
+- **Estate:** `planPossessions` runs inside settlement: attached loans pass with the item, an underwater item goes back to the lender, and items with no eligible taker (or in an insolvent estate) are sold into `Settlement.possessionSales`. Pets pass in kind to one beneficiary.
+- **Content:** about 38 events (categories `pets`, `vehicles`, `property`), checked by `tools/content/possessions.ts`: an event that binds a possession must require owning it (except the death events), an effect on a possession needs `bind`, and registry events are follow-up only.
+- **Saves:** schema version 16 (empty `possessions`, ledger `upkeep` and `insurance` of 0, housing `renovations`).
+- **Simulation** (`tools/simulate/possessions.ts`): the bot adopts, buys, insures, services, renovates and plays with pets; a watcher reports ownership, ages, accidents, claims, insurance and upkeep costs, vacation homes (and foreclosures) and renovations, with targets under `possessions` in `balance/targets.yaml`.
+
 ### Stage 11 — Polish
 
 **Objective:** Make it feel like a finished mobile game.

@@ -11,6 +11,7 @@ requires:
   all:
     - { age: { gte: 21 } }
     - { hidden: vice, gt: 40 }
+    - { belongings: { vehicles: { gte: 1 } } }
 weight:
   base: 3
   modifiers:

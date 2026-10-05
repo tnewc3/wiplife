@@ -1,0 +1,11 @@
+id: hamster
+name: hamster
+blurb: "Small, nocturnal, and very busy."
+lifespan: { min: 2, max: 3 }
+adoptCost: 25
+buyCost: 30
+yearlyCost: 90
+vetCost: 90
+sickChance: 0.1
+attention: 0.4
+personalities: { playful: 4, anxious: 3, stubborn: 2, lazy: 2 }

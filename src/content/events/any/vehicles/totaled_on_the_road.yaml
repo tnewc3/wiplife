@@ -1,0 +1,44 @@
+# Queued by the possessions step (registries/possessions.yaml accidents.total).
+id: totaled_on_the_road
+title: Nothing left to repair
+text: >-
+  The tow truck driver walks around your {vehicle} once and does not bother to
+  say it. The frame is bent, the glass is gone, and you are standing on the
+  shoulder with nothing but your phone and a pulse.
+tone: dark
+category: vehicles
+rarity: uncommon
+lifeStages: [teen, youngAdult, adult, senior]
+requires: { belongings: { vehicles: { gte: 1 } } }
+weight: { base: 10 }
+followUpOnly: true
+bind: [vehicle]
+cast:
+  helper: { support: true, optional: true, presence: anywhere }
+choices:
+  - id: wait
+    label: Wait for the paramedics
+    outcome:
+      text: >-
+        Nothing is broken, which the doctor keeps calling a miracle. You wake
+        the next morning stiff, shaken and without a car.
+      effects:
+        - { type: possession, action: vehicle_damage, severity: total }
+        - { type: health, conditionId: back_injury, severity: 15 }
+        - { type: mental, action: trauma, amount: 15 }
+        - { type: flag, key: had_car_accident, value: true }
+        - { type: history, text: 'Your {vehicle} was destroyed in a crash that you walked away from.', importance: 3 }
+        - { type: stat, key: stress, delta: 10 }
+  - id: call
+    label: Call {helper.name} to come and get you
+    visibleIf: { role: helper }
+    outcome:
+      text: '{helper.name} does not ask a single question until you are in the passenger seat with the heat on.'
+      effects:
+        - { type: possession, action: vehicle_damage, severity: total }
+        - { type: mental, action: trauma, amount: 12 }
+        - { type: memory, role: helper, tag: ride_after_crash }
+        - { type: relationship, role: helper, affection: 6, trust: 5 }
+        - { type: flag, key: had_car_accident, value: true }
+        - { type: history, text: 'Your {vehicle} was destroyed in a crash that you walked away from.', importance: 3 }
+        - { type: stat, key: stress, delta: 8 }

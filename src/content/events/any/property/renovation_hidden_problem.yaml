@@ -1,0 +1,34 @@
+id: renovation_hidden_problem
+title: Behind the wall
+text: >-
+  The contractor stops mid-sentence and calls you over. Behind the wall that was
+  supposed to be straightforward, there is something the house had been hiding for
+  decades.
+tone: neutral
+category: property
+rarity: uncommon
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { belongings: { renovated: true } }
+    - { home: { kind: [owned] } }
+weight: { base: 5 }
+cooldownYears: 8
+choices:
+  - id: fix
+    label: Fix it properly, whatever it takes
+    outcome:
+      text: >-
+        It is rot, old wiring and an unwelcome list of things the previous owner
+        never mentioned. The repair is not cheap, and the house is sound at last.
+      effects:
+        - { type: cost, item: home_repair }
+        - { type: stat, key: stress, delta: 4 }
+  - id: patch
+    label: Cover it up and carry on
+    outcome:
+      text: The contractor looks at you for a second too long, then does what you ask. You try not to think about what is behind the paint.
+      effects:
+        - { type: stat, key: stress, delta: 3 }
+        - { type: stat, key: discipline, delta: -1 }

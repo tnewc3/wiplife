@@ -8,7 +8,7 @@ import { z } from 'zod';
 import { curveSchema } from './balance';
 import { dollarsSchema, idSchema, scoreSchema } from './common';
 
-export const DEBT_KINDS = ['student', 'personal', 'mortgage', 'medical', 'collections'] as const;
+export const DEBT_KINDS = ['student', 'personal', 'mortgage', 'medical', 'collections', 'auto'] as const;
 export const debtKindSchema = z.enum(DEBT_KINDS);
 export type DebtKind = z.infer<typeof debtKindSchema>;
 
@@ -53,7 +53,7 @@ export type StatEffects = z.infer<typeof statEffectsSchema>;
 const perWealth = <T extends z.ZodType>(value: T) =>
   z.strictObject({ poor: value, working: value, middle: value, affluent: value, rich: value });
 const perDebtKind = <T extends z.ZodType>(value: T) =>
-  z.strictObject({ student: value, personal: value, mortgage: value, medical: value, collections: value });
+  z.strictObject({ student: value, personal: value, mortgage: value, medical: value, collections: value, auto: value });
 
 const lifestyleTierSchema = z.strictObject({
   /** Multiplies living costs. */

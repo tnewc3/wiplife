@@ -1,0 +1,44 @@
+# Queued by the possessions step when a pet dies (registries/possessions.yaml petDied): any pet but a dog.
+id: pet_passed_away
+title: Saying goodbye to {pet.name}
+text: >-
+  {pet.name} was your {petKind} for a long time, and the home keeps looking
+  for {pet.them}. The quiet is the worst part: nothing at the door, nothing at
+  your feet.
+tone: serious
+category: pets
+rarity: common
+lifeStages: [child, teen, youngAdult, adult, senior]
+requires: { belongings: { species: [cat, rabbit, hamster, parakeet, goldfish, bearded_dragon, guinea_pig] } }
+weight: { base: 10 }
+followUpOnly: true
+bind: [pet]
+choices:
+  - id: memorial
+    label: Hold a small memorial
+    outcome:
+      text: A shoebox, a few words, a photograph and a plant you will end up taking care of for years.
+      effects:
+        - { type: cost, item: pet_supplies }
+        - { type: flag, key: lost_a_pet, value: true }
+        - { type: history, text: 'You said goodbye to {pet.name}.', importance: 2 }
+        - { type: stat, key: happiness, delta: -4 }
+        - { type: stat, key: kindness, delta: 1 }
+  - id: talk
+    label: Tell someone how much {pet.they} meant
+    outcome:
+      text: You expected to feel silly. The other person does not laugh, and tells you about an animal of their own.
+      effects:
+        - { type: flag, key: lost_a_pet, value: true }
+        - { type: history, text: 'You said goodbye to {pet.name}.', importance: 2 }
+        - { type: stat, key: happiness, delta: -3 }
+        - { type: stat, key: stress, delta: -2 }
+  - id: quiet
+    label: Put the bowl away and keep going
+    outcome:
+      text: The bowl goes into a cupboard. The cupboard door stays shut for a long time.
+      effects:
+        - { type: flag, key: lost_a_pet, value: true }
+        - { type: history, text: 'You said goodbye to {pet.name}.', importance: 2 }
+        - { type: stat, key: happiness, delta: -5 }
+        - { type: stat, key: stress, delta: 3 }

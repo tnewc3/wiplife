@@ -47,6 +47,8 @@ function changesMoney(outcome: Outcome | undefined): boolean {
       e.type === 'debt' ||
       e.type === 'housing' ||
       e.type === 'legal' ||
+      // E5: damage, theft and a vet visit are paid (or paid out).
+      (e.type === 'possession' && (e.action === 'vehicle_damage' || e.action === 'vehicle_stolen' || e.action === 'vehicle_sell' || e.action === 'home_damage' || e.action === 'pet_vet')) ||
       // M1: a first visit for care and a one-time medical cost are paid, and so is a crisis.
       (e.type === 'mental' && (e.action === 'pay' || (e.action === 'start' && e.care !== 'support'))) ||
       (e.type === 'job' && e.action !== 'performance') ||

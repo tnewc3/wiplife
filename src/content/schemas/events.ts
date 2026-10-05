@@ -16,6 +16,7 @@ import {
   STAT_KEYS,
   TRAIT_KEYS,
 } from './common';
+import { DAMAGE_SEVERITIES, PET_PERSONALITIES, PET_SOURCES, POSSESSION_EFFECT_ACTIONS, POSSESSION_KINDS, VEHICLE_KINDS } from './belongings';
 import { debtKindSchema, housingKindSchema, lifestyleSchema } from './economy';
 import { FAMILY_DEEDS, GUARDIAN_KINDS, familyProcessSchema, parentingKeySchema } from './family';
 import { credentialTypeSchema, programSchema, tierSchema } from './education';
@@ -97,6 +98,7 @@ export type Condition =
   | { legal: LegalCondition }
   | { discovery: DiscoveryCondition }
   | { family: FamilyCondition }
+  | { belongings: BelongingsCondition }
   | { memory: { role: string; tag: string } }
   | {
       role: string;
@@ -340,6 +342,38 @@ export interface FamilyCondition {
   will?: boolean;
 }
 
+/**
+ * E5, what you own. pets, vehicles and vacationHomes count them (a pet that
+ * has died doesn't count). The other fields describe one pet, one vehicle or
+ * one home: the one the event is about (it binds it, see `bind`), or, in a
+ * requirement that doesn't bind, any that fits every field given. species,
+ * personality, petAge, petHealth, petBond and petIll are about a pet;
+ * vehicleKind, vehicleDef, vehicleAge, vehicleCondition, insured and loan
+ * about a vehicle (insured: it is; loan: a car loan is being paid on it);
+ * renovated: a home you own has been renovated (the one you live in or a
+ * vacation home; bound to one, that one); claims: insurance claims
+ * in the years that count toward the premium.
+ */
+export interface BelongingsCondition {
+  pets?: Compare;
+  vehicles?: Compare;
+  vacationHomes?: Compare;
+  species?: string[];
+  personality?: (typeof PET_PERSONALITIES)[number][];
+  petAge?: Compare;
+  petHealth?: Compare;
+  petBond?: Compare;
+  petIll?: boolean;
+  vehicleKind?: (typeof VEHICLE_KINDS)[number][];
+  vehicleDef?: string[];
+  vehicleAge?: Compare;
+  vehicleCondition?: Compare;
+  insured?: boolean;
+  loan?: boolean;
+  renovated?: boolean;
+  claims?: Compare;
+}
+
 const atLeastOneField = (c: Record<string, unknown>) => Object.values(c).some((v) => v !== undefined);
 const lifeConditionSchema = z
   .strictObject({
@@ -576,6 +610,29 @@ export const conditionSchema: z.ZodType<Condition> = z.lazy(() =>
         .optional(),
     }),
     z.strictObject({ tie: tieConditionSchema }),
+    z.strictObject({
+      belongings: z
+        .strictObject({
+          pets: compareSchema.optional(),
+          vehicles: compareSchema.optional(),
+          vacationHomes: compareSchema.optional(),
+          species: z.array(idSchema).min(1).optional(),
+          personality: z.array(z.enum(PET_PERSONALITIES)).min(1).optional(),
+          petAge: compareSchema.optional(),
+          petHealth: compareSchema.optional(),
+          petBond: compareSchema.optional(),
+          petIll: z.boolean().optional(),
+          vehicleKind: z.array(z.enum(VEHICLE_KINDS)).min(1).optional(),
+          vehicleDef: z.array(idSchema).min(1).optional(),
+          vehicleAge: compareSchema.optional(),
+          vehicleCondition: compareSchema.optional(),
+          insured: z.boolean().optional(),
+          loan: z.boolean().optional(),
+          renovated: z.boolean().optional(),
+          claims: compareSchema.optional(),
+        })
+        .refine(atLeastOneField, 'needs at least one field'),
+    }),
   ]),
 ) as z.ZodType<Condition>;
 
@@ -1004,6 +1061,35 @@ export const effectSchema = z.discriminatedUnion('type', [
     with: roleSchema,
     result: z.enum(['friends', 'romance', 'rivalry', 'feud']),
   }),
+  /**
+   * E5, what you own (the event must bind what it acts on, except pet_adopt).
+   * vehicle_damage / home_damage: your vehicle (or vacation home) is damaged
+   * by `severity`: you pay the repair (insured, you pay the deductible and a
+   * claim is made, which raises premiums; a total loss is paid out by the
+   * insurer, or lost). vehicle_stolen: it is gone (paid out when insured).
+   * vehicle_sell: you sell it at its market price (its loan paid first).
+   * vehicle_condition: its condition moves by `delta` (a repair, a breakdown).
+   * pet_adopt: a pet of `species` joins you from `source` (a stray, a family
+   * pet), if you have room. pet_health / pet_bond: the pet's health or bond
+   * moves by `delta`. pet_vet: a vet visit, paid. pet_leaves: it goes
+   * somewhere else (rehomed, left with the family you've parted from). pet_dies: it
+   * dies (only an old or failing pet; the engine ignores it otherwise).
+   * insure: your vehicles' insurance is cancelled (`insured: false`) or restored.
+   */
+  z
+    .strictObject({
+      type: z.literal('possession'),
+      action: z.enum(POSSESSION_EFFECT_ACTIONS),
+      severity: z.enum(DAMAGE_SEVERITIES).optional(),
+      delta: z.int().min(-100).max(100).optional(),
+      species: idSchema.optional(),
+      source: z.enum(PET_SOURCES).optional(),
+      insured: z.boolean().optional(),
+    })
+    .refine((e) => (e.action === 'vehicle_damage' || e.action === 'home_damage') === (e.severity !== undefined), 'vehicle_damage and home_damage need severity (and only they have one)')
+    .refine((e) => (e.action === 'pet_health' || e.action === 'pet_bond' || e.action === 'vehicle_condition') === (e.delta !== undefined && e.delta !== 0), 'pet_health, pet_bond and vehicle_condition need a non-zero delta (and only they have one)')
+    .refine((e) => (e.action === 'pet_adopt') === (e.species !== undefined && e.source !== undefined), 'pet_adopt needs species and source (and only it has them)')
+    .refine((e) => (e.action === 'insure') === (e.insured !== undefined), 'insure needs insured (and only it has it)'),
 ]);
 export type Effect = z.infer<typeof effectSchema>;
 
@@ -1086,6 +1172,12 @@ export const eventSchema = baseDefSchema
      */
     followUpOnly: z.boolean().optional(),
     cast: z.record(roleSchema, castSpecSchema).optional(),
+    /**
+     * E5: the possessions the event is about: a pet, a vehicle, a vacation
+     * home. One of each is picked among those that fit the requirements, and
+     * the event's text can name them ({pet.name}, {vehicle}, {homeCity}).
+     */
+    bind: z.array(z.enum(POSSESSION_KINDS)).min(1).optional(),
     choices: z.array(choiceSchema).min(2).max(4).optional(),
     autoOutcome: outcomeSchema.optional(),
   })

@@ -1,0 +1,37 @@
+id: pet_and_partner
+title: Whose pet is this
+text: >-
+  {mate.name} is on the couch with {pet.name} asleep across {mate.their} lap. The
+  two of them have clearly decided something without you.
+tone: light
+category: pets
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { romance: [dating] }
+    - { belongings: { pets: { gte: 1 } } }
+weight: { base: 6 }
+cooldownYears: 5
+bind: [pet]
+cast:
+  mate: { kind: partner, presence: nearby }
+choices:
+  - id: share
+    label: Make room on the couch
+    outcome:
+      text: >-
+        The three of you take up far too much space. {mate.name} says something
+        about how this feels like a home, and neither of you finishes the thought.
+      effects:
+        - { type: relationship, role: mate, affection: 6, trust: 3 }
+        - { type: possession, action: pet_bond, delta: 3 }
+        - { type: stat, key: happiness, delta: 3 }
+  - id: jealous
+    label: Feel a little jealous, and say so
+    outcome:
+      text: "{mate.name} laughs, then realizes you mean it. It leads to an honest, slightly ridiculous conversation."
+      effects:
+        - { type: relationship, role: mate, trust: 4 }
+        - { type: stat, key: confidence, delta: 1 }

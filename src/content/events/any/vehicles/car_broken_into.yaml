@@ -1,0 +1,35 @@
+id: car_broken_into
+title: Broken glass on the seat
+text: >-
+  You find the {vehicle} with a window smashed in and the glove box open. The
+  thieves took whatever they could carry and none of what they could not.
+tone: neutral
+category: vehicles
+rarity: common
+lifeStages: [teen, youngAdult, adult, senior]
+requires: { belongings: { vehicles: { gte: 1 } } }
+weight:
+  base: 5
+  modifiers:
+    - { if: { city: nyc }, x: 1.6 }
+    - { if: { city: los_angeles }, x: 1.4 }
+cooldownYears: 5
+bind: [vehicle]
+choices:
+  - id: replace
+    label: Replace the window and what was taken
+    outcome:
+      text: A man with a plastic sheet and a shop vacuum fixes it in an hour. The things inside are not as easy to replace.
+      effects:
+        - { type: cost, item: theft_loss }
+        - { type: possession, action: vehicle_condition, delta: -1 }
+        - { type: stat, key: stress, delta: 3 }
+  - id: lock_up
+    label: Do all that, and start parking in a garage
+    outcome:
+      text: The garage is further from your door and a lot more expensive. You sleep better, and the {vehicle} stays in one piece.
+      effects:
+        - { type: cost, item: theft_loss }
+        - { type: cost, item: car_repair_small }
+        - { type: stat, key: stress, delta: 1 }
+        - { type: stat, key: discipline, delta: 1 }

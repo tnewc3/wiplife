@@ -1,0 +1,49 @@
+id: car_wont_start
+title: Click, click, nothing
+text: >-
+  You turn the key and the {vehicle} gives you a dry little click and nothing
+  else. It has been making noises for a while now. This one is different.
+tone: neutral
+category: vehicles
+rarity: common
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { belongings: { vehicles: { gte: 1 }, vehicleCondition: { lt: 55 } } }
+weight:
+  base: 9
+  modifiers:
+    - { if: { belongings: { vehicleCondition: { lt: 30 } } }, x: 2 }
+cooldownYears: 2
+bind: [vehicle]
+choices:
+  - id: tow
+    label: Have it towed and properly repaired
+    outcome:
+      text: A flatbed, a long afternoon in a waiting room and a mechanic who explains everything. It runs better than it has in years.
+      effects:
+        - { type: cost, item: towing }
+        - { type: cost, item: car_repair_small }
+        - { type: possession, action: vehicle_condition, delta: 14 }
+  - id: jump
+    label: Try to get it going yourself
+    check:
+      base: 50
+      stats: [{ key: discipline, weight: 0.3 }, { key: smarts, weight: 0.2 }]
+      success:
+        text: A set of cables from a neighbor, a second battery and a lot of patience. It coughs, and it catches.
+        effects:
+          - { type: possession, action: vehicle_condition, delta: 3 }
+          - { type: stat, key: confidence, delta: 1 }
+      failure:
+        text: Two hours, one busted knuckle and a call to a tow truck you did not want to call.
+        effects:
+          - { type: cost, item: towing }
+          - { type: stat, key: stress, delta: 4 }
+  - id: bus
+    label: Leave it for a few days and take the bus
+    outcome:
+      text: The bus adds an hour to your day. The {vehicle} sits and waits, and does not get any younger.
+      effects:
+        - { type: possession, action: vehicle_condition, delta: -4 }
+        - { type: stat, key: stress, delta: 3 }

@@ -2,6 +2,7 @@ id: retail_associate
 name: "Retail"
 category: gig
 blurb: "Folding the same sweaters, forever."
+vehicle: 0.3
 levels:
   - { title: "sales associate", salary: 28000, years: 1 }
   - { title: "key holder", salary: 31000 }

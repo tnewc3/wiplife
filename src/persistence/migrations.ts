@@ -232,6 +232,24 @@ export const migrations: readonly Migration[] = [
       return { ...data, health: { ...data.health, conditions, mental: { trauma: 0, noticed: {}, past: {}, crises: 0 } } };
     },
   },
+  {
+    from: 15,
+    description:
+      'E5: pets, vehicles and homes. A life starts owning nothing ("possessions" on the life), and nobody is given a ' +
+      'pet, a car or a vacation home they never had. The yearly ledger gains two lines, upkeep and insurance, which are ' +
+      'zero for every year already kept. An estate settled before this stage passed no possessions and sold none.',
+    migrate: (data) => {
+      if (!isRecord(data)) return data;
+      const finances = isRecord(data.finances)
+        ? {
+            ...data.finances,
+            ...(isRecord(data.finances.lastLedger) ? { lastLedger: { ...data.finances.lastLedger, upkeep: 0, insurance: 0 } } : {}),
+          }
+        : data.finances;
+      const estate = isRecord(data.estate) ? { ...data.estate, possessionSales: 0 } : data.estate;
+      return { ...data, finances, estate, possessions: { items: [], nextId: 1, claims: [], noVehicleYears: 0 } };
+    },
+  },
 ];
 
 function isRecord(value: unknown): value is Record<string, unknown> {

@@ -2,6 +2,7 @@ id: warehouse_worker
 name: "Warehouse work"
 category: gig
 blurb: "Boxes, scanners and a step counter that never stops."
+vehicle: 0.4
 levels:
   - { title: "warehouse associate", salary: 34000, years: 1 }
   - { title: "forklift operator", salary: 38000 }

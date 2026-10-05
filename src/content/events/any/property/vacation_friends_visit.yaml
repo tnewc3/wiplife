@@ -1,0 +1,35 @@
+id: vacation_friends_visit
+title: A house with a view
+text: >-
+  {friend.name} has seen the photographs of your place in {homeCity} and has
+  been very casual about wanting to see it in person. The message ends with
+  "no pressure" and three exclamation marks.
+tone: light
+category: property
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { belongings: { vacationHomes: { gte: 1 } } }
+weight: { base: 6 }
+cooldownYears: 4
+bind: [home]
+cast:
+  friend: { kind: friend, presence: anywhere }
+choices:
+  - id: host
+    label: Host a long weekend
+    outcome:
+      text: The cooler is full, the grill is lit and the porch has more people on it than it was ever meant for. You end up on the dock after midnight, talking about nothing.
+      effects:
+        - { type: cost, item: celebration_dinner }
+        - { type: memory, role: friend, tag: vacationed_with_you }
+        - { type: relationship, role: friend, affection: 9, trust: 4 }
+        - { type: stat, key: happiness, delta: 5 }
+  - id: later
+    label: Say it is not a good time
+    outcome:
+      text: "{friend.name} takes it well. The photographs stay photographs, and you can feel the invitation getting colder."
+      effects:
+        - { type: relationship, role: friend, affection: -3 }

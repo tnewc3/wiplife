@@ -1,0 +1,10 @@
+id: sports_car
+name: sports car
+blurb: "Fast, loud and expensive to insure."
+kind: car
+price: 62000
+upkeep: 4200
+service: 1100
+insurance: 2000
+risk: 1.8
+used: true

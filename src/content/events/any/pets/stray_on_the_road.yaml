@@ -1,0 +1,40 @@
+id: stray_on_the_road
+title: A dog by the road
+text: >-
+  The dog is limping along the shoulder with no collar, looking at every car
+  as if it might be the one. You are slowing down before you decide to.
+tone: neutral
+category: pets
+rarity: uncommon
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { belongings: { pets: { lt: 4 } } }
+weight: { base: 3 }
+cooldownYears: 8
+choices:
+  - id: keep
+    label: Pull over, and take the dog to a vet
+    outcome:
+      text: >-
+        A sore paw, a few ticks and no chip. The vet shrugs, and you realize
+        you have been scratching the dog's ears for ten minutes without
+        deciding anything. The dog has.
+      effects:
+        - { type: cost, item: vet_routine }
+        - { type: possession, action: pet_adopt, species: dog, source: stray }
+        - { type: stat, key: happiness, delta: 5 }
+  - id: call
+    label: Call animal control and wait with the dog
+    outcome:
+      text: You stay until the truck comes. The dog lets itself be lifted in without a fuss, and looks back once.
+      effects:
+        - { type: stat, key: kindness, delta: 1 }
+        - { type: stat, key: stress, delta: 2 }
+  - id: drive
+    label: Keep driving
+    outcome:
+      text: You tell yourself someone else will stop. You think about it for the rest of the drive.
+      effects:
+        - { type: stat, key: happiness, delta: -2 }

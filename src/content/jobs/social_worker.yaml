@@ -3,6 +3,7 @@ name: "Social work"
 category: professional
 blurb: "Helping people through the worst years of their lives."
 requires: {"any": [{"education": {"credential": ["bachelor"], "field": ["psychology"]}}, {"education": {"credential": ["grad"], "field": ["masters"]}}]}
+vehicle: 0.6
 levels:
   - { title: "case worker", salary: 40000 }
   - { title: "social worker", salary: 50000 }

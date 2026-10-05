@@ -1,0 +1,11 @@
+id: bearded_dragon
+name: bearded dragon
+blurb: "A calm lizard with opinions about lettuce."
+lifespan: { min: 8, max: 12 }
+adoptCost: 90
+buyCost: 250
+yearlyCost: 180
+vetCost: 140
+sickChance: 0.07
+attention: 0.3
+personalities: { playful: 2, anxious: 2, stubborn: 3, lazy: 5 }

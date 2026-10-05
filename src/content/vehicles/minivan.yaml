@@ -1,0 +1,10 @@
+id: minivan
+name: minivan
+blurb: "A rolling living room for a family."
+kind: van
+price: 38000
+upkeep: 3000
+service: 650
+insurance: 1100
+risk: 0.9
+used: true
