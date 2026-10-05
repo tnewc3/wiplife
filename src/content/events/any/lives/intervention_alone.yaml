@@ -1,0 +1,51 @@
+# Request (intervention): you are the one who sees it.
+id: intervention_alone
+title: Someone has to say it
+text: >-
+  Nobody else will say it, so it falls to you. {npc.name} is not doing well:
+  the missed calls, the bad weeks, the look of someone half-living. You've
+  watched it for a while. This might be the day to talk about it.
+tone: serious
+category: lives
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { role: npc, alive: true, age: { gte: 18 }, kind: [sibling, friend, child, parent, grandparent], where: [household, city], life: { trouble: [addiction], serious: true } }
+weight: { base: 8 }
+followUpOnly: true
+cast:
+  npc: { support: true, presence: nearby }
+choices:
+  - id: talk
+    label: Sit down with {npc.them} and say it plainly
+    check:
+      base: 40
+      stats:
+        - { role: npc, key: trust, weight: 0.4 }
+        - { key: kindness, weight: 0.2 }
+      success:
+        text: >-
+          {npc.name} doesn't deny it. There's a long quiet, and then a small
+          nod. "I'm tired," {npc.they} {npc:says|say}. "I don't know how to stop."
+        effects:
+          - { type: lifeHelp, role: npc, action: rehab }
+          - { type: relationship, role: npc, affection: 6, trust: 10 }
+          - { type: memory, role: npc, tag: staged_their_intervention }
+      failure:
+        text: >-
+          "Mind your business," {npc.name} says, and shuts the door. You stand
+          in the hallway, shaking a little.
+        effects:
+          - { type: relationship, role: npc, affection: -7, trust: -6 }
+          - { type: stat, key: stress, delta: 4 }
+  - id: wait
+    label: Wait until {npc.they} {npc:asks|ask}
+    outcome:
+      text: >-
+        You tell yourself you'll wait for the right moment. The right moment
+        seems to be in the next room, behind a closed door.
+      effects:
+        - { type: relationship, role: npc, affection: -2 }
+        - { type: stat, key: stress, delta: 2 }

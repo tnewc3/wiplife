@@ -13,6 +13,7 @@ import {
   forgiveDebts,
   isIndependent,
   spend,
+  wholeDollars,
   startDebtPlan,
 } from '../finance';
 import { afterMove, canTakeJob, checkJobFits, endJob, giveRaise, promote, startJob } from '../career';
@@ -21,13 +22,14 @@ import { applyIdentity, discoverTalent } from '../discovery';
 import { changeSeverity, setTreated } from '../health';
 import { sentence } from '../legal';
 import { changeRent, moveInTogether, moveTo, refreshHousingCost, sellHome, settleHousehold, supportingParent } from '../housing';
-import { payCost, rentMonthsAmount } from '../costs';
+import { costPrice, payCost, rentMonthsAmount } from '../costs';
 import { createStepchildren } from '../family/children';
 import { applyCustody } from '../family/custody';
 import { shiftParenting } from '../family/parenting';
 import { beginPregnancy, decidePregnancy, failAttempt } from '../family/pregnancy';
 import { startProcess } from '../family/process';
 import { betray, giveMoney } from '../interactions/links';
+import { lifeHelp } from '../lives/help';
 import { shiftMood } from '../interactions/mood';
 import { whereabouts } from '../presence';
 import { clampInt } from '../random';
@@ -87,7 +89,7 @@ const handlers: { [T in Effect['type']]: Handler<T> } = {
     if (!isIndependent(state, ctx.content)) return;
     switch (effect.action) {
       case 'add':
-        if (effect.kind && effect.amount) addDebt(state, effect.kind, effect.amount, ctx.content);
+        if (effect.kind && (effect.amount || effect.item)) addDebt(state, effect.kind, effect.amount ?? costPrice(state, effect.item!, ctx.content), ctx.content);
         return;
       case 'forgive':
         forgiveDebts(state, effect.share ?? 0, ctx.content, effect.kinds);
@@ -335,6 +337,15 @@ const handlers: { [T in Effect['type']]: Handler<T> } = {
 
   // E2a: an adoption, IVF cycle or surrogacy begins (its fees are cost effects beside this one).
   process: (state, effect, ctx) => startProcess(state, ctx.rng, effect.process, ctx.content),
+
+  // E3: you step in for someone (bail, rehab, treatment, a job lead, care).
+  lifeHelp: (state, effect, ctx) => {
+    const id = ctx.cast[effect.role];
+    if (id !== undefined) lifeHelp(state, id, effect.action, ctx.rng, ctx.content);
+  },
+
+  // E3: money paid back to you, sized like the cost it repays.
+  repay: (state, effect, ctx) => earn(state, wholeDollars(costPrice(state, effect.item, ctx.content) * effect.share)),
 };
 
 /** Applies effects in order. */

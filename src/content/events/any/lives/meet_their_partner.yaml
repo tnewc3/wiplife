@@ -1,0 +1,45 @@
+# Request (newPartner): someone close wants you to meet the person they've started seeing.
+id: meet_their_partner
+title: Someone for you to meet
+text: >-
+  {npc.name}, your {npc.relation}, has been seeing someone: {npc.partner}.
+  Now {npc.they} {npc:wants|want} you to meet them, and the invitation has the
+  careful casualness of a person who needs it to go well.
+tone: neutral
+category: lives
+rarity: common
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 16 } }
+    - { role: npc, alive: true, age: { gte: 18 }, kind: [parent, sibling, friend, child, grandparent, relative], life: { partner: [dating] } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  npc: { support: true, presence: anywhere }
+choices:
+  - id: warm
+    label: Be warm, and ask {npc.partner} a lot of questions
+    outcome:
+      text: >-
+        You ask about work, about home, about the worst date they ever had.
+        {npc.partner} relaxes by dessert. On the way out {npc.name} squeezes your arm.
+      effects:
+        - { type: relationship, role: npc, affection: 7, trust: 5 }
+        - { type: stat, key: happiness, delta: 1 }
+  - id: sizing_up
+    label: Keep your guard up until they've earned it
+    outcome:
+      text: >-
+        You are polite and give nothing away. {npc.name} notices, and so does
+        {npc.partner}. The evening ends a little earlier than planned.
+      effects:
+        - { type: relationship, role: npc, affection: -4, trust: 2 }
+  - id: busy
+    label: Say you can't make it this time
+    outcome:
+      text: >-
+        You tell {npc.name} you'll meet them another time. Another time has a
+        way of not arriving.
+      effects:
+        - { type: relationship, role: npc, affection: -3 }

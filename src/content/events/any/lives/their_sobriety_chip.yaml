@@ -1,0 +1,53 @@
+# Request (recovered): someone close has beaten an addiction.
+id: their_sobriety_chip
+title: A chip and a cake
+text: >-
+  {npc.name} has made it. Not a day of it was easy, and {npc.they}
+  {npc:wants|want} you to be in the room when someone hands {npc.them} the
+  little coin that says so. The meeting is plain, and the cake is
+  from a grocery store.
+tone: light
+category: lives
+rarity: uncommon
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 16 } }
+    - { role: npc, alive: true, age: { gte: 18 }, kind: [parent, sibling, friend, child, grandparent, relative], life: { recovered: 2 } }
+weight: { base: 7 }
+followUpOnly: true
+cast:
+  npc: { support: true, presence: anywhere }
+choices:
+  - id: call
+    label: Call and tell {npc.them} how proud you are
+    outcome:
+      text: >-
+        You say the word "proud" three times because it won't stop being true.
+        {npc.name} laughs, and the laugh turns into something else.
+      effects:
+        - { type: relationship, role: npc, affection: 7, trust: 6 }
+        - { type: stat, key: happiness, delta: 2 }
+  - id: go
+    label: Be in the room
+    visibleIf: { role: npc, where: [household, city] }
+    outcome:
+      text: >-
+        {npc.name} stands up, says a few quiet words, and sits back down. You
+        clap until your hands sting. Nobody here is a stranger by the end.
+      effects:
+        - { type: relationship, role: npc, affection: 10, trust: 9 }
+        - { type: stat, key: happiness, delta: 3 }
+  - id: thanked
+    label: Hear {npc.them} say it began with you
+    visibleIf:
+      any:
+        - { memory: { role: npc, tag: paid_for_their_treatment } }
+        - { memory: { role: npc, tag: staged_their_intervention } }
+    outcome:
+      text: >-
+        "I wouldn't be here if you hadn't shown up," {npc.name} says, in front
+        of the room. You didn't know you were going to cry. You do.
+      effects:
+        - { type: relationship, role: npc, affection: 12, trust: 12 }
+        - { type: stat, key: happiness, delta: 4 }

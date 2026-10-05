@@ -1,0 +1,65 @@
+# Request (moneyTrouble): someone short of money needs a cosigner for a car.
+id: cosign_car_loan
+title: A car to get to work
+text: >-
+  {npc.name} needs a car to get to a job that's too far for the bus. The
+  bank will lend the money only with a cosigner, and {npc.they} {npc:has|have}
+  asked you the way people ask for a kidney.
+tone: serious
+category: lives
+rarity: common
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 21 } }
+    - { role: npc, alive: true, age: { gte: 18 }, kind: [sibling, friend, child, parent, relative], life: { wealth: [poor, working] } }
+    - { not: { finances: { collections: true } } }
+    - { not: { flag: cosigned_a_loan } }
+weight: { base: 8 }
+followUpOnly: true
+cast:
+  npc: { support: true, presence: anywhere }
+choices:
+  - id: cosign
+    label: Cosign for {npc.them}
+    check:
+      base: 70
+      stats:
+        - { role: npc, key: trust, weight: 0.3 }
+      success:
+        text: >-
+          The car is old and the paperwork is long. {npc.name} drives you
+          to lunch in it with the radio too loud.
+        effects:
+          - { type: flag, key: cosigned_a_loan, value: true }
+          - { type: relationship, role: npc, affection: 8, trust: 8 }
+          - { type: memory, role: npc, tag: cosigned_for_them }
+          - { type: schedule, eventId: cosign_paid_off, inYears: [2, 4], cast: [npc] }
+      failure:
+        text: >-
+          The car breaks down, and so, soon afterwards, do the payments. The
+          bank has your number now.
+        effects:
+          - { type: flag, key: cosigned_a_loan, value: true }
+          - { type: relationship, role: npc, affection: 4, trust: 1 }
+          - { type: memory, role: npc, tag: cosigned_for_them }
+          - { type: schedule, eventId: cosign_default, inYears: [1, 3], cast: [npc] }
+  - id: help_look
+    label: Offer to help find something cheaper
+    outcome:
+      text: >-
+        You spend three Saturdays kicking tires. {npc.name} ends up with a
+        smaller car and a smaller payment, and both of you are satisfied.
+      effects:
+        - { type: cost, item: moving_help }
+        - { type: relationship, role: npc, affection: 6, trust: 5 }
+        - { type: memory, role: npc, tag: you_helped_them }
+  - id: refuse
+    label: Say no and explain
+    outcome:
+      text: >-
+        You tell {npc.name} you have a rule about cosigning, and it's not about
+        {npc.them}. {npc.They} {npc:says|say} {npc.they} {npc:understands|understand}.
+        You both know it stings.
+      effects:
+        - { type: relationship, role: npc, affection: -6, trust: -2 }

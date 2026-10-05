@@ -1,0 +1,77 @@
+# Request (released): someone close is out and needs work.
+id: released_job_lead
+title: A second chance, if someone gives one
+text: >-
+  {npc.name} is out and looking for work, and every application ends at the
+  same box on the form. "I'm not asking for charity," {npc.they} {npc:says|say}.
+  "I'm asking if you know anyone who gives people a chance."
+tone: serious
+category: lives
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { role: npc, alive: true, age: { gte: 18 }, kind: [parent, sibling, friend, child, grandparent, relative], life: { employed: false } }
+weight: { base: 6 }
+followUpOnly: true
+cast:
+  npc: { support: true, presence: anywhere }
+choices:
+  - id: calls
+    label: Make some calls on {npc.their} behalf
+    outcome:
+      text: >-
+        Four calls, two dead ends, and one old acquaintance who runs a small
+        shop and says to send {npc.them} by. {npc.name} gets the job.
+      effects:
+        - { type: lifeHelp, role: npc, action: job_lead }
+        - { type: relationship, role: npc, affection: 8, trust: 7 }
+        - { type: memory, role: npc, tag: helped_them_find_work }
+        - { type: stat, key: stress, delta: 2 }
+  - id: vouch
+    label: Put in a word where you work
+    visibleIf: { career: { employed: true, retired: false } }
+    check:
+      base: 55
+      stats:
+        - { job: performance, weight: 0.3 }
+        - { role: npc, key: trust, weight: 0.2 }
+      success:
+        text: >-
+          Your boss reads the application twice, then says, "If you vouch for
+          them, that's good enough." {npc.name} starts on Monday.
+        effects:
+          - { type: lifeHelp, role: npc, action: job_lead }
+          - { type: relationship, role: npc, affection: 10, trust: 9 }
+          - { type: memory, role: npc, tag: helped_them_find_work }
+      failure:
+        text: >-
+          HR says the policy doesn't allow it, and your boss looks at you a
+          little differently for asking.
+        effects:
+          - { type: relationship, role: npc, affection: 3, trust: 3 }
+          - { type: job, action: performance, value: -4 }
+  - id: owed_ride
+    label: Put in a word; you drove them home, you'll see this through
+    visibleIf:
+      all:
+        - { memory: { role: npc, tag: drove_them_home } }
+        - { career: { employed: true, retired: false } }
+    outcome:
+      text: >-
+        Your boss knows you well enough to take your word. "If you drove
+        them home from there, I can give them a week," your boss says. {npc.name}
+        works that week like it's a year.
+      effects:
+        - { type: lifeHelp, role: npc, action: job_lead }
+        - { type: relationship, role: npc, affection: 11, trust: 10 }
+        - { type: memory, role: npc, tag: helped_them_find_work }
+  - id: wish
+    label: Wish {npc.them} well
+    outcome:
+      text: >-
+        You say you'll keep an ear out. You mean it when you say it. The ear
+        isn't very good at the job.
+      effects:
+        - { type: relationship, role: npc, affection: -4 }

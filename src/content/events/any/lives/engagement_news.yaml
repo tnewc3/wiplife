@@ -1,0 +1,60 @@
+# Request (registries/people.yaml engaged): someone close is engaged to a partner who isn't on your list.
+id: engagement_news
+title: A ring
+text: >-
+  {npc.name}, your {npc.relation}, wants you to be the first to know: {npc.they}
+  and {npc.partner} are engaged. {npc.They} {npc:is|are} grinning like a person
+  who has been practicing the sentence.
+tone: light
+category: lives
+rarity: common
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 16 } }
+    - { role: npc, alive: true, age: { gte: 18 }, kind: [parent, sibling, friend, child, grandparent, relative], life: { partner: [engaged] } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  npc: { support: true, presence: anywhere }
+choices:
+  - id: congratulate
+    label: Congratulate {npc.them} and ask about the plans
+    outcome:
+      text: >-
+        You ask about the date, the guest list, whether there will be a band.
+        {npc.name} has answers for some of it and a laugh for the rest.
+      effects:
+        - { type: relationship, role: npc, affection: 5, trust: 2 }
+  - id: celebrate
+    label: Take {npc.them} out to celebrate
+    visibleIf: { role: npc, where: [household, city] }
+    outcome:
+      text: >-
+        You order the second-best bottle on the menu and listen to the whole
+        story, twice. {npc.name} talks about {npc.partner} the way people talk
+        about weather they plan to live in.
+      effects:
+        - { type: cost, item: celebration_dinner }
+        - { type: relationship, role: npc, affection: 8, trust: 4 }
+        - { type: stat, key: happiness, delta: 2 }
+  - id: worries
+    label: Say what worries you about {npc.partner}
+    check:
+      base: 35
+      stats:
+        - { role: npc, key: trust, weight: 0.4 }
+      success:
+        text: >-
+          {npc.name} goes quiet, then nods slowly. "I know," {npc.they}
+          {npc:says|say}. "I've thought about all of it." {npc.They} {npc:thanks|thank} you for saying it
+          to {npc.their} face.
+        effects:
+          - { type: relationship, role: npc, affection: 2, trust: 8 }
+      failure:
+        text: >-
+          The grin goes out like a switch. "I wanted you on my side," {npc.name}
+          says, and the call ends soon after.
+        effects:
+          - { type: relationship, role: npc, affection: -8, trust: -5 }
+          - { type: stat, key: stress, delta: 3 }

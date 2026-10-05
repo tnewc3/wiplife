@@ -1,0 +1,53 @@
+# Request (relapse): someone close is using again.
+id: relapse_call
+title: Two in the morning
+text: >-
+  The call comes at an hour that never carries good news. It's {npc.name}, and
+  you can tell from the first word. After all the work, all the weeks, {npc.they}
+  {npc:is|are} using again, and {npc.they} {npc:needs|need} someone who won't
+  hang up.
+tone: dark
+category: lives
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { role: npc, alive: true, kind: [parent, sibling, friend, child, grandparent, relative], life: { trouble: [addiction] } }
+weight: { base: 9 }
+followUpOnly: true
+cast:
+  npc: { support: true, presence: anywhere }
+choices:
+  - id: stay_on
+    label: Stay on the line until morning
+    outcome:
+      text: >-
+        You say little. You stay. By dawn {npc.name} is still there, and
+        still using, but has said out loud that {npc.they} {npc:wants|want} to stop.
+      effects:
+        - { type: relationship, role: npc, affection: 8, trust: 8 }
+        - { type: memory, role: npc, tag: was_there_for_them }
+        - { type: stat, key: stress, delta: 4 }
+  - id: pay_rehab
+    label: Pay for another try at treatment
+    visibleIf: { money: { gte: 4000 } }
+    outcome:
+      text: >-
+        You make the arrangements while {npc.name} is still crying. The bed
+        is ready the next morning. Neither of you says how many times it's been.
+      effects:
+        - { type: cost, item: rehab_stay }
+        - { type: lifeHelp, role: npc, action: rehab }
+        - { type: relationship, role: npc, affection: 9, trust: 6 }
+        - { type: memory, role: npc, tag: paid_for_their_treatment }
+        - { type: stat, key: stress, delta: 3 }
+  - id: boundary
+    label: Say you love {npc.them} and can't do this tonight
+    outcome:
+      text: >-
+        "I know," {npc.name} says, and the line goes quiet. You sit with
+        the phone for a long time before you put it down.
+      effects:
+        - { type: relationship, role: npc, affection: -4, trust: -2 }
+        - { type: stat, key: stress, delta: 3 }

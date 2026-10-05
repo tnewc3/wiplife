@@ -192,8 +192,9 @@ export function rollPriorChildren(rng: RngState, age: number, currentYear: numbe
  */
 export function createStepchildren(state: LifeState, rng: RngState, partnerId: Id, content: ContentBundle): Id[] {
   const partner = state.people[partnerId];
-  const born = partner?.priorChildren;
-  if (!partner || !born || born.length === 0) return [];
+  // E3: children they had since you met them (their life summary) join the ones they came with.
+  const born = [...(partner?.priorChildren ?? []), ...(partner?.life?.children.map((c) => c.birthYear) ?? [])];
+  if (!partner || born.length === 0) return [];
   const ids: Id[] = [];
   for (const birthYear of born) {
     const id = createChild(
@@ -208,6 +209,11 @@ export function createStepchildren(state: LifeState, rng: RngState, partnerId: I
     ids.push(id);
   }
   delete partner.priorChildren;
+  // E3: they are your stepchildren now, and you are their partner.
+  if (partner.life) {
+    partner.life.children = [];
+    partner.life.partner = null;
+  }
   return ids;
 }
 

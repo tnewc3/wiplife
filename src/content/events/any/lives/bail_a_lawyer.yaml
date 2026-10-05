@@ -1,0 +1,63 @@
+# Request (arrest): someone close needs help with their case.
+id: bail_a_lawyer
+title: Somebody who knows the law
+text: >-
+  {npc.name} was arrested, and the court-appointed lawyer has forty other
+  cases and a tired voice. {npc.They} {npc:asks|ask} if you know anyone better,
+  or if you'd come to the hearing and say what kind of person {npc.they}
+  {npc:is|are}.
+tone: serious
+category: lives
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { role: npc, alive: true, age: { gte: 18 }, kind: [parent, sibling, friend, child, grandparent, relative], life: { crime: [held] } }
+weight: { base: 7 }
+followUpOnly: true
+cast:
+  npc: { support: true, presence: anywhere }
+choices:
+  - id: vouch
+    label: Go to the hearing and vouch for {npc.them}
+    check:
+      base: 50
+      stats:
+        - { key: reputation, weight: 0.3 }
+        - { key: confidence, weight: 0.2 }
+      success:
+        text: >-
+          You say what you know to be true: that {npc.name} showed up, worked,
+          and stayed kind to people who didn't deserve it. The judge listens.
+        effects:
+          - { type: lifeHelp, role: npc, action: bail }
+          - { type: relationship, role: npc, affection: 8, trust: 8 }
+          - { type: memory, role: npc, tag: you_helped_them }
+      failure:
+        text: >-
+          The prosecutor asks pointed questions about how well you really know
+          {npc.name}. You stammer out answers. It doesn't help.
+        effects:
+          - { type: relationship, role: npc, affection: 3, trust: 2 }
+          - { type: stat, key: stress, delta: 4 }
+  - id: hire
+    label: Pay for a good lawyer
+    visibleIf: { money: { gte: 1500 } }
+    outcome:
+      text: >-
+        The new lawyer reads the file in an hour and starts using phrases
+        like "procedural issue." {npc.name} sleeps for the first time in days.
+      effects:
+        - { type: cost, item: lawyer_fee }
+        - { type: lifeHelp, role: npc, action: bail }
+        - { type: relationship, role: npc, affection: 8, trust: 7 }
+        - { type: memory, role: npc, tag: you_helped_them }
+  - id: stay_out
+    label: Wish {npc.them} luck and stay out of it
+    outcome:
+      text: >-
+        You tell {npc.name} you hope it works out. It sounds, when you hear
+        yourself say it, like exactly what it is.
+      effects:
+        - { type: relationship, role: npc, affection: -6, trust: -5 }

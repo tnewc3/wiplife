@@ -9,7 +9,7 @@ import { Button } from '../../components/Button';
 import { Card } from '../../components/Card';
 import { ConfirmSheet } from '../../components/ConfirmSheet';
 import { InteractSheet } from '../../components/InteractSheet';
-import { ACTION_LABELS, actionConfirmation, CUSTODY_LABELS, gradesPhrase, moodPhrase, ORIGIN_LABELS, parentingStyleLine, personLine, timelineAgeLabel } from '../../labels';
+import { ACTION_LABELS, actionConfirmation, CUSTODY_LABELS, gradesPhrase, lifeRows, moodPhrase, ORIGIN_LABELS, parentingStyleLine, personLine, timelineAgeLabel, troubleLine } from '../../labels';
 
 /**
  * One person's page: who they are to you, how they feel about you (bars, no
@@ -67,6 +67,38 @@ export function PersonScreen({ life, personId }: { life: LifeState; personId: st
               {gradesPhrase(detail.child.gpa)}.
             </p>
           )}
+        </Card>
+      )}
+
+      {detail.life && row.alive && (
+        <Card role="region" aria-labelledby="their-life-title" data-testid="their-life">
+          <h3 id="their-life-title" className="text-lg font-bold">
+            {firstName}'s life
+          </h3>
+          <dl className="mt-2 flex flex-col divide-y divide-border">
+            {lifeRows(detail.life).map((r) => (
+              <div key={r.label} className="flex min-w-0 flex-col py-2" data-testid={`life-${r.label.toLowerCase()}`}>
+                <dt className="text-sm text-muted">{r.label}</dt>
+                <dd className="break-words [overflow-wrap:anywhere]">{r.value}</dd>
+              </div>
+            ))}
+            <div className="flex min-w-0 flex-col py-2" data-testid="life-troubles">
+              <dt className="text-sm text-muted">Troubles</dt>
+              <dd>
+                {detail.life.troubles.length === 0 ? (
+                  'None right now'
+                ) : (
+                  <ul className="flex flex-col gap-1">
+                    {detail.life.troubles.map((t, i) => (
+                      <li key={i} className="break-words [overflow-wrap:anywhere]">
+                        {troubleLine(t)}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </dd>
+            </div>
+          </dl>
         </Card>
       )}
 

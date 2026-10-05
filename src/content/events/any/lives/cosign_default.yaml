@@ -1,0 +1,56 @@
+# Follow-up to cosigning for someone, when it went wrong.
+id: cosign_default
+title: The letter with your name on it
+text: >-
+  The bank's letter is polite, which makes it worse. {npc.name} has stopped
+  paying what you cosigned for {since}, and the bank has turned to you for the
+  rest. {npc.They} {npc:hasn't|haven't} been answering the phone.
+tone: serious
+category: lives
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { memory: { role: npc, tag: cosigned_for_them } }
+    - { role: npc, alive: true }
+weight: { base: 8 }
+followUpOnly: true
+cast:
+  npc: { support: true, presence: anywhere }
+choices:
+  - id: take_it_on
+    label: Take it on and sort it out with {npc.them} later
+    outcome:
+      text: >-
+        You sign the repayment plan with a hand that doesn't shake. It's a
+        matter of time before {npc.name} calls to say sorry, and a longer
+        matter before the money's back.
+      effects:
+        - { type: debt, action: add, kind: personal, item: cosigned_debt }
+        - { type: relationship, role: npc, affection: -4, trust: -6 }
+        - { type: stat, key: stress, delta: 5 }
+  - id: confront
+    label: Track {npc.them} down first
+    check:
+      base: 45
+      stats:
+        - { role: npc, key: trust, weight: 0.3 }
+        - { key: confidence, weight: 0.2 }
+      success:
+        text: >-
+          {npc.name} opens the door looking terrible. It takes an hour, but
+          you work out a plan together, and the bank settles for less than it
+          could have asked.
+        effects:
+          - { type: debt, action: add, kind: personal, item: cosigned_debt }
+          - { type: relationship, role: npc, affection: 3, trust: 3 }
+          - { type: stat, key: stress, delta: 3 }
+      failure:
+        text: >-
+          {npc.name} isn't home. The bank doesn't wait. By the time you find
+          {npc.them}, the damage is done and the apologies are cheap.
+        effects:
+          - { type: debt, action: add, kind: personal, item: cosigned_debt }
+          - { type: relationship, role: npc, affection: -10, trust: -10 }
+          - { type: stat, key: stress, delta: 6 }

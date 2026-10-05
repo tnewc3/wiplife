@@ -1,0 +1,37 @@
+# Follow-up to godparent_ask: the child has grown.
+id: godparent_recital
+title: Front row
+text: >-
+  {npc.name}'s child is performing in a school show, and has asked,
+  specifically, that you come. You promised, {since}, to show up. This is the
+  kind of showing up you meant.
+tone: light
+category: lives
+rarity: common
+lifeStages: [adult, senior]
+requires:
+  all:
+    - { memory: { role: npc, tag: godparent_to_their_child } }
+    - { role: npc, alive: true }
+weight: { base: 8 }
+followUpOnly: true
+cast:
+  npc: { support: true, presence: anywhere }
+choices:
+  - id: go
+    label: Go, and clap the loudest
+    outcome:
+      text: >-
+        The child finds you in the crowd before the first line and holds up a
+        very small, very serious thumb. Yours goes up too.
+      effects:
+        - { type: relationship, role: npc, affection: 8, trust: 5 }
+        - { type: stat, key: happiness, delta: 3 }
+  - id: skip
+    label: Send your love and miss it
+    outcome:
+      text: >-
+        You mean to go, and then something comes up, and then the show is
+        over. {npc.name} says the child asked where you were.
+      effects:
+        - { type: relationship, role: npc, affection: -7, trust: -4 }

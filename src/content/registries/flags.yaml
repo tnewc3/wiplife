@@ -73,3 +73,8 @@ flags:
   sold_the_family_home: You sold the family home
   reconciled_over_estate: You settled things with a sibling after your parent died
   parent_will_dispute: You and a sibling fell out over your parent's will
+  # E3: the people you know ask something of you.
+  is_a_godparent: You are a godparent
+  took_in_a_relative: You took a relative into your home to be looked after
+  paid_for_care: You pay for a relative's care
+  cosigned_a_loan: You cosigned a loan for someone

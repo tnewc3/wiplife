@@ -1,0 +1,51 @@
+# Follow-up to the loans that didn't come back.
+id: loan_unpaid
+title: The money never mentioned
+text: >-
+  You lent {npc.name} money {since}. It hasn't come up since. Now {npc.they}
+  {npc:is|are} posting about a vacation, and you're doing the math in your head
+  without meaning to.
+tone: neutral
+category: lives
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { memory: { role: npc, tag: lent_money } }
+    - { role: npc, alive: true }
+weight: { base: 8 }
+followUpOnly: true
+cast:
+  npc: { support: true, presence: anywhere }
+choices:
+  - id: ask
+    label: Bring it up, kindly
+    check:
+      base: 50
+      stats:
+        - { role: npc, key: trust, weight: 0.3 }
+      success:
+        text: >-
+          "I'm so sorry. I was ashamed, and I should have said." {npc.name}
+          sends some that week, and a plan for the rest.
+        effects:
+          - { type: repay, item: loan_small, share: 0.6 }
+          - { type: relationship, role: npc, affection: 2, trust: 5 }
+          - { type: memory, role: npc, tag: paid_you_back }
+      failure:
+        text: >-
+          {npc.name} bristles. "You're really going to do this now?" The
+          conversation ends badly, and the problem doesn't.
+        effects:
+          - { type: relationship, role: npc, affection: -9, trust: -8 }
+          - { type: memory, role: npc, tag: never_paid_back }
+  - id: let_go
+    label: Let it go
+    outcome:
+      text: >-
+        You decide the friendship is worth more than the sum. It takes a few
+        weeks to feel true, and a few more to stop counting.
+      effects:
+        - { type: relationship, role: npc, affection: 2 }
+        - { type: memory, role: npc, tag: never_paid_back }
+        - { type: stat, key: kindness, delta: 1 }

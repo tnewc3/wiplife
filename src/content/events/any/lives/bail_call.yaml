@@ -1,0 +1,57 @@
+# Request (arrest): someone close has been arrested and is being held.
+id: bail_call
+title: The call from the station
+text: >-
+  The number isn't one you know. It's {npc.name}, your {npc.relation}, calling
+  from the police station. {npc.They} {npc:has|have} been arrested. There's
+  a bail hearing in the morning, and a hold on {npc.their} bank account, and
+  nobody else to call.
+tone: dark
+category: lives
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { role: npc, alive: true, age: { gte: 18 }, kind: [parent, sibling, friend, child, grandparent, relative], life: { crime: [held] } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  npc: { support: true, presence: anywhere }
+choices:
+  - id: split_it
+    label: Pitch in with the family and split it
+    outcome:
+      text: >-
+        You make three calls, and the amount is covered by the afternoon. It
+        shouldn't have taken a crisis for the family to act like a family.
+      effects:
+        - { type: cost, item: bail_share }
+        - { type: lifeHelp, role: npc, action: bail }
+        - { type: relationship, role: npc, affection: 6, trust: 5 }
+        - { type: memory, role: npc, tag: paid_their_bail }
+        - { type: stat, key: stress, delta: 3 }
+  - id: post_bail
+    label: Post bail
+    visibleIf: { money: { gte: 2000 } }
+    outcome:
+      text: >-
+        You wire the money before you can talk yourself out of it. By the time
+        the sun is up {npc.name} is out, wearing yesterday's clothes and
+        a look you won't forget. "I'll make this right," {npc.they} {npc:says|say}.
+      effects:
+        - { type: cost, item: bail }
+        - { type: lifeHelp, role: npc, action: bail }
+        - { type: relationship, role: npc, affection: 9, trust: 7 }
+        - { type: memory, role: npc, tag: paid_their_bail }
+        - { type: stat, key: stress, delta: 4 }
+  - id: refuse
+    label: Tell {npc.them} you can't do this one
+    outcome:
+      text: >-
+        "I understand," {npc.name} says, in the voice of someone who doesn't.
+        {npc.They} {npc:stays|stay} where {npc.they} {npc:is|are} until the hearing.
+      effects:
+        - { type: relationship, role: npc, affection: -10, trust: -10 }
+        - { type: memory, role: npc, tag: left_them_in_jail }
+        - { type: stat, key: stress, delta: 3 }

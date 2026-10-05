@@ -5,6 +5,7 @@
 import type { ContentBundle } from '../../content/schemas';
 import { discoveryValues } from '../discovery';
 import { sentenceText } from '../legal';
+import { lifeTextRole } from '../lives/model';
 import type { TextContext } from '../text';
 import type { Id, LifeState } from '../types';
 
@@ -25,7 +26,8 @@ export function textContext(state: LifeState, cast: Record<string, Id>, content:
   const roles: NonNullable<TextContext['roles']> = { [SELF_ROLE]: { name: c.name, pronouns: c.identity.pronouns } };
   for (const [role, id] of Object.entries(cast)) {
     const person = state.people[id];
-    if (person) roles[role] = { name: person.name, pronouns: person.identity.pronouns };
+    // E3: and the facts of their own life ({npc.relation}, {npc.partner}, {npc.city}, {npc.job}).
+    if (person) roles[role] = lifeTextRole(state, id, content) ?? { name: person.name, pronouns: person.identity.pronouns };
   }
   return { roles, values: { age: c.age, ...discoveryValues(state, content), sentence: sentenceText(state, content), since: sinceText(state, since, content) } };
 }

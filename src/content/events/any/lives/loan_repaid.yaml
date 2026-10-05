@@ -1,0 +1,39 @@
+# Follow-up to the small loans (divorce_lawyer_money, job_loss_rent_help).
+id: loan_repaid
+title: Paid back
+text: >-
+  An envelope arrives in {npc.name}'s handwriting, thicker than it needs to
+  be. You lent {npc.them} money {since}, and this is the end of it.
+tone: light
+category: lives
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { memory: { role: npc, tag: lent_money } }
+    - { role: npc, alive: true }
+weight: { base: 8 }
+followUpOnly: true
+cast:
+  npc: { support: true, presence: anywhere }
+choices:
+  - id: take_it
+    label: Take it, with thanks
+    outcome:
+      text: >-
+        There's a note inside: "Thank you for believing I'd get here."
+        You put the note in your wallet and the rest in the bank.
+      effects:
+        - { type: repay, item: loan_small, share: 1 }
+        - { type: relationship, role: npc, affection: 6, trust: 8 }
+        - { type: memory, role: npc, tag: paid_you_back }
+  - id: keep_half
+    label: Take half, and tell {npc.them} to keep the rest
+    outcome:
+      text: >-
+        "I can't," {npc.name} says, and you say you insist, and in the end
+        you both win a little.
+      effects:
+        - { type: repay, item: loan_small, share: 0.5 }
+        - { type: relationship, role: npc, affection: 9, trust: 9 }
+        - { type: memory, role: npc, tag: paid_you_back }

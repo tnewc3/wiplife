@@ -259,6 +259,9 @@ export type EventsBalance = z.infer<typeof eventsBalanceSchema>;
 const shareRangeSchema = z
   .strictObject({ min: probabilitySchema, max: probabilitySchema })
   .refine((r) => r.min <= r.max, 'min must not be greater than max');
+const ratioRangeSchema = z
+  .strictObject({ min: z.number().min(0), max: z.number().min(0) })
+  .refine((r) => r.min <= r.max, 'min must not be greater than max');
 
 /**
  * Target numbers simulation runs are judged against (docs/technical.md,
@@ -388,6 +391,47 @@ export const targetsBalanceSchema = z.strictObject({
     reputationCorrelation: z.number().min(0).max(1),
     /** Of the heirs who begin with a memory of how they were raised, at least this share see an event about it in their life. */
     memoryEvents: probabilitySchema,
+  }),
+  /**
+   * E3: the lives of the people you know (tools/simulate/people.ts), judged on the careful
+   * player's lives. Shares are of person-years or people, as each says.
+   */
+  people: z.strictObject({
+    /** Close people of working age (18 to retirement) who have a job, over their person-years. */
+    employed: shareRangeSchema,
+    /**
+     * Rates among the people you know divided by the player's own, in the same run: the range
+     * the ratio has to fall in (promotions and firings and layoffs per year worked; the share
+     * of people reaching 40 who have married; divorces per married year; moves to another city and
+     * arrests (your record's entries) per adult year, 18 to 64).
+     */
+    ratio: z.strictObject({
+      promotion: ratioRangeSchema,
+      firing: ratioRangeSchema,
+      layoff: ratioRangeSchema,
+      marriedBy40: ratioRangeSchema,
+      divorce: ratioRangeSchema,
+      moves: ratioRangeSchema,
+      arrests: ratioRangeSchema,
+    }),
+    /** Children per person who has married, among those who reach 45 (as far as the people you know show). */
+    childrenPerMarried: z.strictObject({ min: z.number().min(0), max: z.number().min(0) }).refine((r) => r.min <= r.max, 'min must not be greater than max'),
+    /** Yearly share of adults (18 and up) who start a serious illness. */
+    illness: shareRangeSchema,
+    /** Of the people you know who reach 40, the share who had an addiction. */
+    addiction: shareRangeSchema,
+    /** Of the addictions that ended within the run, the share that ended in recovery rather than death. */
+    recovery: shareRangeSchema,
+    /** Romance among people under 18 (anyone): none, ever. */
+    underageRomance: z.int().min(0).max(0),
+    /** Requests that reach you each year (those that became event cards), on average. */
+    requestsPerYear: z.strictObject({ min: z.number().min(0), max: z.number().min(0) }).refine((r) => r.min <= r.max, 'min must not be greater than max'),
+    /** Requests as a share of all events (your own story stays the main thing). */
+    maxRequestShare: probabilitySchema,
+    /** Lines in the yearly feed, on average, for years that had any news. */
+    newsPerYear: z.strictObject({ min: z.number().min(0), max: z.number().min(0) }).refine((r) => r.min <= r.max, 'min must not be greater than max'),
+    /** The most milliseconds a year's beginYear takes on average (the full circle simulated), on this machine. */
+    maxBeginYearMs: z.number().positive(),
   }),
   coverage: z.strictObject({
     /** At least this many events (not retired). */

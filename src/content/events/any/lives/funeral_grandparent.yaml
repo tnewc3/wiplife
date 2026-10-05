@@ -1,0 +1,60 @@
+# Request (death): a grandparent has died.
+id: funeral_grandparent
+title: The oldest chair in the room
+text: >-
+  {npc.name}, your {npc.relation}, has died. The family gathers, the way the
+  family gathers only for this. Everyone is a little older than at the last
+  time, and a little closer.
+tone: dark
+category: lives
+rarity: common
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 14 } }
+    - { role: npc, alive: false, kind: [grandparent] }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  npc: { kind: grandparent, presence: anywhere, deceased: true }
+choices:
+  - id: stay_close
+    label: Spend the days with the family
+    outcome:
+      text: >-
+        There are too many casseroles and too many stories. You hear a few you'd
+        never heard, and realize how much of {npc.name} was in the room all along.
+      effects:
+        - { type: stat, key: happiness, delta: -3 }
+        - { type: stat, key: stress, delta: 3 }
+        - { type: stat, key: kindness, delta: 1 }
+  - id: travel
+    label: Travel for the service
+    visibleIf: { role: npc, where: [elsewhere] }
+    outcome:
+      text: >-
+        You make the trip, and on the way you think about how rarely you made
+        it when {npc.they} {npc:was|were} alive.
+      effects:
+        - { type: cost, item: funeral_travel }
+        - { type: stat, key: happiness, delta: -3 }
+        - { type: stat, key: stress, delta: 3 }
+  - id: keepsake
+    label: Ask for something small to keep
+    outcome:
+      text: >-
+        A cardigan, a clock, a book with notes in the margin. It doesn't mean
+        much to anyone else. It will to you.
+      effects:
+        - { type: stat, key: happiness, delta: -2 }
+        - { type: stat, key: stress, delta: 1 }
+  - id: skip
+    label: Stay home; you can't face it
+    outcome:
+      text: >-
+        You send flowers and tell yourself you will visit the grave soon.
+        Months pass. The thought sits there, undone.
+      effects:
+        - { type: cost, item: flowers }
+        - { type: stat, key: happiness, delta: -4 }
+        - { type: stat, key: stress, delta: 2 }

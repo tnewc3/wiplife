@@ -142,6 +142,31 @@ heirs:
   reputationCorrelation: 0.3
   memoryEvents: 0.3
 
+# E3: the lives of the people you know, judged on the careful player's lives
+# (tools/simulate/people.ts). Rates are compared with the player's own in the
+# same run: the ratio (people ÷ you) has to land in the range.
+people:
+  employed: { min: 0.78, max: 0.97 }
+  ratio:
+    promotion: { min: 0.5, max: 2 }
+    firing: { min: 0.4, max: 2.5 }
+    layoff: { min: 0.4, max: 2.5 }
+    marriedBy40: { min: 0.7, max: 1.15 }
+    divorce: { min: 0.5, max: 1.8 }
+    moves: { min: 0.3, max: 3 }
+    arrests: { min: 0.2, max: 2.5 }
+  childrenPerMarried: { min: 1, max: 2.8 }
+  illness: { min: 0.01, max: 0.08 }
+  addiction: { min: 0.08, max: 0.4 }
+  recovery: { min: 0.3, max: 0.9 }
+  underageRomance: 0
+  # Requests that become event cards, per year; and their share of all events.
+  requestsPerYear: { min: 0.15, max: 1.2 }
+  maxRequestShare: 0.25
+  newsPerYear: { min: 1, max: 8 }
+  # Milliseconds a year's beginYear takes on average, on the machine the simulation runs on.
+  maxBeginYearMs: 20
+
 coverage:
   minEvents: 300
   legendary: { min: 5, max: 10 }

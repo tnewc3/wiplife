@@ -1,0 +1,41 @@
+# Follow-up to loan_for_a_dream.
+id: loan_repaid_large
+title: The first of many
+text: >-
+  {npc.name}'s venture made it. A check arrives with a note that says it's the
+  first installment, and a promise that more is coming. You backed the plan
+  {since}, and it paid off.
+tone: light
+category: lives
+rarity: uncommon
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { memory: { role: npc, tag: lent_money } }
+    - { role: npc, alive: true }
+weight: { base: 6 }
+followUpOnly: true
+cast:
+  npc: { support: true, presence: anywhere }
+choices:
+  - id: accept
+    label: Accept it, and visit the shop
+    outcome:
+      text: >-
+        The sign over the door is hand-painted. {npc.name} makes you the
+        first coffee of the day. It's the best one you've ever had.
+      effects:
+        - { type: repay, item: loan_large, share: 1.2 }
+        - { type: relationship, role: npc, affection: 10, trust: 10 }
+        - { type: memory, role: npc, tag: paid_you_back }
+        - { type: stat, key: happiness, delta: 3 }
+  - id: reinvest
+    label: Tell {npc.them} to put it back into the business
+    outcome:
+      text: >-
+        "Are you sure?" {npc.name} asks twice. Then {npc.they} {npc:hires|hire}
+        a second person. Your name goes on a plaque nobody will read.
+      effects:
+        - { type: relationship, role: npc, affection: 12, trust: 12 }
+        - { type: memory, role: npc, tag: paid_you_back }
+        - { type: stat, key: happiness, delta: 2 }

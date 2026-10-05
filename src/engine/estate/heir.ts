@@ -245,6 +245,11 @@ export function continueAsHeir(dead: LifeState, heirId: Id, content: ContentBund
     const person: Person = cloneJson(original);
     delete person.child;
     delete person.priorChildren;
+    // E3: what they were to the parent who died (care at their home, a request they made) doesn't carry over; the family has taken it on.
+    if (person.life) {
+      delete person.life.requestYear;
+      if (person.life.care === 'home' || person.life.care === 'paid') person.life.care = 'sibling';
+    }
     people[id] = person;
     const bonds = hb.bonds[bond];
     relationships[id] = {
@@ -353,6 +358,7 @@ export function continueAsHeir(dead: LifeState, heirId: Id, content: ContentBund
       reputation: dead.lineage.reputation,
       deeds: [...dead.lineage.deeds],
     },
+    news: [],
   };
 
   // ── What they inherit ────────────────────────────────────────────────────

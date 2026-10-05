@@ -10,6 +10,7 @@ import type { CastSpec, ContentBundle, Tone } from '../content/schemas';
 import { evaluate } from './conditions';
 import { pronounsFromPreset } from './creation/character';
 import { createPerson, otherCity } from './events/casting';
+import { giveSampleLife, lifeConditionFor } from './lives/sample';
 import { consistencyProblems } from './presence';
 import { isPartnerKind } from './relationships';
 import { createLife, resolveChoice } from './life';
@@ -85,6 +86,8 @@ export function previewEvent(content: ContentBundle, options: SandboxOptions): S
         if (isPartnerKind(kind)) d.housing.partnerId = id;
         else d.housing.kind = 'with_parents';
       }
+      // E3: and a life that fits what the event asks of them (a partner, a job, a trouble).
+      giveSampleLife(d as LifeState, id, lifeConditionFor(def.requires, role), content);
       cast[role] = id;
     }
     d.phase = 'events';

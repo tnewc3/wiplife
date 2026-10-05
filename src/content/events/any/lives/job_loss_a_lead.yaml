@@ -1,0 +1,49 @@
+# Request (jobLoss): someone close needs a way back to work.
+id: job_loss_a_lead
+title: Any leads
+text: >-
+  {npc.name} got the news at work on a Tuesday: the job is gone. Now
+  {npc.they} {npc:is|are} calling everyone {npc.they} {npc:knows|know}, and
+  you're on the list. "Do you hear of anything?" {npc.they} {npc:asks|ask}.
+tone: neutral
+category: lives
+rarity: common
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { role: npc, alive: true, age: { gte: 18 }, kind: [parent, sibling, friend, child, grandparent, relative], life: { employed: false } }
+weight: { base: 7 }
+followUpOnly: true
+cast:
+  npc: { support: true, presence: anywhere }
+choices:
+  - id: polish
+    label: Help {npc.them} fix up the application
+    outcome:
+      text: >-
+        Together you cut the page in half and make the best three lines
+        sound like a person. {npc.name} sends it out with a steadier hand.
+      effects:
+        - { type: lifeHelp, role: npc, action: job_lead }
+        - { type: relationship, role: npc, affection: 6, trust: 5 }
+        - { type: memory, role: npc, tag: you_helped_them }
+  - id: ask_around
+    label: Ask around at work
+    visibleIf: { career: { employed: true, retired: false } }
+    outcome:
+      text: >-
+        A coworker's cousin is hiring. It takes some phone tag, but {npc.name}
+        has an interview by Friday, and a job by the end of the month.
+      effects:
+        - { type: lifeHelp, role: npc, action: job_lead }
+        - { type: relationship, role: npc, affection: 8, trust: 6 }
+        - { type: memory, role: npc, tag: helped_them_find_work }
+  - id: sympathy
+    label: Be sympathetic, and that's all
+    outcome:
+      text: >-
+        You say all the right things and nothing happens as a result. It's
+        a kind of help. It's a small one.
+      effects:
+        - { type: relationship, role: npc, affection: 1 }

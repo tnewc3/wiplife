@@ -29,6 +29,7 @@ describe('year pipeline', () => {
       'relationships',
       'moods',
       'selfDiscovery',
+      'lives',
       'pacing',
     ]);
   });

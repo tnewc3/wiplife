@@ -76,7 +76,9 @@ describe('simulation runner', () => {
   });
 
   it('is deterministic', { timeout: 60_000 }, () => {
-    expect(runSimulation(content, { lives: 5, seedPrefix: 'same' })).toEqual(runSimulation(content, { lives: 5, seedPrefix: 'same' }));
+    // How long a year took is the one thing that differs between runs.
+    const untimed = (r: ReturnType<typeof runSimulation>) => ({ ...r, people: { ...r.people, timing: null } });
+    expect(untimed(runSimulation(content, { lives: 5, seedPrefix: 'same' }))).toEqual(untimed(runSimulation(content, { lives: 5, seedPrefix: 'same' })));
   });
 
   it('lets personality weigh the careful player’s event choices', () => {

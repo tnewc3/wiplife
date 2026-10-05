@@ -163,6 +163,7 @@ export function createLife(input: CreateLifeOptions, content: ContentBundle): Li
     will: null,
     estate: null,
     lineage: { generation: 1, lineId: `life_${seed}`, familyName: character.name.last, reputation: 50, deeds: [] },
+    news: [],
   };
   // E1: everyone starts the life in their baseline mood (no randomness: the yearly swing comes with the first year).
   for (const person of Object.values(life.people)) person.mood = person.moodBase = moodBaseline(life, person, content);

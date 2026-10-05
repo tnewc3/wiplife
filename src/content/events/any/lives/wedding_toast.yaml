@@ -1,0 +1,63 @@
+# Request (wedding): someone very close asks you to speak.
+id: wedding_toast
+title: Say a few words
+text: >-
+  "Would you give a toast?" {npc.name} asks. {npc.They} {npc:has|have} asked it
+  quickly, the way you ask for something that matters. Your {npc.relation} is
+  marrying {npc.partner}, and a whole room will be looking at you.
+tone: neutral
+category: lives
+rarity: uncommon
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 16 } }
+    - { role: npc, alive: true, age: { gte: 18 }, kind: [parent, sibling, friend, child], affection: { gte: 60 }, life: { partner: [married] } }
+weight: { base: 6 }
+followUpOnly: true
+cast:
+  npc: { support: true, presence: anywhere }
+choices:
+  - id: write_it
+    label: Write something real and say it
+    check:
+      base: 55
+      stats:
+        - { key: confidence, weight: 0.4 }
+        - { key: sociability, weight: 0.2 }
+      success:
+        text: >-
+          You hold the glass with both hands and tell the truth about {npc.name}.
+          The room laughs where you wanted it to, and goes quiet where you
+          needed it to. {npc.partner} is wiping an eye.
+        effects:
+          - { type: relationship, role: npc, affection: 10, trust: 6 }
+          - { type: memory, role: npc, tag: in_their_wedding }
+          - { type: stat, key: confidence, delta: 2 }
+          - { type: stat, key: happiness, delta: 3 }
+      failure:
+        text: >-
+          You lose your place in the middle and find it again at the end, and
+          the joke you were saving lands in silence. Everyone applauds anyway.
+          {npc.name} hugs you hard and says it was perfect.
+        effects:
+          - { type: relationship, role: npc, affection: 5, trust: 3 }
+          - { type: memory, role: npc, tag: in_their_wedding }
+          - { type: stat, key: stress, delta: 3 }
+  - id: keep_short
+    label: Raise a glass and keep it short
+    outcome:
+      text: >-
+        "To {npc.name} and {npc.partner}." You sit down to cheers. It wasn't
+        much, but it was yours.
+      effects:
+        - { type: relationship, role: npc, affection: 5, trust: 2 }
+        - { type: memory, role: npc, tag: in_their_wedding }
+  - id: decline
+    label: Turn it down and cheer from your seat
+    outcome:
+      text: >-
+        {npc.name} says of course, it's fine, and finds someone else by the end
+        of the night. It's fine. It's a little less than fine.
+      effects:
+        - { type: relationship, role: npc, affection: -4 }

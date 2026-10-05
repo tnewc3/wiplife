@@ -1,0 +1,77 @@
+# Request (moneyTrouble): someone has an idea and needs seed money.
+id: loan_for_a_dream
+title: The plan
+text: >-
+  {npc.name} has a plan. A food truck, a salon, a repair shop. There are
+  numbers in a spreadsheet and a lot of belief, and a gap between them
+  that's about the size of a loan. "I wouldn't ask if I didn't believe in it,"
+  {npc.they} {npc:says|say}.
+tone: neutral
+category: lives
+rarity: uncommon
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 21 } }
+    - { role: npc, alive: true, age: { gte: 20, lte: 55 }, kind: [sibling, friend, child, relative], life: { wealth: [poor, working, middle] } }
+    - { money: { gte: 5000 } }
+weight: { base: 5 }
+followUpOnly: true
+cast:
+  npc: { support: true, presence: anywhere }
+choices:
+  - id: back_it
+    label: Back the whole plan
+    check:
+      base: 45
+      stats:
+        - { role: npc, key: trust, weight: 0.3 }
+        - { key: smarts, weight: 0.1 }
+      success:
+        text: >-
+          Before long the truck has a line. {npc.name} sends a photo
+          with the sign painted on the side: it has your name in tiny letters
+          at the bottom.
+        effects:
+          - { type: cost, item: loan_large }
+          - { type: relationship, role: npc, affection: 10, trust: 10 }
+          - { type: memory, role: npc, tag: lent_money }
+          - { type: schedule, eventId: loan_repaid_large, inYears: [2, 4], cast: [npc] }
+      failure:
+        text: >-
+          The idea was good. The timing wasn't. {npc.name} apologizes so many
+          times that you stop picking up the phone.
+        effects:
+          - { type: cost, item: loan_large }
+          - { type: relationship, role: npc, affection: 2, trust: -4 }
+          - { type: memory, role: npc, tag: lent_money }
+          - { type: schedule, eventId: loan_unpaid, inYears: [1, 3], cast: [npc] }
+  - id: smaller
+    label: Offer a smaller amount to get it started
+    outcome:
+      text: >-
+        "That's not enough," {npc.name} says, and then, "That's... a start."
+        {npc.They} {npc:builds|build} the first version out of what {npc.they}
+        {npc:has|have}.
+      effects:
+        - { type: cost, item: loan_small }
+        - { type: relationship, role: npc, affection: 5, trust: 4 }
+        - { type: memory, role: npc, tag: you_helped_them }
+  - id: advice
+    label: Offer advice instead
+    outcome:
+      text: >-
+        You go through the spreadsheet line by line, the way somebody who
+        cares would. {npc.name} writes down half of what you say, and
+        seems to listen to all of it.
+      effects:
+        - { type: relationship, role: npc, affection: 4, trust: 5 }
+        - { type: stat, key: smarts, delta: 1 }
+  - id: pass
+    label: Pass on it
+    outcome:
+      text: >-
+        You tell {npc.name} you wish {npc.them} the best. It sounds smaller
+        out loud than it did in your head.
+      effects:
+        - { type: relationship, role: npc, affection: -5, trust: -2 }

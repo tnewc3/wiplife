@@ -4,6 +4,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { content } from '../content';
 import { performAction } from '../engine/actions';
 import { performInteraction } from '../engine/interactions/perform';
+import { playYear } from '../engine/autoplay';
 import { beginYear, createLife } from '../engine/life';
 import { nextUint32 } from '../engine/rng';
 import { die, parentLife } from '../engine/estate/fixtures';
@@ -286,7 +287,7 @@ describe('lives from Stage 6 on', () => {
   it('round trip a life with debts, a mortgage and a move', async () => {
     let life = produce(lifeAtAge('stage6-round', 30), (d) => {
       d.finances.savings = 500_000;
-      d.finances.lastLedger = { year: d.currentYear, gross: 90_000, retirement: 0, tax: 0, housing: 0, living: 0, debtPayments: 0, interest: 0, debtInterest: 0, borrowed: 0, support: 0, children: 0, supportPaid: 0, supportReceived: 0, net: 90_000 };
+      d.finances.lastLedger = { year: d.currentYear, gross: 90_000, retirement: 0, tax: 0, housing: 0, living: 0, debtPayments: 0, interest: 0, debtInterest: 0, borrowed: 0, support: 0, children: 0, care: 0, supportPaid: 0, supportReceived: 0, net: 90_000 };
       d.finances.debts.push({ id: 'd1', kind: 'student', balance: 12_000, annualRate: 0.055, minPayment: 1_600, missed: 1 });
     });
     const other = life.character.cityId === 'nyc' ? 'houston' : 'nyc';
@@ -558,7 +559,7 @@ describe('lives from E2a on', () => {
   it('upgrade a schema version 10 life: who can carry follows the gender category, an empty family, and a ledger without children', async () => {
     const base = lifeAtAge('e2a-migrate', 30);
     const life = produce(base, (d) => {
-      d.finances.lastLedger = { year: d.currentYear, gross: 40_000, retirement: 0, tax: 3_000, housing: 5_000, living: 12_000, debtPayments: 0, interest: 0, debtInterest: 0, borrowed: 0, support: 0, children: 0, supportPaid: 0, supportReceived: 0, net: 20_000 };
+      d.finances.lastLedger = { year: d.currentYear, gross: 40_000, retirement: 0, tax: 3_000, housing: 5_000, living: 12_000, debtPayments: 0, interest: 0, debtInterest: 0, borrowed: 0, support: 0, children: 0, care: 0, supportPaid: 0, supportReceived: 0, net: 20_000 };
     });
     const v10 = JSON.parse(JSON.stringify(life)) as Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any -- stripping fields from plain JSON to build an old save
     delete v10.family;
@@ -576,7 +577,7 @@ describe('lives from E2a on', () => {
       if (person.identity.genderCategory === 'woman') expect(person.canCarry).toBe(true);
       if (person.identity.genderCategory === 'man') expect(person.canCarry).toBe(false);
     }
-    expect(upgraded.finances.lastLedger).toMatchObject({ children: 0, supportPaid: 0, supportReceived: 0 });
+    expect(upgraded.finances.lastLedger).toMatchObject({ children: 0, care: 0, supportPaid: 0, supportReceived: 0 });
   });
 
   it('round trip a pregnancy, a process, children with parenting styles, custody and child support', async () => {
@@ -681,6 +682,58 @@ describe('heirs, wills and estates (E2b)', () => {
     });
     expect(loadedLifeSchema(content).safeParse(stale).success).toBe(false);
     const extra = { ...heir, lineage: { ...heir.lineage, mystery: true } };
+    expect(lifeStateSchema.safeParse(extra).success).toBe(false);
+  });
+
+  it('upgrades a version 12 life: no news, no care costs, and people who get their own life from the first year', async () => {
+    const base = lifeAtAge('e3-v12', 30);
+    const life = produce(base, (d) => {
+      d.finances.lastLedger = { year: d.currentYear - 1, gross: 40_000, retirement: 0, tax: 3_000, housing: 5_000, living: 12_000, debtPayments: 0, interest: 0, debtInterest: 0, borrowed: 0, support: 0, children: 0, care: 0, supportPaid: 0, supportReceived: 0, net: 20_000 };
+    });
+    const v12 = JSON.parse(JSON.stringify(life)) as Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any -- stripping fields from plain JSON to build an old save
+    delete v12.news;
+    delete v12.finances.lastLedger.care;
+    for (const p of Object.values<Record<string, unknown>>(v12.people)) delete p.life;
+    const db = freshDb();
+    await db.lives.put({ id: 'active', envelope: { ...makeEnvelope(v12, content.contentVersion), schemaVersion: 12 } });
+    const result = await readSave(db, loadedLifeSchema(content));
+    expect(result.status).toBe('ok');
+    if (result.status !== 'ok') return;
+    const upgraded = result.envelope.data;
+    expect(result.envelope.schemaVersion).toBe(CURRENT_SCHEMA_VERSION);
+    expect(upgraded.news).toEqual([]);
+    expect(upgraded.finances.lastLedger!.care).toBe(0);
+    expect(upgraded).toEqual(life);
+    // Nobody is given a partner, children or troubles they never had: the first year builds each life from what the save holds.
+    const next = beginYear(upgraded, content);
+    for (const person of Object.values(next.people)) {
+      if (!person.alive || next.relationships[person.id]?.status === 'ended' || person.child) continue;
+      expect(person.life, person.id).toBeDefined();
+    }
+  });
+
+  it('round trips a life with people living their own lives: partners, children, troubles, care and a news log', async () => {
+    let life = random('e3-round');
+    for (let i = 0; i < 35 && life.phase !== 'dead'; i++) life = playYear(life, content);
+    expect(life.news.length).toBeGreaterThan(0);
+    expect(Object.values(life.people).some((p) => p.life?.partner || (p.life?.children.length ?? 0) > 0 || (p.life?.troubles.length ?? 0) > 0)).toBe(true);
+    expect(loadedLifeSchema(content).safeParse(life).success).toBe(true);
+    expect(await roundTrip(life)).toEqual(life);
+  });
+
+  it('rejects a life with a partner who is not dating, engaged or married, a severity out of range, or an unknown field in the news', () => {
+    let life = random('e3-bad');
+    for (let i = 0; i < 25 && life.phase !== 'dead'; i++) life = playYear(life, content);
+    const id = Object.keys(life.people).find((k) => life.people[k]!.life && !life.people[k]!.child)!;
+    const badPartner = produce(life, (d) => {
+      d.people[id]!.life!.partner = { name: { first: 'Kit', last: 'Lee' }, genderCategory: 'woman', birthYear: 1990, canCarry: true, status: 'seeing' as never, since: 2040, statusSince: 2040 };
+    });
+    expect(lifeStateSchema.safeParse(badPartner).success).toBe(false);
+    const badSeverity = produce(life, (d) => {
+      d.people[id]!.life!.troubles = [{ kind: 'illness', refId: 'cancer', since: 2040, severity: 200, treated: false }];
+    });
+    expect(lifeStateSchema.safeParse(badSeverity).success).toBe(false);
+    const extra = { ...life, news: [{ year: life.currentYear, lines: [{ personId: id, kind: 'hired', text: 'x', mystery: 1 }] }] };
     expect(lifeStateSchema.safeParse(extra).success).toBe(false);
   });
 });

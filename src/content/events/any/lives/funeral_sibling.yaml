@@ -1,0 +1,50 @@
+# Request (death): a brother or sister has died.
+id: funeral_sibling
+title: Someone who knew you before you were you
+text: >-
+  {npc.name} has died. Your {npc.relation}, the only person who shared all of
+  your childhood. The family is falling apart in several directions at once,
+  and nobody has the strength to hold it together.
+tone: dark
+category: lives
+rarity: uncommon
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 14 } }
+    - { role: npc, alive: false, kind: [sibling] }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  npc: { kind: sibling, presence: anywhere, deceased: true }
+choices:
+  - id: with_family
+    label: Lean on the family
+    outcome:
+      text: >-
+        You sit with your parents, with the cousins, with strangers who knew
+        {npc.them}. Nobody says the right thing, and it doesn't matter.
+      effects:
+        - { type: stat, key: stress, delta: 4 }
+        - { type: stat, key: happiness, delta: -6 }
+  - id: carry
+    label: Take care of the arrangements
+    visibleIf: { age: { gte: 18 } }
+    outcome:
+      text: >-
+        You do the paperwork and the phone calls and the thankful nods. You
+        keep waiting to feel something and the something arrives all at once,
+        in the car, in a parking lot.
+      effects:
+        - { type: cost, item: funeral_share }
+        - { type: stat, key: stress, delta: 8 }
+        - { type: stat, key: happiness, delta: -8 }
+  - id: alone
+    label: Grieve on your own terms
+    outcome:
+      text: >-
+        You do not go to the reception. You walk, and walk, and end up somewhere
+        familiar. You tell {npc.them} things.
+      effects:
+        - { type: stat, key: stress, delta: 5 }
+        - { type: stat, key: happiness, delta: -7 }

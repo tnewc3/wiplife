@@ -1,0 +1,51 @@
+# Request (death): a friend has died.
+id: funeral_friend
+title: One fewer at the table
+text: >-
+  {npc.name} has died. Someone from the old group has posted it, and the
+  messages come in one by one: disbelief, shock, a photo of the whole group
+  from long ago, everyone squinting into the sun.
+tone: dark
+category: lives
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 16 } }
+    - { role: npc, alive: false, kind: [friend], affection: { gte: 40 } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  npc: { kind: friend, presence: anywhere, deceased: true }
+choices:
+  - id: write
+    label: Write something for the family
+    outcome:
+      text: >-
+        It takes you five drafts to say it plainly: what {npc.name} was to
+        you, and what {npc.they} did for you. The family reads it aloud.
+      effects:
+        - { type: stat, key: happiness, delta: -3 }
+        - { type: stat, key: kindness, delta: 1 }
+  - id: go
+    label: Go to the funeral
+    visibleIf: { role: npc, where: [household, city] }
+    outcome:
+      text: >-
+        You stand at the back with the people who knew {npc.name} from before.
+        Afterwards, someone tells a story you'd never heard, and for a moment
+        {npc.they} {npc:is|are} in the room.
+      effects:
+        - { type: stat, key: happiness, delta: -4 }
+        - { type: stat, key: stress, delta: 3 }
+  - id: travel
+    label: Travel for it
+    visibleIf: { role: npc, where: [elsewhere] }
+    outcome:
+      text: >-
+        The trip is long. The old group is there, older than you remember,
+        and by midnight you're all laughing and nobody quite knows why.
+      effects:
+        - { type: cost, item: funeral_travel }
+        - { type: stat, key: happiness, delta: -2 }
+        - { type: stat, key: stress, delta: 3 }

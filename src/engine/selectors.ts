@@ -52,6 +52,7 @@ import {
 import { costToYou, familyHelp, rentMonthsAmount } from './costs';
 import { availableInteractions } from './interactions/availability';
 import { moodView, type MoodView } from './interactions/mood';
+import { getNews, getPersonLifeView, type NewsItem, type PersonLifeView } from './lives/views';
 export { getInteractionMenu, getInteractionOutcome } from './interactions/views';
 export {
   canPlanEstate,
@@ -72,6 +73,8 @@ export { getChildView, getFamilyView, type ChildView, type FamilyOptionView, typ
 import { getChildView, type ChildView } from './family/views';
 export type { InteractionMenuGroup, InteractionMenuItem, InteractionOutcomeView } from './interactions/views';
 export type { MoodBand, MoodView } from './interactions/mood';
+export { getNews, getPersonLifeView } from './lives/views';
+export type { NewsFeedView, NewsItem, PersonLifeView, TroubleView } from './lives/views';
 import { consistencyProblems, whereabouts } from './presence';
 import { benefitFromRecord } from './retirement';
 import {
@@ -579,6 +582,8 @@ export interface PersonDetail {
   canInteract: boolean;
   /** E2a: set for your children and stepchildren. */
   child: ChildView | null;
+  /** E3: their own life: job, partner, children, city, troubles. */
+  life: PersonLifeView | null;
 }
 
 /** A memory's readable text for this person (registries/memories.yaml). */
@@ -603,6 +608,7 @@ export function getPersonDetail(state: LifeState, personId: Id, content: Content
     actions: availableActions(state, personId, content),
     canInteract: availableInteractions(state, personId, content).length > 0,
     child: getChildView(state, personId, content),
+    life: getPersonLifeView(state, personId, content),
   };
 }
 
@@ -653,6 +659,8 @@ export interface YearRecapView {
   newPeople: { name: string; kind: Relationship['kind'] }[];
   /** This year's money, when there was any to speak of. */
   money: { net: number; borrowed: number; savings: number; debt: number } | null;
+  /** E3: news from your people this year. */
+  news: NewsItem[];
 }
 
 /** The last finished year's recap, or null before the first age-up or mid-year. */
@@ -683,6 +691,7 @@ export function getYearRecap(state: LifeState, content: ContentBundle): YearReca
     memories,
     newPeople,
     money: recapMoney(state, recap.year),
+    news: getNews(state, recap.year)?.items ?? [],
   };
 }
 

@@ -94,7 +94,7 @@ export function deadLife(life: LifeState): LifeState {
 /** Puts a life in the app's database as the active life, and reloads so the app loads it. */
 export async function loadSavedLife(page: Page, life: LifeState): Promise<void> {
   const content = pack();
-  const envelope = { schemaVersion: 12, contentVersion: content.contentVersion, savedAt: new Date().toISOString(), data: JSON.parse(JSON.stringify(life)) as unknown };
+  const envelope = { schemaVersion: 13, contentVersion: content.contentVersion, savedAt: new Date().toISOString(), data: JSON.parse(JSON.stringify(life)) as unknown };
   await page.evaluate(
     (saved) =>
       new Promise<void>((resolve, reject) => {

@@ -1,0 +1,63 @@
+# Request (illness): someone close has a serious diagnosis.
+id: diagnosis_call
+title: The doctor's news
+text: >-
+  {npc.name} asks you to sit down before saying it, which is how you know.
+  The results came back: it's serious, and treatment is going to be long. "I
+  wanted you to hear it from me," {npc.they} {npc:says|say}.
+tone: dark
+category: lives
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 16 } }
+    - { role: npc, alive: true, kind: [parent, sibling, friend, child, grandparent, stepparent, relative], life: { trouble: [illness], serious: true } }
+weight: { base: 9 }
+followUpOnly: true
+cast:
+  npc: { support: true, presence: anywhere }
+choices:
+  - id: call
+    label: Call every few days, and mean it
+    outcome:
+      text: >-
+        You put it on the calendar so you can't forget. {npc.name} says
+        it's the calls that keep {npc.them} going.
+      effects:
+        - { type: relationship, role: npc, affection: 5, trust: 4 }
+        - { type: stat, key: stress, delta: 2 }
+  - id: help_pay
+    label: Help cover the treatment
+    visibleIf: { all: [{ age: { gte: 18 } }, { money: { gte: 2000 } }] }
+    outcome:
+      text: >-
+        "You don't have to," {npc.name} says, which means something is going
+        to be hard to say. Instead {npc.they} {npc:holds|hold} your hand. The
+        first round of treatment starts the next week.
+      effects:
+        - { type: cost, item: treatment_help }
+        - { type: lifeHelp, role: npc, action: treatment }
+        - { type: relationship, role: npc, affection: 10, trust: 8 }
+        - { type: memory, role: npc, tag: paid_for_their_treatment }
+        - { type: stat, key: stress, delta: 3 }
+  - id: go_with
+    label: Go with {npc.them} to the appointments
+    visibleIf: { role: npc, where: [household, city] }
+    outcome:
+      text: >-
+        You learn the names of the nurses and how the waiting room coffee
+        tastes. It isn't much, and it is exactly what the day needed.
+      effects:
+        - { type: relationship, role: npc, affection: 9, trust: 7 }
+        - { type: memory, role: npc, tag: was_there_for_them }
+        - { type: stat, key: stress, delta: 4 }
+  - id: distance
+    label: Keep your distance; you can't watch this
+    outcome:
+      text: >-
+        You say you'll check in. You do, a little. Not enough to feel good
+        about it.
+      effects:
+        - { type: relationship, role: npc, affection: -8, trust: -5 }
+        - { type: stat, key: stress, delta: 2 }

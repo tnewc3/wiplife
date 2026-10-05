@@ -625,7 +625,7 @@ choices:
         'id: test_debt\ntitle: Debt\ntext: Debt.\ntone: neutral\ncategory: money\nrarity: common\nlifeStages: [adult]\nrequires: { finances: {} }\nweight: { base: 1 }\nautoOutcome:\n  effects:\n    - { type: debt, action: add, kind: personal }\n',
       );
       const text = await expectErrors();
-      expect(text).toContain('add needs kind and amount');
+      expect(text).toContain('add needs kind and either amount or item');
       expect(text).toContain('requires');
     });
   });
@@ -1071,5 +1071,76 @@ describe('heir play and inheritance (E2b)', () => {
     const real = await readFile(path.join(dir, 'events/any/legacy/remember_warm_home.yaml'), 'utf8');
     await write('events/any/legacy/remember_warm_home.yaml', real.replace('tag: heir_warm_home', 'tag: heir_cold_home'));
     expect(await expectErrors()).toContain('so it must require the memory "heir_warm_home" from the parent');
+  });
+});
+
+describe("people's own lives (E3)", () => {
+  it('accepts the real content: about forty request events and about sixty news lines', { timeout: 90_000 }, async () => {
+    const result = await compile();
+    if (!result.ok) throw new Error(formatErrors(result.errors));
+    const registered = new Set(Object.values(result.bundle.registries.people.requests).flatMap((r) => r.events));
+    const followUps = Object.values(result.bundle.events).filter((e) => !e.retired && (e.category === 'lives' || e.category === 'care'));
+    expect(followUps.length).toBeGreaterThanOrEqual(40);
+    expect(followUps.length).toBeLessThanOrEqual(50);
+    expect([...registered].every((id) => result.bundle.events[id])).toBe(true);
+    const lines = Object.values(result.bundle.text.news.lines).reduce((sum, l) => sum + l.length, 0);
+    expect(lines).toBeGreaterThanOrEqual(55);
+    expect(lines).toBeLessThanOrEqual(70);
+    expect(result.warnings).toEqual([]);
+  });
+
+  it('keeps request events to follow-ups that cast the person whose life changed', { timeout: 90_000 }, async () => {
+    const real = await readFile(path.join(dir, 'events/any/lives/wedding_invitation.yaml'), 'utf8');
+    await write('events/any/lives/wedding_invitation.yaml', real.replace('followUpOnly: true\n', ''));
+    expect(await expectErrors()).toContain('answers wedding, so it must be followUpOnly');
+    await write('events/any/lives/wedding_invitation.yaml', real.replace('npc: { support: true, presence: anywhere }', 'person: { support: true, presence: anywhere }'));
+    expect(await expectErrors()).toContain('casts the person whose life changed as "npc"');
+    await write('events/any/lives/wedding_invitation.yaml', real.replace('npc: { support: true, presence: anywhere }', 'npc: { support: true, presence: anywhere }\n  stranger: { kind: friend, presence: anywhere }'));
+    expect(await expectErrors()).toContain('its cast can only be npc, partner or sibling (not "stranger")');
+    const funeral = await readFile(path.join(dir, 'events/any/lives/funeral_parent.yaml'), 'utf8');
+    await write('events/any/lives/funeral_parent.yaml', funeral.replace('npc: { kind: parent, presence: anywhere, deceased: true }', 'npc: { kind: parent, presence: anywhere }'));
+    expect(await expectErrors()).toContain('a death casts "npc" as a deceased role');
+  });
+
+  it('needs the situation that makes {npc.partner} and {npc.job} true', { timeout: 90_000 }, async () => {
+    const real = await readFile(path.join(dir, 'events/any/lives/engagement_news.yaml'), 'utf8');
+    await write('events/any/lives/engagement_news.yaml', real.replace(', life: { partner: [engaged] }', ''));
+    expect(await expectErrors()).toContain('{npc.partner} needs requires: role npc with life');
+    const promotion = await readFile(path.join(dir, 'events/any/lives/promotion_dinner.yaml'), 'utf8');
+    await write('events/any/lives/promotion_dinner.yaml', promotion.replace('text: >-\n  {npc.name} got the promotion.', 'text: >-\n  {npc.name} got the promotion as {npc.job}.').replace(', life: { employed: true }', ''));
+    expect(await expectErrors()).toContain('{npc.job} needs requires: role npc with life: { employed: true }');
+    const toast = await readFile(path.join(dir, 'events/any/lives/wedding_toast.yaml'), 'utf8');
+    await write('events/any/lives/wedding_toast.yaml', toast.replace('text: >-\n  "Would you give a toast?"', 'text: >-\n  {self.city} "Would you give a toast?"'));
+    expect(await expectErrors()).toContain("{self.city} isn't available");
+  });
+
+  it('keeps news lines to the values they are given, short, and without a hardcoded pronoun', { timeout: 90_000 }, async () => {
+    const news = await readFile(path.join(dir, 'text/news.yaml'), 'utf8');
+    await write('text/news.yaml', news.replace('    - "Your {npc.relation} {npc.name} retired."', '    - "Your {npc.relation} {npc.name} retired from {employer}."'));
+    expect(await expectErrors()).toContain('lines.retired[0]');
+    await write('text/news.yaml', news.replace('    - "Your {npc.relation} {npc.name} retired."', '    - "Your {npc.relation} {npc.name} retired, and she is glad."'));
+    expect(await expectErrors()).toContain('hardcoded pronoun');
+    await write('text/news.yaml', news.replace('    - "Your {npc.relation} {npc.name} retired."', `    - "Your {npc.relation} {npc.name} retired ${'and so on '.repeat(20)}."`));
+    expect(await expectErrors()).toContain('news lines are short');
+    await write('text/news.yaml', news.replace(/ {2}care_needed:\n.*\n.*\n/s, ''));
+    expect(await expectErrors()).toContain('care_needed');
+  });
+
+  it('checks the people balance against itself and the pacing cap', { timeout: 90_000 }, async () => {
+    const people = await readFile(path.join(dir, 'balance/people.yaml'), 'utf8');
+    await write('balance/people.yaml', people.replace('partnerAgeOffset: { min: -5, max: 7 }', 'partnerAgeOffset: { min: 9, max: 7 }'));
+    expect(await expectErrors()).toContain('love.partnerAgeOffset: min is greater than max');
+    const pacing = await readFile(path.join(dir, 'balance/pacing.yaml'), 'utf8');
+    await write('balance/pacing.yaml', pacing.replace('cap: 6', 'cap: 1'));
+    expect(await expectErrors()).toContain('requests.maxPerYear is above the pacing cap');
+    await write('balance/pacing.yaml', pacing);
+    await write('balance/people.yaml', people.replace('  far: [love, children, trouble]', '  far: [love, children, trouble, career]'));
+    expect(await expectErrors()).toContain('each tier follows a subset of the tier above it');
+  });
+
+  it('has the costs, memories and flags the events use', { timeout: 90_000 }, async () => {
+    const economy = await readFile(path.join(dir, 'balance/economy.yaml'), 'utf8');
+    await write('balance/economy.yaml', economy.replace('  cosigned_debt: { amount: 7000, familyHelp: false }\n', ''));
+    expect(await expectErrors()).toContain('cosigned_debt');
   });
 });

@@ -1,0 +1,65 @@
+# Request (death): a parent has died.
+id: funeral_parent
+title: The call you were dreading
+text: >-
+  {npc.name} has died. Your {npc.relation}. There are phone calls to make and
+  a funeral to plan, and everyone looks to the person who is still standing.
+tone: dark
+category: lives
+rarity: common
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 14 } }
+    - { role: npc, alive: false, kind: [parent, stepparent] }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  npc: { kind: parent, presence: anywhere, deceased: true }
+choices:
+  - id: sit
+    label: Sit in the back and say little
+    outcome:
+      text: >-
+        You do what you can. You stand when you're supposed to stand and sit
+        when you're supposed to sit. The grief arrives later, in a grocery
+        store, over a brand of tea.
+      effects:
+        - { type: stat, key: happiness, delta: -5 }
+        - { type: stat, key: stress, delta: 5 }
+  - id: plan
+    label: Help plan the service
+    visibleIf: { age: { gte: 18 } }
+    outcome:
+      text: >-
+        You choose the hymns, the photographs and the flowers, and go through
+        {npc.their} closet with your family, laughing at one jacket and
+        crying at another. It is a good send-off.
+      effects:
+        - { type: cost, item: funeral_share }
+        - { type: stat, key: stress, delta: 6 }
+        - { type: stat, key: happiness, delta: -4 }
+        - { type: stat, key: kindness, delta: 1 }
+  - id: at_the_end
+    label: Share what the last days were like
+    visibleIf: { memory: { role: npc, tag: stayed_by_their_bed } }
+    outcome:
+      text: >-
+        You were there at the end, and the family wants to know what {npc.name}
+        said. You tell them the small things, the ones that were
+        entirely {npc.theirs}. They ask for them again.
+      effects:
+        - { type: stat, key: happiness, delta: -2 }
+        - { type: stat, key: stress, delta: 3 }
+        - { type: stat, key: kindness, delta: 1 }
+  - id: travel
+    label: Travel for the service
+    visibleIf: { role: npc, where: [elsewhere] }
+    outcome:
+      text: >-
+        The flight is cheap and the day is long. You arrive for the part
+        where everyone's holding a paper plate, and you hold one too.
+      effects:
+        - { type: cost, item: funeral_travel }
+        - { type: stat, key: happiness, delta: -4 }
+        - { type: stat, key: stress, delta: 4 }

@@ -1,0 +1,65 @@
+# Request (death): the family asks you to speak.
+id: eulogy_request
+title: "\"You knew them best\""
+text: >-
+  The family has asked you to give the eulogy for {npc.name}. Your {npc.relation}.
+  They say you're the one who knew {npc.them} best, and that anything you say
+  will be right. You are not sure that's true, but you know the question
+  can't be refused lightly.
+tone: serious
+category: lives
+rarity: uncommon
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { role: npc, alive: false, kind: [parent, grandparent, sibling, friend, stepparent], affection: { gte: 60 } }
+weight: { base: 6 }
+followUpOnly: true
+cast:
+  npc: { kind: friend, presence: anywhere, deceased: true }
+choices:
+  - id: honest
+    label: Tell the truth, flaws included
+    check:
+      base: 50
+      stats:
+        - { key: confidence, weight: 0.3 }
+        - { key: kindness, weight: 0.2 }
+      success:
+        text: >-
+          You describe the stubbornness, the terrible jokes, the day {npc.they}
+          {npc:drove|drive} four hours to bring you a coat. People laugh and then
+          nod. This was a real person, and now they all remember {npc.them}
+          that way.
+        effects:
+          - { type: stat, key: confidence, delta: 3 }
+          - { type: stat, key: stress, delta: 4 }
+          - { type: stat, key: happiness, delta: -3 }
+          - { type: history, text: 'You gave the eulogy for {npc.name}.', importance: 2 }
+      failure:
+        text: >-
+          Halfway through the stories your voice gives out. A cousin takes
+          your arm and reads the rest from your notes, kindly and a little
+          too fast.
+        effects:
+          - { type: stat, key: stress, delta: 6 }
+          - { type: stat, key: happiness, delta: -5 }
+  - id: short
+    label: Say a few warm words and sit down
+    outcome:
+      text: >-
+        Six sentences. You mean every one. It's enough, and it's all you
+        can stand.
+      effects:
+        - { type: stat, key: stress, delta: 3 }
+        - { type: stat, key: happiness, delta: -3 }
+  - id: decline
+    label: Ask someone else to do it
+    outcome:
+      text: >-
+        You tell the family you wouldn't do it justice. They understand. You
+        listen from a pew and think of everything you didn't say.
+      effects:
+        - { type: stat, key: happiness, delta: -4 }
+        - { type: stat, key: stress, delta: 2 }
