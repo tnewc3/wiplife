@@ -1,0 +1,73 @@
+# Request (promotion): good news from someone close.
+id: promotion_dinner
+title: Moving up
+text: >-
+  {npc.name} got the promotion. Your {npc.relation} calls with a voice that
+  skips instead of walks, and wants to tell you everything: the title, the
+  corner desk, the first thing {npc.they} {npc:is|are} going to do with the
+  raise.
+tone: light
+category: lives
+rarity: common
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 16 } }
+    - { role: npc, alive: true, age: { gte: 18 }, kind: [parent, sibling, friend, child, relative], life: { employed: true } }
+weight: { base: 8 }
+followUpOnly: true
+cast:
+  npc: { support: true, presence: anywhere }
+choices:
+  - id: cheer
+    label: Cheer for {npc.them} on the phone
+    outcome:
+      text: >-
+        You whoop so loudly someone in the next room asks if you're all right.
+        {npc.name} laughs until {npc.they} {npc:has|have} to sit down.
+      effects:
+        - { type: relationship, role: npc, affection: 5, trust: 2 }
+  - id: dinner
+    label: Take {npc.them} out to dinner
+    visibleIf: { role: npc, where: [household, city] }
+    outcome:
+      text: >-
+        {npc.name} talks with {npc.their} hands and insists on paying for
+        dessert. It's the happiest you have seen {npc.them} in a long while.
+      effects:
+        - { type: cost, item: celebration_dinner }
+        - { type: relationship, role: npc, affection: 8, trust: 4 }
+        - { type: stat, key: happiness, delta: 2 }
+  - id: raise_a_glass
+    label: Raise a glass to the job you helped {npc.them} land
+    visibleIf:
+      all:
+        - { role: npc, where: [household, city] }
+        - { memory: { role: npc, tag: helped_them_find_work } }
+    outcome:
+      text: >-
+        "Without you I wouldn't even be there," {npc.name} says, and means
+        it. You protest, and then stop protesting, and clink glasses.
+      effects:
+        - { type: cost, item: celebration_dinner }
+        - { type: relationship, role: npc, affection: 11, trust: 8 }
+        - { type: stat, key: happiness, delta: 3 }
+  - id: jealous
+    label: Admit you're a little jealous
+    check:
+      base: 50
+      stats:
+        - { role: npc, key: trust, weight: 0.4 }
+      success:
+        text: >-
+          "Honestly? Me too," {npc.name} admits. "I keep waiting for someone to
+          notice I don't know what I'm doing." You laugh. You both feel better.
+        effects:
+          - { type: relationship, role: npc, affection: 4, trust: 8 }
+          - { type: stat, key: happiness, delta: 1 }
+      failure:
+        text: >-
+          There's a pause. "I thought you'd be happy for me," {npc.name} says.
+          You say you are. It doesn't come out the way you meant.
+        effects:
+          - { type: relationship, role: npc, affection: -6, trust: -2 }

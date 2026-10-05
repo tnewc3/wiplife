@@ -48,6 +48,7 @@ import { CONTINUE_CHOICE } from '../../src/engine/life';
 import { checkTemplate } from '../../src/engine/text';
 import type { ContentError } from './compile';
 import { MONEY } from './consistency';
+import { checkPeople } from './people';
 
 const CREATION = 'balance/creation.yaml';
 const AGING = 'balance/aging.yaml';
@@ -178,6 +179,7 @@ export function checkReferences(
   errors.push(...checkInteractions(bundle, fileOf));
   errors.push(...checkFamily(bundle, fileOf, options.partialEvents === true));
   errors.push(...checkHeir(bundle, fileOf, options.partialEvents === true));
+  errors.push(...checkPeople(bundle, fileOf, options.partialEvents === true));
 
   return errors;
 }
@@ -476,6 +478,8 @@ function checkEvents(bundle: ContentBundle, fileOf: (typeKey: CollectionKey, id:
     ...bundle.registries.interactions.infidelity.intimate.events,
     ...familyResults(bundle.registries.family).flatMap((r) => r.events),
     ...heirResults(bundle.registries.heir).flatMap((r) => r.events),
+    // E3: the events the lives of the people you know can ask of you.
+    ...Object.values(bundle.registries.people.requests).flatMap((r) => r.events),
   ]);
 
   for (const [id, def] of Object.entries(bundle.events)) {
@@ -1252,10 +1256,11 @@ function checkHeir(bundle: ContentBundle, fileOf: (typeKey: CollectionKey, id: s
     }
   }
 
-  // A parent who has died only exists for heirs, so every event that casts one is for heirs only.
+  // The role "parent" is the heir's parent who died (passed in by the heir system), so every event that casts one is for heirs only.
+  // (E3: a parent who dies in a life you are living is a funeral, cast under another role name.)
   for (const [id, def] of Object.entries(bundle.events)) {
     if (def.retired) continue;
-    if (Object.values(def.cast ?? {}).some((c) => c.deceased === true && c.kind === 'parent') && !requiresHeir(def.requires)) {
+    if (Object.entries(def.cast ?? {}).some(([role, c]) => role === 'parent' && c.deceased === true && c.kind === 'parent') && !requiresHeir(def.requires)) {
       err(fileOf('events', id), `${id}: casts a parent who has died, which only heirs have, so it must require { family: { heir: true } }`);
     }
   }

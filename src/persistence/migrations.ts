@@ -184,6 +184,22 @@ export const migrations: readonly Migration[] = [
       return { ...data, will: null, estate: null, lineage: { ...lineage, lineId, familyName, reputation: 50, deeds: [] } };
     },
   },
+  {
+    from: 12,
+    description:
+      'E3: people\'s own lives. A life starts with no news, and last year\'s ledger with no care costs. People get their ' +
+      'life summary (job level, partner, children, troubles; "life" on a person) from the first yearly step that ' +
+      'meets them, built from what the save already holds (their job, wealth and relationship to you), so nobody ' +
+      'is given a partner, children or troubles they never had.',
+    migrate: (data) => {
+      if (!isRecord(data)) return data;
+      let finances = data.finances;
+      if (isRecord(finances) && isRecord(finances.lastLedger)) {
+        finances = { ...finances, lastLedger: { ...finances.lastLedger, care: 0 } };
+      }
+      return { ...data, finances, news: [] };
+    },
+  },
 ];
 
 function isRecord(value: unknown): value is Record<string, unknown> {

@@ -1,0 +1,64 @@
+# Request (wedding): someone close is getting married to a partner who isn't on your list.
+id: wedding_invitation
+title: Save the date
+text: >-
+  The invitation comes on thick cream paper. {npc.name}, your {npc.relation},
+  is marrying {npc.partner}, and there is a handwritten line at the bottom:
+  "Please come."
+tone: light
+category: lives
+rarity: common
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 14 } }
+    - { role: npc, alive: true, age: { gte: 18 }, kind: [parent, sibling, friend, child, grandparent, relative], life: { partner: [married] } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  npc: { support: true, presence: anywhere }
+choices:
+  - id: send_gift
+    label: Send a gift and your love
+    outcome:
+      text: >-
+        The card says everything you would have said in person, and a little
+        less. {npc.name} sends a photo of the cake.
+      effects:
+        - { type: cost, item: wedding_gift }
+        - { type: relationship, role: npc, affection: 2 }
+  - id: go_near
+    label: Go, and bring a gift
+    visibleIf: { role: npc, where: [household, city] }
+    outcome:
+      text: >-
+        You dance badly and eat two slices of cake. When {npc.name} and
+        {npc.partner} leave in a shower of rice, you find you are crying a
+        little, and don't mind.
+      effects:
+        - { type: cost, item: wedding_gift }
+        - { type: relationship, role: npc, affection: 8, trust: 4 }
+        - { type: memory, role: npc, tag: went_to_their_wedding }
+        - { type: stat, key: happiness, delta: 3 }
+  - id: go_far
+    label: Travel for it
+    visibleIf: { role: npc, where: [elsewhere] }
+    outcome:
+      text: >-
+        The trip is long and the hotel is mediocre, and none of that matters
+        when {npc.name} walks in. Being there is the gift.
+      effects:
+        - { type: cost, item: wedding_travel }
+        - { type: relationship, role: npc, affection: 9, trust: 5 }
+        - { type: memory, role: npc, tag: went_to_their_wedding }
+        - { type: stat, key: happiness, delta: 3 }
+        - { type: stat, key: stress, delta: 2 }
+  - id: skip
+    label: Skip it
+    outcome:
+      text: >-
+        You tell yourself it's only a party. {npc.name} will remember who was
+        there.
+      effects:
+        - { type: relationship, role: npc, affection: -8, trust: -4 }
+        - { type: memory, role: npc, tag: missed_wedding }

@@ -1,0 +1,51 @@
+# Request (moveAway): someone close has moved away from your city.
+id: after_they_leave
+title: The empty chair
+text: >-
+  {npc.name} has moved to {npc.city}. The apartment is already someone else's
+  problem, and the group chat is oddly quiet. There's a new address, a new
+  number, and a message that says: "Come visit. I mean it."
+tone: neutral
+category: lives
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 16 } }
+    - { role: npc, alive: true, age: { gte: 18 }, kind: [parent, sibling, friend, child, grandparent, relative], where: [elsewhere] }
+weight: { base: 8 }
+followUpOnly: true
+cast:
+  npc: { support: true, presence: elsewhere }
+choices:
+  - id: visit
+    label: Plan a visit soon
+    outcome:
+      text: >-
+        You book it before you can talk yourself out of it. {npc.name} meets
+        you at the station with a hug that lifts you off the ground, and shows
+        you the new neighborhood like it's a trophy.
+      effects:
+        - { type: cost, item: wedding_travel }
+        - { type: relationship, role: npc, affection: 9, trust: 5 }
+        - { type: memory, role: npc, tag: kept_in_touch }
+        - { type: stat, key: happiness, delta: 2 }
+  - id: package
+    label: Send a care package
+    outcome:
+      text: >-
+        Local snacks, a mug that says the name of the old town, and a note.
+        {npc.name} posts a photo of the mug on the first shelf.
+      effects:
+        - { type: cost, item: moving_help }
+        - { type: relationship, role: npc, affection: 5, trust: 3 }
+        - { type: memory, role: npc, tag: kept_in_touch }
+  - id: let_it_fade
+    label: Wish {npc.them} well and let the distance do what it does
+    outcome:
+      text: >-
+        You mean to call. The calls get shorter, then rarer. It happens so
+        gently you almost miss it.
+      effects:
+        - { type: relationship, role: npc, affection: -6 }
+        - { type: memory, role: npc, tag: lost_touch }

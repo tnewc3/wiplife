@@ -1,0 +1,77 @@
+# Follow-up to care_needed: the care you pay for.
+id: care_paid_bills
+title: The monthly statement
+text: >-
+  You've been paying for {npc.name}'s care since {since}. The care home has
+  sent a new statement, and the number at the bottom has grown. The staff are
+  kind, and the sum is not.
+tone: serious
+category: care
+rarity: common
+lifeStages: [adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { flag: paid_for_care }
+    - { memory: { role: npc, tag: paid_for_their_care } }
+    - { role: npc, alive: true, life: { care: [paid] } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  npc: { support: true, presence: anywhere }
+  partner: { support: true, presence: household, optional: true }
+choices:
+  - id: keep_paying
+    label: Keep paying, and cut elsewhere
+    outcome:
+      text: >-
+        You give up the extras without much ceremony: the trips, the dinners
+        out. {npc.name} never hears about it, which is how you want it.
+      effects:
+        - { type: cost, item: care_extras }
+        - { type: relationship, role: npc, affection: 4, trust: 3 }
+        - { type: stat, key: stress, delta: 3 }
+  - id: bring_home
+    label: Bring {npc.them} home instead
+    visibleIf:
+      all:
+        - { home: { kind: [renting, owned] } }
+        - { not: { home: { partner: true } } }
+    outcome:
+      text: >-
+        The care home throws a small send-off. At home {npc.name} sleeps
+        in the spare room and complains about the pillow with great
+        satisfaction.
+      effects:
+        - { type: lifeHelp, role: npc, action: move_in }
+        - { type: flag, key: took_in_a_relative, value: true }
+        - { type: relationship, role: npc, affection: 8, trust: 6 }
+        - { type: memory, role: npc, tag: took_them_in_for_care }
+        - { type: stat, key: stress, delta: 4 }
+  - id: bring_home_together
+    label: Talk it over with {partner.name} and bring {npc.them} home
+    visibleIf:
+      all:
+        - { role: partner }
+        - { home: { kind: [renting, owned] } }
+    outcome:
+      text: >-
+        {partner.name} takes a long breath and says it will be hard. Then
+        says yes. You make the room together.
+      effects:
+        - { type: lifeHelp, role: npc, action: move_in }
+        - { type: flag, key: took_in_a_relative, value: true }
+        - { type: relationship, role: npc, affection: 8, trust: 6 }
+        - { type: relationship, role: partner, affection: 3, trust: 5 }
+        - { type: memory, role: npc, tag: took_them_in_for_care }
+        - { type: stat, key: stress, delta: 4 }
+  - id: ask_family
+    label: Ask the family to split it
+    visibleIf: { relative: { kind: sibling, alive: true } }
+    outcome:
+      text: >-
+        You make three calls and a spreadsheet. Nobody enjoys it. Everyone
+        chips in something, and for the first time the whole thing feels shared.
+      effects:
+        - { type: lifeHelp, role: npc, action: leave_care }
+        - { type: stat, key: stress, delta: -2 }

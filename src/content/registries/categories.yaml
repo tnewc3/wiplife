@@ -71,3 +71,9 @@ categories:
   legacy:
     label: Your family's name
     requires: { family: { heir: true } }
+  # E3: requests and news from the people you know. Only the lives step
+  # queues them (registries/people.yaml); they have no contract of their own,
+  # each event requires what it is about. Care is about your home, so a
+  # partner who lives with you comes first (the household rule).
+  lives: { label: People's lives }
+  care: { label: Care for a relative, household: true }

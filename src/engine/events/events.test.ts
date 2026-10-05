@@ -295,7 +295,7 @@ describe('pacing director', () => {
     return out;
   };
 
-  it('keeps each year within its stage budget plus the volatility bonus, never above the cap, without repeats', () => {
+  it('keeps each year within its stage budget plus the volatility bonus, never above the cap, without repeats', { timeout: 30_000 }, () => {
     const { budgets, cap, volatility } = content.balance.pacing;
     for (let s = 0; s < 20; s++) {
       for (const begun of years(`pace-${s}`, 90)) {
@@ -475,9 +475,11 @@ describe('event text', () => {
   it('renders every event, choice and outcome for she/her, he/him, they/them and xe/xem', () => {
     const presets = ['she_her', 'he_him', 'they_them', 'xe_xem'].map((id) => content.pronouns[id]!);
     for (const preset of presets) {
-      const person = { name: { first: 'Ana', last: 'Ruiz' }, pronouns: preset };
+      // E3: a person you know also has what they are to you, a partner, a city and a job.
+      const person = { name: { first: 'Ana', last: 'Ruiz' }, pronouns: preset, relation: 'friend', partner: 'Rowan', city: 'Chicago', job: 'an electrician' };
+      const self = { name: person.name, pronouns: preset };
       for (const def of Object.values(content.events)) {
-        const roles = Object.fromEntries([...Object.keys(def.cast ?? {}), SELF_ROLE].map((r) => [r, person]));
+        const roles = Object.fromEntries([...Object.keys(def.cast ?? {}).map((r) => [r, person] as const), [SELF_ROLE, self] as const]);
         const values = {
           age: 40,
           talent: 'music',

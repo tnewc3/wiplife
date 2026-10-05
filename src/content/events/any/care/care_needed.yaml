@@ -1,0 +1,91 @@
+# Request (careNeeded): an older relative can no longer manage alone.
+id: care_needed
+title: Who looks after the parents
+text: >-
+  {npc.name} fell again. The doctor says {npc.name} shouldn't be living
+  alone anymore, and everyone is looking at you as if you're
+  supposed to know what happens next. Your {npc.relation} is awake in the
+  next room, pretending not to listen.
+tone: serious
+category: care
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { role: npc, alive: true, kind: [parent, stepparent, grandparent], life: { care: [needed] } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  npc: { support: true, presence: anywhere }
+  partner: { support: true, presence: household, optional: true }
+choices:
+  - id: pay_care
+    label: Pay for good care, and visit often
+    outcome:
+      text: >-
+        You tour six places that smell like soup. The seventh has a garden and
+        a nurse who knows everyone's name. You visit on Sundays, and the
+        bills arrive on the first of every month.
+      effects:
+        - { type: cost, item: care_setup }
+        - { type: lifeHelp, role: npc, action: pay_care }
+        - { type: flag, key: paid_for_care, value: true }
+        - { type: relationship, role: npc, affection: 6, trust: 6 }
+        - { type: memory, role: npc, tag: paid_for_their_care }
+        - { type: stat, key: stress, delta: 3 }
+        - { type: schedule, eventId: care_paid_bills, inYears: [2, 4], cast: [npc] }
+  - id: take_in
+    label: Move {npc.them} into your home
+    visibleIf:
+      all:
+        - { home: { kind: [renting, owned] } }
+        - { not: { home: { partner: true } } }
+    outcome:
+      text: >-
+        You clear out the spare room and learn what a pill organizer is for.
+        {npc.name} grumbles about the mattress and thanks you in the same
+        breath. Some evenings you're exhausted. Some evenings you're glad.
+      effects:
+        - { type: cost, item: care_setup }
+        - { type: lifeHelp, role: npc, action: move_in }
+        - { type: flag, key: took_in_a_relative, value: true }
+        - { type: relationship, role: npc, affection: 10, trust: 8 }
+        - { type: memory, role: npc, tag: took_them_in_for_care }
+        - { type: stat, key: stress, delta: 6 }
+        - { type: schedule, eventId: care_year_at_home, inYears: [2, 4], cast: [npc] }
+  - id: take_in_together
+    label: Talk it over with {partner.name}, then bring {npc.them} home
+    visibleIf:
+      all:
+        - { role: partner }
+        - { home: { kind: [renting, owned] } }
+    outcome:
+      text: >-
+        {partner.name} listens to the whole thing, then says, "Of course," in
+        the voice of someone who has already moved the furniture. The two of
+        you set up the room together, and the house gets a little fuller.
+      effects:
+        - { type: cost, item: care_setup }
+        - { type: lifeHelp, role: npc, action: move_in }
+        - { type: flag, key: took_in_a_relative, value: true }
+        - { type: relationship, role: npc, affection: 10, trust: 8 }
+        - { type: relationship, role: partner, affection: 3, trust: 5 }
+        - { type: memory, role: npc, tag: took_them_in_for_care }
+        - { type: stat, key: stress, delta: 5 }
+        - { type: schedule, eventId: care_year_at_home, inYears: [2, 4], cast: [npc, partner] }
+  - id: leave_it
+    label: Leave it to the rest of the family
+    visibleIf: { relative: { kind: sibling, alive: true } }
+    outcome:
+      text: >-
+        Someone else steps up. At holidays, nobody quite says it, but everybody
+        knows. You feel the relief and the guilt arrive together, like
+        guests who came in the same car.
+      effects:
+        - { type: lifeHelp, role: npc, action: leave_care }
+        - { type: relationship, role: npc, affection: -7, trust: -3 }
+        - { type: memory, role: npc, tag: left_their_care_to_family }
+        - { type: stat, key: stress, delta: -2 }
+        - { type: stat, key: reputation, delta: -1 }
+        - { type: schedule, eventId: care_sibling_resents, inYears: [1, 3], cast: [npc] }

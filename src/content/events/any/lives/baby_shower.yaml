@@ -1,0 +1,67 @@
+# Request (newBaby): a baby has come to someone close.
+id: baby_shower
+title: A little one
+text: >-
+  {npc.name}, your {npc.relation}, has a new baby. There's a photo with eight
+  hearts and no caption, and then a call, and then an invitation to come
+  and meet the newest member of the family.
+tone: light
+category: lives
+rarity: common
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 14 } }
+    - { role: npc, alive: true, age: { gte: 18 }, kind: [parent, sibling, friend, child, grandparent, relative], life: { children: { gte: 1 } } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  npc: { support: true, presence: anywhere }
+choices:
+  - id: send
+    label: Send a gift and a long message
+    outcome:
+      text: >-
+        You pick out something soft, and write a card that takes you three
+        tries. {npc.name} sends back a picture of the baby wearing it.
+      effects:
+        - { type: cost, item: baby_gift }
+        - { type: relationship, role: npc, affection: 3 }
+  - id: visit
+    label: Visit, with a gift
+    visibleIf: { role: npc, where: [household, city] }
+    outcome:
+      text: >-
+        The baby weighs almost nothing and holds your finger with surprising
+        force. {npc.name} watches you do it like someone watching a miracle
+        happen to someone else.
+      effects:
+        - { type: cost, item: baby_gift }
+        - { type: relationship, role: npc, affection: 8, trust: 4 }
+        - { type: stat, key: happiness, delta: 3 }
+  - id: visit_wedding
+    label: Visit; you were at the wedding, you'll be here for this
+    visibleIf:
+      all:
+        - { role: npc, where: [household, city] }
+        - { memory: { role: npc, tag: went_to_their_wedding } }
+    outcome:
+      text: >-
+        You were at the wedding, and now you are here, holding the next chapter
+        of {npc.name}'s story. {npc.They} {npc:says|say} it feels like family
+        showing up to family, and you agree.
+      effects:
+        - { type: cost, item: baby_gift }
+        - { type: relationship, role: npc, affection: 11, trust: 7 }
+        - { type: stat, key: happiness, delta: 3 }
+  - id: travel
+    label: Travel to meet the baby
+    visibleIf: { role: npc, where: [elsewhere] }
+    outcome:
+      text: >-
+        A long trip for twenty minutes holding a very small person. Entirely
+        worth it. You cry in the rental car.
+      effects:
+        - { type: cost, item: wedding_travel }
+        - { type: relationship, role: npc, affection: 9, trust: 5 }
+        - { type: stat, key: happiness, delta: 3 }

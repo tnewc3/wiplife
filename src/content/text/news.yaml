@@ -1,0 +1,100 @@
+# News from your people (E3): one line for each notable change in the life of
+# someone you know. Each kind has alternative wordings; one is picked at
+# random. {npc} is the person; {npc.relation} is what they are to you
+# ("sister", "friend"). Other values are listed in schemas/people.ts
+# (NEWS_VALUES); {title} and {npc.job} come with their article ("an
+# electrician"). Never write he or she: use the pronoun placeholders.
+lines:
+  hired:
+    - "Your {npc.relation} {npc.name} got hired at {employer}, as {title}."
+    - "{npc.name} started work at {employer}. {npc.They} {npc:is|are} {title} now."
+  promoted:
+    - "{npc.name}, your {npc.relation}, got promoted and is {title} now."
+    - "Your {npc.relation} {npc.name} moved up at work: {npc.they} {npc:is|are} {title}."
+  fired:
+    - "Your {npc.relation} {npc.name} lost {npc.their} job. It wasn't {npc.their} idea."
+    - "{npc.name} was fired. {npc.They} {npc:hasn't|haven't} said much about it."
+  laid_off:
+    - "{npc.name}, your {npc.relation}, was laid off when the company cut jobs."
+    - "Your {npc.relation} {npc.name} is out of a job after a round of layoffs."
+  switched:
+    - "Your {npc.relation} {npc.name} changed careers and now works at {employer} as {title}."
+    - "{npc.name} left {npc.their} old job for {employer}. {npc.They} {npc:is|are} {title} now."
+  retired:
+    - "Your {npc.relation} {npc.name} retired."
+    - "{npc.name} cleaned out the desk for the last time. Retired, at last."
+  started_dating:
+    - "Your {npc.relation} {npc.name} is seeing someone: {partner}."
+    - "Word is {npc.name}, your {npc.relation}, started dating {partner}."
+  engaged:
+    - "{npc.name}, your {npc.relation}, got engaged to {partner}."
+    - "There's a ring: {npc.name} and {partner} are getting married."
+  married:
+    - "Your {npc.relation} {npc.name} married {partner}."
+    - "{npc.name}, your {npc.relation}, tied the knot with {partner}."
+  broke_up:
+    - "Your {npc.relation} {npc.name} and {partner} broke up."
+    - "{npc.name} is single again. {partner} is out of the picture."
+  divorced:
+    - "Your {npc.relation} {npc.name} and {partner} divorced."
+    - "{npc.name}'s marriage to {partner} is over."
+  widowed:
+    - "{partner} has died, and your {npc.relation} {npc.name} is grieving."
+    - "Your {npc.relation} {npc.name} lost {partner}. It's a heavy time."
+  moved:
+    - "Your {npc.relation} {npc.name} moved to {city}."
+    - "{npc.name} packed up and moved to {city}."
+  moved_near:
+    - "Your {npc.relation} {npc.name} moved to {city}, your city."
+    - "{npc.name} moved to {city}. That's close enough to drop by."
+  had_child:
+    - "Your {npc.relation} {npc.name} had a baby, {child}."
+    - "A new baby: {child}, born to {npc.name}, your {npc.relation}."
+  child_grew:
+    - "{npc.name}'s child {child} turned 18."
+    - "{child} is all grown up: {npc.name}'s child turned 18 this year."
+  came_of_age:
+    - "Your {npc.relation} {npc.name} turned 18."
+    - "{npc.name} just turned 18, and everyone is asking what comes next."
+  moved_out:
+    - "Your {npc.relation} {npc.name} left home for {city}."
+    - "{npc.name} packed up for {city} and is on {npc.their} own now."
+  diagnosed:
+    - "Your {npc.relation} {npc.name} was diagnosed with {condition}."
+    - "Bad news: {npc.name} has {condition}."
+  worsened:
+    - "{npc.name}, your {npc.relation}, is struggling more with {condition}."
+    - "Your {npc.relation} {npc.name} is sicker than last year. It's {condition}."
+  recovered_health:
+    - "Good news: your {npc.relation} {npc.name} has recovered from {condition}."
+    - "{npc.name} is over {condition} and getting back to normal."
+  addiction_started:
+    - "Your {npc.relation} {npc.name} is struggling with {condition}."
+    - "People are worried about {npc.name}. It looks like {condition}."
+  got_clean:
+    - "Your {npc.relation} {npc.name} got treatment and is getting clean."
+    - "{npc.name} is in recovery from {condition}."
+  relapsed:
+    - "Your {npc.relation} {npc.name} relapsed."
+    - "{npc.name} is using again. It's {condition}, and it's back."
+  arrested:
+    - "Your {npc.relation} {npc.name} was arrested for {offense}."
+    - "Police picked up {npc.name} on a charge of {offense}."
+  warned:
+    - "{npc.name} got a warning for {offense} and was sent home."
+    - "Your {npc.relation} {npc.name} was let go with a warning over {offense}."
+  fined:
+    - "{npc.name} was fined for {offense}, and the case is closed."
+    - "Your {npc.relation} {npc.name} got off with a fine for {offense}."
+  probation:
+    - "{npc.name} was put on probation for {years} over {offense}."
+    - "Your {npc.relation} {npc.name} got {years} of probation for {offense}."
+  jailed:
+    - "Your {npc.relation} {npc.name} was sentenced to {years} in prison for {offense}."
+    - "{npc.name} is going to prison for {years}. The charge: {offense}."
+  released:
+    - "Your {npc.relation} {npc.name} is out of prison."
+    - "{npc.name} walked out today. The sentence is served."
+  care_needed:
+    - "Your {npc.relation} {npc.name} can't manage alone anymore."
+    - "{npc.name} needs more help every day, and the family has begun to talk about it."

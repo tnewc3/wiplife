@@ -17,6 +17,7 @@ import {
 import { debtKindSchema, housingKindSchema, lifestyleSchema } from './economy';
 import { FAMILY_DEEDS, GUARDIAN_KINDS, familyProcessSchema, parentingKeySchema } from './family';
 import { credentialTypeSchema, programSchema, tierSchema } from './education';
+import { lifeTierSchema } from './people';
 import { relationshipKindSchema, relationshipStatusSchema, romanceStatusSchema } from './relationships';
 import { templateSchema } from './text';
 
@@ -112,7 +113,36 @@ export type Condition =
       custody?: ('you' | 'shared' | 'other')[];
       /** E2a: a grown child has moved out (or not). */
       movedOut?: boolean;
+      /** E3: their own life now (job, partner, children, troubles, care). */
+      life?: LifeCondition;
     };
+
+/**
+ * E3: a cast person's own life. Every field given must hold. tier: how
+ * closely their life is followed; employed: they have a job (or not);
+ * partner: their partner's status, 'none' for no partner; ended: how their
+ * last relationship ended, in the past year (their ex's name is then
+ * {role.partner}); children: how many
+ * they have; trouble: they have a trouble of one of these kinds right now;
+ * serious: an illness or addiction at least as bad as the balance calls
+ * serious; crime: a crime case at one of these stages; care: care for them
+ * (needed, at your home, paid for by you, left to the family) or 'none';
+ * wealth: their wealth level; recovered: they recovered from an addiction
+ * within this many years.
+ */
+export interface LifeCondition {
+  tier?: z.infer<typeof lifeTierSchema>[];
+  employed?: boolean;
+  partner?: ('dating' | 'engaged' | 'married' | 'none')[];
+  ended?: ('broke_up' | 'divorced' | 'widowed')[];
+  children?: Compare;
+  trouble?: ('illness' | 'crime' | 'addiction')[];
+  serious?: boolean;
+  crime?: ('held' | 'bailed' | 'probation' | 'jail')[];
+  care?: ('needed' | 'home' | 'paid' | 'sibling' | 'none')[];
+  wealth?: z.infer<typeof familyWealthSchema>[];
+  recovered?: number;
+}
 
 /** Your money situation. Every field given must hold. */
 export interface FinancesCondition {
@@ -274,6 +304,21 @@ export interface FamilyCondition {
 }
 
 const atLeastOneField = (c: Record<string, unknown>) => Object.values(c).some((v) => v !== undefined);
+const lifeConditionSchema = z
+  .strictObject({
+    tier: z.array(lifeTierSchema).min(1).optional(),
+    employed: z.boolean().optional(),
+    partner: z.array(z.enum(['dating', 'engaged', 'married', 'none'])).min(1).optional(),
+    ended: z.array(z.enum(['broke_up', 'divorced', 'widowed'])).min(1).optional(),
+    children: compareSchema.optional(),
+    trouble: z.array(z.enum(['illness', 'crime', 'addiction'])).min(1).optional(),
+    serious: z.boolean().optional(),
+    crime: z.array(z.enum(['held', 'bailed', 'probation', 'jail'])).min(1).optional(),
+    care: z.array(z.enum(['needed', 'home', 'paid', 'sibling', 'none'])).min(1).optional(),
+    wealth: z.array(familyWealthSchema).min(1).optional(),
+    recovered: z.int().min(1).max(50).optional(),
+  })
+  .refine(atLeastOneField, 'needs at least one field');
 const latentKindSchema = z.enum(LATENT_KINDS);
 
 export const conditionSchema: z.ZodType<Condition> = z.lazy(() =>
@@ -418,6 +463,7 @@ export const conditionSchema: z.ZodType<Condition> = z.lazy(() =>
       style: z.partialRecord(parentingKeySchema, compareSchema).optional(),
       custody: z.array(z.enum(['you', 'shared', 'other'])).min(1).optional(),
       movedOut: z.boolean().optional(),
+      life: lifeConditionSchema.optional(),
     }),
   ]),
 ) as z.ZodType<Condition>;
@@ -529,10 +575,15 @@ export const effectSchema = z.discriminatedUnion('type', [
       action: z.enum(['add', 'forgive', 'bankruptcy', 'plan']),
       kind: z.enum(['student', 'personal', 'medical']).optional(),
       amount: z.int().min(1).max(100_000_000).optional(),
+      /** E3: instead of `amount`, a cost item from balance/economy.yaml costs (scaled by your city): what you owe if someone you cosigned for defaults. */
+      item: idSchema.optional(),
       kinds: z.array(debtKindSchema).min(1).optional(),
       share: z.number().gt(0).max(1).optional(),
     })
-    .refine((e) => (e.action === 'add') === (e.kind !== undefined && e.amount !== undefined), 'add needs kind and amount (and only add has them)')
+    .refine(
+      (e) => (e.action === 'add') === (e.kind !== undefined && (e.amount !== undefined) !== (e.item !== undefined)),
+      'add needs kind and either amount or item (and only add has them)',
+    )
     .refine((e) => (e.action === 'forgive') === (e.share !== undefined), 'forgive needs share (and only forgive has it)')
     .refine((e) => e.kinds === undefined || e.action === 'forgive', 'only forgive takes kinds'),
   /**
@@ -732,6 +783,25 @@ export const effectSchema = z.discriminatedUnion('type', [
   z.strictObject({ type: z.literal('custody'), role: roleSchema, choice: z.enum(['full', 'shared', 'other']) }),
   /** E2a: start an adoption, IVF or surrogacy process (its fees are a separate cost effect). */
   z.strictObject({ type: z.literal('process'), action: z.literal('start'), process: familyProcessSchema }),
+  /**
+   * E3: you step in for the person cast in `role`, through the systems that
+   * already exist (the money for it is a separate cost effect). bail: they
+   * are out on bail until their case is decided (legal); rehab: an addiction
+   * goes into treatment; treatment: an illness is treated; job_lead: they
+   * find work (a job in a track they fit); move_in: someone who needs care
+   * moves into your home; pay_care: you pay for their care; leave_care: you
+   * leave their care to the family. The engine ignores what doesn't fit.
+   */
+  z.strictObject({
+    type: z.literal('lifeHelp'),
+    role: roleSchema,
+    action: z.enum(['bail', 'rehab', 'treatment', 'job_lead', 'move_in', 'pay_care', 'leave_care']),
+  }),
+  /**
+   * E3: money paid back to you: `share` of what the cost item costs in your
+   * city (balance/economy.yaml costs), such as a loan coming back.
+   */
+  z.strictObject({ type: z.literal('repay'), item: idSchema, share: z.number().gt(0).max(2) }),
 ]);
 export type Effect = z.infer<typeof effectSchema>;
 

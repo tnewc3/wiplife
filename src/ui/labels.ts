@@ -16,6 +16,7 @@ import type {
 } from '../content/schemas';
 import type { JobApplyBlock, SearchBlock } from '../engine/career';
 import type { ApplyBlock } from '../engine/education';
+import type { PersonLifeView, TroubleView } from '../engine/lives/views';
 import type {
   CredentialView,
   DoctorBlock,
@@ -294,6 +295,7 @@ export const LEDGER_LABELS = {
   housing: 'Housing',
   living: 'Living costs',
   children: 'Your children',
+  care: 'Care for a relative',
   supportPaid: 'Child support you paid',
   supportReceived: 'Child support you received',
   debtPayments: 'Debt payments',
@@ -790,4 +792,58 @@ export function estateHomeLine(home: 'none' | 'passes' | 'sold' | 'surrendered',
     case 'surrendered':
       return 'The home was worth less than its mortgage, so the lender took it. No one inherits the difference.';
   }
+}
+
+// E3: the lives of the people you know.
+
+/** The rows of the "Their life" card on a person's page. */
+export function lifeRows(view: PersonLifeView): { label: string; value: string }[] {
+  const rows: { label: string; value: string }[] = [];
+  rows.push({ label: 'Work', value: view.job ? capitalizeFirst(view.job) : view.retired ? 'Retired' : 'No job right now' });
+  rows.push({ label: 'Where', value: view.city.withYou ? `${view.city.name}, with you` : view.city.yours ? `${view.city.name}, in your city` : view.city.name });
+  if (view.partner) {
+    const years = view.partner.years;
+    const since = years >= 1 ? ` · ${years} ${years === 1 ? 'year' : 'years'}` : '';
+    rows.push({ label: 'Partner', value: `${PARTNER_STATUS_LABELS[view.partner.status]} ${view.partner.name}${since}` });
+  } else if (view.ended) {
+    rows.push({ label: 'Partner', value: `${ENDED_LABELS[view.ended.how]} (${view.ended.year})` });
+  }
+  rows.push({
+    label: 'Children',
+    value: view.children.length === 0 ? 'None' : view.children.map((c) => `${c.name} (${c.age})`).join(', '),
+  });
+  if (view.care) rows.push({ label: 'Care', value: CARE_LABELS[view.care] });
+  return rows;
+}
+
+function capitalizeFirst(text: string): string {
+  return text.charAt(0).toUpperCase() + text.slice(1);
+}
+
+export const PARTNER_STATUS_LABELS = { dating: 'Dating', engaged: 'Engaged to', married: 'Married to' } as const;
+export const ENDED_LABELS = { broke_up: 'Single after a breakup', divorced: 'Divorced', widowed: 'Widowed' } as const;
+export const CARE_LABELS = {
+  needed: 'Needs looking after',
+  home: 'Lives with you, and you look after them',
+  paid: 'You pay for their care',
+  sibling: 'The family looks after them',
+} as const;
+export const NEWS_TITLE = 'News from your people';
+
+/** One current trouble, as a line. */
+export function troubleLine(t: TroubleView): string {
+  if (t.kind === 'crime') {
+    switch (t.stage) {
+      case 'held':
+        return `Arrested: ${t.name}, in custody awaiting trial`;
+      case 'bailed':
+        return `Arrested: ${t.name}, out awaiting trial`;
+      case 'probation':
+        return `On probation (${t.name})${t.until !== null ? `, until ${t.until}` : ''}`;
+      case 'jail':
+        return `In prison (${t.name})${t.until !== null ? `, until ${t.until}` : ''}`;
+    }
+  }
+  if (t.kind === 'addiction') return `${t.name}${t.treated ? ', in recovery' : ''}`;
+  return `${t.name}${t.treated ? ', being treated' : ''}${t.serious && !t.treated ? ', serious' : ''}`;
 }

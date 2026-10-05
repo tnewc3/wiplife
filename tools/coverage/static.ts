@@ -81,6 +81,8 @@ export function rootEvents(content: ContentBundle): Set<string> {
     ...familyResults(r.family).map((result) => ({ events: [...result.events] })),
     // E2b: what the heir system schedules (the will read, disputes, a guardian's first year, foster care, memories).
     ...heirResults(r.heir).map((result) => ({ events: [...result.events] })),
+    // E3: what the lives of the people you know ask of you (weddings, bail, loans, funerals, care...).
+    ...Object.values(r.people.requests),
   ];
   for (const list of lists) for (const id of list.events) roots.add(id);
   return roots;

@@ -19,6 +19,7 @@ import { conditionDefSchema, healthBalanceSchema, healthRegistrySchema } from '.
 import { legalBalanceSchema, legalRegistrySchema, offenseSchema } from './legal';
 import { discoveryBalanceSchema, discoveryRegistrySchema, discoveryTextSchema } from './discovery';
 import { interactionRegistrySchema, interactionSchema, interactionsBalanceSchema } from './interactions';
+import { newsTextSchema, peopleBalanceSchema, peopleRegistrySchema } from './people';
 import { estateRegistrySchema, familyBalanceSchema, familyRegistrySchema, heirRegistrySchema, heirTextSchema } from './family';
 
 export * from './balance';
@@ -36,6 +37,7 @@ export * from './legal';
 export * from './discovery';
 export * from './interactions';
 export * from './family';
+export * from './people';
 
 /**
  * Collections: a folder under src/content with one YAML file per definition,
@@ -81,6 +83,7 @@ export const singletonTypes = {
   'balance/discovery': discoveryBalanceSchema,
   'balance/interactions': interactionsBalanceSchema,
   'balance/family': familyBalanceSchema,
+  'balance/people': peopleBalanceSchema,
   'balance/targets': targetsBalanceSchema,
   'character/identity': identityOptionsSchema,
   'character/appearance': appearanceOptionsSchema,
@@ -91,6 +94,7 @@ export const singletonTypes = {
   'text/discovery': discoveryTextSchema,
   'text/time': timeTextSchema,
   'text/heir': heirTextSchema,
+  'text/news': newsTextSchema,
   'registries/memories': memoryRegistrySchema,
   'registries/flags': flagRegistrySchema,
   'registries/categories': categoryRegistrySchema,
@@ -104,6 +108,7 @@ export const singletonTypes = {
   'registries/family': familyRegistrySchema,
   'registries/estate': estateRegistrySchema,
   'registries/heir': heirRegistrySchema,
+  'registries/people': peopleRegistrySchema,
 } as const;
 
 export type SingletonPath = keyof typeof singletonTypes;
@@ -138,6 +143,7 @@ export const contentBundleSchema = z.strictObject({
     discovery: discoveryBalanceSchema,
     interactions: interactionsBalanceSchema,
     family: familyBalanceSchema,
+    people: peopleBalanceSchema,
     targets: targetsBalanceSchema,
   }),
   character: z.strictObject({ identity: identityOptionsSchema, appearance: appearanceOptionsSchema }),
@@ -149,6 +155,7 @@ export const contentBundleSchema = z.strictObject({
     discovery: discoveryTextSchema,
     time: timeTextSchema,
     heir: heirTextSchema,
+    news: newsTextSchema,
   }),
   registries: z.strictObject({
     memories: memoryRegistrySchema,
@@ -164,6 +171,7 @@ export const contentBundleSchema = z.strictObject({
     family: familyRegistrySchema,
     estate: estateRegistrySchema,
     heir: heirRegistrySchema,
+    people: peopleRegistrySchema,
   }),
 });
 

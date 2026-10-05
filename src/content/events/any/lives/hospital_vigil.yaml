@@ -1,0 +1,71 @@
+# Request (illness): someone close has gotten much worse.
+id: hospital_vigil
+title: Visiting hours aren't over
+text: >-
+  The hospital calls. {npc.name} has taken a turn, and the doctor says it
+  would be a good time for family and close friends to come. The words are
+  gentle. The meaning isn't.
+tone: dark
+category: lives
+rarity: uncommon
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 16 } }
+    - { role: npc, alive: true, kind: [parent, sibling, friend, child, grandparent, stepparent], affection: { gte: 50 }, life: { trouble: [illness], serious: true } }
+weight: { base: 6 }
+followUpOnly: true
+cast:
+  npc: { support: true, presence: anywhere }
+choices:
+  - id: phone
+    label: Stay on the phone with the nurse
+    outcome:
+      text: >-
+        You say what you need to say into a phone held to an ear you can't
+        see. It's not what you wanted. It's what there was.
+      effects:
+        - { type: relationship, role: npc, affection: 3, trust: 2 }
+        - { type: stat, key: stress, delta: 4 }
+  - id: stay_near
+    label: Drop everything and go
+    visibleIf: { role: npc, where: [household, city] }
+    outcome:
+      text: >-
+        You sit through the night in a chair that isn't meant for sitting.
+        {npc.name} wakes twice. The second time {npc.they} {npc:knows|know} you.
+      effects:
+        - { type: relationship, role: npc, affection: 12, trust: 9 }
+        - { type: memory, role: npc, tag: stayed_by_their_bed }
+        - { type: stat, key: stress, delta: 6 }
+        - { type: stat, key: health, delta: -1 }
+  - id: fly
+    label: Travel to be there
+    visibleIf: { role: npc, where: [elsewhere] }
+    outcome:
+      text: >-
+        You make the last flight with a bag you don't remember packing. {npc.name}
+        is smaller than you remember, and exactly the same.
+      effects:
+        - { type: cost, item: funeral_travel }
+        - { type: relationship, role: npc, affection: 12, trust: 9 }
+        - { type: memory, role: npc, tag: stayed_by_their_bed }
+        - { type: stat, key: stress, delta: 6 }
+  - id: read
+    label: Read to {npc.them}, like {npc.they} read to you
+    visibleIf:
+      all:
+        - { role: npc, where: [household, city] }
+        - any:
+            - { memory: { role: npc, tag: read_to_you } }
+            - { memory: { role: npc, tag: comforted_you } }
+            - { memory: { role: npc, tag: cared_for_you } }
+    outcome:
+      text: >-
+        You bring the same old book. {npc.name} drifts in and out of the
+        pages, the way you used to drift in and out of them as a kid, and
+        wakes once to ask for chapter three.
+      effects:
+        - { type: relationship, role: npc, affection: 12, trust: 7 }
+        - { type: memory, role: npc, tag: stayed_by_their_bed }
+        - { type: stat, key: stress, delta: 5 }

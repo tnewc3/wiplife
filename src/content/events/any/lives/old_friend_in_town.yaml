@@ -1,0 +1,49 @@
+# Request (moveToYou): someone close has moved to your city.
+id: old_friend_in_town
+title: Same zip code
+text: >-
+  {npc.name}, your {npc.relation}, has moved to your city. The text is just
+  an address and a grinning emoji. "Surprise," it says. "I'm two miles
+  away. Take me to your favorite place."
+tone: light
+category: lives
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 16 } }
+    - { role: npc, alive: true, age: { gte: 18 }, kind: [parent, sibling, friend, child, grandparent, relative], where: [city] }
+weight: { base: 8 }
+followUpOnly: true
+cast:
+  npc: { support: true, presence: city }
+choices:
+  - id: show_around
+    label: Show {npc.them} around
+    outcome:
+      text: >-
+        You walk the city together, and the places you thought you knew look a
+        little different through someone else's eyes.
+      effects:
+        - { type: cost, item: celebration_dinner }
+        - { type: relationship, role: npc, affection: 8, trust: 5 }
+        - { type: stat, key: happiness, delta: 2 }
+  - id: help_settle
+    label: Help {npc.them} get settled
+    outcome:
+      text: >-
+        You carry a couch up two flights, assemble a bookshelf with one
+        spare screw, and learn which neighbor has the loudest TV.
+      effects:
+        - { type: cost, item: moving_help }
+        - { type: relationship, role: npc, affection: 9, trust: 7 }
+        - { type: memory, role: npc, tag: you_helped_them }
+        - { type: stat, key: stress, delta: 1 }
+  - id: busy
+    label: Say you're swamped for a few weeks
+    outcome:
+      text: >-
+        "No rush," {npc.name} says. You mean to follow up. Time goes quickly
+        in the way it does.
+      effects:
+        - { type: relationship, role: npc, affection: -4 }

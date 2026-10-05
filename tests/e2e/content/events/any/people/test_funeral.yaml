@@ -1,0 +1,26 @@
+# Request (death): someone close has died.
+id: test_funeral
+title: A funeral
+text: "{npc.name} has died. Your {npc.relation}. The family gathers."
+tone: dark
+category: people
+rarity: common
+lifeStages: [teen, youngAdult, adult, senior]
+requires: { role: npc, alive: false }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  npc: { kind: sibling, presence: anywhere, deceased: true }
+choices:
+  - id: attend
+    label: Go to the funeral
+    outcome:
+      text: You stand with the family and say goodbye to {npc.name}.
+      effects:
+        - { type: stat, key: stress, delta: 3 }
+  - id: send_flowers
+    label: Send flowers
+    outcome:
+      text: The flowers arrive in time. It is not the same as being there.
+      effects:
+        - { type: cost, item: flowers }

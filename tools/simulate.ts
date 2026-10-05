@@ -15,6 +15,7 @@ import type { ContentBundle } from '../src/content/schemas';
 import { formatInteractions } from './simulate/interactions';
 import { continueAsHeirs, startChains } from './simulate/generations';
 import { formatHeirs, heirTargets } from './simulate/heirs';
+import { measureFullCircle } from './simulate/people';
 import { formatComparison, formatReport, interactionTargets, runSimulation, type SimulatedPlayer } from './simulate/run';
 
 // The compiled JSON directly: src/content/index.ts relies on Vite's import.meta.env.
@@ -58,6 +59,8 @@ const chains = startChains(content);
 const reports = players.map((player) =>
   runSimulation(content, { lives, seedPrefix: values.seed, player, ...(player === 'careful' && generations > 1 ? { onLife: chains.onLife } : {}) }),
 );
+// E3: how long a year takes to begin with a full circle of people simulated.
+for (const r of reports) if (r.player === 'careful') r.people.fullCircle = measureFullCircle(content, 60, 20);
 console.log(formatReport(reports[0]!, content));
 if (reports.length >= 2 && reports[0]!.player === 'careful' && reports[1]!.player === 'careless') {
   console.log('');

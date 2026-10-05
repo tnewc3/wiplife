@@ -64,6 +64,16 @@ export function fertilityFactor(state: LifeState, carrier: Carrier, otherId: Id 
   return factor;
 }
 
+/**
+ * How fertile a pair is (0–1) from the carrier's age and the other parent's,
+ * for someone other than you (E3: the people you know), whose Health counts
+ * as the balance's npcHealth.
+ */
+export function carrierFactorFor(carrierAgeYears: number, otherAgeYears: number, content: ContentBundle): number {
+  const f = content.balance.family.fertility;
+  return curveAt(f.carrierAge, carrierAgeYears) * curveAt(f.health, f.npcHealth) * curveAt(f.otherAge, otherAgeYears);
+}
+
 /** A pregnancy or a process is already under way. */
 export function familyBusy(state: LifeState): boolean {
   return state.family.pregnancy !== null || state.family.process !== null;

@@ -110,6 +110,49 @@ const childData = z.strictObject({
   movedOutYear: int.exactOptional(),
 });
 
+const wealthLevel = z.enum(['poor', 'working', 'middle', 'affluent', 'rich']);
+
+// E3: a person's own life.
+const outsidePartner = z.strictObject({
+  name,
+  genderCategory: category,
+  birthYear: int,
+  canCarry: z.boolean(),
+  status: z.enum(['dating', 'engaged', 'married']),
+  since: int,
+  statusSince: int,
+});
+const trouble = z.strictObject({
+  kind: z.enum(['illness', 'crime', 'addiction']),
+  refId: id,
+  since: int,
+  severity: int.min(0).max(100),
+  treated: z.boolean(),
+  stage: z.enum(['held', 'bailed', 'probation', 'jail']).exactOptional(),
+  until: int.exactOptional(),
+});
+const personLife = z.strictObject({
+  tier: z.enum(['close', 'near', 'far']),
+  background: wealthLevel,
+  level: int.min(0),
+  levelSince: int,
+  jobLost: z.strictObject({ year: int, how: z.enum(['fired', 'laid_off']) }).exactOptional(),
+  retired: z.literal(true).exactOptional(),
+  partner: outsidePartner.nullable(),
+  ended: z.strictObject({ year: int, how: z.enum(['broke_up', 'divorced', 'widowed']), partner: filled }).exactOptional(),
+  children: z.array(z.strictObject({ first: filled, birthYear: int })),
+  troubles: z.array(trouble),
+  recovered: z.array(z.strictObject({ refId: id, year: int })),
+  care: z.enum(['needed', 'home', 'paid', 'sibling']).exactOptional(),
+  careSince: int.exactOptional(),
+  gossip: score,
+  requestYear: int.exactOptional(),
+});
+const newsYear = z.strictObject({
+  year: int,
+  lines: z.array(z.strictObject({ personId: id, kind: filled, text: filled })),
+});
+
 const person = z.strictObject({
   id,
   name,
@@ -125,10 +168,11 @@ const person = z.strictObject({
   tags: z.array(z.string()),
   mood: score,
   moodBase: score,
-  wealthLevel: z.enum(['poor', 'working', 'middle', 'affluent', 'rich']),
+  wealthLevel,
   canCarry: z.boolean(),
   priorChildren: z.array(int).min(1).exactOptional(),
   child: childData.exactOptional(),
+  life: personLife.exactOptional(),
 });
 
 const relationship = z.strictObject({
@@ -276,6 +320,7 @@ const finances = z.strictObject({
       borrowed: dollars,
       support: dollars,
       children: dollars,
+      care: dollars,
       supportPaid: dollars,
       supportReceived: dollars,
       net: dollars,
@@ -497,6 +542,7 @@ export const lifeStateSchema: z.ZodType<LifeState> = z.strictObject({
   will: will.nullable(),
   estate: settlement.nullable(),
   lineage,
+  news: z.array(newsYear),
 });
 
 /**

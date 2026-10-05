@@ -41,6 +41,7 @@ function changesMoney(outcome: Outcome | undefined): boolean {
   return (outcome?.effects ?? []).some(
     (e) =>
       e.type === 'money' ||
+      e.type === 'repay' ||
       e.type === 'rentMonths' ||
       e.type === 'cost' ||
       e.type === 'debt' ||

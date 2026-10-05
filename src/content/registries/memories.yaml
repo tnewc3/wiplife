@@ -177,3 +177,18 @@ tags:
   heir_no_rules: Gave you almost no rules
   lost_the_same_parent: You and {npc.them} lost the same person
   foster_carer: Looked after you in foster care
+  # E3: the people you know ask something of you.
+  went_to_their_wedding: You were at {npc.their} wedding
+  paid_their_bail: You paid {npc.their} bail
+  left_them_in_jail: You didn't pay {npc.their} bail
+  visited_them_in_prison: You visited {npc.them} in prison
+  stayed_by_their_bed: You stayed by {npc.their} bedside
+  paid_for_their_treatment: You paid for {npc.their} treatment
+  staged_their_intervention: You took part in {npc.their} intervention
+  cosigned_for_them: You cosigned a loan for {npc.them}
+  took_them_in_for_care: You took {npc.them} into your home to be looked after
+  paid_for_their_care: You paid for {npc.their} care
+  left_their_care_to_family: You left {npc.their} care to the family
+  godparent_to_their_child: You are godparent to {npc.their} child
+  helped_them_find_work: You helped {npc.them} find work
+  drove_them_home: You picked {npc.them} up when {npc.they} came out of prison

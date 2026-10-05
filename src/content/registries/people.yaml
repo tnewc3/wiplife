@@ -1,0 +1,68 @@
+# The events the lives of the people you know can ask of you (E3). Each
+# trigger names the events that can answer it; the lives step casts the
+# person whose life changed as `npc` and picks one that fits (kind, ages, your
+# money, their situation), by weight. Every event here is followUpOnly. When
+# several people ask in a year, the most pressing trigger goes first.
+priority:
+  - death
+  - careNeeded
+  - arrest
+  - illness
+  - relapse
+  - intervention
+  - divorce
+  - jobLoss
+  - wedding
+  - newBaby
+  - jailed
+  - released
+  - moneyTrouble
+  - moveAway
+  - moveToYou
+  - engaged
+  - newPartner
+  - promotion
+  - recovered
+  - cameOfAge
+
+requests:
+  engaged:
+    events: [engagement_news]
+  newPartner:
+    events: [meet_their_partner]
+  wedding:
+    events: [wedding_invitation, wedding_toast]
+  divorce:
+    events: [divorce_on_the_couch, divorce_lawyer_money]
+  newBaby:
+    events: [baby_shower, meet_the_baby, godparent_ask]
+  arrest:
+    events: [bail_call, bail_a_lawyer]
+  jailed:
+    events: [jail_visit]
+  released:
+    events: [released_ride_home, released_job_lead]
+  jobLoss:
+    events: [job_loss_rent_help, job_loss_a_lead]
+  promotion:
+    events: [promotion_dinner]
+  moneyTrouble:
+    events: [cosign_lease, cosign_car_loan, loan_for_a_dream]
+  illness:
+    events: [diagnosis_call, hospital_vigil]
+  relapse:
+    events: [relapse_call]
+  intervention:
+    events: [intervention_plan, intervention_alone]
+  recovered:
+    events: [their_sobriety_chip]
+  death:
+    events: [funeral_parent, funeral_grandparent, funeral_sibling, funeral_friend, eulogy_request]
+  moveAway:
+    events: [after_they_leave]
+  moveToYou:
+    events: [old_friend_in_town]
+  careNeeded:
+    events: [care_needed]
+  cameOfAge:
+    events: [coming_of_age_party]

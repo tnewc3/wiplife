@@ -1,0 +1,67 @@
+# Request (released): someone close has served their sentence.
+id: released_ride_home
+title: The gate
+text: >-
+  {npc.name} is getting out today. {npc.They} {npc:has|have} a paper bag with
+  {npc.their} things and no one waiting. "You don't have to," {npc.they}
+  {npc:says|say} on the phone. "I just don't know who else to call."
+tone: neutral
+category: lives
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 16 } }
+    - { role: npc, alive: true, age: { gte: 18 }, kind: [parent, sibling, friend, child, grandparent, relative] }
+weight: { base: 8 }
+followUpOnly: true
+cast:
+  npc: { support: true, presence: anywhere }
+choices:
+  - id: arrange
+    label: Make sure there's a ride and a hot meal waiting
+    outcome:
+      text: >-
+        Someone is at the gate with a ride, and a meal waits at the end of it.
+        {npc.name} climbs into the car and says nothing for twenty minutes.
+        Then asks for a burger, and laughs at how good it tastes.
+      effects:
+        - { type: cost, item: celebration_dinner }
+        - { type: relationship, role: npc, affection: 8, trust: 8 }
+        - { type: memory, role: npc, tag: drove_them_home }
+  - id: gate_all_along
+    label: Be at the gate; you've visited all along
+    visibleIf:
+      all:
+        - { role: npc, where: [household, city] }
+        - { memory: { role: npc, tag: visited_them_in_prison } }
+    outcome:
+      text: >-
+        After all those visits across the glass, the open air feels strange to
+        both of you. {npc.name} hugs you and doesn't let go for a long time.
+      effects:
+        - { type: cost, item: celebration_dinner }
+        - { type: relationship, role: npc, affection: 12, trust: 10 }
+        - { type: memory, role: npc, tag: drove_them_home }
+  - id: face_it
+    label: Be at the gate and say what you didn't do
+    visibleIf:
+      all:
+        - { role: npc, where: [household, city] }
+        - { memory: { role: npc, tag: left_them_in_jail } }
+    outcome:
+      text: >-
+        "I should have been there," you say. "I'm sorry." {npc.name} looks at the
+        pavement for a while, and then at you. "You came," {npc.they}
+        {npc:says|say}. It's a beginning.
+      effects:
+        - { type: relationship, role: npc, affection: 6, trust: 4 }
+        - { type: memory, role: npc, tag: drove_them_home }
+  - id: nothing
+    label: Say you wish you could, and don't
+    outcome:
+      text: >-
+        You hear the line go quiet. After a while, {npc.name} says "okay"
+        and hangs up.
+      effects:
+        - { type: relationship, role: npc, affection: -7, trust: -4 }

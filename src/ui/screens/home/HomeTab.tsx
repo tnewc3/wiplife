@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { content } from '../../../content';
-import { getCharacterSummary, getFamilyView, getFamily, getHistoryFeed, getPreviously, getYearRecap } from '../../../engine/selectors';
+import { getCharacterSummary, getFamilyView, getFamily, getHistoryFeed, getNews, getPreviously, getYearRecap } from '../../../engine/selectors';
 import type { LifeState, Stats } from '../../../engine/types';
 import { useAppStore } from '../../../store/appStore';
 import { Button } from '../../components/Button';
@@ -16,6 +16,7 @@ import {
   LIFE_STAGE_LABELS,
   memberAgeLabel,
   money,
+  NEWS_TITLE,
   PROCESS_LABELS,
   pregnancyLine,
   relativeLabel,
@@ -68,6 +69,27 @@ function StoryFeed({ life }: { life: LifeState }) {
           </Button>
         </>
       )}
+    </Card>
+  );
+}
+
+/** E3: the newest news from the people you know. */
+function NewsCard({ life }: { life: LifeState }) {
+  const news = getNews(life);
+  if (!news) return null;
+  return (
+    <Card role="region" aria-labelledby="news-title" data-testid="news-card">
+      <h3 id="news-title" className="text-lg font-bold">
+        {NEWS_TITLE}
+      </h3>
+      <p className="text-sm text-muted">{news.year}</p>
+      <ul className="mt-2 flex flex-col gap-2" aria-label={NEWS_TITLE}>
+        {news.items.map((item, i) => (
+          <li key={i} className="break-words [overflow-wrap:anywhere]">
+            {item.text}
+          </li>
+        ))}
+      </ul>
     </Card>
   );
 }
@@ -158,6 +180,7 @@ export function HomeTab({ life }: { life: LifeState }) {
       )}
 
       <YearRecapCard life={life} />
+      <NewsCard life={life} />
 
       <Card>
         <h3 className="sr-only">Stats</h3>

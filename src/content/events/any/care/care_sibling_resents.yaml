@@ -1,0 +1,57 @@
+# Follow-up to care_needed: you left the care to the family.
+id: care_sibling_resents
+title: Whose turn it is
+text: >-
+  {npc.name} is still being looked after by the family, which in practice
+  means one person. You left it to them {since}, and the call tonight from
+  {sibling.name} makes clear who has been doing it. "I'm not angry," {sibling.they}
+  {sibling:says|say}, in the tone of someone who is.
+tone: serious
+category: care
+rarity: common
+lifeStages: [adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { memory: { role: npc, tag: left_their_care_to_family } }
+    - { role: npc, alive: true, life: { care: [sibling] } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  npc: { support: true, presence: anywhere }
+  sibling: { kind: sibling, presence: anywhere }
+  partner: { support: true, presence: household, optional: true }
+choices:
+  - id: step_in
+    label: Take your share and pay for help
+    outcome:
+      text: >-
+        You tell {sibling.name} you will pay for a few hours of help every
+        week, and take the weekends yourself. It's a start. The relief on
+        the line is audible.
+      effects:
+        - { type: cost, item: care_setup }
+        - { type: lifeHelp, role: npc, action: pay_care }
+        - { type: flag, key: paid_for_care, value: true }
+        - { type: relationship, role: sibling, affection: 7, trust: 8 }
+        - { type: relationship, role: npc, affection: 4, trust: 3 }
+        - { type: memory, role: npc, tag: paid_for_their_care }
+        - { type: stat, key: stress, delta: 3 }
+  - id: apologize
+    label: Apologize, and say you'll visit more
+    outcome:
+      text: >-
+        "Sorry" isn't enough, and you both know it. But it's said, and your
+        {sibling.their} voice loses an edge.
+      effects:
+        - { type: relationship, role: sibling, affection: 3, trust: 3 }
+        - { type: relationship, role: npc, affection: 2 }
+  - id: defend
+    label: Say you do what you can, from where you are
+    outcome:
+      text: >-
+        You point out the miles, the job, the life. {sibling.name} points out
+        the rest. The call ends without a goodbye.
+      effects:
+        - { type: relationship, role: sibling, affection: -10, trust: -8 }
+        - { type: stat, key: stress, delta: 3 }

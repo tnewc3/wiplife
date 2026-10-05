@@ -1,0 +1,63 @@
+# Request (divorce): someone close needs to find their feet after a split.
+id: divorce_lawyer_money
+title: A fresh start, barely
+text: >-
+  After the split, the numbers don't work. {npc.name} has found an apartment
+  and a lawyer's bill, and is short on both. {npc.They} {npc:hasn't|haven't}
+  asked yet. {npc.They} {npc:is|are} working up to it.
+tone: serious
+category: lives
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { role: npc, alive: true, age: { gte: 18 }, kind: [parent, sibling, friend, child], life: { ended: [divorced] } }
+    - { money: { gte: 1500 } }
+weight: { base: 5 }
+followUpOnly: true
+cast:
+  npc: { support: true, presence: anywhere }
+choices:
+  - id: lend_it
+    label: Lend {npc.them} what {npc.they} {npc:needs|need}
+    check:
+      base: 65
+      stats:
+        - { role: npc, key: trust, weight: 0.3 }
+      success:
+        text: >-
+          "I'll pay you back every dollar," {npc.name} says, and sends the first
+          part the next week, with a note.
+        effects:
+          - { type: cost, item: loan_small }
+          - { type: relationship, role: npc, affection: 8, trust: 8 }
+          - { type: memory, role: npc, tag: lent_money }
+          - { type: schedule, eventId: loan_repaid, inYears: [1, 3], cast: [npc] }
+      failure:
+        text: >-
+          You hand it over, and {npc.name} thanks you, and then the thanks
+          stops. Nobody brings it up again.
+        effects:
+          - { type: cost, item: loan_small }
+          - { type: relationship, role: npc, affection: 3, trust: -2 }
+          - { type: memory, role: npc, tag: lent_money }
+          - { type: schedule, eventId: loan_unpaid, inYears: [1, 3], cast: [npc] }
+  - id: gift_it
+    label: Give {npc.them} the money and say it's a gift
+    outcome:
+      text: >-
+        "I can't take that," {npc.name} says, and then does, and then cries a
+        little in your hallway. You never mention it again.
+      effects:
+        - { type: cost, item: loan_small }
+        - { type: relationship, role: npc, affection: 12, trust: 8 }
+        - { type: memory, role: npc, tag: you_helped_them }
+  - id: cant
+    label: Tell {npc.them} you can't this time
+    outcome:
+      text: >-
+        {npc.name} says of course. It's another few awkward weeks before
+        {npc.they} {npc:call|calls} again.
+      effects:
+        - { type: relationship, role: npc, affection: -3 }

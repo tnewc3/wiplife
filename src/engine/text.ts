@@ -6,6 +6,10 @@
  * - `{role.field}` inserts part of a person cast in a role: `name` (first
  *   name), `last`, `fullName`, or a pronoun form: `they`, `them`, `their`,
  *   `theirs`, `themself`. Capitalized forms (`{npc.They}`) start a sentence.
+ *   E3: a person's own life adds `relation` (what they are to you: "sister"),
+ *   `partner` (their partner's first name), `city` (where they live) and
+ *   `job` (their job with its article: "an electrician"); an event may use
+ *   one only when its requirements guarantee it (the content build checks).
  * - `{role:singular|plural}` picks the verb form that agrees with the role's
  *   pronouns: `{npc:is|are}`, `{self:was|were}`.
  *
@@ -17,6 +21,14 @@ import type { Pronouns } from './types';
 export interface TextRole {
   name: { first: string; last: string };
   pronouns: Pronouns;
+  /** E3: what they are to you ("sister", "friend"). */
+  relation?: string;
+  /** E3: their partner's first name, when their partner isn't on your list. */
+  partner?: string;
+  /** E3: the city they live in. */
+  city?: string;
+  /** E3: their job, with its article. */
+  job?: string;
 }
 
 export interface TextContext {
@@ -34,6 +46,8 @@ const PRONOUN_FORMS = {
 
 type PronounField = keyof typeof PRONOUN_FORMS;
 const NAME_FIELDS = ['name', 'last', 'fullName'] as const;
+/** E3: facts about a person's life; a role may lack them (the renderer then throws). */
+export const LIFE_FIELDS = ['relation', 'partner', 'city', 'job'] as const;
 
 export type Placeholder =
   | { kind: 'value'; raw: string; name: string }
@@ -65,7 +79,7 @@ function parsePlaceholder(raw: string): Placeholder {
     if (!IDENT.test(role) || !IDENT.test(field)) throw new TextError(`"${raw}" must look like {role.field}`);
     const lower = field.charAt(0).toLowerCase() + field.slice(1);
     const capitalized = field !== lower && lower in PRONOUN_FORMS;
-    const known = (NAME_FIELDS as readonly string[]).includes(field) || field in PRONOUN_FORMS || capitalized;
+    const known = (NAME_FIELDS as readonly string[]).includes(field) || (LIFE_FIELDS as readonly string[]).includes(field) || field in PRONOUN_FORMS || capitalized;
     if (!known) throw new TextError(`"${raw}": unknown field "${field}"`);
     return { kind: 'role', raw, role, field: capitalized ? lower : field, capitalized };
   }
@@ -110,6 +124,11 @@ function capitalize(text: string): string {
 }
 
 function roleField(role: TextRole, field: string): string {
+  if ((LIFE_FIELDS as readonly string[]).includes(field)) {
+    const value = role[field as (typeof LIFE_FIELDS)[number]];
+    if (value === undefined) throw new TextError(`no ${field} for {${field}}`);
+    return value;
+  }
   switch (field) {
     case 'name':
       return role.name.first;

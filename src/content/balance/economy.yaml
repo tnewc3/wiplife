@@ -143,6 +143,28 @@ costs:
   surrogacy_balance: { amount: 60000, familyHelp: true }
   # E2b: a lawyer for an estate that is contested.
   legal_help: { amount: 3500, familyHelp: false }
+  # E3: what the people you know ask of you. Gifts and travel for a wedding or
+  # a baby, a dinner to celebrate, a move, bail and a lawyer, a loan (small or
+  # large; it comes back as `repay`), what you owe if someone you cosigned for
+  # stops paying, treatment, and your share of a funeral.
+  celebration_dinner: { amount: 120, familyHelp: false }
+  wedding_gift: { amount: 150, familyHelp: false }
+  wedding_travel: { amount: 700, familyHelp: false }
+  baby_gift: { amount: 120, familyHelp: false }
+  moving_help: { amount: 200, familyHelp: false }
+  bail: { amount: 3000, familyHelp: false }
+  bail_share: { amount: 1200, familyHelp: false }
+  lawyer_fee: { amount: 2500, familyHelp: false }
+  loan_small: { amount: 800, familyHelp: false }
+  loan_large: { amount: 4000, familyHelp: false }
+  cosigned_debt: { amount: 7000, familyHelp: false }
+  rehab_stay: { amount: 9000, familyHelp: false }
+  treatment_help: { amount: 1500, familyHelp: false }
+  funeral_share: { amount: 1800, familyHelp: false }
+  funeral_travel: { amount: 600, familyHelp: false }
+  flowers: { amount: 80, familyHelp: false }
+  care_setup: { amount: 2000, familyHelp: false }
+  care_extras: { amount: 500, familyHelp: false }
 
 # C1: the share of a cost your family covers, by family wealth, times how
 # close you are to your closest living parent (affection ÷ 100). Nothing

@@ -1,0 +1,61 @@
+# Request (jailed): someone close has been sentenced to prison.
+id: jail_visit
+title: Visiting hours
+text: >-
+  {npc.name} is serving time now. The letter that arrives is short, with an
+  inmate number and a line at the bottom that says the visiting rules are
+  on the back. "It would mean a lot," it says.
+tone: serious
+category: lives
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 16 } }
+    - { role: npc, alive: true, age: { gte: 18 }, kind: [parent, sibling, friend, child, grandparent, relative], life: { crime: [jail] } }
+weight: { base: 8 }
+followUpOnly: true
+cast:
+  npc: { support: true, presence: anywhere }
+choices:
+  - id: visit
+    label: Visit, and keep visiting
+    outcome:
+      text: >-
+        The glass and the buzzers and the guard's flat voice. Then {npc.name}
+        walks in and you forget about all of it. You talk about nothing
+        for an hour, and it is the most important hour of the month.
+      effects:
+        - { type: relationship, role: npc, affection: 9, trust: 8 }
+        - { type: memory, role: npc, tag: visited_them_in_prison }
+        - { type: stat, key: stress, delta: 4 }
+  - id: stand_by
+    label: Visit; you posted the bail, you'll see it through
+    visibleIf: { memory: { role: npc, tag: paid_their_bail } }
+    outcome:
+      text: >-
+        You posted the bail and it didn't keep {npc.name} out. You sit down
+        across the glass anyway. "I let you down," {npc.they} {npc:says|say}. You say
+        you're still here.
+      effects:
+        - { type: relationship, role: npc, affection: 10, trust: 10 }
+        - { type: memory, role: npc, tag: visited_them_in_prison }
+        - { type: stat, key: stress, delta: 4 }
+  - id: write
+    label: Write letters, but don't go
+    outcome:
+      text: >-
+        You write every other week. The replies are slow and careful, and
+        some of them go into the drawer where you keep things you aren't ready
+        to throw away.
+      effects:
+        - { type: relationship, role: npc, affection: 3, trust: 3 }
+        - { type: stat, key: stress, delta: 1 }
+  - id: distance
+    label: Let it lie
+    outcome:
+      text: >-
+        You put the letter in a drawer. The drawer closes. The guilt does not.
+      effects:
+        - { type: relationship, role: npc, affection: -10, trust: -6 }
+        - { type: stat, key: stress, delta: 2 }

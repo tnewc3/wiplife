@@ -1,0 +1,157 @@
+# Test pack: the people you know are quiet. Nobody dates, moves, has children, falls ill or
+# is arrested; nobody finds work, and anyone with a job retires at their first chance (the
+# one news line the tests can count on); a death in your life always asks something of you.
+tiers:
+  # Family and partners get the full yearly update.
+  closeKinds: [parent, stepparent, grandparent, sibling, child, stepchild, partner, fiance, spouse]
+  # Friends who feel at least this much for you are close too.
+  closeAffection: 60
+  # The rest of your friends, relatives, exes and the people you work with get
+  # a lighter update. Acquaintances, classmates and anyone you've cut off even less.
+  nearKinds: [relative, friend, ex, coworker, boss]
+
+# What changes in a life each year, by tier.
+domains:
+  close: [career, love, moving, children, growing, trouble]
+  near: [love, moving, children, growing, trouble]
+  far: [love, children, trouble]
+
+news:
+  # A year's feed keeps its biggest news first, up to this many lines.
+  maxPerYear: 8
+  keepYears: 4
+  perPerson: 2
+  # Near and far people only make the news with these.
+  major: [engaged, married, divorced, widowed, had_child, diagnosed, addiction_started, jailed, moved]
+
+career:
+  performance: { mean: 56, sd: 18 }
+  market: 60
+  # Test pack: nobody finds work or changes track, and anyone with a job retires at their first chance.
+  hire:
+    - { at: 0, x: 0 }
+    - { at: 100, x: 0 }
+  hireLevel:
+    - { at: 0, x: 1 }
+    - { at: 100, x: 1 }
+  hireLevelSd: 0
+  switch:
+    - { at: 0, x: 0 }
+    - { at: 100, x: 0 }
+  retire:
+    - { at: 0, x: 1 }
+    - { at: 100, x: 1 }
+  credentialSmarts: 58
+  trackFit: [1, 0.5, 0.15, 0.04, 0.01]
+  unemployedWealth: poor
+
+love:
+  # Yearly chance a single adult starts dating, by age.
+  meet:
+    - { at: 0, x: 0 }
+    - { at: 100, x: 0 }
+  # After a breakup, divorce or loss, dating is slower for a while.
+  afterEnd: 0.45
+  afterEndYears: 3
+  engage: 0.3
+  engageAfterYears: 1
+  marry: 0.65
+  # Couples who aren't married, by years together.
+  breakup:
+    - { at: 0, x: 0.3 }
+    - { at: 3, x: 0.25 }
+    - { at: 8, x: 0.12 }
+  # An engagement breaks up half as often.
+  engagedBreakup: 0.5
+  # Married couples, by years married.
+  divorce:
+    - { at: 0, x: 0.008 }
+    - { at: 6, x: 0.006 }
+    - { at: 15, x: 0.0035 }
+    - { at: 30, x: 0.0012 }
+  partnerAgeOffset: { min: -5, max: 7 }
+
+moving:
+  rate:
+    - { at: 0, x: 0 }
+    - { at: 100, x: 0 }
+  # Of those who move, the chance they come to your city when they're elsewhere.
+  towardYou: 0.3
+
+# How likely someone is to talk: for the social web (E4).
+gossip: { sociability: 0.6, unkindness: 0.3, base: 5 }
+
+children:
+  # A year's chance of trying for a baby, by how far along the couple are;
+  # the pair's fertility (family.yaml) takes it from there.
+  tryShare: { dating: 0, engaged: 0, married: 0 }
+  perChild: 0.6
+  max: 5
+
+growing:
+  # Of the minors who come of age, the chance they leave for another city.
+  moveAway: 0
+
+trouble:
+  illnessScale: 0
+  maxTroubles: 2
+  # Onset curves read Stress, Health and Fitness; the people you know count as these.
+  stats: { stress: 50, health: 60, fitness: 50 }
+  vice: { base: 40, riskTaking: 0.7, discipline: 0.5 }
+  access: { poor: 0.5, working: 0.75, middle: 1, affluent: 1.15, rich: 1.3 }
+  rehab: 0.12
+  relapse: { years: 6, chance: 0.1 }
+  serious: 35
+  intervention: 45
+  deathScale: 0.5
+  crime:
+    rate:
+      - { at: 0, x: 0 }
+      - { at: 100, x: 0 }
+    riskTaking:
+      - { at: 0, x: 0.3 }
+      - { at: 50, x: 1 }
+      - { at: 100, x: 2.2 }
+    wealth: { poor: 1.8, working: 1.2, middle: 0.8, affluent: 0.5, rich: 0.4 }
+    juvenile: 0.4
+    bailJail: 0.5
+
+requests:
+  # Requests are events; they count toward the year's event budget, so the cap
+  # of six events a year still holds.
+  maxPerYear: 1
+  minAffection: 35
+  personCooldownYears: 3
+  minAge: 14
+  triggers:
+    engaged: { chance: 0, tiers: [close] }
+    newPartner: { chance: 0, tiers: [close] }
+    wedding: { chance: 0, tiers: [close, near] }
+    divorce: { chance: 0, tiers: [close] }
+    newBaby: { chance: 0, tiers: [close, near] }
+    arrest: { chance: 0, tiers: [close, near] }
+    jailed: { chance: 0, tiers: [close] }
+    released: { chance: 0, tiers: [close] }
+    jobLoss: { chance: 0, tiers: [close] }
+    promotion: { chance: 0, tiers: [close] }
+    # Per year, for each close adult who is short of money.
+    moneyTrouble: { chance: 0, tiers: [close, near] }
+    illness: { chance: 0, tiers: [close] }
+    relapse: { chance: 0, tiers: [close] }
+    intervention: { chance: 0, tiers: [close] }
+    recovered: { chance: 0, tiers: [close] }
+    death: { chance: 1, tiers: [close, near] }
+    moveAway: { chance: 0, tiers: [close] }
+    moveToYou: { chance: 0, tiers: [close] }
+    careNeeded: { chance: 0, tiers: [close] }
+    cameOfAge: { chance: 0, tiers: [close] }
+
+care:
+  age: 70
+  needChance:
+    - { at: 0, x: 0 }
+    - { at: 100, x: 0 }
+  illnessBoost: 2.5
+  # A year of it, at the national average: a relative at your home, and paid care.
+  cost: { home: 6000, paid: 30000 }
+  incomeShare: 0.2

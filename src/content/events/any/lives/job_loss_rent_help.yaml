@@ -1,0 +1,62 @@
+# Request (jobLoss): someone close has lost their job.
+id: job_loss_rent_help
+title: Between jobs
+text: >-
+  {npc.name} lost {npc.their} job, and the bills don't know that. A text
+  arrives with a long apology and a short question: could you help cover
+  the rent until the next paycheck?
+tone: serious
+category: lives
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { role: npc, alive: true, age: { gte: 18 }, kind: [parent, sibling, friend, child], life: { employed: false } }
+    - { money: { gte: 1200 } }
+weight: { base: 9 }
+followUpOnly: true
+cast:
+  npc: { support: true, presence: anywhere }
+choices:
+  - id: lend
+    label: Lend {npc.them} what {npc.they} {npc:needs|need}
+    check:
+      base: 65
+      stats:
+        - { role: npc, key: trust, weight: 0.3 }
+      success:
+        text: >-
+          "I'll pay you back the day I'm working," {npc.name} says. {npc.They}
+          {npc:sounds|sound} like someone who will.
+        effects:
+          - { type: cost, item: loan_small }
+          - { type: relationship, role: npc, affection: 7, trust: 7 }
+          - { type: memory, role: npc, tag: lent_money }
+          - { type: schedule, eventId: loan_repaid, inYears: [1, 3], cast: [npc] }
+      failure:
+        text: >-
+          You send it. {npc.name} thanks you profusely, and then the thanks
+          slowly dries up, along with the news.
+        effects:
+          - { type: cost, item: loan_small }
+          - { type: relationship, role: npc, affection: 3, trust: -2 }
+          - { type: memory, role: npc, tag: lent_money }
+          - { type: schedule, eventId: loan_unpaid, inYears: [1, 3], cast: [npc] }
+  - id: give
+    label: Cover it, no strings
+    outcome:
+      text: >-
+        "Don't thank me," you say, and then say it again when {npc.name} tries.
+        It's not about the money. It's about what the next month looks like.
+      effects:
+        - { type: cost, item: loan_small }
+        - { type: relationship, role: npc, affection: 11, trust: 8 }
+        - { type: memory, role: npc, tag: you_helped_them }
+  - id: no
+    label: Say you can't spare it right now
+    outcome:
+      text: >-
+        {npc.name} tells you it's fine. It takes a month before it feels fine.
+      effects:
+        - { type: relationship, role: npc, affection: -5, trust: -3 }

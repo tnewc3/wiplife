@@ -48,7 +48,7 @@ export function isInteractionAvailable(state: LifeState, def: InteractionDef, pe
 
   if (def.romance) {
     if (isFamilyKind(rel.kind) || !bothAdults(state, person, content)) return false;
-    if (isPartnerKind(rel.kind) ? !isCurrentPartner(state, rel) : !mutualAttraction(state, person)) return false;
+    if (isPartnerKind(rel.kind) ? !isCurrentPartner(state, rel) : !mutualAttraction(state, person) || person.life?.partner) return false;
   }
   return evaluate(a.requires, state, { cast: { [INTERACTION_ROLE]: personId }, roles: 'strict', content });
 }

@@ -1,0 +1,47 @@
+# Request (newBaby): someone close asks for help in the first weeks.
+id: meet_the_baby
+title: Three in the morning
+text: >-
+  The new baby is three weeks old and {npc.name} hasn't slept since. The text
+  arrives at an hour only the desperate use: could you come over, just for a
+  couple of hours, so {npc.they} can close {npc.their} eyes?
+tone: neutral
+category: lives
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 16 } }
+    - { role: npc, alive: true, age: { gte: 18 }, kind: [parent, sibling, friend, child], where: [household, city], life: { children: { gte: 1 } } }
+weight: { base: 7 }
+followUpOnly: true
+cast:
+  npc: { support: true, presence: nearby }
+choices:
+  - id: come_over
+    label: Go over and take the night shift
+    outcome:
+      text: >-
+        You walk the hallway with the baby for two hours, humming, and learn
+        every tile of the floor. When {npc.name} wakes, you are both a bit
+        different.
+      effects:
+        - { type: relationship, role: npc, affection: 9, trust: 8 }
+        - { type: memory, role: npc, tag: you_helped_them }
+        - { type: stat, key: stress, delta: 3 }
+  - id: tomorrow
+    label: Offer to come tomorrow, properly rested
+    outcome:
+      text: >-
+        You show up the next afternoon with food and a clear head, which is
+        also a kind of help, even if it isn't the kind that was asked for.
+      effects:
+        - { type: relationship, role: npc, affection: 3, trust: 2 }
+  - id: no
+    label: Say you can't, and mean it
+    outcome:
+      text: >-
+        You have your own life and your own early morning. {npc.name} says it's
+        fine in a voice that tells you it isn't, quite.
+      effects:
+        - { type: relationship, role: npc, affection: -3 }

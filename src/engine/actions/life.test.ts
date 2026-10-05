@@ -111,7 +111,7 @@ describe('home actions', () => {
 
   it('buying needs a down payment, and the mortgage is paid through the debt system', () => {
     const base = atHome(0, (d) => {
-      d.finances.lastLedger = { year: d.currentYear, gross: 120_000, retirement: 0, tax: 0, housing: 0, living: 0, debtPayments: 0, interest: 0, debtInterest: 0, borrowed: 0, support: 0, children: 0, supportPaid: 0, supportReceived: 0, net: 120_000 };
+      d.finances.lastLedger = { year: d.currentYear, gross: 120_000, retirement: 0, tax: 0, housing: 0, living: 0, debtPayments: 0, interest: 0, debtInterest: 0, borrowed: 0, support: 0, children: 0, care: 0, supportPaid: 0, supportReceived: 0, net: 120_000 };
     });
     const quote = purchaseQuote(base, content);
     expect(quote.cashNeeded).toBe(Math.round(quote.price * eco.ownership.downPayment) + Math.round(quote.price * eco.ownership.closingCosts));

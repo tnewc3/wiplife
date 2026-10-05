@@ -15,6 +15,11 @@ import type { Id, LifeState } from '../types';
 export function relocateChildren(state: LifeState): void {
   const partnerId = state.housing.partnerId;
   for (const person of Object.values(state.people)) {
+    // E3: a relative you've taken in comes with you, to a home of your own; without one (the street, your parents', prison) the family looks after them.
+    if (person.alive && person.life?.care === 'home') {
+      if (state.housing.kind === 'renting' || state.housing.kind === 'owned') person.cityId = state.character.cityId;
+      else person.life.care = 'sibling';
+    }
     const kid = person.child;
     if (!kid || !person.alive || kid.movedOutYear !== undefined) continue;
     const rel = state.relationships[person.id];

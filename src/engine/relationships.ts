@@ -81,7 +81,8 @@ export function partnerAgeRange(age: number, content: ContentBundle): { min: num
  */
 export function isRomanticMatch(state: LifeState, person: Person, content: ContentBundle): boolean {
   const rel = state.relationships[person.id];
-  if (!person.alive || (rel && isFamilyKind(rel.kind))) return false;
+  // E3: someone who has a partner of their own (off your list) isn't a possible partner.
+  if (!person.alive || person.life?.partner || (rel && isFamilyKind(rel.kind))) return false;
   return bothAdults(state, person, content) && mutualAttraction(state, person);
 }
 
@@ -92,7 +93,7 @@ export function isRomanticMatch(state: LifeState, person: Person, content: Conte
  */
 export function isAdmirerMatch(state: LifeState, person: Person, content: ContentBundle): boolean {
   const rel = state.relationships[person.id];
-  if (!person.alive || (rel && isFamilyKind(rel.kind))) return false;
+  if (!person.alive || person.life?.partner || (rel && isFamilyKind(rel.kind))) return false;
   const me = state.character.identity;
   return bothAdults(state, person, content) && attractedTo(person.identity, me) && !attractedTo(me, person.identity);
 }
@@ -138,7 +139,8 @@ export function canChangeKind(state: LifeState, personId: Id, to: RelationshipKi
   if (!person.alive) return false;
 
   if (isPartnerKind(to)) {
-    if (rel.status !== 'active' || !bothAdults(state, person, content)) return false;
+    // E3: not someone who has a partner of their own.
+    if (rel.status !== 'active' || person.life?.partner || !bothAdults(state, person, content)) return false;
     const partner = currentPartner(state);
     if (partner && partner.personId !== personId) return false;
     if (to === 'partner') return !isPartnerKind(from) && mutualAttraction(state, person);

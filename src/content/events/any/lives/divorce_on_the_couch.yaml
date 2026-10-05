@@ -1,0 +1,58 @@
+# Request (divorce): someone close has just split from a spouse who isn't on your list.
+id: divorce_on_the_couch
+title: Not a good night
+text: >-
+  {npc.name} is on the phone, trying and failing to sound normal. {npc.Their}
+  marriage to {npc.partner} is over. It's final, the papers are signed, and
+  there is a silence on the line where the next sentence should be.
+tone: serious
+category: lives
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { role: npc, alive: true, age: { gte: 18 }, kind: [parent, sibling, friend, child, grandparent, relative], life: { ended: [divorced] } }
+weight: { base: 8 }
+followUpOnly: true
+cast:
+  npc: { support: true, presence: anywhere }
+choices:
+  - id: come_over
+    label: Tell {npc.them} to come stay for a while
+    outcome:
+      text: >-
+        {npc.name} shows up with a duffel bag and the look of someone who
+        hasn't slept. You make up the couch. It's a long week, and a good one,
+        in its way.
+      effects:
+        - { type: relationship, role: npc, affection: 10, trust: 8 }
+        - { type: memory, role: npc, tag: let_them_stay }
+        - { type: stat, key: stress, delta: 3 }
+  - id: listen
+    label: Stay on the phone as long as {npc.they} {npc:needs|need}
+    outcome:
+      text: >-
+        You don't fix anything. You say "I know" and "that's not fair" and
+        "I'm here" until it's light outside.
+      effects:
+        - { type: relationship, role: npc, affection: 6, trust: 6 }
+        - { type: memory, role: npc, tag: was_there_for_them }
+        - { type: stat, key: stress, delta: 2 }
+  - id: advice
+    label: Tell {npc.them} what you always thought
+    check:
+      base: 30
+      stats:
+        - { role: npc, key: trust, weight: 0.4 }
+      success:
+        text: >-
+          "You're right," {npc.name} says, after a long breath. "I didn't want
+          to hear it, but you're right." It helps more than comfort would have.
+        effects:
+          - { type: relationship, role: npc, affection: 3, trust: 8 }
+      failure:
+        text: >-
+          "Not tonight," {npc.name} says, very quietly, and the line goes dead.
+        effects:
+          - { type: relationship, role: npc, affection: -9, trust: -6 }

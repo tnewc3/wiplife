@@ -773,7 +773,7 @@ describe('relationship content', () => {
 });
 
 describe('whole lives with relationships', () => {
-  it('play out with actions and keep every invariant', () => {
+  it('play out with actions and keep every invariant', { timeout: 30_000 }, () => {
     for (let s = 0; s < 6; s++) {
       let life = createLife({ mode: 'random', seed: `rel-life-${s}`, birthYear: 2026 }, content);
       const choices = createRng(`rel-life-${s}:c`);

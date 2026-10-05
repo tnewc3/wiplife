@@ -37,6 +37,7 @@ import {
 } from '../finance';
 import { housingCost, livingCost, moveTo, ownsHome, refreshHousingCost, sellHome, settleHousehold, supportingParent } from '../housing';
 import { childCosts, childSupportDue } from '../family/costs';
+import { careCosts } from '../lives/care';
 import { recordEarnings, retirementBenefit } from '../retirement';
 import { clampInt, weightedPick } from '../random';
 import { chance } from '../rng';
@@ -150,6 +151,7 @@ export function runEconomy(state: LifeState, content: ContentBundle): void {
   let living = livingCost(state, content);
   let kids = childCosts(state, content);
   const { paid: supportPaid, received: supportReceived } = childSupportDue(state, gross, content);
+  const care = careCosts(state, content, gross);
   const before = f.savings + interest + gross + retirement + supportReceived - tax - garnished;
   let support = 0;
   if (state.housing.kind === 'with_parents' && before < housing + living + kids) {
@@ -164,7 +166,7 @@ export function runEconomy(state: LifeState, content: ContentBundle): void {
   }
 
   // 5. Minimum payments from what is left, then any shortfall is borrowed.
-  let available = before - housing - living - kids - supportPaid;
+  let available = before - housing - living - kids - care - supportPaid;
   let debtPayments = garnished;
   let missedAny = false;
   const ordered = [...f.debts].sort((a, b) => PAYMENT_ORDER[a.kind] - PAYMENT_ORDER[b.kind]);
@@ -184,7 +186,7 @@ export function runEconomy(state: LifeState, content: ContentBundle): void {
       debt.missed = 0;
     }
   }
-  const net = gross + retirement + interest + supportReceived - tax - housing - living - kids - supportPaid - debtPayments;
+  const net = gross + retirement + interest + supportReceived - tax - housing - living - kids - care - supportPaid - debtPayments;
   let borrowed = 0;
   if (available >= 0) {
     f.savings = wholeDollars(available);
@@ -236,6 +238,7 @@ export function runEconomy(state: LifeState, content: ContentBundle): void {
     borrowed,
     support,
     children: kids,
+    care,
     supportPaid,
     supportReceived,
     net,

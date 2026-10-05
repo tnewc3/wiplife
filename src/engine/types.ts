@@ -138,6 +138,87 @@ export interface Person {
   priorChildren?: number[];
   /** E2a: set for your children and stepchildren: the fuller data a child has. */
   child?: ChildData;
+  /** E3: their own life as a summary (job level, partner, children, troubles). Filled in by the first yearly step that meets them. */
+  life?: PersonLife;
+}
+
+/** E3: how closely a person's life is followed: close people get the full yearly update, the rest only the major milestones. */
+export type LifeTier = 'close' | 'near' | 'far';
+
+export type PartnerStatus = 'dating' | 'engaged' | 'married';
+
+/**
+ * E3: someone's partner when the partner isn't on your People list (a
+ * summary: name, gender, age and how far the relationship has come). Always
+ * an adult, like the person they're with.
+ */
+export interface OutsidePartner {
+  name: { first: string; last: string };
+  genderCategory: GenderCategory;
+  birthYear: number;
+  canCarry: boolean;
+  status: PartnerStatus;
+  /** The year they got together. */
+  since: number;
+  /** The year the relationship took its current status (engaged, married...). */
+  statusSince: number;
+}
+
+export type TroubleKind = 'illness' | 'crime' | 'addiction';
+
+/**
+ * E3: something going wrong in a person's life, from the existing content: an
+ * illness or an addiction (a condition) or a crime (an offense). A crime
+ * waits for its case in `stage` 'held' or 'bailed' (set by the year it
+ * happened and ended the next), then ends as 'probation' or 'jail' until
+ * `until`, or is over at once (a warning or a fine).
+ */
+export interface Trouble {
+  kind: TroubleKind;
+  /** The condition's id (illness, addiction) or the offense's id (crime). */
+  refId: Id;
+  since: number;
+  /** An illness's or addiction's severity (1–100); 0 for a crime. */
+  severity: number;
+  /** Treated, or in rehab. */
+  treated: boolean;
+  /** A crime's stage. */
+  stage?: 'held' | 'bailed' | 'probation' | 'jail';
+  /** The last year of a probation or prison term. */
+  until?: number;
+}
+
+/** E3: care for an aging person: needed (nobody has stepped in yet), at your home, paid for by you, or left to the family. */
+export type CareState = 'needed' | 'home' | 'paid' | 'sibling';
+
+/** E3: a person's own life, as a summary over the same content your own life uses. Their job is `Person.occupation` and `Person.wealthLevel`. */
+export interface PersonLife {
+  tier: LifeTier;
+  /** The family background their wealth level is blended with. */
+  background: FamilyWealth;
+  /** Their level in their job track (0 without a job). */
+  level: number;
+  /** The year they reached this level (or started the job). */
+  levelSince: number;
+  /** The last job they lost, and when. */
+  jobLost?: { year: number; how: 'fired' | 'laid_off' };
+  /** They have retired and don't look for work. */
+  retired?: true;
+  partner: OutsidePartner | null;
+  /** How their last relationship ended, and when. */
+  ended?: { year: number; how: 'broke_up' | 'divorced' | 'widowed'; /** Their first name. */ partner: string };
+  /** Their children (not on your People list), oldest first. */
+  children: { first: string; birthYear: number }[];
+  troubles: Trouble[];
+  /** Addictions they recovered from, for relapses. */
+  recovered: { refId: Id; year: number }[];
+  care?: CareState;
+  /** The year care became needed. */
+  careSince?: number;
+  /** How likely they are to talk (0–100); used by the social web (E4). */
+  gossip: number;
+  /** The last year a request from them came to you. */
+  requestYear?: number;
 }
 
 export type ChildOrigin = 'birth' | 'adopted' | 'ivf' | 'surrogacy' | 'step';
@@ -433,10 +514,12 @@ export interface Ledger {
   support: number;
   /** E2a: what your children cost this year. */
   children: number;
+  /** E3: what looking after aging relatives cost you this year (at your home or paid care). */
+  care: number;
   /** E2a: child support you paid and received this year. */
   supportPaid: number;
   supportReceived: number;
-  /** gross + retirement + interest + supportReceived − tax − housing − living − children − supportPaid − debtPayments (savings change by net + borrowed). */
+  /** gross + retirement + interest + supportReceived − tax − housing − living − children − care − supportPaid − debtPayments (savings change by net + borrowed). */
   net: number;
 }
 
@@ -599,6 +682,21 @@ export interface DiscoveryState {
   surfaced: Partial<Record<DiscoveryKind, { year: number; times: number }>>;
   /** The last year an inner crisis came. */
   crisisYear?: number;
+}
+
+/** E3: one line of news from the people you know. */
+export interface NewsLine {
+  personId: Id;
+  /** The kind of change (text/news.yaml). */
+  kind: string;
+  /** The line as written, pronouns filled in. */
+  text: string;
+}
+
+/** E3: a year's news from your people, capped (balance/people.yaml news). */
+export interface NewsYear {
+  year: number;
+  lines: NewsLine[];
 }
 
 export interface EventInstance {
@@ -770,6 +868,8 @@ export interface LifeState {
   estate: Settlement | null;
   /** E2b: where this life sits in its family line. */
   lineage: Lineage;
+  /** E3: news from your people, newest year last, a few years kept. */
+  news: NewsYear[];
 }
 
 /** E2b: the family line a life belongs to. Family reputation sits on the line and passes to each heir. */

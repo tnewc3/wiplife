@@ -1,0 +1,58 @@
+# Request (cameOfAge): someone close has turned 18.
+id: coming_of_age_party
+title: All grown up
+text: >-
+  {npc.name}, your {npc.relation}, turned 18 this year. There's a small party
+  with a cake that says so, and a lot of relatives who can't quite believe the
+  number. "Say a few words," someone says, with a grin.
+tone: light
+category: lives
+rarity: common
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 14 } }
+    - { role: npc, alive: true, age: { gte: 18, lte: 18 }, kind: [sibling, friend, relative, grandparent], where: [household, city] }
+weight: { base: 7 }
+followUpOnly: true
+cast:
+  npc: { support: true, presence: nearby }
+choices:
+  - id: speech
+    label: Say a few words
+    check:
+      base: 60
+      stats:
+        - { key: confidence, weight: 0.3 }
+        - { key: sociability, weight: 0.2 }
+      success:
+        text: >-
+          You tell the story of {npc.name}'s first day of school. People
+          laugh. {npc.They} {npc:blushes|blush} and then, quietly, {npc:hugs|hug} you.
+        effects:
+          - { type: relationship, role: npc, affection: 8, trust: 5 }
+          - { type: stat, key: happiness, delta: 2 }
+      failure:
+        text: >-
+          You start a story you shouldn't. It ends in a very long silence, and
+          somebody cuts the cake before you can finish.
+        effects:
+          - { type: relationship, role: npc, affection: -1 }
+          - { type: stat, key: stress, delta: 1 }
+  - id: gift
+    label: Give {npc.them} something for the road ahead
+    outcome:
+      text: >-
+        A good pen, a worn map, a book you've kept. You tell {npc.them} to
+        call, whatever happens. {npc.They} {npc:says|say} {npc.they} will.
+      effects:
+        - { type: cost, item: wedding_gift }
+        - { type: relationship, role: npc, affection: 8, trust: 7 }
+  - id: toast
+    label: Just raise a glass
+    outcome:
+      text: >-
+        "To the next chapter." Everyone drinks to that. Then someone turns
+        on music, and the party becomes a party.
+      effects:
+        - { type: relationship, role: npc, affection: 4 }

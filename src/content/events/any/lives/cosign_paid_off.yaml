@@ -1,0 +1,26 @@
+# Follow-up to cosigning for someone, when it went well.
+id: cosign_paid_off
+title: Off the hook
+text: >-
+  A letter arrives from the bank, and for once it's good news. {npc.name} has
+  cleared what you signed for {since}, and your name is released. A second
+  note from {npc.them} says only "thank you for trusting me."
+tone: light
+category: lives
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { memory: { role: npc, tag: cosigned_for_them } }
+    - { role: npc, alive: true }
+weight: { base: 8 }
+followUpOnly: true
+cast:
+  npc: { support: true, presence: anywhere }
+autoOutcome:
+  text: >-
+    You read the letter twice and fold it into your drawer. Cosigning was a
+    risk, and it worked out. You make a note to say thank you back.
+  effects:
+    - { type: relationship, role: npc, affection: 7, trust: 9 }
+    - { type: stat, key: stress, delta: -2 }

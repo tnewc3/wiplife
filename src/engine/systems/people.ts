@@ -9,6 +9,7 @@ import type { ContentBundle } from '../../content/schemas';
 import { chance } from '../rng';
 import type { LifeState, Relationship } from '../types';
 import { writeFromGroup } from './history';
+import { troubleDeathChance } from '../lives/model';
 import { npcDeathChance } from './mortality';
 
 type WordedKind = keyof ContentBundle['text']['relations'];
@@ -27,7 +28,8 @@ export function ageNpcs(state: LifeState, content: ContentBundle): void {
     // E2a: your children and stepchildren are handled by the family step (a death there leads to its own events).
     if (!seen.alive || seen.child) continue;
     const age = state.currentYear - seen.birthYear;
-    if (!chance(state.rng, npcDeathChance(age, content))) continue;
+    // E3: the illnesses and addictions someone has add to their chance.
+    if (!chance(state.rng, Math.min(1, npcDeathChance(age, content) + troubleDeathChance(seen.life, content)))) continue;
 
     const person = state.people[id]!;
     person.alive = false;

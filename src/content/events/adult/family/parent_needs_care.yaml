@@ -1,4 +1,6 @@
+# Retired in E3: the care chain (care_needed and its follow-ups) now answers a relative who really needs care.
 id: parent_needs_care
+retired: true
 title: Who looks after the parents
 text: >-
   {parent.name} fell again. The doctor says {parent.they} shouldn't be living

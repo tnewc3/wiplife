@@ -8,10 +8,13 @@
  * in the same year's ledger and events. The heritage step (E2b) follows it: an
  * heir's trust is released and a minor's guardian is looked after before the
  * ledger runs. Steps for systems that don't exist yet are empty
- * functions in src/engine/systems, filled in by later stages.
+ * functions in src/engine/systems, filled in by later stages. The lives step
+ * (E3) comes last before pacing: the people you know have their year, and the
+ * requests it queues are picked up the same year.
  */
 import type { ContentBundle } from '../content/schemas';
 import { runHeritage } from './estate/heritage';
+import { runLives } from './lives/step';
 import { runFamily } from './family/step';
 import { runMoods } from './interactions/mood';
 import { advanceAge } from './systems/aging';
@@ -45,6 +48,7 @@ export const YEAR_PIPELINE: readonly PipelineStep[] = [
   { id: 'relationships', run: runRelationships },
   { id: 'moods', run: runMoods },
   { id: 'selfDiscovery', run: runSelfDiscovery },
+  { id: 'lives', run: runLives },
   { id: 'pacing', run: runPacing },
 ];
 

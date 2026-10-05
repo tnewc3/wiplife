@@ -1,0 +1,55 @@
+# Request (newBaby): asked to be a godparent.
+id: godparent_ask
+title: Would you be the one
+text: >-
+  {npc.name} sits you down. {npc.They} {npc:has|have} chosen who should be
+  there if anything ever goes wrong, and who should be there when nothing does.
+  "We'd like you to be a godparent," {npc.they} {npc:says|say}.
+tone: neutral
+category: lives
+rarity: uncommon
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 20 } }
+    - { role: npc, alive: true, age: { gte: 20 }, kind: [sibling, friend, child], affection: { gte: 60 }, life: { children: { gte: 1 } } }
+    - { not: { flag: is_a_godparent } }
+weight: { base: 5 }
+once: true
+followUpOnly: true
+cast:
+  npc: { support: true, presence: anywhere }
+choices:
+  - id: yes
+    label: Say yes, and mean the whole thing
+    outcome:
+      text: >-
+        You promise to show up, for the christening and for the long run, and
+        you feel the weight of the promise settle where it belongs.
+      effects:
+        - { type: flag, key: is_a_godparent, value: true }
+        - { type: relationship, role: npc, affection: 10, trust: 8 }
+        - { type: memory, role: npc, tag: godparent_to_their_child }
+        - { type: stat, key: kindness, delta: 2 }
+        - { type: history, text: 'You became a godparent to {npc.name}''s child.', importance: 2 }
+        - { type: schedule, eventId: godparent_recital, inYears: [4, 8], cast: [npc] }
+  - id: honest
+    label: Say you're honored, but not sure you're the one
+    outcome:
+      text: >-
+        {npc.name} thinks about it. "That's why I asked you," {npc.they}
+        {npc:says|say}, and you agree, because there's no better answer.
+      effects:
+        - { type: flag, key: is_a_godparent, value: true }
+        - { type: relationship, role: npc, affection: 8, trust: 10 }
+        - { type: memory, role: npc, tag: godparent_to_their_child }
+        - { type: stat, key: confidence, delta: 1 }
+        - { type: schedule, eventId: godparent_recital, inYears: [4, 8], cast: [npc] }
+  - id: decline
+    label: Decline, kindly
+    outcome:
+      text: >-
+        "It's not that I don't want to," you say. {npc.name} nods and says
+        thank you for being honest. The conversation after that is shorter.
+      effects:
+        - { type: relationship, role: npc, affection: -5, trust: 1 }

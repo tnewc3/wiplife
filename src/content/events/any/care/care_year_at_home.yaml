@@ -1,0 +1,67 @@
+# Follow-up to care_needed: living with the relative you took in.
+id: care_year_at_home
+title: The long haul
+text: >-
+  You took {npc.name} in {since}. The hallway has a rail now, the kitchen
+  has a different rhythm, and the nights are not what they were. You love
+  {npc.them}, and you are tired in a way sleep does not touch.
+tone: serious
+category: care
+rarity: common
+lifeStages: [adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { flag: took_in_a_relative }
+    - { memory: { role: npc, tag: took_them_in_for_care } }
+    - { role: npc, alive: true, life: { care: [home] } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  npc: { support: true, presence: household }
+  partner: { support: true, presence: household, optional: true }
+choices:
+  - id: respite
+    label: Arrange a few days of respite care
+    outcome:
+      text: >-
+        A nurse comes for the weekend. You sleep eleven hours and wake up
+        feeling guilty about how good it felt, and then not guilty at all.
+      effects:
+        - { type: cost, item: care_extras }
+        - { type: stat, key: stress, delta: -6 }
+        - { type: relationship, role: npc, affection: 3 }
+  - id: lean_on_partner
+    label: Share the load with {partner.name}
+    visibleIf: { role: partner }
+    outcome:
+      text: >-
+        You and {partner.name} divide the days like a rota, and keep one
+        evening free for the two of you. It's not romantic. It's something
+        that matters more.
+      effects:
+        - { type: relationship, role: partner, affection: 5, trust: 6 }
+        - { type: relationship, role: npc, affection: 4, trust: 3 }
+        - { type: stat, key: stress, delta: -3 }
+  - id: keep_going
+    label: Keep going, and say nothing
+    outcome:
+      text: >-
+        You do the next thing and the next. {npc.name} notices more than
+        {npc.they} {npc:lets|let} on. One afternoon {npc.they} {npc:takes|take} your hand and
+        {npc:says|say} only, "Thank you."
+      effects:
+        - { type: relationship, role: npc, affection: 9, trust: 7 }
+        - { type: stat, key: stress, delta: 5 }
+        - { type: stat, key: health, delta: -2 }
+  - id: move_to_care
+    label: Move {npc.them} to a care home
+    outcome:
+      text: >-
+        It is the hardest conversation of the year, and the kindest. {npc.name}
+        cries, then says it's time. You visit every Sunday and feel the house
+        breathe again.
+      effects:
+        - { type: lifeHelp, role: npc, action: pay_care }
+        - { type: relationship, role: npc, affection: -2, trust: 2 }
+        - { type: stat, key: stress, delta: -4 }

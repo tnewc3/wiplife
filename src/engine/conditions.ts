@@ -5,6 +5,7 @@
  */
 import type { Compare, Condition, ContentBundle } from '../content/schemas';
 import { familyHolds } from './family/query';
+import { lifeHolds } from './lives/query';
 import { whereabouts } from './presence';
 import { mostMissed, totalDebt } from './finance';
 import { romanceStatus, yearsInKind } from './relationships';
@@ -202,6 +203,7 @@ export function evaluate(condition: Condition | undefined, state: LifeState, ctx
       }
       if (condition.custody && !(person.child && condition.custody.includes(person.child.custody))) return false;
       if (condition.movedOut !== undefined && (person.child?.movedOutYear !== undefined) !== condition.movedOut) return false;
+      if (condition.life && !lifeHolds(condition.life, person, state.currentYear, ctx.content?.balance.people.trouble.serious ?? 35)) return false;
       return true;
     });
   }

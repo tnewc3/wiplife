@@ -1,0 +1,16 @@
+# Request (any change but a death): never queued in the test pack.
+id: test_request
+title: A request
+text: "{npc.name} asks something of you."
+tone: neutral
+category: people
+rarity: common
+lifeStages: [teen, youngAdult, adult, senior]
+requires: { role: npc, alive: true }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  npc: { support: true, presence: anywhere }
+autoOutcome:
+  text: You help.
+  effects: []
