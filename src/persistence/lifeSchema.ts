@@ -148,6 +148,42 @@ const personLife = z.strictObject({
   gossip: score,
   requestYear: int.exactOptional(),
 });
+// E4: the social web.
+const tie = z.strictObject({
+  a: id,
+  b: id,
+  kind: z.enum(['married', 'dating', 'siblings', 'parentChild', 'inLaw', 'friends']),
+  affection: score,
+  origin: z.enum(['family', 'partner', 'context', 'introduced']),
+  since: int,
+  feud: z.strictObject({ since: int, side: id.exactOptional(), neutral: z.literal(true).exactOptional(), aware: z.literal(true).exactOptional() }).exactOptional(),
+  kindSince: int.exactOptional(),
+  eventYear: int.exactOptional(),
+  followed: z.literal(true).exactOptional(),
+});
+const holder = z.strictObject({
+  version: filled,
+  since: int,
+  from: filled,
+  reacted: z.boolean(),
+  hushed: int.exactOptional(),
+});
+const knowledgeItem = z.strictObject({
+  id,
+  kind: filled,
+  subject: filled,
+  other: id.exactOptional(),
+  year: int,
+  truth: filled,
+  holders: z.record(z.string(), holder),
+  public: z.literal(true).exactOptional(),
+});
+const web = z.strictObject({
+  ties: z.record(z.string(), tie),
+  items: z.array(knowledgeItem),
+  nextItem: int.min(1),
+  seen: z.array(z.string()),
+});
 const newsYear = z.strictObject({
   year: int,
   lines: z.array(z.strictObject({ personId: id, kind: filled, text: filled })),
@@ -464,6 +500,8 @@ const moneyChange = z.strictObject({
 const pendingInteraction = z.strictObject({
   interactionId: id,
   personId: id,
+  otherId: id.exactOptional(),
+  itemId: z.string().min(1).exactOptional(),
   tier: z.enum(['great', 'good', 'neutral', 'bad', 'backfire']),
   giftTier: z.enum(['small', 'medium', 'big']).exactOptional(),
   text: filled,
@@ -543,6 +581,7 @@ export const lifeStateSchema: z.ZodType<LifeState> = z.strictObject({
   estate: settlement.nullable(),
   lineage,
   news: z.array(newsYear),
+  web,
 });
 
 /**

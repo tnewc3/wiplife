@@ -1,0 +1,45 @@
+# Web (feudEnded): a feud is over.
+id: feud_ends_hug
+title: Talking again
+text: >-
+  Word comes the way it does, through a third person: {a.name} and {b.name}
+  are talking again. Nobody can say who called first, and neither will admit
+  it was them. The feud is over.
+tone: light
+category: web
+rarity: common
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 14 } }
+    - { tie: { a: a, b: b, status: [normal, close, strained] } }
+    - { role: a, alive: true }
+    - { role: b, alive: true }
+weight:
+  base: 8
+  # Known as the one who gets people talking again: people tell you first.
+  modifiers:
+    - { if: { flag: hosted_a_peace_dinner }, x: 1.5 }
+followUpOnly: true
+cast:
+  a: { support: true, presence: anywhere }
+  b: { support: true, presence: anywhere }
+choices:
+  - id: glad
+    label: Tell them both you're glad
+    outcome:
+      text: >-
+        You call each of them and say, with no explanation, that you're glad.
+        Both of them know exactly what you mean.
+      effects:
+        - { type: relationship, role: a, affection: 3, trust: 2 }
+        - { type: relationship, role: b, affection: 3, trust: 2 }
+        - { type: stat, key: happiness, delta: 2 }
+  - id: dont_make_it_a_thing
+    label: Don't make a thing of it
+    outcome:
+      text: >-
+        You say nothing. At the next gathering you are careful to seat them
+        like normal people. Nobody comments, which is the point.
+      effects:
+        - { type: stat, key: happiness, delta: 1 }

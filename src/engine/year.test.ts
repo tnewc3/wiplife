@@ -30,6 +30,7 @@ describe('year pipeline', () => {
       'moods',
       'selfDiscovery',
       'lives',
+      'web',
       'pacing',
     ]);
   });

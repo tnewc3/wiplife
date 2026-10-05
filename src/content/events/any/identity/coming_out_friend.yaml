@@ -23,6 +23,7 @@ choices:
       success:
         text: '{friend.name} listens, then grins. "Okay. Tell me everything." You talk until the coffee shop closes.'
         effects:
+          - { type: knowledge, role: friend, action: tell, kind: identity }
           - { type: memory, role: friend, tag: accepted_you }
           - { type: relationship, role: friend, affection: 8, trust: 8 }
           - { type: innerConflict, delta: -10 }
@@ -31,6 +32,7 @@ choices:
       failure:
         text: '{friend.name} says {friend.they} {friend:needs|need} time. Some friendships bend. You''ll find out if this one does.'
         effects:
+          - { type: knowledge, role: friend, action: tell, kind: identity }
           - { type: memory, role: friend, tag: struggled_with_it }
           - { type: relationship, role: friend, affection: -10, trust: -6 }
           - { type: flag, key: came_out, value: true }
@@ -43,6 +45,7 @@ choices:
       success:
         text: You post it, put your phone in a drawer, and come back to more love than you knew you had.
         effects:
+          - { type: knowledge, action: announce, kind: identity }
           - { type: innerConflict, delta: -12 }
           - { type: flag, key: came_out, value: true }
           - { type: stat, key: happiness, delta: 6 }
@@ -50,6 +53,7 @@ choices:
       failure:
         text: Most replies are kind. A few are cruel, and those are the ones you read at three in the morning.
         effects:
+          - { type: knowledge, action: announce, kind: identity }
           - { type: innerConflict, delta: -6 }
           - { type: flag, key: came_out, value: true }
           - { type: stat, key: stress, delta: 6 }

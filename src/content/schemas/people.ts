@@ -93,6 +93,11 @@ export const NEWS_VALUES = {
   jailed: ['offense', 'years'],
   released: [],
   care_needed: [],
+  // E4: ties between people you know. {other} is the first name of the other person.
+  feud_began: ['other'],
+  feud_ended: ['other'],
+  couple_formed: ['other'],
+  couple_wed: ['other'],
 } as const satisfies Record<string, readonly string[]>;
 export type NewsKind = keyof typeof NEWS_VALUES;
 export const NEWS_KINDS = Object.keys(NEWS_VALUES) as NewsKind[];

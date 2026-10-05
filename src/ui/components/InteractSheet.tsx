@@ -1,6 +1,6 @@
 import { content } from '../../content';
 import type { GiftTier } from '../../content/schemas';
-import { getInteractionMenu } from '../../engine/selectors';
+import { getInteractionMenu, getIntroduceChoices, getTopicChoices } from '../../engine/selectors';
 import type { LifeState } from '../../engine/types';
 import { useAppStore } from '../../store/appStore';
 import { GIFT_TIER_LABELS, INTERACTION_GROUP_LABELS, money } from '../labels';
@@ -57,6 +57,43 @@ export function InteractSheet({ life }: { life: LifeState }) {
     );
   }
 
+  // E4: an introduction asks who to introduce them to; setting the record straight or asking for quiet asks which story.
+  const picking = sheet.view === 'pick' ? menu.flatMap((g) => g.items).find((item) => item.id === sheet.pick) : undefined;
+  if (picking?.pick) {
+    const choices =
+      picking.pick === 'other' ? getIntroduceChoices(life, sheet.personId, content) : getTopicChoices(life, sheet.personId, picking.pick, content);
+    return (
+      <Sheet
+        open
+        title={picking.pick === 'other' ? `Introduce ${person.name.first} to…` : `${picking.name}: which story?`}
+        onClose={close}
+        footer={
+          <Button variant="secondary" block disabled={busy} onClick={() => setView('menu')}>
+            Back
+          </Button>
+        }
+      >
+        {picking.pick !== 'other' && <p className="mb-3 text-muted">{person.name.first} has heard…</p>}
+        <ul className="flex flex-col gap-2" aria-label={picking.pick === 'other' ? 'People you could introduce' : 'What they have heard'} data-testid="interact-picker">
+          {choices.map((choice) => (
+            <li key={choice.id}>
+              <button
+                type="button"
+                data-testid={`pick-${choice.id}`}
+                disabled={busy}
+                onClick={() => void interact(picking.id, sheet.personId, undefined, picking.pick === 'other' ? { otherId: choice.id } : { itemId: choice.id })}
+                className="flex min-h-11 w-full flex-col rounded-xl border border-border bg-surface px-4 py-2 text-left active:bg-surface-2 disabled:opacity-50"
+              >
+                <span className="font-semibold break-words [overflow-wrap:anywhere]">{picking.pick === 'other' ? choice.label : `…${choice.label}`}</span>
+                {choice.detail && <span className="text-sm text-muted">{choice.detail}</span>}
+              </button>
+            </li>
+          ))}
+        </ul>
+      </Sheet>
+    );
+  }
+
   return (
     <Sheet open title={`Interact with ${person.name.first}`} onClose={close}>
       {menu.length === 0 ? (
@@ -75,7 +112,7 @@ export function InteractSheet({ life }: { life: LifeState }) {
                       type="button"
                       data-testid={`interaction-${item.id}`}
                       disabled={busy}
-                      onClick={() => (item.gift ? setView('gift') : void interact(item.id, sheet.personId))}
+                      onClick={() => (item.gift ? setView('gift') : item.pick ? setView('pick', item.id) : void interact(item.id, sheet.personId))}
                       className="flex min-h-11 w-full flex-col rounded-xl border border-border bg-surface px-4 py-2 text-left active:bg-surface-2 disabled:opacity-50"
                     >
                       <span className="font-semibold">{item.name}</span>

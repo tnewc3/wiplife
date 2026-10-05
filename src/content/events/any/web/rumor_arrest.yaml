@@ -1,0 +1,64 @@
+# Web reaction (arrest): someone has heard a version of your trouble with the law.
+id: rumor_arrest
+title: What's going around
+text: >-
+  {npc.name} stops you outside, with the look of a person who has decided
+  to be brave. "I heard {heard}," {npc.they} {npc:says|say}. "I don't know
+  how much of it is true, and I'd rather hear it from you."
+tone: serious
+category: web
+rarity: common
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 14 } }
+    - { role: npc, alive: true, kind: [friend, sibling, parent, partner, fiance, spouse, grandparent], heard: { kinds: [arrest], learned: [gossip] } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  npc: { support: true, presence: anywhere }
+choices:
+  - id: tell_it_straight
+    label: Tell {npc.them} exactly what happened
+    check:
+      base: 55
+      stats:
+        - { role: npc, key: trust, weight: 0.4 }
+        - { role: npc, key: affection, weight: 0.2 }
+      success:
+        text: >-
+          You give {npc.name} the facts, including the parts you'd rather not.
+          {npc.They} {npc:listens|listen} without interrupting. "Okay," {npc.they}
+          {npc:says|say}. "Okay. Thank you for not making it smaller."
+        effects:
+          - { type: knowledge, role: npc, action: correct }
+          - { type: relationship, role: npc, affection: 1, trust: 4 }
+          - { type: memory, role: npc, tag: you_set_it_straight }
+      failure:
+        text: >-
+          Even the true version sounds bad out loud. {npc.name} doesn't argue.
+          {npc.They} just {npc:looks|look} at you for a moment with a new,
+          careful expression, and says that {npc.they} should go.
+        effects:
+          - { type: knowledge, role: npc, action: correct }
+          - { type: relationship, role: npc, affection: -5, trust: -6 }
+          - { type: stat, key: stress, delta: 3 }
+  - id: say_its_handled
+    label: Say it's handled and you don't want to talk about it
+    outcome:
+      text: >-
+        "It's handled." {npc.name} nods. The story stays as it is, which is
+        to say, bigger than the truth.
+      effects:
+        - { type: relationship, role: npc, trust: -3 }
+        - { type: stat, key: stress, delta: 2 }
+  - id: ask_for_the_benefit
+    label: Ask {npc.them} to hold judgment until you can explain
+    outcome:
+      text: >-
+        "Give me the chance to explain." {npc.name} thinks about it. "All
+        right," {npc.they} {npc:says|say}. "But I'm going to need it."
+      effects:
+        - { type: knowledge, role: npc, action: hush }
+        - { type: relationship, role: npc, trust: 1 }
+        - { type: stat, key: stress, delta: 2 }

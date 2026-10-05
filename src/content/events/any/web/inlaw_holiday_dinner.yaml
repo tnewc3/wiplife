@@ -1,0 +1,61 @@
+# Web (tieStrained): holiday tension between your partner and one of your family.
+id: inlaw_holiday_dinner
+title: The holiday table
+text: >-
+  The holiday table has {a.name} on one side and {b.name} on the other, and
+  you in the middle with a serving spoon. Every topic is a minefield. {b.name}
+  starts on {a.name}'s job; {a.name} answers with exactly the amount of
+  politeness that makes things worse.
+tone: neutral
+category: web
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { tie: { a: a, b: b, kind: [inLaw], status: [strained] } }
+    - { role: a, alive: true, kind: [partner, fiance, spouse] }
+    - { role: b, alive: true, kind: [parent, stepparent, grandparent, sibling, relative], where: [household, city] }
+weight: { base: 8 }
+followUpOnly: true
+cast:
+  a: { support: true, presence: nearby }
+  b: { support: true, presence: nearby }
+choices:
+  - id: change_subject
+    label: Change the subject, loudly
+    outcome:
+      text: >-
+        You start a story about a neighbor's dog that nobody has asked for.
+        It's terrible, and it works. Everybody eats.
+      effects:
+        - { type: tie, a: a, b: b, action: mend, delta: 4 }
+        - { type: stat, key: stress, delta: 2 }
+  - id: call_it_out
+    label: Tell {b.name} to stop
+    outcome:
+      text: >-
+        "That's enough." The table goes quiet. {a.name} looks at you with
+        something that is gratitude and surprise. {b.name} looks at the
+        tablecloth.
+      effects:
+        - { type: relationship, role: a, affection: 5, trust: 4 }
+        - { type: relationship, role: b, affection: -6, trust: -2 }
+        - { type: tie, a: a, b: b, action: worsen, delta: 3 }
+  - id: leave_early
+    label: Make an excuse and leave early with {a.name}
+    outcome:
+      text: >-
+        You are halfway down the driveway when {a.name} starts laughing,
+        slightly hysterically. It isn't a solution, but it is a way out.
+      effects:
+        - { type: relationship, role: a, affection: 3, trust: 2 }
+        - { type: relationship, role: b, affection: -3 }
+  - id: say_nothing
+    label: Say nothing and get through it
+    outcome:
+      text: >-
+        You get through it. Afterward {a.name} says "thanks for not making
+        it worse," and you take that as the compliment it isn't quite.
+      effects:
+        - { type: stat, key: stress, delta: 3 }

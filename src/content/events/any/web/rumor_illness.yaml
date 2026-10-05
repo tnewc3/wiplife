@@ -1,0 +1,52 @@
+# Web reaction (illness): someone has heard a version of your diagnosis.
+id: rumor_illness
+title: What they've heard about your health
+text: >-
+  {npc.name} has been checking on you more than usual. "I heard {heard},"
+  {npc.they} {npc:says|say} at last, with the face of someone bracing for
+  the answer. "I should have called sooner. Is it true?"
+tone: serious
+category: web
+rarity: common
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 14 } }
+    - { role: npc, alive: true, kind: [friend, sibling, parent, grandparent, partner, fiance, spouse], heard: { kinds: [illness], learned: [gossip] } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  npc: { support: true, presence: anywhere }
+choices:
+  - id: tell_everything
+    label: Tell {npc.them} how it actually stands
+    outcome:
+      text: >-
+        You tell it straight: what the doctors said, what they didn't, what you
+        are afraid of. {npc.name} listens to all of it, and says only, "Thank
+        you for telling me," and stays another hour.
+      effects:
+        - { type: knowledge, role: npc, action: correct }
+        - { type: relationship, role: npc, affection: 4, trust: 5 }
+        - { type: memory, role: npc, tag: you_confided }
+        - { type: stat, key: stress, delta: -2 }
+  - id: play_it_down
+    label: Play it down
+    outcome:
+      text: >-
+        "It's not as bad as that." You say it lightly, and {npc.name} lets you
+        have it, but {npc.they} {npc:keeps|keep} looking at you for the rest of
+        the evening.
+      effects:
+        - { type: knowledge, role: npc, action: correct }
+        - { type: relationship, role: npc, trust: -1 }
+  - id: ask_for_space
+    label: Say you'd rather not talk about it yet
+    outcome:
+      text: >-
+        "Not yet, if that's okay." {npc.name} says of course, and means it, and
+        sends a text each day with nothing in it except a picture of something
+        silly.
+      effects:
+        - { type: relationship, role: npc, affection: 2 }
+        - { type: stat, key: happiness, delta: 1 }

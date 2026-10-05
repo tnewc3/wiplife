@@ -21,6 +21,8 @@ import {
 } from '../../content/schemas';
 import { fittingResults, queueResult } from '../actions/result';
 import { InvalidInputError } from '../creation/input';
+import { introduceCandidates, topicItems } from '../web/actions';
+import { ITEM_ROLE } from '../web/query';
 import { curveAt } from '../curve';
 import { evaluate } from '../conditions';
 import { textContext } from '../events/text';
@@ -39,6 +41,10 @@ import { availableTier, reactionScore, repeatsThisYear, returnsFactor, rollTier,
 export interface InteractParams {
   interactionId: Id;
   personId: Id;
+  /** E4: the person to introduce them to (an interaction with `other`). */
+  otherId?: Id;
+  /** E4: the story they have heard that you are setting straight or asking them to keep quiet (an interaction with a `topic`). */
+  itemId?: string;
   /** Which gift price tier, for a gift interaction. */
   giftTier?: GiftTier;
 }
@@ -46,6 +52,8 @@ export interface InteractParams {
 const paramsSchema = z.strictObject({
   interactionId: z.string().min(1),
   personId: z.string().min(1),
+  otherId: z.string().min(1).optional(),
+  itemId: z.string().min(1).optional(),
   giftTier: z.enum(GIFT_TIERS).optional(),
 });
 
@@ -55,8 +63,8 @@ export function parseInteractParams(params: unknown): InteractParams {
   if (!parsed.success) {
     throw new InvalidInputError(parsed.error.issues.map((i) => ({ path: `interaction.${i.path.join('.')}`.replace(/\.$/, ''), message: i.message })));
   }
-  const { interactionId, personId, giftTier } = parsed.data;
-  return { interactionId, personId, ...(giftTier ? { giftTier } : {}) };
+  const { interactionId, personId, giftTier, otherId, itemId } = parsed.data;
+  return { interactionId, personId, ...(giftTier ? { giftTier } : {}), ...(otherId ? { otherId } : {}), ...(itemId ? { itemId } : {}) };
 }
 
 type Consequence = Pick<InteractionTier, 'affection' | 'trust' | 'mood' | 'effects' | 'extras'>;
@@ -64,12 +72,19 @@ type Consequence = Pick<InteractionTier, 'affection' | 'trust' | 'mood' | 'effec
 interface Moment {
   def: InteractionDef;
   personId: Id;
+  /** Who is in the moment: the person, and (E4) the other person and the story. */
+  roles: Record<string, Id>;
   /** Multiplies gains: diminishing returns, and a gift's warmth. */
   factor: number;
   pending: PendingInteraction;
 }
 
-const cast = (personId: Id) => ({ [INTERACTION_ROLE]: personId });
+/** The cast of an interaction: the person, and (E4) the other person you introduce them to and the story it is about. */
+const castOf = (c: { personId: Id; otherId?: Id | undefined; itemId?: string | undefined }): Record<string, Id> => ({
+  [INTERACTION_ROLE]: c.personId,
+  ...(c.otherId !== undefined ? { other: c.otherId } : {}),
+  ...(c.itemId !== undefined ? { [ITEM_ROLE]: c.itemId } : {}),
+});
 
 function counters(rel: { interactions?: InteractionCounters }, year: number): InteractionCounters {
   if (!rel.interactions || rel.interactions.year !== year) {
@@ -97,7 +112,7 @@ function scaleEffects(effects: readonly Effect[], factor: number): Effect[] {
 
 /** Applies one tier's (or choice option's) consequences and records what changed on the card. */
 function applyConsequence(draft: Draft<LifeState>, moment: Moment, c: Consequence, content: ContentBundle): void {
-  const { def, personId, factor, pending } = moment;
+  const { def, personId, factor, pending, roles } = moment;
   const rel = draft.relationships[personId]!;
   const person = draft.people[personId]!;
   const year = draft.currentYear;
@@ -121,11 +136,11 @@ function applyConsequence(draft: Draft<LifeState>, moment: Moment, c: Consequenc
   rel.trust = clampInt(rel.trust + trust, 0, 100);
   shiftMood(person, gain(c.mood));
 
-  const effectCtx = { def: { id: def.id, rarity: 'common' as const }, cast: cast(personId), rng: draft.rng, content };
+  const effectCtx = { def: { id: def.id, rarity: 'common' as const }, cast: roles, rng: draft.rng, content };
   applyEffects(draft, scaleEffects(c.effects as Effect[], factor), effectCtx);
-  const textCtx = () => textContext(draft, cast(personId), content);
+  const textCtx = () => textContext(draft, roles, content);
   for (const extra of c.extras) {
-    if (extra.if && !evaluate(extra.if, draft, { cast: cast(personId), roles: 'strict', content })) continue;
+    if (extra.if && !evaluate(extra.if, draft, { cast: roles, roles: 'strict', content })) continue;
     if (extra.chance && !chance(draft.rng, extraChance(draft, extra.chance, personId, content))) continue;
     applyEffects(draft, extra.effects as Effect[], effectCtx);
     if (extra.note) pending.notes.push(renderText(extra.note, textCtx()));
@@ -169,11 +184,16 @@ export function performInteraction(state: LifeState, params: unknown, content: C
   if (!isInteractionAvailable(state, def, p.personId, content)) throw bad(`"${def.id}" isn't available with "${p.personId}" now.`);
   if ((def.gift === true) !== (p.giftTier !== undefined)) throw bad(def.gift ? 'A gift needs a price tier.' : `"${def.id}" takes no gift tier.`);
   if (p.giftTier && !canAffordGift(state, p.giftTier, content)) throw bad('You can’t afford that gift.');
+  // E4: an introduction needs someone to introduce them to; a story needs one they have heard.
+  if ((def.other === true) !== (p.otherId !== undefined)) throw bad(def.other ? 'Choose who to introduce them to.' : `"${def.id}" takes no second person.`);
+  if (p.otherId !== undefined && !introduceCandidates(state, p.personId, content).includes(p.otherId)) throw bad(`"${p.otherId}" can't be introduced to "${p.personId}" now.`);
+  if ((def.topic !== undefined) !== (p.itemId !== undefined)) throw bad(def.topic ? 'Choose which story.' : `"${def.id}" takes no story.`);
+  if (p.itemId !== undefined && !topicItems(state, p.personId, def.topic!, content).some((i) => i.id === p.itemId)) throw bad(`"${p.itemId}" isn't something "${p.personId}" has heard that this is about.`);
 
   return produce(state, (draft) => {
     draft.rng = cloneRng(state.rng);
     const year = draft.currentYear;
-    draft.inputLog.push({ year, kind: 'interact', payload: { interactionId: p.interactionId, personId: p.personId, ...(p.giftTier ? { giftTier: p.giftTier } : {}) } });
+    draft.inputLog.push({ year, kind: 'interact', payload: { interactionId: p.interactionId, personId: p.personId, ...(p.giftTier ? { giftTier: p.giftTier } : {}), ...(p.otherId ? { otherId: p.otherId } : {}), ...(p.itemId ? { itemId: p.itemId } : {}) } });
     const rel = draft.relationships[p.personId]!;
     const person = draft.people[p.personId]!;
     const savings = draft.finances.savings;
@@ -200,6 +220,8 @@ export function performInteraction(state: LifeState, params: unknown, content: C
     const pending: PendingInteraction = {
       interactionId: def.id,
       personId: p.personId,
+      ...(p.otherId ? { otherId: p.otherId } : {}),
+      ...(p.itemId ? { itemId: p.itemId } : {}),
       tier,
       ...(p.giftTier ? { giftTier: p.giftTier } : {}),
       text: '',
@@ -207,7 +229,9 @@ export function performInteraction(state: LifeState, params: unknown, content: C
       changes: { affection: 0, trust: 0, mood: 0 },
       annoyed: false,
     };
-    const moment: Moment = { def, personId: p.personId, factor, pending };
+    const moment: Moment = { def, personId: p.personId, roles: castOf(p), factor, pending };
+    // E4: what they had heard is what the card recounts, so it is read before the outcome changes what they believe.
+    const recount = def.topic ? renderText(variant, textContext(draft, castOf(p), content)) : undefined;
     applyConsequence(draft, moment, outcome, content);
     // Asking again and again costs trust, whatever came of it.
     if (profile.repeatTrust > 0 && repeats.same > 0) {
@@ -215,12 +239,12 @@ export function performInteraction(state: LifeState, params: unknown, content: C
       rel.trust -= lost;
       pending.changes.trust -= lost;
     }
-    pending.text = renderText(variant, textContext(draft, cast(p.personId), content));
+    pending.text = recount ?? renderText(variant, textContext(draft, castOf(p), content));
     pending.annoyed = count.annoyed;
     const money = moneyChange(draft, savings, debt);
     if (money) pending.money = money;
     if (outcome.choice) {
-      const ctx = textContext(draft, cast(p.personId), content);
+      const ctx = textContext(draft, castOf(p), content);
       pending.choice = {
         prompt: renderText(outcome.choice.prompt, ctx),
         options: outcome.choice.options.map((o) => ({ id: o.id, label: renderText(o.label, ctx) })),
@@ -257,10 +281,10 @@ export function resolveInteractionChoice(state: LifeState, choiceId: unknown, co
     const now = rel.interactions!;
     const repeats: Repeats = { same: (now.counts[def.id] ?? 1) - 1, total: Object.values(now.counts).reduce((sum, n) => sum + n, 0) - 1 };
     const factor = returnsFactor(repeats, content);
-    const moment: Moment = { def, personId: pending.personId, factor, pending: card };
+    const moment: Moment = { def, personId: pending.personId, roles: castOf(pending), factor, pending: card };
     applyConsequence(draft, moment, option, content);
     card.choice!.chosen = choiceId;
-    card.choice!.result = renderText(option.text, textContext(draft, cast(pending.personId), content));
+    card.choice!.result = renderText(option.text, textContext(draft, castOf(pending), content));
     card.annoyed = now.annoyed;
     addMoney(card, moneyChange(draft, savings, debt));
   });

@@ -1,0 +1,61 @@
+# Web reaction (breakup): someone has heard a version of how your relationship ended.
+id: rumor_breakup
+title: The story of the breakup
+text: >-
+  {npc.name} has heard the story of how it ended: {heard}. Before you can
+  answer, {npc.they} {npc:says|say}, "I'm sorry. I don't know what's true and
+  I didn't want to guess."
+tone: neutral
+category: web
+rarity: common
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 16 } }
+    - { role: npc, alive: true, kind: [friend, sibling, parent, grandparent], heard: { kinds: [breakup], learned: [gossip] } }
+weight: { base: 9 }
+followUpOnly: true
+cast:
+  npc: { support: true, presence: anywhere }
+choices:
+  - id: tell_the_truth
+    label: Tell {npc.them} how it really ended
+    check:
+      base: 55
+      stats:
+        - { role: npc, key: trust, weight: 0.3 }
+        - { key: kindness, weight: 0.1 }
+      success:
+        text: >-
+          You tell it fairly, including the parts that don't make you look good.
+          {npc.name} nods slowly. "That's very different from what I heard,"
+          {npc.they} {npc:says|say}, "and I'm glad I asked."
+        effects:
+          - { type: knowledge, role: npc, action: correct }
+          - { type: relationship, role: npc, affection: 2, trust: 3 }
+          - { type: memory, role: npc, tag: you_set_it_straight }
+      failure:
+        text: >-
+          It comes out bitter, and half of it is unfair, and you can see
+          {npc.name} sorting out which half. "I'm sorry," {npc.they} {npc:says|say}.
+          "I shouldn't have asked."
+        effects:
+          - { type: relationship, role: npc, affection: -2 }
+          - { type: stat, key: stress, delta: 2 }
+  - id: say_nothing
+    label: Say it's not worth going into
+    outcome:
+      text: >-
+        "It's over. That's all anyone needs to know." You mean it. It doesn't
+        stop the story from getting better or worse in the telling.
+      effects:
+        - { type: relationship, role: npc, trust: -1 }
+  - id: laugh_it_off
+    label: Laugh it off, whichever version it is
+    outcome:
+      text: >-
+        You laugh, and {npc.name} laughs with you, relieved. The version going
+        around will go on being the version going around.
+      effects:
+        - { type: relationship, role: npc, affection: 1 }
+        - { type: stat, key: stress, delta: 1 }

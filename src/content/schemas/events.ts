@@ -20,6 +20,7 @@ import { credentialTypeSchema, programSchema, tierSchema } from './education';
 import { lifeTierSchema } from './people';
 import { relationshipKindSchema, relationshipStatusSchema, romanceStatusSchema } from './relationships';
 import { templateSchema } from './text';
+import { knowledgeKindSchema, tieKindSchema, tieStatusSchema, type KnowledgeKindId, type TieKindId, type TieStatusId } from './web';
 
 export const LIFE_STAGE_IDS = ['early', 'child', 'teen', 'youngAdult', 'adult', 'senior'] as const;
 export const lifeStageSchema = z.enum(LIFE_STAGE_IDS);
@@ -115,7 +116,10 @@ export type Condition =
       movedOut?: boolean;
       /** E3: their own life now (job, partner, children, troubles, care). */
       life?: LifeCondition;
-    };
+      /** E4: what they have heard. */
+      heard?: HeardCondition;
+    }
+  | { tie: TieCondition };
 
 /**
  * E3: a cast person's own life. Every field given must hold. tier: how
@@ -319,6 +323,58 @@ const lifeConditionSchema = z
     recovered: z.int().min(1).max(50).optional(),
   })
   .refine(atLeastOneField, 'needs at least one field');
+/** E4: what a person has heard about you (or about someone else): a kind of knowledge, a version, how they came to know it. */
+const heardConditionSchema = z
+  .strictObject({
+    kinds: z.array(knowledgeKindSchema).min(1).optional(),
+    versions: z.array(idSchema).min(1).optional(),
+    /** They believe a version that isn't the true one (or, false, the true one). */
+    distorted: z.boolean().optional(),
+    /** The item is a secret kind. */
+    secret: z.boolean().optional(),
+    /** The version they heard is a funny one. */
+    light: z.boolean().optional(),
+    /** Who told them: you, nobody (they saw it), or another person (gossip). */
+    learned: z.array(z.enum(['you', 'saw', 'gossip'])).min(1).optional(),
+    /** They haven't reacted to it yet. */
+    fresh: z.boolean().optional(),
+  })
+  .refine(atLeastOneField, 'needs at least one field');
+export interface HeardCondition {
+  kinds?: KnowledgeKindId[];
+  versions?: string[];
+  distorted?: boolean;
+  secret?: boolean;
+  light?: boolean;
+  learned?: ('you' | 'saw' | 'gossip')[];
+  fresh?: boolean;
+}
+
+/** E4: the tie between two cast people. */
+const tieConditionSchema = z
+  .strictObject({
+    a: roleSchema,
+    b: roleSchema,
+    kind: z.array(tieKindSchema).min(1).optional(),
+    status: z.array(tieStatusSchema).min(1).optional(),
+    /** Years the feud has lasted. */
+    feudYears: compareSchema.optional(),
+    /** You have taken a side (true), or haven't (false). */
+    sided: z.boolean().optional(),
+    /** You said you would stay out of it. */
+    neutral: z.boolean().optional(),
+  })
+  .refine((t) => t.a !== t.b, 'a tie is between two different roles');
+export interface TieCondition {
+  a: string;
+  b: string;
+  kind?: TieKindId[];
+  status?: TieStatusId[];
+  feudYears?: Compare;
+  sided?: boolean;
+  neutral?: boolean;
+}
+
 const latentKindSchema = z.enum(LATENT_KINDS);
 
 export const conditionSchema: z.ZodType<Condition> = z.lazy(() =>
@@ -464,7 +520,9 @@ export const conditionSchema: z.ZodType<Condition> = z.lazy(() =>
       custody: z.array(z.enum(['you', 'shared', 'other'])).min(1).optional(),
       movedOut: z.boolean().optional(),
       life: lifeConditionSchema.optional(),
+      heard: heardConditionSchema.optional(),
     }),
+    z.strictObject({ tie: tieConditionSchema }),
   ]),
 ) as z.ZodType<Condition>;
 
@@ -802,6 +860,56 @@ export const effectSchema = z.discriminatedUnion('type', [
    * city (balance/economy.yaml costs), such as a loan coming back.
    */
   z.strictObject({ type: z.literal('repay'), item: idSchema, share: z.number().gt(0).max(2) }),
+  /**
+   * E4: something between two people you know (cast as `a` and `b`). side:
+   * you take `with`'s side (a feud you said you'd stay out of is no longer
+   * neutral); neutral: you stay out of it (it costs you with both, each
+   * year); mend / worsen: their affection for each other moves by `delta`
+   * (a feud ends when it climbs far enough); reconcile: the feud is over.
+   * Changes to how they feel about you are relationship effects beside this one.
+   */
+  z
+    .strictObject({
+      type: z.literal('tie'),
+      a: roleSchema,
+      b: roleSchema,
+      action: z.enum(['side', 'neutral', 'mend', 'worsen', 'reconcile']),
+      with: roleSchema.optional(),
+      delta: z.int().min(1).max(40).optional(),
+    })
+    .refine((e) => (e.action === 'side') === (e.with !== undefined), 'side needs with (and only side has it)')
+    .refine((e) => (e.action === 'mend' || e.action === 'worsen') === (e.delta !== undefined), 'mend and worsen need delta (and only they have it)')
+    .refine((e) => e.with === undefined || e.with === e.a || e.with === e.b, 'with is one of a and b'),
+  /**
+   * E4: what the person in `role` has heard about you. correct: they now
+   * believe the true version; confirm: you admit it (the true version, and
+   * they have reacted); hush: they keep it quiet for a while; leak: they tell
+   * one person they know; tell: you tell them yourself (they learn the true
+   * version, and it isn't gossip). Without `kind`, it is the item the event
+   * or interaction is about.
+   */
+  z
+    .strictObject({
+      type: z.literal('knowledge'),
+      /** Who it is about; announce has no one: everyone you know hears it. */
+      role: roleSchema.optional(),
+      action: z.enum(['correct', 'confirm', 'hush', 'leak', 'tell', 'announce']),
+      kind: knowledgeKindSchema.optional(),
+    })
+    .refine((e) => (e.action === 'announce') === (e.role === undefined), 'announce has no role (everyone hears it), and every other action needs one')
+    .refine((e) => e.action !== 'announce' || e.kind !== undefined, 'announce needs kind'),
+  /**
+   * E4: you introduce the person in `role` to the person in `with`. friends,
+   * rivalry and feud start a tie of that feeling; romance starts a couple if
+   * both are single, unrelated adults who are attracted to each other (and
+   * friends otherwise). The engine refuses what doesn't fit.
+   */
+  z.strictObject({
+    type: z.literal('introduce'),
+    role: roleSchema,
+    with: roleSchema,
+    result: z.enum(['friends', 'romance', 'rivalry', 'feud']),
+  }),
 ]);
 export type Effect = z.infer<typeof effectSchema>;
 

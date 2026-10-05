@@ -1,0 +1,88 @@
+# Web (feudBegan): two of your siblings have stopped speaking.
+id: feud_siblings_side
+title: Whose side
+text: >-
+  {a.name} and {b.name} aren't speaking. It began over something small, the
+  way these things do, and has hardened into something that isn't. Each of
+  them has called you separately to explain how it happened, and in each
+  version the other one is the villain.
+tone: serious
+category: web
+rarity: common
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 14 } }
+    - { tie: { a: a, b: b, kind: [siblings], status: [feuding] } }
+    - { role: a, alive: true, kind: [sibling] }
+    - { role: b, alive: true, kind: [sibling] }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  a: { support: true, presence: anywhere }
+  b: { support: true, presence: anywhere }
+choices:
+  - id: side_a
+    label: Take {a.name}'s side
+    outcome:
+      text: >-
+        "Thank you," {a.name} says, and means it. {b.name} hears about it by
+        the end of the day, and the silence on that end gets colder.
+      effects:
+        - { type: tie, a: a, b: b, action: side, with: a }
+        - { type: relationship, role: a, affection: 8, trust: 4 }
+        - { type: relationship, role: b, affection: -10, trust: -4 }
+        - { type: memory, role: a, tag: took_your_side }
+        - { type: memory, role: b, tag: you_sided_against_them }
+  - id: side_b
+    label: Take {b.name}'s side
+    outcome:
+      text: >-
+        "I knew you'd see it," {b.name} says. {a.name} doesn't call again that
+        week, and when {a.they} finally {a:does|do}, it is short.
+      effects:
+        - { type: tie, a: a, b: b, action: side, with: b }
+        - { type: relationship, role: b, affection: 8, trust: 4 }
+        - { type: relationship, role: a, affection: -10, trust: -4 }
+        - { type: memory, role: b, tag: took_your_side }
+        - { type: memory, role: a, tag: you_sided_against_them }
+  - id: broker
+    label: Try to get them talking again
+    check:
+      base: 30
+      stats:
+        - { role: a, key: affection, weight: 0.2 }
+        - { role: b, key: affection, weight: 0.2 }
+        - { key: kindness, weight: 0.2 }
+      success:
+        text: >-
+          It takes three calls and one very honest evening. By the end,
+          {a.name} and {b.name} are not friends yet, but they are speaking, and
+          both of them know who made that happen.
+        effects:
+          - { type: tie, a: a, b: b, action: mend, delta: 22 }
+          - { type: relationship, role: a, affection: 4, trust: 4 }
+          - { type: relationship, role: b, affection: 4, trust: 4 }
+          - { type: memory, role: a, tag: mediated_for_them }
+          - { type: memory, role: b, tag: mediated_for_them }
+      failure:
+        text: >-
+          Each of them hears "let it go" as "you're wrong." By Sunday you have
+          two angry siblings instead of one angry pair.
+        effects:
+          - { type: tie, a: a, b: b, action: worsen, delta: 4 }
+          - { type: relationship, role: a, affection: -4, trust: -2 }
+          - { type: relationship, role: b, affection: -4, trust: -2 }
+          - { type: stat, key: stress, delta: 4 }
+  - id: stay_out
+    label: Tell them you're staying out of it
+    outcome:
+      text: >-
+        "I love you both. I'm not picking." It is the fairest thing you can
+        say, and neither of them forgives you for saying it.
+      effects:
+        - { type: tie, a: a, b: b, action: neutral }
+        - { type: relationship, role: a, affection: -2 }
+        - { type: relationship, role: b, affection: -2 }
+        - { type: memory, role: a, tag: you_stayed_neutral }
+        - { type: memory, role: b, tag: you_stayed_neutral }

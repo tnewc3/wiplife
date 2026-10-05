@@ -32,7 +32,7 @@ profiles:
     their: { kindness: 0.12, sociability: 0.15 }
     you: { kindness: 0.1, confidence: 0.06, happiness: 0.05 }
     repeat: { same: 8, total: 1.5 }
-    memories: { humiliated_them: -12, big_fight: -6, great_time_together: 4, stepfamily_welcomed: 4, stepfamily_kept_distance: -4, expecting_together: 3, placed_a_baby: -3 }
+    memories: { humiliated_them: -12, big_fight: -6, great_time_together: 4, stepfamily_welcomed: 4, stepfamily_kept_distance: -4, expecting_together: 3, placed_a_baby: -3, you_sided_against_them: -8, you_stayed_neutral: -3, mediated_for_them: 4 }
   admiring:
     base: 3
     their: { kindness: 0.1, confidence: 0.05 }
@@ -132,6 +132,28 @@ profiles:
     you: {}
     repeat: { same: 5, total: 1 }
     memories: {}
+  # E4: the social web. Introducing two people you know, setting the record
+  # straight about something they heard, and asking them to keep a secret.
+  introduce:
+    base: 8
+    their: { sociability: 0.12, kindness: 0.06 }
+    you: { sociability: 0.1, kindness: 0.06 }
+    repeat: { same: 6, total: 1 }
+    memories: { introduction_went_badly: -6, introduced_us: 3 }
+  straight:
+    base: -2
+    their: { kindness: 0.1 }
+    you: { confidence: 0.1, kindness: 0.06 }
+    repeat: { same: 12, total: 1.5 }
+    repeatTrust: 4
+    memories: { you_set_it_straight: -8, broke_your_confidence: -6, you_confided: 4 }
+  quiet:
+    base: -6
+    their: { kindness: 0.12, sociability: -0.12 }
+    you: { kindness: 0.04 }
+    repeat: { same: 14, total: 2 }
+    repeatTrust: 5
+    memories: { broke_your_confidence: -20, you_confided: 8, asked_to_keep_quiet: -6 }
 
 # Diminishing returns. Gains (affection, trust, mood, and your own stat
 # gains) are multiplied by `same` for each earlier use of the same

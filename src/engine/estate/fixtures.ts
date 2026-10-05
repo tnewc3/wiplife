@@ -7,6 +7,7 @@ import { endYear } from '../life';
 import { createRng } from '../rng';
 import { cloneJson, lifeAtAge } from '../testFixtures';
 import type { LifeState, Person } from '../types';
+import { pruneWeb } from '../web/ties';
 
 export interface ParentOptions {
   seed?: string;
@@ -36,6 +37,7 @@ export function parentLife(opts: ParentOptions = {}, bundle: ContentBundle = con
         delete d.relationships[id];
       }
     }
+    pruneWeb(d);
     d.finances.savings = opts.savings ?? 100_000;
     if (opts.spouse) {
       const template: Person = cloneJson(Object.values(d.people)[0] ?? ({} as Person));

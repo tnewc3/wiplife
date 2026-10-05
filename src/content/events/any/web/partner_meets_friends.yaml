@@ -1,0 +1,42 @@
+# Web (partnerMet): your partner has got to know one of your friends.
+id: partner_meets_friends
+title: They get along
+text: >-
+  {a.name} and {b.name} have met, and it turns out they get along. You find
+  them laughing in the corner at a party, which is lovely, and slightly
+  suspicious, since you can't tell what the joke is.
+tone: light
+category: web
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { tie: { a: a, b: b, kind: [friends] } }
+    - { role: a, alive: true, kind: [partner, fiance, spouse] }
+    - { role: b, alive: true, kind: [friend], where: [household, city] }
+weight: { base: 8 }
+followUpOnly: true
+cast:
+  a: { support: true, presence: nearby }
+  b: { support: true, presence: nearby }
+choices:
+  - id: join
+    label: Join them
+    outcome:
+      text: >-
+        "We were talking about you," {b.name} says, and both of them
+        immediately look guilty, and then not. It was affectionate. Mostly.
+      effects:
+        - { type: relationship, role: a, affection: 2 }
+        - { type: relationship, role: b, affection: 2 }
+        - { type: stat, key: happiness, delta: 2 }
+  - id: leave_them
+    label: Leave them to it
+    outcome:
+      text: >-
+        You circulate. When you come back, they're exchanging numbers, and
+        it dawns on you that your partner now has an independent source of
+        embarrassing stories about you.
+      effects:
+        - { type: stat, key: happiness, delta: 1 }

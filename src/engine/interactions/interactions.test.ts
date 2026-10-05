@@ -12,7 +12,7 @@ import { replayLife } from '../replay';
 import { createRng, nextInt } from '../rng';
 import { cloneJson, lifeAtAge } from '../testFixtures';
 import type { GenderCategory, LifeState, Person, Relationship, RelationshipKind } from '../types';
-import { availableInteractions, isInteractionAvailable } from './availability';
+import { availableInteractions, defaultExtras, isInteractionAvailable } from './availability';
 import { betray, canAffordGift, giftPrice, giveMoney, rollAskedAmount } from './links';
 import { isClose, moodBand, moodBaseline, moodView, runMoods, shiftMood } from './mood';
 import { closeInteraction, performInteraction, resolveInteractionChoice } from './perform';
@@ -544,7 +544,7 @@ describe('doing an interaction', () => {
         const def = options[nextInt(rng, 0, options.length - 1)]!;
         const giftTier = def.gift ? (['small', 'medium', 'big'] as const)[nextInt(rng, 0, 2)]! : undefined;
         if (giftTier && !canAffordGift(life, giftTier, content)) continue;
-        life = performInteraction(life, { interactionId: def.id, personId: id, ...(giftTier ? { giftTier } : {}) }, content);
+        life = performInteraction(life, { interactionId: def.id, personId: id, ...(giftTier ? { giftTier } : {}), ...defaultExtras(life, def, id, content) }, content);
         const choice = life.pendingInteraction?.choice;
         if (choice) life = resolveInteractionChoice(life, choice.options[nextInt(rng, 0, choice.options.length - 1)]!.id, content);
         if (nextInt(rng, 0, 1) === 0) life = closeInteraction(life, content);
@@ -823,9 +823,9 @@ describe('every interaction', () => {
         );
         if (!isInteractionAvailable(start, def, 'x', content)) continue;
         const bundle = forced(tier);
-        let life = performInteraction(start, { interactionId: def.id, personId: 'x', ...(def.gift ? { giftTier: 'small' as const } : {}) }, bundle);
+        let life = performInteraction(start, { interactionId: def.id, personId: 'x', ...(def.gift ? { giftTier: 'small' as const } : {}), ...defaultExtras(start, def, 'x', content) }, bundle);
         const choice = life.pendingInteraction?.choice;
-        if (choice) for (const option of choice.options) life = resolveInteractionChoice(performInteraction(start, { interactionId: def.id, personId: 'x', ...(def.gift ? { giftTier: 'small' as const } : {}) }, bundle), option.id, bundle);
+        if (choice) for (const option of choice.options) life = resolveInteractionChoice(performInteraction(start, { interactionId: def.id, personId: 'x', ...(def.gift ? { giftTier: 'small' as const } : {}), ...defaultExtras(start, def, 'x', content) }, bundle), option.id, bundle);
         expect(life.pendingInteraction?.text, `${def.id} ${tier}`).toBeTruthy();
         expect(checkInvariants(life, bundle), `${def.id} ${tier}`).toEqual([]);
       }

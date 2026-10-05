@@ -1,0 +1,300 @@
+# The social web (E4). Two things.
+#
+# priority: when several things happen in a year, the most pressing trigger first.
+#
+# triggers: the events a change among the people you know can ask of you.
+# A tie's event (a feud, a strained marriage, a couple, an introduction
+# that worked or didn't) casts the two people as `a` and `b`, in whichever
+# order its requirements accept. A reaction casts the person who heard
+# something as `npc`; {heard} is what they heard. Every event listed is
+# followUpOnly.
+#
+# kinds: the things that get talked about. A kind lists the versions of its
+# story (the true ones in `truths`, the rest are twists), how a version reads
+# in "What they've heard" (`heard`, about you; `heardAbout`, about someone
+# else), which versions it can turn into when passed on (`twists`, by weight),
+# how someone feels on first hearing it (affection and trust, scaled by what
+# they are to you), and the events that follow when someone hears it from
+# another person. Secrets start known only to who saw them. Twisted versions
+# of serious secrets stay serious; only low-stakes rumors are funny (`light`).
+priority:
+  - feudBegan
+  - betrayed
+  - feudLong
+  - public
+  - feudEnded
+  - coupleFormed
+  - coupleWed
+  - introducedBadly
+  - introducedCouple
+  - introducedWell
+  - tieStrained
+  - tieClose
+  - partnerMet
+
+triggers:
+  feudBegan:
+    events: [feud_siblings_side, feud_parents_side, feud_friends_side, feud_in_law_side, couple_falling_apart]
+  feudLong:
+    events: [mediate_dinner, mediate_one_on_one, feud_neutral_wears]
+  feudEnded:
+    events: [feud_ends_hug]
+  tieStrained:
+    events: [parents_marriage_strain, siblings_rivalry, inlaw_never_accepts, inlaw_holiday_dinner]
+  tieClose:
+    events: [siblings_close, inlaw_wins_over, parents_renew_vows]
+  partnerMet:
+    events: [partner_meets_friends]
+  coupleFormed:
+    events: [friends_started_dating]
+  coupleWed:
+    events: [friends_engaged]
+  introducedWell:
+    events: [introduction_pays_off]
+  introducedBadly:
+    events: [introduction_goes_wrong]
+  introducedCouple:
+    events: [introduced_couple]
+  betrayed:
+    events: [kept_quiet_betrayed]
+  public:
+    events: [everyone_knows]
+
+kinds:
+  # An affair (from the memory an unfaithful night leaves on the other person).
+  # Your partner finds out through the existing discovery events.
+  affair:
+    secret: true
+    witness: { who: other, chance: 1, count: 1 }
+    sources: { memory: affair_with_you }
+    truths: [affair]
+    versions:
+      affair:
+        heard: "that you had an affair with {other.name}"
+        twists: [{ to: affair_serial, weight: 2 }, { to: affair_close, weight: 1 }]
+        affection: -8
+        trust: -14
+      affair_serial:
+        heard: "that you've been cheating for years, and not with just one person"
+        twists: [{ to: affair, weight: 1 }]
+        affection: -14
+        trust: -20
+      affair_close:
+        heard: "that you and {other.name} are \"very close\", whatever that means"
+        twists: [{ to: affair, weight: 1 }]
+        affection: -3
+        trust: -6
+    reactions: [affair_discovered, cheating_found_out, affair_whispers, affair_family_hears]
+
+  # Something you did that nobody is known to have seen.
+  unknownCrime:
+    secret: true
+    witness: { who: closest, chance: 0.4, count: 1 }
+    sources:
+      flags: [shoplifted, joyrode, tagged_bridge, ran_package, cooked_books, stole_from_work]
+      unless: { shoplifted: caught_shoplifting }
+    truths: [crime]
+    versions:
+      crime:
+        heard: "that you did something illegal and got away with it"
+        twists: [{ to: crime_worse, weight: 2 }, { to: crime_arrested, weight: 1 }]
+        affection: -6
+        trust: -10
+      crime_worse:
+        heard: "that you're mixed up in something criminal"
+        twists: [{ to: crime, weight: 1 }]
+        affection: -12
+        trust: -16
+      crime_arrested:
+        heard: "that you were arrested"
+        twists: [{ to: crime_worse, weight: 1 }]
+        affection: -8
+        trust: -8
+    reactions: [crime_whispers]
+
+  # Debts you haven't told anyone about.
+  hiddenDebt:
+    secret: true
+    witness: { who: household, chance: 0.9, count: 2 }
+    truths: [debt]
+    versions:
+      debt:
+        heard: "that you're deep in debt and haven't told anyone"
+        twists: [{ to: debt_ruin, weight: 2 }, { to: debt_gambling, weight: 1 }]
+        affection: -3
+        trust: -8
+      debt_ruin:
+        heard: "that you're about to lose everything"
+        twists: [{ to: debt, weight: 1 }]
+        affection: -4
+        trust: -6
+      debt_gambling:
+        heard: "that you've been gambling money you don't have"
+        twists: [{ to: debt, weight: 1 }]
+        affection: -8
+        trust: -14
+    reactions: [debt_whispers]
+
+  # An addiction that has taken hold.
+  addiction:
+    secret: true
+    witness: { who: household, chance: 0.85, count: 2 }
+    truths: [addiction]
+    versions:
+      addiction:
+        heard: "that you're struggling with an addiction"
+        twists: [{ to: addiction_lost, weight: 2 }, { to: addiction_party, weight: 1 }]
+        affection: -2
+        trust: -6
+      addiction_lost:
+        heard: "that you're not coming back from this"
+        twists: [{ to: addiction, weight: 1 }]
+        affection: -6
+        trust: -10
+      addiction_party:
+        heard: "that you just don't know when to stop partying"
+        twists: [{ to: addiction, weight: 1 }]
+        affection: -1
+        trust: -3
+    reactions: [addiction_concern]
+
+  # Who you are, accepted and not shared (see the coming-out events for telling people yourself).
+  identity:
+    secret: true
+    witness: { who: closest, chance: 0.3, count: 1 }
+    truths: [identity]
+    versions:
+      identity:
+        heard: "that you've come to understand something about who you are, and haven't told everyone"
+        twists: [{ to: identity_phase, weight: 1 }, { to: identity_lie, weight: 1 }]
+        affection: -2
+        trust: -6
+      identity_phase:
+        heard: "that who you say you are is \"just a phase\""
+        twists: [{ to: identity, weight: 1 }]
+        affection: -2
+        trust: -4
+      identity_lie:
+        heard: "that you've been lying to everyone about who you are"
+        twists: [{ to: identity, weight: 1 }]
+        affection: -8
+        trust: -14
+    reactions: [outed_family, outed_friend, outed_sibling, outed_partner]
+
+  # Losing a job.
+  jobLoss:
+    secret: false
+    witness: { who: closest, chance: 0.7, count: 2 }
+    truths: [laid_off, fired]
+    versions:
+      laid_off:
+        heard: "that you were laid off"
+        heardAbout: "that {about.name} was laid off"
+        twists: [{ to: fired, weight: 1 }, { to: fired_stealing, weight: 1 }, { to: quit_dramatic, weight: 1 }]
+        affection: 1
+        trust: 0
+      fired:
+        heard: "that you were fired"
+        heardAbout: "that {about.name} was fired"
+        twists: [{ to: fired_stealing, weight: 2 }, { to: laid_off, weight: 1 }, { to: quit_dramatic, weight: 1 }]
+        affection: -2
+        trust: -3
+      fired_stealing:
+        heard: "that you were fired for stealing"
+        heardAbout: "that {about.name} was fired for stealing"
+        twists: [{ to: fired, weight: 1 }]
+        affection: -8
+        trust: -14
+      quit_dramatic:
+        heard: "that you quit by telling your boss exactly what you thought, in front of the whole office"
+        heardAbout: "that {about.name} quit by telling the boss exactly what {about.they} thought, in front of the whole office"
+        twists: [{ to: fired, weight: 1 }]
+        affection: 1
+        trust: 0
+        light: true
+    reactions: [rumor_job_loss, rumor_funny_version]
+
+  # Trouble with the law that others get to hear about.
+  arrest:
+    secret: false
+    witness: { who: random, chance: 0.7, count: 2 }
+    truths: [arrested]
+    versions:
+      arrested:
+        heard: "that you got in trouble with the law"
+        heardAbout: "that {about.name} got in trouble with the law"
+        twists: [{ to: arrest_worse, weight: 2 }, { to: arrest_mixup, weight: 1 }]
+        affection: -5
+        trust: -8
+      arrest_worse:
+        heard: "that you're a danger to the people around you"
+        heardAbout: "that {about.name} is a danger to the people around {about.them}"
+        twists: [{ to: arrested, weight: 1 }]
+        affection: -12
+        trust: -16
+      arrest_mixup:
+        heard: "that it was all a misunderstanding, and you did nothing wrong"
+        heardAbout: "that it was all a misunderstanding, and {about.name} did nothing wrong"
+        twists: [{ to: arrested, weight: 1 }]
+        affection: -1
+        trust: -2
+    reactions: [rumor_arrest]
+
+  # A relationship ending.
+  breakup:
+    secret: false
+    witness: { who: closest, chance: 0.7, count: 2 }
+    truths: [broke_up]
+    versions:
+      broke_up:
+        heard: "that you and {other.name} broke up"
+        heardAbout: "that {about.name}'s relationship is over"
+        twists: [{ to: breakup_cheating, weight: 1 }, { to: breakup_left, weight: 1 }, { to: breakup_scene, weight: 1 }]
+        affection: 0
+        trust: 0
+      breakup_cheating:
+        heard: "that you cheated on {other.name}"
+        heardAbout: "that {about.name} cheated, and that's why it's over"
+        twists: [{ to: broke_up, weight: 1 }]
+        affection: -8
+        trust: -12
+      breakup_left:
+        heard: "that {other.name} left you for someone else"
+        heardAbout: "that {about.name} was left for someone else"
+        twists: [{ to: broke_up, weight: 1 }]
+        affection: 2
+        trust: 0
+      breakup_scene:
+        heard: "that it ended in a screaming match in a parking lot, with an audience"
+        heardAbout: "that it ended in a screaming match in a parking lot, with an audience"
+        twists: [{ to: broke_up, weight: 1 }]
+        affection: 0
+        trust: 0
+        light: true
+    reactions: [rumor_breakup]
+
+  # A serious illness.
+  illness:
+    secret: false
+    witness: { who: household, chance: 0.9, count: 2 }
+    truths: [ill]
+    versions:
+      ill:
+        heard: "that you've been diagnosed with something serious"
+        heardAbout: "that {about.name} has been diagnosed with something serious"
+        twists: [{ to: ill_worse, weight: 2 }, { to: ill_minor, weight: 1 }]
+        affection: 2
+        trust: 0
+      ill_worse:
+        heard: "that you don't have long"
+        heardAbout: "that {about.name} doesn't have long"
+        twists: [{ to: ill, weight: 1 }]
+        affection: 1
+        trust: 0
+      ill_minor:
+        heard: "that you're just run down and it's nothing to worry about"
+        heardAbout: "that {about.name} is just run down and it's nothing to worry about"
+        twists: [{ to: ill, weight: 1 }]
+        affection: 0
+        trust: 0
+    reactions: [rumor_illness]

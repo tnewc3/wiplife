@@ -15,6 +15,8 @@ export interface InteractionMenuItem {
   blurb: string;
   /** A gift: its price tiers, with whether you can pay. */
   gift?: { tier: GiftTier; price: number; affordable: boolean }[];
+  /** E4: needs a choice first: another person to introduce them to, or a story they have heard (distorted ones, or secrets). */
+  pick?: 'other' | 'distorted' | 'secret';
 }
 
 export interface InteractionMenuGroup {
@@ -30,6 +32,7 @@ export function getInteractionMenu(state: LifeState, personId: Id, content: Cont
       id: def.id,
       name: def.name,
       blurb: def.blurb,
+      ...(def.other ? { pick: 'other' as const } : def.topic ? { pick: def.topic } : {}),
       ...(def.gift
         ? { gift: GIFT_TIERS.map((tier) => ({ tier, price: giftPrice(state, tier, content), affordable: canAffordGift(state, tier, content) })) }
         : {}),

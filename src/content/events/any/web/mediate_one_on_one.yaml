@@ -1,0 +1,58 @@
+# Web (feudLong): a feud that might finally be ready to end; you try to carry messages.
+id: mediate_one_on_one
+title: Carrying messages
+text: >-
+  Out of nowhere, {a.name} asks about {b.name}. It is casual, like asking
+  about the weather. A few days later {b.name} does the same thing in the same
+  voice. You've seen this before. It might be a door opening.
+tone: neutral
+category: web
+rarity: common
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 14 } }
+    - { tie: { a: a, b: b, status: [feuding], feudYears: { gte: 3 } } }
+    - { role: a, alive: true }
+    - { role: b, alive: true }
+weight: { base: 8 }
+followUpOnly: true
+cast:
+  a: { support: true, presence: anywhere }
+  b: { support: true, presence: anywhere }
+choices:
+  - id: pass_it_on
+    label: Tell each that the other asked about them
+    check:
+      base: 45
+      stats:
+        - { role: a, key: trust, weight: 0.15 }
+        - { role: b, key: trust, weight: 0.15 }
+        - { key: kindness, weight: 0.15 }
+      success:
+        text: >-
+          "{b.name} asked about you." You watch {a.name} try not to look
+          pleased. Within the month there is a text, and then a call.
+        effects:
+          - { type: tie, a: a, b: b, action: mend, delta: 22 }
+          - { type: relationship, role: a, affection: 3, trust: 3 }
+          - { type: relationship, role: b, affection: 3, trust: 3 }
+          - { type: memory, role: a, tag: mediated_for_them }
+          - { type: memory, role: b, tag: mediated_for_them }
+      failure:
+        text: >-
+          You pass it on and it arrives wrong: "{b.name} asked if you were
+          still angry." {a.name} says something unforgivable about {b.name}, and
+          someone repeats it.
+        effects:
+          - { type: tie, a: a, b: b, action: worsen, delta: 4 }
+          - { type: relationship, role: a, affection: -2 }
+          - { type: relationship, role: b, affection: -2 }
+  - id: say_nothing
+    label: Keep it to yourself, and see what happens
+    outcome:
+      text: >-
+        You don't move anything or anyone. It is possible you have just let the
+        moment pass.
+      effects:
+        - { type: stat, key: stress, delta: 1 }

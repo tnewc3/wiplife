@@ -1,0 +1,52 @@
+# Web (coupleFormed): two of your friends have become a couple.
+id: friends_started_dating
+title: It finally happened
+text: >-
+  {a.name} and {b.name}, two of your friends, are together. It has been
+  obvious to everyone but them for a while. The group chat took the news the
+  way you'd expect: loudly, and with a lot of "I KNEW IT."
+tone: light
+category: web
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { tie: { a: a, b: b, kind: [dating] } }
+    - { role: a, alive: true, age: { gte: 18 }, kind: [friend] }
+    - { role: b, alive: true, age: { gte: 18 }, kind: [friend] }
+weight: { base: 8 }
+followUpOnly: true
+cast:
+  a: { support: true, presence: anywhere }
+  b: { support: true, presence: anywhere }
+choices:
+  - id: be_happy
+    label: Be properly happy for them
+    outcome:
+      text: >-
+        You send both of them the same message, and each replies in the first
+        minute. The group will be a little different now, and mostly better.
+      effects:
+        - { type: relationship, role: a, affection: 3, trust: 2 }
+        - { type: relationship, role: b, affection: 3, trust: 2 }
+        - { type: stat, key: happiness, delta: 2 }
+  - id: tease
+    label: Tease them without mercy
+    outcome:
+      text: >-
+        You have waited a long time for this. They take it as the love
+        it is, mostly, and by the end of the evening you have a new
+        nickname for them.
+      effects:
+        - { type: relationship, role: a, affection: 2 }
+        - { type: relationship, role: b, affection: 2 }
+        - { type: stat, key: happiness, delta: 1 }
+  - id: wonder_about_group
+    label: Wonder what it will do to the group
+    outcome:
+      text: >-
+        Couples change a group. Dinners get planned around two instead of one.
+        You keep this to yourself and raise a glass when everyone does.
+      effects:
+        - { type: stat, key: stress, delta: 1 }

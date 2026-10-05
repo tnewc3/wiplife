@@ -1,0 +1,65 @@
+# Web (public): a secret is common knowledge now.
+id: everyone_knows
+title: Everyone knows
+text: >-
+  It stopped being a secret some time ago. Today you notice that it has also
+  stopped being whispered. {npc.name} is the first to say it to your face:
+  {npc.they} heard {heard}.
+tone: serious
+category: web
+rarity: common
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 14 } }
+    - { role: npc, alive: true, heard: { secret: true } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  npc: { support: true, presence: anywhere }
+choices:
+  - id: own_it
+    label: Own it, plainly
+    check:
+      base: 45
+      stats:
+        - { role: npc, key: affection, weight: 0.3 }
+        - { role: npc, key: trust, weight: 0.2 }
+        - { key: confidence, weight: 0.2 }
+      success:
+        text: >-
+          You say it plainly: this is true, and this is not. {npc.name} listens
+          to all of it. When you finish, there is a very long pause, and then
+          "thank you for telling me yourself." It makes the rest a little easier.
+        effects:
+          - { type: knowledge, role: npc, action: confirm }
+          - { type: relationship, role: npc, affection: 4, trust: 6 }
+          - { type: stat, key: stress, delta: -3 }
+      failure:
+        text: >-
+          You try to explain, and every sentence comes out wrong. {npc.name}
+          nods through all of it with a face that has already decided.
+        effects:
+          - { type: knowledge, role: npc, action: confirm }
+          - { type: relationship, role: npc, affection: -6, trust: -6 }
+          - { type: stat, key: stress, delta: 5 }
+  - id: set_straight
+    label: Tell {npc.them} what is actually true
+    outcome:
+      text: >-
+        You give {npc.name} the real version, in order, with nothing left out
+        that matters. {npc.They} {npc:takes|take} it in. It doesn't undo what
+        everyone else has heard, but this one person has it right.
+      effects:
+        - { type: knowledge, role: npc, action: correct }
+        - { type: relationship, role: npc, affection: 1, trust: 3 }
+        - { type: memory, role: npc, tag: you_set_it_straight }
+  - id: hold_your_head_up
+    label: Say nothing and carry on
+    outcome:
+      text: >-
+        You nod, say "I know," and ask about something else. It takes everything
+        you have, and it is, for now, enough.
+      effects:
+        - { type: stat, key: stress, delta: 4 }
+        - { type: relationship, role: npc, trust: -2 }

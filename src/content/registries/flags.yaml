@@ -78,3 +78,6 @@ flags:
   took_in_a_relative: You took a relative into your home to be looked after
   paid_for_care: You pay for a relative's care
   cosigned_a_loan: You cosigned a loan for someone
+  # E4: the web between the people you know.
+  hosted_a_peace_dinner: You hosted a dinner to get two people talking
+  was_outed: Someone else told people who you are before you did

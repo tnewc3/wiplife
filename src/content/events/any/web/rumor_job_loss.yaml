@@ -1,0 +1,62 @@
+# Web reaction (jobLoss): someone has heard a version of how you lost your job.
+id: rumor_job_loss
+title: What they heard about your job
+text: >-
+  {npc.name} brings it up carefully, over coffee, the way people do when
+  they've been rehearsing. {npc.They} heard {heard}. It isn't quite how you
+  remember it.
+tone: neutral
+category: web
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { role: npc, alive: true, kind: [friend, sibling, parent, partner, fiance, spouse, grandparent], heard: { kinds: [jobLoss], light: false, learned: [gossip] } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  npc: { support: true, presence: anywhere }
+choices:
+  - id: set_straight
+    label: Tell {npc.them} what really happened
+    check:
+      base: 55
+      stats:
+        - { role: npc, key: trust, weight: 0.4 }
+        - { key: confidence, weight: 0.15 }
+      success:
+        text: >-
+          You tell it in order, plainly. {npc.name} listens and nods, and by
+          the end the whole thing sounds smaller than the version going around.
+          "Good," {npc.they} {npc:says|say}. "I'll tell people."
+        effects:
+          - { type: knowledge, role: npc, action: correct }
+          - { type: relationship, role: npc, affection: 2, trust: 4 }
+          - { type: memory, role: npc, tag: you_set_it_straight }
+      failure:
+        text: >-
+          Everything you say sounds like an excuse, even to you. {npc.name}
+          says "okay" in a tone that doesn't mean it, and the old version
+          clearly isn't going anywhere.
+        effects:
+          - { type: relationship, role: npc, affection: -3, trust: -3 }
+          - { type: stat, key: stress, delta: 3 }
+  - id: let_it_go
+    label: Let it go, and let people think what they think
+    outcome:
+      text: >-
+        You shrug. People will always believe the better story. You can feel
+        it spreading, and decide, with effort, not to care.
+      effects:
+        - { type: relationship, role: npc, affection: -1 }
+        - { type: stat, key: stress, delta: 2 }
+  - id: ask_who_said
+    label: Ask who started it
+    outcome:
+      text: >-
+        {npc.name} won't say, which tells you it was someone you know. You
+        spend the next week looking at everyone a little differently.
+      effects:
+        - { type: relationship, role: npc, trust: -1 }
+        - { type: stat, key: stress, delta: 3 }

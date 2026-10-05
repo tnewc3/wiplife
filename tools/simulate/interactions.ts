@@ -15,7 +15,7 @@
  */
 import { OUTCOME_TIERS, type ContentBundle, type GiftTier, type OutcomeTier } from '../../src/content/schemas';
 import { canAffordGift, giftPrice } from '../../src/engine/interactions/links';
-import { availableInteractions, isInteractionAvailable } from '../../src/engine/interactions/availability';
+import { availableInteractions, defaultExtras, isInteractionAvailable } from '../../src/engine/interactions/availability';
 import { closeInteraction, performInteraction, resolveInteractionChoice } from '../../src/engine/interactions/perform';
 import { repeatsThisYear } from '../../src/engine/interactions/reaction';
 import { isFamilyKind, isPartnerKind } from '../../src/engine/relationships';
@@ -83,7 +83,7 @@ export function chooseInteractions(life: LifeState, content: ContentBundle, rng:
     const def =
       player === 'careless'
         ? pick(rng, defs)
-        : weightedPick(rng, defs.map((d) => [d, d.group === 'everyday' ? 3 : d.group === 'romance' ? 2 : d.id === 'apologize' ? 3 : 1.5] as const));
+        : weightedPick(rng, defs.map((d) => [d, d.group === 'everyday' ? 3 : d.group === 'romance' ? 2 : d.id === 'apologize' ? 3 : d.id === 'introduce' ? 0.25 : d.topic ? 4 : 1.5] as const));
     let giftTier: GiftTier | undefined;
     if (def.gift) {
       const affordable = GIFT_TIERS_BY_PRICE.filter((t) => canAffordGift(life, t, content) && (player === 'careless' || life.finances.savings >= giftPrice(life, t, content) * 20));
@@ -205,7 +205,8 @@ export function playInteraction(
   const before = life;
   const repeats = repeatsThisYear(before, before.relationships[plan.personId]!, def.id);
   const price = plan.giftTier ? giftPrice(before, plan.giftTier, content) : 0;
-  let next = performInteraction(life, plan, content);
+  // E4: who to introduce them to, or which story, is chosen as it happens (an earlier one this year may have changed who's left).
+  let next = performInteraction(life, { ...plan, ...defaultExtras(life, def, plan.personId, content) }, content);
   const outcome = next.pendingInteraction!;
   if (outcome.choice) next = resolveInteractionChoice(next, chooseOption(outcome.choice.options, player, rng), content);
   const card = next.pendingInteraction!;

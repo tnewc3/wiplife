@@ -1,0 +1,72 @@
+# Web (tieStrained): your parents' marriage has gone quiet in the wrong way.
+id: parents_marriage_strain
+title: The quiet in the kitchen
+text: >-
+  Your parents' marriage has gone quiet in the wrong way. {a.name} and
+  {b.name} are polite, which is new, and careful, which is worse. At dinner
+  you can hear the forks.
+tone: serious
+category: web
+rarity: common
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 14 } }
+    - { tie: { a: a, b: b, kind: [married], status: [strained] } }
+    - { role: a, alive: true, kind: [parent] }
+    - { role: b, alive: true, kind: [parent] }
+weight: { base: 9 }
+followUpOnly: true
+cast:
+  a: { support: true, presence: anywhere }
+  b: { support: true, presence: anywhere }
+choices:
+  - id: talk_a
+    label: Ask {a.name} what's wrong
+    outcome:
+      text: >-
+        {a.name} tells you less than the truth, and more than you were ready
+        for. You hang up with a better idea of the shape of it and no idea what
+        to do about it.
+      effects:
+        - { type: relationship, role: a, affection: 3, trust: 4 }
+        - { type: stat, key: stress, delta: 2 }
+  - id: talk_b
+    label: Ask {b.name} what's wrong
+    outcome:
+      text: >-
+        {b.name} says, "It's nothing," in the voice that means it's everything.
+        Later, in a text: "Thank you for asking."
+      effects:
+        - { type: relationship, role: b, affection: 3, trust: 4 }
+        - { type: stat, key: stress, delta: 2 }
+  - id: weekend_away
+    label: Suggest they take a weekend away, just the two of them
+    check:
+      base: 40
+      stats:
+        - { role: a, key: trust, weight: 0.15 }
+        - { role: b, key: trust, weight: 0.15 }
+        - { key: kindness, weight: 0.1 }
+      success:
+        text: >-
+          They go, grumbling. They come back sunburnt and sheepish, and
+          {a.name} keeps finding reasons to touch {b.name}'s arm.
+        effects:
+          - { type: tie, a: a, b: b, action: mend, delta: 14 }
+          - { type: relationship, role: a, affection: 3 }
+          - { type: relationship, role: b, affection: 3 }
+      failure:
+        text: >-
+          They don't go. "We don't need a trip," {b.name} says. Things stay
+          where they were, which is nowhere good.
+        effects:
+          - { type: tie, a: a, b: b, action: worsen, delta: 3 }
+  - id: pretend
+    label: Pretend not to notice
+    outcome:
+      text: >-
+        You pass the salt and talk about the weather. It's a kind of mercy, and
+        a kind of cowardice, and you aren't sure which.
+      effects:
+        - { type: stat, key: stress, delta: 2 }

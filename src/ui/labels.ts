@@ -13,14 +13,18 @@ import type {
   Program,
   RomanceStatus,
   Tier,
+  TieKindId,
+  TieStatusId,
 } from '../content/schemas';
 import type { JobApplyBlock, SearchBlock } from '../engine/career';
 import type { ApplyBlock } from '../engine/education';
 import type { PersonLifeView, TroubleView } from '../engine/lives/views';
 import type {
+  ConnectionView,
   CredentialView,
   DoctorBlock,
   FamilyMember,
+  HeardView,
   LegalStatus,
   MoodBand,
   MoodView,
@@ -846,4 +850,39 @@ export function troubleLine(t: TroubleView): string {
   }
   if (t.kind === 'addiction') return `${t.name}${t.treated ? ', in recovery' : ''}`;
   return `${t.name}${t.treated ? ', being treated' : ''}${t.serious && !t.treated ? ', serious' : ''}`;
+}
+
+// E4: the social web.
+
+/** Words for what ties two people (interface words for built-in values). */
+export const TIE_KIND_LABELS: Record<TieKindId, string> = {
+  married: 'Married',
+  dating: 'Dating',
+  siblings: 'Siblings',
+  parentChild: 'Parent and child',
+  inLaw: 'In-laws',
+  friends: 'Friends',
+};
+
+/** How a tie reads. */
+export const TIE_STATUS_LABELS: Record<TieStatusId, string> = {
+  close: 'Close',
+  normal: 'Getting along',
+  strained: 'Strained',
+  feuding: 'Feuding',
+};
+
+export const CONNECTIONS_TITLE = 'Connections';
+export const HEARD_TITLE = "What they've heard";
+
+/** One connection, as a line: who they are, what they are to you, and how it stands. */
+export function connectionLine(c: ConnectionView): { who: string; how: string } {
+  const feud = c.status === 'feuding' ? (c.sided ? ' (you took a side)' : c.neutral ? ' (you are staying out of it)' : '') : '';
+  return { who: `${c.fullName}, your ${c.relation}`, how: `${TIE_KIND_LABELS[c.kind]} · ${TIE_STATUS_LABELS[c.status]}${feud}` };
+}
+
+/** One thing they have heard, as a sentence, with where it came from and whether it is the whole story. */
+export function heardLine(name: string, h: HeardView): { text: string; note: string } {
+  const how = h.learned === 'you' ? 'You told them' : h.learned === 'saw' ? 'They saw it for themselves' : 'They heard it from someone else';
+  return { text: `${name} has heard ${h.text}.`, note: h.distorted ? `${how}, and it isn't how it was.` : `${how}.` };
 }

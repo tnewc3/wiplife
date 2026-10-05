@@ -259,6 +259,7 @@ export type EventsBalance = z.infer<typeof eventsBalanceSchema>;
 const shareRangeSchema = z
   .strictObject({ min: probabilitySchema, max: probabilitySchema })
   .refine((r) => r.min <= r.max, 'min must not be greater than max');
+const numberRangeSchema = z.strictObject({ min: z.number().min(0), max: z.number().min(0) }).refine((r) => r.min <= r.max, 'min must not be greater than max');
 const ratioRangeSchema = z
   .strictObject({ min: z.number().min(0), max: z.number().min(0) })
   .refine((r) => r.min <= r.max, 'min must not be greater than max');
@@ -432,6 +433,37 @@ export const targetsBalanceSchema = z.strictObject({
     newsPerYear: z.strictObject({ min: z.number().min(0), max: z.number().min(0) }).refine((r) => r.min <= r.max, 'min must not be greater than max'),
     /** The most milliseconds a year's beginYear takes on average (the full circle simulated), on this machine. */
     maxBeginYearMs: z.number().positive(),
+  }),
+  /**
+   * E4: the social web (tools/simulate/web.ts), judged on the careful player's lives: ties,
+   * feuds, what spreads and how, and the events it asks of you.
+   */
+  web: z.strictObject({
+    /** Ties between the people you know, at a time, on average over life-years. */
+    tiesAtATime: numberRangeSchema,
+    /** Feuds that begin in a life, on average. */
+    feudsPerLife: numberRangeSchema,
+    /** The share of tie-years in which the tie is feuding ("feuds everywhere" is a failure mode). */
+    feudingShare: shareRangeSchema,
+    /** Years a feud lasts before it ends, on average (of those that ended in the run). */
+    feudYears: numberRangeSchema,
+    /** Of the feuds that began, the share that ended within the run. */
+    feudsEnded: shareRangeSchema,
+    /** Of the secrets, the share that someone heard from another person ("no secret ever lasts" or "none ever matters"). */
+    secretsOut: shareRangeSchema,
+    /** Years from a secret beginning to its first telling (median). */
+    secretYears: numberRangeSchema,
+    /** Of the news that isn't secret (a lost job, an arrest...), the share that someone heard from another person. */
+    newsOut: shareRangeSchema,
+    /** The share of passes from one person to another that change the story. */
+    twistRate: shareRangeSchema,
+    /** Events from the web that reach you, a year, on average. */
+    eventsPerYear: numberRangeSchema,
+    /** Events from the web as a share of all events. */
+    maxEventShare: probabilitySchema,
+    /** The most milliseconds beginYear takes on average (all steps; and with the full circle simulated), and the web step on its own. */
+    maxBeginYearMs: z.number().positive(),
+    maxWebStepMs: z.number().positive(),
   }),
   coverage: z.strictObject({
     /** At least this many events (not retired). */

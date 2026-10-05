@@ -6,6 +6,7 @@
 import type { Compare, Condition, ContentBundle } from '../content/schemas';
 import { familyHolds } from './family/query';
 import { lifeHolds } from './lives/query';
+import { heardHolds, ITEM_ROLE, tieHolds } from './web/query';
 import { whereabouts } from './presence';
 import { mostMissed, totalDebt } from './finance';
 import { romanceStatus, yearsInKind } from './relationships';
@@ -204,8 +205,16 @@ export function evaluate(condition: Condition | undefined, state: LifeState, ctx
       if (condition.custody && !(person.child && condition.custody.includes(person.child.custody))) return false;
       if (condition.movedOut !== undefined && (person.child?.movedOutYear !== undefined) !== condition.movedOut) return false;
       if (condition.life && !lifeHolds(condition.life, person, state.currentYear, ctx.content?.balance.people.trouble.serious ?? 35)) return false;
+      if (condition.heard && !heardHolds(condition.heard, state, id, ctx.content, ctx.cast?.[ITEM_ROLE])) return false;
       return true;
     });
+  }
+  if ('tie' in condition) {
+    const q = condition.tie;
+    const a = ctx.cast?.[q.a];
+    const b = ctx.cast?.[q.b];
+    if (a === undefined || b === undefined) return ctx.roles === 'assumeTrue';
+    return tieHolds(q, state, a, b, ctx.content);
   }
   const unknown: never = condition;
   throw new Error(`Unknown condition: ${JSON.stringify(unknown)}`);
@@ -216,7 +225,7 @@ export function mentionsRole(condition: Condition): boolean {
   if ('all' in condition) return condition.all.some(mentionsRole);
   if ('any' in condition) return condition.any.some(mentionsRole);
   if ('not' in condition) return mentionsRole(condition.not);
-  return 'memory' in condition || 'role' in condition;
+  return 'memory' in condition || 'role' in condition || 'tie' in condition;
 }
 
 /** Every role a condition refers to (for the content build). */
@@ -227,6 +236,7 @@ export function rolesIn(condition: Condition | undefined): string[] {
   if ('not' in condition) return rolesIn(condition.not);
   if ('memory' in condition) return [condition.memory.role];
   if ('role' in condition) return [condition.role];
+  if ('tie' in condition) return [condition.tie.a, condition.tie.b];
   return [];
 }
 

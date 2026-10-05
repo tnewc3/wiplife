@@ -37,6 +37,7 @@ choices:
           silent, then, eventually, says {partner.they} {partner:wants|want}
           to try.
         effects:
+          - { type: knowledge, role: partner, action: confirm, kind: affair }
           - { type: relationship, role: partner, affection: -15, trust: -35 }
           - { type: memory, role: partner, tag: forgave_you }
           - { type: stat, key: stress, delta: 10 }
@@ -44,6 +45,7 @@ choices:
       failure:
         text: '{partner.name} listens to every word, nods once, and leaves.'
         effects:
+          - { type: knowledge, role: partner, action: confirm, kind: affair }
           - { type: relationship, role: partner, kind: ex, affection: -40, trust: -60 }
           - { type: memory, role: partner, tag: they_broke_up }
           - { type: stat, key: happiness, delta: -12 }
@@ -57,11 +59,13 @@ choices:
       success:
         text: '{partner.name} can''t prove anything. {partner.They} {partner:doesn''t|don''t} believe you, either.'
         effects:
+          - { type: knowledge, role: partner, action: confirm, kind: affair }
           - { type: relationship, role: partner, affection: -10, trust: -40 }
           - { type: stat, key: stress, delta: 8 }
       failure:
         text: There are messages. {partner.name} is gone by the weekend.
         effects:
+          - { type: knowledge, role: partner, action: confirm, kind: affair }
           - { type: relationship, role: partner, kind: ex, affection: -50, trust: -70 }
           - { type: memory, role: partner, tag: they_broke_up }
           - { type: stat, key: happiness, delta: -12 }

@@ -30,6 +30,7 @@ import { beginPregnancy, decidePregnancy, failAttempt } from '../family/pregnanc
 import { startProcess } from '../family/process';
 import { betray, giveMoney } from '../interactions/links';
 import { lifeHelp } from '../lives/help';
+import { applyIntroduce, applyKnowledge, applyTie, noteIdentityAccepted } from '../web/actions';
 import { shiftMood } from '../interactions/mood';
 import { whereabouts } from '../presence';
 import { clampInt } from '../random';
@@ -265,7 +266,10 @@ const handlers: { [T in Effect['type']]: Handler<T> } = {
   },
 
   identity: (state, effect, ctx) => {
+    const before = JSON.stringify(state.character.identity);
     applyIdentity(state, effect.field, effect.value, effect.role === undefined ? undefined : ctx.cast[effect.role], ctx.content);
+    // E4: who you are, once accepted, is a fact others may come to hear.
+    if (JSON.stringify(state.character.identity) !== before) noteIdentityAccepted(state, ctx.rng, ctx.content);
   },
 
   innerConflict: (state, effect) => {
@@ -343,6 +347,11 @@ const handlers: { [T in Effect['type']]: Handler<T> } = {
     const id = ctx.cast[effect.role];
     if (id !== undefined) lifeHelp(state, id, effect.action, ctx.rng, ctx.content);
   },
+
+  // E4: something between two people you know; what someone has heard about you; introducing two people.
+  tie: (state, effect, ctx) => applyTie(state, effect, ctx.cast, ctx.content),
+  knowledge: (state, effect, ctx) => applyKnowledge(state, effect, ctx.cast, ctx.rng, ctx.content),
+  introduce: (state, effect, ctx) => applyIntroduce(state, effect, ctx.cast, ctx.rng, ctx.content),
 
   // E3: money paid back to you, sized like the cost it repays.
   repay: (state, effect, ctx) => earn(state, wholeDollars(costPrice(state, effect.item, ctx.content) * effect.share)),

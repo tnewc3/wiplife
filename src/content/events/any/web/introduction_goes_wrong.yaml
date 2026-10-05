@@ -1,0 +1,69 @@
+# Web (introducedBadly): two people you introduced can't stand each other.
+id: introduction_goes_wrong
+title: Never again
+text: >-
+  {a.name} and {b.name}, the two you introduced, do not get along. Each of
+  them has told you, in nearly the same words, that the other one is a lot.
+  Each of them has also asked, with a certain edge, why you thought they'd
+  get along.
+tone: neutral
+category: web
+rarity: common
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 14 } }
+    - { tie: { a: a, b: b, kind: [friends], status: [strained, feuding] } }
+    - { role: a, alive: true }
+    - { role: b, alive: true }
+weight: { base: 9 }
+followUpOnly: true
+cast:
+  a: { support: true, presence: anywhere }
+  b: { support: true, presence: anywhere }
+choices:
+  - id: apologize
+    label: Apologize to both of them
+    outcome:
+      text: >-
+        "I misjudged it." It takes only a little pride, and both of
+        them are more forgiving than you expected.
+      effects:
+        - { type: relationship, role: a, affection: 2, trust: 2 }
+        - { type: relationship, role: b, affection: 2, trust: 2 }
+        - { type: memory, role: a, tag: introduction_went_badly }
+        - { type: memory, role: b, tag: introduction_went_badly }
+  - id: how_could_i_know
+    label: Say you couldn't have known
+    outcome:
+      text: >-
+        It's true. It's also not what either of them wanted to hear, and the
+        next few dinners are a little cooler than they were.
+      effects:
+        - { type: relationship, role: a, affection: -2 }
+        - { type: relationship, role: b, affection: -2 }
+        - { type: memory, role: a, tag: introduction_went_badly }
+        - { type: memory, role: b, tag: introduction_went_badly }
+  - id: give_it_time
+    label: Ask them both to give it time
+    check:
+      base: 35
+      stats:
+        - { role: a, key: trust, weight: 0.15 }
+        - { role: b, key: trust, weight: 0.15 }
+        - { key: kindness, weight: 0.15 }
+      success:
+        text: >-
+          They agree, grudgingly, to one more try. It goes better. It is
+          still a long way from friendship, but it is polite, which is a start.
+        effects:
+          - { type: tie, a: a, b: b, action: mend, delta: 14 }
+          - { type: relationship, role: a, affection: 2 }
+          - { type: relationship, role: b, affection: 2 }
+      failure:
+        text: >-
+          "You can't make us like each other," {a.name} says. It's hard to
+          argue with that.
+        effects:
+          - { type: relationship, role: a, affection: -2 }
+          - { type: relationship, role: b, affection: -2 }

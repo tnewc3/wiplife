@@ -6,6 +6,8 @@ import type { ContentBundle } from '../../content/schemas';
 import { discoveryValues } from '../discovery';
 import { sentenceText } from '../legal';
 import { lifeTextRole } from '../lives/model';
+import { heardFor } from '../web/knowledge';
+import { ITEM_ROLE } from '../web/query';
 import type { TextContext } from '../text';
 import type { Id, LifeState } from '../types';
 
@@ -29,7 +31,10 @@ export function textContext(state: LifeState, cast: Record<string, Id>, content:
     // E3: and the facts of their own life ({npc.relation}, {npc.partner}, {npc.city}, {npc.job}).
     if (person) roles[role] = lifeTextRole(state, id, content) ?? { name: person.name, pronouns: person.identity.pronouns };
   }
-  return { roles, values: { age: c.age, ...discoveryValues(state, content), sentence: sentenceText(state, content), since: sinceText(state, since, content) } };
+  // E4: what the person in the story has heard about you (the item the event or interaction is about).
+  const holderId = cast.npc ?? cast.person;
+  const heard = holderId === undefined ? '' : heardFor(state, holderId, cast[ITEM_ROLE], content);
+  return { roles, values: { age: c.age, ...discoveryValues(state, content), sentence: sentenceText(state, content), since: sinceText(state, since, content), heard } };
 }
 
 /**
@@ -39,6 +44,8 @@ export function textContext(state: LifeState, cast: Record<string, Id>, content:
  * current one without a latent trait), and {sentence} (what a court just
  * handed down, "two years in prison"; only in an outcome with a legal effect);
  * (C1) {since}, how long ago the event that scheduled a follow-up happened
- * ("last year", "two years ago"; only in follow-ups).
+ * ("last year", "two years ago"; only in follow-ups); (E4) {heard}, what the
+ * person in the story (npc or person) has heard about you, as a phrase ("that
+ * you were fired for stealing"; only where the event requires that they have).
  */
-export const EVENT_TEXT_VALUES = ['age', 'talent', 'latentPeople', 'latentGender', 'latentExpression', 'latentTrait', 'sentence', 'since'] as const;
+export const EVENT_TEXT_VALUES = ['age', 'talent', 'latentPeople', 'latentGender', 'latentExpression', 'latentTrait', 'sentence', 'since', 'heard'] as const;

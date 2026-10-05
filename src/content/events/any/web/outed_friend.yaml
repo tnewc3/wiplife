@@ -1,0 +1,76 @@
+# Web reaction (identity): a friend heard who you are from someone else.
+id: outed_friend
+title: Not from you
+text: >-
+  {npc.name} finds you after work, awkwardly. "I heard something," {npc.they}
+  {npc:says|say}. "I heard {heard}. I haven't said anything to anyone. I wanted to
+  ask you first. I hope that's okay."
+tone: serious
+category: web
+rarity: common
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 14 } }
+    - { role: npc, alive: true, kind: [friend, classmate], heard: { kinds: [identity], learned: [gossip] } }
+weight:
+  base: 10
+  # It happened before: people have had time to think about it, and a second time is less of a shock.
+  modifiers:
+    - { if: { flag: was_outed }, x: 0.6 }
+followUpOnly: true
+cast:
+  npc: { support: true, presence: anywhere }
+choices:
+  - id: talk
+    label: Tell {npc.them} what's true
+    check:
+      base: 60
+      stats:
+        - { role: npc, key: affection, weight: 0.5 }
+        - { role: npc, key: trust, weight: 0.4 }
+      success:
+        text: >-
+          "Honestly? I kind of figured," {npc.name} says, and steals a fry off
+          your plate. "I'm glad you told me. Now I can stop pretending not to
+          have noticed."
+        effects:
+          - { type: knowledge, role: npc, action: tell }
+          - { type: memory, role: npc, tag: accepted_you }
+          - { type: relationship, role: npc, affection: 8, trust: 8 }
+          - { type: innerConflict, delta: -8 }
+          - { type: flag, key: came_out, value: true }
+          - { type: flag, key: was_outed, value: true }
+          - { type: stat, key: happiness, delta: 4 }
+      failure:
+        text: >-
+          {npc.name} says all the right words in the wrong voice. Things between
+          you are careful for a long time, like a house after an argument.
+        effects:
+          - { type: knowledge, role: npc, action: tell }
+          - { type: memory, role: npc, tag: struggled_with_it }
+          - { type: relationship, role: npc, affection: -8, trust: -5 }
+          - { type: flag, key: came_out, value: true }
+          - { type: flag, key: was_outed, value: true }
+          - { type: stat, key: stress, delta: 5 }
+  - id: ask_to_wait
+    label: Ask {npc.them} to hold off telling anyone
+    outcome:
+      text: >-
+        "Please don't say anything to anybody." {npc.name} promises, and means
+        it, and you are aware of how much weight a promise has to hold.
+      effects:
+        - { type: knowledge, role: npc, action: hush }
+        - { type: memory, role: npc, tag: asked_to_keep_quiet }
+        - { type: relationship, role: npc, trust: 2 }
+        - { type: stat, key: stress, delta: 3 }
+  - id: not_now
+    label: Say it isn't something you want to talk about
+    outcome:
+      text: >-
+        "It's not something I want to talk about." {npc.name} nods. "Okay. I'm
+        here, whenever." {npc.They} {npc:doesn't|don't} look away, and doesn't
+        ask again.
+      effects:
+        - { type: relationship, role: npc, affection: 1 }
+        - { type: stat, key: stress, delta: 3 }

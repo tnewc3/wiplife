@@ -1,0 +1,82 @@
+# Web reaction (identity): your partner heard something about who you are from someone else.
+id: outed_partner
+title: What they were told
+text: >-
+  {npc.name} is waiting when you get home, sitting very still at the table.
+  "Someone told me {heard}," {npc.they} {npc:says|say}. "I don't know what
+  I'm supposed to do with that. I'd like to hear it from you."
+tone: serious
+category: web
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { role: npc, alive: true, kind: [partner, fiance, spouse], heard: { kinds: [identity], learned: [gossip] } }
+weight:
+  base: 12
+  modifiers:
+    - { if: { flag: was_outed }, x: 0.6 }
+followUpOnly: true
+cast:
+  npc: { support: true, presence: household }
+choices:
+  - id: tell_them
+    label: Tell {npc.name} everything
+    check:
+      base: 45
+      stats:
+        - { role: npc, key: affection, weight: 0.4 }
+        - { role: npc, key: trust, weight: 0.4 }
+      success:
+        text: >-
+          It takes most of the night. {npc.name} asks questions that you're
+          surprised to find you can answer. At the end {npc.they} {npc:takes|take}
+          your hand. "I wish you'd told me yourself," {npc.they} {npc:says|say}.
+          "But I'm here."
+        effects:
+          - { type: knowledge, role: npc, action: tell }
+          - { type: memory, role: npc, tag: accepted_you }
+          - { type: relationship, role: npc, affection: 6, trust: 6 }
+          - { type: innerConflict, delta: -8 }
+          - { type: flag, key: came_out, value: true }
+          - { type: flag, key: was_outed, value: true }
+          - { type: stat, key: happiness, delta: 3 }
+      failure:
+        text: >-
+          {npc.name} listens to every word and says almost nothing. At the end,
+          {npc.they} {npc:says|say}, "I need some time," and {npc:takes|take} a
+          coat, and the door closes carefully, which is worse than if it had
+          slammed.
+        effects:
+          - { type: knowledge, role: npc, action: tell }
+          - { type: memory, role: npc, tag: struggled_with_it }
+          - { type: relationship, role: npc, affection: -12, trust: -10 }
+          - { type: flag, key: came_out, value: true }
+          - { type: flag, key: was_outed, value: true }
+          - { type: stat, key: stress, delta: 7 }
+  - id: ask_for_time
+    label: Tell {npc.them} you need a little time before you can talk
+    outcome:
+      text: >-
+        "I need a day." {npc.name} nods, but doesn't let go of your hand for a
+        moment. "One day. Then we talk, okay?" It isn't a verdict. It's a
+        deadline, kindly given.
+      effects:
+        - { type: knowledge, role: npc, action: hush }
+        - { type: relationship, role: npc, trust: -2 }
+        - { type: stat, key: stress, delta: 4 }
+  - id: say_what_was_wrong
+    label: Tell {npc.them} what you were afraid of
+    outcome:
+      text: >-
+        "I wasn't hiding it from you. I was scared of how you'd look at me."
+        It's the truest thing you've said in a long time. {npc.name} doesn't
+        answer right away, which is its own kind of listening.
+      effects:
+        - { type: knowledge, role: npc, action: tell }
+        - { type: relationship, role: npc, affection: 2, trust: 3 }
+        - { type: memory, role: npc, tag: you_confided }
+        - { type: flag, key: came_out, value: true }
+        - { type: flag, key: was_outed, value: true }
+        - { type: stat, key: stress, delta: 3 }

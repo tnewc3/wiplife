@@ -1,0 +1,65 @@
+# Web reaction (affair): a parent has heard.
+id: affair_family_hears
+title: The call from home
+text: >-
+  The call comes on a weeknight, which is how you know. {npc.name} doesn't
+  start with hello. {npc.They} {npc:says|say}: "I heard {heard}." And then,
+  very quietly: "Tell me that isn't true."
+tone: dark
+category: web
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { role: npc, alive: true, kind: [parent, stepparent, grandparent], heard: { kinds: [affair], learned: [gossip] } }
+weight: { base: 9 }
+followUpOnly: true
+cast:
+  npc: { support: true, presence: anywhere }
+choices:
+  - id: own_it
+    label: Tell {npc.them} the truth
+    check:
+      base: 40
+      stats:
+        - { role: npc, key: affection, weight: 0.4 }
+        - { role: npc, key: trust, weight: 0.3 }
+      success:
+        text: >-
+          "It's true." There is a silence on the line that goes on until you
+          are sure the call has dropped. Then {npc.name} says, "I'm
+          disappointed in you. I'm also still your family. Both are true."
+        effects:
+          - { type: knowledge, role: npc, action: confirm }
+          - { type: relationship, role: npc, affection: -4, trust: 2 }
+          - { type: memory, role: npc, tag: you_confided }
+      failure:
+        text: >-
+          {npc.name} doesn't shout. {npc.They} just {npc:goes|go} very quiet,
+          and then {npc:says|say}, "I raised you better than that," and hangs
+          up. It is the worst thing anyone has said to you in a long time.
+        effects:
+          - { type: knowledge, role: npc, action: confirm }
+          - { type: relationship, role: npc, affection: -12, trust: -10 }
+          - { type: stat, key: stress, delta: 5 }
+  - id: set_straight
+    label: Tell {npc.them} what is really going on
+    outcome:
+      text: >-
+        You tell it carefully: who, and how long, and what's already over. It
+        is the version you can say out loud, and {npc.name} takes it the way
+        you'd expect: slowly, and without thanks.
+      effects:
+        - { type: knowledge, role: npc, action: correct }
+        - { type: relationship, role: npc, affection: -4, trust: -2 }
+        - { type: memory, role: npc, tag: you_set_it_straight }
+  - id: hang_up
+    label: Say you can't talk about it, and hang up
+    outcome:
+      text: >-
+        You press the button before you've finished the sentence. It rings
+        again an hour later. You let it.
+      effects:
+        - { type: relationship, role: npc, affection: -6, trust: -8 }
+        - { type: stat, key: stress, delta: 5 }

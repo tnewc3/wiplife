@@ -7,6 +7,7 @@ import { performInteraction } from '../engine/interactions/perform';
 import { playYear } from '../engine/autoplay';
 import { beginYear, createLife } from '../engine/life';
 import { nextUint32 } from '../engine/rng';
+import { emptyWeb } from '../engine/web/ties';
 import { die, parentLife } from '../engine/estate/fixtures';
 import { continueAsHeir, heirCandidates } from '../engine/estate/heir';
 import { customInput, lifeAtAge, liveOut } from '../engine/testFixtures';
@@ -182,6 +183,8 @@ describe('lives from Stage 3 on', () => {
           person.moodBase = 50;
           person.wealthLevel = d.character.familyWealth;
         }
+        // E4: the web starts empty (the first year builds it).
+        d.web = emptyWeb();
       });
       expect(result.envelope.data).toEqual(expected);
     }
@@ -641,7 +644,7 @@ describe('heirs, wills and estates (E2b)', () => {
     expect(result.envelope.schemaVersion).toBe(CURRENT_SCHEMA_VERSION);
     expect([upgraded.will, upgraded.estate]).toEqual([null, null]);
     expect(upgraded.lineage).toEqual({ generation: 1, lineId: life.id, familyName: life.character.name.last, reputation: 50, deeds: [] });
-    expect(upgraded).toEqual(life);
+    expect(upgraded).toEqual({ ...life, web: emptyWeb() });
   });
 
   it('round trips a will, an estate settlement, and heirs: a minor in trust with a guardian, one in foster care, a grown one with a home', async () => {
@@ -703,7 +706,7 @@ describe('heirs, wills and estates (E2b)', () => {
     expect(result.envelope.schemaVersion).toBe(CURRENT_SCHEMA_VERSION);
     expect(upgraded.news).toEqual([]);
     expect(upgraded.finances.lastLedger!.care).toBe(0);
-    expect(upgraded).toEqual(life);
+    expect(upgraded).toEqual({ ...life, web: emptyWeb() });
     // Nobody is given a partner, children or troubles they never had: the first year builds each life from what the save holds.
     const next = beginYear(upgraded, content);
     for (const person of Object.values(next.people)) {
@@ -735,5 +738,54 @@ describe('heirs, wills and estates (E2b)', () => {
     expect(lifeStateSchema.safeParse(badSeverity).success).toBe(false);
     const extra = { ...life, news: [{ year: life.currentYear, lines: [{ personId: id, kind: 'hired', text: 'x', mystery: 1 }] }] };
     expect(lifeStateSchema.safeParse(extra).success).toBe(false);
+  });
+  it('upgrades a version 13 life: no ties and no stories, and the first year builds the family\'s web from what the save holds', async () => {
+    const life = lifeAtAge('e4-v13', 30);
+    const v13 = JSON.parse(JSON.stringify(life)) as Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any -- stripping fields from plain JSON to build an old save
+    delete v13.web;
+    const db = freshDb();
+    await db.lives.put({ id: 'active', envelope: { ...makeEnvelope(v13, content.contentVersion), schemaVersion: 13 } });
+    const result = await readSave(db, loadedLifeSchema(content));
+    expect(result.status).toBe('ok');
+    if (result.status !== 'ok') return;
+    const upgraded = result.envelope.data;
+    expect(result.envelope.schemaVersion).toBe(CURRENT_SCHEMA_VERSION);
+    expect(upgraded.web).toEqual(emptyWeb());
+    expect(upgraded).toEqual({ ...life, web: emptyWeb() });
+    // Nobody is given a feud, a couple or a rumor they never had: the first year ties the family from its structure.
+    const next = beginYear(upgraded, content);
+    expect(Object.keys(next.web.ties).length).toBeGreaterThan(0);
+    for (const t of Object.values(next.web.ties)) expect(['family', 'partner', 'context']).toContain(t.origin);
+    expect(Object.values(next.web.ties).some((t) => t.feud)).toBe(false);
+    expect(loadedLifeSchema(content).safeParse(next).success).toBe(true);
+  });
+
+  it('round trips a life with ties, feuds and what people have heard, and rejects a tie to someone who is gone or a broken story', async () => {
+    let life = random('e4-round');
+    for (let i = 0; i < 35 && life.phase !== 'dead'; i++) life = playYear(life, content);
+    expect(Object.keys(life.web.ties).length).toBeGreaterThan(0);
+    expect(loadedLifeSchema(content).safeParse(life).success).toBe(true);
+    expect(await roundTrip(life)).toEqual(life);
+
+    const [key, tie] = Object.entries(life.web.ties)[0]!;
+    const gone = produce(life, (d) => {
+      d.people[tie.a]!.alive = false;
+      d.people[tie.a]!.deathYear = d.currentYear;
+    });
+    expect(loadedLifeSchema(content).safeParse(gone).success).toBe(false);
+    const badKind = produce(life, (d) => {
+      d.web.ties[key]!.kind = 'lovers' as never;
+    });
+    expect(lifeStateSchema.safeParse(badKind).success).toBe(false);
+    const extra = produce(life, (d) => {
+      (d.web.ties[key] as unknown as Record<string, unknown>).mystery = 1;
+    });
+    expect(lifeStateSchema.safeParse(extra).success).toBe(false);
+    const story = produce(life, (d) => {
+      d.web.items.push({ id: 'k99', kind: 'jobLoss', subject: 'you', year: d.currentYear, truth: 'fired', holders: { [tie.a]: { version: 'no_such_version', since: d.currentYear, from: 'saw', reacted: true } } });
+      d.web.nextItem = 100;
+    });
+    expect(lifeStateSchema.safeParse(story).success).toBe(true);
+    expect(loadedLifeSchema(content).safeParse(story).success).toBe(false);
   });
 });

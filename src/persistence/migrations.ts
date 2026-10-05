@@ -200,6 +200,18 @@ export const migrations: readonly Migration[] = [
       return { ...data, finances, news: [] };
     },
   },
+  {
+    from: 13,
+    description:
+      'E4: the social web. A life starts with no ties and no knowledge items. Ties between the people you know ' +
+      '("web" on the life) are built from the family\'s structure by the first yearly step, from what the save ' +
+      'already holds, and what people have heard starts from the first year the web step notices it; so nobody ' +
+      'is given a feud, a couple or a rumor they never had.',
+    migrate: (data) => {
+      if (!isRecord(data)) return data;
+      return { ...data, web: { ties: {}, items: [], nextItem: 1, seen: [] } };
+    },
+  },
 ];
 
 function isRecord(value: unknown): value is Record<string, unknown> {

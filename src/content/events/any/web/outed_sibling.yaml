@@ -1,0 +1,76 @@
+# Web reaction (identity): a sibling heard who you are from someone else.
+id: outed_sibling
+title: Everyone else knew first
+text: >-
+  {npc.name} has been avoiding your eyes all week. Finally, in the car, with
+  the engine off: "I heard {heard}. I wanted to hear it from you. I didn't want
+  to find out from someone else, and I did."
+tone: serious
+category: web
+rarity: common
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 14 } }
+    - { role: npc, alive: true, kind: [sibling], heard: { kinds: [identity], learned: [gossip] } }
+weight:
+  base: 10
+  # It happened before: people have had time to think about it, and a second time is less of a shock.
+  modifiers:
+    - { if: { flag: was_outed }, x: 0.6 }
+followUpOnly: true
+cast:
+  npc: { support: true, presence: anywhere }
+choices:
+  - id: tell_them
+    label: Tell {npc.name} what's true
+    check:
+      base: 60
+      stats:
+        - { role: npc, key: affection, weight: 0.5 }
+        - { role: npc, key: trust, weight: 0.4 }
+      success:
+        text: >-
+          "Do you want me to tell everyone else," {npc.name} says, "or do you
+          want to watch their faces?" It is such a typical thing for {npc.them} to say that you
+          laugh, and then you both do, and the thing you've been carrying is a
+          little lighter.
+        effects:
+          - { type: knowledge, role: npc, action: tell }
+          - { type: memory, role: npc, tag: accepted_you }
+          - { type: relationship, role: npc, affection: 8, trust: 8 }
+          - { type: innerConflict, delta: -8 }
+          - { type: flag, key: came_out, value: true }
+          - { type: flag, key: was_outed, value: true }
+          - { type: stat, key: happiness, delta: 4 }
+      failure:
+        text: >-
+          {npc.name} says all the right words in a voice you don't know. Things
+          between you stay careful for a long time, and neither of you says why.
+        effects:
+          - { type: knowledge, role: npc, action: tell }
+          - { type: memory, role: npc, tag: struggled_with_it }
+          - { type: relationship, role: npc, affection: -10, trust: -5 }
+          - { type: flag, key: came_out, value: true }
+          - { type: flag, key: was_outed, value: true }
+          - { type: stat, key: stress, delta: 5 }
+  - id: ask_for_quiet
+    label: Ask {npc.them} not to tell the others yet
+    outcome:
+      text: >-
+        "Please. Not yet." {npc.name} swallows what {npc.they} {npc:was|were} about
+        to say. "Okay. It's yours to tell."
+      effects:
+        - { type: knowledge, role: npc, action: hush }
+        - { type: memory, role: npc, tag: asked_to_keep_quiet }
+        - { type: relationship, role: npc, trust: 2 }
+        - { type: stat, key: stress, delta: 3 }
+  - id: not_yet
+    label: Tell {npc.them} you can't talk about it yet
+    outcome:
+      text: >-
+        "I can't yet." {npc.name} starts the engine. At the first red light
+        {npc.they} {npc:says|say}, without looking over, "When you can."
+      effects:
+        - { type: relationship, role: npc, affection: 1 }
+        - { type: stat, key: stress, delta: 3 }

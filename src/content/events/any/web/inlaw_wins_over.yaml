@@ -1,0 +1,43 @@
+# Web (tieClose): your partner and one of your family have bonded.
+id: inlaw_wins_over
+title: In the kitchen
+text: >-
+  You find {a.name} and {b.name} in the kitchen, heads together, laughing at
+  something you can't hear. They stop when you come in, with the guilty look of
+  people who were talking about you.
+tone: light
+category: web
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { tie: { a: a, b: b, kind: [inLaw], status: [close] } }
+    - { role: a, alive: true, kind: [partner, fiance, spouse] }
+    - { role: b, alive: true, kind: [parent, stepparent, grandparent, sibling, relative], where: [household, city] }
+weight: { base: 7 }
+followUpOnly: true
+cast:
+  a: { support: true, presence: nearby }
+  b: { support: true, presence: nearby }
+choices:
+  - id: ask_what
+    label: Ask what you missed
+    outcome:
+      text: >-
+        "Nothing," they say together, which settles it. It is the best sign
+        you've had all year.
+      effects:
+        - { type: relationship, role: a, affection: 2 }
+        - { type: relationship, role: b, affection: 2 }
+        - { type: stat, key: happiness, delta: 3 }
+  - id: join_them
+    label: Pull up a chair
+    outcome:
+      text: >-
+        Two hours later the three of you are still at it, and you've found out
+        three things about yourself you'd rather not have known.
+      effects:
+        - { type: relationship, role: a, affection: 3, trust: 2 }
+        - { type: relationship, role: b, affection: 3, trust: 2 }
+        - { type: stat, key: happiness, delta: 2 }

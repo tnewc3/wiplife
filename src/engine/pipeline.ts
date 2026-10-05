@@ -10,11 +10,13 @@
  * ledger runs. Steps for systems that don't exist yet are empty
  * functions in src/engine/systems, filled in by later stages. The lives step
  * (E3) comes last before pacing: the people you know have their year, and the
- * requests it queues are picked up the same year.
+ * requests it queues are picked up the same year. The web step (E4) follows it:
+ * ties between the people you know change, and what they know spreads.
  */
 import type { ContentBundle } from '../content/schemas';
 import { runHeritage } from './estate/heritage';
 import { runLives } from './lives/step';
+import { runWeb } from './web/step';
 import { runFamily } from './family/step';
 import { runMoods } from './interactions/mood';
 import { advanceAge } from './systems/aging';
@@ -49,6 +51,7 @@ export const YEAR_PIPELINE: readonly PipelineStep[] = [
   { id: 'moods', run: runMoods },
   { id: 'selfDiscovery', run: runSelfDiscovery },
   { id: 'lives', run: runLives },
+  { id: 'web', run: runWeb },
   { id: 'pacing', run: runPacing },
 ];
 

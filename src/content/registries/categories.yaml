@@ -77,3 +77,7 @@ categories:
   # partner who lives with you comes first (the household rule).
   lives: { label: People's lives }
   care: { label: Care for a relative, household: true }
+  # E4: what happens between the people around you, and what is said about you.
+  # Only the web step queues them (registries/web.yaml); each event requires
+  # the tie or the story it is about.
+  web: { label: The people around you }

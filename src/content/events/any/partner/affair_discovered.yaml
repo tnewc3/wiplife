@@ -31,6 +31,7 @@ choices:
           It takes months of couples therapy and sleeping on the couch. But
           {spouse.name} stays.
         effects:
+          - { type: knowledge, role: spouse, action: confirm, kind: affair }
           - { type: relationship, role: spouse, affection: -15, trust: -35 }
           - { type: memory, role: spouse, tag: forgave_you }
           - { type: stat, key: stress, delta: 10 }
@@ -38,6 +39,7 @@ choices:
       failure:
         text: '{spouse.name} listens to every word. Then {spouse.they} {spouse:calls|call} a lawyer.'
         effects:
+          - { type: knowledge, role: spouse, action: confirm, kind: affair }
           - { type: relationship, role: spouse, kind: ex, affection: -40, trust: -60 }
           - { type: memory, role: spouse, tag: divorced }
           - { type: memory, role: spouse, tag: they_broke_up }
@@ -53,11 +55,13 @@ choices:
       success:
         text: '{spouse.name} can''t prove anything. {spouse.They} {spouse:doesn''t|don''t} believe you, either.'
         effects:
+          - { type: knowledge, role: spouse, action: confirm, kind: affair }
           - { type: relationship, role: spouse, affection: -10, trust: -40 }
           - { type: stat, key: stress, delta: 8 }
       failure:
         text: There are photos. {spouse.name} is gone by the weekend, and the divorce is quick and ugly.
         effects:
+          - { type: knowledge, role: spouse, action: confirm, kind: affair }
           - { type: relationship, role: spouse, kind: ex, affection: -50, trust: -70 }
           - { type: memory, role: spouse, tag: divorced }
           - { type: memory, role: spouse, tag: they_broke_up }
@@ -70,6 +74,7 @@ choices:
     outcome:
       text: It's the cruelest thing you've ever said, and it might even be true. You move out that night.
       effects:
+        - { type: knowledge, role: spouse, action: confirm, kind: affair }
         - { type: relationship, role: spouse, kind: ex, affection: -45, trust: -50 }
         - { type: memory, role: spouse, tag: divorced }
         - { type: memory, role: spouse, tag: you_broke_up }

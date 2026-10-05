@@ -20,6 +20,7 @@ import { careCosts } from './care';
 import { lifeHelp } from './help';
 import { livesFailures } from './invariants';
 import { defaultLife, tierFor } from './model';
+import { pruneWeb } from '../web/ties';
 import { lifeHolds } from './query';
 import { giveSampleLife } from './sample';
 import { runLives } from './step';
@@ -83,6 +84,7 @@ function lifeWith(specs: Spec[], age = 35, seed = 'lives'): LifeState {
     }
     d.character.identity.attractedTo = ['man', 'woman', 'nonbinary'];
     for (const spec of specs) addPerson(d, spec, template);
+    pruneWeb(d);
     d.finances.savings = 50_000;
   });
 }
@@ -465,6 +467,7 @@ describe('care for aging parents', () => {
     life = produce(life, (d) => {
       d.people.p!.alive = false;
       d.people.p!.deathYear = d.currentYear;
+      pruneWeb(d);
     });
     expect(careCosts(life, content)).toBe(0);
   });

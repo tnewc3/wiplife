@@ -56,3 +56,11 @@ with no roll. A fight (picking one, then throwing the first punch) always
 ends in an injury and a charge (for a minor, a suspension).
 `registries/interactions.yaml` here answers being found out with two
 predictable events (`test_flirting_found_out`, `test_cheating_found_out`).
+
+The social web (E4) is still (`balance/web.yaml` here replaces the real
+one): the ties the family's structure gives exist, but nothing wobbles,
+shocks, meets or spreads, nobody falls out, and the web never asks anything
+of you, so the flows above don't change. The web tests set up the ties and
+what people have heard in a saved life (`tests/e2e/webFixtures.ts`), and use
+the real Introduce, Set the record straight and Ask them to keep it quiet
+interactions, which go neutral here like every other.
