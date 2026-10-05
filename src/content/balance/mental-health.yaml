@@ -1,0 +1,143 @@
+# Mental health (M1, docs/expansion.md): depression, anxiety and PTSD that
+# come and go, ADHD and neurodivergence you are born with, how they are
+# named, what caring for them costs and does, and who notices. Each
+# condition's own onset curve, stat effects and course live in
+# src/content/conditions; everything here is shared by all of them.
+# Prices are whole dollars at a cost of living of 1 (scaled by your city);
+# every cost is a medical cost: savings pay first, the rest becomes medical
+# debt, and a child's family pays.
+# Starting proposals; Stage 12 (balancing) tunes them against simulation runs.
+
+# Born-with conditions. `rate` is the chance anyone has it; each biological
+# parent who has it adds inheritMult × rate to your chance (so about
+# 1 + inheritMult times as likely with one parent). Traits shift your
+# personality at birth: before a diagnosis, this is how it shows.
+neuro:
+  adhd:
+    rate: 0.065
+    inheritMult: 3
+    severity: { min: 25, max: 75 }
+    traits: { riskTaking: 8, discipline: -9, sociability: 3 }
+  neurodivergence:
+    rate: 0.05
+    inheritMult: 3.5
+    severity: { min: 25, max: 75 }
+    traits: { sociability: -7, discipline: 5, confidence: -3 }
+
+# Trauma from hard events (accidents, crime, violence, mistreatment) is
+# carried as a score and fades; PTSD's onset reads it.
+trauma:
+  decay: 6
+
+diagnosis:
+  # The chance a doctor or a therapist names a condition you have, by how bad it is.
+  doctor:
+    - { at: 0, x: 0.1 }
+    - { at: 40, x: 0.3 }
+    - { at: 100, x: 0.6 }
+  therapist:
+    - { at: 0, x: 0.3 }
+    - { at: 40, x: 0.6 }
+    - { at: 100, x: 0.9 }
+  # ADHD and neurodivergence are named this share as often by a doctor or therapist.
+  neuroMult: 0.15
+  # A deliberate assessment (school testing, an adult asking for one).
+  assessment:
+    - { at: 0, x: 0.7 }
+    - { at: 100, x: 0.97 }
+
+course:
+  # Each year's severity moves up to this much either way beyond its course.
+  swing: 5
+  # A hard year: the chance of a flare-up (times careMult in care) and the size.
+  flare:
+    chance: 0.14
+    careMult: 0.5
+    severity: { min: 6, max: 16 }
+  # After recovery the condition can return: onset chance × mult, fading to normal over `years`.
+  relapse: { mult: 7, years: 12 }
+  # The share of (treated course − untreated course) that each kind of care delivers.
+  share:
+    depression: { therapy: 0.6, medication: 0.55 }
+    anxiety_disorder: { therapy: 0.7, medication: 0.4 }
+    ptsd: { therapy: 0.8, medication: 0.25 }
+    adhd: { therapy: 0.3, medication: 0.8 }
+    neurodivergence: { therapy: 0.5, medication: 0 }
+  # Full support (every close person supportive and close) takes this much off a year's severity.
+  supportBonus: 4
+  # Ignoring it costs more later: while it is this severe and not in care,
+  # work and grades slip each year.
+  ignored: { severity: 50, performance: -3, grades: -0.1 }
+
+care:
+  # Therapy costs money and time: the hours come out of work and the day.
+  therapy:
+    intake: 250
+    yearly: 2800
+    performance: -2
+    stress: 1
+  # Medication: a cost, a chance of side effects, and a flare-up if you stop.
+  medication:
+    intake: 180
+    yearly: 700
+    sideEffectChance: 0.14
+    sideEffect:
+      health: { perYear: -2, limit: 40 }
+      happiness: { perYear: -2, limit: 30 }
+    stopFlare: 0.35
+  # Leaning on people: they have to be there and trust you, and it wears on them.
+  support:
+    people: 3
+    minTrust: 45
+    strainMood: -4
+    strainAffection: -2
+    strainChance: 0.3
+    brushedOffTrust: -6
+
+notice:
+  minSeverity: 20
+  minAge: 10
+  base: 0.14
+  presence: { household: 3, city: 1, elsewhere: 0.25 }
+  closeness:
+    - { at: 0, x: 0.1 }
+    - { at: 50, x: 1 }
+    - { at: 100, x: 1.8 }
+  maxPerYear: 2
+  forgetYears: 6
+
+reaction:
+  kindness: 0.55
+  sociability: 0.15
+  closeness: 0.3
+  sd: 14
+  supportiveAbove: 56
+  dismissiveBelow: 36
+
+support:
+  weight: { supportive: 1, neutral: 0.1, dismissive: -0.7 }
+  presence: { household: 1, city: 0.8, elsewhere: 0.35 }
+  cap: 1.5
+  # Before you struggle, your support is your closest people: this many.
+  circle: 3
+
+# Telling someone you are struggling: how it changes what they feel for you, by how they take it.
+confide:
+  supportive: { affection: 4, trust: 7 }
+  neutral: { affection: 0, trust: 1 }
+  dismissive: { affection: -2, trust: -6 }
+
+# One-time costs for the `pay` effect (balance/mental-health.yaml costs).
+costs:
+  assessment: { amount: 900, familyHelp: false }
+  psych_evaluation: { amount: 350, familyHelp: false }
+  therapy_session: { amount: 160, familyHelp: false }
+  hospital_stay: { amount: 5200, familyHelp: false }
+  crisis_visit: { amount: 1400, familyHelp: false }
+  support_group: { amount: 40, familyHelp: false }
+
+crisis:
+  severity: 12
+  stress: 10
+  happiness: -8
+  cooldownYears: 8

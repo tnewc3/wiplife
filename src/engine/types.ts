@@ -140,6 +140,8 @@ export interface Person {
   child?: ChildData;
   /** E3: their own life as a summary (job level, partner, children, troubles). Filled in by the first yearly step that meets them. */
   life?: PersonLife;
+  /** M1: born-with conditions (ADHD, neurodivergence) they have: passed on, in part, to their children. */
+  neuro?: Id[];
 }
 
 /** E3: how closely a person's life is followed: close people get the full yearly update, the rest only the major milestones. */
@@ -644,21 +646,63 @@ export interface HousingState {
   foster?: true;
 }
 
+/** M1: the ways of caring for a mental health condition. */
+export type MentalCare = 'therapy' | 'medication' | 'support';
+/** M1: how a condition came to be named. */
+export type DiagnosisPath = 'doctor' | 'therapist' | 'assessment' | 'crisis';
+/** M1: how someone who noticed you struggling took it. */
+export type Reaction = 'supportive' | 'neutral' | 'dismissive';
+
 /** A health condition you have (Stage 9). */
 export interface HealthCondition {
   conditionId: Id;
-  /** The year it started. */
+  /** The year it started (for a born-with condition, your birth year). */
   since: number;
   /** How bad it is, 1–100 (gone at 0). */
   severity: number;
-  /** A doctor (or rehab) is treating it. */
+  /** A doctor (or rehab) is treating it; for a mental health condition, you're in therapy or on medication. */
   treated: boolean;
+  /** M1: the year a mental health condition or neurodivergence was named. Until then it shows only in your stats and in events. */
+  diagnosed?: number;
+  diagnosedBy?: DiagnosisPath;
+  /** M1: how you're caring for it now (therapy, medication, leaning on people). */
+  care?: MentalCare[];
+}
+
+/** M1: someone who has noticed you struggling. */
+export interface Noticing {
+  /** The year they first noticed (or you told them). */
+  since: number;
+  /** The last year it was still true. */
+  year: number;
+  reaction: Reaction;
+  /** You told them (or leaned on them), rather than them noticing. */
+  told?: true;
+}
+
+/** M1: mental health beyond the conditions themselves. */
+export interface MentalState {
+  /** Trauma you carry, 0–100; fades each year. */
+  trauma: number;
+  /** Who has noticed you struggling, by person id. */
+  noticed: Record<Id, Noticing>;
+  /** Mental health conditions you recovered from (they can come back), by condition id. */
+  past: Record<Id, { year: number; times: number; diagnosed: boolean }>;
+  /** The last year of a crisis, and how many there have been. */
+  crisisYear?: number;
+  crises: number;
+  /** The last year you saw a therapist (once a year). */
+  lastTherapist?: number;
+  /** The last year medication gave you a side effect. */
+  sideEffectYear?: number;
 }
 
 export interface HealthState {
   conditions: HealthCondition[];
   /** The last year you saw a doctor (once a year). */
   lastVisit?: number;
+  /** M1: mental health. */
+  mental: MentalState;
 }
 
 export type RecordOutcome = 'warning' | 'fine' | 'probation' | 'jail';

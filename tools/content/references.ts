@@ -48,6 +48,7 @@ import { CONTINUE_CHOICE } from '../../src/engine/life';
 import { checkTemplate } from '../../src/engine/text';
 import type { ContentError } from './compile';
 import { MONEY } from './consistency';
+import { mentalSafetyErrors } from './mentalSafety';
 import { checkPeople } from './people';
 import { checkWeb } from './web';
 
@@ -471,6 +472,8 @@ function checkEvents(bundle: ContentBundle, fileOf: (typeKey: CollectionKey, id:
   const doctorEvents = new Set(Object.values(bundle.registries.health.doctor).flatMap((r) => r.events));
   const systemEvents = new Set([
     ...doctorEvents,
+    // M1: what a therapist's visit answers with.
+    ...Object.values(bundle.registries.mental.therapist).flatMap((r) => r.events),
     ...Object.values(bundle.registries.legal.triggers).flatMap((r) => r.events),
     ...Object.values(bundle.registries.discovery.surfacing).flatMap((r) => r.events),
     ...Object.values(bundle.registries.discovery.resurfacing).flatMap((r) => r.events),
@@ -571,6 +574,21 @@ function checkEvents(bundle: ContentBundle, fileOf: (typeKey: CollectionKey, id:
         }
         if (effect.type === 'job' && effect.jobId !== undefined && !bundle.jobs[effect.jobId]) err(`${where}: unknown job "${effect.jobId}"`);
         if (effect.type === 'health' && !bundle.conditions[effect.conditionId]) err(`${where}: unknown health condition "${effect.conditionId}"`);
+        if (effect.type === 'health' && effect.treated !== undefined && ['mental', 'neuro'].includes(bundle.conditions[effect.conditionId]?.kind ?? '')) {
+          err(`${where}: care for a mental health condition is chosen with a mental effect (start / stop), not marked treated`);
+        }
+        if (effect.type === 'mental') {
+          const target = effect.conditionId === undefined ? undefined : bundle.conditions[effect.conditionId];
+          if (effect.conditionId !== undefined && (!target || !['mental', 'neuro'].includes(target.kind))) err(`${where}: "${effect.conditionId}" is not a mental health condition or neurodivergence`);
+          if (effect.care !== undefined && target && !target.care?.includes(effect.care)) err(`${where}: ${effect.conditionId} can't be cared for with ${effect.care}`);
+          if (effect.item !== undefined && !bundle.balance.mentalHealth.costs[effect.item]) err(`${where}: unknown cost item "${effect.item}" (balance/mental-health.yaml costs)`);
+          for (const [reaction, next] of Object.entries(effect.then ?? {})) {
+            scheduledIds.add(next);
+            const follow = bundle.events[next];
+            if (!follow) err(`${where}: then.${reaction}: unknown event "${next}"`);
+            else if (!follow.followUpOnly || !(effect.role !== undefined && effect.role in (follow.cast ?? {}))) err(`${where}: then.${reaction}: "${next}" must be followUpOnly and cast "${effect.role}"`);
+          }
+        }
         if (effect.type === 'legal') {
           const offense = bundle.offenses[effect.offenseId];
           if (!offense) err(`${where}: unknown offense "${effect.offenseId}"`);
@@ -844,6 +862,46 @@ function checkHealth(bundle: ContentBundle, fileOf: (typeKey: CollectionKey, id:
     );
   }
   errors.push(...checkTargets(bundle.balance.targets.health.conditions, bundle.conditions, 'health.conditions'));
+  errors.push(...checkMental(bundle, fileOf));
+  return errors;
+}
+
+/**
+ * Mental health (M1): every mental health condition has its course shares,
+ * every born-with one its birth numbers; the therapist's answers exist
+ * (followUpOnly, nobody cast); the mental registry's `diagnosed` events and
+ * the health registry's agree; and nothing in the content offers or
+ * describes self-harm or suicide (tools/content/mentalSafety.ts).
+ */
+function checkMental(bundle: ContentBundle, fileOf: (typeKey: CollectionKey, id: string) => string): ContentError[] {
+  const errors: ContentError[] = [];
+  const m = bundle.balance.mentalHealth;
+  for (const [id, def] of Object.entries(bundle.conditions)) {
+    if (def.retired || (def.kind !== 'mental' && def.kind !== 'neuro')) continue;
+    const file = fileOf('conditions', id);
+    if (!m.course.share[id]) errors.push({ file: 'balance/mental-health.yaml', message: `course.share: no shares for "${id}"` });
+    if (def.kind === 'neuro' && !m.neuro[id]) errors.push({ file: 'balance/mental-health.yaml', message: `neuro: no birth numbers for "${id}"` });
+    if (def.kind === 'mental' && !def.onset) errors.push({ file, message: `${id}: a mental health condition needs an onset` });
+    if (def.kind === 'mental' && !(bundle.registries.web.kinds.mentalHealth.truths as string[]).includes(id)) {
+      errors.push({ file: 'registries/web.yaml', message: `kinds.mentalHealth: "${id}" needs its own true version (truths)` });
+    }
+    if (def.kind === 'neuro' && !(bundle.registries.web.kinds.mentalHealth.truths as string[]).includes(id)) {
+      errors.push({ file: 'registries/web.yaml', message: `kinds.mentalHealth: "${id}" needs its own true version (truths)` });
+    }
+  }
+  for (const id of Object.keys(m.neuro)) {
+    if (!bundle.conditions[id] || bundle.conditions[id]!.kind !== 'neuro') errors.push({ file: 'balance/mental-health.yaml', message: `neuro: "${id}" is not a neuro condition` });
+  }
+  for (const id of Object.keys(m.course.share)) if (!bundle.conditions[id]) errors.push({ file: 'balance/mental-health.yaml', message: `course.share: unknown condition "${id}"` });
+  if (!m.costs.therapy_session) errors.push({ file: 'balance/mental-health.yaml', message: 'costs: needs therapy_session (the price of seeing a therapist)' });
+  for (const [label, events] of [['therapist.talked', bundle.registries.mental.therapist.talked.events], ['therapist.diagnosed', bundle.registries.mental.therapist.diagnosed.events]] as const) {
+    errors.push(
+      ...checkRegistryEvents(bundle, fileOf, 'registries/mental.yaml', label, events, (def, err) => {
+        if (Object.keys(def.cast ?? {}).length > 0) err('answers a therapist visit, so it casts nobody');
+      }),
+    );
+  }
+  errors.push(...mentalSafetyErrors(bundle, fileOf));
   return errors;
 }
 

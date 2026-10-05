@@ -1,0 +1,43 @@
+# Who showed up after a crisis (follow-up).
+id: crisis_who_came
+title: Who showed up
+text: >-
+  In the worst of it {since}, there were people you did not know were
+  watching. A few showed up without being asked. Some did not, and you
+  have been working out what that means. Sorting the two groups is a strange
+  inventory.
+tone: serious
+category: mental
+rarity: common
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { mental: { crisis: 3 } }
+    - { role: helper, alive: true }
+weight: { base: 8 }
+followUpOnly: true
+cast:
+  helper: { support: true, presence: anywhere }
+choices:
+  - id: thank
+    label: Thank {helper.name} properly
+    outcome:
+      text: >-
+        You do it in person, with no speech. {helper.name} says it was nothing,
+        which both of you know is untrue. It becomes one of those friendships
+        where nobody ever has to explain.
+      effects:
+        - { type: relationship, role: helper, affection: 6, trust: 7 }
+        - { type: memory, role: helper, tag: stood_by_you_struggling }
+        - { type: stat, key: happiness, delta: 3 }
+  - id: ask_for_more
+    label: Ask {helper.name} to stay close
+    outcome:
+      text: >-
+        You say it straight: you will need people for a while. {helper.name}
+        says yes. Both of you understand this is not a small request, and
+        neither of you treats it as one.
+      effects:
+        - { type: mental, action: start, care: support }
+        - { type: relationship, role: helper, trust: 6 }
+        - { type: stat, key: stress, delta: -3 }

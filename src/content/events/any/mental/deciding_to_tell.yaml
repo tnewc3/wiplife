@@ -1,0 +1,54 @@
+# Deciding who to tell about a diagnosis. A diagnosis is a secret that is yours to share (E4).
+id: deciding_to_tell
+title: Who gets to know
+text: >-
+  A diagnosis is yours. Nobody has a right to it, and some people will be hurt not
+  to have heard. You have been turning over who to tell, and how much, and
+  what it might change. There is no right answer, only the one you can live with.
+tone: neutral
+category: mental
+rarity: common
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 13 } }
+    - { health: { conditions: [depression, anxiety_disorder, ptsd, adhd, neurodivergence], named: true } }
+    - { not: { flag: kept_diagnosis_private } }
+weight: { base: 6 }
+once: true
+cast:
+  helper: { support: true, optional: true, presence: nearby }
+choices:
+  - id: tell_one
+    label: Tell {helper.name}
+    visibleIf: { role: helper }
+    outcome:
+      text: >-
+        You tell {helper.name} the name of it, and what it has been like.
+        {helper.They} {helper:listens|listen} the way people do when
+        they know they are trusted with something. What happens next is up to
+        {helper.them}, and to you.
+      effects:
+        - { type: mental, action: confide, role: helper, then: { supportive: told_supportive, neutral: told_neutral, dismissive: told_dismissive } }
+        - { type: knowledge, role: helper, action: tell, kind: mentalHealth }
+  - id: tell_everyone
+    label: Let everyone you know hear it from you
+    outcome:
+      text: >-
+        You say it once, plainly, to everyone who matters, before anyone else
+        can say it for you. Most take it well. A few take it oddly.
+        Nobody can use it against you anymore, because it is out.
+      effects:
+        - { type: knowledge, action: announce, kind: mentalHealth }
+        - { type: stat, key: confidence, delta: 3 }
+        - { type: stat, key: stress, delta: -3 }
+  - id: keep_private
+    label: Keep it to yourself
+    outcome:
+      text: >-
+        You decide it is nobody else's business, for now. That is a fair choice,
+        and a heavier one to keep. Secrets, even sensible ones, have a way
+        of traveling.
+      effects:
+        - { type: flag, key: kept_diagnosis_private, value: true }
+        - { type: stat, key: stress, delta: 1 }

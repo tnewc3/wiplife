@@ -8,6 +8,8 @@ import { familyWealthSchema } from './balance';
 import {
   baseDefSchema,
   HIDDEN_KEYS,
+  mentalCareSchema,
+  type MentalCareId,
   idSchema,
   LATENT_KINDS,
   scoreKeySchema,
@@ -20,6 +22,7 @@ import { credentialTypeSchema, programSchema, tierSchema } from './education';
 import { lifeTierSchema } from './people';
 import { relationshipKindSchema, relationshipStatusSchema, romanceStatusSchema } from './relationships';
 import { templateSchema } from './text';
+import { reactionSchema, type ReactionId } from './mental';
 import { knowledgeKindSchema, tieKindSchema, tieStatusSchema, type KnowledgeKindId, type TieKindId, type TieStatusId } from './web';
 
 export const LIFE_STAGE_IDS = ['early', 'child', 'teen', 'youngAdult', 'adult', 'senior'] as const;
@@ -90,6 +93,7 @@ export type Condition =
   | { career: CareerCondition }
   | { record: RecordCondition }
   | { health: HealthCondition }
+  | { mental: MentalCondition }
   | { legal: LegalCondition }
   | { discovery: DiscoveryCondition }
   | { family: FamilyCondition }
@@ -118,6 +122,8 @@ export type Condition =
       life?: LifeCondition;
       /** E4: what they have heard. */
       heard?: HeardCondition;
+      /** M1: they have noticed you struggling (or not), and took it this way. */
+      mental?: { noticed?: boolean; reaction?: ReactionId[] };
     }
   | { tie: TieCondition };
 
@@ -250,6 +256,33 @@ export interface HealthCondition {
   conditions?: string[];
   treated?: boolean;
   severity?: Compare;
+  /**
+   * M1 (mental health and neurodivergence): `named` is true once it has been
+   * diagnosed (false while it has shown only in your stats); `within`: the
+   * diagnosis was in this year or the last N years; `care`: you care for it
+   * in one of these ways now; `uncared`: you care for it in none.
+   */
+  named?: boolean;
+  within?: number;
+  care?: MentalCareId[];
+  uncared?: boolean;
+}
+
+/**
+ * M1: how your mind is doing, beyond the conditions. trauma: how much you
+ * carry (0–100); support: how much your closest people give you (0–100);
+ * crisis: you had a crisis within this many years (true: ever; false: never);
+ * recovered: you recovered from one of these conditions (they can come
+ * back); noticed: someone has noticed you struggling (or nobody has);
+ * sideEffects: medication gave you a side effect in the past year.
+ */
+export interface MentalCondition {
+  trauma?: Compare;
+  support?: Compare;
+  crisis?: number | boolean;
+  recovered?: string[];
+  noticed?: boolean;
+  sideEffects?: boolean;
 }
 
 /** The law (Stage 9): in prison, on probation (or not). */
@@ -462,6 +495,22 @@ export const conditionSchema: z.ZodType<Condition> = z.lazy(() =>
           conditions: z.array(idSchema).min(1).optional(),
           treated: z.boolean().optional(),
           severity: compareSchema.optional(),
+          named: z.boolean().optional(),
+          within: z.int().min(0).max(100).optional(),
+          care: z.array(mentalCareSchema).min(1).optional(),
+          uncared: z.boolean().optional(),
+        })
+        .refine(atLeastOneField, 'needs at least one field'),
+    }),
+    z.strictObject({
+      mental: z
+        .strictObject({
+          trauma: compareSchema.optional(),
+          support: compareSchema.optional(),
+          crisis: z.union([z.int().min(1).max(100), z.boolean()]).optional(),
+          recovered: z.array(idSchema).min(1).optional(),
+          noticed: z.boolean().optional(),
+          sideEffects: z.boolean().optional(),
         })
         .refine(atLeastOneField, 'needs at least one field'),
     }),
@@ -521,6 +570,10 @@ export const conditionSchema: z.ZodType<Condition> = z.lazy(() =>
       movedOut: z.boolean().optional(),
       life: lifeConditionSchema.optional(),
       heard: heardConditionSchema.optional(),
+      mental: z
+        .strictObject({ noticed: z.boolean().optional(), reaction: z.array(reactionSchema).min(1).optional() })
+        .refine(atLeastOneField, 'needs at least one field')
+        .optional(),
     }),
     z.strictObject({ tie: tieConditionSchema }),
   ]),
@@ -541,6 +594,12 @@ export const castSpecSchema = z
      * close kind. Never creates anyone.
      */
     support: z.boolean().optional(),
+    /**
+     * M1: someone who has noticed you struggling and took it one of these
+     * ways (supportive, neutral, dismissive), closest first. It may also name
+     * a `kind` (the parent who noticed); on its own it needs no kind. It never creates anyone.
+     */
+    noticed: z.array(reactionSchema).min(1).optional(),
     /**
      * A potential partner: an adult you're attracted to who is attracted to
      * you, found or (with createIfMissing) created. Never family.
@@ -584,11 +643,11 @@ export const castSpecSchema = z
      */
     deceased: z.literal(true).optional(),
   })
-  .refine((s) => (s.kind === undefined) !== (s.support !== true), 'a role needs exactly one of kind or support: true')
+  .refine((s) => (s.kind !== undefined && s.support === true) === false && (s.kind !== undefined || s.support === true || s.noticed !== undefined), 'a role needs one of kind or support: true (or noticed, alone or with a kind)')
   .refine((s) => s.deceased !== true || (s.presence === 'anywhere' && s.support !== true && !s.romantic && !s.admirer && !s.createIfMissing && s.newChance === undefined), 'a deceased role has presence anywhere and is only passed in')
   .refine(
-    (s) => s.support !== true || (!s.createIfMissing && s.newChance === undefined && !s.romantic && !s.admirer),
-    'a support role finds someone you know: no createIfMissing, newChance, romantic or admirer',
+    (s) => (s.support !== true && s.noticed === undefined) || (!s.createIfMissing && s.newChance === undefined && !s.romantic && !s.admirer),
+    'a support or noticed role finds someone you know: no createIfMissing, newChance, romantic or admirer',
   )
   .refine((s) => !(s.romantic && s.admirer), 'a role is romantic or an admirer, not both');
 export type CastSpec = z.infer<typeof castSpecSchema>;
@@ -754,6 +813,41 @@ export const effectSchema = z.discriminatedUnion('type', [
       treated: z.boolean().optional(),
     })
     .refine((e) => (e.severity !== undefined && e.severity !== 0) || e.treated !== undefined, 'needs a non-zero severity or treated'),
+  /**
+   * M1, mental health. trauma: you carry `amount` more trauma (accidents,
+   * violence, mistreatment; it fades, and PTSD's onset reads it). diagnose: a
+   * condition you have is named (`conditionId`; without one, every condition
+   * not named yet that you're old enough for), through an `assessment`
+   * (default), a `doctor` or a `therapist`. start / stop: you begin or stop
+   * caring for a named condition (`conditionId`; without one, each that
+   * takes it) with `care`: therapy and medication pay their first visit,
+   * leaning on people reaches out to the people you can lean on. pay: a
+   * one-time medical cost `item` from balance/mental-health.yaml costs
+   * (savings, then medical debt; a child's family pays). crisis: a crisis
+   * happens: what you carry is named and gets worse before it gets better.
+   * confide: you tell the person cast in `role` you are struggling; they take
+   * it by who they are, and `then` names the follow-up event for each way
+   * (it comes the next year). The engine ignores what doesn't fit.
+   */
+  z
+    .strictObject({
+      type: z.literal('mental'),
+      action: z.enum(['trauma', 'diagnose', 'start', 'stop', 'pay', 'crisis', 'confide']),
+      amount: z.int().min(1).max(100).optional(),
+      conditionId: idSchema.optional(),
+      care: mentalCareSchema.optional(),
+      via: z.enum(['assessment', 'doctor', 'therapist']).optional(),
+      item: idSchema.optional(),
+      role: roleSchema.optional(),
+      then: z.partialRecord(reactionSchema, idSchema).optional(),
+    })
+    .refine((e) => (e.action === 'trauma') === (e.amount !== undefined), 'trauma needs amount (and only trauma has one)')
+    .refine((e) => (e.action === 'start' || e.action === 'stop') === (e.care !== undefined), 'start and stop need care (and only they have one)')
+    .refine((e) => (e.action === 'pay') === (e.item !== undefined), 'pay needs item (and only pay has one)')
+    .refine((e) => (e.action === 'confide') === (e.role !== undefined), 'confide needs role (and only confide has one)')
+    .refine((e) => e.then === undefined || e.action === 'confide', 'only confide takes then')
+    .refine((e) => e.via === undefined || e.action === 'diagnose', 'only diagnose takes via')
+    .refine((e) => e.conditionId === undefined || e.action === 'diagnose' || e.action === 'start' || e.action === 'stop', 'only diagnose, start and stop take conditionId'),
   /**
    * Who you are (Stage 9). field: attraction, gender (identity and
    * category), expression, pronouns or personality. value 'fromLatent'
@@ -984,7 +1078,7 @@ export const eventSchema = baseDefSchema
      * (tools/content/consistency.ts; docs/consistency-review.md).
      */
     justified: z
-      .strictObject({ time: z.string().trim().min(10).optional(), money: z.string().trim().min(10).optional(), past: z.string().trim().min(10).optional() })
+      .strictObject({ time: z.string().trim().min(10).optional(), money: z.string().trim().min(10).optional(), past: z.string().trim().min(10).optional(), safety: z.string().trim().min(10).optional() })
       .optional(),
     /**
      * Only happens when scheduled by another event (the later steps of a

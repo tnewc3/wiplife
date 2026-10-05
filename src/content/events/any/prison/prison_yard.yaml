@@ -25,6 +25,7 @@ choices:
         text: You get the kid out, and take a beating for it. A month in solitary for "fighting" follows.
         effects:
           - { type: stat, key: health, delta: -8 }
+          - { type: mental, action: trauma, amount: 16 }
           - { type: stat, key: stress, delta: 6 }
           - { type: stat, key: kindness, delta: 2 }
   - id: walk_away
@@ -32,6 +33,7 @@ choices:
     outcome:
       text: You keep walking. You don't sleep well that night, or for a few after it.
       effects:
+        - { type: mental, action: trauma, amount: 6 }
         - { type: stat, key: stress, delta: 3 }
         - { type: stat, key: kindness, delta: -2 }
   - id: guard

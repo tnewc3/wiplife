@@ -181,6 +181,62 @@ kinds:
         trust: -14
     reactions: [outed_family, outed_friend, outed_sibling, outed_partner]
 
+  # M1: a diagnosis of a mental health condition or neurodivergence. Who knows
+  # is up to you (and to whoever lives with you and sees the appointments);
+  # a story that spreads takes the shape the teller gives it. Each condition
+  # is its own true version; the twists are what gossip makes of them.
+  mentalHealth:
+    secret: true
+    witness: { who: household, chance: 0.6, count: 2 }
+    truths: [depression, anxiety_disorder, ptsd, adhd, neurodivergence]
+    versions:
+      depression:
+        heard: "that you've been diagnosed with depression"
+        twists: [{ to: mh_unwell, weight: 2 }, { to: mh_dramatic, weight: 1 }, { to: mh_faking, weight: 1 }]
+        affection: 0
+        trust: -3
+      anxiety_disorder:
+        heard: "that you've been dealing with an anxiety disorder"
+        twists: [{ to: mh_unwell, weight: 1 }, { to: mh_dramatic, weight: 1 }, { to: mh_faking, weight: 1 }]
+        affection: 0
+        trust: -2
+      ptsd:
+        heard: "that you have PTSD after what happened"
+        twists: [{ to: mh_unwell, weight: 2 }, { to: mh_coping, weight: 1 }]
+        affection: 2
+        trust: -3
+      adhd:
+        heard: "that you've been diagnosed with ADHD"
+        twists: [{ to: mh_faking, weight: 2 }, { to: mh_coping, weight: 1 }]
+        affection: 0
+        trust: -1
+      neurodivergence:
+        heard: "that your mind works differently from most people's, and you have a name for it now"
+        twists: [{ to: mh_unwell, weight: 1 }, { to: mh_coping, weight: 2 }]
+        affection: 0
+        trust: -1
+      mh_unwell:
+        heard: "that you're not well, and people should be careful around you"
+        twists: [{ to: depression, weight: 1 }, { to: anxiety_disorder, weight: 1 }]
+        affection: -4
+        trust: -8
+      mh_dramatic:
+        heard: "that you fell apart completely"
+        twists: [{ to: depression, weight: 1 }, { to: anxiety_disorder, weight: 1 }]
+        affection: -3
+        trust: -6
+      mh_faking:
+        heard: "that you're making a big deal out of nothing"
+        twists: [{ to: depression, weight: 1 }, { to: adhd, weight: 1 }]
+        affection: -4
+        trust: -6
+      mh_coping:
+        heard: "that you've been dealing with something and getting help for it"
+        twists: [{ to: depression, weight: 1 }, { to: ptsd, weight: 1 }]
+        affection: 3
+        trust: 1
+    reactions: [mental_whispers, mental_family_hears, mental_close_friend_hears]
+
   # Losing a job.
   jobLoss:
     secret: false

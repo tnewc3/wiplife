@@ -45,7 +45,11 @@ function factorValue(ctx: Ctx, s: Subject, key: FactorKey): number {
       return s.person.looks;
     case 'happiness':
     case 'geneticRisk':
+    case 'support':
       return 50;
+    // M1: trauma isn't followed for the people you know, so PTSD is rare among them.
+    case 'trauma':
+      return 10;
     case 'vice': {
       const risk = s.person.traits.riskTaking ?? 50;
       const discipline = s.person.traits.discipline ?? 50;

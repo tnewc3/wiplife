@@ -8,6 +8,8 @@
  * 'yearStart', or ends the life in 'dead'. Every function returns a new state
  * and never changes the one it is given, so the game can be saved in any phase.
  */
+import { giveNeuro, rollNeuro } from './mental/neuro';
+import { emptyMental } from './mental/query';
 import { produce } from 'immer';
 import type { ChoiceDef, ContentBundle, Outcome } from '../content/schemas';
 import { evaluate } from './conditions';
@@ -148,7 +150,7 @@ export function createLife(input: CreateLifeOptions, content: ContentBundle): Li
     career: { job: null, gig: false, retired: false, history: [], applied: [], openings: [] },
     finances: { savings: 0, debts: [], lifestyle: 'comfortable', earnings: { years: 0, total: 0 }, hardshipYears: 0 },
     housing: { kind: 'with_parents', cityId: character.cityId, annualCost: 0, since: birthYear },
-    health: { conditions: [] },
+    health: { conditions: [], mental: emptyMental() },
     legal: { record: [] },
     discovery: { surfaced: {} },
     flags: {},
@@ -168,6 +170,16 @@ export function createLife(input: CreateLifeOptions, content: ContentBundle): Li
     news: [],
     web: emptyWeb(),
   };
+  // M1: ADHD and neurodivergence are inherited in part: your parents and siblings (and grandparents) may have them, and you are likelier to if a parent does.
+  for (const person of Object.values(life.people)) {
+    const kind = life.relationships[person.id]?.kind;
+    if (kind === 'parent' || kind === 'sibling' || kind === 'grandparent') {
+      const neuro = rollNeuro(life.rng, content, []);
+      if (neuro.length > 0) person.neuro = neuro;
+    }
+  }
+  const parents = Object.values(life.people).filter((p) => life.relationships[p.id]?.kind === 'parent');
+  giveNeuro(life, rollNeuro(life.rng, content, parents.map((p) => p.neuro)), content);
   // E1: everyone starts the life in their baseline mood (no randomness: the yearly swing comes with the first year).
   for (const person of Object.values(life.people)) person.mood = person.moodBase = moodBaseline(life, person, content);
   // E4: the ties the family's structure gives (your parents with each other, your siblings with each other and with them).

@@ -1,0 +1,40 @@
+# A late diagnosis: an adult recognizes themselves in a description and asks to be assessed.
+id: adult_recognition
+title: Oh. That's me.
+text: >-
+  You are reading something that is not about you at all, and it describes
+  your whole life: the strategies, the exhaustion, the explanation you never
+  had for why easy things were hard. You read it three times. A small, strange
+  grief settles in, for the years of working it out alone, and underneath it
+  something that feels a lot like relief.
+tone: neutral
+category: mental
+rarity: uncommon
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 20 } }
+    - { any: [{ health: { conditions: [adhd], named: false } }, { health: { conditions: [neurodivergence], named: false } }] }
+weight: { base: 6 }
+cooldownYears: 5
+choices:
+  - id: assessment
+    label: Ask for an assessment
+    outcome:
+      text: >-
+        The wait is long and the process is thorough. The report that comes
+        back confirms what you suspected. It does not change who you are. It
+        lets you stop apologizing for it.
+      effects:
+        - { type: mental, action: pay, item: assessment }
+        - { type: mental, action: diagnose, via: assessment }
+        - { type: stat, key: confidence, delta: 3 }
+        - { type: stat, key: stress, delta: -3 }
+  - id: sit_with_it
+    label: Sit with it for a while
+    outcome:
+      text: >-
+        You bookmark the page and do not look at it for a week. The idea does
+        not leave. It just waits, patiently, until you are ready.
+      effects:
+        - { type: stat, key: stress, delta: 1 }

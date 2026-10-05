@@ -1,0 +1,38 @@
+# Born-with ADHD showing before a diagnosis: through behavior only. The condition is never named in the text.
+id: restless_mind
+title: Seventeen tabs open
+text: >-
+  You started the thing at nine, switched to a better idea at ten, and by
+  noon there are three half-finished projects and a quiet sense that
+  everyone else got a manual you didn't. Your head is fast and interesting
+  and nearly impossible to point at the boring part. Then something grabs you,
+  and the hours disappear in the best possible way.
+tone: neutral
+category: mental
+rarity: common
+lifeStages: [child, teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 8 } }
+    - { health: { conditions: [adhd], named: false } }
+weight: { base: 6 }
+cooldownYears: 4
+choices:
+  - id: ride_it
+    label: Chase the one that grabs you
+    outcome:
+      text: >-
+        Four hours vanish. What comes out of them is better than anything you
+        have made while forcing yourself. The dishes remain where they were.
+      effects:
+        - { type: stat, key: smarts, delta: 2 }
+        - { type: stat, key: happiness, delta: 2 }
+  - id: force_order
+    label: Make yourself finish the boring one first
+    outcome:
+      text: >-
+        It takes every ounce of will you have, and you finish. You feel as if
+        you just carried something heavy up a hill that was not even steep.
+      effects:
+        - { type: stat, key: stress, delta: 3 }
+        - { type: stat, key: discipline, delta: 1 }

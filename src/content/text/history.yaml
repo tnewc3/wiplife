@@ -270,6 +270,12 @@ health:
     variants:
       - "You got over {condition}."
       - "You finally shook off {condition}."
+  # M1: a mental health condition you had recovered from came back.
+  relapsed:
+    importance: 2
+    variants:
+      - "{condition} came back."
+      - "The old weight of {condition} returned."
 
 # The law (Stage 9). Values: {offense} ("shoplifting"), {amount} (a fine),
 # {years} ("two years").

@@ -1,0 +1,53 @@
+# Answers a diagnosis of ADHD (registries/health.yaml and registries/mental.yaml diagnosed).
+id: dx_adhd
+title: It has a name
+text: >-
+  The assessment ends with ADHD, and with a long list of things that suddenly
+  make sense: the lost keys, the lightning starts, the hours that vanish into
+  one thing you love. It is not a character flaw. It is a mind that runs fast
+  and needs a different kind of structure, and it comes with real strengths.
+tone: neutral
+category: mental
+rarity: common
+lifeStages: [child, teen, youngAdult, adult, senior]
+requires: { health: { conditions: [adhd], named: true, within: 1 } }
+weight: { base: 1 }
+followUpOnly: true
+choices:
+  - id: medication
+    label: Try ADHD medication
+    outcome:
+      text: >-
+        The first good day on it feels like someone finally turned on the
+        lights: one thing at a time, in order, and the quiet to finish it. It
+        does not fix everything, and it does help.
+      effects:
+        - { type: mental, action: start, care: medication, conditionId: adhd }
+  - id: coaching
+    label: Work with a therapist or a coach
+    outcome:
+      text: >-
+        You build systems that fit a mind like yours, instead of the ones
+        built for someone else's: timers, body doubling, a calendar that yells.
+        Some of them even stick.
+      effects:
+        - { type: mental, action: start, care: therapy, conditionId: adhd }
+  - id: people
+    label: Get the people around you on board
+    visibleIf: { mental: { support: { gte: 35 } } }
+    outcome:
+      text: >-
+        You explain it to the people who matter. Most of them listen, and
+        some of the old arguments about forgetting and being late turn into
+        plans.
+      effects:
+        - { type: mental, action: start, care: support, conditionId: adhd }
+  - id: learn
+    label: Read everything first
+    outcome:
+      text: >-
+        You read for three days, because of course you do. The part about
+        hyperfocus makes you laugh out loud. You come out of it understanding
+        yourself a little better.
+      effects:
+        - { type: stat, key: smarts, delta: 1 }

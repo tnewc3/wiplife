@@ -1,0 +1,47 @@
+# Therapy plateau: it is working slowly, or not working with this person.
+id: therapy_stuck
+title: Going in circles
+text: >-
+  The sessions have settled into a pattern: you say the same things, the
+  therapist asks the same careful questions, and nothing moves. You are not
+  sure whether this is how it works, or whether this is not working. You are
+  tired of paying for the privilege of feeling stuck.
+tone: neutral
+category: mental
+rarity: common
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 12 } }
+    - { health: { conditions: [depression, anxiety_disorder, ptsd, adhd, neurodivergence], care: [therapy] } }
+weight: { base: 5 }
+cooldownYears: 4
+choices:
+  - id: say_so
+    label: Tell the therapist it feels stuck
+    outcome:
+      text: >-
+        It is awkward, and it is exactly the right thing to say. The therapist
+        does not get defensive. They change approach, and the next few sessions
+        feel different.
+      effects:
+        - { type: stat, key: confidence, delta: 2 }
+        - { type: stat, key: stress, delta: -2 }
+  - id: switch
+    label: Find a different therapist
+    outcome:
+      text: >-
+        The new therapist asks different questions. Within two sessions you
+        know it is a better fit. You wish you had done it sooner, and are glad you did it at all.
+      effects:
+        - { type: mental, action: pay, item: therapy_session }
+        - { type: stat, key: happiness, delta: 2 }
+  - id: stop
+    label: Stop going
+    outcome:
+      text: >-
+        You cancel the next appointment, then the one after. There is relief,
+        and under it a worry you decide not to look at yet.
+      effects:
+        - { type: mental, action: stop, care: therapy }
+        - { type: stat, key: stress, delta: 2 }

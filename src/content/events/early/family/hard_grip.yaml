@@ -28,6 +28,7 @@ choices:
       effects:
         - { type: relationship, role: parent, trust: -10, affection: -4 }
         - { type: memory, role: parent, tag: lost_temper_with_you }
+        - { type: mental, action: trauma, amount: 14 }
         - { type: stat, key: stress, delta: 6 }
         - { type: stat, key: confidence, delta: -2 }
         - { type: schedule, eventId: taller_now, inYears: [10, 13], cast: [parent] }
@@ -40,6 +41,7 @@ choices:
       effects:
         - { type: relationship, role: parent, trust: -5 }
         - { type: memory, role: parent, tag: lost_temper_with_you }
+        - { type: mental, action: trauma, amount: 8 }
         - { type: stat, key: stress, delta: 4 }
         - { type: stat, key: kindness, delta: 2 }
         - { type: schedule, eventId: taller_now, inYears: [10, 13], cast: [parent] }

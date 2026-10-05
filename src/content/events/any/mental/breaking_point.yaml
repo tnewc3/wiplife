@@ -1,0 +1,112 @@
+# The crisis chain begins: a breakdown that ends in help. Never a choice about harm; every way out leads toward people who can help.
+id: breaking_point
+title: Breaking point
+text: >-
+  It has been building for months, and tonight it breaks. You cannot stop
+  shaking, you cannot think in a straight line, and the world has narrowed to
+  a tunnel with nothing at the other end. Whatever you have been holding
+  together, you cannot hold it any longer, and some part of you knows that this
+  is the moment to get help.
+tone: dark
+category: mental
+rarity: rare
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 13 } }
+    - { health: { conditions: [depression, anxiety_disorder, ptsd], severity: { gte: 45 } } }
+    - { stat: stress, gte: 50 }
+    - { not: { mental: { crisis: 8 } } }
+weight:
+  base: 5
+  modifiers:
+    - { if: { health: { conditions: [depression, anxiety_disorder, ptsd], uncared: true } }, x: 2.5 }
+    - { if: { stat: stress, gte: 85 }, x: 2 }
+cast:
+  helper: { support: true, optional: true, presence: nearby }
+choices:
+  - id: call_helper
+    label: Call {helper.name}
+    visibleIf: { role: helper }
+    outcome:
+      text: >-
+        You can barely get the words out. "I need help," you say, and
+        {helper.name} says, "I'm coming." {helper.They} {helper:arrives|arrive}
+        in minutes and stay with you through the worst of it. In the morning
+        you both go to see someone who can help, and {helper.name} sits beside you.
+      effects:
+        - { type: mental, action: crisis }
+        - { type: mental, action: pay, item: crisis_visit }
+        - { type: relationship, role: helper, affection: 6, trust: 8 }
+        - { type: memory, role: helper, tag: stood_by_you_struggling }
+        - { type: schedule, eventId: dx_depression, inYears: [1, 1] }
+        - { type: schedule, eventId: dx_anxiety, inYears: [1, 1] }
+        - { type: schedule, eventId: dx_ptsd, inYears: [1, 1] }
+        - { type: schedule, eventId: crisis_aftermath, inYears: [1, 2] }
+        - { type: history, text: "You hit a breaking point, and asked for help.", importance: 3 }
+  - id: emergency_room
+    label: Go to the emergency room
+    outcome:
+      text: >-
+        The waiting room is bright and loud and the nurse who sees you is
+        kind. You are taken seriously, which is the thing you most needed. A
+        few days of rest, people who know what they are doing and a plan for
+        afterward. It is the first time in months that someone else is
+        holding the weight.
+      effects:
+        - { type: mental, action: crisis }
+        - { type: mental, action: pay, item: hospital_stay }
+        - { type: schedule, eventId: dx_depression, inYears: [1, 1] }
+        - { type: schedule, eventId: dx_anxiety, inYears: [1, 1] }
+        - { type: schedule, eventId: dx_ptsd, inYears: [1, 1] }
+        - { type: schedule, eventId: crisis_who_came, inYears: [1, 1] }
+        - { type: schedule, eventId: crisis_aftermath, inYears: [1, 2] }
+        - { type: history, text: "You reached a breaking point and went to the hospital for help.", importance: 3 }
+  - id: crisis_line
+    label: Call a crisis line
+    outcome:
+      text: >-
+        A calm voice answers on the second ring and does not hurry you. You
+        talk for an hour, then another. By the end you have a plan for the
+        night, a name of someone to see in the morning, and the first
+        steady breath in days.
+      effects:
+        - { type: mental, action: crisis }
+        - { type: schedule, eventId: dx_depression, inYears: [1, 1] }
+        - { type: schedule, eventId: dx_anxiety, inYears: [1, 1] }
+        - { type: schedule, eventId: dx_ptsd, inYears: [1, 1] }
+        - { type: schedule, eventId: crisis_aftermath, inYears: [1, 2] }
+        - { type: history, text: "You hit a breaking point, and reached out for help.", importance: 3 }
+  - id: hold_out
+    label: Try to ride it out alone
+    check:
+      base: 30
+      stats:
+        - { key: stress, weight: -0.1 }
+      success:
+        text: >-
+          You do get through the night, barely. In the gray light you are honest
+          with yourself: that was too close, and it should not be this hard.
+          You make the call you have been putting off.
+        effects:
+          - { type: mental, action: crisis }
+          - { type: mental, action: pay, item: crisis_visit }
+          - { type: schedule, eventId: dx_depression, inYears: [1, 1] }
+          - { type: schedule, eventId: dx_anxiety, inYears: [1, 1] }
+          - { type: schedule, eventId: dx_ptsd, inYears: [1, 1] }
+          - { type: schedule, eventId: crisis_aftermath, inYears: [1, 2] }
+      failure:
+        text: >-
+          You cannot get through it on your own, and you were never meant to. A
+          coworker finds you, or a neighbor knocks, or you simply fold. Somebody
+          calls for help, and help comes. You are taken to the hospital and kept
+          until it is safe to go home.
+        effects:
+          - { type: mental, action: crisis }
+          - { type: mental, action: pay, item: hospital_stay }
+          - { type: schedule, eventId: dx_depression, inYears: [1, 1] }
+          - { type: schedule, eventId: dx_anxiety, inYears: [1, 1] }
+          - { type: schedule, eventId: dx_ptsd, inYears: [1, 1] }
+          - { type: schedule, eventId: crisis_who_came, inYears: [1, 1] }
+          - { type: schedule, eventId: crisis_aftermath, inYears: [1, 2] }
+          - { type: history, text: "You reached a breaking point, and others got you to the hospital.", importance: 3 }

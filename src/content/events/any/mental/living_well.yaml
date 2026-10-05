@@ -1,0 +1,47 @@
+# Living well with a condition: the routines that help.
+id: living_well
+title: What keeps you steady
+text: >-
+  You have learned what helps. It is not one big thing. It is a handful of
+  small ones, kept up even when you do not feel like it. You are thinking
+  about which to protect, because there are only so many hours in the day.
+tone: neutral
+category: mental
+rarity: common
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 12 } }
+    - { health: { conditions: [depression, anxiety_disorder, ptsd, adhd, neurodivergence], named: true } }
+weight: { base: 5 }
+cooldownYears: 3
+choices:
+  - id: move
+    label: Protect your movement
+    outcome:
+      text: >-
+        A walk, a run, a swim, whatever your body wants. It will not cure
+        anything. Most days it is the difference between a heavy day and a
+        manageable one.
+      effects:
+        - { type: stat, key: fitness, delta: 3 }
+        - { type: stat, key: stress, delta: -3 }
+  - id: sleep
+    label: Protect your sleep
+    outcome:
+      text: >-
+        Fixed hours, screens off, no exceptions. It is dull and it works better
+        than anything exciting you have tried.
+      effects:
+        - { type: stat, key: health, delta: 2 }
+        - { type: stat, key: stress, delta: -3 }
+  - id: people
+    label: Protect your people
+    outcome:
+      text: >-
+        You say yes to the dinner, the call, the walk with a friend, including on
+        the days it feels like too much. Almost every time, you are glad
+        afterward.
+      effects:
+        - { type: stat, key: sociability, delta: 2 }
+        - { type: stat, key: happiness, delta: 3 }

@@ -45,6 +45,7 @@ choices:
     outcome:
       text: You pick up your lunch and say nothing. It happens again the next week.
       effects:
+        - { type: mental, action: trauma, amount: 8 }
         - { type: stat, key: stress, delta: 4 }
         - { type: memory, role: bully, tag: bullied_you }
         - { type: schedule, eventId: bully_grown_up, inYears: [15, 25], cast: [bully] }

@@ -1,0 +1,51 @@
+# A sibling notices.
+id: sibling_notices
+title: The sibling radar
+text: >-
+  {sibling.name} knows you better than almost anyone, and reads you like a
+  weather report. "You're doing the thing," {sibling.they}
+  {sibling:says|say}. "The quiet, closed-door thing." It is blunt and it is
+  right, and it is the sort of thing only family can say.
+tone: neutral
+category: mental
+rarity: common
+lifeStages: [child, teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 10 } }
+    - { role: sibling, kind: [sibling], mental: { reaction: [supportive, neutral] } }
+    - { health: { conditions: [depression, anxiety_disorder, ptsd], severity: { gte: 20 } } }
+weight: { base: 8 }
+cooldownYears: 3
+cast:
+  sibling: { kind: sibling, noticed: [supportive, neutral], presence: anywhere }
+choices:
+  - id: admit_it
+    label: Admit it
+    outcome:
+      text: >-
+        "Yeah," you say. "I am." {sibling.name} sits next to you and bumps your
+        shoulder. Neither of you says anything for a while, and it is exactly right.
+      effects:
+        - { type: mental, action: confide, role: sibling }
+        - { type: relationship, role: sibling, affection: 3, trust: 4 }
+        - { type: stat, key: stress, delta: -3 }
+  - id: tease_back
+    label: Deflect with a joke
+    outcome:
+      text: >-
+        You make a joke, and {sibling.name} laughs, because that is the deal
+        between you. Under the laugh, {sibling.they}
+        {sibling:keeps|keep} looking at you.
+      effects:
+        - { type: relationship, role: sibling, affection: 1 }
+  - id: shut_down
+    label: Tell {sibling.them} to leave you alone
+    outcome:
+      text: >-
+        "Fine," {sibling.name} {sibling:says|say}, and goes. {sibling.They}
+        {sibling:does|do} not take it personally. {sibling.They} {sibling:will|will}
+        be back.
+      effects:
+        - { type: relationship, role: sibling, affection: -2 }
+        - { type: stat, key: stress, delta: 2 }

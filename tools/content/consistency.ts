@@ -47,6 +47,8 @@ function changesMoney(outcome: Outcome | undefined): boolean {
       e.type === 'debt' ||
       e.type === 'housing' ||
       e.type === 'legal' ||
+      // M1: a first visit for care and a one-time medical cost are paid, and so is a crisis.
+      (e.type === 'mental' && (e.action === 'pay' || (e.action === 'start' && e.care !== 'support'))) ||
       (e.type === 'job' && e.action !== 'performance') ||
       (e.type === 'education' && e.action === 'scholarship'),
   );
@@ -124,7 +126,8 @@ export function consistencyWarnings(
       if (def.justified?.[kind]) continue;
       for (const message of messages) warnings.push({ file, eventId: id, kind, message: `${id}: ${message}` });
     }
-    for (const kind of Object.keys(def.justified ?? {}) as WarningKind[]) {
+    // (justified.safety is checked by the mental health safety check, tools/content/mentalSafety.ts.)
+    for (const kind of Object.keys(def.justified ?? {}).filter((k) => k !== 'safety') as WarningKind[]) {
       if (!found.has(kind)) errors.push({ file, message: `${id}: justified.${kind} is set, but nothing is flagged for it (remove it)` });
     }
   }

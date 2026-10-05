@@ -1,0 +1,22 @@
+id: neurodivergence
+name: Neurodivergence
+noun: neurodivergence
+kind: neuro
+blurb: A mind that works differently from most, with its own strengths and its own strain. Understanding helps more than fixing.
+course: { untreated: 0, treated: 0 }
+effects:
+  stress: { perYear: 1.5, limit: 70 }
+  happiness: { perYear: -0.4, limit: 40 }
+strengths:
+  smarts: { perYear: 0.5, limit: 90 }
+strengthNotes:
+  - Deep, lasting focus on what fascinates you
+  - Noticing patterns and details others miss
+  - Honesty, and loyalty to the few you let in
+challengeNotes:
+  - Crowds, noise and sudden change
+  - Unwritten social rules, and the tiredness of following them
+  - Being misread by people who expect you to be different
+treatable: true
+diagnosableFrom: 4
+care: [therapy, support]

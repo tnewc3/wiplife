@@ -1,0 +1,37 @@
+# What came of confiding in someone who did not know what to say (the confide effect schedules it).
+id: told_neutral
+title: The careful silence
+text: >-
+  {helper.name} heard you, and has been careful around you since you told {helper.them} {since}.
+  There are not many words: a nod, a slightly-too-gentle tone. It is not
+  unkind, and it is not what you hoped for. {helper.They} clearly
+  {helper:doesn't|don't} know what to do with what you said.
+tone: neutral
+category: mental
+rarity: common
+lifeStages: [child, teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { role: helper, alive: true, mental: { reaction: [neutral] } }
+weight: { base: 8 }
+followUpOnly: true
+cast:
+  helper: { support: true, presence: anywhere }
+choices:
+  - id: tell_what_helps
+    label: Tell {helper.them} what would actually help
+    outcome:
+      text: >-
+        You say it plainly: ask how you are, then listen, and do not try to
+        fix it. {helper.name} nods slowly, as though writing it down. It gets better from there.
+      effects:
+        - { type: relationship, role: helper, trust: 4 }
+        - { type: stat, key: stress, delta: -2 }
+  - id: let_it_be
+    label: Leave it as it is
+    outcome:
+      text: >-
+        You do not push. Some people take longer to know what to say. {helper.name}
+        stays {helper.their} kind, awkward self, and you decide that is enough.
+      effects:
+        - { type: stat, key: stress, delta: 1 }

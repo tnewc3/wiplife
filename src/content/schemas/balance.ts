@@ -465,6 +465,36 @@ export const targetsBalanceSchema = z.strictObject({
     maxBeginYearMs: z.number().positive(),
     maxWebStepMs: z.number().positive(),
   }),
+  /**
+   * M1: mental health (tools/simulate/mental.ts), judged on the careful player's lives.
+   * Ranges may leave out min or max.
+   */
+  mental: z.strictObject({
+    /** Of lives with a mental health condition (or with ADHD or neurodivergence), the share ever named. */
+    namedShare: shareRangeSchema,
+    neuroNamedShare: shareRangeSchema,
+    /** Years from a mental health condition starting to being named (median). */
+    yearsToNaming: numberRangeSchema,
+    /** Born with ADHD or neurodivergence: how many times as likely with an affected parent. */
+    inheritance: z.strictObject({ min: z.number().min(1) }),
+    /** Mental health conditions recovered from, per condition that began; and the share of recoveries that come back. */
+    recovered: shareRangeSchema,
+    relapse: shareRangeSchema,
+    /** Of named lives, the share that ever used professional care. */
+    careUptake: shareRangeSchema,
+    /** Severity points a year in professional care less with no care (negative: care helps). */
+    careEffect: z.strictObject({ max: z.number() }),
+    /** Severity a year with supportive noticers less when dismissed (negative: support helps). */
+    supportEffect: z.strictObject({ max: z.number() }),
+    noticed: shareRangeSchema,
+    /** Noticing for someone who lives with you, as a multiple of someone far away. */
+    householdNotice: z.strictObject({ min: z.number().min(1) }),
+    dismissive: shareRangeSchema,
+    crisisLives: shareRangeSchema,
+    crisisToCare: shareRangeSchema,
+    secretKnown: shareRangeSchema,
+    eventShare: z.strictObject({ max: probabilitySchema }),
+  }),
   coverage: z.strictObject({
     /** At least this many events (not retired). */
     minEvents: z.int().min(1),

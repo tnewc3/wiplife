@@ -81,3 +81,6 @@ flags:
   # E4: the web between the people you know.
   hosted_a_peace_dinner: You hosted a dinner to get two people talking
   was_outed: Someone else told people who you are before you did
+  # M1: mental health.
+  kept_diagnosis_private: You have chosen to keep a mental health diagnosis to yourself
+  told_boss_about_diagnosis: You told your boss about a mental health diagnosis

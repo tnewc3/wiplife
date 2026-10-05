@@ -98,6 +98,7 @@ export const HEALTH_HISTORY_VALUES = {
   diagnosed: ['condition'],
   treated: ['condition'],
   recovered: ['condition'],
+  relapsed: ['condition'],
 } as const satisfies Record<string, readonly string[]>;
 export type HealthHistoryKey = keyof typeof HEALTH_HISTORY_VALUES;
 

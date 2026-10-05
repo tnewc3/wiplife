@@ -9,37 +9,23 @@
  *    by treatment.
  * 3. Treated conditions cost their yearly medication (medical debt for what
  *    savings can't cover); untreated ones can cost money too (an addiction).
+ *    Mental health conditions and neurodivergence (M1) have their own year:
+ *    ../mental/course.ts (care costs and side effects come after the loop).
  * 4. Vice escalation: an untreated addiction feeds the habit (vice rises);
  *    with only treated addictions it fades.
  * 5. New conditions may start, each by its onset chance.
  *
  * The rules live in ../health.ts; numbers in balance/health.yaml.
  */
-import type { ContentBundle, StatEffects } from '../../content/schemas';
+import type { ContentBundle } from '../../content/schemas';
 import { spend } from '../finance';
 import { activeCondition, addCondition, addictions, changeSeverity, onsetChance, payMedical, rollSeverity } from '../health';
-import { clampInt } from '../random';
+import { mentalCareYear, mentalYear } from '../mental/course';
+import { isMentalKind } from '../mental/query';
+import { clampInt, wholeChange } from '../random';
 import { chance } from '../rng';
-import type { LifeState, StatKey } from '../types';
-import { applyStatEffects } from './economy';
-
-/** A condition's yearly stat pulls at this severity (and treatment). */
-function scaledEffects(effects: StatEffects, share: number): StatEffects {
-  const out: StatEffects = {};
-  for (const key of Object.keys(effects).sort() as StatKey[]) {
-    const pull = effects[key];
-    if (pull) out[key] = { perYear: pull.perYear * share, limit: pull.limit };
-  }
-  return out;
-}
-
-/** A whole number from a fractional change: the fraction happens by chance. */
-function wholeChange(state: LifeState, change: number): number {
-  const size = Math.abs(change);
-  const whole = Math.floor(size);
-  const n = whole + (size > whole && chance(state.rng, size - whole) ? 1 : 0);
-  return change < 0 ? -n : n;
-}
+import type { LifeState } from '../types';
+import { applyStatEffects, scaledEffects } from './economy';
 
 /** Step 6: progress conditions and roll for new ones. */
 export function runHealth(state: LifeState, content: ContentBundle): void {
@@ -49,7 +35,12 @@ export function runHealth(state: LifeState, content: ContentBundle): void {
   for (const condition of [...state.health.conditions]) {
     const def = content.conditions[condition.conditionId];
     if (!def) continue;
-    const delta = wholeChange(state, condition.treated ? def.course.treated : def.course.untreated);
+    // M1: mental health conditions and neurodivergence have their own year (their care costs come after).
+    if (isMentalKind(def.kind)) {
+      mentalYear(state, condition, def, content);
+      continue;
+    }
+    const delta = wholeChange(state.rng, condition.treated ? def.course.treated : def.course.untreated);
     if (delta !== 0) changeSeverity(state, def.id, delta, content);
     const still = state.health.conditions.find((c) => c.conditionId === def.id);
     if (!still) continue;
@@ -63,6 +54,8 @@ export function runHealth(state: LifeState, content: ContentBundle): void {
       else spend(state, amount, content);
     }
   }
+
+  mentalCareYear(state, content);
 
   // 4. Vice escalation.
   const habits = addictions(state, content);

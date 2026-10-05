@@ -1,0 +1,38 @@
+# Therapy working: a session where something moves.
+id: therapy_breakthrough
+title: The session that moved something
+text: >-
+  Halfway through an ordinary session, you say a sentence you did not know you
+  were going to say, and the room goes quiet. The therapist lets the silence
+  sit. When you leave, nothing about the day is different, and everything about
+  how you carry it is.
+tone: light
+category: mental
+rarity: common
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 12 } }
+    - { health: { conditions: [depression, anxiety_disorder, ptsd], care: [therapy] } }
+weight: { base: 6 }
+cooldownYears: 3
+choices:
+  - id: take_it_home
+    label: Write down what you realized
+    outcome:
+      text: >-
+        You put it on paper before it fades, in your own words. A few weeks
+        later you read it again and it still holds.
+      effects:
+        - { type: stat, key: happiness, delta: 3 }
+        - { type: stat, key: stress, delta: -3 }
+  - id: share_it
+    label: Tell someone you trust what you worked out
+    visibleIf: { mental: { support: { gte: 40 } } }
+    outcome:
+      text: >-
+        Saying it to someone who is not a professional makes it real in a new
+        way. They do not have answers. They have a hug, and that is plenty.
+      effects:
+        - { type: stat, key: happiness, delta: 3 }
+        - { type: stat, key: sociability, delta: 1 }

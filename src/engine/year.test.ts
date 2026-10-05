@@ -26,6 +26,7 @@ describe('year pipeline', () => {
       'career',
       'economy',
       'health',
+      'mental',
       'relationships',
       'moods',
       'selfDiscovery',

@@ -1,0 +1,39 @@
+# An old condition stirring: early signs after recovery.
+id: relapse_warning
+title: The old weather
+text: >-
+  It starts small: a flat week, a bad night, a flicker of the old feeling at
+  the edge of things. You recognize it the way you recognize a familiar
+  footstep. Recovery was real, and so is the possibility that it is not
+  permanent. What you do now is the difference between a blip and a slide.
+tone: neutral
+category: mental
+rarity: common
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 12 } }
+    - { mental: { recovered: [depression, anxiety_disorder, ptsd] } }
+    - { not: { health: { conditions: [depression, anxiety_disorder, ptsd] } } }
+weight: { base: 6 }
+cooldownYears: 4
+choices:
+  - id: act_early
+    label: Go back to what helped
+    outcome:
+      text: >-
+        You book the appointment, tell someone close and get back to the
+        routines that worked. It is not a failure. It is a plan, and you
+        remember what is on it.
+      effects:
+        - { type: mental, action: pay, item: therapy_session }
+        - { type: stat, key: stress, delta: -2 }
+        - { type: stat, key: discipline, delta: 2 }
+  - id: wait_and_see
+    label: Watch it for a while
+    outcome:
+      text: >-
+        You keep an eye on it, the way you would on a cough. For now it is just
+        weather.
+      effects:
+        - { type: stat, key: stress, delta: 1 }

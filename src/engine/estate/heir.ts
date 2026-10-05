@@ -23,6 +23,8 @@
  *
  * All randomness comes from the new life's own seeded generator.
  */
+import { giveNeuro } from '../mental/neuro';
+import { emptyMental } from '../mental/query';
 import type { ContentBundle } from '../../content/schemas';
 import { HEIR_MEMORY_MAP, HEIR_MEMORY_TAGS, type GuardianKind } from '../../content/schemas';
 import { canTakeJob, startJob } from '../career';
@@ -336,7 +338,7 @@ export function continueAsHeir(dead: LifeState, heirId: Id, content: ContentBund
     career: { job: null, gig: false, retired: false, history: [], applied: [], openings: [] },
     finances: { savings: 0, debts: [], lifestyle: 'comfortable', earnings: { years: 0, total: 0 }, hardshipYears: 0 },
     housing: { kind: 'with_parents', cityId: candidate.cityId, annualCost: 0, since: year },
-    health: { conditions: [] },
+    health: { conditions: [], mental: emptyMental() },
     legal: { record: [] },
     discovery: { surfaced: {} },
     flags: {},
@@ -432,6 +434,8 @@ export function continueAsHeir(dead: LifeState, heirId: Id, content: ContentBund
   // ── The web between the people around them (E4) ──────────────────────────
   // Rebuilt from the heir's side: who is married to whom, who is whose sibling, who a parent to whom. A pair that was tied
   // in the parent's life in the same way keeps how it stood (and a feud), without the side the parent took.
+  // M1: the heir carries any born-with condition their parent passed on (they start unnamed).
+  giveNeuro(life, candidate.neuro ?? [], content);
   ensureStructure(life, life.web, rng, content, year);
   for (const [key, tie] of Object.entries(life.web.ties)) {
     const old = dead.web.ties[key];

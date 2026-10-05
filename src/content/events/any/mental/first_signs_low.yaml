@@ -1,0 +1,56 @@
+# First signs of depression, before anyone has named it. The condition is never named here.
+id: first_signs_low
+title: Nothing lands
+text: >-
+  Weeks have gone by in a kind of gray. Sleep is too much or not enough, the
+  things you used to enjoy feel like chores, and you keep saying "I'm just
+  tired" because it is easier than finding words for the rest. Something is
+  off, and it has been off long enough that it no longer feels like a mood.
+tone: dark
+category: mental
+rarity: common
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 13 } }
+    - { health: { conditions: [depression], named: false } }
+weight: { base: 8 }
+cooldownYears: 3
+# A depression that begins in the story is never named by the story: it can only be recognized.
+justified:
+  past: "\"The things you used to enjoy\" describes the loss of interest depression brings, not a specific claim about your history."
+cast:
+  helper: { support: true, optional: true, presence: nearby }
+choices:
+  - id: appointment
+    label: Make an appointment
+    outcome:
+      text: >-
+        You say it out loud to a professional, which is the hardest part. The
+        questions are specific and unembarrassing, and by the end of the hour
+        what you have been carrying has a name.
+      effects:
+        - { type: mental, action: pay, item: psych_evaluation }
+        - { type: mental, action: diagnose, conditionId: depression, via: doctor }
+        - { type: schedule, eventId: dx_depression, inYears: [1, 1] }
+  - id: tell_someone
+    label: Tell {helper.name} how long it has been like this
+    visibleIf: { role: helper }
+    outcome:
+      text: >-
+        {helper.name} does not try to fix it. {helper.They} {helper:asks|ask}
+        one good question, then another, and {helper:stays|stay} until you have
+        said all of it. {helper.They} {helper:says|say} you should talk to
+        someone who can actually help, and offers to wait while you call.
+      effects:
+        - { type: mental, action: confide, role: helper, then: { supportive: told_supportive, neutral: told_neutral, dismissive: told_dismissive } }
+        - { type: stat, key: stress, delta: -2 }
+  - id: push_through
+    label: Push through it
+    outcome:
+      text: >-
+        You work harder, sleep later and tell yourself it will pass. It might.
+        Meanwhile the days get a little heavier each week.
+      effects:
+        - { type: health, conditionId: depression, severity: 4 }
+        - { type: stat, key: stress, delta: 3 }

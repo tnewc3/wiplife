@@ -6,12 +6,17 @@
  */
 import { z } from 'zod';
 import { curveSchema } from './balance';
-import { baseDefSchema, conditionKindSchema, dollarsSchema, idSchema, STAT_KEYS, TRAIT_KEYS } from './common';
+import { baseDefSchema, conditionKindSchema, dollarsSchema, idSchema, mentalCareSchema, STAT_KEYS, TRAIT_KEYS } from './common';
 import { statEffectsSchema } from './economy';
 import { conditionSchema } from './events';
 
-/** What onset can depend on besides age: a stat, a trait, vice or genetic risk. */
-export const ONSET_FACTOR_KEYS = [...STAT_KEYS, ...TRAIT_KEYS, 'vice', 'geneticRisk'] as const;
+/**
+ * What onset can depend on besides age: a stat, a trait, vice or genetic risk,
+ * and (M1) how much trauma you carry (0–100) and how much support your circle
+ * gives you (0–100, from your closest people).
+ */
+export const ONSET_FACTOR_KEYS = [...STAT_KEYS, ...TRAIT_KEYS, 'vice', 'geneticRisk', 'trauma', 'support'] as const;
+
 
 const severityRange = z
   .strictObject({ min: z.int().min(1).max(100), max: z.int().min(1).max(100) })
@@ -61,12 +66,27 @@ export const conditionDefSchema = baseDefSchema
         yearlyUntreated: dollarsSchema.optional(),
       })
       .optional(),
+    /**
+     * M1 (kinds mental and neuro): the youngest age a doctor, therapist or
+     * school can name it, and which cares apply to it. `strengths` are yearly
+     * pulls the condition gives (neurodivergence's gifts: scaled with
+     * severity, never softened by care); `strengthNotes` and `challengeNotes`
+     * are the words shown once it is diagnosed. Born-with conditions (kind
+     * neuro) have no onset, no course and no recovery.
+     */
+    diagnosableFrom: z.int().min(0).max(30).optional(),
+    care: z.array(mentalCareSchema).min(1).optional(),
+    strengths: statEffectsSchema.optional(),
+    strengthNotes: z.array(z.string().trim().min(1).max(120)).max(5).optional(),
+    challengeNotes: z.array(z.string().trim().min(1).max(120)).max(5).optional(),
     /** Extra yearly chance of death at full severity, untreated (treatment lowers it, balance/health.yaml). */
     mortality: z.number().min(0).max(1).default(0),
     /** The cause of death recorded when it kills (src/content/causes); needed when mortality is above 0. */
     cause: idSchema.optional(),
   })
-  .refine((c) => c.mortality === 0 || c.cause !== undefined, 'a condition that can kill needs a cause');
+  .refine((c) => c.mortality === 0 || c.cause !== undefined, 'a condition that can kill needs a cause')
+  .refine((c) => (c.kind !== 'mental' && c.kind !== 'neuro') || (c.diagnosableFrom !== undefined && c.care !== undefined), 'a mental or neuro condition needs diagnosableFrom and care')
+  .refine((c) => c.kind !== 'neuro' || c.onset === undefined, 'a neuro condition is born with you: no onset');
 export type ConditionDef = z.infer<typeof conditionDefSchema>;
 
 const share = z.number().min(0).max(1);
@@ -99,13 +119,14 @@ export const healthBalanceSchema = z.strictObject({
 export type HealthBalance = z.infer<typeof healthBalanceSchema>;
 
 /** Results of seeing a doctor (registries/health.yaml). */
-export const DOCTOR_RESULTS = ['clean', 'treated', 'managed'] as const;
+export const DOCTOR_RESULTS = ['clean', 'treated', 'managed', 'diagnosed'] as const;
 export type DoctorResult = (typeof DOCTOR_RESULTS)[number];
 
 /**
  * The events that answer a doctor's visit: `clean` (nothing to treat, a
- * checkup), `treated` (at least one condition treated) or `managed` (only
- * conditions a doctor can ease, not treat, or treatment didn't take).
+ * checkup), `treated` (at least one condition treated), `managed` (only
+ * conditions a doctor can ease, not treat, or treatment didn't take) or
+ * (M1) `diagnosed` (a mental health condition or neurodivergence was named).
  */
 export const healthRegistrySchema = z.strictObject({
   doctor: z.strictObject(

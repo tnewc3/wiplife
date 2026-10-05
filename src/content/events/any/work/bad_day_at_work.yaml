@@ -1,0 +1,47 @@
+# A mental health condition at work.
+id: bad_day_at_work
+title: One of those days
+text: >-
+  You made it in, and that is about all you can say for the day. Concentration
+  will not come, the inbox is a wall, and a simple question from a coworker
+  takes everything you have. You know you are not at your best. You also know
+  you have not told anyone why.
+tone: neutral
+category: work
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { career: { employed: true, retired: false } }
+    - { health: { conditions: [depression, anxiety_disorder, ptsd], named: true, severity: { gte: 40 } } }
+weight: { base: 6 }
+cooldownYears: 3
+choices:
+  - id: take_break
+    label: Take a break and step outside
+    outcome:
+      text: >-
+        Ten minutes in the fresh air, a few slow breaths, and the day becomes
+        manageable. You finish most of what you planned, and nobody notices.
+      effects:
+        - { type: job, action: performance, value: 1 }
+        - { type: stat, key: stress, delta: -2 }
+  - id: ask_for_day
+    label: Ask to go home early
+    outcome:
+      text: >-
+        You say you are not well and need to go. Your boss says to take care of
+        yourself. That is the whole conversation, and it is a relief.
+      effects:
+        - { type: job, action: performance, value: -2 }
+        - { type: stat, key: stress, delta: -3 }
+  - id: push_on
+    label: Push through
+    outcome:
+      text: >-
+        You force it. By five the work is done and there is nothing left of
+        you. Tomorrow will be harder, and you know it.
+      effects:
+        - { type: job, action: performance, value: 1 }
+        - { type: stat, key: stress, delta: 4 }
+        - { type: stat, key: happiness, delta: -2 }

@@ -1,0 +1,45 @@
+# Answers a diagnosis of neurodivergence (registries/health.yaml and registries/mental.yaml diagnosed).
+id: dx_neurodivergence
+title: A different kind of mind
+text: >-
+  The assessment finds what you have felt for as long as you can remember:
+  your mind works differently from most. It is not a fault, and it is not a
+  puzzle you failed. It comes with its own strengths and its own strain, and
+  now there is a way to talk about both.
+tone: neutral
+category: mental
+rarity: common
+lifeStages: [child, teen, youngAdult, adult, senior]
+requires: { health: { conditions: [neurodivergence], named: true, within: 1 } }
+weight: { base: 1 }
+followUpOnly: true
+choices:
+  - id: therapy
+    label: Work with someone who gets it
+    outcome:
+      text: >-
+        A therapist who has seen minds like yours before. For once nobody is
+        trying to teach you to be someone else; you work on the parts that wear
+        you out and keep the parts that are yours.
+      effects:
+        - { type: mental, action: start, care: therapy, conditionId: neurodivergence }
+  - id: people
+    label: Tell people what you need
+    visibleIf: { mental: { support: { gte: 35 } } }
+    outcome:
+      text: >-
+        Quiet rooms, advance notice, and nobody taking it personally when you
+        need to leave early. It turns out people will give you a lot, once they
+        know what to give.
+      effects:
+        - { type: mental, action: start, care: support, conditionId: neurodivergence }
+  - id: learn
+    label: Read what others have written
+    outcome:
+      text: >-
+        Page after page of strangers describing your life. You close the
+        laptop feeling less like an exception and more like part of a
+        very large, very interesting crowd.
+      effects:
+        - { type: stat, key: confidence, delta: 2 }
+        - { type: stat, key: stress, delta: -2 }

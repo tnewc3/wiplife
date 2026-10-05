@@ -1,0 +1,53 @@
+# First signs of an anxiety disorder, before anyone has named it. The condition is never named here.
+id: first_signs_worry
+title: Three in the morning
+text: >-
+  It is three in the morning and your mind is running a conversation that has
+  not happened, with every way it could go wrong. Your chest is tight, your
+  hands are cold, and you know the fear is out of proportion and cannot make
+  it stop. This is not the first night. It is starting to leak into the days.
+tone: dark
+category: mental
+rarity: common
+lifeStages: [child, teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 9 } }
+    - { health: { conditions: [anxiety_disorder], named: false } }
+weight: { base: 8 }
+cooldownYears: 3
+cast:
+  helper: { support: true, optional: true, presence: nearby }
+choices:
+  - id: appointment
+    label: Ask to see someone about it
+    outcome:
+      text: >-
+        You explain the three a.m. spirals to someone trained to hear them. The
+        relief of being taken seriously is almost as strong as the relief of
+        having a name for it.
+      effects:
+        - { type: mental, action: pay, item: psych_evaluation }
+        - { type: mental, action: diagnose, conditionId: anxiety_disorder, via: doctor }
+        - { type: schedule, eventId: dx_anxiety, inYears: [1, 1] }
+  - id: tell_someone
+    label: Tell {helper.name} what the nights are like
+    visibleIf: { role: helper }
+    outcome:
+      text: >-
+        {helper.name} listens and does not tell you to relax. "That sounds
+        exhausting," {helper.they} {helper:says|say}, and the plain kindness of it
+        loosens something in your chest. {helper.They} {helper:suggests|suggest}
+        you get it looked at, and mean it.
+      effects:
+        - { type: mental, action: confide, role: helper, then: { supportive: told_supportive, neutral: told_neutral, dismissive: told_dismissive } }
+        - { type: stat, key: stress, delta: -2 }
+  - id: white_knuckle
+    label: Grit your teeth and manage
+    outcome:
+      text: >-
+        You make lists, check the locks twice and avoid the things that set it
+        off. It works the way holding your breath works.
+      effects:
+        - { type: health, conditionId: anxiety_disorder, severity: 3 }
+        - { type: stat, key: stress, delta: 3 }

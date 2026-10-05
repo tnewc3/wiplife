@@ -1,0 +1,45 @@
+# Feeling better, and thinking about stopping medication.
+id: feeling_better_stop
+title: Better, so why bother
+text: >-
+  You feel good. Honestly good, for months. The small voice that has been
+  waiting to ask is finally loud enough: if you feel fine, why are you still
+  taking the pills? It is a reasonable question. It also happens to be the
+  one the prescriber warned you about.
+tone: neutral
+category: mental
+rarity: common
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 12 } }
+    - { health: { conditions: [depression, anxiety_disorder, ptsd], care: [medication], severity: { lt: 30 } } }
+weight: { base: 6 }
+cooldownYears: 4
+choices:
+  - id: keep_going
+    label: Keep taking it
+    outcome:
+      text: >-
+        You decide that feeling this good is the plan working, not a sign it is
+        no longer needed. The routine feels a little less like a burden after that.
+      effects:
+        - { type: stat, key: discipline, delta: 1 }
+  - id: ask_first
+    label: Ask the prescriber about easing off
+    outcome:
+      text: >-
+        The prescriber says yes, carefully, with a plan and a check-in. That
+        feels like exactly the right answer, and the right way to do it.
+      effects:
+        - { type: mental, action: pay, item: psych_evaluation }
+        - { type: stat, key: confidence, delta: 2 }
+  - id: stop_now
+    label: Stop it all at once
+    outcome:
+      text: >-
+        You stop. The first weeks are fine, which is the part that makes it
+        easy to believe you were right.
+      effects:
+        - { type: mental, action: stop, care: medication }
+        - { type: stat, key: confidence, delta: 1 }

@@ -20,6 +20,7 @@ import { afterMove, canTakeJob, checkJobFits, endJob, giveRaise, promote, startJ
 import { addScholarshipFund, leaveSchool } from '../education';
 import { applyIdentity, discoverTalent } from '../discovery';
 import { changeSeverity, setTreated } from '../health';
+import { applyMentalEffect } from '../mental/effects';
 import { sentence } from '../legal';
 import { changeRent, moveInTogether, moveTo, refreshHousingCost, sellHome, settleHousehold, supportingParent } from '../housing';
 import { costPrice, payCost, rentMonthsAmount } from '../costs';
@@ -264,6 +265,8 @@ const handlers: { [T in Effect['type']]: Handler<T> } = {
     if (effect.severity !== undefined) changeSeverity(state, effect.conditionId, effect.severity, ctx.content);
     if (effect.treated !== undefined) setTreated(state, effect.conditionId, effect.treated, ctx.content);
   },
+
+  mental: (state, effect, ctx) => applyMentalEffect(state, effect, ctx.cast, ctx.content),
 
   identity: (state, effect, ctx) => {
     const before = JSON.stringify(state.character.identity);

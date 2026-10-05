@@ -1,0 +1,65 @@
+# Web reaction (mental health): a partner has heard something about you from someone else.
+id: mental_whispers
+title: "Someone told me"
+text: >-
+  {npc.name} has heard {heard}, from someone who thought you had already said.
+  {npc.They} {npc:waits|wait} until you are alone to bring it up. It is not
+  anger. It is the hurt of finding out something about the person you share a
+  life with from a stranger.
+tone: serious
+category: web
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { role: npc, alive: true, kind: [partner, fiance, spouse], heard: { kinds: [mentalHealth], learned: [gossip] } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  npc: { support: true, presence: anywhere }
+choices:
+  - id: tell_all
+    label: Tell {npc.them} all of it
+    check:
+      base: 60
+      stats:
+        - { role: npc, key: affection, weight: 0.3 }
+        - { role: npc, key: trust, weight: 0.3 }
+      success:
+        text: >-
+          You tell it plainly, including why you did not say sooner. {npc.name}
+          takes a long breath and puts an arm around you. "Thank you for telling
+          me now," {npc.they} {npc:says|say}. "We'll do this together."
+        effects:
+          - { type: knowledge, role: npc, action: confirm }
+          - { type: relationship, role: npc, affection: 5, trust: 6 }
+          - { type: stat, key: stress, delta: -3 }
+      failure:
+        text: >-
+          Your explanation sounds like an excuse, even to you. {npc.name}
+          nods in the way people do when they have stopped believing the
+          sentence they are hearing. It will take time to mend.
+        effects:
+          - { type: knowledge, role: npc, action: confirm }
+          - { type: relationship, role: npc, affection: -3, trust: -5 }
+          - { type: stat, key: stress, delta: 3 }
+  - id: set_straight
+    label: Tell {npc.them} what is actually true
+    outcome:
+      text: >-
+        You separate what happened from what was said about it. {npc.name}
+        listens, and mostly believes you. There is a small question still in
+        {npc.their} face.
+      effects:
+        - { type: knowledge, role: npc, action: correct }
+        - { type: relationship, role: npc, trust: -1 }
+  - id: ask_to_keep_quiet
+    label: Ask {npc.them} to keep it between the two of you
+    outcome:
+      text: >-
+        {npc.name} agrees without hesitation, and then reaches for your hand.
+        It is not a secret between you any more, and that is a relief.
+      effects:
+        - { type: knowledge, role: npc, action: hush }
+        - { type: relationship, role: npc, trust: 2 }

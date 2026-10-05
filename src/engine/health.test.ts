@@ -165,11 +165,11 @@ describe('health effects and conditions', () => {
 
   it('gives, worsens, eases and treats a condition', () => {
     const life = adult();
-    const given = produce(life, (d) => applyEffects(d, [{ type: 'health', conditionId: 'depression', severity: 30 }], ctx(d)));
-    expect(given.health.conditions).toEqual([expect.objectContaining({ conditionId: 'depression', severity: 30, treated: false })]);
-    const treated = produce(given, (d) => applyEffects(d, [{ type: 'health', conditionId: 'depression', severity: -10, treated: true }], ctx(d)));
+    const given = produce(life, (d) => applyEffects(d, [{ type: 'health', conditionId: 'type_2_diabetes', severity: 30 }], ctx(d)));
+    expect(given.health.conditions).toEqual([expect.objectContaining({ conditionId: 'type_2_diabetes', severity: 30, treated: false })]);
+    const treated = produce(given, (d) => applyEffects(d, [{ type: 'health', conditionId: 'type_2_diabetes', severity: -10, treated: true }], ctx(d)));
     expect(treated.health.conditions[0]).toEqual(expect.objectContaining({ severity: 20, treated: true }));
-    const gone = produce(treated, (d) => applyEffects(d, [{ type: 'health', conditionId: 'depression', severity: -50 }], ctx(d)));
+    const gone = produce(treated, (d) => applyEffects(d, [{ type: 'health', conditionId: 'type_2_diabetes', severity: -50 }], ctx(d)));
     expect(gone.health.conditions).toEqual([]);
     // Easing a condition you don't have does nothing.
     const none = produce(life, (d) => applyEffects(d, [{ type: 'health', conditionId: 'cancer', severity: -10 }], ctx(d)));

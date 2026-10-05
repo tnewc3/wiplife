@@ -1,0 +1,65 @@
+# Web reaction (mental health): a parent or sibling has heard something about you from someone else.
+id: mental_family_hears
+title: They heard it from someone else
+text: >-
+  {npc.name} has heard {heard}, and not from you. {npc.They} {npc:comes|come}
+  to find you with the particular look of someone who has had a day to think
+  about it, hurt that you did not say and worried about what you might not
+  have said.
+tone: serious
+category: web
+rarity: common
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 14 } }
+    - { role: npc, alive: true, kind: [parent, sibling], heard: { kinds: [mentalHealth], learned: [gossip] } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  npc: { support: true, presence: anywhere }
+choices:
+  - id: talk_honestly
+    label: Tell {npc.them} everything
+    check:
+      base: 55
+      stats:
+        - { role: npc, key: affection, weight: 0.3 }
+        - { role: npc, key: trust, weight: 0.3 }
+      success:
+        text: >-
+          You tell it properly this time, and what you hear back is worry, not
+          judgment. "I wish you'd told me sooner," {npc.name} {npc:says|say},
+          "but I'm glad I know." It is a lot lighter after that.
+        effects:
+          - { type: knowledge, role: npc, action: confirm }
+          - { type: relationship, role: npc, affection: 5, trust: 6 }
+          - { type: stat, key: stress, delta: -3 }
+      failure:
+        text: >-
+          It comes out defensive, and {npc.name} flinches. "I just want to
+          help," {npc.they} {npc:says|say}, and what you hear is that you are
+          being managed. You both leave the conversation hurt.
+        effects:
+          - { type: knowledge, role: npc, action: confirm }
+          - { type: relationship, role: npc, affection: -2, trust: -3 }
+          - { type: stat, key: stress, delta: 3 }
+  - id: set_straight
+    label: Tell {npc.them} that is not quite what happened
+    outcome:
+      text: >-
+        You give {npc.name} the account you can stand behind. {npc.They}
+        {npc:nods|nod}, and you can see {npc.them} wondering how much to believe.
+      effects:
+        - { type: knowledge, role: npc, action: correct }
+        - { type: relationship, role: npc, trust: -2 }
+  - id: say_it_is_private
+    label: Say it is not something you want to discuss
+    outcome:
+      text: >-
+        "I'm not ready to talk about it," you say, and {npc.name} accepts that,
+        slowly. The offer to talk is left in the room between you like a
+        coat on a chair.
+      effects:
+        - { type: knowledge, role: npc, action: hush }
+        - { type: relationship, role: npc, trust: -1 }

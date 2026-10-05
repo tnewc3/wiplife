@@ -1,0 +1,50 @@
+# ADHD at work: the deadline that finally switches focus on.
+id: deadline_rush
+title: Due at nine
+text: >-
+  It has been sitting there for three weeks, and you have not been able to
+  start. At eleven the night before, the panic finally does what discipline
+  could not. Everything locks into place and the work pours out. It is going to
+  be good. It is also going to take something out of tomorrow.
+tone: neutral
+category: work
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { career: { employed: true, retired: false } }
+    - { health: { conditions: [adhd] } }
+weight: { base: 5 }
+cooldownYears: 3
+choices:
+  - id: all_nighter
+    label: Ride it until it is done
+    check:
+      base: 62
+      stats:
+        - { key: smarts, weight: 0.3 }
+        - { key: stress, weight: -0.2 }
+      success:
+        text: >-
+          You hand it in at nine, bleary and proud. It is excellent, and your boss
+          says so. You will need two days to recover.
+        effects:
+          - { type: job, action: performance, value: 8 }
+          - { type: stat, key: stress, delta: 4 }
+      failure:
+        text: >-
+          Somewhere around four a.m. the focus slips, and what you hand in is
+          a rushed version of what you meant to do. It is fine. Fine was not the plan.
+        effects:
+          - { type: job, action: performance, value: -4 }
+          - { type: stat, key: stress, delta: 5 }
+  - id: ask_for_time
+    label: Ask for more time
+    outcome:
+      text: >-
+        It is an awkward email to send. The answer is yes, with a day of
+        grace and a joke you decide to take well. You use the day to build a
+        system so this does not happen the same way twice.
+      effects:
+        - { type: job, action: performance, value: 1 }
+        - { type: stat, key: discipline, delta: 2 }

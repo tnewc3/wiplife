@@ -1,0 +1,49 @@
+# Picking up the pieces after a crisis (follow-up).
+id: crisis_aftermath
+title: After
+text: >-
+  The worst of it was {since}. It is behind you, and the days since have been
+  oddly ordinary: laundry, appointments, a pharmacy line. You are still tender,
+  and still here, and the people who treated you made it clear that
+  asking for help was the right call, not a failure. Now comes the quiet work
+  of keeping it that way.
+tone: neutral
+category: mental
+rarity: common
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { mental: { crisis: 5 } }
+    - { health: { conditions: [depression, anxiety_disorder, ptsd], named: true } }
+weight: { base: 8 }
+followUpOnly: true
+choices:
+  - id: keep_appointments
+    label: Keep every appointment
+    outcome:
+      text: >-
+        You go, even on the days it feels pointless. The therapist notes it in
+        your file without comment, and you start to trust the routine.
+      effects:
+        - { type: mental, action: start, care: therapy }
+        - { type: stat, key: discipline, delta: 2 }
+        - { type: stat, key: stress, delta: -3 }
+  - id: write_plan
+    label: Write a plan for the hard nights
+    outcome:
+      text: >-
+        You and a professional write it together: the signs, the people to call,
+        the places to go, the things that help. It fits on one page, and it is
+        taped inside a cupboard door where you will see it.
+      effects:
+        - { type: stat, key: confidence, delta: 3 }
+        - { type: stat, key: stress, delta: -2 }
+  - id: ease_back
+    label: Ease back into your life, one thing at a time
+    outcome:
+      text: >-
+        One thing at a time: a short shift, a coffee with a friend, a walk. By
+        spring you are doing more than you thought you could.
+      effects:
+        - { type: stat, key: happiness, delta: 3 }
+        - { type: stat, key: stress, delta: -2 }

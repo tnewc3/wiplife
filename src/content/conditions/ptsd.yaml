@@ -1,0 +1,26 @@
+id: ptsd
+name: PTSD
+noun: PTSD
+kind: mental
+blurb: What happened is over, but your body hasn't been told. Trauma-focused therapy and steady people help.
+onset:
+  chance:
+    - { at: 4, x: 0 }
+    - { at: 5, x: 0.012 }
+    - { at: 80, x: 0.012 }
+  factors:
+    - key: trauma
+      curve: [{ at: 0, x: 0.02 }, { at: 20, x: 0.5 }, { at: 50, x: 2.6 }, { at: 100, x: 6 }]
+    - key: support
+      curve: [{ at: 0, x: 1.5 }, { at: 50, x: 1 }, { at: 100, x: 0.7 }]
+    - key: geneticRisk
+      curve: [{ at: 0, x: 0.7 }, { at: 100, x: 1.6 }]
+  severity: { min: 25, max: 60 }
+course: { untreated: 2.5, treated: -7 }
+effects:
+  stress: { perYear: 4, limit: 90 }
+  happiness: { perYear: -3, limit: 20 }
+  health: { perYear: -0.4, limit: 45 }
+treatable: true
+diagnosableFrom: 6
+care: [therapy, medication, support]

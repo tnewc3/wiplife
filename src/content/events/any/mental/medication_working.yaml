@@ -1,0 +1,38 @@
+# Medication helping.
+id: medication_working
+title: The volume comes down
+text: >-
+  Somewhere in the last few weeks you stopped bracing. The thing that used to
+  shout in the background is just a murmur now, and you can hear yourself
+  think. You did not feel it happen. You only notice because you are doing the
+  dishes and humming.
+tone: light
+category: mental
+rarity: common
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 12 } }
+    - { health: { care: [medication] } }
+    - { mental: { sideEffects: false } }
+weight: { base: 5 }
+cooldownYears: 4
+choices:
+  - id: use_it
+    label: Use the room it gives you
+    outcome:
+      text: >-
+        You finally make the phone calls, answer the old emails, go for the
+        walk. Medication does not do the work. It makes the work possible.
+      effects:
+        - { type: stat, key: happiness, delta: 3 }
+        - { type: stat, key: fitness, delta: 1 }
+  - id: just_notice
+    label: Enjoy the quiet
+    outcome:
+      text: >-
+        You sit on the porch and notice that nothing is wrong. It is a bigger
+        deal than it sounds.
+      effects:
+        - { type: stat, key: happiness, delta: 2 }
+        - { type: stat, key: stress, delta: -3 }

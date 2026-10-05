@@ -1,4 +1,6 @@
 id: dark_season
+# M1: retired. Depression now begins unnamed, is recognized through first_signs_low and is cared for through the mental health effects.
+retired: true
 title: The gray months
 text: >-
   For weeks now, getting out of bed has felt like lifting a car. Food tastes
@@ -53,7 +55,7 @@ choices:
     outcome:
       text: It takes three tries to find the right one. The fourth session is the first good day in months.
       effects:
-        - { type: health, conditionId: depression, treated: true }
+        - { type: mental, action: start, care: therapy, conditionId: depression }
         - { type: debt, action: add, kind: medical, amount: 1200 }
         - { type: stat, key: stress, delta: -3 }
   - id: hide

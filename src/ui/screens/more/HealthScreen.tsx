@@ -7,6 +7,7 @@ import { Button } from '../../components/Button';
 import { Card } from '../../components/Card';
 import { ConfirmSheet } from '../../components/ConfirmSheet';
 import { StatBar } from '../../components/StatBar';
+import { MentalHealthSection } from './MentalHealthSection';
 import { CONDITION_KIND_LABELS, DOCTOR_BLOCK_LABELS, money, severityLabel, STAT_LABELS, treatmentLabel } from '../../labels';
 
 /** More → Health: how you're doing, your conditions, and seeing a doctor. */
@@ -57,6 +58,8 @@ export function HealthScreen({ life }: { life: LifeState }) {
           </ul>
         )}
       </Card>
+
+      <MentalHealthSection mental={view.mental} />
 
       <Card role="region" aria-labelledby="doctor-title">
         <h2 id="doctor-title" className="text-lg font-bold">

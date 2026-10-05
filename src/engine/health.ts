@@ -14,6 +14,8 @@ import type { ConditionDef, ContentBundle, DoctorResult, ONSET_FACTOR_KEYS } fro
 import { evaluate } from './conditions';
 import { curveAt } from './curve';
 import { addDebt, isIndependent, setMinPayment, wholeDollars } from './finance';
+import { rollDiagnosis } from './mental/diagnose';
+import { circleSupport, isMentalKind } from './mental/query';
 import { clampInt } from './random';
 import { chance, nextInt } from './rng';
 import { writeFromGroup } from './systems/history';
@@ -35,7 +37,7 @@ export function addictions(state: LifeState, content: ContentBundle): HealthCond
   return state.health.conditions.filter((c) => content.conditions[c.conditionId]?.kind === 'addiction');
 }
 
-function healthHistory(state: LifeState, key: 'diagnosed' | 'treated' | 'recovered', def: ConditionDef, content: ContentBundle): void {
+export function healthHistory(state: LifeState, key: 'diagnosed' | 'treated' | 'recovered' | 'relapsed', def: ConditionDef, content: ContentBundle): void {
   writeFromGroup(state, content.text.history.health[key], ['health', key, `condition:${def.id}`], { values: { condition: def.noun } }, content);
 }
 
@@ -77,8 +79,18 @@ export function addCondition(state: LifeState, conditionId: Id, severity: number
     had.severity = clampInt(had.severity + severity, 1, 100);
     return;
   }
-  state.health.conditions.push({ conditionId, since: state.currentYear, severity: clampInt(severity, 1, 100), treated: false });
-  healthHistory(state, 'diagnosed', def, content);
+  const condition: HealthCondition = { conditionId, since: state.currentYear, severity: clampInt(severity, 1, 100), treated: false };
+  state.health.conditions.push(condition);
+  if (!isMentalKind(def.kind)) {
+    healthHistory(state, 'diagnosed', def, content);
+    return;
+  }
+  // M1: a mental health condition is named only after a diagnosis (./mental/diagnose.ts), unless it
+  // is one you recovered from and know: it comes back with its name.
+  if (state.health.mental.past[conditionId]?.diagnosed) {
+    condition.diagnosed = state.currentYear;
+    healthHistory(state, 'relapsed', def, content);
+  }
 }
 
 /** Moves a condition's severity; at 0 it is gone (with a history entry). */
@@ -95,21 +107,34 @@ export function changeSeverity(state: LifeState, conditionId: Id, delta: number,
   }
   state.health.conditions = state.health.conditions.filter((c) => c !== had);
   const def = content.conditions[conditionId];
-  if (def) healthHistory(state, 'recovered', def, content);
+  if (!def) return;
+  if (!isMentalKind(def.kind)) {
+    healthHistory(state, 'recovered', def, content);
+    return;
+  }
+  // M1: you can recover from a mental health condition, and it can come back. You only remember
+  // recovering from one you knew you had.
+  const past = state.health.mental.past[conditionId];
+  state.health.mental.past[conditionId] = { year: state.currentYear, times: (past?.times ?? 0) + 1, diagnosed: had.diagnosed !== undefined };
+  if (had.diagnosed !== undefined) healthHistory(state, 'recovered', def, content);
 }
 
 /** Marks a condition you have as treated or not (a history entry when treatment starts). */
 export function setTreated(state: LifeState, conditionId: Id, treated: boolean, content: ContentBundle): void {
   const had = conditionOf(state, conditionId);
   if (!had || had.treated === treated) return;
-  had.treated = treated;
   const def = content.conditions[conditionId];
+  // M1: care for a mental health condition is chosen through ./mental/care.ts, not marked.
+  if (def && isMentalKind(def.kind)) return;
+  had.treated = treated;
   if (treated && def) healthHistory(state, 'treated', def, content);
 }
 
 /** The value an onset factor reads: a stat, a trait, vice or genetic risk. */
-function factorValue(state: LifeState, key: (typeof ONSET_FACTOR_KEYS)[number]): number {
+function factorValue(state: LifeState, key: (typeof ONSET_FACTOR_KEYS)[number], content: ContentBundle): number {
   const c = state.character;
+  if (key === 'trauma') return state.health.mental.trauma;
+  if (key === 'support') return circleSupport(state, content);
   if (key === 'vice' || key === 'geneticRisk') return c.hidden[key];
   if (key in c.stats) return c.stats[key as keyof typeof c.stats];
   return c.personality[key as keyof typeof c.personality];
@@ -123,10 +148,19 @@ function factorValue(state: LifeState, key: (typeof ONSET_FACTOR_KEYS)[number]):
 export function onsetChance(state: LifeState, def: ConditionDef, content: ContentBundle): number {
   const onset = def.onset;
   if (!onset || def.retired || conditionOf(state, def.id)) return 0;
-  if (state.health.conditions.length >= content.balance.health.maxConditions) return 0;
+  // Born-with conditions (M1) don't count toward the limit.
+  const held = state.health.conditions.filter((c) => content.conditions[c.conditionId]?.kind !== 'neuro').length;
+  if (held >= content.balance.health.maxConditions) return 0;
   if (!evaluate(onset.requires, state, { roles: 'strict' })) return 0;
   let p = curveAt(onset.chance, state.character.age);
-  for (const f of onset.factors ?? []) p *= curveAt(f.curve, factorValue(state, f.key));
+  for (const f of onset.factors ?? []) p *= curveAt(f.curve, factorValue(state, f.key, content));
+  // M1: a condition you recovered from comes back more easily, less so as the years pass.
+  const past = state.health.mental.past[def.id];
+  if (past) {
+    const relapse = content.balance.mentalHealth.course.relapse;
+    const left = Math.max(0, 1 - (state.currentYear - past.year) / relapse.years);
+    p *= 1 + (relapse.mult - 1) * left;
+  }
   return Math.min(1, Math.max(0, p));
 }
 
@@ -163,7 +197,7 @@ export function doctorQuote(state: LifeState, content: ContentBundle): { visit: 
   const visit = wholeDollars(content.balance.health.doctor.visitCost * (city?.costOfLiving ?? 1));
   const treatment = state.health.conditions.reduce((sum, c) => {
     const def = content.conditions[c.conditionId];
-    return sum + (def && def.treatable && !c.treated ? (def.costs?.treatment ?? 0) : 0);
+    return sum + (def && def.treatable && !c.treated && !isMentalKind(def.kind) ? (def.costs?.treatment ?? 0) : 0);
   }, 0);
   return { visit, treatment: wholeDollars(treatment) };
 }
@@ -181,9 +215,11 @@ export function seeDoctor(state: LifeState, content: ContentBundle): DoctorResul
   let cost = doctorQuote(state, content).visit;
   let treated = false;
   let managed = false;
+  // M1: a doctor may put a name to something you have been carrying (care for it is chosen on the Health page).
+  const named = rollDiagnosis(state, 'doctor', content).length > 0;
   for (const condition of [...state.health.conditions]) {
     const def = content.conditions[condition.conditionId];
-    if (!def || condition.treated) continue;
+    if (!def || condition.treated || isMentalKind(def.kind)) continue;
     if (def.treatable) {
       if (chance(state.rng, curveAt(d.treatChance, condition.severity))) {
         cost += def.costs?.treatment ?? 0;
@@ -198,6 +234,7 @@ export function seeDoctor(state: LifeState, content: ContentBundle): DoctorResul
     }
   }
   payMedical(state, cost, content);
+  if (named) return 'diagnosed';
   if (treated) return 'treated';
   if (managed) return 'managed';
   const s = state.character.stats;

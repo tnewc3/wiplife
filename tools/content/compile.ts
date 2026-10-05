@@ -242,7 +242,8 @@ export async function compileContent({ contentDir, appVersion, overlayDir }: Com
   for (const [singletonPath, value] of [...singletons.entries()].sort(byKey)) {
     const [group, name] = singletonPath.split('/') as [string, string];
     const target = (body[group] ??= {}) as Record<string, unknown>;
-    target[name] = value;
+    // A hyphenated file name is a camelCase key: balance/mental-health.yaml is bundle.balance.mentalHealth.
+    target[name.replace(/-([a-z])/g, (_, c: string) => c.toUpperCase())] = value;
   }
 
   const hash = createHash('sha256').update(JSON.stringify(body)).digest('hex').slice(0, 10);

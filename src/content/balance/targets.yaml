@@ -48,6 +48,7 @@ health:
   # Lives that ever have each condition (every active condition needs one).
   conditions:
     alcohol_addiction: { min: 0.07, max: 0.18 }
+    adhd: { min: 0.04, max: 0.16 }
     anxiety_disorder: { min: 0.12, max: 0.3 }
     back_injury: { min: 0.4, max: 0.8 }
     broken_bone: { min: 0.3, max: 0.65 }
@@ -59,7 +60,9 @@ health:
     gambling_addiction: { min: 0.01, max: 0.07 }
     heart_disease: { min: 0.25, max: 0.55 }
     high_blood_pressure: { min: 0.3, max: 0.6 }
+    neurodivergence: { min: 0.03, max: 0.14 }
     pneumonia: { min: 0.12, max: 0.35 }
+    ptsd: { min: 0.03, max: 0.16 }
     treatable_infection: { min: 0, max: 0.25 }
     type_2_diabetes: { min: 0.1, max: 0.25 }
 
@@ -182,6 +185,25 @@ web:
   maxEventShare: 0.2
   maxBeginYearMs: 20
   maxWebStepMs: 6
+
+# M1: mental health (tools/simulate/mental.ts), on the careful player's lives.
+mental:
+  namedShare: { min: 0.4, max: 0.98 }
+  neuroNamedShare: { min: 0.3, max: 0.98 }
+  yearsToNaming: { min: 0, max: 8 }
+  inheritance: { min: 2 }
+  recovered: { min: 0.2, max: 0.95 }
+  relapse: { min: 0.05, max: 0.7 }
+  careUptake: { min: 0.4, max: 0.98 }
+  careEffect: { max: -1 }
+  supportEffect: { max: -0.5 }
+  noticed: { min: 0.4, max: 0.99 }
+  householdNotice: { min: 1.5 }
+  dismissive: { min: 0.05, max: 0.4 }
+  crisisLives: { min: 0.01, max: 0.15 }
+  crisisToCare: { min: 0.5, max: 1 }
+  secretKnown: { min: 0.3, max: 1 }
+  eventShare: { max: 0.1 }
 
 coverage:
   minEvents: 300

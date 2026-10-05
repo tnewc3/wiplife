@@ -30,9 +30,15 @@ export const scoreKeySchema = z.enum([...STAT_KEYS, ...TRAIT_KEYS, ...HIDDEN_KEY
 export type EffectStatKey = z.infer<typeof scoreKeySchema>;
 
 /** Kinds of health condition (Stage 9). */
-export const CONDITION_KINDS = ['illness', 'chronic', 'injury', 'mental', 'addiction'] as const;
+/** M1: 'mental' conditions (depression, anxiety, PTSD) come and go; 'neuro' ones (ADHD, neurodivergence) are born with you. Both are named only after diagnosis. */
+export const CONDITION_KINDS = ['illness', 'chronic', 'injury', 'mental', 'neuro', 'addiction'] as const;
 export const conditionKindSchema = z.enum(CONDITION_KINDS);
 export type ConditionKind = z.infer<typeof conditionKindSchema>;
+
+/** M1: the ways of caring for a mental health condition. */
+export const MENTAL_CARES = ['therapy', 'medication', 'support'] as const;
+export type MentalCareId = (typeof MENTAL_CARES)[number];
+export const mentalCareSchema = z.enum(MENTAL_CARES);
 
 /**
  * What self-discovery can bring to the surface (Stage 9): who you're

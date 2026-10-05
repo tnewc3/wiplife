@@ -1,0 +1,3 @@
+therapist:
+  talked: { events: [test_doctor] }
+  diagnosed: { events: [test_doctor] }

@@ -9,6 +9,7 @@ import { lifeHolds } from './lives/query';
 import { heardHolds, ITEM_ROLE, tieHolds } from './web/query';
 import { whereabouts } from './presence';
 import { mostMissed, totalDebt } from './finance';
+import { circleSupport } from './mental/query';
 import { romanceStatus, yearsInKind } from './relationships';
 import type { Id, LifeState } from './types';
 
@@ -147,6 +148,11 @@ export function evaluate(condition: Condition | undefined, state: LifeState, ctx
       if (q.conditions && !q.conditions.includes(had.conditionId)) return false;
       if (q.treated !== undefined && had.treated !== q.treated) return false;
       if (q.severity && !compare(had.severity, q.severity)) return false;
+      // M1: named once diagnosed; the year it was; how you care for it.
+      if (q.named !== undefined && (had.diagnosed !== undefined) !== q.named) return false;
+      if (q.within !== undefined && !(had.diagnosed !== undefined && state.currentYear - had.diagnosed <= q.within)) return false;
+      if (q.care && !q.care.some((c) => (had.care ?? []).includes(c))) return false;
+      if (q.uncared !== undefined && ((had.care ?? []).length === 0) !== q.uncared) return false;
       return true;
     });
   }
@@ -206,8 +212,28 @@ export function evaluate(condition: Condition | undefined, state: LifeState, ctx
       if (condition.movedOut !== undefined && (person.child?.movedOutYear !== undefined) !== condition.movedOut) return false;
       if (condition.life && !lifeHolds(condition.life, person, state.currentYear, ctx.content?.balance.people.trouble.serious ?? 35)) return false;
       if (condition.heard && !heardHolds(condition.heard, state, id, ctx.content, ctx.cast?.[ITEM_ROLE])) return false;
+      if (condition.mental) {
+        const noticing = state.health.mental.noticed[id];
+        if (condition.mental.noticed !== undefined && (noticing !== undefined) !== condition.mental.noticed) return false;
+        if (condition.mental.reaction && !(noticing && condition.mental.reaction.includes(noticing.reaction))) return false;
+      }
       return true;
     });
+  }
+  if ('mental' in condition) {
+    const q = condition.mental;
+    const m = state.health.mental;
+    if (q.trauma && !compare(m.trauma, q.trauma)) return false;
+    if (q.support && !(ctx.content && compare(circleSupport(state, ctx.content), q.support))) return false;
+    if (q.crisis !== undefined) {
+      const since = m.crisisYear === undefined ? undefined : state.currentYear - m.crisisYear;
+      const held = typeof q.crisis === 'boolean' ? (since !== undefined) === q.crisis : since !== undefined && since <= q.crisis;
+      if (!held) return false;
+    }
+    if (q.recovered && !q.recovered.some((id) => m.past[id] !== undefined)) return false;
+    if (q.noticed !== undefined && (Object.keys(m.noticed).length > 0) !== q.noticed) return false;
+    if (q.sideEffects !== undefined && (m.sideEffectYear !== undefined && state.currentYear - m.sideEffectYear <= 1) !== q.sideEffects) return false;
+    return true;
   }
   if ('tie' in condition) {
     const q = condition.tie;

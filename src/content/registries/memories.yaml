@@ -203,3 +203,6 @@ tags:
   asked_to_keep_quiet: You asked {npc.them} to keep something quiet
   broke_your_confidence: Told people what you asked {npc.them} to keep quiet
   heard_it_from_others: Heard it from someone else before you told {npc.them}
+  # M1: mental health.
+  brushed_you_off: Brushed off how you were struggling
+  stood_by_you_struggling: Stood by you when you were struggling

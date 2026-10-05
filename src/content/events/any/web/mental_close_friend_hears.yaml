@@ -1,0 +1,59 @@
+# Web reaction (mental health): a friend has heard something about you from someone else.
+id: mental_close_friend_hears
+title: "Why didn't you tell me?"
+text: >-
+  {npc.name} has heard {heard}, and it is not the news that stings. It is
+  that you did not tell {npc.them}. "I'd have wanted to know," {npc.they}
+  {npc:says|say}. "I thought we were closer than that."
+tone: serious
+category: web
+rarity: common
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 14 } }
+    - { role: npc, alive: true, kind: [friend], heard: { kinds: [mentalHealth], learned: [gossip] } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  npc: { support: true, presence: anywhere }
+choices:
+  - id: apologize
+    label: Tell {npc.them} why you kept it quiet
+    check:
+      base: 55
+      stats:
+        - { role: npc, key: affection, weight: 0.3 }
+        - { role: npc, key: trust, weight: 0.2 }
+      success:
+        text: >-
+          You explain that it was not about {npc.them}, only about how hard it
+          was to say out loud. {npc.name} hugs you. "Next time, tell me," {npc.they}
+          {npc:says|say}. "Even if it is just 'I'm having a bad day.'"
+        effects:
+          - { type: knowledge, role: npc, action: confirm }
+          - { type: relationship, role: npc, affection: 5, trust: 6 }
+          - { type: memory, role: npc, tag: you_confided }
+      failure:
+        text: >-
+          Your explanation does not land. {npc.name} says it is fine in a voice
+          that makes clear it is not. The friendship is still there. It has a small crack in it.
+        effects:
+          - { type: knowledge, role: npc, action: confirm }
+          - { type: relationship, role: npc, affection: -3, trust: -3 }
+  - id: set_straight
+    label: Tell {npc.them} the real story
+    outcome:
+      text: >-
+        You correct what you can. {npc.name} listens, and some of it sticks,
+        and some of it does not. That is how stories work.
+      effects:
+        - { type: knowledge, role: npc, action: correct }
+        - { type: stat, key: stress, delta: 1 }
+  - id: let_it_be
+    label: Say you would rather not get into it
+    outcome:
+      text: >-
+        {npc.name} drops it, and it hangs in the air for the rest of the evening.
+      effects:
+        - { type: relationship, role: npc, trust: -2 }

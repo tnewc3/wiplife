@@ -1,0 +1,8 @@
+# The events that answer seeing a therapist (More → Health → Mental health).
+# The engine picks one that fits (by weight and requirements). Every event
+# listed must be followUpOnly: it only happens this way.
+#   talked     nothing was named: the sessions still help
+#   diagnosed  a condition was named (the same events as registries/health.yaml diagnosed)
+therapist:
+  talked: { events: [therapist_talked] }
+  diagnosed: { events: [dx_depression, dx_anxiety, dx_ptsd, dx_adhd, dx_neurodivergence] }
