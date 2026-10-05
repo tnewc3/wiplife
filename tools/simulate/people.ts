@@ -383,6 +383,8 @@ export function measureFullCircle(content: ContentBundle, people: number, years:
       d.relationships[id] = { personId: id, kind, status: 'active', affection: 40 + (i % 50), trust: 50, memories: [], since: d.currentYear - 3 };
     }
   });
+  // One year first, untimed: the first call pays for compiling the code, which isn't what a phone spends each year.
+  beginYear(life, content);
   const times: number[] = [];
   for (let i = 0; i < years; i++) {
     const t0 = performance.now();

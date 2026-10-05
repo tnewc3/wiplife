@@ -136,11 +136,11 @@ function contextTies(ctx: Ctx): void {
     .filter((id) => view.relationships[id]!.status === 'active' && inCircle(view, id) && FRIEND_TIE_KINDS.includes(view.relationships[id]!.kind));
   if (pool.length < 2) return;
   let made = 0;
+  const cur = { ...view, web };
   for (let i = 0; i < c.draws; i++) {
     const a = pool[nextInt(rng, 0, pool.length - 1)]!;
     const b = pool[nextInt(rng, 0, pool.length - 1)]!;
     if (made >= c.maxPerYear) break;
-    const cur = { ...view, web };
     if (a === b || !canTie(cur, a, b) || tieCount(web, a) >= cap || tieCount(web, b) >= cap) continue;
     const pa = view.people[a]!;
     const pb = view.people[b]!;
@@ -411,5 +411,22 @@ export function runWeb(state: LifeState, content: ContentBundle): void {
   publicSecrets(ctx);
 
   if (open(ctx)) queueTieEvents(ctx, Math.max(0, content.balance.pacing.cap - dueNow(state)));
-  state.web = web;
+  writeBack(state, view.web, web);
+}
+
+/**
+ * Writes the changes to the web into the life, tie by tie and item by item, so
+ * what didn't change stays as it was (cheaper for the draft to finish, and for
+ * the state to be frozen).
+ */
+function writeBack(state: LifeState, before: WebState, after: WebState): void {
+  const target = state.web;
+  for (const key of Object.keys(target.ties)) if (!after.ties[key]) delete target.ties[key];
+  for (const [key, tie] of Object.entries(after.ties)) {
+    const was = before.ties[key];
+    if (!was || JSON.stringify(was) !== JSON.stringify(tie)) target.ties[key] = tie;
+  }
+  if (JSON.stringify(before.items) !== JSON.stringify(after.items)) target.items = after.items;
+  if (before.nextItem !== after.nextItem) target.nextItem = after.nextItem;
+  if (before.seen.length !== after.seen.length || before.seen[before.seen.length - 1] !== after.seen[after.seen.length - 1]) target.seen = after.seen;
 }
