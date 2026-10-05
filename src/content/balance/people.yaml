@@ -188,3 +188,6 @@ care:
   illnessBoost: 2.5
   # A year of it, at the national average: a relative at your home, and paid care.
   cost: { home: 6000, paid: 30000 }
+  # You never pay more than this share of a year's gross income; the rest falls
+  # to the family, the state and the relative's own savings.
+  incomeShare: 0.2

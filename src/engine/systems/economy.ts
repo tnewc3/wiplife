@@ -151,7 +151,7 @@ export function runEconomy(state: LifeState, content: ContentBundle): void {
   let living = livingCost(state, content);
   let kids = childCosts(state, content);
   const { paid: supportPaid, received: supportReceived } = childSupportDue(state, gross, content);
-  const care = careCosts(state, content);
+  const care = careCosts(state, content, gross);
   const before = f.savings + interest + gross + retirement + supportReceived - tax - garnished;
   let support = 0;
   if (state.housing.kind === 'with_parents' && before < housing + living + kids) {

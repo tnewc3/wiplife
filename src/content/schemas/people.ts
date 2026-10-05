@@ -243,6 +243,8 @@ export const peopleBalanceSchema = z.strictObject({
     illnessBoost: z.number().min(1).max(10),
     /** What it costs you a year, at the national average (scaled to your city): a relative at your home, and paid care. */
     cost: z.strictObject({ home: z.int().min(0), paid: z.int().min(0) }),
+    /** The most care can take of a year's gross income; the family and the public cover the rest. */
+    incomeShare: z.number().min(0).max(1),
   }),
 });
 export type PeopleBalance = z.infer<typeof peopleBalanceSchema>;

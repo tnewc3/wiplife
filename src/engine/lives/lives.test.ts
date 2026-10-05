@@ -458,7 +458,7 @@ describe('care for aging parents', () => {
     let life = produce(needing(), (d) => lifeHelp(d, 'p', 'pay_care', rng, content));
     expect(life.people.p!.life!.care).toBe('paid');
     const paid = produce(life, (d) => runEconomy(d, content));
-    expect(paid.finances.lastLedger!.care).toBe(careCosts(life, content));
+    expect(paid.finances.lastLedger!.care).toBe(careCosts(life, content, paid.finances.lastLedger!.gross));
     expect(paid.finances.lastLedger!.net).toBe(
       paid.finances.lastLedger!.gross + paid.finances.lastLedger!.retirement + paid.finances.lastLedger!.interest + paid.finances.lastLedger!.supportReceived - paid.finances.lastLedger!.tax - paid.finances.lastLedger!.housing - paid.finances.lastLedger!.living - paid.finances.lastLedger!.children - paid.finances.lastLedger!.care - paid.finances.lastLedger!.supportPaid - paid.finances.lastLedger!.debtPayments,
     );
@@ -467,6 +467,16 @@ describe('care for aging parents', () => {
       d.people.p!.deathYear = d.currentYear;
     });
     expect(careCosts(life, content)).toBe(0);
+  });
+
+  it("never takes more than its share of a year's income", () => {
+    const rng = createRng('care');
+    const life = produce(needing(), (d) => lifeHelp(d, 'p', 'pay_care', rng, content));
+    const uncapped = careCosts(life, content);
+    const share = content.balance.people.care.incomeShare;
+    expect(careCosts(life, content, 1_000_000)).toBe(uncapped);
+    expect(careCosts(life, content, 40_000)).toBe(Math.min(uncapped, Math.floor(40_000 * share)));
+    expect(careCosts(life, content, 0)).toBe(0);
   });
 
   it('can be left to the family, and cannot be taken in by someone living on the street or in prison', () => {
