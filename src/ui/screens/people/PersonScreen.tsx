@@ -9,7 +9,7 @@ import { Button } from '../../components/Button';
 import { Card } from '../../components/Card';
 import { ConfirmSheet } from '../../components/ConfirmSheet';
 import { InteractSheet } from '../../components/InteractSheet';
-import { ACTION_LABELS, actionConfirmation, CUSTODY_LABELS, gradesPhrase, lifeRows, moodPhrase, ORIGIN_LABELS, parentingStyleLine, personLine, timelineAgeLabel, troubleLine } from '../../labels';
+import { ACTION_LABELS, actionConfirmation, CONNECTIONS_TITLE, connectionLine, CUSTODY_LABELS, HEARD_TITLE, heardLine, gradesPhrase, lifeRows, moodPhrase, ORIGIN_LABELS, parentingStyleLine, personLine, timelineAgeLabel, troubleLine } from '../../labels';
 
 /**
  * One person's page: who they are to you, how they feel about you (bars, no
@@ -99,6 +99,44 @@ export function PersonScreen({ life, personId }: { life: LifeState; personId: st
               </dd>
             </div>
           </dl>
+        </Card>
+      )}
+
+      {detail.connections.length > 0 && (
+        <Card role="region" aria-labelledby="connections-title" data-testid="connections">
+          <h3 id="connections-title" className="text-lg font-bold">
+            {CONNECTIONS_TITLE}
+          </h3>
+          <ul className="mt-2 flex flex-col divide-y divide-border" aria-label={CONNECTIONS_TITLE}>
+            {detail.connections.map((c) => {
+              const line = connectionLine(c);
+              return (
+                <li key={c.personId} className="flex min-w-0 flex-col py-2" data-testid={`connection-${c.personId}`}>
+                  <span className="break-words [overflow-wrap:anywhere]">{line.who}</span>
+                  <span className="text-sm text-muted">{line.how}</span>
+                </li>
+              );
+            })}
+          </ul>
+        </Card>
+      )}
+
+      {detail.heard.length > 0 && (
+        <Card role="region" aria-labelledby="heard-title" data-testid="heard">
+          <h3 id="heard-title" className="text-lg font-bold">
+            {HEARD_TITLE}
+          </h3>
+          <ul className="mt-2 flex flex-col divide-y divide-border" aria-label={HEARD_TITLE}>
+            {detail.heard.map((h) => {
+              const line = heardLine(firstName, h);
+              return (
+                <li key={h.itemId} className="flex min-w-0 flex-col py-2" data-testid={`heard-${h.itemId}`}>
+                  <span className="break-words [overflow-wrap:anywhere]">{line.text}</span>
+                  <span className="text-sm text-muted">{line.note}</span>
+                </li>
+              );
+            })}
+          </ul>
         </Card>
       )}
 

@@ -1,0 +1,41 @@
+# Web (tieClose): two siblings have become close.
+id: siblings_close
+title: Thick as thieves
+text: >-
+  {a.name} and {b.name} have grown close in a way you didn't see coming.
+  They finish each other's sentences. They've started to keep a group chat,
+  and you only know because it chimed during dinner.
+tone: light
+category: web
+rarity: common
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 14 } }
+    - { tie: { a: a, b: b, kind: [siblings], status: [close] } }
+    - { role: a, alive: true, kind: [sibling] }
+    - { role: b, alive: true, kind: [sibling] }
+weight: { base: 7 }
+followUpOnly: true
+cast:
+  a: { support: true, presence: anywhere }
+  b: { support: true, presence: anywhere }
+choices:
+  - id: join_in
+    label: Ask to be added to the chat
+    outcome:
+      text: >-
+        You are added within a minute, with a GIF of a raccoon that is
+        apparently about you. By the end of the week you've seen all of it.
+      effects:
+        - { type: relationship, role: a, affection: 3, trust: 2 }
+        - { type: relationship, role: b, affection: 3, trust: 2 }
+        - { type: stat, key: happiness, delta: 2 }
+  - id: leave_them_to_it
+    label: Be glad for them, and leave them to it
+    outcome:
+      text: >-
+        It's good to see. You send nothing, and feel, for a moment, very
+        slightly left out, and then not.
+      effects:
+        - { type: stat, key: happiness, delta: 1 }

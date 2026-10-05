@@ -59,6 +59,7 @@ import {
 } from './interactions';
 import { chooseWillActions, rollWillProfile } from './heirs';
 import { emptyPeopleReport, formatPeople, peopleTargets, PeopleWatcher, PipelineTimer, type PeopleReport } from './people';
+import { emptyWebReport, formatWeb, webTargets, WebWatcher, type WebReport } from './web';
 import { YEAR_PIPELINE } from '../../src/engine/pipeline';
 import { chooseFamilyActions, chooseParentingPlans, emptyFamilyReport, FamilyWatcher, formatFamily, familyTargets, rollFamilyProfile, type FamilyReport } from './family';
 
@@ -130,6 +131,8 @@ export interface SimulationReport {
   family: FamilyReport;
   /** E3: the lives of the people you know, measured. */
   people: PeopleReport;
+  /** E4: the social web, measured. */
+  web: WebReport;
 }
 
 /** C1: the consistency pass, measured. */
@@ -758,6 +761,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
   const interactions = emptyInteractionReport(playerKind as InteractionPlayer, content);
   const family = emptyFamilyReport();
   const people = emptyPeopleReport();
+  const web = emptyWebReport();
   const peopleTimer = new PipelineTimer(people);
   const timedSteps = peopleTimer.steps(YEAR_PIPELINE);
   // Found out: the follow-ups only this system schedules (affair_discovered also answers an older chain, so it counts only for an unfaithful life).
@@ -792,6 +796,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
     const familyProfile = { ...rollFamilyProfile(familyRng), ...(playerKind === 'spammer' ? { wantsKids: false } : {}) };
     const familyWatcher = new FamilyWatcher(family, familyProfile, playerKind === 'careful');
     const peopleWatcher = new PeopleWatcher(people, content);
+    const webWatcher = new WebWatcher(web, content);
     const profile = rollMoneyProfile(player);
     // E2b: whether this life writes a will, and who it names.
     const willRng = createRng(`${seed}:will`);
@@ -941,6 +946,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
       const yearBefore = life;
       life = peopleTimer.time(() => beginYear(yearBefore, content, timedSteps));
       peopleWatcher.observe(yearBefore, life);
+      webWatcher.observe(yearBefore, life);
       watch(life);
       options.onYear?.(life);
       const stage = perYear[life.character.lifeStage];
@@ -978,6 +984,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
     }
     options.onLife?.(life);
     peopleWatcher.finish();
+    webWatcher.finish(life);
     familyWatcher.finish(life, firesThisLife);
     // E1: who reached maximum affection, being found out, and a sample of lives rebuilt from their input logs.
     interactions.lives++;
@@ -1299,6 +1306,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
     interactions,
     family,
     people,
+    web,
     consistency: {
       violations,
       happiness: spreadOf(lifetimeHappiness),
@@ -1430,6 +1438,7 @@ export function formatReport(report: SimulationReport, content: ContentBundle): 
   lines.push(...formatInteractions(report.interactions, content), '  targets (src/content/balance/targets.yaml):', ...interactionTargets(report, content).map((r) => target(r.label, r.value, r.goal, r.met)));
   lines.push(...formatFamily(report.family, content), '  targets (src/content/balance/targets.yaml):', ...familyTargets(report.family, content).map((r) => target(r.label, r.value, r.goal, r.met)));
   lines.push(...formatPeople(report.people, content, report.relationships.divorces), '  targets (src/content/balance/targets.yaml):', ...peopleTargets(report, content).map((r) => target(r.label, r.value, r.goal, r.met)));
+  lines.push('', ...formatWeb(report.web, content), '  targets (src/content/balance/targets.yaml):', ...webTargets(report, content).map((r) => target(r.label, r.value, r.goal, r.met)));
   lines.push(`Events fired: ${report.totalEventsFired}`);
   lines.push('  event'.padEnd(30) + 'fired'.padStart(8) + 'share'.padStart(8) + 'lives'.padStart(9));
   for (const e of [...report.events].sort((a, b) => b.fired - a.fired)) {

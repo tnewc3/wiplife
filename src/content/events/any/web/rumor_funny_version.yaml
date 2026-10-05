@@ -1,0 +1,50 @@
+# Web reaction (jobLoss): someone has heard the funny version of how you left your job.
+id: rumor_funny_version
+title: The legend of how you left
+text: >-
+  {npc.name} can barely get it out. {npc.They} heard {heard}, and wants to
+  know if it's true. {npc.They} {npc:is|are} already laughing, and so, you
+  realize, is half the group chat.
+tone: light
+category: web
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { role: npc, alive: true, kind: [friend, sibling], heard: { kinds: [jobLoss], light: true, learned: [gossip] } }
+weight: { base: 9 }
+followUpOnly: true
+cast:
+  npc: { support: true, presence: anywhere }
+choices:
+  - id: play_along
+    label: Neither confirm nor deny
+    outcome:
+      text: >-
+        "A magician never reveals." The legend grows by a detail or two that
+        evening, none of them yours. You decide, on balance, that you can live
+        with being the person who did that.
+      effects:
+        - { type: relationship, role: npc, affection: 3 }
+        - { type: stat, key: happiness, delta: 2 }
+  - id: set_straight
+    label: Give {npc.them} the real, much duller version
+    outcome:
+      text: >-
+        "Nobody screamed. There was no cake." {npc.name} looks genuinely
+        disappointed. "Oh," {npc.they} {npc:says|say}. "That's way worse."
+      effects:
+        - { type: knowledge, role: npc, action: correct }
+        - { type: relationship, role: npc, trust: 2 }
+        - { type: memory, role: npc, tag: you_set_it_straight }
+  - id: groan
+    label: Groan, and bury your face in your hands
+    outcome:
+      text: >-
+        It is not, strictly speaking, what happened. It is an improvement on
+        what happened, and you can't be too angry at a story that makes you
+        sound that brave.
+      effects:
+        - { type: relationship, role: npc, affection: 2 }
+        - { type: stat, key: happiness, delta: 1 }

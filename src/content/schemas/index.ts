@@ -20,6 +20,7 @@ import { legalBalanceSchema, legalRegistrySchema, offenseSchema } from './legal'
 import { discoveryBalanceSchema, discoveryRegistrySchema, discoveryTextSchema } from './discovery';
 import { interactionRegistrySchema, interactionSchema, interactionsBalanceSchema } from './interactions';
 import { newsTextSchema, peopleBalanceSchema, peopleRegistrySchema } from './people';
+import { webBalanceSchema, webRegistrySchema } from './web';
 import { estateRegistrySchema, familyBalanceSchema, familyRegistrySchema, heirRegistrySchema, heirTextSchema } from './family';
 
 export * from './balance';
@@ -38,6 +39,7 @@ export * from './discovery';
 export * from './interactions';
 export * from './family';
 export * from './people';
+export * from './web';
 
 /**
  * Collections: a folder under src/content with one YAML file per definition,
@@ -84,6 +86,7 @@ export const singletonTypes = {
   'balance/interactions': interactionsBalanceSchema,
   'balance/family': familyBalanceSchema,
   'balance/people': peopleBalanceSchema,
+  'balance/web': webBalanceSchema,
   'balance/targets': targetsBalanceSchema,
   'character/identity': identityOptionsSchema,
   'character/appearance': appearanceOptionsSchema,
@@ -109,6 +112,7 @@ export const singletonTypes = {
   'registries/estate': estateRegistrySchema,
   'registries/heir': heirRegistrySchema,
   'registries/people': peopleRegistrySchema,
+  'registries/web': webRegistrySchema,
 } as const;
 
 export type SingletonPath = keyof typeof singletonTypes;
@@ -144,6 +148,7 @@ export const contentBundleSchema = z.strictObject({
     interactions: interactionsBalanceSchema,
     family: familyBalanceSchema,
     people: peopleBalanceSchema,
+    web: webBalanceSchema,
     targets: targetsBalanceSchema,
   }),
   character: z.strictObject({ identity: identityOptionsSchema, appearance: appearanceOptionsSchema }),
@@ -172,6 +177,7 @@ export const contentBundleSchema = z.strictObject({
     estate: estateRegistrySchema,
     heir: heirRegistrySchema,
     people: peopleRegistrySchema,
+    web: webRegistrySchema,
   }),
 });
 

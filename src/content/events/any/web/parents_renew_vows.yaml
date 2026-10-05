@@ -1,0 +1,45 @@
+# Web (tieClose): your parents' marriage is happy.
+id: parents_renew_vows
+title: Still at it
+text: >-
+  {a.name} and {b.name} have been happy for so long it has stopped looking
+  like effort. This morning they announced, over breakfast, that they would
+  like to say it all again, in front of the family, in the backyard.
+tone: light
+category: web
+rarity: common
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 14 } }
+    - { tie: { a: a, b: b, kind: [married], status: [close] } }
+    - { role: a, alive: true, kind: [parent] }
+    - { role: b, alive: true, kind: [parent] }
+weight: { base: 7 }
+followUpOnly: true
+cast:
+  a: { support: true, presence: anywhere }
+  b: { support: true, presence: anywhere }
+choices:
+  - id: plan_it
+    label: Help plan it
+    outcome:
+      text: >-
+        You spend a weekend with string lights and a borrowed folding table.
+        When they say the words, {a.name} cries first, and {b.name} pretends it
+        is the wind.
+      effects:
+        - { type: cost, item: celebration_dinner }
+        - { type: relationship, role: a, affection: 5, trust: 3 }
+        - { type: relationship, role: b, affection: 5, trust: 3 }
+        - { type: stat, key: happiness, delta: 4 }
+  - id: just_attend
+    label: Show up with a card
+    outcome:
+      text: >-
+        It's a good day. A card in a pocket, a speech with too many jokes, a
+        hug from each of them that lasts a little too long.
+      effects:
+        - { type: relationship, role: a, affection: 3 }
+        - { type: relationship, role: b, affection: 3 }
+        - { type: stat, key: happiness, delta: 3 }

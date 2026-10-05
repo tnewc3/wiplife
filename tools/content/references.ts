@@ -49,6 +49,7 @@ import { checkTemplate } from '../../src/engine/text';
 import type { ContentError } from './compile';
 import { MONEY } from './consistency';
 import { checkPeople } from './people';
+import { checkWeb } from './web';
 
 const CREATION = 'balance/creation.yaml';
 const AGING = 'balance/aging.yaml';
@@ -180,6 +181,7 @@ export function checkReferences(
   errors.push(...checkFamily(bundle, fileOf, options.partialEvents === true));
   errors.push(...checkHeir(bundle, fileOf, options.partialEvents === true));
   errors.push(...checkPeople(bundle, fileOf, options.partialEvents === true));
+  errors.push(...checkWeb(bundle, fileOf, options.partialEvents === true));
 
   return errors;
 }
@@ -480,6 +482,9 @@ function checkEvents(bundle: ContentBundle, fileOf: (typeKey: CollectionKey, id:
     ...heirResults(bundle.registries.heir).flatMap((r) => r.events),
     // E3: the events the lives of the people you know can ask of you.
     ...Object.values(bundle.registries.people.requests).flatMap((r) => r.events),
+    // E4: the events a change among the people you know can ask of you, and the reactions to what they hear.
+    ...Object.values(bundle.registries.web.triggers).flatMap((r) => r.events),
+    ...Object.values(bundle.registries.web.kinds).flatMap((k) => k.reactions),
   ]);
 
   for (const [id, def] of Object.entries(bundle.events)) {
@@ -952,9 +957,11 @@ function checkInteractions(bundle: ContentBundle, fileOf: (typeKey: CollectionKe
         const here = [...g.effects, ...extras];
         allEffects.push(...here);
         const sentenced = here.some((e) => e.type === 'legal');
-        const values = sentenced ? ['age', 'sentence'] : ['age'];
+        // E4: an introduction casts the second person as `other`; a story (a topic) gives {heard}.
+        const values = [...(sentenced ? ['age', 'sentence'] : ['age']), ...(def.topic ? ['heard'] : [])];
+        const roles = [INTERACTION_ROLE, SELF_ROLE, ...(def.other ? ['other'] : [])];
         const template = (field: string, text: string) => {
-          for (const message of checkTemplate(text, { roles: [INTERACTION_ROLE, SELF_ROLE], values })) err(`${tierId} ${field}: ${message}`);
+          for (const message of checkTemplate(text, { roles, values })) err(`${tierId} ${field}: ${message}`);
         };
         for (const text of g.text) {
           template(g.where, text);
@@ -973,12 +980,12 @@ function checkInteractions(bundle: ContentBundle, fileOf: (typeKey: CollectionKe
       }
       if (tier.choice) {
         const prompt = tier.choice.prompt;
-        for (const message of checkTemplate(prompt, { roles: [INTERACTION_ROLE, SELF_ROLE], values: ['age'] })) err(`${tierId} choice.prompt: ${message}`);
+        for (const message of checkTemplate(prompt, { roles: [INTERACTION_ROLE, SELF_ROLE, ...(def.other ? ['other'] : [])], values: ['age', ...(def.topic ? ['heard'] : [])] })) err(`${tierId} choice.prompt: ${message}`);
       }
     }
     for (const [tierId, tier] of tiersOf(def)) {
       for (const o of tier.choice?.options ?? []) {
-        for (const message of checkTemplate(o.label, { roles: [INTERACTION_ROLE, SELF_ROLE], values: ['age'] })) err(`${tierId} ${o.id}.label: ${message}`);
+        for (const message of checkTemplate(o.label, { roles: [INTERACTION_ROLE, SELF_ROLE, ...(def.other ? ['other'] : [])], values: ['age', ...(def.topic ? ['heard'] : [])] })) err(`${tierId} ${o.id}.label: ${message}`);
       }
     }
 
@@ -997,7 +1004,10 @@ function checkInteractions(bundle: ContentBundle, fileOf: (typeKey: CollectionKe
     // Effects.
     for (const effect of allEffects) {
       const where = `${effect.type} effect`;
-      if ('role' in effect && effect.role !== undefined && effect.role !== INTERACTION_ROLE) err(`${where}: the only role is "${INTERACTION_ROLE}"`);
+      if ('role' in effect && effect.role !== undefined && effect.role !== INTERACTION_ROLE && !(def.other && effect.role === 'other')) err(`${where}: the only role is "${INTERACTION_ROLE}"${def.other ? ' (or "other")' : ''}`);
+      // E4: introducing needs a second person; asking about a story needs a story.
+      if (effect.type === 'introduce' && (!def.other || effect.with !== 'other')) err(`${where}: an introduction is an interaction with other: true, and introduces the person to "other"`);
+      if (effect.type === 'knowledge' && !def.topic) err(`${where}: knowledge effects are for an interaction with a topic (the story it is about)`);
       if (effect.type === 'memory' && !tags[effect.tag]) err(`${where}: memory "${effect.tag}" is not in registries/memories.yaml`);
       if (effect.type === 'flag' && !flags[effect.key]) err(`${where}: flag "${effect.key}" is not in registries/flags.yaml`);
       if (effect.type === 'health' && !bundle.conditions[effect.conditionId]) err(`${where}: unknown health condition "${effect.conditionId}"`);

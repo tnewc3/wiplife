@@ -1,0 +1,52 @@
+# Web reaction (hiddenDebt): someone has heard you are in deep, and offers to help.
+id: debt_whispers
+title: The kind of help you didn't ask for
+text: >-
+  {npc.name} has been quiet around you, and then not quiet at all: {npc.they}
+  heard {heard}. {npc.They} say it carefully, like handing you something that
+  might break.
+tone: serious
+category: web
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { finances: { debt: { gt: 0 } } }
+    - { role: npc, alive: true, kind: [friend, sibling, parent, partner, fiance, spouse], heard: { kinds: [hiddenDebt], learned: [gossip] } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  npc: { support: true, presence: anywhere }
+choices:
+  - id: accept_help
+    label: Let {npc.name} help
+    outcome:
+      text: >-
+        It's hard to say yes. {npc.name} writes a check anyway, for less than
+        you owe and more than you'd have asked for, and makes you promise not
+        to thank {npc.them} out loud.
+      effects:
+        - { type: debt, action: forgive, share: 0.25 }
+        - { type: knowledge, role: npc, action: confirm }
+        - { type: relationship, role: npc, affection: 5, trust: 4 }
+        - { type: stat, key: stress, delta: -3 }
+  - id: set_straight
+    label: Tell {npc.them} how it really stands
+    outcome:
+      text: >-
+        You lay it out, plainly: how it started, what it looks like now. It is
+        not as bad as the whispers and not as good as you've been pretending.
+      effects:
+        - { type: knowledge, role: npc, action: correct }
+        - { type: relationship, role: npc, trust: 3 }
+        - { type: memory, role: npc, tag: you_set_it_straight }
+  - id: decline
+    label: Say you've got it handled
+    outcome:
+      text: >-
+        "I've got it," you say, and {npc.name} lets you have your pride. You
+        both know what you've just done.
+      effects:
+        - { type: relationship, role: npc, trust: -3 }
+        - { type: stat, key: stress, delta: 3 }

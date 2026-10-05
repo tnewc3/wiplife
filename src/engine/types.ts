@@ -808,6 +808,9 @@ export interface InputRecord {
 export interface PendingInteraction {
   interactionId: Id;
   personId: Id;
+  /** E4: the second person (an introduction) or the story (a knowledge item) the interaction was about. */
+  otherId?: Id;
+  itemId?: string;
   tier: OutcomeTier;
   giftTier?: GiftTier;
   /** The outcome text, written (pronouns filled in) when it happened. */
@@ -870,6 +873,81 @@ export interface LifeState {
   lineage: Lineage;
   /** E3: news from your people, newest year last, a few years kept. */
   news: NewsYear[];
+  /** E4: the ties between the people you know, and what each of them has heard. */
+  web: WebState;
+}
+
+/** E4: how two people you know are connected to each other. */
+export type TieKind = 'married' | 'dating' | 'siblings' | 'parentChild' | 'inLaw' | 'friends';
+
+/** E4: how a tie begins: from the family's structure, when a partner meets your people, from a shared city, or when you introduce them. */
+export type TieOrigin = 'family' | 'partner' | 'context' | 'introduced';
+
+/**
+ * E4: a tie between two people in your circle. The same from both sides: one
+ * record per pair, kept under `tieKey(a, b)` with `a` before `b`. Its status
+ * (close, normal, strained) follows from `affection`; `feud` is set while the
+ * two are feuding.
+ */
+export interface Tie {
+  a: Id;
+  b: Id;
+  kind: TieKind;
+  affection: number;
+  origin: TieOrigin;
+  /** The year the tie began. */
+  since: number;
+  /** While feuding: the year it began, the side you took (if you did), whether you said you would stay out of it, and whether it has come to your attention (an event asked you about it). */
+  feud?: { since: number; side?: Id; neutral?: true; aware?: true };
+  /** The year the tie took its current kind (dating became married...); absent when it never changed. */
+  kindSince?: number;
+  /** The last year an event about this tie was queued. */
+  eventYear?: number;
+  /** An introduction's follow-up has been looked at. */
+  followed?: true;
+}
+
+/** E4: what one person has heard about something. */
+export interface Holder {
+  /** The version of the story they believe (an id in registries/web.yaml). */
+  version: string;
+  /** The year they heard it. */
+  since: number;
+  /** Who told them: you, another person, or nobody (they saw it for themselves). */
+  from: 'you' | 'saw' | Id;
+  /** They have reacted (an event, or the changes to how they feel). */
+  reacted: boolean;
+  /** You asked them to keep it quiet, and the year (they tell far fewer people for a while). */
+  hushed?: number;
+}
+
+/** E4: a notable fact, or a secret, about you or about someone you know, and who has heard which version of it. */
+export interface KnowledgeItem {
+  id: Id;
+  /** The kind of fact (registries/web.yaml kinds). */
+  kind: string;
+  /** Who it is about: 'you' or a person. */
+  subject: 'you' | Id;
+  /** The other person in it (an affair's other person, an ex), if any. */
+  other?: Id;
+  /** The year it happened. */
+  year: number;
+  /** The version that is true. */
+  truth: string;
+  holders: Record<Id, Holder>;
+  /** A secret that has become common knowledge (its event has been queued). */
+  public?: true;
+}
+
+/** E4: the social web. */
+export interface WebState {
+  /** Ties by `tieKey`. */
+  ties: Record<string, Tie>;
+  items: KnowledgeItem[];
+  /** The next item number. */
+  nextItem: number;
+  /** What has already become a knowledge item, so each fact is recorded once. */
+  seen: string[];
 }
 
 /** E2b: the family line a life belongs to. Family reputation sits on the line and passes to each heir. */

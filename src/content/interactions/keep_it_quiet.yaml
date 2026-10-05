@@ -1,0 +1,53 @@
+id: keep_it_quiet
+name: Ask them to keep it quiet
+blurb: Ask them not to tell anyone what they know.
+group: practical
+profile: quiet
+inPerson: false
+visit: true
+topic: secret
+availability:
+  kinds: [parent, stepparent, sibling, grandparent, relative, friend, partner, fiance, spouse, coworker, classmate, acquaintance]
+  you: { min: 12 }
+  them: { min: 12 }
+outcomes:
+  great:
+    text:
+      - "\"Of course,\" says {person.name}, without a pause. \"It stays with me.\" You believe {person.them}, and the knot in your chest loosens."
+      - "{person.name} takes your hands and says it plainly: nobody will hear it from {person.them}. It is the kind of promise that gets kept."
+    affection: 3
+    trust: 4
+    mood: 3
+    effects:
+      - { type: knowledge, role: person, action: hush }
+      - { type: memory, role: person, tag: asked_to_keep_quiet }
+  good:
+    text:
+      - "{person.name} knew {heard}, and nods. \"Okay. I won't say anything.\" It's a promise made carefully, by someone who means to keep it."
+      - "\"Not a word,\" says {person.name}. It comes out sounding like a real promise, which is more than you'd hoped for."
+    affection: 1
+    trust: 2
+    effects:
+      - { type: knowledge, role: person, action: hush }
+      - { type: memory, role: person, tag: asked_to_keep_quiet }
+  neutral:
+    text:
+      - "{person.name} says \"I'll try,\" in a tone that isn't quite a promise. It isn't a no, either. You will have to hope."
+      - "\"I don't really talk about things like that,\" says {person.name}, which is what people say. It doesn't settle anything."
+    trust: -1
+  bad:
+    text:
+      - "\"I'm not going to lie for you,\" says {person.name}, hurt. \"But I'm not going to say anything.\" It lands badly, and you are not sure which half to believe."
+      - "{person.name} bristles at being asked. \"Do you think I'm the kind of person who talks?\" The question hangs in the air, unanswered."
+    affection: -3
+    trust: -4
+    mood: -4
+  backfire:
+    text:
+      - "Asking was a mistake. {person.name} hears an accusation, and in the middle of the argument says {person.their} piece to someone who didn't need to know."
+      - "{person.name} goes pale, then angry. \"If you thought I'd tell, why did you tell me?\" By evening, someone else has heard the whole thing."
+    affection: -5
+    trust: -6
+    mood: -6
+    effects:
+      - { type: knowledge, role: person, action: leak }

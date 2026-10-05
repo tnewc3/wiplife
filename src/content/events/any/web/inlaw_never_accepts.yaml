@@ -1,0 +1,65 @@
+# Web (tieStrained): one of your family has never accepted your partner.
+id: inlaw_never_accepts
+title: Never quite good enough
+text: >-
+  {b.name} has never quite warmed to {a.name}. It comes out in small things:
+  the extra second before a greeting, the "oh, you came" at the door, the
+  family photo that somehow doesn't have {a.name} in it. {a.name} has noticed
+  every one.
+tone: serious
+category: web
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { tie: { a: a, b: b, kind: [inLaw], status: [strained] } }
+    - { role: a, alive: true, kind: [partner, fiance, spouse] }
+    - { role: b, alive: true, kind: [parent, stepparent, grandparent, sibling, relative] }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  a: { support: true, presence: anywhere }
+  b: { support: true, presence: anywhere }
+choices:
+  - id: talk_to_family
+    label: Talk to {b.name} about it
+    check:
+      base: 30
+      stats:
+        - { role: b, key: affection, weight: 0.3 }
+        - { role: b, key: trust, weight: 0.2 }
+      success:
+        text: >-
+          "I just want you to be happy," {b.name} says, and then, after a
+          long pause, "I'll try." It's not a victory. It's an opening.
+        effects:
+          - { type: tie, a: a, b: b, action: mend, delta: 14 }
+          - { type: relationship, role: b, affection: 3, trust: 3 }
+          - { type: relationship, role: a, affection: 3, trust: 3 }
+      failure:
+        text: >-
+          "I'm not the one with the problem," {b.name} says, and that is the
+          end of the conversation. {a.name} hears about it, in a roundabout
+          way, and says nothing.
+        effects:
+          - { type: tie, a: a, b: b, action: worsen, delta: 4 }
+          - { type: relationship, role: b, affection: -4, trust: -3 }
+          - { type: relationship, role: a, affection: -2 }
+  - id: ask_patience
+    label: Ask {a.name} to be patient
+    outcome:
+      text: >-
+        {a.name} says "I will," and means it. It is a lot to ask of someone
+        every holiday, and you know it.
+      effects:
+        - { type: relationship, role: a, affection: 1, trust: 2 }
+        - { type: stat, key: stress, delta: 2 }
+  - id: do_nothing
+    label: Do nothing and hope it passes
+    outcome:
+      text: >-
+        You tell yourself it will settle with time. Meanwhile {a.name} learns
+        which parts of the family to avoid.
+      effects:
+        - { type: relationship, role: a, affection: -2, trust: -2 }

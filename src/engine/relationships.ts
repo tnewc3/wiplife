@@ -7,6 +7,7 @@
  */
 import type { ContentBundle, EventDef, Outcome, RomanceStatus } from '../content/schemas';
 import { curveAt } from './curve';
+import { hasRomanticTie, ITEM_ROLE } from './web/query';
 import type { Id, Identity, LifeState, Person, Relationship, RelationshipKind, RelationshipStatus } from './types';
 
 export const FAMILY_KINDS: readonly RelationshipKind[] = ['parent', 'stepparent', 'grandparent', 'relative', 'sibling', 'child', 'stepchild'];
@@ -81,8 +82,8 @@ export function partnerAgeRange(age: number, content: ContentBundle): { min: num
  */
 export function isRomanticMatch(state: LifeState, person: Person, content: ContentBundle): boolean {
   const rel = state.relationships[person.id];
-  // E3: someone who has a partner of their own (off your list) isn't a possible partner.
-  if (!person.alive || person.life?.partner || (rel && isFamilyKind(rel.kind))) return false;
+  // E3: someone who has a partner of their own (off your list) isn't a possible partner; neither (E4) is someone in a couple with another of the people you know.
+  if (!person.alive || person.life?.partner || hasRomanticTie(state.web, person.id) || (rel && isFamilyKind(rel.kind))) return false;
   return bothAdults(state, person, content) && mutualAttraction(state, person);
 }
 
@@ -93,7 +94,7 @@ export function isRomanticMatch(state: LifeState, person: Person, content: Conte
  */
 export function isAdmirerMatch(state: LifeState, person: Person, content: ContentBundle): boolean {
   const rel = state.relationships[person.id];
-  if (!person.alive || person.life?.partner || (rel && isFamilyKind(rel.kind))) return false;
+  if (!person.alive || person.life?.partner || hasRomanticTie(state.web, person.id) || (rel && isFamilyKind(rel.kind))) return false;
   const me = state.character.identity;
   return bothAdults(state, person, content) && attractedTo(person.identity, me) && !attractedTo(me, person.identity);
 }
@@ -140,7 +141,7 @@ export function canChangeKind(state: LifeState, personId: Id, to: RelationshipKi
 
   if (isPartnerKind(to)) {
     // E3: not someone who has a partner of their own.
-    if (rel.status !== 'active' || person.life?.partner || !bothAdults(state, person, content)) return false;
+    if (rel.status !== 'active' || person.life?.partner || hasRomanticTie(state.web, personId) || !bothAdults(state, person, content)) return false;
     const partner = currentPartner(state);
     if (partner && partner.personId !== personId) return false;
     if (to === 'partner') return !isPartnerKind(from) && mutualAttraction(state, person);
@@ -193,7 +194,9 @@ export function romanceAllowed(state: LifeState, def: EventDef, cast: Record<str
   if (!isRomanceEvent(def, content)) return true;
   const { adultAge } = content.balance.relationships;
   if (state.character.age < adultAge) return false;
-  return Object.values(cast).every((id) => {
+  // (E4: the knowledge item an event is about travels in the cast as a pseudo-role, and is no person.)
+  return Object.entries(cast).every(([role, id]) => {
+    if (role === ITEM_ROLE) return true;
     const person = state.people[id];
     return person !== undefined && ageOf(state, person) >= adultAge;
   });

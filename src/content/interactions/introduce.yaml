@@ -1,0 +1,61 @@
+id: introduce
+name: Introduce
+blurb: Introduce them to someone else you know.
+group: practical
+profile: introduce
+inPerson: true
+other: true
+availability:
+  kinds: [parent, stepparent, sibling, grandparent, relative, child, stepchild, friend, partner, fiance, spouse, coworker, boss, classmate, acquaintance]
+  you: { min: 8 }
+  them: { min: 5 }
+outcomes:
+  great:
+    text:
+      - "It's one of those meetings where you can almost hear the click. {person.name} and {other.name} are still talking when you remember you were there too."
+      - "You say two names and step back. By the end of the hour {person.name} and {other.name} have a private joke, and you are not in on it."
+      - "{person.name} and {other.name} take one look at each other and make you feel like the best host in the world."
+    affection: 3
+    trust: 2
+    mood: 5
+    effects:
+      - { type: introduce, role: person, with: other, result: romance }
+      - { type: memory, role: person, tag: introduced_us }
+      - { type: memory, role: other, tag: introduced_us }
+  good:
+    text:
+      - "{person.name} and {other.name} get along better than you'd hoped. By the end of the evening they are trading numbers."
+      - "A good introduction: easy, warm, over before anyone notices the time. You can tell they'll see each other again."
+    affection: 2
+    trust: 1
+    mood: 3
+    effects:
+      - { type: introduce, role: person, with: other, result: friends }
+      - { type: memory, role: other, tag: introduced_us }
+  neutral:
+    text:
+      - "{person.name} and {other.name} are polite to each other, and that's all. They know each other's names now, which is more than before."
+      - "It's pleasant enough. Nobody is rude, and nobody is thrilled. You have made a connection, of a sort."
+    affection: 1
+    effects:
+      - { type: introduce, role: person, with: other, result: friends }
+  bad:
+    text:
+      - "It's awkward from the first sentence. {person.name} and {other.name} find nothing in common, and cannot hide it."
+      - "{other.name} says something that lands badly, and {person.name} answers with a look. You spend the rest of the meeting steering around it."
+    affection: -2
+    mood: -3
+    effects:
+      - { type: introduce, role: person, with: other, result: rivalry }
+      - { type: memory, role: person, tag: introduction_went_badly }
+  backfire:
+    text:
+      - "It goes wrong at once. By the time the drinks arrive, {person.name} and {other.name} are in a real argument, and each is looking at you for backup."
+      - "You said two names and lit a fuse. {person.name} and {other.name} leave separately, and neither of them is looking at you kindly."
+    affection: -4
+    trust: -2
+    mood: -5
+    effects:
+      - { type: introduce, role: person, with: other, result: feud }
+      - { type: memory, role: person, tag: introduction_went_badly }
+      - { type: memory, role: other, tag: introduction_went_badly }

@@ -1,0 +1,88 @@
+# Web (feudBegan): your partner and one of your family can't be in a room together.
+id: feud_in_law_side
+title: Caught in the middle
+text: >-
+  {a.name} and {b.name} can't be in the same room anymore. {b.name} has made
+  it plain what {b.they} {b:thinks|think}, and {a.name} has heard all of it,
+  from you or from someone else. Now you are the thing standing between them.
+tone: serious
+category: web
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { tie: { a: a, b: b, kind: [inLaw], status: [feuding] } }
+    - { role: a, alive: true, kind: [partner, fiance, spouse] }
+    - { role: b, alive: true, kind: [parent, stepparent, sibling, grandparent, relative] }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  a: { support: true, presence: anywhere }
+  b: { support: true, presence: anywhere }
+choices:
+  - id: back_partner
+    label: Back {a.name}
+    outcome:
+      text: >-
+        "{a.name} is the person I chose," you say, and you watch {b.name}'s face
+        close. At home, {a.name} holds your hand a little tighter than usual.
+      effects:
+        - { type: tie, a: a, b: b, action: side, with: a }
+        - { type: relationship, role: a, affection: 7, trust: 6 }
+        - { type: relationship, role: b, affection: -10, trust: -5 }
+        - { type: memory, role: a, tag: took_your_side }
+        - { type: memory, role: b, tag: you_sided_against_them }
+  - id: back_family
+    label: Back {b.name}
+    outcome:
+      text: >-
+        You say "{b.name} has a point," just once, and just quietly. It is
+        enough. {a.name} is silent for a day and a half.
+      effects:
+        - { type: tie, a: a, b: b, action: side, with: b }
+        - { type: relationship, role: b, affection: 6, trust: 4 }
+        - { type: relationship, role: a, affection: -10, trust: -8 }
+        - { type: memory, role: b, tag: took_your_side }
+        - { type: memory, role: a, tag: you_sided_against_them }
+  - id: make_them_talk
+    label: Insist they sit down together
+    check:
+      base: 25
+      stats:
+        - { role: a, key: affection, weight: 0.2 }
+        - { role: b, key: affection, weight: 0.2 }
+        - { key: confidence, weight: 0.2 }
+      success:
+        text: >-
+          You set the table and the rules: no interrupting, nobody leaves.
+          It's the hardest dinner of the year, and halfway through the sweet
+          course {b.name} says something almost like an apology.
+        effects:
+          - { type: tie, a: a, b: b, action: mend, delta: 22 }
+          - { type: relationship, role: a, affection: 4, trust: 4 }
+          - { type: relationship, role: b, affection: 4, trust: 4 }
+          - { type: memory, role: a, tag: mediated_for_them }
+          - { type: memory, role: b, tag: mediated_for_them }
+      failure:
+        text: >-
+          It lasts eleven minutes. A chair goes back too hard; a door closes
+          too loud. You are left with the cold dinner and both of them angry
+          at you for arranging it.
+        effects:
+          - { type: tie, a: a, b: b, action: worsen, delta: 4 }
+          - { type: relationship, role: a, affection: -3 }
+          - { type: relationship, role: b, affection: -3 }
+          - { type: stat, key: stress, delta: 5 }
+  - id: stay_out
+    label: Refuse to choose
+    outcome:
+      text: >-
+        "I won't do this." You say it to both of them, and mean it. It isn't a
+        solution. It does keep you from being the one who lit the match.
+      effects:
+        - { type: tie, a: a, b: b, action: neutral }
+        - { type: relationship, role: a, affection: -3 }
+        - { type: relationship, role: b, affection: -3 }
+        - { type: memory, role: a, tag: you_stayed_neutral }
+        - { type: memory, role: b, tag: you_stayed_neutral }

@@ -1,0 +1,64 @@
+# Web (feudLong): you said you would stay out of a feud; it keeps costing you.
+id: feud_neutral_wears
+title: Staying out of it
+text: >-
+  Staying out of it was supposed to keep you out of it. It hasn't. {a.name}
+  thinks you've chosen {b.name}, {b.name} thinks you've chosen {a.name}, and
+  neither can tell whether it is worse that you didn't choose at all.
+tone: serious
+category: web
+rarity: common
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 14 } }
+    - { tie: { a: a, b: b, status: [feuding], neutral: true } }
+    - { role: a, alive: true }
+    - { role: b, alive: true }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  a: { support: true, presence: anywhere }
+  b: { support: true, presence: anywhere }
+choices:
+  - id: side_a
+    label: Finally choose {a.name}
+    outcome:
+      text: >-
+        "I should have said so sooner," you tell {a.name}, who nods, and
+        doesn't say that it should have been sooner. {b.name} finds out the
+        slow way.
+      effects:
+        - { type: tie, a: a, b: b, action: side, with: a }
+        - { type: relationship, role: a, affection: 5, trust: 3 }
+        - { type: relationship, role: b, affection: -8, trust: -4 }
+        - { type: memory, role: b, tag: you_sided_against_them }
+  - id: side_b
+    label: Finally choose {b.name}
+    outcome:
+      text: >-
+        "I should have said so sooner," you tell {b.name}, who nods, and
+        doesn't say that it should have been sooner. {a.name} finds out the
+        slow way.
+      effects:
+        - { type: tie, a: a, b: b, action: side, with: b }
+        - { type: relationship, role: b, affection: 5, trust: 3 }
+        - { type: relationship, role: a, affection: -8, trust: -4 }
+        - { type: memory, role: a, tag: you_sided_against_them }
+  - id: tell_both
+    label: Tell both of them that you care about them, and mean it
+    outcome:
+      text: >-
+        It doesn't fix anything. But you say it plainly, to each of them, and
+        it turns out that is worth something.
+      effects:
+        - { type: relationship, role: a, affection: 3, trust: 2 }
+        - { type: relationship, role: b, affection: 3, trust: 2 }
+  - id: keep_out
+    label: Keep out of it, and accept the consequences
+    outcome:
+      text: >-
+        It's the same answer as before. You are more at peace with it than
+        either of them is.
+      effects:
+        - { type: stat, key: stress, delta: 2 }

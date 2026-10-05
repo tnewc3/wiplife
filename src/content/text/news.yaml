@@ -98,3 +98,16 @@ lines:
   care_needed:
     - "Your {npc.relation} {npc.name} can't manage alone anymore."
     - "{npc.name} needs more help every day, and the family has begun to talk about it."
+  # E4: ties between people you know. {other} is the other person's first name.
+  feud_began:
+    - "{npc.name}, your {npc.relation}, and {other} have stopped speaking."
+    - "Something went wrong between {npc.name} and {other}. Neither of them will say what."
+  feud_ended:
+    - "{npc.name}, your {npc.relation}, and {other} are talking again."
+    - "{npc.name} and {other} made up, finally."
+  couple_formed:
+    - "Your {npc.relation} {npc.name} and {other} are seeing each other."
+    - "{npc.name}, your {npc.relation}, started dating {other}, and nobody is surprised."
+  couple_wed:
+    - "{npc.name}, your {npc.relation}, and {other} got married."
+    - "Your {npc.relation} {npc.name} married {other}."

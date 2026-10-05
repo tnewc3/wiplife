@@ -1,0 +1,63 @@
+# Web (tieStrained): two siblings keep score.
+id: siblings_rivalry
+title: Keeping score
+text: >-
+  {a.name} and {b.name} have been keeping score for as long as you can
+  remember, and lately the score has started to matter. Every success of one
+  is taken as an insult by the other. You get both versions, always.
+tone: neutral
+category: web
+rarity: common
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 14 } }
+    - { tie: { a: a, b: b, kind: [siblings], status: [strained] } }
+    - { role: a, alive: true, kind: [sibling] }
+    - { role: b, alive: true, kind: [sibling] }
+weight: { base: 9 }
+followUpOnly: true
+cast:
+  a: { support: true, presence: anywhere }
+  b: { support: true, presence: anywhere }
+choices:
+  - id: knock_it_off
+    label: Tell them to knock it off
+    check:
+      base: 35
+      stats:
+        - { role: a, key: affection, weight: 0.15 }
+        - { role: b, key: affection, weight: 0.15 }
+        - { key: confidence, weight: 0.2 }
+      success:
+        text: >-
+          "You're both ridiculous," you say, "and I love you." There's a long
+          silence. Then {a.name} laughs, and {b.name} can't help it either.
+        effects:
+          - { type: tie, a: a, b: b, action: mend, delta: 12 }
+          - { type: relationship, role: a, affection: 3 }
+          - { type: relationship, role: b, affection: 3 }
+      failure:
+        text: >-
+          Both of them turn on you at once: you don't understand, you
+          obviously favor the other. It takes a month for either to speak to
+          you in full sentences.
+        effects:
+          - { type: relationship, role: a, affection: -3 }
+          - { type: relationship, role: b, affection: -3 }
+          - { type: stat, key: stress, delta: 3 }
+  - id: stay_neutral
+    label: Listen to both and judge neither
+    outcome:
+      text: >-
+        You're a good audience for each. It is easier than it should be to
+        tell people what they want to hear, and you try not to.
+      effects:
+        - { type: relationship, role: a, affection: 1, trust: 1 }
+        - { type: relationship, role: b, affection: 1, trust: 1 }
+  - id: ignore
+    label: Let them work it out
+    outcome:
+      text: They are adults, or close enough. You change the subject.
+      effects:
+        - { type: stat, key: stress, delta: 1 }

@@ -61,6 +61,8 @@ export const INTERACTION_EFFECT_TYPES = [
   'parenting',
   'childStat',
   'childTrait',
+  'knowledge',
+  'introduce',
 ] as const;
 
 const interactionEffectSchema = effectSchema.refine(
@@ -137,6 +139,17 @@ export const interactionSchema = baseDefSchema
     gift: z.literal(true).optional(),
     /** Needs the person to live in your city; otherwise it works anywhere. */
     inPerson: z.boolean(),
+    /**
+     * E4: takes a second person you know, cast as `other` (introducing them
+     * to the person). Both must live in your city.
+     */
+    other: z.literal(true).optional(),
+    /**
+     * E4: about something the person has heard about you (a picker if there
+     * is more than one): a story that isn't true ("distorted"), or a secret.
+     * Cast as the context for {heard}.
+     */
+    topic: z.enum(['distorted', 'secret']).optional(),
     /** Possible from prison: a visit, a call or a letter. */
     visit: z.literal(true).optional(),
     availability: z.strictObject({
@@ -159,7 +172,8 @@ export const interactionSchema = baseDefSchema
     }),
   })
   .refine((d) => d.group !== 'romance' || d.romance === true, 'an interaction in the romance group must be marked romance: true')
-  .refine((d) => d.intimate !== true || d.romance === true, 'an intimate interaction must be marked romance: true');
+  .refine((d) => d.intimate !== true || d.romance === true, 'an intimate interaction must be marked romance: true')
+  .refine((d) => d.other === undefined || d.topic === undefined, 'an interaction takes another person or a topic, not both');
 export type InteractionDef = z.infer<typeof interactionSchema>;
 
 const probability = z.number().min(0).max(1);

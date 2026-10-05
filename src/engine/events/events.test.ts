@@ -489,6 +489,7 @@ describe('event text', () => {
           latentTrait: 'a taste for risk you never let yourself have',
           sentence: 'a year in prison',
           since: 'two years ago',
+          heard: 'that you were let go',
         } satisfies Record<(typeof EVENT_TEXT_VALUES)[number], string | number>;
         const context = { roles, values };
         const texts = [def.title, def.text, ...(def.choices ?? []).map((c) => c.label)];

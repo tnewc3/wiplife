@@ -17,6 +17,7 @@ import { fitsPresence } from '../presence';
 import { isAdmirerMatch, isRomanticMatch, partnerAgeRange, SUPPORT_KINDS } from '../relationships';
 import { chance, nextInt, pick, type RngState } from '../rng';
 import type { Id, LifeState, Person } from '../types';
+import { ITEM_ROLE } from '../web/query';
 
 function personAge(state: LifeState, person: Person): number {
   return state.currentYear - person.birthYear;
@@ -224,6 +225,11 @@ export function castEvent(
   };
 
   for (const [role, id] of Object.entries(preset)) {
+    // E4: the knowledge item an event is about travels in the cast under a pseudo-role.
+    if (role === ITEM_ROLE) {
+      cast[role] = id;
+      continue;
+    }
     const known = view.people[id];
     // Someone who has died can only fill a role that says so (E2a: the grief events).
     if (!known || (!known.alive && def.cast?.[role]?.deceased !== true)) return fail();

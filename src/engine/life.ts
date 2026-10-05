@@ -41,6 +41,8 @@ import { writeFromGroup } from './systems/history';
 import { characterDeathChance, pickCause } from './systems/mortality';
 import { deadlyConditions } from './health';
 import type { Character, Id, LifePhase, LifeState } from './types';
+import { ensureStructure } from './web/structure';
+import { emptyWeb } from './web/ties';
 
 export type { CreateLifeOptions, CustomLifeInput } from './creation/input';
 
@@ -164,9 +166,12 @@ export function createLife(input: CreateLifeOptions, content: ContentBundle): Li
     estate: null,
     lineage: { generation: 1, lineId: `life_${seed}`, familyName: character.name.last, reputation: 50, deeds: [] },
     news: [],
+    web: emptyWeb(),
   };
   // E1: everyone starts the life in their baseline mood (no randomness: the yearly swing comes with the first year).
   for (const person of Object.values(life.people)) person.mood = person.moodBase = moodBaseline(life, person, content);
+  // E4: the ties the family's structure gives (your parents with each other, your siblings with each other and with them).
+  ensureStructure(life, life.web, life.rng, content, birthYear);
   return life;
 }
 

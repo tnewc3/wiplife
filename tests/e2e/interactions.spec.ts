@@ -22,7 +22,7 @@ const tab = (page: Page, name: string) => page.getByRole('navigation', { name: '
 const card = (page: Page) => page.getByTestId('interaction-card');
 
 async function startLife(page: Page): Promise<void> {
-  await passAgeGate(page, { testPack: true, seed: 'e2e-interactions' });
+  await passAgeGate(page, { testPack: true, seed: 'e2e-interactions-web' });
   await page.getByRole('button', { name: 'New Life' }).click();
   await createCustomLife(page, CHARACTER);
   await expect(page.getByTestId('character-name')).toBeVisible();

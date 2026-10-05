@@ -1,0 +1,85 @@
+# Web (feudBegan): your parents' marriage has come apart, and each wants you on their side.
+id: feud_parents_side
+title: Two phone calls
+text: >-
+  Your parents have stopped pretending. {a.name} and {b.name} don't share a
+  room unless they have to, and every call home now has a second purpose:
+  finding out whose side you're on.
+tone: dark
+category: web
+rarity: common
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 14 } }
+    - { tie: { a: a, b: b, kind: [married], status: [feuding] } }
+    - { role: a, alive: true, kind: [parent] }
+    - { role: b, alive: true, kind: [parent] }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  a: { support: true, presence: anywhere }
+  b: { support: true, presence: anywhere }
+choices:
+  - id: side_a
+    label: Be there for {a.name}
+    outcome:
+      text: >-
+        You listen to {a.name} for two hours. By the end you aren't sure what
+        happened, only that you have been put on a side. {b.name} can tell.
+      effects:
+        - { type: tie, a: a, b: b, action: side, with: a }
+        - { type: relationship, role: a, affection: 8, trust: 5 }
+        - { type: relationship, role: b, affection: -9, trust: -4 }
+        - { type: memory, role: a, tag: took_your_side }
+        - { type: memory, role: b, tag: you_sided_against_them }
+        - { type: stat, key: stress, delta: 4 }
+  - id: side_b
+    label: Be there for {b.name}
+    outcome:
+      text: >-
+        {b.name} needs someone to say it wasn't all {b.their} fault, and you
+        say it. {a.name} stops answering your calls for a few weeks.
+      effects:
+        - { type: tie, a: a, b: b, action: side, with: b }
+        - { type: relationship, role: b, affection: 8, trust: 5 }
+        - { type: relationship, role: a, affection: -9, trust: -4 }
+        - { type: memory, role: b, tag: took_your_side }
+        - { type: memory, role: a, tag: you_sided_against_them }
+        - { type: stat, key: stress, delta: 4 }
+  - id: suggest_counselor
+    label: Ask them both to talk to someone
+    check:
+      base: 28
+      stats:
+        - { role: a, key: trust, weight: 0.2 }
+        - { role: b, key: trust, weight: 0.2 }
+        - { key: confidence, weight: 0.15 }
+      success:
+        text: >-
+          It's the last thing either of them wants to hear, and the only thing
+          they can both agree on. They go together, grudgingly. What comes of it
+          is slow, but it is a start.
+        effects:
+          - { type: tie, a: a, b: b, action: mend, delta: 22 }
+          - { type: relationship, role: a, affection: 3, trust: 3 }
+          - { type: relationship, role: b, affection: 3, trust: 3 }
+      failure:
+        text: >-
+          "We don't need a stranger to tell us what's wrong," {a.name} says, and
+          for the first time in weeks {b.name} agrees. It does not help.
+        effects:
+          - { type: tie, a: a, b: b, action: worsen, delta: 3 }
+          - { type: stat, key: stress, delta: 3 }
+  - id: stay_out
+    label: Tell them you love them both and won't be the referee
+    outcome:
+      text: >-
+        You say it to each of them in turn, in nearly the same words. Both
+        hear it as a refusal, and both are right.
+      effects:
+        - { type: tie, a: a, b: b, action: neutral }
+        - { type: relationship, role: a, affection: -2 }
+        - { type: relationship, role: b, affection: -2 }
+        - { type: memory, role: a, tag: you_stayed_neutral }
+        - { type: memory, role: b, tag: you_stayed_neutral }

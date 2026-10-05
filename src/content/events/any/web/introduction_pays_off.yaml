@@ -1,0 +1,47 @@
+# Web (introducedWell): two people you introduced have become close.
+id: introduction_pays_off
+title: Thank you for that
+text: >-
+  {a.name} and {b.name}, the two of them you put in a room together, have
+  become close. Today, one at a time, each of them tells you the same thing:
+  "I'm so glad you introduced us."
+tone: light
+category: web
+rarity: common
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 14 } }
+    - { tie: { a: a, b: b, kind: [friends], status: [normal, close] } }
+    - { role: a, alive: true }
+    - { role: b, alive: true }
+weight: { base: 8 }
+followUpOnly: true
+cast:
+  a: { support: true, presence: anywhere }
+  b: { support: true, presence: anywhere }
+choices:
+  - id: accept_thanks
+    label: Take the credit
+    outcome:
+      text: >-
+        You take the credit, which was luck. Both of them will remember it
+        was you.
+      effects:
+        - { type: relationship, role: a, affection: 4, trust: 3 }
+        - { type: relationship, role: b, affection: 4, trust: 3 }
+        - { type: memory, role: a, tag: introduced_us }
+        - { type: memory, role: b, tag: introduced_us }
+        - { type: stat, key: happiness, delta: 3 }
+  - id: deflect
+    label: Say it was nothing, they did the rest
+    outcome:
+      text: >-
+        It is true, which makes it a good thing to say. It is also exactly the
+        sort of thing a person says when they are very pleased.
+      effects:
+        - { type: relationship, role: a, affection: 3, trust: 2 }
+        - { type: relationship, role: b, affection: 3, trust: 2 }
+        - { type: memory, role: a, tag: introduced_us }
+        - { type: memory, role: b, tag: introduced_us }
+        - { type: stat, key: happiness, delta: 2 }

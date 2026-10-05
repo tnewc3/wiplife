@@ -40,6 +40,9 @@ export default defineConfig({
         globPatterns: ['**/*.{js,css,html,svg,png,ico,json,webmanifest}'],
         navigateFallback: 'index.html',
         cleanupOutdatedCaches: true,
+        // The game is its content: the compiled events, balance and text ship inside the app bundle, which grows with every
+        // expansion and passed the 2 MiB default in E4. The whole bundle must be cached for the app to work offline.
+        maximumFileSizeToCacheInBytes: 8 * 1024 * 1024,
       },
     }),
   ],

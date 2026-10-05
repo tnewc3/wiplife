@@ -53,7 +53,10 @@ import { costToYou, familyHelp, rentMonthsAmount } from './costs';
 import { availableInteractions } from './interactions/availability';
 import { moodView, type MoodView } from './interactions/mood';
 import { getNews, getPersonLifeView, type NewsItem, type PersonLifeView } from './lives/views';
+import { getConnections, getHeard, getIntroduceChoices, getTopicChoices, type ConnectionView, type HeardView, type PickView } from './web/views';
 export { getInteractionMenu, getInteractionOutcome } from './interactions/views';
+export { getConnections, getHeard, getIntroduceChoices, getTopicChoices };
+export type { ConnectionView, HeardView, PickView };
 export {
   canPlanEstate,
   getDeathView,
@@ -584,6 +587,10 @@ export interface PersonDetail {
   child: ChildView | null;
   /** E3: their own life: job, partner, children, city, troubles. */
   life: PersonLifeView | null;
+  /** E4: who they are close to and who they are feuding with. */
+  connections: ConnectionView[];
+  /** E4: what they have heard about you (close people only), their version of the story. */
+  heard: HeardView[];
 }
 
 /** A memory's readable text for this person (registries/memories.yaml). */
@@ -609,6 +616,8 @@ export function getPersonDetail(state: LifeState, personId: Id, content: Content
     canInteract: availableInteractions(state, personId, content).length > 0,
     child: getChildView(state, personId, content),
     life: getPersonLifeView(state, personId, content),
+    connections: person.alive ? getConnections(state, personId, content) : [],
+    heard: getHeard(state, personId, content),
   };
 }
 

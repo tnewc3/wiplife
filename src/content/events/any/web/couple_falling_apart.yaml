@@ -1,0 +1,85 @@
+# Web (feudBegan): a couple among your friends is coming apart, and you are the one both of them call.
+id: couple_falling_apart
+title: Both of them call you
+text: >-
+  {a.name} and {b.name} are a couple, and for a while now they have been
+  coming apart in public. Last night each of them called you, twenty minutes
+  apart, to say the same sentence in two different ways: "I don't know what
+  to do."
+tone: serious
+category: web
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { tie: { a: a, b: b, kind: [dating, married], status: [feuding] } }
+    - { role: a, alive: true, age: { gte: 18 }, kind: [friend] }
+    - { role: b, alive: true, age: { gte: 18 }, kind: [friend] }
+weight: { base: 9 }
+followUpOnly: true
+cast:
+  a: { support: true, presence: anywhere }
+  b: { support: true, presence: anywhere }
+choices:
+  - id: listen_a
+    label: Be the one {a.name} can talk to
+    outcome:
+      text: >-
+        You hold nothing back from {a.name} and nothing against {b.name}, and
+        you are careful about the difference. It still gets back to {b.name}.
+      effects:
+        - { type: tie, a: a, b: b, action: side, with: a }
+        - { type: relationship, role: a, affection: 7, trust: 5 }
+        - { type: relationship, role: b, affection: -7, trust: -3 }
+        - { type: memory, role: a, tag: took_your_side }
+        - { type: memory, role: b, tag: you_sided_against_them }
+  - id: listen_b
+    label: Be the one {b.name} can talk to
+    outcome:
+      text: >-
+        {b.name} talks until two in the morning, and you say "that sounds
+        hard" often enough that it turns out to be exactly right. {a.name}
+        notices who you have been spending time with.
+      effects:
+        - { type: tie, a: a, b: b, action: side, with: b }
+        - { type: relationship, role: b, affection: 7, trust: 5 }
+        - { type: relationship, role: a, affection: -7, trust: -3 }
+        - { type: memory, role: b, tag: took_your_side }
+        - { type: memory, role: a, tag: you_sided_against_them }
+  - id: counseling
+    label: Tell them both, kindly, to get help
+    check:
+      base: 30
+      stats:
+        - { role: a, key: trust, weight: 0.2 }
+        - { role: b, key: trust, weight: 0.2 }
+        - { key: kindness, weight: 0.2 }
+      success:
+        text: >-
+          Because you said it to both and meant it for both, neither can hear
+          it as a side. They make the call together, a day apart.
+        effects:
+          - { type: tie, a: a, b: b, action: mend, delta: 22 }
+          - { type: relationship, role: a, affection: 3, trust: 3 }
+          - { type: relationship, role: b, affection: 3, trust: 3 }
+      failure:
+        text: >-
+          "You think we're broken," {a.name} says, and {b.name}, for the first
+          time in weeks, doesn't contradict {a.them}.
+        effects:
+          - { type: tie, a: a, b: b, action: worsen, delta: 3 }
+          - { type: relationship, role: a, affection: -2 }
+          - { type: relationship, role: b, affection: -2 }
+  - id: stay_out
+    label: Say you can't be in the middle of this
+    outcome:
+      text: >-
+        It's honest, and it lands badly on both ends. Some things aren't
+        yours to carry.
+      effects:
+        - { type: tie, a: a, b: b, action: neutral }
+        - { type: relationship, role: a, affection: -3 }
+        - { type: relationship, role: b, affection: -3 }
+        - { type: memory, role: a, tag: you_stayed_neutral }
+        - { type: memory, role: b, tag: you_stayed_neutral }

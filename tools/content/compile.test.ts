@@ -1144,3 +1144,77 @@ describe("people's own lives (E3)", () => {
     expect(await expectErrors()).toContain('cosigned_debt');
   });
 });
+
+describe('the social web (E4)', () => {
+  it('accepts the real content: about forty events, versions with twists for every kind, and no warnings', { timeout: 90_000 }, async () => {
+    const result = await compile();
+    if (!result.ok) throw new Error(formatErrors(result.errors));
+    const web = Object.values(result.bundle.events).filter((e) => !e.retired && e.category === 'web');
+    expect(web.length).toBeGreaterThanOrEqual(35);
+    expect(web.length).toBeLessThanOrEqual(45);
+    const kinds = Object.entries(result.bundle.registries.web.kinds);
+    expect(kinds).toHaveLength(9);
+    for (const [kind, def] of kinds) {
+      expect(Object.keys(def.versions).length, kind).toBeGreaterThanOrEqual(3);
+      expect(Object.values(def.versions).some((v) => v.twists.length > 0), kind).toBe(true);
+    }
+    expect(result.warnings).toEqual([]);
+  });
+
+  it('checks the web balance against itself and the pacing cap', { timeout: 90_000 }, async () => {
+    const web = await readFile(path.join(dir, 'balance/web.yaml'), 'utf8');
+    await write('balance/web.yaml', web.replace('  start: 16\n', '  start: 45\n'));
+    expect(await expectErrors()).toContain('a feud ends above where it starts');
+    await write('balance/web.yaml', web.replace('status: { close: 70, strained: 40 }', 'status: { close: 30, strained: 40 }'));
+    expect(await expectErrors()).toContain('strained must be below close');
+    const pacing = await readFile(path.join(dir, 'balance/pacing.yaml'), 'utf8');
+    await write('balance/web.yaml', web);
+    await write('balance/pacing.yaml', pacing.replace('cap: 6', 'cap: 1'));
+    expect(await expectErrors()).toContain('events.maxPerYear is above the pacing cap');
+  });
+
+  it('keeps each tie event to a follow-up that casts a and b and requires the tie', { timeout: 90_000 }, async () => {
+    const real = await readFile(path.join(dir, 'events/any/web/feud_siblings_side.yaml'), 'utf8');
+    await write('events/any/web/feud_siblings_side.yaml', real.replace('followUpOnly: true\n', ''));
+    expect(await expectErrors()).toContain('answers trigger feudBegan, so it must be followUpOnly');
+    await write('events/any/web/feud_siblings_side.yaml', real.replace('  b: { support: true, presence: anywhere }\n', ''));
+    expect(await expectErrors()).toContain('its cast is exactly a and b');
+    await write('events/any/web/feud_siblings_side.yaml', real.replace('    - { tie: { a: a, b: b, kind: [siblings], status: [feuding] } }\n', ''));
+    expect(await expectErrors()).toContain('must require the tie between "a" and "b"');
+    await write('events/any/web/feud_siblings_side.yaml', real.replace('{ type: tie, a: a, b: b, action: side, with: a }', '{ type: tie, a: a, b: z, action: side, with: a }'));
+    expect(await expectErrors()).toContain('role "z" is not in the cast');
+  });
+
+  it('needs a reaction to cast the person who heard and require what they heard, and {heard} only where they have', { timeout: 90_000 }, async () => {
+    const real = await readFile(path.join(dir, 'events/any/web/rumor_job_loss.yaml'), 'utf8');
+    await write('events/any/web/rumor_job_loss.yaml', real.replace('heard: { kinds: [jobLoss], light: false, learned: [gossip] }', 'heard: { kinds: [arrest], learned: [gossip] }'));
+    expect(await expectErrors()).toContain('must require that "npc" has heard about jobLoss');
+    await write('events/any/web/rumor_job_loss.yaml', real.replace(', heard: { kinds: [jobLoss], light: false, learned: [gossip] }', ''));
+    expect(await expectErrors()).toContain('{heard} needs requires');
+  });
+
+  it('keeps the versions of every story reachable, written without a hardcoded pronoun, and secrets serious', { timeout: 90_000 }, async () => {
+    const reg = await readFile(path.join(dir, 'registries/web.yaml'), 'utf8');
+    await write('registries/web.yaml', reg.replace('twists: [{ to: affair_serial, weight: 2 }, { to: affair_close, weight: 1 }]', 'twists: [{ to: affair_serial, weight: 2 }, { to: nowhere, weight: 1 }]'));
+    expect(await expectErrors()).toContain('twists to "nowhere", which is not a version');
+    await write('registries/web.yaml', reg.replace('        twists: [{ to: affair, weight: 1 }]\n        affection: -3', '        twists: [{ to: affair, weight: 1 }]\n        light: true\n        affection: -3'));
+    expect(await expectErrors()).toContain('a secret is never played for laughs');
+    await write('registries/web.yaml', reg.replace('heard: "that you were laid off"', 'heard: "that she was laid off"'));
+    expect(await expectErrors()).toContain('hardcoded pronoun');
+    await write('registries/web.yaml', reg.replace('heard: "that you were laid off"', 'heard: "you were laid off"'));
+    expect(await expectErrors()).toContain('starts with "that"');
+    await write('registries/web.yaml', reg.replace('        heardAbout: "that {about.name} was laid off"\n', ''));
+    expect(await expectErrors()).toContain('heardAbout is missing');
+    await write('registries/web.yaml', reg.replace("flags: [shoplifted, joyrode, tagged_bridge, ran_package, cooked_books, stole_from_work]", "flags: [shoplifted, not_a_flag]"));
+    expect(await expectErrors()).toContain('flag "not_a_flag" is not in registries/flags.yaml');
+  });
+
+  it('keeps the new interactions to what they are about', { timeout: 90_000 }, async () => {
+    const real = await readFile(path.join(dir, 'interactions/introduce.yaml'), 'utf8');
+    await write('interactions/introduce.yaml', real.replace('other: true\n', ''));
+    expect(await expectErrors()).toContain('an introduction is an interaction with other: true');
+    const straight = await readFile(path.join(dir, 'interactions/set_record_straight.yaml'), 'utf8');
+    await write('interactions/set_record_straight.yaml', straight.replace('topic: distorted\n', ''));
+    expect(await expectErrors()).toContain('knowledge effects are for an interaction with a topic');
+  });
+});

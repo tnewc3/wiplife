@@ -1,0 +1,53 @@
+id: set_record_straight
+name: Set the record straight
+blurb: Correct what they've heard about you.
+group: practical
+profile: straight
+inPerson: false
+visit: true
+topic: distorted
+availability:
+  kinds: [parent, stepparent, sibling, grandparent, relative, friend, partner, fiance, spouse, coworker, boss, classmate, acquaintance]
+  you: { min: 12 }
+  them: { min: 12 }
+outcomes:
+  great:
+    text:
+      - "{person.name} heard {heard}. You tell {person.them} how it really was, and {person.they} {person:believes|believe} you at once. \"I should have asked,\" {person.they} {person:says|say}."
+      - "You set it out in order, and by the end {person.name} is shaking {person.their} head at the people who got it wrong. \"I'll tell anyone who asks,\" {person.they} {person:says|say}."
+    affection: 3
+    trust: 4
+    mood: 3
+    effects:
+      - { type: knowledge, role: person, action: correct }
+      - { type: memory, role: person, tag: you_set_it_straight }
+  good:
+    text:
+      - "{person.name} heard {heard}. You explain what really happened, and {person.they} {person:nods|nod} slowly. \"All right. That makes more sense.\""
+      - "It takes a few tries to find the right words. {person.name} listens, and by the end the story {person.they} had is gone, and yours is in its place."
+    affection: 1
+    trust: 2
+    effects:
+      - { type: knowledge, role: person, action: correct }
+      - { type: memory, role: person, tag: you_set_it_straight }
+  neutral:
+    text:
+      - "{person.name} heard {heard}. You tell it your way. \"Maybe,\" {person.they} {person:says|say}, in a voice that settles nothing."
+      - "{person.name} heard {heard}. You say your piece, and {person.they} {person:listens|listen} politely and {person:gives|give} nothing away. You will have to wait and see what {person.they} {person:believes|believe}."
+    trust: -1
+  bad:
+    text:
+      - "{person.name} heard {heard}. You say it isn't true, and {person.they} {person:doesn't|don't} accept it. \"That's what you would say,\" {person.they} {person:says|say}."
+      - "The harder you explain, the worse it sounds. {person.name} folds {person.their} arms, and the original version only seems to gain ground."
+    affection: -3
+    trust: -3
+    mood: -4
+  backfire:
+    text:
+      - "You make your case, and {person.name} gets angry about being handled. By the evening {person.they} {person:has|have} told someone else exactly what you said."
+      - "It lands as an accusation. {person.name} storms off and, in the telling, you become the one with something to hide."
+    affection: -5
+    trust: -5
+    mood: -6
+    effects:
+      - { type: knowledge, role: person, action: leak }

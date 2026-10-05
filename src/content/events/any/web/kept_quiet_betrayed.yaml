@@ -1,0 +1,64 @@
+# Web (betrayed): someone you asked to keep it quiet didn't.
+id: kept_quiet_betrayed
+title: You asked them not to
+text: >-
+  It reaches you the way these things do: indirectly, and from the wrong
+  person. {npc.name} knew {heard}. You asked {npc.them} to keep it quiet, and
+  it is not quiet now.
+tone: serious
+category: web
+rarity: common
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 14 } }
+    - { role: npc, alive: true, heard: { secret: true } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  npc: { support: true, presence: anywhere }
+choices:
+  - id: confront
+    label: Ask {npc.name} why
+    check:
+      base: 40
+      stats:
+        - { role: npc, key: affection, weight: 0.3 }
+        - { role: npc, key: trust, weight: 0.2 }
+      success:
+        text: >-
+          {npc.name} doesn't make excuses. "It was a mistake. I was scared, and I
+          wanted to share it with someone, and it was the wrong someone." It is
+          not enough, but it is honest.
+        effects:
+          - { type: relationship, role: npc, affection: -4, trust: -6 }
+          - { type: memory, role: npc, tag: broke_your_confidence }
+      failure:
+        text: >-
+          "I didn't say anything you didn't already know people were saying,"
+          {npc.name} says. You hang up before you say something you can't take
+          back.
+        effects:
+          - { type: relationship, role: npc, affection: -10, trust: -14 }
+          - { type: memory, role: npc, tag: broke_your_confidence }
+          - { type: stat, key: stress, delta: 4 }
+  - id: let_it_go
+    label: Let it go, and stop telling {npc.them} things
+    outcome:
+      text: >-
+        You don't say a word, which is its own message. You will remember what
+        you can't tell {npc.name}.
+      effects:
+        - { type: relationship, role: npc, affection: -5, trust: -10 }
+        - { type: memory, role: npc, tag: broke_your_confidence }
+  - id: take_stock
+    label: Decide who else has to hear it from you first
+    outcome:
+      text: >-
+        You make a short list of names, and you call the first one before you
+        can think better of it. If it is going to be known, it will at least be
+        known from you.
+      effects:
+        - { type: relationship, role: npc, affection: -3, trust: -6 }
+        - { type: memory, role: npc, tag: broke_your_confidence }
+        - { type: stat, key: stress, delta: 3 }

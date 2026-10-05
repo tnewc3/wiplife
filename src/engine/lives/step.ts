@@ -19,6 +19,7 @@ import { ageOfPerson, cloneLife, defaultLife, levelForWealth, tierFor } from './
 import { queueRequests } from './requests';
 import { ask, type Ctx, type Subject } from './subject';
 import { careStep, troubleStep } from './trouble';
+import { hasRomanticTie } from '../web/query';
 
 const TIER_RANK = { close: 0, near: 1, far: 2 } as const;
 
@@ -32,7 +33,9 @@ function domainsFor(ctx: Ctx, s: Subject): Set<LifeDomain> {
     d.delete('children');
   }
   if (kind === 'coworker' || kind === 'boss') d.delete('career');
-  // The older generation's partners are each other (E4 builds the web between people): no new love lives or children for them here.
+  // E4: someone in a couple with another of the people you know has their love life already.
+  if (hasRomanticTie(ctx.view.web, s.id)) d.delete('love');
+  // The older generation's partners are each other (the web between people, E4, ties them): no new love lives or children for them here.
   if (kind === 'parent' || kind === 'stepparent' || kind === 'grandparent' || kind === 'relative') {
     d.delete('love');
     d.delete('children');

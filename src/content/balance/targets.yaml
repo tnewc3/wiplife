@@ -167,6 +167,22 @@ people:
   # Milliseconds a year's beginYear takes on average, on the machine the simulation runs on.
   maxBeginYearMs: 20
 
+# E4: the social web (tools/simulate/web.ts), on the careful player's lives.
+web:
+  tiesAtATime: { min: 6, max: 60 }
+  feudsPerLife: { min: 0.5, max: 4 }
+  feudingShare: { min: 0.005, max: 0.06 }
+  feudYears: { min: 2, max: 12 }
+  feudsEnded: { min: 0.4, max: 1 }
+  secretsOut: { min: 0.25, max: 0.9 }
+  secretYears: { min: 1, max: 8 }
+  newsOut: { min: 0.3, max: 0.95 }
+  twistRate: { min: 0.1, max: 0.45 }
+  eventsPerYear: { min: 0.08, max: 1 }
+  maxEventShare: 0.2
+  maxBeginYearMs: 20
+  maxWebStepMs: 6
+
 coverage:
   minEvents: 300
   legendary: { min: 5, max: 10 }

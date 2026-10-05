@@ -1,0 +1,84 @@
+# Web reaction (identity): a parent heard who you are from someone else. Handled with weight, and you always get to answer.
+id: outed_family
+title: They heard it from someone else
+text: >-
+  You had meant to tell {npc.name} yourself, in your own words, when you were
+  ready. Someone else got there first. {npc.They} {npc:calls|call} you that
+  evening, and begins with: "I heard {heard}." And then: "I'd like to hear it
+  from you."
+tone: serious
+category: web
+rarity: common
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 14 } }
+    - { role: npc, alive: true, kind: [parent, stepparent, grandparent], heard: { kinds: [identity], learned: [gossip] } }
+weight:
+  base: 10
+  # It happened before: people have had time to think about it, and a second time is less of a shock.
+  modifiers:
+    - { if: { flag: was_outed }, x: 0.6 }
+followUpOnly: true
+cast:
+  npc: { support: true, presence: anywhere }
+choices:
+  - id: tell_them
+    label: Tell {npc.name} everything, in your own words
+    check:
+      base: 50
+      stats:
+        - { role: npc, key: affection, weight: 0.5 }
+        - { role: npc, key: trust, weight: 0.4 }
+      success:
+        text: >-
+          It's easier than you thought once you start. {npc.name} is quiet for a
+          long moment. Then {npc.they} {npc:hugs|hug} you hard over the phone,
+          in the only way a voice can, and {npc:tells|tell} you nothing could
+          change how much you are loved. "I'm sorry you had to hear it
+          from someone else," {npc.they} {npc:says|say}. "Next time, I'd like to
+          be the first to know."
+        effects:
+          - { type: knowledge, role: npc, action: tell }
+          - { type: memory, role: npc, tag: accepted_you }
+          - { type: relationship, role: npc, affection: 8, trust: 5 }
+          - { type: innerConflict, delta: -8 }
+          - { type: flag, key: came_out, value: true }
+          - { type: flag, key: was_outed, value: true }
+          - { type: stat, key: happiness, delta: 4 }
+      failure:
+        text: >-
+          {npc.name} doesn't yell. {npc.They} just {npc:goes|go} very quiet, and
+          the quiet lasts for weeks. {npc.They} {npc:says|say} the right words
+          in the wrong voice, and you can tell it's going to take time. It is
+          not the end of the conversation. It is a hard start.
+        effects:
+          - { type: knowledge, role: npc, action: tell }
+          - { type: memory, role: npc, tag: struggled_with_it }
+          - { type: relationship, role: npc, affection: -10, trust: -4 }
+          - { type: flag, key: came_out, value: true }
+          - { type: flag, key: was_outed, value: true }
+          - { type: stat, key: stress, delta: 6 }
+  - id: ask_for_time
+    label: Tell {npc.them} you aren't ready to talk about it yet
+    outcome:
+      text: >-
+        "I'm not ready," you say. There is a pause that you can feel
+        thinking. {npc.name} says, "Then I'll wait." {npc.They} {npc:doesn't|don't}
+        push. It's a gift, and you take it, and the knowing doesn't go away.
+      effects:
+        - { type: knowledge, role: npc, action: hush }
+        - { type: relationship, role: npc, affection: 1, trust: 1 }
+        - { type: stat, key: stress, delta: 3 }
+  - id: ask_to_keep_it_private
+    label: Ask {npc.them} to keep it between the two of you for now
+    outcome:
+      text: >-
+        "It's mine to tell," you say. "Please." {npc.name} says yes, with the
+        careful tone of someone making a promise. Whatever else happens, you
+        have asked for something small, and it was given.
+      effects:
+        - { type: knowledge, role: npc, action: hush }
+        - { type: memory, role: npc, tag: asked_to_keep_quiet }
+        - { type: relationship, role: npc, trust: 2 }
+        - { type: stat, key: stress, delta: 2 }

@@ -13,6 +13,7 @@ import type { ContentBundle } from '../../src/content/schemas';
 import { createLife } from '../../src/engine/life';
 import { lifeStageForAge } from '../../src/engine/systems/aging';
 import type { GenderCategory, LifeState, Person, RelationshipKind } from '../../src/engine/types';
+import { emptyWeb } from '../../src/engine/web/ties';
 
 function pack(): ContentBundle {
   return JSON.parse(readFileSync(path.resolve('src/content/compiled/test-content.json'), 'utf8')) as ContentBundle;
@@ -74,6 +75,8 @@ export function peopleLife(seed: string): LifeState {
     add({ id: 'frd', first: 'Marcus', age: 41, kind: 'friend', category: 'man', affection: 85 });
     add({ id: 'pal', first: 'Jo', age: 36, kind: 'friend', category: 'nonbinary', affection: 85 });
     d.finances.savings = 40_000;
+    // Nobody the generator gave you is left, so none of its ties are either.
+    d.web = emptyWeb();
     const stats = { ...d.character.stats };
     d.recap = { year: d.currentYear, age, statsBefore: stats, statsAfter: { ...stats } };
     d.lifetime = { happinessTotal: d.character.stats.happiness * age, years: age };

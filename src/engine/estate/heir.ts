@@ -54,6 +54,8 @@ import type {
 } from '../types';
 import { PhaseError } from '../life';
 import { receivePossessions } from './possessions';
+import { ensureStructure } from '../web/structure';
+import { emptyWeb } from '../web/ties';
 
 /** A deep copy through JSON: the life holds plain data only (the engine has no structuredClone). */
 export function cloneJson<T>(value: T): T {
@@ -359,6 +361,7 @@ export function continueAsHeir(dead: LifeState, heirId: Id, content: ContentBund
       deeds: [...dead.lineage.deeds],
     },
     news: [],
+    web: emptyWeb(),
   };
 
   // ── What they inherit ────────────────────────────────────────────────────
@@ -425,6 +428,18 @@ export function continueAsHeir(dead: LifeState, heirId: Id, content: ContentBund
 
   // ── Possessions (E5 hook) ────────────────────────────────────────────────
   receivePossessions(life, dead.estate.possessions.filter((t) => t.toPersonId === heirId), content);
+
+  // ── The web between the people around them (E4) ──────────────────────────
+  // Rebuilt from the heir's side: who is married to whom, who is whose sibling, who a parent to whom. A pair that was tied
+  // in the parent's life in the same way keeps how it stood (and a feud), without the side the parent took.
+  ensureStructure(life, life.web, rng, content, year);
+  for (const [key, tie] of Object.entries(life.web.ties)) {
+    const old = dead.web.ties[key];
+    if (old && old.kind === tie.kind) {
+      tie.affection = old.affection;
+      if (old.feud) tie.feud = { since: Math.min(old.feud.since, year) };
+    }
+  }
 
   // ── The card, the recap and what comes next ──────────────────────────────
   const cause = content.causes[dead.death?.causeId ?? '']?.text ?? 'natural causes';

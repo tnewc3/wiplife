@@ -1,0 +1,43 @@
+# Web (coupleWed): two of your friends have married each other.
+id: friends_engaged
+title: Plus one, each other
+text: >-
+  The invitation has two names on it, {a.name} and {b.name}, both of them
+  yours. It's a small wedding, the kind with a shared playlist and a long
+  table, and you've been asked, with some ceremony, to come.
+tone: light
+category: web
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { tie: { a: a, b: b, kind: [married] } }
+    - { role: a, alive: true, age: { gte: 18 }, kind: [friend], where: [household, city] }
+    - { role: b, alive: true, age: { gte: 18 }, kind: [friend], where: [household, city] }
+weight: { base: 8 }
+followUpOnly: true
+cast:
+  a: { support: true, presence: nearby }
+  b: { support: true, presence: nearby }
+choices:
+  - id: go
+    label: Go, with a gift
+    outcome:
+      text: >-
+        It's a good day. You dance badly, and are cheered for it. Late in the
+        night, both of them find you separately and say thank you.
+      effects:
+        - { type: cost, item: wedding_gift }
+        - { type: relationship, role: a, affection: 5, trust: 3 }
+        - { type: relationship, role: b, affection: 5, trust: 3 }
+        - { type: stat, key: happiness, delta: 3 }
+  - id: send_regrets
+    label: Send your regrets
+    outcome:
+      text: >-
+        You can't make it. The card you send is warm, and late, and both
+        of them understand, in the way that people understand and remember.
+      effects:
+        - { type: relationship, role: a, affection: -3 }
+        - { type: relationship, role: b, affection: -3 }

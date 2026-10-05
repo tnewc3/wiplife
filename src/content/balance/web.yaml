@@ -1,0 +1,127 @@
+# The social web (E4, docs/expansion.md): ties between the people you know,
+# feuds, and what travels along them. Ties start from the family's structure,
+# when a partner meets your people, between friends who share a city and by
+# your introductions; they drift, change and can turn into feuds. Knowledge
+# (what happened to you, secrets and rumors) spreads along ties, weighted by
+# closeness and each person's gossip tendency (balance/people.yaml gossip),
+# and can twist into other versions (registries/web.yaml).
+# Starting proposals; Stage 12 (balancing) tunes them against simulation runs.
+
+ties:
+  # Affection a new tie starts at, by kind.
+  start:
+    married: { mean: 62, sd: 18 }
+    dating: { mean: 66, sd: 12 }
+    siblings: { mean: 55, sd: 18 }
+    parentChild: { mean: 62, sd: 16 }
+    inLaw: { mean: 54, sd: 14 }
+    friends: { mean: 58, sd: 14 }
+  # Where an introduction starts a tie, by how it goes.
+  introduced:
+    friends: { mean: 58, sd: 12 }
+    rivalry: { mean: 30, sd: 8 }
+    feud: { mean: 14, sd: 4 }
+    romance: { mean: 66, sd: 10 }
+  drift:
+    # Where each kind settles on its own, and how fast (the share of the gap closed each year).
+    means: { married: 60, dating: 62, siblings: 55, parentChild: 62, inLaw: 56, friends: 58 }
+    pull: 0.12
+    sd: 5
+    # Points per point their average Kindness is above 50, and off per point they differ in Sociability and in Discipline.
+    kindness: 0.18
+    unlike: 0.12
+  # Now and then something happens between two people: a falling-out (or making up).
+  shock:
+    chance: 0.014
+    worse: 0.65
+    fall: { min: 18, max: 48 }
+    rise: { min: 8, max: 25 }
+  # At or above close: close; below strained: strained; between: normal.
+  status: { close: 70, strained: 40 }
+  maxPerPerson: 10
+  # Minors are only tied to minors, within this many years of each other.
+  minorAgeGap: 6
+  # When your partner meets your people (yearly, once together for afterYears).
+  meet:
+    afterYears: 0
+    inLaw: 0.35
+    friends: 0.2
+    committed: 1.6
+    household: 2
+  # Friends in the same city: a few pairs are drawn each year.
+  context:
+    draws: 6
+    chance: 0.12
+    maxPerYear: 2
+    romance: 0.06
+  couple:
+    marry: 0.1
+    afterYears: 2
+    breakup:
+      - { at: 0, x: 0.12 }
+      - { at: 5, x: 0.06 }
+      - { at: 15, x: 0.03 }
+    # The affection a couple who split lose, and the widest age gap for a couple formed by chance.
+    breakupDrop: 35
+    maxAgeGap: 15
+
+feud:
+  # A tie that falls below this becomes a feud (not in the year it began)...
+  start: 16
+  # ...and a feuding tie that climbs to this ends it.
+  end: 40
+  # Feuds don't pull back toward the kind's mean; time heals them slowly.
+  heal: { chance: 0.7, min: 3, max: 9 }
+  # Each year you stay neutral, both sides think a little less of you.
+  neutralCost: 3
+  mediateAfter: 3
+  sideChance: 0.8
+  mediateChance: 0.25
+  endAffection: 40
+
+events:
+  # Web events count toward the year's pacing budget, like requests from E3.
+  maxPerYear: 2
+  strainedChance: 0.35
+  closeChance: 0.2
+  formedChance: 0.4
+  introFollowYears: 2
+  introChance: 0.85
+  tieCooldownYears: 4
+  minAge: 14
+
+knowledge:
+  maxItems: 16
+  newPerYear: 3
+  remember: 240
+  expireYears: { secret: 30, rumor: 8 }
+  spread:
+    # Yearly chance a holder tells someone they're connected to.
+    base: 0.16
+    closeness: { close: 1.3, normal: 1, strained: 0.7, feuding: 1.5 }
+    # 1 scales the chance by gossip tendency / 50.
+    gossip: 1
+    secret: 0.3
+    # Someone who is fond of you and trusts you tells less about you: up to this share off.
+    loyalty: 0.7
+    hushed: 0.1
+    hushYears: 6
+    perHolder: 2
+  twist: { chance: 0.3, secret: 0.2 }
+  detect:
+    # A debt this large (and collections) becomes a hidden debt; an addiction or illness this bad shows.
+    hiddenDebt: 8000
+    # Years before another hidden debt is noticed.
+    debtRepeatYears: 10
+    addictionSeverity: 25
+    illnessSeverity: 40
+  reaction:
+    # How much a version's feelings count, by what the person is to you.
+    scale: { spouse: 1.5, partner: 1.4, fiance: 1.4, parent: 1.2, stepparent: 0.8, sibling: 1, child: 1, stepchild: 0.8, grandparent: 0.8, relative: 0.6, friend: 0.8, ex: 0.2, coworker: 0.4, boss: 0.4, classmate: 0.3, acquaintance: 0.3 }
+    # For something about someone else, the share that moves the tie between them.
+    aboutOthers: 0.5
+    maxEvents: 2
+    eventChance: 0.5
+    # A secret held by this share of your circle (and at least publicMin people) is common knowledge.
+    publicShare: 0.6
+    publicMin: 4

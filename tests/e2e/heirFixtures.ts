@@ -15,6 +15,8 @@ import { createLife, endYear } from '../../src/engine/life';
 import { createRng } from '../../src/engine/rng';
 import { lifeStageForAge } from '../../src/engine/systems/aging';
 import type { LifeState } from '../../src/engine/types';
+import { pruneWeb } from '../../src/engine/web/ties';
+import { CURRENT_SCHEMA_VERSION } from '../../src/persistence/envelope';
 
 /** The test content pack, as the app loads it with ?content=test (read when first needed: `npm run content` builds it). */
 function pack(): ContentBundle {
@@ -76,6 +78,8 @@ export function familyLife(options: FamilyLife): LifeState {
     for (const kid of options.kids) {
       createChild(d, rng, { origin: 'birth', age: kid, parents: { you: true, ...(options.spouse ? { other: 'sp' } : {}) }, ...(options.spouse ? { otherParentId: 'sp' } : {}), custody: 'you' }, content);
     }
+    // Relatives who died are no longer tied to anyone.
+    pruneWeb(d);
   });
 }
 
@@ -94,7 +98,7 @@ export function deadLife(life: LifeState): LifeState {
 /** Puts a life in the app's database as the active life, and reloads so the app loads it. */
 export async function loadSavedLife(page: Page, life: LifeState): Promise<void> {
   const content = pack();
-  const envelope = { schemaVersion: 13, contentVersion: content.contentVersion, savedAt: new Date().toISOString(), data: JSON.parse(JSON.stringify(life)) as unknown };
+  const envelope = { schemaVersion: CURRENT_SCHEMA_VERSION, contentVersion: content.contentVersion, savedAt: new Date().toISOString(), data: JSON.parse(JSON.stringify(life)) as unknown };
   await page.evaluate(
     (saved) =>
       new Promise<void>((resolve, reject) => {

@@ -1,0 +1,83 @@
+# Web (feudBegan): two friends have fallen out.
+id: feud_friends_side
+title: The group splits
+text: >-
+  Something happened between {a.name} and {b.name}, and nobody agrees on what.
+  Plans are suddenly "already made." Messages go unanswered. Everyone in the
+  group has noticed, and everyone is waiting to see which way you lean.
+tone: neutral
+category: web
+rarity: common
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 14 } }
+    - { tie: { a: a, b: b, kind: [friends], status: [feuding] } }
+    - { role: a, alive: true, kind: [friend] }
+    - { role: b, alive: true, kind: [friend] }
+weight: { base: 9 }
+followUpOnly: true
+cast:
+  a: { support: true, presence: anywhere }
+  b: { support: true, presence: anywhere }
+choices:
+  - id: side_a
+    label: Stick with {a.name}
+    outcome:
+      text: >-
+        You make it clear where you stand. {a.name} is grateful. {b.name} stops
+        including you in things, quietly, without a word about why.
+      effects:
+        - { type: tie, a: a, b: b, action: side, with: a }
+        - { type: relationship, role: a, affection: 7, trust: 4 }
+        - { type: relationship, role: b, affection: -8, trust: -3 }
+        - { type: memory, role: a, tag: took_your_side }
+        - { type: memory, role: b, tag: you_sided_against_them }
+  - id: side_b
+    label: Stick with {b.name}
+    outcome:
+      text: >-
+        {b.name} tells you the whole story over coffee, and you believe it. When
+        {a.name} hears, {a.they} {a:doesn't|don't} say anything. That is worse.
+      effects:
+        - { type: tie, a: a, b: b, action: side, with: b }
+        - { type: relationship, role: b, affection: 7, trust: 4 }
+        - { type: relationship, role: a, affection: -8, trust: -3 }
+        - { type: memory, role: b, tag: took_your_side }
+        - { type: memory, role: a, tag: you_sided_against_them }
+  - id: both
+    label: Keep seeing both of them, separately
+    check:
+      base: 40
+      stats:
+        - { key: sociability, weight: 0.2 }
+        - { key: kindness, weight: 0.2 }
+      success:
+        text: >-
+          You are careful, and warm, and never repeat what either one says
+          about the other. After a while that carefulness is the thing both of
+          them respect most about you.
+        effects:
+          - { type: tie, a: a, b: b, action: neutral }
+          - { type: relationship, role: a, affection: 2, trust: 3 }
+          - { type: relationship, role: b, affection: 2, trust: 3 }
+      failure:
+        text: >-
+          It works until each of them learns you saw the other that week. Then
+          you are the one who "can't be trusted with anything."
+        effects:
+          - { type: tie, a: a, b: b, action: neutral }
+          - { type: relationship, role: a, affection: -4, trust: -4 }
+          - { type: relationship, role: b, affection: -4, trust: -4 }
+  - id: stay_out
+    label: Step back from the whole thing
+    outcome:
+      text: >-
+        You go quiet in the group chat and busy on the weekends. Nobody blames
+        you out loud.
+      effects:
+        - { type: tie, a: a, b: b, action: neutral }
+        - { type: relationship, role: a, affection: -2 }
+        - { type: relationship, role: b, affection: -2 }
+        - { type: memory, role: a, tag: you_stayed_neutral }
+        - { type: memory, role: b, tag: you_stayed_neutral }

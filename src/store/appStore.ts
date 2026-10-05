@@ -96,7 +96,8 @@ export interface AppState {
   /** A page open on the More tab (More → Home, More → Health), if any. */
   moreView: 'home' | 'health' | 'family' | 'will' | null;
   /** E1: the Interact sheet open on a person's page: the grouped menu, or the gift price tiers. */
-  interactSheet: { personId: string; view: 'menu' | 'gift' } | null;
+  /** The Interact sheet: the menu, a gift's price tiers, or (E4) the picker for an interaction that needs another person or a story first. */
+  interactSheet: { personId: string; view: 'menu' | 'gift' | 'pick'; /** The interaction a picker is for. */ pick?: string } | null;
 
   init: () => Promise<void>;
   confirmAge: () => Promise<void>;
@@ -172,14 +173,15 @@ export interface AppState {
   /** E1: opens the Interact sheet for a person. */
   openInteractions: (personId: string) => void;
   /** E1: from the Interact sheet to the gift price tiers, and back. */
-  setInteractView: (view: 'menu' | 'gift') => void;
+  setInteractView: (view: 'menu' | 'gift' | 'pick', pick?: string) => void;
   closeInteractions: () => void;
   /**
    * E1: does an interaction with a person (between years) and autosaves. The
    * outcome card then shows from the saved life, so it is still there after a
    * reload. Ignored while the engine is working.
    */
-  interact: (interactionId: string, personId: string, giftTier?: GiftTier) => Promise<void>;
+  /** `extra`: who to introduce them to, or which story the interaction is about (E4). */
+  interact: (interactionId: string, personId: string, giftTier?: GiftTier, extra?: { otherId?: string; itemId?: string }) => Promise<void>;
   /** E1: answers the choice an outcome card opened (walk away, keep going) and autosaves. */
   chooseInteractionOption: (choiceId: string) => Promise<void>;
   /** E1: closes the outcome card and autosaves. */
@@ -662,9 +664,12 @@ export function createAppStore({
             if (s.life?.people[personId] && s.life.phase === 'yearStart') s.interactSheet = { personId, view: 'menu' };
           }),
 
-        setInteractView: (view) =>
+        setInteractView: (view, pick) =>
           set((s) => {
-            if (s.interactSheet) s.interactSheet.view = view;
+            if (!s.interactSheet) return;
+            s.interactSheet.view = view;
+            if (pick !== undefined) s.interactSheet.pick = pick;
+            else delete s.interactSheet.pick;
           }),
 
         closeInteractions: () =>
@@ -672,11 +677,11 @@ export function createAppStore({
             s.interactSheet = null;
           }),
 
-        interact: (interactionId, personId, giftTier) =>
+        interact: (interactionId, personId, giftTier, extra) =>
           busy(async () => {
             const life = get().life;
             if (!life || life.phase !== 'yearStart' || get().eventSheet) return;
-            const next = performInteraction(life, { interactionId, personId, ...(giftTier ? { giftTier } : {}) }, bundle);
+            const next = performInteraction(life, { interactionId, personId, ...(giftTier ? { giftTier } : {}), ...(extra?.otherId ? { otherId: extra.otherId } : {}), ...(extra?.itemId ? { itemId: extra.itemId } : {}) }, bundle);
             await commit(next);
             set((s) => {
               s.interactSheet = null;

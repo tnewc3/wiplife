@@ -8,6 +8,8 @@ import { estateFailures } from './estate/invariants';
 import { familyFailures } from './family/invariants';
 import { interactionFailures } from './interactions/invariants';
 import { livesFailures } from './lives/invariants';
+import { webFailures } from './web/invariants';
+import { ITEM_ROLE } from './web/query';
 import { consistencyProblems } from './presence';
 import { isRngState } from './rng';
 import { lifeStageForAge } from './systems/aging';
@@ -186,6 +188,9 @@ export function checkInvariants(state: LifeState, content: ContentBundle): strin
   // The lives of the people you know (E3).
   failures.push(...livesFailures(state, content));
 
+  // The social web (E4).
+  failures.push(...webFailures(state, content));
+
   // People and relationships.
   const { parentAgeAtBirth } = content.balance.creation.family;
   for (const [id, person] of Object.entries(state.people)) {
@@ -320,7 +325,7 @@ export function checkInvariants(state: LifeState, content: ContentBundle): strin
     if (ids.has(p.instanceId)) fail(`duplicate pending instance ${p.instanceId}`);
     ids.add(p.instanceId);
     if (!content.events[p.eventId]) fail(`pending event "${p.eventId}" is not known`);
-    for (const [role, id] of Object.entries(p.cast)) if (!state.people[id]) fail(`pending ${p.eventId} casts missing person ${id} as ${role}`);
+    for (const [role, id] of Object.entries(p.cast)) if (role !== ITEM_ROLE && !state.people[id]) fail(`pending ${p.eventId} casts missing person ${id} as ${role}`);
   }
   // C1: while nothing has been chosen yet (the state is as it was when the
   // events were picked), every pending event keeps its category contract and
@@ -341,7 +346,7 @@ export function checkInvariants(state: LifeState, content: ContentBundle): strin
     // Follow-ups are always for a later year; due ones leave the list when the year begins.
     if (s.dueYear <= state.currentYear) fail(`scheduled ${s.eventId} is due in the past (${s.dueYear})`);
     if (s.since !== undefined && (s.since < state.birthYear || s.since > state.currentYear)) fail(`scheduled ${s.eventId} was set up outside the life`);
-    for (const [role, id] of Object.entries(s.cast)) if (!state.people[id]) fail(`scheduled ${s.eventId} casts missing person ${id} as ${role}`);
+    for (const [role, id] of Object.entries(s.cast)) if (role !== ITEM_ROLE && !state.people[id]) fail(`scheduled ${s.eventId} casts missing person ${id} as ${role}`);
   }
   for (const [id, log] of Object.entries(state.eventLog)) {
     if (!(log.count >= 1) || log.lastYear > state.currentYear || log.lastYear < state.birthYear) fail(`event log for ${id} is invalid`);

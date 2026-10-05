@@ -1,0 +1,75 @@
+# Web reaction (affair): a friend or sibling has heard about an affair and asks you.
+id: affair_whispers
+title: Can we talk?
+text: >-
+  {npc.name} has asked to talk, in the careful voice of someone who has
+  rehearsed. {npc.They} heard {heard}. {npc.They} wanted to ask you before
+  anyone else could say it for you.
+tone: dark
+category: web
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { role: npc, alive: true, kind: [friend, sibling], heard: { kinds: [affair], learned: [gossip] } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  npc: { support: true, presence: anywhere }
+choices:
+  - id: tell_truth
+    label: Tell the truth
+    check:
+      base: 40
+      stats:
+        - { role: npc, key: affection, weight: 0.3 }
+        - { role: npc, key: trust, weight: 0.3 }
+      success:
+        text: >-
+          It's true, and you say so. {npc.name} is quiet for a long while.
+          "Thank you for not lying to me," {npc.they} {npc:says|say}. "I don't
+          know what I think yet, but thank you."
+        effects:
+          - { type: knowledge, role: npc, action: confirm }
+          - { type: relationship, role: npc, affection: -2, trust: 4 }
+          - { type: memory, role: npc, tag: you_confided }
+      failure:
+        text: >-
+          You tell it plainly. {npc.name} looks at you as if you had turned
+          into someone else. "I don't want to hear any more," {npc.they}
+          {npc:says|say}, and leave.
+        effects:
+          - { type: knowledge, role: npc, action: confirm }
+          - { type: relationship, role: npc, affection: -10, trust: -10 }
+          - { type: stat, key: stress, delta: 4 }
+  - id: set_straight
+    label: Tell {npc.them} what really happened
+    outcome:
+      text: >-
+        You tell {npc.name} the account you can stand behind: where it
+        started, where it stopped, and what you regret. It is not a defense.
+        It is a record, and {npc.they} {npc:listens|listen} to all of it.
+      effects:
+        - { type: knowledge, role: npc, action: correct }
+        - { type: relationship, role: npc, affection: -2, trust: 1 }
+        - { type: memory, role: npc, tag: you_set_it_straight }
+  - id: deny
+    label: Deny it
+    check:
+      base: 30
+      stats: [{ key: confidence, weight: 0.3 }]
+      success:
+        text: >-
+          "That isn't true." {npc.name} wants to believe you, and does, or
+          agrees to. It is not the same thing, but it gets you out of the room.
+        effects:
+          - { type: relationship, role: npc, trust: -4 }
+          - { type: stat, key: stress, delta: 4 }
+      failure:
+        text: >-
+          {npc.name} has seen the same photo you didn't know existed. The silence
+          after your denial is its own kind of answer.
+        effects:
+          - { type: relationship, role: npc, affection: -12, trust: -16 }
+          - { type: stat, key: stress, delta: 6 }

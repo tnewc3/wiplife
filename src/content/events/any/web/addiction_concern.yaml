@@ -1,0 +1,70 @@
+# Web reaction (addiction): someone has heard you are struggling.
+id: addiction_concern
+title: The soft voice
+text: >-
+  {npc.name} has stopped asking how you are and has started asking how
+  you're really doing. {npc.They} heard {heard}. {npc.They} wanted you to
+  know, before it got out of hand, that {npc.they} {npc:is|are} not going to
+  judge you.
+tone: serious
+category: web
+rarity: common
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 14 } }
+    - { role: npc, alive: true, kind: [friend, sibling, parent, partner, fiance, spouse, grandparent], heard: { kinds: [addiction], learned: [gossip] } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  npc: { support: true, presence: anywhere }
+choices:
+  - id: let_them_in
+    label: Admit it, and let {npc.them} help
+    check:
+      base: 50
+      stats:
+        - { role: npc, key: affection, weight: 0.3 }
+        - { role: npc, key: trust, weight: 0.3 }
+      success:
+        text: >-
+          The words are small and they come out in the wrong order. {npc.name}
+          doesn't flinch, doesn't lecture. {npc.They} {npc:holds|hold} your hand
+          across the table, and for the first time in a long time, you aren't
+          carrying it alone.
+        effects:
+          - { type: knowledge, role: npc, action: confirm }
+          - { type: relationship, role: npc, affection: 6, trust: 8 }
+          - { type: memory, role: npc, tag: you_confided }
+          - { type: stat, key: stress, delta: -4 }
+      failure:
+        text: >-
+          You try, and what comes out is anger instead. {npc.name} takes it,
+          because {npc.they} {npc:has|have} to, and says, "I'll be here when you
+          want to talk." {npc.They} {npc:leaves|leave} before you can say you
+          didn't mean it.
+        effects:
+          - { type: knowledge, role: npc, action: confirm }
+          - { type: relationship, role: npc, affection: -3, trust: -2 }
+          - { type: stat, key: stress, delta: 4 }
+  - id: set_straight
+    label: Tell {npc.them} it isn't that bad
+    outcome:
+      text: >-
+        "It's not like that," you say, and {npc.name} nods, as if that were an
+        answer. {npc.They} {npc:keeps|keep} looking at you the way people look
+        at a pot that is just about to boil over.
+      effects:
+        - { type: knowledge, role: npc, action: correct }
+        - { type: relationship, role: npc, trust: -2 }
+        - { type: stat, key: stress, delta: 2 }
+  - id: tell_them_off
+    label: Tell {npc.them} to mind their own business
+    outcome:
+      text: >-
+        "Mind your own business," you say, and watch it land. {npc.name}
+        doesn't argue. {npc.They} just {npc:says|say}, "Okay," and mean
+        something else by it.
+      effects:
+        - { type: relationship, role: npc, affection: -8, trust: -6 }
+        - { type: stat, key: stress, delta: 4 }

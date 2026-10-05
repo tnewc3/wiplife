@@ -29,6 +29,7 @@ choices:
           change how much you're loved. By dinner, {parent.they}
           {parent:is|are} practicing: {self.they}, {self.them}, {self.their}.
         effects:
+          - { type: knowledge, role: parent, action: tell, kind: identity }
           - { type: memory, role: parent, tag: accepted_you }
           - { type: relationship, role: parent, affection: 8, trust: 6 }
           - { type: innerConflict, delta: -10 }
@@ -40,6 +41,7 @@ choices:
           quiet, and the quiet lasts for months. It isn't the end of the
           conversation, but it's a hard start.
         effects:
+          - { type: knowledge, role: parent, action: tell, kind: identity }
           - { type: memory, role: parent, tag: struggled_with_it }
           - { type: relationship, role: parent, affection: -12, trust: -4 }
           - { type: flag, key: came_out, value: true }
@@ -56,6 +58,7 @@ choices:
           off your plate. "Do you want me to tell everyone else, or do you
           want to watch their faces?"
         effects:
+          - { type: knowledge, role: sibling, action: tell, kind: identity }
           - { type: memory, role: sibling, tag: accepted_you }
           - { type: relationship, role: sibling, affection: 8, trust: 8 }
           - { type: innerConflict, delta: -10 }
@@ -64,6 +67,7 @@ choices:
       failure:
         text: '{sibling.name} says all the right words in the wrong voice. Things between you are careful for a long time.'
         effects:
+          - { type: knowledge, role: sibling, action: tell, kind: identity }
           - { type: memory, role: sibling, tag: struggled_with_it }
           - { type: relationship, role: sibling, affection: -10, trust: -5 }
           - { type: flag, key: came_out, value: true }

@@ -7,6 +7,7 @@ import { playLife } from './autoplay';
 import { createLife } from './life';
 import { lifeStageForAge } from './systems/aging';
 import type { LifeState } from './types';
+import { pruneWeb } from './web/ties';
 
 /** A complete, valid custom character; override any part. */
 export function customInput(overrides: Partial<CustomLifeInput> = {}): CustomLifeInput {
@@ -54,6 +55,7 @@ export function lifeAtAge(seed: string, age: number, contentBundle: ContentBundl
         person.deathYear = draft.currentYear;
       }
     }
+    pruneWeb(draft);
     if (age > 0) {
       const stats = { ...draft.character.stats };
       draft.recap = { year: draft.currentYear, age, statsBefore: stats, statsAfter: { ...stats } };

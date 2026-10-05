@@ -10,6 +10,8 @@ import { evaluate } from '../conditions';
 import { whereabouts } from '../presence';
 import { ageOf, bothAdults, isCurrentPartner, isFamilyKind, isPartnerKind, mutualAttraction } from '../relationships';
 import type { Id, LifeState } from '../types';
+import { introduceCandidates, topicItems } from '../web/actions';
+import { hasRomanticTie } from '../web/query';
 
 /** The role the person is cast in for an interaction's text and conditions. */
 export const INTERACTION_ROLE = 'person';
@@ -48,9 +50,29 @@ export function isInteractionAvailable(state: LifeState, def: InteractionDef, pe
 
   if (def.romance) {
     if (isFamilyKind(rel.kind) || !bothAdults(state, person, content)) return false;
-    if (isPartnerKind(rel.kind) ? !isCurrentPartner(state, rel) : !mutualAttraction(state, person) || person.life?.partner) return false;
+    if (isPartnerKind(rel.kind) ? !isCurrentPartner(state, rel) : !mutualAttraction(state, person) || person.life?.partner || hasRomanticTie(state.web, personId)) return false;
   }
+  // E4: an introduction needs someone to introduce them to; a story needs one they have heard.
+  if (def.other && introduceCandidates(state, personId, content).length === 0) return false;
+  if (def.topic && topicItems(state, personId, def.topic, content).length === 0) return false;
   return evaluate(a.requires, state, { cast: { [INTERACTION_ROLE]: personId }, roles: 'strict', content });
+}
+
+/**
+ * What an interaction asks you to choose first, if anything: the first person
+ * you could introduce them to, or the first story they have heard that it is
+ * about (for the simulation and tests; the app shows a picker).
+ */
+export function defaultExtras(state: LifeState, def: InteractionDef, personId: Id, content: ContentBundle): { otherId?: Id; itemId?: string } {
+  if (def.other) {
+    const otherId = introduceCandidates(state, personId, content)[0];
+    return otherId !== undefined ? { otherId } : {};
+  }
+  if (def.topic) {
+    const itemId = topicItems(state, personId, def.topic, content)[0]?.id;
+    return itemId !== undefined ? { itemId } : {};
+  }
+  return {};
 }
 
 /** Every interaction available with this person now, in id order. */

@@ -192,3 +192,14 @@ tags:
   godparent_to_their_child: You are godparent to {npc.their} child
   helped_them_find_work: You helped {npc.them} find work
   drove_them_home: You picked {npc.them} up when {npc.they} came out of prison
+  # E4: the web between the people you know.
+  you_sided_against_them: You sided against {npc.them} in a feud
+  you_stayed_neutral: You stayed out of {npc.their} feud
+  mediated_for_them: You got {npc.them} and someone else talking again
+  introduced_us: You introduced {npc.them} to someone who mattered
+  introduction_went_badly: You introduced {npc.them} to someone, and it went badly
+  you_set_it_straight: You set the record straight with {npc.them}
+  you_confided: You confided in {npc.them}
+  asked_to_keep_quiet: You asked {npc.them} to keep something quiet
+  broke_your_confidence: Told people what you asked {npc.them} to keep quiet
+  heard_it_from_others: Heard it from someone else before you told {npc.them}

@@ -11,6 +11,7 @@ import { evaluate } from './conditions';
 import { pronounsFromPreset } from './creation/character';
 import { createPerson, otherCity } from './events/casting';
 import { giveSampleLife, lifeConditionFor } from './lives/sample';
+import { giveSampleWeb } from './web/sample';
 import { consistencyProblems } from './presence';
 import { isPartnerKind } from './relationships';
 import { createLife, resolveChoice } from './life';
@@ -90,6 +91,8 @@ export function previewEvent(content: ContentBundle, options: SandboxOptions): S
       giveSampleLife(d as LifeState, id, lifeConditionFor(def.requires, role), content);
       cast[role] = id;
     }
+    // E4: a tie between the people cast, and what one of them has heard, as the event asks.
+    giveSampleWeb(d as LifeState, def, cast, content);
     d.phase = 'events';
     d.pending = [{ instanceId: SANDBOX_INSTANCE, eventId: def.id, cast }];
   });

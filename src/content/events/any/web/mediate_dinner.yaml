@@ -1,0 +1,79 @@
+# Web (feudLong): a feud has outlasted everyone's patience; you could host a dinner.
+id: mediate_dinner
+title: A table for three
+text: >-
+  The feud between {a.name} and {b.name} has outlasted most people's patience,
+  including, nearly, yours. You've been picturing a table, three chairs and a
+  very long evening.
+tone: neutral
+category: web
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { tie: { a: a, b: b, status: [feuding], feudYears: { gte: 3 } } }
+    - { role: a, alive: true, where: [household, city] }
+    - { role: b, alive: true, where: [household, city] }
+weight:
+  base: 9
+  # Having hosted one, people expect another, and you are a little tired of dinners.
+  modifiers:
+    - { if: { flag: hosted_a_peace_dinner }, x: 0.5 }
+followUpOnly: true
+cast:
+  a: { support: true, presence: nearby }
+  b: { support: true, presence: nearby }
+choices:
+  - id: host
+    label: Host the dinner and invite both
+    check:
+      base: 35
+      stats:
+        - { role: a, key: affection, weight: 0.15 }
+        - { role: b, key: affection, weight: 0.15 }
+        - { key: kindness, weight: 0.2 }
+      success:
+        text: >-
+          Dessert is the turning point. {a.name} laughs at something {b.name}
+          says before either of them has remembered not to. By the time they
+          leave, they are walking out together.
+        effects:
+          - { type: cost, item: celebration_dinner }
+          - { type: tie, a: a, b: b, action: reconcile }
+          - { type: flag, key: hosted_a_peace_dinner, value: true }
+          - { type: relationship, role: a, affection: 5, trust: 4 }
+          - { type: relationship, role: b, affection: 5, trust: 4 }
+          - { type: memory, role: a, tag: mediated_for_them }
+          - { type: memory, role: b, tag: mediated_for_them }
+          - { type: stat, key: happiness, delta: 3 }
+      failure:
+        text: >-
+          The soup is good. Nothing else is. Somewhere between the main course
+          and the dishes, an old sentence is said out loud and a chair scrapes
+          back for the last time that night.
+        effects:
+          - { type: cost, item: celebration_dinner }
+          - { type: tie, a: a, b: b, action: worsen, delta: 5 }
+          - { type: relationship, role: a, affection: -3 }
+          - { type: relationship, role: b, affection: -3 }
+          - { type: stat, key: stress, delta: 5 }
+  - id: one_at_a_time
+    label: Have each of them over, one at a time
+    outcome:
+      text: >-
+        You say nothing about the feud unless they do. Both of them do,
+        eventually. You come out of it knowing more than you wanted to and
+        having solved nothing, which is its own kind of progress.
+      effects:
+        - { type: tie, a: a, b: b, action: mend, delta: 6 }
+        - { type: relationship, role: a, affection: 2, trust: 2 }
+        - { type: relationship, role: b, affection: 2, trust: 2 }
+  - id: let_it_lie
+    label: Let it lie
+    outcome:
+      text: >-
+        Some things have to end by themselves. You tell yourself that, and
+        mostly believe it.
+      effects:
+        - { type: stat, key: stress, delta: 1 }

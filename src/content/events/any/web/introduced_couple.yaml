@@ -1,0 +1,47 @@
+# Web (introducedCouple): two people you introduced are a couple.
+id: introduced_couple
+title: You did that
+text: >-
+  {a.name} and {b.name} are together. They met, you will be reminded, at
+  the place you put them in the same room. They want you to know it was you,
+  and also that you may not take any credit at the wedding.
+tone: light
+category: web
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { tie: { a: a, b: b, kind: [dating, married] } }
+    - { role: a, alive: true, age: { gte: 18 } }
+    - { role: b, alive: true, age: { gte: 18 } }
+weight: { base: 9 }
+followUpOnly: true
+cast:
+  a: { support: true, presence: anywhere }
+  b: { support: true, presence: anywhere }
+choices:
+  - id: take_credit
+    label: Take full credit
+    outcome:
+      text: >-
+        "I'd like it noted that I knew." Both of them roll their eyes. Both of
+        them are, at the same time, delighted.
+      effects:
+        - { type: relationship, role: a, affection: 4, trust: 3 }
+        - { type: relationship, role: b, affection: 4, trust: 3 }
+        - { type: memory, role: a, tag: introduced_us }
+        - { type: memory, role: b, tag: introduced_us }
+        - { type: stat, key: happiness, delta: 3 }
+  - id: say_nothing
+    label: Say you're just happy for them
+    outcome:
+      text: >-
+        It is the better answer. They both remember it, and that is, you
+        suspect, why you are the one asked to give a toast.
+      effects:
+        - { type: relationship, role: a, affection: 3, trust: 3 }
+        - { type: relationship, role: b, affection: 3, trust: 3 }
+        - { type: memory, role: a, tag: introduced_us }
+        - { type: memory, role: b, tag: introduced_us }
+        - { type: stat, key: happiness, delta: 2 }
