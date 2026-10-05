@@ -1,0 +1,68 @@
+# A partner who lives with you notices you are struggling, and does not take it seriously.
+id: partner_notices_dismissive
+title: "Just snap out of it"
+text: >-
+  "You've been like this for weeks," {partner.name} says, in the tone of
+  someone who is tired and does not know what to do about it. "Everyone has
+  bad days. Can you just snap out of it?" It is not cruelty. It is
+  incomprehension, and it still hurts more than anything cruel would.
+tone: dark
+category: mental
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { role: partner, kind: [partner, fiance, spouse], mental: { reaction: [dismissive] } }
+    - { health: { conditions: [depression, anxiety_disorder, ptsd], severity: { gte: 20 } } }
+weight: { base: 9 }
+cooldownYears: 3
+cast:
+  partner: { noticed: [dismissive], presence: household }
+choices:
+  - id: explain
+    label: Try to explain it is not a choice
+    check:
+      base: 40
+      stats:
+        - { role: partner, key: trust, weight: 0.3 }
+        - { role: partner, key: affection, weight: 0.2 }
+      success:
+        text: >-
+          You say it as plainly as you can: if you could snap out of it, you
+          would have. {partner.name} is quiet for a long time. "I didn't
+          understand," {partner.they} {partner:says|say}. "I want to."
+        effects:
+          - { type: relationship, role: partner, affection: 4, trust: 5 }
+          - { type: stat, key: stress, delta: -2 }
+      failure:
+        text: >-
+          "I'm just saying you could try," {partner.name} {partner:says|say},
+          and the conversation ends there, with both of you more alone than
+          before.
+        effects:
+          - { type: relationship, role: partner, affection: -4, trust: -4 }
+          - { type: stat, key: stress, delta: 4 }
+  - id: get_help_alone
+    label: Find help without {partner.them}
+    outcome:
+      text: >-
+        You decide not to wait for {partner.name} to understand. You look
+        for someone who already does. It is lonelier than it should be, and it helps.
+      effects:
+        - { type: mental, action: pay, item: psych_evaluation }
+        - { type: mental, action: diagnose, via: doctor }
+        - { type: schedule, eventId: dx_depression, inYears: [1, 1] }
+        - { type: schedule, eventId: dx_anxiety, inYears: [1, 1] }
+        - { type: schedule, eventId: dx_ptsd, inYears: [1, 1] }
+        - { type: relationship, role: partner, trust: -2 }
+  - id: withdraw
+    label: Stop bringing it up
+    outcome:
+      text: >-
+        You say you are fine, because it is easier than being told to try
+        harder. {partner.name} accepts it with visible relief. The silence
+        between you gets thicker.
+      effects:
+        - { type: relationship, role: partner, affection: -3 }
+        - { type: stat, key: stress, delta: 3 }

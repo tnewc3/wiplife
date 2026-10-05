@@ -50,7 +50,12 @@ export function castCandidates(state: LifeState, spec: CastSpec, content: Conten
       const rel = state.relationships[id]!;
       const person = state.people[id];
       if (!person || !person.alive || rel.status === 'ended') return [];
-      if (spec.support) {
+      if (spec.noticed) {
+        // M1: someone who noticed you struggling and took it one of these ways.
+        const noticing = state.health.mental.noticed[id];
+        if (rel.status !== 'active' || !noticing || !spec.noticed.includes(noticing.reaction)) return [];
+        if (spec.kind !== undefined && rel.kind !== spec.kind) return [];
+      } else if (spec.support) {
         if (rel.status !== 'active' || !SUPPORT_KINDS.includes(rel.kind)) return [];
         const housePartner = preferHousehold && state.housing.partnerId === id;
         if (!housePartner && (rel.trust < support.minTrust || rel.affection < support.minAffection)) return [];
@@ -62,6 +67,10 @@ export function castCandidates(state: LifeState, spec: CastSpec, content: Conten
       if (!fitsPresence(state, id, spec.presence, content)) return [];
       return fitsAge(state, spec, personAge(state, person)) ? [person] : [];
     });
+  if (spec.noticed) {
+    // The closest first.
+    found.sort((a, b) => state.relationships[b.id]!.affection - state.relationships[a.id]!.affection || (a.id < b.id ? -1 : 1));
+  }
   if (spec.support) {
     const rel = (p: Person) => state.relationships[p.id]!;
     // A partner who lives with you comes first for home and wellbeing (C1,
@@ -245,8 +254,8 @@ export function castEvent(
       spec.createIfMissing === true && spec.kind !== undefined && (CREATABLE_KINDS as readonly string[]).includes(spec.kind);
     const wantsNew = canCreate && spec.newChance !== undefined && chance(rng, spec.newChance);
     let id: Id | null = null;
-    // A support role goes to the most trusted person; others to anyone who fits.
-    if (options.length > 0 && !wantsNew) id = spec.support ? options[0]!.id : pick(rng, options).id;
+    // A support or noticed role goes to the most trusted (closest) person; others to anyone who fits.
+    if (options.length > 0 && !wantsNew) id = spec.support || spec.noticed ? options[0]!.id : pick(rng, options).id;
     else if (canCreate) {
       id = createPerson(state, spec, rng, content);
       if (id) created.push(id);

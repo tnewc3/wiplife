@@ -5,14 +5,17 @@
  * an identity edit takes effect at once. The common checks (between years,
  * input validation, the input log) live in ./index.ts.
  */
-import { DOCTOR_RESULTS, type ContentBundle } from '../../content/schemas';
+import { DOCTOR_RESULTS, MENTAL_CARES, type ContentBundle, type MentalCareId } from '../../content/schemas';
 import { editIdentity, identityEditChanges, parseIdentityEdit } from '../discovery';
 import { canSeeDoctor, seeDoctor } from '../health';
+import { canSeeTherapist, seeTherapist } from '../mental/therapist';
+import { careBlock, startCare, stopCare } from '../mental/care';
+import { conditionOf } from '../health';
 import type { LifeState } from '../types';
 import type { LifeActionParams, LifeActionRule } from './life';
 import { fittingResults, queueResult } from './result';
 
-export const PERSONAL_ACTION_IDS = ['see_doctor', 'edit_identity'] as const;
+export const PERSONAL_ACTION_IDS = ['see_doctor', 'edit_identity', 'see_therapist', 'set_care'] as const;
 export type PersonalActionId = (typeof PERSONAL_ACTION_IDS)[number];
 
 const none = (params: unknown): LifeActionParams | null =>
@@ -20,7 +23,8 @@ const none = (params: unknown): LifeActionParams | null =>
 
 /** Every doctor result has an event that fits now (so the visit always answers). */
 function doctorAnswers(state: LifeState, content: ContentBundle): boolean {
-  return DOCTOR_RESULTS.every((r) => fittingResults(state, content.registries.health.doctor[r].events, {}, content).length > 0);
+  // The diagnosed answer (M1) only fits in a year something was named.
+  return DOCTOR_RESULTS.filter((r) => r !== 'diagnosed').every((r) => fittingResults(state, content.registries.health.doctor[r].events, {}, content).length > 0);
 }
 
 export const PERSONAL_ACTIONS: Record<PersonalActionId, LifeActionRule> = {
@@ -32,6 +36,26 @@ export const PERSONAL_ACTIONS: Record<PersonalActionId, LifeActionRule> = {
       const options = fittingResults(state, content.registries.health.doctor[result].events, {}, content);
       if (options.length > 0) queueResult(state, options, {});
     },
+  },
+  // M1: a therapist may put a name to what you carry; either way the session helps (registries/mental.yaml).
+  see_therapist: {
+    parse: none,
+    allowed: (state, _p, content) => canSeeTherapist(state, content),
+    apply: (state, _p, content) => seeTherapist(state, content),
+  },
+  // M1: start or stop caring for a named condition with therapy, medication or leaning on people (More → Health).
+  set_care: {
+    parse: (params) => {
+      const p = typeof params === 'object' && params !== null ? (params as Record<string, unknown>) : {};
+      if (typeof p.conditionId !== 'string' || !(MENTAL_CARES as readonly unknown[]).includes(p.care) || typeof p.on !== 'boolean') return null;
+      return { conditionId: p.conditionId, care: p.care as MentalCareId, on: p.on };
+    },
+    allowed: (state, p, content) => {
+      if (p.conditionId === undefined || p.care === undefined || p.on === undefined) return false;
+      if (p.on) return careBlock(state, p.conditionId, p.care, content) === null;
+      return conditionOf(state, p.conditionId)?.care?.includes(p.care) === true;
+    },
+    apply: (state, p, content) => void (p.on ? startCare(state, p.conditionId!, p.care!, content) : stopCare(state, p.conditionId!, p.care!, content)),
   },
   edit_identity: {
     parse: (params) => {

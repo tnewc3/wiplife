@@ -1,3 +1,4 @@
+import { pruneWeb } from './web/ties';
 import { produce } from 'immer';
 import { describe, expect, it } from 'vitest';
 import { content } from '../content';
@@ -354,6 +355,7 @@ describe('relationship changes', () => {
       d.recap = { year: d.currentYear, age: d.character.age, statsBefore: d.character.stats, statsAfter: d.character.stats };
       d.lifetime.years += 1;
       ageNpcs(d, content);
+      pruneWeb(d);
     });
     expect(life.people.wife!.alive).toBe(false);
     expect(life.history.at(-1)!.text).toContain('wife');

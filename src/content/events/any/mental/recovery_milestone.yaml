@@ -1,0 +1,38 @@
+# Recovering from a named condition: a quiet milestone. Once, with an earlier recovery as evidence.
+id: recovery_milestone
+title: The first quiet year
+text: >-
+  Someone asks how you are and you answer without thinking: fine. It takes a
+  moment to realize you mean it. It has been long enough that the old weight
+  has become something you remember rather than something you carry.
+tone: light
+category: mental
+rarity: uncommon
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 12 } }
+    - { mental: { recovered: [depression, anxiety_disorder, ptsd] } }
+    - { not: { health: { conditions: [depression, anxiety_disorder, ptsd] } } }
+weight: { base: 6 }
+once: true
+choices:
+  - id: mark_it
+    label: Mark it somehow
+    outcome:
+      text: >-
+        A good dinner, a small present to yourself, a note in the margin of
+        the year. Some milestones deserve a ceremony, even one with an audience of one.
+      effects:
+        - { type: stat, key: happiness, delta: 4 }
+        - { type: stat, key: confidence, delta: 2 }
+        - { type: history, text: "You marked a year of feeling like yourself again.", importance: 2 }
+  - id: tell_someone
+    label: Tell someone who was there for it
+    outcome:
+      text: >-
+        The person you tell has been waiting to hear it for a long time. They
+        do not say much. They do not need to.
+      effects:
+        - { type: stat, key: happiness, delta: 3 }
+        - { type: stat, key: sociability, delta: 2 }

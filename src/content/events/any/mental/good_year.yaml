@@ -1,0 +1,39 @@
+# A good stretch with a condition: not cured, living well.
+id: good_year
+title: A good stretch
+text: >-
+  It has been a good run. Not perfect, since there are still days with weather in them,
+  but you have noticed that most mornings you want to get up, and most
+  evenings you are glad you did. It is not luck. You have built a life that
+  works with the way your mind works.
+tone: light
+category: mental
+rarity: common
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 12 } }
+    - { health: { conditions: [depression, anxiety_disorder, ptsd, adhd, neurodivergence], named: true, severity: { lt: 40 } } }
+weight: { base: 5 }
+cooldownYears: 4
+choices:
+  - id: enjoy
+    label: Notice it, and enjoy it
+    outcome:
+      text: >-
+        You do not wait for the other shoe. You eat the good meal, take the trip,
+        make the plan. Living well is not an accident, and you let yourself
+        enjoy being good at it.
+      effects:
+        - { type: stat, key: happiness, delta: 4 }
+        - { type: stat, key: stress, delta: -3 }
+  - id: write_down
+    label: Write down what has been working
+    outcome:
+      text: >-
+        Sleep, movement, certain people, certain limits. The list is short and
+        unglamorous and it is yours. You put a copy where you will see it on a
+        bad day.
+      effects:
+        - { type: stat, key: discipline, delta: 2 }
+        - { type: stat, key: stress, delta: -2 }

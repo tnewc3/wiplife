@@ -1,0 +1,58 @@
+# Telling the boss about a diagnosis.
+id: workplace_disclosure
+title: Telling the boss
+text: >-
+  There are things at work that would be easier if your boss knew: the
+  appointments, the days that are harder than others, the way you work best.
+  There are also reasons not to say. Some bosses are decent. Others quietly
+  start treating you differently, and you cannot always prove it.
+tone: neutral
+category: work
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { career: { employed: true, retired: false } }
+    - { health: { conditions: [depression, anxiety_disorder, ptsd, adhd, neurodivergence], named: true } }
+    - { not: { flag: told_boss_about_diagnosis } }
+weight: { base: 5 }
+once: true
+cast:
+  boss: { kind: boss, presence: anywhere }
+choices:
+  - id: tell_boss
+    label: Tell {boss.name}
+    check:
+      base: 55
+      stats:
+        - { role: boss, key: trust, weight: 0.25 }
+      success:
+        text: >-
+          {boss.name} thanks you for telling {boss.them}, asks what would help
+          and means it. A few adjustments later, work is noticeably easier.
+        effects:
+          - { type: knowledge, role: boss, action: tell, kind: mentalHealth }
+          - { type: flag, key: told_boss_about_diagnosis, value: true }
+          - { type: relationship, role: boss, trust: 5 }
+          - { type: job, action: performance, value: 4 }
+          - { type: stat, key: stress, delta: -3 }
+      failure:
+        text: >-
+          {boss.name} says all the right things and then, over the following
+          months, quietly stops giving you the interesting work. You cannot
+          prove it is connected. You are fairly sure it is.
+        effects:
+          - { type: knowledge, role: boss, action: tell, kind: mentalHealth }
+          - { type: flag, key: told_boss_about_diagnosis, value: true }
+          - { type: relationship, role: boss, trust: -3 }
+          - { type: job, action: performance, value: -4 }
+          - { type: stat, key: stress, delta: 3 }
+  - id: keep_it
+    label: Keep it to yourself
+    outcome:
+      text: >-
+        You handle it on your own terms. The appointments are dentist
+        appointments and the bad days are migraines. It works, and it takes work.
+      effects:
+        - { type: flag, key: kept_diagnosis_private, value: true }
+        - { type: stat, key: stress, delta: 2 }

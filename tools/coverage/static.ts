@@ -70,6 +70,7 @@ export function rootEvents(content: ContentBundle): Set<string> {
     ...Object.values(r.triggers.triggers),
     ...Object.values(r.work.results),
     ...Object.values(r.health.doctor),
+    ...Object.values(r.mental.therapist),
     ...Object.values(r.legal.triggers),
     ...Object.values(r.discovery.surfacing),
     ...Object.values(r.discovery.resurfacing),
@@ -101,7 +102,11 @@ export function reachableEvents(content: ContentBundle): Set<string> {
     if (!def || def.retired || seen.has(id)) continue;
     seen.add(id);
     for (const outcome of eventOutcomes(def)) {
-      for (const effect of outcome.effects) if (effect.type === 'schedule') queue.push(effect.eventId);
+      for (const effect of outcome.effects) {
+        if (effect.type === 'schedule') queue.push(effect.eventId);
+        // M1: confiding in someone schedules the follow-up for how they took it.
+        if (effect.type === 'mental') queue.push(...Object.values(effect.then ?? {}));
+      }
     }
   }
   return seen;

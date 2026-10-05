@@ -3,7 +3,7 @@
  * basic arithmetic (no Math.log, Math.cos...), whose results are identical on
  * every JavaScript engine, so a seed replays the same life on any device.
  */
-import { nextFloat, nextInt, type RngState } from './rng';
+import { chance, nextFloat, nextInt, type RngState } from './rng';
 
 export interface Spread {
   mean: number;
@@ -67,4 +67,12 @@ export function sample<T>(state: RngState, items: readonly T[], count: number): 
     result.push(pool.splice(nextInt(state, 0, pool.length - 1), 1)[0]!);
   }
   return result;
+}
+
+/** A whole number from a fractional change: the fractional part happens by chance (a change of 1.4 is 1 with chance 0.6, otherwise 2). */
+export function wholeChange(state: RngState, change: number): number {
+  const size = Math.abs(change);
+  const whole = Math.floor(size);
+  const n = whole + (size > whole && chance(state, size - whole) ? 1 : 0);
+  return change < 0 ? -n : n;
 }

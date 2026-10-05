@@ -2,10 +2,11 @@ id: anxiety_disorder
 name: Anxiety disorder
 noun: an anxiety disorder
 kind: mental
-blurb: Your body keeps sounding alarms nobody else can hear.
+blurb: Your body keeps sounding alarms nobody else can hear. It responds to practice, and to help.
 onset:
   chance:
-    - { at: 12, x: 0 }
+    - { at: 8, x: 0 }
+    - { at: 9, x: 0.0015 }
     - { at: 13, x: 0.003 }
     - { at: 30, x: 0.0035 }
     - { at: 60, x: 0.002 }
@@ -14,10 +15,17 @@ onset:
       curve: [{ at: 0, x: 0.3 }, { at: 50, x: 1 }, { at: 100, x: 2.5 }]
     - key: confidence
       curve: [{ at: 0, x: 1.6 }, { at: 50, x: 1 }, { at: 100, x: 0.6 }]
+    - key: geneticRisk
+      curve: [{ at: 0, x: 0.6 }, { at: 50, x: 1 }, { at: 100, x: 1.9 }]
+    - key: support
+      curve: [{ at: 0, x: 1.6 }, { at: 50, x: 1 }, { at: 100, x: 0.7 }]
+    - key: trauma
+      curve: [{ at: 0, x: 1 }, { at: 100, x: 2 }]
   severity: { min: 20, max: 55 }
-course: { untreated: 1, treated: -10 }
+course: { untreated: 2, treated: -7 }
 effects:
   stress: { perYear: 5, limit: 90 }
   happiness: { perYear: -3, limit: 25 }
 treatable: true
-costs: { treatment: 800, yearlyTreated: 500 }
+diagnosableFrom: 8
+care: [therapy, medication, support]

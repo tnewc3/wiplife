@@ -1,0 +1,40 @@
+# What came of confiding in someone who took it well (the confide effect schedules it).
+id: told_supportive
+title: They remembered
+text: >-
+  {helper.name} has not forgotten what you told {helper.them} {since}. There
+  are small things: a text on a bad day, a plate left at the door, a question
+  asked in the right tone. It is not a big gesture. It is a steady one, and it
+  is exactly what you needed.
+tone: light
+category: mental
+rarity: common
+lifeStages: [child, teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { role: helper, alive: true, mental: { reaction: [supportive] } }
+weight: { base: 8 }
+followUpOnly: true
+cast:
+  helper: { support: true, presence: anywhere }
+choices:
+  - id: say_thanks
+    label: Thank {helper.them}
+    outcome:
+      text: >-
+        "You don't have to thank me," {helper.name} {helper:says|say}, and
+        then, after a moment, "but I'm glad you did." Something in the
+        friendship has quietly deepened.
+      effects:
+        - { type: relationship, role: helper, affection: 5, trust: 4 }
+        - { type: memory, role: helper, tag: stood_by_you_struggling }
+        - { type: stat, key: happiness, delta: 3 }
+  - id: lean_more
+    label: Let {helper.them} be more part of it
+    outcome:
+      text: >-
+        You ask for what you need, plainly, for the first time. {helper.name}
+        says yes before you finish the sentence.
+      effects:
+        - { type: relationship, role: helper, trust: 6 }
+        - { type: stat, key: stress, delta: -3 }

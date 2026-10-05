@@ -7,7 +7,7 @@
  * nothing is charged twice. The common checks (between years, input
  * validation, the input log) live in ./index.ts.
  */
-import { LIFESTYLES, type ApplyProgram, type ContentBundle, type Lifestyle, type Tier } from '../../content/schemas';
+import { LIFESTYLES, type ApplyProgram, type ContentBundle, type Lifestyle, type MentalCareId, type Tier } from '../../content/schemas';
 import { canStartDebtPlan, isIndependent, payDebt, spend, startDebtPlan } from '../finance';
 import { buyHome, moveInCost, moveTo, purchaseQuote, refreshHousingCost, sellHome, supportingParent } from '../housing';
 import { afterMove } from '../career';
@@ -47,6 +47,10 @@ export interface LifeActionParams {
   identity?: IdentityEdit;
   /** The shares of a will (E2b); none clears it. */
   shares?: WillShare[];
+  /** M1: start (on) or stop (off) caring for a mental health condition this way. */
+  conditionId?: string;
+  care?: MentalCareId;
+  on?: boolean;
 }
 
 export interface LifeActionRule {

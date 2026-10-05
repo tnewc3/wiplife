@@ -2,23 +2,30 @@ id: depression
 name: Depression
 noun: depression
 kind: mental
-blurb: A heaviness that colors everything. It can lift, especially with help.
+blurb: A heaviness that colors everything. It can lift, especially with help, and it can come back.
 onset:
   chance:
     - { at: 12, x: 0 }
-    - { at: 13, x: 0.0025 }
-    - { at: 25, x: 0.0032 }
-    - { at: 60, x: 0.002 }
+    - { at: 13, x: 0.0026 }
+    - { at: 25, x: 0.0033 }
+    - { at: 60, x: 0.0021 }
   factors:
     - key: stress
       curve: [{ at: 0, x: 0.4 }, { at: 50, x: 1 }, { at: 100, x: 2.5 }]
     - key: happiness
       curve: [{ at: 0, x: 2 }, { at: 50, x: 1 }, { at: 100, x: 0.5 }]
+    - key: geneticRisk
+      curve: [{ at: 0, x: 0.6 }, { at: 50, x: 1 }, { at: 100, x: 1.9 }]
+    - key: support
+      curve: [{ at: 0, x: 1.8 }, { at: 50, x: 1 }, { at: 100, x: 0.6 }]
+    - key: trauma
+      curve: [{ at: 0, x: 1 }, { at: 100, x: 2.2 }]
   severity: { min: 25, max: 60 }
-course: { untreated: 2, treated: -12 }
+course: { untreated: 3, treated: -8 }
 effects:
   happiness: { perYear: -6, limit: 15 }
   stress: { perYear: 3, limit: 85 }
   health: { perYear: -0.5, limit: 40 }
 treatable: true
-costs: { treatment: 800, yearlyTreated: 600 }
+diagnosableFrom: 12
+care: [therapy, medication, support]

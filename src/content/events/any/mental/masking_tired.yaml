@@ -1,0 +1,50 @@
+# Neurodivergence: the cost of acting normal, before or after a diagnosis.
+id: masking_tired
+title: Doing an impression of yourself
+text: >-
+  You spent the day performing an impression of an easygoing person: the right
+  amount of eye contact, the right jokes, the faces at the right moments. You
+  were convincing. Now you are home, your face aches, and you cannot say a
+  single word to anyone.
+tone: neutral
+category: mental
+rarity: common
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 13 } }
+    - { health: { conditions: [neurodivergence] } }
+weight: { base: 5 }
+cooldownYears: 3
+cast:
+  helper: { support: true, optional: true, presence: nearby }
+choices:
+  - id: rest
+    label: Take the evening to yourself
+    outcome:
+      text: >-
+        Lights low, no talking, nothing asked of you. By morning you are most
+        of the way back to being a person.
+      effects:
+        - { type: stat, key: stress, delta: -3 }
+  - id: explain
+    label: Tell {helper.name} how tiring it is
+    visibleIf: { role: helper }
+    outcome:
+      text: >-
+        {helper.name} listens, then says something you did not expect: that
+        {helper.they} {helper:has|have} noticed, and that you never have to
+        perform for {helper.them}. It is a small sentence and a big
+        relief.
+      effects:
+        - { type: relationship, role: helper, affection: 3, trust: 4 }
+        - { type: stat, key: stress, delta: -4 }
+  - id: keep_going
+    label: Keep the mask on
+    outcome:
+      text: >-
+        You will be fine. You are always fine. It is just that fine is getting
+        more expensive each year.
+      effects:
+        - { type: stat, key: stress, delta: 3 }
+        - { type: stat, key: happiness, delta: -1 }

@@ -9,6 +9,7 @@ import type {
   InteractionGroup,
   JobCategory,
   Lifestyle,
+  MentalCareId,
   OutcomeTier,
   Program,
   RomanceStatus,
@@ -34,7 +35,7 @@ import type {
   SchoolLine,
 } from '../engine/selectors';
 import type { StyleLevel } from '../engine/family/parenting';
-import type { FamilyWealth, GenderCategory, JobEnd, LifeStage, Personality, RecordOutcome, RelationshipKind, Stats } from '../engine/types';
+import type { FamilyWealth, GenderCategory, JobEnd, LifeStage, Personality, Reaction, RecordOutcome, RelationshipKind, Stats } from '../engine/types';
 
 export const STAT_LABELS: Record<keyof Stats, string> = {
   health: 'Health',
@@ -553,6 +554,7 @@ export const CONDITION_KIND_LABELS: Record<ConditionKind, string> = {
   chronic: 'Chronic condition',
   injury: 'Injury',
   mental: 'Mental health',
+  neuro: 'Neurodivergence',
   addiction: 'Addiction',
 };
 
@@ -561,6 +563,34 @@ export function treatmentLabel(treated: boolean, treatable: boolean): string {
   if (treated) return 'Being treated';
   return treatable ? 'Not treated' : 'No cure; a doctor can ease it';
 }
+
+/** M1: the ways of caring for a mental health condition, with what each one asks of you. */
+export const MENTAL_CARE_LABELS: Record<MentalCareId, { name: string; tradeoff: string }> = {
+  therapy: { name: 'Therapy', tradeoff: 'Costs money every year and time out of your week.' },
+  medication: { name: 'Medication', tradeoff: 'Costs money every year, and can bring side effects.' },
+  support: { name: 'Leaning on people', tradeoff: 'Costs no money. It depends on who you have, and it can wear on them.' },
+};
+
+/** M1: why a way of caring isn't available. */
+export const MENTAL_CARE_BLOCK_LABELS = {
+  unsuitable: 'Not for this one.',
+  alone: 'There is nobody you trust enough to lean on yet.',
+} as const;
+
+/** M1: how someone who noticed you struggling took it. */
+export const REACTION_LABELS: Record<Reaction, string> = {
+  supportive: 'Was there for you',
+  neutral: 'Wasn’t sure what to say',
+  dismissive: 'Brushed it off',
+};
+
+/** M1: why you can't see a therapist now. */
+export const THERAPIST_BLOCK_LABELS = {
+  visited: 'You saw a therapist this year. You can go again next year.',
+  young: 'A parent or guardian arranges this at your age.',
+  prison: 'In prison, the prison’s own counselors are the only ones you can see.',
+  busy: 'Finish what’s in front of you first.',
+} as const;
 
 export const DOCTOR_BLOCK_LABELS: Record<DoctorBlock, string> = {
   visited: 'You saw a doctor this year. You can go again next year.',

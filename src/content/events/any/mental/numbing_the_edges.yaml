@@ -1,0 +1,52 @@
+# The link to addiction: using something to quiet what a condition is doing.
+id: numbing_the_edges
+title: Quieting it
+text: >-
+  The evening is long and the noise in your head is loud. There is a bottle
+  in the cupboard, or a friend who always has something, or a screen and a
+  bet that would make the next hour disappear. It would work, for tonight.
+  You know what it tends to do to the mornings after.
+tone: dark
+category: mental
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { health: { conditions: [depression, anxiety_disorder, ptsd], severity: { gte: 40 }, uncared: true } }
+weight: { base: 6 }
+cooldownYears: 3
+cast:
+  helper: { support: true, optional: true, presence: nearby }
+choices:
+  - id: numb_it
+    label: Pour another and let the night go quiet
+    outcome:
+      text: >-
+        It works, for a while. By morning the noise is back, louder, with a
+        headache to go with it, and a quiet resolve to do it again tomorrow.
+      effects:
+        - { type: stat, key: vice, delta: 4 }
+        - { type: stat, key: health, delta: -2 }
+        - { type: stat, key: stress, delta: 3 }
+  - id: call_someone
+    label: Call {helper.name} instead
+    visibleIf: { role: helper }
+    outcome:
+      text: >-
+        {helper.name} picks up on the second ring. You do not talk about
+        anything important. You talk about everything else, for an hour, and by the end
+        the night has lost its edge.
+      effects:
+        - { type: relationship, role: helper, affection: 3, trust: 4 }
+        - { type: stat, key: stress, delta: -3 }
+  - id: go_out
+    label: Walk it off
+    outcome:
+      text: >-
+        You walk until your legs ache and the streetlights are your only
+        company. It does not solve anything. You sleep better than you
+        expected to.
+      effects:
+        - { type: stat, key: fitness, delta: 2 }
+        - { type: stat, key: stress, delta: -3 }

@@ -41,6 +41,8 @@ import {
   chooseCarelessLifeActions,
   chooseCareerActions,
   chooseHealthActions,
+  chooseMentalActions,
+  rollMentalProfile,
   chooseMoneyActions,
   choiceTraits,
   personalityChoice,
@@ -59,6 +61,7 @@ import {
 } from './interactions';
 import { chooseWillActions, rollWillProfile } from './heirs';
 import { emptyPeopleReport, formatPeople, peopleTargets, PeopleWatcher, PipelineTimer, type PeopleReport } from './people';
+import { emptyMentalReport, formatMental, mentalTargets, MentalWatcher, type MentalReport } from './mental';
 import { emptyWebReport, formatWeb, webTargets, WebWatcher, type WebReport } from './web';
 import { YEAR_PIPELINE } from '../../src/engine/pipeline';
 import { chooseFamilyActions, chooseParentingPlans, emptyFamilyReport, FamilyWatcher, formatFamily, familyTargets, rollFamilyProfile, type FamilyReport } from './family';
@@ -133,6 +136,8 @@ export interface SimulationReport {
   people: PeopleReport;
   /** E4: the social web, measured. */
   web: WebReport;
+  /** M1: mental health, measured. */
+  mental: MentalReport;
 }
 
 /** C1: the consistency pass, measured. */
@@ -163,6 +168,7 @@ export function recurringEvents(content: ContentBundle): Set<string> {
     ...Object.values(r.work.results).flatMap((w) => w.events),
     ...Object.values(r.triggers.triggers).flatMap((t) => t.events),
     ...Object.values(r.health.doctor).flatMap((t) => t.events),
+    ...Object.values(r.mental.therapist).flatMap((t) => t.events),
     ...Object.values(r.legal.triggers).flatMap((t) => t.events),
     ...Object.values(r.discovery.surfacing).flatMap((t) => t.events),
     ...Object.values(r.discovery.resurfacing).flatMap((t) => t.events),
@@ -762,6 +768,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
   const family = emptyFamilyReport();
   const people = emptyPeopleReport();
   const web = emptyWebReport();
+  const mental = emptyMentalReport(content);
   const peopleTimer = new PipelineTimer(people);
   const timedSteps = peopleTimer.steps(YEAR_PIPELINE);
   // Found out: the follow-ups only this system schedules (affair_discovered also answers an older chain, so it counts only for an unfaithful life).
@@ -797,8 +804,11 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
     const familyWatcher = new FamilyWatcher(family, familyProfile, playerKind === 'careful');
     const peopleWatcher = new PeopleWatcher(people, content);
     const webWatcher = new WebWatcher(web, content);
+    const mentalWatcher = new MentalWatcher(mental, content);
     const profile = rollMoneyProfile(player);
     // E2b: whether this life writes a will, and who it names.
+    const mentalRng = createRng(`${seed}:mental`);
+    const mentalProfile = rollMentalProfile(mentalRng);
     const willRng = createRng(`${seed}:will`);
     const willProfile = rollWillProfile(willRng);
     // Event choices: the careful player by personality, the careless one at random (Stage 9).
@@ -850,6 +860,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
     };
     let life = startLife ?? createLife({ mode: 'random', seed, birthYear: 2026 }, content);
     watch(life);
+    mentalWatcher.begin(life);
     while (life.phase !== 'dead') {
       // Between years, the simulated player may act on money and home...
       for (const [actionId, params] of careless ? chooseCarelessLifeActions(life, content, player) : chooseMoneyActions(life, content, player, profile)) {
@@ -903,6 +914,12 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
         money.actionsTaken[actionId]++;
         health.doctorVisits++;
       }
+      // ...and on their mind (M1)...
+      for (const [actionId, params] of careless ? [] : chooseMentalActions(life, content, mentalRng, mentalProfile)) {
+        if (!isLifeActionAvailable(life, actionId, params, content)) continue;
+        life = takeLifeAction(life, actionId, params);
+        money.actionsTaken[actionId]++;
+      }
       // ...and on relationships.
       for (const [actionId, personId] of careless ? chooseCarelessActions(life, content, player) : chooseActions(life, content, player)) {
         if (!isActionAvailable(life, actionId, personId, content)) continue;
@@ -947,6 +964,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
       life = peopleTimer.time(() => beginYear(yearBefore, content, timedSteps));
       peopleWatcher.observe(yearBefore, life);
       webWatcher.observe(yearBefore, life);
+      mentalWatcher.observe(yearBefore, life);
       watch(life);
       options.onYear?.(life);
       const stage = perYear[life.character.lifeStage];
@@ -985,6 +1003,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
     options.onLife?.(life);
     peopleWatcher.finish();
     webWatcher.finish(life);
+    mentalWatcher.finish(life);
     familyWatcher.finish(life, firesThisLife);
     // E1: who reached maximum affection, being found out, and a sample of lives rebuilt from their input logs.
     interactions.lives++;
@@ -1307,6 +1326,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
     family,
     people,
     web,
+    mental,
     consistency: {
       violations,
       happiness: spreadOf(lifetimeHappiness),
@@ -1439,6 +1459,7 @@ export function formatReport(report: SimulationReport, content: ContentBundle): 
   lines.push(...formatFamily(report.family, content), '  targets (src/content/balance/targets.yaml):', ...familyTargets(report.family, content).map((r) => target(r.label, r.value, r.goal, r.met)));
   lines.push(...formatPeople(report.people, content, report.relationships.divorces), '  targets (src/content/balance/targets.yaml):', ...peopleTargets(report, content).map((r) => target(r.label, r.value, r.goal, r.met)));
   lines.push('', ...formatWeb(report.web, content), '  targets (src/content/balance/targets.yaml):', ...webTargets(report, content).map((r) => target(r.label, r.value, r.goal, r.met)));
+  lines.push('', ...formatMental(report.mental, content, report.events), '  targets (src/content/balance/targets.yaml):', ...mentalTargets(report, content).map((r) => target(r.label, r.value, r.goal, r.met)));
   lines.push(`Events fired: ${report.totalEventsFired}`);
   lines.push('  event'.padEnd(30) + 'fired'.padStart(8) + 'share'.padStart(8) + 'lives'.padStart(9));
   for (const e of [...report.events].sort((a, b) => b.fired - a.fired)) {

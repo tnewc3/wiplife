@@ -1,0 +1,53 @@
+# First signs of PTSD, before anyone has named it. The condition is never named here.
+id: first_signs_startle
+title: On edge
+text: >-
+  A door slams somewhere and you are on your feet with your heart pounding
+  before you know why. Sleep has been thin and full of things you would rather
+  not remember. Certain sounds, certain smells, certain rooms make the world
+  tilt for a second. You tell yourself it is over. Your body disagrees.
+tone: dark
+category: mental
+rarity: common
+lifeStages: [child, teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 6 } }
+    - { health: { conditions: [ptsd], named: false } }
+weight: { base: 8 }
+cooldownYears: 3
+cast:
+  helper: { support: true, optional: true, presence: nearby }
+choices:
+  - id: appointment
+    label: Ask someone who understands trauma
+    outcome:
+      text: >-
+        You do not have to tell the story to be believed. The questions are
+        careful, and by the end there is a name for what your body has been
+        doing, and a way forward that does not start with reliving it.
+      effects:
+        - { type: mental, action: pay, item: psych_evaluation }
+        - { type: mental, action: diagnose, conditionId: ptsd, via: doctor }
+        - { type: schedule, eventId: dx_ptsd, inYears: [1, 1] }
+  - id: tell_someone
+    label: Tell {helper.name} some of it
+    visibleIf: { role: helper }
+    outcome:
+      text: >-
+        You do not tell it all. You say that some things hit harder than they
+        should. {helper.name} does not push for details. {helper.They}
+        {helper:says|say} you do not have to carry it alone and that there are
+        people who help with exactly this.
+      effects:
+        - { type: mental, action: confide, role: helper, then: { supportive: told_supportive, neutral: told_neutral, dismissive: told_dismissive } }
+        - { type: stat, key: stress, delta: -2 }
+  - id: avoid_it
+    label: Avoid whatever sets it off
+    outcome:
+      text: >-
+        You learn the routes, the rooms and the times of day that are safe. Your
+        world gets smaller and quieter, and it feels like control.
+      effects:
+        - { type: health, conditionId: ptsd, severity: 3 }
+        - { type: stat, key: stress, delta: 2 }

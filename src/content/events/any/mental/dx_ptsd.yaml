@@ -1,0 +1,51 @@
+# Answers a diagnosis of PTSD (registries/health.yaml and registries/mental.yaml diagnosed).
+id: dx_ptsd
+title: What your body remembers
+text: >-
+  The word is PTSD, and it explains more than you expected: the jumpiness, the
+  sleep, the way a sound or a smell can pull you somewhere you thought was
+  finished. It does not mean you are broken. It means what happened was
+  serious and your body has not yet been told it is over.
+tone: serious
+category: mental
+rarity: common
+lifeStages: [child, teen, youngAdult, adult, senior]
+requires: { health: { conditions: [ptsd], named: true, within: 1 } }
+weight: { base: 1 }
+followUpOnly: true
+choices:
+  - id: therapy
+    label: Start trauma-focused therapy
+    outcome:
+      text: >-
+        You never have to tell it all at once. The work is slow and careful and
+        built so that you set the pace. Weeks in, there are afternoons where
+        the past stays in the past.
+      effects:
+        - { type: mental, action: start, care: therapy, conditionId: ptsd }
+  - id: medication
+    label: Try medication for the symptoms
+    outcome:
+      text: >-
+        It will not change what happened, but it can turn the volume down on
+        sleep and startle. The prescriber says it works best alongside
+        therapy. You say you will think about that part.
+      effects:
+        - { type: mental, action: start, care: medication, conditionId: ptsd }
+  - id: lean
+    label: Lean on someone steady
+    visibleIf: { mental: { support: { gte: 35 } } }
+    outcome:
+      text: >-
+        You do not have to explain it. You just have to tell one person that
+        some days are harder, and they can be calm next to you.
+      effects:
+        - { type: mental, action: start, care: support, conditionId: ptsd }
+  - id: wait
+    label: Not yet
+    outcome:
+      text: >-
+        You are not ready to talk about it with a stranger, and the
+        clinician says that is allowed. The offer stays open.
+      effects:
+        - { type: stat, key: stress, delta: 1 }

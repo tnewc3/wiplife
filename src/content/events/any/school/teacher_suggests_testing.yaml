@@ -1,0 +1,42 @@
+# School testing for ADHD or neurodivergence: a teacher notices and suggests an assessment.
+id: teacher_suggests_testing
+title: A note home
+text: >-
+  The teacher keeps you after class. It is not about trouble. "I've noticed
+  how hard you work to do things that look easy for the others," the teacher
+  says, "and how brilliant you are when something grabs you. There is an
+  assessment the school can arrange. It might explain a lot." A form goes home
+  to be signed.
+tone: neutral
+category: school
+rarity: uncommon
+lifeStages: [child, teen]
+requires:
+  all:
+    - { education: { program: [elementary, middle, high] } }
+    - { age: { gte: 6, lte: 17 } }
+    - { any: [{ health: { conditions: [adhd], named: false } }, { health: { conditions: [neurodivergence], named: false } }] }
+weight: { base: 4 }
+cooldownYears: 3
+choices:
+  - id: agree
+    label: Get the assessment
+    outcome:
+      text: >-
+        There are puzzles, questionnaires and a very patient evaluator. The
+        results take weeks. When they come, they explain a lot, and the school
+        starts adjusting how it works with you.
+      effects:
+        - { type: mental, action: pay, item: assessment }
+        - { type: mental, action: diagnose, via: assessment }
+        - { type: education, action: grades, value: 0.1 }
+        - { type: stat, key: stress, delta: -2 }
+  - id: decline
+    label: Say not yet
+    outcome:
+      text: >-
+        The form goes in a drawer. The teacher nods and says the offer stands. School
+        stays the way it was, only now you know someone noticed.
+      effects:
+        - { type: stat, key: stress, delta: 2 }
+        - { type: education, action: grades, value: -0.1 }

@@ -4,7 +4,9 @@
 #   clean    nothing to treat: a checkup
 #   treated  at least one condition treated
 #   managed  only conditions a doctor can ease, or treatment didn't take
+#   diagnosed (M1) a mental health condition or neurodivergence was named
 doctor:
   clean: { events: [doctor_all_clear] }
   treated: { events: [doctor_treatment] }
   managed: { events: [doctor_no_cure] }
+  diagnosed: { events: [dx_depression, dx_anxiety, dx_ptsd, dx_adhd, dx_neurodivergence] }

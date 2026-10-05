@@ -1,0 +1,37 @@
+# The strength of neurodivergence: deep, lasting interest.
+id: special_interest
+title: The deep end
+text: >-
+  There is a subject you could talk about for days, and you know it better
+  than almost anyone. Details others skim past are the whole point for you.
+  Finding someone who shares it is like finding a door in a wall you thought
+  was solid.
+tone: light
+category: mental
+rarity: common
+lifeStages: [child, teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 6 } }
+    - { health: { conditions: [neurodivergence] } }
+weight: { base: 5 }
+cooldownYears: 3
+choices:
+  - id: dive
+    label: Spend the weekend on it
+    outcome:
+      text: >-
+        You come up Monday knowing more than anyone you know. It is a quiet
+        kind of happiness that has nothing to do with being noticed.
+      effects:
+        - { type: stat, key: smarts, delta: 3 }
+        - { type: stat, key: happiness, delta: 2 }
+  - id: share
+    label: Find your people for it
+    outcome:
+      text: >-
+        There is a forum, then a meetup, then a handful of people who finish
+        your sentences. For the first time in a while, you are not translating.
+      effects:
+        - { type: stat, key: sociability, delta: 3 }
+        - { type: stat, key: happiness, delta: 3 }

@@ -81,3 +81,5 @@ categories:
   # Only the web step queues them (registries/web.yaml); each event requires
   # the tie or the story it is about.
   web: { label: The people around you }
+  # M1: depression, anxiety, PTSD, ADHD and neurodivergence: first signs, diagnosis, care, the people who notice, and crisis. A partner who lives with you is preferred for their roles (the household rule).
+  mental: { label: Mental health, household: true }

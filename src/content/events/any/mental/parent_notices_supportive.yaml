@@ -1,0 +1,54 @@
+# A parent notices you are struggling, and is gentle about it.
+id: parent_notices_supportive
+title: A knock on the door
+text: >-
+  {parent.name} knocks and waits to be let in, which is not usually how this
+  goes. "I've noticed you're not doing great," {parent.they} {parent:says|say}.
+  "You do not have to explain. I just want you to know I'm here, and that
+  we can find some help if you want it."
+tone: neutral
+category: mental
+rarity: common
+lifeStages: [child, teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 10 } }
+    - { role: parent, mental: { reaction: [supportive] } }
+    - { health: { conditions: [depression, anxiety_disorder, ptsd], severity: { gte: 20 } } }
+weight: { base: 8 }
+cooldownYears: 3
+cast:
+  parent: { kind: parent, noticed: [supportive], presence: nearby }
+choices:
+  - id: talk
+    label: Let {parent.them} in on some of it
+    outcome:
+      text: >-
+        You say less than there is to say, and it is still more than you
+        expected. {parent.name} does not flinch or fix. {parent.They}
+        {parent:sits|sit} on the edge of the bed and {parent:stays|stay}.
+      effects:
+        - { type: mental, action: confide, role: parent }
+        - { type: relationship, role: parent, affection: 3, trust: 4 }
+        - { type: stat, key: stress, delta: -3 }
+  - id: appointment
+    label: Say yes to getting help
+    outcome:
+      text: >-
+        {parent.name} makes the call and goes with you. The appointment ends
+        with a name for what has been happening, and with {parent.name} squeezing
+        your shoulder in the car.
+      effects:
+        - { type: mental, action: pay, item: psych_evaluation }
+        - { type: mental, action: diagnose, via: doctor }
+        - { type: schedule, eventId: dx_depression, inYears: [1, 1] }
+        - { type: schedule, eventId: dx_anxiety, inYears: [1, 1] }
+        - { type: schedule, eventId: dx_ptsd, inYears: [1, 1] }
+  - id: not_ready
+    label: Say you are not ready
+    outcome:
+      text: >-
+        {parent.name} nods and says the offer does not expire. It is the
+        kindest way anyone could have heard no.
+      effects:
+        - { type: relationship, role: parent, trust: 2 }

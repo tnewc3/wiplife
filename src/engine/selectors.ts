@@ -100,6 +100,8 @@ import { CONTINUE_CHOICE } from './life';
 import { currentPartner, FAMILY_KINDS, isCurrentPartner, romanceStatus, ROMANTIC_KINDS, WORK_KINDS } from './relationships';
 import { renderText } from './text';
 import { doctorQuote } from './health';
+import { getMentalView, type MentalView } from './mental/views';
+import { isNamed } from './mental/query';
 import type {
   GenderCategory,
   HistoryEntry,
@@ -1189,6 +1191,8 @@ export interface HealthView {
   familyPays: boolean;
   /** Medical debt you owe. */
   medicalDebt: number;
+  /** M1: your mind: the conditions that have been named, how to care for them, who has noticed, and a therapist. */
+  mental: MentalView;
 }
 
 /** More → Health: your conditions, worst first, and seeing a doctor. */
@@ -1196,7 +1200,8 @@ export function getHealthView(state: LifeState, content: ContentBundle): HealthV
   const conditions = state.health.conditions
     .flatMap((c): ConditionView[] => {
       const def = content.conditions[c.conditionId];
-      if (!def) return [];
+      // M1: a mental health condition or neurodivergence has its own part of the page, and only once it has been named.
+      if (!def || def.kind === 'mental' || def.kind === 'neuro' || !isNamed(c, def)) return [];
       return [{ id: def.id, name: def.name, blurb: def.blurb, kind: def.kind, severity: c.severity, treated: c.treated, treatable: def.treatable, since: c.since }];
     })
     .sort((a, b) => b.severity - a.severity || a.name.localeCompare(b.name));
@@ -1214,6 +1219,7 @@ export function getHealthView(state: LifeState, content: ContentBundle): HealthV
     doctor: { visitCost: quote.visit, treatmentCost: quote.treatment, block },
     familyPays: !isIndependent(state, content),
     medicalDebt: wholeDollars(state.finances.debts.filter((d) => d.kind === 'medical').reduce((sum, d) => sum + d.balance, 0)),
+    mental: getMentalView(state, content),
   };
 }
 

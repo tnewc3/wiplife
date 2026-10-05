@@ -1,0 +1,53 @@
+# A friend notices and checks in.
+id: friend_notices
+title: A text out of nowhere
+text: >-
+  {friend.name} texts: "Hey. You've seemed off. No pressure, but I'm around."
+  It is the kind of message you can answer with a thumbs-up, or with
+  everything. It is, in any case, the only message you have gotten this week
+  that did not need a reply.
+tone: neutral
+category: mental
+rarity: common
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 13 } }
+    - { role: friend, kind: [friend], mental: { reaction: [supportive, neutral] } }
+    - { health: { conditions: [depression, anxiety_disorder, ptsd], severity: { gte: 20 } } }
+weight:
+  base: 8
+  modifiers:
+    - { if: { memory: { role: friend, tag: stood_by_you_struggling } }, x: 1.5 }
+cooldownYears: 3
+cast:
+  friend: { kind: friend, noticed: [supportive, neutral], presence: anywhere }
+choices:
+  - id: call
+    label: Call {friend.them} and tell the truth
+    outcome:
+      text: >-
+        {friend.name} picks up on the first ring and does not hurry you. By
+        the end of the call you are tired and lighter, in that order.
+      effects:
+        - { type: mental, action: confide, role: friend }
+        - { type: relationship, role: friend, affection: 3, trust: 4 }
+        - { type: stat, key: stress, delta: -3 }
+  - id: thumbs_up
+    label: Send a thumbs-up
+    outcome:
+      text: >-
+        A small yes that says almost nothing. {friend.name} sends a heart and
+        a "whenever," and leaves it there. The door stays open.
+      effects:
+        - { type: relationship, role: friend, trust: 1 }
+  - id: ignore
+    label: Leave it on read
+    outcome:
+      text: >-
+        You mean to answer, and the days go by. {friend.name} does not text
+        again. Not because {friend.they} {friend:has|have} stopped caring.
+        You gave no sign to say you wanted it.
+      effects:
+        - { type: relationship, role: friend, affection: -2 }
+        - { type: stat, key: stress, delta: 2 }

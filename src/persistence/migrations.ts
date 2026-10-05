@@ -212,6 +212,26 @@ export const migrations: readonly Migration[] = [
       return { ...data, web: { ties: {}, items: [], nextItem: 1, seen: [] } };
     },
   },
+  {
+    from: 14,
+    description:
+      'M1: mental health. A life gets its mental health record (no trauma, nobody who has noticed, nothing recovered ' +
+      'from, no crises). Depression and anxiety were shown by name before this stage, so a life that has one keeps it ' +
+      'named (diagnosed in the year it began); one that was being treated is in therapy, which is what treatment ' +
+      'meant. ADHD and neurodivergence are rolled at birth, so lives from before M1 have none, and nobody is given ' +
+      'a condition they never had.',
+    migrate: (data) => {
+      if (!isRecord(data) || !isRecord(data.health)) return data;
+      const conditions = Array.isArray(data.health.conditions)
+        ? (data.health.conditions as unknown[]).map((c) => {
+            if (!isRecord(c) || (c.conditionId !== 'depression' && c.conditionId !== 'anxiety_disorder')) return c;
+            const since = typeof c.since === 'number' ? c.since : 0;
+            return { ...c, diagnosed: since, diagnosedBy: 'doctor', ...(c.treated === true ? { care: ['therapy'] } : {}) };
+          })
+        : data.health.conditions;
+      return { ...data, health: { ...data.health, conditions, mental: { trauma: 0, noticed: {}, past: {}, crises: 0 } } };
+    },
+  },
 ];
 
 function isRecord(value: unknown): value is Record<string, unknown> {

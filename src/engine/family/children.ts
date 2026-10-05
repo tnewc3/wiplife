@@ -9,6 +9,8 @@
  * are always rolled independently, never inherited. Numbers:
  * balance/family.yaml.
  */
+import { rollNeuro } from '../mental/neuro';
+import { ownNeuro } from '../mental/query';
 import type { ContentBundle, Distribution } from '../../content/schemas';
 import { PERSONALITY_TRAITS, rollGenderCategory, rollIdentity, rollLatent, activeIds } from '../creation/character';
 import { pickUnused, rollHeritage } from '../creation/family';
@@ -118,6 +120,9 @@ export function createChild(state: LifeState, rng: RngState, spec: NewChild, con
   if (parentTalent !== null && bio.includes('you') && chance(rng, genetics.talentInherit)) talent = parentTalent;
   else if (chance(rng, creation.talentChance) && talents.length > 0) talent = pick(rng, talents);
 
+  // M1: ADHD and neurodivergence run in families: likelier if either biological parent has them.
+  const neuro = rollNeuro(rng, content, bio.map((b) => (b === 'you' ? ownNeuro(state, content) : state.people[b]?.neuro)));
+
   const newborn = genetics.newborn;
   const child: ChildData = {
     origin: spec.origin,
@@ -152,6 +157,7 @@ export function createChild(state: LifeState, rng: RngState, spec: NewChild, con
     wealthLevel: step && parentPerson ? parentPerson.wealthLevel : yourWealth(state, content),
     canCarry,
     child,
+    ...(neuro.length > 0 ? { neuro } : {}),
   };
   const bond = spec.origin === 'adopted' ? parenting.bond.adopted : parenting.bond.birth;
   const relationship: Relationship = {

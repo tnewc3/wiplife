@@ -1,0 +1,51 @@
+# Answers a diagnosis of an anxiety disorder (registries/health.yaml and registries/mental.yaml diagnosed).
+id: dx_anxiety
+title: Not just nerves
+text: >-
+  "This isn't being a worrier," the clinician says, "and it isn't a flaw."
+  The racing mind, the tight chest, the rehearsed conversations that never
+  happen have a name now: an anxiety disorder. It is common, it is real, and
+  it responds well to the right kind of help.
+tone: serious
+category: mental
+rarity: common
+lifeStages: [child, teen, youngAdult, adult, senior]
+requires: { health: { conditions: [anxiety_disorder], named: true, within: 1 } }
+weight: { base: 1 }
+followUpOnly: true
+choices:
+  - id: therapy
+    label: Start therapy
+    outcome:
+      text: >-
+        You learn that the alarm is real but the danger often isn't, and how
+        to tell the difference when your heart is going. It is slow, practical
+        work, and some weeks it is boring in the best way.
+      effects:
+        - { type: mental, action: start, care: therapy, conditionId: anxiety_disorder }
+  - id: medication
+    label: Try medication
+    outcome:
+      text: >-
+        The prescription is small and the follow-up is scheduled. The volume
+        on the alarms comes down, a little at a time, until you notice a quiet
+        you had forgotten was possible.
+      effects:
+        - { type: mental, action: start, care: medication, conditionId: anxiety_disorder }
+  - id: lean
+    label: Tell someone who can help you practice
+    visibleIf: { mental: { support: { gte: 35 } } }
+    outcome:
+      text: >-
+        You ask someone you trust to be your person when it spikes. It turns
+        out they were hoping you would.
+      effects:
+        - { type: mental, action: start, care: support, conditionId: anxiety_disorder }
+  - id: wait
+    label: Think about it
+    outcome:
+      text: >-
+        You take the information home and read it twice. Knowing is better
+        than not knowing, though not yet better than doing something.
+      effects:
+        - { type: stat, key: stress, delta: 1 }

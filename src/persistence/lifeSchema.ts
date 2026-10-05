@@ -209,6 +209,7 @@ const person = z.strictObject({
   priorChildren: z.array(int).min(1).exactOptional(),
   child: childData.exactOptional(),
   life: personLife.exactOptional(),
+  neuro: z.array(id).min(1).exactOptional(),
 });
 
 const relationship = z.strictObject({
@@ -383,9 +384,30 @@ const housing = z.strictObject({
   foster: z.literal(true).exactOptional(),
 });
 
+// M1: mental health.
+const reaction = z.enum(['supportive', 'neutral', 'dismissive']);
 const health = z.strictObject({
-  conditions: z.array(z.strictObject({ conditionId: id, since: int, severity: z.int().min(1).max(100), treated: z.boolean() })),
+  conditions: z.array(
+    z.strictObject({
+      conditionId: id,
+      since: int,
+      severity: z.int().min(1).max(100),
+      treated: z.boolean(),
+      diagnosed: int.exactOptional(),
+      diagnosedBy: z.enum(['doctor', 'therapist', 'assessment', 'crisis']).exactOptional(),
+      care: z.array(z.enum(['therapy', 'medication', 'support'])).exactOptional(),
+    }),
+  ),
   lastVisit: int.exactOptional(),
+  mental: z.strictObject({
+    trauma: score,
+    noticed: z.record(z.string(), z.strictObject({ since: int, year: int, reaction, told: z.literal(true).exactOptional() })),
+    past: z.record(z.string(), z.strictObject({ year: int, times: int.min(1), diagnosed: z.boolean() })),
+    crisisYear: int.exactOptional(),
+    crises: int.min(0),
+    lastTherapist: int.exactOptional(),
+    sideEffectYear: int.exactOptional(),
+  }),
 });
 
 const legal = z.strictObject({

@@ -418,7 +418,7 @@ describe('lives from Stage 9 on', () => {
 
   it('round trip a life with conditions, a doctor visit, a record, prison and things that surfaced', async () => {
     const life = produce(lifeAtAge('stage9-round', 30), (d) => {
-      d.health = { conditions: [{ conditionId: 'depression', since: d.currentYear - 2, severity: 35, treated: true }], lastVisit: d.currentYear - 1 };
+      d.health = { conditions: [{ conditionId: 'depression', since: d.currentYear - 2, severity: 35, treated: true, diagnosed: d.currentYear - 2, diagnosedBy: 'doctor', care: ['therapy'] }], lastVisit: d.currentYear - 1, mental: { trauma: 12, noticed: {}, past: {}, crises: 0 } };
       d.legal = {
         record: [
           { offenseId: 'shoplifting', year: d.currentYear - 15, outcome: 'warning' },
@@ -689,7 +689,7 @@ describe('heirs, wills and estates (E2b)', () => {
   });
 
   it('upgrades a version 12 life: no news, no care costs, and people who get their own life from the first year', async () => {
-    const base = lifeAtAge('e3-v12', 30);
+    const base = lifeAtAge('e3-v12b', 30);
     const life = produce(base, (d) => {
       d.finances.lastLedger = { year: d.currentYear - 1, gross: 40_000, retirement: 0, tax: 3_000, housing: 5_000, living: 12_000, debtPayments: 0, interest: 0, debtInterest: 0, borrowed: 0, support: 0, children: 0, care: 0, supportPaid: 0, supportReceived: 0, net: 20_000 };
     });
@@ -787,5 +787,56 @@ describe('heirs, wills and estates (E2b)', () => {
     });
     expect(lifeStateSchema.safeParse(story).success).toBe(true);
     expect(loadedLifeSchema(content).safeParse(story).success).toBe(false);
+  });
+});
+
+describe('lives from M1 on', () => {
+  it('upgrade a schema version 14 life: an empty mental health record, depression and anxiety stay named, treatment becomes therapy', async () => {
+    const life = produce(lifeAtAge('m1-v14', 30), (d) => {
+      d.health.conditions = [
+        { conditionId: 'depression', since: d.currentYear - 3, severity: 40, treated: true, diagnosed: d.currentYear - 3, diagnosedBy: 'doctor', care: ['therapy'] },
+        { conditionId: 'anxiety_disorder', since: d.currentYear - 1, severity: 30, treated: false, diagnosed: d.currentYear - 1, diagnosedBy: 'doctor' },
+        { conditionId: 'cancer', since: d.currentYear - 1, severity: 30, treated: false },
+      ];
+    });
+    const v14 = JSON.parse(JSON.stringify(life)) as Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any -- stripping fields from plain JSON to build an old save
+    delete v14.health.mental;
+    for (const c of v14.health.conditions) {
+      delete c.diagnosed;
+      delete c.diagnosedBy;
+      delete c.care;
+    }
+    const db = freshDb();
+    await db.lives.put({ id: 'active', envelope: { ...makeEnvelope(v14, content.contentVersion), schemaVersion: 14 } });
+    const result = await readSave(db, loadedLifeSchema(content));
+    expect(result.status).toBe('ok');
+    if (result.status !== 'ok') return;
+    expect(result.envelope.schemaVersion).toBe(CURRENT_SCHEMA_VERSION);
+    const h = result.envelope.data.health;
+    expect(h.mental).toEqual({ trauma: 0, noticed: {}, past: {}, crises: 0 });
+    const by = (id: string) => h.conditions.find((c) => c.conditionId === id)!;
+    expect(by('depression')).toEqual(expect.objectContaining({ diagnosed: life.currentYear - 3, care: ['therapy'], treated: true }));
+    expect(by('anxiety_disorder').diagnosed).toBe(life.currentYear - 1);
+    expect(by('anxiety_disorder').care).toBeUndefined();
+    expect(by('cancer').diagnosed).toBeUndefined();
+  });
+
+  it('round trip a life with noticing, a recovery, a crisis and a born-with condition', async () => {
+    const life = produce(lifeAtAge('m1-round', 30), (d) => {
+      const [id] = Object.keys(d.people);
+      d.people[id!]!.neuro = ['adhd'];
+      d.health.conditions = [{ conditionId: 'adhd', since: d.birthYear, severity: 50, treated: true, diagnosed: d.currentYear - 2, diagnosedBy: 'assessment', care: ['medication', 'support'] }];
+      d.health.mental = {
+        trauma: 20,
+        noticed: { [id!]: { since: d.currentYear - 1, year: d.currentYear, reaction: 'supportive', told: true } },
+        past: { depression: { year: d.currentYear - 5, times: 1, diagnosed: true } },
+        crisisYear: d.currentYear - 4,
+        crises: 1,
+        lastTherapist: d.currentYear - 1,
+        sideEffectYear: d.currentYear - 1,
+      };
+    });
+    expect(loadedLifeSchema(content).safeParse(life).success).toBe(true);
+    expect(await roundTrip(life)).toEqual(life);
   });
 });

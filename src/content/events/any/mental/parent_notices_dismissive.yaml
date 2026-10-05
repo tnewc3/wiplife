@@ -1,0 +1,62 @@
+# A parent notices you are struggling, and brushes it off.
+id: parent_notices_dismissive
+title: "It's a phase"
+text: >-
+  {parent.name} has noticed something is wrong, in the way you notice weather
+  from a window. "It's a phase," {parent.they} {parent:says|say}. "You're
+  tired. When I was your age, we did not have time to feel like this." It is
+  not unkindness. It is a lifetime of not having the words, handed down.
+tone: dark
+category: mental
+rarity: common
+lifeStages: [child, teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 10 } }
+    - { role: parent, mental: { reaction: [dismissive] } }
+    - { health: { conditions: [depression, anxiety_disorder, ptsd], severity: { gte: 20 } } }
+weight: { base: 8 }
+cooldownYears: 3
+cast:
+  parent: { kind: parent, noticed: [dismissive], presence: nearby }
+choices:
+  - id: insist
+    label: Insist it is real
+    check:
+      base: 40
+      stats:
+        - { role: parent, key: trust, weight: 0.3 }
+        - { role: parent, key: affection, weight: 0.2 }
+      success:
+        text: >-
+          You say it flatly: this is not a phase. {parent.name} looks at you
+          for a long moment, as if for the first time. "Then what do you need?"
+          {parent.they} {parent:asks|ask}, and it is the beginning of something.
+        effects:
+          - { type: relationship, role: parent, affection: 3, trust: 4 }
+          - { type: stat, key: stress, delta: -2 }
+      failure:
+        text: >-
+          "Don't be dramatic," {parent.name} {parent:says|say}, and the
+          subject is closed. You carry it into the next room, which is where
+          things like this get carried.
+        effects:
+          - { type: relationship, role: parent, affection: -3, trust: -3 }
+          - { type: stat, key: stress, delta: 3 }
+  - id: find_another
+    label: Take it to someone else
+    outcome:
+      text: >-
+        A teacher, a friend, a doctor: someone who can hear it. It is not the
+        answer you wanted from {parent.name}. It is one you can use.
+      effects:
+        - { type: stat, key: stress, delta: -1 }
+        - { type: stat, key: confidence, delta: 1 }
+  - id: let_it_go
+    label: Let it drop
+    outcome:
+      text: >-
+        You shrug, the way you are expected to. {parent.name} is visibly
+        relieved. The conversation ends, and the feeling does not.
+      effects:
+        - { type: stat, key: stress, delta: 3 }

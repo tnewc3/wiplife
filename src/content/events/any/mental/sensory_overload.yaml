@@ -1,0 +1,45 @@
+# Neurodivergence: noise, crowds, light. Never names the condition.
+id: sensory_overload
+title: Too much at once
+text: >-
+  The room is loud, bright and full of overlapping voices, and somewhere in
+  the middle of it your whole system quietly gives up. Everything is too
+  sharp. You need to be somewhere else, now, and you know that to everyone
+  else it looks as if nothing is wrong.
+tone: neutral
+category: mental
+rarity: common
+lifeStages: [child, teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 6 } }
+    - { health: { conditions: [neurodivergence] } }
+weight: { base: 5 }
+cooldownYears: 3
+choices:
+  - id: step_out
+    label: Step outside and breathe
+    outcome:
+      text: >-
+        Five minutes in the quiet and the world comes back to a size you can
+        manage. You rejoin the party feeling like you had to earn it.
+      effects:
+        - { type: stat, key: stress, delta: -2 }
+  - id: leave
+    label: Go home
+    outcome:
+      text: >-
+        You make your excuses and go. The silence in the car is the best thing
+        that has happened all evening. Nobody is angry. A few people are puzzled.
+      effects:
+        - { type: stat, key: stress, delta: -3 }
+        - { type: stat, key: sociability, delta: -1 }
+  - id: tough_it_out
+    label: Tough it out
+    outcome:
+      text: >-
+        You smile, nod and stay, and feel it later, with a headache and a
+        day of doing nothing at all.
+      effects:
+        - { type: stat, key: stress, delta: 4 }
+        - { type: stat, key: health, delta: -1 }

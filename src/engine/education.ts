@@ -10,6 +10,7 @@
  * the rest is a student loan (takeStudentLoan in ./finance.ts). Student loan
  * payments pause while you're in college, trade school or grad school.
  */
+import { gradeDrag } from './mental/drag';
 import type { ApplyProgram, ChanceModel, ContentBundle, CredentialType, EducationHistoryKey, Program, Tier } from '../content/schemas';
 import { curveAt } from './curve';
 import { scoreOf } from './events/checks';
@@ -116,6 +117,8 @@ export function expectedGrade(state: LifeState, place: SchoolPlace, content: Con
   grade += g.wealth[state.character.familyWealth];
   grade += (difficultyOf(place, content) - 3) * g.difficulty;
   if (place.program === 'college' && place.tier) grade += g.tier[place.tier];
+  // M1: a severe condition you ignore wears on your grades.
+  grade += gradeDrag(state, content);
   return roundGpa(grade);
 }
 

@@ -1,0 +1,49 @@
+# Medication: a side effect shows up.
+id: medication_side_effects
+title: The trade-off
+text: >-
+  The medication is helping, and it is also doing other things: a fog in the
+  afternoons, a stomach that will not settle, a flatness in places you would
+  rather keep. Nobody warned you that the cure comes with a list of
+  its own. You have to decide whether the list is worth it.
+tone: neutral
+category: mental
+rarity: common
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 12 } }
+    - { mental: { sideEffects: true } }
+    - { health: { care: [medication] } }
+weight: { base: 8 }
+cooldownYears: 3
+choices:
+  - id: talk_to_prescriber
+    label: Tell the prescriber
+    outcome:
+      text: >-
+        The prescriber is not surprised. There are other options, and the
+        adjustment takes a few weeks of trial and patience. By the end of it
+        you have something you can live with.
+      effects:
+        - { type: mental, action: pay, item: psych_evaluation }
+        - { type: stat, key: health, delta: 2 }
+        - { type: stat, key: stress, delta: -1 }
+  - id: stop_meds
+    label: Stop taking it
+    outcome:
+      text: >-
+        The fog lifts within days. So, over the following weeks, does some of
+        the protection it was giving you. You notice, and you decide to see
+        how it goes.
+      effects:
+        - { type: mental, action: stop, care: medication }
+        - { type: stat, key: health, delta: 1 }
+  - id: tough_it_out
+    label: Wait and see if it settles
+    outcome:
+      text: >-
+        You give it a month, as advised. Some of it eases and some does not,
+        and you learn which parts you can live with.
+      effects:
+        - { type: stat, key: stress, delta: 1 }

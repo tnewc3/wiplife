@@ -1,0 +1,29 @@
+# Answers seeing a therapist when nothing new was named (registries/mental.yaml talked).
+id: therapist_talked
+title: Fifty minutes
+text: >-
+  The therapist's office has a box of tissues, a bad plant and a chair that is
+  more comfortable than it looks. For fifty minutes someone listens to you
+  without needing anything back. You leave lighter than you came, whatever
+  was or wasn't said.
+tone: neutral
+category: mental
+rarity: common
+lifeStages: [child, teen, youngAdult, adult, senior]
+weight: { base: 1 }
+followUpOnly: true
+choices:
+  - id: book_again
+    label: Book another session
+    outcome:
+      text: You make an appointment for next time. The therapist writes it on a card, and you keep the card.
+      effects:
+        - { type: mental, action: start, care: therapy }
+        - { type: stat, key: stress, delta: -3 }
+  - id: once
+    label: That was enough for now
+    outcome:
+      text: It helped more than you expected. You carry what you talked about with you for the rest of the week.
+      effects:
+        - { type: stat, key: stress, delta: -3 }
+        - { type: stat, key: happiness, delta: 1 }

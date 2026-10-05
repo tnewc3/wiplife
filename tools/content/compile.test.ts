@@ -507,9 +507,9 @@ ${extra}`;
       await write(romanceFile, romance(adultOnly).replace('kind: acquaintance, romantic: true, createIfMissing: true', 'kind: sibling, romantic: true'));
       expect(await expectErrors()).toContain('a romantic role finds a potential partner, never family');
       await write(romanceFile, romance(adultOnly).replace('kind: acquaintance, romantic: true, createIfMissing: true', 'kind: friend, support: true'));
-      expect(await expectErrors()).toContain('exactly one of kind or support');
+      expect(await expectErrors()).toContain('a role needs one of kind or support');
       await write(romanceFile, romance(adultOnly).replace('kind: acquaintance, romantic: true, createIfMissing: true', 'romantic: true'));
-      expect(await expectErrors()).toContain('exactly one of kind or support');
+      expect(await expectErrors()).toContain('a role needs one of kind or support');
     });
 
     it('only lets an optional role appear in choices that require it', async () => {
@@ -830,8 +830,9 @@ choices:
       );
       await writeFile(
         path.join(overlay, 'registries/health.yaml'),
-        'doctor:\n  clean: { events: [only_doctor] }\n  treated: { events: [only_doctor] }\n  managed: { events: [only_doctor] }\n',
+        'doctor:\n  clean: { events: [only_doctor] }\n  treated: { events: [only_doctor] }\n  managed: { events: [only_doctor] }\n  diagnosed: { events: [only_doctor] }\n',
       );
+      await writeFile(path.join(overlay, 'registries/mental.yaml'), 'therapist:\n  talked: { events: [only_doctor] }\n  diagnosed: { events: [only_doctor] }\n');
       await writeFile(
         path.join(overlay, 'registries/legal.yaml'),
         'triggers:\n  jailed: { events: [only_prison] }\n  released: { events: [only_justice] }\n  probation: { events: [only_justice] }\n',
@@ -1153,7 +1154,7 @@ describe('the social web (E4)', () => {
     expect(web.length).toBeGreaterThanOrEqual(35);
     expect(web.length).toBeLessThanOrEqual(45);
     const kinds = Object.entries(result.bundle.registries.web.kinds);
-    expect(kinds).toHaveLength(9);
+    expect(kinds).toHaveLength(10);
     for (const [kind, def] of kinds) {
       expect(Object.keys(def.versions).length, kind).toBeGreaterThanOrEqual(3);
       expect(Object.values(def.versions).some((v) => v.twists.length > 0), kind).toBe(true);

@@ -1,0 +1,51 @@
+# Your struggles affect the people who live with you.
+id: partner_worn_thin
+title: Running on fumes
+text: >-
+  {partner.name} has been holding more than {partner.their} share for a long
+  time: the dinners, the errands, the careful tone, the listening. It
+  shows in small ways: a sigh at the sink, a night out that was cancelled
+  without discussion. {partner.They} {partner:hasn't|haven't} complained.
+  {partner.They} {partner:is|are} also running on fumes.
+tone: serious
+category: mental
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { role: partner, kind: [partner, fiance, spouse], mental: { reaction: [supportive, neutral] } }
+    - { health: { conditions: [depression, anxiety_disorder, ptsd], severity: { gte: 45 } } }
+weight: { base: 8 }
+cooldownYears: 4
+cast:
+  partner: { noticed: [supportive, neutral], presence: household }
+choices:
+  - id: acknowledge
+    label: Thank {partner.them}, and mean it
+    outcome:
+      text: >-
+        You say what has been unsaid: that you see how much it takes, and
+        that you are grateful. {partner.name} cries a little, with relief more
+        than sadness. It was the thing {partner.they} {partner:needs|need}.
+      effects:
+        - { type: relationship, role: partner, affection: 5, trust: 4 }
+        - { type: relationship, role: partner, mood: 12 }
+  - id: more_help
+    label: Get more help so it is not all on {partner.them}
+    outcome:
+      text: >-
+        You book more sessions and ask others to share the load. It is a hard
+        admission and a good decision, and {partner.name} is quietly proud.
+      effects:
+        - { type: mental, action: start, care: therapy }
+        - { type: relationship, role: partner, affection: 3, trust: 3 }
+  - id: ignore_it
+    label: Tell yourself it is fine
+    outcome:
+      text: >-
+        You say nothing. {partner.name} says nothing back. The distance between
+        you grows by an inch that neither of you measures.
+      effects:
+        - { type: relationship, role: partner, affection: -4 }
+        - { type: relationship, role: partner, mood: -10 }

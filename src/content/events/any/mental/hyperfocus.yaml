@@ -1,0 +1,36 @@
+# The strength of ADHD: intense focus on what grabs you, before or after a diagnosis.
+id: hyperfocus
+title: In the zone
+text: >-
+  Something clicks, and the world narrows to one problem. The hours pass like
+  minutes. Nobody can reach you, and you do not want them to. When you
+  surface, it is dark outside and the thing is done, and done well.
+tone: light
+category: mental
+rarity: common
+lifeStages: [child, teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 8 } }
+    - { health: { conditions: [adhd] } }
+weight: { base: 5 }
+cooldownYears: 3
+choices:
+  - id: study
+    label: Pour it into something you are learning
+    outcome:
+      text: >-
+        You learn more in one evening than in weeks of trying to study on
+        schedule. The knowledge stays, the way things you love do.
+      effects:
+        - { type: stat, key: smarts, delta: 3 }
+        - { type: education, action: grades, value: 0.1 }
+  - id: make
+    label: Pour it into something you are making
+    outcome:
+      text: >-
+        You finish something you have been circling for months. It is rough in
+        places and unmistakably yours.
+      effects:
+        - { type: stat, key: happiness, delta: 3 }
+        - { type: stat, key: confidence, delta: 2 }

@@ -21,6 +21,7 @@ import { discoveryBalanceSchema, discoveryRegistrySchema, discoveryTextSchema } 
 import { interactionRegistrySchema, interactionSchema, interactionsBalanceSchema } from './interactions';
 import { newsTextSchema, peopleBalanceSchema, peopleRegistrySchema } from './people';
 import { webBalanceSchema, webRegistrySchema } from './web';
+import { mentalHealthBalanceSchema, mentalRegistrySchema } from './mental';
 import { estateRegistrySchema, familyBalanceSchema, familyRegistrySchema, heirRegistrySchema, heirTextSchema } from './family';
 
 export * from './balance';
@@ -40,6 +41,7 @@ export * from './interactions';
 export * from './family';
 export * from './people';
 export * from './web';
+export * from './mental';
 
 /**
  * Collections: a folder under src/content with one YAML file per definition,
@@ -87,6 +89,7 @@ export const singletonTypes = {
   'balance/family': familyBalanceSchema,
   'balance/people': peopleBalanceSchema,
   'balance/web': webBalanceSchema,
+  'balance/mental-health': mentalHealthBalanceSchema,
   'balance/targets': targetsBalanceSchema,
   'character/identity': identityOptionsSchema,
   'character/appearance': appearanceOptionsSchema,
@@ -113,6 +116,7 @@ export const singletonTypes = {
   'registries/heir': heirRegistrySchema,
   'registries/people': peopleRegistrySchema,
   'registries/web': webRegistrySchema,
+  'registries/mental': mentalRegistrySchema,
 } as const;
 
 export type SingletonPath = keyof typeof singletonTypes;
@@ -149,6 +153,7 @@ export const contentBundleSchema = z.strictObject({
     family: familyBalanceSchema,
     people: peopleBalanceSchema,
     web: webBalanceSchema,
+    mentalHealth: mentalHealthBalanceSchema,
     targets: targetsBalanceSchema,
   }),
   character: z.strictObject({ identity: identityOptionsSchema, appearance: appearanceOptionsSchema }),
@@ -178,6 +183,7 @@ export const contentBundleSchema = z.strictObject({
     heir: heirRegistrySchema,
     people: peopleRegistrySchema,
     web: webRegistrySchema,
+    mental: mentalRegistrySchema,
   }),
 });
 

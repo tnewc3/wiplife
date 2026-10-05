@@ -1,0 +1,54 @@
+# Answers a diagnosis of depression (registries/health.yaml and registries/mental.yaml diagnosed).
+id: dx_depression
+title: A name for it
+text: >-
+  The appointment ends with a word you have been half afraid of and half
+  hoping for: depression. It is not a verdict on you. It is an explanation
+  for the weight, the flat mornings, and the way nothing has been landing.
+  It also comes with a list of things that can help, and none of them
+  involve simply trying harder.
+tone: serious
+category: mental
+rarity: common
+lifeStages: [teen, youngAdult, adult, senior]
+requires: { health: { conditions: [depression], named: true, within: 1 } }
+weight: { base: 1 }
+followUpOnly: true
+choices:
+  - id: therapy
+    label: Start therapy
+    outcome:
+      text: >-
+        The first session is mostly paperwork and an awkward silence. The
+        third one is where something shifts: a person who is paid to listen
+        and is, it turns out, very good at it.
+      effects:
+        - { type: mental, action: start, care: therapy, conditionId: depression }
+        - { type: stat, key: stress, delta: -2 }
+  - id: medication
+    label: Try an antidepressant
+    outcome:
+      text: >-
+        A small prescription and a warning that it takes weeks, not days. The
+        first weeks are mostly waiting. Then one morning the world has a
+        little more color than it had before.
+      effects:
+        - { type: mental, action: start, care: medication, conditionId: depression }
+  - id: lean
+    label: Let someone close to you in
+    visibleIf: { mental: { support: { gte: 35 } } }
+    outcome:
+      text: >-
+        You say it out loud to someone who matters, and nobody flinches. It
+        doesn't fix anything. It does mean you are no longer carrying it
+        entirely by yourself.
+      effects:
+        - { type: mental, action: start, care: support, conditionId: depression }
+  - id: wait
+    label: Take it in, and do nothing yet
+    outcome:
+      text: >-
+        You nod, take the pamphlet, and put it in a drawer. Having a name for
+        it helps a little on its own. It won't do the rest.
+      effects:
+        - { type: stat, key: stress, delta: 1 }

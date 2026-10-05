@@ -38,7 +38,7 @@ describe('createLife (random)', () => {
     expect(life.finances).toEqual({ savings: 0, debts: [], lifestyle: 'comfortable', earnings: { years: 0, total: 0 }, hardshipYears: 0 });
     expect(life.housing).toEqual({ kind: 'with_parents', cityId: life.character.cityId, annualCost: 0, since: life.birthYear });
     expect(life.character.birthCityId).toBe(life.character.cityId);
-    expect(life.health).toEqual({ conditions: [] });
+    expect(life.health).toEqual({ conditions: [], mental: { trauma: 0, noticed: {}, past: {}, crises: 0 } });
     expect(life.legal).toEqual({ record: [] });
     expect([life.flags, life.eventLog]).toEqual([{}, {}]);
     expect([life.scheduled, life.pending, life.history]).toEqual([[], [], []]);

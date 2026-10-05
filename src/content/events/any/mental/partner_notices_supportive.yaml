@@ -1,0 +1,57 @@
+# A partner who lives with you notices you are struggling, and is kind about it.
+id: partner_notices_supportive
+title: "You haven't been yourself"
+text: >-
+  {partner.name} puts down {partner.their} phone and says it gently: you have
+  not been yourself lately. {partner.They} {partner:has|have} noticed the
+  quiet, the early nights and the plans you keep letting slide. There is no
+  accusation in it. {partner.They} just {partner:wants|want} to know what is
+  going on.
+tone: neutral
+category: mental
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { role: partner, kind: [partner, fiance, spouse], mental: { reaction: [supportive] } }
+    - { health: { conditions: [depression, anxiety_disorder, ptsd], severity: { gte: 20 } } }
+weight: { base: 9 }
+cooldownYears: 3
+cast:
+  partner: { noticed: [supportive], presence: household }
+choices:
+  - id: open_up
+    label: Tell {partner.them} the truth
+    outcome:
+      text: >-
+        It comes out in the wrong order. {partner.name} just listens, then
+        takes your hand. "Okay," {partner.they} {partner:says|say}. "Then we'll
+        work out what to do together." It is a big sentence.
+      effects:
+        - { type: mental, action: confide, role: partner }
+        - { type: relationship, role: partner, affection: 3, trust: 4 }
+        - { type: stat, key: stress, delta: -3 }
+  - id: see_someone
+    label: Agree to see someone about it
+    outcome:
+      text: >-
+        {partner.name} makes the call with you sitting right there, so that
+        you cannot talk yourself out of it. The appointment ends with an
+        answer, and {partner.they} {partner:is|are} in the waiting room.
+      effects:
+        - { type: mental, action: pay, item: psych_evaluation }
+        - { type: mental, action: diagnose, via: doctor }
+        - { type: schedule, eventId: dx_depression, inYears: [1, 1] }
+        - { type: schedule, eventId: dx_anxiety, inYears: [1, 1] }
+        - { type: schedule, eventId: dx_ptsd, inYears: [1, 1] }
+        - { type: relationship, role: partner, affection: 4, trust: 5 }
+  - id: deflect
+    label: Say you are just tired
+    outcome:
+      text: >-
+        "Just tired," you say. {partner.name} does not believe it and lets it
+        go, for now. The door has been left open, and you both know it.
+      effects:
+        - { type: relationship, role: partner, trust: -2 }
+        - { type: stat, key: stress, delta: 2 }

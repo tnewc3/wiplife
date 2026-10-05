@@ -61,6 +61,16 @@ export function taxOn(gross: number, content: ContentBundle): number {
 const PAYMENT_ORDER: Record<Debt['kind'], number> = { mortgage: 0, student: 1, medical: 2, personal: 3, collections: 4 };
 
 /** Applies yearly stat pulls (fractions happen by chance). */
+/** A condition's yearly stat pulls at this share of their full size (its severity, softened by treatment). */
+export function scaledEffects(effects: StatEffects, share: number): StatEffects {
+  const out: StatEffects = {};
+  for (const key of Object.keys(effects).sort() as StatKey[]) {
+    const pull = effects[key];
+    if (pull) out[key] = { perYear: pull.perYear * share, limit: pull.limit };
+  }
+  return out;
+}
+
 export function applyStatEffects(state: LifeState, effects: StatEffects): void {
   for (const key of Object.keys(effects).sort() as StatKey[]) {
     const pull = effects[key];

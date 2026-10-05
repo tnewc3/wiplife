@@ -1,0 +1,52 @@
+# A hard stretch with a named condition.
+id: hard_year
+title: A hard stretch
+text: >-
+  This has been a hard one. The old weight is back, or never quite left, and
+  the things that used to help are taking more effort than they are giving.
+  You know this is part of how it goes, and knowing does not make it
+  lighter. You have to decide how to get through.
+tone: dark
+category: mental
+rarity: common
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 12 } }
+    - { health: { conditions: [depression, anxiety_disorder, ptsd], named: true, severity: { gte: 55 } } }
+weight: { base: 7 }
+cooldownYears: 3
+cast:
+  helper: { support: true, optional: true, presence: nearby }
+choices:
+  - id: reach_out
+    label: Let {helper.name} know it is a bad stretch
+    visibleIf: { role: helper }
+    outcome:
+      text: >-
+        {helper.name} does not need it explained. {helper.They}
+        {helper:shows|show} up, makes the small things easier and does not
+        ask for anything back. It does not fix it. It makes it survivable.
+      effects:
+        - { type: mental, action: confide, role: helper, then: { supportive: told_supportive, neutral: told_neutral, dismissive: told_dismissive } }
+        - { type: stat, key: stress, delta: -3 }
+  - id: lean_on_care
+    label: Go back to the people who help professionally
+    outcome:
+      text: >-
+        You call the office and say you need to be seen sooner than planned.
+        They find you a slot. The relief of not white-knuckling it alone is
+        immediate.
+      effects:
+        - { type: mental, action: start, care: therapy }
+        - { type: stat, key: stress, delta: -2 }
+  - id: ride_it
+    label: Hold on and wait it out
+    outcome:
+      text: >-
+        You do the minimum, then the minimum again. It lasts longer than you
+        thought it would. It does lift, a little at a time, and you are
+        tired in a way sleep does not touch.
+      effects:
+        - { type: stat, key: happiness, delta: -2 }
+        - { type: stat, key: stress, delta: 2 }

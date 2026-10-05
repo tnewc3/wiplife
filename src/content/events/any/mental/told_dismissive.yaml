@@ -1,0 +1,51 @@
+# What came of confiding in someone who brushed it off (the confide effect schedules it).
+id: told_dismissive
+title: "Everyone feels like that"
+text: >-
+  {helper.name} has not really talked to you about it since you told {helper.them} {since}. On
+  the rare occasions the subject comes up, the answer is the same: that
+  everyone feels that way sometimes, that you should try getting more sleep,
+  that you will be fine. {helper.They} {helper:means|mean} well. It lands
+  like a door closing.
+tone: dark
+category: mental
+rarity: common
+lifeStages: [child, teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { role: helper, alive: true, mental: { reaction: [dismissive] } }
+weight: { base: 8 }
+followUpOnly: true
+cast:
+  helper: { support: true, presence: anywhere }
+choices:
+  - id: try_again
+    label: Try once more to explain
+    check:
+      base: 40
+      stats:
+        - { role: helper, key: trust, weight: 0.3 }
+        - { role: helper, key: affection, weight: 0.2 }
+      success:
+        text: >-
+          This time, something gets through. {helper.name} goes quiet, then
+          says, "I didn't realize it was that bad. I'm sorry." It is a start.
+        effects:
+          - { type: relationship, role: helper, affection: 4, trust: 5 }
+          - { type: stat, key: stress, delta: -2 }
+      failure:
+        text: >-
+          "I just don't see it," {helper.name} {helper:says|say}, and you stop
+          trying. You find other places to put what you carry.
+        effects:
+          - { type: relationship, role: helper, affection: -3, trust: -4 }
+          - { type: stat, key: stress, delta: 3 }
+  - id: step_back
+    label: Look for support elsewhere
+    outcome:
+      text: >-
+        You stop bringing it to {helper.name}. It is a relief and a loss at
+        once. There are other people, and better places to be heard.
+      effects:
+        - { type: relationship, role: helper, trust: -2 }
+        - { type: stat, key: stress, delta: -1 }

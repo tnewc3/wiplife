@@ -1,0 +1,23 @@
+id: adhd
+name: ADHD
+noun: ADHD
+kind: neuro
+blurb: A mind that runs fast, jumps tracks and locks onto what it loves. Structure, medication and patient people help.
+course: { untreated: 0, treated: 0 }
+effects:
+  stress: { perYear: 1.5, limit: 70 }
+  happiness: { perYear: -0.5, limit: 40 }
+strengths:
+  smarts: { perYear: 0.4, limit: 85 }
+  fitness: { perYear: 0.4, limit: 85 }
+strengthNotes:
+  - Bursts of intense focus on what interests you
+  - Energy, curiosity and a quick mind for ideas
+  - Good in a crisis, when everything else goes quiet
+challengeNotes:
+  - Starting and finishing what bores you
+  - Time, deadlines and losing things
+  - Feeling like you are always behind
+treatable: true
+diagnosableFrom: 5
+care: [therapy, medication, support]

@@ -13,6 +13,7 @@
  * between years (or by an event during one), so the first year of pay is
  * the next year's ledger; the yearly review comes after a full year worked.
  */
+import { performanceDrag } from './mental/drag';
 import type { CareerHistoryKey, ContentBundle, JobDef } from '../content/schemas';
 import { evaluate } from './conditions';
 import { curveAt } from './curve';
@@ -303,6 +304,8 @@ export function performanceAim(state: LifeState, def: JobDef, content: ContentBu
   aim -= curveAt(p.health, state.character.stats.health);
   // A talent you've found that suits the work (Stage 9).
   if (talentHelpsJob(state, def.id, content)) aim += content.balance.discovery.talent.performanceBonus;
+  // M1: therapy takes time out of the week, and a severe condition you ignore wears on your work.
+  aim += performanceDrag(state, content);
   return aim;
 }
 

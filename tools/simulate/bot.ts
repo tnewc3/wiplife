@@ -19,7 +19,7 @@ import { livingCost, rentIn } from '../../src/engine/housing';
 import { weightedPick } from '../../src/engine/random';
 import { chance, nextFloat, pick, type RngState } from '../../src/engine/rng';
 import { getApplicationOptions } from '../../src/engine/selectors';
-import type { FamilyWealth, LifeState } from '../../src/engine/types';
+import type { FamilyWealth, LifeState, MentalCare } from '../../src/engine/types';
 
 /** Yearly chance the bot takes each action when it can, by how the person feels about you. */
 const POLICY: Record<ActionId, (affection: number) => number> = {
@@ -377,6 +377,10 @@ function paramOptions(life: LifeState, content: ContentBundle, actionId: LifeAct
           .map((gradProgramId) => ({ program: 'grad' as const, gradProgramId })),
       ];
     }
+    case 'set_care':
+      return life.health.conditions.flatMap((c) =>
+        (['therapy', 'medication', 'support'] as const).flatMap((care) => [true, false].map((on) => ({ conditionId: c.conditionId, care, on }))),
+      );
     case 'apply_job':
       return life.career.openings.map((jobId) => ({ jobId }));
     default:
@@ -422,6 +426,45 @@ export function chooseHealthActions(life: LifeState, content: ContentBundle, rng
   if (!isLifeActionAvailable(life, 'see_doctor', {}, content)) return [];
   const untreated = life.health.conditions.some((c) => !c.treated);
   return chance(rng, untreated ? HEALTH_POLICY.untreated : HEALTH_POLICY.checkup) ? [['see_doctor', {}]] : [];
+}
+
+/**
+ * How the simulated player looks after their mind (M1): they see a therapist
+ * when they feel low (stress high or happiness low, which is all a player
+ * can see), start care on what has been named in the way their own style
+ * prefers, and stop medication now and then when they feel fine. Chances
+ * describe the simulated player, not the game.
+ */
+const MENTAL_POLICY = { distressed: 0.3, steady: 0.03, startCare: 0.6, stopWhenFine: 0.25 };
+
+export interface MentalProfile {
+  /** Prefers therapy, medication, or leaning on people first. */
+  prefers: MentalCare;
+}
+
+export function rollMentalProfile(rng: RngState): MentalProfile {
+  return { prefers: pick(rng, ['therapy', 'medication', 'support'] as const) };
+}
+
+export function chooseMentalActions(life: LifeState, content: ContentBundle, rng: RngState, profile: MentalProfile): MoneyAction[] {
+  const out: MoneyAction[] = [];
+  const s = life.character.stats;
+  const distressed = s.stress >= 70 || s.happiness <= 30;
+  if (isLifeActionAvailable(life, 'see_therapist', {}, content) && chance(rng, distressed ? MENTAL_POLICY.distressed : MENTAL_POLICY.steady)) out.push(['see_therapist', {}]);
+  for (const c of life.health.conditions) {
+    const def = content.conditions[c.conditionId];
+    if (!def || c.diagnosed === undefined || !def.care) continue;
+    const care = c.care ?? [];
+    if (care.length === 0 && chance(rng, MENTAL_POLICY.startCare)) {
+      const order = [profile.prefers, ...(['therapy', 'medication', 'support'] as const).filter((x) => x !== profile.prefers)];
+      const choice = order.find((x) => def.care!.includes(x) && isLifeActionAvailable(life, 'set_care', { conditionId: c.conditionId, care: x, on: true }, content));
+      if (choice) out.push(['set_care', { conditionId: c.conditionId, care: choice, on: true }]);
+    } else if (def.kind === 'mental' && c.severity < 20 && care.length > 0 && chance(rng, MENTAL_POLICY.stopWhenFine)) {
+      // Feeling fine, they ease off the first thing they were doing.
+      out.push(['set_care', { conditionId: c.conditionId, care: care[0]!, on: false }]);
+    }
+  }
+  return out;
 }
 
 /** What a choice can lead to, for the player model below (Stage 9). */
