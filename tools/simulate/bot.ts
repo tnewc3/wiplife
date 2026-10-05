@@ -424,7 +424,8 @@ const HEALTH_POLICY = {
 /** The doctor visit the careful player makes this year, if any, drawing from `rng`. */
 export function chooseHealthActions(life: LifeState, content: ContentBundle, rng: RngState): MoneyAction[] {
   if (!isLifeActionAvailable(life, 'see_doctor', {}, content)) return [];
-  const untreated = life.health.conditions.some((c) => !c.treated);
+  // Mental health and neurodivergence aren't a doctor's to treat here: they are seen to through the therapist and care choices (M1).
+  const untreated = life.health.conditions.some((c) => !c.treated && !['mental', 'neuro'].includes(content.conditions[c.conditionId]?.kind ?? ''));
   return chance(rng, untreated ? HEALTH_POLICY.untreated : HEALTH_POLICY.checkup) ? [['see_doctor', {}]] : [];
 }
 
@@ -435,7 +436,7 @@ export function chooseHealthActions(life: LifeState, content: ContentBundle, rng
  * prefers, and stop medication now and then when they feel fine. Chances
  * describe the simulated player, not the game.
  */
-const MENTAL_POLICY = { distressed: 0.3, steady: 0.03, startCare: 0.6, stopWhenFine: 0.25 };
+const MENTAL_POLICY = { distressed: 0.3, steady: 0.01, startCare: 0.6, stopWhenFine: 0.25 };
 
 export interface MentalProfile {
   /** Prefers therapy, medication, or leaning on people first. */
