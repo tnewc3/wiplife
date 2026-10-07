@@ -2,6 +2,7 @@ id: construction_worker
 name: "Construction"
 category: trade
 blurb: "Building things you can drive past for decades."
+vehicle: 0.7
 levels:
   - { title: "laborer", salary: 34000 }
   - { title: "carpenter", salary: 44000 }

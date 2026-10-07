@@ -1,0 +1,8 @@
+id: landscaping
+name: Yard and landscaping
+blurb: "A garden, a patio, and a reason to sit outside."
+cost: 0.018
+value: 0.012
+comfort: 1
+happiness: 3
+cooldownYears: 8

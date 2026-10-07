@@ -12,10 +12,12 @@ import { die, parentLife } from '../engine/estate/fixtures';
 import { continueAsHeir, heirCandidates } from '../engine/estate/heir';
 import { customInput, lifeAtAge, liveOut } from '../engine/testFixtures';
 import type { LifeState } from '../engine/types';
+import { withPossessions } from '../engine/possessions/fixtures';
 import { createDb, type WiplifeDb } from './db';
 import { CURRENT_SCHEMA_VERSION, makeEnvelope, type SaveEnvelope } from './envelope';
 import { lifeStateSchema, loadedLifeSchema } from './lifeSchema';
 import { readSave, writeSave } from './saves';
+import { migrateEnvelope } from './migrations';
 
 let n = 0;
 const opened: WiplifeDb[] = [];
@@ -290,7 +292,7 @@ describe('lives from Stage 6 on', () => {
   it('round trip a life with debts, a mortgage and a move', async () => {
     let life = produce(lifeAtAge('stage6-round', 30), (d) => {
       d.finances.savings = 500_000;
-      d.finances.lastLedger = { year: d.currentYear, gross: 90_000, retirement: 0, tax: 0, housing: 0, living: 0, debtPayments: 0, interest: 0, debtInterest: 0, borrowed: 0, support: 0, children: 0, care: 0, supportPaid: 0, supportReceived: 0, net: 90_000 };
+      d.finances.lastLedger = { year: d.currentYear, gross: 90_000, retirement: 0, tax: 0, housing: 0, living: 0, debtPayments: 0, interest: 0, debtInterest: 0, borrowed: 0, support: 0, children: 0, care: 0, supportPaid: 0, supportReceived: 0, upkeep: 0, insurance: 0, net: 90_000 };
       d.finances.debts.push({ id: 'd1', kind: 'student', balance: 12_000, annualRate: 0.055, minPayment: 1_600, missed: 1 });
     });
     const other = life.character.cityId === 'nyc' ? 'houston' : 'nyc';
@@ -562,7 +564,7 @@ describe('lives from E2a on', () => {
   it('upgrade a schema version 10 life: who can carry follows the gender category, an empty family, and a ledger without children', async () => {
     const base = lifeAtAge('e2a-migrate', 30);
     const life = produce(base, (d) => {
-      d.finances.lastLedger = { year: d.currentYear, gross: 40_000, retirement: 0, tax: 3_000, housing: 5_000, living: 12_000, debtPayments: 0, interest: 0, debtInterest: 0, borrowed: 0, support: 0, children: 0, care: 0, supportPaid: 0, supportReceived: 0, net: 20_000 };
+      d.finances.lastLedger = { year: d.currentYear, gross: 40_000, retirement: 0, tax: 3_000, housing: 5_000, living: 12_000, debtPayments: 0, interest: 0, debtInterest: 0, borrowed: 0, support: 0, children: 0, care: 0, supportPaid: 0, supportReceived: 0, upkeep: 0, insurance: 0, net: 20_000 };
     });
     const v10 = JSON.parse(JSON.stringify(life)) as Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any -- stripping fields from plain JSON to build an old save
     delete v10.family;
@@ -691,7 +693,7 @@ describe('heirs, wills and estates (E2b)', () => {
   it('upgrades a version 12 life: no news, no care costs, and people who get their own life from the first year', async () => {
     const base = lifeAtAge('e3-v12b', 30);
     const life = produce(base, (d) => {
-      d.finances.lastLedger = { year: d.currentYear - 1, gross: 40_000, retirement: 0, tax: 3_000, housing: 5_000, living: 12_000, debtPayments: 0, interest: 0, debtInterest: 0, borrowed: 0, support: 0, children: 0, care: 0, supportPaid: 0, supportReceived: 0, net: 20_000 };
+      d.finances.lastLedger = { year: d.currentYear - 1, gross: 40_000, retirement: 0, tax: 3_000, housing: 5_000, living: 12_000, debtPayments: 0, interest: 0, debtInterest: 0, borrowed: 0, support: 0, children: 0, care: 0, supportPaid: 0, supportReceived: 0, upkeep: 0, insurance: 0, net: 20_000 };
     });
     const v12 = JSON.parse(JSON.stringify(life)) as Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any -- stripping fields from plain JSON to build an old save
     delete v12.news;
@@ -838,5 +840,75 @@ describe('lives from M1 on', () => {
     });
     expect(loadedLifeSchema(content).safeParse(life).success).toBe(true);
     expect(await roundTrip(life)).toEqual(life);
+  });
+});
+
+describe('lives from E5 on', () => {
+  const owned = () =>
+    withPossessions(
+      produce(lifeAtAge('e5-save', 40), (d) => {
+        d.finances.savings = 50_000;
+      }),
+      { pets: [{ species: 'cat' }], vehicles: [{ loan: 4_000 }], vacation: [{ mortgage: 80_000 }] },
+    );
+
+  it('upgrades a schema version 15 life: it owns nothing, and the ledger gains upkeep and insurance lines of zero', async () => {
+    const life = produce(lifeAtAge('e5-v15', 30), (d) => {
+      d.finances.lastLedger = { year: d.currentYear - 1, gross: 40_000, retirement: 0, tax: 3_000, housing: 5_000, living: 12_000, debtPayments: 0, interest: 0, debtInterest: 0, borrowed: 0, support: 0, children: 0, care: 0, supportPaid: 0, supportReceived: 0, upkeep: 0, insurance: 0, net: 20_000 };
+    });
+    const v15 = JSON.parse(JSON.stringify(life)) as Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any -- stripping fields from plain JSON to build an old save
+    delete v15.possessions;
+    delete v15.finances.lastLedger.upkeep;
+    delete v15.finances.lastLedger.insurance;
+    const db = freshDb();
+    await db.lives.put({ id: 'active', envelope: { ...makeEnvelope(v15, content.contentVersion), schemaVersion: 15 } });
+    const result = await readSave(db, loadedLifeSchema(content));
+    expect(result.status).toBe('ok');
+    if (result.status !== 'ok') return;
+    expect(result.envelope.schemaVersion).toBe(CURRENT_SCHEMA_VERSION);
+    expect(result.envelope.data).toEqual(life);
+    expect(result.envelope.data.possessions).toEqual({ items: [], nextId: 1, claims: [], noVehicleYears: 0 });
+  });
+
+  it('upgrades a settled estate too: no possessions were sold', async () => {
+    const dead = die(parentLife({ kids: [30], noRelatives: true }));
+    const v15 = JSON.parse(JSON.stringify(dead)) as Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any -- stripping fields from plain JSON to build an old save
+    delete v15.possessions;
+    delete v15.estate.possessionSales;
+    if (v15.finances.lastLedger) {
+      delete v15.finances.lastLedger.upkeep;
+      delete v15.finances.lastLedger.insurance;
+    }
+    const migrated = migrateEnvelope({ ...makeEnvelope(v15, content.contentVersion), schemaVersion: 15 });
+    expect((migrated.data as { estate: { possessionSales: number } }).estate.possessionSales).toBe(0);
+    expect(lifeStateSchema.safeParse(migrated.data).success).toBe(true);
+  });
+
+  it('round trips a life with a pet, a car with a loan and a vacation home with a mortgage', async () => {
+    const life = owned();
+    expect(loadedLifeSchema(content).safeParse(life).success).toBe(true);
+    expect(await roundTrip(life)).toEqual(life);
+  });
+
+  it('round trips a settled estate that passes possessions on', async () => {
+    const dead = die(withPossessions(parentLife({ kids: [30], noRelatives: true }), { pets: [{}], vehicles: [{ loan: 2_000 }] }));
+    expect(dead.estate!.possessions.length).toBeGreaterThan(0);
+    expect(loadedLifeSchema(content).safeParse(dead).success).toBe(true);
+    expect(await roundTrip(dead)).toEqual(dead);
+  });
+
+  it('rejects broken possessions: a bond out of range, an extra field, a car loan that is not a debt, a pet kind with a vehicle record', () => {
+    const life = owned();
+    const bond = produce(life, (d) => void (d.possessions.items[0]!.pet!.bond = 150));
+    expect(lifeStateSchema.safeParse(bond).success).toBe(false);
+    const extra = produce(life, (d) => void ((d.possessions.items[0]!.pet as unknown as Record<string, unknown>).mystery = 1));
+    expect(lifeStateSchema.safeParse(extra).success).toBe(false);
+    const loan = produce(life, (d) => void (d.possessions.items[1]!.vehicle!.loanDebtId = 'd99'));
+    expect(lifeStateSchema.safeParse(loan).success).toBe(true);
+    expect(loadedLifeSchema(content).safeParse(loan).success).toBe(false);
+    const mixed = produce(life, (d) => void (d.possessions.items[0]!.vehicle = { startAge: 1, insured: true }));
+    expect(loadedLifeSchema(content).safeParse(mixed).success).toBe(false);
+    const badName = produce(life, (d) => void (d.possessions.items[0]!.name = '<script>'));
+    expect(loadedLifeSchema(content).safeParse(badName).success).toBe(false);
   });
 });

@@ -3,6 +3,7 @@ name: "Journalism"
 category: professional
 blurb: "Chasing the story, and the deadline, every day."
 requires: {"education": {"credential": ["bachelor"], "field": ["english", "communications"]}}
+vehicle: 0.4
 levels:
   - { title: "staff writer", salary: 40000 }
   - { title: "reporter", salary: 50000 }

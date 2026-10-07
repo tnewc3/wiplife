@@ -1,0 +1,66 @@
+# Queued by the possessions step (registries/possessions.yaml accidents.major).
+id: highway_collision
+title: The sound
+text: >-
+  Traffic stops without warning, and the car behind you does not. The first thing
+  you notice is how quiet it gets, and the second is that your {vehicle} is not where
+  it was.
+tone: dark
+category: vehicles
+rarity: common
+lifeStages: [teen, youngAdult, adult, senior]
+requires: { belongings: { vehicles: { gte: 1 } } }
+weight: { base: 10 }
+followUpOnly: true
+bind: [vehicle]
+cast:
+  helper: { support: true, optional: true, presence: anywhere }
+choices:
+  - id: hospital
+    label: Let the paramedics take you in
+    outcome:
+      text: >-
+        A neck brace, a gurney and a ceiling of bright tiles. You are bruised
+        and sore, and the doctor says you were lucky. You do not feel lucky yet.
+      effects:
+        - { type: possession, action: vehicle_damage, severity: major }
+        - { type: health, conditionId: back_injury, severity: 20 }
+        - { type: mental, action: trauma, amount: 12 }
+        - { type: flag, key: had_car_accident, value: true }
+        - { type: stat, key: stress, delta: 8 }
+  - id: walk
+    label: Say you are fine and walk it off
+    check:
+      base: 45
+      stats: [{ key: fitness, weight: 0.3 }, { key: luck, weight: 0.3 }]
+      success:
+        text: Adrenaline carries you through the report and the tow truck. The aches arrive the next morning, but nothing is broken.
+        effects:
+          - { type: possession, action: vehicle_damage, severity: major }
+          - { type: mental, action: trauma, amount: 8 }
+          - { type: flag, key: had_car_accident, value: true }
+          - { type: stat, key: stress, delta: 6 }
+      failure:
+        text: By evening the wrist is the size of a grapefruit, and the pain in your back has a shape. You should have gone with the paramedics.
+        effects:
+          - { type: possession, action: vehicle_damage, severity: major }
+          - { type: health, conditionId: broken_bone, severity: 25 }
+          - { type: health, conditionId: back_injury, severity: 25 }
+          - { type: mental, action: trauma, amount: 12 }
+          - { type: flag, key: had_car_accident, value: true }
+          - { type: stat, key: stress, delta: 8 }
+  - id: call
+    label: Call {helper.name}
+    visibleIf: { role: helper }
+    outcome:
+      text: >-
+        {helper.name} is there in twenty minutes, and stays through the hospital,
+        the paperwork and the long ride home.
+      effects:
+        - { type: possession, action: vehicle_damage, severity: major }
+        - { type: health, conditionId: back_injury, severity: 15 }
+        - { type: memory, role: helper, tag: ride_after_crash }
+        - { type: relationship, role: helper, affection: 5, trust: 5 }
+        - { type: mental, action: trauma, amount: 8 }
+        - { type: flag, key: had_car_accident, value: true }
+        - { type: stat, key: stress, delta: 5 }

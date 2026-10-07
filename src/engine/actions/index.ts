@@ -27,6 +27,7 @@ export { CAREER_ACTION_IDS, type CareerActionId } from './career';
 export { PERSONAL_ACTION_IDS, type PersonalActionId } from './personal';
 export { ACTION_PROCESS, FAMILY_ACTION_IDS, type FamilyActionId } from './family';
 export { ESTATE_ACTION_IDS, type EstateActionId } from './estate';
+export { POSSESSION_ACTION_IDS, type PossessionActionId } from './possessions';
 export {
   HOME_ACTION_IDS,
   isLifeActionAvailable,

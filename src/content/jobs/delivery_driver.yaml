@@ -2,6 +2,7 @@ id: delivery_driver
 name: "Delivery driving"
 category: gig
 blurb: "Every street in the city, twice a day."
+vehicle: 1.0
 levels:
   - { title: "courier", salary: 32000, years: 1 }
   - { title: "route driver", salary: 38000 }

@@ -6,6 +6,7 @@ blurb: "Expensive · A big, varied job market"
 costOfLiving: 1.4
 baseRent: 31200
 baseHomePrice: 850000
+carDependence: 0.95
 salaryMultiplier: 1.2
 jobMarket:
   professional: 80

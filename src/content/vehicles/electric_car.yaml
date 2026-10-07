@@ -1,0 +1,10 @@
+id: electric_car
+name: electric car
+blurb: "Quiet, cheap to run, dear to buy."
+kind: car
+price: 44000
+upkeep: 1700
+service: 500
+insurance: 1250
+risk: 0.9
+used: true

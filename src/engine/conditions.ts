@@ -10,6 +10,7 @@ import { heardHolds, ITEM_ROLE, tieHolds } from './web/query';
 import { whereabouts } from './presence';
 import { mostMissed, totalDebt } from './finance';
 import { circleSupport } from './mental/query';
+import { belongingsHolds } from './possessions/holds';
 import { romanceStatus, yearsInKind } from './relationships';
 import type { Id, LifeState } from './types';
 
@@ -184,6 +185,7 @@ export function evaluate(condition: Condition | undefined, state: LifeState, ctx
     return true;
   }
   if ('family' in condition) return familyHolds(condition.family, state, ctx.content?.balance.relationships.adultAge);
+  if ('belongings' in condition) return belongingsHolds(condition.belongings, state, ctx.cast, ctx.content);
   if ('memory' in condition) {
     const { role, tag } = condition.memory;
     return roleCheck(role, (id) => state.relationships[id]?.memories.some((m) => m.tag === tag) ?? false);
@@ -279,6 +281,9 @@ export function referencesIn(condition: Condition | undefined): {
   jobs: string[];
   /** Health conditions (Stage 9). */
   conditions: string[];
+  /** E5: pet species and vehicle types. */
+  pets: string[];
+  vehicles: string[];
 } {
   const out = {
     flags: [] as string[],
@@ -290,6 +295,8 @@ export function referencesIn(condition: Condition | undefined): {
     fields: [] as string[],
     jobs: [] as string[],
     conditions: [] as string[],
+    pets: [] as string[],
+    vehicles: [] as string[],
   };
   const walk = (cond: Condition | undefined) => {
     if (!cond) return;
@@ -306,6 +313,10 @@ export function referencesIn(condition: Condition | undefined): {
       out.fields.push(...(cond.education.field ?? []));
     } else if ('career' in cond) out.jobs.push(...(cond.career.job ?? []));
     else if ('health' in cond) out.conditions.push(...(cond.health.conditions ?? []));
+    else if ('belongings' in cond) {
+      out.pets.push(...(cond.belongings.species ?? []));
+      out.vehicles.push(...(cond.belongings.vehicleDef ?? []));
+    }
   };
   walk(condition);
   return out;

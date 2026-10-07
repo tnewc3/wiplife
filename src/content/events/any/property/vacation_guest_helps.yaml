@@ -1,0 +1,36 @@
+id: vacation_guest_helps
+title: Uninvited, and welcome
+text: >-
+  {friend.name} drives up to your place in {homeCity} with a toolbox, a six-pack
+  of paint and no warning. "I remembered that fence," {friend.they}
+  {friend:says|say}.
+tone: light
+category: property
+rarity: uncommon
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { belongings: { vacationHomes: { gte: 1 } } }
+    - { memory: { role: friend, tag: vacationed_with_you } }
+weight: { base: 6 }
+cooldownYears: 5
+bind: [home]
+cast:
+  friend: { kind: friend, presence: anywhere }
+choices:
+  - id: work
+    label: Hand over a hammer and get to it
+    outcome:
+      text: A whole weekend of work, bad jokes and a fence that is finally straight. You split the pizza on the porch and the satisfaction is almost physical.
+      effects:
+        - { type: relationship, role: friend, affection: 6, trust: 5 }
+        - { type: stat, key: happiness, delta: 4 }
+        - { type: stat, key: stress, delta: -4 }
+  - id: guest
+    label: Insist {friend.they} {friend:rests|rest} instead
+    outcome:
+      text: "{friend.name} gives in with a long sigh, and spends the weekend on the dock with a book. It is a good weekend, and the fence is crooked."
+      effects:
+        - { type: relationship, role: friend, affection: 4, trust: 2 }
+        - { type: stat, key: happiness, delta: 2 }

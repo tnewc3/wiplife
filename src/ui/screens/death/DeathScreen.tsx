@@ -32,6 +32,21 @@ function EstateCard({ view }: { view: DeathView }) {
         {view.writtenOff > 0 && <Row label="Debts the estate couldn’t pay (not passed on)" value={money(view.writtenOff)} />}
       </dl>
       {home && <p className="mt-1 text-sm">{home}</p>}
+      {view.possessionSales > 0 && (
+        <p className="mt-1 text-sm" data-testid="estate-possession-sales">
+          A vehicle or vacation home nobody could take was sold, and {money(view.possessionSales)} went into the estate.
+        </p>
+      )}
+      {view.possessions.length > 0 && (
+        <ul className="mt-2 flex flex-col gap-1 text-sm" aria-label="Pets, vehicles and homes that passed on" data-testid="estate-possessions">
+          {view.possessions.map((p) => (
+            <li key={`${p.what}-${p.to}`}>
+              {p.what} went to {p.to}
+              {p.loan > 0 ? `, with ${money(p.loan)} still owed on it` : ''}.
+            </li>
+          ))}
+        </ul>
+      )}
       {view.lines.length === 0 ? (
         <p className="mt-2 font-semibold" data-testid="estate-nothing">
           {view.netEstate > 0 || view.unclaimed > 0 ? 'No one was left to inherit.' : 'Nothing was left to pass on.'}
@@ -111,6 +126,7 @@ export function DeathScreen() {
                               ? `Inherits ${h.cash > 0 ? money(h.cash) : ''}${h.cash > 0 && h.home ? ' and ' : ''}${h.home ? `the home (${money(h.home.value)})` : ''}`
                               : 'Inherits nothing'}
                         </span>
+                        {h.possessions.length > 0 && <span className="text-sm font-normal text-muted">And {h.possessions.join(', ')}</span>}
                       </Button>
                     </li>
                   ))}

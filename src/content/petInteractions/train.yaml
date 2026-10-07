@@ -1,0 +1,35 @@
+id: train
+name: Train
+blurb: Patience, repetition and a lot of nerve.
+profile: train
+outcomes:
+  great:
+    text:
+      - "Something clicks, and {pet.name} gets it. You are both more pleased than either would admit."
+      - "A new trick, learned in one afternoon. {pet.name} will not stop showing it off."
+    bond: 5
+    effects:
+      - { type: stat, key: smarts, delta: 1 }
+      - { type: stat, key: happiness, delta: 1 }
+  good:
+    text:
+      - "Slow progress, and some of it sticks."
+      - "{pet.name} does it right twice, and you take the win."
+    bond: 3
+  neutral:
+    text:
+      - "A lesson that goes nowhere in particular. You try again another day."
+      - "{pet.name} learned nothing, and you learned a little about patience."
+    bond: 1
+  bad:
+    text:
+      - "{pet.name} has decided that the lesson is optional."
+      - "You lose your patience, and {pet.name} loses interest."
+    bond: -2
+  backfire:
+    text:
+      - "You snap, {pet.name} flinches, and the afternoon is spoiled."
+      - "{pet.name} learns exactly the wrong thing, loudly."
+    bond: -4
+    effects:
+      - { type: stat, key: stress, delta: 3 }

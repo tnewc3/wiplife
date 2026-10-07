@@ -3,6 +3,7 @@ name: "Medicine"
 category: professional
 blurb: "Long training, longer hours, and lives in your hands."
 requires: {"education": {"credential": ["grad"], "field": ["medicine"]}}
+vehicle: 0.2
 levels:
   - { title: "resident physician", salary: 64000, years: 3 }
   - { title: "attending physician", salary: 225000 }

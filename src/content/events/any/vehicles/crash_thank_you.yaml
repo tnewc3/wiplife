@@ -1,0 +1,36 @@
+id: crash_thank_you
+title: The one who came
+text: >-
+  You pass the stretch of road where it happened, and for a moment you are back
+  there on the shoulder, shaking. Then you remember who came for you, and how
+  little they asked.
+tone: neutral
+category: vehicles
+rarity: uncommon
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { memory: { role: helper, tag: ride_after_crash } }
+weight: { base: 6 }
+once: true
+cast:
+  helper: { support: true, presence: anywhere }
+choices:
+  - id: say
+    label: Tell {helper.name} what that meant
+    outcome:
+      text: >-
+        {helper.name} shrugs it off and changes the subject, and then, at the
+        door, turns back and says it was nothing, and it wasn't.
+      effects:
+        - { type: relationship, role: helper, affection: 6, trust: 5 }
+        - { type: stat, key: happiness, delta: 2 }
+        - { type: mental, action: trauma, amount: 1 }
+  - id: dinner
+    label: Cook a dinner and let it speak for you
+    outcome:
+      text: A long table, a full pot and no speeches. {helper.name} has seconds, and then thirds.
+      effects:
+        - { type: cost, item: thank_you_meal }
+        - { type: relationship, role: helper, affection: 5, trust: 4 }

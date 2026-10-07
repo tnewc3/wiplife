@@ -1,0 +1,44 @@
+id: carpool_coworker
+title: A ride to work
+text: >-
+  {coworker.name} has been getting to work by bus, and the bus has been getting
+  worse. You hear it from three directions before {coworker.they} {coworker:asks|ask}
+  you directly, with the careful smile of someone who does not want to owe anyone anything.
+tone: light
+category: vehicles
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { career: { employed: true, retired: false } }
+    - { belongings: { vehicles: { gte: 1 } } }
+weight: { base: 5 }
+cooldownYears: 5
+bind: [vehicle]
+cast:
+  coworker: { kind: coworker, presence: city }
+choices:
+  - id: share
+    label: Give rides if they chip in for fuel
+    outcome:
+      text: >-
+        {coworker.name} pays up every Friday in small bills and a running
+        commentary on your driving. You talk more in the car than you do at the desk.
+      effects:
+        - { type: money, delta: 300 }
+        - { type: relationship, role: coworker, affection: 6, trust: 3 }
+        - { type: possession, action: vehicle_condition, delta: -1 }
+  - id: free
+    label: Give rides for free
+    outcome:
+      text: It is no trouble, and you tell {coworker.them} so. A few months in, it turns out to be a bit of trouble.
+      effects:
+        - { type: relationship, role: coworker, affection: 8, trust: 4 }
+        - { type: stat, key: kindness, delta: 1 }
+        - { type: stat, key: stress, delta: 1 }
+  - id: no
+    label: Say it does not work with your schedule
+    outcome:
+      text: "{coworker.name} says that is fine. The silence in the break room, the next morning, is not entirely fine."
+      effects:
+        - { type: relationship, role: coworker, affection: -3 }

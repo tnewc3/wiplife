@@ -12,6 +12,7 @@ import { pronounsFromPreset } from './creation/character';
 import { createPerson, otherCity } from './events/casting';
 import { giveSampleLife, lifeConditionFor } from './lives/sample';
 import { giveSampleWeb } from './web/sample';
+import { giveSamplePossessions } from './possessions/sample';
 import { consistencyProblems } from './presence';
 import { isPartnerKind } from './relationships';
 import { createLife, resolveChoice } from './life';
@@ -93,6 +94,8 @@ export function previewEvent(content: ContentBundle, options: SandboxOptions): S
     }
     // E4: a tie between the people cast, and what one of them has heard, as the event asks.
     giveSampleWeb(d as LifeState, def, cast, content);
+    // E5: the pet, vehicle or vacation home the event is about.
+    giveSamplePossessions(d as LifeState, def, cast, content);
     d.phase = 'events';
     d.pending = [{ instanceId: SANDBOX_INSTANCE, eventId: def.id, cast }];
   });
@@ -106,7 +109,7 @@ export function previewEvent(content: ContentBundle, options: SandboxOptions): S
     title: card.title,
     text: card.text,
     tone: card.tone,
-    cast: Object.entries(instance.cast).map(([role, id]) => {
+    cast: Object.entries(instance.cast).filter(([role]) => !role.startsWith('@')).map(([role, id]) => {
       const p = life.people[id]!;
       return { role, name: `${p.name.first} ${p.name.last}`, age: life.currentYear - p.birthYear };
     }),

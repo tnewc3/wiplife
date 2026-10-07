@@ -1,0 +1,152 @@
+# E5: pets, vehicles and homes. Every number here is a starting proposal; the
+# simulation targets (balance/targets.yaml, possessions) say where they should land.
+
+limits: { pets: 4, vehicles: 3, vacationHomes: 2 }
+
+# The youngest age you can drive, and buy a vehicle for cash.
+drivingAge: 16
+
+pets:
+  # From this age you can adopt or buy a pet yourself. Children's pets come through events.
+  adoptAge: 18
+  # How old a pet is when it joins you, as a share of its lifespan.
+  startAgeShare:
+    shelter: { min: 0.1, max: 0.35 }
+    breeder: { min: 0, max: 0.04 }
+    stray: { min: 0.1, max: 0.5 }
+  startHealth: { shelter: 72, breeder: 86, stray: 60 }
+  startBond: { shelter: 35, breeder: 45, stray: 55 }
+  health:
+    # Health lost each year, and more at the end of life (scaled by the share of its life lived).
+    drift: -1
+    ageDrift: -7
+    vet: { checkup: 8, cure: 18 }
+    sick:
+      ageShare:
+        - { at: 0, x: 0.5 }
+        - { at: 0.5, x: 1 }
+        - { at: 1, x: 2.6 }
+      severity: { min: 15, max: 35 }
+      untreated: 8
+      recover: 0.35
+      recoverAbove: 45
+    failing: 22
+    lifespanLoss: 1
+  bond:
+    decay: 5
+    companionship: 2
+    yearlyCap: 25
+  illVetMult: 2.2
+  interaction:
+    bondWeight: 0.3
+    healthWeight: 0.2
+    returnsSame: 0.6
+    returnsTotal: 0.85
+    annoyedAfter: 4
+    profiles:
+      play:
+        base: 6
+        personality: { playful: 14, anxious: -4, stubborn: -2, lazy: -12 }
+        repeat: { same: 6, total: 2 }
+      walk:
+        base: 8
+        personality: { playful: 6, anxious: -8, stubborn: -8, lazy: -12 }
+        repeat: { same: 6, total: 2 }
+      treat:
+        base: 12
+        personality: { playful: 4, anxious: 6, stubborn: 8, lazy: 8 }
+        repeat: { same: 7, total: 2 }
+      train:
+        base: 0
+        personality: { playful: 6, anxious: -6, stubborn: -18, lazy: -8 }
+        repeat: { same: 8, total: 2 }
+
+vehicles:
+  # Tax, title and registration, as a share of the price.
+  fees: 0.07
+  # Living costs already include getting around: a share of them (food, transport, bills) is what a vehicle's
+  # upkeep and insurance replace, so the first vehicle is not charged twice for the same trips.
+  transportShare: 0.15
+  used:
+    condition: { min: 35, max: 75 }
+    age: { min: 3, max: 10 }
+    priceShare: 0.62
+  depreciation: { first: 0.15, yearly: 0.09, floor: 0.06 }
+  conditionValue:
+    - { at: 0, x: 0.4 }
+    - { at: 50, x: 0.85 }
+    - { at: 100, x: 1 }
+  wear: { base: 3, perAge: 0.25, unserviced: 3, jobUse: 3 }
+  serviceGain: 22
+  sellShare: 0.93
+  loan: { minDown: 0.2, termYears: 5, maxPaymentShare: 0.12 }
+  insurance:
+    age:
+      - { at: 16, x: 2.6 }
+      - { at: 21, x: 1.7 }
+      - { at: 25, x: 1.15 }
+      - { at: 30, x: 1 }
+      - { at: 70, x: 1 }
+      - { at: 90, x: 1.6 }
+    claim: { surcharge: 0.3, years: 4, max: 4 }
+    record: { offenseId: dui, surcharge: 1.2, years: 6 }
+    cityShare: 0.5
+    deductible: 800
+    totalPayout: 0.9
+  repair:
+    minor: { cost: 0.025, condition: 3 }
+    major: { cost: 0.14, condition: 12 }
+    total: { cost: 0, condition: 0 }
+  accident:
+    base:
+      - { at: 16, x: 0.09 }
+      - { at: 22, x: 0.06 }
+      - { at: 30, x: 0.04 }
+      - { at: 65, x: 0.035 }
+      - { at: 85, x: 0.07 }
+    riskTaking: 0.7
+    condition:
+      - { at: 0, x: 2.2 }
+      - { at: 40, x: 1.4 }
+      - { at: 70, x: 1 }
+      - { at: 100, x: 0.85 }
+    severity: { minor: 0.7, major: 0.24, total: 0.06 }
+    drunk:
+      vice:
+        - { at: 0, x: 0 }
+        - { at: 45, x: 0 }
+        - { at: 70, x: 0.04 }
+        - { at: 100, x: 0.1 }
+      conditions: [alcohol_addiction]
+      conditionMult: 3
+
+jobs:
+  requireAt: 0.5
+  helpfulPenalty: 12
+  missingPenalty: 25
+  graceYears: 1
+
+homes:
+  vacation:
+    priceShare: 0.8
+    rateExtra: 0.01
+    upkeep: 0.02
+    insurance: 0.004
+    appreciation: 0.025
+    maxPaymentShare: 0.38
+    effects:
+      happiness: { perYear: 1.2, limit: 92 }
+      stress: { perYear: -0.8, limit: 8 }
+    repair: { minor: 0.01, major: 0.07, total: 0 }
+    totalPayout: 0.9
+  renovation:
+    lastsYears: 10
+    fadeYears: 12
+    perPoint: 0.15
+    max: 2
+    limit: 90
+    maxActive: 5
+
+estate:
+  # Who is best placed to take a pet.
+  petPresence: { household: 3, city: 2, elsewhere: 0 }

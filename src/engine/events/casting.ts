@@ -18,6 +18,9 @@ import { isAdmirerMatch, isRomanticMatch, partnerAgeRange, SUPPORT_KINDS } from 
 import { chance, nextInt, pick, type RngState } from '../rng';
 import type { Id, LifeState, Person } from '../types';
 import { ITEM_ROLE } from '../web/query';
+import { evaluate } from '../conditions';
+import { POSSESSION_ROLES } from '../../content/schemas';
+import { livingPets, vacationHomesOf, vehiclesOf, possessionById } from '../possessions/query';
 
 function personAge(state: LifeState, person: Person): number {
   return state.currentYear - person.birthYear;
@@ -239,6 +242,12 @@ export function castEvent(
       cast[role] = id;
       continue;
     }
+    // E5: the possession a follow-up is about must still be yours (a pet that died this year still counts for its own event).
+    if ((Object.values(POSSESSION_ROLES) as string[]).includes(role)) {
+      if (!possessionById(view, id)) return fail();
+      cast[role] = id;
+      continue;
+    }
     const known = view.people[id];
     // Someone who has died can only fill a role that says so (E2a: the grief events).
     if (!known || (!known.alive && def.cast?.[role]?.deceased !== true)) return fail();
@@ -266,6 +275,15 @@ export function castEvent(
     }
     cast[role] = id;
     used.add(id);
+  }
+  // E5: the possessions the event is about: one of each kind it binds, picked among those that make its requirements true.
+  for (const kind of def.bind ?? []) {
+    const key = POSSESSION_ROLES[kind];
+    if (cast[key] !== undefined) continue;
+    const pool = kind === 'pet' ? livingPets(view) : kind === 'vehicle' ? vehiclesOf(view) : vacationHomesOf(view);
+    const fitting = pool.filter((p) => evaluate(def.requires, view, { cast: { ...cast, [key]: p.id }, roles: 'assumeTrue', content }));
+    if (fitting.length === 0) return fail();
+    cast[key] = pick(rng, fitting).id;
   }
   return { cast, created };
 }

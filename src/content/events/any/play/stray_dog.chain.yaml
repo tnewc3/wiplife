@@ -27,9 +27,9 @@ events:
             effects:
               - { type: stat, key: happiness, delta: 8 }
               - { type: flag, key: has_dog, value: true }
+              - { type: possession, action: pet_adopt, species: dog, source: stray }
               - { type: history, text: A stray dog followed you home and never left., importance: 2 }
               - { type: schedule, eventId: dog_chews_shoes, inYears: [1, 2] }
-              - { type: schedule, eventId: dog_old_age, inYears: [9, 13] }
           failure:
             text: '{parent.name} says no and calls the shelter. You watch the van drive away.'
             effects:
@@ -77,7 +77,9 @@ events:
             effects:
               - { type: stat, key: discipline, delta: 1 }
 
+  # Retired in E5: a dog is a real pet now, and its end is dog_passed_away (queued by the possessions step).
   - id: dog_old_age
+    retired: true
     title: Gray around the muzzle
     text: >-
       Your dog is old now: gray around the muzzle, slow on the stairs. The vet

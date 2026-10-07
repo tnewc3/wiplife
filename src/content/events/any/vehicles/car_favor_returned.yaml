@@ -1,0 +1,33 @@
+id: car_favor_returned
+title: Keys on the table
+text: >-
+  Your {vehicle} has been in the shop for three days. When {friend.name} hears,
+  there is a set of keys on your table before you finish the story.
+tone: light
+category: vehicles
+rarity: uncommon
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { belongings: { vehicles: { gte: 1 }, vehicleCondition: { lt: 60 } } }
+    - { memory: { role: friend, tag: borrowed_your_car } }
+weight: { base: 6 }
+cooldownYears: 6
+bind: [vehicle]
+cast:
+  friend: { kind: friend, presence: city }
+choices:
+  - id: take
+    label: Take the keys, and say thank you
+    outcome:
+      text: It smells like someone else's coffee and fits like someone else’s coat. {friend.name} waves off every attempt to thank {friend.them}.
+      effects:
+        - { type: relationship, role: friend, affection: 5, trust: 5 }
+        - { type: stat, key: stress, delta: -3 }
+  - id: decline
+    label: Say you will manage
+    outcome:
+      text: You do, with buses and a bad week. {friend.name} looks a little hurt, and you realize you have mistaken pride for independence.
+      effects:
+        - { type: relationship, role: friend, affection: -2 }
+        - { type: stat, key: stress, delta: 3 }

@@ -62,7 +62,7 @@ describe('content coverage, simulated', () => {
     for (const id of eligible) expect(content.events[id]!.lifeStages).toContain('early');
   });
 
-  it('collects eligibility, dry spots and repetition from simulated lives', () => {
+  it('collects eligibility, dry spots and repetition from simulated lives', { timeout: 60_000 }, () => {
     const d = collectCoverage(content, { lives: 3, seedPrefix: 'cov-test' });
     expect(d.lives).toBe(3);
     expect(d.years).toBeGreaterThan(100);

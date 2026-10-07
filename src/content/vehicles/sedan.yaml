@@ -1,0 +1,10 @@
+id: sedan
+name: sedan
+blurb: "A plain, reliable car."
+kind: car
+price: 30000
+upkeep: 2500
+service: 520
+insurance: 1000
+risk: 1.0
+used: true

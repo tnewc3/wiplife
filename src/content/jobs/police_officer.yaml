@@ -3,6 +3,7 @@ name: "Policing"
 category: professional
 blurb: "Long nights, hard calls, and a badge that weighs more than it looks."
 requires: {"all": [{"education": {"credential": ["hs_diploma", "ged"]}}, {"age": {"gte": 21}}, {"not": {"record": {}}}]}
+vehicle: 0.5
 levels:
   - { title: "patrol officer", salary: 48000 }
   - { title: "senior officer", salary: 55000 }

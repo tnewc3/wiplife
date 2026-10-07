@@ -6,6 +6,7 @@ blurb: "Moderate costs · Strong jobs across the board"
 costOfLiving: 1.1
 baseRent: 21600
 baseHomePrice: 330000
+carDependence: 0.45
 salaryMultiplier: 1.08
 jobMarket:
   professional: 75

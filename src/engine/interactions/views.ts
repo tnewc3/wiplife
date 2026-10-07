@@ -59,11 +59,13 @@ export interface InteractionOutcomeView {
 export function getInteractionOutcome(state: LifeState, content: ContentBundle): InteractionOutcomeView | null {
   const p = state.pendingInteraction;
   if (!p) return null;
-  const def = content.interactions[p.interactionId];
+  // E5: a pet interaction names the pet (its id is in personId).
+  const def = p.pet ? content.petInteractions[p.interactionId] : content.interactions[p.interactionId];
   const person = state.people[p.personId];
+  const petName = p.pet ? state.possessions.items.find((q) => q.id === p.personId)?.name : undefined;
   return {
     interactionName: def?.name ?? p.interactionId,
-    personName: person?.name.first ?? '',
+    personName: petName ?? person?.name.first ?? '',
     personId: p.personId,
     tier: p.tier,
     ...(p.giftTier ? { giftTier: p.giftTier } : {}),

@@ -38,6 +38,12 @@ export const jobSchema = baseDefSchema
     blurb: z.string().trim().min(1).max(100),
     /** Who can be hired (condition language): degrees, licenses, a clean record, age. */
     requires: conditionSchema.optional(),
+    /**
+     * E5: how much the work depends on a vehicle (0–1; 0 when left out), weighted by the
+     * city's car dependence (balance/possessions.yaml jobs). Where it comes to enough, you
+     * need a vehicle to be hired and to keep the job.
+     */
+    vehicle: z.number().min(0).max(1).optional(),
     /** From the first level up; salaries never go down a level. */
     levels: z
       .array(jobLevelSchema)

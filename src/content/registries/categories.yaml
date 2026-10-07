@@ -83,3 +83,9 @@ categories:
   web: { label: The people around you }
   # M1: depression, anxiety, PTSD, ADHD and neurodivergence: first signs, diagnosis, care, the people who notice, and crisis. A partner who lives with you is preferred for their roles (the household rule).
   mental: { label: Mental health, household: true }
+
+  # E5: pets, vehicles and homes beyond the one you live in. Each event requires
+  # what it is about (belongings: ...); the content build checks it.
+  pets: { label: Pets, household: true }
+  vehicles: { label: Cars and driving }
+  property: { label: Property }

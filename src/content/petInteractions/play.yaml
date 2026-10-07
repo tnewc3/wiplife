@@ -1,0 +1,38 @@
+id: play
+name: Play
+blurb: Toys, a ball, a lot of nonsense.
+profile: play
+outcomes:
+  great:
+    text:
+      - "{pet.name} is wild with joy. You both end up worn out and grinning."
+      - "It is the best game {pet.name} has ever played, and {pet.they} {pet:wants|want} to play it again."
+    bond: 6
+    effects:
+      - { type: stat, key: happiness, delta: 2 }
+      - { type: stat, key: stress, delta: -3 }
+  good:
+    text:
+      - "You play until {pet.name} loses interest, which takes a good while."
+      - "A solid game. {pet.name} keeps bringing the toy back for more."
+    bond: 4
+    effects:
+      - { type: stat, key: stress, delta: -2 }
+  neutral:
+    text:
+      - "{pet.name} plays for a few minutes and then wanders off."
+      - "You do most of the playing. {pet.name} does most of the watching."
+    bond: 1
+  bad:
+    text:
+      - "{pet.name} isn't in the mood and makes that very clear."
+      - "The toy lands somewhere unreachable, and the game is over."
+    bond: -1
+  backfire:
+    text:
+      - "A game gets too rough, and {pet.name} gives you a scratch you'll remember."
+      - "You startle {pet.name}, who hides for the rest of the day."
+    bond: -3
+    health: -2
+    effects:
+      - { type: stat, key: stress, delta: 2 }

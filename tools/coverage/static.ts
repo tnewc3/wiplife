@@ -87,6 +87,9 @@ export function rootEvents(content: ContentBundle): Set<string> {
     // E4: what a change among the people you know asks of you, and what people say when they hear something.
     ...Object.values(r.web.triggers),
     ...Object.values(r.web.kinds).map((k) => ({ events: [...k.reactions] })),
+    // E5: the accidents and the death of a pet the possessions step queues.
+    ...Object.values(r.possessions.accidents),
+    r.possessions.petDied,
   ];
   for (const list of lists) for (const id of list.events) roots.add(id);
   return roots;

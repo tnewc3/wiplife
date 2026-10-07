@@ -1,0 +1,76 @@
+id: pet_runs_off
+title: The open door
+text: >-
+  The door was open for ten seconds. {pet.name} was through it in two, and now
+  the street is empty and your {petKind} is nowhere you can see.
+tone: serious
+category: pets
+rarity: uncommon
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { belongings: { pets: { gte: 1 }, species: [dog, cat, rabbit, parakeet], personality: [anxious, stubborn, playful] } }
+weight:
+  base: 4
+  modifiers:
+    - { if: { belongings: { personality: [stubborn] } }, x: 1.5 }
+cooldownYears: 8
+bind: [pet]
+choices:
+  - id: search
+    label: Search the neighborhood until dark
+    check:
+      base: 55
+      stats: [{ key: luck, weight: 0.3 }, { key: fitness, weight: 0.1 }]
+      success:
+        text: >-
+          At the third street you hear it before you see it: {pet.name}, muddy and
+          delighted, three blocks away. You hold on to {pet.them} the whole way home.
+        effects:
+          - { type: possession, action: pet_bond, delta: 8 }
+          - { type: stat, key: stress, delta: -3 }
+      failure:
+        text: >-
+          You call until your voice goes. You walk until it is dark. {pet.name} does
+          not come home that night, or the next.
+        effects:
+          - { type: history, text: '{pet.name}, your {petKind}, ran off and you never found {pet.them}.', importance: 2 }
+          - { type: flag, key: pet_never_found, value: true }
+          - { type: possession, action: pet_leaves }
+          - { type: stat, key: happiness, delta: -8 }
+          - { type: stat, key: stress, delta: 6 }
+  - id: flyers
+    label: Put up flyers and ask the neighbors
+    check:
+      base: 50
+      stats: [{ key: sociability, weight: 0.3 }, { key: luck, weight: 0.2 }]
+      success:
+        text: A kid two streets over has been feeding {pet.name} for the afternoon. {pet.They} {pet:is|are} fat and unrepentant.
+        effects:
+          - { type: possession, action: pet_bond, delta: 4 }
+          - { type: stat, key: happiness, delta: 2 }
+      failure:
+        text: The flyers curl in the rain. Nobody calls. {pet.name} does not come back.
+        effects:
+          - { type: history, text: '{pet.name}, your {petKind}, ran off and you never found {pet.them}.', importance: 2 }
+          - { type: flag, key: pet_never_found, value: true }
+          - { type: possession, action: pet_leaves }
+          - { type: stat, key: happiness, delta: -7 }
+          - { type: stat, key: stress, delta: 5 }
+  - id: wait
+    label: Leave the door open and wait
+    check:
+      base: 40
+      stats: [{ key: luck, weight: 0.4 }]
+      success:
+        text: At dawn there is a scratch at the door, and {pet.name} comes in like nothing happened.
+        effects:
+          - { type: possession, action: pet_bond, delta: 5 }
+      failure:
+        text: The door stays open for a week. {pet.name} does not come back.
+        effects:
+          - { type: history, text: '{pet.name}, your {petKind}, ran off and you never found {pet.them}.', importance: 2 }
+          - { type: flag, key: pet_never_found, value: true }
+          - { type: possession, action: pet_leaves }
+          - { type: stat, key: happiness, delta: -8 }

@@ -479,7 +479,9 @@ describe('event text', () => {
       const person = { name: { first: 'Ana', last: 'Ruiz' }, pronouns: preset, relation: 'friend', partner: 'Rowan', city: 'Chicago', job: 'an electrician' };
       const self = { name: person.name, pronouns: preset };
       for (const def of Object.values(content.events)) {
-        const roles = Object.fromEntries([...Object.keys(def.cast ?? {}).map((r) => [r, person] as const), [SELF_ROLE, self] as const]);
+        // E5: an event that binds a pet can name it ({pet.name}, "it"), and use {petKind}, {vehicle} and {homeCity}.
+        const pet = { name: { first: 'Biscuit', last: '' }, pronouns: { subject: 'it', object: 'it', possessive: 'its', possessivePronoun: 'its', reflexive: 'itself', verbPlural: false } };
+        const roles = Object.fromEntries([...Object.keys(def.cast ?? {}).map((r) => [r, person] as const), [SELF_ROLE, self] as const, ...(def.bind?.includes('pet') ? [['pet', pet] as const] : [])]);
         const values = {
           age: 40,
           talent: 'music',
@@ -490,7 +492,10 @@ describe('event text', () => {
           sentence: 'a year in prison',
           since: 'two years ago',
           heard: 'that you were let go',
-        } satisfies Record<(typeof EVENT_TEXT_VALUES)[number], string | number>;
+          petKind: 'dog',
+          vehicle: 'sedan',
+          homeCity: 'Chicago',
+        } satisfies Record<(typeof EVENT_TEXT_VALUES)[number] | 'petKind' | 'vehicle' | 'homeCity', string | number>;
         const context = { roles, values };
         const texts = [def.title, def.text, ...(def.choices ?? []).map((c) => c.label)];
         const outcomes = def.autoOutcome ? [def.autoOutcome] : (def.choices ?? []).flatMap((c) => (c.outcome ? [c.outcome] : [c.check!.success, c.check!.failure]));

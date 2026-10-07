@@ -3,6 +3,7 @@ name: "Electrical work"
 category: trade
 blurb: "Wiring homes and buildings, and not getting shocked."
 requires: {"education": {"credential": ["trade_license"], "field": ["electrician"]}}
+vehicle: 0.85
 levels:
   - { title: "apprentice electrician", salary: 40000 }
   - { title: "journeyman electrician", salary: 60000 }

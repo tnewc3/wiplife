@@ -10,6 +10,7 @@
  * amounts are kept within safe integer limits.
  */
 import type { ContentBundle, DebtKind } from '../content/schemas';
+import { detachDebt, possessionsValue } from './possessions/query';
 import { writeFromGroup } from './systems/history';
 import type { Debt, Id, LifeState } from './types';
 
@@ -32,9 +33,9 @@ export function totalDebt(state: LifeState): number {
   return wholeDollars(state.finances.debts.reduce((sum, d) => sum + d.balance, 0));
 }
 
-/** Savings (and any money held in trust) plus the value of your home, minus every debt. */
+/** Savings (and any money held in trust) plus the value of your home, vehicles and vacation homes, minus every debt. */
 export function netWorth(state: LifeState): number {
-  return wholeDollars(state.finances.savings + (state.finances.trust?.balance ?? 0) + (state.housing.homeValue ?? 0) - totalDebt(state));
+  return wholeDollars(state.finances.savings + (state.finances.trust?.balance ?? 0) + (state.housing.homeValue ?? 0) + possessionsValue(state) - totalDebt(state));
 }
 
 /** The most payments in a row missed on any one debt. */
@@ -164,6 +165,7 @@ export function clearPaidDebts(state: LifeState, content: ContentBundle): void {
   if (paid.length === 0) return;
   f.debts = f.debts.filter((d) => d.balance > 0);
   for (const debt of paid) {
+    detachDebt(state, debt.id);
     if (debt.id !== state.housing.mortgageDebtId) continue;
     delete state.housing.mortgageDebtId;
     writeFromGroup(state, content.text.history.money.mortgagePaidOff, ['money', 'mortgagePaidOff'], {}, content);
@@ -245,6 +247,7 @@ export function sendToCollections(state: LifeState, debt: Debt, content: Content
   const { missed, interest } = content.balance.economy;
   const amount = debt.balance + wholeDollars(debt.balance * missed.collectionsFee);
   state.finances.debts = state.finances.debts.filter((d) => d.id !== debt.id);
+  detachDebt(state, debt.id);
   const existing = state.finances.debts.find((d) => d.kind === 'collections');
   if (existing) {
     grow(existing, amount, content);

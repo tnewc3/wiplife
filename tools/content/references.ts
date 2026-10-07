@@ -43,7 +43,7 @@ import { ACTION_ROLE } from '../../src/engine/actions';
 import { INTERACTION_ROLE } from '../../src/engine/interactions/availability';
 import { referencesIn, rolesIn } from '../../src/engine/conditions';
 import { CHILD_KINDS, EFFECT_KINDS, FAMILY_KINDS, isPartnerKind, isRomanceEvent, isRomanticKind } from '../../src/engine/relationships';
-import { EVENT_TEXT_VALUES, SELF_ROLE } from '../../src/engine/events/text';
+import { EVENT_TEXT_VALUES, POSSESSION_TEXT_VALUES, SELF_ROLE } from '../../src/engine/events/text';
 import { CONTINUE_CHOICE } from '../../src/engine/life';
 import { checkTemplate } from '../../src/engine/text';
 import type { ContentError } from './compile';
@@ -51,6 +51,7 @@ import { MONEY } from './consistency';
 import { mentalSafetyErrors } from './mentalSafety';
 import { checkPeople } from './people';
 import { checkWeb } from './web';
+import { checkPossessions } from './possessions';
 
 const CREATION = 'balance/creation.yaml';
 const AGING = 'balance/aging.yaml';
@@ -183,6 +184,7 @@ export function checkReferences(
   errors.push(...checkHeir(bundle, fileOf, options.partialEvents === true));
   errors.push(...checkPeople(bundle, fileOf, options.partialEvents === true));
   errors.push(...checkWeb(bundle, fileOf, options.partialEvents === true));
+  errors.push(...checkPossessions(bundle, fileOf, options.partialEvents === true));
 
   return errors;
 }
@@ -488,6 +490,9 @@ function checkEvents(bundle: ContentBundle, fileOf: (typeKey: CollectionKey, id:
     // E4: the events a change among the people you know can ask of you, and the reactions to what they hear.
     ...Object.values(bundle.registries.web.triggers).flatMap((r) => r.events),
     ...Object.values(bundle.registries.web.kinds).flatMap((k) => k.reactions),
+    // E5: accidents and the death of a pet.
+    ...Object.values(bundle.registries.possessions.accidents).flatMap((r) => r.events),
+    ...bundle.registries.possessions.petDied.events,
   ]);
 
   for (const [id, def] of Object.entries(bundle.events)) {
@@ -495,7 +500,12 @@ function checkEvents(bundle: ContentBundle, fileOf: (typeKey: CollectionKey, id:
     const err = (message: string) => errors.push({ file, message: `${id}: ${message}` });
     const roles = Object.keys(def.cast ?? {});
     // {sentence} only where a legal effect has just handed one down (checked per outcome below).
-    const allowed = { roles: [...roles, SELF_ROLE], values: EVENT_TEXT_VALUES.filter((v) => v !== 'sentence') as string[] };
+    // E5: an event that binds a pet can name it ({pet.name}, {petKind}); a vehicle gives {vehicle}; a vacation home {homeCity}.
+    const bound = def.bind ?? [];
+    const allowed = {
+      roles: [...roles, SELF_ROLE, ...(bound.includes('pet') ? ['pet'] : [])],
+      values: [...(EVENT_TEXT_VALUES.filter((v) => v !== 'sentence') as string[]), ...bound.flatMap((k) => [...POSSESSION_TEXT_VALUES[k]])],
+    };
     const template = (field: string, text: string) => {
       for (const message of checkTemplate(text, allowed)) err(`${field}: ${message}`);
     };
@@ -511,6 +521,8 @@ function checkEvents(bundle: ContentBundle, fileOf: (typeKey: CollectionKey, id:
       for (const f of refs.fields) if (!knownField(bundle, f)) err(`${field}: "${f}" is not a major, trade or grad program`);
       for (const j of refs.jobs) if (!bundle.jobs[j]) err(`${field}: unknown job "${j}"`);
       for (const c of refs.conditions) if (!bundle.conditions[c]) err(`${field}: unknown health condition "${c}"`);
+      for (const pet of refs.pets) if (!bundle.pets[pet]) err(`${field}: unknown pet "${pet}"`);
+      for (const v of refs.vehicles) if (!bundle.vehicles[v]) err(`${field}: unknown vehicle "${v}"`);
     };
 
     if (!categories[def.category]) err(`category "${def.category}" is not in registries/categories.yaml`);
@@ -532,6 +544,7 @@ function checkEvents(bundle: ContentBundle, fileOf: (typeKey: CollectionKey, id:
         err(`cast.${role}: a romantic role finds a potential partner, never family or a current partner (kind "${kind}")`);
       }
       if (role === SELF_ROLE) err(`cast.${role}: "${SELF_ROLE}" is always you in event text, so it can't be a cast role`);
+      if (role === 'pet' || role === 'vehicle' || role === 'home') err(`cast.${role}: "${role}" is for the possession an event binds (bind: [${role}]), so it can't be a cast role`);
       // C1, presence: nobody new joins your household, and a support role finds someone you know.
       if (spec.presence === 'household' && (spec.createIfMissing || spec.newChance !== undefined)) {
         err(`cast.${role}: presence household can't create someone new (nobody new moves in with you)`);
@@ -599,6 +612,12 @@ function checkEvents(bundle: ContentBundle, fileOf: (typeKey: CollectionKey, id:
         if (effect.type === 'identity' && effect.field === 'pronouns' && effect.value !== 'fromLatent' && !bundle.pronouns[effect.value]) {
           err(`${where}: unknown pronoun preset "${effect.value}"`);
         }
+        if (effect.type === 'possession') {
+          const need = effect.action.startsWith('vehicle_') ? 'vehicle' : effect.action === 'home_damage' ? 'home' : effect.action.startsWith('pet_') && effect.action !== 'pet_adopt' ? 'pet' : null;
+          if (need && !(def.bind ?? []).includes(need)) err(`${where}: ${effect.action} acts on a ${need}, so the event must bind it (bind: [${need}])`);
+          if (effect.species !== undefined && !bundle.pets[effect.species]) err(`${where}: unknown pet "${effect.species}"`);
+          if (effect.action === 'pet_adopt' && effect.source !== 'stray' && effect.source !== 'shelter') err(`${where}: an event can bring a pet from a shelter or a stray, not a breeder (that is a purchase)`);
+        }
         if (effect.type === 'history') {
           writesHistory = true;
           template(`${where}.text`, effect.text);
@@ -608,6 +627,13 @@ function checkEvents(bundle: ContentBundle, fileOf: (typeKey: CollectionKey, id:
           const target = bundle.events[effect.eventId];
           if (!target) err(`${where}: unknown event "${effect.eventId}"`);
           for (const role of effect.cast ?? []) {
+            // E5: the pet, vehicle or vacation home an event is about travels to a follow-up that binds the same kind.
+            if (role === 'pet' || role === 'vehicle' || role === 'home') {
+              const kind = role;
+              if (!(def.bind ?? []).includes(kind)) err(`${where}: "${role}" is not bound by this event (bind: [${kind}])`);
+              if (target && !(target.bind ?? []).includes(kind)) err(`${where}: "${effect.eventId}" doesn't bind a ${kind}`);
+              continue;
+            }
             if (!roles.includes(role)) err(`${where}: role "${role}" is not in the cast`);
             if (target && !(role in (target.cast ?? {}))) err(`${where}: "${effect.eventId}" has no role "${role}"`);
           }

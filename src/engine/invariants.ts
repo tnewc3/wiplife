@@ -9,6 +9,8 @@ import { familyFailures } from './family/invariants';
 import { interactionFailures } from './interactions/invariants';
 import { livesFailures } from './lives/invariants';
 import { webFailures } from './web/invariants';
+import { possessionsFailures } from './possessions/invariants';
+import { attachedDebtIds } from './possessions/query';
 import { ITEM_ROLE } from './web/query';
 import { consistencyProblems } from './presence';
 import { isRngState } from './rng';
@@ -96,7 +98,7 @@ export function checkInvariants(state: LifeState, content: ContentBundle): strin
   money('finances.savings', f.savings);
   if (f.savings < 0) fail('finances.savings must not be negative');
   const debtIds = new Set<string>();
-  const DEBT_KINDS = new Set(['student', 'personal', 'mortgage', 'medical', 'collections']);
+  const DEBT_KINDS = new Set(['student', 'personal', 'mortgage', 'medical', 'collections', 'auto']);
   for (const debt of f.debts) {
     const label = `debt ${debt.id}`;
     if (debtIds.has(debt.id)) fail(`${label} appears twice`);
@@ -118,12 +120,12 @@ export function checkInvariants(state: LifeState, content: ContentBundle): strin
   if (!independent && f.debts.length > 0) fail('a child has debt');
   if (f.lastLedger) {
     const l = f.lastLedger;
-    for (const key of ['gross', 'retirement', 'tax', 'housing', 'living', 'debtPayments', 'interest', 'debtInterest', 'borrowed', 'support', 'children', 'care', 'supportPaid', 'supportReceived'] as const) {
+    for (const key of ['gross', 'retirement', 'tax', 'housing', 'living', 'debtPayments', 'interest', 'debtInterest', 'borrowed', 'support', 'children', 'care', 'supportPaid', 'supportReceived', 'upkeep', 'insurance'] as const) {
       money(`lastLedger.${key}`, l[key]);
       if (l[key] < 0) fail(`lastLedger.${key} must not be negative`);
     }
     money('lastLedger.net', l.net);
-    if (l.net !== l.gross + l.retirement + l.interest + l.supportReceived - l.tax - l.housing - l.living - l.children - l.care - l.supportPaid - l.debtPayments) fail('lastLedger.net does not add up');
+    if (l.net !== l.gross + l.retirement + l.interest + l.supportReceived - l.tax - l.housing - l.living - l.children - l.care - l.supportPaid - l.upkeep - l.insurance - l.debtPayments) fail('lastLedger.net does not add up');
     if (l.year > state.currentYear || l.year <= state.birthYear) fail('lastLedger is for a year outside the life');
   }
   if (state.career.gig && c.age < content.balance.economy.gig.minAge) fail('gig work before the minimum age');
@@ -164,7 +166,8 @@ export function checkInvariants(state: LifeState, content: ContentBundle): strin
     fail(`a "${h.kind}" home has a value or mortgage`);
   }
   if (h.mortgageDebtId !== undefined && !mortgages.some((d) => d.id === h.mortgageDebtId)) fail('housing.mortgageDebtId is not a mortgage');
-  if (mortgages.some((d) => d.id !== h.mortgageDebtId)) fail('a mortgage without a home');
+  const onPossessions = attachedDebtIds(state);
+  if (mortgages.some((d) => d.id !== h.mortgageDebtId && !onPossessions.has(d.id))) fail('a mortgage without a home');
 
   // Education: the right school for your age, programs that fit their
   // rules (grad school after a bachelor's...), credentials that exist.
@@ -190,6 +193,9 @@ export function checkInvariants(state: LifeState, content: ContentBundle): strin
 
   // The social web (E4).
   failures.push(...webFailures(state, content));
+
+  // Pets, vehicles and vacation homes (E5).
+  failures.push(...possessionsFailures(state, content));
 
   // People and relationships.
   const { parentAgeAtBirth } = content.balance.creation.family;
@@ -315,7 +321,8 @@ export function checkInvariants(state: LifeState, content: ContentBundle): strin
     fail('lifetime.happinessTotal is out of range');
   }
 
-  // Events.
+  // Events. E5: a role that starts with @ is a possession the event is about.
+  const castExists = (role: string, id: string) => role === ITEM_ROLE || (role.startsWith('@') ? state.possessions.items.some((q) => q.id === id) : state.people[id] !== undefined);
   const inYear = state.phase === 'events' || state.phase === 'yearEnd';
   if (!inYear && state.phase !== 'action' && state.pending.length > 0) fail(`pending events in the "${state.phase}" phase`);
   if (state.phase === 'events' && state.pending.every((p) => p.resolvedChoiceId !== undefined)) fail('the events phase has nothing left to resolve');
@@ -325,7 +332,8 @@ export function checkInvariants(state: LifeState, content: ContentBundle): strin
     if (ids.has(p.instanceId)) fail(`duplicate pending instance ${p.instanceId}`);
     ids.add(p.instanceId);
     if (!content.events[p.eventId]) fail(`pending event "${p.eventId}" is not known`);
-    for (const [role, id] of Object.entries(p.cast)) if (role !== ITEM_ROLE && !state.people[id]) fail(`pending ${p.eventId} casts missing person ${id} as ${role}`);
+    // (A resolved event keeps its cast; a possession it took away is gone by now.)
+    for (const [role, id] of Object.entries(p.cast)) if (p.resolvedChoiceId === undefined && !castExists(role, id)) fail(`pending ${p.eventId} casts missing ${role.startsWith('@') ? 'possession' : 'person'} ${id} as ${role}`);
   }
   // C1: while nothing has been chosen yet (the state is as it was when the
   // events were picked), every pending event keeps its category contract and
@@ -346,7 +354,8 @@ export function checkInvariants(state: LifeState, content: ContentBundle): strin
     // Follow-ups are always for a later year; due ones leave the list when the year begins.
     if (s.dueYear <= state.currentYear) fail(`scheduled ${s.eventId} is due in the past (${s.dueYear})`);
     if (s.since !== undefined && (s.since < state.birthYear || s.since > state.currentYear)) fail(`scheduled ${s.eventId} was set up outside the life`);
-    for (const [role, id] of Object.entries(s.cast)) if (role !== ITEM_ROLE && !state.people[id]) fail(`scheduled ${s.eventId} casts missing person ${id} as ${role}`);
+    // E5: a possession a follow-up is about may be gone by the time it is due (it is then dropped).
+    for (const [role, id] of Object.entries(s.cast)) if (!role.startsWith('@') && !castExists(role, id)) fail(`scheduled ${s.eventId} casts missing ${role.startsWith('@') ? 'possession' : 'person'} ${id} as ${role}`);
   }
   for (const [id, log] of Object.entries(state.eventLog)) {
     if (!(log.count >= 1) || log.lastYear > state.currentYear || log.lastYear < state.birthYear) fail(`event log for ${id} is invalid`);

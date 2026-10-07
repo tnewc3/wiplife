@@ -1,0 +1,52 @@
+id: speeding_ticket
+title: Lights in the mirror
+text: >-
+  The flashing lights come up behind your {vehicle} on an empty stretch of road,
+  and you realize you were not paying attention to the speedometer.
+tone: neutral
+category: vehicles
+rarity: common
+lifeStages: [teen, youngAdult, adult, senior]
+requires: { belongings: { vehicles: { gte: 1 } } }
+weight:
+  base: 7
+  modifiers:
+    - { if: { trait: riskTaking, gt: 60 }, x: 1.6 }
+cooldownYears: 3
+bind: [vehicle]
+choices:
+  - id: pay
+    label: Take the ticket and pay it
+    outcome:
+      text: "\"Slow down,\" says the officer, handing it over. You do, for about a week."
+      effects:
+        - { type: cost, item: traffic_fine }
+        - { type: stat, key: discipline, delta: 1 }
+  - id: charm
+    label: Be as polite as humanly possible
+    check:
+      base: 40
+      stats: [{ key: confidence, weight: 0.3 }, { key: looks, weight: 0.1 }, { key: kindness, weight: 0.2 }]
+      success:
+        text: The officer looks at you for a long time and lets you off with a lecture about what the road can do.
+        effects:
+          - { type: stat, key: confidence, delta: 1 }
+      failure:
+        text: Polite does not work today. The ticket is the same, and a little heavier.
+        effects:
+          - { type: cost, item: traffic_fine }
+          - { type: stat, key: stress, delta: 2 }
+  - id: contest
+    label: Contest it in court
+    check:
+      base: 35
+      stats: [{ key: smarts, weight: 0.3 }, { key: luck, weight: 0.2 }]
+      success:
+        text: The officer does not show up. The judge shrugs, and the matter is over.
+        effects:
+          - { type: stat, key: confidence, delta: 2 }
+      failure:
+        text: The officer does show up, with photographs. You lose a whole day and pay the ticket anyway.
+        effects:
+          - { type: cost, item: traffic_fine }
+          - { type: stat, key: stress, delta: 3 }

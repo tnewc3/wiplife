@@ -1,0 +1,40 @@
+id: walk
+name: Take for a walk
+blurb: Fresh air for both of you.
+profile: walk
+outcomes:
+  great:
+    text:
+      - "A long, easy walk. {pet.name} meets everyone and loves them all."
+      - "You find a new path, and {pet.name} treats it as a gift."
+    bond: 5
+    health: 2
+    effects:
+      - { type: stat, key: fitness, delta: 2 }
+      - { type: stat, key: stress, delta: -3 }
+  good:
+    text:
+      - "A walk around the block, then a longer one. {pet.name} sets the pace."
+      - "You both get some air, and the day feels a little lighter."
+    bond: 3
+    health: 1
+    effects:
+      - { type: stat, key: fitness, delta: 1 }
+      - { type: stat, key: stress, delta: -2 }
+  neutral:
+    text:
+      - "A short, uneventful walk. {pet.name} sniffs, you scroll."
+      - "{pet.name} does what needs doing, and you head back."
+    bond: 1
+  bad:
+    text:
+      - "{pet.name} stops dead and refuses to go on. You carry the leash all the way back."
+      - "It rains, {pet.name} sulks, and nobody has a good time."
+    bond: -1
+  backfire:
+    text:
+      - "{pet.name} bolts after something, and the leash burns your hand. It takes an hour to get things calm again."
+      - "A bad scare on the street leaves {pet.name} shaking for the rest of the day."
+    bond: -3
+    effects:
+      - { type: stat, key: stress, delta: 3 }

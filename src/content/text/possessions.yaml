@@ -1,0 +1,60 @@
+# History lines the possessions systems write. The player is "you".
+# Values: {pet}, {species}, {vehicle}, {city}, {renovation}.
+petNames: [Biscuit, Juniper, Pepper, Waffles, Mochi, Bean, Clover, Otis, Maple, Pickles, Ziggy, Willow, Tofu, Nugget, Poppy, Ranger, Olive, Pretzel, Basil, Sprout]
+
+history:
+  petAdopted:
+    importance: 2
+    variants:
+      - "{pet} the {species} came home with you."
+      - "You brought home a {species} and named {pet}."
+  petDied:
+    importance: 2
+    variants:
+      - "{pet}, your {species}, died."
+      - "You lost {pet}, who had been your {species} for a long time."
+  petLeft:
+    importance: 1
+    variants:
+      - "{pet}, your {species}, went to live somewhere else."
+      - "You and {pet} parted ways."
+  vehicleBought:
+    importance: 2
+    variants:
+      - "You bought a {vehicle}."
+      - "A {vehicle} became yours."
+  vehicleSold:
+    importance: 1
+    variants:
+      - "You sold your {vehicle}."
+      - "Your {vehicle} went to a new owner."
+  vehicleLost:
+    importance: 2
+    variants:
+      - "You lost your {vehicle}."
+      - "Your {vehicle} was gone for good."
+  vacationBought:
+    importance: 3
+    variants:
+      - "You bought a vacation home in {city}."
+      - "You became the owner of a getaway in {city}."
+  vacationSold:
+    importance: 2
+    variants:
+      - "You sold your vacation home in {city}."
+      - "The place in {city} went on the market, and then it was gone."
+  vacationForeclosed:
+    importance: 3
+    variants:
+      - "The bank took your vacation home in {city}."
+      - "You couldn't keep up the payments on the place in {city}, and the lender took it back."
+  renovated:
+    importance: 2
+    variants:
+      - "You finished a {renovation} on your place in {city}."
+      - "The {renovation} on the home in {city} was finally done."
+  noVehicleJobLost:
+    importance: 2
+    variants:
+      - "Without a vehicle you couldn't keep up with the work, and the job ended."
+      - "The job needed a way to get around, and without one it fell through."

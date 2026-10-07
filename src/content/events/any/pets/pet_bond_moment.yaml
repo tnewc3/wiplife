@@ -1,0 +1,36 @@
+id: pet_bond_moment
+title: The one who waits
+text: >-
+  It has been a hard week, and {pet.name} knows it. {pet.They} {pet:has|have} spent
+  the evening pressed against you, as if {pet.they} {pet:were|were} holding the
+  couch down.
+tone: light
+category: pets
+rarity: common
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { belongings: { pets: { gte: 1 }, petBond: { gte: 70 } } }
+weight:
+  base: 8
+  modifiers:
+    - { if: { stat: stress, gt: 60 }, x: 2 }
+cooldownYears: 3
+bind: [pet]
+choices:
+  - id: stay
+    label: Stay in and let {pet.them} look after you
+    outcome:
+      text: Nobody talks. Nobody needs to. The week gets quieter.
+      effects:
+        - { type: stat, key: stress, delta: -8 }
+        - { type: stat, key: happiness, delta: 3 }
+        - { type: possession, action: pet_bond, delta: 2 }
+  - id: out
+    label: Take {pet.them} out into the evening
+    outcome:
+      text: The two of you walk until the streetlights come on. You feel a little more like yourself on the way back.
+      effects:
+        - { type: stat, key: fitness, delta: 1 }
+        - { type: stat, key: stress, delta: -5 }
+        - { type: possession, action: pet_bond, delta: 3 }

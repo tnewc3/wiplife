@@ -38,6 +38,7 @@ import {
 import { housingCost, livingCost, moveTo, ownsHome, refreshHousingCost, sellHome, settleHousehold, supportingParent } from '../housing';
 import { childCosts, childSupportDue } from '../family/costs';
 import { careCosts } from '../lives/care';
+import { possessionCosts } from '../possessions/costs';
 import { recordEarnings, retirementBenefit } from '../retirement';
 import { clampInt, weightedPick } from '../random';
 import { chance } from '../rng';
@@ -58,7 +59,7 @@ export function taxOn(gross: number, content: ContentBundle): number {
 }
 
 /** Debts are paid in this order when money is short: the home first, collections last. */
-const PAYMENT_ORDER: Record<Debt['kind'], number> = { mortgage: 0, student: 1, medical: 2, personal: 3, collections: 4 };
+const PAYMENT_ORDER: Record<Debt['kind'], number> = { mortgage: 0, auto: 1, student: 2, medical: 3, personal: 4, collections: 5 };
 
 /** Applies yearly stat pulls (fractions happen by chance). */
 /** A condition's yearly stat pulls at this share of their full size (its severity, softened by treatment). */
@@ -162,6 +163,8 @@ export function runEconomy(state: LifeState, content: ContentBundle): void {
   let kids = childCosts(state, content);
   const { paid: supportPaid, received: supportReceived } = childSupportDue(state, gross, content);
   const care = careCosts(state, content, gross);
+  // E5: what your pets, vehicles and vacation homes cost to keep, and their insurance.
+  const { upkeep, insurance } = possessionCosts(state, content);
   const before = f.savings + interest + gross + retirement + supportReceived - tax - garnished;
   let support = 0;
   if (state.housing.kind === 'with_parents' && before < housing + living + kids) {
@@ -176,7 +179,7 @@ export function runEconomy(state: LifeState, content: ContentBundle): void {
   }
 
   // 5. Minimum payments from what is left, then any shortfall is borrowed.
-  let available = before - housing - living - kids - care - supportPaid;
+  let available = before - housing - living - kids - care - supportPaid - upkeep - insurance;
   let debtPayments = garnished;
   let missedAny = false;
   const ordered = [...f.debts].sort((a, b) => PAYMENT_ORDER[a.kind] - PAYMENT_ORDER[b.kind]);
@@ -196,7 +199,7 @@ export function runEconomy(state: LifeState, content: ContentBundle): void {
       debt.missed = 0;
     }
   }
-  const net = gross + retirement + interest + supportReceived - tax - housing - living - kids - care - supportPaid - debtPayments;
+  const net = gross + retirement + interest + supportReceived - tax - housing - living - kids - care - supportPaid - upkeep - insurance - debtPayments;
   let borrowed = 0;
   if (available >= 0) {
     f.savings = wholeDollars(available);
@@ -251,6 +254,8 @@ export function runEconomy(state: LifeState, content: ContentBundle): void {
     care,
     supportPaid,
     supportReceived,
+    upkeep,
+    insurance,
     net,
   };
   refreshHousingCost(state, content);

@@ -3,6 +3,7 @@ name: "Auto repair"
 category: trade
 blurb: "Engines, diagnostics, and greasy hands that know their stuff."
 requires: {"education": {"credential": ["trade_license"], "field": ["auto_mechanic"]}}
+vehicle: 0.4
 levels:
   - { title: "lube technician", salary: 31000 }
   - { title: "mechanic", salary: 44000 }

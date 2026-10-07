@@ -3,6 +3,7 @@ name: "Welding"
 category: trade
 blurb: "Joining steel, one bright seam at a time."
 requires: {"education": {"credential": ["trade_license"], "field": ["welder"]}}
+vehicle: 0.5
 levels:
   - { title: "welder's helper", salary: 36000 }
   - { title: "welder", salary: 48000 }

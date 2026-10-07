@@ -1,0 +1,54 @@
+# Follow-up to the divorce papers (scheduled by divorce_papers): who keeps the pet.
+id: pet_after_divorce
+title: Who keeps {pet.name}
+text: >-
+  The furniture was easy. The photos were a negotiation. Then {person.name}
+  looks at {pet.name} on the floor between you, and nobody says anything for a
+  long moment.
+tone: serious
+category: pets
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { belongings: { pets: { gte: 1 } } }
+weight: { base: 10 }
+followUpOnly: true
+bind: [pet]
+cast:
+  person: { kind: ex, presence: anywhere }
+choices:
+  - id: keep
+    label: Keep {pet.name}
+    outcome:
+      text: >-
+        You say it as gently as you can. {person.name} nods, kneels down for a
+        long goodbye, and leaves without looking back.
+      effects:
+        - { type: relationship, role: person, affection: -6, trust: -3 }
+        - { type: possession, action: pet_bond, delta: 3 }
+        - { type: stat, key: happiness, delta: -1 }
+  - id: let_go
+    label: Let {person.name} take {pet.name}
+    outcome:
+      text: >-
+        {pet.name} goes out the door in {person.their} arms, and the home is
+        suddenly very quiet. You keep the leash by the door for a while.
+      effects:
+        - { type: history, text: 'After the divorce, {pet.name} went to live with {person.name}.', importance: 2 }
+        - { type: relationship, role: person, affection: 8, trust: 5 }
+        - { type: possession, action: pet_leaves }
+        - { type: stat, key: happiness, delta: -6 }
+        - { type: stat, key: stress, delta: 3 }
+  - id: share
+    label: Share {pet.them}, a few days each
+    visibleIf: { role: person, where: [city] }
+    outcome:
+      text: >-
+        A shared calendar, a travel bag and a lot of goodwill. {pet.name} will have
+        two homes and, for a while, no idea what is going on.
+      effects:
+        - { type: relationship, role: person, affection: 4, trust: 4 }
+        - { type: possession, action: pet_bond, delta: -4 }
+        - { type: stat, key: stress, delta: 2 }

@@ -17,6 +17,7 @@ import { ACTION_IDS, DISCOVERY_KINDS, type ActionId, type ContentBundle, type Di
 import { hasLatent } from '../../src/engine/discovery';
 import { canAffordGift } from '../../src/engine/interactions/links';
 import { isInteractionAvailable } from '../../src/engine/interactions/availability';
+import { closeInteraction, performInteraction } from '../../src/engine/interactions/perform';
 import { replayLife } from '../../src/engine/replay';
 import { isDeepStrictEqual } from 'node:util';
 import {
@@ -62,6 +63,7 @@ import {
 import { chooseWillActions, rollWillProfile } from './heirs';
 import { emptyPeopleReport, formatPeople, peopleTargets, PeopleWatcher, PipelineTimer, type PeopleReport } from './people';
 import { emptyMentalReport, formatMental, mentalTargets, MentalWatcher, type MentalReport } from './mental';
+import { choosePetInteractions, choosePossessionActions, emptyPossessionsReport, formatPossessions, possessionsTargets, PossessionsWatcher, rollPossessionProfile, type PossessionsReport } from './possessions';
 import { emptyWebReport, formatWeb, webTargets, WebWatcher, type WebReport } from './web';
 import { YEAR_PIPELINE } from '../../src/engine/pipeline';
 import { chooseFamilyActions, chooseParentingPlans, emptyFamilyReport, FamilyWatcher, formatFamily, familyTargets, rollFamilyProfile, type FamilyReport } from './family';
@@ -138,6 +140,8 @@ export interface SimulationReport {
   web: WebReport;
   /** M1: mental health, measured. */
   mental: MentalReport;
+  /** E5: pets, vehicles and homes, measured. */
+  possessions: PossessionsReport;
 }
 
 /** C1: the consistency pass, measured. */
@@ -769,6 +773,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
   const people = emptyPeopleReport();
   const web = emptyWebReport();
   const mental = emptyMentalReport(content);
+  const possessions = emptyPossessionsReport(content);
   const peopleTimer = new PipelineTimer(people);
   const timedSteps = peopleTimer.steps(YEAR_PIPELINE);
   // Found out: the follow-ups only this system schedules (affair_discovered also answers an older chain, so it counts only for an unfaithful life).
@@ -787,6 +792,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
       const failures = checkInvariants(life, content);
       invariantFailures += failures.length;
       violations += failures.filter((f) => f.startsWith('consistency:')).length;
+      possessions.invariantFailures += failures.filter((f) => /possession|\bpet\b|vehicle|car loan|vacation|renovation|insurance|upkeep/i.test(f)).length;
       for (const f of failures) if (failureMessages.length < maxMessages) failureMessages.push(`${seed} age ${life.character.age}: ${f}`);
     };
     const choices = createRng(`${seed}:choices`);
@@ -805,6 +811,10 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
     const peopleWatcher = new PeopleWatcher(people, content);
     const webWatcher = new WebWatcher(web, content);
     const mentalWatcher = new MentalWatcher(mental, content);
+    // E5: what this life owns.
+    const possessionsWatcher = new PossessionsWatcher(possessions, content);
+    const possessionRng = createRng(`${seed}:possessions`);
+    const possessionProfile = rollPossessionProfile(possessionRng);
     const profile = rollMoneyProfile(player);
     // E2b: whether this life writes a will, and who it names.
     const mentalRng = createRng(`${seed}:mental`);
@@ -920,6 +930,23 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
         life = takeLifeAction(life, actionId, params);
         money.actionsTaken[actionId]++;
       }
+      // ...and on what they own (E5): pets, vehicles, a vacation home, renovations...
+      for (const [actionId, params] of careless ? [] : choosePossessionActions(life, content, possessionRng, possessionProfile)) {
+        if (!isLifeActionAvailable(life, actionId, params, content)) continue;
+        life = takeLifeAction(life, actionId, params);
+        money.actionsTaken[actionId]++;
+        possessionsWatcher.acted(actionId, params);
+      }
+      // ...and time with their pets.
+      if (!careless) {
+        for (const [interactionId, petId] of choosePetInteractions(life, content, possessionRng)) {
+          if (life.phase !== 'yearStart' || life.pendingInteraction?.choice) break;
+          life = performInteraction(life, { interactionId, petId }, content);
+          life = closeInteraction(life, content);
+          possessionsWatcher.petInteraction();
+        }
+        check(life);
+      }
       // ...and on relationships.
       for (const [actionId, personId] of careless ? chooseCarelessActions(life, content, player) : chooseActions(life, content, player)) {
         if (!isActionAvailable(life, actionId, personId, content)) continue;
@@ -965,6 +992,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
       peopleWatcher.observe(yearBefore, life);
       webWatcher.observe(yearBefore, life);
       mentalWatcher.observe(yearBefore, life);
+      possessionsWatcher.observe(yearBefore, life, content);
       watch(life);
       options.onYear?.(life);
       const stage = perYear[life.character.lifeStage];
@@ -1004,6 +1032,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
     peopleWatcher.finish();
     webWatcher.finish(life);
     mentalWatcher.finish(life);
+    possessionsWatcher.finish(life);
     familyWatcher.finish(life, firesThisLife);
     // E1: who reached maximum affection, being found out, and a sample of lives rebuilt from their input logs.
     interactions.lives++;
@@ -1327,6 +1356,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
     people,
     web,
     mental,
+    possessions,
     consistency: {
       violations,
       happiness: spreadOf(lifetimeHappiness),
@@ -1460,6 +1490,7 @@ export function formatReport(report: SimulationReport, content: ContentBundle): 
   lines.push(...formatPeople(report.people, content, report.relationships.divorces), '  targets (src/content/balance/targets.yaml):', ...peopleTargets(report, content).map((r) => target(r.label, r.value, r.goal, r.met)));
   lines.push('', ...formatWeb(report.web, content), '  targets (src/content/balance/targets.yaml):', ...webTargets(report, content).map((r) => target(r.label, r.value, r.goal, r.met)));
   lines.push('', ...formatMental(report.mental, content, report.events), '  targets (src/content/balance/targets.yaml):', ...mentalTargets(report, content).map((r) => target(r.label, r.value, r.goal, r.met)));
+  lines.push(...formatPossessions(report.possessions, content, report.events), '  targets (src/content/balance/targets.yaml):', ...possessionsTargets(report, content).map((r) => target(r.label, r.value, r.goal, r.met)));
   lines.push(`Events fired: ${report.totalEventsFired}`);
   lines.push('  event'.padEnd(30) + 'fired'.padStart(8) + 'share'.padStart(8) + 'lives'.padStart(9));
   for (const e of [...report.events].sort((a, b) => b.fired - a.fired)) {

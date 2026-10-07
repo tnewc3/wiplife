@@ -1,0 +1,45 @@
+id: insurance_renewal
+title: The renewal letter
+text: >-
+  The renewal letter is thicker than usual. The accident is in there, listed
+  neatly, and so is what it has done to your standing with the insurer.
+tone: neutral
+category: vehicles
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { belongings: { vehicles: { gte: 1 }, insured: true, claims: { gte: 1 } } }
+weight: { base: 8 }
+cooldownYears: 4
+bind: [vehicle]
+choices:
+  - id: keep
+    label: Keep the coverage
+    outcome:
+      text: You sign, and tell yourself that this is what coverage is for. The next two years are going to be careful ones.
+      effects:
+        - { type: stat, key: discipline, delta: 1 }
+        - { type: stat, key: stress, delta: 1 }
+  - id: drop
+    label: Let the coverage lapse
+    outcome:
+      text: You cancel it. For the first time in a long time, nobody is guarding the {vehicle} but you.
+      effects:
+        - { type: possession, action: insure, insured: false }
+        - { type: stat, key: riskTaking, delta: 1 }
+  - id: shop
+    label: Call around for something better
+    check:
+      base: 45
+      stats: [{ key: smarts, weight: 0.3 }, { key: confidence, weight: 0.2 }]
+      success:
+        text: A very patient agent finds you the same cover on kinder terms. It takes most of the afternoon.
+        effects:
+          - { type: stat, key: confidence, delta: 1 }
+          - { type: stat, key: happiness, delta: 1 }
+      failure:
+        text: Every agent finds the accident in the same place. You come back to the first policy and sign.
+        effects:
+          - { type: stat, key: stress, delta: 2 }

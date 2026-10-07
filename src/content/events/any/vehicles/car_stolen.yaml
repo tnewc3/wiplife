@@ -1,0 +1,29 @@
+id: car_stolen
+title: Just a parking space
+text: >-
+  You walk to where you left the {vehicle} and find an ordinary patch of
+  pavement, a few crumbs of glass and the beginning of a very long day.
+tone: dark
+category: vehicles
+rarity: uncommon
+lifeStages: [teen, youngAdult, adult, senior]
+requires: { belongings: { vehicles: { gte: 1 } } }
+weight:
+  base: 2
+  modifiers:
+    - { if: { city: nyc }, x: 2 }
+    - { if: { city: chicago }, x: 1.6 }
+    - { if: { city: los_angeles }, x: 1.6 }
+    - { if: { belongings: { vehicleCondition: { lt: 40 } } }, x: 0.6 }
+cooldownYears: 15
+bind: [vehicle]
+autoOutcome:
+  text: >-
+    The police take the report, nod, and say the kind of things police say.
+    The {vehicle} turns up nowhere. You start looking up bus routes.
+  effects:
+    - { type: possession, action: vehicle_stolen }
+    - { type: flag, key: car_was_stolen, value: true }
+    - { type: history, text: 'Your {vehicle} was stolen.', importance: 2 }
+    - { type: stat, key: stress, delta: 8 }
+    - { type: stat, key: happiness, delta: -3 }

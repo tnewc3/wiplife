@@ -31,7 +31,7 @@ import { defaultCanCarry, rollCanCarry } from './family/carrying';
 import { InvalidInputError, parseCreateLifeOptions, type CreateLifeOptions } from './creation/input';
 import { successChance } from './events/checks';
 import { applyEffects } from './events/effects';
-import { textContext } from './events/text';
+import { keepPossessionText, textContext } from './events/text';
 import { familyHelp } from './costs';
 import { moodBaseline } from './interactions/mood';
 import { totalDebt } from './finance';
@@ -45,6 +45,7 @@ import { deadlyConditions } from './health';
 import type { Character, Id, LifePhase, LifeState } from './types';
 import { ensureStructure } from './web/structure';
 import { emptyWeb } from './web/ties';
+import { emptyPossessions } from './possessions/query';
 
 export type { CreateLifeOptions, CustomLifeInput } from './creation/input';
 
@@ -169,6 +170,7 @@ export function createLife(input: CreateLifeOptions, content: ContentBundle): Li
     lineage: { generation: 1, lineId: `life_${seed}`, familyName: character.name.last, reputation: 50, deeds: [] },
     news: [],
     web: emptyWeb(),
+    possessions: emptyPossessions(),
   };
   // M1: ADHD and neurodivergence are inherited in part: your parents and siblings (and grandparents) may have them, and you are likelier to if a parent does.
   for (const person of Object.values(life.people)) {
@@ -341,9 +343,15 @@ export function resolveChoice(state: LifeState, instanceId: Id, choiceId: Id, co
         const debt = totalDebt(draft);
         const housing = draft.housing.annualCost;
         const help = outcome.effects.reduce((sum, e) => sum + (e.type === 'cost' ? familyHelp(draft, e.item, content) : 0), 0);
-        applyEffects(draft, outcome.effects, { def, cast: instance.cast, rng: draft.rng, content, ...(instance.since !== undefined ? { since: instance.since } : {}) });
+        // E5: a possession the outcome removes is still named in its text.
+        const named = def.bind ? textContext(draft, instance.cast, content, instance.since) : undefined;
+        if (named) target.card = { title: renderText(def.title, named), text: renderText(def.text, named) };
+        applyEffects(draft, outcome.effects, { def, cast: instance.cast, rng: draft.rng, content, ...(instance.since !== undefined ? { since: instance.since } : {}), ...(named ? { named } : {}) });
         // Written after the effects, so it can tell what they did ({sentence}, new pronouns).
-        if (outcome.text) target.outcomeText = renderText(outcome.text, textContext(draft, instance.cast, content, instance.since));
+        if (outcome.text) {
+          const now = textContext(draft, instance.cast, content, instance.since);
+          target.outcomeText = renderText(outcome.text, named ? keepPossessionText(now, named) : now);
+        }
         // Every money change shows on the outcome card, with the new balance (C1).
         const change = draft.finances.savings - savings;
         const debtChange = totalDebt(draft) - debt;
@@ -360,6 +368,10 @@ export function resolveChoice(state: LifeState, instanceId: Id, choiceId: Id, co
       }
     }
 
+    // E5: an event about a pet, vehicle or home you no longer have (an earlier one this year took it) doesn't happen.
+    draft.pending = draft.pending.filter(
+      (p) => p.resolvedChoiceId !== undefined || Object.entries(p.cast).every(([role, id]) => !role.startsWith('@') || draft.possessions.items.some((q) => q.id === id)),
+    );
     // A management action's result stays on screen until finishAction.
     if (draft.phase === 'action') return;
     // A death, or being taken to prison, ends the year's remaining events.

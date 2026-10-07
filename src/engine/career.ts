@@ -14,6 +14,8 @@
  * the next year's ledger; the yearly review comes after a full year worked.
  */
 import { performanceDrag } from './mental/drag';
+import { jobRequiresVehicle, missingVehiclePenalty } from './possessions/jobs';
+import { hasVehicle } from './possessions/query';
 import type { CareerHistoryKey, ContentBundle, JobDef } from '../content/schemas';
 import { evaluate } from './conditions';
 import { curveAt } from './curve';
@@ -101,7 +103,7 @@ export function checkJobFits(state: LifeState, content: ContentBundle): void {
 }
 
 /** Why you can't apply for this job now, or null when you can. */
-export type JobApplyBlock = SearchBlock | 'unknown' | 'closed' | 'current' | 'requirements' | 'tried' | 'limit';
+export type JobApplyBlock = SearchBlock | 'unknown' | 'closed' | 'current' | 'requirements' | 'vehicle' | 'tried' | 'limit';
 
 export function jobApplyBlock(state: LifeState, jobId: Id, content: ContentBundle): JobApplyBlock | null {
   const def = activeJob(content, jobId);
@@ -112,6 +114,8 @@ export function jobApplyBlock(state: LifeState, jobId: Id, content: ContentBundl
   if (!c.openings.includes(jobId)) return 'closed';
   if (c.job?.jobId === jobId) return 'current';
   if (!meetsJobRequirements(state, def, content)) return 'requirements';
+  // E5: where the work needs a vehicle (the job's need, weighted by the city), you need one to be hired.
+  if (jobRequiresVehicle(jobId, state.character.cityId, content) && !hasVehicle(state)) return 'vehicle';
   if (c.applied.some((a) => a.jobId === jobId)) return 'tried';
   if (c.applied.length >= content.balance.careers.maxApplications) return 'limit';
   return null;
@@ -289,7 +293,14 @@ export function startJob(state: LifeState, jobId: Id, content: ContentBundle): v
 /** You can take this job now (an offer from an event): old enough, out of school, and you meet its requirements. */
 export function canTakeJob(state: LifeState, jobId: Id, content: ContentBundle): boolean {
   const def = activeJob(content, jobId);
-  return def !== undefined && searchBlock(state, content) === null && state.career.job?.jobId !== jobId && meetsJobRequirements(state, def, content);
+  return (
+    def !== undefined &&
+    searchBlock(state, content) === null &&
+    state.career.job?.jobId !== jobId &&
+    meetsJobRequirements(state, def, content) &&
+    // E5: a job that needs a vehicle here needs you to have one.
+    (!jobRequiresVehicle(jobId, state.character.cityId, content) || hasVehicle(state))
+  );
 }
 
 /**
@@ -306,6 +317,8 @@ export function performanceAim(state: LifeState, def: JobDef, content: ContentBu
   if (talentHelpsJob(state, def.id, content)) aim += content.balance.discovery.talent.performanceBonus;
   // M1: therapy takes time out of the week, and a severe condition you ignore wears on your work.
   aim += performanceDrag(state, content);
+  // E5: getting to work without a vehicle where the work needs one (or where one helps) costs you.
+  aim -= missingVehiclePenalty(state, content);
   return aim;
 }
 

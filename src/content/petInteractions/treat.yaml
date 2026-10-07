@@ -1,0 +1,43 @@
+id: treat
+name: Give a treat
+blurb: Never wrong, usually.
+profile: treat
+outcomes:
+  great:
+    text:
+      - "{pet.name} treats the snack like a gift from the heavens, and follows you around all evening."
+      - "One treat, one look of pure devotion."
+    bond: 4
+    effects:
+      - { type: cost, item: pet_treat }
+      - { type: stat, key: happiness, delta: 1 }
+  good:
+    text:
+      - "{pet.name} takes the treat, and you are, for the moment, the best person alive."
+      - "A small snack, gladly accepted."
+    bond: 3
+    effects:
+      - { type: cost, item: pet_treat }
+  neutral:
+    text:
+      - "{pet.name} eats it and moves on with life."
+      - "The treat is accepted. Nothing else is promised."
+    bond: 1
+    effects:
+      - { type: cost, item: pet_treat }
+  bad:
+    text:
+      - "{pet.name} sniffs the treat and walks away. You eat it yourself, out of spite."
+      - "Too many treats lately. {pet.name} is bored of them."
+    bond: 0
+    effects:
+      - { type: cost, item: pet_treat }
+  backfire:
+    text:
+      - "{pet.name} gets an upset stomach, and the evening gets messy."
+      - "A treat that doesn't agree with {pet.name}. You clean up, and you both feel bad about it."
+    bond: -2
+    health: -3
+    effects:
+      - { type: cost, item: pet_treat }
+      - { type: stat, key: stress, delta: 2 }

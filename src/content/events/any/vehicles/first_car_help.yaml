@@ -1,0 +1,41 @@
+id: first_car_help
+title: Your first set of keys
+text: >-
+  {parent.name} has been quiet at dinner, which usually means something is
+  coming. It turns out to be an envelope, and an offer: help with your first
+  car, if you want it.
+tone: light
+category: vehicles
+rarity: common
+lifeStages: [teen, youngAdult]
+requires:
+  all:
+    - { age: { gte: 16, lte: 25 } }
+    - { belongings: { vehicles: { lt: 1 } } }
+    - { not: { flag: got_help_with_first_car } }
+weight: { base: 8 }
+once: true
+cast:
+  parent: { kind: parent, presence: nearby }
+choices:
+  - id: accept
+    label: Take it, and say thank you properly
+    outcome:
+      text: >-
+        {parent.name} presses it into your hand and says not to make a speech.
+        You make a small one anyway.
+      effects:
+        - { type: money, delta: 3000 }
+        - { type: relationship, role: parent, affection: 6, trust: 3 }
+        - { type: flag, key: got_help_with_first_car, value: true }
+        - { type: stat, key: happiness, delta: 4 }
+  - id: decline
+    label: Say you want to do it on your own
+    outcome:
+      text: >-
+        {parent.name} nods, a little proud and a little hurt, and puts the
+        envelope away. You both know it will be there if you change your mind.
+      effects:
+        - { type: relationship, role: parent, affection: 2, trust: 4 }
+        - { type: stat, key: discipline, delta: 2 }
+        - { type: stat, key: confidence, delta: 1 }

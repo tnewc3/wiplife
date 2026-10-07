@@ -13,6 +13,7 @@ requires:
     - { age: { gte: 18 } }
     - { family: { minors: { gte: 1 } } }
     - { not: { flag: has_dog } }
+    - { belongings: { pets: { lt: 4 } } }
 weight: { base: 6 }
 cooldownYears: 5
 cast:
@@ -29,6 +30,7 @@ choices:
       effects:
         - { type: money, delta: -300 }
         - { type: flag, key: has_dog, value: true }
+        - { type: possession, action: pet_adopt, species: dog, source: shelter }
         - { type: parenting, role: kid, warmth: 5, strictness: -2 }
         - { type: relationship, role: kid, affection: 8, trust: 4, mood: 10 }
         - { type: stat, key: happiness, delta: 4 }

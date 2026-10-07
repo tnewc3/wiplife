@@ -1,0 +1,33 @@
+id: renovation_dust
+title: Mid-renovation
+text: >-
+  There is plaster dust on everything you own, and a contractor's radio playing
+  in the next room. You can see how good it is going to be, if you can only
+  hold out until the end of the job.
+tone: neutral
+category: property
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { belongings: { renovated: true } }
+    - { home: { kind: [owned] } }
+weight: { base: 6 }
+cooldownYears: 6
+choices:
+  - id: wait
+    label: Live in the mess and wait it out
+    outcome:
+      text: Three weeks of dust, a microwave in the hallway and every dinner eaten standing up. Then, one afternoon, it is done and it is gorgeous.
+      effects:
+        - { type: stat, key: stress, delta: 4 }
+        - { type: stat, key: happiness, delta: 3 }
+  - id: away
+    label: Stay somewhere else until it is finished
+    outcome:
+      text: A hotel room, a bag of clothes and a surprisingly good week. You come home to a place that smells like new wood.
+      effects:
+        - { type: cost, item: vacation_week }
+        - { type: stat, key: stress, delta: -2 }
+        - { type: stat, key: happiness, delta: 2 }

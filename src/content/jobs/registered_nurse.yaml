@@ -3,6 +3,7 @@ name: "Nursing"
 category: professional
 blurb: "Twelve-hour shifts, real emergencies, and patients who remember you."
 requires: {"education": {"credential": ["associate", "bachelor"], "field": ["nursing"]}}
+vehicle: 0.3
 levels:
   - { title: "staff nurse", salary: 62000 }
   - { title: "registered nurse", salary: 71000 }

@@ -1,0 +1,43 @@
+# Queued by the possessions step (registries/possessions.yaml accidents.major).
+id: black_ice
+title: Black ice
+text: >-
+  The road looks wet and is not. You feel the {vehicle} go light under you, and
+  for one long second you are only a passenger.
+tone: dark
+category: vehicles
+rarity: common
+lifeStages: [teen, youngAdult, adult, senior]
+requires: { belongings: { vehicles: { gte: 1 } } }
+weight: { base: 8 }
+followUpOnly: true
+bind: [vehicle]
+choices:
+  - id: steer
+    label: Steer into the skid
+    check:
+      base: 45
+      stats: [{ key: confidence, weight: 0.3 }, { key: discipline, weight: 0.2 }]
+      success:
+        text: Your hands remember something your head does not. The {vehicle} swings, catches, and stops sideways on the shoulder, bumper deep in the snowbank.
+        effects:
+          - { type: possession, action: vehicle_damage, severity: minor }
+          - { type: flag, key: had_car_accident, value: true }
+          - { type: stat, key: stress, delta: 5 }
+      failure:
+        text: The guardrail comes up much too fast. You walk away. The {vehicle} does not drive away.
+        effects:
+          - { type: possession, action: vehicle_damage, severity: major }
+          - { type: health, conditionId: broken_bone, severity: 20 }
+          - { type: mental, action: trauma, amount: 10 }
+          - { type: flag, key: had_car_accident, value: true }
+          - { type: stat, key: stress, delta: 8 }
+  - id: brake
+    label: Slam the brakes
+    outcome:
+      text: The wheels lock and the world spins once, slowly, and ends in a ditch. You are shaken but unhurt.
+      effects:
+        - { type: possession, action: vehicle_damage, severity: major }
+        - { type: mental, action: trauma, amount: 8 }
+        - { type: flag, key: had_car_accident, value: true }
+        - { type: stat, key: stress, delta: 6 }

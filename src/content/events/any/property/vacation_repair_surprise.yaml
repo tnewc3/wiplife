@@ -1,0 +1,31 @@
+id: vacation_repair_surprise
+title: A pipe, an offseason
+text: >-
+  The caretaker's message is short. A pipe in the place in {homeCity} froze and
+  burst while the house sat empty, and the floor has spent a month soaking it up.
+tone: neutral
+category: property
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { belongings: { vacationHomes: { gte: 1 } } }
+weight: { base: 5 }
+cooldownYears: 5
+bind: [home]
+choices:
+  - id: fix
+    label: Pay for a proper repair
+    outcome:
+      text: A plumber, a floor crew and a dehumidifier that runs for a week. Everything is done right, and it takes most of the season.
+      effects:
+        - { type: cost, item: home_repair }
+        - { type: stat, key: stress, delta: 2 }
+  - id: patch
+    label: Make the cheapest repair that will hold
+    outcome:
+      text: The patch holds, more or less. You know it will come up again, and so does the caretaker.
+      effects:
+        - { type: possession, action: home_damage, severity: minor }
+        - { type: stat, key: stress, delta: 3 }

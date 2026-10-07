@@ -1,0 +1,10 @@
+id: hatchback
+name: hatchback
+blurb: "A small, sensible car that costs little to keep."
+kind: car
+price: 20000
+upkeep: 1900
+service: 400
+insurance: 850
+risk: 1.0
+used: true

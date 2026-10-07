@@ -1,0 +1,46 @@
+id: vacation_first_summer
+title: The first long weekend
+text: >-
+  The place in {homeCity} still smells like paint and somebody else's life. You
+  are standing in the kitchen with a coffee, looking at a view that is yours.
+tone: light
+category: property
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { belongings: { vacationHomes: { gte: 1 } } }
+weight: { base: 12 }
+cooldownYears: 6
+bind: [home]
+cast:
+  guest: { support: true, optional: true, presence: anywhere }
+choices:
+  - id: alone
+    label: Spend the weekend by yourself
+    outcome:
+      text: You read a book on the porch, sleep with the windows open and do absolutely nothing worth mentioning. It is perfect.
+      effects:
+        - { type: stat, key: stress, delta: -8 }
+        - { type: stat, key: happiness, delta: 4 }
+  - id: invite
+    label: Invite {guest.name} to stay
+    visibleIf: { role: guest }
+    outcome:
+      text: >-
+        {guest.name} arrives with a cooler and no plan. By Sunday you have a
+        list of things to fix, a list of things to do next time and a feeling
+        you were meant to have somewhere like this.
+      effects:
+        - { type: memory, role: guest, tag: vacationed_with_you }
+        - { type: relationship, role: guest, affection: 7, trust: 4 }
+        - { type: stat, key: happiness, delta: 5 }
+        - { type: stat, key: stress, delta: -5 }
+  - id: fix
+    label: Spend the weekend fixing things
+    outcome:
+      text: A leaky tap, a sticking door and a shelf that was never level. You go home tired and oddly proud.
+      effects:
+        - { type: stat, key: discipline, delta: 1 }
+        - { type: stat, key: happiness, delta: 2 }

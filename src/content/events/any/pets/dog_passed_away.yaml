@@ -1,0 +1,49 @@
+# Queued by the possessions step when a dog dies (registries/possessions.yaml petDied).
+id: dog_passed_away
+title: Saying goodbye to {pet.name}
+text: >-
+  {pet.name} was your dog for a long time. The walks, the leash by the door, the
+  weight at the end of the bed: all of it is suddenly a question with no one to
+  answer.
+tone: serious
+category: pets
+rarity: common
+lifeStages: [child, teen, youngAdult, adult, senior]
+requires: { belongings: { species: [dog] } }
+weight: { base: 10 }
+followUpOnly: true
+bind: [pet]
+choices:
+  - id: stay
+    label: Stay with {pet.them} to the end
+    outcome:
+      text: You hold on the whole time. It is the hardest thing you have done in years, and you would do it again.
+      effects:
+        - { type: flag, key: has_dog, value: false }
+        - { type: flag, key: had_dog, value: true }
+        - { type: flag, key: lost_a_pet, value: true }
+        - { type: history, text: 'You said goodbye to {pet.name}.', importance: 2 }
+        - { type: stat, key: happiness, delta: -6 }
+        - { type: stat, key: kindness, delta: 2 }
+  - id: memorial
+    label: Bury {pet.them} somewhere that mattered
+    outcome:
+      text: A spot by the tree you both liked. You plant something there, and for a week you walk the long way around.
+      effects:
+        - { type: cost, item: pet_supplies }
+        - { type: flag, key: has_dog, value: false }
+        - { type: flag, key: had_dog, value: true }
+        - { type: flag, key: lost_a_pet, value: true }
+        - { type: history, text: 'You said goodbye to {pet.name}.', importance: 2 }
+        - { type: stat, key: happiness, delta: -5 }
+  - id: door
+    label: Say goodbye at the door
+    outcome:
+      text: You cannot watch. You are still not sure you did the right thing, but you know it was the only thing you could do.
+      effects:
+        - { type: flag, key: has_dog, value: false }
+        - { type: flag, key: had_dog, value: true }
+        - { type: flag, key: lost_a_pet, value: true }
+        - { type: history, text: 'You said goodbye to {pet.name}.', importance: 2 }
+        - { type: stat, key: happiness, delta: -5 }
+        - { type: stat, key: stress, delta: 4 }

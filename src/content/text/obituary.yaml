@@ -152,6 +152,12 @@ deeds:
   recruited_athlete: "{self.They} {self:was|were} a recruited athlete in {self.their} school days."
   studied_inside: "{self.They} took classes in prison and came out with more than {self.they} went in with."
   had_dog: "{self.They} loved a scruffy dog who followed {self.them} home one day."
+  # E5: pets, cars and homes.
+  lost_a_pet: "{self.They} loved a pet for years, and mourned it when it was gone."
+  pet_never_found: "{self.They} lost a pet who ran off one day, and never stopped looking for it in a crowd."
+  had_car_accident: "{self.They} survived a car accident, and drove more carefully ever after."
+  drove_drunk_crash: "{self.They} crashed a car after drinking, and had to live with what that meant."
+  car_was_stolen: "{self.They} had a car stolen, and told the story at dinner parties for decades."
 
 # Hard chapters, written frankly. prison: values {years} ("two years").
 # bankrupt: values {year}.
