@@ -299,6 +299,8 @@ export function sellHome(state: LifeState, content: ContentBundle, share?: numbe
     delete state.housing.homeValue;
     delete state.housing.mortgageDebtId;
     delete state.housing.partnerId;
+    // E5: the renovations went with the home.
+    delete state.housing.renovations;
     refreshHousingCost(state, content);
     return;
   }

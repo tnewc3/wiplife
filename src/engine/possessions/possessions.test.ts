@@ -7,6 +7,7 @@ import { performInteraction, closeInteraction } from '../interactions/perform';
 import { playYear } from '../autoplay';
 import { createRng } from '../rng';
 import { sendToCollections } from '../finance';
+import { sellHome } from '../housing';
 import { runEconomy } from '../systems/economy';
 import { lifeAtAge } from '../testFixtures';
 import type { LifeState } from '../types';
@@ -633,5 +634,17 @@ describe('what the save holds', () => {
     let life = withPossessions(rich(40), { pets: [{}], vehicles: [{}] });
     for (let i = 0; i < 6 && life.phase !== 'dead'; i++) life = playYear(life, content);
     expect(inventoryFailures(life)).toEqual([]);
+  });
+
+  it('a home sold while you are in prison takes its renovations with it', () => {
+    const life = produce(withPossessions(rich(), {}), (d) => {
+      d.housing = { kind: 'owned', cityId: d.character.cityId, annualCost: 0, homeValue: 400_000, since: d.currentYear - 5 };
+      renovate(d, 'main', content.renovations.kitchen!, content);
+      d.housing.kind = 'incarcerated';
+      d.legal.incarceratedUntil = d.currentYear + 3;
+    });
+    const sold = produce(life, (d) => void sellHome(d, content));
+    expect(sold.housing.renovations).toBeUndefined();
+    expect(inventoryFailures(sold).filter((f) => /renovations/.test(f))).toEqual([]);
   });
 });
