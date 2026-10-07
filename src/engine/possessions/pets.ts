@@ -146,7 +146,7 @@ export function petYear(state: LifeState, p: Possession, content: ContentBundle)
   const neglect = state.housing.kind === 'incarcerated' || !together ? b.bond.decay * def.attention : 0;
   pet.bond = clampInt(pet.bond + Math.round(b.bond.companionship - neglect), 0, 100);
 
-  if (pet.ill && p.condition <= b.health.failing && pet.lifespan > def.lifespan.min) pet.lifespan = Math.max(def.lifespan.min, pet.lifespan - b.health.lifespanLoss);
+  if (pet.ill && p.condition <= b.health.failing && pet.lifespan > def.lifespan.min) pet.lifespan = Math.max(def.lifespan.min, pet.startAge + 1, pet.lifespan - b.health.lifespanLoss);
   if (age >= pet.lifespan) {
     pet.died = state.currentYear;
     writeFromGroup(state, content.text.possessions.history.petDied, ['possessions', 'petDied', `pet:${p.defId}`], { values: { pet: p.name!, species: def.name } }, content);
