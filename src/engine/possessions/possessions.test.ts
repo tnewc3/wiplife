@@ -124,6 +124,23 @@ describe('pets', () => {
     expect(petOf(run(true).possessions.items[0]!).bond).toBeGreaterThanOrEqual(60);
   });
 
+  it('never shortens a pet’s lifespan to before the age it already was when it came to you', () => {
+    const base = withPossessions(rich(), { pets: [{ species: 'dog', health: 5 }] });
+    const next = produce(base, (d) => {
+      const p = d.possessions.items[0]!;
+      const pet = petOf(p);
+      pet.startAge = 14;
+      pet.lifespan = 15;
+      pet.ill = true;
+      p.acquired = d.currentYear;
+      d.currentYear += 0;
+      petYear(d, p, content);
+    });
+    const pet = petOf(next.possessions.items[0]!);
+    expect(pet.lifespan).toBeGreaterThan(pet.startAge);
+    expect(inventoryFailures(next).filter((f) => /lifespan/.test(f))).toEqual([]);
+  });
+
   it('changes how a pet takes an interaction by its personality: a playful pet loves a game a lazy one shrugs at', () => {
     const base = withPossessions(rich(), { pets: [{ bond: 50, health: 70 }] });
     const petId = base.possessions.items[0]!.id;
