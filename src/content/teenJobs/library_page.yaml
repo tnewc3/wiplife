@@ -1,0 +1,11 @@
+id: library_page
+name: library page
+blurb: Carts of returned books, a quiet that you learn to love and a section of the stacks that somehow always needs to be reshelved.
+minAge: 14
+hours: 8
+wage: 10
+employers: ["the Central Branch Library", "the Eastside Library", "the Mill Road Library"]
+effects:
+  smarts: { perYear: 0.3, limit: 85 }
+  stress: { perYear: -0.3, limit: 35 }
+needs: { discipline: 40 }

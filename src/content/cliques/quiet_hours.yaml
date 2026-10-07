@@ -1,0 +1,15 @@
+id: quiet_hours
+name: The Quiet Hours
+blurb: Readers, writers and night owls who trade books and late-night messages, and who would rather talk for two hours with one person than ten minutes with ten.
+weight: 1.1
+traits: { kindness: 6, sociability: -8, discipline: 4 }
+likes: { kindness: 0.4, sociability: -0.3, discipline: 0.2 }
+standing: 36
+effects:
+  smarts: { perYear: 0.8, limit: 88 }
+  stress: { perYear: -0.4, limit: 30 }
+grades: 0.15
+friends: 3
+money: 1
+passion: 3
+trouble: 0.3

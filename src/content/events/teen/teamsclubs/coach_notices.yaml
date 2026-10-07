@@ -1,0 +1,47 @@
+id: coach_notices
+title: Staying after
+text: >-
+  {mentor.name} asks you to stay a few minutes after practice. {mentor.They}
+  {mentor:has|have} been watching you for months, and says that what you
+  have isn't something that can be taught.
+tone: light
+category: teamsclubs
+rarity: uncommon
+lifeStages: [teen]
+requires:
+  all:
+    - { teen: { activity: true } }
+    - { teen: { passion: { gte: 30 } } }
+cast:
+  mentor: { kind: acquaintance, presence: city, createIfMissing: true, newChance: 1, ageOffset: { min: 10, max: 35 } }
+weight: { base: 6 }
+cooldownYears: 4
+choices:
+  - id: work
+    label: Ask what it would take
+    outcome:
+      text: >-
+        {mentor.name} writes down a plan in careful handwriting: extra hours, a
+        reading list, a regional camp over the summer. It looks like a lot, and
+        it looks like a door.
+      effects:
+        - { type: teen, action: passion, delta: 10 }
+        - { type: relationship, role: mentor, kind: acquaintance, affection: 12, trust: 8 }
+        - { type: talent }
+        - { type: stat, key: confidence, delta: 3 }
+  - id: doubt
+    label: Say you aren't sure you're that good
+    outcome:
+      text: >-
+        "Nobody is, at first," {mentor.name} says. "Return when you want to
+        find out." The offer is still there. So is the doubt.
+      effects:
+        - { type: relationship, role: mentor, affection: 5, trust: 3 }
+        - { type: teen, action: passion, delta: 3 }
+  - id: thanks
+    label: Thank {mentor.them}, but it's just something you do for fun
+    outcome:
+      text: '{mentor.name} smiles, and does not push. "That''s a good reason too."'
+      effects:
+        - { type: stat, key: happiness, delta: 2 }
+        - { type: relationship, role: mentor, affection: 3 }

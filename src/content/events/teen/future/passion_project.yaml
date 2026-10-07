@@ -1,0 +1,50 @@
+id: passion_project
+title: The thing you can't stop doing
+text: >-
+  It started as something to do after school. Now it fills your evenings,
+  your notebooks, and a good part of your thoughts. It isn't homework and
+  it isn't a job, and it's the first thing you've ever been this good at.
+tone: light
+category: future
+rarity: common
+lifeStages: [teen]
+requires:
+  all:
+    - { teen: { passion: { gte: 25 } } }
+    - { age: { gte: 13 } }
+weight: { base: 7 }
+cooldownYears: 3
+choices:
+  - id: all_in
+    label: Give it everything this year
+    outcome:
+      text: >-
+        You put in the hours, the grades slip a little, and the thing you make
+        gets better in ways you can see. There's a thrill in finally knowing
+        what you want to do.
+      effects:
+        - { type: teen, action: passion, delta: 10 }
+        - { type: education, action: grades, value: -0.1 }
+        - { type: stat, key: happiness, delta: 3 }
+  - id: balance
+    label: Fit it around school and everything else
+    outcome:
+      text: It's slower, and steadier. You make less in a year and more in four, and the people who love you are glad you're still around.
+      effects:
+        - { type: teen, action: passion, delta: 5 }
+        - { type: stat, key: discipline, delta: 1 }
+  - id: share
+    label: Show it to somebody for the first time
+    check:
+      base: 55
+      stats: [{ key: confidence, weight: 0.3 }]
+      success:
+        text: The reaction is better than you had feared, and the surprising kind of better. They ask questions, and want to see the next one.
+        effects:
+          - { type: teen, action: passion, delta: 6 }
+          - { type: stat, key: confidence, delta: 3 }
+      failure:
+        text: It's not what you hoped for. The person is kind about it, which is almost worse. You put it away for a while, and then take it back out.
+        effects:
+          - { type: teen, action: passion, delta: 2 }
+          - { type: stat, key: confidence, delta: -1 }

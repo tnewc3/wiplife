@@ -1,0 +1,38 @@
+id: record_sealed
+title: A clean slate
+text: >-
+  The letter is short and formal. Because of when it happened, and because you
+  were a minor, what you were charged with at the time has been sealed. It will
+  not show up for employers or landlords, and the court no longer counts it.
+tone: light
+category: justice
+rarity: common
+lifeStages: [youngAdult]
+requires:
+  all:
+    - { teen: { sealed: true } }
+    - { age: { lte: 19 } }
+weight: { base: 20 }
+once: true
+choices:
+  - id: relief
+    label: Read it again, slowly
+    outcome:
+      text: It's just a piece of paper. You keep it anyway, in the drawer where you keep the things you're not sure you're ready to throw away.
+      effects:
+        - { type: stat, key: stress, delta: -4 }
+        - { type: stat, key: happiness, delta: 3 }
+  - id: new_start
+    label: Take it as a reason to make a change
+    outcome:
+      text: You don't know exactly what to change, only that you are done being the person from the file. It is a start.
+      effects:
+        - { type: stat, key: discipline, delta: 2 }
+        - { type: stat, key: confidence, delta: 2 }
+  - id: tell_someone
+    label: Tell someone close to you what it means
+    outcome:
+      text: Saying it out loud makes it smaller, and the person you tell doesn't flinch. It is not a secret anymore, and it is also not a weight.
+      effects:
+        - { type: stat, key: stress, delta: -2 }
+        - { type: stat, key: happiness, delta: 2 }

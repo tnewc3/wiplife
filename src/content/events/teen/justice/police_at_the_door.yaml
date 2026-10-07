@@ -1,0 +1,56 @@
+id: police_at_the_door
+title: A knock at the door
+text: >-
+  The knock comes just after dinner. An officer is standing on the porch, and
+  {parent.name} is standing next to you. The words "juvenile" and "your
+  name" come out of the officer's mouth in the same sentence.
+tone: dark
+category: justice
+rarity: common
+lifeStages: [teen]
+followUpOnly: true
+weight: { base: 1 }
+requires:
+  all:
+    - { record: { within: 2 } }
+    - { age: { lt: 18 } }
+cast:
+  parent: { kind: parent, presence: household }
+choices:
+  - id: truth
+    label: Tell them what happened, all of it
+    outcome:
+      text: >-
+        It's the worst conversation of your life, and the shortest. When
+        the officer leaves, {parent.name} sits down at the table and says nothing for a
+        long time. Then {parent.they} {parent:says|say}, "Okay. What happens next?"
+      effects:
+        - { type: relationship, role: parent, trust: 4, affection: 2 }
+        - { type: stat, key: stress, delta: 3 }
+  - id: minimize
+    label: Say it wasn't as bad as it sounds
+    check:
+      base: 30
+      stats: [{ role: parent, key: trust, weight: 0.3 }, { key: confidence, weight: 0.1 }]
+      success:
+        text: '{parent.name} listens, and decides to believe you. It takes something from you, and you know it.'
+        effects:
+          - { type: relationship, role: parent, trust: -1 }
+          - { type: stat, key: stress, delta: 2 }
+      failure:
+        text: >-
+          {parent.name} already knows what happened, from two other people,
+          and the account you give does not match either of them.
+        effects:
+          - { type: relationship, role: parent, trust: -7, affection: -3 }
+          - { type: teen, action: ground }
+  - id: blame
+    label: Blame the people you were with
+    outcome:
+      text: >-
+        It's true, partly, and the officer writes it down. Your friends'
+        parents will get a phone call tonight, and you'll hear about it for the rest of the year.
+      effects:
+        - { type: relationship, role: parent, trust: -2 }
+        - { type: teen, action: standing, delta: -3 }
+        - { type: stat, key: kindness, delta: -2 }

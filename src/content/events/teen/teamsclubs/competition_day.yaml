@@ -1,0 +1,56 @@
+id: competition_day
+title: Regional day
+text: >-
+  The bus leaves at five in the morning, and everyone is in various stages of
+  asleep. The regional competition is across two counties and the whole of
+  your season has been leading up to it.
+tone: neutral
+category: teamsclubs
+rarity: common
+lifeStages: [teen]
+requires:
+  all:
+    - { teen: { activity: [robotics_club, debate_team, drama_club, art_club, marching_band] } }
+weight: { base: 7 }
+cooldownYears: 2
+choices:
+  - id: prepare
+    label: Run the routine one more time on the bus
+    check:
+      base: 50
+      stats: [{ key: discipline, weight: 0.3 }, { key: smarts, weight: 0.2 }]
+      success:
+        text: It goes better than any rehearsal. When your name is called for the second round, you almost don't hear it.
+        effects:
+          - { type: stat, key: confidence, delta: 3 }
+          - { type: stat, key: happiness, delta: 3 }
+          - { type: teen, action: passion, delta: 5 }
+          - { type: teen, action: standing, delta: 3 }
+      failure:
+        text: Something goes wrong, small and then large. You do not place, and the ride home is quiet and long.
+        effects:
+          - { type: stat, key: happiness, delta: -2 }
+          - { type: stat, key: stress, delta: 3 }
+          - { type: teen, action: passion, delta: 2 }
+  - id: wing_it
+    label: Trust your instincts and wing it
+    check:
+      base: 30
+      stats: [{ key: confidence, weight: 0.35 }, { key: luck, weight: 0.2 }]
+      success:
+        text: Improvising turns out to be the thing you do best. It is risky and it works, and the judges write it down.
+        effects:
+          - { type: stat, key: confidence, delta: 3 }
+          - { type: teen, action: passion, delta: 4 }
+      failure:
+        text: Winging it works in practice and not under the lights. You learn the difference the hard way.
+        effects:
+          - { type: stat, key: stress, delta: 3 }
+          - { type: stat, key: happiness, delta: -2 }
+  - id: cheer
+    label: Spend the day cheering for everybody else
+    outcome:
+      text: It is a good day, and you're an excellent audience. You come away with six new friends and a hoarse voice.
+      effects:
+        - { type: stat, key: sociability, delta: 2 }
+        - { type: stat, key: happiness, delta: 2 }

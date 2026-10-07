@@ -8,7 +8,7 @@ category: mischief
 rarity: common
 lifeStages: [teen]
 weight:
-  base: 7
+  base: 5
   modifiers:
     - { if: { trait: riskTaking, gt: 60 }, x: 1.5 }
 cooldownYears: 3

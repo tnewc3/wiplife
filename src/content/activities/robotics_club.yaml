@@ -1,0 +1,14 @@
+id: robotics_club
+name: The robotics club
+kind: club
+blurb: A cage of aluminum parts, a regional competition and a robot that works perfectly until it is on the table.
+minAge: 13
+cost: 100
+effects:
+  smarts: { perYear: 0.8, limit: 88 }
+  stress: { perYear: 0.3, limit: 60 }
+grades: 0.06
+friends: 3
+talent: mechanics
+passion: 6
+injury: 0

@@ -11,7 +11,7 @@ requires: { role: parent, age: { gte: 78 } }
 weight:
   base: 4
   modifiers:
-    - { if: { flag: can_drive }, x: 1.5 }
+    - { if: { teen: { license: [licensed] } }, x: 1.5 }
 once: true
 cast:
   parent: { kind: parent, presence: anywhere }

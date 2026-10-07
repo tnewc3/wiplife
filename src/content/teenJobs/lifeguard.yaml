@@ -1,0 +1,10 @@
+id: lifeguard
+name: lifeguard
+blurb: A tall chair, a whistle and long hours of watching the water for the one moment that matters.
+minAge: 15
+hours: 16
+wage: 14
+employers: ["Riverside Public Pool", "Lakeview Aquatic Center", "the Harborside Club pool"]
+effects:
+  fitness: { perYear: 1, limit: 85 }
+needs: { fitness: 45 }

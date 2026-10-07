@@ -1,0 +1,56 @@
+id: argument_about_rules
+title: Not a little kid
+text: >-
+  It begins with something small, a question about where you're going, and
+  within a minute you and {parent.name} are both standing up. You say you're
+  not a little kid. {parent.They} say that as long as you live here, there are rules.
+tone: serious
+category: houserules
+rarity: common
+lifeStages: [teen]
+requires:
+  all:
+    - { teen: { rules: { gte: 1 } } }
+    - { teen: { rules: { gte: 2 } } }
+    - { age: { gte: 14 } }
+cast:
+  parent: { kind: parent, presence: household }
+weight: { base: 6 }
+cooldownYears: 2
+choices:
+  - id: hold
+    label: Hold your ground
+    outcome:
+      text: >-
+        Neither of you wins. You both end up in separate rooms, listening to
+        the quiet, and in the morning nobody says a thing about it at breakfast.
+      effects:
+        - { type: relationship, role: parent, affection: -3, trust: -1 }
+        - { type: stat, key: confidence, delta: 2 }
+  - id: cool
+    label: Stop, breathe, and try again
+    check:
+      base: 45
+      stats: [{ key: discipline, weight: 0.25 }, { role: parent, key: affection, weight: 0.2 }]
+      success:
+        text: >-
+          "I'm not trying to be the enemy," {parent.name} says, quieter. Neither
+          are you. It is almost the best conversation you have had all year.
+        effects:
+          - { type: relationship, role: parent, affection: 4, trust: 3 }
+          - { type: stat, key: stress, delta: -2 }
+      failure:
+        text: Your second try is no better than the first. This time there are tears, and they're not only yours.
+        effects:
+          - { type: relationship, role: parent, affection: -4 }
+          - { type: stat, key: stress, delta: 3 }
+  - id: say_it
+    label: Say the thing you've been holding in
+    outcome:
+      text: >-
+        It is a lot, and it is true, and it can't be unsaid. {parent.name} sits
+        down slowly, and the silence has a different shape than before.
+      effects:
+        - { type: relationship, role: parent, affection: 2, trust: 2 }
+        - { type: stat, key: stress, delta: -1 }
+        - { type: stat, key: confidence, delta: 1 }

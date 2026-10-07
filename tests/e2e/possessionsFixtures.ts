@@ -12,6 +12,7 @@ import { addPet } from '../../src/engine/possessions/pets';
 import { nextPossessionId } from '../../src/engine/possessions/query';
 import { refreshVehicleValue } from '../../src/engine/possessions/vehicles';
 import { lifeStageForAge } from '../../src/engine/systems/aging';
+import { startingTeen } from '../../src/engine/teen/query';
 import type { LifeState } from '../../src/engine/types';
 
 function pack(): ContentBundle {
@@ -35,6 +36,7 @@ export function belongingsLife(options: BelongingsLife): LifeState {
     d.currentYear = d.birthYear + age;
     d.character.age = age;
     d.character.lifeStage = lifeStageForAge(age, content);
+    d.teen = startingTeen(age, d.currentYear, content);
     for (let i = 0; i < age; i++) d.inputLog.push({ year: d.birthYear + i, kind: 'ageUp', payload: {} });
     for (const person of Object.values(d.people)) {
       if (d.currentYear - person.birthYear >= content.balance.mortality.maxAge) {

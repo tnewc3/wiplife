@@ -1,0 +1,50 @@
+id: caught_chores
+title: The sink
+text: >-
+  The sink has been full for three days. {parent.name} counts the dishes out
+  loud, one by one, and gets to the end of the pile before saying your name.
+tone: light
+category: houserules
+rarity: common
+lifeStages: [teen]
+followUpOnly: true
+weight: { base: 1 }
+requires:
+  all:
+    - { teen: { rules: { gte: 1 } } }
+    - { teen: { caught: [chores] } }
+cast:
+  parent: { kind: parent, presence: household }
+choices:
+  - id: do_it_now
+    label: Do every single one, right now
+    outcome:
+      text: >-
+        It takes forty minutes. {parent.name} dries, which is not the deal but
+        is somehow the point, and tells you about the year {parent.they} {parent:was|were} your age.
+      effects:
+        - { type: relationship, role: parent, affection: 3, trust: 2 }
+        - { type: stat, key: discipline, delta: 1 }
+  - id: trade
+    label: Offer to trade chores for a later curfew
+    check:
+      base: 30
+      stats: [{ role: parent, key: affection, weight: 0.25 }, { key: smarts, weight: 0.15 }]
+      success:
+        text: >-
+          {parent.name} stares at you. "That's actually not a bad idea," {parent.they}
+          {parent:says|say}, and shakes your hand like it is a contract.
+        effects:
+          - { type: teen, action: loosen, rule: curfew }
+          - { type: relationship, role: parent, trust: 3 }
+      failure:
+        text: '"Nice try," {parent.name} says. "Dishes first. Negotiations after."'
+        effects:
+          - { type: relationship, role: parent, trust: -1 }
+  - id: later
+    label: Promise you'll get to it tomorrow
+    outcome:
+      text: Tomorrow turns out to look a lot like today, and the dishes are still there.
+      effects:
+        - { type: relationship, role: parent, affection: -2 }
+        - { type: stat, key: stress, delta: 1 }

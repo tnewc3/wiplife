@@ -1,0 +1,55 @@
+id: kitchen_table_future
+title: What comes next
+text: >-
+  {parent.name} puts down the mail and asks the question you've been avoiding:
+  what you want to do after school. It's not a lecture, just a question, and
+  there's a long pause while you try to find a good answer.
+tone: neutral
+category: future
+rarity: common
+lifeStages: [teen]
+requires:
+  all:
+    - { age: { gte: 15 } }
+    - { education: { program: [high] } }
+cast:
+  parent: { kind: parent, presence: household }
+weight: { base: 8 }
+once: true
+choices:
+  - id: college
+    label: College, probably
+    outcome:
+      text: >-
+        {parent.name} nods, and you can see {parent.them} doing the math in {parent.their} head. By the end of the
+        conversation you have a list of schools and a deadline.
+      effects:
+        - { type: flag, key: plans_college, value: true }
+        - { type: relationship, role: parent, trust: 2 }
+  - id: trade
+    label: A trade
+    outcome:
+      text: >-
+        Something changes in {parent.name}'s face, a loosening. "Good work, and
+        good people," {parent.they} {parent:says|say}. You go over what the program involves.
+      effects:
+        - { type: flag, key: plans_trade, value: true }
+        - { type: relationship, role: parent, trust: 2 }
+  - id: work
+    label: Straight to work
+    outcome:
+      text: >-
+        It's not what {parent.name} had in mind, and {parent.they} {parent:says|say}
+        so, gently. You agree to talk it over again after your next report card.
+      effects:
+        - { type: flag, key: plans_work, value: true }
+        - { type: stat, key: ambition, delta: 1 }
+  - id: unsure
+    label: Say you honestly don't know
+    outcome:
+      text: >-
+        It's the most honest thing you've said all month. {parent.name} says that's fine,
+        and means it, and that for now, not knowing is a plan.
+      effects:
+        - { type: relationship, role: parent, affection: 3, trust: 2 }
+        - { type: stat, key: stress, delta: -2 }

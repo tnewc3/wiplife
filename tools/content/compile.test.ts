@@ -1290,3 +1290,92 @@ describe('pets, vehicles and homes (E5)', () => {
     expect(await expectErrors()).toContain('carDependence');
   });
 });
+
+describe('the teen years (T1)', () => {
+  it('accepts the real content: eight crowds, nine house rules, nine jobs, eight teams and clubs, about fifty-five events, and no warnings', { timeout: 90_000 }, async () => {
+    const result = await compile();
+    if (!result.ok) throw new Error(formatErrors(result.errors));
+    expect(Object.keys(result.bundle.cliques)).toHaveLength(8);
+    expect(Object.keys(result.bundle.houseRules)).toHaveLength(9);
+    expect(Object.keys(result.bundle.teenJobs)).toHaveLength(9);
+    expect(Object.keys(result.bundle.activities)).toHaveLength(8);
+    const categories = ['crowds', 'houserules', 'driving', 'teenwork', 'teamsclubs', 'future'];
+    const events = Object.values(result.bundle.events).filter((e) => !e.retired && categories.includes(e.category));
+    expect(events.length).toBeGreaterThanOrEqual(35);
+    expect(result.warnings).toEqual([]);
+  });
+
+  it('keeps the events the teen step queues followUpOnly, and casting only what it passes in', { timeout: 90_000 }, async () => {
+    const real = await readFile(path.join(dir, 'events/teen/houserules/caught_curfew.yaml'), 'utf8');
+    await write('events/teen/houserules/caught_curfew.yaml', real.replace('followUpOnly: true\n', ''));
+    expect(await expectErrors()).toContain('so it must be followUpOnly');
+    await write('events/teen/houserules/caught_curfew.yaml', real.replace('cast:\n  parent: { kind: parent, presence: household }\n', 'cast:\n  parent: { kind: parent, presence: household }\n  friend: { kind: friend, presence: city }\n'));
+    expect(await expectErrors()).toContain('so its cast can only be: parent');
+    await write('events/teen/houserules/caught_curfew.yaml', real.replace('    - { teen: { caught: [curfew] } }\n', ''));
+    expect(await expectErrors()).toContain('must require { teen: { caught');
+    const clash = await readFile(path.join(dir, 'events/teen/crowds/rival_prank.yaml'), 'utf8');
+    await write('events/teen/houserules/caught_curfew.yaml', real);
+    await write('events/teen/crowds/rival_prank.yaml', clash.replace('  member: { kind: classmate, crowd: yours, presence: city }\n', ''));
+    expect(await expectErrors()).toContain('must cast "member"');
+  });
+
+  it('allows the crowd, rule, job and school values only where an event requires what they name', { timeout: 90_000 }, async () => {
+    const real = await readFile(path.join(dir, 'events/teen/crowds/crowd_notices_you.yaml'), 'utf8');
+    await write('events/teen/crowds/crowd_notices_you.yaml', real.replace('    - { teen: { invited: true } }\n', ''));
+    expect(await expectErrors()).toContain('uses {clique} without requiring a crowd');
+    await write('events/teen/crowds/crowd_notices_you.yaml', real.replace('{clique} catches', '{clique} and {rule} and {job} catch'));
+    const messages = await expectErrors();
+    expect(messages).toContain('uses {rule} without requiring teen: caught');
+    expect(messages).toContain('uses {job} without requiring a teen job');
+  });
+
+  it('refuses a crowd, team, job or rule that is not real, and a house rule whose id is not its domain', { timeout: 90_000 }, async () => {
+    const real = await readFile(path.join(dir, 'events/teen/crowds/rival_prank.yaml'), 'utf8');
+    await write('events/teen/crowds/rival_prank.yaml', real.replace('    - { teen: { clash: true } }\n', '    - { teen: { clash: true, crowd: [nonexistent_crowd] } }\n'));
+    expect(await expectErrors()).toContain('unknown crowd "nonexistent_crowd"');
+    const job = await readFile(path.join(dir, 'events/teen/teenwork/who_is_hiring.yaml'), 'utf8');
+    await write('events/teen/crowds/rival_prank.yaml', real);
+    await write('events/teen/teenwork/who_is_hiring.yaml', job.replace('jobId: dog_walker', 'jobId: astronaut'));
+    expect(await expectErrors()).toContain('unknown teen job "astronaut"');
+    await write('events/teen/teenwork/who_is_hiring.yaml', job);
+    const rule = await readFile(path.join(dir, 'houseRules/curfew.yaml'), 'utf8');
+    await write('houseRules/curfew.yaml', rule.replace('domain: curfew', 'domain: chores'));
+    expect(await expectErrors()).toContain("a house rule's id must be its domain");
+  });
+
+  it('checks the teen balance: ages, license ages, rule levels and enough crowds for a school', { timeout: 90_000 }, async () => {
+    const real = await readFile(path.join(dir, 'balance/teen.yaml'), 'utf8');
+    await write('balance/teen.yaml', real.replace('permitAge: 15', 'permitAge: 17').replace('licenseAge: 16', 'licenseAge: 16'));
+    expect(await expectErrors()).toContain('permitAge is greater than licenseAge');
+    await write('balance/teen.yaml', real.replace('cliques: { min: 4, max: 5 }', 'cliques: { min: 4, max: 9 }'));
+    expect(await expectErrors()).toContain('is more than the 8 crowds');
+    await write('balance/teen.yaml', real.replace('levelAt: [53, 63]', 'levelAt: [63, 53]'));
+    expect(await expectErrors()).toContain('the first number must be below the second');
+    await write('balance/teen.yaml', real.replace('none: { grades: 0,', 'none: { grades: 0.3,'));
+    expect(await expectErrors()).toContain('a year with no focus gives nothing');
+  });
+
+  it('never allows romance or sexual wording, a romance event or a romantic role where a teenager can meet it', { timeout: 90_000 }, async () => {
+    const real = await readFile(path.join(dir, 'events/teen/crowds/crowd_inside_joke.yaml'), 'utf8');
+    await write('events/teen/crowds/crowd_inside_joke.yaml', real.replace('one word from anyone', 'one flirty word from anyone'));
+    expect(await expectErrors()).toContain('there is never romance or sexual content involving anyone under 18');
+    await write('events/teen/crowds/crowd_inside_joke.yaml', real.replace('cast:\n  member: { kind: classmate, crowd: yours, presence: city }', 'cast:\n  member: { kind: classmate, crowd: yours, presence: city }\n  admirer: { kind: acquaintance, admirer: true, presence: city, createIfMissing: true }'));
+    expect(await expectErrors()).toContain('is an admirer');
+    await write('events/teen/crowds/crowd_inside_joke.yaml', real.replace('{ type: relationship, role: member, affection: 4 }', '{ type: relationship, role: member, kind: partner }'));
+    expect(await expectErrors()).toContain('makes someone your partner');
+    await write('events/teen/crowds/crowd_inside_joke.yaml', real);
+    const cl = await readFile(path.join(dir, 'cliques/afterburn.yaml'), 'utf8');
+    await write('cliques/afterburn.yaml', cl.replace('Thrill-seekers', 'Crush-hungry thrill-seekers'));
+    expect(await expectErrors()).toContain('uses romantic or sexual wording');
+    const rule = await readFile(path.join(dir, 'houseRules/screens.yaml'), 'utf8');
+    await write('cliques/afterburn.yaml', cl);
+    await write('houseRules/screens.yaml', rule.replace('Phones off at the table', 'No dating apps at the table'));
+    expect(await expectErrors()).toContain('uses romantic or sexual wording');
+  });
+
+  it('keeps a crowd from reading as a stand-in for any real group', { timeout: 90_000 }, async () => {
+    const cl = await readFile(path.join(dir, 'cliques/quiet_hours.yaml'), 'utf8');
+    await write('cliques/quiet_hours.yaml', cl.replace('Readers, writers and night owls', 'Nerds, geeks and night owls'));
+    expect(await expectErrors()).toContain('says nothing about race, religion, background or money');
+  });
+});

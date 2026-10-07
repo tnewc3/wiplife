@@ -1,0 +1,48 @@
+id: big_game
+title: The big game
+text: >-
+  It is the last game of the season, tied with two minutes left, and every
+  seat in the stands is full. Somewhere in the bleachers someone has a sign
+  with your name on it, misspelled.
+tone: serious
+category: teamsclubs
+rarity: common
+lifeStages: [teen]
+requires:
+  all:
+    - { teen: { activity: [soccer_team, track_team, basketball_team] } }
+weight: { base: 7 }
+cooldownYears: 2
+choices:
+  - id: give_all
+    label: Give it everything you've got
+    check:
+      base: 50
+      stats: [{ key: fitness, weight: 0.4 }, { key: confidence, weight: 0.2 }]
+      success:
+        text: You hear nothing but your own breath and the thump of the ball, and then you hear everything. You win, and you remember it for the rest of your life.
+        effects:
+          - { type: stat, key: happiness, delta: 5 }
+          - { type: stat, key: confidence, delta: 3 }
+          - { type: teen, action: standing, delta: 4 }
+          - { type: teen, action: passion, delta: 4 }
+      failure:
+        text: You go down hard on a play you shouldn't have tried, and the final whistle goes while you're getting looked at by a trainer. Your arm is not right.
+        effects:
+          - { type: health, conditionId: broken_bone, severity: 40 }
+          - { type: stat, key: happiness, delta: -2 }
+          - { type: teen, action: passion, delta: 1 }
+  - id: play_smart
+    label: Play it safe and pass
+    outcome:
+      text: You make the pass, someone else makes the shot, and the team wins. Your name is nowhere in the write-up, which is fine.
+      effects:
+        - { type: stat, key: happiness, delta: 3 }
+        - { type: stat, key: discipline, delta: 1 }
+  - id: rest
+    label: Ask to sit out because something doesn't feel right
+    outcome:
+      text: The coach looks at you for a long moment, then nods. You watch the last two minutes with your heart in your throat. You were right.
+      effects:
+        - { type: stat, key: health, delta: 1 }
+        - { type: stat, key: stress, delta: 2 }

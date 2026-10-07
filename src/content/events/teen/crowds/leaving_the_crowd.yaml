@@ -1,0 +1,44 @@
+id: leaving_the_crowd
+title: The odd one out
+text: >-
+  It's been creeping up on you for a while: the jokes you don't get, the
+  plans you hear about afterward. At {school}, {clique} used to feel like a
+  place you belonged. Lately it feels like a place you are visiting.
+tone: serious
+category: crowds
+rarity: uncommon
+lifeStages: [teen]
+requires:
+  all:
+    - { education: { program: [middle, high] } }
+    - { teen: { clique: true } }
+    - { teen: { standing: { lt: 55 } } }
+weight: { base: 5 }
+cooldownYears: 3
+choices:
+  - id: say_so
+    label: Tell someone in the crowd how it feels
+    outcome:
+      text: >-
+        It is awkward to say out loud, and most of them are kinder than you
+        expected. Two of them admit they have felt it too.
+      effects:
+        - { type: teen, action: rank, delta: 5 }
+        - { type: stat, key: stress, delta: -3 }
+  - id: leave
+    label: Drift away and find your own people
+    outcome:
+      text: >-
+        It's quiet, no scene and no announcement. The first week is the
+        hardest. The second week there is space to breathe.
+      effects:
+        - { type: teen, action: leave }
+        - { type: stat, key: stress, delta: -1 }
+        - { type: stat, key: happiness, delta: -1 }
+  - id: stay
+    label: Stay, and keep trying
+    outcome:
+      text: You put in the effort, show up to the things, laugh at the jokes. It's work, and some days it works.
+      effects:
+        - { type: stat, key: discipline, delta: 1 }
+        - { type: stat, key: stress, delta: 2 }

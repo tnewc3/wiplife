@@ -90,6 +90,8 @@ export function rootEvents(content: ContentBundle): Set<string> {
     // E5: the accidents and the death of a pet the possessions step queues.
     ...Object.values(r.possessions.accidents),
     r.possessions.petDied,
+    // T1: what the teen step queues (a catch at home, an invitation, a clash, a juvenile case).
+    ...Object.values(r.teen.triggers),
   ];
   for (const list of lists) for (const id of list.events) roots.add(id);
   return roots;

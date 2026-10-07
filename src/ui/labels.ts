@@ -17,7 +17,13 @@ import type {
   TieKindId,
   TieStatusId,
 } from '../content/schemas';
-import type { PetPersonalityId } from '../content/schemas';
+import type { PetPersonalityId, TeenFocusId } from '../content/schemas';
+import type { ActivityBlock } from '../engine/teen/activities';
+import type { JoinBlock } from '../engine/teen/cliques';
+import type { FocusBlock } from '../engine/teen/focus';
+import type { JobBlock } from '../engine/teen/jobs';
+import type { LicenseBlock } from '../engine/teen/license';
+import type { NegotiateBlock } from '../engine/teen/rules';
 import type { JobApplyBlock, SearchBlock } from '../engine/career';
 import type { PetBlock } from '../engine/possessions/pets';
 import type { RenovationBlock, VacationBlock } from '../engine/possessions/homes';
@@ -981,6 +987,7 @@ export const VEHICLE_BLOCK_LABELS: Record<VehicleBlock | LoanBlock, string> = {
   savings: 'You don’t have enough saved.',
   unknown: 'Not available.',
   used: 'This one isn’t sold used.',
+  license: 'You need your driver’s license first (More → Teen years).',
   independent: 'You have to be old enough to borrow.',
   bankruptcy: 'Lenders won’t say yes so soon after a bankruptcy.',
   income: 'The payments would be more than a lender will allow for your income.',
@@ -1009,3 +1016,96 @@ export const INSURANCE_WORDS = {
   on: 'Insured',
   off: 'Not insured',
 } as const;
+
+// ── T1: the teen years ─────────────────────────────────────────────────────
+
+/** The four places a year's energy can go. */
+export const FOCUS_LABELS: Record<TeenFocusId, { label: string; blurb: string }> = {
+  school: { label: 'School', blurb: 'Better grades; less time for friends and work.' },
+  friends: { label: 'Friends', blurb: 'Closer friendships; grades slip a little.' },
+  work: { label: 'Work', blurb: 'More money from your job or odd jobs; grades and friends slip.' },
+  passion: { label: 'A passion', blurb: 'Time for the thing you love; it may bring a talent to light.' },
+};
+
+export const JOIN_BLOCK_LABELS: Record<JoinBlock, string> = {
+  age: 'Crowds are for the teen years.',
+  school: 'You’re not in school.',
+  unknown: 'Not available.',
+  member: 'You’re already in this crowd.',
+  turnedAway: 'They turned you away (or you left), and it’s too soon to try again.',
+  away: 'You’re away.',
+};
+
+export const JOB_BLOCK_LABELS: Record<JobBlock, string> = {
+  age: 'You’re too young for this job.',
+  unknown: 'Not available.',
+  have: 'You already have a job.',
+  needs: 'It needs more than you have right now.',
+  license: 'It needs your driver’s license.',
+  away: 'You’re away.',
+  adult: 'Teen jobs are for teenagers.',
+};
+
+export const ACTIVITY_BLOCK_LABELS: Record<ActivityBlock, string> = {
+  age: 'Too young for this.',
+  unknown: 'Not available.',
+  member: 'You’re already in it.',
+  limit: 'You’re in as many as you can handle.',
+  turnedAway: 'You were cut, and it’s too soon to try again.',
+  away: 'You’re away.',
+};
+
+export const LICENSE_BLOCK_LABELS: Record<LicenseBlock, string> = {
+  age: 'You’re too young.',
+  have: 'You already have this.',
+  permit: 'You need a learner’s permit first.',
+  lessons: 'You need a few more lessons first.',
+  wait: 'You sat the test this year; try again next year.',
+  away: 'You’re away.',
+  max: 'You’ve had all the lessons they offer.',
+};
+
+export const NEGOTIATE_BLOCK_LABELS: Record<NegotiateBlock, string> = {
+  none: 'There’s no such rule.',
+  relaxed: 'It’s already as relaxed as it gets.',
+  asked: 'You already asked this year.',
+  limit: 'You’ve asked about enough rules this year.',
+  away: 'You’re away.',
+  age: 'Rules at home are for the teen years.',
+};
+
+export const FOCUS_BLOCK_LABELS: Record<FocusBlock, string> = {
+  age: 'Choosing a focus is for the teen years.',
+  away: 'You’re away.',
+  school: 'You’re not in school.',
+};
+
+/** A chance from 0 to 1, in words. */
+export function chanceWords(chance: number): string {
+  if (chance >= 0.8) return 'Very likely';
+  if (chance >= 0.6) return 'Likely';
+  if (chance >= 0.4) return 'About even';
+  if (chance >= 0.2) return 'Unlikely';
+  return 'A long shot';
+}
+
+/** How much a crowd (or you) counts at school, in words. */
+export function standingWords(standing: number): string {
+  if (standing >= 75) return 'Everyone knows them';
+  if (standing >= 55) return 'Well known';
+  if (standing >= 35) return 'Known by some';
+  return 'Mostly under the radar';
+}
+
+/** How close you are to a crowd, in words. */
+export function rankWords(rank: number): string {
+  if (rank >= 80) return 'One of the core';
+  if (rank >= 60) return 'Part of the group';
+  if (rank >= 40) return 'Getting there';
+  return 'Still on the edge';
+}
+
+export const LICENSE_STAGE_LABELS = { none: 'No permit yet', permit: 'Learner’s permit', licensed: 'Licensed driver' } as const;
+
+/** How tight a house rule is, in words. */
+export const RULE_LEVEL_LABELS = ['Relaxed', 'The usual', 'Strict'] as const;

@@ -1,0 +1,56 @@
+id: friend_switches_crowds
+title: A new table
+text: >-
+  {friend.name} has been sitting with {rival} for a week. Nobody in {clique}
+  said anything, but everybody noticed, and now it is the only thing anyone is
+  talking about.
+tone: neutral
+category: crowds
+rarity: common
+lifeStages: [teen]
+requires:
+  all:
+    - { education: { program: [middle, high] } }
+    - { teen: { clique: true, rival: true } }
+cast:
+  friend: { kind: classmate, crowd: yours, presence: city }
+weight: { base: 5 }
+cooldownYears: 3
+choices:
+  - id: talk
+    label: Ask {friend.them} about it, no accusations
+    check:
+      base: 50
+      stats: [{ role: friend, key: trust, weight: 0.3 }, { key: kindness, weight: 0.15 }]
+      success:
+        text: >-
+          "It isn't about you," {friend.name} says. "I wanted to find out
+          what it's like." You talk until the bell, and nothing in it is a fight.
+        effects:
+          - { type: relationship, role: friend, affection: 5, trust: 5 }
+          - { type: stat, key: confidence, delta: 1 }
+      failure:
+        text: >-
+          It comes out wrong. {friend.name} hears an accusation, and the
+          conversation ends with someone walking away.
+        effects:
+          - { type: relationship, role: friend, affection: -5, trust: -4 }
+  - id: follow
+    label: Go and sit there too, just to see
+    outcome:
+      text: >-
+        It is an odd afternoon. {rival} turns out to be neither as terrible nor
+        as welcoming as the stories, and your own crowd is going to have opinions.
+      effects:
+        - { type: relationship, role: friend, affection: 3 }
+        - { type: teen, action: leave }
+        - { type: stat, key: confidence, delta: 1 }
+  - id: cold
+    label: Stop saving {friend.them} a seat
+    outcome:
+      text: >-
+        It is a small thing, a chair pulled in at the wrong moment, and
+        {friend.name} understands it perfectly.
+      effects:
+        - { type: relationship, role: friend, affection: -7, trust: -4 }
+        - { type: teen, action: rank, delta: 1 }

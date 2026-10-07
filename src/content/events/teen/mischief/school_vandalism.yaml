@@ -1,0 +1,78 @@
+id: school_vandalism
+title: The trophy case
+text: >-
+  {friend.name} has a plan for the empty school at night, and the plan
+  involves spray paint, a stolen key and the trophy case in the front hall.
+  The idea has been making the rounds all week, and now it has your name on it.
+tone: serious
+category: mischief
+rarity: common
+lifeStages: [teen]
+requires:
+  all:
+    - { age: { gte: 14 } }
+    - { education: { program: [middle, high] } }
+cast:
+  friend: { kind: friend, ageOffset: { min: -1, max: 2 }, createIfMissing: true, newChance: 0.3, presence: city }
+weight:
+  base: 2
+  modifiers:
+    - { if: { teen: { crowd: [afterburn, half_timers] } }, x: 2.2 }
+    - { if: { trait: discipline, gt: 65 }, x: 0.4 }
+cooldownYears: 3
+choices:
+  - id: in
+    label: Go along with it
+    check:
+      base: 50
+      stats: [{ key: luck, weight: 0.4 }, { key: discipline, weight: 0.2 }]
+      success:
+        text: >-
+          It's over before it starts, and in the morning the case is covered
+          in color and no one knows who. For a week it is the only thing
+          anyone talks about, and none of them know it was you.
+        effects:
+          - { type: relationship, role: friend, affection: 6 }
+          - { type: flag, key: tagged_bridge, value: true }
+          - { type: stat, key: riskTaking, delta: 2 }
+          - { type: teen, action: standing, delta: 2 }
+      failure:
+        text: >-
+          The custodian comes in early. You are the slowest runner, and the
+          only one caught. You get {sentence}, a suspension, and a long
+          talk with your family about who you are going around with.
+        effects:
+          - { type: legal, offenseId: vandalism, outcome: sentence }
+          - { type: flag, key: suspended, value: true }
+          - { type: stat, key: stress, delta: 7 }
+          - { type: stat, key: reputation, delta: -4 }
+          - { type: education, action: grades, value: -0.15 }
+          - { type: relationship, role: friend, affection: -2 }
+  - id: talk_out
+    label: Try to talk {friend.them} out of it
+    check:
+      base: 40
+      stats: [{ key: confidence, weight: 0.3 }, { role: friend, key: trust, weight: 0.25 }]
+      success:
+        text: >-
+          You suggest painting a mural on the back wall instead, with permission.
+          It sounds stupid until the art teacher says yes.
+        effects:
+          - { type: relationship, role: friend, affection: 5, trust: 4 }
+          - { type: teen, action: passion, delta: 3 }
+          - { type: stat, key: confidence, delta: 2 }
+      failure:
+        text: '{friend.name} does it without you. The next morning, you know exactly who did it, and you say nothing.'
+        effects:
+          - { type: relationship, role: friend, affection: -3 }
+          - { type: stat, key: stress, delta: 2 }
+  - id: tell
+    label: Tell a teacher about the plan
+    outcome:
+      text: >-
+        The plan dies, and so does your invitation to the next one. Everyone
+        knows who told, and it is a lonely few weeks.
+      effects:
+        - { type: relationship, role: friend, affection: -8, trust: -6 }
+        - { type: teen, action: standing, delta: -3 }
+        - { type: stat, key: discipline, delta: 2 }

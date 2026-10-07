@@ -11,7 +11,7 @@
  */
 import { ACTION_IDS, LIFESTYLES, type ActionId, type ChoiceDef, type ContentBundle, type JobDef, type Lifestyle } from '../../src/content/schemas';
 import type { ChoicePicker } from '../../src/engine/autoplay';
-import { availableActions, isLifeActionAvailable, LIFE_ACTION_IDS, type LifeActionId, type LifeActionParams } from '../../src/engine/actions';
+import { availableActions, isLifeActionAvailable, LIFE_ACTION_IDS, TEEN_ACTION_IDS, type LifeActionId, type LifeActionParams } from '../../src/engine/actions';
 import { activeJob, canAskRaise, canRetire, jobApplyBlock, levelPay, startLevel } from '../../src/engine/career';
 import { referencesIn } from '../../src/engine/conditions';
 import { applicationGpa } from '../../src/engine/education';
@@ -392,6 +392,8 @@ function paramOptions(life: LifeState, content: ContentBundle, actionId: LifeAct
 export function chooseCarelessLifeActions(life: LifeState, content: ContentBundle, rng: RngState): MoneyAction[] {
   const out: MoneyAction[] = [];
   for (const actionId of LIFE_ACTION_IDS) {
+    // The teen actions need chosen parameters; the teen player (tools/simulate/teen.ts) takes them, and a careless one lets the teen years happen.
+    if ((TEEN_ACTION_IDS as readonly string[]).includes(actionId)) continue;
     if (!chance(rng, CARELESS.lifeAction)) continue;
     const available = paramOptions(life, content, actionId).filter((params) => isLifeActionAvailable(life, actionId, params, content));
     if (available.length > 0) out.push([actionId, pick(rng, available)]);

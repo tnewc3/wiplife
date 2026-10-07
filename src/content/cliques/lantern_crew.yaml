@@ -1,0 +1,15 @@
+id: lantern_crew
+name: The Lantern Crew
+blurb: Tinkerers and makers who turn up in someone's garage after school with a half-built something and strong opinions about how to finish it.
+weight: 1.2
+traits: { ambition: 8, discipline: 6, sociability: -4 }
+likes: { discipline: 0.5, ambition: 0.4 }
+standing: 48
+effects:
+  smarts: { perYear: 0.6, limit: 85 }
+  happiness: { perYear: 0.4, limit: 80 }
+grades: 0.1
+friends: 3
+money: 1
+passion: 4
+trouble: 0.5

@@ -1,0 +1,64 @@
+id: rules_review
+title: A good year
+text: >-
+  {parent.name} sits you down, which usually means trouble. This time it's
+  different: you have been home when you said you would be, and {parent.they}
+  want to talk about what that is worth.
+tone: light
+category: houserules
+rarity: uncommon
+lifeStages: [teen]
+requires:
+  all:
+    - { teen: { rules: { gte: 1 } } }
+    - { teen: { grounded: false } }
+    - { age: { gte: 15 } }
+cast:
+  parent: { kind: parent, presence: household }
+weight:
+  base: 4
+  modifiers:
+    - { if: { role: parent, trust: { gte: 65 } }, x: 2 }
+    - { if: { role: parent, trust: { lt: 40 } }, x: 0.2 }
+cooldownYears: 2
+choices:
+  - id: curfew
+    label: Ask for a later curfew
+    check:
+      base: 60
+      stats: [{ role: parent, key: trust, weight: 0.4 }]
+      success:
+        text: >-
+          "Half an hour," {parent.name} says. "Not a minute more, and I'll know."
+          You decide not to push your luck, and enjoy the half hour.
+        effects:
+          - { type: teen, action: loosen, rule: curfew }
+          - { type: relationship, role: parent, trust: 3, affection: 2 }
+      failure:
+        text: >-
+          {parent.name} thinks about it. "Not yet," {parent.they} {parent:says|say}. "But
+          ask me again, and ask like this."
+        effects:
+          - { type: relationship, role: parent, trust: 1 }
+  - id: phone
+    label: Ask for the phone rules to ease up
+    check:
+      base: 55
+      stats: [{ role: parent, key: trust, weight: 0.4 }]
+      success:
+        text: The phone stays in your room at night, as long as the grades hold. You both know what that means.
+        effects:
+          - { type: teen, action: loosen, rule: screens }
+          - { type: relationship, role: parent, trust: 3 }
+      failure:
+        text: '"Let''s see how the next report card looks," {parent.name} says, which is a no with a calendar attached.'
+        effects:
+          - { type: relationship, role: parent, trust: 1 }
+  - id: thank
+    label: Just say thank you
+    outcome:
+      text: >-
+        {parent.name} looks almost embarrassed. It is the kind of conversation
+        that you'll both pretend not to remember, and both remember.
+      effects:
+        - { type: relationship, role: parent, affection: 5, trust: 3 }

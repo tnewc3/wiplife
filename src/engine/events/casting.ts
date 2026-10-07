@@ -21,6 +21,7 @@ import { ITEM_ROLE } from '../web/query';
 import { evaluate } from '../conditions';
 import { POSSESSION_ROLES } from '../../content/schemas';
 import { livingPets, vacationHomesOf, vehiclesOf, possessionById } from '../possessions/query';
+import { crowdMembers } from '../teen/query';
 
 function personAge(state: LifeState, person: Person): number {
   return state.currentYear - person.birthYear;
@@ -62,6 +63,9 @@ export function castCandidates(state: LifeState, spec: CastSpec, content: Conten
         if (rel.status !== 'active' || !SUPPORT_KINDS.includes(rel.kind)) return [];
         const housePartner = preferHousehold && state.housing.partnerId === id;
         if (!housePartner && (rel.trust < support.minTrust || rel.affection < support.minAffection)) return [];
+      } else if (spec.crowd) {
+        // T1: someone from your crowd (or its rival's): a friend or classmate who is one of its members.
+        if (!crowdMembers(state, spec.crowd).includes(id) || (rel.kind !== 'friend' && rel.kind !== 'classmate') || rel.status !== 'active') return [];
       } else if (rel.kind !== spec.kind) {
         return [];
       }

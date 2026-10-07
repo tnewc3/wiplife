@@ -1,0 +1,55 @@
+id: summer_program
+title: Summer plans
+text: >-
+  There's a summer program in the city for people exactly like you: six weeks of
+  intense study of the thing you love, with a real teacher and a bunch of other
+  kids who are as obsessed as you are. It's not cheap, and the summer job is
+  waiting.
+tone: neutral
+category: future
+rarity: uncommon
+lifeStages: [teen]
+requires:
+  all:
+    - { age: { gte: 15 } }
+    - { teen: { passion: { gte: 20 } } }
+weight: { base: 6 }
+cooldownYears: 3
+choices:
+  - id: program
+    label: Do the program
+    check:
+      base: 60
+      stats: [{ key: smarts, weight: 0.2 }, { key: confidence, weight: 0.15 }]
+      success:
+        text: >-
+          It's the best six weeks of your life. You come back with a notebook full
+          of ideas, three new friends, and a letter from the director.
+        effects:
+          - { type: money, delta: -900 }
+          - { type: teen, action: passion, delta: 12 }
+          - { type: stat, key: happiness, delta: 4 }
+          - { type: stat, key: smarts, delta: 2 }
+      failure:
+        text: >-
+          It's harder than you expected, and the other kids are better. You
+          learn a lot about what you don't know yet, and it costs you more than you planned.
+        effects:
+          - { type: money, delta: -900 }
+          - { type: teen, action: passion, delta: 5 }
+          - { type: stat, key: stress, delta: 4 }
+  - id: job
+    label: Work all summer instead
+    outcome:
+      text: It's a long, hot summer of early shifts. The money piles up, and so does a quiet feeling of wanting something else.
+      effects:
+        - { type: money, delta: 1800 }
+        - { type: stat, key: discipline, delta: 1 }
+  - id: both
+    label: Work mornings, and practice every afternoon
+    outcome:
+      text: It's exhausting, and it works, mostly. You don't get the program, but you get a little of both worlds.
+      effects:
+        - { type: money, delta: 900 }
+        - { type: teen, action: passion, delta: 4 }
+        - { type: stat, key: stress, delta: 3 }

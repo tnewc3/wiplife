@@ -1,0 +1,50 @@
+id: who_is_hiring
+title: I know someone who's hiring
+text: >-
+  {member.name} from {clique} mentions, in the offhand way people do when they
+  know exactly what they're doing, that a place near school needs help, and
+  that you'd be good at it.
+tone: light
+category: teenwork
+rarity: common
+lifeStages: [teen]
+requires:
+  all:
+    - { teen: { job: false } }
+    - { teen: { clique: true } }
+    - { age: { gte: 14 } }
+cast:
+  member: { kind: classmate, crowd: yours, presence: city }
+weight:
+  base: 6
+  modifiers:
+    - { if: { teen: { crowd: [overtime] } }, x: 3 }
+cooldownYears: 3
+choices:
+  - id: bag
+    label: Apply to bag groceries
+    check:
+      base: 65
+      stats: [{ key: discipline, weight: 0.25 }]
+      success:
+        text: The manager looks at your application for about eleven seconds, then asks when you can start. You can start Saturday.
+        effects:
+          - { type: teen, action: hire, jobId: grocery_bagger }
+          - { type: relationship, role: member, affection: 3 }
+      failure:
+        text: You don't hear back, and when you ask, it turns out the opening was filled the day before.
+        effects:
+          - { type: stat, key: stress, delta: 1 }
+  - id: dogs
+    label: Start a dog-walking route in the neighborhood
+    outcome:
+      text: A flyer, three phone calls, a very enthusiastic retriever. By the end of the month, you have a schedule and a small pile of dog treats.
+      effects:
+        - { type: teen, action: hire, jobId: dog_walker }
+        - { type: stat, key: fitness, delta: 1 }
+  - id: no_thanks
+    label: Thank {member.them}, but you have enough going on
+    outcome:
+      text: '{member.name} shrugs. "Offer stands," {member.they} {member:says|say}.'
+      effects:
+        - { type: stat, key: stress, delta: -1 }

@@ -15,7 +15,7 @@ cast:
 choices:
   - id: drive
     label: Drive everyone yourself
-    visibleIf: { flag: can_drive }
+    visibleIf: { teen: { license: [licensed] } }
     outcome:
       text: >-
         Four of you in the car, the album on repeat, singing badly both ways.

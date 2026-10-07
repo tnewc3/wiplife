@@ -1,0 +1,39 @@
+id: first_paycheck
+title: Your first paycheck
+text: >-
+  Your first paycheck from work is smaller than you expected, with a
+  line for taxes you didn't know about. It is still the most money you've ever
+  had that you earned yourself.
+tone: light
+category: teenwork
+rarity: common
+lifeStages: [teen]
+requires:
+  all:
+    - { teen: { job: true } }
+    - { age: { gte: 14 } }
+weight: { base: 14 }
+once: true
+choices:
+  - id: save
+    label: Put it all in savings
+    outcome:
+      text: You look at the new balance more often than is healthy, and every time it makes you feel capable.
+      effects:
+        - { type: money, delta: 200 }
+        - { type: stat, key: discipline, delta: 3 }
+  - id: treat
+    label: Treat your friends
+    outcome:
+      text: A round of fries and shakes for everyone. You get home with half the paycheck and all the credit.
+      effects:
+        - { type: money, delta: 100 }
+        - { type: stat, key: happiness, delta: 3 }
+        - { type: stat, key: sociability, delta: 1 }
+  - id: give_some
+    label: Give some to your family
+    outcome:
+      text: It is a small amount, and it means more than that to everyone at the table, though nobody says so.
+      effects:
+        - { type: money, delta: 130 }
+        - { type: stat, key: kindness, delta: 2 }

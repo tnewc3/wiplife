@@ -26,6 +26,7 @@ import { curveAt } from '../curve';
 import { inPostSecondary } from '../education';
 import { wholeDollars } from '../finance';
 import { chance, nextFloat, type RngState } from '../rng';
+import { teenIncome } from '../teen/jobs';
 import type { LifeState } from '../types';
 
 /** Old enough for gig work, free to do it, and without a job (a job is full-time). */
@@ -57,7 +58,8 @@ export function gigPay(state: LifeState, content: ContentBundle, rng: RngState):
  * began (careers.yaml jobLoss), and gig pay. Draws from the life's generator.
  */
 export function yearIncome(state: LifeState, content: ContentBundle): number {
-  return wholeDollars((state.career.job?.salary ?? 0) + jobLossPay(state, content) + gigPay(state, content, state.rng));
+  // T1: a teen job's pay (or odd jobs, for a teen who made work their focus).
+  return wholeDollars((state.career.job?.salary ?? 0) + jobLossPay(state, content) + gigPay(state, content, state.rng) + teenIncome(state, content));
 }
 
 /**

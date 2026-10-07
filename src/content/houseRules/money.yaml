@@ -1,0 +1,12 @@
+id: money
+domain: money
+name: Your earnings
+levels:
+  - Your wages are yours to spend.
+  - A tenth of what you earn goes into savings, and you show them the account.
+  - A quarter goes to savings or the household, and big purchases need a talk first.
+tight: { strictness: 0.48, warmth: 0, involvement: 0.32, traits: { discipline: 0.32, ambition: 0.16 } }
+absentBelow: 55
+temptation: 0.076
+watch: 0.4
+applies: job

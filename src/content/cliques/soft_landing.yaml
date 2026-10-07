@@ -1,0 +1,15 @@
+id: soft_landing
+name: Soft Landing
+blurb: The ones who notice the new kid at lunch and the person eating alone, and who keep a spare seat and a spare charger in every bag.
+weight: 1.2
+traits: { kindness: 12, sociability: 4 }
+likes: { kindness: 0.7, sociability: 0.2 }
+standing: 44
+effects:
+  happiness: { perYear: 0.8, limit: 85 }
+  stress: { perYear: -0.6, limit: 30 }
+grades: 0
+friends: 5
+money: 1
+passion: 1
+trouble: 0.4

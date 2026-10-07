@@ -1,0 +1,15 @@
+id: signal_fire
+name: Signal Fire
+blurb: Organizers, debaters and club presidents who are already writing the agenda for the next meeting, and who will have you on a committee before you've sat down.
+weight: 1
+traits: { ambition: 14, confidence: 8, discipline: 6 }
+likes: { ambition: 0.6, confidence: 0.4, discipline: 0.3 }
+standing: 62
+effects:
+  smarts: { perYear: 0.4, limit: 85 }
+  stress: { perYear: 0.6, limit: 65 }
+grades: 0.18
+friends: 2
+money: 1.1
+passion: 2
+trouble: 0.4

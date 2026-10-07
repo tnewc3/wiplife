@@ -260,6 +260,8 @@ const shareRangeSchema = z
   .strictObject({ min: probabilitySchema, max: probabilitySchema })
   .refine((r) => r.min <= r.max, 'min must not be greater than max');
 const numberRangeSchema = z.strictObject({ min: z.number().min(0), max: z.number().min(0) }).refine((r) => r.min <= r.max, 'min must not be greater than max');
+/** A range for a measured difference, which can be negative. */
+const signedRangeSchema = z.strictObject({ min: z.number(), max: z.number() }).refine((r) => r.min <= r.max, 'min must not be greater than max');
 const ratioRangeSchema = z
   .strictObject({ min: z.number().min(0), max: z.number().min(0) })
   .refine((r) => r.min <= r.max, 'min must not be greater than max');
@@ -517,6 +519,41 @@ export const targetsBalanceSchema = z.strictObject({
     renovationLives: shareRangeSchema,
     /** The share of pet-years a pet is ill. */
     illShare: shareRangeSchema,
+  }),
+  /**
+   * T1: the teen years (tools/simulate/teen.ts), judged on the careful
+   * player's lives, which follow one yearly focus plan each (or none).
+   */
+  teen: z.strictObject({
+    /** Of teens (lives reaching 18): the share who belonged to a crowd; of crowd members, the share who switched and who were in a clash; the people a crowd brings when you join it. */
+    crowdMembers: shareRangeSchema,
+    switches: shareRangeSchema,
+    clashLives: shareRangeSchema,
+    peoplePerCrowd: numberRangeSchema,
+    /** Licensed by 18; owned a car before 18; had a teen job; belonged to a team or club. */
+    licensedBy18: shareRangeSchema,
+    carBefore18: shareRangeSchema,
+    jobLives: shareRangeSchema,
+    activityLives: shareRangeSchema,
+    /** House rules: how many a year in a home that sets any; mean level of a strict-style parent's rules minus a relaxed-style parent's. */
+    rulesPerHome: numberRangeSchema,
+    strictVsRelaxed: signedRangeSchema,
+    /** Breaks per teen, and the share of breaks that were caught. */
+    breaksPerTeen: numberRangeSchema,
+    caughtShare: shareRangeSchema,
+    /** When caught: the share who are grounded, strict-style minus relaxed-style parents; the share who get only a talk or chores, close minus distant from the parent. */
+    groundedStrictVsRelaxed: signedRangeSchema,
+    mildCloseVsDistant: signedRangeSchema,
+    /** Teens with a juvenile case; teens who started an addiction before 18. */
+    juvenileLives: shareRangeSchema,
+    addictionLives: shareRangeSchema,
+    /** Focus plans compared: diploma GPA (school minus friends), friend closeness (friends minus school), teen income (work as a multiple of none), talent found (passion minus none). */
+    focusGrades: signedRangeSchema,
+    focusFriends: signedRangeSchema,
+    focusMoney: numberRangeSchema,
+    focusTalent: signedRangeSchema,
+    /** Romance involving anyone under 18: none, ever. */
+    romanceUnder18: numberRangeSchema,
   }),
   coverage: z.strictObject({
     /** At least this many events (not retired). */

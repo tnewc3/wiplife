@@ -1,0 +1,10 @@
+id: grocery_bagger
+name: grocery bagger
+blurb: Paper or plastic, eggs on top, and the checkout regulars who have opinions about both.
+minAge: 15
+hours: 12
+wage: 11
+employers: ["Greenfield Market", "Fairway Foods", "Corner Basket Grocers"]
+effects:
+  fitness: { perYear: 0.3, limit: 70 }
+needs: {}

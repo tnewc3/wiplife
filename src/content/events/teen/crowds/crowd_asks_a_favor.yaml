@@ -1,0 +1,68 @@
+id: crowd_asks_a_favor
+title: Cover for us
+text: >-
+  {member.name} pulls you aside before third period. A few people from {clique}
+  are leaving school early, and if anybody asks, they were in the library.
+  {member.They} {member:is|are} looking at you like someone who already knows the answer.
+tone: neutral
+category: crowds
+rarity: common
+lifeStages: [teen]
+requires:
+  all:
+    - { education: { program: [middle, high] } }
+    - { teen: { clique: true } }
+    - { age: { gte: 14 } }
+cast:
+  member: { kind: classmate, crowd: yours, presence: city }
+weight: { base: 6 }
+cooldownYears: 3
+choices:
+  - id: cover
+    label: Say you will cover for them
+    check:
+      base: 55
+      stats: [{ key: luck, weight: 0.3 }, { key: confidence, weight: 0.2 }]
+      success:
+        text: >-
+          Nobody asks. They come back with stories, and you are, for a week,
+          the one who can be trusted with a secret.
+        effects:
+          - { type: relationship, role: member, affection: 5, trust: 6 }
+          - { type: teen, action: rank, delta: 3 }
+          - { type: stat, key: riskTaking, delta: 1 }
+      failure:
+        text: >-
+          A teacher asks you straight out, and you are a worse liar than you
+          thought. Everyone gets a lecture, and you get a reputation in two
+          directions at once.
+        effects:
+          - { type: relationship, role: member, trust: -3 }
+          - { type: teen, action: standing, delta: -3 }
+          - { type: education, action: grades, value: -0.1 }
+          - { type: stat, key: stress, delta: 3 }
+  - id: refuse
+    label: Tell {member.them} you can't
+    outcome:
+      text: >-
+        "Fine," {member.name} says, not meaning it. It takes a couple of
+        weeks for things to feel normal again.
+      effects:
+        - { type: relationship, role: member, affection: -3, trust: -1 }
+        - { type: stat, key: discipline, delta: 2 }
+  - id: talk_out
+    label: Cover for them, if they stay for the quiz
+    check:
+      base: 40
+      stats: [{ key: confidence, weight: 0.3 }, { role: member, key: trust, weight: 0.2 }]
+      success:
+        text: >-
+          They stay, mostly because you made it sound like a dare. One of them
+          even passes the quiz.
+        effects:
+          - { type: relationship, role: member, affection: 4, trust: 4 }
+          - { type: stat, key: confidence, delta: 2 }
+      failure:
+        text: They leave anyway, and you are the only one who knows you tried.
+        effects:
+          - { type: relationship, role: member, trust: -1 }

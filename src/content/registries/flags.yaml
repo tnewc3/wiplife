@@ -7,7 +7,6 @@ flags:
   broke_arm: You broke your arm as a child
   shoplifted: You have stolen from a store
   caught_shoplifting: You were caught shoplifting
-  can_drive: You can drive
   ran_marathon: You have run a marathon
   volunteers: You volunteer at the animal shelter
   wrote_memoir: You wrote your life story
@@ -91,3 +90,8 @@ flags:
   pet_never_found: A pet of yours ran off and was never found
   car_was_stolen: Your car was stolen
   got_help_with_first_car: A parent helped you pay for your first car
+  # T1: the teen years.
+  plans_college: You told your parents you plan to go to college
+  plans_trade: You told your parents you plan to learn a trade
+  plans_work: You told your parents you plan to go straight to work
+  passion_scholarship: A scholarship came out of a passion you spent years on

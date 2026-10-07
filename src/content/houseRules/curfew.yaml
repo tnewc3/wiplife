@@ -1,0 +1,12 @@
+id: curfew
+domain: curfew
+name: Curfew
+levels:
+  - Home by midnight on weekends, with a text if plans change.
+  - Home by ten on school nights and eleven on weekends.
+  - Home by eight on school nights and nine-thirty on weekends, no exceptions.
+tight: { strictness: 0.88, warmth: 0, involvement: 0.16, traits: { discipline: 0.32, riskTaking: -0.16 } }
+absentBelow: 49
+temptation: 0.136
+watch: 0.4
+applies: always

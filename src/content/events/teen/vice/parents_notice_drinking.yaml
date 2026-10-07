@@ -1,0 +1,55 @@
+id: parents_notice_drinking
+title: The bottle in the closet
+text: >-
+  {parent.name} found it behind your winter coats, half-empty and
+  hidden. {parent.They} {parent:is|are} sitting on the edge of your bed
+  holding it, and does not look angry. {parent.They} look scared.
+tone: dark
+category: vice
+rarity: uncommon
+lifeStages: [teen]
+requires:
+  all:
+    - { health: { conditions: [alcohol_addiction] } }
+    - { age: { lt: 18 } }
+cast:
+  parent: { kind: parent, presence: household }
+weight: { base: 12 }
+cooldownYears: 3
+choices:
+  - id: accept_help
+    label: Say you need help
+    outcome:
+      text: >-
+        It takes everything you have to say it, and then it's out and the
+        room doesn't fall down. {parent.name} holds you, and in the morning
+        there is a phone number on the refrigerator.
+      effects:
+        - { type: health, conditionId: alcohol_addiction, treated: true }
+        - { type: relationship, role: parent, trust: 6, affection: 6 }
+        - { type: stat, key: stress, delta: -3 }
+  - id: deny
+    label: Say it isn't yours
+    outcome:
+      text: >-
+        "Whose is it, then?" {parent.name} asks, quietly. You don't have an
+        answer. The bottle goes in the trash, and the question stays in the air.
+      effects:
+        - { type: relationship, role: parent, trust: -5 }
+        - { type: stat, key: stress, delta: 3 }
+  - id: promise
+    label: Promise to stop on your own
+    check:
+      base: 30
+      stats: [{ key: discipline, weight: 0.3 }, { key: vice, weight: -0.3 }]
+      success:
+        text: You mean it, and for once the meaning is enough. The bottle goes down the drain, and you watch it go.
+        effects:
+          - { type: health, conditionId: alcohol_addiction, severity: -8 }
+          - { type: relationship, role: parent, trust: 3 }
+          - { type: stat, key: discipline, delta: 2 }
+      failure:
+        text: You mean it, too, but meaning it isn't the same as doing it. Both of you know that by the next weekend.
+        effects:
+          - { type: relationship, role: parent, trust: -3 }
+          - { type: stat, key: stress, delta: 3 }

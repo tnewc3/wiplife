@@ -1,0 +1,64 @@
+id: pills_at_a_party
+title: What's in the bowl
+text: >-
+  On the kitchen counter, between the chips and a stack of cups, there is a
+  bowl of pills that nobody can name. Someone says they're fine. Someone
+  else says they got them from a cousin.
+tone: dark
+category: vice
+rarity: uncommon
+lifeStages: [teen]
+requires:
+  all:
+    - { age: { gte: 15 } }
+weight:
+  base: 4
+  modifiers:
+    - { if: { trait: riskTaking, gt: 65 }, x: 1.8 }
+    - { if: { hidden: vice, gt: 60 }, x: 1.8 }
+    - { if: { trait: discipline, gt: 65 }, x: 0.5 }
+cooldownYears: 3
+choices:
+  - id: take
+    label: Take one
+    check:
+      base: 50
+      stats: [{ key: luck, weight: 0.3 }, { key: vice, weight: -0.4 }, { key: health, weight: 0.1 }]
+      success:
+        text: >-
+          Nothing happens, or nothing you can name. You feel odd for a few
+          hours, and then you feel fine. You have the unpleasant feeling that
+          you just got away with something you shouldn't have.
+        effects:
+          - { type: stat, key: vice, delta: 3 }
+          - { type: stat, key: riskTaking, delta: 2 }
+      failure:
+        text: >-
+          Within an hour you are sweating, shaking and sure something is wrong.
+          A friend calls an ambulance, and you spend the night in the emergency
+          room, where a nurse with kind eyes asks what you took. You get {sentence}.
+        effects:
+          - { type: health, conditionId: drug_addiction, severity: 10 }
+          - { type: legal, offenseId: drug_possession, outcome: sentence }
+          - { type: stat, key: health, delta: -6 }
+          - { type: stat, key: stress, delta: 8 }
+          - { type: stat, key: vice, delta: 4 }
+  - id: pocket
+    label: Pocket a handful and leave
+    outcome:
+      text: >-
+        You don't use them. They sit in your room for a week, until you flush
+        them. For seven days, though, every knock at the door makes your heart stop.
+      effects:
+        - { type: stat, key: stress, delta: 4 }
+        - { type: stat, key: riskTaking, delta: 1 }
+  - id: refuse
+    label: Say no and go find the person who brought you
+    outcome:
+      text: >-
+        You tell your friends you're going, and two of them come with you. It
+        is not a heroic exit, but it's a clean one, and on the way home somebody
+        says, quietly, that they were glad someone said it.
+      effects:
+        - { type: stat, key: discipline, delta: 2 }
+        - { type: stat, key: confidence, delta: 1 }

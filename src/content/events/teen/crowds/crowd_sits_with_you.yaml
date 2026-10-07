@@ -1,0 +1,49 @@
+id: crowd_sits_with_you
+title: They come to you
+text: >-
+  A few people from {clique} end up at your table, which isn't usually where
+  they sit. One of them asks if you want to come along to something that
+  afternoon. It sounds like a test, and a good one.
+tone: neutral
+category: crowds
+rarity: common
+lifeStages: [teen]
+followUpOnly: true
+weight: { base: 1 }
+requires:
+  all:
+    - { education: { program: [middle, high] } }
+    - { teen: { invited: true } }
+choices:
+  - id: go
+    label: Go with them
+    outcome:
+      text: >-
+        It turns out to be nothing much: a bench, a bag of chips and four hours of
+        talking. You get home feeling like you have been somewhere.
+      effects:
+        - { type: teen, action: join }
+        - { type: stat, key: happiness, delta: 3 }
+        - { type: stat, key: sociability, delta: 1 }
+  - id: hedge
+    label: Say maybe, and see how the week goes
+    check:
+      base: 50
+      stats: [{ key: confidence, weight: 0.25 }]
+      success:
+        text: >-
+          You make it to the second invitation, and the third. "You took your
+          time," someone says, "but fine." It counts.
+        effects:
+          - { type: teen, action: join }
+          - { type: stat, key: discipline, delta: 1 }
+      failure:
+        text: The invitation doesn't come around again, and you spend a few days wondering what you missed.
+        effects:
+          - { type: stat, key: happiness, delta: -2 }
+  - id: no
+    label: Say you already have plans
+    outcome:
+      text: You do, as it happens, and they are good. The question will come up again.
+      effects:
+        - { type: stat, key: stress, delta: -1 }

@@ -10,6 +10,7 @@ import { interactionFailures } from './interactions/invariants';
 import { livesFailures } from './lives/invariants';
 import { webFailures } from './web/invariants';
 import { possessionsFailures } from './possessions/invariants';
+import { teenFailures } from './teen/invariants';
 import { attachedDebtIds } from './possessions/query';
 import { ITEM_ROLE } from './web/query';
 import { consistencyProblems } from './presence';
@@ -196,6 +197,9 @@ export function checkInvariants(state: LifeState, content: ContentBundle): strin
 
   // Pets, vehicles and vacation homes (E5).
   failures.push(...possessionsFailures(state, content));
+
+  // The teen years (T1), including that no romance involves anyone under 18.
+  failures.push(...teenFailures(state, content));
 
   // People and relationships.
   const { parentAgeAtBirth } = content.balance.creation.family;

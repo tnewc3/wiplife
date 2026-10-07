@@ -9,7 +9,7 @@ rarity: common
 lifeStages: [teen]
 requires: { age: { gte: 15 } }
 weight:
-  base: 3
+  base: 4
   modifiers:
     - { if: { trait: riskTaking, gt: 60 }, x: 1.8 }
 once: true

@@ -1,0 +1,17 @@
+id: debate_team
+name: The debate team
+kind: team
+blurb: Briefcases of index cards, weekend tournaments in other towns, and arguing for whichever side the coin picks.
+minAge: 13
+tryout:
+  base: 50
+  stats: [{ key: confidence, weight: 0.4 }, { key: smarts, weight: 0.3 }]
+cost: 80
+effects:
+  smarts: { perYear: 0.6, limit: 88 }
+  stress: { perYear: 0.5, limit: 65 }
+grades: 0.08
+friends: 3
+talent: persuasion
+passion: 6
+injury: 0

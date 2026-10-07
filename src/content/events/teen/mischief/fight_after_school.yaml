@@ -1,0 +1,80 @@
+id: fight_after_school
+title: After the last bell
+text: >-
+  A crowd has formed behind the gym, the way it does when two people are about
+  to do something stupid. {foe.name} is in the middle of it, saying something
+  about you that you are not going to let stand.
+tone: serious
+category: mischief
+rarity: common
+lifeStages: [teen]
+requires:
+  all:
+    - { age: { gte: 13 } }
+    - { education: { program: [middle, high] } }
+cast:
+  foe: { kind: classmate, presence: city, createIfMissing: true, newChance: 0.5 }
+weight:
+  base: 2.5
+  modifiers:
+    - { if: { trait: riskTaking, gt: 60 }, x: 1.5 }
+    - { if: { teen: { crowd: [afterburn] } }, x: 2 }
+    - { if: { trait: kindness, gt: 70 }, x: 0.5 }
+cooldownYears: 2
+choices:
+  - id: fight
+    label: Throw the first punch
+    check:
+      base: 45
+      stats: [{ key: fitness, weight: 0.4 }, { key: luck, weight: 0.2 }]
+      success:
+        text: >-
+          It's over in under a minute, and it isn't pretty. Nobody with a badge
+          sees it, and you walk away with a split knuckle and a legend that
+          grows in the retelling.
+        effects:
+          - { type: relationship, role: foe, affection: -10 }
+          - { type: stat, key: health, delta: -1 }
+          - { type: stat, key: riskTaking, delta: 2 }
+          - { type: teen, action: standing, delta: 3 }
+      failure:
+        text: >-
+          A teacher drags you apart, and your lip is split and your eye is
+          swelling shut. Somebody filmed it. You are suspended for three days,
+          the police are called, and you get {sentence}.
+        effects:
+          - { type: legal, offenseId: assault, outcome: sentence }
+          - { type: flag, key: suspended, value: true }
+          - { type: relationship, role: foe, affection: -10 }
+          - { type: stat, key: health, delta: -4 }
+          - { type: stat, key: stress, delta: 6 }
+          - { type: stat, key: reputation, delta: -4 }
+          - { type: education, action: grades, value: -0.2 }
+  - id: walk
+    label: Walk away, and let them talk
+    outcome:
+      text: >-
+        It is the hardest thing you do all week. The crowd boos, somebody laughs, and
+        you keep walking. By Monday nobody remembers anything but the part where you left.
+      effects:
+        - { type: stat, key: discipline, delta: 2 }
+        - { type: stat, key: stress, delta: 2 }
+        - { type: teen, action: standing, delta: -1 }
+  - id: break_up
+    label: Step between them
+    check:
+      base: 35
+      stats: [{ key: confidence, weight: 0.3 }, { key: kindness, weight: 0.2 }]
+      success:
+        text: >-
+          You say something that is nowhere near clever, and it is just enough: the moment
+          breaks, someone laughs, and a teacher arrives to find nothing to see.
+        effects:
+          - { type: relationship, role: foe, affection: 4 }
+          - { type: stat, key: confidence, delta: 2 }
+          - { type: teen, action: standing, delta: 2 }
+      failure:
+        text: You take an elbow meant for someone else. It breaks up the fight, and gives you a bruise the shape of a doorknob.
+        effects:
+          - { type: stat, key: health, delta: -2 }
+          - { type: stat, key: stress, delta: 2 }

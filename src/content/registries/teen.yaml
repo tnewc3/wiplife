@@ -1,0 +1,20 @@
+# The events the teen step queues. Every event here is followUpOnly. Each
+# trigger lists the events that may answer it; the step picks one that fits
+# (requirements, cooldowns, one-time rules) by weight.
+#
+# caught: a parent caught you breaking a rule; the parent who caught you is
+#   cast as {parent}.
+# invited: a crowd at school has noticed you.
+# clash: your crowd and its rival crowd have fallen out; a member of your crowd
+#   is cast as {member} and one of theirs as {foe}.
+# juvenile: a juvenile case landed on your record; the parent who answers it
+#   is cast as {parent}.
+triggers:
+  caught:
+    events: [caught_curfew, caught_screens, caught_party, caught_car, caught_grades, caught_chores]
+  invited:
+    events: [crowd_notices_you, crowd_sits_with_you]
+  clash:
+    events: [rival_prank, cafeteria_standoff]
+  juvenile:
+    events: [police_at_the_door, juvenile_hearing]

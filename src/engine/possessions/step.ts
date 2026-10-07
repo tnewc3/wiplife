@@ -21,6 +21,7 @@ import { weightedPick, wholeChange } from '../random';
 import { chance } from '../rng';
 import { writeFromGroup } from '../systems/history';
 import type { Id, LifeState } from '../types';
+import { hasLicense } from '../teen/query';
 import { comfortPull, foreclosePossession } from './homes';
 import { jobDependence, jobNeedsVehicle } from './jobs';
 import { petYear } from './pets';
@@ -78,7 +79,8 @@ export function runPossessions(state: LifeState, content: ContentBundle): void {
     }
     refreshVehicleValue(state, p, content);
   }
-  const drivers = inside ? [] : vehiclesOf(state);
+  // T1: only someone with a license drives (an unlicensed teen who inherited a car doesn't).
+  const drivers = inside || !hasLicense(state) ? [] : vehiclesOf(state);
   if (drivers.length > 0 && state.character.age >= b.drivingAge) {
     const first = drivers[0]!;
     if (chance(state.rng, drunkChance(state, content))) {

@@ -1,0 +1,71 @@
+id: bonfire_night
+title: The field behind the quarry
+text: >-
+  There's a fire in a field and forty people standing around it, half of them
+  holding a drink they definitely aren't supposed to have. {friend.name}
+  hands you a can, and {friend.they} {friend:is|are} grinning.
+tone: serious
+category: vice
+rarity: common
+lifeStages: [teen]
+requires:
+  all:
+    - { age: { gte: 15 } }
+cast:
+  friend: { kind: friend, ageOffset: { min: -1, max: 2 }, createIfMissing: true, newChance: 0.2, presence: city }
+weight:
+  base: 4
+  modifiers:
+    - { if: { trait: riskTaking, gt: 60 }, x: 1.6 }
+    - { if: { teen: { crowd: [afterburn, half_timers] } }, x: 1.8 }
+    - { if: { trait: discipline, gt: 70 }, x: 0.5 }
+cooldownYears: 2
+choices:
+  - id: drink
+    label: Drink it
+    check:
+      base: 55
+      stats: [{ key: discipline, weight: 0.3 }, { key: vice, weight: -0.3 }, { key: luck, weight: 0.2 }]
+      success:
+        text: >-
+          It tastes terrible, and the night is good anyway. You are in bed
+          before anyone checks, and the smell of smoke is in your hair until Monday.
+        effects:
+          - { type: flag, key: tried_alcohol, value: true }
+          - { type: stat, key: happiness, delta: 3 }
+          - { type: stat, key: vice, delta: 2 }
+          - { type: relationship, role: friend, affection: 4 }
+          - { type: teen, action: break, rule: curfew }
+      failure:
+        text: >-
+          Blue lights come across the field and the whole crowd scatters.
+          Somebody grabs your arm and somebody else loses a shoe. You are
+          the one who gets caught, with a can in your hand. You get {sentence}.
+          Your family is called, and the ride home is silent.
+        effects:
+          - { type: legal, offenseId: underage_drinking, outcome: sentence }
+          - { type: flag, key: tried_alcohol, value: true }
+          - { type: health, conditionId: alcohol_addiction, severity: 8 }
+          - { type: stat, key: vice, delta: 3 }
+          - { type: stat, key: stress, delta: 6 }
+          - { type: stat, key: reputation, delta: -3 }
+          - { type: relationship, role: friend, affection: 1 }
+  - id: soda
+    label: Hold on to it, but don't drink it
+    outcome:
+      text: >-
+        You nurse the same can for three hours, and nobody notices. At two
+        in the morning someone needs a sober person to drive them home, and
+        it turns out it's you.
+      effects:
+        - { type: stat, key: discipline, delta: 2 }
+        - { type: relationship, role: friend, affection: 2, trust: 3 }
+  - id: leave
+    label: Hand it back and leave
+    outcome:
+      text: >-
+        {friend.name} rolls {friend.their} eyes, but you can tell {friend.they}
+        {friend:is|are} more impressed than annoyed. The walk home is long and quiet, and you're glad you went.
+      effects:
+        - { type: stat, key: discipline, delta: 2 }
+        - { type: relationship, role: friend, affection: -1, trust: 2 }

@@ -1,0 +1,18 @@
+id: soccer_team
+name: The school soccer team
+kind: team
+blurb: Practice four afternoons a week, a bus to away games, and a coach who says "again" more often than "good."
+minAge: 13
+tryout:
+  base: 45
+  stats: [{ key: fitness, weight: 0.5 }, { key: discipline, weight: 0.2 }]
+cost: 150
+effects:
+  fitness: { perYear: 1.2, limit: 85 }
+  health: { perYear: 0.3, limit: 80 }
+  stress: { perYear: -0.4, limit: 30 }
+grades: -0.04
+friends: 4
+talent: athletics
+passion: 5
+injury: 0.1

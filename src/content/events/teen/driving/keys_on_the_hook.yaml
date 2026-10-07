@@ -1,0 +1,41 @@
+id: keys_on_the_hook
+title: The spare keys
+text: >-
+  {parent.name} sets the keys on the hook by the door and says you can use the
+  car whenever you need it, as long as you fill the tank and tell {parent.them}
+  where you're going. It is, you realize, a gift of trust, and a big one.
+tone: light
+category: driving
+rarity: uncommon
+lifeStages: [teen]
+requires:
+  all:
+    - { age: { gte: 16 } }
+    - { teen: { license: [licensed] } }
+    - { teen: { rule: { domain: car, level: { eq: 0 } } } }
+    - { belongings: { vehicles: { lt: 1 } } }
+cast:
+  parent: { kind: parent, presence: household }
+weight: { base: 8 }
+cooldownYears: 4
+choices:
+  - id: earn_it
+    label: Fill the tank every time, and check in
+    outcome:
+      text: >-
+        You keep up your end of it for months, fuel receipts folded in the
+        glove compartment. {parent.name} stops asking where you are, because
+        you always tell {parent.them} first.
+      effects:
+        - { type: money, delta: -25 }
+        - { type: relationship, role: parent, trust: 5 }
+        - { type: stat, key: discipline, delta: 2 }
+  - id: take_advantage
+    label: Use it as much as you like
+    outcome:
+      text: >-
+        It works fine for a while. Then the tank is empty one morning when
+        {parent.name} has to get to work, and the conversation is short and cold.
+      effects:
+        - { type: teen, action: tighten, rule: car }
+        - { type: relationship, role: parent, trust: -4 }

@@ -1,0 +1,52 @@
+id: caught_car
+title: The odometer
+text: >-
+  {parent.name} didn't need to check the odometer to know. The car is parked
+  one space over from where {parent.they} left it, and you have the look of
+  someone who has been somewhere.
+tone: serious
+category: houserules
+rarity: common
+lifeStages: [teen]
+followUpOnly: true
+weight: { base: 1 }
+requires:
+  all:
+    - { teen: { rules: { gte: 1 } } }
+    - { teen: { caught: [car] } }
+    - { teen: { license: [licensed] } }
+cast:
+  parent: { kind: parent, presence: household }
+choices:
+  - id: keys
+    label: Put the keys in {parent.their} hand
+    outcome:
+      text: >-
+        "Thank you," {parent.name} says, which is somehow worse than shouting.
+        The keys go on a hook that is higher up than it used to be.
+      effects:
+        - { type: relationship, role: parent, trust: 3 }
+        - { type: teen, action: tighten, rule: car }
+  - id: promise
+    label: Promise it won't happen again
+    check:
+      base: 40
+      stats: [{ key: discipline, weight: 0.25 }, { role: parent, key: trust, weight: 0.25 }]
+      success:
+        text: >-
+          {parent.name} gives you a long look, then nods once. "I'm trusting
+          you with this," {parent.they} {parent:says|say}.
+        effects:
+          - { type: relationship, role: parent, trust: 3 }
+          - { type: stat, key: discipline, delta: 2 }
+      failure:
+        text: '"You said that last time," {parent.name} says, and it is true.'
+        effects:
+          - { type: relationship, role: parent, trust: -5 }
+          - { type: teen, action: tighten, rule: car }
+  - id: shrug
+    label: Shrug and say you were careful
+    outcome:
+      text: You were. It doesn't seem to be the point.
+      effects:
+        - { type: relationship, role: parent, trust: -3, affection: -1 }

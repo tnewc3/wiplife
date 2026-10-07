@@ -1,0 +1,50 @@
+id: friends_want_a_ride
+title: Can you drive us?
+text: >-
+  Now that you can drive, you are everyone's favorite person. {friend.name}
+  has a list of places and a plan that depends on you having a car, and
+  {friend.they} {friend:is|are} not shy about it.
+tone: neutral
+category: driving
+rarity: common
+lifeStages: [teen]
+requires:
+  all:
+    - { age: { gte: 16 } }
+    - { teen: { license: [licensed] } }
+    - { teen: { rule: { domain: car } } }
+cast:
+  friend: { kind: friend, presence: city }
+weight: { base: 7 }
+cooldownYears: 2
+choices:
+  - id: drive
+    label: Drive them, even though the rule is no passengers
+    outcome:
+      text: >-
+        Five people in a car built for four, the radio too loud, and nobody
+        wearing a seat belt properly. It is the best night of the month, and
+        you are never quite sure you got away with it.
+      effects:
+        - { type: teen, action: break, rule: car }
+        - { type: relationship, role: friend, affection: 5 }
+        - { type: stat, key: happiness, delta: 3 }
+  - id: ask_first
+    label: Tell {friend.them} you need to ask your parents first
+    outcome:
+      text: >-
+        You ask, you are allowed one friend, and it ends up being a better
+        evening than the loud one. {friend.name} gets a ride and you keep your
+        parents' trust.
+      effects:
+        - { type: relationship, role: friend, affection: 2 }
+        - { type: stat, key: discipline, delta: 1 }
+  - id: no
+    label: Say no. It is not your car
+    outcome:
+      text: >-
+        {friend.name} rolls {friend.their} eyes, and gets a ride from someone
+        else. You are fine with it. Mostly.
+      effects:
+        - { type: relationship, role: friend, affection: -3 }
+        - { type: stat, key: discipline, delta: 1 }

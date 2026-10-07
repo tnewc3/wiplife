@@ -11,6 +11,7 @@ import { whereabouts } from './presence';
 import { mostMissed, totalDebt } from './finance';
 import { circleSupport } from './mental/query';
 import { belongingsHolds } from './possessions/holds';
+import { teenHolds } from './teen/holds';
 import { romanceStatus, yearsInKind } from './relationships';
 import type { Id, LifeState } from './types';
 
@@ -140,7 +141,7 @@ export function evaluate(condition: Condition | undefined, state: LifeState, ctx
   if ('record' in condition) {
     const q = condition.record;
     return state.legal.record.some(
-      (r) => (!q.outcome || q.outcome.includes(r.outcome)) && (q.within === undefined || state.currentYear - r.year <= q.within),
+      (r) => !r.sealed && (!q.outcome || q.outcome.includes(r.outcome)) && (q.within === undefined || state.currentYear - r.year <= q.within),
     );
   }
   if ('health' in condition) {
@@ -186,6 +187,7 @@ export function evaluate(condition: Condition | undefined, state: LifeState, ctx
   }
   if ('family' in condition) return familyHolds(condition.family, state, ctx.content?.balance.relationships.adultAge);
   if ('belongings' in condition) return belongingsHolds(condition.belongings, state, ctx.cast, ctx.content);
+  if ('teen' in condition) return teenHolds(condition.teen, state);
   if ('memory' in condition) {
     const { role, tag } = condition.memory;
     return roleCheck(role, (id) => state.relationships[id]?.memories.some((m) => m.tag === tag) ?? false);

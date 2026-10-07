@@ -250,6 +250,51 @@ export const migrations: readonly Migration[] = [
       return { ...data, finances, estate, possessions: { items: [], nextId: 1, claims: [], noVehicleYears: 0 } };
     },
   },
+  {
+    from: 16,
+    description:
+      'T1: the teen years. A life gains a "teen" record: no crowds, focus, job, teams or house rules yet (the first teen year ' +
+      'sets up a school\'s crowds and the rules at home). Anyone who is an adult, or already drives (the can_drive flag), ' +
+      'holds a license, so nobody loses a car they own. Offenses from before 18 on the record of an adult are marked sealed ' +
+      '(without a history entry); the record a teen has now counts as seen, so nothing from before is answered at home.',
+    migrate: (data) => {
+      if (!isRecord(data) || !isRecord(data.character)) return data;
+      const age = typeof data.character.age === 'number' ? data.character.age : 0;
+      const birthYear = typeof data.birthYear === 'number' ? data.birthYear : 0;
+      const flags = isRecord(data.flags) ? data.flags : {};
+      const legal = isRecord(data.legal) ? data.legal : { record: [] };
+      const record = Array.isArray(legal.record) ? legal.record : [];
+      const adult = age >= 18;
+      const sealedRecord = adult
+        ? record.map((r) => (isRecord(r) && typeof r.year === 'number' && r.year - birthYear < 18 ? { ...r, sealed: true } : r))
+        : record;
+      const hadJuvenile = adult && sealedRecord.some((r) => isRecord(r) && r.sealed === true);
+      const licensed = adult || flags.can_drive === true;
+      return {
+        ...data,
+        legal: { ...legal, record: sealedRecord },
+        teen: {
+          school: null,
+          cliques: [],
+          nextClique: 1,
+          member: null,
+          turnedAway: {},
+          standing: 40,
+          focus: null,
+          focusYears: { school: 0, friends: 0, work: 0, passion: 0 },
+          passion: 0,
+          license: licensed ? { stage: 'licensed', since: typeof data.currentYear === 'number' ? data.currentYear : birthYear, lessons: 0, fails: 0 } : { stage: 'none', lessons: 0, fails: 0 },
+          job: null,
+          activities: [],
+          home: null,
+          penalties: [],
+          totals: { broken: 0, caught: 0, negotiated: 0, won: 0 },
+          seenRecords: record.length,
+          ...(hadJuvenile ? { sealed: true } : {}),
+        },
+      };
+    },
+  },
 ];
 
 function isRecord(value: unknown): value is Record<string, unknown> {

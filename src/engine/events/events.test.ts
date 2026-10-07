@@ -495,6 +495,12 @@ describe('event text', () => {
           petKind: 'dog',
           vehicle: 'sedan',
           homeCity: 'Chicago',
+          clique: 'Back Bleacher',
+          rival: 'Afterburn',
+          school: 'Lincoln High',
+          rule: 'curfew',
+          activity: 'the soccer team',
+          job: 'lifeguard',
         } satisfies Record<(typeof EVENT_TEXT_VALUES)[number] | 'petKind' | 'vehicle' | 'homeCity', string | number>;
         const context = { roles, values };
         const texts = [def.title, def.text, ...(def.choices ?? []).map((c) => c.label)];

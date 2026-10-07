@@ -1,0 +1,57 @@
+id: truancy_letter
+title: Unexcused absences
+text: >-
+  The letter has your name on it and the word "unexcused" three times. It
+  arrives on a Tuesday and lands on the kitchen table, in front of
+  {parent.name}, who reads it twice.
+tone: serious
+category: school
+rarity: common
+lifeStages: [teen]
+requires:
+  all:
+    - { education: { program: [middle, high] } }
+    - { age: { gte: 14 } }
+    - { trait: discipline, lt: 55 }
+cast:
+  parent: { kind: parent, presence: household }
+weight: { base: 3 }
+cooldownYears: 3
+choices:
+  - id: explain
+    label: Tell {parent.them} why you've been skipping
+    check:
+      base: 50
+      stats: [{ role: parent, key: trust, weight: 0.25 }]
+      success:
+        text: >-
+          It isn't about the school, exactly. It's about third period, and a
+          person in third period, and a feeling in your stomach. {parent.name}
+          calls the counselor. It isn't a fix, but it's a start.
+        effects:
+          - { type: relationship, role: parent, trust: 5, affection: 4 }
+          - { type: stat, key: stress, delta: -3 }
+      failure:
+        text: >-
+          You can't find the words, so you say "I don't know," and
+          {parent.name} hears it as an excuse. The conversation ends.
+        effects:
+          - { type: relationship, role: parent, trust: -3 }
+          - { type: stat, key: stress, delta: 2 }
+  - id: promise
+    label: Promise to go from now on
+    outcome:
+      text: You go for a month, then two, and it gets easier. Not good, but easier.
+      effects:
+        - { type: stat, key: discipline, delta: 2 }
+        - { type: education, action: grades, value: 0.1 }
+  - id: ignore
+    label: Say it's not a big deal
+    outcome:
+      text: >-
+        It becomes one when a hearing is scheduled. You are told you'll go,
+        and you do, and you get {sentence}.
+      effects:
+        - { type: legal, offenseId: truancy, outcome: sentence }
+        - { type: relationship, role: parent, trust: -4 }
+        - { type: stat, key: stress, delta: 3 }

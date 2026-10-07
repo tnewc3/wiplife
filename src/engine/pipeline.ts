@@ -13,13 +13,16 @@
  * requests it queues are picked up the same year. The web step (E4) follows it:
  * ties between the people you know change, and what they know spreads. The
  * mental health step (M1) follows the health step: who has noticed you struggling.
- * The possessions step (E5) follows the ledger, which has charged the year's upkeep and insurance:
+ * The teen step (T1) follows education, so the grade points a focus, a crowd,
+ * a team or a teen job gives count toward the year that has begun; the teen
+ * job's pay joins the ledger's income. The possessions step (E5) follows the ledger, which has charged the year's upkeep and insurance:
  * pets and vehicles age, accidents and deaths are queued as events.
  */
 import type { ContentBundle } from '../content/schemas';
 import { runHeritage } from './estate/heritage';
 import { runLives } from './lives/step';
 import { runPossessions } from './possessions/step';
+import { runTeen } from './teen/step';
 import { runWeb } from './web/step';
 import { runFamily } from './family/step';
 import { runMoods } from './interactions/mood';
@@ -49,6 +52,7 @@ export const YEAR_PIPELINE: readonly PipelineStep[] = [
   { id: 'heritage', run: runHeritage },
   { id: 'legal', run: runLegal },
   { id: 'education', run: runEducation },
+  { id: 'teen', run: runTeen },
   { id: 'career', run: runCareer },
   { id: 'economy', run: runEconomy },
   { id: 'possessions', run: runPossessions },

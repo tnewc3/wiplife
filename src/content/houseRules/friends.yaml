@@ -1,0 +1,12 @@
+id: friends
+domain: friends
+name: Who you see
+levels:
+  - Bring your friends around whenever you like.
+  - Parents meet the friends first, and you say where you're going.
+  - Only people your parents have met, and never at a house with nobody home.
+tight: { strictness: 0.56, warmth: -0.16, involvement: 0.56, traits: { kindness: -0.16 } }
+absentBelow: 54
+temptation: 0.106
+watch: 0.4
+applies: always

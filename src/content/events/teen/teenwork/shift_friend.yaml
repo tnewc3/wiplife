@@ -1,0 +1,39 @@
+id: shift_friend
+title: The person on the next register
+text: >-
+  {coworker.name} has been on your shift since the beginning, and the two of
+  you have developed a language made of looks. A slow Tuesday, a broken
+  fryer and a long argument about the best flavor of anything is how it begins.
+tone: light
+category: teenwork
+rarity: common
+lifeStages: [teen]
+requires:
+  all:
+    - { teen: { job: true } }
+cast:
+  coworker: { kind: friend, ageOffset: { min: -1, max: 2 }, createIfMissing: true, newChance: 0.6, presence: city }
+weight: { base: 6 }
+cooldownYears: 3
+choices:
+  - id: hang
+    label: Hang out after your shift
+    outcome:
+      text: The best conversations of the month happen in a parking lot at ten at night, with the smell of the fryer still on your clothes.
+      effects:
+        - { type: relationship, role: coworker, kind: friend, affection: 10, trust: 5 }
+        - { type: stat, key: happiness, delta: 3 }
+  - id: cover
+    label: Cover {coworker.their} shift for {coworker.them}
+    outcome:
+      text: You work a double and fall into bed. {coworker.name} owes you one, and brings you a coffee the next day.
+      effects:
+        - { type: money, delta: 70 }
+        - { type: relationship, role: coworker, affection: 6, trust: 6 }
+        - { type: stat, key: stress, delta: 2 }
+  - id: keep_distance
+    label: Keep it professional
+    outcome:
+      text: You get through every shift without much conversation. It's quiet, and it's fine.
+      effects:
+        - { type: stat, key: discipline, delta: 1 }

@@ -11,6 +11,7 @@ import { HealthScreen } from '../more/HealthScreen';
 import { FamilyScreen } from '../more/FamilyScreen';
 import { WillScreen } from '../more/WillScreen';
 import { BelongingsScreen } from '../more/BelongingsScreen';
+import { TeenScreen } from '../more/TeenScreen';
 import { PetScreen } from '../people/PetScreen';
 import { LegalBanner } from '../../components/LegalBanner';
 import { MoreTab } from '../more/MoreTab';
@@ -71,16 +72,17 @@ export function GameScreen({ life }: { life: LifeState }) {
   const family = tab === 'more' && moreView === 'family';
   const will = tab === 'more' && moreView === 'will';
   const belongings = tab === 'more' && moreView === 'belongings';
+  const teen = tab === 'more' && moreView === 'teen';
   const pet = tab === 'people' && personId !== null && life.possessions.items.some((p) => p.id === personId && p.kind === 'pet') ? personId : null;
   const back = person || pet
     ? { onBack: closePerson, backLabel: 'Back to People' }
-    : home || health || family || will || belongings
+    : home || health || family || will || belongings || teen
       ? { onBack: closeHome, backLabel: 'Back to More' }
       : {};
 
   return (
     <Screen
-      title={home ? 'Home' : health ? 'Health' : family ? 'Family' : will ? 'Your will' : belongings ? 'Belongings' : current.label}
+      title={home ? 'Home' : health ? 'Health' : family ? 'Family' : will ? 'Your will' : belongings ? 'Belongings' : teen ? 'Teen years' : current.label}
       {...back}
       footer={
         <>
@@ -114,6 +116,8 @@ export function GameScreen({ life }: { life: LifeState }) {
         <WillScreen life={life} />
       ) : belongings ? (
         <BelongingsScreen life={life} />
+      ) : teen ? (
+        <TeenScreen life={life} />
       ) : (
         <MoreTab />
       )}

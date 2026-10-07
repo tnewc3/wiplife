@@ -1,0 +1,38 @@
+id: scholarship_for_your_passion
+title: The envelope
+text: >-
+  The envelope is thick, which in your experience means good news. Inside is a
+  letter from a program that has been watching what you do for a long time, and
+  an offer: a scholarship for a talent you've spent years on.
+tone: light
+category: future
+rarity: rare
+lifeStages: [teen]
+requires:
+  all:
+    - { teen: { passion: { gte: 45 } } }
+    - { discovery: { talent: found } }
+    - { age: { gte: 16 } }
+weight: { base: 8 }
+once: true
+choices:
+  - id: accept
+    label: Accept it, and tell everyone you know
+    outcome:
+      text: >-
+        The whole house goes quiet and then loud. Nothing has been decided about what comes
+        next, but for the first time you can imagine a version where it works.
+      effects:
+        - { type: education, action: scholarship, value: 6000 }
+        - { type: flag, key: passion_scholarship, value: true }
+        - { type: stat, key: happiness, delta: 6 }
+        - { type: stat, key: confidence, delta: 3 }
+  - id: ask_time
+    label: Ask for time to decide
+    outcome:
+      text: They say yes, which is also a kind of answer. By the end of the month, you know what you want, and it's what the letter offered.
+      effects:
+        - { type: education, action: scholarship, value: 4000 }
+        - { type: flag, key: passion_scholarship, value: true }
+        - { type: stat, key: stress, delta: 2 }
+        - { type: stat, key: discipline, delta: 1 }

@@ -1,0 +1,53 @@
+id: caught_screens
+title: The glow under the blanket
+text: >-
+  The light from your phone gives you away: {parent.name} opens the door
+  without knocking, long after the time {parent.they} told you to put it away.
+tone: neutral
+category: houserules
+rarity: common
+lifeStages: [teen]
+followUpOnly: true
+weight: { base: 1 }
+requires:
+  all:
+    - { teen: { rules: { gte: 1 } } }
+    - { teen: { caught: [screens, check_in, friends] } }
+cast:
+  parent: { kind: parent, presence: household }
+choices:
+  - id: hand_over
+    label: Hand it over
+    outcome:
+      text: >-
+        You hand it over. {parent.name} looks almost surprised, and the phone
+        spends the night on the kitchen counter, next to the keys.
+      effects:
+        - { type: relationship, role: parent, trust: 3 }
+        - { type: stat, key: stress, delta: -1 }
+  - id: explain
+    label: Explain what you were doing, honestly
+    check:
+      base: 45
+      stats: [{ role: parent, key: trust, weight: 0.3 }]
+      success:
+        text: >-
+          It was a group chat about a friend who was having a rough night, and
+          you tell {parent.them} so. {parent.name} sits on the end of the bed
+          for a minute before leaving without taking the phone.
+        effects:
+          - { type: relationship, role: parent, trust: 5, affection: 2 }
+      failure:
+        text: >-
+          The truth sounds worse out loud than it did in your head, and the
+          phone goes into a drawer anyway.
+        effects:
+          - { type: relationship, role: parent, trust: -2 }
+          - { type: stat, key: happiness, delta: -2 }
+  - id: sulk
+    label: Sulk about how unfair it is
+    outcome:
+      text: It is fair, and you know it, which is the worst part.
+      effects:
+        - { type: relationship, role: parent, affection: -2 }
+        - { type: stat, key: happiness, delta: -2 }

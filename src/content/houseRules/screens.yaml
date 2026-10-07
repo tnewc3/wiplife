@@ -1,0 +1,12 @@
+id: screens
+domain: screens
+name: Phone and screens
+levels:
+  - Phones off at the table, and that's about it.
+  - Phones on the kitchen counter at ten.
+  - No phone after nine, and the password is not a secret.
+tight: { strictness: 0.64, warmth: -0.08, involvement: 0.48, traits: { discipline: 0.16 } }
+absentBelow: 50
+temptation: 0.191
+watch: 0.35
+applies: always

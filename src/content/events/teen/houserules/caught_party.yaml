@@ -1,0 +1,53 @@
+id: caught_party
+title: The ride home
+text: >-
+  {parent.name} picks you up from the party {parent.they} said you couldn't go
+  to. Neither of you says anything until the first red light.
+tone: serious
+category: houserules
+rarity: common
+lifeStages: [teen]
+followUpOnly: true
+weight: { base: 1 }
+requires:
+  all:
+    - { teen: { rules: { gte: 1 } } }
+    - { teen: { caught: [parties, friends] } }
+cast:
+  parent: { kind: parent, presence: household }
+choices:
+  - id: truth
+    label: Tell {parent.them} how the night really went
+    outcome:
+      text: >-
+        You tell it straight, including the parts that don't make you look
+        good. {parent.name} grips the wheel and listens, and by the time you
+        get home the worst of it has gone out of the car.
+      effects:
+        - { type: relationship, role: parent, trust: 5 }
+        - { type: stat, key: stress, delta: -2 }
+  - id: minimize
+    label: Say it was nothing, just a lot of people in a kitchen
+    check:
+      base: 35
+      stats: [{ key: confidence, weight: 0.2 }, { role: parent, key: trust, weight: 0.2 }]
+      success:
+        text: '{parent.name} lets it go, mostly. You can tell {parent.they} will remember it.'
+        effects:
+          - { type: relationship, role: parent, trust: -1 }
+      failure:
+        text: >-
+          {parent.name} has already talked to another parent. The rest of the
+          ride is a list of names, and each one is somebody who told.
+        effects:
+          - { type: relationship, role: parent, trust: -6 }
+          - { type: teen, action: tighten, rule: parties }
+  - id: blame
+    label: Blame your friends for it
+    outcome:
+      text: >-
+        It works, in the sense that nobody is punished tonight but your friends'
+        parents will hear about it. You do not feel good about it.
+      effects:
+        - { type: relationship, role: parent, trust: -3 }
+        - { type: stat, key: kindness, delta: -2 }

@@ -22,6 +22,7 @@ choices:
           tan, rich by your standards, and you've pulled one kid out of the deep end.
         effects:
           - { type: money, delta: 1800 }
+          - { type: teen, action: hire, jobId: lifeguard }
           - { type: stat, key: fitness, delta: 3 }
           - { type: stat, key: confidence, delta: 3 }
           - { type: history, text: 'You spent a summer as a lifeguard and pulled a kid out of the deep end.', importance: 1 }

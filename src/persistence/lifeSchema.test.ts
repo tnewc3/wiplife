@@ -912,3 +912,76 @@ describe('lives from E5 on', () => {
     expect(loadedLifeSchema(content).safeParse(badName).success).toBe(false);
   });
 });
+
+describe('lives from T1 on', () => {
+  const teenLife = () => {
+    let life = lifeAtAge('t1-teen', 12);
+    for (let i = 0; i < 4; i++) life = playYear(life, content);
+    return life;
+  };
+
+  it('round trips a teen with a school, crowds, rules at home and a record', async () => {
+    const life = produce(teenLife(), (d) => {
+      d.legal.record.push({ offenseId: 'vandalism', year: d.currentYear - 1, outcome: 'warning' });
+      d.teen.seenRecords = d.legal.record.length;
+    });
+    expect(life.teen.school).not.toBeNull();
+    expect(life.teen.cliques.length).toBeGreaterThan(0);
+    expect(life.teen.home?.rules.length).toBeGreaterThan(0);
+    expect(loadedLifeSchema(content).safeParse(life).success).toBe(true);
+    expect(await roundTrip(life)).toEqual(life);
+  });
+
+  it('round trips an adult whose juvenile record was sealed', async () => {
+    const life = produce(lifeAtAge('t1-sealed', 30), (d) => {
+      d.legal.record.push({ offenseId: 'vandalism', year: d.birthYear + 16, outcome: 'fine', amount: 300, sealed: true });
+      d.teen.sealed = true;
+      d.teen.seenRecords = 1;
+    });
+    expect(await roundTrip(life)).toEqual(life);
+  });
+
+  it('upgrades a schema version 16 life: no crowds, rules or job yet; a grown life holds a license; an adult’s juvenile record is sealed', async () => {
+    const life = produce(lifeAtAge('t1-v16', 30), (d) => {
+      d.legal.record.push({ offenseId: 'vandalism', year: d.birthYear + 16, outcome: 'fine', amount: 300, sealed: true });
+      d.legal.record.push({ offenseId: 'shoplifting', year: d.currentYear - 2, outcome: 'warning' });
+      d.teen.sealed = true;
+      d.teen.seenRecords = 2;
+    });
+    const v16 = JSON.parse(JSON.stringify(life)) as Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any -- stripping fields from plain JSON to build an old save
+    delete v16.teen;
+    for (const r of v16.legal.record) delete r.sealed;
+    const db = freshDb();
+    await db.lives.put({ id: 'active', envelope: { ...makeEnvelope(v16, content.contentVersion), schemaVersion: 16 } });
+    const result = await readSave(db, loadedLifeSchema(content));
+    expect(result.status).toBe('ok');
+    if (result.status !== 'ok') return;
+    expect(result.envelope.schemaVersion).toBe(CURRENT_SCHEMA_VERSION);
+    expect(result.envelope.data).toEqual(life);
+    expect(result.envelope.data.teen.license.stage).toBe('licensed');
+  });
+
+  it('upgrades a teen’s save: a license only with the can_drive flag, and nothing on the record is answered at home', () => {
+    const base = JSON.parse(JSON.stringify(lifeAtAge('t1-v16b', 17))) as Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any -- building an old save
+    delete base.teen;
+    base.legal.record = [{ offenseId: 'vandalism', year: base.currentYear - 1, outcome: 'warning' }];
+    const plain = migrateEnvelope({ ...makeEnvelope(base, content.contentVersion), schemaVersion: 16 }).data as LifeState;
+    expect(plain.teen.license.stage).toBe('none');
+    expect(plain.teen.seenRecords).toBe(1);
+    expect(plain.legal.record[0]!.sealed).toBeUndefined();
+    base.flags.can_drive = true;
+    const driver = migrateEnvelope({ ...makeEnvelope(base, content.contentVersion), schemaVersion: 16 }).data as LifeState;
+    expect(driver.teen.license.stage).toBe('licensed');
+    expect(lifeStateSchema.safeParse(driver).success).toBe(true);
+  });
+
+  it('refuses a save with something wrong in the teen record', () => {
+    const life = teenLife();
+    const bad = JSON.parse(JSON.stringify(life)) as LifeState;
+    bad.teen.passion = 101;
+    expect(lifeStateSchema.safeParse(bad).success).toBe(false);
+    const worse = JSON.parse(JSON.stringify(life)) as Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any -- breaking a plain JSON save on purpose
+    worse.teen.license.stage = 'driver';
+    expect(lifeStateSchema.safeParse(worse).success).toBe(false);
+  });
+});

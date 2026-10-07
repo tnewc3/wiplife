@@ -1,0 +1,17 @@
+id: basketball_team
+name: The basketball team
+kind: team
+blurb: Gym time, a bench you have to earn and a season that comes down to one stubborn free throw.
+minAge: 13
+tryout:
+  base: 40
+  stats: [{ key: fitness, weight: 0.45 }, { key: confidence, weight: 0.15 }]
+cost: 130
+effects:
+  fitness: { perYear: 1.1, limit: 85 }
+  health: { perYear: 0.2, limit: 80 }
+grades: -0.04
+friends: 4
+talent: athletics
+passion: 5
+injury: 0.11

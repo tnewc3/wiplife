@@ -1,0 +1,49 @@
+id: job_vs_homework
+title: Closing shift, open book
+text: >-
+  The test is tomorrow, and so is your closing shift. You have a textbook in
+  your bag, a manager who won't let you swap, and a feeling in your stomach
+  that something has to give.
+tone: neutral
+category: teenwork
+rarity: common
+lifeStages: [teen]
+requires:
+  all:
+    - { teen: { job: true } }
+    - { education: { program: [middle, high] } }
+weight: { base: 6 }
+cooldownYears: 2
+choices:
+  - id: work
+    label: Work the shift and cram on the bus
+    check:
+      base: 45
+      stats: [{ key: smarts, weight: 0.3 }, { key: discipline, weight: 0.2 }]
+      success:
+        text: It's grim, and it works. You get a B on the test and a pat on the back from your manager.
+        effects:
+          - { type: money, delta: 90 }
+          - { type: stat, key: stress, delta: 3 }
+      failure:
+        text: You fall asleep on the bus and wake up at the end of the line. The test goes about how you'd expect.
+        effects:
+          - { type: money, delta: 90 }
+          - { type: education, action: grades, value: -0.1 }
+          - { type: stat, key: stress, delta: 4 }
+  - id: swap
+    label: Call out and study, and take the consequences
+    outcome:
+      text: Your manager is not happy, and you get a long talk about reliability. You ace the test.
+      effects:
+        - { type: money, delta: -60 }
+        - { type: education, action: grades, value: 0.1 }
+        - { type: stat, key: discipline, delta: -1 }
+  - id: quit
+    label: Quit, and focus on school
+    outcome:
+      text: You hand in your notice at the end of the week. It's a relief, and also the end of the money you were counting on.
+      effects:
+        - { type: teen, action: quit }
+        - { type: money, delta: -40 }
+        - { type: education, action: grades, value: 0.15 }

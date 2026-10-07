@@ -12,6 +12,7 @@ import { clampInt } from '../random';
 import { nextInt } from '../rng';
 import { writeFromGroup } from '../systems/history';
 import type { Id, LifeState, Possession } from '../types';
+import { hasLicense } from '../teen/query';
 import { jobNeedsVehicle } from './jobs';
 import { costOfLiving, loanIdOf, nextPossessionId, possessionById, vehicleAge, vehicleDef, vehicleOf, vehiclesOf } from './query';
 
@@ -57,7 +58,7 @@ export function vehicleUpkeep(state: LifeState, p: Possession, content: ContentB
   return wholeDollars(vehicleDef(content, p).upkeep * costOfLiving(state, content));
 }
 
-export type VehicleBlock = 'age' | 'limit' | 'savings' | 'unknown' | 'used';
+export type VehicleBlock = 'age' | 'limit' | 'savings' | 'unknown' | 'used' | 'license';
 export type LoanBlock = 'independent' | 'bankruptcy' | 'income';
 
 export interface VehicleQuote {
@@ -90,6 +91,8 @@ export function vehicleQuote(state: LifeState, defId: Id, used: boolean, content
   if (!def || def.retired) base = 'unknown';
   else if (used && !def.used) base = 'used';
   else if (state.character.age < content.balance.possessions.drivingAge) base = 'age';
+  // T1: you need your license to buy a vehicle (the teen years: lessons and the test).
+  else if (!hasLicense(state)) base = 'license';
   else if (vehiclesOf(state).length >= content.balance.possessions.limits.vehicles) base = 'limit';
   const cashBlock = base ?? (state.finances.savings < cash ? 'savings' : null);
 

@@ -52,6 +52,7 @@ import { mentalSafetyErrors } from './mentalSafety';
 import { checkPeople } from './people';
 import { checkWeb } from './web';
 import { checkPossessions } from './possessions';
+import { checkTeen } from './teen';
 
 const CREATION = 'balance/creation.yaml';
 const AGING = 'balance/aging.yaml';
@@ -185,6 +186,7 @@ export function checkReferences(
   errors.push(...checkPeople(bundle, fileOf, options.partialEvents === true));
   errors.push(...checkWeb(bundle, fileOf, options.partialEvents === true));
   errors.push(...checkPossessions(bundle, fileOf, options.partialEvents === true));
+  errors.push(...checkTeen(bundle, fileOf, options.partialEvents === true));
 
   return errors;
 }
@@ -493,6 +495,8 @@ function checkEvents(bundle: ContentBundle, fileOf: (typeKey: CollectionKey, id:
     // E5: accidents and the death of a pet.
     ...Object.values(bundle.registries.possessions.accidents).flatMap((r) => r.events),
     ...bundle.registries.possessions.petDied.events,
+    // T1: what the teen step queues (caught, invited, clash, juvenile).
+    ...Object.values(bundle.registries.teen.triggers).flatMap((r) => r.events),
   ]);
 
   for (const [id, def] of Object.entries(bundle.events)) {
