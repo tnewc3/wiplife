@@ -1,0 +1,15 @@
+id: overtime
+name: Overtime
+blurb: Hustlers with a side gig and a plan, who compare schedules the way other people compare grades, and who always know who is hiring.
+weight: 1
+traits: { ambition: 10, discipline: 8, riskTaking: -2 }
+likes: { ambition: 0.5, discipline: 0.5 }
+standing: 46
+effects:
+  stress: { perYear: 0.5, limit: 70 }
+  fitness: { perYear: 0.2, limit: 70 }
+grades: -0.04
+friends: 2
+money: 1.3
+passion: 1
+trouble: 0.6

@@ -1,0 +1,59 @@
+id: clash_truce
+title: A truce, maybe
+text: >-
+  {foe.name} from {rival} catches up with you after class, hands shoved in
+  pockets. Things between the two crowds have been bad for a while, and
+  {foe.they} {foe:is|are} here to ask whether they could stop.
+tone: neutral
+category: crowds
+rarity: uncommon
+lifeStages: [teen]
+requires:
+  all:
+    - { education: { program: [middle, high] } }
+    - { teen: { clique: true } }
+    - { teen: { clash: true } }
+cast:
+  member: { kind: classmate, crowd: yours, presence: city }
+  foe: { kind: classmate, crowd: rival, presence: city }
+weight: { base: 6 }
+cooldownYears: 3
+choices:
+  - id: accept
+    label: Say yes, and mean it
+    check:
+      base: 55
+      stats: [{ key: kindness, weight: 0.25 }, { role: foe, key: affection, weight: 0.2 }]
+      success:
+        text: >-
+          You shake on it. It is awkward, and you each tell your crowd it was
+          your idea, and for once that is true of both of you.
+        effects:
+          - { type: teen, action: settle }
+          - { type: tie, a: member, b: foe, action: mend, delta: 18 }
+          - { type: relationship, role: foe, affection: 8, trust: 3 }
+          - { type: stat, key: stress, delta: -3 }
+      failure:
+        text: >-
+          Your crowd isn't convinced. The truce lasts two days, and each side
+          is sure the other one broke it first.
+        effects:
+          - { type: relationship, role: foe, trust: -3 }
+          - { type: stat, key: stress, delta: 1 }
+  - id: demand
+    label: Say you'll think about it, and make {foe.them} wait
+    outcome:
+      text: >-
+        The wait does something to {foe.name}'s face. When you finally say
+        yes, it isn't much of a victory, and you can tell it isn't one.
+      effects:
+        - { type: relationship, role: foe, affection: -3 }
+        - { type: teen, action: standing, delta: 1 }
+  - id: no
+    label: Tell {foe.them} no
+    outcome:
+      text: It is the loyal thing to do. It is also the thing that keeps it going.
+      effects:
+        - { type: relationship, role: member, affection: 3 }
+        - { type: relationship, role: foe, affection: -4 }
+        - { type: tie, a: member, b: foe, action: worsen, delta: 4 }

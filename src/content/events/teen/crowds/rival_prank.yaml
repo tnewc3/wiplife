@@ -1,0 +1,63 @@
+id: rival_prank
+title: Somebody's idea of a joke
+text: >-
+  Somebody from {rival} has been busy: {member.name}'s locker is full of
+  confetti, and everyone in the hallway is pretending not to look. {member.They}
+  {member:is|are} trying very hard to laugh along.
+tone: neutral
+category: crowds
+rarity: common
+lifeStages: [teen]
+followUpOnly: true
+weight: { base: 1 }
+requires:
+  all:
+    - { education: { program: [middle, high] } }
+    - { teen: { clique: true } }
+    - { teen: { clash: true } }
+cast:
+  member: { kind: classmate, crowd: yours, presence: city }
+  foe: { kind: classmate, crowd: rival, presence: city }
+choices:
+  - id: help
+    label: Help {member.them} clean it up
+    outcome:
+      text: >-
+        You pick up confetti side by side and say nothing about it. {member.name}
+        says thanks, and means more than that.
+      effects:
+        - { type: relationship, role: member, affection: 6, trust: 4 }
+        - { type: teen, action: rank, delta: 2 }
+  - id: retaliate
+    label: Get even with {foe.name}
+    check:
+      base: 40
+      stats: [{ key: riskTaking, weight: 0.25 }, { key: confidence, weight: 0.2 }]
+      success:
+        text: >-
+          Whatever you do, it is clever and nobody can prove it was you. Your
+          crowd tells the story for a week, and {foe.name} stops smiling.
+        effects:
+          - { type: relationship, role: foe, affection: -6 }
+          - { type: tie, a: member, b: foe, action: worsen, delta: 8 }
+          - { type: teen, action: standing, delta: 3 }
+          - { type: stat, key: riskTaking, delta: 2 }
+      failure:
+        text: >-
+          It goes wrong in the loudest possible way, and the vice principal is
+          standing there for the best part of it. You get a lecture and a week
+          of afternoons in a classroom.
+        effects:
+          - { type: teen, action: standing, delta: -4 }
+          - { type: stat, key: stress, delta: 4 }
+          - { type: education, action: grades, value: -0.1 }
+  - id: tell
+    label: Tell a teacher
+    outcome:
+      text: >-
+        The teacher takes it seriously, and the prank stops. Some people
+        in your crowd think you handled it like a grown-up. Others call it snitching.
+      effects:
+        - { type: relationship, role: member, trust: 2 }
+        - { type: teen, action: standing, delta: -2 }
+        - { type: stat, key: stress, delta: -2 }

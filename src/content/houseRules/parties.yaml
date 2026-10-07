@@ -1,0 +1,12 @@
+id: parties
+domain: parties
+name: Parties
+levels:
+  - Parties are fine, as long as someone sober is driving.
+  - No parties without a parent in the house.
+  - No parties at all, and a call to the host's parents before you go anywhere.
+tight: { strictness: 0.8, warmth: -0.08, involvement: 0.4, traits: { riskTaking: -0.24 } }
+absentBelow: 52
+temptation: 0.128
+watch: 0.4
+applies: always

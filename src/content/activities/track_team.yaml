@@ -1,0 +1,17 @@
+id: track_team
+name: Track and field
+kind: team
+blurb: Early mornings, long runs and a stopwatch that doesn't care how your day went.
+minAge: 13
+tryout:
+  base: 55
+  stats: [{ key: fitness, weight: 0.45 }, { key: discipline, weight: 0.3 }]
+cost: 90
+effects:
+  fitness: { perYear: 1.4, limit: 88 }
+  health: { perYear: 0.3, limit: 80 }
+grades: 0
+friends: 3
+talent: athletics
+passion: 5
+injury: 0.08

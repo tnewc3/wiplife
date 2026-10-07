@@ -1,0 +1,11 @@
+id: pizza_delivery
+name: delivery driver
+blurb: A borrowed hatchback, a hot bag on the passenger seat and a list of addresses that don't exist on the map.
+minAge: 16
+hours: 14
+wage: 12
+employers: ["Slice of Home Pizza", "Quickbite Delivery", "Mama Lena's Kitchen"]
+effects:
+  stress: { perYear: 0.4, limit: 65 }
+needs: { discipline: 35 }
+needsLicense: true

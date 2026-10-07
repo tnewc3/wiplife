@@ -1,0 +1,50 @@
+id: lunch_table_alone
+title: Nowhere to sit
+text: >-
+  Everyone at {school} seems to have a table. You hold your tray in the
+  doorway of the cafeteria and do the math: three seats here, one there, a
+  whole room of people who all seem to know where they're going.
+tone: neutral
+category: crowds
+rarity: common
+lifeStages: [teen]
+requires:
+  all:
+    - { education: { program: [middle, high] } }
+    - { teen: { clique: false } }
+    - { teen: { standing: { lt: 50 } } }
+weight: { base: 8 }
+cooldownYears: 2
+choices:
+  - id: ask
+    label: Walk up to a table and ask to sit
+    check:
+      base: 50
+      stats: [{ key: confidence, weight: 0.3 }, { key: sociability, weight: 0.25 }]
+      success:
+        text: >-
+          "Sure," says someone, and shifts a bag off the chair. By the end of
+          lunch you've been told three names and one rumor.
+        effects:
+          - { type: teen, action: join }
+          - { type: stat, key: confidence, delta: 2 }
+      failure:
+        text: >-
+          "That seat's taken," says someone, who is not sitting in it. You
+          eat in the library and feel it for a few days.
+        effects:
+          - { type: stat, key: happiness, delta: -2 }
+          - { type: teen, action: standing, delta: -1 }
+  - id: library
+    label: Eat in the library and read
+    outcome:
+      text: It's quiet, it's fine, and nobody can see you not knowing where to go.
+      effects:
+        - { type: stat, key: smarts, delta: 1 }
+        - { type: stat, key: stress, delta: -1 }
+  - id: wait
+    label: Wait for someone to wave you over
+    outcome:
+      text: You stand there long enough that it starts to be the only thing anyone has noticed. Eventually you sit somewhere, anywhere.
+      effects:
+        - { type: stat, key: stress, delta: 2 }

@@ -1,0 +1,49 @@
+id: first_solo_drive
+title: Alone behind the wheel
+text: >-
+  The first time you drive somewhere with nobody in the passenger seat, the
+  car is quiet in a way it never was with {parent.name} next to you. It's a
+  ten-minute trip, and you remember every single minute of it.
+tone: light
+category: driving
+rarity: common
+lifeStages: [teen]
+requires:
+  all:
+    - { age: { gte: 16 } }
+    - { teen: { license: [licensed] } }
+cast:
+  parent: { kind: parent, presence: nearby }
+weight: { base: 12 }
+once: true
+choices:
+  - id: straight
+    label: Go straight there and straight back
+    outcome:
+      text: You signal at every turn and keep your hands at ten and two. It is the most responsible ten minutes of your life.
+      effects:
+        - { type: stat, key: discipline, delta: 2 }
+        - { type: relationship, role: parent, trust: 3 }
+  - id: long_way
+    label: Take the long way home, windows down
+    check:
+      base: 70
+      stats: [{ key: luck, weight: 0.2 }, { key: discipline, weight: 0.2 }]
+      success:
+        text: You find roads you did not know were there, and the song you wanted comes on. You'll never be quite this free again.
+        effects:
+          - { type: stat, key: happiness, delta: 4 }
+          - { type: stat, key: riskTaking, delta: 1 }
+      failure:
+        text: >-
+          A police officer pulls you over for a taillight you didn't know was
+          out. It's a warning, but your heart does not stop pounding until you are home.
+        effects:
+          - { type: stat, key: stress, delta: 3 }
+          - { type: relationship, role: parent, trust: -1 }
+  - id: call
+    label: Call {parent.name} from the driveway to say you made it
+    outcome:
+      text: '"Good," {parent.name} says, and you can hear that {parent.they} had been holding {parent.their} breath.'
+      effects:
+        - { type: relationship, role: parent, affection: 4, trust: 2 }

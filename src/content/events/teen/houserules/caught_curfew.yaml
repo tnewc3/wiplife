@@ -1,0 +1,56 @@
+id: caught_curfew
+title: The porch light
+text: >-
+  The porch light is on, and so is {parent.name}, sitting at the kitchen table
+  with {parent.their} arms folded. It is a lot later than {parent.they} told you
+  to be home.
+tone: serious
+category: houserules
+rarity: common
+lifeStages: [teen]
+followUpOnly: true
+weight: { base: 1 }
+requires:
+  all:
+    - { teen: { rules: { gte: 1 } } }
+    - { teen: { caught: [curfew] } }
+cast:
+  parent: { kind: parent, presence: household }
+choices:
+  - id: own_up
+    label: Say you're sorry, and mean most of it
+    outcome:
+      text: >-
+        {parent.name} lets the silence do some of the work, then says the part
+        about being worried sick twice. It is a hard conversation and a fair one.
+      effects:
+        - { type: relationship, role: parent, trust: 4, affection: 1 }
+        - { type: stat, key: discipline, delta: 1 }
+  - id: argue
+    label: Argue that everyone else's curfew is later
+    check:
+      base: 28
+      stats: [{ role: parent, key: affection, weight: 0.3 }, { key: confidence, weight: 0.15 }]
+      success:
+        text: >-
+          You are calm for once, and {parent.name} actually hears it. Nothing
+          changes tonight, but {parent.they} {parent:agrees|agree} to talk about it
+          again when things have cooled off.
+        effects:
+          - { type: relationship, role: parent, trust: 1 }
+          - { type: stat, key: confidence, delta: 2 }
+      failure:
+        text: >-
+          It goes the way these things go: louder and louder, until you have
+          both said something that is going to take a few days to un-say.
+        effects:
+          - { type: relationship, role: parent, trust: -4, affection: -3 }
+          - { type: teen, action: tighten, rule: curfew }
+          - { type: stat, key: stress, delta: 3 }
+  - id: silent
+    label: Say nothing and go to your room
+    outcome:
+      text: The door closes harder than you meant it to. Nobody comes up for a long time.
+      effects:
+        - { type: relationship, role: parent, trust: -2 }
+        - { type: stat, key: stress, delta: 2 }

@@ -1,0 +1,14 @@
+id: art_club
+name: The art club
+kind: club
+blurb: A room that smells of paint and old clay, with no grades, no judges and a gallery wall in the hallway.
+minAge: 13
+cost: 40
+effects:
+  happiness: { perYear: 0.6, limit: 85 }
+  stress: { perYear: -0.4, limit: 30 }
+grades: 0.02
+friends: 3
+talent: art
+passion: 6
+injury: 0

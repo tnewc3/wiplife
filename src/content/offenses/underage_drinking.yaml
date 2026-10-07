@@ -1,0 +1,7 @@
+id: underage_drinking
+name: underage drinking
+class: misdemeanor
+severity: 1
+outcomes: { warning: 5, fine: 3, probation: 0.5, jail: 0 }
+fine: { min: 150, max: 600 }
+probationYears: { min: 1, max: 1 }

@@ -1,0 +1,46 @@
+id: let_go
+title: Don't bother coming Monday
+text: >-
+  Your manager asks you to stay a minute after the shift. The words that
+  follow are kind and clear: they've decided to go in another direction, and
+  they wish you the best.
+tone: serious
+category: teenwork
+rarity: uncommon
+lifeStages: [teen]
+requires:
+  all:
+    - { teen: { job: true } }
+weight:
+  base: 3
+  modifiers:
+    - { if: { trait: discipline, lt: 40 }, x: 2.5 }
+cooldownYears: 4
+choices:
+  - id: ask_why
+    label: Ask what you could have done differently
+    outcome:
+      text: >-
+        It takes your manager a minute, and then it's honest: you were late
+        too often, and when you were there you were looking at the clock. It's
+        hard to hear, and it's the most useful thing anyone has said to you.
+      effects:
+        - { type: teen, action: quit }
+        - { type: money, delta: 60 }
+        - { type: stat, key: discipline, delta: 2 }
+  - id: argue
+    label: Argue that it isn't fair
+    outcome:
+      text: It isn't a conversation, it's a speech, and it makes no difference. You walk out with your pay and your pride, and not much else.
+      effects:
+        - { type: teen, action: quit }
+        - { type: money, delta: 60 }
+        - { type: stat, key: stress, delta: 4 }
+  - id: shrug
+    label: Shrug it off and plan the next thing
+    outcome:
+      text: You say thank you, clean out your locker and go home. By the weekend you have three places to check.
+      effects:
+        - { type: teen, action: quit }
+        - { type: money, delta: 60 }
+        - { type: stat, key: confidence, delta: 1 }

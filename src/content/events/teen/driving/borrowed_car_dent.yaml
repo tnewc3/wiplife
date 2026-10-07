@@ -1,0 +1,58 @@
+id: borrowed_car_dent
+title: A new dent
+text: >-
+  There is a dent in the bumper of {parent.name}'s car, and it wasn't there
+  this morning. It is small, round and about the same height as a concrete
+  post in the school parking lot.
+tone: neutral
+category: driving
+rarity: common
+lifeStages: [teen]
+requires:
+  all:
+    - { age: { gte: 16 } }
+    - { teen: { license: [licensed] } }
+    - { belongings: { vehicles: { lt: 1 } } }
+cast:
+  parent: { kind: parent, presence: household }
+weight: { base: 6 }
+cooldownYears: 3
+choices:
+  - id: confess
+    label: Tell {parent.name} first, and offer to pay for it
+    outcome:
+      text: >-
+        {parent.name} looks at the dent for a long moment. "Thank you for telling
+        me," {parent.they} {parent:says|say}. You hand over some of your savings, and
+        both of you feel better about it.
+      effects:
+        - { type: money, delta: -150 }
+        - { type: relationship, role: parent, trust: 5, affection: 2 }
+        - { type: stat, key: discipline, delta: 2 }
+  - id: hope
+    label: Say nothing and hope it goes unnoticed
+    check:
+      base: 30
+      stats: [{ key: luck, weight: 0.3 }]
+      success:
+        text: Nobody notices for a week, then a month, and then the car gets traded in. You never quite stop checking the bumper.
+        effects:
+          - { type: stat, key: stress, delta: 2 }
+          - { type: stat, key: riskTaking, delta: 1 }
+      failure:
+        text: >-
+          {parent.name} notices on the third day, and the conversation is made
+          worse by how long you waited. The repair comes out of your savings, with interest.
+        effects:
+          - { type: money, delta: -300 }
+          - { type: relationship, role: parent, trust: -6, affection: -2 }
+          - { type: teen, action: tighten, rule: car }
+  - id: blame
+    label: Blame a stranger in a parking lot
+    outcome:
+      text: >-
+        It is a convincing story, and it takes a chunk of {parent.name}'s trust that you
+        can't tell you have lost. You will find out later.
+      effects:
+        - { type: relationship, role: parent, trust: -3 }
+        - { type: stat, key: kindness, delta: -2 }

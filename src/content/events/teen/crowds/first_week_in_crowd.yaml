@@ -1,0 +1,52 @@
+id: first_week_in_crowd
+title: Learning the rules
+text: >-
+  Every crowd has rules nobody wrote down, and {clique} is no different.
+  {member.name} walks you through some of them: where you sit, what you don't
+  say out loud, and who is not to be mentioned.
+tone: light
+category: crowds
+rarity: common
+lifeStages: [teen]
+requires:
+  all:
+    - { education: { program: [middle, high] } }
+    - { teen: { clique: true } }
+cast:
+  member: { kind: classmate, crowd: yours, presence: city }
+weight: { base: 7 }
+cooldownYears: 3
+choices:
+  - id: listen
+    label: Listen carefully and ask a lot of questions
+    outcome:
+      text: >-
+        It turns out most of the rules are kinder than they sound. {member.name}
+        seems pleased that you asked.
+      effects:
+        - { type: relationship, role: member, affection: 5, trust: 3 }
+        - { type: teen, action: rank, delta: 3 }
+  - id: laugh
+    label: Laugh it off as if you belong already
+    check:
+      base: 50
+      stats: [{ key: confidence, weight: 0.3 }, { key: sociability, weight: 0.2 }]
+      success:
+        text: You play it so well that {member.name} forgets you were ever new.
+        effects:
+          - { type: relationship, role: member, affection: 4 }
+          - { type: teen, action: standing, delta: 2 }
+      failure:
+        text: You get one of the rules wrong in front of everyone, and the silence is long enough to count.
+        effects:
+          - { type: relationship, role: member, affection: -2 }
+          - { type: stat, key: stress, delta: 2 }
+  - id: push_back
+    label: Say you'll make your own rules
+    outcome:
+      text: >-
+        {member.name} grins, a little surprised. Some people like that. You
+        will find out which ones.
+      effects:
+        - { type: stat, key: confidence, delta: 2 }
+        - { type: teen, action: rank, delta: -1 }

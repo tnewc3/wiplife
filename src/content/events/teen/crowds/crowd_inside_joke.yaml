@@ -1,0 +1,34 @@
+id: crowd_inside_joke
+title: The joke that never dies
+text: >-
+  It started with something {member.name} said in the second week of school,
+  and by now it needs no context: one word from anyone in {clique} and the
+  whole table loses it, while everybody else in the room looks on, puzzled.
+tone: light
+category: crowds
+rarity: common
+lifeStages: [teen]
+requires:
+  all:
+    - { education: { program: [middle, high] } }
+    - { teen: { clique: true } }
+cast:
+  member: { kind: classmate, crowd: yours, presence: city }
+weight: { base: 7 }
+cooldownYears: 2
+choices:
+  - id: start_it
+    label: Be the one who says the word
+    outcome:
+      text: You time it perfectly, and someone at the next table starts laughing without knowing why. It is, you decide, the best thing you've done all week.
+      effects:
+        - { type: relationship, role: member, affection: 4 }
+        - { type: stat, key: happiness, delta: 3 }
+        - { type: teen, action: rank, delta: 2 }
+  - id: explain
+    label: Explain it to the people next to you
+    outcome:
+      text: It doesn't work at all. Explained, it is not funny in the slightest, and your crowd is delighted by this.
+      effects:
+        - { type: stat, key: happiness, delta: 2 }
+        - { type: stat, key: sociability, delta: 1 }

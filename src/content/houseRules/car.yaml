@@ -1,0 +1,12 @@
+id: car
+domain: car
+name: The car
+levels:
+  - The keys are on the hook; fill the tank if you use it.
+  - Ask first, tell them where you're going, and nobody else drives.
+  - School and work only, with no passengers, and a text on arrival.
+tight: { strictness: 0.8, warmth: 0, involvement: 0.32, traits: { riskTaking: -0.32, discipline: 0.16 } }
+absentBelow: 50
+temptation: 0.085
+watch: 0.45
+applies: licensed

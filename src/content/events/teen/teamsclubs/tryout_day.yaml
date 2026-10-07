@@ -1,0 +1,44 @@
+id: tryout_day
+title: Tryouts
+text: >-
+  The sign-up sheet has forty names on it and room for twelve. You can feel
+  everybody in the gym trying to look like they're not looking at everybody else.
+tone: neutral
+category: teamsclubs
+rarity: common
+lifeStages: [teen]
+requires:
+  all:
+    - { teen: { activity: false } }
+    - { education: { program: [middle, high] } }
+    - { age: { gte: 13 } }
+weight: { base: 8 }
+cooldownYears: 2
+choices:
+  - id: soccer
+    label: Try out for the soccer team
+    check:
+      base: 40
+      stats: [{ key: fitness, weight: 0.5 }, { key: discipline, weight: 0.2 }]
+      success:
+        text: The list goes up on Friday, and your name is on it, between two people you've never met and, by the end of the season, will not forget.
+        effects:
+          - { type: teen, action: enroll, activityId: soccer_team }
+          - { type: stat, key: confidence, delta: 2 }
+      failure:
+        text: Your name isn't on the list. The coach says to try again next year, and for once it sounds like a real offer.
+        effects:
+          - { type: stat, key: happiness, delta: -2 }
+  - id: band
+    label: Sign up for the marching band
+    outcome:
+      text: Nobody gets cut, and nobody is told the instruments they'll be playing until it is too late. You end up on trumpet.
+      effects:
+        - { type: teen, action: enroll, activityId: marching_band }
+        - { type: stat, key: happiness, delta: 2 }
+  - id: pass
+    label: Walk past the sign-up sheet
+    outcome:
+      text: You look at it for a long minute, then you keep walking. It's easier not to find out.
+      effects:
+        - { type: stat, key: stress, delta: -1 }

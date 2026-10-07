@@ -1,0 +1,52 @@
+id: crowd_gets_credit
+title: Who gets the credit
+text: >-
+  The winter assembly was {member.name}'s idea and {clique}'s work. The
+  principal thanks everyone in the room except you and your crowd, and
+  thanks one student by name: somebody who showed up on the day.
+tone: neutral
+category: crowds
+rarity: uncommon
+lifeStages: [teen]
+requires:
+  all:
+    - { education: { program: [middle, high] } }
+    - { teen: { clique: true } }
+cast:
+  member: { kind: classmate, crowd: yours, presence: city }
+weight: { base: 4 }
+cooldownYears: 4
+choices:
+  - id: speak_up
+    label: Tell the principal who really did the work
+    check:
+      base: 50
+      stats: [{ key: confidence, weight: 0.3 }]
+      success:
+        text: >-
+          The principal listens, thanks everyone properly in the next morning's
+          announcements, and {member.name} looks at you like you have done
+          something heroic.
+        effects:
+          - { type: relationship, role: member, affection: 6, trust: 5 }
+          - { type: teen, action: standing, delta: 3 }
+      failure:
+        text: >-
+          It comes out as complaining, and the principal is not in the mood.
+          You walk away with a flat feeling and a good story for your crowd.
+        effects:
+          - { type: relationship, role: member, affection: 2 }
+          - { type: teen, action: standing, delta: -1 }
+  - id: shrug
+    label: Let it go. It's a thank-you, not a trophy
+    outcome:
+      text: You'll have the memory and not the credit, which is how it often works.
+      effects:
+        - { type: stat, key: discipline, delta: 1 }
+  - id: tell_crowd
+    label: Tell your crowd you all deserve a trophy
+    outcome:
+      text: It becomes a running joke, and a good one. By spring, someone has made a trophy out of a mug.
+      effects:
+        - { type: relationship, role: member, affection: 3 }
+        - { type: teen, action: rank, delta: 3 }

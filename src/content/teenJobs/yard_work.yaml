@@ -1,0 +1,10 @@
+id: yard_work
+name: yard worker
+blurb: Mowing, raking and a rotating cast of neighbors who always say they will pay you on Friday.
+minAge: 13
+hours: 8
+wage: 13
+employers: ["your own lawn route", "Green Thumb Yard Crew", "the Hallett Street cooperative"]
+effects:
+  fitness: { perYear: 0.9, limit: 80 }
+needs: { fitness: 35 }

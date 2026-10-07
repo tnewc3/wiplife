@@ -1,0 +1,55 @@
+id: crowd_notices_you
+title: A seat at the back table
+text: >-
+  Someone from {clique} catches your eye across the cafeteria and tips their
+  head toward an empty chair. They've noticed you around, and it seems they
+  have decided what they think.
+tone: light
+category: crowds
+rarity: common
+lifeStages: [teen]
+followUpOnly: true
+weight: { base: 1 }
+requires:
+  all:
+    - { education: { program: [middle, high] } }
+    - { teen: { invited: true } }
+choices:
+  - id: sit
+    label: Take the chair
+    outcome:
+      text: >-
+        The conversation stops, restarts, and swallows you whole. By the end
+        of lunch you know three inside jokes and have been assigned a nickname.
+      effects:
+        - { type: teen, action: join }
+        - { type: stat, key: happiness, delta: 3 }
+  - id: bring_friend
+    label: Take the chair, and bring a friend along
+    check:
+      base: 55
+      stats: [{ key: confidence, weight: 0.3 }, { key: sociability, weight: 0.2 }]
+      success:
+        text: >-
+          "Sure, the more the merrier," someone says, and means it. You have a
+          crowd, and you didn't have to leave anyone behind to get it.
+        effects:
+          - { type: teen, action: join }
+          - { type: teen, action: rank, delta: 4 }
+          - { type: stat, key: confidence, delta: 2 }
+      failure:
+        text: >-
+          Nobody says no, exactly, but the table goes quiet in a way that
+          makes your friend say they're not hungry. You stay. It stings.
+        effects:
+          - { type: teen, action: join }
+          - { type: stat, key: happiness, delta: -1 }
+  - id: decline
+    label: Wave back, and stay where you are
+    outcome:
+      text: >-
+        You wave, and they wave back, and that is that. For the rest of the
+        year you aren't sure whether you made a good call or a mistake.
+      effects:
+        - { type: teen, action: standing, delta: -1 }
+        - { type: stat, key: discipline, delta: 1 }

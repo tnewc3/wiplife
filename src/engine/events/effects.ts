@@ -34,6 +34,7 @@ import { lifeHelp } from '../lives/help';
 import { applyIntroduce, applyKnowledge, applyTie, noteIdentityAccepted } from '../web/actions';
 import { shiftMood } from '../interactions/mood';
 import { applyPossessionEffect } from '../possessions/effects';
+import { applyTeenEffect } from '../teen/effects';
 import { whereabouts } from '../presence';
 import { clampInt } from '../random';
 import { otherCity } from './casting';
@@ -365,6 +366,9 @@ const handlers: { [T in Effect['type']]: Handler<T> } = {
 
   // E5: what you own: damage, theft, a pet turning up, a vet visit, insurance.
   possession: (state, effect, ctx) => applyPossessionEffect(state, effect, ctx.cast, ctx.content),
+
+  // T1: the teen years: crowds, house rules, the license, a teen job, teams and clubs.
+  teen: (state, effect, ctx) => applyTeenEffect(state, effect, ctx.cast, ctx.content),
 
   // E3: money paid back to you, sized like the cost it repays.
   repay: (state, effect, ctx) => earn(state, wholeDollars(costPrice(state, effect.item, ctx.content) * effect.share)),

@@ -1,0 +1,15 @@
+id: half_timers
+name: The Half-Timers
+blurb: Easygoing jokers who are always between two plans and somehow never in a hurry, and who make any boring afternoon feel like it was worth it.
+weight: 1.3
+traits: { sociability: 6, discipline: -6, riskTaking: 3 }
+likes: { sociability: 0.4, discipline: -0.2, kindness: 0.2 }
+standing: 52
+effects:
+  happiness: { perYear: 0.8, limit: 85 }
+  stress: { perYear: -0.5, limit: 30 }
+grades: -0.12
+friends: 4
+money: 0.9
+passion: 1
+trouble: 1.2

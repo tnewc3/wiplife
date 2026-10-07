@@ -21,6 +21,7 @@ import { debtKindSchema, housingKindSchema, lifestyleSchema } from './economy';
 import { FAMILY_DEEDS, GUARDIAN_KINDS, familyProcessSchema, parentingKeySchema } from './family';
 import { credentialTypeSchema, programSchema, tierSchema } from './education';
 import { lifeTierSchema } from './people';
+import { FOCUS_KEYS, LICENSE_STAGE_IDS, ruleDomainSchema, type RuleDomainId, type TeenFocusId } from './teen';
 import { relationshipKindSchema, relationshipStatusSchema, romanceStatusSchema } from './relationships';
 import { templateSchema } from './text';
 import { reactionSchema, type ReactionId } from './mental';
@@ -99,6 +100,7 @@ export type Condition =
   | { discovery: DiscoveryCondition }
   | { family: FamilyCondition }
   | { belongings: BelongingsCondition }
+  | { teen: TeenCondition }
   | { memory: { role: string; tag: string } }
   | {
       role: string;
@@ -154,6 +156,42 @@ export interface LifeCondition {
   care?: ('needed' | 'home' | 'paid' | 'sibling' | 'none')[];
   wealth?: z.infer<typeof familyWealthSchema>[];
   recovered?: number;
+}
+
+/**
+ * T1, the teen years. Every field given must hold. clique: you belong to a
+ * crowd at school (or don't); crowd: it is one of these (an id in
+ * src/content/cliques); rival: your crowd has a rival crowd at your school;
+ * clash: you are in a clash with one; invited: a crowd has noticed you;
+ * standing: your standing at school (0-100); focus: where this year's energy
+ * goes ('none': nothing chosen); passion: how far a passion has taken you;
+ * license: your stage (none, permit, licensed); lessons: driving lessons and
+ * practice so far; job: you have a teen job (or one of these); activity: you
+ * belong to a team or club (or one of these); rules: how many
+ * house rules there are; rule: a rule of this domain is set, at a level in
+ * `level` (0 relaxed, 1 usual, 2 strict); caught: a parent caught you breaking
+ * a rule this year (of this domain, if given); grounded: you are grounded;
+ * restricted: you have lost this privilege; sealed: your juvenile record was sealed.
+ */
+export interface TeenCondition {
+  clique?: boolean;
+  crowd?: string[];
+  rival?: boolean;
+  clash?: boolean;
+  invited?: boolean;
+  standing?: Compare;
+  focus?: (TeenFocusId | 'none')[];
+  passion?: Compare;
+  license?: (typeof LICENSE_STAGE_IDS)[number][];
+  lessons?: Compare;
+  job?: boolean | string[];
+  activity?: boolean | string[];
+  rules?: Compare;
+  rule?: { domain: RuleDomainId; level?: Compare };
+  caught?: boolean | RuleDomainId[];
+  grounded?: boolean;
+  restricted?: RuleDomainId[];
+  sealed?: boolean;
 }
 
 /** Your money situation. Every field given must hold. */
@@ -587,6 +625,30 @@ export const conditionSchema: z.ZodType<Condition> = z.lazy(() =>
         })
         .refine(atLeastOneField, 'needs at least one field'),
     }),
+    z.strictObject({
+      teen: z
+        .strictObject({
+          clique: z.boolean().optional(),
+          crowd: z.array(idSchema).min(1).optional(),
+          rival: z.boolean().optional(),
+          clash: z.boolean().optional(),
+          invited: z.boolean().optional(),
+          standing: compareSchema.optional(),
+          focus: z.array(z.enum(FOCUS_KEYS)).min(1).optional(),
+          passion: compareSchema.optional(),
+          license: z.array(z.enum(LICENSE_STAGE_IDS)).min(1).optional(),
+          lessons: compareSchema.optional(),
+          job: z.union([z.boolean(), z.array(idSchema).min(1)]).optional(),
+          activity: z.union([z.boolean(), z.array(idSchema).min(1)]).optional(),
+          rules: compareSchema.optional(),
+          rule: z.strictObject({ domain: ruleDomainSchema, level: compareSchema.optional() }).optional(),
+          caught: z.union([z.boolean(), z.array(ruleDomainSchema).min(1)]).optional(),
+          grounded: z.boolean().optional(),
+          restricted: z.array(ruleDomainSchema).min(1).optional(),
+          sealed: z.boolean().optional(),
+        })
+        .refine(atLeastOneField, 'needs at least one field'),
+    }),
     z.strictObject({ memory: z.strictObject({ role: roleSchema, tag: idSchema }) }),
     z.strictObject({
       role: roleSchema,
@@ -699,6 +761,12 @@ export const castSpecSchema = z
      * conditions or choices of someone alive.
      */
     deceased: z.literal(true).optional(),
+    /**
+     * T1: someone from a crowd at your school: your own crowd (yours) or the
+     * crowd it is at odds with (rival). The person is one of its members (a
+     * friend or classmate of yours), found only, never created.
+     */
+    crowd: z.enum(['yours', 'rival']).optional(),
   })
   .refine((s) => (s.kind !== undefined && s.support === true) === false && (s.kind !== undefined || s.support === true || s.noticed !== undefined), 'a role needs one of kind or support: true (or noticed, alone or with a kind)')
   .refine((s) => s.deceased !== true || (s.presence === 'anywhere' && s.support !== true && !s.romantic && !s.admirer && !s.createIfMissing && s.newChance === undefined), 'a deceased role has presence anywhere and is only passed in')
@@ -706,7 +774,11 @@ export const castSpecSchema = z
     (s) => (s.support !== true && s.noticed === undefined) || (!s.createIfMissing && s.newChance === undefined && !s.romantic && !s.admirer),
     'a support or noticed role finds someone you know: no createIfMissing, newChance, romantic or admirer',
   )
-  .refine((s) => !(s.romantic && s.admirer), 'a role is romantic or an admirer, not both');
+  .refine((s) => !(s.romantic && s.admirer), 'a role is romantic or an admirer, not both')
+  .refine(
+    (s) => s.crowd === undefined || ((s.kind === 'friend' || s.kind === 'classmate') && !s.support && !s.noticed && !s.romantic && !s.admirer && !s.createIfMissing && s.newChance === undefined),
+    'a crowd role is a friend or classmate who is found, never created, and not a support, noticed, romantic or admirer role',
+  );
 export type CastSpec = z.infer<typeof castSpecSchema>;
 
 const statKeySchema = scoreKeySchema;
@@ -1090,6 +1162,39 @@ export const effectSchema = z.discriminatedUnion('type', [
     .refine((e) => (e.action === 'pet_health' || e.action === 'pet_bond' || e.action === 'vehicle_condition') === (e.delta !== undefined && e.delta !== 0), 'pet_health, pet_bond and vehicle_condition need a non-zero delta (and only they have one)')
     .refine((e) => (e.action === 'pet_adopt') === (e.species !== undefined && e.source !== undefined), 'pet_adopt needs species and source (and only it has them)')
     .refine((e) => (e.action === 'insure') === (e.insured !== undefined), 'insure needs insured (and only it has it)'),
+  /**
+   * T1, the teen years. standing: your standing at school moves by `delta`.
+   * rank: your place in your crowd moves by `delta`. join: you join the crowd
+   * that has noticed you (nothing without an invitation). leave: you leave
+   * your crowd. clash: your crowd and its rival fall out (nothing without a
+   * rival). settle: the clash is over. break: you break the house rule of
+   * `rule` (if there is one): you may be caught, and the parent answers as
+   * they would. ground: you are grounded for `years` (1 by default). loosen /
+   * tighten: the rule of `rule` goes one level looser or stricter. practice:
+   * driving practice adds a lesson. license: your stage becomes `stage`
+   * (permit or licensed; revoke takes the license away). passion: your passion
+   * moves by `delta`. hire: you take the teen job `jobId` (if you may). quit:
+   * you leave your teen job. enroll: you try out for (or sign up to) the
+   * team or club `activityId`; withdraw: you leave it. The engine ignores what doesn't fit, and never
+   * what would break a rule (an under-18 romance, a license below the age).
+   */
+  z
+    .strictObject({
+      type: z.literal('teen'),
+      action: z.enum(['standing', 'rank', 'join', 'leave', 'clash', 'settle', 'break', 'ground', 'loosen', 'tighten', 'practice', 'license', 'passion', 'hire', 'quit', 'enroll', 'withdraw']),
+      delta: z.int().min(-100).max(100).optional(),
+      rule: ruleDomainSchema.optional(),
+      years: z.int().min(1).max(3).optional(),
+      stage: z.enum(['permit', 'licensed', 'revoke']).optional(),
+      jobId: idSchema.optional(),
+      activityId: idSchema.optional(),
+    })
+    .refine((e) => (e.action === 'standing' || e.action === 'rank' || e.action === 'passion') === (e.delta !== undefined && e.delta !== 0), 'standing, rank and passion need a non-zero delta (and only they have one)')
+    .refine((e) => (e.action === 'break' || e.action === 'loosen' || e.action === 'tighten') === (e.rule !== undefined), 'break, loosen and tighten need rule (and only they have one)')
+    .refine((e) => e.years === undefined || e.action === 'ground', 'only ground takes years')
+    .refine((e) => (e.action === 'license') === (e.stage !== undefined), 'license needs stage (and only license has it)')
+    .refine((e) => (e.action === 'hire') === (e.jobId !== undefined), 'hire needs jobId (and only hire has it)')
+    .refine((e) => (e.action === 'enroll' || e.action === 'withdraw') === (e.activityId !== undefined), 'enroll and withdraw need activityId (and only they have it)'),
 ]);
 export type Effect = z.infer<typeof effectSchema>;
 

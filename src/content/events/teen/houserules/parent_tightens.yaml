@@ -1,0 +1,52 @@
+id: parent_tightens
+title: New rules
+text: >-
+  {parent.name} has been reading things online, or talking to other parents,
+  or both. At dinner there is a speech with the phrase "after what happened
+  to the family down the street," and by dessert there is a new rule.
+tone: neutral
+category: houserules
+rarity: common
+lifeStages: [teen]
+requires:
+  all:
+    - { teen: { rules: { gte: 1 } } }
+    - { teen: { rule: { domain: check_in, level: { lt: 2 } } } }
+cast:
+  parent: { kind: parent, presence: household }
+weight: { base: 4 }
+cooldownYears: 3
+choices:
+  - id: accept
+    label: Accept it without a fight
+    outcome:
+      text: It is a rule you are not going to like, but you let {parent.name} have it. It may come in handy later, when you need a favor.
+      effects:
+        - { type: teen, action: tighten, rule: check_in }
+        - { type: relationship, role: parent, trust: 3 }
+  - id: argue
+    label: Argue that it isn't fair
+    check:
+      base: 35
+      stats: [{ role: parent, key: affection, weight: 0.25 }, { key: confidence, weight: 0.15 }]
+      success:
+        text: >-
+          You make it about trust and not about rules, and {parent.name}
+          visibly rethinks. The new rule is smaller than the one that was proposed.
+        effects:
+          - { type: relationship, role: parent, trust: 2 }
+          - { type: stat, key: confidence, delta: 1 }
+      failure:
+        text: >-
+          "That's exactly why we need it," {parent.name} says, and the rule stays
+          exactly as announced.
+        effects:
+          - { type: teen, action: tighten, rule: check_in }
+          - { type: relationship, role: parent, trust: -2 }
+  - id: ignore
+    label: Nod, and plan to ignore it
+    outcome:
+      text: You say yes, you mean maybe, and you have a good idea of how it will go.
+      effects:
+        - { type: teen, action: tighten, rule: check_in }
+        - { type: stat, key: riskTaking, delta: 1 }

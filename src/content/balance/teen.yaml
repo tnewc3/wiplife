@@ -1,0 +1,212 @@
+# The teen years (T1): the crowds at a school, the yearly focus, the driver's
+# license, teen jobs, teams and clubs, house rules and their consequences.
+# Every number here is a starting proposal; the simulation targets
+# (balance/targets.yaml, teen) say where they should land.
+
+ages:
+  # The teen systems begin at this age and run until the adult age.
+  from: 13
+
+school:
+  # Crowds at a school, drawn without repeats from src/content/cliques.
+  cliques: { min: 4, max: 5 }
+  # The chance a crowd has a rival at its school (pairs; never more than one each).
+  rivalChance: 0.7
+  standingNoise: 12
+
+cliques:
+  # The people a crowd brings into your life when you first join it.
+  members: { min: 3, max: 4 }
+  memberAge: { below: 1, above: 1 }
+  memberAffection: { mean: 55, sd: 10 }
+  tieAffection: { mean: 62, sd: 10 }
+  # Their chance of taking you in: base + fit (its likes, summed, in chance
+  # points) + standing (your standing against its own), clamped.
+  join: { base: 0.55, fit: 0.35, standing: 0.25, min: 0.1, max: 0.95 }
+  # Years a crowd that turned you away (or that you left) won't have you back.
+  coolOff: 2
+  leave:
+    # How its members feel about you after, and your standing; the chance they hold it against you.
+    affection: -8
+    standing: -4
+    clashChance: 0.12
+    rivalClashChance: 0.45
+  yearly:
+    inviteChance: 0.2
+    clashChance: 0.14
+    clashYears: { min: 1, max: 2 }
+    clashEventChance: 0.5
+    rank: 3
+    standingPull: 0.3
+    alone:
+      happiness: { perYear: -0.6, limit: 40 }
+      stress: { perYear: 0.6, limit: 70 }
+    fade: 0.25
+  standingStart: 40
+  clash: { standing: -4, stress: 3, affection: -10, feud: 22 }
+
+focus:
+  # A year with no focus chosen: even, no gain and no neglect.
+  none: { grades: 0, friends: 0, income: 1, odd: 0, passion: 0, talentChance: 0, stats: {} }
+  school:
+    grades: 0.35
+    friends: -1
+    income: 0.7
+    odd: 0
+    passion: 0
+    talentChance: 0
+    stats:
+      smarts: { perYear: 0.8, limit: 90 }
+      stress: { perYear: 1, limit: 65 }
+  friends:
+    grades: -0.12
+    friends: 6
+    income: 0.9
+    odd: 0
+    passion: 0
+    talentChance: 0
+    stats:
+      happiness: { perYear: 1, limit: 85 }
+  work:
+    grades: -0.18
+    friends: -1
+    income: 1.5
+    odd: 1400
+    passion: 0
+    talentChance: 0
+    stats:
+      stress: { perYear: 1, limit: 70 }
+  passion:
+    grades: -0.12
+    friends: 0
+    income: 0.9
+    odd: 0
+    passion: 14
+    talentChance: 0.3
+    stats:
+      happiness: { perYear: 1, limit: 85 }
+
+passion:
+  decay: 4
+  counts: 40
+  discoverAt: 55
+
+friends:
+  # The closest friends and classmates a focus on friends reaches.
+  people: 5
+
+license:
+  permitAge: 15
+  licenseAge: 16
+  permitFee: 40
+  lessonFee: 120
+  testFee: 60
+  lessons: { max: 8, minToTest: 2 }
+  test:
+    base: 42
+    perLesson: 6
+    perFail: 3
+    traits: { discipline: 0.22, riskTaking: -0.12, confidence: 0.12 }
+    min: 8
+    max: 96
+  adultFeeMultiplier: 1.5
+
+jobs:
+  weeks: 40
+  # GPA points lost a year per weekly hour beyond freeHours.
+  gradePerHour: 0.02
+  freeHours: 6
+  # The yearly chance the job ends, by Discipline.
+  endChance:
+    - { at: 0, x: 0.3 }
+    - { at: 50, x: 0.14 }
+    - { at: 100, x: 0.05 }
+  # The share of your pay a parent takes (the money rule), at each level of it.
+  parentShare: [0, 0.1, 0.25]
+  swing: 0.15
+
+activities:
+  max: 2
+  cutWait: 1
+
+rules:
+  style:
+    warmth: { kindness: 0.8, affection: 0.2 }
+    strictness: { discipline: 0.7, riskTaking: -0.2, ambition: 0.2 }
+    involvement: { sociability: 0.3, kindness: 0.2, affection: 0.3 }
+    memory: 12
+    stepparent: -8
+  tightness:
+    base: 50
+    # Below the first number a rule is relaxed, below the second the usual, above it strict.
+    levelAt: [53, 63]
+  levelTemptation: [1.3, 1, 0.65]
+  levelWatch: [0.7, 1, 1.35]
+  riskTaking:
+    - { at: 0, x: 0.2 }
+    - { at: 50, x: 1 }
+    - { at: 100, x: 2.2 }
+  discipline:
+    - { at: 0, x: 1.8 }
+    - { at: 50, x: 1 }
+    - { at: 100, x: 0.35 }
+  involvement:
+    - { at: 0, x: 0.35 }
+    - { at: 50, x: 1 }
+    - { at: 100, x: 1.7 }
+  groundedBreak: 0.4
+  groundedGain: 0.5
+  maxBreaksPerYear: 2
+  thrill: { happiness: 2, standing: 2, riskTaking: 1, vice: 0 }
+  consequences:
+    talking_to:
+      weight: { base: 2, warmth: 0.05, strictness: -0.03, involvement: 0.02, affection: 0.04 }
+      years: 0
+      stats: { stress: 3 }
+      affection: -1
+      trust: -3
+      standing: 0
+    grounded:
+      weight: { base: 2, warmth: -0.02, strictness: 0.08, involvement: 0.02, affection: -0.02 }
+      years: 1
+      stats: { happiness: -3, stress: 3 }
+      affection: -3
+      trust: -2
+      standing: -3
+    privilege:
+      weight: { base: 1.5, warmth: 0, strictness: 0.04, involvement: 0.02, affection: 0 }
+      years: 1
+      stats: { happiness: -1 }
+      affection: -2
+      trust: -2
+      standing: -1
+    chores:
+      weight: { base: 1, warmth: 0, strictness: 0.03, involvement: 0, affection: 0 }
+      years: 0
+      stats: { stress: 1 }
+      affection: -1
+      trust: -1
+      standing: 0
+  restricted:
+    happiness: { perYear: -0.8, limit: 35 }
+    stress: { perYear: 0.8, limit: 75 }
+  negotiate:
+    base: 28
+    affection: 0.3
+    trust: 0.3
+    warmth: 0.15
+    strictness: -0.25
+    grades: 10
+    perLevel: -6
+    caught: -4
+    min: 5
+    max: 85
+    win: { affection: 2, trust: 4 }
+    lose: { affection: -2, trust: -1 }
+    perYear: 3
+    ageTrust: { affection: 60, trust: 55 }
+    looserAt: [15, 16, 17]
+
+trouble:
+  parents: { affection: -4, trust: -8 }
+  eventChance: 0.5

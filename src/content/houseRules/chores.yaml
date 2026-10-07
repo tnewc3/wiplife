@@ -1,0 +1,12 @@
+id: chores
+domain: chores
+name: Chores
+levels:
+  - Take out the trash when you remember.
+  - Dishes and trash every day, laundry on Saturday.
+  - A full chore chart on the fridge, checked every evening.
+tight: { strictness: 0.64, warmth: -0.08, involvement: 0.24, traits: { discipline: 0.4 } }
+absentBelow: 47
+temptation: 0.17
+watch: 0.5
+applies: always

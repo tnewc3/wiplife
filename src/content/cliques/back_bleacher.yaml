@@ -1,0 +1,15 @@
+id: back_bleacher
+name: Back Bleacher
+blurb: The loud, loyal crowd that fills the top row at every game, whoever is playing, and knows everyone's business by Monday.
+weight: 1.4
+traits: { sociability: 10, confidence: 6 }
+likes: { sociability: 0.6, confidence: 0.3 }
+standing: 72
+effects:
+  happiness: { perYear: 0.8, limit: 85 }
+  fitness: { perYear: 0.3, limit: 70 }
+grades: -0.05
+friends: 4
+money: 1
+passion: 1
+trouble: 1

@@ -1,0 +1,46 @@
+id: friend_in_trouble
+title: Bad news about {friend.name}
+text: >-
+  The news comes down the hall before first period: {friend.name} was taken
+  to the police station last night. Nobody knows the whole story, and everyone
+  has a version of it.
+tone: serious
+category: mischief
+rarity: common
+lifeStages: [teen]
+requires:
+  all:
+    - { age: { gte: 13 } }
+cast:
+  friend: { kind: friend, ageOffset: { min: -2, max: 2 }, presence: city }
+weight:
+  base: 4
+  modifiers:
+    - { if: { teen: { crowd: [afterburn, half_timers] } }, x: 1.8 }
+cooldownYears: 3
+choices:
+  - id: stand_by
+    label: Text {friend.them} that you're there, whatever happens
+    outcome:
+      text: >-
+        {friend.name} doesn't answer for two days. When {friend.they} finally
+        {friend:does|do}, it is one word, and it is "thanks."
+      effects:
+        - { type: relationship, role: friend, affection: 7, trust: 8 }
+        - { type: stat, key: kindness, delta: 2 }
+  - id: ask
+    label: Wait to hear what really happened
+    outcome:
+      text: >-
+        You wait. The story gets smaller and then bigger and then it is
+        something you'd have wanted to hear from {friend.name} yourself.
+      effects:
+        - { type: relationship, role: friend, trust: -1 }
+        - { type: stat, key: stress, delta: 1 }
+  - id: distance
+    label: Keep your distance, for now
+    outcome:
+      text: You tell yourself it's about being careful. It's also about being afraid, and the two are hard to tell apart.
+      effects:
+        - { type: relationship, role: friend, affection: -7, trust: -5 }
+        - { type: stat, key: stress, delta: 2 }

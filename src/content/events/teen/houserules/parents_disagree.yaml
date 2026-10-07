@@ -1,0 +1,55 @@
+id: parents_disagree
+title: Two different answers
+text: >-
+  You ask {parent.name} for a late night out and get a yes. You ask
+  {other.name} and get a no. Now they're in the kitchen, speaking in
+  low voices about you, and you can hear every word.
+tone: neutral
+category: houserules
+rarity: uncommon
+lifeStages: [teen]
+requires:
+  all:
+    - { teen: { rules: { gte: 1 } } }
+    - { teen: { rules: { gte: 2 } } }
+    - { age: { gte: 14 } }
+cast:
+  parent: { kind: parent, presence: household }
+  other: { kind: parent, presence: household }
+weight: { base: 3 }
+cooldownYears: 4
+choices:
+  - id: stay_out
+    label: Stay out of it
+    outcome:
+      text: The rule they land on is somewhere in the middle. Nobody is happy, which means they probably got it right.
+      effects:
+        - { type: relationship, role: parent, trust: 1 }
+        - { type: relationship, role: other, trust: 1 }
+  - id: side
+    label: Work the one who said yes
+    check:
+      base: 40
+      stats: [{ role: parent, key: affection, weight: 0.3 }]
+      success:
+        text: >-
+          You win the night, and {other.name} gives you a look that says you'll
+          answer for it in some other way. You probably will.
+        effects:
+          - { type: relationship, role: parent, affection: 3 }
+          - { type: relationship, role: other, trust: -3 }
+      failure:
+        text: >-
+          Both of them see what you're doing. They end up in perfect agreement:
+          you can stay in.
+        effects:
+          - { type: relationship, role: parent, trust: -2 }
+          - { type: relationship, role: other, trust: -2 }
+  - id: apologize
+    label: Tell them you shouldn't have asked both
+    outcome:
+      text: The kitchen goes quiet. "That," {parent.name} says, "is the most grown-up thing you've said all week."
+      effects:
+        - { type: relationship, role: parent, trust: 3 }
+        - { type: relationship, role: other, trust: 3 }
+        - { type: stat, key: discipline, delta: 1 }

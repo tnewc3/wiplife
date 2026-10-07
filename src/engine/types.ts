@@ -16,6 +16,8 @@ import type {
   PregnancyHow,
   PetPersonalityId,
   Program,
+  RuleDomainId,
+  TeenFocusId,
   Tier,
 } from '../content/schemas';
 import type { RngState } from './rng';
@@ -800,8 +802,12 @@ export interface HealthState {
 export type RecordOutcome = 'warning' | 'fine' | 'probation' | 'jail';
 
 export interface LegalState {
-  /** Entries on your criminal record: a fine's amount, and the years of probation or prison handed down. */
-  record: { offenseId: Id; year: number; outcome: RecordOutcome; amount?: number; years?: number }[];
+  /**
+   * Entries on your criminal record: a fine's amount, and the years of
+   * probation or prison handed down. T1: `sealed` marks a juvenile case once
+   * you are an adult: it stays in your history but no longer counts anywhere.
+   */
+  record: { offenseId: Id; year: number; outcome: RecordOutcome; amount?: number; years?: number; sealed?: true }[];
   /** The last year of your probation. */
   probationUntil?: number;
   /** The last year you spend in prison; you're released as the year after begins. */
@@ -1018,6 +1024,95 @@ export interface LifeState {
   web: WebState;
   /** E5: pets, vehicles and vacation homes. */
   possessions: PossessionsState;
+  /** T1: the teen years: your school's crowds, your focus, the license, a teen job, house rules. */
+  teen: TeenState;
+}
+
+/** T1: a social group at your school (a definition in src/content/cliques, made real for one school). */
+export interface TeenClique {
+  /** k1, k2... (the next number is `TeenState.nextClique`). */
+  id: Id;
+  defId: Id;
+  /** The classmates it has brought into your life, once you have met the crowd. */
+  members: Id[];
+  /** How much the crowd counts at school (0–100). */
+  standing: number;
+  /** The crowd it is at odds with at this school, if any (the same both ways). */
+  rival?: Id;
+}
+
+/** T1: the school the crowds belong to. Moving city, or starting high school, is a new school. */
+export interface TeenSchool {
+  /** `${cityId}:${program}`. */
+  key: string;
+  cityId: Id;
+  program: 'middle' | 'high';
+  since: number;
+}
+
+/** T1: one house rule: set by a parent you live with, at one of three levels (0 relaxed, 1 usual, 2 strict). */
+export interface TeenRule {
+  ruleId: RuleDomainId;
+  /** The parent (or guardian) who set it. */
+  by: Id;
+  level: 0 | 1 | 2;
+  since: number;
+  /** The last year you asked to change it. */
+  negotiated?: number;
+  /** Times you have broken it (and, of those, been caught). */
+  broken: number;
+  caught: number;
+}
+
+/** T1: what a parent did when they caught you; a year at a time. */
+export interface TeenPenalty {
+  kind: 'grounded' | 'privilege';
+  /** The last year it lasts. */
+  until: number;
+  /** A lost privilege: the rule's domain it took away. */
+  domain?: RuleDomainId;
+}
+
+export type LicenseStage = 'none' | 'permit' | 'licensed';
+
+/** T1: everything the teen years add to a life. Empty (and mostly idle) outside them. */
+export interface TeenState {
+  school: TeenSchool | null;
+  cliques: TeenClique[];
+  nextClique: number;
+  /** The crowd you belong to. `rank` is your place in it (0–100). */
+  member: { cliqueId: Id; since: number; rank: number } | null;
+  /** Crowds that turned you away (or that you left), by crowd id, with the year; they won't have you again for a while. */
+  turnedAway: Record<Id, number>;
+  /** A crowd that has noticed you and would have you. */
+  invite?: Id;
+  /** A clash with another crowd: whose, since when, and the last year it lasts unless it is settled. */
+  clash?: { cliqueId: Id; since: number; until: number };
+  /** Your standing at school (0–100). */
+  standing: number;
+  /** Where your energy goes this year (chosen between years); a year with none chosen is an even one. */
+  focus: { year: number; id: TeenFocusId } | null;
+  /** Years spent on each focus. */
+  focusYears: Record<TeenFocusId, number>;
+  /** How far a passion has taken you (0–100); it fades without attention. */
+  passion: number;
+  license: { stage: LicenseStage; since?: number; lessons: number; fails: number; testYear?: number };
+  /** Your teen job, if you have one (src/content/teenJobs). */
+  job: { jobId: Id; employer: string; since: number } | null;
+  /** Teams and clubs you belong to (src/content/activities). */
+  activities: { id: Id; since: number }[];
+  /** The rules at home: each parent's style (worked out once from who they are), and the rules they set. */
+  home: { styles: Record<Id, ParentingStyle>; rules: TeenRule[]; year: number } | null;
+  /** Punishments in force. */
+  penalties: TeenPenalty[];
+  /** The last time you were caught breaking a rule (the year, the rule and who caught you); it waits for its event. */
+  caught?: { year: number; ruleId: RuleDomainId; by: Id };
+  /** Totals over the teen years, for the life summary and the simulation. */
+  totals: { broken: number; caught: number; negotiated: number; won: number };
+  /** How many entries of the criminal record the teen step has already looked at (a new juvenile case is answered once). */
+  seenRecords: number;
+  /** The juvenile record was sealed at 18 (set once). */
+  sealed?: true;
 }
 
 /** E4: how two people you know are connected to each other. */

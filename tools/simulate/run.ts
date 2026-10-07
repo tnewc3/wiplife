@@ -65,6 +65,7 @@ import { emptyPeopleReport, formatPeople, peopleTargets, PeopleWatcher, Pipeline
 import { emptyMentalReport, formatMental, mentalTargets, MentalWatcher, type MentalReport } from './mental';
 import { choosePetInteractions, choosePossessionActions, emptyPossessionsReport, formatPossessions, possessionsTargets, PossessionsWatcher, rollPossessionProfile, type PossessionsReport } from './possessions';
 import { emptyWebReport, formatWeb, webTargets, WebWatcher, type WebReport } from './web';
+import { chooseTeenActions, emptyTeenReport, formatTeen, rollTeenProfile, teenTargets, TeenWatcher, type TeenReport } from './teen';
 import { YEAR_PIPELINE } from '../../src/engine/pipeline';
 import { chooseFamilyActions, chooseParentingPlans, emptyFamilyReport, FamilyWatcher, formatFamily, familyTargets, rollFamilyProfile, type FamilyReport } from './family';
 
@@ -142,6 +143,8 @@ export interface SimulationReport {
   mental: MentalReport;
   /** E5: pets, vehicles and homes, measured. */
   possessions: PossessionsReport;
+  /** T1: the teen years, measured. */
+  teen: TeenReport;
 }
 
 /** C1: the consistency pass, measured. */
@@ -774,6 +777,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
   const web = emptyWebReport();
   const mental = emptyMentalReport(content);
   const possessions = emptyPossessionsReport(content);
+  const teen = emptyTeenReport(content);
   const peopleTimer = new PipelineTimer(people);
   const timedSteps = peopleTimer.steps(YEAR_PIPELINE);
   // Found out: the follow-ups only this system schedules (affair_discovered also answers an older chain, so it counts only for an unfaithful life).
@@ -793,6 +797,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
       invariantFailures += failures.length;
       violations += failures.filter((f) => f.startsWith('consistency:')).length;
       possessions.invariantFailures += failures.filter((f) => /possession|\bpet\b|vehicle|car loan|vacation|renovation|insurance|upkeep/i.test(f)).length;
+      teen.invariantFailures += failures.filter((f) => /crowd|teen|license|learner|house rule|rule |romance|couple with someone under|under 18|is under \d+ and|they are under|you are under/i.test(f)).length;
       for (const f of failures) if (failureMessages.length < maxMessages) failureMessages.push(`${seed} age ${life.character.age}: ${f}`);
     };
     const choices = createRng(`${seed}:choices`);
@@ -815,6 +820,10 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
     const possessionsWatcher = new PossessionsWatcher(possessions, content);
     const possessionRng = createRng(`${seed}:possessions`);
     const possessionProfile = rollPossessionProfile(possessionRng);
+    // T1: the teen years: this life's plan for its yearly focus and what kind of teenager it is.
+    const teenRng = createRng(`${seed}:teen`);
+    const teenProfile = rollTeenProfile(teenRng);
+    let teenWatcher: TeenWatcher | undefined;
     const profile = rollMoneyProfile(player);
     // E2b: whether this life writes a will, and who it names.
     const mentalRng = createRng(`${seed}:mental`);
@@ -930,6 +939,17 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
         life = takeLifeAction(life, actionId, params);
         money.actionsTaken[actionId]++;
       }
+      // ...and in the teen years (T1): a focus, a crowd, the license, a job, a team, the rules at home...
+      if (!careless) {
+        teenWatcher ??= new TeenWatcher(teen, content, teenProfile, life);
+        for (const [actionId, params] of chooseTeenActions(life, content, teenRng, teenProfile)) {
+          if (!isLifeActionAvailable(life, actionId, params, content)) continue;
+          const beforeAction = life;
+          life = takeLifeAction(life, actionId, params);
+          money.actionsTaken[actionId]++;
+          teenWatcher.acted(actionId, params, beforeAction, life);
+        }
+      }
       // ...and on what they own (E5): pets, vehicles, a vacation home, renovations...
       for (const [actionId, params] of careless ? [] : choosePossessionActions(life, content, possessionRng, possessionProfile)) {
         if (!isLifeActionAvailable(life, actionId, params, content)) continue;
@@ -993,6 +1013,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
       webWatcher.observe(yearBefore, life);
       mentalWatcher.observe(yearBefore, life);
       possessionsWatcher.observe(yearBefore, life, content);
+      if (!careless) teenWatcher?.observe(yearBefore, life);
       watch(life);
       options.onYear?.(life);
       const stage = perYear[life.character.lifeStage];
@@ -1033,6 +1054,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
     webWatcher.finish(life);
     mentalWatcher.finish(life);
     possessionsWatcher.finish(life);
+    if (!careless) teenWatcher?.finish(life);
     familyWatcher.finish(life, firesThisLife);
     // E1: who reached maximum affection, being found out, and a sample of lives rebuilt from their input logs.
     interactions.lives++;
@@ -1357,6 +1379,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
     web,
     mental,
     possessions,
+    teen,
     consistency: {
       violations,
       happiness: spreadOf(lifetimeHappiness),
@@ -1491,6 +1514,7 @@ export function formatReport(report: SimulationReport, content: ContentBundle): 
   lines.push('', ...formatWeb(report.web, content), '  targets (src/content/balance/targets.yaml):', ...webTargets(report, content).map((r) => target(r.label, r.value, r.goal, r.met)));
   lines.push('', ...formatMental(report.mental, content, report.events), '  targets (src/content/balance/targets.yaml):', ...mentalTargets(report, content).map((r) => target(r.label, r.value, r.goal, r.met)));
   lines.push(...formatPossessions(report.possessions, content, report.events), '  targets (src/content/balance/targets.yaml):', ...possessionsTargets(report, content).map((r) => target(r.label, r.value, r.goal, r.met)));
+  lines.push(...formatTeen(report.teen, content), '  targets (src/content/balance/targets.yaml):', ...teenTargets(report, content).map((r) => target(r.label, r.value, r.goal, r.met)));
   lines.push(`Events fired: ${report.totalEventsFired}`);
   lines.push('  event'.padEnd(30) + 'fired'.padStart(8) + 'share'.padStart(8) + 'lives'.padStart(9));
   for (const e of [...report.events].sort((a, b) => b.fired - a.fired)) {

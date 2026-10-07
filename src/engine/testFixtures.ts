@@ -6,6 +6,7 @@ import type { CustomLifeInput } from './creation/input';
 import { playLife } from './autoplay';
 import { createLife } from './life';
 import { lifeStageForAge } from './systems/aging';
+import { startingTeen } from './teen/query';
 import type { LifeState } from './types';
 import { pruneWeb } from './web/ties';
 
@@ -56,6 +57,8 @@ export function lifeAtAge(seed: string, age: number, contentBundle: ContentBundl
       }
     }
     pruneWeb(draft);
+    // T1: an adult is taken to hold a license (a life built at birth earns one in its teen years).
+    draft.teen = startingTeen(age, draft.currentYear, contentBundle);
     if (age > 0) {
       const stats = { ...draft.character.stats };
       draft.recap = { year: draft.currentYear, age, statsBefore: stats, statsAfter: { ...stats } };

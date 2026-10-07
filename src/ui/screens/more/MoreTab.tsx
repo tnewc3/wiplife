@@ -1,5 +1,5 @@
 import { content } from '../../../content';
-import { canPlanEstate } from '../../../engine/selectors';
+import { canPlanEstate, getTeenView } from '../../../engine/selectors';
 import { useAppStore } from '../../../store/appStore';
 import { Button } from '../../components/Button';
 
@@ -13,6 +13,13 @@ export function MoreTab() {
   const openFamily = useAppStore((s) => s.openFamily);
   const openWill = useAppStore((s) => s.openWill);
   const openBelongings = useAppStore((s) => s.openBelongings);
+  const openTeen = useAppStore((s) => s.openTeen);
+  /** T1: the teen years, and for anyone grown without a license the way to get one. */
+  const teen = useAppStore((s) => {
+    if (!s.life) return null;
+    const v = getTeenView(s.life, content);
+    return v.teen ? 'Teen years' : v.license.stage !== 'licensed' && s.life.character.age >= 16 ? 'Driver’s license' : null;
+  });
   const adult = useAppStore((s) => s.life !== null && canPlanEstate(s.life, content));
   return (
     <div className="flex flex-col gap-2">
@@ -25,6 +32,11 @@ export function MoreTab() {
       <Button variant="secondary" block onClick={openFamily}>
         Family
       </Button>
+      {teen && (
+        <Button variant="secondary" block onClick={openTeen} data-testid="more-teen">
+          {teen}
+        </Button>
+      )}
       <Button variant="secondary" block onClick={openBelongings} data-testid="more-belongings">
         Belongings
       </Button>

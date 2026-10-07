@@ -1,0 +1,46 @@
+id: hours_cut
+title: Fewer shifts
+text: >-
+  The schedule goes up on the wall and your name is on it half as many times.
+  Your manager says it's slow, and it is, but the new kid has more hours than
+  you do.
+tone: neutral
+category: teenwork
+rarity: common
+lifeStages: [teen]
+requires:
+  all:
+    - { teen: { job: true } }
+weight: { base: 6 }
+cooldownYears: 3
+choices:
+  - id: ask
+    label: Ask your manager for more hours
+    check:
+      base: 45
+      stats: [{ key: confidence, weight: 0.25 }, { key: discipline, weight: 0.2 }]
+      success:
+        text: Your manager looks at the schedule, then at you. "Fine," they say, and you pick up the Saturday closing shift. It pays well, and it is a lot of Saturday.
+        effects:
+          - { type: money, delta: 250 }
+          - { type: stat, key: stress, delta: 2 }
+      failure:
+        text: Your manager gives you a polite no and a vague promise. The hours are what they are.
+        effects:
+          - { type: money, delta: -50 }
+          - { type: stat, key: stress, delta: 2 }
+  - id: take_break
+    label: Use the time for school and friends
+    outcome:
+      text: It's almost a relief, and a smaller paycheck than you had planned for.
+      effects:
+        - { type: money, delta: -80 }
+        - { type: education, action: grades, value: 0.1 }
+        - { type: stat, key: stress, delta: -2 }
+  - id: second_job
+    label: Look for something else
+    outcome:
+      text: Two interviews, one callback, a lot of waiting. It does not lead anywhere, this time, but you learn what an interview feels like.
+      effects:
+        - { type: stat, key: confidence, delta: 2 }
+        - { type: stat, key: stress, delta: 1 }

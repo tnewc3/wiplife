@@ -1,0 +1,12 @@
+id: check_in
+domain: check_in
+name: Checking in
+levels:
+  - Let someone know if you won't be home for dinner.
+  - A text when you get there and a text when you leave.
+  - Location sharing on, and a call at every stop.
+tight: { strictness: 0.48, warmth: -0.08, involvement: 0.8, traits: { riskTaking: -0.16 } }
+absentBelow: 53
+temptation: 0.149
+watch: 0.4
+applies: always

@@ -1,0 +1,51 @@
+id: juvenile_hearing
+title: The conference room
+text: >-
+  There's no jury and no gavel, just a table, a caseworker with a folder and
+  {parent.name} sitting very straight beside you. The caseworker explains what happens
+  to people your age: supervision, a program, and a record that is sealed when
+  you turn eighteen if you stay out of trouble until then.
+tone: serious
+category: justice
+rarity: common
+lifeStages: [teen]
+followUpOnly: true
+weight: { base: 1 }
+requires:
+  all:
+    - { record: { within: 2 } }
+    - { age: { lt: 18 } }
+cast:
+  parent: { kind: parent, presence: household }
+choices:
+  - id: program
+    label: Say you'll do the program, and mean it
+    outcome:
+      text: >-
+        Six Saturdays in a room with other kids who made the same mistake. It's
+        less awful than you expected, and one of the counselors turns out to
+        be someone you'd actually listen to.
+      effects:
+        - { type: stat, key: discipline, delta: 3 }
+        - { type: stat, key: vice, delta: -2 }
+        - { type: relationship, role: parent, trust: 4 }
+        - { type: stat, key: stress, delta: -1 }
+  - id: sullen
+    label: Say as little as possible
+    outcome:
+      text: >-
+        You get through it. The caseworker writes something down, and
+        {parent.name} drives you home in a silence that is no longer angry, just tired.
+      effects:
+        - { type: relationship, role: parent, trust: -1 }
+        - { type: stat, key: stress, delta: 2 }
+  - id: ask
+    label: Ask what happens if you stay out of trouble
+    outcome:
+      text: >-
+        "A fresh start," the caseworker says. "That's the point of all this." It's the
+        first thing anyone has said all week that makes you feel like you have a future.
+      effects:
+        - { type: stat, key: confidence, delta: 2 }
+        - { type: stat, key: discipline, delta: 1 }
+        - { type: relationship, role: parent, trust: 2 }

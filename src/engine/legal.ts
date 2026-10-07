@@ -16,6 +16,7 @@ import { eventWeight } from './events/selection';
 import { isIndependent, spend } from './finance';
 import { leaveSchool } from './education';
 import { moveInCost, moveTo, ownsHome, refreshHousingCost, supportingParent } from './housing';
+import { unsealedRecord } from './record';
 import { weightedPick } from './random';
 import { nextInt, type RngState } from './rng';
 import { writeFromGroup } from './systems/history';
@@ -52,7 +53,7 @@ export function yearsText(years: number, content: ContentBundle): string {
 export function sentenceWeights(state: LifeState, def: OffenseDef, content: ContentBundle): Record<RecordOutcome, number> {
   const s = content.balance.legal.sentencing;
   const weights = { ...def.outcomes };
-  const priors = state.legal.record.length;
+  const priors = unsealedRecord(state).length;
   const juvenile = !isIndependent(state, content);
   for (const outcome of Object.keys(weights) as RecordOutcome[]) {
     let w = weights[outcome];
@@ -169,7 +170,9 @@ export function sentence(
         // Inside, probation means nothing: it becomes more time.
         state.legal.incarceratedUntil = (state.legal.incarceratedUntil ?? state.currentYear) + 1;
       } else {
-        state.legal.probationUntil = Math.max(state.legal.probationUntil ?? 0, state.currentYear + n);
+        // T1: a minor's probation (juvenile supervision) ends when they come of age.
+        const until = isIndependent(state, content) ? state.currentYear + n : Math.min(state.currentYear + n, state.birthYear + content.balance.economy.independenceAge);
+        state.legal.probationUntil = Math.max(state.legal.probationUntil ?? 0, until);
       }
       legalHistory(state, 'probation', { offense, years: yearsText(n, content) }, content);
       break;

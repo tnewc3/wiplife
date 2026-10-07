@@ -19,6 +19,7 @@ choices:
         text: The kids adore you, and the cash adds up.
         effects:
           - { type: money, delta: 600 }
+          - { type: teen, action: hire, jobId: babysitter }
           - { type: stat, key: discipline, delta: 2 }
           - { type: stat, key: happiness, delta: 2 }
       failure:

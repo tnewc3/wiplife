@@ -1,0 +1,9 @@
+id: babysitter
+name: babysitter
+blurb: Evenings and weekends with other people's kids, a list of emergency numbers on the fridge and a phone you are not supposed to look at.
+minAge: 13
+hours: 6
+wage: 12
+employers: ["the Alvarez-Brooks family", "the Okafor-Lindqvist house", "the family on Maple Court", "the Nakamura-Reyes family"]
+effects: {}
+needs: { kindness: 35 }

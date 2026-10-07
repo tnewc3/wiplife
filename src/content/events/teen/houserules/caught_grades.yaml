@@ -1,0 +1,47 @@
+id: caught_grades
+title: The report card
+text: >-
+  The envelope from school never made it onto the kitchen table. It is in
+  {parent.name}'s hand now, and {parent.they} found it in the bottom of your bag.
+tone: neutral
+category: houserules
+rarity: common
+lifeStages: [teen]
+followUpOnly: true
+weight: { base: 1 }
+requires:
+  all:
+    - { teen: { rules: { gte: 1 } } }
+    - { teen: { caught: [grades] } }
+    - { education: { program: [middle, high] } }
+cast:
+  parent: { kind: parent, presence: household }
+choices:
+  - id: plan
+    label: Offer a plan for bringing the grades up
+    outcome:
+      text: >-
+        You propose an hour a night before anything else. {parent.name} adds
+        a check-in on Fridays, and for once it feels like a deal between two
+        people instead of a sentence.
+      effects:
+        - { type: education, action: grades, value: 0.15 }
+        - { type: relationship, role: parent, trust: 4 }
+  - id: hid_it
+    label: Admit you hid it because you were scared
+    outcome:
+      text: >-
+        {parent.name}'s face changes. "Scared of what?" {parent.they} {parent:asks|ask}.
+        It turns into a longer conversation than the grades deserve, and a better one.
+      effects:
+        - { type: relationship, role: parent, trust: 3, affection: 3 }
+        - { type: stat, key: stress, delta: -2 }
+  - id: dont_care
+    label: Say grades aren't everything
+    outcome:
+      text: >-
+        "No," {parent.name} says. "But they're something." The phone goes in a drawer
+        until the next report card.
+      effects:
+        - { type: relationship, role: parent, trust: -3, affection: -2 }
+        - { type: teen, action: tighten, rule: grades }

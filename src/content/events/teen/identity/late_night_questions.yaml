@@ -1,0 +1,55 @@
+id: late_night_questions
+title: Two a.m.
+text: >-
+  {friend.name} and you have been up too late, in a basement or on a roof,
+  talking about the kind of thing you can only talk about at this hour: who you
+  are, who you want to be, and whether those turn out to be the same person.
+tone: light
+category: identity
+rarity: common
+lifeStages: [teen]
+requires:
+  all:
+    - { age: { gte: 13 } }
+cast:
+  friend: { kind: friend, presence: city }
+weight: { base: 7 }
+cooldownYears: 3
+choices:
+  - id: honest
+    label: Say the thing you haven't said to anyone
+    check:
+      base: 55
+      stats: [{ role: friend, key: trust, weight: 0.3 }]
+      success:
+        text: >-
+          {friend.name} doesn't flinch. "I kind of figured," {friend.they}
+          {friend:says|say}, and then {friend.they} {friend:tells|tell} you something
+          of {friend.their} own. The night goes quiet in the best way.
+        effects:
+          - { type: relationship, role: friend, affection: 7, trust: 8 }
+          - { type: innerConflict, delta: -3 }
+          - { type: stat, key: stress, delta: -3 }
+      failure:
+        text: >-
+          It comes out clumsy, and {friend.name} doesn't know what to say. You laugh it
+          off. The friendship holds, but the thing you said is still in the room.
+        effects:
+          - { type: relationship, role: friend, trust: -2 }
+          - { type: innerConflict, delta: 2 }
+  - id: ask
+    label: Ask {friend.them} the big questions first
+    outcome:
+      text: >-
+        You listen more than you talk, and learn something about {friend.name}
+        that you'd never have guessed. It turns out you weren't the only one asking.
+      effects:
+        - { type: relationship, role: friend, affection: 4, trust: 4 }
+        - { type: stat, key: kindness, delta: 1 }
+  - id: laugh
+    label: Make it a joke and go back to the snacks
+    outcome:
+      text: It's easier. It's always easier. The questions are still there in the morning.
+      effects:
+        - { type: innerConflict, delta: 2 }
+        - { type: stat, key: happiness, delta: 1 }

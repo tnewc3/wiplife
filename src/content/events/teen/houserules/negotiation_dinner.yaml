@@ -1,0 +1,65 @@
+id: negotiation_dinner
+title: Making your case
+text: >-
+  You have been rehearsing this in the shower for two days. Over dinner, you
+  clear your throat and tell {parent.name} that you would like to talk about
+  the rules, using a lot of the word "mature."
+tone: neutral
+category: houserules
+rarity: common
+lifeStages: [teen]
+requires:
+  all:
+    - { teen: { rules: { gte: 1 } } }
+    - { teen: { rules: { gte: 2 } } }
+    - { teen: { rule: { domain: curfew, level: { gte: 1 } } } }
+cast:
+  parent: { kind: parent, presence: household }
+weight: { base: 6 }
+cooldownYears: 2
+choices:
+  - id: calm
+    label: Lay it out calmly, with examples
+    check:
+      base: 40
+      stats: [{ role: parent, key: trust, weight: 0.3 }, { key: smarts, weight: 0.15 }, { key: confidence, weight: 0.15 }]
+      success:
+        text: >-
+          {parent.name} listens through the whole thing, asks two good
+          questions and says "Let me think." The next morning, a rule has
+          been quietly rewritten.
+        effects:
+          - { type: teen, action: loosen, rule: curfew }
+          - { type: relationship, role: parent, trust: 4 }
+          - { type: stat, key: confidence, delta: 2 }
+      failure:
+        text: >-
+          Halfway through, {parent.name} starts nodding in a way you
+          recognize as not listening. The answer is no, and it is polite, and it is final.
+        effects:
+          - { type: relationship, role: parent, trust: -1 }
+          - { type: stat, key: stress, delta: 1 }
+  - id: lawyer
+    label: Bring a written list
+    check:
+      base: 30
+      stats: [{ key: smarts, weight: 0.25 }, { key: discipline, weight: 0.15 }]
+      success:
+        text: >-
+          The list has numbered points and a proposed trial period. {parent.name}
+          is so impressed that {parent.they} {parent:forgets|forget} to be annoyed.
+        effects:
+          - { type: teen, action: loosen, rule: curfew }
+          - { type: relationship, role: parent, trust: 3, affection: 2 }
+      failure:
+        text: '{parent.name} reads it twice, then adds a rule at the bottom: no more lists.'
+        effects:
+          - { type: relationship, role: parent, trust: -2 }
+          - { type: stat, key: happiness, delta: -1 }
+  - id: storm
+    label: Storm out when it gets difficult
+    outcome:
+      text: It is satisfying for about forty seconds, and then your plate is still sitting there.
+      effects:
+        - { type: relationship, role: parent, trust: -3, affection: -2 }
+        - { type: teen, action: tighten, rule: curfew }

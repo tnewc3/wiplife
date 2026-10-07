@@ -1,0 +1,7 @@
+id: truancy
+name: truancy
+class: misdemeanor
+severity: 1
+outcomes: { warning: 6, fine: 1.5, probation: 0.2, jail: 0 }
+fine: { min: 100, max: 400 }
+probationYears: { min: 1, max: 1 }

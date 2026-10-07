@@ -1,0 +1,13 @@
+id: drama_club
+name: The drama club
+kind: club
+blurb: Auditions, painted flats, and a show that is certain to be a disaster until the moment it isn't.
+minAge: 13
+cost: 60
+effects:
+  happiness: { perYear: 0.7, limit: 85 }
+grades: -0.02
+friends: 4
+talent: performance
+passion: 6
+injury: 0

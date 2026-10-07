@@ -1,0 +1,10 @@
+id: dog_walker
+name: dog walker
+blurb: Eight leashes, one very slow elderly retriever and a route that takes you past every house on the block twice.
+minAge: 13
+hours: 6
+wage: 11
+employers: ["Four Paws Daily", "Leash & Lead Walks", "Neighborhood Pet Pals"]
+effects:
+  fitness: { perYear: 0.8, limit: 75 }
+needs: {}

@@ -11,6 +11,7 @@ lifeStages: [teen, youngAdult]
 requires:
   all:
     - { age: { gte: 16, lte: 25 } }
+    - { teen: { license: [licensed] } }
     - { belongings: { vehicles: { lt: 1 } } }
     - { not: { flag: got_help_with_first_car } }
 weight: { base: 8 }

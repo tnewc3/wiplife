@@ -1,0 +1,50 @@
+id: finding_your_style
+title: Who you look like
+text: >-
+  You've been trying on versions of yourself: clothes from the thrift shop, a
+  haircut you were not sure about, a way of walking into a room that you
+  practiced in the bathroom mirror. Somewhere in there, one of them starts to
+  feel like you.
+tone: light
+category: identity
+rarity: common
+lifeStages: [teen]
+requires:
+  all:
+    - { age: { gte: 13 } }
+weight: { base: 7 }
+cooldownYears: 3
+choices:
+  - id: from_latent
+    label: Wear what you've been imagining for a while
+    visibleIf: { discovery: { latent: [expression] } }
+    outcome:
+      text: It's a small decision with a big feeling behind it. Nobody says much, and you feel taller anyway.
+      effects:
+        - { type: identity, field: expression, value: fromLatent }
+        - { type: innerConflict, delta: -4 }
+        - { type: stat, key: confidence, delta: 3 }
+  - id: bold
+    label: Go bold, and see who notices
+    check:
+      base: 50
+      stats: [{ key: confidence, weight: 0.3 }, { key: looks, weight: 0.1 }]
+      success:
+        text: People notice, and a few of them say it out loud. By Friday, three people have asked where you got it.
+        effects:
+          - { type: stat, key: confidence, delta: 3 }
+          - { type: stat, key: looks, delta: 1 }
+          - { type: teen, action: standing, delta: 2 }
+      failure:
+        text: Someone says something, and then someone else repeats it. It is a bad day, and a better week.
+        effects:
+          - { type: stat, key: confidence, delta: -1 }
+          - { type: stat, key: stress, delta: 2 }
+          - { type: stat, key: discipline, delta: 1 }
+  - id: low_key
+    label: Keep it simple and let people find out
+    outcome:
+      text: It's quiet, and it works. People find out who you are slowly, and it feels like they chose to.
+      effects:
+        - { type: stat, key: stress, delta: -1 }
+        - { type: stat, key: confidence, delta: 1 }

@@ -1,0 +1,88 @@
+# History lines the teen systems write. The player is "you".
+# Values: {clique}, {school}, {job}, {employer}, {activity}, {rule}, {parent}.
+history:
+  newSchool:
+    importance: 1
+    variants:
+      - "You started at {school}, where nobody knew you yet."
+      - "{school} was new, and so was everyone's idea of who you were."
+  cliqueJoined:
+    importance: 2
+    variants:
+      - "You found your crowd at {school}: {clique} took you in."
+      - "{clique} made room for you at {school}."
+  cliqueTurnedAway:
+    importance: 1
+    variants:
+      - "{clique} didn't have room for you, and you felt it for a while."
+      - "You tried to join {clique} and it didn't work out."
+  cliqueSwitched:
+    importance: 2
+    variants:
+      - "You left your old crowd and joined {clique}."
+      - "You changed crowds, and {clique} became your people."
+  cliqueLeft:
+    importance: 1
+    variants:
+      - "You drifted away from {clique}."
+      - "You stopped going around with {clique}."
+  cliqueClash:
+    importance: 1
+    variants:
+      - "{clique} and a rival crowd at {school} fell out, and you were in the middle of it."
+      - "A rivalry between {clique} and another crowd turned ugly at {school}."
+  permit:
+    importance: 1
+    variants:
+      - "You got your learner's permit."
+      - "You passed the written test and got your learner's permit."
+  licensePassed:
+    importance: 2
+    variants:
+      - "You passed your driving test and got your license."
+      - "You got your driver's license."
+  licenseFailed:
+    importance: 1
+    variants:
+      - "You failed your driving test."
+      - "You didn't pass your driving test the first time."
+  jobStarted:
+    importance: 1
+    variants:
+      - "You got a job as a {job} at {employer}."
+      - "You started work as a {job} for {employer}."
+  jobEnded:
+    importance: 1
+    variants:
+      - "Your job as a {job} at {employer} came to an end."
+      - "You stopped working as a {job} for {employer}."
+  activityJoined:
+    importance: 1
+    variants:
+      - "You joined {activity}."
+      - "You made it onto {activity}."
+  activityCut:
+    importance: 1
+    variants:
+      - "You tried out for {activity} and didn't make it."
+      - "You were cut from {activity}."
+  activityLeft:
+    importance: 1
+    variants:
+      - "You left {activity}."
+      - "You quit {activity}."
+  ruleCaught:
+    importance: 1
+    variants:
+      - "{parent} caught you breaking a rule at home."
+      - "You broke one of {parent}'s rules and got caught."
+  ruleLoosened:
+    importance: 1
+    variants:
+      - "{parent} agreed to loosen one of the rules at home."
+      - "You talked {parent} into easing up on a rule."
+  sealed:
+    importance: 1
+    variants:
+      - "Your juvenile record was sealed when you turned eighteen."
+      - "At eighteen, what happened when you were a minor was sealed from the record."

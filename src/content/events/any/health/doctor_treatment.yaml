@@ -3,7 +3,7 @@ id: doctor_treatment
 title: A plan
 text: >-
   The doctor writes for a long time, then hands you a printed plan: a
-  prescription, a follow-up date and a list of things to change. "It works,"
+  prescription, a follow-up visit and a list of things to change. "It works,"
   the doctor says, "if you work it."
 tone: neutral
 category: health

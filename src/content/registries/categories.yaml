@@ -89,3 +89,16 @@ categories:
   pets: { label: Pets, household: true }
   vehicles: { label: Cars and driving }
   property: { label: Property }
+
+  # T1: the teen years. Crowds at school and the rules at home have their own contracts.
+  crowds:
+    label: Your crowd
+    requires: { education: { program: [middle, high] } }
+  houserules:
+    label: Rules at home
+    household: true
+    requires: { teen: { rules: { gte: 1 } } }
+  driving: { label: Driving }
+  teenwork: { label: Teen jobs }
+  teamsclubs: { label: Teams and clubs }
+  future: { label: Thinking ahead }

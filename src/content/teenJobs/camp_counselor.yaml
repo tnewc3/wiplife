@@ -1,0 +1,11 @@
+id: camp_counselor
+name: camp counselor
+blurb: Six weeks of other people's kids, sunscreen, a whistle and songs that you will never get out of your head.
+minAge: 16
+hours: 20
+wage: 11
+employers: ["Pine Hollow Day Camp", "Lakeshore Summer Camp", "Silver Creek Adventure Camp"]
+effects:
+  happiness: { perYear: 0.6, limit: 85 }
+  fitness: { perYear: 0.5, limit: 75 }
+needs: { kindness: 40, sociability: 40 }

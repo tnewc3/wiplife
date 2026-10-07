@@ -1,0 +1,16 @@
+id: afterburn
+name: Afterburn
+blurb: Thrill-seekers who skate the empty lots and go looking for the next dare, and who treat the rules as suggestions made by people who have never been bored.
+weight: 0.9
+traits: { riskTaking: 14, confidence: 6, discipline: -8 }
+likes: { riskTaking: 0.7, confidence: 0.2, discipline: -0.3 }
+standing: 58
+effects:
+  happiness: { perYear: 0.6, limit: 85 }
+  fitness: { perYear: 0.4, limit: 75 }
+  health: { perYear: -0.3, limit: 55 }
+grades: -0.2
+friends: 4
+money: 1
+passion: 1
+trouble: 2.2

@@ -1,0 +1,63 @@
+id: cafeteria_standoff
+title: The standoff
+text: >-
+  Two tables, two crowds and one empty space between them, and nobody wants
+  to be the first to look away. {foe.name} from {rival} says something
+  across it, and {member.name} stands up.
+tone: serious
+category: crowds
+rarity: common
+lifeStages: [teen]
+followUpOnly: true
+weight: { base: 1 }
+requires:
+  all:
+    - { education: { program: [middle, high] } }
+    - { teen: { clique: true } }
+    - { teen: { clash: true } }
+cast:
+  member: { kind: classmate, crowd: yours, presence: city }
+  foe: { kind: classmate, crowd: rival, presence: city }
+choices:
+  - id: stand_with
+    label: Stand up next to {member.them}
+    outcome:
+      text: >-
+        Nobody throws anything. Everybody stays very still, a teacher appears
+        in the doorway, and both crowds suddenly remember their lunches. It
+        counts as a win, and everyone knows whose side you were on.
+      effects:
+        - { type: relationship, role: member, affection: 6, trust: 5 }
+        - { type: relationship, role: foe, affection: -5 }
+        - { type: tie, a: member, b: foe, action: worsen, delta: 5 }
+        - { type: teen, action: standing, delta: 2 }
+  - id: peacemaker
+    label: Step in between them and talk it down
+    check:
+      base: 40
+      stats: [{ key: confidence, weight: 0.3 }, { key: kindness, weight: 0.2 }]
+      success:
+        text: >-
+          It's awkward and brave and it works: a couple of people laugh, and
+          the tension goes out of the room like air out of a tire. Even {foe.name}
+          almost nods at you on the way out.
+        effects:
+          - { type: teen, action: settle }
+          - { type: tie, a: member, b: foe, action: mend, delta: 12 }
+          - { type: relationship, role: foe, affection: 6 }
+          - { type: stat, key: confidence, delta: 3 }
+      failure:
+        text: >-
+          You get a shove from someone who wasn't aiming at you. A teacher
+          arrives, and the version of the story the adults hear has you in the middle.
+        effects:
+          - { type: stat, key: health, delta: -1 }
+          - { type: stat, key: stress, delta: 3 }
+          - { type: teen, action: standing, delta: -2 }
+  - id: stay_seated
+    label: Stay in your seat and keep your head down
+    outcome:
+      text: It blows over without you. Nobody says anything about it, which is its own kind of saying something.
+      effects:
+        - { type: relationship, role: member, affection: -3, trust: -2 }
+        - { type: teen, action: rank, delta: -2 }

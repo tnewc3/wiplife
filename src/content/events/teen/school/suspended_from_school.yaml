@@ -1,0 +1,53 @@
+id: suspended_from_school
+title: Three days at home
+text: >-
+  The vice principal's letter says three days, and the word "pattern." You're
+  sent home with a stack of assignments and a look from the secretary that is
+  more pity than judgment.
+tone: serious
+category: school
+rarity: common
+lifeStages: [teen]
+requires:
+  all:
+    - { education: { program: [middle, high] } }
+    - { flag: suspended }
+weight: { base: 12 }
+once: true
+cast:
+  parent: { kind: parent, presence: household }
+choices:
+  - id: catch_up
+    label: Do all of the work, properly
+    outcome:
+      text: It's the first time in months you've had three days to yourself, and the first time all year that you've finished every assignment on time.
+      effects:
+        - { type: education, action: grades, value: 0.1 }
+        - { type: stat, key: discipline, delta: 2 }
+        - { type: relationship, role: parent, trust: 2 }
+  - id: sleep
+    label: Sleep, and scroll, and do nothing
+    outcome:
+      text: It feels like a vacation until the third afternoon, when you realize the work is still waiting, and so is everyone's opinion of you.
+      effects:
+        - { type: education, action: grades, value: -0.1 }
+        - { type: stat, key: happiness, delta: 1 }
+        - { type: relationship, role: parent, trust: -2 }
+  - id: talk
+    label: Use the time to talk to {parent.name} about it
+    check:
+      base: 50
+      stats: [{ role: parent, key: affection, weight: 0.3 }]
+      success:
+        text: >-
+          You talk in the kitchen over coffee that neither of you finishes.
+          Nothing is fixed, but something has been said out loud that needed
+          to be.
+        effects:
+          - { type: relationship, role: parent, affection: 6, trust: 4 }
+          - { type: stat, key: stress, delta: -3 }
+      failure:
+        text: The talk turns into a fight about everything but the thing you were suspended for, and you both wind up worse off.
+        effects:
+          - { type: relationship, role: parent, affection: -3 }
+          - { type: stat, key: stress, delta: 3 }

@@ -1,0 +1,10 @@
+id: kitchen_helper
+name: kitchen helper
+blurb: Chopping, scrubbing and a rush at six that is the closest thing to a team sport that you've ever been paid for.
+minAge: 15
+hours: 14
+wage: 12
+employers: ["Salt & Ember Diner", "Brightside Cafe", "Tony's Noodle House", "Harvest Table"]
+effects:
+  stress: { perYear: 0.4, limit: 65 }
+needs: {}

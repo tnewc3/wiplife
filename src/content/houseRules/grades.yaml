@@ -1,0 +1,12 @@
+id: grades
+domain: grades
+name: Grades
+levels:
+  - Keep your grades where you can live with them.
+  - Nothing below a B, or the phone goes in a drawer.
+  - Report cards signed at the table, and nothing below a B-plus.
+tight: { strictness: 0.56, warmth: 0, involvement: 0.48, traits: { ambition: 0.4, discipline: 0.16 } }
+absentBelow: 51
+temptation: 0.093
+watch: 0.6
+applies: school

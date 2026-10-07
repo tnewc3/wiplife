@@ -1,0 +1,54 @@
+id: sneak_out_window
+title: The window
+text: >-
+  Everyone you know is out tonight, and you have been told to stay home.
+  Your window opens onto the porch roof, and from the porch roof it is not
+  a very long way down.
+tone: serious
+category: houserules
+rarity: common
+lifeStages: [teen]
+requires:
+  all:
+    - { teen: { rules: { gte: 1 } } }
+    - { teen: { rules: { gte: 2 } } }
+    - { teen: { rule: { domain: curfew, level: { gte: 1 } } } }
+    - { age: { gte: 14 } }
+weight:
+  base: 6
+  modifiers:
+    - { if: { trait: riskTaking, gt: 60 }, x: 1.8 }
+    - { if: { trait: discipline, gt: 65 }, x: 0.5 }
+cooldownYears: 2
+choices:
+  - id: go
+    label: Climb out
+    outcome:
+      text: >-
+        The night air is the best thing you've felt all week, and the hour or
+        two that you are gone stretches out in your memory into something much longer.
+      effects:
+        - { type: teen, action: break, rule: curfew }
+        - { type: stat, key: happiness, delta: 2 }
+  - id: stay
+    label: Stay in and tell yourself it was a good decision
+    outcome:
+      text: You watch the street from the window for a while. Nothing happens, which is the whole point, even if it doesn't feel like one.
+      effects:
+        - { type: stat, key: discipline, delta: 2 }
+        - { type: stat, key: happiness, delta: -1 }
+  - id: ask
+    label: Go downstairs and ask to go, one more time
+    check:
+      base: 30
+      stats: [{ key: confidence, weight: 0.2 }, { key: kindness, weight: 0.1 }]
+      success:
+        text: >-
+          The answer is yes, with a text every hour, and you are home by
+          eleven. Doing it the long way turns out to feel better than the window would have.
+        effects:
+          - { type: stat, key: happiness, delta: 2 }
+      failure:
+        text: The answer is still no, and now your parents know exactly how badly you wanted to go.
+        effects:
+          - { type: stat, key: stress, delta: 2 }

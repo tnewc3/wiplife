@@ -421,6 +421,7 @@ const legal = z.strictObject({
       outcome: z.enum(['warning', 'fine', 'probation', 'jail']),
       amount: dollars.exactOptional(),
       years: int.min(1).exactOptional(),
+      sealed: z.literal(true).exactOptional(),
     }),
   ),
   probationUntil: int.exactOptional(),
@@ -503,6 +504,39 @@ const possession = z.strictObject({
   home: z.strictObject({ cityId: id, insured: z.boolean(), mortgageDebtId: id.exactOptional(), renovations: z.array(renovation) }).exactOptional(),
 });
 const possessions = z.strictObject({ items: z.array(possession), nextId: int.min(1), claims: z.array(int), noVehicleYears: int.min(0) });
+
+// T1: the teen years.
+const ruleDomain = z.enum(['curfew', 'chores', 'grades', 'screens', 'friends', 'parties', 'car', 'check_in', 'money']);
+const teen = z.strictObject({
+  school: z.strictObject({ key: id, cityId: id, program: z.enum(['middle', 'high']), since: int }).nullable(),
+  cliques: z.array(z.strictObject({ id, defId: id, members: z.array(id), standing: score, rival: id.exactOptional() })),
+  nextClique: int.min(1),
+  member: z.strictObject({ cliqueId: id, since: int, rank: score }).nullable(),
+  turnedAway: z.record(z.string(), int),
+  invite: id.exactOptional(),
+  clash: z.strictObject({ cliqueId: id, since: int, until: int }).exactOptional(),
+  standing: score,
+  focus: z.strictObject({ year: int, id: z.enum(['school', 'friends', 'work', 'passion']) }).nullable(),
+  focusYears: z.strictObject({ school: int.min(0), friends: int.min(0), work: int.min(0), passion: int.min(0) }),
+  passion: score,
+  license: z.strictObject({ stage: z.enum(['none', 'permit', 'licensed']), since: int.exactOptional(), lessons: int.min(0), fails: int.min(0), testYear: int.exactOptional() }),
+  job: z.strictObject({ jobId: id, employer: z.string().min(1), since: int }).nullable(),
+  activities: z.array(z.strictObject({ id, since: int })),
+  home: z
+    .strictObject({
+      styles: z.record(z.string(), z.strictObject({ warmth: score, strictness: score, involvement: score })),
+      rules: z.array(
+        z.strictObject({ ruleId: ruleDomain, by: id, level: z.union([z.literal(0), z.literal(1), z.literal(2)]), since: int, negotiated: int.exactOptional(), broken: int.min(0), caught: int.min(0) }),
+      ),
+      year: int,
+    })
+    .nullable(),
+  penalties: z.array(z.strictObject({ kind: z.enum(['grounded', 'privilege']), until: int, domain: ruleDomain.exactOptional() })),
+  caught: z.strictObject({ year: int, ruleId: ruleDomain, by: id }).exactOptional(),
+  totals: z.strictObject({ broken: int.min(0), caught: int.min(0), negotiated: int.min(0), won: int.min(0) }),
+  seenRecords: int.min(0),
+  sealed: z.literal(true).exactOptional(),
+});
 
 const settlement = z.strictObject({
   year: int,
@@ -640,6 +674,7 @@ export const lifeStateSchema: z.ZodType<LifeState> = z.strictObject({
   news: z.array(newsYear),
   web,
   possessions,
+  teen,
 });
 
 /**
