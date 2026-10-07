@@ -186,8 +186,8 @@ describe('crowds at school', () => {
 
   it('a crowd that noticed you can be joined without a second roll, and an event can ask for the best fit', () => {
     const life = edit(step(teenAt('crowds-invite', 15)), (d) => {
-      d.teen.member = undefined;
-      d.teen.clash = undefined;
+      d.teen.member = null;
+      delete d.teen.clash;
       d.teen.invite = d.teen.cliques[1]!.id;
     });
     expect(crowdToJoin(life, content)?.id).toBe(life.teen.cliques[1]!.id);
