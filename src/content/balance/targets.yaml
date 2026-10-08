@@ -286,7 +286,7 @@ fame:
   talentQualityGap: { min: 12, max: 40 }
   disagree: { min: 0.1, max: 0.4 }
   # Going all in climbs faster, strains the people close to you and brings burnout much closer.
-  allInClimb: { min: 1.3, max: 8 }
+  allInClimb: { min: 1.3, max: 12 }
   allInStrain: { min: 1.5, max: 8 }
   allInBurnout: { min: 3, max: 200 }
   fadeLives: { min: 0.15, max: 0.7 }
