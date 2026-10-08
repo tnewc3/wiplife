@@ -15,6 +15,7 @@ import { yearIncome } from '../systems/career';
 import { renderText } from '../text';
 import { textContext } from '../events/text';
 import { lifeAtAge } from '../testFixtures';
+import { defaultLife } from '../lives/model';
 import { startItem } from '../web/knowledge';
 import type { FamePlan, LifeState } from '../types';
 import {
@@ -382,6 +383,23 @@ describe('fans, haters and critics', () => {
     expect(life.web.ties[[s1, s2].sort().join('|')]).toBeDefined();
     expect(life.fame.people).toEqual({ super: [s1, s2], hater: [h], critic: [c] });
     ok(life);
+  });
+
+  it('charges a stalker only when they have no other crime case', () => {
+    for (let i = 0; i < 12; i++) {
+      const made = apply(star(`stalker-case-${i}`, 30, 'music', 'music'), (d) => {
+        d.rng = createRng(`stalker-case-${i}`);
+        spawnFan(d, 'super', content, d.rng);
+        const fan = d.fame.people.super[0]!;
+        d.people[fan]!.life = defaultLife(d, d.people[fan]!, d.relationships[fan]!, content);
+        d.people[fan]!.life!.troubles.push({ kind: 'crime', refId: 'shoplifting', since: d.currentYear, severity: 0, treated: false, stage: 'held' });
+        startStalker(d, fan, content);
+        reportStalker(d, content, d.rng);
+      });
+      const fan = made.fame.people.super[0]!;
+      expect(made.people[fan]!.life!.troubles.filter((t) => t.kind === 'crime')).toHaveLength(1);
+      ok(made);
+    }
   });
 
   it('does not estrange a fan you went on to marry when the stalking ends', () => {

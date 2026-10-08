@@ -80,7 +80,8 @@ function charge(state: LifeState, id: Id, content: ContentBundle): void {
   const rel = state.relationships[id];
   if (!person || !rel || !content.offenses.stalking) return;
   const life = (person.life ??= defaultLife(state, person, rel, content));
-  if (life.troubles.some((t) => t.kind === 'crime' && t.refId === 'stalking')) return;
+  // One crime case at a time among the people you know (E3): a fan already in trouble is not charged again.
+  if (life.troubles.some((t) => t.kind === 'crime')) return;
   life.troubles.push({ kind: 'crime', refId: 'stalking', since: state.currentYear, severity: 0, treated: false, stage: 'held' });
 }
 
