@@ -21,6 +21,7 @@ import { debtKindSchema, housingKindSchema, lifestyleSchema } from './economy';
 import { FAMILY_DEEDS, GUARDIAN_KINDS, familyProcessSchema, parentingKeySchema } from './family';
 import { credentialTypeSchema, programSchema, tierSchema } from './education';
 import { lifeTierSchema } from './people';
+import { jobSizeSchema } from './crime';
 import { FOCUS_KEYS, LICENSE_STAGE_IDS, ruleDomainSchema, type RuleDomainId, type TeenFocusId } from './teen';
 import { relationshipKindSchema, relationshipStatusSchema, romanceStatusSchema } from './relationships';
 import { templateSchema } from './text';
@@ -101,6 +102,7 @@ export type Condition =
   | { family: FamilyCondition }
   | { belongings: BelongingsCondition }
   | { teen: TeenCondition }
+  | { crime: CrimeCondition }
   | { memory: { role: string; tag: string } }
   | {
       role: string;
@@ -194,8 +196,38 @@ export interface TeenCondition {
   sealed?: boolean;
 }
 
+/**
+ * E6a, crime careers. Every field given must hold. member: you are in a crew;
+ * former: you were in one and are not now; rank: your rank (1 to 5; 5 runs the
+ * crew); leader: you run it; standing: your standing in it (0-100); heat: how
+ * much police attention you carry (0-100); investigated: an investigation into
+ * you is open; rivalry: how hot things are with the rival crew (0-100); rival:
+ * your crew has a rival; informant: someone in your crew is talking to the
+ * police; jobs: jobs you have done this year; years: years in the crew (or, for
+ * a former member, years since you left); crew: you are in (or were in) one of
+ * these crews; arrests: arrests so far in your life of crime.
+ */
+export interface CrimeCondition {
+  member?: boolean;
+  former?: boolean;
+  rank?: Compare;
+  leader?: boolean;
+  standing?: Compare;
+  heat?: Compare;
+  investigated?: boolean;
+  rivalry?: Compare;
+  rival?: boolean;
+  informant?: boolean;
+  jobs?: Compare;
+  years?: Compare;
+  crew?: string[];
+  arrests?: Compare;
+}
+
 /** Your money situation. Every field given must hold. */
 export interface FinancesCondition {
+  /** E6a: your dirty money (cash from crime you have not laundered). */
+  dirty?: Compare;
   /** Total debt balance. */
   debt?: Compare;
   /** Most missed payments in a row on any one debt. */
@@ -511,6 +543,7 @@ export const conditionSchema: z.ZodType<Condition> = z.lazy(() =>
           bankruptWithin: z.int().min(1).max(100).optional(),
           planWithin: z.int().min(1).max(100).optional(),
           income: compareSchema.optional(),
+          dirty: compareSchema.optional(),
         })
         .refine(atLeastOneField, 'needs at least one field'),
     }),
@@ -649,6 +682,26 @@ export const conditionSchema: z.ZodType<Condition> = z.lazy(() =>
         })
         .refine(atLeastOneField, 'needs at least one field'),
     }),
+    z.strictObject({
+      crime: z
+        .strictObject({
+          member: z.boolean().optional(),
+          former: z.boolean().optional(),
+          rank: compareSchema.optional(),
+          leader: z.boolean().optional(),
+          standing: compareSchema.optional(),
+          heat: compareSchema.optional(),
+          investigated: z.boolean().optional(),
+          rivalry: compareSchema.optional(),
+          rival: z.boolean().optional(),
+          informant: z.boolean().optional(),
+          jobs: compareSchema.optional(),
+          years: compareSchema.optional(),
+          crew: z.array(idSchema).min(1).optional(),
+          arrests: compareSchema.optional(),
+        })
+        .refine(atLeastOneField, 'needs at least one field'),
+    }),
     z.strictObject({ memory: z.strictObject({ role: roleSchema, tag: idSchema }) }),
     z.strictObject({
       role: roleSchema,
@@ -767,6 +820,12 @@ export const castSpecSchema = z
      * friend or classmate of yours), found only, never created.
      */
     crowd: z.enum(['yours', 'rival']).optional(),
+    /**
+     * E6a: someone from a crew: your own crew (yours), the person who runs it
+     * above you (boss), the member who is talking to the police (informant),
+     * or a person from the rival crew (rival, who may be created: they are met, not known).
+     */
+    crew: z.enum(['yours', 'boss', 'informant', 'rival']).optional(),
   })
   .refine((s) => (s.kind !== undefined && s.support === true) === false && (s.kind !== undefined || s.support === true || s.noticed !== undefined), 'a role needs one of kind or support: true (or noticed, alone or with a kind)')
   .refine((s) => s.deceased !== true || (s.presence === 'anywhere' && s.support !== true && !s.romantic && !s.admirer && !s.createIfMissing && s.newChance === undefined), 'a deceased role has presence anywhere and is only passed in')
@@ -778,6 +837,10 @@ export const castSpecSchema = z
   .refine(
     (s) => s.crowd === undefined || ((s.kind === 'friend' || s.kind === 'classmate') && !s.support && !s.noticed && !s.romantic && !s.admirer && !s.createIfMissing && s.newChance === undefined),
     'a crowd role is a friend or classmate who is found, never created, and not a support, noticed, romantic or admirer role',
+  )
+  .refine(
+    (s) => s.crew === undefined || (!s.crowd && !s.support && !s.noticed && !s.romantic && !s.admirer && (s.crew === 'rival' ? s.kind === 'acquaintance' : s.kind === 'friend') && (s.crew === 'rival' || (!s.createIfMissing && s.newChance === undefined))),
+    'a crew role is a friend (your crew, boss or informant: found, never created) or an acquaintance (rival), and not a crowd, support, noticed, romantic or admirer role',
   );
 export type CastSpec = z.infer<typeof castSpecSchema>;
 
@@ -1000,6 +1063,46 @@ export const effectSchema = z.discriminatedUnion('type', [
       "attraction, gender and personality take value 'fromLatent' (attraction also 'withRole')",
     ),
   /** Inner conflict (Stage 9): pushing something down raises it; making peace lowers it. */
+  /**
+   * E6a, a life in a crew (adults only; the engine and the content build both
+   * say so). join: you are taken in by a crew that works in your city (the
+   * rest of the life is the same as before). leave: you leave (how: left by
+   * choice, pushed out, caught, drifted, or a deal); the people stay in your
+   * life, the heat stays on you. heat / standing / rivalry: move by `delta`.
+   * promote / demote: one rank up or down (to the top you run the crew).
+   * job: you did a job of this size (its heat, its standing, and your count
+   * for the year). investigate: an investigation into you opens; close: it
+   * ends. remove: the person in `role` is no longer in the crew. join may
+   * bring the person in `role` (whoever brought you in) into the crew too.
+   */
+  z
+    .strictObject({
+      type: z.literal('crime'),
+      action: z.enum(['join', 'leave', 'heat', 'standing', 'rivalry', 'promote', 'demote', 'job', 'investigate', 'close', 'remove']),
+      delta: z.int().min(-100).max(100).optional(),
+      size: jobSizeSchema.optional(),
+      how: z.enum(['left', 'pushed', 'drifted', 'deal']).optional(),
+      role: roleSchema.optional(),
+    })
+    .refine((e) => (e.action === 'heat' || e.action === 'standing' || e.action === 'rivalry') === (e.delta !== undefined && e.delta !== 0), 'heat, standing and rivalry need a non-zero delta (and only they have one)')
+    .refine((e) => (e.action === 'job') === (e.size !== undefined), 'job needs size (and only job has it)')
+    .refine((e) => (e.action === 'leave') || e.how === undefined, 'only leave takes how')
+    .refine((e) => (e.action === 'remove' ? e.role !== undefined : e.action === 'join' || e.role === undefined), 'remove needs role; join may bring a person with it; no other action has one'),
+  /**
+   * E6a, dirty money (cash from crime you have not laundered). gain: a job's
+   * take of this size, times your rank's multiplier and your city's pay level,
+   * varying a little. pay: you hand over this size of cost out of it
+   * (hush money, a bribe; no more than you hold). lose: a share of what you
+   * hold is seized, stolen or burned.
+   */
+  z
+    .strictObject({
+      type: z.literal('dirtyMoney'),
+      gain: jobSizeSchema.optional(),
+      pay: jobSizeSchema.optional(),
+      lose: z.number().gt(0).max(1).optional(),
+    })
+    .refine((e) => [e.gain, e.pay, e.lose].filter((v) => v !== undefined).length === 1, 'needs exactly one of gain, pay or lose'),
   z.strictObject({ type: z.literal('innerConflict'), delta: z.int().min(-100).max(100) }),
   /** You discover your hidden talent, if you have one you haven't found (Stage 9). */
   z.strictObject({ type: z.literal('talent') }),
@@ -1210,6 +1313,8 @@ export const checkStatSchema = z.union([
   z.strictObject({ key: statKeySchema, weight: checkWeightSchema }),
   z.strictObject({ role: roleSchema, key: z.enum(['affection', 'trust']), weight: checkWeightSchema }),
   z.strictObject({ job: z.literal('performance'), weight: checkWeightSchema }),
+  /** E6a: your standing in the crew, your rank (1 to 5, centred on 3 at 50) or the heat on you, each 0-100. */
+  z.strictObject({ crime: z.enum(['standing', 'rank', 'heat']), weight: checkWeightSchema }),
   /**
    * E2a: your chance of having a baby with the person in `role` this year
    * (fertility, or fertilityPlanned when you plan around it: from the ages

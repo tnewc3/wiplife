@@ -474,6 +474,12 @@ export function chooseMentalActions(life: LifeState, content: ContentBundle, rng
 export interface ChoiceTraits {
   /** Some outcome puts an offense on your record (a legal effect). */
   illegal: boolean;
+  /** E6a: some outcome takes you into a crew (a crime join effect). */
+  joinsCrew: boolean;
+  /** E6a: some outcome is a job for the crew (a crime job effect). */
+  crewJob: boolean;
+  /** E6a: some outcome moves you up a rank in the crew (a crime promote effect). */
+  promotes: boolean;
   /** It rolls a chance check (and isn't illegal). */
   risky: boolean;
   /** Some outcome feeds a vice (raises vice). */
@@ -494,6 +500,9 @@ export function choiceTraits(choice: ChoiceDef): ChoiceTraits {
     const illegal = effects.some((e) => e.type === 'legal');
     traits = {
       illegal,
+      joinsCrew: effects.some((e) => e.type === 'crime' && e.action === 'join'),
+      crewJob: effects.some((e) => e.type === 'crime' && e.action === 'job'),
+      promotes: effects.some((e) => e.type === 'crime' && e.action === 'promote'),
       risky: !illegal && choice.check !== undefined,
       vice: effects.some((e) => e.type === 'stat' && e.key === 'vice' && e.delta > 0),
       kind: affection > 0,
@@ -534,13 +543,26 @@ export function choiceWeight(life: LifeState, traits: ChoiceTraits): number {
   return Math.max(0.01, w);
 }
 
+/** How much more likely the criminal player is to take a choice that is a job for the crew, or a step up in it, than its other choices. */
+const CREW_JOB_EAGERNESS = 4;
+
 /** The careful player's choice on a card, by personality (drawing from `rng`). */
-export function personalityChoice(content: ContentBundle): ChoicePicker {
+export function personalityChoice(content: ContentBundle, crime: 'refuse' | 'accept' = 'refuse'): ChoicePicker {
   return (life, card, rng) => {
     const def = content.events[life.pending.find((p) => p.instanceId === card.instanceId)?.eventId ?? ''];
-    const options = card.choices.map((c) => {
-      const choice = def?.choices?.find((d) => d.id === c.id);
-      return [c.id, choice ? choiceWeight(life, choiceTraits(choice)) : 1] as const;
+    const traitsOf = (id: string) => {
+      const choice = def?.choices?.find((d) => d.id === id);
+      return choice ? choiceTraits(choice) : undefined;
+    };
+    // E6a: the law-abiding player never takes a place in a crew; the criminal one takes every one it is offered.
+    const joins = card.choices.filter((c) => traitsOf(c.id)?.joinsCrew === true);
+    if (crime === 'accept' && def?.category === 'crimeoffers' && joins.length > 0) return joins[0]!.id;
+    const open = crime === 'refuse' && joins.length < card.choices.length ? card.choices.filter((c) => !joins.includes(c)) : card.choices;
+    const options = open.map((c) => {
+      const traits = traitsOf(c.id);
+      // The criminal player does the crew's work when it is asked: that is what being in a crew is.
+      const eager = crime === 'accept' && (traits?.crewJob === true || traits?.promotes === true) ? CREW_JOB_EAGERNESS : 1;
+      return [c.id, (traits ? choiceWeight(life, traits) : 1) * eager] as const;
     });
     return weightedPick(rng, options);
   };

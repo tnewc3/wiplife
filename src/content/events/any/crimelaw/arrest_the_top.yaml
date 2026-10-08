@@ -1,0 +1,65 @@
+id: arrest_the_top
+title: The indictment
+text: >-
+  A federal prosecutor reads it out in a room full of cameras. It is a
+  long document and it is about the crew, and every page of it ends in your
+  name. They have been building this for longer than you have been running
+  anything.
+tone: dark
+category: crimelaw
+rarity: uncommon
+recurring: true
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { crime: { member: true } }
+    - { crime: { rank: { gte: 4 } } }
+weight: { base: 8 }
+followUpOnly: true
+choices:
+  - id: fight
+    label: Hire the best defence money buys and fight it
+    check:
+      base: 38
+      stats: [{ key: smarts, weight: 0.25 }, { crime: standing, weight: 0.15 }, { key: luck, weight: 0.3 }]
+      success:
+        text: >-
+          The defence picks the case apart one witness at a time. The
+          charges are reduced, and the sentence is something you can survive.
+        effects:
+          - { type: cost, item: lawyer_fee }
+          - { type: dirtyMoney, lose: 0.4 }
+          - { type: legal, offenseId: racketeering, outcome: probation, years: 3 }
+          - { type: crime, action: heat, delta: -15 }
+      failure:
+        text: >-
+          Someone close to you takes the stand. It is the worst day of your life
+          and it takes eleven minutes.
+        effects:
+          - { type: cost, item: lawyer_fee }
+          - { type: dirtyMoney, lose: 0.7 }
+          - { type: legal, offenseId: racketeering, outcome: sentence }
+  - id: plead
+    label: Plead guilty and spare the crew
+    outcome:
+      text: >-
+        You stand up and say it, and the people below you watch you do it.
+        They will not forget that you kept them out.
+      effects:
+        - { type: dirtyMoney, lose: 0.6 }
+        - { type: legal, offenseId: racketeering, outcome: sentence }
+        - { type: crime, action: standing, delta: 10 }
+        - { type: crime, action: heat, delta: -10 }
+  - id: deal
+    label: Give them the crew in exchange for a lighter sentence
+    outcome:
+      text: >-
+        You trade the rest of your life for the next few years of it. The
+        crew does not forgive that kind of arithmetic.
+      effects:
+        - { type: dirtyMoney, lose: 0.5 }
+        - { type: legal, offenseId: racketeering, outcome: probation, years: 4 }
+        - { type: crime, action: leave, how: deal }
+        - { type: flag, key: testified_against_crew, value: true }
+        - { type: stat, key: stress, delta: 12 }

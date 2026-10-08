@@ -1,0 +1,66 @@
+id: close_call_followed
+title: The same face twice
+text: >-
+  It is the same person in the same coat, outside the laundromat and then
+  outside your building. The follower is bad at pretending to be anything but patient.
+tone: dark
+category: crime
+rarity: common
+recurring: true
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { crime: { member: true } }
+    - { crime: { heat: { gte: 30 } } }
+weight:
+  base: 4
+  modifiers:
+    - { if: { crime: { investigated: true } }, x: 2 }
+cast:
+  member: { kind: friend, crew: yours, presence: city }
+choices:
+  - id: change_routine
+    label: Change everything about how you move
+    outcome:
+      text: >-
+        New routes, new hours, nothing on the phone. After two weeks the coat is
+        gone. You are no more sure than before.
+      effects:
+        - { type: crime, action: heat, delta: -10 }
+        - { type: stat, key: stress, delta: 5 }
+  - id: tell_crew
+    label: Tell {member.name}
+    check:
+      base: 55
+      stats: [{ role: member, key: trust, weight: 0.3 }, { crime: standing, weight: 0.2 }]
+      success:
+        text: >-
+          {member.name} takes it seriously and the crew goes quiet for a
+          while. You are thanked in the way people like you get thanked.
+        effects:
+          - { type: crime, action: heat, delta: -8 }
+          - { type: crime, action: standing, delta: 3 }
+          - { type: relationship, role: member, trust: 3 }
+      failure:
+        text: >-
+          {member.name} wonders aloud why a person is following you in
+          particular. The question hangs in the room long after the answer.
+        effects:
+          - { type: crime, action: standing, delta: -5 }
+          - { type: relationship, role: member, trust: -4 }
+  - id: confront
+    label: Walk up and ask what the follower wants
+    check:
+      base: 35
+      stats: [{ key: confidence, weight: 0.4 }, { key: riskTaking, weight: 0.2 }]
+      success:
+        text: The follower is a private investigator working for someone with a grudge. The investigator leaves, and so does the client's interest.
+        effects:
+          - { type: crime, action: heat, delta: -6 }
+          - { type: stat, key: confidence, delta: 2 }
+      failure:
+        text: The follower is not what they seemed, and it was the wrong person to wave at. A call gets made before you are out of sight.
+        effects:
+          - { type: crime, action: heat, delta: 10 }
+          - { type: crime, action: investigate }

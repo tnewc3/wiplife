@@ -1,5 +1,6 @@
 import 'fake-indexeddb/auto';
 import { produce } from 'immer';
+import { joinCrew } from '../engine/crime/crew';
 import { afterEach, describe, expect, it } from 'vitest';
 import { content } from '../content';
 import { performAction } from '../engine/actions';
@@ -286,7 +287,7 @@ describe('lives from Stage 6 on', () => {
     const upgraded = result.envelope.data;
     expect(upgraded.character.birthCityId).toBe(life.character.cityId);
     expect(upgraded.housing.since).toBe(life.birthYear);
-    expect(upgraded.finances).toEqual({ ...life.finances, savings: 1_234, earnings: { years: 0, total: 0 }, hardshipYears: 0 });
+    expect(upgraded.finances).toEqual({ ...life.finances, savings: 1_234, earnings: { years: 0, total: 0 }, hardshipYears: 0, dirty: 0 });
   });
 
   it('round trip a life with debts, a mortgage and a move', async () => {
@@ -983,5 +984,61 @@ describe('lives from T1 on', () => {
     const worse = JSON.parse(JSON.stringify(life)) as Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any -- breaking a plain JSON save on purpose
     worse.teen.license.stage = 'driver';
     expect(lifeStateSchema.safeParse(worse).success).toBe(false);
+  });
+});
+
+describe('crime careers (E6a)', () => {
+  const crimeLife = () =>
+    produce(lifeAtAge('e6a-save', 30), (d) => {
+      joinCrew(d as LifeState, content);
+      d.crime.heat = 42;
+      d.crime.standing = 61;
+      d.crime.investigation = { since: d.currentYear - 1, until: d.currentYear + 2 };
+      d.crime.past.push({ crewId: 'marrow_street_crew', fromYear: d.currentYear - 9, toYear: d.currentYear - 6, topRank: 2, how: 'pushed' });
+      d.crime.laundered = { year: d.currentYear, byFront: { dots_lucky_lanes: 1_500 } };
+      d.crime.totals = { jobs: 7, earned: 31_000, cleaned: 9_000, fees: 2_700, lost: 500, spent: 1_000, arrests: 1, years: 4 };
+      d.finances.dirty = 17_250;
+    });
+
+  it('round trips a life in a crew with heat, an investigation, a past and dirty money', async () => {
+    const life = crimeLife();
+    expect(life.crime.crew).not.toBeNull();
+    expect(await roundTrip(life)).toEqual(life);
+  });
+
+  it('upgrades a schema version 17 life: no crew, no heat, no dirty money, and nobody is placed in a crew', async () => {
+    const life = lifeAtAge('e6a-v17', 30);
+    const v17 = JSON.parse(JSON.stringify(life)) as Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any -- stripping fields from plain JSON to build an old save
+    delete v17.crime;
+    delete v17.finances.dirty;
+    const db = freshDb();
+    await db.lives.put({ id: 'active', envelope: { ...makeEnvelope(v17, content.contentVersion), schemaVersion: 17 } });
+    const result = await readSave(db, loadedLifeSchema(content));
+    expect(result.status).toBe('ok');
+    if (result.status !== 'ok') return;
+    expect(result.envelope.schemaVersion).toBe(CURRENT_SCHEMA_VERSION);
+    expect(result.envelope.data).toEqual(life);
+    expect(result.envelope.data.crime.crew).toBeNull();
+    expect(result.envelope.data.finances.dirty).toBe(0);
+  });
+
+  it('refuses a save with something wrong in the crime record', async () => {
+    const life = crimeLife();
+    const bad = JSON.parse(JSON.stringify(life)) as LifeState;
+    bad.crime.heat = 101;
+    expect(lifeStateSchema.safeParse(bad).success).toBe(false);
+    const negative = JSON.parse(JSON.stringify(life)) as LifeState;
+    negative.finances.dirty = -5;
+    expect(lifeStateSchema.safeParse(negative).success).toBe(false);
+    const worse = JSON.parse(JSON.stringify(life)) as Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any -- breaking a plain JSON save on purpose
+    worse.crime.past[0].how = 'retired';
+    expect(lifeStateSchema.safeParse(worse).success).toBe(false);
+    // And one that parses but breaks a rule: a rank past the top, and a teenager in a crew.
+    const rank = produce(life, (d) => void (d.crime.rank = 9));
+    expect(loadedLifeSchema(content).safeParse(rank).success).toBe(false);
+    const young = produce(lifeAtAge('e6a-young', 15), (d) => {
+      d.crime = { ...d.crime, crew: { defId: 'cinder_row_outfit', cityId: d.character.cityId, since: d.currentYear, members: [], rivalMembers: [] }, rank: 1, peak: 1, standing: 30 };
+    });
+    expect(loadedLifeSchema(content).safeParse(young).success).toBe(false);
   });
 });

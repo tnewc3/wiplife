@@ -4,7 +4,7 @@ import type { Tone } from '../../content/schemas';
 import { getEventCard, problemReport } from '../../engine/selectors';
 import type { LifeState } from '../../engine/types';
 import { useAppStore } from '../../store/appStore';
-import { ageLabel, choiceMoneyLabel, familyHelpLabel, housingChangeLabel, outcomeDebtLabel, outcomeMoneyLabel } from '../labels';
+import { ageLabel, choiceMoneyLabel, familyHelpLabel, housingChangeLabel, outcomeDebtLabel, outcomeDirtyLabel, outcomeMoneyLabel } from '../labels';
 import { Button } from './Button';
 import { YearRecapList } from './YearRecapList';
 
@@ -113,6 +113,7 @@ export function EventSheet({ life }: { life: LifeState }) {
                         {card.money.debtChange !== 0 && <span className="block">{outcomeDebtLabel(card.money.debtChange)}</span>}
                         {card.money.familyHelp !== undefined && <span className="block">{familyHelpLabel(card.money.familyHelp)}</span>}
                         {card.money.housing && <span className="block">{housingChangeLabel(card.money.housing.change, card.money.housing.annual)}</span>}
+                        {card.money.dirty && <span className="block" data-testid="event-dirty">{outcomeDirtyLabel(card.money.dirty.change, card.money.dirty.balance)}</span>}
                       </p>
                     )}
                   </>

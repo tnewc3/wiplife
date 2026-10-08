@@ -295,6 +295,35 @@ export const migrations: readonly Migration[] = [
       };
     },
   },
+  {
+    from: 17,
+    description:
+      'E6a: crime careers. A life gains a "crime" record (no crew, no heat, no past) and its finances gain a dirty money balance of 0. ' +
+      'Nobody is placed in a crew by the upgrade: a crime life begins with an offer, as it does for a new life.',
+    migrate: (data) => {
+      if (!isRecord(data)) return data;
+      const finances = isRecord(data.finances) ? { ...data.finances, dirty: 0 } : data.finances;
+      return {
+        ...data,
+        finances,
+        crime: {
+          crew: null,
+          rank: 0,
+          peak: 0,
+          rankSince: 0,
+          standing: 0,
+          lowYears: 0,
+          awayYears: 0,
+          heat: 0,
+          rivalry: 0,
+          jobs: { year: 0, count: 0, last: 0 },
+          past: [],
+          laundered: { year: 0, byFront: {} },
+          totals: { jobs: 0, earned: 0, cleaned: 0, fees: 0, lost: 0, spent: 0, arrests: 0, years: 0 },
+        },
+      };
+    },
+  },
 ];
 
 function isRecord(value: unknown): value is Record<string, unknown> {

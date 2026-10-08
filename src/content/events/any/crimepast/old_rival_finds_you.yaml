@@ -1,0 +1,60 @@
+id: old_rival_finds_you
+title: Someone who remembers
+text: >-
+  The person in the doorway is older than you remember, and exactly as angry.
+  {opponent.name} used to work for a crew that fought yours, and you were a problem
+  of theirs. Time is not the same thing as forgiveness.
+tone: dark
+category: crimepast
+rarity: uncommon
+recurring: true
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { crime: { former: true } }
+    - { crime: { member: false } }
+    - { crime: { years: { gte: 1 } } }
+weight: { base: 8 }
+followUpOnly: true
+cast:
+  opponent: { kind: acquaintance, presence: city, createIfMissing: true, age: { min: 25, max: 60 } }
+choices:
+  - id: face_it
+    label: Hear {opponent.them} out
+    check:
+      base: 45
+      stats: [{ key: confidence, weight: 0.3 }, { key: kindness, weight: 0.2 }]
+      success:
+        text: >-
+          {opponent.name} says what has been waiting to be said. Then
+          {opponent.they} {opponent:leaves|leave}, lighter, and so do you.
+        effects:
+          - { type: stat, key: stress, delta: -4 }
+          - { type: relationship, role: opponent, affection: 6 }
+      failure:
+        text: >-
+          It starts as a conversation and ends on the floor. {opponent.name}
+          walks off with the last word and you are left with a bruised face.
+        effects:
+          - { type: health, conditionId: broken_bone, severity: 35 }
+          - { type: mental, action: trauma, amount: 8 }
+          - { type: relationship, role: opponent, affection: -6 }
+  - id: call_police
+    label: Call the police
+    outcome:
+      text: >-
+        They come, take notes and promise to follow up. It is the most
+        respectable thing you have done in months, and the least effective.
+      effects:
+        - { type: crime, action: heat, delta: 4 }
+        - { type: stat, key: stress, delta: 3 }
+  - id: move_on
+    label: Leave town for a while
+    outcome:
+      text: >-
+        You pack what matters and leave before dark. There is a lot to be
+        said for a place where nobody has a reason to remember you.
+      effects:
+        - { type: stat, key: stress, delta: 3 }
+        - { type: stat, key: happiness, delta: -2 }

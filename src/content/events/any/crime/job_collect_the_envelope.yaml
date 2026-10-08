@@ -1,0 +1,58 @@
+id: job_collect_the_envelope
+title: What the shop owes
+text: >-
+  A shop in the neighbourhood is behind on what it owes the crew. {member.name}
+  wants you to go in with {member.them}, stand where you can be seen and let
+  the owner do the arithmetic.
+tone: dark
+category: crime
+rarity: common
+recurring: true
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { crime: { member: true } }
+weight: { base: 7 }
+followUpOnly: true
+cast:
+  member: { kind: friend, crew: yours, presence: city }
+choices:
+  - id: stand_there
+    label: Stand there and say nothing
+    check:
+      base: 65
+      stats: [{ key: confidence, weight: 0.3 }, { key: kindness, weight: -0.2 }, { crime: standing, weight: 0.2 }]
+      success:
+        text: >-
+          The owner counts it out with shaking hands. You are given your share
+          outside, and you do not look back at the window.
+        effects:
+          - { type: dirtyMoney, gain: small }
+          - { type: crime, action: job, size: small }
+          - { type: stat, key: kindness, delta: -2 }
+          - { type: stat, key: stress, delta: 3 }
+      failure:
+        text: >-
+          The owner calls your bluff and calls the police. {member.name}
+          gets you out before they arrive, but your face is on a camera.
+        effects:
+          - { type: crime, action: job, size: small }
+          - { type: crime, action: heat, delta: 10 }
+          - { type: stat, key: stress, delta: 5 }
+  - id: go_gentle
+    label: Offer the owner more time instead
+    outcome:
+      text: >-
+        You talk the owner down to a smaller number and a promise. {member.name}
+        does not say anything about it, which says plenty.
+      effects:
+        - { type: crime, action: standing, delta: -6 }
+        - { type: stat, key: kindness, delta: 2 }
+        - { type: relationship, role: member, affection: -4 }
+  - id: refuse
+    label: Refuse to go
+    outcome:
+      text: '{member.name} goes alone. By the end of the week the story has reached everyone.'
+      effects:
+        - { type: crime, action: standing, delta: -8 }

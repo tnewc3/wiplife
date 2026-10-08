@@ -1,0 +1,49 @@
+id: job_parcel_run
+title: A package for the other side of town
+text: >-
+  {member.name} hands you a package and an address. The only instructions are
+  where to be and when, and what not to look at on the way.
+tone: dark
+category: crime
+rarity: common
+recurring: true
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { crime: { member: true } }
+weight: { base: 8 }
+followUpOnly: true
+cast:
+  member: { kind: friend, crew: yours, presence: city }
+choices:
+  - id: deliver
+    label: Make the delivery
+    check:
+      base: 70
+      stats: [{ key: discipline, weight: 0.3 }, { crime: heat, weight: -0.25 }, { key: luck, weight: 0.2 }]
+      success:
+        text: >-
+          You hand it over, collect a nod, and head home. There is cash in
+          your pocket by the time you sit down.
+        effects:
+          - { type: dirtyMoney, gain: small }
+          - { type: crime, action: job, size: small }
+          - { type: relationship, role: member, trust: 3 }
+      failure:
+        text: >-
+          Halfway there you spot the same car twice. You take the long way, and
+          you get the package where it needs to go late and sweating. {member.name}
+          is not happy.
+        effects:
+          - { type: crime, action: job, size: small }
+          - { type: crime, action: heat, delta: 7 }
+          - { type: crime, action: standing, delta: -3 }
+          - { type: relationship, role: member, trust: -3 }
+  - id: refuse
+    label: Tell {member.them} to find someone else
+    outcome:
+      text: '{member.name} takes the package back without a word. You can feel it being noted.'
+      effects:
+        - { type: crime, action: standing, delta: -5 }
+        - { type: relationship, role: member, affection: -3 }

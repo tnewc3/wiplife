@@ -1,0 +1,7 @@
+id: harrowgate_freight
+name: Harrowgate Freight
+blurb: A trucking outfit with a second set of books. Things go missing between the dock and the door.
+cities: [houston, chicago, los_angeles, small_town]
+ranks: [spotter, driver, loader, dispatcher, owner]
+rivals: [cinder_row_outfit, larkspur_collective]
+traits: { discipline: 6, riskTaking: 8, ambition: 8 }

@@ -158,6 +158,9 @@ deeds:
   had_car_accident: "{self.They} survived a car accident, and drove more carefully ever after."
   drove_drunk_crash: "{self.They} crashed a car after drinking, and had to live with what that meant."
   car_was_stolen: "{self.They} had a car stolen, and told the story at dinner parties for decades."
+  # E6a: a crime career.
+  joined_a_crew: "{self.They} ran with a crew for a while, and some of what {self.they} did is not in this obituary."
+  testified_against_crew: "{self.They} gave the police what {self.they} knew about a crew, and looked over {self.their} shoulder for a long time afterwards."
 
 # Hard chapters, written frankly. prison: values {years} ("two years").
 # bankrupt: values {year}.

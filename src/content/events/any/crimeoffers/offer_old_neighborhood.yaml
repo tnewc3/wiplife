@@ -1,0 +1,54 @@
+id: offer_old_neighborhood
+title: Doing well for yourself
+text: >-
+  {classmate.name}, who sat three rows behind you in school, pulls up in a
+  car that is much too nice. {classmate.They} {classmate:says|say} there is a
+  place for you in what {classmate.they} {classmate:does|do} now, if you want it.
+  {classmate.They} {classmate:looks|look} happy, or like someone practising.
+tone: dark
+category: crimeoffers
+rarity: uncommon
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { crime: { member: false } }
+once: true
+weight:
+  base: 0.3
+  modifiers:
+    - { if: { trait: ambition, gt: 60 }, x: 1.4 }
+    - { if: { trait: riskTaking, gt: 60 }, x: 1.5 }
+    - { if: { finances: { income: { lt: 20000 } } }, x: 1.5 }
+cast:
+  classmate: { kind: classmate, presence: city, age: { min: 19, max: 70 }, ageOffset: { min: -4, max: 4 } }
+choices:
+  - id: ask
+    label: Ask what the work is
+    check:
+      base: 50
+      stats: [{ key: confidence, weight: 0.3 }, { role: classmate, key: trust, weight: 0.3 }]
+      success:
+        text: >-
+          {classmate.name} tells you enough, and you ask for the rest. A week
+          later you are in {crew}, and it feels like coming home to a house
+          you never lived in.
+        effects:
+          - { type: crime, action: join, role: classmate }
+          - { type: flag, key: joined_a_crew, value: true }
+          - { type: memory, role: classmate, tag: brought_you_in }
+      failure:
+        text: >-
+          {classmate.name} closes up. Whatever you were about to be told, you
+          will not be told now.
+        effects:
+          - { type: relationship, role: classmate, trust: -4 }
+  - id: pass
+    label: Wish {classmate.them} luck and leave it there
+    outcome:
+      text: >-
+        {classmate.name} waves, the car pulls away, and your own life seems
+        smaller for about an hour.
+      effects:
+        - { type: flag, key: turned_down_a_crew, value: true }
+        - { type: stat, key: happiness, delta: -1 }

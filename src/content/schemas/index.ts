@@ -23,6 +23,7 @@ import { newsTextSchema, peopleBalanceSchema, peopleRegistrySchema } from './peo
 import { webBalanceSchema, webRegistrySchema } from './web';
 import { mentalHealthBalanceSchema, mentalRegistrySchema } from './mental';
 import { petInteractionSchema, petSchema, possessionsBalanceSchema, possessionsRegistrySchema, possessionsTextSchema, renovationSchema, vehicleSchema } from './possessions';
+import { crewSchema, crimeBalanceSchema, crimeRegistrySchema, crimeTextSchema, frontSchema } from './crime';
 import { activitySchema, cliqueSchema, houseRuleSchema, teenBalanceSchema, teenJobSchema, teenRegistrySchema, teenTextSchema } from './teen';
 import { estateRegistrySchema, familyBalanceSchema, familyRegistrySchema, heirRegistrySchema, heirTextSchema } from './family';
 
@@ -46,6 +47,7 @@ export * from './web';
 export * from './mental';
 export * from './possessions';
 export * from './teen';
+export * from './crime';
 
 /**
  * Collections: a folder under src/content with one YAML file per definition,
@@ -56,10 +58,12 @@ export const collectionTypes = {
   activities: { folder: 'activities', schema: activitySchema },
   causes: { folder: 'causes', schema: causeSchema },
   cliques: { folder: 'cliques', schema: cliqueSchema },
+  crews: { folder: 'crews', schema: crewSchema },
   cities: { folder: 'cities', schema: citySchema },
   conditions: { folder: 'conditions', schema: conditionDefSchema },
   /** Nested by life stage and category, and chain files hold several events (see compile.ts). */
   events: { folder: 'events', schema: eventSchema },
+  fronts: { folder: 'fronts', schema: frontSchema },
   gradPrograms: { folder: 'grad', schema: gradProgramSchema },
   houseRules: { folder: 'houseRules', schema: houseRuleSchema },
   interactions: { folder: 'interactions', schema: interactionSchema },
@@ -104,6 +108,7 @@ export const singletonTypes = {
   'balance/mental-health': mentalHealthBalanceSchema,
   'balance/possessions': possessionsBalanceSchema,
   'balance/teen': teenBalanceSchema,
+  'balance/crime': crimeBalanceSchema,
   'balance/targets': targetsBalanceSchema,
   'character/identity': identityOptionsSchema,
   'character/appearance': appearanceOptionsSchema,
@@ -117,6 +122,7 @@ export const singletonTypes = {
   'text/news': newsTextSchema,
   'text/possessions': possessionsTextSchema,
   'text/teen': teenTextSchema,
+  'text/crime': crimeTextSchema,
   'registries/memories': memoryRegistrySchema,
   'registries/flags': flagRegistrySchema,
   'registries/categories': categoryRegistrySchema,
@@ -135,6 +141,7 @@ export const singletonTypes = {
   'registries/mental': mentalRegistrySchema,
   'registries/possessions': possessionsRegistrySchema,
   'registries/teen': teenRegistrySchema,
+  'registries/crime': crimeRegistrySchema,
 } as const;
 
 export type SingletonPath = keyof typeof singletonTypes;
@@ -144,9 +151,11 @@ export const contentBundleSchema = z.strictObject({
   activities: z.record(z.string(), activitySchema),
   causes: z.record(z.string(), causeSchema),
   cliques: z.record(z.string(), cliqueSchema),
+  crews: z.record(z.string(), crewSchema),
   cities: z.record(z.string(), citySchema),
   conditions: z.record(z.string(), conditionDefSchema),
   events: z.record(z.string(), eventSchema),
+  fronts: z.record(z.string(), frontSchema),
   gradPrograms: z.record(z.string(), gradProgramSchema),
   houseRules: z.record(z.string(), houseRuleSchema),
   interactions: z.record(z.string(), interactionSchema),
@@ -182,6 +191,7 @@ export const contentBundleSchema = z.strictObject({
     mentalHealth: mentalHealthBalanceSchema,
     possessions: possessionsBalanceSchema,
     teen: teenBalanceSchema,
+    crime: crimeBalanceSchema,
     targets: targetsBalanceSchema,
   }),
   character: z.strictObject({ identity: identityOptionsSchema, appearance: appearanceOptionsSchema }),
@@ -196,6 +206,7 @@ export const contentBundleSchema = z.strictObject({
     news: newsTextSchema,
     possessions: possessionsTextSchema,
     teen: teenTextSchema,
+    crime: crimeTextSchema,
   }),
   registries: z.strictObject({
     memories: memoryRegistrySchema,
@@ -216,6 +227,7 @@ export const contentBundleSchema = z.strictObject({
     mental: mentalRegistrySchema,
     possessions: possessionsRegistrySchema,
     teen: teenRegistrySchema,
+    crime: crimeRegistrySchema,
   }),
 });
 

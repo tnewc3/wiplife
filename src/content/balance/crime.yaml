@@ -1,0 +1,148 @@
+# Crime careers (E6a): crews, ranks, jobs, heat, standing, the police, dirty
+# money and laundering. Starting proposals; Stage 12 (balancing) tunes them.
+# Payouts and costs are in dollars at a city pay level of 1 (the national
+# average); a city's salary multiplier scales them.
+
+entry:
+  # People in a crew you know (besides you), made when you join, and their ages.
+  members: { min: 3, max: 5 }
+  memberAge: { min: 20, max: 50 }
+  memberAffection: { mean: 55, sd: 12 }
+  tieAffection: { mean: 60, sd: 12 }
+  # How the people of a rival crew you meet feel about you at first.
+  rivalAffection: { mean: 20, sd: 10 }
+  standing: 35
+  heat: 0
+  rivalry: 30
+
+# Rank 1 to 5 (the last runs the crew). payout multiplies what a job pays you.
+# reach: what the rank asks for (standing, whole years at the rank below) and the
+# chance each year you qualify that the crew offers it. stress: a yearly pull.
+ranks:
+  - { payout: 1.0, stress: 1 }
+  - { payout: 1.4, stress: 1.5, reach: { standing: 50, years: 1, chance: 0.6 } }
+  - { payout: 2.0, stress: 2, reach: { standing: 60, years: 2, chance: 0.5 } }
+  - { payout: 3.0, stress: 2.5, reach: { standing: 70, years: 2, chance: 0.4 } }
+  - { payout: 4.5, stress: 3, reach: { standing: 80, years: 2, chance: 0.3 } }
+
+jobs:
+  # Jobs queued each year as events, by rank.
+  perYear:
+    - { min: 1, max: 2 }
+    - { min: 1, max: 2 }
+    - { min: 1, max: 3 }
+    - { min: 2, max: 3 }
+    - { min: 2, max: 3 }
+  # The most events the crime step queues in a year, jobs included.
+  maxQueued: 4
+  sizes:
+    petty: { payout: 700, heat: 3, standing: 4 }
+    small: { payout: 2500, heat: 6, standing: 7 }
+    solid: { payout: 8000, heat: 10, standing: 10 }
+    big: { payout: 26000, heat: 16, standing: 14 }
+    major: { payout: 80000, heat: 24, standing: 20 }
+  variation: 0.25
+  # What paying out of dirty money costs (hush money, a bribe, a favour).
+  costs: { petty: 300, small: 1200, solid: 4000, big: 13000, major: 40000 }
+
+heat:
+  # Each year heat falls by this share of itself plus this much, and by more of its share after a year with no job.
+  decay: { share: 0.2, flat: 2 }
+  quietShare: 0.25
+  # Once you are out, the decay share is multiplied by this.
+  formerDecay: 1.5
+  # Where each word starts (unnoticed, noticed, watched, hot, burning).
+  bands: [10, 30, 55, 80]
+
+standing:
+  # Every year trust slips this much, and a year with no job costs more.
+  slide: 3
+  idleLoss: 6
+  awayLoss: 10
+  awayYears: 2
+  # At or below this for this many years in a row, you are pushed out.
+  lowAt: 15
+  lowYears: 2
+  # Where each word starts (disrespected, unproven, solid, trusted, revered).
+  bands: [20, 40, 60, 80]
+
+rivalry:
+  settle: { at: 30, share: 0.2 }
+  perJob: 1.5
+  eventChance:
+    - { at: 0, x: 0.03 }
+    - { at: 30, x: 0.08 }
+    - { at: 50, x: 0.18 }
+    - { at: 75, x: 0.35 }
+    - { at: 100, x: 0.5 }
+  # Where each word starts (quiet, tense, brewing, at war).
+  bands: [25, 50, 75]
+
+# The police read the heat on you (legal.ts).
+police:
+  investigation:
+    - { at: 0, x: 0 }
+    - { at: 15, x: 0.02 }
+    - { at: 30, x: 0.07 }
+    - { at: 50, x: 0.16 }
+    - { at: 75, x: 0.30 }
+    - { at: 100, x: 0.45 }
+  arrest:
+    - { at: 0, x: 0 }
+    - { at: 15, x: 0.01 }
+    - { at: 30, x: 0.04 }
+    - { at: 50, x: 0.10 }
+    - { at: 75, x: 0.22 }
+    - { at: 100, x: 0.38 }
+  openYears: { min: 2, max: 4 }
+  coldBelow: 25
+  coldChance: 0.5
+  investigated: 2.2
+  informant: 1.5
+  record: 1.1
+  recordMax: 4
+  probation: 1.5
+  informantChance: 0.15
+
+dirty:
+  # Spending dirty money: heat for each $1,000 (at a city pay level of 1), the most a time, and what a good time does for happiness.
+  spend: { perThousand: 1.5, max: 25, minimum: 500, happiness: 0.5, happinessMax: 8 }
+  # A stash above this is at risk each year: raided (more likely with heat) or stolen.
+  stash:
+    above: 15000
+    raid:
+      - { at: 0, x: 0 }
+      - { at: 30, x: 0.01 }
+      - { at: 60, x: 0.05 }
+      - { at: 100, x: 0.15 }
+    theft: 0.03
+  laundering:
+    minimum: 500
+    # Tier 1 to 3: the cut it keeps, how often a deposit is flagged, how much it takes in a year, the rank you need (0: anyone).
+    tiers:
+      - { fee: 0.30, risk: 0.03, capacity: 12000, rank: 0 }
+      - { fee: 0.20, risk: 0.06, capacity: 50000, rank: 2 }
+      - { fee: 0.12, risk: 0.10, capacity: 200000, rank: 3 }
+    heatRisk: 1
+    over: 3
+    # Where each word starts (low, moderate, high).
+    riskBands: [0.06, 0.12]
+    lost: 0.5
+    flaggedHeat: 12
+    investigates: 0.35
+
+life:
+  # Yearly stress from life in a crew (on top of the rank's), to a limit; and points off a legal job's performance.
+  stress: 1.5
+  stressLimit: 75
+  performance: -8
+
+past:
+  # Chance each year, by years since you left, that the past catches up.
+  eventChance:
+    - { at: 1, x: 0.12 }
+    - { at: 4, x: 0.08 }
+    - { at: 8, x: 0.04 }
+    - { at: 15, x: 0.01 }
+  # What follows you out can't stay above this.
+  heatLimit: 60

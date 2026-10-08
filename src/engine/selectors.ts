@@ -79,6 +79,8 @@ export type { MoodBand, MoodView } from './interactions/mood';
 export { getNews, getPersonLifeView } from './lives/views';
 export { getBelongingsView, getPetDetail, getPets } from './possessions/views';
 export { getTeenView } from './teen/views';
+export { getCrimeView, getDirtyView, getLaunderBlock, getSpendBlock } from './crime/views';
+export type { CrimeMemberView, CrimeView, DirtyView, FrontView } from './crime/views';
 export type { ActivityOptionView, CrowdView, JobOptionView, RuleView, TeenView } from './teen/views';
 export type { AdoptOption, BelongingsView, MainHomeView, PetDetailView, PetView, RenovationOption, VacationHomeView, VacationOption, VehicleOption, VehicleView } from './possessions/views';
 export type { NewsFeedView, NewsItem, PersonLifeView, TroubleView } from './lives/views';

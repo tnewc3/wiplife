@@ -1,0 +1,60 @@
+id: job_driver_for_the_night
+title: Behind the wheel
+text: >-
+  {member.name} needs a driver, someone who can keep a car at the speed limit
+  until it matters and keep a straight face when it does. The car is
+  not yours, and neither is the plan.
+tone: dark
+category: crime
+rarity: common
+recurring: true
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { crime: { member: true } }
+    - { crime: { rank: { gte: 2 } } }
+weight: { base: 6 }
+followUpOnly: true
+cast:
+  member: { kind: friend, crew: yours, presence: city }
+choices:
+  - id: drive
+    label: Drive
+    check:
+      base: 58
+      stats: [{ key: discipline, weight: 0.2 }, { key: confidence, weight: 0.2 }, { crime: heat, weight: -0.25 }, { key: luck, weight: 0.2 }]
+      success:
+        text: >-
+          Not one light run, not one glance in your direction. The car is
+          back where it belongs before anyone notices it left, and your share
+          is waiting.
+        effects:
+          - { type: dirtyMoney, gain: solid }
+          - { type: crime, action: job, size: solid }
+          - { type: relationship, role: member, trust: 4 }
+      failure:
+        text: >-
+          A cruiser lights up behind you at the worst possible moment. You
+          lose it, but not before you hit something solid, and you walk away
+          bruised from the wheel.
+        effects:
+          - { type: crime, action: job, size: solid }
+          - { type: health, conditionId: back_injury, severity: 20 }
+          - { type: crime, action: heat, delta: 13 }
+          - { type: stat, key: stress, delta: 6 }
+  - id: ride_along
+    label: Ride along but don't drive
+    outcome:
+      text: >-
+        You take a smaller part: in the passenger seat, a watcher and little more. It
+        goes without a hitch, and so does your small share.
+      effects:
+        - { type: dirtyMoney, gain: small }
+        - { type: crime, action: job, size: small }
+  - id: no
+    label: Say no
+    outcome:
+      text: '{member.name} finds another driver and does not mention it again, which is how you know.'
+      effects:
+        - { type: crime, action: standing, delta: -6 }

@@ -35,6 +35,7 @@ import { applyIntroduce, applyKnowledge, applyTie, noteIdentityAccepted } from '
 import { shiftMood } from '../interactions/mood';
 import { applyPossessionEffect } from '../possessions/effects';
 import { applyTeenEffect } from '../teen/effects';
+import { applyCrimeEffect, applyDirtyMoneyEffect } from '../crime/effects';
 import { whereabouts } from '../presence';
 import { clampInt } from '../random';
 import { otherCity } from './casting';
@@ -369,6 +370,10 @@ const handlers: { [T in Effect['type']]: Handler<T> } = {
 
   // T1: the teen years: crowds, house rules, the license, a teen job, teams and clubs.
   teen: (state, effect, ctx) => applyTeenEffect(state, effect, ctx.cast, ctx.content),
+
+  // E6a: a life in a crew, and dirty money.
+  crime: (state, effect, ctx) => applyCrimeEffect(state, effect, ctx.cast, ctx.content),
+  dirtyMoney: (state, effect, ctx) => applyDirtyMoneyEffect(state, effect, ctx.rng, ctx.content),
 
   // E3: money paid back to you, sized like the cost it repays.
   repay: (state, effect, ctx) => earn(state, wholeDollars(costPrice(state, effect.item, ctx.content) * effect.share)),

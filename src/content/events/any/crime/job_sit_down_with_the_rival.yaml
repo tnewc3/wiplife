@@ -1,0 +1,68 @@
+id: job_sit_down_with_the_rival
+title: A table between enemies
+text: >-
+  {opponent.name}, speaking for {rivalCrew}, has asked to talk. Neutral ground, no
+  weapons, one person each. The crew has decided that the person on your
+  side of the table is you.
+tone: serious
+category: crime
+rarity: uncommon
+recurring: true
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { crime: { member: true } }
+    - { crime: { leader: true } }
+    - { crime: { rival: true } }
+weight: { base: 5 }
+followUpOnly: true
+cast:
+  opponent: { kind: acquaintance, crew: rival, presence: city, createIfMissing: true, age: { min: 28, max: 60 } }
+choices:
+  - id: negotiate
+    label: Negotiate for the crew
+    check:
+      base: 50
+      stats: [{ key: smarts, weight: 0.25 }, { key: confidence, weight: 0.3 }, { crime: standing, weight: 0.2 }]
+      success:
+        text: >-
+          You come away with a line on the map and a promise that sounds like
+          one. Both crews do well out of it for a while.
+        effects:
+          - { type: dirtyMoney, gain: big }
+          - { type: crime, action: job, size: big }
+          - { type: crime, action: rivalry, delta: -25 }
+          - { type: relationship, role: opponent, affection: 8 }
+      failure:
+        text: >-
+          Somewhere in the second hour it stops being a negotiation. You leave
+          without a deal and with a list of things that were said.
+        effects:
+          - { type: crime, action: rivalry, delta: 18 }
+          - { type: crime, action: heat, delta: 5 }
+          - { type: relationship, role: opponent, affection: -10 }
+  - id: hard_line
+    label: Take a hard line
+    check:
+      base: 40
+      stats: [{ key: confidence, weight: 0.3 }, { key: riskTaking, weight: 0.2 }, { crime: standing, weight: 0.2 }]
+      success:
+        text: '{opponent.name} blinks first. Your crew gets what it came for, and the other crew remembers.'
+        effects:
+          - { type: dirtyMoney, gain: big }
+          - { type: crime, action: job, size: big }
+          - { type: crime, action: rivalry, delta: 12 }
+          - { type: crime, action: standing, delta: 5 }
+      failure:
+        text: '{opponent.name} does not blink. What follows takes the rest of the season to settle, and it is not settled quietly.'
+        effects:
+          - { type: crime, action: rivalry, delta: 25 }
+          - { type: crime, action: heat, delta: 8 }
+  - id: send_someone
+    label: Send a deputy in your place
+    outcome:
+      text: Your deputy comes back with a short agreement and a message that you ought to have come yourself.
+      effects:
+        - { type: crime, action: rivalry, delta: 5 }
+        - { type: crime, action: standing, delta: -3 }

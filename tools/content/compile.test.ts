@@ -1379,3 +1379,116 @@ describe('the teen years (T1)', () => {
     expect(await expectErrors()).toContain('says nothing about race, religion, background or money');
   });
 });
+
+describe('crime careers (E6a)', () => {
+  const read = (file: string) => readFile(path.join(dir, file), 'utf8');
+
+  it('accepts the real content: five crews, six businesses, about forty-five events, and no warnings', { timeout: 90_000 }, async () => {
+    const result = await compile();
+    if (!result.ok) throw new Error(formatErrors(result.errors));
+    expect(Object.keys(result.bundle.crews)).toHaveLength(5);
+    expect(Object.keys(result.bundle.fronts)).toHaveLength(6);
+    const categories = ['crimeoffers', 'crime', 'crimehome', 'crimelaw', 'crimepast'];
+    const events = Object.values(result.bundle.events).filter((e) => !e.retired && categories.includes(e.category));
+    for (const city of Object.values(result.bundle.cities)) expect(Object.values(result.bundle.crews).filter((c) => c.cities.includes(city.id)).length, city.id).toBeGreaterThanOrEqual(2);
+    expect(events.length).toBeGreaterThanOrEqual(44);
+    expect(events.length).toBeLessThanOrEqual(50);
+    expect(result.warnings).toEqual([]);
+  });
+
+  it('is for adults only: joining a crew, or any crime content, needs an adult age and no young life stage', { timeout: 90_000 }, async () => {
+    const real = await read('events/any/crimeoffers/offer_through_a_friend.yaml');
+    await write('events/any/crimeoffers/offer_through_a_friend.yaml', real.replace('    - { age: { gte: 18 } }\n', ''));
+    const messages = await expectErrors();
+    expect(messages).toMatch(/category "crimeoffers" requires/);
+    await write('events/any/crimeoffers/offer_through_a_friend.yaml', real.replace('lifeStages: [youngAdult, adult]', 'lifeStages: [teen, youngAdult, adult]'));
+    expect(await expectErrors()).toContain('crime content is for adults (18+)');
+    // An event in another category that joins a crew must ask for the age itself.
+    await write('events/any/crimeoffers/offer_through_a_friend.yaml', real);
+    const other = real.replace('id: offer_through_a_friend', 'id: offer_elsewhere').replace('category: crimeoffers', 'category: money').replace('    - { age: { gte: 18 } }\n', '').replace('lifeStages: [youngAdult, adult]', 'lifeStages: [teen, youngAdult, adult]');
+    await write('events/any/money/offer_elsewhere.yaml', other);
+    const elsewhere = await expectErrors();
+    expect(elsewhere).toContain('joins a crew, so it must require');
+    expect(elsewhere).toContain('crime content is for adults');
+  });
+
+  it('keeps balance from putting anyone under 18 in a crew', { timeout: 90_000 }, async () => {
+    const real = await read('balance/crime.yaml');
+    await write('balance/crime.yaml', real.replace('memberAge: { min: 20, max: 50 }', 'memberAge: { min: 16, max: 50 }'));
+    expect(await expectErrors()).toMatch(/memberAge/);
+  });
+
+  it('keeps the events the crime step queues followUpOnly, and jobs recorded as jobs', { timeout: 90_000 }, async () => {
+    const real = await read('events/any/crime/job_parcel_run.yaml');
+    await write('events/any/crime/job_parcel_run.yaml', real.replace('followUpOnly: true\n', ''));
+    expect(await expectErrors()).toContain('so it must be followUpOnly');
+    await write('events/any/crime/job_parcel_run.yaml', real.replace(/ *- \{ type: crime, action: job, size: small \}\n/g, ''));
+    expect(await expectErrors()).toContain('some outcome must record it');
+    await write('events/any/crime/job_parcel_run.yaml', real.replace('    - { crime: { member: true } }\n', ''));
+    const messages = await expectErrors();
+    expect(messages).toContain('must require { crime: { member: true } }');
+  });
+
+  it('allows {crew}, {rivalCrew} and {rank} only where an event requires what they name', { timeout: 90_000 }, async () => {
+    const real = await read('events/any/crime/close_call_followed.yaml');
+    await write('events/any/crime/close_call_followed.yaml', real.replace('It is the same person', '{crew} and {rivalCrew} and {rank}. It is the same person'));
+    const messages = await expectErrors();
+    expect(messages).toContain('uses {rivalCrew} without requiring a rival crew');
+    await write('events/any/crime/close_call_followed.yaml', real.replace('    - { crime: { member: true } }\n', ''));
+    expect(await expectErrors()).toMatch(/category "crime" requires|a role from your crew needs requires/);
+  });
+
+  it('needs a crew role to be backed by the crew, the informant by an informant, the boss by a rank below the top, and the rival by a rival', { timeout: 90_000 }, async () => {
+    const real = await read('events/any/crime/informant_rumor.yaml');
+    await write('events/any/crime/informant_rumor.yaml', real.replace('    - { crime: { informant: true } }\n', ''));
+    const informant = await expectErrors();
+    expect(informant).toContain('the informant needs requires: crime: informant: true');
+    expect(informant).toContain('so it must require { crime: { informant: true } }');
+    const boss = await read('events/any/crime/betrayal_set_up.yaml');
+    await write('events/any/crime/informant_rumor.yaml', real);
+    await write('events/any/crime/betrayal_set_up.yaml', boss.replace('    - { crime: { rank: { lte: 3 } } }\n', ''));
+    expect(await expectErrors()).toContain('needs requires: a rank below the top');
+    const rival = await read('events/any/crime/rival_threat.yaml');
+    await write('events/any/crime/betrayal_set_up.yaml', boss);
+    await write('events/any/crime/rival_threat.yaml', rival.replace('    - { crime: { rival: true } }\n', ''));
+    expect(await expectErrors()).toContain('a role from the rival crew needs requires: crime: rival: true');
+  });
+
+  it('refuses a crew that is not real: an unknown city, rival or crew in a condition, a rival in no shared city, and a city with fewer than two crews', { timeout: 90_000 }, async () => {
+    const crew = await read('crews/cinder_row_outfit.yaml');
+    await write('crews/cinder_row_outfit.yaml', crew.replace('[chicago, houston, small_town]', '[chicago, houston, atlantis]'));
+    expect(await expectErrors()).toContain('unknown city "atlantis"');
+    await write('crews/cinder_row_outfit.yaml', crew.replace('rivals: [marrow_street_crew, harrowgate_freight]', 'rivals: [nobody_at_all]'));
+    expect(await expectErrors()).toContain('unknown rival crew "nobody_at_all"');
+    await write('crews/cinder_row_outfit.yaml', crew.replace('cities: [chicago, houston, small_town]', 'cities: [small_town]').replace('rivals: [marrow_street_crew, harrowgate_freight]', 'rivals: [marrow_street_crew]'));
+    expect(await expectErrors()).toContain('works in none of');
+    await write('crews/cinder_row_outfit.yaml', crew);
+    const event = await read('events/any/crime/close_call_followed.yaml');
+    await write('events/any/crime/close_call_followed.yaml', event.replace('    - { crime: { member: true } }\n', '    - { crime: { member: true, crew: [phantom_crew] } }\n'));
+    expect(await expectErrors()).toContain('unknown crew "phantom_crew"');
+  });
+
+  it('keeps crews and businesses made up, and crime at the level of story', { timeout: 90_000 }, async () => {
+    const crew = await read('crews/velvet_hand.yaml');
+    await write('crews/velvet_hand.yaml', crew.replace('A crew of smooth talkers', 'An Italian mafia of smooth talkers'));
+    expect(await expectErrors()).toContain('says nothing about race, religion, nationality or background');
+    await write('crews/velvet_hand.yaml', crew);
+    const front = await read('fronts/dots_lucky_lanes.yaml');
+    await write('fronts/dots_lucky_lanes.yaml', front.replace('A bowling alley', 'A bowling alley, and here\'s how to hide cash in it,'));
+    expect(await expectErrors()).toContain('instruction wording');
+    await write('fronts/dots_lucky_lanes.yaml', front);
+    const event = await read('events/any/crime/job_warehouse_night.yaml');
+    await write('events/any/crime/job_warehouse_night.yaml', event.replace('The plan comes from somebody else', 'Here is how to pick a lock step by step'));
+    expect(await expectErrors()).toContain('crime stays at the level of story and consequences');
+  });
+
+  it('checks the crime balance: increasing bands, ranks that pay more as they rise, and businesses that charge less and risk more at higher tiers', { timeout: 90_000 }, async () => {
+    const real = await read('balance/crime.yaml');
+    await write('balance/crime.yaml', real.replace('bands: [10, 30, 55, 80]', 'bands: [10, 30, 25, 80]'));
+    expect(await expectErrors()).toContain('heat.bands must increase');
+    await write('balance/crime.yaml', real.replace('{ fee: 0.20, risk: 0.06, capacity: 50000, rank: 2 }', '{ fee: 0.40, risk: 0.06, capacity: 50000, rank: 2 }'));
+    expect(await expectErrors()).toContain('a higher tier charges less');
+    await write('balance/crime.yaml', real.replace('- { payout: 4.5, stress: 3,', '- { payout: 0.5, stress: 3,'));
+    expect(await expectErrors()).toContain('payout is below the rank before it');
+  });
+});

@@ -1,0 +1,69 @@
+id: arrest_caught_in_the_act
+title: Caught in the act
+text: >-
+  The lights come on in the wrong places. Somebody says your name, which
+  means this was never luck. For one long second you think about running.
+tone: dark
+category: crimelaw
+rarity: common
+recurring: true
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { crime: { member: true } }
+    - { crime: { jobs: { gte: 1 } } }
+    - { crime: { heat: { gte: 1 } } }
+weight: { base: 6 }
+followUpOnly: true
+choices:
+  - id: run
+    label: Run for it
+    check:
+      base: 22
+      stats: [{ key: fitness, weight: 0.3 }, { key: luck, weight: 0.4 }, { key: riskTaking, weight: 0.1 }]
+      success:
+        text: Over a fence, down an alley, into a stranger's backyard. You get away, and you will be wanted by morning.
+        effects:
+          - { type: crime, action: heat, delta: 20 }
+          - { type: stat, key: stress, delta: 10 }
+      failure:
+        text: >-
+          You make it forty yards. The court adds the running to the rest,
+          and does not take it kindly.
+        effects:
+          - { type: dirtyMoney, lose: 0.6 }
+          - { type: legal, offenseId: robbery, outcome: sentence }
+          - { type: legal, offenseId: disorderly_conduct, outcome: fine }
+          - { type: crime, action: heat, delta: -4 }
+  - id: lawyer
+    label: Stay still and ask for a lawyer
+    check:
+      base: 40
+      stats: [{ key: smarts, weight: 0.25 }, { key: discipline, weight: 0.2 }]
+      success:
+        text: A lawyer, a long argument and a charge reduced to something you can live with.
+        effects:
+          - { type: cost, item: lawyer_fee }
+          - { type: dirtyMoney, lose: 0.5 }
+          - { type: legal, offenseId: robbery, outcome: probation, years: 2 }
+          - { type: crime, action: heat, delta: -8 }
+      failure:
+        text: The evidence is on film. The lawyer does what lawyers can, and the court does the rest.
+        effects:
+          - { type: cost, item: lawyer_fee }
+          - { type: dirtyMoney, lose: 0.6 }
+          - { type: legal, offenseId: robbery, outcome: sentence }
+  - id: deal
+    label: Offer to talk about the crew
+    visibleIf: { crime: { rank: { gte: 2 } } }
+    outcome:
+      text: >-
+        They are very interested. By the end of the week your name is attached
+        to one of the biggest cases in town, and your sentence is a footnote.
+      effects:
+        - { type: dirtyMoney, lose: 0.5 }
+        - { type: legal, offenseId: robbery, outcome: probation, years: 2 }
+        - { type: crime, action: leave, how: deal }
+        - { type: flag, key: testified_against_crew, value: true }
+        - { type: stat, key: stress, delta: 10 }

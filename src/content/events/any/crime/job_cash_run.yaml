@@ -1,0 +1,67 @@
+id: job_cash_run
+title: The bag
+text: >-
+  A lot of cash has to move across the city in one night, and the crew trusts
+  you with it. Everyone knows who else would like to know where it is going.
+tone: dark
+category: crime
+rarity: uncommon
+recurring: true
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { crime: { member: true } }
+    - { crime: { rank: { gte: 3 } } }
+    - { crime: { rival: true } }
+weight: { base: 5 }
+followUpOnly: true
+cast:
+  opponent: { kind: acquaintance, crew: rival, presence: city, createIfMissing: true, age: { min: 20, max: 50 } }
+choices:
+  - id: carry
+    label: Carry it yourself
+    check:
+      base: 55
+      stats: [{ key: discipline, weight: 0.25 }, { key: luck, weight: 0.3 }, { crime: heat, weight: -0.2 }]
+      success:
+        text: >-
+          Every light is green. You hand it over and take your cut of the
+          trust you earned tonight.
+        effects:
+          - { type: dirtyMoney, gain: solid }
+          - { type: crime, action: job, size: solid }
+          - { type: crime, action: standing, delta: 3 }
+      failure:
+        text: >-
+          {opponent.name} and two others are waiting at the second stop. The bag
+          is taken, you are hurt, and you have to go back and explain.
+        effects:
+          - { type: dirtyMoney, lose: 0.4 }
+          - { type: crime, action: job, size: solid }
+          - { type: health, conditionId: broken_bone, severity: 40 }
+          - { type: crime, action: rivalry, delta: 10 }
+          - { type: crime, action: standing, delta: -8 }
+          - { type: mental, action: trauma, amount: 8 }
+  - id: split_it
+    label: Split it and send two routes
+    check:
+      base: 60
+      stats: [{ key: smarts, weight: 0.3 }, { key: luck, weight: 0.2 }]
+      success:
+        text: Slower and less impressive, and nothing goes wrong. The crew grumbles, and counts it.
+        effects:
+          - { type: dirtyMoney, gain: small }
+          - { type: crime, action: job, size: small }
+      failure:
+        text: One route is hit and one is not. You still get the blame for the one that was.
+        effects:
+          - { type: crime, action: job, size: small }
+          - { type: crime, action: rivalry, delta: 6 }
+          - { type: crime, action: standing, delta: -4 }
+  - id: hand_it_on
+    label: Pass it to someone else
+    outcome:
+      text: You are not the one who loses it, and not the one who delivers it either. People notice that, too.
+      effects:
+        - { type: crime, action: standing, delta: -5 }

@@ -1,0 +1,62 @@
+id: rival_threat
+title: A message from {rivalCrew}
+text: >-
+  {opponent.name} finds you where you did not expect to be found. The words are
+  polite and the meaning is not: your crew has been working in places
+  that belong to {rivalCrew}, and the next time will not be a conversation.
+tone: dark
+category: crime
+rarity: common
+recurring: true
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { crime: { member: true } }
+    - { crime: { rival: true } }
+weight: { base: 8 }
+followUpOnly: true
+cast:
+  opponent: { kind: acquaintance, crew: rival, presence: city, createIfMissing: true, age: { min: 22, max: 55 } }
+choices:
+  - id: stand_firm
+    label: Stand your ground
+    check:
+      base: 50
+      stats: [{ key: confidence, weight: 0.35 }, { crime: standing, weight: 0.25 }]
+      success:
+        text: >-
+          You do not move and do not raise your voice. {opponent.name} leaves
+          with the message undelivered, and your crew hears about it by dinner.
+        effects:
+          - { type: crime, action: standing, delta: 6 }
+          - { type: crime, action: rivalry, delta: 8 }
+          - { type: relationship, role: opponent, affection: -4 }
+      failure:
+        text: >-
+          Your voice cracks in the middle of a sentence. {opponent.name}
+          smiles with real warmth, and the crew hears about that by dinner too.
+        effects:
+          - { type: crime, action: standing, delta: -6 }
+          - { type: crime, action: rivalry, delta: 10 }
+          - { type: stat, key: confidence, delta: -3 }
+  - id: pay_it_off
+    label: Hand over something to keep the peace
+    outcome:
+      text: >-
+        A bag changes hands. It is not enough to be an insult and not enough
+        to be forgotten. {opponent.name} walks away looking like someone who
+        has found a tap.
+      effects:
+        - { type: dirtyMoney, pay: small }
+        - { type: crime, action: rivalry, delta: -10 }
+        - { type: crime, action: standing, delta: -3 }
+  - id: tell_the_crew
+    label: Take it straight to the crew
+    outcome:
+      text: >-
+        The room gets quiet for the first time in a long while. What you
+        started cannot be unstarted, but you are trusted for starting it.
+      effects:
+        - { type: crime, action: standing, delta: 4 }
+        - { type: crime, action: rivalry, delta: 15 }

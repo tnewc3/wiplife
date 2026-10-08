@@ -1,0 +1,58 @@
+id: stash_raided_together
+title: The knock, with {partner.name} there
+text: >-
+  It is early, and there are too many of them. {partner.name}, who lives here
+  with you, stands in the hallway in a robe and watches strangers go through
+  the drawers. {partner.They} {partner:is|are} looking at you, not at them.
+tone: dark
+category: crimehome
+rarity: uncommon
+recurring: true
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { crime: { member: true } }
+    - { home: { partner: true } }
+    - { finances: { dirty: { gte: 1000 } } }
+    - { role: partner, kind: [partner, fiance, spouse] }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  partner: { support: true, presence: household }
+choices:
+  - id: take_it_on
+    label: Tell them it was all yours
+    outcome:
+      text: >-
+        You say it plainly, in front of everyone, and the cash goes into a
+        bag. {partner.name} says nothing until they leave, and then says everything.
+      effects:
+        - { type: dirtyMoney, lose: 1 }
+        - { type: crime, action: heat, delta: 10 }
+        - { type: relationship, role: partner, affection: -12, trust: -18 }
+        - { type: stat, key: stress, delta: 8 }
+  - id: lawyer
+    label: Ask for a lawyer and keep {partner.name} out of it
+    check:
+      base: 50
+      stats: [{ key: discipline, weight: 0.3 }, { key: smarts, weight: 0.2 }, { role: partner, key: trust, weight: 0.2 }]
+      success:
+        text: >-
+          Your lawyer is on the phone within the hour, and {partner.name}
+          is out of it by lunch. The cash is gone, the rest of the damage is
+          contained.
+        effects:
+          - { type: dirtyMoney, lose: 0.7 }
+          - { type: cost, item: lawyer_fee }
+          - { type: crime, action: heat, delta: 6 }
+          - { type: relationship, role: partner, trust: -8 }
+      failure:
+        text: >-
+          They find it all, and they have questions for {partner.name} too.
+          It will take a long time for {partner.them} to forgive you for that.
+        effects:
+          - { type: dirtyMoney, lose: 1 }
+          - { type: legal, offenseId: money_laundering, outcome: sentence }
+          - { type: relationship, role: partner, affection: -18, trust: -25 }
+          - { type: crime, action: heat, delta: 12 }

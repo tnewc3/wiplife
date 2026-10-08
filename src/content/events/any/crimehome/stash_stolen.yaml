@@ -1,0 +1,49 @@
+id: stash_stolen
+title: Where you left it
+text: >-
+  The hiding place is a good one, and it is empty. No broken lock, no sign
+  that anyone came or went. Only a space where something large used to be,
+  and a list in your head of who knew.
+tone: dark
+category: crimehome
+rarity: uncommon
+recurring: true
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { crime: { member: true } }
+    - { finances: { dirty: { gte: 1000 } } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  member: { kind: friend, crew: yours, presence: city }
+choices:
+  - id: ask_around
+    label: Ask around, quietly
+    check:
+      base: 35
+      stats: [{ key: smarts, weight: 0.3 }, { role: member, key: trust, weight: 0.2 }]
+      success:
+        text: >-
+          Three conversations later you have a name, and a door to knock on.
+          Most of it comes back, and the thief will not be doing this again.
+        effects:
+          - { type: dirtyMoney, lose: 0.25 }
+          - { type: crime, action: standing, delta: 3 }
+      failure:
+        text: >-
+          You ask the wrong person, and now the whole crew knows you lost
+          what you lost. The money does not come back.
+        effects:
+          - { type: dirtyMoney, lose: 0.8 }
+          - { type: crime, action: standing, delta: -6 }
+  - id: eat_the_loss
+    label: Take the loss and say nothing
+    outcome:
+      text: >-
+        You never find out who it was. The loss is yours to swallow, and
+        you move what is left somewhere else.
+      effects:
+        - { type: dirtyMoney, lose: 0.8 }
+        - { type: stat, key: stress, delta: 5 }

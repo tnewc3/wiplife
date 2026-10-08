@@ -1,0 +1,42 @@
+# The events the crime step queues (E6a). Every event listed must be
+# followUpOnly: it only happens this way. Each is picked by weight among those
+# whose requirements fit now (rank, standing, heat, a crew...).
+#
+# jobs        the work a year in a crew brings (balance/crime.yaml jobs.perYear
+#             says how many); each job event gives dirty money and tells the
+#             game it was a job (crime job), which adds heat and standing.
+# promotion   the crew offers a higher rank (standing and time at the rank allow it)
+# pushedOut   standing has been at the low line for years: the crew is done with you
+# investigation  an investigation into you has opened (a member's, or a former member's)
+# arrest      the police arrested you (more likely with heat, an investigation, an informant)
+# rival       trouble with the rival crew
+# informant   a member of your crew is talking to the police
+# raid        the police search where you keep your dirty money
+# theft       someone takes your dirty money
+# laundering  a deposit was flagged (queued by the launder action)
+# past        what you left behind finds you (a former member)
+jobs:
+  - job_lookout_shift
+  - job_parcel_run
+  - job_collect_the_envelope
+  - job_quiet_year
+  - job_warehouse_night
+  - job_moving_goods
+  - job_driver_for_the_night
+  - job_inside_man
+  - job_cash_run
+  - job_paperwork_scheme
+  - job_the_big_one
+  - job_sit_down_with_the_rival
+  - job_tribute_season
+triggers:
+  promotion: { events: [promotion_offered] }
+  pushedOut: { events: [pushed_out] }
+  investigation: { events: [detective_visit, detective_reopens] }
+  arrest: { events: [arrest_at_dawn, arrest_caught_in_the_act, arrest_the_books, arrest_the_top] }
+  rival: { events: [rival_threat, rival_ambush] }
+  informant: { events: [informant_rumor] }
+  raid: { events: [stash_raided, stash_raided_together] }
+  theft: { events: [stash_stolen] }
+  laundering: { events: [launder_flagged] }
+  past: { events: [old_crew_calls, old_rival_finds_you] }

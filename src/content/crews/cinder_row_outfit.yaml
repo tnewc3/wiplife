@@ -1,0 +1,7 @@
+id: cinder_row_outfit
+name: the Cinder Row Outfit
+blurb: A neighbourhood crew that grew out of one street and a lot of grudges. Everybody knows somebody in it.
+cities: [chicago, houston, small_town]
+ranks: [lookout, runner, enforcer, captain, boss]
+rivals: [marrow_street_crew, harrowgate_freight]
+traits: { riskTaking: 15, discipline: -8, sociability: 6 }

@@ -1,0 +1,68 @@
+id: arrest_at_dawn
+title: Before sunrise
+text: >-
+  The sound at the door is not a knock. By the time you are standing, there
+  are officers in the hall, a warrant in somebody's hand and a list of things
+  you are accused of. They already know which of them they can prove.
+tone: dark
+category: crimelaw
+rarity: common
+recurring: true
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { crime: { heat: { gte: 1 } } }
+    - { crime: { rank: { lte: 2 } } }
+weight: { base: 10 }
+followUpOnly: true
+choices:
+  - id: lawyer
+    label: Say nothing and get a lawyer
+    check:
+      base: 50
+      stats: [{ key: smarts, weight: 0.25 }, { key: discipline, weight: 0.2 }, { crime: standing, weight: 0.15 }]
+      success:
+        text: >-
+          The lawyer finds the holes in a case that depended on them being filled.
+          You are charged with less than they came for, and the court is
+          lenient.
+        effects:
+          - { type: cost, item: lawyer_fee }
+          - { type: dirtyMoney, lose: 0.4 }
+          - { type: legal, offenseId: burglary, outcome: probation, years: 1 }
+          - { type: crime, action: heat, delta: -10 }
+      failure:
+        text: >-
+          The case holds. A good lawyer cannot undo what the evidence says, and
+          the court decides what comes next.
+        effects:
+          - { type: cost, item: lawyer_fee }
+          - { type: dirtyMoney, lose: 0.5 }
+          - { type: legal, offenseId: burglary, outcome: sentence }
+          - { type: crime, action: heat, delta: -5 }
+  - id: plead
+    label: Plead guilty and take what comes
+    outcome:
+      text: >-
+        You sign, and say it in a courtroom, and someone writes down the
+        number. The crew notes that you did not bring them into it.
+      effects:
+        - { type: dirtyMoney, lose: 0.5 }
+        - { type: legal, offenseId: burglary, outcome: sentence }
+        - { type: crime, action: standing, delta: 4 }
+        - { type: crime, action: heat, delta: -8 }
+  - id: deal
+    label: Take the prosecutors' deal and name the crew
+    visibleIf: { crime: { rank: { gte: 2 } } }
+    outcome:
+      text: >-
+        You talk, for a long afternoon, and an officer you have never met
+        thanks you. The sentence is light. What is waiting for you afterwards is
+        not.
+      effects:
+        - { type: dirtyMoney, lose: 0.5 }
+        - { type: legal, offenseId: burglary, outcome: probation, years: 2 }
+        - { type: crime, action: leave, how: deal }
+        - { type: flag, key: testified_against_crew, value: true }
+        - { type: stat, key: stress, delta: 8 }

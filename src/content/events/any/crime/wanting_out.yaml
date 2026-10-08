@@ -1,0 +1,67 @@
+id: wanting_out
+title: Enough
+text: >-
+  It is three in the morning and you are awake again, doing arithmetic. How
+  much you have, how much you have lost, how many people you have stopped being
+  able to look in the eye. {member.name} would say it is just a bad week.
+  You are no longer sure it is.
+tone: serious
+category: crime
+rarity: uncommon
+recurring: true
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { crime: { member: true } }
+    - { crime: { years: { gte: 2 } } }
+weight:
+  base: 3
+  modifiers:
+    - { if: { stat: stress, gt: 60 }, x: 1.8 }
+    - { if: { flag: promised_to_leave_the_crew }, x: 2.5 }
+    - { if: { crime: { arrests: { gte: 1 } } }, x: 1.8 }
+cast:
+  member: { kind: friend, crew: yours, presence: city }
+choices:
+  - id: leave_quietly
+    label: Tell {member.name} you are done
+    check:
+      base: 50
+      stats: [{ role: member, key: affection, weight: 0.3 }, { crime: standing, weight: 0.3 }]
+      success:
+        text: >-
+          {member.name} looks at you for a long time, and then says a lot of
+          things that are all variations on goodbye. No one tries to stop you.
+          It is not a clean break, but it is a break.
+        effects:
+          - { type: crime, action: leave, how: left }
+          - { type: relationship, role: member, affection: -6 }
+          - { type: stat, key: stress, delta: -6 }
+          - { type: stat, key: happiness, delta: 4 }
+      failure:
+        text: >-
+          {member.name} shakes {member.their} head. Nobody leaves because
+          they say so, {member.they} {member:tells|tell} you. You are reminded
+          of what you know, and of who else knows it.
+        effects:
+          - { type: crime, action: standing, delta: -8 }
+          - { type: stat, key: stress, delta: 8 }
+  - id: buy_out
+    label: Offer to pay your way out
+    outcome:
+      text: >-
+        There is a number, and you have it. You hand over the bag, and the crew
+        decides the account is closed.
+      effects:
+        - { type: dirtyMoney, pay: big }
+        - { type: crime, action: leave, how: left }
+        - { type: stat, key: stress, delta: -8 }
+        - { type: stat, key: happiness, delta: 5 }
+  - id: stay
+    label: Tell yourself it is just a bad week
+    outcome:
+      text: You tell yourself it is just a bad week. The week is followed by another one, and the arithmetic does not change.
+      effects:
+        - { type: stat, key: stress, delta: 4 }
+        - { type: stat, key: happiness, delta: -2 }

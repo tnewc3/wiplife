@@ -1,0 +1,51 @@
+id: old_crew_calls
+title: A familiar number
+text: >-
+  {contact.name}, from {crew}, calls out of nowhere. It starts with
+  small talk and arrives, eventually, at the point: there is a job, and nobody
+  else can do it the way you could.
+tone: dark
+category: crimepast
+rarity: common
+recurring: true
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { crime: { former: true } }
+    - { crime: { member: false } }
+    - { not: { flag: testified_against_crew } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  contact: { kind: friend, presence: city }
+choices:
+  - id: one_more
+    label: Say you'll do one more job
+    outcome:
+      text: >-
+        It is only one, you tell yourself. By the end of the month you are
+        back in {crew}, and the numbers on your phone are familiar ones.
+      effects:
+        - { type: crime, action: join, role: contact }
+        - { type: flag, key: joined_a_crew, value: true }
+        - { type: dirtyMoney, gain: small }
+        - { type: stat, key: stress, delta: 5 }
+  - id: refuse
+    label: Tell {contact.them} that part of your life is over
+    check:
+      base: 55
+      stats: [{ key: confidence, weight: 0.3 }, { key: discipline, weight: 0.2 }]
+      success:
+        text: '{contact.name} takes it better than you hoped. The call ends, and the number does not ring again.'
+        effects:
+          - { type: relationship, role: contact, affection: -4 }
+          - { type: stat, key: stress, delta: -3 }
+          - { type: crime, action: heat, delta: -3 }
+      failure:
+        text: >-
+          {contact.name} does not shout. {contact.They} {contact:says|say} the names of people
+          who know where you live, one at a time, politely.
+        effects:
+          - { type: relationship, role: contact, affection: -8, trust: -10 }
+          - { type: stat, key: stress, delta: 8 }

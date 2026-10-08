@@ -1,0 +1,44 @@
+id: detective_reopens
+title: A file reopened
+text: >-
+  The letter is polite and short. A detective you have never met would like
+  to ask about {crew} again. There is a new witness, or a new
+  piece of paper, or just a new person with time on their hands.
+tone: serious
+category: crimepast
+rarity: uncommon
+recurring: true
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { crime: { former: true } }
+    - { crime: { member: false } }
+    - { crime: { investigated: true } }
+weight: { base: 10 }
+followUpOnly: true
+choices:
+  - id: lawyer
+    label: Let a lawyer answer
+    outcome:
+      text: >-
+        The lawyer is brief and unhelpful, on your behalf. By the afternoon the
+        letter is in a folder, where you can see it and cannot touch it.
+      effects:
+        - { type: cost, item: lawyer_fee }
+        - { type: crime, action: heat, delta: -6 }
+  - id: meet
+    label: Agree to talk
+    check:
+      base: 50
+      stats: [{ key: smarts, weight: 0.3 }, { key: confidence, weight: 0.2 }]
+      success:
+        text: They get less than they wanted. You are reminded how long a year can feel.
+        effects:
+          - { type: crime, action: heat, delta: -8 }
+          - { type: stat, key: stress, delta: 4 }
+      failure:
+        text: Something you say turns out to matter more than you meant it to.
+        effects:
+          - { type: crime, action: heat, delta: 12 }
+          - { type: stat, key: stress, delta: 7 }

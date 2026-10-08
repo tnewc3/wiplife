@@ -1,0 +1,49 @@
+id: rival_truce_offer
+title: Let it end
+text: >-
+  The feud with {rivalCrew} has gone on long enough to hurt both crews more than either has gained. {member.name} says the word from above is that
+  someone has to go and ask for peace. It will not be easy, and it will not
+  be quick.
+tone: serious
+category: crime
+rarity: uncommon
+recurring: true
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { crime: { member: true } }
+    - { crime: { rival: true } }
+    - { crime: { rivalry: { gte: 45 } } }
+weight: { base: 6 }
+cast:
+  member: { kind: friend, crew: yours, presence: city }
+choices:
+  - id: broker
+    label: Take it on
+    check:
+      base: 45
+      stats: [{ key: smarts, weight: 0.25 }, { key: kindness, weight: 0.2 }, { crime: standing, weight: 0.2 }]
+      success:
+        text: >-
+          Weeks of messages through people who dislike each other, and then a
+          handshake. For the first time in a long while, the street feels quiet.
+        effects:
+          - { type: crime, action: rivalry, delta: -35 }
+          - { type: crime, action: standing, delta: 8 }
+          - { type: crime, action: heat, delta: -5 }
+      failure:
+        text: >-
+          Your first message is read as weakness. It gets worse before it
+          gets better, and somebody has to carry the blame for that.
+        effects:
+          - { type: crime, action: rivalry, delta: 10 }
+          - { type: crime, action: standing, delta: -5 }
+  - id: let_it_burn
+    label: Say there is nothing to ask for
+    outcome:
+      text: >-
+        {member.name} stares at you and then nods. The feud goes on, and so does everything it takes from both crews.
+      effects:
+        - { type: crime, action: rivalry, delta: 8 }
+        - { type: stat, key: stress, delta: 3 }

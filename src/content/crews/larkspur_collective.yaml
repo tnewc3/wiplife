@@ -1,0 +1,7 @@
+id: larkspur_collective
+name: the Larkspur Collective
+blurb: Younger than the others and hungry. They talk about family a lot, and they keep a list of who owes whom.
+cities: [houston, los_angeles, nyc]
+ranks: [errand runner, collector, trusted hand, deputy, head]
+rivals: [velvet_hand, harrowgate_freight]
+traits: { riskTaking: 12, sociability: 8, ambition: 10 }

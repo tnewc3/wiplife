@@ -1,0 +1,43 @@
+id: offer_when_out_of_work
+title: Work, of a kind
+text: >-
+  The job search has gone nowhere, and everyone seems to know it.
+  {contact.name} finds you with an easy smile: there is work, it pays now,
+  and nobody asks about references.
+tone: dark
+category: crimeoffers
+rarity: uncommon
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { crime: { member: false } }
+    - { career: { employed: false, retired: false } }
+weight:
+  base: 0.5
+  modifiers:
+    - { if: { flag: turned_down_a_crew }, x: 0.6 }
+    - { if: { finances: { debt: { gte: 3000 } } }, x: 1.4 }
+    - { if: { trait: riskTaking, gt: 60 }, x: 1.6 }
+cast:
+  contact: { kind: acquaintance, presence: city, createIfMissing: true, newChance: 0.6, ageOffset: { min: -8, max: 15 } }
+choices:
+  - id: take_the_work
+    label: Hear what the work is
+    outcome:
+      text: >-
+        It starts small and it starts immediately. You get a first envelope
+        of real cash that night, and a place in {crew}.
+      effects:
+        - { type: crime, action: join }
+        - { type: flag, key: joined_a_crew, value: true }
+        - { type: dirtyMoney, gain: petty }
+  - id: keep_looking
+    label: Thank {contact.them} and keep looking
+    outcome:
+      text: >-
+        {contact.name} nods as if this is all {contact.they} expected. You
+        keep the offer in your head like a stone in a shoe.
+      effects:
+        - { type: flag, key: turned_down_a_crew, value: true }
+        - { type: stat, key: stress, delta: 3 }

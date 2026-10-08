@@ -1,0 +1,63 @@
+id: close_call_traffic_stop
+title: Lights in the mirror
+text: >-
+  The cruiser behind you has been there for four blocks. You are carrying
+  nothing you should not, mostly, but your hands know what your head is
+  trying not to think about.
+tone: serious
+category: crime
+rarity: common
+recurring: true
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { crime: { member: true } }
+    - { crime: { heat: { gte: 15 } } }
+weight:
+  base: 4
+  modifiers:
+    - { if: { crime: { heat: { gte: 50 } } }, x: 1.8 }
+choices:
+  - id: calm
+    label: Keep your hands on the wheel and your voice flat
+    check:
+      base: 62
+      stats: [{ key: confidence, weight: 0.3 }, { key: discipline, weight: 0.2 }, { crime: heat, weight: -0.3 }]
+      success:
+        text: A bored officer, a taillight excuse, and a warning. Your pulse takes an hour to come down.
+        effects:
+          - { type: stat, key: stress, delta: 3 }
+          - { type: crime, action: heat, delta: -3 }
+      failure:
+        text: >-
+          The questions get longer and the officer's face stops being bored.
+          You are let go in the end, but your name is now in a notebook.
+        effects:
+          - { type: crime, action: heat, delta: 8 }
+          - { type: stat, key: stress, delta: 5 }
+  - id: bolt
+    label: Pull away and run for it
+    check:
+      base: 25
+      stats: [{ key: riskTaking, weight: 0.2 }, { key: luck, weight: 0.4 }]
+      success:
+        text: You lose them in the maze behind the rail yard, and spend two hours in a parking structure shaking. Somehow, you are clean.
+        effects:
+          - { type: crime, action: heat, delta: 10 }
+          - { type: stat, key: stress, delta: 8 }
+          - { type: stat, key: riskTaking, delta: 2 }
+      failure:
+        text: It ends against a barrier, with the engine ticking and an officer's flashlight in your face. The court is unimpressed with the driving, and the rest.
+        effects:
+          - { type: legal, offenseId: disorderly_conduct, outcome: sentence }
+          - { type: crime, action: heat, delta: 14 }
+  - id: ditch_it
+    label: Ride it out, but get what you carry out of the car first
+    outcome:
+      text: >-
+        You make sure you are carrying nothing for the next few days, and the
+        crew thinks you are being careful or being a coward. Possibly both.
+      effects:
+        - { type: crime, action: heat, delta: -5 }
+        - { type: crime, action: standing, delta: -2 }

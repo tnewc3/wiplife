@@ -1,0 +1,50 @@
+id: front_owner_wants_more
+title: The owner has a new number
+text: >-
+  The owner of the place you use for your money says business has been
+  good and, because of that, the rate is going up. It is delivered
+  like a fact of nature.
+tone: neutral
+category: crime
+rarity: uncommon
+recurring: true
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { crime: { member: true } }
+    - { crime: { rank: { gte: 2 } } }
+    - { finances: { dirty: { gte: 2000 } } }
+weight: { base: 5 }
+choices:
+  - id: pay
+    label: Pay the new rate
+    outcome:
+      text: >-
+        You hand it over. The owner smiles as if it was never in question, and the arrangement carries on.
+      effects:
+        - { type: dirtyMoney, pay: small }
+  - id: push_back
+    label: Push back
+    check:
+      base: 45
+      stats: [{ key: confidence, weight: 0.3 }, { crime: standing, weight: 0.25 }]
+      success:
+        text: >-
+          You mention the people who sent you. The rate stays where it was and
+          the owner becomes slightly more polite.
+        effects:
+          - { type: crime, action: standing, delta: 2 }
+      failure:
+        text: >-
+          The owner is not as afraid as you hoped. The arrangement ends, and an
+          unfriendly rumour about you reaches the street.
+        effects:
+          - { type: crime, action: heat, delta: 5 }
+          - { type: crime, action: standing, delta: -3 }
+  - id: take_business_elsewhere
+    label: Find another way
+    outcome:
+      text: It takes patience and a little luck, but you find a different door. You are more careful with it.
+      effects:
+        - { type: stat, key: stress, delta: 2 }

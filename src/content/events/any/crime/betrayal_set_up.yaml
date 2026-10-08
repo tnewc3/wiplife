@@ -1,0 +1,69 @@
+id: betrayal_set_up
+title: Hung out to dry
+text: >-
+  A job went wrong, and the story that is coming back has your name at the
+  centre of it. {boss.name}, who sent you, is not mentioned at all. It is
+  the oldest trick the crew has.
+tone: dark
+category: crime
+rarity: uncommon
+recurring: true
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { crime: { member: true } }
+    - { crime: { rank: { lte: 3 } } }
+    - { crime: { jobs: { gte: 1 } } }
+weight:
+  base: 2.5
+  modifiers:
+    - { if: { crime: { standing: { lt: 45 } } }, x: 1.8 }
+cast:
+  boss: { kind: friend, crew: boss, presence: city }
+choices:
+  - id: call_it_out
+    label: Call {boss.them} out in front of everyone
+    check:
+      base: 35
+      stats: [{ key: confidence, weight: 0.35 }, { crime: standing, weight: 0.3 }]
+      success:
+        text: >-
+          The room is silent, and then it shifts. {boss.name} backs down in
+          the way people with power do: by not looking at anyone.
+        effects:
+          - { type: crime, action: standing, delta: 10 }
+          - { type: relationship, role: boss, affection: -16, trust: -20 }
+      failure:
+        text: >-
+          Nobody backs you. {boss.name} calmly explains what you did, in a
+          voice that sounds like patience, and the room believes it.
+        effects:
+          - { type: crime, action: standing, delta: -15 }
+          - { type: relationship, role: boss, affection: -12, trust: -14 }
+          - { type: stat, key: stress, delta: 6 }
+  - id: eat_it
+    label: Take the blame and keep your head down
+    outcome:
+      text: >-
+        You say it was your mistake. {boss.name} gives you a look that might
+        be gratitude. You will remember what it took, even if no one else does.
+      effects:
+        - { type: crime, action: standing, delta: -5 }
+        - { type: relationship, role: boss, trust: 6 }
+        - { type: stat, key: stress, delta: 4 }
+  - id: go_around
+    label: Take it to someone above {boss.them}
+    check:
+      base: 40
+      stats: [{ key: smarts, weight: 0.3 }, { crime: standing, weight: 0.3 }]
+      success:
+        text: Somebody above listens, checks, and does something about it. {boss.name} is taken down a rung, and you have a new kind of ally.
+        effects:
+          - { type: crime, action: standing, delta: 8 }
+          - { type: relationship, role: boss, affection: -20, trust: -25 }
+      failure:
+        text: Going over a person's head is the one thing the crew does not forgive. You are told so, politely.
+        effects:
+          - { type: crime, action: standing, delta: -12 }
+          - { type: relationship, role: boss, affection: -14, trust: -16 }

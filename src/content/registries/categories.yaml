@@ -102,3 +102,35 @@ categories:
   teenwork: { label: Teen jobs }
   teamsclubs: { label: Teams and clubs }
   future: { label: Thinking ahead }
+
+  # E6a: crime careers. Offers are for adults who are not in a crew; the rest of a crew's life is for those in one,
+  # the law's side of it (investigations, arrests, a flagged deposit) is for any adult, and the past catches up with
+  # those who left. Crime at home accounts for a partner who lives with you (the household rule).
+  crimeoffers:
+    label: An offer
+    requires:
+      all:
+        - { age: { gte: 18 } }
+        - { crime: { member: false } }
+  crime:
+    label: The crew
+    requires:
+      all:
+        - { age: { gte: 18 } }
+        - { crime: { member: true } }
+  crimehome:
+    label: Crime at home
+    household: true
+    requires:
+      all:
+        - { age: { gte: 18 } }
+        - { crime: { member: true } }
+  crimelaw:
+    label: The police
+    requires: { age: { gte: 18 } }
+  crimepast:
+    label: The past catches up
+    requires:
+      all:
+        - { age: { gte: 18 } }
+        - { crime: { former: true } }

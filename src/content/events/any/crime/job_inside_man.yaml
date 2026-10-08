@@ -1,0 +1,70 @@
+id: job_inside_man
+title: The inside contact
+text: >-
+  A contact inside a company has offered a way in, for a share. The crew
+  needs someone to run the plan with them, to talk to the contact and make it
+  work. You are the person they are looking at.
+tone: dark
+category: crime
+rarity: uncommon
+recurring: true
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { crime: { member: true } }
+    - { crime: { rank: { gte: 3 } } }
+weight: { base: 5 }
+followUpOnly: true
+cast:
+  member: { kind: friend, crew: yours, presence: city }
+choices:
+  - id: lead_it
+    label: Run the plan yourself
+    check:
+      base: 48
+      stats: [{ key: smarts, weight: 0.35 }, { key: confidence, weight: 0.2 }, { crime: standing, weight: 0.2 }, { crime: heat, weight: -0.25 }]
+      success:
+        text: >-
+          It goes the way it looked on paper, which almost never happens. The
+          crew's share is substantial and your name is attached to it.
+        effects:
+          - { type: dirtyMoney, gain: big }
+          - { type: crime, action: job, size: big }
+          - { type: crime, action: standing, delta: 4 }
+      failure:
+        text: >-
+          The contact gets nervous and talks to the wrong person. The plan
+          falls apart in an afternoon, and the people asking questions
+          afterwards are not all on your side.
+        effects:
+          - { type: crime, action: job, size: big }
+          - { type: crime, action: heat, delta: 16 }
+          - { type: crime, action: standing, delta: -8 }
+          - { type: stat, key: stress, delta: 8 }
+  - id: follow_orders
+    label: Follow {member.name}'s lead
+    check:
+      base: 62
+      stats: [{ key: discipline, weight: 0.25 }, { key: luck, weight: 0.2 }]
+      success:
+        text: >-
+          {member.name} runs it and you do what you are told. The result is
+          smaller, but you sleep.
+        effects:
+          - { type: dirtyMoney, gain: solid }
+          - { type: crime, action: job, size: solid }
+          - { type: relationship, role: member, trust: 3 }
+      failure:
+        text: >-
+          {member.name} makes a call you would not have made, and the damage lands on the whole crew.
+        effects:
+          - { type: crime, action: job, size: solid }
+          - { type: crime, action: heat, delta: 12 }
+          - { type: relationship, role: member, trust: -4 }
+  - id: walk
+    label: Say it's not for you
+    outcome:
+      text: Nobody argues, though the plan goes ahead without you, and it is not forgotten who was asked.
+      effects:
+        - { type: crime, action: standing, delta: -8 }

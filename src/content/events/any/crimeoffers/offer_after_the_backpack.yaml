@@ -1,0 +1,41 @@
+id: offer_after_the_backpack
+title: Word gets around
+text: >-
+  {contact.name} finds you again, this time without a backpack. People noticed
+  that you did what you were told and kept quiet about it. They would like to
+  make that official.
+tone: dark
+category: crimeoffers
+rarity: uncommon
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { crime: { member: false } }
+    - { flag: ran_package }
+    - { memory: { role: contact, tag: gave_you_package } }
+once: true
+weight: { base: 1.5 }
+cast:
+  contact: { kind: acquaintance, presence: city }
+choices:
+  - id: join
+    label: Say yes
+    outcome:
+      text: >-
+        You shake {contact.name}'s hand. In {crew}, the backpack was the
+        audition.
+      effects:
+        - { type: crime, action: join, role: contact }
+        - { type: flag, key: joined_a_crew, value: true }
+        - { type: stat, key: riskTaking, delta: 2 }
+  - id: no
+    label: Say that was a one-time thing
+    outcome:
+      text: >-
+        {contact.name} says that is what everyone says. {contact.They}
+        {contact:does|do} not sound threatening, just certain.
+      effects:
+        - { type: relationship, role: contact, affection: -6 }
+        - { type: flag, key: turned_down_a_crew, value: true }
+        - { type: stat, key: discipline, delta: 2 }

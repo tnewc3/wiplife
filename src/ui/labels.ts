@@ -1109,3 +1109,55 @@ export const LICENSE_STAGE_LABELS = { none: 'No permit yet', permit: 'Learner’
 
 /** How tight a house rule is, in words. */
 export const RULE_LEVEL_LABELS = ['Relaxed', 'The usual', 'Strict'] as const;
+
+// ── E6a: crime careers ───────────────────────────────────────────────────────
+
+/** Police attention as words (the engine gives a band, 0 up; balance/crime.yaml heat.bands). */
+export const HEAT_WORDS = ['Unnoticed', 'Noticed', 'Watched', 'Hot', 'Burning'] as const;
+export const HEAT_BLURBS = [
+  'The police have no reason to know your name.',
+  'A few people at the station have heard it.',
+  'You are on someone’s list, and the list is getting read.',
+  'Detectives are asking about you, and every job makes it worse.',
+  'You are the thing the police are working on. Lying low is the only thing that helps.',
+] as const;
+
+/** Standing in the crew as words (balance/crime.yaml standing.bands). */
+export const STANDING_WORDS = ['Disrespected', 'Unproven', 'Solid', 'Trusted', 'Revered'] as const;
+
+/** How hot things are with the rival crew (balance/crime.yaml rivalry.bands). */
+export const RIVALRY_WORDS = ['Quiet', 'Tense', 'Brewing', 'At war'] as const;
+
+/** How risky a deposit is (balance/crime.yaml dirty.laundering.riskBands). */
+export const LAUNDER_RISK_WORDS = ['Low risk', 'Some risk', 'High risk'] as const;
+
+/** How a crew ended, for someone who is out. */
+export const CRIME_HOW_LABELS: Record<'left' | 'pushed' | 'drifted' | 'deal', string> = {
+  left: 'You walked away',
+  pushed: 'You were pushed out',
+  drifted: 'You drifted out',
+  deal: 'You made a deal with the police',
+};
+
+/** Dirty money an outcome gave or took, with the new balance: "+$2,400 dirty · Dirty money now $3,100". */
+export function outcomeDirtyLabel(change: number, balance: number): string {
+  return `${moneyChange(change)} dirty · Dirty money now ${money(balance)}`;
+}
+
+/** Why dirty money can't be used now. */
+export function dirtyBlockLabel(block: 'age' | 'away' | 'none' | 'amount' | 'front' | null): string {
+  switch (block) {
+    case 'age':
+      return 'Not at your age.';
+    case 'away':
+      return 'Not from prison.';
+    case 'none':
+      return 'You have no dirty money.';
+    case 'amount':
+      return 'Enter a whole number of dollars you have, at least the minimum.';
+    case 'front':
+      return 'That business is not open to you.';
+    default:
+      return '';
+  }
+}

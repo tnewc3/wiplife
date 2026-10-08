@@ -12,6 +12,7 @@ import { mostMissed, totalDebt } from './finance';
 import { circleSupport } from './mental/query';
 import { belongingsHolds } from './possessions/holds';
 import { teenHolds } from './teen/holds';
+import { crimeHolds } from './crime/holds';
 import { romanceStatus, yearsInKind } from './relationships';
 import type { Id, LifeState } from './types';
 
@@ -89,6 +90,7 @@ export function evaluate(condition: Condition | undefined, state: LifeState, ctx
     if (q.bankruptWithin !== undefined && !(f.bankruptcyYear !== undefined && state.currentYear - f.bankruptcyYear <= q.bankruptWithin)) return false;
     if (q.planWithin !== undefined && !(f.debtPlanYear !== undefined && state.currentYear - f.debtPlanYear <= q.planWithin)) return false;
     if (q.income && !compare(f.lastLedger?.gross ?? 0, q.income)) return false;
+    if (q.dirty && !compare(f.dirty, q.dirty)) return false;
     return true;
   }
   if ('home' in condition) {
@@ -188,6 +190,7 @@ export function evaluate(condition: Condition | undefined, state: LifeState, ctx
   if ('family' in condition) return familyHolds(condition.family, state, ctx.content?.balance.relationships.adultAge);
   if ('belongings' in condition) return belongingsHolds(condition.belongings, state, ctx.cast, ctx.content);
   if ('teen' in condition) return teenHolds(condition.teen, state);
+  if ('crime' in condition) return crimeHolds(condition.crime, state, ctx.content?.balance.crime.ranks.length ?? 5);
   if ('memory' in condition) {
     const { role, tag } = condition.memory;
     return roleCheck(role, (id) => state.relationships[id]?.memories.some((m) => m.tag === tag) ?? false);

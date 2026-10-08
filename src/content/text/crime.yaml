@@ -1,0 +1,48 @@
+# History lines the crime systems write. The player is "you".
+# Values: {crew}, {rank} ({front} for a flagged deposit).
+history:
+  joined:
+    importance: 3
+    variants:
+      - "You joined {crew}. Nobody wrote it down, and everybody remembered it."
+      - "{crew} took you in. You told yourself it was temporary."
+  promoted:
+    importance: 2
+    variants:
+      - "{crew} made you a {rank}."
+      - "You rose to {rank} in {crew}, and people started to lower their voices when you walked in."
+  leader:
+    importance: 3
+    variants:
+      - "You came to run {crew}."
+      - "The old order ended and you ended up at the head of {crew}."
+  left:
+    importance: 3
+    variants:
+      - "You walked away from {crew}."
+      - "You left {crew}, with more to carry out than you carried in."
+  pushedOut:
+    importance: 3
+    variants:
+      - "{crew} cut you loose."
+      - "{crew} stopped calling, and then made it official."
+  drifted:
+    importance: 2
+    variants:
+      - "You moved away and {crew} forgot your number."
+      - "Distance did what nobody else had managed, and you were out of {crew}."
+  investigationOpened:
+    importance: 2
+    variants:
+      - "Police started looking into you."
+      - "Somebody official put your name on a file."
+  investigationCold:
+    importance: 1
+    variants:
+      - "The investigation into you went cold."
+      - "Whoever had been looking into you stopped looking."
+  flagged:
+    importance: 2
+    variants:
+      - "A deposit through {front} was flagged, and some of the money did not come back."
+      - "{front} got nervous about your money, and so did the people watching it."
