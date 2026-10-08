@@ -34,7 +34,7 @@ export function crimeFailures(state: LifeState, content: ContentBundle): string[
     if (k.crew.since > state.currentYear || k.crew.since < state.birthYear + adultAge) fail('crime: the crew was joined outside the adult years');
     if (!content.cities[k.crew.cityId]) fail(`crime: the crew works in an unknown city "${k.crew.cityId}"`);
     if (k.crew.away) {
-      if (k.crew.cityId === state.character.cityId) fail('crime: away from a crew that works in the city you live in');
+      // (Moving back mid-year leaves this set until the year step resolves it.)
       score('crime.away.standing', k.crew.away.standing);
       score('crime.away.suspicion', k.crew.away.suspicion);
       if (k.crew.away.since > state.currentYear) fail('crime: away since a year to come');

@@ -2,8 +2,8 @@ id: settle_it_in_the_yard
 title: Settle it in the yard
 text: >-
   The dispute with {rivalCrew} has gone on long enough that someone has named a
-  place and a time. {opponent.name} will be there with {opponent.their} people. Word is that
-  the last man who went to one of these did not leave on his feet.
+  place and a time. {opponent.name} will be there with {opponent.their} people. People say
+  the last person who went to one of these did not walk out.
 tone: dark
 category: crime
 rarity: rare
