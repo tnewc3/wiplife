@@ -2,7 +2,7 @@ import { content } from '../../../content';
 import { getCrimeView } from '../../../engine/selectors';
 import type { LifeState } from '../../../engine/types';
 import { Card } from '../../components/Card';
-import { CRIME_HOW_LABELS, HEAT_BLURBS, HEAT_WORDS, RIVALRY_WORDS, STANDING_WORDS } from '../../labels';
+import { CRIME_HOW_LABELS, HEAT_BLURBS, HEAT_WORDS, RIVALRY_WORDS, STANDING_WORDS, SUSPICION_WORDS } from '../../labels';
 
 function Row({ label, value, testId }: { label: string; value: string; testId?: string }) {
   return (
@@ -35,6 +35,8 @@ export function CrimeCard({ life }: { life: LifeState }) {
           <dl className="mt-2 flex flex-col" aria-label="Your place in the crew">
             <Row label="Your rank" value={view.rankTitle[0]!.toUpperCase() + view.rankTitle.slice(1)} testId="crime-rank" />
             <Row label="Standing" value={STANDING_WORDS[view.standingBand]!} testId="crime-standing" />
+            {view.away !== null && <Row label={`Far from ${view.away.city}`} value={`${view.away.years} ${view.away.years === 1 ? 'year' : 'years'}`} testId="crime-away" />}
+            {view.away !== null && <Row label="What the crew thinks" value={SUSPICION_WORDS[view.away.suspicionBand]!} testId="crime-suspicion" />}
             <Row label="Police attention" value={HEAT_WORDS[view.heatBand]!} testId="crime-heat" />
             {view.rival !== null && view.rivalryBand !== null && <Row label={`With ${view.rival}`} value={RIVALRY_WORDS[view.rivalryBand]!} testId="crime-rivalry" />}
           </dl>

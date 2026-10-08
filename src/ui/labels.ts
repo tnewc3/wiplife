@@ -1128,14 +1128,18 @@ export const STANDING_WORDS = ['Disrespected', 'Unproven', 'Solid', 'Trusted', '
 /** How hot things are with the rival crew (balance/crime.yaml rivalry.bands). */
 export const RIVALRY_WORDS = ['Quiet', 'Tense', 'Brewing', 'At war'] as const;
 
+/** What the crew you moved away from suspects of you (balance/crime.yaml away.suspicion.bands). */
+export const SUSPICION_WORDS = ['Missed', 'Wondering', 'Doubtful', 'Sure you ran'] as const;
+
 /** How risky a deposit is (balance/crime.yaml dirty.laundering.riskBands). */
 export const LAUNDER_RISK_WORDS = ['Low risk', 'Some risk', 'High risk'] as const;
 
 /** How a crew ended, for someone who is out. */
-export const CRIME_HOW_LABELS: Record<'left' | 'pushed' | 'drifted' | 'deal', string> = {
+export const CRIME_HOW_LABELS: Record<'left' | 'pushed' | 'drifted' | 'deal' | 'moved', string> = {
   left: 'You walked away',
   pushed: 'You were pushed out',
   drifted: 'You drifted out',
+  moved: 'You moved on to a crew in a new city',
   deal: 'You made a deal with the police',
 };
 

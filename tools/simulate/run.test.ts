@@ -87,7 +87,7 @@ describe('simulation runner', () => {
     const drive = choiceTraits(choices.find((c) => c.id === 'drive')!);
     const ride = choiceTraits(choices.find((c) => c.id === 'ride')!);
     expect(drive.illegal).toBe(true);
-    expect(ride).toEqual({ illegal: false, joinsCrew: false, crewJob: false, promotes: false, risky: false, vice: false, kind: false, unkind: false });
+    expect(ride).toEqual({ illegal: false, joinsCrew: false, crewJob: false, promotes: false, transfers: false, risky: false, vice: false, kind: false, unkind: false });
     const person = (riskTaking: number, discipline: number) =>
       produce(lifeAtAge('choices', 30), (d) => {
         Object.assign(d.character.personality, { riskTaking, discipline });

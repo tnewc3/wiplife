@@ -29,14 +29,25 @@ jobs:
   - job_the_big_one
   - job_sit_down_with_the_rival
   - job_tribute_season
+  - job_warned_off
+# deathCauses the causes of death a crew life can end in (src/content/causes)
+# cut         a rank 4-5 member's yearly share of the crew's business, as an event
+# away        the crew reaches out while you live far from it (favors, threats, suspicion)
+# awayCut     the crew writes you off after years away
+# back        you are home again and the crew has to decide what you are now
+deathCauses: [crime_job_gone_wrong, crew_war_killing, crew_reprisal, crew_fight]
 triggers:
   promotion: { events: [promotion_offered] }
   pushedOut: { events: [pushed_out] }
   investigation: { events: [detective_visit, detective_reopens] }
   arrest: { events: [arrest_at_dawn, arrest_caught_in_the_act, arrest_the_books, arrest_the_top] }
-  rival: { events: [rival_threat, rival_ambush] }
+  rival: { events: [rival_threat, rival_ambush, rival_war_boils_over, settle_it_in_the_yard] }
   informant: { events: [informant_rumor] }
   raid: { events: [stash_raided, stash_raided_together] }
   theft: { events: [stash_stolen] }
   laundering: { events: [launder_flagged] }
-  past: { events: [old_crew_calls, old_rival_finds_you] }
+  past: { events: [old_crew_calls, old_rival_finds_you, crew_comes_for_a_witness] }
+  cut: { events: [crew_cut_lieutenant, crew_cut_leader] }
+  away: { events: [away_favor, away_threat, away_police_rumor, away_new_crew_notices] }
+  awayCut: { events: [away_written_off] }
+  back: { events: [back_in_town] }

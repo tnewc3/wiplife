@@ -35,6 +35,16 @@ test('the Work tab shows the crew, your rank, standing and heat as words, and fi
   await expectTouchTargets(page);
 });
 
+test('far from the crew, the card says how long and what the crew thinks, as words', async ({ page }) => {
+  await open(page, { seed: 'e2e-crime-away', away: { years: 2, suspicion: 60 } });
+  await tab(page, 'Work/School').click();
+  await expect(page.getByTestId('crime-away')).toContainText('2 years');
+  await expect(page.getByTestId('crime-suspicion')).toHaveText(/Missed|Wondering|Doubtful|Sure you ran/);
+  await expect(page.getByTestId('crime-card')).not.toContainText(/\b\d{2,3}\/100\b/);
+  await expectNoHorizontalScroll(page);
+  await expectTouchTargets(page);
+});
+
 test('a life with no crime past has no crime card and no dirty money card', async ({ page }) => {
   await open(page, { seed: 'e2e-crime-2', inCrew: false, dirty: 0, heat: 0 });
   await tab(page, 'Work/School').click();

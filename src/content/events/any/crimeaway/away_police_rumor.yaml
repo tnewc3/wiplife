@@ -1,0 +1,53 @@
+id: away_police_rumor
+title: Questions about the questions
+text: >-
+  The police have been asking about {crew}, and someone has put your name
+  next to the questions. {member.name} calls to say it is just talk. {member.They}
+  {member:mentions|mention} it twice.
+tone: dark
+category: crimeaway
+rarity: uncommon
+recurring: true
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { crime: { member: true } }
+    - { crime: { away: true } }
+    - { crime: { investigated: true } }
+    - { crime: { suspicion: { gte: 30 } } }
+weight: { base: 8 }
+followUpOnly: true
+cast:
+  member: { kind: friend, crew: yours, presence: elsewhere }
+choices:
+  - id: swear_it
+    label: Swear you have said nothing to anyone
+    check:
+      base: 55
+      stats: [{ key: confidence, weight: 0.3 }, { role: member, key: trust, weight: 0.2 }]
+      success:
+        text: >-
+          {member.name} believes you, or says {member.they} {member:does|do}, and the call ends
+          warmly enough that you can breathe again.
+        effects:
+          - { type: crime, action: suspicion, delta: -20 }
+          - { type: stat, key: stress, delta: -2 }
+      failure:
+        text: >-
+          Swearing is what a person does when they are lying, {member.name}
+          says, gently. You do not hear from {member.them} for a long time.
+        effects:
+          - { type: crime, action: suspicion, delta: 14 }
+          - { type: crime, action: standing, delta: -8 }
+          - { type: relationship, role: member, trust: -8 }
+          - { type: stat, key: stress, delta: 8 }
+  - id: lawyer_up
+    label: Say nothing and let it blow over
+    outcome:
+      text: >-
+        You say nothing to anyone, which is the right thing for the police
+        and exactly the wrong thing for the crew. It is a hard silence to live inside.
+      effects:
+        - { type: crime, action: suspicion, delta: 8 }
+        - { type: stat, key: stress, delta: 4 }

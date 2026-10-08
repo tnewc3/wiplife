@@ -18,12 +18,14 @@ entry:
 # Rank 1 to 5 (the last runs the crew). payout multiplies what a job pays you.
 # reach: what the rank asks for (standing, whole years at the rank below) and the
 # chance each year you qualify that the crew offers it. stress: a yearly pull.
+# cut: the higher ranks' yearly share of the crew's business, paid as dirty money
+# (amount at a city pay level of 1, with a little variation) and the heat it adds.
 ranks:
   - { payout: 1.0, stress: 1 }
   - { payout: 1.4, stress: 1.5, reach: { standing: 50, years: 1, chance: 0.6 } }
   - { payout: 2.0, stress: 2, reach: { standing: 60, years: 2, chance: 0.5 } }
-  - { payout: 3.0, stress: 2.5, reach: { standing: 70, years: 2, chance: 0.4 } }
-  - { payout: 4.5, stress: 3, reach: { standing: 80, years: 2, chance: 0.3 } }
+  - { payout: 3.0, stress: 2.5, reach: { standing: 70, years: 2, chance: 0.4 }, cut: { amount: 3000, heat: 2 } }
+  - { payout: 4.5, stress: 3, reach: { standing: 80, years: 2, chance: 0.3 }, cut: { amount: 8000, heat: 3 } }
 
 jobs:
   # Jobs queued each year as events, by rank.
@@ -58,13 +60,40 @@ standing:
   # Every year trust slips this much, and a year with no job costs more.
   slide: 3
   idleLoss: 6
-  awayLoss: 10
-  awayYears: 2
   # At or below this for this many years in a row, you are pushed out.
   lowAt: 15
   lowYears: 2
   # Where each word starts (disrespected, unproven, solid, trusted, revered).
   bands: [20, 40, 60, 80]
+
+# Moving away from your crew's city (E6a follow-up). Your rank stays where it was;
+# standing slowly fades to the floor; what the crew suspects (that you ran, that you
+# talked) grows. The crew reaches out by events; after cutLooseYears it writes you off.
+away:
+  standingLoss: 3
+  floor: 25
+  suspicion:
+    start: 10
+    perYear: 6
+    perHeat: 0.2
+    investigated: 12
+    bands: [25, 50, 75]
+  reachChance:
+    - { at: 0, x: 0.15 }
+    - { at: 40, x: 0.3 }
+    - { at: 100, x: 0.5 }
+  cutLooseYears: 8
+  # Coming back: this share of the standing you left with returns, less this share of the suspicion.
+  back: { standing: 0.9, suspicionWeight: 0.5 }
+  # A crew in the new city: ranks lost from your best, standing gained, for a record, per point of reputation over 50.
+  transfer: { rankDrop: 2, standing: 5, reputation: 0.4, record: 8 }
+  # Rejoining a crew you were in before, by how you left it.
+  rejoin:
+    left: { rankDrop: 1, standing: 5 }
+    moved: { rankDrop: 1, standing: 0 }
+    drifted: { rankDrop: 2, standing: -5 }
+    pushed: { rankDrop: 3, standing: -10 }
+    deal: { rankDrop: 3, standing: -15 }
 
 rivalry:
   settle: { at: 30, share: 0.2 }

@@ -1383,16 +1383,16 @@ describe('the teen years (T1)', () => {
 describe('crime careers (E6a)', () => {
   const read = (file: string) => readFile(path.join(dir, file), 'utf8');
 
-  it('accepts the real content: five crews, six businesses, about forty-five events, and no warnings', { timeout: 90_000 }, async () => {
+  it('accepts the real content: five crews, six businesses, about fifty-five events, and no warnings', { timeout: 90_000 }, async () => {
     const result = await compile();
     if (!result.ok) throw new Error(formatErrors(result.errors));
     expect(Object.keys(result.bundle.crews)).toHaveLength(5);
     expect(Object.keys(result.bundle.fronts)).toHaveLength(6);
-    const categories = ['crimeoffers', 'crime', 'crimehome', 'crimelaw', 'crimepast'];
+    const categories = ['crimeoffers', 'crime', 'crimeaway', 'crimehome', 'crimelaw', 'crimepast'];
     const events = Object.values(result.bundle.events).filter((e) => !e.retired && categories.includes(e.category));
     for (const city of Object.values(result.bundle.cities)) expect(Object.values(result.bundle.crews).filter((c) => c.cities.includes(city.id)).length, city.id).toBeGreaterThanOrEqual(2);
-    expect(events.length).toBeGreaterThanOrEqual(44);
-    expect(events.length).toBeLessThanOrEqual(50);
+    expect(events.length).toBeGreaterThanOrEqual(54);
+    expect(events.length).toBeLessThanOrEqual(62);
     expect(result.warnings).toEqual([]);
   });
 
@@ -1416,6 +1416,28 @@ describe('crime careers (E6a)', () => {
     const real = await read('balance/crime.yaml');
     await write('balance/crime.yaml', real.replace('memberAge: { min: 20, max: 50 }', 'memberAge: { min: 16, max: 50 }'));
     expect(await expectErrors()).toMatch(/memberAge/);
+  });
+
+  it('keeps the yearly cut to the two highest ranks, and a crew death rare, readable and avoidable', { timeout: 90_000 }, async () => {
+    const balance = await read('balance/crime.yaml');
+    await write('balance/crime.yaml', balance.replace('{ payout: 2.0, stress: 2, reach: { standing: 60, years: 2, chance: 0.5 } }', '{ payout: 2.0, stress: 2, reach: { standing: 60, years: 2, chance: 0.5 }, cut: { amount: 100, heat: 1 } }'));
+    expect(await expectErrors()).toContain('only the two highest ranks take a yearly cut');
+    await write('balance/crime.yaml', balance);
+    const cut = await read('events/any/crime/crew_cut_lieutenant.yaml');
+    await write('events/any/crime/crew_cut_lieutenant.yaml', cut.replace('    - { crime: { away: false } }\n', ''));
+    expect(await expectErrors()).toContain('must require { crime: { away: false } }');
+    await write('events/any/crime/crew_cut_lieutenant.yaml', cut);
+    const war = await read('events/any/crime/rival_war_boils_over.yaml');
+    await write('events/any/crime/rival_war_boils_over.yaml', war.replace('base: 52', 'base: 30'));
+    expect(await expectErrors()).toContain('must have a base of at least 50');
+    await write('events/any/crime/rival_war_boils_over.yaml', war.replace('    - { crime: { rivalry: { gte: 75 } } }\n', ''));
+    expect(await expectErrors()).toContain('needs a visible build-up');
+    await write('events/any/crime/rival_war_boils_over.yaml', war.replace('followUpOnly: true\n', ''));
+    expect(await expectErrors()).toContain('comes only from an event the crime step queues');
+    await write('events/any/crime/rival_war_boils_over.yaml', war);
+    const back = await read('events/any/crime/back_in_town.yaml');
+    await write('events/any/crime/back_in_town.yaml', back.replace('    - { crime: { returned: true } }\n', ''));
+    expect(await expectErrors()).toContain('so it must require { crime: { returned: true } }');
   });
 
   it('keeps the events the crime step queues followUpOnly, and jobs recorded as jobs', { timeout: 90_000 }, async () => {

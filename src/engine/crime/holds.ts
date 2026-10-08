@@ -3,8 +3,9 @@
  * an open investigation, the rival crew and who is talking to the police.
  * Every field given must hold.
  */
-import type { Compare, CrimeCondition } from '../../content/schemas';
+import type { Compare, ContentBundle, CrimeCondition } from '../../content/schemas';
 import type { LifeState } from '../types';
+import { crewsIn } from './crew';
 import { crimeYears, inCrew, isFormer, lastCrewId } from './query';
 
 function within(value: number, c: Compare): boolean {
@@ -21,7 +22,7 @@ export function jobsThisYear(state: LifeState): number {
   return state.crime.jobs.year === state.currentYear ? state.crime.jobs.count : 0;
 }
 
-export function crimeHolds(c: CrimeCondition, state: LifeState, topRank: number): boolean {
+export function crimeHolds(c: CrimeCondition, state: LifeState, topRank: number, content?: ContentBundle): boolean {
   const k = state.crime;
   if (c.member !== undefined && inCrew(state) !== c.member) return false;
   if (c.former !== undefined && isFormer(state) !== c.former) return false;
@@ -40,5 +41,10 @@ export function crimeHolds(c: CrimeCondition, state: LifeState, topRank: number)
     if (id === undefined || !c.crew.includes(id)) return false;
   }
   if (c.arrests && !within(k.totals.arrests, c.arrests)) return false;
+  if (c.away !== undefined && (k.crew?.away !== undefined) !== c.away) return false;
+  if (c.awayYears && !within(k.crew?.away ? k.awayYears : 0, c.awayYears)) return false;
+  if (c.suspicion && !within(k.crew?.away?.suspicion ?? 0, c.suspicion)) return false;
+  if (c.returned !== undefined && (k.crew?.returned === state.currentYear) !== c.returned) return false;
+  if (c.local !== undefined && (content !== undefined && crewsIn(content, state.character.cityId).length > 0) !== c.local) return false;
   return true;
 }

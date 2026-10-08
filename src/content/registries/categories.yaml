@@ -118,6 +118,13 @@ categories:
       all:
         - { age: { gte: 18 } }
         - { crime: { member: true } }
+  crimeaway:
+    label: Far from the crew
+    requires:
+      all:
+        - { age: { gte: 18 } }
+        - { crime: { member: true } }
+        - { crime: { away: true } }
   crimehome:
     label: Crime at home
     household: true

@@ -1,0 +1,23 @@
+id: crew_cut_leader
+title: What the crew owes the one who runs it
+text: >-
+  Everything the crew earns passes through you first, and what you keep of it is yours without anyone asking. The year closes, the bags are counted, and your share is set aside.
+tone: neutral
+category: crime
+rarity: common
+recurring: true
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { crime: { member: true } }
+    - { crime: { rank: { gte: 5 } } }
+    - { crime: { away: false } }
+weight: { base: 10 }
+followUpOnly: true
+autoOutcome:
+  text: >-
+    The year's share lands in your hands as cash that nobody will ever
+    write down. It is a good year to be where you are, and the attention that comes with it grows a little too.
+  effects:
+    - { type: dirtyMoney, cut: true }

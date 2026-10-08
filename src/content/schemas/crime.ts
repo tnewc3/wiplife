@@ -98,6 +98,8 @@ export const crimeBalanceSchema = z.strictObject({
         reach: z.strictObject({ standing: z.int().min(0).max(100), years: z.int().min(0).max(20), chance: probability }).optional(),
         /** Yearly pulls on you at this rank. */
         stress: z.number().min(0).max(20),
+        /** The yearly cut of the crew's business paid to this rank (dollars at a city pay level of 1) and the heat it adds. Only the top two ranks have one. */
+        cut: z.strictObject({ amount: positive, heat: z.number().min(0).max(50) }).optional(),
       }),
     )
     .length(CREW_RANKS),
@@ -134,14 +136,42 @@ export const crimeBalanceSchema = z.strictObject({
     slide: z.number().min(0).max(50),
     /** A year without a job costs this much more standing. */
     idleLoss: z.number().min(0).max(100),
-    /** Each year you live too far from the crew costs this much; the crew forgets you after `awayYears`. */
-    awayLoss: z.number().min(0).max(100),
-    awayYears: z.int().min(1).max(10),
     /** At or below this for `lowYears` years in a row, you're pushed out. */
     lowAt: z.int().min(0).max(100),
     lowYears: z.int().min(1).max(10),
     /** Words (labels.ts): where each band starts, above the lowest. */
     bands: z.array(z.int().min(1).max(100)).length(4),
+  }),
+  /** Moving away from your crew's city: what happens to your place, your standing, what the crew thinks of you, and how a new crew or the old one takes you. */
+  away: z.strictObject({
+    /** Standing lost each year away (to the floor). Your rank stays where it was. */
+    standingLoss: z.number().min(0).max(50),
+    floor: z.int().min(0).max(100),
+    suspicion: z.strictObject({
+      start: z.int().min(0).max(100),
+      perYear: z.number().min(0).max(50),
+      /** Plus this much for each point of heat over 50, and this much a year with an investigation open. */
+      perHeat: z.number().min(0).max(5),
+      investigated: z.number().min(0).max(50),
+      /** Words (labels.ts): where each band starts, above the lowest. */
+      bands: z.array(z.int().min(1).max(100)).length(3),
+    }),
+    /** Chance each year away that the crew reaches out, by how much it suspects you. */
+    reachChance: curveSchema,
+    /** The crew writes you off after this many years away (an event, never silently). */
+    cutLooseYears: z.int().min(1).max(30),
+    /** Coming back: the share of the standing you left with that returns, less this share of the suspicion. */
+    back: z.strictObject({ standing: probability, suspicionWeight: probability }),
+    /** A new crew in the city you moved to: ranks lost from the best you held, standing gained, and for each point of reputation above 50 and for a record. */
+    transfer: z.strictObject({ rankDrop: z.int().min(0).max(4), standing: z.int().min(0).max(50), reputation: z.number().min(0).max(2), record: z.int().min(0).max(30) }),
+    /** Rejoining a crew you were in before, by how you left it: ranks lost from the best you held, and standing gained (or lost). */
+    rejoin: z.strictObject({
+      left: z.strictObject({ rankDrop: z.int().min(0).max(4), standing: z.int().min(-40).max(40) }),
+      moved: z.strictObject({ rankDrop: z.int().min(0).max(4), standing: z.int().min(-40).max(40) }),
+      drifted: z.strictObject({ rankDrop: z.int().min(0).max(4), standing: z.int().min(-40).max(40) }),
+      pushed: z.strictObject({ rankDrop: z.int().min(0).max(4), standing: z.int().min(-40).max(40) }),
+      deal: z.strictObject({ rankDrop: z.int().min(0).max(4), standing: z.int().min(-40).max(40) }),
+    }),
   }),
   rivalry: z.strictObject({
     /** Each year the rival feeling drifts toward this (0–100) by this share. */
@@ -209,12 +239,14 @@ export const crimeBalanceSchema = z.strictObject({
 export type CrimeBalance = z.infer<typeof crimeBalanceSchema>;
 
 /** The events the crime step queues (registries/crime.yaml). */
-export const CRIME_TRIGGERS = ['promotion', 'pushedOut', 'investigation', 'arrest', 'rival', 'informant', 'raid', 'theft', 'laundering', 'past'] as const;
+export const CRIME_TRIGGERS = ['promotion', 'pushedOut', 'investigation', 'arrest', 'rival', 'informant', 'raid', 'theft', 'laundering', 'past', 'cut', 'away', 'awayCut', 'back'] as const;
 export type CrimeTrigger = (typeof CRIME_TRIGGERS)[number];
 
 export const crimeRegistrySchema = z.strictObject({
   /** The jobs a year can bring; each is picked by weight among those whose requirements fit (rank, standing, heat...). */
   jobs: z.array(idSchema).min(1),
+  /** The causes of death a crew life can end in (src/content/causes); the simulation counts them. */
+  deathCauses: z.array(idSchema).min(1),
   triggers: z.strictObject(
     Object.fromEntries(CRIME_TRIGGERS.map((id) => [id, z.strictObject({ events: z.array(idSchema).min(1) })])) as Record<
       CrimeTrigger,

@@ -84,6 +84,15 @@ export function giveSampleCrime(state: LifeState, def: EventDef, cast: Record<st
       if (crew.informant !== undefined) openInvestigation(state, content);
       if (want.rival === true || want.rivalry !== undefined) k.rivalry = bound(want.rivalry) ?? k.rivalry;
       if (want.jobs !== undefined) k.jobs = { year: state.currentYear, count: bound(want.jobs) ?? 1, last: 0 };
+      if (want.away === true || want.suspicion !== undefined || want.awayYears !== undefined) {
+        const elsewhere = Object.keys(content.cities).find((c) => c !== crew.cityId);
+        if (elsewhere !== undefined) {
+          state.character.cityId = elsewhere;
+          k.awayYears = Math.max(1, bound(want.awayYears) ?? 1);
+          crew.away = { since: state.currentYear - k.awayYears, standing: k.standing, suspicion: bound(want.suspicion) ?? bound(want.suspicion, false) ?? 40 };
+        }
+      }
+      if (want.returned === true) crew.returned = state.currentYear;
       if (want.former === true) {
         leaveCrew(state, 'left', content);
         k.past[k.past.length - 1]!.toYear = state.currentYear - Math.max(1, bound(want.years) ?? 2);

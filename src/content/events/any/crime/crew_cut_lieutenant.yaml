@@ -1,0 +1,23 @@
+id: crew_cut_lieutenant
+title: Your share
+text: >-
+  The lieutenants take a share before anything is counted, and you are one of them. It arrives in a plain bag, with a handshake, the way it always has.
+tone: neutral
+category: crime
+rarity: common
+recurring: true
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { crime: { member: true } }
+    - { crime: { rank: { eq: 4 } } }
+    - { crime: { away: false } }
+weight: { base: 10 }
+followUpOnly: true
+autoOutcome:
+  text: >-
+    The year's share lands in your hands as cash that nobody will ever
+    write down. It is a good year to be where you are, and the attention that comes with it grows a little too.
+  effects:
+    - { type: dirtyMoney, cut: true }

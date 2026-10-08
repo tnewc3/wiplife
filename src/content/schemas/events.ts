@@ -205,7 +205,11 @@ export interface TeenCondition {
  * your crew has a rival; informant: someone in your crew is talking to the
  * police; jobs: jobs you have done this year; years: years in the crew (or, for
  * a former member, years since you left); crew: you are in (or were in) one of
- * these crews; arrests: arrests so far in your life of crime.
+ * these crews; arrests: arrests so far in your life of crime. away: you live in
+ * another city from your crew (your rank is frozen); awayYears: years you have
+ * been away; suspicion: how much your crew suspects you ran or talked (0-100,
+ * while you are away); returned: you came back to your crew's city this year;
+ * local: a crew works in the city you live in now.
  */
 export interface CrimeCondition {
   member?: boolean;
@@ -222,6 +226,11 @@ export interface CrimeCondition {
   years?: Compare;
   crew?: string[];
   arrests?: Compare;
+  away?: boolean;
+  awayYears?: Compare;
+  suspicion?: Compare;
+  returned?: boolean;
+  local?: boolean;
 }
 
 /** Your money situation. Every field given must hold. */
@@ -699,6 +708,11 @@ export const conditionSchema: z.ZodType<Condition> = z.lazy(() =>
           years: compareSchema.optional(),
           crew: z.array(idSchema).min(1).optional(),
           arrests: compareSchema.optional(),
+          away: z.boolean().optional(),
+          awayYears: compareSchema.optional(),
+          suspicion: compareSchema.optional(),
+          returned: z.boolean().optional(),
+          local: z.boolean().optional(),
         })
         .refine(atLeastOneField, 'needs at least one field'),
     }),
@@ -1074,17 +1088,21 @@ export const effectSchema = z.discriminatedUnion('type', [
    * for the year). investigate: an investigation into you opens; close: it
    * ends. remove: the person in `role` is no longer in the crew. join may
    * bring the person in `role` (whoever brought you in) into the crew too.
+   * suspicion: what the crew you moved away from suspects of you moves by
+   * `delta`. transfer: while you are away, you leave that crew (how: moved) and
+   * join one that works where you live now, below your best rank. leave's how
+   * can also be moved.
    */
   z
     .strictObject({
       type: z.literal('crime'),
-      action: z.enum(['join', 'leave', 'heat', 'standing', 'rivalry', 'promote', 'demote', 'job', 'investigate', 'close', 'remove']),
+      action: z.enum(['join', 'leave', 'heat', 'standing', 'rivalry', 'suspicion', 'promote', 'demote', 'job', 'investigate', 'close', 'remove', 'transfer']),
       delta: z.int().min(-100).max(100).optional(),
       size: jobSizeSchema.optional(),
-      how: z.enum(['left', 'pushed', 'drifted', 'deal']).optional(),
+      how: z.enum(['left', 'pushed', 'drifted', 'deal', 'moved']).optional(),
       role: roleSchema.optional(),
     })
-    .refine((e) => (e.action === 'heat' || e.action === 'standing' || e.action === 'rivalry') === (e.delta !== undefined && e.delta !== 0), 'heat, standing and rivalry need a non-zero delta (and only they have one)')
+    .refine((e) => (e.action === 'heat' || e.action === 'standing' || e.action === 'rivalry' || e.action === 'suspicion') === (e.delta !== undefined && e.delta !== 0), 'heat, standing, rivalry and suspicion need a non-zero delta (and only they have one)')
     .refine((e) => (e.action === 'job') === (e.size !== undefined), 'job needs size (and only job has it)')
     .refine((e) => (e.action === 'leave') || e.how === undefined, 'only leave takes how')
     .refine((e) => (e.action === 'remove' ? e.role !== undefined : e.action === 'join' || e.role === undefined), 'remove needs role; join may bring a person with it; no other action has one'),
@@ -1101,8 +1119,10 @@ export const effectSchema = z.discriminatedUnion('type', [
       gain: jobSizeSchema.optional(),
       pay: jobSizeSchema.optional(),
       lose: z.number().gt(0).max(1).optional(),
+      /** Your yearly cut of the crew's business (the top two ranks), with the little heat it adds. */
+      cut: z.literal(true).optional(),
     })
-    .refine((e) => [e.gain, e.pay, e.lose].filter((v) => v !== undefined).length === 1, 'needs exactly one of gain, pay or lose'),
+    .refine((e) => [e.gain, e.pay, e.lose, e.cut].filter((v) => v !== undefined).length === 1, 'needs exactly one of gain, pay, lose or cut'),
   z.strictObject({ type: z.literal('innerConflict'), delta: z.int().min(-100).max(100) }),
   /** You discover your hidden talent, if you have one you haven't found (Stage 9). */
   z.strictObject({ type: z.literal('talent') }),

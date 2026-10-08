@@ -35,6 +35,16 @@ export function jobPayout(state: LifeState, size: JobSize, content: ContentBundl
   return wholeDollars(b.jobs.sizes[size].payout * rank.payout * payLevel(state, content) * swing);
 }
 
+/** The yearly cut a higher rank takes from the crew's business (dirty money; 0 below the ranks that have one). Draws from `rng`. */
+export function crewCut(state: LifeState, content: ContentBundle, rng: RngState): number {
+  const b = content.balance.crime;
+  const cut = b.ranks[Math.max(1, state.crime.rank) - 1]!.cut;
+  if (!cut || !state.crime.crew) return 0;
+  const swing = 1 + b.jobs.variation * (nextFloat(rng) * 2 - 1);
+  addHeat(state, cut.heat);
+  return wholeDollars(cut.amount * payLevel(state, content) * swing);
+}
+
 /** What paying out of your dirty money costs for a size (hush money, a bribe). */
 export function dirtyCost(state: LifeState, size: JobSize, content: ContentBundle): number {
   return wholeDollars(content.balance.crime.jobs.costs[size] * payLevel(state, content));

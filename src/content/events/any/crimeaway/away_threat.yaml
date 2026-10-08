@@ -1,0 +1,66 @@
+id: away_threat
+title: Word travels
+text: >-
+  The message does not come from {member.name}, but it comes through
+  {member.them}: back in the old neighborhood, people are saying you ran. That
+  you took something with you. That you have been talking to the wrong people.
+  Nobody says who started it.
+tone: dark
+category: crimeaway
+rarity: uncommon
+recurring: true
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { crime: { member: true } }
+    - { crime: { away: true } }
+    - { crime: { suspicion: { gte: 45 } } }
+weight:
+  base: 8
+  modifiers:
+    - { if: { crime: { suspicion: { gte: 70 } } }, x: 1.8 }
+followUpOnly: true
+cast:
+  member: { kind: friend, crew: yours, presence: elsewhere }
+choices:
+  - id: explain
+    label: Call and explain yourself
+    check:
+      base: 50
+      stats: [{ key: confidence, weight: 0.3 }, { crime: standing, weight: 0.3 }, { role: member, key: trust, weight: 0.2 }]
+      success:
+        text: >-
+          {member.name} listens, which is more than you expected. By the end
+          of the call there is a kind of peace between you, the kind that has conditions.
+        effects:
+          - { type: crime, action: suspicion, delta: -25 }
+          - { type: relationship, role: member, trust: 5 }
+          - { type: stat, key: stress, delta: 2 }
+      failure:
+        text: >-
+          Every word you say sounds like something a person with a secret
+          would say. {member.name} thanks you for your time.
+        effects:
+          - { type: crime, action: suspicion, delta: 10 }
+          - { type: crime, action: standing, delta: -6 }
+          - { type: stat, key: stress, delta: 8 }
+  - id: send_tribute
+    label: Send something back to the crew to show good faith
+    outcome:
+      text: >-
+        You put together what you can and send it with a note that says very
+        little. It is accepted without comment, which is the best you could hope for.
+      effects:
+        - { type: dirtyMoney, pay: small }
+        - { type: crime, action: suspicion, delta: -18 }
+        - { type: crime, action: heat, delta: 2 }
+  - id: ignore
+    label: Ignore it and hope it passes
+    outcome:
+      text: >-
+        You do not answer. The silence settles over everything, and you check
+        the street outside your door more often.
+      effects:
+        - { type: crime, action: suspicion, delta: 12 }
+        - { type: stat, key: stress, delta: 6 }

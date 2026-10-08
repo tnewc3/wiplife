@@ -38,6 +38,8 @@ export interface CrimeView {
   rivalryBand: number | null;
   investigated: boolean;
   informant: boolean;
+  /** Living far from the crew: how long, and how much the crew suspects you (a band, 0 up), or null. */
+  away: { years: number; suspicionBand: number; city: string } | null;
   rival: string | null;
   members: CrimeMemberView[];
   jobsThisYear: number;
@@ -72,6 +74,7 @@ export function getCrimeView(state: LifeState, content: ContentBundle): CrimeVie
     rivalryBand: crew?.rival ? bandOf(k.rivalry, b.rivalry.bands) : null,
     investigated: k.investigation !== undefined,
     informant: crew?.informant !== undefined,
+    away: crew?.away ? { years: k.awayYears, suspicionBand: bandOf(crew.away.suspicion, b.away.suspicion.bands), city: content.cities[crew.cityId]?.name ?? '' } : null,
     rival: crew?.rival ? crewName(content, crew.rival) : null,
     members: liveMembers(state).map(person),
     jobsThisYear: k.jobs.year === state.currentYear ? k.jobs.count : 0,

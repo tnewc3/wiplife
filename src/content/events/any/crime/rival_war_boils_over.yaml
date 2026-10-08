@@ -1,0 +1,75 @@
+id: rival_war_boils_over
+title: The war comes to your door
+text: >-
+  It has been a year of windows broken after dark, of cars set alight and
+  funerals held on both sides. {opponent.name}, who speaks for the rival crew,
+  sends word that this is where it ends, one way or the other. Everyone you
+  know says it is going to get worse.
+tone: dark
+category: crime
+rarity: rare
+recurring: true
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { crime: { member: true } }
+    - { crime: { rival: true } }
+    - { crime: { rivalry: { gte: 75 } } }
+    - { crime: { away: false } }
+weight: { base: 8 }
+followUpOnly: true
+cast:
+  opponent: { kind: acquaintance, crew: rival, presence: city, createIfMissing: true, age: { min: 22, max: 55 } }
+choices:
+  - id: escalate
+    label: Hit them harder than they hit you
+    check:
+      base: 52
+      stats: [{ key: riskTaking, weight: 0.2 }, { key: fitness, weight: 0.15 }, { key: luck, weight: 0.3 }]
+      success:
+        text: >-
+          Your answer is loud and unmistakable. The rival crew goes quiet for a
+          season, and the crew treats you the way it treats people it is afraid of.
+        effects:
+          - { type: crime, action: standing, delta: 14 }
+          - { type: crime, action: rivalry, delta: -25 }
+          - { type: crime, action: heat, delta: 12 }
+          - { type: mental, action: trauma, amount: 10 }
+      failure:
+        text: >-
+          They were waiting. By the time anyone understands what the war is, it
+          has already taken you, and the people left behind are still counting.
+        effects:
+          - { type: death, cause: crew_war_killing }
+  - id: sit_down
+    label: Ask for a sit-down to end it
+    check:
+      base: 58
+      stats: [{ key: confidence, weight: 0.25 }, { key: smarts, weight: 0.2 }]
+      success:
+        text: >-
+          Nobody trusts anybody, but everyone is tired. A truce is agreed in a
+          back room, and you walk out of it in one piece.
+        effects:
+          - { type: crime, action: rivalry, delta: -30 }
+          - { type: relationship, role: opponent, trust: 6 }
+          - { type: crime, action: standing, delta: 4 }
+      failure:
+        text: >-
+          The sit-down ends before it starts. You leave with a message and a
+          limp, and the war is no smaller than it was.
+        effects:
+          - { type: health, conditionId: broken_bone, severity: 40 }
+          - { type: crime, action: standing, delta: -6 }
+          - { type: mental, action: trauma, amount: 8 }
+  - id: lie_low
+    label: Disappear for a while
+    outcome:
+      text: >-
+        You stay where nobody knows to look. The crew thinks less of you
+        for it, and you are alive to hear them think it.
+      effects:
+        - { type: crime, action: standing, delta: -10 }
+        - { type: crime, action: rivalry, delta: -8 }
+        - { type: stat, key: stress, delta: 5 }

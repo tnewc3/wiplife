@@ -9,8 +9,8 @@ import type { ContentBundle, Effect } from '../../content/schemas';
 import { clampInt } from '../random';
 import type { RngState } from '../rng';
 import type { Id, LifeState } from '../types';
-import { demote, joinCrew, leaveCrew, promote, removeMember } from './crew';
-import { addDirty, addHeat, closeInvestigation, dirtyCost, jobPayout, loseDirty, openInvestigation, takeDirty } from './money';
+import { demote, joinCrew, leaveCrew, promote, removeMember, transferCrew } from './crew';
+import { addDirty, addHeat, closeInvestigation, crewCut, dirtyCost, jobPayout, loseDirty, openInvestigation, takeDirty } from './money';
 
 type CrimeEffect = Extract<Effect, { type: 'crime' }>;
 type DirtyEffect = Extract<Effect, { type: 'dirtyMoney' }>;
@@ -52,6 +52,12 @@ export function applyCrimeEffect(state: LifeState, effect: CrimeEffect, cast: Re
       if (crime.crew.rival) crime.rivalry = clampInt(crime.rivalry + b.rivalry.perJob, 0, 100);
       return;
     }
+    case 'suspicion':
+      if (crime.crew?.away) crime.crew.away.suspicion = clampInt(crime.crew.away.suspicion + effect.delta!, 0, 100);
+      return;
+    case 'transfer':
+      transferCrew(state, content);
+      return;
     case 'investigate':
       openInvestigation(state, content);
       return;
@@ -65,7 +71,9 @@ export function applyCrimeEffect(state: LifeState, effect: CrimeEffect, cast: Re
 }
 
 export function applyDirtyMoneyEffect(state: LifeState, effect: DirtyEffect, rng: RngState, content: ContentBundle): void {
-  if (effect.gain !== undefined) {
+  if (effect.cut === true) {
+    addDirty(state, crewCut(state, content, rng));
+  } else if (effect.gain !== undefined) {
     // (A job outside a crew pays as a first-rank job would.)
     addDirty(state, jobPayout(state, effect.gain, content, rng));
   } else if (effect.pay !== undefined) {

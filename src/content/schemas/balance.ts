@@ -582,6 +582,8 @@ export const targetsBalanceSchema = z.strictObject({
     richArrested: shareRangeSchema,
     /** Deposits flagged as a share of deposits put through a business. */
     flaggedShare: shareRangeSchema,
+    /** Of those who entered: the share whose life ended in a crew death (a job gone wrong, a war, a reprisal, a fight). Kept low. */
+    deaths: shareRangeSchema,
     /** Anyone under 18 in a crew, or holding dirty money: none, ever. */
     underAge: numberRangeSchema,
   }),
