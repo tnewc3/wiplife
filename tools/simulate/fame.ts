@@ -321,7 +321,6 @@ export class FameWatcher {
     };
     if (before.fame.active) {
       const main = mainPath(before);
-      const mainAfter = mainPath(after);
       const setting = before.fame.commitment;
       const row = r.commitment[setting];
       r.careerYears++;
