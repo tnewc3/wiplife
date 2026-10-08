@@ -1,8 +1,8 @@
 id: crossover_to_acting
 title: A part with your name on it
 text: >-
-  A casting director has a part she thinks only you can play. You have never
-  acted in front of a camera for real. She says that is part of the appeal.
+  A casting director has a part that only you can play, they say. You have never
+  acted in front of a camera for real. That, they say, is part of the appeal.
 tone: neutral
 category: famebiz
 rarity: uncommon
@@ -29,5 +29,5 @@ choices:
   - id: pass
     label: Say it is not for you
     outcome:
-      text: She understands. She gives you her card, anyway, and tells you the door doesn't close.
+      text: They understand. The card stays in your pocket anyway, and the door, you are told, doesn't close.
       effects: []

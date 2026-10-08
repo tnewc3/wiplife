@@ -47,7 +47,7 @@ choices:
     label: Stay in your seat and watch
     outcome:
       text: >-
-        You clap for everyone, including the man who plays a song about his
+        You clap for everyone, including whoever plays a song about a
         truck. It is the kind of night that makes you think, and then
         doesn't ask you to do anything about it.
       effects:

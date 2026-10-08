@@ -1,8 +1,8 @@
 id: child_star_scout
 title: A card and a phone number
 text: >-
-  A woman at the mall hands your {parent.relation} a card. She works for a
-  children's agency, she says, and she thinks you have something. She is
+  A stranger at the mall hands your {parent.relation} a card. The stranger
+  works for a children's agency, and thinks you have something, and is
   careful to say that it is entirely up to your family.
 tone: neutral
 category: fameentry

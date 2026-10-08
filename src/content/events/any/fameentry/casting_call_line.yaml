@@ -24,7 +24,7 @@ choices:
     label: Wait your turn
     outcome:
       text: >-
-        Six hours later you say four lines to one tired face. She writes
+        Six hours later you say four lines to one tired face. The face writes
         something down and says "thank you, next." A week later a call comes
         for background work, and you take it.
       effects:
