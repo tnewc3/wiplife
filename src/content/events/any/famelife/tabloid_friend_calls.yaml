@@ -3,7 +3,7 @@ title: "Is it true?"
 text: >-
   "{headline}" The phone lights up before you finish reading it. {npc.name} is
   on the line, and starts with "I'm not calling to judge," which is how you
-  know that {npc.they} {npc:are|are} a little bit.
+  know that {npc.they} {npc:is|are} a little bit.
 tone: dark
 category: famelife
 rarity: uncommon
