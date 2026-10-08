@@ -29,6 +29,7 @@ export { ACTION_PROCESS, FAMILY_ACTION_IDS, type FamilyActionId } from './family
 export { ESTATE_ACTION_IDS, type EstateActionId } from './estate';
 export { POSSESSION_ACTION_IDS, type PossessionActionId } from './possessions';
 export { TEEN_ACTION_IDS, type TeenActionId } from './teen';
+export { CRIME_ACTION_IDS, type CrimeActionId } from './crime';
 export {
   HOME_ACTION_IDS,
   isLifeActionAvailable,

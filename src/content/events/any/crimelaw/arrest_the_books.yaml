@@ -1,0 +1,64 @@
+id: arrest_the_books
+title: The paper trail
+text: >-
+  It is not a raid. A letter arrives, then another, and then two people in
+  plain clothes who want to go through the numbers with you, line by line.
+  Every transfer you thought was clean has been following you around.
+tone: dark
+category: crimelaw
+rarity: uncommon
+recurring: true
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { crime: { heat: { gte: 20 } } }
+    - { finances: { dirty: { gte: 1000 } } }
+weight: { base: 8 }
+followUpOnly: true
+choices:
+  - id: lawyer
+    label: Hand everything to a lawyer
+    check:
+      base: 50
+      stats: [{ key: smarts, weight: 0.3 }, { key: discipline, weight: 0.15 }]
+      success:
+        text: >-
+          The case is complicated and the lawyer makes it more so. What is left
+          is a fine and a stern letter.
+        effects:
+          - { type: cost, item: lawyer_fee }
+          - { type: dirtyMoney, lose: 0.4 }
+          - { type: legal, offenseId: money_laundering, outcome: fine }
+          - { type: crime, action: heat, delta: -8 }
+      failure:
+        text: >-
+          The numbers tell a story and the story is long. The court decides
+          the ending.
+        effects:
+          - { type: cost, item: lawyer_fee }
+          - { type: dirtyMoney, lose: 0.6 }
+          - { type: legal, offenseId: money_laundering, outcome: sentence }
+  - id: plead
+    label: Plead out to the lesser charge
+    outcome:
+      text: >-
+        You plead to fraud, and the rest goes away with the stroke of a
+        pen. The record will not.
+      effects:
+        - { type: dirtyMoney, lose: 0.5 }
+        - { type: legal, offenseId: fraud, outcome: sentence }
+        - { type: crime, action: heat, delta: -10 }
+  - id: deal
+    label: Trade what you know for a lighter sentence
+    visibleIf: { crime: { member: true } }
+    outcome:
+      text: >-
+        You hand them a set of names, dates and locations, and walk out into
+        a city that no longer feels like yours.
+      effects:
+        - { type: dirtyMoney, lose: 0.5 }
+        - { type: legal, offenseId: money_laundering, outcome: probation, years: 2 }
+        - { type: crime, action: leave, how: deal }
+        - { type: flag, key: testified_against_crew, value: true }
+        - { type: stat, key: stress, delta: 8 }

@@ -1,0 +1,74 @@
+id: partner_notices_the_money
+title: What I found in the closet
+text: >-
+  {partner.name} is holding a bag that is not supposed to be in the house. The
+  conversation has been coming for a long time, and neither of you has
+  rehearsed it.
+tone: dark
+category: crimehome
+rarity: uncommon
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { crime: { member: true } }
+    - { home: { partner: true } }
+    - { finances: { dirty: { gte: 1000 } } }
+    - { role: partner, kind: [partner, fiance, spouse] }
+weight:
+  base: 10
+  modifiers:
+    - { if: { memory: { role: partner, tag: knows_about_the_crew } }, x: 0.2 }
+cast:
+  partner: { support: true, presence: household }
+choices:
+  - id: truth
+    label: Tell {partner.them} the truth
+    check:
+      base: 40
+      stats: [{ role: partner, key: affection, weight: 0.4 }, { role: partner, key: trust, weight: 0.3 }]
+      success:
+        text: >-
+          It takes a night, and it is the worst conversation of your life. But
+          {partner.name} stays, on terms, with a promise you will have to keep.
+        effects:
+          - { type: relationship, role: partner, affection: -8, trust: -10 }
+          - { type: crime, action: heat, delta: -2 }
+          - { type: stat, key: stress, delta: 6 }
+          - { type: memory, role: partner, tag: knows_about_the_crew }
+      failure:
+        text: >-
+          {partner.name} listens to all of it, and then packs a bag. You
+          watch from the doorway and do not stop {partner.them}.
+        effects:
+          - { type: relationship, role: partner, affection: -25, trust: -35 }
+          - { type: stat, key: happiness, delta: -8 }
+          - { type: memory, role: partner, tag: knows_about_the_crew }
+  - id: lie
+    label: Say it's not what it looks like
+    check:
+      base: 35
+      stats: [{ key: confidence, weight: 0.3 }, { role: partner, key: trust, weight: 0.3 }]
+      success:
+        text: >-
+          You say it with a straight face, and {partner.name} lets you.
+          It is not belief so much as a decision not to look.
+        effects:
+          - { type: relationship, role: partner, trust: -6 }
+          - { type: stat, key: stress, delta: 5 }
+      failure:
+        text: >-
+          {partner.name} knows you too well. The lie does more damage than the
+          bag.
+        effects:
+          - { type: relationship, role: partner, affection: -18, trust: -28 }
+          - { type: stat, key: stress, delta: 8 }
+  - id: get_out
+    label: Promise this is the last of it
+    outcome:
+      text: >-
+        You promise to leave, and mean it, as far as you know. {partner.name}
+        holds you to it and tells you what failing will mean.
+      effects:
+        - { type: relationship, role: partner, affection: -4, trust: 2 }
+        - { type: flag, key: promised_to_leave_the_crew, value: true }

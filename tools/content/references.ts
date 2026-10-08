@@ -53,6 +53,7 @@ import { checkPeople } from './people';
 import { checkWeb } from './web';
 import { checkPossessions } from './possessions';
 import { checkTeen } from './teen';
+import { checkCrime } from './crime';
 
 const CREATION = 'balance/creation.yaml';
 const AGING = 'balance/aging.yaml';
@@ -187,6 +188,7 @@ export function checkReferences(
   errors.push(...checkWeb(bundle, fileOf, options.partialEvents === true));
   errors.push(...checkPossessions(bundle, fileOf, options.partialEvents === true));
   errors.push(...checkTeen(bundle, fileOf, options.partialEvents === true));
+  errors.push(...checkCrime(bundle, fileOf, options.partialEvents === true));
 
   return errors;
 }
@@ -450,6 +452,10 @@ function implies(required: Condition, part: Condition): boolean {
     // E2b: every field the contract names must be asked for the same way.
     return Object.entries(part.family).every(([key, value]) => JSON.stringify((required.family as Record<string, unknown>)[key]) === JSON.stringify(value));
   }
+  if ('crime' in part && 'crime' in required) {
+    // E6a: every field the contract names must be asked for the same way.
+    return Object.entries(part.crime).every(([key, value]) => JSON.stringify((required.crime as Record<string, unknown>)[key]) === JSON.stringify(value));
+  }
   if ('legal' in part && 'legal' in required) {
     return (part.legal.incarcerated === undefined || part.legal.incarcerated === required.legal.incarcerated) &&
       (part.legal.probation === undefined || part.legal.probation === required.legal.probation);
@@ -497,6 +503,9 @@ function checkEvents(bundle: ContentBundle, fileOf: (typeKey: CollectionKey, id:
     ...bundle.registries.possessions.petDied.events,
     // T1: what the teen step queues (caught, invited, clash, juvenile).
     ...Object.values(bundle.registries.teen.triggers).flatMap((r) => r.events),
+    // E6a: what the crime step queues (a year's jobs, a promotion, an arrest, a raid, the past catching up...).
+    ...bundle.registries.crime.jobs,
+    ...Object.values(bundle.registries.crime.triggers).flatMap((r) => r.events),
   ]);
 
   for (const [id, def] of Object.entries(bundle.events)) {

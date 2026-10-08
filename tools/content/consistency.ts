@@ -41,6 +41,8 @@ function changesMoney(outcome: Outcome | undefined): boolean {
   return (outcome?.effects ?? []).some(
     (e) =>
       e.type === 'money' ||
+      // E6a: dirty money gained, paid out or lost, and a bail or lawyer's fee (a cost).
+      e.type === 'dirtyMoney' ||
       e.type === 'repay' ||
       e.type === 'rentMonths' ||
       e.type === 'cost' ||

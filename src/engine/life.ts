@@ -47,6 +47,7 @@ import { ensureStructure } from './web/structure';
 import { emptyWeb } from './web/ties';
 import { emptyPossessions } from './possessions/query';
 import { emptyTeen } from './teen/query';
+import { emptyCrime } from './crime/query';
 
 export type { CreateLifeOptions, CustomLifeInput } from './creation/input';
 
@@ -150,7 +151,7 @@ export function createLife(input: CreateLifeOptions, content: ContentBundle): Li
     relationships: Object.fromEntries(family.relationships.map((r) => [r.personId, r])),
     education: { current: null, credentials: [], admission: null, left: null, applied: [], fund: 0 },
     career: { job: null, gig: false, retired: false, history: [], applied: [], openings: [] },
-    finances: { savings: 0, debts: [], lifestyle: 'comfortable', earnings: { years: 0, total: 0 }, hardshipYears: 0 },
+    finances: { savings: 0, debts: [], lifestyle: 'comfortable', earnings: { years: 0, total: 0 }, hardshipYears: 0, dirty: 0 },
     housing: { kind: 'with_parents', cityId: character.cityId, annualCost: 0, since: birthYear },
     health: { conditions: [], mental: emptyMental() },
     legal: { record: [] },
@@ -173,6 +174,7 @@ export function createLife(input: CreateLifeOptions, content: ContentBundle): Li
     web: emptyWeb(),
     possessions: emptyPossessions(),
     teen: emptyTeen(),
+    crime: emptyCrime(),
   };
   // M1: ADHD and neurodivergence are inherited in part: your parents and siblings (and grandparents) may have them, and you are likelier to if a parent does.
   for (const person of Object.values(life.people)) {
@@ -342,6 +344,7 @@ export function resolveChoice(state: LifeState, instanceId: Id, choiceId: Id, co
       }
       if (outcome) {
         const savings = draft.finances.savings;
+        const dirty = draft.finances.dirty;
         const debt = totalDebt(draft);
         const housing = draft.housing.annualCost;
         const help = outcome.effects.reduce((sum, e) => sum + (e.type === 'cost' ? familyHelp(draft, e.item, content) : 0), 0);
@@ -358,13 +361,15 @@ export function resolveChoice(state: LifeState, instanceId: Id, choiceId: Id, co
         const change = draft.finances.savings - savings;
         const debtChange = totalDebt(draft) - debt;
         const housingChange = draft.housing.annualCost - housing;
-        if (change !== 0 || debtChange !== 0 || help !== 0 || housingChange !== 0) {
+        const dirtyChange = draft.finances.dirty - dirty;
+        if (change !== 0 || debtChange !== 0 || help !== 0 || housingChange !== 0 || dirtyChange !== 0) {
           target.money = {
             change,
             balance: draft.finances.savings,
             debtChange,
             ...(help !== 0 ? { familyHelp: help } : {}),
             ...(housingChange !== 0 ? { housing: { change: housingChange, annual: draft.housing.annualCost } } : {}),
+            ...(dirtyChange !== 0 ? { dirty: { change: dirtyChange, balance: draft.finances.dirty } } : {}),
           };
         }
       }

@@ -1,0 +1,8 @@
+id: racketeering
+name: racketeering
+class: felony
+severity: 5
+outcomes: { warning: 0, fine: 1, probation: 1, jail: 6 }
+fine: { min: 20000, max: 100000 }
+probationYears: { min: 2, max: 4 }
+jailYears: { min: 3, max: 10 }

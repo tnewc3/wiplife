@@ -1,0 +1,65 @@
+id: informant_rumor
+title: Someone is talking
+text: >-
+  The police are too well informed. Places they should not know about, people
+  they should not have named. {suspect.name} has been quiet lately, and
+  quiet is not a thing {suspect.they} usually {suspect:is|are}.
+tone: dark
+category: crime
+rarity: uncommon
+recurring: true
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { crime: { member: true } }
+    - { crime: { informant: true } }
+weight: { base: 8 }
+followUpOnly: true
+cast:
+  suspect: { kind: friend, crew: informant, presence: city }
+choices:
+  - id: confront
+    label: Confront {suspect.them}
+    check:
+      base: 55
+      stats: [{ key: confidence, weight: 0.3 }, { key: smarts, weight: 0.2 }, { role: suspect, key: trust, weight: -0.2 }]
+      success:
+        text: >-
+          {suspect.name} sits very still, and then it all comes out. The crew
+          deals with it in its own way and {suspect.they} {suspect:is|are} not seen
+          again. The pressure on you eases.
+        effects:
+          - { type: crime, action: remove, role: suspect }
+          - { type: crime, action: close }
+          - { type: crime, action: heat, delta: -10 }
+          - { type: crime, action: standing, delta: 8 }
+          - { type: relationship, role: suspect, affection: -30, trust: -40 }
+      failure:
+        text: >-
+          {suspect.name} denies it, bitterly, and makes a call the moment you
+          leave. Whatever is going to happen next, it will happen faster.
+        effects:
+          - { type: crime, action: heat, delta: 12 }
+          - { type: relationship, role: suspect, affection: -12, trust: -20 }
+          - { type: stat, key: stress, delta: 6 }
+  - id: tell_the_boss
+    label: Take your suspicion to the top
+    outcome:
+      text: >-
+        It is out of your hands. Soon after, {suspect.name} is gone and the
+        crew goes very quiet for a while. You do not ask where.
+      effects:
+        - { type: crime, action: remove, role: suspect }
+        - { type: crime, action: heat, delta: -4 }
+        - { type: crime, action: standing, delta: 4 }
+        - { type: stat, key: kindness, delta: -2 }
+  - id: say_nothing
+    label: Watch and wait
+    outcome:
+      text: >-
+        You say nothing to anyone, and you stop saying anything that matters.
+        It is a lonely way to work.
+      effects:
+        - { type: crime, action: heat, delta: 4 }
+        - { type: stat, key: stress, delta: 5 }

@@ -16,6 +16,7 @@ import { eventWeight } from './events/selection';
 import { isIndependent, spend } from './finance';
 import { leaveSchool } from './education';
 import { moveInCost, moveTo, ownsHome, refreshHousingCost, supportingParent } from './housing';
+import { curveAt } from './curve';
 import { unsealedRecord } from './record';
 import { weightedPick } from './random';
 import { nextInt, type RngState } from './rng';
@@ -232,4 +233,29 @@ export function release(state: LifeState, content: ContentBundle): void {
 export function endProbation(state: LifeState, content: ContentBundle): void {
   delete state.legal.probationUntil;
   legalHistory(state, 'probationEnded', {}, content);
+}
+
+/**
+ * E6a: the chance, this year, that the police open an investigation into you:
+ * the heat on you (balance/crime.yaml police), nothing once one is open.
+ */
+export function investigationChance(state: LifeState, content: ContentBundle): number {
+  if (state.crime.investigation) return 0;
+  return Math.min(0.95, curveAt(content.balance.crime.police.investigation, state.crime.heat));
+}
+
+/**
+ * E6a: the chance, this year, that you are arrested for what you have done:
+ * the heat on you, more with an open investigation, an informant in your
+ * crew, entries on your record and probation. Nothing while you are in prison.
+ */
+export function arrestChance(state: LifeState, content: ContentBundle): number {
+  if (isIncarcerated(state)) return 0;
+  const p = content.balance.crime.police;
+  let odds = curveAt(p.arrest, state.crime.heat);
+  if (state.crime.investigation) odds *= p.investigated;
+  if (state.crime.crew?.informant !== undefined) odds *= p.informant;
+  for (let i = 0; i < Math.min(p.recordMax, unsealedRecord(state).length); i++) odds *= p.record;
+  if (onProbation(state)) odds *= p.probation;
+  return Math.min(0.95, odds);
 }

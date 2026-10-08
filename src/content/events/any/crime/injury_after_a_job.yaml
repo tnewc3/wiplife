@@ -1,0 +1,51 @@
+id: injury_after_a_job
+title: What it left you with
+text: >-
+  The work leaves its marks. Something is sore that should not be, and you
+  have been hiding it. You can't keep telling people you fell.
+tone: serious
+category: crime
+rarity: common
+recurring: true
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { crime: { member: true } }
+    - { crime: { jobs: { gte: 1 } } }
+weight: { base: 3 }
+choices:
+  - id: doctor
+    label: See a doctor and invent a story
+    check:
+      base: 60
+      stats: [{ key: smarts, weight: 0.2 }, { key: confidence, weight: 0.2 }]
+      success:
+        text: The doctor accepts the story and treats the injury. It heals the way a proper injury should.
+        effects:
+          - { type: health, conditionId: back_injury, treated: true }
+          - { type: stat, key: health, delta: 3 }
+      failure:
+        text: >-
+          The doctor asks a few too many questions and writes a lot down. It is
+          treated, and the doctor's notes are not the only thing kept.
+        effects:
+          - { type: health, conditionId: back_injury, treated: true }
+          - { type: crime, action: heat, delta: 6 }
+  - id: crew_medic
+    label: Let the crew's own person look at it
+    outcome:
+      text: >-
+        A kitchen table, a bag of supplies and no questions. It hurts more than
+        it should and heals worse, but nobody writes anything down.
+      effects:
+        - { type: health, conditionId: back_injury, severity: 15 }
+        - { type: crime, action: standing, delta: 2 }
+        - { type: stat, key: stress, delta: 2 }
+  - id: tough_it_out
+    label: Push through it
+    outcome:
+      text: You work through the pain and it settles into something you carry. Some mornings you wake up older than you are.
+      effects:
+        - { type: health, conditionId: back_injury, severity: 25 }
+        - { type: stat, key: fitness, delta: -3 }

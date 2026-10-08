@@ -7,6 +7,7 @@ import { useAppStore } from '../../../store/appStore';
 import { Button } from '../../components/Button';
 import { Card } from '../../components/Card';
 import { ConfirmSheet } from '../../components/ConfirmSheet';
+import { DirtyMoneyCard } from './DirtyMoneyCard';
 import { CUSTODY_LABELS, DEBT_LABELS, debtStatus, LEDGER_LABELS, LIFESTYLE_BLURBS, LIFESTYLE_LABELS, money, rateLabel } from '../../labels';
 
 function Row({ label, value, strong = false }: { label: string; value: string; strong?: boolean }) {
@@ -233,6 +234,7 @@ export function MoneyTab({ life }: { life: LifeState }) {
         </Card>
       )}
 
+      <DirtyMoneyCard life={life} />
       <LedgerCard life={life} />
       <CustodyCard life={life} />
       <LifestyleCard life={life} />

@@ -1,0 +1,7 @@
+id: velvet_hand
+name: the Velvet Hand
+blurb: A crew of smooth talkers and paperwork. Nobody gets hurt, they say, and they say it often.
+cities: [nyc, los_angeles, houston]
+ranks: [shill, fixer, closer, partner, ringleader]
+rivals: [marrow_street_crew, larkspur_collective]
+traits: { confidence: 12, discipline: 5, kindness: -6 }

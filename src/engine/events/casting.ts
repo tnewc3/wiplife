@@ -22,6 +22,8 @@ import { evaluate } from '../conditions';
 import { POSSESSION_ROLES } from '../../content/schemas';
 import { livingPets, vacationHomesOf, vehiclesOf, possessionById } from '../possessions/query';
 import { crowdMembers } from '../teen/query';
+import { crewDef, crewPeople } from '../crime/query';
+import { shapePerson } from '../crime/crew';
 
 function personAge(state: LifeState, person: Person): number {
   return state.currentYear - person.birthYear;
@@ -66,6 +68,9 @@ export function castCandidates(state: LifeState, spec: CastSpec, content: Conten
       } else if (spec.crowd) {
         // T1: someone from your crowd (or its rival's): a friend or classmate who is one of its members.
         if (!crowdMembers(state, spec.crowd).includes(id) || (rel.kind !== 'friend' && rel.kind !== 'classmate') || rel.status !== 'active') return [];
+      } else if (spec.crew) {
+        // E6a: someone from your crew (or the one that runs it, or who is talking to the police), or from the rival crew.
+        if (!crewPeople(state, spec.crew).includes(id) || rel.status !== 'active') return [];
       } else if (rel.kind !== spec.kind) {
         return [];
       }
@@ -264,14 +269,24 @@ export function castEvent(
     const preferHousehold = content.registries.categories.categories[def.category]?.household === true;
     const options = castCandidates(view, spec, content, preferHousehold).filter((p) => !used.has(p.id));
     const canCreate =
-      spec.createIfMissing === true && spec.kind !== undefined && (CREATABLE_KINDS as readonly string[]).includes(spec.kind);
+      spec.createIfMissing === true && spec.kind !== undefined && (CREATABLE_KINDS as readonly string[]).includes(spec.kind) && (spec.crew === undefined || (spec.crew === 'rival' && state.crime.crew !== null));
     const wantsNew = canCreate && spec.newChance !== undefined && chance(rng, spec.newChance);
     let id: Id | null = null;
     // A support or noticed role goes to the most trusted (closest) person; others to anyone who fits.
     if (options.length > 0 && !wantsNew) id = spec.support || spec.noticed ? options[0]!.id : pick(rng, options).id;
     else if (canCreate) {
       id = createPerson(state, spec, rng, content);
-      if (id) created.push(id);
+      if (id) {
+        created.push(id);
+        // E6a: someone met from the rival crew joins its people.
+        const crew = state.crime.crew;
+        const def = spec.crew === 'rival' ? crewDef(content, crew?.rival) : undefined;
+        if (crew && def) {
+          crew.rivalMembers.push(id);
+          shapePerson(state.people[id]!, def, `crew:${def.id}`);
+          state.relationships[id]!.affection = rollScore(rng, content.balance.crime.entry.rivalAffection);
+        }
+      }
     }
     if (id === null) {
       if (spec.optional) continue;
@@ -303,6 +318,7 @@ export function otherCity(state: LifeState, rng: RngState, content: ContentBundl
 /** Removes people created for a cast that was then rejected. */
 export function uncast(state: LifeState, created: readonly Id[]): void {
   for (const id of created) {
+    if (state.crime.crew) state.crime.crew.rivalMembers = state.crime.crew.rivalMembers.filter((m) => m !== id);
     delete state.people[id];
     delete state.relationships[id];
   }

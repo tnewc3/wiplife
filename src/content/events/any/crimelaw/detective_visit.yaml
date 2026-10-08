@@ -1,0 +1,54 @@
+id: detective_visit
+title: Two detectives at the door
+text: >-
+  They are polite. One of them knows your name, your address and where you
+  work. The other is writing something down. They have a few questions, and a
+  patience that suggests they have all day.
+tone: serious
+category: crimelaw
+rarity: common
+recurring: true
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { crime: { member: true } }
+    - { crime: { investigated: true } }
+weight: { base: 10 }
+followUpOnly: true
+choices:
+  - id: talk
+    label: Answer their questions, carefully
+    check:
+      base: 50
+      stats: [{ key: smarts, weight: 0.3 }, { key: confidence, weight: 0.25 }, { crime: heat, weight: -0.2 }]
+      success:
+        text: You say a lot without saying anything. They leave a card on the table and a feeling that they did not get what they came for.
+        effects:
+          - { type: crime, action: heat, delta: -6 }
+          - { type: stat, key: stress, delta: 5 }
+      failure:
+        text: >-
+          Somewhere in the third question you contradict yourself. They do not
+          comment, only write it down.
+        effects:
+          - { type: crime, action: heat, delta: 12 }
+          - { type: stat, key: stress, delta: 8 }
+  - id: lawyer
+    label: Say nothing until you have a lawyer
+    outcome:
+      text: >-
+        Their faces do not change. The lawyer you call is expensive, quick
+        and bored, and by the afternoon the visit is over.
+      effects:
+        - { type: cost, item: lawyer_fee }
+        - { type: crime, action: heat, delta: -4 }
+  - id: lean_on_crew
+    label: Warn the crew at once
+    outcome:
+      text: >-
+        You call from a phone that is not yours. The crew goes to ground for
+        a few days, and thinks better of you for it.
+      effects:
+        - { type: crime, action: standing, delta: 4 }
+        - { type: crime, action: heat, delta: -3 }

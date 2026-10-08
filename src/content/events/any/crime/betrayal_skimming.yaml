@@ -1,0 +1,72 @@
+id: betrayal_skimming
+title: The numbers don't add up
+text: >-
+  The counts are off by a little, and then by a little more. It would be easy
+  to blame the paperwork, except the only person who could be doing it is
+  {member.name}.
+tone: dark
+category: crime
+rarity: uncommon
+recurring: true
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { crime: { member: true } }
+    - { crime: { rank: { gte: 2 } } }
+weight: { base: 3 }
+cast:
+  member: { kind: friend, crew: yours, presence: city }
+choices:
+  - id: confront
+    label: Confront {member.them} privately
+    check:
+      base: 55
+      stats: [{ key: confidence, weight: 0.3 }, { role: member, key: trust, weight: 0.3 }]
+      success:
+        text: >-
+          {member.name} cracks, sort of. The money comes back and so does the
+          silence. You have a debtor now, which is its own kind of friend.
+        effects:
+          - { type: dirtyMoney, gain: small }
+          - { type: relationship, role: member, affection: -8, trust: -10 }
+          - { type: crime, action: standing, delta: 4 }
+      failure:
+        text: >-
+          {member.name} denies everything, then tells someone you made an
+          accusation with no proof. It sours the room for both of you.
+        effects:
+          - { type: relationship, role: member, affection: -14, trust: -18 }
+          - { type: crime, action: standing, delta: -6 }
+  - id: report
+    label: Take it to the people above you
+    outcome:
+      text: >-
+        You say what you found and leave it there. What happens next is
+        handled without your involvement, and {member.name} is not seen in the
+        neighbourhood again.
+      effects:
+        - { type: crime, action: remove, role: member }
+        - { type: crime, action: standing, delta: 5 }
+        - { type: stat, key: kindness, delta: -2 }
+  - id: join_in
+    label: Quietly get a piece of it
+    check:
+      base: 45
+      stats: [{ key: smarts, weight: 0.3 }, { key: luck, weight: 0.3 }]
+      success:
+        text: >-
+          You and {member.name} settle into an arrangement that neither of
+          you mention. The extra is modest and regular.
+        effects:
+          - { type: dirtyMoney, gain: small }
+          - { type: relationship, role: member, trust: 6 }
+          - { type: stat, key: discipline, delta: -2 }
+      failure:
+        text: >-
+          Someone above you counts too, and the number that is missing now has
+          two names beside it.
+        effects:
+          - { type: dirtyMoney, lose: 0.35 }
+          - { type: crime, action: standing, delta: -16 }
+          - { type: crime, action: heat, delta: 5 }

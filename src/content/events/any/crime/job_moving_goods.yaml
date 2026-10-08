@@ -1,0 +1,68 @@
+id: job_moving_goods
+title: Moving the goods
+text: >-
+  Nobody tells you where it came from. {member.name} tells you where it needs
+  to go, and who is waiting. You are the one who talks to the buyer.
+tone: dark
+category: crime
+rarity: common
+recurring: true
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { crime: { member: true } }
+    - { crime: { rank: { gte: 2 } } }
+weight: { base: 7 }
+followUpOnly: true
+cast:
+  member: { kind: friend, crew: yours, presence: city }
+choices:
+  - id: sell
+    label: Make the sale
+    check:
+      base: 58
+      stats: [{ key: confidence, weight: 0.3 }, { key: smarts, weight: 0.2 }, { crime: standing, weight: 0.2 }]
+      success:
+        text: >-
+          The buyer talks it down, you talk it back up, and everybody leaves
+          pretending to be a little bit cheated. Your cut is a good one.
+        effects:
+          - { type: dirtyMoney, gain: solid }
+          - { type: crime, action: job, size: solid }
+          - { type: relationship, role: member, trust: 3 }
+      failure:
+        text: >-
+          The buyer turns out to know somebody who knows the original owner.
+          You leave quickly with the goods you came with and a clear sense that
+          you have been seen.
+        effects:
+          - { type: crime, action: job, size: solid }
+          - { type: crime, action: heat, delta: 11 }
+          - { type: crime, action: standing, delta: -4 }
+  - id: hold_out
+    label: Hold out for a better buyer
+    check:
+      base: 38
+      stats: [{ key: smarts, weight: 0.3 }, { key: luck, weight: 0.3 }]
+      success:
+        text: >-
+          It takes longer, and it is worth it. Your cut is bigger than anyone
+          expected, and {member.name} makes a point of saying so.
+        effects:
+          - { type: dirtyMoney, gain: big }
+          - { type: crime, action: job, size: big }
+          - { type: crime, action: standing, delta: 4 }
+      failure:
+        text: >-
+          Waiting means the goods sit somewhere they should not. By the time
+          the better buyer calls, the first one has stopped answering.
+        effects:
+          - { type: crime, action: heat, delta: 9 }
+          - { type: crime, action: standing, delta: -6 }
+  - id: hand_off
+    label: Hand it off to someone else
+    outcome:
+      text: '{member.name} shrugs and does it {member.themself}. You are not asked again for a while.'
+      effects:
+        - { type: crime, action: standing, delta: -6 }

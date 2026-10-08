@@ -317,6 +317,8 @@ export function performanceAim(state: LifeState, def: JobDef, content: ContentBu
   if (talentHelpsJob(state, def.id, content)) aim += content.balance.discovery.talent.performanceBonus;
   // M1: therapy takes time out of the week, and a severe condition you ignore wears on your work.
   aim += performanceDrag(state, content);
+  // E6a: a second life in a crew takes its toll on the job you hold.
+  if (state.crime.crew) aim += content.balance.crime.life.performance;
   // E5: getting to work without a vehicle where the work needs one (or where one helps) costs you.
   aim -= missingVehiclePenalty(state, content);
   return aim;

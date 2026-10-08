@@ -2,7 +2,8 @@ import { describe, expect, it } from 'vitest';
 import { content } from '../../src/content';
 import { produce } from 'immer';
 import { lifeAtAge } from '../../src/engine/testFixtures';
-import { choiceTraits, choiceWeight } from './bot';
+import { createRng } from '../../src/engine/rng';
+import { choiceTraits, choiceWeight, personalityChoice } from './bot';
 import { consistencyTargets, formatComparison, formatReport, interactionTargets, recurringEvents, runSimulation, stage9Targets, targetResults } from './run';
 
 describe('simulation runner', () => {
@@ -86,7 +87,7 @@ describe('simulation runner', () => {
     const drive = choiceTraits(choices.find((c) => c.id === 'drive')!);
     const ride = choiceTraits(choices.find((c) => c.id === 'ride')!);
     expect(drive.illegal).toBe(true);
-    expect(ride).toEqual({ illegal: false, risky: false, vice: false, kind: false, unkind: false });
+    expect(ride).toEqual({ illegal: false, joinsCrew: false, crewJob: false, promotes: false, risky: false, vice: false, kind: false, unkind: false });
     const person = (riskTaking: number, discipline: number) =>
       produce(lifeAtAge('choices', 30), (d) => {
         Object.assign(d.character.personality, { riskTaking, discipline });
@@ -162,5 +163,30 @@ describe('interactions report (E1)', () => {
     expect(bad(many!)).toBeGreaterThan(bad(first!));
     expect(interactionTargets(spammer, content).find((t) => t.label.startsWith('neutral relationships'))!.met).toBe(true);
   });
-});
 
+  it('reports crime careers (E6a): the law-abiding player never takes a place in a crew, the criminal player does, and the report counts what it earns and what it costs', { timeout: 180_000 }, () => {
+    const careful = runSimulation(content, { lives: 40, seedPrefix: 'sim-crime', player: 'careful' });
+    expect(careful.crime.entered).toBe(0);
+    expect(careful.crime.underAge).toBe(0);
+    const criminal = runSimulation(content, { lives: 80, seedPrefix: 'sim-crime', player: 'criminal' });
+    expect(criminal.invariantFailures).toBe(0);
+    expect(criminal.crime.underAge).toBe(0);
+    expect(criminal.crime.entered).toBeGreaterThan(0);
+    expect(criminal.crime.totals.jobs).toBeGreaterThan(0);
+    expect(criminal.crime.totals.earned).toBeGreaterThan(0);
+    const text = formatReport(criminal, content);
+    expect(text).toContain('Crime careers (E6a)');
+  });
+
+  it('lets the careful player refuse every place in a crew, and the criminal player take it', () => {
+    const offer = content.events.offer_through_a_friend!;
+    const life = produce(lifeAtAge('crime-choice', 30), (d) => {
+      d.phase = 'events';
+      d.pending = [{ instanceId: 'e1', eventId: offer.id, cast: {} }];
+    });
+    const card = { instanceId: 'e1', choices: offer.choices!.map((c) => ({ id: c.id })) } as never;
+    const rng = createRng('picker');
+    for (let i = 0; i < 40; i++) expect(personalityChoice(content, 'refuse')(life, card, rng)).not.toBe('meet');
+    expect(personalityChoice(content, 'accept')(life, card, rng)).toBe('meet');
+  });
+});

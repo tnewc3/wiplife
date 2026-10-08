@@ -1,0 +1,42 @@
+id: promotion_offered
+title: A step up
+text: >-
+  Word has come down that people are pleased with you. There is a bigger
+  place in {crew}, with more of the work, more of the take, and more of the
+  risk. The question is whether you want what comes with it.
+tone: serious
+category: crime
+rarity: common
+recurring: true
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { crime: { member: true } }
+    - { crime: { rank: { lte: 4 } } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  member: { kind: friend, crew: yours, presence: city }
+choices:
+  - id: accept
+    label: Take the step up
+    outcome:
+      text: >-
+        It is a quiet ceremony, if it is one at all: a handshake and a new
+        name for what you do. You are a {rank} now, and the people who used to
+        be your equals call you that to your face.
+      effects:
+        - { type: crime, action: promote }
+        - { type: relationship, role: member, affection: 3 }
+        - { type: stat, key: stress, delta: 3 }
+        - { type: stat, key: confidence, delta: 3 }
+  - id: not_yet
+    label: Ask to wait
+    outcome:
+      text: >-
+        {member.name} passes it along. It is considered wise, or timid, and
+        the offer is not withdrawn. It is also not repeated for a while.
+      effects:
+        - { type: crime, action: standing, delta: -3 }
+        - { type: stat, key: stress, delta: -2 }

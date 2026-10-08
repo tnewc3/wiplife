@@ -1,0 +1,84 @@
+id: rival_ambush
+title: Wrong street, wrong night
+text: >-
+  It is dark and the street is shorter than you remember. {opponent.name} and
+  two of {opponent.their} people step out of a doorway, and nobody is making
+  speeches this time.
+tone: dark
+category: crime
+rarity: uncommon
+recurring: true
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { crime: { member: true } }
+    - { crime: { rival: true } }
+    - { crime: { rivalry: { gte: 40 } } }
+weight: { base: 8 }
+followUpOnly: true
+cast:
+  opponent: { kind: acquaintance, crew: rival, presence: city, createIfMissing: true, age: { min: 22, max: 50 } }
+choices:
+  - id: run
+    label: Run
+    check:
+      base: 50
+      stats: [{ key: fitness, weight: 0.35 }, { key: luck, weight: 0.3 }]
+      success:
+        text: You are faster than they expected, and angrier than they planned for. You reach a lit street with your lungs on fire and nothing broken.
+        effects:
+          - { type: stat, key: stress, delta: 6 }
+          - { type: crime, action: rivalry, delta: 6 }
+      failure:
+        text: >-
+          They catch you at the corner. By the time they leave you are on the
+          pavement, and the story is that you are fortunate to be there at all.
+        effects:
+          - { type: health, conditionId: broken_bone, severity: 45 }
+          - { type: mental, action: trauma, amount: 12 }
+          - { type: crime, action: rivalry, delta: 10 }
+          - { type: crime, action: standing, delta: -4 }
+  - id: fight
+    label: Fight back
+    check:
+      base: 30
+      stats: [{ key: fitness, weight: 0.3 }, { key: riskTaking, weight: 0.2 }, { key: luck, weight: 0.3 }]
+      success:
+        text: >-
+          Chaos, and then a sudden lull in which everyone remembers they have
+          faces. {opponent.name} backs off bleeding. The message you send is not subtle.
+        effects:
+          - { type: crime, action: standing, delta: 10 }
+          - { type: crime, action: rivalry, delta: 18 }
+          - { type: mental, action: trauma, amount: 6 }
+          - { type: health, conditionId: broken_bone, severity: 20 }
+      failure:
+        text: >-
+          It is quick and it is one-sided. You come to in an emergency room
+          with your hands wrapped, and your phone full of messages from people who all want to know whose side you
+          were on.
+        effects:
+          - { type: health, conditionId: broken_bone, severity: 55 }
+          - { type: mental, action: trauma, amount: 15 }
+          - { type: crime, action: rivalry, delta: 14 }
+          - { type: crime, action: heat, delta: 6 }
+  - id: talk
+    label: Try to talk your way out
+    check:
+      base: 35
+      stats: [{ key: confidence, weight: 0.3 }, { key: smarts, weight: 0.2 }]
+      success:
+        text: >-
+          You find the one thing {opponent.name} wants to hear and say it
+          fast. They let you leave with a warning, and an understanding that they now hold something over you.
+        effects:
+          - { type: crime, action: rivalry, delta: -6 }
+          - { type: relationship, role: opponent, trust: 5 }
+          - { type: crime, action: standing, delta: -3 }
+      failure:
+        text: Talking was the wrong choice. They take it as fear, and treat you accordingly.
+        effects:
+          - { type: health, conditionId: broken_bone, severity: 40 }
+          - { type: mental, action: trauma, amount: 10 }
+          - { type: crime, action: standing, delta: -6 }

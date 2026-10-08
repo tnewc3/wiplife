@@ -212,7 +212,7 @@ describe('archive entry', () => {
       ageAtDeath: dead.character.age,
       causeOfDeath: content.causes[dead.death!.causeId]!.text,
       unfinished: false,
-      cityId: 'chicago',
+      cityId: dead.character.cityId,
       finalNetWorth: netWorth(dead),
       finalStats: dead.character.stats,
       seed: 'archive-done',

@@ -1,0 +1,49 @@
+id: job_quiet_year
+title: Things go quiet
+text: >-
+  For a while nobody calls. {member.name} says it is the heat on the street, or
+  a slow season, or both. You can stay out of sight, or you can go looking for
+  something small to do.
+tone: neutral
+category: crime
+rarity: common
+recurring: true
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { crime: { member: true } }
+    - { crime: { heat: { gte: 15 } } }
+weight: { base: 6 }
+followUpOnly: true
+cast:
+  member: { kind: friend, crew: yours, presence: city }
+choices:
+  - id: lie_low
+    label: Lie low
+    outcome:
+      text: >-
+        You work your regular days, sleep, and make yourself boring. The
+        street forgets you, which is the whole idea.
+      effects:
+        - { type: crime, action: heat, delta: -14 }
+        - { type: stat, key: stress, delta: -3 }
+  - id: small_work
+    label: Pick up small work
+    check:
+      base: 65
+      stats: [{ key: luck, weight: 0.3 }, { crime: heat, weight: -0.2 }]
+      success:
+        text: >-
+          A couple of easy errands. The cash is not much but it is enough
+          to keep your name in people's mouths for the right reasons.
+        effects:
+          - { type: dirtyMoney, gain: petty }
+          - { type: crime, action: job, size: petty }
+      failure:
+        text: >-
+          The errands come with attention you did not need, and you end the
+          week looking over your shoulder.
+        effects:
+          - { type: crime, action: job, size: petty }
+          - { type: crime, action: heat, delta: 6 }

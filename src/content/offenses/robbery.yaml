@@ -1,0 +1,8 @@
+id: robbery
+name: robbery
+class: felony
+severity: 4
+outcomes: { warning: 0, fine: 1, probation: 3, jail: 4 }
+fine: { min: 5000, max: 25000 }
+probationYears: { min: 2, max: 3 }
+jailYears: { min: 2, max: 6 }

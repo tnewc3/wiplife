@@ -1,0 +1,52 @@
+id: crew_member_arrested
+title: A call from the station
+text: >-
+  {member.name} made a call from the station, and you are one of the
+  numbers {member.they} {member:knows|know} by heart. {member.They} {member:needs|need}
+  someone to get {member.them} out, and someone to keep quiet.
+tone: serious
+category: crime
+rarity: uncommon
+recurring: true
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { crime: { member: true } }
+weight:
+  base: 3
+  modifiers:
+    - { if: { crime: { investigated: true } }, x: 1.6 }
+cast:
+  member: { kind: friend, crew: yours, presence: city }
+choices:
+  - id: bail
+    label: Post bail
+    outcome:
+      text: >-
+        You sign what you are asked to sign, and {member.name} walks out with
+        a plastic bag of belongings and a tired look. {member.They}
+        {member:owes|owe} you now, and you both know it.
+      effects:
+        - { type: cost, item: bail }
+        - { type: relationship, role: member, affection: 8, trust: 8 }
+        - { type: crime, action: standing, delta: 5 }
+  - id: lawyer
+    label: Send the crew's lawyer and stay out of sight
+    outcome:
+      text: >-
+        The lawyer arrives within the hour and {member.name} says
+        nothing to anyone. You do not go near the building.
+      effects:
+        - { type: relationship, role: member, trust: 4 }
+        - { type: crime, action: heat, delta: -2 }
+  - id: distance
+    label: Never heard of {member.them}
+    outcome:
+      text: >-
+        You do not answer the next call or the one after. {member.name} will
+        remember exactly who answered and who did not.
+      effects:
+        - { type: relationship, role: member, affection: -14, trust: -16 }
+        - { type: crime, action: standing, delta: -6 }
+        - { type: crime, action: remove, role: member }

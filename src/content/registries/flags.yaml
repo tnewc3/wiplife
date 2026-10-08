@@ -95,3 +95,8 @@ flags:
   plans_trade: You told your parents you plan to learn a trade
   plans_work: You told your parents you plan to go straight to work
   passion_scholarship: A scholarship came out of a passion you spent years on
+  # E6a: crime careers.
+  joined_a_crew: You were in a crew
+  turned_down_a_crew: You said no to a crew that wanted you
+  promised_to_leave_the_crew: You promised someone close to you that you would leave the crew
+  testified_against_crew: You gave the police what you knew about your crew

@@ -637,6 +637,8 @@ export interface FinanceState {
   bankruptcyYear?: number;
   /** The year you last set up a debt plan. */
   debtPlanYear?: number;
+  /** E6a: dirty money, cash from crime you haven't laundered (never counted in savings, net worth or the ledger). */
+  dirty: number;
 }
 
 export interface HousingState {
@@ -867,6 +869,8 @@ export interface MoneyChange {
   debtChange: number;
   familyHelp?: number;
   housing?: { change: number; annual: number };
+  /** E6a: a change to your dirty money, with the new balance. */
+  dirty?: { change: number; balance: number };
 }
 
 export interface ScheduledEvent {
@@ -1026,6 +1030,78 @@ export interface LifeState {
   possessions: PossessionsState;
   /** T1: the teen years: your school's crowds, your focus, the license, a teen job, house rules. */
   teen: TeenState;
+  /** E6a: your crime career: the crew you are in, your rank and standing, the heat on you, and how it ended if you got out. */
+  crime: CrimeState;
+}
+
+/** E6a: the crew you are in (a definition in src/content/crews, made real for you). */
+export interface CrimeCrew {
+  defId: Id;
+  /** The city it works in (yours when you joined). */
+  cityId: Id;
+  since: number;
+  /** The people in it you know (not you): friends of yours, tied to one another. */
+  members: Id[];
+  /** The person who runs it, while you don't. */
+  leader?: Id;
+  /** The crew it is at odds with, and the people of it you have met. */
+  rival?: Id;
+  rivalMembers: Id[];
+  /** A member who is talking to the police, if one is. */
+  informant?: Id;
+}
+
+/** E6a: a crew you were in once. */
+export interface CrimePast {
+  crewId: Id;
+  fromYear: number;
+  toYear: number;
+  /** The highest rank you reached (1 to 5). */
+  topRank: number;
+  how: 'left' | 'pushed' | 'drifted' | 'deal';
+}
+
+export interface CrimeState {
+  crew: CrimeCrew | null;
+  /** Your rank in the crew (1 to 5, the crew leader); 0 without one. */
+  rank: number;
+  /** The highest rank you have held in this crew. */
+  peak: number;
+  /** The year you reached your rank. */
+  rankSince: number;
+  /** How much the crew thinks of you (0–100). */
+  standing: number;
+  /** Years in a row your standing was at the low line. */
+  lowYears: number;
+  /** Years in a row you lived too far from the crew. */
+  awayYears: number;
+  /** Police attention (0–100); it stays after you get out, and fades. */
+  heat: number;
+  /** How hot things are with the rival crew (0–100). */
+  rivalry: number;
+  /** An investigation into you, open from `since` until `until` unless refreshed or closed. */
+  investigation?: { since: number; until: number };
+  /** Jobs done in `year`, and in the year before it. */
+  jobs: { year: number; count: number; last: number };
+  /** Crews you left or lost, oldest first. */
+  past: CrimePast[];
+  /** What you launder this year, by business. */
+  laundered: { year: number; byFront: Record<Id, number> };
+  totals: {
+    jobs: number;
+    /** Dirty money jobs paid you. */
+    earned: number;
+    /** Dirty money turned into savings (after fees), and the fees paid. */
+    cleaned: number;
+    fees: number;
+    /** Dirty money lost to a flagged deposit, a raid, a theft or an arrest. */
+    lost: number;
+    /** Dirty money spent. */
+    spent: number;
+    arrests: number;
+    /** Years spent in a crew. */
+    years: number;
+  };
 }
 
 /** T1: a social group at your school (a definition in src/content/cliques, made real for one school). */

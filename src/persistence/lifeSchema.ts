@@ -370,6 +370,7 @@ const finances = z.strictObject({
   trust: z.strictObject({ balance: dollars.min(1), releaseAge: int.min(1) }).exactOptional(),
   bankruptcyYear: int.exactOptional(),
   debtPlanYear: int.exactOptional(),
+  dirty: dollars.min(0),
 });
 
 const housing = z.strictObject({
@@ -538,6 +539,34 @@ const teen = z.strictObject({
   sealed: z.literal(true).exactOptional(),
 });
 
+// E6a: a crime career.
+const crimeCrew = z.strictObject({
+  defId: id,
+  cityId: id,
+  since: int,
+  members: z.array(id),
+  leader: id.exactOptional(),
+  rival: id.exactOptional(),
+  rivalMembers: z.array(id),
+  informant: id.exactOptional(),
+});
+const crime = z.strictObject({
+  crew: crimeCrew.nullable(),
+  rank: int.min(0),
+  peak: int.min(0),
+  rankSince: int,
+  standing: score,
+  lowYears: int.min(0),
+  awayYears: int.min(0),
+  heat: score,
+  rivalry: score,
+  investigation: z.strictObject({ since: int, until: int }).exactOptional(),
+  jobs: z.strictObject({ year: int, count: int.min(0), last: int.min(0) }),
+  past: z.array(z.strictObject({ crewId: id, fromYear: int, toYear: int, topRank: int.min(1), how: z.enum(['left', 'pushed', 'drifted', 'deal']) })),
+  laundered: z.strictObject({ year: int, byFront: z.record(z.string(), dollars.min(0)) }),
+  totals: z.strictObject({ jobs: int.min(0), earned: dollars.min(0), cleaned: dollars.min(0), fees: dollars.min(0), lost: dollars.min(0), spent: dollars.min(0), arrests: int.min(0), years: int.min(0) }),
+});
+
 const settlement = z.strictObject({
   year: int,
   source: z.enum(['will', 'default']),
@@ -584,6 +613,7 @@ const moneyChange = z.strictObject({
   debtChange: int,
   familyHelp: int.min(1).exactOptional(),
   housing: z.strictObject({ change: int, annual: int.min(0) }).exactOptional(),
+  dirty: z.strictObject({ change: int, balance: int.min(0) }).exactOptional(),
 });
 
 const pendingInteraction = z.strictObject({
@@ -675,6 +705,7 @@ export const lifeStateSchema: z.ZodType<LifeState> = z.strictObject({
   web,
   possessions,
   teen,
+  crime,
 });
 
 /**

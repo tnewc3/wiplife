@@ -1,0 +1,58 @@
+id: job_warehouse_night
+title: A warehouse after dark
+text: >-
+  The plan comes from somebody else, and it is neat: a warehouse, a gap in
+  the schedule, and a list of what is worth taking. Your part is simple.
+  Simple is not the same as safe.
+tone: dark
+category: crime
+rarity: common
+recurring: true
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { crime: { member: true } }
+    - { crime: { rank: { gte: 2 } } }
+weight: { base: 7 }
+followUpOnly: true
+cast:
+  member: { kind: friend, crew: yours, presence: city }
+choices:
+  - id: go_in
+    label: Do your part
+    check:
+      base: 58
+      stats: [{ key: discipline, weight: 0.25 }, { key: fitness, weight: 0.15 }, { crime: heat, weight: -0.25 }, { key: luck, weight: 0.2 }]
+      success:
+        text: >-
+          Twenty-five quiet minutes. By morning the haul is gone and your
+          share is sitting where you can reach it.
+        effects:
+          - { type: dirtyMoney, gain: solid }
+          - { type: crime, action: job, size: solid }
+          - { type: relationship, role: member, trust: 4 }
+      failure:
+        text: >-
+          An alarm that was supposed to be dead goes off. You run, you fall, and
+          you make it out with a hurt leg and nothing else.
+        effects:
+          - { type: crime, action: job, size: solid }
+          - { type: health, conditionId: broken_bone, severity: 35 }
+          - { type: crime, action: heat, delta: 12 }
+          - { type: stat, key: stress, delta: 6 }
+  - id: bad_feeling
+    label: Say you have a bad feeling
+    outcome:
+      text: >-
+        {member.name} hears you out and calls it off, this time. It is
+        remembered, as a point either for your instincts or against your nerve.
+      effects:
+        - { type: crime, action: standing, delta: -3 }
+        - { type: crime, action: heat, delta: -3 }
+  - id: decline
+    label: Sit this one out
+    outcome:
+      text: '{member.name} finds someone else, and the job goes fine. You hear about it afterwards.'
+      effects:
+        - { type: crime, action: standing, delta: -7 }

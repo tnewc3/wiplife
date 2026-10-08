@@ -79,6 +79,8 @@ function prune(state: LifeState, view: LifeState, drifted: Map<string, number>, 
     if (!prunable(seen) || seen.status === 'ended') continue;
     // Your boss stays in your life while you work there (Stage 8).
     if (seen.kind === 'boss' && view.career.job !== null && view.people[id]?.alive) continue;
+    // E6a: so do the people in your crew while you are in it.
+    if (view.crime.crew?.members.includes(id) && view.people[id]?.alive) continue;
     const rel = drifted.has(id) ? { ...seen, affection: drifted.get(id)! } : seen;
     const person = view.people[id];
     const forgettable = rel.kind === 'acquaintance' || rel.kind === 'classmate';

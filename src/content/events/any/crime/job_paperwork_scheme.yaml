@@ -1,0 +1,57 @@
+id: job_paperwork_scheme
+title: Clean hands, dirty books
+text: >-
+  The crew has a way of making invoices appear and accounts agree. Nobody
+  gets hurt, {member.name} says, and the only weapon is a signature. They
+  need someone who can look a bank manager in the eye.
+tone: dark
+category: crime
+rarity: uncommon
+recurring: true
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { crime: { member: true } }
+    - { crime: { rank: { gte: 3 } } }
+weight: { base: 4 }
+followUpOnly: true
+cast:
+  member: { kind: friend, crew: yours, presence: city }
+choices:
+  - id: sign
+    label: Be the face of it
+    check:
+      base: 52
+      stats: [{ key: smarts, weight: 0.3 }, { key: confidence, weight: 0.25 }, { crime: heat, weight: -0.2 }]
+      success:
+        text: >-
+          The manager smiles, the signatures hold, and the books balance on
+          paper. The amount that lands is considerable.
+        effects:
+          - { type: dirtyMoney, gain: big }
+          - { type: crime, action: job, size: big }
+          - { type: crime, action: heat, delta: -2 }
+      failure:
+        text: >-
+          An auditor with nothing better to do spots a number that does not
+          fit. The letter that arrives has your name in it.
+        effects:
+          - { type: crime, action: job, size: big }
+          - { type: crime, action: heat, delta: 15 }
+          - { type: legal, offenseId: fraud, outcome: fine }
+          - { type: stat, key: stress, delta: 6 }
+  - id: advise
+    label: Stay behind the scenes
+    outcome:
+      text: A junior member takes the front seat. Your advice is the reason it works, and the reason your share is modest.
+      effects:
+        - { type: dirtyMoney, gain: small }
+        - { type: crime, action: job, size: small }
+        - { type: relationship, role: member, trust: 2 }
+  - id: decline
+    label: Say it's not your kind of crime
+    outcome:
+      text: '{member.name} laughs and then realises you meant it. There are plenty of kinds, apparently, and the crew has opinions about the choosy.'
+      effects:
+        - { type: crime, action: standing, delta: -6 }

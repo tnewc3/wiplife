@@ -24,6 +24,13 @@ function statValue(state: LifeState, stat: CheckStat, cast: Record<string, Id>, 
     return stat.family === 'custody' ? custodyCase(state, id, content) : Math.round(100 * tryChance(state, id, stat.family === 'fertilityPlanned', content));
   }
   if ('job' in stat) return state.career.job?.performance ?? 50;
+  // E6a: your standing in the crew, your rank (1 to 5, 3 is 50) or the heat on you; 50 for each without a crew.
+  if ('crime' in stat) {
+    const k = state.crime;
+    if (stat.crime === 'heat') return k.heat;
+    if (k.crew === null) return 50;
+    return stat.crime === 'standing' ? k.standing : 50 + (k.rank - 3) * 20;
+  }
   if ('role' in stat) {
     const rel = state.relationships[cast[stat.role] ?? ''];
     return rel ? rel[stat.key] : 50;

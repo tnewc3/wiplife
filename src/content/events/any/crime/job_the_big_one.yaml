@@ -1,0 +1,64 @@
+id: job_the_big_one
+title: The big one
+text: >-
+  It has been planned for months: a single night, a real prize, and a crew that
+  has been waiting to see who steps up. If it works, nobody in the city will
+  forget it. If it does not, nobody will forget that either.
+tone: dark
+category: crime
+rarity: rare
+recurring: true
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { crime: { member: true } }
+    - { crime: { rank: { gte: 4 } } }
+weight: { base: 4 }
+followUpOnly: true
+cast:
+  member: { kind: friend, crew: yours, presence: city }
+choices:
+  - id: go_in
+    label: Go in
+    check:
+      base: 45
+      stats: [{ key: smarts, weight: 0.25 }, { key: confidence, weight: 0.2 }, { key: luck, weight: 0.3 }, { crime: heat, weight: -0.3 }]
+      success:
+        text: >-
+          It goes right. Not perfectly, but right. In the morning you are
+          standing in a room full of people who look at you differently.
+        effects:
+          - { type: dirtyMoney, gain: major }
+          - { type: crime, action: job, size: major }
+          - { type: crime, action: standing, delta: 6 }
+          - { type: relationship, role: member, trust: 5 }
+      failure:
+        text: >-
+          Something goes wrong in the first five minutes, and everything after
+          that is damage control. Someone is hurt. You are among the ones who
+          get away.
+        effects:
+          - { type: crime, action: job, size: major }
+          - { type: crime, action: heat, delta: 30 }
+          - { type: health, conditionId: broken_bone, severity: 50 }
+          - { type: mental, action: trauma, amount: 15 }
+          - { type: crime, action: standing, delta: -6 }
+  - id: plan_more
+    label: Push it back and plan it again
+    outcome:
+      text: >-
+        You rewrite the plan until there is no part of it that depends on
+        luck. It takes the whole season, and the chance is gone this time.
+      effects:
+        - { type: crime, action: heat, delta: -4 }
+        - { type: stat, key: stress, delta: 3 }
+  - id: step_aside
+    label: Hand it to {member.name}
+    outcome:
+      text: >-
+        {member.name} takes the lead and the credit. If it goes well it
+        will not be your name that goes with it.
+      effects:
+        - { type: crime, action: standing, delta: -5 }
+        - { type: relationship, role: member, trust: 3 }

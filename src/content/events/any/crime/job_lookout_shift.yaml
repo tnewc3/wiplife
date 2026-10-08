@@ -1,0 +1,46 @@
+id: job_lookout_shift
+title: Eyes on the street
+text: >-
+  You get a corner, a time and a reason not to ask questions.
+  Your job is to watch a door for a few hours and call if anything changes.
+  It is the kind of work that looks like nothing, and the crew pays well
+  for nothing.
+tone: dark
+category: crime
+rarity: common
+recurring: true
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { crime: { member: true } }
+    - { crime: { rank: { lte: 3 } } }
+weight: { base: 8 }
+followUpOnly: true
+choices:
+  - id: watch
+    label: Take the shift
+    check:
+      base: 75
+      stats: [{ key: discipline, weight: 0.3 }, { crime: heat, weight: -0.2 }, { key: luck, weight: 0.2 }]
+      success:
+        text: >-
+          Nothing happens, which is exactly how it is meant to go. Someone
+          presses an envelope into your hand without meeting your eye.
+        effects:
+          - { type: dirtyMoney, gain: petty }
+          - { type: crime, action: job, size: petty }
+      failure:
+        text: >-
+          A patrol car slows, then stops, then asks what you are doing out here.
+          You say something forgettable and walk away with your heart in your throat.
+        effects:
+          - { type: crime, action: job, size: petty }
+          - { type: crime, action: heat, delta: 8 }
+          - { type: stat, key: stress, delta: 4 }
+  - id: pass
+    label: Pass it to someone else
+    outcome:
+      text: Someone else takes the corner. The crew notices who says no.
+      effects:
+        - { type: crime, action: standing, delta: -4 }

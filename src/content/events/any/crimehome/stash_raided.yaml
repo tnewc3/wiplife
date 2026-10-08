@@ -1,0 +1,52 @@
+id: stash_raided
+title: The knock
+text: >-
+  It is early, and there are too many of them. They have a warrant, a list
+  and a very good idea of where to start. Everything you own spends the
+  morning on the floor.
+tone: dark
+category: crimehome
+rarity: uncommon
+recurring: true
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { crime: { member: true } }
+    - { home: { partner: false } }
+    - { finances: { dirty: { gte: 1000 } } }
+weight: { base: 10 }
+followUpOnly: true
+choices:
+  - id: say_nothing
+    label: Say nothing and ask for a lawyer
+    check:
+      base: 50
+      stats: [{ key: discipline, weight: 0.3 }, { key: smarts, weight: 0.2 }, { crime: heat, weight: -0.2 }]
+      success:
+        text: >-
+          They take what they find and leave with less than they wanted. The
+          cash is gone for good, but nothing in the apartment links to you in
+          a way a court would like.
+        effects:
+          - { type: dirtyMoney, lose: 0.6 }
+          - { type: crime, action: heat, delta: 6 }
+          - { type: cost, item: lawyer_fee }
+      failure:
+        text: >-
+          The search finds the one thing you had forgotten about. What follows
+          is a long afternoon, and a longer set of consequences.
+        effects:
+          - { type: dirtyMoney, lose: 1 }
+          - { type: legal, offenseId: money_laundering, outcome: sentence }
+          - { type: crime, action: heat, delta: 12 }
+  - id: cooperate
+    label: Cooperate and hope it ends sooner
+    outcome:
+      text: >-
+        They are efficient and unsentimental. The cash is taken, the
+        neighbours watch, and the questions come later.
+      effects:
+        - { type: dirtyMoney, lose: 1 }
+        - { type: crime, action: heat, delta: 10 }
+        - { type: stat, key: stress, delta: 8 }

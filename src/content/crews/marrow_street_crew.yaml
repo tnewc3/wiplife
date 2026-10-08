@@ -1,0 +1,7 @@
+id: marrow_street_crew
+name: the Marrow Street Crew
+blurb: Old, patient and well connected, with a reputation for getting paid. They do not like being surprised.
+cities: [nyc, chicago, los_angeles]
+ranks: [lookout, courier, soldier, lieutenant, boss]
+rivals: [cinder_row_outfit, velvet_hand]
+traits: { riskTaking: 10, discipline: 8, kindness: -8 }

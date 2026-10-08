@@ -1,0 +1,66 @@
+id: offer_way_out_of_debt
+title: A way to make it disappear
+text: >-
+  The collectors have your number memorised. Then {fixer.name}, who knows
+  more about your situation than {fixer.they} should, offers a different
+  kind of arrangement: some work for a crew that settles what you owe, and
+  then some.
+tone: dark
+category: crimeoffers
+rarity: uncommon
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { crime: { member: false } }
+    - { finances: { debt: { gte: 4000 } } }
+weight:
+  base: 0.8
+  modifiers:
+    - { if: { finances: { missed: { gte: 2 } } }, x: 1.8 }
+    - { if: { finances: { collections: true } }, x: 1.5 }
+    - { if: { trait: riskTaking, gt: 55 }, x: 1.3 }
+cast:
+  fixer: { kind: acquaintance, presence: city, createIfMissing: true, newChance: 0.6, ageOffset: { min: -6, max: 15 } }
+choices:
+  - id: take_it
+    label: Take the deal
+    outcome:
+      text: >-
+        The calls stop within the week. Your balance drops by more than half,
+        and you spend a long time wondering what you just agreed to. {crew}
+        now knows exactly where you live.
+      effects:
+        - { type: debt, action: forgive, share: 0.6 }
+        - { type: crime, action: join }
+        - { type: flag, key: joined_a_crew, value: true }
+        - { type: stat, key: stress, delta: -3 }
+  - id: haggle
+    label: Ask for better terms
+    check:
+      base: 40
+      stats: [{ key: confidence, weight: 0.4 }, { key: smarts, weight: 0.2 }]
+      success:
+        text: >-
+          {fixer.name} laughs, and then agrees to more than you expected. What
+          you owe nearly vanishes, and you are part of {crew} by the end of
+          the conversation.
+        effects:
+          - { type: debt, action: forgive, share: 0.85 }
+          - { type: crime, action: join }
+          - { type: flag, key: joined_a_crew, value: true }
+      failure:
+        text: >-
+          {fixer.name} stops smiling. The offer is gone, and so is any chance
+          that you will be asked again.
+        effects:
+          - { type: relationship, role: fixer, affection: -10 }
+          - { type: stat, key: stress, delta: 5 }
+  - id: refuse
+    label: Say no and climb out the slow way
+    outcome:
+      text: >-
+        {fixer.name} says the door stays open. You keep climbing out the long way, slowly, and you keep closing that door.
+      effects:
+        - { type: flag, key: turned_down_a_crew, value: true }
+        - { type: stat, key: discipline, delta: 3 }

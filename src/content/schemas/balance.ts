@@ -555,6 +555,36 @@ export const targetsBalanceSchema = z.strictObject({
     /** Romance involving anyone under 18: none, ever. */
     romanceUnder18: numberRangeSchema,
   }),
+  /**
+   * E6a: crime careers (tools/simulate/crime.ts). The law-abiding careful
+   * player must never enter a crew; the criminal player (one who says yes to
+   * every offer and plays the crew's life) is judged on how far it gets, what
+   * it earns and what it costs, and on crime not paying better than a legal
+   * career without matching risk.
+   */
+  crime: z.strictObject({
+    /** Lives of the careful player that entered a crew: none. */
+    carefulEntered: numberRangeSchema,
+    /** Of the criminal player's lives that reach 30: the share that entered a crew. */
+    entered: shareRangeSchema,
+    /** Of those who entered: the share who reached the third rank, and the share who ran a crew. */
+    reachedRank3: shareRangeSchema,
+    leaders: shareRangeSchema,
+    /** Of those who entered: the share arrested at least once, the share who went to prison, the share who got out (left, were pushed out or made a deal). */
+    arrested: shareRangeSchema,
+    prison: shareRangeSchema,
+    gotOut: shareRangeSchema,
+    /** The mean heat on a crew member (0–100). */
+    meanHeat: numberRangeSchema,
+    /** Crew lives' median net worth at death (savings, assets and cleaned money, less debt) as a multiple of the careful player's median. */
+    netWorthRatio: numberRangeSchema,
+    /** Of crew lives in the top quarter of dirty earnings, the share arrested at least once (high pay carries matching risk). */
+    richArrested: shareRangeSchema,
+    /** Deposits flagged as a share of deposits put through a business. */
+    flaggedShare: shareRangeSchema,
+    /** Anyone under 18 in a crew, or holding dirty money: none, ever. */
+    underAge: numberRangeSchema,
+  }),
   coverage: z.strictObject({
     /** At least this many events (not retired). */
     minEvents: z.int().min(1),

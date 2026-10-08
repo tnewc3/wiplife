@@ -1,0 +1,69 @@
+id: job_tribute_season
+title: When it all comes in
+text: >-
+  Once a year, everything the crew has earned flows upward to the person who
+  runs it. This year that is you, and everyone in the room is watching how
+  you carve it up.
+tone: serious
+category: crime
+rarity: common
+recurring: true
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { crime: { member: true } }
+    - { crime: { leader: true } }
+weight: { base: 8 }
+followUpOnly: true
+cast:
+  member: { kind: friend, crew: yours, presence: city }
+choices:
+  - id: generous
+    label: Share it out generously
+    outcome:
+      text: >-
+        You keep the smaller half and send the rest down. The crew sees it
+        and the loyalty is real, even if the haul is thinner.
+      effects:
+        - { type: dirtyMoney, gain: solid }
+        - { type: crime, action: job, size: solid }
+        - { type: crime, action: standing, delta: 8 }
+        - { type: relationship, role: member, affection: 6, trust: 4 }
+  - id: fair
+    label: Take what the rank takes
+    check:
+      base: 70
+      stats: [{ key: discipline, weight: 0.2 }, { key: luck, weight: 0.2 }]
+      success:
+        text: Nobody complains, because nobody is surprised. The haul is large and quiet.
+        effects:
+          - { type: dirtyMoney, gain: big }
+          - { type: crime, action: job, size: big }
+      failure:
+        text: A deal downstream goes bad and takes a chunk of the haul with it. You make up the difference from your own end.
+        effects:
+          - { type: dirtyMoney, gain: solid }
+          - { type: crime, action: job, size: solid }
+          - { type: crime, action: heat, delta: 8 }
+  - id: greedy
+    label: Keep the biggest share
+    check:
+      base: 55
+      stats: [{ key: confidence, weight: 0.25 }, { crime: standing, weight: 0.25 }]
+      success:
+        text: Nobody says a word to your face. The haul is the biggest it has ever been, and the quiet around you is a different quiet.
+        effects:
+          - { type: dirtyMoney, gain: major }
+          - { type: crime, action: job, size: major }
+          - { type: crime, action: standing, delta: -4 }
+          - { type: relationship, role: member, affection: -4, trust: -4 }
+      failure:
+        text: >-
+          Someone talks. By the end of the week the people below you have
+          counted the numbers themselves. There is a lot to repair.
+        effects:
+          - { type: dirtyMoney, gain: big }
+          - { type: crime, action: job, size: big }
+          - { type: crime, action: standing, delta: -14 }
+          - { type: relationship, role: member, affection: -10, trust: -12 }

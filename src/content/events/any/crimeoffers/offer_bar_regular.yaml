@@ -1,0 +1,52 @@
+id: offer_bar_regular
+title: Someone at the end of the bar
+text: >-
+  {stranger.name} has been watching how you handle a bad night. After the
+  third refill {stranger.they} {stranger:slides|slide} over and says that
+  people who keep their heads are hard to find, and that some friends of
+  {stranger.theirs} are always looking.
+tone: dark
+category: crimeoffers
+rarity: rare
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { age: { gte: 21 } }
+    - { crime: { member: false } }
+    - { trait: riskTaking, gt: 45 }
+once: true
+weight:
+  base: 0.3
+  modifiers:
+    - { if: { trait: riskTaking, gt: 70 }, x: 2 }
+    - { if: { trait: confidence, gt: 65 }, x: 1.4 }
+cast:
+  stranger: { kind: acquaintance, presence: city, createIfMissing: true, newChance: 0.8, ageOffset: { min: -5, max: 20 } }
+choices:
+  - id: hear_it
+    label: Hear the offer
+    check:
+      base: 55
+      stats: [{ key: confidence, weight: 0.3 }, { key: riskTaking, weight: 0.3 }]
+      success:
+        text: >-
+          You say the right amount and no more. By the weekend you are
+          standing in a room with the people {stranger.name} meant, and you
+          are one of them.
+        effects:
+          - { type: crime, action: join }
+          - { type: flag, key: joined_a_crew, value: true }
+      failure:
+        text: >-
+          Something in how you answer tells {stranger.name} you are not what
+          {stranger.they} {stranger:was|were} looking for. The conversation
+          ends politely, which is somehow worse.
+        effects:
+          - { type: stat, key: confidence, delta: -2 }
+  - id: laugh_it_off
+    label: Laugh it off and finish your drink
+    outcome:
+      text: '{stranger.name} lifts a glass and does not push. You leave a little faster than you meant to.'
+      effects:
+        - { type: flag, key: turned_down_a_crew, value: true }

@@ -82,6 +82,12 @@ legal:
     underage_drinking: { min: 0.02, max: 0.25 }
     theft: { min: 0.08, max: 0.25 }
     vandalism: { min: 0.03, max: 0.12 }
+    # E6a: only a crime career brings these; the careful player never has one.
+    burglary: { min: 0, max: 0.01 }
+    extortion: { min: 0, max: 0.01 }
+    money_laundering: { min: 0, max: 0.01 }
+    racketeering: { min: 0, max: 0.01 }
+    robbery: { min: 0, max: 0.01 }
   # Lives that ever go to prison.
   jailed: { min: 0.05, max: 0.15 }
 
@@ -242,6 +248,25 @@ teen:
   focusMoney: { min: 1.3, max: 8 }
   focusTalent: { min: 0.08, max: 0.6 }
   romanceUnder18: { min: 0, max: 0 }
+
+# E6a: crime careers. Set from 10,000 criminal-player lives (four runs of 2,500 lives): about four lives in ten reach 30
+# having entered a crew (the criminal player says yes to every offer), a third of those reach the third rank and
+# about one in ten runs a crew; a little over four in ten are arrested and about one in five goes to prison, and
+# nearly nine in ten of the top quarter by dirty money earned are arrested. Crew lives end up about as wealthy as
+# the same player's lives that never entered a crew (they keep a legal job, and pay the cuts, fines and years inside).
+crime:
+  carefulEntered: { min: 0, max: 0 }
+  entered: { min: 0.25, max: 0.6 }
+  reachedRank3: { min: 0.15, max: 0.5 }
+  leaders: { min: 0.03, max: 0.2 }
+  arrested: { min: 0.3, max: 0.7 }
+  prison: { min: 0.1, max: 0.4 }
+  gotOut: { min: 0.5, max: 0.9 }
+  meanHeat: { min: 15, max: 40 }
+  netWorthRatio: { min: 0.5, max: 1.2 }
+  richArrested: { min: 0.6, max: 1 }
+  flaggedShare: { min: 0.03, max: 0.15 }
+  underAge: { min: 0, max: 0 }
 
 coverage:
   minEvents: 300

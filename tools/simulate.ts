@@ -17,6 +17,7 @@ import { continueAsHeirs, startChains } from './simulate/generations';
 import { formatHeirs, heirTargets } from './simulate/heirs';
 import { measureFullCircle } from './simulate/people';
 import { formatComparison, formatReport, interactionTargets, runSimulation, type SimulatedPlayer } from './simulate/run';
+import { crimeTargets, formatCrime } from './simulate/crime';
 
 // The compiled JSON directly: src/content/index.ts relies on Vite's import.meta.env.
 const content = compiled as ContentBundle;
@@ -44,9 +45,9 @@ setAutoFreeze(false);
 
 const started = Date.now();
 const players: SimulatedPlayer[] =
-  values.player === 'all' ? ['careful', 'careless', 'spammer'] : values.player === 'both' ? ['careful', 'careless'] : [values.player as SimulatedPlayer];
-if (!players.every((p) => p === 'careful' || p === 'careless' || p === 'spammer')) {
-  console.error('--player must be all, both, careful, careless or spammer');
+  values.player === 'all' ? ['careful', 'careless', 'spammer', 'criminal'] : values.player === 'both' ? ['careful', 'careless'] : [values.player as SimulatedPlayer];
+if (!players.every((p) => p === 'careful' || p === 'careless' || p === 'spammer' || p === 'criminal')) {
+  console.error('--player must be all, both, careful, careless, spammer or criminal');
   process.exit(2);
 }
 const generations = Number(values.generations);
@@ -93,6 +94,10 @@ for (const report of reports.slice(1)) {
       ...formatInteractions(report.interactions, content),
       '  targets (the spammer and the careless player are reported, not tuned for):',
       ...interactionTargets(report, content).map((r) => `  ${r.met ? 'MET    ' : 'NOT MET'} ${r.label}: ${r.value} (target ${r.goal})`),
+      // E6a: every other player's crime career, too (the criminal player's is judged).
+      ...formatCrime(report.crime, content),
+      '  targets (src/content/balance/targets.yaml):',
+      ...crimeTargets(report, content).map((r) => `  ${r.met ? 'MET    ' : 'NOT MET'} ${r.label}: ${r.value} (target ${r.goal})`),
     ].join('\n'),
   );
 }

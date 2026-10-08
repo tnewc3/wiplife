@@ -1,0 +1,49 @@
+id: pushed_out
+title: The phone stops ringing
+text: >-
+  Nobody calls. When you show up, conversations end early. {member.name}
+  finally tells you what the others are too polite to: you are not pulling your
+  weight, and the crew is thinking about cutting you loose.
+tone: dark
+category: crime
+rarity: common
+recurring: true
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { crime: { member: true } }
+    - { crime: { standing: { lte: 20 } } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  member: { kind: friend, crew: yours, presence: city }
+choices:
+  - id: prove_it
+    label: Ask for one more chance
+    check:
+      base: 40
+      stats: [{ key: confidence, weight: 0.3 }, { role: member, key: affection, weight: 0.3 }]
+      success:
+        text: >-
+          {member.name} vouches for you, with conditions. You get your place
+          back on a probation of sorts.
+        effects:
+          - { type: crime, action: standing, delta: 22 }
+          - { type: relationship, role: member, trust: 3 }
+      failure:
+        text: >-
+          Nobody says no. They simply stop saying anything, and by the end of
+          the week you are out.
+        effects:
+          - { type: crime, action: leave, how: pushed }
+          - { type: relationship, role: member, affection: -6 }
+  - id: walk_away
+    label: Walk away before they do it
+    outcome:
+      text: >-
+        You tell {member.name} you are done, and it takes the sting out of
+        the moment. The world gets bigger and emptier at once.
+      effects:
+        - { type: crime, action: leave, how: left }
+        - { type: stat, key: happiness, delta: 2 }

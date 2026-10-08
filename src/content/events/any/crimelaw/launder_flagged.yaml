@@ -1,0 +1,45 @@
+id: launder_flagged
+title: A call from the owner
+text: >-
+  The owner of the business you used phones before you have had coffee.
+  The bank has asked questions about deposits, and there is a visitor from a
+  government office with a clipboard and a lot of patience.
+tone: dark
+category: crimelaw
+rarity: common
+recurring: true
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { crime: { heat: { gte: 10 } } }
+weight: { base: 10 }
+followUpOnly: true
+choices:
+  - id: cooperate
+    label: Say you will help however you can
+    outcome:
+      text: >-
+        You answer what is asked, in the voice of someone with nothing to hide.
+        The owner is furious but unharmed, and the visitor takes notes.
+      effects:
+        - { type: crime, action: heat, delta: 4 }
+        - { type: stat, key: stress, delta: 4 }
+  - id: lawyer
+    label: Hire a lawyer to deal with it
+    outcome:
+      text: >-
+        The lawyer reads, listens and says what you can say. The visit ends
+        in a few polite sentences.
+      effects:
+        - { type: cost, item: lawyer_fee }
+        - { type: crime, action: heat, delta: -4 }
+  - id: cut_it_off
+    label: Cut every tie with the business
+    outcome:
+      text: >-
+        You never go near it again, and neither does anything of yours. The
+        owner is relieved. You have fewer places to take what you earn.
+      effects:
+        - { type: crime, action: heat, delta: -6 }
+        - { type: stat, key: discipline, delta: 1 }
