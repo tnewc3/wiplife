@@ -32,6 +32,15 @@ export function enrollFan(state: LifeState, id: Id, type: FameFanType, content: 
   if (type === 'super') rel.trust = clampInt(rel.trust + 10, 0, 100);
   rel.memories.push({ tag: MEMORY[type], year: state.currentYear });
   f.people[type].push(id);
+  // Events can bring fans too, so the cap holds here: the longest-known fan of this kind drifts out of the list (never the one stalking you).
+  const max = content.balance.fame.people.max;
+  while (f.people[type].length > max) {
+    const gone = f.people[type].find((other) => other !== id && other !== f.stalker?.id);
+    if (gone === undefined) break;
+    f.people[type] = f.people[type].filter((other) => other !== gone);
+    const tags = state.people[gone]?.tags;
+    if (tags) state.people[gone]!.tags = tags.filter((t) => t !== `fan:${type}`);
+  }
   const year = state.currentYear;
   const same = f.people[type].filter((other) => other !== id && inCircle(state, other) && canTie(state, id, other));
   if (type !== 'critic' && same.length > 0) addTie(state.web, id, pick(rng, same), 'friends', type === 'super' ? 62 : 55, 'context', year);

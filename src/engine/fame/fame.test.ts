@@ -35,7 +35,7 @@ import {
   signContract,
   endContract,
 } from './ladder';
-import { exposableSecrets, exposeSecret, orderStalker, reportStalker, spawnFan, startStalker, stalkerChance, tabloidChance } from './people';
+import { endStalker, exposableSecrets, exposeSecret, orderStalker, reportStalker, spawnFan, startStalker, stalkerChance, tabloidChance } from './people';
 import { breakCeiling, hasTalentFor, rungDef, sizeAmount } from './query';
 import { fameIncome, queueFameEvent, runFame, sceneCost } from './step';
 import { aptitude, bandFor, planBlock, rollWork } from './work';
@@ -382,6 +382,33 @@ describe('fans, haters and critics', () => {
     expect(life.web.ties[[s1, s2].sort().join('|')]).toBeDefined();
     expect(life.fame.people).toEqual({ super: [s1, s2], hater: [h], critic: [c] });
     ok(life);
+  });
+
+  it('does not estrange a fan you went on to marry when the stalking ends', () => {
+    const base = apply(star('stalker-spouse', 30, 'music', 'music'), (d) => {
+      d.rng = createRng('stalker-spouse');
+      spawnFan(d, 'super', content, d.rng);
+    });
+    const fan = base.fame.people.super[0]!;
+    const ended = apply(base, (d) => {
+      startStalker(d, fan, content);
+      d.relationships[fan]!.kind = 'spouse';
+      endStalker(d);
+    });
+    expect(ended.relationships[fan]!.status).toBe('active');
+    expect(ended.fame.stalker).toBeNull();
+  });
+
+  it('keep to the cap however fans arrive: the longest-known drifts out, and never the stalker', () => {
+    const max = content.balance.fame.people.max;
+    const made = apply(star('fan-cap', 30, 'music', 'music'), (d) => {
+      d.rng = createRng('fan-cap');
+      for (let i = 0; i < max + 4; i++) spawnFan(d, 'hater', content, d.rng);
+    });
+    expect(made.fame.people.hater.length).toBeLessThanOrEqual(max);
+    const dropped = Object.values(made.people).filter((p) => p.tags.includes('fan:hater') && !made.fame.people.hater.includes(p.id));
+    expect(dropped).toEqual([]);
+    ok(made);
   });
 
   it('are the age of a young star, and fans are never romantic', () => {

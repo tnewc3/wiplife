@@ -11,6 +11,7 @@ import { createPerson } from '../events/casting';
 import { curveAt } from '../curve';
 import { defaultLife } from '../lives/model';
 import { clampInt } from '../random';
+import { isPartnerKind } from '../relationships';
 import { chance, pick, type RngState } from '../rng';
 import { kindDef, reactionDelta } from '../web/knowledge';
 import { inCircle } from '../web/ties';
@@ -105,7 +106,8 @@ export function endStalker(state: LifeState): void {
   const s = state.fame.stalker;
   if (!s) return;
   const rel = state.relationships[s.id];
-  if (rel && rel.status === 'active') rel.status = 'estranged';
+  // A fan you went on to love is not estranged by this.
+  if (rel && rel.status === 'active' && !isPartnerKind(rel.kind)) rel.status = 'estranged';
   state.fame.stalker = null;
 }
 
