@@ -1,0 +1,44 @@
+id: health_scare_on_the_road
+title: Your body said no
+text: >-
+  It happens in the middle of a long week: a dizzy spell on a staircase, a
+  heart racing in a hotel bed, a doctor's face carefully calm. The word they
+  use is "exhaustion," and the way they say it is not casual.
+tone: serious
+category: fame
+rarity: uncommon
+recurring: true
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { fame: { active: true } }
+    - { fame: { commitment: [all] } }
+    - { fame: { burnout: { gte: 40 } } }
+weight: { base: 3 }
+cooldownYears: 3
+choices:
+  - id: rest
+    label: Follow the doctor's orders
+    outcome:
+      text: Three weeks of rest, fluids and boredom. You feel stupid for needing it, and better for having it.
+      effects:
+        - { type: stat, key: health, delta: 4 }
+        - { type: fame, action: burnout, delta: -15 }
+        - { type: fame, action: commitment, value: steady }
+  - id: carry_on
+    label: Take the pills and finish the run
+    check:
+      base: 45
+      stats: [{ key: health, weight: 0.3 }, { key: fitness, weight: 0.2 }]
+      success:
+        text: You finish the last dates on adrenaline and discipline, and sleep for two days afterwards.
+        effects:
+          - { type: stat, key: health, delta: -3 }
+          - { type: fame, action: fame, delta: 1 }
+      failure:
+        text: You collapse in a hallway halfway through the tour. The rest of the dates are cancelled, and a hospital bed is a very bright place.
+        effects:
+          - { type: stat, key: health, delta: -10 }
+          - { type: fame, action: mood, delta: -4 }
+          - { type: fame, action: burnout, delta: 10 }

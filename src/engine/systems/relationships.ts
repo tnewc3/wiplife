@@ -12,6 +12,7 @@
 import { isDraft, original } from 'immer';
 import type { ContentBundle } from '../../content/schemas';
 import { curveAt } from '../curve';
+import { fanIds } from '../fame/query';
 import { clampInt } from '../random';
 import { isFamilyKind, isRomanticKind } from '../relationships';
 import { chance } from '../rng';
@@ -81,6 +82,8 @@ function prune(state: LifeState, view: LifeState, drifted: Map<string, number>, 
     if (seen.kind === 'boss' && view.career.job !== null && view.people[id]?.alive) continue;
     // E6a: so do the people in your crew while you are in it.
     if (view.crime.crew?.members.includes(id) && view.people[id]?.alive) continue;
+    // E6b: and the fans who came to you through your work (superfans, haters, critics) while you are in the business.
+    if (view.fame.active && fanIds(view).has(id)) continue;
     const rel = drifted.has(id) ? { ...seen, affection: drifted.get(id)! } : seen;
     const person = view.people[id];
     const forgettable = rel.kind === 'acquaintance' || rel.kind === 'classmate';

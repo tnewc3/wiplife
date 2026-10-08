@@ -1,0 +1,60 @@
+id: superfan_stage_door
+title: At the stage door
+text: >-
+  {fan.name} is waiting by the stage door, with a gift in a paper bag and
+  a look that says {fan.they} {fan:has|have} been rehearsing this for a long time.
+  Behind {fan.them}, a few other people are waiting too.
+tone: light
+category: famefans
+rarity: common
+recurring: true
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 14 } }
+    - { fame: { active: true } }
+    - { fame: { rung: { gte: 2 } } }
+    - { fame: { stalker: false } }
+weight: { base: 9 }
+followUpOnly: true
+cast:
+  fan: { kind: acquaintance, fan: super, presence: city, createIfMissing: true }
+choices:
+  - id: stop
+    label: Stop, sign things and talk
+    outcome:
+      text: >-
+        You are late for dinner, and it is worth it. {fan.name} tells you the
+        year they first heard your name, and you tell them about the year
+        you almost quit.
+      effects:
+        - { type: memory, role: fan, tag: answered_their_letter }
+        - { type: relationship, role: fan, affection: 5 }
+        - { type: fame, action: mood, delta: 4 }
+        - { type: fame, action: fans, delta: 2 }
+  - id: wave
+    label: Wave and keep walking
+    outcome:
+      text: You smile and do not slow. {fan.name} watches the car go until it turns the corner.
+      effects:
+        - { type: memory, role: fan, tag: turned_them_away }
+        - { type: relationship, role: fan, affection: -3 }
+  - id: remember
+    label: Tell {fan.them} you still have the letter
+    visibleIf: { memory: { role: fan, tag: answered_their_letter } }
+    outcome:
+      text: >-
+        {fan.name} goes pink to the ears. "You kept it?" You did. The two of you
+        talk for a long time about the sentence in the third paragraph.
+      effects:
+        - { type: relationship, role: fan, affection: 5 }
+        - { type: fame, action: mood, delta: 3 }
+  - id: make_amends
+    label: Apologise for walking past {fan.them} last time
+    visibleIf: { memory: { role: fan, tag: turned_them_away } }
+    outcome:
+      text: >-
+        "It's fine," says {fan.name}, in the voice of someone for whom it was
+        not entirely fine. The apology lands, and the next sentence is easier.
+      effects:
+        - { type: relationship, role: fan, affection: 4 }

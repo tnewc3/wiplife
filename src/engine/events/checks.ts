@@ -31,6 +31,27 @@ function statValue(state: LifeState, stat: CheckStat, cast: Record<string, Id>, 
     if (k.crew === null) return 50;
     return stat.crime === 'standing' ? k.standing : 50 + (k.rank - 3) * 20;
   }
+  // E6b: your craft, the quality of your latest work, your fame, public image, fan mood, or your place on the ladder (0–100).
+  if ('fame' in stat) {
+    const f = state.fame;
+    const main = f.main === null ? undefined : f.paths[f.main];
+    switch (stat.fame) {
+      case 'craft':
+        return main?.craft ?? 0;
+      case 'quality':
+        return f.projects.at(-1)?.quality ?? 50;
+      case 'fame':
+        return main?.fame ?? 0;
+      case 'image':
+        return f.image;
+      case 'mood':
+        return f.mood;
+      case 'rung': {
+        const ladder = f.main === null ? undefined : content?.famePaths[f.main]?.rungs.length;
+        return main && ladder && ladder > 1 ? Math.round(((main.rung - 1) / (ladder - 1)) * 100) : 0;
+      }
+    }
+  }
   if ('role' in stat) {
     const rel = state.relationships[cast[stat.role] ?? ''];
     return rel ? rel[stat.key] : 50;

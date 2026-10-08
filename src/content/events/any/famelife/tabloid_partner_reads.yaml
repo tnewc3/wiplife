@@ -1,0 +1,64 @@
+id: tabloid_partner_reads
+title: Front page
+text: >-
+  It is on the front of every paper at the shop at the end of the street:
+  "{headline}" {npc.name} reads it standing up, in the doorway, with {npc.their}
+  coat still on. {npc.They} {npc:looks|look} up. It is not what you wanted
+  {npc.them} to find out this way, and {npc.they} {npc:says|say} so.
+tone: dark
+category: famelife
+rarity: uncommon
+recurring: true
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { fame: { active: true } }
+    - { fame: { tabloid: true } }
+    - { role: npc, alive: true, kind: [partner, fiance, spouse], heard: { secret: true } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  npc: { support: true, presence: anywhere }
+choices:
+  - id: tell_all
+    label: Sit down and tell {npc.them} all of it
+    check:
+      base: 45
+      stats: [{ role: npc, key: trust, weight: 0.3 }, { role: npc, key: affection, weight: 0.2 }, { key: kindness, weight: 0.1 }]
+      success:
+        text: >-
+          It is a long night. {npc.name} asks for every detail and gets them.
+          By the morning, you are both exhausted, and not finished, but still
+          in the same room.
+        effects:
+          - { type: knowledge, role: npc, action: confirm }
+          - { type: relationship, role: npc, affection: 3, trust: 5 }
+          - { type: stat, key: stress, delta: -2 }
+      failure:
+        text: >-
+          Every sentence makes it worse. {npc.name} leaves at midnight without
+          saying where {npc.they} {npc:is|are} going, and you sit up until the
+          grey comes in at the window.
+        effects:
+          - { type: knowledge, role: npc, action: confirm }
+          - { type: relationship, role: npc, affection: -8, trust: -10 }
+          - { type: stat, key: stress, delta: 6 }
+  - id: deny
+    label: Tell {npc.them} the papers have it wrong
+    outcome:
+      text: >-
+        {npc.name} watches you, and wants to believe you, and you both know it.
+        You've gained a few days, and put a crack under what comes after.
+      effects:
+        - { type: relationship, role: npc, trust: -6 }
+        - { type: stat, key: stress, delta: 4 }
+  - id: statement
+    label: Put out a statement with your team
+    outcome:
+      text: >-
+        The statement is careful and clean. {npc.name} reads it twice and says
+        it sounds like someone else wrote it, which is true.
+      effects:
+        - { type: fame, action: image, delta: 2 }
+        - { type: relationship, role: npc, trust: -3 }

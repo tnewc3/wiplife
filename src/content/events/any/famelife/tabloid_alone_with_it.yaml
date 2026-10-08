@@ -1,0 +1,56 @@
+id: tabloid_alone_with_it
+title: Everyone has seen it
+text: >-
+  "{headline}" You see it on a screen in a waiting room, then on another in
+  a cafe, then in the face of a stranger who recognises you and looks away too
+  quickly. {npc.name} has seen it too, and has not yet said anything.
+tone: dark
+category: famelife
+rarity: uncommon
+recurring: true
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { fame: { active: true } }
+    - { fame: { tabloid: true } }
+    - { role: npc, alive: true, heard: { secret: true } }
+weight: { base: 8 }
+followUpOnly: true
+cast:
+  npc: { support: true, presence: anywhere }
+choices:
+  - id: lawyer
+    label: Call a lawyer
+    outcome:
+      text: >-
+        The lawyer is brisk. The paper is within its rights, mostly, and a
+        letter gets one false line corrected. It does not make the rest less
+        true.
+      effects:
+        - { type: cost, item: lawyer_fee }
+        - { type: fame, action: image, delta: 1 }
+  - id: lean_in
+    label: Say it yourself, in your own words
+    check:
+      base: 45
+      stats: [{ key: confidence, weight: 0.25 }, { fame: image, weight: 0.2 }, { fame: mood, weight: 0.15 }]
+      success:
+        text: You put it out plainly, on your own terms. Some people leave, but more than you feared stay, and a few come closer.
+        effects:
+          - { type: fame, action: image, delta: 4 }
+          - { type: fame, action: mood, delta: 4 }
+          - { type: knowledge, role: npc, action: confirm }
+      failure:
+        text: It lands badly. The wrong phrase becomes the headline, and your explanation becomes a second scandal.
+        effects:
+          - { type: fame, action: image, delta: -6 }
+          - { type: fame, action: mood, delta: -4 }
+          - { type: knowledge, role: npc, action: confirm }
+  - id: hide
+    label: Stay indoors until it passes
+    outcome:
+      text: Three days, a locked door, and the curtains drawn. By Thursday there's a new story. Yours is still true.
+      effects:
+        - { type: stat, key: stress, delta: 4 }
+        - { type: fame, action: mood, delta: -2 }

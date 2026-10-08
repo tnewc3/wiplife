@@ -1,0 +1,46 @@
+id: comeback_offer
+title: Time away, and then a call
+text: >-
+  You have not put anything out in a long while. Out of nowhere, someone
+  who still remembers you offers a way back: a small room, a modest slot and a
+  chance to show that the name still means something.
+tone: neutral
+category: fame
+rarity: uncommon
+recurring: true
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { fame: { active: true } }
+    - { fame: { faded: true } }
+    - { fame: { gap: { gte: 2 } } }
+weight: { base: 10 }
+followUpOnly: true
+choices:
+  - id: take_it
+    label: Take the slot and give it everything
+    check:
+      base: 55
+      stats: [{ fame: craft, weight: 0.25 }, { fame: image, weight: 0.2 }, { key: discipline, weight: 0.1 }]
+      success:
+        text: >-
+          The room is half full at the start and full at the end. People who
+          had not seen you in years stand up before you finish the last piece.
+        effects:
+          - { type: fame, action: comeback }
+          - { type: fame, action: mood, delta: 8 }
+          - { type: famePay, gain: small }
+      failure:
+        text: >-
+          Out of practice and out of luck, you are fine, and fine is not what
+          anyone came for. They are kind about it, which is worse.
+        effects:
+          - { type: fame, action: comeback }
+          - { type: stat, key: confidence, delta: -4 }
+  - id: decline
+    label: Say no, and mean it
+    outcome:
+      text: You have your reasons. You write them down so that you do not forget they were good ones.
+      effects:
+        - { type: stat, key: stress, delta: -2 }

@@ -1,0 +1,39 @@
+id: writing_sent_out
+title: A reader who means it
+text: >-
+  A teacher at the library reads something of yours and says, without
+  looking up, that it should not stay in a drawer. {teacher.They}
+  {teacher:gives|give} you the address of a magazine that takes new work, and
+  a name to put on the envelope.
+tone: neutral
+category: fameentry
+rarity: uncommon
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 12 } }
+    - { fame: { active: false } }
+    - { fame: { retired: false } }
+    - { discovery: { talent: found } }
+weight:
+  base: 0.6
+cast:
+  teacher: { kind: acquaintance, presence: city, createIfMissing: true, age: { min: 28, max: 70 } }
+choices:
+  - id: send
+    label: Send it
+    outcome:
+      text: >-
+        Six weeks of waiting, and then a printed slip with a sentence of
+        encouragement on it. It is not an acceptance. It is the most you have
+        ever wanted a slip of paper.
+      effects:
+        - { type: fame, action: enter, path: arts, route: submit }
+        - { type: relationship, role: teacher, affection: 4 }
+  - id: keep
+    label: Keep it in the drawer
+    outcome:
+      text: >-
+        The drawer is a safe place. You take the pages out some nights and
+        read them over, and put them back.
+      effects: []

@@ -1,0 +1,37 @@
+id: fans_devoted_rally
+title: They showed up
+text: >-
+  Something goes wrong in your life, publicly, and your fans don't leave.
+  They write, they post, they turn up outside with signs. It is more
+  love than a person can quite take in at once.
+tone: light
+category: famefans
+rarity: uncommon
+recurring: true
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { fame: { active: true } }
+    - { fame: { mood: { gte: 75 } } }
+    - { fame: { fans: { gte: 500 } } }
+weight: { base: 2 }
+cooldownYears: 4
+choices:
+  - id: show_them
+    label: Go outside and thank them
+    outcome:
+      text: >-
+        You stand in the street in your slippers and thank the people who
+        stood in the rain for you. It's not a speech, and it is the best one
+        you have ever made.
+      effects:
+        - { type: fame, action: mood, delta: 4 }
+        - { type: stat, key: happiness, delta: 6 }
+        - { type: fame, action: image, delta: 3 }
+  - id: private
+    label: Stay private, and let the support carry you
+    outcome:
+      text: The cards, letters and posts pile up. You read them on the bad nights, and they get you through.
+      effects:
+        - { type: stat, key: happiness, delta: 5 }
+        - { type: stat, key: stress, delta: -4 }

@@ -1,0 +1,44 @@
+id: sponsor_deal
+title: A brand wants your face
+text: >-
+  A company that makes something you might actually use has sent an offer.
+  They want your name on their packaging for a year. The deal is generous,
+  and the product is fine, and you can see exactly how it will look.
+tone: neutral
+category: fame
+rarity: common
+recurring: true
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { fame: { active: true } }
+    - { fame: { rung: { gte: 3 } } }
+    - { fame: { image: { gte: 40 } } }
+weight:
+  base: 0.9
+  modifiers:
+    - { if: { fame: { path: [social] } }, x: 2 }
+    - { if: { fame: { image: { gte: 65 } } }, x: 1.5 }
+cooldownYears: 3
+choices:
+  - id: take_it
+    label: Take the deal
+    outcome:
+      text: The shoot takes a day and a half. Most of it is waiting, and the part you are on camera for goes well enough. The cheque clears on time.
+      effects:
+        - { type: famePay, gain: big }
+        - { type: fame, action: image, delta: -2 }
+  - id: choosy
+    label: Take a smaller deal with a brand you like
+    outcome:
+      text: They are small and slightly odd, and the work is yours to design. It pays less, and fans like it more.
+      effects:
+        - { type: famePay, gain: solid }
+        - { type: fame, action: image, delta: 3 }
+  - id: refuse
+    label: Say no to all of it
+    outcome:
+      text: You send a polite note. Your agent doesn't, quite, hide a sigh.
+      effects:
+        - { type: fame, action: image, delta: 1 }

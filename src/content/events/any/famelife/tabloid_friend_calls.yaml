@@ -1,0 +1,52 @@
+id: tabloid_friend_calls
+title: "Is it true?"
+text: >-
+  "{headline}" The phone lights up before you finish reading it. {npc.name} is
+  on the line, and starts with "I'm not calling to judge," which is how you
+  know that {npc.they} {npc:are|are} a little bit.
+tone: dark
+category: famelife
+rarity: uncommon
+recurring: true
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { fame: { active: true } }
+    - { fame: { tabloid: true } }
+    - { role: npc, alive: true, kind: [friend, sibling, parent, stepparent, grandparent, relative], heard: { secret: true } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  npc: { support: true, presence: anywhere }
+choices:
+  - id: own_it
+    label: Own it plainly
+    check:
+      base: 50
+      stats: [{ role: npc, key: affection, weight: 0.3 }, { role: npc, key: trust, weight: 0.2 }, { key: confidence, weight: 0.15 }]
+      success:
+        text: "It is true, and you say so. {npc.name} is quiet for a moment, and then says \"thank you for telling me yourself,\" in a tone that settles something."
+        effects:
+          - { type: knowledge, role: npc, action: confirm }
+          - { type: relationship, role: npc, affection: 4, trust: 5 }
+          - { type: fame, action: image, delta: 2 }
+      failure:
+        text: Your words come out stiff and half-prepared. {npc.name} says "ok," three times, and rings off.
+        effects:
+          - { type: knowledge, role: npc, action: confirm }
+          - { type: relationship, role: npc, affection: -5, trust: -6 }
+  - id: set_straight
+    label: Tell {npc.them} the real story
+    outcome:
+      text: The real version is less simple than the one in the paper. {npc.name} listens to all of it and says "that's different."
+      effects:
+        - { type: knowledge, role: npc, action: correct }
+        - { type: relationship, role: npc, trust: 3 }
+  - id: no_comment
+    label: Say you can't talk about it
+    outcome:
+      text: A long silence. "Ok," says {npc.name}. "I'm here if you want to."
+      effects:
+        - { type: relationship, role: npc, trust: -2 }
+        - { type: stat, key: stress, delta: 3 }

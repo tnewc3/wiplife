@@ -1,0 +1,37 @@
+id: studio_corner
+title: A corner with a window
+text: >-
+  {neighbor.name} has a spare corner in a shared studio, with a window, a stool
+  and a rent that does not seem like much until you do the sums. The group
+  show is in six weeks.
+tone: neutral
+category: fameentry
+rarity: uncommon
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 14 } }
+    - { fame: { active: false } }
+    - { fame: { retired: false } }
+    - { discovery: { talent: found } }
+weight:
+  base: 0.5
+cast:
+  neighbor: { kind: acquaintance, presence: city, createIfMissing: true, age: { min: 22, max: 70 } }
+choices:
+  - id: take_it
+    label: Take the corner
+    outcome:
+      text: >-
+        You spend more evenings there than at home. The group show is crowded
+        with friends and one stranger who stands in front of your piece for a
+        very long time.
+      effects:
+        - { type: fame, action: enter, path: arts, route: studio }
+        - { type: money, delta: -600 }
+        - { type: relationship, role: neighbor, affection: 3 }
+  - id: decline
+    label: Say you will think about it
+    outcome:
+      text: You think about it for the rest of the year, and the corner is taken by someone else by spring.
+      effects: []

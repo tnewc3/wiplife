@@ -1,0 +1,64 @@
+id: school_talent_show
+title: The talent show
+text: >-
+  The sign-up sheet for the school talent show has been on the wall for two
+  weeks. People you know have written their names on it. Your {parent.relation}
+  {parent:asks|ask} if you are going to.
+tone: light
+category: fameentry
+rarity: uncommon
+lifeStages: [child, teen]
+requires:
+  all:
+    - { age: { gte: 10 } }
+    - { age: { lte: 17 } }
+    - { fame: { active: false } }
+    - { fame: { retired: false } }
+    - { education: { program: [elementary, middle, high] } }
+weight:
+  base: 0.5
+  modifiers:
+    - { if: { discovery: { talent: found } }, x: 2.2 }
+    - { if: { trait: confidence, gt: 60 }, x: 1.5 }
+cast:
+  parent: { kind: parent, presence: household }
+choices:
+  - id: sing
+    label: Sign up to sing
+    check:
+      base: 52
+      stats: [{ key: confidence, weight: 0.3 }, { key: discipline, weight: 0.15 }]
+      success:
+        text: >-
+          The gym goes quiet when you start, and loud when you finish. Your
+          {parent.relation} is crying a little and pretending not to. A music
+          teacher you barely know finds you afterwards and says you should keep
+          going.
+        effects:
+          - { type: fame, action: enter, path: music, route: talent_show }
+          - { type: stat, key: happiness, delta: 6 }
+          - { type: relationship, role: parent, affection: 4 }
+      failure:
+        text: >-
+          Your voice cracks on the high note and the whole gym hears it. You
+          finish anyway. It is the worst and bravest thing you have done, and
+          two kids clap for a long time.
+        effects:
+          - { type: fame, action: enter, path: music, route: talent_show }
+          - { type: stat, key: confidence, delta: -2 }
+  - id: act
+    label: Sign up to do a scene
+    outcome:
+      text: >-
+        You and a friend do three minutes of a play you found in the library.
+        Somebody laughs where you meant them to. That is a feeling you want
+        to have again.
+      effects:
+        - { type: fame, action: enter, path: acting, route: community_theatre }
+        - { type: stat, key: happiness, delta: 4 }
+  - id: skip
+    label: Skip it
+    outcome:
+      text: You watch from the back and clap with everyone else. Nobody asks you again.
+      effects:
+        - { type: stat, key: confidence, delta: -1 }

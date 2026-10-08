@@ -1,0 +1,36 @@
+id: release_crowd
+title: Not a critics' favorite
+text: >-
+  {project} is selling and people are enjoying it, and a certain kind of
+  writer is enjoying disliking it. A critic writes {review} A fan writes
+  {fanLine}
+tone: neutral
+category: fame
+rarity: uncommon
+recurring: true
+lifeStages: [child, teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { fame: { active: true } }
+    - { fame: { last: [crowd] } }
+weight: { base: 10 }
+followUpOnly: true
+choices:
+  - id: ignore_critics
+    label: Ignore them, and enjoy the crowd
+    outcome:
+      text: The crowd is warm and loud and has no use for subtlety. You take it, and find it easier than you expected to leave the rest.
+      effects:
+        - { type: fame, action: mood, delta: 5 }
+        - { type: fame, action: fans, delta: 7 }
+        - { type: fame, action: image, delta: -2 }
+  - id: prove_them_wrong
+    label: Aim the next one higher
+    outcome:
+      text: >-
+        You decide to make something even the people who dismissed you cannot
+        argue with. It will take years, and it gives the work a direction.
+      effects:
+        - { type: fame, action: craft, delta: 3 }
+        - { type: stat, key: stress, delta: 3 }
+        - { type: fame, action: burnout, delta: 3 }

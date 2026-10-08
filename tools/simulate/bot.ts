@@ -482,6 +482,8 @@ export interface ChoiceTraits {
   promotes: boolean;
   /** E6a: some outcome takes you into a crew in the city you moved to (a crime transfer effect). */
   transfers: boolean;
+  /** E6b: some outcome starts a career, signs a deal or an agent, goes back to work or crosses over (a fame effect). */
+  fameStep: boolean;
   /** It rolls a chance check (and isn't illegal). */
   risky: boolean;
   /** Some outcome feeds a vice (raises vice). */
@@ -506,6 +508,7 @@ export function choiceTraits(choice: ChoiceDef): ChoiceTraits {
       crewJob: effects.some((e) => e.type === 'crime' && e.action === 'job'),
       promotes: effects.some((e) => e.type === 'crime' && e.action === 'promote'),
       transfers: effects.some((e) => e.type === 'crime' && e.action === 'transfer'),
+      fameStep: effects.some((e) => e.type === 'fame' && (e.action === 'enter' || e.action === 'contract' || e.action === 'agent' || e.action === 'comeback' || e.action === 'cross')),
       risky: !illegal && choice.check !== undefined,
       vice: effects.some((e) => e.type === 'stat' && e.key === 'vice' && e.delta > 0),
       kind: affection > 0,
@@ -549,8 +552,11 @@ export function choiceWeight(life: LifeState, traits: ChoiceTraits): number {
 /** How much more likely the criminal player is to take a choice that is a job for the crew, or a step up in it, than its other choices. */
 const CREW_JOB_EAGERNESS = 4;
 
+/** How much more likely the star player is to take a choice that starts or builds a career than its other choices. */
+const FAME_EAGERNESS = 5;
+
 /** The careful player's choice on a card, by personality (drawing from `rng`). */
-export function personalityChoice(content: ContentBundle, crime: 'refuse' | 'accept' = 'refuse'): ChoicePicker {
+export function personalityChoice(content: ContentBundle, crime: 'refuse' | 'accept' = 'refuse', fame: 'neutral' | 'seek' = 'neutral'): ChoicePicker {
   return (life, card, rng) => {
     const def = content.events[life.pending.find((p) => p.instanceId === card.instanceId)?.eventId ?? ''];
     const traitsOf = (id: string) => {
@@ -565,7 +571,9 @@ export function personalityChoice(content: ContentBundle, crime: 'refuse' | 'acc
       const traits = traitsOf(c.id);
       // The criminal player does the crew's work when it is asked: that is what being in a crew is.
       const eager = crime === 'accept' && (traits?.crewJob === true || traits?.promotes === true || traits?.transfers === true) ? CREW_JOB_EAGERNESS : 1;
-      return [c.id, (traits ? choiceWeight(life, traits) : 1) * eager] as const;
+      // E6b: the star player takes the chance to start or build a career.
+      const starry = fame === 'seek' && traits?.fameStep === true ? FAME_EAGERNESS : 1;
+      return [c.id, (traits ? choiceWeight(life, traits) : 1) * eager * starry] as const;
     });
     return weightedPick(rng, options);
   };

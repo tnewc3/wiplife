@@ -1,0 +1,46 @@
+id: press_bad_interview
+title: A question you didn't expect
+text: >-
+  The interview is going well until it is not. The journalist, with a smile,
+  asks the one thing you have been avoiding saying out loud. The recorder is on
+  the table. Your publicist is shaking her head.
+tone: dark
+category: fame
+rarity: common
+recurring: true
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { fame: { active: true } }
+    - { fame: { released: true } }
+weight: { base: 9 }
+followUpOnly: true
+choices:
+  - id: honest
+    label: Answer it honestly
+    check:
+      base: 50
+      stats: [{ key: confidence, weight: 0.25 }, { key: kindness, weight: 0.1 }, { fame: image, weight: 0.15 }]
+      success:
+        text: The room is quiet for a second, and then the journalist puts down the pen. It becomes the quote everyone repeats, in a good way.
+        effects:
+          - { type: fame, action: image, delta: 5 }
+          - { type: fame, action: fans, delta: 4 }
+      failure:
+        text: You mean it, and it comes out sounding like something else. By evening the clipped version is everywhere.
+        effects:
+          - { type: fame, action: image, delta: -6 }
+          - { type: fame, action: mood, delta: -3 }
+  - id: deflect
+    label: Deflect with a joke
+    outcome:
+      text: It works, mostly. The journalist smiles in a way that suggests the next piece will be harder.
+      effects:
+        - { type: stat, key: stress, delta: 2 }
+  - id: end_it
+    label: End the interview
+    outcome:
+      text: You stand, shake hands and go. It is a controlled exit, and the story is that you left.
+      effects:
+        - { type: fame, action: image, delta: -3 }
+        - { type: stat, key: confidence, delta: 1 }

@@ -66,6 +66,8 @@ import { emptyMentalReport, formatMental, mentalTargets, MentalWatcher, type Men
 import { choosePetInteractions, choosePossessionActions, emptyPossessionsReport, formatPossessions, possessionsTargets, PossessionsWatcher, rollPossessionProfile, type PossessionsReport } from './possessions';
 import { emptyWebReport, formatWeb, webTargets, WebWatcher, type WebReport } from './web';
 import { chooseCrimeActions, CrimeWatcher, crimeTargets, emptyCrimeReport, formatCrime, type CrimeReport } from './crime';
+import { chooseFameActions, emptyFameReport, FameWatcher, fameTargets, formatFame, rollStarProfile, type FameReport } from './fame';
+import { peakRung } from '../../src/engine/fame/query';
 import { chooseTeenActions, emptyTeenReport, formatTeen, rollTeenProfile, teenTargets, TeenWatcher, type TeenReport } from './teen';
 import { YEAR_PIPELINE } from '../../src/engine/pipeline';
 import { chooseFamilyActions, chooseParentingPlans, emptyFamilyReport, FamilyWatcher, formatFamily, familyTargets, rollFamilyProfile, type FamilyReport } from './family';
@@ -100,7 +102,7 @@ export interface SimulationOptions {
   starts?: readonly LifeState[];
 }
 
-export type SimulatedPlayer = 'careful' | 'careless' | 'spammer' | 'criminal';
+export type SimulatedPlayer = 'careful' | 'careless' | 'spammer' | 'criminal' | 'star';
 
 export interface StageYears {
   years: number;
@@ -148,6 +150,8 @@ export interface SimulationReport {
   teen: TeenReport;
   /** E6a: crime careers, measured. */
   crime: CrimeReport;
+  /** E6b: fame in arts and media, measured. */
+  fame: FameReport;
 }
 
 /** C1: the consistency pass, measured. */
@@ -762,6 +766,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
   };
   const carefulChoice = personalityChoice(content, 'refuse');
   const criminalChoice = personalityChoice(content, 'accept');
+  const starChoice = personalityChoice(content, 'refuse', 'seek');
   const offenseRows = new Map(Object.keys(content.offenses).sort().map((id) => [id, { id, lives: 0 }]));
   const discovery: DiscoveryReport = {
     kinds: Object.fromEntries(DISCOVERY_KINDS.map((k) => [k, { latent: 0, surfaced: 0, accepted: 0, resurfaced: 0, heldBack: 0 }])) as DiscoveryReport['kinds'],
@@ -776,7 +781,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
 
   const recurring = recurringEvents(content);
   // E6a: the criminal player lives as the careful one does (family, interactions), and also in a crew.
-  const behaves: InteractionPlayer = playerKind === 'criminal' ? 'careful' : playerKind;
+  const behaves: InteractionPlayer = playerKind === 'criminal' || playerKind === 'star' ? 'careful' : playerKind;
   const interactions = emptyInteractionReport(behaves, content);
   const family = emptyFamilyReport();
   const people = emptyPeopleReport();
@@ -785,6 +790,8 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
   const possessions = emptyPossessionsReport(content);
   const teen = emptyTeenReport(content);
   const crime = emptyCrimeReport(playerKind, content);
+  const fame = emptyFameReport(playerKind, content);
+  const famousAtTarget: number[] = [];
   const peopleTimer = new PipelineTimer(people);
   const timedSteps = peopleTimer.steps(YEAR_PIPELINE);
   // Found out: the follow-ups only this system schedules (affair_discovered also answers an older chain, so it counts only for an unfaithful life).
@@ -805,6 +812,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
       violations += failures.filter((f) => f.startsWith('consistency:')).length;
       possessions.invariantFailures += failures.filter((f) => /possession|\bpet\b|vehicle|car loan|vacation|renovation|insurance|upkeep/i.test(f)).length;
       crime.invariantFailures += failures.filter((f) => /crime|crew|dirty/i.test(f)).length;
+      fame.invariantFailures += failures.filter((f) => /^fame|fame\./i.test(f)).length;
       teen.invariantFailures += failures.filter((f) => /crowd|teen|license|learner|house rule|rule |romance|couple with someone under|under 18|is under \d+ and|they are under|you are under/i.test(f)).length;
       for (const f of failures) if (failureMessages.length < maxMessages) failureMessages.push(`${seed} age ${life.character.age}: ${f}`);
     };
@@ -823,6 +831,9 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
     const familyWatcher = new FamilyWatcher(family, familyProfile, behaves === 'careful');
     const crimeWatcher = new CrimeWatcher(crime, content);
     const crimeRng = createRng(`${seed}:crime`);
+    const fameWatcher = new FameWatcher(fame, content);
+    const fameRng = createRng(`${seed}:fame`);
+    const starProfile = rollStarProfile(fameRng);
     const peopleWatcher = new PeopleWatcher(people, content);
     const webWatcher = new WebWatcher(web, content);
     const mentalWatcher = new MentalWatcher(mental, content);
@@ -849,7 +860,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
       const eventId = l.pending.find((p) => p.instanceId === card.instanceId)?.eventId ?? '';
       // Starting an adoption, IVF cycle or surrogacy: the player came here to begin.
       const starts = [...content.registries.family.adoption.start, ...content.registries.family.ivf.start, ...content.registries.family.surrogacy.start];
-      const id = starts.includes(eventId) ? card.choices[0]!.id : careless ? pick(rng, card.choices).id : playerKind === 'criminal' ? criminalChoice(l, card, rng) : carefulChoice(l, card, rng);
+      const id = starts.includes(eventId) ? card.choices[0]!.id : careless ? pick(rng, card.choices).id : playerKind === 'criminal' ? criminalChoice(l, card, rng) : playerKind === 'star' ? starChoice(l, card, rng) : carefulChoice(l, card, rng);
       if (illegal.size > 0) {
         legal.illegalChoices.offered++;
         if (illegal.has(id)) legal.illegalChoices.taken++;
@@ -953,6 +964,14 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
           if (actionId === 'launder_money') crimeWatcher.laundered(beforeAction, life, params.frontId!);
         }
       }
+      // ...and on a career in arts and media (E6b): the star player goes after one and lines up a project every year...
+      if (playerKind === 'star') {
+        for (const [actionId, params] of chooseFameActions(life, content, fameRng, starProfile)) {
+          if (!isLifeActionAvailable(life, actionId, params, content)) continue;
+          life = takeLifeAction(life, actionId, params);
+          money.actionsTaken[actionId]++;
+        }
+      }
       // ...and on their mind (M1)...
       for (const [actionId, params] of careless ? [] : chooseMentalActions(life, content, mentalRng, mentalProfile)) {
         if (!isLifeActionAvailable(life, actionId, params, content)) continue;
@@ -1033,6 +1052,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
       webWatcher.observe(yearBefore, life);
       mentalWatcher.observe(yearBefore, life);
       crimeWatcher.observe(yearBefore, life);
+      fameWatcher.observe(yearBefore, life);
       possessionsWatcher.observe(yearBefore, life, content);
       if (!careless) teenWatcher?.observe(yearBefore, life);
       watch(life);
@@ -1075,6 +1095,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
     webWatcher.finish(life);
     mentalWatcher.finish(life);
     crimeWatcher.finish(life);
+    fameWatcher.finish(life);
     possessionsWatcher.finish(life);
     if (!careless) teenWatcher?.finish(life);
     familyWatcher.finish(life, firesThisLife);
@@ -1114,16 +1135,21 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
     for (const [id, n] of firesThisLife) if (gains.has(id)) mostFires.set(id, Math.max(mostFires.get(id) ?? 0, n));
     ages.push(life.character.age);
 
-    for (const [age, v] of wallet.at) {
+    // E6b: famous lives are reported apart from the net worth target (their fortunes would swamp it).
+    const famous = peakRung(life) >= content.balance.fame.crossover.rung;
+    if (famous) famousAtTarget.push(wallet.at.get(content.balance.targets.money.netWorthAge)?.netWorth ?? netWorth(life));
+    for (const [age, v] of famous ? [] : wallet.at) {
       const bucket = atAge.get(age)!;
       bucket.savings.push(v.savings);
       bucket.debt.push(v.debt);
       bucket.netWorth.push(v.netWorth);
     }
     const end = atAge.get('death')!;
-    end.savings.push(life.finances.savings);
-    end.debt.push(totalDebt(life));
-    end.netWorth.push(netWorth(life));
+    if (!famous) {
+      end.savings.push(life.finances.savings);
+      end.debt.push(totalDebt(life));
+      end.netWorth.push(netWorth(life));
+    }
     money.largest.savings = Math.max(money.largest.savings, wallet.maxSavings);
     money.largest.debt = Math.max(money.largest.debt, wallet.maxDebt);
     if (wallet.maxNetWorth > money.largest.netWorth) money.largest = { ...money.largest, netWorth: wallet.maxNetWorth, netWorthSeed: seed };
@@ -1403,6 +1429,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
     possessions,
     teen,
     crime,
+    fame: { ...fame, famousAtTarget },
     consistency: {
       violations,
       happiness: spreadOf(lifetimeHappiness),
@@ -1539,6 +1566,7 @@ export function formatReport(report: SimulationReport, content: ContentBundle): 
   lines.push(...formatPossessions(report.possessions, content, report.events), '  targets (src/content/balance/targets.yaml):', ...possessionsTargets(report, content).map((r) => target(r.label, r.value, r.goal, r.met)));
   lines.push(...formatTeen(report.teen, content), '  targets (src/content/balance/targets.yaml):', ...teenTargets(report, content).map((r) => target(r.label, r.value, r.goal, r.met)));
   lines.push(...formatCrime(report.crime, content), '  targets (src/content/balance/targets.yaml):', ...crimeTargets(report, content).map((r) => target(r.label, r.value, r.goal, r.met)));
+  lines.push(...formatFame(report.fame, content), '  targets (src/content/balance/targets.yaml):', ...fameTargets(report, content).map((r) => target(r.label, r.value, r.goal, r.met)));
   lines.push(`Events fired: ${report.totalEventsFired}`);
   lines.push('  event'.padEnd(30) + 'fired'.padStart(8) + 'share'.padStart(8) + 'lives'.padStart(9));
   for (const e of [...report.events].sort((a, b) => b.fired - a.fired)) {

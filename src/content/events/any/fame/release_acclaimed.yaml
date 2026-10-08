@@ -1,0 +1,46 @@
+id: release_acclaimed
+title: Everyone is talking about it
+text: >-
+  {project} is out, and it is the talk of the season. A critic writes
+  {review} A fan writes {fanLine} You are asked to be in rooms you did not know
+  existed.
+tone: light
+category: fame
+rarity: uncommon
+recurring: true
+lifeStages: [child, teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { fame: { active: true } }
+    - { fame: { last: [acclaimed] } }
+weight: { base: 10 }
+followUpOnly: true
+choices:
+  - id: soak_it_up
+    label: Say yes to everything
+    outcome:
+      text: >-
+        Two weeks of dinners, interviews and handshakes. You are very good at it
+        and slightly frightened by how quickly it becomes normal.
+      effects:
+        - { type: fame, action: image, delta: 4 }
+        - { type: fame, action: fans, delta: 8 }
+        - { type: fame, action: burnout, delta: 7 }
+        - { type: famePay, gain: solid }
+  - id: stay_grounded
+    label: Take only what you want
+    outcome:
+      text: >-
+        You say no more than you say yes. The ones you say yes to are the ones
+        you will remember, and they seem to like that you are choosy.
+      effects:
+        - { type: fame, action: image, delta: 3 }
+        - { type: fame, action: craft, delta: 2 }
+        - { type: famePay, gain: small }
+  - id: thank_them
+    label: Call everyone who helped, and thank them
+    outcome:
+      text: It takes an entire afternoon. A few of them do not pick up, and the ones who do are quiet for a moment, and then say thank you back.
+      effects:
+        - { type: stat, key: happiness, delta: 5 }
+        - { type: fame, action: mood, delta: 2 }

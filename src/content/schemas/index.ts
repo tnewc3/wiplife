@@ -24,6 +24,7 @@ import { webBalanceSchema, webRegistrySchema } from './web';
 import { mentalHealthBalanceSchema, mentalRegistrySchema } from './mental';
 import { petInteractionSchema, petSchema, possessionsBalanceSchema, possessionsRegistrySchema, possessionsTextSchema, renovationSchema, vehicleSchema } from './possessions';
 import { crewSchema, crimeBalanceSchema, crimeRegistrySchema, crimeTextSchema, frontSchema } from './crime';
+import { fameAgentSchema, fameAwardSchema, fameBalanceSchema, fameCompanySchema, famePathSchema, fameRegistrySchema, fameTextSchema } from './fame';
 import { activitySchema, cliqueSchema, houseRuleSchema, teenBalanceSchema, teenJobSchema, teenRegistrySchema, teenTextSchema } from './teen';
 import { estateRegistrySchema, familyBalanceSchema, familyRegistrySchema, heirRegistrySchema, heirTextSchema } from './family';
 
@@ -48,6 +49,7 @@ export * from './mental';
 export * from './possessions';
 export * from './teen';
 export * from './crime';
+export * from './fame';
 
 /**
  * Collections: a folder under src/content with one YAML file per definition,
@@ -56,6 +58,10 @@ export * from './crime';
  */
 export const collectionTypes = {
   activities: { folder: 'activities', schema: activitySchema },
+  fameAgents: { folder: 'agents', schema: fameAgentSchema },
+  fameAwards: { folder: 'awards', schema: fameAwardSchema },
+  famePaths: { folder: 'fame', schema: famePathSchema },
+  fameCompanies: { folder: 'studios', schema: fameCompanySchema },
   causes: { folder: 'causes', schema: causeSchema },
   cliques: { folder: 'cliques', schema: cliqueSchema },
   crews: { folder: 'crews', schema: crewSchema },
@@ -109,6 +115,7 @@ export const singletonTypes = {
   'balance/possessions': possessionsBalanceSchema,
   'balance/teen': teenBalanceSchema,
   'balance/crime': crimeBalanceSchema,
+  'balance/fame': fameBalanceSchema,
   'balance/targets': targetsBalanceSchema,
   'character/identity': identityOptionsSchema,
   'character/appearance': appearanceOptionsSchema,
@@ -123,6 +130,7 @@ export const singletonTypes = {
   'text/possessions': possessionsTextSchema,
   'text/teen': teenTextSchema,
   'text/crime': crimeTextSchema,
+  'text/fame': fameTextSchema,
   'registries/memories': memoryRegistrySchema,
   'registries/flags': flagRegistrySchema,
   'registries/categories': categoryRegistrySchema,
@@ -142,6 +150,7 @@ export const singletonTypes = {
   'registries/possessions': possessionsRegistrySchema,
   'registries/teen': teenRegistrySchema,
   'registries/crime': crimeRegistrySchema,
+  'registries/fame': fameRegistrySchema,
 } as const;
 
 export type SingletonPath = keyof typeof singletonTypes;
@@ -149,6 +158,10 @@ export type SingletonPath = keyof typeof singletonTypes;
 export const contentBundleSchema = z.strictObject({
   contentVersion: z.string().min(1),
   activities: z.record(z.string(), activitySchema),
+  fameAgents: z.record(z.string(), fameAgentSchema),
+  fameAwards: z.record(z.string(), fameAwardSchema),
+  famePaths: z.record(z.string(), famePathSchema),
+  fameCompanies: z.record(z.string(), fameCompanySchema),
   causes: z.record(z.string(), causeSchema),
   cliques: z.record(z.string(), cliqueSchema),
   crews: z.record(z.string(), crewSchema),
@@ -192,6 +205,7 @@ export const contentBundleSchema = z.strictObject({
     possessions: possessionsBalanceSchema,
     teen: teenBalanceSchema,
     crime: crimeBalanceSchema,
+    fame: fameBalanceSchema,
     targets: targetsBalanceSchema,
   }),
   character: z.strictObject({ identity: identityOptionsSchema, appearance: appearanceOptionsSchema }),
@@ -207,6 +221,7 @@ export const contentBundleSchema = z.strictObject({
     possessions: possessionsTextSchema,
     teen: teenTextSchema,
     crime: crimeTextSchema,
+    fame: fameTextSchema,
   }),
   registries: z.strictObject({
     memories: memoryRegistrySchema,
@@ -228,6 +243,7 @@ export const contentBundleSchema = z.strictObject({
     possessions: possessionsRegistrySchema,
     teen: teenRegistrySchema,
     crime: crimeRegistrySchema,
+    fame: fameRegistrySchema,
   }),
 });
 

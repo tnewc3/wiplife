@@ -1,0 +1,46 @@
+id: tour_after_party
+title: After the last show
+text: >-
+  The tour ends in a hotel ballroom full of people who are very pleased to
+  know you. Someone puts a drink in your hand. Someone else puts a phone in
+  front of your face. It is two in the morning, and nobody is thinking about
+  the next show.
+tone: neutral
+category: fame
+rarity: common
+recurring: true
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { fame: { active: true } }
+    - { fame: { released: true } }
+weight: { base: 8 }
+followUpOnly: true
+choices:
+  - id: stay
+    label: Stay until the end
+    check:
+      base: 55
+      stats: [{ key: discipline, weight: 0.25 }, { key: riskTaking, weight: -0.2 }, { key: health, weight: 0.1 }]
+      success:
+        text: A great night, an expensive one and a hangover that is worth every minute. You leave with your dignity and a few phone numbers.
+        effects:
+          - { type: stat, key: happiness, delta: 5 }
+          - { type: famePay, cost: petty }
+          - { type: fame, action: image, delta: 2 }
+      failure:
+        text: >-
+          You lose track of the hours, and of what you said. By noon someone has
+          sent you a clip of it, and you do not watch the whole thing.
+        effects:
+          - { type: fame, action: image, delta: -6 }
+          - { type: stat, key: health, delta: -3 }
+          - { type: famePay, cost: small }
+  - id: go_to_bed
+    label: Slip out and go to sleep
+    outcome:
+      text: The ballroom roars on without you. You sleep like someone who has finished something.
+      effects:
+        - { type: stat, key: stress, delta: -4 }
+        - { type: fame, action: burnout, delta: -3 }

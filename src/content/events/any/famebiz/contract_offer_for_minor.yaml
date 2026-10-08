@@ -1,0 +1,42 @@
+id: contract_offer_for_minor
+title: A contract your parent reads first
+text: >-
+  A company has sent a contract. Because you are not yet grown, your
+  {parent.relation} has to sign it, and reads every page while you wait.
+  {parent.They} {parent:asks|ask} for changes in the margin and then, at last,
+  looks up.
+tone: neutral
+category: famebiz
+rarity: uncommon
+recurring: true
+lifeStages: [child, teen]
+requires:
+  all:
+    - { age: { lte: 17 } }
+    - { fame: { active: true } }
+    - { fame: { contract: false } }
+    - { fame: { rung: { gte: 2 } } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  parent: { kind: parent, presence: household }
+choices:
+  - id: sign
+    label: Let your {parent.relation} sign it
+    outcome:
+      text: >-
+        {parent.They} {parent:signs|sign} in blue ink, and a lawyer co-signs.
+        Part of what you earn will be put away until you are grown. It is
+        explained to you carefully, twice.
+      effects:
+        - { type: fame, action: contract, terms: generous }
+        - { type: relationship, role: parent, trust: 3 }
+  - id: wait
+    label: Ask to wait
+    outcome:
+      text: >-
+        Your {parent.relation} nods slowly. "There will be other offers," {parent.they}
+        {parent:says|say}, and there is something in the way it is said that
+        makes it sound true.
+      effects:
+        - { type: relationship, role: parent, trust: 2 }

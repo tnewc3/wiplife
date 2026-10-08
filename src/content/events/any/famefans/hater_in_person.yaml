@@ -1,0 +1,46 @@
+id: hater_in_person
+title: Face to face
+text: >-
+  You are in line for coffee when {hater.name} recognises you, and does not
+  look away. {hater.They} {hater:says|say} what {hater.they} {hater:thinks|think}
+  of your work, at some length, with the room listening.
+tone: dark
+category: famefans
+rarity: uncommon
+recurring: true
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { fame: { active: true } }
+    - { fame: { rung: { gte: 2 } } }
+weight: { base: 8 }
+followUpOnly: true
+cast:
+  hater: { kind: acquaintance, fan: hater, presence: city }
+choices:
+  - id: listen
+    label: Listen to all of it
+    outcome:
+      text: >-
+        When {hater.name} runs out of things to say, you say "thank you." The
+        silence lasts three seconds and you will think about it for a month.
+      effects:
+        - { type: relationship, role: hater, affection: 6 }
+        - { type: fame, action: image, delta: 2 }
+        - { type: stat, key: stress, delta: 2 }
+  - id: answer
+    label: Answer back
+    outcome:
+      text: >-
+        It goes badly, in public, and someone is filming. You are right about
+        most of it and it makes no difference.
+      effects:
+        - { type: relationship, role: hater, affection: -6 }
+        - { type: fame, action: image, delta: -5 }
+  - id: leave
+    label: Put the coffee down and leave
+    outcome:
+      text: A small retreat, and probably the right one. The coffee is cold by the time you remember you left it.
+      effects:
+        - { type: stat, key: stress, delta: 1 }

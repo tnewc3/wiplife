@@ -54,6 +54,7 @@ import { checkWeb } from './web';
 import { checkPossessions } from './possessions';
 import { checkTeen } from './teen';
 import { checkCrime } from './crime';
+import { checkFame } from './fame';
 
 const CREATION = 'balance/creation.yaml';
 const AGING = 'balance/aging.yaml';
@@ -189,6 +190,7 @@ export function checkReferences(
   errors.push(...checkPossessions(bundle, fileOf, options.partialEvents === true));
   errors.push(...checkTeen(bundle, fileOf, options.partialEvents === true));
   errors.push(...checkCrime(bundle, fileOf, options.partialEvents === true));
+  errors.push(...checkFame(bundle, fileOf, options.partialEvents === true));
 
   return errors;
 }
@@ -452,6 +454,10 @@ function implies(required: Condition, part: Condition): boolean {
     // E2b: every field the contract names must be asked for the same way.
     return Object.entries(part.family).every(([key, value]) => JSON.stringify((required.family as Record<string, unknown>)[key]) === JSON.stringify(value));
   }
+  if ('fame' in part && 'fame' in required) {
+    // E6b: every field the contract names must be asked for the same way.
+    return Object.entries(part.fame).every(([key, value]) => JSON.stringify((required.fame as Record<string, unknown>)[key]) === JSON.stringify(value));
+  }
   if ('crime' in part && 'crime' in required) {
     // E6a: every field the contract names must be asked for the same way.
     return Object.entries(part.crime).every(([key, value]) => JSON.stringify((required.crime as Record<string, unknown>)[key]) === JSON.stringify(value));
@@ -506,6 +512,8 @@ function checkEvents(bundle: ContentBundle, fileOf: (typeKey: CollectionKey, id:
     // E6a: what the crime step queues (a year's jobs, a promotion, an arrest, a raid, the past catching up...).
     ...bundle.registries.crime.jobs,
     ...Object.values(bundle.registries.crime.triggers).flatMap((r) => r.events),
+    // E6b: what the fame step queues (a release's reception, a break, a fade, a deal, a ceremony, a tabloid, a stalker...).
+    ...Object.values(bundle.registries.fame.triggers).flatMap((r) => r.events),
   ]);
 
   for (const [id, def] of Object.entries(bundle.events)) {

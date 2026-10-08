@@ -17,6 +17,7 @@ import {
   memberAgeLabel,
   money,
   NEWS_TITLE,
+  TABLOID_TITLE,
   PROCESS_LABELS,
   pregnancyLine,
   relativeLabel,
@@ -85,7 +86,8 @@ function NewsCard({ life }: { life: LifeState }) {
       <p className="text-sm text-muted">{news.year}</p>
       <ul className="mt-2 flex flex-col gap-2" aria-label={NEWS_TITLE}>
         {news.items.map((item, i) => (
-          <li key={i} className="break-words [overflow-wrap:anywhere]">
+          <li key={i} className="break-words [overflow-wrap:anywhere]" data-testid={item.tabloid ? 'tabloid-headline' : undefined}>
+            {item.tabloid && <span className="font-semibold">{TABLOID_TITLE}: </span>}
             {item.text}
           </li>
         ))}

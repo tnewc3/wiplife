@@ -1,0 +1,47 @@
+id: contract_offer_standard
+title: A fair-looking deal
+text: >-
+  A company has put a contract in front of you. It is thirty pages long and the
+  lawyer who reads it for you says it is about what anyone in your position
+  would get: an advance, a share of what the work earns, a few years, and a
+  promise to put something out each year.
+tone: neutral
+category: famebiz
+rarity: common
+recurring: true
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { fame: { active: true } }
+    - { fame: { contract: false } }
+    - { fame: { rung: { gte: 2 } } }
+weight: { base: 10 }
+followUpOnly: true
+choices:
+  - id: sign
+    label: Sign it
+    outcome:
+      text: A pen, a signature, a photograph for the press release. It is real now, and it is a lot of paper.
+      effects:
+        - { type: fame, action: contract, terms: standard }
+  - id: negotiate
+    label: Push for better terms
+    check:
+      base: 45
+      stats: [{ fame: image, weight: 0.2 }, { key: confidence, weight: 0.2 }, { fame: rung, weight: 0.15 }]
+      success:
+        text: Your lawyer finds the three clauses that matter. The next draft is shorter and kinder, and you sign it.
+        effects:
+          - { type: fame, action: contract, terms: generous }
+      failure:
+        text: They hold firm and mention that other people would be glad of the deal. You sign what was on the table.
+        effects:
+          - { type: fame, action: contract, terms: standard }
+          - { type: fame, action: image, delta: -2 }
+  - id: decline
+    label: Walk away
+    outcome:
+      text: It is a clean sort of freedom. Whether it is a good decision depends on what comes next.
+      effects:
+        - { type: stat, key: stress, delta: 1 }

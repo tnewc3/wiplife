@@ -1,0 +1,46 @@
+# The events the fame step queues (E6b). Every event listed must be
+# followUpOnly: it only happens this way. Each is picked by weight among those
+# whose requirements fit now.
+#
+# flop, solid, hit, acclaimed, cult, crowd   how this year's release was received
+# bigBreak   a rare jump up the ladder
+# fade       fame has slipped a rung
+# comeback   a way back (a faded star, or one who retired)
+# burnout    the schedule caught up with you
+# agent      an agent comes to you
+# contract   a company puts a deal in front of you
+# contractEnd a deal has run out
+# won, lost  this year's awards night
+# tabloid    a secret about you is in the news (cast: the person closest to you who now knows)
+# scandal    the scene you keep gave the papers a story
+# superfan, hater, critic   one of your fan people turns up
+# stalker    a superfan crosses a line, or the situation moves
+# retire     a natural time to stop
+# crossover  a door into a second path
+# tour, press   something happens on a tour or a press run
+triggers:
+  flop: { events: [release_flop] }
+  solid: { events: [release_solid] }
+  hit: { events: [release_hit] }
+  acclaimed: { events: [release_acclaimed] }
+  cult: { events: [release_cult] }
+  crowd: { events: [release_crowd] }
+  bigBreak: { events: [big_break_viral, big_break_audition, big_break_cosign, big_break_review] }
+  fade: { events: [fade_quiet_phone] }
+  comeback: { events: [comeback_offer, comeback_calling] }
+  burnout: { events: [burnout_alone, burnout_together] }
+  agent: { events: [agent_small_office, agent_established, agent_power] }
+  contract: { events: [contract_offer_standard, contract_offer_tough, contract_offer_generous, contract_offer_for_minor] }
+  contractEnd: { events: [contract_ends_quietly, contract_ends_with_a_fight] }
+  won: { events: [awards_won_night] }
+  lost: { events: [awards_lost_night] }
+  tabloid: { events: [tabloid_partner_reads, tabloid_friend_calls, tabloid_alone_with_it] }
+  scandal: { events: [scene_scandal_night] }
+  superfan: { events: [superfan_letter, superfan_stage_door] }
+  hater: { events: [hater_pile_on, hater_in_person] }
+  critic: { events: [critic_takes_aim, critic_comes_around] }
+  stalker: { events: [stalker_too_close, stalker_escalates, stalker_order_violated] }
+  retire: { events: [retire_farewell] }
+  crossover: { events: [crossover_to_music, crossover_to_acting, crossover_to_social, crossover_to_arts] }
+  tour: { events: [tour_bus_breakdown, tour_empty_room, tour_after_party] }
+  press: { events: [press_bad_interview, press_great_profile, press_hit_piece] }

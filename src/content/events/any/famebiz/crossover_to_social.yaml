@@ -1,0 +1,35 @@
+id: crossover_to_social
+title: Your own channel
+text: >-
+  The people around you have been saying it for a while: you should have your
+  own channel, your own feed, your own voice. This time somebody has already
+  built it, and just needs you to press the button.
+tone: light
+category: famebiz
+rarity: uncommon
+recurring: true
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { fame: { active: true } }
+    - { fame: { path: [music, acting, arts] } }
+    - { fame: { second: false } }
+    - { fame: { crossable: true } }
+weight: { base: 10 }
+followUpOnly: true
+choices:
+  - id: launch
+    label: Launch it
+    outcome:
+      text: >-
+        Your first post reaches more people than your last three projects. Some
+        of them are surprised to discover you are funny.
+      effects:
+        - { type: fame, action: cross, path: social }
+  - id: no
+    label: Keep your private life private
+    outcome:
+      text: >-
+        You decide that not everything has to be seen. It is a quiet and
+        slightly lonely sort of principle.
+      effects: []

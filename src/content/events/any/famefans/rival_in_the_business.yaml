@@ -1,0 +1,51 @@
+id: rival_in_the_business
+title: A rival with a following
+text: >-
+  {rival.name} came up at the same time as you, and has been better at
+  getting noticed ever since. Today {rival.they} {rival:says|say} something
+  about you in an interview that is not exactly untrue, and not exactly kind.
+tone: serious
+category: famefans
+rarity: uncommon
+recurring: true
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { fame: { active: true } }
+    - { fame: { rung: { gte: 3 } } }
+weight: { base: 3 }
+cooldownYears: 4
+cast:
+  rival: { kind: acquaintance, fan: hater, presence: city, createIfMissing: true }
+choices:
+  - id: respond
+    label: Respond, politely, with a joke
+    outcome:
+      text: It is a good joke, and everyone shares it. {rival.name} replies with an even better one, and the feud becomes a double act for a season.
+      effects:
+        - { type: fame, action: image, delta: 2 }
+        - { type: fame, action: fans, delta: 4 }
+        - { type: relationship, role: rival, affection: 3 }
+  - id: make_peace
+    label: Reach out privately
+    check:
+      base: 40
+      stats: [{ key: kindness, weight: 0.25 }, { key: sociability, weight: 0.15 }]
+      success:
+        text: >-
+          {rival.name} doesn't pick up for a day, and then calls. You talk for
+          two hours, mostly about how hard it is. Nobody ever finds out.
+        effects:
+          - { type: relationship, role: rival, affection: 20 }
+      failure:
+        text: Your message is leaked, edited slightly, and quoted out of context. It becomes the story, with a nastier subtitle.
+        effects:
+          - { type: fame, action: image, delta: -5 }
+          - { type: relationship, role: rival, affection: -5 }
+  - id: let_work_answer
+    label: Say nothing, and make your next piece better
+    outcome:
+      text: It's slower and quieter than a counterpunch, and tends to win in the end.
+      effects:
+        - { type: fame, action: craft, delta: 2 }

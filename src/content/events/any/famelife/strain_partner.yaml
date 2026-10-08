@@ -1,0 +1,44 @@
+id: strain_partner
+title: A dinner for one
+text: >-
+  {partner.name} has cooked for the third night this week, and for the third
+  night this week you are not there. The text you send is warm and honest and
+  one line long. {partner.They} {partner:reads|read} it, and puts it away.
+tone: serious
+category: famelife
+rarity: common
+recurring: true
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { fame: { active: true } }
+    - { fame: { commitment: [all] } }
+    - { home: { partner: true } }
+weight: { base: 1.2, modifiers: [{ if: { fame: { burnout: { gte: 50 } } }, x: 1.5 }] }
+cooldownYears: 2
+cast:
+  partner: { support: true, presence: household }
+choices:
+  - id: clear_a_week
+    label: Clear a week and spend it together
+    outcome:
+      text: It is a lot of trouble, and your team is not pleased. {partner.name} says nothing about it, and holds your hand through the film.
+      effects:
+        - { type: relationship, role: partner, affection: 8 }
+        - { type: relationship, role: partner, trust: 4 }
+        - { type: fame, action: burnout, delta: -6 }
+  - id: promise
+    label: Promise it will get better
+    outcome:
+      text: "{partner.name} smiles and nods. It has been promised before. This time, you mean it a little more."
+      effects:
+        - { type: relationship, role: partner, trust: -4 }
+        - { type: stat, key: stress, delta: 3 }
+  - id: ease_off
+    label: Hold back for a while
+    outcome:
+      text: Saying no to things is hard. It is easier than watching someone stop waiting for you.
+      effects:
+        - { type: fame, action: commitment, value: steady }
+        - { type: relationship, role: partner, affection: 5 }

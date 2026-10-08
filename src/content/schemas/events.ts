@@ -22,6 +22,7 @@ import { FAMILY_DEEDS, GUARDIAN_KINDS, familyProcessSchema, parentingKeySchema }
 import { credentialTypeSchema, programSchema, tierSchema } from './education';
 import { lifeTierSchema } from './people';
 import { jobSizeSchema } from './crime';
+import { fameBandSchema, fameCommitmentSchema, fameSceneSchema, fameSizeSchema, fameTermsSchema, FAME_FAN_TYPES, FAME_STALKER_STAGES, type FameBand, type FameCommitment, type FameStalkerStage } from './fame';
 import { FOCUS_KEYS, LICENSE_STAGE_IDS, ruleDomainSchema, type RuleDomainId, type TeenFocusId } from './teen';
 import { relationshipKindSchema, relationshipStatusSchema, romanceStatusSchema } from './relationships';
 import { templateSchema } from './text';
@@ -103,6 +104,7 @@ export type Condition =
   | { belongings: BelongingsCondition }
   | { teen: TeenCondition }
   | { crime: CrimeCondition }
+  | { fame: FameCondition }
   | { memory: { role: string; tag: string } }
   | {
       role: string;
@@ -231,6 +233,51 @@ export interface CrimeCondition {
   suspicion?: Compare;
   returned?: boolean;
   local?: boolean;
+}
+
+/**
+ * E6b, fame in arts and media. Every field given must hold. active: you have a
+ * career in one of the paths (and haven't retired); retired: you did; path:
+ * your main path is one of these; second: you have crossed over into a second
+ * path; rung / peak: your rung now, and the highest you reached (1 and up);
+ * fame / image / mood: 0–100; fans: how many fans you have; commitment: your
+ * setting; burnout: 0–100; agent: your agent's tier (0 for none); contract: you
+ * are under contract; released: a project came out this year; last: how this
+ * year's release was received; faded: you stand lower than your peak; gap:
+ * years since your last project; years: years in the business; stalker: someone
+ * is stalking you (or in this stage); ceremony: this year's awards night went
+ * this way; tabloid: a tabloid ran a story about you this year; scandal: one
+ * of them was about the scene you keep, not a secret; crossable: you
+ * could cross over now; top: you are on the top rung; plan: you have a project
+ * lined up.
+ */
+export interface FameCondition {
+  active?: boolean;
+  retired?: boolean;
+  path?: string[];
+  second?: boolean;
+  rung?: Compare;
+  peak?: Compare;
+  fame?: Compare;
+  image?: Compare;
+  mood?: Compare;
+  fans?: Compare;
+  commitment?: FameCommitment[];
+  burnout?: Compare;
+  agent?: Compare;
+  contract?: boolean;
+  released?: boolean;
+  last?: FameBand[];
+  faded?: boolean;
+  gap?: Compare;
+  years?: Compare;
+  stalker?: boolean | FameStalkerStage[];
+  ceremony?: ('won' | 'lost')[];
+  tabloid?: boolean;
+  scandal?: boolean;
+  crossable?: boolean;
+  top?: boolean;
+  plan?: boolean;
 }
 
 /** Your money situation. Every field given must hold. */
@@ -716,6 +763,38 @@ export const conditionSchema: z.ZodType<Condition> = z.lazy(() =>
         })
         .refine(atLeastOneField, 'needs at least one field'),
     }),
+    z.strictObject({
+      fame: z
+        .strictObject({
+          active: z.boolean().optional(),
+          retired: z.boolean().optional(),
+          path: z.array(idSchema).min(1).optional(),
+          second: z.boolean().optional(),
+          rung: compareSchema.optional(),
+          peak: compareSchema.optional(),
+          fame: compareSchema.optional(),
+          image: compareSchema.optional(),
+          mood: compareSchema.optional(),
+          fans: compareSchema.optional(),
+          commitment: z.array(fameCommitmentSchema).min(1).optional(),
+          burnout: compareSchema.optional(),
+          agent: compareSchema.optional(),
+          contract: z.boolean().optional(),
+          released: z.boolean().optional(),
+          last: z.array(fameBandSchema).min(1).optional(),
+          faded: z.boolean().optional(),
+          gap: compareSchema.optional(),
+          years: compareSchema.optional(),
+          stalker: z.union([z.boolean(), z.array(z.enum(FAME_STALKER_STAGES)).min(1)]).optional(),
+          ceremony: z.array(z.enum(['won', 'lost'])).min(1).optional(),
+          tabloid: z.boolean().optional(),
+          scandal: z.boolean().optional(),
+          crossable: z.boolean().optional(),
+          top: z.boolean().optional(),
+          plan: z.boolean().optional(),
+        })
+        .refine(atLeastOneField, 'needs at least one field'),
+    }),
     z.strictObject({ memory: z.strictObject({ role: roleSchema, tag: idSchema }) }),
     z.strictObject({
       role: roleSchema,
@@ -840,6 +919,12 @@ export const castSpecSchema = z
      * or a person from the rival crew (rival, who may be created: they are met, not known).
      */
     crew: z.enum(['yours', 'boss', 'informant', 'rival']).optional(),
+    /**
+     * E6b: a fan person of yours: a superfan, a hater or a critic. Found among
+     * the ones you already have, or (createIfMissing) made on the spot and
+     * added to them. `stalker` is the superfan who has crossed the line.
+     */
+    fan: z.enum([...FAME_FAN_TYPES, 'stalker']).optional(),
   })
   .refine((s) => (s.kind !== undefined && s.support === true) === false && (s.kind !== undefined || s.support === true || s.noticed !== undefined), 'a role needs one of kind or support: true (or noticed, alone or with a kind)')
   .refine((s) => s.deceased !== true || (s.presence === 'anywhere' && s.support !== true && !s.romantic && !s.admirer && !s.createIfMissing && s.newChance === undefined), 'a deceased role has presence anywhere and is only passed in')
@@ -855,6 +940,10 @@ export const castSpecSchema = z
   .refine(
     (s) => s.crew === undefined || (!s.crowd && !s.support && !s.noticed && !s.romantic && !s.admirer && (s.crew === 'rival' ? s.kind === 'acquaintance' : s.kind === 'friend') && (s.crew === 'rival' || (!s.createIfMissing && s.newChance === undefined))),
     'a crew role is a friend (your crew, boss or informant: found, never created) or an acquaintance (rival), and not a crowd, support, noticed, romantic or admirer role',
+  )
+  .refine(
+    (s) => s.fan === undefined || (s.kind === 'acquaintance' && !s.crew && !s.crowd && !s.support && !s.noticed && !s.romantic && !s.admirer && (s.fan !== 'stalker' || (!s.createIfMissing && s.newChance === undefined))),
+    'a fan role is an acquaintance (a stalker is found, never created) and not a crew, crowd, support, noticed, romantic or admirer role: fans are never romantic',
   );
 export type CastSpec = z.infer<typeof castSpecSchema>;
 
@@ -1123,6 +1212,56 @@ export const effectSchema = z.discriminatedUnion('type', [
       cut: z.literal(true).optional(),
     })
     .refine((e) => [e.gain, e.pay, e.lose, e.cut].filter((v) => v !== undefined).length === 1, 'needs exactly one of gain, pay, lose or cut'),
+  /**
+   * E6b, fame in arts and media. enter: you start a career in `path` (by
+   * `route`, a way in; any age the path allows, a parent signs for you under
+   * 18). cross: you start a second path. rung: you move up or down `delta`
+   * rungs (never past the ladder). break: a big break jumps you `delta` rungs
+   * (at most the ladder's ceiling for you). fame / image / mood / craft /
+   * burnout: move by `delta`. fans: your fan base moves by `delta` percent.
+   * commitment: you set it. agent: you sign with an agent of this tier (0 to
+   * part ways). contract: you sign a deal on these terms with a company that
+   * fits; end_contract: it ends (ended: it ran out; broken: you walked away
+   * and pay for it). scene: your lifestyle. retire / comeback: you stop, or go
+   * back to work. stalker: the superfan in `role` starts stalking you
+   * (start); you report it (report); a restraining order is granted (order);
+   * it ends (end).
+   */
+  z
+    .strictObject({
+      type: z.literal('fame'),
+      action: z.enum(['enter', 'cross', 'rung', 'break', 'fame', 'image', 'mood', 'craft', 'burnout', 'fans', 'commitment', 'agent', 'contract', 'end_contract', 'scene', 'retire', 'comeback', 'stalker']),
+      delta: z.int().min(-100).max(100).optional(),
+      path: idSchema.optional(),
+      route: idSchema.optional(),
+      value: fameCommitmentSchema.optional(),
+      scene: fameSceneSchema.optional(),
+      tier: z.int().min(0).max(3).optional(),
+      terms: fameTermsSchema.optional(),
+      how: z.enum(['ended', 'broken']).optional(),
+      step: z.enum(['start', 'report', 'order', 'end']).optional(),
+      role: roleSchema.optional(),
+    })
+    .refine((e) => (['rung', 'break', 'fame', 'image', 'mood', 'craft', 'burnout', 'fans'] as string[]).includes(e.action) === (e.delta !== undefined && e.delta !== 0), 'rung, break, fame, image, mood, craft, burnout and fans need a non-zero delta (and only they have one)')
+    .refine((e) => e.action !== 'break' || (e.delta !== undefined && e.delta > 0 && e.delta <= 4), 'break jumps 1 to 4 rungs')
+    .refine((e) => (e.action === 'enter' || e.action === 'cross') === (e.path !== undefined), 'enter and cross need path (and only they have one)')
+    .refine((e) => e.route === undefined || e.action === 'enter', 'only enter takes route')
+    .refine((e) => (e.action === 'commitment') === (e.value !== undefined), 'commitment needs value (and only it has one)')
+    .refine((e) => (e.action === 'scene') === (e.scene !== undefined), 'scene needs scene (and only it has one)')
+    .refine((e) => (e.action === 'agent') === (e.tier !== undefined), 'agent needs tier (and only it has one)')
+    .refine((e) => (e.action === 'contract') === (e.terms !== undefined), 'contract needs terms (and only it has them)')
+    .refine((e) => (e.action === 'end_contract') === (e.how !== undefined), 'end_contract needs how (and only it has one)')
+    .refine((e) => (e.action === 'stalker') === (e.step !== undefined), 'stalker needs step (and only it has one)')
+    .refine((e) => e.role === undefined || (e.action === 'stalker' && e.step === 'start'), 'only a stalker start takes a role'),
+  /**
+   * E6b, money from the work, sized for where you are on the ladder: gain pays
+   * a size of payment (a share of your rung's usual year, with a floor), cost
+   * takes one (as savings, then debt, like any cost). The outcome card shows
+   * the amount and the new balance.
+   */
+  z
+    .strictObject({ type: z.literal('famePay'), gain: fameSizeSchema.optional(), cost: fameSizeSchema.optional() })
+    .refine((e) => (e.gain === undefined) !== (e.cost === undefined), 'needs exactly one of gain or cost'),
   z.strictObject({ type: z.literal('innerConflict'), delta: z.int().min(-100).max(100) }),
   /** You discover your hidden talent, if you have one you haven't found (Stage 9). */
   z.strictObject({ type: z.literal('talent') }),
@@ -1335,6 +1474,8 @@ export const checkStatSchema = z.union([
   z.strictObject({ job: z.literal('performance'), weight: checkWeightSchema }),
   /** E6a: your standing in the crew, your rank (1 to 5, centred on 3 at 50) or the heat on you, each 0-100. */
   z.strictObject({ crime: z.enum(['standing', 'rank', 'heat']), weight: checkWeightSchema }),
+  /** E6b: your craft, the quality of your latest work, your fame, public image, fan mood (each 0–100), or your rung (0–100 across the ladder). */
+  z.strictObject({ fame: z.enum(['craft', 'quality', 'fame', 'image', 'mood', 'rung']), weight: checkWeightSchema }),
   /**
    * E2a: your chance of having a baby with the person in `role` this year
    * (fertility, or fertilityPlanned when you plan around it: from the ages

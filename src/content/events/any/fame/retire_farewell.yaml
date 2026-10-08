@@ -1,0 +1,36 @@
+id: retire_farewell
+title: The right time to stop
+text: >-
+  People have started saying the word "legacy" around you, which is a thing
+  they only say about someone who is finished. You are not sure you are. You are
+  sure you are tired, and that the work still means something.
+tone: serious
+category: fame
+rarity: uncommon
+recurring: true
+lifeStages: [adult, senior]
+requires:
+  all:
+    - { age: { gte: 40 } }
+    - { fame: { active: true } }
+weight: { base: 10 }
+followUpOnly: true
+choices:
+  - id: step_away
+    label: Say goodbye while you still can
+    outcome:
+      text: >-
+        You do one last thing, properly, and tell the people you love that
+        this is the end. Something in your chest lets go. It is quieter than
+        you expected, and wide.
+      effects:
+        - { type: fame, action: retire }
+        - { type: stat, key: stress, delta: -8 }
+        - { type: stat, key: happiness, delta: 3 }
+  - id: keep_going
+    label: Keep going for now
+    outcome:
+      text: A few more years. A little slower, a little more carefully, a little more for yourself.
+      effects:
+        - { type: stat, key: confidence, delta: 2 }
+        - { type: fame, action: burnout, delta: -4 }

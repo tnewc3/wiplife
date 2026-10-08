@@ -1,0 +1,48 @@
+id: entourage_problem
+title: Someone on the payroll
+text: >-
+  It's a small thing at first: a receipt that doesn't quite add up. Then a
+  second. Someone on your team has been doing quite well out of you, in a way that
+  won't stand up to a careful look.
+tone: dark
+category: fame
+rarity: uncommon
+recurring: true
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { fame: { active: true } }
+    - { fame: { rung: { gte: 4 } } }
+    - { fame: { commitment: [steady, all] } }
+weight: { base: 0.8, modifiers: [{ if: { fame: { rung: { gte: 5 } } }, x: 1.4 }] }
+cooldownYears: 4
+choices:
+  - id: confront
+    label: Confront them
+    check:
+      base: 50
+      stats: [{ key: smarts, weight: 0.25 }, { key: confidence, weight: 0.2 }]
+      success:
+        text: They don't deny it, much. They pay a part of it back, and you part ways without a scene.
+        effects:
+          - { type: famePay, cost: small }
+          - { type: stat, key: confidence, delta: 2 }
+      failure:
+        text: It turns into a story you didn't tell, and a legal one. By the end of the month you have paid twice for the same mistake.
+        effects:
+          - { type: famePay, cost: solid }
+          - { type: fame, action: image, delta: -3 }
+  - id: overlook
+    label: Let it go this once
+    outcome:
+      text: It happens again, and larger. You've learned something about yourself and what it costs.
+      effects:
+        - { type: famePay, cost: solid }
+  - id: audit
+    label: Hire someone to audit everything
+    outcome:
+      text: The report is thick and calm. Three more small problems come to light, and a better system comes into place.
+      effects:
+        - { type: famePay, cost: small }
+        - { type: stat, key: stress, delta: -2 }

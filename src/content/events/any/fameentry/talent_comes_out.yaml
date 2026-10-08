@@ -1,0 +1,47 @@
+id: talent_comes_out
+title: What you are good at
+text: >-
+  Somebody who knows what they are talking about watches you do the thing you
+  can do, and tells you plainly that it is not ordinary. They give you a name
+  to call and the week to call it.
+tone: neutral
+category: fameentry
+rarity: rare
+lifeStages: [child, teen, youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 14 } }
+    - { age: { lte: 50 } }
+    - { fame: { active: false } }
+    - { fame: { retired: false } }
+    - { discovery: { talent: found } }
+weight:
+  base: 0.18
+  modifiers:
+    - { if: { trait: ambition, gt: 60 }, x: 1.5 }
+cast:
+  judge: { kind: acquaintance, presence: city, createIfMissing: true, age: { min: 30, max: 70 } }
+choices:
+  - id: music
+    label: Call about singing and playing
+    outcome:
+      text: A lesson, a small stage and a year of scales. The sound you make is better than you thought it was.
+      effects:
+        - { type: fame, action: enter, path: music, route: lessons }
+  - id: acting
+    label: Call about acting classes
+    outcome:
+      text: The coach is hard on you, and it is a relief to be taken seriously.
+      effects:
+        - { type: fame, action: enter, path: acting, route: drama_class }
+  - id: writing
+    label: Call about a writing workshop
+    outcome:
+      text: A room full of people who are scared of the same thing you are. You read your first page out loud.
+      effects:
+        - { type: fame, action: enter, path: arts, route: workshop }
+  - id: nothing
+    label: Say thank you and do nothing
+    outcome:
+      text: It is easy to leave a phone number in a pocket. It goes through the wash.
+      effects: []

@@ -1,0 +1,49 @@
+id: press_hit_piece
+title: They went looking
+text: >-
+  The piece is long, and careful, and cruel. It collects old posts, old
+  quotes and old rumours, and arranges them into a person you barely
+  recognise. People you know are quoted, politely, by name.
+tone: dark
+category: fame
+rarity: uncommon
+recurring: true
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { fame: { active: true } }
+    - { fame: { released: true } }
+    - { fame: { image: { lte: 60 } } }
+weight: { base: 6 }
+followUpOnly: true
+choices:
+  - id: ignore
+    label: Say nothing and wait it out
+    outcome:
+      text: It is the correct advice and the hardest to follow. Before long, a bigger story has pushed yours down.
+      effects:
+        - { type: fame, action: image, delta: -4 }
+        - { type: stat, key: stress, delta: 4 }
+  - id: reply
+    label: Answer it point by point
+    check:
+      base: 40
+      stats: [{ key: smarts, weight: 0.25 }, { key: confidence, weight: 0.2 }]
+      success:
+        text: Your reply is clear, calm and quoted everywhere. The piece gets a correction, and a quiet apology.
+        effects:
+          - { type: fame, action: image, delta: 3 }
+          - { type: fame, action: mood, delta: 3 }
+      failure:
+        text: The reply makes a second story out of the first. The tone is defensive, and everyone says so.
+        effects:
+          - { type: fame, action: image, delta: -7 }
+          - { type: fame, action: mood, delta: -4 }
+  - id: lawyer
+    label: Send a lawyer's letter
+    outcome:
+      text: The letter is fast and expensive. It gets the worst line removed, and the story says "legal threats" in its subtitle.
+      effects:
+        - { type: famePay, cost: solid }
+        - { type: fame, action: image, delta: -2 }

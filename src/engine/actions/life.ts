@@ -22,12 +22,13 @@ import { PERSONAL_ACTION_IDS, PERSONAL_ACTIONS } from './personal';
 import { POSSESSION_ACTION_IDS, POSSESSION_ACTIONS } from './possessions';
 import { TEEN_ACTION_IDS, TEEN_ACTIONS } from './teen';
 import { CRIME_ACTION_IDS, CRIME_ACTIONS } from './crime';
+import { FAME_ACTION_IDS, FAME_ACTIONS } from './fame';
 import type { IdentityEdit } from '../discovery';
 import { isIncarcerated, onProbation } from '../legal';
 
 export const MONEY_ACTION_IDS = ['set_lifestyle', 'start_gig', 'stop_gig', 'pay_debt', 'debt_plan'] as const;
 export const HOME_ACTION_IDS = ['rent_home', 'move_home', 'relocate', 'buy_home', 'sell_home', 'find_roommate', 'live_alone'] as const;
-export const LIFE_ACTION_IDS = [...MONEY_ACTION_IDS, ...HOME_ACTION_IDS, ...EDUCATION_ACTION_IDS, ...CAREER_ACTION_IDS, ...PERSONAL_ACTION_IDS, ...FAMILY_ACTION_IDS, ...ESTATE_ACTION_IDS, ...POSSESSION_ACTION_IDS, ...TEEN_ACTION_IDS, ...CRIME_ACTION_IDS] as const;
+export const LIFE_ACTION_IDS = [...MONEY_ACTION_IDS, ...HOME_ACTION_IDS, ...EDUCATION_ACTION_IDS, ...CAREER_ACTION_IDS, ...PERSONAL_ACTION_IDS, ...FAMILY_ACTION_IDS, ...ESTATE_ACTION_IDS, ...POSSESSION_ACTION_IDS, ...TEEN_ACTION_IDS, ...CRIME_ACTION_IDS, ...FAME_ACTION_IDS] as const;
 
 /** The only money, home, school, work and personal actions you can take in prison (Stage 9). */
 export const PRISON_LIFE_ACTIONS: readonly LifeActionId[] = ['pay_debt', 'debt_plan', 'stop_gig', 'edit_identity', 'write_will'];
@@ -73,6 +74,17 @@ export interface LifeActionParams {
   /** E6a: dirty money: the business to launder through, and how much (whole dollars). */
   frontId?: string;
   amount?: number;
+  /** E6b: fame: a path and the way in, a project's kind and creative choices, your commitment and scene, an agent. */
+  pathId?: string;
+  routeId?: string;
+  kindId?: string;
+  style?: 'commercial' | 'artistic';
+  risk?: 'safe' | 'bold';
+  tour?: boolean;
+  press?: boolean;
+  commitment?: 'back' | 'steady' | 'all';
+  scene?: 'low' | 'social' | 'entourage' | 'lavish';
+  agentId?: string;
 }
 
 export interface LifeActionRule {
@@ -239,6 +251,7 @@ export const LIFE_ACTIONS: Record<LifeActionId, LifeActionRule> = {
   ...POSSESSION_ACTIONS,
   ...TEEN_ACTIONS,
   ...CRIME_ACTIONS,
+  ...FAME_ACTIONS,
 };
 
 /** True when the action can be taken now with these (validated) parameters. In prison, only a few can. */

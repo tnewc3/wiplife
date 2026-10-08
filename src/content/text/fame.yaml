@@ -1,0 +1,191 @@
+# Lines the fame systems write (E6b). The player is "you". Everything named
+# here is made up. History values: {pathNoun}, {rungTitle} (with its article),
+# {secondPath}, {agent}, {company}, {award}, {headline}. Quotes: {project}, {noun}.
+history:
+  entered:
+    importance: 2
+    variants:
+      - "You took your first real step toward a life in {pathNoun}."
+      - "You started chasing {pathNoun} for real, which is a different thing from wanting to."
+  climbed:
+    importance: 2
+    variants:
+      - "In {pathNoun}, you became {rungTitle}."
+      - "Your name in {pathNoun} started to mean something: you were {rungTitle} now."
+  faded:
+    importance: 2
+    variants:
+      - "The work dried up, the calls slowed, and you slipped back to {rungTitle}."
+      - "Your name in {pathNoun} lost its shine. You were {rungTitle} again."
+  break:
+    importance: 3
+    variants:
+      - "One thing broke through, and overnight you went from a name some people knew to {rungTitle}."
+      - "A break came out of nowhere and carried you to {rungTitle} in a single year."
+  signed:
+    importance: 2
+    variants:
+      - "You signed with {company}."
+      - "{company} put a contract in front of you, and you signed it."
+  agent:
+    importance: 2
+    variants:
+      - "You took on {agent} as your agent."
+      - "{agent} agreed to represent you."
+  award:
+    importance: 3
+    variants:
+      - "You won {award} for {project}."
+      - "{award} went to you, for {project}. You said something you did not plan to say."
+  burnout:
+    importance: 3
+    variants:
+      - "You burned out. The schedule you had kept for years stopped, and so did you."
+      - "Everything you had been holding up came down at once. You had to stop."
+  retired:
+    importance: 3
+    variants:
+      - "You stepped away from {pathNoun}."
+      - "You walked away from {pathNoun}, and the world kept turning."
+  comeback:
+    importance: 3
+    variants:
+      - "You went back to {pathNoun}, and people noticed."
+      - "You came back to {pathNoun} after time away. Some people had not forgotten you."
+  crossover:
+    importance: 3
+    variants:
+      - "You crossed over into {secondPath}, and brought your name with you."
+      - "With a name behind you, you tried {secondPath}."
+  stalker:
+    importance: 3
+    variants:
+      - "One of your biggest fans stopped being a fan and became a problem."
+      - "A fan who would not stop became someone you looked for in every crowd."
+  tabloid:
+    importance: 3
+    variants:
+      - "The papers got hold of a private thing: {headline}"
+      - "A secret you had kept was printed for everyone to read: {headline}"
+
+# Short quotes by how the work was received, from critics and from fans.
+critic:
+  flop:
+    - "\"{project} is a {noun} in search of a reason to exist.\""
+    - "\"Everything in {project} has been done better, and recently.\""
+  solid:
+    - "\"{project} is competent, and sometimes more than that.\""
+    - "\"A decent {noun}, if not a memorable one.\""
+  hit:
+    - "\"{project} is confident, polished and hard to dislike.\""
+    - "\"A strong {noun} from someone who knows what they are doing.\""
+  acclaimed:
+    - "\"{project} is the {noun} everyone will be arguing about this year.\""
+    - "\"A rare thing: {project} is both ambitious and finished.\""
+  cult:
+    - "\"{project} is strange, difficult and impossible to stop thinking about.\""
+    - "\"Not for everyone, which is exactly the point of this {noun}.\""
+  crowd:
+    - "\"{project} gives people what they came for and not much else.\""
+    - "\"A crowd-pleaser without a second layer. Still, the crowd is pleased.\""
+fan:
+  flop:
+    - "\"I wanted to like {project}. I really did.\""
+    - "\"Nobody I know got through {project}.\""
+  solid:
+    - "\"{project} is fine. I'll listen again, probably.\""
+    - "\"Not your best, but I'm still here.\""
+  hit:
+    - "\"I've had {project} on repeat for a week.\""
+    - "\"{project} is the best thing you've done, and I can't stop telling people.\""
+  acclaimed:
+    - "\"{project} changed something for me. I mean that.\""
+    - "\"Everyone I know is talking about {project}.\""
+  cult:
+    - "\"I don't get {project} yet, but I think I will.\""
+    - "\"Too weird for me. My friend cried at it.\""
+  crowd:
+    - "\"{project} is so fun I forgot to check the time.\""
+    - "\"I took everyone I know to {project}, and they loved it.\""
+
+# Titles for the work, by path.
+titles:
+  music:
+    - Glass Weather
+    - Low Orbit
+    - The Long Way Round
+    - Paper Lanterns
+    - Static and Honey
+    - Midnight Parade
+    - Salt Flats
+    - Come Down Slow
+    - A Quiet Riot
+    - Borrowed Light
+    - Rooms I Left
+    - Highway Hymn
+  acting:
+    - The Understudy
+    - Second Spring
+    - What the River Keeps
+    - The Last Good Summer
+    - Fault Lines
+    - A Small Fire
+    - Hollow Crown
+    - The Distance Between Us
+    - Night Shift
+    - Winter Quarters
+    - Borrowed Time
+    - The Long Table
+  social:
+    - Day in the Life
+    - The Honest Series
+    - Behind the Screen
+    - Fifty Things
+    - Nobody Asked
+    - Try It With Me
+    - The Big Reset
+    - Late Night Chat
+    - The Ugly Cut
+    - A Week Off-Script
+    - Home Edit
+    - The Comeback Cut
+  arts:
+    - The Cartographer's Daughter
+    - Slow Tides
+    - Rooms Without Doors
+    - What We Kept
+    - The Orchard Year
+    - Small Mercies
+    - A Map of Ordinary Days
+    - Blue Hour
+    - Ink and Ash
+    - The Weight of Water
+    - After the Flood
+    - Tenant of Light
+
+# Tabloid headlines. The key is the kind of story (registries/web.yaml, in snake case) or
+# "scandal" for one the scene gave them. {name} is the player's full name.
+tabloid:
+  affair:
+    - "{name} Caught in Secret Affair"
+    - "Who Was {name} Seen With? The Whole Story"
+  unknown_crime:
+    - "{name}'s Dark Secret: What They Got Away With"
+    - "The Night {name} Hopes Nobody Remembers"
+  hidden_debt:
+    - "{name}'s Money Trouble Laid Bare"
+    - "Behind the Glamour, {name} Is Drowning in Debt"
+  addiction:
+    - "{name}'s Private Struggle Goes Public"
+    - "Inside {name}'s Battle With Addiction"
+  identity:
+    - "{name}'s Private Life Made Public"
+    - "{name} Speaks After Details of Personal Life Leak"
+  mental_health:
+    - "{name} Reveals the Struggle Behind the Smile"
+    - "{name}'s Mental Health Crisis Exposed"
+  scandal:
+    - "{name} Spotted Out Until Dawn Again"
+    - "{name}'s Night Out Gets Out of Hand"
+    - "Is {name} Spending Beyond the Spotlight?"
+    - "{name}'s Entourage Under Fire"

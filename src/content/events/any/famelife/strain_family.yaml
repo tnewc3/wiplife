@@ -1,0 +1,41 @@
+id: strain_family
+title: A birthday you missed
+text: >-
+  The card from {family.name} arrives three days after the party. It is cheerful,
+  and has a joke in it, and a line at the bottom that says "no pressure."
+  There is, of course, pressure.
+tone: serious
+category: famelife
+rarity: common
+recurring: true
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { fame: { active: true } }
+    - { fame: { commitment: [steady, all] } }
+    - { home: { partner: false } }
+weight: { base: 0.7 }
+cooldownYears: 2
+cast:
+  family: { kind: sibling, presence: nearby }
+choices:
+  - id: show_up
+    label: Drop everything and go see {family.them}
+    outcome:
+      text: A long drive, a late dinner and an apology you mean. {family.name} is gracious, and the afternoon is worth it.
+      effects:
+        - { type: relationship, role: family, affection: 7 }
+        - { type: fame, action: burnout, delta: -3 }
+  - id: send_something
+    label: Send something thoughtful
+    outcome:
+      text: A parcel and a long message. It's received the way those things are, warmly, and not quite for what it is.
+      effects:
+        - { type: relationship, role: family, affection: 1 }
+  - id: let_it_slide
+    label: Let it slide, again
+    outcome:
+      text: You tell yourself you'll make it up later. The list of things to make up is getting long.
+      effects:
+        - { type: relationship, role: family, affection: -5 }
+        - { type: relationship, role: family, trust: -3 }

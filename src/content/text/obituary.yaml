@@ -161,6 +161,11 @@ deeds:
   # E6a: a crime career.
   joined_a_crew: "{self.They} ran with a crew for a while, and some of what {self.they} did is not in this obituary."
   testified_against_crew: "{self.They} gave the police what {self.they} knew about a crew, and looked over {self.their} shoulder for a long time afterwards."
+  # E6b: fame in arts and media.
+  fame_famous: "{self.They} became famous, and strangers knew {self.their} name for the rest of {self.their} life."
+  fame_burned_out: "{self.They} burned out under the weight of {self.their} work, and had to learn how to stop."
+  fame_stalked: "{self.They} {self:was|were} followed by a fan who would not stop, and learned what safety costs."
+  fame_broke_contract: "{self.They} walked away from a contract, and paid for it."
 
 # Hard chapters, written frankly. prison: values {years} ("two years").
 # bankrupt: values {year}.

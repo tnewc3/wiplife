@@ -1,0 +1,39 @@
+id: big_break_viral
+title: It went everywhere
+text: >-
+  It started as one more clip. By lunchtime a famous account had shared it,
+  by dinner it was on screens in cities far from yours, and by morning
+  you were {rungTitle}, with a phone you could not hold still.
+tone: light
+category: fame
+rarity: rare
+recurring: true
+lifeStages: [child, teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { fame: { active: true } }
+    - { fame: { path: [social] } }
+weight: { base: 10 }
+followUpOnly: true
+choices:
+  - id: ride_it
+    label: Ride it as hard as you can
+    outcome:
+      text: >-
+        You post every day for a month and sleep when you can. The audience
+        stays larger than it was, and a good part of it stays for you.
+      effects:
+        - { type: fame, action: fans, delta: 25 }
+        - { type: fame, action: burnout, delta: 10 }
+        - { type: famePay, gain: solid }
+        - { type: stat, key: stress, delta: 6 }
+  - id: pace_yourself
+    label: Take it a week at a time
+    outcome:
+      text: >-
+        You say no to half of what comes in, and yes to the half that sounds
+        like you. It is the slow version of an overnight success.
+      effects:
+        - { type: fame, action: image, delta: 3 }
+        - { type: famePay, gain: small }
+        - { type: stat, key: happiness, delta: 4 }

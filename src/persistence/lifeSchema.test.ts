@@ -1,6 +1,7 @@
 import 'fake-indexeddb/auto';
 import { produce } from 'immer';
 import { joinCrew } from '../engine/crime/crew';
+import { enterPath } from '../engine/fame/ladder';
 import { afterEach, describe, expect, it } from 'vitest';
 import { content } from '../content';
 import { performAction } from '../engine/actions';
@@ -1040,5 +1041,77 @@ describe('crime careers (E6a)', () => {
       d.crime = { ...d.crime, crew: { defId: 'cinder_row_outfit', cityId: d.character.cityId, since: d.currentYear, members: [], rivalMembers: [] }, rank: 1, peak: 1, standing: 30 };
     });
     expect(loadedLifeSchema(content).safeParse(young).success).toBe(false);
+  });
+});
+
+describe('fame in arts and media (E6b)', () => {
+  const fameLife = () =>
+    produce(lifeAtAge('e6b-save', 30), (d) => {
+      enterPath(d as LifeState, 'music', 'open_mic', content);
+      const p = d.fame.paths.music!;
+      p.rung = 4;
+      p.peak = 5;
+      p.fame = 47.5;
+      p.craft = 62.3;
+      p.recent = [58, 61, 66];
+      d.fame.image = 64;
+      d.fame.fans = 5_400;
+      d.fame.mood = 72;
+      d.fame.burnout = 33;
+      d.fame.commitment = 'all';
+      d.fame.scene = 'entourage';
+      d.fame.agent = { agentId: 'dunmore_talent', since: d.currentYear - 2 };
+      d.fame.contract = { company: 'brightline_music', path: 'music', since: d.currentYear - 1, until: d.currentYear + 2, advance: 24_000, share: 0.25, terms: 'standard', exclusive: false, byParent: false };
+      d.fame.plan = { path: 'music', kind: 'ep', style: 'artistic', risk: 'bold', tour: false, press: true };
+      d.fame.projects.push({ year: d.currentYear - 1, path: 'music', kind: 'ep', title: 'Glass Weather', style: 'artistic', risk: 'bold', tour: false, press: true, quality: 66, critics: 78, fans: 52, band: 'cult', gain: 6.5, earned: 31_000 });
+      d.fame.awards.push({ awardId: 'halcyon_music_prize', year: d.currentYear - 1, path: 'music', project: 'Glass Weather', won: false });
+      d.fame.nominated = { awardId: 'halcyon_music_prize', project: 'Glass Weather', due: d.currentYear + 1, score: 71 };
+      d.fame.headlines.push({ year: d.currentYear, text: 'A Night Out That Went On', kind: 'scandal' });
+      d.fame.income = { year: d.currentYear, gross: 90_000, agent: 13_500, company: 6_000, trust: 0, scene: 7_000 };
+      d.fame.totals = { projects: 6, hits: 3, flops: 1, breaks: 1, fades: 2, comebacks: 1, nominations: 3, wins: 1, scandals: 2, tours: 1, burnouts: 1, crossovers: 0, stalkers: 0, earned: 310_000 };
+    });
+
+  it('round trips a life with a career, an agent, a contract, a project and an awards shelf', async () => {
+    const life = fameLife();
+    expect(life.fame.active).toBe(true);
+    expect(await roundTrip(life)).toEqual(life);
+  });
+
+  it('upgrades a schema version 18 life: no career, no fans, nothing signed, and nobody is given a career', async () => {
+    const life = lifeAtAge('e6b-v18', 30);
+    const v18 = JSON.parse(JSON.stringify(life)) as Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any -- stripping fields from plain JSON to build an old save
+    delete v18.fame;
+    const db = freshDb();
+    await db.lives.put({ id: 'active', envelope: { ...makeEnvelope(v18, content.contentVersion), schemaVersion: 18 } });
+    const result = await readSave(db, loadedLifeSchema(content));
+    expect(result.status).toBe('ok');
+    if (result.status !== 'ok') return;
+    expect(result.envelope.schemaVersion).toBe(CURRENT_SCHEMA_VERSION);
+    expect(result.envelope.data).toEqual(life);
+    expect(result.envelope.data.fame.active).toBe(false);
+    expect(result.envelope.data.fame.main).toBeNull();
+  });
+
+  it('refuses a save with something wrong in the fame record', async () => {
+    const life = fameLife();
+    const bad = JSON.parse(JSON.stringify(life)) as LifeState;
+    bad.fame.image = 101;
+    expect(lifeStateSchema.safeParse(bad).success).toBe(false);
+    const style = JSON.parse(JSON.stringify(life)) as Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any -- breaking a plain JSON save on purpose
+    style.fame.plan.style = 'loud';
+    expect(lifeStateSchema.safeParse(style).success).toBe(false);
+    // And ones that parse but break a rule: a rung off the ladder, a teenager all in, a teenager's deal no parent signed.
+    const rung = produce(life, (d) => void (d.fame.paths.music!.rung = 9));
+    expect(loadedLifeSchema(content).safeParse(rung).success).toBe(false);
+    const young = produce(lifeAtAge('e6b-young', 15), (d) => {
+      enterPath(d as LifeState, 'music', 'lessons', content);
+      d.fame.commitment = 'all';
+    });
+    expect(loadedLifeSchema(content).safeParse(young).success).toBe(false);
+    const unsigned = produce(lifeAtAge('e6b-unsigned', 15), (d) => {
+      enterPath(d as LifeState, 'music', 'lessons', content);
+      d.fame.contract = { company: 'lowtide_records', path: 'music', since: d.currentYear, until: d.currentYear + 1, advance: 1_000, share: 0.2, terms: 'standard', exclusive: false, byParent: false };
+    });
+    expect(loadedLifeSchema(content).safeParse(unsigned).success).toBe(false);
   });
 });

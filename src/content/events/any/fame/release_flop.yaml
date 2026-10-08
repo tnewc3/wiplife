@@ -1,0 +1,54 @@
+id: release_flop
+title: It landed badly
+text: >-
+  {project} is out, and nobody is quite sure what to say about it. A critic
+  writes {review} A fan writes {fanLine} The numbers come in on a Tuesday, and
+  they are small.
+tone: dark
+category: fame
+rarity: common
+recurring: true
+lifeStages: [child, teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { fame: { active: true } }
+    - { fame: { last: [flop] } }
+weight: { base: 10 }
+followUpOnly: true
+choices:
+  - id: take_it
+    label: Read all of it, and learn from it
+    check:
+      base: 50
+      stats: [{ key: discipline, weight: 0.25 }, { fame: craft, weight: 0.2 }, { key: confidence, weight: 0.1 }]
+      success:
+        text: >-
+          It takes a week of feeling sick about it. At the end of the week you
+          can see exactly what was wrong, and exactly how to fix it.
+        effects:
+          - { type: fame, action: craft, delta: 3 }
+          - { type: stat, key: confidence, delta: -2 }
+      failure:
+        text: >-
+          You read it twelve times and remember only the worst line. It follows
+          you around the house for a month.
+        effects:
+          - { type: stat, key: confidence, delta: -5 }
+          - { type: stat, key: happiness, delta: -4 }
+  - id: defend
+    label: Defend it, loudly
+    outcome:
+      text: >-
+        Your post gets more attention than the work did, none of it kind. A
+        few fans stand with you. Most stop talking about it, and about you.
+      effects:
+        - { type: fame, action: mood, delta: -6 }
+        - { type: fame, action: image, delta: -3 }
+        - { type: stat, key: stress, delta: 4 }
+  - id: move_on
+    label: Put it away and start something new
+    outcome:
+      text: You close the file. The next idea is already waiting, impatient, in the back of your head.
+      effects:
+        - { type: fame, action: burnout, delta: -4 }
+        - { type: stat, key: stress, delta: -2 }

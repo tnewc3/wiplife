@@ -1,0 +1,52 @@
+id: burnout_together
+title: The wall, with someone watching
+text: >-
+  {partner.name} finds you sitting on the edge of the bed with your shoes on
+  and the schedule in your hands, not moving. {partner.They} {partner:sits|sit}
+  down next to you and waits, which is what you needed, and are most afraid of.
+tone: dark
+category: fame
+rarity: common
+recurring: true
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { fame: { active: true } }
+    - { home: { partner: true } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  partner: { support: true, presence: household }
+choices:
+  - id: stop
+    label: Tell {partner.them} you cannot do this any more
+    outcome:
+      text: >-
+        {partner.name} makes the calls with you. It is the first time in years
+        that the two of you spend a week in the same room with nothing to do.
+      effects:
+        - { type: fame, action: commitment, value: back }
+        - { type: stat, key: stress, delta: -8 }
+        - { type: relationship, role: partner, affection: 5 }
+        - { type: relationship, role: partner, trust: 4 }
+  - id: lie
+    label: Say you are fine and put your shoes on
+    outcome:
+      text: >-
+        {partner.name} lets you go, and watches you go. Neither of you says
+        what you both know. The calendar does not care.
+      effects:
+        - { type: stat, key: stress, delta: 5 }
+        - { type: relationship, role: partner, trust: -5 }
+        - { type: fame, action: burnout, delta: 5 }
+  - id: ask_for_help
+    label: Ask {partner.them} to help you find help
+    outcome:
+      text: >-
+        {partner.They} {partner:finds|find} a name, makes the appointment and
+        drives you there. You hold {partner.their} hand in the waiting room.
+      effects:
+        - { type: fame, action: commitment, value: back }
+        - { type: mental, action: crisis }
+        - { type: relationship, role: partner, affection: 6 }

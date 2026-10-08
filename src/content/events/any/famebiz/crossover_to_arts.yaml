@@ -1,0 +1,35 @@
+id: crossover_to_arts
+title: A book, or a canvas
+text: >-
+  A publisher and a gallery both want something from you, separately, and
+  neither knows about the other. Your name will do a lot of the work. The
+  rest, they say, is yours.
+tone: neutral
+category: famebiz
+rarity: uncommon
+recurring: true
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { fame: { active: true } }
+    - { fame: { path: [music, acting, social] } }
+    - { fame: { second: false } }
+    - { fame: { crossable: true } }
+weight: { base: 10 }
+followUpOnly: true
+choices:
+  - id: write
+    label: Write the book
+    outcome:
+      text: >-
+        You write at night, in notebooks, for a year. It is the hardest thing
+        you have done, and the first thing in a long time that you have had
+        entirely to yourself.
+      effects:
+        - { type: fame, action: cross, path: arts }
+        - { type: stat, key: stress, delta: 2 }
+  - id: decline
+    label: Thank them and say no
+    outcome:
+      text: They are gracious. A copy of someone else's book arrives soon afterwards, with a note.
+      effects: []

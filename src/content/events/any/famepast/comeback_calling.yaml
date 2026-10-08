@@ -1,0 +1,34 @@
+id: comeback_calling
+title: One more time
+text: >-
+  The call is from someone younger than you who learned your work from a
+  recording. They would like you to be part of something. They say it with
+  the careful tone of someone who knows how this could sound.
+tone: neutral
+category: famepast
+rarity: uncommon
+recurring: true
+lifeStages: [adult, senior]
+requires:
+  all:
+    - { age: { gte: 30 } }
+    - { fame: { retired: true } }
+    - { fame: { peak: { gte: 2 } } }
+weight: { base: 10 }
+followUpOnly: true
+choices:
+  - id: yes
+    label: Say yes
+    outcome:
+      text: The first rehearsal is rusty. The third is not. By the end, the room is quiet in the specific way that means they know.
+      effects:
+        - { type: fame, action: comeback }
+        - { type: stat, key: happiness, delta: 5 }
+  - id: no
+    label: Say no, with real thanks
+    outcome:
+      text: >-
+        You sit with the phone on your knee for a while. The answer was right.
+        It still takes a few days to feel that way.
+      effects:
+        - { type: stat, key: stress, delta: -1 }

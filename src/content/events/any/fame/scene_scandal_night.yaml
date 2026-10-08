@@ -1,0 +1,40 @@
+id: scene_scandal_night
+title: Out until dawn
+text: >-
+  "{headline}" A photograph, taken from across a street by someone you didn't
+  see, is on a news site by morning. You know the night it was, and so
+  do a dozen people in the picture.
+tone: dark
+category: fame
+rarity: common
+recurring: true
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { fame: { active: true } }
+    - { fame: { scandal: true } }
+weight: { base: 10 }
+followUpOnly: true
+choices:
+  - id: laugh_it_off
+    label: Laugh it off in public
+    outcome:
+      text: You post a joke at your own expense. People like it more than the photograph.
+      effects:
+        - { type: fame, action: image, delta: 2 }
+        - { type: fame, action: mood, delta: 1 }
+  - id: cut_the_scene
+    label: Go quiet and change your habits
+    outcome:
+      text: Fewer nights out, fewer faces, more evenings in. It is not the life you imagined, and it's better for you.
+      effects:
+        - { type: fame, action: scene, scene: low }
+        - { type: stat, key: stress, delta: -3 }
+  - id: double_down
+    label: Carry on exactly as before
+    outcome:
+      text: Another photograph follows in a month. The story becomes your reputation, and the reputation becomes the story.
+      effects:
+        - { type: fame, action: image, delta: -4 }
+        - { type: fame, action: fame, delta: 1 }

@@ -1,0 +1,38 @@
+id: casting_call_line
+title: Three hundred people in a line
+text: >-
+  Word gets round that a production is holding an open casting call. When you
+  arrive the line already goes round the block. Everyone has a headshot and a
+  face that says they have been here before.
+tone: neutral
+category: fameentry
+rarity: uncommon
+lifeStages: [child, teen, youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 6 } }
+    - { age: { lte: 45 } }
+    - { fame: { active: false } }
+    - { fame: { retired: false } }
+weight:
+  base: 0.4
+  modifiers:
+    - { if: { discovery: { talent: found } }, x: 2 }
+    - { if: { stat: looks, gte: 65 }, x: 1.5 }
+choices:
+  - id: wait
+    label: Wait your turn
+    outcome:
+      text: >-
+        Six hours later you say four lines to one tired face. She writes
+        something down and says "thank you, next." A week later a call comes
+        for background work, and you take it.
+      effects:
+        - { type: fame, action: enter, path: acting, route: open_call }
+        - { type: famePay, gain: petty }
+  - id: leave
+    label: Go home
+    outcome:
+      text: You get as far as the corner before you turn around, and then you do not turn around. The line looks very long in the mirror.
+      effects:
+        - { type: stat, key: stress, delta: -1 }

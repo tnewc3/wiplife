@@ -1,0 +1,37 @@
+id: day_job_or_dream
+title: The day job
+text: >-
+  The work is finally paying enough to think about. Your manager has noticed
+  you checking your phone. Something has to give, and it won't be the dream.
+tone: neutral
+category: fame
+rarity: uncommon
+recurring: true
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { fame: { active: true } }
+    - { fame: { rung: { gte: 3 } } }
+    - { career: { employed: true, retired: false } }
+weight: { base: 3 }
+cooldownYears: 5
+choices:
+  - id: quit
+    label: Hand in your notice
+    outcome:
+      text: >-
+        Your manager shakes your hand, wishes you luck and means it. The
+        first morning of having no job to go to is the strangest, and then it
+        is the best.
+      effects:
+        - { type: job, action: quit }
+        - { type: fame, action: craft, delta: 2 }
+        - { type: stat, key: stress, delta: -2 }
+  - id: both
+    label: Keep both for a while longer
+    outcome:
+      text: It is exhausting. It is also safe. You're good at being tired.
+      effects:
+        - { type: fame, action: burnout, delta: 6 }
+        - { type: stat, key: stress, delta: 3 }

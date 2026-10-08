@@ -319,6 +319,8 @@ export function performanceAim(state: LifeState, def: JobDef, content: ContentBu
   aim += performanceDrag(state, content);
   // E6a: a second life in a crew takes its toll on the job you hold.
   if (state.crime.crew) aim += content.balance.crime.life.performance;
+  // E6b: so does a career in arts and media on the side.
+  if (state.fame.active) aim += content.balance.fame.commitment.job[state.fame.commitment];
   // E5: getting to work without a vehicle where the work needs one (or where one helps) costs you.
   aim -= missingVehiclePenalty(state, content);
   return aim;

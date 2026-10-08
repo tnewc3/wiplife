@@ -1,0 +1,61 @@
+id: minor_parent_pressure
+title: When your parent wants it more than you do
+text: >-
+  It's a long drive home from the audition, and your {parent.relation} has
+  been quiet for most of it. Then {parent.they} {parent:starts|start} talking
+  about what the next one could mean, and the sums behind it, and the way
+  {parent.they} {parent:has|have} rearranged things. You realise they're
+  more nervous than you.
+tone: serious
+category: fame
+rarity: uncommon
+recurring: true
+lifeStages: [child, teen]
+requires:
+  all:
+    - { age: { lte: 17 } }
+    - { fame: { active: true } }
+    - { fame: { rung: { gte: 2 } } }
+weight: { base: 2 }
+cooldownYears: 4
+cast:
+  parent: { kind: parent, presence: household }
+choices:
+  - id: tell_them
+    label: Tell {parent.them} how you actually feel
+    check:
+      base: 55
+      stats: [{ role: parent, key: trust, weight: 0.3 }, { key: confidence, weight: 0.15 }]
+      success:
+        text: >-
+          {parent.They} {parent:pulls|pull} over. It's a long conversation in a
+          parking lot. At the end of it, {parent.they} {parent:says|say} "we
+          do this for as long as you want to, and no longer," and it's the
+          most generous thing you've heard.
+        effects:
+          - { type: relationship, role: parent, affection: 7 }
+          - { type: relationship, role: parent, trust: 5 }
+          - { type: stat, key: stress, delta: -4 }
+      failure:
+        text: >-
+          It comes out as an accusation, and {parent.they} {parent:hears|hear}
+          it as one. Neither of you says anything else on the drive.
+        effects:
+          - { type: relationship, role: parent, affection: -4 }
+          - { type: stat, key: stress, delta: 4 }
+  - id: keep_going
+    label: Keep going and say nothing
+    outcome:
+      text: You smile in the right places. The drive home is easier, and the thing you didn't say gets heavier.
+      effects:
+        - { type: stat, key: stress, delta: 4 }
+        - { type: fame, action: burnout, delta: 5 }
+  - id: step_back
+    label: Ask to slow down
+    outcome:
+      text: >-
+        Your {parent.relation} is quiet, and then says "ok," in a voice that
+        means it. You both get your weekends back.
+      effects:
+        - { type: fame, action: commitment, value: back }
+        - { type: relationship, role: parent, trust: 4 }

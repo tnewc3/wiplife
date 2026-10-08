@@ -1,0 +1,61 @@
+id: stalker_escalates
+title: In the parking lot
+text: >-
+  {fan.name} is waiting by your car. Not threatening, exactly. Just there, in
+  the dark, saying your name as though it were a thing {fan.they} {fan:owns|own}.
+  Your hands know what to do before your head does.
+tone: dark
+category: famefans
+rarity: uncommon
+recurring: true
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { fame: { active: true } }
+    - { fame: { stalker: [watching, reported] } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  fan: { kind: acquaintance, fan: stalker, presence: city }
+choices:
+  - id: police
+    label: Go back inside and call the police
+    outcome:
+      text: >-
+        The officers take a statement and a photograph. It is calmer than you
+        expected, and slower. They tell you what a case needs and what to keep.
+      effects:
+        - { type: fame, action: stalker, step: report }
+        - { type: stat, key: stress, delta: 4 }
+  - id: order
+    label: Ask a court for a restraining order
+    outcome:
+      text: >-
+        A lawyer and a stack of forms. A judge reads the folder, and the room
+        is very quiet, and the order is granted in four sentences.
+      effects:
+        - { type: fame, action: stalker, step: order }
+        - { type: cost, item: lawyer_fee }
+        - { type: stat, key: stress, delta: 2 }
+  - id: confront
+    label: Confront {fan.them} yourself
+    check:
+      base: 35
+      stats: [{ key: confidence, weight: 0.2 }, { key: fitness, weight: 0.1 }, { key: riskTaking, weight: -0.1 }]
+      success:
+        text: >-
+          Your voice is steady and {fan.name} goes pale. {fan.They}
+          {fan:backs|back} away and does not come back that month.
+        effects:
+          - { type: stat, key: stress, delta: 2 }
+          - { type: stat, key: confidence, delta: 3 }
+      failure:
+        text: >-
+          It goes wrong in a way that you play back for weeks. {fan.name} is
+          calm, and you are not, and what you said in the dark is no longer
+          just yours.
+        effects:
+          - { type: mental, action: trauma, amount: 6 }
+          - { type: stat, key: health, delta: -3 }
+          - { type: stat, key: stress, delta: 6 }

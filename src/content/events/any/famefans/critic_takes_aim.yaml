@@ -1,0 +1,54 @@
+id: critic_takes_aim
+title: A critic who will not let go
+text: >-
+  {critic.name} has reviewed everything you have made, and has not liked any
+  of it. {critic.Their} latest piece is clever, and funny, and mostly fair, which
+  makes it hurt more than a cruel one would have.
+tone: serious
+category: famefans
+rarity: common
+recurring: true
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 15 } }
+    - { fame: { active: true } }
+    - { fame: { rung: { gte: 2 } } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  critic: { kind: acquaintance, fan: critic, presence: city, createIfMissing: true }
+choices:
+  - id: learn
+    label: Read it again, and take the notes you can use
+    outcome:
+      text: >-
+        Half of it you reject at once. The other half sits with you for a
+        month, and then it shows up in the next piece of work.
+      effects:
+        - { type: fame, action: craft, delta: 3 }
+        - { type: relationship, role: critic, affection: 4 }
+  - id: reach_out
+    label: Write to {critic.them}
+    check:
+      base: 40
+      stats: [{ key: kindness, weight: 0.2 }, { key: smarts, weight: 0.2 }]
+      success:
+        text: >-
+          {critic.name} writes back. It is a real exchange, between two people
+          who both care about the same thing, and it changes how you read each
+          other.
+        effects:
+          - { type: relationship, role: critic, affection: 12 }
+          - { type: memory, role: critic, tag: answered_their_letter }
+      failure:
+        text: "{critic.name} quotes your note in the next piece. It is not a quotation you chose."
+        effects:
+          - { type: fame, action: image, delta: -3 }
+          - { type: relationship, role: critic, affection: -5 }
+  - id: ignore
+    label: Refuse to read any more of it
+    outcome:
+      text: It is a clean rule, easily broken. You find out by lunchtime what the new piece says anyway.
+      effects:
+        - { type: stat, key: stress, delta: 2 }

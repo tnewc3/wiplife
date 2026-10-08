@@ -1,0 +1,42 @@
+id: superfan_letter
+title: A very long letter
+text: >-
+  {fan.name} has written to you. It is four pages, in careful handwriting,
+  and it knows your work better than you do. It also asks a few questions,
+  politely, that you have answered in no interview.
+tone: neutral
+category: famefans
+rarity: common
+recurring: true
+lifeStages: [child, teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { fame: { active: true } }
+    - { fame: { stalker: false } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  fan: { kind: acquaintance, fan: super, presence: city, createIfMissing: true }
+choices:
+  - id: write_back
+    label: Write back, kindly
+    outcome:
+      text: >-
+        You send a short note and a signed copy of something. {fan.name} frames
+        the note. It means more to {fan.them} than you will ever hear.
+      effects:
+        - { type: memory, role: fan, tag: answered_their_letter }
+        - { type: relationship, role: fan, affection: 6 }
+        - { type: fame, action: mood, delta: 3 }
+  - id: let_it_sit
+    label: Put it on the pile
+    outcome:
+      text: The letters keep coming. They are lovely, and each one is another small weight on a long list of things to do.
+      effects:
+        - { type: relationship, role: fan, affection: -2 }
+  - id: ask_staff
+    label: Have your team answer it
+    outcome:
+      text: A form reply goes out the same afternoon, polite and signed in a way that does not quite look like your hand.
+      effects:
+        - { type: fame, action: mood, delta: -1 }

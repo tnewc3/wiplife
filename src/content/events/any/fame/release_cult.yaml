@@ -1,0 +1,39 @@
+id: release_cult
+title: Loved by the people who understood it
+text: >-
+  {project} is not for everyone, and the reception shows it. A critic writes
+  {review} A fan writes {fanLine} The ones who love it are loud about it, and
+  the rest of the world moves on.
+tone: neutral
+category: fame
+rarity: uncommon
+recurring: true
+lifeStages: [child, teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { fame: { active: true } }
+    - { fame: { last: [cult] } }
+weight: { base: 10 }
+followUpOnly: true
+choices:
+  - id: stay_weird
+    label: Keep making what you want to make
+    outcome:
+      text: >-
+        You make the next one stranger. The people who love you love you more,
+        and the number of them does not change. It is a trade you made on
+        purpose.
+      effects:
+        - { type: fame, action: craft, delta: 3 }
+        - { type: fame, action: image, delta: 2 }
+        - { type: fame, action: mood, delta: -2 }
+  - id: reach_out
+    label: Make the next one easier to love
+    outcome:
+      text: >-
+        You sand the edges off the next idea. It is still good. It is also, a
+        little, less yours, and you notice that every time you play it.
+      effects:
+        - { type: fame, action: fans, delta: 6 }
+        - { type: fame, action: image, delta: -2 }
+        - { type: stat, key: confidence, delta: -1 }

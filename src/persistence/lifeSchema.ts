@@ -569,6 +569,92 @@ const crime = z.strictObject({
   totals: z.strictObject({ jobs: int.min(0), earned: dollars.min(0), cleaned: dollars.min(0), fees: dollars.min(0), lost: dollars.min(0), spent: dollars.min(0), arrests: int.min(0), years: int.min(0) }),
 });
 
+// E6b: fame in arts and media.
+const fameProjectSchema = z.strictObject({
+  year: int,
+  path: id,
+  kind: id,
+  title: z.string(),
+  style: z.enum(['commercial', 'artistic']),
+  risk: z.enum(['safe', 'bold']),
+  tour: z.boolean(),
+  press: z.boolean(),
+  quality: score,
+  critics: score,
+  fans: score,
+  band: z.enum(['flop', 'solid', 'hit', 'acclaimed', 'cult', 'crowd']),
+  gain: z.number(),
+  earned: dollars.min(0),
+  assigned: z.literal(true).exactOptional(),
+});
+const fame = z.strictObject({
+  active: z.boolean(),
+  retired: int.exactOptional(),
+  main: id.nullable(),
+  second: id.nullable(),
+  paths: z.record(
+    z.string(),
+    z.strictObject({
+      rung: int.min(1),
+      peak: int.min(1),
+      fame: z.number().min(0).max(100),
+      craft: z.number().min(0).max(100),
+      since: int,
+      last: int,
+      recent: z.array(score).max(3),
+      breakYear: int.min(0),
+    }),
+  ),
+  image: score,
+  fans: int.min(0),
+  mood: score,
+  burnout: score,
+  commitment: z.enum(['back', 'steady', 'all']),
+  scene: z.enum(['low', 'social', 'entourage', 'lavish']),
+  agent: z.strictObject({ agentId: id, since: int }).nullable(),
+  contract: z
+    .strictObject({
+      company: id,
+      path: id,
+      since: int,
+      until: int,
+      advance: dollars.min(0),
+      share: z.number().min(0).max(1),
+      terms: z.enum(['standard', 'tough', 'generous']),
+      exclusive: z.boolean(),
+      byParent: z.boolean(),
+    })
+    .nullable(),
+  plan: z
+    .strictObject({ path: id, kind: id, style: z.enum(['commercial', 'artistic']), risk: z.enum(['safe', 'bold']), tour: z.boolean(), press: z.boolean() })
+    .nullable(),
+  projects: z.array(fameProjectSchema).max(12),
+  awards: z.array(z.strictObject({ awardId: id, year: int, path: id, project: z.string(), won: z.boolean() })).max(30),
+  nominated: z.strictObject({ awardId: id, project: z.string(), due: int, score: z.number() }).exactOptional(),
+  ceremony: z.strictObject({ year: int, awardId: id, project: z.string(), result: z.enum(['won', 'lost']) }).exactOptional(),
+  people: z.strictObject({ super: z.array(id), hater: z.array(id), critic: z.array(id) }),
+  stalker: z.strictObject({ id, since: int, stage: z.enum(['watching', 'reported', 'ordered', 'charged']) }).nullable(),
+  headlines: z.array(z.strictObject({ year: int, text: z.string(), kind: z.string() })).max(20),
+  income: z.strictObject({ year: int, gross: dollars.min(0), agent: dollars.min(0), company: dollars.min(0), trust: dollars.min(0), scene: dollars.min(0) }),
+  fadedFrom: int.exactOptional(),
+  totals: z.strictObject({
+    projects: int.min(0),
+    hits: int.min(0),
+    flops: int.min(0),
+    breaks: int.min(0),
+    fades: int.min(0),
+    comebacks: int.min(0),
+    nominations: int.min(0),
+    wins: int.min(0),
+    scandals: int.min(0),
+    tours: int.min(0),
+    burnouts: int.min(0),
+    crossovers: int.min(0),
+    stalkers: int.min(0),
+    earned: dollars.min(0),
+  }),
+});
+
 const settlement = z.strictObject({
   year: int,
   source: z.enum(['will', 'default']),
@@ -708,6 +794,7 @@ export const lifeStateSchema: z.ZodType<LifeState> = z.strictObject({
   possessions,
   teen,
   crime,
+  fame,
 });
 
 /**

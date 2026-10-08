@@ -1,0 +1,50 @@
+id: tour_empty_room
+title: The room that was supposed to be full
+text: >-
+  The venue holds eight hundred. Sixty people are scattered through it. The
+  promoter says something about a competing event. The opening act looks
+  at you, and you look at the floor.
+tone: dark
+category: fame
+rarity: common
+recurring: true
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { fame: { active: true } }
+    - { fame: { released: true } }
+weight: { base: 9 }
+followUpOnly: true
+choices:
+  - id: play_the_room
+    label: Walk off the stage and play to the front row
+    check:
+      base: 50
+      stats: [{ key: confidence, weight: 0.25 }, { key: sociability, weight: 0.2 }, { fame: craft, weight: 0.1 }]
+      success:
+        text: Sixty people who showed up are given an evening nobody else gets. They tell everyone about it for years.
+        effects:
+          - { type: fame, action: mood, delta: 6 }
+          - { type: fame, action: image, delta: 3 }
+      failure:
+        text: >-
+          It goes flat. The room hears the thinness of the whole thing, and you
+          cut the set short and say sorry.
+        effects:
+          - { type: fame, action: mood, delta: -3 }
+          - { type: stat, key: confidence, delta: -4 }
+  - id: play_it_straight
+    label: Do the full show as if it were full
+    outcome:
+      text: Professionalism is a kind of respect. The sixty clap harder than eight hundred would have.
+      effects:
+        - { type: fame, action: craft, delta: 1 }
+        - { type: fame, action: mood, delta: 2 }
+  - id: blame_them
+    label: Make it known whose fault it was
+    outcome:
+      text: >-
+        Your complaint is quoted in a trade paper. The promoter's reply is not
+        kind, and the next venue asks to see the terms twice.
+      effects:
+        - { type: fame, action: image, delta: -4 }

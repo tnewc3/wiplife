@@ -1,0 +1,29 @@
+id: acting
+name: Acting
+noun: acting
+blurb: Auditions, call sheets and one good role that changes which doors open.
+talents: [performance]
+aptitude: { confidence: 0.25, looks: 0.25, sociability: 0.15, discipline: 0.15, ambition: 0.1, smarts: 0.1 }
+criticWeight: 0.5
+minAge: 6
+routes:
+  - { id: community_theatre, label: Join community theatre, blurb: "A church hall, a borrowed costume and a director who believes in you.", minAge: 8, craft: 12 }
+  - { id: open_call, label: Go to an open casting call, blurb: "Stand in a line with three hundred other people and say your lines to one tired face.", minAge: 6, craft: 8 }
+  - { id: drama_class, label: Take acting classes, blurb: "Scene study, a coach and a year of being told to feel something.", minAge: 10, craft: 18 }
+  - { id: extra_work, label: Work as an extra, blurb: "Stand in the background of other people's scenes and watch how it is done.", minAge: 6, craft: 6 }
+rungs:
+  - { title: extra, milestone: Get a line of dialogue, fame: 0, quality: 0, income: 2500 }
+  - { title: bit-part actor, milestone: Land a recurring role, fame: 15, quality: 32, income: 22000 }
+  - { title: recurring cast member, milestone: Carry a show or a film, fame: 32, quality: 45, income: 95000 }
+  - { title: lead actor, milestone: Open a film on your name, fame: 50, quality: 58, income: 380000 }
+  - { title: film lead, milestone: Become the name studios build around, fame: 68, quality: 78, income: 1600000 }
+  - { title: A-list star, milestone: Stay on top, fame: 85, quality: 90, income: 8000000 }
+kinds:
+  - { id: stage_play, label: A stage play, noun: play, blurb: "Eight shows a week and nowhere to hide.", minRung: 1, difficulty: 2, reach: 0.6, pay: 0.4 }
+  - { id: tv_role, label: A television role, noun: series, blurb: "A character you will play for years, if the show lasts.", minRung: 2, difficulty: 0, reach: 1.1, pay: 1 }
+  - { id: indie_film, label: An independent film, noun: indie film, blurb: "A small crew, a short schedule and a part with something to say.", minRung: 2, difficulty: -2, reach: 0.9, pay: 0.6 }
+  - { id: studio_film, label: A studio film, noun: film, blurb: "A big budget, a bigger audience and a lot of people with opinions about your scenes.", minRung: 4, difficulty: -4, reach: 1.5, pay: 1.6 }
+tour: { label: Do a promotional tour, noun: promotional tour, minRung: 3 }
+press: { label: Do a press run, minRung: 2 }
+retire: { from: 60, chance: [{ at: 60, x: 0.03 }, { at: 70, x: 0.1 }, { at: 80, x: 0.3 }] }
+royalties: 0.08

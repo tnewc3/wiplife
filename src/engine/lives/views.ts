@@ -12,6 +12,8 @@ export interface NewsItem {
   personId: Id;
   /** The line as it was written when it happened. */
   text: string;
+  /** E6b: a tabloid headline about you (there is no person it is about). */
+  tabloid?: true;
 }
 
 export interface NewsFeedView {
@@ -21,9 +23,16 @@ export interface NewsFeedView {
 
 /** The news for one year (the newest kept year by default); null when there was none. */
 export function getNews(state: LifeState, year?: number): NewsFeedView | null {
-  const entry = year === undefined ? state.news[state.news.length - 1] : state.news.find((n) => n.year === year);
-  if (!entry || entry.lines.length === 0) return null;
-  return { year: entry.year, items: entry.lines.map((l) => ({ personId: l.personId, text: l.text })) };
+  // E6b: the tabloids' headlines about you count too; with no year given, the newest year with either.
+  const newestLines = state.news[state.news.length - 1]?.year;
+  const newestHeadline = state.fame.headlines.at(-1)?.year;
+  const shown = year ?? Math.max(newestLines ?? -Infinity, newestHeadline ?? -Infinity);
+  if (!Number.isFinite(shown)) return null;
+  const entry = state.news.find((n) => n.year === shown);
+  const tabloid: NewsItem[] = state.fame.headlines.filter((h) => h.year === shown).map((h) => ({ personId: '', text: h.text, tabloid: true as const }));
+  const lines = entry?.lines ?? [];
+  if (lines.length === 0 && tabloid.length === 0) return null;
+  return { year: shown, items: [...tabloid, ...lines.map((l) => ({ personId: l.personId, text: l.text }))] };
 }
 
 export type TroubleView =

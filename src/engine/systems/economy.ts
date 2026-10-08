@@ -38,6 +38,7 @@ import {
 import { housingCost, livingCost, moveTo, ownsHome, refreshHousingCost, sellHome, settleHousehold, supportingParent } from '../housing';
 import { childCosts, childSupportDue } from '../family/costs';
 import { careCosts } from '../lives/care';
+import { sceneCost } from '../fame/step';
 import { possessionCosts } from '../possessions/costs';
 import { recordEarnings, retirementBenefit } from '../retirement';
 import { clampInt, weightedPick } from '../random';
@@ -159,7 +160,8 @@ export function runEconomy(state: LifeState, content: ContentBundle): void {
 
   // 4. Costs. E2a: your children cost money, and child support is paid or received.
   let housing = housingCost(state, content);
-  let living = livingCost(state, content);
+  // E6b: the scene that goes with fame (parties, an entourage, the clothes) is part of what you live on.
+  let living = livingCost(state, content) + sceneCost(state);
   let kids = childCosts(state, content);
   const { paid: supportPaid, received: supportReceived } = childSupportDue(state, gross, content);
   const care = careCosts(state, content, gross);

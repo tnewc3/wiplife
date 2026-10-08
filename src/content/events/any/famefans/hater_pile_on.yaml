@@ -1,0 +1,54 @@
+id: hater_pile_on
+title: The pile-on
+text: >-
+  It begins with {hater.name}, who has never liked you, and a post that is
+  mostly true. By evening it has become a hundred posts, and by morning it has
+  become a movement. People you have never met are very sure of who you are.
+tone: dark
+category: famefans
+rarity: common
+recurring: true
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 13 } }
+    - { fame: { active: true } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  hater: { kind: acquaintance, fan: hater, presence: city, createIfMissing: true }
+choices:
+  - id: block
+    label: Block, mute and leave it alone
+    outcome:
+      text: It takes a week of not looking. Within a month it is old news, and you hate that you know how long a month is.
+      effects:
+        - { type: stat, key: stress, delta: 3 }
+        - { type: fame, action: image, delta: -2 }
+  - id: reply
+    label: Reply to {hater.name} directly
+    check:
+      base: 40
+      stats: [{ key: smarts, weight: 0.2 }, { key: kindness, weight: 0.15 }, { fame: mood, weight: 0.1 }]
+      success:
+        text: >-
+          Your answer is calm and short and does not take the bait. Your fans
+          take up the rest, and {hater.name} goes quiet.
+        effects:
+          - { type: fame, action: mood, delta: 4 }
+          - { type: relationship, role: hater, affection: 3 }
+      failure:
+        text: >-
+          It adds fuel. The thread doubles overnight, and the screenshot of your
+          reply outlives everything else.
+        effects:
+          - { type: fame, action: image, delta: -6 }
+          - { type: fame, action: mood, delta: -4 }
+          - { type: relationship, role: hater, affection: -4 }
+  - id: ask_fans
+    label: Ask your fans to stop
+    outcome:
+      text: Most of them listen. A few do not, and the ones who don't are the loud ones.
+      effects:
+        - { type: fame, action: mood, delta: 2 }
+        - { type: fame, action: image, delta: 1 }

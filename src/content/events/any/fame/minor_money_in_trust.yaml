@@ -1,0 +1,38 @@
+id: minor_money_in_trust
+title: What happens to the pay
+text: >-
+  The first big payment arrives, and your {parent.relation} takes it to
+  a lawyer and a bank rather than to the store. Most of it will be put away
+  until you are grown, {parent.they} {parent:explains|explain}. "It's yours,"
+  {parent.they} {parent:says|say}. "It will be there when you need it."
+tone: neutral
+category: fame
+rarity: uncommon
+recurring: true
+lifeStages: [child, teen]
+requires:
+  all:
+    - { age: { lte: 17 } }
+    - { fame: { active: true } }
+    - { fame: { rung: { gte: 3 } } }
+weight: { base: 2 }
+cooldownYears: 4
+cast:
+  parent: { kind: parent, presence: household }
+choices:
+  - id: understand
+    label: Say you understand
+    outcome:
+      text: The account has a long name and a small label that says "to be released at eighteen." It feels real, and a long way off.
+      effects:
+        - { type: famePay, gain: solid }
+        - { type: relationship, role: parent, trust: 4 }
+  - id: ask_for_some
+    label: Ask for something now
+    outcome:
+      text: >-
+        Your {parent.relation} considers it, honestly. You get a sensible gift
+        and a long talk about what things are for.
+      effects:
+        - { type: famePay, gain: solid }
+        - { type: stat, key: happiness, delta: 3 }

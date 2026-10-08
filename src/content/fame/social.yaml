@@ -1,0 +1,28 @@
+id: social
+name: Social media
+noun: online content
+blurb: Posts, streams and a following, built one upload at a time and owed to an algorithm nobody understands.
+talents: [performance, persuasion]
+aptitude: { sociability: 0.25, confidence: 0.2, riskTaking: 0.15, ambition: 0.15, looks: 0.15, discipline: 0.1 }
+criticWeight: 0.1
+minAge: 13
+routes:
+  - { id: first_posts, label: Start posting, blurb: "A phone, an idea and a handful of strangers who might watch.", minAge: 13, craft: 8 }
+  - { id: streaming, label: Go live, blurb: "Talk to a screen every night until a few people start talking back.", minAge: 14, craft: 10 }
+  - { id: collab, label: Join a creator house, blurb: "Share a studio, share an audience and share the drama.", minAge: 17, craft: 14 }
+  - { id: after_viral, label: Follow up something that took off, blurb: "One post got seen far beyond your friends. Now you have to do it again.", minAge: 13, craft: 6 }
+rungs:
+  - { title: new poster, milestone: Find a small audience that comes back, fame: 0, quality: 0, income: 200 }
+  - { title: small creator, milestone: Become a creator with a real following, fame: 15, quality: 30, income: 5000 }
+  - { title: full-time creator, milestone: Land sponsors that pay, fame: 35, quality: 42, income: 45000 }
+  - { title: sponsored creator, milestone: Become a household name, fame: 58, quality: 66, income: 240000 }
+  - { title: household name, milestone: Stay relevant, fame: 80, quality: 86, income: 1400000 }
+kinds:
+  - { id: short_videos, label: A run of short videos, noun: run of videos, blurb: "Quick, daily and easy to scroll past.", minRung: 1, difficulty: 3, reach: 0.8, pay: 0.5 }
+  - { id: series, label: A series, noun: series, blurb: "A recurring show with a format and a reason to come back.", minRung: 1, difficulty: 0, reach: 1, pay: 0.9 }
+  - { id: livestreams, label: A run of live streams, noun: run of streams, blurb: "Hours of being yourself on a schedule.", minRung: 2, difficulty: 1, reach: 0.9, pay: 1 }
+  - { id: big_collab, label: A big collaboration, noun: collaboration, blurb: "Two audiences meet and one of them is not sure it likes the other.", minRung: 3, difficulty: -2, reach: 1.4, pay: 1.3 }
+tour: { label: Do live events, noun: live events, minRung: 3 }
+press: { label: Do a press run, minRung: 2 }
+retire: { from: 50, chance: [{ at: 50, x: 0.03 }, { at: 60, x: 0.1 }, { at: 75, x: 0.25 }] }
+royalties: 0.05

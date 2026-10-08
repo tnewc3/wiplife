@@ -1,0 +1,37 @@
+id: stalker_order_violated
+title: The order didn't hold
+text: >-
+  The restraining order says a hundred yards. {fan.name} is at the bottom of
+  your steps, and the police are called before you finish dialling. They
+  arrive in minutes, and {fan.they} {fan:does|do} not resist.
+tone: serious
+category: famefans
+rarity: uncommon
+recurring: true
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { fame: { active: true } }
+    - { fame: { stalker: [charged] } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  fan: { kind: acquaintance, fan: stalker, presence: city }
+choices:
+  - id: testify
+    label: Agree to testify
+    outcome:
+      text: >-
+        A courtroom, a folder of evidence and a long afternoon. The prosecutor
+        is good. When it ends, the room is quiet, and you can finally feel
+        your own pulse.
+      effects:
+        - { type: stat, key: stress, delta: -4 }
+        - { type: stat, key: confidence, delta: 3 }
+  - id: let_it_rest
+    label: Let the process handle it
+    outcome:
+      text: The system takes it from your hands. You sleep for eleven hours and wake up feeling lighter than you have in a year.
+      effects:
+        - { type: stat, key: stress, delta: -5 }

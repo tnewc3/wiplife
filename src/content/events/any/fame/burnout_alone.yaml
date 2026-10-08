@@ -1,0 +1,58 @@
+id: burnout_alone
+title: The wall
+text: >-
+  You wake up and cannot do it. Not will not: cannot. The schedule is open on
+  the table, and every line on it makes your chest tight. You sit on the
+  kitchen floor for an hour, and nobody is there to find you.
+tone: dark
+category: fame
+rarity: common
+recurring: true
+lifeStages: [child, teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { fame: { active: true } }
+    - { home: { partner: false } }
+weight: { base: 10 }
+followUpOnly: true
+choices:
+  - id: stop
+    label: Cancel everything and rest
+    outcome:
+      text: >-
+        You make the calls. Some people are understanding and some are not.
+        For a few weeks you do almost nothing, and slowly the world comes
+        back into focus.
+      effects:
+        - { type: fame, action: commitment, value: back }
+        - { type: stat, key: stress, delta: -8 }
+        - { type: stat, key: health, delta: 3 }
+        - { type: fame, action: mood, delta: -3 }
+  - id: get_help
+    label: Tell someone, and ask for help
+    outcome:
+      text: >-
+        You say it out loud to a person who is trained to hear it. It does not
+        fix anything and it makes everything possible.
+      effects:
+        - { type: fame, action: commitment, value: back }
+        - { type: mental, action: crisis }
+        - { type: stat, key: stress, delta: -5 }
+  - id: push_through
+    label: Push through
+    check:
+      base: 35
+      stats: [{ key: discipline, weight: 0.25 }, { key: health, weight: 0.2 }]
+      success:
+        text: You get through the week, and the next, and one morning the knot is gone. You are not sure what it took.
+        effects:
+          - { type: stat, key: stress, delta: 4 }
+      failure:
+        text: >-
+          Three days later you collapse in a stairwell. The people around you
+          are very kind. It is a long way back from here.
+        effects:
+          - { type: fame, action: commitment, value: back }
+          - { type: stat, key: health, delta: -10 }
+          - { type: stat, key: happiness, delta: -8 }
+          - { type: mental, action: trauma, amount: 5 }

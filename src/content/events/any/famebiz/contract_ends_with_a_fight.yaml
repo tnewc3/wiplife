@@ -1,0 +1,50 @@
+id: contract_ends_with_a_fight
+title: The renewal meeting
+text: >-
+  The contract is up, and the people across the table are not smiling. They
+  have a new deal ready, with new numbers and an old tone, and they expect you
+  to take it because you always have.
+tone: serious
+category: famebiz
+rarity: uncommon
+recurring: true
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { fame: { active: true } }
+    - { fame: { contract: false } }
+    - { fame: { rung: { gte: 3 } } }
+    - { fame: { mood: { lt: 70 } } }
+weight: { base: 6 }
+followUpOnly: true
+choices:
+  - id: take_it
+    label: Take their terms
+    outcome:
+      text: It is the quickest way out of the room. You sign under protest, and your handwriting shows it.
+      effects:
+        - { type: fame, action: contract, terms: tough }
+        - { type: stat, key: stress, delta: 3 }
+  - id: stand_firm
+    label: Hold your ground
+    check:
+      base: 45
+      stats: [{ key: confidence, weight: 0.25 }, { fame: rung, weight: 0.2 }, { fame: mood, weight: 0.15 }]
+      success:
+        text: The room goes quiet. A junior person leaves and comes back with an older one, and the older one says the thing you wanted to hear.
+        effects:
+          - { type: fame, action: contract, terms: standard }
+          - { type: fame, action: image, delta: 2 }
+      failure:
+        text: The meeting ends without a deal. The story gets out before you do, and it is not told your way.
+        effects:
+          - { type: fame, action: image, delta: -4 }
+          - { type: fame, action: mood, delta: -3 }
+  - id: leave
+    label: Walk out
+    outcome:
+      text: A door closes quietly behind you. The elevator takes a very long time.
+      effects:
+        - { type: fame, action: image, delta: -1 }
+        - { type: stat, key: stress, delta: 2 }

@@ -95,6 +95,8 @@ export function rootEvents(content: ContentBundle): Set<string> {
     // E6a: what the crime step queues (a year's jobs, a promotion, an arrest, a raid, the past catching up...).
     { events: r.crime.jobs },
     ...Object.values(r.crime.triggers),
+    // E6b: what the fame step queues.
+    ...Object.values(r.fame.triggers),
   ];
   for (const list of lists) for (const id of list.events) roots.add(id);
   return roots;
@@ -210,6 +212,8 @@ export function analyzeContent(content: ContentBundle): StaticCoverage {
   // E2b: the heir conversion writes the memories of how the heir was raised and of who stood by them, and the flags
   // that tell how the estate went; family reputation reads the flags that make a family known for a deed.
   for (const tag of [...Object.values(HEIR_MEMORY_MAP), 'lost_the_same_parent', 'took_you_in', 'foster_carer']) addTo(memoryWrites, tag, 'heir (engine)');
+  // E6b: fame writes these itself (a burnout, a stalker, a contract broken, a rung of fame reached).
+  for (const flag of ['fame_broke_contract', 'fame_burned_out', 'fame_stalked', 'fame_famous']) addTo(flagWrites, flag, 'fame (engine)');
   for (const flag of ['estate_will', 'estate_no_will', 'left_out_of_will', 'inherited_a_home', 'in_foster_care', 'grew_up_in_foster_care']) addTo(flagWrites, flag, 'heir (engine)');
   for (const flag of Object.keys(content.balance.family.heir.reputation.flags)) addTo(flagReads, flag, 'balance/family.yaml heir.reputation.flags');
 
