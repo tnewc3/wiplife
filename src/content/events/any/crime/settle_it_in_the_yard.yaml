@@ -1,0 +1,62 @@
+id: settle_it_in_the_yard
+title: Settle it in the yard
+text: >-
+  The dispute with {rivalCrew} has gone on long enough that someone has named a
+  place and a time. {opponent.name} will be there with {opponent.their} people. Word is that
+  the last man who went to one of these did not leave on his feet.
+tone: dark
+category: crime
+rarity: rare
+recurring: true
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { crime: { member: true } }
+    - { crime: { rival: true } }
+    - { crime: { rivalry: { gte: 50 } } }
+    - { crime: { away: false } }
+weight: { base: 8 }
+followUpOnly: true
+cast:
+  opponent: { kind: acquaintance, crew: rival, presence: city, createIfMissing: true, age: { min: 22, max: 55 } }
+choices:
+  - id: fight
+    label: Show up and fight
+    check:
+      base: 55
+      stats: [{ key: fitness, weight: 0.3 }, { key: riskTaking, weight: 0.15 }, { key: luck, weight: 0.3 }]
+      success:
+        text: >-
+          It is ugly and short. You walk out with a split lip and a name people
+          will use to frighten each other.
+        effects:
+          - { type: crime, action: standing, delta: 12 }
+          - { type: crime, action: rivalry, delta: 10 }
+          - { type: health, conditionId: broken_bone, severity: 25 }
+          - { type: mental, action: trauma, amount: 6 }
+      failure:
+        text: >-
+          They brought more than they said they would. The yard is quiet by the
+          time anyone dares to come in.
+        effects:
+          - { type: death, cause: crew_fight }
+  - id: send_a_message
+    label: Send a message that you will not come
+    outcome:
+      text: >-
+        You say you have nothing to prove. It is true, and everyone who hears it
+        thinks it is the beginning of something.
+      effects:
+        - { type: crime, action: standing, delta: -7 }
+        - { type: crime, action: rivalry, delta: -5 }
+  - id: go_to_police
+    label: Warn someone who can stop it
+    outcome:
+      text: >-
+        A call is made, a car is parked at the end of the street, and the yard stays empty.
+        The crew learns who made the call, and nobody thanks you for it.
+      effects:
+        - { type: crime, action: standing, delta: -14 }
+        - { type: crime, action: heat, delta: 8 }
+        - { type: crime, action: rivalry, delta: -10 }

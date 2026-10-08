@@ -1049,6 +1049,10 @@ export interface CrimeCrew {
   rivalMembers: Id[];
   /** A member who is talking to the police, if one is. */
   informant?: Id;
+  /** Set while you live in another city: when you left, the standing you left with and what the crew suspects of you (0–100). */
+  away?: { since: number; standing: number; suspicion: number };
+  /** The year you came back to the crew's city (it is a story that year). */
+  returned?: number;
 }
 
 /** E6a: a crew you were in once. */
@@ -1058,7 +1062,7 @@ export interface CrimePast {
   toYear: number;
   /** The highest rank you reached (1 to 5). */
   topRank: number;
-  how: 'left' | 'pushed' | 'drifted' | 'deal';
+  how: 'left' | 'pushed' | 'drifted' | 'deal' | 'moved';
 }
 
 export interface CrimeState {

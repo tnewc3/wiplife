@@ -1,0 +1,64 @@
+id: away_favor
+title: A favor from far away
+text: >-
+  {member.name}, from {crew}, calls the way people do when they have not
+  forgotten you and want you to know it. There is something that needs doing
+  where you are now, and it would be a shame to have to ask someone else.
+tone: dark
+category: crimeaway
+rarity: common
+recurring: true
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { crime: { member: true } }
+    - { crime: { away: true } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  member: { kind: friend, crew: yours, presence: elsewhere }
+choices:
+  - id: do_it
+    label: Do the favor
+    check:
+      base: 65
+      stats: [{ key: smarts, weight: 0.2 }, { key: luck, weight: 0.3 }, { crime: heat, weight: -0.2 }]
+      success:
+        text: >-
+          It is a small thing, done quietly, and a few days later an envelope
+          arrives with the crew's thanks and a note that you are remembered.
+        effects:
+          - { type: dirtyMoney, gain: petty }
+          - { type: crime, action: standing, delta: 6 }
+          - { type: crime, action: suspicion, delta: -12 }
+          - { type: crime, action: heat, delta: 3 }
+          - { type: relationship, role: member, trust: 4 }
+      failure:
+        text: >-
+          It goes wrong in a small, public way, and you spend the next week
+          wondering who noticed. {member.name} does not call to ask how it went.
+        effects:
+          - { type: crime, action: heat, delta: 8 }
+          - { type: crime, action: suspicion, delta: 6 }
+          - { type: stat, key: stress, delta: 5 }
+  - id: excuse
+    label: Make an excuse
+    outcome:
+      text: >-
+        You say you have your hands full, which is true. {member.name} says
+        {member.they} {member:understands|understand}, in the voice people use when they do not.
+      effects:
+        - { type: crime, action: suspicion, delta: 10 }
+        - { type: crime, action: standing, delta: -3 }
+        - { type: relationship, role: member, trust: -4 }
+  - id: say_no
+    label: Say you are out of that life for now
+    outcome:
+      text: >-
+        There is a long pause on the line. "For now," {member.name} repeats,
+        and hangs up before you can correct {member.them}.
+      effects:
+        - { type: crime, action: suspicion, delta: 16 }
+        - { type: crime, action: standing, delta: -6 }
+        - { type: relationship, role: member, affection: -5 }

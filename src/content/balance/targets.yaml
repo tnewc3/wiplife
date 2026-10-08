@@ -266,6 +266,8 @@ crime:
   netWorthRatio: { min: 0.5, max: 1.2 }
   richArrested: { min: 0.6, max: 1 }
   flaggedShare: { min: 0.03, max: 0.15 }
+  # E6a follow-up: deaths from a crew life (rare; only from a warned job, a war, a reprisal or a fight).
+  deaths: { min: 0, max: 0.03 }
   underAge: { min: 0, max: 0 }
 
 coverage:

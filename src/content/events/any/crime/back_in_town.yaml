@@ -1,0 +1,48 @@
+id: back_in_town
+title: Back where they know you
+text: >-
+  The streets are the same, and so are the faces, but the way they look at
+  you is not. You have been gone, and {member.name}, from {crew}, wants to
+  know exactly where you were, and who you were with.
+tone: neutral
+category: crime
+rarity: common
+recurring: true
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { crime: { member: true } }
+    - { crime: { returned: true } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  member: { kind: friend, crew: yours, presence: city }
+choices:
+  - id: make_the_rounds
+    label: Make the rounds and show your face
+    check:
+      base: 55
+      stats: [{ key: confidence, weight: 0.25 }, { crime: standing, weight: 0.3 }]
+      success:
+        text: >-
+          Drinks, handshakes and long explanations. By the end of the week
+          people are saying you were always going to be back.
+        effects:
+          - { type: crime, action: standing, delta: 8 }
+          - { type: relationship, role: member, trust: 4 }
+      failure:
+        text: >-
+          Some people are glad to see you. Others look at your hands. The
+          rounds take longer than you meant, and the welcome is cooler than you hoped.
+        effects:
+          - { type: crime, action: standing, delta: -4 }
+          - { type: stat, key: stress, delta: 4 }
+  - id: lie_low
+    label: Keep your head down
+    outcome:
+      text: >-
+        You are around, but not too visible. The crew notices, and decides
+        you will show yourself when you have something to show.
+      effects:
+        - { type: crime, action: heat, delta: -3 }

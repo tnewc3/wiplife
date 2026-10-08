@@ -993,6 +993,10 @@ Stage 9 (legal) and E4 (ties, for crew members).
 - The law-abiding test player never enters a crime career, and its targets stay met.
 - A 10,000-life simulation reports how many lives enter crime careers, how far they rise, earnings, arrests and prison, with zero invariant failures, plus a check that crime doesn't out-earn legal careers without matching risk.
 
+### Later (not built yet)
+
+- **An heir finds a hidden stash.** Dirty money you hold at death is lost today (it is never part of the estate). A later event for the heir could find part of it (a hidden stash, a number written down, a person who knew), with its own heat and its own choices about what to do with it. It would use the existing heir play events and needs a way for the estate to remember that a stash existed; it must not turn dirty money into inheritance by itself.
+
 ### Coding-AI prompt
 
 ```text

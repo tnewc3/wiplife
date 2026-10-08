@@ -69,7 +69,7 @@ export function eventWeight(state: LifeState, def: EventDef, content: ContentBun
     const last = lastCategoryYear(state, def.category, content);
     if (last !== undefined && state.currentYear - last < categoryCooldown) return 0;
   }
-  const ctx = { roles: 'assumeTrue' as const, ...(cast ? { cast } : {}) };
+  const ctx = { roles: 'assumeTrue' as const, content, ...(cast ? { cast } : {}) };
   if (!evaluate(def.requires, state, ctx)) return 0;
   let weight = def.weight.base * content.balance.events.rarityWeight[def.rarity];
   for (const modifier of def.weight.modifiers ?? []) {

@@ -480,6 +480,8 @@ export interface ChoiceTraits {
   crewJob: boolean;
   /** E6a: some outcome moves you up a rank in the crew (a crime promote effect). */
   promotes: boolean;
+  /** E6a: some outcome takes you into a crew in the city you moved to (a crime transfer effect). */
+  transfers: boolean;
   /** It rolls a chance check (and isn't illegal). */
   risky: boolean;
   /** Some outcome feeds a vice (raises vice). */
@@ -503,6 +505,7 @@ export function choiceTraits(choice: ChoiceDef): ChoiceTraits {
       joinsCrew: effects.some((e) => e.type === 'crime' && e.action === 'join'),
       crewJob: effects.some((e) => e.type === 'crime' && e.action === 'job'),
       promotes: effects.some((e) => e.type === 'crime' && e.action === 'promote'),
+      transfers: effects.some((e) => e.type === 'crime' && e.action === 'transfer'),
       risky: !illegal && choice.check !== undefined,
       vice: effects.some((e) => e.type === 'stat' && e.key === 'vice' && e.delta > 0),
       kind: affection > 0,
@@ -561,7 +564,7 @@ export function personalityChoice(content: ContentBundle, crime: 'refuse' | 'acc
     const options = open.map((c) => {
       const traits = traitsOf(c.id);
       // The criminal player does the crew's work when it is asked: that is what being in a crew is.
-      const eager = crime === 'accept' && (traits?.crewJob === true || traits?.promotes === true) ? CREW_JOB_EAGERNESS : 1;
+      const eager = crime === 'accept' && (traits?.crewJob === true || traits?.promotes === true || traits?.transfers === true) ? CREW_JOB_EAGERNESS : 1;
       return [c.id, (traits ? choiceWeight(life, traits) : 1) * eager] as const;
     });
     return weightedPick(rng, options);

@@ -549,6 +549,8 @@ const crimeCrew = z.strictObject({
   rival: id.exactOptional(),
   rivalMembers: z.array(id),
   informant: id.exactOptional(),
+  away: z.strictObject({ since: int, standing: score, suspicion: score }).exactOptional(),
+  returned: int.exactOptional(),
 });
 const crime = z.strictObject({
   crew: crimeCrew.nullable(),
@@ -562,7 +564,7 @@ const crime = z.strictObject({
   rivalry: score,
   investigation: z.strictObject({ since: int, until: int }).exactOptional(),
   jobs: z.strictObject({ year: int, count: int.min(0), last: int.min(0) }),
-  past: z.array(z.strictObject({ crewId: id, fromYear: int, toYear: int, topRank: int.min(1), how: z.enum(['left', 'pushed', 'drifted', 'deal']) })),
+  past: z.array(z.strictObject({ crewId: id, fromYear: int, toYear: int, topRank: int.min(1), how: z.enum(['left', 'pushed', 'drifted', 'deal', 'moved']) })),
   laundered: z.strictObject({ year: int, byFront: z.record(z.string(), dollars.min(0)) }),
   totals: z.strictObject({ jobs: int.min(0), earned: dollars.min(0), cleaned: dollars.min(0), fees: dollars.min(0), lost: dollars.min(0), spent: dollars.min(0), arrests: int.min(0), years: int.min(0) }),
 });

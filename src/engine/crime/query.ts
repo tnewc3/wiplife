@@ -33,6 +33,11 @@ export function isFormer(state: LifeState): boolean {
   return state.crime.crew === null && state.crime.past.length > 0;
 }
 
+/** In a crew, but living in another city from it. */
+export function isAway(state: LifeState): boolean {
+  return state.crime.crew !== null && state.crime.crew.cityId !== state.character.cityId;
+}
+
 /** Runs the crew you are in (the top rank). */
 export function isLeader(state: LifeState, content: ContentBundle): boolean {
   return state.crime.crew !== null && state.crime.rank >= content.balance.crime.ranks.length;

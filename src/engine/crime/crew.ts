@@ -94,15 +94,26 @@ export function staffCrew(state: LifeState, content: ContentBundle): void {
   if (crew.informant !== undefined && !crew.members.includes(crew.informant)) delete crew.informant;
 }
 
+/** Where you start in a crew: a rank and a standing. */
+export interface Start {
+  rank: number;
+  standing: number;
+}
+
 /**
- * You are taken in by a crew that works in your city: rank 1, a standing to
- * start from, the people already in it (and whoever brought you, if given),
- * and a rival crew. Returns false when you may not (see `joinBlock`).
+ * You are taken in by a crew that works in your city: a rank and standing to
+ * start from (rank 1 and the usual standing for a new member; for a crew you
+ * were in before, what balance `away.rejoin` gives for how you left it, below
+ * the best rank you held; or what `start` says), the people already in it
+ * (and whoever brought you, if given), and a rival crew. Returns false when
+ * you may not (see `joinBlock`).
  */
-export function joinCrew(state: LifeState, content: ContentBundle, brought?: Id): boolean {
+export function joinCrew(state: LifeState, content: ContentBundle, brought?: Id, start?: Start): boolean {
   if (joinBlock(state, content) !== null) return false;
   const crews = crewsIn(content, state.character.cityId);
-  const def = pick(state.rng, crews);
+  // A crew you were in before takes you back first, if it works here.
+  const before = [...state.crime.past].reverse().find((p) => crews.some((c) => c.id === p.crewId));
+  const def = (before && crews.find((c) => c.id === before.crewId)) || pick(state.rng, crews);
   const entry = content.balance.crime.entry;
   const rivals = def.rivals.filter((id) => content.crews[id] && !content.crews[id]!.retired && content.crews[id]!.cities.includes(state.character.cityId));
   const crime = state.crime;
@@ -114,10 +125,11 @@ export function joinCrew(state: LifeState, content: ContentBundle, brought?: Id)
     rivalMembers: [],
     ...(rivals.length > 0 ? { rival: pick(state.rng, rivals) } : {}),
   };
-  crime.rank = 1;
-  crime.peak = Math.max(crime.peak, 1);
+  const again = start ?? (before ? rejoinStart(before, content) : undefined);
+  crime.rank = again?.rank ?? 1;
+  crime.peak = crime.rank;
   crime.rankSince = state.currentYear;
-  crime.standing = entry.standing;
+  crime.standing = again?.standing ?? entry.standing;
   crime.lowYears = 0;
   crime.awayYears = 0;
   crime.rivalry = entry.rivalry;
@@ -131,6 +143,39 @@ export function joinCrew(state: LifeState, content: ContentBundle, brought?: Id)
   staffCrew(state, content);
   writeFromGroup(state, content.text.crime.history.joined, ['crime', 'joined'], { values: { crew: def.name } }, content);
   return true;
+}
+
+/** Where you start in a crew you were in before: below the best rank you held, by how you left it. */
+function rejoinStart(before: CrimePast, content: ContentBundle): Start {
+  const r = content.balance.crime.away.rejoin[before.how];
+  return {
+    rank: clampInt(before.topRank - r.rankDrop, 1, content.balance.crime.ranks.length - 1),
+    standing: clampInt(content.balance.crime.entry.standing + r.standing, 0, 100),
+  };
+}
+
+/** Where you would start in a crew that works where you live now, having moved: your best rank less a few, with your reputation and record counting for you. */
+export function transferStart(state: LifeState, content: ContentBundle): Start {
+  const t = content.balance.crime.away.transfer;
+  const record = state.legal.record.some((r) => !r.sealed) ? t.record : 0;
+  const reputation = Math.max(0, state.character.hidden.reputation - 50) * t.reputation;
+  return {
+    rank: clampInt(state.crime.peak - t.rankDrop, 1, content.balance.crime.ranks.length - 1),
+    standing: clampInt(content.balance.crime.entry.standing + t.standing + record + reputation, 0, 100),
+  };
+}
+
+/**
+ * While you are away from your crew, you leave it (how: moved) and join one that
+ * works where you live now, at a lower rank. False when you are not away or no
+ * crew works here.
+ */
+export function transferCrew(state: LifeState, content: ContentBundle): boolean {
+  const crew = state.crime.crew;
+  if (!crew?.away || crewsIn(content, state.character.cityId).length === 0) return false;
+  const start = transferStart(state, content);
+  leaveCrew(state, 'moved', content);
+  return joinCrew(state, content, undefined, start);
 }
 
 /** How you left, for the record and the history. */

@@ -178,15 +178,10 @@ describe('the crew year', () => {
     expect(worked.crime.standing).toBe(50 - b.standing.slide);
   });
 
-  it('pushes you out when standing stays at the low line, and forgets you when you live far away', () => {
+  it('pushes you out when standing stays at the low line', () => {
     let life = apply(inCrewLife('low'), (d) => void (d.crime.standing = 0));
     for (let i = 0; i < b.standing.lowYears; i++) life = yearStep(life);
     expect(life.scheduled.some((s) => content.registries.crime.triggers.pushedOut.events.includes(s.eventId))).toBe(true);
-    let away = apply(inCrewLife('away'), (d) => void (d.character.cityId = Object.keys(content.cities).find((c) => c !== d.crime.crew!.cityId)!));
-    for (let i = 0; i < b.standing.awayYears; i++) away = yearStep(away);
-    expect(away.crime.crew).toBeNull();
-    expect(away.crime.past.at(-1)!.how).toBe('drifted');
-    ok(away);
   });
 
   it('lets an informant stop informing when the investigation ends, however it ends', () => {
@@ -245,6 +240,115 @@ describe('the crew year', () => {
     expect(l.crime.peak).toBe(b.ranks.length);
     expect(l.crime.crew!.leader).toBeDefined();
     ok(l);
+  });
+});
+
+const movedAway = (seed: string) => apply(inCrewLife(seed), (d) => void (d.character.cityId = Object.keys(content.cities).find((c) => c !== d.crime.crew!.cityId && Object.values(content.crews).some((x) => x.cities.includes(c)))!));
+
+describe('moving away from the crew', () => {
+  it('freezes your rank, fades standing to a floor and grows what the crew suspects, without forgetting you at once', () => {
+    let life = apply(movedAway('away'), (d) => void ((d.crime.rank = 3), (d.crime.peak = 3), (d.crime.standing = 70)));
+    for (let i = 0; i < 3; i++) life = yearStep(life);
+    expect(life.crime.crew).not.toBeNull();
+    expect(life.crime.rank).toBe(3);
+    expect(life.crime.crew!.away).toMatchObject({ standing: 70 });
+    expect(life.crime.crew!.away!.suspicion).toBeGreaterThan(b.away.suspicion.start);
+    expect(life.crime.standing).toBe(70 - 3 * b.away.standingLoss);
+    expect(life.scheduled.some((s) => content.registries.crime.jobs.includes(s.eventId))).toBe(false);
+    for (let i = 0; i < 12; i++) life = yearStep(life);
+    expect(life.crime.crew === null || life.crime.standing >= Math.min(70, b.away.floor)).toBe(true);
+    ok(life);
+  });
+
+  it('is never silent: the crew reaches out as an event, and after years away writes you off as one', () => {
+    let life = apply(movedAway('reach'), (d) => void (d.crime.rank = 2));
+    life = apply(life, (d) => void (d.crime.crew!.away = { since: d.currentYear, standing: 50, suspicion: 90 }));
+    let reached = 0;
+    for (let i = 0; i < b.away.cutLooseYears - 1; i++) {
+      life = yearStep(life);
+      reached += life.scheduled.filter((s) => content.registries.crime.triggers.away.events.includes(s.eventId)).length;
+      life = apply(life, (d) => void (d.scheduled = []));
+    }
+    expect(reached).toBeGreaterThan(0);
+    life = apply(life, (d) => void (d.crime.awayYears = b.away.cutLooseYears - 1));
+    life = yearStep(life);
+    expect(life.scheduled.some((s) => content.registries.crime.triggers.awayCut.events.includes(s.eventId))).toBe(true);
+    const out = apply(life, (d) => void applyEffects(d, [{ type: 'crime', action: 'leave', how: 'drifted' }], { def: content.events.away_written_off!, cast: {}, rng: d.rng, content }));
+    expect(out.crime.past.at(-1)!.how).toBe('drifted');
+  });
+
+  it('restores part of your standing when you come home, less what the crew suspects, and says so in an event', () => {
+    for (const [suspicion, expected] of [[0, Math.round(80 * b.away.back.standing)], [80, Math.round(80 * b.away.back.standing - 80 * b.away.back.suspicionWeight)]] as const) {
+      const away = apply(movedAway(`home-${suspicion}`), (d) => void ((d.crime.rank = 3), (d.crime.peak = 3), (d.crime.standing = 30), (d.crime.crew!.away = { since: d.currentYear - 3, standing: 80, suspicion })));
+      const home = yearStep(apply(away, (d) => void (d.character.cityId = d.crime.crew!.cityId)));
+      expect(home.crime.crew!.away).toBeUndefined();
+      expect(home.crime.crew!.returned).toBe(home.currentYear);
+      expect(home.crime.standing).toBe(Math.max(30, expected) - b.standing.slide - b.standing.idleLoss);
+      expect(home.scheduled.some((s) => content.registries.crime.triggers.back.events.includes(s.eventId))).toBe(true);
+      ok(home);
+    }
+  });
+
+  it('lets a local crew take you at a lower rank when you have moved, and a record and reputation help', () => {
+    const away = apply(movedAway('transfer'), (d) => void ((d.crime.rank = 4), (d.crime.peak = 4), (d.crime.standing = 70), (d.crime.crew!.away = { since: d.currentYear, standing: 70, suspicion: 20 })));
+    const moved = apply(away, (d) => void applyEffects(d, [{ type: 'crime', action: 'transfer' }], { def: content.events.away_new_crew_notices!, cast: {}, rng: d.rng, content }));
+    expect(moved.crime.crew!.cityId).toBe(moved.character.cityId);
+    expect(moved.crime.crew!.away).toBeUndefined();
+    expect(moved.crime.rank).toBe(4 - b.away.transfer.rankDrop);
+    expect(moved.crime.past.at(-1)!.how).toBe('moved');
+    const famous = apply(away, (d) => void ((d.character.hidden.reputation = 90), applyEffects(d, [{ type: 'crime', action: 'transfer' }], { def: content.events.away_new_crew_notices!, cast: {}, rng: d.rng, content })));
+    expect(famous.crime.standing).toBeGreaterThan(moved.crime.standing);
+    ok(moved);
+  });
+
+  it('takes you back to a crew you were in before, below your best rank, by how you left', () => {
+    const results = (['left', 'drifted', 'pushed'] as const).map((how) => {
+      const life = apply(inCrewLife(`rejoin-${how}`), (d) => void ((d.crime.rank = 4), (d.crime.peak = 4), leaveCrew(d, how, content)));
+      const back = apply(life, (d) => void joinCrew(d, content));
+      expect(back.crime.crew!.defId).toBe(life.crime.past.at(-1)!.crewId);
+      return back.crime.rank;
+    });
+    expect(results[0]).toBe(4 - b.away.rejoin.left.rankDrop);
+    expect(results[2]).toBeLessThan(results[0]!);
+  });
+});
+
+describe('the yearly cut', () => {
+  it('is paid in dirty money to the two highest ranks only, adds a little heat, and is queued as an event', () => {
+    for (const rank of [1, 2, 3, 4, 5]) {
+      const life = yearStep(apply(inCrewLife(`cut-${rank}`), (d) => void ((d.crime.rank = rank), (d.crime.peak = rank), (d.crime.standing = 60))));
+      const queued = life.scheduled.some((s) => content.registries.crime.triggers.cut.events.includes(s.eventId));
+      expect(queued).toBe(rank >= 4);
+    }
+    const lt = apply(inCrewLife('cut-pay'), (d) => void ((d.crime.rank = 4), (d.crime.peak = 4), (d.crime.heat = 0), (d.finances.dirty = 0)));
+    const paid = apply(lt, (d) => void applyEffects(d, [{ type: 'dirtyMoney', cut: true }], { def: content.events.crew_cut_lieutenant!, cast: {}, rng: d.rng, content }));
+    const base = b.ranks[3]!.cut!.amount * (content.cities[lt.character.cityId]!.salaryMultiplier ?? 1);
+    expect(paid.finances.dirty).toBeGreaterThan(base * (1 - b.jobs.variation) - 1);
+    expect(paid.finances.dirty).toBeLessThan(base * (1 + b.jobs.variation) + 1);
+    expect(paid.crime.heat).toBe(b.ranks[3]!.cut!.heat);
+    const low = apply(lt, (d) => void ((d.crime.rank = 2), applyEffects(d, [{ type: 'dirtyMoney', cut: true }], { def: content.events.crew_cut_lieutenant!, cast: {}, rng: d.rng, content })));
+    expect(low.finances.dirty).toBe(0);
+  });
+});
+
+describe('deaths in a crew life', () => {
+  const deadly = Object.values(content.events).filter((d) => content.registries.crime.deathCauses.some((cause) => JSON.stringify(d.choices ?? []).includes(`"cause":"${cause}"`)));
+
+  it('come only from rare, queued events with a visible build-up, a risky choice on a check, and a way out', () => {
+    expect(deadly.length).toBeGreaterThanOrEqual(content.registries.crime.deathCauses.length);
+    for (const d of deadly) {
+      expect(d.followUpOnly).toBe(true);
+      expect(d.rarity).not.toBe('common');
+      expect((d.choices ?? []).some((c) => !JSON.stringify(c).includes('"type":"death"'))).toBe(true);
+    }
+  });
+
+  it('go through the death path with a cause the obituary names', () => {
+    for (const cause of content.registries.crime.deathCauses) {
+      const life = apply(inCrewLife(`death-${cause}`), (d) => void applyEffects(d, [{ type: 'death', cause }], { def: content.events.rival_ambush!, cast: {}, rng: d.rng, content }));
+      expect(life.death?.causeId).toBe(cause);
+      expect(content.causes[cause]!.text.length).toBeGreaterThan(0);
+    }
   });
 });
 

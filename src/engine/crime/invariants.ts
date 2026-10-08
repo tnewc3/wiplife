@@ -33,6 +33,12 @@ export function crimeFailures(state: LifeState, content: ContentBundle): string[
     if (k.peak < k.rank) fail('crime: the highest rank held is below the current rank');
     if (k.crew.since > state.currentYear || k.crew.since < state.birthYear + adultAge) fail('crime: the crew was joined outside the adult years');
     if (!content.cities[k.crew.cityId]) fail(`crime: the crew works in an unknown city "${k.crew.cityId}"`);
+    if (k.crew.away) {
+      if (k.crew.cityId === state.character.cityId) fail('crime: away from a crew that works in the city you live in');
+      score('crime.away.standing', k.crew.away.standing);
+      score('crime.away.suspicion', k.crew.away.suspicion);
+      if (k.crew.away.since > state.currentYear) fail('crime: away since a year to come');
+    } else if (k.crew.cityId !== state.character.cityId && k.awayYears !== 0) fail('crime: years away counted without being away');
     if (k.crew.rival !== undefined) {
       if (!content.crews[k.crew.rival]) fail(`crime: unknown rival crew "${k.crew.rival}"`);
       if (k.crew.rival === k.crew.defId) fail('crime: a crew is its own rival');

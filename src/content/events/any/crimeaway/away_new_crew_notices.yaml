@@ -1,0 +1,48 @@
+id: away_new_crew_notices
+title: Someone local has heard of you
+text: >-
+  {member.name}, who works with a crew here, has heard things about you.
+  Not all of them are true, but enough are. There is a place at the table, if
+  you want it, and a conversation to have first about where you stood before
+  you came.
+tone: neutral
+category: crimeaway
+rarity: uncommon
+recurring: true
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { crime: { member: true } }
+    - { crime: { away: true } }
+    - { crime: { local: true } }
+    - { crime: { awayYears: { gte: 1 } } }
+    - { crime: { rank: { gte: 2 } } }
+weight:
+  base: 8
+  modifiers:
+    - { if: { crime: { suspicion: { gte: 50 } } }, x: 1.6 }
+    - { if: { crime: { awayYears: { gte: 3 } } }, x: 1.5 }
+followUpOnly: true
+cast:
+  member: { kind: acquaintance, presence: city, createIfMissing: true, age: { min: 25, max: 55 } }
+choices:
+  - id: take_the_place
+    label: Take the place, at a lower rank than you held
+    outcome:
+      text: >-
+        The old crew gets a short, careful message from you. The new one
+        gets your time. You start at the bottom of a ladder you have climbed elsewhere, with people who do not yet know what you are worth.
+      effects:
+        - { type: crime, action: transfer }
+        - { type: stat, key: stress, delta: 3 }
+        - { type: relationship, role: member, trust: 3 }
+  - id: stay_loyal
+    label: Turn it down and stay loyal to the old crew
+    outcome:
+      text: >-
+        {member.name} shrugs. The offer stays open, {member.they} {member:says|say}, for as long
+        as you are somewhere {member.they} can find you.
+      effects:
+        - { type: crime, action: suspicion, delta: -6 }
+        - { type: relationship, role: member, affection: -2 }

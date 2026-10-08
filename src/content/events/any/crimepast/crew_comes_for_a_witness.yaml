@@ -1,0 +1,61 @@
+id: crew_comes_for_a_witness
+title: Nobody forgets a witness
+text: >-
+  Since you gave the police what you knew about {crew}, there have been small
+  signs: a car outside, a call that ends when you answer, a friend who crosses
+  the street. {contact.name} says the people you named have been asking where you
+  sleep, and that the offers to move you somewhere safe will not last.
+tone: dark
+category: crimepast
+rarity: rare
+recurring: true
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { crime: { former: true } }
+    - { crime: { member: false } }
+    - { flag: testified_against_crew }
+    - { crime: { heat: { gte: 10 } } }
+weight: { base: 8 }
+followUpOnly: true
+cast:
+  contact: { kind: friend, presence: city }
+choices:
+  - id: stay_put
+    label: Ignore the warnings and keep your routine
+    check:
+      base: 65
+      stats: [{ key: luck, weight: 0.3 }, { key: smarts, weight: 0.15 }, { crime: heat, weight: -0.2 }]
+      success:
+        text: >-
+          Nothing happens. A season of looking over your shoulder, and then it
+          fades, the way these things sometimes do.
+        effects:
+          - { type: stat, key: stress, delta: 6 }
+          - { type: crime, action: heat, delta: -6 }
+      failure:
+        text: >-
+          They knew your routine better than you did. It ends on a street you
+          have walked a hundred times.
+        effects:
+          - { type: death, cause: crew_reprisal }
+  - id: take_the_help
+    label: Take the offer and move somewhere new
+    outcome:
+      text: >-
+        You pack what you can carry and leave. The new place is unfamiliar and
+        far from everyone, and you sleep better for it.
+      effects:
+        - { type: stat, key: stress, delta: -2 }
+        - { type: crime, action: heat, delta: -10 }
+        - { type: relationship, role: contact, affection: -3 }
+  - id: tell_the_police
+    label: Tell the detective about the threats
+    outcome:
+      text: >-
+        The detective writes it down, and someone is sent to sit outside for a
+        few weeks. It does not make you safe. It makes you harder to reach.
+      effects:
+        - { type: crime, action: heat, delta: -4 }
+        - { type: stat, key: stress, delta: 2 }

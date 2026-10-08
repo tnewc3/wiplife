@@ -4,8 +4,9 @@
  *
  * - Heat falls (faster after a quiet year, or once you are out). The year's job
  *   count rolls over. In prison, standing is lost and that is all.
- * - In a crew: living far from it costs standing and, in time, the crew
- *   forgets you; a year with no job costs standing; life in a crew wears on
+ * - In a crew: living far from it freezes your rank, fades your standing to a
+ *   floor and grows what the crew suspects (an event may reach out, and after
+ *   years away it writes you off); coming home restores part of your standing; a year with no job costs standing; life in a crew wears on
  *   you; the rival feeling settles; the crew is kept staffed; with an
  *   investigation open, a member may turn informant.
  * - The police (legal.ts): an investigation may open, an arrest may happen,
@@ -13,7 +14,7 @@
  * - Events are queued for this year (up to balance jobs.maxQueued), most
  *   serious first: an arrest, an investigation, being pushed out, a stash
  *   raided or stolen, a promotion, trouble with the rival crew, an informant,
- *   the past catching up with someone who left, then the year's jobs.
+ *   the past catching up with someone who left, a higher rank's yearly cut, then the year's jobs.
  *
  * Numbers: balance/crime.yaml. The events: registries/crime.yaml.
  */
@@ -94,27 +95,39 @@ export function runCrime(state: LifeState, content: ContentBundle): void {
   const crew = crime.crew;
   const top = b.ranks.length;
   let pushedOut = false;
+  let away = false;
+  let returned = false;
   if (crew) {
     crime.totals.years += 1;
-    // Too far from the crew to be any use to it.
     if (crew.cityId !== state.character.cityId) {
+      // Living far from the crew: your rank stays, your standing fades to a floor, and what the crew suspects grows.
+      const a = (crew.away ??= { since: state.currentYear, standing: crime.standing, suspicion: b.away.suspicion.start });
       crime.awayYears += 1;
-      crime.standing = clampInt(crime.standing - b.standing.awayLoss, 0, 100);
-      if (crime.awayYears >= b.standing.awayYears) {
-        leaveCrew(state, 'drifted', content);
-        return;
-      }
+      crime.standing = clampInt(Math.max(Math.min(crime.standing, b.away.floor), crime.standing - b.away.standingLoss), 0, 100);
+      crime.lowYears = 0;
+      a.suspicion = clampInt(a.suspicion + b.away.suspicion.perYear + b.away.suspicion.perHeat * Math.max(0, crime.heat - 50) + (crime.investigation ? b.away.suspicion.investigated : 0), 0, 100);
+      away = true;
     } else {
       crime.awayYears = 0;
+      if (crew.away) {
+        // Home again: part of the standing you left with comes back, less what the crew thinks of how you left.
+        const back = Math.round(crew.away.standing * b.away.back.standing - crew.away.suspicion * b.away.back.suspicionWeight);
+        crime.standing = clampInt(Math.max(crime.standing, back), 0, 100);
+        delete crew.away;
+        crew.returned = state.currentYear;
+        returned = true;
+      }
       crime.standing = clampInt(crime.standing - b.standing.slide, 0, 100);
       if (done === 0) crime.standing = clampInt(crime.standing - b.standing.idleLoss, 0, 100);
       staffCrew(state, content);
     }
-    applyStatEffects(state, { stress: { perYear: b.ranks[crime.rank - 1]!.stress + b.life.stress, limit: b.life.stressLimit } });
-    crime.lowYears = crime.standing <= b.standing.lowAt ? crime.lowYears + 1 : 0;
-    pushedOut = crime.lowYears >= b.standing.lowYears;
-    if (crew.rival) crime.rivalry = clampInt(crime.rivalry + (b.rivalry.settle.at - crime.rivalry) * b.rivalry.settle.share, 0, 100);
-    if (crime.investigation && crew.informant === undefined && chance(state.rng, b.police.informantChance)) {
+    if (!away) {
+      applyStatEffects(state, { stress: { perYear: b.ranks[crime.rank - 1]!.stress + b.life.stress, limit: b.life.stressLimit } });
+      crime.lowYears = crime.standing <= b.standing.lowAt ? crime.lowYears + 1 : 0;
+      pushedOut = crime.lowYears >= b.standing.lowYears;
+    }
+    if (crew.rival && !away) crime.rivalry = clampInt(crime.rivalry + (b.rivalry.settle.at - crime.rivalry) * b.rivalry.settle.share, 0, 100);
+    if (!away && crime.investigation && crew.informant === undefined && chance(state.rng, b.police.informantChance)) {
       const members = liveMembers(state, crew).filter((id) => id !== crew.leader || crime.rank < top);
       if (members.length > 0) crew.informant = pick(state.rng, members);
     }
@@ -142,7 +155,14 @@ export function runCrime(state: LifeState, content: ContentBundle): void {
     if (chance(state.rng, curveAt(b.dirty.stash.raid, crime.heat))) queue('raid');
     else if (chance(state.rng, b.dirty.stash.theft)) queue('theft');
   }
-  if (crew) {
+  if (crew && away) {
+    // The crew reaches out, or writes you off; never silently.
+    if (crime.awayYears >= b.away.cutLooseYears) {
+      if (!queueCrimeEvent(state, 'awayCut', content)) leaveCrew(state, 'drifted', content);
+    } else if (room > 0 && chance(state.rng, curveAt(b.away.reachChance, crew.away!.suspicion))) queue('away');
+  } else if (crew) {
+    if (returned) queue('back');
+    if (!arrested && b.ranks[crime.rank - 1]!.cut) queue('cut');
     const next = b.ranks[crime.rank];
     if (next?.reach && crime.standing >= next.reach.standing && state.currentYear - crime.rankSince >= next.reach.years && chance(state.rng, next.reach.chance)) queue('promotion');
     if (crew.rival && chance(state.rng, curveAt(b.rivalry.eventChance, crime.rivalry))) queue('rival');
@@ -150,7 +170,7 @@ export function runCrime(state: LifeState, content: ContentBundle): void {
   } else if (isFormer(state) && chance(state.rng, curveAt(b.past.eventChance, crimeYears(state)))) queue('past');
 
   // This year's jobs, from what the registry offers and the rank allows.
-  if (crew && !arrested && room > 0) {
+  if (crew && !away && !arrested && room > 0) {
     const range = b.jobs.perYear[crime.rank - 1]!;
     const n = Math.min(room, nextInt(state.rng, range.min, range.max));
     const taken = new Set<Id>();

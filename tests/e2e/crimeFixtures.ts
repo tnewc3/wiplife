@@ -25,6 +25,8 @@ export interface CrimeLife {
   dirty?: number;
   heat?: number;
   standing?: number;
+  /** Living in another city from the crew, for this many years, with this much suspicion. */
+  away?: { years: number; suspicion: number };
 }
 
 export function crimeLife(options: CrimeLife): LifeState {
@@ -54,6 +56,12 @@ export function crimeLife(options: CrimeLife): LifeState {
     if (options.inCrew !== false) {
       joinCrew(d as LifeState, content);
       d.crime.standing = options.standing ?? 55;
+    }
+    if (options.away && d.crime.crew) {
+      d.character.cityId = Object.keys(content.cities).find((c) => c !== d.crime.crew!.cityId)!;
+      d.housing.cityId = d.character.cityId;
+      d.crime.awayYears = options.away.years;
+      d.crime.crew.away = { since: d.currentYear - options.away.years, standing: d.crime.standing, suspicion: options.away.suspicion };
     }
     d.crime.heat = options.heat ?? 35;
     d.finances.dirty = options.dirty ?? 12_000;

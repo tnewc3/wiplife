@@ -83,6 +83,14 @@ export interface CrimeReport {
   gotOut: number;
   how: Record<string, number>;
   rejoined: number;
+  /** Lives that ever lived far from their crew, that came home to it, and that moved to a crew in a new city. */
+  awayLives: number;
+  returns: number;
+  transfers: number;
+  /** Years spent away from the crew (counted once a year), and the most suspicion the crew reached. */
+  awayYears: number;
+  /** Lives whose end came from a crew death, by cause. */
+  deaths: Record<string, number>;
   deposits: number;
   flagged: number;
   byTier: number[];
@@ -124,6 +132,11 @@ export function emptyCrimeReport(player: string, content: ContentBundle): CrimeR
     gotOut: 0,
     how: {},
     rejoined: 0,
+    awayLives: 0,
+    returns: 0,
+    transfers: 0,
+    awayYears: 0,
+    deaths: {},
     deposits: 0,
     flagged: 0,
     byTier: [0, 0, 0],
@@ -140,6 +153,7 @@ export function emptyCrimeReport(player: string, content: ContentBundle): CrimeR
 export class CrimeWatcher {
   private everIn = false;
   private everInvestigated = false;
+  private everAway = false;
   private everPrison = false;
   private lastEarned = 0;
   private informantSeen: string | undefined;
@@ -172,6 +186,14 @@ export class CrimeWatcher {
       r.heatSum += before.crime.heat;
       r.heatMax = Math.max(r.heatMax, before.crime.heat);
     }
+    if (k.crew?.away) {
+      r.awayYears++;
+      if (!this.everAway) {
+        this.everAway = true;
+        r.awayLives++;
+      }
+    }
+    if (k.crew?.returned === after.currentYear && before.crime.crew?.returned !== after.currentYear) r.returns++;
     if (k.investigation && !before.crime.investigation) {
       r.investigations++;
       this.everInvestigated = true;
@@ -203,6 +225,7 @@ export class CrimeWatcher {
     const { r } = this;
     const k = life.crime;
     r.lives++;
+    if (life.death && this.content.registries.crime.deathCauses.includes(life.death.causeId)) r.deaths[life.death.causeId] = (r.deaths[life.death.causeId] ?? 0) + 1;
     if (life.character.age >= 30) r.reached30++;
     const wealth = netWorth(life) + life.finances.dirty;
     if (this.everIn || k.past.length > 0) {
@@ -214,7 +237,10 @@ export class CrimeWatcher {
       if (this.everInvestigated) r.investigatedLives++;
       if (this.everPrison) r.prisonLives++;
       if (k.past.length > 0) r.gotOut++;
-      for (const p of k.past) r.how[p.how] = (r.how[p.how] ?? 0) + 1;
+      for (const p of k.past) {
+        r.how[p.how] = (r.how[p.how] ?? 0) + 1;
+        if (p.how === 'moved') r.transfers++;
+      }
       if (k.past.length > 1 || (k.past.length >= 1 && k.crew !== null)) r.rejoined++;
       r.totals.jobs += k.totals.jobs;
       r.totals.earned += k.totals.earned;
@@ -252,6 +278,10 @@ export function formatCrime(r: CrimeReport, content: ContentBundle): string[] {
   lines.push(`  laundering: ${r.deposits} deposits (tier 1 ${r.byTier[0]}, tier 2 ${r.byTier[1]}, tier 3 ${r.byTier[2]}); flagged ${pct(r.flagged, r.deposits)}`);
   lines.push(`  the law: investigated ${pct(r.investigatedLives, r.entered)} (${r.investigations} investigations, ${r.informants} informants); arrested ${pct(r.arrestedLives, r.entered)} (${t.arrests} arrests); prison ${pct(r.prisonLives, r.entered)} (${r.prisonYears} years inside)`);
   lines.push(`  getting out: ${pct(r.gotOut, r.entered)} got out (${Object.entries(r.how).map(([k, n]) => `${k} ${n}`).join(', ') || 'none'}); ${r.rejoined} went back`);
+  const away = Object.entries(r.events).filter(([id]) => content.registries.crime.triggers.away.events.includes(id)).reduce((a, [, n]) => a + n, 0);
+  lines.push(`  moving away: ${pct(r.awayLives, r.entered)} of crew lives lived far from their crew (${r.awayYears} years, ${per(r.awayYears, Math.max(1, r.awayLives))} a life); ${away} reach-out events; ${r.transfers} moved to a crew in a new city; ${r.returns} came home to the old crew`);
+  lines.push(`  years inside per crew life: ${per(r.prisonYears, r.entered, 2)} (${r.prisonYears} years in ${r.entered} crew lives); the yearly cut: ${Object.entries(r.events).filter(([id]) => id.startsWith('crew_cut')).map(([id, n]) => `${id} ${n}`).join(', ') || 'none'}`);
+  lines.push(`  crew deaths: ${pct(Object.values(r.deaths).reduce((a, b) => a + b, 0), r.entered)} of crew lives (${Object.entries(r.deaths).map(([id, n]) => `${id} ${n}`).join(', ') || 'none'})`);
   lines.push(`  wealth at death (net worth plus dirty money): median of crew lives ${dollars(median(r.crewWealth))}, of the same player's lives with no crew ${dollars(median(r.otherWealth))}`);
   const top = [...r.crewLives].sort((a, b) => b.earned - a.earned).slice(0, Math.max(1, Math.ceil(r.crewLives.length / 4)));
   lines.push(`  the top quarter by dirty money earned (${top.length} lives, from ${dollars(top.at(-1)?.earned ?? 0)}): ${pct(top.filter((l) => l.arrested).length, top.length)} arrested`);
@@ -285,6 +315,7 @@ export function crimeTargets(report: SimulationReport, content: ContentBundle): 
   range('median wealth at death: crew lives as a multiple of the same player’s lives with no crew', share(median(r.crewWealth), Math.max(1, median(r.otherWealth))), t.netWorthRatio, (n) => n.toFixed(2));
   const top = [...r.crewLives].sort((a, b) => b.earned - a.earned).slice(0, Math.max(1, Math.ceil(r.crewLives.length / 4)));
   range('arrested at least once, of crew lives in the top quarter by dirty money earned', share(top.filter((l) => l.arrested).length, top.length), t.richArrested);
+  range('crew lives that ended in a crew death', share(Object.values(r.deaths).reduce((a, b) => a + b, 0), r.entered), t.deaths);
   range('deposits flagged', share(r.flagged, r.deposits), t.flaggedShare);
   return out;
 }

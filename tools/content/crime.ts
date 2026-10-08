@@ -15,7 +15,7 @@ const REGISTRY = 'registries/crime.yaml';
 const BALANCE = 'balance/crime.yaml';
 
 /** Event categories that are about a crime career, whatever they do. */
-const CRIME_CATEGORIES = ['crimeoffers', 'crime', 'crimehome', 'crimelaw', 'crimepast'];
+const CRIME_CATEGORIES = ['crimeoffers', 'crime', 'crimeaway', 'crimehome', 'crimelaw', 'crimepast'];
 
 function required(condition: Condition | undefined): Condition[] {
   if (!condition) return [];
@@ -54,6 +54,11 @@ const INSTRUCTION_WORDS =
 const STEREOTYPE_WORDS =
   /\b(?:mafia|cartel|yakuza|triads?|bloods|crips|mob|gangs?ters?|italian|irish|russian|mexican|colombian|chinese|asian|latino|latina|hispanic|black|white|christians?|muslims?|jewish|jews|church|mosque|temple|cosa nostra|hell'?s angels)\b/i;
 
+/** Does the event's category itself require being away? */
+function requiresCategoryAway(bundle: ContentBundle, def: EventDef): boolean {
+  return required(bundle.registries.categories.categories[def.category]?.requires).some((c) => 'crime' in c && c.crime.away === true);
+}
+
 export function checkCrime(bundle: ContentBundle, fileOf: (typeKey: CollectionKey, id: string) => string, partialEvents: boolean): ContentError[] {
   const errors: ContentError[] = [];
   const err = (file: string, message: string) => errors.push({ file, message });
@@ -73,6 +78,15 @@ export function checkCrime(bundle: ContentBundle, fileOf: (typeKey: CollectionKe
   for (const [name, bands] of [['heat.bands', b.heat.bands], ['standing.bands', b.standing.bands], ['rivalry.bands', b.rivalry.bands]] as const) {
     if (bands.some((v, i) => i > 0 && v <= bands[i - 1]!)) err(BALANCE, `${name} must increase`);
   }
+  b.ranks.forEach((r, i) => {
+    if (r.cut && i < 3) err(BALANCE, `ranks[${i}].cut: only the two highest ranks take a yearly cut`);
+  });
+  if (!b.ranks.slice(3).every((r) => r.cut)) err(BALANCE, 'the two highest ranks each need a cut (ranks[3] and ranks[4])');
+  if (b.ranks[4]!.cut && b.ranks[3]!.cut && b.ranks[4]!.cut.amount < b.ranks[3]!.cut.amount) err(BALANCE, 'ranks[4].cut.amount is below the rank before it');
+  if (b.away.suspicion.bands.some((v, i) => i > 0 && v <= b.away.suspicion.bands[i - 1]!)) err(BALANCE, 'away.suspicion.bands must increase');
+  if (b.away.floor > b.standing.lowAt + 40) err(BALANCE, 'away.floor is too high: standing should still be able to fade');
+  const r = b.away.rejoin;
+  if (r.pushed.rankDrop < r.drifted.rankDrop || r.drifted.rankDrop < r.moved.rankDrop || r.moved.rankDrop < r.left.rankDrop) err(BALANCE, 'away.rejoin: rankDrop should grow from left to moved to drifted to pushed');
   const lt = b.dirty.laundering.tiers;
   if (lt.some((t, i) => i > 0 && (t.fee > lt[i - 1]!.fee || t.risk < lt[i - 1]!.risk || t.capacity < lt[i - 1]!.capacity))) {
     err(BALANCE, 'dirty.laundering.tiers: a higher tier charges less, is riskier and takes more');
@@ -137,9 +151,48 @@ export function checkCrime(bundle: ContentBundle, fileOf: (typeKey: CollectionKe
         if (name === 'informant' && !requiresCrime(def, (c) => c.informant === true)) e('answers informant, so it must require { crime: { informant: true } }');
         if (name === 'investigation' && !requiresCrime(def, (c) => c.investigated === true)) e('answers investigation, so it must require { crime: { investigated: true } }');
         if (name === 'rival' && !requiresCrime(def, (c) => c.rival === true)) e('answers rival, so it must require { crime: { rival: true } }');
+        if ((name === 'away' || name === 'awayCut') && !(requiresCrime(def, (c) => c.away === true) || requiresCategoryAway(bundle, def))) e(`answers ${name}, so it must require { crime: { away: true } }`);
+        if (name === 'back' && !requiresCrime(def, (c) => c.returned === true)) e('answers back, so it must require { crime: { returned: true } }');
+        if (name === 'cut') {
+          if (!outcomesOf(def).some((o) => (o.effects as Effect[]).some((x) => x.type === 'dirtyMoney' && x.cut === true))) e('answers cut, so some outcome must pay your cut (dirtyMoney cut)');
+          if (!requiresCrime(def, (c) => c.rank?.gte !== undefined && c.rank.gte >= bundle.balance.crime.ranks.length - 1 || c.rank?.eq !== undefined && c.rank.eq >= bundle.balance.crime.ranks.length - 1)) e('answers cut, so it must require one of the top two ranks');
+          if (!requiresCrime(def, (c) => c.away === false)) e('answers cut, so it must require { crime: { away: false } } (nothing is shared while you are far away)');
+        }
         if (name === 'pushedOut' && !requiresCrime(def, (c) => c.standing !== undefined)) e('answers pushedOut, so it must require a low standing');
       }
     }
+  }
+
+  // Deaths: rare, never out of nowhere. A death in a crew life comes only from a choice that clearly signals danger,
+  // on a check you can fail, in an event that needs a visible build-up, with a way out in the same event.
+  const causes = bundle.registries.crime.deathCauses;
+  for (const cause of causes) if (!bundle.causes[cause]) err(REGISTRY, `deathCauses: unknown cause of death "${cause}"`);
+  if (!partialEvents) {
+    for (const cause of causes) {
+      if (!Object.values(bundle.events).some((d) => !d.retired && outcomesOf(d).some((o) => (o.effects as Effect[]).some((x) => x.type === 'death' && x.cause === cause)))) err(REGISTRY, `deathCauses: no event ends in "${cause}"`);
+    }
+  }
+  for (const [id, def] of Object.entries(bundle.events)) {
+    if (def.retired) continue;
+    const e = (message: string) => err(fileOf('events', id), `${id}: ${message}`);
+    const choices = def.choices ?? [];
+    const deadly = (o: { effects: unknown } | undefined) => ((o?.effects ?? []) as Effect[]).some((x) => x.type === 'death' && causes.includes(x.cause));
+    const anyDeath = outcomesOf(def).some(deadly);
+    if (!anyDeath) continue;
+    if (!def.followUpOnly) e('a crew death comes only from an event the crime step queues (followUpOnly)');
+    if (def.autoOutcome && deadly(def.autoOutcome)) e('a crew death is never automatic: it follows a choice');
+    if (!requiresCrime(def, (c) => c.rivalry?.gte !== undefined && c.rivalry.gte >= 50) && !requiresCrime(def, (c) => c.heat?.gte !== undefined && c.heat.gte >= 10) && !required(def.requires).some((c) => 'flag' in c)) {
+      e('a crew death needs a visible build-up: require rivalry of at least 50, heat of at least 10, or a flag that proves the danger');
+    }
+    for (const c of choices) {
+      if (c.outcome && deadly(c.outcome)) e(`choices.${c.id}: a crew death is a risk you take on a check, never the certain result of a choice`);
+      if (c.check) {
+        if (deadly(c.check.success)) e(`choices.${c.id}: death on success`);
+        if (deadly(c.check.failure) && c.check.base < 50) e(`choices.${c.id}: a check that can end in death must have a base of at least 50 (rare, never out of nowhere)`);
+      }
+    }
+    if (!choices.some((c) => !deadly(c.outcome) && !deadly(c.check?.success) && !deadly(c.check?.failure))) e('a crew death needs a way out: at least one choice that cannot end in death');
+    if (def.rarity === 'common') e('an event that can end in death is not common');
   }
 
   // Events.

@@ -1,0 +1,64 @@
+id: job_warned_off
+title: Everyone says walk away
+text: >-
+  {member.name} has gone quiet about this one, and so has everyone else who
+  has looked at it. Two people who were meant to be in it have found reasons not to be.
+  The prize is big. The warnings are louder than the prize.
+tone: dark
+category: crime
+rarity: rare
+recurring: true
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { crime: { member: true } }
+    - { crime: { rank: { gte: 2 } } }
+    - { crime: { heat: { gte: 25 } } }
+    - { crime: { away: false } }
+weight:
+  base: 2
+  modifiers:
+    - { if: { crime: { rivalry: { gte: 50 } } }, x: 1.5 }
+followUpOnly: true
+cast:
+  member: { kind: friend, crew: yours, presence: city }
+choices:
+  - id: go_anyway
+    label: Go in anyway, against the warnings
+    check:
+      base: 70
+      stats: [{ key: smarts, weight: 0.2 }, { key: fitness, weight: 0.15 }, { key: luck, weight: 0.3 }, { crime: heat, weight: -0.25 }]
+      success:
+        text: >-
+          It is as bad as they said and you are somehow still on your feet at
+          the end of it. The prize is real. So is the way people look at you afterward.
+        effects:
+          - { type: dirtyMoney, gain: big }
+          - { type: crime, action: job, size: big }
+          - { type: crime, action: standing, delta: 10 }
+          - { type: mental, action: trauma, amount: 6 }
+      failure:
+        text: >-
+          Everything the warnings promised happens, in the order they promised
+          it. You do not make it out, and nobody who does can say exactly how it ended.
+        effects:
+          - { type: death, cause: crime_job_gone_wrong }
+  - id: walk_away
+    label: Walk away and take the hit to your name
+    outcome:
+      text: >-
+        You say it is not for you. The room does not argue. In a month people
+        will either call it wisdom or fear, and which depends on how the job goes.
+      effects:
+        - { type: crime, action: standing, delta: -6 }
+        - { type: stat, key: stress, delta: -2 }
+  - id: send_someone_else
+    label: Hand it to {member.name} and stay out of it
+    outcome:
+      text: >-
+        {member.name} takes it, with a look that says {member.they} {member:knows|know} why you did not.
+        Whatever happens, it will not be your name on it.
+      effects:
+        - { type: crime, action: standing, delta: -9 }
+        - { type: relationship, role: member, trust: -6 }

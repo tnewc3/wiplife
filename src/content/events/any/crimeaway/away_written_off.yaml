@@ -1,0 +1,26 @@
+id: away_written_off
+title: Nobody expects you back
+text: >-
+  The word that reaches you is that {crew} has stopped counting you among
+  its own. No threat comes with it, which is its own kind of message. The
+  place that was yours has been given to someone who stayed.
+tone: dark
+category: crimeaway
+rarity: common
+recurring: true
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { crime: { member: true } }
+    - { crime: { away: true } }
+    - { crime: { awayYears: { gte: 6 } } }
+weight: { base: 10 }
+followUpOnly: true
+autoOutcome:
+  text: >-
+    You are no longer one of them. It could have been worse, and that thought
+    does not help as much as it should.
+  effects:
+    - { type: crime, action: leave, how: drifted }
+    - { type: stat, key: stress, delta: -2 }
