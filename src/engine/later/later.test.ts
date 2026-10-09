@@ -462,7 +462,7 @@ describe('a death you see coming', () => {
     const kids = Object.keys(t.relationships).filter((id) => ['child', 'spouse'].includes(t.relationships[id]!.kind));
     const share = Math.floor(100 / kids.length);
     const written = produce(t, (d) => {
-      d.will = { shares: kids.map((id, i) => ({ kind: 'person' as const, id, percent: i === 0 ? 100 - share * (kids.length - 1) : share })) };
+      d.will = { year: d.currentYear, shares: kids.map((id, i) => ({ kind: 'person' as const, id, percent: i === 0 ? 100 - share * (kids.length - 1) : share })) };
     });
     expect(willOutOfDate(written)).toBe(false);
     const gone = produce(written, (d) => {

@@ -189,11 +189,11 @@ function applyDeltas(state: LifeState, deltas: Partial<Record<'health' | 'happin
 export function runCare(state: LifeState, content: ContentBundle): void {
   const b = content.balance.later.care;
   if (state.housing.kind === 'incarcerated') return;
-  let care = state.later.care;
+  const care = state.later.care;
   if (care === null) {
     const p = careChance(state, content);
     if (p > 0 && chance(state.rng, p)) {
-      state.later.care = care = { since: state.currentYear, option: null, declined: [] };
+      state.later.care = { since: state.currentYear, option: null, declined: [] };
       history(state, 'careNeeded', content);
       state.later.offered.care = state.currentYear;
       askAboutCare(state, content);
