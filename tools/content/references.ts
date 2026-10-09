@@ -196,6 +196,7 @@ export function checkReferences(
   errors.push(...checkFame(bundle, fileOf, options.partialEvents === true));
   errors.push(...checkSports(bundle, fileOf, options.partialEvents === true));
   errors.push(...checkEulogy(bundle));
+  errors.push(...checkLater(bundle, fileOf, options.partialEvents === true));
 
   return errors;
 }
@@ -1514,5 +1515,47 @@ function checkEulogy(bundle: ContentBundle): ContentError[] {
   all('absent.distant', a.distant, reason);
   all('absent.far', a.far, reason);
   for (const [why, list] of Object.entries(text.couldNot)) all(`couldNot.${why}`, list, reason);
+  return errors;
+}
+
+/**
+ * Content checks for later life (L1): every event the later-life registry
+ * names exists and is a follow-up; every diagnosis key is a condition (or one
+ * of `decline` and `other`) and `other` and `decline` always have an event;
+ * amends sources and review lines only name memories that exist; and the
+ * later-life and review text has no hardcoded pronoun.
+ */
+function checkLater(bundle: ContentBundle, fileOf: (typeKey: CollectionKey, id: string) => string, partialEvents: boolean): ContentError[] {
+  const errors: ContentError[] = [];
+  const REGISTRY = 'registries/later.yaml';
+  const REVIEW = 'text/review.yaml';
+  const LATER_TEXT = 'text/later.yaml';
+  const registry = bundle.registries.later;
+  if (!partialEvents) for (const { where, events } of laterResults(registry)) errors.push(...checkRegistryEvents(bundle, fileOf, REGISTRY, where, events));
+  for (const key of ['decline', 'other']) if (!registry.terminal.diagnosis[key]?.length) errors.push({ file: REGISTRY, message: `terminal.diagnosis.${key}: needs an event` });
+  for (const key of Object.keys(registry.terminal.diagnosis)) {
+    if (key !== 'decline' && key !== 'other' && !bundle.conditions[key]) errors.push({ file: REGISTRY, message: `terminal.diagnosis.${key}: not a health condition` });
+  }
+  const memoryExists = (tag: string) => bundle.registries.memories.tags[tag] !== undefined;
+  for (const [name, source] of Object.entries(registry.amends.sources)) {
+    for (const tag of source.memories ?? []) if (!memoryExists(tag)) errors.push({ file: REGISTRY, message: `amends.sources.${name}: unknown memory "${tag}"` });
+  }
+  const lines = [...bundle.text.review.regrets, ...bundle.text.review.proud];
+  const seen = new Set<string>();
+  for (const t of lines) {
+    if (seen.has(t.id)) errors.push({ file: REVIEW, message: `${t.id}: duplicate review line id` });
+    seen.add(t.id);
+    if (t.who?.memory && !memoryExists(t.who.memory)) errors.push({ file: REVIEW, message: `${t.id}: unknown memory "${t.who.memory}"` });
+    if (/\b(he|she|him|her|his|hers)\b/i.test(t.text.replace(/\{[^}]*\}/g, ''))) errors.push({ file: REVIEW, message: `${t.id}: hardcoded pronoun; use placeholders` });
+  }
+  const strings = (node: unknown, out: string[] = []): string[] => {
+    if (typeof node === 'string') out.push(node);
+    else if (Array.isArray(node)) for (const n of node) strings(n, out);
+    else if (typeof node === 'object' && node !== null) for (const n of Object.values(node)) strings(n, out);
+    return out;
+  };
+  for (const text of strings(bundle.text.later)) {
+    if (/\b(he|she|him|her|his|hers)\b/i.test(text.replace(/\{[^}]*\}/g, ''))) errors.push({ file: LATER_TEXT, message: `hardcoded pronoun; use placeholders: "${text.slice(0, 50)}"` });
+  }
   return errors;
 }

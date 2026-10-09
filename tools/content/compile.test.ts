@@ -1733,3 +1733,34 @@ describe('the eulogy (W1)', () => {
     expect(await expectErrors()).toContain('"friend" is in no group');
   });
 });
+
+describe('later life (L1)', () => {
+  const read = (file: string) => readFile(path.join(dir, file), 'utf8');
+
+  it('accepts the real content, with an event for every kind of warning and a proof for every review line', { timeout: 90_000 }, async () => {
+    const result = await compile();
+    if (!result.ok) throw new Error(formatErrors(result.errors));
+    const diagnosis = result.bundle.registries.later.terminal.diagnosis;
+    expect(diagnosis.other?.length).toBeGreaterThan(0);
+    expect(diagnosis.decline?.length).toBeGreaterThan(0);
+    for (const line of [...result.bundle.text.review.regrets, ...result.bundle.text.review.proud]) expect(line.who ?? line.when, line.id).toBeDefined();
+  });
+
+  it('wants the registry to name events and conditions that exist', { timeout: 90_000 }, async () => {
+    const real = await read('registries/later.yaml');
+    await write('registries/later.yaml', real.replace('    cancer: [terminal_cancer]', '    cancer: [terminal_ghost]'));
+    expect(await expectErrors()).toContain('unknown event "terminal_ghost"');
+    await write('registries/later.yaml', real.replace('    cancer: [terminal_cancer]', '    imaginary_illness: [terminal_cancer]'));
+    expect(await expectErrors()).toContain('not a health condition');
+    await write('registries/later.yaml', real.replace('    other: [terminal_other]\n', ''));
+    expect(await expectErrors()).toContain('terminal.diagnosis.other: needs an event');
+  });
+
+  it('keeps review lines to memories that exist and to pronoun placeholders', { timeout: 90_000 }, async () => {
+    const real = await read('text/review.yaml');
+    await write('text/review.yaml', real.replace('who: { memory: taught_them }', 'who: { memory: taught_by_a_ghost }'));
+    expect(await expectErrors()).toContain('unknown memory "taught_by_a_ghost"');
+    await write('text/review.yaml', real.replace('You taught {npc.name} something that lasted.', 'You taught {npc.name} and she learned.'));
+    expect(await expectErrors()).toContain('hardcoded pronoun');
+  });
+});

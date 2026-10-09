@@ -287,26 +287,14 @@ proud:
     weight: 1
     when: { age: { gte: 85 } }
     text: "You lived a long life, and were there for most of it."
-  - id: coached_grandchild
-    weight: 3
-    when: { flag: coached_a_grandchild }
-    text: "You handed a grandchild your trade, and watched it become theirs."
   - id: hosted_friends
     weight: 2
     when: { flag: hosted_old_friends }
     text: "You got the old friends in one room again before it was too late."
-  - id: picked_up_dream
-    weight: 4
-    when: { flag: picked_up_the_dream }
-    text: "You went back to the thing you had walked away from, and it was still yours."
   - id: told_openly
     weight: 3
     when: { flag: took_the_diagnosis_openly }
     text: "You told the people close to you the truth about your illness, and let them stay."
-  - id: passed_on
-    weight: 3
-    when: { flag: passed_something_on }
-    text: "You passed on something that mattered, while you could still explain it."
   - id: paid_school
     weight: 3
     when: { flag: paid_for_grandchild_school }
