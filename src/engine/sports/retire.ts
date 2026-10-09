@@ -7,7 +7,7 @@
  * balance/sports.yaml.
  */
 import type { ContentBundle, SportRetireRoute } from '../../content/schemas';
-import { startJob } from '../career';
+import { meetsJobRequirements, startJob } from '../career';
 import { crossBlock, crossOver, retire } from '../fame/ladder';
 import { addCondition, conditionOf } from '../health';
 import { chance, type RngState } from '../rng';
@@ -17,9 +17,15 @@ import { mySport } from './query';
 
 export type RetireWhy = 'retired' | 'aged' | 'injury' | 'stalled';
 
+/** Coaching is a job like any other: its requirements (a name in the game, or a degree) still apply. */
+function canCoach(state: LifeState, content: ContentBundle): boolean {
+  const def = content.jobs['coach'];
+  return def !== undefined && meetsJobRequirements(state, def, content);
+}
+
 /** Whether this route is open to you now (broadcasting asks for enough fame to cross over). */
 export function routeBlock(state: LifeState, route: SportRetireRoute, content: ContentBundle): string | null {
-  if (route === 'coaching') return content.jobs['coach'] ? null : 'job';
+  if (route === 'coaching') return canCoach(state, content) ? null : 'job';
   if (route === 'broadcast') {
     const media = content.balance.sports.retire.broadcastPath;
     return crossBlock(state, media, content) === null ? null : 'fame';
@@ -39,7 +45,7 @@ export function takeRoute(state: LifeState, route: SportRetireRoute, content: Co
   const def = mySport(state, content);
   if (!r || r.year !== state.currentYear || r.route !== null || !def) return false;
   if (route === 'coaching') {
-    if (!content.jobs['coach'] || state.career.job) return false;
+    if (!canCoach(state, content) || state.career.job) return false;
     startJob(state, 'coach', content);
     s.retired = { year: r.year, route };
     return true;
@@ -98,6 +104,6 @@ export function retireSports(state: LifeState, route: SportRetireRoute | null, w
     return true;
   }
   retire(state, content);
-  if (route === 'coaching' && content.jobs['coach'] && !state.career.job) startJob(state, 'coach', content);
+  if (route === 'coaching' && canCoach(state, content) && !state.career.job) startJob(state, 'coach', content);
   return true;
 }

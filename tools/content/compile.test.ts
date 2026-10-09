@@ -1648,7 +1648,9 @@ describe('sports (E6c)', () => {
     expect(await expectErrors()).toContain('must be pin: true');
     await write('events/any/sportsplayoffs/playoffs_opening_series.yaml', series.replace('          - { type: sports, action: series, result: win }\n', ''));
     expect(await expectErrors()).toContain('must end the series in a win or a loss');
+    const road = await read('events/any/sportsplayoffs/playoffs_opening_road.yaml');
     await write('events/any/sportsplayoffs/playoffs_opening_series.yaml', series.replace('    - { sports: { round: { eq: 1 } } }\n', '    - { sports: { round: { eq: 2 } } }\n'));
+    await write('events/any/sportsplayoffs/playoffs_opening_road.yaml', road.replace('    - { sports: { round: { eq: 1 } } }\n', '    - { sports: { round: { eq: 2 } } }\n'));
     expect(await expectErrors()).toContain('{ sports: { round: { eq: 1 } } }');
   });
 
