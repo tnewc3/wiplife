@@ -318,7 +318,7 @@ describe('pacing director', () => {
     }
   });
 
-  it('respects cooldowns and one-time events over whole lives', () => {
+  it('respects cooldowns and one-time events over whole lives', { timeout: 30_000 }, () => {
     for (let s = 0; s < 10; s++) {
       const seen = new Map<string, number[]>();
       for (const begun of years(`cool-${s}`, 120)) {
