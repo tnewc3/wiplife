@@ -1,6 +1,7 @@
 import type { Stats } from '../../../engine/types';
 import { useAppStore } from '../../../store/appStore';
 import { Card } from '../../components/Card';
+import { FuneralCards } from '../../components/FuneralCards';
 import { HistoryTimeline } from '../../components/HistoryTimeline';
 import { Obituary } from '../../components/Obituary';
 import { Screen } from '../../components/Screen';
@@ -18,6 +19,7 @@ export function ArchivedLifeScreen() {
       {life ? (
         <div className="flex flex-col gap-4">
           <Obituary life={life} />
+          <FuneralCards life={life} headingLevel={3} />
           <Card data-testid="archived-line">
             <h3 className="text-lg font-bold">The {life.familyName} family</h3>
             <p className="mt-1 text-muted">

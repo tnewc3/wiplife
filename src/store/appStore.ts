@@ -39,6 +39,7 @@ export type ScreenId =
   | 'custom'
   | 'game'
   | 'lifeHistory'
+  | 'funeral'
   | 'death'
   | 'archive'
   | 'archivedLife'
@@ -176,6 +177,8 @@ export interface AppState {
   chooseHeir: (heirId: string) => Promise<void>;
   /** E2b: leaves the Death screen; a life still waiting for an heir goes into the archive first. */
   leaveDeath: (to: 'newLife' | 'archive' | 'title') => Promise<void>;
+  /** W1: leaves the funeral for the Death screen (the obituary, the estate and who carries on). */
+  continueFromFuneral: () => void;
   /** E1: opens the Interact sheet for a person. */
   openInteractions: (personId: string) => void;
   /** E1: from the Interact sheet to the gift price tiers, and back. */
@@ -300,7 +303,7 @@ export function createAppStore({
             s.savedLifeStatus = 'none';
             s.lastDeath = archiveEntry(dead, bundle);
             s.deathView = getDeathView(dead, bundle);
-            s.screen = 'death';
+            s.screen = 'funeral';
             s.eventSheet = null;
           });
           return;
@@ -312,7 +315,7 @@ export function createAppStore({
           s.savedLifeStatus = 'none';
           s.lastDeath = entry;
           s.deathView = getDeathView(dead, bundle);
-          s.screen = 'death';
+          s.screen = 'funeral';
         });
       };
 
@@ -786,6 +789,11 @@ export function createAppStore({
               s.moreView = null;
               s.interactSheet = null;
             });
+          }),
+
+        continueFromFuneral: () =>
+          set((s) => {
+            if (s.screen === 'funeral') s.screen = 'death';
           }),
 
         leaveDeath: (to) =>

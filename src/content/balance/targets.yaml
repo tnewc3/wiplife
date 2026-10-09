@@ -332,6 +332,15 @@ sports:
   medianEarnings: { min: 300000, max: 30000000 }
   signedShare: { min: 0.1, max: 0.6 }
 
+# W1: the eulogy (tools/simulate/eulogy.ts), on the careful player's lives.
+eulogy:
+  speakerShare: { min: 0.7, max: 0.99 }
+  pieceVariety: { min: 0.8, max: 1 }
+  distinctShare: { min: 0.95, max: 1 }
+  speakerGroups: { min: 5, max: 6 }
+  absentShare: { min: 0.15, max: 0.9 }
+  couldNotShare: { min: 0.1, max: 0.85 }
+
 coverage:
   minEvents: 300
   legendary: { min: 5, max: 10 }

@@ -21,6 +21,7 @@ import { discoveryBalanceSchema, discoveryRegistrySchema, discoveryTextSchema } 
 import { interactionRegistrySchema, interactionSchema, interactionsBalanceSchema } from './interactions';
 import { newsTextSchema, peopleBalanceSchema, peopleRegistrySchema } from './people';
 import { webBalanceSchema, webRegistrySchema } from './web';
+import { eulogyBalanceSchema, eulogyTextSchema } from './eulogy';
 import { mentalHealthBalanceSchema, mentalRegistrySchema } from './mental';
 import { petInteractionSchema, petSchema, possessionsBalanceSchema, possessionsRegistrySchema, possessionsTextSchema, renovationSchema, vehicleSchema } from './possessions';
 import { crewSchema, crimeBalanceSchema, crimeRegistrySchema, crimeTextSchema, frontSchema } from './crime';
@@ -52,6 +53,7 @@ export * from './teen';
 export * from './crime';
 export * from './fame';
 export * from './sports';
+export * from './eulogy';
 
 /**
  * Collections: a folder under src/content with one YAML file per definition,
@@ -113,6 +115,7 @@ export const singletonTypes = {
   'balance/family': familyBalanceSchema,
   'balance/people': peopleBalanceSchema,
   'balance/web': webBalanceSchema,
+  'balance/eulogy': eulogyBalanceSchema,
   'balance/mental-health': mentalHealthBalanceSchema,
   'balance/possessions': possessionsBalanceSchema,
   'balance/teen': teenBalanceSchema,
@@ -129,6 +132,7 @@ export const singletonTypes = {
   'text/discovery': discoveryTextSchema,
   'text/time': timeTextSchema,
   'text/heir': heirTextSchema,
+  'text/eulogy': eulogyTextSchema,
   'text/news': newsTextSchema,
   'text/possessions': possessionsTextSchema,
   'text/teen': teenTextSchema,
@@ -206,6 +210,7 @@ export const contentBundleSchema = z.strictObject({
     family: familyBalanceSchema,
     people: peopleBalanceSchema,
     web: webBalanceSchema,
+    eulogy: eulogyBalanceSchema,
     mentalHealth: mentalHealthBalanceSchema,
     possessions: possessionsBalanceSchema,
     teen: teenBalanceSchema,
@@ -223,6 +228,7 @@ export const contentBundleSchema = z.strictObject({
     discovery: discoveryTextSchema,
     time: timeTextSchema,
     heir: heirTextSchema,
+    eulogy: eulogyTextSchema,
     news: newsTextSchema,
     possessions: possessionsTextSchema,
     teen: teenTextSchema,

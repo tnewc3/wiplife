@@ -7,6 +7,8 @@ import type {
   CredentialType,
   DebtKind,
   DiscoveryKind,
+  EulogyGroup,
+  EulogyTone,
   FamilyProcessKind,
   GenderCategory,
   GiftTier,
@@ -909,6 +911,43 @@ export interface DeathRecord {
 }
 
 /** A life in the archive: kept for good, readable without the content that made it. */
+/**
+ * W1: the eulogy given at a funeral, from the point of view of the person who
+ * knew you best. `paragraphs` is the text; `pieces` names the template pieces
+ * it was built from (for the simulation's variety report).
+ */
+export interface Eulogy {
+  speakerName: string;
+  /** What the speaker was to you ("wife", "son", "friend"). */
+  relation: string;
+  /** What the speaker was to you, in the groups the opening is written for. */
+  group: EulogyGroup;
+  tone: EulogyTone;
+  paragraphs: string[];
+  pieces: string[];
+}
+
+/** W1: someone who was not at the funeral, with the reason in words. */
+export interface FuneralGuest {
+  name: string;
+  relation: string;
+  reason: string;
+}
+
+/**
+ * W1: the funeral of a life that ended. No `eulogy` means no one was close
+ * enough to speak. `notAttending` are people who chose to stay away (the
+ * closest first, at most the balance's `maxListed`; `moreNotAttending` counts
+ * the rest); `couldNotAttend` are people who could not come (prison, illness,
+ * care).
+ */
+export interface Funeral {
+  eulogy: Eulogy | null;
+  notAttending: FuneralGuest[];
+  moreNotAttending: number;
+  couldNotAttend: FuneralGuest[];
+}
+
 export interface ArchivedLife {
   id: Id;
   name: string;
@@ -926,6 +965,8 @@ export interface ArchivedLife {
   /** Where the life began. */
   birthCityId: Id;
   obituary: string;
+  /** W1: the funeral. Null for a life set aside unfinished, and for lives archived before W1 (archive schema version 4). */
+  funeral: Funeral | null;
   highlights: HistoryEntry[];
   finalNetWorth: number;
   finalStats: Stats;

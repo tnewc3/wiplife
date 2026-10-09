@@ -1317,3 +1317,24 @@ export function placeLabel(n: number): string {
   const suffix = n % 10 === 1 ? 'st' : n % 10 === 2 ? 'nd' : n % 10 === 3 ? 'rd' : 'th';
   return `${n}${suffix}`;
 }
+
+// ── W1: the funeral ─────────────────────────────────────────────────────────
+// The words around the eulogy. What the speaker says, and why people stayed
+// away, is content (src/content/text/eulogy.yaml).
+
+export const FUNERAL_LABELS = {
+  screen: 'The funeral',
+  eulogy: 'The eulogy',
+  noSpeaker: 'No one was close enough to speak for you.',
+  absent: 'Who didn’t come',
+  everyoneCame: 'Everyone who was expected came.',
+  unable: 'Couldn’t be there',
+  unableNote: 'They would have come if they could.',
+  noFuneral: 'No funeral was recorded for this life: it ended before eulogies were written.',
+} as const;
+
+/** "Spoken by Ana Ruiz, your wife". */
+export const spokenBy = (name: string, relation: string): string => `Spoken by ${name}, your ${relation}`;
+
+/** "And 3 more." for the people left off a full list. */
+export const andMore = (n: number): string => `And ${n} more.`;

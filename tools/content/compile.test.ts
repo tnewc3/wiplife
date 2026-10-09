@@ -1684,3 +1684,52 @@ describe('sports (E6c)', () => {
     expect(await expectErrors()).toContain('must be a condition of kind injury');
   });
 });
+
+describe('the eulogy (W1)', () => {
+  const read = (file: string) => readFile(path.join(dir, file), 'utf8');
+
+  it('accepts the real content, with a line for every kind of story and every twisted version', { timeout: 90_000 }, async () => {
+    const result = await compile();
+    if (!result.ok) throw new Error(formatErrors(result.errors));
+    const text = result.bundle.text.eulogy;
+    expect(Object.keys(text.beliefs.true).sort()).toEqual(Object.keys(result.bundle.registries.web.kinds).sort());
+    expect(Object.keys(text.memories).length).toBeGreaterThan(20);
+    expect(result.bundle.balance.eulogy.speaker.excludedKinds).toEqual(['ex']);
+  });
+
+  it('wants a line for a twisted version, and for a kind of story, and only for ones that exist', { timeout: 90_000 }, async () => {
+    const real = await read('text/eulogy.yaml');
+    await write('text/eulogy.yaml', real.replace(/ {4}fired_stealing: .*\n/, ''));
+    expect(await expectErrors()).toContain('beliefs.twisted.fired_stealing: no line for this twisted version');
+    await write('text/eulogy.yaml', real.replace(/ {4}arrest: "I knew about the trouble.*\n/, ''));
+    expect(await expectErrors()).toContain('beliefs.true.arrest');
+    await write('text/eulogy.yaml', real.replace('    ill_minor: ', '    ill_imaginary: "x."\n    ill_minor: '));
+    expect(await expectErrors()).toContain('beliefs.twisted.ill_imaginary: not a twisted version');
+  });
+
+  it('only has memory lines for memories that exist', { timeout: 90_000 }, async () => {
+    const real = await read('text/eulogy.yaml');
+    await write('text/eulogy.yaml', real.replace('  comforted_you:\n', '  comforted_by_a_ghost:\n'));
+    expect(await expectErrors()).toContain('memories.comforted_by_a_ghost: not a memory in registries/memories.yaml');
+  });
+
+  it('keeps the text to the roles and values it is given, and to pronoun placeholders', { timeout: 90_000 }, async () => {
+    const real = await read('text/eulogy.yaml');
+    await write('text/eulogy.yaml', real.replace('I stood by {self.them} when things fell apart', 'I stood by {self.them} when {stranger.name} fell apart {nowhere}'));
+    const errors = await expectErrors();
+    expect(errors).toContain('unknown role "stranger"');
+    expect(errors).toContain('{nowhere}: unknown value');
+    await write('text/eulogy.yaml', real.replace('I stood by {self.them} when things fell apart', 'I stood by her when things fell apart'));
+    expect(await expectErrors()).toContain('hardcoded pronoun');
+    await write('text/eulogy.yaml', real.replace('{self.They} retired after {years} of work', '{self.They} retired after {decades} of work'));
+    expect(await expectErrors()).toContain('milestones.retired');
+  });
+
+  it('puts every kind of relationship in at most one group, and every one that can speak in one', { timeout: 90_000 }, async () => {
+    const real = await read('balance/eulogy.yaml');
+    await write('balance/eulogy.yaml', real.replace('    friend: [friend]', '    friend: [friend, sibling]'));
+    expect(await expectErrors()).toContain('"sibling" is in both sibling and friend');
+    await write('balance/eulogy.yaml', real.replace('    friend: [friend]', '    friend: []'));
+    expect(await expectErrors()).toContain('"friend" is in no group');
+  });
+});
