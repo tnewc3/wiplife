@@ -1,0 +1,45 @@
+id: broadcast_booth_debut
+title: Live in three, two, one
+text: >-
+  The booth is small and smells of coffee and cable. A producer counts down
+  on spread fingers and the red light comes on. The camera is a cold eye, and
+  you know the game on the monitor better than you know your own phone number.
+tone: light
+category: sportspast
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { sports: { retired: true } }
+    - { fame: { active: true } }
+    - { fame: { path: [social] } }
+weight: { base: 1.5 }
+once: true
+choices:
+  - id: honest
+    label: Say what you actually see
+    outcome:
+      text: >-
+        Your first honest comment about a former teammate is on the evening
+        news. It earns you five hundred angry messages and one from the teammate in question that
+        says "fair."
+      effects:
+        - { type: fame, action: image, delta: 3 }
+        - { type: fame, action: craft, delta: 3 }
+  - id: safe
+    label: Stick to the script and the highlights
+    outcome:
+      text: >-
+        Nobody can fault it, and nobody remembers it. The producer says
+        "solid" in the voice you use for "fine."
+      effects:
+        - { type: fame, action: fame, delta: 1 }
+  - id: funny
+    label: Play it for laughs
+    outcome:
+      text: >-
+        The first joke lands and the second one doesn't, and the clip of the
+        second one travels farther. It is very good for the numbers.
+      effects:
+        - { type: fame, action: fans, delta: 10 }
+        - { type: fame, action: image, delta: -1 }

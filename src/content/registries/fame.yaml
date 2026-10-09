@@ -25,7 +25,7 @@ triggers:
   acclaimed: { events: [release_acclaimed] }
   cult: { events: [release_cult] }
   crowd: { events: [release_crowd] }
-  bigBreak: { events: [big_break_viral, big_break_audition, big_break_cosign, big_break_review] }
+  bigBreak: { events: [big_break_viral, big_break_audition, big_break_cosign, big_break_review, break_scout_in_the_stands, break_breakout_game] }
   fade: { events: [fade_quiet_phone] }
   comeback: { events: [comeback_offer, comeback_calling] }
   burnout: { events: [burnout_alone, burnout_together] }
@@ -36,7 +36,7 @@ triggers:
   lost: { events: [awards_lost_night] }
   tabloid: { events: [tabloid_partner_reads, tabloid_friend_calls, tabloid_alone_with_it] }
   scandal: { events: [scene_scandal_night] }
-  superfan: { events: [superfan_letter, superfan_stage_door] }
+  superfan: { events: [superfan_letter, superfan_stage_door, sports_superfan_at_the_gate] }
   hater: { events: [hater_pile_on, hater_in_person] }
   critic: { events: [critic_takes_aim, critic_comes_around] }
   stalker: { events: [stalker_too_close, stalker_escalates, stalker_order_violated] }

@@ -1,0 +1,62 @@
+id: rivalry_trash_talk
+title: A rival who knows your name
+text: >-
+  {rival.name} has made a habit of finding you before every game. It is
+  never loud. It is a word in the tunnel, a comment on a play, a look across
+  the floor. This week, it is a quote in the paper, and it is about you, and
+  the reporter has your phone number.
+tone: neutral
+category: sports
+rarity: common
+recurring: true
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 14 } }
+    - { sports: { active: true } }
+    - { sports: { level: [school, college, pro] } }
+weight: { base: 10 }
+cooldownYears: 3
+followUpOnly: true
+cast:
+  rival: { kind: acquaintance, presence: city, createIfMissing: true }
+choices:
+  - id: ignore
+    label: Say nothing and let the game answer
+    check:
+      base: 45
+      stats: [{ sports: rating, weight: 0.25 }, { key: discipline, weight: 0.15 }]
+      success:
+        text: >-
+          You play the best game of the month. {rival.name} is quiet in the
+          tunnel afterwards, and you do not need to say anything at all.
+        effects:
+          - { type: sports, action: rating, delta: 2 }
+          - { type: fame, action: image, delta: 2 }
+      failure:
+        text: >-
+          You play tight, and {rival.name} is the one who finds the gaps. It
+          is a very long ride home.
+        effects:
+          - { type: sports, action: rating, delta: -1 }
+          - { type: stat, key: stress, delta: 3 }
+  - id: answer_back
+    label: Give the reporter a line of your own
+    outcome:
+      text: >-
+        It is a good line, and it runs on every screen. {rival.name} replies in
+        kind, and the next meeting between you two is sold out.
+      effects:
+        - { type: fame, action: fans, delta: 5 }
+        - { type: fame, action: image, delta: -1 }
+        - { type: relationship, role: rival, affection: -6 }
+  - id: reach_out
+    label: Find {rival.name} afterwards and shake {rival.their} hand
+    outcome:
+      text: >-
+        {rival.They} {rival:is|are} startled, then not. You talk for ten
+        minutes about something that is nothing to do with the game, and the
+        paper has no idea.
+      effects:
+        - { type: relationship, role: rival, affection: 8 }
+        - { type: stat, key: happiness, delta: 3 }

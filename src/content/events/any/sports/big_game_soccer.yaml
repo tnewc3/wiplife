@@ -1,0 +1,57 @@
+id: big_game_soccer
+title: The penalty
+text: >-
+  It is deep in injury time and {team} has a penalty. The usual taker has been substituted. The ball is under your arm, and the captain has nodded at you without a word. The goalkeeper is staring through you as if you were glass.
+tone: serious
+category: sports
+rarity: common
+recurring: true
+lifeStages: [child, teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { sports: { active: true } }
+    - { sports: { sport: [soccer] } }
+    - { sports: { level: [school, college, pro] } }
+    - { fame: { released: true } }
+weight: { base: 10 }
+cooldownYears: 2
+followUpOnly: true
+choices:
+  - id: take_it
+    label: Take it yourself
+    check:
+      base: 45
+      stats: [{ sports: rating, weight: 0.3 }, { key: confidence, weight: 0.2 }, { sports: form, weight: 0.1 }, { key: riskTaking, weight: 0.05 }]
+      success:
+        text: >-
+          You pick your corner and you do not change your mind. The net moves, the stadium erupts and for a moment you do not know where you are.
+        effects:
+          - { type: sports, action: rating, delta: 3 }
+          - { type: fame, action: fame, delta: 2 }
+          - { type: fame, action: mood, delta: 4 }
+          - { type: flag, key: sports_took_the_shot, value: true }
+      failure:
+        text: >-
+          You pick your corner and the keeper picks it too. The ball is in the keeper's hands and the sound that follows is a held breath being let go.
+        effects:
+          - { type: sports, action: rating, delta: -2 }
+          - { type: fame, action: mood, delta: -3 }
+          - { type: stat, key: happiness, delta: -4 }
+  - id: share_it
+    label: Hand the ball to the regular taker
+    check:
+      base: 50
+      stats: [{ sports: team, weight: 0.3 }, { sports: rating, weight: 0.15 }, { key: sociability, weight: 0.1 }]
+      success:
+        text: >-
+          The regular taker nods, steps up and puts it away. You thump a shoulder, and you are surprised how much you want to cry.
+        effects:
+          - { type: sports, action: rating, delta: 2 }
+          - { type: fame, action: image, delta: 3 }
+          - { type: stat, key: happiness, delta: 4 }
+      failure:
+        text: >-
+          The regular taker steps up and the ball hits the post. You are the first to reach that player, and you say nothing at all.
+        effects:
+          - { type: fame, action: image, delta: -1 }
+          - { type: stat, key: happiness, delta: -3 }

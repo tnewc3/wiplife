@@ -22,6 +22,7 @@ import { FAMILY_DEEDS, GUARDIAN_KINDS, familyProcessSchema, parentingKeySchema }
 import { credentialTypeSchema, programSchema, tierSchema } from './education';
 import { lifeTierSchema } from './people';
 import { jobSizeSchema } from './crime';
+import { SPORT_LEVELS, SPORT_RESULTS, SPORT_RETIRE_ROUTES, SPORT_CONTRACT_KINDS, type SportLevel, type SportResult } from './sports';
 import { fameBandSchema, fameCommitmentSchema, fameSceneSchema, fameSizeSchema, fameTermsSchema, FAME_FAN_TYPES, FAME_STALKER_STAGES, type FameBand, type FameCommitment, type FameStalkerStage } from './fame';
 import { FOCUS_KEYS, LICENSE_STAGE_IDS, ruleDomainSchema, type RuleDomainId, type TeenFocusId } from './teen';
 import { relationshipKindSchema, relationshipStatusSchema, romanceStatusSchema } from './relationships';
@@ -105,6 +106,7 @@ export type Condition =
   | { teen: TeenCondition }
   | { crime: CrimeCondition }
   | { fame: FameCondition }
+  | { sports: SportsCondition }
   | { memory: { role: string; tag: string } }
   | {
       role: string;
@@ -252,6 +254,8 @@ export interface CrimeCondition {
  * lined up.
  */
 export interface FameCondition {
+  /** E6c: your main path is a sport (true) or arts and media (false). */
+  sport?: boolean;
   active?: boolean;
   retired?: boolean;
   path?: string[];
@@ -278,6 +282,49 @@ export interface FameCondition {
   crossable?: boolean;
   top?: boolean;
   plan?: boolean;
+}
+
+/**
+ * E6c, sports. Every field given must hold. active: your main path is a sport
+ * and you play (haven't retired); sport: your sport is one of these paths;
+ * level: youth, school, college or pro; position: your position; contract:
+ * you are under a pro contract; contractYear: its last year is this one;
+ * freeAgent: you have no team; run: a playoff run is alive; round: the series
+ * you are about to play (1 to 3); result: how this year's playoffs went;
+ * injured: a sports injury is keeping you from your best; pain: you are
+ * playing through one; drafted / undrafted: the draft went this way for you
+ * this year, and offered: a team has put a deal in front of you (pick: where you went); traded / released / agedOut / suspended: it happened this year;
+ * rating: this year's rating (0–100); titles / seasons / allStars: career
+ * totals; retired: you have left your sport; stage: the highest rung you
+ * reached was below the pro level (true) or at it (false).
+ */
+export interface SportsCondition {
+  active?: boolean;
+  sport?: string[];
+  level?: SportLevel[];
+  position?: string[];
+  contract?: boolean;
+  contractYear?: boolean;
+  freeAgent?: boolean;
+  run?: boolean;
+  round?: Compare;
+  result?: SportResult[];
+  injured?: boolean;
+  pain?: boolean;
+  drafted?: boolean;
+  undrafted?: boolean;
+  offered?: boolean;
+  pick?: Compare;
+  traded?: boolean;
+  released?: boolean;
+  agedOut?: boolean;
+  suspended?: boolean;
+  rating?: Compare;
+  titles?: Compare;
+  seasons?: Compare;
+  allStars?: Compare;
+  retired?: boolean;
+  amateur?: boolean;
 }
 
 /** Your money situation. Every field given must hold. */
@@ -766,6 +813,7 @@ export const conditionSchema: z.ZodType<Condition> = z.lazy(() =>
     z.strictObject({
       fame: z
         .strictObject({
+          sport: z.boolean().optional(),
           active: z.boolean().optional(),
           retired: z.boolean().optional(),
           path: z.array(idSchema).min(1).optional(),
@@ -792,6 +840,38 @@ export const conditionSchema: z.ZodType<Condition> = z.lazy(() =>
           crossable: z.boolean().optional(),
           top: z.boolean().optional(),
           plan: z.boolean().optional(),
+        })
+        .refine(atLeastOneField, 'needs at least one field'),
+    }),
+    z.strictObject({
+      sports: z
+        .strictObject({
+          active: z.boolean().optional(),
+          sport: z.array(idSchema).min(1).optional(),
+          level: z.array(z.enum(SPORT_LEVELS)).min(1).optional(),
+          position: z.array(idSchema).min(1).optional(),
+          contract: z.boolean().optional(),
+          contractYear: z.boolean().optional(),
+          freeAgent: z.boolean().optional(),
+          run: z.boolean().optional(),
+          round: compareSchema.optional(),
+          result: z.array(z.enum(SPORT_RESULTS)).min(1).optional(),
+          injured: z.boolean().optional(),
+          pain: z.boolean().optional(),
+          drafted: z.boolean().optional(),
+          undrafted: z.boolean().optional(),
+          offered: z.boolean().optional(),
+          pick: compareSchema.optional(),
+          traded: z.boolean().optional(),
+          released: z.boolean().optional(),
+          agedOut: z.boolean().optional(),
+          suspended: z.boolean().optional(),
+          rating: compareSchema.optional(),
+          titles: compareSchema.optional(),
+          seasons: compareSchema.optional(),
+          allStars: compareSchema.optional(),
+          retired: z.boolean().optional(),
+          amateur: z.boolean().optional(),
         })
         .refine(atLeastOneField, 'needs at least one field'),
     }),
@@ -1262,6 +1342,44 @@ export const effectSchema = z.discriminatedUnion('type', [
   z
     .strictObject({ type: z.literal('famePay'), gain: fameSizeSchema.optional(), cost: fameSizeSchema.optional() })
     .refine((e) => (e.gain === undefined) !== (e.cost === undefined), 'needs exactly one of gain or cost'),
+  /**
+   * E6c, sports. form: `delta` points of form for the next season (and the
+   * playoffs now), −10 to 10. rating: `delta` points on this year's rating,
+   * already played. series: the playoff series just played ends in a win or a
+   * loss (a win moves a run on, the last one wins the title). sign: you sign
+   * the contract you were offered (the draft's deal, or a minimum deal);
+   * decline: you turn the draft down and stay an amateur another year.
+   * extend: your team signs you again on `terms` (fair: the market; rich:
+   * you push and may win; cheap: you take less, for loyalty). playout: you
+   * play out your contract to test free agency. trade: the trade you asked
+   * for (or the one on offer) happens now; ask: you ask for a trade or a new
+   * deal through your agent; refuse: you stay where you are. injury: rest
+   * (the injury is treated, you sit), pain (you play through it), surgery
+   * (treated, and the best chance of healing). suspend: a ban for a season.
+   * retire: you leave your sport by `route`. position: you move to another
+   * position (the one in `position`).
+   */
+  z
+    .strictObject({
+      type: z.literal('sports'),
+      action: z.enum(['form', 'rating', 'series', 'sign', 'decline', 'extend', 'playout', 'trade', 'ask', 'refuse', 'injury', 'suspend', 'retire', 'position']),
+      delta: z.int().min(-30).max(30).optional(),
+      result: z.enum(['win', 'lose']).optional(),
+      terms: z.enum(['fair', 'rich', 'cheap']).optional(),
+      what: z.enum(['trade', 'contract', 'rest', 'pain', 'surgery']).optional(),
+      route: z.enum(SPORT_RETIRE_ROUTES).optional(),
+      position: idSchema.optional(),
+      kind: z.enum(SPORT_CONTRACT_KINDS).optional(),
+    })
+    .refine((e) => (e.action === 'form' || e.action === 'rating') === (e.delta !== undefined && e.delta !== 0), 'form and rating need a non-zero delta (and only they have one)')
+    .refine((e) => (e.action === 'series') === (e.result !== undefined), 'series needs result (and only it has one)')
+    .refine((e) => (e.action === 'extend') === (e.terms !== undefined), 'extend needs terms (and only it has them)')
+    .refine((e) => (e.action === 'ask' || e.action === 'injury') === (e.what !== undefined), 'ask and injury need what (and only they have one)')
+    .refine((e) => e.action !== 'ask' || e.what === 'trade' || e.what === 'contract', 'ask is for a trade or a contract')
+    .refine((e) => e.action !== 'injury' || e.what === 'rest' || e.what === 'pain' || e.what === 'surgery', 'injury is rest, pain or surgery')
+    .refine((e) => (e.action === 'retire') === (e.route !== undefined), 'retire needs route (and only it has one)')
+    .refine((e) => (e.action === 'position') === (e.position !== undefined), 'position needs position (and only it has one)')
+    .refine((e) => e.kind === undefined || e.action === 'sign', 'only sign takes kind'),
   z.strictObject({ type: z.literal('innerConflict'), delta: z.int().min(-100).max(100) }),
   /** You discover your hidden talent, if you have one you haven't found (Stage 9). */
   z.strictObject({ type: z.literal('talent') }),
@@ -1476,6 +1594,8 @@ export const checkStatSchema = z.union([
   z.strictObject({ crime: z.enum(['standing', 'rank', 'heat']), weight: checkWeightSchema }),
   /** E6b: your craft, the quality of your latest work, your fame, public image, fan mood (each 0–100), or your rung (0–100 across the ladder). */
   z.strictObject({ fame: z.enum(['craft', 'quality', 'fame', 'image', 'mood', 'rung']), weight: checkWeightSchema }),
+  /** E6c: this year's rating, your team's strength, your form, or how well you fit your position (each 0–100). */
+  z.strictObject({ sports: z.enum(['rating', 'team', 'form', 'fit']), weight: checkWeightSchema }),
   /**
    * E2a: your chance of having a baby with the person in `role` this year
    * (fertility, or fertilityPlanned when you plan around it: from the ages
@@ -1549,6 +1669,11 @@ export const eventSchema = baseDefSchema
      * the event's text can name them ({pet.name}, {vehicle}, {homeCity}).
      */
     bind: z.array(z.enum(POSSESSION_KINDS)).min(1).optional(),
+    /**
+     * E6c: the card keeps the words it was shown with, and the outcome keeps {stage} and
+     * {opponent} as they were, even though the choice moves a playoff run on.
+     */
+    pin: z.literal(true).optional(),
     choices: z.array(choiceSchema).min(2).max(4).optional(),
     autoOutcome: outcomeSchema.optional(),
   })

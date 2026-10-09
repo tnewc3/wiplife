@@ -293,7 +293,9 @@ export class FameWatcher {
     const age = after.character.age;
     if ((f.active || f.retired !== undefined) && age < adultAge && f.stalker) r.minors.stalked++;
     if (f.active && age < independence && f.commitment === 'all') r.minors.allIn++;
-    if (f.active && !this.everIn) {
+    // A sport is measured by tools/simulate/sports.ts; this is arts and media.
+    const sportMain = f.main !== null && this.content.famePaths[f.main]?.sport !== undefined;
+    if (f.active && !this.everIn && !sportMain) {
       this.everIn = true;
       this.enteredAt = age;
       this.enteredPath = f.main ?? '';
@@ -312,6 +314,7 @@ export class FameWatcher {
       const def = this.content.events[p.eventId];
       if (def && def.category.startsWith('fame')) r.events[p.eventId] = (r.events[p.eventId] ?? 0) + 1;
     }
+    if (!this.everIn) return;
     if (!before.fame.active && !f.active) return;
     // Totals that moved this year.
     const t = f.totals;

@@ -1,0 +1,57 @@
+id: big_game_basketball
+title: Ten seconds, one point
+text: >-
+  {team} is down one with ten seconds left, and the ball is in your hands at the top of the arc. The defender is a step off. Your open teammate is under the basket. The noise in the building has gone somewhere beyond sound.
+tone: serious
+category: sports
+rarity: common
+recurring: true
+lifeStages: [child, teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { sports: { active: true } }
+    - { sports: { sport: [basketball] } }
+    - { sports: { level: [school, college, pro] } }
+    - { fame: { released: true } }
+weight: { base: 10 }
+cooldownYears: 2
+followUpOnly: true
+choices:
+  - id: take_it
+    label: Take the shot yourself
+    check:
+      base: 45
+      stats: [{ sports: rating, weight: 0.3 }, { key: confidence, weight: 0.2 }, { sports: form, weight: 0.1 }, { key: riskTaking, weight: 0.05 }]
+      success:
+        text: >-
+          The ball leaves your fingers and the rest of the building holds still. It drops through without touching the rim, and you are on the bottom of a pile before you know it.
+        effects:
+          - { type: sports, action: rating, delta: 3 }
+          - { type: fame, action: fame, delta: 2 }
+          - { type: fame, action: mood, delta: 4 }
+          - { type: flag, key: sports_took_the_shot, value: true }
+      failure:
+        text: >-
+          It is a good look, and it rims out. You stand there with your hands on your head while the other bench empties onto the floor.
+        effects:
+          - { type: sports, action: rating, delta: -2 }
+          - { type: fame, action: mood, delta: -3 }
+          - { type: stat, key: happiness, delta: -4 }
+  - id: share_it
+    label: Pass to the open man
+    check:
+      base: 50
+      stats: [{ sports: team, weight: 0.3 }, { sports: rating, weight: 0.15 }, { key: sociability, weight: 0.1 }]
+      success:
+        text: >-
+          You see the open teammate a half-second before the defence does. The pass is easy, the finish is easy, and the building is the loudest it has ever been.
+        effects:
+          - { type: sports, action: rating, delta: 2 }
+          - { type: fame, action: image, delta: 3 }
+          - { type: stat, key: happiness, delta: 4 }
+      failure:
+        text: >-
+          The pass is on time and the finish is not. The ball rolls off the rim and the buzzer sounds, and the first thing you do is look for your teammate.
+        effects:
+          - { type: fame, action: image, delta: -1 }
+          - { type: stat, key: happiness, delta: -3 }

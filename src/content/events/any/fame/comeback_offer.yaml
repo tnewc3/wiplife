@@ -15,6 +15,7 @@ requires:
     - { fame: { active: true } }
     - { fame: { faded: true } }
     - { fame: { gap: { gte: 2 } } }
+    - { fame: { sport: false } }
 weight: { base: 10 }
 followUpOnly: true
 choices:

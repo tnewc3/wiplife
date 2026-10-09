@@ -13,6 +13,7 @@ import { possessionsFailures } from './possessions/invariants';
 import { teenFailures } from './teen/invariants';
 import { crimeFailures } from './crime/invariants';
 import { fameFailures } from './fame/invariants';
+import { sportsFailures } from './sports/invariants';
 import { attachedDebtIds } from './possessions/query';
 import { ITEM_ROLE } from './web/query';
 import { consistencyProblems } from './presence';
@@ -208,6 +209,8 @@ export function checkInvariants(state: LifeState, content: ContentBundle): strin
 
   // Fame in arts and media (E6b), including that nobody under 18 goes all in or is stalked.
   failures.push(...fameFailures(state, content));
+  // Sports (E6c).
+  failures.push(...sportsFailures(state, content));
 
   // People and relationships.
   const { parentAgeAtBirth } = content.balance.creation.family;

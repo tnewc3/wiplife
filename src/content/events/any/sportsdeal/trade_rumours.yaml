@@ -1,0 +1,48 @@
+id: trade_rumours
+title: Your name in a column
+text: >-
+  A reporter you have never met writes that {team} is "shopping" you. The
+  story is two paragraphs long and has no named sources. By lunchtime, three
+  teammates have asked about it and one has stopped looking you in the eye.
+tone: neutral
+category: sportsdeal
+rarity: uncommon
+recurring: true
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { sports: { active: true } }
+    - { sports: { level: [pro] } }
+    - { sports: { contract: true } }
+weight: { base: 1.2 }
+cooldownYears: 3
+choices:
+  - id: ask_agent
+    label: Ask your agent to find out what is true
+    visibleIf: { fame: { agent: { gte: 1 } } }
+    outcome:
+      text: >-
+        Your agent calls back in an hour. "Nothing firm," they say. "But
+        nobody said no, which is its own answer."
+      effects:
+        - { type: sports, action: ask, what: trade }
+  - id: ask_for_move
+    label: Say, through your agent, that you want out
+    visibleIf: { fame: { agent: { gte: 1 } } }
+    outcome:
+      text: >-
+        It is the first time you have said it out loud. Your agent writes it
+        down in the careful way of someone who knows it will matter.
+      effects:
+        - { type: sports, action: ask, what: trade }
+        - { type: fame, action: mood, delta: -2 }
+  - id: stay_put
+    label: Tell the press you want to stay
+    outcome:
+      text: >-
+        The quote is on the next morning's front page. The fans love it, and
+        the front office pretends it has not seen it.
+      effects:
+        - { type: fame, action: mood, delta: 4 }
+        - { type: fame, action: image, delta: 1 }

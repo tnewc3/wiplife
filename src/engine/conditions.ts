@@ -14,6 +14,7 @@ import { belongingsHolds } from './possessions/holds';
 import { teenHolds } from './teen/holds';
 import { crimeHolds } from './crime/holds';
 import { fameHolds } from './fame/holds';
+import { sportsHolds } from './sports/holds';
 import { romanceStatus, yearsInKind } from './relationships';
 import type { Id, LifeState } from './types';
 
@@ -193,6 +194,7 @@ export function evaluate(condition: Condition | undefined, state: LifeState, ctx
   if ('teen' in condition) return teenHolds(condition.teen, state);
   if ('crime' in condition) return crimeHolds(condition.crime, state, ctx.content?.balance.crime.ranks.length ?? 5, ctx.content);
   if ('fame' in condition) return fameHolds(condition.fame, state, ctx.content);
+  if ('sports' in condition) return sportsHolds(condition.sports, state, ctx.content);
   if ('memory' in condition) {
     const { role, tag } = condition.memory;
     return roleCheck(role, (id) => state.relationships[id]?.memories.some((m) => m.tag === tag) ?? false);

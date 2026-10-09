@@ -8,7 +8,10 @@ tone: neutral
 category: jobless
 rarity: common
 lifeStages: [youngAdult, adult, senior]
-requires: { career: { employed: false, retired: false, lostWithin: 1 } }
+requires:
+  all:
+    - { career: { employed: false, retired: false, lostWithin: 1 } }
+    - { fame: { active: false } }
 weight: { base: 8 }
 cooldownYears: 3
 choices:

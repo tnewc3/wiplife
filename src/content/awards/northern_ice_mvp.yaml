@@ -1,0 +1,8 @@
+id: northern_ice_mvp
+name: "the Northern Ice MVP Award"
+category: "Most Valuable Player"
+path: hockey
+blurb: "Voted by the writers who cover the league, and sometimes disputed by the ones who do not."
+minRung: 5
+critics: 0.6
+prestige: 0.9

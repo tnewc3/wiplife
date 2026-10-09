@@ -28,7 +28,10 @@ categories:
   career: { label: Finding work }
   jobless:
     label: Out of work
-    requires: { career: { employed: false, retired: false } }
+    requires:
+      all:
+        - { career: { employed: false, retired: false } }
+        - { fame: { active: false } }
   retirement:
     label: Retirement
     requires: { career: { retired: true } }
@@ -166,3 +169,39 @@ categories:
   famepast:
     label: Looking back
     requires: { fame: { retired: true } }
+
+  # E6c: sports. A way in is for someone with no career and no seasons behind them; the rest are for someone who plays
+  # (or, after the game, someone who did). Life in the game at home accounts for a partner who lives with you.
+  sportsentry:
+    label: A way in
+    requires:
+      all:
+        - { fame: { active: false } }
+        - { sports: { seasons: { lt: 1 } } }
+  sports:
+    label: The game
+    requires: { sports: { active: true } }
+  sportsdeal:
+    label: Contracts and trades
+    requires:
+      all:
+        - { age: { gte: 18 } }
+        - { sports: { active: true } }
+        - { sports: { level: [pro] } }
+  sportsbody:
+    label: The body
+    household: true
+    requires: { sports: { active: true } }
+  sportslife:
+    label: Life in the game
+    household: true
+    requires: { sports: { active: true } }
+  sportsplayoffs:
+    label: The playoffs
+    requires:
+      all:
+        - { sports: { active: true } }
+        - { sports: { run: true } }
+  sportspast:
+    label: After the game
+    requires: { sports: { retired: true } }

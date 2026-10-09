@@ -1,0 +1,8 @@
+id: gridiron_schoolboy_awards
+name: "the Schoolboy Gridiron Awards"
+category: "Player of the Year"
+path: football
+blurb: "Handed out at a banquet with rubber chicken, to the player nobody could tackle."
+minRung: 2
+critics: 0.4
+prestige: 0.5

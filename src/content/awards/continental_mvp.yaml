@@ -1,0 +1,8 @@
+id: continental_mvp
+name: "the Continental MVP Award"
+category: "Most Valuable Player"
+path: basketball
+blurb: "The league's biggest individual prize, voted by writers and broadcasters."
+minRung: 5
+critics: 0.6
+prestige: 0.9

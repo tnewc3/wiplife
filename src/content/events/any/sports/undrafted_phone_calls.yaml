@@ -1,0 +1,47 @@
+id: undrafted_phone_calls
+title: The phone that did not ring
+text: >-
+  The last name is read, and it is not yours. You sit on the couch with your
+  phone face-up on the cushion and a bowl of food you cannot eat. Around
+  midnight it finally buzzes, and then, quieter, buzzes again.
+tone: serious
+category: sports
+rarity: common
+lifeStages: [teen, youngAdult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { sports: { active: true } }
+    - { sports: { undrafted: true } }
+weight: { base: 10 }
+followUpOnly: true
+choices:
+  - id: take_the_camp
+    label: Take the camp invitation
+    visibleIf: { sports: { offered: true } }
+    outcome:
+      text: >-
+        It is a minimum deal and a locker at the end of a hallway. It is also
+        a locker, and you put your name over it in tape the same night.
+      effects:
+        - { type: sports, action: sign, kind: minimum }
+        - { type: stat, key: happiness, delta: 4 }
+  - id: try_again
+    label: Go back and try again next year
+    outcome:
+      text: >-
+        You get up the next morning and go to the gym. Nobody asks you to, and
+        that is the point.
+      effects:
+        - { type: sports, action: decline }
+        - { type: fame, action: craft, delta: 2 }
+        - { type: stat, key: stress, delta: 3 }
+  - id: let_it_go
+    label: Close the door on it
+    outcome:
+      text: >-
+        You make a call, shake a hand, and close the door as gently as you can.
+        It still sounds like a door.
+      effects:
+        - { type: sports, action: retire, route: normal }
+        - { type: stat, key: happiness, delta: -3 }

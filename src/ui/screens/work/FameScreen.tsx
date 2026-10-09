@@ -43,7 +43,7 @@ function Section({ title, children, testId }: { title: string; children: React.R
   );
 }
 
-function Ladder({ path }: { path: FamePathView }) {
+export function Ladder({ path }: { path: FamePathView }) {
   return (
     <div className="mt-2" data-testid={`ladder-${path.id}`}>
       <p className="font-semibold">{path.name}</p>

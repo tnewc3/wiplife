@@ -1,0 +1,74 @@
+id: playoffs_opening_road
+title: A hostile building
+text: >-
+  {opponent} have the home crowd and the better record, and they are very good at making a visitor feel unwelcome. Their fans start on you before you are out of the tunnel. {team} needs to win in {stage}, and nobody in this building wants that.
+tone: serious
+category: sportsplayoffs
+rarity: common
+recurring: true
+lifeStages: [child, teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { sports: { active: true } }
+    - { sports: { run: true } }
+    - { sports: { round: { eq: 1 } } }
+weight: { base: 10 }
+followUpOnly: true
+pin: true
+choices:
+  - id: lead
+    label: Let them shout, and play louder
+    check:
+      base: 37
+      stats: [{ sports: rating, weight: 0.22 }, { sports: team, weight: 0.15 }, { key: confidence, weight: 0.1 }, { sports: form, weight: 0.1 }]
+      success:
+        text: >-
+          You turn the noise into a kind of fuel. {team} wins {stage} in their building, and the walk back to the bus is the sweetest walk of the season.
+        effects:
+          - { type: sports, action: series, result: win }
+          - { type: fame, action: fans, delta: 4 }
+      failure:
+        text: >-
+          The noise gets in. You hear every word and play like you are listening for more. {opponent} win {stage}, and the quiet on the bus is long.
+        effects:
+          - { type: sports, action: series, result: lose }
+          - { type: stat, key: happiness, delta: -4 }
+  - id: trust
+    label: Lean on the older players
+    check:
+      base: 37
+      stats: [{ sports: team, weight: 0.3 }, { sports: rating, weight: 0.1 }, { key: sociability, weight: 0.1 }]
+      success:
+        text: >-
+          A veteran talks everyone through the first ten minutes, and the building turns into scenery. {team} wins {stage} and the veteran does not even smile.
+        effects:
+          - { type: sports, action: series, result: win }
+          - { type: fame, action: image, delta: 2 }
+      failure:
+        text: >-
+          The veteran's advice is wise and it does not matter. {opponent} take {stage} on a bad bounce, and the bus is silent.
+        effects:
+          - { type: sports, action: series, result: lose }
+          - { type: stat, key: happiness, delta: -3 }
+  - id: play_hurt
+    label: Play through the pain
+    visibleIf: { sports: { injured: true } }
+    check:
+      base: 40
+      stats: [{ sports: rating, weight: 0.2 }, { key: health, weight: 0.15 }, { key: fitness, weight: 0.15 }, { sports: team, weight: 0.2 }]
+      success:
+        text: >-
+          You hide the limp in the tunnel and play like it is nothing. {team} wins {stage}, and in the shower you let yourself feel all of it.
+        effects:
+          - { type: sports, action: injury, what: pain }
+          - { type: sports, action: series, result: win }
+          - { type: flag, key: sports_played_hurt, value: true }
+          - { type: fame, action: mood, delta: 4 }
+      failure:
+        text: >-
+          You hide the limp until you can't. {opponent} take {stage}, and you sit on the bench with a towel over your head.
+        effects:
+          - { type: sports, action: injury, what: pain }
+          - { type: sports, action: series, result: lose }
+          - { type: flag, key: sports_played_hurt, value: true }
+          - { type: stat, key: health, delta: -3 }

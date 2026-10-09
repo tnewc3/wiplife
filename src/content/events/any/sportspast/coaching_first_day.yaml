@@ -1,0 +1,46 @@
+id: coaching_first_day
+title: The whistle is yours now
+text: >-
+  The whistle is lighter than you expected. Thirty faces look up at you, and
+  every one of them knows who you were. You have a plan on a clipboard and
+  nothing at all in your head. Somebody asks if it's true about the game.
+tone: light
+category: sportspast
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { sports: { retired: true } }
+    - { career: { employed: true, retired: false } }
+    - { fame: { peak: { gte: 3 } } }
+weight: { base: 1.5 }
+once: true
+choices:
+  - id: stories
+    label: Tell them the story, once, and then get to work
+    outcome:
+      text: >-
+        The story takes four minutes and the work takes two hours. At the end,
+        a kid asks if the next practice is tomorrow, and you realise you have
+        found the next thing.
+      effects:
+        - { type: stat, key: happiness, delta: 5 }
+        - { type: job, action: performance, value: 6 }
+  - id: no_stories
+    label: Tell them it is not about you
+    outcome:
+      text: >-
+        You start with a drill. A few kids are disappointed, and the rest are
+        better by the end of the month.
+      effects:
+        - { type: stat, key: smarts, delta: 1 }
+        - { type: job, action: performance, value: 4 }
+  - id: hard_line
+    label: Run it exactly the way you were coached
+    outcome:
+      text: >-
+        You run laps until the sun is gone. It works, and a parent writes an
+        email you do not answer. You are not sure you like the voice you used.
+      effects:
+        - { type: stat, key: stress, delta: 3 }
+        - { type: job, action: performance, value: 2 }

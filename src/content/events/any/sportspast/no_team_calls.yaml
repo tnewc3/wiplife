@@ -1,0 +1,45 @@
+id: no_team_calls
+title: The phone stopped ringing
+text: >-
+  Nobody calls. The agent's calls take longer to return, then do not return. A
+  scout you knew well says hello in a way that closes a door. It is the
+  middle of the season, and you are watching it on a screen.
+tone: serious
+category: sportspast
+rarity: common
+recurring: true
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { sports: { retired: true } }
+    - { age: { gte: 18 } }
+weight: { base: 10 }
+followUpOnly: true
+choices:
+  - id: coach
+    label: Take a coaching job with a youth team
+    outcome:
+      text: >-
+        Twelve-year-olds listen to you with open mouths. You teach them the one
+        thing you were taught well, and it is enough for a start.
+      effects:
+        - { type: sports, action: retire, route: coaching }
+        - { type: stat, key: happiness, delta: 3 }
+  - id: media
+    label: Say yes to the sports channel
+    visibleIf: { fame: { peak: { gte: 4 } } }
+    outcome:
+      text: >-
+        They want a recognisable face and an opinion. You have both, and a
+        stiff tie.
+      effects:
+        - { type: sports, action: retire, route: broadcast }
+  - id: move_on
+    label: Move on, and mean it
+    outcome:
+      text: >-
+        You pack the equipment into one bag and put the bag in the closet. The
+        closet door closes with a very small click.
+      effects:
+        - { type: sports, action: retire, route: normal }
+        - { type: stat, key: stress, delta: -1 }

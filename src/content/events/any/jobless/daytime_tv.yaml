@@ -7,7 +7,10 @@ tone: serious
 category: jobless
 rarity: common
 lifeStages: [youngAdult, adult]
-requires: { career: { employed: false, retired: false, lostWithin: 2 } }
+requires:
+  all:
+    - { career: { employed: false, retired: false, lostWithin: 2 } }
+    - { fame: { active: false } }
 weight: { base: 6 }
 cooldownYears: 4
 choices:

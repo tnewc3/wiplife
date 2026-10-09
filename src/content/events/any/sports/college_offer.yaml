@@ -1,0 +1,63 @@
+id: college_offer
+title: A letter with a crest
+text: >-
+  The envelope is heavier than a rejection would be. A college program has
+  watched you play and would like you to come, with a place on the team and
+  help with the tuition. There is a catch, as there always is: the coach wants
+  an answer by Friday.
+tone: light
+category: sports
+rarity: uncommon
+lifeStages: [teen, youngAdult]
+requires:
+  all:
+    - { age: { gte: 16, lte: 19 } }
+    - { sports: { active: true } }
+    - { sports: { level: [school] } }
+    - { sports: { rating: { gte: 40 } } }
+    - { fame: { rung: { gte: 2 } } }
+weight:
+  base: 1.4
+  modifiers:
+    - { if: { sports: { rating: { gte: 55 } } }, x: 2 }
+once: true
+choices:
+  - id: accept
+    label: Say yes
+    outcome:
+      text: >-
+        You sign in an office that smells of floor wax, with a coach who
+        shakes your hand a beat too long. The scholarship will cover a good
+        part of what college costs, and the rest will be on you.
+      effects:
+        - { type: education, action: scholarship, value: 12000 }
+        - { type: flag, key: recruited_athlete, value: true }
+        - { type: fame, action: fame, delta: 2 }
+  - id: negotiate
+    label: Ask for more
+    check:
+      base: 40
+      stats: [{ key: confidence, weight: 0.25 }, { key: smarts, weight: 0.15 }]
+      success:
+        text: >-
+          You ask the thing out loud, your voice steady. The coach laughs, goes
+          away and comes back with a bigger number.
+        effects:
+          - { type: education, action: scholarship, value: 24000 }
+          - { type: flag, key: recruited_athlete, value: true }
+      failure:
+        text: >-
+          The coach says the offer is the offer. You take it, and the room is
+          cooler than it was.
+        effects:
+          - { type: education, action: scholarship, value: 8000 }
+          - { type: flag, key: recruited_athlete, value: true }
+  - id: decline
+    label: Turn it down and keep your options open
+    outcome:
+      text: >-
+        The coach says the door stays open, in the voice of someone who says
+        that to a lot of people. You hang up and feel both lighter and a little
+        lost.
+      effects:
+        - { type: stat, key: stress, delta: -1 }

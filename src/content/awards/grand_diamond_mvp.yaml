@@ -1,0 +1,8 @@
+id: grand_diamond_mvp
+name: "the Grand Diamond MVP Award"
+category: "Most Valuable Player"
+path: baseball
+blurb: "The league's oldest prize, decided by a long vote and a longer argument."
+minRung: 5
+critics: 0.7
+prestige: 0.9

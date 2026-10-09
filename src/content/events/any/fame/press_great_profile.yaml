@@ -13,6 +13,7 @@ requires:
   all:
     - { fame: { active: true } }
     - { fame: { released: true } }
+    - { fame: { sport: false } }
 weight: { base: 8 }
 followUpOnly: true
 choices:

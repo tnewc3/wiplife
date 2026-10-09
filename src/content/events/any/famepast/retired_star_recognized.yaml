@@ -15,6 +15,7 @@ requires:
     - { age: { gte: 30 } }
     - { fame: { retired: true } }
     - { fame: { peak: { gte: 3 } } }
+    - { fame: { sport: false } }
 weight: { base: 3 }
 cooldownYears: 3
 choices:

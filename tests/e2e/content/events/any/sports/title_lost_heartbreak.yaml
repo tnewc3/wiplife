@@ -1,0 +1,44 @@
+id: title_lost_heartbreak
+title: The one that got away
+text: >-
+  It has been {since} since the final, and people keep telling you it was a
+  great run. You do not want to hear about a great run. You want one more
+  possession of that last game, and you know exactly what you would do with it.
+tone: serious
+category: sports
+rarity: uncommon
+lifeStages: [child, teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { sports: { active: true } }
+weight: { base: 10 }
+followUpOnly: true
+choices:
+  - id: use_it
+    label: Make it the reason you train this summer
+    outcome:
+      text: >-
+        You are in the gym at six every morning with the final playing on a
+        phone propped against a weight rack. It is not healthy, and it works.
+      effects:
+        - { type: sports, action: form, delta: 3 }
+        - { type: fame, action: craft, delta: 2 }
+        - { type: stat, key: stress, delta: 3 }
+  - id: talk_about_it
+    label: Sit with a teammate and talk it through
+    outcome:
+      text: >-
+        You both say the same things in different words, and somewhere in the
+        second hour it stops hurting in quite the same place.
+      effects:
+        - { type: stat, key: stress, delta: -4 }
+        - { type: stat, key: happiness, delta: 2 }
+  - id: let_go
+    label: Put it away and enjoy the summer
+    outcome:
+      text: >-
+        You go somewhere with water and no screens. When you come back, the
+        loss is smaller, and you are not sure that is entirely a good thing.
+      effects:
+        - { type: stat, key: happiness, delta: 4 }
+        - { type: sports, action: form, delta: -1 }

@@ -1,0 +1,8 @@
+id: diamond_prep_awards
+name: "the Prep Diamond Awards"
+category: "Player of the Year"
+path: baseball
+blurb: "A plaque in a gymnasium and a photograph in the local paper."
+minRung: 2
+critics: 0.4
+prestige: 0.5

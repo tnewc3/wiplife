@@ -1,0 +1,57 @@
+id: big_game_hockey
+title: Overtime
+text: >-
+  Sudden death, and the first goal ends it. You are out on the ice with your legs gone to jelly and your lungs full of cold. The puck bounces to you in the slot, with a defender and the goalie both leaning the wrong way.
+tone: serious
+category: sports
+rarity: common
+recurring: true
+lifeStages: [child, teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { sports: { active: true } }
+    - { sports: { sport: [hockey] } }
+    - { sports: { level: [school, college, pro] } }
+    - { fame: { released: true } }
+weight: { base: 10 }
+cooldownYears: 2
+followUpOnly: true
+choices:
+  - id: take_it
+    label: Shoot
+    check:
+      base: 45
+      stats: [{ sports: rating, weight: 0.3 }, { key: confidence, weight: 0.2 }, { sports: form, weight: 0.1 }, { key: riskTaking, weight: 0.05 }]
+      success:
+        text: >-
+          It's a snap shot with nothing behind it but instinct. It finds the top corner and the red light goes on, and the whole bench is on the ice before the horn ends.
+        effects:
+          - { type: sports, action: rating, delta: 3 }
+          - { type: fame, action: fame, delta: 2 }
+          - { type: fame, action: mood, delta: 4 }
+          - { type: flag, key: sports_took_the_shot, value: true }
+      failure:
+        text: >-
+          It's a good shot and a better save. The goalie's glove finds it like it has all night, and the rebound goes the other way.
+        effects:
+          - { type: sports, action: rating, delta: -2 }
+          - { type: fame, action: mood, delta: -3 }
+          - { type: stat, key: happiness, delta: -4 }
+  - id: share_it
+    label: Slide it across to the open skater
+    check:
+      base: 50
+      stats: [{ sports: team, weight: 0.3 }, { sports: rating, weight: 0.15 }, { key: sociability, weight: 0.1 }]
+      success:
+        text: >-
+          You find the skater on the far side with a pass so clean it looks planned. There is no need for a second touch, and the bench empties.
+        effects:
+          - { type: sports, action: rating, delta: 2 }
+          - { type: fame, action: image, delta: 3 }
+          - { type: stat, key: happiness, delta: 4 }
+      failure:
+        text: >-
+          The pass is a stride behind. The defence clears it and the other team takes it down the ice.
+        effects:
+          - { type: fame, action: image, delta: -1 }
+          - { type: stat, key: happiness, delta: -3 }

@@ -82,6 +82,8 @@ export { getTeenView } from './teen/views';
 export { getCrimeView, getDirtyView, getLaunderBlock, getSpendBlock } from './crime/views';
 export type { CrimeMemberView, CrimeView, DirtyView, FrontView } from './crime/views';
 export { fanCount, getFameView, getProjectBlock } from './fame/views';
+export { getSportsView } from './sports/views';
+export type { SportsSeasonView, SportsView } from './sports/views';
 export type { FameEntryView, FamePathView, FameProjectView, FameRungView, FameView } from './fame/views';
 export type { ActivityOptionView, CrowdView, JobOptionView, RuleView, TeenView } from './teen/views';
 export type { AdoptOption, BelongingsView, MainHomeView, PetDetailView, PetView, RenovationOption, VacationHomeView, VacationOption, VehicleOption, VehicleView } from './possessions/views';

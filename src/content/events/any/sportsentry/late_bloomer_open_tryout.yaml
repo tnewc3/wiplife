@@ -1,0 +1,71 @@
+id: late_bloomer_open_tryout
+title: The flyer on the gym door
+text: >-
+  A flyer on the gym door says "open tryouts, no experience required, bring
+  your own shoes." Somebody has written "ha" under it in marker. You walk past
+  it twice, and then you copy down the day and the time.
+tone: neutral
+category: sportsentry
+rarity: uncommon
+lifeStages: [teen, youngAdult]
+requires:
+  all:
+    - { age: { gte: 17, lte: 26 } }
+    - { fame: { active: false } }
+    - { sports: { seasons: { lt: 1 } } }
+    - { stat: fitness, gte: 55 }
+weight:
+  base: 0.5
+  modifiers:
+    - { if: { discovery: { talent: found } }, x: 3 }
+    - { if: { trait: ambition, gt: 60 }, x: 1.4 }
+choices:
+  - id: basketball
+    label: Try for the basketball side
+    check:
+      base: 35
+      stats: [{ key: fitness, weight: 0.35 }, { key: discipline, weight: 0.15 }, { key: luck, weight: 0.05 }]
+      success:
+        text: The gym is loud and bright and full of people who have been doing this all their lives. You hold your own for a minute and then for an hour, and a coach writes your name on the back of a hand.
+        effects:
+          - { type: fame, action: enter, path: basketball, route: open_tryout }
+          - { type: stat, key: happiness, delta: 6 }
+      failure:
+        text: You are three steps slow at everything, and you know it by the second drill. You stay to the end because leaving would be worse.
+        effects:
+          - { type: stat, key: confidence, delta: -2 }
+  - id: football
+    label: Go to the football combine
+    visibleIf: { age: { gte: 18 } }
+    check:
+      base: 35
+      stats: [{ key: fitness, weight: 0.35 }, { key: discipline, weight: 0.15 }, { key: luck, weight: 0.05 }]
+      success:
+        text: The stopwatch clicks and nobody says what it read. A scout with a notebook asks for your number, which is not, the scout says, a promise.
+        effects:
+          - { type: fame, action: enter, path: football, route: open_tryout }
+          - { type: stat, key: happiness, delta: 6 }
+      failure:
+        text: You are a half-second off the pace and several pounds off the weight, and the notebooks do not open. You drive home with the radio off.
+        effects:
+          - { type: stat, key: confidence, delta: -2 }
+  - id: soccer
+    label: Turn up for the soccer trial
+    check:
+      base: 35
+      stats: [{ key: fitness, weight: 0.35 }, { key: discipline, weight: 0.15 }, { key: luck, weight: 0.05 }]
+      success:
+        text: Ninety minutes on a wet pitch with players half your age and twice as sharp. In the last ten you win a ball nobody thought you would, and a scout in a long coat looks up.
+        effects:
+          - { type: fame, action: enter, path: soccer, route: open_tryout }
+          - { type: stat, key: happiness, delta: 6 }
+      failure:
+        text: The pitch is wet and you are late to everything. The scout leaves at half time, and you play on out of stubbornness.
+        effects:
+          - { type: stat, key: confidence, delta: -2 }
+  - id: walk_on_by
+    label: Walk past it, again
+    outcome:
+      text: The flyer is still there next week. Someone has crossed out "ha" and written "go".
+      effects:
+        - { type: stat, key: happiness, delta: -1 }

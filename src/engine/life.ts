@@ -49,6 +49,7 @@ import { emptyPossessions } from './possessions/query';
 import { emptyTeen } from './teen/query';
 import { emptyCrime } from './crime/query';
 import { emptyFame } from './fame/query';
+import { emptySports } from './sports/query';
 
 export type { CreateLifeOptions, CustomLifeInput } from './creation/input';
 
@@ -177,6 +178,7 @@ export function createLife(input: CreateLifeOptions, content: ContentBundle): Li
     teen: emptyTeen(),
     crime: emptyCrime(),
     fame: emptyFame(),
+    sports: emptySports(),
   };
   // M1: ADHD and neurodivergence are inherited in part: your parents and siblings (and grandparents) may have them, and you are likelier to if a parent does.
   for (const person of Object.values(life.people)) {
@@ -353,11 +355,15 @@ export function resolveChoice(state: LifeState, instanceId: Id, choiceId: Id, co
         // E5: a possession the outcome removes is still named in its text.
         const named = def.bind ? textContext(draft, instance.cast, content, instance.since) : undefined;
         if (named) target.card = { title: renderText(def.title, named), text: renderText(def.text, named) };
+        // E6c: a pinned card keeps the words it was shown with (a playoff series moves on when you choose).
+        const pinned = def.pin ? textContext(draft, instance.cast, content, instance.since) : undefined;
+        if (pinned) target.card = { title: renderText(def.title, pinned), text: renderText(def.text, pinned) };
         applyEffects(draft, outcome.effects, { def, cast: instance.cast, rng: draft.rng, content, ...(instance.since !== undefined ? { since: instance.since } : {}), ...(named ? { named } : {}) });
         // Written after the effects, so it can tell what they did ({sentence}, new pronouns).
         if (outcome.text) {
           const now = textContext(draft, instance.cast, content, instance.since);
-          target.outcomeText = renderText(outcome.text, named ? keepPossessionText(now, named) : now);
+          const base = named ? keepPossessionText(now, named) : now;
+          target.outcomeText = renderText(outcome.text, pinned ? { ...base, values: { ...base.values, stage: pinned.values?.stage ?? '', opponent: pinned.values?.opponent ?? '' } } : base);
         }
         // Every money change shows on the outcome card, with the new balance (C1).
         const change = draft.finances.savings - savings;

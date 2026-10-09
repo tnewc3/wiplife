@@ -1,0 +1,8 @@
+id: scholastic_soccer_awards
+name: "the Scholastic Soccer Awards"
+category: "Player of the Year"
+path: soccer
+blurb: "Given at a school dinner, to the player who ran the midfield and everything else."
+minRung: 2
+critics: 0.4
+prestige: 0.5

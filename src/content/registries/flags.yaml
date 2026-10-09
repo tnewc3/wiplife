@@ -105,3 +105,10 @@ flags:
   fame_burned_out: You burned out and had to stop
   fame_stalked: A fan became a stalker
   fame_famous: You became famous
+  # E6c: sports.
+  sports_hall_of_fame: You were inducted into the Hall of Fame
+  sports_doped: You took something you should not have to play better
+  sports_played_hurt: You played through an injury when you should have sat out
+  sports_spoke_up: You spoke up in the locker room
+  sports_took_the_shot: You took the last shot when it mattered
+  sports_career_ended_by_injury: An injury ended your sports career

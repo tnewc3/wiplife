@@ -1,0 +1,44 @@
+id: aged_out_of_the_team
+title: No place on the next team
+text: >-
+  The list went up this morning, and you were not on it. You read it twice, as
+  if a name could change. The coach finds you in the parking lot and says
+  something kind that you will not remember, and something true that you will.
+tone: serious
+category: sportspast
+rarity: common
+recurring: true
+lifeStages: [child, teen, youngAdult]
+requires:
+  all:
+    - { sports: { retired: true } }
+    - { sports: { agedOut: true } }
+weight: { base: 10 }
+followUpOnly: true
+choices:
+  - id: study
+    label: Put the hours into school
+    outcome:
+      text: >-
+        The first weeks are strange, without the shape of practice. By the end
+        of the term, your marks have moved, and so has something else.
+      effects:
+        - { type: education, action: grades, value: 0.2 }
+        - { type: stat, key: smarts, delta: 1 }
+  - id: play_for_fun
+    label: Keep playing with friends, for no reason at all
+    outcome:
+      text: >-
+        Saturdays go back to being a game. Nobody keeps score, and you notice
+        you are better at it than you were when someone did.
+      effects:
+        - { type: stat, key: happiness, delta: 4 }
+        - { type: stat, key: fitness, delta: 1 }
+  - id: sulk
+    label: Quit everything for a while
+    outcome:
+      text: >-
+        You stay in your room until a friend leaves a ball on your doorstep with
+        a note that says nothing at all.
+      effects:
+        - { type: stat, key: happiness, delta: -4 }

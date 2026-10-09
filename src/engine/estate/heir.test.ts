@@ -391,7 +391,7 @@ describe('three generations', () => {
     const youngest = (dead: LifeState) => heirCandidates(dead).sort((a, b) => dead.people[b]!.birthYear - dead.people[a]!.birthYear)[0]!;
 
     // Generation 1 ends, leaving a child of 9 and a grown one.
-    const first = die(parentLife({ kids: [9, 28], spouse: true, seed: 'chain', age: 52, savings: 250_000 }));
+    const first = die(parentLife({ kids: [9, 28], spouse: true, seed: 'chain-c', age: 52, savings: 250_000 }));
     check(first);
     expect(first.lineage.generation).toBe(1);
 

@@ -13,6 +13,7 @@ requires:
   all:
     - { age: { gte: 40 } }
     - { fame: { active: true } }
+    - { fame: { sport: false } }
 weight: { base: 10 }
 followUpOnly: true
 choices:

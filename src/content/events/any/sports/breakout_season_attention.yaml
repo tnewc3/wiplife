@@ -1,0 +1,48 @@
+id: breakout_season_attention
+title: Everyone wants to know your name
+text: >-
+  You came into the year as a name on the roster, and you leave it as a name
+  on the front of the sports section. People who did not know you in the spring
+  now say they were always sure. Your phone has become a different kind of
+  object.
+tone: light
+category: sports
+rarity: common
+recurring: true
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 13 } }
+    - { sports: { active: true } }
+    - { fame: { released: true } }
+weight: { base: 10 }
+cooldownYears: 3
+followUpOnly: true
+choices:
+  - id: enjoy
+    label: Enjoy it, you earned it
+    outcome:
+      text: >-
+        You go to the restaurant that never had a table. They find one in
+        thirty seconds. It is a small, ridiculous thing and you savour it.
+      effects:
+        - { type: stat, key: happiness, delta: 6 }
+        - { type: fame, action: fans, delta: 5 }
+  - id: stay_focused
+    label: Stay focused and turn most of it down
+    outcome:
+      text: >-
+        You say no a lot, politely. Your coach notices, and says nothing, and
+        then lets you start the next game.
+      effects:
+        - { type: sports, action: form, delta: 2 }
+        - { type: fame, action: image, delta: 2 }
+  - id: thank_them
+    label: Thank the people who believed in you
+    outcome:
+      text: >-
+        You write eleven letters by hand. One of them is to a coach who never
+        got the credit, and the reply comes in a single line: "I knew."
+      effects:
+        - { type: stat, key: happiness, delta: 4 }
+        - { type: fame, action: mood, delta: 3 }

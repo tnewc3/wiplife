@@ -97,6 +97,8 @@ export function rootEvents(content: ContentBundle): Set<string> {
     ...Object.values(r.crime.triggers),
     // E6b: what the fame step queues.
     ...Object.values(r.fame.triggers),
+    // E6c: what the sports step queues.
+    ...Object.values(r.sports.triggers),
   ];
   for (const list of lists) for (const id of list.events) roots.add(id);
   return roots;
@@ -214,6 +216,8 @@ export function analyzeContent(content: ContentBundle): StaticCoverage {
   for (const tag of [...Object.values(HEIR_MEMORY_MAP), 'lost_the_same_parent', 'took_you_in', 'foster_carer']) addTo(memoryWrites, tag, 'heir (engine)');
   // E6b: fame writes these itself (a burnout, a stalker, a contract broken, a rung of fame reached).
   for (const flag of ['fame_broke_contract', 'fame_burned_out', 'fame_stalked', 'fame_famous']) addTo(flagWrites, flag, 'fame (engine)');
+  // E6c: the sports step writes this when an injury ends a career.
+  addTo(flagWrites, 'sports_career_ended_by_injury', 'sports (engine)');
   for (const flag of ['estate_will', 'estate_no_will', 'left_out_of_will', 'inherited_a_home', 'in_foster_care', 'grew_up_in_foster_care']) addTo(flagWrites, flag, 'heir (engine)');
   for (const flag of Object.keys(content.balance.family.heir.reputation.flags)) addTo(flagReads, flag, 'balance/family.yaml heir.reputation.flags');
 

@@ -122,7 +122,7 @@ const name = (state: LifeState, id: Id): string => {
   return p ? `${p.name.first} ${p.name.last}` : '';
 };
 
-function pathView(state: LifeState, id: Id, content: ContentBundle): FamePathView | null {
+export function pathView(state: LifeState, id: Id, content: ContentBundle): FamePathView | null {
   const def = pathDef(content, id);
   const p = state.fame.paths[id];
   if (!def || !p) return null;
@@ -158,7 +158,10 @@ export function getFameView(state: LifeState, content: ContentBundle): FameView 
   const ceiling = commitmentCeiling(state, content);
   const floor = commitmentFloor(state, content);
   const order = { back: 0, steady: 1, all: 2 } as const;
+  // E6c: a sport has its own screen; this one is for arts and media.
+  const sportMain = pathDef(content, f.main)?.sport !== undefined;
   const paths = workedPaths(state)
+    .filter((id) => pathDef(content, id)?.sport === undefined)
     .map((id) => pathView(state, id, content))
     .filter((p): p is FamePathView => p !== null);
   const projectBlock = !f.active ? 'inactive' : isIncarcerated(state) ? 'prison' : null;
@@ -166,9 +169,9 @@ export function getFameView(state: LifeState, content: ContentBundle): FameView 
   const contract = f.contract;
   const company = contract ? content.fameCompanies[contract.company] : undefined;
   return {
-    show: f.active || f.retired !== undefined || age >= minAge,
-    active: f.active,
-    retired: !f.active && f.retired !== undefined,
+    show: sportMain ? paths.length > 0 : f.active || f.retired !== undefined || age >= minAge,
+    active: f.active && paths.length > 0,
+    retired: !f.active && f.retired !== undefined && !sportMain,
     between,
     minor,
     years: main ? state.currentYear - main.since : 0,
@@ -200,7 +203,8 @@ export function getFameView(state: LifeState, content: ContentBundle): FameView 
     plan: f.plan
       ? { pathId: f.plan.path, kindLabel: pathDef(content, f.plan.path)?.kinds.find((k) => k.id === f.plan!.kind)?.label ?? '', style: f.plan.style, risk: f.plan.risk, tour: f.plan.tour, press: f.plan.press }
       : null,
-    projects: [...f.projects]
+    projects: f.projects
+      .filter((p) => pathDef(content, p.path)?.sport === undefined)
       .reverse()
       .slice(0, 6)
       .map((p) => ({
@@ -220,8 +224,11 @@ export function getFameView(state: LifeState, content: ContentBundle): FameView 
         earned: p.earned,
         assigned: p.assigned === true,
       })),
-    awards: [...f.awards].reverse().map((a) => ({ name: awardOf(a.awardId)?.name ?? '', category: awardOf(a.awardId)?.category ?? '', year: a.year, project: a.project, won: a.won })),
-    nominated: f.nominated ? { name: awardOf(f.nominated.awardId)?.name ?? '', category: awardOf(f.nominated.awardId)?.category ?? '', project: f.nominated.project, due: f.nominated.due } : null,
+    awards: f.awards
+      .filter((a) => content.famePaths[a.path]?.sport === undefined)
+      .reverse()
+      .map((a) => ({ name: awardOf(a.awardId)?.name ?? '', category: awardOf(a.awardId)?.category ?? '', year: a.year, project: a.project, won: a.won })),
+    nominated: f.nominated && content.famePaths[content.fameAwards[f.nominated.awardId]?.path ?? '']?.sport === undefined ? { name: awardOf(f.nominated.awardId)?.name ?? '', category: awardOf(f.nominated.awardId)?.category ?? '', project: f.nominated.project, due: f.nominated.due } : null,
     people: {
       super: f.people.super.filter((id) => fanAlive(state, id)).map((id) => name(state, id)),
       hater: f.people.hater.filter((id) => fanAlive(state, id)).map((id) => name(state, id)),

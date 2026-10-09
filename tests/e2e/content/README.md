@@ -64,3 +64,8 @@ of you, so the flows above don't change. The web tests set up the ties and
 what people have heard in a saved life (`tests/e2e/webFixtures.ts`), and use
 the real Introduce, Set the record straight and Ask them to keep it quiet
 interactions, which go neutral here like every other.
+
+Sports (E6c): the playoff series events (`playoffs_opening_series`,
+`playoffs_semifinal_swing`, `playoffs_final_game_seven`) and the two that
+follow a final (`title_parade`, `title_lost_heartbreak`) are copies of the real
+ones, so the sports tests can play a short run through the event sheet.

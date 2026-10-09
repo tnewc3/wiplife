@@ -1,0 +1,8 @@
+id: golden_boot_award
+name: "the Golden Boot Trophy"
+category: "Golden Boot"
+path: soccer
+blurb: "A heavy trophy, given to the player who scored the most and was seen to celebrate it."
+minRung: 4
+critics: 0.3
+prestige: 0.6

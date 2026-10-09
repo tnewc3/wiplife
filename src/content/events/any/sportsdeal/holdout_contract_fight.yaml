@@ -1,0 +1,59 @@
+id: holdout_contract_fight
+title: The number on the table
+text: >-
+  {team} has put a number on the table, and it is not the one you had in your
+  head. The meeting is polite and short. Somebody says "market value" three
+  times, as though it were a place.
+tone: neutral
+category: sportsdeal
+rarity: uncommon
+recurring: true
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { sports: { active: true } }
+    - { sports: { level: [pro] } }
+    - { sports: { contract: true } }
+    - { sports: { rating: { gte: 60 } } }
+weight: { base: 1 }
+cooldownYears: 4
+choices:
+  - id: ask_for_more
+    label: Tell them you want a deal that fits the player you are
+    visibleIf: { fame: { agent: { gte: 1 } } }
+    outcome:
+      text: >-
+        You say it plainly. Your agent says nothing and writes a longer number
+        on a different piece of paper.
+      effects:
+        - { type: sports, action: ask, what: contract }
+  - id: sit_out
+    label: Skip the first week of camp
+    check:
+      base: 40
+      stats: [{ sports: rating, weight: 0.3 }, { key: riskTaking, weight: 0.1 }]
+      success:
+        text: >-
+          The team blinks first. There is a new number, a call from the owner
+          and a very polite week of silence.
+        effects:
+          - { type: sports, action: extend, terms: rich }
+          - { type: fame, action: mood, delta: -2 }
+      failure:
+        text: >-
+          Nobody calls. The fans write angry things about you and the coach
+          says what a shame it is, and you report on Monday with a smaller
+          deal and a bigger audience.
+        effects:
+          - { type: sports, action: extend, terms: cheap }
+          - { type: fame, action: mood, delta: -6 }
+          - { type: fame, action: image, delta: -3 }
+  - id: take_it
+    label: Take it and let the play do the talking
+    outcome:
+      text: >-
+        You sign. The team is relieved, your agent is not, and you are
+        somewhere in between.
+      effects:
+        - { type: sports, action: extend, terms: fair }

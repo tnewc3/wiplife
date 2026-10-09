@@ -1,0 +1,8 @@
+id: hoops_breakthrough
+name: "the Breakthrough Player Award"
+category: "Breakthrough Player"
+path: basketball
+blurb: "For the player who came from nowhere, as judged by the people who watch every game."
+minRung: 4
+critics: 0.5
+prestige: 0.6

@@ -1,0 +1,51 @@
+id: veteran_mentor
+title: The old hand
+text: >-
+  {mate.name} has been in this league longer than some of your teammates have
+  been alive. {mate.They} {mate:moves|move} a half-step slower and see everything
+  a half-second earlier. After a practice in the rain, {mate.they}
+  {mate:offers|offer} to show you how to read a game, if you would like.
+tone: light
+category: sports
+rarity: common
+recurring: true
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 16, lte: 30 } }
+    - { sports: { active: true } }
+    - { sports: { level: [school, college, pro] } }
+weight: { base: 10 }
+cooldownYears: 3
+followUpOnly: true
+cast:
+  mate: { kind: acquaintance, presence: city, createIfMissing: true, age: { min: 33, max: 45 } }
+choices:
+  - id: listen
+    label: Say yes and take notes
+    outcome:
+      text: >-
+        You watch tape for three hours on a Tuesday night. {mate.name} stops the
+        video eleven times and says the same thing in different ways: where to
+        stand, and when to wait.
+      effects:
+        - { type: fame, action: craft, delta: 3 }
+        - { type: relationship, role: mate, affection: 6 }
+  - id: your_way
+    label: Thank {mate.them}, and keep doing it your way
+    outcome:
+      text: >-
+        {mate.They} {mate:shrugs|shrug}, kindly. Every good player thinks that,
+        {mate.they} {mate:says|say}, and sometimes it is true.
+      effects:
+        - { type: stat, key: confidence, delta: 1 }
+  - id: return_favour
+    label: Offer to run extra drills with {mate.them}
+    outcome:
+      text: >-
+        {mate.They} {mate:laughs|laugh} and says no one has asked in years. By
+        the end of the month, {mate.they} {mate:is|are} calling you the best
+        thing to happen to the roster.
+      effects:
+        - { type: relationship, role: mate, affection: 8 }
+        - { type: sports, action: form, delta: 1 }

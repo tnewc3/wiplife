@@ -1,0 +1,12 @@
+id: concussion
+name: Concussion
+noun: a concussion
+kind: injury
+blurb: The lights are too bright and the words come slowly. The only cure is time and quiet.
+course: { untreated: -14, treated: -35 }
+effects:
+  smarts: { perYear: -1, limit: 30 }
+  happiness: { perYear: -2, limit: 30 }
+  stress: { perYear: 2, limit: 75 }
+treatable: true
+costs: { treatment: 2500 }

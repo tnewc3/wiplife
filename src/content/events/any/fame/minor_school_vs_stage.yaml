@@ -15,6 +15,7 @@ requires:
     - { fame: { active: true } }
     - { fame: { commitment: [steady, all] } }
     - { education: { program: [elementary, middle, high] } }
+    - { fame: { sport: false } }
 weight: { base: 2.5 }
 cooldownYears: 3
 cast:

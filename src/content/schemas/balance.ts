@@ -629,6 +629,31 @@ export const targetsBalanceSchema = z.strictObject({
     /** A big break taking someone with no fitting talent above the ceiling: none, ever. */
     breakOverCeiling: numberRangeSchema,
   }),
+  /**
+   * E6c: sports (tools/simulate/sports.ts). The athlete player (one who goes
+   * after a sport) is judged on how often it starts, how far it gets with and
+   * without a talent that fits, how long pro careers last, how rough the
+   * games are on a body (and what playing through pain does), titles,
+   * all-stars and earnings. Nobody under 18 is ever in the pros.
+   */
+  sports: z.strictObject({
+    underAgePros: numberRangeSchema,
+    entered: shareRangeSchema,
+    talentPro: shareRangeSchema,
+    noTalentPro: shareRangeSchema,
+    talentPastMiddle: shareRangeSchema,
+    noTalentPastMiddle: shareRangeSchema,
+    legend: shareRangeSchema,
+    proYears: numberRangeSchema,
+    endAge: numberRangeSchema,
+    injuriesPer100: numberRangeSchema,
+    injuryEnded: shareRangeSchema,
+    painRisk: numberRangeSchema,
+    titleLives: shareRangeSchema,
+    allStarLives: shareRangeSchema,
+    medianEarnings: numberRangeSchema,
+    signedShare: shareRangeSchema,
+  }),
   coverage: z.strictObject({
     /** At least this many events (not retired). */
     minEvents: z.int().min(1),

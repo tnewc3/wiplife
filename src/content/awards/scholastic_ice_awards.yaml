@@ -1,0 +1,8 @@
+id: scholastic_ice_awards
+name: "the Scholastic Ice Awards"
+category: "Player of the Year"
+path: hockey
+blurb: "A trophy shaped like a puck, presented in a rink cafeteria."
+minRung: 2
+critics: 0.4
+prestige: 0.5

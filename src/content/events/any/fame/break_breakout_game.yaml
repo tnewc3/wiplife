@@ -1,0 +1,39 @@
+id: break_breakout_game
+title: The night everything went in
+text: >-
+  It was an ordinary game until about halfway through, and then it wasn't.
+  Everything you tried worked, and the crowd noticed before you did. By the end,
+  the arena was on its feet, the clips were on every screen in the city, and
+  you were {rungTitle}.
+tone: light
+category: fame
+rarity: rare
+recurring: true
+lifeStages: [child, teen, youngAdult, adult]
+requires:
+  all:
+    - { fame: { active: true } }
+    - { fame: { sport: true } }
+weight: { base: 10 }
+followUpOnly: true
+choices:
+  - id: soak_it_up
+    label: Take every interview they ask for
+    outcome:
+      text: >-
+        By midnight you have said the same three sentences nine times. They
+        are true each time, and you are tired every time.
+      effects:
+        - { type: fame, action: fans, delta: 15 }
+        - { type: fame, action: image, delta: 2 }
+        - { type: fame, action: burnout, delta: 4 }
+  - id: credit_the_team
+    label: Say it was the team, and mean it
+    outcome:
+      text: >-
+        Your teammates hear you say it on the news, and the locker room the next
+        morning is warmer than it has been all season.
+      effects:
+        - { type: fame, action: image, delta: 4 }
+        - { type: sports, action: form, delta: 2 }
+        - { type: stat, key: happiness, delta: 5 }

@@ -1,0 +1,68 @@
+id: declining_step_slower
+title: A half-step slower
+text: >-
+  You catch it on film. It is nothing anyone else would notice: a step
+  that used to be early, a read that used to be instant. Your body keeps the
+  numbers honestly, and the numbers are a little worse than they were. The
+  younger players have started to be polite to you.
+tone: serious
+category: sports
+rarity: common
+recurring: true
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 30 } }
+    - { sports: { active: true } }
+    - { sports: { level: [pro] } }
+weight: { base: 10 }
+cooldownYears: 3
+followUpOnly: true
+choices:
+  - id: adapt
+    label: Change how you play to fit the body you have
+    outcome:
+      text: >-
+        You trade pace for position and speed for timing. It takes a season to
+        learn, and then it feels like a different game, and a better one.
+      effects:
+        - { type: fame, action: craft, delta: 4 }
+        - { type: sports, action: form, delta: 1 }
+  - id: fight
+    label: Train harder and refuse to slow down
+    check:
+      base: 45
+      stats: [{ key: fitness, weight: 0.25 }, { key: discipline, weight: 0.2 }, { key: health, weight: 0.1 }]
+      success:
+        text: >-
+          The extra work works, for now. You are as fast as you were, and you
+          are very, very tired.
+        effects:
+          - { type: stat, key: fitness, delta: 2 }
+          - { type: stat, key: stress, delta: 3 }
+      failure:
+        text: >-
+          Your body files a complaint in the form of a strained hamstring. The
+          doctors suggest, in unison, that you consider the word "maintenance."
+        effects:
+          - { type: stat, key: health, delta: -3 }
+          - { type: stat, key: fitness, delta: -1 }
+  - id: ignore
+    label: Say nothing and hope it was a bad week
+    outcome:
+      text: >-
+        It was not a bad week. You know that on the drive home, and you turn
+        the radio up so you do not have to think it again.
+      effects:
+        - { type: stat, key: stress, delta: 2 }
+  - id: old_injuries
+    label: Admit that the nights you played hurt are catching up
+    visibleIf: { flag: sports_played_hurt }
+    outcome:
+      text: >-
+        The trainer does not say "I told you so." The treatment table gets a lot
+        more of your time, and the knee, for a year, does what it is asked.
+      effects:
+        - { type: stat, key: health, delta: 2 }
+        - { type: stat, key: fitness, delta: -1 }
+        - { type: sports, action: form, delta: 1 }

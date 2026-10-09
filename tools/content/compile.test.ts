@@ -1521,7 +1521,7 @@ describe('fame in arts and media (E6b)', () => {
   it('accepts the real content: four paths, agents, awards, companies, about eighty events, and no warnings', { timeout: 90_000 }, async () => {
     const result = await compile();
     if (!result.ok) throw new Error(formatErrors(result.errors));
-    expect(Object.keys(result.bundle.famePaths).sort()).toEqual(['acting', 'arts', 'music', 'social']);
+    expect(Object.values(result.bundle.famePaths).filter((p) => !p.sport).map((p) => p.id).sort()).toEqual(['acting', 'arts', 'music', 'social']);
     expect(Object.keys(result.bundle.fameAgents)).toHaveLength(3);
     expect(Object.keys(result.bundle.fameCompanies).length).toBeGreaterThanOrEqual(12);
     const events = Object.values(result.bundle.events).filter((e) => !e.retired && e.category.startsWith('fame'));
@@ -1598,5 +1598,87 @@ describe('fame in arts and media (E6b)', () => {
     expect(await expectErrors()).toContain('must ask for more fame and quality');
     await write('fame/music.yaml', music.replace('talents: [music]', 'talents: [juggling]'));
     expect(await expectErrors()).toContain('unknown talent "juggling"');
+  });
+});
+
+describe('sports (E6c)', () => {
+  const read = (file: string) => readFile(path.join(dir, file), 'utf8');
+
+  it('accepts the real content: five sports with twelve teams each, awards, brands, about fifty-five events, and no warnings', { timeout: 90_000 }, async () => {
+    const result = await compile();
+    if (!result.ok) throw new Error(formatErrors(result.errors));
+    const sports = Object.values(result.bundle.famePaths).filter((p) => p.sport);
+    expect(sports.map((p) => p.id).sort()).toEqual(['baseball', 'basketball', 'football', 'hockey', 'soccer']);
+    for (const sport of sports) {
+      expect(sport.sport!.leagues.pro.teams).toHaveLength(12);
+      expect(sport.rungs).toHaveLength(8);
+      expect(sport.sport!.positions.length).toBeGreaterThanOrEqual(4);
+    }
+    const events = Object.values(result.bundle.events).filter((e) => !e.retired && (e.category.startsWith('sports') || ['break_scout_in_the_stands', 'break_breakout_game', 'sports_superfan_at_the_gate'].includes(e.id)));
+    expect(events.length).toBeGreaterThanOrEqual(48);
+    expect(events.length).toBeLessThanOrEqual(62);
+    expect(result.warnings).toEqual([]);
+  });
+
+  it('keeps the pros for adults: the pro rung, the draft and any signing ask for 18', { timeout: 90_000 }, async () => {
+    const hoops = await read('fame/basketball.yaml');
+    await write('fame/basketball.yaml', hoops.replace('income: 110000, minAge: 18', 'income: 110000, minAge: 16'));
+    expect(await expectErrors()).toContain('the pro rung must ask for age 18');
+    await write('fame/basketball.yaml', hoops.replace('draft: { name: "the draft", age: 19, force: 22, rounds: 2 }', 'draft: { name: "the draft", age: 16, force: 22, rounds: 2 }'));
+    expect(await expectErrors()).toMatch(/draft|Too small/);
+    await write('fame/basketball.yaml', hoops);
+    const draft = await read('events/any/sports/draft_night_first_round.yaml');
+    await write('events/any/sports/draft_night_first_round.yaml', draft.replace('    - { age: { gte: 18 } }\n', ''));
+    expect(await expectErrors()).toContain('so it requires { age: { gte: 18 } }');
+  });
+
+  it('checks a way in against the route’s ages, choice by choice', { timeout: 90_000 }, async () => {
+    const entry = await read('events/any/sportsentry/way_in_basketball.yaml');
+    await write('events/any/sportsentry/way_in_basketball.yaml', entry.replace('    visibleIf: { age: { gte: 13 } }\n', ''));
+    expect(await expectErrors()).toContain('which needs age 13');
+    await write('events/any/sportsentry/way_in_basketball.yaml', entry.replace('    visibleIf: { age: { lte: 13 } }\n', ''));
+    expect(await expectErrors()).toContain('which is open to age 13');
+    await write('events/any/sportsentry/way_in_basketball.yaml', entry.replace('route: school_tryout', 'route: nowhere'));
+    expect(await expectErrors()).toContain('unknown route "nowhere"');
+  });
+
+  it('keeps the playoffs a pinned chain of three series that each end in a win or a loss', { timeout: 90_000 }, async () => {
+    const series = await read('events/any/sportsplayoffs/playoffs_opening_series.yaml');
+    await write('events/any/sportsplayoffs/playoffs_opening_series.yaml', series.replace('pin: true\n', ''));
+    expect(await expectErrors()).toContain('must be pin: true');
+    await write('events/any/sportsplayoffs/playoffs_opening_series.yaml', series.replace('          - { type: sports, action: series, result: win }\n', ''));
+    expect(await expectErrors()).toContain('must end the series in a win or a loss');
+    await write('events/any/sportsplayoffs/playoffs_opening_series.yaml', series.replace('    - { sports: { round: { eq: 1 } } }\n', '    - { sports: { round: { eq: 2 } } }\n'));
+    expect(await expectErrors()).toContain('{ sports: { round: { eq: 1 } } }');
+  });
+
+  it('allows the sports text values only where an event requires what they name', { timeout: 90_000 }, async () => {
+    const real = await read('events/any/sports/slump_season_doubts.yaml');
+    await write('events/any/sports/slump_season_doubts.yaml', real.replace('Nothing is wrong, exactly.', '{opponent}, {pick}, {injury} and {salary}. Nothing is wrong, exactly.'));
+    const messages = await expectErrors();
+    expect(messages).toContain('uses {opponent} without requiring { sports: { run: true } }');
+    expect(messages).toContain('uses {pick} without requiring { sports: { drafted: true } }');
+    expect(messages).toContain('uses {injury} without requiring { sports: { injured: true } }');
+    expect(messages).toContain('uses {salary} without requiring { sports: { contract: true } }');
+  });
+
+  it('keeps sports away from romance and a partner to adult events', { timeout: 90_000 }, async () => {
+    const real = await read('events/any/sports/coach_notices_you.yaml');
+    await write('events/any/sports/coach_notices_you.yaml', real.replace('and one thing you do better', 'a kiss and one thing you do better'));
+    expect(await expectErrors()).toContain("can't use romantic or sexual words");
+    await write('events/any/sports/coach_notices_you.yaml', real.replace('cast:\n', 'cast:\n  date: { kind: partner, presence: city }\n'));
+    expect(await expectErrors()).toContain('a partner means the event requires');
+  });
+
+  it('keeps balance and sport definitions consistent', { timeout: 90_000 }, async () => {
+    const balance = await read('balance/sports.yaml');
+    await write('balance/sports.yaml', balance.replace('broadcastPath: social', 'broadcastPath: basketball'));
+    expect(await expectErrors()).toContain('must be a path in arts and media');
+    await write('balance/sports.yaml', balance);
+    const hockey = await read('fame/hockey.yaml');
+    await write('fame/hockey.yaml', hockey.replace('city: "chicago"', 'city: "atlantis"'));
+    expect(await expectErrors()).toContain('unknown city "atlantis"');
+    await write('fame/hockey.yaml', hockey.replace('{ id: "torn_ligament", weight: 16, min: 40, max: 75 }', '{ id: "cancer", weight: 16, min: 40, max: 75 }'));
+    expect(await expectErrors()).toContain('must be a condition of kind injury');
   });
 });

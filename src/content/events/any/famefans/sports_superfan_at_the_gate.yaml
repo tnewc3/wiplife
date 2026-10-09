@@ -1,0 +1,53 @@
+id: sports_superfan_at_the_gate
+title: At the players' gate
+text: >-
+  {fan.name} is waiting by the players' gate with a faded jersey, a marker
+  and a laminated card with a list of your games. {fan.They} {fan:has|have}
+  been to most of them. It is raining, and {fan.they} {fan:hasn't|haven't}
+  moved.
+tone: light
+category: famefans
+rarity: common
+recurring: true
+lifeStages: [child, teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { fame: { active: true } }
+    - { fame: { sport: true } }
+    - { fame: { stalker: false } }
+    - { fame: { rung: { gte: 2 } } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  fan: { kind: acquaintance, fan: super, presence: city, createIfMissing: true }
+choices:
+  - id: stop
+    label: Stop, sign it and ask what the best game was
+    outcome:
+      text: >-
+        {fan.name} lights up. The answer is a game you had forgotten, and you
+        stand in the rain for ten minutes while it is explained to you move by
+        move.
+      effects:
+        - { type: memory, role: fan, tag: answered_their_letter }
+        - { type: relationship, role: fan, affection: 6 }
+        - { type: fame, action: mood, delta: 3 }
+  - id: wave
+    label: Wave, and keep walking
+    outcome:
+      text: >-
+        The wave is a kind of answer, and {fan.they} {fan:takes|take} it as
+        one. You see {fan.them} in the stands the next game, a little further
+        back.
+      effects:
+        - { type: relationship, role: fan, affection: -1 }
+  - id: invite
+    label: Invite {fan.them} to watch a practice
+    outcome:
+      text: >-
+        {fan.They} {fan:arrives|arrive} half an hour early and {fan:sits|sit}
+        very straight. By the end, you have both laughed more than you
+        expected, and the coach hands {fan.them} a cap.
+      effects:
+        - { type: relationship, role: fan, affection: 10 }
+        - { type: fame, action: image, delta: 2 }

@@ -29,6 +29,7 @@ export function fameHolds(c: FameCondition, state: LifeState, content?: ContentB
   const f = state.fame;
   const main = mainPath(state);
   const year = state.currentYear;
+  if (c.sport !== undefined && ((content ? pathDef(content, f.main)?.sport !== undefined : false) !== c.sport)) return false;
   if (c.active !== undefined && f.active !== c.active) return false;
   if (c.retired !== undefined && (!f.active && f.retired !== undefined) !== c.retired) return false;
   if (c.path !== undefined && (f.main === null || !c.path.includes(f.main))) return false;

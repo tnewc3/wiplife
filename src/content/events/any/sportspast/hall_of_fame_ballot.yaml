@@ -1,0 +1,62 @@
+id: hall_of_fame_ballot
+title: A letter from the Hall
+text: >-
+  The envelope is thin, cream and addressed in a looping hand. It is from the
+  Hall of Fame, and it is brief: you have been voted in. The ceremony is in
+  the summer, and you are asked to speak for as long as you wish, within
+  reason.
+tone: light
+category: sportspast
+rarity: rare
+lifeStages: [adult, senior]
+requires:
+  all:
+    - { age: { gte: 32 } }
+    - { sports: { retired: true } }
+weight: { base: 10 }
+once: true
+followUpOnly: true
+choices:
+  - id: thank_everyone
+    label: Thank everyone who got you there
+    outcome:
+      text: >-
+        You read the list from your phone. It is long, and every name on it is
+        someone who got up early for you. The room hears all of it.
+      effects:
+        - { type: flag, key: sports_hall_of_fame, value: true }
+        - { type: fame, action: image, delta: 5 }
+        - { type: stat, key: happiness, delta: 8 }
+        - { type: history, text: "You were inducted into the Hall of Fame, in front of the people who had made it possible.", importance: 3 }
+  - id: short_speech
+    label: Keep it short and let the numbers talk
+    outcome:
+      text: >-
+        You speak for four minutes, and they cheer for six. People say it was
+        the most you in a speech they ever heard.
+      effects:
+        - { type: flag, key: sports_hall_of_fame, value: true }
+        - { type: stat, key: happiness, delta: 6 }
+        - { type: history, text: "You were inducted into the Hall of Fame and gave the shortest speech of the day.", importance: 3 }
+  - id: decline_the_dinner
+    label: Accept, and skip the dinner
+    outcome:
+      text: >-
+        You send a recorded message, and the plaque goes in the post. It is a
+        very good plaque. The silence at your table was not worth the fuss.
+      effects:
+        - { type: flag, key: sports_hall_of_fame, value: true }
+        - { type: stat, key: happiness, delta: 3 }
+  - id: come_clean
+    label: Admit what you took, and accept the asterisk
+    visibleIf: { flag: sports_doped }
+    outcome:
+      text: >-
+        You say it at the podium, in a plain voice, before anyone else can. The
+        room goes quiet, and some of the quiet is respect. The plaque will say
+        what it says, and you will be able to look at it.
+      effects:
+        - { type: flag, key: sports_hall_of_fame, value: true }
+        - { type: fame, action: image, delta: -2 }
+        - { type: stat, key: stress, delta: -6 }
+        - { type: history, text: "You were inducted into the Hall of Fame, and you told the room what you had taken to get there.", importance: 3 }

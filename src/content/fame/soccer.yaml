@@ -1,0 +1,99 @@
+# Soccer: a fame path with a sport block (E6c). Everything named here is made up.
+id: soccer
+name: "Soccer"
+noun: "soccer"
+blurb: "The world's game: a ball, a patch of grass and ninety minutes of running. Clubs scout early, and academies decide who gets a chance."
+talents: [athletics]
+aptitude: { fitness: 0.45, discipline: 0.15, smarts: 0.12, confidence: 0.1, ambition: 0.08, sociability: 0.06, riskTaking: 0.04 }
+criticWeight: 0.35
+minAge: 8
+routes:
+  - { id: "youth_league", label: "Join a youth side", blurb: "Orange slices, a muddy pitch and a coach who knows everyone's name.", minAge: 8, maxAge: 13, rung: 1, craft: 10 }
+  - { id: "school_tryout", label: "Try out for the school team", blurb: "A rainy afternoon, cones on the grass and a list on the noticeboard.", minAge: 13, maxAge: 17, rung: 2, craft: 14 }
+  - { id: "open_tryout", label: "Go to an open trial", blurb: "A club pitch, a scout in a long coat and ninety minutes to be noticed.", minAge: 17, maxAge: 26, rung: 3, craft: 18 }
+rungs:
+  - { title: "youth side player", milestone: "Make your school team", fame: 0, quality: 0, income: 0 }
+  - { title: "school team player", milestone: "Earn a place in a club academy", fame: 5, quality: 22, income: 0, minAge: 13 }
+  - { title: "academy player", milestone: "Sign a first professional contract", fame: 12, quality: 31, income: 0, minAge: 17 }
+  - { title: "squad player", milestone: "Win a starting place", fame: 30, quality: 44, income: 100000, minAge: 18 }
+  - { title: "first-team starter", milestone: "Become the player a club is built around", fame: 44, quality: 54, income: 600000 }
+  - { title: "star", milestone: "Be named in the league's team of the year", fame: 58, quality: 67, income: 2800000 }
+  - { title: "international", milestone: "Win the league and be remembered for it", fame: 74, quality: 79, income: 6500000 }
+  - { title: "legend", milestone: "Stay on top", fame: 90, quality: 91, income: 13200000 }
+kinds:
+  - { id: "season", label: "A season", noun: "season", blurb: "A full season with your team.", minRung: 1, difficulty: 0, reach: 1, pay: 1 }
+tour: { label: "Tour", noun: "tour", minRung: 8 }
+press: { label: "Press run", minRung: 8 }
+retire: { from: 33, chance: [{ at: 33, x: 0.02 }, { at: 45, x: 0.2 }] }
+royalties: 0.05
+sport:
+  positions:
+    - id: goalkeeper
+      label: "Goalkeeper"
+      blurb: "The last line: quiet for an hour and then everything at once."
+      fit: { discipline: 0.3, confidence: 0.25, fitness: 0.25, smarts: 0.2 }
+      impact: 1.1
+      stats: [{ id: "clean_sheets", low: 2, high: 18 }, { id: "saves", low: 40, high: 120 }]
+    - id: centre_back
+      label: "Centre back"
+      blurb: "Reads the game, wins the header and clears the danger."
+      fit: { fitness: 0.4, discipline: 0.3, smarts: 0.15, confidence: 0.15 }
+      impact: 1.0
+      stats: [{ id: "tackles", low: 20, high: 90 }, { id: "clean_sheets", low: 2, high: 14 }]
+    - id: midfielder
+      label: "Midfielder"
+      blurb: "Everywhere at once: the engine of the side."
+      fit: { fitness: 0.35, smarts: 0.25, sociability: 0.15, discipline: 0.15, confidence: 0.1 }
+      impact: 1.15
+      stats: [{ id: "goals", low: 0, high: 8 }, { id: "assists", low: 1, high: 14 }]
+    - id: winger
+      label: "Winger"
+      blurb: "Pace, trickery and a cross into the box."
+      fit: { fitness: 0.4, riskTaking: 0.2, confidence: 0.2, looks: 0.1, smarts: 0.1 }
+      impact: 1.0
+      stats: [{ id: "goals", low: 1, high: 14 }, { id: "assists", low: 1, high: 13 }]
+    - id: striker
+      label: "Striker"
+      blurb: "Lives for the one chance, and sometimes gets it."
+      fit: { confidence: 0.3, fitness: 0.3, riskTaking: 0.2, ambition: 0.1, smarts: 0.1 }
+      impact: 1.15
+      stats: [{ id: "goals", low: 2, high: 28 }, { id: "assists", low: 0, high: 8 }]
+  stats:
+    - { id: "goals", label: "Goals", decimals: 0, per: "a season" }
+    - { id: "assists", label: "Assists", decimals: 0, per: "a season" }
+    - { id: "tackles", label: "Tackles", decimals: 0, per: "a season" }
+    - { id: "clean_sheets", label: "Clean sheets", decimals: 0, per: "" }
+    - { id: "saves", label: "Saves", decimals: 0, per: "a season" }
+  season: { games: 38, draws: true, playoffTeams: 4, noun: "the league season" }
+  stages: ["the quarter-final", "the semi-final", "the cup final"]
+  title: "the cup"
+  proRung: 4
+  ageOut: [14, 18, 23]
+  draft: { name: "the academy intake", age: 18, force: 21, rounds: 3 }
+  ageCurve: [{ at: 8, x: -6 }, { at: 12, x: -4 }, { at: 14, x: -3 }, { at: 16, x: -2 }, { at: 18, x: -1 }, { at: 21, x: 0 }, { at: 23, x: 1 }, { at: 26, x: 3 }, { at: 29, x: 3 }, { at: 31, x: 1 }, { at: 33, x: -5 }, { at: 35, x: -11 }, { at: 37, x: -18 }, { at: 40, x: -28 }]
+  hazard: 0.9
+  injuries:
+    - { id: "muscle_tear", weight: 30, min: 20, max: 55 }
+    - { id: "torn_ligament", weight: 16, min: 40, max: 75 }
+    - { id: "stress_fracture", weight: 14, min: 30, max: 55 }
+    - { id: "concussion", weight: 8, min: 20, max: 50 }
+    - { id: "broken_bone", weight: 8, min: 30, max: 55 }
+  leagues:
+    youth: { name: "The Community Soccer League", nicknames: ["Rovers", "Strikers", "United", "Athletic", "Juniors"] }
+    school: { name: "The Scholastic Soccer Conference", nicknames: ["Lions", "Hawks", "Thistles", "Foxes", "Ospreys", "Rangers"] }
+    college: { name: "The Collegiate Soccer Conference", nicknames: ["Mariners", "Stags", "Cardinals", "Herons", "Colonels", "Pilgrims"] }
+    pro:
+      name: "The Premier Soccer Federation"
+      teams:
+        - { id: "chicago_lakefront_fc", name: "Chicago Lakefront FC", city: "chicago", quality: 60 }
+        - { id: "chicago_union_yard_sc", name: "Chicago Union Yard SC", city: "chicago", quality: 45 }
+        - { id: "chicago_ashgrove_united", name: "Chicago Ashgrove United", city: "chicago", quality: 52 }
+        - { id: "houston_gulf_city_fc", name: "Houston Gulf City FC", city: "houston", quality: 66 }
+        - { id: "houston_ship_channel_sc", name: "Houston Ship Channel SC", city: "houston", quality: 42 }
+        - { id: "houston_magnolia_united", name: "Houston Magnolia United", city: "houston", quality: 54 }
+        - { id: "los_angeles_pacific_coast_fc", name: "Los Angeles Pacific Coast FC", city: "los_angeles", quality: 70 }
+        - { id: "los_angeles_arroyo_sc", name: "Los Angeles Arroyo SC", city: "los_angeles", quality: 48 }
+        - { id: "los_angeles_foothill_united", name: "Los Angeles Foothill United", city: "los_angeles", quality: 57 }
+        - { id: "new_york_harbor_fc", name: "New York Harbor FC", city: "nyc", quality: 64 }
+        - { id: "new_york_five_boroughs_sc", name: "New York Five Boroughs SC", city: "nyc", quality: 40 }
+        - { id: "new_york_liberty_hill_united", name: "New York Liberty Hill United", city: "nyc", quality: 55 }

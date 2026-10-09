@@ -1,0 +1,70 @@
+id: contract_year_pressure
+title: The final year of the deal
+text: >-
+  This is the final year of your contract with {team}. Every game is also a
+  job interview, and everyone knows it. In the tunnel, a front-office man you
+  barely know says "no pressure" with an entire face.
+tone: neutral
+category: sportsdeal
+rarity: common
+recurring: true
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { sports: { active: true } }
+    - { sports: { level: [pro] } }
+    - { sports: { contractYear: true } }
+weight: { base: 10 }
+followUpOnly: true
+choices:
+  - id: push
+    label: Have your agent push for an extension now
+    visibleIf: { fame: { agent: { gte: 1 } } }
+    check:
+      base: 40
+      stats: [{ sports: rating, weight: 0.3 }, { key: confidence, weight: 0.1 }]
+      success:
+        text: >-
+          Your agent comes out of the meeting with a smile that would be rude on
+          anyone else. The new deal is longer, and {team} sounds sincere about
+          it.
+        effects:
+          - { type: sports, action: extend, terms: rich }
+          - { type: stat, key: happiness, delta: 5 }
+      failure:
+        text: >-
+          The team says it is happy to talk, and that the numbers are the
+          numbers. You take the fair deal and tell yourself it is not a
+          defeat.
+        effects:
+          - { type: sports, action: extend, terms: fair }
+  - id: fair
+    label: Take the fair extension the team offers
+    outcome:
+      text: >-
+        There is a handshake, a pen and a deal that is nearly what you hoped
+        for. It is a relief to stop thinking about it.
+      effects:
+        - { type: sports, action: extend, terms: fair }
+        - { type: stat, key: stress, delta: -3 }
+  - id: loyal
+    label: Sign for less to stay where you are
+    outcome:
+      text: >-
+        Your agent does not hide a wince. The people at {team} are touched, in
+        the way people are touched when the news is also convenient.
+      effects:
+        - { type: sports, action: extend, terms: cheap }
+        - { type: fame, action: image, delta: 3 }
+        - { type: fame, action: mood, delta: 4 }
+  - id: bet
+    label: Bet on yourself and play out the year
+    outcome:
+      text: >-
+        You tell no one, and the whole year feels slightly lit. The market will
+        open for you in the summer, one way or the other.
+      effects:
+        - { type: sports, action: playout }
+        - { type: sports, action: form, delta: 2 }
+        - { type: stat, key: stress, delta: 4 }

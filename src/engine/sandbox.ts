@@ -16,6 +16,7 @@ import { giveSamplePossessions } from './possessions/sample';
 import { giveSampleTeen } from './teen/sample';
 import { giveSampleCrime } from './crime/sample';
 import { giveSampleFame } from './fame/sample';
+import { giveSampleSports } from './sports/sample';
 import { consistencyProblems } from './presence';
 import { isPartnerKind } from './relationships';
 import { createLife, resolveChoice } from './life';
@@ -105,6 +106,8 @@ export function previewEvent(content: ContentBundle, options: SandboxOptions): S
     giveSampleCrime(d as LifeState, def, cast, content);
     // E6b: the career, release, fans or stalker the event asks for.
     giveSampleFame(d as LifeState, def, cast, content);
+    // E6c: the sport, team, deal, season, injury or draft the event asks for.
+    giveSampleSports(d as LifeState, def, cast, content);
     d.phase = 'events';
     d.pending = [{ instanceId: SANDBOX_INSTANCE, eventId: def.id, cast }];
   });

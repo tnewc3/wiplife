@@ -21,7 +21,7 @@
  * For someone who has retired, royalties and fading fans. In prison, fame fades
  * and nothing else happens. Numbers: balance/fame.yaml. Events: registries/fame.yaml.
  */
-import type { ContentBundle, FameTrigger } from '../../content/schemas';
+import type { ContentBundle, FameKindDef, FamePathDef, FameTrigger } from '../../content/schemas';
 import { curveAt } from '../curve';
 import { eventWeight } from '../events/selection';
 import { wholeDollars } from '../finance';
@@ -30,11 +30,12 @@ import { possessionsValue } from '../possessions/query';
 import { clampInt, weightedPick, wholeChange } from '../random';
 import { chance, pick, type RngState } from '../rng';
 import { ITEM_ROLE } from '../web/query';
-import type { FameProject, Id, LifeState } from '../types';
+import type { FamePathState, FamePlan, FameProject, Id, LifeState } from '../types';
 import { bigBreak, breakChance, climb, contractBlock, crossBlock, endContract, fade, fadeThin, fameHistory, hasFaded, openAgents, retire } from './ladder';
 import { exposableSecrets, addHeadline, exposeSecret, closestHolder, stalkerChance, stalkerYear, tabloidChance, tendFans } from './people';
+import { playSeason, queueSeasonEvents, runSportsRetired } from '../sports/season';
 import { allPaths, isMinorStar, kindDef, pathDef, rungDef, topRung, usualYear, workedPaths } from './query';
-import { agentDef, agentTier, assignedPlan, craftGrowth, planBlock, projectTitle, releaseGross, retainer, rollWork, RECENT } from './work';
+import { agentDef, agentTier, assignedPlan, craftGrowth, planBlock, projectTitle, releaseGross, retainer, rollWork, RECENT, type Roll } from './work';
 
 const COMMITMENT_ORDER = { back: 0, steady: 1, all: 2 } as const;
 
@@ -97,11 +98,29 @@ function release(state: LifeState, content: ContentBundle, rng: RngState): { pro
   }
   f.plan = null;
   if (!plan) return null;
-  const b = content.balance.fame;
   const def = pathDef(content, plan.path)!;
   const path = f.paths[plan.path]!;
   const kind = kindDef(def, plan.kind)!;
   const roll = rollWork(state, plan, path, def, kind, content, rng);
+  const pay = releaseGross(state, plan, path, def, kind, roll.fans, content);
+  const project = landProject(state, content, rng, { plan, def, path, kind, roll, title: projectTitle(state, plan.path, content, rng), earned: pay.release + pay.tour, assigned });
+  return { project, release: pay.release };
+}
+
+/**
+ * Lands a piece of work (a release, or a sports season): the fame it wins or
+ * loses, the climb, fan mood and public image, the entry on your list of work
+ * and a nomination for the awards night next year. Money is the caller's.
+ */
+export function landProject(
+  state: LifeState,
+  content: ContentBundle,
+  rng: RngState,
+  input: { plan: FamePlan; def: FamePathDef; path: FamePathState; kind: FameKindDef; roll: Roll; title: string; earned: number; assigned: boolean },
+): FameProject {
+  const f = state.fame;
+  const b = content.balance.fame;
+  const { plan, def, path, kind, roll } = input;
   const reception = roll.critics * def.criticWeight + roll.fans * (1 - def.criticWeight);
 
   // Fame.
@@ -129,13 +148,11 @@ function release(state: LifeState, content: ContentBundle, rng: RngState): { pro
   const styleImage = (plan.style === 'artistic' ? 0.5 : -0.5) + (plan.risk === 'bold' ? 1 : 0);
   f.image = clampInt(f.image + b.gain.imageShare * (roll.critics - 50) + styleImage, 0, 100);
 
-  // Money, before anyone's cut.
-  const pay = releaseGross(state, plan, path, def, kind, roll.fans, content);
   const project: FameProject = {
     year: state.currentYear,
     path: plan.path,
     kind: plan.kind,
-    title: projectTitle(state, plan.path, content, rng),
+    title: input.title,
     style: plan.style,
     risk: plan.risk,
     tour: plan.tour,
@@ -145,8 +162,8 @@ function release(state: LifeState, content: ContentBundle, rng: RngState): { pro
     fans: roll.fans,
     band: roll.band,
     gain: Math.round(gain * 10) / 10,
-    earned: pay.release + pay.tour,
-    ...(assigned ? { assigned: true as const } : {}),
+    earned: input.earned,
+    ...(input.assigned ? { assigned: true as const } : {}),
   };
   f.projects.push(project);
   if (f.projects.length > 12) f.projects.splice(0, f.projects.length - 12);
@@ -177,7 +194,7 @@ function release(state: LifeState, content: ContentBundle, rng: RngState): { pro
       }
     }
   }
-  return { project, release: pay.release };
+  return project;
 }
 
 /** Holds the awards night for last year's nomination: the work's reception decides it. */
@@ -250,6 +267,8 @@ export function runFame(state: LifeState, content: ContentBundle): void {
     tendFans(state, content, rng);
     if (f.stalker) stalkerYear(state, content, rng);
     settleIncome(state, paid, content);
+    // E6c: a retired athlete's years go on (the Hall of Fame ballot, worn joints).
+    runSportsRetired(state, content);
     // A retired star may be asked back (an event, never silently).
     const gone = year - f.retired;
     if (state.housing.kind !== 'incarcerated' && chance(rng, curveAt(b.comeback.chance, gone))) queueFameEvent(state, 'comeback', content);
@@ -258,6 +277,7 @@ export function runFame(state: LifeState, content: ContentBundle): void {
 
   const prison = isIncarcerated(state);
   const events: FameTrigger[] = [];
+  let sportsBreak = false;
   const minor = isMinorStar(state, content);
   if (minor && COMMITMENT_ORDER[f.commitment] > COMMITMENT_ORDER[b.commitment.minorsMax]) f.commitment = b.commitment.minorsMax;
 
@@ -271,19 +291,23 @@ export function runFame(state: LifeState, content: ContentBundle): void {
   const night = ceremony(state, content, rng);
   if (night) events.push(night);
 
-  // The work.
-  const out = prison ? null : release(state, content, rng);
-  const worked = out !== null;
-  const project = out?.project;
+  // The work: a project lined up (arts and media), and a season if you play a sport (E6c).
+  const sportOut = prison ? null : playSeason(state, content, rng);
+  const planOut = prison ? null : release(state, content, rng);
+  const out = planOut;
+  const worked = planOut !== null || sportOut?.project !== undefined;
+  const project = planOut?.project;
+  const seasonProject = sportOut?.project;
   if (prison) f.plan = null;
   if (project) events.push(project.band);
+  const playedIds = new Set([project?.path, seasonProject?.path].filter((p): p is string => p !== undefined));
 
   // Craft, fading, and the climb or the fall.
   for (const id of workedPaths(state)) {
     const def = pathDef(content, id);
     const path = f.paths[id]!;
     if (!def) continue;
-    const wasWorked = project?.path === id;
+    const wasWorked = playedIds.has(id);
     path.craft = Math.min(100, Math.round((path.craft + craftGrowth(state, def, path, wasWorked, content)) * 10) / 10);
     const lost = wasWorked ? fadeThin(state, id, content) : fade(state, id, content);
     if (lost) events.push('fade');
@@ -291,8 +315,10 @@ export function runFame(state: LifeState, content: ContentBundle): void {
   const main = f.main === null ? undefined : f.paths[f.main];
 
   // A big break.
-  if (project && chance(rng, breakChance(state, project.path, content, project.press, project.tour)) && bigBreak(state, project.path, content, rng) > 0) {
-    events.unshift('bigBreak');
+  const breaker = project ?? seasonProject;
+  if (breaker && chance(rng, breakChance(state, breaker.path, content, breaker.press, breaker.tour)) && bigBreak(state, breaker.path, content, rng) > 0) {
+    if (seasonProject && breaker === seasonProject) sportsBreak = true;
+    else events.unshift('bigBreak');
   }
 
   // The toll of the life you chose, and burnout.
@@ -338,7 +364,7 @@ export function runFame(state: LifeState, content: ContentBundle): void {
     if (next && !events.includes('stalker')) events.push('stalker');
   }
   const fans = f.people;
-  if (fans.super.length + fans.hater.length + fans.critic.length > 0 && project && chance(rng, 0.2)) {
+  if (fans.super.length + fans.hater.length + fans.critic.length > 0 && (project ?? seasonProject) && chance(rng, 0.2)) {
     const options: FameTrigger[] = [];
     if (fans.super.length > 0) options.push('superfan');
     if (fans.hater.length > 0) options.push('hater');
@@ -372,9 +398,12 @@ export function runFame(state: LifeState, content: ContentBundle): void {
     if (contractBlock(state, content) === null && chance(rng, Math.min(0.9, curveAt(b.contracts.offer, top) * (1 + tier * b.agents.doors)))) events.push('contract');
     if (f.second === null && allPaths(content).some((p) => crossBlock(state, p.id, content) === null) && chance(rng, 0.12)) events.push('crossover');
     const def = pathDef(content, f.main);
-    if (def && state.character.age >= def.retire.from && chance(rng, curveAt(def.retire.chance, state.character.age))) events.push('retire');
-    const gap = year - main.last;
-    if (hasFaded(state) && gap >= 2 && chance(rng, curveAt(b.comeback.chance, gap))) events.push('comeback');
+    // Sports have their own retirement, decline and comeback events (E6c).
+    if (!def?.sport) {
+      if (def && state.character.age >= def.retire.from && chance(rng, curveAt(def.retire.chance, state.character.age))) events.push('retire');
+      const gap = year - main.last;
+      if (hasFaded(state) && gap >= 2 && chance(rng, curveAt(b.comeback.chance, gap))) events.push('comeback');
+    }
     if (project?.tour && chance(rng, 0.35)) events.push('tour');
     if (project?.press && chance(rng, 0.3)) events.push('press');
   }
@@ -383,9 +412,12 @@ export function runFame(state: LifeState, content: ContentBundle): void {
   if (main && main.rung === 1 && year - main.last >= b.fade.dormant && f.contract === null) retire(state, content);
 
   // What the year earned, for the ledger.
-  const gross = (out ? out.project.earned : 0) + (prison ? 0 : retainer(state, content));
+  const gross = (out ? out.project.earned : 0) + (sportOut?.earned ?? 0) + (prison ? 0 : retainer(state, content));
   f.totals.earned += gross;
   settleIncome(state, gross, content, out?.release ?? 0);
+
+  // The sports events (E6c): the season's own, then the shared turning points are queued above.
+  if (sportOut) queueSeasonEvents(state, content, sportOut.triggers, sportsBreak);
 
   // Queue the events, most pressing first, up to the cap (the release's own event always comes).
   let room = b.events.maxQueued;

@@ -19,6 +19,7 @@ import { measureFullCircle } from './simulate/people';
 import { formatComparison, formatReport, interactionTargets, runSimulation, type SimulatedPlayer } from './simulate/run';
 import { crimeTargets, formatCrime } from './simulate/crime';
 import { fameTargets, formatFame } from './simulate/fame';
+import { formatSports, sportsTargets } from './simulate/sports';
 
 // The compiled JSON directly: src/content/index.ts relies on Vite's import.meta.env.
 const content = compiled as ContentBundle;
@@ -46,9 +47,9 @@ setAutoFreeze(false);
 
 const started = Date.now();
 const players: SimulatedPlayer[] =
-  values.player === 'all' ? ['careful', 'careless', 'spammer', 'criminal', 'star'] : values.player === 'both' ? ['careful', 'careless'] : [values.player as SimulatedPlayer];
-if (!players.every((p) => p === 'careful' || p === 'careless' || p === 'spammer' || p === 'criminal' || p === 'star')) {
-  console.error('--player must be all, both, careful, careless, spammer, criminal or star');
+  values.player === 'all' ? ['careful', 'careless', 'spammer', 'criminal', 'star', 'athlete'] : values.player === 'both' ? ['careful', 'careless'] : [values.player as SimulatedPlayer];
+if (!players.every((p) => p === 'careful' || p === 'careless' || p === 'spammer' || p === 'criminal' || p === 'star' || p === 'athlete')) {
+  console.error('--player must be all, both, careful, careless, spammer, criminal, star or athlete');
   process.exit(2);
 }
 const generations = Number(values.generations);
@@ -103,6 +104,10 @@ for (const report of reports.slice(1)) {
       ...formatFame(report.fame, content),
       '  targets (src/content/balance/targets.yaml):',
       ...fameTargets(report, content).map((r) => `  ${r.met ? 'MET    ' : 'NOT MET'} ${r.label}: ${r.value} (target ${r.goal})`),
+      // E6c: every other player's sports, too (the athlete player's are judged).
+      ...formatSports(report.sports, content),
+      '  targets (src/content/balance/targets.yaml):',
+      ...sportsTargets(report, content).map((r) => `  ${r.met ? 'MET    ' : 'NOT MET'} ${r.label}: ${r.value} (target ${r.goal})`),
     ].join('\n'),
   );
 }
