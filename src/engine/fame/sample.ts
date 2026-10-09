@@ -19,7 +19,7 @@ function wanted(condition: Condition | undefined): FameCondition {
   return out;
 }
 
-function bound(c: Compare | undefined, up = true): number | undefined {
+export function bound(c: Compare | undefined, up = true): number | undefined {
   if (!c) return undefined;
   if (c.eq !== undefined) return c.eq;
   if (up) return c.gte ?? (c.gt === undefined ? undefined : c.gt + 1);

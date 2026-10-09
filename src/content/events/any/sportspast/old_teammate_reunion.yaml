@@ -1,0 +1,58 @@
+id: old_teammate_reunion
+title: The old locker room
+text: >-
+  The invitation says "a reunion, no speeches." A function room, a banner with
+  a team name that is no longer on the shirts, and {mate.name}, who is
+  heavier, quieter and exactly as you remember. You find out at the bar that
+  you have all kept the same bad jokes.
+tone: light
+category: sportspast
+rarity: common
+recurring: true
+lifeStages: [adult, senior]
+requires:
+  all:
+    - { age: { gte: 35 } }
+    - { sports: { retired: true } }
+weight: { base: 1.2 }
+cooldownYears: 6
+cast:
+  mate: { kind: acquaintance, presence: city, createIfMissing: true, age: { min: 33, max: 60 } }
+choices:
+  - id: stay_late
+    label: Stay until the last chair is stacked
+    outcome:
+      text: >-
+        At one in the morning, someone finds a ball. You play three on three in
+        the car park in dress shoes, and for ten minutes nobody is old.
+      effects:
+        - { type: relationship, role: mate, affection: 8 }
+        - { type: stat, key: happiness, delta: 6 }
+  - id: leave_early
+    label: Make an excuse and leave early
+    outcome:
+      text: >-
+        You sit in the car for a minute with the engine off. The music is still
+        faintly audible through the wall.
+      effects:
+        - { type: stat, key: happiness, delta: -1 }
+  - id: the_shot
+    label: Let them tell the story of the shot, again
+    visibleIf: { flag: sports_took_the_shot }
+    outcome:
+      text: >-
+        It has grown in the retelling. The ball is higher, the clock is shorter
+        and you are calmer than you were. You do not correct a word of it.
+      effects:
+        - { type: relationship, role: mate, affection: 6 }
+        - { type: stat, key: happiness, delta: 5 }
+  - id: the_plaque
+    label: Admit, quietly, that the plaque is in a hallway somewhere
+    visibleIf: { flag: sports_hall_of_fame }
+    outcome:
+      text: >-
+        {mate.They} {mate:laughs|laugh}, then stop. "It is real, though," {mate.they}
+        {mate:says|say}. You nod, and for the first time in a while you let it be real.
+      effects:
+        - { type: relationship, role: mate, affection: 5 }
+        - { type: stat, key: happiness, delta: 4 }

@@ -1034,6 +1034,8 @@ export interface LifeState {
   crime: CrimeState;
   /** E6b: your fame in arts and media: the path, rung, fame, image, fans, projects, agent, contract and awards. */
   fame: FameState;
+  /** E6c: your sports career: sport, position, team, contract, seasons, injuries and the playoff run under way (the ladder, fame and fans are in `fame`). */
+  sports: SportsState;
 }
 
 /** E6a: the crew you are in (a definition in src/content/crews, made real for you). */
@@ -1250,6 +1252,120 @@ export interface FameState {
     stalkers: number;
     earned: number;
   };
+}
+
+/** E6c: the team you play for. Pro teams are in the league's definition (`id`); an amateur team is a school or a city's club, named when you joined it. */
+export interface SportsTeam {
+  id: Id | null;
+  name: string;
+  city: Id;
+  level: 'youth' | 'school' | 'college' | 'pro';
+  /** 0–100. */
+  quality: number;
+}
+
+export interface SportsContract {
+  teamId: Id;
+  since: number;
+  /** The last year it runs. */
+  until: number;
+  /** Whole dollars a year, paid through the yearly ledger as fame income. */
+  salary: number;
+  kind: 'minimum' | 'rookie' | 'standard' | 'star';
+  option: 'none' | 'team' | 'player';
+}
+
+/** E6c: one season as it went: the team, your rating and numbers, the record and how the playoffs ended. */
+export interface SportsSeason {
+  year: number;
+  sport: Id;
+  level: 'youth' | 'school' | 'college' | 'pro';
+  team: string;
+  position: Id;
+  /** 0–100. */
+  rating: number;
+  /** The share of the games you played (0–100); an injury or a suspension takes some. */
+  played: number;
+  wins: number;
+  draws: number;
+  losses: number;
+  /** Where the team finished among `of` teams. */
+  rank: number;
+  of: number;
+  result: 'missed' | 'out' | 'final' | 'champion';
+  stats: Record<Id, number>;
+  salary: number;
+  allStar: boolean;
+  injury?: Id;
+}
+
+/** E6c: a playoff run in progress: `won` series won of three; `alive` until you lose one. */
+export interface SportsRun {
+  year: number;
+  won: number;
+  alive: boolean;
+  /** Your side's strength this year and the typical opponent's. */
+  strength: number;
+  rival: number;
+}
+
+/** E6c: how the draft went for you, the year you declared. `pick` is 0 for undrafted. */
+export interface SportsDraft {
+  year: number;
+  pick: number;
+  round: number;
+  teamId: Id | null;
+}
+
+export interface SportsTotals {
+  seasons: number;
+  proSeasons: number;
+  playoffs: number;
+  finals: number;
+  titles: number;
+  allStars: number;
+  injuries: number;
+  serious: number;
+  playedThrough: number;
+  trades: number;
+  releases: number;
+  suspensions: number;
+  /** Salary and bonuses paid by teams, before the agent's cut and tax. */
+  earned: number;
+  bestRating: number;
+}
+
+export interface SportsState {
+  /** The sport (a fame path) you play, or last played. */
+  sport: Id | null;
+  position: Id | null;
+  /** You have been drafted or signed by a pro team (and not left the pro game). */
+  pro: boolean;
+  team: SportsTeam | null;
+  contract: SportsContract | null;
+  /** Years in a row without a team since the last one let you go. */
+  unsigned: number;
+  focus: 'skills' | 'conditioning' | 'film';
+  /** Points of form from events, spent by the next season. */
+  form: number;
+  /** You are playing through an injury; next year's risk is higher. */
+  pain: boolean;
+  /** You rested an injury this year. */
+  rest: boolean;
+  /** You asked for a trade or a new deal through your agent. */
+  ask: 'trade' | 'contract' | null;
+  /** You are playing out your contract to test free agency. */
+  playOut: boolean;
+  seasons: SportsSeason[];
+  run: SportsRun | null;
+  draft: SportsDraft | null;
+  /** The year you were suspended for (0 for never), traded, released, or aged out of a level. */
+  suspended: number;
+  traded: number;
+  released: number;
+  agedOut: number;
+  retired?: { year: number; route: 'coaching' | 'broadcast' | 'normal' | null };
+  totals: SportsTotals;
 }
 
 /** T1: a social group at your school (a definition in src/content/cliques, made real for one school). */

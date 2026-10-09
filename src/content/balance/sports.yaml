@@ -1,0 +1,137 @@
+# Sports (E6c): the numbers shared by all five sports. Starting proposals;
+# Stage 12 (balancing) tunes them. Sports are fame paths (src/content/fame),
+# so rungs, the pace of the climb, fame, fans, agents, awards and commitment
+# are E6b's numbers (balance/fame.yaml); this file is what is particular to a
+# season, a team, a contract and an injury.
+
+performance:
+  # Rating points per point of Fitness above 50, and for a perfect fit with your position (and the same lost for the worst fit).
+  fitness: 0.14
+  fit: 12
+  # Per point your team's quality stands above 50.
+  team: 0.07
+  # Rating lost per point of severity of an injury you play with.
+  injury: 0.28
+  # Per point of form events gave you.
+  form: 1.2
+  focus:
+    skills: { craft: 1.6, fitness: 0, risk: 1, rating: 0 }
+    conditioning: { craft: 1, fitness: 0.8, risk: 0.75, rating: 1.5 }
+    film: { craft: 1.3, fitness: 0, risk: 1, rating: 1 }
+  film: 0.08
+  switchCraft: 4
+
+league:
+  strengthSd: 6
+  playerShare: 0.35
+  winScale: 14
+  rivals: 9
+  amateurPlayoffs: 0.45
+  games: { youth: 14, school: 18, college: 28 }
+  reception: { critics: 0.25, fans: 0.5 }
+  quality: { youth: 45, high: 50, community: 44, state: 58, elite: 70 }
+  draws: 0.22
+  allStar: 78
+
+playoffs:
+  # The chance a series left to the engine is won, by your strength less theirs.
+  settle:
+    - { at: -30, x: 0.08 }
+    - { at: 0, x: 0.5 }
+    - { at: 30, x: 0.88 }
+  fame: { series: 1.5, title: 8 }
+  mood: 15
+
+injury:
+  base: 0.16
+  level: { youth: 0.3, school: 0.5, college: 0.8, pro: 1 }
+  age:
+    - { at: 8, x: 0.6 }
+    - { at: 18, x: 0.9 }
+    - { at: 25, x: 1 }
+    - { at: 30, x: 1.3 }
+    - { at: 35, x: 1.8 }
+    - { at: 40, x: 2.4 }
+  fitness:
+    - { at: 0, x: 1.7 }
+    - { at: 50, x: 1 }
+    - { at: 100, x: 0.6 }
+  commitment: { back: 0.8, steady: 1, all: 1.3 }
+  pain: 1.8
+  aggravate: { chance: 0.4, min: 15, max: 35, endsAt: 95 }
+  catastrophic: { from: 60, chance: 0.25 }
+  missed: 0.011
+  treatment: small
+  worn: { perSeason: 0.03, max: 0.6 }
+  wornSeverity: 40
+
+draft:
+  score: { quality: 1, fame: 0.35, noise: 5 }
+  declare: 50
+  top: 78
+  perPick: 1.2
+  undrafted:
+    - { at: 30, x: 0 }
+    - { at: 40, x: 0.1 }
+    - { at: 50, x: 0.4 }
+    - { at: 60, x: 0.8 }
+
+contract:
+  kind: { minimum: 0.35, rookie: 1, standard: 1, star: 1.15 }
+  years:
+    minimum: { min: 1, max: 2 }
+    rookie: { min: 3, max: 4 }
+    standard: { min: 2, max: 4 }
+    star: { min: 3, max: 5 }
+  market:
+    - { at: 30, x: 0.5 }
+    - { at: 50, x: 0.8 }
+    - { at: 65, x: 1.1 }
+    - { at: 80, x: 1.5 }
+    - { at: 95, x: 1.8 }
+  bonus: 0.12
+  option: { chance: 0.3, team: 0.6 }
+  push:
+    win: 1.2
+    lose: 0.85
+    cheap: 0.85
+    chance:
+      - { at: 30, x: 0.15 }
+      - { at: 60, x: 0.4 }
+      - { at: 90, x: 0.7 }
+  rookieRound: [1.4, 1, 0.8, 0.6]
+  buyout: 0.5
+  keep: { rating: 50, chance: 0.4 }
+  unsigned: 2
+  freeAgent:
+    - { at: 30, x: 0.1 }
+    - { at: 45, x: 0.5 }
+    - { at: 60, x: 0.85 }
+    - { at: 75, x: 0.95 }
+
+trade:
+  chance: 0.06
+  asked: 5
+  grant: 0.55
+  refusedMood: 5
+
+release:
+  perPoint: 0.05
+  max: 0.5
+  slack: 4
+
+retire:
+  broadcastPath: social
+  hallYears: 5
+  hallRung: 7
+  # The yearly chance, by age, that the thought of stopping comes up (doubled when your rating is under the rung's).
+  quit:
+    - { at: 30, x: 0.02 }
+    - { at: 32, x: 0.06 }
+    - { at: 34, x: 0.15 }
+    - { at: 36, x: 0.3 }
+    - { at: 38, x: 0.5 }
+    - { at: 40, x: 0.75 }
+
+events:
+  maxQueued: 3

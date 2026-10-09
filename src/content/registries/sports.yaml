@@ -1,0 +1,47 @@
+# The events the sports step queues (E6c). Every event listed must be
+# followUpOnly: it only happens this way. Each is picked by weight among those
+# whose requirements fit now.
+#
+# draft         you declared and a team picked you
+# undrafted     the draft passed you by
+# signed        a deal was struck (a new team, or a renewal)
+# contractYear  the last year of your deal
+# freeAgency    you tested the market, or your deal ran out
+# traded        a trade moved you
+# released      a team let you go
+# injury        you were hurt this season
+# agedOut       you did not make the next team up
+# playoffs      a run begins (the first series; later series are put in after it)
+# stalled       no team will have you
+# ended         an injury ended your career
+# declining      the years are catching up
+# retirement    a natural time to stop
+# hall          the Hall of Fame ballot
+# suspended     a ban
+# bigGame       a moment that could define the season
+# slump, breakout, locker, rookie, rivalry   the colour of a season
+# endorsement   a brand wants your name
+triggers:
+  draft: { events: [draft_night_first_round, draft_night_later_round] }
+  undrafted: { events: [undrafted_phone_calls] }
+  signed: { events: [new_deal_signed] }
+  contractYear: { events: [contract_year_pressure] }
+  freeAgency: { events: [free_agency_market] }
+  traded: { events: [traded_overnight] }
+  released: { events: [released_phone_call] }
+  injury: { events: [injury_play_through_pain] }
+  agedOut: { events: [aged_out_of_the_team] }
+  playoffs: { events: [playoffs_opening_series, playoffs_opening_road, playoffs_semifinal_swing, playoffs_final_game_seven, playoffs_final_last_play] }
+  stalled: { events: [no_team_calls] }
+  ended: { events: [injury_career_over] }
+  declining: { events: [declining_step_slower] }
+  retirement: { events: [retirement_press_conference] }
+  hall: { events: [hall_of_fame_ballot] }
+  suspended: { events: [suspension_served] }
+  bigGame: { events: [big_game_basketball, big_game_football, big_game_soccer, big_game_baseball, big_game_hockey] }
+  slump: { events: [slump_season_doubts] }
+  breakout: { events: [breakout_season_attention] }
+  locker: { events: [locker_room_speak_up, locker_room_rift, veteran_mentor] }
+  rookie: { events: [rookie_first_game] }
+  rivalry: { events: [rivalry_trash_talk] }
+  endorsement: { events: [endorsement_offer] }

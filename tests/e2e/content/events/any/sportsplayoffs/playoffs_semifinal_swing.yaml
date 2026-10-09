@@ -1,0 +1,74 @@
+id: playoffs_semifinal_swing
+title: The series that swung
+text: >-
+  It has gone back and forth for a week, and everyone you know has an opinion about it. {team} is one result from {stage}, and {opponent} are one result from ending it. The coach has said nothing for ten minutes.
+tone: serious
+category: sportsplayoffs
+rarity: common
+recurring: true
+lifeStages: [child, teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { sports: { active: true } }
+    - { sports: { run: true } }
+    - { sports: { round: { eq: 2 } } }
+weight: { base: 10 }
+followUpOnly: true
+pin: true
+choices:
+  - id: lead
+    label: Ask for the ball when it matters
+    check:
+      base: 37
+      stats: [{ sports: rating, weight: 0.22 }, { sports: team, weight: 0.15 }, { key: confidence, weight: 0.1 }, { sports: form, weight: 0.1 }]
+      success:
+        text: >-
+          You ask for it, and you get it. When the last chance comes, you make it, and {team} is through {stage}.
+        effects:
+          - { type: sports, action: series, result: win }
+          - { type: fame, action: fans, delta: 4 }
+      failure:
+        text: >-
+          You ask for it, and you get it, and it is not enough. {opponent} win {stage} on the next play, and you replay it in your head until the sun comes up.
+        effects:
+          - { type: sports, action: series, result: lose }
+          - { type: stat, key: happiness, delta: -4 }
+  - id: trust
+    label: Keep it simple and keep everyone calm
+    check:
+      base: 37
+      stats: [{ sports: team, weight: 0.3 }, { sports: rating, weight: 0.1 }, { key: sociability, weight: 0.1 }]
+      success:
+        text: >-
+          The simplest plan in the book turns out to be the right one. {team} gets through {stage}, and you hug people you barely know.
+        effects:
+          - { type: sports, action: series, result: win }
+          - { type: fame, action: image, delta: 2 }
+      failure:
+        text: >-
+          Simple turns out to be predictable. {opponent} read it like a book and take {stage}.
+        effects:
+          - { type: sports, action: series, result: lose }
+          - { type: stat, key: happiness, delta: -3 }
+  - id: play_hurt
+    label: Play through the pain
+    visibleIf: { sports: { injured: true } }
+    check:
+      base: 40
+      stats: [{ sports: rating, weight: 0.2 }, { key: health, weight: 0.15 }, { key: fitness, weight: 0.15 }, { sports: team, weight: 0.2 }]
+      success:
+        text: >-
+          Every step is a negotiation with your own body, and you win all of them. {team} takes {stage}, and the trainer has to help you off the court.
+        effects:
+          - { type: sports, action: injury, what: pain }
+          - { type: sports, action: series, result: win }
+          - { type: flag, key: sports_played_hurt, value: true }
+          - { type: fame, action: mood, delta: 4 }
+      failure:
+        text: >-
+          The body that carried you all season presents its reckoning. {opponent} take {stage} while you watch from the bench with your hands in your lap.
+        effects:
+          - { type: sports, action: injury, what: pain }
+          - { type: sports, action: series, result: lose }
+          - { type: flag, key: sports_played_hurt, value: true }
+          - { type: stat, key: health, delta: -3 }

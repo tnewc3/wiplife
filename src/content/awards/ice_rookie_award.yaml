@@ -1,0 +1,8 @@
+id: ice_rookie_award
+name: "the Ice Rookie Award"
+category: "Rookie of the Year"
+path: hockey
+blurb: "For the first-year player who made the veterans nervous."
+minRung: 4
+critics: 0.5
+prestige: 0.6

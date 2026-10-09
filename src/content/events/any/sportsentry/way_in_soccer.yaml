@@ -1,0 +1,59 @@
+id: way_in_soccer
+title: A ball in the park
+text: >-
+  {friend.name} kicks a worn ball across the grass at you, and you stop it without thinking. A stranger walking a dog, who has watched for a while, says you have good feet. It is the sort of thing a stranger says. It stays with you all evening.
+tone: light
+category: sportsentry
+rarity: common
+lifeStages: [child, teen]
+requires:
+  all:
+    - { age: { gte: 9, lte: 17 } }
+    - { fame: { active: false } }
+    - { sports: { seasons: { lt: 1 } } }
+weight:
+  base: 0.9
+  modifiers:
+    - { if: { discovery: { talent: found } }, x: 2 }
+    - { if: { stat: fitness, gt: 60 }, x: 1.6 }
+    - { if: { trait: ambition, gt: 60 }, x: 1.3 }
+cast:
+  friend: { kind: friend, presence: city }
+choices:
+  - id: join
+    label: Join a youth league
+    visibleIf: { age: { lte: 13 } }
+    outcome:
+      text: >-
+        The community league runs Saturday mornings on the muddy pitch. Someone hands you a bib and a bag of orange slices, and you are suddenly on a team.
+      effects:
+        - { type: fame, action: enter, path: soccer, route: youth_league }
+        - { type: stat, key: happiness, delta: 4 }
+        - { type: relationship, role: friend, affection: 3 }
+  - id: tryout
+    label: Try out for the school team
+    visibleIf: { age: { gte: 13 } }
+    check:
+      base: 50
+      stats: [{ key: fitness, weight: 0.3 }, { key: discipline, weight: 0.15 }, { key: luck, weight: 0.05 }]
+      success:
+        text: >-
+          A rainy afternoon, a line of cones and a coach who watches everyone without saying anything. The list goes up on the noticeboard. Your name is on it, near the bottom.
+        effects:
+          - { type: fame, action: enter, path: soccer, route: school_tryout }
+          - { type: stat, key: happiness, delta: 6 }
+      failure:
+        text: >-
+          The coach lists the squad and your name is not on it. The coach finds you afterwards and says the quiet thing coaches say: come again next year.
+        effects:
+          - { type: stat, key: confidence, delta: -3 }
+          - { type: stat, key: happiness, delta: -2 }
+  - id: fun
+    label: Just play for the fun of it
+    outcome:
+      text: >-
+        Jackets for goalposts, no referee and eleven arguments a minute. It is, you decide, the best way to spend a Saturday.
+      effects:
+        - { type: stat, key: happiness, delta: 3 }
+        - { type: stat, key: fitness, delta: 1 }
+        - { type: relationship, role: friend, affection: 2 }

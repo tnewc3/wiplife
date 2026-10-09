@@ -14,13 +14,13 @@ const BALANCE = 'balance/fame.yaml';
 const REGISTRY = 'registries/fame.yaml';
 const TEXT = 'text/fame.yaml';
 
-function required(condition: Condition | undefined): Condition[] {
+export function required(condition: Condition | undefined): Condition[] {
   if (!condition) return [];
   if ('all' in condition) return condition.all.flatMap(required);
   return [condition];
 }
 
-function ageFloor(condition: Condition | undefined): number {
+export function ageFloor(condition: Condition | undefined): number {
   let floor = 0;
   for (const c of required(condition)) {
     if (!('age' in c)) continue;
@@ -30,7 +30,7 @@ function ageFloor(condition: Condition | undefined): number {
   return floor;
 }
 
-function ageCeiling(condition: Condition | undefined): number {
+export function ageCeiling(condition: Condition | undefined): number {
   let ceiling = Infinity;
   for (const c of required(condition)) {
     if (!('age' in c)) continue;
@@ -40,7 +40,7 @@ function ageCeiling(condition: Condition | undefined): number {
   return ceiling;
 }
 
-function outcomesOf(def: EventDef) {
+export function outcomesOf(def: EventDef) {
   if (def.autoOutcome) return [def.autoOutcome];
   return (def.choices ?? []).flatMap((c) => (c.outcome ? [c.outcome] : c.check ? [c.check.success, c.check.failure] : []));
 }
@@ -101,7 +101,7 @@ export function checkFame(bundle: ContentBundle, fileOf: (typeKey: CollectionKey
     for (const r of def.routes) if (r.minAge < def.minAge) err(file, `${def.id}: route "${r.id}" starts younger than the path allows (${def.minAge})`);
     const weights = Object.values(def.aptitude).reduce((a, w) => a + (w ?? 0), 0);
     if (weights < 0.9 || weights > 1.1) err(file, `${def.id}: aptitude weights should sum to about 1 (got ${weights.toFixed(2)})`);
-    if ((bundle.text.fame.titles[def.id]?.length ?? 0) < 8) err(TEXT, `titles.${def.id}: at least 8 titles`);
+    if (def.sport === undefined && (bundle.text.fame.titles[def.id]?.length ?? 0) < 8) err(TEXT, `titles.${def.id}: at least 8 titles`);
     if (!Object.values(bundle.fameCompanies).some((c) => c.path === def.id && c.tier === 1 && !c.retired)) err('studios/', `${def.id}: a company that signs newcomers (tier 1)`);
     if (!Object.values(bundle.fameAwards).some((a) => a.path === def.id && !a.retired)) err('awards/', `${def.id}: at least one award`);
     if (def.minAge < 13 && /social/i.test(def.id)) err(file, `${def.id}: social media platforms start at 13`);
@@ -180,7 +180,8 @@ export function checkFame(bundle: ContentBundle, fileOf: (typeKey: CollectionKey
         if (x.action === 'enter' && x.route !== undefined && !route) e(`unknown route "${x.route}" in ${path.id}`);
         const needed = Math.max(path.minAge, route?.minAge ?? 0);
         if (x.action === 'enter' && !requiresFame(def, (c) => c.active === false)) e('starts a career, so it must require { fame: { active: false } }');
-        if (x.action === 'enter' && floor < needed) e(`starts ${path.id} by "${x.route}", which needs age ${needed}: require { age: { gte: ${needed} } }`);
+        // Sports ways in are checked choice by choice in tools/content/sports.ts.
+        if (x.action === 'enter' && !path.sport && floor < needed) e(`starts ${path.id} by "${x.route}", which needs age ${needed}: require { age: { gte: ${needed} } }`);
       }
       if ((x.action === 'contract' || (x.action === 'agent' && x.tier !== 0)) && floor < adultAge) {
         if (!hasParent(def)) e(`signs a deal or an agent, so it requires { age: { gte: ${adultAge} } } or casts the parent who signs for a minor`);

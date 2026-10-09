@@ -1,0 +1,59 @@
+id: varsity_vs_grades
+title: Practice or the paper
+text: >-
+  The team has a tournament on the same weekend as your biggest paper of the
+  term. The coach says nobody is irreplaceable, in a tone that means you might
+  be. Your teacher says a deadline is a deadline. Neither of them looks like
+  they are bluffing.
+tone: serious
+category: sports
+rarity: common
+lifeStages: [teen]
+requires:
+  all:
+    - { age: { gte: 14, lte: 18 } }
+    - { sports: { active: true } }
+    - { sports: { level: [school] } }
+    - { education: { program: [high] } }
+weight:
+  base: 7
+cooldownYears: 3
+choices:
+  - id: team
+    label: Play the tournament and ask for an extension
+    check:
+      base: 45
+      stats: [{ key: smarts, weight: 0.2 }, { key: sociability, weight: 0.1 }]
+      success:
+        text: >-
+          Your teacher gives you three more days, a look and a lecture. You play
+          like someone with something to prove, and you prove it.
+        effects:
+          - { type: sports, action: form, delta: 2 }
+          - { type: stat, key: stress, delta: 3 }
+      failure:
+        text: >-
+          The extension is a no. You write the paper on the bus and play a
+          tired game. Neither of them is your best work.
+        effects:
+          - { type: education, action: grades, value: -0.2 }
+          - { type: stat, key: stress, delta: 5 }
+  - id: paper
+    label: Skip the tournament and do the paper properly
+    outcome:
+      text: >-
+        The paper is good. The tournament goes on without you, and the team
+        loses by two. Nobody says anything, which is louder than saying it.
+      effects:
+        - { type: education, action: grades, value: 0.2 }
+        - { type: sports, action: form, delta: -2 }
+  - id: both
+    label: Do both, and sleep when you can
+    outcome:
+      text: >-
+        Two weeks of four-hour nights. The paper is fine, the tournament is
+        fine, and you are not, quite.
+      effects:
+        - { type: education, action: grades, value: 0.1 }
+        - { type: stat, key: health, delta: -2 }
+        - { type: stat, key: stress, delta: 6 }

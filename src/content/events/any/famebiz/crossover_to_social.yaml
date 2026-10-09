@@ -12,7 +12,7 @@ lifeStages: [youngAdult, adult, senior]
 requires:
   all:
     - { fame: { active: true } }
-    - { fame: { path: [music, acting, arts] } }
+    - { fame: { path: [music, acting, arts, basketball, football, soccer, baseball, hockey] } }
     - { fame: { second: false } }
     - { fame: { crossable: true } }
 weight: { base: 10 }

@@ -62,6 +62,7 @@ import { emptyPossessions } from '../possessions/query';
 import { startingTeen } from '../teen/query';
 import { emptyCrime } from '../crime/query';
 import { emptyFame } from '../fame/query';
+import { emptySports } from '../sports/query';
 
 /** A deep copy through JSON: the life holds plain data only (the engine has no structuredClone). */
 export function cloneJson<T>(value: T): T {
@@ -372,6 +373,7 @@ export function continueAsHeir(dead: LifeState, heirId: Id, content: ContentBund
     teen: startingTeen(age, year, content),
     crime: emptyCrime(),
     fame: emptyFame(),
+    sports: emptySports(),
   };
 
   // ── What they inherit ────────────────────────────────────────────────────

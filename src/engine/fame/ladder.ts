@@ -14,6 +14,7 @@ import { writeFromGroup } from '../systems/history';
 import type { FamePathState, Id, LifeState } from '../types';
 import { breakCeiling, isMinorStar, pathDef, rungDef, topRung, usualYear, workedPaths } from './query';
 import { fameTextValues } from './text';
+import { startSports } from '../sports/start';
 import { recentQuality } from './work';
 
 /** Writes one of the fame history lines. */
@@ -58,7 +59,7 @@ export function enterBlock(state: LifeState, pathId: string, routeId: string | u
   if (state.fame.active) return 'active';
   if (state.housing.kind === 'incarcerated') return 'prison';
   const age = state.character.age;
-  if (age < Math.max(def.minAge, route?.minAge ?? 0) || age > content.balance.fame.entry.maxAge) return 'age';
+  if (age < Math.max(def.minAge, route?.minAge ?? 0) || age > Math.min(content.balance.fame.entry.maxAge, route?.maxAge ?? 200)) return 'age';
   if (isMinorStar(state, content) && !hasGuardian(state)) return 'parent';
   return null;
 }
@@ -77,7 +78,8 @@ export function enterPath(state: LifeState, pathId: string, routeId: string | un
   delete f.nominated;
   f.main = pathId;
   f.second = null;
-  f.paths = { [pathId]: { rung: 1, peak: 1, fame: e.fame, craft: route?.craft ?? e.craft, since: year, last: year, recent: [], breakYear: 0 } };
+  const rung = Math.min(def.rungs.length, route?.rung ?? 1);
+  f.paths = { [pathId]: { rung, peak: rung, fame: Math.max(e.fame, rung > 1 ? rungDef(def, rung).fame + 1 : 0), craft: route?.craft ?? e.craft, since: year, last: year, recent: [], breakYear: 0 } };
   f.image = e.image;
   f.mood = e.mood;
   f.fans = e.fans;
@@ -87,6 +89,7 @@ export function enterPath(state: LifeState, pathId: string, routeId: string | un
   f.contract = null;
   f.commitment = 'steady';
   fameHistory(state, 'entered', content);
+  if (def.sport) startSports(state, def, content);
   return true;
 }
 
@@ -96,7 +99,7 @@ export type CrossBlock = 'unknown' | 'inactive' | 'same' | 'second' | 'rung' | '
 export function crossBlock(state: LifeState, pathId: string, content: ContentBundle): CrossBlock | null {
   const def = pathDef(content, pathId);
   const f = state.fame;
-  if (!def) return 'unknown';
+  if (!def || def.sport) return 'unknown';
   if (!f.active || f.main === null) return 'inactive';
   if (state.housing.kind === 'incarcerated') return 'prison';
   if (f.main === pathId || f.paths[pathId]) return 'same';
@@ -149,6 +152,9 @@ export function climb(state: LifeState, pathId: string, content: ContentBundle):
   while (path.rung < def.rungs.length) {
     const next = rungDef(def, path.rung + 1);
     if (path.fame < next.fame || recentQuality(path) < next.quality) break;
+    // E6c: some rungs ask for an age, and the pros take a draft or a signing, not fame alone.
+    if (next.minAge !== undefined && state.character.age < next.minAge) break;
+    if (def.sport && path.rung + 1 >= def.sport.proRung && !state.sports.pro) break;
     path.rung += 1;
     climbed += 1;
   }
@@ -164,6 +170,7 @@ export function climb(state: LifeState, pathId: string, content: ContentBundle):
 
 function dropRung(state: LifeState, def: FamePathDef, path: FamePathState, content: ContentBundle): boolean {
   if (path.rung <= 1) return false;
+  if (def.sport && state.sports.pro && path.rung <= def.sport.proRung) return false;
   if (path.fame >= rungDef(def, path.rung).fame - content.balance.fame.fade.slack) return false;
   path.rung -= 1;
   state.fame.fadedFrom = Math.max(state.fame.fadedFrom ?? 0, path.peak);

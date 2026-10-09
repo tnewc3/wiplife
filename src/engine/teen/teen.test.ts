@@ -429,7 +429,7 @@ describe('teen jobs', () => {
 
 describe('teams and clubs', () => {
   it('cut people from teams, never from clubs, and cost, train and bring friends', () => {
-    const life = step(teenAt('act-1', 15));
+    const life = edit(step(teenAt('act-1', 15)), (d) => void (d.teen.activities = []));
     const team = content.activities.soccer_team!;
     const club = content.activities.art_club!;
     expect(tryoutChance(life, club)).toBe(1);

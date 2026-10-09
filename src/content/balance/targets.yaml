@@ -65,6 +65,13 @@ health:
     ptsd: { min: 0.03, max: 0.16 }
     treatable_infection: { min: 0, max: 0.25 }
     type_2_diabetes: { min: 0.1, max: 0.25 }
+    # E6c: sports injuries only happen to the few who play a sport.
+    concussion: { min: 0, max: 0.2 }
+    muscle_tear: { min: 0, max: 0.15 }
+    shoulder_injury: { min: 0, max: 0.15 }
+    stress_fracture: { min: 0, max: 0.1 }
+    torn_ligament: { min: 0, max: 0.15 }
+    worn_joints: { min: 0, max: 0.1 }
 
 legal:
   # Lives with each offense on their record (every active offense needs one).
@@ -300,6 +307,30 @@ fame:
   minorsHarmed: { min: 0, max: 0 }
   unsignedMinorDeals: { min: 0, max: 0 }
   breakOverCeiling: { min: 0, max: 0 }
+
+sports:
+  # Nobody under 18 is ever in the pros or under a pro contract.
+  underAgePros: { min: 0, max: 0 }
+  # The athlete player (one that goes after a sport) starts one in nearly every life.
+  entered: { min: 0.8, max: 1 }
+  # Talent and Fitness matter most: with a fitting talent most turn pro and many go far; without, few do.
+  talentPro: { min: 0.5, max: 1 }
+  noTalentPro: { min: 0.02, max: 0.3 }
+  talentPastMiddle: { min: 0.25, max: 1 }
+  noTalentPastMiddle: { min: 0, max: 0.06 }
+  legend: { min: 0.002, max: 0.06 }
+  # Athletes peak young: pro careers are short, and end in the thirties.
+  proYears: { min: 3, max: 14 }
+  endAge: { min: 26, max: 37 }
+  # Hard on the body, football worst; some careers end that way.
+  injuriesPer100: { min: 6, max: 30 }
+  injuryEnded: { min: 0.02, max: 0.25 }
+  # Playing through pain makes the injury worse more often than resting does.
+  painRisk: { min: 1.2, max: 40 }
+  titleLives: { min: 0.05, max: 0.4 }
+  allStarLives: { min: 0.1, max: 0.5 }
+  medianEarnings: { min: 300000, max: 30000000 }
+  signedShare: { min: 0.1, max: 0.6 }
 
 coverage:
   minEvents: 300

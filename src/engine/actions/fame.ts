@@ -113,12 +113,12 @@ export const FAME_ACTIONS: Record<FameActionId, LifeActionRule> = {
   },
   retire_fame: {
     parse: none,
-    allowed: (state) => state.fame.active,
+    allowed: (state, _p, content) => state.fame.active && content.famePaths[state.fame.main ?? '']?.sport === undefined,
     apply: (state, _p, content) => void retire(state, content),
   },
   return_fame: {
     parse: none,
-    allowed: (state) => !state.fame.active && state.fame.retired !== undefined && state.housing.kind !== 'incarcerated',
+    allowed: (state, _p, content) => !state.fame.active && state.fame.retired !== undefined && state.housing.kind !== 'incarcerated' && content.famePaths[state.fame.main ?? '']?.sport === undefined,
     apply: (state, _p, content) => void comeback(state, content),
   },
 };

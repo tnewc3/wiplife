@@ -9,6 +9,7 @@ import { CrimeCard } from './CrimeCard';
 import { FameCard } from './FameCard';
 import { JobCard } from './JobCard';
 import { SchoolCard } from './SchoolCard';
+import { SportsCard } from './SportsCard';
 
 /** The Work/School tab: your job (Stage 8), school (Stage 7) and gig work. */
 export function WorkTab({ life }: { life: LifeState }) {
@@ -22,6 +23,7 @@ export function WorkTab({ life }: { life: LifeState }) {
       <SchoolCard life={life} />
       <CrimeCard life={life} />
       <FameCard life={life} />
+      <SportsCard life={life} />
       <Card role="region" aria-labelledby="gig-title">
         <h2 id="gig-title" className="text-lg font-bold">
           Gig work

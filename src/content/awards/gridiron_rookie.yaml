@@ -1,0 +1,8 @@
+id: gridiron_rookie
+name: "the Gridiron Rookie Award"
+category: "Rookie of the Year"
+path: football
+blurb: "For the first-year player who looked like they had been there a decade."
+minRung: 4
+critics: 0.5
+prestige: 0.6

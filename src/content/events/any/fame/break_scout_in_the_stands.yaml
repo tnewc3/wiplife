@@ -1,0 +1,39 @@
+id: break_scout_in_the_stands
+title: A scout in the stands
+text: >-
+  Nobody told you who was in the third row. Someone with a notebook came for the
+  other team's centre, stayed for you, and by the time the game ended the scout had
+  made three calls. Within the week you were {rungTitle}.
+tone: light
+category: fame
+rarity: rare
+recurring: true
+lifeStages: [child, teen, youngAdult, adult]
+requires:
+  all:
+    - { fame: { active: true } }
+    - { fame: { sport: true } }
+    - { sports: { amateur: true } }
+weight: { base: 10 }
+followUpOnly: true
+choices:
+  - id: stay_hungry
+    label: Keep your head down and keep working
+    outcome:
+      text: >-
+        You do not change a thing. The extra attention makes the gym quieter
+        and the work better, and your coach has the face of someone who is not
+        surprised.
+      effects:
+        - { type: fame, action: craft, delta: 3 }
+        - { type: sports, action: form, delta: 2 }
+  - id: talk_to_him
+    label: Find the scout and ask what was seen
+    outcome:
+      text: >-
+        The scout gives you five minutes and two honest criticisms. Both of them are
+        right, and you write them on your hand before you forget.
+      effects:
+        - { type: fame, action: fame, delta: 2 }
+        - { type: fame, action: craft, delta: 2 }
+        - { type: stat, key: happiness, delta: 5 }

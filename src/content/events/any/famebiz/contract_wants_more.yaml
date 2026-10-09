@@ -14,6 +14,7 @@ requires:
     - { age: { gte: 18 } }
     - { fame: { active: true } }
     - { fame: { contract: true } }
+    - { fame: { sport: false } }
 weight: { base: 0.9 }
 cooldownYears: 3
 choices:

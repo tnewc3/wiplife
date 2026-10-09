@@ -1,0 +1,60 @@
+id: parent_on_the_sideline
+title: The voice from the stands
+text: >-
+  You can hear {parent.name} over the whole crowd, and so can everyone else. It
+  starts as encouragement and ends as a list of things the referee, the coach
+  and you have done wrong. The other team's bench is grinning.
+tone: serious
+category: sports
+rarity: common
+lifeStages: [child, teen]
+requires:
+  all:
+    - { age: { lte: 17 } }
+    - { sports: { active: true } }
+    - { sports: { amateur: true } }
+weight:
+  base: 7
+cooldownYears: 4
+cast:
+  parent: { kind: parent, presence: household }
+choices:
+  - id: talk_after
+    label: Tell {parent.them} in the car that it needs to stop
+    check:
+      base: 50
+      stats: [{ key: confidence, weight: 0.25 }, { role: parent, key: trust, weight: 0.2 }]
+      success:
+        text: >-
+          It is not an easy ride home, and then it is. {parent.They}
+          {parent:goes|go} quiet, then says sorry in a smaller voice than you
+          expected, and does better next game.
+        effects:
+          - { type: relationship, role: parent, trust: 5 }
+          - { type: stat, key: happiness, delta: 4 }
+      failure:
+        text: >-
+          {parent.They} {parent:says|say} it comes from love, and the car is
+          silent for the rest of the drive. You play the next game with your
+          eyes on the grass.
+        effects:
+          - { type: relationship, role: parent, affection: -4 }
+          - { type: stat, key: stress, delta: 4 }
+  - id: ignore_it
+    label: Let it wash over you
+    outcome:
+      text: >-
+        You learn to hear it as weather. It does not go away, and you stop
+        looking for it in the crowd.
+      effects:
+        - { type: stat, key: stress, delta: 2 }
+        - { type: sports, action: form, delta: -1 }
+  - id: ask_coach
+    label: Ask the coach to say something
+    outcome:
+      text: >-
+        The coach has a quiet word at the next practice. Nothing is said about
+        it afterwards, but the stands are a little calmer.
+      effects:
+        - { type: relationship, role: parent, affection: -2 }
+        - { type: stat, key: stress, delta: -2 }

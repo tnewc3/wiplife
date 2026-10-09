@@ -1,0 +1,44 @@
+id: free_agency_market
+title: The market opens
+text: >-
+  The first night of free agency is a phone that does not stop. Teams you have
+  played against for years suddenly speak to you like an old friend. When it
+  settles, {team} is the name on your shirt.
+tone: neutral
+category: sportsdeal
+rarity: common
+recurring: true
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { sports: { active: true } }
+    - { sports: { level: [pro] } }
+    - { sports: { contract: true } }
+weight: { base: 10 }
+followUpOnly: true
+choices:
+  - id: thankful
+    label: Call the people who tried to sign you
+    outcome:
+      text: >-
+        Most of them do not call back. A few do, and one of them tells you they
+        will remember this, and you believe it.
+      effects:
+        - { type: fame, action: image, delta: 2 }
+  - id: tell_family
+    label: Tell your family the news first
+    outcome:
+      text: >-
+        Your mother says congratulations and asks if there is a good school
+        nearby. You laugh for the first time in a week.
+      effects:
+        - { type: stat, key: happiness, delta: 5 }
+  - id: stay_calm
+    label: Turn the phone off for the night
+    outcome:
+      text: >-
+        You sleep eleven hours. In the morning, everything is the same, and
+        entirely different.
+      effects:
+        - { type: stat, key: stress, delta: -4 }

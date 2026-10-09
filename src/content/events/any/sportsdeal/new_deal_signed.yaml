@@ -1,0 +1,47 @@
+id: new_deal_signed
+title: Ink on the paper
+text: >-
+  The deal with {team} is done. The press release is two lines and a
+  photograph of you holding a jersey you will wear for a while. Your phone
+  buzzes with people who suddenly remember you exist.
+tone: light
+category: sportsdeal
+rarity: common
+recurring: true
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { sports: { active: true } }
+    - { sports: { level: [pro] } }
+    - { sports: { contract: true } }
+weight: { base: 10 }
+followUpOnly: true
+choices:
+  - id: celebrate
+    label: Take the people who helped to dinner
+    outcome:
+      text: >-
+        The table runs long. Someone makes a toast you do not deserve, and
+        someone else makes a better one.
+      effects:
+        - { type: famePay, cost: small }
+        - { type: stat, key: happiness, delta: 5 }
+  - id: quiet
+    label: Go home and tell no one until morning
+    outcome:
+      text: >-
+        You read the contract once more, in your kitchen, for the pleasure of
+        reading your own name in it.
+      effects:
+        - { type: stat, key: happiness, delta: 3 }
+  - id: thank_agent
+    label: Call your agent and say thank you
+    visibleIf: { fame: { agent: { gte: 1 } } }
+    outcome:
+      text: >-
+        Your agent says "of course," like it is nothing, and you can hear how
+        much it is not.
+      effects:
+        - { type: fame, action: image, delta: 1 }
+        - { type: stat, key: happiness, delta: 2 }

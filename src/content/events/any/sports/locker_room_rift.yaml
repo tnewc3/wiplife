@@ -1,0 +1,70 @@
+id: locker_room_rift
+title: Two cliques and one ball
+text: >-
+  The team has split. One side eats together, the other leaves early, and
+  {mate.name} has made it clear which one {mate.they} {mate:is|are} on. The
+  coach calls a meeting about "chemistry" and nobody looks at anybody. You
+  have friends on both sides.
+tone: neutral
+category: sports
+rarity: common
+recurring: true
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 14 } }
+    - { sports: { active: true } }
+    - { sports: { level: [school, college, pro] } }
+weight: { base: 10 }
+cooldownYears: 3
+followUpOnly: true
+cast:
+  mate: { kind: acquaintance, presence: city, createIfMissing: true }
+choices:
+  - id: bridge
+    label: Organise a dinner for both sides
+    check:
+      base: 45
+      stats: [{ key: sociability, weight: 0.25 }, { key: kindness, weight: 0.1 }]
+      success:
+        text: >-
+          The food does most of the work. By dessert, two people who have not
+          spoken in a month are arguing about something small, loudly and
+          happily.
+        effects:
+          - { type: sports, action: form, delta: 2 }
+          - { type: relationship, role: mate, affection: 5 }
+      failure:
+        text: >-
+          Half of them do not come, and the other half sit on opposite ends of
+          the table. You pay for the food and learn something about teams.
+        effects:
+          - { type: famePay, cost: small }
+          - { type: stat, key: stress, delta: 3 }
+  - id: pick_a_side
+    label: Throw in with the side you like
+    outcome:
+      text: >-
+        It is easier, and it is lonelier. The other side starts to treat you as
+        part of the problem, which, you have to admit, you are.
+      effects:
+        - { type: sports, action: form, delta: -1 }
+        - { type: relationship, role: mate, affection: -4 }
+  - id: stay_out
+    label: Stay out of it and keep your head down
+    outcome:
+      text: >-
+        You play your game and go home. The rift gets better or worse without
+        you, and you have no idea which.
+      effects:
+        - { type: stat, key: stress, delta: 1 }
+  - id: cash_in
+    label: Remind them of the day you said what needed saying
+    visibleIf: { flag: sports_spoke_up }
+    outcome:
+      text: >-
+        Nobody has forgotten it, and the room, to your quiet surprise, listens.
+        The two sides do not become friends, but they do start sharing the ball.
+      effects:
+        - { type: sports, action: form, delta: 2 }
+        - { type: relationship, role: mate, trust: 3 }

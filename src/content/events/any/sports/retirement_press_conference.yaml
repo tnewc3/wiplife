@@ -1,0 +1,60 @@
+id: retirement_press_conference
+title: Is this the year?
+text: >-
+  Someone at the end of the long table asks if this is it. They ask the way
+  people ask a question they already know the answer to. You have thought
+  about this moment so many times that it feels like a rerun, and you still
+  do not know what you are going to say.
+tone: serious
+category: sports
+rarity: common
+recurring: true
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 30 } }
+    - { sports: { active: true } }
+    - { sports: { level: [pro] } }
+weight: { base: 10 }
+cooldownYears: 2
+followUpOnly: true
+choices:
+  - id: coach
+    label: Announce you are staying in the game as a coach
+    outcome:
+      text: >-
+        There is a standing ovation, a lot of flash photography and a clipboard
+        in your future. The tears at the end of the speech are surprisingly
+        your own.
+      effects:
+        - { type: sports, action: retire, route: coaching }
+        - { type: stat, key: happiness, delta: 3 }
+  - id: media
+    label: Announce a seat in the broadcast booth
+    visibleIf: { fame: { fame: { gte: 55 } } }
+    outcome:
+      text: >-
+        The network has been waiting for this. They promise you a good chair
+        and a bad tie, and you decide to be good at it.
+      effects:
+        - { type: sports, action: retire, route: broadcast }
+        - { type: stat, key: happiness, delta: 3 }
+  - id: normal
+    label: Say thank you and go home
+    outcome:
+      text: >-
+        You thank the fans, the team, your family and your coach, in that order.
+        The next morning, you wake up before the alarm out of habit, and lie
+        there.
+      effects:
+        - { type: sports, action: retire, route: normal }
+        - { type: stat, key: stress, delta: -3 }
+  - id: one_more
+    label: Say there is more to do
+    outcome:
+      text: >-
+        "Let's see," you say, and the room laughs, because you are the only one
+        who understands what you meant. It is another season.
+      effects:
+        - { type: sports, action: form, delta: 1 }
+        - { type: fame, action: mood, delta: 3 }

@@ -1,0 +1,51 @@
+id: traded_overnight
+title: A call at midnight
+text: >-
+  The call comes at midnight, from a number you do not recognise. You have been
+  traded to {team}, effective immediately. The friend who tells you first is
+  nicer about it than the team is. You have two days to be somewhere else.
+tone: serious
+category: sportsdeal
+rarity: common
+recurring: true
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { sports: { active: true } }
+    - { sports: { level: [pro] } }
+    - { sports: { traded: true } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  partner: { kind: partner, presence: household, optional: true }
+choices:
+  - id: embrace
+    label: Show up smiling and ask for the playbook
+    outcome:
+      text: >-
+        The new locker room tests you for a week and then stops. The coach says
+        you were wanted for a reason, and you set about proving it right.
+      effects:
+        - { type: sports, action: form, delta: 1 }
+        - { type: stat, key: happiness, delta: 2 }
+  - id: sulk
+    label: Make it known you did not want to go
+    outcome:
+      text: >-
+        The story runs for two days. It makes you feel better and makes the
+        new team nervous, which is not the same as welcoming.
+      effects:
+        - { type: fame, action: image, delta: -2 }
+        - { type: sports, action: form, delta: -1 }
+  - id: talk_partner
+    label: Talk it through with {partner.name}
+    visibleIf: { role: partner }
+    outcome:
+      text: >-
+        {partner.They} {partner:has|have} already started packing, and
+        {partner:asks|ask} you what you want to keep. It is the kindest thing
+        anyone says all week.
+      effects:
+        - { type: relationship, role: partner, affection: 4 }
+        - { type: stat, key: stress, delta: -3 }

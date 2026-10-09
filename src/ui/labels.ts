@@ -1267,3 +1267,53 @@ export const REACTION_WORDS = ['Hated it', 'Panned it', 'Mixed', 'Liked it', 'Lo
 export function reactionWord(score: number): string {
   return REACTION_WORDS[Math.min(4, Math.max(0, Math.floor(score / 20)))]!;
 }
+
+// ── E6c: sports ──────────────────────────────────────────────────────────────
+
+export const SPORT_LEVEL_LABELS = { youth: 'Youth team', school: 'School team', college: 'College or academy', pro: 'Pro' } as const;
+/** How a season was received (the band of the season on the shared fame record). */
+export const SEASON_BAND_LABELS = {
+  flop: 'A rough year',
+  solid: 'A steady year',
+  hit: 'A strong year',
+  acclaimed: 'A special year',
+  cult: 'The analysts’ pick',
+  crowd: 'The fans’ favorite',
+} as const;
+export const RATING_WORDS = ['Poor', 'Fair', 'Good', 'Great', 'Outstanding'] as const;
+export const TEAM_QUALITY_WORDS = ['A weak side', 'An average side', 'A good side', 'A contender'] as const;
+export const FIT_WORDS = ['A poor fit', 'A fair fit', 'A good fit', 'A natural fit'] as const;
+export const INJURY_SEVERITY_WORDS = ['Minor', 'Moderate', 'Serious', 'Severe'] as const;
+export const PLAYOFF_RESULT_LABELS = { missed: 'Missed the playoffs', out: 'Lost in the playoffs', final: 'Lost the final', champion: 'Won it all' } as const;
+export const SPORT_FOCUS_LABELS = { skills: 'Skills', conditioning: 'Conditioning', film: 'Film study' } as const;
+export const SPORT_FOCUS_BLURBS = {
+  skills: 'Drills and repetition. The craft grows fastest.',
+  conditioning: 'Gym, track and recovery. Fitness grows, injuries are rarer, and you are sharper for it.',
+  film: 'Hours with the tape. A smart player reads the game earlier.',
+} as const;
+export const CONTRACT_KIND_LABELS = { minimum: 'A minimum deal', rookie: 'A rookie deal', standard: 'A standard deal', star: 'A star deal' } as const;
+export const CONTRACT_OPTION_LABELS = { none: 'no option', team: 'a team option on the last year', player: 'a player option on the last year' } as const;
+export const SPORT_EXIT_LABELS = {
+  coaching: { label: 'Become a coach', blurb: 'Stay in the game with a whistle and a clipboard. A job in coaching.' },
+  broadcast: { label: 'Go into broadcasting', blurb: 'Take a seat in the booth. Your fame carries over into a career in media.' },
+  normal: { label: 'Start a normal life', blurb: 'Hang it up and find a job somewhere else. Your fame turns into royalties that fade.' },
+} as const;
+export const SPORT_EXIT_BLOCK_LABELS = { fame: 'You are not famous enough yet.', job: 'No such job is open.' } as const;
+export const SPORT_RETIRED_LABELS = {
+  coaching: 'You left the game to become a coach.',
+  broadcast: 'You left the game for the broadcast booth.',
+  normal: 'You left the game for a normal life.',
+} as const;
+
+/** Money as it reads in a salary line ("$1,200,000 a year"). */
+export function salaryLabel(n: number): string {
+  return `${money(n)} a year`;
+}
+
+/** "1st", "2nd", "3rd", "11th": a place in the standings. */
+export function placeLabel(n: number): string {
+  const tens = n % 100;
+  if (tens >= 11 && tens <= 13) return `${n}th`;
+  const suffix = n % 10 === 1 ? 'st' : n % 10 === 2 ? 'nd' : n % 10 === 3 ? 'rd' : 'th';
+  return `${n}${suffix}`;
+}

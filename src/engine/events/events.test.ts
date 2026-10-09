@@ -516,6 +516,21 @@ describe('event text', () => {
           agent: 'Dunmore Talent Group',
           award: 'the Halcyon Music Prize',
           headline: 'Star caught in the news',
+          sport: 'basketball',
+          team: 'the Lakefront Kings',
+          league: 'the Continental Hoops League',
+          position: 'point guard',
+          stage: 'the first round',
+          trophy: 'the championship',
+          pick: '7th',
+          draftRound: '1st',
+          draftTeam: 'the Houston Gulfrunners',
+          record: '48-34',
+          statLine: '21.4 points, 7.1 assists',
+          opponent: 'the Harbor Wolves',
+          injury: 'a torn ligament',
+          salary: '$900,000',
+          season: '2031',
         } satisfies Record<(typeof EVENT_TEXT_VALUES)[number] | 'petKind' | 'vehicle' | 'homeCity', string | number>;
         const context = { roles, values };
         const texts = [def.title, def.text, ...(def.choices ?? []).map((c) => c.label)];

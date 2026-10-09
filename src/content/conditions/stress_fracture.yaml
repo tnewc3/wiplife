@@ -1,0 +1,11 @@
+id: stress_fracture
+name: Stress fracture
+noun: a stress fracture
+kind: injury
+blurb: A hairline crack from too many hard miles, and a doctor who says the word "rest" three times.
+course: { untreated: -12, treated: -34 }
+effects:
+  fitness: { perYear: -3, limit: 25 }
+  happiness: { perYear: -1.5, limit: 30 }
+treatable: true
+costs: { treatment: 3200 }

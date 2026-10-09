@@ -38,12 +38,12 @@ export function pathDef(content: ContentBundle, id: Id | null | undefined): Fame
   return def && !def.retired ? def : undefined;
 }
 
-/** Every active path definition, in id order. */
+/** Every active path in arts and media, in id order (sports, E6c, have their own screen: see ../sports). */
 export function allPaths(content: ContentBundle): FamePathDef[] {
   return Object.keys(content.famePaths)
     .sort()
     .map((id) => content.famePaths[id]!)
-    .filter((d) => !d.retired);
+    .filter((d) => !d.retired && d.sport === undefined);
 }
 
 /** You have a career (a faded one counts) and haven't retired. */
@@ -141,7 +141,9 @@ export function isHitBand(band: FameBand): boolean {
 /** The ceiling rung a break can take you to in a path (talent: the top; none: a share of the ladder). */
 export function breakCeiling(state: LifeState, def: FamePathDef, content: ContentBundle): number {
   const share = hasTalentFor(state, def) ? content.balance.fame.bigBreak.ceiling.talent : content.balance.fame.bigBreak.ceiling.none;
-  return Math.max(2, Math.min(def.rungs.length, Math.round(def.rungs.length * share)));
+  const ceiling = Math.max(2, Math.min(def.rungs.length, Math.round(def.rungs.length * share)));
+  // E6c: no break puts an amateur in the pros; that takes the draft or a signing.
+  return def.sport && !state.sports.pro ? Math.min(ceiling, def.sport.proRung - 1) : ceiling;
 }
 
 /** A fan person is still alive and in your life. */

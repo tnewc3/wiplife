@@ -1,0 +1,62 @@
+id: away_from_home_strain
+title: Another away game
+text: >-
+  The schedule has you out of town for eleven of the next fourteen days, and
+  {partner.name} has put the calendar on the fridge with the home dates
+  circled. "I'm not asking you to quit," {partner.they} {partner:says|say}.
+  "I'm asking you to be home on the circled ones."
+tone: neutral
+category: sportslife
+rarity: common
+recurring: true
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { sports: { active: true } }
+    - { sports: { level: [college, pro] } }
+    - { home: { partner: true } }
+weight: { base: 8 }
+cooldownYears: 3
+cast:
+  partner: { kind: partner, presence: household }
+choices:
+  - id: protect
+    label: Promise to be home on the circled ones, and do it
+    outcome:
+      text: >-
+        It means two team dinners and a bad night's sleep on a flight, and
+        {partner.they} {partner:notices|notice}. The circle on the fridge gets
+        a small tick every time.
+      effects:
+        - { type: relationship, role: partner, affection: 6 }
+        - { type: stat, key: stress, delta: 2 }
+  - id: explain
+    label: Explain that this is the window you have
+    check:
+      base: 45
+      stats: [{ role: partner, key: trust, weight: 0.2 }, { key: kindness, weight: 0.1 }]
+      success:
+        text: >-
+          {partner.They} {partner:listens|listen}, and says "okay," and
+          means it. By the end of the season, the calendar has more ticks than
+          circles.
+        effects:
+          - { type: relationship, role: partner, trust: 5 }
+      failure:
+        text: >-
+          "I know it's a short window," {partner.they} {partner:says|say}. "I'm
+          in it too." The apartment is quiet for a week.
+        effects:
+          - { type: relationship, role: partner, affection: -7 }
+          - { type: stat, key: stress, delta: 3 }
+  - id: bring_along
+    label: Bring {partner.them} on the road when you can
+    outcome:
+      text: >-
+        The hotel rooms are all the same and the company is not. {partner.They}
+        {partner:turns|turn} out to be a very good traveller, and an even better
+        fan.
+      effects:
+        - { type: relationship, role: partner, affection: 6 }
+        - { type: stat, key: happiness, delta: 3 }

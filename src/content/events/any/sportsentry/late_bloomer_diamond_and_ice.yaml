@@ -1,0 +1,56 @@
+id: late_bloomer_diamond_and_ice
+title: The notice at the rink
+text: >-
+  A notice on the corkboard at the rink says "open camp, all levels, bring
+  your own gear." Underneath, someone has drawn a small, hopeful smiley. You
+  stop and read it twice, and then you take a photograph of it.
+tone: neutral
+category: sportsentry
+rarity: uncommon
+lifeStages: [teen, youngAdult]
+requires:
+  all:
+    - { age: { gte: 17, lte: 26 } }
+    - { fame: { active: false } }
+    - { sports: { seasons: { lt: 1 } } }
+    - { stat: fitness, gte: 55 }
+weight:
+  base: 0.5
+  modifiers:
+    - { if: { discovery: { talent: found } }, x: 3 }
+    - { if: { trait: ambition, gt: 60 }, x: 1.4 }
+choices:
+  - id: baseball
+    label: Show up for the baseball showcase
+    check:
+      base: 35
+      stats: [{ key: fitness, weight: 0.3 }, { key: discipline, weight: 0.2 }, { key: luck, weight: 0.05 }]
+      success:
+        text: A radar gun, a bag of balls and a row of scouts who do not look up until your third pitch. Then they do, all together.
+        effects:
+          - { type: fame, action: enter, path: baseball, route: open_tryout }
+          - { type: stat, key: happiness, delta: 6 }
+      failure:
+        text: The gun reads a number you would rather not have seen. The scouts look at their notebooks, and then at the next kid.
+        effects:
+          - { type: stat, key: confidence, delta: -2 }
+  - id: hockey
+    label: Lace up for the hockey camp
+    check:
+      base: 35
+      stats: [{ key: fitness, weight: 0.35 }, { key: discipline, weight: 0.15 }, { key: luck, weight: 0.05 }]
+      success:
+        text: The rink is cold, the camp is fast and every drill is a test. You skate the last one until your legs shake, and the coach with the thermos lets out a long breath.
+        effects:
+          - { type: fame, action: enter, path: hockey, route: open_tryout }
+          - { type: stat, key: happiness, delta: 6 }
+      failure:
+        text: The speed of the camp is not like anything you have skated before. You make it through the first day and not much further.
+        effects:
+          - { type: stat, key: confidence, delta: -2 }
+  - id: walk_on_by
+    label: Walk past it, again
+    outcome:
+      text: The notice is still there next week. The smiley has been joined by a second one.
+      effects:
+        - { type: stat, key: happiness, delta: -1 }

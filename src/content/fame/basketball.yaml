@@ -1,0 +1,99 @@
+# Basketball: a fame path with a sport block (E6c). Everything named here is made up.
+id: basketball
+name: "Basketball"
+noun: "basketball"
+blurb: "Hardwood, sneakers and a ball that never lies about your last shot. From a gym in your neighbourhood to the biggest arenas in the country."
+talents: [athletics]
+aptitude: { fitness: 0.45, discipline: 0.15, confidence: 0.12, ambition: 0.1, smarts: 0.1, riskTaking: 0.04, sociability: 0.04 }
+criticWeight: 0.35
+minAge: 8
+routes:
+  - { id: "youth_league", label: "Join a youth league", blurb: "A rec centre, a whistle and fifteen kids who all want the ball.", minAge: 8, maxAge: 13, rung: 1, craft: 10 }
+  - { id: "school_tryout", label: "Try out for the school team", blurb: "A gym, a clipboard and a list of names on a door on Monday.", minAge: 13, maxAge: 17, rung: 2, craft: 14 }
+  - { id: "open_tryout", label: "Go to an open tryout", blurb: "A college gym, two hundred hopefuls and three coaches with whistles.", minAge: 17, maxAge: 26, rung: 3, craft: 18 }
+rungs:
+  - { title: "youth league player", milestone: "Make your school team", fame: 0, quality: 0, income: 0 }
+  - { title: "school team player", milestone: "Earn a place at a college or an academy", fame: 5, quality: 22, income: 0, minAge: 13 }
+  - { title: "college player", milestone: "Get drafted by a pro team", fame: 12, quality: 31, income: 0, minAge: 17 }
+  - { title: "bench player", milestone: "Win a starting place", fame: 30, quality: 44, income: 110000, minAge: 18 }
+  - { title: "starter", milestone: "Become the player a team is built around", fame: 44, quality: 54, income: 650000 }
+  - { title: "star", milestone: "Make the all-star team", fame: 58, quality: 67, income: 3000000 }
+  - { title: "all-star", milestone: "Win a title and be remembered for it", fame: 74, quality: 79, income: 7000000 }
+  - { title: "legend", milestone: "Stay on top", fame: 90, quality: 91, income: 13200000 }
+kinds:
+  - { id: "season", label: "A season", noun: "season", blurb: "A full season with your team.", minRung: 1, difficulty: 0, reach: 1, pay: 1 }
+tour: { label: "Tour", noun: "tour", minRung: 8 }
+press: { label: "Press run", minRung: 8 }
+retire: { from: 33, chance: [{ at: 33, x: 0.02 }, { at: 45, x: 0.2 }] }
+royalties: 0.05
+sport:
+  positions:
+    - id: point_guard
+      label: "Point guard"
+      blurb: "Runs the offence, sees the floor and gets everyone the ball."
+      fit: { smarts: 0.3, sociability: 0.2, discipline: 0.2, fitness: 0.15, confidence: 0.15 }
+      impact: 1.15
+      stats: [{ id: "points", low: 3, high: 22 }, { id: "assists", low: 1.5, high: 11 }]
+    - id: shooting_guard
+      label: "Shooting guard"
+      blurb: "Scores from everywhere and wants the last shot."
+      fit: { confidence: 0.3, riskTaking: 0.15, fitness: 0.3, discipline: 0.15, looks: 0.1 }
+      impact: 1.1
+      stats: [{ id: "points", low: 4, high: 27 }, { id: "steals", low: 0.3, high: 2.2 }]
+    - id: small_forward
+      label: "Small forward"
+      blurb: "Does a little of everything and a lot of it well."
+      fit: { fitness: 0.4, discipline: 0.2, smarts: 0.15, confidence: 0.15, riskTaking: 0.1 }
+      impact: 1.0
+      stats: [{ id: "points", low: 4, high: 25 }, { id: "rebounds", low: 2, high: 8 }]
+    - id: power_forward
+      label: "Power forward"
+      blurb: "Works in the paint, takes the contact and finishes."
+      fit: { fitness: 0.45, discipline: 0.25, riskTaking: 0.1, kindness: 0.05, confidence: 0.15 }
+      impact: 0.95
+      stats: [{ id: "points", low: 3, high: 21 }, { id: "rebounds", low: 3, high: 11 }]
+    - id: center
+      label: "Center"
+      blurb: "Owns the middle: rebounds, blocks and the other team's bad day."
+      fit: { fitness: 0.45, discipline: 0.3, smarts: 0.1, confidence: 0.15 }
+      impact: 1.1
+      stats: [{ id: "points", low: 3, high: 20 }, { id: "rebounds", low: 4, high: 13 }, { id: "blocks", low: 0.3, high: 3.0 }]
+  stats:
+    - { id: "points", label: "Points", decimals: 1, per: "a game" }
+    - { id: "rebounds", label: "Rebounds", decimals: 1, per: "a game" }
+    - { id: "assists", label: "Assists", decimals: 1, per: "a game" }
+    - { id: "steals", label: "Steals", decimals: 1, per: "a game" }
+    - { id: "blocks", label: "Blocks", decimals: 1, per: "a game" }
+  season: { games: 82, draws: false, playoffTeams: 6, noun: "the regular season" }
+  stages: ["the first round", "the conference final", "the final"]
+  title: "the championship"
+  proRung: 4
+  ageOut: [14, 18, 23]
+  draft: { name: "the draft", age: 19, force: 22, rounds: 2 }
+  ageCurve: [{ at: 8, x: -6 }, { at: 12, x: -4 }, { at: 14, x: -3 }, { at: 16, x: -2 }, { at: 18, x: -1 }, { at: 21, x: 0 }, { at: 24, x: 2 }, { at: 27, x: 3 }, { at: 30, x: 1 }, { at: 32, x: -2 }, { at: 34, x: -9 }, { at: 36, x: -15 }, { at: 38, x: -22 }, { at: 42, x: -32 }]
+  hazard: 0.9
+  injuries:
+    - { id: "muscle_tear", weight: 30, min: 20, max: 50 }
+    - { id: "torn_ligament", weight: 18, min: 40, max: 75 }
+    - { id: "stress_fracture", weight: 14, min: 30, max: 60 }
+    - { id: "concussion", weight: 12, min: 20, max: 55 }
+    - { id: "broken_bone", weight: 8, min: 30, max: 55 }
+  leagues:
+    youth: { name: "The Neighbourhood Youth League", nicknames: ["Hoopsters", "Rim Rockers", "Fast Break", "Little Kings", "Court Kids"] }
+    school: { name: "The Scholastic Hoops Conference", nicknames: ["Wildcats", "Comets", "Pioneers", "Rangers", "Mustangs", "Knights"] }
+    college: { name: "The Collegiate Hoops Association", nicknames: ["Falcons", "Stags", "Bruins", "Mavericks", "Hornets", "Pilots"] }
+    pro:
+      name: "The Continental Hoops League"
+      teams:
+        - { id: "chicago_foundrymen", name: "Chicago Foundrymen", city: "chicago", quality: 62 }
+        - { id: "chicago_lamplighters", name: "Chicago Lamplighters", city: "chicago", quality: 44 }
+        - { id: "chicago_stockyard_kings", name: "Chicago Stockyard Kings", city: "chicago", quality: 55 }
+        - { id: "houston_gulfrunners", name: "Houston Gulfrunners", city: "houston", quality: 68 }
+        - { id: "houston_cinder_kings", name: "Houston Cinder Kings", city: "houston", quality: 40 }
+        - { id: "houston_bayou_barons", name: "Houston Bayou Barons", city: "houston", quality: 52 }
+        - { id: "los_angeles_sundowners", name: "Los Angeles Sundowners", city: "los_angeles", quality: 72 }
+        - { id: "los_angeles_surfmen", name: "Los Angeles Surfmen", city: "los_angeles", quality: 48 }
+        - { id: "los_angeles_palisade_prowlers", name: "Los Angeles Palisade Prowlers", city: "los_angeles", quality: 58 }
+        - { id: "new_york_brickmen", name: "New York Brickmen", city: "nyc", quality: 66 }
+        - { id: "new_york_harbor_ghosts", name: "New York Harbor Ghosts", city: "nyc", quality: 36 }
+        - { id: "new_york_subway_saints", name: "New York Subway Saints", city: "nyc", quality: 56 }

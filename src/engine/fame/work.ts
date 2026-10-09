@@ -107,8 +107,10 @@ export function craftGrowth(state: LifeState, def: FamePathDef, path: FamePathSt
   const q = content.balance.fame.quality;
   const discipline = 1 + (state.character.personality.discipline - 50) * q.craftDiscipline;
   const talent = hasTalentFor(state, def) ? 1.3 : 1;
+  // E6c: a sport's training focus shapes how much the year teaches.
+  const focus = def.sport ? content.balance.sports.performance.focus[state.sports.focus].craft : 1;
   const room = Math.max(0, (hasTalentFor(state, def) ? q.craftCap.talent : q.craftCap.none) - path.craft);
-  return Math.min(room, curveAt(q.craftGain, path.craft) * Math.max(0.3, discipline) * talent * (worked ? 1 : q.craftIdle));
+  return Math.min(room, curveAt(q.craftGain, path.craft) * Math.max(0.3, discipline) * talent * focus * (worked ? 1 : q.craftIdle));
 }
 
 /** What a release earns before anyone takes a cut: the rung's usual year times the kind's pay, by how fans took it, at your commitment's output; and a tour on top. */
@@ -139,7 +141,7 @@ export function assignedPlan(state: LifeState, content: ContentBundle): FamePlan
   const c = state.fame.contract;
   const path = c ? state.fame.paths[c.path] : undefined;
   const def = c ? content.famePaths[c.path] : undefined;
-  if (!c || !path || !def) return null;
+  if (!c || !path || !def || def.sport) return null;
   const kind = def.kinds.find((k) => k.minRung <= path.rung);
   return kind ? { path: c.path, kind: kind.id, style: 'commercial', risk: 'safe', tour: false, press: false } : null;
 }
@@ -152,6 +154,7 @@ export function planBlock(state: LifeState, plan: FamePlan, content: ContentBund
   const def = content.famePaths[plan.path];
   const path = f.paths[plan.path];
   if (!def || !path || ![f.main, f.second].includes(plan.path)) return 'path';
+  if (def.sport) return 'sport';
   const kind = kindDef(def, plan.kind);
   if (!kind) return 'kind';
   if (kind.minRung > path.rung) return 'rung';

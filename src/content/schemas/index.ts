@@ -24,6 +24,7 @@ import { webBalanceSchema, webRegistrySchema } from './web';
 import { mentalHealthBalanceSchema, mentalRegistrySchema } from './mental';
 import { petInteractionSchema, petSchema, possessionsBalanceSchema, possessionsRegistrySchema, possessionsTextSchema, renovationSchema, vehicleSchema } from './possessions';
 import { crewSchema, crimeBalanceSchema, crimeRegistrySchema, crimeTextSchema, frontSchema } from './crime';
+import { sportsBalanceSchema, sportsRegistrySchema, sportsTextSchema } from './sports';
 import { fameAgentSchema, fameAwardSchema, fameBalanceSchema, fameCompanySchema, famePathSchema, fameRegistrySchema, fameTextSchema } from './fame';
 import { activitySchema, cliqueSchema, houseRuleSchema, teenBalanceSchema, teenJobSchema, teenRegistrySchema, teenTextSchema } from './teen';
 import { estateRegistrySchema, familyBalanceSchema, familyRegistrySchema, heirRegistrySchema, heirTextSchema } from './family';
@@ -50,6 +51,7 @@ export * from './possessions';
 export * from './teen';
 export * from './crime';
 export * from './fame';
+export * from './sports';
 
 /**
  * Collections: a folder under src/content with one YAML file per definition,
@@ -116,6 +118,7 @@ export const singletonTypes = {
   'balance/teen': teenBalanceSchema,
   'balance/crime': crimeBalanceSchema,
   'balance/fame': fameBalanceSchema,
+  'balance/sports': sportsBalanceSchema,
   'balance/targets': targetsBalanceSchema,
   'character/identity': identityOptionsSchema,
   'character/appearance': appearanceOptionsSchema,
@@ -131,6 +134,7 @@ export const singletonTypes = {
   'text/teen': teenTextSchema,
   'text/crime': crimeTextSchema,
   'text/fame': fameTextSchema,
+  'text/sports': sportsTextSchema,
   'registries/memories': memoryRegistrySchema,
   'registries/flags': flagRegistrySchema,
   'registries/categories': categoryRegistrySchema,
@@ -151,6 +155,7 @@ export const singletonTypes = {
   'registries/teen': teenRegistrySchema,
   'registries/crime': crimeRegistrySchema,
   'registries/fame': fameRegistrySchema,
+  'registries/sports': sportsRegistrySchema,
 } as const;
 
 export type SingletonPath = keyof typeof singletonTypes;
@@ -206,6 +211,7 @@ export const contentBundleSchema = z.strictObject({
     teen: teenBalanceSchema,
     crime: crimeBalanceSchema,
     fame: fameBalanceSchema,
+    sports: sportsBalanceSchema,
     targets: targetsBalanceSchema,
   }),
   character: z.strictObject({ identity: identityOptionsSchema, appearance: appearanceOptionsSchema }),
@@ -222,6 +228,7 @@ export const contentBundleSchema = z.strictObject({
     teen: teenTextSchema,
     crime: crimeTextSchema,
     fame: fameTextSchema,
+    sports: sportsTextSchema,
   }),
   registries: z.strictObject({
     memories: memoryRegistrySchema,
@@ -244,6 +251,7 @@ export const contentBundleSchema = z.strictObject({
     teen: teenRegistrySchema,
     crime: crimeRegistrySchema,
     fame: fameRegistrySchema,
+    sports: sportsRegistrySchema,
   }),
 });
 

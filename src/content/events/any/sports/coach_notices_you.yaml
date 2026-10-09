@@ -1,0 +1,62 @@
+id: coach_notices_you
+title: Stay after practice
+text: >-
+  {coach.name} waits until the others have gone to the showers, then asks you to
+  stay. {coach.They} {coach:has|have} watched you for a month and has a drill,
+  a list of things you do wrong and one thing you do better than anyone on the
+  roster.
+tone: neutral
+category: sports
+rarity: common
+lifeStages: [child, teen, youngAdult]
+requires:
+  all:
+    - { age: { lte: 22 } }
+    - { sports: { active: true } }
+    - { sports: { amateur: true } }
+weight:
+  base: 8
+  modifiers:
+    - { if: { discovery: { talent: found } }, x: 1.5 }
+cooldownYears: 3
+cast:
+  coach: { kind: acquaintance, presence: city, createIfMissing: true, age: { min: 28, max: 60 } }
+choices:
+  - id: extra_work
+    label: Stay, and do the drill until it's right
+    outcome:
+      text: >-
+        An hour later you can barely walk, and you are better. {coach.name} says
+        nothing about it except "same time Thursday."
+      effects:
+        - { type: fame, action: craft, delta: 3 }
+        - { type: stat, key: fitness, delta: 2 }
+        - { type: sports, action: form, delta: 1 }
+        - { type: relationship, role: coach, affection: 5 }
+  - id: ask_straight
+    label: Ask for the honest version
+    check:
+      base: 50
+      stats: [{ key: confidence, weight: 0.25 }, { key: discipline, weight: 0.15 }]
+      success:
+        text: >-
+          {coach.name} gives you the honest version, and it stings and helps in
+          equal measure. You write it down in the car.
+        effects:
+          - { type: fame, action: craft, delta: 4 }
+          - { type: relationship, role: coach, trust: 6 }
+      failure:
+        text: >-
+          The honest version is longer than you were ready for. You nod through
+          all of it and go home with a very quiet head.
+        effects:
+          - { type: stat, key: confidence, delta: -3 }
+          - { type: fame, action: craft, delta: 1 }
+  - id: go_home
+    label: Say you have somewhere to be
+    outcome:
+      text: >-
+        {coach.name} nods and lets it go. You make the bus, and you do not
+        think about the drill until the next game.
+      effects:
+        - { type: relationship, role: coach, affection: -2 }

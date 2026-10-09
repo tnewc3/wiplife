@@ -16,6 +16,7 @@ requires:
     - { age: { lte: 17 } }
     - { fame: { active: true } }
     - { fame: { rung: { gte: 2 } } }
+    - { fame: { sport: false } }
 weight: { base: 2 }
 cooldownYears: 4
 cast:

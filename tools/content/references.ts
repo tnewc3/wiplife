@@ -55,6 +55,7 @@ import { checkPossessions } from './possessions';
 import { checkTeen } from './teen';
 import { checkCrime } from './crime';
 import { checkFame } from './fame';
+import { checkSports } from './sports';
 
 const CREATION = 'balance/creation.yaml';
 const AGING = 'balance/aging.yaml';
@@ -191,6 +192,7 @@ export function checkReferences(
   errors.push(...checkTeen(bundle, fileOf, options.partialEvents === true));
   errors.push(...checkCrime(bundle, fileOf, options.partialEvents === true));
   errors.push(...checkFame(bundle, fileOf, options.partialEvents === true));
+  errors.push(...checkSports(bundle, fileOf, options.partialEvents === true));
 
   return errors;
 }
@@ -514,6 +516,8 @@ function checkEvents(bundle: ContentBundle, fileOf: (typeKey: CollectionKey, id:
     ...Object.values(bundle.registries.crime.triggers).flatMap((r) => r.events),
     // E6b: what the fame step queues (a release's reception, a break, a fade, a deal, a ceremony, a tabloid, a stalker...).
     ...Object.values(bundle.registries.fame.triggers).flatMap((r) => r.events),
+    // E6c: what the sports step queues (the draft, deals, injuries, the playoffs, a big game...).
+    ...Object.values(bundle.registries.sports.triggers).flatMap((r) => r.events),
   ]);
 
   for (const [id, def] of Object.entries(bundle.events)) {

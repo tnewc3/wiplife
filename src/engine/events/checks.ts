@@ -7,6 +7,8 @@ import type { Check, CheckStat, ContentBundle, EffectStatKey } from '../../conte
 import { HIDDEN_KEYS, STAT_KEYS } from '../../content/schemas';
 import { custodyCase } from '../family/custody';
 import { tryChance } from '../family/carrying';
+import { runStrength } from '../sports/playoffs';
+import { fitFor } from '../sports/query';
 import type { Id, LifeState } from '../types';
 
 /** Your value for a stat, personality trait or readable hidden value. */
@@ -49,6 +51,23 @@ function statValue(state: LifeState, stat: CheckStat, cast: Record<string, Id>, 
       case 'rung': {
         const ladder = f.main === null ? undefined : content?.famePaths[f.main]?.rungs.length;
         return main && ladder && ladder > 1 ? Math.round(((main.rung - 1) / (ladder - 1)) * 100) : 0;
+      }
+    }
+  }
+  // E6c: this year's rating, your team's strength against the opposition, your form and how well you fit your position (0–100).
+  if ('sports' in stat) {
+    const sp = state.sports;
+    switch (stat.sports) {
+      case 'rating':
+        return sp.seasons.at(-1)?.rating ?? 50;
+      case 'team':
+        return runStrength(state);
+      case 'form':
+        return Math.max(0, Math.min(100, 50 + sp.form * 5));
+      case 'fit': {
+        const def = content && sp.sport ? content.famePaths[sp.sport]?.sport : undefined;
+        const position = def?.positions.find((p) => p.id === sp.position);
+        return position ? Math.round(100 * fitFor(state, position)) : 50;
       }
     }
   }

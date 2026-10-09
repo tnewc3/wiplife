@@ -15,6 +15,7 @@ requires:
     - { fame: { active: true } }
     - { fame: { contract: false } }
     - { fame: { rung: { gte: 2 } } }
+    - { fame: { sport: false } }
 weight: { base: 5 }
 followUpOnly: true
 choices:

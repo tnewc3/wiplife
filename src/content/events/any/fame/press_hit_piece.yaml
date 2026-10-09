@@ -15,6 +15,7 @@ requires:
     - { fame: { active: true } }
     - { fame: { released: true } }
     - { fame: { image: { lte: 60 } } }
+    - { fame: { sport: false } }
 weight: { base: 6 }
 followUpOnly: true
 choices:

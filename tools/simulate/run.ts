@@ -68,6 +68,7 @@ import { emptyWebReport, formatWeb, webTargets, WebWatcher, type WebReport } fro
 import { chooseCrimeActions, CrimeWatcher, crimeTargets, emptyCrimeReport, formatCrime, type CrimeReport } from './crime';
 import { chooseFameActions, emptyFameReport, FameWatcher, fameTargets, formatFame, rollStarProfile, type FameReport } from './fame';
 import { peakRung } from '../../src/engine/fame/query';
+import { chooseSportsActions, emptySportsReport, formatSports, rollAthleteProfile, SportsWatcher, sportsTargets, type SportsReport } from './sports';
 import { chooseTeenActions, emptyTeenReport, formatTeen, rollTeenProfile, teenTargets, TeenWatcher, type TeenReport } from './teen';
 import { YEAR_PIPELINE } from '../../src/engine/pipeline';
 import { chooseFamilyActions, chooseParentingPlans, emptyFamilyReport, FamilyWatcher, formatFamily, familyTargets, rollFamilyProfile, type FamilyReport } from './family';
@@ -102,7 +103,7 @@ export interface SimulationOptions {
   starts?: readonly LifeState[];
 }
 
-export type SimulatedPlayer = 'careful' | 'careless' | 'spammer' | 'criminal' | 'star';
+export type SimulatedPlayer = 'careful' | 'careless' | 'spammer' | 'criminal' | 'star' | 'athlete';
 
 export interface StageYears {
   years: number;
@@ -152,6 +153,8 @@ export interface SimulationReport {
   crime: CrimeReport;
   /** E6b: fame in arts and media, measured. */
   fame: FameReport;
+  /** E6c: sports, measured. */
+  sports: SportsReport;
 }
 
 /** C1: the consistency pass, measured. */
@@ -781,7 +784,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
 
   const recurring = recurringEvents(content);
   // E6a: the criminal player lives as the careful one does (family, interactions), and also in a crew.
-  const behaves: InteractionPlayer = playerKind === 'criminal' || playerKind === 'star' ? 'careful' : playerKind;
+  const behaves: InteractionPlayer = playerKind === 'criminal' || playerKind === 'star' || playerKind === 'athlete' ? 'careful' : playerKind;
   const interactions = emptyInteractionReport(behaves, content);
   const family = emptyFamilyReport();
   const people = emptyPeopleReport();
@@ -791,6 +794,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
   const teen = emptyTeenReport(content);
   const crime = emptyCrimeReport(playerKind, content);
   const fame = emptyFameReport(playerKind, content);
+  const sports = emptySportsReport(playerKind, content);
   const famousAtTarget: number[] = [];
   const peopleTimer = new PipelineTimer(people);
   const timedSteps = peopleTimer.steps(YEAR_PIPELINE);
@@ -813,6 +817,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
       possessions.invariantFailures += failures.filter((f) => /possession|\bpet\b|vehicle|car loan|vacation|renovation|insurance|upkeep/i.test(f)).length;
       crime.invariantFailures += failures.filter((f) => /crime|crew|dirty/i.test(f)).length;
       fame.invariantFailures += failures.filter((f) => /^fame|fame\./i.test(f)).length;
+      sports.invariantFailures += failures.filter((f) => /^sports/i.test(f)).length;
       teen.invariantFailures += failures.filter((f) => /crowd|teen|license|learner|house rule|rule |romance|couple with someone under|under 18|is under \d+ and|they are under|you are under/i.test(f)).length;
       for (const f of failures) if (failureMessages.length < maxMessages) failureMessages.push(`${seed} age ${life.character.age}: ${f}`);
     };
@@ -834,6 +839,9 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
     const fameWatcher = new FameWatcher(fame, content);
     const fameRng = createRng(`${seed}:fame`);
     const starProfile = rollStarProfile(fameRng);
+    const sportsWatcher = new SportsWatcher(sports, content);
+    const sportsRng = createRng(`${seed}:sports`);
+    const athleteProfile = rollAthleteProfile(sportsRng);
     const peopleWatcher = new PeopleWatcher(people, content);
     const webWatcher = new WebWatcher(web, content);
     const mentalWatcher = new MentalWatcher(mental, content);
@@ -860,7 +868,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
       const eventId = l.pending.find((p) => p.instanceId === card.instanceId)?.eventId ?? '';
       // Starting an adoption, IVF cycle or surrogacy: the player came here to begin.
       const starts = [...content.registries.family.adoption.start, ...content.registries.family.ivf.start, ...content.registries.family.surrogacy.start];
-      const id = starts.includes(eventId) ? card.choices[0]!.id : careless ? pick(rng, card.choices).id : playerKind === 'criminal' ? criminalChoice(l, card, rng) : playerKind === 'star' ? starChoice(l, card, rng) : carefulChoice(l, card, rng);
+      const id = starts.includes(eventId) ? card.choices[0]!.id : careless ? pick(rng, card.choices).id : playerKind === 'criminal' ? criminalChoice(l, card, rng) : playerKind === 'star' || playerKind === 'athlete' ? starChoice(l, card, rng) : carefulChoice(l, card, rng);
       if (illegal.size > 0) {
         legal.illegalChoices.offered++;
         if (illegal.has(id)) legal.illegalChoices.taken++;
@@ -972,6 +980,16 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
           money.actionsTaken[actionId]++;
         }
       }
+      // ...and on a sport (E6c): the athlete player goes after one, hires an agent, trains and plays...
+      if (playerKind === 'athlete') {
+        for (const [actionId, params] of chooseSportsActions(life, content, sportsRng, athleteProfile)) {
+          if (!isLifeActionAvailable(life, actionId, params, content)) continue;
+          const beforeAction = life;
+          life = takeLifeAction(life, actionId, params);
+          money.actionsTaken[actionId]++;
+          sportsWatcher.acted(actionId, beforeAction);
+        }
+      }
       // ...and on their mind (M1)...
       for (const [actionId, params] of careless ? [] : chooseMentalActions(life, content, mentalRng, mentalProfile)) {
         if (!isLifeActionAvailable(life, actionId, params, content)) continue;
@@ -1053,6 +1071,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
       mentalWatcher.observe(yearBefore, life);
       crimeWatcher.observe(yearBefore, life);
       fameWatcher.observe(yearBefore, life);
+      sportsWatcher.observe(yearBefore, life);
       possessionsWatcher.observe(yearBefore, life, content);
       if (!careless) teenWatcher?.observe(yearBefore, life);
       watch(life);
@@ -1096,6 +1115,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
     mentalWatcher.finish(life);
     crimeWatcher.finish(life);
     fameWatcher.finish(life);
+    sportsWatcher.finish(life);
     possessionsWatcher.finish(life);
     if (!careless) teenWatcher?.finish(life);
     familyWatcher.finish(life, firesThisLife);
@@ -1430,6 +1450,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
     teen,
     crime,
     fame: { ...fame, famousAtTarget },
+    sports,
     consistency: {
       violations,
       happiness: spreadOf(lifetimeHappiness),
@@ -1567,6 +1588,7 @@ export function formatReport(report: SimulationReport, content: ContentBundle): 
   lines.push(...formatTeen(report.teen, content), '  targets (src/content/balance/targets.yaml):', ...teenTargets(report, content).map((r) => target(r.label, r.value, r.goal, r.met)));
   lines.push(...formatCrime(report.crime, content), '  targets (src/content/balance/targets.yaml):', ...crimeTargets(report, content).map((r) => target(r.label, r.value, r.goal, r.met)));
   lines.push(...formatFame(report.fame, content), '  targets (src/content/balance/targets.yaml):', ...fameTargets(report, content).map((r) => target(r.label, r.value, r.goal, r.met)));
+  lines.push(...formatSports(report.sports, content), '  targets (src/content/balance/targets.yaml):', ...sportsTargets(report, content).map((r) => target(r.label, r.value, r.goal, r.met)));
   lines.push(`Events fired: ${report.totalEventsFired}`);
   lines.push('  event'.padEnd(30) + 'fired'.padStart(8) + 'share'.padStart(8) + 'lives'.padStart(9));
   for (const e of [...report.events].sort((a, b) => b.fired - a.fired)) {

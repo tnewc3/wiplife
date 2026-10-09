@@ -1,0 +1,8 @@
+id: heartland_mvp
+name: "the Heartland MVP Award"
+category: "Most Valuable Player"
+path: football
+blurb: "The league's top prize, announced on the night before the final."
+minRung: 5
+critics: 0.6
+prestige: 0.9

@@ -1,0 +1,57 @@
+id: big_game_baseball
+title: Two outs in the ninth
+text: >-
+  It is the bottom of the ninth, two outs, a runner on second, and the game is tied. You are in the box and the pitcher is shaking off signs. There is nowhere to look except at the ball, and the crowd has stopped existing.
+tone: serious
+category: sports
+rarity: common
+recurring: true
+lifeStages: [child, teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { sports: { active: true } }
+    - { sports: { sport: [baseball] } }
+    - { sports: { level: [school, college, pro] } }
+    - { fame: { released: true } }
+weight: { base: 10 }
+cooldownYears: 2
+followUpOnly: true
+choices:
+  - id: take_it
+    label: Swing at the first good pitch
+    check:
+      base: 45
+      stats: [{ sports: rating, weight: 0.3 }, { key: confidence, weight: 0.2 }, { sports: form, weight: 0.1 }, { key: riskTaking, weight: 0.05 }]
+      success:
+        text: >-
+          You get ahead of it and the bat answers. The ball goes where balls are supposed to go, and the park falls apart with joy.
+        effects:
+          - { type: sports, action: rating, delta: 3 }
+          - { type: fame, action: fame, delta: 2 }
+          - { type: fame, action: mood, delta: 4 }
+          - { type: flag, key: sports_took_the_shot, value: true }
+      failure:
+        text: >-
+          You get a piece of it, and a piece is not enough. The fielder catches it with no hurry at all, and the inning is over.
+        effects:
+          - { type: sports, action: rating, delta: -2 }
+          - { type: fame, action: mood, delta: -3 }
+          - { type: stat, key: happiness, delta: -4 }
+  - id: share_it
+    label: Take your time and wait for yours
+    check:
+      base: 50
+      stats: [{ sports: team, weight: 0.3 }, { sports: rating, weight: 0.15 }, { key: sociability, weight: 0.1 }]
+      success:
+        text: >-
+          You let two go by and the third is the one. You put it exactly where they aren't, and the runner is home before you stop running.
+        effects:
+          - { type: sports, action: rating, delta: 2 }
+          - { type: fame, action: image, delta: 3 }
+          - { type: stat, key: happiness, delta: 4 }
+      failure:
+        text: >-
+          You wait, and it is a strike on the corner. The next one is better than yours, and the umpire's arm goes up.
+        effects:
+          - { type: fame, action: image, delta: -1 }
+          - { type: stat, key: happiness, delta: -3 }

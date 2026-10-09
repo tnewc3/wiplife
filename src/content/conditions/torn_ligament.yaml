@@ -1,0 +1,12 @@
+id: torn_ligament
+name: Torn ligament
+noun: a torn ligament
+kind: injury
+blurb: A pop you felt before you heard it. Months of rehab, and a knee that remembers.
+course: { untreated: -10, treated: -32 }
+effects:
+  fitness: { perYear: -4, limit: 20 }
+  happiness: { perYear: -2, limit: 30 }
+  stress: { perYear: 2, limit: 75 }
+treatable: true
+costs: { treatment: 9000 }

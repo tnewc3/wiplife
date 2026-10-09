@@ -15,6 +15,7 @@ requires:
     - { fame: { active: true } }
     - { fame: { rung: { gte: 2 } } }
     - { fame: { stalker: false } }
+    - { fame: { sport: false } }
 weight: { base: 9 }
 followUpOnly: true
 cast:

@@ -1,0 +1,8 @@
+id: premier_player_award
+name: "the Premier Player of the Year Award"
+category: "Player of the Year"
+path: soccer
+blurb: "Voted by players, coaches and the supporters' clubs."
+minRung: 5
+critics: 0.5
+prestige: 0.9

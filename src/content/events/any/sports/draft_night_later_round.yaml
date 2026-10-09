@@ -1,0 +1,42 @@
+id: draft_night_later_round
+title: The long wait
+text: >-
+  The first round goes by, and then the second. Every time a name is read, your
+  phone lights up with someone checking whether it was yours. When it is
+  finally {draftTeam}, with the {pick} pick, you have almost stopped
+  breathing.
+tone: neutral
+category: sports
+rarity: common
+lifeStages: [teen, youngAdult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { sports: { active: true } }
+    - { sports: { drafted: true } }
+    - { sports: { offered: true } }
+    - { sports: { pick: { gte: 13 } } }
+weight: { base: 10 }
+followUpOnly: true
+choices:
+  - id: sign
+    label: Sign, and plan to earn the rest
+    outcome:
+      text: >-
+        The deal is smaller than the ones on the first night, and so is the
+        fuss. You sign anyway, and the bonus, small as it is, is more money
+        than you have ever held.
+      effects:
+        - { type: sports, action: sign }
+        - { type: stat, key: happiness, delta: 6 }
+        - { type: fame, action: craft, delta: 1 }
+  - id: wait
+    label: Say no, and go back to school
+    visibleIf: { age: { lte: 21 } }
+    outcome:
+      text: >-
+        Your agent stares at you for a moment. You say you will be a better
+        player next year, and you hope that is true.
+      effects:
+        - { type: sports, action: decline }
+        - { type: stat, key: stress, delta: 3 }

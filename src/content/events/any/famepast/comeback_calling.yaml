@@ -14,6 +14,7 @@ requires:
     - { age: { gte: 30 } }
     - { fame: { retired: true } }
     - { fame: { peak: { gte: 2 } } }
+    - { fame: { sport: false } }
 weight: { base: 10 }
 followUpOnly: true
 choices:

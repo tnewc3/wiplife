@@ -358,6 +358,40 @@ export const migrations: readonly Migration[] = [
       };
     },
   },
+  {
+    from: 19,
+    description:
+      'E6c: sports. A life gains a "sports" record (no sport, no team, no contract, no seasons). Nobody is given a career by the upgrade: ' +
+      'a sports career begins with a first step, as it does for a new life.',
+    migrate: (data) => {
+      if (!isRecord(data)) return data;
+      return {
+        ...data,
+        sports: {
+          sport: null,
+          position: null,
+          pro: false,
+          team: null,
+          contract: null,
+          unsigned: 0,
+          focus: 'skills',
+          form: 0,
+          pain: false,
+          rest: false,
+          ask: null,
+          playOut: false,
+          seasons: [],
+          run: null,
+          draft: null,
+          suspended: 0,
+          traded: 0,
+          released: 0,
+          agedOut: 0,
+          totals: { seasons: 0, proSeasons: 0, playoffs: 0, finals: 0, titles: 0, allStars: 0, injuries: 0, serious: 0, playedThrough: 0, trades: 0, releases: 0, suspensions: 0, earned: 0, bestRating: 0 },
+        },
+      };
+    },
+  },
 ];
 
 function isRecord(value: unknown): value is Record<string, unknown> {

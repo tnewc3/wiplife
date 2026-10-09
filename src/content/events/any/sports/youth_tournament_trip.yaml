@@ -1,0 +1,50 @@
+id: youth_tournament_trip
+title: Three days on a bus
+text: >-
+  The tournament is four hours away, and the team goes by bus. There are
+  sleeping bags in the aisle, a card game that no one understands and a coach
+  who has told the same joke eleven times. {mate.name} wants to know whether
+  you have ever been this far from home.
+tone: light
+category: sports
+rarity: common
+recurring: true
+lifeStages: [child, teen]
+requires:
+  all:
+    - { age: { lte: 17 } }
+    - { sports: { active: true } }
+    - { sports: { amateur: true } }
+weight: { base: 7 }
+cooldownYears: 3
+cast:
+  mate: { kind: acquaintance, presence: city, createIfMissing: true, age: { min: 8, max: 17 } }
+choices:
+  - id: bond
+    label: Spend the whole trip with the team
+    outcome:
+      text: >-
+        You trade snacks and secrets across the aisle, and by the second night
+        you know the whole team's middle names. The games are almost an
+        afterthought.
+      effects:
+        - { type: relationship, role: mate, affection: 8 }
+        - { type: stat, key: happiness, delta: 6 }
+  - id: focus
+    label: Spend it watching film and stretching
+    outcome:
+      text: >-
+        You play better than anyone expected, and nobody sits with you at
+        dinner. It is a fair trade, you tell yourself, and mostly it is.
+      effects:
+        - { type: sports, action: form, delta: 2 }
+        - { type: relationship, role: mate, affection: -2 }
+  - id: homesick
+    label: Call home every night
+    outcome:
+      text: >-
+        The calls are short and stupid and wonderful. Home is somewhere that
+        still knows you in your own bed.
+      effects:
+        - { type: stat, key: happiness, delta: 3 }
+        - { type: stat, key: stress, delta: -2 }

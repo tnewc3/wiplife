@@ -1,0 +1,52 @@
+id: released_phone_call
+title: The short call
+text: >-
+  The call is two minutes long. Someone from the front office says "it is not
+  personal" and "we wish you luck", and you say thank you before you realise
+  what you are thanking them for. A box for the contents of your locker is
+  already at the door.
+tone: serious
+category: sportsdeal
+rarity: common
+recurring: true
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { sports: { active: true } }
+    - { sports: { level: [pro] } }
+    - { sports: { released: true } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  partner: { kind: partner, presence: household, optional: true }
+choices:
+  - id: take_stock
+    label: Take a week to think before you do anything
+    outcome:
+      text: >-
+        You run in the mornings and read in the afternoons. By Friday you know
+        what you want, and it is another year.
+      effects:
+        - { type: stat, key: stress, delta: -2 }
+        - { type: stat, key: fitness, delta: 1 }
+  - id: call_agent
+    label: Call your agent that night
+    visibleIf: { fame: { agent: { gte: 1 } } }
+    outcome:
+      text: >-
+        Your agent has already made three calls. "The market's thin," they say,
+        "but it's not empty."
+      effects:
+        - { type: fame, action: image, delta: 1 }
+  - id: lean_on_partner
+    label: Tell {partner.name} what happened
+    visibleIf: { role: partner }
+    outcome:
+      text: >-
+        {partner.They} {partner:listens|listen} without trying to fix it. The
+        kitchen smells like coffee and the night is a little shorter than it
+        might have been.
+      effects:
+        - { type: relationship, role: partner, affection: 4 }
+        - { type: stat, key: stress, delta: -3 }

@@ -1,0 +1,11 @@
+id: worn_joints
+name: Worn joints
+noun: worn joints
+kind: chronic
+blurb: Every season you played is still in your knees and your back. Some mornings you can feel all of them.
+course: { untreated: 1, treated: -4 }
+effects:
+  fitness: { perYear: -1.5, limit: 25 }
+  happiness: { perYear: -1, limit: 35 }
+treatable: true
+costs: { treatment: 4000, yearlyTreated: 900 }

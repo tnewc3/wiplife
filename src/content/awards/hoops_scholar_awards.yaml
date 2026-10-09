@@ -1,0 +1,8 @@
+id: hoops_scholar_awards
+name: "the Scholastic Hoops Awards"
+category: "Player of the Year"
+path: basketball
+blurb: "Handed out in a school gym, to the player the whole conference talked about."
+minRung: 2
+critics: 0.4
+prestige: 0.5

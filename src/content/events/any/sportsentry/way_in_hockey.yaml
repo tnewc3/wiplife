@@ -1,0 +1,59 @@
+id: way_in_hockey
+title: A morning on the ice
+text: >-
+  {friend.name}'s parent has a spare set of skates and a six o'clock slot at the community rink. The ice is cold and loud. You fall three times in the first minute and, somehow, you want to go again.
+tone: light
+category: sportsentry
+rarity: common
+lifeStages: [child, teen]
+requires:
+  all:
+    - { age: { gte: 9, lte: 17 } }
+    - { fame: { active: false } }
+    - { sports: { seasons: { lt: 1 } } }
+weight:
+  base: 0.9
+  modifiers:
+    - { if: { discovery: { talent: found } }, x: 2 }
+    - { if: { stat: fitness, gt: 60 }, x: 1.6 }
+    - { if: { trait: ambition, gt: 60 }, x: 1.3 }
+cast:
+  friend: { kind: friend, presence: city }
+choices:
+  - id: join
+    label: Join a youth league
+    visibleIf: { age: { lte: 13 } }
+    outcome:
+      text: >-
+        The youth league starts at dawn, with cocoa in a thermos and a rink that smells of cold. Your skates are rented, your stick came from a friend and your coach thinks you can be taught.
+      effects:
+        - { type: fame, action: enter, path: hockey, route: youth_league }
+        - { type: stat, key: happiness, delta: 4 }
+        - { type: relationship, role: friend, affection: 3 }
+  - id: tryout
+    label: Try out for the school team
+    visibleIf: { age: { gte: 13 } }
+    check:
+      base: 50
+      stats: [{ key: fitness, weight: 0.3 }, { key: discipline, weight: 0.15 }, { key: luck, weight: 0.05 }]
+      success:
+        text: >-
+          The school team skates its tryout at seven in the morning. Forty names, one clipboard, a list on the rink door. You find yours on the third line down.
+        effects:
+          - { type: fame, action: enter, path: hockey, route: school_tryout }
+          - { type: stat, key: happiness, delta: 6 }
+      failure:
+        text: >-
+          The list has your name nowhere on it. The coach, a big presence with a gentle voice, says the team needs a few more strides from you, and says it twice.
+        effects:
+          - { type: stat, key: confidence, delta: -3 }
+          - { type: stat, key: happiness, delta: -2 }
+  - id: fun
+    label: Just play for the fun of it
+    outcome:
+      text: >-
+        A pond, a puck and a rule that the last to go home is a fool. You stay out a long time.
+      effects:
+        - { type: stat, key: happiness, delta: 3 }
+        - { type: stat, key: fitness, delta: 1 }
+        - { type: relationship, role: friend, affection: 2 }

@@ -1,0 +1,74 @@
+id: playoffs_opening_series
+title: The first night of the playoffs
+text: >-
+  The building is louder than it has been all season, and the other side has been waiting for this since the schedule came out. {team} meets {opponent} in {stage}, and the locker room is a place where nobody makes jokes.
+tone: serious
+category: sportsplayoffs
+rarity: common
+recurring: true
+lifeStages: [child, teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { sports: { active: true } }
+    - { sports: { run: true } }
+    - { sports: { round: { eq: 1 } } }
+weight: { base: 10 }
+followUpOnly: true
+pin: true
+choices:
+  - id: lead
+    label: Take the game on yourself
+    check:
+      base: 37
+      stats: [{ sports: rating, weight: 0.22 }, { sports: team, weight: 0.15 }, { key: confidence, weight: 0.1 }, { sports: form, weight: 0.1 }]
+      success:
+        text: >-
+          You set the pace from the first minute and nobody catches up. {team} takes {stage} and the other bench stops shouting by halftime.
+        effects:
+          - { type: sports, action: series, result: win }
+          - { type: fame, action: fans, delta: 4 }
+      failure:
+        text: >-
+          You press, and press, and the game gets away from you in the last quarter. {opponent} take {stage}, and the building empties in silence.
+        effects:
+          - { type: sports, action: series, result: lose }
+          - { type: stat, key: happiness, delta: -4 }
+  - id: trust
+    label: Trust the system you have built
+    check:
+      base: 37
+      stats: [{ sports: team, weight: 0.3 }, { sports: rating, weight: 0.1 }, { key: sociability, weight: 0.1 }]
+      success:
+        text: >-
+          Everyone does their job, a little better than usual. {team} gets through {stage} without a hero, and the locker room afterwards is the loudest it has been all year.
+        effects:
+          - { type: sports, action: series, result: win }
+          - { type: fame, action: image, delta: 2 }
+      failure:
+        text: >-
+          The system holds for a while and then it does not. {opponent} find the gap, and {stage} is over before anyone is ready.
+        effects:
+          - { type: sports, action: series, result: lose }
+          - { type: stat, key: happiness, delta: -3 }
+  - id: play_hurt
+    label: Play through the pain
+    visibleIf: { sports: { injured: true } }
+    check:
+      base: 40
+      stats: [{ sports: rating, weight: 0.2 }, { key: health, weight: 0.15 }, { key: fitness, weight: 0.15 }, { sports: team, weight: 0.2 }]
+      success:
+        text: >-
+          The injury is a bright line down your side and you ignore it for as long as anyone could. {team} wins {stage}, and you do not remember getting back to the bench.
+        effects:
+          - { type: sports, action: injury, what: pain }
+          - { type: sports, action: series, result: win }
+          - { type: flag, key: sports_played_hurt, value: true }
+          - { type: fame, action: mood, delta: 4 }
+      failure:
+        text: >-
+          You play like someone who is not hurt, and for a while it works. In the last minutes your body stops going along with the lie, and {opponent} take {stage}.
+        effects:
+          - { type: sports, action: injury, what: pain }
+          - { type: sports, action: series, result: lose }
+          - { type: flag, key: sports_played_hurt, value: true }
+          - { type: stat, key: health, delta: -3 }

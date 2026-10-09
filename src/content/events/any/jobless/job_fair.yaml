@@ -7,7 +7,10 @@ tone: neutral
 category: jobless
 rarity: common
 lifeStages: [youngAdult, adult, senior]
-requires: { career: { employed: false, retired: false, lostWithin: 3 } }
+requires:
+  all:
+    - { career: { employed: false, retired: false, lostWithin: 3 } }
+    - { fame: { active: false } }
 weight: { base: 6 }
 cooldownYears: 3
 # C1: reviewed build warnings kept on purpose (docs/consistency-review.md).

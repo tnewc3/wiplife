@@ -1,0 +1,61 @@
+id: locker_room_speak_up
+title: The thing nobody wants to say
+text: >-
+  The team has lost four in a row, and the locker room has stopped talking
+  about why. {mate.name} has been coasting for a month and everyone has seen
+  it. The captain is looking at the floor. Somebody has to say something, and
+  the silence has turned to you.
+tone: serious
+category: sports
+rarity: common
+recurring: true
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 14 } }
+    - { sports: { active: true } }
+    - { sports: { level: [school, college, pro] } }
+weight: { base: 10 }
+cooldownYears: 3
+followUpOnly: true
+cast:
+  mate: { kind: acquaintance, presence: city, createIfMissing: true }
+choices:
+  - id: speak
+    label: Say it, plainly and to the room
+    check:
+      base: 45
+      stats: [{ key: confidence, weight: 0.25 }, { key: sociability, weight: 0.15 }, { sports: rating, weight: 0.1 }]
+      success:
+        text: >-
+          It is quiet for a moment and then it is not. {mate.name} bristles and
+          then nods, and the next practice is the best one in weeks.
+        effects:
+          - { type: sports, action: form, delta: 2 }
+          - { type: flag, key: sports_spoke_up, value: true }
+          - { type: relationship, role: mate, trust: 4 }
+      failure:
+        text: >-
+          It comes out harder than you meant. {mate.name} takes it as an attack,
+          and the locker room splits in two for a month.
+        effects:
+          - { type: sports, action: form, delta: -2 }
+          - { type: relationship, role: mate, affection: -8 }
+  - id: one_on_one
+    label: Find {mate.name} alone after practice
+    outcome:
+      text: >-
+        You say it in the parking lot, with no audience. {mate.They}
+        {mate:listens|listen}, says nothing, and plays differently on Friday.
+      effects:
+        - { type: relationship, role: mate, trust: 3 }
+        - { type: sports, action: form, delta: 1 }
+  - id: stay_quiet
+    label: Stay quiet and let the captain handle it
+    outcome:
+      text: >-
+        The captain says something about "playing for each other" and nothing
+        changes. You hold your tongue, and wonder about it on the bus home.
+      effects:
+        - { type: sports, action: form, delta: -1 }
+        - { type: stat, key: stress, delta: 2 }

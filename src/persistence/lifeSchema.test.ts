@@ -1115,3 +1115,64 @@ describe('fame in arts and media (E6b)', () => {
     expect(loadedLifeSchema(content).safeParse(unsigned).success).toBe(false);
   });
 });
+
+describe('sports (E6c)', () => {
+  const sportsLife = () =>
+    produce(lifeAtAge('e6c-save', 24), (d) => {
+      enterPath(d as LifeState, 'hockey', 'open_tryout', content);
+      const p = d.fame.paths.hockey!;
+      p.rung = 5;
+      p.peak = 6;
+      p.fame = 51.5;
+      d.sports.pro = true;
+      d.sports.position = 'centre';
+      d.sports.focus = 'conditioning';
+      d.sports.form = 2;
+      d.sports.pain = true;
+      d.sports.team = { id: 'chicago_frostbite', name: 'Chicago Frostbite', city: 'chicago', level: 'pro', quality: 63 };
+      d.sports.contract = { teamId: 'chicago_frostbite', since: d.currentYear - 1, until: d.currentYear + 2, salary: 910_000, kind: 'standard', option: 'team' };
+      d.sports.seasons.push({ year: d.currentYear - 1, sport: 'hockey', level: 'pro', team: 'Chicago Frostbite', position: 'centre', rating: 71, played: 90, wins: 50, draws: 0, losses: 32, rank: 2, of: 12, result: 'final', stats: { goals: 24, assists: 31 }, salary: 910_000, allStar: true, injury: 'muscle_tear' });
+      d.sports.run = { year: d.currentYear, won: 1, alive: true, strength: 64, rival: 58 };
+      d.sports.draft = { year: d.currentYear - 3, pick: 0, round: 0, teamId: null };
+      d.sports.totals = { seasons: 6, proSeasons: 3, playoffs: 3, finals: 1, titles: 0, allStars: 1, injuries: 2, serious: 1, playedThrough: 1, trades: 1, releases: 0, suspensions: 0, earned: 2_100_000, bestRating: 74 };
+    });
+
+  it('round trips a life with a team, a deal, a season, a playoff run and a draft', async () => {
+    const life = sportsLife();
+    expect(life.sports.pro).toBe(true);
+    expect(await roundTrip(life)).toEqual(life);
+  });
+
+  it('upgrades a schema version 19 life: no sport, no team, no deal, and nobody is given a career', async () => {
+    const life = lifeAtAge('e6c-v19', 30);
+    const v19 = JSON.parse(JSON.stringify(life)) as Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any -- stripping fields from plain JSON to build an old save
+    delete v19.sports;
+    const db = freshDb();
+    await db.lives.put({ id: 'active', envelope: { ...makeEnvelope(v19, content.contentVersion), schemaVersion: 19 } });
+    const result = await readSave(db, loadedLifeSchema(content));
+    expect(result.status).toBe('ok');
+    if (result.status !== 'ok') return;
+    expect(result.envelope.schemaVersion).toBe(CURRENT_SCHEMA_VERSION);
+    expect(result.envelope.data).toEqual(life);
+    expect(result.envelope.data.sports.sport).toBeNull();
+    expect(result.envelope.data.fame.active).toBe(false);
+  });
+
+  it('refuses a save with something wrong in the sports record', () => {
+    const life = sportsLife();
+    const bad = JSON.parse(JSON.stringify(life)) as LifeState;
+    bad.sports.focus = 'sleep' as never;
+    expect(lifeStateSchema.safeParse(bad).success).toBe(false);
+    const run = JSON.parse(JSON.stringify(life)) as LifeState;
+    run.sports.run!.won = 4;
+    expect(lifeStateSchema.safeParse(run).success).toBe(false);
+    // And ones that parse but break a rule: a team nobody has heard of, a deal with a team of another sport, a teenager in the pros.
+    const team = produce(life, (d) => void (d.sports.team = { ...d.sports.team!, id: 'nowhere_nobodies' }));
+    expect(loadedLifeSchema(content).safeParse(team).success).toBe(false);
+    const young = produce(lifeAtAge('e6c-young', 16), (d) => {
+      enterPath(d as LifeState, 'hockey', 'school_tryout', content);
+      d.sports.pro = true;
+    });
+    expect(loadedLifeSchema(content).safeParse(young).success).toBe(false);
+  });
+});

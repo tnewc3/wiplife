@@ -46,6 +46,8 @@ function changesMoney(outcome: Outcome | undefined): boolean {
       // E6b: money from the work, a deal's advance, and the price of walking away from one.
       e.type === 'famePay' ||
       (e.type === 'fame' && (e.action === 'contract' || (e.action === 'end_contract' && e.how === 'broken'))) ||
+      // E6c: a signing bonus, a new deal's bonus and an injury treated at your own cost.
+      (e.type === 'sports' && (e.action === 'sign' || e.action === 'extend' || (e.action === 'injury' && (e.what === 'rest' || e.what === 'surgery')))) ||
       e.type === 'repay' ||
       e.type === 'rentMonths' ||
       e.type === 'cost' ||

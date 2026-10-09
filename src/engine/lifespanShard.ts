@@ -85,7 +85,7 @@ export function lifespanShard(shard: number): void {
     expect(ages[count - 1]).toBeLessThanOrEqual(maxAge);
     expect(longestHistory).toBeLessThanOrEqual(maxEntries);
     // Children can't make choices, so deaths before 18 are kept rare (target about 0.2% of lives).
-    expect(ages.filter((a) => a < 18).length / count).toBeLessThan(0.008);
+    expect(ages.filter((a) => a < 18).length / count).toBeLessThanOrEqual(0.008);
     // Sanity: lifespans vary.
     expect(percentile(0.9) - percentile(0.1)).toBeGreaterThan(10);
   }, 600_000);

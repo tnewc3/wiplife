@@ -1,0 +1,56 @@
+id: injury_career_over
+title: The doctor said the word
+text: >-
+  The doctor puts the scans on the light and does not speak for a moment. What
+  you did to your body cannot be fixed to the standard the game asks. The doctor says
+  "I'm sorry" and then, a long time later, "what do you want to do?"
+tone: dark
+category: sportspast
+rarity: uncommon
+recurring: true
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { sports: { retired: true } }
+    - { flag: sports_career_ended_by_injury }
+weight: { base: 10 }
+followUpOnly: true
+choices:
+  - id: coach
+    label: Stay in the game as a coach
+    outcome:
+      text: >-
+        The offer is sooner than you expected and smaller than you deserve. You
+        take it, because a locker room is the only place you know how to be.
+      effects:
+        - { type: sports, action: retire, route: coaching }
+        - { type: stat, key: happiness, delta: 2 }
+  - id: broadcast
+    label: Take a seat in the broadcast booth
+    visibleIf: { fame: { peak: { gte: 4 } } }
+    outcome:
+      text: >-
+        They put a headset on you and a script in front of you. You are a
+        little stiff on the first night, and by the third you are very good at
+        saying what everyone is thinking.
+      effects:
+        - { type: sports, action: retire, route: broadcast }
+        - { type: stat, key: happiness, delta: 2 }
+  - id: normal
+    label: Walk away and find another life
+    outcome:
+      text: >-
+        You close the door to the training room for the last time. Outside,
+        the world is brighter and more ordinary than you remembered.
+      effects:
+        - { type: sports, action: retire, route: normal }
+        - { type: stat, key: stress, delta: -2 }
+  - id: grieve
+    label: Do nothing for a while
+    outcome:
+      text: >-
+        Weeks pass in the same chair. People are kind, and you do not want kind.
+        Eventually something small, a call, a kid in the street, nudges you out.
+      effects:
+        - { type: stat, key: happiness, delta: -5 }
+        - { type: stat, key: stress, delta: 4 }

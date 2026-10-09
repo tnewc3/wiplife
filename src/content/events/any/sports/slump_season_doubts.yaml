@@ -1,0 +1,49 @@
+id: slump_season_doubts
+title: The season it all went flat
+text: >-
+  Nothing is wrong, exactly. The legs are there, and the eye, and the plan. It
+  just does not come off, night after night, and the commentators have started
+  to use the word "form" with a little frown. At night, you do not sleep.
+tone: serious
+category: sports
+rarity: common
+recurring: true
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 13 } }
+    - { sports: { active: true } }
+    - { fame: { released: true } }
+weight: { base: 10 }
+cooldownYears: 3
+followUpOnly: true
+choices:
+  - id: work
+    label: Go back to basics, at dawn, on your own
+    outcome:
+      text: >-
+        You do the plainest drills until your hands remember. Nothing changes
+        for two weeks, and then, without announcement, something does.
+      effects:
+        - { type: fame, action: craft, delta: 3 }
+        - { type: sports, action: form, delta: 2 }
+        - { type: stat, key: stress, delta: 2 }
+  - id: talk
+    label: Talk to someone who can hear it
+    outcome:
+      text: >-
+        It is a relief to say it out loud: you are scared that this is the
+        player you are now. It is easier to carry when someone else is holding
+        a corner.
+      effects:
+        - { type: stat, key: stress, delta: -4 }
+        - { type: stat, key: happiness, delta: 2 }
+  - id: rest
+    label: Take a few days off and not think about it
+    outcome:
+      text: >-
+        You stay away from the ball for a week. When you pick it up again, it
+        feels lighter than it did.
+      effects:
+        - { type: stat, key: stress, delta: -3 }
+        - { type: sports, action: form, delta: 1 }

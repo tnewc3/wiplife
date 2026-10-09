@@ -1,0 +1,46 @@
+id: rookie_first_game
+title: The first game of the rest of your life
+text: >-
+  The tunnel is longer than it looked on television. Your name is on a
+  jersey that is going to be washed by someone else, and your cleats are the
+  only thing in the locker room that still smells new. A veteran you have
+  admired for years gives you a single nod, and it is enough to loosen your knees.
+tone: light
+category: sports
+rarity: common
+lifeStages: [teen, youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { sports: { active: true } }
+    - { sports: { level: [pro] } }
+    - { sports: { seasons: { lte: 6 } } }
+weight: { base: 10 }
+once: true
+followUpOnly: true
+choices:
+  - id: soak_it_in
+    label: Look up at the crowd for one second
+    outcome:
+      text: >-
+        There it is: all of it, as bright as a thing can be. You look at it for
+        exactly one second, and then you go and do your job.
+      effects:
+        - { type: stat, key: happiness, delta: 7 }
+  - id: ask_veteran
+    label: Ask the veteran what they would tell a younger self
+    outcome:
+      text: >-
+        A long moment passes. "Breathe," the veteran says. "And do not read the
+        comments." You spend the next three years learning how right that is.
+      effects:
+        - { type: fame, action: craft, delta: 2 }
+        - { type: sports, action: form, delta: 1 }
+  - id: tell_family
+    label: Send your family a photo from the tunnel
+    outcome:
+      text: >-
+        The reply from home is eleven messages in a row, none of which are about
+        the game and all of which are about you.
+      effects:
+        - { type: stat, key: happiness, delta: 5 }

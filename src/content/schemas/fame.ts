@@ -14,6 +14,7 @@
 import { z } from 'zod';
 import { curveSchema } from './balance';
 import { baseDefSchema, idSchema } from './common';
+import { sportSchema } from './sports';
 
 const probability = z.number().min(0).max(1);
 const positive = z.number().positive().max(1_000_000_000);
@@ -61,6 +62,8 @@ const rungSchema = z.strictObject({
   quality: z.int().min(0).max(100),
   /** A typical year's earnings here, in dollars at a city pay level of 1. */
   income: z.number().min(0).max(1_000_000_000),
+  /** E6c: the youngest age that can climb into this rung (0 for none). */
+  minAge: z.int().min(0).max(40).optional(),
 });
 
 const kindSchema = z.strictObject({
@@ -85,6 +88,9 @@ const routeSchema = z.strictObject({
   minAge: z.int().min(5).max(90),
   /** The craft you start with. */
   craft: z.int().min(0).max(60),
+  /** E6c: the rung you start on (1 when left out) and the oldest age this way in is open to. */
+  rung: z.int().min(1).max(8).optional(),
+  maxAge: z.int().min(5).max(90).optional(),
 });
 
 /** A path (src/content/fame): music, acting, social media or writing and art. */
@@ -103,7 +109,7 @@ export const famePathSchema = baseDefSchema.extend({
   minAge: z.int().min(5).max(90),
   routes: z.array(routeSchema).min(1),
   rungs: z.array(rungSchema).min(4).max(8),
-  kinds: z.array(kindSchema).min(2),
+  kinds: z.array(kindSchema).min(1),
   /** The words for a tour and a press run here ("Tour", "Book tour"). */
   tour: z.strictObject({ label: z.string().trim().min(2).max(30), noun: z.string().trim().min(2).max(30), minRung: z.int().min(1).max(8) }),
   press: z.strictObject({ label: z.string().trim().min(2).max(30), minRung: z.int().min(1).max(8) }),
@@ -111,6 +117,8 @@ export const famePathSchema = baseDefSchema.extend({
   retire: z.strictObject({ from: z.int().min(30).max(100), chance: curveSchema }),
   /** What a retired star still earns from the past, as a share of the top rung's usual year. */
   royalties: probability,
+  /** E6c: a sport. It is a path like any other (rungs, fame, fans, agents, awards) with a season in place of projects. */
+  sport: sportSchema.optional(),
 });
 export type FamePathDef = z.infer<typeof famePathSchema>;
 export type FameRungDef = z.infer<typeof rungSchema>;

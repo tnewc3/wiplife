@@ -655,6 +655,78 @@ const fame = z.strictObject({
   }),
 });
 
+// E6c: sports.
+const sportsLevel = z.enum(['youth', 'school', 'college', 'pro']);
+const sports = z.strictObject({
+  sport: id.nullable(),
+  position: id.nullable(),
+  pro: z.boolean(),
+  team: z.strictObject({ id: id.nullable(), name: z.string(), city: id, level: sportsLevel, quality: score }).nullable(),
+  contract: z
+    .strictObject({
+      teamId: id,
+      since: int,
+      until: int,
+      salary: dollars.min(0),
+      kind: z.enum(['minimum', 'rookie', 'standard', 'star']),
+      option: z.enum(['none', 'team', 'player']),
+    })
+    .nullable(),
+  unsigned: int.min(0),
+  focus: z.enum(['skills', 'conditioning', 'film']),
+  form: z.number().min(-10).max(10),
+  pain: z.boolean(),
+  rest: z.boolean(),
+  ask: z.enum(['trade', 'contract']).nullable(),
+  playOut: z.boolean(),
+  seasons: z
+    .array(
+      z.strictObject({
+        year: int,
+        sport: id,
+        level: sportsLevel,
+        team: z.string(),
+        position: id,
+        rating: score,
+        played: score,
+        wins: int.min(0),
+        draws: int.min(0),
+        losses: int.min(0),
+        rank: int.min(1),
+        of: int.min(1),
+        result: z.enum(['missed', 'out', 'final', 'champion']),
+        stats: z.record(z.string(), z.number()),
+        salary: dollars.min(0),
+        allStar: z.boolean(),
+        injury: id.exactOptional(),
+      }),
+    )
+    .max(12),
+  run: z.strictObject({ year: int, won: int.min(0).max(3), alive: z.boolean(), strength: z.number(), rival: z.number() }).nullable(),
+  draft: z.strictObject({ year: int, pick: int.min(0), round: int.min(0), teamId: id.nullable() }).nullable(),
+  suspended: int.min(0),
+  traded: int.min(0),
+  released: int.min(0),
+  agedOut: int.min(0),
+  retired: z.strictObject({ year: int, route: z.enum(['coaching', 'broadcast', 'normal']).nullable() }).exactOptional(),
+  totals: z.strictObject({
+    seasons: int.min(0),
+    proSeasons: int.min(0),
+    playoffs: int.min(0),
+    finals: int.min(0),
+    titles: int.min(0),
+    allStars: int.min(0),
+    injuries: int.min(0),
+    serious: int.min(0),
+    playedThrough: int.min(0),
+    trades: int.min(0),
+    releases: int.min(0),
+    suspensions: int.min(0),
+    earned: dollars.min(0),
+    bestRating: score,
+  }),
+});
+
 const settlement = z.strictObject({
   year: int,
   source: z.enum(['will', 'default']),
@@ -795,6 +867,7 @@ export const lifeStateSchema: z.ZodType<LifeState> = z.strictObject({
   teen,
   crime,
   fame,
+  sports,
 });
 
 /**

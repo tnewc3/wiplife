@@ -1,0 +1,66 @@
+id: scandal_night_out
+title: The party that went too late
+text: >-
+  It is two in the morning at a party you should have left at midnight. Your
+  keys are in your pocket, and so is a phone with a dozen unanswered texts
+  from people who care about you. A teammate is asleep on a sofa. There is a
+  taxi stand two blocks away.
+tone: serious
+category: sports
+rarity: uncommon
+recurring: true
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 21 } }
+    - { sports: { active: true } }
+    - { sports: { level: [pro] } }
+    - { fame: { fame: { gte: 25 } } }
+weight:
+  base: 0.9
+  modifiers:
+    - { if: { trait: riskTaking, gt: 65 }, x: 1.8 }
+    - { if: { trait: discipline, gt: 70 }, x: 0.4 }
+cooldownYears: 4
+choices:
+  - id: ride
+    label: Get a ride home
+    outcome:
+      text: >-
+        The cab is cold and smells of pine. It costs less than a bad night's
+        worth of regret, and you sleep the sleep of the sensible.
+      effects:
+        - { type: famePay, cost: petty }
+        - { type: stat, key: stress, delta: -1 }
+  - id: sofa
+    label: Take the other sofa and sort it out in the morning
+    outcome:
+      text: >-
+        You wake up at ten with a stiff neck and no consequences, which is
+        more than you deserve.
+      effects:
+        - { type: stat, key: happiness, delta: 1 }
+  - id: drive
+    label: Drive yourself home
+    check:
+      base: 35
+      stats: [{ key: luck, weight: 0.15 }, { key: discipline, weight: 0.1 }]
+      success:
+        text: >-
+          You make it home with your hands at ten and two and your heart in
+          your throat. In the morning, you take your keys off the hook and
+          give them to a friend for the week.
+        effects:
+          - { type: stat, key: stress, delta: 4 }
+          - { type: stat, key: confidence, delta: -1 }
+      failure:
+        text: >-
+          The lights come up behind you at the second intersection. By dawn,
+          there is a report, a mugshot and a call from your agent that begins
+          with the word "listen."
+        effects:
+          - { type: legal, offenseId: dui, outcome: sentence }
+          - { type: sports, action: suspend }
+          - { type: fame, action: image, delta: -10 }
+          - { type: fame, action: mood, delta: -6 }
+          - { type: history, text: "You were arrested for driving under the influence, and the league sat you down for a season.", importance: 3 }

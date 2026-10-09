@@ -1,0 +1,16 @@
+id: coach
+name: "Coaching"
+category: professional
+blurb: "A whistle, a clipboard and a team of people who will remember what you told them."
+requires: {"any": [{"fame": {"peak": {"gte": 3}}}, {"education": {"credential": ["bachelor"]}}]}
+levels:
+  - { title: "assistant coach", salary: 38000 }
+  - { title: "position coach", salary: 52000 }
+  - { title: "head coach", salary: 82000 }
+  - { title: "director of coaching", salary: 120000 }
+performance:
+  - { key: discipline, weight: 0.25 }
+  - { key: smarts, weight: 0.2 }
+  - { key: sociability, weight: 0.2 }
+  - { key: kindness, weight: 0.1 }
+employers: ["Riverside Youth Athletics", "Oakmont Academy", "Lincoln Park Sports Council", "Bayview Training Centre"]

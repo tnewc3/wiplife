@@ -1,0 +1,80 @@
+id: playoffs_final_game_seven
+title: One game left
+text: >-
+  It has come down to a single game. Everyone you have ever met has texted you, and you have answered none of them. {team} and {opponent} meet in {stage} for {trophy}, and the building is a held breath.
+tone: serious
+category: sportsplayoffs
+rarity: rare
+recurring: true
+lifeStages: [child, teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { sports: { active: true } }
+    - { sports: { run: true } }
+    - { sports: { round: { eq: 3 } } }
+weight: { base: 10 }
+followUpOnly: true
+pin: true
+choices:
+  - id: lead
+    label: Want it more than anyone in the building
+    check:
+      base: 37
+      stats: [{ sports: rating, weight: 0.22 }, { sports: team, weight: 0.15 }, { key: confidence, weight: 0.1 }, { sports: form, weight: 0.1 }]
+      success:
+        text: >-
+          It is not elegant and it is not close, and then it is done. {team} wins {trophy}, and you are at the bottom of a pile of people who are crying and laughing in equal parts.
+        effects:
+          - { type: sports, action: series, result: win }
+          - { type: fame, action: fans, delta: 4 }
+          - { type: schedule, eventId: title_parade, inYears: [1, 1] }
+      failure:
+        text: >-
+          You want it more than anyone in the building, and it does not matter. {opponent} win {trophy}, and you stay on the floor until somebody helps you up.
+        effects:
+          - { type: sports, action: series, result: lose }
+          - { type: stat, key: happiness, delta: -4 }
+          - { type: schedule, eventId: title_lost_heartbreak, inYears: [1, 1] }
+  - id: trust
+    label: Settle your teammates and do your job
+    check:
+      base: 37
+      stats: [{ sports: team, weight: 0.3 }, { sports: rating, weight: 0.1 }, { key: sociability, weight: 0.1 }]
+      success:
+        text: >-
+          You talk the nerves out of the room, one person at a time. {team} wins {trophy}, and you are quiet for a long time in the middle of the noise.
+        effects:
+          - { type: sports, action: series, result: win }
+          - { type: fame, action: image, delta: 2 }
+          - { type: schedule, eventId: title_parade, inYears: [1, 1] }
+      failure:
+        text: >-
+          You do your job and it is good, and it is not enough. {opponent} win {trophy}, and the handshake line is the longest walk you have taken.
+        effects:
+          - { type: sports, action: series, result: lose }
+          - { type: stat, key: happiness, delta: -3 }
+          - { type: schedule, eventId: title_lost_heartbreak, inYears: [1, 1] }
+  - id: play_hurt
+    label: Play through the pain
+    visibleIf: { sports: { injured: true } }
+    check:
+      base: 40
+      stats: [{ sports: rating, weight: 0.2 }, { key: health, weight: 0.15 }, { key: fitness, weight: 0.15 }, { sports: team, weight: 0.2 }]
+      success:
+        text: >-
+          You cannot feel the injury and you cannot feel much else. {team} wins {trophy}, and you find out about the damage at four in the morning.
+        effects:
+          - { type: sports, action: injury, what: pain }
+          - { type: sports, action: series, result: win }
+          - { type: flag, key: sports_played_hurt, value: true }
+          - { type: fame, action: mood, delta: 4 }
+          - { type: schedule, eventId: title_parade, inYears: [1, 1] }
+      failure:
+        text: >-
+          You give them everything the injury will let you, and it is less than you needed. {opponent} win {trophy}, and the doctor's face in the morning says what the scoreboard did.
+        effects:
+          - { type: sports, action: injury, what: pain }
+          - { type: sports, action: series, result: lose }
+          - { type: flag, key: sports_played_hurt, value: true }
+          - { type: stat, key: health, delta: -3 }
+          - { type: schedule, eventId: title_lost_heartbreak, inYears: [1, 1] }

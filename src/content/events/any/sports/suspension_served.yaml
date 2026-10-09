@@ -1,0 +1,47 @@
+id: suspension_served
+title: A season on the sidelines
+text: >-
+  The ban stands. You watch the whole season from a seat in the stands, in a
+  jacket that does not look like you, while someone else wears your number.
+  Every game, the crowd looks up at you for a second and then looks away.
+tone: serious
+category: sports
+rarity: common
+recurring: true
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { sports: { active: true } }
+    - { sports: { suspended: true } }
+weight: { base: 10 }
+followUpOnly: true
+choices:
+  - id: own_it
+    label: Say sorry in public and mean it
+    outcome:
+      text: >-
+        The statement is one paragraph, and you write every word yourself. Some
+        people forgive you, and some write back to say they won't, and both
+        groups are right.
+      effects:
+        - { type: fame, action: image, delta: 4 }
+        - { type: fame, action: mood, delta: 3 }
+  - id: train_alone
+    label: Train alone and be ready for the day it ends
+    outcome:
+      text: >-
+        You run the empty stands at night when the groundskeeper has gone home.
+        By the end of the ban you are in the best shape of your life.
+      effects:
+        - { type: stat, key: fitness, delta: 3 }
+        - { type: sports, action: form, delta: 3 }
+  - id: disappear
+    label: Leave town and say nothing
+    outcome:
+      text: >-
+        You go somewhere no one knows your name. It's restful, for a while,
+        and then it is just quiet.
+      effects:
+        - { type: stat, key: stress, delta: -2 }
+        - { type: fame, action: mood, delta: -4 }

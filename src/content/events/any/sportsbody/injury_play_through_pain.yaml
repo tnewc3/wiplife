@@ -1,0 +1,53 @@
+id: injury_play_through_pain
+title: Something gave
+text: >-
+  It happens in a second: a bad landing, a twist, a sound you feel in your
+  teeth. The trainer's hands on {injury} are careful and unhurried, and the
+  look on the trainer's face is the one used when someone does not want to say.
+  Tomorrow there is a game, and everyone is watching the door.
+tone: serious
+category: sportsbody
+rarity: common
+recurring: true
+lifeStages: [child, teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { sports: { active: true } }
+    - { sports: { injured: true } }
+weight: { base: 10 }
+followUpOnly: true
+choices:
+  - id: rest
+    label: Sit out and let it heal
+    outcome:
+      text: >-
+        You watch the next games from the bench with a bag of ice and a long
+        list of things that no one wants to say about missing them. The injury
+        heals properly, which is the entire point.
+      effects:
+        - { type: sports, action: injury, what: rest }
+        - { type: sports, action: form, delta: -1 }
+        - { type: stat, key: stress, delta: 2 }
+  - id: surgery_team
+    label: Have it fixed properly by the team's surgeon
+    visibleIf: { sports: { level: [pro] } }
+    outcome:
+      text: >-
+        The team's surgeon is quick and blunt. The recovery is long, boring and
+        well run, and your body, in time, becomes yours again.
+      effects:
+        - { type: sports, action: injury, what: surgery }
+        - { type: sports, action: form, delta: -2 }
+        - { type: stat, key: stress, delta: 3 }
+  - id: pain
+    label: Tape it up and play
+    outcome:
+      text: >-
+        You play, and play well, and the crowd loves you for it. The pain is
+        worse in the morning, and you tell no one but the pillow.
+      effects:
+        - { type: sports, action: injury, what: pain }
+        - { type: sports, action: form, delta: 2 }
+        - { type: flag, key: sports_played_hurt, value: true }
+        - { type: fame, action: mood, delta: 3 }
+        - { type: stat, key: health, delta: -2 }

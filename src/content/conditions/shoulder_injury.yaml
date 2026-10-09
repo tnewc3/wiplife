@@ -1,0 +1,11 @@
+id: shoulder_injury
+name: Shoulder injury
+noun: a shoulder injury
+kind: injury
+blurb: It aches on the way to bed and screams on the way to the ball.
+course: { untreated: -9, treated: -30 }
+effects:
+  fitness: { perYear: -3, limit: 25 }
+  happiness: { perYear: -1.5, limit: 30 }
+treatable: true
+costs: { treatment: 6500 }

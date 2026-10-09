@@ -1,0 +1,44 @@
+id: title_parade
+title: The parade
+text: >-
+  The city closes a street for you. {team} rides down it on the back of
+  trucks, in front of more people than you have ever seen in one place. It is
+  {since} that you won {trophy}, and someone in the crowd is holding a sign
+  with your name on it, spelled right.
+tone: light
+category: sports
+rarity: rare
+lifeStages: [child, teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { sports: { active: true } }
+    - { sports: { titles: { gte: 1 } } }
+weight: { base: 10 }
+followUpOnly: true
+choices:
+  - id: wave
+    label: Wave, and then wave some more
+    outcome:
+      text: >-
+        Your arm gets tired before the route does. A kid on a parent's shoulders
+        screams your name, and you decide you will remember that exact kid.
+      effects:
+        - { type: fame, action: fans, delta: 6 }
+        - { type: stat, key: happiness, delta: 8 }
+  - id: bring_family
+    label: Have your family ride with you
+    outcome:
+      text: >-
+        Your family does not know where to put its hands. By the end, they have
+        stopped trying, and you have a photograph that will outlast the trophy.
+      effects:
+        - { type: fame, action: image, delta: 3 }
+        - { type: stat, key: happiness, delta: 6 }
+  - id: slip_away
+    label: Slip away early and call it a night
+    outcome:
+      text: >-
+        You miss the speeches and gain a quiet evening. The trophy is on the
+        counter in your kitchen, next to the mail.
+      effects:
+        - { type: stat, key: stress, delta: -4 }

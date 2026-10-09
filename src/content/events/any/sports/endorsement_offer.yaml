@@ -1,0 +1,57 @@
+id: endorsement_offer
+title: A brand wants your name
+text: >-
+  A maker of shoes, drinks and the kind of gear you actually use wants you in
+  its next campaign. The shoot is two days, the contract is six pages and
+  your agent's grin is visible from the other side of the room. You can see
+  your own face on a bus.
+tone: light
+category: sports
+rarity: common
+recurring: true
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { sports: { active: true } }
+    - { fame: { contract: false } }
+    - { fame: { fame: { gte: 25 } } }
+weight: { base: 10 }
+followUpOnly: true
+choices:
+  - id: big
+    label: Sign the big deal
+    outcome:
+      text: >-
+        The advance lands within the week. The photographs are polished and
+        make you look like someone more certain than you are, which is the
+        entire idea.
+      effects:
+        - { type: fame, action: contract, terms: tough }
+        - { type: fame, action: image, delta: -1 }
+  - id: fair
+    label: Sign a fair deal with a brand you actually use
+    outcome:
+      text: >-
+        The shoot is two days of standing in the same place in different
+        shirts. The pay is decent and the box is one you recognise.
+      effects:
+        - { type: fame, action: contract, terms: standard }
+        - { type: fame, action: image, delta: 2 }
+  - id: small
+    label: Sign a small, friendly deal that leaves you free
+    outcome:
+      text: >-
+        The brand is small and delighted. There is no exclusivity clause, and a
+        lot of free socks.
+      effects:
+        - { type: fame, action: contract, terms: generous }
+        - { type: fame, action: image, delta: 3 }
+  - id: no
+    label: Say no to all of it
+    outcome:
+      text: >-
+        Your agent exhales through the nose. You tell yourself you will be glad
+        you have kept your face to yourself.
+      effects:
+        - { type: fame, action: image, delta: 1 }

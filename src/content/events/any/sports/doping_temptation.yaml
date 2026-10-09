@@ -1,0 +1,79 @@
+id: doping_temptation
+title: The shortcut
+text: >-
+  {mate.name} slips a small envelope across the bench in the locker room. It is
+  not hidden, exactly, and it is not offered. "Everyone who has got where
+  you want to be uses something," {mate.they} {mate:says|say}. "It's not even
+  a secret, it's just not a conversation." Your numbers have been flat for a
+  year.
+tone: serious
+category: sports
+rarity: uncommon
+recurring: true
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { sports: { active: true } }
+    - { sports: { level: [pro] } }
+    - { sports: { rating: { lte: 62 } } }
+weight:
+  base: 0.8
+  modifiers:
+    - { if: { trait: ambition, gt: 70 }, x: 1.6 }
+    - { if: { trait: riskTaking, gt: 65 }, x: 1.6 }
+    - { if: { trait: discipline, gt: 70 }, x: 0.5 }
+cooldownYears: 5
+cast:
+  mate: { kind: acquaintance, presence: city, createIfMissing: true }
+choices:
+  - id: take_it
+    label: Take it, just this once
+    check:
+      base: 45
+      stats: [{ key: luck, weight: 0.15 }, { key: smarts, weight: 0.1 }]
+      success:
+        text: >-
+          Nothing happens in the tests, and everything happens on the field.
+          You hit numbers you had only dreamed about, and sleep worse every night
+          you do.
+        effects:
+          - { type: sports, action: rating, delta: 6 }
+          - { type: flag, key: sports_doped, value: true }
+          - { type: stat, key: health, delta: -3 }
+          - { type: stat, key: stress, delta: 5 }
+          - { type: relationship, role: mate, trust: 6 }
+      failure:
+        text: >-
+          The test comes back in the morning, in an email that is two
+          sentences long. The league suspends you for a season, the papers use
+          your face and your name, and {mate.name} says nothing at all.
+        effects:
+          - { type: sports, action: suspend }
+          - { type: flag, key: sports_doped, value: true }
+          - { type: fame, action: image, delta: -14 }
+          - { type: fame, action: mood, delta: -10 }
+          - { type: famePay, cost: big }
+          - { type: relationship, role: mate, trust: -10 }
+          - { type: history, text: "You tested positive and were suspended for a season. Everything you had done came with an asterisk.", importance: 3 }
+  - id: refuse
+    label: Slide it back across the bench
+    outcome:
+      text: >-
+        "Suit yourself," {mate.they} {mate:says|say}, and does not mention it
+        again. It is lonely for about a week, and then it is just the way you
+        are.
+      effects:
+        - { type: stat, key: confidence, delta: 2 }
+        - { type: fame, action: craft, delta: 1 }
+  - id: report
+    label: Tell the team doctor about it, and who offered
+    outcome:
+      text: >-
+        The doctor writes it down without expression. {mate.name} is gone from
+        the roster within the month, and some of your teammates avoid you for
+        a lot longer than that.
+      effects:
+        - { type: relationship, role: mate, affection: -20 }
+        - { type: fame, action: image, delta: 3 }
+        - { type: stat, key: stress, delta: 3 }

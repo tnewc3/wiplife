@@ -1,0 +1,95 @@
+# Lines the sports systems write (E6c). The player is "you". Everything named
+# here is made up. History values: {sport}, {team}, {league}, {pick}, {draftRound}, {position}.
+history:
+  drafted:
+    importance: 3
+    variants:
+      - "You were taken {pick} in the draft by {team}. Your name was read out on a stage, and you did not hear the next three."
+      - "{team} picked you in the {draftRound} round. The call came before the announcement, and the announcement still made you cry."
+  undrafted:
+    importance: 2
+    variants:
+      - "The draft ended without your name. You sat with your phone for an hour, waiting for it to ring."
+      - "Nobody called your name. A few teams called afterwards, quieter, and that was where it started."
+  signed:
+    importance: 2
+    variants:
+      - "You signed with {team}."
+      - "{team} gave you a deal and a locker, and you took both."
+  traded:
+    importance: 2
+    variants:
+      - "You were traded to {team}, and found out from a message on your phone."
+      - "{team} traded for you. You packed the apartment in two days."
+  released:
+    importance: 3
+    variants:
+      - "{team} let you go. The call was short, and the box for your locker was already packed."
+      - "You were cut by {team}, and drove home with the radio off."
+  title:
+    importance: 3
+    variants:
+      - "You won {trophy} with {team}. You will remember where you were standing for the rest of your life."
+      - "{team} won {trophy}, and you were part of it. Somebody put a trophy in your hands and then took a photograph you still have."
+  allStar:
+    importance: 2
+    variants:
+      - "You were named an all-star for the first time."
+      - "They put your name on the all-star list. Your phone did not stop for a day."
+  retired:
+    importance: 3
+    variants:
+      - "You retired from {sport}. The game went on without you the next day, the way it does."
+      - "You hung it up. {sport} had been the shape of every year, and now it was not."
+  aged:
+    importance: 2
+    variants:
+      - "You did not make the next team, and that was the end of {sport} as a thing you did every week."
+      - "The next level did not have a place for you. You turned in your kit and went home."
+
+# Names for a season, in the season report. Values: {year}, {team}.
+seasons:
+  - "The {year} season"
+  - "{year} with {team}"
+  - "The {year} campaign"
+  - "A year with {team}"
+
+# Short quotes about a season by how it was received (the same bands as E6b): from the press, and from fans. Values: {team}, {sport}.
+press:
+  flop:
+    - "\"A season to forget for {team}, and for the player at the centre of it.\""
+    - "\"The numbers never came, and neither did the answers.\""
+  solid:
+    - "\"A steady year: nothing to be ashamed of, little to build a poster around.\""
+    - "\"Reliable, and hard to replace, even if no one is writing songs about it.\""
+  hit:
+    - "\"A season that made the rest of the league take note.\""
+    - "\"{team} knew what it was doing when it built the side around this player.\""
+  acclaimed:
+    - "\"One of the great seasons the game has seen in a while, and the voters will have a hard time ignoring it.\""
+    - "\"Complete, calm and almost unfair: the best year of anyone in {sport}.\""
+  cult:
+    - "\"The numbers are only part of it. The people who watch closely say this was something special.\""
+    - "\"Analysts rate the season far higher than the standings do.\""
+  crowd:
+    - "\"The crowd got what it came for, and the critics will keep arguing about the rest.\""
+    - "\"Loud, popular and a little showy: a season the fans loved more than the writers did.\""
+fans:
+  flop:
+    - "\"We expected more. A lot more.\""
+    - "\"I still believe in you. Please give me a reason to.\""
+  solid:
+    - "\"Good enough for me. Same time next year?\""
+    - "\"You always show up, and I'll always show up for that.\""
+  hit:
+    - "\"I took my kids to every home game and they want your number on their jerseys.\""
+    - "\"Best year yet. I don't think you know what it means to us.\""
+  acclaimed:
+    - "\"I cried at the final whistle. I'm not embarrassed.\""
+    - "\"Everyone in this town is talking about {team}, and about you.\""
+  cult:
+    - "\"People who watch the replays know. We know.\""
+    - "\"The stats don't say it, but the real fans do: you were something else.\""
+  crowd:
+    - "\"Best seats in the house, and worth every cent.\""
+    - "\"I've never been so loud in my life.\""

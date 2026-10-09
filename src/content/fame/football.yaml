@@ -1,0 +1,101 @@
+# American football: a fame path with a sport block (E6c). Everything named here is made up.
+id: football
+name: "American football"
+noun: "football"
+blurb: "Friday nights, film rooms and a collision on every snap. The hardest road to the top, and the hardest on the body."
+talents: [athletics]
+aptitude: { fitness: 0.45, discipline: 0.2, confidence: 0.1, ambition: 0.08, smarts: 0.1, riskTaking: 0.05, sociability: 0.02 }
+criticWeight: 0.35
+minAge: 8
+routes:
+  - { id: "youth_league", label: "Join a youth league", blurb: "Oversized helmets, a field with chalk lines and a coach who yells with love.", minAge: 8, maxAge: 13, rung: 1, craft: 10 }
+  - { id: "school_tryout", label: "Try out for the school team", blurb: "Two-a-days in August heat and a roster that goes up on the locker-room door.", minAge: 13, maxAge: 17, rung: 2, craft: 14 }
+  - { id: "open_tryout", label: "Go to an open combine", blurb: "A cold morning, a stopwatch and men with notebooks who give nothing away.", minAge: 18, maxAge: 26, rung: 3, craft: 18 }
+rungs:
+  - { title: "youth league player", milestone: "Make your school team", fame: 0, quality: 0, income: 0 }
+  - { title: "varsity player", milestone: "Earn a place at a college program", fame: 5, quality: 22, income: 0, minAge: 13 }
+  - { title: "college player", milestone: "Get drafted by a pro team", fame: 12, quality: 31, income: 0, minAge: 18 }
+  - { title: "reserve", milestone: "Win a starting place", fame: 30, quality: 44, income: 120000, minAge: 21 }
+  - { title: "starter", milestone: "Become the player a defence is built around", fame: 44, quality: 54, income: 800000 }
+  - { title: "star", milestone: "Make the all-star team", fame: 58, quality: 67, income: 3300000 }
+  - { title: "all-star", milestone: "Win a title and be remembered for it", fame: 74, quality: 79, income: 8000000 }
+  - { title: "legend", milestone: "Stay on top", fame: 90, quality: 91, income: 16000000 }
+kinds:
+  - { id: "season", label: "A season", noun: "season", blurb: "A full season with your team.", minRung: 1, difficulty: 0, reach: 1, pay: 1 }
+tour: { label: "Tour", noun: "tour", minRung: 8 }
+press: { label: "Press run", minRung: 8 }
+retire: { from: 33, chance: [{ at: 33, x: 0.02 }, { at: 45, x: 0.2 }] }
+royalties: 0.05
+sport:
+  positions:
+    - id: quarterback
+      label: "Quarterback"
+      blurb: "Reads the defence, makes the call and carries the team on a good day."
+      fit: { smarts: 0.3, confidence: 0.25, discipline: 0.2, sociability: 0.15, fitness: 0.1 }
+      impact: 1.5
+      stats: [{ id: "passing_yards", low: 1800, high: 4900 }, { id: "touchdowns", low: 8, high: 42 }]
+    - id: running_back
+      label: "Running back"
+      blurb: "Takes the handoff and the hit, and keeps moving."
+      fit: { fitness: 0.5, riskTaking: 0.2, discipline: 0.15, confidence: 0.15 }
+      impact: 1.0
+      stats: [{ id: "rushing_yards", low: 400, high: 1900 }, { id: "touchdowns", low: 2, high: 18 }]
+    - id: wide_receiver
+      label: "Wide receiver"
+      blurb: "Runs the route, catches the ball and does it in traffic."
+      fit: { fitness: 0.4, confidence: 0.25, riskTaking: 0.15, smarts: 0.1, looks: 0.1 }
+      impact: 0.95
+      stats: [{ id: "receiving_yards", low: 350, high: 1700 }, { id: "touchdowns", low: 1, high: 15 }]
+    - id: lineman
+      label: "Lineman"
+      blurb: "The wall: nobody notices you until you lose."
+      fit: { fitness: 0.45, discipline: 0.35, kindness: 0.05, confidence: 0.15 }
+      impact: 1.05
+      stats: [{ id: "tackles", low: 10, high: 50 }, { id: "sacks", low: 0, high: 8 }]
+    - id: linebacker
+      label: "Linebacker"
+      blurb: "Hits hard, reads fast and is always near the ball."
+      fit: { fitness: 0.4, riskTaking: 0.2, discipline: 0.2, smarts: 0.1, confidence: 0.1 }
+      impact: 1.05
+      stats: [{ id: "tackles", low: 30, high: 150 }, { id: "sacks", low: 0, high: 14 }]
+  stats:
+    - { id: "passing_yards", label: "Passing yards", decimals: 0, per: "a season" }
+    - { id: "rushing_yards", label: "Rushing yards", decimals: 0, per: "a season" }
+    - { id: "receiving_yards", label: "Receiving yards", decimals: 0, per: "a season" }
+    - { id: "touchdowns", label: "Touchdowns", decimals: 0, per: "" }
+    - { id: "tackles", label: "Tackles", decimals: 0, per: "a season" }
+    - { id: "sacks", label: "Sacks", decimals: 0, per: "" }
+  season: { games: 17, draws: false, playoffTeams: 6, noun: "the regular season" }
+  stages: ["the wild-card round", "the conference final", "the final"]
+  title: "the championship"
+  proRung: 4
+  ageOut: [14, 18, 23]
+  draft: { name: "the draft", age: 21, force: 23, rounds: 5 }
+  ageCurve: [{ at: 8, x: -6 }, { at: 12, x: -4 }, { at: 14, x: -3 }, { at: 16, x: -2 }, { at: 18, x: -1 }, { at: 21, x: 0 }, { at: 24, x: 2 }, { at: 27, x: 3 }, { at: 29, x: 2 }, { at: 31, x: -2 }, { at: 33, x: -10 }, { at: 35, x: -18 }, { at: 38, x: -28 }]
+  hazard: 1.5
+  injuries:
+    - { id: "torn_ligament", weight: 24, min: 40, max: 80 }
+    - { id: "concussion", weight: 20, min: 25, max: 65 }
+    - { id: "muscle_tear", weight: 20, min: 25, max: 55 }
+    - { id: "shoulder_injury", weight: 14, min: 30, max: 65 }
+    - { id: "broken_bone", weight: 12, min: 35, max: 60 }
+    - { id: "stress_fracture", weight: 6, min: 30, max: 55 }
+  leagues:
+    youth: { name: "The Pee-Wee Football League", nicknames: ["Raiders", "Bulldogs", "Hurricanes", "Eagles", "Cobras"] }
+    school: { name: "The Friday Night Conference", nicknames: ["Gladiators", "Panthers", "Vikings", "Warriors", "Titans", "Spartans"] }
+    college: { name: "The Collegiate Gridiron Conference", nicknames: ["Rams", "Centurions", "Buccaneers", "Trojans", "Sentinels", "Wolverines"] }
+    pro:
+      name: "The Heartland Gridiron League"
+      teams:
+        - { id: "chicago_smokestacks", name: "Chicago Smokestacks", city: "chicago", quality: 64 }
+        - { id: "chicago_lakeshore_lancers", name: "Chicago Lakeshore Lancers", city: "chicago", quality: 46 }
+        - { id: "chicago_windbreakers", name: "Chicago Windbreakers", city: "chicago", quality: 54 }
+        - { id: "houston_gulf_stormers", name: "Houston Gulf Stormers", city: "houston", quality: 66 }
+        - { id: "houston_bluebonnets", name: "Houston Bluebonnets", city: "houston", quality: 42 }
+        - { id: "houston_drillers", name: "Houston Drillers", city: "houston", quality: 56 }
+        - { id: "los_angeles_sunset_condors", name: "Los Angeles Sunset Condors", city: "los_angeles", quality: 70 }
+        - { id: "los_angeles_mariners", name: "Los Angeles Mariners", city: "los_angeles", quality: 47 }
+        - { id: "los_angeles_foothill_coyotes", name: "Los Angeles Foothill Coyotes", city: "los_angeles", quality: 52 }
+        - { id: "new_york_skyline_sentinels", name: "New York Skyline Sentinels", city: "nyc", quality: 63 }
+        - { id: "new_york_bridgemen", name: "New York Bridgemen", city: "nyc", quality: 45 }
+        - { id: "new_york_stonecutters", name: "New York Stonecutters", city: "nyc", quality: 57 }

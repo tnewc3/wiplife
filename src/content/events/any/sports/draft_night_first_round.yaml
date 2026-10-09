@@ -1,0 +1,42 @@
+id: draft_night_first_round
+title: Your name, on a stage
+text: >-
+  {draftTeam} has the {pick} pick. Your family is in the second row in clothes
+  they chose for tonight, and a camera is pointed at your face from three
+  feet away. The announcer at the microphone looks at the card, then up at you.
+tone: light
+category: sports
+rarity: common
+lifeStages: [teen, youngAdult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { sports: { active: true } }
+    - { sports: { drafted: true } }
+    - { sports: { offered: true } }
+    - { sports: { pick: { lte: 12 } } }
+weight: { base: 10 }
+followUpOnly: true
+choices:
+  - id: sign
+    label: Sign with {draftTeam}
+    outcome:
+      text: >-
+        You say yes before the question is finished. There is a signing, a
+        photograph and a bonus that arrives faster than you can understand it,
+        and your mother cries into a napkin.
+      effects:
+        - { type: sports, action: sign }
+        - { type: stat, key: happiness, delta: 8 }
+        - { type: fame, action: fans, delta: 8 }
+  - id: wait
+    label: Thank them, and go back to school for another year
+    visibleIf: { age: { lte: 21 } }
+    outcome:
+      text: >-
+        The room goes quiet for a second, and then someone starts to clap. It
+        is hard to say no, and you are sure that you mean it.
+      effects:
+        - { type: sports, action: decline }
+        - { type: stat, key: stress, delta: 3 }
+        - { type: fame, action: image, delta: 1 }

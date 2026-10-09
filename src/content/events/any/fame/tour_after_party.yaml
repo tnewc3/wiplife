@@ -15,6 +15,7 @@ requires:
     - { age: { gte: 18 } }
     - { fame: { active: true } }
     - { fame: { released: true } }
+    - { fame: { sport: false } }
 weight: { base: 8 }
 followUpOnly: true
 choices:

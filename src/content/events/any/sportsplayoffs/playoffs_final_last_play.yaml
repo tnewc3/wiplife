@@ -1,0 +1,80 @@
+id: playoffs_final_last_play
+title: The last play
+text: >-
+  There are nine seconds left and {team} is holding on to {trophy} by a thread. The coach's whiteboard has three arrows and a circle around your name. Everyone in the building knows where the ball is going, including the people in {opponent}'s colours.
+tone: serious
+category: sportsplayoffs
+rarity: rare
+recurring: true
+lifeStages: [child, teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { sports: { active: true } }
+    - { sports: { run: true } }
+    - { sports: { round: { eq: 3 } } }
+weight: { base: 10 }
+followUpOnly: true
+pin: true
+choices:
+  - id: lead
+    label: Take it yourself
+    check:
+      base: 37
+      stats: [{ sports: rating, weight: 0.22 }, { sports: team, weight: 0.15 }, { key: confidence, weight: 0.1 }, { sports: form, weight: 0.1 }]
+      success:
+        text: >-
+          The play breaks the way plays almost never do, and you are in the right place. {team} wins {trophy}, and the sound is like nothing else you have ever heard.
+        effects:
+          - { type: sports, action: series, result: win }
+          - { type: fame, action: fans, delta: 4 }
+          - { type: schedule, eventId: title_parade, inYears: [1, 1] }
+      failure:
+        text: >-
+          You do exactly what you meant to, and it is a half-step short. {opponent} win {trophy}, and the sound of it is a mile away.
+        effects:
+          - { type: sports, action: series, result: lose }
+          - { type: stat, key: happiness, delta: -4 }
+          - { type: schedule, eventId: title_lost_heartbreak, inYears: [1, 1] }
+  - id: trust
+    label: Make the extra pass
+    check:
+      base: 37
+      stats: [{ sports: team, weight: 0.3 }, { sports: rating, weight: 0.1 }, { key: sociability, weight: 0.1 }]
+      success:
+        text: >-
+          You see the open teammate a second before anyone else does, and you make the pass without thinking. {team} wins {trophy}, and your teammate is already on top of you.
+        effects:
+          - { type: sports, action: series, result: win }
+          - { type: fame, action: image, delta: 2 }
+          - { type: schedule, eventId: title_parade, inYears: [1, 1] }
+      failure:
+        text: >-
+          The extra pass is the right read and a bad throw. {opponent} win {trophy}, and nobody says a word to you for a long time, which is worse.
+        effects:
+          - { type: sports, action: series, result: lose }
+          - { type: stat, key: happiness, delta: -3 }
+          - { type: schedule, eventId: title_lost_heartbreak, inYears: [1, 1] }
+  - id: play_hurt
+    label: Play through the pain
+    visibleIf: { sports: { injured: true } }
+    check:
+      base: 40
+      stats: [{ sports: rating, weight: 0.2 }, { key: health, weight: 0.15 }, { key: fitness, weight: 0.15 }, { sports: team, weight: 0.2 }]
+      success:
+        text: >-
+          It hurts and you do it anyway, and it works. {team} wins {trophy}, and the doctor's hands are shaking more than yours.
+        effects:
+          - { type: sports, action: injury, what: pain }
+          - { type: sports, action: series, result: win }
+          - { type: flag, key: sports_played_hurt, value: true }
+          - { type: fame, action: mood, delta: 4 }
+          - { type: schedule, eventId: title_parade, inYears: [1, 1] }
+      failure:
+        text: >-
+          You give it everything the injury allows, and it is not enough. {opponent} win {trophy}, and you cannot stand without help.
+        effects:
+          - { type: sports, action: injury, what: pain }
+          - { type: sports, action: series, result: lose }
+          - { type: flag, key: sports_played_hurt, value: true }
+          - { type: stat, key: health, delta: -3 }
+          - { type: schedule, eventId: title_lost_heartbreak, inYears: [1, 1] }
