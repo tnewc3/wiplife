@@ -4,6 +4,7 @@
  * schema version, separate from the active life's.
  */
 import { z } from 'zod';
+import { eulogyGroupSchema, eulogyToneSchema } from '../content/schemas';
 import type { ArchivedLife } from '../engine/types';
 import type { WiplifeDb } from './db';
 import { envelopeSchema, makeEnvelope, type SaveEnvelope } from './envelope';
@@ -12,7 +13,7 @@ import { migrateEnvelope, type Migration } from './migrations';
 import { writeSaveIn } from './saves';
 
 /** Version of the archive entry layout. Bump it with a migration below when ArchivedLife changes. */
-export const ARCHIVE_SCHEMA_VERSION = 3;
+export const ARCHIVE_SCHEMA_VERSION = 4;
 
 /** Every archive migration ever shipped, oldest first. Never edit or remove one. */
 export const archiveMigrations: readonly Migration[] = [
@@ -34,7 +35,32 @@ export const archiveMigrations: readonly Migration[] = [
       return { ...data, lineId: entry.id, familyName: words.at(-1) ?? 'Family', familyReputation: 50 };
     },
   },
+  {
+    from: 3,
+    description:
+      'W1: the funeral. A life archived before W1 has no funeral on record (null): the people who would have spoken ' +
+      'or stayed away are no longer known, so none is invented.',
+    migrate: (data) => (typeof data === 'object' && data !== null && !Array.isArray(data) ? { ...data, funeral: null } : data),
+  },
 ];
+
+const text = z.string().min(1);
+const guestSchema = z.strictObject({ name: text, relation: text, reason: text });
+export const funeralSchema = z.strictObject({
+  eulogy: z
+    .strictObject({
+      speakerName: text,
+      relation: text,
+      group: eulogyGroupSchema,
+      tone: eulogyToneSchema,
+      paragraphs: z.array(text).min(1),
+      pieces: z.array(text),
+    })
+    .nullable(),
+  notAttending: z.array(guestSchema),
+  moreNotAttending: z.int().min(0),
+  couldNotAttend: z.array(guestSchema),
+});
 
 export const archivedLifeSchema: z.ZodType<ArchivedLife> = z.strictObject({
   id: z.string().min(1),
@@ -48,6 +74,7 @@ export const archivedLifeSchema: z.ZodType<ArchivedLife> = z.strictObject({
   cityId: z.string().min(1),
   birthCityId: z.string().min(1),
   obituary: z.string().min(1),
+  funeral: funeralSchema.nullable(),
   highlights: z.array(historyEntrySchema),
   finalNetWorth: z.int().refine(Number.isSafeInteger, 'must be a safe integer'),
   finalStats: statsSchema,

@@ -3,6 +3,7 @@ import { produce } from 'immer';
 import { afterEach, describe, expect, it } from 'vitest';
 import { InvalidInputError } from '../engine/creation/input';
 import { die, parentLife } from '../engine/estate/fixtures';
+import { writeFuneral } from '../engine/eulogy';
 import { heirCandidates } from '../engine/estate/heir';
 import { customInput, lifeAtAge } from '../engine/testFixtures';
 import { beginYear, CONTINUE_CHOICE } from '../engine/life';
@@ -231,7 +232,7 @@ describe('app store: aging', () => {
       expect([life.character.age, life.phase]).toEqual([1, 'yearStart']);
       expect(restarted.getState().savedLifeStatus).toBe('ok');
     } else {
-      expect(restarted.getState().screen).toBe('death');
+      expect(restarted.getState().screen).toBe('funeral');
     }
   });
 
@@ -254,9 +255,13 @@ describe('app store: aging', () => {
 
     const state = store.getState();
     expect(state.life).toBeNull();
-    expect(state.screen).toBe('death');
+    // W1: the funeral comes first, and is kept with the life in the archive.
+    expect(state.screen).toBe('funeral');
     expect(state.lastDeath).toMatchObject({ name: `${name.first} ${name.last}`, unfinished: false, seed: 'test-seed-1' });
     expect(state.lastDeath!.causeOfDeath).toBeTruthy();
+    expect(state.lastDeath!.funeral).not.toBeNull();
+    store.getState().continueFromFuneral();
+    expect(store.getState().screen).toBe('death');
     expect((await readSave(db, lifeStateSchema)).status).toBe('none');
     expect(await db.backups.count()).toBe(0);
 
@@ -349,7 +354,7 @@ describe('app store: events', () => {
       await store.getState().continueEvents();
       expect(store.getState().eventSheet).toBeNull();
     } else {
-      expect(state.screen).toBe('death');
+      expect(state.screen).toBe('funeral');
     }
   });
 
@@ -563,7 +568,7 @@ describe('app store: heirs and wills (E2b)', () => {
     const { db, store, dead } = await waiting();
     const state = store.getState();
     expect(state.life).toBeNull();
-    expect(state.screen).toBe('death');
+    expect(state.screen).toBe('funeral');
     expect(state.deadLife?.id).toBe(dead.id);
     expect(state.deathView!.heirs.map((h) => h.id).sort()).toEqual([...heirCandidates(dead)].sort());
     expect(state.deathView!.lines.length).toBeGreaterThan(0);
@@ -576,9 +581,25 @@ describe('app store: heirs and wills (E2b)', () => {
     const { options, dead } = await waiting();
     const restarted = createAppStore(options);
     await restarted.getState().init();
-    expect(restarted.getState().screen).toBe('death');
+    expect(restarted.getState().screen).toBe('funeral');
     expect(restarted.getState().deadLife?.id).toBe(dead.id);
     expect(restarted.getState().deathView!.heirs).toHaveLength(2);
+  });
+
+  it('shows the funeral before the Death screen, also for a saved life that died before eulogies existed (W1)', async () => {
+    // A saved life never stores its funeral: it is written from the life when it is shown.
+    const { options, store, dead } = await waiting();
+    expect(store.getState().screen).toBe('funeral');
+    expect(store.getState().lastDeath!.funeral).toEqual(writeFuneral(dead, content));
+    // Leaving the funeral goes on to the obituary, the estate and the heirs, and only from the funeral.
+    store.getState().continueFromFuneral();
+    expect(store.getState().screen).toBe('death');
+    store.getState().continueFromFuneral();
+    expect(store.getState().screen).toBe('death');
+    expect(store.getState().deathView!.heirs).toHaveLength(2);
+    const restarted = createAppStore(options);
+    await restarted.getState().init();
+    expect(restarted.getState().screen).toBe('funeral');
   });
 
   it('continues as the chosen child, archiving the parent in the same step', async () => {
@@ -624,7 +645,7 @@ describe('app store: heirs and wills (E2b)', () => {
     const dead = die(parentLife({ kids: [], spouse: true, seed: 'store-childless' }));
     await writeSave(db, makeEnvelope(dead, content.contentVersion));
     await store.getState().init();
-    expect(store.getState().screen).toBe('death');
+    expect(store.getState().screen).toBe('funeral');
     expect(store.getState().deadLife).toBeNull();
     expect(store.getState().deathView!.heirs).toEqual([]);
     expect(store.getState().deathView!.lines[0]!.relation).toBe('spouse');

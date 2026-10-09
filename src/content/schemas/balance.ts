@@ -654,6 +654,25 @@ export const targetsBalanceSchema = z.strictObject({
     medianEarnings: numberRangeSchema,
     signedShare: shareRangeSchema,
   }),
+  /**
+   * W1, the eulogy (tools/simulate/eulogy.ts), on the careful player's lives
+   * that end: how many get a speaker, how varied the eulogies are, and who
+   * stays away.
+   */
+  eulogy: z.strictObject({
+    /** The share of lives that end with a speaker (the rest have no one close enough). */
+    speakerShare: shareRangeSchema,
+    /** The share of eulogy pieces (of those that can appear) used at least once. */
+    pieceVariety: shareRangeSchema,
+    /** The share of eulogies that are different from every other. */
+    distinctShare: shareRangeSchema,
+    /** Kinds of speaker (spouse, child, elder, sibling, friend, other) that speak at least once. */
+    speakerGroups: numberRangeSchema,
+    /** The share of lives where somebody chose not to come. */
+    absentShare: shareRangeSchema,
+    /** The share of lives where somebody could not come. */
+    couldNotShare: shareRangeSchema,
+  }),
   coverage: z.strictObject({
     /** At least this many events (not retired). */
     minEvents: z.int().min(1),

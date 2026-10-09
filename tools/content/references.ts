@@ -1,4 +1,5 @@
 import {
+  RELATIONSHIP_KINDS,
   CAREER_HISTORY_VALUES,
   DISCOVERY_HISTORY_VALUES,
   DISCOVERY_KINDS,
@@ -193,6 +194,7 @@ export function checkReferences(
   errors.push(...checkCrime(bundle, fileOf, options.partialEvents === true));
   errors.push(...checkFame(bundle, fileOf, options.partialEvents === true));
   errors.push(...checkSports(bundle, fileOf, options.partialEvents === true));
+  errors.push(...checkEulogy(bundle));
 
   return errors;
 }
@@ -1410,5 +1412,100 @@ function checkHeir(bundle: ContentBundle, fileOf: (typeKey: CollectionKey, id: s
   for (const [where, template] of templates) {
     for (const message of checkTemplate(template, allowed)) err(HEIR_TEXT, `${where}: ${message}`);
   }
+  return errors;
+}
+
+
+const EULOGY_BALANCE = 'balance/eulogy.yaml';
+const EULOGY_TEXT = 'text/eulogy.yaml';
+
+/** The values each milestone line may use (the schema notes them). */
+const EULOGY_MILESTONE_VALUES: Record<string, string[]> = {
+  career: ['title', 'employer'],
+  retired: ['years'],
+  marriage: ['partner'],
+  divorce: ['partner'],
+  children: ['children'],
+  prison: ['years'],
+  bankruptcy: ['year'],
+  tooSoon: ['age'],
+  longLife: ['age'],
+};
+
+/**
+ * The eulogy (W1): every kind of relationship has at most one group and every
+ * kind that can speak has one; the memories and stories the text has lines
+ * for exist; every kind of story and every twisted version has a line; and
+ * every template only uses the roles and values it is given, and never a
+ * hardcoded pronoun.
+ */
+function checkEulogy(bundle: ContentBundle): ContentError[] {
+  const errors: ContentError[] = [];
+  const err = (file: string, message: string) => errors.push({ file, message });
+  const b = bundle.balance.eulogy;
+  const text = bundle.text.eulogy;
+
+  // Balance.
+  if (b.tone.cool > b.tone.warm) err(EULOGY_BALANCE, 'tone: cool is above warm');
+  const seen = new Map<string, string>();
+  for (const [group, kinds] of Object.entries(b.speaker.groups)) {
+    for (const kind of kinds) {
+      const before = seen.get(kind);
+      if (before !== undefined) err(EULOGY_BALANCE, `speaker.groups: "${kind}" is in both ${before} and ${group}`);
+      seen.set(kind, group);
+    }
+  }
+  for (const kind of RELATIONSHIP_KINDS) {
+    if (!seen.has(kind) && !(b.speaker.excludedKinds as readonly string[]).includes(kind)) err(EULOGY_BALANCE, `speaker.groups: "${kind}" is in no group and does not always stay out`);
+  }
+
+  // The memories and stories the text has lines for.
+  const memories = bundle.registries.memories.tags;
+  const tagged = (where: string, tags: string[]) => {
+    for (const tag of tags) if (!memories[tag]) err(EULOGY_TEXT, `${where}.${tag}: not a memory in registries/memories.yaml`);
+  };
+  tagged('memories', Object.keys(text.memories));
+  tagged('absent.estranged.memory', Object.keys(text.absent.estranged.memory));
+  tagged('absent.ex.memory', Object.keys(text.absent.ex.memory));
+  const kinds = bundle.registries.web.kinds;
+  const truthKinds = Object.keys(text.beliefs.true).sort();
+  const wantKinds = Object.keys(kinds).sort();
+  for (const kind of wantKinds) if (!truthKinds.includes(kind)) err(EULOGY_TEXT, `beliefs.true.${kind}: no line for this kind of story`);
+  for (const kind of truthKinds) if (!kinds[kind as keyof typeof kinds]) err(EULOGY_TEXT, `beliefs.true.${kind}: not a kind in registries/web.yaml`);
+  const twists = Object.values(kinds).flatMap((k) => Object.keys(k.versions).filter((v) => !k.truths.includes(v)));
+  for (const version of twists) if (!text.beliefs.twisted[version]) err(EULOGY_TEXT, `beliefs.twisted.${version}: no line for this twisted version`);
+  for (const version of Object.keys(text.beliefs.twisted)) if (!twists.includes(version)) err(EULOGY_TEXT, `beliefs.twisted.${version}: not a twisted version in registries/web.yaml`);
+
+  // Templates.
+  const check = (where: string, template: string, allowed: { roles?: string[]; values?: string[] }) => {
+    for (const message of checkTemplate(template, allowed)) err(EULOGY_TEXT, `${where}: ${message}`);
+    if (/\b(he|she|him|her|his|hers)\b/i.test(template.replace(/\{[^}]*\}/g, ''))) err(EULOGY_TEXT, `${where}: hardcoded pronoun (use {self.they} and the like)`);
+  };
+  const speech = { roles: ['self', 'npc'], values: ['known', 'age', 'year', 'since'] };
+  const all = (where: string, list: readonly string[], allowed: { roles?: string[]; values?: string[] }) => list.forEach((t) => check(where, t, allowed));
+  for (const [group, tones] of Object.entries(text.opening)) for (const [tone, list] of Object.entries(tones)) all(`opening.${group}.${tone}`, list, speech);
+  all('bare', text.bare, speech);
+  for (const [tag, m] of Object.entries(text.memories)) check(`memories.${tag}`, m.line, speech);
+  for (const [kind, t] of Object.entries(text.beliefs.true)) check(`beliefs.true.${kind}`, t, { ...speech, roles: ['self', 'npc', 'other'] });
+  for (const [version, t] of Object.entries(text.beliefs.twisted)) check(`beliefs.twisted.${version}`, t, { ...speech, roles: ['self', 'npc', 'other'] });
+  for (const [kind, t] of Object.entries(text.unknown)) check(`unknown.${kind}`, t, speech);
+  for (const [m, t] of Object.entries(text.milestones)) check(`milestones.${m}`, t, { roles: ['self', 'npc'], values: EULOGY_MILESTONE_VALUES[m] ?? [] });
+  for (const [tone, list] of Object.entries(text.closing)) all(`closing.${tone}`, list, speech);
+  check('children.one', text.children.one, {});
+  check('children.many', text.children.many, { values: ['n'] });
+  const reason = { roles: ['self', 'npc'], values: ['heard', 'speaker'] };
+  const a = text.absent;
+  all('absent.estranged.generic', a.estranged.generic, reason);
+  for (const [tag, t] of Object.entries(a.estranged.memory)) check(`absent.estranged.memory.${tag}`, t, reason);
+  all('absent.feud.sided', a.feud.sided, reason);
+  all('absent.feud.speaker', a.feud.speaker, reason);
+  all('absent.feud.generic', a.feud.generic, reason);
+  all('absent.ex.generic', a.ex.generic, reason);
+  for (const [tag, t] of Object.entries(a.ex.memory)) check(`absent.ex.memory.${tag}`, t, reason);
+  all('absent.rumor', a.rumor, reason);
+  all('absent.distrust', a.distrust, reason);
+  all('absent.distant', a.distant, reason);
+  all('absent.far', a.far, reason);
+  for (const [why, list] of Object.entries(text.couldNot)) all(`couldNot.${why}`, list, reason);
   return errors;
 }

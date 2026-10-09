@@ -30,10 +30,10 @@ export async function startRandomLife(page: Page, options: OpenOptions = {}): Pr
 export const ageUpButton = (page: Page) => page.getByRole('button', { name: 'Age Up' });
 export const eventSheet = (page: Page) => page.getByRole('dialog').filter({ has: page.getByTestId('event-card') });
 
-/** Waits until the screen is ready for the next tap: Age Up, an event card, or the Death screen. */
+/** Waits until the screen is ready for the next tap: Age Up, an event card, or the funeral that follows a death. */
 export async function settle(page: Page): Promise<void> {
   await page.waitForFunction(() => {
-    if (document.body.textContent?.includes('In memoriam')) return true;
+    if (document.body.textContent?.includes('The funeral') || document.body.textContent?.includes('In memoriam')) return true;
     const sheet = document.querySelector('[aria-labelledby="event-title"]');
     if (sheet) return [...sheet.querySelectorAll('button')].every((b) => !b.disabled);
     const button = [...document.querySelectorAll('button')].find((b) => b.textContent?.trim() === 'Age Up');
@@ -183,4 +183,11 @@ export async function expectTouchTargets(page: Page): Promise<void> {
     min,
   );
   expect(small).toEqual([]);
+}
+
+/** After a death: the funeral comes first (W1). Continues from it to the Death screen (the obituary, the estate and who carries on). */
+export async function passFuneral(page: Page): Promise<void> {
+  await expect(page.getByText('The funeral', { exact: true })).toBeVisible();
+  await page.getByTestId('funeral-continue').click();
+  await expect(page.getByText('In memoriam')).toBeVisible();
 }

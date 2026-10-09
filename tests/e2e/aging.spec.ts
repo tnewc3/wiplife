@@ -127,7 +127,13 @@ test('a life ends in an obituary, goes into the archive, and a new life starts',
   await expect(sheet.getByTestId('event-outcome')).toContainText('The test life ends here.');
   await sheet.getByRole('button', { name: 'Continue' }).click();
 
-  // Death and Obituary screen.
+  // The funeral comes first (W1), then the Death and Obituary screen.
+  await expect(page.getByText('The funeral', { exact: true })).toBeVisible();
+  await expect(page.getByTestId('eulogy')).toBeVisible();
+  await expect(page.getByTestId('funeral-absent')).toBeVisible();
+  await expectNoHorizontalScroll(page);
+  await expectTouchTargets(page);
+  await page.getByTestId('funeral-continue').click();
   await expect(page.getByText('In memoriam')).toBeVisible();
   await expect(page.getByRole('heading', { name })).toBeVisible();
   await expect(page.getByTestId('obituary')).toContainText(name);

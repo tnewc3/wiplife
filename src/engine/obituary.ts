@@ -96,7 +96,7 @@ function highestEducation(life: LifeState, content: ContentBundle): { key: Obitu
 }
 
 /** The best job held (the highest salary), with its title and employer. */
-function careerPeak(life: LifeState, content: ContentBundle): { title: string; employer: string; level: number } | null {
+export function careerPeak(life: LifeState, content: ContentBundle): { title: string; employer: string; level: number } | null {
   const jobs = [...life.career.history, ...(life.career.job ? [life.career.job] : [])];
   let best: (typeof jobs)[number] | null = null;
   for (const j of jobs) if (content.jobs[j.jobId] && (!best || j.salary > best.salary)) best = j;
