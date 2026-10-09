@@ -141,3 +141,28 @@ categories:
       all:
         - { age: { gte: 18 } }
         - { crime: { former: true } }
+
+  # E6b: fame in arts and media. A way in is for someone with no career (and none behind them); the rest are for
+  # someone with one. Fame at home accounts for a partner who lives with you (the household rule).
+  fameentry:
+    label: A way in
+    requires:
+      all:
+        - { fame: { active: false } }
+        - { fame: { retired: false } }
+  fame:
+    label: The business
+    requires: { fame: { active: true } }
+  famebiz:
+    label: Deals and awards
+    requires: { fame: { active: true } }
+  famefans:
+    label: Fans and critics
+    requires: { fame: { active: true } }
+  famelife:
+    label: The price
+    household: true
+    requires: { fame: { active: true } }
+  famepast:
+    label: Looking back
+    requires: { fame: { retired: true } }

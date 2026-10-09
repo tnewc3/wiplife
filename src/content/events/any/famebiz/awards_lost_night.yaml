@@ -1,0 +1,41 @@
+id: awards_lost_night
+title: Someone else's name
+text: >-
+  The envelope is for {award}, and it is not your name. You applaud with the
+  rest of the room, on schedule, while a camera finds your face and reads it.
+  It will be on a screen somewhere in the next minute.
+tone: serious
+category: famebiz
+rarity: uncommon
+recurring: true
+lifeStages: [child, teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { fame: { active: true } }
+    - { fame: { ceremony: [lost] } }
+weight: { base: 10 }
+followUpOnly: true
+choices:
+  - id: grace
+    label: Smile, clap, and mean at least some of it
+    outcome:
+      text: You keep your face steady until the car, and then you let it go. It was a good night anyway.
+      effects:
+        - { type: fame, action: image, delta: 2 }
+        - { type: stat, key: stress, delta: 2 }
+  - id: sulk
+    label: Leave early
+    outcome:
+      text: >-
+        You are in the car before the next category. A photograph of you
+        heading out with your jaw set is the story of the night.
+      effects:
+        - { type: fame, action: image, delta: -5 }
+        - { type: fame, action: mood, delta: -2 }
+  - id: use_it
+    label: Let it make you angry, in a useful way
+    outcome:
+      text: By morning it has turned into a plan. You want the next piece to be so good no one can look away.
+      effects:
+        - { type: fame, action: craft, delta: 2 }
+        - { type: stat, key: stress, delta: 3 }

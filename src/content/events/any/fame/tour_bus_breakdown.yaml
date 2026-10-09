@@ -1,0 +1,48 @@
+id: tour_bus_breakdown
+title: Forty hours on the road
+text: >-
+  The tour is four weeks and nineteen cities. The bus breaks down outside a
+  town none of you can pronounce, with two nights to make up and a driver who
+  has stopped answering questions.
+tone: light
+category: fame
+rarity: common
+recurring: true
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { fame: { active: true } }
+    - { fame: { released: true } }
+weight: { base: 10 }
+followUpOnly: true
+choices:
+  - id: push
+    label: Rent two cars and make the shows
+    outcome:
+      text: >-
+        You make both, barely. By the time you reach the stage you are running
+        on gas station coffee and spite. The audience has no idea, and it is the
+        best show of the tour.
+      effects:
+        - { type: famePay, cost: small }
+        - { type: fame, action: fans, delta: 3 }
+        - { type: fame, action: burnout, delta: 5 }
+  - id: cancel
+    label: Cancel one of the shows
+    outcome:
+      text: >-
+        You apologise in public and refund the tickets. A few fans are
+        gracious and a few are not, and you sleep eleven hours.
+      effects:
+        - { type: famePay, cost: small }
+        - { type: fame, action: mood, delta: -4 }
+        - { type: fame, action: burnout, delta: -4 }
+  - id: wait_it_out
+    label: Play for the people at the motel bar
+    outcome:
+      text: >-
+        Forty people, a spare amp and a cat on the pool table. It's one of
+        those nights nobody tells their friends about, and everyone there will.
+      effects:
+        - { type: fame, action: image, delta: 3 }
+        - { type: stat, key: happiness, delta: 5 }

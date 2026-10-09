@@ -1165,3 +1165,105 @@ export function dirtyBlockLabel(block: 'age' | 'away' | 'none' | 'amount' | 'fro
       return '';
   }
 }
+
+// ── E6b: fame in arts and media ──────────────────────────────────────────────
+
+/** Fame as words (the engine gives a band, 0 up; the screen's bars never show a number). */
+export const FAME_WORDS = ['Unknown', 'Local', 'Rising', 'Famous', 'Legendary'] as const;
+/** How the public sees you. */
+export const IMAGE_WORDS = ['Ruined', 'Tarnished', 'Mixed', 'Well liked', 'Beloved'] as const;
+/** How your fans feel: below 30 they have turned, above 60 they are devoted. */
+export const FAN_MOOD_WORDS = ['Turned on you', 'Restless', 'Devoted'] as const;
+export const BURNOUT_WORDS = ['Fresh', 'Tired', 'Worn down', 'On the edge'] as const;
+
+export const COMMITMENT_LABELS = { back: 'Holding back', steady: 'Steady', all: 'All in' } as const;
+export const COMMITMENT_BLURBS = {
+  back: 'A slower climb, and your life stays yours: time for people, rest and health.',
+  steady: 'A fair pace. Some strain on the people close to you, but nothing you can’t carry.',
+  all: 'Faster, with more tours and press. Your people, your health and your nerves pay for it, and burnout gets close.',
+} as const;
+export const COMMITMENT_BLOCK_LABELS = { contract: 'Your contract asks for more than this.', young: 'Too young to go all in.' } as const;
+
+export const SCENE_LABELS = { low: 'Low-key', social: 'Social', entourage: 'Entourage', lavish: 'Lavish' } as const;
+export const SCENE_BLURBS = {
+  low: 'Quiet nights and a small circle. Cheap, and out of the papers.',
+  social: 'Dinners, openings and a decent table. A fair price for being seen.',
+  entourage: 'People to carry things, answer things and say yes. It adds up, and so do the stories.',
+  lavish: 'The best of everything, loudly. It costs a great deal and the tabloids notice.',
+} as const;
+
+export const STYLE_LABELS = { commercial: 'Commercial', artistic: 'Artistic' } as const;
+export const STYLE_BLURBS = {
+  commercial: 'Aim for the crowd. Fans tend to love it, and critics tend to shrug.',
+  artistic: 'Aim for the work itself. Critics tend to love it, and fans tend to wait and see.',
+} as const;
+export const RISK_LABELS = { safe: 'Safe', bold: 'Bold' } as const;
+export const RISK_BLURBS = {
+  safe: 'A steady result. Rarely a disaster, rarely a triumph.',
+  bold: 'A wide range: it could be the best thing you do, or a flop.',
+} as const;
+
+/** How a release was received (the project's band). */
+export const RECEPTION_LABELS = {
+  flop: 'It landed badly',
+  solid: 'A fair reception',
+  hit: 'A hit',
+  acclaimed: 'Acclaimed',
+  cult: 'Critics’ darling',
+  crowd: 'Fans’ favorite',
+} as const;
+
+export const STALKER_STAGE_LABELS = {
+  watching: 'Following you',
+  reported: 'Reported to the police',
+  ordered: 'A restraining order is in place',
+  charged: 'Charged in court',
+} as const;
+
+export const COMPANY_KIND_LABELS = { label: 'label', studio: 'studio', platform: 'platform', publisher: 'publisher', gallery: 'gallery', brand: 'brand' } as const;
+export const CONTRACT_TERMS_LABELS = { standard: 'Standard terms', tough: 'Tough terms', generous: 'Generous terms' } as const;
+
+/** Why you can't start a career this way. */
+export const FAME_ENTER_BLOCK_LABELS = {
+  unknown: 'Not open to you.',
+  active: 'You already have a career.',
+  age: 'You are not the right age for this yet.',
+  prison: 'Not from prison.',
+  parent: 'A parent has to sign for you, and there is none.',
+} as const;
+
+export const FAME_CROSS_BLOCK_LABELS = {
+  unknown: 'Not open to you.',
+  inactive: 'You have no career.',
+  same: 'You are already there.',
+  second: 'You already have a second path.',
+  rung: 'You are not high enough on the ladder yet.',
+  fame: 'You are not famous enough yet.',
+  age: 'You are not the right age for this yet.',
+  contract: 'Your contract keeps you from other work.',
+  prison: 'Not from prison.',
+} as const;
+
+export const FAME_AGENT_BLOCK_LABELS = {
+  unknown: 'Not open to you.',
+  inactive: 'You have no career.',
+  have: 'You have an agent as good or better.',
+  rung: 'You are not high enough on the ladder yet.',
+  image: 'Your public image is not good enough for them.',
+  prison: 'Not from prison.',
+} as const;
+
+/** A fan count, short ("3,400", "1.2 million"). */
+export function fansLabel(n: number): string {
+  if (n >= 1_000_000) return `${(Math.round(n / 100_000) / 10).toString()} million`;
+  return n.toLocaleString('en-US');
+}
+
+/** The tabloid card's title in the news feed. */
+export const TABLOID_TITLE = 'In the tabloids';
+
+/** What critics or fans made of a work, as words (0–100 in bands of 20). */
+export const REACTION_WORDS = ['Hated it', 'Panned it', 'Mixed', 'Liked it', 'Loved it'] as const;
+export function reactionWord(score: number): string {
+  return REACTION_WORDS[Math.min(4, Math.max(0, Math.floor(score / 20)))]!;
+}

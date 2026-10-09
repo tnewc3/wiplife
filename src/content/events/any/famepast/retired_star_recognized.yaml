@@ -1,0 +1,33 @@
+id: retired_star_recognized
+title: "Aren't you...?"
+text: >-
+  A stranger at the counter squints, and then lights up. {pathNoun} used to be
+  your whole world, and for them it still is. They tell you what your work
+  meant, and you listen, with the particular patience of someone who isn't
+  working any more.
+tone: light
+category: famepast
+rarity: uncommon
+recurring: true
+lifeStages: [adult, senior]
+requires:
+  all:
+    - { age: { gte: 30 } }
+    - { fame: { retired: true } }
+    - { fame: { peak: { gte: 3 } } }
+weight: { base: 3 }
+cooldownYears: 3
+choices:
+  - id: talk
+    label: Talk for as long as they want
+    outcome:
+      text: An hour at a counter, a coffee gone cold, and your signature on a napkin. It's the best part of the week.
+      effects:
+        - { type: stat, key: happiness, delta: 5 }
+        - { type: fame, action: mood, delta: 3 }
+  - id: smile
+    label: Smile, thank them, and go
+    outcome:
+      text: It is kind and brief. You carry the warmth of it with you to the car, and nothing else.
+      effects:
+        - { type: stat, key: happiness, delta: 2 }

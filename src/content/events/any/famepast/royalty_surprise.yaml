@@ -1,0 +1,35 @@
+id: royalty_surprise
+title: Something from the old days
+text: >-
+  A statement arrives from an address you'd forgotten. Something you made
+  years ago has been rediscovered: used on a screen, quoted at a graduation,
+  passed round by people who weren't born when you made it. It is, apparently,
+  doing well.
+tone: light
+category: famepast
+rarity: uncommon
+recurring: true
+lifeStages: [adult, senior]
+requires:
+  all:
+    - { age: { gte: 30 } }
+    - { fame: { retired: true } }
+    - { fame: { peak: { gte: 3 } } }
+weight: { base: 3 }
+cooldownYears: 4
+choices:
+  - id: enjoy
+    label: Take it, and enjoy it
+    outcome:
+      text: A dinner you wouldn't normally have, with people you hadn't seen in too long.
+      effects:
+        - { type: famePay, gain: solid }
+        - { type: stat, key: happiness, delta: 4 }
+  - id: reinvest
+    label: Put it into something new
+    outcome:
+      text: A workshop for people just starting out, with your name over the door. It's the kind of thing you'd have wanted.
+      effects:
+        - { type: famePay, gain: small }
+        - { type: fame, action: image, delta: 3 }
+        - { type: stat, key: happiness, delta: 3 }

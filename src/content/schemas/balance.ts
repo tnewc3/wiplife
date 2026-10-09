@@ -259,7 +259,7 @@ export type EventsBalance = z.infer<typeof eventsBalanceSchema>;
 const shareRangeSchema = z
   .strictObject({ min: probabilitySchema, max: probabilitySchema })
   .refine((r) => r.min <= r.max, 'min must not be greater than max');
-const numberRangeSchema = z.strictObject({ min: z.number().min(0), max: z.number().min(0) }).refine((r) => r.min <= r.max, 'min must not be greater than max');
+const numberRangeSchema = z.strictObject({ min: z.number(), max: z.number().min(0) }).refine((r) => r.min <= r.max, 'min must not be greater than max');
 /** A range for a measured difference, which can be negative. */
 const signedRangeSchema = z.strictObject({ min: z.number(), max: z.number() }).refine((r) => r.min <= r.max, 'min must not be greater than max');
 const ratioRangeSchema = z
@@ -586,6 +586,48 @@ export const targetsBalanceSchema = z.strictObject({
     deaths: shareRangeSchema,
     /** Anyone under 18 in a crew, or holding dirty money: none, ever. */
     underAge: numberRangeSchema,
+  }),
+  /**
+   * E6b: fame in arts and media (tools/simulate/fame.ts). The star player (one
+   * who goes after a career in one of the four paths) is judged on how often
+   * it starts, how far it gets with and without a talent that fits, how rare big
+   * breaks are, what commitment costs and buys, fades and comebacks, awards,
+   * tabloids, stalkers and crossovers. Famous lives' net worth is judged apart
+   * from the net worth target. Young stars are never harmed.
+   */
+  fame: z.strictObject({
+    /** Lives of the star player that start a career. */
+    entered: shareRangeSchema,
+    /** Of careers: the share with at least one big break, and big breaks per year in the business. */
+    breakLives: shareRangeSchema,
+    breaksPerYear: numberRangeSchema,
+    /** Of careers: the share that go past the middle of the ladder, with a talent that fits the path and without. */
+    talentPastMiddle: shareRangeSchema,
+    noTalentPastMiddle: shareRangeSchema,
+    /** Of careers: the share that reach the top rung. */
+    topRung: shareRangeSchema,
+    /** Mean quality of the work of careers with a fitting talent less that of those without (points). */
+    talentQualityGap: numberRangeSchema,
+    /** The share of releases where critics and fans were 20+ points apart. */
+    disagree: shareRangeSchema,
+    /** All in against holding back: fame gained a release year (a multiple), affection lost by partner and children (points), burnouts a year against steady (a multiple). */
+    allInClimb: numberRangeSchema,
+    allInStrain: numberRangeSchema,
+    allInBurnout: numberRangeSchema,
+    /** Of careers: a rung lost to fading, a comeback, an award won, a tabloid story, a stalker, a crossover. */
+    fadeLives: shareRangeSchema,
+    comebackLives: shareRangeSchema,
+    winLives: shareRangeSchema,
+    tabloidLives: shareRangeSchema,
+    stalkerLives: shareRangeSchema,
+    crossoverLives: shareRangeSchema,
+    /** Famous lives' median net worth at death as a multiple of the other careers' median. */
+    famousWealthRatio: numberRangeSchema,
+    /** Young stars who went all in or were stalked, and deals for them not signed by a parent: none, ever. */
+    minorsHarmed: numberRangeSchema,
+    unsignedMinorDeals: numberRangeSchema,
+    /** A big break taking someone with no fitting talent above the ceiling: none, ever. */
+    breakOverCeiling: numberRangeSchema,
   }),
   coverage: z.strictObject({
     /** At least this many events (not retired). */

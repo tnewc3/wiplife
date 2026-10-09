@@ -6,6 +6,7 @@ import { Button } from '../../components/Button';
 import { Card } from '../../components/Card';
 import { money } from '../../labels';
 import { CrimeCard } from './CrimeCard';
+import { FameCard } from './FameCard';
 import { JobCard } from './JobCard';
 import { SchoolCard } from './SchoolCard';
 
@@ -20,6 +21,7 @@ export function WorkTab({ life }: { life: LifeState }) {
       {life.character.age >= view.minAge - 2 && <JobCard life={life} />}
       <SchoolCard life={life} />
       <CrimeCard life={life} />
+      <FameCard life={life} />
       <Card role="region" aria-labelledby="gig-title">
         <h2 id="gig-title" className="text-lg font-bold">
           Gig work

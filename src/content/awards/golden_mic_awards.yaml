@@ -1,0 +1,8 @@
+id: golden_mic_awards
+name: the Golden Mic Awards
+category: Song of the Year
+path: music
+blurb: The big televised night, voted by the public and the industry, with a lot of sequins.
+minRung: 3
+critics: 0.3
+prestige: 0.8

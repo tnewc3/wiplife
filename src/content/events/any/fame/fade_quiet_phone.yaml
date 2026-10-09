@@ -1,0 +1,52 @@
+id: fade_quiet_phone
+title: The phone stopped ringing
+text: >-
+  It is not a dramatic fall. The invitations come a little less often, then
+  stop. The people who used to answer on the first ring take a day, then two.
+  Nobody tells you. You can work it out.
+tone: dark
+category: fame
+rarity: common
+recurring: true
+lifeStages: [child, teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { fame: { active: true } }
+    - { fame: { faded: true } }
+weight: { base: 10 }
+followUpOnly: true
+choices:
+  - id: new_work
+    label: Start something new, small and on your own
+    outcome:
+      text: >-
+        You make it in a spare room, with nobody's permission. It is the first
+        thing in a while that feels like yours.
+      effects:
+        - { type: fame, action: craft, delta: 3 }
+        - { type: stat, key: happiness, delta: 3 }
+  - id: call_around
+    label: Call everyone you know
+    check:
+      base: 45
+      stats: [{ key: sociability, weight: 0.25 }, { fame: image, weight: 0.2 }]
+      success:
+        text: Three of them call back. One has a job that is small and honest and starts on Monday.
+        effects:
+          - { type: famePay, gain: small }
+          - { type: fame, action: fame, delta: 2 }
+      failure:
+        text: >-
+          Two of them don't pick up, one picks up and says it's a bad time.
+          You do not call anyone else that week.
+        effects:
+          - { type: stat, key: confidence, delta: -4 }
+  - id: let_it_go
+    label: Let it fade
+    outcome:
+      text: >-
+        You mean to say it is a relief. Some days it is, and some days it is a
+        door you were standing near.
+      effects:
+        - { type: stat, key: stress, delta: -3 }
+        - { type: stat, key: happiness, delta: -2 }

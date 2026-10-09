@@ -213,3 +213,10 @@ tags:
   # E6a: crime careers.
   brought_you_in: Brought you into a crew
   knows_about_the_crew: Knows what you do for the crew
+  # E6b: fame in arts and media.
+  fan_super: Became a devoted fan of your work
+  fan_hater: Cannot stand you or your work
+  fan_critic: Reviews your work, and has opinions
+  fan_stalker: Would not stop following you
+  answered_their_letter: You answered their letter or stopped to talk
+  turned_them_away: You walked past them

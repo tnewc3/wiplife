@@ -1,0 +1,37 @@
+id: big_break_cosign
+title: Someone you admire said your name
+text: >-
+  A star you grew up listening to said your name in an interview, almost by
+  accident. Within a day your songs were on lists you had never been on. By
+  the end of the week you were {rungTitle}, and a label you had given up on
+  called back.
+tone: light
+category: fame
+rarity: rare
+recurring: true
+lifeStages: [child, teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { fame: { active: true } }
+    - { fame: { path: [music] } }
+weight: { base: 10 }
+followUpOnly: true
+choices:
+  - id: write_back
+    label: Use the attention to put out something new, fast
+    outcome:
+      text: A week in a rented studio, a single nobody has heard, and a crowd that has just been told to listen.
+      effects:
+        - { type: fame, action: fans, delta: 20 }
+        - { type: fame, action: burnout, delta: 8 }
+        - { type: famePay, gain: solid }
+  - id: thank_them
+    label: Thank them, in person, and mean it
+    outcome:
+      text: >-
+        They are shorter than you expected and kinder. You talk for an hour,
+        and they give you the one piece of advice you will repeat for years.
+      effects:
+        - { type: fame, action: craft, delta: 3 }
+        - { type: stat, key: happiness, delta: 6 }
+        - { type: fame, action: image, delta: 2 }

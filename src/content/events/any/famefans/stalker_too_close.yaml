@@ -1,0 +1,55 @@
+id: stalker_too_close
+title: Too close
+text: >-
+  {fan.name} has been at every show you have played this year, which is not
+  unusual. What is unusual is the photograph {fan.they} {fan:sends|send} you of
+  your own front door, with a note that says "just wanted to say hi."
+tone: dark
+category: famefans
+rarity: uncommon
+recurring: true
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { fame: { active: true } }
+    - { fame: { stalker: false } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  fan: { kind: acquaintance, fan: super, presence: city }
+choices:
+  - id: talk
+    label: Reply once, firmly, and tell them it has to stop
+    check:
+      base: 40
+      stats: [{ key: confidence, weight: 0.2 }, { key: kindness, weight: 0.1 }, { fame: mood, weight: -0.1 }]
+      success:
+        text: The reply is short and unambiguous. They apologise at length, and for now they stay away.
+        effects:
+          - { type: relationship, role: fan, affection: -10 }
+          - { type: stat, key: stress, delta: 2 }
+      failure:
+        text: >-
+          The reply is read as a conversation, and a long one. {fan.name} does
+          not stop, and now believes you are listening.
+        effects:
+          - { type: fame, action: stalker, step: start, role: fan }
+          - { type: stat, key: stress, delta: 5 }
+  - id: security
+    label: Tell your team and change your routine
+    outcome:
+      text: >-
+        New locks, a different route, a new number. You are safer, and it
+        feels like living in a house with the curtains drawn.
+      effects:
+        - { type: fame, action: stalker, step: start, role: fan }
+        - { type: stat, key: stress, delta: 3 }
+        - { type: famePay, cost: small }
+  - id: ignore
+    label: Tell yourself it's harmless
+    outcome:
+      text: It is probably nothing. You keep the photograph, to show someone, in case it is something.
+      effects:
+        - { type: fame, action: stalker, step: start, role: fan }
+        - { type: stat, key: stress, delta: 4 }

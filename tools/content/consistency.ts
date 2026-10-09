@@ -43,6 +43,9 @@ function changesMoney(outcome: Outcome | undefined): boolean {
       e.type === 'money' ||
       // E6a: dirty money gained, paid out or lost, and a bail or lawyer's fee (a cost).
       e.type === 'dirtyMoney' ||
+      // E6b: money from the work, a deal's advance, and the price of walking away from one.
+      e.type === 'famePay' ||
+      (e.type === 'fame' && (e.action === 'contract' || (e.action === 'end_contract' && e.how === 'broken'))) ||
       e.type === 'repay' ||
       e.type === 'rentMonths' ||
       e.type === 'cost' ||

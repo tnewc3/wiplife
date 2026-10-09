@@ -1,0 +1,53 @@
+id: copycat_accusation
+title: "That sounds familiar"
+text: >-
+  Someone has noticed a resemblance. It starts as a post and becomes a thread
+  and then a segment on a show. They have found two bars, a phrase and a
+  gesture that match a work older than yours. It is, you are fairly sure,
+  an accident. You are not entirely sure.
+tone: serious
+category: fame
+rarity: uncommon
+recurring: true
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { fame: { active: true } }
+    - { fame: { rung: { gte: 3 } } }
+    - { fame: { released: true } }
+    - { fame: { path: [music] } }
+weight: { base: 0.8 }
+cooldownYears: 6
+choices:
+  - id: credit
+    label: Add the credit and say so
+    outcome:
+      text: A small royalty, a public thank you, and a very civil email from the original artist. The thread dies of old age.
+      effects:
+        - { type: famePay, cost: small }
+        - { type: fame, action: image, delta: 2 }
+  - id: fight
+    label: Fight it
+    check:
+      base: 45
+      stats: [{ key: smarts, weight: 0.2 }, { fame: image, weight: 0.2 }]
+      success:
+        text: Your lawyers produce a dated recording and a long list of earlier examples. The accusation falls apart, and the accuser apologises.
+        effects:
+          - { type: cost, item: lawyer_fee }
+          - { type: fame, action: image, delta: 3 }
+      failure:
+        text: >-
+          Your own early demo turns up, and it doesn't help. You settle quietly
+          and expensively, and the story sticks to your name.
+        effects:
+          - { type: cost, item: lawyer_fee }
+          - { type: famePay, cost: big }
+          - { type: fame, action: image, delta: -7 }
+  - id: ignore
+    label: Say nothing at all
+    outcome:
+      text: Silence is read as guilt by some and as dignity by others. Which side you hear from depends on the day.
+      effects:
+        - { type: fame, action: image, delta: -3 }

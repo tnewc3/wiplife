@@ -1,0 +1,33 @@
+id: agent_small_office
+title: Someone who answers the phone
+text: >-
+  A small agency above a dry cleaner wants to represent you. There are two
+  people in the office and a plant that is not doing well. They say they
+  believe in you, which is cheap, and prove it by offering to start before
+  you've signed anything.
+tone: neutral
+category: famebiz
+rarity: common
+recurring: true
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { fame: { active: true } }
+    - { fame: { agent: { eq: 0 } } }
+    - { fame: { rung: { gte: 2, lte: 4 } } }
+weight: { base: 10 }
+followUpOnly: true
+choices:
+  - id: sign
+    label: Sign with them
+    outcome:
+      text: They send three emails the same afternoon. One of them is an audition, and one is a thank-you.
+      effects:
+        - { type: fame, action: agent, tier: 1 }
+  - id: wait
+    label: Wait for a bigger agency
+    outcome:
+      text: A bigger name may come. For now there is just you, a phone, and a lot of unanswered messages.
+      effects:
+        - { type: stat, key: stress, delta: 1 }

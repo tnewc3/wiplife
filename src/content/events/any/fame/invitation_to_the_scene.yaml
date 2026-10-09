@@ -1,0 +1,49 @@
+id: invitation_to_the_scene
+title: Doors that were never open before
+text: >-
+  The invitations have started: openings, dinners, a yacht on a river you
+  have never heard of. Everyone in the room is lovely, and everyone wants
+  something small. The people who matter are in the corner and are not talking.
+tone: light
+category: fame
+rarity: common
+recurring: true
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { fame: { active: true } }
+    - { fame: { rung: { gte: 3 } } }
+    - { fame: { stalker: false } }
+weight:
+  base: 0.9
+  modifiers:
+    - { if: { trait: sociability, gt: 60 }, x: 1.4 }
+cooldownYears: 3
+choices:
+  - id: go_all_in
+    label: Go to everything
+    outcome:
+      text: >-
+        Six weeks of nights out, with the right people. You meet a producer,
+        a poet and a man who sells yachts. The bill, once it comes, is
+        impressive.
+      effects:
+        - { type: famePay, cost: big }
+        - { type: fame, action: fame, delta: 2 }
+        - { type: fame, action: image, delta: 3 }
+        - { type: stat, key: happiness, delta: 4 }
+  - id: pick_two
+    label: Pick two, and enjoy them
+    outcome:
+      text: A good dinner and a better conversation. You leave early and do not miss the rest.
+      effects:
+        - { type: famePay, cost: small }
+        - { type: stat, key: happiness, delta: 4 }
+        - { type: fame, action: image, delta: 1 }
+  - id: stay_home
+    label: Stay home
+    outcome:
+      text: The invitations keep coming for a while, and then slow. Your house has never been quieter or more comfortable.
+      effects:
+        - { type: stat, key: stress, delta: -3 }

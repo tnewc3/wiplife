@@ -1,0 +1,38 @@
+id: big_break_review
+title: One review
+text: >-
+  It was a short review in a paper almost nobody reads, until the right person
+  read it. Within the week the whole conversation about your work had changed,
+  and you were {rungTitle}.
+tone: light
+category: fame
+rarity: rare
+recurring: true
+lifeStages: [child, teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { fame: { active: true } }
+    - { fame: { path: [arts] } }
+weight: { base: 10 }
+followUpOnly: true
+choices:
+  - id: make_more
+    label: Go straight back into the work
+    outcome:
+      text: >-
+        You do not read the other reviews. You go into the room with the door
+        shut and make the next thing while the world is still listening.
+      effects:
+        - { type: fame, action: craft, delta: 4 }
+        - { type: fame, action: burnout, delta: 5 }
+        - { type: famePay, gain: small }
+  - id: talk_to_them
+    label: Say yes to every interview
+    outcome:
+      text: >-
+        You explain yourself in forty-two conversations and learn what you
+        think by the end of it. Some of it is true.
+      effects:
+        - { type: fame, action: fans, delta: 15 }
+        - { type: fame, action: image, delta: 3 }
+        - { type: famePay, gain: solid }

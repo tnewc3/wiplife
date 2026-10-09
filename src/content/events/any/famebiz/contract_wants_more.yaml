@@ -1,0 +1,51 @@
+id: contract_wants_more
+title: A clause they forgot to mention
+text: >-
+  The people you work for call a meeting with no agenda. They would like more:
+  a second project this year, a few appearances, a tour. It is all within
+  reach of the contract's wording, if not its spirit.
+tone: serious
+category: famebiz
+rarity: common
+recurring: true
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { fame: { active: true } }
+    - { fame: { contract: true } }
+weight: { base: 0.9 }
+cooldownYears: 3
+choices:
+  - id: comply
+    label: Give them what they ask for
+    outcome:
+      text: You say yes, and the year fills up. The result is a lot of work, and goodwill that will be remembered when your name comes up.
+      effects:
+        - { type: fame, action: burnout, delta: 8 }
+        - { type: fame, action: fame, delta: 2 }
+        - { type: stat, key: stress, delta: 3 }
+  - id: negotiate
+    label: Negotiate for something in return
+    check:
+      base: 45
+      stats: [{ fame: rung, weight: 0.25 }, { fame: image, weight: 0.2 }, { key: confidence, weight: 0.15 }]
+      success:
+        text: You trade the extra work for a larger share of what comes in. The meeting ends on a handshake and a new page of figures.
+        effects:
+          - { type: famePay, gain: solid }
+          - { type: fame, action: burnout, delta: 4 }
+      failure:
+        text: They say they will think about it. A week later the extra work is scheduled anyway, with no apology.
+        effects:
+          - { type: fame, action: burnout, delta: 8 }
+          - { type: fame, action: image, delta: -1 }
+  - id: walk
+    label: Break the contract
+    outcome:
+      text: >-
+        It is a decision with a price. They send a letter, you send a larger
+        one, and a lawyer you will be paying for a while sends the largest.
+      effects:
+        - { type: fame, action: end_contract, how: broken }
+        - { type: stat, key: stress, delta: 4 }

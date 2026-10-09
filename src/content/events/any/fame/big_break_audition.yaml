@@ -1,0 +1,39 @@
+id: big_break_audition
+title: The part that was meant for someone else
+text: >-
+  The actor they wanted dropped out on a Thursday. A casting director who had
+  seen your work in a small room remembered your name. By Friday you were reading for the part,
+  and by Monday you were {rungTitle}.
+tone: light
+category: fame
+rarity: rare
+recurring: true
+lifeStages: [child, teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { fame: { active: true } }
+    - { fame: { path: [acting] } }
+weight: { base: 10 }
+followUpOnly: true
+choices:
+  - id: all_in
+    label: Give it everything
+    outcome:
+      text: >-
+        You learn the lines in a weekend and the character in a week. On the
+        first day of shooting, the director says nothing for a long moment and
+        then says "yes."
+      effects:
+        - { type: fame, action: craft, delta: 4 }
+        - { type: fame, action: burnout, delta: 8 }
+        - { type: famePay, gain: solid }
+  - id: stay_humble
+    label: Remember where you came from
+    outcome:
+      text: >-
+        You call the people who gave you your first chances before anyone else
+        can. It is the kind of thing people say about you later.
+      effects:
+        - { type: fame, action: image, delta: 4 }
+        - { type: famePay, gain: small }
+        - { type: stat, key: happiness, delta: 5 }

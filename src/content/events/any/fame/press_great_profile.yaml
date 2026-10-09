@@ -1,0 +1,32 @@
+id: press_great_profile
+title: A long, kind profile
+text: >-
+  A writer follows you for a week and writes four thousand words that are fair
+  and funny and true. You read it standing up, in the kitchen, and call three
+  people to read parts of it aloud.
+tone: light
+category: fame
+rarity: common
+recurring: true
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { fame: { active: true } }
+    - { fame: { released: true } }
+weight: { base: 8 }
+followUpOnly: true
+choices:
+  - id: share
+    label: Share it widely
+    outcome:
+      text: It travels better than your work did. For a month, people mention it before they mention the work.
+      effects:
+        - { type: fame, action: image, delta: 5 }
+        - { type: fame, action: fans, delta: 5 }
+  - id: thank_writer
+    label: Write to thank the writer
+    outcome:
+      text: The reply comes in an hour. You end up trading messages for a year, the sort of friendship you cannot plan.
+      effects:
+        - { type: stat, key: happiness, delta: 4 }
+        - { type: fame, action: image, delta: 2 }

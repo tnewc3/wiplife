@@ -1,0 +1,8 @@
+id: halcyon_music_prize
+name: the Halcyon Music Prize
+category: Record of the Year
+path: music
+blurb: The critics' prize in music, voted by people who listen for a living.
+minRung: 3
+critics: 0.75
+prestige: 1

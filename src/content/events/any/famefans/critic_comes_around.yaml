@@ -1,0 +1,38 @@
+id: critic_comes_around
+title: Changing their mind
+text: >-
+  {critic.name} has written about you again, and this time it reads
+  differently. It begins with the phrase "I was wrong," which is a rare thing
+  to see in print, and goes on to say why.
+tone: light
+category: famefans
+rarity: uncommon
+recurring: true
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 15 } }
+    - { fame: { active: true } }
+    - { fame: { rung: { gte: 3 } } }
+    - { fame: { image: { gte: 55 } } }
+weight: { base: 5 }
+followUpOnly: true
+cast:
+  critic: { kind: acquaintance, fan: critic, presence: city }
+choices:
+  - id: gracious
+    label: Reach out and thank {critic.them}
+    outcome:
+      text: >-
+        The email is short. The answer is shorter, and warmer than you'd
+        expect. {critic.name} says it took years to say.
+      effects:
+        - { type: relationship, role: critic, affection: 15 }
+        - { type: fame, action: image, delta: 3 }
+  - id: savour
+    label: Keep it to yourself and enjoy it
+    outcome:
+      text: You read it eleven times in the first week. It is the sort of thing you save in a drawer for the bad days.
+      effects:
+        - { type: stat, key: happiness, delta: 5 }
+        - { type: stat, key: confidence, delta: 3 }

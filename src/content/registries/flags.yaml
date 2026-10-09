@@ -100,3 +100,8 @@ flags:
   turned_down_a_crew: You said no to a crew that wanted you
   promised_to_leave_the_crew: You promised someone close to you that you would leave the crew
   testified_against_crew: You gave the police what you knew about your crew
+  # E6b: fame in arts and media.
+  fame_broke_contract: You walked away from a contract and paid for it
+  fame_burned_out: You burned out and had to stop
+  fame_stalked: A fan became a stalker
+  fame_famous: You became famous

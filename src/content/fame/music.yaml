@@ -1,0 +1,30 @@
+id: music
+name: Music
+noun: music
+blurb: Songs, stages and the long road between a bar with six people in it and an arena that knows every word.
+talents: [music]
+aptitude: { sociability: 0.2, confidence: 0.2, discipline: 0.2, ambition: 0.15, looks: 0.1, smarts: 0.15 }
+criticWeight: 0.4
+minAge: 8
+routes:
+  - { id: open_mic, label: Play open mics, blurb: "Sign up on the list, play three songs to a room that is mostly waiting for its drinks.", minAge: 14, craft: 12 }
+  - { id: band, label: Start a band, blurb: "Find people who can play and rehearse in someone's garage until the neighbours complain.", minAge: 13, craft: 14 }
+  - { id: lessons, label: Take lessons and perform, blurb: "A teacher, a recital hall and a year of scales before anyone hears anything.", minAge: 8, craft: 20 }
+  - { id: talent_show, label: Enter the talent contest, blurb: "A stage, a panel and a crowd that will tell you what it thinks.", minAge: 10, craft: 10 }
+rungs:
+  - { title: open-mic regular, milestone: Play your way into a room that pays, fame: 0, quality: 0, income: 700 }
+  - { title: local gig player, milestone: Put out your first release, fame: 12, quality: 32, income: 7000 }
+  - { title: first-release artist, milestone: Get signed by a label, fame: 26, quality: 42, income: 24000 }
+  - { title: signed act, milestone: Land a hit that people know the words to, fame: 40, quality: 52, income: 80000 }
+  - { title: artist with a hit, milestone: Headline your own tour, fame: 56, quality: 64, income: 240000 }
+  - { title: touring headliner, milestone: Sell out an arena, fame: 72, quality: 80, income: 800000 }
+  - { title: arena star, milestone: Stay on top, fame: 88, quality: 92, income: 3000000 }
+kinds:
+  - { id: single, label: A single, noun: single, blurb: "One song, one shot at the radio.", minRung: 1, difficulty: 3, reach: 0.7, pay: 0.5 }
+  - { id: ep, label: An EP, noun: EP, blurb: "Five songs that sound like they belong together.", minRung: 2, difficulty: 0, reach: 0.9, pay: 0.8 }
+  - { id: album, label: An album, noun: album, blurb: "A full record, with everything that can go wrong with one.", minRung: 3, difficulty: -3, reach: 1.2, pay: 1.2 }
+  - { id: live_record, label: A live record, noun: live record, blurb: "One loud night on tape.", minRung: 4, difficulty: 2, reach: 0.8, pay: 0.9 }
+tour: { label: Go on tour, noun: tour, minRung: 3 }
+press: { label: Do a press run, minRung: 2 }
+retire: { from: 55, chance: [{ at: 55, x: 0.03 }, { at: 65, x: 0.1 }, { at: 75, x: 0.25 }] }
+royalties: 0.1

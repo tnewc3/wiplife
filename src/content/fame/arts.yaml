@@ -1,0 +1,28 @@
+id: arts
+name: Writing and art
+noun: your writing and art
+blurb: Manuscripts, canvases and the slow work of getting someone else to look.
+talents: [writing, art]
+aptitude: { discipline: 0.25, smarts: 0.25, confidence: 0.1, ambition: 0.15, riskTaking: 0.1, kindness: 0.05, sociability: 0.1 }
+criticWeight: 0.7
+minAge: 10
+routes:
+  - { id: submit, label: Send your writing out, blurb: "A cover letter, a folder of pages and a very long wait for a reply.", minAge: 12, craft: 14 }
+  - { id: studio, label: Work in a studio and show your art, blurb: "A rented corner, a pile of canvases and a group show that nobody comes to except your friends.", minAge: 10, craft: 14 }
+  - { id: workshop, label: Join a workshop, blurb: "A room of people who will tell you what is wrong with page three.", minAge: 14, craft: 18 }
+  - { id: zine, label: Make a zine, blurb: "Photocopies, staples and the first stranger who says they liked it.", minAge: 10, craft: 8 }
+rungs:
+  - { title: unpublished writer or artist, milestone: Get your work published or shown, fame: 0, quality: 0, income: 400 }
+  - { title: published or shown artist, milestone: Earn real critical notice, fame: 18, quality: 35, income: 9000 }
+  - { title: critically noticed artist, milestone: Land a bestseller or a major show, fame: 38, quality: 50, income: 36000 }
+  - { title: bestselling author or major exhibitor, milestone: Become an icon of the form, fame: 62, quality: 70, income: 160000 }
+  - { title: icon, milestone: Stay in the conversation, fame: 82, quality: 88, income: 850000 }
+kinds:
+  - { id: short_pieces, label: Short pieces or prints, noun: set of pieces, blurb: "A few things made quickly and sent out.", minRung: 1, difficulty: 3, reach: 0.6, pay: 0.4 }
+  - { id: book, label: A book, noun: book, blurb: "A novel, a memoir or a collection, and a year inside it.", minRung: 1, difficulty: -2, reach: 1.1, pay: 1.1 }
+  - { id: series_of_works, label: A series of works, noun: series of works, blurb: "A body of work with an idea running through it.", minRung: 2, difficulty: -1, reach: 1, pay: 0.9 }
+  - { id: solo_show, label: A solo show or a major release, noun: show, blurb: "Your name on the wall, or on the spine, of something big.", minRung: 3, difficulty: -4, reach: 1.5, pay: 1.5 }
+tour: { label: Go on a book tour, noun: book tour, minRung: 3 }
+press: { label: Do a press run, minRung: 2 }
+retire: { from: 65, chance: [{ at: 65, x: 0.02 }, { at: 75, x: 0.07 }, { at: 85, x: 0.2 }] }
+royalties: 0.15

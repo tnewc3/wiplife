@@ -1,0 +1,44 @@
+id: minor_school_vs_stage
+title: Missing too much school
+text: >-
+  The letter from school is polite and specific. Your attendance is down, a
+  teacher notes, and so is your attention. Your {parent.relation} reads it
+  twice at the kitchen table and does not say anything for a long time.
+tone: serious
+category: fame
+rarity: common
+recurring: true
+lifeStages: [child, teen]
+requires:
+  all:
+    - { age: { lte: 17 } }
+    - { fame: { active: true } }
+    - { fame: { commitment: [steady, all] } }
+    - { education: { program: [elementary, middle, high] } }
+weight: { base: 2.5 }
+cooldownYears: 3
+cast:
+  parent: { kind: parent, presence: household }
+choices:
+  - id: school_first
+    label: Say you'll put school first
+    outcome:
+      text: You skip an audition, and you hate it. By the end of the term your grades are back and so is the quiet.
+      effects:
+        - { type: fame, action: commitment, value: back }
+        - { type: education, action: grades, value: 0.2 }
+        - { type: relationship, role: parent, trust: 4 }
+  - id: tutor
+    label: Ask for a tutor and keep going
+    outcome:
+      text: It's a compromise your family can afford, barely. You do your homework in the back of a car, and it mostly works.
+      effects:
+        - { type: famePay, cost: small }
+        - { type: education, action: grades, value: 0.1 }
+  - id: ignore
+    label: Say it's fine
+    outcome:
+      text: The letters get firmer. You pretend not to see them, and then you can't.
+      effects:
+        - { type: education, action: grades, value: -0.3 }
+        - { type: relationship, role: parent, trust: -3 }

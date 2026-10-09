@@ -1,0 +1,31 @@
+id: release_solid
+title: A fair reception
+text: >-
+  {project} is out. A critic writes {review} A fan writes {fanLine} It is the
+  kind of response that does not make a story, and keeps you working.
+tone: neutral
+category: fame
+rarity: common
+recurring: true
+lifeStages: [child, teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { fame: { active: true } }
+    - { fame: { last: [solid] } }
+weight: { base: 10 }
+followUpOnly: true
+choices:
+  - id: work
+    label: Get straight back to work
+    outcome:
+      text: There is no ceremony. You do the next thing, and the next, and slowly the pile of work behind you gets taller.
+      effects:
+        - { type: fame, action: craft, delta: 1 }
+        - { type: fame, action: burnout, delta: 2 }
+  - id: breathe
+    label: Take a few days off
+    outcome:
+      text: A walk, a long dinner, a night of sleep nobody interrupts. It does you more good than you expected.
+      effects:
+        - { type: stat, key: stress, delta: -4 }
+        - { type: fame, action: burnout, delta: -3 }

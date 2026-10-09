@@ -1,0 +1,36 @@
+id: agent_established
+title: A proper agency
+text: >-
+  A well-known agency says your name in a meeting and you hear about it from
+  three different people before they call. The pitch is professional, the cut
+  is bigger, and the doors it opens are real.
+tone: neutral
+category: famebiz
+rarity: uncommon
+recurring: true
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { fame: { active: true } }
+    - { fame: { agent: { lt: 2 } } }
+    - { fame: { rung: { gte: 4 } } }
+weight: { base: 10 }
+followUpOnly: true
+choices:
+  - id: sign
+    label: Sign with them
+    outcome:
+      text: >-
+        The first meeting is in a conference room with a view. They know your
+        work better than you expected, and they are already talking about the
+        next three years.
+      effects:
+        - { type: fame, action: agent, tier: 2 }
+  - id: stay_small
+    label: Stay with the people you have
+    visibleIf: { fame: { agent: { gte: 1 } } }
+    outcome:
+      text: Your agent is quiet for a moment when you tell them, and then says "thank you," the way people do when it has been a long time.
+      effects:
+        - { type: fame, action: image, delta: 1 }

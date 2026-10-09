@@ -324,6 +324,40 @@ export const migrations: readonly Migration[] = [
       };
     },
   },
+  {
+    from: 18,
+    description:
+      'E6b: fame in arts and media. A life gains a "fame" record (no career, no fans, nothing signed or released). ' +
+      'Nobody is given a career by the upgrade: a career begins with a first step, as it does for a new life.',
+    migrate: (data) => {
+      if (!isRecord(data)) return data;
+      return {
+        ...data,
+        fame: {
+          active: false,
+          main: null,
+          second: null,
+          paths: {},
+          image: 50,
+          fans: 0,
+          mood: 60,
+          burnout: 0,
+          commitment: 'steady',
+          scene: 'social',
+          agent: null,
+          contract: null,
+          plan: null,
+          projects: [],
+          awards: [],
+          people: { super: [], hater: [], critic: [] },
+          stalker: null,
+          headlines: [],
+          income: { year: 0, gross: 0, agent: 0, company: 0, trust: 0, scene: 0 },
+          totals: { projects: 0, hits: 0, flops: 0, breaks: 0, fades: 0, comebacks: 0, nominations: 0, wins: 0, scandals: 0, tours: 0, burnouts: 0, crossovers: 0, stalkers: 0, earned: 0 },
+        },
+      };
+    },
+  },
 ];
 
 function isRecord(value: unknown): value is Record<string, unknown> {

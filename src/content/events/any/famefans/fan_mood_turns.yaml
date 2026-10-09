@@ -1,0 +1,49 @@
+id: fan_mood_turns
+title: The mood has changed
+text: >-
+  It is something in the comments, the empty seats in the second row, and the
+  silence where there used to be someone shouting your name. The people who
+  loved your work have stopped believing in you, and they're saying so.
+tone: dark
+category: famefans
+rarity: common
+recurring: true
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { fame: { active: true } }
+    - { fame: { mood: { lt: 30 } } }
+    - { fame: { fans: { gte: 200 } } }
+weight: { base: 3 }
+cooldownYears: 3
+choices:
+  - id: apologise
+    label: Say sorry, and mean it
+    check:
+      base: 50
+      stats: [{ key: kindness, weight: 0.25 }, { key: confidence, weight: 0.1 }, { fame: image, weight: 0.15 }]
+      success:
+        text: The apology is simple and doesn't ask for anything. A lot of them come back, a few with better manners than before.
+        effects:
+          - { type: fame, action: mood, delta: 14 }
+          - { type: fame, action: image, delta: 3 }
+      failure:
+        text: >-
+          It reads like a press release, and they are not fooled. Three more
+          people announce publicly that they are leaving.
+        effects:
+          - { type: fame, action: mood, delta: -4 }
+          - { type: fame, action: fans, delta: -6 }
+  - id: new_work
+    label: Let the next piece of work do the talking
+    outcome:
+      text: It's a long road, but a straight one. When the next thing comes out, some will listen again.
+      effects:
+        - { type: fame, action: craft, delta: 2 }
+        - { type: stat, key: stress, delta: 3 }
+  - id: ignore
+    label: Ignore it
+    outcome:
+      text: They notice that you did. The mood sets like cement.
+      effects:
+        - { type: fame, action: mood, delta: -4 }

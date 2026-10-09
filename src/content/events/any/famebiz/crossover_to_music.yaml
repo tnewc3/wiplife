@@ -1,0 +1,34 @@
+id: crossover_to_music
+title: Can you sing?
+text: >-
+  A producer who watched you work asks a question you have been waiting for
+  someone to ask: can you sing? It is a strange thing to be asked when
+  everybody already thinks they know what you are.
+tone: neutral
+category: famebiz
+rarity: uncommon
+recurring: true
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { fame: { active: true } }
+    - { fame: { path: [acting, social, arts] } }
+    - { fame: { second: false } }
+    - { fame: { crossable: true } }
+weight: { base: 10 }
+followUpOnly: true
+choices:
+  - id: try
+    label: Try it
+    outcome:
+      text: >-
+        The first session is a disaster of nerves. The second is a small
+        miracle. Your name opens the door, and the rest is up to you.
+      effects:
+        - { type: fame, action: cross, path: music }
+        - { type: stat, key: stress, delta: 3 }
+  - id: no
+    label: Stick to what you know
+    outcome:
+      text: It is a good reason to say no, and you say it well. It will sit in a corner of your head for a long time.
+      effects: []

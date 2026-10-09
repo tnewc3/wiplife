@@ -1,0 +1,40 @@
+id: release_hit
+title: People like it
+text: >-
+  {project} is out, and for once everyone seems to agree. A critic writes
+  {review} A fan writes {fanLine} The phone does not stop for two days.
+tone: light
+category: fame
+rarity: common
+recurring: true
+lifeStages: [child, teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { fame: { active: true } }
+    - { fame: { last: [hit] } }
+weight: { base: 10 }
+followUpOnly: true
+choices:
+  - id: celebrate
+    label: Celebrate with the people who helped
+    outcome:
+      text: A long table, a lot of toasts and a night nobody wants to end. You remember the faces more than the words.
+      effects:
+        - { type: stat, key: happiness, delta: 6 }
+        - { type: fame, action: mood, delta: 3 }
+        - { type: famePay, cost: petty }
+  - id: ride_it
+    label: Use the momentum and do a bit more press
+    outcome:
+      text: Interviews, a few appearances, a day you only vaguely remember. The attention does not last, so you make the most of it.
+      effects:
+        - { type: fame, action: fame, delta: 2 }
+        - { type: fame, action: burnout, delta: 4 }
+        - { type: stat, key: stress, delta: 3 }
+  - id: quiet
+    label: Stay quiet and keep your head down
+    outcome:
+      text: You turn off the notifications and go back to the thing that got you here. It feels like cheating, and works.
+      effects:
+        - { type: fame, action: craft, delta: 2 }
+        - { type: stat, key: stress, delta: -2 }

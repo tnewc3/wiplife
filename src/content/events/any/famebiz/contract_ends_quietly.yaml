@@ -1,0 +1,40 @@
+id: contract_ends_quietly
+title: The deal runs out
+text: >-
+  Your contract has run its course and nobody sent a card. The people you
+  worked with are warm in the hallway and noncommittal in the email. Whether
+  to stay, and on what terms, is up to you.
+tone: neutral
+category: famebiz
+rarity: common
+recurring: true
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { fame: { active: true } }
+    - { fame: { contract: false } }
+weight: { base: 10 }
+followUpOnly: true
+choices:
+  - id: renew
+    label: Ask about staying on
+    check:
+      base: 50
+      stats: [{ fame: image, weight: 0.2 }, { fame: rung, weight: 0.2 }, { fame: mood, weight: 0.1 }]
+      success:
+        text: They draw up fresh papers over lunch. The terms are better than the last time, and everybody pretends this is a coincidence.
+        effects:
+          - { type: fame, action: contract, terms: standard }
+      failure:
+        text: A short email says the company is "going in a different direction," and wishes you well.
+        effects:
+          - { type: fame, action: image, delta: -1 }
+          - { type: fame, action: mood, delta: -2 }
+  - id: go_free
+    label: Go independent
+    outcome:
+      text: No label, no studio, no notes. The work is entirely yours, and so is everything that goes wrong.
+      effects:
+        - { type: fame, action: craft, delta: 2 }
+        - { type: stat, key: stress, delta: 2 }

@@ -1032,6 +1032,8 @@ export interface LifeState {
   teen: TeenState;
   /** E6a: your crime career: the crew you are in, your rank and standing, the heat on you, and how it ended if you got out. */
   crime: CrimeState;
+  /** E6b: your fame in arts and media: the path, rung, fame, image, fans, projects, agent, contract and awards. */
+  fame: FameState;
 }
 
 /** E6a: the crew you are in (a definition in src/content/crews, made real for you). */
@@ -1105,6 +1107,148 @@ export interface CrimeState {
     arrests: number;
     /** Years spent in a crew. */
     years: number;
+  };
+}
+
+/** E6b: where you stand in one path (music, acting, social media, writing and art). */
+export interface FamePathState {
+  /** Your rung on the ladder (1 and up; the path's rungs say what each is called). */
+  rung: number;
+  /** The highest rung you have held. */
+  peak: number;
+  /** Fame in this path (0–100). It holds the rung, and fades without new work. */
+  fame: number;
+  /** How good you are at the work itself (0–100); it grows with years of practice. */
+  craft: number;
+  /** The year you started. */
+  since: number;
+  /** The last year you put out something new (or went on the road). */
+  last: number;
+  /** The best quality of your last few releases, for the gate to the next rung. */
+  recent: number[];
+  /** The year of your last big break (0 for none). */
+  breakYear: number;
+}
+
+/** E6b: how a release was made and what critics and fans made of it. */
+export interface FameProject {
+  year: number;
+  path: Id;
+  kind: Id;
+  title: string;
+  style: 'commercial' | 'artistic';
+  risk: 'safe' | 'bold';
+  tour: boolean;
+  press: boolean;
+  /** 0–100: the work itself, then what critics and what fans made of it. */
+  quality: number;
+  critics: number;
+  fans: number;
+  band: 'flop' | 'solid' | 'hit' | 'acclaimed' | 'cult' | 'crowd';
+  /** Fame won (or lost), and what it earned before the cuts. */
+  gain: number;
+  earned: number;
+  /** A company or agent picked it for you (a contract's yearly work). */
+  assigned?: true;
+}
+
+/** E6b: a project lined up for the coming year, with its creative choices. */
+export interface FamePlan {
+  path: Id;
+  kind: Id;
+  style: 'commercial' | 'artistic';
+  risk: 'safe' | 'bold';
+  tour: boolean;
+  press: boolean;
+}
+
+export interface FameContract {
+  company: Id;
+  path: Id;
+  since: number;
+  /** The last year it runs. */
+  until: number;
+  advance: number;
+  /** The share of what the work earns that the company keeps (0–1). */
+  share: number;
+  terms: 'standard' | 'tough' | 'generous';
+  /** You can't work for anyone else, or cross over, while it runs. */
+  exclusive: boolean;
+  /** A parent signed it (you are under 18). */
+  byParent: boolean;
+}
+
+export interface FameAward {
+  awardId: Id;
+  year: number;
+  path: Id;
+  project: string;
+  won: boolean;
+}
+
+/** E6b: what your fame has brought of its own accord this year, to be paid by the yearly ledger. */
+export interface FameIncome {
+  year: number;
+  /** What the work earned, before the cuts (an advance counts the year it is signed). */
+  gross: number;
+  /** The agent's cut and the company's share. */
+  agent: number;
+  company: number;
+  /** A minor's share held in trust by a parent. */
+  trust: number;
+  /** What the scene (your lifestyle) costs this year, charged with your living costs. */
+  scene: number;
+}
+
+export interface FameState {
+  /** You have a career in at least one path (even a faded one); false before you start and after you retire. */
+  active: boolean;
+  /** The year you retired from it. */
+  retired?: number;
+  main: Id | null;
+  second: Id | null;
+  paths: Record<Id, FamePathState>;
+  /** How the public sees you (0–100, 50 is neutral). */
+  image: number;
+  fans: number;
+  /** How fans feel about you now (0–100): below 30 they have turned, above 60 they are devoted. */
+  mood: number;
+  burnout: number;
+  commitment: 'back' | 'steady' | 'all';
+  scene: 'low' | 'social' | 'entourage' | 'lavish';
+  agent: { agentId: Id; since: number } | null;
+  contract: FameContract | null;
+  plan: FamePlan | null;
+  /** Your latest releases, newest last (a dozen are kept). */
+  projects: FameProject[];
+  awards: FameAward[];
+  /** A nomination waiting for its awards night (the year it is held). */
+  nominated?: { awardId: Id; project: string; due: number; score: number };
+  /** An awards night this year, and how it went. */
+  ceremony?: { year: number; awardId: Id; project: string; result: 'won' | 'lost' };
+  /** Superfans, haters and critics: people in your life who came to you through your work. */
+  people: { super: Id[]; hater: Id[]; critic: Id[] };
+  stalker: { id: Id; since: number; stage: 'watching' | 'reported' | 'ordered' | 'charged' } | null;
+  /** The tabloid headlines of the last few years, newest last. */
+  headlines: { year: number; text: string; kind: string }[];
+  income: FameIncome;
+  /** The rung you stood on before your fame faded (for a comeback). */
+  fadedFrom?: number;
+  totals: {
+    projects: number;
+    hits: number;
+    flops: number;
+    breaks: number;
+    fades: number;
+    comebacks: number;
+    nominations: number;
+    wins: number;
+    scandals: number;
+    tours: number;
+    burnouts: number;
+    crossovers: number;
+    stalkers: number;
+    earned: number;
   };
 }
 

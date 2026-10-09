@@ -15,6 +15,7 @@ import { giveSampleWeb } from './web/sample';
 import { giveSamplePossessions } from './possessions/sample';
 import { giveSampleTeen } from './teen/sample';
 import { giveSampleCrime } from './crime/sample';
+import { giveSampleFame } from './fame/sample';
 import { consistencyProblems } from './presence';
 import { isPartnerKind } from './relationships';
 import { createLife, resolveChoice } from './life';
@@ -102,6 +103,8 @@ export function previewEvent(content: ContentBundle, options: SandboxOptions): S
     giveSampleTeen(d as LifeState, def, cast, content);
     // E6a: the crew, rank, heat, investigation or dirty money the event asks for.
     giveSampleCrime(d as LifeState, def, cast, content);
+    // E6b: the career, release, fans or stalker the event asks for.
+    giveSampleFame(d as LifeState, def, cast, content);
     d.phase = 'events';
     d.pending = [{ instanceId: SANDBOX_INSTANCE, eventId: def.id, cast }];
   });

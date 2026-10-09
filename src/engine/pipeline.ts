@@ -17,12 +17,15 @@
  * a team or a teen job gives count toward the year that has begun; the teen
  * job's pay joins the ledger's income. The possessions step (E5) follows the ledger, which has charged the year's upkeep and insurance:
  * pets and vehicles age, accidents and deaths are queued as events.
+ * The fame step (E6b) follows the crime step and runs before the ledger: the year's
+ * releases come out, fame rises or fades, and the year's pay is set aside for the ledger.
  * The crime step (E6a) follows the legal step: heat fades, a crew's year passes,
  * the police may open an investigation or make an arrest, and the year's jobs
  * and trouble are queued as events.
  */
 import type { ContentBundle } from '../content/schemas';
 import { runCrime } from './crime/step';
+import { runFame } from './fame/step';
 import { runHeritage } from './estate/heritage';
 import { runLives } from './lives/step';
 import { runPossessions } from './possessions/step';
@@ -56,6 +59,7 @@ export const YEAR_PIPELINE: readonly PipelineStep[] = [
   { id: 'heritage', run: runHeritage },
   { id: 'legal', run: runLegal },
   { id: 'crime', run: runCrime },
+  { id: 'fame', run: runFame },
   { id: 'education', run: runEducation },
   { id: 'teen', run: runTeen },
   { id: 'career', run: runCareer },

@@ -1,0 +1,40 @@
+id: minor_set_schedule
+title: Rules for the schedule
+text: >-
+  Your {parent.relation} sits you down with a calendar and a coloured pen.
+  School comes first, {parent.they} {parent:says|say}, and then the work, and
+  then sleep, and all three get written down. It is not an argument. It is a
+  list.
+tone: neutral
+category: fame
+rarity: common
+recurring: true
+lifeStages: [child, teen]
+requires:
+  all:
+    - { age: { lte: 17 } }
+    - { fame: { active: true } }
+    - { fame: { rung: { gte: 2 } } }
+weight: { base: 2 }
+cooldownYears: 3
+cast:
+  parent: { kind: parent, presence: household }
+choices:
+  - id: agree
+    label: Agree to all of it
+    outcome:
+      text: It's a tight week. It is also a calm one, and your {parent.relation} notices that you're sleeping.
+      effects:
+        - { type: fame, action: commitment, value: back }
+        - { type: relationship, role: parent, trust: 4 }
+        - { type: stat, key: stress, delta: -2 }
+  - id: push_back
+    label: Ask for more time for the work
+    outcome:
+      text: >-
+        You make your case. It's a good one. You get a compromise, and your
+        {parent.relation} writes it on the calendar in a different colour.
+      effects:
+        - { type: fame, action: commitment, value: steady }
+        - { type: relationship, role: parent, trust: 1 }
+        - { type: education, action: grades, value: -0.1 }

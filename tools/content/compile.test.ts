@@ -1514,3 +1514,89 @@ describe('crime careers (E6a)', () => {
     expect(await expectErrors()).toContain('payout is below the rank before it');
   });
 });
+
+describe('fame in arts and media (E6b)', () => {
+  const read = (file: string) => readFile(path.join(dir, file), 'utf8');
+
+  it('accepts the real content: four paths, agents, awards, companies, about eighty events, and no warnings', { timeout: 90_000 }, async () => {
+    const result = await compile();
+    if (!result.ok) throw new Error(formatErrors(result.errors));
+    expect(Object.keys(result.bundle.famePaths).sort()).toEqual(['acting', 'arts', 'music', 'social']);
+    expect(Object.keys(result.bundle.fameAgents)).toHaveLength(3);
+    expect(Object.keys(result.bundle.fameCompanies).length).toBeGreaterThanOrEqual(12);
+    const events = Object.values(result.bundle.events).filter((e) => !e.retired && e.category.startsWith('fame'));
+    expect(events.length).toBeGreaterThanOrEqual(65);
+    expect(events.length).toBeLessThanOrEqual(90);
+    expect(result.warnings).toEqual([]);
+  });
+
+  it('keeps fame away from romance, and a stalker to adults', { timeout: 90_000 }, async () => {
+    const letter = await read('events/any/famefans/superfan_letter.yaml');
+    await write('events/any/famefans/superfan_letter.yaml', letter.replace('It is four pages', 'It is four pages, and ends with a kiss and a crush.'));
+    expect(await expectErrors()).toContain("can't use romantic or sexual words");
+    await write('events/any/famefans/superfan_letter.yaml', letter.replace('fan: { kind: acquaintance, fan: super, presence: city, createIfMissing: true }', 'fan: { kind: acquaintance, fan: super, presence: city, createIfMissing: true }\n  date: { kind: acquaintance, presence: city, romantic: true }'));
+    expect(await expectErrors()).toContain('fame content has no romantic roles');
+    await write('events/any/famefans/superfan_letter.yaml', letter);
+    const stalker = await read('events/any/famefans/stalker_escalates.yaml');
+    await write('events/any/famefans/stalker_escalates.yaml', stalker.replace('lifeStages: [youngAdult, adult, senior]', 'lifeStages: [teen, youngAdult, adult, senior]'));
+    expect(await expectErrors()).toContain('involves a stalker, so it requires');
+    await write('events/any/famefans/stalker_escalates.yaml', stalker.replace('    - { age: { gte: 18 } }\n', ''));
+    expect(await expectErrors()).toContain('involves a stalker, so it requires');
+  });
+
+  it('starts a career only at an age the path and route allow, and only for someone with none', { timeout: 90_000 }, async () => {
+    const mic = await read('events/any/fameentry/open_mic_night.yaml');
+    await write('events/any/fameentry/open_mic_night.yaml', mic.replace('    - { age: { gte: 14 } }\n', '    - { age: { gte: 9 } }\n'));
+    expect(await expectErrors()).toContain('which needs age 14');
+    await write('events/any/fameentry/open_mic_night.yaml', mic.replace('    - { fame: { active: false } }\n', ''));
+    expect(await expectErrors()).toMatch(/must require \{ fame: \{ active: false \} \}|category "fameentry" requires/);
+    await write('events/any/fameentry/open_mic_night.yaml', mic.replace('route: open_mic', 'route: nowhere'));
+    expect(await expectErrors()).toContain('unknown route "nowhere"');
+  });
+
+  it('has a parent sign for anyone under 18, never for an adult-only deal', { timeout: 90_000 }, async () => {
+    const minor = await read('events/any/famebiz/contract_offer_for_minor.yaml');
+    await write('events/any/famebiz/contract_offer_for_minor.yaml', minor.replace('parent: { kind: parent, presence: household }', 'parent: { kind: friend, presence: city }'));
+    expect(await expectErrors()).toContain('casts the parent who signs for a minor');
+    await write('events/any/famebiz/contract_offer_for_minor.yaml', minor);
+    const standard = await read('events/any/famebiz/contract_offer_standard.yaml');
+    await write('events/any/famebiz/contract_offer_standard.yaml', standard.replace('    - { age: { gte: 18 } }\n', ''));
+    expect(await expectErrors()).toContain('signs a deal or an agent');
+  });
+
+  it('allows the fame text values only where an event requires what they name', { timeout: 90_000 }, async () => {
+    const real = await read('events/any/fame/press_great_profile.yaml');
+    await write('events/any/fame/press_great_profile.yaml', real.replace('A writer follows you', '{award} and {company} and {agent} and {headline}. A writer follows you'));
+    const messages = await expectErrors();
+    expect(messages).toContain('uses {award} without requiring ceremony');
+    expect(messages).toContain('uses {company} without requiring contract: true');
+    expect(messages).toContain('uses {agent} without requiring an agent');
+    expect(messages).toContain('uses {headline} without requiring tabloid or scandal');
+    await write('events/any/fame/press_great_profile.yaml', real);
+    const hit = await read('events/any/fame/release_hit.yaml');
+    await write('events/any/fame/release_hit.yaml', hit.replace('    - { fame: { last: [hit] } }\n', ''));
+    expect(await expectErrors()).toContain('so it must require { fame: { last: [hit] } }');
+  });
+
+  it('keeps the events the fame step queues followUpOnly, and fame events behind the category contract', { timeout: 90_000 }, async () => {
+    const real = await read('events/any/fame/tour_empty_room.yaml');
+    await write('events/any/fame/tour_empty_room.yaml', real.replace('followUpOnly: true\n', ''));
+    expect(await expectErrors()).toContain('so it must be followUpOnly');
+    await write('events/any/fame/tour_empty_room.yaml', real.replace('    - { fame: { active: true } }\n', ''));
+    expect(await expectErrors()).toContain('category "fame" requires');
+  });
+
+  it('checks the fame balance and ladders: ladders that climb, young stars never all in, no secrets of minors printed', { timeout: 90_000 }, async () => {
+    const balance = await read('balance/fame.yaml');
+    await write('balance/fame.yaml', balance.replace('minorsMax: steady', 'minorsMax: all'));
+    expect(await expectErrors()).toContain('nobody under 18 goes all in');
+    await write('balance/fame.yaml', balance.replace('  minAge: 18\n', '  minAge: 12\n'));
+    expect(await expectErrors()).toContain('tabloids.minAge must be at least the adult age');
+    await write('balance/fame.yaml', balance);
+    const music = await read('fame/music.yaml');
+    await write('fame/music.yaml', music.replace('fame: 26, quality: 42', 'fame: 8, quality: 42'));
+    expect(await expectErrors()).toContain('must ask for more fame and quality');
+    await write('fame/music.yaml', music.replace('talents: [music]', 'talents: [juggling]'));
+    expect(await expectErrors()).toContain('unknown talent "juggling"');
+  });
+});

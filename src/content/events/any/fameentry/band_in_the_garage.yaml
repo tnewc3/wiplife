@@ -1,0 +1,43 @@
+id: band_in_the_garage
+title: Four people and a garage
+text: >-
+  {friend.name} has a drummer, a bass player and a garage with a door that
+  mostly closes. What {friend.they} {friend:needs|need} is somebody who can sing,
+  or play, or at least show up on Thursdays.
+tone: light
+category: fameentry
+rarity: uncommon
+lifeStages: [teen, youngAdult]
+requires:
+  all:
+    - { age: { gte: 13 } }
+    - { age: { lte: 29 } }
+    - { fame: { active: false } }
+    - { fame: { retired: false } }
+weight:
+  base: 0.55
+  modifiers:
+    - { if: { discovery: { talent: found } }, x: 2 }
+    - { if: { trait: sociability, gt: 60 }, x: 1.5 }
+cast:
+  friend: { kind: friend, presence: city, ageOffset: { min: -4, max: 6 } }
+choices:
+  - id: join
+    label: Join the band
+    outcome:
+      text: >-
+        The first three rehearsals are terrible. The fourth is not. By the end
+        of the month there are four songs, a name nobody can agree on and a
+        show at a friend's birthday party.
+      effects:
+        - { type: fame, action: enter, path: music, route: band }
+        - { type: relationship, role: friend, affection: 4 }
+  - id: pass
+    label: Wish them luck and go home
+    outcome:
+      text: >-
+        You hear them from the street on your way past, a month later. They
+        are better than you thought, and that is a feeling you carry for a
+        while.
+      effects:
+        - { type: stat, key: happiness, delta: -2 }

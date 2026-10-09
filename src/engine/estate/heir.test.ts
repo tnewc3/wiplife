@@ -206,7 +206,8 @@ describe('continuing as a minor heir', () => {
     let current = heir;
     const trust = current.finances.trust!.balance;
     for (let i = 0; i < 3; i++) {
-      expect(current.finances.trust?.balance).toBe(trust);
+      // (A young star's parents add to it, E6b; nothing takes from it.)
+      expect(current.finances.trust?.balance).toBeGreaterThanOrEqual(trust);
       current = playYear(current, content);
     }
     expect(current.character.age).toBe(18);

@@ -1,0 +1,41 @@
+id: first_post_takes_off
+title: Forty thousand people
+text: >-
+  You posted it on a whim. By morning it had been seen by forty thousand
+  strangers, and by the afternoon people you do not know were arguing about
+  it in the comments. Your phone will not stop buzzing.
+tone: neutral
+category: fameentry
+rarity: uncommon
+lifeStages: [teen, youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 13 } }
+    - { age: { lte: 55 } }
+    - { fame: { active: false } }
+    - { fame: { retired: false } }
+weight:
+  base: 0.5
+  modifiers:
+    - { if: { trait: sociability, gt: 60 }, x: 1.5 }
+    - { if: { trait: riskTaking, gt: 60 }, x: 1.3 }
+    - { if: { discovery: { talent: found } }, x: 1.5 }
+choices:
+  - id: follow_up
+    label: Post another before it fades
+    outcome:
+      text: >-
+        The second one does less than the first, and the third does less than
+        that. But a few thousand of them stayed, and that is a start of
+        something.
+      effects:
+        - { type: fame, action: enter, path: social, route: after_viral }
+        - { type: stat, key: stress, delta: 3 }
+  - id: let_it_go
+    label: Let it be a good day
+    outcome:
+      text: >-
+        By the end of the week nobody is talking about it. You keep the
+        screenshot. It is a funny thing to have happened.
+      effects:
+        - { type: stat, key: happiness, delta: 2 }

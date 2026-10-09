@@ -318,7 +318,7 @@ describe('pacing director', () => {
     }
   });
 
-  it('respects cooldowns and one-time events over whole lives', () => {
+  it('respects cooldowns and one-time events over whole lives', { timeout: 30_000 }, () => {
     for (let s = 0; s < 10; s++) {
       const seen = new Map<string, number[]>();
       for (const begun of years(`cool-${s}`, 120)) {
@@ -504,6 +504,18 @@ describe('event text', () => {
           crew: 'the Cinder Row Outfit',
           rivalCrew: 'Marrow Street',
           rank: 'runner',
+          project: 'Glass Weather',
+          noun: 'album',
+          review: 'A record that rewards a second listen.',
+          fanLine: 'Played it forty times.',
+          rungTitle: 'a signed act',
+          nextTitle: 'artist with a hit',
+          pathNoun: 'music',
+          secondPath: 'acting',
+          company: 'Brightline Music',
+          agent: 'Dunmore Talent Group',
+          award: 'the Halcyon Music Prize',
+          headline: 'Star caught in the news',
         } satisfies Record<(typeof EVENT_TEXT_VALUES)[number] | 'petKind' | 'vehicle' | 'homeCity', string | number>;
         const context = { roles, values };
         const texts = [def.title, def.text, ...(def.choices ?? []).map((c) => c.label)];

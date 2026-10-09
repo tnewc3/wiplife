@@ -1,0 +1,33 @@
+id: agent_power
+title: The big agency
+text: >-
+  The agency with the lobby asks you to lunch. They take a large share, they
+  say so openly, and they promise a calendar that is yours for the asking.
+  People who have said no to them are not mentioned.
+tone: neutral
+category: famebiz
+rarity: uncommon
+recurring: true
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { fame: { active: true } }
+    - { fame: { agent: { lt: 3 } } }
+    - { fame: { rung: { gte: 5 } } }
+    - { fame: { image: { gte: 40 } } }
+weight: { base: 10 }
+followUpOnly: true
+choices:
+  - id: sign
+    label: Sign
+    outcome:
+      text: The lunch lasts three hours. By the end of it, you can see your whole next year, and who is on it.
+      effects:
+        - { type: fame, action: agent, tier: 3 }
+  - id: decline
+    label: Decline politely
+    outcome:
+      text: They shrug. The word that gets back to you is "interesting."
+      effects:
+        - { type: fame, action: image, delta: -1 }

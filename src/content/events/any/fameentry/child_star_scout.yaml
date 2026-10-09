@@ -1,0 +1,43 @@
+id: child_star_scout
+title: A card and a phone number
+text: >-
+  A stranger at the mall hands your {parent.relation} a card. The stranger
+  works for a children's agency, and thinks you have something, and is
+  careful to say that it is entirely up to your family.
+tone: neutral
+category: fameentry
+rarity: rare
+lifeStages: [child, teen]
+requires:
+  all:
+    - { age: { gte: 6 } }
+    - { age: { lte: 15 } }
+    - { fame: { active: false } }
+    - { fame: { retired: false } }
+weight:
+  base: 0.12
+  modifiers:
+    - { if: { discovery: { talent: found } }, x: 3 }
+    - { if: { stat: looks, gte: 70 }, x: 2 }
+cast:
+  parent: { kind: parent, presence: household }
+choices:
+  - id: try
+    label: Ask to give it a try
+    outcome:
+      text: >-
+        Your {parent.relation} reads everything twice, makes three phone calls,
+        and says yes on one condition: school comes first. There is a first
+        audition, with {parent.them} in the waiting room, and you are on your
+        way.
+      effects:
+        - { type: fame, action: enter, path: acting, route: open_call }
+        - { type: relationship, role: parent, trust: 3 }
+  - id: no
+    label: Say you would rather not
+    outcome:
+      text: >-
+        Your {parent.relation} throws the card away without a word, and you
+        understand it as a kind of respect.
+      effects:
+        - { type: relationship, role: parent, trust: 3 }

@@ -1,0 +1,48 @@
+id: contract_offer_tough
+title: A deal with teeth
+text: >-
+  A company wants you, and says so, and has a contract that shows it. The
+  advance is large. The share they keep is larger, and the clause about not
+  working for anyone else takes up most of a page.
+tone: serious
+category: famebiz
+rarity: uncommon
+recurring: true
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { fame: { active: true } }
+    - { fame: { contract: false } }
+    - { fame: { rung: { gte: 3 } } }
+weight: { base: 7 }
+followUpOnly: true
+choices:
+  - id: sign
+    label: Take the money and sign
+    outcome:
+      text: >-
+        The advance clears the same afternoon. Your lawyer sends a polite email
+        that begins "As we discussed" and ends with a warning.
+      effects:
+        - { type: fame, action: contract, terms: tough }
+        - { type: fame, action: burnout, delta: 4 }
+  - id: negotiate
+    label: Say you will sign if the exclusivity goes
+    check:
+      base: 40
+      stats: [{ fame: image, weight: 0.2 }, { key: confidence, weight: 0.2 }, { key: smarts, weight: 0.15 }]
+      success:
+        text: They resist and then bend. The exclusivity clause comes out, and the share they keep stays high.
+        effects:
+          - { type: fame, action: contract, terms: standard }
+      failure:
+        text: The offer is withdrawn that evening, and the email that arrives is courteous and final.
+        effects:
+          - { type: fame, action: image, delta: -2 }
+  - id: decline
+    label: Say no
+    outcome:
+      text: It is a good decision made quietly. Your lawyer looks relieved.
+      effects:
+        - { type: fame, action: image, delta: 1 }

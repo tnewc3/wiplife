@@ -1,0 +1,54 @@
+id: open_mic_night
+title: The sign-up sheet
+text: >-
+  {friend.name} drags you to an open mic in the back room of a bar. The list by
+  the door has eleven names on it and a pen on a string. {friend.They}
+  {friend:puts|put} your name at the bottom before you can say anything.
+tone: light
+category: fameentry
+rarity: uncommon
+lifeStages: [teen, youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 14 } }
+    - { fame: { active: false } }
+    - { fame: { retired: false } }
+weight:
+  base: 0.6
+  modifiers:
+    - { if: { discovery: { talent: found } }, x: 2 }
+    - { if: { trait: confidence, gt: 60 }, x: 1.6 }
+    - { if: { trait: sociability, gt: 60 }, x: 1.3 }
+cast:
+  friend: { kind: friend, presence: city }
+choices:
+  - id: play
+    label: Get up and play
+    check:
+      base: 50
+      stats: [{ key: confidence, weight: 0.3 }, { key: discipline, weight: 0.15 }, { key: luck, weight: 0.1 }]
+      success:
+        text: >-
+          Your hands shake for the first verse and then stop. The room is not
+          big, but it goes quiet, and when you finish a stranger asks if you
+          play anywhere else. You do now.
+        effects:
+          - { type: fame, action: enter, path: music, route: open_mic }
+          - { type: stat, key: happiness, delta: 6 }
+      failure:
+        text: >-
+          You forget the second verse and play the first one twice. Nobody
+          boos. Somebody at the bar claps anyway, and you find, walking home,
+          that you want to do it again more than you want to forget it.
+        effects:
+          - { type: fame, action: enter, path: music, route: open_mic }
+          - { type: stat, key: confidence, delta: -3 }
+  - id: watch
+    label: Stay in your seat and watch
+    outcome:
+      text: >-
+        You clap for everyone, including whoever plays a song about a
+        truck. It is the kind of night that makes you think, and then
+        doesn't ask you to do anything about it.
+      effects:
+        - { type: relationship, role: friend, affection: 2 }

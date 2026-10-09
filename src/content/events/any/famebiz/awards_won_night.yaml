@@ -1,0 +1,49 @@
+id: awards_won_night
+title: And the winner is
+text: >-
+  The envelope takes a very long time to open. Then it is {award}, and then
+  it is {project}, and then it is your name, and you are standing up in a
+  dress or a suit you were not sure about, in front of a room that is
+  looking at you.
+tone: light
+category: famebiz
+rarity: uncommon
+recurring: true
+lifeStages: [child, teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { fame: { active: true } }
+    - { fame: { ceremony: [won] } }
+weight: { base: 10 }
+followUpOnly: true
+choices:
+  - id: thank_everyone
+    label: Thank everyone who got you here
+    outcome:
+      text: >-
+        You go down the list and forget one name. It is a long list. The room
+        applauds the forgetting more than the thanks.
+      effects:
+        - { type: stat, key: happiness, delta: 7 }
+        - { type: fame, action: mood, delta: 4 }
+  - id: say_something_real
+    label: Say the thing you actually feel
+    check:
+      base: 50
+      stats: [{ key: confidence, weight: 0.25 }, { key: sociability, weight: 0.15 }, { fame: image, weight: 0.1 }]
+      success:
+        text: It is a few honest sentences. Afterwards people you've never met come up and say it was the only speech they remembered.
+        effects:
+          - { type: fame, action: image, delta: 5 }
+          - { type: fame, action: fans, delta: 6 }
+      failure:
+        text: It comes out wrong, a little too raw and a little too long. A clip of it travels, with a laugh track nobody asked for.
+        effects:
+          - { type: fame, action: image, delta: -4 }
+          - { type: fame, action: mood, delta: -2 }
+  - id: keep_it_short
+    label: Say thank you and sit down
+    outcome:
+      text: Eleven words. A good number. Somebody at the next table calls it "classy" and somebody else calls it "stiff."
+      effects:
+        - { type: stat, key: stress, delta: -2 }

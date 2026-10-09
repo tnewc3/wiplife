@@ -1,0 +1,33 @@
+id: crossover_to_acting
+title: A part with your name on it
+text: >-
+  A casting director has a part that only you can play, they say. You have never
+  acted in front of a camera for real. That, they say, is part of the appeal.
+tone: neutral
+category: famebiz
+rarity: uncommon
+recurring: true
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { fame: { active: true } }
+    - { fame: { path: [music, social, arts] } }
+    - { fame: { second: false } }
+    - { fame: { crossable: true } }
+weight: { base: 10 }
+followUpOnly: true
+choices:
+  - id: take_it
+    label: Say yes
+    outcome:
+      text: >-
+        You are nervous in a different way than you are on a stage. A crew of
+        sixty waits while you find it. On the fourth take, you do.
+      effects:
+        - { type: fame, action: cross, path: acting }
+        - { type: stat, key: stress, delta: 3 }
+  - id: pass
+    label: Say it is not for you
+    outcome:
+      text: They understand. The card stays in your pocket anyway, and the door, you are told, doesn't close.
+      effects: []

@@ -1,0 +1,31 @@
+id: contract_offer_generous
+title: An easy deal
+text: >-
+  A company sends a short contract with a friendly cover letter. The advance
+  is modest and the share they keep is small, and nothing in it ties your
+  hands. It is such a gentle offer that you check it twice for the catch.
+tone: light
+category: famebiz
+rarity: uncommon
+recurring: true
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { fame: { active: true } }
+    - { fame: { contract: false } }
+    - { fame: { rung: { gte: 2 } } }
+weight: { base: 5 }
+followUpOnly: true
+choices:
+  - id: sign
+    label: Sign
+    outcome:
+      text: There is no catch. The people at the company are simply decent, and the paperwork says so.
+      effects:
+        - { type: fame, action: contract, terms: generous }
+  - id: decline
+    label: Say thank you, and no
+    outcome:
+      text: They are gracious, and leave the door open.
+      effects: []

@@ -1,0 +1,47 @@
+id: teen_creator_rules
+title: Posting with a parent in the room
+text: >-
+  You want to post what you make, properly, with a name and a schedule. Your
+  {parent.relation} has a list of rules, and the first is that
+  {parent.they} {parent:gets|get} to see everything before it goes up.
+tone: neutral
+category: fameentry
+rarity: uncommon
+lifeStages: [teen]
+requires:
+  all:
+    - { age: { gte: 13 } }
+    - { age: { lte: 17 } }
+    - { fame: { active: false } }
+    - { fame: { retired: false } }
+weight:
+  base: 0.4
+  modifiers:
+    - { if: { trait: sociability, gt: 55 }, x: 1.4 }
+cast:
+  parent: { kind: parent, presence: household }
+choices:
+  - id: agree
+    label: Agree to the rules
+    outcome:
+      text: >-
+        It is slower than you wanted and a lot safer than it could have been.
+        Your {parent.relation} reviews each one and laughs in the right places.
+      effects:
+        - { type: fame, action: enter, path: social, route: first_posts }
+        - { type: relationship, role: parent, trust: 4 }
+  - id: argue
+    label: Argue for a long time
+    outcome:
+      text: >-
+        You do not win. You get a compromise, which turns out to be most of
+        what you wanted, and a parent who now knows what you care about.
+      effects:
+        - { type: fame, action: enter, path: social, route: first_posts }
+        - { type: relationship, role: parent, affection: -2 }
+  - id: wait
+    label: Decide to wait until you are older
+    outcome:
+      text: Waiting is a sensible choice. It does not feel like one.
+      effects:
+        - { type: stat, key: confidence, delta: 1 }
