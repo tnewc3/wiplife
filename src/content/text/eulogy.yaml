@@ -1,0 +1,309 @@
+# The eulogy (W1, docs/expansion.md). One person, the one who knew you best,
+# speaks at the funeral, from their own point of view. The engine decides what
+# they can say (src/engine/eulogy): memories they hold, stories as they believe
+# them, moments of your life someone in their place would know. This file
+# only says it.
+#
+# Roles: {self} is you, who died (use {self.they}, {self:was|were}); {npc} is
+# the speaker, with {npc.relation} ("wife", "son", "friend"). Beliefs about a
+# story with a second person may use {other.name}; if that person is no longer
+# in the life, the line is left out. Values: {known} ("41 years") and {since}
+# (when a memory happened, "three years ago").
+#
+# The speaker is in first person ("I"); you are in the third. Past tense after
+# {self.they}, so the verbs agree with any pronoun. Nothing here claims a past
+# the engine has not checked: a memory line is told only by someone who holds
+# that memory (the tag names it), a belief line only by someone who believes that
+# story (the version names it), and a moment only when the life has it.
+
+# How the eulogy begins: by what the speaker is to you, and how they feel
+# (warm, measured, cool) from their affection and trust.
+opening:
+  spouse:
+    warm:
+      - "I was {self.name}'s {npc.relation}. I knew {self.them} for {known}, and I'm not sure I have the words for what that was, but I'm going to try."
+    measured:
+      - "I'm {self.name}'s {npc.relation}. We were together for {known}, and it was the real thing, which means it was never only one thing."
+    cool:
+      - "I'm {self.name}'s {npc.relation}, and I was asked to say a few words. I'll keep them honest, which is the best thing I have to offer."
+  child:
+    warm:
+      - "I'm {self.name}'s {npc.relation}. I had {known} with {self.them}, and I would not trade any of it."
+    measured:
+      - "I'm {self.name}'s {npc.relation}. Being someone's child is complicated, and I've had {known} to learn how, and I'm not finished."
+    cool:
+      - "I'm {self.name}'s {npc.relation}. We weren't as close as families are meant to be, but I'm here, and I'd like to say what I can truthfully say."
+  elder:
+    warm:
+      - "I'm {self.name}'s {npc.relation}. I had {known} with {self.them}, and no number would have been enough."
+    measured:
+      - "I'm {self.name}'s {npc.relation}. I knew {self.them} for {known}, and I didn't always understand {self.them}, which I think is allowed."
+    cool:
+      - "I'm {self.name}'s {npc.relation}. Families keep their distance in all sorts of ways, and ours did. I'm here anyway, and I'll say what I can."
+  sibling:
+    warm:
+      - "I'm {self.name}'s {npc.relation}. We shared a history for {known}: the same family, the same jokes nobody else understands. I'm going to miss having someone who remembers it with me."
+    measured:
+      - "I'm {self.name}'s {npc.relation}. We shared a family and {known}, and we did what siblings do, which is love each other in ways that don't always look like it."
+    cool:
+      - "I'm {self.name}'s {npc.relation}. We shared a family and not much else, and I'd like to be honest about that."
+  friend:
+    warm:
+      - "I'm {self.name}'s {npc.relation}. I knew {self.them} for {known}, and I can tell you exactly how lucky I was."
+    measured:
+      - "I'm {self.name}'s {npc.relation}. We knew each other for {known}, and friendship is the thing you choose, so I'll say plainly that I chose {self.them}."
+    cool:
+      - "I'm {self.name}'s {npc.relation}, or I was. We knew each other for {known}, and I'm here, so some of it mattered."
+  other:
+    warm:
+      - "I'm {self.name}'s {npc.relation}, though that undersells it. I knew {self.them} for {known}, and some people matter more than the word for them."
+    measured:
+      - "I'm {self.name}'s {npc.relation}. I knew {self.them} for {known}, which is long enough to say something true, if not everything."
+    cool:
+      - "I'm {self.name}'s {npc.relation}. I'm told I knew {self.them} as well as anyone still here, so I'll say what I know, and keep it honest."
+
+# When the speaker holds no memory the eulogy has a line for.
+bare:
+  - "I don't have a speech full of stories. I have {known} of knowing {self.name}, and I have decided that is something."
+  - "There isn't one story that sums {self.name} up, and I won't pretend there is. What I have is {known}, and the fact that I'm standing here."
+
+# One line for each memory a relationship can hold (a tag in
+# registries/memories.yaml), told by the person who holds it. A tag describes
+# what the other person did to you ("Comforted you", so the speaker did) or
+# what you did to them ("You took the blame", so the speaker is the one who
+# was helped). Warm memories are told more by warm speakers, hard ones more by
+# cool speakers. {since} is when it happened.
+memories:
+  # Warm.
+  comforted_you:
+    valence: warm
+    line: "I sat with {self.them} once when {self.they} {self:was|were} frightened, and I have not stopped thinking about it."
+  read_to_you:
+    valence: warm
+    line: "I read to {self.them} at bedtime when {self.they} {self:was|were} small, and I'd give a lot to do it once more."
+  cared_for_you:
+    valence: warm
+    line: "I looked after {self.them} when {self.they} {self:was|were} sick, and I'd do it again tomorrow."
+  stood_by_you:
+    valence: warm
+    line: "I stood by {self.them} when things fell apart, and I'd do it again."
+  taught_you_to_drive:
+    valence: warm
+    line: "I taught {self.them} to drive, which tells you how much I trusted {self.them}, and how little I valued my car."
+  road_trip_together:
+    valence: warm
+    line: "We took a road trip together once, and I can't pass a highway exit now without thinking of it."
+  married_you:
+    valence: warm
+    line: "I married {self.them} {since}, and I would do it again."
+  anniversary_trip:
+    valence: warm
+    line: "We took the trip of a lifetime together, and I'm grateful we went when we could."
+  great_time_together:
+    valence: warm
+    line: "We had a really good time together {since}, and I keep going back to it."
+  believed_in_you:
+    valence: warm
+    line: "I believed in {self.them} when it counted, and I'm glad I did."
+  took_you_in:
+    valence: warm
+    line: "{self.They} had nowhere to go once, and I took {self.them} in. I never regretted a night of it."
+  forgave_you:
+    valence: warm
+    line: "I forgave {self.them} for something I thought I never could, and it was the right call."
+  made_peace:
+    valence: warm
+    line: "We made peace in the end, and I'm more grateful for that than for almost anything."
+  accepted_you:
+    valence: warm
+    line: "{self.They} told me who {self.they} {self:was|were}, and I stood by {self.them}. I still do."
+  parent_always_there:
+    valence: warm
+    line: "{self.They} {self:was|were} always there: the school gate, the bad days, the small ones."
+  parent_warm_home:
+    valence: warm
+    line: "{self.They} made a warm home, and I didn't know how rare that was until I saw other people's."
+  parent_listened:
+    valence: warm
+    line: "{self.They} listened. It sounds like a small thing, and it was everything."
+  parent_stood_up_for_them:
+    valence: warm
+    line: "{self.They} stood up for me when I couldn't do it myself."
+  took_the_blame:
+    valence: warm
+    line: "{self.They} took the blame for something that was mine, and never held it over me."
+  you_helped_them:
+    valence: warm
+    line: "{self.They} helped me when I needed it, and never made me feel it."
+  generous_gift:
+    valence: warm
+    line: "{self.They} gave me a gift once that meant more than I let on."
+  # Hard.
+  parent_cold_home:
+    valence: hard
+    line: "The house I grew up in was cold, and I'm not going to pretend otherwise today. I'm here anyway."
+  parent_never_around:
+    valence: hard
+    line: "{self.They} {self:wasn't|weren't} around much when I was growing up. I'm still working out what to do with that, and I came anyway."
+  parent_lost_temper:
+    valence: hard
+    line: "{self.They} lost {self.their} temper with me more than once, and I have decided to remember the rest."
+  left_you_alone:
+    valence: hard
+    line: "I left {self.them} alone when {self.they} {self:was|were} small, and I can't take that back. I would like to say so out loud."
+  lost_temper_with_you:
+    valence: hard
+    line: "I lost my temper with {self.them} when {self.they} {self:was|were} small, more than I would like to admit."
+  big_fight:
+    valence: hard
+    line: "We had one fight I'm not going to pretend didn't happen. We both said things."
+  cruel_words:
+    valence: hard
+    line: "{self.They} said something cruel to me once. I have chosen to forgive it, mostly."
+  cheated_on_them:
+    valence: hard
+    line: "{self.They} hurt me badly once, in the way that's hardest to forgive. I'm still here, and I won't say more than that."
+  missed_wedding:
+    valence: hard
+    line: "{self.They} missed my wedding, and I held it against {self.them} for longer than I should have."
+
+beliefs:
+  # The speaker believes what happened (one line for each kind of story in registries/web.yaml).
+  true:
+    affair: "I knew about {other.name}, and I said nothing then, so I will say very little now."
+    unknownCrime: "I knew about the thing {self.they} got away with, and I never told a soul. I won't start now."
+    hiddenDebt: "I knew how heavily money weighed on {self.them}, and that {self.they} wouldn't ask for help."
+    addiction: "I knew what {self.they} {self:was|were} fighting. I would rather you remember how hard {self.they} fought."
+    identity: "I knew who {self.they} really {self:was|were}, and I loved {self.them} as {self.they} {self:was|were}."
+    mentalHealth: "I knew about the dark stretches, and I learned to sit through them with {self.them}."
+    jobLoss: "I remember when {self.they} lost that job, and how {self.they} carried it."
+    arrest: "I knew about the trouble with the law. It is part of the story, so I'll say it plainly."
+    breakup: "I knew when it ended with {other.name}, and I knew what it cost {self.them}."
+    illness: "I knew how ill {self.they} had been. It's part of how I'll remember {self.them}."
+  # The speaker believes a twisted version (one line for each version that is not a truth). They say what they believed, and what they never checked.
+  twisted:
+    affair_serial: "I heard that {self.they} had been unfaithful, and not once, and not with one person. I believed it, and I never asked."
+    affair_close: "I heard that {self.they} and {other.name} were very close, and I wondered what that meant, and I never asked."
+    crime_worse: "I had heard {self.they} {self:was|were} mixed up in something criminal. I never found out what, or whether it was true."
+    crime_arrested: "I heard that {self.they} had been arrested. I believed it, and I never asked {self.them}."
+    debt_ruin: "I heard that {self.they} {self:was|were} about to lose everything, and I worried about it more than I said."
+    debt_gambling: "I heard that {self.they} had been gambling money {self.they} didn't have. I believed it, and it colored how I saw {self.them}."
+    addiction_lost: "I was told {self.they} {self:was|were} past saving. I wish I had never believed that."
+    addiction_party: "I always thought {self.they} just didn't know when to stop partying. I never saw the rest."
+    identity_phase: "I was told that who {self.they} said {self.they} {self:was|were} was just a phase. I'm sorry I ever listened."
+    identity_lie: "I heard that {self.they} had been lying to everyone about who {self.they} {self:was|were}. I believed that, and I let it come between us."
+    mh_unwell: "I heard that {self.they} {self:wasn't|weren't} well and that people should be careful around {self.them}. I was careful, when I should have been close."
+    mh_dramatic: "I heard that {self.they} had fallen apart completely. I only ever saw it from a distance."
+    mh_faking: "I thought {self.they} {self:was|were} making a big deal out of nothing. I would like to take that back."
+    mh_coping: "I heard that {self.they} {self:was|were} dealing with something and getting help. I was glad, and I never said so."
+    fired_stealing: "I heard that {self.they} {self:was|were} fired for stealing. I believed it. I never asked."
+    quit_dramatic: "I heard that {self.they} quit by telling the boss exactly what {self.they} thought, in front of the whole office, and I have never stopped enjoying that."
+    arrest_worse: "I heard that {self.they} {self:was|were} a danger to the people around {self.them}. I kept my distance because of it."
+    arrest_mixup: "I always understood the arrest was a misunderstanding, and that is how I'll remember it."
+    breakup_cheating: "I heard that {self.they} cheated on {other.name}. I believed it, and I never asked {self.them}."
+    breakup_left: "I heard that {other.name} left {self.them} for someone else, and I felt for {self.them}."
+    breakup_scene: "I heard that the end with {other.name} came in a parking lot, with an audience. It's the version people tell, and it isn't the one I'd choose."
+    ill_worse: "I heard that {self.they} didn't have long, and I started saying goodbye early."
+    ill_minor: "I was told {self.they} {self:was|were} just run down, and I took that at face value."
+
+# What the speaker was never told: a secret that is true of your life and that they never learned.
+unknown:
+  affair: "There are things about {self.name}'s heart that {self.they} never explained to me, and I have decided not to go looking."
+  unknownCrime: "{self.They} kept some things from me, and I never asked what."
+  hiddenDebt: "I never knew how heavy things were for {self.them}. {self.They} carried it alone."
+  addiction: "I knew {self.they} {self:was|were} struggling sometimes, and I never understood how much."
+  identity: "There was a part of {self.name} that {self.they} kept quiet around me. I'd like to think I would have understood."
+  mentalHealth: "{self.They} had hard days I never saw. I wish {self.they} had let me in."
+
+# Moments of your life the speaker may mention (the ones someone in their
+# place would know). Values: career {title}, {employer}; retired {years};
+# marriage and divorce {partner}; children {children}; prison {years};
+# bankruptcy {year}; tooSoon and longLife {age}.
+milestones:
+  career: "{self.They} worked as {title} at {employer}, and took the work seriously."
+  retired: "{self.They} retired after {years} of work, and I like to think {self.they} slept in."
+  marriage: "{self.They} married {partner}, and that changed the shape of everything."
+  divorce: "{self.Their} marriage to {partner} ended. It is part of the story, so I'll say it."
+  children: "{self.They} had {children}, and that mattered more than any title."
+  prison: "{self.They} spent {years} in prison. We don't need to pretend otherwise."
+  bankruptcy: "In {year}, {self.they} went through bankruptcy, and came out the other side."
+  recovery: "{self.They} fought an addiction, and kept fighting it. That is not a small thing."
+  tooSoon: "{self.They} {self:was|were} only {age}. It isn't enough, and it isn't fair."
+  longLife: "{self.They} lived to {age}, which is a great deal of living."
+  famous: "A lot of strangers knew {self.their} name. To us, {self.they} {self:was|were} just {self.name}."
+  hallOfFame: "{self.They} made the hall of fame. Anyone who knows that sport knows what that means."
+
+closing:
+  warm:
+    - "Goodbye, {self.name}. Thank you for all of it."
+    - "I'll miss {self.them} for the rest of my life, and I will be glad to, because it means {self.they} mattered."
+    - "{self.name} {self:was|were} loved. I'm saying it out loud so there's no doubt."
+  measured:
+    - "{self.name} {self:was|were} complicated, as people are, and I think that's the best compliment I know how to give."
+    - "I'll remember {self.them} as {self.they} {self:was|were}, not as it would be easier to say. I think {self.they} would prefer that."
+    - "That's what I have. It isn't all of {self.name}, but it's true."
+  cool:
+    - "That's what I can say, and I've tried to keep it true. Thank you for letting me."
+    - "Whatever was left unsaid between us stays that way. Rest well, {self.name}."
+    - "I came, and I spoke, and I hope that counts for something. Goodbye."
+
+# {children}: "a child" and "{n} children" (n is written out up to ten).
+children:
+  one: "a child"
+  many: "{n} children"
+
+# Why someone chose not to come, shown in the list of who was not there. This
+# text is addressed to you ("you"). Role: {npc} is the one who stayed away.
+# Values: {heard} (the story they believed), {speaker} (the speaker's first name).
+absent:
+  estranged:
+    generic:
+      - "The two of you weren't speaking when you died, and {npc.they} didn't make an exception."
+      - "Contact had stopped between you, and a funeral wasn't enough to restart it."
+      - "{npc.They} {npc:was|were} estranged from you, and stayed that way."
+    # By a memory they hold (a tag in registries/memories.yaml); such a reason is more likely than a general one.
+    memory:
+      you_cut_them_off: "{npc.They} never got over being cut out of your life."
+      reconcile_refused: "{npc.They} {npc:wasn't|weren't} ready to make peace when you reached out, and {npc.they} {npc:wasn't|weren't} ready now."
+      big_fight: "The big fight between you was never settled."
+      cruel_words: "{npc.They} couldn't forget the cruel thing you said."
+      cheated_on_them: "{npc.They} never forgave you for cheating."
+      spilled_their_secret: "{npc.They} never forgave you for telling {npc.their} secret."
+  feud:
+    # You took the other side.
+    sided:
+      - "{npc.They} hadn't forgotten that you took the other side in {npc.their} feud."
+    # The feud was with the speaker.
+    speaker:
+      - "{npc.They} {npc:was|were} feuding with {speaker}, and wouldn't share a room with {speaker}."
+    generic:
+      - "{npc.They} {npc:was|were} in the middle of a feud and wouldn't set it aside for a day."
+      - "{npc.They} {npc:was|were} still caught up in a feud, and {npc.they} {npc:wasn't|weren't} going to put it down for a funeral."
+  ex:
+    generic:
+      - "{npc.They} {npc:was|were} your ex, and a funeral doesn't change that."
+      - "An ex, and {npc.they} saw no reason to come."
+    memory:
+      divorced: "Your marriage had ended, and {npc.they} didn't think a funeral changed that."
+      cheated_on_them: "{npc.They} never forgave you for cheating."
+  rumor:
+    - "{npc.They} had heard {heard}, and stayed away without asking you whether it was true."
+    - "{npc.They} had heard {heard}, believed it, and stayed away."
+  distrust:
+    - "{npc.They} didn't trust you, and a funeral wasn't going to change that."
+    - "Trust between you had worn thin, and {npc.they} stayed home."
+  distant:
+    - "You had drifted apart, and {npc.they} didn't make the effort."
+    - "{npc.They} {npc:wasn't|weren't} close to you any more, and let the day pass."
+  far:
+    - "{npc.They} lived in {npc.city}, and the trip didn't seem worth making."
+    - "{npc.They} chose not to make the trip from {npc.city}."
+
+# Why someone could not come. Not their choice.
+couldNot:
+  prison:
+    - "In prison, and couldn't be there."
+  ill:
+    - "Too ill to come."
+  care:
+    - "Needed care and couldn't make the trip."

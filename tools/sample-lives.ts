@@ -41,9 +41,23 @@ const lines: string[] = [
   `${finished.length} lives played by the simulation's careful player (seeds \`${values.seed}-0\` to \`${values.seed}-${finished.length - 1}\`), ` +
     `content version \`${content.contentVersion}\`, for the Stage 10 writing review. Regenerate with \`npm run samples\`.`,
   '',
-  'Each life shows its obituary as the archive keeps it, then its life history. Lines marked ★ come from legendary events.',
+  'Each life shows its obituary as the archive keeps it, then its funeral (W1: the eulogy, who stayed away and why, and who could not come), then its life history. Lines marked ★ come from legendary events.',
   '',
 ];
+/** The funeral as the archive keeps it, in markdown. */
+function funeralLines(entry: ReturnType<typeof archiveEntry>): string[] {
+  const f = entry.funeral;
+  if (!f) return [];
+  const out: string[] = [];
+  if (f.eulogy) out.push(`**Eulogy** by ${f.eulogy.speakerName}, ${f.eulogy.relation} (${f.eulogy.group}, ${f.eulogy.tone}):`, '', ...f.eulogy.paragraphs.map((p) => `> ${p}`), '');
+  else out.push('**Eulogy:** none, no one was close enough to speak.', '');
+  for (const g of f.notAttending) out.push(`- Did not come: ${g.name} (${g.relation}): ${g.reason}`);
+  if (f.moreNotAttending > 0) out.push(`- ...and ${f.moreNotAttending} more`);
+  for (const g of f.couldNotAttend) out.push(`- Could not come: ${g.name} (${g.relation}): ${g.reason}`);
+  if (out.length > 0) out.push('');
+  return out;
+}
+
 finished.forEach((life, i) => {
   const entry = archiveEntry(life, content);
   const p = life.character.identity.pronouns;
@@ -55,6 +69,7 @@ finished.forEach((life, i) => {
     '',
     `> ${entry.obituary}`,
     '',
+    ...funeralLines(entry),
     '<details><summary>Life history</summary>',
     '',
   );

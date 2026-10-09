@@ -99,8 +99,8 @@ describe('archive migrations', () => {
     const { birthCityId: _birth, ...v1 } = finished('archive-v1');
     await db.archive.put({ id: v1.id, envelope: { ...makeArchiveEnvelope(v1 as ArchivedLife, content.contentVersion), schemaVersion: 1 } });
     const read = await readArchivedLife(db, v1.id);
-    // E2b: and, on the way to version 3, a family line of its own.
-    expect(read).toEqual({ ...v1, birthCityId: v1.cityId, lineId: v1.id, familyName: v1.name.split(' ').at(-1), familyReputation: 50 });
+    // E2b: and, on the way to version 3, a family line of its own; W1: and, on the way to version 4, no funeral on record.
+    expect(read).toEqual({ ...v1, birthCityId: v1.cityId, lineId: v1.id, familyName: v1.name.split(' ').at(-1), familyReputation: 50, funeral: null });
     expect(archivedLifeSchema.safeParse(read).success).toBe(true);
   });
 
@@ -109,7 +109,28 @@ describe('archive migrations', () => {
     const { lineId: _line, familyName: _family, familyReputation: _rep, ...v2 } = finished('archive-v2');
     await db.archive.put({ id: v2.id, envelope: { ...makeArchiveEnvelope(v2 as ArchivedLife, content.contentVersion), schemaVersion: 2 } });
     const read = await readArchivedLife(db, v2.id);
-    expect(read).toEqual({ ...v2, lineId: v2.id, familyName: v2.name.split(' ').at(-1), familyReputation: 50 });
+    expect(read).toEqual({ ...v2, lineId: v2.id, familyName: v2.name.split(' ').at(-1), familyReputation: 50, funeral: null });
     expect(archivedLifeSchema.safeParse(read).success).toBe(true);
+  });
+
+  it('upgrade a version 3 entry with no funeral on record, and keep a funeral that is there (W1)', async () => {
+    const db = freshDb();
+    const { funeral: _funeral, ...v3 } = finished('archive-v3');
+    await db.archive.put({ id: v3.id, envelope: { ...makeArchiveEnvelope(v3 as unknown as ArchivedLife, content.contentVersion), schemaVersion: 3 } });
+    const read = await readArchivedLife(db, v3.id);
+    expect(read).toEqual({ ...v3, funeral: null });
+    expect(archivedLifeSchema.safeParse(read).success).toBe(true);
+
+    // A current entry's funeral is stored as it is, and read back the same.
+    const current = finished('archive-v4');
+    expect(current.funeral).not.toBeNull();
+    await archiveLife(db, makeArchiveEnvelope(current, content.contentVersion));
+    expect(await readArchivedLife(db, current.id)).toEqual(current);
+  });
+
+  it('rejects a funeral with an empty eulogy or reason', () => {
+    const entry = finished('archive-bad-funeral');
+    const bad = { ...entry, funeral: { eulogy: null, notAttending: [{ name: 'A B', relation: 'friend', reason: '' }], moreNotAttending: 0, couldNotAttend: [] } };
+    expect(archivedLifeSchema.safeParse(bad).success).toBe(false);
   });
 });

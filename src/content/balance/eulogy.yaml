@@ -1,0 +1,69 @@
+# The eulogy and the funeral (W1, docs/expansion.md): who speaks, how they
+# sound, who is expected and who stays away. Starting proposals; the 10,000-life
+# simulation (tools/simulate/eulogy.ts) reports how they land.
+
+speaker:
+  # Younger people do not speak, and are not asked whether they will come.
+  minAge: 12
+  # Affection plus trust (0-200) the closest eligible person needs to be asked to speak.
+  minCombined: 90
+  # An ex is not who stands up.
+  excludedKinds: [ex]
+  groups:
+    spouse: [spouse, partner, fiance]
+    child: [child, stepchild]
+    elder: [parent, stepparent, grandparent, relative]
+    sibling: [sibling]
+    friend: [friend]
+    other: [coworker, boss, classmate, acquaintance]
+
+# Affection plus trust at or above `warm` is a warm eulogy; below `cool`, a
+# cool one (dutiful, distant); in between, measured.
+tone:
+  warm: 150
+  cool: 115
+
+length:
+  memories: 2
+  beliefs: 2
+  milestones: 2
+
+# How likely a memory is to be told, by the kind of memory it is.
+memoryBias:
+  warm: { warm: 5, hard: 1 }
+  measured: { warm: 2, hard: 2 }
+  cool: { warm: 1, hard: 3 }
+
+# How often a speaker says something about what they never knew, when there is something to say.
+unknownChance: 0.4
+
+# Affection plus trust a speaker needs to know a private milestone (prison,
+# bankruptcy, recovery, a divorce) when they are not family or a partner.
+intimateMin: 130
+
+longLifeAge: 85
+
+attendance:
+  # Family, partners and an ex you were married to are always expected. A
+  # friend is expected if you were at least this close (affection plus trust)...
+  friendMinCombined: 80
+  # ...and coworkers, classmates and acquaintances if you were this close.
+  otherMinCombined: 120
+  # The chance of staying away for each cause that applies (several combine).
+  causes:
+    estranged: 0.85
+    feud: 0.55
+    ex: 0.5
+    rumor: 0.35
+    distrust: 0.3
+    distant: 0.3
+    far: 0.12
+  distrustBelow: 35
+  distantBelow: 35
+  # Living in another city only keeps someone away when they were not this close.
+  farBelow: 110
+  # An illness or addiction this severe (1-100) keeps someone from coming. In prison, or in need of care, they cannot come either.
+  unableSeverity: 60
+  # A reason from a memory the person holds is this many times as likely as a general one.
+  specificWeight: 3
+  maxListed: 8

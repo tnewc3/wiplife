@@ -64,6 +64,7 @@ import { chooseWillActions, rollWillProfile } from './heirs';
 import { emptyPeopleReport, formatPeople, peopleTargets, PeopleWatcher, PipelineTimer, type PeopleReport } from './people';
 import { emptyMentalReport, formatMental, mentalTargets, MentalWatcher, type MentalReport } from './mental';
 import { choosePetInteractions, choosePossessionActions, emptyPossessionsReport, formatPossessions, possessionsTargets, PossessionsWatcher, rollPossessionProfile, type PossessionsReport } from './possessions';
+import { emptyEulogyReport, EulogyWatcher, eulogyTargets, formatEulogy, type EulogyReport } from './eulogy';
 import { emptyWebReport, formatWeb, webTargets, WebWatcher, type WebReport } from './web';
 import { chooseCrimeActions, CrimeWatcher, crimeTargets, emptyCrimeReport, formatCrime, type CrimeReport } from './crime';
 import { chooseFameActions, emptyFameReport, FameWatcher, fameTargets, formatFame, rollStarProfile, type FameReport } from './fame';
@@ -143,6 +144,8 @@ export interface SimulationReport {
   people: PeopleReport;
   /** E4: the social web, measured. */
   web: WebReport;
+  /** W1: the eulogy and the funeral, measured. */
+  eulogy: EulogyReport;
   /** M1: mental health, measured. */
   mental: MentalReport;
   /** E5: pets, vehicles and homes, measured. */
@@ -789,6 +792,8 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
   const family = emptyFamilyReport();
   const people = emptyPeopleReport();
   const web = emptyWebReport();
+  const eulogy = emptyEulogyReport(content);
+  const eulogyWatcher = new EulogyWatcher(eulogy, content);
   const mental = emptyMentalReport(content);
   const possessions = emptyPossessionsReport(content);
   const teen = emptyTeenReport(content);
@@ -1112,6 +1117,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
     options.onLife?.(life);
     peopleWatcher.finish();
     webWatcher.finish(life);
+    eulogyWatcher.finish(life);
     mentalWatcher.finish(life);
     crimeWatcher.finish(life);
     fameWatcher.finish(life);
@@ -1445,6 +1451,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
     family,
     people,
     web,
+    eulogy,
     mental,
     possessions,
     teen,
@@ -1583,6 +1590,7 @@ export function formatReport(report: SimulationReport, content: ContentBundle): 
   lines.push(...formatFamily(report.family, content), '  targets (src/content/balance/targets.yaml):', ...familyTargets(report.family, content).map((r) => target(r.label, r.value, r.goal, r.met)));
   lines.push(...formatPeople(report.people, content, report.relationships.divorces), '  targets (src/content/balance/targets.yaml):', ...peopleTargets(report, content).map((r) => target(r.label, r.value, r.goal, r.met)));
   lines.push('', ...formatWeb(report.web, content), '  targets (src/content/balance/targets.yaml):', ...webTargets(report, content).map((r) => target(r.label, r.value, r.goal, r.met)));
+  lines.push(...formatEulogy(report.eulogy, content), '  targets (src/content/balance/targets.yaml):', ...eulogyTargets(report, content).map((r) => target(r.label, r.value, r.goal, r.met)));
   lines.push('', ...formatMental(report.mental, content, report.events), '  targets (src/content/balance/targets.yaml):', ...mentalTargets(report, content).map((r) => target(r.label, r.value, r.goal, r.met)));
   lines.push(...formatPossessions(report.possessions, content, report.events), '  targets (src/content/balance/targets.yaml):', ...possessionsTargets(report, content).map((r) => target(r.label, r.value, r.goal, r.met)));
   lines.push(...formatTeen(report.teen, content), '  targets (src/content/balance/targets.yaml):', ...teenTargets(report, content).map((r) => target(r.label, r.value, r.goal, r.met)));

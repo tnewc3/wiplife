@@ -5,7 +5,7 @@
  */
 import { expect, test, type Page } from '@playwright/test';
 import { deadLife, familyLife, loadSavedLife } from './heirFixtures';
-import { expectNoHorizontalScroll, expectTouchTargets, passAgeGate } from './helpers';
+import { expectNoHorizontalScroll, expectTouchTargets, passAgeGate, passFuneral } from './helpers';
 
 const tab = (page: Page, name: string) => page.getByRole('navigation', { name: 'Game sections' }).getByRole('button', { name, exact: true });
 const OPEN = { testPack: true };
@@ -66,8 +66,8 @@ test('death settles the estate; continue as a child of 9: Previously, trust, fam
   await passAgeGate(page, OPEN);
   await loadSavedLife(page, deadLife(familyLife({ seed: 'e2e-heir-death', kids: [9, 30], spouse: true })));
 
-  // The Death screen: obituary, the estate being settled, and who can carry on.
-  await expect(page.getByText('In memoriam')).toBeVisible();
+  // The funeral first (W1), then the Death screen: obituary, the estate being settled, and who can carry on.
+  await passFuneral(page);
   const estate = page.getByTestId('death-estate');
   await expect(estate).toContainText('There was no will, so the default shares applied.');
   await expect(estate).toContainText('Funeral and settlement costs');
@@ -81,8 +81,9 @@ test('death settles the estate; continue as a child of 9: Previously, trust, fam
   await expectNoHorizontalScroll(page);
   await expectTouchTargets(page);
 
-  // A reload keeps the choice waiting.
+  // A reload keeps the choice waiting (the funeral is shown again on the way).
   await page.reload();
+  await passFuneral(page);
   await expect(page.getByTestId('death-heirs')).toBeVisible();
 
   // Continue as the nine-year-old.
@@ -137,7 +138,7 @@ test('death settles the estate; continue as a child of 9: Previously, trust, fam
 test('a life with no living children is archived at once, and the estate still shows (a spouse, and parents and siblings by the default shares)', async ({ page }) => {
   await passAgeGate(page, OPEN);
   await loadSavedLife(page, deadLife(familyLife({ seed: 'e2e-heir-none', kids: [], spouse: true })));
-  await expect(page.getByText('In memoriam')).toBeVisible();
+  await passFuneral(page);
   await expect(page.getByTestId('death-estate')).toContainText('Spouse · 80%');
   await expect(page.getByTestId('death-heirs')).toHaveCount(0);
   await expect(page.getByText('This life has been saved to your archive.')).toBeVisible();
