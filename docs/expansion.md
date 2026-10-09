@@ -41,7 +41,7 @@ The MVP (Stages 1–10) covers a full life. The expansions are what make WIPlife
 - **E3 comes before E4,** because people need their own lives before they can have relationships with each other.
 - **M1 after E4,** so people can notice and react through the social web; **T1 after E5,** for parenting style, cliques and a first car; **L1 after W1,** because end-of-life choices feed the eulogy.
 - **W4a and W4b come before W5 and W6,** because travel and emigration need other countries and languages to exist.
-- **Polish, balancing and launch come last,** because every expansion changes the economy, relationships and event frequencies. Doing them earlier would mean doing them twice. Each stage still keeps the simulation targets green, and the playable game on Netlify keeps updating along the way.
+- **Polish, balancing and launch come last,** because every expansion changes the economy, relationships and event frequencies. Doing them earlier would mean doing them twice. Each stage still keeps the simulation targets green, and the playable game on Cloudflare Pages keeps updating along the way.
 - **Launch (Stage 13) is postponed,** but its save-reliability and cross-browser work must still happen before real players arrive.
 
 ## Rules for every stage
