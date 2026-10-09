@@ -188,7 +188,7 @@ Conditions are structured data, not text formulas. They're safer, and the conten
 
 ### Deployment
 
-The app is hosted on Cloudflare Pages (free plan, 500 builds a month, so every push to a pull request branch counts). The main branch deploys to production. Every pull request gets a preview link.
+The app is hosted on Cloudflare Pages at https://wiplife.pages.dev (free plan, 500 builds a month, so every push to a pull request branch counts). The main branch deploys to production. Every pull request gets a preview link.
 
 Pages settings: build command `npm run build`, output directory `dist`, Node version from `.node-version` (24, the same as `.nvmrc`, which CI uses). `public/_headers` is copied into `dist/` and read by Pages (same format as before: a path, then indented headers). It sets `Cache-Control: no-cache` on `/sw.js`, `/workbox-*.js`, `/index.html` and `/manifest.webmanifest`, so the browser revalidates them and finds a new build, and `public, max-age=31536000, immutable` on the hashed files under `/assets/*`. The service worker update flow depends on this: the page checks `sw.js` for a new version (`src/ui/components/UpdatePrompt.tsx`), and `tools/hosting.test.ts` fails if those rules go missing. There are no redirects: the app is one page, and offline navigation is handled by the service worker (`navigateFallback`). CI runs the type check, lint, unit tests, content validation and a short simulation run, and blocks the merge if any fail.
 

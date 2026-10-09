@@ -5,6 +5,7 @@ A free, mobile-first life simulator that runs entirely on the player's device. E
 - Game design: [docs/design.md](docs/design.md)
 - Architecture, data model and roadmap: [docs/technical.md](docs/technical.md)
 - Rules for coding AIs: [AGENTS.md](AGENTS.md)
+- Playable game: https://wiplife.pages.dev (hosted on Cloudflare Pages)
 
 ## Commands
 
