@@ -125,12 +125,12 @@ terminal:
 amends:
   minAge: 45
   # The chance in a year that a chance to make amends comes, if any history calls for one.
-  yearlyChance: 0.12
+  yearlyChance: 0.06
   # Years before the same source and person can come up again.
   cooldownYears: 10
   # Years between any two chances, and the most chances one life is offered.
-  gapYears: 4
-  maxPerLife: 3
+  gapYears: 5
+  maxPerLife: 2
 
 review:
   maxRegrets: 3
