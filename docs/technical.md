@@ -1697,7 +1697,18 @@ The plan is in docs/expansion.md (E6b); these notes say how it was built. It ext
 - **Simulation** (`tools/simulate/fame.ts`): a `star` player (`--player star`, included in `--player all`) goes after a career (in the path that fits a talent it has found, 70% of the time), lines up a project each year with creative choices by a rolled profile, takes the agents and deals that come, sets its commitment and scene, crosses over, sometimes breaks a contract, retires late and sometimes returns; it prefers event choices that start or build a career. The other players take whatever events offer. Famous lives (a rung of 4 or higher) are left out of the net worth target and reported apart. Targets are in `balance/targets.yaml fame`.
 - **Fan cap:** the list of fans of each kind holds at `balance/fame.yaml people.max` however they arrive (the yearly step or an event's `fan` cast); the longest-known drifts out, never the one stalking you.
 
-<!-- E6B-RESULTS -->
+**E6b results (10,000 lives, `--player star`, four shards of 2,500 with seeds `e6b-10k-a` to `d`).** 0 invariant failures in all four shards (0 about fame), and every target in every report was met, fame targets included. Each shard, with the range across shards:
+
+- 99.5–99.7% of lives started a career; 14.3–15.2% of careers had a big break (0.0035–0.0038 a career year); none went over the ceiling of someone without a fitting talent.
+- Talent matters most: careers with a fitting talent went past the middle of the ladder 98.4–99.6% of the time, careers without one 2.2–3.0%; mean quality of work was 23.7–23.9 points higher with a talent; 10.3–11.2% of careers reached the top rung.
+- Critics and fans were 20 or more points apart on 25.5–26.2% of releases. All in won 5.8–7.5 times the fame a release year of holding back did, at 2.8 more affection lost by partner and children; burnouts were 11.0–12.6 times as frequent as steady's.
+- Fading cost a rung in 37.4–39.6% of careers, 63.7–65.2% had a comeback; 29.3–30.3% won an award; 29.2–30.9% had a tabloid story; 7.4–8.0% had a stalker; 26.2–27.2% crossed into a second path.
+- Young stars: no one under 18 went all in, was stalked or signed a deal without a parent.
+- Famous lives (rung 4 and above) were left out of the net worth buckets: their median net worth at death was 10.7–13.1 times the other careers' (shard a: $15.5 million for 767 lives against $1.18 million for 1,726).
+
+Only the seed `e6b-10k-a` report was read line by line for the per-path figures (Acting, Music, Social media, Writing and art ladders); the other figures come from all four reports. The careful-player regression run was not repeated for 10,000 lives (unverified for E6b).
+
+Known gaps: heirs do not inherit fame, sports are E6c, and the stage has 79 events against the planned seventy.
 
 ### Stage 11 — Polish
 
