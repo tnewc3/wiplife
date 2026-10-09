@@ -73,20 +73,20 @@ terminal:
   condition:
     minSeverity: 45
     chance:
-      - { at: 45, x: 0.05 }
-      - { at: 70, x: 0.2 }
-      - { at: 100, x: 0.4 }
+      - { at: 45, x: 0.03 }
+      - { at: 70, x: 0.1 }
+      - { at: 100, x: 0.25 }
   # A long decline: old, and in poor health.
   decline:
     minAge: 80
     healthBelow: 35
     chance:
-      - { at: 80, x: 0.03 }
-      - { at: 90, x: 0.12 }
-      - { at: 100, x: 0.3 }
+      - { at: 80, x: 0.02 }
+      - { at: 90, x: 0.08 }
+      - { at: 100, x: 0.2 }
   # The chance of dying in the year it begins, and in each year after. The last
   # entry is the longest anyone lasts.
-  deathChance: [0.08, 0.4, 0.7, 0.95]
+  deathChance: [0.04, 0.25, 0.55, 0.9]
   # Where you spend your last months: the cost of a year (scaled by your city's
   # cost of living) and what a year there does for you.
   hospice:
