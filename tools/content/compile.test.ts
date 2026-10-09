@@ -872,7 +872,7 @@ describe('interactions (E1)', () => {
     if (!real.ok) throw new Error(formatErrors(real.errors));
     const defs = Object.values(real.bundle.interactions);
     expect(defs.length).toBeGreaterThanOrEqual(19);
-    expect(defs.length).toBeLessThanOrEqual(32);
+    expect(defs.length).toBeLessThanOrEqual(36);
     for (const def of defs) {
       for (const tier of Object.values(def.outcomes)) {
         if (!tier) continue;

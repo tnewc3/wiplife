@@ -32,7 +32,6 @@ choices:
         whether you made it right.
       effects:
         - { type: later, action: raise, role: kid }
-        - { type: flag, key: raising_a_grandchild, value: true }
         - { type: relationship, role: parent, trust: -3 }
         - { type: stat, key: stress, delta: 6 }
         - { type: stat, key: happiness, delta: 2 }

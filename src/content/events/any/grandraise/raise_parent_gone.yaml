@@ -28,7 +28,6 @@ choices:
         bedtime. In the morning you make breakfast for two, and it is a start.
       effects:
         - { type: later, action: raise, role: kid }
-        - { type: flag, key: raising_a_grandchild, value: true }
         - { type: stat, key: stress, delta: 6 }
         - { type: stat, key: kindness, delta: 1 }
         - { type: schedule, eventId: raise_first_night, inYears: [1, 1], cast: [kid] }
