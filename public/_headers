@@ -1,5 +1,6 @@
-# Cloudflare Pages / Netlify: never cache the service worker or the page
-# shell, so a new build is always discovered.
+# Cloudflare Pages: never cache the service worker or the page shell, so a
+# new build is always discovered. (Pages reads this file from the build output
+# root, dist/, where Vite copies it from public/.)
 /sw.js
   Cache-Control: no-cache
 /workbox-*.js

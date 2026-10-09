@@ -43,7 +43,7 @@ The engine never talks to the UI or to storage directly. The store is the only b
 | Storage | IndexedDB via Dexie | More room and reliability than localStorage |
 | Offline and install | vite-plugin-pwa | App manifest and service worker |
 | Tests | Vitest (engine and units), Playwright (phone-sized end-to-end) | Standard, fast |
-| Hosting | Cloudflare Pages or Netlify | Free static hosting with preview links |
+| Hosting | Cloudflare Pages | Free static hosting with preview links |
 | CI | GitHub Actions | Runs every check on every change |
 
 **Not included, on purpose:** backend, database server, authentication, payments and ads. Analytics are also left out of the MVP; if they're added later, they should be cookieless and aggregate only.
@@ -188,7 +188,9 @@ Conditions are structured data, not text formulas. They're safer, and the conten
 
 ### Deployment
 
-The main branch deploys to production. Every pull request gets a preview link. CI runs the type check, lint, unit tests, content validation and a short simulation run, and blocks the merge if any fail.
+The app is hosted on Cloudflare Pages at https://wiplife.pages.dev (free plan, 500 builds a month, so every push to a pull request branch counts). The main branch deploys to production. Every pull request gets a preview link.
+
+Pages settings: build command `npm run build`, output directory `dist`, Node version from `.node-version` (24, the same as `.nvmrc`, which CI uses). `public/_headers` is copied into `dist/` and read by Pages (same format as before: a path, then indented headers). It sets `Cache-Control: no-cache` on `/sw.js`, `/workbox-*.js`, `/index.html` and `/manifest.webmanifest`, so the browser revalidates them and finds a new build, and `public, max-age=31536000, immutable` on the hashed files under `/assets/*`. The service worker update flow depends on this: the page checks `sw.js` for a new version (`src/ui/components/UpdatePrompt.tsx`), and `tools/hosting.test.ts` fails if those rules go missing. There are no redirects: the app is one page, and offline navigation is handled by the service worker (`navigateFallback`). CI runs the type check, lint, unit tests, content validation and a short simulation run, and blocks the merge if any fail.
 
 ### Built for coding AIs
 
@@ -2210,5 +2212,5 @@ choices:
 ## S. Open Questions for Part 2
 
 1. **Who writes the event content?** You, a coding AI, a writer, or a mix? If AI writes most events, it would help to add a review step before content is merged, since writing quality is one of the game's pillars.
-2. **Hosting.** Cloudflare Pages and Netlify are both free and suitable. Is there one you already use?
+2. **Hosting.** Decided: Cloudflare Pages (free plan), replacing Netlify.
 3. **Domain.** Do you want a domain for WIPlife, or is a free hosting address fine to start?
