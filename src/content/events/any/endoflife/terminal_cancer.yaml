@@ -23,7 +23,7 @@ choices:
       text: >-
         You say it before you lose your nerve. The hospice nurse comes the next
         day with a folder and a gentle manner, and explains that there will be
-        good days. She turns out to be right, and honest about the others.
+        good days. The nurse turns out to be right, and honest about the others.
       effects:
         - { type: later, action: hospice, choice: hospice }
         - { type: flag, key: took_the_diagnosis_openly, value: true }

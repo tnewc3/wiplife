@@ -39,7 +39,7 @@ choices:
     outcome:
       text: >-
         You volunteer at a youth club. A fourteen-year-old with no talent
-        and a lot of heart asks if you'll show her. You do, and it comes
+        and a lot of heart asks if you'll show them. You do, and it comes
         back in your hands before you've quite decided to let it.
       effects:
         - { type: flag, key: picked_up_the_dream, value: true }

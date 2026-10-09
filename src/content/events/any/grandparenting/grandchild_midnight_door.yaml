@@ -19,7 +19,7 @@ cast:
   kid: { kind: grandchild, presence: city }
 choices:
   - id: let_in_and_call
-    label: Let {kid.them} in, and call home to say where {kid.they} are
+    label: Let {kid.them} in, and say where {kid.they} {kid:is|are}
     outcome:
       text: >-
         You put the kettle on and the phone call before the story. The parent

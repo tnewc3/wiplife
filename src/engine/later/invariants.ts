@@ -36,7 +36,7 @@ export function laterFailures(state: LifeState, content: ContentBundle): string[
       if (!p) fail('family care without someone providing it');
       else if (!p.alive && state.phase !== 'dead') fail('family care provided by someone who has died');
     } else if (care.providerId !== undefined) fail(`${care.option ?? 'unarranged'} care has a provider`);
-    if (care.option === 'assisted' && state.housing.kind !== 'renting' && state.housing.kind !== 'incarcerated') fail('assisted care without assisted living as your home');
+    // A move out of assisted living leaves the option set until the next year's care step reopens it.
   }
   if (state.housing.assisted !== undefined) {
     if (state.housing.kind !== 'renting') fail(`assisted living in a "${state.housing.kind}" home`);

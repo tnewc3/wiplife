@@ -2,7 +2,7 @@
 id: terminal_dementia
 title: The slow goodbye
 text: >-
-  There's a clear day, and the doctor chooses it. She says what's coming
+  There's a clear day, and the doctor chooses it. The doctor says what's coming
   in a way you can still follow: the forgetting will deepen, and over
   time the person who knows you will become someone you have to be reminded
   of. There is time yet to decide what you want, while you can.
@@ -43,8 +43,8 @@ choices:
     outcome:
       text: >-
         The ward has soft lighting and a nurse who learns your name and
-        uses it. On the good days you thank her, and on the bad days you ask
-        who she is, and she tells you, kindly, every time.
+        uses it. On the good days you thank the nurse, and on the bad days you ask
+        who the nurse is, and the answer comes, kindly, every time.
       effects:
         - { type: later, action: hospice, choice: hospital }
         - { type: stat, key: stress, delta: 2 }

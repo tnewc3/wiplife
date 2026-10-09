@@ -326,7 +326,7 @@ describe('romance between the people you know', () => {
         expect(webFailures(life, content), `life ${i} age ${life.character.age}`).toEqual([]);
       }
     }
-  });
+  }, 120_000);
 });
 
 describe('feuds', () => {

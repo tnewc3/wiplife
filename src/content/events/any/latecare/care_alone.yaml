@@ -21,8 +21,8 @@ choices:
     label: Hire a carer to come to your home
     outcome:
       text: >-
-        The agency sends a woman with a laminated badge, who turns out to be
-        funnier than the badge. She learns where you keep everything in a week.
+        The agency sends a carer with a laminated badge, who turns out to be
+        funnier than the badge. The carer learns where you keep everything in a week.
         The setup costs what it costs, and you pay it without arguing.
       effects:
         - { type: cost, item: late_care_setup }
