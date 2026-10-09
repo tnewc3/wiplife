@@ -1,0 +1,37 @@
+# Engine (registries/later.yaml, terminal.will): a warning, and a will that's out of date.
+id: terminal_will_update
+title: The will in the drawer
+text: >-
+  Your will was written when you thought there was more time, and a lot has happened since. It leaves out
+  someone who matters, or names someone who is gone, and it was written by a
+  person who thought there was more time. The folder is in the drawer. It is
+  worth an afternoon.
+tone: serious
+category: endoflife
+rarity: common
+lifeStages: [adult, senior]
+requires:
+  all:
+    - { later: { terminal: true } }
+    - { later: { terminal: true, willOutOfDate: true } }
+    - { family: { will: true } }
+weight: { base: 10 }
+followUpOnly: true
+choices:
+  - id: update_now
+    label: Update it now (More → Write a will)
+    outcome:
+      text: >-
+        You read it through twice, and cross things out with a steady hand.
+        The new version is shorter, truer and kinder, and under More you save
+        it before the day ends.
+      effects:
+        - { type: stat, key: stress, delta: -3 }
+  - id: leave_it
+    label: Leave it as it is
+    outcome:
+      text: >-
+        It will do. It will almost do. You put it back, and don't think about
+        the parts it gets wrong for as long as you can.
+      effects:
+        - { type: stat, key: stress, delta: 1 }

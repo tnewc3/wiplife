@@ -50,6 +50,9 @@ recap:
     adopted:
       - "You came to {parent.name} at {age}, and you became a family."
       - "You were {age} when {parent.name} brought you home for good."
+    grandchild:
+      - "You came to live with {parent.name}, your grandparent, at {age}, and the house became yours too."
+      - "You were {age} when {parent.name}, your grandparent, took you in and raised you."
   memories:
     parent_warm_home: "You grew up in a warm house, and {parent.name} was a big part of it."
     parent_cold_home: "The house you grew up in was cold, and you learned early how to be quiet in it."

@@ -12,6 +12,7 @@ speaker:
   groups:
     spouse: [spouse, partner, fiance]
     child: [child, stepchild]
+    grandchild: [grandchild]
     elder: [parent, stepparent, grandparent, relative]
     sibling: [sibling]
     friend: [friend]

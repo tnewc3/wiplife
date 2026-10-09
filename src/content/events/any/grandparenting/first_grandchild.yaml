@@ -1,0 +1,61 @@
+# Engine (registries/later.yaml): your first grandchild is born.
+id: first_grandchild
+title: A new name on the list
+text: >-
+  The phone rings at an hour that means something. {parent.name} has had the
+  baby. {kid.name} has arrived, all lungs and fists, and you are somebody's
+  grandparent now, which sounds like a thing you were told about once and
+  never believed.
+tone: light
+category: grandparenting
+rarity: uncommon
+lifeStages: [adult, senior]
+requires:
+  all:
+    - { later: { grandchildren: { gte: 1 } } }
+    - { role: kid, kind: [grandchild], alive: true }
+    - { role: parent, kind: [child, stepchild], alive: true }
+weight: { base: 10 }
+once: true
+followUpOnly: true
+cast:
+  kid: { kind: grandchild, presence: anywhere }
+  parent: { kind: child, presence: anywhere }
+choices:
+  - id: go_now
+    label: Drop everything and go
+    visibleIf: { role: kid, where: [household, city] }
+    outcome:
+      text: >-
+        You are at the hospital before the visiting hours are. {kid.name} is
+        smaller than anything has a right to be, and holds your finger as if
+        it were a rope. You stay until someone asks you politely to leave.
+      effects:
+        - { type: relationship, role: kid, affection: 8, trust: 4 }
+        - { type: relationship, role: parent, affection: 5, trust: 3 }
+        - { type: memory, role: kid, tag: looked_after_them }
+        - { type: stat, key: happiness, delta: 6 }
+  - id: book_trip
+    label: Book the first flight you can find
+    visibleIf: { role: kid, where: [elsewhere] }
+    outcome:
+      text: >-
+        The tickets cost more than they should, and you buy them without
+        reading the fine print. {kid.name} meets you the way newborns do, with
+        complete indifference, and you fall in love anyway.
+      effects:
+        - { type: cost, item: reunion_trip }
+        - { type: relationship, role: kid, affection: 7, trust: 3 }
+        - { type: relationship, role: parent, affection: 5, trust: 3 }
+        - { type: stat, key: happiness, delta: 5 }
+  - id: wait_for_invitation
+    label: Wait until you are asked, and send something nice
+    outcome:
+      text: >-
+        You send flowers, and a card you rewrite three times. {parent.name}
+        calls to say thank you. The invitation comes soon after, and you
+        wonder what you were waiting for.
+      effects:
+        - { type: cost, item: flowers }
+        - { type: relationship, role: parent, affection: 1 }
+        - { type: stat, key: happiness, delta: 3 }

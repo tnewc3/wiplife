@@ -189,6 +189,20 @@ export function buildEulogy(life: LifeState, content: ContentBundle, speaker: Sp
     const kind = pick(rng, unknownKinds) as (typeof UNKNOWN_KINDS)[number];
     thirdParagraph.push(say(w, `unknown.${kind}`, text.unknown[kind]));
   }
+  // L1: what the speaker can say about your last days: you asked them, they were there, they got your letter, you had time.
+  const t = life.later.terminal;
+  if (t !== null) {
+    const lastDays = content.text.later.eulogy;
+    const years = Math.max(0, life.currentYear - t.since);
+    const kinds: [string, readonly string[], boolean][] = [
+      ['asked', lastDays.asked, t.speakerId === speaker.personId],
+      ['bedside', lastDays.bedside, t.visits.some((v) => v.id === speaker.personId && v.came)],
+      ['letter', lastDays.letter, t.letters.includes(speaker.personId)],
+      ['time', lastDays.time, years >= 1],
+    ];
+    const fitting = kinds.find(([, , applies]) => applies);
+    if (fitting) thirdParagraph.push(variant(w, `later.eulogy.${fitting[0]}`, fitting[1], { years: years <= 1 ? 'a year' : `${years} years` }));
+  }
   thirdParagraph.push(variant(w, `closing.${speaker.tone}`, text.closing[speaker.tone]));
 
   const paragraphs = [firstParagraph, secondParagraph, thirdParagraph]

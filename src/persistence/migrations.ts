@@ -392,6 +392,17 @@ export const migrations: readonly Migration[] = [
       };
     },
   },
+  {
+    from: 20,
+    description:
+      'L1: later life. A life gains a "later" record (no care needed, no warning of a death, no amends made). Nobody is given ' +
+      'grandchildren by the upgrade directly: the next year\'s step meets the children of your grown children and makes them people ' +
+      'on your People list, as it does for a new life.',
+    migrate: (data) => {
+      if (!isRecord(data)) return data;
+      return { ...data, later: { care: null, terminal: null, amends: [], offered: {} } };
+    },
+  },
 ];
 
 function isRecord(value: unknown): value is Record<string, unknown> {

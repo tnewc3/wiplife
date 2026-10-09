@@ -1,0 +1,280 @@
+# The life review (L1, docs/expansion.md): the regrets and proud moments shown
+# at the end of a life, beside the eulogy. Every line says what proves it, and
+# is told only when that holds of the life that ended:
+#   who   a person in your life it is about (their relationship to you, what is
+#         between you, whether they were still alive); the line may use {npc}
+#         ({npc.name}, {npc.relation}, {npc.they}...)
+#   when  a condition on your life (flags, memories, family, career, health...),
+#         checked with that person cast as `npc`
+# A line needs at least one of them. You are "you": no line claims a past the
+# life does not have. Each template is told at most once, and each person at
+# most once in a list.
+regrets:
+  - id: never_made_peace
+    weight: 4
+    who: { status: [estranged], alive: true, kinds: [parent, stepparent, child, stepchild, sibling, relative, grandchild] }
+    text: "You never made peace with {npc.name}, your {npc.relation}. The silence outlasted whatever started it."
+  - id: gone_before_peace
+    weight: 4
+    who: { status: [estranged], alive: false, kinds: [parent, stepparent, child, stepchild, sibling, relative, grandchild, friend, partner, spouse, ex] }
+    text: "{npc.name} died while the two of you weren't speaking, and you never got to say any of it."
+  - id: unfaithful
+    weight: 3
+    who: { memory: cheated_on_them }
+    text: "You were unfaithful to {npc.name}, and some part of that never came back."
+  - id: told_the_secret
+    weight: 3
+    who: { memory: spilled_their_secret }
+    text: "You told {npc.name}'s secret when you should have kept it, and {npc.they} never trusted you quite the same way."
+  - id: cruel_words
+    weight: 3
+    who: { memory: cruel_words }
+    text: "You said something cruel to {npc.name} that you could never take back."
+  - id: humiliated
+    weight: 2
+    who: { memory: humiliated_them }
+    text: "You humiliated {npc.name} once, in front of other people, and it was the thing {npc.they} remembered."
+  - id: left_their_care
+    weight: 3
+    who: { memory: left_their_care_to_family }
+    text: "You left {npc.name}'s care to everyone else, and the family noticed."
+  - id: left_in_jail
+    weight: 3
+    who: { memory: left_them_in_jail }
+    text: "You didn't pay {npc.name}'s bail when it mattered, and neither of you forgot it."
+  - id: missed_the_wedding
+    weight: 2
+    who: { memory: missed_wedding }
+    text: "You missed {npc.name}'s wedding, and nothing you said afterward made up for it."
+  - id: turned_away
+    weight: 2
+    who: { memory: turned_them_away }
+    text: "You walked past {npc.name} when {npc.they} {npc:needed|needed} you to stop."
+  - id: drifted_friend
+    weight: 2
+    who: { memory: lost_touch, kinds: [friend] }
+    text: "You let {npc.name} drift out of your life and never picked up the phone."
+  - id: cold_with_child
+    weight: 4
+    who: { kinds: [child, stepchild], alive: true, affection: { lt: 40 } }
+    text: "You were never as close to {npc.name} as you meant to be. Life kept getting in the way, and then so did you."
+  - id: cold_with_parent
+    weight: 3
+    who: { kinds: [parent, stepparent], affection: { lt: 40 } }
+    text: "You and {npc.name}, your {npc.relation}, never got close, and by the time you wanted to, it was late."
+  - id: never_around
+    weight: 4
+    who: { memory: parent_never_around }
+    text: "{npc.name} grew up remembering that you weren't around, and you knew it."
+  - id: cold_house
+    weight: 3
+    who: { memory: parent_cold_home }
+    text: "You kept a cold house, and {npc.name} grew up in it."
+  - id: missed_recital
+    weight: 2
+    who: { memory: parent_missed_recital }
+    text: "You missed {npc.name}'s recital, and {npc.they} never forgot the empty seat."
+  - id: broken_promise
+    weight: 2
+    who: { memory: parent_broke_a_promise }
+    text: "You broke a promise to {npc.name} that you never fully made good."
+  - id: gave_up_custody
+    weight: 3
+    when: { flag: gave_up_custody }
+    text: "You gave up custody of your children, and never quite forgave yourself."
+  - id: left_school
+    weight: 2
+    when: { education: { left: true } }
+    text: "You left school unfinished, and always wondered who you'd have been if you had stayed."
+  - id: burned_out_fame
+    weight: 2
+    when: { flag: fame_burned_out }
+    text: "You burned out chasing a life in the spotlight, and what it cost was louder than what it paid."
+  - id: played_hurt
+    weight: 2
+    when: { flag: sports_played_hurt }
+    text: "You played through an injury you should have rested, and your body kept the bill."
+  - id: doped
+    weight: 3
+    when: { flag: sports_doped }
+    text: "You took something you shouldn't have to win, and you knew it every time you looked at the trophies."
+  - id: drove_drunk
+    weight: 3
+    when: { flag: drove_drunk_crash }
+    text: "You drove drunk and crashed. You were lucky, and you knew it."
+  - id: bankruptcy
+    weight: 2
+    when: { flag: filed_bankruptcy }
+    text: "You went bankrupt, and carried the shame of it longer than the debt."
+  - id: the_crew
+    weight: 3
+    when: { flag: joined_a_crew }
+    text: "You spent years in a crew, and some of what you did there you never told anyone."
+  - id: talent_unfound
+    weight: 2
+    when: { discovery: { talent: hidden } }
+    text: "You never found out what you were really good at. It was there the whole time."
+  - id: worked_yourself_down
+    weight: 2
+    when: { flag: burned_out }
+    text: "You worked yourself into burnout, and missed things you couldn't get back."
+  - id: unfaithful_flag
+    weight: 1
+    when: { flag: unfaithful }
+    text: "You were unfaithful to someone who trusted you, and that stayed with you."
+  - id: put_off_amends
+    weight: 4
+    who: { memory: amends_put_off }
+    text: "You meant to make things right with {npc.name} and kept putting it off."
+  - id: amends_turned_away
+    weight: 3
+    who: { memory: amends_refused }
+    text: "You tried to make amends with {npc.name} and were turned away. You carried it anyway."
+  - id: asked_and_not_there
+    weight: 3
+    who: { memory: stayed_away_at_the_end }
+    text: "You asked {npc.name} to be with you at the end, and {npc.they} didn't come."
+proud:
+  - id: close_to_the_end_child
+    weight: 4
+    who: { kinds: [child, stepchild], alive: true, affection: { gte: 75 } }
+    text: "You and {npc.name} stayed close all the way to the end."
+  - id: grew_old_together
+    weight: 4
+    who: { kinds: [spouse], alive: true, affection: { gte: 70 } }
+    text: "You and {npc.name} grew old together, and meant it."
+  - id: friend_for_life
+    weight: 3
+    who: { kinds: [friend], alive: true, affection: { gte: 80 }, trust: { gte: 70 } }
+    text: "{npc.name} was a friend through all of it, and you were one back."
+  - id: close_to_grandchild
+    weight: 3
+    who: { kinds: [grandchild], alive: true, affection: { gte: 75 } }
+    text: "{npc.name}, your {npc.relation}, loved you without reservation, and you earned it."
+  - id: took_in_relative
+    weight: 3
+    when: { flag: took_in_a_relative }
+    text: "You took a relative into your home when they needed looking after."
+  - id: paid_for_care
+    weight: 2
+    when: { flag: paid_for_care }
+    text: "You paid for a relative's care, and never made them feel it."
+  - id: raised_grandchild
+    weight: 5
+    when: { flag: raised_a_grandchild }
+    text: "You raised a grandchild at an age when most people are finished with raising anyone, and you did it well."
+  - id: taught_someone
+    weight: 3
+    who: { memory: taught_them }
+    text: "You taught {npc.name} something that lasted."
+  - id: told_stories
+    weight: 2
+    who: { memory: told_them_stories }
+    text: "You told {npc.name} the stories so they wouldn't be lost."
+  - id: made_amends
+    weight: 4
+    who: { memory: amends_made }
+    text: "You made peace with {npc.name} while there was still time."
+  - id: bedside
+    weight: 3
+    who: { memory: at_your_bedside }
+    text: "{npc.name} was with you at the end, because you had made it possible to be."
+  - id: adopted
+    weight: 3
+    when: { flag: adopted_a_child }
+    text: "You opened your home to a child who needed one."
+  - id: valedictorian
+    weight: 2
+    when: { flag: valedictorian }
+    text: "You were valedictorian, and you worked for it."
+  - id: degree
+    weight: 2
+    when: { education: { credential: [bachelor, grad] } }
+    text: "You earned a degree, and nobody gave it to you."
+  - id: finished_late
+    weight: 4
+    when: { flag: amends_unfinished_degree }
+    text: "You went back and finished what you had left at school."
+  - id: trade
+    weight: 2
+    when: { education: { credential: [trade_license] } }
+    text: "You learned a trade and were good at it."
+  - id: worked_a_life
+    weight: 2
+    when:
+      any:
+        - { career: { retired: true } }
+        - { career: { years: { gte: 20 } } }
+    text: "You worked for decades and made something of it."
+  - id: union
+    weight: 2
+    when: { flag: union_member }
+    text: "You helped workers organize, and the workplace was better for it."
+  - id: whistleblower
+    weight: 3
+    when: { flag: whistleblower }
+    text: "You blew the whistle when it cost you something, and you would do it again."
+  - id: recovery
+    weight: 4
+    when: { flag: in_recovery }
+    text: "You got clean, and stayed clean, when it would have been easier not to."
+  - id: marathon
+    weight: 1
+    when: { flag: ran_marathon }
+    text: "You ran a marathon, and finished it."
+  - id: volunteered
+    weight: 2
+    when: { flag: volunteers }
+    text: "You gave your time to the animal shelter when nobody was counting."
+  - id: memoir
+    weight: 3
+    when: { flag: wrote_memoir }
+    text: "You wrote your story down so it would outlast you."
+  - id: famous
+    weight: 2
+    when: { flag: fame_famous }
+    text: "You became someone people knew."
+  - id: hall_of_fame
+    weight: 3
+    when: { flag: sports_hall_of_fame }
+    text: "You were inducted into the Hall of Fame, and you earned it one season at a time."
+  - id: peace_dinner
+    weight: 2
+    when: { flag: hosted_a_peace_dinner }
+    text: "You brought two people back to the same table."
+  - id: stood_by
+    weight: 3
+    who: { memory: stood_by_you }
+    text: "{npc.name} stood by you when things fell apart, and you never took it for granted."
+  - id: prison_visits
+    weight: 3
+    who: { memory: visited_them_in_prison }
+    text: "You visited {npc.name} when it would have been easier not to."
+  - id: stayed_at_the_bed
+    weight: 3
+    who: { memory: stayed_by_their_bed }
+    text: "You stayed by {npc.name}'s bed through the worst of it."
+  - id: godparent
+    weight: 1
+    when: { flag: is_a_godparent }
+    text: "You were a godparent, and took it seriously."
+  - id: came_out
+    weight: 3
+    when: { flag: came_out }
+    text: "You told the people close to you who you are. That took courage."
+  - id: picked_up_dream
+    weight: 4
+    when: { flag: picked_up_the_dream }
+    text: "You went back to something you had walked away from, and it was still yours."
+  - id: passed_it_on
+    weight: 2
+    when: { flag: passed_something_on }
+    text: "You gave something to the next generation while you were still around to see them use it."
+  - id: coached_grandchild
+    weight: 2
+    when: { flag: coached_a_grandchild }
+    text: "You taught a grandchild your trade, and watched it take."
+  - id: long_life
+    weight: 1
+    when: { age: { gte: 85 } }
+    text: "You lived a long life, and were there for most of it."

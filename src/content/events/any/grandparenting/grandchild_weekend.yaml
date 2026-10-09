@@ -1,0 +1,55 @@
+id: grandchild_weekend
+title: A weekend with the grandchildren
+text: >-
+  {kid.name}'s parents have a wedding to go to, a long way away and no
+  babysitter. They ask very politely whether you might have {kid.them} for the
+  whole weekend, in the voice of people who have run out of other ideas.
+tone: light
+category: grandparenting
+rarity: common
+lifeStages: [adult, senior]
+requires:
+  all:
+    - { later: { grandchildren: { gte: 1 } } }
+    - { age: { gte: 45 } }
+    - { role: kid, kind: [grandchild], alive: true, age: { gte: 3, lte: 12 }, where: [city, household] }
+weight: { base: 7 }
+cooldownYears: 4
+cast:
+  kid: { kind: grandchild, presence: nearby }
+choices:
+  - id: spoil
+    label: Say yes, and throw the rules away
+    outcome:
+      text: >-
+        Ice cream for dinner. A film on a school night that is not a school
+        night. {kid.name} will remember it for the rest of {kid.their} life, and
+        so will {kid.their} parents, in a different way.
+      effects:
+        - { type: cost, item: grandchild_treat }
+        - { type: relationship, role: kid, affection: 8, trust: 2 }
+        - { type: memory, role: kid, tag: spoiled_by_you }
+        - { type: stat, key: happiness, delta: 4 }
+        - { type: stat, key: stress, delta: 2 }
+  - id: keep_rules
+    label: Say yes, and keep to their house rules
+    outcome:
+      text: >-
+        You read the list on the fridge twice and follow it exactly. {kid.name}
+        negotiates for an extra story and wins. The weekend is quieter than you
+        feared and better than you expected.
+      effects:
+        - { type: relationship, role: kid, affection: 5, trust: 4 }
+        - { type: memory, role: kid, tag: looked_after_them }
+        - { type: stat, key: happiness, delta: 3 }
+        - { type: stat, key: stress, delta: 2 }
+  - id: too_tired
+    label: Say you can't, and mean it
+    outcome:
+      text: >-
+        The honest answer is that you are not as young as you were. They
+        understand, and they find someone else, and you spend the weekend
+        wondering if you will be asked again.
+      effects:
+        - { type: relationship, role: kid, affection: -2 }
+        - { type: stat, key: stress, delta: -1 }

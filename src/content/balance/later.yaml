@@ -1,0 +1,137 @@
+# Later life (L1, docs/expansion.md): grandchildren, care near the end, a death
+# you see coming, and making amends. Starting proposals; the 10,000-life
+# simulation (tools/simulate/later.ts) reports how they land.
+
+grandchildren:
+  # How a new grandchild feels about you to start with.
+  bond:
+    affection: { mean: 62, sd: 10 }
+    trust: { mean: 58, sd: 10 }
+  # How much of a grandchild's personality, looks and smarts come from their parent (the rest from the population).
+  parentShare: 0.5
+  noiseSd: 10
+  # Playing favorites: a favorite is remembered for this many years; each year
+  # it costs the other grandchildren this much affection for you, and their
+  # parents this much trust.
+  favorite: { years: 3, others: -3, parentTrust: -2 }
+  # What helping out does with a grandchild's parent, and what spoiling their
+  # child does to their trust in you.
+  help: { babysitParentAffection: 2, babysitParentTrust: 1, spoilParentTrust: -1 }
+  # A parent who asks for a grandchild back has to be doing better than this (trouble severity).
+  parentRecovered: 20
+
+care:
+  # Care near the end: the chance of needing it in a year is the age curve times
+  # the health factor times the strongest of the conditions you have.
+  minAge: 70
+  chance:
+    - { at: 70, x: 0.002 }
+    - { at: 80, x: 0.014 }
+    - { at: 90, x: 0.06 }
+    - { at: 100, x: 0.15 }
+  healthFactor:
+    - { at: 0, x: 4 }
+    - { at: 30, x: 2.2 }
+    - { at: 60, x: 1 }
+    - { at: 100, x: 0.4 }
+  conditions:
+    dementia: 4
+    heart_disease: 1.6
+    worn_joints: 1.5
+    back_injury: 1.3
+    type_2_diabetes: 1.2
+  # If you haven't arranged anything in this many years, your family (or paid care) steps in.
+  defaultAfterYears: 2
+  reminderYears: 2
+  # A year of paid care at home and a year in assisted living at the national
+  # average; both are scaled by your city's cost of living.
+  cost: { paid: 34000, assisted: 58000 }
+  # Assisted living covers meals, so everyday living costs less.
+  assisted: { livingShare: 0.2 }
+  family:
+    # Who can step up, in the order they are asked; among the same kind, whoever feels closest.
+    kinds: [spouse, partner, fiance, child, stepchild, sibling, grandchild, relative]
+    minCombined: 100
+    minAge: 21
+    maxAge: 78
+    # An estranged relative who still feels this much comes back with this chance.
+    estranged: { minAffection: 25, chance: 0.4 }
+    # The chance in a year that the relative looking after you gives out.
+    givesOut: 0.07
+    # A year of looking after you: how much closer they feel.
+    provider: { affection: 2, trust: 1 }
+  # What a year under each kind of care does for you.
+  effects:
+    family: { happiness: 1, stress: -1 }
+    paid: { stress: -1 }
+    assisted: { happiness: -1, stress: -1, health: 1 }
+
+terminal:
+  minAge: 50
+  # A health condition with at least this mortality can be the one that takes you.
+  conditionMortality: 0.015
+  condition:
+    minSeverity: 45
+    chance:
+      - { at: 45, x: 0.05 }
+      - { at: 70, x: 0.2 }
+      - { at: 100, x: 0.4 }
+  # A long decline: old, and in poor health.
+  decline:
+    minAge: 80
+    healthBelow: 35
+    chance:
+      - { at: 80, x: 0.03 }
+      - { at: 90, x: 0.12 }
+      - { at: 100, x: 0.3 }
+  # The chance of dying in the year it begins, and in each year after. The last
+  # entry is the longest anyone lasts.
+  deathChance: [0.08, 0.4, 0.7, 0.95]
+  # Where you spend your last months: the cost of a year (scaled by your city's
+  # cost of living) and what a year there does for you.
+  hospice:
+    hospice: { cost: 7000, deltas: { stress: -3, happiness: 2 } }
+    home: { cost: 15000, deltas: { stress: -2, happiness: 3 } }
+    hospital: { cost: 24000, deltas: { stress: 2, happiness: -1 } }
+  # The service you ask for: what it costs next to a traditional funeral, and
+  # how likely guests are to stay away (a multiple of their usual chance).
+  service:
+    traditional: { cost: 1, stayAway: 1 }
+    simple: { cost: 0.55, stayAway: 0.9 }
+    celebration: { cost: 1.2, stayAway: 0.6 }
+    private: { cost: 0.7, stayAway: 1.6 }
+  maxVisitors: 4
+  maxLetters: 3
+  visit:
+    # The chance someone you invite comes: affection plus trust over 200, times this.
+    scale: 1.1
+    # An estranged person comes with this multiple of that chance; someone in another city, this one.
+    estranged: 0.35
+    far: 0.8
+    # Each year a visitor is with you, how much closer they feel.
+    affection: 3
+    trust: 3
+  letter:
+    affection: 6
+    trust: 6
+    # An estranged person who gets a letter makes peace with this chance.
+    reconcile: 0.4
+  # At the funeral: a visitor who came stays away with this multiple of their
+  # usual chance; someone who got your letter, this one.
+  attend: { visited: 0.15, letter: 0.6 }
+  # The will prompt is shown at most this many years into the decline.
+  willPromptYears: 1
+
+amends:
+  minAge: 45
+  # The chance in a year that a chance to make amends comes, if any history calls for one.
+  yearlyChance: 0.12
+  # Years before the same source and person can come up again.
+  cooldownYears: 10
+  # Years between any two chances, and the most chances one life is offered.
+  gapYears: 4
+  maxPerLife: 3
+
+review:
+  maxRegrets: 3
+  maxProud: 3

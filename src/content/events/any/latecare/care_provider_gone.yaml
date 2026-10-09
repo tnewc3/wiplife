@@ -1,0 +1,52 @@
+# Engine (registries/later.yaml): whoever looked after you can't go on.
+id: care_provider_gone
+title: Starting again
+text: >-
+  The arrangement that held together for so long has finally come apart.
+  Sometimes it's an illness, sometimes a job, sometimes the plain exhaustion of
+  looking after another person. Whatever the cause, you need looking after
+  again, and the people who did it are done.
+tone: serious
+category: latecare
+rarity: common
+lifeStages: [senior, adult]
+requires:
+  all:
+    - { later: { care: true } }
+    - { later: { care: true, careOption: [none] } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  carer: { kind: child, presence: anywhere, optional: true }
+choices:
+  - id: paid
+    label: Hire a carer to come to your home
+    outcome:
+      text: >-
+        There's a relief in it, a clean arrangement with a start and a
+        number. You arrange it on your own, and tell the family afterward.
+      effects:
+        - { type: cost, item: late_care_setup }
+        - { type: later, action: care, option: paid }
+  - id: assisted
+    label: Move into assisted living
+    visibleIf: { home: { kind: [renting, owned] } }
+    outcome:
+      text: >-
+        You decide before the family does, which feels important. The move
+        takes a month and costs more than you planned. The window faces the
+        right way.
+      effects:
+        - { type: cost, item: assisted_move_in }
+        - { type: later, action: care, option: assisted }
+  - id: thank_them
+    label: Thank whoever it was, and mean it
+    visibleIf: { role: carer }
+    outcome:
+      text: >-
+        You phone {carer.name}, who is relieved and a little tearful, and tell
+        {carer.them} what the last years have meant. It's not the same as a
+        solution, but it is the right place to begin one.
+      effects:
+        - { type: relationship, role: carer, affection: 6, trust: 5 }
+        - { type: stat, key: happiness, delta: 2 }

@@ -7,7 +7,7 @@
 
 tiers:
   # Family and partners get the full yearly update.
-  closeKinds: [parent, stepparent, grandparent, sibling, child, stepchild, partner, fiance, spouse]
+  closeKinds: [parent, stepparent, grandparent, sibling, child, stepchild, grandchild, partner, fiance, spouse]
   # Friends who feel at least this much for you are close too.
   closeAffection: 60
   # The rest of your friends, relatives, exes and the people you work with get

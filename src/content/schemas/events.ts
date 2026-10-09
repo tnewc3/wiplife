@@ -26,6 +26,7 @@ import { SPORT_LEVELS, SPORT_RESULTS, SPORT_RETIRE_ROUTES, SPORT_CONTRACT_KINDS,
 import { fameBandSchema, fameCommitmentSchema, fameSceneSchema, fameSizeSchema, fameTermsSchema, FAME_FAN_TYPES, FAME_STALKER_STAGES, type FameBand, type FameCommitment, type FameStalkerStage } from './fame';
 import { FOCUS_KEYS, LICENSE_STAGE_IDS, ruleDomainSchema, type RuleDomainId, type TeenFocusId } from './teen';
 import { relationshipKindSchema, relationshipStatusSchema, romanceStatusSchema } from './relationships';
+import { AMENDS_RESULTS, CARE_OPTIONS, HOSPICE_CHOICES, LATER_ACTIONS, TEACH_KEYS } from './laterIds';
 import { templateSchema } from './text';
 import { reactionSchema, type ReactionId } from './mental';
 import { knowledgeKindSchema, tieKindSchema, tieStatusSchema, type KnowledgeKindId, type TieKindId, type TieStatusId } from './web';
@@ -107,6 +108,7 @@ export type Condition =
   | { crime: CrimeCondition }
   | { fame: FameCondition }
   | { sports: SportsCondition }
+  | { later: LaterCondition }
   | { memory: { role: string; tag: string } }
   | {
       role: string;
@@ -128,6 +130,8 @@ export type Condition =
       custody?: ('you' | 'shared' | 'other')[];
       /** E2a: a grown child has moved out (or not). */
       movedOut?: boolean;
+      /** L1: how a child came to you: a grandchild you are raising has the origin `grandchild`. */
+      origin?: ('birth' | 'adopted' | 'ivf' | 'surrogacy' | 'step' | 'grandchild')[];
       /** E3: their own life now (job, partner, children, troubles, care). */
       life?: LifeCondition;
       /** E4: what they have heard. */
@@ -516,6 +520,31 @@ export interface FamilyCondition {
 }
 
 /**
+ * Later life (L1). Every field given must hold. grandchildren counts your
+ * grandchildren who are alive and on your People list (not ones you are
+ * raising, who are your children then), minors those under 18; raising: you
+ * are raising a grandchild; care: you need care in your last years;
+ * careOption: how it is provided ('none': needed, not arranged yet);
+ * terminal: you have been told your death is coming (a diagnosis or a long
+ * decline); hospice: where you chose to spend your last months ('none': not
+ * chosen yet); wishes: you have set your final wishes; willOutOfDate: you have
+ * no will, or it leaves out someone who matters (a child, a grandchild, a
+ * spouse); amends: how many amends you have made.
+ */
+export interface LaterCondition {
+  grandchildren?: Compare;
+  minors?: Compare;
+  raising?: boolean;
+  care?: boolean;
+  careOption?: ((typeof CARE_OPTIONS)[number] | 'none')[];
+  terminal?: boolean;
+  hospice?: ((typeof HOSPICE_CHOICES)[number] | 'none')[];
+  wishes?: boolean;
+  willOutOfDate?: boolean;
+  amends?: Compare;
+}
+
+/**
  * E5, what you own. pets, vehicles and vacationHomes count them (a pet that
  * has died doesn't count). The other fields describe one pet, one vehicle or
  * one home: the one the event is about (it binds it, see `bind`), or, in a
@@ -875,6 +904,22 @@ export const conditionSchema: z.ZodType<Condition> = z.lazy(() =>
         })
         .refine(atLeastOneField, 'needs at least one field'),
     }),
+    z.strictObject({
+      later: z
+        .strictObject({
+          grandchildren: compareSchema.optional(),
+          minors: compareSchema.optional(),
+          raising: z.boolean().optional(),
+          care: z.boolean().optional(),
+          careOption: z.array(z.enum([...CARE_OPTIONS, 'none'])).min(1).optional(),
+          terminal: z.boolean().optional(),
+          hospice: z.array(z.enum([...HOSPICE_CHOICES, 'none'])).min(1).optional(),
+          wishes: z.boolean().optional(),
+          willOutOfDate: z.boolean().optional(),
+          amends: compareSchema.optional(),
+        })
+        .refine(atLeastOneField, 'needs at least one field'),
+    }),
     z.strictObject({ memory: z.strictObject({ role: roleSchema, tag: idSchema }) }),
     z.strictObject({
       role: roleSchema,
@@ -890,6 +935,7 @@ export const conditionSchema: z.ZodType<Condition> = z.lazy(() =>
       style: z.partialRecord(parentingKeySchema, compareSchema).optional(),
       custody: z.array(z.enum(['you', 'shared', 'other'])).min(1).optional(),
       movedOut: z.boolean().optional(),
+      origin: z.array(z.enum(['birth', 'adopted', 'ivf', 'surrogacy', 'step', 'grandchild'])).min(1).optional(),
       life: lifeConditionSchema.optional(),
       heard: heardConditionSchema.optional(),
       mental: z
@@ -1380,6 +1426,35 @@ export const effectSchema = z.discriminatedUnion('type', [
     .refine((e) => (e.action === 'retire') === (e.route !== undefined), 'retire needs route (and only it has one)')
     .refine((e) => (e.action === 'position') === (e.position !== undefined), 'position needs position (and only it has one)')
     .refine((e) => e.kind === undefined || e.action === 'sign', 'only sign takes kind'),
+  /**
+   * L1, later life. care: you choose how your care is provided (`option`; for
+   * family care `role` is the relative who steps up, and they move in
+   * nearby). hospice: where you spend your last months. amends: records an
+   * amends chance and its result (`source` in registries/later.yaml, `role`
+   * the person). raise: you take the grandchild `role` in and raise them (they
+   * become your child; their parent can ask for them back); return: a
+   * grandchild you raise goes back to their parent. teach: you nudge the
+   * grandchild `role`'s trait or smarts by `delta`. The engine ignores what
+   * doesn't fit now.
+   */
+  z
+    .strictObject({
+      type: z.literal('later'),
+      action: z.enum(LATER_ACTIONS),
+      role: roleSchema.optional(),
+      option: z.enum(CARE_OPTIONS).optional(),
+      choice: z.enum(HOSPICE_CHOICES).optional(),
+      source: idSchema.optional(),
+      result: z.enum(AMENDS_RESULTS).optional(),
+      key: z.enum(TEACH_KEYS).optional(),
+      delta: z.int().min(-12).max(12).optional(),
+    })
+    .refine((e) => (e.action === 'care') === (e.option !== undefined), 'care needs option (and only care has one)')
+    .refine((e) => (e.action === 'hospice') === (e.choice !== undefined), 'hospice needs choice (and only hospice has one)')
+    .refine((e) => (e.action === 'amends') === (e.source !== undefined && e.result !== undefined), 'amends needs source and result (and only amends has them)')
+    .refine((e) => (e.action === 'teach') === (e.key !== undefined && e.delta !== undefined && e.delta !== 0), 'teach needs key and a non-zero delta (and only teach has them)')
+    .refine((e) => e.action === 'care' || e.action === 'hospice' || e.role !== undefined || e.action === 'amends', 'raise, return and teach need role')
+    .refine((e) => e.action !== 'care' || e.option !== 'family' || e.role !== undefined, 'family care needs the role of the relative who steps up'),
   z.strictObject({ type: z.literal('innerConflict'), delta: z.int().min(-100).max(100) }),
   /** You discover your hidden talent, if you have one you haven't found (Stage 9). */
   z.strictObject({ type: z.literal('talent') }),

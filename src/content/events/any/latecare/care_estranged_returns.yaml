@@ -1,0 +1,56 @@
+# Engine (registries/later.yaml): an estranged relative comes back when you need care.
+id: care_estranged_returns
+title: A knock you didn't expect
+text: >-
+  {carer.name}, your {carer.relation}, is on the step with a suitcase and a
+  face like a closed door that has just been opened. You haven't spoken in
+  years. {carer.They} {carer:heard|heard} you weren't well, and {carer.they}
+  {carer:wanted|wanted} to see for {carer.themself} what that meant.
+tone: serious
+category: latecare
+rarity: uncommon
+lifeStages: [senior, adult]
+requires:
+  all:
+    - { later: { care: true } }
+    - { later: { care: true, careOption: [none] } }
+    - { role: carer, alive: true, status: [estranged], kind: [spouse, partner, fiance, child, stepchild, sibling, grandchild, relative] }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  carer: { kind: child, presence: anywhere }
+choices:
+  - id: let_in
+    label: Let {carer.them} in, and let {carer.them} help
+    outcome:
+      text: >-
+        You do not make a speech and neither does {carer.name}. The suitcase
+        goes in the spare room. The first night, you both lie awake with the
+        wall between you, and it is the closest you have been in a long time.
+      effects:
+        - { type: later, action: care, option: family, role: carer }
+        - { type: later, action: amends, source: estranged_family, result: made, role: carer }
+        - { type: relationship, role: carer, affection: 12, trust: 10 }
+        - { type: stat, key: happiness, delta: 4 }
+  - id: paid_instead
+    label: Thank {carer.them}, but arrange a paid carer
+    outcome:
+      text: >-
+        You are not ready to be looked after by someone you have hurt. You
+        say so, in kinder words, and arrange a carer. {carer.name} stays the
+        night, and in the morning is gone, with a number on the table.
+      effects:
+        - { type: cost, item: late_care_setup }
+        - { type: later, action: care, option: paid }
+        - { type: relationship, role: carer, affection: 1, trust: -1 }
+  - id: send_away
+    label: Say it is too late
+    outcome:
+      text: >-
+        You say that you'd have wanted it once, and that you don't want it
+        now. It is not the whole truth, and it is the only part you can say.
+        {carer.name} nods, and goes, and does not come back.
+      effects:
+        - { type: later, action: amends, source: estranged_family, result: refused, role: carer }
+        - { type: relationship, role: carer, affection: -8, trust: -8 }
+        - { type: stat, key: happiness, delta: -4 }

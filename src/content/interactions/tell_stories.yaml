@@ -1,0 +1,49 @@
+id: tell_stories
+name: Tell them about the old days
+blurb: Where you came from. What you got wrong. What you would do again.
+group: grandparenting
+profile: warm
+inPerson: true
+availability:
+  kinds: [grandchild]
+  you: { min: 45 }
+  them: { min: 7 }
+outcomes:
+  great:
+    text:
+      - "You tell {person.name} about the year everything changed, and {person.they} {person:asks|ask} the question you've been waiting fifty years for someone to ask."
+      - "{person.name} listens to the whole story, then asks you to tell it again, slower, so {person.they} can remember it."
+    affection: 5
+    trust: 4
+    mood: 8
+    effects:
+      - { type: memory, role: person, tag: told_them_stories }
+      - { type: stat, key: happiness, delta: 3 }
+  good:
+    text:
+      - "You tell it the way you always tell it, and {person.name} laughs in the right places."
+      - "A good story, mostly true. {person.name} suspects the parts that aren't, and likes them anyway."
+    affection: 3
+    trust: 2
+    mood: 5
+    effects:
+      - { type: memory, role: person, tag: told_them_stories }
+  neutral:
+    text:
+      - "{person.name} listens politely, and checks the clock only twice."
+      - "The story takes longer than you remember, and {person.name} lets it."
+    affection: 1
+    mood: 1
+  bad:
+    text:
+      - "You tell the story you've told before, and {person.name} says so."
+      - "Halfway through you lose the thread, and {person.name} is kind about it in a way that hurts."
+    affection: -1
+    mood: -3
+  backfire:
+    text:
+      - "You tell a story that was never meant for a child's ears, and {person.name} goes quiet for the rest of the visit."
+      - "The story takes a dark turn you hadn't planned. {person.name} stops asking questions, and doesn't ask for another."
+    affection: -3
+    trust: -2
+    mood: -5

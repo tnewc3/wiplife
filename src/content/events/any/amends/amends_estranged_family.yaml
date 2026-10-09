@@ -1,0 +1,86 @@
+# Engine (registries/later.yaml, amends.estranged_family): a family member you are estranged from.
+id: amends_estranged_family
+title: The name you don't say
+text: >-
+  There's a name that has been missing from your conversations for a long
+  time: {npc.name}, your {npc.relation}. You haven't spoken since things broke,
+  and the reasons have gone soft and indistinct in the telling. What's left is
+  the gap, and that gets harder to cross each year it's left.
+tone: serious
+category: amends
+rarity: uncommon
+lifeStages: [adult, senior]
+requires:
+  all:
+    - { age: { gte: 40 } }
+    - { age: { gte: 45 } }
+    - { role: npc, alive: true, age: { gte: 18 }, status: [estranged], kind: [parent, stepparent, child, stepchild, sibling, relative, grandchild] }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  npc: { kind: sibling, presence: anywhere }
+choices:
+  - id: write
+    label: Write {npc.them} a letter, and mean every word
+    check:
+      base: 50
+      stats:
+        - { role: npc, key: affection, weight: 0.3 }
+        - { key: kindness, weight: 0.3 }
+      success:
+        text: >-
+          The reply comes in nine days, in handwriting you'd know anywhere. It
+          is short and careful and not at all what you expected. It says, in
+          the end, that {npc.they} {npc:is|are} glad you wrote. That is
+          enough to start from.
+        effects:
+          - { type: relationship, role: npc, status: active, affection: 14, trust: 10 }
+          - { type: later, action: amends, source: estranged_family, result: made, role: npc }
+          - { type: stat, key: happiness, delta: 6 }
+          - { type: stat, key: stress, delta: -4 }
+      failure:
+        text: >-
+          You wait. The letter is not returned, and it is not answered either.
+          Then a card arrives from a cousin, who writes only that it
+          was read. You hold on to that.
+        effects:
+          - { type: later, action: amends, source: estranged_family, result: refused, role: npc }
+          - { type: stat, key: stress, delta: 3 }
+          - { type: stat, key: happiness, delta: -2 }
+  - id: go_in_person
+    label: Go and knock on the door
+    visibleIf: { role: npc, where: [city, elsewhere] }
+    check:
+      base: 40
+      stats:
+        - { role: npc, key: affection, weight: 0.4 }
+        - { key: confidence, weight: 0.2 }
+      success:
+        text: >-
+          The door opens a hand's width, and then wider. You don't get to the end
+          of the speech you'd rehearsed on the train. Someone is crying,
+          maybe you both are, and the kettle goes on.
+        effects:
+          - { type: relationship, role: npc, status: active, affection: 16, trust: 12 }
+          - { type: later, action: amends, source: estranged_family, result: made, role: npc }
+          - { type: stat, key: happiness, delta: 7 }
+          - { type: stat, key: stress, delta: -5 }
+      failure:
+        text: >-
+          The door doesn't open. A voice behind it says that this isn't the time,
+          and that it may never be. You sit in the car for a while before you
+          drive.
+        effects:
+          - { type: later, action: amends, source: estranged_family, result: refused, role: npc }
+          - { type: relationship, role: npc, affection: -3 }
+          - { type: stat, key: stress, delta: 4 }
+          - { type: stat, key: happiness, delta: -3 }
+  - id: not_yet
+    label: Not yet. Maybe next year
+    outcome:
+      text: >-
+        You tell yourself there'll be a better time, and put the thought
+        away carefully. There's always a better time, until there isn't.
+      effects:
+        - { type: later, action: amends, source: estranged_family, result: declined, role: npc }
+        - { type: stat, key: stress, delta: 1 }

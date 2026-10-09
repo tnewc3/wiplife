@@ -1,0 +1,59 @@
+id: new_hobby_class
+title: A beginner at seventy
+text: >-
+  There's a flyer on the library board: a class for beginners, Thursday
+  mornings, no experience necessary. You have read it every week for a month.
+  Today you take it down and put it in your pocket, which is the first step.
+tone: light
+category: latelife
+rarity: common
+lifeStages: [adult, senior]
+requires:
+  all:
+    - { age: { gte: 55 } }
+    - { age: { gte: 60 } }
+    - { not: { flag: new_late_hobby } }
+weight: { base: 6 }
+once: true
+choices:
+  - id: pottery
+    label: Pottery, with clay up to your elbows
+    outcome:
+      text: >-
+        Your first bowl is a disaster. Your fourth is a bowl. The teacher
+        keeps one on a shelf and tells the new students it was made by a
+        beginner, and you are the beginner.
+      effects:
+        - { type: flag, key: new_late_hobby, value: true }
+        - { type: stat, key: happiness, delta: 5 }
+        - { type: stat, key: stress, delta: -3 }
+  - id: choir
+    label: A community choir, and the Thursday sing
+    outcome:
+      text: >-
+        You are placed with the tenors, who are mostly seventy-year-olds
+        pretending not to be nervous. Singing in a room of strangers turns out
+        to be one of the best ways of no longer being one.
+      effects:
+        - { type: flag, key: new_late_hobby, value: true }
+        - { type: stat, key: happiness, delta: 5 }
+        - { type: stat, key: sociability, delta: 2 }
+  - id: swimming
+    label: Morning swims at the pool
+    outcome:
+      text: >-
+        The water is cold and takes your breath. After a month, the cold is a
+        pleasure and the breath comes back. Your knees thank you in a language
+        you haven't heard in years.
+      effects:
+        - { type: flag, key: new_late_hobby, value: true }
+        - { type: stat, key: fitness, delta: 3 }
+        - { type: stat, key: happiness, delta: 3 }
+  - id: not_for_me
+    label: Put the flyer back
+    outcome:
+      text: >-
+        You tell yourself it wasn't for you, and put it back on the board. The
+        following Thursday, someone else's name is on the sign-up sheet.
+      effects:
+        - { type: stat, key: happiness, delta: -1 }

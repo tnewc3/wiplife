@@ -1,0 +1,50 @@
+id: grandchild_asks_about_you
+title: What were you like?
+text: >-
+  {kid.name} asks it out of nowhere, in the car, looking out the window: what
+  did you want to be, at {kid.their} age? It isn't a casual question. It is the
+  kind children ask when they are working out what they might become.
+tone: neutral
+category: grandparenting
+rarity: common
+lifeStages: [adult, senior]
+requires:
+  all:
+    - { later: { grandchildren: { gte: 1 } } }
+    - { age: { gte: 50 } }
+    - { role: kid, kind: [grandchild], alive: true, age: { gte: 10, lte: 25 }, where: [city, household] }
+weight: { base: 5 }
+cooldownYears: 4
+cast:
+  kid: { kind: grandchild, presence: nearby }
+choices:
+  - id: truth
+    label: Tell {kid.them} the truth, including what went wrong
+    outcome:
+      text: >-
+        You tell it straight: what you wanted, what got in the way, what you
+        got wrong. {kid.name} is quiet for a while, and then says that it makes
+        you seem more real. You decide to take that as the compliment it is.
+      effects:
+        - { type: relationship, role: kid, affection: 6, trust: 8 }
+        - { type: memory, role: kid, tag: told_them_stories }
+        - { type: stat, key: happiness, delta: 2 }
+  - id: tidy_version
+    label: Give {kid.them} the tidy version
+    outcome:
+      text: >-
+        You tell the version with a beginning, a middle and a sensible end.
+        {kid.name} nods, and looks out the window again, and you are not sure
+        you gave {kid.them} what {kid.they} {kid:was|were} asking for.
+      effects:
+        - { type: relationship, role: kid, affection: 1, trust: -1 }
+  - id: ask_back
+    label: Ask what {kid.they} want to be, and listen
+    outcome:
+      text: >-
+        {kid.name} does not know, and says so, and then tells you about three
+        different things, one after the other, like someone trying on coats.
+        You do not tell {kid.them} which one to pick.
+      effects:
+        - { type: relationship, role: kid, affection: 7, trust: 5 }
+        - { type: stat, key: kindness, delta: 1 }

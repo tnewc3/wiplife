@@ -10,6 +10,7 @@ import type { Funeral, LifeState } from '../types';
 import { getAttendance } from './attendance';
 import { buildEulogy } from './build';
 import { chooseSpeaker } from './speaker';
+import { writeLastDays } from './lastDays';
 
 /** The funeral for a life that has died; null for a life that is still going or was set aside unfinished. */
 export function writeFuneral(life: LifeState, content: ContentBundle): Funeral | null {
@@ -17,5 +18,7 @@ export function writeFuneral(life: LifeState, content: ContentBundle): Funeral |
   const speaker = chooseSpeaker(life, content);
   const eulogy = speaker ? buildEulogy(life, content, speaker, createRng(`${life.seed}:eulogy:${life.currentYear}`)) : null;
   const attendance = getAttendance(life, content, speaker?.personId, createRng(`${life.seed}:funeral:${life.currentYear}`));
-  return { eulogy, ...attendance };
+  const rng = createRng(`${life.seed}:lastdays:${life.currentYear}`);
+  const lastDays = writeLastDays(life, content, speaker?.personId, rng);
+  return { eulogy, ...attendance, ...(lastDays ? { lastDays } : {}) };
 }

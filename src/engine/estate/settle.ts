@@ -69,6 +69,8 @@ export function defaultShares(state: LifeState, content: ContentBundle): Share[]
   const children = alive(['child']).sort((a, b) => state.people[a]!.birthYear - state.people[b]!.birthYear || byId(a, b));
   const parents = alive(['parent']);
   const siblings = alive(['sibling']);
+  // L1: with no spouse and no children, grandchildren come before parents and siblings.
+  const grandchildren = alive(['grandchild']).sort((a, b) => state.people[a]!.birthYear - state.people[b]!.birthYear || byId(a, b));
   const out: Share[] = [];
   const split = (ids: Id[], total: number) => equalPercents(total, ids.length).forEach((percent, i) => out.push(personShare(state, ids[i]!, percent)));
 
@@ -84,6 +86,8 @@ export function defaultShares(state: LifeState, content: ContentBundle): Share[]
     }
   } else if (children.length > 0) {
     split(children, 100);
+  } else if (grandchildren.length > 0 && spouse === undefined) {
+    split(grandchildren, 100);
   } else if (parents.length > 0 && siblings.length > 0) {
     split(parents, d.parents);
     split(siblings, 100 - d.parents);
@@ -123,6 +127,13 @@ function entitlements(shares: readonly Share[], total: number): number[] {
   return parts;
 }
 
+/** L1: what the funeral costs: the usual amount in the city, as the service you asked for (if you did) changes it. */
+export function funeralCost(life: LifeState, content: ContentBundle): number {
+  const style = life.later.terminal?.service;
+  const mult = style ? content.balance.later.terminal.service[style].cost : 1;
+  return wholeDollars(content.balance.family.estate.funeral * (content.cities[life.character.cityId]?.costOfLiving ?? 1) * mult);
+}
+
 /** How the estate of a life is settled (see the module comment). */
 export function settleEstate(life: LifeState, content: ContentBundle): Settlement {
   const { estate } = content.balance.family;
@@ -136,13 +147,12 @@ export function settleEstate(life: LifeState, content: ContentBundle): Settlemen
   const mortgageDebt = life.finances.debts.find((d) => d.id === life.housing.mortgageDebtId);
   const mortgage = wholeDollars(mortgageDebt?.balance ?? 0);
   const debts = wholeDollars(f.debts.filter((d) => d.id !== life.housing.mortgageDebtId && !attached.has(d.id)).reduce((sum, d) => sum + d.balance, 0));
-  const costOfLiving = content.cities[life.character.cityId]?.costOfLiving ?? 1;
-  const costsDue0 = wholeDollars(estate.funeral * costOfLiving) + wholeDollars((cashOnHand + homeValue) * estate.settlementShare);
+  const costsDue0 = funeralCost(life, content) + wholeDollars((cashOnHand + homeValue) * estate.settlementShare);
   // A vehicle or vacation home is sold, not passed on, when the cash can't pay the costs and debts.
   const plan = planPossessions(life, shares, cashOnHand < costsDue0 + debts, content);
   const savings = cashOnHand;
   const possessionSales = plan.sold;
-  const costsDue = wholeDollars(estate.funeral * costOfLiving) + wholeDollars((savings + possessionSales + homeValue) * estate.settlementShare);
+  const costsDue = funeralCost(life, content) + wholeDollars((savings + possessionSales + homeValue) * estate.settlementShare);
 
   // Costs, then debts, from savings.
   let cash = savings + possessionSales;

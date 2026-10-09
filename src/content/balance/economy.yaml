@@ -182,6 +182,15 @@ costs:
   home_repair: { amount: 1800, familyHelp: false }
   storm_repair: { amount: 4200, familyHelp: false }
   vacation_week: { amount: 1400, familyHelp: false }
+  # L1: later life. A treat or a day out for a grandchild, a part of their school bills, a ramp and grab rails, the
+  # setup of paid care at home, a move into assisted living, and a gift for a grandchild's wedding.
+  grandchild_treat: { amount: 150, familyHelp: false }
+  grandchild_school_help: { amount: 3500, familyHelp: false }
+  home_changes: { amount: 4500, familyHelp: false }
+  late_care_setup: { amount: 2500, familyHelp: false }
+  assisted_move_in: { amount: 6500, familyHelp: false }
+  grandchild_wedding_gift: { amount: 700, familyHelp: false }
+  reunion_trip: { amount: 900, familyHelp: false }
 
 # C1: the share of a cost your family covers, by family wealth, times how
 # close you are to your closest living parent (affection ÷ 100). Nothing

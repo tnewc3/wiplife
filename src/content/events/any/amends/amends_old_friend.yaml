@@ -1,0 +1,66 @@
+# Engine (registries/later.yaml, amends.old_friend): a friend you lost touch with.
+id: amends_old_friend
+title: The number you kept
+text: >-
+  You still have {npc.name}'s number. It has outlived two phones and one
+  address book. You were close once, close enough that the silence is a
+  surprise whenever you think about it. Nobody did anything. You just stopped.
+tone: neutral
+category: amends
+rarity: common
+lifeStages: [adult, senior]
+requires:
+  all:
+    - { age: { gte: 40 } }
+    - { age: { gte: 45 } }
+    - { role: npc, alive: true, age: { gte: 18 }, kind: [friend], affection: { lt: 30 } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  npc: { kind: friend, presence: anywhere }
+choices:
+  - id: call
+    label: Call, and say you've been thinking about {npc.them}
+    check:
+      base: 55
+      stats:
+        - { role: npc, key: affection, weight: 0.3 }
+        - { key: sociability, weight: 0.2 }
+      success:
+        text: >-
+          {npc.name} answers on the fourth ring and says your name like a
+          question, and then like an answer. You talk for two hours, mostly
+          about nothing, and book a day to meet. It was never as complicated as
+          you'd made it.
+        effects:
+          - { type: relationship, role: npc, affection: 22, trust: 12 }
+          - { type: later, action: amends, source: old_friend, result: made, role: npc }
+          - { type: stat, key: happiness, delta: 5 }
+      failure:
+        text: >-
+          The number is disconnected, or answered by a cousin who is very
+          sorry. You put the phone down and sit with the strange feeling of a
+          door that was there, and isn't.
+        effects:
+          - { type: later, action: amends, source: old_friend, result: refused, role: npc }
+          - { type: stat, key: happiness, delta: -2 }
+  - id: write
+    label: Send a letter, and a photograph from the old days
+    outcome:
+      text: >-
+        The picture is of the two of you on someone's roof, laughing at
+        something nobody remembers. {npc.name} writes back with the story
+        of what happened next, which you had forgotten, and which is better
+        than you remembered.
+      effects:
+        - { type: relationship, role: npc, affection: 12, trust: 8 }
+        - { type: later, action: amends, source: old_friend, result: made, role: npc }
+        - { type: stat, key: happiness, delta: 3 }
+  - id: leave_it
+    label: Leave the number where it is
+    outcome:
+      text: >-
+        Some friendships belong to the time they were in. You close the
+        address book. The number stays, as numbers do.
+      effects:
+        - { type: later, action: amends, source: old_friend, result: declined, role: npc }

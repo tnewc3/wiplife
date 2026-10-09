@@ -1,5 +1,5 @@
 import { content } from '../../../content';
-import { canPlanEstate, getTeenView } from '../../../engine/selectors';
+import { canPlanEstate, getLaterView, getTeenView } from '../../../engine/selectors';
 import { useAppStore } from '../../../store/appStore';
 import { Button } from '../../components/Button';
 
@@ -13,6 +13,9 @@ export function MoreTab() {
   const openFamily = useAppStore((s) => s.openFamily);
   const openWill = useAppStore((s) => s.openWill);
   const openBelongings = useAppStore((s) => s.openBelongings);
+  const openLater = useAppStore((s) => s.openLater);
+  /** L1: later life, once there is a grandchild, care to arrange or a death coming. */
+  const later = useAppStore((s) => s.life !== null && getLaterView(s.life, content).active);
   const openTeen = useAppStore((s) => s.openTeen);
   /** T1: the teen years, and for anyone grown without a license the way to get one. */
   const teen = useAppStore((s) => {
@@ -35,6 +38,11 @@ export function MoreTab() {
       {teen && (
         <Button variant="secondary" block onClick={openTeen} data-testid="more-teen">
           {teen}
+        </Button>
+      )}
+      {later && (
+        <Button variant="secondary" block onClick={openLater} data-testid="more-later">
+          Later life
         </Button>
       )}
       <Button variant="secondary" block onClick={openBelongings} data-testid="more-belongings">

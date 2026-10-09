@@ -1,0 +1,54 @@
+# Engine (registries/later.yaml, terminal.visit): a person you asked to be with you has come.
+id: terminal_last_visit
+title: At the bedside
+text: >-
+  {visitor.name}, your {visitor.relation}, has come, as you asked. The chair
+  by the bed is pulled in close. The light is soft, the room is quiet, and
+  there's an awkward and tender silence of two people with a great deal to say
+  and one afternoon to say it in.
+tone: serious
+category: endoflife
+rarity: common
+lifeStages: [adult, senior]
+requires:
+  all:
+    - { later: { terminal: true } }
+    - { role: visitor, alive: true }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  visitor: { kind: child, presence: anywhere }
+choices:
+  - id: say_it_all
+    label: Say what you need to say, while you can
+    outcome:
+      text: >-
+        You say it badly, and in the wrong order, and it all comes out.
+        {visitor.name} listens to every word, and answers with a few of {visitor.their} own.
+        When {visitor.they} {visitor:leaves|leave}, the room is quieter than before, and lighter.
+      effects:
+        - { type: relationship, role: visitor, affection: 8, trust: 8 }
+        - { type: stat, key: stress, delta: -4 }
+        - { type: stat, key: happiness, delta: 4 }
+  - id: hold_hand
+    label: Say nothing much, and hold {visitor.their} hand
+    outcome:
+      text: >-
+        You talk about the weather, and the dog, and the football. Under the
+        talk, your hand is in {visitor.their} hand, and that is what the
+        visit is about.
+      effects:
+        - { type: relationship, role: visitor, affection: 6, trust: 5 }
+        - { type: stat, key: stress, delta: -3 }
+        - { type: stat, key: happiness, delta: 3 }
+  - id: ask_forgiveness
+    label: Ask {visitor.them} to forgive you for what you did
+    outcome:
+      text: >-
+        {visitor.name} is quiet a long moment. Then {visitor.they}
+        {visitor:says|say} "I did, a while ago. I just never told you." You
+        did not expect to cry with relief, and you do.
+      effects:
+        - { type: relationship, role: visitor, affection: 10, trust: 10 }
+        - { type: stat, key: stress, delta: -5 }
+        - { type: stat, key: happiness, delta: 5 }

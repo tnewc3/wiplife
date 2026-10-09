@@ -4,7 +4,7 @@ import { z } from 'zod';
  * Version of the saved data layout. Bump it whenever the shape of saved data
  * changes, and add a migration from the previous version in migrations.ts.
  */
-export const CURRENT_SCHEMA_VERSION = 20;
+export const CURRENT_SCHEMA_VERSION = 21;
 
 /** Every save is wrapped in this envelope (docs/technical.md, section M). */
 export interface SaveEnvelope<T = unknown> {

@@ -1,0 +1,37 @@
+id: will_nudge
+title: The papers in the drawer
+text: >-
+  A friend's funeral last month brought something home. Nobody at the
+  reception could say what the friend wanted, and the family spent three
+  weeks guessing. You have no will, and a house full of things that will need
+  to go somewhere.
+tone: serious
+category: latelife
+rarity: common
+lifeStages: [adult, senior]
+requires:
+  all:
+    - { age: { gte: 55 } }
+    - { age: { gte: 65 } }
+    - { family: { will: false } }
+    - { not: { later: { terminal: true } } }
+weight: { base: 5 }
+cooldownYears: 8
+choices:
+  - id: write_it
+    label: Settle it now (More → Write a will)
+    outcome:
+      text: >-
+        You make a list, on the back of an envelope, of who should have what
+        and why. It's the clearest you've been about anything in a while. The
+        form is in More, and you fill it in properly before the week is out.
+      effects:
+        - { type: stat, key: stress, delta: -2 }
+  - id: put_off
+    label: Put it off, again
+    outcome:
+      text: >-
+        You will do it soon. The envelope goes in the drawer with the other
+        papers, to wait for a better day, which is the kind that doesn't come.
+      effects:
+        - { type: stat, key: stress, delta: 1 }

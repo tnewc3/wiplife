@@ -1,0 +1,61 @@
+# Engine (registries/later.yaml, terminal.diagnosis.cancer): a warning that is cancer.
+id: terminal_cancer
+title: The word
+text: >-
+  The doctor sits down, which is how you know. The scans are on the screen,
+  turned away from you, and the room is very clean. It is cancer, and it is
+  past the point where treatment means a cure, and the question now is what to
+  do with the time and how.
+tone: dark
+category: endoflife
+rarity: uncommon
+lifeStages: [adult, senior]
+requires:
+  all:
+    - { later: { terminal: true } }
+    - { health: { conditions: [cancer] } }
+weight: { base: 10 }
+followUpOnly: true
+choices:
+  - id: hospice
+    label: Choose hospice care, and comfort over cures
+    outcome:
+      text: >-
+        You say it before you lose your nerve. The hospice nurse comes the next
+        day with a folder and a gentle manner, and explains that there will be
+        good days. She turns out to be right, and honest about the others.
+      effects:
+        - { type: later, action: hospice, choice: hospice }
+        - { type: flag, key: took_the_diagnosis_openly, value: true }
+        - { type: stat, key: stress, delta: -2 }
+  - id: home
+    label: Stay home, with help coming to you
+    outcome:
+      text: >-
+        You will not die in a ward. A bed goes in the front room, and the
+        window faces the garden. People come and go, and the house is
+        fuller than it has been for years.
+      effects:
+        - { type: later, action: hospice, choice: home }
+        - { type: flag, key: took_the_diagnosis_openly, value: true }
+        - { type: stat, key: happiness, delta: 1 }
+  - id: fight
+    label: Keep fighting, in the hospital
+    outcome:
+      text: >-
+        There's a trial. There's a long shot. The ward becomes a second home.
+        You don't regret it, and you don't expect it to work, and both of
+        those are true.
+      effects:
+        - { type: later, action: hospice, choice: hospital }
+        - { type: stat, key: stress, delta: 3 }
+  - id: think
+    label: Ask for time to think
+    outcome:
+      text: >-
+        You go home and sit in the kitchen, and you don't tell anyone
+        yet. It's a day or a week of the world going on as normal, and the
+        knowledge sitting in you like a stone. Then you make a call.
+      effects:
+        - { type: flag, key: kept_the_diagnosis_quiet, value: true }
+        - { type: stat, key: stress, delta: 4 }

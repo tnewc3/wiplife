@@ -226,7 +226,7 @@ export class FamilyWatcher {
       const known = this.seen.get(person.id);
       if (!known) {
         this.seen.set(person.id, { origin: d.origin, custodyDecided: d.custodyDecided, custody: d.custody });
-        r.children[d.origin]++;
+        if (d.origin !== 'grandchild') r.children[d.origin]++;
         if (d.origin === 'adopted') r.processes.adoption.worked++;
         if (d.origin === 'birth' || d.origin === 'ivf' || d.origin === 'surrogacy') r.pregnancies.born++;
         if (d.origin === 'ivf') r.processes.ivf.worked++;

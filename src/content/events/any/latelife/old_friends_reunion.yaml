@@ -1,0 +1,53 @@
+id: old_friends_reunion
+title: Do you remember Harrow Street?
+text: >-
+  The envelope has a return address you don't recognize and a name you do.
+  Inside is an invitation to a reunion of people who haven't seen each other in
+  years, and a line on the back: we're not getting any younger, you know.
+tone: light
+category: latelife
+rarity: uncommon
+lifeStages: [adult, senior]
+requires:
+  all:
+    - { age: { gte: 55 } }
+    - { age: { gte: 62 } }
+    - { role: friend, kind: [friend], alive: true, where: [city, elsewhere] }
+weight: { base: 4 }
+once: true
+cast:
+  friend: { kind: friend, presence: anywhere }
+choices:
+  - id: host
+    label: Offer to host it, and call everyone yourself
+    outcome:
+      text: >-
+        The house is loud for the first time in years. People sit where they
+        always sat, in a different house, with new hair. {friend.name} makes the
+        speech, and halfway through you realize you are all crying, quietly,
+        into the potato salad.
+      effects:
+        - { type: cost, item: celebration_dinner }
+        - { type: flag, key: hosted_old_friends, value: true }
+        - { type: relationship, role: friend, affection: 8, trust: 6 }
+        - { type: stat, key: happiness, delta: 6 }
+  - id: go_there
+    label: Travel to the reunion
+    outcome:
+      text: >-
+        The trip is long and the chairs are low. At the end of the night,
+        {friend.name} drives you to the station, and you hold the hug a
+        moment longer than the schedule allows.
+      effects:
+        - { type: cost, item: reunion_trip }
+        - { type: relationship, role: friend, affection: 7, trust: 4 }
+        - { type: stat, key: happiness, delta: 5 }
+  - id: send_regrets
+    label: Send a card, and a promise to see everyone another time
+    outcome:
+      text: >-
+        You mean the promise when you make it. The card goes out. Next year,
+        you tell yourself, and the thing about next year is how short the list
+        of them is getting.
+      effects:
+        - { type: relationship, role: friend, affection: -3 }

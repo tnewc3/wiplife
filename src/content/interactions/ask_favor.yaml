@@ -5,7 +5,7 @@ group: practical
 profile: favor
 inPerson: false
 availability:
-  kinds: [parent, stepparent, sibling, grandparent, relative, child, stepchild, friend, partner, fiance, spouse, coworker, classmate]
+  kinds: [parent, stepparent, sibling, grandparent, relative, child, stepchild, grandchild, friend, partner, fiance, spouse, coworker, classmate]
   you: { min: 8 }
   them: { min: 14 }
 outcomes:

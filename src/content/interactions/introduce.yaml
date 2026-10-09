@@ -6,7 +6,7 @@ profile: introduce
 inPerson: true
 other: true
 availability:
-  kinds: [parent, stepparent, sibling, grandparent, relative, child, stepchild, friend, partner, fiance, spouse, coworker, boss, classmate, acquaintance]
+  kinds: [parent, stepparent, sibling, grandparent, relative, child, stepchild, grandchild, friend, partner, fiance, spouse, coworker, boss, classmate, acquaintance]
   you: { min: 8 }
   them: { min: 5 }
 outcomes:

@@ -1,0 +1,58 @@
+# Engine (registries/later.yaml, terminal.diagnosis.decline): a long decline.
+id: terminal_decline
+title: The long way down
+text: >-
+  It isn't one illness. It's everything, a little at a time, and then a
+  doctor's careful voice summing it up: you are in the last part of your life.
+  Not a crisis, just an unsentimental kind of arithmetic. The good news is
+  that there is time to be deliberate.
+tone: dark
+category: endoflife
+rarity: common
+lifeStages: [adult, senior]
+requires:
+  all:
+    - { later: { terminal: true } }
+weight: { base: 10 }
+followUpOnly: true
+choices:
+  - id: hospice
+    label: Choose hospice care, and be comfortable
+    outcome:
+      text: >-
+        The hospice has a garden and a cat. You are assigned a social worker
+        whose job is to ask you what a good day looks like, and to make it
+        happen.
+      effects:
+        - { type: later, action: hospice, choice: hospice }
+        - { type: flag, key: took_the_diagnosis_openly, value: true }
+        - { type: stat, key: stress, delta: -2 }
+  - id: home
+    label: Stay in your own home, in your own bed
+    outcome:
+      text: >-
+        The window faces the right way, and the cat on the sill has
+        opinions. The days become soft at the edges, but they are
+        yours.
+      effects:
+        - { type: later, action: hospice, choice: home }
+        - { type: stat, key: happiness, delta: 2 }
+  - id: hospital
+    label: Stay in the hospital, where help is closest
+    outcome:
+      text: >-
+        There is a certain safety in the bleeping. You have visitors in
+        shifts, and a view of the car park, and a nurse named Mo who keeps a
+        chair by your bed.
+      effects:
+        - { type: later, action: hospice, choice: hospital }
+        - { type: stat, key: stress, delta: 2 }
+  - id: think
+    label: Not yet. Let the days come as they come
+    outcome:
+      text: >-
+        You don't make a decision. You make tea, and talk to the dog, and
+        look at the light on the floor. Some of this is what you were going
+        to do anyway.
+      effects:
+        - { type: flag, key: kept_the_diagnosis_quiet, value: true }

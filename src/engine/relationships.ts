@@ -10,7 +10,7 @@ import { curveAt } from './curve';
 import { hasRomanticTie, ITEM_ROLE } from './web/query';
 import type { Id, Identity, LifeState, Person, Relationship, RelationshipKind, RelationshipStatus } from './types';
 
-export const FAMILY_KINDS: readonly RelationshipKind[] = ['parent', 'stepparent', 'grandparent', 'relative', 'sibling', 'child', 'stepchild'];
+export const FAMILY_KINDS: readonly RelationshipKind[] = ['parent', 'stepparent', 'grandparent', 'relative', 'sibling', 'child', 'stepchild', 'grandchild'];
 /** E2a: your children and stepchildren. */
 export const CHILD_KINDS: readonly RelationshipKind[] = ['child', 'stepchild'];
 /** A current romance: dating, engaged or married. */
@@ -21,7 +21,7 @@ export const WORK_KINDS: readonly RelationshipKind[] = ['coworker', 'boss'];
 /** Kinds a content effect may turn a relationship into (family and work come from their own systems). */
 export const EFFECT_KINDS: readonly RelationshipKind[] = ['friend', 'classmate', 'acquaintance', 'partner', 'fiance', 'spouse', 'ex'];
 /** Kinds that can step in during a crisis (support roles). */
-export const SUPPORT_KINDS: readonly RelationshipKind[] = [...FAMILY_KINDS.filter((k) => !CHILD_KINDS.includes(k)), 'friend', ...PARTNER_KINDS];
+export const SUPPORT_KINDS: readonly RelationshipKind[] = [...FAMILY_KINDS.filter((k) => !CHILD_KINDS.includes(k) && k !== 'grandchild'), 'friend', ...PARTNER_KINDS];
 /** Kinds you can ask out: people you know who aren't family and aren't already your partner. */
 export const ASKABLE_KINDS: readonly RelationshipKind[] = ['friend', 'acquaintance', 'classmate', 'coworker', 'boss', 'ex'];
 

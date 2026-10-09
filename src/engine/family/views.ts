@@ -15,7 +15,7 @@ import { processView, type ProcessView } from './process';
 
 export interface ChildView {
   stepchild: boolean;
-  origin: 'birth' | 'adopted' | 'ivf' | 'surrogacy' | 'step';
+  origin: 'birth' | 'adopted' | 'ivf' | 'surrogacy' | 'step' | 'grandchild';
   custody: Custody;
   /** The other parent's first name, if known. */
   otherParent: string | null;

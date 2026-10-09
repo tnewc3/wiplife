@@ -1,0 +1,44 @@
+# Engine (registries/later.yaml): a grandchild's parent has died.
+id: raise_parent_gone
+title: After the funeral
+text: >-
+  The flowers have gone brown. The casseroles are in the freezer. The relatives
+  have gone home, and what remains is a quiet question in the kitchen, put by
+  a child who has just lost a parent: where is {kid.name} going to live?
+tone: dark
+category: grandraise
+rarity: rare
+lifeStages: [adult, senior]
+requires:
+  all:
+    - { age: { gte: 40, lte: 82 } }
+    - { role: kid, kind: [grandchild], alive: true, age: { lte: 16 } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  kid: { kind: grandchild, presence: anywhere }
+choices:
+  - id: take_in
+    label: Take {kid.them} in, and make it home
+    visibleIf: { home: { kind: [renting, owned] } }
+    outcome:
+      text: >-
+        You say it before anyone else can: {kid.they} {kid:is|are} staying with
+        you. {kid.name} does not say anything, and holds on to your sleeve until
+        bedtime. In the morning you make breakfast for two, and it is a start.
+      effects:
+        - { type: later, action: raise, role: kid }
+        - { type: flag, key: raising_a_grandchild, value: true }
+        - { type: stat, key: stress, delta: 6 }
+        - { type: stat, key: kindness, delta: 1 }
+        - { type: schedule, eventId: raise_first_night, inYears: [1, 1], cast: [kid] }
+  - id: other_family
+    label: See {kid.them} settled with family, and stay close
+    outcome:
+      text: >-
+        There is an uncle with a big house and a loud family. You help with the
+        move, and with the school forms, and you are the one who remembers
+        {kid.their} birthday. It is a role, if not the one you wanted.
+      effects:
+        - { type: relationship, role: kid, affection: 5, trust: 5 }
+        - { type: stat, key: stress, delta: 3 }

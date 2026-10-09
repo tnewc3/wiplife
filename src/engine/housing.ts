@@ -63,6 +63,8 @@ export function housingCost(state: LifeState, content: ContentBundle): number {
     case 'with_parents':
       return isIndependent(state, content) ? wholeDollars(city.baseRent * eco.withParents.rentShare[state.character.familyWealth]) : 0;
     case 'renting':
+      // L1: assisted living costs what it costs there, meals and care of the place included.
+      if (h.assisted) return wholeDollars(content.balance.later.care.cost.assisted * city.costOfLiving * shared);
       return wholeDollars(rentIn(city, h.roommate === true, content) * (h.rentFactor ?? 1) * shared);
     case 'owned':
       return wholeDollars((h.homeValue ?? 0) * eco.ownership.upkeep * shared);
@@ -92,6 +94,10 @@ export function livingCost(state: LifeState, content: ContentBundle, lifestyle: 
       return 0;
     case 'with_parents':
       return wholeDollars(base * eco.lifestyle[lifestyle].living * eco.withParents.livingShare[state.character.familyWealth]);
+    case 'renting':
+      // L1: assisted living serves meals, so everyday living costs a fraction.
+      if (state.housing.assisted) return wholeDollars(base * eco.lifestyle[lifestyle].living * content.balance.later.care.assisted.livingShare);
+      return wholeDollars(base * eco.lifestyle[lifestyle].living);
     default:
       return wholeDollars(base * eco.lifestyle[lifestyle].living);
   }
@@ -110,7 +116,7 @@ function nextRentFactor(state: LifeState, percent: number, content: ContentBundl
  * city's base rent. Renting only.
  */
 export function changeRent(state: LifeState, percent: number, content: ContentBundle): void {
-  if (state.housing.kind !== 'renting') return;
+  if (state.housing.kind !== 'renting' || state.housing.assisted) return;
   state.housing.rentFactor = nextRentFactor(state, percent, content);
   refreshHousingCost(state, content);
 }
@@ -143,6 +149,25 @@ export function moveTo(state: LifeState, kind: Exclude<HousingKind, 'owned'>, ci
   if (partnerId !== undefined) livingTogether(state, partnerId);
   // E2a: children who live with you come along.
   relocateChildren(state);
+  refreshHousingCost(state, content);
+}
+
+/** L1: you could move into assisted living now: you live on your own, in a rental or a home you own. */
+export function canMoveToAssisted(state: LifeState, content: ContentBundle): boolean {
+  const h = state.housing;
+  return isIndependent(state, content) && !h.assisted && (h.kind === 'renting' || h.kind === 'owned');
+}
+
+/**
+ * L1: you move into assisted living, in the city you live in. A home you own is sold first
+ * (the mortgage is paid from the proceeds, as in any sale); a rental is given up. A partner
+ * who lives with you comes along. Does nothing when you can't.
+ */
+export function moveToAssisted(state: LifeState, content: ContentBundle): void {
+  if (!canMoveToAssisted(state, content)) return;
+  if (state.housing.kind === 'owned') sellHome(state, content);
+  else moveTo(state, 'renting', state.character.cityId, content);
+  state.housing.assisted = { since: state.currentYear };
   refreshHousingCost(state, content);
 }
 

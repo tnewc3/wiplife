@@ -1,0 +1,133 @@
+# The words of later life (L1, docs/expansion.md). History lines are written to
+# your history when something happens; the last-days lines are the funeral's
+# account of how the end went (you are "you"; {npc} is the person named);
+# eulogy lines are what a speaker can say about your last days. The engine
+# decides what is true; this file only says it.
+
+history:
+  # Roles: {kid} the grandchild, {parent} their parent.
+  grandchild:
+    importance: 2
+    variants:
+      - "{parent.name} had a baby, {kid.name}. You are a grandparent."
+      - "{kid.name} was born to {parent.name}, and the family got one name longer."
+      - "{kid.name}, {parent.name}'s new baby, arrived. You are somebody's grandparent now."
+  # Roles: {kid}.
+  raised:
+    importance: 3
+    variants:
+      - "You took {kid.name}, your grandchild, in and began raising {kid.them}."
+      - "{kid.name} came to live with you, and you started again at being the one in charge."
+  returned:
+    importance: 2
+    variants:
+      - "{kid.name} went back to live with {kid.their} parent, and the house got quiet."
+      - "You handed {kid.name}'s keys back to {kid.their} parent, and found out how loud quiet can be."
+  careNeeded:
+    importance: 2
+    variants:
+      - "You came to need looking after, and had to say so out loud."
+      - "The day came when you could no longer manage everything yourself."
+  # Roles: {npc} the relative.
+  careFamily:
+    importance: 2
+    variants:
+      - "{npc.name} took on looking after you."
+      - "{npc.name} stepped in to look after you, and you let {npc.them}."
+  carePaid:
+    importance: 2
+    variants:
+      - "You arranged for a carer to come to your home."
+      - "A paid carer began coming to your home, and you got used to the key in the door."
+  careAssisted:
+    importance: 2
+    variants:
+      - "You moved into assisted living."
+      - "You gave up your home for a room with help down the hall."
+  terminal:
+    importance: 3
+    variants:
+      - "You were told your time was running short."
+      - "The doctors said what everyone had been avoiding saying: there wasn't long."
+  amends:
+    importance: 2
+    variants:
+      - "You made amends for something you had been carrying for years."
+      - "You said what you needed to say, to someone who needed to hear it."
+
+lastDays:
+  # {years} is how long you knew.
+  foreseen:
+    short:
+      - "You knew it was coming, and had {years} to get ready."
+      - "There was warning: {years} to put things in order."
+    long:
+      - "You knew for {years} that the end was near, and used the time."
+      - "It came with warning, {years} of it, which is its own kind of gift."
+  hospice:
+    hospice:
+      - "You spent your last months in hospice care, with people whose whole job was making them gentle."
+      - "You chose hospice, and the last months were about comfort rather than cures."
+    home:
+      - "You stayed at home with help coming and going, in your own chair, by your own window."
+      - "You spent the end at home, with carers who learned where everything was kept."
+    hospital:
+      - "You spent your last months in the hospital, fighting for every week of them."
+      - "You chose to keep fighting, and the hospital room became where you lived."
+  # {names} are the people who came.
+  bedside:
+    some:
+      - "{names} came to be with you at the end, as you had asked."
+      - "You asked for {names}, and they came."
+    none:
+      - "You asked people to come, and no one made it in time."
+      - "The people you asked for did not come, and the room was quiet."
+  # {names} are the people you wrote to.
+  letters:
+    - "You wrote last letters to {names}."
+    - "Before the end, you wrote to {names}, because some things are easier on paper."
+  speaker:
+    spoke:
+      - "{npc.name} spoke for you, as you asked."
+      - "You asked {npc.name} to speak, and {npc.they} did."
+    absent:
+      - "You asked {npc.name} to speak, but it was not to be."
+      - "You had wanted {npc.name} to speak, and someone else stood up instead."
+  service:
+    traditional:
+      - "You asked for a traditional service, and you had one."
+    simple:
+      - "You asked for something simple, and it was."
+    celebration:
+      - "You asked for a celebration, not a mourning, and people tried."
+    private:
+      - "You asked for a private service, for the few closest to you."
+  # {cost} is what the funeral cost.
+  paid:
+    - "The service came to {cost}, paid from what you left."
+    - "It cost {cost}, which came out of your estate."
+  # Each is what a chosen visitor who came is listed as having done.
+  bedsideReason:
+    - "Sat with you through the last night."
+    - "Came to your bedside, and stayed."
+    - "Held your hand at the end."
+    - "Was there when you needed someone to be."
+  declinedReason:
+    - "You asked {npc.them} to be with you at the end. {npc.They} didn't come, and {npc.they} didn't come now."
+    - "{npc.They} {npc:was|were} asked to your bedside, and stayed away. {npc.They} stayed away from this too."
+    - "You wanted {npc.them} there at the end, and {npc.they} {npc:wasn't|weren't}. {npc.They} {npc:wasn't|weren't} here today either."
+
+# What a speaker can say about your last days (roles {self} and {npc}, the speaker; {years} is how long you knew).
+eulogy:
+  asked:
+    - "{self.They} asked me to speak, which I took as the highest compliment {self.they} had left to pay."
+    - "When {self.they} {self:was|were} dying, {self.they} asked me to be the one to stand here. I said yes before I understood what I was agreeing to."
+  bedside:
+    - "I was there at the end. I'm not going to tell you what was said, but I will tell you that nobody was afraid."
+    - "I was in the room when {self.they} died, and I would not trade having been there for anything."
+  letter:
+    - "{self.They} wrote me a letter at the end. I have read it more times than I should admit, and I'm not going to read it to you."
+    - "I got a letter from {self.them} before the end. It said the things people say too late, and somehow it wasn't too late."
+  time:
+    - "We had {years} to say what we needed to say. It wasn't enough, and it was more than most people get."
+    - "{self.They} knew for {years}, and spent it like someone who knew."

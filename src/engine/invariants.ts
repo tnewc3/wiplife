@@ -14,6 +14,7 @@ import { teenFailures } from './teen/invariants';
 import { crimeFailures } from './crime/invariants';
 import { fameFailures } from './fame/invariants';
 import { sportsFailures } from './sports/invariants';
+import { laterFailures } from './later/invariants';
 import { attachedDebtIds } from './possessions/query';
 import { ITEM_ROLE } from './web/query';
 import { consistencyProblems } from './presence';
@@ -197,6 +198,9 @@ export function checkInvariants(state: LifeState, content: ContentBundle): strin
 
   // The social web (E4).
   failures.push(...webFailures(state, content));
+
+  // Later life (L1).
+  failures.push(...laterFailures(state, content));
 
   // Pets, vehicles and vacation homes (E5).
   failures.push(...possessionsFailures(state, content));

@@ -1,0 +1,47 @@
+# Engine (registries/later.yaml): the first weeks in assisted living.
+id: care_assisted_first_weeks
+title: The new room
+text: >-
+  The room is smaller than the house, and bigger than you thought. There is
+  a window, a bed that goes up and down, and a corridor of doors with names on
+  them. The woman across the hall keeps trying to learn yours.
+tone: neutral
+category: latecare
+rarity: common
+lifeStages: [senior, adult]
+requires:
+  all:
+    - { later: { care: true } }
+    - { later: { care: true, careOption: [assisted] } }
+weight: { base: 10 }
+followUpOnly: true
+choices:
+  - id: join_in
+    label: Go to the afternoon activities, and see who's there
+    outcome:
+      text: >-
+        Bingo is a competitive sport, as it turns out. You sit with a man who
+        was an engineer and a woman who was a dancer, and neither of them
+        speaks of it. By Friday you have a standing game of cards.
+      effects:
+        - { type: stat, key: happiness, delta: 3 }
+        - { type: stat, key: sociability, delta: 2 }
+  - id: keep_to_yourself
+    label: Keep to your room, and your own company
+    outcome:
+      text: >-
+        You read, and listen to the corridor, and make a list of what you
+        miss. The staff are kind and do not push, and on the third day someone
+        slides a note under the door asking if you play chess.
+      effects:
+        - { type: stat, key: happiness, delta: -1 }
+  - id: decorate
+    label: Make the room yours, one photograph at a time
+    outcome:
+      text: >-
+        You hang the pictures in the order that makes sense to you. By the end
+        it is a room with your name on the door, and a shelf of family looking
+        out at you.
+      effects:
+        - { type: stat, key: happiness, delta: 2 }
+        - { type: stat, key: stress, delta: -1 }

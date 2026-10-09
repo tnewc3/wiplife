@@ -220,3 +220,17 @@ tags:
   fan_stalker: Would not stop following you
   answered_their_letter: You answered their letter or stopped to talk
   turned_them_away: You walked past them
+  # L1: later life.
+  looks_after_you: Looks after you in your last years
+  at_your_bedside: Was at your bedside at the end
+  stayed_away_at_the_end: Did not come when you asked {npc.them} to be with you at the end
+  got_your_letter: Got the last letter you wrote {npc.them}
+  you_raised_them: You raised {npc.them}
+  your_favorite: You made {npc.them} your favorite
+  looked_after_them: You looked after {npc.them} while the grown-ups were out
+  spoiled_by_you: You spoiled {npc.them}
+  taught_them: You taught {npc.them} something that stuck
+  told_them_stories: You told {npc.them} about the old days
+  amends_made: You made amends with {npc.them}
+  amends_refused: Would not hear your apology
+  amends_put_off: You put off making amends with {npc.them}

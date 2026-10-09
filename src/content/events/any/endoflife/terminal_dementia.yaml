@@ -1,0 +1,59 @@
+# Engine (registries/later.yaml, terminal.diagnosis.dementia): a warning that is dementia running its course.
+id: terminal_dementia
+title: The slow goodbye
+text: >-
+  There's a clear day, and the doctor chooses it. She says what's coming
+  in a way you can still follow: the forgetting will deepen, and over
+  time the person who knows you will become someone you have to be reminded
+  of. There is time yet to decide what you want, while you can.
+tone: dark
+category: endoflife
+rarity: rare
+lifeStages: [adult, senior]
+requires:
+  all:
+    - { later: { terminal: true } }
+    - { health: { conditions: [dementia] } }
+weight: { base: 10 }
+followUpOnly: true
+choices:
+  - id: hospice
+    label: Choose hospice care for the end, and put it in writing
+    outcome:
+      text: >-
+        You write it on a sheet of paper, dated and witnessed, and ask your
+        family to keep it by the bed. It's the most useful thing you have done
+        in a long while, and the hardest.
+      effects:
+        - { type: later, action: hospice, choice: hospice }
+        - { type: flag, key: took_the_diagnosis_openly, value: true }
+        - { type: stat, key: stress, delta: -1 }
+  - id: home
+    label: Stay home as long as it can be done
+    outcome:
+      text: >-
+        You label the drawers. You tape a note to the door about the stove.
+        Your family takes turns, and the house becomes a kind of a rota of
+        people being patient.
+      effects:
+        - { type: later, action: hospice, choice: home }
+        - { type: stat, key: stress, delta: 1 }
+  - id: hospital
+    label: Accept whatever the doctors can offer
+    outcome:
+      text: >-
+        The ward has soft lighting and a nurse who learns your name and
+        uses it. On the good days you thank her, and on the bad days you ask
+        who she is, and she tells you, kindly, every time.
+      effects:
+        - { type: later, action: hospice, choice: hospital }
+        - { type: stat, key: stress, delta: 2 }
+  - id: think
+    label: Spend the clear days putting things in order first
+    outcome:
+      text: >-
+        You make lists. You make more lists. The days when your mind is
+        sharp are for the people you love, and the others are for the lists.
+      effects:
+        - { type: flag, key: kept_the_diagnosis_quiet, value: true }
+        - { type: stat, key: stress, delta: 3 }

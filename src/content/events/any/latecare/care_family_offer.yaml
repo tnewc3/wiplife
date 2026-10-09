@@ -1,0 +1,67 @@
+# Engine (registries/later.yaml): you need care near the end and a relative steps up.
+id: care_family_offer
+title: Who looks after you
+text: >-
+  The doctor says what everyone has been working around: you shouldn't be
+  managing alone anymore. Before you can answer, {carer.name}, your
+  {carer.relation}, says quietly that {carer.they} {carer:has|have} thought
+  about it, and that {carer.they} would like to do it.
+tone: serious
+category: latecare
+rarity: common
+lifeStages: [senior, adult]
+requires:
+  all:
+    - { later: { care: true } }
+    - { later: { care: true, careOption: [none] } }
+    - { role: carer, alive: true, status: [active], kind: [spouse, partner, fiance, child, stepchild, sibling, grandchild, relative] }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  carer: { kind: child, presence: anywhere }
+choices:
+  - id: family
+    label: Let {carer.name} look after you
+    outcome:
+      text: >-
+        You say yes, and it is harder than you expected and easier than you
+        feared. {carer.name} arranges the kitchen the way {carer.they} want
+        it, and you let {carer.them}. Some days are for being grateful and some
+        are for being stubborn, and you manage both.
+      effects:
+        - { type: later, action: care, option: family, role: carer }
+        - { type: relationship, role: carer, affection: 6, trust: 6 }
+        - { type: stat, key: stress, delta: -2 }
+        - { type: schedule, eventId: care_year_family, inYears: [2, 3], cast: [carer] }
+  - id: paid
+    label: Hire a paid carer, so no one has to give up their life
+    outcome:
+      text: >-
+        You say it kindly, and mean it kindly: you don't want to be a job for
+        someone you love. A carer starts on Monday with a clipboard and a good
+        sense of humor, and the setup costs what setups cost.
+      effects:
+        - { type: cost, item: late_care_setup }
+        - { type: later, action: care, option: paid }
+        - { type: relationship, role: carer, affection: 2, trust: 1 }
+  - id: assisted
+    label: Move to a place with help on hand
+    visibleIf: { home: { kind: [renting, owned] } }
+    outcome:
+      text: >-
+        You tour three places and choose the one with the garden. The move is
+        mostly boxes you don't open again. {carer.name} comes every Sunday,
+        and the fee for the first month is paid in advance.
+      effects:
+        - { type: cost, item: assisted_move_in }
+        - { type: later, action: care, option: assisted }
+        - { type: relationship, role: carer, affection: 3, trust: 2 }
+  - id: refuse
+    label: Tell everyone you're fine
+    outcome:
+      text: >-
+        You say it firmly, and everyone nods the way people nod when they don't
+        believe you. The offer sits on the table, patiently, like a casserole.
+      effects:
+        - { type: flag, key: refused_help_at_home, value: true }
+        - { type: relationship, role: carer, affection: -2, trust: -2 }

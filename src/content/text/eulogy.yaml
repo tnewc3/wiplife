@@ -33,6 +33,16 @@ opening:
       - "I'm {self.name}'s {npc.relation}. Being someone's child is complicated, and I've had {known} to learn how, and I'm not finished."
     cool:
       - "I'm {self.name}'s {npc.relation}. We weren't as close as families are meant to be, but I'm here, and I'd like to say what I can truthfully say."
+  grandchild:
+    warm:
+      - "I'm {self.name}'s {npc.relation}. I only had {known} with {self.them}, and I'd give a great deal for more of them."
+      - "I'm {self.name}'s {npc.relation}. {self.They} {self:was|were} the person who thought I could do anything, and I've been trying to deserve that ever since."
+    measured:
+      - "I'm {self.name}'s {npc.relation}. I knew {self.them} for {known}, which is long enough to love someone and not long enough to ask them everything."
+      - "I'm {self.name}'s {npc.relation}. Grandparents are the part of a family that you only really understand later, and I'm still understanding."
+    cool:
+      - "I'm {self.name}'s {npc.relation}. I didn't know {self.them} as well as I should have, and today I'm learning how much I mean that."
+      - "I'm {self.name}'s {npc.relation}. We were more polite than close, and I'd like to say a few honest things anyway."
   elder:
     warm:
       - "I'm {self.name}'s {npc.relation}. I had {known} with {self.them}, and no number would have been enough."

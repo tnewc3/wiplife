@@ -9,7 +9,7 @@
  * listed as staying away is someone with a cause to.
  */
 import { ABSENCE_CAUSES, COULD_NOT_REASONS, EULOGY_GROUPS, EULOGY_TONES, type ContentBundle } from '../../src/content/schemas';
-import { absenceCauses, chooseSpeaker, couldNotAttend, eulogyPieces, expectedGuests, writeFuneral } from '../../src/engine/eulogy';
+import { absenceCauses, askedSpeaker, chooseSpeaker, couldNotAttend, eulogyPieces, expectedGuests, writeFuneral } from '../../src/engine/eulogy';
 import { ageOf, isChildKind } from '../../src/engine/relationships';
 import type { Funeral, Id, LifeState } from '../../src/engine/types';
 import type { SimulationReport, TargetResult } from './run';
@@ -157,6 +157,11 @@ export class EulogyWatcher {
         bestIds = [person.id];
       } else if (score === bestScore && rank === bestRank) bestIds.push(person.id);
     }
+    // L1: the person you asked to speak in your final wishes, when they can, speaks whoever is closest.
+    const asked = askedSpeaker(life, this.content);
+    if (asked) {
+      bestIds = [asked.personId];
+    }
     const names = bestIds.map((id) => `${life.people[id]!.name.first} ${life.people[id]!.name.last}`);
     if (bestIds.length === 0) {
       if (funeral.eulogy) this.fail('speaker', life, `a speaker (${funeral.eulogy.speakerName}) where nobody was eligible`);
@@ -204,8 +209,12 @@ export class EulogyWatcher {
       if (id === undefined) continue;
       if (couldNotAttend(life, id, this.content) !== null) this.fail('absentUnable', life, `${g.name} is listed as staying away but could not come`);
       const cause = strongest(id);
-      if (cause === undefined) this.fail('absentWithoutCause', life, `${g.name} stayed away with no cause (${g.reason})`);
-      else r.absence.byCause[cause]!++;
+      // L1: someone you asked to your bedside who did not come is listed as staying away, with that as the cause.
+      const declined = life.later.terminal?.visits.some((v) => v.id === id && !v.came) === true;
+      if (!declined) {
+        if (cause === undefined) this.fail('absentWithoutCause', life, `${g.name} stayed away with no cause (${g.reason})`);
+        else r.absence.byCause[cause]!++;
+      }
       if (ageOf(life, life.people[id]!) < this.content.balance.eulogy.speaker.minAge) this.fail('underAge', life, `${g.name} is under the age of choosing`);
     }
     if (funeral.couldNotAttend.length > 0) r.couldNot.livesWith++;

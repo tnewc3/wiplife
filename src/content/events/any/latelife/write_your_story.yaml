@@ -1,0 +1,48 @@
+id: write_your_story
+title: A blank page
+text: >-
+  Someone gave you a notebook, years ago, with a ribbon marker and a hopeful
+  cover. This morning you find it in a drawer, and for the first time you
+  wonder what someone will know about you in fifty years if you write
+  nothing down.
+tone: neutral
+category: latelife
+rarity: uncommon
+lifeStages: [adult, senior]
+requires:
+  all:
+    - { age: { gte: 55 } }
+    - { age: { gte: 65 } }
+    - { not: { flag: wrote_memoir } }
+weight: { base: 4 }
+once: true
+choices:
+  - id: write
+    label: Start writing, one page a day
+    outcome:
+      text: >-
+        The first week is a list of dates. The second is a list of rooms. By
+        the third month it's a story, and you stay up late over a chapter about
+        the person you were. When you finish, you have a stack of paper
+        and the sense of having said it.
+      effects:
+        - { type: flag, key: wrote_memoir, value: true }
+        - { type: stat, key: happiness, delta: 4 }
+        - { type: stat, key: stress, delta: -2 }
+  - id: record
+    label: Record yourself telling it, for the family
+    outcome:
+      text: >-
+        You talk to a phone propped on a book. The first recording is stiff.
+        The tenth is you, and anyone who knows you could pick you out of a
+        crowd by it.
+      effects:
+        - { type: flag, key: wrote_memoir, value: true }
+        - { type: stat, key: happiness, delta: 3 }
+  - id: not_now
+    label: Put the notebook back in the drawer
+    outcome:
+      text: >-
+        Tomorrow, you tell it. The notebook sits there, patient as a stone.
+      effects:
+        - { type: stat, key: happiness, delta: -1 }

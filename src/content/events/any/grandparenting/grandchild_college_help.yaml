@@ -1,0 +1,52 @@
+id: grandchild_college_help
+title: The envelope from the college
+text: >-
+  {kid.name} got in. The letter is on the table, and so is the other letter,
+  the one with the bill. Nobody says anything about it directly. Everybody is
+  very interested in what you think about the weather.
+tone: neutral
+category: grandparenting
+rarity: uncommon
+lifeStages: [adult, senior]
+requires:
+  all:
+    - { later: { grandchildren: { gte: 1 } } }
+    - { age: { gte: 55 } }
+    - { role: kid, kind: [grandchild], alive: true, age: { gte: 17, lte: 19 }, affection: { gte: 50 } }
+weight: { base: 5 }
+once: true
+cast:
+  kid: { kind: grandchild, presence: anywhere }
+choices:
+  - id: pay_part
+    label: Offer to cover part of the tuition
+    visibleIf: { money: { gte: 4000 } }
+    outcome:
+      text: >-
+        You write the check in the kitchen with everyone watching, and the room
+        exhales. {kid.name} hugs you hard enough to hurt. The bill does not go
+        away, but it gets smaller, and so does the silence.
+      effects:
+        - { type: cost, item: grandchild_school_help }
+        - { type: relationship, role: kid, affection: 10, trust: 6 }
+        - { type: flag, key: paid_for_grandchild_school, value: true }
+        - { type: stat, key: happiness, delta: 4 }
+  - id: advice_only
+    label: Offer advice, and a place to stay on weekends
+    outcome:
+      text: >-
+        You can't afford it, and you say so. You offer the spare room and a
+        laundry machine and a standing dinner. It turns out those were worth
+        something too.
+      effects:
+        - { type: relationship, role: kid, affection: 5, trust: 4 }
+        - { type: stat, key: happiness, delta: 2 }
+  - id: earn_it
+    label: Tell {kid.them} to find the funding on {kid.their} own
+    outcome:
+      text: >-
+        You mean it as a lesson, and it lands as a door closing. {kid.name}
+        finds the funding elsewhere, and the two of you are polite with each
+        other for a long time.
+      effects:
+        - { type: relationship, role: kid, affection: -6, trust: -6 }

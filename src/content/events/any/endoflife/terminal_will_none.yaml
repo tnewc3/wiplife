@@ -1,0 +1,38 @@
+# Engine (registries/later.yaml, terminal.will): a warning, and no will.
+id: terminal_will_none
+title: What happens to your things
+text: >-
+  The lawyer's number is on a card in the drawer, and has been for fifteen
+  years. There is no will, and you have a warning, and what you leave will
+  be shared out by default rules written for people who aren't you. Put in
+  your own words, it takes an afternoon.
+tone: serious
+category: endoflife
+rarity: common
+lifeStages: [adult, senior]
+requires:
+  all:
+    - { later: { terminal: true } }
+    - { later: { terminal: true, willOutOfDate: true } }
+    - { family: { will: false } }
+weight: { base: 10 }
+followUpOnly: true
+choices:
+  - id: write_now
+    label: Write one now (More → Write a will)
+    outcome:
+      text: >-
+        You make a list on the back of the card: who should have what, and who
+        should be told why. The form is under More, and you fill it in
+        properly. Doing it is a relief out of proportion to the work.
+      effects:
+        - { type: stat, key: stress, delta: -3 }
+  - id: leave_default
+    label: Let the default rules decide
+    outcome:
+      text: >-
+        You can't face it. The card goes back in the drawer. You tell yourself
+        the family will work it out, and that they're good at that, and
+        hope you are right.
+      effects:
+        - { type: stat, key: stress, delta: 1 }

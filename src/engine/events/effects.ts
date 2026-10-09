@@ -38,6 +38,7 @@ import { applyTeenEffect } from '../teen/effects';
 import { applyCrimeEffect, applyDirtyMoneyEffect } from '../crime/effects';
 import { applyFameEffect, applyFamePayEffect } from '../fame/effects';
 import { applySportsEffect } from '../sports/effects';
+import { applyLaterEffect } from '../later/effects';
 import { whereabouts } from '../presence';
 import { clampInt } from '../random';
 import { otherCity } from './casting';
@@ -382,6 +383,9 @@ const handlers: { [T in Effect['type']]: Handler<T> } = {
   famePay: (state, effect, ctx) => applyFamePayEffect(state, effect, ctx.content),
   // E6c: sports.
   sports: (state, effect, ctx) => applySportsEffect(state, effect, ctx.cast, ctx.content, ctx.rng, ctx.def.id),
+
+  // L1: later life: care, hospice, amends, grandchildren.
+  later: (state, effect, ctx) => applyLaterEffect(state, effect, ctx.cast, ctx.rng, ctx.content),
 
   // E3: money paid back to you, sized like the cost it repays.
   repay: (state, effect, ctx) => earn(state, wholeDollars(costPrice(state, effect.item, ctx.content) * effect.share)),

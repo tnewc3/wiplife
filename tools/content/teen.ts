@@ -32,7 +32,7 @@ function required(condition: Condition | undefined): Condition[] {
 /** True when every way of meeting the condition needs you to be at least this old. */
 function requiresAtLeast(condition: Condition | undefined, age: number): boolean {
   return required(condition).some((c) => {
-    if (!('age' in c)) return false;
+    if (!('age' in c) || 'role' in c) return false;
     const a = c.age;
     return Math.max(a.gte ?? -Infinity, a.gt === undefined ? -Infinity : a.gt + 1, a.eq ?? -Infinity) >= age;
   });

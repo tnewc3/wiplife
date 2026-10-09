@@ -1,0 +1,48 @@
+id: grandchild_school_play
+title: Third tree from the left
+text: >-
+  {kid.name} has a part in the school play. It is a tree. It has one line, which
+  has been rehearsed in your kitchen eleven times, and you have been given a
+  ticket in the front row.
+tone: light
+category: grandparenting
+rarity: common
+lifeStages: [adult, senior]
+requires:
+  all:
+    - { later: { grandchildren: { gte: 1 } } }
+    - { age: { gte: 45 } }
+    - { role: kid, kind: [grandchild], alive: true, age: { gte: 5, lte: 12 }, where: [city, household] }
+weight: { base: 6 }
+cooldownYears: 3
+cast:
+  kid: { kind: grandchild, presence: nearby }
+choices:
+  - id: front_row
+    label: Sit in the front row and cry openly
+    outcome:
+      text: >-
+        {kid.name} says the line perfectly, finds you in the audience, and
+        waves, which was not in the script. You do not stop crying until the
+        car park.
+      effects:
+        - { type: relationship, role: kid, affection: 7, trust: 3 }
+        - { type: stat, key: happiness, delta: 5 }
+  - id: film_it
+    label: Film all of it, for the family
+    outcome:
+      text: >-
+        You hold the phone up the whole time and see the play through a small
+        screen. The video is shaky. {kid.name} is proud of it anyway, and wants
+        to watch it again tonight.
+      effects:
+        - { type: relationship, role: kid, affection: 4, trust: 1 }
+        - { type: stat, key: happiness, delta: 3 }
+  - id: send_card
+    label: Send a card, and say your knees are not up to the bleachers
+    outcome:
+      text: >-
+        The card arrives with a drawing of a very green tree on the back, sent
+        by return post. Your seat stays empty, and {kid.name} noticed.
+      effects:
+        - { type: relationship, role: kid, affection: -2 }

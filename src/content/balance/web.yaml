@@ -117,7 +117,7 @@ knowledge:
     illnessSeverity: 40
   reaction:
     # How much a version's feelings count, by what the person is to you.
-    scale: { spouse: 1.5, partner: 1.4, fiance: 1.4, parent: 1.2, stepparent: 0.8, sibling: 1, child: 1, stepchild: 0.8, grandparent: 0.8, relative: 0.6, friend: 0.8, ex: 0.2, coworker: 0.4, boss: 0.4, classmate: 0.3, acquaintance: 0.3 }
+    scale: { spouse: 1.5, partner: 1.4, fiance: 1.4, parent: 1.2, stepparent: 0.8, sibling: 1, child: 1, stepchild: 0.8, grandchild: 0.8, grandparent: 0.8, relative: 0.6, friend: 0.8, ex: 0.2, coworker: 0.4, boss: 0.4, classmate: 0.3, acquaintance: 0.3 }
     # For something about someone else, the share that moves the tie between them.
     aboutOthers: 0.5
     maxEvents: 2

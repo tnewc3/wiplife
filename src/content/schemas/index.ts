@@ -22,6 +22,7 @@ import { interactionRegistrySchema, interactionSchema, interactionsBalanceSchema
 import { newsTextSchema, peopleBalanceSchema, peopleRegistrySchema } from './people';
 import { webBalanceSchema, webRegistrySchema } from './web';
 import { eulogyBalanceSchema, eulogyTextSchema } from './eulogy';
+import { laterBalanceSchema, laterRegistrySchema, laterTextSchema, reviewTextSchema } from './later';
 import { mentalHealthBalanceSchema, mentalRegistrySchema } from './mental';
 import { petInteractionSchema, petSchema, possessionsBalanceSchema, possessionsRegistrySchema, possessionsTextSchema, renovationSchema, vehicleSchema } from './possessions';
 import { crewSchema, crimeBalanceSchema, crimeRegistrySchema, crimeTextSchema, frontSchema } from './crime';
@@ -54,6 +55,7 @@ export * from './crime';
 export * from './fame';
 export * from './sports';
 export * from './eulogy';
+export * from './later';
 
 /**
  * Collections: a folder under src/content with one YAML file per definition,
@@ -116,6 +118,7 @@ export const singletonTypes = {
   'balance/people': peopleBalanceSchema,
   'balance/web': webBalanceSchema,
   'balance/eulogy': eulogyBalanceSchema,
+  'balance/later': laterBalanceSchema,
   'balance/mental-health': mentalHealthBalanceSchema,
   'balance/possessions': possessionsBalanceSchema,
   'balance/teen': teenBalanceSchema,
@@ -133,6 +136,8 @@ export const singletonTypes = {
   'text/time': timeTextSchema,
   'text/heir': heirTextSchema,
   'text/eulogy': eulogyTextSchema,
+  'text/later': laterTextSchema,
+  'text/review': reviewTextSchema,
   'text/news': newsTextSchema,
   'text/possessions': possessionsTextSchema,
   'text/teen': teenTextSchema,
@@ -160,6 +165,7 @@ export const singletonTypes = {
   'registries/crime': crimeRegistrySchema,
   'registries/fame': fameRegistrySchema,
   'registries/sports': sportsRegistrySchema,
+  'registries/later': laterRegistrySchema,
 } as const;
 
 export type SingletonPath = keyof typeof singletonTypes;
@@ -211,6 +217,7 @@ export const contentBundleSchema = z.strictObject({
     people: peopleBalanceSchema,
     web: webBalanceSchema,
     eulogy: eulogyBalanceSchema,
+    later: laterBalanceSchema,
     mentalHealth: mentalHealthBalanceSchema,
     possessions: possessionsBalanceSchema,
     teen: teenBalanceSchema,
@@ -229,6 +236,8 @@ export const contentBundleSchema = z.strictObject({
     time: timeTextSchema,
     heir: heirTextSchema,
     eulogy: eulogyTextSchema,
+    later: laterTextSchema,
+    review: reviewTextSchema,
     news: newsTextSchema,
     possessions: possessionsTextSchema,
     teen: teenTextSchema,
@@ -258,6 +267,7 @@ export const contentBundleSchema = z.strictObject({
     crime: crimeRegistrySchema,
     fame: fameRegistrySchema,
     sports: sportsRegistrySchema,
+    later: laterRegistrySchema,
   }),
 });
 

@@ -29,6 +29,7 @@ import {
   HEIR_MEMORY_MAP,
   HEIR_MEMORY_TAGS,
   familyResults,
+  laterResults,
   heirResults,
 } from '../../src/content/schemas';
 import {
@@ -89,7 +90,7 @@ function lowerBound(c: { gt?: number | undefined; gte?: number | undefined; eq?:
 
 /** True when the condition always requires your age to be at least `min`. */
 function requiresAge(condition: Condition | undefined, min: number): boolean {
-  return requiredParts(condition).some((c) => 'age' in c && (lowerBound(c.age) ?? -Infinity) >= min);
+  return requiredParts(condition).some((c) => 'age' in c && !('role' in c) && (lowerBound(c.age) ?? -Infinity) >= min);
 }
 
 /** True when the condition always requires this role to be cast (and, with `minAge`, at least that old). */
@@ -466,6 +467,10 @@ function implies(required: Condition, part: Condition): boolean {
     // E6a: every field the contract names must be asked for the same way.
     return Object.entries(part.crime).every(([key, value]) => JSON.stringify((required.crime as Record<string, unknown>)[key]) === JSON.stringify(value));
   }
+  if ('later' in part && 'later' in required) {
+    // L1: every field the contract names must be asked for the same way.
+    return Object.entries(part.later).every(([key, value]) => JSON.stringify((required.later as Record<string, unknown>)[key]) === JSON.stringify(value));
+  }
   if ('legal' in part && 'legal' in required) {
     return (part.legal.incarcerated === undefined || part.legal.incarcerated === required.legal.incarcerated) &&
       (part.legal.probation === undefined || part.legal.probation === required.legal.probation);
@@ -513,6 +518,8 @@ function checkEvents(bundle: ContentBundle, fileOf: (typeKey: CollectionKey, id:
     ...bundle.registries.possessions.petDied.events,
     // T1: what the teen step queues (caught, invited, clash, juvenile).
     ...Object.values(bundle.registries.teen.triggers).flatMap((r) => r.events),
+    // L1: what the later-life step queues (a first grandchild, a grandchild who needs a home, care, a warning, amends).
+    ...laterResults(bundle.registries.later).flatMap((r) => r.events),
     // E6a: what the crime step queues (a year's jobs, a promotion, an arrest, a raid, the past catching up...).
     ...bundle.registries.crime.jobs,
     ...Object.values(bundle.registries.crime.triggers).flatMap((r) => r.events),

@@ -1,0 +1,56 @@
+# Engine (registries/later.yaml, amends.abandoned_dream): a dream you walked away from.
+id: amends_abandoned_dream
+title: What you put down
+text: >-
+  You were good at it once. Then it stopped being fun, or it stopped being
+  possible, and you put it down and told yourself that was growing up. Then a
+  smell, a sound, or an old recording on a shelf reaches you from the other
+  side of that decision.
+tone: neutral
+category: amends
+rarity: uncommon
+lifeStages: [adult, senior]
+requires:
+  all:
+    - { age: { gte: 40 } }
+    - { age: { gte: 45 } }
+    - any:
+        - { flag: fame_burned_out }
+        - { flag: sports_career_ended_by_injury }
+        - { flag: fame_broke_contract }
+        - { fame: { retired: true } }
+weight: { base: 10 }
+followUpOnly: true
+choices:
+  - id: pick_it_up
+    label: Pick it up again, for no one but you
+    outcome:
+      text: >-
+        There's no audience and no schedule. It's worse than it was, and better
+        than you'd feared, and for an hour on Sunday you are someone who does
+        this, again.
+      effects:
+        - { type: flag, key: picked_up_the_dream, value: true }
+        - { type: later, action: amends, source: abandoned_dream, result: made }
+        - { type: stat, key: happiness, delta: 6 }
+        - { type: stat, key: stress, delta: -3 }
+  - id: teach_it
+    label: Teach it to someone younger
+    outcome:
+      text: >-
+        You volunteer at a youth club. A fourteen-year-old with no talent
+        and a lot of heart asks if you'll show her. You do, and it comes
+        back in your hands before you've quite decided to let it.
+      effects:
+        - { type: flag, key: picked_up_the_dream, value: true }
+        - { type: later, action: amends, source: abandoned_dream, result: made }
+        - { type: stat, key: happiness, delta: 5 }
+        - { type: stat, key: kindness, delta: 1 }
+  - id: let_it_rest
+    label: Let it rest. It was a part of who you were
+    outcome:
+      text: >-
+        You put the thing back on the shelf where it lives. Some endings
+        deserve to stay endings. You tell yourself that, and nod.
+      effects:
+        - { type: later, action: amends, source: abandoned_dream, result: declined }

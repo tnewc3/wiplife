@@ -1,0 +1,53 @@
+id: raise_hard_year
+title: Tired in a new way
+text: >-
+  Raising a child at your age is not the same as the first time. You have
+  more patience and less energy, and the parent-teacher night is on the same
+  day as a doctor's appointment. {kid.name} notices that you are tired, and is
+  trying very hard not to be any trouble, which is worse.
+tone: neutral
+category: grandraise
+rarity: common
+lifeStages: [adult, senior]
+requires:
+  all:
+    - { age: { gte: 50 } }
+    - { later: { raising: true } }
+    - { role: kid, kind: [child], alive: true, origin: [grandchild], age: { lte: 17 } }
+weight: { base: 6 }
+cooldownYears: 3
+cast:
+  kid: { kind: child, presence: household }
+choices:
+  - id: ask_help
+    label: Ask the family for help, out loud
+    outcome:
+      text: >-
+        It's one of the harder things you do all year, and you do it on the
+        phone with your voice steady. Two cousins and a neighbor come through,
+        and a rota appears on the fridge. {kid.name} stops tiptoeing.
+      effects:
+        - { type: relationship, role: kid, affection: 4, trust: 5 }
+        - { type: stat, key: stress, delta: -3 }
+  - id: push_through
+    label: Push through, and tell no one
+    outcome:
+      text: >-
+        You do all of it, and get through it, and are smaller at the end of the
+        year by a number you can't measure. {kid.name} sees you fall asleep in
+        the chair and puts a blanket over you.
+      effects:
+        - { type: relationship, role: kid, affection: 3, trust: 2 }
+        - { type: stat, key: stress, delta: 4 }
+        - { type: stat, key: health, delta: -2 }
+  - id: treat_day
+    label: Take a day for just the two of you
+    outcome:
+      text: >-
+        You close the laptop and take {kid.name} to the sea. It is cold, and
+        you eat chips on the sea wall with your coat buttoned to the top. The
+        year gets lighter by about the weight of a day.
+      effects:
+        - { type: cost, item: grandchild_treat }
+        - { type: relationship, role: kid, affection: 7, trust: 4 }
+        - { type: stat, key: happiness, delta: 3 }

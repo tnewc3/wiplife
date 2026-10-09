@@ -1,0 +1,56 @@
+# Engine (registries/later.yaml): the parent is doing better and asks about the grandchild you raise.
+id: raise_parent_back
+title: Can we talk about {kid.name}?
+text: >-
+  {parent.name} is steadier than you have seen in years. {parent.They} {parent:sits|sit}
+  at your kitchen table with a letter from a counselor, and a plan, and a
+  question that has taken courage: could {kid.name} come home?
+tone: serious
+category: grandraise
+rarity: uncommon
+lifeStages: [adult, senior]
+requires:
+  all:
+    - { later: { raising: true } }
+    - { role: kid, kind: [child], alive: true, origin: [grandchild] }
+    - { role: parent, kind: [child, stepchild], alive: true }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  kid: { kind: child, presence: anywhere }
+  parent: { kind: child, presence: anywhere }
+choices:
+  - id: hand_back
+    label: Say yes, and help {kid.them} settle in at home
+    outcome:
+      text: >-
+        You pack {kid.name}'s things yourself and drive them over. The
+        goodbye is on the doorstep, with no speeches. The house is quiet that
+        night, quieter than it has been since the day {kid.they} came.
+      effects:
+        - { type: later, action: return, role: kid }
+        - { type: flag, key: raised_a_grandchild, value: true }
+        - { type: relationship, role: parent, affection: 8, trust: 9 }
+        - { type: relationship, role: kid, affection: 3 }
+        - { type: stat, key: stress, delta: -4 }
+        - { type: stat, key: happiness, delta: -2 }
+  - id: more_time
+    label: Ask for more time, to be sure
+    outcome:
+      text: >-
+        You say it as gently as you can: not yet. {parent.name} nods slowly,
+        and says that is fair. Nobody argues, and you agree to talk again soon.
+      effects:
+        - { type: relationship, role: parent, trust: -2 }
+        - { type: stat, key: stress, delta: 2 }
+  - id: refuse
+    label: Say no. {kid.name} is settled here
+    outcome:
+      text: >-
+        {parent.name} stares at you, and then at the floor. The words that
+        come out afterward are the kind that are not forgotten, on either
+        side. {kid.name} hears more of it than you meant.
+      effects:
+        - { type: relationship, role: parent, affection: -14, trust: -16 }
+        - { type: relationship, role: kid, trust: -4 }
+        - { type: stat, key: stress, delta: 5 }

@@ -1,0 +1,49 @@
+id: second_career_offer
+title: Just a few days a week
+text: >-
+  A call from a former colleague. They have a project, a deadline
+  and a problem only you remember how to solve. It would be part-time and
+  well below your old salary, and they say so, with the particular
+  embarrassment of people asking an old friend for a favor.
+tone: light
+category: latelife
+rarity: uncommon
+lifeStages: [adult, senior]
+requires:
+  all:
+    - { age: { gte: 55 } }
+    - { age: { gte: 60, lte: 78 } }
+    - { career: { retired: true, employed: false } }
+weight: { base: 4 }
+once: true
+choices:
+  - id: take_it
+    label: Say yes, on your own terms
+    outcome:
+      text: >-
+        You go back in on a Tuesday, a guest in your old job. People ask how
+        retirement is, and you say it's wonderful, and mean it more than when you
+        said it before. Work feels different when you can leave.
+      effects:
+        - { type: job, action: offer, jobId: office_administrator }
+        - { type: flag, key: second_career, value: true }
+        - { type: stat, key: happiness, delta: 4 }
+        - { type: stat, key: stress, delta: 2 }
+  - id: help_for_free
+    label: Help them out once, for the pleasure of it
+    outcome:
+      text: >-
+        You spend an afternoon fixing the problem and refuse the invoice. On the
+        way home you feel more capable than you have since you left, and
+        decide that's enough.
+      effects:
+        - { type: stat, key: happiness, delta: 3 }
+        - { type: stat, key: confidence, delta: 1 }
+  - id: decline
+    label: Say you're done, and mean it
+    outcome:
+      text: >-
+        You thank them, kindly, and hang up. The quiet afterward is a different
+        quiet from the one you were afraid of. You make lunch.
+      effects:
+        - { type: stat, key: stress, delta: -2 }

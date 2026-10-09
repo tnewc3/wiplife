@@ -15,6 +15,7 @@ import { teenHolds } from './teen/holds';
 import { crimeHolds } from './crime/holds';
 import { fameHolds } from './fame/holds';
 import { sportsHolds } from './sports/holds';
+import { laterHolds } from './later/query';
 import { romanceStatus, yearsInKind } from './relationships';
 import type { Id, LifeState } from './types';
 
@@ -59,7 +60,8 @@ export function evaluate(condition: Condition | undefined, state: LifeState, ctx
     if (ctx.roles === 'assumeTrue' && mentionsRole(condition.not)) return true;
     return !evaluate(condition.not, state, ctx);
   }
-  if ('age' in condition) return compare(c.age, condition.age);
+  // (A role condition has an `age` of its own: the person's, checked with the rest of the role below.)
+  if ('age' in condition && !('role' in condition)) return compare(c.age, condition.age);
   if ('lifeStage' in condition) return condition.lifeStage.includes(c.lifeStage);
   if ('stat' in condition) return compare(c.stats[condition.stat], condition);
   if ('trait' in condition) return compare(c.personality[condition.trait], condition);
@@ -195,6 +197,7 @@ export function evaluate(condition: Condition | undefined, state: LifeState, ctx
   if ('crime' in condition) return crimeHolds(condition.crime, state, ctx.content?.balance.crime.ranks.length ?? 5, ctx.content);
   if ('fame' in condition) return fameHolds(condition.fame, state, ctx.content);
   if ('sports' in condition) return sportsHolds(condition.sports, state, ctx.content);
+  if ('later' in condition) return laterHolds(condition.later, state);
   if ('memory' in condition) {
     const { role, tag } = condition.memory;
     return roleCheck(role, (id) => state.relationships[id]?.memories.some((m) => m.tag === tag) ?? false);
@@ -221,6 +224,7 @@ export function evaluate(condition: Condition | undefined, state: LifeState, ctx
       }
       if (condition.custody && !(person.child && condition.custody.includes(person.child.custody))) return false;
       if (condition.movedOut !== undefined && (person.child?.movedOutYear !== undefined) !== condition.movedOut) return false;
+      if (condition.origin && !(person.child && condition.origin.includes(person.child.origin))) return false;
       if (condition.life && !lifeHolds(condition.life, person, state.currentYear, ctx.content?.balance.people.trouble.serious ?? 35)) return false;
       if (condition.heard && !heardHolds(condition.heard, state, id, ctx.content, ctx.cast?.[ITEM_ROLE])) return false;
       if (condition.mental) {

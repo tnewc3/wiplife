@@ -1,0 +1,52 @@
+# Engine (registries/later.yaml, amends.unfinished_degree): a degree you left unfinished.
+id: amends_unfinished_degree
+title: Credits that haven't expired
+text: >-
+  The letter from the college arrives every spring, in the same envelope,
+  addressed to a younger version of you. It says you have credits that
+  haven't expired. You left before you finished. There was a reason, a good
+  one, and the reason is no longer here.
+tone: neutral
+category: amends
+rarity: uncommon
+lifeStages: [adult, senior]
+requires:
+  all:
+    - { age: { gte: 40 } }
+    - { age: { gte: 45 } }
+    - { education: { left: true } }
+weight: { base: 10 }
+followUpOnly: true
+choices:
+  - id: go_back
+    label: Sign up for one course, just to see
+    outcome:
+      text: >-
+        You sit in the front row, with the other late arrivals. You turn
+        in an essay for the first time in decades and get it back with a
+        comment in the margin that says well argued. You carry it around for
+        a week.
+      effects:
+        - { type: flag, key: amends_unfinished_degree, value: true }
+        - { type: later, action: amends, source: unfinished_degree, result: made }
+        - { type: stat, key: smarts, delta: 2 }
+        - { type: stat, key: happiness, delta: 5 }
+  - id: audit
+    label: Sit in on a lecture series for the love of it
+    outcome:
+      text: >-
+        There are no exams and no pressure, and you learn more than you did
+        the first time. You leave with no credential and a notebook full of
+        lines you underlined.
+      effects:
+        - { type: later, action: amends, source: unfinished_degree, result: made }
+        - { type: stat, key: smarts, delta: 1 }
+        - { type: stat, key: happiness, delta: 3 }
+  - id: let_go
+    label: Let it go, and put the letter in the recycling
+    outcome:
+      text: >-
+        You decide that this is the life you built. It is enough. You drop the
+        letter in with the newspapers, and feel it more than you expected.
+      effects:
+        - { type: later, action: amends, source: unfinished_degree, result: declined }

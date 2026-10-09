@@ -531,7 +531,7 @@ export const heirTextSchema = z.strictObject({
   /** Childhood recap entries for the start of the heir's life history. Role: parent. */
   recap: z.strictObject({
     /** Values: {age} (how old the heir was when they joined, for an adopted child). */
-    origin: z.strictObject({ birth: variantsSchema, adopted: variantsSchema }),
+    origin: z.strictObject({ birth: variantsSchema, adopted: variantsSchema, grandchild: variantsSchema }),
     /** One line for each memory of how the heir was raised. */
     memories: z.strictObject(Object.fromEntries(HEIR_MEMORY_TAGS.map((t) => [t, templateSchema])) as Record<HeirMemoryTag, typeof templateSchema>),
     /** The heir had moved out before the death. */
