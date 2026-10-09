@@ -9,6 +9,7 @@
 import type { ContentBundle, SportRetireRoute } from '../../content/schemas';
 import { meetsJobRequirements, startJob } from '../career';
 import { crossBlock, crossOver, retire } from '../fame/ladder';
+import { inFinalYear } from '../education';
 import { addCondition, conditionOf } from '../health';
 import { chance, type RngState } from '../rng';
 import type { LifeState } from '../types';
@@ -20,7 +21,10 @@ export type RetireWhy = 'retired' | 'aged' | 'injury' | 'stalled';
 /** Coaching is a job like any other: its requirements (a name in the game, or a degree) still apply. */
 function canCoach(state: LifeState, content: ContentBundle): boolean {
   const def = content.jobs['coach'];
-  return def !== undefined && meetsJobRequirements(state, def, content);
+  if (def === undefined || !meetsJobRequirements(state, def, content)) return false;
+  // Not while in school (before its last year), on gig work or retired.
+  if (state.education.current && !inFinalYear(state)) return false;
+  return !state.career.gig && !state.career.retired;
 }
 
 /** Whether this route is open to you now (broadcasting asks for enough fame to cross over). */
