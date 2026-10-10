@@ -10,6 +10,8 @@ export function emptyLater(): LaterState {
   return { care: null, terminal: null, amends: [], offered: {} };
 }
 
+const byId = (a: Id, b: Id) => a.localeCompare(b, 'en', { numeric: true });
+
 function compare(value: number, c: Compare): boolean {
   if (c.gt !== undefined && !(value > c.gt)) return false;
   if (c.gte !== undefined && !(value >= c.gte)) return false;
@@ -21,26 +23,27 @@ function compare(value: number, c: Compare): boolean {
 
 /** Your living grandchildren who are on your People list and not in your care as your own child, in id order. */
 export function grandchildren(state: LifeState): (Person & { grandchild: NonNullable<Person['grandchild']> })[] {
-  return Object.keys(state.relationships)
-    .sort((a, b) => a.localeCompare(b, 'en', { numeric: true }))
-    .flatMap((id) => {
-      const rel = state.relationships[id]!;
-      const person = state.people[id];
-      if (rel.kind !== 'grandchild' || rel.status === 'ended' || !person?.alive || !person.grandchild) return [];
-      return [person as Person & { grandchild: NonNullable<Person['grandchild']> }];
-    });
+  // Filter first and sort the few that remain: sorting every tie is the slow part of a big circle.
+  const found: Id[] = [];
+  for (const id in state.relationships) {
+    const rel = state.relationships[id]!;
+    if (rel.kind !== 'grandchild' || rel.status === 'ended') continue;
+    const person = state.people[id];
+    if (person?.alive && person.grandchild) found.push(id);
+  }
+  return found.sort(byId).map((id) => state.people[id] as Person & { grandchild: NonNullable<Person['grandchild']> });
 }
 
 /** The grandchildren you are raising: living children of yours with the grandchild origin. */
 export function raisedGrandchildren(state: LifeState): Person[] {
-  return Object.keys(state.relationships)
-    .sort((a, b) => a.localeCompare(b, 'en', { numeric: true }))
-    .flatMap((id) => {
-      const person = state.people[id];
-      const rel = state.relationships[id]!;
-      if (!person?.alive || !person.child || person.child.origin !== 'grandchild' || rel.kind !== 'child' || rel.status === 'ended') return [];
-      return [person];
-    });
+  const found: Id[] = [];
+  for (const id in state.relationships) {
+    const rel = state.relationships[id]!;
+    if (rel.kind !== 'child' || rel.status === 'ended') continue;
+    const person = state.people[id];
+    if (person?.alive && person.child && person.child.origin === 'grandchild') found.push(id);
+  }
+  return found.sort(byId).map((id) => state.people[id]!);
 }
 
 /** Who is named in your will, or null without one. */
@@ -57,12 +60,12 @@ function named(state: LifeState): Set<Id> | null {
 export function willGaps(state: LifeState): { missing: Id[]; gone: Id[] } {
   const will = named(state);
   const matter: Id[] = [];
-  for (const id of Object.keys(state.relationships).sort((a, b) => a.localeCompare(b, 'en', { numeric: true }))) {
+  for (const id in state.relationships) {
     const rel = state.relationships[id]!;
-    const person = state.people[id];
-    if (!person?.alive || rel.status === 'ended') continue;
-    if (['spouse', 'child', 'stepchild', 'grandchild'].includes(rel.kind)) matter.push(id);
+    if (rel.status === 'ended' || !(rel.kind === 'spouse' || rel.kind === 'child' || rel.kind === 'stepchild' || rel.kind === 'grandchild')) continue;
+    if (state.people[id]?.alive) matter.push(id);
   }
+  matter.sort(byId);
   const missing = will === null ? matter : matter.filter((id) => !will.has(id));
   const gone = will === null ? [] : [...will].filter((id) => state.people[id]?.alive !== true);
   return { missing, gone };

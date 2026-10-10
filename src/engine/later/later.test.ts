@@ -369,11 +369,10 @@ describe('a death you see coming', () => {
 
   it('carries a death chance that rises with each year since the warning', () => {
     const t = dying();
-    const chances = [0, 1, 2, 3, 6].map((years) => terminalDeathChance(produce(t, (d) => void (d.currentYear += years)), content));
-    expect(chances[0]!).toBeLessThan(chances[1]!);
-    expect(chances[1]!).toBeLessThan(chances[2]!);
-    expect(chances[2]!).toBeLessThan(chances[3]!);
-    expect(chances[4]).toBe(chances[3]);
+    const last = content.balance.later.terminal.deathChance.length - 1;
+    const chances = [...Array(last + 1).keys(), last + 3].map((years) => terminalDeathChance(produce(t, (d) => void (d.currentYear += years)), content));
+    for (let i = 1; i <= last; i++) expect(chances[i - 1]!).toBeLessThan(chances[i]!);
+    expect(chances[last + 1]).toBe(chances[last]);
     expect(terminalDeathChance(lifeAtAge('l1-none', 80), content)).toBe(0);
   });
 

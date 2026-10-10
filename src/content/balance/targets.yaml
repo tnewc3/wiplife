@@ -346,7 +346,7 @@ eulogy:
 later:
   grandparentShare: { min: 0.2, max: 0.9 }
   careShare: { min: 0.1, max: 0.8 }
-  foreseenShare: { min: 0.15, max: 0.7 }
+  foreseenShare: { min: 0.08, max: 0.7 }
   wishesShare: { min: 0.5, max: 0.95 }
   amendsShare: { min: 0.2, max: 0.95 }
   amendsMadeShare: { min: 0.2, max: 0.9 }

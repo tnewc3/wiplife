@@ -228,6 +228,16 @@ function raisingChances(state: LifeState, content: ContentBundle): void {
 
 /** Step part: grandchildren are born, grow up and are looked after. */
 export function runGrandchildren(state: LifeState, content: ContentBundle): void {
+  // Nothing to do without a child or grandchild (one cheap pass; the steps below each scan everyone you know).
+  let family = false;
+  for (const id in state.relationships) {
+    const kind = state.relationships[id]!.kind;
+    if (kind === 'child' || kind === 'stepchild' || kind === 'grandchild') {
+      family = true;
+      break;
+    }
+  }
+  if (!family) return;
   welcomeGrandchildren(state, content);
   followParents(state, content);
   parentsNotice(state, content);
