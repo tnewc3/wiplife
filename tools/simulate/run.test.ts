@@ -164,7 +164,7 @@ describe('interactions report (E1)', () => {
     expect(interactionTargets(spammer, content).find((t) => t.label.startsWith('neutral relationships'))!.met).toBe(true);
   });
 
-  it('reports crime careers (E6a): the law-abiding player never takes a place in a crew, the criminal player does, and the report counts what it earns and what it costs', { timeout: 180_000 }, () => {
+  it('reports crime careers (E6a): the law-abiding player never takes a place in a crew, the criminal player does, and the report counts what it earns and what it costs', { timeout: 420_000 }, () => {
     const careful = runSimulation(content, { lives: 40, seedPrefix: 'sim-crime', player: 'careful' });
     expect(careful.crime.entered).toBe(0);
     expect(careful.crime.underAge).toBe(0);

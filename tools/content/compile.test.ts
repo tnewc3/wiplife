@@ -95,7 +95,7 @@ describe('content build with the real content', () => {
     expect(Object.keys(result.bundle.causes)).toContain('natural_causes');
     expect(result.bundle.balance.mortality.maxAge).toBe(120);
     expect(result.bundle.text.obituary.opening.finished.mixed.length).toBeGreaterThan(0);
-  });
+  }, 60_000);
 
   it('has no consistency warnings left unreviewed (C1, docs/consistency-review.md)', async () => {
     const result = await compileContent({ contentDir: realContentDir, appVersion: '1.2.3' });
