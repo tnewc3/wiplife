@@ -205,3 +205,25 @@ categories:
   sportspast:
     label: After the game
     requires: { sports: { retired: true } }
+
+  # L1: later life. Grandparenting needs a grandchild on your People list; the rest of later life is for people of an age
+  # (and care and the end of life for people who need care or have been told what is coming). Raising a grandchild is
+  # about a particular grandchild, so each event requires the person it is about.
+  grandparenting:
+    label: Grandchildren
+    requires: { later: { grandchildren: { gte: 1 } } }
+  grandraise: { label: Raising a grandchild }
+  latelife:
+    label: Later life
+    requires: { age: { gte: 55 } }
+  latecare:
+    label: Care near the end
+    household: true
+    requires: { later: { care: true } }
+  amends:
+    label: Making amends
+    requires: { age: { gte: 40 } }
+  endoflife:
+    label: The end of life
+    household: true
+    requires: { later: { terminal: true } }

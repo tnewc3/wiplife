@@ -60,7 +60,24 @@ export function eligibleSpeakers(life: LifeState, content: ContentBundle): Speak
   return out.map(({ personId, group, tone, combined }) => ({ personId, group, tone, combined }));
 }
 
-/** The speaker, or null when no one is close enough. */
+/**
+ * L1: the person you asked to speak in your final wishes, if they can: alive, still in your life
+ * (not estranged), able to come and old enough. They need not be the closest.
+ */
+export function askedSpeaker(life: LifeState, content: ContentBundle): SpeakerChoice | null {
+  const id = life.later.terminal?.speakerId;
+  if (id === undefined) return null;
+  const rel = life.relationships[id];
+  const person = life.people[id];
+  const b = content.balance.eulogy.speaker;
+  if (!rel || !person || !person.alive || rel.status !== 'active' || (b.excludedKinds as readonly string[]).includes(rel.kind)) return null;
+  const group = groupOf(rel.kind, content);
+  if (group === null || ageOf(life, person) < b.minAge || couldNotAttend(life, id, content) !== null) return null;
+  const combined = rel.affection + rel.trust;
+  return { personId: id, group, tone: toneOf(combined, content), combined };
+}
+
+/** The speaker you asked for (L1), or else the closest eligible person; null when no one is close enough. */
 export function chooseSpeaker(life: LifeState, content: ContentBundle): SpeakerChoice | null {
-  return eligibleSpeakers(life, content)[0] ?? null;
+  return askedSpeaker(life, content) ?? eligibleSpeakers(life, content)[0] ?? null;
 }

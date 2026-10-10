@@ -11,7 +11,7 @@ rarity: common
 lifeStages: [teen, youngAdult, adult, senior]
 requires:
   all:
-    - { age: { gte: 14 } }
+    - { age: { gte: 18 } }
     - { role: npc, alive: true, age: { gte: 18 }, kind: [parent, sibling, friend, child, grandparent, relative], life: { partner: [married] } }
 weight: { base: 10 }
 followUpOnly: true

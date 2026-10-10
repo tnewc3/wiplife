@@ -1,0 +1,48 @@
+id: giving_up_keys
+title: The car keys
+text: >-
+  The family has been very careful not to bring it up. There is the dent on
+  the left that you don't remember getting, and the parking space you took
+  three tries to enter. Someone in the family glances at the keys on the hook,
+  and then at you.
+tone: neutral
+category: latelife
+rarity: uncommon
+lifeStages: [senior]
+requires:
+  all:
+    - { age: { gte: 55 } }
+    - { age: { gte: 75 } }
+    - { belongings: { vehicles: { gte: 1 } } }
+    - { not: { flag: stopped_driving } }
+weight: { base: 5 }
+once: true
+choices:
+  - id: stop_driving
+    label: Hand over the keys yourself
+    outcome:
+      text: >-
+        It's the hardest part of getting old, apart from the other parts. You
+        put the keys in an envelope and write a name on it. Somebody drives you
+        to the shops on Fridays, and you discover that you can talk the whole
+        way.
+      effects:
+        - { type: flag, key: stopped_driving, value: true }
+        - { type: stat, key: stress, delta: 2 }
+        - { type: stat, key: happiness, delta: -2 }
+  - id: keep_driving
+    label: Keep driving, but only close to home and in daylight
+    outcome:
+      text: >-
+        You make your own rules, and mostly keep them. The dent on the left
+        gets a neighbor, and the neighbor gets a story.
+      effects:
+        - { type: stat, key: stress, delta: 1 }
+  - id: argue
+    label: Tell them you've been driving since before they were born
+    outcome:
+      text: >-
+        You win the argument and nobody wins anything else. The keys stay on
+        the hook, and the family looks at them every time they visit.
+      effects:
+        - { type: stat, key: stress, delta: 3 }

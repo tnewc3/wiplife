@@ -50,6 +50,8 @@ import { emptyTeen } from './teen/query';
 import { emptyCrime } from './crime/query';
 import { emptyFame } from './fame/query';
 import { emptySports } from './sports/query';
+import { emptyLater } from './later/query';
+import { terminalDeathChance, TERMINAL_ID } from './later/terminal';
 
 export type { CreateLifeOptions, CustomLifeInput } from './creation/input';
 
@@ -179,6 +181,7 @@ export function createLife(input: CreateLifeOptions, content: ContentBundle): Li
     crime: emptyCrime(),
     fame: emptyFame(),
     sports: emptySports(),
+    later: emptyLater(),
   };
   // M1: ADHD and neurodivergence are inherited in part: your parents and siblings (and grandparents) may have them, and you are likelier to if a parent does.
   for (const person of Object.values(life.people)) {
@@ -277,12 +280,25 @@ export function endYear(state: LifeState, content: ContentBundle): LifeState {
     // age, Health and genetic risk set the chance, and each health condition
     // adds its own; a death is put down to one of them by its share.
     const base = characterDeathChance(c.age, c.stats.health, c.hidden.geneticRisk, content);
-    const deadly = deadlyConditions(draft, content);
+    let deadly = [...deadlyConditions(draft, content)];
+    // L1: a death you saw coming has its own chance, which rises with each year since the warning.
+    // It stands in for the mortality of the condition behind it, so the illness is not counted twice.
+    const foreseen = terminalDeathChance(draft as LifeState, content);
+    if (foreseen > 0) {
+      const behind = draft.later.terminal?.conditionId;
+      if (behind !== undefined) deadly = deadly.filter(([id]) => id !== behind);
+      deadly.push([TERMINAL_ID, foreseen] as const);
+    }
     const total = Math.min(1, deadly.reduce((sum, [, p]) => sum + p, base));
     let causeId = draft.death?.causeId ?? null;
     if (causeId === null && chance(draft.rng, total)) {
       const from = deadly.length === 0 ? null : weightedPick(draft.rng, [[null, base] as const, ...deadly]);
-      causeId = from === null ? pickCause(draft.rng, c.age, content) : (content.conditions[from]?.cause ?? pickCause(draft.rng, c.age, content));
+      causeId =
+        from === null
+          ? pickCause(draft.rng, c.age, content)
+          : from === TERMINAL_ID
+            ? (draft.later.terminal?.causeId ?? pickCause(draft.rng, c.age, content))
+            : (content.conditions[from]?.cause ?? pickCause(draft.rng, c.age, content));
     }
     draft.pending = [];
     draft.lifetime.happinessTotal += c.stats.happiness;

@@ -29,6 +29,7 @@ import {
   HEIR_MEMORY_MAP,
   HEIR_MEMORY_TAGS,
   familyResults,
+  laterResults,
   heirResults,
 } from '../../src/content/schemas';
 import {
@@ -89,7 +90,7 @@ function lowerBound(c: { gt?: number | undefined; gte?: number | undefined; eq?:
 
 /** True when the condition always requires your age to be at least `min`. */
 function requiresAge(condition: Condition | undefined, min: number): boolean {
-  return requiredParts(condition).some((c) => 'age' in c && (lowerBound(c.age) ?? -Infinity) >= min);
+  return requiredParts(condition).some((c) => 'age' in c && !('role' in c) && (lowerBound(c.age) ?? -Infinity) >= min);
 }
 
 /** True when the condition always requires this role to be cast (and, with `minAge`, at least that old). */
@@ -195,6 +196,7 @@ export function checkReferences(
   errors.push(...checkFame(bundle, fileOf, options.partialEvents === true));
   errors.push(...checkSports(bundle, fileOf, options.partialEvents === true));
   errors.push(...checkEulogy(bundle));
+  errors.push(...checkLater(bundle, fileOf, options.partialEvents === true));
 
   return errors;
 }
@@ -466,6 +468,10 @@ function implies(required: Condition, part: Condition): boolean {
     // E6a: every field the contract names must be asked for the same way.
     return Object.entries(part.crime).every(([key, value]) => JSON.stringify((required.crime as Record<string, unknown>)[key]) === JSON.stringify(value));
   }
+  if ('later' in part && 'later' in required) {
+    // L1: every field the contract names must be asked for the same way.
+    return Object.entries(part.later).every(([key, value]) => JSON.stringify((required.later as Record<string, unknown>)[key]) === JSON.stringify(value));
+  }
   if ('legal' in part && 'legal' in required) {
     return (part.legal.incarcerated === undefined || part.legal.incarcerated === required.legal.incarcerated) &&
       (part.legal.probation === undefined || part.legal.probation === required.legal.probation);
@@ -513,6 +519,8 @@ function checkEvents(bundle: ContentBundle, fileOf: (typeKey: CollectionKey, id:
     ...bundle.registries.possessions.petDied.events,
     // T1: what the teen step queues (caught, invited, clash, juvenile).
     ...Object.values(bundle.registries.teen.triggers).flatMap((r) => r.events),
+    // L1: what the later-life step queues (a first grandchild, a grandchild who needs a home, care, a warning, amends).
+    ...laterResults(bundle.registries.later).flatMap((r) => r.events),
     // E6a: what the crime step queues (a year's jobs, a promotion, an arrest, a raid, the past catching up...).
     ...bundle.registries.crime.jobs,
     ...Object.values(bundle.registries.crime.triggers).flatMap((r) => r.events),
@@ -1507,5 +1515,47 @@ function checkEulogy(bundle: ContentBundle): ContentError[] {
   all('absent.distant', a.distant, reason);
   all('absent.far', a.far, reason);
   for (const [why, list] of Object.entries(text.couldNot)) all(`couldNot.${why}`, list, reason);
+  return errors;
+}
+
+/**
+ * Content checks for later life (L1): every event the later-life registry
+ * names exists and is a follow-up; every diagnosis key is a condition (or one
+ * of `decline` and `other`) and `other` and `decline` always have an event;
+ * amends sources and review lines only name memories that exist; and the
+ * later-life and review text has no hardcoded pronoun.
+ */
+function checkLater(bundle: ContentBundle, fileOf: (typeKey: CollectionKey, id: string) => string, partialEvents: boolean): ContentError[] {
+  const errors: ContentError[] = [];
+  const REGISTRY = 'registries/later.yaml';
+  const REVIEW = 'text/review.yaml';
+  const LATER_TEXT = 'text/later.yaml';
+  const registry = bundle.registries.later;
+  if (!partialEvents) for (const { where, events } of laterResults(registry)) errors.push(...checkRegistryEvents(bundle, fileOf, REGISTRY, where, events));
+  for (const key of ['decline', 'other']) if (!registry.terminal.diagnosis[key]?.length) errors.push({ file: REGISTRY, message: `terminal.diagnosis.${key}: needs an event` });
+  for (const key of Object.keys(registry.terminal.diagnosis)) {
+    if (key !== 'decline' && key !== 'other' && !bundle.conditions[key]) errors.push({ file: REGISTRY, message: `terminal.diagnosis.${key}: not a health condition` });
+  }
+  const memoryExists = (tag: string) => bundle.registries.memories.tags[tag] !== undefined;
+  for (const [name, source] of Object.entries(registry.amends.sources)) {
+    for (const tag of source.memories ?? []) if (!memoryExists(tag)) errors.push({ file: REGISTRY, message: `amends.sources.${name}: unknown memory "${tag}"` });
+  }
+  const lines = [...bundle.text.review.regrets, ...bundle.text.review.proud];
+  const seen = new Set<string>();
+  for (const t of lines) {
+    if (seen.has(t.id)) errors.push({ file: REVIEW, message: `${t.id}: duplicate review line id` });
+    seen.add(t.id);
+    if (t.who?.memory && !memoryExists(t.who.memory)) errors.push({ file: REVIEW, message: `${t.id}: unknown memory "${t.who.memory}"` });
+    if (/\b(he|she|him|her|his|hers)\b/i.test(t.text.replace(/\{[^}]*\}/g, ''))) errors.push({ file: REVIEW, message: `${t.id}: hardcoded pronoun; use placeholders` });
+  }
+  const strings = (node: unknown, out: string[] = []): string[] => {
+    if (typeof node === 'string') out.push(node);
+    else if (Array.isArray(node)) for (const n of node) strings(n, out);
+    else if (typeof node === 'object' && node !== null) for (const n of Object.values(node)) strings(n, out);
+    return out;
+  };
+  for (const text of strings(bundle.text.later)) {
+    if (/\b(he|she|him|her|his|hers)\b/i.test(text.replace(/\{[^}]*\}/g, ''))) errors.push({ file: LATER_TEXT, message: `hardcoded pronoun; use placeholders: "${text.slice(0, 50)}"` });
+  }
   return errors;
 }

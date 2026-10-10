@@ -147,6 +147,13 @@ export interface Person {
   life?: PersonLife;
   /** M1: born-with conditions (ADHD, neurodivergence) they have: passed on, in part, to their children. */
   neuro?: Id[];
+  /** L1: set for your grandchildren (and kept if you raise one): who their parent is, one of your children. */
+  grandchild?: GrandchildData;
+}
+
+/** L1: a grandchild's link to your family: their parent is one of your children or stepchildren. */
+export interface GrandchildData {
+  parentId: Id;
 }
 
 /** E3: how closely a person's life is followed: close people get the full yearly update, the rest only the major milestones. */
@@ -215,7 +222,7 @@ export interface PersonLife {
   /** How their last relationship ended, and when. */
   ended?: { year: number; how: 'broke_up' | 'divorced' | 'widowed'; /** Their first name. */ partner: string };
   /** Their children (not on your People list), oldest first. */
-  children: { first: string; birthYear: number }[];
+  children: { first: string; birthYear: number; /** L1: the grandchild on your People list this child became, if they are your grandchild. */ id?: Id }[];
   troubles: Trouble[];
   /** Addictions they recovered from, for relapses. */
   recovered: { refId: Id; year: number }[];
@@ -228,7 +235,7 @@ export interface PersonLife {
   requestYear?: number;
 }
 
-export type ChildOrigin = 'birth' | 'adopted' | 'ivf' | 'surrogacy' | 'step';
+export type ChildOrigin = 'birth' | 'adopted' | 'ivf' | 'surrogacy' | 'step' | 'grandchild';
 /** Where a child lives: with you, in shared custody, or with their other parent. */
 export type Custody = 'you' | 'shared' | 'other';
 
@@ -314,6 +321,7 @@ export type RelationshipKind =
   | 'relative'
   | 'child'
   | 'stepchild'
+  | 'grandchild'
   | 'friend'
   | 'partner'
   | 'fiance'
@@ -666,6 +674,8 @@ export interface HousingState {
   foster?: true;
   /** E5: renovations done to the home you own and live in (a move or sale starts afresh). */
   renovations?: Renovation[];
+  /** L1: you live in assisted living (a rental, for the year it began and after): housing costs what it costs there, meals included. A move ends it. */
+  assisted?: { since: number };
 }
 
 /** E5: a renovation done, and the year. */
@@ -946,6 +956,36 @@ export interface Funeral {
   notAttending: FuneralGuest[];
   moreNotAttending: number;
   couldNotAttend: FuneralGuest[];
+  /** L1: the last days: a foreseen death, hospice, the service you asked for, the people who came. Absent for lives archived before L1. */
+  lastDays?: LastDays | null;
+}
+
+/** L1: how you chose to spend your last months. */
+export type HospiceChoice = 'hospice' | 'home' | 'hospital';
+/** L1: the kind of service you asked for. */
+export type ServiceStyle = 'traditional' | 'simple' | 'celebration' | 'private';
+
+/** L1: the lines of a life review: a regret or a proud moment, written from the life, with the template it came from. */
+export interface ReviewLine {
+  id: string;
+  text: string;
+}
+
+/** L1: the regrets and proud moments of a life that ended, built from its history, memories and relationships. */
+export interface LifeReview {
+  regrets: ReviewLine[];
+  proud: ReviewLine[];
+}
+
+/** L1: what the last days were, for the funeral: whether the death was foreseen, the hospice choice and the service, and what happened. */
+export interface LastDays {
+  foreseen: boolean;
+  hospice: HospiceChoice | null;
+  service: ServiceStyle | null;
+  /** The last days in a few lines (the choice, who was there, the letters, whether the wishes were carried out). */
+  lines: string[];
+  /** The chosen visitors who came. */
+  bedside: FuneralGuest[];
 }
 
 export interface ArchivedLife {
@@ -967,6 +1007,8 @@ export interface ArchivedLife {
   obituary: string;
   /** W1: the funeral. Null for a life set aside unfinished, and for lives archived before W1 (archive schema version 4). */
   funeral: Funeral | null;
+  /** L1: the regrets and proud moments of the life (archive schema version 5). Null for a life set aside unfinished and for lives archived before L1. */
+  review: LifeReview | null;
   highlights: HistoryEntry[];
   finalNetWorth: number;
   finalStats: Stats;
@@ -1077,6 +1119,69 @@ export interface LifeState {
   fame: FameState;
   /** E6c: your sports career: sport, position, team, contract, seasons, injuries and the playoff run under way (the ladder, fame and fans are in `fame`). */
   sports: SportsState;
+  /** L1: later life: care you need, a foreseen death and your final wishes, and the amends you have made. */
+  later: LaterState;
+}
+
+/** L1: how late-life care is provided. */
+export type CareOption = 'family' | 'paid' | 'assisted';
+
+/** L1: care you need near the end: since when, how it is provided and, for family care, who provides it. */
+export interface LateCare {
+  since: number;
+  option: CareOption | null;
+  /** The year the current option began. */
+  optionSince?: number;
+  /** Family care: who provides it. */
+  providerId?: Id;
+  /** People who were asked to provide care and said no (they are not asked again). */
+  declined: Id[];
+}
+
+/** L1: a chosen visitor, and whether they came to your bedside. */
+export interface LastVisit {
+  id: Id;
+  came: boolean;
+}
+
+/** L1: a foreseen death: a diagnosis or a long decline, with your final wishes. */
+export interface Terminal {
+  since: number;
+  /** What the death will be put down to (a cause in src/content/causes). */
+  causeId: Id;
+  /** The condition behind it, if there is one. */
+  conditionId?: Id;
+  hospice: HospiceChoice | null;
+  service: ServiceStyle | null;
+  /** Who you asked to speak at the funeral. */
+  speakerId?: Id;
+  /** People you wrote a last letter to. */
+  letters: Id[];
+  /** People you asked to be with you. */
+  visitors: Id[];
+  /** Who came, worked out when the last visit takes place (empty until then). */
+  visits: LastVisit[];
+  /** The year the final wishes were last set. */
+  wishesYear?: number;
+  /** The will prompt has been shown. */
+  willPrompted?: true;
+}
+
+/** L1: one amends chance and what you did with it. */
+export interface AmendsRecord {
+  year: number;
+  /** The source in registries/later.yaml. */
+  source: string;
+  personId?: Id;
+  result: 'made' | 'declined' | 'refused';
+}
+
+export interface LaterState {
+  care: LateCare | null;
+  terminal: Terminal | null;
+  amends: AmendsRecord[];
+  /** The last year each amends chance (source and person) was offered, so none comes again soon. */
+  offered: Record<string, number>;
 }
 
 /** E6a: the crew you are in (a definition in src/content/crews, made real for you). */

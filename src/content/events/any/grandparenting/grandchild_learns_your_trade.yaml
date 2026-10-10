@@ -1,0 +1,53 @@
+id: grandchild_learns_your_trade
+title: Show me how
+text: >-
+  {kid.name} has been watching your hands. After years of seeing how you
+  fix, build or solve things, {kid.they} {kid:asks|ask} the question you've
+  been half-waiting for: would you show {kid.them} how it's done?
+tone: light
+category: grandparenting
+rarity: uncommon
+lifeStages: [adult, senior]
+requires:
+  all:
+    - { later: { grandchildren: { gte: 1 } } }
+    - { career: { retired: true } }
+    - { role: kid, kind: [grandchild], alive: true, age: { gte: 12, lte: 30 }, affection: { gte: 55 }, where: [city, household] }
+weight: { base: 5 }
+once: true
+cast:
+  kid: { kind: grandchild, presence: nearby }
+choices:
+  - id: teach_properly
+    label: Teach {kid.them} properly, one afternoon a week
+    outcome:
+      text: >-
+        It takes a season. {kid.name} is clumsy, then careful, then, one day,
+        better than you were at the same age. You hand over your oldest tool
+        without making a speech.
+      effects:
+        - { type: later, action: teach, role: kid, key: discipline, delta: 4 }
+        - { type: later, action: teach, role: kid, key: smarts, delta: 2 }
+        - { type: memory, role: kid, tag: taught_them }
+        - { type: flag, key: coached_a_grandchild, value: true }
+        - { type: relationship, role: kid, affection: 8, trust: 7 }
+        - { type: stat, key: happiness, delta: 5 }
+  - id: show_a_little
+    label: Show {kid.them} a few things, and leave it at that
+    outcome:
+      text: >-
+        You show {kid.them} the basics and the shortcuts, and the one thing
+        nobody told you. It isn't a career, but it is a gift that sits in
+        {kid.their} hands.
+      effects:
+        - { type: later, action: teach, role: kid, key: smarts, delta: 1 }
+        - { type: memory, role: kid, tag: taught_them }
+        - { type: relationship, role: kid, affection: 4, trust: 3 }
+  - id: not_for_you
+    label: Tell {kid.them} to find something better than this
+    outcome:
+      text: >-
+        You mean it kindly. {kid.name} hears that you think the work was not
+        worth it, and says nothing, and looks at your hands for a long time.
+      effects:
+        - { type: relationship, role: kid, affection: -3, trust: -2 }

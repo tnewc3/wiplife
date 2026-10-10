@@ -12,7 +12,7 @@ import { templateSchema, variantsSchema } from './text';
 const probability = z.number().min(0).max(1);
 
 /** What the speaker is to you, for the words of the opening. */
-export const EULOGY_GROUPS = ['spouse', 'child', 'elder', 'sibling', 'friend', 'other'] as const;
+export const EULOGY_GROUPS = ['spouse', 'child', 'grandchild', 'elder', 'sibling', 'friend', 'other'] as const;
 export const eulogyGroupSchema = z.enum(EULOGY_GROUPS);
 export type EulogyGroup = z.infer<typeof eulogyGroupSchema>;
 

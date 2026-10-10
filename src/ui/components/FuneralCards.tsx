@@ -34,7 +34,8 @@ export function FuneralCards({ life, headingLevel = 2 }: { life: ArchivedLife; h
       </Card>
     );
   }
-  const { eulogy } = funeral;
+  const { eulogy, lastDays } = funeral;
+  const review = life.review;
   return (
     <>
       <Card role="region" aria-label={FUNERAL_LABELS.eulogy} data-testid="eulogy">
@@ -58,6 +59,56 @@ export function FuneralCards({ life, headingLevel = 2 }: { life: ArchivedLife; h
           </p>
         )}
       </Card>
+      {lastDays && (
+        <Card role="region" aria-label={FUNERAL_LABELS.lastDays} data-testid="funeral-last-days">
+          <Heading className="text-lg font-bold">{FUNERAL_LABELS.lastDays}</Heading>
+          <ul className="mt-2 flex flex-col gap-2" aria-label={FUNERAL_LABELS.lastDays}>
+            {lastDays.lines.map((line, i) => (
+              <li key={i} className="break-words [overflow-wrap:anywhere]">
+                {line}
+              </li>
+            ))}
+          </ul>
+          {lastDays.bedside.length > 0 && <GuestList label={FUNERAL_LABELS.bedside} guests={lastDays.bedside} testId="funeral-bedside" />}
+        </Card>
+      )}
+      {review && (
+        <Card role="region" aria-label={FUNERAL_LABELS.review} data-testid="life-review">
+          <Heading className="text-lg font-bold">{FUNERAL_LABELS.review}</Heading>
+          {review.regrets.length === 0 && review.proud.length === 0 ? (
+            <p className="mt-1 text-muted" data-testid="life-review-none">
+              {FUNERAL_LABELS.reviewNone}
+            </p>
+          ) : (
+            <>
+              {review.proud.length > 0 && (
+                <>
+                  <h4 className="mt-3 font-semibold">{FUNERAL_LABELS.proud}</h4>
+                  <ul className="mt-1 flex flex-col gap-2" aria-label={FUNERAL_LABELS.proud} data-testid="life-review-proud">
+                    {review.proud.map((line) => (
+                      <li key={line.id} className="break-words [overflow-wrap:anywhere]">
+                        {line.text}
+                      </li>
+                    ))}
+                  </ul>
+                </>
+              )}
+              {review.regrets.length > 0 && (
+                <>
+                  <h4 className="mt-3 font-semibold">{FUNERAL_LABELS.regrets}</h4>
+                  <ul className="mt-1 flex flex-col gap-2" aria-label={FUNERAL_LABELS.regrets} data-testid="life-review-regrets">
+                    {review.regrets.map((line) => (
+                      <li key={line.id} className="break-words [overflow-wrap:anywhere]">
+                        {line.text}
+                      </li>
+                    ))}
+                  </ul>
+                </>
+              )}
+            </>
+          )}
+        </Card>
+      )}
       <Card role="region" aria-label={FUNERAL_LABELS.absent} data-testid="funeral-absent">
         <Heading className="text-lg font-bold">{FUNERAL_LABELS.absent}</Heading>
         {funeral.notAttending.length === 0 ? (

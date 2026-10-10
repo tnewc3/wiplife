@@ -1,0 +1,110 @@
+# What the later-life step queues (L1, docs/expansion.md): for each moment, the
+# events that can answer it. The step casts the people in it (a relative as
+# `carer`, a grandchild as `kid` and their parent as `parent`, a person as
+# `npc`) and picks one that fits, by weight. Every event listed is followUpOnly.
+
+grandchildren:
+  # Your first grandchild is born (cast kid, parent).
+  first: [first_grandchild]
+  # A grandchild's parent can't raise them for now (cast kid, parent), or has died (cast kid).
+  parentCannot: [raise_parent_cannot]
+  parentGone: [raise_parent_gone]
+  # A parent doing better asks about the grandchild you are raising (cast kid, parent).
+  parentBack: [raise_parent_back]
+  # Playing favorites comes to light (cast kid, parent).
+  favorite: [grandchild_favorite_noticed]
+
+care:
+  # You need care near the end, and a relative steps up (cast carer).
+  offer: [care_family_offer]
+  # You need care and nobody can.
+  alone: [care_alone]
+  # An estranged relative comes back (cast carer).
+  returns: [care_estranged_returns]
+  # Whoever looked after you can't go on (cast carer, if they are alive).
+  providerGone: [care_provider_gone]
+  # Nothing is arranged yet.
+  reminder: [care_reminder]
+  # A year of family care (cast carer); the first weeks in assisted living.
+  year: [care_year_family]
+  assisted: [care_assisted_first_weeks]
+
+terminal:
+  # A warning: by the condition behind it; `decline` a long decline, `other` anything else.
+  diagnosis:
+    cancer: [terminal_cancer]
+    heart_disease: [terminal_heart]
+    dementia: [terminal_dementia]
+    decline: [terminal_decline]
+    other: [terminal_other]
+  # The will prompt.
+  will: [terminal_will_none, terminal_will_update]
+  # The people you asked to be with you come (cast visitor).
+  visit: [terminal_last_visit]
+
+# Amends: unresolved history that later years call back. A tie is someone in your life with something
+# unresolved between you (the kind of relationship, estranged or cold or holding a memory you would
+# rather not have); a goal is something you gave up. Each lists the events that can answer it.
+amends:
+  sources:
+    estranged_family:
+      label: A family member you are estranged from
+      kind: tie
+      weight: 4
+      kinds: [parent, stepparent, child, stepchild, sibling, relative, grandchild]
+      status: [estranged]
+      events: [amends_estranged_family]
+    cold_family:
+      label: A family member who has grown cold
+      kind: tie
+      weight: 2
+      kinds: [parent, stepparent, child, stepchild, sibling, relative, grandchild]
+      status: [active]
+      below: { affection: 35 }
+      events: [amends_cold_family]
+    broken_trust:
+      label: Someone whose trust you broke
+      kind: tie
+      weight: 3
+      kinds: [parent, stepparent, child, stepchild, sibling, relative, friend, partner, fiance, spouse, ex, coworker]
+      memories: [cheated_on_them, broke_your_confidence, spilled_their_secret, cruel_words, humiliated_them, you_sided_against_them]
+      events: [amends_broken_trust]
+    old_friend:
+      label: A friend you lost touch with
+      kind: tie
+      weight: 3
+      kinds: [friend]
+      below: { affection: 20 }
+      events: [amends_old_friend]
+    ex_spouse:
+      label: Someone you were married to
+      kind: tie
+      weight: 2
+      kinds: [ex]
+      status: [active, estranged]
+      wasSpouse: true
+      events: [amends_ex_spouse]
+    left_alone:
+      label: Someone you left to cope alone
+      kind: tie
+      weight: 3
+      kinds: [parent, stepparent, child, stepchild, sibling, relative, friend, partner, fiance, spouse, ex]
+      memories: [left_their_care_to_family, left_them_in_jail, turned_them_away, walked_out_on_them, missed_wedding]
+      events: [amends_left_alone]
+    unfinished_degree:
+      label: A degree you left unfinished
+      kind: goal
+      weight: 2
+      when: { education: { left: true } }
+      events: [amends_unfinished_degree]
+    abandoned_dream:
+      label: A dream you walked away from
+      kind: goal
+      weight: 2
+      when:
+        any:
+          - { flag: fame_burned_out }
+          - { flag: sports_career_ended_by_injury }
+          - { flag: fame_broke_contract }
+          - { fame: { retired: true } }
+      events: [amends_abandoned_dream]

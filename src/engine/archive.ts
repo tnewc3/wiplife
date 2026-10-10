@@ -5,6 +5,7 @@
  */
 import type { ContentBundle } from '../content/schemas';
 import { writeFuneral } from './eulogy';
+import { writeReview } from './later/review';
 import { netWorth } from './finance';
 import { writeObituary } from './obituary';
 import type { ArchivedLife, HistoryEntry, LifeState } from './types';
@@ -49,6 +50,7 @@ export function archiveEntry(life: LifeState, content: ContentBundle, heirName?:
     birthCityId: c.birthCityId,
     obituary: writeObituary(life, content),
     funeral: writeFuneral(life, content),
+    review: writeReview(life, content),
     highlights: selectHighlights(life.history, content),
     finalNetWorth: netWorth(life),
     finalStats: { ...c.stats },

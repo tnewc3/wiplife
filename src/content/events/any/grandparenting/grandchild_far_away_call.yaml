@@ -1,0 +1,51 @@
+id: grandchild_far_away_call
+title: A small face on a small screen
+text: >-
+  {kid.name} lives far away, and the video call is a thing you have to be taught
+  how to do every time. Today the screen shows mostly the ceiling and one
+  ear, and then a whole face, grinning, shouting hello at the wrong volume.
+tone: light
+category: grandparenting
+rarity: common
+lifeStages: [adult, senior]
+requires:
+  all:
+    - { later: { grandchildren: { gte: 1 } } }
+    - { age: { gte: 50 } }
+    - { role: kid, kind: [grandchild], alive: true, age: { gte: 3, lte: 25 }, where: [elsewhere] }
+weight: { base: 6 }
+cooldownYears: 3
+cast:
+  kid: { kind: grandchild, presence: elsewhere }
+choices:
+  - id: stay_on
+    label: Stay on the call for as long as {kid.they} want
+    outcome:
+      text: >-
+        You see the new dog, the loose tooth and the drawing of you, in which
+        you have four hands. It is a good hour. When it ends, the house feels
+        quieter than before.
+      effects:
+        - { type: relationship, role: kid, affection: 5, trust: 3 }
+        - { type: stat, key: happiness, delta: 3 }
+  - id: plan_visit
+    label: Promise to visit this summer, and mean it
+    outcome:
+      text: >-
+        You say it out loud, so there is no taking it back. A visit is a
+        trip, and a trip is a ticket, and you buy one before you can think
+        about it.
+      effects:
+        - { type: cost, item: reunion_trip }
+        - { type: relationship, role: kid, affection: 8, trust: 6 }
+        - { type: stat, key: happiness, delta: 4 }
+  - id: letters
+    label: Start writing {kid.them} real letters
+    outcome:
+      text: >-
+        Paper, a stamp and your slow handwriting. The first reply takes three
+        weeks and has a pressed leaf in it. By the sixth you have a
+        correspondence, which is a strange and lovely word.
+      effects:
+        - { type: relationship, role: kid, affection: 6, trust: 5 }
+        - { type: memory, role: kid, tag: told_them_stories }

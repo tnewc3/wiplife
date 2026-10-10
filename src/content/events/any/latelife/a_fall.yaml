@@ -1,0 +1,39 @@
+id: a_fall
+title: Down, and then a long moment
+text: >-
+  It was a step you've taken ten thousand times. You were on it, and then
+  you were not, and then you were on the floor listening to your own heart.
+  Lying there, you think very clearly about the phone being in the other room.
+tone: dark
+category: latelife
+rarity: uncommon
+lifeStages: [senior]
+requires:
+  all:
+    - { age: { gte: 55 } }
+    - { age: { gte: 72 } }
+    - { stat: health, lt: 70 }
+weight: { base: 4 }
+cooldownYears: 6
+choices:
+  - id: accept_help
+    label: Call for help, and accept what follows
+    outcome:
+      text: >-
+        You make the call, and it is humbling, and it is the right one. A
+        cousin comes by, then a nurse, then a plan. The bruise fades before the
+        feeling that you should have asked sooner.
+      effects:
+        - { type: health, conditionId: broken_bone, severity: 12 }
+        - { type: stat, key: stress, delta: 3 }
+        - { type: stat, key: health, delta: -3 }
+  - id: insist_fine
+    label: Get up, brush yourself off, and tell no one
+    outcome:
+      text: >-
+        You get up slowly and say nothing to anyone. For the next month you
+        keep a hand on the wall, and nobody finds out, which is the problem.
+      effects:
+        - { type: flag, key: refused_help_at_home, value: true }
+        - { type: stat, key: health, delta: -4 }
+        - { type: stat, key: stress, delta: 3 }

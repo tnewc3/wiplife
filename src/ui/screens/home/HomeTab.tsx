@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { content } from '../../../content';
-import { getCharacterSummary, getFamilyView, getFamily, getHistoryFeed, getNews, getPreviously, getYearRecap } from '../../../engine/selectors';
+import { getCharacterSummary, getFamilyView, getFamily, getHistoryFeed, getLaterView, getNews, getPreviously, getYearRecap } from '../../../engine/selectors';
 import type { LifeState, Stats } from '../../../engine/types';
 import { useAppStore } from '../../../store/appStore';
 import { Button } from '../../components/Button';
@@ -117,6 +117,45 @@ function PreviouslyCard({ life }: { life: LifeState }) {
   );
 }
 
+/** L1: care to arrange, or a death coming: the card that says what to do about it. */
+function LaterCard({ life }: { life: LifeState }) {
+  const view = getLaterView(life, content);
+  const openLater = useAppStore((s) => s.openLater);
+  const openWill = useAppStore((s) => s.openWill);
+  const setTab = useAppStore((s) => s.setTab);
+  const t = view.terminal;
+  const careOpen = view.care !== null && view.care.option === null;
+  if (!t && !careOpen) return null;
+  const go = (open: () => void) => () => {
+    setTab('more');
+    open();
+  };
+  return (
+    <Card role="region" aria-labelledby="later-card-title" data-testid="later-card">
+      <h3 id="later-card-title" className="text-lg font-bold">
+        {t ? 'Put your affairs in order' : 'You need looking after'}
+      </h3>
+      <p className="mt-1 text-muted">
+        {t
+          ? t.wishesSet
+            ? 'Your final wishes are set. You can change them while there is time.'
+            : 'Choose where you spend your last months, who is with you and what comes after.'
+          : 'Someone has to help. Choose how: family, a paid carer, or assisted living.'}
+      </p>
+      <div className="mt-2 flex flex-col gap-2">
+        <Button variant="secondary" block onClick={go(openLater)} data-testid="later-card-open">
+          {t ? 'Final wishes' : 'Arrange care'}
+        </Button>
+        {t && (view.willOutOfDate || !view.hasWill) && (
+          <Button variant="secondary" block onClick={go(openWill)} data-testid="later-card-will">
+            {view.hasWill ? 'Update your will' : 'Write your will'}
+          </Button>
+        )}
+      </div>
+    </Card>
+  );
+}
+
 /** The Life tab: who you are, how you're doing, your family and your story. */
 export function HomeTab({ life }: { life: LifeState }) {
   const summary = getCharacterSummary(life, content);
@@ -181,6 +220,7 @@ export function HomeTab({ life }: { life: LifeState }) {
         </Card>
       )}
 
+      <LaterCard life={life} />
       <YearRecapCard life={life} />
       <NewsCard life={life} />
 

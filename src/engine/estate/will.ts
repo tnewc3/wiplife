@@ -27,7 +27,7 @@ export function fullName(person: { name: { first: string; last: string } }): str
  * know (alive, still in your life), then the causes.
  */
 export function willCandidates(state: LifeState, content: ContentBundle): WillCandidate[] {
-  const order: RelationshipKind[] = ['spouse', 'fiance', 'partner', 'child', 'stepchild', 'parent', 'stepparent', 'sibling', 'grandparent', 'relative'];
+  const order: RelationshipKind[] = ['spouse', 'fiance', 'partner', 'child', 'stepchild', 'grandchild', 'parent', 'stepparent', 'sibling', 'grandparent', 'relative'];
   const rank = (kind: RelationshipKind) => {
     const i = order.indexOf(kind);
     return i < 0 ? order.length : i;

@@ -8,7 +8,8 @@ import { performAction } from '../engine/actions';
 import { performInteraction } from '../engine/interactions/perform';
 import { playYear } from '../engine/autoplay';
 import { beginYear, createLife } from '../engine/life';
-import { nextUint32 } from '../engine/rng';
+import { createRng, nextUint32 } from '../engine/rng';
+import { createGrandchild } from '../engine/later/grandchildren';
 import { emptyWeb } from '../engine/web/ties';
 import { die, parentLife } from '../engine/estate/fixtures';
 import { continueAsHeir, heirCandidates } from '../engine/estate/heir';
@@ -1174,5 +1175,52 @@ describe('sports (E6c)', () => {
       d.sports.pro = true;
     });
     expect(loadedLifeSchema(content).safeParse(young).success).toBe(false);
+  });
+});
+
+describe('later life (L1)', () => {
+  /** An old life with a grandchild, care arranged, a death foreseen and an amends on record. */
+  function oldLife(): LifeState {
+    const base = lifeAtAge('l1-save', 82);
+    return produce(base, (d) => {
+      const kid = Object.values(d.relationships).find((r) => r.kind === 'child')?.personId;
+      if (kid !== undefined) createGrandchild(d, createRng('l1-save-grandchild'), kid, { first: 'Nova', birthYear: d.currentYear - 6 }, content);
+      d.later.care = { since: d.currentYear - 1, option: 'paid', optionSince: d.currentYear, declined: [] };
+      d.later.terminal = {
+        since: d.currentYear,
+        causeId: Object.keys(content.causes).sort()[0]!,
+        hospice: 'home',
+        service: 'simple',
+        letters: [],
+        visitors: [],
+        visits: [],
+        wishesYear: d.currentYear,
+      };
+      d.later.amends.push({ year: d.currentYear - 2, source: 'unfinished_degree', result: 'made' });
+      d.later.offered.care = d.currentYear;
+    });
+  }
+
+  it('round trips a life with care, a foreseen death, amends and a grandchild', async () => {
+    const life = oldLife();
+    expect(lifeStateSchema.safeParse(life).success).toBe(true);
+    expect(await roundTrip(life)).toEqual(life);
+  });
+
+  it('upgrades a version 20 save with an empty later-life record', () => {
+    const old = JSON.parse(JSON.stringify(lifeAtAge('l1-v20', 70))) as Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any -- building an old save
+    delete old.later;
+    const migrated = migrateEnvelope({ ...makeEnvelope(old, content.contentVersion), schemaVersion: 20 });
+    expect((migrated.data as LifeState).later).toEqual({ care: null, terminal: null, amends: [], offered: {} });
+    expect(lifeStateSchema.safeParse(migrated.data).success).toBe(true);
+  });
+
+  it('refuses a save with something wrong in the later-life record', () => {
+    const bad = JSON.parse(JSON.stringify(oldLife())) as Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any -- breaking a plain JSON save on purpose
+    bad.later.terminal.hospice = 'cruise';
+    expect(lifeStateSchema.safeParse(bad).success).toBe(false);
+    const worse = JSON.parse(JSON.stringify(oldLife())) as Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any -- breaking a plain JSON save on purpose
+    worse.later.care.option = 'cruise';
+    expect(lifeStateSchema.safeParse(worse).success).toBe(false);
   });
 });

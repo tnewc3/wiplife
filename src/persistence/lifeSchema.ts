@@ -92,7 +92,7 @@ const character = z.strictObject({
 });
 
 const childData = z.strictObject({
-  origin: z.enum(['birth', 'adopted', 'ivf', 'surrogacy', 'step']),
+  origin: z.enum(['birth', 'adopted', 'ivf', 'surrogacy', 'step', 'grandchild']),
   otherParentId: id.exactOptional(),
   custody: z.enum(['you', 'shared', 'other']),
   custodyDecided: z.boolean(),
@@ -140,7 +140,7 @@ const personLife = z.strictObject({
   retired: z.literal(true).exactOptional(),
   partner: outsidePartner.nullable(),
   ended: z.strictObject({ year: int, how: z.enum(['broke_up', 'divorced', 'widowed']), partner: filled }).exactOptional(),
-  children: z.array(z.strictObject({ first: filled, birthYear: int })),
+  children: z.array(z.strictObject({ first: filled, birthYear: int, id: id.exactOptional() })),
   troubles: z.array(trouble),
   recovered: z.array(z.strictObject({ refId: id, year: int })),
   care: z.enum(['needed', 'home', 'paid', 'sibling']).exactOptional(),
@@ -210,6 +210,7 @@ const person = z.strictObject({
   child: childData.exactOptional(),
   life: personLife.exactOptional(),
   neuro: z.array(id).min(1).exactOptional(),
+  grandchild: z.strictObject({ parentId: id }).exactOptional(),
 });
 
 const relationship = z.strictObject({
@@ -222,6 +223,7 @@ const relationship = z.strictObject({
     'relative',
     'child',
     'stepchild',
+    'grandchild',
     'friend',
     'partner',
     'fiance',
@@ -386,6 +388,7 @@ const housing = z.strictObject({
   guardianId: id.exactOptional(),
   foster: z.literal(true).exactOptional(),
   renovations: z.array(z.strictObject({ id, year: int })).exactOptional(),
+  assisted: z.strictObject({ since: int }).exactOptional(),
 });
 
 // M1: mental health.
@@ -474,7 +477,7 @@ const will = z.strictObject({
 });
 
 const relationKind = z.enum([
-  'parent', 'stepparent', 'sibling', 'grandparent', 'relative', 'child', 'stepchild', 'friend', 'partner', 'fiance', 'spouse', 'ex', 'coworker', 'boss', 'classmate', 'acquaintance',
+  'parent', 'stepparent', 'sibling', 'grandparent', 'relative', 'child', 'stepchild', 'grandchild', 'friend', 'partner', 'fiance', 'spouse', 'ex', 'coworker', 'boss', 'classmate', 'acquaintance',
 ]);
 
 // E5: what you own.
@@ -799,6 +802,37 @@ const pendingInteraction = z.strictObject({
     .exactOptional(),
 });
 
+// L1: later life.
+const careOption = z.enum(['family', 'paid', 'assisted']);
+const later = z.strictObject({
+  care: z
+    .strictObject({
+      since: int,
+      option: careOption.nullable(),
+      optionSince: int.exactOptional(),
+      providerId: id.exactOptional(),
+      declined: z.array(id),
+    })
+    .nullable(),
+  terminal: z
+    .strictObject({
+      since: int,
+      causeId: id,
+      conditionId: id.exactOptional(),
+      hospice: z.enum(['hospice', 'home', 'hospital']).nullable(),
+      service: z.enum(['traditional', 'simple', 'celebration', 'private']).nullable(),
+      speakerId: id.exactOptional(),
+      letters: z.array(id),
+      visitors: z.array(id),
+      visits: z.array(z.strictObject({ id, came: z.boolean() })),
+      wishesYear: int.exactOptional(),
+      willPrompted: z.literal(true).exactOptional(),
+    })
+    .nullable(),
+  amends: z.array(z.strictObject({ year: int, source: id, personId: id.exactOptional(), result: z.enum(['made', 'declined', 'refused']) })),
+  offered: z.record(z.string(), int),
+});
+
 export const historyEntrySchema = z.strictObject({
   year: int,
   age: int,
@@ -868,6 +902,7 @@ export const lifeStateSchema: z.ZodType<LifeState> = z.strictObject({
   crime,
   fame,
   sports,
+  later,
 });
 
 /**

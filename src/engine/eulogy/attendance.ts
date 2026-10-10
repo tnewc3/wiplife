@@ -33,6 +33,11 @@ export function expectedGuests(life: LifeState, content: ContentBundle): Id[] {
       (rel.kind === 'ex' ? rel.wasSpouse === true : closeness >= (rel.kind === 'friend' ? b.attendance.friendMinCombined : b.attendance.otherMinCombined));
     if (expected) out.push(person.id);
   }
+  // L1: the people you asked to be with you at the end are expected, whatever else they are to you.
+  for (const id of life.later.terminal?.visitors ?? []) {
+    const person = life.people[id];
+    if (person?.alive && life.relationships[id]?.status !== 'ended' && ageOf(life, person) >= b.speaker.minAge && !out.includes(id)) out.push(id);
+  }
   return out.sort();
 }
 
@@ -146,6 +151,24 @@ function reasonFor(life: LifeState, personId: Id, cause: AbsenceCause, speakerId
   }
 }
 
+/** L1: how much more or less likely this guest is to stay away because of your final wishes. */
+function guestFactor(life: LifeState, id: Id, content: ContentBundle): number {
+  const t = life.later.terminal;
+  if (t === null) return 1;
+  const b = content.balance.later.terminal;
+  let factor = t.service !== null ? b.service[t.service].stayAway : 1;
+  if (t.visits.some((v) => v.id === id && v.came)) factor *= b.attend.visited;
+  if (t.letters.includes(id)) factor *= b.attend.letter;
+  return factor;
+}
+
+/** L1: the reason given for someone you asked to be with you who did not come. */
+function declinedReason(life: LifeState, id: Id, content: ContentBundle, rng: RngState): string {
+  return renderText(pick(rng, content.text.later.lastDays.declinedReason), {
+    roles: { self: { name: life.character.name, pronouns: life.character.identity.pronouns }, npc: role(life, id, content) },
+  });
+}
+
 function couldNotReason(life: LifeState, personId: Id, why: CouldNotReason, content: ContentBundle, rng: RngState): string {
   return renderText(pick(rng, content.text.eulogy.couldNot[why]), {
     roles: { self: { name: life.character.name, pronouns: life.character.identity.pronouns }, npc: role(life, personId, content) },
@@ -182,8 +205,15 @@ export function getAttendance(life: LifeState, content: ContentBundle, speakerId
       unable.push({ id, closeness, reason: couldNotReason(life, id, cannot, content, rng) });
       continue;
     }
+    // L1: someone you asked to be with you who did not come is listed as staying away (nothing is rolled).
+    const visit = life.later.terminal?.visits.find((v) => v.id === id);
+    if (visit && !visit.came) {
+      staying.push({ id, closeness, reason: declinedReason(life, id, content, rng) });
+      continue;
+    }
     const hits = absenceCauses(life, id, speakerId, content);
-    const p = 1 - hits.reduce((left, h) => left * (1 - h.p), 1);
+    // L1: a visitor who came, or got your letter, rarely stays away now; the service you asked for changes how many come.
+    const p = Math.min(0.97, (1 - hits.reduce((left, h) => left * (1 - h.p), 1)) * guestFactor(life, id, content));
     if (!chance(rng, p) || hits.length === 0) continue;
     // The strongest cause gives the reason; ties go in the order the causes are listed.
     const strongest = [...hits].sort((x, y) => y.p - x.p || ABSENCE_CAUSES.indexOf(x.cause) - ABSENCE_CAUSES.indexOf(y.cause))[0]!;

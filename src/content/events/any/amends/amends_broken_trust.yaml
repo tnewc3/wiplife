@@ -1,0 +1,75 @@
+# Engine (registries/later.yaml, amends.broken_trust): someone whose trust you broke.
+id: amends_broken_trust
+title: Something to put right
+text: >-
+  There's a thing you did to {npc.name}. You know which one. It has been years,
+  and it has been small in your mind, the way things get when you're the one who
+  did them. It has not been small in {npc.their}.
+tone: serious
+category: amends
+rarity: uncommon
+lifeStages: [adult, senior]
+requires:
+  all:
+    - { age: { gte: 40 } }
+    - { age: { gte: 45 } }
+    - { role: npc, alive: true, age: { gte: 18 }, kind: [parent, stepparent, child, stepchild, sibling, relative, friend, partner, fiance, spouse, ex, coworker] }
+    - any:
+        - { memory: { role: npc, tag: cheated_on_them } }
+        - { memory: { role: npc, tag: broke_your_confidence } }
+        - { memory: { role: npc, tag: spilled_their_secret } }
+        - { memory: { role: npc, tag: cruel_words } }
+        - { memory: { role: npc, tag: humiliated_them } }
+        - { memory: { role: npc, tag: you_sided_against_them } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  npc: { kind: friend, presence: anywhere }
+choices:
+  - id: own_it
+    label: Tell {npc.them} exactly what you did, and that it was wrong
+    check:
+      base: 50
+      stats:
+        - { role: npc, key: trust, weight: 0.3 }
+        - { key: kindness, weight: 0.3 }
+      success:
+        text: >-
+          You say it without excuses. {npc.name} listens to all of it, nods
+          slowly, and says that it took you a long time. Then, after a while,
+          "But you said it." It does not fix it. It is something to build on.
+        effects:
+          - { type: relationship, role: npc, affection: 10, trust: 12 }
+          - { type: later, action: amends, source: broken_trust, result: made, role: npc }
+          - { type: stat, key: happiness, delta: 5 }
+          - { type: stat, key: stress, delta: -4 }
+      failure:
+        text: >-
+          {npc.name} lets you finish, and then says that some things can't be
+          unsaid by saying other things. The conversation ends quietly. You
+          are lighter and no better.
+        effects:
+          - { type: later, action: amends, source: broken_trust, result: refused, role: npc }
+          - { type: relationship, role: npc, trust: -2 }
+          - { type: stat, key: stress, delta: 3 }
+  - id: write_it
+    label: Write it down, and let {npc.them} decide what to do with it
+    outcome:
+      text: >-
+        It takes six drafts. The final one is two paragraphs, with no
+        requests in it. {npc.name} writes back, eventually, three lines long.
+        It doesn't absolve you. It does close the door gently instead of
+        slamming it.
+      effects:
+        - { type: relationship, role: npc, affection: 5, trust: 6 }
+        - { type: later, action: amends, source: broken_trust, result: made, role: npc }
+        - { type: stat, key: stress, delta: -2 }
+  - id: let_it_lie
+    label: Decide it's better to let it lie
+    outcome:
+      text: >-
+        You tell yourself that raising it would only reopen it. It's the
+        argument you've used for years, and you notice how comfortable it is.
+      effects:
+        - { type: later, action: amends, source: broken_trust, result: declined, role: npc }
+        - { type: stat, key: stress, delta: 2 }

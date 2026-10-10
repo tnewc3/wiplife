@@ -1,0 +1,68 @@
+# Engine (registries/later.yaml, amends.cold_family): a family member who has grown cold.
+id: amends_cold_family
+title: Closer than this
+text: >-
+  The phone calls with {npc.name}, your {npc.relation}, have turned into
+  status reports. Nobody's angry, exactly. It's the polite distance of
+  people who care and have never found the way to show it, and you can see
+  the shape of what you'd regret.
+tone: neutral
+category: amends
+rarity: common
+lifeStages: [adult, senior]
+requires:
+  all:
+    - { age: { gte: 40 } }
+    - { age: { gte: 45 } }
+    - { role: npc, alive: true, age: { gte: 18 }, status: [active], affection: { lt: 35 }, kind: [parent, stepparent, child, stepchild, sibling, relative, grandchild] }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  npc: { kind: sibling, presence: anywhere }
+choices:
+  - id: say_it
+    label: Say plainly that you want to be closer
+    check:
+      base: 55
+      stats:
+        - { role: npc, key: trust, weight: 0.3 }
+        - { key: confidence, weight: 0.2 }
+      success:
+        text: >-
+          There's a pause that goes on a little too long. Then {npc.name} laughs,
+          unsteadily, and says that {npc.they} {npc:has|have} been wanting to say
+          the same thing for years. You make a plan to see each other. It's a
+          small plan. It's a start.
+        effects:
+          - { type: relationship, role: npc, affection: 14, trust: 9 }
+          - { type: later, action: amends, source: cold_family, result: made, role: npc }
+          - { type: stat, key: happiness, delta: 4 }
+      failure:
+        text: >-
+          {npc.name} is polite, and surprised, and says things like "of course"
+          and "we should". The call ends warm and nothing changes. You wonder if
+          it was too late, or just too soon.
+        effects:
+          - { type: relationship, role: npc, affection: 2 }
+          - { type: later, action: amends, source: cold_family, result: refused, role: npc }
+          - { type: stat, key: stress, delta: 2 }
+  - id: visit
+    label: Show up with no agenda but an afternoon
+    visibleIf: { role: npc, where: [city, elsewhere] }
+    outcome:
+      text: >-
+        You arrive without a speech. You fix a hinge, drink the tea, and
+        listen to a story you have heard before. When you leave, {npc.name}
+        stands in the doorway longer than the weather requires.
+      effects:
+        - { type: relationship, role: npc, affection: 9, trust: 5 }
+        - { type: later, action: amends, source: cold_family, result: made, role: npc }
+        - { type: stat, key: happiness, delta: 3 }
+  - id: let_it_be
+    label: Let it be as it is
+    outcome:
+      text: >-
+        Some distances are just the shape of a family. You tell yourself that,
+        and almost believe it.
+      effects:
+        - { type: later, action: amends, source: cold_family, result: declined, role: npc }

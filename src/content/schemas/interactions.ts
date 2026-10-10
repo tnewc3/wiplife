@@ -15,7 +15,7 @@ import { relationshipKindSchema, relationshipStatusSchema } from './relationship
 import { templateSchema } from './text';
 
 /** Groups on the Interact sheet. */
-export const INTERACTION_GROUPS = ['everyday', 'conflict', 'romance', 'practical', 'parenting'] as const;
+export const INTERACTION_GROUPS = ['everyday', 'conflict', 'romance', 'practical', 'parenting', 'grandparenting'] as const;
 export type InteractionGroup = (typeof INTERACTION_GROUPS)[number];
 
 /** Outcome tiers, best first. */
@@ -63,6 +63,7 @@ export const INTERACTION_EFFECT_TYPES = [
   'childTrait',
   'knowledge',
   'introduce',
+  'later',
 ] as const;
 
 const interactionEffectSchema = effectSchema.refine(

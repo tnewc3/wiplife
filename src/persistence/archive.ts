@@ -13,7 +13,7 @@ import { migrateEnvelope, type Migration } from './migrations';
 import { writeSaveIn } from './saves';
 
 /** Version of the archive entry layout. Bump it with a migration below when ArchivedLife changes. */
-export const ARCHIVE_SCHEMA_VERSION = 4;
+export const ARCHIVE_SCHEMA_VERSION = 5;
 
 /** Every archive migration ever shipped, oldest first. Never edit or remove one. */
 export const archiveMigrations: readonly Migration[] = [
@@ -42,10 +42,26 @@ export const archiveMigrations: readonly Migration[] = [
       'or stayed away are no longer known, so none is invented.',
     migrate: (data) => (typeof data === 'object' && data !== null && !Array.isArray(data) ? { ...data, funeral: null } : data),
   },
+  {
+    from: 4,
+    description:
+      'L1: the life review. A life archived before L1 has no review on record (null): its regrets and proud moments ' +
+      'would be built from a life that is no longer there, so none is invented. Its funeral has no account of the last days.',
+    migrate: (data) => (typeof data === 'object' && data !== null && !Array.isArray(data) ? { ...data, review: null } : data),
+  },
 ];
 
 const text = z.string().min(1);
 const guestSchema = z.strictObject({ name: text, relation: text, reason: text });
+const reviewLineSchema = z.strictObject({ id: text, text });
+export const reviewSchema = z.strictObject({ regrets: z.array(reviewLineSchema), proud: z.array(reviewLineSchema) });
+const lastDaysSchema = z.strictObject({
+  foreseen: z.boolean(),
+  hospice: z.enum(['hospice', 'home', 'hospital']).nullable(),
+  service: z.enum(['traditional', 'simple', 'celebration', 'private']).nullable(),
+  lines: z.array(text),
+  bedside: z.array(guestSchema),
+});
 export const funeralSchema = z.strictObject({
   eulogy: z
     .strictObject({
@@ -60,6 +76,7 @@ export const funeralSchema = z.strictObject({
   notAttending: z.array(guestSchema),
   moreNotAttending: z.int().min(0),
   couldNotAttend: z.array(guestSchema),
+  lastDays: lastDaysSchema.nullable().exactOptional(),
 });
 
 export const archivedLifeSchema: z.ZodType<ArchivedLife> = z.strictObject({
@@ -75,6 +92,7 @@ export const archivedLifeSchema: z.ZodType<ArchivedLife> = z.strictObject({
   birthCityId: z.string().min(1),
   obituary: z.string().min(1),
   funeral: funeralSchema.nullable(),
+  review: reviewSchema.nullable(),
   highlights: z.array(historyEntrySchema),
   finalNetWorth: z.int().refine(Number.isSafeInteger, 'must be a safe integer'),
   finalStats: statsSchema,

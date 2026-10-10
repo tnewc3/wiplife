@@ -15,6 +15,7 @@ export const RELATIONSHIP_KINDS = [
   'relative',
   'child',
   'stepchild',
+  'grandchild',
   'friend',
   'partner',
   'fiance',

@@ -1,0 +1,52 @@
+# Engine (registries/later.yaml): a year of being looked after by a relative.
+id: care_year_family
+title: Being looked after
+text: >-
+  {carer.name} brings the tea at four, as {carer.they} {carer:has|have} done for
+  months. You've both settled into a pattern of small kindnesses and smaller
+  irritations. Today you notice how tired {carer.they} {carer:looks|look}, and
+  how seldom either of you says it.
+tone: neutral
+category: latecare
+rarity: common
+lifeStages: [senior, adult]
+requires:
+  all:
+    - { later: { care: true } }
+    - { later: { care: true, careOption: [family] } }
+    - { role: carer, alive: true, status: [active] }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  carer: { kind: child, presence: household }
+choices:
+  - id: say_it
+    label: Tell {carer.them} what it means to you
+    outcome:
+      text: >-
+        {carer.name} waves it off, then sits down, then does not wave it off.
+        Years of unsaid things come out in a few plain sentences, and the tea
+        goes cold.
+      effects:
+        - { type: relationship, role: carer, affection: 7, trust: 7 }
+        - { type: stat, key: happiness, delta: 3 }
+  - id: give_a_break
+    label: Insist {carer.they} take a weekend away
+    outcome:
+      text: >-
+        A neighbor sits in, a cousin visits, and the house survives. {carer.name}
+        comes back with color in {carer.their} face, and an apology, and is
+        told there is nothing to apologize for.
+      effects:
+        - { type: relationship, role: carer, affection: 5, trust: 4 }
+        - { type: stat, key: stress, delta: 1 }
+  - id: snap
+    label: Snap at {carer.them} over something small
+    outcome:
+      text: >-
+        It's about the soup. It is not about the soup. {carer.name} goes
+        very still, finishes what {carer.they} {carer:was|were} doing, and leaves
+        the room. You listen to the door close for a long time.
+      effects:
+        - { type: relationship, role: carer, affection: -6, trust: -4 }
+        - { type: stat, key: stress, delta: 3 }

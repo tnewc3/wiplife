@@ -1,0 +1,53 @@
+# Engine (registries/later.yaml): playing favorites comes to light.
+id: grandchild_favorite_noticed
+title: Who gets the good chair
+text: >-
+  It is {kid.name}, not the one you were looking at, who says it at the end of
+  the visit, in the flat voice children use for the truth: you like the others
+  better. {kid.their} parent {parent.name} does not argue.
+tone: serious
+category: grandparenting
+rarity: uncommon
+lifeStages: [adult, senior]
+requires:
+  all:
+    - { later: { grandchildren: { gte: 1 } } }
+    - { later: { grandchildren: { gte: 2 } } }
+    - { role: kid, kind: [grandchild], alive: true }
+    - { role: parent, kind: [child, stepchild], alive: true }
+weight: { base: 8 }
+followUpOnly: true
+cast:
+  kid: { kind: grandchild, presence: anywhere }
+  parent: { kind: child, presence: anywhere }
+choices:
+  - id: even_it_out
+    label: Own it, apologize to {kid.them}, and make it right
+    outcome:
+      text: >-
+        You do not make excuses. You tell {kid.name} that it was true, that it
+        was wrong, and that you would like to do better, and then you do, one
+        afternoon at a time. {parent.name} sees it too.
+      effects:
+        - { type: relationship, role: kid, affection: 9, trust: 8 }
+        - { type: relationship, role: parent, affection: 3, trust: 6 }
+        - { type: stat, key: kindness, delta: 1 }
+  - id: deny_it
+    label: Tell {kid.them} that of course you love them all the same
+    outcome:
+      text: >-
+        You say all the right words, and {kid.name} does not believe a single
+        one. {parent.name} watches you say it and says nothing at all.
+      effects:
+        - { type: relationship, role: kid, affection: -4, trust: -6 }
+        - { type: relationship, role: parent, trust: -3 }
+  - id: get_defensive
+    label: Say that children don't understand how these things work
+    outcome:
+      text: >-
+        It comes out harder than you meant. {kid.name} stops talking. On the
+        way out, {parent.name} turns to say that you might want to think about
+        what you said.
+      effects:
+        - { type: relationship, role: kid, affection: -7, trust: -9 }
+        - { type: relationship, role: parent, affection: -5, trust: -5 }

@@ -1,0 +1,54 @@
+# Engine (registries/later.yaml, amends.ex_spouse): someone you were married to.
+id: amends_ex_spouse
+title: A name at the dinner table
+text: >-
+  {npc.name}'s name came up at a dinner party, and for a moment the table
+  went quiet in the way tables do. You were married once. It ended, and the
+  ending was not good for either of you. The bitter taste has gone by now;
+  what's left is the odd regret of two people who didn't make it.
+tone: neutral
+category: amends
+rarity: uncommon
+lifeStages: [adult, senior]
+requires:
+  all:
+    - { age: { gte: 40 } }
+    - { age: { gte: 50 } }
+    - { role: npc, alive: true, age: { gte: 18 }, kind: [ex] }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  npc: { kind: ex, presence: anywhere }
+choices:
+  - id: write_kindly
+    label: Write to say sorry, and wish {npc.them} well
+    check:
+      base: 50
+      stats:
+        - { role: npc, key: trust, weight: 0.3 }
+        - { key: kindness, weight: 0.2 }
+      success:
+        text: >-
+          {npc.name} replies within the week, politely and with feeling. You
+          trade a few letters over the following months. Nothing is rekindled,
+          and everything is settled, and each of you sleeps a little better.
+        effects:
+          - { type: relationship, role: npc, affection: 12, trust: 12 }
+          - { type: later, action: amends, source: ex_spouse, result: made, role: npc }
+          - { type: stat, key: happiness, delta: 4 }
+          - { type: stat, key: stress, delta: -3 }
+      failure:
+        text: >-
+          No reply comes. You imagine the envelope in a drawer, or a bin, or
+          read and kept. It's the not knowing that stays.
+        effects:
+          - { type: later, action: amends, source: ex_spouse, result: refused, role: npc }
+          - { type: stat, key: happiness, delta: -1 }
+  - id: leave_it
+    label: Leave it where it is
+    outcome:
+      text: >-
+        Some doors are best left shut. You raise your glass and turn the
+        conversation to something else.
+      effects:
+        - { type: later, action: amends, source: ex_spouse, result: declined, role: npc }

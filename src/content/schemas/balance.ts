@@ -673,6 +673,33 @@ export const targetsBalanceSchema = z.strictObject({
     /** The share of lives where somebody could not come. */
     couldNotShare: shareRangeSchema,
   }),
+  /**
+   * L1, later life (tools/simulate/later.ts), on the careful player's lives
+   * that end: grandparenting, care near the end, foreseen deaths and the
+   * final wishes, amends and the life review.
+   */
+  later: z.strictObject({
+    /** The share of lives that reached 65 with a grandchild. */
+    grandparentShare: shareRangeSchema,
+    /** The share of lives that reached 70 that needed care. */
+    careShare: shareRangeSchema,
+    /** The share of deaths at 50 or later that were foreseen. */
+    foreseenShare: shareRangeSchema,
+    /** The share of foreseen deaths where the player set final wishes. */
+    wishesShare: shareRangeSchema,
+    /** The share of lives that reached 50 offered a chance to make amends. */
+    amendsShare: shareRangeSchema,
+    /** The share of chances to make amends that ended well. */
+    amendsMadeShare: shareRangeSchema,
+    /** The share of lives with at least one regret or proud moment. */
+    reviewShare: shareRangeSchema,
+    /** The share of review templates used at least once. */
+    reviewVariety: shareRangeSchema,
+    /** The share of care arranged that was family care. */
+    familyCareShare: shareRangeSchema,
+    /** Years between the warning and a foreseen death, on average. */
+    yearsKnown: numberRangeSchema,
+  }),
   coverage: z.strictObject({
     /** At least this many events (not retired). */
     minEvents: z.int().min(1),

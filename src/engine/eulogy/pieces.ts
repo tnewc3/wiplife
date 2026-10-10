@@ -22,6 +22,8 @@ export function eulogyPieces(content: ContentBundle): EulogyPiece[] {
   for (const [kind, template] of Object.entries(t.unknown)) out.push({ id: `unknown.${kind}`, template });
   for (const [m, template] of Object.entries(t.milestones)) out.push({ id: `milestone.${m}`, template });
   for (const [tone, list] of Object.entries(t.closing)) variants(`closing.${tone}`, list);
+  // L1: what a speaker says about your last days.
+  for (const [kind, list] of Object.entries(content.text.later.eulogy)) variants(`later.eulogy.${kind}`, list);
   return out;
 }
 
@@ -42,5 +44,6 @@ export function reasonPieces(content: ContentBundle): EulogyPiece[] {
   variants('absent.distant', a.distant);
   variants('absent.far', a.far);
   for (const [why, list] of Object.entries(content.text.eulogy.couldNot)) variants(`couldNot.${why}`, list);
+  variants('later.declinedReason', content.text.later.lastDays.declinedReason);
   return out;
 }

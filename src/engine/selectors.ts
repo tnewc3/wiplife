@@ -72,6 +72,7 @@ export {
   type WillRowView,
   type WillView,
 } from './estate/views';
+export { getLaterView, type CareView, type LaterPersonView, type LaterView, type TerminalView } from './later/views';
 export { getChildView, getFamilyView, type ChildView, type FamilyOptionView, type FamilyView, type PregnancyView } from './family/views';
 import { getChildView, type ChildView } from './family/views';
 export type { InteractionMenuGroup, InteractionMenuItem, InteractionOutcomeView } from './interactions/views';
@@ -154,6 +155,7 @@ const FAMILY_ORDER: Partial<Record<Relationship['kind'], number>> = {
   sibling: 4,
   child: 5,
   stepchild: 6,
+  grandchild: 7,
 };
 
 /** Your spouses, current and late (not exes), longest married first. */
@@ -485,8 +487,8 @@ export function getApplicationOptions(state: LifeState, content: ContentBundle):
 
 
 /** Groups on the People screen (docs/design.md, section L). */
-export type PeopleGroupId = 'family' | 'children' | 'romance' | 'friends' | 'work';
-export const PEOPLE_GROUPS: readonly PeopleGroupId[] = ['family', 'children', 'romance', 'friends', 'work'];
+export type PeopleGroupId = 'family' | 'children' | 'grandchildren' | 'romance' | 'friends' | 'work';
+export const PEOPLE_GROUPS: readonly PeopleGroupId[] = ['family', 'children', 'grandchildren', 'romance', 'friends', 'work'];
 
 export interface PersonRow {
   id: Id;
@@ -509,6 +511,8 @@ export interface PersonRow {
 
 function groupOf(kind: RelationshipKind): PeopleGroupId {
   if (kind === 'child' || kind === 'stepchild') return 'children';
+  // L1: your grandchildren have their own group.
+  if (kind === 'grandchild') return 'grandchildren';
   if (FAMILY_KINDS.includes(kind)) return 'family';
   if (ROMANTIC_KINDS.includes(kind)) return 'romance';
   if (WORK_KINDS.includes(kind)) return 'work';
@@ -540,6 +544,7 @@ const KIND_ORDER: RelationshipKind[] = [
   'sibling',
   'child',
   'stepchild',
+  'grandchild',
   'spouse',
   'fiance',
   'partner',
@@ -558,7 +563,7 @@ const KIND_ORDER: RelationshipKind[] = [
  * kind, then (family) oldest first or (others) closest first.
  */
 export function getPeople(state: LifeState, content: ContentBundle): Record<PeopleGroupId, PersonRow[]> {
-  const groups: Record<PeopleGroupId, PersonRow[]> = { family: [], children: [], romance: [], friends: [], work: [] };
+  const groups: Record<PeopleGroupId, PersonRow[]> = { family: [], children: [], grandchildren: [], romance: [], friends: [], work: [] };
   for (const id of Object.keys(state.relationships).sort()) {
     const rel = state.relationships[id]!;
     const person = state.people[id];
@@ -573,7 +578,7 @@ export function getPeople(state: LifeState, content: ContentBundle): Record<Peop
       (a, b) =>
         Number(b.alive) - Number(a.alive) ||
         KIND_ORDER.indexOf(a.kind) - KIND_ORDER.indexOf(b.kind) ||
-        (group === 'family' || group === 'children' ? birthYear(a) - birthYear(b) : b.affection - a.affection),
+        (group === 'family' || group === 'children' || group === 'grandchildren' ? birthYear(a) - birthYear(b) : b.affection - a.affection),
     );
   }
   return groups;

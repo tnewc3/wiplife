@@ -9,7 +9,7 @@
  * listed as staying away is someone with a cause to.
  */
 import { ABSENCE_CAUSES, COULD_NOT_REASONS, EULOGY_GROUPS, EULOGY_TONES, type ContentBundle } from '../../src/content/schemas';
-import { absenceCauses, chooseSpeaker, couldNotAttend, eulogyPieces, expectedGuests, writeFuneral } from '../../src/engine/eulogy';
+import { absenceCauses, askedSpeaker, chooseSpeaker, couldNotAttend, eulogyPieces, expectedGuests, writeFuneral } from '../../src/engine/eulogy';
 import { ageOf, isChildKind } from '../../src/engine/relationships';
 import type { Funeral, Id, LifeState } from '../../src/engine/types';
 import type { SimulationReport, TargetResult } from './run';
@@ -157,6 +157,11 @@ export class EulogyWatcher {
         bestIds = [person.id];
       } else if (score === bestScore && rank === bestRank) bestIds.push(person.id);
     }
+    // L1: the person you asked to speak in your final wishes, when they can, speaks whoever is closest.
+    const asked = askedSpeaker(life, this.content);
+    if (asked) {
+      bestIds = [asked.personId];
+    }
     const names = bestIds.map((id) => `${life.people[id]!.name.first} ${life.people[id]!.name.last}`);
     if (bestIds.length === 0) {
       if (funeral.eulogy) this.fail('speaker', life, `a speaker (${funeral.eulogy.speakerName}) where nobody was eligible`);
@@ -190,7 +195,16 @@ export class EulogyWatcher {
     const r = this.report;
     const expected = expectedGuests(life, this.content);
     const speakerId = chooseSpeaker(life, this.content)?.personId;
-    const byName = new Map<string, Id>(expected.map((id) => [`${life.people[id]!.name.first} ${life.people[id]!.name.last}`, id]));
+    // Two guests can share a name (a child named after an aunt): the one the list means is the one that fits its side of the list.
+    const byName = new Map<string, Id[]>();
+    for (const id of expected) {
+      const name = `${life.people[id]!.name.first} ${life.people[id]!.name.last}`;
+      byName.set(name, [...(byName.get(name) ?? []), id]);
+    }
+    const find = (name: string, unable: boolean): Id | undefined => {
+      const ids = byName.get(name) ?? [];
+      return ids.find((id) => (couldNotAttend(life, id, this.content) !== null) === unable) ?? ids[0];
+    };
     const strongest = (id: Id) => {
       const hits = absenceCauses(life, id, speakerId, this.content);
       return [...hits].sort((x, y) => y.p - x.p || ABSENCE_CAUSES.indexOf(x.cause) - ABSENCE_CAUSES.indexOf(y.cause))[0]?.cause;
@@ -200,18 +214,22 @@ export class EulogyWatcher {
     r.absence.unlisted += funeral.moreNotAttending;
     r.absence.mostListed = Math.max(r.absence.mostListed, funeral.notAttending.length);
     for (const g of funeral.notAttending) {
-      const id = byName.get(g.name);
+      const id = find(g.name, false);
       if (id === undefined) continue;
       if (couldNotAttend(life, id, this.content) !== null) this.fail('absentUnable', life, `${g.name} is listed as staying away but could not come`);
       const cause = strongest(id);
-      if (cause === undefined) this.fail('absentWithoutCause', life, `${g.name} stayed away with no cause (${g.reason})`);
-      else r.absence.byCause[cause]!++;
+      // L1: someone you asked to your bedside who did not come is listed as staying away, with that as the cause.
+      const declined = life.later.terminal?.visits.some((v) => v.id === id && !v.came) === true;
+      if (!declined) {
+        if (cause === undefined) this.fail('absentWithoutCause', life, `${g.name} stayed away with no cause (${g.reason})`);
+        else r.absence.byCause[cause]!++;
+      }
       if (ageOf(life, life.people[id]!) < this.content.balance.eulogy.speaker.minAge) this.fail('underAge', life, `${g.name} is under the age of choosing`);
     }
     if (funeral.couldNotAttend.length > 0) r.couldNot.livesWith++;
     r.couldNot.people += funeral.couldNotAttend.length;
     for (const g of funeral.couldNotAttend) {
-      const id = byName.get(g.name);
+      const id = find(g.name, true);
       const why = id === undefined ? null : couldNotAttend(life, id, this.content);
       if (why === null) this.fail('absentUnable', life, `${g.name} is listed as unable to come but could`);
       else r.couldNot.byReason[why]!++;

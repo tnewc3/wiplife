@@ -1,0 +1,51 @@
+id: grandchild_midnight_door
+title: The knock at midnight
+text: >-
+  It is nearly midnight when you hear it: a small, careful knock. On the step
+  is {kid.name} with a backpack, a red face and a story about a fight at home
+  that has no beginning, only an end.
+tone: serious
+category: grandparenting
+rarity: uncommon
+lifeStages: [adult, senior]
+requires:
+  all:
+    - { later: { grandchildren: { gte: 1 } } }
+    - { age: { gte: 50 } }
+    - { role: kid, kind: [grandchild], alive: true, age: { gte: 13, lte: 17 }, where: [city] }
+weight: { base: 4 }
+cooldownYears: 6
+cast:
+  kid: { kind: grandchild, presence: city }
+choices:
+  - id: let_in_and_call
+    label: Let {kid.them} in, and say where {kid.they} {kid:is|are}
+    outcome:
+      text: >-
+        You put the kettle on and the phone call before the story. The parent
+        is frantic, then grateful, then quiet. {kid.name} sleeps in the spare
+        room, and in the morning the world looks smaller.
+      effects:
+        - { type: relationship, role: kid, affection: 6, trust: 6 }
+        - { type: stat, key: stress, delta: 2 }
+  - id: let_in_quiet
+    label: Let {kid.them} in, and listen first
+    outcome:
+      text: >-
+        You do not call yet. You listen for an hour, and by the end {kid.name}
+        is calmer, and you are the only person who knows where {kid.they}
+        {kid:is|are}. The next morning you call anyway, and it is worse for the
+        wait.
+      effects:
+        - { type: relationship, role: kid, affection: 5, trust: 3 }
+        - { type: stat, key: stress, delta: 3 }
+  - id: drive_home
+    label: Give {kid.them} a cup of tea and drive {kid.them} home
+    outcome:
+      text: >-
+        You do the sensible thing. The drive is silent, and the front door
+        opens before you reach it. {kid.name} does not say thank you, and
+        does not need to; it will come back around eventually.
+      effects:
+        - { type: relationship, role: kid, affection: -1, trust: 1 }
+        - { type: stat, key: stress, delta: 1 }

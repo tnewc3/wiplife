@@ -1,0 +1,69 @@
+id: teach_them
+name: Teach them something
+blurb: A craft, a card trick, how to stand your ground. What sticks is up to them.
+group: grandparenting
+profile: guide
+inPerson: true
+availability:
+  kinds: [grandchild]
+  you: { min: 40 }
+  them: { min: 6 }
+outcomes:
+  great:
+    text:
+      - "{person.name} listens like it matters. By the end, {person.they} {person:is|are} doing it better than you, and says so, and you let {person.them}."
+      - "Something clicks. {person.name} asks a question you have never been asked, and you realize you are teaching, not just talking."
+    affection: 4
+    trust: 4
+    mood: 7
+    effects:
+      - { type: memory, role: person, tag: taught_them }
+      - { type: stat, key: happiness, delta: 2 }
+    choice:
+      prompt: "{person.name} asks what you most want {person.them} to take from this. What do you say?"
+      options:
+        - id: patience
+          label: Patience and doing it properly
+          text: "You show {person.them} how to do it slowly, and then again. {person.They} {person:rolls|roll} {person.their} eyes, and then does it slowly."
+          trust: 2
+          effects:
+            - { type: later, action: teach, role: person, key: discipline, delta: 3 }
+        - id: nerve
+          label: Nerve, and trying anyway
+          text: "You tell {person.them} to fail quickly and keep going. It's what you wish someone had told you."
+          effects:
+            - { type: later, action: teach, role: person, key: confidence, delta: 3 }
+        - id: kindness
+          label: Kindness, which counts
+          text: "You tell {person.them} that being good to people is a skill, and a hard one. {person.They} {person:nods|nod} slowly."
+          effects:
+            - { type: later, action: teach, role: person, key: kindness, delta: 3 }
+  good:
+    text:
+      - "You go through it twice. {person.name} gets it on the second go, and is more pleased about that than {person.they} {person:lets|let} on."
+      - "A good lesson. {person.name} asks to do it again next time, which is as close to a review as you'll get."
+    affection: 3
+    trust: 2
+    mood: 5
+    effects:
+      - { type: memory, role: person, tag: taught_them }
+      - { type: later, action: teach, role: person, key: smarts, delta: 1 }
+  neutral:
+    text:
+      - "{person.name} tries it, loses interest and wanders off. It might take. You won't know for years."
+      - "You say the words, and {person.name} nods in the right places. Some of it goes in."
+    affection: 1
+    mood: 1
+  bad:
+    text:
+      - "You explain it too long, and {person.name} stops listening somewhere in the middle."
+      - "It turns out you remember how to do it better than you remember how to explain it."
+    affection: -1
+    mood: -3
+  backfire:
+    text:
+      - "You lose patience, and {person.name} goes quiet. You said nothing that bad, and you can see that it landed badly anyway."
+      - "You take over and do it yourself, which is the opposite of teaching, and {person.name} lets you."
+    affection: -3
+    trust: -2
+    mood: -6

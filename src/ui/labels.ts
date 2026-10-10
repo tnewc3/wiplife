@@ -45,7 +45,7 @@ import type {
   SchoolLine,
 } from '../engine/selectors';
 import type { StyleLevel } from '../engine/family/parenting';
-import type { FamilyWealth, GenderCategory, JobEnd, LifeStage, Personality, Reaction, RecordOutcome, RelationshipKind, Stats } from '../engine/types';
+import type { CareOption, FamilyWealth, GenderCategory, HospiceChoice, JobEnd, LifeStage, Personality, Reaction, RecordOutcome, RelationshipKind, ServiceStyle, Stats } from '../engine/types';
 
 export const STAT_LABELS: Record<keyof Stats, string> = {
   health: 'Health',
@@ -98,6 +98,7 @@ const RELATIONSHIP_LABELS: Record<RelationshipKind, Record<GenderCategory, strin
   sibling: { woman: 'Sister', man: 'Brother', nonbinary: 'Sibling' },
   child: { woman: 'Daughter', man: 'Son', nonbinary: 'Child' },
   stepchild: { woman: 'Stepdaughter', man: 'Stepson', nonbinary: 'Stepchild' },
+  grandchild: { woman: 'Granddaughter', man: 'Grandson', nonbinary: 'Grandchild' },
   partner: { woman: 'Girlfriend', man: 'Boyfriend', nonbinary: 'Partner' },
   fiance: { woman: 'Fiancée', man: 'Fiancé', nonbinary: 'Fiancé' },
   spouse: { woman: 'Wife', man: 'Husband', nonbinary: 'Spouse' },
@@ -130,6 +131,7 @@ export function personLine(row: PersonRow): string {
 export const PEOPLE_GROUP_LABELS: Record<PeopleGroupId, string> = {
   family: 'Family',
   children: 'Children',
+  grandchildren: 'Grandchildren',
   romance: 'Love',
   friends: 'Friends',
   work: 'Work',
@@ -139,6 +141,7 @@ export const PEOPLE_GROUP_LABELS: Record<PeopleGroupId, string> = {
 export const PEOPLE_GROUP_EMPTY: Record<PeopleGroupId, string> = {
   family: 'No family.',
   children: 'No children.',
+  grandchildren: 'No grandchildren.',
   romance: 'No one right now.',
   friends: 'No friends yet.',
   work: 'No one from work yet.',
@@ -654,6 +657,7 @@ export const INTERACTION_GROUP_LABELS: Record<InteractionGroup, string> = {
   romance: 'Romance',
   practical: 'Practical',
   parenting: 'Parenting',
+  grandparenting: 'Grandparenting',
 };
 
 export const GIFT_TIER_LABELS: Record<GiftTier, string> = {
@@ -715,12 +719,13 @@ export const CUSTODY_LABELS: Record<'you' | 'shared' | 'other', string> = {
   other: 'Lives with their other parent',
 };
 
-export const ORIGIN_LABELS: Record<'birth' | 'adopted' | 'ivf' | 'surrogacy' | 'step', string> = {
+export const ORIGIN_LABELS: Record<'birth' | 'adopted' | 'ivf' | 'surrogacy' | 'step' | 'grandchild', string> = {
   birth: 'Your child',
   adopted: 'Adopted',
   ivf: 'Your child, through IVF',
   surrogacy: 'Your child, through surrogacy',
   step: 'Stepchild',
+  grandchild: 'Your grandchild, whom you are raising',
 };
 
 /**
@@ -802,6 +807,7 @@ export const ESTATE_RELATION_LABELS: Record<RelationshipKind | 'cause', string> 
   sibling: 'Sibling',
   child: 'Child',
   stepchild: 'Stepchild',
+  grandchild: 'Grandchild',
   partner: 'Partner',
   fiance: 'Fiancé(e)',
   spouse: 'Spouse',
@@ -1331,6 +1337,13 @@ export const FUNERAL_LABELS = {
   unable: 'Couldn’t be there',
   unableNote: 'They would have come if they could.',
   noFuneral: 'No funeral was recorded for this life: it ended before eulogies were written.',
+  // L1.
+  lastDays: 'Your last days',
+  bedside: 'At your bedside',
+  review: 'Looking back',
+  regrets: 'Regrets',
+  proud: 'Proud moments',
+  reviewNone: 'Nothing in this life stood out as a regret or a proud moment.',
 } as const;
 
 /** "Spoken by Ana Ruiz, your wife". */
@@ -1338,3 +1351,39 @@ export const spokenBy = (name: string, relation: string): string => `Spoken by $
 
 /** "And 3 more." for the people left off a full list. */
 export const andMore = (n: number): string => `And ${n} more.`;
+
+// ── L1: later life ─────────────────────────────────────────────────────────
+
+/** Where you spend your last months (final wishes). */
+export const HOSPICE_LABELS: Record<HospiceChoice, { name: string; blurb: string }> = {
+  hospice: { name: 'Hospice care', blurb: 'Comfort over cures, with a team around you.' },
+  home: { name: 'At home', blurb: 'Your own bed, with help coming to you.' },
+  hospital: { name: 'In the hospital', blurb: 'Keep trying everything, close to the doctors.' },
+};
+
+/** The service you ask for (final wishes). */
+export const SERVICE_LABELS: Record<ServiceStyle, { name: string; blurb: string }> = {
+  traditional: { name: 'Traditional', blurb: 'A formal service, as most people expect.' },
+  simple: { name: 'Simple', blurb: 'Small and quiet, and it costs less.' },
+  celebration: { name: 'A celebration', blurb: 'Stories and music, and more people come.' },
+  private: { name: 'Private', blurb: 'Only those closest to you, and fewer come.' },
+};
+
+/** How care near the end is provided. */
+export const OWN_CARE_LABELS: Record<CareOption, { name: string; blurb: string }> = {
+  family: { name: 'Family', blurb: 'A relative looks after you, and moves close.' },
+  paid: { name: 'A paid carer', blurb: 'Someone comes to your home. It costs every year.' },
+  assisted: { name: 'Assisted living', blurb: 'You move into a place with help on hand. It replaces your home’s costs.' },
+};
+
+export const LATER_TITLES = {
+  grandchildren: 'Grandchildren',
+  raising: 'Grandchildren you are raising',
+  care: 'Care',
+  wishes: 'Final wishes',
+} as const;
+
+/** "Marked down": the people you can ask in your final wishes, with what they are to you. */
+export function laterPersonLine(p: { kind: RelationshipKind; genderCategory: GenderCategory; age: number; estranged: boolean }): string {
+  return [relationshipLabel(p.kind, p.genderCategory), ageLabel(p.age), ...(p.estranged ? ['Estranged'] : [])].join(' · ');
+}

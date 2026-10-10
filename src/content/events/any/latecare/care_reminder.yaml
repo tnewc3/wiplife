@@ -1,0 +1,46 @@
+# Engine (registries/later.yaml): care is needed and nothing is arranged yet.
+id: care_reminder
+title: The forms are still on the table
+text: >-
+  The leaflets are in a pile now. The fridge is the one in need of looking
+  after, and so are you, if you were willing to say so out loud. A phone call
+  would settle most of it, and the call is one you are good at not making.
+tone: neutral
+category: latecare
+rarity: common
+lifeStages: [senior, adult]
+requires:
+  all:
+    - { later: { care: true } }
+    - { later: { care: true, careOption: [none] } }
+weight: { base: 10 }
+followUpOnly: true
+choices:
+  - id: paid
+    label: Make the call, and arrange a carer
+    outcome:
+      text: >-
+        You do it in the morning before you can change your mind. By
+        lunchtime the setup is paid for, and the fridge has food in it.
+      effects:
+        - { type: cost, item: late_care_setup }
+        - { type: later, action: care, option: paid }
+  - id: assisted
+    label: Choose a place with help on hand
+    visibleIf: { home: { kind: [renting, owned] } }
+    outcome:
+      text: >-
+        You spend a week touring, and a day deciding. The place with the
+        garden wins. The move-in fee is steep, and you stop minding it by
+        the third meal.
+      effects:
+        - { type: cost, item: assisted_move_in }
+        - { type: later, action: care, option: assisted }
+  - id: leave_it
+    label: Leave it to the family to sort out
+    outcome:
+      text: >-
+        The decision slides to someone else, as decisions do. It will be made
+        with or without you, and the longer you wait, the less it is yours.
+      effects:
+        - { type: stat, key: stress, delta: 2 }

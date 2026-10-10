@@ -352,10 +352,10 @@ describe('who came', () => {
 describe('every piece of text', () => {
   const sets = ['she_her', 'he_him', 'they_them', 'xe_xem'].map((id) => content.pronouns[id]!);
 
-  it('has about 120 pieces', () => {
+  it('has about 150 pieces', () => {
     const n = eulogyPieces(content).length + reasonPieces(content).length;
     expect(n).toBeGreaterThanOrEqual(110);
-    expect(n).toBeLessThanOrEqual(150);
+    expect(n).toBeLessThanOrEqual(170);
   });
 
   it('renders with four pronoun sets, with nothing left unfilled and no hardcoded pronoun', () => {

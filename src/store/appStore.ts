@@ -95,7 +95,7 @@ export interface AppState {
   /** The person open on the People tab, if any (E5: or a pet, by its possession id). */
   personId: string | null;
   /** A page open on the More tab (More → Home, More → Health), if any. */
-  moreView: 'home' | 'health' | 'family' | 'will' | 'belongings' | 'teen' | null;
+  moreView: 'home' | 'health' | 'family' | 'will' | 'belongings' | 'teen' | 'later' | null;
   /** E1: the Interact sheet open on a person's page: the grouped menu, or the gift price tiers. */
   /** The Interact sheet: the menu, a gift's price tiers, or (E4) the picker for an interaction that needs another person or a story first. */
   interactSheet: { personId: string; view: 'menu' | 'gift' | 'pick'; /** The interaction a picker is for. */ pick?: string } | null;
@@ -166,6 +166,8 @@ export interface AppState {
   openFamily: () => void;
   /** E2b: opens More → Write a will. */
   openWill: () => void;
+  /** L1: opens More → Later life. */
+  openLater: () => void;
   /** E5: More → Belongings. */
   openBelongings: () => void;
   /** T1: More → Teen years. */
@@ -757,6 +759,11 @@ export function createAppStore({
         openWill: () =>
           set((s) => {
             if (s.life) s.moreView = 'will';
+          }),
+
+        openLater: () =>
+          set((s) => {
+            if (s.life) s.moreView = 'later';
           }),
 
         openBelongings: () =>

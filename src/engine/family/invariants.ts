@@ -74,7 +74,7 @@ export function familyFailures(state: LifeState, content: ContentBundle): string
     if (kid.talent !== null && !content.talents[kid.talent]) fail(`${label} has an unknown talent "${kid.talent}"`);
     if (kid.otherParentId !== undefined && !state.people[kid.otherParentId]) fail(`${label} names a missing other parent`);
     if (kid.custody === 'other' && kid.otherParentId === undefined) fail(`${label} lives with an other parent they don't have`);
-    if (rel.kind === 'child' && kid.origin !== 'adopted' && person.birthYear - state.birthYear < adultAge) fail(`${label} was born when you were under ${adultAge}`);
+    if (rel.kind === 'child' && kid.origin !== 'adopted' && kid.origin !== 'grandchild' && person.birthYear - state.birthYear < adultAge) fail(`${label} was born when you were under ${adultAge}`);
     if (kid.movedOutYear !== undefined && (kid.movedOutYear < person.birthYear || kid.movedOutYear > state.currentYear)) fail(`${label} moved out outside their life`);
     if (isRomanticKind(rel.kind)) fail(`${label} is in a romantic relationship`);
     if (rel.parenting) {

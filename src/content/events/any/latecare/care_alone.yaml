@@ -1,0 +1,51 @@
+# Engine (registries/later.yaml): you need care near the end and nobody can step in.
+id: care_alone
+title: No one to ask
+text: >-
+  The doctor says it as gently as it can be said: managing at home isn't safe
+  any more. You go through the names on your phone and find them either too
+  far, too busy, or no longer there. There are leaflets on the table, and the
+  decision is yours.
+tone: serious
+category: latecare
+rarity: common
+lifeStages: [senior, adult]
+requires:
+  all:
+    - { later: { care: true } }
+    - { later: { care: true, careOption: [none] } }
+weight: { base: 10 }
+followUpOnly: true
+choices:
+  - id: paid
+    label: Hire a carer to come to your home
+    outcome:
+      text: >-
+        The agency sends a carer with a laminated badge, who turns out to be
+        funnier than the badge. The carer learns where you keep everything in a week.
+        The setup costs what it costs, and you pay it without arguing.
+      effects:
+        - { type: cost, item: late_care_setup }
+        - { type: later, action: care, option: paid }
+        - { type: stat, key: stress, delta: -2 }
+  - id: assisted
+    label: Move into assisted living
+    visibleIf: { home: { kind: [renting, owned] } }
+    outcome:
+      text: >-
+        The staff know your name on the second day. You give up the house, and
+        the garden, and the key, and get a small room with a window and meals
+        brought on trays. The move costs what it costs.
+      effects:
+        - { type: cost, item: assisted_move_in }
+        - { type: later, action: care, option: assisted }
+        - { type: stat, key: stress, delta: -1 }
+  - id: wait
+    label: Think about it a little longer
+    outcome:
+      text: >-
+        You put the leaflets in a drawer. They are patient. You are not, but
+        you are good at pretending, and the drawer fills slowly with paper.
+      effects:
+        - { type: flag, key: refused_help_at_home, value: true }
+        - { type: stat, key: stress, delta: 2 }

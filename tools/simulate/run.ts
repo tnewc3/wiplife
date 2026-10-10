@@ -65,6 +65,7 @@ import { emptyPeopleReport, formatPeople, peopleTargets, PeopleWatcher, Pipeline
 import { emptyMentalReport, formatMental, mentalTargets, MentalWatcher, type MentalReport } from './mental';
 import { choosePetInteractions, choosePossessionActions, emptyPossessionsReport, formatPossessions, possessionsTargets, PossessionsWatcher, rollPossessionProfile, type PossessionsReport } from './possessions';
 import { emptyEulogyReport, EulogyWatcher, eulogyTargets, formatEulogy, type EulogyReport } from './eulogy';
+import { chooseGrandparentPlans, chooseLaterActions, emptyLaterReport, formatLater, LaterWatcher, laterTargets, rollLaterProfile, type LaterReport } from './later';
 import { emptyWebReport, formatWeb, webTargets, WebWatcher, type WebReport } from './web';
 import { chooseCrimeActions, CrimeWatcher, crimeTargets, emptyCrimeReport, formatCrime, type CrimeReport } from './crime';
 import { chooseFameActions, emptyFameReport, FameWatcher, fameTargets, formatFame, rollStarProfile, type FameReport } from './fame';
@@ -146,6 +147,8 @@ export interface SimulationReport {
   web: WebReport;
   /** W1: the eulogy and the funeral, measured. */
   eulogy: EulogyReport;
+  /** L1: later life, measured: grandchildren, care, foreseen deaths and final wishes, amends, the life review. */
+  later: LaterReport;
   /** M1: mental health, measured. */
   mental: MentalReport;
   /** E5: pets, vehicles and homes, measured. */
@@ -794,6 +797,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
   const web = emptyWebReport();
   const eulogy = emptyEulogyReport(content);
   const eulogyWatcher = new EulogyWatcher(eulogy, content);
+  const later = emptyLaterReport(content);
   const mental = emptyMentalReport(content);
   const possessions = emptyPossessionsReport(content);
   const teen = emptyTeenReport(content);
@@ -847,6 +851,10 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
     const sportsWatcher = new SportsWatcher(sports, content);
     const sportsRng = createRng(`${seed}:sports`);
     const athleteProfile = rollAthleteProfile(sportsRng);
+    // L1: how this life behaves in later life.
+    const laterRng = createRng(`${seed}:later`);
+    const laterProfile = rollLaterProfile(laterRng);
+    const laterWatcher = new LaterWatcher(later, content);
     const peopleWatcher = new PeopleWatcher(people, content);
     const webWatcher = new WebWatcher(web, content);
     const mentalWatcher = new MentalWatcher(mental, content);
@@ -926,6 +934,12 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
       }
       // ...and on a will (E2b)...
       for (const [actionId, params] of careless ? [] : chooseWillActions(life, content, willRng, willProfile)) {
+        if (!isLifeActionAvailable(life, actionId, params, content)) continue;
+        life = takeLifeAction(life, actionId, params);
+        money.actionsTaken[actionId]++;
+      }
+      // ...and in later life (L1): final wishes, an updated will, how care is arranged...
+      for (const [actionId, params] of careless ? [] : chooseLaterActions(life, content, laterRng, laterProfile)) {
         if (!isLifeActionAvailable(life, actionId, params, content)) continue;
         life = takeLifeAction(life, actionId, params);
         money.actionsTaken[actionId]++;
@@ -1054,10 +1068,12 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
         interactions.years++;
         interactionWatcher.beginYear(life);
         const parenting = playerKind === 'spammer' ? [] : chooseParentingPlans(life, content, familyRng, familyProfile, careless);
-        for (const plan of [...chooseInteractions(life, content, interactionRng, behaves), ...parenting]) {
+        const grandparenting = playerKind === 'spammer' || careless ? [] : chooseGrandparentPlans(life, content, laterRng, laterProfile);
+        for (const plan of [...chooseInteractions(life, content, interactionRng, behaves), ...parenting, ...grandparenting]) {
           const def = content.interactions[plan.interactionId]!;
           if (!isInteractionAvailable(life, def, plan.personId, content)) continue;
           if (plan.giftTier && !canAffordGift(life, plan.giftTier, content)) continue;
+          laterWatcher.interacted(plan, life);
           life = playInteraction(life, content, plan, behaves, interactionRng, interactionWatcher, interactions);
           // E2a: an intimate night that began an unplanned pregnancy opens its decision.
           if (life.phase === 'action') {
@@ -1072,6 +1088,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
       const yearBefore = life;
       life = peopleTimer.time(() => beginYear(yearBefore, content, timedSteps));
       peopleWatcher.observe(yearBefore, life);
+      laterWatcher.observe(yearBefore, life);
       webWatcher.observe(yearBefore, life);
       mentalWatcher.observe(yearBefore, life);
       crimeWatcher.observe(yearBefore, life);
@@ -1118,6 +1135,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
     peopleWatcher.finish();
     webWatcher.finish(life);
     eulogyWatcher.finish(life);
+    laterWatcher.finish(life);
     mentalWatcher.finish(life);
     crimeWatcher.finish(life);
     fameWatcher.finish(life);
@@ -1452,6 +1470,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
     people,
     web,
     eulogy,
+    later,
     mental,
     possessions,
     teen,
@@ -1591,6 +1610,7 @@ export function formatReport(report: SimulationReport, content: ContentBundle): 
   lines.push(...formatPeople(report.people, content, report.relationships.divorces), '  targets (src/content/balance/targets.yaml):', ...peopleTargets(report, content).map((r) => target(r.label, r.value, r.goal, r.met)));
   lines.push('', ...formatWeb(report.web, content), '  targets (src/content/balance/targets.yaml):', ...webTargets(report, content).map((r) => target(r.label, r.value, r.goal, r.met)));
   lines.push(...formatEulogy(report.eulogy, content), '  targets (src/content/balance/targets.yaml):', ...eulogyTargets(report, content).map((r) => target(r.label, r.value, r.goal, r.met)));
+  lines.push(...formatLater(report.later, content), '  targets (src/content/balance/targets.yaml):', ...laterTargets(report, content).map((r) => target(r.label, r.value, r.goal, r.met)));
   lines.push('', ...formatMental(report.mental, content, report.events), '  targets (src/content/balance/targets.yaml):', ...mentalTargets(report, content).map((r) => target(r.label, r.value, r.goal, r.met)));
   lines.push(...formatPossessions(report.possessions, content, report.events), '  targets (src/content/balance/targets.yaml):', ...possessionsTargets(report, content).map((r) => target(r.label, r.value, r.goal, r.met)));
   lines.push(...formatTeen(report.teen, content), '  targets (src/content/balance/targets.yaml):', ...teenTargets(report, content).map((r) => target(r.label, r.value, r.goal, r.met)));

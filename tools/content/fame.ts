@@ -23,7 +23,7 @@ export function required(condition: Condition | undefined): Condition[] {
 export function ageFloor(condition: Condition | undefined): number {
   let floor = 0;
   for (const c of required(condition)) {
-    if (!('age' in c)) continue;
+    if (!('age' in c) || 'role' in c) continue;
     const a = c.age;
     floor = Math.max(floor, a.gte ?? 0, a.gt === undefined ? 0 : a.gt + 1, a.eq ?? 0);
   }
@@ -33,7 +33,7 @@ export function ageFloor(condition: Condition | undefined): number {
 export function ageCeiling(condition: Condition | undefined): number {
   let ceiling = Infinity;
   for (const c of required(condition)) {
-    if (!('age' in c)) continue;
+    if (!('age' in c) || 'role' in c) continue;
     const a = c.age;
     ceiling = Math.min(ceiling, a.lte ?? Infinity, a.lt === undefined ? Infinity : a.lt - 1, a.eq ?? Infinity);
   }

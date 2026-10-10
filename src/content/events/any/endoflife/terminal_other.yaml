@@ -1,0 +1,57 @@
+# Engine (registries/later.yaml, terminal.diagnosis.other): a warning from another cause.
+id: terminal_other
+title: Not much time
+text: >-
+  The doctor closes the file, which is how you know. The illness has gone
+  further than anyone hoped, and what remains is a short stretch in
+  which things can still be arranged. It is sooner than you'd have chosen, and
+  later than some people get.
+tone: dark
+category: endoflife
+rarity: uncommon
+lifeStages: [adult, senior]
+requires:
+  all:
+    - { later: { terminal: true } }
+weight: { base: 10 }
+followUpOnly: true
+choices:
+  - id: hospice
+    label: Choose hospice care
+    outcome:
+      text: >-
+        You sign the forms at the kitchen table with a pen that doesn't write
+        well. The hospice team arrives with a quiet competence you have no
+        right to be grateful for, and are.
+      effects:
+        - { type: later, action: hospice, choice: hospice }
+        - { type: flag, key: took_the_diagnosis_openly, value: true }
+        - { type: stat, key: stress, delta: -2 }
+  - id: home
+    label: Stay at home, with nurses who come to you
+    outcome:
+      text: >-
+        You make the front room your world. The nurses leave notes, and the
+        postman waves through the window.
+      effects:
+        - { type: later, action: hospice, choice: home }
+        - { type: stat, key: happiness, delta: 1 }
+  - id: hospital
+    label: Stay in the hospital for as long as there's anything to try
+    outcome:
+      text: >-
+        The ward is full of other people's families. You make small friends
+        with the man in the next bed, who has opinions about the food.
+      effects:
+        - { type: later, action: hospice, choice: hospital }
+        - { type: stat, key: stress, delta: 2 }
+  - id: think
+    label: Take a day to take it in
+    outcome:
+      text: >-
+        You go home, shut the door, sit very still, and listen to the house
+        make its noises. You have heard them for years, and you listen to them
+        properly now.
+      effects:
+        - { type: flag, key: kept_the_diagnosis_quiet, value: true }
+        - { type: stat, key: stress, delta: 3 }

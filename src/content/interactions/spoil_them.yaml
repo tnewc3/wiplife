@@ -1,0 +1,50 @@
+id: spoil_them
+name: Spoil them
+blurb: A treat, a toy, a day out, as their parents said not to. Costs real money.
+group: grandparenting
+profile: gift
+gift: true
+inPerson: true
+availability:
+  kinds: [grandchild]
+  you: { min: 40 }
+  them: { min: 2 }
+outcomes:
+  great:
+    text:
+      - "{person.name} opens it and stares. Then {person.they} {person:throws|throw} {person.their} arms around you and says you are the best grandparent in the world, which is not a close contest."
+      - "It is the exact thing {person.name} has been asking everyone for. {person.They} {person:holds|hold} on to it for the rest of the day, and to you for most of it."
+    affection: 6
+    trust: 2
+    mood: 10
+    effects:
+      - { type: memory, role: person, tag: spoiled_by_you }
+  good:
+    text:
+      - "{person.name} is thrilled, and hides it from {person.their} parents for exactly eleven minutes."
+      - "A treat, a laugh, and a promise not to tell. {person.name} keeps the first two."
+    affection: 4
+    trust: 1
+    mood: 7
+    effects:
+      - { type: memory, role: person, tag: spoiled_by_you }
+  neutral:
+    text:
+      - "{person.name} says thank you the way {person.they} {person:has|have} been told to, and moves on to the next thing."
+      - "It goes down fine. Children get a lot of presents, and you are one of the crowd."
+    affection: 1
+    mood: 2
+  bad:
+    text:
+      - "It is too much, or the wrong thing, and {person.name} can tell you tried. That is its own kind of sad."
+      - "The gift is gone in a day, and a parent mentions, kindly, that there was no need."
+    affection: -1
+    trust: -1
+    mood: -2
+  backfire:
+    text:
+      - "It turns out the parents had said no for a reason, and now everyone knows you knew. {person.name} is in the middle of it, and unhappy."
+      - "{person.name} loves the gift. {person.their} parents do not love that you gave it, and say so in the hallway."
+    affection: -2
+    trust: -4
+    mood: -5

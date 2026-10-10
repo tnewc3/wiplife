@@ -1,0 +1,60 @@
+# Engine (registries/later.yaml): a grandchild's parent can't raise them for now.
+id: raise_parent_cannot
+title: Somewhere safe for {kid.name}
+text: >-
+  {parent.name} is in no state to look after a child right now, and everyone
+  knows it, and nobody has said it. {kid.name} is sitting in your front room
+  with a bag packed for a night that might be a month. The phone has been
+  ringing, and nobody knows who should pick it up.
+tone: serious
+category: grandraise
+rarity: uncommon
+lifeStages: [adult, senior]
+requires:
+  all:
+    - { age: { gte: 40, lte: 82 } }
+    - { role: kid, kind: [grandchild], alive: true, age: { lte: 16 } }
+    - { role: parent, kind: [child, stepchild], alive: true }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  kid: { kind: grandchild, presence: anywhere }
+  parent: { kind: child, presence: anywhere }
+choices:
+  - id: take_in
+    label: Take {kid.them} in, and raise {kid.them} until things change
+    visibleIf: { home: { kind: [renting, owned] } }
+    outcome:
+      text: >-
+        You make up the bed that used to be someone else's. {kid.name} goes
+        to sleep that night in a house that smells of toast and old books. It
+        is not a decision you will make twice, and you will not ask yourself
+        whether you made it right.
+      effects:
+        - { type: later, action: raise, role: kid }
+        - { type: relationship, role: parent, trust: -3 }
+        - { type: stat, key: stress, delta: 6 }
+        - { type: stat, key: happiness, delta: 2 }
+        - { type: schedule, eventId: raise_first_night, inYears: [1, 1], cast: [kid] }
+  - id: other_relatives
+    label: Help the family find someone who can, and stay close
+    outcome:
+      text: >-
+        You make calls until two in the morning. In the end an aunt with a
+        spare room says yes, and you drive {kid.name} there yourself, and
+        promise to visit on Sundays. It isn't what you pictured, but it is
+        something solid for {kid.them}.
+      effects:
+        - { type: relationship, role: kid, affection: 4, trust: 4 }
+        - { type: stat, key: stress, delta: 3 }
+  - id: not_you
+    label: Say that you can't, and that you are sorry
+    outcome:
+      text: >-
+        You tell them honestly that you do not have it in you, and you watch
+        what that does to the room. Somebody else will have to. You tell
+        yourself it is the right answer, and you keep telling yourself.
+      effects:
+        - { type: relationship, role: kid, affection: -5, trust: -6 }
+        - { type: relationship, role: parent, affection: -4, trust: -4 }
+        - { type: stat, key: stress, delta: 2 }

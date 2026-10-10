@@ -1,0 +1,52 @@
+id: slowing_down_stairs
+title: The stairs are longer than they were
+text: >-
+  The house hasn't changed, but the stairs have. You count them now, and
+  take the banister without thinking. Your family has noticed, and is
+  trying not to say anything, and the kindest thing is to say it first.
+tone: neutral
+category: latelife
+rarity: common
+lifeStages: [adult, senior]
+requires:
+  all:
+    - { age: { gte: 55 } }
+    - { age: { gte: 70 } }
+    - { home: { kind: [owned, renting] } }
+    - { not: { flag: adapted_the_home } }
+weight: { base: 6 }
+once: true
+choices:
+  - id: adapt
+    label: Have grab rails and a ramp fitted
+    outcome:
+      text: >-
+        The workmen are cheerful, and the house looks a little more like a
+        clinic for a week. By spring you've stopped noticing the rails, which
+        is how you know they're working.
+      effects:
+        - { type: cost, item: home_changes }
+        - { type: flag, key: adapted_the_home, value: true }
+        - { type: stat, key: health, delta: 2 }
+        - { type: stat, key: stress, delta: -2 }
+  - id: carry_on
+    label: Carry on exactly as before
+    outcome:
+      text: >-
+        You tell everyone you're fine and take the stairs twice as often to
+        prove it. By the end of the month you've proven it twice, and your hip
+        has a different opinion.
+      effects:
+        - { type: stat, key: health, delta: -2 }
+        - { type: stat, key: stress, delta: 1 }
+  - id: move_downstairs
+    label: Move your bed to the ground floor
+    outcome:
+      text: >-
+        The spare room becomes a bedroom, and it turns out it has the best
+        light. It feels like a defeat for about a week and like common sense
+        ever after.
+      effects:
+        - { type: flag, key: adapted_the_home, value: true }
+        - { type: stat, key: stress, delta: -1 }
+        - { type: stat, key: happiness, delta: 1 }

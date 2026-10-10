@@ -337,9 +337,23 @@ eulogy:
   speakerShare: { min: 0.7, max: 0.99 }
   pieceVariety: { min: 0.8, max: 1 }
   distinctShare: { min: 0.95, max: 1 }
-  speakerGroups: { min: 5, max: 6 }
+  speakerGroups: { min: 5, max: 7 }
   absentShare: { min: 0.15, max: 0.9 }
   couldNotShare: { min: 0.1, max: 0.85 }
+
+# L1, later life (tools/simulate/later.ts), on the careful player's lives. Starting ranges; the first
+# 10,000-life run sets them.
+later:
+  grandparentShare: { min: 0.2, max: 0.9 }
+  careShare: { min: 0.1, max: 0.8 }
+  foreseenShare: { min: 0.08, max: 0.7 }
+  wishesShare: { min: 0.5, max: 0.95 }
+  amendsShare: { min: 0.2, max: 0.95 }
+  amendsMadeShare: { min: 0.2, max: 0.9 }
+  reviewShare: { min: 0.9, max: 1 }
+  reviewVariety: { min: 0.5, max: 1 }
+  familyCareShare: { min: 0.1, max: 0.9 }
+  yearsKnown: { min: 0.5, max: 3 }
 
 coverage:
   minEvents: 300

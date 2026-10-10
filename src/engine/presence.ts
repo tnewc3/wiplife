@@ -25,6 +25,8 @@ export function whereabouts(state: LifeState, personId: Id, content: ContentBund
   if (livesWithYou(state, personId)) return 'household';
   // E3: a relative who needs care and lives at your home.
   if (person?.life?.care === 'home') return 'household';
+  // L1: the relative who looks after you in your last years is with you.
+  if (state.later.care?.option === 'family' && state.later.care.providerId === personId) return 'household';
   // E2b: a minor heir lives with their guardian.
   if (state.housing.guardianId === personId) return 'household';
   if (state.housing.kind === 'with_parents' && rel && person) {

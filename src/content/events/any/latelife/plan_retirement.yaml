@@ -1,0 +1,50 @@
+id: plan_retirement
+title: The long goodbye
+text: >-
+  A colleague's leaving party, a slow Friday afternoon, and a question that
+  isn't a question: when are you going? You've been thinking about it for
+  longer than you've said out loud, and today it won't wait politely.
+tone: neutral
+category: latelife
+rarity: common
+lifeStages: [adult, senior]
+requires:
+  all:
+    - { age: { gte: 55 } }
+    - { age: { gte: 58, lte: 70 } }
+    - { career: { employed: true, retired: false } }
+weight: { base: 8 }
+once: true
+choices:
+  - id: set_a_date
+    label: Name a date, and stick to it
+    outcome:
+      text: >-
+        You say a month and a year, out loud, in front of people. The world
+        does not end. It starts, instead, to sort itself into the time before
+        and the time after, and you begin to plan the second one.
+      effects:
+        - { type: flag, key: planned_retirement, value: true }
+        - { type: stat, key: stress, delta: -3 }
+        - { type: stat, key: happiness, delta: 3 }
+  - id: phase_out
+    label: Ask to wind down gradually
+    outcome:
+      text: >-
+        Four days a week, then three. Your manager is surprised, then relieved,
+        then oddly emotional. You find out how much of your life was Mondays.
+      effects:
+        - { type: flag, key: planned_retirement, value: true }
+        - { type: job, action: performance, value: -5 }
+        - { type: stat, key: stress, delta: -4 }
+        - { type: stat, key: happiness, delta: 2 }
+  - id: keep_going
+    label: Tell them you'll work as long as you can
+    outcome:
+      text: >-
+        You say it lightly and mean it heavily. There is still something in
+        the work that needs you, or you in it, and you are not ready to find
+        out which.
+      effects:
+        - { type: stat, key: ambition, delta: 1 }
+        - { type: stat, key: stress, delta: 2 }

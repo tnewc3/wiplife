@@ -1,0 +1,54 @@
+id: make_favorite
+name: Make them your favorite
+blurb: The best seat, the last cookie, the secret. The others will notice.
+group: grandparenting
+profile: warm
+inPerson: true
+availability:
+  kinds: [grandchild]
+  you: { min: 45 }
+  them: { min: 3 }
+  requires: { later: { grandchildren: { gte: 2 } } }
+outcomes:
+  great:
+    text:
+      - "You pick {person.name} out of the crowd and the whole afternoon turns to {person.them}. {person.They} {person:glows|glow}. The others pretend not to see."
+      - "A whispered secret, a private joke, a hand on the shoulder. {person.name} knows exactly what it means."
+    affection: 7
+    trust: 3
+    mood: 10
+    effects:
+      - { type: memory, role: person, tag: your_favorite }
+  good:
+    text:
+      - "You save {person.name} the best seat, and {person.they} {person:takes|take} it as the compliment it is."
+      - "A little more time for {person.name} than for the rest. It's easy to do and hard to undo."
+    affection: 5
+    trust: 2
+    mood: 7
+    effects:
+      - { type: memory, role: person, tag: your_favorite }
+  neutral:
+    text:
+      - "{person.name} doesn't seem to notice, and the others notice enough for everyone."
+      - "You try to be subtle about it. Nobody is fooled, least of all {person.name}, who goes pink and says nothing."
+    affection: 1
+    mood: 1
+    effects:
+      - { type: memory, role: person, tag: your_favorite }
+  bad:
+    text:
+      - "It lands wrong. {person.name} is embarrassed, and an aunt or uncle raises an eyebrow across the room."
+      - "You overdo it, and everyone sees. {person.name} would rather have been left out of it."
+    affection: -1
+    trust: -1
+    mood: -3
+    effects:
+      - { type: memory, role: person, tag: your_favorite }
+  backfire:
+    text:
+      - "{person.name} is the one who gets teased for it. It was supposed to be a kindness, and it has done the opposite."
+      - "A cousin says out loud what everyone has been thinking, and {person.name} is the one who has to answer it."
+    affection: -3
+    trust: -2
+    mood: -6

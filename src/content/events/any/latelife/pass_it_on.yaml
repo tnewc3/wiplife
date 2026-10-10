@@ -1,0 +1,53 @@
+id: pass_it_on
+title: Who gets the good clock
+text: >-
+  You've been walking around the house with a pencil and a pad of labels, which
+  is how you found out how much of it is a story. The clock, the chair, the
+  bad painting your sister made. Some of it should go to someone before it
+  has to.
+tone: neutral
+category: latelife
+rarity: uncommon
+lifeStages: [adult, senior]
+requires:
+  all:
+    - { age: { gte: 55 } }
+    - { age: { gte: 62 } }
+    - { role: heir, kind: [child], alive: true, affection: { gte: 50 } }
+weight: { base: 5 }
+once: true
+cast:
+  heir: { kind: child, presence: anywhere }
+choices:
+  - id: give_now
+    label: Give {heir.them} the thing now, with its story
+    outcome:
+      text: >-
+        {heir.name} holds it carefully, like something alive. You tell the
+        story, and for once nobody interrupts. It is easier to give things
+        away when you can see them being used.
+      effects:
+        - { type: flag, key: passed_something_on, value: true }
+        - { type: relationship, role: heir, affection: 8, trust: 6 }
+        - { type: memory, role: heir, tag: told_them_stories }
+        - { type: stat, key: happiness, delta: 4 }
+  - id: give_money
+    label: Give {heir.them} some help while you can see it land
+    outcome:
+      text: >-
+        You do it quietly, in an envelope, with a note. {heir.name} calls to
+        say thank you and cannot get the words out, so you talk about the
+        garden instead. It helps. It helps more than the money does.
+      effects:
+        - { type: cost, item: grandchild_school_help }
+        - { type: flag, key: passed_something_on, value: true }
+        - { type: relationship, role: heir, affection: 7, trust: 5 }
+        - { type: stat, key: happiness, delta: 3 }
+  - id: leave_it
+    label: Leave it all to be sorted out later
+    outcome:
+      text: >-
+        The labels go back in the drawer. It's the sort of job that waits for
+        you, and the longer it waits, the heavier it gets.
+      effects:
+        - { type: stat, key: stress, delta: 1 }

@@ -1,0 +1,76 @@
+# Engine (registries/later.yaml, amends.left_alone): someone you left to cope alone.
+id: amends_left_alone
+title: When you weren't there
+text: >-
+  There was a time {npc.name} needed you, and you weren't there. It isn't
+  that you didn't know. It's that you chose something else, and then another
+  thing, and then it was over, and neither of you ever said so. The silence has
+  been doing the talking since.
+tone: serious
+category: amends
+rarity: uncommon
+lifeStages: [adult, senior]
+requires:
+  all:
+    - { age: { gte: 40 } }
+    - { age: { gte: 45 } }
+    - { role: npc, alive: true, age: { gte: 18 }, kind: [parent, stepparent, child, stepchild, sibling, relative, friend, partner, fiance, spouse, ex] }
+    - any:
+        - { memory: { role: npc, tag: left_their_care_to_family } }
+        - { memory: { role: npc, tag: left_them_in_jail } }
+        - { memory: { role: npc, tag: turned_them_away } }
+        - { memory: { role: npc, tag: walked_out_on_them } }
+        - { memory: { role: npc, tag: missed_wedding } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  npc: { kind: friend, presence: anywhere }
+choices:
+  - id: apologize
+    label: Go to {npc.them}, and apologize in person
+    visibleIf: { role: npc, where: [city, elsewhere] }
+    check:
+      base: 50
+      stats:
+        - { role: npc, key: affection, weight: 0.3 }
+        - { key: kindness, weight: 0.2 }
+      success:
+        text: >-
+          {npc.name} lets you finish, and says it was hard, and that it still
+          is. Then, after a while, {npc.they} {npc:tells|tell} you what
+          it was like, and you listen to all of it without defending anything.
+        effects:
+          - { type: relationship, role: npc, affection: 12, trust: 12 }
+          - { type: later, action: amends, source: left_alone, result: made, role: npc }
+          - { type: stat, key: happiness, delta: 5 }
+          - { type: stat, key: kindness, delta: 1 }
+      failure:
+        text: >-
+          {npc.name} hears you out and says that it's too much to ask to be
+          forgiven for something that hurt so much. You do not argue. You go
+          home on a train that feels longer than the distance.
+        effects:
+          - { type: later, action: amends, source: left_alone, result: refused, role: npc }
+          - { type: stat, key: stress, delta: 3 }
+          - { type: stat, key: happiness, delta: -2 }
+  - id: write
+    label: Write to say you were wrong, and ask nothing back
+    outcome:
+      text: >-
+        You say what you did, plainly, and that you know what it did.
+        A reply comes, four lines long. It says thank you, and
+        that {npc.they} {npc:is|are} not ready for more. That is more than you
+        had a right to.
+      effects:
+        - { type: relationship, role: npc, affection: 5, trust: 5 }
+        - { type: later, action: amends, source: left_alone, result: made, role: npc }
+        - { type: stat, key: stress, delta: -2 }
+  - id: avoid
+    label: Tell yourself it was a long time ago
+    outcome:
+      text: >-
+        It was. It is also the most recent thing you think about on a bad
+        night.
+      effects:
+        - { type: later, action: amends, source: left_alone, result: declined, role: npc }
+        - { type: stat, key: stress, delta: 2 }

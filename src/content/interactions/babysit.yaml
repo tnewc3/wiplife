@@ -1,0 +1,59 @@
+id: babysit
+name: Look after them
+blurb: Give their parents a break. A few hours, a long afternoon.
+group: grandparenting
+profile: nurture
+inPerson: true
+availability:
+  kinds: [grandchild]
+  you: { min: 40 }
+  them: { min: 0, max: 12 }
+outcomes:
+  great:
+    text:
+      - "You and {person.name} build a fort out of every cushion in the house. When the parents come to collect {person.them}, nobody wants to leave."
+      - "{person.name} falls asleep on your chest during a film neither of you was watching. You don't move for an hour."
+      - "You teach {person.name} the card game you learned at the same age, and {person.they} {person:beats|beat} you twice."
+    affection: 5
+    trust: 3
+    mood: 9
+    effects:
+      - { type: memory, role: person, tag: looked_after_them }
+      - { type: stat, key: happiness, delta: 3 }
+      - { type: stat, key: stress, delta: -2 }
+  good:
+    text:
+      - "A calm few hours. {person.name} eats most of a meal, and you both pretend the rest of it was also eaten."
+      - "You walk to the park and back. {person.name} collects four sticks and tells you what each one is for."
+    affection: 3
+    trust: 2
+    mood: 5
+    effects:
+      - { type: memory, role: person, tag: looked_after_them }
+      - { type: stat, key: stress, delta: -1 }
+  neutral:
+    text:
+      - "It's a long afternoon, mostly about snacks. By the end you are tired and {person.name} is exactly the same as when you started."
+      - "{person.name} watches a screen, you watch {person.them}, and the hours pass."
+    affection: 1
+    mood: 2
+    effects:
+      - { type: memory, role: person, tag: looked_after_them }
+      - { type: stat, key: stress, delta: 1 }
+  bad:
+    text:
+      - "You lose track of {person.name} for four terrible minutes. {person.They} {person:was|were} in the cupboard. Nobody is hurt, and you are not the same person."
+      - "It takes less than an hour to remember how much energy children have, and how much less you do."
+    affection: -1
+    mood: -3
+    effects:
+      - { type: stat, key: stress, delta: 3 }
+  backfire:
+    text:
+      - "A small scrape, a very loud scream, and a phone call to the parents you wish you hadn't had to make. {person.name} is fine. You are mortified."
+      - "You fall asleep in the chair. When you wake, {person.name} has drawn on the wall in something that does not wash out."
+    affection: -3
+    trust: -3
+    mood: -6
+    effects:
+      - { type: stat, key: stress, delta: 4 }

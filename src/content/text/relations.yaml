@@ -9,6 +9,7 @@ relative: { man: uncle, woman: aunt, nonbinary: relative }
 sibling: { man: brother, woman: sister, nonbinary: sibling }
 child: { man: son, woman: daughter, nonbinary: child }
 stepchild: { man: stepson, woman: stepdaughter, nonbinary: stepchild }
+grandchild: { man: grandson, woman: granddaughter, nonbinary: grandchild }
 partner: { man: boyfriend, woman: girlfriend, nonbinary: partner }
 fiance: { man: fiancé, woman: fiancée, nonbinary: fiancé }
 spouse: { man: husband, woman: wife, nonbinary: spouse }

@@ -1,0 +1,51 @@
+id: raise_first_night
+title: Rules of the house
+text: >-
+  It's been {since} since {kid.name} came to stay, and the house has learned
+  a new sound: someone running down the stairs. There is a toothbrush in the
+  bathroom, a bag by the door, and a question about whether the rules here are
+  the same as the rules at home.
+tone: light
+category: grandraise
+rarity: common
+lifeStages: [adult, senior]
+requires:
+  all:
+    - { role: kid, kind: [child], alive: true, origin: [grandchild] }
+weight: { base: 10 }
+once: true
+followUpOnly: true
+cast:
+  kid: { kind: child, presence: household }
+choices:
+  - id: warm
+    label: Make it clear that this is home, for as long as they need
+    outcome:
+      text: >-
+        You tell {kid.them} the rules are simple: dinner at six, lights out at
+        nine, and you can ask for anything. {kid.name} tests the first two over
+        the following months and never needs to test the last.
+      effects:
+        - { type: parenting, role: kid, warmth: 6, involvement: 4 }
+        - { type: relationship, role: kid, affection: 6, trust: 6 }
+        - { type: memory, role: kid, tag: parent_warm_home }
+  - id: strict
+    label: Keep to the rules you ran your own house by
+    outcome:
+      text: >-
+        You do what you know. {kid.name} complains about the curfew, the
+        vegetables and the phone basket. It turns out that routine is what a
+        child with a lot of change in their life was asking for.
+      effects:
+        - { type: parenting, role: kid, strictness: 6, involvement: 3 }
+        - { type: relationship, role: kid, affection: 2, trust: 4 }
+  - id: ask_them
+    label: Ask {kid.them} what would help
+    outcome:
+      text: >-
+        {kid.name} thinks about it seriously. The answer is a nightlight, a
+        favorite cereal, and for you to say when you're going to be late. You
+        agree to all three, and mean it.
+      effects:
+        - { type: parenting, role: kid, warmth: 4, involvement: 6 }
+        - { type: relationship, role: kid, affection: 5, trust: 8 }

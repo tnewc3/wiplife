@@ -1,0 +1,59 @@
+# Engine (registries/later.yaml, terminal.diagnosis.heart_disease): a warning that is the heart.
+id: terminal_heart
+title: A heart that's tired
+text: >-
+  The cardiologist is kind about it. Your heart has done a long job and is
+  nearly done, and there are things that can be done, and none of them make
+  you young. The conversation is about months, then, or perhaps a year,
+  and what you want to do with them.
+tone: dark
+category: endoflife
+rarity: uncommon
+lifeStages: [adult, senior]
+requires:
+  all:
+    - { later: { terminal: true } }
+    - { health: { conditions: [heart_disease] } }
+weight: { base: 10 }
+followUpOnly: true
+choices:
+  - id: hospice
+    label: Choose hospice care
+    outcome:
+      text: >-
+        The team talks about comfort in a way you don't mind. Your days become
+        slower and more precise: who you see, what you eat, which chair.
+      effects:
+        - { type: later, action: hospice, choice: hospice }
+        - { type: flag, key: took_the_diagnosis_openly, value: true }
+        - { type: stat, key: stress, delta: -2 }
+  - id: home
+    label: Stay at home with help
+    outcome:
+      text: >-
+        A nurse visits twice a week, and a family recipe is allowed in the
+        house again. The doctor says to rest, and you do the thing you're
+        worst at: nothing, as well as you can.
+      effects:
+        - { type: later, action: hospice, choice: home }
+        - { type: stat, key: happiness, delta: 1 }
+  - id: hospital
+    label: Stay under the doctors' care while there's more to try
+    outcome:
+      text: >-
+        There's a device and a procedure and a ward you get to know by sound.
+        The staff are good at their work, and you are good at pretending you
+        are not frightened.
+      effects:
+        - { type: later, action: hospice, choice: hospital }
+        - { type: stat, key: stress, delta: 3 }
+  - id: think
+    label: Take a few days to take it in
+    outcome:
+      text: >-
+        You say you'll decide, and then you take a long drive, with the
+        windows down, past all the places that mattered. By the time you get
+        home you know what you'll say.
+      effects:
+        - { type: flag, key: kept_the_diagnosis_quiet, value: true }
+        - { type: stat, key: stress, delta: 3 }

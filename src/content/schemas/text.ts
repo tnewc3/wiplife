@@ -32,6 +32,7 @@ export const relationWordsSchema = z.strictObject({
   sibling: byCategorySchema,
   child: byCategorySchema,
   stepchild: byCategorySchema,
+  grandchild: byCategorySchema,
   partner: byCategorySchema,
   fiance: byCategorySchema,
   spouse: byCategorySchema,

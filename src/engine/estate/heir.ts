@@ -36,6 +36,7 @@ import { nextPersonId } from '../events/casting';
 import { addDebt, wholeDollars } from '../finance';
 import { livingChildren } from '../family/children';
 import { moveTo, refreshHousingCost } from '../housing';
+import { isJailed, seriousTrouble } from '../lives/model';
 import { moodBaseline } from '../interactions/mood';
 import { yourWealth } from '../interactions/wealth';
 import { clampInt, rollScore } from '../random';
@@ -63,6 +64,7 @@ import { startingTeen } from '../teen/query';
 import { emptyCrime } from '../crime/query';
 import { emptyFame } from '../fame/query';
 import { emptySports } from '../sports/query';
+import { emptyLater } from '../later/query';
 
 /** A deep copy through JSON: the life holds plain data only (the engine has no structuredClone). */
 export function cloneJson<T>(value: T): T {
@@ -96,7 +98,7 @@ export function homeSaleNet(value: number, mortgage: number, content: ContentBun
  * relative or an older sibling who is of an age to, and fond enough. Null
  * when no one can (foster care follows).
  */
-export function chooseGuardian(life: LifeState, content: ContentBundle): { id: Id; kind: GuardianKind } | null {
+export function chooseGuardian(life: LifeState, content: ContentBundle, avoidTroubled = false): { id: Id; kind: GuardianKind } | null {
   const g = content.balance.family.heir.guardian;
   const tiers: GuardianKind[] = ['parent', 'stepparent', 'grandparent', 'relative', 'sibling'];
   const options: { id: Id; kind: GuardianKind; tier: number; affection: number }[] = [];
@@ -105,6 +107,8 @@ export function chooseGuardian(life: LifeState, content: ContentBundle): { id: I
     const person = life.people[id];
     const tier = tiers.indexOf(rel.kind as GuardianKind);
     if (tier < 0 || !person?.alive || rel.status !== 'active' || person.tags.includes('foster')) continue;
+    // L1: a grandchild raised by a grandparent because their parent could not: that parent is not first in line again while still in trouble.
+    if (avoidTroubled && person.life && (isJailed(person.life) || seriousTrouble(person.life, content) !== undefined)) continue;
     const age = life.currentYear - person.birthYear;
     if (rel.kind !== 'parent' && (age < g.minAge || age > g.maxAge || rel.affection < g.minAffection)) continue;
     options.push({ id, kind: rel.kind as GuardianKind, tier, affection: rel.affection });
@@ -166,9 +170,11 @@ function childhoodRecap(dead: LifeState, heir: Person & { child: NonNullable<Per
     entries.push({ year, age: year - birthYear, text: line, tags: ['childhood', ...tags], importance });
   const ctx = (values: Record<string, string | number> = {}): TextContext => ({ roles: { parent: parentRole }, values });
 
-  const adopted = heir.child.origin === 'adopted';
-  const joined = adopted ? Math.max(birthYear, oldRel.since) : birthYear;
-  add(joined, renderText(pick(rng, adopted ? text.origin.adopted : text.origin.birth), ctx({ age: joined - birthYear })), adopted ? 2 : 1, ['origin']);
+  // L1: a grandchild you raised came to you when you took them in (the year their relationship with you became a child's).
+  const adopted = heir.child.origin === 'adopted' || heir.child.origin === 'grandchild';
+  const joined = adopted ? Math.max(birthYear, oldRel.kindSince ?? oldRel.since) : birthYear;
+  const origin = heir.child.origin === 'grandchild' ? text.origin.grandchild : adopted ? text.origin.adopted : text.origin.birth;
+  add(joined, renderText(pick(rng, origin), ctx({ age: joined - birthYear })), adopted ? 2 : 1, ['origin']);
 
   // How they were raised: the first time each style memory was written, at most four, oldest first.
   const seen = new Set<string>();
@@ -236,7 +242,8 @@ export function continueAsHeir(dead: LifeState, heirId: Id, content: ContentBund
   const parentRole = role(people[parentId]!);
   relationships[parentId] = {
     personId: parentId,
-    kind: 'parent',
+    // L1: a grandchild you raised knew you as their grandparent.
+    kind: kid.origin === 'grandchild' ? 'grandparent' : 'parent',
     status: 'active',
     affection: oldRel.affection,
     trust: oldRel.trust,
@@ -254,6 +261,8 @@ export function continueAsHeir(dead: LifeState, heirId: Id, content: ContentBund
     const person: Person = cloneJson(original);
     delete person.child;
     delete person.priorChildren;
+    // L1: a grandchild's link is to a parent in the life that ended; here they are only family.
+    delete person.grandchild;
     // E3: what they were to the parent who died (care at their home, a request they made) doesn't carry over; the family has taken it on.
     if (person.life) {
       delete person.life.requestYear;
@@ -275,7 +284,10 @@ export function continueAsHeir(dead: LifeState, heirId: Id, content: ContentBund
   const ids = Object.keys(dead.relationships).sort(byId);
   const aliveActive = (id: Id) => dead.people[id]?.alive === true && dead.relationships[id]!.status !== 'ended';
   // The heir themselves: a person no more, a character now.
-  const otherId = kid.otherParentId !== undefined && dead.people[kid.otherParentId] ? kid.otherParentId : undefined;
+  const grandHeir = kid.origin === 'grandchild';
+  // L1: for a grandchild you raised, their own parent (your child) is their parent.
+  const realParent = grandHeir && candidate.grandchild && dead.people[candidate.grandchild.parentId] ? candidate.grandchild.parentId : undefined;
+  const otherId = grandHeir ? realParent : kid.otherParentId !== undefined && dead.people[kid.otherParentId] ? kid.otherParentId : undefined;
   if (otherId !== undefined) {
     const old = dead.relationships[otherId]!;
     bring(otherId, 'parent', 'parent', old.status === 'estranged' ? 'estranged' : 'active');
@@ -283,12 +295,18 @@ export function continueAsHeir(dead: LifeState, heirId: Id, content: ContentBund
     if (!dead.people[otherId]!.alive) relationships[otherId]!.memories = [];
   }
   const spouse = ids.find((id) => dead.relationships[id]!.kind === 'spouse' && dead.relationships[id]!.status === 'active' && dead.people[id]!.alive);
-  if (spouse !== undefined && spouse !== otherId) bring(spouse, 'stepparent', 'stepparent');
+  if (spouse !== undefined && spouse !== otherId) bring(spouse, grandHeir ? 'grandparent' : 'stepparent', grandHeir ? 'grandparent' : 'stepparent');
   for (const id of ids) {
     const rel = dead.relationships[id]!;
     const person = dead.people[id]!;
     if (id === heirId) continue;
-    if (rel.kind === 'child' && person.alive) bring(id, 'sibling', 'sibling', rel.status === 'estranged' ? 'estranged' : 'active');
+    // L1: for a grandchild you raised, your other children are their aunts and uncles, and the other grandchildren you raised from the same parent their siblings.
+    if (grandHeir && rel.kind === 'child' && person.alive) {
+      const sameParent = person.child?.origin === 'grandchild' && person.grandchild?.parentId === candidate.grandchild?.parentId;
+      bring(id, sameParent ? 'sibling' : 'relative', sameParent ? 'sibling' : 'relative', rel.status === 'estranged' ? 'estranged' : 'active');
+    } else if (grandHeir && (rel.kind === 'parent' || rel.kind === 'stepparent' || rel.kind === 'sibling' || rel.kind === 'stepchild')) {
+      // (Their great-grandparents, your siblings and your stepchildren are not carried over: the family has no word for them.)
+    } else if (rel.kind === 'child' && person.alive) bring(id, 'sibling', 'sibling', rel.status === 'estranged' ? 'estranged' : 'active');
     else if (rel.kind === 'stepchild' && aliveActive(id) && person.child?.otherParentId !== undefined && (person.child.otherParentId === otherId || person.child.otherParentId === spouse)) {
       bring(id, 'sibling', 'sibling');
     } else if ((rel.kind === 'parent' || rel.kind === 'stepparent') && aliveActive(id)) bring(id, 'grandparent', 'grandparent');
@@ -374,6 +392,7 @@ export function continueAsHeir(dead: LifeState, heirId: Id, content: ContentBund
     crime: emptyCrime(),
     fame: emptyFame(),
     sports: emptySports(),
+    later: emptyLater(),
   };
 
   // ── What they inherit ────────────────────────────────────────────────────
@@ -406,7 +425,7 @@ export function continueAsHeir(dead: LifeState, heirId: Id, content: ContentBund
   let guardianId: Id | null = null;
   let guardianKind: GuardianKind | 'foster' | null = null;
   if (!independent) {
-    const guardian = chooseGuardian(life, content);
+    const guardian = chooseGuardian(life, content, grandHeir);
     if (guardian) {
       guardianId = guardian.id;
       guardianKind = guardian.kind;

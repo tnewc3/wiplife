@@ -6,7 +6,7 @@
  */
 import type { ContentBundle, EventDef, Outcome, Rarity, Tone } from '../../src/content/schemas';
 import type { LifeStage } from '../../src/engine/types';
-import { familyResults, heirResults, HEIR_MEMORY_MAP, LIFE_STAGE_IDS } from '../../src/content/schemas';
+import { familyResults, heirResults, laterResults, HEIR_MEMORY_MAP, LIFE_STAGE_IDS } from '../../src/content/schemas';
 import { referencesIn } from '../../src/engine/conditions';
 
 export interface StaticCoverage {
@@ -99,6 +99,8 @@ export function rootEvents(content: ContentBundle): Set<string> {
     ...Object.values(r.fame.triggers),
     // E6c: what the sports step queues.
     ...Object.values(r.sports.triggers),
+    // L1: what the later-life step queues (grandchildren, care, a foreseen death, amends).
+    ...laterResults(r.later).map((result) => ({ events: [...result.events] })),
   ];
   for (const list of lists) for (const id of list.events) roots.add(id);
   return roots;
@@ -220,6 +222,18 @@ export function analyzeContent(content: ContentBundle): StaticCoverage {
   addTo(flagWrites, 'sports_career_ended_by_injury', 'sports (engine)');
   for (const flag of ['estate_will', 'estate_no_will', 'left_out_of_will', 'inherited_a_home', 'in_foster_care', 'grew_up_in_foster_care']) addTo(flagWrites, flag, 'heir (engine)');
   for (const flag of Object.keys(content.balance.family.heir.reputation.flags)) addTo(flagReads, flag, 'balance/family.yaml heir.reputation.flags');
+
+  // L1: the life review tells a line only when the memory or flag that proves it is there; the grandchildren step reads
+  // your_favorite when it decides who feels left out.
+  for (const t of [...content.text.review.regrets, ...content.text.review.proud]) {
+    if (t.who?.memory) addTo(memoryReads, t.who.memory, `text/review.yaml ${t.id}`);
+    const refs = referencesIn(t.when);
+    for (const tag of refs.memories) addTo(memoryReads, tag, `text/review.yaml ${t.id}`);
+    for (const flag of refs.flags) addTo(flagReads, flag, `text/review.yaml ${t.id}`);
+  }
+  addTo(memoryReads, 'your_favorite', 'later (engine)');
+  // The amends and final-wishes code writes these (recordAmends, setWishes and the bedside visit).
+  for (const tag of ['amends_made', 'amends_put_off', 'amends_refused', 'at_your_bedside', 'stayed_away_at_the_end']) addTo(memoryWrites, tag, 'later (engine)');
 
   const sorted = (xs: Iterable<string>) => [...xs].sort();
   const reachable = reachableEvents(content);

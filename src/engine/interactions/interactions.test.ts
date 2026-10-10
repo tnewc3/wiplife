@@ -65,6 +65,11 @@ function addPerson(d: LifeState, spec: Spec): void {
     person.traits = { ambition: 50, confidence: 50, kindness: 50, riskTaking: 50, discipline: 50, sociability: 50 };
     person.child = { origin: spec.kind === 'child' ? 'birth' : 'step', custody: 'you', custodyDecided: true, health: 80, happiness: 70, fitness: 50, stress: 10, geneticRisk: 30, talent: null, gpa: 0, latent: {} };
   }
+  if (spec.kind === 'grandchild') {
+    // A grandchild has a parent of yours who is a grown child.
+    addPerson(d, { id: `${spec.id}-parent`, age: d.character.age - 22, kind: 'child' });
+    d.people[spec.id]!.grandchild = { parentId: `${spec.id}-parent` };
+  }
   if (spec.alive === false) d.people[spec.id]!.deathYear = d.currentYear;
   d.relationships[spec.id] = {
     personId: spec.id,
@@ -800,7 +805,7 @@ describe('every interaction', () => {
   it('has a profile, 2–3 wordings per tier, and fills in cleanly for people of any pronouns', () => {
     const defs = Object.values(content.interactions).filter((d) => !d.retired);
     expect(defs.length).toBeGreaterThanOrEqual(19);
-    expect(new Set(defs.map((d) => d.group))).toEqual(new Set(['everyday', 'conflict', 'romance', 'practical', 'parenting']));
+    expect(new Set(defs.map((d) => d.group))).toEqual(new Set(['everyday', 'conflict', 'romance', 'practical', 'parenting', 'grandparenting']));
     for (const def of defs) {
       expect(balance.profiles[def.profile], def.id).toBeDefined();
       for (const [tier, outcome] of Object.entries(def.outcomes)) {
@@ -815,10 +820,10 @@ describe('every interaction', () => {
     for (const def of Object.values(content.interactions)) {
       for (const tier of ['great', 'good', 'neutral', 'bad', 'backfire'] as const) {
         const kind = def.availability.kinds.includes('partner') ? 'partner' : def.availability.kinds[0]!;
-        const age = def.availability.you.min !== undefined ? Math.max(30, def.availability.you.min) : 30;
+        const age = kind === 'grandchild' ? 80 : def.availability.you.min !== undefined ? Math.max(30, def.availability.you.min) : 30;
         const start = lifeWith(
           age,
-          [{ id: 'x', age: kind === 'child' || kind === 'stepchild' ? Math.max(def.availability.them.min ?? 5, 5) : Math.max(def.availability.them.min ?? 20, 24) + (['parent', 'stepparent'].includes(kind) ? 30 : kind === 'grandparent' ? 55 : 0), kind, affection: 80, trust: 80, status: def.availability.status[0] === 'estranged' ? 'estranged' : 'active', memories: [{ tag: 'big_fight', year: 2020 }] }],
+          [{ id: 'x', age: kind === 'child' || kind === 'stepchild' || kind === 'grandchild' ? Math.max(def.availability.them.min ?? 5, 5) : Math.max(def.availability.them.min ?? 20, 24) + (['parent', 'stepparent'].includes(kind) ? 30 : kind === 'grandparent' ? 55 : 0), kind, affection: 80, trust: 80, status: def.availability.status[0] === 'estranged' ? 'estranged' : 'active', memories: [{ tag: 'big_fight', year: 2020 }] }],
           20000,
         );
         if (!isInteractionAvailable(start, def, 'x', content)) continue;

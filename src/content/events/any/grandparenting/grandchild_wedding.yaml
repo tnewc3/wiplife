@@ -1,0 +1,50 @@
+id: grandchild_wedding
+title: Save the date
+text: >-
+  The invitation has gold edges and your name written in someone else's
+  careful hand. {kid.name} is getting married. Somewhere between the first page
+  and the fourth, a card falls out asking whether you would say a few words.
+tone: light
+category: grandparenting
+rarity: uncommon
+lifeStages: [adult, senior]
+requires:
+  all:
+    - { later: { grandchildren: { gte: 1 } } }
+    - { age: { gte: 60 } }
+    - { role: kid, kind: [grandchild], alive: true, age: { gte: 22, lte: 40 }, affection: { gte: 50 } }
+weight: { base: 5 }
+cooldownYears: 5
+cast:
+  kid: { kind: grandchild, presence: anywhere }
+choices:
+  - id: toast
+    label: Go, give the toast, and bring a gift
+    outcome:
+      text: >-
+        You speak for four minutes and cry for three of them. {kid.name} hugs
+        you after, and says your toast was the one people kept repeating. The
+        gift is a small thing, wrapped badly, and it is the first one opened.
+      effects:
+        - { type: cost, item: grandchild_wedding_gift }
+        - { type: relationship, role: kid, affection: 9, trust: 5 }
+        - { type: stat, key: happiness, delta: 6 }
+  - id: attend_quietly
+    label: Go, sit at the back, and keep it simple
+    outcome:
+      text: >-
+        You wear the good suit and stand at the back. When the music starts,
+        you realize you are going to cry, and the usher hands you a tissue as if
+        this happens at every wedding.
+      effects:
+        - { type: relationship, role: kid, affection: 4, trust: 2 }
+        - { type: stat, key: happiness, delta: 4 }
+  - id: send_regrets
+    label: Send your regrets
+    outcome:
+      text: >-
+        The distance, your knees, the long day: all true, none of it quite the
+        reason. A card goes out in your place. {kid.name} writes back a very
+        polite thank-you.
+      effects:
+        - { type: relationship, role: kid, affection: -5, trust: -2 }
