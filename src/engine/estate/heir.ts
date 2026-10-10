@@ -261,6 +261,8 @@ export function continueAsHeir(dead: LifeState, heirId: Id, content: ContentBund
     const person: Person = cloneJson(original);
     delete person.child;
     delete person.priorChildren;
+    // L1: a grandchild's link is to a parent in the life that ended; here they are only family.
+    delete person.grandchild;
     // E3: what they were to the parent who died (care at their home, a request they made) doesn't carry over; the family has taken it on.
     if (person.life) {
       delete person.life.requestYear;

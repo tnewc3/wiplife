@@ -234,6 +234,20 @@ describe('raising a grandchild (guardianship)', () => {
     expect(heir.people[parentRel.personId]!.name.first).toBe('Dana');
     expect(checkInvariants(heir, content)).toEqual([]);
   });
+
+  it('carries a brother or sister you raised from the same parent into the heir\'s life, as family and nothing more', () => {
+    const raised = produce(born(), (d) => {
+      const first = grandchildren(d)[0]!;
+      createGrandchild(d, createRng('second'), first.grandchild.parentId, { first: 'Leo', birthYear: d.currentYear - 5 }, content);
+      for (const g of grandchildren(d)) raiseGrandchild(d, g.id, createRng(`r-${g.id}`), content);
+    });
+    const kids = raisedGrandchildren(raised);
+    expect(kids.length).toBe(2);
+    const heir = continueAsHeir(die(raised), kids[0]!.id, content);
+    expect(Object.values(heir.relationships).some((r) => r.kind === 'sibling')).toBe(true);
+    expect(Object.values(heir.people).some((p) => p.grandchild)).toBe(false);
+    expect(checkInvariants(heir, content)).toEqual([]);
+  });
 });
 
 describe('care near the end', () => {
