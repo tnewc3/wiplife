@@ -15,7 +15,7 @@ import type { ContentBundle } from '../../src/content/schemas';
 import { writeFuneral } from '../../src/engine/eulogy';
 import { archiveEntry } from '../../src/engine/archive';
 import type { LifeState } from '../../src/engine/types';
-import { ARCHIVE_SCHEMA_VERSION, makeArchiveEnvelope } from '../../src/persistence/archive';
+import { makeArchiveEnvelope } from '../../src/persistence/archive';
 import { deadLife, familyLife, loadSavedLife } from './heirFixtures';
 import { expectNoHorizontalScroll, expectTouchTargets, passAgeGate, passFuneral } from './helpers';
 
@@ -124,8 +124,8 @@ test('a life archived before eulogies says no funeral was recorded', async ({ pa
   const entry = { ...archiveEntry(deadLife(familyLife({ seed: 'e2e-funeral-old', kids: [], spouse: true })), content), funeral: null };
   await passAgeGate(page, OPEN);
   // An archive entry as version 3 stored it (no funeral at all): it is upgraded when it is read.
-  const { funeral: _funeral, ...v3 } = entry;
-  const envelope = { ...makeArchiveEnvelope(entry, content.contentVersion), schemaVersion: ARCHIVE_SCHEMA_VERSION - 1, data: v3 };
+  const { funeral: _funeral, review: _review, ...v3 } = entry;
+  const envelope = { ...makeArchiveEnvelope(entry, content.contentVersion), schemaVersion: 3, data: v3 };
   await page.evaluate(
     (row) =>
       new Promise<void>((resolve, reject) => {
