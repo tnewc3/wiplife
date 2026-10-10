@@ -17,7 +17,7 @@ import type { ContentBundle } from '../../src/content/schemas';
 import { AMENDS_RESULTS, CARE_OPTIONS, HOSPICE_CHOICES, SERVICE_STYLES } from '../../src/content/schemas';
 import type { LifeActionId, LifeActionParams } from '../../src/engine/actions';
 import { availableInteractions } from '../../src/engine/interactions/availability';
-import { amendsCandidates } from '../../src/engine/later/amends';
+import { amendsCandidates, amendsKey } from '../../src/engine/later/amends';
 import { careProviders } from '../../src/engine/later/care';
 import { grandchildren, raisedGrandchildren, willOutOfDate } from '../../src/engine/later/query';
 import { reviewOptions } from '../../src/engine/later/review';
@@ -402,7 +402,9 @@ export class LaterWatcher {
     if (ac?.option === 'family' && ac.providerId !== undefined) {
       const p = after.people[ac.providerId];
       const rel = after.relationships[ac.providerId];
-      if (!p?.alive || !rel || rel.status !== 'active' || !this.content.balance.later.care.family.kinds.includes(rel.kind)) {
+      // A divorce or a death during the year ends it at the next care step, so only a provider who already failed the year before is a fault.
+      const changedThisYear = before.relationships[ac.providerId]?.kind !== rel?.kind || before.relationships[ac.providerId]?.status !== rel?.status || before.people[ac.providerId]?.alive !== p?.alive;
+      if (!changedThisYear && (!p?.alive || !rel || rel.status !== 'active' || !this.content.balance.later.care.family.kinds.includes(rel.kind))) {
         this.fail('careProvider', after, `family care provided by ${ac.providerId} (${rel?.kind ?? 'unrelated'}, ${rel?.status ?? 'gone'}, alive ${String(p?.alive)})`);
       }
     }
@@ -420,15 +422,18 @@ export class LaterWatcher {
       if (source !== undefined) {
         r.amends.chances++;
         r.amends.bySource[source]!.offered++;
-        this.checkAmends(after, source, p.cast.npc);
+        this.checkAmends(before, after, source, p.cast.npc);
       }
     }
   }
 
   /** Every amends chance has history behind it: a source that fits the person (or the goal) as the year began. */
-  private checkAmends(life: LifeState, source: string, npc: Id | undefined): void {
-    const ok = amendsCandidates(life, this.content).some((c) => c.source === source && c.personId === npc);
-    if (!ok) this.fail('amendsHistory', life, `an amends chance from "${source}" for ${npc ?? 'no one'} with nothing in the history to call for it`);
+  private checkAmends(before: LifeState, life: LifeState, source: string, npc: Id | undefined): void {
+    // The history may have changed since it was offered (a chance waiting from last year, a call that mended things), so either end of the year will do.
+    const fits = (s: LifeState) => amendsCandidates(s, this.content).some((c) => c.source === source && c.personId === npc);
+    // Or the amends step itself picked it this year, from the history as it stood at that step (the web step that runs after it can move a tie across a threshold).
+    const picked = life.later.offered[amendsKey(source, npc)] === life.currentYear;
+    if (!picked && !fits(before) && !fits(life)) this.fail('amendsHistory', life, `an amends chance from "${source}" for ${npc ?? 'no one'} with nothing in the history to call for it`);
   }
 
   /** The life that has just ended. */

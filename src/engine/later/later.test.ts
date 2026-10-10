@@ -96,6 +96,14 @@ describe('grandchildren', () => {
     expect(Object.values(twice.people).filter((p) => p.grandchild)).toHaveLength(1);
   });
 
+  it('are not made from the children of a grandchild you raised (those are great-grandchildren)', () => {
+    const start = produce(grandparent(), (d) => {
+      d.people.kid!.grandchild = { parentId: 'kid' };
+    });
+    const after = produce(start, (d) => runGrandchildren(d, content));
+    expect(Object.values(after.people).filter((p) => p.grandchild && p.id !== 'kid')).toHaveLength(0);
+  });
+
   it('follow their parent to a new city until they are grown', () => {
     const born = produce(grandparent(), (d) => runGrandchildren(d, content));
     const other = Object.keys(content.cities).find((c) => c !== born.character.cityId)!;
@@ -337,6 +345,19 @@ describe('care near the end', () => {
     });
     expect(gone.later.care!.option).toBeNull();
     expect(gone.later.care!.declined).toContain('k1');
+  });
+
+  it('ends when the person who looks after you stops being someone who can (a divorce makes a spouse an ex)', () => {
+    const settled = produce(old(), (d) => {
+      addPerson(d, 'sp', 'spouse', { age: 70, affection: 90, trust: 90 });
+      d.later.care = { since: d.currentYear - 2, option: 'family', optionSince: d.currentYear - 1, providerId: 'sp', declined: [] };
+    });
+    const divorced = produce(settled, (d) => {
+      d.relationships.sp!.kind = 'ex';
+      runCare(d, content);
+    });
+    expect(divorced.later.care!.option).toBeNull();
+    expect(divorced.later.care!.declined).toContain('sp');
   });
 });
 

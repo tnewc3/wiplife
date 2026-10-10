@@ -22,7 +22,7 @@ export function laterFailures(state: LifeState, content: ContentBundle): string[
     if (!person.grandchild) continue;
     const parent = state.people[person.grandchild.parentId];
     if (!parent) fail(`${label} names a missing parent`);
-    else if (!(state.relationships[parent.id]?.kind === 'child' || state.relationships[parent.id]?.kind === 'stepchild')) fail(`${label}'s parent is not your child`);
+    else if (!(state.relationships[parent.id]?.kind === 'child' || state.relationships[parent.id]?.kind === 'stepchild')) fail(`${label}'s parent ${parent.id} is not your child (${state.relationships[parent.id]?.kind ?? 'no tie'}, ${state.relationships[parent.id]?.status ?? '-'})`);
     else if (person.birthYear - parent.birthYear < adultAge) fail(`${label} was born when their parent was under ${adultAge}`);
     if (rel && rel.kind !== 'grandchild' && !(rel.kind === 'child' && person.child?.origin === 'grandchild')) fail(`${label} is "${rel.kind}", not a grandchild or a grandchild you raise`);
     if (person.child && person.child.origin !== 'grandchild') fail(`${label} is raised by you but their origin is "${person.child.origin}"`);

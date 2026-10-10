@@ -117,6 +117,8 @@ function welcomeGrandchildren(state: LifeState, content: ContentBundle): void {
     const rel = state.relationships[parentId]!;
     const parent = state.people[parentId];
     if ((rel.kind !== 'child' && rel.kind !== 'stepchild') || rel.status === 'ended' || !parent?.life) continue;
+    // The children of a grandchild you raised are your great-grandchildren, not grandchildren.
+    if (parent.grandchild) continue;
     const kids = parent.life.children;
     for (let i = 0; i < kids.length; i++) {
       const kid = kids[i]!;

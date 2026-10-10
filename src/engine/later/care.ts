@@ -225,7 +225,7 @@ export function runCare(state: LifeState, content: ContentBundle): void {
     const id = care.providerId;
     const person = id === undefined ? undefined : state.people[id];
     const rel = id === undefined ? undefined : state.relationships[id];
-    const able = person !== undefined && rel !== undefined && rel.status === 'active' && ableToCare(state, person, rel.kind, content);
+    const able = person !== undefined && rel !== undefined && rel.status === 'active' && b.family.kinds.includes(rel.kind) && ableToCare(state, person, rel.kind, content);
     if (!able || chance(state.rng, b.family.givesOut)) {
       providerGone(state, content);
       return;
