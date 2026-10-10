@@ -69,24 +69,24 @@ care:
 terminal:
   minAge: 50
   # A health condition with at least this mortality can be the one that takes you.
-  conditionMortality: 0.015
+  conditionMortality: 0.05
   condition:
     minSeverity: 45
     chance:
-      - { at: 45, x: 0.03 }
-      - { at: 70, x: 0.1 }
-      - { at: 100, x: 0.25 }
+      - { at: 45, x: 0.025 }
+      - { at: 70, x: 0.08 }
+      - { at: 100, x: 0.2 }
   # A long decline: old, and in poor health.
   decline:
     minAge: 80
     healthBelow: 35
     chance:
-      - { at: 80, x: 0.02 }
-      - { at: 90, x: 0.08 }
-      - { at: 100, x: 0.2 }
+      - { at: 80, x: 0.015 }
+      - { at: 90, x: 0.06 }
+      - { at: 100, x: 0.15 }
   # The chance of dying in the year it begins, and in each year after. The last
   # entry is the longest anyone lasts.
-  deathChance: [0.04, 0.25, 0.55, 0.9]
+  deathChance: [0.04, 0.12, 0.22, 0.35, 0.5, 0.7, 0.95]
   # Where you spend your last months: the cost of a year (scaled by your city's
   # cost of living) and what a year there does for you.
   hospice:

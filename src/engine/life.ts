@@ -280,10 +280,15 @@ export function endYear(state: LifeState, content: ContentBundle): LifeState {
     // age, Health and genetic risk set the chance, and each health condition
     // adds its own; a death is put down to one of them by its share.
     const base = characterDeathChance(c.age, c.stats.health, c.hidden.geneticRisk, content);
-    const deadly = [...deadlyConditions(draft, content)];
+    let deadly = [...deadlyConditions(draft, content)];
     // L1: a death you saw coming has its own chance, which rises with each year since the warning.
+    // It stands in for the mortality of the condition behind it, so the illness is not counted twice.
     const foreseen = terminalDeathChance(draft as LifeState, content);
-    if (foreseen > 0) deadly.push([TERMINAL_ID, foreseen] as const);
+    if (foreseen > 0) {
+      const behind = draft.later.terminal?.conditionId;
+      if (behind !== undefined) deadly = deadly.filter(([id]) => id !== behind);
+      deadly.push([TERMINAL_ID, foreseen] as const);
+    }
     const total = Math.min(1, deadly.reduce((sum, [, p]) => sum + p, base));
     let causeId = draft.death?.causeId ?? null;
     if (causeId === null && chance(draft.rng, total)) {
