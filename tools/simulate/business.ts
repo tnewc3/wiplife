@@ -134,7 +134,7 @@ export function chooseBusinessActions(life: LifeState, content: ContentBundle, r
       }
     }
     // Giving up, or selling at the end of a career.
-    const giveUp = profile.policy === 'good' ? 3 : profile.policy === 'random' ? 4 : 99;
+    const giveUp = 4;
     if (b.lossYears >= giveUp && b.cash < 1) out.push(['close_business', { biz: { businessId: b.id } }]);
     else if (age >= 64 && chance(rng, 0.4)) out.push(['sell_business', { biz: { businessId: b.id } }]);
     // Pay an investor back when it can be afforded.
