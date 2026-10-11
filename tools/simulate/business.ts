@@ -129,7 +129,7 @@ export function chooseBusinessActions(life: LifeState, content: ContentBundle, r
     if (profile.policy === 'good') {
       if (b.report && b.report.profit > 0 && b.staff.filter((s) => !s.manager).length < 2 && hireBlock(life, b, def, { locationId: b.locations[0]!.id }, content) === null && chance(rng, 0.3)) out.push(['hire_staff', { biz: { businessId: b.id } }]);
       const r = b.report;
-      if (r && r.profit > def.styles[b.style].startup * 0.5 && b.locations.length < 3 && b.report.year - b.founded >= 3 && b.lossYears === 0 && life.finances.savings > def.styles[b.style].startup * 2.5 && chance(rng, 0.25)) {
+      if (r && r.profit > def.styles[b.style].startup * 0.5 && b.locations.length < 3 && r.year - b.founded >= 3 && b.lossYears === 0 && life.finances.savings > def.styles[b.style].startup * 2.5 && chance(rng, 0.25)) {
         out.push(['open_location', { biz: { businessId: b.id, cityId: b.cityId, style: b.style, funding: 'savings' } }]);
       }
     }
@@ -191,7 +191,7 @@ export interface BusinessReport {
   /** Survival: businesses not failed or closed after 1, 5 and 10 years, by cut. */
   survival: { all: Cohort; byType: Record<string, Cohort>; byStyle: Record<BusinessStyle, Cohort>; byPolicy: Record<Policy, Cohort>; bySkill: Record<'low' | 'mid' | 'high', Cohort>; byRole: Record<'self' | 'manager', Cohort>; byFunding: Record<BusinessFunding, Cohort> };
   /** Business-years, and what they earned (whole dollars): profit, paid to the owner, put in. */
-  years: { n: number; profit: number; profitable: number; draw: number; injected: number; revenue: number; staffMorale: number; unlicensed: number };
+  years: { byPolicy: Record<Policy, { n: number; profit: number; profitable: number }>; n: number; profit: number; profitable: number; draw: number; injected: number; revenue: number; staffMorale: number; unlicensed: number };
   /** How businesses ended. */
   ends: { sold: number; closed: number; failed: number; passed: number; estateSold: number };
   /** Failures: the debts left (loans not repaid and the guaranteed shortfall), and lives that went bankrupt within five years. */
@@ -223,7 +223,7 @@ export function emptyBusinessReport(content: ContentBundle): BusinessReport {
       byRole: { self: cohort(), manager: cohort() },
       byFunding: Object.fromEntries(BUSINESS_FUNDING.map((f) => [f, cohort()])) as Record<BusinessFunding, Cohort>,
     },
-    years: { n: 0, profit: 0, profitable: 0, draw: 0, injected: 0, revenue: 0, staffMorale: 0, unlicensed: 0 },
+    years: { byPolicy: { good: { n: 0, profit: 0, profitable: 0 }, random: { n: 0, profit: 0, profitable: 0 }, poor: { n: 0, profit: 0, profitable: 0 } }, n: 0, profit: 0, profitable: 0, draw: 0, injected: 0, revenue: 0, staffMorale: 0, unlicensed: 0 },
     ends: { sold: 0, closed: 0, failed: 0, passed: 0, estateSold: 0 },
     failures: { n: 0, debtLeft: 0, withDebt: 0, bankruptAfter: 0, investorsLost: 0, lostBy: {} },
     people: { hires: 0, quits: 0, namedPeak: 0, investors: 0, investorsMadeMoney: 0, investorsLostMoney: 0, cofounders: 0, buyouts: 0, managerSkims: 0 },
@@ -282,6 +282,10 @@ export class BusinessWatcher {
       const rep = b.report;
       if (!rep || rep.year !== life.currentYear) continue;
       r.years.n++;
+      const pol = r.years.byPolicy[this.policy];
+      pol.n++;
+      pol.profit += rep.profit;
+      if (rep.profit > 0) pol.profitable++;
       r.years.profit += rep.profit;
       r.years.revenue += rep.revenue;
       if (rep.profit > 0) r.years.profitable++;
@@ -447,6 +451,10 @@ export function formatBusiness(r: BusinessReport, content: ContentBundle): strin
   lines.push(`  ${pct(r.owners.any, r.reached[30])} of lives reaching 30 started or bought a business (started ${pct(r.owners.started, r.reached[30])}, bought ${pct(r.owners.bought, r.reached[30])}, a chain ${r.owners.chains}); ${r.owners.heirs} heirs inherited one`);
   lines.push(`  begun: ${r.begun.total} (started ${r.begun.started}, bought ${r.begun.bought}, run by a manager ${r.begun.managed}); by funding: ${BUSINESS_FUNDING.map((f) => `${f} ${r.begun.byFunding[f]}`).join(', ')}`);
   lines.push(`    by kind: ${Object.keys(content.businesses).sort().map((t) => `${t} ${r.begun.byType[t] ?? 0}`).join(', ')}; by style: ${BUSINESS_STYLES.map((s) => `${s} ${r.begun.byStyle[s]}`).join(', ')}`);
+  for (const p of ['good', 'random', 'poor'] as const) {
+    const q = r.years.byPolicy[p];
+    lines.push(`  ${p} decisions: ${q.n} business-years, mean profit ${dollars(q.n > 0 ? q.profit / q.n : 0)}, ${pct(q.profitable, q.n)} profitable`);
+  }
   lines.push('  survival (not failed or closed after 1, 5 and 10 years):');
   lines.push(survivalLine('all', r.survival.all));
   for (const t of Object.keys(content.businesses).sort()) lines.push(survivalLine(t, r.survival.byType[t]!));
