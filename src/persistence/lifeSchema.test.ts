@@ -719,7 +719,7 @@ describe('heirs, wills and estates (E2b)', () => {
   });
 
   it('upgrades a version 12 life: no news, no care costs, and people who get their own life from the first year', async () => {
-    const base = lifeAtAge('e3-v12c', 30);
+    const base = lifeAtAge('e3-v12d', 30);
     const life = produce(base, (d) => {
       d.finances.lastLedger = { year: d.currentYear - 1, gross: 40_000, retirement: 0, tax: 3_000, housing: 5_000, living: 12_000, debtPayments: 0, interest: 0, debtInterest: 0, borrowed: 0, support: 0, children: 0, care: 0, supportPaid: 0, supportReceived: 0, upkeep: 0, insurance: 0, giving: 0, business: 0, net: 20_000 };
     });

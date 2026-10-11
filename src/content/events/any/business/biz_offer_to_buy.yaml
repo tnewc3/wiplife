@@ -1,9 +1,10 @@
 id: biz_offer_to_buy
 title: An offer on the table
 text: >-
-  A man in a good coat has eaten at {business} three times this month. This
-  time, he introduces himself, and says he's interested in buying it. The price
-  he names is a number, not an insult.
+  {buyer.name}, in a good coat, has eaten at {business} three times this month.
+  This time, {buyer.they} {buyer:introduces|introduce} {buyer.themself}, and
+  {buyer:says|say} {buyer.they} {buyer:is|are} interested in buying it. The price {buyer.they}
+  {buyer:names|name} is a number, not an insult.
 tone: neutral
 category: business
 rarity: rare
@@ -16,6 +17,8 @@ requires:
 weight: { base: 3 }
 cooldownYears: 8
 bindBusiness: true
+cast:
+  buyer: { kind: acquaintance, presence: city, createIfMissing: true, age: { min: 35, max: 65 } }
 choices:
   - id: sell
     label: Sell it
@@ -26,7 +29,7 @@ choices:
   - id: decline
     label: Politely decline
     outcome:
-      text: He leaves a card. You put it in a drawer, in case. The business feels slightly more yours than before.
+      text: "{buyer.name} leaves a card. You put it in a drawer, in case. The business feels slightly more yours than before."
       effects:
         - { type: stat, key: confidence, delta: 3 }
         - { type: business, action: reputation, delta: 2 }
@@ -37,12 +40,12 @@ choices:
       stats: [{ key: confidence, weight: 0.25 }, { key: smarts, weight: 0.15 }]
       success:
         text: >-
-          He comes back with a better number, and a sheepish smile. You thank him
+          {buyer.name} comes back with a better number, and a sheepish smile. You thank {buyer.them}
           anyway, and keep the place a little longer.
         effects:
           - { type: business, action: receive, share: 0.01, floor: 300 }
           - { type: stat, key: confidence, delta: 3 }
       failure:
-        text: He doesn't come back. The offer, apparently, was only good the day he made it.
+        text: "{buyer.name} doesn't come back. The offer, apparently, was only good the day it was made."
         effects:
           - { type: stat, key: stress, delta: 2 }

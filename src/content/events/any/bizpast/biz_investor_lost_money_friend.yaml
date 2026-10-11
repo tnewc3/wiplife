@@ -44,7 +44,6 @@ choices:
       effects:
         - { type: cost, item: biz_repay_start }
         - { type: relationship, role: investor, trust: 6 }
-        - { type: memory, role: investor, tag: you_started_paying_them_back }
   - id: avoid
     label: Turn the cart around
     outcome:

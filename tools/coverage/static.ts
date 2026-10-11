@@ -227,6 +227,11 @@ export function analyzeContent(content: ContentBundle): StaticCoverage {
   for (const flag of ['estate_will', 'estate_no_will', 'left_out_of_will', 'inherited_a_home', 'in_foster_care', 'grew_up_in_foster_care']) addTo(flagWrites, flag, 'heir (engine)');
   for (const flag of Object.keys(content.balance.family.heir.reputation.flags)) addTo(flagReads, flag, 'balance/family.yaml heir.reputation.flags');
 
+  // W3: the business engine writes these when money goes in or comes back (a stake, a partnership, a sale or a failure),
+  // and reads the ones about a worker: work given to someone, being there for their family, and money taken.
+  for (const tag of ['invested_in_your_business', 'cofounded_with_you', 'made_money_in_your_business', 'lost_money_in_your_business', 'stole_from_your_business']) addTo(memoryWrites, tag, 'business (engine)');
+  for (const tag of ['stole_from_your_business', 'you_gave_them_work', 'you_were_there_for_their_family']) addTo(memoryReads, tag, 'business (engine)');
+
   // L1: the life review tells a line only when the memory or flag that proves it is there; the grandchildren step reads
   // your_favorite when it decides who feels left out.
   for (const t of [...content.text.review.regrets, ...content.text.review.proud]) {

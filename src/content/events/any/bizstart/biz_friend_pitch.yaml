@@ -14,7 +14,10 @@ requires:
     - { age: { gte: 21 } }
     - { business: { owned: false } }
     - { role: friend, alive: true, affection: { gte: 55 } }
-weight: { base: 3 }
+weight:
+  base: 3
+  modifiers:
+    - { if: { memory: { role: friend, tag: made_money_in_your_business } }, x: 3 }
 cooldownYears: 6
 cast:
   friend: { kind: friend, presence: city, age: { min: 21, max: 60 } }

@@ -192,6 +192,8 @@ export const businessBalanceSchema = z.strictObject({
       noise: z.number().min(0).max(20),
       /** Staff you know well (affection) stay: per point of affection above 50. */
       bond: z.number().min(0).max(0.5),
+      /** Morale added for someone you gave work to when they needed it, and for someone you were there for when family needed them. */
+      loyalty: z.strictObject({ work: z.number().min(0).max(20), family: z.number().min(0).max(20) }),
     }),
     /** The yearly chance a named worker quits, by their morale. */
     quit: z.array(z.strictObject({ at: z.number(), x: z.number().min(0).max(1) })).min(2),

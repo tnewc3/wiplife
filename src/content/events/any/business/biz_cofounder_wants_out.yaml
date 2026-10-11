@@ -12,6 +12,7 @@ requires:
   all:
     - { business: { owned: true } }
     - { age: { gte: 18 } }
+    - { memory: { role: cofounder, tag: cofounded_with_you } }
     - { business: { owned: true, cofounder: true, years: { gte: 2 } } }
 weight: { base: 5 }
 followUpOnly: true

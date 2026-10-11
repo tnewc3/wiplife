@@ -12,6 +12,7 @@ requires:
   all:
     - { business: { owned: true } }
     - { age: { gte: 18 } }
+    - { memory: { role: investor, tag: invested_in_your_business } }
     - { business: { owned: true, investors: true, years: { gte: 2 } } }
 weight: { base: 4 }
 cooldownYears: 5
@@ -43,5 +44,4 @@ choices:
         {investor.name} takes you at your word, and files it where it matters.
         You'll both remember what you said.
       effects:
-        - { type: memory, role: investor, tag: you_promised_to_pay_them_back }
         - { type: relationship, role: investor, trust: 1 }

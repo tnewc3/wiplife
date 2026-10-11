@@ -53,6 +53,8 @@ export function hireCandidates(state: LifeState, b: Business, def: BusinessDef, 
       const age = ageOf(state, p);
       if (age < ages.min || age > ages.max + 5 || rel.affection < pool.minAffection) return [];
       if (workingElsewhere.has(id) || owners.has(id) || p.cityId !== city) return [];
+      // Nobody who took money from you before.
+      if (rel.memories.some((m) => m.tag === 'stole_from_your_business')) return [];
       if (state.housing.partnerId === id && b.role === 'self') {
         // A partner who lives with you may work there too.
       }
@@ -137,7 +139,6 @@ export function hireStaff(state: LifeState, b: Business, opts: HireOptions, cont
   entry.wage = opts.manager ? managerWage(def, b.style, b.cityId, b.pay, skill, content) : wageOf(def, b.style, cityId, b.pay, skill, licensed, 1, content);
   tieToStaff(state, b, id, content);
   b.staff.push(entry);
-  rel.memories.push({ tag: 'you_hired_them', year: state.currentYear });
   if (!quiet) spend(state, hiringCost(def, b, licensed, opts.manager === true, content), content);
   return id;
 }
@@ -160,7 +161,6 @@ export function fireStaff(state: LifeState, b: Business, personId: Id, content: 
   spend(state, wholeDollars(s.wage * content.balance.business.staff.severance), content);
   const rel = state.relationships[personId];
   if (rel) {
-    rel.memories.push({ tag: 'you_let_them_go', year: state.currentYear });
     rel.affection = clampInt(rel.affection - 8, 0, 100);
     rel.trust = clampInt(rel.trust - 6, 0, 100);
   }
@@ -185,6 +185,9 @@ export function moraleAim(state: LifeState, b: Business, s: BusinessStaff, profi
   const rel = state.relationships[s.personId];
   let aim = m.base + lv.pay[b.pay].morale + lv.staffing[b.staffing].morale + (state.character.personality.kindness - 50) * m.kindness + ((rel?.affection ?? 50) - 50) * m.bond;
   aim += profitable ? m.profit : m.loss;
+  // Work given to someone out of a job, and being there for their family, are remembered.
+  if (rel?.memories.some((x) => x.tag === 'you_gave_them_work')) aim += m.loyalty.work;
+  if (rel?.memories.some((x) => x.tag === 'you_were_there_for_their_family')) aim += m.loyalty.family;
   if (s.manager && b.role === 'manager') aim += 3;
   return aim;
 }

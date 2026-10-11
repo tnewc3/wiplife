@@ -22,7 +22,7 @@ choices:
     outcome:
       text: >-
         You work until the sun comes up. The kitchen opens on time, and the owner
-        sends everyone she knows your way.
+        sends half the neighborhood your way.
       effects:
         - { type: business, action: receive, share: 0.04, floor: 1500 }
         - { type: business, action: reputation, delta: 3 }

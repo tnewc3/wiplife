@@ -467,8 +467,6 @@ export function endBusiness(state: LifeState, id: Id, how: 'sold' | 'closed' | '
   }
   // The staff are let go: the people stay in your life.
   for (const s of [...b.staff]) {
-    const rel = state.relationships[s.personId];
-    if (rel && (how === 'failed' || how === 'closed')) rel.memories.push({ tag: 'lost_their_job_when_it_closed', year });
     removeStaff(state, b, s.personId);
   }
   state.business.items = state.business.items.filter((x) => x.id !== id);

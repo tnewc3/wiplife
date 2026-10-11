@@ -56,7 +56,6 @@ export function applyBusinessEffect(state: LifeState, effect: BusinessEffect, ca
       return;
     case 'staffQuit':
       if (staff) {
-        state.relationships[staff.personId]?.memories.push({ tag: 'quit_your_business', year });
         removeStaff(state, b, staff.personId);
       }
       return;

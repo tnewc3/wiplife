@@ -12,7 +12,10 @@ requires:
   all:
     - { age: { gte: 25 } }
     - { business: { owned: false } }
-weight: { base: 3 }
+weight:
+  base: 3
+  modifiers:
+    - { if: { flag: thinking_about_a_business }, x: 2.5 }
 cooldownYears: 6
 choices:
   - id: ask

@@ -28,7 +28,6 @@ choices:
         says you can pay it back whenever. You intend to pay it back sooner.
       effects:
         - { type: business, action: receive, share: 0.04, floor: 1800 }
-        - { type: memory, role: relative, tag: lent_you_money_for_the_business }
         - { type: relationship, role: relative, trust: 3 }
   - id: refuse
     label: Thank {relative.them} and refuse

@@ -12,6 +12,7 @@ requires:
   all:
     - { business: { owned: true } }
     - { age: { gte: 18 } }
+    - { memory: { role: investor, tag: invested_in_your_business } }
     - { business: { owned: true, investors: true } }
 weight: { base: 6 }
 cooldownYears: 3

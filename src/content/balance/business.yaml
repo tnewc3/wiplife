@@ -80,6 +80,7 @@ staff:
     profit: 4
     noise: 8
     bond: 0.1
+    loyalty: { work: 5, family: 8 }
   quit:
     - { at: 0, x: 0.6 }
     - { at: 30, x: 0.35 }

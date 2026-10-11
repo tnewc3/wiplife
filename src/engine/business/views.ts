@@ -18,7 +18,7 @@ import {
 } from '../../content/schemas';
 import { paymentDue } from '../finance';
 import type { Business, BusinessReport, Id, LifeState } from '../types';
-import { cofounderCandidates, investorCandidates, loanOffer, stakeFor, type Candidate, type LoanOffer } from './funding';
+import { checkFunding, cofounderCandidates, investorCandidates, loanOffer, stakeFor, type Candidate, type FundingPlan, type LoanOffer } from './funding';
 import { listingById, marketFor, type Listing } from './market';
 import { fitMult, managerWage, salePrice, totalToStart, typicalLocation, valuation } from './model';
 import { hasLicenseHolder, livingStaff, managerOf, myBusinesses, yourShare, youHoldLicense } from './query';
@@ -155,6 +155,8 @@ export interface StartOption {
     fitOut: number;
     capital: number;
     hiring: number;
+    /** What hiring a manager would add to the cost. */
+    managerHiring: number;
     total: number;
     /** A typical year there once it is established. */
     typicalRevenue: number;
@@ -285,7 +287,7 @@ export function startOptions(state: LifeState, cityId: Id, content: ContentBundl
         styles: BUSINESS_STYLES.map((style) => {
           const t = totalToStart(d, style, cityId, d.license !== undefined && !holds, content);
           const typical = typicalLocation(d, style, cityId, content.balance.business.reputation.start + 5, d.styles[style].quality, content);
-          return { style, label: d.styles[style].label, blurb: d.styles[style].blurb, fitOut: t.fitOut, capital: t.capital, hiring: t.hiring, total: t.total, typicalRevenue: typical.revenue, typicalProfit: typical.profit, fit: Math.round(fitMult(d, style, cityId, content) * 100) };
+          return { style, label: d.styles[style].label, blurb: d.styles[style].blurb, fitOut: t.fitOut, capital: t.capital, hiring: t.hiring, managerHiring: hiringCost(d, { style, cityId, pay: 'fair' } as Business, false, true, content), total: t.total, typicalRevenue: typical.revenue, typicalProfit: typical.profit, fit: Math.round(fitMult(d, style, cityId, content) * 100) };
         }),
       };
     });
@@ -302,6 +304,22 @@ export function fundingView(state: LifeState, need: number, defId: Id | undefine
     savings: state.finances.savings,
     maxInvestors: f.investors.max,
   };
+}
+
+export interface FundingCheck {
+  /** Why the plan cannot be carried out (a key into BUSINESS_BLOCK_LABELS), or null. */
+  block: string | null;
+  /** What you would pay from savings, borrow, and what the others put in. */
+  own: number;
+  loan: number;
+  others: number;
+}
+
+/** Checks a funding plan for `need` dollars: what each side would pay, or why it cannot be done. */
+export function fundingCheck(state: LifeState, need: number, plan: FundingPlan, defId: Id | undefined, content: ContentBundle): FundingCheck {
+  const checked = checkFunding(state, need, plan, defId ? content.businesses[defId] : undefined, content);
+  if ('block' in checked) return { block: checked.block, own: 0, loan: 0, others: 0 };
+  return { block: null, own: checked.result.own, loan: checked.result.loan, others: checked.result.others };
 }
 
 function listingView(l: Listing, content: ContentBundle): ListingView {

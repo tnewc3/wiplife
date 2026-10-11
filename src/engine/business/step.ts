@@ -205,8 +205,6 @@ function stepBusiness(state: LifeState, b: Business, content: ContentBundle, fun
   }
   for (const s of [...b.staff]) {
     if (!quits(state, s, content)) continue;
-    const rel = state.relationships[s.personId];
-    rel?.memories.push({ tag: 'quit_your_business', year });
     removeStaff(state, b, s.personId);
     quit += 1;
     if (s.manager) {

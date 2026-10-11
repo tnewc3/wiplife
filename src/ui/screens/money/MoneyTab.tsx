@@ -7,6 +7,7 @@ import { useAppStore } from '../../../store/appStore';
 import { Button } from '../../components/Button';
 import { Card } from '../../components/Card';
 import { ConfirmSheet } from '../../components/ConfirmSheet';
+import { BusinessMoneyCard } from './BusinessMoneyCard';
 import { DirtyMoneyCard } from './DirtyMoneyCard';
 import { CUSTODY_LABELS, DEBT_LABELS, debtStatus, LEDGER_LABELS, LIFESTYLE_BLURBS, LIFESTYLE_LABELS, money, rateLabel } from '../../labels';
 
@@ -39,6 +40,8 @@ function LedgerCard({ life }: { life: LifeState }) {
           {ledger.children > 0 && <Row label={LEDGER_LABELS.children} value={money(-ledger.children)} />}
           {ledger.care > 0 && <Row label={LEDGER_LABELS.care} value={money(-ledger.care)} />}
           {ledger.upkeep > 0 && <Row label={LEDGER_LABELS.upkeep} value={money(-ledger.upkeep)} />}
+          {ledger.giving > 0 && <Row label={LEDGER_LABELS.giving} value={money(-ledger.giving)} />}
+          {ledger.business > 0 && <Row label={LEDGER_LABELS.business} value={money(-ledger.business)} />}
           {ledger.insurance > 0 && <Row label={LEDGER_LABELS.insurance} value={money(-ledger.insurance)} />}
           {ledger.supportPaid > 0 && <Row label={LEDGER_LABELS.supportPaid} value={money(-ledger.supportPaid)} />}
           {ledger.supportReceived > 0 && <Row label={LEDGER_LABELS.supportReceived} value={money(ledger.supportReceived)} />}
@@ -234,6 +237,7 @@ export function MoneyTab({ life }: { life: LifeState }) {
         </Card>
       )}
 
+      <BusinessMoneyCard life={life} />
       <DirtyMoneyCard life={life} />
       <LedgerCard life={life} />
       <CustodyCard life={life} />

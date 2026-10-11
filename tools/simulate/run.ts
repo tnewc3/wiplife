@@ -65,6 +65,7 @@ import { emptyPeopleReport, formatPeople, peopleTargets, PeopleWatcher, Pipeline
 import { emptyMentalReport, formatMental, mentalTargets, MentalWatcher, type MentalReport } from './mental';
 import { choosePetInteractions, choosePossessionActions, emptyPossessionsReport, formatPossessions, possessionsTargets, PossessionsWatcher, rollPossessionProfile, type PossessionsReport } from './possessions';
 import { emptyEulogyReport, EulogyWatcher, eulogyTargets, formatEulogy, type EulogyReport } from './eulogy';
+import { BusinessWatcher, businessTargets, chooseBusinessActions, emptyBusinessReport, formatBusiness, rollBusinessProfile, type BusinessReport } from './business';
 import { BelongingWatcher, belongingTargets, chooseBelongingActions, emptyBelongingReport, formatBelonging, rollBelongingProfile, type BelongingReport } from './belonging';
 import { chooseGrandparentPlans, chooseLaterActions, emptyLaterReport, formatLater, LaterWatcher, laterTargets, rollLaterProfile, type LaterReport } from './later';
 import { emptyWebReport, formatWeb, webTargets, WebWatcher, type WebReport } from './web';
@@ -152,6 +153,8 @@ export interface SimulationReport {
   later: LaterReport;
   /** W2: belonging, measured: groups by type, roles, the people there, what they cost, faith and its changes, and what long membership does to values and reputation. */
   belonging: BelongingReport;
+  /** W3: businesses, measured: who starts or buys one, how long they last by kind, style and how well the owner decides, profit, failures and what is left owing, staff, investors and co-founders, and how owning one compares with a career. */
+  business: BusinessReport;
   /** M1: mental health, measured. */
   mental: MentalReport;
   /** E5: pets, vehicles and homes, measured. */
@@ -202,6 +205,8 @@ export function recurringEvents(content: ContentBundle): Set<string> {
     ...r.discovery.comingOut.events,
     // W2: invitations, offers of a role and doubts about a group answer something that can happen again.
     ...Object.values(r.belonging.triggers).flatMap((t) => t.events),
+    // W3: what the business step queues answers something that can happen again.
+    ...Object.values(r.business.triggers).flatMap((t) => t.events),
   ]);
 }
 
@@ -804,6 +809,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
   const eulogyWatcher = new EulogyWatcher(eulogy, content);
   const later = emptyLaterReport(content);
   const belonging = emptyBelongingReport(content);
+  const business = emptyBusinessReport(content);
   const mental = emptyMentalReport(content);
   const possessions = emptyPossessionsReport(content);
   const teen = emptyTeenReport(content);
@@ -865,6 +871,10 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
     const belongingRng = createRng(`${seed}:belonging`);
     const belongingProfile = rollBelongingProfile(belongingRng);
     const belongingWatcher = new BelongingWatcher(belonging, content);
+    // W3: how this life behaves about businesses.
+    const businessRng = createRng(`${seed}:business`);
+    const businessProfile = rollBusinessProfile(businessRng);
+    const businessWatcher = new BusinessWatcher(business, content, businessProfile.policy);
     const peopleWatcher = new PeopleWatcher(people, content);
     const webWatcher = new WebWatcher(web, content);
     const mentalWatcher = new MentalWatcher(mental, content);
@@ -958,6 +968,13 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
       for (const [actionId, params] of careless ? [] : chooseBelongingActions(life, content, belongingRng, belongingProfile)) {
         if (!isLifeActionAvailable(life, actionId, params, content)) continue;
         if (actionId === 'join_group' && params.groupId !== undefined) belongingWatcher.joined(params.groupId);
+        life = takeLifeAction(life, actionId, params);
+        money.actionsTaken[actionId]++;
+      }
+      // ...and in business (W3): starting or buying one, running it, selling or closing it...
+      for (const [actionId, params] of careless ? [] : chooseBusinessActions(life, content, businessRng, businessProfile)) {
+        if (!isLifeActionAvailable(life, actionId, params, content)) continue;
+        if ((actionId === 'start_business' || actionId === 'buy_business') && params.biz?.plan) businessWatcher.planned(params.biz.plan.source);
         life = takeLifeAction(life, actionId, params);
         money.actionsTaken[actionId]++;
       }
@@ -1107,6 +1124,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
       peopleWatcher.observe(yearBefore, life);
       laterWatcher.observe(yearBefore, life);
       belongingWatcher.observe(yearBefore, life);
+      businessWatcher.observe(yearBefore, life);
       webWatcher.observe(yearBefore, life);
       mentalWatcher.observe(yearBefore, life);
       crimeWatcher.observe(yearBefore, life);
@@ -1155,6 +1173,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
     eulogyWatcher.finish(life);
     laterWatcher.finish(life);
     belongingWatcher.finish(life);
+    businessWatcher.finish(life);
     mentalWatcher.finish(life);
     crimeWatcher.finish(life);
     fameWatcher.finish(life);
@@ -1491,6 +1510,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
     eulogy,
     later,
     belonging,
+    business,
     mental,
     possessions,
     teen,
@@ -1632,6 +1652,7 @@ export function formatReport(report: SimulationReport, content: ContentBundle): 
   lines.push(...formatEulogy(report.eulogy, content), '  targets (src/content/balance/targets.yaml):', ...eulogyTargets(report, content).map((r) => target(r.label, r.value, r.goal, r.met)));
   lines.push(...formatLater(report.later, content), '  targets (src/content/balance/targets.yaml):', ...laterTargets(report, content).map((r) => target(r.label, r.value, r.goal, r.met)));
   lines.push(...formatBelonging(report.belonging, content), '  targets (src/content/balance/targets.yaml):', ...belongingTargets(report, content).map((r) => target(r.label, r.value, r.goal, r.met)));
+  lines.push(...formatBusiness(report.business, content), '  targets (src/content/balance/targets.yaml):', ...businessTargets(report, content).map((r) => target(r.label, r.value, r.goal, r.met)));
   lines.push('', ...formatMental(report.mental, content, report.events), '  targets (src/content/balance/targets.yaml):', ...mentalTargets(report, content).map((r) => target(r.label, r.value, r.goal, r.met)));
   lines.push(...formatPossessions(report.possessions, content, report.events), '  targets (src/content/balance/targets.yaml):', ...possessionsTargets(report, content).map((r) => target(r.label, r.value, r.goal, r.met)));
   lines.push(...formatTeen(report.teen, content), '  targets (src/content/balance/targets.yaml):', ...teenTargets(report, content).map((r) => target(r.label, r.value, r.goal, r.met)));
