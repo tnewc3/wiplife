@@ -497,7 +497,9 @@ export function businessTargets(sim: SimulationReport, content: ContentBundle): 
   add('businesses still going after 1 year', s(r.survival.all, 0), t.survival1, pct1);
   add('businesses still going after 5 years', s(r.survival.all, 1), t.survival5, pct1);
   add('businesses still going after 10 years', s(r.survival.all, 2), t.survival10, pct1);
-  add('5-year survival: good decisions above poor ones (points)', 100 * (s(r.survival.byPolicy.good, 1) - s(r.survival.byPolicy.poor, 1)), t.decisionGap, (x) => x.toFixed(1));
+  // Poor decisions bleed slowly (a business can lose money for years before it fails) and good ones pay for a hard first year, so the measure is the years that made a profit, not the survival at five years.
+  const profitShare = (p: 'good' | 'poor') => share(r.years.byPolicy[p].profitable, r.years.byPolicy[p].n);
+  add('business-years that made a profit: good decisions above poor ones (points)', 100 * (profitShare('good') - profitShare('poor')), t.decisionGap, (x) => x.toFixed(1));
   add('5-year survival: a good skill fit above a poor one (points)', 100 * (s(r.survival.bySkill.high, 1) - s(r.survival.bySkill.low, 1)), t.skillGap, (x) => x.toFixed(1));
   add('5-year survival with good decisions (not a guarantee)', s(r.survival.byPolicy.good, 1), t.goodSurvival5, pct1);
   add('businesses that ended in failure, of all that ended', share(r.ends.failed, r.ends.failed + r.ends.closed + r.ends.sold), t.failureShare, pct1);

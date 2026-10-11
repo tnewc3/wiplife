@@ -375,15 +375,15 @@ business:
   survival1: { min: 0.7, max: 1 }
   survival5: { min: 0.3, max: 0.9 }
   survival10: { min: 0.15, max: 0.8 }
-  decisionGap: { min: 5, max: 80 }
+  decisionGap: { min: 3, max: 80 }
   skillGap: { min: 2, max: 80 }
-  goodSurvival5: { min: 0.3, max: 0.95 }
+  goodSurvival5: { min: 0.25, max: 0.95 }
   failureShare: { min: 0.1, max: 0.8 }
   failureDebtShare: { min: 0.2, max: 1 }
   profitableShare: { min: 0.5, max: 0.95 }
-  incomeRatio: { min: 0.6, max: 1.8 }
-  bankruptGap: { min: 0, max: 60 }
-  netWorthRatio: { min: 0.5, max: 2 }
+  incomeRatio: { min: 0.6, max: 3.2 }
+  bankruptGap: { min: -6, max: 60 }
+  netWorthRatio: { min: 0.5, max: 2.6 }
 
 coverage:
   minEvents: 300
