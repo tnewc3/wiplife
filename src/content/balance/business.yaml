@@ -24,7 +24,7 @@ levels:
   price:
     low: { label: Below the going rate, mult: 0.85, reputation: 1.5 }
     fair: { label: The going rate, mult: 1, reputation: 0 }
-    high: { label: Above the going rate, mult: 1.2, reputation: -2.5 }
+    high: { label: Above the going rate, mult: 1.25, reputation: -4 }
   marketing:
     none: { label: None, share: 0, boost: 0 }
     light: { label: Some, share: 0.02, boost: 0.08 }
@@ -34,11 +34,11 @@ levels:
     some: { label: Some, share: 0.02, aim: 10 }
     lots: { label: A lot, share: 0.05, aim: 18 }
   pay:
-    low: { label: Below the market, mult: 0.88, morale: -8 }
+    low: { label: Below the market, mult: 0.88, morale: -12 }
     fair: { label: The market rate, mult: 1, morale: 0 }
     high: { label: Above the market, mult: 1.15, morale: 8 }
   staffing:
-    lean: { label: Lean, mult: 0.75, morale: -4, quality: -5 }
+    lean: { label: Lean, mult: 0.75, morale: -6, quality: -10 }
     normal: { label: Normal, mult: 1, morale: 0, quality: 0 }
     full: { label: Generous, mult: 1.25, morale: 3, quality: 4 }
 
