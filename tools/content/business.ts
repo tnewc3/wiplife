@@ -78,7 +78,7 @@ export function checkBusiness(bundle: ContentBundle, fileOf: (typeKey: Collectio
   }
 
   // Balance.
-  for (const city of Object.keys(bundle.cities)) if (!bal.cities[city]) err(BALANCE, `cities: no numbers for "${city}"`);
+  // (A city with no numbers of its own is an average one: size, wealth and competition of 1.)
   for (const city of Object.keys(bal.cities)) if (!bundle.cities[city]) err(BALANCE, `cities: unknown city "${city}"`);
   if (bal.limits.minAge < bundle.balance.economy.independenceAge) err(BALANCE, 'limits.minAge is below the independence age');
   if (bal.funding.minAge < bundle.balance.economy.independenceAge) err(BALANCE, 'funding.minAge is below the independence age');

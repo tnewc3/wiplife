@@ -142,6 +142,8 @@ export const businessBalanceSchema = z.strictObject({
     season: z.strictObject({ sd: z.number().min(0).max(0.5), luck: z.number().min(0).max(0.3) }),
     /** The owner's skill (or the manager's) moves demand by this much per point above 50, at full effort. */
     skill: z.number().min(0).max(0.02),
+    /** Attention: demand is `floor` plus the rest times the effort put in (an owner who is away, or a manager, draws fewer customers than one who is there). */
+    attention: z.strictObject({ floor: z.number().min(0).max(1) }),
     /** A business with nobody licensed (where a licence is needed) serves no one. */
     unlicensed: z.number().min(0).max(1),
   }),

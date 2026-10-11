@@ -22,11 +22,11 @@ styles:
     startup: 30000
     rent: 14000
     staff: 2
-    capacity: 7500
-    demand: 5600
+    capacity: 6500
+    demand: 4800
     spend: 28
-    supplies: 0.12
-    wage: 29000
+    supplies: 0.16
+    wage: 31000
     quality: 40
     elasticity: 1.6
   standard:
@@ -35,11 +35,11 @@ styles:
     startup: 70000
     rent: 24000
     staff: 3
-    capacity: 5200
-    demand: 3600
+    capacity: 4400
+    demand: 3000
     spend: 70
-    supplies: 0.14
-    wage: 34000
+    supplies: 0.18
+    wage: 38000
     quality: 52
     elasticity: 1.2
   premium:
@@ -48,16 +48,16 @@ styles:
     startup: 150000
     rent: 46000
     staff: 5
-    capacity: 3800
-    demand: 1900
+    capacity: 3200
+    demand: 1600
     spend: 170
-    supplies: 0.15
-    wage: 42000
+    supplies: 0.2
+    wage: 46000
     quality: 67
     elasticity: 0.8
 fit:
   budget: { size: 0.3, wealth: -0.3 }
-  standard: { size: 0.35, wealth: 0.4 }
+  standard: { size: 0.3, wealth: 0.2 }
   premium: { size: 0.3, wealth: 1.5 }
 names:
   - "Hush & Shear"

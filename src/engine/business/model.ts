@@ -31,7 +31,7 @@ export function fitMult(def: BusinessDef, style: BusinessStyle, cityId: Id, cont
 }
 
 /** What a customer's spending is scaled by in a city (prices follow the cost of living, less than one for one). */
-export const priceScale = (content: ContentBundle, cityId: Id): number => Math.pow(cityNumbers(content, cityId).costOfLiving, 0.55);
+export const priceScale = (content: ContentBundle, cityId: Id): number => Math.pow(cityNumbers(content, cityId).costOfLiving, 0.5);
 
 /** A worker's market wage for a style in a city. */
 export const marketWage = (def: BusinessDef, style: BusinessStyle, cityId: Id, content: ContentBundle): number => wholeDollars(def.styles[style].wage * cityNumbers(content, cityId).salaryMultiplier);
@@ -134,7 +134,8 @@ export function locationFigures(i: LocationInputs, content: ContentBundle): Loca
   const marketing = 1 + lv.marketing[i.marketing].boost;
   const skill = 1 + b.demand.skill * (i.skill - 50) * Math.min(1.2, i.effort);
   const saturation = Math.pow(b.demand.saturation, i.rank);
-  const demand = baseDemand(i.def, i.style, i.cityId, content) * rep * qual * price * marketing * skill * saturation * maturityAt(i.yearsOpen, content) * i.season * i.shock * (i.licensed ? 1 : b.demand.unlicensed);
+  const attention = b.demand.attention.floor + (1 - b.demand.attention.floor) * Math.min(1, i.effort);
+  const demand = baseDemand(i.def, i.style, i.cityId, content) * rep * qual * price * marketing * skill * saturation * attention * maturityAt(i.yearsOpen, content) * i.season * i.shock * (i.licensed ? 1 : b.demand.unlicensed);
 
   // What the staff can serve.
   const capacity = st.capacity * Math.pow(Math.min(1.25, staffed), 0.85) * (0.85 + (0.3 * avgSkill) / 100) * Math.min(1, 0.4 + i.effort);

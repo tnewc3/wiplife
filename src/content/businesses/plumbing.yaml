@@ -22,11 +22,11 @@ styles:
     startup: 25000
     rent: 8000
     staff: 2
-    capacity: 650
-    demand: 640
-    spend: 380
-    supplies: 0.22
-    wage: 44000
+    capacity: 560
+    demand: 540
+    spend: 420
+    supplies: 0.26
+    wage: 48000
     quality: 42
     elasticity: 1.3
   standard:
@@ -35,11 +35,11 @@ styles:
     startup: 55000
     rent: 14000
     staff: 3
-    capacity: 900
-    demand: 640
-    spend: 520
-    supplies: 0.22
-    wage: 48000
+    capacity: 780
+    demand: 520
+    spend: 600
+    supplies: 0.26
+    wage: 50000
     quality: 52
     elasticity: 1.1
   premium:
@@ -47,17 +47,17 @@ styles:
     blurb: "Bathrooms, kitchens and whole-house repipes for people who want it done once."
     startup: 110000
     rent: 28000
-    staff: 5
-    capacity: 700
-    demand: 400
-    spend: 1250
-    supplies: 0.25
-    wage: 56000
+    staff: 4
+    capacity: 600
+    demand: 380
+    spend: 1350
+    supplies: 0.3
+    wage: 60000
     quality: 66
     elasticity: 0.7
 fit:
   budget: { size: 0.3, wealth: -0.1 }
-  standard: { size: 0.35, wealth: 0.2 }
+  standard: { size: 0.3, wealth: 0.2 }
   premium: { size: 0.3, wealth: 1.2 }
 names:
   - "Clearflow & Sons Plumbing"

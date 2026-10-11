@@ -231,3 +231,22 @@ All 31 events below were then read in full against the four points of the guidan
 | `resurface_faith_lose` | The doubt that didn't go away | Accepting, or keeping the practice for what it gives you, both shown as honest ways to belong. | Replaced a group-standing effect (the event is not about a group) with a value effect. |
 
 The four rites (Jewish, Christian, Muslim, and one shared by the Hindu, Buddhist and Sikh traditions) are written to be accurate and generic rather than detailed: where a tradition varies between communities (the form of a ceremony, how much a child fasts), the text says so. The other belonging events happen in a group of any type (invitations, roles, scandals, a fundraiser) and mention no religion; they were read for the same points and need nothing from this review. Reviewers should look especially at `faith_strict_congregation_tension`, which is the one hard tension in this stage.
+
+## W3 (businesses): the events
+
+The 47 business events (`business`, `bizstart` and `bizpast`) were written against AGENTS.md and the second-wave writing guidance (all brands, chains, shops and people are fictional; humor from situations, not from where people are from), then run through the content build. The first pass gave 16 warnings, all of the same kind: text or a choice that mentioned money ("costs", "pay", "loan", "owe", "price", "rent", "wages") without changing money. Each was resolved by rewording where no money should change ("It costs nothing" became "It's free"; "the loan officer" became "the officer"; "a 'for rent' sign" became "a vacant storefront"), or by making the choice move money (`business: pay`/`receive`, `cost`, `repay`), and by counting a raise (`staffRaise`) as an ongoing change to your money in the build's check. After that `npm run content` prints no warnings, and nothing needed a `justified` entry.
+
+What the review looked at beyond the warnings:
+
+| Rule | What was checked | Result |
+|---|---|---|
+| Category contracts | Every `business` event requires `business: { owned: true }`, every `bizstart` event requires that you own none, every `bizpast` event requires `failedWithin`; the build rejects one that doesn't. | Enforced by `registries/categories.yaml`. |
+| Presence | Workers, investors, a co-founder and a manager are cast from the business itself (`cast: { business: ... }`) with the presence the scene needs: staff `city` (they are at the shop), investors and a manager `anywhere` (a phone call, a letter), a partner at home `household`. | Done in each event. |
+| Evidence | Events about investors require the memory that proves it (`invested_in_your_business`), co-founder events `cofounded_with_you`, the failed-investor events `lost_money_in_your_business`; text that speaks of a past failure requires `failedWithin`; text that speaks of years of trading requires `years`. | Done; `biz_investor_update` and `biz_investor_wants_out` were the ones that first lacked the memory. |
+| Time | No fixed gaps in follow-ups. | None found. |
+| Money | Every amount an event moves is a share of the business's own yearly revenue (`pay`, `receive`, `theft`) or a scaled cost item (`biz_salvage`, `biz_repay_start`, `biz_repay_more` in `balance/economy.yaml`), so it grows with the business and the city; the screen shows the amount and the new balance. | `biz_failure_closing_day` and the two investor-loss events first used fixed dollars and were changed to cost items. |
+| Household | `biz_partner_resents_hours` casts a partner who lives with you and requires that you run the business yourself. | Done. |
+| Status-aware text | Choices that need staff, a manager or a co-founder are hidden unless the business has one (`visibleIf`). | Done. |
+| Pronouns | Every person is cast with pronoun placeholders; a buyer in `biz_offer_to_buy` and an owner in `biz_emergency_job` first had a hardcoded "he" and "she" (caught by the render test) and were changed. | Done. |
+
+Tone and subject matter worth a second look: `biz_staff_theft` (a worker takes money; the choices are to confront, let them go, or lock the drawer, and the worker's reason is a bill, not a villain), `biz_failure_closing_day` and `biz_failure_debts` (failure and guaranteed debts, with the debt counselor and bankruptcy shown as ordinary ways through), and `biz_investor_lost_money_family` (a relative who lost money, written without blame).

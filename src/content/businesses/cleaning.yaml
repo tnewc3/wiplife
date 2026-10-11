@@ -17,11 +17,11 @@ styles:
     startup: 15000
     rent: 4000
     staff: 3
-    capacity: 1900
-    demand: 1250
+    capacity: 1500
+    demand: 1000
     spend: 140
-    supplies: 0.08
-    wage: 27000
+    supplies: 0.12
+    wage: 29000
     quality: 42
     elasticity: 1.5
   standard:
@@ -30,11 +30,11 @@ styles:
     startup: 35000
     rent: 8000
     staff: 4
-    capacity: 1700
-    demand: 1000
+    capacity: 1400
+    demand: 900
     spend: 230
-    supplies: 0.08
-    wage: 29000
+    supplies: 0.11
+    wage: 30000
     quality: 52
     elasticity: 1.2
   premium:
@@ -42,17 +42,17 @@ styles:
     blurb: "Move-outs, post-construction and a client list that includes property managers."
     startup: 70000
     rent: 18000
-    staff: 6
-    capacity: 1200
-    demand: 620
+    staff: 5
+    capacity: 900
+    demand: 560
     spend: 480
-    supplies: 0.1
-    wage: 34000
+    supplies: 0.13
+    wage: 36000
     quality: 64
     elasticity: 0.8
 fit:
   budget: { size: 0.3, wealth: -0.1 }
-  standard: { size: 0.35, wealth: 0.3 }
+  standard: { size: 0.3, wealth: 0.2 }
   premium: { size: 0.3, wealth: 1.2 }
 names:
   - "Spotless Sparrow Cleaning"

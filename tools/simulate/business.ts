@@ -42,7 +42,7 @@ export interface BusinessProfile {
 
 export function rollBusinessProfile(rng: RngState): BusinessProfile {
   return {
-    startChance: weightedPick(rng, [[0, 62], [0.03, 22], [0.08, 12], [0.2, 4]] as const),
+    startChance: weightedPick(rng, [[0, 72], [0.02, 16], [0.06, 9], [0.15, 3]] as const),
     buyShare: weightedPick(rng, [[0, 4], [0.3, 4], [0.7, 2]] as const),
     policy: weightedPick(rng, [['good', 4], ['random', 3], ['poor', 3]] as const),
     funding: [
@@ -258,6 +258,7 @@ export class BusinessWatcher {
   private inherited = false;
   private pendingFunding: BusinessFunding | null = null;
   private failedYears: number[] = [];
+  private readonly seenStaff = new Set<string>();
 
   constructor(
     private readonly report: BusinessReport,
@@ -324,9 +325,15 @@ export class BusinessWatcher {
     this.pastSeen = life.business.past.length;
     // Staff and owners.
     for (const b of life.business.items) {
+      for (const s of b.staff) {
+        const key = `${b.id}:${s.personId}`;
+        if (!this.seenStaff.has(key)) {
+          this.seenStaff.add(key);
+          r.people.hires++;
+        }
+      }
       const was = before.business.items.find((x) => x.id === b.id);
       if (was) {
-        r.people.hires += Math.max(0, b.staff.filter((s) => !was.staff.some((w) => w.personId === s.personId)).length);
         if (was.owners.length > b.owners.length) r.people.buyouts++;
         if (b.skimmed > was.skimmed) r.people.managerSkims++;
       }
@@ -340,7 +347,7 @@ export class BusinessWatcher {
     this.pendingFunding = null;
     const skill = ownerSkill(life, def, this.content);
     const band = skill < 45 ? 'low' : skill >= 60 ? 'high' : 'mid';
-    this.records.set(b.id, { id: b.id, defId: b.defId, style: b.style, start: life.currentYear, funding, skill: band, role: b.role, lost: null, ended: null, how: b.how });
+    this.records.set(b.id, { id: b.id, defId: b.defId, style: b.style, start: b.founded, funding, skill: band, role: b.role, lost: null, ended: null, how: b.how });
     this.everOwned = true;
     if (b.how === 'inherited') {
       this.inherited = true;

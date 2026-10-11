@@ -53,7 +53,7 @@ styles:
     elasticity: 0.9
 fit:
   budget: { size: 0.35, wealth: -0.3 }
-  standard: { size: 0.35, wealth: 0.3 }
+  standard: { size: 0.3, wealth: 0.2 }
   premium: { size: 0.3, wealth: 1.4 }
 names:
   - "The Grey Heron Café"
