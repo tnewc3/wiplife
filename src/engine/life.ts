@@ -11,7 +11,7 @@
 import { giveNeuro, rollNeuro } from './mental/neuro';
 import { emptyMental } from './mental/query';
 import { produce } from 'immer';
-import type { ChoiceDef, ContentBundle, Outcome } from '../content/schemas';
+import { POSSESSION_ROLES, type ChoiceDef, type ContentBundle, type Outcome } from '../content/schemas';
 import { evaluate } from './conditions';
 import {
   activeIds,
@@ -52,6 +52,8 @@ import { emptyFame } from './fame/query';
 import { emptySports } from './sports/query';
 import { emptyLater } from './later/query';
 import { terminalDeathChance, TERMINAL_ID } from './later/terminal';
+import { emptyBelonging } from './belonging/query';
+import { startBelonging } from './belonging/start';
 
 export type { CreateLifeOptions, CustomLifeInput } from './creation/input';
 
@@ -182,6 +184,7 @@ export function createLife(input: CreateLifeOptions, content: ContentBundle): Li
     fame: emptyFame(),
     sports: emptySports(),
     later: emptyLater(),
+    belonging: emptyBelonging(),
   };
   // M1: ADHD and neurodivergence are inherited in part: your parents and siblings (and grandparents) may have them, and you are likelier to if a parent does.
   for (const person of Object.values(life.people)) {
@@ -197,6 +200,9 @@ export function createLife(input: CreateLifeOptions, content: ContentBundle): Li
   for (const person of Object.values(life.people)) person.mood = person.moodBase = moodBaseline(life, person, content);
   // E4: the ties the family's structure gives (your parents with each other, your siblings with each other and with them).
   ensureStructure(life, life.web, life.rng, content, birthYear);
+  // W2: your family's faith and your own (or the one chosen in custom creation), your values, and a hidden pull toward another faith now and then.
+  // (From a generator of its own, so adding faith to a life leaves the rest of its random sequence as it was.)
+  startBelonging(life, createRng(`${seed}:belonging`), content, { choice: options.mode === 'custom' ? options.custom.faith : undefined });
   return life;
 }
 
@@ -401,7 +407,7 @@ export function resolveChoice(state: LifeState, instanceId: Id, choiceId: Id, co
 
     // E5: an event about a pet, vehicle or home you no longer have (an earlier one this year took it) doesn't happen.
     draft.pending = draft.pending.filter(
-      (p) => p.resolvedChoiceId !== undefined || Object.entries(p.cast).every(([role, id]) => !role.startsWith('@') || draft.possessions.items.some((q) => q.id === id)),
+      (p) => p.resolvedChoiceId !== undefined || Object.entries(p.cast).every(([role, id]) => !(Object.values(POSSESSION_ROLES) as string[]).includes(role) || draft.possessions.items.some((q) => q.id === id)),
     );
     // A management action's result stays on screen until finishAction.
     if (draft.phase === 'action') return;

@@ -4,7 +4,7 @@ import { GENDER_CATEGORIES } from '../../../content/schemas';
 import { pronounsFromPreset } from '../../../engine/creation/character';
 import { InvalidInputError } from '../../../engine/creation/input';
 import { identityEditIssues, type IdentityEditInput } from '../../../engine/discovery';
-import { getProfileView, getPronounPresets } from '../../../engine/selectors';
+import { getBelongingView, getProfileView, getPronounPresets } from '../../../engine/selectors';
 import type { GenderCategory, LifeState, Personality, Pronouns } from '../../../engine/types';
 import { useAppStore } from '../../../store/appStore';
 import { Button } from '../../components/Button';
@@ -13,7 +13,7 @@ import { SingleChoice, Suggestions } from '../../components/Choices';
 import { Sheet } from '../../components/Sheet';
 import { StatBar } from '../../components/StatBar';
 import { TextField } from '../../components/TextField';
-import { ATTRACTION_LABELS, recordLine, TRAIT_LABELS } from '../../labels';
+import { ATTRACTION_LABELS, FAITH_STRENGTH_WORDS, GROUPS_TITLES, recordLine, roleLine, TRAIT_LABELS, VALUE_LABELS } from '../../labels';
 
 const PRONOUN_FIELDS: { key: Exclude<keyof Pronouns, 'verbPlural'>; label: string; example: string }[] = [
   { key: 'subject', label: 'Subject', example: 'they' },
@@ -189,6 +189,7 @@ function IdentityForm({ life, onDone }: { life: LifeState; onDone: () => void })
  */
 export function ProfileSheet({ life, open, onClose }: { life: LifeState; open: boolean; onClose: () => void }) {
   const view = getProfileView(life, content);
+  const belonging = getBelongingView(life, content);
   const [editing, setEditing] = useState(false);
   const close = () => {
     setEditing(false);
@@ -231,6 +232,34 @@ export function ProfileSheet({ life, open, onClose }: { life: LifeState; open: b
             <div className="grid grid-cols-2 gap-x-4 gap-y-3" role="group" aria-label="Personality">
               {(Object.keys(TRAIT_LABELS) as (keyof Personality)[]).map((key) => (
                 <StatBar key={key} label={TRAIT_LABELS[key]} value={view.personality[key]} />
+              ))}
+            </div>
+          </section>
+          <section aria-labelledby="profile-belonging" data-testid="profile-belonging">
+            <h3 id="profile-belonging" className="mb-2 text-lg font-bold">
+              Faith, groups and values
+            </h3>
+            <dl className="flex flex-col divide-y divide-border">
+              <div className="flex min-w-0 justify-between gap-3 py-2">
+                <dt className="text-muted">{GROUPS_TITLES.faith}</dt>
+                <dd className="text-right break-words [overflow-wrap:anywhere]" data-testid="profile-faith">
+                  {belonging.faith.name}
+                  {belonging.faith.id !== null ? ` · ${FAITH_STRENGTH_WORDS[belonging.faith.word]}` : ''}
+                </dd>
+              </div>
+              {belonging.memberships.map((m) => (
+                <div key={m.group.id} className="flex min-w-0 justify-between gap-3 py-2" data-testid="profile-membership">
+                  <dt className="min-w-0 text-muted break-words [overflow-wrap:anywhere]">{m.group.name}</dt>
+                  <dd className="text-right break-words [overflow-wrap:anywhere]">{roleLine(m.role, m.years)}</dd>
+                </div>
+              ))}
+              {belonging.memberships.length === 0 && (
+                <div className="py-2 text-muted">{GROUPS_TITLES.none}</div>
+              )}
+            </dl>
+            <div className="mt-3 grid grid-cols-2 gap-x-4 gap-y-3" role="group" aria-label="Values">
+              {belonging.values.map((v) => (
+                <StatBar key={v.id} label={VALUE_LABELS[v.id]!.name} value={v.level} />
               ))}
             </div>
           </section>

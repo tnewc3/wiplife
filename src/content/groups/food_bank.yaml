@@ -1,0 +1,32 @@
+# Food bank (service). W2 belonging. Fictional names; real religions are real.
+id: food_bank
+name: "Food bank"
+type: service
+blurb: "Sorting, boxing and handing out groceries to neighbors who ran short this month."
+minAge: 14
+weight: 1.0
+cities: {small_town: 0.7}
+count: { min: 1, max: 2 }
+traits:
+  welcome: { mean: 66, sd: 16 }
+  strict: { mean: 35, sd: 18 }
+  intense: { mean: 45, sd: 22 }
+activities:
+  - "Sorting donations"
+  - "Packing boxes"
+  - "Handing out groceries"
+ladder:
+  - { id: volunteer, name: "Volunteer", minYears: 0, minStanding: 0, committed: false }
+  - { id: shift_lead, name: "Shift lead", minYears: 2, minStanding: 60, committed: true }
+  - { id: coordinator, name: "Coordinator", minYears: 4, minStanding: 70, committed: true }
+  - { id: director, name: "Volunteer director", minYears: 8, minStanding: 78, committed: true }
+commitment:
+  casual: { hours: 2, cost: { flat: 0, share: 0 } }
+  committed: { hours: 6, cost: { flat: 30, share: 0 } }
+values: {compassion: 1.0, community: 0.4}
+names:
+  - "The Full Table Food Pantry"
+  - "Harvest Row Food Bank"
+  - "Neighbors' Pantry"
+  - "Eastgate Community Pantry"
+  - "The Open Cupboard"

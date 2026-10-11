@@ -165,7 +165,7 @@ describe('continuing as a grown heir', () => {
 });
 
 describe('continuing as a minor heir', () => {
-  const base = parentLife({ kids: [9, 15], spouse: true, savings: 300_000, seed: 'minor' });
+  const base = parentLife({ kids: [9, 15], spouse: true, savings: 300_000, seed: 'minor-w2' });
   const dead = die(base);
   const [young] = heirCandidates(dead).sort((a, b) => dead.people[b]!.birthYear - dead.people[a]!.birthYear);
 

@@ -323,6 +323,7 @@ export const targetsBalanceSchema = z.strictObject({
       gender: shareRangeSchema,
       expression: shareRangeSchema,
       personality: shareRangeSchema,
+      faith: shareRangeSchema,
       talent: shareRangeSchema,
     }),
   }),
@@ -699,6 +700,29 @@ export const targetsBalanceSchema = z.strictObject({
     familyCareShare: shareRangeSchema,
     /** Years between the warning and a foreseen death, on average. */
     yearsKnown: numberRangeSchema,
+  }),
+  /**
+   * W2: belonging, judged on the careful player. The shares are of lives that
+   * reached the age named: belonged to a group, rose to a role, changed faith,
+   * and each type's share of the groups people belong to.
+   */
+  belonging: z.strictObject({
+    /** The share of lives reaching 30 that belonged to at least one group. */
+    memberShare: shareRangeSchema,
+    /** The share of members who held a role above a plain member for some time. */
+    roleShare: shareRangeSchema,
+    /** The share of lives reaching 30 with a faith. */
+    faithShare: shareRangeSchema,
+    /** The share of lives reaching 50 whose faith changed at least once (found, lost, converted, returned). */
+    faithChangeShare: shareRangeSchema,
+    /** The share of lives that were raised in a faith and kept it to 30. */
+    keptShare: shareRangeSchema,
+    /** The most a yearly cost of groups takes of a year's income, as a share, across all member-years. */
+    givingShare: shareRangeSchema,
+    /** How many people a member of a group comes to know there, on average. */
+    peoplePerGroup: numberRangeSchema,
+    /** The share of group members who belonged for at least ten years. */
+    longShare: shareRangeSchema,
   }),
   coverage: z.strictObject({
     /** At least this many events (not retired). */

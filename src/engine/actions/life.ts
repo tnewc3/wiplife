@@ -25,13 +25,14 @@ import { CRIME_ACTION_IDS, CRIME_ACTIONS } from './crime';
 import { FAME_ACTION_IDS, FAME_ACTIONS } from './fame';
 import { SPORTS_ACTION_IDS, SPORTS_ACTIONS } from './sports';
 import { LATER_ACTION_IDS, LATER_ACTIONS } from './later';
+import { BELONGING_ACTION_IDS, BELONGING_ACTIONS } from './belonging';
 import type { WishesInput } from '../later/terminal';
 import type { IdentityEdit } from '../discovery';
 import { isIncarcerated, onProbation } from '../legal';
 
 export const MONEY_ACTION_IDS = ['set_lifestyle', 'start_gig', 'stop_gig', 'pay_debt', 'debt_plan'] as const;
 export const HOME_ACTION_IDS = ['rent_home', 'move_home', 'relocate', 'buy_home', 'sell_home', 'find_roommate', 'live_alone'] as const;
-export const LIFE_ACTION_IDS = [...MONEY_ACTION_IDS, ...HOME_ACTION_IDS, ...EDUCATION_ACTION_IDS, ...CAREER_ACTION_IDS, ...PERSONAL_ACTION_IDS, ...FAMILY_ACTION_IDS, ...ESTATE_ACTION_IDS, ...POSSESSION_ACTION_IDS, ...TEEN_ACTION_IDS, ...CRIME_ACTION_IDS, ...FAME_ACTION_IDS, ...SPORTS_ACTION_IDS, ...LATER_ACTION_IDS] as const;
+export const LIFE_ACTION_IDS = [...MONEY_ACTION_IDS, ...HOME_ACTION_IDS, ...EDUCATION_ACTION_IDS, ...CAREER_ACTION_IDS, ...PERSONAL_ACTION_IDS, ...FAMILY_ACTION_IDS, ...ESTATE_ACTION_IDS, ...POSSESSION_ACTION_IDS, ...TEEN_ACTION_IDS, ...CRIME_ACTION_IDS, ...FAME_ACTION_IDS, ...SPORTS_ACTION_IDS, ...LATER_ACTION_IDS, ...BELONGING_ACTION_IDS] as const;
 
 /** The only money, home, school, work and personal actions you can take in prison (Stage 9). */
 export const PRISON_LIFE_ACTIONS: readonly LifeActionId[] = ['pay_debt', 'debt_plan', 'stop_gig', 'edit_identity', 'write_will'];
@@ -96,6 +97,9 @@ export interface LifeActionParams {
   wishes?: WishesInput;
   careOption?: 'family' | 'paid' | 'assisted';
   carerId?: string;
+  /** W2: a group (its id) and how committed you are to it. */
+  groupId?: string;
+  level?: 'casual' | 'committed';
 }
 
 export interface LifeActionRule {
@@ -265,6 +269,7 @@ export const LIFE_ACTIONS: Record<LifeActionId, LifeActionRule> = {
   ...FAME_ACTIONS,
   ...SPORTS_ACTIONS,
   ...LATER_ACTIONS,
+  ...BELONGING_ACTIONS,
 };
 
 /** True when the action can be taken now with these (validated) parameters. In prison, only a few can. */

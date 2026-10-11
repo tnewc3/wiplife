@@ -1,0 +1,48 @@
+id: discovery_faith_convert
+title: A different house of prayer
+text: >-
+  Your faith has been good to you. And yet {latentFaith} keeps turning up in
+  your life: a friend's holiday, a passage somebody quoted, a sense of
+  recognition that has no good explanation. You wonder whether you've
+  been looking at the right door all along.
+tone: neutral
+category: identity
+rarity: uncommon
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 14 } }
+    - { discovery: { latent: [faith] } }
+    - { faith: { leaning: true } }
+    - { faith: { pull: [convert] } }
+    - { faith: { strength: { gte: 1 } } }
+weight: { base: 8 }
+followUpOnly: true
+choices:
+  - id: switch
+    label: Take the step and follow it
+    outcome:
+      text: >-
+        It is not a rejection of what raised you. It's a place you were
+        always going to arrive. Some people in your life take it well,
+        others take it hard, and you hold them all with care.
+      effects:
+        - { type: faith, action: fromLatent }
+        - { type: flag, key: converted, value: true }
+  - id: study
+    label: Learn more before deciding
+    outcome:
+      text: >-
+        You read, attend and ask, and you give it a full year. By the end
+        you know the shape of the choice, and it is yours.
+      effects:
+        - { type: stat, key: smarts, delta: 1 }
+        - { type: value, key: independence, delta: 1 }
+  - id: stay
+    label: Stay with what you have
+    outcome:
+      text: >-
+        You decide that the pull is an invitation to learn, not to leave.
+        You keep your faith and learn from the other, with real respect.
+      effects:
+        - { type: faith, action: strengthen, delta: 2 }

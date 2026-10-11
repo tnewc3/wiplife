@@ -9,11 +9,13 @@ surfacing:
   gender: { events: [discovery_mirror] }
   expression: { events: [discovery_wardrobe] }
   personality: { events: [discovery_surprise_self] }
+  faith: { events: [discovery_faith_find, discovery_faith_lose, discovery_faith_convert] }
   talent: { events: [talent_spark] }
 resurfacing:
   attraction: { events: [resurface_feelings] }
   gender: { events: [resurface_reflection] }
   expression: { events: [resurface_closet] }
   personality: { events: [resurface_old_self] }
+  faith: { events: [resurface_faith_find, resurface_faith_lose] }
 crisis: { events: [identity_crisis] }
 comingOut: { events: [coming_out_family, coming_out_friend] }

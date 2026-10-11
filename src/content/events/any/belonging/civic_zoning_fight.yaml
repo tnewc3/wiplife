@@ -1,0 +1,61 @@
+id: civic_zoning_fight
+title: The hearing on the corner lot
+text: >-
+  A developer wants to turn the empty lot on the corner into something
+  large. {group} has opinions, and the hearing is tomorrow night.
+  Neighbors you have lived beside for years are going to say things about each other in public.
+tone: serious
+category: belonging
+rarity: uncommon
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 21 } }
+    - { group: { member: true } }
+    - { group: { type: [civic] } }
+weight: { base: 8 }
+bindGroup: true
+choices:
+  - id: against
+    label: Speak against the plan
+    outcome:
+      text: >-
+        You say what you've rehearsed and some of what you haven't. People
+        clap. A neighbor you like a good deal looks at the floor.
+      effects:
+        - { type: value, key: tradition, delta: 2 }
+        - { type: value, key: civic, delta: 2 }
+        - { type: group, action: standing, delta: 3 }
+  - id: for
+    label: Speak for it, and take the heat
+    outcome:
+      text: >-
+        You say the neighborhood needs homes and jobs more than it needs an
+        empty lot. The room does not take it well. A few people find you
+        afterward to say they agree, quietly.
+      effects:
+        - { type: value, key: independence, delta: 2 }
+        - { type: value, key: civic, delta: 2 }
+        - { type: group, action: standing, delta: -2 }
+  - id: broker
+    label: Push for a compromise both sides can live with
+    check:
+      base: 45
+      stats:
+        - { key: smarts, weight: 0.25 }
+        - { key: sociability, weight: 0.2 }
+      success:
+        text: >-
+          Your amendment lands because nobody can find the reason to hate
+          it. The room vote is ugly and the compromise passes. Everyone goes home slightly
+          disappointed, which is how you know.
+        effects:
+          - { type: group, action: standing, delta: 7 }
+          - { type: group, action: community, delta: 3 }
+      failure:
+        text: >-
+          Both sides hear your compromise as the other side's idea. The meeting ends
+          in a shouting match and someone leaves with the microphone cord.
+        effects:
+          - { type: group, action: standing, delta: -3 }
+          - { type: stat, key: stress, delta: 3 }

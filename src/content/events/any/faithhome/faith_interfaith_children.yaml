@@ -1,0 +1,57 @@
+id: faith_interfaith_children
+title: What the children will be taught
+text: >-
+  You and {partner.name} have different faiths, and your child has started asking
+  questions that need answering. Where do you go on the holy days? What do you tell
+  them is true? The grandparents have views. You and {partner.name} have not
+  settled it between you.
+tone: neutral
+category: faithhome
+rarity: uncommon
+lifeStages: [adult, senior]
+requires:
+  all:
+    - { age: { gte: 22 } }
+    - { family: { minors: { gte: 1 } } }
+    - { romance: [dating, engaged, married] }
+    - { faith: { strength: { gte: 20 } } }
+    - { role: partner, alive: true, kind: [partner, fiance, spouse] }
+    - { role: partner, faith: { same: false, none: false } }
+weight:
+  base: 8
+  modifiers:
+    - { if: { flag: interfaith_wedding }, x: 1.5 }
+once: true
+cast:
+  partner: { support: true, presence: anywhere }
+choices:
+  - id: both
+    label: Raise them knowing both, and let them choose
+    outcome:
+      text: >-
+        You tell the story of each, and the children decide for themselves
+        which they believe, when they are ready. The grandparents are
+        unsure. The children have twice as many holidays.
+      effects:
+        - { type: relationship, role: partner, affection: 6, trust: 5 }
+        - { type: value, key: independence, delta: 1 }
+  - id: yours
+    label: Raise them in your faith, and honor {partner.their}
+    outcome:
+      text: >-
+        The children grow up in one tradition with a clear window onto the
+        other. {partner.name} agrees, with grace and a few conditions, and keeps its
+        most important days for the family.
+      effects:
+        - { type: relationship, role: partner, affection: 2, trust: 3 }
+        - { type: faith, action: strengthen, delta: 2 }
+  - id: theirs
+    label: Raise them in {partner.their}, and keep yours at the edges
+    outcome:
+      text: >-
+        You give it up as a headline and keep it as a footnote: your holidays,
+        your recipes, your stories at bedtime. It takes some adjusting. It
+        is, you decide, what a shared home asks.
+      effects:
+        - { type: relationship, role: partner, affection: 5, trust: 5 }
+        - { type: faith, action: weaken, delta: 2 }

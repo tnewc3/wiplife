@@ -1,0 +1,31 @@
+# Belonging (W2, docs/expansion.md): the real faiths a character can be born
+# into, and the events the belonging step can queue. Congregations, clubs and
+# causes are fictional; the religions are real, and none is written as better,
+# worse, truer or sillier than another. Every event listed under triggers is
+# followUpOnly and is about one group (bindGroup).
+#
+# invite: an invitation to a group in your city you do not belong to.
+# rise: a committed member who qualifies is asked to take on a role.
+# drifting: a member who is stretched thin, or who has stopped showing up, comes to a decision.
+
+# Weights are the broad shares of families (a starting proposal; Stage 12 tunes them).
+faiths:
+  protestant: { name: Protestant Christianity, adherent: Protestant, family: Christian, birthWeight: 33 }
+  catholic: { name: Catholicism, adherent: Catholic, family: Christian, birthWeight: 20 }
+  orthodox_christian: { name: Orthodox Christianity, adherent: Orthodox Christian, family: Christian, birthWeight: 0.8 }
+  jewish: { name: Judaism, adherent: Jewish, family: Jewish, birthWeight: 2 }
+  muslim: { name: Islam, adherent: Muslim, family: Muslim, birthWeight: 1.5 }
+  hindu: { name: Hinduism, adherent: Hindu, family: Hindu, birthWeight: 1.2 }
+  buddhist: { name: Buddhism, adherent: Buddhist, family: Buddhist, birthWeight: 1.2 }
+  sikh: { name: Sikhism, adherent: Sikh, family: Sikh, birthWeight: 0.3 }
+
+noneWeight: 30
+noneName: No religion
+
+triggers:
+  invite:
+    events: [invite_to_club, invite_to_service, invite_to_civic, invite_youth_club, invite_faith_curious, invite_faith_congregation]
+  rise:
+    events: [asked_to_help_organize, asked_to_lead_group]
+  drifting:
+    events: [group_stretched_thin, group_stopped_showing_up]

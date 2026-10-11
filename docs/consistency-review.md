@@ -182,3 +182,52 @@ The 30 heir events (categories `estate`, `guardianship` and `legacy`) were writt
 - **Money:** the contested estate and the contested will charge `legal_help` (scaled by city), and selling the family home goes through the `housing` effect; no other heir event mentions money, and the amounts an heir inherits are on the "Previously" card and the Money tab, not in event text.
 - **Household:** the family-home decision doesn't happen while a partner lives with the heir (it would have to account for them).
 - **Adults only:** the guardianship events are about a minor's family and use no romantic wording; nothing in them casts a partner.
+
+## W2 (belonging): the faith events
+
+Expansion plan, "Second-wave writing guidance": no religion is presented as better, worse, truer or sillier than another; the writing never mocks belief or the lack of it; congregations vary in how welcoming or strict they are, so no faith is painted as one thing, and people within them vary too; hard tensions are handled with weight, with reactions that differ from person to person and no community written as a villain. Congregation names and clubs are fictional; the religions are real.
+
+Besides the rules in AGENTS.md (checked by the content build as for every event, `npm run content` prints no warnings for these), the content build now enforces a few of these mechanically (`tools/content/belonging.ts`):
+
+- every faith has a congregation, and every congregation asks the same hours, costs and values and draws its traits from the same ranges (the tradition changes the name, the words and nothing about how hard it is to belong);
+- the faiths, groups, rites and events contain none of a list of words that mock belief or the lack of it, or name a religion as something to fear;
+- an event names a group, a role, a faith or a pull toward a faith only where it requires one;
+- a conversion to "the faith of the group" needs a faith group, and returning needs a faith you were raised in.
+
+All 31 events below were then read in full against the four points of the guidance. "Checks" is what was looked for and found; "Changed" is what the review changed.
+
+| Event | About | Checks | Changed |
+|---|---|---|---|
+| `faith_holiday_gathering` | Your tradition's holy days at home | Names no religion: it uses `{faith}`, so the same words fit every tradition; hosting, services only and a quiet year are each shown as a valid way to keep it. | None needed. |
+| `faith_holiday_far_from_home` | A holy day away from family | Same for every tradition; travelling, phoning and building your own way are equally respected. | The trip costs money through the `holiday_travel` cost item. |
+| `rite_jewish_coming_of_age` | Bar, bat or b'nei mitzvah | Names the three forms because communities differ; a young person who is unsure is answered calmly by the teacher, parents are not villains. | Reworded the candy-throwing detail (some communities only) to "the congregation answers with a song". |
+| `rite_christian_confirmation` | Confirmation or its equivalent | "Or the equivalent in your church" covers traditions that mark it differently; waiting a year is met with respect. | None needed. |
+| `rite_muslim_first_fast` | A first fast | Half a day is called a fine beginning; waiting is accepted without fuss; nothing says how much a child must do. | Replaced "dates" (also the content build's romance word) with "dried fruits". |
+| `rite_dharmic_young_practice` | Taking up the practice (Hindu, Buddhist, Sikh) | One event for three traditions, with no ceremony described that belongs to only one, and the elders say the practice has a place whether or not you stay. | Kept generic on purpose: three accurate rites would each be a different event. |
+| `faith_engagement_blessing` | Marrying in your congregation | A full ceremony, a blend of two traditions and a simple one are all warm; the congregation sends a gift and a note even for the simple one. | Title changed from "within the walls" to "in your congregation". |
+| `faith_comfort_in_illness` | A congregation after an illness | Prayer is offered "in their own way" and asked first; accepting everything, only the practical help, or privacy are all fine and nobody is offended. | None needed. |
+| `faith_crisis_of_faith` | Doubt after a hard stretch | Three ways through (ask, sit with it, let go), none better; no tradition is claimed to answer doubt in a particular way. | Reworded "the hard times are when belief matters most" (a claim about every tradition) to "you were taught"; "honest doubt is old company in your tradition" became "doubt is not unusual"; "putting down something you have carried so long you forgot it was heavy" (belief as a burden) became "something that held you up for a long time". |
+| `faith_doubts_young_adult` | Questions away from home | Studying your own tradition, looking at others and setting it aside are all shown as ordinary; exploring is not shown as a fall. | None needed. |
+| `faith_found_in_hard_time` | Finding a faith | Names the group's religion with `{groupFaith}`; staying, going as a guest and turning back are all shown with dignity; a person without faith is not cast as lacking. | None needed. |
+| `faith_return_late_life` | Returning to the faith you were raised in | Going back, honoring it in memory and exploring elsewhere are equal; a secular life is not a mistake. | None needed. |
+| `faith_conversion_study` | Studying a partner's faith | Converting, learning without converting and declining kindly all keep the relationship warm; the partner never pressures. | None needed. |
+| `faith_interfaith_holidays` | Two calendars, one home | Celebrating both, alternating and keeping them apart are each named as working, each with its small cost. | Removed a line that assigned the holidays to "his, hers" with hardcoded pronouns. |
+| `faith_interfaith_children` | What the children will be taught | Raising them in either faith, or both, is treated symmetrically; the grandparents have views and are not blamed. | None needed. |
+| `faith_parent_hurt_by_leaving` | A devout parent when you stop believing | The parent is hurt, not hostile: no punishment, no ultimatum; staying close and taking distance are both open to you. | None needed. |
+| `faith_parent_shrugs_at_leaving` | A parent who is not surprised | Shows the other common reaction (relief, shared honesty), so reactions differ from parent to parent. Does not imply belief is hollow: the parent's remark is about this one faith being "more mine than yours". | None needed. |
+| `faith_parent_and_conversion` | A parent and your new faith | The parent's feelings are real and mixed; sharing, inviting and waiting are all warm; the failure case is a misunderstanding, not a fight. | None needed. |
+| `faith_strict_congregation_tension` | A hard tension: being who you are in a strict congregation | Written with weight. Reactions differ person to person: an ally who stays beside you, an elder who is kind and does not move, a leader who says nothing unkind. Nobody is a villain and the congregation is not; leaving is shown as a grief, staying quietly as a cost, speaking up as uncertain. | Checked that it requires the congregation to be strict, that you have come out and that the speaker is a member; the outcomes never end with someone cast out. |
+| `faith_welcoming_congregation` | A congregation that welcomes you | The counterpart: a congregation that is welcoming (the same faith can be either), so no faith is painted as one thing. | None needed. |
+| `faith_child_asks` | A child asks why | Tell them honestly, say there are many answers, or put it off: all fine. | None needed. |
+| `faith_work_observance` | A day your tradition sets aside, at work | The boss is not hostile in either outcome; the failure leaves a workable compromise. | None needed. |
+| `faith_neighbor_preaches` | A neighbor who wants to talk about eternity | Gentle comedy at the neighbor's expense was the first draft; now the neighbor is kind and committed and the three choices (listen, set a boundary, argue for fun) all end warmly. | Reworded "utterly sure about what you ought to believe" to "deeply committed to their faith, and hopeful you might come to share it". |
+| `faith_retreat_weekend` | A retreat | Stress relief as a consequence of the practice, not a verdict on it; skipping is not punished. | The retreat costs money through the `faith_retreat` cost item. |
+| `invite_faith_curious` | An invitation to a faith that is not yours | Visiting as a guest, declining and asking questions are all welcomed; nobody asks what you believe. | None needed. |
+| `invite_faith_congregation` | An invitation to a congregation of your own religion | Joining casually, committing or waiting are all fine; "not yet" is not criticized. | Reworded "years ago" (a fixed gap in a follow-up) to "long before". |
+| `discovery_faith_find` | A pull toward a faith you do not have | Following it, holding it quietly and putting it away are all allowed; the pull is not a symptom. | Removed "it isn't your family's" (could be false). |
+| `discovery_faith_lose` | Going through the motions | Admitting it, talking to someone and carrying on are all fine; loss is not shown as failure. | Reworded "relief at no longer pretending" (implying the belief was false) to "relief at being honest with yourself". |
+| `discovery_faith_convert` | A different house of prayer | Switching, studying and staying are all respectful; "not a rejection of what raised you". | None needed. |
+| `resurface_faith_find` | The pull is back | Same as the first time: listen or put it away again. | None needed. |
+| `resurface_faith_lose` | The doubt that didn't go away | Accepting, or keeping the practice for what it gives you, both shown as honest ways to belong. | Replaced a group-standing effect (the event is not about a group) with a value effect. |
+
+The four rites (Jewish, Christian, Muslim, and one shared by the Hindu, Buddhist and Sikh traditions) are written to be accurate and generic rather than detailed: where a tradition varies between communities (the form of a ceremony, how much a child fasts), the text says so. The other belonging events happen in a group of any type (invitations, roles, scandals, a fundraiser) and mention no religion; they were read for the same points and need nothing from this review. Reviewers should look especially at `faith_strict_congregation_tension`, which is the one hard tension in this stage.

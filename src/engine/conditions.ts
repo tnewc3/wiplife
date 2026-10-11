@@ -16,6 +16,8 @@ import { crimeHolds } from './crime/holds';
 import { fameHolds } from './fame/holds';
 import { sportsHolds } from './sports/holds';
 import { laterHolds } from './later/query';
+import { faithHolds, groupHolds } from './belonging/query';
+import { faithOf } from './belonging/faith';
 import { romanceStatus, yearsInKind } from './relationships';
 import type { Id, LifeState } from './types';
 
@@ -181,6 +183,7 @@ export function evaluate(condition: Condition | undefined, state: LifeState, ctx
       gender: latent?.genderCategory !== undefined,
       expression: latent?.genderExpression !== undefined,
       personality: c.latent.personality !== undefined && Object.keys(c.latent.personality).length > 0,
+      faith: c.latent.faith !== undefined,
     };
     if (q.latent && !q.latent.some((k) => has[k])) return false;
     if (q.known && !q.known.some((k) => has[k] && state.discovery.surfaced[k] !== undefined)) return false;
@@ -225,6 +228,16 @@ export function evaluate(condition: Condition | undefined, state: LifeState, ctx
       if (condition.custody && !(person.child && condition.custody.includes(person.child.custody))) return false;
       if (condition.movedOut !== undefined && (person.child?.movedOutYear !== undefined) !== condition.movedOut) return false;
       if (condition.origin && !(person.child && condition.origin.includes(person.child.origin))) return false;
+      if (condition.faith) {
+        // W2: their faith against yours.
+        if (!ctx.content) return false;
+        const theirs = faithOf(state, person, ctx.content);
+        const q = condition.faith;
+        if (q.same !== undefined && (theirs.id === state.belonging.faith.id) !== q.same) return false;
+        if (q.none !== undefined && (theirs.id === null) !== q.none) return false;
+        if (q.id && !q.id.includes(theirs.id ?? 'none')) return false;
+        if (q.strength && !compare(theirs.strength, q.strength)) return false;
+      }
       if (condition.life && !lifeHolds(condition.life, person, state.currentYear, ctx.content?.balance.people.trouble.serious ?? 35)) return false;
       if (condition.heard && !heardHolds(condition.heard, state, id, ctx.content, ctx.cast?.[ITEM_ROLE])) return false;
       if (condition.mental) {
@@ -235,6 +248,9 @@ export function evaluate(condition: Condition | undefined, state: LifeState, ctx
       return true;
     });
   }
+  if ('group' in condition) return groupHolds(condition.group, state, ctx.cast, ctx.content, ctx.roles === 'assumeTrue');
+  if ('faith' in condition) return faithHolds(condition.faith, state, ctx.content);
+  if ('value' in condition) return compare(state.belonging.values[condition.value], condition);
   if ('mental' in condition) {
     const q = condition.mental;
     const m = state.health.mental;

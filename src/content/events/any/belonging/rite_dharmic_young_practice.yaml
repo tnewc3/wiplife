@@ -1,0 +1,52 @@
+id: rite_dharmic_young_practice
+title: Taking up the practice yourself
+text: >-
+  At {group}, the elders mark the time when a young person begins to
+  carry the practice of {faith} on their own account, not only alongside
+  their family. There's a ceremony, a blessing and a good deal of
+  food, and this year it is yours.
+tone: neutral
+category: belonging
+rarity: common
+lifeStages: [child, teen]
+requires:
+  all:
+    - { age: { gte: 10 } }
+    - { age: { lte: 17 } }
+    - { group: { member: true } }
+    - { group: { religion: [hindu, buddhist, sikh] } }
+    - { faith: { id: [hindu, buddhist, sikh] } }
+weight: { base: 14 }
+once: true
+bindGroup: true
+choices:
+  - id: embrace
+    label: Take it on with your whole heart
+    outcome:
+      text: >-
+        You learn the words, hold your posture through the long ceremony
+        and eat more than you ever have. Afterward, an elder tells you the
+        practice has a place for you whether or not you stay with it.
+      effects:
+        - { type: faith, action: strengthen, delta: 5 }
+        - { type: group, action: standing, delta: 5 }
+        - { type: flag, key: had_a_coming_of_age_rite, value: true }
+  - id: for_family
+    label: Do it for the people who raised you
+    outcome:
+      text: >-
+        It means more to them than to you, and you let it. Your grandparent
+        looks happier than you have seen them, which is its own answer.
+      effects:
+        - { type: faith, action: strengthen, delta: 2 }
+        - { type: group, action: standing, delta: 3 }
+        - { type: flag, key: had_a_coming_of_age_rite, value: true }
+  - id: questions
+    label: Ask the elders the hard questions first
+    outcome:
+      text: >-
+        They answer some and tell you honestly that others they are still
+        asking. You find that more reassuring than a neat answer would have been.
+      effects:
+        - { type: faith, action: strengthen, delta: 2 }
+        - { type: value, key: independence, delta: 1 }

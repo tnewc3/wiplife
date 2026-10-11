@@ -194,9 +194,9 @@ export function romanceAllowed(state: LifeState, def: EventDef, cast: Record<str
   if (!isRomanceEvent(def, content)) return true;
   const { adultAge } = content.balance.relationships;
   if (state.character.age < adultAge) return false;
-  // (E4: the knowledge item an event is about travels in the cast as a pseudo-role, and is no person.)
+  // (E4: the knowledge item an event is about travels in the cast as a pseudo-role, and is no person; nor is the group or the possession.)
   return Object.entries(cast).every(([role, id]) => {
-    if (role === ITEM_ROLE) return true;
+    if (role === ITEM_ROLE || role.startsWith('@')) return true;
     const person = state.people[id];
     return person !== undefined && ageOf(state, person) >= adultAge;
   });

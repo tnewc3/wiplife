@@ -1,0 +1,50 @@
+id: faith_interfaith_holidays
+title: Two calendars, one home
+text: >-
+  You and {partner.name} follow different faiths, and the calendar gets
+  complicated this time of year. Two sets of holidays,
+  two sets of relatives with expectations, and one small apartment's worth of table.
+tone: light
+category: faithhome
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { romance: [dating, engaged, married] }
+    - { faith: { strength: { gte: 20 } } }
+    - { role: partner, alive: true, kind: [partner, fiance, spouse] }
+    - { role: partner, faith: { same: false, none: false } }
+weight: { base: 9 }
+recurring: true
+cast:
+  partner: { support: true, presence: anywhere }
+choices:
+  - id: both
+    label: Celebrate both, and learn each other's
+    outcome:
+      text: >-
+        There are twice as many dishes, twice as many arguments about whose
+        recipe is right, and a long list of things each of you now knows how to do. It is
+        exhausting. It is also, mostly, delightful.
+      effects:
+        - { type: relationship, role: partner, affection: 6, trust: 4 }
+        - { type: value, key: community, delta: 1 }
+        - { type: stat, key: stress, delta: 2 }
+  - id: alternate
+    label: Alternate by year
+    outcome:
+      text: >-
+        It's fair, and it works, and nobody feels like a guest in their own
+        holiday. You each keep one more year of someone's family stories.
+      effects:
+        - { type: relationship, role: partner, affection: 3, trust: 3 }
+  - id: separate
+    label: Keep your own holidays separately
+    outcome:
+      text: >-
+        Each of you keeps your own days, with your own people, and meets afterward over
+        a quiet dinner. It works, but there's a gap in it that neither of you names.
+      effects:
+        - { type: relationship, role: partner, affection: -2 }
+        - { type: faith, action: strengthen, delta: 1 }

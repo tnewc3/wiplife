@@ -48,7 +48,7 @@ export function belongingsLife(options: BelongingsLife): LifeState {
     d.recap = { year: d.currentYear, age, statsBefore: stats, statsAfter: { ...stats } };
     d.lifetime = { happinessTotal: d.character.stats.happiness * age, years: age };
     d.finances.savings = options.savings ?? 600_000;
-    d.finances.lastLedger = { year: d.currentYear - 1, gross: 200_000, retirement: 0, tax: 0, housing: 0, living: 0, debtPayments: 0, interest: 0, debtInterest: 0, borrowed: 0, support: 0, children: 0, care: 0, supportPaid: 0, supportReceived: 0, upkeep: 0, insurance: 0, net: 200_000 };
+    d.finances.lastLedger = { year: d.currentYear - 1, gross: 200_000, retirement: 0, tax: 0, housing: 0, living: 0, debtPayments: 0, interest: 0, debtInterest: 0, borrowed: 0, support: 0, children: 0, care: 0, supportPaid: 0, supportReceived: 0, upkeep: 0, insurance: 0, giving: 0, net: 200_000 };
     d.housing = options.ownsHome
       ? { kind: 'owned', cityId: d.character.cityId, annualCost: 0, homeValue: 300_000, since: d.currentYear - 6 }
       : { kind: 'renting', cityId: d.character.cityId, annualCost: 0, since: d.currentYear - 3 };

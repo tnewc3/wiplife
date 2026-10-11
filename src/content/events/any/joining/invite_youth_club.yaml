@@ -1,0 +1,34 @@
+id: invite_youth_club
+title: The room with the pool table
+text: >-
+  There is a room in your neighborhood that is open after school: a pool
+  table, a snack cupboard, adults who learn your name and use it. Someone
+  your age says they go most days and that you should come see it.
+tone: light
+category: joining
+rarity: common
+lifeStages: [child, teen]
+requires:
+  all:
+    - { age: { lt: 18 } }
+    - { group: { member: false } }
+    - { group: { def: [youth_club] } }
+weight: { base: 10 }
+followUpOnly: true
+bindGroup: true
+choices:
+  - id: casual
+    label: Check it out after school
+    outcome:
+      text: >-
+        It is louder than you expected and friendlier. Someone teaches you a
+        card game and then loses to you at it, which is how friendships start.
+      effects:
+        - { type: group, action: join, level: casual }
+        - { type: stat, key: happiness, delta: 2 }
+  - id: no
+    label: It isn't really your scene
+    outcome:
+      text: You walk past the door on your way home, and notice the lights are on.
+      effects:
+        - { type: stat, key: happiness, delta: -1 }

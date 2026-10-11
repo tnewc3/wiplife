@@ -1,0 +1,50 @@
+id: faith_holiday_gathering
+title: The days your tradition sets apart
+text: >-
+  The season of {faith} observances is here, the days your tradition sets
+  apart, and the question of how to spend them comes round again. {companion.name}
+  is the first person you think of when you start to plan.
+tone: light
+category: faithhome
+rarity: common
+lifeStages: [child, teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { faith: { strength: { gte: 20 } } }
+    - { age: { gte: 8 } }
+    - { role: companion, alive: true }
+weight: { base: 8 }
+recurring: true
+cast:
+  companion: { support: true, presence: anywhere }
+choices:
+  - id: host
+    label: Gather people at your place
+    visibleIf: { age: { gte: 18 } }
+    outcome:
+      text: >-
+        The table is too small and everyone fits anyway. {companion.name} and
+        you cook together, and for one evening the old words feel newly
+        said.
+      effects:
+        - { type: relationship, role: companion, affection: 6, trust: 3 }
+        - { type: faith, action: strengthen, delta: 2 }
+        - { type: stat, key: stress, delta: 2 }
+  - id: services
+    label: Keep to the services, the way you always have
+    outcome:
+      text: >-
+        You go, stand and sit where you are supposed to, and say what you
+        say. It is the same as every year, which, today, is the point.
+      effects:
+        - { type: faith, action: strengthen, delta: 2 }
+        - { type: stat, key: happiness, delta: 2 }
+  - id: low_key
+    label: Let it pass quietly this year
+    outcome:
+      text: >-
+        You mark it privately, a candle or a few words or just a pause in the
+        day. It is smaller than it used to be and still yours.
+      effects:
+        - { type: faith, action: weaken, delta: 1 }
+        - { type: relationship, role: companion, affection: 1 }

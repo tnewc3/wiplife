@@ -11,6 +11,7 @@
  * payments pause while you're in college, trade school or grad school.
  */
 import { gradeDrag } from './mental/drag';
+import { groupGradeDrag } from './belonging/load';
 import type { ApplyProgram, ChanceModel, ContentBundle, CredentialType, EducationHistoryKey, Program, Tier } from '../content/schemas';
 import { curveAt } from './curve';
 import { scoreOf } from './events/checks';
@@ -119,6 +120,8 @@ export function expectedGrade(state: LifeState, place: SchoolPlace, content: Con
   if (place.program === 'college' && place.tier) grade += g.tier[place.tier];
   // M1: a severe condition you ignore wears on your grades.
   grade += gradeDrag(state, content);
+  // W2: the time your groups take.
+  grade += groupGradeDrag(state, content);
   return roundGpa(grade);
 }
 

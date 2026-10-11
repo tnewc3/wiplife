@@ -1,0 +1,35 @@
+# Church (faith). W2 belonging. Fictional names; real religions are real.
+id: mainline_church
+name: "Church"
+type: faith
+religion: protestant
+tradition: "Mainline Protestant"
+blurb: "A church with a choir, a steeple and a potluck every first Sunday."
+minAge: 0
+weight: 1.0
+count: { min: 1, max: 3 }
+traits:
+  welcome: { mean: 60, sd: 22 }
+  strict: { mean: 50, sd: 25 }
+  intense: { mean: 50, sd: 22 }
+activities:
+  - "Sunday services"
+  - "Potlucks"
+  - "Sunday school"
+  - "Community outreach"
+ladder:
+  - { id: member, name: "Member", minYears: 0, minStanding: 0, committed: false }
+  - { id: helper, name: "Volunteer", minYears: 1, minStanding: 50, committed: false }
+  - { id: council, name: "Church council member", minYears: 3, minStanding: 62, committed: true }
+  - { id: chair, name: "Church council chair", minYears: 7, minStanding: 76, committed: true }
+commitment:
+  casual: { hours: 1.5, cost: { flat: 25, share: 0.005 } }
+  committed: { hours: 4, cost: { flat: 90, share: 0.02 } }
+values: {community: 0.8, tradition: 0.6, compassion: 0.4}
+names:
+  - "Eastgate Community Church"
+  - "First Congregation of Harbor Hill"
+  - "Riverside United Church"
+  - "Bridgeway Fellowship Church"
+  - "Cedar Street Church"
+  - "Northgate Chapel"

@@ -39,6 +39,8 @@ export function hasLatent(state: LifeState, kind: DiscoveryKind): boolean {
       return latent?.genderExpression !== undefined;
     case 'personality':
       return c.latent.personality !== undefined && Object.keys(c.latent.personality).length > 0;
+    case 'faith':
+      return c.latent.faith !== undefined;
     case 'talent':
       return c.hidden.talent !== null && !c.hidden.talentDiscovered;
   }
@@ -72,6 +74,7 @@ function clearLatent(state: LifeState, kind: LatentKind): void {
   }
   if (kind === 'expression' && latent) delete latent.genderExpression;
   if (kind === 'personality') delete c.latent.personality;
+  if (kind === 'faith') delete c.latent.faith;
   if (c.latent.identity && Object.keys(c.latent.identity).length === 0) delete c.latent.identity;
   delete state.discovery.surfaced[kind];
 }

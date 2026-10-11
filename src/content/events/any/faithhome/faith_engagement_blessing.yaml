@@ -1,0 +1,56 @@
+id: faith_engagement_blessing
+title: Marrying in your congregation
+text: >-
+  You are engaged, and {partner.name} has asked what you want from the
+  ceremony. Your {adherent} faith has views about weddings, and so does {group}.
+  The question is how much of it you want in the day.
+tone: light
+category: faithhome
+rarity: uncommon
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { romance: [engaged] }
+    - { faith: { strength: { gte: 31 } } }
+    - { faith: { congregation: true } }
+    - { group: { member: true } }
+    - { role: partner, alive: true, kind: [fiance] }
+weight: { base: 12 }
+once: true
+bindGroup: true
+cast:
+  partner: { kind: fiance, presence: anywhere }
+choices:
+  - id: full
+    label: Have the full ceremony in your congregation
+    outcome:
+      text: >-
+        The planning has more steps than you expected, and each has a person
+        at the end of it who remembers when your family first came through
+        the door. On the day, the old words are said over a new household.
+      effects:
+        - { type: faith, action: strengthen, delta: 4 }
+        - { type: group, action: standing, delta: 5 }
+        - { type: relationship, role: partner, affection: 5 }
+        - { type: flag, key: married_in_faith, value: true }
+  - id: blended
+    label: Blend the traditions, a little from each
+    visibleIf: { role: partner, faith: { same: false } }
+    outcome:
+      text: >-
+        It takes some patient planning to make two traditions share a day.
+        Both families watch, and both find a thing in it that they recognize.
+      effects:
+        - { type: relationship, role: partner, affection: 7, trust: 5 }
+        - { type: value, key: community, delta: 1 }
+        - { type: flag, key: interfaith_wedding, value: true }
+  - id: simple
+    label: Keep the ceremony simple and mostly secular
+    outcome:
+      text: >-
+        The faith is there in a reading, a blessing from someone you
+        love, a few words. Your congregation sends a gift and a warm note.
+      effects:
+        - { type: faith, action: weaken, delta: 1 }
+        - { type: relationship, role: partner, affection: 3 }

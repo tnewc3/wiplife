@@ -1,0 +1,50 @@
+id: group_honor_dinner
+title: An evening in your name
+text: >-
+  {group} has organized an evening to thank you. There's a cake, a handful of
+  speeches and a slideshow of photos you do not remember anyone taking.
+  You are not a person who enjoys being the center of a room. This is
+  going to be a long hour.
+tone: light
+category: belonging
+rarity: uncommon
+lifeStages: [adult, senior]
+requires:
+  all:
+    - { age: { gte: 30 } }
+    - { group: { member: true } }
+    - { group: { years: { gte: 5 } } }
+    - { group: { standing: { gte: 75 } } }
+weight:
+  base: 6
+  modifiers:
+    - { if: { flag: joined_a_group }, x: 1.5 }
+bindGroup: true
+choices:
+  - id: soak
+    label: Let yourself be thanked
+    outcome:
+      text: >-
+        You stand, you cry a little, you say thank you more than once. On
+        the way out, someone presses a card into your hand that you will keep.
+      effects:
+        - { type: group, action: standing, delta: 3 }
+        - { type: group, action: news, kind: groupHonor }
+        - { type: stat, key: happiness, delta: 5 }
+  - id: deflect
+    label: Give the credit to everyone else
+    outcome:
+      text: >-
+        You name twenty people, and mean each one. By the end the room is
+        applauding itself, and that is what you wanted.
+      effects:
+        - { type: group, action: community, delta: 2 }
+        - { type: value, key: community, delta: 2 }
+  - id: slip_out
+    label: Slip out before the slideshow
+    outcome:
+      text: >-
+        You are halfway down the steps before someone catches you and
+        marches you back in. The slideshow includes the escape attempt.
+      effects:
+        - { type: stat, key: happiness, delta: 2 }

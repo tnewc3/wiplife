@@ -33,6 +33,15 @@ surfacing:
       - { at: 13, x: 0.04 }
       - { at: 30, x: 0.06 }
       - { at: 60, x: 0.03 }
+  # W2: a pull toward a faith, or away from the one you have (balance/belonging.yaml faith.latent).
+  faith:
+    minAge: 14
+    chance:
+      - { at: 14, x: 0.04 }
+      - { at: 20, x: 0.09 }
+      - { at: 35, x: 0.07 }
+      - { at: 55, x: 0.08 }
+      - { at: 75, x: 0.06 }
   talent:
     minAge: 6
     chance:

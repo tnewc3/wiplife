@@ -39,6 +39,7 @@ import { applyCrimeEffect, applyDirtyMoneyEffect } from '../crime/effects';
 import { applyFameEffect, applyFamePayEffect } from '../fame/effects';
 import { applySportsEffect } from '../sports/effects';
 import { applyLaterEffect } from '../later/effects';
+import { applyFaithEffect, applyGroupEffect, applyValueEffect } from '../belonging/effects';
 import { whereabouts } from '../presence';
 import { clampInt } from '../random';
 import { otherCity } from './casting';
@@ -386,6 +387,11 @@ const handlers: { [T in Effect['type']]: Handler<T> } = {
 
   // L1: later life: care, hospice, amends, grandchildren.
   later: (state, effect, ctx) => applyLaterEffect(state, effect, ctx.cast, ctx.rng, ctx.content),
+
+  // W2: belonging: your place in a group, your faith (or someone's), your values.
+  group: (state, effect, ctx) => applyGroupEffect(state, effect, ctx.cast, ctx.content),
+  faith: (state, effect, ctx) => applyFaithEffect(state, effect, ctx.cast, ctx.content),
+  value: (state, effect, ctx) => applyValueEffect(state, effect, ctx.content),
 
   // E3: money paid back to you, sized like the cost it repays.
   repay: (state, effect, ctx) => earn(state, wholeDollars(costPrice(state, effect.item, ctx.content) * effect.share)),

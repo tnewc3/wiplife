@@ -207,6 +207,20 @@ function FamilyStep({ draft, update, errors }: StepProps) {
         choices={(Object.keys(WEALTH_LABELS) as FamilyWealth[]).map((w) => ({ value: w, label: WEALTH_LABELS[w] }))}
         onChange={(familyWealth) => update({ familyWealth })}
       />
+      <SingleChoice<string>
+        label="Faith you’re born into"
+        value={draft.faith}
+        columns={1}
+        error={errors.faith}
+        choices={[
+          { value: 'family', label: 'Surprise me' },
+          { value: 'none', label: content.registries.belonging.noneName },
+          ...Object.keys(content.registries.belonging.faiths)
+            .sort()
+            .map((id) => ({ value: id, label: content.registries.belonging.faiths[id]!.name })),
+        ]}
+        onChange={(faith) => update({ faith })}
+      />
     </div>
   );
 }
@@ -277,6 +291,7 @@ function ReviewStep({ draft }: StepProps) {
     ['Attracted to', draft.attractedTo.length ? draft.attractedTo.map((c) => ATTRACTION_LABELS[c]).join(', ') : 'No one'],
     ['Family', `${draft.parents === 1 ? 'One parent' : 'Two parents'}, ${draft.siblings === 0 ? 'no' : draft.siblings} older sibling${draft.siblings === 1 ? '' : 's'}`],
     ['Wealth', draft.familyWealth ? WEALTH_LABELS[draft.familyWealth] : ''],
+    ['Faith', draft.faith === 'family' ? 'Surprise me' : draft.faith === 'none' ? content.registries.belonging.noneName : (content.registries.belonging.faiths[draft.faith]?.name ?? '')],
     ['City', city ?? ''],
   ];
   return (
@@ -312,6 +327,7 @@ const ERROR_PATHS: Record<keyof Draft, string> = {
   parents: 'family.parents',
   siblings: 'family.siblings',
   familyWealth: 'familyWealth',
+  faith: 'faith',
   cityId: 'cityId',
   stats: 'stats',
   personality: 'personality',

@@ -1,0 +1,60 @@
+id: league_big_game
+title: The game that matters
+text: >-
+  The standings at {group} come down to this one: your team against the
+  one that has beaten it three seasons running. The stakes are a trophy
+  nobody can name the origin of, and everyone cares a ridiculous amount.
+tone: light
+category: belonging
+rarity: common
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { age: { lte: 50 } }
+    - { group: { member: true } }
+    - { group: { def: [rec_league, running_club] } }
+weight: { base: 8 }
+recurring: true
+bindGroup: true
+choices:
+  - id: all_out
+    label: Play hard and don't hold anything back
+    check:
+      base: 50
+      stats:
+        - { key: fitness, weight: 0.3 }
+        - { key: confidence, weight: 0.1 }
+      success:
+        text: >-
+          You win it in the last minutes, with a play that will be told
+          at every end-of-season dinner. You are sore for a week and
+          do not mind.
+        effects:
+          - { type: stat, key: fitness, delta: 1 }
+          - { type: stat, key: happiness, delta: 4 }
+          - { type: group, action: standing, delta: 3 }
+      failure:
+        text: >-
+          You lose by one. You spend the car ride home replaying the moment.
+          The team gets burgers and by the end of the night it's funny.
+        effects:
+          - { type: stat, key: happiness, delta: 1 }
+          - { type: group, action: standing, delta: 1 }
+  - id: for_fun
+    label: Play for the fun of it
+    outcome:
+      text: >-
+        You laugh through most of it and you lose. Nobody is upset. The pizza afterward is the best
+        part, which has always been the point.
+      effects:
+        - { type: stat, key: happiness, delta: 2 }
+        - { type: group, action: standing, delta: 2 }
+  - id: sit_out
+    label: Sit it out with a tight hamstring
+    outcome:
+      text: >-
+        You watch from the bench with a clipboard you do not need. It is
+        possible to be a loyal teammate and also a coward about hamstrings.
+      effects:
+        - { type: stat, key: stress, delta: -1 }

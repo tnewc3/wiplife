@@ -1,0 +1,30 @@
+# Running club (club). W2 belonging. Fictional names; real religions are real.
+id: running_club
+name: "Running club"
+type: club
+blurb: "Early mornings, a lot of stretching and a standing coffee afterward."
+minAge: 18
+weight: 0.9
+count: { min: 1, max: 2 }
+traits:
+  welcome: { mean: 62, sd: 18 }
+  strict: { mean: 30, sd: 18 }
+  intense: { mean: 40, sd: 22 }
+activities:
+  - "Group runs"
+  - "Race weekends"
+  - "Pacing newcomers"
+ladder:
+  - { id: member, name: "Member", minYears: 0, minStanding: 0, committed: false }
+  - { id: organizer, name: "Organizer", minYears: 2, minStanding: 60, committed: true }
+  - { id: leader, name: "Run captain", minYears: 5, minStanding: 72, committed: true }
+commitment:
+  casual: { hours: 2, cost: { flat: 30, share: 0 } }
+  committed: { hours: 5, cost: { flat: 110, share: 0 } }
+values: {community: 0.7}
+names:
+  - "Dawn Patrol Runners"
+  - "The Slow Lap Club"
+  - "Bridgeway Road Runners"
+  - "Lakeshore Striders"
+  - "The Last Mile Running Club"

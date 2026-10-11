@@ -1,0 +1,59 @@
+id: group_election_chair
+title: Nominations are open
+text: >-
+  Every few years, the top job at {group} comes open, and it is the
+  kind of election where everyone knows how it will go and votes anyway.
+  This time the room is split, and there's a name missing from the list.
+tone: neutral
+category: belonging
+rarity: uncommon
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 21 } }
+    - { group: { member: true } }
+    - { group: { rung: { gte: 1 } } }
+    - { group: { leader: false } }
+    - { group: { years: { gte: 3 } } }
+weight: { base: 6 }
+bindGroup: true
+choices:
+  - id: run
+    label: Put your own name forward
+    check:
+      base: 50
+      stats:
+        - { key: confidence, weight: 0.3 }
+        - { key: sociability, weight: 0.15 }
+      success:
+        text: >-
+          You give a short speech with a real sentence in it. It carries. A
+          dozen people vote for you who haven't said two words to you
+          all year.
+        effects:
+          - { type: group, action: promote }
+          - { type: value, key: civic, delta: 1 }
+      failure:
+        text: >-
+          You lose by a margin that is too small to console you and large
+          enough to be clear. The winner thanks you publicly, and you take it with a smile.
+        effects:
+          - { type: stat, key: happiness, delta: -2 }
+          - { type: group, action: standing, delta: 1 }
+  - id: back_friend
+    label: Nominate someone you trust
+    outcome:
+      text: >-
+        You make the case for them better than they could. When it works, you
+        feel pleased in a way that has nothing to do with the title.
+      effects:
+        - { type: group, action: standing, delta: 4 }
+        - { type: value, key: community, delta: 1 }
+  - id: abstain
+    label: Stay out of it
+    outcome:
+      text: >-
+        You vote and say nothing. It goes the way it was always going to. You
+        are not sure that was neutrality or cowardice.
+      effects:
+        - { type: stat, key: stress, delta: -1 }

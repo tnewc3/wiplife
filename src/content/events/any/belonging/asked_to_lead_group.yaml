@@ -1,0 +1,63 @@
+id: asked_to_lead_group
+title: The nominating committee
+text: >-
+  At {group} the leadership has been quietly turning over, and a few people
+  have made it clear they'd like you to stand for the top job. You are
+  {role} now. This would be the step above it.
+tone: neutral
+category: belonging
+rarity: uncommon
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { group: { member: true } }
+    - { group: { commitment: [committed] } }
+    - { group: { leader: false } }
+    - { group: { rung: { gte: 1 } } }
+weight: { base: 8 }
+followUpOnly: true
+bindGroup: true
+choices:
+  - id: stand
+    label: Stand for it
+    check:
+      base: 62
+      stats:
+        - { key: confidence, weight: 0.3 }
+        - { key: reputation, weight: 0.2 }
+      success:
+        text: >-
+          It isn't close. The vote is warm and loud, and afterward people
+          shake your hand a beat longer than usual. You are the person they
+          chose, and now you get to find out what that means.
+        effects:
+          - { type: group, action: promote }
+          - { type: stat, key: stress, delta: 3 }
+          - { type: stat, key: happiness, delta: 3 }
+      failure:
+        text: >-
+          Someone else gets it, by a handful of votes. They are gracious about
+          it, and so are you, mostly. You stay on, and you stay useful.
+        effects:
+          - { type: group, action: standing, delta: -2 }
+          - { type: stat, key: happiness, delta: -2 }
+  - id: decline
+    label: Decline, and back someone else
+    outcome:
+      text: >-
+        You nominate someone better suited. The relief on your face when they
+        say yes is, you notice, not entirely for them.
+      effects:
+        - { type: group, action: standing, delta: 2 }
+  - id: step_back
+    label: Step back from your role instead
+    visibleIf: { group: { rung: { gte: 1 } } }
+    outcome:
+      text: >-
+        You tell them you want your evenings back. They take it well. Afterward,
+        someone brings you a coffee and says the place is lighter and
+        also quieter without your name on the door.
+      effects:
+        - { type: group, action: demote }
+        - { type: stat, key: stress, delta: -3 }

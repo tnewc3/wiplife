@@ -72,6 +72,7 @@ export {
   type WillRowView,
   type WillView,
 } from './estate/views';
+export { getBelongingView, type BelongingView, type GroupView, type MembershipView, type GroupPersonView } from './belonging/views';
 export { getLaterView, type CareView, type LaterPersonView, type LaterView, type TerminalView } from './later/views';
 export { getChildView, getFamilyView, type ChildView, type FamilyOptionView, type FamilyView, type PregnancyView } from './family/views';
 import { getChildView, type ChildView } from './family/views';

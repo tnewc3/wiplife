@@ -27,6 +27,7 @@ import { fameBandSchema, fameCommitmentSchema, fameSceneSchema, fameSizeSchema, 
 import { FOCUS_KEYS, LICENSE_STAGE_IDS, ruleDomainSchema, type RuleDomainId, type TeenFocusId } from './teen';
 import { relationshipKindSchema, relationshipStatusSchema, romanceStatusSchema } from './relationships';
 import { AMENDS_RESULTS, CARE_OPTIONS, HOSPICE_CHOICES, LATER_ACTIONS, TEACH_KEYS } from './laterIds';
+import { COMMITMENTS, FAITH_ACTIONS, GROUP_ACTIONS, GROUP_NEWS_KINDS, GROUP_TYPES, VALUE_IDS } from './belongingIds';
 import { templateSchema } from './text';
 import { reactionSchema, type ReactionId } from './mental';
 import { knowledgeKindSchema, tieKindSchema, tieStatusSchema, type KnowledgeKindId, type TieKindId, type TieStatusId } from './web';
@@ -109,6 +110,9 @@ export type Condition =
   | { fame: FameCondition }
   | { sports: SportsCondition }
   | { later: LaterCondition }
+  | { group: GroupCondition }
+  | { faith: FaithCondition }
+  | ({ value: (typeof VALUE_IDS)[number] } & Compare)
   | { memory: { role: string; tag: string } }
   | {
       role: string;
@@ -132,6 +136,8 @@ export type Condition =
       movedOut?: boolean;
       /** L1: how a child came to you: a grandchild you are raising has the origin `grandchild`. */
       origin?: ('birth' | 'adopted' | 'ivf' | 'surrogacy' | 'step' | 'grandchild')[];
+      /** W2: their faith against yours. */
+      faith?: RoleFaithCondition;
       /** E3: their own life now (job, partner, children, troubles, care). */
       life?: LifeCondition;
       /** E4: what they have heard. */
@@ -468,6 +474,68 @@ export interface MentalCondition {
 export interface LegalCondition {
   incarcerated?: boolean;
   probation?: boolean;
+}
+
+/**
+ * W2, groups. Every field given must hold. With a group bound to the event
+ * (`bindGroup`, or one the engine passes in), the fields describe that group
+ * and your place in it; without one, `member` and the fields about a place in
+ * a group hold for any group you belong to that fits every field given.
+ * member: you belong to it (false: you don't, or, with no group bound,
+ * belong to none of this type); count: how many groups you belong to; type,
+ * def and religion: what kind of group (a faith group's religion);
+ * commitment, rung (0 is a plain member), leader (at the top rung), years in,
+ * standing (0–100); welcome, strict and intense: the group's own traits
+ * (0–100); hours: the hours a week all your groups take.
+ */
+export interface GroupCondition {
+  member?: boolean;
+  count?: Compare;
+  type?: (typeof GROUP_TYPES)[number][];
+  def?: string[];
+  religion?: string[];
+  commitment?: (typeof COMMITMENTS)[number][];
+  rung?: Compare;
+  leader?: boolean;
+  years?: Compare;
+  standing?: Compare;
+  welcome?: Compare;
+  strict?: Compare;
+  intense?: Compare;
+  hours?: Compare;
+  /** Your standing in your city beyond any one group (0–100). */
+  community?: Compare;
+}
+
+/**
+ * W2, faith. Every field given must hold. id: your faith is one of these
+ * ('none' for no faith); strength: how strongly you believe (0–100; 0 with no
+ * faith); wavering: belief at or below the wavering line (with a faith);
+ * devout: at or above the devout line; raised: the faith you were raised in
+ * (or 'none'); changed: years since your faith last changed (never changed
+ * does not hold); leaning: a pull toward another faith, or away from yours, you
+ * haven't acted on (the latent trait); pull: which way it leans (find: toward a faith when you have
+ * none, lose: away from the one you have, convert: toward another); congregation: you belong to a group of
+ * your religion (false: you have a faith and none of its groups).
+ */
+export interface FaithCondition {
+  id?: (string | 'none')[];
+  strength?: Compare;
+  wavering?: boolean;
+  devout?: boolean;
+  raised?: (string | 'none')[];
+  changed?: Compare;
+  leaning?: boolean;
+  pull?: ('find' | 'lose' | 'convert')[];
+  congregation?: boolean;
+}
+
+/** W2: the person in a role: their faith against yours, or what it is. */
+export interface RoleFaithCondition {
+  same?: boolean;
+  none?: boolean;
+  id?: (string | 'none')[];
+  strength?: Compare;
 }
 
 /**
@@ -905,6 +973,43 @@ export const conditionSchema: z.ZodType<Condition> = z.lazy(() =>
         .refine(atLeastOneField, 'needs at least one field'),
     }),
     z.strictObject({
+      group: z
+        .strictObject({
+          member: z.boolean().optional(),
+          count: compareSchema.optional(),
+          type: z.array(z.enum(GROUP_TYPES)).min(1).optional(),
+          def: z.array(idSchema).min(1).optional(),
+          religion: z.array(idSchema).min(1).optional(),
+          commitment: z.array(z.enum(COMMITMENTS)).min(1).optional(),
+          rung: compareSchema.optional(),
+          leader: z.boolean().optional(),
+          years: compareSchema.optional(),
+          standing: compareSchema.optional(),
+          welcome: compareSchema.optional(),
+          strict: compareSchema.optional(),
+          intense: compareSchema.optional(),
+          hours: compareSchema.optional(),
+          community: compareSchema.optional(),
+        })
+        .refine(atLeastOneField, 'needs at least one field'),
+    }),
+    z.strictObject({
+      faith: z
+        .strictObject({
+          id: z.array(idSchema).min(1).optional(),
+          strength: compareSchema.optional(),
+          wavering: z.boolean().optional(),
+          devout: z.boolean().optional(),
+          raised: z.array(idSchema).min(1).optional(),
+          changed: compareSchema.optional(),
+          leaning: z.boolean().optional(),
+          pull: z.array(z.enum(['find', 'lose', 'convert'])).min(1).optional(),
+          congregation: z.boolean().optional(),
+        })
+        .refine(atLeastOneField, 'needs at least one field'),
+    }),
+    z.strictObject({ value: z.enum(VALUE_IDS), ...compareFields }).refine(hasBound, 'needs a bound'),
+    z.strictObject({
       later: z
         .strictObject({
           grandchildren: compareSchema.optional(),
@@ -936,6 +1041,10 @@ export const conditionSchema: z.ZodType<Condition> = z.lazy(() =>
       custody: z.array(z.enum(['you', 'shared', 'other'])).min(1).optional(),
       movedOut: z.boolean().optional(),
       origin: z.array(z.enum(['birth', 'adopted', 'ivf', 'surrogacy', 'step', 'grandchild'])).min(1).optional(),
+      faith: z
+        .strictObject({ same: z.boolean().optional(), none: z.boolean().optional(), id: z.array(idSchema).min(1).optional(), strength: compareSchema.optional() })
+        .refine(atLeastOneField, 'needs at least one field')
+        .optional(),
       life: lifeConditionSchema.optional(),
       heard: heardConditionSchema.optional(),
       mental: z
@@ -1051,6 +1160,12 @@ export const castSpecSchema = z
      * added to them. `stalker` is the superfan who has crossed the line.
      */
     fan: z.enum([...FAME_FAN_TYPES, 'stalker']).optional(),
+    /**
+     * W2: someone from a group of yours: a member of the group the event is
+     * about (or, with none bound, of any group you belong to). A friend,
+     * found only, never created.
+     */
+    group: z.literal('yours').optional(),
   })
   .refine((s) => (s.kind !== undefined && s.support === true) === false && (s.kind !== undefined || s.support === true || s.noticed !== undefined), 'a role needs one of kind or support: true (or noticed, alone or with a kind)')
   .refine((s) => s.deceased !== true || (s.presence === 'anywhere' && s.support !== true && !s.romantic && !s.admirer && !s.createIfMissing && s.newChance === undefined), 'a deceased role has presence anywhere and is only passed in')
@@ -1066,6 +1181,10 @@ export const castSpecSchema = z
   .refine(
     (s) => s.crew === undefined || (!s.crowd && !s.support && !s.noticed && !s.romantic && !s.admirer && (s.crew === 'rival' ? s.kind === 'acquaintance' : s.kind === 'friend') && (s.crew === 'rival' || (!s.createIfMissing && s.newChance === undefined))),
     'a crew role is a friend (your crew, boss or informant: found, never created) or an acquaintance (rival), and not a crowd, support, noticed, romantic or admirer role',
+  )
+  .refine(
+    (s) => s.group === undefined || (s.kind === 'friend' && !s.crew && !s.crowd && !s.fan && !s.support && !s.noticed && !s.romantic && !s.admirer && !s.createIfMissing && s.newChance === undefined),
+    'a group role is a friend who is found, never created, and not a crew, crowd, fan, support, noticed, romantic or admirer role',
   )
   .refine(
     (s) => s.fan === undefined || (s.kind === 'acquaintance' && !s.crew && !s.crowd && !s.support && !s.noticed && !s.romantic && !s.admirer && (s.fan !== 'stalker' || (!s.createIfMissing && s.newChance === undefined))),
@@ -1455,6 +1574,57 @@ export const effectSchema = z.discriminatedUnion('type', [
     .refine((e) => (e.action === 'teach') === (e.key !== undefined && e.delta !== undefined && e.delta !== 0), 'teach needs key and a non-zero delta (and only teach has them)')
     .refine((e) => e.action === 'care' || e.action === 'hospice' || e.role !== undefined || e.action === 'amends', 'raise, return and teach need role')
     .refine((e) => e.action !== 'care' || e.option !== 'family' || e.role !== undefined, 'family care needs the role of the relative who steps up'),
+  /**
+   * W2, groups. They act on the group the event is about (`bindGroup`, or the
+   * one the engine passed in; else the one group you belong to that fits).
+   * join: you join it (as `level`, casual by default; `defId` instead joins
+   * one of that kind in your city); leave; commit: change your commitment to
+   * `level`; promote and demote: a rung up or down; standing: its standing
+   * (0–100) moves by `delta`; community: your standing in the city moves by
+   * `delta`; news: starts the story `kind` (about you, or the person at `role`)
+   * to travel by gossip. The engine ignores what doesn't fit now.
+   */
+  z
+    .strictObject({
+      type: z.literal('group'),
+      action: z.enum(GROUP_ACTIONS),
+      level: z.enum(COMMITMENTS).optional(),
+      defId: idSchema.optional(),
+      delta: z.int().min(-30).max(30).optional(),
+      kind: z.enum(GROUP_NEWS_KINDS).optional(),
+      role: roleSchema.optional(),
+    })
+    .refine((e) => (e.action === 'commit') === (e.level !== undefined) || e.action === 'join', 'commit needs level (only commit and join have one)')
+    .refine((e) => (e.action === 'standing' || e.action === 'community') === (e.delta !== undefined && e.delta !== 0), 'standing and community need a non-zero delta (and only they have one)')
+    .refine((e) => (e.action === 'news') === (e.kind !== undefined), 'news needs kind (and only news has one)')
+    .refine((e) => e.defId === undefined || e.action === 'join', 'only join takes defId')
+    .refine((e) => e.role === undefined || e.action === 'news', 'only news takes role'),
+  /**
+   * W2, faith. strengthen and weaken: belief moves by `delta`; lose: you stop
+   * believing (no faith); convert: you take the faith `id`, or the faith of
+   * the person at `role`, or of the group the event is about (`group: true`);
+   * return: back to the faith you were raised in; fromLatent: you act on the
+   * pull you felt. With `who`, strengthen, weaken, lose and convert (with an
+   * `id`) change that person's faith instead of yours.
+   */
+  z
+    .strictObject({
+      type: z.literal('faith'),
+      action: z.enum(FAITH_ACTIONS),
+      delta: z.int().min(1).max(60).optional(),
+      id: idSchema.optional(),
+      role: roleSchema.optional(),
+      group: z.literal(true).optional(),
+      who: roleSchema.optional(),
+    })
+    .refine((e) => (e.action === 'strengthen' || e.action === 'weaken') === (e.delta !== undefined), 'strengthen and weaken need a delta (and only they have one)')
+    .refine((e) => e.action === 'convert' || (e.id === undefined && e.group === undefined && e.role === undefined), 'only convert takes id, role or group')
+    .refine((e) => e.action !== 'convert' || [e.id !== undefined, e.role !== undefined, e.group === true].filter(Boolean).length === 1, 'convert takes exactly one of id, role or group: true')
+    .refine((e) => e.who === undefined || ['strengthen', 'weaken', 'lose', 'convert'].includes(e.action), 'who is for strengthen, weaken, lose and convert')
+    .refine((e) => e.who === undefined || e.action !== 'convert' || e.id !== undefined, 'convert with who needs an id')
+    .refine((e) => (e.action !== 'return' && e.action !== 'fromLatent') || e.who === undefined, 'return and fromLatent are about you'),
+  /** W2: a value moves by `delta`; a share of it sticks to your temperament (balance/belonging.yaml values.sticks). */
+  z.strictObject({ type: z.literal('value'), key: z.enum(VALUE_IDS), delta: z.int().min(-30).max(30).refine((n) => n !== 0, 'delta must not be 0') }),
   z.strictObject({ type: z.literal('innerConflict'), delta: z.int().min(-100).max(100) }),
   /** You discover your hidden talent, if you have one you haven't found (Stage 9). */
   z.strictObject({ type: z.literal('talent') }),
@@ -1744,6 +1914,12 @@ export const eventSchema = baseDefSchema
      * the event's text can name them ({pet.name}, {vehicle}, {homeCity}).
      */
     bind: z.array(z.enum(POSSESSION_KINDS)).min(1).optional(),
+    /**
+     * W2: the event is about one of your groups (or, for an offer, one in your
+     * city you could join): one is picked among those that make its
+     * requirements true, and the text can name it ({group}, {role}, {religion}).
+     */
+    bindGroup: z.literal(true).optional(),
     /**
      * E6c: the card keeps the words it was shown with, and the outcome keeps {stage} and
      * {opponent} as they were, even though the choice moves a playoff run on.

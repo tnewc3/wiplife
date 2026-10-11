@@ -1,0 +1,51 @@
+id: faith_comfort_in_illness
+title: Casseroles and prayers
+text: >-
+  Word of your illness has gotten around, and {group} has responded as it
+  does: food at the door, cards in the mail, offers of rides, someone who
+  wants to sit with you. People pray in their own way. Some offer to pray for you, and ask first.
+tone: serious
+category: belonging
+rarity: uncommon
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { group: { member: true } }
+    - { group: { type: [faith] } }
+    - { health: { severity: { gte: 40 } } }
+weight: { base: 10 }
+bindGroup: true
+choices:
+  - id: accept
+    label: Accept all of it
+    outcome:
+      text: >-
+        You say yes to the rides and the soup and the visits and, when
+        asked, the prayers. It is easier than you thought to be looked after, and harder
+        to stop being surprised that people want to.
+      effects:
+        - { type: faith, action: strengthen, delta: 3 }
+        - { type: group, action: standing, delta: 3 }
+        - { type: stat, key: stress, delta: -3 }
+        - { type: stat, key: happiness, delta: 3 }
+  - id: practical
+    label: Accept the help and leave the rest
+    outcome:
+      text: >-
+        You thank everyone for the rides and food, and leave the prayers to
+        those who want to offer them. Nobody is offended. A few say they will do it anyway,
+        in their own time, which you find you don't mind.
+      effects:
+        - { type: group, action: standing, delta: 1 }
+        - { type: stat, key: stress, delta: -2 }
+  - id: private
+    label: Ask for privacy
+    outcome:
+      text: >-
+        You say that you appreciate it and would like to deal with this on
+        your own. They honor it, mostly, and leave a casserole on the porch
+        in case you change your mind.
+      effects:
+        - { type: group, action: standing, delta: -1 }
+        - { type: stat, key: stress, delta: 1 }

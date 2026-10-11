@@ -1,0 +1,48 @@
+id: faith_retreat_weekend
+title: A weekend away from everything
+text: >-
+  A retreat is on offer, three days of quiet in a place that smells of pine and old
+  stone, run by people of your {faith} tradition. Nothing is scheduled but
+  meals and the practices you came for. Your phone will be in a drawer.
+tone: light
+category: faith
+rarity: uncommon
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 20 } }
+    - { faith: { strength: { gte: 40 } } }
+    - { stat: stress, gte: 40 }
+weight:
+  base: 6
+  modifiers:
+    - { if: { any: [{ flag: found_faith }, { flag: converted }] }, x: 1.5 }
+recurring: true
+choices:
+  - id: go
+    label: Go, and leave your phone behind
+    outcome:
+      text: >-
+        The first day is restlessness. The second is a surprise, and the third is
+        the thing you came for. You drive home slowly and with the windows down.
+      effects:
+        - { type: cost, item: faith_retreat }
+        - { type: faith, action: strengthen, delta: 4 }
+        - { type: stat, key: stress, delta: -8 }
+        - { type: stat, key: happiness, delta: 3 }
+  - id: day
+    label: Take a quiet day at home instead
+    outcome:
+      text: >-
+        You turn off the screens, make a pot of something warm and sit with
+        your own thoughts. It is a fraction of the retreat, and most of the value.
+      effects:
+        - { type: stat, key: stress, delta: -3 }
+  - id: no
+    label: Skip it. There's too much to do
+    outcome:
+      text: >-
+        You work through the weekend. The quiet you didn't take is still
+        waiting for you on Monday, in the form of a headache.
+      effects:
+        - { type: stat, key: stress, delta: 2 }

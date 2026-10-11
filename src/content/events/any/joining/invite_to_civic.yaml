@@ -1,0 +1,44 @@
+id: invite_to_civic
+title: A seat at the meeting
+text: >-
+  The decisions about your street, your school or your library are made in a
+  room most people never enter. A neighbor tells you {group} meets next week
+  and keeps a chair open for anyone willing to listen. Maybe to talk, too.
+tone: neutral
+category: joining
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { group: { member: false } }
+    - { group: { type: [civic] } }
+weight: { base: 10 }
+followUpOnly: true
+bindGroup: true
+choices:
+  - id: casual
+    label: Go to a meeting and just listen
+    outcome:
+      text: >-
+        Two hours about drainage. You leave with opinions about drainage you
+        did not have before and a name tag with your own handwriting on it.
+      effects:
+        - { type: group, action: join, level: casual }
+        - { type: value, key: civic, delta: 2 }
+  - id: committed
+    label: Sign up for a committee
+    outcome:
+      text: >-
+        You get a folder. In a month you are the person people ask what the
+        agenda says, and in a year you are the person who writes it.
+      effects:
+        - { type: group, action: join, level: committed }
+        - { type: value, key: civic, delta: 3 }
+        - { type: flag, key: joined_a_group, value: true }
+  - id: no
+    label: Let someone else deal with it
+    outcome:
+      text: Someone else will. They always do. You find yourself reading the minutes anyway.
+      effects:
+        - { type: stat, key: happiness, delta: -1 }

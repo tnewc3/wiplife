@@ -70,6 +70,7 @@ const character = z.strictObject({
   latent: z.strictObject({
     identity: exactPartial(identity).exactOptional(),
     personality: exactPartial(personality).exactOptional(),
+    faith: z.strictObject({ id: id.nullable() }).exactOptional(),
   }),
   appearance: z.strictObject({ descriptors: z.array(z.string()) }),
   stats,
@@ -211,6 +212,7 @@ const person = z.strictObject({
   life: personLife.exactOptional(),
   neuro: z.array(id).min(1).exactOptional(),
   grandchild: z.strictObject({ parentId: id }).exactOptional(),
+  faith: z.strictObject({ id: id.nullable(), strength: score }).exactOptional(),
 });
 
 const relationship = z.strictObject({
@@ -364,6 +366,7 @@ const finances = z.strictObject({
       supportReceived: dollars,
       upkeep: dollars,
       insurance: dollars,
+      giving: dollars,
       net: dollars,
     })
     .exactOptional(),
@@ -439,6 +442,7 @@ const discovery = z.strictObject({
     gender: surfacedEntry.exactOptional(),
     expression: surfacedEntry.exactOptional(),
     personality: surfacedEntry.exactOptional(),
+    faith: surfacedEntry.exactOptional(),
     talent: surfacedEntry.exactOptional(),
   }),
   crisisYear: int.exactOptional(),
@@ -833,6 +837,48 @@ const later = z.strictObject({
   offered: z.record(z.string(), int),
 });
 
+// W2: belonging.
+const valueSet = z.strictObject({ community: score, compassion: score, tradition: score, independence: score, civic: score });
+const belonging = z.strictObject({
+  household: z.strictObject({ faith: id.nullable(), devotion: score }),
+  faith: z.strictObject({ id: id.nullable(), strength: score, raised: id.nullable(), since: int.nullable(), changes: int.min(0) }),
+  values: valueSet,
+  temperament: valueSet,
+  groups: z.record(
+    z.string(),
+    z.strictObject({ id: filled, defId: id, cityId: id, name: filled, welcome: score, strict: score, intense: score, people: z.array(id) }),
+  ),
+  cities: z.record(z.string(), z.array(filled)),
+  memberships: z.array(
+    z.strictObject({
+      groupId: filled,
+      since: int,
+      commitment: z.enum(['casual', 'committed']),
+      rung: int.min(0),
+      rungSince: int,
+      standing: score,
+      family: z.literal(true).exactOptional(),
+    }),
+  ),
+  past: z.array(
+    z.strictObject({
+      groupId: filled,
+      defId: id,
+      name: filled,
+      cityId: id,
+      fromYear: int,
+      toYear: int,
+      topRung: int.min(0),
+      how: z.enum(['left', 'moved', 'drifted']),
+    }),
+  ),
+  nextGroup: int.min(1),
+  community: score,
+  repCarry: z.number(),
+  offered: z.record(z.string(), int),
+  upgrade: z.literal(true).exactOptional(),
+});
+
 export const historyEntrySchema = z.strictObject({
   year: int,
   age: int,
@@ -903,6 +949,7 @@ export const lifeStateSchema: z.ZodType<LifeState> = z.strictObject({
   fame,
   sports,
   later,
+  belonging,
 });
 
 /**

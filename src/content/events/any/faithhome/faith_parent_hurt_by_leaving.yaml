@@ -1,0 +1,55 @@
+id: faith_parent_hurt_by_leaving
+title: What you told {parent.name}
+text: >-
+  You have told {parent.name} that you no longer believe the way you were
+  raised to. {parent.They} {parent:is|are} devout, and have taken it the way
+  people take a loss: quietly, and with a lot of effort to not make it
+  worse. It sits between you at every meal.
+tone: serious
+category: faithhome
+rarity: uncommon
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { faith: { id: [none] } }
+    - { not: { faith: { raised: [none] } } }
+    - { faith: { changed: { lte: 4 } } }
+    - { role: parent, alive: true, kind: [parent] }
+    - { role: parent, faith: { strength: { gte: 60 } } }
+weight:
+  base: 12
+  modifiers:
+    - { if: { flag: left_faith }, x: 1.5 }
+once: true
+cast:
+  parent: { kind: parent, presence: nearby }
+choices:
+  - id: explain
+    label: Explain it, and listen to how it hurts
+    outcome:
+      text: >-
+        It is a hard conversation and a long one. {parent.name} does not agree,
+        and does not stop loving you, and says both. You leave with a loose,
+        unfinished peace.
+      effects:
+        - { type: relationship, role: parent, affection: 4, trust: 5 }
+        - { type: stat, key: stress, delta: -2 }
+  - id: keep_peace
+    label: Keep the peace and go along to the services sometimes
+    outcome:
+      text: >-
+        You go at the big holidays and sit through them. {parent.name} is
+        quietly grateful. You are quietly aware of a distance neither of you
+        can name.
+      effects:
+        - { type: relationship, role: parent, affection: 3 }
+        - { type: stat, key: stress, delta: 2 }
+  - id: distance
+    label: Take some distance for a while
+    outcome:
+      text: >-
+        Phone calls get shorter and visits get rarer. {parent.name} does not
+        push. The space is there, and the silence in it.
+      effects:
+        - { type: relationship, role: parent, affection: -6, trust: -3 }

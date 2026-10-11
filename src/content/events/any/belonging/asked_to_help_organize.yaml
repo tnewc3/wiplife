@@ -1,0 +1,49 @@
+# Rise (registries/belonging.yaml rise): a committed member who qualifies is asked to take on more.
+id: asked_to_help_organize
+title: They need someone to take this on
+text: >-
+  The person who has held things together at {group} says the quiet part out
+  loud: they can't keep doing it alone, and you are the person they'd trust
+  with the job. It would mean more of your time, and a name on the schedule.
+tone: neutral
+category: belonging
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { group: { member: true } }
+    - { group: { commitment: [committed] } }
+    - { group: { leader: false } }
+    - { group: { rung: { lte: 1 } } }
+weight: { base: 10 }
+followUpOnly: true
+bindGroup: true
+choices:
+  - id: yes
+    label: Say yes
+    outcome:
+      text: >-
+        The first week is a blur of keys, spreadsheets and sticky notes. The
+        second week you understand how much the place depended on one tired
+        person, and that you are not going to let that stay true.
+      effects:
+        - { type: group, action: promote }
+        - { type: stat, key: stress, delta: 3 }
+        - { type: value, key: community, delta: 2 }
+  - id: help_not_lead
+    label: Offer to help without the title
+    outcome:
+      text: >-
+        You take a corner of the work and leave the title where it is. They
+        look relieved and a little disappointed, in about equal parts.
+      effects:
+        - { type: group, action: standing, delta: 3 }
+  - id: no
+    label: Tell them you're stretched too thin
+    outcome:
+      text: >-
+        "I understand," they say, and you can see them going down the list of
+        other names. You feel the weight of that for a while.
+      effects:
+        - { type: group, action: standing, delta: -3 }

@@ -234,3 +234,6 @@ tags:
   amends_made: You made amends with {npc.them}
   amends_refused: Would not hear your apology
   amends_put_off: You put off making amends with {npc.them}
+  # W2: belonging.
+  met_through_a_group: You got to know each other in a group
+  were_there_in_hospital: You were there when {npc.they} {npc:was|were} in the hospital

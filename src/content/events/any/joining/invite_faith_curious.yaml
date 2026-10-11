@@ -1,0 +1,49 @@
+# Invitation to a faith community that is not your own (or to one when you have no faith): welcome, never pressure.
+id: invite_faith_curious
+title: Come and see
+text: >-
+  A coworker, a neighbor or a friend of a friend belongs to {group}, a {groupFaith}
+  community, and mentions that visitors are always welcome. There is no
+  pressure in how they say it, just an open door and a time.
+tone: neutral
+category: joining
+rarity: uncommon
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { group: { member: false } }
+    - { group: { type: [faith] } }
+    - { not: { faith: { congregation: true } } }
+weight: { base: 6 }
+followUpOnly: true
+bindGroup: true
+choices:
+  - id: visit
+    label: Visit once, as a guest
+    outcome:
+      text: >-
+        You sit near the back and follow along as well as you can. People are
+        patient about where to stand and when, and no one asks what you believe.
+        You leave knowing a little more about a neighbor's world.
+      effects:
+        - { type: group, action: join, level: casual }
+        - { type: stat, key: happiness, delta: 1 }
+  - id: thanks
+    label: Thank them and decline
+    outcome:
+      text: >-
+        "Of course," they say, and mean it. The invitation stays open, and
+        nothing about the way you part is any different.
+      effects:
+        - { type: stat, key: happiness, delta: 0 }
+  - id: curious
+    label: Ask what it would mean to belong
+    outcome:
+      text: >-
+        You ask honest questions and get honest answers, including the
+        parts that are hard to explain. You leave thinking about it for
+        longer than you would admit.
+      effects:
+        - { type: value, key: tradition, delta: 1 }
+        - { type: value, key: independence, delta: 1 }

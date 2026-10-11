@@ -1,0 +1,51 @@
+# Invitation to a congregation of your own religion (you have a faith and none of its groups).
+id: invite_faith_congregation
+title: A place where you'd be known
+text: >-
+  You have {adherent} beliefs and no congregation to share them with. {group},
+  a {tradition} community in your city, is the kind of place where people
+  would learn your name. A neighbor who goes there asks whether you've
+  considered it.
+tone: neutral
+category: joining
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { group: { member: false } }
+    - { group: { type: [faith] } }
+    - { faith: { strength: { gte: 31 } } }
+    - { faith: { congregation: false } }
+weight: { base: 12 }
+followUpOnly: true
+bindGroup: true
+choices:
+  - id: casual
+    label: Go when you can, and see how it feels
+    outcome:
+      text: >-
+        The first visit feels like being handed something you set down long
+        before. You are a guest for a few weeks, and then someone asks if you'd
+        like to help set up.
+      effects:
+        - { type: group, action: join, level: casual }
+        - { type: faith, action: strengthen, delta: 3 }
+  - id: committed
+    label: Make it a regular part of your week
+    outcome:
+      text: >-
+        You make room for it on purpose. It shapes your week and the people in
+        it, and a year from now you will not remember how you managed without it.
+      effects:
+        - { type: group, action: join, level: committed }
+        - { type: faith, action: strengthen, delta: 5 }
+        - { type: flag, key: joined_a_group, value: true }
+  - id: not_yet
+    label: Not yet. You aren't sure it's the right place
+    outcome:
+      text: >-
+        You keep your faith the way you have, privately. It holds. Some days
+        you wish it had company.
+      effects:
+        - { type: stat, key: happiness, delta: -1 }

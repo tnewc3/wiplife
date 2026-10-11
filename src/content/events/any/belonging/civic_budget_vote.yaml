@@ -1,0 +1,49 @@
+id: civic_budget_vote
+title: The budget has a gap
+text: >-
+  The budget of {group} has a hole in it, and someone has to say where
+  the money for the year goes. It is not a dramatic decision, which is exactly why it's easy
+  to get wrong.
+tone: neutral
+category: belonging
+rarity: common
+lifeStages: [adult, senior]
+requires:
+  all:
+    - { age: { gte: 25 } }
+    - { group: { member: true } }
+    - { group: { type: [civic, club] } }
+    - { group: { rung: { gte: 1 } } }
+weight: { base: 7 }
+recurring: true
+bindGroup: true
+choices:
+  - id: cut
+    label: Cut the extras and keep the core
+    outcome:
+      text: >-
+        The summer picnic goes. A few people grumble. The core programs survive,
+        and you hear one person say it was the right call.
+      effects:
+        - { type: group, action: standing, delta: 3 }
+        - { type: value, key: tradition, delta: 1 }
+  - id: raise
+    label: Ask members for a little more
+    outcome:
+      text: >-
+        You make the case at a meeting, and a majority agrees. People pay
+        what they said they would, and one or two quietly do not renew.
+      effects:
+        - { type: cost, item: group_fundraiser }
+        - { type: group, action: standing, delta: 2 }
+  - id: audit
+    label: Go through the books line by line
+    outcome:
+      text: >-
+        You find three things that did not need to exist and one that
+        should have. It takes every evening for a week, and you come out of it
+        knowing the place better than you did.
+      effects:
+        - { type: stat, key: stress, delta: 3 }
+        - { type: group, action: standing, delta: 5 }
+        - { type: value, key: civic, delta: 1 }

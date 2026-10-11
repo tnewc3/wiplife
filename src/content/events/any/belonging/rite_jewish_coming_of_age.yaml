@@ -1,0 +1,56 @@
+id: rite_jewish_coming_of_age
+title: The day you become responsible
+text: >-
+  At {group}, the year has come when young people in the community are
+  called up to take on the commandments for themselves, in the ceremony called
+  bar mitzvah, bat mitzvah or b'nei mitzvah, depending on the community. There
+  is a portion to learn and a congregation that will be listening.
+tone: neutral
+category: belonging
+rarity: common
+lifeStages: [child, teen]
+requires:
+  all:
+    - { age: { gte: 12 } }
+    - { age: { lte: 14 } }
+    - { group: { member: true } }
+    - { group: { religion: [jewish] } }
+    - { faith: { id: [jewish] } }
+weight: { base: 14 }
+once: true
+bindGroup: true
+choices:
+  - id: prepare
+    label: Learn your portion thoroughly
+    outcome:
+      text: >-
+        Months of Saturdays with a tutor and a recording. On the day, your voice shakes
+        on the first line and settles by the third, and when you finish the
+        congregation answers with a song. You are, by all accounts, a person now.
+      effects:
+        - { type: faith, action: strengthen, delta: 6 }
+        - { type: group, action: standing, delta: 6 }
+        - { type: stat, key: confidence, delta: 3 }
+        - { type: flag, key: had_a_coming_of_age_rite, value: true }
+  - id: for_family
+    label: Go through with it mostly for your family
+    outcome:
+      text: >-
+        You learn what you need to and say it clearly. It means more to
+        the people in the front row than it does to you, and you find
+        you are glad to have given it to them.
+      effects:
+        - { type: faith, action: strengthen, delta: 2 }
+        - { type: group, action: standing, delta: 3 }
+        - { type: flag, key: had_a_coming_of_age_rite, value: true }
+  - id: question
+    label: Tell your parents you aren't sure what you believe
+    outcome:
+      text: >-
+        It goes quietly. They don't say yes or no. Someone suggests you talk
+        with the teacher, who has heard it before and does not seem alarmed.
+        You do the ceremony anyway, asking questions the whole way.
+      effects:
+        - { type: faith, action: weaken, delta: 3 }
+        - { type: value, key: independence, delta: 2 }
+        - { type: flag, key: had_a_coming_of_age_rite, value: true }

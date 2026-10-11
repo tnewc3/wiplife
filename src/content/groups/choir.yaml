@@ -1,0 +1,30 @@
+# Community choir (club). W2 belonging. Fictional names; real religions are real.
+id: choir
+name: "Community choir"
+type: club
+blurb: "Sopranos, tenors and a director who thanks everyone for coming."
+minAge: 18
+weight: 0.8
+count: { min: 1, max: 2 }
+traits:
+  welcome: { mean: 62, sd: 18 }
+  strict: { mean: 30, sd: 18 }
+  intense: { mean: 40, sd: 22 }
+activities:
+  - "Weekly rehearsal"
+  - "Seasonal concerts"
+  - "Sing-alongs at the care home"
+ladder:
+  - { id: member, name: "Member", minYears: 0, minStanding: 0, committed: false }
+  - { id: organizer, name: "Organizer", minYears: 2, minStanding: 60, committed: true }
+  - { id: leader, name: "Music director", minYears: 5, minStanding: 72, committed: true }
+commitment:
+  casual: { hours: 2, cost: { flat: 30, share: 0 } }
+  committed: { hours: 5, cost: { flat: 110, share: 0 } }
+values: {community: 0.7}
+names:
+  - "The Evening Chorale"
+  - "Riverbend Community Singers"
+  - "Harmony Row Choir"
+  - "The Open Door Chorus"
+  - "Brightwater Voices"

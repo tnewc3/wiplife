@@ -1,0 +1,48 @@
+id: group_fundraiser
+title: The collection plate goes around
+text: >-
+  {group} needs to raise money for something it can't postpone, and the
+  organizers are asking everyone to give what they can. Nobody is keeping a
+  list. People are watching the list anyway.
+tone: neutral
+category: belonging
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 21 } }
+    - { group: { member: true } }
+    - { group: { commitment: [committed] } }
+weight: { base: 7 }
+recurring: true
+bindGroup: true
+choices:
+  - id: generous
+    label: Give generously
+    visibleIf: { money: { gte: 2000 } }
+    outcome:
+      text: >-
+        You give more than you planned and less than you could. The organizer
+        thanks you quietly, in a way that suggests it matters more than the number.
+      effects:
+        - { type: cost, item: group_donation }
+        - { type: group, action: standing, delta: 5 }
+        - { type: group, action: community, delta: 1 }
+  - id: modest
+    label: Give what fits
+    outcome:
+      text: >-
+        You give a modest amount and mean it. It lands in the pot alongside
+        forty other modest amounts, which is how these things get done.
+      effects:
+        - { type: cost, item: group_fundraiser }
+        - { type: group, action: standing, delta: 2 }
+  - id: time
+    label: Give your time instead
+    outcome:
+      text: >-
+        You say you can't give this month but can give three Saturdays.
+        They hand you a clipboard before you finish the sentence.
+      effects:
+        - { type: stat, key: stress, delta: 2 }
+        - { type: group, action: standing, delta: 3 }

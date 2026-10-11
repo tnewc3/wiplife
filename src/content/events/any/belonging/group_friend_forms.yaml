@@ -1,0 +1,50 @@
+id: group_friend_forms
+title: The person you save a seat for
+text: >-
+  Somewhere in the last few weeks at {group}, {friend.name} stopped being a
+  familiar face and became the person you look for first. You find yourself
+  saying "you'd like {friend.them}" to people who haven't met.
+tone: light
+category: belonging
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { group: { member: true } }
+    - { role: friend, alive: true, kind: [friend] }
+weight:
+  base: 8
+  modifiers:
+    - { if: { memory: { role: friend, tag: were_there_in_hospital } }, x: 1.5 }
+bindGroup: true
+cast:
+  friend: { kind: friend, group: yours, presence: city }
+choices:
+  - id: invite
+    label: Invite {friend.them} to something outside the group
+    outcome:
+      text: >-
+        Dinner turns into three hours. By the end you are planning the
+        next one, and neither of you pretends you aren't.
+      effects:
+        - { type: relationship, role: friend, affection: 12, trust: 6 }
+        - { type: memory, role: friend, tag: met_through_a_group }
+        - { type: stat, key: happiness, delta: 3 }
+  - id: keep_it_here
+    label: Keep it to the group, where it works
+    outcome:
+      text: >-
+        It stays what it is: Thursday nights, coffee afterward. There is
+        something to be said for a friendship that has a schedule.
+      effects:
+        - { type: relationship, role: friend, affection: 5 }
+  - id: share
+    label: Introduce {friend.them} to your other friends
+    outcome:
+      text: >-
+        {friend.name} fits in as if there had been a space shaped for {friend.them}.
+        It makes both worlds a little bigger.
+      effects:
+        - { type: relationship, role: friend, affection: 8, trust: 4 }
+        - { type: stat, key: sociability, delta: 1 }

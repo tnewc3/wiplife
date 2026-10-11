@@ -1,0 +1,30 @@
+# Community board (civic). W2 belonging. Fictional names; real religions are real.
+id: community_board
+name: "Community board"
+type: civic
+blurb: "Monthly meetings in a municipal room with bad lighting and real votes."
+minAge: 21
+weight: 0.7
+count: { min: 1, max: 2 }
+traits:
+  welcome: { mean: 50, sd: 20 }
+  strict: { mean: 45, sd: 20 }
+  intense: { mean: 45, sd: 22 }
+activities:
+  - "Monthly hearings"
+  - "Reviewing permits"
+  - "Public comment"
+ladder:
+  - { id: member, name: "Member", minYears: 0, minStanding: 0, committed: false }
+  - { id: committee, name: "Committee member", minYears: 1, minStanding: 55, committed: true }
+  - { id: officer, name: "Officer", minYears: 3, minStanding: 66, committed: true }
+  - { id: president, name: "Board chair", minYears: 6, minStanding: 76, committed: true }
+commitment:
+  casual: { hours: 1.5, cost: { flat: 20, share: 0 } }
+  committed: { hours: 5, cost: { flat: 45, share: 0 } }
+values: {civic: 1.0, community: 0.3}
+names:
+  - "Ward Seven Community Board"
+  - "The Riverside Community Board"
+  - "Northgate Civic Board"
+  - "Cedar District Board"

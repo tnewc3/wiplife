@@ -1387,3 +1387,45 @@ export const LATER_TITLES = {
 export function laterPersonLine(p: { kind: RelationshipKind; genderCategory: GenderCategory; age: number; estranged: boolean }): string {
   return [relationshipLabel(p.kind, p.genderCategory), ageLabel(p.age), ...(p.estranged ? ['Estranged'] : [])].join(' · ');
 }
+
+// W2: belonging. Interface words for groups, faith and values; what a group is like comes from content.
+export const GROUP_TYPE_LABELS = { club: 'Clubs and hobbies', faith: 'Faith communities', service: 'Volunteering and causes', civic: 'Neighborhood and civic groups' } as const;
+export const GROUP_TYPE_SINGULAR = { club: 'Club', faith: 'Faith community', service: 'Cause', civic: 'Civic group' } as const;
+export const VALUE_LABELS: Record<string, { name: string; blurb: string }> = {
+  community: { name: 'Community', blurb: 'Belonging to something larger than yourself' },
+  compassion: { name: 'Compassion', blurb: 'Caring for people who are struggling' },
+  tradition: { name: 'Tradition', blurb: 'Honoring the old ways' },
+  independence: { name: 'Independence', blurb: 'Thinking and choosing for yourself' },
+  civic: { name: 'Civic duty', blurb: 'What you owe the place you live' },
+};
+export const FAITH_STRENGTH_WORDS = { none: 'No belief to speak of', wavering: 'Wavering', steady: 'Steady', devout: 'Devout' } as const;
+export const GROUP_COMMITMENT_LABELS = { casual: 'Casual', committed: 'Committed' } as const;
+export const GROUP_COMMITMENT_BLURBS = { casual: 'Drop in when you can', committed: 'Make it part of your week' } as const;
+export const GROUP_JOIN_BLOCK_LABELS = {
+  unknown: 'Not available',
+  member: 'You belong already',
+  age: 'Not open at your age',
+  away: 'You can’t while you are away',
+  city: 'In another city',
+  full: 'You belong to as many as you can manage',
+  committedAge: 'Too young to commit to this',
+} as const;
+export const RISE_NEEDS_LABELS = {
+  years: 'More years in the group',
+  standing: 'Better standing in the group',
+  committed: 'Committing to the group',
+  age: 'Being older',
+} as const;
+export const GROUPS_TITLES = {
+  screen: 'Groups',
+  yours: 'Your groups',
+  none: 'You don’t belong to any group yet.',
+  available: 'In your city',
+  past: 'Groups you left',
+  faith: 'Faith',
+  values: 'What you value',
+  week: 'Hours a week',
+  cost: 'Costs this year',
+} as const;
+export const hoursLine = (h: number): string => (h === 0 ? 'No time' : `${h} hour${h === 1 ? '' : 's'} a week`);
+export const roleLine = (role: string, years: number): string => `${role}, ${years === 0 ? 'new this year' : `${years} year${years === 1 ? '' : 's'}`}`;

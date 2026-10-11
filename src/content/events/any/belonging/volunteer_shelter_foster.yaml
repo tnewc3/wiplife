@@ -1,0 +1,48 @@
+id: volunteer_shelter_foster
+title: A week in your kitchen
+text: >-
+  The animal shelter at {group} is full, and the staff has run out of kennels.
+  A young dog with a bad cough and good manners needs somewhere to stay
+  for a week. Everyone looks at the people who have been there longest.
+  That is you.
+tone: light
+category: belonging
+rarity: uncommon
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { group: { member: true } }
+    - { group: { def: [animal_shelter] } }
+weight: { base: 7 }
+bindGroup: true
+choices:
+  - id: foster
+    label: Take the dog home for the week
+    outcome:
+      text: >-
+        The dog sleeps on your feet, ignores the bed you bought and cries when
+        you leave for work. When the week ends, you hand over the leash with
+        an ache you had not budgeted for.
+      effects:
+        - { type: cost, item: pet_supplies }
+        - { type: value, key: compassion, delta: 3 }
+        - { type: group, action: standing, delta: 5 }
+        - { type: stat, key: happiness, delta: 3 }
+  - id: help_another_way
+    label: Offer to walk the dogs twice a day instead
+    outcome:
+      text: >-
+        You can't take one home, but you can do the mornings. By the end
+        of the week the dogs hear your car and bark.
+      effects:
+        - { type: group, action: standing, delta: 2 }
+        - { type: stat, key: fitness, delta: 1 }
+  - id: cannot
+    label: Explain that your home can't take an animal right now
+    outcome:
+      text: >-
+        The coordinator nods and moves on to the next name. You spend the
+        evening thinking about the cough.
+      effects:
+        - { type: stat, key: happiness, delta: -1 }

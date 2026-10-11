@@ -8,6 +8,7 @@ import type {
   DebtKind,
   DiscoveryKind,
   EulogyGroup,
+  Commitment,
   EulogyTone,
   FamilyProcessKind,
   GenderCategory,
@@ -21,6 +22,7 @@ import type {
   RuleDomainId,
   TeenFocusId,
   Tier,
+  ValueId,
 } from '../content/schemas';
 import type { RngState } from './rng';
 
@@ -101,6 +103,8 @@ export interface Character {
   latent: {
     identity?: Partial<Identity>;
     personality?: Partial<Personality>;
+    /** W2: a pull toward another faith, or away from the one you have (null: toward no faith), to be found or lost later. */
+    faith?: { id: Id | null };
   };
   appearance: { descriptors: string[] };
   stats: Stats;
@@ -149,6 +153,12 @@ export interface Person {
   neuro?: Id[];
   /** L1: set for your grandchildren (and kept if you raise one): who their parent is, one of your children. */
   grandchild?: GrandchildData;
+  /**
+   * W2: their faith and how strongly they believe, once it is set down (a family member's at birth, a child's when they
+   * are born, a change of faith, a member of a faith group). Everyone else's is worked out from the life's seed when asked
+   * (src/engine/belonging/faith.ts), so it is always the same.
+   */
+  faith?: { id: Id | null; strength: number };
 }
 
 /** L1: a grandchild's link to your family: their parent is one of your children or stepchildren. */
@@ -538,7 +548,9 @@ export interface Ledger {
   upkeep: number;
   /** E5: insurance premiums on your vehicles and vacation homes this year. */
   insurance: number;
-  /** gross + retirement + interest + supportReceived − tax − housing − living − children − care − supportPaid − upkeep − insurance − debtPayments (savings change by net + borrowed). */
+  /** W2: dues, collections and donations to the groups you belong to this year. */
+  giving: number;
+  /** gross + retirement + interest + supportReceived − tax − housing − living − children − care − supportPaid − upkeep − insurance − giving − debtPayments (savings change by net + borrowed). */
   net: number;
 }
 
@@ -1121,6 +1133,85 @@ export interface LifeState {
   sports: SportsState;
   /** L1: later life: care you need, a foreseen death and your final wishes, and the amends you have made. */
   later: LaterState;
+  /** W2: belonging: your faith and values, the groups of your city and the ones you belong to. */
+  belonging: BelongingState;
+}
+
+/** W2: your faith: which (null: none), how strongly you believe, what you were raised in and when it last changed. */
+export interface FaithState {
+  id: Id | null;
+  /** 0–100; 0 without a faith. */
+  strength: number;
+  /** The faith your household had (null: none). */
+  raised: Id | null;
+  /** The year your faith last changed (null: never). */
+  since: number | null;
+  /** How many times it has changed. */
+  changes: number;
+}
+
+/** W2: one club, congregation or cause in a city, with traits of its own (0–100). */
+export interface GroupInstance {
+  id: Id;
+  /** The kind of group (src/content/groups). */
+  defId: Id;
+  cityId: Id;
+  name: string;
+  welcome: number;
+  strict: number;
+  intense: number;
+  /** The people in it you know, once you have joined (made once; see ensureMembers). */
+  people: Id[];
+}
+
+/** W2: your place in a group. */
+export interface Membership {
+  groupId: Id;
+  since: number;
+  commitment: Commitment;
+  /** Your role: an index into the kind's ladder (0 is a plain member). */
+  rung: number;
+  rungSince: number;
+  /** How well regarded you are in it (0–100). */
+  standing: number;
+  /** Your family took you along as a child; it ends when you grow up unless you believe. */
+  family?: true;
+}
+
+/** W2: a group you belonged to once. */
+export interface PastMembership {
+  groupId: Id;
+  defId: Id;
+  name: string;
+  cityId: Id;
+  fromYear: number;
+  toYear: number;
+  /** The highest role you held. */
+  topRung: number;
+  how: 'left' | 'moved' | 'drifted';
+}
+
+export interface BelongingState {
+  /** The faith your family had when you were born (null: none) and how devout it was. */
+  household: { faith: Id | null; devotion: number };
+  faith: FaithState;
+  /** Your values (0–100) and the temperament they settle back toward. */
+  values: Record<ValueId, number>;
+  temperament: Record<ValueId, number>;
+  /** Every group of every city you have seen, by id; each city's are made the first time you are there. */
+  groups: Record<Id, GroupInstance>;
+  cities: Record<Id, Id[]>;
+  memberships: Membership[];
+  past: PastMembership[];
+  nextGroup: number;
+  /** Your standing in your city beyond any one group (0–100). */
+  community: number;
+  /** Reputation points not yet whole. */
+  repCarry: number;
+  /** The last year each offer (an invitation to a group, a role, a decision about drifting) was made, so none comes again soon. */
+  offered: Record<string, number>;
+  /** Set on a life saved before belonging existed: the first yearly step gives it a faith and values (from its seed), and clears this. */
+  upgrade?: true;
 }
 
 /** L1: how late-life care is provided. */

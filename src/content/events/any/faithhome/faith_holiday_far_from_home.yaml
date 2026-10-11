@@ -1,0 +1,49 @@
+id: faith_holiday_far_from_home
+title: A holiday a long way from home
+text: >-
+  The days of {faith} observance are coming, and you are not where your family
+  keeps them. {parent.name} has said, without saying, that they will be kept
+  differently this year without you.
+tone: neutral
+category: faithhome
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { faith: { strength: { gte: 25 } } }
+    - { age: { gte: 18 } }
+    - { role: parent, alive: true, where: [elsewhere] }
+weight: { base: 8 }
+recurring: true
+cast:
+  parent: { kind: parent, presence: elsewhere }
+choices:
+  - id: travel
+    label: Travel home for it
+    outcome:
+      text: >-
+        The airport is crowded and the journey is long. At the door, {parent.name}
+        holds on a moment longer than usual, and the old table has the old
+        smells, and you let it be enough.
+      effects:
+        - { type: cost, item: holiday_travel }
+        - { type: relationship, role: parent, affection: 8, trust: 4 }
+        - { type: faith, action: strengthen, delta: 2 }
+  - id: call
+    label: Keep it together by phone
+    outcome:
+      text: >-
+        You light, taste or recite your part where you are, and {parent.name}
+        does the same, and a screen carries what it can across the miles.
+      effects:
+        - { type: relationship, role: parent, affection: 3 }
+  - id: your_way
+    label: Make your own way of keeping it here
+    outcome:
+      text: >-
+        You find the people in your city who keep the same days, or you
+        invent a way, with the friends who happen to be around. It does not
+        feel like home. It starts to feel like yours.
+      effects:
+        - { type: relationship, role: parent, affection: -1 }
+        - { type: value, key: independence, delta: 1 }

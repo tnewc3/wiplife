@@ -65,6 +65,8 @@ import { emptyCrime } from '../crime/query';
 import { emptyFame } from '../fame/query';
 import { emptySports } from '../sports/query';
 import { emptyLater } from '../later/query';
+import { emptyBelonging } from '../belonging/query';
+import { startBelonging } from '../belonging/start';
 
 /** A deep copy through JSON: the life holds plain data only (the engine has no structuredClone). */
 export function cloneJson<T>(value: T): T {
@@ -393,6 +395,7 @@ export function continueAsHeir(dead: LifeState, heirId: Id, content: ContentBund
     fame: emptyFame(),
     sports: emptySports(),
     later: emptyLater(),
+    belonging: emptyBelonging(),
   };
 
   // ── What they inherit ────────────────────────────────────────────────────
@@ -465,6 +468,10 @@ export function continueAsHeir(dead: LifeState, heirId: Id, content: ContentBund
   // in the parent's life in the same way keeps how it stood (and a feud), without the side the parent took.
   // M1: the heir carries any born-with condition their parent passed on (they start unnamed).
   giveNeuro(life, candidate.neuro ?? [], content);
+  // W2: raised in the faith of the parent who died (or the one set down for the child), with a share of their temperament.
+  const parentFaith = dead.belonging.faith;
+  life.people[parentId]!.faith = { id: parentFaith.id, strength: parentFaith.strength };
+  startBelonging(life, createRng(`${seed}:belonging`), content, { parent: { faith: parentFaith.id, strength: parentFaith.strength, temperament: dead.belonging.temperament, child: candidate.faith } });
   ensureStructure(life, life.web, rng, content, year);
   for (const [key, tie] of Object.entries(life.web.ties)) {
     const old = dead.web.ties[key];

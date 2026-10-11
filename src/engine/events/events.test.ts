@@ -531,6 +531,13 @@ describe('event text', () => {
           injury: 'a torn ligament',
           salary: '$900,000',
           season: '2031',
+          group: 'the Eastgate Book Club',
+          role: 'Organizer',
+          groupFaith: 'Judaism',
+          tradition: 'Reform',
+          faith: 'Judaism',
+          adherent: 'Jewish',
+          latentFaith: 'Buddhism',
         } satisfies Record<(typeof EVENT_TEXT_VALUES)[number] | 'petKind' | 'vehicle' | 'homeCity', string | number>;
         const context = { roles, values };
         const texts = [def.title, def.text, ...(def.choices ?? []).map((c) => c.label)];

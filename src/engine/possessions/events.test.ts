@@ -18,7 +18,7 @@ import { vehicleQuote } from './vehicles';
 const rich = (age = 35, seed = 'e5-ev') =>
   produce(lifeAtAge(seed, age), (d) => {
     d.finances.savings = 400_000;
-    d.finances.lastLedger = { year: d.currentYear - 1, gross: 150_000, retirement: 0, tax: 0, housing: 0, living: 0, debtPayments: 0, interest: 0, debtInterest: 0, borrowed: 0, support: 0, children: 0, care: 0, supportPaid: 0, supportReceived: 0, upkeep: 0, insurance: 0, net: 150_000 };
+    d.finances.lastLedger = { year: d.currentYear - 1, gross: 150_000, retirement: 0, tax: 0, housing: 0, living: 0, debtPayments: 0, interest: 0, debtInterest: 0, borrowed: 0, support: 0, children: 0, care: 0, supportPaid: 0, supportReceived: 0, upkeep: 0, insurance: 0, giving: 0, net: 150_000 };
   });
 const inventoryFailures = (life: LifeState) => checkInvariants(life, content).filter((f) => !/input log|recap|lifetime/.test(f));
 

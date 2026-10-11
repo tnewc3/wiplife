@@ -838,7 +838,7 @@ choices:
         path.join(overlay, 'registries/legal.yaml'),
         'triggers:\n  jailed: { events: [only_prison] }\n  released: { events: [only_justice] }\n  probation: { events: [only_justice] }\n',
       );
-      const kinds = ['attraction', 'gender', 'expression', 'personality'];
+      const kinds = ['attraction', 'gender', 'expression', 'personality', 'faith'];
       const each = (list: string[]) => list.map((k) => `  ${k}: { events: [only_identity] }`).join('\n');
       await writeFile(
         path.join(overlay, 'registries/discovery.yaml'),
@@ -1155,7 +1155,7 @@ describe('the social web (E4)', () => {
     expect(web.length).toBeGreaterThanOrEqual(35);
     expect(web.length).toBeLessThanOrEqual(45);
     const kinds = Object.entries(result.bundle.registries.web.kinds);
-    expect(kinds).toHaveLength(10);
+    expect(kinds).toHaveLength(12);
     for (const [kind, def] of kinds) {
       expect(Object.keys(def.versions).length, kind).toBeGreaterThanOrEqual(3);
       expect(Object.values(def.versions).some((v) => v.twists.length > 0), kind).toBe(true);
@@ -1762,5 +1762,55 @@ describe('later life (L1)', () => {
     expect(await expectErrors()).toContain('unknown memory "taught_by_a_ghost"');
     await write('text/review.yaml', real.replace('You taught {npc.name} something that lasted.', 'You taught {npc.name} and she learned.'));
     expect(await expectErrors()).toContain('hardcoded pronoun');
+  });
+});
+
+describe('belonging (W2)', () => {
+  const read = (file: string) => readFile(path.join(dir, file), 'utf8');
+
+  it('accepts the real content: every faith has a congregation and the groups ask the same of every faith', { timeout: 90_000 }, async () => {
+    const result = await compile();
+    if (!result.ok) throw new Error(formatErrors(result.errors));
+    const faiths = Object.keys(result.bundle.registries.belonging.faiths);
+    for (const id of faiths) expect(Object.values(result.bundle.groups).some((g) => g.religion === id), id).toBe(true);
+    expect(Object.values(result.bundle.groups).map((g) => g.type)).toEqual(expect.arrayContaining(['club', 'faith', 'service', 'civic']));
+    expect(result.warnings.filter((w) => /group|faith|rite|invite/.test(w.eventId))).toEqual([]);
+  });
+
+  it('refuses a faith with no congregation, a group of an unknown religion and a congregation that asks more', { timeout: 90_000 }, async () => {
+    const reg = await read('registries/belonging.yaml');
+    await write('registries/belonging.yaml', reg.replace('  sikh: { name: Sikhism', '  druid: { name: Druidry, adherent: Druid, family: Druid, birthWeight: 0.1 }\n  sikh: { name: Sikhism'));
+    expect(await expectErrors()).toContain('faith "druid" has no congregation');
+    await write('registries/belonging.yaml', reg);
+    const g = await read('groups/sikh_gurdwara.yaml');
+    await write('groups/sikh_gurdwara.yaml', g.replace('religion: sikh', 'religion: pastafarian'));
+    expect(await expectErrors()).toContain('unknown religion "pastafarian"');
+    await write('groups/sikh_gurdwara.yaml', g.replace('committed: { hours: 4, cost: { flat: 90, share: 0.02 } }', 'committed: { hours: 9, cost: { flat: 90, share: 0.02 } }'));
+    expect(await expectErrors()).toContain('every faith community asks the same');
+    await write('groups/sikh_gurdwara.yaml', g.replace('strict: { mean: 50, sd: 25 }', 'strict: { mean: 80, sd: 25 }'));
+    expect(await expectErrors()).toContain('congregations vary person to person');
+  });
+
+  it('refuses wording that mocks belief, and an event that names what it does not require', { timeout: 90_000 }, async () => {
+    const ev = await read('events/any/faith/faith_neighbor_preaches.yaml');
+    await write('events/any/faith/faith_neighbor_preaches.yaml', ev.replace('deeply committed to', 'a brainwashed zealot about'));
+    expect(await expectErrors()).toContain('the faith writing guidance rules out');
+    const retreat = await read('events/any/faith/faith_retreat_weekend.yaml');
+    await write('events/any/faith/faith_retreat_weekend.yaml', retreat.replace('    - { faith: { strength: { gte: 40 } } }\n', ''));
+    expect(await expectErrors()).toContain('uses {faith} or {adherent} without requiring that you have a faith');
+    const club = await read('events/any/belonging/group_newcomer_welcome.yaml');
+    await write('events/any/belonging/group_newcomer_welcome.yaml', club.replace('bindGroup: true\n', ''));
+    expect(await expectErrors()).toContain('uses {group} without being about a group');
+  });
+
+  it('wants the queued events to be follow-ups about a group, and every id to exist', { timeout: 90_000 }, async () => {
+    const reg = await read('registries/belonging.yaml');
+    await write('registries/belonging.yaml', reg.replace('[asked_to_help_organize, asked_to_lead_group]', '[asked_to_help_organize, ghost_event]'));
+    expect(await expectErrors()).toContain('unknown event "ghost_event"');
+    await write('registries/belonging.yaml', reg.replace('[asked_to_help_organize, asked_to_lead_group]', '[asked_to_help_organize, group_newcomer_welcome]'));
+    expect(await expectErrors()).toContain('answers rise, so it must be followUpOnly');
+    const ev = await read('events/any/identity/discovery_faith_find.yaml');
+    await write('events/any/identity/discovery_faith_find.yaml', ev.replace('action: fromLatent', 'action: convert, id: no_such_faith'));
+    expect(await expectErrors()).toContain('unknown faith "no_such_faith"');
   });
 });

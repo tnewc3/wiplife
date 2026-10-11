@@ -1,0 +1,48 @@
+id: faith_doubts_young_adult
+title: Away from home, the old answers are quiet
+text: >-
+  Out in the world, among people who believe all kinds of things, the answers
+  you were raised with have to stand up on their own. Some do. Some wobble.
+  You notice that you are asking questions you never had to ask before.
+tone: neutral
+category: faith
+rarity: common
+lifeStages: [youngAdult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { age: { lte: 30 } }
+    - { faith: { strength: { gte: 15 } } }
+weight:
+  base: 8
+  modifiers:
+    - { if: { flag: had_a_coming_of_age_rite }, x: 1.5 }
+once: true
+choices:
+  - id: study
+    label: Read, ask and study it properly
+    outcome:
+      text: >-
+        You read more of your own tradition in a year than you did growing up
+        in it. It does not settle everything, but it becomes something you chose.
+      effects:
+        - { type: faith, action: strengthen, delta: 4 }
+        - { type: value, key: tradition, delta: 1 }
+  - id: explore
+    label: Look at how others believe, or don't
+    outcome:
+      text: >-
+        You go to a service of someone else's, a lecture, a long conversation
+        with a friend who sees it differently. You come back changed a little, less sure, more curious.
+      effects:
+        - { type: faith, action: weaken, delta: 3 }
+        - { type: value, key: independence, delta: 2 }
+        - { type: stat, key: smarts, delta: 1 }
+  - id: set_aside
+    label: Set it aside for now and get on with life
+    outcome:
+      text: >-
+        You mean to come back to it. For now, it sits in the background, like a
+        light left on in a room you aren't using.
+      effects:
+        - { type: faith, action: weaken, delta: 2 }

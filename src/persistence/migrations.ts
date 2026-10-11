@@ -403,6 +403,40 @@ export const migrations: readonly Migration[] = [
       return { ...data, later: { care: null, terminal: null, amends: [], offered: {} } };
     },
   },
+  {
+    from: 21,
+    description:
+      'W2: belonging. A life gains a "belonging" record: it belongs to no groups, and its faith and values are marked to be ' +
+      'worked out. The next yearly step gives it a faith (its family\'s, like any life) and values from its temperament, from ' +
+      'its seed, so nobody is given a religion or a place in a congregation by the upgrade itself. The yearly ledger gains a ' +
+      '"giving" line, zero for every year already kept.',
+    migrate: (data) => {
+      if (!isRecord(data)) return data;
+      const finances = isRecord(data.finances)
+        ? { ...data.finances, ...(isRecord(data.finances.lastLedger) ? { lastLedger: { ...data.finances.lastLedger, giving: 0 } } : {}) }
+        : data.finances;
+      const mid = { community: 50, compassion: 50, tradition: 50, independence: 50, civic: 50 };
+      return {
+        ...data,
+        finances,
+        belonging: {
+          household: { faith: null, devotion: 0 },
+          faith: { id: null, strength: 0, raised: null, since: null, changes: 0 },
+          values: { ...mid },
+          temperament: { ...mid },
+          groups: {},
+          cities: {},
+          memberships: [],
+          past: [],
+          nextGroup: 1,
+          community: 45,
+          repCarry: 0,
+          offered: {},
+          upgrade: true,
+        },
+      };
+    },
+  },
 ];
 
 function isRecord(value: unknown): value is Record<string, unknown> {

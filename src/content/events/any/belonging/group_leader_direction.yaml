@@ -1,0 +1,61 @@
+id: group_leader_direction
+title: The way we've always done it
+text: >-
+  As {role} of {group}, you're the one the argument lands on. The old
+  guard want things done the way they always have been. The newer members
+  want something different. Both sides are right about something.
+tone: serious
+category: belonging
+rarity: uncommon
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 21 } }
+    - { group: { member: true } }
+    - { group: { leader: true } }
+weight: { base: 8 }
+bindGroup: true
+choices:
+  - id: keep
+    label: Keep the old ways, and explain why
+    outcome:
+      text: >-
+        The old guard relax. Some of the newer members start looking at
+        the door. You tell yourself that stability is also a kind of welcome.
+      effects:
+        - { type: value, key: tradition, delta: 2 }
+        - { type: group, action: standing, delta: 2 }
+        - { type: group, action: community, delta: -1 }
+  - id: change
+    label: Back the changes, carefully
+    outcome:
+      text: >-
+        You phase them in over a season and say plainly what stays. A few
+        people leave. More than that stay, and bring friends.
+      effects:
+        - { type: value, key: independence, delta: 2 }
+        - { type: group, action: standing, delta: 2 }
+        - { type: group, action: community, delta: 1 }
+  - id: both
+    label: Split the difference and own the awkwardness
+    check:
+      base: 50
+      stats:
+        - { key: sociability, weight: 0.2 }
+        - { key: smarts, weight: 0.2 }
+      success:
+        text: >-
+          It takes six meetings and a lot of coffee, and what comes out is
+          a compromise people can live with. Both camps feel heard, which in practice
+          means both camps are mildly dissatisfied, which is how you know it worked.
+        effects:
+          - { type: group, action: standing, delta: 6 }
+          - { type: stat, key: stress, delta: 3 }
+      failure:
+        text: >-
+          Each side hears the other half of the compromise as the loss. By spring you
+          have two camps and a rotating cast of people who say they'll
+          stay out of it, and a lot of unspoken resentment.
+        effects:
+          - { type: group, action: standing, delta: -4 }
+          - { type: stat, key: stress, delta: 4 }

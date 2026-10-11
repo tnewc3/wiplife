@@ -1,0 +1,55 @@
+id: faith_welcoming_congregation
+title: They knew, and they set a place for you
+text: >-
+  You told people at {group} who you are, bracing for the worst. What happened was
+  that {friend.name} hugged you, someone asked whether you wanted to help
+  with the potluck, and the leader mentioned it from the front the next
+  week, kindly and in two sentences. Not every congregation does this. This one did.
+tone: light
+category: belonging
+rarity: uncommon
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { group: { member: true } }
+    - { group: { type: [faith] } }
+    - { group: { welcome: { gte: 60 } } }
+    - { group: { strict: { lt: 50 } } }
+    - { flag: came_out }
+    - { role: friend, alive: true, kind: [friend] }
+weight: { base: 6 }
+once: true
+bindGroup: true
+cast:
+  friend: { kind: friend, group: yours, presence: city }
+choices:
+  - id: stay
+    label: Stay, and say thank you
+    outcome:
+      text: >-
+        You say thank you to more people than you can count. You find you
+        are a little more yourself in the pews than you were. The faith hasn't changed,
+        but you have more room in it.
+      effects:
+        - { type: faith, action: strengthen, delta: 5 }
+        - { type: group, action: standing, delta: 5 }
+        - { type: relationship, role: friend, affection: 6, trust: 4 }
+        - { type: stat, key: happiness, delta: 4 }
+  - id: volunteer
+    label: Take on a role to give something back
+    outcome:
+      text: >-
+        You sign up for the committee. Someone remarks that every congregation
+        needs at least one member who remembers what it felt like to not be sure of a welcome.
+      effects:
+        - { type: group, action: standing, delta: 7 }
+        - { type: value, key: community, delta: 2 }
+  - id: keep_apart
+    label: Stay, but keep a little distance from the community
+    outcome:
+      text: >-
+        The welcome was real, and you believe it. You still hold something
+        back, out of habit. They give you room for that, too.
+      effects:
+        - { type: group, action: standing, delta: 1 }
