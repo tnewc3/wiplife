@@ -38,13 +38,13 @@ levels:
     fair: { label: The market rate, mult: 1, morale: 0 }
     high: { label: Above the market, mult: 1.15, morale: 8 }
   staffing:
-    lean: { label: Lean, mult: 0.75, morale: -6, quality: -10 }
+    lean: { label: Lean, mult: 0.75, morale: -6, quality: -15 }
     normal: { label: Normal, mult: 1, morale: 0, quality: 0 }
     full: { label: Generous, mult: 1.25, morale: 3, quality: 4 }
 
 demand:
   reputation: { base: 0.55, slope: 0.9 }
-  quality: { base: 0.8, slope: 0.4 }
+  quality: { base: 0.5, slope: 0.9 }
   maturity: [0.7, 0.9, 1]
   saturation: 0.8
   season: { sd: 0.07, luck: 0.05 }
@@ -111,7 +111,7 @@ manager:
 quality:
   carry: 0.55
   skill: 0.25
-  morale: 0.2
+  morale: 0.5
   noise: 4
   shortfall: 25
 
