@@ -1232,6 +1232,8 @@ export interface BusinessShock {
 export interface BusinessReport {
   year: number;
   customers: number;
+  /** Customers the year before (0 in the first report). */
+  customersBefore: number;
   demand: number;
   revenue: number;
   rent: number;

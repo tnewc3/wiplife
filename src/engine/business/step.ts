@@ -275,6 +275,7 @@ function stepBusiness(state: LifeState, b: Business, content: ContentBundle, fun
   const report: BusinessReport = {
     year,
     customers,
+    customersBefore: b.report?.customers ?? 0,
     demand,
     revenue,
     rent,

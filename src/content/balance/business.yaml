@@ -45,7 +45,7 @@ levels:
 demand:
   reputation: { base: 0.55, slope: 0.9 }
   quality: { base: 0.8, slope: 0.4 }
-  maturity: [0.6, 0.85, 0.95, 1]
+  maturity: [0.7, 0.9, 1]
   saturation: 0.8
   season: { sd: 0.07, luck: 0.05 }
   skill: 0.006

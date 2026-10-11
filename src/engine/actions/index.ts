@@ -34,6 +34,7 @@ export { FAME_ACTION_IDS, type FameActionId } from './fame';
 export { SPORTS_ACTION_IDS, type SportsActionId } from './sports';
 export { LATER_ACTION_IDS, type LaterActionId } from './later';
 export { BELONGING_ACTION_IDS, type BelongingActionId } from './belonging';
+export { BUSINESS_ACTION_IDS, type BusinessActionId, type BusinessActionParams } from './business';
 export {
   HOME_ACTION_IDS,
   isLifeActionAvailable,

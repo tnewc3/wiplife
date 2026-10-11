@@ -79,7 +79,7 @@ function nameTaken(state: LifeState, name: string): boolean {
   return state.business.items.some((b) => b.name.toLowerCase() === name.toLowerCase());
 }
 
-function newBusiness(state: LifeState, def: BusinessDef, name: string, cityId: Id, style: BusinessStyle, how: Business['how'], content: ContentBundle): Business {
+export function newBusiness(state: LifeState, def: BusinessDef, name: string, cityId: Id, style: BusinessStyle, how: Business['how'], content: ContentBundle): Business {
   const b = state.business;
   const loc: BusinessLocation = { id: `l${b.nextLocation++}`, cityId, style, opened: state.currentYear };
   return {
@@ -436,7 +436,6 @@ export function endBusiness(state: LifeState, id: Id, how: 'sold' | 'closed' | '
   state.finances.debts = state.finances.debts.filter((d) => d.balance > 0);
   const loansLeft = loanBalance(state, b);
   // What is left is shared by share (you take the rounding).
-  let gotten = 0;
   const year = state.currentYear;
   const others = b.owners.filter((o) => o.id !== 'you');
   let otherTotal = 0;
@@ -456,7 +455,7 @@ export function endBusiness(state: LifeState, id: Id, how: 'sold' | 'closed' | '
       }
     }
   }
-  gotten = pool - otherTotal;
+  const gotten = pool - otherTotal;
   if (gotten > 0) earn(state, gotten);
   const you = b.owners.find((o) => o.id === 'you');
   const put = you?.put ?? 0;

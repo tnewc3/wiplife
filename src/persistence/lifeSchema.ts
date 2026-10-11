@@ -787,6 +787,7 @@ const business = z.strictObject({
     .strictObject({
       year: int,
       customers: int.min(0),
+      customersBefore: int.min(0),
       demand: int.min(0),
       revenue: dollars,
       rent: dollars,

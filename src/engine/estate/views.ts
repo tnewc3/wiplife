@@ -108,6 +108,9 @@ export interface DeathView {
   /** E5: pets, vehicles and vacation homes that passed on in kind, and the cash from those that were sold instead. */
   possessions: PassedPossessionView[];
   possessionSales: number;
+  /** W3: businesses that passed on in kind, and the cash from those that were sold instead. */
+  businesses: { what: string; to: string; loan: number }[];
+  businessSales: number;
 }
 
 /** A possession as a phrase. */
@@ -151,7 +154,11 @@ export function getDeathView(state: LifeState, content: ContentBundle): DeathVie
         cash: minor ? 0 : cash,
         trust: minor ? cash + (property ? homeSaleNet(property.value, property.mortgage, content) : 0) : 0,
         home: minor ? null : property,
-        possessions: e.possessions.filter((t) => t.toPersonId === id).map((t) => possessionPhrase(t.item, content)),
+        possessions: [
+          ...e.possessions.filter((t) => t.toPersonId === id).map((t) => possessionPhrase(t.item, content)),
+          // W3: a business in the family.
+          ...e.businesses.filter((t) => t.toPersonId === id && !minor).map((t) => `${t.item.name}, a ${content.businesses[t.item.defId]?.noun ?? 'business'}`),
+        ],
       };
     }),
     possessions: e.possessions.map((t) => ({
@@ -160,6 +167,12 @@ export function getDeathView(state: LifeState, content: ContentBundle): DeathVie
       loan: t.loan,
     })),
     possessionSales: e.possessionSales,
+    businesses: e.businesses.map((t) => ({
+      what: `${t.item.name}${content.businesses[t.item.defId] ? `, a ${content.businesses[t.item.defId]!.noun}` : ''}`,
+      to: state.people[t.toPersonId] ? `${state.people[t.toPersonId]!.name.first} ${state.people[t.toPersonId]!.name.last}` : 'someone',
+      loan: t.loan,
+    })),
+    businessSales: e.businessSales,
   };
 }
 

@@ -37,6 +37,21 @@ function EstateCard({ view }: { view: DeathView }) {
           A vehicle or vacation home nobody could take was sold, and {money(view.possessionSales)} went into the estate.
         </p>
       )}
+      {view.businessSales > 0 && (
+        <p className="mt-1 text-sm" data-testid="estate-business-sales">
+          A business nobody could take on was sold, and your share, {money(view.businessSales)}, went into the estate.
+        </p>
+      )}
+      {view.businesses.length > 0 && (
+        <ul className="mt-2 flex flex-col gap-1 text-sm" aria-label="Businesses that passed on" data-testid="estate-businesses">
+          {view.businesses.map((p) => (
+            <li key={`${p.what}-${p.to}`}>
+              {p.what} went to {p.to}
+              {p.loan > 0 ? `, with ${money(p.loan)} still owed on it` : ''}.
+            </li>
+          ))}
+        </ul>
+      )}
       {view.possessions.length > 0 && (
         <ul className="mt-2 flex flex-col gap-1 text-sm" aria-label="Pets, vehicles and homes that passed on" data-testid="estate-possessions">
           {view.possessions.map((p) => (
