@@ -1,0 +1,45 @@
+id: invite_to_service
+title: They could use another pair of hands
+text: >-
+  A flyer, a friend, a name that keeps coming up. {group} always needs more
+  people than it has, and this week someone asks you straight out: would you
+  give it a few hours?
+tone: neutral
+category: joining
+rarity: common
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 14 } }
+    - { group: { member: false } }
+    - { group: { type: [service] } }
+weight: { base: 10 }
+followUpOnly: true
+bindGroup: true
+choices:
+  - id: casual
+    label: Try a shift and see
+    outcome:
+      text: >-
+        The first shift goes by faster than you expected. By the end of it you
+        know three names and where the good gloves are kept.
+      effects:
+        - { type: group, action: join, level: casual }
+        - { type: value, key: compassion, delta: 2 }
+  - id: committed
+    label: Sign up for regular hours
+    visibleIf: { age: { gte: 16 } }
+    outcome:
+      text: >-
+        You take a regular slot. It is tiring in a way that sits well, and the
+        regulars start saving a chair for you at the end of a shift.
+      effects:
+        - { type: group, action: join, level: committed }
+        - { type: value, key: compassion, delta: 3 }
+        - { type: flag, key: joined_a_group, value: true }
+  - id: no
+    label: Say you can't spare the time
+    outcome:
+      text: They thank you for being honest about it. You mean to help another way, someday.
+      effects:
+        - { type: stat, key: happiness, delta: -1 }

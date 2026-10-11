@@ -1,0 +1,30 @@
+# Families and teachers council (civic). W2 belonging. Fictional names; real religions are real.
+id: parents_council
+name: "Families and teachers council"
+type: civic
+blurb: "Bake sales, budget fights and the school's one working projector."
+minAge: 22
+weight: 0.8
+count: { min: 1, max: 2 }
+traits:
+  welcome: { mean: 50, sd: 20 }
+  strict: { mean: 45, sd: 20 }
+  intense: { mean: 45, sd: 22 }
+activities:
+  - "School fundraisers"
+  - "Budget meetings"
+  - "Volunteer rosters"
+ladder:
+  - { id: member, name: "Member", minYears: 0, minStanding: 0, committed: false }
+  - { id: committee, name: "Committee member", minYears: 1, minStanding: 55, committed: true }
+  - { id: officer, name: "Officer", minYears: 3, minStanding: 66, committed: true }
+  - { id: president, name: "Council chair", minYears: 6, minStanding: 76, committed: true }
+commitment:
+  casual: { hours: 1.5, cost: { flat: 20, share: 0 } }
+  committed: { hours: 5, cost: { flat: 45, share: 0 } }
+values: {civic: 1.0, community: 0.3}
+names:
+  - "Lakeview Families & Teachers Council"
+  - "The Hillcrest School Council"
+  - "Bridgeway Parent Council"
+  - "Eastgate School Partnership"

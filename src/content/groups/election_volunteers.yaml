@@ -1,0 +1,29 @@
+# Local election volunteers (civic). W2 belonging. Fictional names; real religions are real.
+id: election_volunteers
+name: "Local election volunteers"
+type: civic
+blurb: "Poll workers, ballot counters and the person who knows where the extension cords are."
+minAge: 18
+weight: 0.6
+count: { min: 1, max: 2 }
+traits:
+  welcome: { mean: 50, sd: 20 }
+  strict: { mean: 45, sd: 20 }
+  intense: { mean: 45, sd: 22 }
+activities:
+  - "Poll work"
+  - "Voter registration"
+  - "Training new volunteers"
+ladder:
+  - { id: member, name: "Member", minYears: 0, minStanding: 0, committed: false }
+  - { id: committee, name: "Committee member", minYears: 1, minStanding: 55, committed: true }
+  - { id: officer, name: "Officer", minYears: 3, minStanding: 66, committed: true }
+  - { id: president, name: "Precinct captain", minYears: 6, minStanding: 76, committed: true }
+commitment:
+  casual: { hours: 1.5, cost: { flat: 20, share: 0 } }
+  committed: { hours: 5, cost: { flat: 45, share: 0 } }
+values: {civic: 1.2, community: 0.3}
+names:
+  - "Ward Seven Poll Workers"
+  - "The Election Day Volunteers"
+  - "Northgate Voter Services Team"

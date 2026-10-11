@@ -15,6 +15,8 @@
  * mental health step (M1) follows the health step: who has noticed you struggling.
  * The later-life step (L1) follows the lives step: your children's babies become grandchildren,
  * care near the end and a warning of a death coming are rolled, and history calls for amends.
+ * The belonging step (W2) follows it, before the web: standing in the groups you belong to, the people there, faith and values drifting,
+ * and the year's offers (an invitation, a role, a decision about drifting away).
  * The teen step (T1) follows education, so the grade points a focus, a crowd,
  * a team or a teen job gives count toward the year that has begun; the teen
  * job's pay joins the ledger's income. The possessions step (E5) follows the ledger, which has charged the year's upkeep and insurance:
@@ -31,6 +33,7 @@ import { runFame } from './fame/step';
 import { runHeritage } from './estate/heritage';
 import { runLives } from './lives/step';
 import { runLater } from './later/step';
+import { runBelonging } from './belonging/step';
 import { runPossessions } from './possessions/step';
 import { runTeen } from './teen/step';
 import { runWeb } from './web/step';
@@ -75,6 +78,7 @@ export const YEAR_PIPELINE: readonly PipelineStep[] = [
   { id: 'selfDiscovery', run: runSelfDiscovery },
   { id: 'lives', run: runLives },
   { id: 'later', run: runLater },
+  { id: 'belonging', run: runBelonging },
   { id: 'web', run: runWeb },
   { id: 'pacing', run: runPacing },
 ];

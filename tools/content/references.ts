@@ -53,6 +53,7 @@ import { MONEY } from './consistency';
 import { mentalSafetyErrors } from './mentalSafety';
 import { checkPeople } from './people';
 import { checkWeb } from './web';
+import { checkBelonging } from './belonging';
 import { checkPossessions } from './possessions';
 import { checkTeen } from './teen';
 import { checkCrime } from './crime';
@@ -197,6 +198,7 @@ export function checkReferences(
   errors.push(...checkSports(bundle, fileOf, options.partialEvents === true));
   errors.push(...checkEulogy(bundle));
   errors.push(...checkLater(bundle, fileOf, options.partialEvents === true));
+  errors.push(...checkBelonging(bundle, fileOf, options.partialEvents === true));
 
   return errors;
 }
@@ -472,6 +474,10 @@ function implies(required: Condition, part: Condition): boolean {
     // L1: every field the contract names must be asked for the same way.
     return Object.entries(part.later).every(([key, value]) => JSON.stringify((required.later as Record<string, unknown>)[key]) === JSON.stringify(value));
   }
+  if ('group' in part && 'group' in required) {
+    // W2: every field the contract names must be asked for the same way.
+    return Object.entries(part.group).every(([key, value]) => JSON.stringify((required.group as Record<string, unknown>)[key]) === JSON.stringify(value));
+  }
   if ('legal' in part && 'legal' in required) {
     return (part.legal.incarcerated === undefined || part.legal.incarcerated === required.legal.incarcerated) &&
       (part.legal.probation === undefined || part.legal.probation === required.legal.probation);
@@ -521,6 +527,8 @@ function checkEvents(bundle: ContentBundle, fileOf: (typeKey: CollectionKey, id:
     ...Object.values(bundle.registries.teen.triggers).flatMap((r) => r.events),
     // L1: what the later-life step queues (a first grandchild, a grandchild who needs a home, care, a warning, amends).
     ...laterResults(bundle.registries.later).flatMap((r) => r.events),
+    // W2: what the belonging step queues (an invitation, a role, a decision about drifting away).
+    ...Object.values(bundle.registries.belonging.triggers).flatMap((r) => r.events),
     // E6a: what the crime step queues (a year's jobs, a promotion, an arrest, a raid, the past catching up...).
     ...bundle.registries.crime.jobs,
     ...Object.values(bundle.registries.crime.triggers).flatMap((r) => r.events),

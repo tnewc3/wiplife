@@ -128,3 +128,11 @@ flags:
   kept_the_diagnosis_quiet: You kept your diagnosis to yourself for a while
   refused_help_at_home: You turned down help when you needed it
   paid_for_grandchild_school: You helped a grandchild with school
+  # W2: belonging.
+  joined_a_group: You committed to a group of your own choosing
+  had_a_coming_of_age_rite: You were marked as grown in your faith community
+  married_in_faith: You were married in your own congregation
+  interfaith_wedding: Your wedding blended two faiths
+  found_faith: You came to believe, and found a faith
+  converted: You took up a different faith
+  left_faith: You stopped believing

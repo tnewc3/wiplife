@@ -863,7 +863,18 @@ describe('moods in the year pipeline', () => {
         const next = life.pending.find((p) => p.resolvedChoiceId === undefined);
         if (!next) break;
         const def = content.events[next.eventId];
-        life = resolveChoice(life, next.instanceId, def?.choices ? def.choices[0]!.id : 'continue', content);
+        // The first choice this life can see (some are only shown with the right memory).
+        const ids = def?.choices ? def.choices.map((c) => c.id) : ['continue'];
+        const at = life;
+        const picked = ids.find((id) => {
+          try {
+            resolveChoice(at, next.instanceId, id, content);
+            return true;
+          } catch {
+            return false;
+          }
+        });
+        life = resolveChoice(life, next.instanceId, picked ?? ids[0]!, content);
       }
       if (life.phase === 'yearEnd') life = endYear(life, content);
       if (life.phase === 'dead') break;

@@ -3,11 +3,13 @@ surfacing:
   gender: { events: [test_discovery] }
   expression: { events: [test_discovery] }
   personality: { events: [test_discovery] }
+  faith: { events: [test_discovery] }
   talent: { events: [test_discovery] }
 resurfacing:
   attraction: { events: [test_resurface] }
   gender: { events: [test_resurface] }
   expression: { events: [test_resurface] }
   personality: { events: [test_resurface] }
+  faith: { events: [test_resurface] }
 crisis: { events: [test_resurface] }
 comingOut: { events: [test_coming_out] }

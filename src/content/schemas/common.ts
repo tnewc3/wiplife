@@ -42,12 +42,12 @@ export const mentalCareSchema = z.enum(MENTAL_CARES);
 
 /**
  * What self-discovery can bring to the surface (Stage 9): who you're
- * attracted to, your gender, how you express it, a personality tendency, or
- * a hidden talent.
+ * attracted to, your gender, how you express it, a personality tendency,
+ * (W2) a pull toward a faith, or away from the one you have, or a hidden talent.
  */
-export const DISCOVERY_KINDS = ['attraction', 'gender', 'expression', 'personality', 'talent'] as const;
+export const DISCOVERY_KINDS = ['attraction', 'gender', 'expression', 'personality', 'faith', 'talent'] as const;
 export const discoveryKindSchema = z.enum(DISCOVERY_KINDS);
 export type DiscoveryKind = z.infer<typeof discoveryKindSchema>;
 /** The discovery kinds that are latent traits (everything but a talent). */
-export const LATENT_KINDS = ['attraction', 'gender', 'expression', 'personality'] as const satisfies readonly DiscoveryKind[];
+export const LATENT_KINDS = ['attraction', 'gender', 'expression', 'personality', 'faith'] as const satisfies readonly DiscoveryKind[];
 export type LatentKind = (typeof LATENT_KINDS)[number];

@@ -1,0 +1,35 @@
+# Parish (faith). W2 belonging. Fictional names; real religions are real.
+id: catholic_parish
+name: "Parish"
+type: faith
+religion: catholic
+tradition: "Roman Catholic"
+blurb: "A parish with a Sunday schedule, a hall for suppers and a long memory."
+minAge: 0
+weight: 1.0
+count: { min: 1, max: 2 }
+traits:
+  welcome: { mean: 60, sd: 22 }
+  strict: { mean: 50, sd: 25 }
+  intense: { mean: 50, sd: 22 }
+activities:
+  - "Weekly Mass"
+  - "Parish suppers"
+  - "Youth faith formation"
+  - "Charity drives"
+ladder:
+  - { id: member, name: "Parishioner", minYears: 0, minStanding: 0, committed: false }
+  - { id: helper, name: "Volunteer", minYears: 1, minStanding: 50, committed: false }
+  - { id: council, name: "Parish council member", minYears: 3, minStanding: 62, committed: true }
+  - { id: chair, name: "Parish council chair", minYears: 7, minStanding: 76, committed: true }
+commitment:
+  casual: { hours: 1.5, cost: { flat: 25, share: 0.005 } }
+  committed: { hours: 4, cost: { flat: 90, share: 0.02 } }
+values: {community: 0.8, tradition: 0.6, compassion: 0.4}
+names:
+  - "Saint Odran Parish at Linden Ridge"
+  - "Holy Name of Mary Parish"
+  - "Saint Ebba Parish"
+  - "Our Lady of the Millrace"
+  - "Saint Corvin Parish"
+  - "Saint Alda's of Eastgate"

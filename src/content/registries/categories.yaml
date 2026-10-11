@@ -227,3 +227,17 @@ categories:
     label: The end of life
     household: true
     requires: { later: { terminal: true } }
+
+  # W2: belonging. Events about the groups you belong to need a membership; an invitation is about a group you do not belong to
+  # (and, bound to it, requires that you are not a member); faith is for anyone, and each event requires what it is about
+  # (a faith, its strength, a pull toward another). Group events at home account for a partner who lives with you (the household rule).
+  belonging:
+    label: Your groups
+    requires: { group: { member: true } }
+  joining:
+    label: An invitation
+    requires: { group: { member: false } }
+  faith: { label: Faith }
+  faithhome:
+    label: Faith at home
+    household: true

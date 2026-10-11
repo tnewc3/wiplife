@@ -6,6 +6,7 @@ surfacing:
   gender: { minAge: 26, chance: [{ at: 0, x: 1 }] }
   expression: { minAge: 26, chance: [{ at: 0, x: 1 }] }
   personality: { minAge: 26, chance: [{ at: 0, x: 1 }] }
+  faith: { minAge: 120, chance: [{ at: 0, x: 0 }] }
   talent: { minAge: 120, chance: [{ at: 0, x: 0 }] }
 resurfacing:
   afterYears: 1

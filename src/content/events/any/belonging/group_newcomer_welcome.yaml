@@ -1,0 +1,55 @@
+id: group_newcomer_welcome
+title: Someone new at the door
+text: >-
+  A newcomer hovers near the back at {group}, holding a coat and looking
+  like someone who has rehearsed the walk in. Everyone else is busy with the
+  people they already know.
+tone: light
+category: belonging
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { group: { member: true } }
+weight: { base: 9 }
+recurring: true
+bindGroup: true
+choices:
+  - id: welcome
+    label: Go over and introduce yourself
+    outcome:
+      text: >-
+        You ask their name, show them where the chairs are, and sit with them
+        for the first half hour. They come back the next time, and look for you.
+      effects:
+        - { type: group, action: standing, delta: 4 }
+        - { type: value, key: community, delta: 1 }
+  - id: wave
+    label: Smile from across the room
+    outcome:
+      text: >-
+        Someone else gets there first. You were going to. The room is warm
+        enough that it does not much matter.
+      effects:
+        - { type: stat, key: happiness, delta: 1 }
+  - id: introduce
+    label: Introduce them to the person most like them
+    check:
+      base: 55
+      stats:
+        - { key: sociability, weight: 0.3 }
+        - { key: kindness, weight: 0.15 }
+      success:
+        text: >-
+          You pick right. Within ten minutes the two of them are deep in an
+          argument about nothing, and you slip away with a sense of a job well done.
+        effects:
+          - { type: group, action: standing, delta: 5 }
+          - { type: group, action: community, delta: 1 }
+      failure:
+        text: >-
+          You pick wrong, and the conversation has the sound of two people being polite. You rescue it
+          with a topic you both turn out to hate, and the newcomer is laughing by the end.
+        effects:
+          - { type: group, action: standing, delta: 1 }

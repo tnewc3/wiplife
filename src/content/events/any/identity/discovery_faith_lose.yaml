@@ -1,0 +1,47 @@
+id: discovery_faith_lose
+title: Going through the motions
+text: >-
+  At the service, you notice that you are saying the words and not hearing them.
+  It isn't the first time. Maybe, you realize, it hasn't been for some time.
+  What you thought was a rough patch may be something else.
+tone: serious
+category: identity
+rarity: uncommon
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 14 } }
+    - { discovery: { latent: [faith] } }
+    - { faith: { leaning: true } }
+    - { faith: { pull: [lose] } }
+    - { faith: { strength: { gte: 1 } } }
+weight: { base: 8 }
+followUpOnly: true
+choices:
+  - id: honest
+    label: Admit it to yourself, and see what follows
+    outcome:
+      text: >-
+        You say it quietly, once, in an empty room. The sky does not fall. You
+        feel the loss of something that held you up, and, under it, relief at being honest with yourself.
+      effects:
+        - { type: faith, action: fromLatent }
+        - { type: flag, key: left_faith, value: true }
+  - id: talk
+    label: Talk to someone in your community about it
+    outcome:
+      text: >-
+        You choose someone you trust. They don't have a speech ready, which is
+        the kindest thing they could have done. You leave with the question still
+        open and a little less alone with it.
+      effects:
+        - { type: faith, action: weaken, delta: 3 }
+        - { type: stat, key: stress, delta: -2 }
+  - id: push_on
+    label: Keep going as before. It will pass
+    outcome:
+      text: >-
+        You go on. The words are there, and the routines are there, and
+        you tell yourself that is what faith looks like on a dry day.
+      effects:
+        - { type: stat, key: stress, delta: 2 }

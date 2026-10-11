@@ -1,0 +1,51 @@
+id: faith_found_in_hard_time
+title: Something to lean on
+text: >-
+  A hard stretch has left you looking for something steadier than
+  yourself. A neighbor who belongs to {group}, a {groupFaith} community,
+  has mentioned it more than once, without pressing. Tonight you find
+  yourself standing at the door.
+tone: serious
+category: faith
+rarity: uncommon
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { group: { member: false } }
+    - { group: { type: [faith] } }
+    - { faith: { id: [none] } }
+    - { stat: happiness, lt: 45 }
+weight: { base: 7 }
+bindGroup: true
+choices:
+  - id: stay
+    label: Go in, and see where it leads
+    outcome:
+      text: >-
+        You sit at the back, and the words wash over you, then catch. Over the
+        next year you come back often enough that people save you a seat. You
+        begin to believe, slowly, and not because anyone told you to.
+      effects:
+        - { type: faith, action: convert, group: true }
+        - { type: group, action: join, level: casual }
+        - { type: flag, key: found_faith, value: true }
+        - { type: stat, key: stress, delta: -4 }
+        - { type: stat, key: happiness, delta: 3 }
+  - id: guest
+    label: Go as a guest, with no promises either way
+    outcome:
+      text: >-
+        You are welcomed as a guest, and you let yourself be one. Whatever
+        you find in the building, you keep your own counsel about what it means.
+      effects:
+        - { type: group, action: join, level: casual }
+        - { type: stat, key: stress, delta: -2 }
+  - id: turn_back
+    label: Turn back. It's not what you need
+    outcome:
+      text: >-
+        You walk the long way home and look for steadiness somewhere else:
+        a friend, a walk, a decision. It's there, in time.
+      effects:
+        - { type: stat, key: stress, delta: 1 }

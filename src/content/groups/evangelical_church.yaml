@@ -1,0 +1,35 @@
+# Church (faith). W2 belonging. Fictional names; real religions are real.
+id: evangelical_church
+name: "Church"
+type: faith
+religion: protestant
+tradition: "Evangelical Protestant"
+blurb: "A large church with a band, small groups and a coffee bar in the lobby."
+minAge: 0
+weight: 1.0
+count: { min: 1, max: 3 }
+traits:
+  welcome: { mean: 60, sd: 22 }
+  strict: { mean: 50, sd: 25 }
+  intense: { mean: 50, sd: 22 }
+activities:
+  - "Sunday services"
+  - "Small groups"
+  - "Youth ministry"
+  - "Mission trips"
+ladder:
+  - { id: member, name: "Member", minYears: 0, minStanding: 0, committed: false }
+  - { id: helper, name: "Small group host", minYears: 1, minStanding: 50, committed: false }
+  - { id: council, name: "Elder board member", minYears: 3, minStanding: 62, committed: true }
+  - { id: chair, name: "Elder board chair", minYears: 7, minStanding: 76, committed: true }
+commitment:
+  casual: { hours: 1.5, cost: { flat: 25, share: 0.005 } }
+  committed: { hours: 4, cost: { flat: 90, share: 0.02 } }
+values: {community: 0.8, tradition: 0.6, compassion: 0.4}
+names:
+  - "Open Hands Church"
+  - "Crossroads Fellowship"
+  - "The River Church at Bridgeway"
+  - "Living Water Fellowship"
+  - "Harvest Gate Church"
+  - "Northgate Community Church"

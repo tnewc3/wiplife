@@ -429,7 +429,7 @@ describe('teen jobs', () => {
 
 describe('teams and clubs', () => {
   it('cut people from teams, never from clubs, and cost, train and bring friends', () => {
-    const life = edit(step(teenAt('act-1', 15)), (d) => void (d.teen.activities = []));
+    const life = edit(step(teenAt('act-2', 15)), (d) => void (d.teen.activities = []));
     const team = content.activities.soccer_team!;
     const club = content.activities.art_club!;
     expect(tryoutChance(life, club)).toBe(1);
@@ -566,7 +566,7 @@ describe('house rules', () => {
   });
 
   it('are answered by the parent’s style and by how you two get on: strict and distant means grounded, warm and close means a talk', () => {
-    const base = homeOf('rules-answer', () => {});
+    const base = homeOf('rules-answer-4', () => {});
     const domain = base.teen.home!.rules[0]!.ruleId;
     const by = base.teen.home!.rules[0]!.by;
     const answers = (style: { warmth: number; strictness: number; involvement: number }, affection: number) => {

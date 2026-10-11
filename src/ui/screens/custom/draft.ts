@@ -26,6 +26,8 @@ export interface Draft {
   parents: 1 | 2;
   siblings: number;
   familyWealth: FamilyWealth | null;
+  /** W2: 'family' (rolled like any life), 'none' or a faith's id. */
+  faith: string;
   cityId: string | null;
   stats: Stats;
   personality: Personality;
@@ -34,7 +36,7 @@ export interface Draft {
 export const STEPS = [
   { id: 'name', title: 'Name and looks', fields: ['name', 'appearance'] },
   { id: 'identity', title: 'Identity', fields: ['identity', 'canCarry'] },
-  { id: 'family', title: 'Family', fields: ['family', 'familyWealth'] },
+  { id: 'family', title: 'Family', fields: ['family', 'familyWealth', 'faith'] },
   { id: 'city', title: 'City', fields: ['cityId'] },
   { id: 'traits', title: 'Stats and personality', fields: ['stats', 'personality'] },
   { id: 'review', title: 'Review', fields: [] },
@@ -60,6 +62,7 @@ export function initialDraft(content: ContentBundle): Draft {
     parents: 2,
     siblings: 0,
     familyWealth: null,
+    faith: 'family',
     cityId: null,
     stats: { health: MIDDLE, happiness: MIDDLE, smarts: MIDDLE, looks: MIDDLE, fitness: MIDDLE, stress: MIDDLE },
     personality: {
@@ -134,6 +137,7 @@ export function toCustomInput(draft: Draft, content: ContentBundle): CustomLifeI
     appearance: { descriptors },
     cityId: draft.cityId ?? '',
     familyWealth: draft.familyWealth ?? 'middle',
+    ...(draft.faith !== 'family' ? { faith: draft.faith } : {}),
     family: { parents: draft.parents, siblings: draft.siblings },
     stats: draft.stats,
     personality: draft.personality,

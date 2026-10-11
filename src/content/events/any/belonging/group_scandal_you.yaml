@@ -1,0 +1,59 @@
+id: group_scandal_you
+title: A misunderstanding with your name on it
+text: >-
+  Something got said at {group} that turned out not to be what you
+  meant, and by now it has traveled further than the room it started in. You
+  can feel it in the way a few people say hello.
+tone: serious
+category: belonging
+rarity: uncommon
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { group: { member: true } }
+    - { group: { years: { gte: 1 } } }
+weight: { base: 5 }
+bindGroup: true
+choices:
+  - id: address
+    label: Address it at the next meeting, in plain words
+    check:
+      base: 55
+      stats:
+        - { key: confidence, weight: 0.25 }
+        - { key: kindness, weight: 0.15 }
+      success:
+        text: >-
+          You say what you meant and what you didn't, and apologize for the
+          part that was yours. A silence, then a person in the back who says
+          "thank you." The air changes.
+        effects:
+          - { type: group, action: standing, delta: 3 }
+          - { type: group, action: news, kind: groupScandal }
+      failure:
+        text: >-
+          It comes out stiffer than you meant, and a few people take
+          it as defensive. The story goes around a second time, with your
+          explanation added.
+        effects:
+          - { type: group, action: standing, delta: -6 }
+          - { type: group, action: news, kind: groupScandal }
+  - id: private
+    label: Talk to the people it hurt, one at a time
+    outcome:
+      text: >-
+        It takes a month. Most are gracious. One isn't, and you learn
+        to live with that one.
+      effects:
+        - { type: group, action: standing, delta: 2 }
+        - { type: stat, key: stress, delta: 2 }
+  - id: wait
+    label: Let it blow over
+    outcome:
+      text: >-
+        It mostly does. Not entirely. A few months on, you find out who
+        still believes the first version.
+      effects:
+        - { type: group, action: standing, delta: -4 }
+        - { type: group, action: news, kind: groupScandal }

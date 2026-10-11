@@ -10,6 +10,9 @@ import { playYear } from '../engine/autoplay';
 import { beginYear, createLife } from '../engine/life';
 import { createRng, nextUint32 } from '../engine/rng';
 import { createGrandchild } from '../engine/later/grandchildren';
+import { cityGroups, ensureCity } from '../engine/belonging/cities';
+import { joinGroup } from '../engine/belonging/groups';
+import { runBelonging } from '../engine/belonging/step';
 import { emptyWeb } from '../engine/web/ties';
 import { die, parentLife } from '../engine/estate/fixtures';
 import { continueAsHeir, heirCandidates } from '../engine/estate/heir';
@@ -32,6 +35,28 @@ function freshDb(): WiplifeDb {
   const db = createDb(`wiplife-life-test-${++n}`);
   opened.push(db);
   return db;
+}
+
+/** W2: what the 21 → 22 migration gives a life: an empty record of belonging, marked to be worked out (the first yearly step does it). */
+function w2Upgraded(life: LifeState): LifeState {
+  return produce(life, (d) => {
+    const mid = { community: 50, compassion: 50, tradition: 50, independence: 50, civic: 50 };
+    d.belonging = {
+      household: { faith: null, devotion: 0 },
+      faith: { id: null, strength: 0, raised: null, since: null, changes: 0 },
+      values: { ...mid },
+      temperament: { ...mid },
+      groups: {},
+      cities: {},
+      memberships: [],
+      past: [],
+      nextGroup: 1,
+      community: 45,
+      repCarry: 0,
+      offered: {},
+      upgrade: true,
+    };
+  });
 }
 
 const random = (seed: string) => createLife({ mode: 'random', seed, birthYear: 2026 }, content);
@@ -191,7 +216,7 @@ describe('lives from Stage 3 on', () => {
         // E4: the web starts empty (the first year builds it).
         d.web = emptyWeb();
       });
-      expect(result.envelope.data).toEqual(expected);
+      expect(result.envelope.data).toEqual(w2Upgraded(expected));
     }
   });
 
@@ -295,7 +320,7 @@ describe('lives from Stage 6 on', () => {
   it('round trip a life with debts, a mortgage and a move', async () => {
     let life = produce(lifeAtAge('stage6-round', 30), (d) => {
       d.finances.savings = 500_000;
-      d.finances.lastLedger = { year: d.currentYear, gross: 90_000, retirement: 0, tax: 0, housing: 0, living: 0, debtPayments: 0, interest: 0, debtInterest: 0, borrowed: 0, support: 0, children: 0, care: 0, supportPaid: 0, supportReceived: 0, upkeep: 0, insurance: 0, net: 90_000 };
+      d.finances.lastLedger = { year: d.currentYear, gross: 90_000, retirement: 0, tax: 0, housing: 0, living: 0, debtPayments: 0, interest: 0, debtInterest: 0, borrowed: 0, support: 0, children: 0, care: 0, supportPaid: 0, supportReceived: 0, upkeep: 0, insurance: 0, giving: 0, net: 90_000 };
       d.finances.debts.push({ id: 'd1', kind: 'student', balance: 12_000, annualRate: 0.055, minPayment: 1_600, missed: 1 });
     });
     const other = life.character.cityId === 'nyc' ? 'houston' : 'nyc';
@@ -567,7 +592,7 @@ describe('lives from E2a on', () => {
   it('upgrade a schema version 10 life: who can carry follows the gender category, an empty family, and a ledger without children', async () => {
     const base = lifeAtAge('e2a-migrate', 30);
     const life = produce(base, (d) => {
-      d.finances.lastLedger = { year: d.currentYear, gross: 40_000, retirement: 0, tax: 3_000, housing: 5_000, living: 12_000, debtPayments: 0, interest: 0, debtInterest: 0, borrowed: 0, support: 0, children: 0, care: 0, supportPaid: 0, supportReceived: 0, upkeep: 0, insurance: 0, net: 20_000 };
+      d.finances.lastLedger = { year: d.currentYear, gross: 40_000, retirement: 0, tax: 3_000, housing: 5_000, living: 12_000, debtPayments: 0, interest: 0, debtInterest: 0, borrowed: 0, support: 0, children: 0, care: 0, supportPaid: 0, supportReceived: 0, upkeep: 0, insurance: 0, giving: 0, net: 20_000 };
     });
     const v10 = JSON.parse(JSON.stringify(life)) as Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any -- stripping fields from plain JSON to build an old save
     delete v10.family;
@@ -649,7 +674,7 @@ describe('heirs, wills and estates (E2b)', () => {
     expect(result.envelope.schemaVersion).toBe(CURRENT_SCHEMA_VERSION);
     expect([upgraded.will, upgraded.estate]).toEqual([null, null]);
     expect(upgraded.lineage).toEqual({ generation: 1, lineId: life.id, familyName: life.character.name.last, reputation: 50, deeds: [] });
-    expect(upgraded).toEqual({ ...life, web: emptyWeb() });
+    expect(upgraded).toEqual(w2Upgraded({ ...life, web: emptyWeb() }));
   });
 
   it('round trips a will, an estate settlement, and heirs: a minor in trust with a guardian, one in foster care, a grown one with a home', async () => {
@@ -694,9 +719,9 @@ describe('heirs, wills and estates (E2b)', () => {
   });
 
   it('upgrades a version 12 life: no news, no care costs, and people who get their own life from the first year', async () => {
-    const base = lifeAtAge('e3-v12b', 30);
+    const base = lifeAtAge('e3-v12c', 30);
     const life = produce(base, (d) => {
-      d.finances.lastLedger = { year: d.currentYear - 1, gross: 40_000, retirement: 0, tax: 3_000, housing: 5_000, living: 12_000, debtPayments: 0, interest: 0, debtInterest: 0, borrowed: 0, support: 0, children: 0, care: 0, supportPaid: 0, supportReceived: 0, upkeep: 0, insurance: 0, net: 20_000 };
+      d.finances.lastLedger = { year: d.currentYear - 1, gross: 40_000, retirement: 0, tax: 3_000, housing: 5_000, living: 12_000, debtPayments: 0, interest: 0, debtInterest: 0, borrowed: 0, support: 0, children: 0, care: 0, supportPaid: 0, supportReceived: 0, upkeep: 0, insurance: 0, giving: 0, net: 20_000 };
     });
     const v12 = JSON.parse(JSON.stringify(life)) as Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any -- stripping fields from plain JSON to build an old save
     delete v12.news;
@@ -711,7 +736,7 @@ describe('heirs, wills and estates (E2b)', () => {
     expect(result.envelope.schemaVersion).toBe(CURRENT_SCHEMA_VERSION);
     expect(upgraded.news).toEqual([]);
     expect(upgraded.finances.lastLedger!.care).toBe(0);
-    expect(upgraded).toEqual({ ...life, web: emptyWeb() });
+    expect(upgraded).toEqual(w2Upgraded({ ...life, web: emptyWeb() }));
     // Nobody is given a partner, children or troubles they never had: the first year builds each life from what the save holds.
     const next = beginYear(upgraded, content);
     for (const person of Object.values(next.people)) {
@@ -756,7 +781,7 @@ describe('heirs, wills and estates (E2b)', () => {
     const upgraded = result.envelope.data;
     expect(result.envelope.schemaVersion).toBe(CURRENT_SCHEMA_VERSION);
     expect(upgraded.web).toEqual(emptyWeb());
-    expect(upgraded).toEqual({ ...life, web: emptyWeb() });
+    expect(upgraded).toEqual(w2Upgraded({ ...life, web: emptyWeb() }));
     // Nobody is given a feud, a couple or a rumor they never had: the first year ties the family from its structure.
     const next = beginYear(upgraded, content);
     expect(Object.keys(next.web.ties).length).toBeGreaterThan(0);
@@ -857,7 +882,7 @@ describe('lives from E5 on', () => {
 
   it('upgrades a schema version 15 life: it owns nothing, and the ledger gains upkeep and insurance lines of zero', async () => {
     const life = produce(lifeAtAge('e5-v15', 30), (d) => {
-      d.finances.lastLedger = { year: d.currentYear - 1, gross: 40_000, retirement: 0, tax: 3_000, housing: 5_000, living: 12_000, debtPayments: 0, interest: 0, debtInterest: 0, borrowed: 0, support: 0, children: 0, care: 0, supportPaid: 0, supportReceived: 0, upkeep: 0, insurance: 0, net: 20_000 };
+      d.finances.lastLedger = { year: d.currentYear - 1, gross: 40_000, retirement: 0, tax: 3_000, housing: 5_000, living: 12_000, debtPayments: 0, interest: 0, debtInterest: 0, borrowed: 0, support: 0, children: 0, care: 0, supportPaid: 0, supportReceived: 0, upkeep: 0, insurance: 0, giving: 0, net: 20_000 };
     });
     const v15 = JSON.parse(JSON.stringify(life)) as Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any -- stripping fields from plain JSON to build an old save
     delete v15.possessions;
@@ -869,7 +894,7 @@ describe('lives from E5 on', () => {
     expect(result.status).toBe('ok');
     if (result.status !== 'ok') return;
     expect(result.envelope.schemaVersion).toBe(CURRENT_SCHEMA_VERSION);
-    expect(result.envelope.data).toEqual(life);
+    expect(result.envelope.data).toEqual(w2Upgraded(life));
     expect(result.envelope.data.possessions).toEqual({ items: [], nextId: 1, claims: [], noVehicleYears: 0 });
   });
 
@@ -925,7 +950,7 @@ describe('lives from T1 on', () => {
 
   it('round trips a teen with a school, crowds, rules at home and a record', async () => {
     const life = produce(teenLife(), (d) => {
-      d.legal.record.push({ offenseId: 'vandalism', year: d.currentYear - 1, outcome: 'warning' });
+      d.legal.record.push({ offenseId: 'vandalism', year: Math.max(d.currentYear - 1, ...d.legal.record.map((r) => r.year)), outcome: 'warning' });
       d.teen.seenRecords = d.legal.record.length;
     });
     expect(life.teen.school).not.toBeNull();
@@ -960,7 +985,7 @@ describe('lives from T1 on', () => {
     expect(result.status).toBe('ok');
     if (result.status !== 'ok') return;
     expect(result.envelope.schemaVersion).toBe(CURRENT_SCHEMA_VERSION);
-    expect(result.envelope.data).toEqual(life);
+    expect(result.envelope.data).toEqual(w2Upgraded(life));
     expect(result.envelope.data.teen.license.stage).toBe('licensed');
   });
 
@@ -1019,7 +1044,7 @@ describe('crime careers (E6a)', () => {
     expect(result.status).toBe('ok');
     if (result.status !== 'ok') return;
     expect(result.envelope.schemaVersion).toBe(CURRENT_SCHEMA_VERSION);
-    expect(result.envelope.data).toEqual(life);
+    expect(result.envelope.data).toEqual(w2Upgraded(life));
     expect(result.envelope.data.crime.crew).toBeNull();
     expect(result.envelope.data.finances.dirty).toBe(0);
   });
@@ -1088,7 +1113,7 @@ describe('fame in arts and media (E6b)', () => {
     expect(result.status).toBe('ok');
     if (result.status !== 'ok') return;
     expect(result.envelope.schemaVersion).toBe(CURRENT_SCHEMA_VERSION);
-    expect(result.envelope.data).toEqual(life);
+    expect(result.envelope.data).toEqual(w2Upgraded(life));
     expect(result.envelope.data.fame.active).toBe(false);
     expect(result.envelope.data.fame.main).toBeNull();
   });
@@ -1154,7 +1179,7 @@ describe('sports (E6c)', () => {
     expect(result.status).toBe('ok');
     if (result.status !== 'ok') return;
     expect(result.envelope.schemaVersion).toBe(CURRENT_SCHEMA_VERSION);
-    expect(result.envelope.data).toEqual(life);
+    expect(result.envelope.data).toEqual(w2Upgraded(life));
     expect(result.envelope.data.sports.sport).toBeNull();
     expect(result.envelope.data.fame.active).toBe(false);
   });
@@ -1222,5 +1247,78 @@ describe('later life (L1)', () => {
     const worse = JSON.parse(JSON.stringify(oldLife())) as Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any -- breaking a plain JSON save on purpose
     worse.later.care.option = 'cruise';
     expect(lifeStateSchema.safeParse(worse).success).toBe(false);
+  });
+});
+
+describe('belonging (W2)', () => {
+  /** A life of 35 that belongs to a committed club and a congregation, with a pull toward another faith. */
+  function memberLife(): LifeState {
+    return produce(lifeAtAge('w2-save', 35), (d) => {
+      ensureCity(d, d.character.cityId, content);
+      for (const g of cityGroups(d, d.character.cityId, content)) {
+        const def = content.groups[g.defId]!;
+        if (d.belonging.memberships.length < 2 && def.maxAge === undefined && (def.type === 'club' || def.type === 'faith')) joinGroup(d, g.id, 'committed', content);
+      }
+      d.belonging.faith = { id: 'catholic', strength: 64, raised: 'catholic', since: null, changes: 0 };
+      d.character.latent.faith = { id: 'buddhist' };
+      const kid = Object.values(d.people)[0]!;
+      kid.faith = { id: 'hindu', strength: 70 };
+    });
+  }
+
+  it('round trips groups, memberships, faith, values and a hidden pull', async () => {
+    const life = memberLife();
+    expect(life.belonging.memberships.length).toBeGreaterThan(0);
+    expect(loadedLifeSchema(content).safeParse(life).success).toBe(true);
+    expect(await roundTrip(life)).toEqual(life);
+  });
+
+  it('upgrades a schema version 21 life: no groups, a faith and values worked out from its seed on the first year, and the same every time', async () => {
+    const life = lifeAtAge('w2-v21', 40);
+    const v21 = JSON.parse(JSON.stringify(life)) as Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any -- stripping fields from plain JSON to build an old save
+    delete v21.belonging;
+    delete v21.character.latent.faith;
+    delete v21.finances.lastLedger?.giving;
+    const db = freshDb();
+    await db.lives.put({ id: 'active', envelope: { ...makeEnvelope(v21, content.contentVersion), schemaVersion: 21 } });
+    const result = await readSave(db, loadedLifeSchema(content));
+    expect(result.status).toBe('ok');
+    if (result.status !== 'ok') return;
+    expect(result.envelope.schemaVersion).toBe(CURRENT_SCHEMA_VERSION);
+    const old = result.envelope.data;
+    expect(old.belonging.upgrade).toBe(true);
+    expect(old.belonging.memberships).toEqual([]);
+    expect(old.belonging.faith).toMatchObject({ id: null, strength: 0 });
+    const a = produce(old, (d) => {
+      runBelonging(d, content);
+      d.scheduled = [];
+    });
+    const b = produce(old, (d) => {
+      runBelonging(d, content);
+      d.scheduled = [];
+    });
+    expect(a.belonging.upgrade).toBeUndefined();
+    expect(a.belonging).toEqual(b.belonging);
+    expect(a.belonging.memberships.length).toBe(0);
+    expect(Object.values(a.belonging.values).every((v) => v >= 0 && v <= 100)).toBe(true);
+    expect(loadedLifeSchema(content).safeParse(a).success).toBe(true);
+  });
+
+  it('refuses a save with a membership in a group that does not exist, or a faith that is not one', () => {
+    const life = memberLife();
+    const ghost = produce(life, (d) => void (d.belonging.memberships[0]!.groupId = 'g_nowhere_ghost_1'));
+    expect(loadedLifeSchema(content).safeParse(ghost).success).toBe(false);
+    const faith = produce(life, (d) => void (d.belonging.faith.id = 'pastafarian'));
+    expect(loadedLifeSchema(content).safeParse(faith).success).toBe(false);
+    const child = produce(lifeAtAge('w2-child', 12), (d) => {
+      ensureCity(d, d.character.cityId, content);
+      const g = cityGroups(d, d.character.cityId, content).find((x) => content.groups[x.defId]!.type === 'faith')!;
+      d.belonging.groups[g.id] = { ...g };
+      d.belonging.memberships.push({ groupId: g.id, since: d.currentYear, commitment: 'committed', rung: 0, rungSince: d.currentYear, standing: 50 });
+    });
+    expect(loadedLifeSchema(content).safeParse(child).success).toBe(false);
+    const extra = JSON.parse(JSON.stringify(life)) as LifeState;
+    (extra.belonging as unknown as Record<string, unknown>).mystery = 1;
+    expect(lifeStateSchema.safeParse(extra).success).toBe(false);
   });
 });

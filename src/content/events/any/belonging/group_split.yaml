@@ -1,0 +1,59 @@
+id: group_split
+title: The group is splitting
+text: >-
+  After one disagreement too many, a few of the long-timers at {group} have
+  started meeting separately. They want you to join them. Others want you
+  to help hold things together. Both groups know your name.
+tone: serious
+category: belonging
+rarity: rare
+lifeStages: [adult, senior]
+requires:
+  all:
+    - { age: { gte: 25 } }
+    - { group: { member: true } }
+    - { group: { years: { gte: 4 } } }
+    - { group: { commitment: [committed] } }
+weight: { base: 5 }
+bindGroup: true
+choices:
+  - id: stay
+    label: Stay and help hold it together
+    outcome:
+      text: >-
+        The breakaway group takes eleven people and a lot of good will. You
+        spend a year rebuilding what is left, and it turns out to be enough.
+      effects:
+        - { type: group, action: standing, delta: 6 }
+        - { type: stat, key: stress, delta: 4 }
+  - id: go
+    label: Leave with the others
+    outcome:
+      text: >-
+        You go, with guilt and with relief. The new place is smaller and has
+        chairs that match, and for a while you're happy there. Then you start
+        noticing what you left.
+      effects:
+        - { type: group, action: leave }
+        - { type: stat, key: happiness, delta: -1 }
+  - id: mediate
+    label: Try to bring both sides to one table
+    check:
+      base: 40
+      stats:
+        - { key: kindness, weight: 0.2 }
+        - { key: confidence, weight: 0.2 }
+      success:
+        text: >-
+          One long evening, a lot of tea and two people who haven't spoken in a year
+          shaking hands. It is not a full repair, but it is a group again.
+        effects:
+          - { type: group, action: standing, delta: 10 }
+          - { type: group, action: community, delta: 2 }
+      failure:
+        text: >-
+          You try, and both sides remember it as meddling. By spring there are two groups and
+          neither wants you much.
+        effects:
+          - { type: group, action: standing, delta: -8 }
+          - { type: stat, key: stress, delta: 5 }

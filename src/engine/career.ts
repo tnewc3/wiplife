@@ -14,6 +14,7 @@
  * the next year's ledger; the yearly review comes after a full year worked.
  */
 import { performanceDrag } from './mental/drag';
+import { groupPerformanceDrag } from './belonging/load';
 import { jobRequiresVehicle, missingVehiclePenalty } from './possessions/jobs';
 import { hasVehicle } from './possessions/query';
 import type { CareerHistoryKey, ContentBundle, JobDef } from '../content/schemas';
@@ -317,6 +318,8 @@ export function performanceAim(state: LifeState, def: JobDef, content: ContentBu
   if (talentHelpsJob(state, def.id, content)) aim += content.balance.discovery.talent.performanceBonus;
   // M1: therapy takes time out of the week, and a severe condition you ignore wears on your work.
   aim += performanceDrag(state, content);
+  // W2: the time your groups take.
+  aim += groupPerformanceDrag(state, content);
   // E6a: a second life in a crew takes its toll on the job you hold.
   if (state.crime.crew) aim += content.balance.crime.life.performance;
   // E6b: so does a career in arts and media on the side.

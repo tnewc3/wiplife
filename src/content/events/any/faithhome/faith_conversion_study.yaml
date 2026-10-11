@@ -1,0 +1,50 @@
+id: faith_conversion_study
+title: Studying the faith of someone you love
+text: >-
+  {partner.name} follows a faith that is not yours, and over the
+  months you have been invited into more and more of them. You find
+  you have questions, and not only the kind that keep a relationship tidy.
+  There's a class for people who want to learn.
+tone: neutral
+category: faithhome
+rarity: uncommon
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { romance: [dating, engaged, married] }
+    - { role: partner, alive: true, kind: [partner, fiance, spouse] }
+    - { role: partner, faith: { same: false, none: false } }
+weight: { base: 7 }
+once: true
+cast:
+  partner: { support: true, presence: anywhere }
+choices:
+  - id: convert
+    label: Convert, after the classes
+    outcome:
+      text: >-
+        The classes take a year and the ceremony takes an hour. Your families
+        have different faces for it. By the end you are not sure if you
+        converted for {partner.name} or with {partner.them}, and decide it doesn't matter.
+      effects:
+        - { type: faith, action: convert, role: partner }
+        - { type: relationship, role: partner, affection: 8, trust: 6 }
+        - { type: flag, key: converted, value: true }
+  - id: learn
+    label: Learn it deeply and stay as you are
+    outcome:
+      text: >-
+        You study it the way you would study a language you love, and you understand
+        {partner.name} better for it. You stay what you are, and are welcome anyway.
+      effects:
+        - { type: relationship, role: partner, affection: 6, trust: 4 }
+        - { type: value, key: tradition, delta: 1 }
+  - id: decline
+    label: Tell {partner.them} warmly that it isn't for you
+    outcome:
+      text: >-
+        {partner.name} listens, and says it was only ever an open door. It
+        does not change what the two of you are. It changes, a little, how the holidays go.
+      effects:
+        - { type: relationship, role: partner, affection: 2, trust: 3 }

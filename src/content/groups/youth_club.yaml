@@ -1,0 +1,30 @@
+# Neighborhood youth club (club). W2 belonging. Fictional names; real religions are real.
+id: youth_club
+name: "Neighborhood youth club"
+type: club
+blurb: "An after-school room with a pool table, snacks and adults who show up."
+minAge: 11
+maxAge: 17
+weight: 0.9
+count: { min: 1, max: 2 }
+traits:
+  welcome: { mean: 62, sd: 18 }
+  strict: { mean: 30, sd: 18 }
+  intense: { mean: 40, sd: 22 }
+activities:
+  - "After-school drop-in"
+  - "Homework tables"
+  - "Weekend trips"
+ladder:
+  - { id: member, name: "Member", minYears: 0, minStanding: 0, committed: false }
+  - { id: organizer, name: "Organizer", minYears: 2, minStanding: 60, committed: true }
+  - { id: leader, name: "Youth council chair", minYears: 5, minStanding: 72, committed: true }
+commitment:
+  casual: { hours: 2, cost: { flat: 30, share: 0 } }
+  committed: { hours: 5, cost: { flat: 110, share: 0 } }
+values: {community: 0.7}
+names:
+  - "The Corner Room Youth Club"
+  - "Eastgate Youth Hub"
+  - "Parkside Kids' Club"
+  - "The Open Gym Youth Program"

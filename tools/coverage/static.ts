@@ -101,6 +101,8 @@ export function rootEvents(content: ContentBundle): Set<string> {
     ...Object.values(r.sports.triggers),
     // L1: what the later-life step queues (grandchildren, care, a foreseen death, amends).
     ...laterResults(r.later).map((result) => ({ events: [...result.events] })),
+    // W2: what the belonging step queues (an invitation, a role, a decision about drifting away).
+    ...Object.values(r.belonging.triggers),
   ];
   for (const list of lists) for (const id of list.events) roots.add(id);
   return roots;

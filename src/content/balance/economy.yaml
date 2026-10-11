@@ -191,6 +191,11 @@ costs:
   assisted_move_in: { amount: 6500, familyHelp: false }
   grandchild_wedding_gift: { amount: 700, familyHelp: false }
   reunion_trip: { amount: 900, familyHelp: false }
+  # W2: belonging. A collection for a group, a larger gift to it, a trip home for a holy day, and a weekend's retreat.
+  group_fundraiser: { amount: 150, familyHelp: false }
+  group_donation: { amount: 400, familyHelp: false }
+  holiday_travel: { amount: 600, familyHelp: false }
+  faith_retreat: { amount: 450, familyHelp: false }
 
 # C1: the share of a cost your family covers, by family wealth, times how
 # close you are to your closest living parent (affection ÷ 100). Nothing

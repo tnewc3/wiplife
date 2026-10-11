@@ -1,0 +1,53 @@
+id: rite_muslim_first_fast
+title: Your first fast
+text: >-
+  The month of Ramadan has come round, and this year you have been allowed,
+  or have asked, to try the fast from dawn to sunset for the first time. At
+  {group} it is a quiet milestone, marked with a whispered
+  word of encouragement and an extra helping at the evening meal.
+tone: neutral
+category: belonging
+rarity: common
+lifeStages: [child, teen]
+requires:
+  all:
+    - { age: { gte: 9 } }
+    - { age: { lte: 15 } }
+    - { group: { member: true } }
+    - { group: { religion: [muslim] } }
+    - { faith: { id: [muslim] } }
+weight: { base: 14 }
+once: true
+bindGroup: true
+choices:
+  - id: full
+    label: Try for the whole day
+    outcome:
+      text: >-
+        By mid-afternoon you can think of nothing but water, and by sunset
+        you are proud in a quiet way. The first sip of water, a few dried fruits, the people
+        around you who all remember their own first time: it is, you decide, worth it.
+      effects:
+        - { type: faith, action: strengthen, delta: 5 }
+        - { type: group, action: standing, delta: 5 }
+        - { type: stat, key: discipline, delta: 2 }
+        - { type: flag, key: had_a_coming_of_age_rite, value: true }
+  - id: half
+    label: Fast for half the day, as your family suggests
+    outcome:
+      text: >-
+        Half a day is a fine beginning, you are told, and you are glad to
+        hear it. You eat with everyone at sunset and are not the only one
+        watching the clock.
+      effects:
+        - { type: faith, action: strengthen, delta: 3 }
+        - { type: group, action: standing, delta: 3 }
+        - { type: flag, key: had_a_coming_of_age_rite, value: true }
+  - id: not_yet
+    label: Tell them you'd rather wait until you're older
+    outcome:
+      text: >-
+        Nobody makes a fuss. Your aunt says hardly anyone manages a whole
+        day the first time, and hands you a plate of what was cooked.
+      effects:
+        - { type: faith, action: strengthen, delta: 1 }

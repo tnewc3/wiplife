@@ -1,0 +1,54 @@
+id: group_member_in_need
+title: One of ours is in the hospital
+text: >-
+  {friend.name}, who has been at {group} longer than almost anyone, is in
+  the hospital. The group, which never agrees on anything, has agreed on this: someone
+  should bring food, someone should visit, and someone should keep
+  {friend.their} family informed. People are looking at the sign-up sheet.
+tone: serious
+category: belonging
+rarity: uncommon
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { group: { member: true } }
+    - { role: friend, alive: true, kind: [friend] }
+weight:
+  base: 6
+  modifiers:
+    - { if: { memory: { role: friend, tag: met_through_a_group } }, x: 1.5 }
+bindGroup: true
+cast:
+  friend: { kind: friend, group: yours, presence: city }
+choices:
+  - id: visit
+    label: Sign up to sit with {friend.them}
+    outcome:
+      text: >-
+        You sit with {friend.name} through the long afternoon, and read aloud
+        from a book neither of you likes. It's the best conversation the two of you
+        have ever had.
+      effects:
+        - { type: relationship, role: friend, affection: 10, trust: 6 }
+        - { type: memory, role: friend, tag: were_there_in_hospital }
+        - { type: value, key: compassion, delta: 2 }
+  - id: organize
+    label: Organize the meals
+    outcome:
+      text: >-
+        You build a rota with color codes. For a month, {friend.name}'s
+        household eats better than it has in years, and the group learns it can do hard things.
+      effects:
+        - { type: relationship, role: friend, affection: 6, trust: 4 }
+        - { type: group, action: standing, delta: 4 }
+        - { type: stat, key: stress, delta: 2 }
+  - id: card
+    label: Send a card and hope that is enough
+    outcome:
+      text: >-
+        {friend.name} writes back, kindly. You feel the gap between a card
+        and a casserole for some time.
+      effects:
+        - { type: relationship, role: friend, affection: 2 }
+        - { type: stat, key: happiness, delta: -1 }

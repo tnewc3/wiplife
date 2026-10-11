@@ -95,6 +95,11 @@ export const customLifeInputSchema = z.strictObject({
   }),
   cityId: idSchema,
   familyWealth: familyWealthSchema,
+  /**
+   * W2: the faith you are born into: 'family' (or left out) rolls it like any random life, 'none' is no religion, or a
+   * faith in registries/belonging.yaml. Your family has it too.
+   */
+  faith: z.string().min(1).max(40).optional(),
   family: z.strictObject({
     parents: z.union([z.literal(1), z.literal(2)]),
     siblings: z.int().min(0).max(SIBLINGS_MAX),
@@ -159,6 +164,10 @@ export function parseCreateLifeOptions(input: unknown, content: ContentBundle): 
     const category = options.custom.identity.genderCategory;
     if (options.custom.canCarry !== undefined && category !== 'nonbinary' && options.custom.canCarry !== (category === 'woman')) {
       issues.push({ path: 'custom.canCarry', message: 'Who can carry a pregnancy follows from gender category for women and men; only nonbinary characters choose' });
+    }
+    const faith = options.custom.faith;
+    if (faith !== undefined && faith !== 'family' && faith !== 'none' && !content.registries.belonging.faiths[faith]) {
+      issues.push({ path: 'custom.faith', message: 'Choose a faith, no religion, or your family’s' });
     }
     if (options.custom.family.siblings > maxSiblings(content)) {
       issues.push({ path: 'custom.family.siblings', message: `Choose up to ${maxSiblings(content)} siblings` });

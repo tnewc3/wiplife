@@ -1,0 +1,45 @@
+id: rumor_group_honor
+title: What they heard about your role
+text: >-
+  {npc.name} mentions it with a smile. {npc.They} heard {heard}. It is
+  nice to be talked about for a reason you'd have chosen.
+tone: light
+category: web
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { role: npc, alive: true, kind: [friend, sibling, parent, partner, fiance, spouse, grandparent], heard: { kinds: [groupHonor], learned: [gossip] } }
+weight: { base: 10 }
+followUpOnly: true
+recurring: true
+cast:
+  npc: { support: true, presence: anywhere }
+choices:
+  - id: thank
+    label: Thank {npc.them} and tell the real story
+    outcome:
+      text: >-
+        You tell it the way it was, with the credit spread where it belongs.
+        {npc.name} listens, pleased, and says that is exactly why it was
+        you.
+      effects:
+        - { type: knowledge, role: npc, action: correct }
+        - { type: relationship, role: npc, affection: 3, trust: 3 }
+  - id: modest
+    label: Wave it off with a laugh
+    outcome:
+      text: >-
+        You change the subject. {npc.name} goes quiet in the way of someone who
+        knows exactly what you're doing, and lets you do it.
+      effects:
+        - { type: relationship, role: npc, affection: 1 }
+  - id: enjoy
+    label: Enjoy it
+    outcome:
+      text: >-
+        You let yourself take a victory lap around the room, then go and wash
+        the cups. It is a good day.
+      effects:
+        - { type: stat, key: happiness, delta: 2 }

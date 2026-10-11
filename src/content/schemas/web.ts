@@ -33,7 +33,7 @@ export const tieOriginSchema = z.enum(TIE_ORIGINS);
  * The kinds of knowledge that spread (the engine knows how to notice each; the
  * registry says what each one is like). The first six (through mentalHealth, M1) are secrets.
  */
-export const KNOWLEDGE_KINDS = ['affair', 'unknownCrime', 'hiddenDebt', 'addiction', 'identity', 'mentalHealth', 'jobLoss', 'arrest', 'breakup', 'illness'] as const;
+export const KNOWLEDGE_KINDS = ['affair', 'unknownCrime', 'hiddenDebt', 'addiction', 'identity', 'mentalHealth', 'jobLoss', 'arrest', 'breakup', 'illness', 'groupScandal', 'groupHonor'] as const;
 export const knowledgeKindSchema = z.enum(KNOWLEDGE_KINDS);
 export type KnowledgeKindId = z.infer<typeof knowledgeKindSchema>;
 export const SECRET_KINDS: readonly KnowledgeKindId[] = ['affair', 'unknownCrime', 'hiddenDebt', 'addiction', 'identity', 'mentalHealth'];

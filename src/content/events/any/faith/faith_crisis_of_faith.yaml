@@ -1,0 +1,46 @@
+id: faith_crisis_of_faith
+title: The questions come in the night
+text: >-
+  It has been a hard stretch, and the questions you keep for easier times have
+  stopped being easy to put off. You were taught that faith is meant to carry
+  you through exactly this. Instead, this stretch feels like the time belief is
+  hardest to find.
+tone: serious
+category: faith
+rarity: uncommon
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { faith: { strength: { gte: 25 } } }
+    - { stat: happiness, lt: 40 }
+weight: { base: 9 }
+choices:
+  - id: ask
+    label: Take the questions to someone in your tradition
+    outcome:
+      text: >-
+        You find a person who has been asked this before and does not reach
+        for a script. They tell you doubt is not unusual, and that you are not the first to bring it to them. You leave without answers, and without feeling alone.
+      effects:
+        - { type: faith, action: strengthen, delta: 4 }
+        - { type: stat, key: stress, delta: -3 }
+  - id: sit
+    label: Sit with the doubt and see where it goes
+    outcome:
+      text: >-
+        You neither push it away nor feed it. Over months, something moves.
+        What you believe now is smaller, plainer and more yours.
+      effects:
+        - { type: faith, action: weaken, delta: 4 }
+        - { type: value, key: independence, delta: 2 }
+  - id: let_go
+    label: Admit to yourself that you've stopped believing
+    outcome:
+      text: >-
+        It is a quiet thing, in the end, like setting down something that held you
+        up for a long time. The grief is real, and so is the room it leaves.
+      effects:
+        - { type: faith, action: lose }
+        - { type: value, key: independence, delta: 3 }
+        - { type: flag, key: left_faith, value: true }

@@ -1,0 +1,31 @@
+# Cause collective (service). W2 belonging. Fictional names; real religions are real.
+id: cause_collective
+name: "Cause collective"
+type: service
+blurb: "A cause, a folding table and a clipboard: signatures, marches and phone banks."
+minAge: 16
+weight: 0.8
+count: { min: 1, max: 2 }
+traits:
+  welcome: { mean: 66, sd: 16 }
+  strict: { mean: 35, sd: 18 }
+  intense: { mean: 45, sd: 22 }
+activities:
+  - "Petition drives"
+  - "Rallies and marches"
+  - "Phone banks"
+ladder:
+  - { id: volunteer, name: "Volunteer", minYears: 0, minStanding: 0, committed: false }
+  - { id: shift_lead, name: "Shift lead", minYears: 2, minStanding: 60, committed: true }
+  - { id: coordinator, name: "Coordinator", minYears: 4, minStanding: 70, committed: true }
+  - { id: director, name: "Volunteer director", minYears: 8, minStanding: 78, committed: true }
+commitment:
+  casual: { hours: 2, cost: { flat: 0, share: 0 } }
+  committed: { hours: 6, cost: { flat: 30, share: 0 } }
+values: {civic: 0.8, compassion: 0.6, independence: 0.3}
+names:
+  - "The Common Ground Collective"
+  - "Clean Waterways Coalition"
+  - "The Fair Rent Network"
+  - "Open Streets Alliance"
+  - "Greener Block Collective"

@@ -1,0 +1,46 @@
+id: faith_neighbor_preaches
+title: A neighbor who wants to talk about eternity
+text: >-
+  {neighbor.name} from down the hall is kind, reliable and deeply committed to
+  {neighbor.their} faith, and hopeful you might come to share it. There's a pamphlet in your mailbox, again. There's
+  a standing offer to come along on Sunday, and a way of asking about your
+  week that turns, every time, to the soul.
+tone: light
+category: faith
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { role: neighbor, alive: true, kind: [acquaintance] }
+weight: { base: 6 }
+cast:
+  neighbor: { kind: acquaintance, presence: city, createIfMissing: true }
+choices:
+  - id: listen
+    label: Hear {neighbor.them} out, as one person to another
+    outcome:
+      text: >-
+        You sit on the stoop for an hour. You don't agree, and that turns out to be
+        all right. By the end {neighbor.name} is asking about your life, and you
+        about the part of {neighbor.their} that isn't a pamphlet.
+      effects:
+        - { type: relationship, role: neighbor, affection: 6, trust: 4 }
+  - id: boundary
+    label: Thank {neighbor.them}, and say it isn't for you
+    outcome:
+      text: >-
+        You say it kindly and clearly. {neighbor.name} is a little hurt and
+        entirely gracious, and the pamphlets stop.
+      effects:
+        - { type: relationship, role: neighbor, affection: 1, trust: 2 }
+  - id: debate
+    label: Argue it out for the fun of it
+    outcome:
+      text: >-
+        It is a good argument. Neither of you wins, and both of you leave
+        with some doubt about the thing you were so sure of. You'll do it
+        again.
+      effects:
+        - { type: relationship, role: neighbor, affection: 3 }
+        - { type: stat, key: smarts, delta: 1 }

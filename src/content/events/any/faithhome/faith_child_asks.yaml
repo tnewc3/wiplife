@@ -1,0 +1,52 @@
+id: faith_child_asks
+title: "\"Why do we do that?\""
+text: >-
+  Your child has been watching how your household keeps its {faith}
+  practice, and tonight, at bedtime, comes the question: why do we do that,
+  and is it true? You have had a long day. This is the sort of question that does not wait for a good one.
+tone: light
+category: faithhome
+rarity: common
+lifeStages: [adult, senior]
+requires:
+  all:
+    - { age: { gte: 22 } }
+    - { family: { minors: { gte: 1 } } }
+    - { faith: { strength: { gte: 20 } } }
+    - { role: companion, alive: true }
+weight:
+  base: 8
+  modifiers:
+    - { if: { flag: married_in_faith }, x: 1.5 }
+recurring: true
+cast:
+  companion: { support: true, presence: anywhere }
+choices:
+  - id: honest
+    label: Tell them what you believe and why, plainly
+    outcome:
+      text: >-
+        You tell it the way it is to you, including the parts you are still
+        working out. They listen with the whole seriousness of the very young,
+        and fall asleep in the middle of your answer.
+      effects:
+        - { type: faith, action: strengthen, delta: 2 }
+        - { type: stat, key: happiness, delta: 2 }
+  - id: both_sides
+    label: Tell them there are many answers, and this is ours
+    outcome:
+      text: >-
+        You say that people believe different things, and that this is what your
+        family believes. "Why?" they ask. It is an excellent question and you
+        haven't finished answering it.
+      effects:
+        - { type: value, key: independence, delta: 1 }
+        - { type: relationship, role: companion, affection: 2 }
+  - id: tomorrow
+    label: Say you'll talk about it tomorrow
+    outcome:
+      text: >-
+        "Okay," they say, and you both know the question will be back, and
+        probably in a more inconvenient place.
+      effects:
+        - { type: stat, key: stress, delta: 1 }

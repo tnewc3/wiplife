@@ -36,6 +36,7 @@ describe('year pipeline', () => {
       'selfDiscovery',
       'lives',
       'later',
+      'belonging',
       'web',
       'pacing',
     ]);

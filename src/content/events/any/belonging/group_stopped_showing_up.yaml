@@ -1,0 +1,44 @@
+id: group_stopped_showing_up
+title: A gap in the schedule
+text: >-
+  It has been a while since you were regularly at {group}. Someone left a
+  message: not an accusation, just a question about whether you're okay and
+  whether they should keep your name on the list.
+tone: neutral
+category: belonging
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { group: { member: true } }
+    - { group: { standing: { lt: 62 } } }
+weight: { base: 10 }
+followUpOnly: true
+bindGroup: true
+choices:
+  - id: recommit
+    label: Show up this week
+    outcome:
+      text: >-
+        You go. The room is the same. A few people say they're glad you're
+        back, and two of them mean it as an invitation to be a bit more than a name on a list.
+      effects:
+        - { type: group, action: standing, delta: 10 }
+  - id: casual
+    label: Tell them you'll come now and then
+    outcome:
+      text: >-
+        "That counts," the organizer says. It does, mostly, though you can feel
+        the place quietly rearrange itself around the shape of your absence.
+      effects:
+        - { type: group, action: commit, level: casual }
+        - { type: group, action: standing, delta: 3 }
+  - id: leave
+    label: Take your name off the list
+    outcome:
+      text: >-
+        The reply is kind. You close the message and are surprised how long
+        it takes for the quiet to feel like quiet.
+      effects:
+        - { type: group, action: leave }

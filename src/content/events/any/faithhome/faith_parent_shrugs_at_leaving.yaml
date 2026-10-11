@@ -1,0 +1,52 @@
+id: faith_parent_shrugs_at_leaving
+title: "\"I wondered when you'd say\""
+text: >-
+  You tell {parent.name} that you don't believe any more. {parent.They}
+  {parent:nods|nod}. "Honestly?" {parent.they} {parent:says|say}. "I wondered.
+  Your faith was always more mine than yours." Neither of you is as upset
+  as you thought you would be.
+tone: light
+category: faithhome
+rarity: uncommon
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { faith: { id: [none] } }
+    - { not: { faith: { raised: [none] } } }
+    - { faith: { changed: { lte: 4 } } }
+    - { role: parent, alive: true, kind: [parent] }
+    - { role: parent, faith: { strength: { lt: 60 } } }
+weight:
+  base: 10
+  modifiers:
+    - { if: { flag: left_faith }, x: 1.5 }
+once: true
+cast:
+  parent: { kind: parent, presence: nearby }
+choices:
+  - id: talk
+    label: Ask what {parent.they} really {parent:believes|believe}
+    outcome:
+      text: >-
+        The conversation takes an hour and goes places neither of you expected. You learn
+        more about {parent.name} than in the last ten years of Sunday dinners, or the equivalent.
+      effects:
+        - { type: relationship, role: parent, affection: 6, trust: 5 }
+  - id: relief
+    label: Admit how relieved you are
+    outcome:
+      text: >-
+        You laugh, and so does {parent.name}, and the weight you didn't know
+        you were carrying stops. Dinner is lighter than it has been in years.
+      effects:
+        - { type: relationship, role: parent, affection: 4, trust: 3 }
+        - { type: stat, key: happiness, delta: 3 }
+  - id: keep_going
+    label: Keep going to the family gatherings anyway
+    outcome:
+      text: >-
+        You still go, sit at the table, hold hands when the others do. You don't
+        believe it and you love them, and the first does not subtract from the second.
+      effects:
+        - { type: relationship, role: parent, affection: 3 }

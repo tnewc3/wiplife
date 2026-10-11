@@ -1,0 +1,51 @@
+id: rite_christian_confirmation
+title: Standing up for what you were baptized into
+text: >-
+  At {group}, there is a ceremony each year for young people who are old enough
+  to affirm, in their own words, the faith they were brought up in. Confirmation, or the
+  equivalent in your church, comes with classes and a promise.
+tone: neutral
+category: belonging
+rarity: common
+lifeStages: [child, teen]
+requires:
+  all:
+    - { age: { gte: 11 } }
+    - { age: { lte: 16 } }
+    - { group: { member: true } }
+    - { group: { religion: [catholic, protestant, orthodox_christian] } }
+    - { faith: { id: [catholic, protestant, orthodox_christian] } }
+weight: { base: 14 }
+once: true
+bindGroup: true
+choices:
+  - id: affirm
+    label: Take the classes seriously and say the words
+    outcome:
+      text: >-
+        You attend every class. The day itself is shorter than the preparation,
+        and what you remember is the quiet afterward, and your family's faces.
+      effects:
+        - { type: faith, action: strengthen, delta: 6 }
+        - { type: group, action: standing, delta: 5 }
+        - { type: flag, key: had_a_coming_of_age_rite, value: true }
+  - id: go_along
+    label: Go along with it, because it's expected
+    outcome:
+      text: >-
+        You say the words you are given. Some days, you suspect, that is how
+        most people begin, and a few of them stay.
+      effects:
+        - { type: faith, action: strengthen, delta: 1 }
+        - { type: group, action: standing, delta: 2 }
+        - { type: flag, key: had_a_coming_of_age_rite, value: true }
+  - id: wait
+    label: Ask to wait a year, until you're sure
+    outcome:
+      text: >-
+        The pastor, priest or teacher takes it seriously, without trying to
+        talk you out of the pause. Your parents are quiet for a day and then
+        say they would rather you meant it later than said it now.
+      effects:
+        - { type: faith, action: weaken, delta: 2 }
+        - { type: value, key: independence, delta: 2 }

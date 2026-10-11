@@ -1,0 +1,45 @@
+id: volunteer_food_bank_regular
+title: The man who always says thank you twice
+text: >-
+  At {group}, a regular comes through the line every other week. Today
+  they do not meet your eye, and you realize you have never seen them
+  come in without a smile before. The box in front of you is the same box it always is.
+tone: serious
+category: belonging
+rarity: uncommon
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 14 } }
+    - { group: { member: true } }
+    - { group: { def: [food_bank] } }
+weight: { base: 8 }
+bindGroup: true
+choices:
+  - id: talk
+    label: Step out from behind the table and ask how they are
+    outcome:
+      text: >-
+        They tell you it's been a hard month, and that being asked is the
+        part they hadn't expected to need. You don't fix anything. You carry
+        the box to their car anyway.
+      effects:
+        - { type: value, key: compassion, delta: 3 }
+        - { type: group, action: standing, delta: 3 }
+  - id: extra
+    label: Slip an extra bag of staples into the box
+    outcome:
+      text: >-
+        It's against the spirit of the sign-in sheet and in the spirit of
+        everything else. You tell the shift lead afterward. They shrug.
+      effects:
+        - { type: value, key: compassion, delta: 2 }
+        - { type: value, key: independence, delta: 1 }
+  - id: keep_working
+    label: Keep the line moving
+    outcome:
+      text: >-
+        There are forty people behind them. You hand over the box with a
+        smile and think about it all the way home.
+      effects:
+        - { type: stat, key: stress, delta: 1 }

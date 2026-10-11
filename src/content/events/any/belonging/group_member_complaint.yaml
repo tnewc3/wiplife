@@ -1,0 +1,62 @@
+id: group_member_complaint
+title: A complaint about {member.name}
+text: >-
+  Three people have come to you separately about how {member.name} treats
+  others at {group}. It is not a crime. It is a pattern, a sharp tone and a
+  habit of making people feel small, and you are the one they bring it to.
+tone: serious
+category: belonging
+rarity: uncommon
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 21 } }
+    - { group: { member: true } }
+    - { group: { leader: true } }
+    - { role: member, alive: true, kind: [friend] }
+weight: { base: 7 }
+bindGroup: true
+cast:
+  member: { kind: friend, group: yours, presence: city }
+choices:
+  - id: talk
+    label: Talk to {member.them} privately
+    check:
+      base: 55
+      stats:
+        - { role: member, key: trust, weight: 0.25 }
+        - { key: kindness, weight: 0.15 }
+      success:
+        text: >-
+          {member.name} listens, defensive at first, and then not. It does not
+          fix everything, but the next meeting is a different room.
+        effects:
+          - { type: relationship, role: member, affection: 3, trust: 4 }
+          - { type: group, action: standing, delta: 4 }
+      failure:
+        text: >-
+          {member.name} hears an accusation, not a concern, and leaves
+          the meeting angry. The three who came to you are not sure anything changed.
+        effects:
+          - { type: relationship, role: member, affection: -8, trust: -6 }
+          - { type: group, action: standing, delta: -2 }
+  - id: process
+    label: Bring it to the group's own process, in the open
+    outcome:
+      text: >-
+        It's slow, and it is fair, and the group argues about whether it was
+        necessary. When it's over, people know how a complaint is handled, which
+        they did not before.
+      effects:
+        - { type: group, action: news, kind: groupScandal, role: member }
+        - { type: group, action: standing, delta: 3 }
+        - { type: relationship, role: member, affection: -10, trust: -4 }
+  - id: wait
+    label: Hope it settles by itself
+    outcome:
+      text: >-
+        It does not. Two of the three stop coming. You think about that
+        most nights for a month.
+      effects:
+        - { type: group, action: standing, delta: -6 }
+        - { type: stat, key: stress, delta: 3 }

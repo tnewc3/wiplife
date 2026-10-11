@@ -1,0 +1,44 @@
+# Invitation (registries/belonging.yaml invite): a club in your city.
+id: invite_to_club
+title: Come along on Thursday
+text: >-
+  Someone you know from around town keeps mentioning {group}: the people,
+  the standing plans, the way a week gets a shape when there's something in it
+  you chose. This time they stop mentioning it and just ask if you'll come.
+tone: light
+category: joining
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { group: { member: false } }
+    - { group: { type: [club] } }
+weight: { base: 10 }
+followUpOnly: true
+bindGroup: true
+choices:
+  - id: casual
+    label: Drop in when you can
+    outcome:
+      text: >-
+        You go once, then again. Nobody counts attendance, which makes you
+        more likely to show up. By the third time, someone has saved you a seat.
+      effects:
+        - { type: group, action: join, level: casual }
+        - { type: stat, key: happiness, delta: 2 }
+  - id: committed
+    label: Join properly and make it part of your week
+    outcome:
+      text: >-
+        You put it in your calendar in ink. It takes up real hours, and it is
+        also the part of the week you start planning the rest around.
+      effects:
+        - { type: group, action: join, level: committed }
+        - { type: flag, key: joined_a_group, value: true }
+  - id: not_now
+    label: Say maybe another time
+    outcome:
+      text: They say the door is open, and you can tell they mean it.
+      effects:
+        - { type: stat, key: happiness, delta: -1 }

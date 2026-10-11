@@ -1,0 +1,38 @@
+id: resurface_faith_lose
+title: The doubt that didn't go away
+text: >-
+  You told yourself it was a phase, a bad week, a tired heart. Yet the doubt
+  you set aside has come back, quieter and more patient. It no longer feels
+  like a crisis. It feels like a fact.
+tone: serious
+category: identity
+rarity: uncommon
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 14 } }
+    - { discovery: { latent: [faith] } }
+    - { faith: { leaning: true } }
+    - { faith: { pull: [lose] } }
+    - { faith: { strength: { gte: 1 } } }
+weight: { base: 10 }
+followUpOnly: true
+choices:
+  - id: accept
+    label: Accept that you no longer believe
+    outcome:
+      text: >-
+        It comes as a kind of exhale. You tell a few people, one at a time,
+        in your own way, and most take it better than you feared.
+      effects:
+        - { type: faith, action: fromLatent }
+        - { type: flag, key: left_faith, value: true }
+  - id: keep_practicing
+    label: Keep the practice, for what it gives you
+    outcome:
+      text: >-
+        You hold the rituals without the certainty. The songs and the
+        company are worth keeping on their own terms, and you decide that is a fair way to belong.
+      effects:
+        - { type: stat, key: happiness, delta: 1 }
+        - { type: value, key: tradition, delta: 1 }

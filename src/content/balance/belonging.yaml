@@ -1,0 +1,119 @@
+# Belonging (W2, docs/expansion.md): faith, values, groups and what they cost.
+# Starting proposals; Stage 12 (balancing) tunes them against simulation runs.
+
+faith:
+  # The chance a child takes the faith the household has.
+  inherit: 0.86
+  # How devout a household is, and how a child's belief sits against it.
+  household: { mean: 52, sd: 24 }
+  childShare: 0.85
+  childNoise: 14
+  # Someone who chooses a faith in custom creation.
+  chosen: { mean: 55, sd: 18 }
+  drift:
+    # Yearly change in strength by age before membership: growing up and leaving home test belief; later life often returns to it.
+    byAge:
+      - { at: 0, x: 0.3 }
+      - { at: 13, x: -0.6 }
+      - { at: 18, x: -1.4 }
+      - { at: 28, x: -0.3 }
+      - { at: 40, x: 0.1 }
+      - { at: 60, x: 0.6 }
+      - { at: 80, x: 0.9 }
+    noise: 1.2
+  # Belonging to a congregation of your religion steadies and deepens belief; going without wears it down.
+  community: { casual: 0.4, committed: 1.1, without: -0.8, fromAge: 16 }
+  start: { convert: 48, find: 40, return: 52 }
+  wavering: 30
+  devout: 70
+  # A child in a household this devout is taken along to its congregation from this age.
+  takenAlong: 45
+  takenAlongAge: 5
+  latent: { chance: 0.14, noneWeight: 40 }
+  strangerNoneShare: 0.3
+  strengthNoise: 18
+
+values:
+  # Where each value starts for a temperament at 50 in everything, and how much each trait moves it per point away from 50.
+  base: { community: 50, compassion: 50, tradition: 45, independence: 50, civic: 40 }
+  weights:
+    community: { sociability: 0.35, kindness: 0.15 }
+    compassion: { kindness: 0.5, confidence: -0.05 }
+    tradition: { discipline: 0.3, riskTaking: -0.3, ambition: -0.05 }
+    independence: { confidence: 0.3, riskTaking: 0.2, sociability: -0.15, discipline: -0.05 }
+    civic: { discipline: 0.2, kindness: 0.15, ambition: 0.15, sociability: 0.1 }
+  # A strong faith adds to tradition and community by its strength above 50.
+  faithPull: { community: 0.15, compassion: 0.05, tradition: 0.3, independence: -0.1, civic: 0 }
+  regress: 0.08
+  casualShare: 0.4
+  sticks: 0.5
+
+groups:
+  max: 4
+  standing:
+    start: 48
+    # Standing moves each year toward a target: higher for a committed member, a little higher where people are welcoming.
+    target: { committed: 82, casual: 56 }
+    welcome: 0.12
+    pull: 0.28
+    noise: 4
+    floor: 10
+    ceiling: 98
+    # The first year in a group is worth this share of a full year's move.
+    firstYear: 0.5
+  members:
+    count: { min: 2, max: 4 }
+    max: 6
+    adultAges: { below: 14, above: 22 }
+    youthAge: 2
+    affection: { mean: 54, sd: 12 }
+    tieAffection: { mean: 56, sd: 14 }
+    # A new member is tied to this many of the people already there, not to all of them.
+    tiesPerMember: 2
+    # Yearly chance a committed member gets to know one more person there, and the yearly affection gain with the people there.
+    growChance: 0.15
+    affectionGain: 1.4
+    # Leaving a group: friends from there below this affection, with no shared memory, fade from your life.
+    keepAffection: 68
+  invite:
+    base: 0.05
+    sociability: 0.10
+    faith: 0.45
+    coolOff: 4
+    minAge: 11
+    perYearMax: 1
+  rise:
+    chance: 0.12
+    standing: 8
+    coolOff: 3
+    community: 3
+  drift:
+    chance: 0.2
+    stress: 0.004
+    standing: 38
+    coolOff: 3
+    casualShare: 0.4
+  attrition: { casual: 0.05, committed: 0.02, stressed: 2, stressLine: 70 }
+  cost:
+    incomeCap: 0.08
+    wealth: { poor: 0.35, working: 0.7, middle: 1, affluent: 1.6, rich: 2.6 }
+  news: { honorChance: 0.35 }
+  load:
+    free: 8
+    stress: 0.35
+    stressLimit: 75
+    belonging: 0.4
+    belongingLimit: 80
+    school: { over: 6, gpa: 0.04 }
+    work: { over: 9, performance: 0.8 }
+    home: { over: 9, affection: 1 }
+
+reputation:
+  standing: 0.4
+  community: 0.3
+  maxPerYear: 0.6
+
+community:
+  start: 45
+  gain: { club: 0.4, faith: 1.2, service: 1.8, civic: 2.0 }
+  pull: 0.06

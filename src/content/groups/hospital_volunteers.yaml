@@ -1,0 +1,30 @@
+# Hospital volunteers (service). W2 belonging. Fictional names; real religions are real.
+id: hospital_volunteers
+name: "Hospital volunteers"
+type: service
+blurb: "Pushing carts, greeting visitors and holding the door."
+minAge: 16
+weight: 0.7
+count: { min: 1, max: 2 }
+traits:
+  welcome: { mean: 66, sd: 16 }
+  strict: { mean: 35, sd: 18 }
+  intense: { mean: 45, sd: 22 }
+activities:
+  - "Visitor desk"
+  - "Delivering flowers"
+  - "Sitting with patients"
+ladder:
+  - { id: volunteer, name: "Volunteer", minYears: 0, minStanding: 0, committed: false }
+  - { id: shift_lead, name: "Shift lead", minYears: 2, minStanding: 60, committed: true }
+  - { id: coordinator, name: "Coordinator", minYears: 4, minStanding: 70, committed: true }
+  - { id: director, name: "Volunteer director", minYears: 8, minStanding: 78, committed: true }
+commitment:
+  casual: { hours: 2, cost: { flat: 0, share: 0 } }
+  committed: { hours: 6, cost: { flat: 30, share: 0 } }
+values: {compassion: 1.0, community: 0.4}
+names:
+  - "Mercy Row Volunteer Corps"
+  - "Cedar Point Hospital Auxiliary"
+  - "The Gray Smock Volunteers"
+  - "Northgate Hospital Friends"

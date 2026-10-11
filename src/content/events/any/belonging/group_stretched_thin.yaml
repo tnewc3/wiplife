@@ -1,0 +1,48 @@
+# Drifting (registries/belonging.yaml drifting): giving a lot of time, and feeling it.
+id: group_stretched_thin
+title: Too many evenings
+text: >-
+  {group} has taken more of your week than it used to, and this week the
+  weight shows. The people there have noticed. Nobody is complaining, which
+  is part of what's wrong with it.
+tone: neutral
+category: belonging
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { group: { member: true } }
+    - { group: { commitment: [committed] } }
+    - { stat: stress, gte: 45 }
+weight: { base: 10 }
+followUpOnly: true
+bindGroup: true
+choices:
+  - id: casual
+    label: Step back to coming when you can
+    outcome:
+      text: >-
+        You tell them plainly. They say what you hoped: that the place will
+        be here when you have more to give, and that you are still welcome now.
+      effects:
+        - { type: group, action: commit, level: casual }
+        - { type: stat, key: stress, delta: -4 }
+  - id: push
+    label: Keep going and do the work on your own time
+    outcome:
+      text: >-
+        You do. For a while it works, and then it works less well, and you
+        notice you've started resenting a thing you chose.
+      effects:
+        - { type: stat, key: stress, delta: 3 }
+        - { type: group, action: standing, delta: 2 }
+  - id: leave
+    label: Leave, and mean it
+    outcome:
+      text: >-
+        It is harder to say than you thought, and easier to do. On the way
+        home you pass the building and don't slow down.
+      effects:
+        - { type: group, action: leave }
+        - { type: stat, key: stress, delta: -5 }

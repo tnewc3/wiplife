@@ -354,3 +354,55 @@ kinds:
         affection: 0
         trust: 0
     reactions: [rumor_illness]
+
+  # W2: what is said about your place in a group of yours.
+  groupScandal:
+    secret: false
+    witness: { who: closest, chance: 0.6, count: 2 }
+    truths: [group_row]
+    versions:
+      group_row:
+        heard: "that you were caught up in a falling-out at your group"
+        heardAbout: "that {about.name} was caught up in a falling-out at {about.their} group"
+        twists: [{ to: group_scandal_worse, weight: 2 }, { to: group_row_minor, weight: 1 }]
+        affection: -3
+        trust: -4
+      group_scandal_worse:
+        heard: "that you did something shameful at your group"
+        heardAbout: "that {about.name} did something shameful at {about.their} group"
+        twists: [{ to: group_row, weight: 1 }]
+        affection: -9
+        trust: -12
+      group_row_minor:
+        heard: "that there was a small disagreement at your group, and you were in the middle of it"
+        heardAbout: "that there was a small disagreement at {about.their} group, and {about.name} was in the middle of it"
+        twists: [{ to: group_row, weight: 1 }]
+        affection: 0
+        trust: 0
+        light: true
+    reactions: [rumor_group_scandal]
+  groupHonor:
+    secret: false
+    witness: { who: closest, chance: 0.7, count: 2 }
+    truths: [group_honor]
+    versions:
+      group_honor:
+        heard: "that your group has given you a role to be proud of"
+        heardAbout: "that {about.name}'s group has given {about.them} a role to be proud of"
+        twists: [{ to: group_honor_pushy, weight: 1 }, { to: group_honor_big, weight: 2 }]
+        affection: 3
+        trust: 2
+      group_honor_pushy:
+        heard: "that you've been putting yourself forward at your group"
+        heardAbout: "that {about.name} has been putting {about.themself} forward at {about.their} group"
+        twists: [{ to: group_honor, weight: 1 }]
+        affection: -2
+        trust: -2
+      group_honor_big:
+        heard: "that you practically run your group now"
+        heardAbout: "that {about.name} practically runs {about.their} group now"
+        twists: [{ to: group_honor, weight: 1 }]
+        affection: 1
+        trust: 0
+        light: true
+    reactions: [rumor_group_honor]

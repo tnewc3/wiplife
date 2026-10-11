@@ -1,0 +1,62 @@
+id: faith_parent_and_conversion
+title: "{parent.name} and your new faith"
+text: >-
+  You have taken up {faith}, and {parent.name} has heard. It is not what you
+  were raised in, and the family has all kinds of feelings about that. {parent.name}
+  asks you to come over, and does not say why.
+tone: serious
+category: faithhome
+rarity: uncommon
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { faith: { strength: { gte: 1 } } }
+    - { faith: { changed: { lte: 4 } } }
+    - { not: { faith: { raised: [none] } } }
+    - { role: parent, alive: true, kind: [parent] }
+    - { role: parent, faith: { same: false } }
+weight: { base: 10 }
+once: true
+cast:
+  parent: { kind: parent, presence: nearby }
+choices:
+  - id: share
+    label: Tell {parent.them} what it means to you
+    check:
+      base: 55
+      stats:
+        - { role: parent, key: trust, weight: 0.2 }
+        - { key: kindness, weight: 0.15 }
+      success:
+        text: >-
+          You describe it plainly, without arguing for it. {parent.name} listens
+          for a long time and then asks a question that tells you {parent.they}
+          {parent:has|have} been trying to understand. It is not agreement. It is a start.
+        effects:
+          - { type: relationship, role: parent, affection: 6, trust: 6 }
+      failure:
+        text: >-
+          Somewhere in the conversation, "I found something" becomes "what we gave you wasn't
+          enough." {parent.name} hears a rejection, and you cannot make the words
+          come out differently. It ends politely, and sadly.
+        effects:
+          - { type: relationship, role: parent, affection: -5, trust: -3 }
+  - id: invite
+    label: Invite {parent.them} to see it for {parent.themself}
+    outcome:
+      text: >-
+        {parent.name} comes once, sits near the back and watches with the
+        careful respect of someone in a house that isn't theirs. {parent.They}
+        {parent:doesn't|don't} convert. {parent.They} {parent:come|comes} again.
+      effects:
+        - { type: relationship, role: parent, affection: 5, trust: 4 }
+  - id: wait
+    label: Give it time, and keep showing up as you
+    outcome:
+      text: >-
+        You come to dinner. You pass the salt. You are the same person, with a
+        different practice, and slowly {parent.name} stops looking for the
+        difference.
+      effects:
+        - { type: relationship, role: parent, affection: 3 }

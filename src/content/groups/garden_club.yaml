@@ -1,0 +1,30 @@
+# Garden club (club). W2 belonging. Fictional names; real religions are real.
+id: garden_club
+name: "Garden club"
+type: club
+blurb: "Seed swaps, plant sales and strong opinions about tomatoes."
+minAge: 18
+weight: 0.8
+count: { min: 1, max: 2 }
+traits:
+  welcome: { mean: 62, sd: 18 }
+  strict: { mean: 30, sd: 18 }
+  intense: { mean: 40, sd: 22 }
+activities:
+  - "Seed swaps"
+  - "Spring plant sale"
+  - "Tending the community plots"
+ladder:
+  - { id: member, name: "Member", minYears: 0, minStanding: 0, committed: false }
+  - { id: organizer, name: "Organizer", minYears: 2, minStanding: 60, committed: true }
+  - { id: leader, name: "President", minYears: 5, minStanding: 72, committed: true }
+commitment:
+  casual: { hours: 2, cost: { flat: 30, share: 0 } }
+  committed: { hours: 5, cost: { flat: 110, share: 0 } }
+values: {community: 0.7}
+names:
+  - "The Tuckered Trowel Club"
+  - "Linden Ridge Garden Society"
+  - "Greenhouse Row Gardeners"
+  - "The Seed Swap Circle"
+  - "Pocket Garden Collective"

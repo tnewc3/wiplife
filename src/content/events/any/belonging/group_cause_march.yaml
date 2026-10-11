@@ -1,0 +1,49 @@
+id: group_cause_march
+title: The march on Saturday
+text: >-
+  {group} is organizing a march, with permits and signs and a route
+  that goes past the building you want to be heard in. A few of your
+  friends think it is a waste of a Saturday. A few of the people you'll be
+  walking with will think you're not nearly angry enough.
+tone: neutral
+category: belonging
+rarity: uncommon
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { group: { member: true } }
+    - { group: { def: [cause_collective, neighborhood_assoc] } }
+weight: { base: 7 }
+bindGroup: true
+choices:
+  - id: march
+    label: March, with a sign you made yourself
+    outcome:
+      text: >-
+        Eleven blocks, one blister and a stranger who hands you a bottle of water
+        without a word. The speeches are long. The crowd is longer, and you feel
+        for an afternoon like a small part of something large.
+      effects:
+        - { type: value, key: civic, delta: 3 }
+        - { type: group, action: standing, delta: 3 }
+        - { type: stat, key: fitness, delta: 1 }
+  - id: organize
+    label: Volunteer to marshal the route
+    outcome:
+      text: >-
+        You wear the vest, you carry the radio and you spend four hours
+        telling people politely to stay on the sidewalk. Nothing goes wrong.
+        You'll be asked again.
+      effects:
+        - { type: group, action: standing, delta: 5 }
+        - { type: stat, key: stress, delta: 2 }
+        - { type: group, action: community, delta: 2 }
+  - id: skip
+    label: Support it in your own way, from home
+    outcome:
+      text: >-
+        You share the notice, give what you can in your own time and watch the
+        coverage in the evening. You are glad it happened. Mostly glad.
+      effects:
+        - { type: value, key: independence, delta: 1 }

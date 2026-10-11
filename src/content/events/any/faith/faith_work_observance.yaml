@@ -1,0 +1,62 @@
+id: faith_work_observance
+title: A day your tradition sets aside
+text: >-
+  A day that matters in your {faith} practice falls on a working day.
+  {boss.name} runs a tight schedule, and you'd need to ask for the day off,
+  or for the hours to be moved. It is a small request that does not feel small.
+tone: neutral
+category: faith
+rarity: common
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { faith: { strength: { gte: 40 } } }
+    - { career: { employed: true } }
+    - { role: boss, alive: true, kind: [boss] }
+weight: { base: 7 }
+recurring: true
+cast:
+  boss: { kind: boss, presence: anywhere }
+choices:
+  - id: ask
+    label: Ask {boss.name} openly
+    check:
+      base: 70
+      stats:
+        - { role: boss, key: trust, weight: 0.2 }
+        - { job: performance, weight: 0.2 }
+      success:
+        text: >-
+          {boss.name} nods and writes it down. "Of course," {boss.they}
+          {boss:says|say}, "tell me what else you'll need." It was less of a
+          conversation than you braced for.
+        effects:
+          - { type: relationship, role: boss, affection: 3, trust: 3 }
+          - { type: faith, action: strengthen, delta: 2 }
+      failure:
+        text: >-
+          {boss.name} says it's a hard week and asks if there's any way around it.
+          You find a way, a half day and a swap, and it works, but you leave the
+          office thinking about how it was asked.
+        effects:
+          - { type: relationship, role: boss, affection: -2 }
+          - { type: stat, key: stress, delta: 2 }
+  - id: vacation
+    label: Take the day as leave and say nothing
+    outcome:
+      text: >-
+        You use a day of your own and spend it as the tradition asks. No
+        one at work knows, and you carry a quiet sense of having kept it
+        to yourself.
+      effects:
+        - { type: faith, action: strengthen, delta: 1 }
+  - id: skip
+    label: Let it pass this year
+    outcome:
+      text: >-
+        You work. The day goes by like any other, and you feel it go.
+        Part of you tells yourself there will be other years.
+      effects:
+        - { type: faith, action: weaken, delta: 2 }
+        - { type: stat, key: stress, delta: 1 }

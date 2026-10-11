@@ -1,0 +1,65 @@
+# Belonging (W2): history lines the belonging step writes, and the words for a
+# group's traits on the Groups screen. Roles: {group} the group's name, {role}
+# the role, {religion} a faith's name.
+history:
+  joined:
+    importance: 1
+    variants:
+      - "You joined {group}."
+      - "You started going to {group}."
+      - "{group} became part of your week."
+  left:
+    importance: 1
+    variants:
+      - "You left {group}."
+      - "You stopped going to {group}."
+  moved:
+    importance: 1
+    variants:
+      - "You moved away from {group}."
+      - "The move took you out of {group}."
+  rose:
+    importance: 2
+    variants:
+      - "You became {role} of {group}."
+      - "{group} made you its {role}."
+  stepped_down:
+    importance: 1
+    variants:
+      - "You stepped down as {role} of {group}."
+  converted:
+    importance: 3
+    variants:
+      - "You took up a new faith: {religion}."
+      - "Your faith changed. You are {religion} now."
+  lostFaith:
+    importance: 3
+    variants:
+      - "You stopped believing."
+      - "Your faith ended quietly, somewhere between one year and the next."
+  foundFaith:
+    importance: 3
+    variants:
+      - "You found a faith: {religion}."
+      - "You began to believe, and it was {religion}."
+  returnedFaith:
+    importance: 3
+    variants:
+      - "You came back to {religion}, the faith you were raised in."
+      - "You returned to {religion}."
+  family_took_along:
+    importance: 1
+    variants:
+      - "Your family took you along to {group}."
+      - "Your family went to {group}, and so did you."
+
+traits:
+  welcome:
+    high: Warm to newcomers
+    low: Slow to let new people in
+  strict:
+    high: Strict about its rules
+    low: Relaxed about its rules
+  intense:
+    high: Intense, with a lot asked of members
+    low: Easygoing, with little asked of members

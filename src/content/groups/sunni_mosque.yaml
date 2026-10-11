@@ -1,0 +1,35 @@
+# Mosque (faith). W2 belonging. Fictional names; real religions are real.
+id: sunni_mosque
+name: "Mosque"
+type: faith
+religion: muslim
+tradition: "Sunni"
+blurb: "A mosque with a full prayer hall on Fridays, a weekend school and iftars that fill the parking lot."
+minAge: 0
+weight: 0.9
+cities: {small_town: 0.4}
+count: { min: 1, max: 2 }
+traits:
+  welcome: { mean: 60, sd: 22 }
+  strict: { mean: 50, sd: 25 }
+  intense: { mean: 50, sd: 22 }
+activities:
+  - "Jumu'ah prayer"
+  - "Weekend school"
+  - "Community iftars"
+  - "Charity drives"
+ladder:
+  - { id: member, name: "Member", minYears: 0, minStanding: 0, committed: false }
+  - { id: helper, name: "Volunteer", minYears: 1, minStanding: 50, committed: false }
+  - { id: council, name: "Committee member", minYears: 3, minStanding: 62, committed: true }
+  - { id: chair, name: "Board chair", minYears: 7, minStanding: 76, committed: true }
+commitment:
+  casual: { hours: 1.5, cost: { flat: 25, share: 0.005 } }
+  committed: { hours: 4, cost: { flat: 90, share: 0.02 } }
+values: {community: 0.8, tradition: 0.6, compassion: 0.4}
+names:
+  - "Masjid Al-Noor of Bridgeway"
+  - "Eastgate Islamic Center"
+  - "Riverside Community Mosque"
+  - "Masjid Al-Huda of Lakeview"
+  - "Harbor Hill Islamic Society"

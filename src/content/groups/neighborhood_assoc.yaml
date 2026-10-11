@@ -1,0 +1,31 @@
+# Neighborhood association (civic). W2 belonging. Fictional names; real religions are real.
+id: neighborhood_assoc
+name: "Neighborhood association"
+type: civic
+blurb: "Block parties, zoning letters and a recurring argument about parking."
+minAge: 18
+weight: 1.0
+count: { min: 1, max: 2 }
+traits:
+  welcome: { mean: 50, sd: 20 }
+  strict: { mean: 45, sd: 20 }
+  intense: { mean: 45, sd: 22 }
+activities:
+  - "Block parties"
+  - "Zoning meetings"
+  - "Neighborhood cleanups"
+ladder:
+  - { id: member, name: "Member", minYears: 0, minStanding: 0, committed: false }
+  - { id: committee, name: "Committee member", minYears: 1, minStanding: 55, committed: true }
+  - { id: officer, name: "Officer", minYears: 3, minStanding: 66, committed: true }
+  - { id: president, name: "President", minYears: 6, minStanding: 76, committed: true }
+commitment:
+  casual: { hours: 1.5, cost: { flat: 20, share: 0 } }
+  committed: { hours: 5, cost: { flat: 45, share: 0 } }
+values: {civic: 1.0, community: 0.3}
+names:
+  - "Linden Ridge Neighbors"
+  - "The Fourth Street Association"
+  - "Harbor Hill Neighborhood Council"
+  - "Eastgate Residents' Association"
+  - "Maple Court Block Club"

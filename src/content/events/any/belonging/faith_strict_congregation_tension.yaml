@@ -1,0 +1,84 @@
+# A hard tension, written with weight: reactions differ from person to person and nobody is written as a villain.
+id: faith_strict_congregation_tension
+title: Who you are, and where you worship
+text: >-
+  {group} is a place you love, and it is also strict about some things that touch you
+  directly. Since you told people who you are, the room has changed in a hundred small ways.
+  {ally.name} sits beside you as always. {elder.name}, who has been there longer than anyone, has been
+  thoughtful in a way you can't read.
+tone: serious
+category: belonging
+rarity: rare
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { group: { member: true } }
+    - { group: { type: [faith] } }
+    - { group: { strict: { gte: 55 } } }
+    - { flag: came_out }
+    - { faith: { strength: { gte: 30 } } }
+    - { role: ally, alive: true, kind: [friend] }
+    - { role: elder, alive: true, kind: [friend] }
+weight: { base: 6 }
+once: true
+bindGroup: true
+cast:
+  ally: { kind: friend, group: yours, presence: city }
+  elder: { kind: friend, group: yours, presence: city }
+choices:
+  - id: speak
+    label: Ask {elder.name} for an honest conversation
+    check:
+      base: 40
+      stats:
+        - { role: elder, key: affection, weight: 0.3 }
+        - { key: confidence, weight: 0.2 }
+      success:
+        text: >-
+          {elder.name} listens for a long time, and says that {elder.they}
+          {elder:doesn't|don't} have all the answers, only the years of knowing you. It
+          is not acceptance in the shape you hoped for. It is something, and it's
+          an honest start.
+        effects:
+          - { type: relationship, role: elder, affection: 6, trust: 6 }
+          - { type: group, action: standing, delta: 3 }
+          - { type: stat, key: stress, delta: -2 }
+      failure:
+        text: >-
+          {elder.name} is kind and does not move. "I'll keep you in my prayers,"
+          {elder.they} {elder:says|say}, and neither of you knows whether that is
+          comfort or a wall. You leave with a heavy chest.
+        effects:
+          - { type: relationship, role: elder, affection: -3, trust: -4 }
+          - { type: stat, key: stress, delta: 4 }
+          - { type: faith, action: weaken, delta: 3 }
+  - id: lean_on_ally
+    label: Lean on {ally.name} and stay put
+    outcome:
+      text: >-
+        {ally.name} says, simply, that your seat is your seat. It doesn't
+        change the policy. It makes the room possible to be in, and some weeks that's what counts.
+      effects:
+        - { type: relationship, role: ally, affection: 10, trust: 8 }
+        - { type: stat, key: stress, delta: -1 }
+  - id: go
+    label: Look for a place where you're more at home
+    outcome:
+      text: >-
+        You leave without a scene. You keep what you took from the place, and carry on your faith somewhere
+        gentler. Some of the people write, and mean it. Others do not. It's a grief either way.
+      effects:
+        - { type: group, action: leave }
+        - { type: relationship, role: ally, affection: 3 }
+        - { type: stat, key: happiness, delta: -1 }
+  - id: quiet
+    label: Keep your head down and your faith, and say nothing more
+    outcome:
+      text: >-
+        You come, you sit, you sing. What it asks of you is the corner of yourself you
+        leave at the door, and you are not sure how long you can keep giving
+        it up.
+      effects:
+        - { type: stat, key: stress, delta: 3 }
+        - { type: value, key: tradition, delta: 1 }

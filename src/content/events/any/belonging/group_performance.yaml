@@ -1,0 +1,58 @@
+id: group_performance
+title: Dress rehearsal
+text: >-
+  {group} has a concert on Saturday, and the last rehearsal has gone
+  as badly as last rehearsals are supposed to. The director says it will
+  be fine in the specific way people say it when it won't be, and yet it always is.
+tone: light
+category: belonging
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { group: { member: true } }
+    - { group: { def: [choir, community_band] } }
+weight: { base: 8 }
+recurring: true
+bindGroup: true
+choices:
+  - id: practice
+    label: Practice every night this week
+    outcome:
+      text: >-
+        You do. On Saturday your part is the cleanest it has ever been, and you
+        notice, in the lull, how much you like the sound of forty people
+        trying.
+      effects:
+        - { type: stat, key: happiness, delta: 3 }
+        - { type: group, action: standing, delta: 3 }
+  - id: trust
+    label: Trust the rehearsals you've had
+    outcome:
+      text: >-
+        It's fine, the way it always is. A flat note in the second movement
+        goes unremarked, and the applause is warm.
+      effects:
+        - { type: stat, key: happiness, delta: 2 }
+  - id: solo
+    label: Say yes when they ask for someone to carry the opening
+    check:
+      base: 45
+      stats:
+        - { key: confidence, weight: 0.3 }
+        - { key: discipline, weight: 0.15 }
+      success:
+        text: >-
+          You hold the first note longer than you meant to. The hall is
+          quiet and then, in one body, not. You will remember that quiet.
+        effects:
+          - { type: group, action: standing, delta: 6 }
+          - { type: stat, key: happiness, delta: 5 }
+      failure:
+        text: >-
+          Your voice cracks on the first note, and recovers on the second. It's
+          the kind of mistake the group will bring up warmly for years.
+        effects:
+          - { type: group, action: standing, delta: 1 }
+          - { type: stat, key: stress, delta: 2 }

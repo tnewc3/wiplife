@@ -1,0 +1,46 @@
+id: faith_return_late_life
+title: Back to where you started
+text: >-
+  The questions you put off for decades are the ones that matter to you now.
+  The faith you were raised in sits in the back of your mind, with its
+  old songs and its old words. You find yourself humming one in the kitchen.
+tone: neutral
+category: faith
+rarity: uncommon
+lifeStages: [adult, senior]
+requires:
+  all:
+    - { age: { gte: 55 } }
+    - { faith: { id: [none] } }
+    - { not: { faith: { raised: [none] } } }
+weight: { base: 8 }
+once: true
+choices:
+  - id: return
+    label: Go back to it
+    outcome:
+      text: >-
+        The first time you walk in is awkward and the second less so.
+        People remember you, or your parents, or the family. It is not the same faith you left,
+        because you are not the same person who left it.
+      effects:
+        - { type: faith, action: return }
+        - { type: stat, key: happiness, delta: 3 }
+  - id: reflect
+    label: Honor it in memory, but stay as you are
+    outcome:
+      text: >-
+        You look through the old photos and sing the old song and leave it
+        there. It is a place you came from, and you are at peace with that.
+      effects:
+        - { type: stat, key: happiness, delta: 1 }
+  - id: explore
+    label: Look around at what else might fit
+    outcome:
+      text: >-
+        You spend a year in the company of people who believe other things,
+        and learn from each of them. You are not sure where you will land. You
+        are glad, at last, to be looking.
+      effects:
+        - { type: value, key: independence, delta: 1 }
+        - { type: stat, key: smarts, delta: 1 }
