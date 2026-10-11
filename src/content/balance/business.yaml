@@ -45,7 +45,7 @@ levels:
 demand:
   reputation: { base: 0.55, slope: 0.9 }
   quality: { base: 0.5, slope: 0.9 }
-  maturity: [0.7, 0.9, 1]
+  maturity: [0.85, 0.95, 1]
   saturation: 0.8
   season: { sd: 0.07, luck: 0.05 }
   skill: 0.006
@@ -53,7 +53,7 @@ demand:
   unlicensed: 0
 
 costs:
-  overheadShare: 0.06
+  overheadShare: 0.09
   overheadFixed: 2000
   waste: 0.004
   crewWage: 1
