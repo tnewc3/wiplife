@@ -1,0 +1,53 @@
+id: biz_staff_asks_raise
+title: A conversation about money
+text: >-
+  {staff.name} asks to talk after closing. {staff.they} {staff:has|have} been at
+  {business} a while now, {staff.they} {staff:says|say}, and the pay hasn't
+  moved. {staff.they} {staff:is|are} calm about it, and clearly rehearsed.
+tone: neutral
+category: business
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { business: { owned: true } }
+    - { age: { gte: 18 } }
+    - { business: { owned: true, staff: { gte: 1 } } }
+weight: { base: 6 }
+cooldownYears: 3
+bindBusiness: true
+cast:
+  staff: { business: staff, presence: city }
+choices:
+  - id: raise
+    label: Give {staff.them} a raise
+    outcome:
+      text: >-
+        You say yes before you have worked out how. {staff.name} thanks you
+        quietly, and the next morning {staff.they} {staff:is|are} in early.
+      effects:
+        - { type: business, action: staffRaise, role: staff }
+        - { type: relationship, role: staff, affection: 4, trust: 4 }
+  - id: bonus
+    label: Offer a one-time bonus instead
+    outcome:
+      text: A bonus is a thank-you, not a promise. {staff.name} accepts it graciously, and looks a little less sure about the future.
+      effects:
+        - { type: business, action: pay, share: 0.008, floor: 300 }
+        - { type: business, action: staffMorale, role: staff, delta: 4 }
+  - id: refuse
+    label: Explain that the business cannot afford it
+    check:
+      base: 45
+      stats: [{ key: kindness, weight: 0.2 }, { key: confidence, weight: 0.2 }]
+      success:
+        text: You show {staff.them} the real numbers, and the plan. {staff.name} nods slowly, and stays.
+        effects:
+          - { type: relationship, role: staff, trust: 5 }
+      failure:
+        text: >-
+          {staff.name} hears "no" and nothing else. {staff.they} {staff:is|are}
+          polite until the end of the week.
+        effects:
+          - { type: business, action: staffMorale, role: staff, delta: -14 }
+          - { type: relationship, role: staff, affection: -6, trust: -5 }

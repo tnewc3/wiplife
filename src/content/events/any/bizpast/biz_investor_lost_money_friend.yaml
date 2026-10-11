@@ -1,0 +1,54 @@
+id: biz_investor_lost_money_friend
+title: What you owe {investor.name}
+text: >-
+  {investor.name} had put money into your business. Now the business is gone,
+  and the money with it. You run into {investor.them} in the grocery store, between the
+  bread and the cereal, and neither of you knows quite where to look.
+tone: serious
+category: bizpast
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { business: { failedWithin: 8 } }
+    - { age: { gte: 18 } }
+    - { business: { failedWithin: 2 } }
+    - { memory: { role: investor, tag: lost_money_in_your_business } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  investor: { kind: friend, presence: city }
+choices:
+  - id: apologize
+    label: Apologize, properly
+    check:
+      base: 45
+      stats: [{ key: kindness, weight: 0.3 }, { key: confidence, weight: 0.1 }]
+      success:
+        text: >-
+          {investor.name} listens to all of it. "I knew the risk," {investor.they}
+          {investor:says|say}. It doesn't make it better, but it makes it
+          bearable.
+        effects:
+          - { type: relationship, role: investor, trust: 5, affection: 3 }
+      failure:
+        text: >-
+          The apology comes out too quickly, and sounds like a script. {investor.name}
+          nods, and says nothing, and pushes the cart away.
+        effects:
+          - { type: relationship, role: investor, affection: -6 }
+  - id: repay
+    label: Promise to pay {investor.them} back, and start now
+    outcome:
+      text: You hand over what you can, right there in the aisle. It's not what you owe. It's the beginning of it.
+      effects:
+        - { type: cost, item: biz_repay_start }
+        - { type: relationship, role: investor, trust: 6 }
+        - { type: memory, role: investor, tag: you_started_paying_them_back }
+  - id: avoid
+    label: Turn the cart around
+    outcome:
+      text: You find another aisle. It isn't the last time you do it.
+      effects:
+        - { type: relationship, role: investor, affection: -5, trust: -4 }
+        - { type: stat, key: stress, delta: 3 }

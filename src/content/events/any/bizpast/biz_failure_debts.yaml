@@ -1,0 +1,44 @@
+id: biz_failure_debts
+title: What you signed
+text: >-
+  The business is gone. The debts you personally guaranteed are not. A letter
+  from the bank arrives, polite and unambiguous, and so does one from the
+  landlord's lawyer. You thought this was something that happened to other
+  people.
+tone: dark
+category: bizpast
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { business: { failedWithin: 8 } }
+    - { age: { gte: 18 } }
+    - { business: { failedWithin: 2 } }
+    - { finances: { debt: { gt: 5000 } } }
+weight: { base: 9 }
+followUpOnly: true
+choices:
+  - id: plan
+    label: Sit down with a debt counselor
+    visibleIf: { not: { finances: { planWithin: 4 } } }
+    outcome:
+      text: A nonprofit counselor sorts the debts you can plan and the ones you can't. It's not fun, and it's something you can follow.
+      effects:
+        - { type: debt, action: plan }
+        - { type: stat, key: stress, delta: -3 }
+  - id: bankruptcy
+    label: File for bankruptcy
+    visibleIf: { not: { finances: { bankruptWithin: 7 } } }
+    outcome:
+      text: A lawyer walks you through it. The business debts are cleared, and so, for a while, is your credit.
+      effects:
+        - { type: debt, action: bankruptcy }
+        - { type: stat, key: happiness, delta: -4 }
+        - { type: stat, key: stress, delta: -5 }
+  - id: grind
+    label: Take any work and chip away at it
+    outcome:
+      text: You take the first thing you are offered, and then a second thing, and start chipping away at it, a bit at a time.
+      effects:
+        - { type: stat, key: discipline, delta: 3 }
+        - { type: stat, key: stress, delta: 4 }

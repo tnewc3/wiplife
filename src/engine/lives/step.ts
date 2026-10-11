@@ -33,6 +33,8 @@ function domainsFor(ctx: Ctx, s: Subject): Set<LifeDomain> {
     d.delete('children');
   }
   if (kind === 'coworker' || kind === 'boss') d.delete('career');
+  // W3: someone who works in your business has the job you gave them: their work is not rolled for them, and they stay where they work.
+  if (s.person.tags.includes('staff')) for (const x of ['career', 'moving'] as const) d.delete(x);
   // E4: someone in a couple with another of the people you know has their love life already.
   if (hasRomanticTie(ctx.view.web, s.id)) d.delete('love');
   // The older generation's partners are each other (the web between people, E4, ties them): no new love lives or children for them here.

@@ -1,0 +1,52 @@
+id: biz_cofounder_wants_out
+title: A different road
+text: >-
+  {cofounder.name} asks you to lunch, away from {business}. {cofounder.they}
+  {cofounder:has|have} taken a job somewhere else, and wants to talk about
+  selling {cofounder.their} share.
+tone: serious
+category: business
+rarity: uncommon
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { business: { owned: true } }
+    - { age: { gte: 18 } }
+    - { business: { owned: true, cofounder: true, years: { gte: 2 } } }
+weight: { base: 5 }
+followUpOnly: true
+bindBusiness: true
+cast:
+  cofounder: { business: cofounder, presence: city }
+choices:
+  - id: buyout
+    label: Buy {cofounder.them} out
+    outcome:
+      text: >-
+        You pay {cofounder.name} for {cofounder.their} share. It is fair, it is
+        friendly, and the office is much quieter on Monday.
+      effects:
+        - { type: business, action: buyout, role: cofounder }
+        - { type: relationship, role: cofounder, affection: 4, trust: 4 }
+  - id: stay
+    label: Ask {cofounder.them} to stay on a little longer
+    check:
+      base: 45
+      stats: [{ key: sociability, weight: 0.25 }, { key: kindness, weight: 0.2 }]
+      success:
+        text: "{cofounder.name} agrees to one more year. \"Then we talk,\" {cofounder.they} {cofounder:says|say}."
+        effects:
+          - { type: relationship, role: cofounder, trust: 3 }
+      failure:
+        text: >-
+          {cofounder.name} has already decided. {cofounder.they} {cofounder:wishes|wish}
+          you well, and leaves your phone calls unanswered.
+        effects:
+          - { type: relationship, role: cofounder, affection: -6, trust: -6 }
+  - id: dissolve
+    label: Decide it's time to close the place
+    outcome:
+      text: You both agree it was a good run. You sell the fit-out, shake hands in the empty room and lock up.
+      effects:
+        - { type: business, action: close }
+        - { type: relationship, role: cofounder, affection: 2 }

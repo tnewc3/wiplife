@@ -1,0 +1,43 @@
+id: biz_expansion_chance
+title: Room for a second one
+text: >-
+  {business} has had a good run. A space has come up in {bizCity}, not far from
+  the first, and the landlord is willing to talk. Part of you wants to say yes
+  immediately. The rest of you is counting.
+tone: light
+category: business
+rarity: uncommon
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { business: { owned: true } }
+    - { age: { gte: 18 } }
+    - { business: { owned: true, profit: { gt: 0 }, years: { gte: 3 } } }
+weight: { base: 8 }
+followUpOnly: true
+bindBusiness: true
+choices:
+  - id: open
+    label: Take the space and open a second location
+    outcome:
+      text: >-
+        The second place takes a lot of money, a lot of weekends and a great deal of
+        trust in the people who will run it. It opens on a Tuesday, a little late and mostly fine.
+      effects:
+        - { type: business, action: expand }
+        - { type: stat, key: stress, delta: 4 }
+        - { type: stat, key: ambition, delta: 1 }
+  - id: wait
+    label: Wait a year and see
+    outcome:
+      text: The space goes to someone else. You never know if you made the right call, which is how most good decisions feel.
+      effects:
+        - { type: stat, key: discipline, delta: 1 }
+  - id: polish
+    label: Put the money into the first one instead
+    outcome:
+      text: A new floor, better equipment, a refreshed menu. It looks better, and people notice.
+      effects:
+        - { type: business, action: pay, share: 0.04, floor: 1500 }
+        - { type: business, action: quality, delta: 6 }
+        - { type: business, action: reputation, delta: 2 }

@@ -1,0 +1,74 @@
+id: salon
+name: Salon
+noun: salon
+kind: service
+blurb: "Chairs, mirrors and the quiet authority of someone holding scissors."
+occupation: hair_stylist
+staffTitle: stylist
+managerTitle: salon manager
+license:
+  trade: cosmetologist
+  job: hair_stylist
+  title: licensed stylist
+skills:
+  - { key: sociability, weight: 0.3 }
+  - { key: looks, weight: 0.15 }
+  - { key: discipline, weight: 0.2 }
+  - { key: confidence, weight: 0.15 }
+styles:
+  budget:
+    label: Walk-in cuts
+    blurb: "Six chairs, no appointments and a radio that never turns off."
+    startup: 30000
+    rent: 14000
+    staff: 2
+    capacity: 7500
+    demand: 5600
+    spend: 28
+    supplies: 0.12
+    wage: 29000
+    quality: 40
+    elasticity: 1.6
+  standard:
+    label: Neighborhood salon
+    blurb: "Appointments, a color bar and clients who have been coming for years."
+    startup: 70000
+    rent: 24000
+    staff: 3
+    capacity: 5200
+    demand: 3600
+    spend: 70
+    supplies: 0.14
+    wage: 34000
+    quality: 52
+    elasticity: 1.2
+  premium:
+    label: Color studio
+    blurb: "Marble, a waiting list and a top stylist whose name is on the door."
+    startup: 150000
+    rent: 46000
+    staff: 5
+    capacity: 3800
+    demand: 1900
+    spend: 170
+    supplies: 0.15
+    wage: 42000
+    quality: 67
+    elasticity: 0.8
+fit:
+  budget: { size: 0.3, wealth: -0.3 }
+  standard: { size: 0.35, wealth: 0.4 }
+  premium: { size: 0.3, wealth: 1.5 }
+names:
+  - "Hush & Shear"
+  - "The Gilded Comb"
+  - "Cedar & Silk Salon"
+  - "Loom Hair Studio"
+  - "Velvet Hour"
+  - "Plum Street Cuts"
+  - "The Third Chair"
+  - "Ember & Ivory"
+  - "Clover Mirror"
+  - "Sable & Sage"
+  - "Lucky Thimble Salon"
+  - "Halcyon Hair"

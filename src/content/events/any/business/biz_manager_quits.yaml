@@ -1,0 +1,40 @@
+id: biz_manager_quits
+title: The keys on the desk
+text: >-
+  Your manager leaves the keys to {business} on your desk, with a note that says
+  they have taken another job. For the first time in months, you realise how
+  much of the place lived in their head.
+tone: serious
+category: business
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { business: { owned: true } }
+    - { age: { gte: 18 } }
+    - { business: { owned: true, role: [self] } }
+weight: { base: 6 }
+followUpOnly: true
+bindBusiness: true
+choices:
+  - id: back
+    label: Run it yourself again
+    outcome:
+      text: You walk into the back room on Monday and relearn the place. It's harder than you remember, and you get a little better every day.
+      effects:
+        - { type: business, action: quality, delta: -2 }
+        - { type: stat, key: stress, delta: 4 }
+  - id: promote
+    label: Name someone from the staff as the lead
+    visibleIf: { business: { staff: { gte: 1 } } }
+    outcome:
+      text: You pick the person everyone else already treats as the boss. They are nervous. They are also very good.
+      effects:
+        - { type: business, action: morale, delta: 4 }
+        - { type: stat, key: stress, delta: -2 }
+  - id: wish
+    label: Wish them well and mean it
+    outcome:
+      text: It's the right thing to say, and the least you can do. You lock the keys in the drawer, and turn the lights back on.
+      effects:
+        - { type: stat, key: confidence, delta: 1 }

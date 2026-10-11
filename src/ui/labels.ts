@@ -283,6 +283,7 @@ export const DEBT_LABELS: Record<DebtKind, string> = {
   mortgage: 'Mortgage',
   medical: 'Medical bills',
   collections: 'In collections',
+  business: 'Business loan',
   auto: 'Car loan',
 };
 

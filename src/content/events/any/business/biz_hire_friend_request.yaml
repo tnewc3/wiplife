@@ -1,0 +1,45 @@
+id: biz_hire_friend_request
+title: A favor, sort of
+text: >-
+  {friend.name} has been out of work since the spring, and asks, a little
+  stiffly, whether there is anything at {business} {friend.they} could do. It
+  isn't charity, {friend.they} {friend:says|say}. {friend.they} {friend:needs|need}
+  a shift to start.
+tone: neutral
+category: business
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { business: { owned: true } }
+    - { age: { gte: 18 } }
+    - { business: { owned: true } }
+    - { role: friend, alive: true, affection: { gte: 40 } }
+weight: { base: 5 }
+cooldownYears: 4
+bindBusiness: true
+cast:
+  friend: { kind: friend, presence: city, age: { min: 19, max: 60 } }
+choices:
+  - id: hire
+    label: Put {friend.them} on the schedule
+    outcome:
+      text: >-
+        {friend.name} starts Monday, in a borrowed apron. Working next to a
+        friend is easier than either of you expected, and harder in the ways you didn't.
+      effects:
+        - { type: business, action: hire, role: friend }
+        - { type: relationship, role: friend, affection: 5, trust: 4 }
+        - { type: memory, role: friend, tag: you_gave_them_work }
+  - id: refer
+    label: Put in a word with someone else
+    outcome:
+      text: You make two calls. Neither leads anywhere quickly, but {friend.name} appreciates that you tried.
+      effects:
+        - { type: relationship, role: friend, affection: 2, trust: 2 }
+  - id: no
+    label: Say that you can't take on anyone right now
+    outcome:
+      text: It is the truth, and it still sounds like an excuse. {friend.name} says it's fine, and doesn't call for a while.
+      effects:
+        - { type: relationship, role: friend, affection: -6 }

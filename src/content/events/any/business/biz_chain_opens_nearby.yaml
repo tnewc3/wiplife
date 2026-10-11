@@ -1,0 +1,51 @@
+id: biz_chain_opens_nearby
+title: The big sign
+text: >-
+  A national chain has leased the corner at the end of the block. The banner on
+  the window says "Coming soon," in letters bigger than the sign above
+  {business}.
+tone: serious
+category: business
+rarity: uncommon
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { business: { owned: true } }
+    - { age: { gte: 18 } }
+    - { business: { owned: true, years: { gte: 2 }, rival: false, kind: [food, retail] } }
+weight: { base: 3 }
+cooldownYears: 8
+bindBusiness: true
+choices:
+  - id: community
+    label: Lean on the neighborhood
+    check:
+      base: 48
+      stats: [{ key: sociability, weight: 0.3 }, { key: kindness, weight: 0.1 }]
+      success:
+        text: >-
+          You put the story of the place in the window, and ask the regulars to
+          help tell it. The corner opens anyway, and so many of them keep coming
+          that the chain doesn't hurt as much as you feared.
+        effects:
+          - { type: business, action: rival, delta: -6, years: 3 }
+          - { type: business, action: reputation, delta: 4 }
+      failure:
+        text: Nobody cares about the story. The chain's opening day has a line to the end of the street.
+        effects:
+          - { type: business, action: rival, delta: -20, years: 3 }
+  - id: price
+    label: Match their prices
+    outcome:
+      text: It keeps people in the shop and leaves very little for you. It's a survival move, not a plan.
+      effects:
+        - { type: business, action: pay, share: 0.03, floor: 800 }
+        - { type: business, action: rival, delta: -10, years: 3 }
+  - id: ignore
+    label: Keep your head down and your quality up
+    outcome:
+      text: You put what you have into doing the things the chain can't. It's quieter, and slower, and probably right.
+      effects:
+        - { type: business, action: pay, share: 0.015, floor: 400 }
+        - { type: business, action: quality, delta: 5 }
+        - { type: business, action: rival, delta: -14, years: 3 }

@@ -1,0 +1,58 @@
+id: biz_staff_theft
+title: The till is short
+text: >-
+  The till has been short at close three times this month, never by much, and
+  always on the days {staff.name} has the key. You have the receipts in front of
+  you, and a sick feeling.
+tone: dark
+category: business
+rarity: uncommon
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { business: { owned: true } }
+    - { age: { gte: 18 } }
+    - { business: { owned: true, staff: { gte: 1 }, years: { gte: 1 } } }
+weight: { base: 3 }
+cooldownYears: 8
+bindBusiness: true
+cast:
+  staff: { business: staff, presence: city }
+choices:
+  - id: confront
+    label: Confront {staff.them} privately
+    check:
+      base: 45
+      stats: [{ key: confidence, weight: 0.25 }, { key: kindness, weight: 0.1 }]
+      success:
+        text: >-
+          {staff.name} breaks down, and admits it. There was a bill {staff.they}
+          couldn't pay. You let {staff.them} go, with a promise to pay it back
+          from the next job.
+        effects:
+          - { type: business, action: theft, role: staff, share: 0.006, floor: 200 }
+          - { type: relationship, role: staff, trust: -10 }
+          - { type: memory, role: staff, tag: stole_from_your_business }
+      failure:
+        text: >-
+          {staff.name} denies it, loudly, in front of the others. By the end of
+          the week the till is short again.
+        effects:
+          - { type: business, action: theft, role: staff, share: 0.01, floor: 400 }
+          - { type: business, action: morale, delta: -6 }
+  - id: fire
+    label: Let {staff.them} go without a conversation
+    outcome:
+      text: A short note, a last paycheck and a changed lock. You never find out for certain.
+      effects:
+        - { type: business, action: staffFire, role: staff }
+        - { type: relationship, role: staff, affection: -12, trust: -12 }
+  - id: lock
+    label: Lock the cash drawer and say nothing
+    outcome:
+      text: >-
+        The shortages stop. You look at {staff.name} differently every day after
+        that, and you are fairly sure {staff.they} know.
+      effects:
+        - { type: business, action: pay, share: 0.002, floor: 100 }
+        - { type: business, action: staffMorale, role: staff, delta: -8 }

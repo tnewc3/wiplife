@@ -3,6 +3,7 @@
  * and values, and the definitions behind them. Pure; the rules that change
  * them are in the files beside this one.
  */
+import { businessLoanIds } from '../business/query';
 import { POSSESSION_ROLES, type ContentBundle, type PetDef, type VehicleDef } from '../../content/schemas';
 import type { Id, LifeState, PetState, Possession, PossessionKind, PossessionsState, VacationState, VehicleState } from '../types';
 
@@ -82,6 +83,8 @@ export function attachedDebtIds(state: LifeState): Set<Id> {
     const id = loanIdOf(p);
     if (id !== undefined) ids.add(id);
   }
+  // W3: the loans taken for a business go with it.
+  for (const id of businessLoanIds(state)) ids.add(id);
   return ids;
 }
 
@@ -118,4 +121,6 @@ export function detachDebt(state: LifeState, debtId: Id): void {
     if (p.vehicle?.loanDebtId === debtId) delete p.vehicle.loanDebtId;
     if (p.home?.mortgageDebtId === debtId) delete p.home.mortgageDebtId;
   }
+  // W3: and a business loan that is paid off (or sent to collections) is no longer the business's.
+  for (const b of state.business.items) if (b.loanIds.includes(debtId)) b.loanIds = b.loanIds.filter((id) => id !== debtId);
 }

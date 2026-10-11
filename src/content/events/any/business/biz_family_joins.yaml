@@ -1,0 +1,45 @@
+id: biz_family_joins
+title: The family business
+text: >-
+  {kid.name} has been coming by {business} after school for as long as you can
+  remember. This week, {kid.they} {kid:asks|ask} if there's a job {kid.they} could
+  have, properly, with a schedule and a paycheck.
+tone: light
+category: business
+rarity: uncommon
+lifeStages: [adult, senior]
+requires:
+  all:
+    - { business: { owned: true } }
+    - { age: { gte: 30 } }
+    - { business: { owned: true } }
+    - { role: kid, alive: true, kind: [child] }
+weight: { base: 4 }
+cooldownYears: 6
+bindBusiness: true
+cast:
+  kid: { kind: child, presence: city, age: { min: 19, max: 45 } }
+choices:
+  - id: hire
+    label: Hire {kid.them}, properly
+    outcome:
+      text: >-
+        {kid.name} gets an apron and a schedule, and treats both with
+        great seriousness. Working side by side is a different relationship from the one you had.
+      effects:
+        - { type: business, action: hire, role: kid }
+        - { type: relationship, role: kid, affection: 6, trust: 5 }
+        - { type: memory, role: kid, tag: you_gave_them_work }
+  - id: elsewhere
+    label: Tell {kid.them} to find a job somewhere else first
+    outcome:
+      text: You say it as kindly as you can. {kid.name} says {kid.they} understand, and it is plain that it stung.
+      effects:
+        - { type: relationship, role: kid, affection: -3 }
+        - { type: stat, key: confidence, delta: 1 }
+  - id: later
+    label: Say maybe one day
+    outcome:
+      text: "\"One day\" can mean a lot of things. {kid.name} files it under the ones that don't happen."
+      effects:
+        - { type: relationship, role: kid, affection: -1 }

@@ -1,0 +1,70 @@
+id: bakery
+name: Bakery
+noun: bakery
+kind: food
+blurb: "Up at three, ovens on, and a line of people who can smell it from the corner."
+occupation: food_service
+staffTitle: baker
+managerTitle: head baker
+skills:
+  - { key: discipline, weight: 0.35 }
+  - { key: fitness, weight: 0.15 }
+  - { key: sociability, weight: 0.15 }
+  - { key: ambition, weight: 0.15 }
+styles:
+  budget:
+    label: Neighborhood bake shop
+    blurb: "Bread, rolls and a case of cookies, priced for everybody."
+    startup: 48000
+    rent: 20000
+    staff: 3
+    capacity: 30000
+    demand: 26000
+    spend: 8
+    supplies: 0.28
+    wage: 28000
+    quality: 40
+    elasticity: 1.6
+  standard:
+    label: Artisan bakery
+    blurb: "Sourdough, laminated pastry and a chalkboard that changes daily."
+    startup: 95000
+    rent: 32000
+    staff: 4
+    capacity: 32000
+    demand: 24000
+    spend: 12
+    supplies: 0.27
+    wage: 31000
+    quality: 52
+    elasticity: 1.2
+  premium:
+    label: Patisserie
+    blurb: "Glass cases, white boxes with ribbon, and wedding cakes booked a year out."
+    startup: 190000
+    rent: 52000
+    staff: 6
+    capacity: 28000
+    demand: 15000
+    spend: 24
+    supplies: 0.26
+    wage: 38000
+    quality: 66
+    elasticity: 0.8
+fit:
+  budget: { size: 0.3, wealth: -0.3 }
+  standard: { size: 0.35, wealth: 0.35 }
+  premium: { size: 0.3, wealth: 1.5 }
+names:
+  - "Crumb & Kettle"
+  - "The Flour Moon Bakery"
+  - "Sunday Rye"
+  - "Almond Lane Bakehouse"
+  - "Rise & Salt"
+  - "Thistle Street Pastry"
+  - "Honeycomb Loaf Co."
+  - "The Warm Oven"
+  - "Pearl & Plum Patisserie"
+  - "Linden Hearth Bakery"
+  - "Butterwick's"
+  - "Little Wheat"

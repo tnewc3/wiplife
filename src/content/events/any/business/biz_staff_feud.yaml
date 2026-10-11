@@ -1,0 +1,53 @@
+id: biz_staff_feud
+title: Two people who cannot share a counter
+text: >-
+  {staff.name} and {other.name} have stopped speaking, which is hard when one
+  of them works the front and the other works the back. Customers are starting
+  to notice the silence.
+tone: serious
+category: business
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { business: { owned: true } }
+    - { age: { gte: 18 } }
+    - { business: { owned: true, staff: { gte: 2 } } }
+weight: { base: 5 }
+cooldownYears: 4
+bindBusiness: true
+cast:
+  staff: { business: staff, presence: city }
+  other: { business: staff, presence: city }
+choices:
+  - id: mediate
+    label: Sit them both down
+    check:
+      base: 48
+      stats: [{ key: kindness, weight: 0.25 }, { key: sociability, weight: 0.15 }]
+      success:
+        text: You let each of them say it all, uninterrupted, then ask what they need. By the end, they are arguing about the schedule, not each other.
+        effects:
+          - { type: business, action: morale, delta: 5 }
+          - { type: relationship, role: staff, trust: 3 }
+          - { type: relationship, role: other, trust: 3 }
+      failure:
+        text: Both of them leave the room sure that you took the other's side.
+        effects:
+          - { type: relationship, role: staff, trust: -5 }
+          - { type: relationship, role: other, trust: -5 }
+          - { type: business, action: morale, delta: -4 }
+  - id: split
+    label: Change the schedule so they never overlap
+    outcome:
+      text: It works, mostly. It also means two people are always working alone, and you are the one who fills the gaps.
+      effects:
+        - { type: stat, key: stress, delta: 3 }
+        - { type: business, action: morale, delta: 2 }
+  - id: side
+    label: Let one of them go
+    outcome:
+      text: You pick the one who is easier to replace, and tell yourself it was about the work. The one who stays is relieved, and a little afraid.
+      effects:
+        - { type: business, action: staffFire, role: other }
+        - { type: business, action: morale, delta: -5 }

@@ -241,3 +241,16 @@ categories:
   faithhome:
     label: Faith at home
     household: true
+
+  # W3: businesses. Events about a business you own need one; a chance to start one is for someone who owns none; what follows a
+  # business that failed is about the one you lost. A business event bound to a business asks about that business.
+  business:
+    label: Your business
+    cooldownYears: 1
+    requires: { business: { owned: true } }
+  bizstart:
+    label: A chance
+    requires: { business: { owned: false } }
+  bizpast:
+    label: After a business
+    requires: { business: { failedWithin: 8 } }

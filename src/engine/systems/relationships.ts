@@ -9,6 +9,7 @@
  * die (friends are remembered), or when too many people crowd the list.
  * Your current boss stays while you have the job.
  */
+import { businessPeople } from '../business/query';
 import { isDraft, original } from 'immer';
 import type { ContentBundle } from '../../content/schemas';
 import { curveAt } from '../curve';
@@ -80,6 +81,8 @@ function prune(state: LifeState, view: LifeState, drifted: Map<string, number>, 
     if (!prunable(seen) || seen.status === 'ended') continue;
     // Your boss stays in your life while you work there (Stage 8).
     if (seen.kind === 'boss' && view.career.job !== null && view.people[id]?.alive) continue;
+    // W3: and the people who work in your businesses, and own a share of them.
+    if (businessPeople(view).has(id) && view.people[id]?.alive) continue;
     // E6a: so do the people in your crew while you are in it.
     if (view.crime.crew?.members.includes(id) && view.people[id]?.alive) continue;
     // E6b: and the fans who came to you through your work (superfans, haters, critics) while you are in the business.

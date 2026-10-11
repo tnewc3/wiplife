@@ -4,6 +4,13 @@
  * integers from 0 to 100.
  */
 import type {
+  BusinessStyle,
+  MarketingLevel,
+  OwnerRole,
+  PayLevel,
+  PriceLevel,
+  QualityLevel,
+  StaffingLevel,
   CredentialType,
   DebtKind,
   DiscoveryKind,
@@ -550,6 +557,8 @@ export interface Ledger {
   insurance: number;
   /** W2: dues, collections and donations to the groups you belong to this year. */
   giving: number;
+  /** W3: money you put into your businesses to cover a loss (their draws to you are in `gross`). */
+  business: number;
   /** gross + retirement + interest + supportReceived − tax − housing − living − children − care − supportPaid − upkeep − insurance − giving − debtPayments (savings change by net + borrowed). */
   net: number;
 }
@@ -620,6 +629,18 @@ export interface Settlement {
   possessions: PossessionTransfer[];
   /** E5: cash from vehicles and vacation homes nobody could take (sold, less selling costs and what was owed on them); part of the cash the estate settles. */
   possessionSales: number;
+  /** W3: businesses passing on in kind (src/engine/business/estate.ts). */
+  businesses: BusinessTransfer[];
+  /** W3: cash from businesses nobody could take (your share of the sale, after their loans); part of the cash the estate settles. */
+  businessSales: number;
+}
+
+/** W3: one business passing to a person in an estate. `item` is the business as it was (its id belongs to the life that ended); `loan` is what is owed on the loans taken for it, which passes with it (never more than it is worth). */
+export interface BusinessTransfer {
+  businessId: Id;
+  toPersonId: Id;
+  item: Business;
+  loan: number;
 }
 
 /**
@@ -1135,6 +1156,184 @@ export interface LifeState {
   later: LaterState;
   /** W2: belonging: your faith and values, the groups of your city and the ones you belong to. */
   belonging: BelongingState;
+  /** W3: your businesses, the ones you have had, and what they paid or cost you this year. */
+  business: BusinessState;
+}
+
+/** W3: one owner of a business: you, an investor from your circle or a co-founder. */
+export interface BusinessOwner {
+  /** 'you', or the person (who may no longer be in your life: then only the name and the stake remain). */
+  id: Id | 'you';
+  name: string;
+  /** Whole percent of the business; all owners together are 100. */
+  share: number;
+  /** What they put in (whole dollars) and the year. */
+  put: number;
+  year: number;
+  /** What they have been paid out of profit so far. */
+  paid: number;
+  role: 'you' | 'investor' | 'cofounder';
+}
+
+/** W3: one place the business trades from, with its own city, style and last results. */
+export interface BusinessLocation {
+  id: Id;
+  cityId: Id;
+  style: BusinessStyle;
+  /** The year it opened (or the year you took it over). */
+  opened: number;
+  result?: LocationResult;
+}
+
+/** W3: how one location did in the last business year (whole dollars). */
+export interface LocationResult {
+  year: number;
+  demand: number;
+  customers: number;
+  revenue: number;
+  rent: number;
+  wages: number;
+  supplies: number;
+  other: number;
+  profit: number;
+}
+
+/** W3: someone who works there, who is also a person in your life. */
+export interface BusinessStaff {
+  personId: Id;
+  /** Where they work (a location id); a manager and a co-founder work across the business. */
+  locationId: Id | null;
+  title: string;
+  /** 0–100, and how they feel about working there (0–100). */
+  skill: number;
+  morale: number;
+  since: number;
+  /** Holds the trade licence the business needs. */
+  licensed: boolean;
+  /** Their pay is the market wage times this (raises make it more). */
+  raise: number;
+  /** The manager, if this one is. */
+  manager?: true;
+  /** A manager's honesty (0–100); only a manager has one. */
+  honesty?: number;
+  /** Their yearly pay now (whole dollars; set as the year's costs are worked out). */
+  wage: number;
+}
+
+/** W3: a stretch of good or bad trading from an event (a viral moment, a competitor next door). */
+export interface BusinessShock {
+  kind: 'buzz' | 'rival';
+  /** Multiplies demand until the year `until` (inclusive). */
+  mult: number;
+  until: number;
+}
+
+/** W3: a year's report for a business (whole dollars). */
+export interface BusinessReport {
+  year: number;
+  customers: number;
+  demand: number;
+  revenue: number;
+  rent: number;
+  wages: number;
+  supplies: number;
+  marketing: number;
+  quality: number;
+  other: number;
+  /** Revenue less every cost above (before loan payments and tax). */
+  profit: number;
+  /** Payments due on the business's loans this year (paid with your own ledger). */
+  loanPayments: number;
+  /** What was paid to the owners out of profit, your share of it, and what you put in to cover a loss. */
+  paidOut: number;
+  draw: number;
+  injected: number;
+  cash: number;
+  morale: number;
+  reputation: number;
+  qualityScore: number;
+  /** Named staff who quit this year. */
+  quit: number;
+  /** Notes for the report: keys into text/business.yaml report.notes. */
+  notes: string[];
+  locations: LocationResult[];
+}
+
+/** W3: a business you own (or own a share of). */
+export interface Business {
+  id: Id;
+  /** The kind (src/content/businesses). */
+  defId: Id;
+  name: string;
+  /** The city of its first location. */
+  cityId: Id;
+  style: BusinessStyle;
+  founded: number;
+  how: 'started' | 'bought' | 'inherited';
+  /** The chain it was bought as (src/content/chains), if it was. */
+  chainId?: Id;
+  locations: BusinessLocation[];
+  staff: BusinessStaff[];
+  owners: BusinessOwner[];
+  /** The yearly decisions. */
+  prices: PriceLevel;
+  marketing: MarketingLevel;
+  qualityInvest: QualityLevel;
+  pay: PayLevel;
+  staffing: StaffingLevel;
+  role: OwnerRole;
+  /** 0–100. */
+  quality: number;
+  reputation: number;
+  morale: number;
+  /** Money in the business (whole dollars; never negative: a loss it cannot cover is put in by the owners). */
+  cash: number;
+  /** What the fit-out is worth (it wears out). */
+  assets: number;
+  /** The debts (ids in finances.debts) taken to start or buy it; they go with it when it is sold or inherited. */
+  loanIds: Id[];
+  /** Profit of the last few years, newest last. */
+  profits: number[];
+  /** Years of loss in a row. */
+  lossYears: number;
+  /** Money a dishonest manager has taken so far (whole dollars; the owner does not see it). */
+  skimmed: number;
+  /** The year the owner last audited the books. */
+  auditedYear?: number;
+  shocks: BusinessShock[];
+  report: BusinessReport | null;
+}
+
+/** W3: a business you used to own. */
+export interface BusinessPast {
+  name: string;
+  defId: Id;
+  style: BusinessStyle;
+  cityId: Id;
+  fromYear: number;
+  toYear: number;
+  end: 'sold' | 'closed' | 'failed' | 'passed';
+  /** Profit over its years and the money you got or lost in the end (whole dollars). */
+  totalProfit: number;
+  net: number;
+}
+
+/** W3: your businesses. */
+export interface BusinessState {
+  items: Business[];
+  nextBusiness: number;
+  nextLocation: number;
+  /** Listings you have bought (or that were taken) in the current market round: their ids. */
+  taken: string[];
+  past: BusinessPast[];
+  /** The year each trigger last asked something of you. */
+  offered: Record<string, number>;
+  /** What the business step set aside for the ledger this year: draws paid to you (taxable income) and money you must put in. */
+  year: { year: number; draw: number; inject: number };
+  /** Years spent owning each kind of business (experience). */
+  experience: Record<Id, number>;
+  /** Your share of your businesses' value for net worth (whole dollars; see src/engine/business/value.ts). */
+  worth: number;
 }
 
 /** W2: your faith: which (null: none), how strongly you believe, what you were raised in and when it last changed. */

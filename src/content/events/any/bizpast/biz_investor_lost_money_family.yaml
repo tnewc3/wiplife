@@ -1,0 +1,44 @@
+id: biz_investor_lost_money_family
+title: Family dinner, with an elephant
+text: >-
+  Your {investor.relation} had put money into your business. Now it is gone. At the
+  family table, the conversation goes around the subject like water around a
+  stone.
+tone: dark
+category: bizpast
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { business: { failedWithin: 8 } }
+    - { age: { gte: 18 } }
+    - { business: { failedWithin: 2 } }
+    - { memory: { role: investor, tag: lost_money_in_your_business } }
+weight: { base: 8 }
+followUpOnly: true
+cast:
+  investor: { kind: sibling, presence: nearby }
+choices:
+  - id: raise
+    label: Bring it up yourself
+    outcome:
+      text: >-
+        You say it plainly, in front of everyone. The silence that follows is
+        short. {investor.name} takes your hand under the table.
+      effects:
+        - { type: relationship, role: investor, trust: 4, affection: 3 }
+        - { type: stat, key: stress, delta: -2 }
+  - id: leave
+    label: Make an excuse and go
+    outcome:
+      text: You leave before dessert. The next family dinner is a little less crowded, and a little more careful.
+      effects:
+        - { type: relationship, role: investor, affection: -5 }
+        - { type: stat, key: happiness, delta: -3 }
+  - id: repay
+    label: Hand over what you can afford
+    outcome:
+      text: It isn't enough. {investor.name} takes it anyway, and puts it in a drawer, and says nothing else about it.
+      effects:
+        - { type: cost, item: biz_repay_more }
+        - { type: relationship, role: investor, trust: 5 }

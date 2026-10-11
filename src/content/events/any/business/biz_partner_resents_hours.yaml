@@ -1,0 +1,55 @@
+id: biz_partner_resents_hours
+title: Dinner for one
+text: >-
+  {partner.name} sets a plate on the table and does not say anything. It's
+  another night {business} kept you out past ten, and the silence in the
+  kitchen is a whole conversation.
+tone: serious
+category: business
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { business: { owned: true } }
+    - { age: { gte: 18 } }
+    - { business: { owned: true, role: [self] } }
+    - { role: partner, alive: true }
+weight: { base: 5 }
+cooldownYears: 4
+bindBusiness: true
+cast:
+  partner: { kind: partner, presence: household }
+choices:
+  - id: promise
+    label: Promise to be home earlier, and mean it
+    outcome:
+      text: >-
+        You hand the closing shift to someone else twice a week. {partner.name}
+        notices before you even say anything.
+      effects:
+        - { type: business, action: morale, delta: 2 }
+        - { type: relationship, role: partner, affection: 5, trust: 4 }
+        - { type: stat, key: stress, delta: -3 }
+  - id: explain
+    label: Explain what the business needs from you
+    check:
+      base: 45
+      stats: [{ key: kindness, weight: 0.2 }, { key: sociability, weight: 0.15 }]
+      success:
+        text: >-
+          You lay it out honestly: what it is, what it will be, and what it asks of
+          both of you. {partner.name} listens, and then asks what would help.
+        effects:
+          - { type: relationship, role: partner, trust: 5 }
+      failure:
+        text: >-
+          It comes out as an excuse. {partner.name} says that's what it always
+          sounds like, and goes to bed.
+        effects:
+          - { type: relationship, role: partner, affection: -6, trust: -4 }
+  - id: dismiss
+    label: Say it's only for a little while longer
+    outcome:
+      text: It is not the first time you have said it. {partner.name} does not argue, which is worse.
+      effects:
+        - { type: relationship, role: partner, affection: -7, trust: -5 }

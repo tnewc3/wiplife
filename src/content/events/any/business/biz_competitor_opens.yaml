@@ -1,0 +1,51 @@
+id: biz_competitor_opens
+title: Next door
+text: >-
+  The shop two doors down has been papered over for a month. This morning the
+  paper comes off: another {bizType}, newer than yours, with a bigger sign.
+tone: serious
+category: business
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { business: { owned: true } }
+    - { age: { gte: 18 } }
+    - { business: { owned: true, years: { gte: 1 }, rival: false } }
+weight: { base: 5 }
+cooldownYears: 5
+bindBusiness: true
+choices:
+  - id: stand
+    label: Stand out by doing it better
+    outcome:
+      text: >-
+        You spend on what makes {business} different, and on telling people about it.
+        Some of them walk past the new place to get to yours.
+      effects:
+        - { type: business, action: pay, share: 0.03, floor: 500 }
+        - { type: business, action: quality, delta: 6 }
+        - { type: business, action: rival, delta: -8, years: 2 }
+  - id: wave
+    label: Go introduce yourself
+    check:
+      base: 50
+      stats: [{ key: kindness, weight: 0.25 }, { key: sociability, weight: 0.2 }]
+      success:
+        text: >-
+          The owner is as nervous as you were. You trade a few tips over coffee,
+          and agree that the street is big enough for two.
+        effects:
+          - { type: business, action: rival, delta: -5, years: 2 }
+          - { type: stat, key: confidence, delta: 2 }
+      failure:
+        text: The owner is polite and clearly thinks you are scouting. It is an awkward exchange, and nothing is gained.
+        effects:
+          - { type: business, action: rival, delta: -12, years: 2 }
+  - id: ignore
+    label: Pretend not to notice
+    outcome:
+      text: You do not look at their window for a month. The numbers look at it for you.
+      effects:
+        - { type: business, action: rival, delta: -15, years: 2 }
+        - { type: stat, key: stress, delta: 3 }

@@ -23,6 +23,8 @@
  * pets and vehicles age, accidents and deaths are queued as events.
  * The fame step (E6b) follows the crime step and runs before the ledger: the year's
  * releases come out, fame rises or fades, and the year's pay is set aside for the ledger.
+ * The business step (W3) follows the fame step and runs before the ledger: each business's year (demand, revenue, costs, staff, profit),
+ * the share paid to you as income for the ledger and any money you must put in to cover a loss, and failure when the money runs out.
  * The crime step (E6a) follows the legal step: heat fades, a crew's year passes,
  * the police may open an investigation or make an arrest, and the year's jobs
  * and trouble are queued as events.
@@ -34,6 +36,7 @@ import { runHeritage } from './estate/heritage';
 import { runLives } from './lives/step';
 import { runLater } from './later/step';
 import { runBelonging } from './belonging/step';
+import { runBusiness } from './business/step';
 import { runPossessions } from './possessions/step';
 import { runTeen } from './teen/step';
 import { runWeb } from './web/step';
@@ -66,6 +69,7 @@ export const YEAR_PIPELINE: readonly PipelineStep[] = [
   { id: 'legal', run: runLegal },
   { id: 'crime', run: runCrime },
   { id: 'fame', run: runFame },
+  { id: 'business', run: runBusiness },
   { id: 'education', run: runEducation },
   { id: 'teen', run: runTeen },
   { id: 'career', run: runCareer },

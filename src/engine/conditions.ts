@@ -17,6 +17,7 @@ import { fameHolds } from './fame/holds';
 import { sportsHolds } from './sports/holds';
 import { laterHolds } from './later/query';
 import { faithHolds, groupHolds } from './belonging/query';
+import { businessHolds } from './business/query';
 import { faithOf } from './belonging/faith';
 import { romanceStatus, yearsInKind } from './relationships';
 import type { Id, LifeState } from './types';
@@ -248,6 +249,7 @@ export function evaluate(condition: Condition | undefined, state: LifeState, ctx
       return true;
     });
   }
+  if ('business' in condition) return businessHolds(condition.business, state, ctx.cast, ctx.content, ctx.roles === 'assumeTrue');
   if ('group' in condition) return groupHolds(condition.group, state, ctx.cast, ctx.content, ctx.roles === 'assumeTrue');
   if ('faith' in condition) return faithHolds(condition.faith, state, ctx.content);
   if ('value' in condition) return compare(state.belonging.values[condition.value], condition);

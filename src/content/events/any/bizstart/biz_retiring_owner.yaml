@@ -1,0 +1,38 @@
+id: biz_retiring_owner
+title: The owner is tired
+text: >-
+  The owner of the place you go to most mornings mentions, between the cup and the
+  lid, that they're thinking of selling. Forty years behind the same counter. A buyer who
+  loves it would be worth more than a big number, they say. They look at you a bit too long.
+tone: neutral
+category: bizstart
+rarity: uncommon
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 25 } }
+    - { business: { owned: false } }
+weight: { base: 3 }
+cooldownYears: 6
+choices:
+  - id: ask
+    label: Ask what they'd want for it
+    outcome:
+      text: >-
+        They tell you a number, then another, then a long story about the lease.
+        You leave with a head full of figures and a napkin.
+      effects:
+        - { type: flag, key: thinking_about_a_business, value: true }
+        - { type: stat, key: ambition, delta: 2 }
+  - id: laugh
+    label: Laugh it off
+    outcome:
+      text: It lands wrong. They smile and wipe the counter, and you think about it on the walk to work.
+      effects:
+        - { type: stat, key: confidence, delta: -1 }
+  - id: tip
+    label: Mention it to someone who might want it
+    outcome:
+      text: You tell a friend who's looking for something to do. The friend calls that night, delighted.
+      effects:
+        - { type: stat, key: kindness, delta: 1 }

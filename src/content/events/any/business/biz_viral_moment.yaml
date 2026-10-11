@@ -1,0 +1,43 @@
+id: biz_viral_moment
+title: Everyone has seen it
+text: >-
+  A video of something small that happened at {business} has been shared more
+  times than there are people in {bizCity}. The phone has not stopped.
+tone: light
+category: business
+rarity: uncommon
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { business: { owned: true } }
+    - { age: { gte: 18 } }
+    - { business: { owned: true, reputation: { gte: 35 } } }
+weight: { base: 3 }
+cooldownYears: 6
+bindBusiness: true
+choices:
+  - id: ride
+    label: Lean in, and get ready for the crowds
+    outcome:
+      text: >-
+        You put on extra hands for a week, order twice the usual, and the line
+        wraps around the corner. It is wonderful and exhausting.
+      effects:
+        - { type: business, action: pay, share: 0.02, floor: 300 }
+        - { type: business, action: buzz, delta: 35, years: 2 }
+        - { type: stat, key: stress, delta: 3 }
+  - id: sponsor
+    label: Take the sponsorship offer that arrived with it
+    outcome:
+      text: A company you have never heard of pays for a few weeks of your logo next to theirs. It feels strange, and the money is real.
+      effects:
+        - { type: business, action: receive, share: 0.03, floor: 800 }
+        - { type: business, action: buzz, delta: 15, years: 1 }
+        - { type: business, action: reputation, delta: -2 }
+  - id: calm
+    label: Stay calm and keep it ordinary
+    outcome:
+      text: A few more people than usual wander in, take a photo, and become regulars, or do not. The place stays what it is.
+      effects:
+        - { type: business, action: buzz, delta: 12, years: 1 }
+        - { type: business, action: reputation, delta: 2 }

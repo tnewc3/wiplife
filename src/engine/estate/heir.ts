@@ -66,6 +66,8 @@ import { emptyFame } from '../fame/query';
 import { emptySports } from '../sports/query';
 import { emptyLater } from '../later/query';
 import { emptyBelonging } from '../belonging/query';
+import { emptyBusiness } from '../business/query';
+import { receiveBusinesses } from '../business/estate';
 import { startBelonging } from '../belonging/start';
 
 /** A deep copy through JSON: the life holds plain data only (the engine has no structuredClone). */
@@ -261,6 +263,8 @@ export function continueAsHeir(dead: LifeState, heirId: Id, content: ContentBund
     const original = dead.people[id];
     if (!original || people[id]) return;
     const person: Person = cloneJson(original);
+    // W3: whoever worked for the parent's business is only a person here (the business's staff list marks them again).
+    person.tags = person.tags.filter((t) => t !== 'staff');
     delete person.child;
     delete person.priorChildren;
     // L1: a grandchild's link is to a parent in the life that ended; here they are only family.
@@ -396,6 +400,7 @@ export function continueAsHeir(dead: LifeState, heirId: Id, content: ContentBund
     sports: emptySports(),
     later: emptyLater(),
     belonging: emptyBelonging(),
+    business: emptyBusiness(),
   };
 
   // ── What they inherit ────────────────────────────────────────────────────
@@ -462,6 +467,8 @@ export function continueAsHeir(dead: LifeState, heirId: Id, content: ContentBund
 
   // ── Possessions (E5 hook) ────────────────────────────────────────────────
   receivePossessions(life, dead.estate.possessions.filter((t) => t.toPersonId === heirId), content);
+  // ── Businesses (W3 hook) ─────────────────────────────────────────────────
+  receiveBusinesses(life, dead.estate.businesses.filter((t) => t.toPersonId === heirId), content);
 
   // ── The web between the people around them (E4) ──────────────────────────
   // Rebuilt from the heir's side: who is married to whom, who is whose sibling, who a parent to whom. A pair that was tied

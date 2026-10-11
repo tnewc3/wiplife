@@ -1,0 +1,52 @@
+id: biz_catering_order
+title: A very large order
+text: >-
+  A company in {bizCity} wants {business} to supply their annual event: three
+  hundred people, a weekend, and a deadline that doesn't care about your
+  schedule. It's the biggest single order you've been offered.
+tone: neutral
+category: business
+rarity: uncommon
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { business: { owned: true } }
+    - { age: { gte: 18 } }
+    - { business: { owned: true, kind: [food], years: { gte: 1 } } }
+weight: { base: 3 }
+cooldownYears: 5
+bindBusiness: true
+choices:
+  - id: take
+    label: Take it and hire help for the weekend
+    outcome:
+      text: >-
+        You line up temp hands, borrow a van, and deliver at six a.m. Sunday. The
+        client is delighted; your feet are not.
+      effects:
+        - { type: business, action: pay, share: 0.02, floor: 500 }
+        - { type: business, action: receive, share: 0.07, floor: 1500 }
+        - { type: business, action: reputation, delta: 3 }
+  - id: staff
+    label: Do it with your own people
+    visibleIf: { business: { staff: { gte: 1 } } }
+    check:
+      base: 45
+      stats: [{ key: discipline, weight: 0.25 }]
+      success:
+        text: Your people rise to it and then some. By Sunday night, everyone is exhausted, proud and arguing about who gets the leftovers.
+        effects:
+          - { type: business, action: receive, share: 0.07, floor: 1500 }
+          - { type: business, action: morale, delta: 6 }
+      failure:
+        text: It's too much. Orders run late and somebody cries in the walk-in. The client pays, but not in full, and won't call again.
+        effects:
+          - { type: business, action: receive, share: 0.03, floor: 600 }
+          - { type: business, action: morale, delta: -10 }
+          - { type: business, action: reputation, delta: -3 }
+  - id: decline
+    label: Turn it down
+    outcome:
+      text: Saying no to the order feels wrong. Saying yes to the weekend would have felt worse.
+      effects:
+        - { type: stat, key: stress, delta: -2 }

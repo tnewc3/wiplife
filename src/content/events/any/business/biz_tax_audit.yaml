@@ -1,0 +1,50 @@
+id: biz_tax_audit
+title: A letter with a seal
+text: >-
+  An envelope from the tax office asks politely for three years of records
+  from {business}. Your bookkeeping has always been a shoebox.
+tone: serious
+category: business
+rarity: uncommon
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { business: { owned: true } }
+    - { age: { gte: 21 } }
+    - { business: { owned: true, years: { gte: 3 } } }
+weight: { base: 3 }
+cooldownYears: 8
+bindBusiness: true
+choices:
+  - id: accountant
+    label: Hire an accountant to sort it out
+    outcome:
+      text: >-
+        The accountant works through the shoebox in a weekend and finds three
+        small mistakes, all in your favor, two of them not. The bill is steep.
+      effects:
+        - { type: business, action: pay, share: 0.015, floor: 600 }
+        - { type: stat, key: stress, delta: -2 }
+  - id: self
+    label: Handle it yourself
+    check:
+      base: 40
+      stats: [{ key: smarts, weight: 0.25 }, { key: discipline, weight: 0.25 }]
+      success:
+        text: Two weeks of evenings, a spreadsheet, and a lot of coffee. The auditor finds nothing worth a fine.
+        effects:
+          - { type: stat, key: discipline, delta: 2 }
+      failure:
+        text: The records don't add up, because you can't prove half of them. There is a penalty, with interest.
+        effects:
+          - { type: business, action: pay, share: 0.04, floor: 1200 }
+          - { type: stat, key: stress, delta: 5 }
+  - id: ignore
+    label: Put the letter in the drawer
+    outcome:
+      text: >-
+        A second letter arrives, with a penalty on top of what was asked for
+        the first time. The drawer fills up.
+      effects:
+        - { type: business, action: pay, share: 0.05, floor: 1500 }
+        - { type: stat, key: stress, delta: 6 }

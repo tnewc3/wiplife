@@ -1,0 +1,8 @@
+id: market_street_provisions
+name: "Market Street Provisions"
+type: shop
+style: budget
+blurb: "Fifteen cheerful discount stores in towns that did not have one before."
+locations: { min: 5, max: 10 }
+cities: [small_town, houston]
+reputation: { mean: 55, sd: 8 }

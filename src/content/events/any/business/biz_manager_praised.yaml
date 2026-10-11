@@ -1,0 +1,42 @@
+id: biz_manager_praised
+title: Someone who gets it
+text: >-
+  A supplier mentions, in passing, how much they like working with
+  {manager.name}. A customer says the same. Two completely separate people
+  praising someone you hired to run the place tells you something about the
+  place.
+tone: light
+category: business
+rarity: uncommon
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { business: { owned: true } }
+    - { age: { gte: 18 } }
+    - { business: { owned: true, manager: true, role: [manager], years: { gte: 1 } } }
+weight: { base: 4 }
+cooldownYears: 6
+bindBusiness: true
+cast:
+  manager: { business: manager, presence: anywhere }
+choices:
+  - id: raise
+    label: Give {manager.them} a raise
+    outcome:
+      text: "{manager.name} says thank you, and means it. The next month, the books are neater than they have been."
+      effects:
+        - { type: business, action: staffRaise, role: manager }
+        - { type: relationship, role: manager, affection: 4, trust: 4 }
+  - id: say
+    label: Tell {manager.them} what you heard
+    outcome:
+      text: It's free, and it matters. {manager.name} stands a little taller for the rest of the week.
+      effects:
+        - { type: business, action: staffMorale, role: manager, delta: 6 }
+        - { type: relationship, role: manager, trust: 3 }
+  - id: nothing
+    label: Say nothing and be glad
+    outcome:
+      text: It's the best you can do. You enjoy not worrying for a while.
+      effects:
+        - { type: stat, key: stress, delta: -2 }

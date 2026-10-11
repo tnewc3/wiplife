@@ -1,0 +1,55 @@
+id: biz_investor_update
+title: How's it going, really?
+text: >-
+  {investor.name} stops by {business}, buys something small and lingers. Then
+  comes the question {investor.they} {investor:has|have} been working up to:
+  how is the money doing, honestly?
+tone: neutral
+category: business
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { business: { owned: true } }
+    - { age: { gte: 18 } }
+    - { business: { owned: true, investors: true } }
+weight: { base: 6 }
+cooldownYears: 3
+bindBusiness: true
+cast:
+  investor: { business: investor, presence: anywhere }
+choices:
+  - id: honest
+    label: Show {investor.them} the real numbers
+    check:
+      base: 50
+      stats: [{ key: confidence, weight: 0.2 }, { key: discipline, weight: 0.2 }]
+      success:
+        text: >-
+          You go through the numbers line by line. {investor.name} asks sharp
+          questions and leaves looking reassured, even about the bad parts.
+        effects:
+          - { type: relationship, role: investor, trust: 6 }
+      failure:
+        text: >-
+          The honest numbers are worse than {investor.they} {investor:expected|expected}.
+          {investor.name} goes quiet, and takes a long time to say goodnight.
+        effects:
+          - { type: relationship, role: investor, trust: -3 }
+          - { type: stat, key: stress, delta: 3 }
+  - id: spin
+    label: Tell {investor.them} what {investor.they} want to hear
+    outcome:
+      text: >-
+        It's a good story. You don't love how easily it comes, or how much
+        it matters that it is only a story.
+      effects:
+        - { type: relationship, role: investor, trust: -2, affection: 2 }
+        - { type: stat, key: stress, delta: 2 }
+  - id: dinner
+    label: Take {investor.them} to dinner instead
+    outcome:
+      text: It's a nice evening. You pay, and you don't talk numbers, and somehow both of you leave feeling better about them.
+      effects:
+        - { type: business, action: pay, share: 0.003, floor: 120 }
+        - { type: relationship, role: investor, affection: 4 }

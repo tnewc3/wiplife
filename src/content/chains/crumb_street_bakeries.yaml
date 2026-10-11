@@ -1,0 +1,8 @@
+id: crumb_street_bakeries
+name: "Crumb Street Bakeries"
+type: bakery
+style: standard
+blurb: "Six warm storefronts, one central kitchen, and the smell of the same cinnamon in every one."
+locations: { min: 4, max: 6 }
+cities: [houston, los_angeles, chicago]
+reputation: { mean: 60, sd: 6 }

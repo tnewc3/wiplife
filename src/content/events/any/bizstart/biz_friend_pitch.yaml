@@ -1,0 +1,44 @@
+id: biz_friend_pitch
+title: "\"I've had an idea\""
+text: >-
+  {friend.name} has been talking about it for an hour, with a lot of gestures
+  and a notebook full of numbers. A shop, a café, a van, a chair in a salon,
+  {friend.their} own thing. {friend.they} {friend:wants|want} to know if you'd
+  be part of it.
+tone: light
+category: bizstart
+rarity: uncommon
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 21 } }
+    - { business: { owned: false } }
+    - { role: friend, alive: true, affection: { gte: 55 } }
+weight: { base: 3 }
+cooldownYears: 6
+cast:
+  friend: { kind: friend, presence: city, age: { min: 21, max: 60 } }
+choices:
+  - id: yes
+    label: Say you're in, and start talking numbers
+    outcome:
+      text: >-
+        You spend the evening on a napkin, with a pen, working out what it would
+        take. By midnight, it's a plan, and the next time you pass a vacant storefront, you read the sign carefully.
+      effects:
+        - { type: relationship, role: friend, affection: 4, trust: 3 }
+        - { type: flag, key: thinking_about_a_business, value: true }
+        - { type: stat, key: ambition, delta: 2 }
+  - id: maybe
+    label: Say you'd like to hear more
+    outcome:
+      text: "{friend.name} lights up, and a second dinner is scheduled before you leave."
+      effects:
+        - { type: relationship, role: friend, affection: 2 }
+        - { type: flag, key: thinking_about_a_business, value: true }
+  - id: no
+    label: Say it isn't for you
+    outcome:
+      text: It's a sensible answer, and it leaves a small gap in the evening. {friend.name} is gracious about it, mostly.
+      effects:
+        - { type: relationship, role: friend, affection: -2 }

@@ -1,0 +1,44 @@
+id: biz_expansion_new_city
+title: Across the state line
+text: >-
+  A friend who moved away keeps telling you that the business is just what
+  their new city needs. {business} would be a long way from home, with nobody
+  there who knows you. It is a lot to chew on.
+tone: neutral
+category: business
+rarity: rare
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { business: { owned: true } }
+    - { age: { gte: 21 } }
+    - { business: { owned: true, profit: { gt: 0 }, years: { gte: 4 }, quality: { gte: 50 } } }
+weight: { base: 6 }
+followUpOnly: true
+bindBusiness: true
+choices:
+  - id: go
+    label: Open a branch in the other city
+    outcome:
+      text: >-
+        You sign a lease in a city where you have to ask for directions. The
+        branch struggles for months, and then something clicks.
+      effects:
+        - { type: business, action: expand }
+        - { type: stat, key: stress, delta: 5 }
+        - { type: stat, key: confidence, delta: 2 }
+  - id: scout
+    label: Visit first and see how it feels
+    outcome:
+      text: >-
+        A weekend there, a long walk and three conversations with strangers. You come
+        home sure of one thing: not yet.
+      effects:
+        - { type: business, action: pay, share: 0.005, floor: 300 }
+        - { type: stat, key: confidence, delta: 1 }
+  - id: stay
+    label: Stay home
+    outcome:
+      text: Your friend sighs. You keep the one place you know how to run.
+      effects:
+        - { type: stat, key: stress, delta: -1 }

@@ -1,0 +1,86 @@
+# W3: businesses. History lines the business step and the actions write ({business}, {type}, {city}), and the words
+# the yearly report uses.
+history:
+  started:
+    importance: 3
+    variants:
+      - "You opened {business}, a {type} in {city}."
+      - "{business} opened its doors in {city}: yours, from the sign to the lease."
+      - "You started a {type} of your own in {city}, and called it {business}."
+  bought:
+    importance: 3
+    variants:
+      - "You bought {business}, a {type} in {city}, from the people who built it."
+      - "{business} in {city} became yours."
+  sold:
+    importance: 3
+    variants:
+      - "You sold {business}."
+      - "{business} went to a new owner."
+  closed:
+    importance: 2
+    variants:
+      - "You closed {business}."
+      - "{business} shut its doors for the last time."
+  failed:
+    importance: 3
+    variants:
+      - "{business} ran out of money and closed."
+      - "{business} could not pay its bills any more. It closed."
+  inherited:
+    importance: 3
+    variants:
+      - "{business} came to you from the family."
+  expanded:
+    importance: 2
+    variants:
+      - "{business} opened a new location in {city}."
+      - "A second sign went up: {business} in {city}."
+  managerHired:
+    importance: 1
+    variants:
+      - "You handed the day-to-day of {business} to a manager."
+  cofounder:
+    importance: 2
+    variants:
+      - "You and a partner started {business} together."
+  investorPaid:
+    importance: 1
+    variants:
+      - "You bought out a partner in {business}."
+  lostMoney:
+    importance: 2
+    variants:
+      - "People who had put money into {business} did not get it back."
+
+report:
+  customers:
+    boom: "More people came through the door than ever before."
+    up: "More customers than last year."
+    steady: "About the same number of customers as last year."
+    down: "Fewer customers than last year."
+    slump: "Customers drifted away; the place felt empty."
+  money:
+    strong: "A strong year: the business paid well."
+    profit: "A profitable year."
+    thin: "A thin year: barely above break-even."
+    loss: "A losing year."
+    deep: "A deep loss. This cannot go on."
+  staff:
+    happy: "The staff are happy and it shows."
+    fine: "The staff are doing fine."
+    tense: "The staff are tense."
+    ready_to_quit: "People are talking about leaving."
+  quality:
+    high: "What you sell is the best it has been."
+    fine: "Quality held steady."
+    slipping: "Quality is slipping."
+  notes:
+    unlicensed: "Nobody here holds the licence this work needs, so no jobs could be taken."
+    understaffed: "The place was short of people for much of the year."
+    newLocation: "A new location opened and is still finding its customers."
+    quit: "Someone on staff left."
+    managerSlip: "The manager seems to be letting things slide."
+    rival: "A competitor is taking customers."
+    buzz: "Word of mouth is working for you."
+    skimmed: "The books show money that was taken."

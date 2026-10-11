@@ -1,0 +1,42 @@
+id: biz_license_lapse
+title: Nobody here is licensed
+text: >-
+  The person who held the licence {business} needs is gone, and without one,
+  you can't take the jobs you're booked for. The calendar is filling up with
+  work you cannot do.
+tone: serious
+category: business
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { business: { owned: true } }
+    - { age: { gte: 18 } }
+    - { business: { owned: true, licensed: false } }
+weight: { base: 10 }
+followUpOnly: true
+bindBusiness: true
+choices:
+  - id: recruit
+    label: Recruit a licensed worker
+    outcome:
+      text: >-
+        It takes a few calls and a signing bonus. Within a week, you have
+        someone with the right card on the wall.
+      effects:
+        - { type: business, action: pay, share: 0.02, floor: 800 }
+        - { type: stat, key: stress, delta: -3 }
+  - id: wait
+    label: Hold on and take only what you can
+    outcome:
+      text: You turn work away and watch your reputation fray at the edges. The calendar quiets down, which is not what you wanted.
+      effects:
+        - { type: business, action: reputation, delta: -5 }
+        - { type: stat, key: stress, delta: 4 }
+  - id: partner
+    label: Subcontract the work out
+    outcome:
+      text: A friendly competitor takes the jobs and a cut of the proceeds. It's awkward, and it keeps the customers.
+      effects:
+        - { type: business, action: pay, share: 0.03, floor: 1000 }
+        - { type: business, action: reputation, delta: 1 }

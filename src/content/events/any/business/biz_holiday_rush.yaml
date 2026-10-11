@@ -1,0 +1,44 @@
+id: biz_holiday_rush
+title: The busiest week of the year
+text: >-
+  The holiday week is here, and {business} is booked solid. Every day has a
+  line, and the schedule is stretched thin.
+tone: light
+category: business
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { business: { owned: true } }
+    - { age: { gte: 18 } }
+    - { business: { owned: true, years: { gte: 1 } } }
+weight: { base: 5 }
+cooldownYears: 3
+recurring: true
+bindBusiness: true
+choices:
+  - id: overtime
+    label: Pay everyone to work extra shifts
+    outcome:
+      text: The extra money lands in a lot of pockets. People are tired and cheerful, and the till is full.
+      effects:
+        - { type: business, action: pay, share: 0.015, floor: 400 }
+        - { type: business, action: receive, share: 0.04, floor: 800 }
+        - { type: business, action: morale, delta: 4 }
+  - id: yourself
+    label: Cover the gaps yourself
+    outcome:
+      text: >-
+        You work every hour the doors are open. It's the best week of sales you've
+        had, and you do not remember most of it.
+      effects:
+        - { type: business, action: receive, share: 0.03, floor: 600 }
+        - { type: stat, key: stress, delta: 6 }
+        - { type: stat, key: health, delta: -2 }
+  - id: limit
+    label: Limit hours and turn people away
+    outcome:
+      text: You put a sign on the door. Some people are gracious about it. Some of them don't come back.
+      effects:
+        - { type: business, action: reputation, delta: -2 }
+        - { type: stat, key: stress, delta: -2 }

@@ -1,0 +1,47 @@
+id: biz_landlord_raises_rent
+title: A letter from the landlord
+text: >-
+  The lease on {business} is coming up, and the landlord has sent a letter,
+  friendly in tone and not in substance. The rent is going up.
+tone: serious
+category: business
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { business: { owned: true } }
+    - { age: { gte: 18 } }
+    - { business: { owned: true, years: { gte: 2 } } }
+weight: { base: 5 }
+cooldownYears: 5
+bindBusiness: true
+choices:
+  - id: negotiate
+    label: Negotiate
+    check:
+      base: 45
+      stats: [{ key: confidence, weight: 0.3 }, { key: smarts, weight: 0.15 }]
+      success:
+        text: You point to the years of on-time payments and the foot traffic you bring. The landlord settles for half of what was asked.
+        effects:
+          - { type: business, action: pay, share: 0.01, floor: 300 }
+          - { type: stat, key: confidence, delta: 3 }
+      failure:
+        text: The landlord is unmoved and a little offended. The full increase stands, with a stiff note about renewal terms.
+        effects:
+          - { type: business, action: pay, share: 0.03, floor: 800 }
+          - { type: stat, key: stress, delta: 3 }
+  - id: accept
+    label: Sign without a fight
+    outcome:
+      text: You sign it, and take the extra rent out of your own pocket this year so the books don't show it.
+      effects:
+        - { type: business, action: pay, share: 0.03, floor: 800 }
+  - id: tighten
+    label: Pay it, and tighten the staffing
+    visibleIf: { business: { staff: { gte: 1 } } }
+    outcome:
+      text: You pay the rent, and the schedule is a little thinner for it. The people on it notice.
+      effects:
+        - { type: business, action: pay, share: 0.02, floor: 500 }
+        - { type: business, action: morale, delta: -6 }

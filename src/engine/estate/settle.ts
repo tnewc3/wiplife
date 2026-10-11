@@ -27,6 +27,7 @@ import { curveAt } from '../curve';
 import { wholeDollars } from '../finance';
 import type { EstateLine, Id, LifeState, Settlement, WillShare } from '../types';
 import { attachedDebtIds } from '../possessions/query';
+import { planBusinesses } from '../business/estate';
 import { planPossessions } from './possessions';
 import { fullName, livingWill } from './will';
 
@@ -150,12 +151,15 @@ export function settleEstate(life: LifeState, content: ContentBundle): Settlemen
   const costsDue0 = funeralCost(life, content) + wholeDollars((cashOnHand + homeValue) * estate.settlementShare);
   // A vehicle or vacation home is sold, not passed on, when the cash can't pay the costs and debts.
   const plan = planPossessions(life, shares, cashOnHand < costsDue0 + debts, content);
+  // W3: a business passes in kind the same way, or is sold (your share of the sale after its loans joins the cash).
+  const bplan = planBusinesses(life, shares, cashOnHand < costsDue0 + debts, content);
   const savings = cashOnHand;
   const possessionSales = plan.sold;
-  const costsDue = funeralCost(life, content) + wholeDollars((savings + possessionSales + homeValue) * estate.settlementShare);
+  const businessSales = bplan.sold;
+  const costsDue = funeralCost(life, content) + wholeDollars((savings + possessionSales + businessSales + homeValue) * estate.settlementShare);
 
   // Costs, then debts, from savings.
-  let cash = savings + possessionSales;
+  let cash = savings + possessionSales + businessSales;
   const costsFromCash = Math.min(cash, costsDue);
   cash -= costsFromCash;
   const debtsFromCash = Math.min(cash, debts);
@@ -249,7 +253,7 @@ export function settleEstate(life: LifeState, content: ContentBundle): Settlemen
     costs,
     debtsPaid,
     tax,
-    writtenOff: owedDebts + plan.writtenOff + (home === 'sold' || home === 'surrendered' ? mortgage - mortgagePaid : 0),
+    writtenOff: owedDebts + plan.writtenOff + bplan.writtenOff + (home === 'sold' || home === 'surrendered' ? mortgage - mortgagePaid : 0),
     home,
     mortgagePaid,
     saleCosts,
@@ -258,5 +262,7 @@ export function settleEstate(life: LifeState, content: ContentBundle): Settlemen
     unclaimed,
     possessions,
     possessionSales,
+    businesses: bplan.transfers,
+    businessSales,
   };
 }

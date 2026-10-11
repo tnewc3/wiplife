@@ -1,0 +1,46 @@
+id: biz_supplier_price_jump
+title: The new price list
+text: >-
+  The supplier you have used since the start sends a new price list, and every
+  number on it is higher. The cover note talks about "market conditions."
+tone: neutral
+category: business
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { business: { owned: true } }
+    - { age: { gte: 18 } }
+    - { business: { owned: true, years: { gte: 1 } } }
+weight: { base: 5 }
+cooldownYears: 4
+bindBusiness: true
+choices:
+  - id: absorb
+    label: Absorb the increase for now
+    outcome:
+      text: You keep the prices on your own board where they are and eat the difference, and hope it is temporary.
+      effects:
+        - { type: business, action: pay, share: 0.03, floor: 600 }
+  - id: shop
+    label: Shop around for another supplier
+    check:
+      base: 45
+      stats: [{ key: smarts, weight: 0.25 }, { key: discipline, weight: 0.15 }]
+      success:
+        text: A smaller supplier across town beats the new price and promises to deliver on Tuesdays, which no one else will.
+        effects:
+          - { type: business, action: pay, share: 0.01, floor: 200 }
+          - { type: stat, key: confidence, delta: 2 }
+      failure:
+        text: Every quote you collect is the same as the new one, or worse. You lose a week and sign the old supplier's price list after all.
+        effects:
+          - { type: business, action: pay, share: 0.03, floor: 600 }
+          - { type: stat, key: stress, delta: 2 }
+  - id: cut
+    label: Cut back on what you buy
+    outcome:
+      text: A thinner menu, a shorter shelf. It saves money, and customers notice what is missing before they notice what is new.
+      effects:
+        - { type: business, action: pay, share: 0.01, floor: 200 }
+        - { type: business, action: quality, delta: -4 }

@@ -53,6 +53,7 @@ import { emptySports } from './sports/query';
 import { emptyLater } from './later/query';
 import { terminalDeathChance, TERMINAL_ID } from './later/terminal';
 import { emptyBelonging } from './belonging/query';
+import { emptyBusiness } from './business/query';
 import { startBelonging } from './belonging/start';
 
 export type { CreateLifeOptions, CustomLifeInput } from './creation/input';
@@ -185,6 +186,7 @@ export function createLife(input: CreateLifeOptions, content: ContentBundle): Li
     sports: emptySports(),
     later: emptyLater(),
     belonging: emptyBelonging(),
+    business: emptyBusiness(),
   };
   // M1: ADHD and neurodivergence are inherited in part: your parents and siblings (and grandparents) may have them, and you are likelier to if a parent does.
   for (const person of Object.values(life.people)) {

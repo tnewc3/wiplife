@@ -23,6 +23,7 @@ import { newsTextSchema, peopleBalanceSchema, peopleRegistrySchema } from './peo
 import { webBalanceSchema, webRegistrySchema } from './web';
 import { eulogyBalanceSchema, eulogyTextSchema } from './eulogy';
 import { belongingBalanceSchema, belongingRegistrySchema, belongingTextSchema, groupSchema } from './belonging';
+import { businessBalanceSchema, businessRegistrySchema, businessSchema, businessTextSchema, chainSchema } from './business';
 import { laterBalanceSchema, laterRegistrySchema, laterTextSchema, reviewTextSchema } from './later';
 import { mentalHealthBalanceSchema, mentalRegistrySchema } from './mental';
 import { petInteractionSchema, petSchema, possessionsBalanceSchema, possessionsRegistrySchema, possessionsTextSchema, renovationSchema, vehicleSchema } from './possessions';
@@ -58,6 +59,7 @@ export * from './sports';
 export * from './eulogy';
 export * from './later';
 export * from './belonging';
+export * from './business';
 
 /**
  * Collections: a folder under src/content with one YAML file per definition,
@@ -76,6 +78,8 @@ export const collectionTypes = {
   cities: { folder: 'cities', schema: citySchema },
   conditions: { folder: 'conditions', schema: conditionDefSchema },
   /** Nested by life stage and category, and chain files hold several events (see compile.ts). */
+  businesses: { folder: 'businesses', schema: businessSchema },
+  chains: { folder: 'chains', schema: chainSchema },
   events: { folder: 'events', schema: eventSchema },
   fronts: { folder: 'fronts', schema: frontSchema },
   gradPrograms: { folder: 'grad', schema: gradProgramSchema },
@@ -123,6 +127,7 @@ export const singletonTypes = {
   'balance/eulogy': eulogyBalanceSchema,
   'balance/later': laterBalanceSchema,
   'balance/belonging': belongingBalanceSchema,
+  'balance/business': businessBalanceSchema,
   'balance/mental-health': mentalHealthBalanceSchema,
   'balance/possessions': possessionsBalanceSchema,
   'balance/teen': teenBalanceSchema,
@@ -143,6 +148,7 @@ export const singletonTypes = {
   'text/later': laterTextSchema,
   'text/review': reviewTextSchema,
   'text/belonging': belongingTextSchema,
+  'text/business': businessTextSchema,
   'text/news': newsTextSchema,
   'text/possessions': possessionsTextSchema,
   'text/teen': teenTextSchema,
@@ -172,6 +178,7 @@ export const singletonTypes = {
   'registries/sports': sportsRegistrySchema,
   'registries/later': laterRegistrySchema,
   'registries/belonging': belongingRegistrySchema,
+  'registries/business': businessRegistrySchema,
 } as const;
 
 export type SingletonPath = keyof typeof singletonTypes;
@@ -188,6 +195,8 @@ export const contentBundleSchema = z.strictObject({
   crews: z.record(z.string(), crewSchema),
   cities: z.record(z.string(), citySchema),
   conditions: z.record(z.string(), conditionDefSchema),
+  businesses: z.record(z.string(), businessSchema),
+  chains: z.record(z.string(), chainSchema),
   events: z.record(z.string(), eventSchema),
   fronts: z.record(z.string(), frontSchema),
   gradPrograms: z.record(z.string(), gradProgramSchema),
@@ -226,6 +235,7 @@ export const contentBundleSchema = z.strictObject({
     eulogy: eulogyBalanceSchema,
     later: laterBalanceSchema,
     belonging: belongingBalanceSchema,
+    business: businessBalanceSchema,
     mentalHealth: mentalHealthBalanceSchema,
     possessions: possessionsBalanceSchema,
     teen: teenBalanceSchema,
@@ -247,6 +257,7 @@ export const contentBundleSchema = z.strictObject({
     later: laterTextSchema,
     review: reviewTextSchema,
     belonging: belongingTextSchema,
+    business: businessTextSchema,
     news: newsTextSchema,
     possessions: possessionsTextSchema,
     teen: teenTextSchema,
@@ -278,6 +289,7 @@ export const contentBundleSchema = z.strictObject({
     sports: sportsRegistrySchema,
     later: laterRegistrySchema,
     belonging: belongingRegistrySchema,
+    business: businessRegistrySchema,
   }),
 });
 

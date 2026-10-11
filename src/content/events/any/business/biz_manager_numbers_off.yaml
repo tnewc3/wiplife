@@ -1,0 +1,55 @@
+id: biz_manager_numbers_off
+title: The numbers feel off
+text: >-
+  You've been away from {business}, and the manager's reports look fine. But the
+  numbers on the page are not the ones you remember from when you ran it. Something
+  is quietly wrong, and you can't put your finger on it.
+tone: serious
+category: business
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { business: { owned: true } }
+    - { age: { gte: 18 } }
+    - { business: { owned: true, role: [manager], manager: true, years: { gte: 1 } } }
+weight: { base: 8 }
+followUpOnly: true
+bindBusiness: true
+cast:
+  manager: { business: manager, presence: anywhere }
+choices:
+  - id: audit
+    label: Go through the books yourself
+    outcome:
+      text: >-
+        You spend a weekend with receipts and a calculator. If anything was taken, it shows now; if it wasn't, you
+        know just how the place has been drifting.
+      effects:
+        - { type: business, action: audit }
+        - { type: stat, key: stress, delta: 3 }
+  - id: ask
+    label: Ask {manager.name} straight out
+    check:
+      base: 45
+      stats: [{ key: confidence, weight: 0.25 }, { key: smarts, weight: 0.15 }]
+      success:
+        text: >-
+          {manager.name} shifts, then admits things have been slipping. You work out a plan together, and the
+          place picks up.
+        effects:
+          - { type: business, action: quality, delta: 4 }
+          - { type: relationship, role: manager, trust: 3 }
+      failure:
+        text: "{manager.name} is smooth and confident, and has an answer for everything. You leave not knowing anything you didn't before."
+        effects:
+          - { type: stat, key: stress, delta: 3 }
+  - id: take
+    label: Take the day-to-day back yourself
+    outcome:
+      text: >-
+        You come in on Monday and tell {manager.name} you'll be running it for
+        now. It's civil. It's also the end of something.
+      effects:
+        - { type: business, action: staffFire, role: manager }
+        - { type: relationship, role: manager, affection: -8, trust: -8 }
