@@ -127,9 +127,9 @@ export function chooseBusinessActions(life: LifeState, content: ContentBundle, r
     // A manager when you have a job and none yet.
     if (b.role === 'self' && life.career.job !== null && chance(rng, 0.5)) out.push(['set_business_role', { biz: { businessId: b.id, role: 'manager' } }]);
     if (profile.policy === 'good') {
-      if (b.staff.filter((s) => !s.manager).length < 2 && hireBlock(life, b, def, { locationId: b.locations[0]!.id }, content) === null && chance(rng, 0.3)) out.push(['hire_staff', { biz: { businessId: b.id } }]);
+      if (b.report && b.report.profit > 0 && b.staff.filter((s) => !s.manager).length < 2 && hireBlock(life, b, def, { locationId: b.locations[0]!.id }, content) === null && chance(rng, 0.3)) out.push(['hire_staff', { biz: { businessId: b.id } }]);
       const r = b.report;
-      if (r && r.profit > def.styles[b.style].startup * 0.5 && b.locations.length < 3 && life.finances.savings > def.styles[b.style].startup * 1.5 && chance(rng, 0.25)) {
+      if (r && r.profit > def.styles[b.style].startup * 0.5 && b.locations.length < 3 && b.report.year - b.founded >= 3 && b.lossYears === 0 && life.finances.savings > def.styles[b.style].startup * 2.5 && chance(rng, 0.25)) {
         out.push(['open_location', { biz: { businessId: b.id, cityId: b.cityId, style: b.style, funding: 'savings' } }]);
       }
     }
