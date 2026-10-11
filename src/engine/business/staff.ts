@@ -120,8 +120,12 @@ export function hireStaff(state: LifeState, b: Business, opts: HireOptions, cont
   if (!person.tags.includes('staff')) person.tags = [...person.tags, 'staff'];
   const rel = state.relationships[id]!;
   const licensed = opts.licensed === true || (def.license !== undefined && person.occupation === def.license.job);
-  if (opts.licensed && def.license) person.occupation = def.license.job;
-  else if (def.occupation !== undefined && !opts.manager) person.occupation = def.occupation;
+  const job = opts.licensed && def.license ? def.license.job : def.occupation !== undefined && !opts.manager ? def.occupation : undefined;
+  if (job !== undefined) {
+    // A new job starts at the bottom of its track, so the person's level always sits on it.
+    if (person.occupation !== job) person.occupation = job;
+    if (person.life && (person.life.level < 1 || person.life.level > (content.jobs[job]?.levels.length ?? 1))) person.life.level = 1;
+  }
   const skill = opts.manager ? clampInt(rollScore(state.rng, content.balance.business.manager.skill) + staffC.smartsLift * (person.smarts - 50), 5, 100) : rollSkill(state, person, content);
   const honesty = opts.manager ? clampInt(rollScore(state.rng, content.balance.business.manager.honesty) + (rel.affection - 50) * 0.3, 0, 100) : undefined;
   const entry: BusinessStaff = {

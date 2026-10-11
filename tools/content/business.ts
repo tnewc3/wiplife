@@ -137,7 +137,7 @@ export function checkBusiness(bundle: ContentBundle, fileOf: (typeKey: Collectio
         staff: (c) => 'business' in c && c.business.staff !== undefined,
       };
       const test = need[spec.business];
-      if (test && spec.business !== 'licensed' && !requires(def, test)) e(`cast.${role}: a ${spec.business} role needs the event to require that the business has one (business: ${spec.business === 'staff' ? 'staff' : spec.business === 'manager' ? 'manager: true' : spec.business + ': true'})`);
+      if (test && spec.business !== 'licensed' && !requires(def, test)) e(`cast.${role}: the ${spec.business} role needs the event to require that the business has one (business: ${spec.business === 'staff' ? 'staff' : spec.business === 'manager' ? 'manager: true' : spec.business + ': true'})`);
     }
     const walk = (c: Condition | undefined): void => {
       if (!c) return;

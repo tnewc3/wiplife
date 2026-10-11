@@ -81,6 +81,7 @@ export interface LoanView {
 
 export interface BusinessView {
   id: Id;
+  defId: Id;
   name: string;
   kind: string;
   noun: string;
@@ -229,6 +230,7 @@ export function businessView(state: LifeState, b: Business, content: ContentBund
   const expandCosts = Object.fromEntries(BUSINESS_STYLES.map((s) => [s, expandCost(def, b.cityId, s, content)])) as Record<BusinessStyle, number>;
   return {
     id: b.id,
+    defId: b.defId,
     name: b.name,
     kind: def.name,
     noun: def.noun,

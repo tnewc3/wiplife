@@ -28,7 +28,7 @@ styles:
     supplies: 0.16
     wage: 31000
     quality: 40
-    elasticity: 1.6
+    elasticity: 2.0
   standard:
     label: Neighborhood salon
     blurb: "Appointments, a color bar and clients who have been coming for years."
@@ -41,7 +41,7 @@ styles:
     supplies: 0.18
     wage: 38000
     quality: 52
-    elasticity: 1.2
+    elasticity: 1.6
   premium:
     label: Color studio
     blurb: "Marble, a waiting list and a top stylist whose name is on the door."
@@ -54,7 +54,7 @@ styles:
     supplies: 0.2
     wage: 46000
     quality: 67
-    elasticity: 0.8
+    elasticity: 0.9
 fit:
   budget: { size: 0.3, wealth: -0.3 }
   standard: { size: 0.3, wealth: 0.2 }

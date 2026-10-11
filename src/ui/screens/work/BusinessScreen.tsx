@@ -107,7 +107,7 @@ function ExpandSheet({ b, life, open, onClose }: { b: BusinessView; life: LifeSt
         <div role="radiogroup" aria-label="Style" className="flex flex-col gap-2">
           {BUSINESS_STYLES.map((s) => (
             <button key={s} type="button" role="radio" aria-checked={style === s} onClick={() => setStyle(s)} data-testid={`expand-style-${s}`} className={`min-h-11 rounded-xl border px-3 py-2 text-left ${style === s ? 'border-accent bg-surface-2 font-semibold' : 'border-border'}`}>
-              {content.businesses[b.id.length > 0 ? Object.keys(content.businesses).find((k) => content.businesses[k]!.name === b.kind)! : '']?.styles[s].label ?? s} · {money(b.expandCosts[s])}
+              {content.businesses[b.defId]?.styles[s].label ?? s} · {money(b.expandCosts[s])}
             </button>
           ))}
         </div>

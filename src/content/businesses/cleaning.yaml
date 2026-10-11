@@ -23,7 +23,7 @@ styles:
     supplies: 0.12
     wage: 29000
     quality: 42
-    elasticity: 1.5
+    elasticity: 1.9
   standard:
     label: Home and office care
     blurb: "Contracts with small offices, and houses that never go back to anyone else."
@@ -36,7 +36,7 @@ styles:
     supplies: 0.11
     wage: 30000
     quality: 52
-    elasticity: 1.2
+    elasticity: 1.6
   premium:
     label: Deep-clean specialists
     blurb: "Move-outs, post-construction and a client list that includes property managers."
@@ -49,7 +49,7 @@ styles:
     supplies: 0.13
     wage: 36000
     quality: 64
-    elasticity: 0.8
+    elasticity: 0.9
 fit:
   budget: { size: 0.3, wealth: -0.1 }
   standard: { size: 0.3, wealth: 0.2 }

@@ -24,7 +24,7 @@ styles:
     supplies: 0.28
     wage: 28000
     quality: 40
-    elasticity: 1.6
+    elasticity: 2.0
   standard:
     label: Artisan bakery
     blurb: "Sourdough, laminated pastry and a chalkboard that changes daily."
@@ -37,7 +37,7 @@ styles:
     supplies: 0.27
     wage: 31000
     quality: 52
-    elasticity: 1.2
+    elasticity: 1.6
   premium:
     label: Patisserie
     blurb: "Glass cases, white boxes with ribbon, and wedding cakes booked a year out."
@@ -50,7 +50,7 @@ styles:
     supplies: 0.26
     wage: 38000
     quality: 66
-    elasticity: 0.8
+    elasticity: 0.9
 fit:
   budget: { size: 0.3, wealth: -0.3 }
   standard: { size: 0.3, wealth: 0.2 }

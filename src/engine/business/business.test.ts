@@ -820,7 +820,6 @@ describe('estate', () => {
   });
 
   it('is sold when nobody old enough can take it, and its loans go back to the lender when it is worth less than they are', () => {
-    const def = content.businesses.cafe!;
     const alone = produce(owner('heir-c', 1_500_000), (d) => {
       for (const id of Object.keys(d.people)) {
         d.people[id]!.alive = false;
@@ -854,7 +853,6 @@ describe('estate', () => {
 describe('net worth and invariants', () => {
   it('count your share of a business, and the invariants catch a broken one', () => {
     const life = start(owner('inv-a'), 'cafe');
-    const b = life.business.items[0]!;
     const withBiz = netWorth(life);
     const without = produce(life, (d) => {
       d.business.worth = 0;

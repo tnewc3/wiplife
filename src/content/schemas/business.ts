@@ -124,7 +124,7 @@ export const businessBalanceSchema = z.strictObject({
   /** Each city's size and wealth for demand (1 is the national average). */
   cities: z.record(idSchema, z.strictObject({ size: z.number().positive().max(5), wealth: z.number().positive().max(5), competition: z.number().min(0.5).max(1.5) })),
   levels: z.strictObject({
-    price: z.record(z.enum(PRICE_LEVELS), levelEffect.extend({ mult: z.number().positive().max(3) })),
+    price: z.record(z.enum(PRICE_LEVELS), levelEffect.extend({ mult: z.number().positive().max(3), reputation: z.number().min(-10).max(10) })),
     marketing: z.record(z.enum(MARKETING_LEVELS), levelEffect.extend({ share: z.number().min(0).max(0.3), boost: z.number().min(0).max(1) })),
     quality: z.record(z.enum(QUALITY_LEVELS), levelEffect.extend({ share: z.number().min(0).max(0.3), aim: z.number().min(0).max(40) })),
     pay: z.record(z.enum(PAY_LEVELS), levelEffect.extend({ mult: z.number().positive().max(3), morale: z.number().min(-30).max(30) })),
@@ -233,6 +233,8 @@ export const businessBalanceSchema = z.strictObject({
     carry: probability,
     /** How far the owner's skill lifts the aim per point above 50, at full effort. */
     skill: z.number().min(0).max(1),
+    /** Staff morale lifts or drags the aim: per point above or below 55. */
+    morale: z.number().min(0).max(1),
     noise: z.number().min(0).max(20),
     /** Lean staffing and an understaffed place drag quality; this much per share short of the need. */
     shortfall: z.number().min(0).max(100),

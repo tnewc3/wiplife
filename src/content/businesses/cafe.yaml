@@ -24,7 +24,7 @@ styles:
     supplies: 0.3
     wage: 28000
     quality: 38
-    elasticity: 1.6
+    elasticity: 2.0
   standard:
     label: Neighborhood café
     blurb: "Tables by the window, a small menu, a loyal crowd."
@@ -37,7 +37,7 @@ styles:
     supplies: 0.3
     wage: 31000
     quality: 50
-    elasticity: 1.3
+    elasticity: 1.7
   premium:
     label: Specialty roastery
     blurb: "Single-origin everything, a roaster in the back and a very good espresso machine."
@@ -50,7 +50,7 @@ styles:
     supplies: 0.28
     wage: 38000
     quality: 66
-    elasticity: 0.9
+    elasticity: 1.0
 fit:
   budget: { size: 0.35, wealth: -0.3 }
   standard: { size: 0.3, wealth: 0.2 }

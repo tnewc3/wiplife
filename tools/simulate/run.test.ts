@@ -189,4 +189,25 @@ describe('interactions report (E1)', () => {
     for (let i = 0; i < 40; i++) expect(personalityChoice(content, 'refuse')(life, card, rng)).not.toBe('meet');
     expect(personalityChoice(content, 'accept')(life, card, rng)).toBe('meet');
   });
+
+  it('reports businesses (W3): who starts or buys one, how long they last, what they earn, and how it all compares with a career, with no invariant failing', { timeout: 420_000 }, () => {
+    const report = runSimulation(content, { lives: 60, seedPrefix: 'sim-biz', player: 'careful' });
+    expect(report.failureMessages.slice(0, 8)).toEqual([]);
+    expect(report.invariantFailures).toBe(0);
+    const b = report.business;
+    expect(b.lives).toBe(60);
+    expect(b.owners.any).toBeGreaterThan(0);
+    expect(b.begun.total).toBeGreaterThan(0);
+    expect(b.begun.started + b.begun.bought).toBe(b.begun.total);
+    expect(Object.values(b.begun.byFunding).reduce((a, n) => a + n, 0)).toBe(b.begun.total);
+    expect(b.years.n).toBeGreaterThan(0);
+    // Survival cohorts are consistent: nobody survives who did not take part.
+    for (const c of [b.survival.all, ...Object.values(b.survival.byType), ...Object.values(b.survival.byPolicy)]) for (let i = 0; i < 3; i++) expect(c.ok[i]!).toBeLessThanOrEqual(c.n[i]!);
+    const text = formatReport(report, content);
+    expect(text).toContain('Businesses (W3):');
+    expect(text).toContain('survival (not failed or closed after 1, 5 and 10 years)');
+    expect(text).toContain('businesses still going after 5 years');
+    const careless = runSimulation(content, { lives: 20, seedPrefix: 'sim-biz', player: 'careless' });
+    expect(careless.business.begun.total).toBe(0);
+  });
 });

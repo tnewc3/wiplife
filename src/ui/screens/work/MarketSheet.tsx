@@ -11,7 +11,7 @@ import { Sheet } from '../../components/Sheet';
 import { BUSINESS_BLOCK_LABELS, BUSINESS_ROLE_BLURBS, BUSINESS_ROLE_LABELS, money } from '../../labels';
 import { FundingPicker } from './FundingPicker';
 
-function BuySheet({ life, listing, onClose }: { life: LifeState; listing: ListingView; onClose: () => void }) {
+function BuySheet({ life, listing, onClose, onBought }: { life: LifeState; listing: ListingView; onClose: () => void; onBought: () => void }) {
   const act = useAppStore((s) => s.takeLifeAction);
   const busy = useAppStore((s) => s.aging);
   const [plan, setPlan] = useState<FundingPlan>({ source: 'savings' });
@@ -54,7 +54,7 @@ function BuySheet({ life, listing, onClose }: { life: LifeState; listing: Listin
         </div>
         <FundingPicker life={life} need={listing.price} defId={defId} plan={plan} onChange={setPlan} />
         {full && <p className="text-sm text-muted">{BUSINESS_BLOCK_LABELS.full}.</p>}
-        <Button block disabled={busy || full || check.block !== null} data-testid="buy-confirm" onClick={() => void act('buy_business', { biz: { listingId: listing.id, plan, role } }).then(() => onClose())}>
+        <Button block disabled={busy || full || check.block !== null} data-testid="buy-confirm" onClick={() => void act('buy_business', { biz: { listingId: listing.id, plan, role } }).then(() => onBought())}>
           Buy {listing.name}
         </Button>
       </div>
@@ -105,7 +105,17 @@ export function MarketSheet({ life, open, onClose }: { life: LifeState; open: bo
           </ul>
         </div>
       </Sheet>
-      {buying && <BuySheet life={life} listing={buying} onClose={() => { setBuying(null); }} />}
+      {buying && (
+        <BuySheet
+          life={life}
+          listing={buying}
+          onClose={() => setBuying(null)}
+          onBought={() => {
+            setBuying(null);
+            onClose();
+          }}
+        />
+      )}
     </>
   );
 }

@@ -193,7 +193,7 @@ export interface BusinessReport {
   /** Business-years, and what they earned (whole dollars): profit, paid to the owner, put in. */
   years: { n: number; profit: number; profitable: number; draw: number; injected: number; revenue: number; staffMorale: number; unlicensed: number };
   /** How businesses ended. */
-  ends: { sold: number; closed: number; failed: number; passed: number };
+  ends: { sold: number; closed: number; failed: number; passed: number; estateSold: number };
   /** Failures: the debts left (loans not repaid and the guaranteed shortfall), and lives that went bankrupt within five years. */
   failures: { n: number; debtLeft: number; withDebt: number; bankruptAfter: number; investorsLost: number; lostBy: Record<string, number> };
   /** Staff, investors and co-founders. */
@@ -224,7 +224,7 @@ export function emptyBusinessReport(content: ContentBundle): BusinessReport {
       byFunding: Object.fromEntries(BUSINESS_FUNDING.map((f) => [f, cohort()])) as Record<BusinessFunding, Cohort>,
     },
     years: { n: 0, profit: 0, profitable: 0, draw: 0, injected: 0, revenue: 0, staffMorale: 0, unlicensed: 0 },
-    ends: { sold: 0, closed: 0, failed: 0, passed: 0 },
+    ends: { sold: 0, closed: 0, failed: 0, passed: 0, estateSold: 0 },
     failures: { n: 0, debtLeft: 0, withDebt: 0, bankruptAfter: 0, investorsLost: 0, lostBy: {} },
     people: { hires: 0, quits: 0, namedPeak: 0, investors: 0, investorsMadeMoney: 0, investorsLostMoney: 0, cofounders: 0, buyouts: 0, managerSkims: 0 },
     compare: { ownerYears: 0, ownerIncome: 0, workerYears: 0, workerIncome: 0, owners65: [], others65: [], ownersBankrupt: 0, ownersN: 0, othersBankrupt: 0, othersN: 0 },
@@ -305,7 +305,7 @@ export class BusinessWatcher {
     }
     // Endings.
     for (const p of life.business.past.slice(this.pastSeen)) {
-      r.ends[p.end]++;
+      if (p.end !== 'passed') r.ends[p.end]++;
       const rec = [...this.records.values()].find((x) => x.ended === null && x.defId === p.defId && x.start === p.fromYear);
       if (rec) {
         rec.ended = p.toYear;
@@ -346,7 +346,7 @@ export class BusinessWatcher {
     const funding = this.pendingFunding ?? (b.owners.some((o) => o.role === 'cofounder') ? 'cofounder' : b.owners.some((o) => o.role === 'investor') ? 'investors' : b.loanIds.length > 0 ? 'loan' : 'savings');
     this.pendingFunding = null;
     const skill = ownerSkill(life, def, this.content);
-    const band = skill < 45 ? 'low' : skill >= 60 ? 'high' : 'mid';
+    const band = skill < 58 ? 'low' : skill >= 64 ? 'high' : 'mid';
     this.records.set(b.id, { id: b.id, defId: b.defId, style: b.style, start: b.founded, funding, skill: band, role: b.role, lost: null, ended: null, how: b.how });
     this.everOwned = true;
     if (b.how === 'inherited') {
@@ -403,6 +403,9 @@ export class BusinessWatcher {
       const cat = this.content.events[id]?.category;
       if (cat === 'business' || cat === 'bizstart' || cat === 'bizpast') r.events[id] = (r.events[id] ?? 0) + log.count;
     }
+    // What became of the businesses still going at death: passed on in kind, or sold for the estate.
+    r.ends.passed += life.estate?.businesses.length ?? 0;
+    r.ends.estateSold += life.estate ? life.business.items.length - life.estate.businesses.length : 0;
     // Careers against ownership.
     const c = r.compare;
     if (age >= 65) {
@@ -454,7 +457,7 @@ export function formatBusiness(r: BusinessReport, content: ContentBundle): strin
   for (const f of BUSINESS_FUNDING) lines.push(survivalLine(`funded: ${f}`, r.survival.byFunding[f]));
   const y = r.years;
   lines.push(`  business-years ${y.n}: mean profit ${dollars(y.n > 0 ? y.profit / y.n : 0)} (${pct(y.profitable, y.n)} profitable), mean sales ${dollars(y.n > 0 ? y.revenue / y.n : 0)}, paid to the owner ${dollars(y.n > 0 ? y.draw / y.n : 0)} a year, put in to cover losses ${dollars(y.n > 0 ? y.injected / y.n : 0)} a year, mean staff morale ${mean(y.staffMorale, y.n)}, years with nobody licensed ${y.unlicensed}`);
-  lines.push(`  endings: sold ${r.ends.sold}, closed ${r.ends.closed}, failed ${r.ends.failed}, passed on at death ${r.ends.passed}; failed by kind: ${Object.entries(r.failures.lostBy).sort().map(([k, v]) => `${k} ${v}`).join(', ') || 'none'}`);
+  lines.push(`  endings: sold ${r.ends.sold}, closed ${r.ends.closed}, failed ${r.ends.failed}; at death: passed on to an heir ${r.ends.passed}, sold or handed back by the estate ${r.ends.estateSold}; failed by kind: ${Object.entries(r.failures.lostBy).sort().map(([k, v]) => `${k} ${v}`).join(', ') || 'none'}`);
   lines.push(`  failures ${r.failures.n}: ${pct(r.failures.withDebt, r.failures.n)} left a debt (mean ${dollars(r.failures.withDebt > 0 ? r.failures.debtLeft / r.failures.withDebt : 0)}); ${pct(r.failures.bankruptAfter, r.failures.n)} of those lives went bankrupt within five years`);
   const p = r.people;
   lines.push(`  people: hires ${p.hires}, quits ${p.quits}, most named staff at once ${p.namedPeak}; investors ${p.investors} (${p.investorsMadeMoney} people made money, ${p.investorsLostMoney} lost it), co-founders ${p.cofounders}, buyouts ${p.buyouts}, managers who skimmed ${p.managerSkims} years`);

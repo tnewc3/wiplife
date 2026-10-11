@@ -24,7 +24,7 @@ styles:
     supplies: 0.62
     wage: 27000
     quality: 38
-    elasticity: 1.8
+    elasticity: 2.2
   standard:
     label: Neighborhood shop
     blurb: "Gifts, home goods and things you did not know you needed."
@@ -37,7 +37,7 @@ styles:
     supplies: 0.55
     wage: 30000
     quality: 50
-    elasticity: 1.3
+    elasticity: 1.7
   premium:
     label: Boutique
     blurb: "A few beautiful things, well lit, with someone who knows all about them."
@@ -50,7 +50,7 @@ styles:
     supplies: 0.5
     wage: 36000
     quality: 65
-    elasticity: 0.9
+    elasticity: 1.0
 fit:
   budget: { size: 0.35, wealth: -0.4 }
   standard: { size: 0.3, wealth: 0.2 }

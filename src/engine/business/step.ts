@@ -187,12 +187,13 @@ function stepBusiness(state: LifeState, b: Business, content: ContentBundle, fun
     bal.levels.quality[b.qualityInvest].aim +
     bal.staff.skillQuality * (avgSkill - 50) +
     bal.quality.skill * (who.skill - 50) * Math.min(1.2, who.effort) +
-    bal.levels.staffing[b.staffing].quality -
+    bal.levels.staffing[b.staffing].quality +
+    bal.quality.morale * (b.morale - 55) -
     bal.quality.shortfall * (short / b.locations.length) +
     rollNormal(state.rng, { mean: 0, sd: bal.quality.noise });
   const oldQuality = b.quality;
   b.quality = clampInt(bal.quality.carry * b.quality + (1 - bal.quality.carry) * aim, 0, 100);
-  b.reputation = clampInt(b.reputation + bal.reputation.pull * (oldQuality - b.reputation) + rollNormal(state.rng, { mean: 0, sd: bal.reputation.noise }) * 0.5, 0, 100);
+  b.reputation = clampInt(b.reputation + bal.reputation.pull * (oldQuality - b.reputation) + bal.levels.price[b.prices].reputation + rollNormal(state.rng, { mean: 0, sd: bal.reputation.noise }) * 0.5, 0, 100);
   if (short / b.locations.length > 0.15) notes.push('understaffed');
   if (b.locations.some((l) => l.opened === year)) notes.push('newLocation');
 
