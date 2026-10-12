@@ -81,6 +81,8 @@ export interface CustomLifeData {
   /** "None", "1", "2"... */
   siblings: string;
   wealth: string;
+  /** The country's name; the United States when left out. */
+  country?: string;
   city: string;
 }
 
@@ -142,6 +144,7 @@ export async function createCustomLife(page: Page, data: CustomLifeData, onStep?
   await next();
 
   await expect(page.getByText('Step 4 of 6')).toBeVisible();
+  await page.getByRole('radio', { name: data.country ?? 'United States' }).click();
   await page.getByRole('radio', { name: data.city }).click();
   await next();
 

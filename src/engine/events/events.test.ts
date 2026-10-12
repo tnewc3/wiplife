@@ -16,6 +16,7 @@ import { castCandidates, castEvent, uncast } from './casting';
 import { successChance } from './checks';
 import { applyEffects } from './effects';
 import { eventIndex, eventWeight } from './selection';
+import { US_WORDS } from '../testFixtures';
 import { SELF_ROLE, sinceText, type EVENT_TEXT_VALUES } from './text';
 
 /** An event with test defaults; override anything. */
@@ -543,8 +544,9 @@ describe('event text', () => {
           bizCity: 'Chicago',
           bizStyle: 'neighborhood café',
           bizTitle: 'barista',
+          ...US_WORDS,
         } satisfies Record<(typeof EVENT_TEXT_VALUES)[number] | 'petKind' | 'vehicle' | 'homeCity', string | number>;
-        const context = { roles, values };
+        const context = { roles, values, money: (n: number) => `$${n}` };
         const texts = [def.title, def.text, ...(def.choices ?? []).map((c) => c.label)];
         const outcomes = def.autoOutcome ? [def.autoOutcome] : (def.choices ?? []).flatMap((c) => (c.outcome ? [c.outcome] : [c.check!.success, c.check!.failure]));
         for (const o of outcomes) {

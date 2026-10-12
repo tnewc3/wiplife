@@ -43,8 +43,8 @@ describe('the debt system', () => {
       addDebt(d, 'medical', 100, content);
     });
     const [student, medical] = life.finances.debts;
-    expect(student).toMatchObject({ id: 'd1', kind: 'student', balance: 30_000, annualRate: eco.interest.debts.student, missed: 0 });
-    expect(student!.minPayment).toBe(amortizedPayment(30_000, eco.interest.debts.student, eco.debts.termYears.student));
+    expect(student).toMatchObject({ id: 'd1', kind: 'student', balance: 30_000, annualRate: content.countries.us!.studentFinance.loanRate, missed: 0 });
+    expect(student!.minPayment).toBe(amortizedPayment(30_000, content.countries.us!.studentFinance.loanRate, eco.debts.termYears.student));
     // Never below the smallest minimum payment (the balance itself is due when smaller).
     expect(medical).toMatchObject({ id: 'd2', minPayment: eco.debts.minPayment });
     expect(totalDebt(life)).toBe(30_100);

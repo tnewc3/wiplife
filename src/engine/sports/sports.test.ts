@@ -46,7 +46,7 @@ const mean = (xs: number[]) => xs.reduce((a, c) => a + c, 0) / xs.length;
 const pro = (seed = 'pro', id = 'basketball', over: (d: LifeState) => void = () => {}) =>
   apply(player(seed, 21, id, 'open_tryout', 'athletics'), (d) => {
     const def = sportPath(content, id)!;
-    d.sports.draft = { year: d.currentYear, pick: 5, round: 1, teamId: draftingTeam(def.sport, 5, content).id };
+    d.sports.draft = { year: d.currentYear, pick: 5, round: 1, teamId: draftingTeam(def.sport, 5, 'chicago', content).id };
     signDraftDeal(d, content, createRng(`${seed}:sign`));
     over(d);
   });
@@ -217,10 +217,10 @@ describe('the ladder', () => {
 describe('the draft and the first deal', () => {
   it('lets a prospect old enough declare, with a pick that follows the score', () => {
     const def = sportPath(content, 'basketball')!.sport;
-    expect(draftSlot(100, def, content).pick).toBe(1);
-    expect(draftSlot(b.draft.top, def, content).pick).toBe(1);
-    const low = draftSlot(40, def, content);
-    expect(low.pick === 0 || low.pick > def.leagues.pro.teams.length).toBe(true);
+    expect(draftSlot(100, def, 'chicago', content).pick).toBe(1);
+    expect(draftSlot(b.draft.top, def, 'chicago', content).pick).toBe(1);
+    const low = draftSlot(40, def, 'chicago', content);
+    expect(low.pick === 0 || low.pick > proTeamsIn(def, 'chicago', content).length).toBe(true);
     const early = yearStep(player('d-young', 17, 'basketball', 'open_tryout', 'athletics'));
     expect(early.sports.draft).toBeNull();
     const declared = many(8, (i) => yearStep(player(`d${i}`, 21, 'basketball', 'open_tryout', 'athletics')).sports.draft);
@@ -230,7 +230,7 @@ describe('the draft and the first deal', () => {
   it('signs a rookie deal: the pro rung, the team’s city, a signing bonus in savings and a deal in the pay', () => {
     const base = player('sign', 21, 'basketball', 'open_tryout', 'athletics');
     const def = sportPath(content, 'basketball')!;
-    const team = draftingTeam(def.sport, 3, content);
+    const team = draftingTeam(def.sport, 3, 'chicago', content);
     const drafted = apply(base, (d) => void (d.sports.draft = { year: d.currentYear, pick: 3, round: 1, teamId: team.id }));
     const signed = apply(drafted, (d) => void signDraftDeal(d, content, createRng('x')));
     expect(signed.sports.pro).toBe(true);
@@ -260,7 +260,7 @@ describe('the draft and the first deal', () => {
 
   it('puts an owned home on the market when a team in another city takes you', () => {
     const def = sportPath(content, 'basketball')!;
-    const other = proTeamsIn(def.sport, content).find((t) => t.city !== 'chicago')!;
+    const other = proTeamsIn(def.sport, 'chicago', content).find((t) => t.city !== 'chicago')!;
     const life = apply(player('home', 21, 'basketball', 'open_tryout', 'athletics', (d) => void (d.character.cityId = 'chicago')), (d) => {
       d.housing = { ...d.housing, kind: 'owned', homeValue: 200000, annualCost: 12000, cityId: 'chicago' };
       d.sports.draft = { year: d.currentYear, pick: 2, round: 1, teamId: other.id };
@@ -324,7 +324,7 @@ describe('contracts, trades and releases', () => {
   it('takes a team in another city for a trade without breaking the life', () => {
     const life = pro('moveto');
     const def = sportPath(content, 'basketball')!;
-    const other = proTeamsIn(def.sport, content).find((t) => t.city !== life.character.cityId)!;
+    const other = proTeamsIn(def.sport, 'chicago', content).find((t) => t.city !== life.character.cityId)!;
     const next = apply(life, (d) => void moveToTeam(d, other.id, true, content, createRng('m')));
     expect(next.character.cityId).toBe(other.city);
     ok(next);
@@ -585,7 +585,7 @@ describe('the conditions, text values and helpers', () => {
       expect(levelOfRung(def.sport, 1)).toBe('youth');
       expect(levelOfRung(def.sport, 3)).toBe('college');
       expect(levelOfRung(def.sport, def.sport.proRung)).toBe('pro');
-      expect(proTeamsIn(def.sport, content).length).toBe(12);
+      expect(proTeamsIn(def.sport, 'chicago', content).length).toBe(12);
     }
   });
 });

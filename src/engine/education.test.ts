@@ -30,7 +30,9 @@ import { lifeAtAge } from './testFixtures';
 import type { Enrollment, LifeState } from './types';
 
 const edu = content.balance.education;
-const ages = schoolAges(content);
+const us = content.countries.us!;
+const usLife = lifeAtAge('edu-us', 10);
+const ages = schoolAges(usLife, content);
 
 /** Content where every admission and GED model gives exactly `percent`. */
 function odds(percent: number): ContentBundle {
@@ -98,7 +100,7 @@ describe('automatic school', () => {
     expect(life.education.current).toBeNull();
     for (let age = ages.startAge; age < ages.highEnd; age++) {
       life = year(life);
-      const expected = placeForAge(age, content)!;
+      const expected = placeForAge(age, usLife, content)!;
       expect(life.character.age).toBe(age);
       expect(life.education.current).toMatchObject({ program: expected.program, year: expected.year });
       expect(checkInvariants(life, content)).toEqual([]);
@@ -175,10 +177,10 @@ describe('grades', () => {
   });
 
   it('show as letter grades', () => {
-    expect(letterGrade(4, content)).toBe('A');
-    expect(letterGrade(3.2, content)).toBe('B+');
-    expect(letterGrade(2.9, content)).toBe('B');
-    expect(letterGrade(0, content)).toBe('F');
+    expect(letterGrade(4, usLife, content)).toBe('A');
+    expect(letterGrade(3.2, usLife, content)).toBe('B+');
+    expect(letterGrade(2.9, usLife, content)).toBe('B');
+    expect(letterGrade(0, usLife, content)).toBe('F');
   });
 
   it('are nudged by events', () => {
@@ -298,7 +300,7 @@ describe('tuition and student loans', () => {
       return billFor(life, place, scholarshipShare(life, 'college', content), content);
     };
     for (const b of [bill('poor', 3), bill('middle', 3), bill('rich', 3), bill('middle', 4)]) {
-      expect(b.tuition).toBe(edu.tuition.college.state);
+      expect(b.tuition).toBe(us.tuition.college.state);
       expect(b.scholarship + b.family + b.fund + b.loan).toBe(b.tuition);
       for (const v of Object.values(b)) expect(Number.isInteger(v)).toBe(true);
     }
@@ -316,7 +318,7 @@ describe('tuition and student loans', () => {
     expect(bill.loan).toBeGreaterThan(0);
     const loans = life.finances.debts.filter((d) => d.kind === 'student');
     expect(loans).toHaveLength(1);
-    expect(loans[0]).toMatchObject({ balance: bill.loan, annualRate: content.balance.economy.interest.debts.student });
+    expect(loans[0]).toMatchObject({ balance: bill.loan, annualRate: us.studentFinance.loanRate });
     const studentDebt = (l: LifeState) => getMoneyView(l, content).debts.find((d) => d.kind === 'student')!;
     expect(studentDebt(life).paused).toBe(true);
     // The ledger asks for nothing while you're in school.
@@ -383,8 +385,8 @@ describe('programs', () => {
 
   it('count an associate degree toward a bachelor’s', () => {
     let life = act(graduate('transfer', 3), 'apply_school', { program: 'college', tier: 'community', majorId: 'psychology' }, always);
-    life = years(life, 1 + edu.college.years.community - 1);
-    expect(life.education.current).toMatchObject({ program: 'college', tier: 'community', year: edu.college.years.community });
+    life = years(life, 1 + us.collegeYears.community - 1);
+    expect(life.education.current).toMatchObject({ program: 'college', tier: 'community', year: us.collegeYears.community });
     life = act(life, 'apply_school', { program: 'college', tier: 'state', majorId: 'psychology' }, always);
     life = year(life);
     expect(life.education.credentials.at(-1)).toMatchObject({ type: 'associate', tier: 'community' });
@@ -422,20 +424,20 @@ describe('dropping out, the GED and going back', () => {
   const sophomore = (age: number) => produce(lifeAtAge(`hs-${age}`, age), (d) => enrolled(d, { program: 'high', year: age - ages.highStart + 1, gpa: 2 }));
 
   it('allow dropping out of high school only from the dropout age', () => {
-    expect(isLifeActionAvailable(sophomore(edu.school.dropoutAge - 1), 'drop_out', {}, content)).toBe(false);
-    const out = act(sophomore(edu.school.dropoutAge), 'drop_out');
+    expect(isLifeActionAvailable(sophomore(us.school.dropoutAge - 1), 'drop_out', {}, content)).toBe(false);
+    const out = act(sophomore(us.school.dropoutAge), 'drop_out');
     expect(out.education.current).toBeNull();
     expect(out.education.left).toMatchObject({ program: 'high', leftYear: out.currentYear });
     // Not forced back to school.
     expect(year(out).education.current).toBeNull();
     // An event can't push a younger student out either.
     const def = { id: 'x', rarity: 'common' } as EventDef;
-    const young = produce(sophomore(edu.school.dropoutAge - 1), (d) => applyEffects(d, [{ type: 'education', action: 'drop_out' }], { def, cast: {}, rng: createRng('x'), content }));
+    const young = produce(sophomore(us.school.dropoutAge - 1), (d) => applyEffects(d, [{ type: 'education', action: 'drop_out' }], { def, cast: {}, rng: createRng('x'), content }));
     expect(young.education.current).not.toBeNull();
   });
 
   it('let a dropout go back while they can still finish by 19', () => {
-    const out = act(sophomore(edu.school.dropoutAge), 'drop_out');
+    const out = act(sophomore(us.school.dropoutAge), 'drop_out');
     expect(isLifeActionAvailable(out, 'return_to_school', {}, content)).toBe(true);
     const back = year(act(out, 'return_to_school'));
     expect(back.education.current).toMatchObject({ program: 'high', year: out.education.left!.year });
@@ -447,7 +449,7 @@ describe('dropping out, the GED and going back', () => {
   });
 
   it('give a GED to those who pass it, once a year', () => {
-    const out = act(sophomore(edu.school.dropoutAge), 'drop_out');
+    const out = act(sophomore(us.school.dropoutAge), 'drop_out');
     const failed = act(out, 'take_ged', {}, never);
     expect(failed.education.credentials).toEqual([]);
     expect(isLifeActionAvailable(failed, 'take_ged', {}, content)).toBe(false);

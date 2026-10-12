@@ -498,7 +498,7 @@ describe('homes', () => {
     const life = rich();
     const q = vacationQuote(life, 'chicago', content);
     expect(q.price).toBe(Math.round(content.cities.chicago!.baseHomePrice * b.homes.vacation.priceShare));
-    expect(q.downPayment).toBe(Math.round(q.price * content.balance.economy.ownership.downPayment));
+    expect(q.downPayment).toBe(Math.round(q.price * content.countries.us!.housing.downPayment));
     expect(q.mortgage).toBe(q.price - q.downPayment);
     expect(q.blocked).toBeNull();
     expect(vacationQuote(produce(life, (d) => void (d.finances.savings = 1_000)), 'chicago', content).blocked).toBe('savings');

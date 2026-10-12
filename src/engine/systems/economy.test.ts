@@ -8,7 +8,7 @@ import { createRng } from '../rng';
 import { lifeAtAge } from '../testFixtures';
 import type { LifeState } from '../types';
 import { expectedGigPay } from './career';
-import { applyStatEffects, runEconomy, taxOn } from './economy';
+import { applyStatEffects, runEconomy, taxOn as taxOnIn } from './economy';
 
 /** Content whose gig pay never swings, so a year's pay is exact. */
 const steady: ContentBundle = produce(content, (c) => {
@@ -36,6 +36,8 @@ const problems = (life: LifeState) => checkInvariants({ ...life, scheduled: life
 
 describe('tax', () => {
   it('applies each bracket to its slice of income, in whole dollars', () => {
+    const us = adult(() => {});
+    const taxOn = (gross: number, bundle: ContentBundle) => taxOnIn(gross, us, bundle);
     expect(taxOn(0, content)).toBe(0);
     expect(taxOn(14_000, content)).toBe(0);
     expect(taxOn(24_000, content)).toBe(1_000);
@@ -57,7 +59,7 @@ describe('the yearly ledger', () => {
     const l = after.finances.lastLedger!;
     expect(l.year).toBe(life.currentYear);
     expect(l.gross).toBe(gross);
-    expect(l.tax).toBe(taxOn(gross, content));
+    expect(l.tax).toBe(taxOnIn(gross, life, content));
     expect(l.housing).toBe(chicago.baseRent);
     expect(l.living).toBe(Math.round(eco.livingCost * chicago.costOfLiving));
     expect(l.interest).toBe(Math.round(10_000 * eco.interest.savings));
@@ -95,8 +97,8 @@ describe('the yearly ledger', () => {
     const after = ledger(life);
     const l = after.finances.lastLedger!;
     expect(l.interest).toBe(20_000);
-    expect(l.debtInterest).toBe(Math.round(20_000 * eco.interest.debts.student));
-    const payment = amortizedPayment(20_000, eco.interest.debts.student, eco.debts.termYears.student);
+    expect(l.debtInterest).toBe(Math.round(20_000 * content.countries.us!.studentFinance.loanRate));
+    const payment = amortizedPayment(20_000, content.countries.us!.studentFinance.loanRate, eco.debts.termYears.student);
     expect(after.finances.debts[0]!.balance).toBe(20_000 + l.debtInterest - payment);
     expect(l.debtPayments).toBe(payment);
     expect(after.finances.debts[0]!.missed).toBe(0);
