@@ -53,7 +53,7 @@ demand:
   unlicensed: 0
 
 costs:
-  overheadShare: 0.09
+  overheadShare: 0.075
   overheadFixed: 2000
   waste: 0.004
   crewWage: 1
