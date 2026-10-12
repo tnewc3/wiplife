@@ -1,0 +1,8 @@
+id: lotus_and_loft
+name: "Lotus & Loft Salons"
+type: salon
+style: premium
+blurb: "A chain of high-ceilinged salons with a waiting list and a regional training academy."
+locations: { min: 3, max: 6 }
+cities: [los_angeles, nyc]
+reputation: { mean: 64, sd: 6 }

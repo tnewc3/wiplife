@@ -1,0 +1,43 @@
+id: biz_near_failure_cut_costs
+title: Where the money goes
+text: >-
+  You go through every line of {business}'s costs with a pen, circling things
+  you could do without. A lot of the circles are people.
+tone: dark
+category: business
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { business: { owned: true } }
+    - { age: { gte: 18 } }
+    - { business: { owned: true, profit: { lt: 0 }, staff: { gte: 1 } } }
+weight: { base: 8 }
+followUpOnly: true
+bindBusiness: true
+cast:
+  staff: { business: staff, presence: city }
+choices:
+  - id: letgo
+    label: Let {staff.name} go
+    outcome:
+      text: >-
+        {staff.name} takes it better than you do. It saves the wages, it empties the rooms, and
+        every person left works harder to fill the gap.
+      effects:
+        - { type: business, action: staffFire, role: staff }
+        - { type: business, action: morale, delta: -8 }
+  - id: hours
+    label: Cut everyone's hours instead
+    outcome:
+      text: Nobody quits, because nobody wants to be first. Everybody is quietly looking.
+      effects:
+        - { type: business, action: morale, delta: -10 }
+        - { type: business, action: quality, delta: -3 }
+  - id: salary
+    label: Cut your own draw to nothing
+    outcome:
+      text: You skip your own pay, and put what would have been into the till. The staff never know; you just eat a lot of rice.
+      effects:
+        - { type: business, action: pay, share: 0.03, floor: 1500 }
+        - { type: stat, key: stress, delta: 3 }

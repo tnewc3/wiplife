@@ -1,0 +1,45 @@
+id: biz_emergency_job
+title: Water through the ceiling
+text: >-
+  A restaurant owner calls at midnight: a pipe has burst above the kitchen, and
+  they open at seven. They'll pay whatever it takes, and they sound like they
+  mean it.
+tone: neutral
+category: business
+rarity: uncommon
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { business: { owned: true } }
+    - { age: { gte: 18 } }
+    - { business: { owned: true, type: [plumbing], licensed: true } }
+weight: { base: 5 }
+cooldownYears: 4
+bindBusiness: true
+choices:
+  - id: go
+    label: Get in the truck
+    outcome:
+      text: >-
+        You work until the sun comes up. The kitchen opens on time, and the owner
+        sends half the neighborhood your way.
+      effects:
+        - { type: business, action: receive, share: 0.04, floor: 1500 }
+        - { type: business, action: reputation, delta: 3 }
+        - { type: stat, key: stress, delta: 3 }
+  - id: send
+    label: Send your best person
+    visibleIf: { business: { staff: { gte: 1 } } }
+    outcome:
+      text: >-
+        You stay on the phone while your people work. The job is done well, and
+        they like being trusted with it.
+      effects:
+        - { type: business, action: receive, share: 0.035, floor: 1200 }
+        - { type: business, action: morale, delta: 5 }
+  - id: pass
+    label: Say it can't be done tonight
+    outcome:
+      text: The owner thanks you coldly, and finds someone else. You sleep, and wonder about it.
+      effects:
+        - { type: business, action: reputation, delta: -2 }

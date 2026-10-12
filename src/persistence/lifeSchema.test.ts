@@ -320,7 +320,7 @@ describe('lives from Stage 6 on', () => {
   it('round trip a life with debts, a mortgage and a move', async () => {
     let life = produce(lifeAtAge('stage6-round', 30), (d) => {
       d.finances.savings = 500_000;
-      d.finances.lastLedger = { year: d.currentYear, gross: 90_000, retirement: 0, tax: 0, housing: 0, living: 0, debtPayments: 0, interest: 0, debtInterest: 0, borrowed: 0, support: 0, children: 0, care: 0, supportPaid: 0, supportReceived: 0, upkeep: 0, insurance: 0, giving: 0, net: 90_000 };
+      d.finances.lastLedger = { year: d.currentYear, gross: 90_000, retirement: 0, tax: 0, housing: 0, living: 0, debtPayments: 0, interest: 0, debtInterest: 0, borrowed: 0, support: 0, children: 0, care: 0, supportPaid: 0, supportReceived: 0, upkeep: 0, insurance: 0, giving: 0, business: 0, net: 90_000 };
       d.finances.debts.push({ id: 'd1', kind: 'student', balance: 12_000, annualRate: 0.055, minPayment: 1_600, missed: 1 });
     });
     const other = life.character.cityId === 'nyc' ? 'houston' : 'nyc';
@@ -592,7 +592,7 @@ describe('lives from E2a on', () => {
   it('upgrade a schema version 10 life: who can carry follows the gender category, an empty family, and a ledger without children', async () => {
     const base = lifeAtAge('e2a-migrate', 30);
     const life = produce(base, (d) => {
-      d.finances.lastLedger = { year: d.currentYear, gross: 40_000, retirement: 0, tax: 3_000, housing: 5_000, living: 12_000, debtPayments: 0, interest: 0, debtInterest: 0, borrowed: 0, support: 0, children: 0, care: 0, supportPaid: 0, supportReceived: 0, upkeep: 0, insurance: 0, giving: 0, net: 20_000 };
+      d.finances.lastLedger = { year: d.currentYear, gross: 40_000, retirement: 0, tax: 3_000, housing: 5_000, living: 12_000, debtPayments: 0, interest: 0, debtInterest: 0, borrowed: 0, support: 0, children: 0, care: 0, supportPaid: 0, supportReceived: 0, upkeep: 0, insurance: 0, giving: 0, business: 0, net: 20_000 };
     });
     const v10 = JSON.parse(JSON.stringify(life)) as Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any -- stripping fields from plain JSON to build an old save
     delete v10.family;
@@ -719,9 +719,9 @@ describe('heirs, wills and estates (E2b)', () => {
   });
 
   it('upgrades a version 12 life: no news, no care costs, and people who get their own life from the first year', async () => {
-    const base = lifeAtAge('e3-v12c', 30);
+    const base = lifeAtAge('e3-v12d', 30);
     const life = produce(base, (d) => {
-      d.finances.lastLedger = { year: d.currentYear - 1, gross: 40_000, retirement: 0, tax: 3_000, housing: 5_000, living: 12_000, debtPayments: 0, interest: 0, debtInterest: 0, borrowed: 0, support: 0, children: 0, care: 0, supportPaid: 0, supportReceived: 0, upkeep: 0, insurance: 0, giving: 0, net: 20_000 };
+      d.finances.lastLedger = { year: d.currentYear - 1, gross: 40_000, retirement: 0, tax: 3_000, housing: 5_000, living: 12_000, debtPayments: 0, interest: 0, debtInterest: 0, borrowed: 0, support: 0, children: 0, care: 0, supportPaid: 0, supportReceived: 0, upkeep: 0, insurance: 0, giving: 0, business: 0, net: 20_000 };
     });
     const v12 = JSON.parse(JSON.stringify(life)) as Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any -- stripping fields from plain JSON to build an old save
     delete v12.news;
@@ -882,7 +882,7 @@ describe('lives from E5 on', () => {
 
   it('upgrades a schema version 15 life: it owns nothing, and the ledger gains upkeep and insurance lines of zero', async () => {
     const life = produce(lifeAtAge('e5-v15', 30), (d) => {
-      d.finances.lastLedger = { year: d.currentYear - 1, gross: 40_000, retirement: 0, tax: 3_000, housing: 5_000, living: 12_000, debtPayments: 0, interest: 0, debtInterest: 0, borrowed: 0, support: 0, children: 0, care: 0, supportPaid: 0, supportReceived: 0, upkeep: 0, insurance: 0, giving: 0, net: 20_000 };
+      d.finances.lastLedger = { year: d.currentYear - 1, gross: 40_000, retirement: 0, tax: 3_000, housing: 5_000, living: 12_000, debtPayments: 0, interest: 0, debtInterest: 0, borrowed: 0, support: 0, children: 0, care: 0, supportPaid: 0, supportReceived: 0, upkeep: 0, insurance: 0, giving: 0, business: 0, net: 20_000 };
     });
     const v15 = JSON.parse(JSON.stringify(life)) as Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any -- stripping fields from plain JSON to build an old save
     delete v15.possessions;
@@ -1319,6 +1319,94 @@ describe('belonging (W2)', () => {
     expect(loadedLifeSchema(content).safeParse(child).success).toBe(false);
     const extra = JSON.parse(JSON.stringify(life)) as LifeState;
     (extra.belonging as unknown as Record<string, unknown>).mystery = 1;
+    expect(lifeStateSchema.safeParse(extra).success).toBe(false);
+  });
+});
+
+describe('businesses (W3)', () => {
+  /** A life of 36 that owns a café with a loan, an investor, a worker and a manager, and has had a business fail and an estate with a business in it. */
+  function ownerLife(): LifeState {
+    const base = produce(lifeAtAge('w3-save', 36), (d) => {
+      d.finances.savings = 900_000;
+      d.finances.lastLedger = { year: d.currentYear - 1, gross: 80_000, retirement: 0, tax: 0, housing: 0, living: 0, debtPayments: 0, interest: 0, debtInterest: 0, borrowed: 0, support: 0, children: 0, care: 0, supportPaid: 0, supportReceived: 0, upkeep: 0, insurance: 0, giving: 0, business: 0, net: 80_000 };
+    });
+    const investor = Object.keys(base.relationships).find((id) => base.people[id]!.alive && base.currentYear - base.people[id]!.birthYear >= 25 && base.relationships[id]!.kind !== 'parent' && base.relationships[id]!.kind !== 'grandparent')!;
+    const rich = produce(base, (d) => {
+      d.relationships[investor]!.affection = 90;
+      d.people[investor]!.wealthLevel = 'rich';
+    });
+    const started = performAction(rich, 'start_business', { biz: { defId: 'cafe', name: 'The Grey Heron', cityId: rich.character.cityId, style: 'standard', plan: { source: 'investors', investors: [{ personId: investor, amount: 20_000 }] }, role: 'self' } }, content);
+    const hired = performAction(started, 'hire_staff', { biz: { businessId: started.business.items[0]!.id } }, content);
+    const managed = performAction(hired, 'set_business_role', { biz: { businessId: started.business.items[0]!.id, role: 'manager' } }, content);
+    return performAction(managed, 'open_location', { biz: { businessId: started.business.items[0]!.id, cityId: started.character.cityId, style: 'budget', funding: 'loan' } }, content);
+  }
+
+  it('round trips a business with staff, a manager, an investor, a loan, locations and a report', async () => {
+    const played = playYear(ownerLife(), content);
+    expect(played.business.items).toHaveLength(1);
+    expect(played.business.items[0]!.report).not.toBeNull();
+    expect(played.business.items[0]!.loanIds.length).toBeGreaterThan(0);
+    expect(loadedLifeSchema(content).safeParse(played).success).toBe(true);
+    expect(await roundTrip(played)).toEqual(played);
+  });
+
+  it('round trips a settled estate with a business passed on, and its heir', async () => {
+    const parent = produce(parentLife({ seed: 'w3-estate', age: 55, kids: [27], noRelatives: true, savings: 1_200_000 }), (d) => {
+      d.finances.lastLedger = { year: d.currentYear - 1, gross: 90_000, retirement: 0, tax: 0, housing: 0, living: 0, debtPayments: 0, interest: 0, debtInterest: 0, borrowed: 0, support: 0, children: 0, care: 0, supportPaid: 0, supportReceived: 0, upkeep: 0, insurance: 0, giving: 0, business: 0, net: 90_000 };
+    });
+    const started = performAction(parent, 'start_business', { biz: { defId: 'cafe', name: 'Family Cafe', cityId: parent.character.cityId, style: 'standard', plan: { source: 'loan', loan: 40_000 }, role: 'self' } }, content);
+    const dead = die(
+      produce(started, (d) => void (d.business.items[0]!.profits = [80_000, 80_000, 80_000])),
+      content,
+    );
+    expect(dead.estate!.businesses).toHaveLength(1);
+    expect(loadedLifeSchema(content).safeParse(dead).success).toBe(true);
+    expect(await roundTrip(dead)).toEqual(dead);
+    const heir = continueAsHeir(dead, heirCandidates(dead)[0]!, content);
+    expect(heir.business.items).toHaveLength(1);
+    expect(loadedLifeSchema(content).safeParse(heir).success).toBe(true);
+    expect(await roundTrip(heir)).toEqual(heir);
+  });
+
+  it('upgrades a schema version 22 life: no business, a ledger line of 0 and an estate with none, and nobody is given one', async () => {
+    const life = lifeAtAge('w3-v22', 40);
+    const v22 = JSON.parse(JSON.stringify(life)) as Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any -- stripping fields from plain JSON to build an old save
+    delete v22.business;
+    if (v22.finances.lastLedger) delete v22.finances.lastLedger.business;
+    const db = freshDb();
+    await db.lives.put({ id: 'active', envelope: { ...makeEnvelope(v22, content.contentVersion), schemaVersion: 22 } });
+    const result = await readSave(db, loadedLifeSchema(content));
+    expect(result.status).toBe('ok');
+    if (result.status !== 'ok') return;
+    expect(result.envelope.schemaVersion).toBe(CURRENT_SCHEMA_VERSION);
+    expect(result.envelope.data.business).toEqual({ items: [], nextBusiness: 1, nextLocation: 1, taken: [], past: [], offered: {}, year: { year: 0, draw: 0, inject: 0 }, experience: {}, worth: 0 });
+    const next = beginYear(result.envelope.data, content);
+    expect(next.business.items).toEqual([]);
+    expect(next.business.worth).toBe(0);
+    // A settled estate from before the stage passed and sold no business.
+    const dead = die(parentLife({ seed: 'w3-v22-estate', age: 55, kids: [27], savings: 100_000 }), content);
+    const old = JSON.parse(JSON.stringify(dead)) as Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any -- stripping fields from plain JSON to build an old save
+    delete old.business;
+    delete old.estate.businesses;
+    delete old.estate.businessSales;
+    for (const kind of ['lastLedger'] as const) if (old.finances[kind]) delete old.finances[kind].business;
+    const migrated = migrateEnvelope({ ...makeEnvelope(old, content.contentVersion), schemaVersion: 22 }, undefined, CURRENT_SCHEMA_VERSION).data as LifeState;
+    expect(migrated.estate!.businesses).toEqual([]);
+    expect(migrated.estate!.businessSales).toBe(0);
+    expect(loadedLifeSchema(content).safeParse(migrated).success).toBe(true);
+  });
+
+  it('refuses a save with a business that breaks a rule: owners that do not add up, a loan that is not a debt, an unknown kind or an extra field', () => {
+    const life = ownerLife();
+    const bad = (mutate: (l: LifeState) => void) => loadedLifeSchema(content).safeParse(produce(life, mutate)).success;
+    expect(loadedLifeSchema(content).safeParse(life).success).toBe(true);
+    expect(bad((d) => void (d.business.items[0]!.owners[0]!.share = 40))).toBe(false);
+    expect(bad((d) => void d.business.items[0]!.loanIds.push('d404'))).toBe(false);
+    expect(bad((d) => void (d.business.items[0]!.defId = 'rocket_shop'))).toBe(false);
+    expect(bad((d) => void (d.business.items[0]!.cash = -1))).toBe(false);
+    expect(bad((d) => void (d.business.items[0]!.prices = 'free' as never))).toBe(false);
+    const extra = JSON.parse(JSON.stringify(life)) as LifeState;
+    (extra.business as unknown as Record<string, unknown>).mystery = 1;
     expect(lifeStateSchema.safeParse(extra).success).toBe(false);
   });
 });

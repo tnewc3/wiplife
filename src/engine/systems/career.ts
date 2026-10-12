@@ -62,7 +62,9 @@ export function yearIncome(state: LifeState, content: ContentBundle): number {
   // E6b: what the work in arts and media earned (after the agent's and the company's cuts, and a minor's share held in trust).
   const fame = fameIncome(state);
   // T1: a teen job's pay (or odd jobs, for a teen who made work their focus).
-  return wholeDollars((state.career.job?.salary ?? 0) + jobLossPay(state, content) + gigPay(state, content, state.rng) + teenIncome(state, content) + fame);
+  // W3: what your businesses paid out to you this year (the business step set it aside).
+  const business = state.business.year.year === state.currentYear ? state.business.year.draw : 0;
+  return wholeDollars((state.career.job?.salary ?? 0) + jobLossPay(state, content) + gigPay(state, content, state.rng) + teenIncome(state, content) + fame + business);
 }
 
 /**

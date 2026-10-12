@@ -1,0 +1,51 @@
+id: biz_opening_day
+title: Opening day
+text: >-
+  The sign is up and the door is unlocked. {business} opens this morning, and
+  the question of who, if anyone, will walk in is the only thing in your head.
+tone: neutral
+category: business
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { business: { owned: true } }
+    - { age: { gte: 18 } }
+    - { business: { owned: true, years: { lte: 1 } } }
+weight: { base: 10 }
+followUpOnly: true
+bindBusiness: true
+choices:
+  - id: party
+    label: Throw an opening party
+    outcome:
+      text: >-
+        You pay for balloons, a banner and enough free samples to feed the
+        block. The street fills up, and several people say they will be back.
+      effects:
+        - { type: business, action: pay, share: 0.03, floor: 400 }
+        - { type: business, action: buzz, delta: 10, years: 1 }
+        - { type: business, action: reputation, delta: 3 }
+  - id: press
+    label: Ask a local blogger to come by
+    check:
+      base: 45
+      stats: [{ key: sociability, weight: 0.3 }, { key: confidence, weight: 0.2 }]
+      success:
+        text: >-
+          The blogger writes a warm little piece about {business}, with a
+          photograph of the first customer. By lunch you have a line.
+        effects:
+          - { type: business, action: reputation, delta: 6 }
+          - { type: business, action: buzz, delta: 12, years: 1 }
+      failure:
+        text: The blogger never shows. You stand in the doorway, waving at traffic.
+        effects:
+          - { type: stat, key: confidence, delta: -2 }
+  - id: quiet
+    label: Open quietly and let the work speak
+    outcome:
+      text: Nobody makes a fuss. You unlock the door, turn the sign, and get on with it. By the afternoon, the place has a rhythm.
+      effects:
+        - { type: stat, key: stress, delta: -2 }
+        - { type: stat, key: discipline, delta: 1 }

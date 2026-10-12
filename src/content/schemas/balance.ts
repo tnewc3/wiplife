@@ -724,6 +724,34 @@ export const targetsBalanceSchema = z.strictObject({
     /** The share of group members who belonged for at least ten years. */
     longShare: shareRangeSchema,
   }),
+  /**
+   * W3: businesses (tools/simulate/business.ts), judged on the careful player's lives. Survival is the share of
+   * businesses not failed or closed after 1, 5 and 10 years; the gaps are in percentage points.
+   */
+  business: z.strictObject({
+    /** Of lives reaching 30, the share that started or bought a business. */
+    ownerShare: shareRangeSchema,
+    survival1: shareRangeSchema,
+    survival5: shareRangeSchema,
+    survival10: shareRangeSchema,
+    /** Good decisions above poor ones, and a good skill fit above a poor one, in 5-year survival (points): clearly better, not a guarantee. */
+    decisionGap: signedRangeSchema,
+    skillGap: signedRangeSchema,
+    /** Even good decisions leave some businesses failing: 5-year survival with good decisions. */
+    goodSurvival5: shareRangeSchema,
+    /** Failures as a share of businesses that ended (failed, closed or sold). */
+    failureShare: shareRangeSchema,
+    /** Failures that left the owner a debt. */
+    failureDebtShare: shareRangeSchema,
+    /** Business-years that made a profit. */
+    profitableShare: shareRangeSchema,
+    /** Owners' income a year (ages 25 to 60) against workers' with a job: the reward. */
+    incomeRatio: ratioRangeSchema,
+    /** Bankruptcy among owners above everyone else's (points): the matching risk. */
+    bankruptGap: signedRangeSchema,
+    /** Owners' median net worth at 65 against everyone else's. */
+    netWorthRatio: ratioRangeSchema,
+  }),
   coverage: z.strictObject({
     /** At least this many events (not retired). */
     minEvents: z.int().min(1),

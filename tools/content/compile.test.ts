@@ -101,7 +101,7 @@ describe('content build with the real content', () => {
     const result = await compileContent({ contentDir: realContentDir, appVersion: '1.2.3' });
     if (!result.ok) throw new Error(formatErrors(result.errors));
     expect(result.warnings.map((w) => w.message)).toEqual([]);
-  });
+  }, 60_000);
 });
 
 describe('content build with fixture files', { timeout: 90_000 }, () => {
@@ -1812,5 +1812,81 @@ describe('belonging (W2)', () => {
     const ev = await read('events/any/identity/discovery_faith_find.yaml');
     await write('events/any/identity/discovery_faith_find.yaml', ev.replace('action: fromLatent', 'action: convert, id: no_such_faith'));
     expect(await expectErrors()).toContain('unknown faith "no_such_faith"');
+  });
+});
+
+describe('businesses (W3)', () => {
+  const read = (file: string) => readFile(path.join(dir, file), 'utf8');
+
+  it('accepts the real content: six kinds with three styles each, fictional chains and about forty-seven events, with no warnings', { timeout: 90_000 }, async () => {
+    const result = await compile();
+    if (!result.ok) throw new Error(formatErrors(result.errors));
+    expect(Object.keys(result.bundle.businesses).sort()).toEqual(['bakery', 'cafe', 'cleaning', 'plumbing', 'salon', 'shop']);
+    for (const d of Object.values(result.bundle.businesses)) expect(Object.keys(d.styles)).toEqual(['budget', 'standard', 'premium']);
+    expect(Object.keys(result.bundle.chains).length).toBeGreaterThanOrEqual(6);
+    const events = Object.values(result.bundle.events).filter((e) => ['business', 'bizstart', 'bizpast'].includes(e.category));
+    expect(events.length).toBeGreaterThanOrEqual(42);
+    expect(events.length).toBeLessThanOrEqual(52);
+    expect(result.warnings.filter((w) => w.eventId.startsWith('biz_'))).toEqual([]);
+    expect(Object.keys(result.bundle.balance.business.cities).sort()).toEqual(Object.keys(result.bundle.cities).sort());
+  });
+
+  it('refuses a chain of an unknown kind or in an unknown city, and a kind with a job or trade that does not exist', { timeout: 90_000 }, async () => {
+    const chain = await read('chains/hearth_and_hammer.yaml');
+    await write('chains/hearth_and_hammer.yaml', chain.replace('type: shop', 'type: kiosk'));
+    expect(await expectErrors()).toContain('unknown business "kiosk"');
+    await write('chains/hearth_and_hammer.yaml', chain.replace('cities: [chicago, nyc, los_angeles]', 'cities: [chicago, atlantis]'));
+    expect(await expectErrors()).toContain('unknown city "atlantis"');
+    await write('chains/hearth_and_hammer.yaml', chain);
+    const plumbing = await read('businesses/plumbing.yaml');
+    await write('businesses/plumbing.yaml', plumbing.replace('trade: plumber', 'trade: sorcerer'));
+    expect(await expectErrors()).toContain('unknown trade "sorcerer"');
+    await write('businesses/plumbing.yaml', plumbing.replace('occupation: plumber', 'occupation: wizard'));
+    expect(await expectErrors()).toContain('unknown job "wizard"');
+  });
+
+  it('refuses a style that costs less than a cheaper one, and a balance that leaves out a style', { timeout: 90_000 }, async () => {
+    const cafe = await read('businesses/cafe.yaml');
+    await write('businesses/cafe.yaml', cafe.replace('startup: 220000', 'startup: 20000'));
+    expect(await expectErrors()).toContain('startup costs must rise from budget to premium');
+    await write('businesses/cafe.yaml', cafe.replace('    elasticity: 1.0\nfit:', 'fit:'));
+    expect(await expectErrors()).toContain('elasticity');
+  });
+
+  it('wants an event to require what it names: the business it is about and the people it casts', { timeout: 90_000 }, async () => {
+    const ev = await read('events/any/business/biz_equipment_breaks.yaml');
+    await write('events/any/business/biz_equipment_breaks.yaml', ev.replace('bindBusiness: true\n', ''));
+    expect(await expectErrors()).toContain('uses {business} without being about a business');
+    await write('events/any/business/biz_equipment_breaks.yaml', ev);
+    const staff = await read('events/any/business/biz_staff_asks_raise.yaml');
+    await write('events/any/business/biz_staff_asks_raise.yaml', staff.replace('    - { business: { owned: true, staff: { gte: 1 } } }\n', '    - { business: { owned: true } }\n'));
+    expect(await expectErrors()).toContain('the staff role needs the event to require that the business has one');
+    await write('events/any/business/biz_staff_asks_raise.yaml', staff);
+    const investor = await read('events/any/business/biz_investor_update.yaml');
+    await write('events/any/business/biz_investor_update.yaml', investor.replace('investors: true', 'loan: true'));
+    expect(await expectErrors()).toContain('the investor role needs the event to require that the business has one');
+  });
+
+  it('wants the queued events to be follow-ups about a business, and every id to exist', { timeout: 90_000 }, async () => {
+    const reg = await read('registries/business.yaml');
+    await write('registries/business.yaml', reg.replace('events: [biz_license_lapse]', 'events: [ghost_event]'));
+    expect(await expectErrors()).toContain('unknown event "ghost_event"');
+    await write('registries/business.yaml', reg.replace('events: [biz_license_lapse]', 'events: [biz_equipment_breaks]'));
+    expect(await expectErrors()).toContain('answers license, so it must be followUpOnly');
+    await write('registries/business.yaml', reg.replace('events: [biz_license_lapse]', 'events: [biz_failure_debts]'));
+    expect(await expectErrors()).toContain('answers license, so it must be about a business');
+    await write('registries/business.yaml', reg);
+    const ev = await read('events/any/business/biz_emergency_job.yaml');
+    await write('events/any/business/biz_emergency_job.yaml', ev.replace('type: [plumbing]', 'type: [rocketry]'));
+    expect(await expectErrors()).toContain('unknown kind "rocketry"');
+  });
+
+  it('keeps the money words honest: a business effect that pays counts, wording about money without one is warned about', { timeout: 90_000 }, async () => {
+    const ev = await read('events/any/business/biz_equipment_breaks.yaml');
+    await write('events/any/business/biz_equipment_breaks.yaml', ev.replace('        - { type: business, action: pay, share: 0.05, floor: 1200 }\n', '        - { type: business, action: quality, delta: 3 }\n'));
+    const result = await compile();
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.warnings.some((w) => w.eventId === 'biz_equipment_breaks' && /money/.test(w.message))).toBe(true);
   });
 });

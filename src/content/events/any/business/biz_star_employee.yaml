@@ -1,0 +1,52 @@
+id: biz_star_employee
+title: Someone worth keeping
+text: >-
+  Customers have started asking for {staff.name} by name. {staff.they}
+  {staff:is|are} quick, kind and good at the work, and a competitor down the
+  road has noticed too.
+tone: light
+category: business
+rarity: uncommon
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { business: { owned: true } }
+    - { age: { gte: 18 } }
+    - { business: { owned: true, staff: { gte: 1 }, years: { gte: 1 } } }
+weight: { base: 4 }
+cooldownYears: 5
+bindBusiness: true
+cast:
+  staff: { business: staff, presence: city }
+choices:
+  - id: raise
+    label: Raise {staff.their} pay before someone else does
+    outcome:
+      text: It's the best money you spend all year. {staff.name} takes the hint, and takes on more.
+      effects:
+        - { type: business, action: staffRaise, role: staff }
+        - { type: business, action: quality, delta: 3 }
+        - { type: relationship, role: staff, affection: 5, trust: 4 }
+  - id: thank
+    label: Thank {staff.them} warmly and hope that's enough
+    check:
+      base: 45
+      stats: [{ key: kindness, weight: 0.3 }]
+      success:
+        text: It is, for now. {staff.name} says {staff.they} {staff:likes|like} it here, and means it.
+        effects:
+          - { type: relationship, role: staff, affection: 4 }
+      failure:
+        text: >-
+          Two weeks later, {staff.name} gives notice. The competitor down the road
+          had a better offer.
+        effects:
+          - { type: business, action: staffQuit, role: staff }
+          - { type: business, action: quality, delta: -3 }
+  - id: manage
+    label: Make {staff.them} lead a shift
+    outcome:
+      text: The extra responsibility is welcome. The paycheck is still the same, and everyone knows it.
+      effects:
+        - { type: business, action: staffMorale, role: staff, delta: 4 }
+        - { type: business, action: quality, delta: 2 }

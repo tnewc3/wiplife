@@ -538,6 +538,11 @@ describe('event text', () => {
           faith: 'Judaism',
           adherent: 'Jewish',
           latentFaith: 'Buddhism',
+          business: 'The Grey Heron Café',
+          bizType: 'café',
+          bizCity: 'Chicago',
+          bizStyle: 'neighborhood café',
+          bizTitle: 'barista',
         } satisfies Record<(typeof EVENT_TEXT_VALUES)[number] | 'petKind' | 'vehicle' | 'homeCity', string | number>;
         const context = { roles, values };
         const texts = [def.title, def.text, ...(def.choices ?? []).map((c) => c.label)];

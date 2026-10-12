@@ -1,0 +1,70 @@
+# W3: businesses. The events the business step queues (every one is a follow-up about your business), and the traits an
+# established business for sale can have.
+
+triggers:
+  opening:
+    events: [biz_opening_day, biz_first_week_nerves]
+  nearFailure:
+    events: [biz_near_failure_bank, biz_near_failure_cut_costs, biz_near_failure_family_offer]
+  failure:
+    events: [biz_failure_closing_day, biz_failure_debts]
+  investorLoss:
+    events: [biz_investor_lost_money_friend, biz_investor_lost_money_family]
+  cofounder:
+    events: [biz_cofounder_dispute, biz_cofounder_credit, biz_cofounder_wants_out]
+  expansion:
+    events: [biz_expansion_chance, biz_expansion_new_city]
+  manager:
+    events: [biz_manager_numbers_off, biz_manager_quits]
+  license:
+    events: [biz_license_lapse]
+
+listingTraits:
+  loyal_regulars:
+    text: "Loyal regulars who have been coming for years"
+    quality: 4
+    reputation: 12
+    earnings: 1.05
+    weight: 8
+  tired_fixtures:
+    text: "Tired fixtures and an owner ready to retire"
+    quality: -8
+    reputation: -4
+    earnings: 0.9
+    weight: 6
+  great_lease:
+    text: "A long lease on a very good corner"
+    quality: 0
+    reputation: 2
+    earnings: 1.12
+    weight: 5
+  one_bad_year:
+    text: "One bad year on the books, and a bad reputation to go with it"
+    quality: -4
+    reputation: -14
+    earnings: 0.75
+    weight: 4
+  well_run:
+    text: "Well run, with staff who have been there a long time"
+    quality: 8
+    reputation: 6
+    earnings: 1.1
+    weight: 6
+  owner_burnout:
+    text: "The owner is exhausted and would take a fair offer"
+    quality: -2
+    reputation: 0
+    earnings: 0.95
+    weight: 6
+  neighborhood_favorite:
+    text: "A neighborhood favorite with a local write-up on the wall"
+    quality: 6
+    reputation: 16
+    earnings: 1.08
+    weight: 4
+  plain:
+    text: "Steady and unremarkable"
+    quality: 0
+    reputation: 0
+    earnings: 1
+    weight: 10

@@ -1,0 +1,40 @@
+id: biz_near_failure_bank
+title: The numbers in the red
+text: >-
+  The report on {business} makes for a hard morning. The money going out is more than the
+  money coming in, and the reserve is nearly gone. You sit in the parking lot a long time
+  before you go in.
+tone: dark
+category: business
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { business: { owned: true } }
+    - { age: { gte: 18 } }
+    - { business: { owned: true, profit: { lt: 0 } } }
+weight: { base: 10 }
+followUpOnly: true
+bindBusiness: true
+choices:
+  - id: loan
+    label: Borrow to keep it going
+    outcome:
+      text: A bank hands you a personal loan on worse terms than you want. The business lives, and so do the payments.
+      effects:
+        - { type: debt, action: add, kind: personal, amount: 12000 }
+        - { type: business, action: quality, delta: 2 }
+  - id: savings
+    label: Put your own savings in
+    outcome:
+      text: You write the check yourself. It's hard to watch it vanish, and harder to imagine not writing it.
+      effects:
+        - { type: business, action: pay, share: 0.05, floor: 2000 }
+        - { type: stat, key: stress, delta: 4 }
+  - id: close
+    label: Close it while you still can
+    outcome:
+      text: You lock up, count what's left, and sell what can be sold. There is grief in it, and a strange lightness.
+      effects:
+        - { type: business, action: close }
+        - { type: stat, key: stress, delta: -4 }

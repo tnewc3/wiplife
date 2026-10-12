@@ -18,6 +18,7 @@ import { giveSampleCrime } from './crime/sample';
 import { giveSampleFame } from './fame/sample';
 import { giveSampleSports } from './sports/sample';
 import { giveSampleBelonging } from './belonging/sample';
+import { giveSampleBusiness } from './business/sample';
 import { consistencyProblems } from './presence';
 import { isPartnerKind } from './relationships';
 import { createLife, resolveChoice } from './life';
@@ -111,6 +112,8 @@ export function previewEvent(content: ContentBundle, options: SandboxOptions): S
     giveSampleSports(d as LifeState, def, cast, content);
     // W2: the faith, the group and the place in it the event asks for.
     giveSampleBelonging(d as LifeState, def, cast, content);
+    // W3: the business, its people and its trouble the event asks for.
+    giveSampleBusiness(d as LifeState, def, cast, content);
     d.phase = 'events';
     d.pending = [{ instanceId: SANDBOX_INSTANCE, eventId: def.id, cast }];
   });

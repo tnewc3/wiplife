@@ -1,0 +1,45 @@
+id: biz_loan_squeeze
+title: The payment letter
+text: >-
+  A letter from the bank reminds you, gently, that the loan on {business} is
+  due again this year. The number is the one you agreed to. It's just larger
+  when you see it in print.
+tone: neutral
+category: business
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { business: { owned: true } }
+    - { age: { gte: 18 } }
+    - { business: { owned: true, loan: true, years: { gte: 1 } } }
+weight: { base: 5 }
+cooldownYears: 4
+bindBusiness: true
+choices:
+  - id: extra
+    label: Pay extra when you can
+    outcome:
+      text: You send a bit more than the minimum, and sleep a little better. The balance goes down faster than you thought it would.
+      effects:
+        - { type: business, action: pay, share: 0.02, floor: 800 }
+        - { type: stat, key: stress, delta: -3 }
+  - id: bank
+    label: Ask the bank for more time
+    check:
+      base: 40
+      stats: [{ key: confidence, weight: 0.25 }, { key: discipline, weight: 0.15 }]
+      success:
+        text: The officer pulls up your history and agrees to stretch the schedule. You exhale for the first time in a week.
+        effects:
+          - { type: stat, key: stress, delta: -4 }
+      failure:
+        text: The bank is sympathetic and unmoved. The officer's tone changes when you say "extension."
+        effects:
+          - { type: stat, key: stress, delta: 4 }
+  - id: normal
+    label: Just keep to the schedule
+    outcome:
+      text: It's a mild year. The payment is made on the day, like all the others, and you try not to think about the next.
+      effects:
+        - { type: stat, key: discipline, delta: 1 }

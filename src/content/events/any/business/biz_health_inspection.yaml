@@ -1,0 +1,50 @@
+id: biz_health_inspection
+title: The inspector
+text: >-
+  A city inspector comes in with a clipboard and a thermometer, and asks to see
+  the back. Everyone in {business} goes very still.
+tone: serious
+category: business
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { business: { owned: true } }
+    - { age: { gte: 18 } }
+    - { business: { owned: true, kind: [food] } }
+weight: { base: 6 }
+cooldownYears: 4
+recurring: true
+bindBusiness: true
+choices:
+  - id: show
+    label: Walk the inspector through it yourself
+    check:
+      base: 50
+      stats: [{ key: discipline, weight: 0.35 }, { key: smarts, weight: 0.1 }]
+      success:
+        text: Everything is labelled, logged and cold where it should be. The inspector signs the card and leaves a sticker for the window.
+        effects:
+          - { type: business, action: reputation, delta: 4 }
+          - { type: stat, key: confidence, delta: 2 }
+      failure:
+        text: The inspector finds a cooler running warm and a log nobody has filled in. There is a fine and a second visit on the calendar.
+        effects:
+          - { type: business, action: pay, share: 0.02, floor: 500 }
+          - { type: business, action: reputation, delta: -4 }
+  - id: staff
+    label: Let the staff handle it
+    visibleIf: { business: { staff: { gte: 1 } } }
+    check:
+      base: 42
+      stats: [{ key: discipline, weight: 0.15 }]
+      success:
+        text: Your people know where everything is. They answer every question like they have been waiting to.
+        effects:
+          - { type: business, action: morale, delta: 6 }
+          - { type: business, action: reputation, delta: 3 }
+      failure:
+        text: Nobody can find the log. The inspector writes it up, and the fine is yours.
+        effects:
+          - { type: business, action: pay, share: 0.02, floor: 500 }
+          - { type: business, action: morale, delta: -4 }

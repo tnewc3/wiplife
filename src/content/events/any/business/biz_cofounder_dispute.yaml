@@ -1,0 +1,56 @@
+id: biz_cofounder_dispute
+title: Not the same plan
+text: >-
+  You and {cofounder.name} have never argued like this before. Tonight in the
+  back office of {business}, it's all you do. You want one thing for the place,
+  and {cofounder.they} want another, and neither of you remembers why you
+  thought you agreed.
+tone: serious
+category: business
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { business: { owned: true } }
+    - { age: { gte: 18 } }
+    - { memory: { role: cofounder, tag: cofounded_with_you } }
+    - { business: { owned: true, cofounder: true } }
+weight: { base: 8 }
+followUpOnly: true
+bindBusiness: true
+cast:
+  cofounder: { business: cofounder, presence: city }
+choices:
+  - id: compromise
+    label: Hammer out a compromise
+    check:
+      base: 50
+      stats: [{ key: kindness, weight: 0.2 }, { key: sociability, weight: 0.2 }]
+      success:
+        text: >-
+          It takes a second pot of coffee, but you each give up the part that
+          mattered least. The plan is better than either of the first two.
+        effects:
+          - { type: relationship, role: cofounder, trust: 6, affection: 3 }
+          - { type: business, action: quality, delta: 3 }
+      failure:
+        text: >-
+          Neither of you will give an inch. You settle on a plan that neither of
+          you wanted, and both resent.
+        effects:
+          - { type: relationship, role: cofounder, trust: -6, affection: -4 }
+          - { type: business, action: morale, delta: -4 }
+  - id: win
+    label: Insist on your way
+    outcome:
+      text: You have the majority of the decisions, and you use them. {cofounder.name} goes quiet and stays that way for weeks.
+      effects:
+        - { type: relationship, role: cofounder, trust: -8, affection: -6 }
+        - { type: stat, key: confidence, delta: 2 }
+  - id: yield
+    label: Let {cofounder.them} have this one
+    outcome:
+      text: You swallow it. It works well enough, and you keep a private list of things to bring up some other time.
+      effects:
+        - { type: relationship, role: cofounder, trust: 3 }
+        - { type: stat, key: stress, delta: 3 }

@@ -5,6 +5,7 @@ import { useAppStore } from '../../../store/appStore';
 import { Button } from '../../components/Button';
 import { Card } from '../../components/Card';
 import { money } from '../../labels';
+import { BusinessCard } from './BusinessCard';
 import { CrimeCard } from './CrimeCard';
 import { FameCard } from './FameCard';
 import { JobCard } from './JobCard';
@@ -21,6 +22,7 @@ export function WorkTab({ life }: { life: LifeState }) {
     <div className="flex flex-col gap-4">
       {life.character.age >= view.minAge - 2 && <JobCard life={life} />}
       <SchoolCard life={life} />
+      <BusinessCard life={life} />
       <CrimeCard life={life} />
       <FameCard life={life} />
       <SportsCard life={life} />

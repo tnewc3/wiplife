@@ -283,6 +283,7 @@ export const DEBT_LABELS: Record<DebtKind, string> = {
   mortgage: 'Mortgage',
   medical: 'Medical bills',
   collections: 'In collections',
+  business: 'Business loan',
   auto: 'Car loan',
 };
 
@@ -317,6 +318,8 @@ export const LEDGER_LABELS = {
   care: 'Care for a relative',
   upkeep: 'Upkeep: pets, vehicles, vacation homes',
   insurance: 'Insurance',
+  giving: 'Dues and donations to your groups',
+  business: 'Put into your businesses to cover a loss',
   supportPaid: 'Child support you paid',
   supportReceived: 'Child support you received',
   debtPayments: 'Debt payments',
@@ -1429,3 +1432,75 @@ export const GROUPS_TITLES = {
 } as const;
 export const hoursLine = (h: number): string => (h === 0 ? 'No time' : `${h} hour${h === 1 ? '' : 's'} a week`);
 export const roleLine = (role: string, years: number): string => `${role}, ${years === 0 ? 'new this year' : `${years} year${years === 1 ? '' : 's'}`}`;
+
+// W3: businesses. Interface words for the decisions and the funding; what a business is like comes from content.
+export const BUSINESS_TITLES = {
+  card: 'Business',
+  screen: 'Business',
+  yours: 'Your businesses',
+  none: 'You don’t own a business yet.',
+  start: 'Start a business',
+  market: 'For sale',
+  report: 'Last year',
+  staff: 'People who work there',
+  locations: 'Locations',
+  owners: 'Who owns it',
+  decisions: 'This year’s decisions',
+  loans: 'Loans',
+  past: 'Businesses you had',
+} as const;
+export const BUSINESS_DECISION_LABELS = {
+  prices: 'Prices',
+  marketing: 'Marketing',
+  qualityInvest: 'Quality',
+  pay: 'Pay',
+  staffing: 'Staffing',
+} as const;
+export const BUSINESS_DECISION_HINTS = {
+  prices: 'Lower prices bring more customers; higher ones bring more from each.',
+  marketing: 'Spend to be noticed. It helps most when little is spent already.',
+  qualityInvest: 'Spend on better ingredients, tools and training.',
+  pay: 'Fair pay keeps people. Low pay saves money until they leave.',
+  staffing: 'More hands serve more customers; fewer save money and wear people out.',
+} as const;
+export const BUSINESS_FUNDING_LABELS = {
+  savings: { name: 'Your savings', blurb: 'All of it from your own pocket.' },
+  loan: { name: 'A business loan', blurb: 'A bank lends part of it. You are personally on the hook.' },
+  investors: { name: 'Family and friends', blurb: 'People you know put money in, and own a share.' },
+  cofounder: { name: 'A co-founder', blurb: 'A partner puts in money and work, and owns a share.' },
+} as const;
+export const BUSINESS_ROLE_LABELS = { self: 'Run it yourself', manager: 'Hire a manager' } as const;
+export const BUSINESS_ROLE_BLURBS = {
+  self: 'You are there every day. Your own skills matter most, and a job on the side suffers.',
+  manager: 'A manager keeps it going while you do something else. A good one keeps it steady; a bad one can run it down quietly.',
+} as const;
+export const BUSINESS_BLOCK_LABELS: Record<string, string> = {
+  age: 'You are too young to run a business',
+  away: 'You can’t while you are away',
+  savings: 'You don’t have enough savings for your share',
+  loanDeclined: 'The bank says no for now',
+  loanAmount: 'That loan is more than the bank will lend',
+  loanOwn: 'The bank wants you to put in more of your own',
+  investorsNone: 'Pick at least one person to ask',
+  investorUnknown: 'One of them isn’t able or willing to invest',
+  investorCapacity: 'One of them can’t put in that much',
+  investorMax: 'Too many investors',
+  stakeCap: 'Together they would own too much of it',
+  cofounderNone: 'Pick a co-founder',
+  cofounderUnknown: 'That person isn’t able or willing to be your partner',
+  cofounderShare: 'Pick a share',
+  name: 'Give it a name (2 to 40 characters, not already used)',
+  type: 'Pick a kind of business',
+  city: 'Pick a city',
+  style: 'Pick a style',
+  full: 'You own as many as you can manage',
+  license: 'The licensed worker you chose no longer fits',
+  role: 'Pick how it is run',
+  listing: 'That one is no longer for sale',
+  bought: 'Already bought',
+  taken: 'Somebody else bought it',
+  plan: 'The plan is not complete',
+};
+export const BUSINESS_END_LABELS = { sold: 'Sold', closed: 'Closed', failed: 'Failed', passed: 'Passed on' } as const;
+export const BUSINESS_HOW_LABELS = { started: 'Started', bought: 'Bought', inherited: 'Inherited' } as const;
+export const businessStakeLine = (share: number, role: 'you' | 'investor' | 'cofounder'): string => `${share}%${role === 'investor' ? ' · investor' : role === 'cofounder' ? ' · co-founder' : ''}`;

@@ -1,0 +1,43 @@
+id: biz_first_week_nerves
+title: The first week
+text: >-
+  Some days of the first week were so quiet you could hear the clock. Others
+  were a rush you were not ready for. {business} is real now, and you are
+  tired in a new way.
+tone: neutral
+category: business
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { business: { owned: true } }
+    - { age: { gte: 18 } }
+    - { business: { owned: true, years: { lte: 1 } } }
+weight: { base: 8 }
+followUpOnly: true
+bindBusiness: true
+choices:
+  - id: late
+    label: Stay late every night until it runs smoothly
+    outcome:
+      text: You learn where everything goes, and where it should not. The place is better for it; you are not.
+      effects:
+        - { type: business, action: quality, delta: 4 }
+        - { type: stat, key: stress, delta: 5 }
+  - id: handouts
+    label: Hand out coupons on the street
+    outcome:
+      text: >-
+        The coupons cost you a little, and they bring in a trickle of people who
+        would not have come in. A few of them come back.
+      effects:
+        - { type: business, action: pay, share: 0.01, floor: 150 }
+        - { type: business, action: buzz, delta: 8, years: 1 }
+  - id: trust
+    label: Trust the people you have
+    visibleIf: { business: { staff: { gte: 1 } } }
+    outcome:
+      text: You go home on time for once. In the morning, the people who work there tell you what they changed. It is mostly good.
+      effects:
+        - { type: business, action: morale, delta: 5 }
+        - { type: stat, key: stress, delta: -2 }

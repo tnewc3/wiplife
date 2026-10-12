@@ -1,0 +1,46 @@
+id: biz_staff_family_emergency
+title: A phone call during the lunch rush
+text: >-
+  {staff.name} takes a call in the back, and comes out with {staff.their} face
+  gone pale. A parent has been taken to the hospital, three hours away.
+  {staff.they} {staff:is|are} still trying to finish the shift.
+tone: serious
+category: business
+rarity: uncommon
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { business: { owned: true } }
+    - { age: { gte: 18 } }
+    - { business: { owned: true, staff: { gte: 1 } } }
+weight: { base: 3 }
+cooldownYears: 6
+bindBusiness: true
+cast:
+  staff: { business: staff, presence: city }
+choices:
+  - id: paid
+    label: Send {staff.them} home with a week of pay
+    outcome:
+      text: You cover the shifts yourself and the cost comes out of your pocket. When {staff.name} returns, {staff.they} remember it.
+      effects:
+        - { type: business, action: pay, share: 0.008, floor: 400 }
+        - { type: business, action: staffMorale, role: staff, delta: 12 }
+        - { type: relationship, role: staff, affection: 6, trust: 6 }
+        - { type: memory, role: staff, tag: you_were_there_for_their_family }
+  - id: unpaid
+    label: Give {staff.them} the days, unpaid
+    outcome:
+      text: You say yes, and {staff.name} goes. There is relief on {staff.their} face, and some other emotion you can't quite read.
+      effects:
+        - { type: business, action: staffMorale, role: staff, delta: 3 }
+        - { type: stat, key: stress, delta: 3 }
+  - id: stay
+    label: Ask {staff.them} to finish the week
+    outcome:
+      text: >-
+        You explain that you can't cover the shifts. {staff.name} nods, and goes
+        home on Friday in silence. Nobody at {business} mentions it again.
+      effects:
+        - { type: business, action: staffMorale, role: staff, delta: -16 }
+        - { type: relationship, role: staff, affection: -10, trust: -8 }

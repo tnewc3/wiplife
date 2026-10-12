@@ -1,0 +1,8 @@
+id: marrow_and_maple
+name: "Marrow & Maple Coffee Co."
+type: cafe
+style: standard
+blurb: "Forty-minute lines, a recognizable green awning and a franchise handbook as thick as a phone book."
+locations: { min: 4, max: 7 }
+cities: [chicago, houston, nyc]
+reputation: { mean: 62, sd: 6 }

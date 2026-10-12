@@ -1,0 +1,46 @@
+id: biz_bad_review
+title: One star
+text: >-
+  Somebody has written a long, furious review of {business} online. It is
+  mostly wrong, and one sentence in the middle is not.
+tone: serious
+category: business
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { business: { owned: true } }
+    - { age: { gte: 18 } }
+    - { business: { owned: true, years: { gte: 1 } } }
+weight: { base: 7 }
+cooldownYears: 3
+bindBusiness: true
+choices:
+  - id: reply
+    label: Reply, politely and in public
+    check:
+      base: 50
+      stats: [{ key: kindness, weight: 0.25 }, { key: confidence, weight: 0.15 }]
+      success:
+        text: Your answer is short, specific and kind. The reviewer edits their post, and strangers say nice things about how you handled it.
+        effects:
+          - { type: business, action: reputation, delta: 3 }
+      failure:
+        text: Your reply sounds defensive once it is posted. People screenshot it.
+        effects:
+          - { type: business, action: reputation, delta: -4 }
+          - { type: stat, key: stress, delta: 3 }
+  - id: fix
+    label: Fix the thing the review got right
+    outcome:
+      text: It takes a week and a little effort and some of your own money, but the sentence in the middle stops being true.
+      effects:
+        - { type: business, action: pay, share: 0.015, floor: 200 }
+        - { type: business, action: quality, delta: 5 }
+  - id: ignore
+    label: Ignore it
+    outcome:
+      text: You close the tab. For a while, you notice who comes in and who doesn't.
+      effects:
+        - { type: business, action: reputation, delta: -3 }
+        - { type: stat, key: stress, delta: 2 }

@@ -1,0 +1,40 @@
+id: biz_failure_comeback
+title: Again?
+text: >-
+  The sting of the closing has faded just enough. Someone you trust says, quite
+  casually, that people who fail once at this usually do better the second time.
+  You haven't decided how you feel about that.
+tone: neutral
+category: bizpast
+rarity: uncommon
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { business: { failedWithin: 8 } }
+    - { age: { gte: 21 } }
+    - { business: { failedWithin: 6 } }
+    - { business: { owned: false } }
+    - { finances: { debt: { lt: 20000 } } }
+weight: { base: 3 }
+cooldownYears: 8
+choices:
+  - id: yes
+    label: Start thinking about the next one
+    outcome:
+      text: The old mistakes are easier to see now. You start a list titled "this time."
+      effects:
+        - { type: flag, key: thinking_about_a_business, value: true }
+        - { type: stat, key: ambition, delta: 2 }
+        - { type: stat, key: confidence, delta: 2 }
+  - id: no
+    label: Say you're done with it
+    outcome:
+      text: You say it aloud, and it doesn't hurt as much as you thought it would. Something else will do.
+      effects:
+        - { type: stat, key: stress, delta: -3 }
+  - id: wait
+    label: Give it a few more years
+    outcome:
+      text: It's an answer neither of you can argue with. The thought goes into the back of the drawer.
+      effects:
+        - { type: stat, key: discipline, delta: 1 }

@@ -1,0 +1,46 @@
+id: biz_equipment_breaks
+title: It stopped
+text: >-
+  The most important machine in {business} makes a sound like a coughing
+  animal, and then no sound at all. It is the busiest hour of the week.
+tone: serious
+category: business
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { business: { owned: true } }
+    - { age: { gte: 18 } }
+    - { business: { owned: true, years: { gte: 1 } } }
+weight: { base: 6 }
+cooldownYears: 3
+bindBusiness: true
+choices:
+  - id: replace
+    label: Replace it today
+    outcome:
+      text: A new one arrives by the end of the afternoon on a delivery truck. It costs a lot, and the line never leaves.
+      effects:
+        - { type: business, action: pay, share: 0.05, floor: 1200 }
+        - { type: business, action: quality, delta: 3 }
+  - id: repair
+    label: Pay for a quick repair
+    check:
+      base: 50
+      stats: [{ key: luck, weight: 0.2 }]
+      success:
+        text: The repair person grunts, tightens something, and it hums again. They charge for an hour and save you a week.
+        effects:
+          - { type: business, action: pay, share: 0.015, floor: 300 }
+      failure:
+        text: It starts, runs for an hour, and stops again. You pay twice before you finally replace it.
+        effects:
+          - { type: business, action: pay, share: 0.06, floor: 1500 }
+          - { type: stat, key: stress, delta: 4 }
+  - id: limp
+    label: Limp along without it
+    outcome:
+      text: Everything takes twice as long. People are patient for a week, and then they are not.
+      effects:
+        - { type: business, action: quality, delta: -6 }
+        - { type: business, action: reputation, delta: -3 }

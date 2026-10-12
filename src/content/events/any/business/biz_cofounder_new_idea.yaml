@@ -1,0 +1,41 @@
+id: biz_cofounder_new_idea
+title: One more location
+text: >-
+  {cofounder.name} has been driving around the city and has found a space for
+  a second {bizType}. {cofounder.they} {cofounder:has|have} drawn it up on a
+  napkin, and the napkin is surprisingly convincing.
+tone: light
+category: business
+rarity: uncommon
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { business: { owned: true } }
+    - { age: { gte: 18 } }
+    - { memory: { role: cofounder, tag: cofounded_with_you } }
+    - { business: { owned: true, cofounder: true, years: { gte: 2 }, profit: { gt: 0 } } }
+weight: { base: 5 }
+cooldownYears: 6
+bindBusiness: true
+cast:
+  cofounder: { business: cofounder, presence: city }
+choices:
+  - id: yes
+    label: Say yes and sign the lease
+    outcome:
+      text: You open a second place, with the same sign and a new set of problems. {cofounder.name} is thrilled.
+      effects:
+        - { type: business, action: expand }
+        - { type: relationship, role: cofounder, affection: 5, trust: 3 }
+  - id: wait
+    label: Ask to wait a year
+    outcome:
+      text: "{cofounder.name} agrees, and files the napkin. It comes up again in conversation more than once."
+      effects:
+        - { type: relationship, role: cofounder, trust: 1, affection: -2 }
+  - id: no
+    label: Say no
+    outcome:
+      text: Not now, not like this. {cofounder.name} takes it better than you expected, and that worries you slightly.
+      effects:
+        - { type: relationship, role: cofounder, affection: -4 }

@@ -136,3 +136,5 @@ flags:
   found_faith: You came to believe, and found a faith
   converted: You took up a different faith
   left_faith: You stopped believing
+  # W3: businesses.
+  thinking_about_a_business: You started to think about a business of your own

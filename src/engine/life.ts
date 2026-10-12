@@ -11,7 +11,7 @@
 import { giveNeuro, rollNeuro } from './mental/neuro';
 import { emptyMental } from './mental/query';
 import { produce } from 'immer';
-import { POSSESSION_ROLES, type ChoiceDef, type ContentBundle, type Outcome } from '../content/schemas';
+import { BUSINESS_ROLE, POSSESSION_ROLES, type ChoiceDef, type ContentBundle, type Outcome } from '../content/schemas';
 import { evaluate } from './conditions';
 import {
   activeIds,
@@ -53,6 +53,7 @@ import { emptySports } from './sports/query';
 import { emptyLater } from './later/query';
 import { terminalDeathChance, TERMINAL_ID } from './later/terminal';
 import { emptyBelonging } from './belonging/query';
+import { emptyBusiness } from './business/query';
 import { startBelonging } from './belonging/start';
 
 export type { CreateLifeOptions, CustomLifeInput } from './creation/input';
@@ -185,6 +186,7 @@ export function createLife(input: CreateLifeOptions, content: ContentBundle): Li
     sports: emptySports(),
     later: emptyLater(),
     belonging: emptyBelonging(),
+    business: emptyBusiness(),
   };
   // M1: ADHD and neurodivergence are inherited in part: your parents and siblings (and grandparents) may have them, and you are likelier to if a parent does.
   for (const person of Object.values(life.people)) {
@@ -409,6 +411,8 @@ export function resolveChoice(state: LifeState, instanceId: Id, choiceId: Id, co
     draft.pending = draft.pending.filter(
       (p) => p.resolvedChoiceId !== undefined || Object.entries(p.cast).every(([role, id]) => !(Object.values(POSSESSION_ROLES) as string[]).includes(role) || draft.possessions.items.some((q) => q.id === id)),
     );
+    // W3: an event about a business you no longer have (an earlier one this year sold or closed it) doesn't happen.
+    draft.pending = draft.pending.filter((p) => p.resolvedChoiceId !== undefined || p.cast[BUSINESS_ROLE] === undefined || draft.business.items.some((b) => b.id === p.cast[BUSINESS_ROLE]));
     // A management action's result stays on screen until finishAction.
     if (draft.phase === 'action') return;
     // A death, or being taken to prison, ends the year's remaining events.

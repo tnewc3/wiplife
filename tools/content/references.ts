@@ -54,6 +54,7 @@ import { mentalSafetyErrors } from './mentalSafety';
 import { checkPeople } from './people';
 import { checkWeb } from './web';
 import { checkBelonging } from './belonging';
+import { checkBusiness } from './business';
 import { checkPossessions } from './possessions';
 import { checkTeen } from './teen';
 import { checkCrime } from './crime';
@@ -199,6 +200,7 @@ export function checkReferences(
   errors.push(...checkEulogy(bundle));
   errors.push(...checkLater(bundle, fileOf, options.partialEvents === true));
   errors.push(...checkBelonging(bundle, fileOf, options.partialEvents === true));
+  errors.push(...checkBusiness(bundle, fileOf, options.partialEvents === true));
 
   return errors;
 }
@@ -529,6 +531,8 @@ function checkEvents(bundle: ContentBundle, fileOf: (typeKey: CollectionKey, id:
     ...laterResults(bundle.registries.later).flatMap((r) => r.events),
     // W2: what the belonging step queues (an invitation, a role, a decision about drifting away).
     ...Object.values(bundle.registries.belonging.triggers).flatMap((r) => r.events),
+    // W3: what the business step queues (an opening, near failure, failure, a dispute, a chance to expand...).
+    ...Object.values(bundle.registries.business.triggers).flatMap((r) => r.events),
     // E6a: what the crime step queues (a year's jobs, a promotion, an arrest, a raid, the past catching up...).
     ...bundle.registries.crime.jobs,
     ...Object.values(bundle.registries.crime.triggers).flatMap((r) => r.events),

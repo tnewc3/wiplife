@@ -1,0 +1,8 @@
+id: hearth_and_hammer
+name: "Hearth & Hammer Home Goods"
+type: shop
+style: standard
+blurb: "Everything for the house, in the same warm lighting in every city."
+locations: { min: 4, max: 8 }
+cities: [chicago, nyc, los_angeles]
+reputation: { mean: 58, sd: 7 }

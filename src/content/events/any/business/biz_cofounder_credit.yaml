@@ -1,0 +1,53 @@
+id: biz_cofounder_credit
+title: Whose idea was it?
+text: >-
+  A reporter profiles {business}, and in the article, the best idea you ever had
+  belongs to {cofounder.name}. {cofounder.they} didn't correct the reporter.
+  You read it three times standing up.
+tone: serious
+category: business
+rarity: uncommon
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { business: { owned: true } }
+    - { age: { gte: 18 } }
+    - { memory: { role: cofounder, tag: cofounded_with_you } }
+    - { business: { owned: true, cofounder: true, years: { gte: 1 } } }
+weight: { base: 6 }
+followUpOnly: true
+bindBusiness: true
+cast:
+  cofounder: { business: cofounder, presence: city }
+choices:
+  - id: raise
+    label: Bring it up directly
+    check:
+      base: 50
+      stats: [{ key: confidence, weight: 0.3 }, { key: kindness, weight: 0.1 }]
+      success:
+        text: >-
+          {cofounder.name} goes red, apologizes, and the next interview sets the
+          record straight. Your partnership is stronger for having had the talk.
+        effects:
+          - { type: relationship, role: cofounder, trust: 5 }
+          - { type: stat, key: confidence, delta: 2 }
+      failure:
+        text: "{cofounder.name} says it was a misunderstanding, and that you're being petty. You can't tell if you are."
+        effects:
+          - { type: relationship, role: cofounder, trust: -6, affection: -4 }
+  - id: let
+    label: Let it go
+    outcome:
+      text: It's one article. By the weekend it's forgotten by everyone but you.
+      effects:
+        - { type: stat, key: stress, delta: 3 }
+  - id: story
+    label: Give your own interview
+    outcome:
+      text: >-
+        You tell the story your way, with fair credit to both of you. It reads as
+        generous, and it works for the business.
+      effects:
+        - { type: business, action: reputation, delta: 3 }
+        - { type: relationship, role: cofounder, trust: 2 }

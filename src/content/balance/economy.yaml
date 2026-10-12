@@ -69,6 +69,8 @@ interest:
     collections: 0.05
     # E5: a car loan.
     auto: 0.07
+    # W3: a business loan (a new business's own rate is set when it is taken: balance/business.yaml funding.loan).
+    business: 0.085
 
 debts:
   # A debt's yearly minimum payment would pay it off in this many years.
@@ -79,6 +81,7 @@ debts:
     medical: 3
     collections: 4
     auto: 5
+    business: 7
   # No minimum payment is smaller than this (or the balance, if less).
   minPayment: 300
 
@@ -191,6 +194,10 @@ costs:
   assisted_move_in: { amount: 6500, familyHelp: false }
   grandchild_wedding_gift: { amount: 700, familyHelp: false }
   reunion_trip: { amount: 900, familyHelp: false }
+  # W3: businesses. What a closed business's leftover equipment brings (paid to you with `repay`), and what you hand back to someone who lost money in it.
+  biz_salvage: { amount: 1500, familyHelp: false }
+  biz_repay_start: { amount: 600, familyHelp: false }
+  biz_repay_more: { amount: 1000, familyHelp: false }
   # W2: belonging. A collection for a group, a larger gift to it, a trip home for a holy day, and a weekend's retreat.
   group_fundraiser: { amount: 150, familyHelp: false }
   group_donation: { amount: 400, familyHelp: false }

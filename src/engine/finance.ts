@@ -10,6 +10,7 @@
  * amounts are kept within safe integer limits.
  */
 import type { ContentBundle, DebtKind } from '../content/schemas';
+import { businessValue } from './business/value';
 import { detachDebt, possessionsValue } from './possessions/query';
 import { writeFromGroup } from './systems/history';
 import type { Debt, Id, LifeState } from './types';
@@ -33,9 +34,9 @@ export function totalDebt(state: LifeState): number {
   return wholeDollars(state.finances.debts.reduce((sum, d) => sum + d.balance, 0));
 }
 
-/** Savings (and any money held in trust) plus the value of your home, vehicles and vacation homes, minus every debt. */
+/** Savings (and any money held in trust) plus the value of your home, vehicles, vacation homes and your share of your businesses, minus every debt. */
 export function netWorth(state: LifeState): number {
-  return wholeDollars(state.finances.savings + (state.finances.trust?.balance ?? 0) + (state.housing.homeValue ?? 0) + possessionsValue(state) - totalDebt(state));
+  return wholeDollars(state.finances.savings + (state.finances.trust?.balance ?? 0) + (state.housing.homeValue ?? 0) + possessionsValue(state) + businessValue(state) - totalDebt(state));
 }
 
 /** The most payments in a row missed on any one debt. */
@@ -185,7 +186,7 @@ export function payDebt(state: LifeState, debtId: Id, amount: number, content: C
 }
 
 /** Kinds help or forgiveness can reach by default: everything but the mortgage. */
-const FORGIVABLE: readonly DebtKind[] = ['student', 'personal', 'medical', 'collections'];
+const FORGIVABLE: readonly DebtKind[] = ['student', 'personal', 'medical', 'collections', 'business'];
 
 /** Writes off `share` of every debt of these kinds (someone helped, or a lender settled). */
 export function forgiveDebts(state: LifeState, share: number, content: ContentBundle, kinds: readonly DebtKind[] = FORGIVABLE): void {
@@ -201,10 +202,11 @@ export function forgiveDebts(state: LifeState, share: number, content: ContentBu
 }
 
 /** Debts bankruptcy clears. Student loans survive it, and a mortgage stays with its home. */
-const DISCHARGED: readonly DebtKind[] = ['personal', 'medical', 'collections'];
+const DISCHARGED: readonly DebtKind[] = ['personal', 'medical', 'collections', 'business'];
 
 /** Files for bankruptcy: personal, medical and collections debt are cleared. */
 export function declareBankruptcy(state: LifeState): void {
+  for (const d of state.finances.debts) if (DISCHARGED.includes(d.kind)) detachDebt(state, d.id);
   state.finances.debts = state.finances.debts.filter((d) => !DISCHARGED.includes(d.kind));
   state.finances.bankruptcyYear = state.currentYear;
   state.finances.hardshipYears = 0;

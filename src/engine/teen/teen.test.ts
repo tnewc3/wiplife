@@ -758,7 +758,7 @@ describe('the yearly step', () => {
   it('runs through whole lives without breaking an invariant', () => {
     for (let i = 0; i < 15; i++) {
       let life = lifeAtAge(`step-${i}`, 11);
-      for (let y = 0; y < 9; y++) {
+      for (let y = 0; y < 9 && life.phase !== 'dead'; y++) {
         life = playYear(life, content);
         expect(checkInvariants(life, content).filter((f) => !/input log|recap|lifetime|history/.test(f)), `${i} at ${life.character.age}`).toEqual([]);
       }

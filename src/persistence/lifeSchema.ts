@@ -4,7 +4,7 @@
  * an unexpected field means the save needs a migration, not silent dropping.
  */
 import { z } from 'zod';
-import type { ContentBundle } from '../content/schemas';
+import { BUSINESS_STYLES, MARKETING_LEVELS, OWNER_ROLES, PAY_LEVELS, PRICE_LEVELS, QUALITY_LEVELS, STAFFING_LEVELS, type ContentBundle } from '../content/schemas';
 import { checkInvariants } from '../engine/invariants';
 import { isRngState, type RngState } from '../engine/rng';
 import type { LifeState } from '../engine/types';
@@ -339,7 +339,7 @@ const finances = z.strictObject({
   debts: z.array(
     z.strictObject({
       id,
-      kind: z.enum(['student', 'personal', 'mortgage', 'medical', 'collections', 'auto']),
+      kind: z.enum(['student', 'personal', 'mortgage', 'medical', 'collections', 'auto', 'business']),
       balance: dollars,
       annualRate: z.number().min(0).max(1),
       minPayment: dollars,
@@ -367,6 +367,7 @@ const finances = z.strictObject({
       upkeep: dollars,
       insurance: dollars,
       giving: dollars,
+      business: dollars,
       net: dollars,
     })
     .exactOptional(),
@@ -734,6 +735,106 @@ const sports = z.strictObject({
   }),
 });
 
+// W3: businesses.
+const levelOf = <T extends readonly [string, ...string[]]>(values: T) => z.enum(values);
+const locationResult = z.strictObject({ year: int, demand: int.min(0), customers: int.min(0), revenue: dollars, rent: dollars, wages: dollars, supplies: dollars, other: dollars, profit: int });
+const business = z.strictObject({
+  id: filled,
+  defId: id,
+  name: filled,
+  cityId: id,
+  style: levelOf(BUSINESS_STYLES),
+  founded: int,
+  how: z.enum(['started', 'bought', 'inherited']),
+  chainId: id.exactOptional(),
+  locations: z.array(z.strictObject({ id: filled, cityId: id, style: levelOf(BUSINESS_STYLES), opened: int, result: locationResult.exactOptional() })).min(1),
+  staff: z.array(
+    z.strictObject({
+      personId: id,
+      locationId: filled.nullable(),
+      title: filled,
+      skill: score,
+      morale: score,
+      since: int,
+      licensed: z.boolean(),
+      raise: z.number().min(1).max(10),
+      manager: z.literal(true).exactOptional(),
+      honesty: score.exactOptional(),
+      wage: dollars,
+    }),
+  ),
+  owners: z
+    .array(z.strictObject({ id: filled, name: filled, share: int.min(1).max(100), put: dollars, year: int, paid: dollars, role: z.enum(['you', 'investor', 'cofounder']) }))
+    .min(1),
+  prices: levelOf(PRICE_LEVELS),
+  marketing: levelOf(MARKETING_LEVELS),
+  qualityInvest: levelOf(QUALITY_LEVELS),
+  pay: levelOf(PAY_LEVELS),
+  staffing: levelOf(STAFFING_LEVELS),
+  role: levelOf(OWNER_ROLES),
+  quality: score,
+  reputation: score,
+  morale: score,
+  cash: dollars,
+  assets: dollars,
+  loanIds: z.array(filled),
+  profits: z.array(int),
+  lossYears: int.min(0),
+  skimmed: dollars,
+  auditedYear: int.exactOptional(),
+  shocks: z.array(z.strictObject({ kind: z.enum(['buzz', 'rival']), mult: z.number().min(0.1).max(5), until: int })),
+  report: z
+    .strictObject({
+      year: int,
+      customers: int.min(0),
+      customersBefore: int.min(0),
+      demand: int.min(0),
+      revenue: dollars,
+      rent: dollars,
+      wages: dollars,
+      supplies: dollars,
+      marketing: dollars,
+      quality: dollars,
+      other: dollars,
+      profit: int,
+      loanPayments: dollars,
+      paidOut: dollars,
+      draw: dollars,
+      injected: dollars,
+      cash: dollars,
+      morale: score,
+      reputation: score,
+      qualityScore: score,
+      quit: int.min(0),
+      notes: z.array(filled),
+      locations: z.array(locationResult),
+    })
+    .nullable(),
+});
+const businessState = z.strictObject({
+  items: z.array(business),
+  nextBusiness: int.min(1),
+  nextLocation: int.min(1),
+  taken: z.array(filled),
+  past: z.array(
+    z.strictObject({
+      name: filled,
+      defId: id,
+      style: levelOf(BUSINESS_STYLES),
+      cityId: id,
+      fromYear: int,
+      toYear: int,
+      end: z.enum(['sold', 'closed', 'failed', 'passed']),
+      totalProfit: int,
+      net: int,
+    }),
+  ),
+  offered: z.record(z.string(), int),
+  year: z.strictObject({ year: int, draw: dollars, inject: dollars }),
+  experience: z.record(z.string(), int.min(0)),
+  worth: dollars,
+});
+
 const settlement = z.strictObject({
   year: int,
   source: z.enum(['will', 'default']),
@@ -762,6 +863,8 @@ const settlement = z.strictObject({
   unclaimed: dollars.min(0),
   possessions: z.array(z.strictObject({ possessionId: id, toPersonId: id, item: possession, loan: dollars.min(0) })),
   possessionSales: dollars.min(0),
+  businesses: z.array(z.strictObject({ businessId: id, toPersonId: id, item: business, loan: dollars.min(0) })),
+  businessSales: dollars.min(0),
 });
 
 const lineage = z.strictObject({
@@ -950,6 +1053,7 @@ export const lifeStateSchema: z.ZodType<LifeState> = z.strictObject({
   sports,
   later,
   belonging,
+  business: businessState,
 });
 
 /**

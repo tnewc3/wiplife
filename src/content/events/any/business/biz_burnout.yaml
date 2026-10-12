@@ -1,0 +1,46 @@
+id: biz_burnout
+title: Nothing left
+text: >-
+  You can't remember the last full day off. You unlock {business} at dawn, lock
+  it at night, and the part of you that used to care about it has quietly gone
+  quiet.
+tone: dark
+category: business
+rarity: uncommon
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { business: { owned: true } }
+    - { age: { gte: 18 } }
+    - { business: { owned: true, role: [self], years: { gte: 2 } } }
+    - { stat: stress, gte: 60 }
+weight: { base: 5 }
+cooldownYears: 5
+bindBusiness: true
+choices:
+  - id: rest
+    label: Close for a week and take it off
+    outcome:
+      text: >-
+        The sign says "back Monday." You sleep for two days. You lose a
+        week of customers, and you do not regret a minute.
+      effects:
+        - { type: business, action: reputation, delta: -2 }
+        - { type: stat, key: stress, delta: -14 }
+        - { type: stat, key: happiness, delta: 5 }
+  - id: delegate
+    label: Hand off the opening shifts
+    visibleIf: { business: { staff: { gte: 1 } } }
+    outcome:
+      text: You teach someone to open. For the first time in months, you wake up when the light does.
+      effects:
+        - { type: business, action: morale, delta: 3 }
+        - { type: stat, key: stress, delta: -8 }
+  - id: push
+    label: Push through
+    outcome:
+      text: You make it to Friday. The following Monday you realise you've been forgetting to eat.
+      effects:
+        - { type: stat, key: stress, delta: 6 }
+        - { type: stat, key: health, delta: -4 }
+        - { type: stat, key: happiness, delta: -4 }

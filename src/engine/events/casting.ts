@@ -28,7 +28,9 @@ import { enrollFan, fanAgeRange, forgetFans } from '../fame/fans';
 import { fanPeople } from '../fame/query';
 import { groupPool } from '../belonging/cities';
 import { instanceOf } from '../belonging/query';
-import { GROUP_ROLE } from '../../content/schemas';
+import { BUSINESS_ROLE, GROUP_ROLE } from '../../content/schemas';
+import { businessById, livingStaff, managerOf } from '../business/query';
+import { businessPool } from '../business/pool';
 
 function personAge(state: LifeState, person: Person): number {
   return state.currentYear - person.birthYear;
@@ -51,7 +53,7 @@ function fitsAge(state: LifeState, spec: CastSpec, age: number): boolean {
  * and wellbeing events), a partner who lives with you is always a candidate,
  * first, whatever the thresholds: they are there, so they notice.
  */
-export function castCandidates(state: LifeState, spec: CastSpec, content: ContentBundle, preferHousehold = false, groupId?: Id): Person[] {
+export function castCandidates(state: LifeState, spec: CastSpec, content: ContentBundle, preferHousehold = false, groupId?: Id, businessId?: Id): Person[] {
   const support = content.balance.relationships.support;
   // E2a: someone who has died is only ever passed in, never found.
   if (spec.deceased) return [];
@@ -77,6 +79,9 @@ export function castCandidates(state: LifeState, spec: CastSpec, content: Conten
         // W2: someone from the group the event is about (or from any group of yours): a friend among its people.
         const inGroup = groupId !== undefined ? (instanceOf(state, groupId)?.people ?? []) : state.belonging.memberships.flatMap((m) => instanceOf(state, m.groupId)?.people ?? []);
         if (!inGroup.includes(id) || rel.kind !== 'friend' || rel.status !== 'active') return [];
+      } else if (spec.business) {
+        // W3: someone from the business the event is about (or from any business of yours).
+        if (!businessPeopleFor(state, spec.business, businessId).includes(id) || rel.status !== 'active') return [];
       } else if (spec.fan) {
         // E6b: one of your fan people (or the stalker among your superfans).
         if (!fanPeople(state, spec.fan).includes(id) || rel.status !== 'active') return [];
@@ -103,6 +108,18 @@ export function castCandidates(state: LifeState, spec: CastSpec, content: Conten
     found.sort((a, b) => first(b) - first(a) || rel(b).trust - rel(a).trust || rel(b).affection - rel(a).affection);
   }
   return found;
+}
+
+/** W3: the people of the business (or of every business of yours) who fill a business role. */
+function businessPeopleFor(state: LifeState, role: NonNullable<CastSpec['business']>, businessId?: Id): Id[] {
+  const list = businessId !== undefined ? [businessById(state, businessId)].filter((b) => b !== undefined) : state.business.items;
+  return list.flatMap((b) => {
+    if (role === 'investor' || role === 'cofounder') return b!.owners.filter((o) => o.role === role).map((o) => o.id);
+    const staff = livingStaff(state, b!);
+    if (role === 'manager') return managerOf(b!) ? [managerOf(b!)!.personId] : [];
+    if (role === 'licensed') return staff.filter((s) => s.licensed).map((s) => s.personId);
+    return staff.filter((s) => !s.manager).map((s) => s.personId);
+  });
 }
 
 /** The next free person id (p1, p2...). */
@@ -269,6 +286,12 @@ export function castEvent(
       cast[role] = id;
       continue;
     }
+    // W3: and the business a follow-up is about.
+    if (role === BUSINESS_ROLE) {
+      if (!businessById(view, id)) return fail();
+      cast[role] = id;
+      continue;
+    }
     // E5: the possession a follow-up is about must still be yours (a pet that died this year still counts for its own event).
     if ((Object.values(POSSESSION_ROLES) as string[]).includes(role)) {
       if (!possessionById(view, id)) return fail();
@@ -287,11 +310,17 @@ export function castEvent(
     if (fitting.length === 0) return fail();
     cast[GROUP_ROLE] = pick(rng, fitting);
   }
+  // W3: the business the event is about, picked among those that make its requirements true (before the people, who may come from it).
+  if (def.bindBusiness && cast[BUSINESS_ROLE] === undefined) {
+    const fitting = businessPool(view).filter((id) => evaluate(def.requires, view, { cast: { ...cast, [BUSINESS_ROLE]: id }, roles: 'assumeTrue', content }));
+    if (fitting.length === 0) return fail();
+    cast[BUSINESS_ROLE] = pick(rng, fitting);
+  }
   for (const role of Object.keys(def.cast ?? {}).sort()) {
     if (cast[role] !== undefined) continue;
     const spec = def.cast![role]!;
     const preferHousehold = content.registries.categories.categories[def.category]?.household === true;
-    const options = castCandidates(view, spec, content, preferHousehold, cast[GROUP_ROLE]).filter((p) => !used.has(p.id));
+    const options = castCandidates(view, spec, content, preferHousehold, cast[GROUP_ROLE], cast[BUSINESS_ROLE]).filter((p) => !used.has(p.id));
     const canCreate =
       spec.createIfMissing === true && spec.kind !== undefined && (CREATABLE_KINDS as readonly string[]).includes(spec.kind) && (spec.crew === undefined || (spec.crew === 'rival' && state.crime.crew !== null)) && (spec.fan === undefined || (spec.fan !== 'stalker' && state.fame.active));
     const wantsNew = canCreate && spec.newChance !== undefined && chance(rng, spec.newChance);

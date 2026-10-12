@@ -1,0 +1,45 @@
+id: biz_near_failure_family_offer
+title: An envelope on the table
+text: >-
+  {relative.name} finds out how {business} is doing, and turns up at your door
+  with an envelope. "It isn't a gift," {relative.they} {relative:says|say}.
+  "It's a loan. Don't make it weird."
+tone: neutral
+category: business
+rarity: uncommon
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { business: { owned: true } }
+    - { age: { gte: 18 } }
+    - { business: { owned: true, profit: { lt: 0 } } }
+    - { role: relative, alive: true, affection: { gte: 55 } }
+weight: { base: 8 }
+followUpOnly: true
+bindBusiness: true
+cast:
+  relative: { kind: sibling, presence: nearby }
+choices:
+  - id: accept
+    label: Accept it, and write down the terms
+    outcome:
+      text: >-
+        You put the envelope in the till and the terms on paper. {relative.name}
+        says you can pay it back whenever. You intend to pay it back sooner.
+      effects:
+        - { type: business, action: receive, share: 0.04, floor: 1800 }
+        - { type: relationship, role: relative, trust: 3 }
+  - id: refuse
+    label: Thank {relative.them} and refuse
+    outcome:
+      text: You can't stand to be beholden. {relative.name} tucks the envelope away, hurt and relieved in equal measure.
+      effects:
+        - { type: relationship, role: relative, affection: -2 }
+        - { type: stat, key: stress, delta: 2 }
+  - id: partial
+    label: Take part of it
+    outcome:
+      text: A compromise that doesn't feel like one. You take a fraction, and promise to use it carefully.
+      effects:
+        - { type: business, action: receive, share: 0.02, floor: 900 }
+        - { type: relationship, role: relative, trust: 2 }

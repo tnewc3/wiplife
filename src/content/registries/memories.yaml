@@ -237,3 +237,11 @@ tags:
   # W2: belonging.
   met_through_a_group: You got to know each other in a group
   were_there_in_hospital: You were there when {npc.they} {npc:was|were} in the hospital
+  # W3: businesses.
+  invested_in_your_business: "{npc.they} put money into your business"
+  cofounded_with_you: "You started a business together"
+  made_money_in_your_business: "{npc.they} made money from your business"
+  lost_money_in_your_business: "{npc.they} lost money in your business"
+  stole_from_your_business: "{npc.they} took money from your business"
+  you_gave_them_work: "You gave {npc.them} work"
+  you_were_there_for_their_family: "You were there for {npc.them} when family needed {npc.them}"

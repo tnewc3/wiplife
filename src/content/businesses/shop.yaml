@@ -1,0 +1,70 @@
+id: shop
+name: Shop
+noun: shop
+kind: retail
+blurb: "Shelves, a till and a window you dress yourself."
+occupation: retail_associate
+staffTitle: shop assistant
+managerTitle: store manager
+skills:
+  - { key: ambition, weight: 0.25 }
+  - { key: smarts, weight: 0.25 }
+  - { key: sociability, weight: 0.2 }
+  - { key: discipline, weight: 0.2 }
+styles:
+  budget:
+    label: Discount store
+    blurb: "Plain shelves, big signs and prices that make people double back."
+    startup: 42000
+    rent: 22000
+    staff: 2
+    capacity: 18000
+    demand: 15000
+    spend: 24
+    supplies: 0.62
+    wage: 27000
+    quality: 38
+    elasticity: 2.2
+  standard:
+    label: Neighborhood shop
+    blurb: "Gifts, home goods and things you did not know you needed."
+    startup: 90000
+    rent: 30000
+    staff: 3
+    capacity: 14000
+    demand: 11000
+    spend: 40
+    supplies: 0.55
+    wage: 30000
+    quality: 50
+    elasticity: 1.7
+  premium:
+    label: Boutique
+    blurb: "A few beautiful things, well lit, with someone who knows all about them."
+    startup: 180000
+    rent: 55000
+    staff: 5
+    capacity: 9000
+    demand: 5800
+    spend: 82
+    supplies: 0.5
+    wage: 36000
+    quality: 65
+    elasticity: 1.0
+fit:
+  budget: { size: 0.35, wealth: -0.4 }
+  standard: { size: 0.3, wealth: 0.2 }
+  premium: { size: 0.35, wealth: 1.4 }
+names:
+  - "Odds & Ends Mercantile"
+  - "The Paper Swallow"
+  - "Wren & Willow Goods"
+  - "Tin Lantern Trading"
+  - "Marigold Row"
+  - "The Brass Button"
+  - "Fennel & Fig Home"
+  - "Cobble Lane Supply"
+  - "Juniper Shelf"
+  - "The Good Drawer"
+  - "Magpie & Co."
+  - "Dovetail Goods"

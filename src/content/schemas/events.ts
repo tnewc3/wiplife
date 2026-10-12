@@ -28,6 +28,7 @@ import { FOCUS_KEYS, LICENSE_STAGE_IDS, ruleDomainSchema, type RuleDomainId, typ
 import { relationshipKindSchema, relationshipStatusSchema, romanceStatusSchema } from './relationships';
 import { AMENDS_RESULTS, CARE_OPTIONS, HOSPICE_CHOICES, LATER_ACTIONS, TEACH_KEYS } from './laterIds';
 import { COMMITMENTS, FAITH_ACTIONS, GROUP_ACTIONS, GROUP_NEWS_KINDS, GROUP_TYPES, VALUE_IDS } from './belongingIds';
+import { BUSINESS_ACTIONS, BUSINESS_KINDS, BUSINESS_PEOPLE, BUSINESS_STYLES, OWNER_ROLES } from './businessIds';
 import { templateSchema } from './text';
 import { reactionSchema, type ReactionId } from './mental';
 import { knowledgeKindSchema, tieKindSchema, tieStatusSchema, type KnowledgeKindId, type TieKindId, type TieStatusId } from './web';
@@ -111,6 +112,7 @@ export type Condition =
   | { sports: SportsCondition }
   | { later: LaterCondition }
   | { group: GroupCondition }
+  | { business: BusinessCondition }
   | { faith: FaithCondition }
   | ({ value: (typeof VALUE_IDS)[number] } & Compare)
   | { memory: { role: string; tag: string } }
@@ -505,6 +507,53 @@ export interface GroupCondition {
   hours?: Compare;
   /** Your standing in your city beyond any one group (0–100). */
   community?: Compare;
+}
+
+
+/**
+ * W3, businesses. Every field given must hold. With a business bound to the
+ * event (`bindBusiness`, or one the engine passes in), the fields describe that
+ * business; without one, `owned` and the fields about a business hold for any
+ * business of yours that fits every field given.
+ * owned: you own one (false: you own none, or none that fits); count: how many
+ * you own; type and kind: what sort; style; role: run by you or a manager;
+ * years: since it was founded; locations; staff: named workers (not counting a
+ * manager); morale, reputation, quality (0–100); profit: last year's, in dollars;
+ * cash: in the business; lossYears: years of loss in a row; chain; investors and
+ * cofounder: someone else owns a share; loan: it has debts; manager: it has one;
+ * licensed: someone holds the licence it needs (false: nobody does; a business
+ * that needs none never fits); needsLicense; skimmed: a manager has taken money;
+ * rival: a competitor is hurting it; failedWithin and soldWithin: you had one
+ * fail or sold one within this many years; experience: years you have owned any.
+ */
+export interface BusinessCondition {
+  owned?: boolean;
+  count?: Compare;
+  type?: string[];
+  kind?: (typeof BUSINESS_KINDS)[number][];
+  style?: (typeof BUSINESS_STYLES)[number][];
+  role?: (typeof OWNER_ROLES)[number][];
+  years?: Compare;
+  locations?: Compare;
+  staff?: Compare;
+  morale?: Compare;
+  reputation?: Compare;
+  quality?: Compare;
+  profit?: Compare;
+  cash?: Compare;
+  lossYears?: Compare;
+  chain?: boolean;
+  investors?: boolean;
+  cofounder?: boolean;
+  loan?: boolean;
+  manager?: boolean;
+  licensed?: boolean;
+  needsLicense?: boolean;
+  skimmed?: boolean;
+  rival?: boolean;
+  failedWithin?: number;
+  soldWithin?: number;
+  experience?: Compare;
 }
 
 /**
@@ -994,6 +1043,39 @@ export const conditionSchema: z.ZodType<Condition> = z.lazy(() =>
         .refine(atLeastOneField, 'needs at least one field'),
     }),
     z.strictObject({
+      business: z
+        .strictObject({
+          owned: z.boolean().optional(),
+          count: compareSchema.optional(),
+          type: z.array(idSchema).min(1).optional(),
+          kind: z.array(z.enum(BUSINESS_KINDS)).min(1).optional(),
+          style: z.array(z.enum(BUSINESS_STYLES)).min(1).optional(),
+          role: z.array(z.enum(OWNER_ROLES)).min(1).optional(),
+          years: compareSchema.optional(),
+          locations: compareSchema.optional(),
+          staff: compareSchema.optional(),
+          morale: compareSchema.optional(),
+          reputation: compareSchema.optional(),
+          quality: compareSchema.optional(),
+          profit: compareSchema.optional(),
+          cash: compareSchema.optional(),
+          lossYears: compareSchema.optional(),
+          chain: z.boolean().optional(),
+          investors: z.boolean().optional(),
+          cofounder: z.boolean().optional(),
+          loan: z.boolean().optional(),
+          manager: z.boolean().optional(),
+          licensed: z.boolean().optional(),
+          needsLicense: z.boolean().optional(),
+          skimmed: z.boolean().optional(),
+          rival: z.boolean().optional(),
+          failedWithin: z.int().min(0).max(40).optional(),
+          soldWithin: z.int().min(0).max(40).optional(),
+          experience: compareSchema.optional(),
+        })
+        .refine(atLeastOneField, 'needs at least one field'),
+    }),
+    z.strictObject({
       faith: z
         .strictObject({
           id: z.array(idSchema).min(1).optional(),
@@ -1166,8 +1248,15 @@ export const castSpecSchema = z
      * found only, never created.
      */
     group: z.literal('yours').optional(),
+    /**
+     * W3: someone from the business the event is about (or, with none bound,
+     * any business of yours): a worker, its manager, an investor, its
+     * co-founder or a worker who holds its licence. Found, never created, and
+     * they need no kind.
+     */
+    business: z.enum(BUSINESS_PEOPLE).optional(),
   })
-  .refine((s) => (s.kind !== undefined && s.support === true) === false && (s.kind !== undefined || s.support === true || s.noticed !== undefined), 'a role needs one of kind or support: true (or noticed, alone or with a kind)')
+  .refine((s) => (s.kind !== undefined && s.support === true) === false && (s.kind !== undefined || s.support === true || s.noticed !== undefined || s.business !== undefined), 'a role needs one of kind or support: true (or noticed, alone or with a kind; or business)')
   .refine((s) => s.deceased !== true || (s.presence === 'anywhere' && s.support !== true && !s.romantic && !s.admirer && !s.createIfMissing && s.newChance === undefined), 'a deceased role has presence anywhere and is only passed in')
   .refine(
     (s) => (s.support !== true && s.noticed === undefined) || (!s.createIfMissing && s.newChance === undefined && !s.romantic && !s.admirer),
@@ -1185,6 +1274,10 @@ export const castSpecSchema = z
   .refine(
     (s) => s.group === undefined || (s.kind === 'friend' && !s.crew && !s.crowd && !s.fan && !s.support && !s.noticed && !s.romantic && !s.admirer && !s.createIfMissing && s.newChance === undefined),
     'a group role is a friend who is found, never created, and not a crew, crowd, fan, support, noticed, romantic or admirer role',
+  )
+  .refine(
+    (s) => s.business === undefined || (s.kind === undefined && !s.crew && !s.crowd && !s.fan && !s.group && !s.support && !s.noticed && !s.romantic && !s.admirer && !s.createIfMissing && s.newChance === undefined),
+    'a business role is found, never created, and has no kind and is not a crew, crowd, fan, group, support, noticed, romantic or admirer role',
   )
   .refine(
     (s) => s.fan === undefined || (s.kind === 'acquaintance' && !s.crew && !s.crowd && !s.support && !s.noticed && !s.romantic && !s.admirer && (s.fan !== 'stalker' || (!s.createIfMissing && s.newChance === undefined))),
@@ -1623,6 +1716,34 @@ export const effectSchema = z.discriminatedUnion('type', [
     .refine((e) => e.who === undefined || ['strengthen', 'weaken', 'lose', 'convert'].includes(e.action), 'who is for strengthen, weaken, lose and convert')
     .refine((e) => e.who === undefined || e.action !== 'convert' || e.id !== undefined, 'convert with who needs an id')
     .refine((e) => (e.action !== 'return' && e.action !== 'fromLatent') || e.who === undefined, 'return and fromLatent are about you'),
+  /**
+   * W3, businesses. They act on the business the event is about (`bindBusiness`,
+   * or the one the engine passed in; else the first you own). pay and receive:
+   * `share` of a year's revenue (at least `floor` dollars) leaves or reaches your
+   * savings; quality, reputation and morale (everyone's) move by `delta`; buzz and
+   * rival: demand moves by `delta` percent for `years` years (a viral moment, a
+   * competitor next door); staffQuit, staffFire, staffRaise, staffMorale and theft
+   * act on the worker at `role` (theft also costs `share` of a year's revenue); hire: the person at `role`, someone you know, joins the staff;
+   * buyout: the investor or co-founder at `role` is bought out; expand: a new
+   * location in the same city (if you can pay for it); sell and close end it;
+   * audit: you look at the books (a manager's skimming then shows). The engine
+   * ignores what does not fit now.
+   */
+  z
+    .strictObject({
+      type: z.literal('business'),
+      action: z.enum(BUSINESS_ACTIONS),
+      share: z.number().gt(0).max(2).optional(),
+      floor: z.int().min(0).max(1_000_000).optional(),
+      delta: z.int().min(-60).max(60).optional(),
+      years: z.int().min(1).max(10).optional(),
+      role: roleSchema.optional(),
+    })
+    .refine((e) => (e.action === 'pay' || e.action === 'receive' || e.action === 'theft') === (e.share !== undefined), 'pay, receive and theft need share (and only they have one)')
+    .refine((e) => e.floor === undefined || e.share !== undefined, 'floor goes with share')
+    .refine((e) => (['quality', 'reputation', 'morale', 'buzz', 'rival', 'staffMorale'] as string[]).includes(e.action) === (e.delta !== undefined && e.delta !== 0), 'quality, reputation, morale, buzz, rival and staffMorale need a non-zero delta (and only they have one)')
+    .refine((e) => (e.action === 'buzz' || e.action === 'rival') === (e.years !== undefined), 'buzz and rival need years (and only they have it)')
+    .refine((e) => (['staffQuit', 'staffFire', 'staffRaise', 'staffMorale', 'hire', 'theft', 'buyout'] as string[]).includes(e.action) === (e.role !== undefined), 'staffQuit, staffFire, staffRaise, staffMorale, hire, theft and buyout need role (and only they have one)'),
   /** W2: a value moves by `delta`; a share of it sticks to your temperament (balance/belonging.yaml values.sticks). */
   z.strictObject({ type: z.literal('value'), key: z.enum(VALUE_IDS), delta: z.int().min(-30).max(30).refine((n) => n !== 0, 'delta must not be 0') }),
   z.strictObject({ type: z.literal('innerConflict'), delta: z.int().min(-100).max(100) }),
@@ -1822,6 +1943,8 @@ export const effectSchema = z.discriminatedUnion('type', [
     .refine((e) => (e.action === 'enroll' || e.action === 'withdraw') === (e.activityId !== undefined), 'enroll and withdraw need activityId (and only they have it)'),
 ]);
 export type Effect = z.infer<typeof effectSchema>;
+/** W3: the `business` effect. */
+export type BusinessEffect = Extract<Effect, { type: 'business' }>;
 
 export const outcomeSchema = z.strictObject({
   text: templateSchema.optional(),
@@ -1920,6 +2043,12 @@ export const eventSchema = baseDefSchema
      * requirements true, and the text can name it ({group}, {role}, {religion}).
      */
     bindGroup: z.literal(true).optional(),
+    /**
+     * W3: the event is about one of your businesses: one is picked among those
+     * that make its requirements true, and the text can name it ({business},
+     * {bizType}, {bizCity}, {bizStyle}, {bizTitle}).
+     */
+    bindBusiness: z.literal(true).optional(),
     /**
      * E6c: the card keeps the words it was shown with, and the outcome keeps {stage} and
      * {opponent} as they were, even though the choice moves a playoff run on.

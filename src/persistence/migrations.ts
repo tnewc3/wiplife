@@ -437,6 +437,26 @@ export const migrations: readonly Migration[] = [
       };
     },
   },
+  {
+    from: 22,
+    description:
+      'W3: businesses. A life gains a "business" record: it owns no business and has none behind it, and nobody is given one ' +
+      'by the upgrade. The yearly ledger gains a "business" line (money put into a business), zero for every year already kept. ' +
+      'An estate settled before this stage passed no business and sold none.',
+    migrate: (data) => {
+      if (!isRecord(data)) return data;
+      const finances = isRecord(data.finances)
+        ? { ...data.finances, ...(isRecord(data.finances.lastLedger) ? { lastLedger: { ...data.finances.lastLedger, business: 0 } } : {}) }
+        : data.finances;
+      const estate = isRecord(data.estate) ? { ...data.estate, businesses: [], businessSales: 0 } : data.estate;
+      return {
+        ...data,
+        finances,
+        estate,
+        business: { items: [], nextBusiness: 1, nextLocation: 1, taken: [], past: [], offered: {}, year: { year: 0, draw: 0, inject: 0 }, experience: {}, worth: 0 },
+      };
+    },
+  },
 ];
 
 function isRecord(value: unknown): value is Record<string, unknown> {

@@ -2,7 +2,7 @@
  * Sanity checks on a life (docs/technical.md, sections M and Q). Used in
  * development and tests; each later stage adds the checks for its systems.
  */
-import { GROUP_ROLE, type ContentBundle } from '../content/schemas';
+import { BUSINESS_ROLE, GROUP_ROLE, type ContentBundle } from '../content/schemas';
 import { ageOf, isCurrentPartner, isFamilyKind, isPartnerKind, isRomanticKind, kindSince } from './relationships';
 import { estateFailures } from './estate/invariants';
 import { familyFailures } from './family/invariants';
@@ -16,6 +16,7 @@ import { fameFailures } from './fame/invariants';
 import { sportsFailures } from './sports/invariants';
 import { laterFailures } from './later/invariants';
 import { belongingFailures } from './belonging/invariants';
+import { businessFailures } from './business/invariants';
 import { attachedDebtIds } from './possessions/query';
 import { ITEM_ROLE } from './web/query';
 import { consistencyProblems } from './presence';
@@ -104,7 +105,7 @@ export function checkInvariants(state: LifeState, content: ContentBundle): strin
   money('finances.savings', f.savings);
   if (f.savings < 0) fail('finances.savings must not be negative');
   const debtIds = new Set<string>();
-  const DEBT_KINDS = new Set(['student', 'personal', 'mortgage', 'medical', 'collections', 'auto']);
+  const DEBT_KINDS = new Set(['student', 'personal', 'mortgage', 'medical', 'collections', 'auto', 'business']);
   for (const debt of f.debts) {
     const label = `debt ${debt.id}`;
     if (debtIds.has(debt.id)) fail(`${label} appears twice`);
@@ -126,12 +127,12 @@ export function checkInvariants(state: LifeState, content: ContentBundle): strin
   if (!independent && f.debts.length > 0) fail('a child has debt');
   if (f.lastLedger) {
     const l = f.lastLedger;
-    for (const key of ['gross', 'retirement', 'tax', 'housing', 'living', 'debtPayments', 'interest', 'debtInterest', 'borrowed', 'support', 'children', 'care', 'supportPaid', 'supportReceived', 'upkeep', 'insurance', 'giving'] as const) {
+    for (const key of ['gross', 'retirement', 'tax', 'housing', 'living', 'debtPayments', 'interest', 'debtInterest', 'borrowed', 'support', 'children', 'care', 'supportPaid', 'supportReceived', 'upkeep', 'insurance', 'giving', 'business'] as const) {
       money(`lastLedger.${key}`, l[key]);
       if (l[key] < 0) fail(`lastLedger.${key} must not be negative`);
     }
     money('lastLedger.net', l.net);
-    if (l.net !== l.gross + l.retirement + l.interest + l.supportReceived - l.tax - l.housing - l.living - l.children - l.care - l.supportPaid - l.upkeep - l.insurance - l.giving - l.debtPayments) fail('lastLedger.net does not add up');
+    if (l.net !== l.gross + l.retirement + l.interest + l.supportReceived - l.tax - l.housing - l.living - l.children - l.care - l.supportPaid - l.upkeep - l.insurance - l.giving - l.business - l.debtPayments) fail('lastLedger.net does not add up');
     if (l.year > state.currentYear || l.year <= state.birthYear) fail('lastLedger is for a year outside the life');
   }
   if (state.career.gig && c.age < content.balance.economy.gig.minAge) fail('gig work before the minimum age');
@@ -205,6 +206,9 @@ export function checkInvariants(state: LifeState, content: ContentBundle): strin
 
   // Belonging (W2): groups, faith and values.
   failures.push(...belongingFailures(state, content));
+
+  // Businesses (W3).
+  failures.push(...businessFailures(state, content));
 
   // Pets, vehicles and vacation homes (E5).
   failures.push(...possessionsFailures(state, content));
@@ -345,7 +349,7 @@ export function checkInvariants(state: LifeState, content: ContentBundle): strin
   }
 
   // Events. E5: a role that starts with @ is a possession the event is about.
-  const castExists = (role: string, id: string) => role === ITEM_ROLE || (role === GROUP_ROLE ? state.belonging.groups[id] !== undefined : role.startsWith('@') ? state.possessions.items.some((q) => q.id === id) : state.people[id] !== undefined);
+  const castExists = (role: string, id: string) => role === ITEM_ROLE || (role === GROUP_ROLE ? state.belonging.groups[id] !== undefined : role === BUSINESS_ROLE ? state.business.items.some((b) => b.id === id) : role.startsWith('@') ? state.possessions.items.some((q) => q.id === id) : state.people[id] !== undefined);
   const inYear = state.phase === 'events' || state.phase === 'yearEnd';
   if (!inYear && state.phase !== 'action' && state.pending.length > 0) fail(`pending events in the "${state.phase}" phase`);
   if (state.phase === 'events' && state.pending.every((p) => p.resolvedChoiceId !== undefined)) fail('the events phase has nothing left to resolve');

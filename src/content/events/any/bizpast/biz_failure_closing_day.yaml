@@ -1,0 +1,41 @@
+id: biz_failure_closing_day
+title: The last day
+text: >-
+  The money ran out, and there was nothing left to be done about it. You stand
+  in the empty room that used to be a business, with a clipboard of things to
+  sell and a lease you can't pay.
+tone: dark
+category: bizpast
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { business: { failedWithin: 8 } }
+    - { age: { gte: 18 } }
+    - { business: { failedWithin: 1 } }
+weight: { base: 10 }
+followUpOnly: true
+choices:
+  - id: face
+    label: Stay and thank everyone who worked there
+    outcome:
+      text: >-
+        You shake every hand and say what you mean. Some of them cry. Some of
+        them say it wasn't your fault, which is generous, and not entirely true.
+      effects:
+        - { type: stat, key: stress, delta: 5 }
+        - { type: stat, key: kindness, delta: 2 }
+  - id: alone
+    label: Lock up alone, and go home
+    outcome:
+      text: You sit in the car for twenty minutes with the engine off. Then you drive, and the town goes by.
+      effects:
+        - { type: stat, key: happiness, delta: -6 }
+        - { type: stat, key: stress, delta: 6 }
+  - id: sell
+    label: Sell off what's left of the equipment
+    outcome:
+      text: A man from a restaurant supplier takes the oven, the shelving and the espresso machine for a fraction of what they cost. It helps. It does not help enough.
+      effects:
+        - { type: repay, item: biz_salvage, share: 1 }
+        - { type: stat, key: stress, delta: 3 }
