@@ -37,8 +37,8 @@ choices:
       stats: [{ key: fitness, weight: 0.3 }, { key: confidence, weight: 0.3 }]
       success:
         text: >-
-          Two flights, a man with a cane and a staircase that never stops moving.
-          You get him out. His family brings you a plate of food for a week.
+          Two flights, {neighbor.name} with a cane and a staircase that never stops moving.
+          You get {neighbor.them} out. {neighbor.Their} family brings you a plate of food for a week.
         effects:
           - { type: relationship, role: neighbor, affection: 9 }
           - { type: stat, key: kindness, delta: 3 }

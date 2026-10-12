@@ -49,7 +49,7 @@ choices:
     label: Go to work and study later
     outcome:
       text: >-
-        A job at your uncle's warehouse, a first pay and a feeling of freedom.
+        A job at a relative's warehouse, a first pay and a feeling of freedom.
         The books stay on the shelf, and you are not sure for how long.
       effects:
         - { type: money, delta: 1800 }

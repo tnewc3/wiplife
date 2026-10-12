@@ -45,7 +45,7 @@ choices:
     label: Move back with your parents and commute
     outcome:
       text: >-
-        A bus pass, a bedroom with the old posters and your mother's dinners.
+        A bus pass, a bedroom with the old posters and home-cooked dinners.
         You save money and miss a lot of Thursday nights.
       effects:
         - { type: money, delta: 400 }

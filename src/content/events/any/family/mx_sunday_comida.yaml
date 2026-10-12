@@ -19,8 +19,8 @@ choices:
     label: Stay at the table for the whole afternoon
     outcome:
       text: >-
-        Dessert, coffee, a second dessert, a story about your grandfather that
-        you had never heard and a cousin who finally asks the question about your
+        Dessert, coffee, a second dessert, a story about a grandparent that
+        you had never heard and a relative who finally asks the question about your
         plans. It is loud and warm, and you leave the last.
       effects:
         - { type: relationship, role: parent, affection: 6 }

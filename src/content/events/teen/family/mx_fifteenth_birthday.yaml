@@ -19,7 +19,7 @@ choices:
     label: Have the big party
     outcome:
       text: >-
-        A hall, a band, cousins from three cities and an aunt who cries before
+        A hall, a band, relatives from three cities and someone who cries before
         the first song. The party costs {$3200}, and you will remember all of it.
       effects:
         - { type: money, delta: -3200 }

@@ -29,7 +29,7 @@ choices:
   - id: home
     label: Watch it at {friend.name}'s house
     outcome:
-      text: A small TV, a big family, an uncle who explains every foul and a grandmother who falls asleep during the penalties.
+      text: A small TV, a big family, a relative who explains every foul and another who falls asleep during the penalties.
       effects:
         - { type: relationship, role: friend, affection: 5 }
         - { type: stat, key: happiness, delta: 2 }

@@ -20,7 +20,7 @@ choices:
     outcome:
       text: >-
         {vendor.name} adds an extra mango to the bag for no reason, asks about
-        your mother and charges you {$14}. You come home with more than you came
+        your family and charges you {$14}. You come home with more than you came
         for.
       effects:
         - { type: money, delta: -14 }

@@ -39,8 +39,8 @@ choices:
     label: Ask a relative who already did it how it went
     outcome:
       text: >-
-        An hour at a kitchen table with a very honest uncle. "It is worth it,"
-        he says, "but read every line." You do.
+        An hour at a kitchen table with a very honest uncle. "It is worth it, but
+        read every line," is the verdict. You do.
       effects:
         - { type: stat, key: smarts, delta: 1 }
         - { type: stat, key: stress, delta: -1 }
