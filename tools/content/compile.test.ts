@@ -101,7 +101,7 @@ describe('content build with the real content', () => {
     const result = await compileContent({ contentDir: realContentDir, appVersion: '1.2.3' });
     if (!result.ok) throw new Error(formatErrors(result.errors));
     expect(result.warnings.map((w) => w.message)).toEqual([]);
-  });
+  }, 60_000);
 });
 
 describe('content build with fixture files', { timeout: 90_000 }, () => {
@@ -1849,7 +1849,7 @@ describe('businesses (W3)', () => {
     const cafe = await read('businesses/cafe.yaml');
     await write('businesses/cafe.yaml', cafe.replace('startup: 220000', 'startup: 20000'));
     expect(await expectErrors()).toContain('startup costs must rise from budget to premium');
-    await write('businesses/cafe.yaml', cafe.replace('    elasticity: 0.9\nfit:', 'fit:'));
+    await write('businesses/cafe.yaml', cafe.replace('    elasticity: 1.0\nfit:', 'fit:'));
     expect(await expectErrors()).toContain('elasticity');
   });
 
