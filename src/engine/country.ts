@@ -179,7 +179,7 @@ function sentenceWord(word: string): string {
   return /^[A-Z][a-z]/.test(word) ? word.charAt(0).toLowerCase() + word.slice(1) : word;
 }
 
-export function countryTextValues(state: LifeState, content: ContentBundle): Record<string, string> {
+export function countryTextValues(state: LifeState, content: ContentBundle): Record<(typeof COUNTRY_TEXT_VALUES)[number], string> {
   const country = countryOf(state, content);
   const w = country.words;
   return {

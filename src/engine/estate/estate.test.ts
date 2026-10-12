@@ -5,22 +5,16 @@ import type { ContentBundle } from '../../content/schemas';
 import { InvalidInputError } from '../creation/input';
 import { performAction } from '../actions';
 import { checkInvariants } from '../invariants';
-import { cloneJson } from '../testFixtures';
 import type { LifeState, WillShare } from '../types';
 import { die, parentLife } from './fixtures';
 import { heirCandidates } from './heir';
 import { canWriteWill, livingWill, parseShares, willCandidates, writeWill } from './will';
 
-/** A content bundle with some family balance numbers replaced. */
-function withEstate(patch: (e: ContentBundle['balance']['family']['estate']) => void): ContentBundle {
-  const family = cloneJson(content.balance.family);
-  patch(family.estate);
-  return { ...content, balance: { ...content.balance, family } };
-}
-
-const noTax = withEstate((e) => {
-  e.tax = [{ at: 0, x: 0 }];
-});
+/** Content where no country charges any estate tax. */
+const noTax: ContentBundle = {
+  ...content,
+  countries: Object.fromEntries(Object.entries(content.countries).map(([id, c]) => [id, { ...c, estateTax: [{ at: 0, x: 0 }] }])),
+};
 
 /** Cash plus the equity of a home, summed over everything the estate gave out. */
 const given = (life: LifeState) => life.estate!.lines.reduce((n, l) => n + l.cash + (l.property ? l.property.value - l.property.mortgage : 0), 0) + life.estate!.unclaimed;
