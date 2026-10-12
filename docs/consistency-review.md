@@ -250,3 +250,17 @@ What the review looked at beyond the warnings:
 | Pronouns | Every person is cast with pronoun placeholders; a buyer in `biz_offer_to_buy` and an owner in `biz_emergency_job` first had a hardcoded "he" and "she" (caught by the render test) and were changed. | Done. |
 
 Tone and subject matter worth a second look: `biz_staff_theft` (a worker takes money; the choices are to confront, let them go, or lock the drawer, and the worker's reason is a bill, not a villain), `biz_failure_closing_day` and `biz_failure_debts` (failure and guaranteed debts, with the debt counselor and bankruptcy shown as ordinary ways through), and `biz_investor_lost_money_family` (a relative who lost money, written without blame).
+
+## W4a (countries): the review of existing events and the new packs
+
+Every existing event was checked for US-only references by the content build's new country contract (`countryTags` in `registries/categories.yaml`: US-only terms, words said differently per country, literal dollar amounts). The build's first run listed what needed changing; 45 event files were changed and the build now refuses a regression.
+
+| Finding | Events | Result |
+|---|---|---|
+| Amounts written as `$300` or "dollars" | about 28 (for example `lost_tooth`, `found_wallet`, `payday_loan`, `lottery_ticket`, `busker_duet`, `pay_it_back`, the `friend_asks_to_borrow` chain) | Now `{$N}` (scaled to the country's prices and shown in its currency) or `{currency}`. The effects were already scaled by the country's price level, so the text and the money agree. |
+| School words (high school, middle school, principal, college) | `chore_chart`, `college_essay`, `semester_abroad`, history and obituary text | `{highSchool}`, `{middleSchool}`, `{principal}`, `{college}`, `{diploma}`, `{equivalency}` and the other country words. |
+| Drinking and gambling at a fixed 21 | `liquid_lunch`, `one_more_for_the_road`, `offer_bar_regular`, `scandal_night_out`, `casino_weekend` | `legalAge: drinking` or `gambling` (and `age gte 18` where the scene needs an adult). |
+| US-only | `surprise_medical_bill`, `valedictorian` (US and Canada) | Tagged `countries`. |
+| Health bills | `chest_pains` | Reworded; the medical cost items pay the country's share (`health:` key), so a public system charges little. |
+
+The 91 new events (31 Canadian, 30 British, 30 Mexican) were written against AGENTS.md and the second-wave writing guidance: no national stereotypes, no named real brands or people, every NPC a placeholder (relatives who may not exist are written as "a relative"), every amount `{$N}` with a matching money effect, every event tagged `countries: [..]`. Warnings the build raised were fixed by rewording; none is justified.
