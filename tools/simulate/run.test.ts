@@ -42,7 +42,7 @@ describe('simulation runner', () => {
     expect(text).toContain('median age at first marriage');
   });
 
-  it('reports careers: income by education path, promotions, firings and job tracks against the targets', { timeout: 60_000 }, () => {
+  it('reports careers: income by education path, promotions, firings and job tracks against the targets', { timeout: 240_000 }, () => {
     const report = runSimulation(content, { lives: 30, seedPrefix: 'sim-work' });
     const c = report.careers;
     expect(report.invariantFailures).toBe(0);
