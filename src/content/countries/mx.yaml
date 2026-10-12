@@ -6,7 +6,7 @@ adjective: Mexican
 blurb: "A young, fast-changing country; public and private health care"
 currency: { code: MXN, symbol: "$", name: peso, plural: pesos, locale: es-MX }
 priceLevel: 0.44
-salaryMultiplier: 0.37
+salaryMultiplier: 0.34
 
 legalAges: { drinking: 18, gambling: 18, driving: 18, permit: 17, marriage: 18 }
 

@@ -17,37 +17,37 @@ startWeights: { us: 40, ca: 20, uk: 20, mx: 20 }
 targets:
   us:
     lifespanMedian: { min: 70, max: 90 }
-    maxBankruptLives: 0.4
-    minHomeOwners: 0.4
+    maxBankruptLives: 0.35
+    minHomeOwners: 0.5
     minDiplomaBy19: 0.85
     degreeBy30: { min: 0.3, max: 0.7 }
-    grossAt40: { min: 20000, max: 120000 }
-    taxShare: { min: 0.05, max: 0.3 }
-    medianNetWorth: { min: 100000, max: 900000 }
+    grossAt40: { min: 40000, max: 90000 }
+    taxShare: { min: 0.1, max: 0.32 }
+    medianNetWorth: { min: 300000, max: 1000000 }
   ca:
     lifespanMedian: { min: 70, max: 90 }
-    maxBankruptLives: 0.4
-    minHomeOwners: 0.4
+    maxBankruptLives: 0.35
+    minHomeOwners: 0.5
     minDiplomaBy19: 0.85
     degreeBy30: { min: 0.3, max: 0.7 }
-    grossAt40: { min: 15000, max: 100000 }
-    taxShare: { min: 0.05, max: 0.35 }
-    medianNetWorth: { min: 80000, max: 800000 }
+    grossAt40: { min: 30000, max: 70000 }
+    taxShare: { min: 0.1, max: 0.35 }
+    medianNetWorth: { min: 300000, max: 900000 }
   uk:
     lifespanMedian: { min: 70, max: 90 }
-    maxBankruptLives: 0.4
-    minHomeOwners: 0.4
+    maxBankruptLives: 0.35
+    minHomeOwners: 0.5
     minDiplomaBy19: 0.85
     degreeBy30: { min: 0.3, max: 0.7 }
-    grossAt40: { min: 12000, max: 90000 }
-    taxShare: { min: 0.05, max: 0.4 }
-    medianNetWorth: { min: 60000, max: 700000 }
+    grossAt40: { min: 25000, max: 60000 }
+    taxShare: { min: 0.1, max: 0.4 }
+    medianNetWorth: { min: 200000, max: 700000 }
   mx:
     lifespanMedian: { min: 68, max: 90 }
-    maxBankruptLives: 0.4
-    minHomeOwners: 0.4
+    maxBankruptLives: 0.35
+    minHomeOwners: 0.5
     minDiplomaBy19: 0.8
     degreeBy30: { min: 0.2, max: 0.7 }
-    grossAt40: { min: 4000, max: 50000 }
-    taxShare: { min: 0.02, max: 0.3 }
-    medianNetWorth: { min: 20000, max: 400000 }
+    grossAt40: { min: 8000, max: 25000 }
+    taxShare: { min: 0.05, max: 0.35 }
+    medianNetWorth: { min: 80000, max: 300000 }
