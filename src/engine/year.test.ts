@@ -9,7 +9,7 @@ import { getYearRecap } from './selectors';
 import { cloneJson, lifeAtAge, liveOut } from './testFixtures';
 import type { LifeState } from './types';
 
-const newborn = (seed: string) => createLife({ mode: 'random', seed, birthYear: 2026 }, content);
+const newborn = (seed: string) => createLife({ mode: 'random', seed, birthYear: 2026, countryId: 'us' }, content);
 
 /** Begins a year and resolves its events with random choices, ready for endYear. */
 const begin = (life: LifeState) => resolveAll(beginYear(life, content), content, createRng(`choices:${life.currentYear}`));

@@ -56,7 +56,7 @@ describe('content coverage, static', () => {
 
 describe('content coverage, simulated', () => {
   it('counts the events that could happen this year', () => {
-    const life = createLife({ mode: 'random', seed: 'cov', birthYear: 2026 }, content);
+    const life = createLife({ mode: 'random', seed: 'cov', birthYear: 2026, countryId: 'us' }, content);
     const eligible = eligibleEvents(life, content);
     expect(eligible.size).toBeGreaterThan(0);
     for (const id of eligible) expect(content.events[id]!.lifeStages).toContain('early');

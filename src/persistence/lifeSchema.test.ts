@@ -59,7 +59,7 @@ function w2Upgraded(life: LifeState): LifeState {
   });
 }
 
-const random = (seed: string) => createLife({ mode: 'random', seed, birthYear: 2026 }, content);
+const random = (seed: string) => createLife({ mode: 'random', seed, birthYear: 2026, countryId: 'us' }, content);
 const custom = (seed: string) => createLife({ mode: 'custom', seed, birthYear: 2026, custom: customInput() }, content);
 
 async function roundTrip(life: LifeState): Promise<LifeState> {

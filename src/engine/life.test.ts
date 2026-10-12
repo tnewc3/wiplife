@@ -11,7 +11,7 @@ const BIRTH_YEAR = 2026;
 
 
 function random(seed: string): LifeState {
-  return createLife({ mode: 'random', seed, birthYear: BIRTH_YEAR }, content);
+  return createLife({ mode: 'random', seed, birthYear: BIRTH_YEAR, countryId: 'us' }, content);
 }
 
 describe('createLife (random)', () => {
@@ -277,7 +277,7 @@ describe('input validation', () => {
 
   it('rejects an unknown mode or missing seed', () => {
     expect(() => createLife({ mode: 'other', seed: 'x', birthYear: 2026 } as never, content)).toThrow(InvalidInputError);
-    expect(() => createLife({ mode: 'random', seed: '', birthYear: 2026 }, content)).toThrow(InvalidInputError);
+    expect(() => createLife({ mode: 'random', seed: '', birthYear: 2026, countryId: 'us' }, content)).toThrow(InvalidInputError);
   });
 });
 
@@ -288,7 +288,7 @@ describe('grandparents (C1)', () => {
     let dead = 0;
     let elsewhere = 0;
     for (let i = 0; i < 200; i++) {
-      const life = createLife({ mode: 'random', seed: `gp-${i}`, birthYear: BIRTH_YEAR }, content);
+      const life = createLife({ mode: 'random', seed: `gp-${i}`, birthYear: BIRTH_YEAR, countryId: 'us' }, content);
       const family = getFamily(life);
       const parents = family.filter((m) => m.relationship.kind === 'parent');
       const grandparents = family.filter((m) => m.relationship.kind === 'grandparent');

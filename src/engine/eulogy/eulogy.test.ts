@@ -379,7 +379,7 @@ describe('every piece of text', () => {
 });
 
 describe('funerals of lives that ended', () => {
-  const lives = Array.from({ length: 24 }, (_, i) => liveOut(createLife({ mode: 'random', seed: `funeral-${i}`, birthYear: 2026 }, content)));
+  const lives = Array.from({ length: 24 }, (_, i) => liveOut(createLife({ mode: 'random', seed: `funeral-${i}`, birthYear: 2026, countryId: 'us' }, content)));
 
   it('has the closest eligible speaker, and a reason for everyone who stayed away', () => {
     let spoke = 0;
@@ -412,7 +412,7 @@ describe('funerals of lives that ended', () => {
     const dead = lives[0]!;
     expect(archiveEntry(dead, content).funeral).toEqual(writeFuneral(dead, content));
     expect(archiveEntry(dead, content).funeral).not.toBeNull();
-    const living = createLife({ mode: 'random', seed: 'still-living', birthYear: 2026 }, content);
+    const living = createLife({ mode: 'random', seed: 'still-living', birthYear: 2026, countryId: 'us' }, content);
     expect(archiveEntry(living, content).funeral).toBeNull();
     expect(writeFuneral(living, content)).toBeNull();
   });

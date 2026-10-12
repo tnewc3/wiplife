@@ -777,7 +777,7 @@ describe('relationship content', () => {
 describe('whole lives with relationships', () => {
   it('play out with actions and keep every invariant', { timeout: 30_000 }, () => {
     for (let s = 0; s < 6; s++) {
-      let life = createLife({ mode: 'random', seed: `rel-life-${s}`, birthYear: 2026 }, content);
+      let life = createLife({ mode: 'random', seed: `rel-life-${s}`, birthYear: 2026, countryId: 'us' }, content);
       const choices = createRng(`rel-life-${s}:c`);
       const check = (l: LifeState) => expect(checkInvariants(l, content)).toEqual([]);
       while (life.phase !== 'dead') {

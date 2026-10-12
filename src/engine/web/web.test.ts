@@ -161,7 +161,7 @@ describe('ties from the family', () => {
   it('give parents a tie to each other, siblings a tie to each other and to their parents, the same from both sides', () => {
     let checked = 0;
     for (let i = 0; i < 60; i++) {
-      const life = createLife({ mode: 'random', seed: `web-structure-${i}`, birthYear: 2000 }, content);
+      const life = createLife({ mode: 'random', seed: `web-structure-${i}`, birthYear: 2000, countryId: 'us' }, content);
       const kinds = (k: RelationshipKind) => Object.keys(life.relationships).filter((id) => life.relationships[id]!.kind === k && life.people[id]!.alive);
       const parents = kinds('parent');
       // (Parents are a couple in the web once both are adults: a very young parent isn't tied yet.)
@@ -320,7 +320,7 @@ describe('romance between the people you know', () => {
 
   it('is never made between people under 18 over a whole simulated life', () => {
     for (let i = 0; i < 12; i++) {
-      let life = createLife({ mode: 'random', seed: `web-couples-${i}`, birthYear: 2000 }, content);
+      let life = createLife({ mode: 'random', seed: `web-couples-${i}`, birthYear: 2000, countryId: 'us' }, content);
       for (let y = 0; y < 60 && life.phase !== 'dead'; y++) {
         life = playYear(life, content);
         expect(webFailures(life, content), `life ${i} age ${life.character.age}`).toEqual([]);
@@ -424,7 +424,7 @@ describe('feuds', () => {
     let tieYears = 0;
     let feudYears = 0;
     for (let i = 0; i < 25; i++) {
-      let life = createLife({ mode: 'random', seed: `web-feuds-${i}`, birthYear: 2000 }, content);
+      let life = createLife({ mode: 'random', seed: `web-feuds-${i}`, birthYear: 2000, countryId: 'us' }, content);
       for (let y = 0; y < 70 && life.phase !== 'dead'; y++) {
         const prev = life.web.ties;
         life = playYear(life, content);

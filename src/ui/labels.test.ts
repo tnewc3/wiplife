@@ -44,7 +44,7 @@ describe('relativeLabel', () => {
       grandparent: { woman: 'Grandmother', man: 'Grandfather', nonbinary: 'Grandparent' },
     };
     for (let i = 0; i < 300; i++) {
-      const life = createLife({ mode: 'random', seed: `labels-${i}`, birthYear: 2026 }, content);
+      const life = createLife({ mode: 'random', seed: `labels-${i}`, birthYear: 2026, countryId: 'us' }, content);
       for (const m of getFamily(life)) {
         expect(relativeLabel(m)).toBe(expected[m.relationship.kind]![m.person.identity.genderCategory]);
       }

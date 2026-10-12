@@ -66,9 +66,9 @@ describe('who can carry a pregnancy', () => {
     expect(defaultCanCarry('woman')).toBe(true);
     expect(defaultCanCarry('man')).toBe(false);
     expect(defaultCanCarry('nonbinary')).toBe(false);
-    const woman = createLife({ mode: 'random', seed: 'w', birthYear: 2000 }, content);
+    const woman = createLife({ mode: 'random', seed: 'w', birthYear: 2000, countryId: 'us' }, content);
     expect(woman.character.canCarry).toBe(woman.character.identity.genderCategory === 'woman' || woman.character.canCarry);
-    for (const life of ['a', 'b', 'c', 'd', 'e', 'f'].map((seed) => createLife({ mode: 'random', seed, birthYear: 2000 }, content))) {
+    for (const life of ['a', 'b', 'c', 'd', 'e', 'f'].map((seed) => createLife({ mode: 'random', seed, birthYear: 2000, countryId: 'us' }, content))) {
       if (life.character.identity.genderCategory === 'woman') expect(life.character.canCarry).toBe(true);
       if (life.character.identity.genderCategory === 'man') expect(life.character.canCarry).toBe(false);
     }
@@ -97,7 +97,7 @@ describe('who can carry a pregnancy', () => {
     let nonbinary = 0;
     let carriers = 0;
     for (let i = 0; i < 400; i++) {
-      for (const p of Object.values(createLife({ mode: 'random', seed: `rel-${i}`, birthYear: 2000 }, content).people)) {
+      for (const p of Object.values(createLife({ mode: 'random', seed: `rel-${i}`, birthYear: 2000, countryId: 'us' }, content).people)) {
         if (p.identity.genderCategory === 'woman') expect(p.canCarry).toBe(true);
         if (p.identity.genderCategory === 'man') expect(p.canCarry).toBe(false);
         if (p.identity.genderCategory === 'nonbinary') {

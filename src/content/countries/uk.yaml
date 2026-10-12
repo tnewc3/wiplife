@@ -7,7 +7,7 @@ adjective: British
 blurb: "The NHS, capped university fees, a big capital and the north"
 currency: { code: GBP, symbol: "£", name: pound, plural: pounds, locale: en-GB }
 priceLevel: 0.98
-salaryMultiplier: 0.73
+salaryMultiplier: 0.83
 
 legalAges: { drinking: 18, gambling: 18, driving: 17, permit: 16, marriage: 18 }
 
@@ -87,9 +87,9 @@ tax:
   blurb: "Income tax and National Insurance."
   brackets:
     - { from: 0, rate: 0 }
-    - { from: 15900, rate: 0.28 }
-    - { from: 63600, rate: 0.42 }
-    - { from: 158000, rate: 0.47 }
+    - { from: 15900, rate: 0.2 }
+    - { from: 63600, rate: 0.38 }
+    - { from: 158000, rate: 0.45 }
 
 # Inheritance tax: 40% above the nil-rate bands, which a home left to children widens.
 estateTax:

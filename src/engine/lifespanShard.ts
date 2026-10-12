@@ -64,7 +64,7 @@ export function lifespanShard(shard: number): void {
 
     for (let i = first; i < first + count; i++) {
       const seed = `lifespan-${i}`;
-      const start = createLife({ mode: 'random', seed, birthYear: 2026 }, content);
+      const start = createLife({ mode: 'random', seed, birthYear: 2026, countryId: 'us' }, content);
       const dead = liveOut(start, content, (life) => {
         // Every year, once it has ended.
         if (failures.length >= 20 || (life.phase !== 'yearStart' && life.phase !== 'dead')) return;

@@ -6,7 +6,7 @@ adjective: Canadian
 blurb: "Public health care, English and French, four very different places"
 currency: { code: CAD, symbol: "$", name: dollar, plural: dollars, locale: en-CA }
 priceLevel: 0.95
-salaryMultiplier: 0.82
+salaryMultiplier: 0.9
 
 # The drinking age is 19 in most provinces (18 in Quebec): cities/montreal.yaml overrides it.
 legalAges: { drinking: 19, gambling: 19, driving: 16, permit: 16, marriage: 18 }

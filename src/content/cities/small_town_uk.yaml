@@ -7,7 +7,7 @@ costOfLiving: 0.72
 baseRent: 11000
 baseHomePrice: 190000
 carDependence: 0.85
-salaryMultiplier: 0.58
+salaryMultiplier: 0.66
 jobMarket:
   professional: 28
   trade: 45
