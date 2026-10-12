@@ -28,6 +28,8 @@ export interface Draft {
   familyWealth: FamilyWealth | null;
   /** W2: 'family' (rolled like any life), 'none' or a faith's id. */
   faith: string;
+  /** W4a: the country you are born in; its cities are the ones to choose from. */
+  countryId: string | null;
   cityId: string | null;
   stats: Stats;
   personality: Personality;
@@ -37,7 +39,7 @@ export const STEPS = [
   { id: 'name', title: 'Name and looks', fields: ['name', 'appearance'] },
   { id: 'identity', title: 'Identity', fields: ['identity', 'canCarry'] },
   { id: 'family', title: 'Family', fields: ['family', 'familyWealth', 'faith'] },
-  { id: 'city', title: 'City', fields: ['cityId'] },
+  { id: 'city', title: 'Where you’re born', fields: ['countryId', 'cityId'] },
   { id: 'traits', title: 'Stats and personality', fields: ['stats', 'personality'] },
   { id: 'review', title: 'Review', fields: [] },
 ] as const;
@@ -63,6 +65,7 @@ export function initialDraft(content: ContentBundle): Draft {
     siblings: 0,
     familyWealth: null,
     faith: 'family',
+    countryId: null,
     cityId: null,
     stats: { health: MIDDLE, happiness: MIDDLE, smarts: MIDDLE, looks: MIDDLE, fitness: MIDDLE, stress: MIDDLE },
     personality: {
@@ -151,7 +154,9 @@ export function validateDraft(draft: Draft, content: ContentBundle): Errors {
   if (!draft.pronounChoice) errors['identity.pronouns'] = 'Choose pronouns';
   if (draft.genderCategory === 'nonbinary' && draft.canCarry === null) errors.canCarry = 'Choose whether you can carry a pregnancy';
   if (!draft.familyWealth) errors.familyWealth = 'Choose how well off your family is';
+  if (!draft.countryId || !content.countries[draft.countryId]) errors.countryId = 'Choose a country';
   if (!draft.cityId || !content.cities[draft.cityId]) errors.cityId = 'Choose a city';
+  else if (draft.countryId && content.cities[draft.cityId]!.countryId !== draft.countryId) errors.cityId = 'Choose a city in that country';
 
   const result = customLifeInputSchema.safeParse(toCustomInput(draft, content));
   if (!result.success) {

@@ -99,3 +99,21 @@ sport:
         - { id: "new_york_skyline_sentinels", name: "New York Skyline Sentinels", city: "nyc", quality: 63 }
         - { id: "new_york_bridgemen", name: "New York Bridgemen", city: "nyc", quality: 45 }
         - { id: "new_york_stonecutters", name: "New York Stonecutters", city: "nyc", quality: 57 }
+        - { id: "toronto_bay_street_barons", name: "Toronto Bay Street Barons", city: "toronto", quality: 60 }
+        - { id: "toronto_rosedale_rams", name: "Toronto Rosedale Rams", city: "toronto", quality: 43 }
+        - { id: "vancouver_cascade_rain", name: "Vancouver Cascade Rain", city: "vancouver", quality: 55 }
+        - { id: "vancouver_seawall_sentries", name: "Vancouver Seawall Sentries", city: "vancouver", quality: 42 }
+        - { id: "montreal_old_port_guard", name: "Montreal Old Port Guard", city: "montreal", quality: 58 }
+        - { id: "montreal_plateau_pikemen", name: "Montreal Plateau Pikemen", city: "montreal", quality: 44 }
+        - { id: "london_tower_guards", name: "London Tower Guards", city: "london", quality: 50 }
+        - { id: "london_docklands_dragons", name: "London Docklands Dragons", city: "london", quality: 41 }
+        - { id: "manchester_mill_wolves", name: "Manchester Mill Wolves", city: "manchester", quality: 46 }
+        - { id: "manchester_canal_cats", name: "Manchester Canal Cats", city: "manchester", quality: 40 }
+        - { id: "london_southbank_sentinels", name: "London Southbank Sentinels", city: "london", quality: 46 }
+        - { id: "manchester_northern_knights", name: "Manchester Northern Knights", city: "manchester", quality: 44 }
+        - { id: "mexico_city_zocalo_eagles", name: "Mexico City Zócalo Eagles", city: "mexico_city", quality: 58 }
+        - { id: "mexico_city_metro_mustangs", name: "Mexico City Metro Mustangs", city: "mexico_city", quality: 42 }
+        - { id: "guadalajara_jacaranda_jets", name: "Guadalajara Jacaranda Jets", city: "guadalajara", quality: 50 }
+        - { id: "guadalajara_rosales_rangers", name: "Guadalajara Rosales Rangers", city: "guadalajara", quality: 40 }
+        - { id: "monterrey_sierra_steel", name: "Monterrey Sierra Steel", city: "monterrey", quality: 60 }
+        - { id: "monterrey_foundry_forgers", name: "Monterrey Foundry Forgers", city: "monterrey", quality: 45 }

@@ -1,0 +1,46 @@
+id: uk_football_saturday
+title: Saturday, three o'clock
+text: >-
+  {friend.name} has a spare ticket for the local match, and a lifetime of
+  loyalty to a team that has not won much. The terraces smell of pies and wet
+  coats. Every song is older than you.
+tone: light
+category: friends
+rarity: common
+countries: [uk]
+lifeStages: [teen, youngAdult, adult, senior]
+requires: { age: { gte: 14 } }
+weight: { base: 6 }
+cooldownYears: 4
+cast:
+  friend: { kind: friend, presence: city }
+choices:
+  - id: go
+    label: Go to the match
+    outcome:
+      text: >-
+        Ninety minutes of hope and hurt. The team loses two-one with a goal in
+        the last minute, and you walk home with {friend.name} in a silence that
+        feels like belonging. The day costs {$52}.
+      effects:
+        - { type: money, delta: -52 }
+        - { type: relationship, role: friend, affection: 7 }
+        - { type: stat, key: happiness, delta: 2 }
+  - id: pub
+    label: Watch it at the pub instead
+    outcome:
+      text: >-
+        A wall of screens, a beer garden and half the street in matching
+        shirts. A goal goes in and the whole room becomes one person.
+      effects:
+        - { type: money, delta: -25 }
+        - { type: relationship, role: friend, affection: 5 }
+        - { type: stat, key: happiness, delta: 2 }
+  - id: pass
+    label: Say it is not your thing
+    outcome:
+      text: >-
+        {friend.name} shrugs and finds another spare. You hear about the match
+        on Monday, in great detail.
+      effects:
+        - { type: relationship, role: friend, affection: -2 }

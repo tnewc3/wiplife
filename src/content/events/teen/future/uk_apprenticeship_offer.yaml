@@ -1,0 +1,54 @@
+id: uk_apprenticeship_offer
+title: Earn while you learn
+text: >-
+  A local firm has an apprenticeship with a wage, a qualification at the end
+  and, at the open evening, a manager who tells you it is as good as a degree.
+  University is the default. This is an alternative with a payslip.
+tone: neutral
+category: future
+rarity: common
+countries: [uk]
+lifeStages: [teen]
+requires: { education: { program: [high], final: true } }
+weight: { base: 6 }
+once: true
+cast:
+  parent: { kind: parent, presence: household }
+choices:
+  - id: take
+    label: Take the apprenticeship
+    outcome:
+      text: >-
+        Four days on site, one in college and a wage of {$9000} for the year. You
+        come home tired and, for the first time, with money of your own.
+      effects:
+        - { type: money, delta: 9000 }
+        - { type: stat, key: discipline, delta: 3 }
+        - { type: relationship, role: parent, affection: 2 }
+  - id: both
+    label: Ask whether you could do both
+    check:
+      base: 40
+      stats: [{ key: confidence, weight: 0.3 }, { key: smarts, weight: 0.2 }]
+      success:
+        text: >-
+          The firm sponsors a degree apprenticeship, with the wage and the
+          qualification. It takes six years and an amazing amount of paperwork.
+        effects:
+          - { type: money, delta: 6000 }
+          - { type: stat, key: ambition, delta: 3 }
+      failure:
+        text: >-
+          The firm has never done that and does not know how. They wish you
+          well, and you go home with a leaflet and a choice.
+        effects:
+          - { type: stat, key: stress, delta: 2 }
+  - id: no
+    label: Say no and stay on the university route
+    outcome:
+      text: >-
+        You thank the manager and keep your options. {parent.name} is relieved
+        and you are not quite sure whether you are.
+      effects:
+        - { type: relationship, role: parent, affection: 2 }
+        - { type: stat, key: stress, delta: 1 }

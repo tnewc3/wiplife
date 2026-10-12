@@ -30,6 +30,7 @@ import { BUSINESS_ACTION_IDS, BUSINESS_ACTIONS, type BusinessActionParams } from
 import type { WishesInput } from '../later/terminal';
 import type { IdentityEdit } from '../discovery';
 import { isIncarcerated, onProbation } from '../legal';
+import { sameCountry } from '../country';
 
 export const MONEY_ACTION_IDS = ['set_lifestyle', 'start_gig', 'stop_gig', 'pay_debt', 'debt_plan'] as const;
 export const HOME_ACTION_IDS = ['rent_home', 'move_home', 'relocate', 'buy_home', 'sell_home', 'find_roommate', 'live_alone'] as const;
@@ -215,6 +216,8 @@ export const LIFE_ACTIONS: Record<LifeActionId, LifeActionRule> = {
       // Probation keeps you where you are (Stage 9).
       !onProbation(state) &&
       p.cityId !== state.character.cityId &&
+      // Moving to another country is emigration (W6), not a move.
+      sameCountry(state.character.cityId, p.cityId!, content) &&
       state.finances.savings >= moveInCost(state, p.cityId!, content),
     apply: (state, p, content) => {
       const from = cityName(state, content);

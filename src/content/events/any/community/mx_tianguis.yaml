@@ -1,0 +1,50 @@
+id: mx_tianguis
+title: The Saturday market
+text: >-
+  The street is closed to cars on Saturdays for the tianguis: a mile of awnings,
+  stalls with fruit stacked in pyramids, a man selling phone cases and a woman
+  who knows your order before you say it. You have forty minutes and a bag.
+tone: light
+category: community
+rarity: common
+countries: [mx]
+lifeStages: [child, teen, youngAdult, adult, senior]
+requires: { age: { gte: 8 } }
+weight: { base: 7 }
+cooldownYears: 3
+cast:
+  vendor: { kind: acquaintance, presence: city, createIfMissing: true, newChance: 0.6, age: { min: 25, max: 75 } }
+choices:
+  - id: regular
+    label: Shop at your usual stall
+    outcome:
+      text: >-
+        {vendor.name} adds an extra mango to the bag for no reason, asks about
+        your mother and charges you {$14}. You come home with more than you came
+        for.
+      effects:
+        - { type: money, delta: -14 }
+        - { type: relationship, role: vendor, affection: 5 }
+        - { type: stat, key: happiness, delta: 1 }
+  - id: bargain
+    label: Haggle at a new stall
+    check:
+      base: 50
+      stats: [{ key: confidence, weight: 0.3 }, { key: sociability, weight: 0.3 }]
+      success:
+        text: Four rounds of friendly argument, a smile and a price {$5} lower. The seller shakes your hand and says you are good at this.
+        effects:
+          - { type: money, delta: -9 }
+          - { type: stat, key: confidence, delta: 2 }
+      failure:
+        text: The price does not move, and the seller's look makes it clear that you did not understand the rules. You pay in full ({$16}) and learn something.
+        effects:
+          - { type: money, delta: -16 }
+          - { type: stat, key: confidence, delta: -1 }
+  - id: browse
+    label: Just wander and look
+    outcome:
+      text: You spend the morning among the awnings and buy nothing but a coffee. You leave feeling richer than you came.
+      effects:
+        - { type: money, delta: -2 }
+        - { type: stat, key: stress, delta: -2 }

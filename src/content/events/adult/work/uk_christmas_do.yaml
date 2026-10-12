@@ -1,0 +1,46 @@
+id: uk_christmas_do
+title: The works do
+text: >-
+  The Christmas party is in a function room above a pub, with a buffet that
+  everyone has opinions about and a playlist chosen by a committee. The
+  evening begins with paper hats and ends with something you will have to
+  explain on Monday.
+tone: light
+category: work
+rarity: common
+countries: [uk]
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { career: { employed: true, retired: false } }
+weight: { base: 7 }
+cooldownYears: 3
+cast:
+  colleague: { kind: coworker, presence: city, age: { min: 20, max: 70 } }
+choices:
+  - id: stay
+    label: Stay until the last song
+    outcome:
+      text: >-
+        You learn more about {colleague.name} in four hours than in four years.
+        The taxi home costs {$26}, and Monday is awkward and kind.
+      effects:
+        - { type: money, delta: -26 }
+        - { type: relationship, role: colleague, affection: 8 }
+        - { type: stat, key: sociability, delta: 2 }
+  - id: early
+    label: Have one drink and slip away
+    outcome:
+      text: >-
+        You eat the sausage rolls, say your thank-yous and leave at nine. Nobody
+        notices you go, which is exactly what you wanted.
+      effects:
+        - { type: relationship, role: colleague, affection: 1 }
+        - { type: stat, key: stress, delta: -1 }
+  - id: skip
+    label: Skip it
+    outcome:
+      text: The party goes on without you. On Monday the stories begin with "you should have been there", and they are right.
+      effects:
+        - { type: relationship, role: colleague, affection: -2 }

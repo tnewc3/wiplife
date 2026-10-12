@@ -11,9 +11,9 @@ import {
   credentialLabel,
   gradeLevelLabel,
   money,
-  PROGRAM_LABELS,
+  programLabel,
   programYearLabel,
-  TIER_LABELS,
+  tierLabel,
 } from '../../labels';
 import { ApplicationSheet } from './ApplicationSheet';
 import { MajorPicker } from './MajorPicker';
@@ -55,15 +55,15 @@ export function SchoolCard({ life }: { life: LifeState }) {
   const cur = view.current;
   const disabled = busy || !view.between;
 
-  const heading = cur ? (cur.gradeLevel !== null ? PROGRAM_LABELS[cur.program] : cur.schoolName) : 'School';
+  const heading = cur ? (cur.gradeLevel !== null ? programLabel(cur.program, view.words) : cur.schoolName) : 'School';
   const sheet = (() => {
     switch (confirm) {
       case 'drop_out':
         return {
-          title: `Drop out of ${cur?.program === 'high' ? 'high school' : cur?.schoolName}?`,
+          title: `Drop out of ${cur?.program === 'high' ? view.words.high : cur?.schoolName}?`,
           body:
             cur?.program === 'high'
-              ? 'You’ll leave without a diploma. You can go back while you’re young enough to finish, or get a GED later.'
+              ? `You’ll leave without your ${view.words.credentials.hs_diploma}. You can go back while you’re young enough to finish, or earn your ${view.words.credentials.ged} later.`
               : 'You’ll leave without finishing. Your progress is kept, so you can go back later.',
           label: 'Drop out',
         };
@@ -71,14 +71,14 @@ export function SchoolCard({ life }: { life: LifeState }) {
         return { title: `Turn down ${view.admission?.schoolName}?`, body: 'You’ll give up your place. You can apply again another year.', label: 'Turn it down' };
       case 'return_to_school':
         return {
-          title: `Go back to ${view.left?.program === 'high' ? 'high school' : view.left?.schoolName}?`,
+          title: `Go back to ${view.left?.program === 'high' ? view.words.high : view.left?.schoolName}?`,
           body: 'You’ll pick up where you left off when the next year begins.',
           label: 'Go back',
         };
       case 'take_ged':
         return {
-          title: 'Take the GED?',
-          body: `The exam costs ${money(view.ged?.fee ?? 0)}. Pass it and it counts as a high school diploma. You can try once a year.`,
+          title: `Take the exam for your ${view.words.credentials.ged}?`,
+          body: `The exam costs ${money(view.ged?.fee ?? 0)}. Pass it and it counts as your ${view.words.credentials.hs_diploma}. You can try once a year.`,
           label: 'Take the exam',
         };
       default:
@@ -95,7 +95,7 @@ export function SchoolCard({ life }: { life: LifeState }) {
       {cur ? (
         <div data-testid="school-status">
           <p className="mt-1">
-            {cur.gradeLevel !== null ? gradeLevelLabel(cur.gradeLevel) : `${cur.tier ? `${TIER_LABELS[cur.tier]} · ` : ''}${programYearLabel(cur.year, cur.lengthYears)}`}
+            {cur.gradeLevel !== null ? gradeLevelLabel(cur.gradeLevel, view.words) : `${cur.tier ? `${tierLabel(cur.tier, view.words)} · ` : ''}${programYearLabel(cur.year, cur.lengthYears)}`}
             {cur.gradeLevel !== null && cur.program !== 'elementary' && cur.program !== 'middle' && ` · ${cur.schoolName}`}
           </p>
           {cur.studying && <p className="mt-1 text-muted">Studying {cur.studying}</p>}
@@ -181,10 +181,10 @@ export function SchoolCard({ life }: { life: LifeState }) {
           <ul className="mt-1 flex flex-col divide-y divide-border" aria-label="Diplomas and degrees">
             {view.credentials.map((c, i) => (
               <li key={i} className="flex min-w-0 flex-col py-2">
-                <span className="font-semibold break-words">{credentialLabel(c)}</span>
+                <span className="font-semibold break-words">{credentialLabel(c, view.words)}</span>
                 <span className="text-sm text-muted">
                   {c.year}
-                  {c.tier ? ` · ${TIER_LABELS[c.tier]}` : ''}
+                  {c.tier ? ` · ${tierLabel(c.tier, view.words)}` : ''}
                   {c.letter ? ` · Grades: ${c.letter}` : ''}
                 </span>
               </li>

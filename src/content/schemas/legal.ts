@@ -68,10 +68,6 @@ export const legalBalanceSchema = z.strictObject({
     /** Yearly pulls on stats while inside. */
     effects: statEffectsSchema,
   }),
-  release: z.strictObject({
-    /** Years of probation (parole) after release. 0 for none. */
-    paroleYears: z.int().min(0).max(20),
-  }),
   record: z.strictObject({
     /** With probation or jail on your record within `recentYears`, a landlord's deposit is multiplied by this. */
     depositMultiplier: z.number().min(1).max(10),

@@ -54,12 +54,14 @@ import { mentalSafetyErrors } from './mentalSafety';
 import { checkPeople } from './people';
 import { checkWeb } from './web';
 import { checkBelonging } from './belonging';
+import { checkCountries, checkCountryTags } from './countries';
 import { checkBusiness } from './business';
 import { checkPossessions } from './possessions';
 import { checkTeen } from './teen';
 import { checkCrime } from './crime';
 import { checkFame } from './fame';
 import { checkSports } from './sports';
+import { COUNTRY_TEXT_VALUES } from '../../src/engine/country';
 
 const CREATION = 'balance/creation.yaml';
 const AGING = 'balance/aging.yaml';
@@ -120,24 +122,11 @@ export function checkReferences(
   if (active(bundle.cities).length === 0) errors.push({ file: 'cities/', message: 'at least one active city is required' });
   if (active(bundle.talents).length === 0) errors.push({ file: 'talents/', message: 'at least one active talent is required' });
 
-  for (const [id, city] of Object.entries(bundle.cities)) {
-    const pool = bundle.names[city.countryId];
-    if (!pool || pool.retired) {
-      errors.push({ file: fileOf('cities', id), message: `no name pool for country "${city.countryId}" (add names/${city.countryId}.yaml)` });
-    }
-  }
+  // W4a: cities, name pools, money and every country-specific rule are checked in tools/content/countries.ts.
+  errors.push(...checkCountries(bundle, fileOf));
+  errors.push(...checkCountryTags(bundle, fileOf, options.partialEvents === true));
 
   const creation = bundle.balance.creation;
-  const countries = new Set(Object.values(bundle.cities).map((c) => c.countryId));
-  for (const country of countries) {
-    const pool = bundle.names[country];
-    if (!pool) continue;
-    for (const heritage of Object.keys(creation.names.heritageWeights)) {
-      if (!pool.heritages[heritage]) {
-        errors.push({ file: CREATION, message: `names.heritageWeights: heritage "${heritage}" is not in names/${country}.yaml` });
-      }
-    }
-  }
   for (const category of GENDER_CATEGORIES) {
     for (const [presetId, weight] of Object.entries(creation.pronouns[category])) {
       const preset = bundle.pronouns[presetId];
@@ -250,7 +239,9 @@ function checkAgingAndMortality(bundle: ContentBundle, fileOf: (typeKey: Collect
 function checkTemplates(bundle: ContentBundle, partialEvents: boolean): ContentError[] {
   const errors: ContentError[] = [];
   const check = (file: string, field: string, template: string, allowed: { roles?: string[]; values?: string[] }) => {
-    for (const message of checkTemplate(template, allowed)) errors.push({ file, message: `${field}: ${message}` });
+    // W4a: history lines are written with the country's words and amounts (systems/history.ts writeFromGroup).
+    const withCountry = file === HISTORY || file === OBITUARY ? { ...allowed, values: [...(allowed.values ?? []), ...COUNTRY_TEXT_VALUES], money: true } : allowed;
+    for (const message of checkTemplate(template, withCountry)) errors.push({ file, message: `${field}: ${message}` });
   };
   const all = (file: string, field: string, templates: readonly string[], allowed: { roles?: string[]; values?: string[] }) =>
     templates.forEach((t, i) => check(file, `${field}[${i}]`, t, allowed));
@@ -403,7 +394,8 @@ function checkLeavingSchool(def: EventDef, bundle: ContentBundle, err: (message:
     (o.effects as Effect[]).some((e) => e.type === 'education' && (e.action === 'drop_out' || e.action === 'expel')),
   );
   if (!used) return;
-  const { dropoutAge } = bundle.balance.education.school;
+  // The latest dropout age of any country: an event that requires it fits them all.
+  const dropoutAge = Math.max(...Object.values(bundle.countries).map((c) => c.school.dropoutAge));
   const start: Record<string, number> = { early: 0, ...bundle.balance.aging.lifeStages };
   if (!requiresAge(def.requires, dropoutAge) && !def.lifeStages.every((stage) => (start[stage] ?? 0) >= dropoutAge)) {
     err(`drop_out and expel happen from the dropout age: require { age: { gte: ${dropoutAge} } } or use later life stages only`);
@@ -552,6 +544,7 @@ function checkEvents(bundle: ContentBundle, fileOf: (typeKey: CollectionKey, id:
     const allowed = {
       roles: [...roles, SELF_ROLE, ...(bound.includes('pet') ? ['pet'] : [])],
       values: [...(EVENT_TEXT_VALUES.filter((v) => v !== 'sentence') as string[]), ...bound.flatMap((k) => [...POSSESSION_TEXT_VALUES[k]])],
+      money: true,
     };
     const template = (field: string, text: string) => {
       for (const message of checkTemplate(text, allowed)) err(`${field}: ${message}`);
@@ -615,7 +608,7 @@ function checkEvents(bundle: ContentBundle, fileOf: (typeKey: CollectionKey, id:
       const sentenced = (outcome.effects as Effect[]).some((e) => e.type === 'legal');
       if (outcome.text) {
         const values = [...allowed.values, ...(sentenced ? ['sentence'] : [])];
-        for (const message of checkTemplate(outcome.text, { roles: allowed.roles, values })) {
+        for (const message of checkTemplate(outcome.text, { roles: allowed.roles, values, money: true })) {
           err(`outcome[${i}].text: ${message}${message.includes('{sentence}') ? ' ({sentence} needs a legal effect in the same outcome)' : ''}`);
         }
       }
@@ -780,15 +773,8 @@ function checkEducation(bundle: ContentBundle, fileOf: (typeKey: CollectionKey, 
       .map(([id]) => id);
 
   if (activeIds(bundle.majors).length === 0) errors.push({ file: 'majors/', message: 'at least one active major is required' });
-  const { school } = edu;
-  const highEnds = school.startAge + school.elementary + school.middle + school.high;
-  if (school.dropoutAge >= highEnds) errors.push({ file: EDUCATION, message: `school.dropoutAge must be before high school ends (${highEnds})` });
-  if (school.applyAge < highEnds - 1) errors.push({ file: EDUCATION, message: `school.applyAge can't be before the last year of high school (${highEnds - 1})` });
-  if (bundle.balance.economy.independenceAge > highEnds) {
-    errors.push({ file: EDUCATION, message: 'high school must end at or after the independence age (balance/economy.yaml), so students can take out loans' });
-  }
-  if (edu.college.transferCredit >= Math.min(edu.college.years.state, edu.college.years.elite)) {
-    errors.push({ file: EDUCATION, message: 'college.transferCredit must leave at least one year of a bachelor’s' });
+  if (bundle.balance.economy.independenceAge > Math.min(...Object.values(bundle.countries).map((c) => c.school.startAge + c.school.elementary + c.school.middle + c.school.high))) {
+    errors.push({ file: EDUCATION, message: 'high school must end at or after the independence age (balance/economy.yaml) in every country, so students can take out loans' });
   }
 
   const model = (field: string, m: ChanceModel) => {
@@ -801,14 +787,8 @@ function checkEducation(bundle: ContentBundle, fileOf: (typeKey: CollectionKey, 
     if (!bundle.gradPrograms[id]) errors.push({ file: EDUCATION, message: `admission.grad: unknown grad program "${id}"` });
     model(`admission.grad.${id}`, m);
   }
-  for (const id of Object.keys(edu.tuition.trade)) if (!bundle.trades[id]) errors.push({ file: EDUCATION, message: `tuition.trade: unknown trade "${id}"` });
-  for (const id of Object.keys(edu.tuition.grad)) if (!bundle.gradPrograms[id]) errors.push({ file: EDUCATION, message: `tuition.grad: unknown grad program "${id}"` });
-  for (const id of activeIds(bundle.trades)) {
-    if (edu.tuition.trade[id] === undefined) errors.push({ file: fileOf('trades', id), message: `${id}: no tuition in balance/education.yaml (tuition.trade.${id})` });
-  }
   for (const id of activeIds(bundle.gradPrograms)) {
     const file = fileOf('gradPrograms', id);
-    if (edu.tuition.grad[id] === undefined) errors.push({ file, message: `${id}: no tuition in balance/education.yaml (tuition.grad.${id})` });
     if (!edu.admission.grad[id]) errors.push({ file, message: `${id}: no admission model in balance/education.yaml (admission.grad.${id})` });
     for (const major of bundle.gradPrograms[id]!.majors ?? []) {
       if (!bundle.majors[major]) errors.push({ file, message: `${id}: unknown major "${major}"` });

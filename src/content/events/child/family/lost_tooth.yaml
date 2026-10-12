@@ -17,7 +17,7 @@ choices:
     label: Put it under your pillow and go straight to sleep
     outcome:
       text: >-
-        In the morning there's a crisp five-dollar bill and a note in very
+        In the morning there's a crisp {$5} note and a note in very
         small, very familiar handwriting. You decide not to ask.
       effects:
         - { type: money, delta: 5 }

@@ -1,0 +1,48 @@
+id: ca_cegep_choice
+title: Pre-university or technical
+text: >-
+  In Quebec, secondary school ends and a two-year college, the CEGEP, comes
+  before university. A guidance counsellor lays out two paths on the desk: the
+  pre-university program that leads to a degree, and the technical program that
+  leads to a job in three years.
+tone: neutral
+category: future
+rarity: common
+countries: [ca]
+lifeStages: [teen]
+requires:
+  all:
+    - { city: montreal }
+    - { education: { program: [high], final: true } }
+weight: { base: 8 }
+once: true
+cast:
+  parent: { kind: parent, presence: household }
+choices:
+  - id: pre
+    label: Choose pre-university
+    outcome:
+      text: >-
+        You pick the program that keeps every door open. {parent.name} nods,
+        and then asks what the doors are.
+      effects:
+        - { type: stat, key: smarts, delta: 1 }
+        - { type: relationship, role: parent, affection: 2 }
+  - id: technical
+    label: Choose the technical program
+    outcome:
+      text: >-
+        You sign up for something with machines in it. {parent.name} worries and
+        then comes to the open house and stops worrying.
+      effects:
+        - { type: stat, key: discipline, delta: 2 }
+        - { type: relationship, role: parent, affection: 3 }
+  - id: undecided
+    label: Take a year to decide
+    outcome:
+      text: >-
+        You tell the counsellor you are not ready. The counsellor says that is
+        allowed. {parent.name} says it is not, and then says it is.
+      effects:
+        - { type: stat, key: stress, delta: 2 }
+        - { type: relationship, role: parent, affection: -1 }

@@ -1,0 +1,56 @@
+id: uk_hospital_waiting_list
+title: Your place on the list
+text: >-
+  The hospital letter is polite and clear: you are on the waiting list for the
+  procedure, and the estimated wait is "fourteen months." The pain is a daily
+  guest. The date is a rumour.
+tone: serious
+category: health
+rarity: uncommon
+countries: [uk]
+lifeStages: [adult, senior]
+requires: { age: { gte: 35 } }
+weight: { base: 4 }
+cooldownYears: 10
+cast:
+  mate: { kind: partner, presence: household, optional: true }
+choices:
+  - id: wait
+    label: Wait your turn
+    outcome:
+      text: >-
+        It takes sixteen months. You learn to live around the pain, and the
+        operation, when it comes, is done by a team who are very good and very
+        tired.
+      effects:
+        - { type: stat, key: health, delta: -2 }
+        - { type: stat, key: stress, delta: 3 }
+  - id: private
+    label: Pay for it privately ({$7800})
+    visibleIf: { money: { gte: 7800 } }
+    outcome:
+      text: >-
+        A date within a month, a private room and a menu. It costs {$7800}, and you
+        are home by the weekend, feeling relieved and slightly guilty.
+      effects:
+        - { type: money, delta: -7800 }
+        - { type: stat, key: health, delta: 3 }
+        - { type: stat, key: stress, delta: -2 }
+  - id: elsewhere
+    label: Ask to be moved to a hospital with a shorter list
+    check:
+      base: 45
+      stats: [{ key: discipline, weight: 0.3 }, { key: confidence, weight: 0.2 }]
+      success:
+        text: >-
+          Three phone calls and a letter from your GP, and you are moved to a
+          hospital forty miles away with a wait of five months. You make the
+          journey twice.
+        effects:
+          - { type: money, delta: -60 }
+          - { type: stat, key: health, delta: 1 }
+          - { type: stat, key: stress, delta: 1 }
+      failure:
+        text: The answer is a form letter that says your place is secure. Your place is exactly where it was.
+        effects:
+          - { type: stat, key: stress, delta: 3 }

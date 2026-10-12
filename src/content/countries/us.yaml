@@ -1,0 +1,148 @@
+# The United States. The base currency of the game is the US dollar, so every figure here is in dollars as written.
+id: us
+name: United States
+adjective: American
+blurb: "Private health care, high tuition, big cities and small towns"
+currency: { code: USD, symbol: "$", name: dollar, plural: dollars, locale: en-US }
+# Everything in event text is written at US prices.
+priceLevel: 1.0
+salaryMultiplier: 1.0
+
+legalAges: { drinking: 21, gambling: 21, driving: 16, permit: 15, marriage: 18 }
+
+school:
+  startAge: 5
+  # Kindergarten to 5th grade, 6th to 8th, 9th to 12th. High school normally ends as you turn 18.
+  elementary: 6
+  middle: 3
+  high: 4
+  dropoutAge: 16
+  repeatBelow: 1.0
+  maxRepeats: 1
+  applyAge: 17
+
+words:
+  elementary: elementary school
+  middle: middle school
+  high: high school
+  college: college
+  principal: principal
+  gradeWord: GPA
+  gradeDisplay: letters
+  tiers: { community: Community college, state: State university, elite: Elite university }
+  credentials:
+    hs_diploma: High school diploma
+    ged: GED
+    associate: Associate degree
+    bachelor: Bachelor’s degree
+    trade_license: Trade license
+    grad: Graduate degree
+  exams: { entrance: SAT or ACT scores, leaving: high school diploma }
+  gradeLabels: [Kindergarten, 1st grade, 2nd grade, 3rd grade, 4th grade, 5th grade, 6th grade, 7th grade, 8th grade, 9th grade, 10th grade, 11th grade, 12th grade]
+
+# Community college earns an associate degree; state and elite universities a bachelor's.
+collegeYears: { community: 2, state: 4, elite: 4 }
+
+# Yearly tuition, whole dollars: by college tier, by trade and by grad program.
+tuition:
+  college: { community: 4000, state: 11500, elite: 58000 }
+  trade:
+    electrician: 7500
+    plumber: 7500
+    welder: 9000
+    hvac_technician: 8500
+    auto_mechanic: 8000
+    cosmetologist: 9500
+  grad:
+    law: 48000
+    medicine: 56000
+    mba: 60000
+    masters: 25000
+
+studentFinance:
+  blurb: "Tuition is high, aid is partial, and most students borrow the rest."
+  # Scholarships take a share of tuition off; your family pays a share of the rest (balance/education.yaml
+  # familyHelp); anything left is a student loan at loanRate.
+  scholarships:
+    merit:
+      - { at: 3.0, x: 0 }
+      - { at: 3.5, x: 0.15 }
+      - { at: 4.0, x: 0.35 }
+    need: { poor: 0.6, working: 0.35, middle: 0.1, affluent: 0, rich: 0 }
+    gradNeed: 0.3
+    maxShare: 0.9
+  loanRate: 0.055
+  # Each application to a college, trade school or grad school costs this.
+  applicationFee: 75
+
+housing:
+  mortgageRate: 0.065
+  downPayment: 0.2
+  appreciation: 0.02
+
+healthcare:
+  model: private
+  blurb: "Mostly insurance through work and bills you pay yourself."
+  shares: { visit: 1, treatment: 1, therapy: 1, medication: 1, care: 1 }
+
+tax:
+  blurb: "Income and payroll taxes, in one line."
+  brackets:
+    - { from: 0, rate: 0 }
+    - { from: 14000, rate: 0.1 }
+    - { from: 45000, rate: 0.2 }
+    - { from: 100000, rate: 0.28 }
+    - { from: 250000, rate: 0.35 }
+
+# What dying costs in tax, by the size of the estate (dollars): nothing on a small estate, rising to 70% on a very large
+# one, so family wealth can't snowball.
+estateTax:
+  - { at: 0, x: 0 }
+  - { at: 600000, x: 0 }
+  - { at: 1200000, x: 0.2 }
+  - { at: 2500000, x: 0.4 }
+  - { at: 6000000, x: 0.55 }
+  - { at: 12000000, x: 0.7 }
+
+# Like Social Security: paid every year from `age` to anyone with at least `minYears` years of earned income, from
+# average yearly earnings over the years that count (each capped at earningsCap), through the formula's slices, times
+# years ÷ fullYears (at most 1). The benefit itself isn't taxed.
+pension:
+  name: Social Security
+  age: 67
+  minYears: 10
+  fullYears: 35
+  creditIncome: 6000
+  earningsCap: 170000
+  formula:
+    - { from: 0, rate: 0.9 }
+    - { from: 14000, rate: 0.32 }
+    - { from: 85000, rate: 0.15 }
+
+jobs:
+  salaryByCategory: { professional: 1, trade: 1, gig: 1 }
+  salaryByJob: {}
+
+sentencing:
+  outcomes: { warning: 1, fine: 1, probation: 1, jail: 1 }
+  termYears: 1
+  fines: 1
+  paroleYears: 1
+
+languages: { official: [en], common: [es, zh, tl, vi, ar] }
+
+names:
+  heritageWeights:
+    general: 56
+    hispanic: 19
+    black: 12
+    south_asian: 2.5
+    chinese: 2
+    vietnamese: 1.5
+    arab: 1.5
+    korean: 1
+    west_african: 1
+    japanese: 0.5
+  sameHeritageParentsChance: 0.85
+
+familyWealth: { poor: 15, working: 30, middle: 35, affluent: 15, rich: 5 }

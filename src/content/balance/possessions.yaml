@@ -3,8 +3,7 @@
 
 limits: { pets: 4, vehicles: 3, vacationHomes: 2 }
 
-# The youngest age you can drive, and buy a vehicle for cash.
-drivingAge: 16
+# The youngest age you can drive, and buy a vehicle for cash, is the country's driving age (countries/*.yaml legalAges).
 
 pets:
   # From this age you can adopt or buy a pet yourself. Children's pets come through events.

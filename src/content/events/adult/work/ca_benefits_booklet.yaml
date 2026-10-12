@@ -1,0 +1,42 @@
+id: ca_benefits_booklet
+title: The benefits booklet
+text: >-
+  Open enrolment at work comes with a forty-page booklet about the extended
+  health plan. Prescriptions, dental, physiotherapy, glasses: each has a limit,
+  a deductible and a form.
+tone: neutral
+category: work
+rarity: common
+countries: [ca]
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 20 } }
+    - { career: { employed: true, retired: false } }
+weight: { base: 5 }
+cooldownYears: 6
+choices:
+  - id: read
+    label: Read every page and claim everything you can
+    outcome:
+      text: >-
+        You find the physiotherapy limit, the eye exam you have never used and a
+        yearly dental cleaning. By March you have been reimbursed {$420}.
+      effects:
+        - { type: money, delta: 420 }
+        - { type: stat, key: discipline, delta: 1 }
+  - id: skim
+    label: Tick the usual boxes
+    outcome:
+      text: You tick the usual boxes. Nothing changes, and nothing is lost, which is how it usually goes.
+      effects:
+        - { type: stat, key: stress, delta: -1 }
+  - id: waive
+    label: Waive the plan to take the extra pay
+    outcome:
+      text: >-
+        The extra {$1100} a year shows up in your paycheque. In October a
+        prescription arrives that your plan would have covered.
+      effects:
+        - { type: money, delta: 1100 }
+        - { type: stat, key: stress, delta: 1 }

@@ -21,7 +21,7 @@ choices:
       stats: [{ key: fitness, weight: 0.4 }, { key: confidence, weight: 0.2 }]
       success:
         text: >-
-          It's over in seconds. The senior backs off, and a vice principal
+          It's over in seconds. The older kid backs off, and an assistant {principal}
           suspends all three of you anyway. {friend.name} never forgets it.
         effects:
           - { type: flag, key: suspended, value: true }

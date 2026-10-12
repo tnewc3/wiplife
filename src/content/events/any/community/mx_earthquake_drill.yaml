@@ -1,0 +1,63 @@
+id: mx_earthquake_drill
+title: The siren
+text: >-
+  The alert sounds over the whole city at the same moment: a drill, held every
+  year on the same day to remember an earthquake. People stream onto the
+  pavement in lines. This time, a few seconds in, the ground itself begins to
+  move.
+tone: serious
+category: community
+rarity: rare
+countries: [mx]
+lifeStages: [child, teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 8 } }
+    - { city: mexico_city }
+weight: { base: 3 }
+cooldownYears: 15
+cast:
+  neighbor: { kind: acquaintance, presence: city, createIfMissing: true, newChance: 0.6, age: { min: 18, max: 80 } }
+choices:
+  - id: out
+    label: Get out to the street with everyone
+    outcome:
+      text: >-
+        The floor ripples and the street fills with people holding each other
+        and their phones. It lasts forty seconds and feels much longer. When it
+        stops, {neighbor.name} is next to you, white as paper, and you hold hands
+        for a minute.
+      effects:
+        - { type: relationship, role: neighbor, affection: 6 }
+        - { type: stat, key: stress, delta: 4 }
+  - id: help
+    label: Run back in to bring out a neighbour who cannot walk fast
+    check:
+      base: 50
+      stats: [{ key: fitness, weight: 0.3 }, { key: confidence, weight: 0.3 }]
+      success:
+        text: >-
+          Two flights, a man with a cane and a staircase that never stops moving.
+          You get him out. His family brings you a plate of food for a week.
+        effects:
+          - { type: relationship, role: neighbor, affection: 9 }
+          - { type: stat, key: kindness, delta: 3 }
+          - { type: stat, key: stress, delta: 5 }
+          - { type: history, text: 'You helped a neighbour out of the building during an earthquake.', importance: 3 }
+      failure:
+        text: >-
+          You are stopped on the stairs by a falling plaster ceiling and carried
+          out by two strangers. You are bruised and shaken, and the neighbour you
+          went to help got out on their own.
+        effects:
+          - { type: stat, key: health, delta: -3 }
+          - { type: stat, key: stress, delta: 5 }
+  - id: freeze
+    label: Stand where you are, unable to move
+    outcome:
+      text: >-
+        You grip the doorframe and count. By the time you move, the street is
+        full of people who did not hesitate, and you are quietly ashamed.
+      effects:
+        - { type: stat, key: stress, delta: 5 }
+        - { type: stat, key: confidence, delta: -2 }

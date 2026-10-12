@@ -2,7 +2,7 @@ id: semester_abroad
 title: A semester away
 text: >-
   The study abroad office has one spot left for a semester in Lisbon. It
-  would cost about $4,000 on top of tuition, and you'd miss a semester of
+  would cost about {$4000} on top of tuition, and you'd miss a semester of
   everything here.
 tone: light
 category: school
@@ -13,7 +13,7 @@ weight: { base: 6 }
 once: true
 # C1: reviewed build warnings kept on purpose (docs/consistency-review.md).
 justified:
-  money: "Staying means not spending the $4,000; your savings stay as they are."
+  money: "Staying means not spending the {$4000}; your savings stay as they are."
 choices:
   - id: go
     label: Go

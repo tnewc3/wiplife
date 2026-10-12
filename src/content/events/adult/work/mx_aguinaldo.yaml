@@ -1,0 +1,51 @@
+id: mx_aguinaldo
+title: The aguinaldo
+text: >-
+  By law, every employee in Mexico receives a year-end bonus of at least fifteen
+  days' pay before the twentieth of December. The whole country thinks about
+  it in November, and spends it in December.
+tone: light
+category: work
+rarity: common
+countries: [mx]
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { career: { employed: true, retired: false } }
+weight: { base: 8 }
+cooldownYears: 2
+choices:
+  - id: save
+    label: Put most of it away
+    outcome:
+      text: >-
+        The bonus is {$700}. You keep {$550} for the new year, buy a modest
+        present and feel, for one month, like a person with a plan.
+      effects:
+        - { type: money, delta: 550 }
+        - { type: stat, key: discipline, delta: 2 }
+        - { type: stat, key: stress, delta: -2 }
+  - id: family
+    label: Spend most of it on the family's Christmas
+    outcome:
+      text: >-
+        A table for twenty, presents for the small ones and a tamal-making
+        session that lasts two days. Of the {$700} bonus, {$650} is gone by the
+        twenty-fifth, and nobody regrets it.
+      effects:
+        - { type: money, delta: 700 }
+        - { type: money, delta: -650 }
+        - { type: stat, key: happiness, delta: 4 }
+  - id: course
+    label: Spend part of it on a course
+    outcome:
+      text: >-
+        Of the {$700} bonus, {$400} becomes an evening course in something you
+        have been curious about for years. Your Saturdays get busier and your
+        head gets quieter.
+      effects:
+        - { type: money, delta: 700 }
+        - { type: money, delta: -400 }
+        - { type: stat, key: smarts, delta: 1 }
+        - { type: stat, key: ambition, delta: 1 }

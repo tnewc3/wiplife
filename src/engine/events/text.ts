@@ -17,6 +17,7 @@ import { BELONGING_TEXT_VALUES, belongingTextValues } from '../belonging/text';
 import { BUSINESS_TEXT_VALUES, businessTextValues } from '../business/text';
 import type { TextContext } from '../text';
 import type { Id, LifeState, Pronouns } from '../types';
+import { COUNTRY_TEXT_VALUES, countryTextValues, priceText } from '../country';
 
 /** A pet is "it" in text: events name it by name, and use these where a pronoun reads naturally. */
 const IT: Pronouns = { subject: 'it', object: 'it', possessive: 'its', possessivePronoun: 'its', reflexive: 'itself', verbPlural: false };
@@ -47,7 +48,7 @@ export function textContext(state: LifeState, cast: Record<string, Id>, content:
   const holderId = cast.npc ?? cast.person;
   const heard = holderId === undefined ? '' : heardFor(state, holderId, cast[ITEM_ROLE], content);
   // E5: a bound pet is the role `pet` ({pet.name}); a bound vehicle and vacation home give {vehicle}, {homeCity}, and a pet's species {petKind}.
-  const values: Record<string, string | number> = { age: c.age, ...discoveryValues(state, content), sentence: sentenceText(state, content), since: sinceText(state, since, content), heard, ...teenTextValues(state, content), ...crimeTextValues(state, content), ...fameTextValues(state, content), ...sportsTextValues(state, content), ...belongingTextValues(state, cast, content), ...businessTextValues(state, cast, content) };
+  const values: Record<string, string | number> = { ...countryTextValues(state, content), age: c.age, ...discoveryValues(state, content), sentence: sentenceText(state, content), since: sinceText(state, since, content), heard, ...teenTextValues(state, content), ...crimeTextValues(state, content), ...fameTextValues(state, content), ...sportsTextValues(state, content), ...belongingTextValues(state, cast, content), ...businessTextValues(state, cast, content) };
   const pet = castPossession(state, cast, 'pet', 'pet');
   if (pet) {
     roles.pet = { name: { first: pet.name ?? '', last: '' }, pronouns: IT };
@@ -57,7 +58,7 @@ export function textContext(state: LifeState, cast: Record<string, Id>, content:
   if (vehicle) values.vehicle = possessionNoun(vehicle, content);
   const home = castPossession(state, cast, 'home', 'home');
   if (home) values.homeCity = possessionNoun(home, content);
-  return { roles, values };
+  return { roles, values, money: (amount) => priceText(state, amount, content) };
 }
 
 /**
@@ -71,7 +72,7 @@ export function textContext(state: LifeState, cast: Record<string, Id>, content:
  * person in the story (npc or person) has heard about you, as a phrase ("that
  * you were fired for stealing"; only where the event requires that they have).
  */
-export const EVENT_TEXT_VALUES = ['age', 'talent', 'latentPeople', 'latentGender', 'latentExpression', 'latentTrait', 'sentence', 'since', 'heard', ...TEEN_TEXT_VALUES, ...CRIME_TEXT_VALUES, ...FAME_TEXT_VALUES, ...SPORTS_TEXT_VALUES, ...BELONGING_TEXT_VALUES, ...BUSINESS_TEXT_VALUES] as const;
+export const EVENT_TEXT_VALUES = [...COUNTRY_TEXT_VALUES, 'age', 'talent', 'latentPeople', 'latentGender', 'latentExpression', 'latentTrait', 'sentence', 'since', 'heard', ...TEEN_TEXT_VALUES, ...CRIME_TEXT_VALUES, ...FAME_TEXT_VALUES, ...SPORTS_TEXT_VALUES, ...BELONGING_TEXT_VALUES, ...BUSINESS_TEXT_VALUES] as const;
 /** E5: values an event may use only when it binds the possession: a pet's species, a vehicle's name, a vacation home's city. */
 export const POSSESSION_TEXT_VALUES = { pet: ['petKind'], vehicle: ['vehicle'], home: ['homeCity'] } as const;
 
@@ -83,10 +84,11 @@ export const POSSESSION_TEXT_VALUES = { pet: ['petKind'], vehicle: ['vehicle'], 
 export function keepPossessionText(after: TextContext, before: TextContext): TextContext {
   const roles = { ...after.roles };
   const values = { ...after.values };
+  const money = after.money ?? before.money;
   if (roles.pet === undefined && before.roles?.pet !== undefined) roles.pet = before.roles.pet;
   for (const key of ['petKind', 'vehicle', 'homeCity'] as const) {
     const was = before.values?.[key];
     if (values[key] === undefined && was !== undefined) values[key] = was;
   }
-  return { roles, values };
+  return { roles, values, ...(money ? { money } : {}) };
 }

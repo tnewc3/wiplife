@@ -1,0 +1,149 @@
+# Mexico. Figures are in the game's base currency (US dollars); pesos are shown at the rate in balance/countries.yaml.
+# Pay and prices are national averages across the cities in src/content/cities.
+id: mx
+name: Mexico
+adjective: Mexican
+blurb: "A young, fast-changing country; public and private health care"
+currency: { code: MXN, symbol: "$", name: peso, plural: pesos, locale: es-MX }
+priceLevel: 0.44
+salaryMultiplier: 0.3
+
+legalAges: { drinking: 18, gambling: 18, driving: 18, permit: 17, marriage: 18 }
+
+school:
+  startAge: 5
+  # The last year of preescolar and primaria years 1 to 6, secundaria years 1 to 3, preparatoria years 1 to 3.
+  elementary: 7
+  middle: 3
+  high: 3
+  dropoutAge: 15
+  repeatBelow: 1.0
+  maxRepeats: 1
+  applyAge: 17
+
+words:
+  elementary: primary school
+  middle: secondary school
+  high: preparatoria
+  college: university
+  principal: director
+  gradeWord: average
+  gradeDisplay: tenPoint
+  tiers: { community: Technical university, state: Public university, elite: Leading university }
+  credentials:
+    hs_diploma: Preparatoria certificate
+    ged: Open-school certificate
+    associate: Technical degree
+    bachelor: Licenciatura
+    trade_license: Technical certificate
+    grad: Postgraduate degree
+  exams: { entrance: university entrance exam, leaving: preparatoria certificate }
+  gradeLabels:
+    - Last year of preschool
+    - Primary, year 1
+    - Primary, year 2
+    - Primary, year 3
+    - Primary, year 4
+    - Primary, year 5
+    - Primary, year 6
+    - Secondary, year 1
+    - Secondary, year 2
+    - Secondary, year 3
+    - Preparatoria, year 1
+    - Preparatoria, year 2
+    - Preparatoria, year 3
+
+collegeYears: { community: 2, state: 4, elite: 4 }
+
+# Public universities charge almost nothing; the leading tier is private and priced for wealthy families.
+tuition:
+  college: { community: 400, state: 700, elite: 9000 }
+  trade:
+    electrician: 900
+    plumber: 900
+    welder: 1100
+    hvac_technician: 1000
+    auto_mechanic: 950
+    cosmetologist: 1300
+  grad:
+    law: 4000
+    medicine: 5000
+    mba: 14000
+    masters: 3000
+
+studentFinance:
+  blurb: "Public tuition is almost free; scholarships (becas) help, and loans are rare and expensive."
+  scholarships:
+    merit:
+      - { at: 3.0, x: 0.05 }
+      - { at: 3.5, x: 0.2 }
+      - { at: 4.0, x: 0.5 }
+    need: { poor: 0.8, working: 0.5, middle: 0.1, affluent: 0, rich: 0 }
+    gradNeed: 0.3
+    maxShare: 0.95
+  loanRate: 0.12
+  applicationFee: 25
+
+housing:
+  mortgageRate: 0.105
+  downPayment: 0.2
+  appreciation: 0.03
+
+healthcare:
+  model: mixed
+  blurb: "Public care through IMSS and other institutes is free but crowded; many people pay for private doctors and pharmacies."
+  shares: { visit: 0.25, treatment: 0.4, therapy: 0.8, medication: 0.5, care: 0.8 }
+
+tax:
+  blurb: "Income tax and social security contributions."
+  brackets:
+    - { from: 0, rate: 0 }
+    - { from: 700, rate: 0.08 }
+    - { from: 3500, rate: 0.16 }
+    - { from: 7500, rate: 0.24 }
+    - { from: 20000, rate: 0.3 }
+    - { from: 40000, rate: 0.35 }
+
+# No estate or inheritance tax: what is owed is notary and registry fees, which a small share stands for (rising for
+# very large estates so wealth can't snowball).
+estateTax:
+  - { at: 0, x: 0 }
+  - { at: 20000, x: 0.02 }
+  - { at: 1000000, x: 0.1 }
+  - { at: 4000000, x: 0.3 }
+  - { at: 10000000, x: 0.5 }
+
+pension:
+  name: IMSS pension and the Pension for Well-being
+  age: 65
+  minYears: 10
+  fullYears: 25
+  creditIncome: 1500
+  earningsCap: 40000
+  formula:
+    - { from: 0, rate: 0.5 }
+    - { from: 4000, rate: 0.3 }
+    - { from: 15000, rate: 0.1 }
+
+jobs:
+  salaryByCategory: { professional: 1.2, trade: 0.95, gig: 0.8 }
+  salaryByJob: {}
+
+sentencing:
+  outcomes: { warning: 0.9, fine: 1.1, probation: 0.7, jail: 1.1 }
+  termYears: 1
+  fines: 0.4
+  paroleYears: 1
+
+languages: { official: [es], common: [nah, yua, en] }
+
+names:
+  heritageWeights:
+    general: 88
+    european: 6
+    arab: 2
+    east_asian: 2
+    afro_mexican: 2
+  sameHeritageParentsChance: 0.9
+
+familyWealth: { poor: 30, working: 35, middle: 25, affluent: 8, rich: 2 }

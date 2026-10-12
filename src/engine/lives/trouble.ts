@@ -14,6 +14,7 @@ import { chance, nextInt } from '../rng';
 import type { Id, Trouble } from '../types';
 import { ask, say, type Ctx, type Subject } from './subject';
 import { isJailed, seriousTrouble } from './model';
+import { pensionAge } from '../country';
 
 /** Conditions people can get: illnesses, chronic and mental conditions and addictions (injuries don't change a life), in id order. */
 const conditionsCache = new WeakMap<ContentBundle, ConditionDef[]>();
@@ -224,7 +225,7 @@ export function troubleStep(ctx: Ctx, s: Subject): void {
 
   // Short of money: someone may ask for a loan or a cosigner.
   const bracket = ctx.content.balance.careers.minAge;
-  if ((s.wealth === 'poor' || s.wealth === 'working') && s.age >= bracket && s.age < ctx.content.balance.economy.retirement.age && !isJailed(life)) {
+  if ((s.wealth === 'poor' || s.wealth === 'working') && s.age >= bracket && s.age < pensionAge(ctx.state, ctx.content) && !isJailed(life)) {
     ask(ctx, s, 'moneyTrouble');
   }
 }

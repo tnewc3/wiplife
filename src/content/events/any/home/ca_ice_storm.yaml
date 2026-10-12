@@ -1,0 +1,51 @@
+id: ca_ice_storm
+title: Four days without power
+text: >-
+  The branches came down first, then the lines, then the lights. Freezing rain
+  has coated the city in glass, and the utility estimates "a few days" in the
+  tone of someone who does not want to be held to it.
+tone: serious
+category: home
+rarity: uncommon
+countries: [ca]
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { home: { kind: [owned, renting] } }
+weight: { base: 4 }
+cooldownYears: 12
+cast:
+  mate: { kind: partner, presence: household, optional: true }
+  neighbor: { kind: acquaintance, presence: city, createIfMissing: true, newChance: 0.5, age: { min: 18, max: 80 } }
+choices:
+  - id: neighbors
+    label: Check on the neighbours and share what you have
+    outcome:
+      text: >-
+        You and {neighbor.name} end up cooking on a camp stove in the hallway for
+        eleven people. By day three you know everyone's name and most of their
+        stories.
+      effects:
+        - { type: relationship, role: neighbor, affection: 8 }
+        - { type: stat, key: kindness, delta: 2 }
+        - { type: stat, key: stress, delta: 2 }
+  - id: hotel
+    label: Move to a hotel until the lights come on
+    outcome:
+      text: >-
+        Four nights, a room with a kettle and a view of a dark skyline. The
+        hotel costs {$680}, and the quiet is almost worth it.
+      effects:
+        - { type: money, delta: -680 }
+        - { type: stat, key: stress, delta: -1 }
+  - id: tough
+    label: Stay put and wait it out
+    outcome:
+      text: >-
+        Blankets, a flashlight and a fridge slowly turning into a science
+        project. You throw out {$220} of food and become wise about batteries.
+      effects:
+        - { type: money, delta: -220 }
+        - { type: stat, key: health, delta: -1 }
+        - { type: stat, key: stress, delta: 4 }

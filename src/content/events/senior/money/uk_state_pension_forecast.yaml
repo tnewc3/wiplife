@@ -1,0 +1,38 @@
+id: uk_state_pension_forecast
+title: Your state pension forecast
+text: >-
+  You ask for a forecast, and it arrives as a letter with a table: how many
+  qualifying years you have, how many more you need, and a date when the money
+  will begin. The date is later than you remember.
+tone: neutral
+category: money
+rarity: common
+countries: [uk]
+lifeStages: [adult, senior]
+requires: { age: { gte: 55 } }
+weight: { base: 8 }
+once: true
+choices:
+  - id: gaps
+    label: Pay voluntary contributions to fill the gaps ({$1100})
+    visibleIf: { money: { gte: 1100 } }
+    outcome:
+      text: >-
+        Two missing years bought back for {$1100}. The adviser says it is one of
+        the best deals available, and you wish you had known twenty years ago.
+      effects:
+        - { type: money, delta: -1100 }
+        - { type: stat, key: stress, delta: -2 }
+  - id: work
+    label: Plan to work a little longer
+    outcome:
+      text: You pencil in two more years. It is not a choice so much as an arithmetic problem with a human answer.
+      effects:
+        - { type: stat, key: ambition, delta: 1 }
+        - { type: stat, key: stress, delta: 1 }
+  - id: file
+    label: File the letter and stop worrying about it
+    outcome:
+      text: The letter goes in a drawer with the passport and the warranties. It will be there when you need it.
+      effects:
+        - { type: stat, key: stress, delta: -1 }

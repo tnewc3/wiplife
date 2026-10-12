@@ -46,7 +46,7 @@ choices:
         - { type: relationship, role: classmate, status: active, affection: 8 }
         - { type: stat, key: happiness, delta: 3 }
   - id: dance
-    label: Dance to the songs from senior year
+    label: Dance to the songs from your last year of school
     outcome:
       text: Your hips have opinions. You ignore them. It's the best night you've had in years.
       effects:

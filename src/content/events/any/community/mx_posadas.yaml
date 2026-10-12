@@ -1,0 +1,44 @@
+id: mx_posadas
+title: Las posadas
+text: >-
+  From mid-December, each night a different household in the building hosts a
+  posada: candles, carols, a piñata and punch that smells of cinnamon and
+  tejocote. Tonight, it is your turn.
+tone: light
+category: community
+rarity: common
+countries: [mx]
+lifeStages: [child, teen, youngAdult, adult, senior]
+requires: { age: { gte: 6 } }
+weight: { base: 7 }
+cooldownYears: 3
+cast:
+  neighbor: { kind: acquaintance, presence: city, createIfMissing: true, newChance: 0.5 }
+choices:
+  - id: host
+    label: Host it and fill the courtyard
+    outcome:
+      text: >-
+        Forty people, three songs, a piñata that survives longer than anyone
+        thought possible, and then does not. The evening costs {$120} and the
+        building feels like one big family.
+      effects:
+        - { type: money, delta: -120 }
+        - { type: relationship, role: neighbor, affection: 7 }
+        - { type: stat, key: happiness, delta: 3 }
+  - id: guest
+    label: Go to a neighbour's posada
+    outcome:
+      text: A small cup, a song you half remember and a conversation on the stairs that lasts until the candles are low.
+      effects:
+        - { type: relationship, role: neighbor, affection: 5 }
+        - { type: stat, key: happiness, delta: 2 }
+  - id: skip
+    label: Stay in this year
+    outcome:
+      text: >-
+        You hear the carols through the wall and do not go down. At the end of the
+        week someone leaves a bag of tamales at your door, without a note.
+      effects:
+        - { type: relationship, role: neighbor, affection: -1 }
+        - { type: stat, key: stress, delta: -1 }

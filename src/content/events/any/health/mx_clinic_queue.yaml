@@ -1,0 +1,47 @@
+id: mx_clinic_queue
+title: Before the clinic opens
+text: >-
+  The public clinic gives out a limited number of appointments each morning, in
+  order of arrival. By five-thirty there are thirty people in line on the
+  pavement with folding stools and thermoses, and the door opens at seven.
+tone: neutral
+category: health
+rarity: common
+countries: [mx]
+lifeStages: [youngAdult, adult, senior]
+requires: { age: { gte: 18 } }
+weight: { base: 6 }
+cooldownYears: 4
+cast:
+  mate: { kind: partner, presence: household, optional: true }
+choices:
+  - id: queue
+    label: Join the line at dawn
+    outcome:
+      text: >-
+        Four hours of standing, a conversation with a woman who has done this
+        every month for ten years, and finally a doctor who is kind, quick and
+        out of time. It is free, and it works.
+      effects:
+        - { type: stat, key: stress, delta: 3 }
+        - { type: stat, key: health, delta: 1 }
+  - id: private
+    label: Pay for a private doctor instead ({$140})
+    visibleIf: { money: { gte: 140 } }
+    outcome:
+      text: >-
+        A clean waiting room, a nurse who knows your name and twenty minutes of
+        attention. The consultation costs {$140}, and you feel guilty about the
+        line you left behind.
+      effects:
+        - { type: money, delta: -140 }
+        - { type: stat, key: health, delta: 2 }
+        - { type: stat, key: stress, delta: -1 }
+  - id: wait
+    label: Wait and see if it passes
+    outcome:
+      text: >-
+        You tell yourself it is nothing. A week of mild worry and one night you
+        do not sleep, and then it is, in fact, nothing. This time.
+      effects:
+        - { type: stat, key: stress, delta: 2 }

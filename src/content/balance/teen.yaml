@@ -96,8 +96,7 @@ friends:
   people: 5
 
 license:
-  permitAge: 15
-  licenseAge: 16
+  # The ages for a permit and the license are the country's (countries/*.yaml legalAges).
   permitFee: 40
   lessonFee: 120
   testFee: 60

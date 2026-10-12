@@ -28,7 +28,7 @@ choices:
       base: 50
       stats: [{ key: discipline, weight: 0.3 }, { key: confidence, weight: 0.2 }]
       success:
-        text: The coin vanishes. The coin reappears behind the principal's ear. You are, briefly, famous.
+        text: The coin vanishes. The coin reappears behind the {principal}'s ear. You are, briefly, famous.
         effects:
           - { type: stat, key: confidence, delta: 3 }
           - { type: stat, key: reputation, delta: 1 }

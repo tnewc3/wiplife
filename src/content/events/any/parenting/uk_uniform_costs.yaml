@@ -1,0 +1,48 @@
+id: uk_uniform_costs
+title: The uniform list
+text: >-
+  The letter from {kid.name}'s school lists the uniform in one column and the
+  stockists in another. The blazer has to come from one shop, the PE kit from a
+  second and the tie, apparently, from a third.
+tone: neutral
+category: parenting
+rarity: common
+countries: [uk]
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 22 } }
+    - { family: { minors: { gte: 1 } } }
+weight: { base: 6 }
+cooldownYears: 4
+cast:
+  kid: { kind: child, presence: household, age: { min: 10, max: 15 } }
+choices:
+  - id: all
+    label: Buy everything on the list ({$320})
+    visibleIf: { money: { gte: 320 } }
+    outcome:
+      text: >-
+        {$320} at three shops and one online order. {kid.name} stands in the
+        hallway in the full kit and says nothing, which is a very good sign.
+      effects:
+        - { type: money, delta: -320 }
+        - { type: relationship, role: kid, affection: 3 }
+  - id: secondhand
+    label: Ask at the school's second-hand sale
+    outcome:
+      text: >-
+        A table in the hall, a blazer one size up and a queue of parents who
+        have all done the same sums. You leave with most of the kit for {$80}.
+      effects:
+        - { type: money, delta: -80 }
+        - { type: stat, key: discipline, delta: 1 }
+  - id: grow
+    label: Buy a size up and hope {kid.they} grow into it
+    outcome:
+      text: >-
+        The blazer is enormous for a year and then, briefly, fits. By then the
+        sleeves are a different problem. The kit costs {$220}.
+      effects:
+        - { type: money, delta: -220 }
+        - { type: relationship, role: kid, affection: -2 }

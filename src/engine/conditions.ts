@@ -21,6 +21,7 @@ import { businessHolds } from './business/query';
 import { faithOf } from './belonging/faith';
 import { romanceStatus, yearsInKind } from './relationships';
 import type { Id, LifeState } from './types';
+import { countryIdOfCity, countryOfCity, legalAge } from './country';
 
 export interface ConditionContext {
   /** Role name -> person id, once the event is cast. */
@@ -33,6 +34,11 @@ export interface ConditionContext {
   roles?: 'strict' | 'assumeTrue';
   /** The content, for conditions on where someone is (C1); without it they fail. */
   content?: ContentBundle;
+}
+
+/** The price level of the country you live in (1 without the content to look it up). */
+function priceLevelOf(state: LifeState, ctx: ConditionContext): number {
+  return ctx.content ? countryOfCity(state.character.cityId, ctx.content).priceLevel : 1;
 }
 
 export function compare(value: number, c: Compare): boolean {
@@ -69,8 +75,12 @@ export function evaluate(condition: Condition | undefined, state: LifeState, ctx
   if ('stat' in condition) return compare(c.stats[condition.stat], condition);
   if ('trait' in condition) return compare(c.personality[condition.trait], condition);
   if ('hidden' in condition) return compare(c.hidden[condition.hidden], condition);
-  if ('money' in condition) return compare(state.finances.savings, condition.money);
+  // Amounts in conditions are written at US prices; they are compared in the price level of the country you live in (W4a).
+  if ('money' in condition) return compare(state.finances.savings / priceLevelOf(state, ctx), condition.money);
   if ('city' in condition) return c.cityId === condition.city;
+  // W4a: the country (needs the content to know which country the city is in) and the legal ages there.
+  if ('country' in condition) return ctx.content !== undefined && condition.country.includes(countryIdOfCity(c.cityId, ctx.content));
+  if ('legalAge' in condition) return ctx.content !== undefined && c.age >= legalAge(condition.legalAge, c.cityId, ctx.content);
   if ('familyWealth' in condition) return condition.familyWealth.includes(c.familyWealth);
   if ('flag' in condition) {
     const value = state.flags[condition.flag];
@@ -88,7 +98,8 @@ export function evaluate(condition: Condition | undefined, state: LifeState, ctx
   if ('finances' in condition) {
     const q = condition.finances;
     const f = state.finances;
-    if (q.debt && !compare(totalDebt(state), q.debt)) return false;
+    const price = priceLevelOf(state, ctx);
+    if (q.debt && !compare(totalDebt(state) / price, q.debt)) return false;
     if (q.missed && !compare(mostMissed(state), q.missed)) return false;
     if (q.collections !== undefined && f.debts.some((d) => d.kind === 'collections') !== q.collections) return false;
     if (q.kinds && !f.debts.some((d) => q.kinds!.includes(d.kind))) return false;
@@ -96,8 +107,8 @@ export function evaluate(condition: Condition | undefined, state: LifeState, ctx
     if (q.gig !== undefined && state.career.gig !== q.gig) return false;
     if (q.bankruptWithin !== undefined && !(f.bankruptcyYear !== undefined && state.currentYear - f.bankruptcyYear <= q.bankruptWithin)) return false;
     if (q.planWithin !== undefined && !(f.debtPlanYear !== undefined && state.currentYear - f.debtPlanYear <= q.planWithin)) return false;
-    if (q.income && !compare(f.lastLedger?.gross ?? 0, q.income)) return false;
-    if (q.dirty && !compare(f.dirty, q.dirty)) return false;
+    if (q.income && !compare((f.lastLedger?.gross ?? 0) / price, q.income)) return false;
+    if (q.dirty && !compare(f.dirty / price, q.dirty)) return false;
     return true;
   }
   if ('home' in condition) {

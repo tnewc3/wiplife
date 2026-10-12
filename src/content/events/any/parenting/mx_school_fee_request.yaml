@@ -1,0 +1,51 @@
+id: mx_school_fee_request
+title: The voluntary contribution
+text: >-
+  The school asks, politely, for a "voluntary" contribution from every family:
+  for the paint, for the toilets, for the broken window. The form says it is
+  optional. The class representative says it would be noticed.
+tone: neutral
+category: parenting
+rarity: common
+countries: [mx]
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 22 } }
+    - { family: { minors: { gte: 1 } } }
+weight: { base: 6 }
+cooldownYears: 4
+cast:
+  kid: { kind: child, presence: household, age: { min: 6, max: 14 } }
+choices:
+  - id: pay
+    label: Contribute the usual amount ({$25})
+    visibleIf: { money: { gte: 25 } }
+    outcome:
+      text: >-
+        {$25} in an envelope, and a thank-you from the head. The toilets are
+        painted, and {kid.name} notices.
+      effects:
+        - { type: money, delta: -25 }
+        - { type: relationship, role: kid, affection: 2 }
+  - id: work
+    label: Offer to help paint instead
+    outcome:
+      text: >-
+        A Saturday with a brush and eight other parents. By lunch the corridor
+        is a different colour and the group has a name.
+      effects:
+        - { type: relationship, role: kid, affection: 4 }
+        - { type: stat, key: kindness, delta: 1 }
+        - { type: stat, key: fitness, delta: 1 }
+  - id: skip
+    label: Skip it this year
+    outcome:
+      text: >-
+        Nobody mentions it, until {kid.name} says that the other children
+        brought the receipt for their families. You hand over the {$25} next
+        term, with an awkward smile.
+      effects:
+        - { type: money, delta: -25 }
+        - { type: relationship, role: kid, affection: -2 }
+        - { type: stat, key: stress, delta: 1 }

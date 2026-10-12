@@ -9,6 +9,7 @@ import type { Id, LifeState } from '../types';
 import { joinCrew, leaveCrew, shapePerson } from './crew';
 import { openInvestigation } from './money';
 import { crewDef } from './query';
+import { sameCountryCities } from '../country';
 
 /** The crime conditions an event cannot do without (those under `all`, not `any` or `not`), merged. */
 function wanted(condition: Condition | undefined): CrimeCondition {
@@ -85,7 +86,7 @@ export function giveSampleCrime(state: LifeState, def: EventDef, cast: Record<st
       if (want.rival === true || want.rivalry !== undefined) k.rivalry = bound(want.rivalry) ?? k.rivalry;
       if (want.jobs !== undefined) k.jobs = { year: state.currentYear, count: bound(want.jobs) ?? 1, last: 0 };
       if (want.away === true || want.suspicion !== undefined || want.awayYears !== undefined) {
-        const elsewhere = Object.keys(content.cities).find((c) => c !== crew.cityId);
+        const elsewhere = sameCountryCities(state.character.cityId, content).find((c) => c !== crew.cityId);
         if (elsewhere !== undefined) {
           state.character.cityId = elsewhere;
           k.awayYears = Math.max(1, bound(want.awayYears) ?? 1);

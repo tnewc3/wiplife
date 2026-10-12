@@ -1,0 +1,54 @@
+id: ca_winter_tires
+title: Tire season
+text: >-
+  The first frost comes with a line at the garage and a sign: winter tires, by
+  appointment only. Your insurer gives a discount if you have them, and the
+  roads in January give a different kind of discount if you don't.
+tone: neutral
+category: vehicles
+rarity: common
+countries: [ca]
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { belongings: { vehicles: { gte: 1 } } }
+weight: { base: 6 }
+cooldownYears: 3
+bind: [vehicle]
+choices:
+  - id: buy
+    label: Buy a set of winter tires ({$700})
+    visibleIf: { money: { gte: 700 } }
+    outcome:
+      text: >-
+        {$700} and an hour at the shop. In January the {vehicle} grips an icy hill
+        that a neighbour's does not, and you feel smug for a full week.
+      effects:
+        - { type: money, delta: -700 }
+        - { type: stat, key: stress, delta: -1 }
+  - id: used
+    label: Find a used set
+    check:
+      base: 50
+      stats: [{ key: smarts, weight: 0.3 }]
+      success:
+        text: A friend of a friend has a set that barely fit someone else's car. They fit yours, and cost {$250}.
+        effects:
+          - { type: money, delta: -250 }
+      failure:
+        text: >-
+          The set is older than the listing said. You find out when one of them
+          goes flat on the highway, which costs {$350} to repair.
+        effects:
+          - { type: money, delta: -350 }
+          - { type: stat, key: stress, delta: 3 }
+  - id: nothing
+    label: Take your chances with all-seasons
+    outcome:
+      text: >-
+        It goes fine until the morning it doesn't. A slow slide into a snowbank,
+        a tow truck and {$220} you did not plan to spend.
+      effects:
+        - { type: money, delta: -220 }
+        - { type: stat, key: stress, delta: 4 }

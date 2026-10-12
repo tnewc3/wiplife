@@ -1,0 +1,47 @@
+id: ca_coop_term
+title: A work term
+text: >-
+  Your program has a co-op stream: alternating terms of classes and paid
+  placements. The posting board is open, and the good placements go quickly.
+tone: neutral
+category: school
+rarity: common
+countries: [ca]
+lifeStages: [youngAdult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { education: { program: [college], year: { gte: 2 } } }
+weight: { base: 6 }
+once: true
+choices:
+  - id: apply
+    label: Apply to everything on the board
+    check:
+      base: 45
+      stats: [{ key: ambition, weight: 0.3 }, { key: smarts, weight: 0.2 }]
+      success:
+        text: >-
+          The third interview turns into an offer. Four months of real work, a
+          reference, and {$7200} that tuition will never see.
+        effects:
+          - { type: money, delta: 7200 }
+          - { type: stat, key: ambition, delta: 3 }
+          - { type: stat, key: confidence, delta: 2 }
+          - { type: history, text: 'You spent a co-op term at a real workplace, and came back to class a different person.', importance: 2 }
+      failure:
+        text: >-
+          Eleven applications and a lot of automated rejections. In the end you
+          fill the term with classes and a cashier job, and the gap shows on the
+          résumé.
+        effects:
+          - { type: money, delta: 2400 }
+          - { type: stat, key: stress, delta: 3 }
+  - id: skip
+    label: Skip co-op and finish early
+    outcome:
+      text: >-
+        You graduate sooner than the classmates who went, and with less to put on
+        your résumé. Nobody says anything. A few of them do not need to.
+      effects:
+        - { type: stat, key: stress, delta: 1 }

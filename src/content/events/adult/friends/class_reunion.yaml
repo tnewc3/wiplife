@@ -1,7 +1,7 @@
 id: class_reunion
 title: The reunion
 text: >-
-  Your high school reunion is in the gym, which smells exactly the same.
+  Your {highSchool} reunion is in the gym, which smells exactly the same.
   {classmate.name} spots you across the room and waves.
 tone: light
 category: friends

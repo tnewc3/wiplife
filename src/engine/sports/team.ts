@@ -12,15 +12,19 @@ import { afterMove } from '../career';
 import { moveTo, sellHome } from '../housing';
 import { pick, type RngState } from '../rng';
 import type { Id, LifeState, SportsTeam } from '../types';
+import { sameCountry } from '../country';
 
 /** A pro team by id. */
 export function proTeamDef(def: SportDef, id: Id | null | undefined): SportProTeamDef | undefined {
   return def.leagues.pro.teams.find((t) => t.id === id);
 }
 
-/** The pro teams in a city that the game has (a team in a city nobody can reach would strand a player). */
-export function proTeamsIn(def: SportDef, content: ContentBundle): SportProTeamDef[] {
-  return def.leagues.pro.teams.filter((t) => content.cities[t.city] !== undefined);
+/**
+ * The pro teams a player living in `home` can play for: those in cities of the same country (a team abroad would be
+ * emigration, W6, and a team in a city nobody can reach would strand a player).
+ */
+export function proTeamsIn(def: SportDef, home: Id, content: ContentBundle): SportProTeamDef[] {
+  return def.leagues.pro.teams.filter((t) => content.cities[t.city] !== undefined && sameCountry(home, t.city, content));
 }
 
 export function proTeam(t: SportProTeamDef): SportsTeam {
@@ -46,15 +50,15 @@ export function amateurTeam(state: LifeState, def: SportDef, level: Exclude<Spor
 }
 
 /** The pro team that picks at this place in a draft: the weakest side picks first, round after round. */
-export function draftingTeam(def: SportDef, pickNumber: number, content: ContentBundle): SportProTeamDef {
-  const teams = [...proTeamsIn(def, content)].sort((a, b) => a.quality - b.quality || (a.id < b.id ? -1 : 1));
+export function draftingTeam(def: SportDef, pickNumber: number, home: Id, content: ContentBundle): SportProTeamDef {
+  const teams = [...proTeamsIn(def, home, content)].sort((a, b) => a.quality - b.quality || (a.id < b.id ? -1 : 1));
   return teams[(pickNumber - 1) % teams.length]!;
 }
 
 /** A pro team other than `not`, picked at random (weighted toward stronger teams for a better player). */
-export function anotherTeam(def: SportDef, not: Id | null, content: ContentBundle, rng: RngState): SportProTeamDef {
-  const options = proTeamsIn(def, content).filter((t) => t.id !== not);
-  return pick(rng, options.length > 0 ? options : proTeamsIn(def, content));
+export function anotherTeam(def: SportDef, not: Id | null, home: Id, content: ContentBundle, rng: RngState): SportProTeamDef {
+  const options = proTeamsIn(def, home, content).filter((t) => t.id !== not);
+  return pick(rng, options.length > 0 ? options : proTeamsIn(def, home, content));
 }
 
 /**

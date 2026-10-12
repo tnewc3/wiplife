@@ -52,13 +52,7 @@ const estateBalanceSchema = z.strictObject({
   funeral: z.int().min(0),
   /** Legal and settlement costs: this share of savings plus the home's value. */
   settlementShare: z.number().min(0).max(0.5),
-  /**
-   * Estate tax: the share of what is left to share out (cash and the home's equity, after costs and
-   * debts) that goes in tax, by the size of that estate (whole dollars): straight lines between the
-   * points, flat beyond the ends. Nothing is owed on a small estate, and a very large one can't pass
-   * whole from one generation to the next, so family wealth can't snowball.
-   */
-  tax: curveSchema,
+  /** Estate tax is the country's (countries/*.yaml estateTax). */
   /** The most one person can put in a will's shares: every share is at least 1%, and the shares add up to 100. */
   maxShares: z.int().min(1).max(20),
   /** Without a will. Percent of the estate (the rest is split by the rules below). */

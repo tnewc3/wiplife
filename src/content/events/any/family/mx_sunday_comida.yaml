@@ -1,0 +1,45 @@
+id: mx_sunday_comida
+title: Comida on Sunday
+text: >-
+  Sunday lunch is at {parent.name}'s house at three, which means four. The
+  table seats ten and eighteen will sit at it. There is a soup, a stew and a
+  conversation that is already in progress when you arrive.
+tone: light
+category: family
+rarity: common
+countries: [mx]
+lifeStages: [child, teen, youngAdult, adult, senior]
+requires: { age: { gte: 8 } }
+weight: { base: 8 }
+cooldownYears: 3
+cast:
+  parent: { kind: parent, presence: household }
+choices:
+  - id: stay
+    label: Stay at the table for the whole afternoon
+    outcome:
+      text: >-
+        Dessert, coffee, a second dessert, a story about your grandfather that
+        you had never heard and a cousin who finally asks the question about your
+        plans. It is loud and warm, and you leave the last.
+      effects:
+        - { type: relationship, role: parent, affection: 6 }
+        - { type: stat, key: happiness, delta: 3 }
+  - id: kitchen
+    label: Help in the kitchen
+    outcome:
+      text: >-
+        The kitchen is where the real conversation happens. {parent.name} tells
+        you things between chopping and stirring that would not fit at the
+        table.
+      effects:
+        - { type: relationship, role: parent, affection: 8 }
+        - { type: stat, key: kindness, delta: 1 }
+  - id: early
+    label: Leave after the first course with an excuse
+    outcome:
+      text: >-
+        {parent.name} wraps a plate in foil and presses it into your hands. Your
+        absence is noticed, and so is the plate.
+      effects:
+        - { type: relationship, role: parent, affection: -3 }

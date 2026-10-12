@@ -43,7 +43,7 @@ choices:
       base: 55
       stats: [{ key: luck, weight: 0.4 }, { key: discipline, weight: 0.2 }]
       success:
-        text: Same drive, same nod at the other end, $3,000 in an envelope. You tell yourself it was the last time.
+        text: Same drive, same nod at the other end, {$3000} in an envelope. You tell yourself it was the last time.
         effects:
           - { type: money, delta: 3000 }
           - { type: stat, key: stress, delta: 5 }

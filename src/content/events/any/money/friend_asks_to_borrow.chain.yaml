@@ -5,7 +5,7 @@ events:
   - id: friend_asks_to_borrow
     title: Short on rent
     text: >-
-      {friend.name} is short on rent and asks if you can spot {friend.them} $300
+      {friend.name} is short on rent and asks if you can spot {friend.them} {$300}
       until next month.
     tone: neutral
     category: money
@@ -59,7 +59,7 @@ events:
   - id: friend_repays
     title: About that money
     text: >-
-      You lent {friend.name} $300 {since}, and {friend.they} just posted photos
+      You lent {friend.name} {$300} {since}, and {friend.they} just posted photos
       from a beach vacation.
     tone: neutral
     category: money
@@ -72,7 +72,7 @@ events:
     followUpOnly: true
     # C1: reviewed build warnings kept on purpose (docs/consistency-review.md).
     justified:
-      money: "The $300 left your savings when you lent it (friend_asks_to_borrow); not getting it back changes nothing now."
+      money: "The {$300} left your savings when you lent it (friend_asks_to_borrow); not getting it back changes nothing now."
     cast:
       friend: { kind: friend, presence: anywhere }
     choices:
@@ -95,7 +95,7 @@ events:
       - id: let_slide
         label: Let it slide
         outcome:
-          text: You decide the friendship is worth more than $300. {friend.name} never mentions it.
+          text: You decide the friendship is worth more than {$300}. {friend.name} never mentions it.
           effects:
             - { type: memory, role: friend, tag: never_paid_back }
             - { type: relationship, role: friend, trust: -3 }

@@ -20,7 +20,7 @@ choices:
   - id: borrow
     label: Take the loan
     outcome:
-      text: Ten minutes, one signature, $1,000 in your hand. You'll owe $1,600 of it back.
+      text: Ten minutes, one signature, {$1000} in your hand. You'll owe {$1600} of it back.
       effects:
         - { type: money, delta: 1000 }
         - { type: debt, action: add, kind: personal, amount: 1600 }

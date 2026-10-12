@@ -1,0 +1,53 @@
+id: mx_placement_exam
+title: The placement exam
+text: >-
+  Every student finishing secondary school in the city takes the same exam
+  on the same Saturday. You list your preferred schools in order, and the exam
+  score, not your wishes, decides where you will spend the next three years.
+tone: serious
+category: school
+rarity: common
+countries: [mx]
+lifeStages: [child, teen]
+requires: { education: { program: [middle], final: true } }
+weight: { base: 12 }
+once: true
+cast:
+  parent: { kind: parent, presence: household }
+choices:
+  - id: study
+    label: Spend the months before it with a prep course
+    check:
+      base: 55
+      stats: [{ key: smarts, weight: 0.3 }, { key: discipline, weight: 0.3 }]
+      success:
+        text: >-
+          Your score is high enough for your first choice. {parent.name} reads
+          the list three times and then goes to tell the neighbours.
+        effects:
+          - { type: education, action: grades, value: 0.3 }
+          - { type: relationship, role: parent, affection: 5 }
+          - { type: stat, key: confidence, delta: 3 }
+      failure:
+        text: >-
+          Close, but not close enough. You are placed in your fourth choice, a
+          school across the city with a long bus ride and a good reputation for
+          the people who stay.
+        effects:
+          - { type: education, action: grades, value: -0.1 }
+          - { type: relationship, role: parent, affection: 1 }
+          - { type: stat, key: stress, delta: 3 }
+  - id: wing
+    label: Take it as it comes
+    check:
+      base: 35
+      stats: [{ key: smarts, weight: 0.4 }]
+      success:
+        text: The exam asks the things you remember. You are placed in your second choice, and you tell nobody how little you studied.
+        effects:
+          - { type: stat, key: confidence, delta: 2 }
+      failure:
+        text: The exam asks the things you forgot. Your placement is the last on your list, and {parent.name} is quiet in the car.
+        effects:
+          - { type: relationship, role: parent, affection: -2 }
+          - { type: stat, key: stress, delta: 4 }

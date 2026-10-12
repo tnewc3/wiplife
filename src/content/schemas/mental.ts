@@ -10,7 +10,7 @@
 import { z } from 'zod';
 import { curveSchema } from './balance';
 import { dollarsSchema, idSchema, TRAIT_KEYS } from './common';
-import { statEffectsSchema } from './economy';
+import { healthShareKeySchema, statEffectsSchema } from './economy';
 
 const probability = z.number().min(0).max(1);
 const share = z.number().min(0).max(1);
@@ -25,7 +25,7 @@ export type ReactionId = (typeof REACTIONS)[number];
 export const reactionSchema = z.enum(REACTIONS);
 
 /** What a cost item is for: priced here, in whole dollars at a cost of living of 1. */
-const costItem = z.strictObject({ amount: dollarsSchema, familyHelp: z.boolean() });
+const costItem = z.strictObject({ amount: dollarsSchema, familyHelp: z.boolean(), health: healthShareKeySchema.optional() });
 
 export const mentalHealthBalanceSchema = z.strictObject({
   /** Born-with conditions (kind neuro): how common, how inherited, how strong, and what they do to who you are. */

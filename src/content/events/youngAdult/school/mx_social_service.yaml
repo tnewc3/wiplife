@@ -1,0 +1,47 @@
+id: mx_social_service
+title: Servicio social
+text: >-
+  To get your degree you must complete six hundred hours of social service,
+  unpaid, at an approved organisation. The list on the department wall is
+  long and mostly forgettable, with one exception: a rural clinic that needs
+  someone to help with paperwork.
+tone: neutral
+category: school
+rarity: common
+countries: [mx]
+lifeStages: [youngAdult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { education: { program: [college], year: { gte: 3 } } }
+weight: { base: 8 }
+once: true
+choices:
+  - id: clinic
+    label: Take the rural clinic
+    outcome:
+      text: >-
+        Two hours each way on a bus, twelve weeks of files and a nurse who
+        teaches you what the forms are for. You are tired, you get a letter of
+        thanks and you find that you care.
+      effects:
+        - { type: money, delta: -200 }
+        - { type: stat, key: kindness, delta: 3 }
+        - { type: stat, key: stress, delta: 2 }
+  - id: office
+    label: Do it at a government office near home
+    outcome:
+      text: >-
+        You make photocopies for six hundred hours. A supervisor signs your
+        form without ever learning your name.
+      effects:
+        - { type: stat, key: stress, delta: 1 }
+        - { type: stat, key: discipline, delta: 1 }
+  - id: delay
+    label: Put it off until the last semester
+    outcome:
+      text: >-
+        The queue for the signature is long, the deadline is close and your
+        weekends vanish. You finish with an hour to spare.
+      effects:
+        - { type: stat, key: stress, delta: 4 }

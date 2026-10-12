@@ -94,7 +94,7 @@ function standing(state: LifeState, path: SportPath, level: 'youth' | 'school' |
   const own = team.quality + rollNormal(rng, { mean: 0, sd: L.strengthSd }) + (rating - 50) * L.playerShare * impact * played;
   const others: number[] =
     level === 'pro'
-      ? proTeamsIn(path.sport, content)
+      ? proTeamsIn(path.sport, state.character.cityId, content)
           .filter((t) => t.id !== team.id)
           .map((t) => t.quality + rollNormal(rng, { mean: 0, sd: L.strengthSd }))
       : Array.from({ length: L.rivals }, () => team.quality + rollNormal(rng, { mean: 0, sd: 9 }) + rollNormal(rng, { mean: 0, sd: L.strengthSd }));
@@ -113,7 +113,8 @@ function standing(state: LifeState, path: SportPath, level: 'youth' | 'school' |
   }
   const losses = games - wins - draws;
   const of = others.length + 1;
-  const qualified = level === 'pro' ? rank <= path.sport.season.playoffTeams : rank <= Math.ceil(of * L.amateurPlayoffs);
+  // A small league (a country's few teams) sends at most half of its teams to the playoffs.
+  const qualified = level === 'pro' ? rank <= Math.min(path.sport.season.playoffTeams, Math.ceil(of / 2)) : rank <= Math.ceil(of * L.amateurPlayoffs);
   const top = [...others].sort((a, b) => b - a).slice(0, 3);
   const rival = top.length === 0 ? mean : top.reduce((a, b) => a + b, 0) / top.length;
   return { wins, draws, losses, rank, of, qualified, own, rival };
@@ -157,7 +158,7 @@ function proMoves(state: LifeState, path: SportPath, content: ContentBundle, rng
     // A free agent: a team signs you, or the year passes. Shut out too long, the game is over for you.
     if (s.unsigned >= b.contract.unsigned) return { playing: false, earned: -1 };
     if (chance(rng, curveAt(b.contract.freeAgent, rating))) {
-      const team = anotherTeam(path.sport, null, content, rng);
+      const team = anotherTeam(path.sport, null, state.character.cityId, content, rng);
       moveToTeam(state, team.id, true, content, rng);
       triggers.push('signed');
       return { playing: true, earned };
@@ -174,7 +175,7 @@ function proMoves(state: LifeState, path: SportPath, content: ContentBundle, rng
     if (kept) {
       if (extend(state, 'fair', content, rng)) triggers.push(tested ? 'freeAgency' : 'signed');
     } else {
-      const team = chance(rng, curveAt(b.contract.freeAgent, rating)) ? anotherTeam(path.sport, c.teamId, content, rng) : null;
+      const team = chance(rng, curveAt(b.contract.freeAgent, rating)) ? anotherTeam(path.sport, c.teamId, state.character.cityId, content, rng) : null;
       if (team) {
         s.contract = null;
         moveToTeam(state, team.id, true, content, rng);
@@ -362,12 +363,12 @@ export function playSeason(state: LifeState, content: ContentBundle, rng: RngSta
     const d = b.draft;
     const score = recentRating(state) * d.score.quality + pstate.fame * d.score.fame + rollNormal(rng, { mean: 0, sd: d.score.noise });
     if (score >= d.declare || age >= path.sport.draft.force) {
-      const slot = draftSlot(score, path.sport, content);
+      const slot = draftSlot(score, path.sport, state.character.cityId, content);
       if (slot.pick > 0) {
-        s.draft = { year, pick: slot.pick, round: slot.round, teamId: pickTeamId(path.sport, slot.pick, content) };
+        s.draft = { year, pick: slot.pick, round: slot.round, teamId: pickTeamId(path.sport, slot.pick, state.character.cityId, content) };
         triggers.unshift('draft');
       } else {
-        s.draft = { year, pick: 0, round: 0, teamId: undraftedOffer(path, recentRating(state), content, rng) };
+        s.draft = { year, pick: 0, round: 0, teamId: undraftedOffer(path, recentRating(state), state.character.cityId, content, rng) };
         triggers.unshift('undrafted');
       }
     }

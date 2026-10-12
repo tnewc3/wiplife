@@ -28,7 +28,7 @@ choices:
       failure:
         text: >-
           The teacher changed the questions. Everyone who wrote the old answers
-          gets a zero and a meeting with the principal. You're one of them.
+          gets a zero and a meeting with the {principal}. You're one of them.
         effects:
           - { type: flag, key: caught_cheating, value: true }
           - { type: education, action: grades, value: -0.6 }

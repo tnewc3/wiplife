@@ -28,9 +28,7 @@ prison:
     stress: { perYear: 4, limit: 80 }
     health: { perYear: -1, limit: 40 }
 
-release:
-  # Years of parole (probation) after release; 0 for none.
-  paroleYears: 1
+# Years of parole after release are the country's (countries/*.yaml sentencing.paroleYears).
 
 record:
   # With probation or prison on your record within recentYears, landlords

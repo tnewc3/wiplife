@@ -1,0 +1,42 @@
+id: ca_curling_night
+title: The curling club
+text: >-
+  A coworker talks you into a Tuesday-night curling league. The ice is cold, the
+  stones are heavy and the rules are explained to you four times by four
+  different people who all love the game.
+tone: light
+category: community
+rarity: common
+countries: [ca]
+lifeStages: [youngAdult, adult, senior]
+requires: { age: { gte: 20 } }
+weight: { base: 5 }
+cooldownYears: 6
+cast:
+  teammate: { kind: acquaintance, presence: city, createIfMissing: true, newChance: 0.6, ageOffset: { min: -15, max: 20 } }
+choices:
+  - id: join
+    label: Join the league for the winter ({$160})
+    visibleIf: { money: { gte: 160 } }
+    outcome:
+      text: >-
+        You are bad at it for six weeks and mediocre for the rest. The post-game
+        bar table is the real sport, and {teammate.name} saves you a chair.
+      effects:
+        - { type: money, delta: -160 }
+        - { type: relationship, role: teammate, affection: 7 }
+        - { type: stat, key: happiness, delta: 2 }
+        - { type: stat, key: fitness, delta: 1 }
+  - id: try
+    label: Try it once and see
+    outcome:
+      text: A single Tuesday, a sore back and an invitation to come back. You say maybe, and the maybe lasts the whole winter.
+      effects:
+        - { type: relationship, role: teammate, affection: 3 }
+        - { type: stat, key: happiness, delta: 1 }
+  - id: pass
+    label: Say no thanks and stay in
+    outcome:
+      text: You stay in with a book. On Wednesday the coworker brings in a brownie and says the league missed you.
+      effects:
+        - { type: stat, key: stress, delta: -1 }

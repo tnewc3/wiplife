@@ -1,0 +1,42 @@
+id: ca_october_thanksgiving
+title: Thanksgiving, October
+text: >-
+  The long weekend arrives with the first cold weekend of the year. {parent.name}
+  has made too much food again, and has invited the cousin that nobody knows
+  how to talk to.
+tone: neutral
+category: family
+rarity: common
+countries: [ca]
+lifeStages: [teen, youngAdult, adult, senior]
+requires: { age: { gte: 15 } }
+weight: { base: 6 }
+cooldownYears: 4
+cast:
+  parent: { kind: parent, presence: household }
+choices:
+  - id: help
+    label: Spend the day in the kitchen
+    outcome:
+      text: >-
+        You peel potatoes for three hours, and overhear more about the family
+        than anyone planned to tell you. {parent.name} gives you the last of the
+        pie.
+      effects:
+        - { type: relationship, role: parent, affection: 6 }
+        - { type: stat, key: happiness, delta: 2 }
+  - id: cousin
+    label: Sit next to the cousin and ask questions
+    outcome:
+      text: >-
+        It turns out the cousin has been hoping someone would ask. By dessert
+        you have an invitation to a place you did not know existed.
+      effects:
+        - { type: relationship, role: parent, affection: 3 }
+        - { type: stat, key: kindness, delta: 1 }
+  - id: leave
+    label: Leave early and call it a headache
+    outcome:
+      text: The apartment is quiet and the leftovers arrive in a container the next day. {parent.name} does not mention the early exit, which is worse.
+      effects:
+        - { type: relationship, role: parent, affection: -4 }

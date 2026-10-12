@@ -1,7 +1,7 @@
 id: vacation_break_in
 title: Nobody home in {homeCity}
 text: >-
-  The sheriff's call comes while you are at work: someone has been through your
+  The police call comes while you are at work: someone has been through your
   place in {homeCity}. The door is broken, and the empty rooms have been taken
   apart for anything small enough to carry.
 tone: dark

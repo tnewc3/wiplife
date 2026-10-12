@@ -11,6 +11,7 @@ import { payMentalCost } from './care';
 import { rollDiagnosis } from './diagnose';
 import { mentalConditions } from './query';
 import type { LifeState } from '../types';
+import { healthShare } from '../country';
 
 /** The youngest age you see a therapist on your own page: the age the balance says people notice. */
 const MIN_AGE = 10;
@@ -29,7 +30,7 @@ export function canSeeTherapist(state: LifeState, content: ContentBundle): boole
 /** What a session costs in your city. */
 export function therapistQuote(state: LifeState, content: ContentBundle): number {
   const def = content.balance.mentalHealth.costs.therapy_session!;
-  return Math.round(def.amount * (content.cities[state.character.cityId]?.costOfLiving ?? 1));
+  return Math.round(def.amount * (content.cities[state.character.cityId]?.costOfLiving ?? 1) * (def.health ? healthShare(state, def.health, content) : 1));
 }
 
 /** The session: it is paid, the therapist may name what you carry, and an event answers. */

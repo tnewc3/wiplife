@@ -17,6 +17,7 @@ import { getFamily, getSpouses, type FamilyMember } from './selectors';
 import { renderText, type TextRole } from './text';
 import { listText } from './words';
 import type { LifeState } from './types';
+import { countryTextValues } from './country';
 
 export interface ObituaryContext {
   life: LifeState;
@@ -268,7 +269,7 @@ export function writeObituary(
     rng,
     self,
     write: (variants, values = {}, npc) =>
-      variants.length === 0 ? null : renderText(pick(rng, variants), { roles: npc ? { self, npc } : { self }, values }),
+      variants.length === 0 ? null : renderText(pick(rng, variants), { roles: npc ? { self, npc } : { self }, values: { ...countryTextValues(life, content), ...values } }),
     list,
     relatives: (members) =>
       list(

@@ -14,12 +14,11 @@ import { whereabouts } from '../presence';
 import type { Id } from '../types';
 import { isJailed } from './model';
 import { ask, say, usedNames, type Ctx, type Subject } from './subject';
+import { sameCountryCities } from '../country';
 
 /** An active city other than `avoid`, picked at random. */
 function anotherCity(ctx: Ctx, avoid: Id): Id {
-  const options = Object.keys(ctx.content.cities)
-    .sort()
-    .filter((id) => id !== avoid && !ctx.content.cities[id]!.retired);
+  const options = sameCountryCities(avoid, ctx.content).filter((id) => id !== avoid);
   return options.length > 0 ? pick(ctx.state.rng, options) : avoid;
 }
 

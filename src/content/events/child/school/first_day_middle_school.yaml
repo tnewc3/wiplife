@@ -1,7 +1,7 @@
 id: first_day_middle_school
 title: A locker of your own
 text: >-
-  First day of middle school. Seven classes, four minutes between them, and
+  First day of {middleSchool}. Seven classes, four minutes between them, and
   a locker whose combination you have already forgotten.
 tone: light
 category: school

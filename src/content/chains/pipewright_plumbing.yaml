@@ -4,5 +4,5 @@ type: plumbing
 style: standard
 blurb: "A fleet of white vans in four counties, a call center and a very long maintenance-plan list."
 locations: { min: 3, max: 6 }
-cities: [houston, chicago, small_town]
+cities: [houston, chicago, small_town, vancouver, manchester, monterrey]
 reputation: { mean: 60, sd: 7 }

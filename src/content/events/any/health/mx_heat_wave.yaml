@@ -1,0 +1,49 @@
+id: mx_heat_wave
+title: Forty-four degrees
+text: >-
+  The thermometer on the bank says forty-four and the air does not move. Power
+  cuts hit the neighbourhood at four in the afternoon, the shops sell out of
+  fans, and the shade under the tree is a place people queue for.
+tone: serious
+category: health
+rarity: uncommon
+countries: [mx]
+lifeStages: [child, teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 3 } }
+    - { city: monterrey }
+weight: { base: 5 }
+cooldownYears: 6
+choices:
+  - id: ac
+    label: Buy an air conditioner for the bedroom ({$420})
+    visibleIf: { money: { gte: 420 } }
+    outcome:
+      text: >-
+        The unit is installed on a Saturday and the room drops fifteen degrees in
+        an hour. It costs {$420} and a higher electricity bill, and the nights are
+        bearable again.
+      effects:
+        - { type: money, delta: -420 }
+        - { type: stat, key: health, delta: 1 }
+        - { type: stat, key: stress, delta: -2 }
+  - id: fan
+    label: Make do with a fan and wet towels
+    outcome:
+      text: >-
+        A fan, a damp sheet and the window open to a roaring street. You sleep
+        in forty-minute pieces, and your temper suffers.
+      effects:
+        - { type: money, delta: -35 }
+        - { type: stat, key: health, delta: -2 }
+        - { type: stat, key: stress, delta: 3 }
+  - id: shelter
+    label: Spend the afternoons at the mall or a neighbour's
+    outcome:
+      text: >-
+        Air conditioning is a public resource for six hours a day. You read a
+        whole book in a food court and make friends with a security guard.
+      effects:
+        - { type: stat, key: stress, delta: 1 }
+        - { type: stat, key: happiness, delta: 1 }

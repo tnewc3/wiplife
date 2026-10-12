@@ -1,0 +1,21 @@
+# Monterrey — a northern industrial city with strong trades and manufacturing.
+id: monterrey
+countryId: mx
+name: Monterrey
+blurb: "Industrial · Strong for skilled trades"
+costOfLiving: 0.47
+baseRent: 6600
+baseHomePrice: 105000
+carDependence: 0.75
+salaryMultiplier: 0.34
+jobMarket:
+  professional: 70
+  trade: 80
+  gig: 65
+schools:
+  high: Preparatoria Cerro de la Silla
+  community: Universidad Tecnológica del Norte
+  state: Universidad Pública de Nuevo León
+  elite: Universidad Regia
+  trade: Instituto Técnico Fundidora
+  grad: Escuela de Posgrado del Norte

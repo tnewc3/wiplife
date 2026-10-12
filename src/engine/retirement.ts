@@ -1,21 +1,22 @@
 /**
- * The retirement benefit (docs/design.md, section J), like Social Security:
+ * The retirement benefit (docs/design.md, section J), like Social Security in the United States (each country's own rules are in countries/*.yaml pension):
  * every year of earned income is recorded, and from the retirement age the
  * ledger pays a yearly benefit based on how many years you earned and your
- * average yearly earnings. Numbers come from src/content/balance/economy.yaml
- * (retirement).
+ * average yearly earnings. Numbers come from the country you live in
+ * (src/content/countries/*.yaml pension).
  *
  * The record counts whatever the ledger calls earned income (yearIncome in
  * ./systems/career.ts): gig pay and salaries (and pay from a job lost as the year began), so
  * every income source feeds the same calculation.
  */
 import type { ContentBundle } from '../content/schemas';
+import { pensionOf } from './country';
 import { wholeDollars } from './finance';
 import type { LifeState } from './types';
 
 /** Adds a year's earned income to the record, if it is enough to count. */
 export function recordEarnings(state: LifeState, earned: number, content: ContentBundle): void {
-  const { creditIncome, earningsCap } = content.balance.economy.retirement;
+  const { creditIncome, earningsCap } = pensionOf(state, content);
   if (earned < creditIncome) return;
   const e = state.finances.earnings;
   e.years += 1;
@@ -34,7 +35,7 @@ export function averageEarnings(state: LifeState): number {
  * minYears. Doesn't check your age (see retirementBenefit).
  */
 export function benefitFromRecord(state: LifeState, content: ContentBundle): number {
-  const { minYears, fullYears, formula } = content.balance.economy.retirement;
+  const { minYears, fullYears, formula } = pensionOf(state, content);
   const { years } = state.finances.earnings;
   if (years < minYears) return 0;
   const average = averageEarnings(state);
@@ -49,5 +50,5 @@ export function benefitFromRecord(state: LifeState, content: ContentBundle): num
 
 /** This year's benefit: the record's benefit once you reach the retirement age. */
 export function retirementBenefit(state: LifeState, content: ContentBundle): number {
-  return state.character.age >= content.balance.economy.retirement.age ? benefitFromRecord(state, content) : 0;
+  return state.character.age >= pensionOf(state, content).age ? benefitFromRecord(state, content) : 0;
 }

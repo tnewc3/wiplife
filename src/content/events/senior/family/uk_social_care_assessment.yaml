@@ -1,0 +1,53 @@
+id: uk_social_care_assessment
+title: The care assessment
+text: >-
+  {parent.name} had a fall in March and is not the same since. The council
+  sends a social worker to assess what help is needed, and then, a week
+  later, a letter about what the council will pay for and what you will.
+tone: serious
+category: family
+rarity: uncommon
+countries: [uk]
+lifeStages: [adult, senior]
+requires:
+  all:
+    - { age: { gte: 45 } }
+    - { role: parent, alive: true, age: { gte: 75 } }
+weight: { base: 6 }
+cooldownYears: 8
+cast:
+  parent: { kind: parent, presence: anywhere }
+choices:
+  - id: council
+    label: Accept the council's care package
+    outcome:
+      text: >-
+        Carers come three times a day for fifteen minutes each. It is not enough,
+        and it is not nothing. You top it up with phone calls and a casserole
+        ({$900} over the year).
+      effects:
+        - { type: money, delta: -900 }
+        - { type: relationship, role: parent, affection: 5 }
+        - { type: stat, key: stress, delta: 3 }
+  - id: home
+    label: Move {parent.them} into your home and give up your evenings
+    outcome:
+      text: >-
+        A bed in the dining room, a rota on the fridge and all the small
+        indignities that come with it. {parent.name} says thank you, in {parent.their}
+        own way.
+      effects:
+        - { type: money, delta: -1800 }
+        - { type: relationship, role: parent, affection: 10 }
+        - { type: stat, key: stress, delta: 6 }
+  - id: home_care
+    label: Pay for a private care home near you ({$18000} for the year)
+    visibleIf: { money: { gte: 18000 } }
+    outcome:
+      text: >-
+        A quiet room, a garden and a staff who know {parent.name}'s name. The
+        year costs {$18000}, and the visits are warmer when no one is cooking.
+      effects:
+        - { type: money, delta: -18000 }
+        - { type: relationship, role: parent, affection: 4 }
+        - { type: stat, key: stress, delta: -1 }

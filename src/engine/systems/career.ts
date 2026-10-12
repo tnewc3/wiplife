@@ -29,6 +29,7 @@ import { chance, nextFloat, type RngState } from '../rng';
 import { fameIncome } from '../fame/step';
 import { teenIncome } from '../teen/jobs';
 import type { LifeState } from '../types';
+import { countryOf } from '../country';
 
 /** Old enough for gig work, free to do it, and without a job (a job is full-time). */
 export function canGig(state: LifeState, content: ContentBundle): boolean {
@@ -40,7 +41,7 @@ export function expectedGigPay(state: LifeState, content: ContentBundle, age = s
   const { gig } = content.balance.economy;
   const city = content.cities[state.character.cityId];
   if (!city) return 0;
-  return wholeDollars(gig.pay * city.salaryMultiplier * curveAt(gig.market, city.jobMarket.gig) * curveAt(gig.byAge, age));
+  return wholeDollars(gig.pay * city.salaryMultiplier * countryOf(state, content).jobs.salaryByCategory.gig * curveAt(gig.market, city.jobMarket.gig) * curveAt(gig.byAge, age));
 }
 
 /**

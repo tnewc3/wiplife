@@ -12,7 +12,7 @@ lifeStages: [youngAdult, adult]
 requires:
   all:
     - { age: { gte: 18 } }
-    - { age: { gte: 21 } }
+    - { legalAge: drinking }
     - { crime: { member: false } }
     - { trait: riskTaking, gt: 45 }
 once: true

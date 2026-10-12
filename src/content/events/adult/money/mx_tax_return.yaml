@@ -1,0 +1,45 @@
+id: mx_tax_return
+title: The annual declaration
+text: >-
+  Every April, anyone who earns beyond a certain amount files an annual tax
+  declaration. The portal is clear, the receipts are not, and you have a
+  shoebox with a year of invoices that the system calls "deductions."
+tone: neutral
+category: money
+rarity: common
+countries: [mx]
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 20 } }
+    - { finances: { income: { gte: 3000 } } }
+weight: { base: 5 }
+cooldownYears: 3
+choices:
+  - id: receipts
+    label: Sort every receipt and claim every deduction
+    outcome:
+      text: >-
+        Medical, school, interest, donations: each one adds a little. The refund
+        is {$420}, and you finish the afternoon quietly satisfied.
+      effects:
+        - { type: money, delta: 420 }
+        - { type: stat, key: discipline, delta: 2 }
+  - id: accountant
+    label: Pay an accountant to do it ({$60})
+    visibleIf: { money: { gte: 60 } }
+    outcome:
+      text: >-
+        The accountant spends ten minutes, finds a deduction you missed and
+        charges {$60}. The refund is {$310}, and you did not lose a weekend.
+      effects:
+        - { type: money, delta: 250 }
+  - id: late
+    label: File at the last minute
+    outcome:
+      text: >-
+        The portal is slow on the deadline day. You file at eleven fifty-eight p.m.,
+        miss a deduction and get a small refund of {$90}.
+      effects:
+        - { type: money, delta: 90 }
+        - { type: stat, key: stress, delta: 3 }

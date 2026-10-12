@@ -1,0 +1,57 @@
+id: mx_public_university_exam
+title: Ten thousand seats, three hundred thousand applicants
+text: >-
+  The big public university admits students by exam. It is free, respected
+  and badly outnumbered: for every seat in your chosen programme, thirty
+  people will sit in a lecture hall this Saturday with a pencil.
+tone: serious
+category: future
+rarity: common
+countries: [mx]
+lifeStages: [teen]
+requires: { education: { program: [high], final: true } }
+weight: { base: 10 }
+once: true
+cast:
+  parent: { kind: parent, presence: household }
+choices:
+  - id: public
+    label: Sit the exam and aim for the public university
+    check:
+      base: 35
+      stats: [{ key: smarts, weight: 0.4 }, { key: discipline, weight: 0.3 }]
+      success:
+        text: >-
+          Your name is on the list. Tuition is nearly free, and {parent.name}
+          presses the printout against the fridge with two magnets.
+        effects:
+          - { type: relationship, role: parent, affection: 6 }
+          - { type: stat, key: confidence, delta: 3 }
+          - { type: stat, key: ambition, delta: 2 }
+      failure:
+        text: >-
+          Not this year. You retake it in twelve months, working a counter job in
+          the meantime, and you know what to expect.
+        effects:
+          - { type: money, delta: 900 }
+          - { type: stat, key: stress, delta: 4 }
+  - id: private
+    label: Apply to a private university with a scholarship
+    outcome:
+      text: >-
+        The campus is polished and the scholarship covers half. The rest is a
+        family conversation that lasts a week and ends with a promise about
+        weekends.
+      effects:
+        - { type: relationship, role: parent, affection: 1 }
+        - { type: stat, key: stress, delta: 2 }
+  - id: work
+    label: Go to work and study later
+    outcome:
+      text: >-
+        A job at your uncle's warehouse, a first pay and a feeling of freedom.
+        The books stay on the shelf, and you are not sure for how long.
+      effects:
+        - { type: money, delta: 1800 }
+        - { type: stat, key: ambition, delta: -1 }
+        - { type: relationship, role: parent, affection: -2 }

@@ -92,3 +92,21 @@ sport:
         - { id: "new_york_icemen", name: "New York Icemen", city: "nyc", quality: 65 }
         - { id: "new_york_coldsnap", name: "New York Coldsnap", city: "nyc", quality: 42 }
         - { id: "new_york_plow_horses", name: "New York Plow Horses", city: "nyc", quality: 54 }
+        - { id: "toronto_lakefront_wolves", name: "Toronto Lakefront Wolves", city: "toronto", quality: 64 }
+        - { id: "toronto_union_blades", name: "Toronto Union Blades", city: "toronto", quality: 44 }
+        - { id: "vancouver_cedar_peaks", name: "Vancouver Cedar Peaks", city: "vancouver", quality: 58 }
+        - { id: "vancouver_seawall_skaters", name: "Vancouver Seawall Skaters", city: "vancouver", quality: 45 }
+        - { id: "montreal_ice_bridge", name: "Montreal Ice Bridge", city: "montreal", quality: 66 }
+        - { id: "montreal_plateau_foxes", name: "Montreal Plateau Foxes", city: "montreal", quality: 47 }
+        - { id: "london_embankment_blades", name: "London Embankment Blades", city: "london", quality: 54 }
+        - { id: "london_fogbound", name: "London Fogbound", city: "london", quality: 41 }
+        - { id: "manchester_pennine_frost", name: "Manchester Pennine Frost", city: "manchester", quality: 52 }
+        - { id: "manchester_canal_kings", name: "Manchester Canal Kings", city: "manchester", quality: 43 }
+        - { id: "london_lea_valley_lightning", name: "London Lea Valley Lightning", city: "london", quality: 47 }
+        - { id: "manchester_ardwick_ice", name: "Manchester Ardwick Ice", city: "manchester", quality: 45 }
+        - { id: "mexico_city_altiplano_ice", name: "Mexico City Altiplano Ice", city: "mexico_city", quality: 50 }
+        - { id: "mexico_city_metro_pucks", name: "Mexico City Metro Pucks", city: "mexico_city", quality: 40 }
+        - { id: "guadalajara_jacaranda_frost", name: "Guadalajara Jacaranda Frost", city: "guadalajara", quality: 46 }
+        - { id: "guadalajara_rinkside", name: "Guadalajara Rinkside", city: "guadalajara", quality: 38 }
+        - { id: "monterrey_sierra_ice", name: "Monterrey Sierra Ice", city: "monterrey", quality: 52 }
+        - { id: "monterrey_foundry_blades", name: "Monterrey Foundry Blades", city: "monterrey", quality: 42 }

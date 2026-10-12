@@ -1,0 +1,41 @@
+id: uk_bank_holiday
+title: Bank holiday Monday
+text: >-
+  The long weekend arrives with a forecast of "sunny intervals", which means
+  everyone has the same idea. The roads to the coast are a queue, the beach is
+  a patchwork of towels and someone is already arguing about parking.
+tone: light
+category: community
+rarity: common
+countries: [uk]
+lifeStages: [child, teen, youngAdult, adult, senior]
+requires: { age: { gte: 6 } }
+weight: { base: 6 }
+cooldownYears: 3
+cast:
+  mate: { kind: friend, presence: city, createIfMissing: true, newChance: 0.4 }
+choices:
+  - id: coast
+    label: Drive to the coast with everyone else
+    outcome:
+      text: >-
+        Three hours in traffic, chips on a wall and a sunburn on one shoulder
+        only. It was loud and crowded and, in the end, perfect. The day costs
+        {$85}.
+      effects:
+        - { type: money, delta: -85 }
+        - { type: relationship, role: mate, affection: 4 }
+        - { type: stat, key: happiness, delta: 3 }
+  - id: park
+    label: Take a picnic to the park instead
+    outcome:
+      text: A blanket, a bag of sandwiches and a game of rounders that gets more competitive than anyone planned.
+      effects:
+        - { type: relationship, role: mate, affection: 5 }
+        - { type: stat, key: happiness, delta: 2 }
+  - id: lie_in
+    label: Stay in and do nothing at all
+    outcome:
+      text: The tea is strong, the telly is on and the traffic report is somebody else's problem. You emerge at four o'clock, content.
+      effects:
+        - { type: stat, key: stress, delta: -3 }

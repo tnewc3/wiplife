@@ -1,0 +1,52 @@
+# Name pool for the United Kingdom, grouped by heritage so families' names hang together. How often each heritage appears is set in
+# countries/uk.yaml (names.heritageWeights). `nonbinary` holds names commonly used across genders.
+id: uk
+heritages:
+  general:
+    first:
+      man: [Oliver, George, Harry, Jack, Jacob, Noah, Charlie, Thomas, Oscar, William, James, Henry, Leo, Alfie, Archie, Joshua, Freddie, Edward, Callum, Declan, Ryan, Liam, Connor, Daniel, Adam]
+      woman: [Olivia, Amelia, Isla, Ava, Emily, Isabella, Sophie, Grace, Lily, Mia, Poppy, Ella, Evie, Jessica, Charlotte, Freya, Ruby, Holly, Chloe, Megan, Bethany, Hannah, Lucy, Rebecca]
+      nonbinary: [Alex, Charlie, Jamie, Sam, Robin, Morgan, Jordan, Taylor, Riley, Casey, Rowan, Ashley, Kit, Frankie, Billie, Max, Sasha, Jesse]
+    last: [Smith, Jones, Taylor, Brown, Williams, Wilson, Johnson, Davies, Robinson, Wright, Thompson, Evans, Walker, White, Roberts, Green, Hall, Wood, Jackson, Clarke, Patel, Khan, Hughes, Edwards, Turner, Hill, Moore, Cooper, Ward, Morris, King, Harrison, Baker, Lewis, Parker, Murray, Campbell]
+  south_asian:
+    first:
+      man: [Mohammed, Ali, Arjun, Rohan, Hassan, Imran, Sanjay, Raj, Amir, Bilal, Yusuf, Omar, Tariq, Vikram, Karan, Zain, Harpreet, Jaspreet, Nikhil, Faisal]
+      woman: [Priya, Aisha, Fatima, Sana, Anika, Zara, Meera, Neha, Amira, Hina, Sofia, Riya, Simran, Kiran, Nadia, Layla, Ayesha, Pooja, Mariam, Shreya]
+      nonbinary: [Kiran, Jay, Sam, Noor, Ashu, Ravi, Amar, Sunny, Raj, Dev]
+    last: [Patel, Khan, Ahmed, Hussain, Begum, Singh, Shah, Ali, Kaur, Sharma, Chaudhry, Malik, Iqbal, Gill, Rahman, Akhtar, Mahmood, Bhatti, Desai, Joshi, Sandhu, Mistry, Siddiqui, Qureshi]
+  black:
+    first:
+      man: [Jayden, Kwame, Tyrese, Marcus, Daniel, Isaiah, Kofi, Michael, Ezra, Malachi, Joel, Elijah, Andre, Leon, Winston, Ryan, Theo, Dante, Femi, Emeka]
+      woman: [Amara, Chiamaka, Imani, Ruth, Esther, Abigail, Shanice, Jada, Naomi, Tiana, Abena, Zainab, Kayleigh, Tamika, Bianca, Precious, Ayo, Nia, Leah, Joy]
+      nonbinary: [Jordan, Kendall, Taylor, Jaden, Amari, Sky, Kai, Dani, Rene, Ola]
+    last: [Williams, Brown, Johnson, Campbell, Thomas, Clarke, Henry, Francis, Lewis, Edwards, Samuels, Grant, Bailey, Adeyemi, Okafor, Mensah, Osei, Boateng, Ndlovu, Okonkwo, Adeleke, Nwosu, Appiah, Owusu]
+  polish:
+    first:
+      man: [Jakub, Kacper, Szymon, Michał, Piotr, Tomasz, Marcin, Paweł, Krzysztof, Mateusz, Adam, Łukasz, Bartosz, Filip, Jan, Wojciech, Dawid, Karol, Aleksander, Patryk]
+      woman: [Zofia, Julia, Maja, Lena, Hanna, Alicja, Natalia, Aleksandra, Katarzyna, Magdalena, Agnieszka, Ewa, Marta, Monika, Karolina, Wiktoria, Oliwia, Martyna, Dominika, Kinga]
+      nonbinary: [Sasza, Alex, Jan, Kuba, Maks, Iga, Ola, Kasia]
+    last: [Kowalski, Nowak, Wiśniewski, Wójcik, Kowalczyk, Kamiński, Lewandowski, Zieliński, Szymański, Woźniak, Dąbrowski, Kozłowski, Jankowski, Mazur, Kwiatkowski, Krawczyk, Piotrowski, Grabowski, Pawlak, Michalski]
+  irish:
+    first:
+      man: [Conor, Seán, Cian, Oisín, Darragh, Niall, Eoin, Declan, Padraig, Ronan, Colm, Fionn, Brendan, Cormac, Liam, Kieran, Rory, Donal, Aidan, Tadhg]
+      woman: [Aoife, Niamh, Siobhán, Ciara, Saoirse, Róisín, Orla, Sinéad, Caoimhe, Grainne, Maeve, Fiona, Clodagh, Aisling, Eimear, Nuala, Deirdre, Roisin, Sorcha, Bríd]
+      nonbinary: [Cassidy, Rory, Sean, Kerry, Riley, Shannon, Quinn, Casey, Darcy, Rowan]
+    last: [Murphy, Kelly, O'Sullivan, Walsh, Byrne, Ryan, O'Brien, Doyle, McCarthy, Gallagher, O'Connor, Quinn, Kennedy, Lynch, Murray, Moore, Brennan, Burke, Collins, Daly, Healy, Nolan, Farrell, Fitzgerald, Maguire]
+  chinese:
+    first:
+      man: [Wei, Jun, Hao, Ming, Jian, Lei, Yong, Kai, Zhen, Tao, Bo, Kevin, Eric, Justin]
+      woman: [Mei, Li, Xiu, Ying, Hua, Jing, Lan, Yan, Fang, Lin, Hui, Qing, Grace, Michelle]
+      nonbinary: [Jun, Ming, An, Yu, Xin, Ping, Le, Chen]
+    last: [Chen, Wang, Li, Zhang, Liu, Wong, Huang, Lin, Wu, Zhou, Yang, Zhao, Chan, Lee, Ho, Leung]
+  arab:
+    first:
+      man: [Ahmed, Omar, Yusuf, Hassan, Khalid, Ali, Karim, Tariq, Samir, Rami, Nabil, Ibrahim, Mustafa, Adam]
+      woman: [Fatima, Layla, Yasmin, Nadia, Mariam, Amira, Rania, Leila, Hana, Salma, Dina, Noor, Zainab, Sara]
+      nonbinary: [Noor, Salam, Rayan, Sami, Iman, Nour]
+    last: [Haddad, Khalil, Nasser, Saleh, Mansour, Aziz, Hamdan, Farah, Hassan, Ibrahim, Khoury, Abboud, Darwish, Saad]
+  west_african:
+    first:
+      man: [Chinedu, Emeka, Kwame, Kofi, Oluwaseun, Tunde, Ade, Obinna, Femi, Yaw, Ikenna, Segun]
+      woman: [Adaeze, Chioma, Ngozi, Amara, Folake, Abena, Ama, Ifeoma, Yewande, Nneka, Efua, Funmi]
+      nonbinary: [Ayo, Tobi, Dayo, Ife, Kelechi, Chidi]
+    last: [Okafor, Adeyemi, Okonkwo, Mensah, Asante, Obi, Eze, Nwosu, Balogun, Owusu, Adebayo, Boateng]

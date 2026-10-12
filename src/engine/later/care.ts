@@ -20,6 +20,7 @@ import { writeFromGroup } from '../systems/history';
 import { wholeDollars } from '../finance';
 import type { CareOption, Id, LifeState, Person } from '../types';
 import { offerOnce } from './grandchildren';
+import { careScale } from '../country';
 
 const byId = (a: Id, b: Id) => a.localeCompare(b, 'en', { numeric: true });
 
@@ -154,7 +155,7 @@ export function chooseCare(state: LifeState, option: CareOption, providerId: Id 
 /** The yearly cost of paid care at home, in your city (assisted living is part of your housing cost). */
 export function paidCareCost(state: LifeState, content: ContentBundle): number {
   if (state.later.care?.option !== 'paid' || state.housing.kind === 'incarcerated') return 0;
-  return wholeDollars(content.balance.later.care.cost.paid * (content.cities[state.character.cityId]?.costOfLiving ?? 1));
+  return wholeDollars(content.balance.later.care.cost.paid * careScale(state, content));
 }
 
 /** Care is needed and nothing is arranged: queue the event that asks. */

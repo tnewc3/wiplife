@@ -7,6 +7,99 @@
 # must require (the content build rejects one that doesn't, and one that
 # fires without it is an invariant failure). household marks home, health
 # and wellbeing: a partner who lives with you is preferred for their roles.
+# W4a, country tags. An event tagged `countries: [ca]` happens only there (the content build turns the tag into the
+# requirement). An event with no tag happens in every country, so it must read right in all of them: amounts as
+# {$300} (US prices, scaled and shown in the local currency), schools as {highSchool}, {principal}, {college},
+# {entranceExam}, the currency as {currency}, the country as {country}. Wording that belongs to one country alone may
+# appear only in events tagged for that country alone; the patterns below are the build's list (case-sensitive).
+countryTags:
+  neutral: "Untagged events read right in every country: write amounts as {$300} and school words as {highSchool}."
+  # Words each country says its own way: an untagged event writes the placeholder.
+  placeholders:
+    - { pattern: '\bhigh school\b', use: '{highSchool}' }
+    - { pattern: '\bmiddle school\b', use: '{middleSchool}' }
+    - { pattern: '\belementary school\b', use: '{elementarySchool}' }
+    - { pattern: '\b[Pp]rincipal\b', use: '{principal}' }
+    - { pattern: '\b[Mm]om\b', use: 'a name for the parent, or {parent.name}' }
+  terms:
+    - countries: [us]
+      patterns:
+        - '\bSAT\b'
+        - '\bACT scores?\b'
+        - '\bAP (classes|class|exam|exams|courses|course)\b'
+        - '\bFAFSA\b'
+        - '\bMedicare\b'
+        - '\bMedicaid\b'
+        - '\bSocial Security\b'
+        - '401\(?k\)?'
+        - '\bIRS\b'
+        - '\bDMV\b'
+        - '\bhomecoming\b'
+        - '\bFourth of July\b'
+        - '\bSuper Bowl\b'
+        - '\bLittle League\b'
+        - '\bBoy Scouts\b'
+        - '\bGirl Scouts\b'
+        - '\b4-H\b'
+        - '\bPTA\b'
+        - '\b[Ff]reshman\b'
+        - '\b[Ss]ophomore\b'
+        - '\b[Jj]unior year\b'
+        - '\b[Ss]enior year\b'
+        - '\b[Ss]heriff\b'
+        - '\bcounty\b'
+        - '\bin-state\b'
+        - '\bout-of-state\b'
+        - '\bZIP\b'
+        - '\bstate (school|university|college)\b'
+        - '\bSecond Amendment\b'
+        - '\bsenator\b'
+        - '\bgovernor\b'
+    - countries: [ca]
+      patterns:
+        - '\bOHIP\b'
+        - '\bCEGEP\b'
+        - '\bTim Hortons\b'
+        - '\bprovincial health\b'
+        - '\bProvince of\b'
+        - '\bMountie\b'
+        - '\bRCMP\b'
+        - '\bCanada Day\b'
+        - '\bCanadian Thanksgiving\b'
+        - '\bToque\b'
+    - countries: [uk]
+      patterns:
+        - '\bNHS\b'
+        - '\bGCSEs?\b'
+        - '\bA-levels?\b'
+        - '\bUCAS\b'
+        - '\bsixth form\b'
+        - '\bGP\b'
+        - '\bcouncil (tax|flat|house|estate)\b'
+        - '\bBank Holiday\b'
+        - '\bBonfire Night\b'
+        - '\bWestminster\b'
+        - '\bpub quiz\b'
+        - '\bMP\b'
+    - countries: [mx]
+      patterns:
+        - '\bIMSS\b'
+        - '\bISSSTE\b'
+        - '\bpreparatoria\b'
+        - '\bprepa\b'
+        - '\bDía de Muertos\b'
+        - '\bquinceañera\b'
+        - '\bQuinceañera\b'
+        - '\bPosadas?\b'
+        - '\bzócalo\b'
+        - '\bAfore\b'
+        - '\bSEP\b'
+    # Valedictorians and Thanksgiving are North American traditions (on different dates).
+    - countries: [us, ca]
+      patterns:
+        - '\b[Vv]aledictorian\b'
+        - '\bThanksgiving\b'
+
 categories:
   family: { label: Family }
   play: { label: Play }

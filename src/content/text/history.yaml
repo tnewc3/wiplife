@@ -111,27 +111,27 @@ education:
   startedSchool:
     importance: 1
     variants:
-      - "You started kindergarten, with a new backpack and very strong opinions about it."
+      - "You started school, with a new backpack and very strong opinions about it."
       - "You started school. The first day involved some crying, not all of it yours."
   startedMiddle:
     importance: 1
     variants:
-      - "You started middle school: lockers, bells and a lot of new hallways."
+      - "You started {middleSchool}: lockers, bells and a lot of new hallways."
   startedHigh:
     importance: 1
     variants:
-      - "You started high school."
-      - "You walked into high school as a freshman."
+      - "You started {highSchool}."
+      - "You walked into {highSchool} on the first day, a little too early."
   heldBack:
     importance: 2
     variants:
-      - "You failed too many classes and had to repeat a year of high school."
-      - "You were held back a year in high school."
+      - "You failed too many classes and had to repeat a year of {highSchool}."
+      - "You were held back a year in {highSchool}."
   graduatedHigh:
     importance: 3
     variants:
-      - "You graduated from high school, with grades averaging {grade}."
-      - "You crossed the stage and got your high school diploma. Final grades: {grade}."
+      - "You finished {highSchool}, with grades averaging {grade}."
+      - "You crossed the stage and got your diploma. Final grades: {grade}."
   droppedOut:
     importance: 3
     variants:
@@ -144,11 +144,11 @@ education:
   passedGed:
     importance: 2
     variants:
-      - "You passed the GED and earned your high school equivalency."
+      - "You passed the exam and earned your {equivalency}."
   failedGed:
     importance: 1
     variants:
-      - "You took the GED and didn't pass."
+      - "You took the exam for your {equivalency} and didn't pass."
   admitted:
     importance: 2
     variants:
@@ -161,7 +161,7 @@ education:
   withdrawn:
     importance: 2
     variants:
-      - "Without a diploma, you lost your place at {school}."
+      - "Without your {leavingExam}, you lost your place at {school}."
   declined:
     importance: 1
     variants:
@@ -185,12 +185,12 @@ education:
   graduatedAssociate:
     importance: 3
     variants:
-      - "You graduated from {school} with an associate degree in {subject}. Final grades: {grade}."
+      - "You earned your {associateDegree} in {subject} at {school}. Final grades: {grade}."
   graduatedBachelor:
     importance: 3
     variants:
-      - "You graduated from {school} with a bachelor's degree in {subject}. Final grades: {grade}."
-      - "You earned your bachelor's degree in {subject} from {school}. Final grades: {grade}."
+      - "You graduated from {school} with your {bachelorDegree} in {subject}. Final grades: {grade}."
+      - "You earned your {bachelorDegree} in {subject} from {school}. Final grades: {grade}."
   graduatedGrad:
     importance: 3
     variants:

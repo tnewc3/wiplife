@@ -1,0 +1,49 @@
+id: mx_water_runs_out
+title: No water today
+text: >-
+  The tap coughs, shudders and goes quiet. The water in the building is supplied
+  on a schedule, and the tank on the roof has been empty since Tuesday. The
+  neighbours are already comparing tricks.
+tone: neutral
+category: home
+rarity: common
+countries: [mx]
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { home: { kind: [owned, renting] } }
+weight: { base: 6 }
+cooldownYears: 4
+cast:
+  mate: { kind: partner, presence: household, optional: true }
+choices:
+  - id: truck
+    label: Order a water truck
+    outcome:
+      text: >-
+        The tanker arrives two hours late, with a driver who is apologetic and a
+        hose that does not quite reach. It costs {$55}, and the building cheers.
+      effects:
+        - { type: money, delta: -55 }
+        - { type: stat, key: stress, delta: -1 }
+  - id: buckets
+    label: Fill buckets from the neighbour's tank
+    outcome:
+      text: >-
+        A bucket brigade down three flights of stairs, a neighbour who insists on
+        no payment and a promise to return the favour. You are tired and a little
+        closer to the building.
+      effects:
+        - { type: stat, key: stress, delta: 2 }
+        - { type: stat, key: fitness, delta: 1 }
+  - id: tank
+    label: Install a bigger tank on the roof ({$520})
+    visibleIf: { money: { gte: 520 } }
+    outcome:
+      text: >-
+        A day with two workers and a crane, and then a tank that holds enough
+        for a week. It costs {$520}, and you never think about the schedule again.
+      effects:
+        - { type: money, delta: -520 }
+        - { type: stat, key: stress, delta: -3 }

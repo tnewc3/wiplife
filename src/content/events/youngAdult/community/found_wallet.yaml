@@ -1,7 +1,7 @@
 id: found_wallet
 title: Finders keepers
 text: >-
-  You find a wallet on the sidewalk with $200 inside, and an ID with a face
+  You find a wallet on the sidewalk with {$200} inside, and an ID with a face
   that looks like it's had a rough week.
 tone: neutral
 category: community

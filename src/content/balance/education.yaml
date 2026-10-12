@@ -6,23 +6,8 @@
 # and is graded as the next year begins. Elementary, middle and high school
 # are automatic; college, trade school and grad school are applied to.
 
-school:
-  # Kindergarten starts the year you turn this old.
-  startAge: 5
-  # Years of each automatic school: kindergarten to 5th grade, 6th to 8th,
-  # 9th to 12th. High school normally ends as you turn 18.
-  elementary: 6
-  middle: 3
-  high: 4
-  # From this age you can drop out of high school (or be expelled).
-  dropoutAge: 16
-  # A high school year graded below this is repeated, at most maxRepeats
-  # times (after that you're passed along), so school ends at 18 or 19.
-  repeatBelow: 1.0
-  maxRepeats: 1
-  # From this age (your last year of high school) you can apply to college,
-  # trade school or grad school.
-  applyAge: 17
+# The school structure (when school starts, how many years of each stage, when you can leave, when you can apply)
+# is the country's: countries/*.yaml school.
 
 grades:
   # Each school year's grade in GPA points (0–4):
@@ -76,9 +61,6 @@ yearEffects:
     stress: { perYear: 1, limit: 50 }
 
 college:
-  # Community college earns an associate degree; state and elite
-  # universities a bachelor's.
-  years: { community: 2, state: 4, elite: 4 }
   # An associate degree counts for this many years toward a bachelor's.
   transferCredit: 2
   # Switching majors in your first years is free; later each switch adds a year.
@@ -94,8 +76,6 @@ admission:
   gpaPivot: 3.0
   # A record without a GPA (a GED) counts as this.
   noGpa: 2.5
-  # Each application costs this.
-  fee: 75
   college:
     # Open admission: almost everyone gets in.
     community:
@@ -157,37 +137,7 @@ admission:
       min: 10
       max: 95
 
-# Yearly tuition, whole dollars: by college tier, by trade and by grad program.
-tuition:
-  college: { community: 4000, state: 11500, elite: 58000 }
-  trade:
-    electrician: 7500
-    plumber: 7500
-    welder: 9000
-    hvac_technician: 8500
-    auto_mechanic: 8000
-    cosmetologist: 9500
-  grad:
-    law: 48000
-    medicine: 56000
-    mba: 60000
-    masters: 25000
-
-# Paying for school, each year: scholarships take a share of tuition off;
-# your family pays a share of the rest; scholarship money from events pays
-# what it can; anything left is a student loan (balance/economy.yaml sets
-# its rate and term). Student loan payments pause while you're in school.
-scholarships:
-  # Merit aid, a share of tuition by the GPA you applied with.
-  merit:
-    - { at: 3.0, x: 0 }
-    - { at: 3.5, x: 0.15 }
-    - { at: 4.0, x: 0.35 }
-  # Need-based aid, a share of tuition by family wealth.
-  need: { poor: 0.6, working: 0.35, middle: 0.1, affluent: 0, rich: 0 }
-  # Grad programs give this share of the need-based aid.
-  gradNeed: 0.3
-  maxShare: 0.9
+# Tuition, aid and what applying costs are the country's: countries/*.yaml tuition and studentFinance.
 
 familyHelp:
   # Share of what's left after scholarships your family pays, while a

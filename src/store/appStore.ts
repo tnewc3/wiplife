@@ -31,6 +31,8 @@ import {
   type Theme,
   type WiplifeDb,
 } from '../persistence';
+import { moneyDisplayOf } from '../engine/country';
+import { BASE_MONEY_DISPLAY, setMoneyDisplay } from './moneyDisplay';
 
 /** Top-level screens. The age gate is not a screen: it shows until confirmed. */
 export type ScreenId =
@@ -259,7 +261,7 @@ export function createAppStore({
   currentYear = () => new Date().getFullYear(),
   checkInvariants = import.meta.env.DEV,
 }: StoreOptions = {}) {
-  return create<AppState>()(
+  const store = create<AppState>()(
     immer((set, get) => {
       /** Autosave: every engine result is saved before the UI moves on. */
       const commit = async (life: LifeState) => {
@@ -846,6 +848,9 @@ export function createAppStore({
       };
     }),
   );
+  // W4a: money is shown in the currency of the country the active life is lived in.
+  store.subscribe((state) => setMoneyDisplay(state.life ? moneyDisplayOf(state.life, bundle) : BASE_MONEY_DISPLAY));
+  return store;
 }
 
 export const useAppStore = createAppStore();

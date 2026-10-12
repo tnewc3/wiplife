@@ -1,0 +1,48 @@
+id: mx_graduation_ceremony
+title: The ceremony
+text: >-
+  The school ends its last year with a ceremony: white shirts, a stage and a
+  class photo that takes forty minutes to arrange. Your family has come in
+  numbers, and someone has brought a banner.
+tone: light
+category: school
+rarity: common
+countries: [mx]
+lifeStages: [child, teen]
+requires: { education: { program: [elementary, middle], final: true } }
+weight: { base: 12 }
+cooldownYears: 3
+cast:
+  parent: { kind: parent, presence: household }
+choices:
+  - id: smile
+    label: Smile for every photograph
+    outcome:
+      text: >-
+        Your aunt takes forty, your cousin takes eleven and your grandmother
+        takes one that is out of focus and perfect. You will see it again at
+        every family event for the rest of your life.
+      effects:
+        - { type: relationship, role: parent, affection: 5 }
+        - { type: stat, key: happiness, delta: 3 }
+  - id: speech
+    label: Give the class speech
+    check:
+      base: 45
+      stats: [{ key: confidence, weight: 0.3 }, { key: sociability, weight: 0.3 }]
+      success:
+        text: The microphone squeals once. Your voice is steady. {parent.name} wipes both eyes in the front row, and does not hide it.
+        effects:
+          - { type: relationship, role: parent, affection: 7 }
+          - { type: stat, key: confidence, delta: 3 }
+      failure:
+        text: You forget the second line and make a joke about it. The audience laughs with you, which is the next best thing.
+        effects:
+          - { type: relationship, role: parent, affection: 3 }
+          - { type: stat, key: confidence, delta: 1 }
+  - id: back
+    label: Slip out the back before the photographs
+    outcome:
+      text: The hallway is quiet, the air is cool and you can hear your own heartbeat. You return in time for the last row.
+      effects:
+        - { type: stat, key: stress, delta: -1 }

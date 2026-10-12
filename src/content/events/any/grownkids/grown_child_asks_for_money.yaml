@@ -20,7 +20,7 @@ cast:
   kid: { kind: child, presence: anywhere, age: { min: 18, max: 60 } }
 choices:
   - id: give
-    label: Send what {kid.they} {kid:needs|need} ($800)
+    label: Send what {kid.they} {kid:needs|need} ({$800})
     outcome:
       text: >-
         You send it that afternoon, with a note that says it is not a loan. The
@@ -31,7 +31,7 @@ choices:
         - { type: relationship, role: kid, affection: 6, trust: 6 }
         - { type: parenting, role: kid, warmth: 3, involvement: 3 }
   - id: loan
-    label: Offer a small loan, with a plan to repay ($300)
+    label: Offer a small loan, with a plan to repay ({$300})
     outcome:
       text: >-
         You work out a plan on the phone. {kid.name} is quiet at first, and

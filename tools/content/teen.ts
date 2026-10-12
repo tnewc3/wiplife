@@ -71,8 +71,6 @@ export function checkTeen(bundle: ContentBundle, fileOf: (typeKey: CollectionKey
   const active = <T extends { retired?: boolean | undefined }>(record: Record<string, T>) => Object.values(record).filter((d) => !d.retired);
 
   // Balance and content agree.
-  if (b.license.permitAge > b.license.licenseAge) err(BALANCE, 'license: permitAge is greater than licenseAge');
-  if (b.license.licenseAge < bundle.balance.possessions.drivingAge) err(BALANCE, `license: licenseAge is below the driving age ${bundle.balance.possessions.drivingAge}`);
   if (b.ages.from >= adultAge) err(BALANCE, `ages.from must be below the adult age ${adultAge}`);
   if ((b.rules.tightness.levelAt[0] ?? 0) >= (b.rules.tightness.levelAt[1] ?? 0)) err(BALANCE, 'rules.tightness.levelAt: the first number must be below the second');
   const share = b.jobs.parentShare;

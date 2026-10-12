@@ -12,6 +12,7 @@ import { wholeDollars } from '../finance';
 import { paidCareCost } from '../later/care';
 import { hospiceCost } from '../later/terminal';
 import type { LifeState } from '../types';
+import { careScale } from '../country';
 
 /**
  * What looking after the relatives you take in or pay for costs this year
@@ -29,7 +30,7 @@ export function careCosts(state: LifeState, content: ContentBundle, grossIncome?
     if (care === 'home') total += cost.home;
     else if (care === 'paid') total += cost.paid;
   }
-  const scaled = total * (content.cities[state.character.cityId]?.costOfLiving ?? 1);
+  const scaled = total * careScale(state, content);
   const relatives = grossIncome === undefined ? scaled : Math.min(scaled, grossIncome * incomeShare);
   // L1: your own care near the end and where you spend your last months are yours to pay, whatever you earn.
   return wholeDollars(relatives) + paidCareCost(state, content) + hospiceCost(state, content);

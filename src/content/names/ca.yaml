@@ -1,0 +1,64 @@
+# Name pool for Canada, grouped by heritage so families' names hang together. How often each heritage appears is set in
+# countries/ca.yaml (names.heritageWeights). `nonbinary` holds names commonly used across genders.
+id: ca
+heritages:
+  general:
+    first:
+      man: [Liam, Noah, Ethan, Lucas, Owen, Jacob, Logan, Ryan, Connor, Nathan, Cameron, Jordan, Mitchell, Graham, Brandon, Tyler, Dylan, Hunter, Colin, Brendan, Austin, Spencer, Declan, Evan]
+      woman: [Emma, Olivia, Charlotte, Ava, Chloe, Sophie, Abigail, Hannah, Madison, Brooke, Paige, Megan, Kayla, Jenna, Tessa, Nicole, Rebecca, Alexis, Claire, Julia, Morgan, Katie, Erin, Leah]
+      nonbinary: [Alex, Avery, Casey, Charlie, Jordan, Morgan, Riley, Taylor, Quinn, Rowan, Sage, Parker, Jamie, Drew, Emerson, Finley, Reese, Skyler, River, Eden]
+    last: [Smith, Brown, Wilson, MacDonald, Campbell, Stewart, Thompson, Anderson, Murray, Fraser, Clarke, Robertson, Reid, Ross, Morrison, Henderson, Graham, Kelly, Walker, Taylor, Johnston, Hamilton, Bell, Mitchell, Sutherland, Gordon, Cameron, Young, Hughes, Peters, Miller, Moore, Davis]
+  french:
+    first:
+      man: [Jean-François, Alexandre, Olivier, Mathieu, Samuel, Étienne, Gabriel, Antoine, Nicolas, Maxime, Philippe, Simon, Francis, Émile, Félix, Louis, Raphaël, Thomas, Vincent, Julien, Guillaume, Marc-André, Hugo, Benoît]
+      woman: [Marie-Ève, Camille, Léa, Émilie, Océane, Juliette, Florence, Catherine, Sophie, Audrey, Mélanie, Charlotte, Jade, Amélie, Anaïs, Geneviève, Isabelle, Marianne, Laurence, Roxanne, Annie, Élodie, Noémie, Pascale]
+      nonbinary: [Camille, Dominique, Claude, Alex, Sasha, Maxime, Jocelyn, Andrée, Lou, Charlie, Réjean, Yannick]
+    last: [Tremblay, Gagnon, Roy, Côté, Bouchard, Gauthier, Morin, Lavoie, Fortin, Gagné, Ouellet, Pelletier, Bélanger, Lévesque, Bergeron, Leblanc, Paquette, Girard, Simard, Boucher, Caron, Beaulieu, Cloutier, Dubé, Poirier, Fournier, Lapointe, Leclerc, Lefebvre, Michaud, Nadeau, Gingras, Desjardins, Martel]
+  south_asian:
+    first:
+      man: [Arjun, Rahul, Rohan, Vikram, Aditya, Karan, Nikhil, Sanjay, Amit, Ravi, Dev, Harpreet, Imran, Aarav]
+      woman: [Priya, Ananya, Neha, Pooja, Divya, Kavya, Anjali, Riya, Meera, Sana, Simran, Aisha, Nisha, Shreya]
+      nonbinary: [Kiran, Jyoti, Arya, Noor, Sam, Ashwin]
+    last: [Patel, Shah, Singh, Kaur, Gupta, Sharma, Kumar, Reddy, Rao, Iyer, Mehta, Desai, Khan, Chowdhury, Joshi, Malhotra]
+  chinese:
+    first:
+      man: [Wei, Jun, Hao, Ming, Jian, Lei, Yong, Kai, Zhen, Tao, Bo, Kevin, Eric, Justin]
+      woman: [Mei, Li, Xiu, Ying, Hua, Jing, Lan, Yan, Fang, Lin, Hui, Qing, Grace, Michelle]
+      nonbinary: [Jun, Ming, An, Yu, Xin, Ping, Le, Chen]
+    last: [Chen, Wang, Li, Zhang, Liu, Wong, Huang, Lin, Wu, Zhou, Yang, Zhao, Chan, Lee, Ho, Leung]
+  arab:
+    first:
+      man: [Ahmed, Omar, Yusuf, Hassan, Khalid, Ali, Karim, Tariq, Samir, Rami, Nabil, Ibrahim, Mustafa, Adam]
+      woman: [Fatima, Layla, Yasmin, Nadia, Mariam, Amira, Rania, Leila, Hana, Salma, Dina, Noor, Zainab, Sara]
+      nonbinary: [Noor, Salam, Rayan, Sami, Iman, Nour]
+    last: [Haddad, Khalil, Nasser, Saleh, Mansour, Aziz, Hamdan, Farah, Hassan, Ibrahim, Khoury, Abboud, Darwish, Saad]
+  hispanic:
+    first:
+      man: [José, Luis, Carlos, Miguel, Javier, Diego, Mateo, Alejandro, Ricardo, Juan, Andrés, Santiago, Eduardo, Fernando, Emilio, Rafael, Adrian, Gabriel]
+      woman: [María, Sofia, Camila, Valentina, Lucía, Daniela, Isabella, Gabriela, Alejandra, Carmen, Rosa, Ana, Mariana, Ximena, Paola, Elena, Vanessa, Beatriz]
+      nonbinary: [Alex, Cruz, Guadalupe, Ariel, Noel, René, Sol, Dani, Angel, Reyes]
+    last: [Garcia, Rodriguez, Martinez, Hernandez, Lopez, Gonzalez, Perez, Sanchez, Ramirez, Torres, Flores, Rivera, Gomez, Diaz, Reyes, Morales, Cruz, Ortiz, Gutierrez, Chavez, Ramos, Mendoza, Castillo, Vargas, Romero, Herrera, Medina, Aguilar, Alvarez, Castro]
+  korean:
+    first:
+      man: [Min-jun, Ji-ho, Seo-jun, Hyun-woo, Jae-won, Dong-hyun, Sung-min, Joon, Daniel, Eugene, Brian]
+      woman: [Ji-woo, Seo-yeon, Min-ji, Ha-eun, Soo-jin, Eun-ji, Hye-jin, Yuna, Grace, Esther, Joy]
+      nonbinary: [Hae, Jin, Min, Sol, Yoon, Ji]
+    last: [Kim, Lee, Park, Choi, Jung, Kang, Cho, Yoon, Jang, Lim, Han, Shin]
+  west_african:
+    first:
+      man: [Chinedu, Emeka, Kwame, Kofi, Oluwaseun, Tunde, Ade, Obinna, Femi, Yaw, Ikenna, Segun]
+      woman: [Adaeze, Chioma, Ngozi, Amara, Folake, Abena, Ama, Ifeoma, Yewande, Nneka, Efua, Funmi]
+      nonbinary: [Ayo, Tobi, Dayo, Ife, Kelechi, Chidi]
+    last: [Okafor, Adeyemi, Okonkwo, Mensah, Asante, Obi, Eze, Nwosu, Balogun, Owusu, Adebayo, Boateng]
+  filipino:
+    first:
+      man: [Jose, Mark, John, Angelo, Joshua, Paolo, Miguel, Rafael, Carlo, Jericho, Renato, Ramon, Nico, Gabriel, Marco, Dennis, Ronald, Francis, Jerome, Lorenzo]
+      woman: [Maria, Angelica, Jasmine, Kristine, Joy, Katrina, Bea, Aileen, Grace, Rose, Patricia, Charmaine, Nicole, Marites, Liza, Andrea, Janelle, Mikaela, Trisha, Cheska]
+      nonbinary: [Jam, Angel, Kris, Bien, Jun, Rain, Sam, Ash, Nico, Jay]
+    last: [Santos, Reyes, Cruz, Bautista, Garcia, Mendoza, Ramos, Aquino, Villanueva, Castillo, Torres, Flores, Gonzales, Dela-Cruz, Navarro, Domingo, Salvador, Pascual, Soriano, Santiago, Tolentino, Manalo, Lim, Tan]
+  black:
+    first:
+      man: [Marcus, Andre, Jamal, Devon, Isaiah, Elijah, Tyrone, Kofi, Kwame, Malik, Trevor, Winston, Delroy, Jordan, Michael, Anthony, Marlon, Leon, Dwayne, Jaden]
+      woman: [Aaliyah, Imani, Nia, Jasmine, Kayla, Tiana, Amara, Zara, Shanice, Monique, Ayana, Chantelle, Keisha, Simone, Naomi, Tamara, Latoya, Alicia, Nadine, Rochelle]
+      nonbinary: [Jordan, Kendall, Taylor, Jaden, Amari, Justice, Sky, London, Peyton, Kai]
+    last: [Williams, Brown, Johnson, Campbell, Clarke, Thomas, Francis, Henry, Jackson, Lewis, Edwards, Morgan, Samuels, Gordon, Brooks, Walker, Bailey, Grant, Roberts, Charles]

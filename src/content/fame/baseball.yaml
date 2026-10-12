@@ -99,3 +99,21 @@ sport:
         - { id: "new_york_ferrymen", name: "New York Ferrymen", city: "nyc", quality: 64 }
         - { id: "new_york_rooftops", name: "New York Rooftops", city: "nyc", quality: 43 }
         - { id: "new_york_cabbies", name: "New York Cabbies", city: "nyc", quality: 56 }
+        - { id: "toronto_streetcars", name: "Toronto Streetcars", city: "toronto", quality: 58 }
+        - { id: "toronto_harbourmen", name: "Toronto Harbourmen", city: "toronto", quality: 43 }
+        - { id: "vancouver_rainmakers", name: "Vancouver Rainmakers", city: "vancouver", quality: 55 }
+        - { id: "vancouver_seawall_bats", name: "Vancouver Seawall Bats", city: "vancouver", quality: 40 }
+        - { id: "montreal_voyageurs", name: "Montreal Voyageurs", city: "montreal", quality: 57 }
+        - { id: "montreal_plateau_pilots", name: "Montreal Plateau Pilots", city: "montreal", quality: 44 }
+        - { id: "london_foggers", name: "London Foggers", city: "london", quality: 48 }
+        - { id: "london_wharfmen", name: "London Wharfmen", city: "london", quality: 40 }
+        - { id: "manchester_mill_sox", name: "Manchester Mill Sox", city: "manchester", quality: 46 }
+        - { id: "manchester_pennine_pickers", name: "Manchester Pennine Pickers", city: "manchester", quality: 39 }
+        - { id: "london_thames_sluggers", name: "London Thames Sluggers", city: "london", quality: 44 }
+        - { id: "manchester_northern_nine", name: "Manchester Northern Nine", city: "manchester", quality: 42 }
+        - { id: "mexico_city_chinampas", name: "Mexico City Chinampas", city: "mexico_city", quality: 60 }
+        - { id: "mexico_city_metro_bats", name: "Mexico City Metro Bats", city: "mexico_city", quality: 43 }
+        - { id: "guadalajara_jacarandas", name: "Guadalajara Jacarandas", city: "guadalajara", quality: 55 }
+        - { id: "guadalajara_rosales_nine", name: "Guadalajara Rosales Nine", city: "guadalajara", quality: 41 }
+        - { id: "monterrey_sierra_sluggers", name: "Monterrey Sierra Sluggers", city: "monterrey", quality: 62 }
+        - { id: "monterrey_fundidores", name: "Monterrey Fundidores", city: "monterrey", quality: 46 }

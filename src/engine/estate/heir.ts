@@ -69,6 +69,7 @@ import { emptyBelonging } from '../belonging/query';
 import { emptyBusiness } from '../business/query';
 import { receiveBusinesses } from '../business/estate';
 import { startBelonging } from '../belonging/start';
+import { scaledAmount } from '../country';
 
 /** A deep copy through JSON: the life holds plain data only (the engine has no structuredClone). */
 export function cloneJson<T>(value: T): T {
@@ -412,7 +413,7 @@ export function continueAsHeir(dead: LifeState, heirId: Id, content: ContentBund
   let inheritedHome: { value: number; city: string } | null = null;
 
   if (independent) {
-    life.finances.savings = hb.adultSavings[life.character.familyWealth] + cash;
+    life.finances.savings = scaledAmount(life, hb.adultSavings[life.character.familyWealth], content) + cash;
     if (property) {
       life.housing = { kind: 'owned', cityId: dead.housing.cityId, annualCost: 0, homeValue: property.value, since: year };
       life.character.cityId = dead.housing.cityId;
@@ -460,7 +461,7 @@ export function continueAsHeir(dead: LifeState, heirId: Id, content: ContentBund
   life.character.birthCityId = candidate.cityId;
 
   // ── School and work ──────────────────────────────────────────────────────
-  const ages = schoolAges(content);
+  const ages = schoolAges(life, content);
   if (age >= ages.highEnd) life.education.credentials.push({ type: 'hs_diploma', year: candidate.birthYear + ages.highEnd });
   else if (enrollForAge(life, content) && kid.gpa > 0 && life.education.current) life.education.current.gpa = Math.min(4, kid.gpa);
   if (independent && candidate.occupation !== undefined && canTakeJob(life, candidate.occupation, content)) startJob(life, candidate.occupation, content);

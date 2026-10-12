@@ -9,7 +9,7 @@ import { bound } from '../fame/sample';
 import type { Id, LifeState, SportsSeason } from '../types';
 import { addCondition } from '../health';
 import { bestPosition, emptySports, levelOfRung, sportPath } from './query';
-import { amateurTeam, draftingTeam, proTeam } from './team';
+import { amateurTeam, draftingTeam, proTeam, proTeamsIn } from './team';
 
 function wanted(condition: Condition | undefined): SportsCondition {
   const out: SportsCondition = {};
@@ -48,7 +48,7 @@ export function giveSampleSports(state: LifeState, def: EventDef, _cast: Record<
   s.sport = sportId;
   s.position = bestPosition(state, path.sport).id;
   s.pro = levelOfRung(path.sport, final) === 'pro';
-  s.team = s.pro ? proTeam(draftingTeam(path.sport, 3, content)) : amateurTeam(state, path.sport, levelOfRung(path.sport, final) as 'youth' | 'school' | 'college', 50, content, state.rng);
+  s.team = s.pro ? proTeam(draftingTeam(path.sport, 3, state.character.cityId, content)) : amateurTeam(state, path.sport, levelOfRung(path.sport, final) as 'youth' | 'school' | 'college', 50, content, state.rng);
   if (s.pro) state.character.cityId = s.team.city;
   if (s.pro && want.freeAgent !== true) {
     s.contract = { teamId: s.team.id!, since: year - 1, until: want.contractYear === true ? year : year + 2, salary: rungDef(path, final).income, kind: 'standard', option: 'none' };
@@ -96,7 +96,7 @@ export function giveSampleSports(state: LifeState, def: EventDef, _cast: Record<
   if (want.pain === true) s.pain = true;
   if (want.drafted === true || want.undrafted === true || want.offered === true || /\{(pick|draftRound|draftTeam)\}/.test(text)) {
     const pick = bound(want.pick) ?? (want.undrafted === true ? 0 : 5);
-    s.draft = { year, pick, round: pick === 0 ? 0 : Math.ceil(pick / path.sport.leagues.pro.teams.length), teamId: draftingTeam(path.sport, Math.max(1, pick), content).id };
+    s.draft = { year, pick, round: pick === 0 ? 0 : Math.ceil(pick / proTeamsIn(path.sport, state.character.cityId, content).length), teamId: draftingTeam(path.sport, Math.max(1, pick), state.character.cityId, content).id };
   }
   if (want.traded === true) s.traded = year;
   if (want.released === true) s.released = year;

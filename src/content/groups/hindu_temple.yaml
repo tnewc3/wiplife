@@ -7,7 +7,7 @@ tradition: "Hindu"
 blurb: "A temple with a priest, a canteen and festivals that spill into the street."
 minAge: 0
 weight: 0.8
-cities: {small_town: 0.2}
+cities: {small_town: 0.2, small_town_ca: 0.2, small_town_uk: 0.2, small_town_mx: 0.2}
 count: { min: 1, max: 1 }
 traits:
   welcome: { mean: 60, sd: 22 }

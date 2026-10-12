@@ -1,0 +1,58 @@
+id: uk_boiler_breaks
+title: No hot water in January
+text: >-
+  The boiler makes a noise like a cough and then a long silence. The radiators
+  go cold, the shower goes cold and the engineer's first available slot is
+  next Thursday.
+tone: neutral
+category: home
+rarity: common
+countries: [uk]
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { home: { kind: [owned, renting] } }
+weight: { base: 5 }
+cooldownYears: 6
+cast:
+  mate: { kind: partner, presence: household, optional: true }
+choices:
+  - id: repair
+    label: Call the engineer and pay for the repair
+    outcome:
+      text: >-
+        A part that needs ordering, a call-out fee and a Thursday spent in a
+        coat. The boiler runs again for {$450}.
+      effects:
+        - { type: money, delta: -450 }
+        - { type: stat, key: stress, delta: 3 }
+  - id: landlord
+    label: Ring the landlord, whose job it is
+    visibleIf: { home: { kind: [renting] } }
+    check:
+      base: 50
+      stats: [{ key: confidence, weight: 0.3 }]
+      success:
+        text: The landlord sends an engineer the next day and apologises for the delay. Heat comes back before the weekend.
+        effects:
+          - { type: stat, key: stress, delta: 1 }
+      failure:
+        text: >-
+          Three unanswered messages and a promise to "look into it." You boil
+          kettles for a week and buy a fan heater for {$60}.
+        effects:
+          - { type: money, delta: -60 }
+          - { type: stat, key: stress, delta: 4 }
+          - { type: stat, key: health, delta: -1 }
+  - id: replace
+    label: Replace the boiler altogether
+    visibleIf: { money: { gte: 2600 } }
+    outcome:
+      text: >-
+        A new boiler, a new thermostat and a warranty with a number on it.
+        {$2600} is a lot, and the silence on the radiators is the best sound in
+        the house.
+      effects:
+        - { type: money, delta: -2600 }
+        - { type: stat, key: stress, delta: -2 }

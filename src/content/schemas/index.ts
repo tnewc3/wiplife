@@ -11,6 +11,7 @@ import { actionRegistrySchema, relationshipsBalanceSchema } from './relationship
 import { careersBalanceSchema, jobSchema, workRegistrySchema } from './careers';
 import { appearanceOptionsSchema, identityOptionsSchema, namePoolSchema, pronounPresetSchema, talentSchema } from './character';
 import { citySchema } from './city';
+import { countriesBalanceSchema, countrySchema } from './country';
 import { economyBalanceSchema, triggerRegistrySchema } from './economy';
 import { educationBalanceSchema, gradProgramSchema, majorSchema, tradeSchema } from './education';
 import { categoryRegistrySchema, eventSchema, flagRegistrySchema, memoryRegistrySchema } from './events';
@@ -37,6 +38,7 @@ export * from './balance';
 export * from './careers';
 export * from './character';
 export * from './city';
+export * from './country';
 export * from './common';
 export * from './economy';
 export * from './education';
@@ -76,6 +78,7 @@ export const collectionTypes = {
   cliques: { folder: 'cliques', schema: cliqueSchema },
   crews: { folder: 'crews', schema: crewSchema },
   cities: { folder: 'cities', schema: citySchema },
+  countries: { folder: 'countries', schema: countrySchema },
   conditions: { folder: 'conditions', schema: conditionDefSchema },
   /** Nested by life stage and category, and chain files hold several events (see compile.ts). */
   businesses: { folder: 'businesses', schema: businessSchema },
@@ -109,6 +112,7 @@ export type CollectionKey = keyof typeof collectionTypes;
  */
 export const singletonTypes = {
   'balance/creation': creationBalanceSchema,
+  'balance/countries': countriesBalanceSchema,
   'balance/aging': agingBalanceSchema,
   'balance/mortality': mortalityBalanceSchema,
   'balance/pacing': pacingBalanceSchema,
@@ -194,6 +198,7 @@ export const contentBundleSchema = z.strictObject({
   cliques: z.record(z.string(), cliqueSchema),
   crews: z.record(z.string(), crewSchema),
   cities: z.record(z.string(), citySchema),
+  countries: z.record(z.string(), countrySchema),
   conditions: z.record(z.string(), conditionDefSchema),
   businesses: z.record(z.string(), businessSchema),
   chains: z.record(z.string(), chainSchema),
@@ -217,6 +222,7 @@ export const contentBundleSchema = z.strictObject({
   vehicles: z.record(z.string(), vehicleSchema),
   balance: z.strictObject({
     creation: creationBalanceSchema,
+    countries: countriesBalanceSchema,
     aging: agingBalanceSchema,
     mortality: mortalityBalanceSchema,
     pacing: pacingBalanceSchema,

@@ -41,7 +41,7 @@ choices:
     visibleIf: { money: { gte: 500 } }
     outcome:
       text: >-
-        It costs you $500 and it's polished to a shine. It sounds like
+        It costs you {$500} and it's polished to a shine. It sounds like
         nobody in particular. You try not to think about it.
       effects:
         - { type: money, delta: -500 }

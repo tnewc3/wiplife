@@ -197,6 +197,8 @@ export function ProfileSheet({ life, open, onClose }: { life: LifeState; open: b
   };
   const id = view.identity;
   const rows: [string, string][] = [
+    ['Lives in', view.country],
+    ['Born in', view.bornIn],
     ['Gender identity', id.genderIdentity],
     ['Gender expression', id.genderExpression],
     ['Pronouns', `${id.pronouns.subject}/${id.pronouns.object}/${id.pronouns.possessivePronoun}`],

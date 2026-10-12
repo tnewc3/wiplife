@@ -2,7 +2,7 @@ id: coworker_short_on_cash
 title: Short on cash
 text: >-
   {npc.name} from work catches you by the coffee machine and asks, very
-  quietly, if you could spot {npc.them} $200 until payday.
+  quietly, if you could spot {npc.them} {$200} until payday.
 tone: neutral
 category: work
 rarity: common

@@ -15,6 +15,7 @@ import type { Id, LifeState, Possession } from '../types';
 import { hasLicense } from '../teen/query';
 import { jobNeedsVehicle } from './jobs';
 import { costOfLiving, loanIdOf, nextPossessionId, possessionById, vehicleAge, vehicleDef, vehicleOf, vehiclesOf } from './query';
+import { atLegalAge } from '../country';
 
 const vb = (content: ContentBundle) => content.balance.possessions.vehicles;
 
@@ -90,7 +91,7 @@ export function vehicleQuote(state: LifeState, defId: Id, used: boolean, content
   let base: VehicleBlock | null = null;
   if (!def || def.retired) base = 'unknown';
   else if (used && !def.used) base = 'used';
-  else if (state.character.age < content.balance.possessions.drivingAge) base = 'age';
+  else if (!atLegalAge(state, 'driving', content)) base = 'age';
   // T1: you need your license to buy a vehicle (the teen years: lessons and the test).
   else if (!hasLicense(state)) base = 'license';
   else if (vehiclesOf(state).length >= content.balance.possessions.limits.vehicles) base = 'limit';

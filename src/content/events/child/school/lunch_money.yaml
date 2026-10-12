@@ -2,7 +2,7 @@ id: lunch_money
 title: Lunch money
 text: >-
   {bully.name} blocks the bathroom door and holds out a hand. "Lunch money.
-  Every Monday. Or else." You've got three dollars in your sock.
+  Every Monday. Or else." You've got {$3} in your sock.
 tone: serious
 category: school
 rarity: common
@@ -16,7 +16,7 @@ choices:
   - id: pay
     label: Hand it over
     outcome:
-      text: It's three dollars every Monday until the end of the year. You eat a lot of free crackers from the nurse.
+      text: It's {$3} every Monday until the end of the year. You eat a lot of free crackers from the nurse.
       effects:
         - { type: money, delta: -3 }
         - { type: stat, key: confidence, delta: -3 }
@@ -56,7 +56,7 @@ choices:
           - { type: stat, key: confidence, delta: 6 }
           - { type: memory, role: bully, tag: you_stood_up_to_them }
       failure:
-        text: Your voice cracks. {bully.name} takes the three dollars and your sock.
+        text: Your voice cracks. {bully.name} takes the {$3} and your sock.
         effects:
           - { type: money, delta: -3 }
           - { type: stat, key: confidence, delta: -4 }

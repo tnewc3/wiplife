@@ -1,0 +1,24 @@
+# Montreal — French-speaking, with lower rents than the other big Canadian cities.
+id: montreal
+countryId: ca
+name: Montreal
+blurb: "French-speaking · Lower rents · Arts and tech"
+costOfLiving: 0.88
+baseRent: 14500
+baseHomePrice: 300000
+carDependence: 0.35
+salaryMultiplier: 0.78
+jobMarket:
+  professional: 65
+  trade: 60
+  gig: 65
+schools:
+  high: Collège du Mont-Royal
+  community: Collège Saint-Laurent
+  state: Université du Plateau
+  elite: Université Royale de l’Île
+  trade: Institut des Métiers du Port
+  grad: École Supérieure de la Montagne
+# Quebec sets the drinking and gambling age at 18.
+legalAges: { drinking: 18, gambling: 18 }
+languages: { official: [fr], common: [en, es, ar] }

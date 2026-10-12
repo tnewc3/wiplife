@@ -1,0 +1,46 @@
+id: mx_profit_sharing
+title: Profit sharing
+text: >-
+  In May, companies above a certain size share part of their profits with
+  their workers by law. The amount depends on the company's year, your salary
+  and your days worked, and nobody is quite sure of the number until it
+  shows up.
+tone: light
+category: work
+rarity: common
+countries: [mx]
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { career: { employed: true, retired: false } }
+weight: { base: 6 }
+cooldownYears: 2
+choices:
+  - id: pay
+    label: Spend it on something the house needs
+    outcome:
+      text: >-
+        The payment is {$480}. The fridge that has been making noises for a
+        year is finally replaced, and the quiet is a luxury.
+      effects:
+        - { type: money, delta: 480 }
+        - { type: money, delta: -400 }
+        - { type: stat, key: stress, delta: -2 }
+  - id: save
+    label: Save it
+    outcome:
+      text: The profit share is {$480} this year. You put all of it aside, and for once you feel ahead of the month.
+      effects:
+        - { type: money, delta: 480 }
+        - { type: stat, key: discipline, delta: 1 }
+  - id: family
+    label: Share some with a relative who needs it
+    outcome:
+      text: >-
+        The profit share is {$480}. You send {$200} to a cousin whose
+        roof is leaking, and for the rest of the month you are very popular.
+      effects:
+        - { type: money, delta: 480 }
+        - { type: money, delta: -200 }
+        - { type: stat, key: kindness, delta: 2 }

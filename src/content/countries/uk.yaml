@@ -1,0 +1,138 @@
+# The United Kingdom. Figures are in the game's base currency (US dollars); pounds are shown at the rate in
+# balance/countries.yaml. Pay and prices are national averages across the cities in src/content/cities. The school
+# and university system modelled is England's.
+id: uk
+name: United Kingdom
+adjective: British
+blurb: "The NHS, capped university fees, a big capital and the north"
+currency: { code: GBP, symbol: "£", name: pound, plural: pounds, locale: en-GB }
+priceLevel: 0.98
+salaryMultiplier: 0.73
+
+legalAges: { drinking: 18, gambling: 18, driving: 17, permit: 16, marriage: 18 }
+
+school:
+  startAge: 4
+  # Reception and years 1 to 6, years 7 to 9, then years 10 to 13 (GCSEs, then sixth form). Nobody repeats a year.
+  elementary: 7
+  middle: 3
+  high: 4
+  dropoutAge: 16
+  repeatBelow: 1.0
+  maxRepeats: 0
+  applyAge: 17
+
+words:
+  elementary: primary school
+  middle: secondary school
+  high: secondary school
+  college: university
+  principal: headteacher
+  gradeWord: grades
+  gradeDisplay: percent
+  tiers: { community: Further education college, state: University, elite: Leading university }
+  credentials:
+    hs_diploma: A-levels
+    ged: Equivalency qualifications
+    associate: Foundation degree
+    bachelor: Bachelor’s degree
+    trade_license: Apprenticeship qualification
+    grad: Postgraduate degree
+  exams: { entrance: A-level results, leaving: A-levels }
+  gradeLabels: [Reception, Year 1, Year 2, Year 3, Year 4, Year 5, Year 6, Year 7, Year 8, Year 9, Year 10, Year 11, Year 12, Year 13]
+
+# A foundation degree takes two years; a bachelor's degree three.
+collegeYears: { community: 2, state: 3, elite: 3 }
+
+# Fees are capped for every university, so the leading ones charge the same. Apprenticeships are paid for by the employer.
+tuition:
+  college: { community: 4200, state: 11700, elite: 11700 }
+  trade:
+    electrician: 1500
+    plumber: 1500
+    welder: 1800
+    hvac_technician: 1600
+    auto_mechanic: 1500
+    cosmetologist: 2200
+  grad:
+    law: 19000
+    medicine: 11700
+    mba: 24000
+    masters: 12500
+
+studentFinance:
+  blurb: "Fees are capped and covered by a student loan; repayment starts only once you earn enough."
+  scholarships:
+    merit:
+      - { at: 3.0, x: 0 }
+      - { at: 3.5, x: 0.05 }
+      - { at: 4.0, x: 0.12 }
+    need: { poor: 0.3, working: 0.2, middle: 0.05, affluent: 0, rich: 0 }
+    gradNeed: 0.15
+    maxShare: 0.5
+  loanRate: 0.045
+  applicationFee: 35
+
+housing:
+  mortgageRate: 0.055
+  downPayment: 0.15
+  appreciation: 0.02
+
+healthcare:
+  model: public
+  blurb: "The National Health Service treats you free when you need it; waits are long, and social care is means-tested."
+  shares: { visit: 0, treatment: 0.03, therapy: 0.35, medication: 0.1, care: 0.6 }
+
+tax:
+  blurb: "Income tax and National Insurance."
+  brackets:
+    - { from: 0, rate: 0 }
+    - { from: 15900, rate: 0.28 }
+    - { from: 63600, rate: 0.42 }
+    - { from: 158000, rate: 0.47 }
+
+# Inheritance tax: 40% above the nil-rate bands, which a home left to children widens.
+estateTax:
+  - { at: 0, x: 0 }
+  - { at: 500000, x: 0 }
+  - { at: 700000, x: 0.15 }
+  - { at: 1500000, x: 0.3 }
+  - { at: 4000000, x: 0.4 }
+  - { at: 12000000, x: 0.5 }
+
+pension:
+  name: State Pension
+  age: 67
+  minYears: 10
+  fullYears: 35
+  creditIncome: 6000
+  earningsCap: 160000
+  formula:
+    - { from: 0, rate: 1 }
+    - { from: 14500, rate: 0.1 }
+
+jobs:
+  salaryByCategory: { professional: 0.95, trade: 1, gig: 1 }
+  salaryByJob: { physician: 0.6, lawyer: 0.8, software_engineer: 0.7, registered_nurse: 0.85 }
+
+sentencing:
+  outcomes: { warning: 1.1, fine: 1, probation: 1, jail: 0.9 }
+  termYears: 0.9
+  fines: 0.8
+  paroleYears: 1
+
+languages: { official: [en], common: [pl, ur, pa, bn, ar, cy] }
+
+names:
+  heritageWeights:
+    general: 78
+    south_asian: 9
+    black: 4
+    polish: 2.5
+    chinese: 1.5
+    arab: 1.5
+    irish: 2
+    west_african: 1.5
+  sameHeritageParentsChance: 0.87
+
+familyWealth: { poor: 18, working: 30, middle: 33, affluent: 15, rich: 4 }

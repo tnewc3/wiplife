@@ -1,0 +1,56 @@
+id: mx_tech_park_offer
+title: An offer from the tech park
+text: >-
+  A recruiter from one of the big technology parks on the edge of the city
+  sends a message with a salary, a start date and an office with a view of a
+  field. The pay is better. The commute is an hour each way.
+tone: neutral
+category: work
+rarity: uncommon
+countries: [mx]
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 21 } }
+    - { city: guadalajara }
+    - { career: { employed: true, retired: false } }
+weight: { base: 5 }
+cooldownYears: 8
+choices:
+  - id: take
+    label: Take the job and the commute
+    outcome:
+      text: >-
+        A shuttle bus at six, a desk by a window and a team that works in two
+        languages. The extra pay is {$1800} for the year, and so is the tiredness.
+      effects:
+        - { type: money, delta: 1800 }
+        - { type: stat, key: ambition, delta: 2 }
+        - { type: stat, key: stress, delta: 3 }
+  - id: counter
+    label: Show your boss the offer and ask for a raise
+    check:
+      base: 45
+      stats: [{ key: confidence, weight: 0.3 }, { key: ambition, weight: 0.2 }]
+      success:
+        text: >-
+          Your boss looks at the number, looks at you and says "let me talk to
+          someone." A week later, you have a raise of {$900} and a new title.
+        effects:
+          - { type: money, delta: 900 }
+          - { type: stat, key: confidence, delta: 3 }
+      failure:
+        text: >-
+          Your boss thanks you for your honesty and says there is no budget. The
+          tone in the office changes in a way nobody names.
+        effects:
+          - { type: stat, key: stress, delta: 3 }
+  - id: stay
+    label: Turn it down and stay close to home
+    outcome:
+      text: >-
+        You thank the recruiter and keep your commute of fifteen minutes. You
+        sleep an extra hour every night, and you wonder about the other road.
+      effects:
+        - { type: stat, key: stress, delta: -2 }
+        - { type: stat, key: happiness, delta: 1 }

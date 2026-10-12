@@ -23,6 +23,7 @@ import { whereabouts } from '../presence';
 import { clampInt } from '../random';
 import { loanIdOf, nextPossessionId } from '../possessions/query';
 import type { Id, LifeState, Possession, PossessionTransfer, WillShare } from '../types';
+import { legalAge } from '../country';
 
 /** A beneficiary who is a person, as the plan sees them. */
 export interface Taker extends WillShare {
@@ -81,7 +82,7 @@ export function planPossessions(life: LifeState, shares: readonly Taker[], insol
       plan.writtenOff += Math.max(0, loan - proceeds);
       continue;
     }
-    const minAge = isHome || loan > 0 ? independence : b.drivingAge;
+    const minAge = isHome || loan > 0 ? independence : legalAge('driving', life.character.cityId, content);
     const taker = insolvent ? undefined : largest(people.filter((t) => ageOfPerson(life, t.id) >= minAge));
     if (taker) pass(p, taker, loan);
     else {

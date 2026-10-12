@@ -1,0 +1,51 @@
+id: uk_freshers_week
+title: Freshers' week
+text: >-
+  Your halls corridor is a mixture of trunks, strangers and a kettle that
+  nobody owns. There is a pub crawl, a club night and a society fair that
+  promises friends for the price of a membership.
+tone: light
+category: school
+rarity: common
+countries: [uk]
+lifeStages: [youngAdult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { education: { program: [college], year: { lte: 1 } } }
+weight: { base: 10 }
+once: true
+cast:
+  flatmate: { kind: friend, presence: city, createIfMissing: true, newChance: 1, age: { min: 18, max: 24 } }
+choices:
+  - id: everything
+    label: Say yes to everything
+    outcome:
+      text: >-
+        A week of late nights, free pizza and a society for something you cannot
+        pronounce. You make {flatmate.name}, a lifelong friend, and lose three days
+        to recovery. It costs {$130}.
+      effects:
+        - { type: money, delta: -130 }
+        - { type: relationship, role: flatmate, affection: 9 }
+        - { type: stat, key: sociability, delta: 3 }
+        - { type: stat, key: health, delta: -1 }
+  - id: society
+    label: Join one society and one only
+    outcome:
+      text: >-
+        The climbing society meets on Wednesdays and everyone is friendly. By
+        term two you know the people who will be at your graduation.
+      effects:
+        - { type: relationship, role: flatmate, affection: 5 }
+        - { type: stat, key: sociability, delta: 2 }
+        - { type: stat, key: fitness, delta: 1 }
+  - id: quiet
+    label: Stay in and unpack slowly
+    outcome:
+      text: >-
+        You make a proper cup of tea and arrange your books. {flatmate.name}
+        knocks to ask where the mugs are, and stays until midnight.
+      effects:
+        - { type: relationship, role: flatmate, affection: 6 }
+        - { type: stat, key: stress, delta: -1 }

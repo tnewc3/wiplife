@@ -11,6 +11,7 @@ import { chance } from '../rng';
 import { costOfLiving } from '../possessions/query';
 import type { LifeState } from '../types';
 import { teenHistory } from './cliques';
+import { atLegalAge } from '../country';
 
 /** What a fee costs you: its base, in your city, and more once you are grown. */
 export function licenseFee(state: LifeState, base: number, content: ContentBundle): number {
@@ -24,10 +25,9 @@ const away = (state: LifeState) => state.housing.kind === 'incarcerated';
 
 /** Why you can't get a learner's permit now, or null. */
 export function permitBlock(state: LifeState, content: ContentBundle): LicenseBlock | null {
-  const l = content.balance.teen.license;
   if (away(state)) return 'away';
   if (state.teen.license.stage !== 'none') return 'have';
-  if (state.character.age < l.permitAge) return 'age';
+  if (!atLegalAge(state, 'permit', content)) return 'age';
   return null;
 }
 
@@ -48,7 +48,7 @@ export function testBlock(state: LifeState, content: ContentBundle): LicenseBloc
   if (away(state)) return 'away';
   if (t.stage === 'licensed') return 'have';
   if (t.stage === 'none') return 'permit';
-  if (state.character.age < l.licenseAge) return 'age';
+  if (!atLegalAge(state, 'driving', content)) return 'age';
   if (t.lessons < l.lessons.minToTest) return 'lessons';
   if (t.testYear === state.currentYear) return 'wait';
   return null;
@@ -102,16 +102,15 @@ export function revokeLicense(state: LifeState): void {
 
 /** The permit or license the event gives you (the `license` effect): never below the ages, never past what you have. */
 export function grantStage(state: LifeState, stage: 'permit' | 'licensed', content: ContentBundle): void {
-  const l = content.balance.teen.license;
   const lic = state.teen.license;
   if (stage === 'permit') {
-    if (lic.stage === 'none' && state.character.age >= l.permitAge) {
+    if (lic.stage === 'none' && atLegalAge(state, 'permit', content)) {
       state.teen.license = { ...lic, stage: 'permit', since: state.currentYear };
       teenHistory(state, 'permit', {}, content);
     }
     return;
   }
-  if (lic.stage !== 'licensed' && state.character.age >= l.licenseAge) {
+  if (lic.stage !== 'licensed' && atLegalAge(state, 'driving', content)) {
     state.teen.license = { ...lic, stage: 'licensed', since: state.currentYear };
     teenHistory(state, 'licensePassed', {}, content);
   }

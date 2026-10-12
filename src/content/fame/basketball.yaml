@@ -97,3 +97,21 @@ sport:
         - { id: "new_york_brickmen", name: "New York Brickmen", city: "nyc", quality: 66 }
         - { id: "new_york_harbor_ghosts", name: "New York Harbor Ghosts", city: "nyc", quality: 36 }
         - { id: "new_york_subway_saints", name: "New York Subway Saints", city: "nyc", quality: 56 }
+        - { id: "toronto_lakeshore_herons", name: "Toronto Lakeshore Herons", city: "toronto", quality: 60 }
+        - { id: "toronto_queen_street_kings", name: "Toronto Queen Street Kings", city: "toronto", quality: 42 }
+        - { id: "vancouver_coastal_ravens", name: "Vancouver Coastal Ravens", city: "vancouver", quality: 54 }
+        - { id: "vancouver_granville_bears", name: "Vancouver Granville Bears", city: "vancouver", quality: 40 }
+        - { id: "montreal_old_port_voyageurs", name: "Montreal Old Port Voyageurs", city: "montreal", quality: 56 }
+        - { id: "montreal_plateau_lynx", name: "Montreal Plateau Lynx", city: "montreal", quality: 43 }
+        - { id: "london_docklands_hawks", name: "London Docklands Hawks", city: "london", quality: 56 }
+        - { id: "london_bridgemen", name: "London Bridgemen", city: "london", quality: 44 }
+        - { id: "manchester_canalside_giants", name: "Manchester Canalside Giants", city: "manchester", quality: 52 }
+        - { id: "manchester_ship_canal_sharks", name: "Manchester Ship Canal Sharks", city: "manchester", quality: 42 }
+        - { id: "london_brixton_ballers", name: "London Brixton Ballers", city: "london", quality: 48 }
+        - { id: "manchester_northern_hoops", name: "Manchester Northern Hoops", city: "manchester", quality: 46 }
+        - { id: "mexico_city_reforma_kings", name: "Mexico City Reforma Kings", city: "mexico_city", quality: 62 }
+        - { id: "mexico_city_metro_jaguars", name: "Mexico City Metro Jaguars", city: "mexico_city", quality: 44 }
+        - { id: "guadalajara_jacaranda_hoops", name: "Guadalajara Jacaranda Hoops", city: "guadalajara", quality: 52 }
+        - { id: "guadalajara_rosales", name: "Guadalajara Rosales", city: "guadalajara", quality: 40 }
+        - { id: "monterrey_sierra_titans", name: "Monterrey Sierra Titans", city: "monterrey", quality: 58 }
+        - { id: "monterrey_foundry_lions", name: "Monterrey Foundry Lions", city: "monterrey", quality: 46 }

@@ -1,0 +1,21 @@
+# Guadalajara — a large western city with a strong technology and creative scene.
+id: guadalajara
+countryId: mx
+name: Guadalajara
+blurb: "Moderate prices · Technology and creative work"
+costOfLiving: 0.44
+baseRent: 6000
+baseHomePrice: 95000
+carDependence: 0.6
+salaryMultiplier: 0.3
+jobMarket:
+  professional: 65
+  trade: 60
+  gig: 70
+schools:
+  high: Preparatoria Los Arcos
+  community: Universidad Tecnológica de Occidente
+  state: Universidad Pública de Jalisco
+  elite: Universidad Tapatía
+  trade: Instituto Técnico Minerva
+  grad: Escuela de Posgrado del Occidente

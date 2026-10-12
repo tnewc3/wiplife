@@ -1,0 +1,52 @@
+id: uk_student_house
+title: The house share
+text: >-
+  Second year means choosing who to live with. Somebody has found a house with
+  five bedrooms, a landlord with a good reputation and a deposit that has to
+  be paid by Friday.
+tone: neutral
+category: home
+rarity: common
+countries: [uk]
+lifeStages: [youngAdult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { education: { program: [college], year: { gte: 2 } } }
+    - { home: { kind: [with_parents, renting] } }
+weight: { base: 7 }
+once: true
+cast:
+  housemate: { kind: friend, presence: city, createIfMissing: true, newChance: 0.6, age: { min: 18, max: 25 } }
+choices:
+  - id: sign
+    label: Sign the tenancy ({$500} deposit)
+    visibleIf: { money: { gte: 500 } }
+    outcome:
+      text: >-
+        You and {housemate.name} sign with a pen you borrowed from the landlord.
+        The deposit is {$500}, the house has a damp patch and a view, and the
+        kitchen belongs to everyone.
+      effects:
+        - { type: money, delta: -500 }
+        - { type: housing, action: roommate }
+        - { type: relationship, role: housemate, affection: 4 }
+        - { type: stat, key: happiness, delta: 2 }
+  - id: halls
+    label: Stay in university housing for another year
+    outcome:
+      text: >-
+        It costs more and it is closer to the library. You eat in the canteen
+        and know the porter's name.
+      effects:
+        - { type: money, delta: -300 }
+        - { type: stat, key: stress, delta: -1 }
+  - id: home
+    label: Move back with your parents and commute
+    outcome:
+      text: >-
+        A bus pass, a bedroom with the old posters and your mother's dinners.
+        You save money and miss a lot of Thursday nights.
+      effects:
+        - { type: money, delta: 400 }
+        - { type: stat, key: happiness, delta: -1 }

@@ -32,6 +32,7 @@ import { BUSINESS_ACTIONS, BUSINESS_KINDS, BUSINESS_PEOPLE, BUSINESS_STYLES, OWN
 import { templateSchema } from './text';
 import { reactionSchema, type ReactionId } from './mental';
 import { knowledgeKindSchema, tieKindSchema, tieStatusSchema, type KnowledgeKindId, type TieKindId, type TieStatusId } from './web';
+import { countryIdSchema, type CountryId, type LegalAges } from './country';
 
 export const LIFE_STAGE_IDS = ['early', 'child', 'teen', 'youngAdult', 'adult', 'senior'] as const;
 export const lifeStageSchema = z.enum(LIFE_STAGE_IDS);
@@ -90,6 +91,8 @@ export type Condition =
   | ({ hidden: (typeof HIDDEN_KEYS)[number] } & Compare)
   | { money: Compare }
   | { city: string }
+  | { country: CountryId[] }
+  | { legalAge: keyof LegalAges }
   | { familyWealth: z.infer<typeof familyWealthSchema>[] }
   | { flag: string; eq?: number | boolean | string }
   | { fired: string }
@@ -775,6 +778,8 @@ export const conditionSchema: z.ZodType<Condition> = z.lazy(() =>
     z.strictObject({ hidden: z.enum(HIDDEN_KEYS), ...compareFields }).refine(hasBound, 'needs a bound'),
     z.strictObject({ money: compareSchema }),
     z.strictObject({ city: idSchema }),
+    z.strictObject({ country: z.array(countryIdSchema).min(1) }),
+    z.strictObject({ legalAge: z.enum(['drinking', 'gambling', 'driving', 'permit', 'marriage']) }),
     z.strictObject({ familyWealth: z.array(familyWealthSchema).min(1) }),
     z.strictObject({ flag: idSchema, eq: flagValueSchema.optional() }),
     z.strictObject({ fired: idSchema }),
@@ -2005,6 +2010,13 @@ export const eventSchema = baseDefSchema
     rarity: raritySchema,
     lifeStages: z.array(lifeStageSchema).min(1),
     requires: conditionSchema.optional(),
+    /**
+     * W4a, the country tag: the event happens only in these countries (an event with no tag fits every country, so it
+     * must read right in all of them: amounts as {$300}, school words as {highSchool}). The content build turns the
+     * tag into the matching requirement and keeps country-specific wording (registries/categories.yaml countryTags)
+     * to tagged events.
+     */
+    countries: z.array(countryIdSchema).min(1).max(4).optional(),
     weight: z.strictObject({
       base: z.number().positive(),
       modifiers: z.array(z.strictObject({ if: conditionSchema, x: z.number().nonnegative() })).optional(),
@@ -2077,6 +2089,18 @@ export const memoryRegistrySchema = z.strictObject({ tags: z.record(idSchema, z.
 export const flagRegistrySchema = z.strictObject({ flags: z.record(idSchema, z.string().trim().min(1).max(200)) });
 /** Event categories (registries/categories.yaml). */
 export const categoryRegistrySchema = z.strictObject({
+  /**
+   * W4a, the country-tag contract: an event tagged `countries: [...]` happens only there (the build adds the
+   * requirement), and wording that belongs to one country alone may appear only in events tagged for that country
+   * alone. `terms` lists, per country, the words that are its own (case-sensitive patterns); `neutral` is what an
+   * untagged event writes instead (amounts as {$300}, a school as {highSchool}...).
+   */
+  countryTags: z.strictObject({
+    terms: z.array(z.strictObject({ countries: z.array(countryIdSchema).min(1), patterns: z.array(z.string().min(1)).min(1) })).min(1),
+    neutral: z.string().trim().min(1).max(300),
+    /** Words an untagged event writes as a placeholder, because each country says it differently. */
+    placeholders: z.array(z.strictObject({ pattern: z.string().min(1), use: z.string().min(1) })).default([]),
+  }),
   categories: z.record(
     idSchema,
     z.strictObject({

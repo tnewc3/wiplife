@@ -27,6 +27,7 @@ import { jobDependence, jobNeedsVehicle } from './jobs';
 import { petYear } from './pets';
 import { homeOf, livingPets, vacationHomesOf, vehicleAge, vehicleOf, vehiclesOf } from './query';
 import { accidentChance, drunkChance, refreshVehicleValue } from './vehicles';
+import { atLegalAge } from '../country';
 
 /** Queues one of these events (picked by weight among those that fit now) for this year, about the possession in `cast`. */
 export function queuePossessionEvent(state: LifeState, ids: readonly Id[], cast: Record<string, Id>, content: ContentBundle): void {
@@ -81,7 +82,7 @@ export function runPossessions(state: LifeState, content: ContentBundle): void {
   }
   // T1: only someone with a license drives (an unlicensed teen who inherited a car doesn't).
   const drivers = inside || !hasLicense(state) ? [] : vehiclesOf(state);
-  if (drivers.length > 0 && state.character.age >= b.drivingAge) {
+  if (drivers.length > 0 && atLegalAge(state, 'driving', content)) {
     const first = drivers[0]!;
     if (chance(state.rng, drunkChance(state, content))) {
       queuePossessionEvent(state, content.registries.possessions.accidents.drunk.events, { [POSSESSION_ROLES.vehicle]: first.id }, content);

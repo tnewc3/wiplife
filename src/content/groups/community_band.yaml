@@ -5,7 +5,7 @@ type: club
 blurb: "A band that rehearses in a school gym and plays the summer park series."
 minAge: 18
 weight: 0.7
-cities: {small_town: 0.6}
+cities: {small_town: 0.6, small_town_ca: 0.6, small_town_uk: 0.6, small_town_mx: 0.6}
 count: { min: 1, max: 2 }
 traits:
   welcome: { mean: 62, sd: 18 }

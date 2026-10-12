@@ -106,24 +106,43 @@ export const chanceModelSchema = z
   .refine((m) => m.min <= m.max, 'min must not be greater than max');
 export type ChanceModel = z.infer<typeof chanceModelSchema>;
 
-/** Education: school years, grades, admissions and paying for school (src/content/balance/education.yaml). */
+/**
+ * How a country's automatic school is built (src/content/countries/*.yaml school), from the first year of
+ * elementary school to the diploma.
+ */
+export const schoolStructureSchema = z.strictObject({
+  /** The age you start school (kindergarten, reception). */
+  startAge: z.int().min(3).max(8),
+  /** Years of each automatic school. */
+  elementary: z.int().min(1).max(8),
+  middle: z.int().min(1).max(5),
+  high: z.int().min(1).max(5),
+  /** From this age you can leave high school (drop out, or be expelled). */
+  dropoutAge: z.int().min(12).max(18),
+  /** A high school year graded below this is repeated (held back)... */
+  repeatBelow: gpaSchema,
+  /** ...at most this many times; after that you are passed along. */
+  maxRepeats: z.int().min(0).max(2),
+  /** From this age you can apply to college, trade school or grad school. */
+  applyAge: z.int().min(14).max(21),
+});
+export type SchoolStructure = z.infer<typeof schoolStructureSchema>;
+
+/** Aid that takes a share of tuition off (a country's student finance). */
+export const scholarshipsSchema = z.strictObject({
+  /** Merit aid: a share of tuition, by the GPA you applied with. */
+  merit: curveSchema,
+  /** Need-based aid: a share of tuition, by family wealth. */
+  need: perWealth(share),
+  /** Grad programs give this share of the need-based aid. */
+  gradNeed: share,
+  /** Scholarships never cover more than this share of tuition. */
+  maxShare: share,
+});
+export type Scholarships = z.infer<typeof scholarshipsSchema>;
+
+/** Education: grades, admissions and paying for school (src/content/balance/education.yaml); the school structure, tuition and aid are the country's. */
 export const educationBalanceSchema = z.strictObject({
-  school: z.strictObject({
-    /** The age you start school (kindergarten). */
-    startAge: z.int().min(3).max(8),
-    /** Years of each automatic school. */
-    elementary: z.int().min(1).max(8),
-    middle: z.int().min(1).max(5),
-    high: z.int().min(1).max(5),
-    /** From this age you can leave high school (drop out, or be expelled). */
-    dropoutAge: z.int().min(12).max(18),
-    /** A high school year graded below this is repeated (held back)... */
-    repeatBelow: gpaSchema,
-    /** ...at most this many times; after that you are passed along. */
-    maxRepeats: z.int().min(0).max(2),
-    /** From this age you can apply to college, trade school or grad school. */
-    applyAge: z.int().min(14).max(21),
-  }),
   grades: z.strictObject({
     /** A school year's grade, in GPA points: base + weight × (value − 50) for each stat... */
     base: gpaSchema,
@@ -155,8 +174,6 @@ export const educationBalanceSchema = z.strictObject({
     grad: statEffectsSchema,
   }),
   college: z.strictObject({
-    /** Years of each tier: community earns an associate degree, state and elite a bachelor's. */
-    years: perTier(z.int().min(1).max(6)),
     /** An associate degree counts for this many years toward a bachelor's. */
     transferCredit: z.int().min(0).max(4),
     /** Changing major in these first years is free; later, each change adds a year. */
@@ -167,28 +184,10 @@ export const educationBalanceSchema = z.strictObject({
     gpaPivot: gpaSchema,
     /** A record without a GPA (a GED) counts as this. */
     noGpa: gpaSchema,
-    /** Each application costs this. */
-    fee: dollarsSchema,
     college: perTier(chanceModelSchema),
     trade: chanceModelSchema,
     /** By grad program id; every grad program needs one. */
     grad: z.record(idSchema, chanceModelSchema),
-  }),
-  /** Yearly tuition: by college tier, by trade and by grad program id. */
-  tuition: z.strictObject({
-    college: perTier(dollarsSchema),
-    trade: z.record(idSchema, dollarsSchema),
-    grad: z.record(idSchema, dollarsSchema),
-  }),
-  scholarships: z.strictObject({
-    /** Merit aid: a share of tuition, by the GPA you applied with. */
-    merit: curveSchema,
-    /** Need-based aid: a share of tuition, by family wealth. */
-    need: perWealth(share),
-    /** Grad programs give this share of the need-based aid. */
-    gradNeed: share,
-    /** Scholarships never cover more than this share of tuition. */
-    maxShare: share,
   }),
   familyHelp: z.strictObject({
     /** The share of tuition left after scholarships your family pays, by wealth, while a parent is there to help. */

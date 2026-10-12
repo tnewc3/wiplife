@@ -1,0 +1,22 @@
+# Toronto — Canada's largest city: expensive housing, a deep professional market.
+id: toronto
+countryId: ca
+name: Toronto
+blurb: "Expensive housing · Deep professional market"
+costOfLiving: 1.1
+baseRent: 22000
+baseHomePrice: 480000
+carDependence: 0.3
+salaryMultiplier: 0.9
+jobMarket:
+  professional: 85
+  trade: 65
+  gig: 80
+schools:
+  high: Lakeshore Collegiate Institute
+  community: Humber Lake College
+  state: University of the Lakeshore
+  elite: Queen’s Park University
+  trade: Don Valley Trades Institute
+  grad: Bloor Graduate School
+legalAges: { drinking: 19, gambling: 19 }

@@ -1,0 +1,42 @@
+id: ca_tax_refund_credits
+title: Line after line
+text: >-
+  You file your tax return, and the software keeps finding things you did not
+  know existed: a credit for your transit pass, one for your tuition, one for
+  something called the "disability tax credit" that does not apply to you.
+tone: light
+category: money
+rarity: common
+countries: [ca]
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 19 } }
+    - { finances: { income: { gte: 8000 } } }
+weight: { base: 5 }
+cooldownYears: 3
+choices:
+  - id: careful
+    label: Go through every credit one at a time
+    outcome:
+      text: >-
+        Two hours with a calculator and a receipt shoebox. The refund is
+        {$640}, and you are slightly proud of yourself.
+      effects:
+        - { type: money, delta: 640 }
+        - { type: stat, key: discipline, delta: 1 }
+  - id: software
+    label: Click through what the software suggests
+    outcome:
+      text: A quick afternoon, a smaller refund of {$280} and no regrets.
+      effects:
+        - { type: money, delta: 280 }
+  - id: ignore
+    label: File it late
+    outcome:
+      text: >-
+        A penalty letter arrives in the spring, written in the polite tone that
+        governments use when they are actually angry. It costs {$150}.
+      effects:
+        - { type: money, delta: -150 }
+        - { type: stat, key: stress, delta: 3 }

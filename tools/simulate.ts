@@ -11,7 +11,7 @@ import { writeFile } from 'node:fs/promises';
 import { parseArgs } from 'node:util';
 import { setAutoFreeze } from 'immer';
 import compiled from '../src/content/compiled/content.json';
-import type { ContentBundle } from '../src/content/schemas';
+import type { ContentBundle, CountryId } from '../src/content/schemas';
 import { formatInteractions } from './simulate/interactions';
 import { continueAsHeirs, startChains } from './simulate/generations';
 import { formatHeirs, heirTargets } from './simulate/heirs';
@@ -20,9 +20,10 @@ import { formatComparison, formatReport, interactionTargets, runSimulation, type
 import { crimeTargets, formatCrime } from './simulate/crime';
 import { fameTargets, formatFame } from './simulate/fame';
 import { formatSports, sportsTargets } from './simulate/sports';
+import { withCountryTargets } from './simulate/countries';
 
 // The compiled JSON directly: src/content/index.ts relies on Vite's import.meta.env.
-const content = compiled as ContentBundle;
+const bundle = compiled as ContentBundle;
 
 const { values } = parseArgs({
   options: {
@@ -31,6 +32,7 @@ const { values } = parseArgs({
     json: { type: 'string' },
     player: { type: 'string', default: 'both' },
     generations: { type: 'string', default: '3' },
+    country: { type: 'string' },
   },
 });
 
@@ -57,10 +59,18 @@ if (!Number.isInteger(generations) || generations < 1) {
   console.error('--generations must be a positive whole number');
   process.exit(2);
 }
+// W4a: --country us|ca|uk|mx plays every life in that country (left out: random starts across countries), judged on that
+// country's own targets (src/content/balance/countries.yaml targets) in place of the shared money and lifespan ones.
+const country = values.country as CountryId | undefined;
+if (country !== undefined && !bundle.countries[country]) {
+  console.error(`--country must be one of ${Object.keys(bundle.countries).sort().join(', ')}`);
+  process.exit(2);
+}
+const content = country ? withCountryTargets(bundle, country) : bundle;
 // E2b: the careful player's lives that end with a living child continue as heirs, for `generations` generations.
 const chains = startChains(content);
 const reports = players.map((player) =>
-  runSimulation(content, { lives, seedPrefix: values.seed, player, ...(player === 'careful' && generations > 1 ? { onLife: chains.onLife } : {}) }),
+  runSimulation(content, { lives, seedPrefix: values.seed, player, ...(country ? { country } : {}), ...(player === 'careful' && generations > 1 ? { onLife: chains.onLife } : {}) }),
 );
 // E3: how long a year takes to begin with a full circle of people simulated.
 for (const r of reports) if (r.player === 'careful') r.people.fullCircle = measureFullCircle(content, 60, 20);

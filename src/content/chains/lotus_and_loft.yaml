@@ -4,5 +4,5 @@ type: salon
 style: premium
 blurb: "A chain of high-ceilinged salons with a waiting list and a regional training academy."
 locations: { min: 3, max: 6 }
-cities: [los_angeles, nyc]
+cities: [los_angeles, nyc, toronto, london, mexico_city]
 reputation: { mean: 64, sd: 6 }

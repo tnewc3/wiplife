@@ -1,0 +1,33 @@
+id: uk_ae_night
+title: Nine hours in A&E
+text: >-
+  The fall looked smaller than it felt. Now there is a cubicle, a blue paper
+  gown and a corridor with trolleys lined up like cars in a car park. Someone
+  has a clipboard, someone has a bucket and nobody, you notice, asks you for a card.
+tone: serious
+category: health
+rarity: common
+countries: [uk]
+lifeStages: [child, teen, youngAdult, adult, senior]
+requires: { age: { gte: 3 } }
+weight: { base: 5 }
+cooldownYears: 6
+choices:
+  - id: wait
+    label: Wait your turn
+    outcome:
+      text: >-
+        A nurse brings you tea at three in the morning. A doctor with red eyes
+        sets the bone, explains it in plain words and sends you home with a
+        sling and a leaflet. You are looked after, and you are grateful.
+      effects:
+        - { type: stat, key: health, delta: 1 }
+        - { type: stat, key: stress, delta: 3 }
+  - id: pharmacist
+    label: Leave and go to the late-night pharmacy
+    outcome:
+      text: >-
+        The pharmacist looks at the injury, says it needs a proper X-ray and
+        sends you back with a note. You lose three hours and keep your dignity.
+      effects:
+        - { type: stat, key: stress, delta: 2 }

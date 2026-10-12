@@ -28,6 +28,11 @@ export const TRIGGER_IDS = ['foreclosure', 'eviction', 'collections', 'garnishme
 export const triggerIdSchema = z.enum(TRIGGER_IDS);
 export type TriggerId = z.infer<typeof triggerIdSchema>;
 
+/** The kinds of medical bill a country's health system covers part of (countries/*.yaml healthcare.shares). A cost item names its kind in `health`. */
+export const HEALTH_SHARE_KEYS = ['visit', 'treatment', 'therapy', 'medication', 'care'] as const;
+export const healthShareKeySchema = z.enum(HEALTH_SHARE_KEYS);
+export type HealthShareKey = z.infer<typeof healthShareKeySchema>;
+
 const share = z.number().min(0).max(1);
 const rate = z.number().min(0).max(1);
 const years = z.int().min(1).max(100);
@@ -65,14 +70,6 @@ const lifestyleTierSchema = z.strictObject({
 export const economyBalanceSchema = z.strictObject({
   /** From this age you pay your own way: living costs, debt, and housing and lifestyle choices. */
   independenceAge: z.int().min(16).max(30),
-  /** Estimated tax: marginal rates on yearly gross income, each from its `from` amount up to the next. */
-  tax: z.strictObject({
-    brackets: z
-      .array(z.strictObject({ from: dollarsSchema, rate }))
-      .min(1)
-      .refine((b) => b[0]!.from === 0, 'the first bracket starts from 0')
-      .refine((b) => b.every((x, i) => i === 0 || x.from > b[i - 1]!.from), 'brackets must be in increasing "from" order'),
-  }),
   /** Yearly living costs for a comfortable life at the national average (city cost of living 1.0). */
   livingCost: dollarsSchema.positive(),
   lifestyle: z.strictObject({
@@ -95,8 +92,8 @@ export const economyBalanceSchema = z.strictObject({
   interest: z.strictObject({
     /** Yearly interest on savings. */
     savings: rate,
-    /** Yearly interest by debt kind. */
-    debts: perDebtKind(rate),
+    /** Yearly interest by debt kind. A student loan's rate (countries/*.yaml studentFinance.loanRate) and a mortgage's (housing.mortgageRate) are the country's. */
+    debts: perDebtKind(rate).omit({ student: true, mortgage: true }),
   }),
   debts: z.strictObject({
     /** Years a debt's minimum payment would take to pay it off, by kind. */
@@ -160,47 +157,20 @@ export const economyBalanceSchema = z.strictObject({
    * effect): amount at the national average, times the city's cost of
    * living; familyHelp: your family may chip in.
    */
-  costs: z.record(idSchema, z.strictObject({ amount: dollarsSchema.positive(), familyHelp: z.boolean() })),
+  costs: z.record(idSchema, z.strictObject({ amount: dollarsSchema.positive(), familyHelp: z.boolean(), health: healthShareKeySchema.optional() })),
   /**
    * C1: how much of a cost your family covers: share by family wealth, times
    * how close you are to your closest living parent (affection ÷ 100), and
    * nothing below minAffection.
    */
   familyHelp: z.strictObject({ share: perWealth(share), minAffection: scoreSchema }),
-  /**
-   * The retirement benefit (like Social Security): paid every year from `age`
-   * once you have `minYears` years with earned income, from your average
-   * yearly earnings over those years. Every kind of earned income counts
-   * (gig pay and salaries).
-   */
-  retirement: z.strictObject({
-    age: z.int().min(40).max(100),
-    /** Years with earned income needed to qualify. */
-    minYears: z.int().min(1).max(60),
-    /** The full benefit needs this many years; fewer years pay a share (years ÷ fullYears). */
-    fullYears: z.int().min(1).max(60),
-    /** A year counts when earned income reaches this. */
-    creditIncome: dollarsSchema.positive(),
-    /** Earnings above this in one year don't count toward the average. */
-    earningsCap: dollarsSchema.positive(),
-    /** The yearly benefit: these rates on slices of average yearly earnings (like the tax brackets). */
-    formula: z
-      .array(z.strictObject({ from: dollarsSchema, rate }))
-      .min(1)
-      .refine((b) => b[0]!.from === 0, 'the first slice starts from 0')
-      .refine((b) => b.every((x, i) => i === 0 || x.from > b[i - 1]!.from), 'slices must be in increasing "from" order'),
-  }),
   ownership: z.strictObject({
-    /** Smallest down payment, as a share of the price. */
-    downPayment: share,
     /** Closing costs when buying, as a share of the price. */
     closingCosts: share,
     /** Costs of selling, as a share of the home's value. */
     sellingCosts: share,
     /** Yearly property tax and upkeep, as a share of the home's value. */
     upkeep: rate,
-    /** Yearly change in home values. */
-    appreciation: z.number().min(-0.2).max(0.2),
     /** The bank's limit: the yearly mortgage payment at most this share of last year's gross income. */
     maxPaymentShare: share,
     /** Savings kept back when putting down more than the smallest down payment. */

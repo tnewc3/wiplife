@@ -1,0 +1,50 @@
+id: uk_maintenance_loan
+title: The student finance letter
+text: >-
+  Student finance sends an email: your tuition fee loan has gone straight to
+  the university, and a maintenance loan, based on your family's income, will land
+  in your bank at the start of every term. The email also explains repayment,
+  in language that makes it sound like an extra tax.
+tone: neutral
+category: school
+rarity: common
+countries: [uk]
+lifeStages: [youngAdult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { education: { program: [college] } }
+weight: { base: 8 }
+once: true
+choices:
+  - id: budget
+    label: Make a spreadsheet and stick to it
+    outcome:
+      text: >-
+        A tab for rent, a tab for food and a tab marked "treats". By the end
+        of term one you have {$300} left over, and a certain smugness.
+      effects:
+        - { type: education, action: scholarship, value: 1200 }
+        - { type: money, delta: 300 }
+        - { type: stat, key: discipline, delta: 2 }
+  - id: spend
+    label: Spend the first instalment on a good term
+    outcome:
+      text: >-
+        The first loan payment is gone in six weeks on nights out, a jacket and
+        a few trips. By week seven you are eating pasta out of the pot.
+      effects:
+        - { type: education, action: scholarship, value: 1200 }
+        - { type: money, delta: -200 }
+        - { type: stat, key: happiness, delta: 2 }
+        - { type: stat, key: stress, delta: 3 }
+  - id: job
+    label: Take a part-time job in the library
+    outcome:
+      text: >-
+        Twelve hours a week shelving, a free coffee and a view of the exam
+        timetable. You earn {$1500} and your essays suffer a little.
+      effects:
+        - { type: education, action: scholarship, value: 1200 }
+        - { type: money, delta: 1500 }
+        - { type: stat, key: stress, delta: 2 }

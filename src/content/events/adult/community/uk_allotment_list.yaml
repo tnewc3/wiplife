@@ -1,0 +1,46 @@
+id: uk_allotment_list
+title: The allotment waiting list
+text: >-
+  A letter from the council: after five years on the list, a plot has come up.
+  It is on the edge of the site, covered in brambles and next to a neighbour
+  with a reputation. It is also yours.
+tone: light
+category: community
+rarity: uncommon
+countries: [uk]
+lifeStages: [adult, senior]
+requires: { age: { gte: 30 } }
+weight: { base: 5 }
+once: true
+cast:
+  neighbour: { kind: acquaintance, presence: city, createIfMissing: true, newChance: 1, age: { min: 40, max: 80 } }
+choices:
+  - id: take
+    label: Take the plot and start clearing
+    outcome:
+      text: >-
+        Brambles, bindweed and a shed that leans. The rent is {$30} a year, and
+        {neighbour.name} turns up on the second Saturday with a spade and
+        advice you did not ask for.
+      effects:
+        - { type: money, delta: -30 }
+        - { type: relationship, role: neighbour, affection: 7 }
+        - { type: stat, key: fitness, delta: 2 }
+        - { type: stat, key: stress, delta: -3 }
+  - id: share
+    label: Split it with a friend
+    outcome:
+      text: >-
+        Half a plot each, one wheelbarrow and a very strong opinion about beans.
+        The friendship survives, mostly.
+      effects:
+        - { type: relationship, role: neighbour, affection: 3 }
+        - { type: stat, key: happiness, delta: 2 }
+  - id: decline
+    label: Hand it back
+    outcome:
+      text: >-
+        You phone the council and the plot goes to the next person on the list.
+        You feel relief for a day and a faint pang afterwards.
+      effects:
+        - { type: stat, key: stress, delta: -1 }

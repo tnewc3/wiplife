@@ -1,0 +1,46 @@
+id: ca_dental_estimate
+title: The treatment plan
+text: >-
+  The dentist slides the estimate across the desk, face down, the way people
+  hand over bad news. The province covers your doctor and your hospital, but
+  not your teeth.
+tone: serious
+category: health
+rarity: common
+countries: [ca]
+lifeStages: [youngAdult, adult, senior]
+requires: { age: { gte: 19 } }
+weight: { base: 4 }
+cooldownYears: 7
+cast:
+  mate: { kind: partner, presence: household, optional: true }
+choices:
+  - id: all
+    label: Do all of it now ({$2400})
+    visibleIf: { money: { gte: 2400 } }
+    outcome:
+      text: >-
+        Three appointments, a crown and a long talk about flossing. It costs
+        {$2400}, and your jaw stops aching for the first time in a year.
+      effects:
+        - { type: money, delta: -2400 }
+        - { type: stat, key: health, delta: 3 }
+  - id: urgent
+    label: Do only the part that hurts ({$600})
+    visibleIf: { money: { gte: 600 } }
+    outcome:
+      text: >-
+        The worst tooth is fixed for {$600} and the rest goes on a list. The list
+        is still there when the next year begins.
+      effects:
+        - { type: money, delta: -600 }
+        - { type: stat, key: health, delta: 1 }
+  - id: delay
+    label: Put it off
+    outcome:
+      text: >-
+        You say you will book it after the next paycheque. The next paycheque has
+        plans of its own, and so does the tooth.
+      effects:
+        - { type: stat, key: health, delta: -2 }
+        - { type: stat, key: stress, delta: 2 }

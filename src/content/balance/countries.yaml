@@ -1,0 +1,53 @@
+# Numbers every country shares (W4a, docs/expansion.md). Each country's own rules are in src/content/countries.
+
+# Money is kept in one base currency, the US dollar, and shown in the player's country's currency. This is how many
+# units of each currency one base-currency unit is worth (rounded; Stage 12 can refresh them).
+exchangeRates:
+  USD: 1
+  CAD: 1.36
+  GBP: 0.79
+  MXN: 17.2
+
+# How often a random life starts in each country. Custom creation chooses a country and a city.
+startWeights: { us: 40, ca: 20, uk: 20, mx: 20 }
+
+# What the simulation judges each country's lives by (npm run simulate -- --country us|ca|uk|mx). Money is in the base
+# currency (US dollars). A run for a country uses these in place of the shared money and lifespan targets in
+# targets.yaml; tools/simulate/countries.ts measures them. Set from 10,000-life runs per country (docs/technical.md, W4a).
+targets:
+  us:
+    lifespanMedian: { min: 70, max: 90 }
+    maxBankruptLives: 0.4
+    minHomeOwners: 0.4
+    minDiplomaBy19: 0.85
+    degreeBy30: { min: 0.3, max: 0.7 }
+    grossAt40: { min: 20000, max: 120000 }
+    taxShare: { min: 0.05, max: 0.3 }
+    medianNetWorth: { min: 100000, max: 900000 }
+  ca:
+    lifespanMedian: { min: 70, max: 90 }
+    maxBankruptLives: 0.4
+    minHomeOwners: 0.4
+    minDiplomaBy19: 0.85
+    degreeBy30: { min: 0.3, max: 0.7 }
+    grossAt40: { min: 15000, max: 100000 }
+    taxShare: { min: 0.05, max: 0.35 }
+    medianNetWorth: { min: 80000, max: 800000 }
+  uk:
+    lifespanMedian: { min: 70, max: 90 }
+    maxBankruptLives: 0.4
+    minHomeOwners: 0.4
+    minDiplomaBy19: 0.85
+    degreeBy30: { min: 0.3, max: 0.7 }
+    grossAt40: { min: 12000, max: 90000 }
+    taxShare: { min: 0.05, max: 0.4 }
+    medianNetWorth: { min: 60000, max: 700000 }
+  mx:
+    lifespanMedian: { min: 68, max: 90 }
+    maxBankruptLives: 0.4
+    minHomeOwners: 0.4
+    minDiplomaBy19: 0.8
+    degreeBy30: { min: 0.2, max: 0.7 }
+    grossAt40: { min: 4000, max: 50000 }
+    taxShare: { min: 0.02, max: 0.3 }
+    medianNetWorth: { min: 20000, max: 400000 }

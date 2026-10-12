@@ -1,0 +1,51 @@
+id: ca_rental_scramble
+title: Forty people at a viewing
+text: >-
+  The one-bedroom you want has a viewing with a line down the block. The agent
+  mentions, lightly, that offers above the asking rent will be considered. In
+  Toronto and Vancouver, every rental looks like this now.
+tone: serious
+category: home
+rarity: uncommon
+countries: [ca]
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 19 } }
+    - { home: { kind: [renting] } }
+    - any:
+        - { city: toronto }
+        - { city: vancouver }
+weight: { base: 6 }
+cooldownYears: 6
+cast:
+  mate: { kind: partner, presence: household, optional: true }
+choices:
+  - id: bid
+    label: Offer above the asking rent
+    outcome:
+      text: >-
+        Your offer is the one the landlord picks. The place is lighter and better
+        placed, and your rent is higher for as long as you stay.
+      effects:
+        - { type: housing, action: rent_change, percent: 12 }
+        - { type: stat, key: happiness, delta: 2 }
+        - { type: stat, key: stress, delta: 2 }
+  - id: keep
+    label: Stay where you are
+    outcome:
+      text: >-
+        You close the listing and keep the lease you have. The commute is worse,
+        and you decide to stop checking the app every
+        morning.
+      effects:
+        - { type: stat, key: stress, delta: -1 }
+  - id: share
+    label: Look for a roommate to split a bigger place
+    outcome:
+      text: >-
+        The right roommate turns up on the fifth try. The rent is halved, the
+        fridge is shared, and the quiet takes some getting used to.
+      effects:
+        - { type: housing, action: roommate }
+        - { type: stat, key: stress, delta: 1 }

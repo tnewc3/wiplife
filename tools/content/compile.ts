@@ -10,6 +10,7 @@ import {
   contentBundleSchema,
   singletonTypes,
   type CollectionKey,
+  type CountryId,
   type ContentBundle,
   type SingletonPath,
 } from '../../src/content/schemas';
@@ -108,6 +109,14 @@ function collectEvents(
     defs = [parsed.data];
   }
   for (const def of defs) {
+    // W4a: the country tag becomes the requirement (and the tag, not a hand-written condition, is how an event asks for a country).
+    if (mentionsCountry(def.requires)) {
+      errors.push(`${def.id}: ask for a country with the countries tag, not a requires condition`);
+    }
+    if (def.countries) {
+      const tag = { country: [...def.countries].sort() as CountryId[] };
+      def.requires = def.requires ? { all: [def.requires, tag] } : tag;
+    }
     if (def.category !== category) errors.push(`${def.id}: category "${def.category}" must match its folder ("${category}")`);
     if (stage !== 'any' && !(def.lifeStages as string[]).includes(stage)) {
       errors.push(`${def.id}: lifeStages must include its folder's stage "${stage}"`);
@@ -117,6 +126,13 @@ function collectEvents(
     else if (errors.length === 0) bucket.set(def.id, { file, def });
   }
   return errors;
+}
+
+/** True when a condition (anywhere inside it) asks about the country. */
+function mentionsCountry(condition: unknown): boolean {
+  if (condition === null || typeof condition !== 'object') return false;
+  if (Array.isArray(condition)) return condition.some(mentionsCountry);
+  return Object.entries(condition).some(([key, value]) => key === 'country' || mentionsCountry(value));
 }
 
 /** Locale-independent ordering, so the content version is the same on every machine. */
