@@ -23,7 +23,7 @@ choices:
       stats: [{ key: smarts, weight: 0.3 }, { key: kindness, weight: 0.3 }]
       success:
         text: >-
-          Three afternoons a week for a term. His marks go up, yours do too, and
+          Three afternoons a week for a term. Their marks go up, yours do too, and
           the {$150} is the most you have ever earned from being right.
         effects:
           - { type: money, delta: 150 }
