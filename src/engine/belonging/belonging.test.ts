@@ -152,15 +152,15 @@ describe('actions', () => {
 });
 
 describe('membership', () => {
-  it('joining brings people: three to five friends in your city, tied to each other through the web', () => {
+  it('joining brings the configured number of friends in your city, tied to each other through the web', () => {
     const life = adult('join-1');
     const id = aClub(life);
     const joined = produce(life, (d) => void joinGroup(d, id, 'casual', content));
     const m = membershipOf(joined, id)!;
     expect(m).toMatchObject({ commitment: 'casual', rung: 0, since: joined.currentYear });
     const g = instanceOf(joined, id)!;
-    expect(g.people.length).toBeGreaterThanOrEqual(3);
-    expect(g.people.length).toBeLessThanOrEqual(5);
+    expect(g.people.length).toBeGreaterThanOrEqual(content.balance.belonging.groups.members.count.min);
+    expect(g.people.length).toBeLessThanOrEqual(content.balance.belonging.groups.members.count.max);
     for (const pid of g.people) {
       const p = joined.people[pid]!;
       expect(joined.relationships[pid]!.kind).toBe('friend');

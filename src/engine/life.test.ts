@@ -67,6 +67,7 @@ describe('createLife (random)', () => {
     const life = random('golden-1');
     const summary = {
       name: life.character.name,
+      languages: life.character.languages,
       city: life.character.cityId,
       identity: life.character.identity.genderIdentity,
       stats: life.character.stats,
@@ -77,13 +78,21 @@ describe('createLife (random)', () => {
         "city": "chicago",
         "family": [
           "parent Samantha 20",
-          "parent Ethan 19",
-          "grandparent Samuel 61",
-          "grandparent Lily 60",
-          "grandparent Ryan 51",
-          "grandparent Molly 49",
+          "parent Liam 19",
+          "grandparent Henry 50",
+          "grandparent Hannah 50",
+          "grandparent Patrick 43",
+          "grandparent Natalie 41",
         ],
         "identity": "man",
+        "languages": [
+          {
+            "id": "en",
+            "lastUsed": 2026,
+            "native": true,
+            "skill": 100,
+          },
+        ],
         "name": {
           "first": "Thomas",
           "last": "Sullivan",
