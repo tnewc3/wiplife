@@ -30,7 +30,7 @@ export function nativeLanguages(cityId: string, heritage: string, year: number, 
   const ids = new Set([local.official[0]!]);
   const heritageIds = b.heritage[heritage] ?? [];
   if (heritageIds.length && chance(rng, b.heritageChance)) ids.add(pick(rng, heritageIds));
-  const second = [...local.official.slice(1), ...local.common].filter((id) => content.languages[id] && !ids.has(id));
+  const second = [...local.official.slice(1), ...local.common].filter((id) => content.languages[id]?.id === id && !ids.has(id));
   const bilingual = b.bilingualChance[cityId] ?? b.bilingualChance[countryIdOfCity(cityId, content)] ?? 0;
   if (second.length && chance(rng, bilingual)) ids.add(pick(rng, second));
   return [...ids].sort().map((id) => ({ id, skill: b.nativeSkill, native: true, lastUsed: year }));
@@ -73,7 +73,7 @@ export function languageClassCost(state: LifeState, content: ContentBundle): num
   return scaledAmount(state, content.balance.languages.classes.cost, content);
 }
 export function canTakeLanguageClasses(state: LifeState, id: string, content: ContentBundle): boolean {
-  return !!content.languages[id] && !content.languages[id]!.retired && state.character.age >= content.balance.languages.classes.minAge && state.languages.classYear !== state.currentYear && languageSkill(state.character.languages, id) < 100 && state.finances.savings >= languageClassCost(state, content);
+  return content.languages[id]?.id === id && !content.languages[id]!.retired && state.character.age >= content.balance.languages.classes.minAge && state.languages.classYear !== state.currentYear && languageSkill(state.character.languages, id) < 100 && state.finances.savings >= languageClassCost(state, content);
 }
 export function takeLanguageClasses(state: LifeState, id: string, content: ContentBundle): void {
   spend(state, languageClassCost(state, content), content);
@@ -96,8 +96,18 @@ export function runLanguages(state: LifeState, content: ContentBundle): void {
   }
   const household = Object.values(state.people).filter((p) => p.alive && (state.housing.partnerId === p.id || (state.housing.kind === 'with_parents' && state.relationships[p.id]?.kind === 'parent')));
   const homeIds = new Set(household.filter((p) => p.cityId === c.cityId).flatMap((p) => p.languages.filter((l) => l.native).map((l) => l.id)));
-  const advance = (languages: LanguageSkill[], cityId: string, age: number, home: ReadonlySet<string>) => {
+  const advance = (languages: LanguageSkill[], cityId: string, age: number, home: ReadonlySet<string>, jobId?: string) => {
     let gained = 0; let faded = 0;
+    // A language actually used for work is not unused merely because the city's
+    // dominant language differs. Prefer that local language when it qualifies.
+    const job = jobId ? content.jobs[jobId] : undefined;
+    if (job) {
+      const req = languageJobRequirement(job, cityId, content);
+      const eligible = req.any.filter((id) => languageSkill(languages, id) >= b.levels[req.level]);
+      const local = localLanguages(cityId, content).official[0]!;
+      const spoken = eligible.includes(local) ? local : eligible[0];
+      if (spoken) languages.find((l) => l.id === spoken)!.lastUsed = year;
+    }
     if (age >= b.immersion.minAge) {
       const local = localLanguages(cityId, content).official[0]!;
       gained += gainLanguage(languages, local, b.immersion.gain, year);
@@ -110,7 +120,7 @@ export function runLanguages(state: LifeState, content: ContentBundle): void {
     }
     return { gained, faded };
   };
-  const mine = advance(c.languages, c.cityId, c.age, homeIds);
+  const mine = advance(c.languages, c.cityId, c.age, homeIds, state.career.job?.jobId);
   state.languages.totals.immersion += mine.gained;
   state.languages.totals.faded += mine.faded;
   for (const person of Object.values(state.people)) if (person.alive) {
@@ -122,6 +132,6 @@ export function runLanguages(state: LifeState, content: ContentBundle): void {
       if (choices.length) gainLanguage(person.languages, pick(createRng(`${state.seed}:${person.id}:language-school`), choices), b.school.gain, year);
     }
     const atHome = person.child?.custody === 'you' || homeIds.size > 0 && household.some((p) => p.id === person.id);
-    advance(person.languages, person.cityId, year - person.birthYear, atHome ? new Set(c.languages.filter((l) => l.native).map((l) => l.id)) : new Set());
+    advance(person.languages, person.cityId, year - person.birthYear, atHome ? new Set(c.languages.filter((l) => l.native).map((l) => l.id)) : new Set(), person.occupation);
   }
 }

@@ -61,13 +61,14 @@ export function chooseLanguageClass(life: LifeState, content: ContentBundle): st
   // The simulated player's taste is stable per year; this is a policy, not an engine learning rate.
   return choices.length && chance(rng, content.balance.languages.classes.interestChance) ? pick(rng, choices) : null;
 }
-export function formatLanguages(r: LanguagesReport, content: ContentBundle): string[] {
+export function formatLanguages(r: LanguagesReport, content: ContentBundle, years = 0): string[] {
   const pct = (n: number, d: number) => d ? `${(100 * n / d).toFixed(1)}%` : 'n/a';
   return [
     '\nLanguages (W4b)',
     `  Lives: ${r.lives}; non-native language retained at death: ${pct(r.learnedLives, r.lives)}`,
     ...Object.entries(r.spoken).sort().map(([id, row]) => `  ${content.languages[id]?.name ?? id}: native ${r.native[id] ?? 0}; basic ${row.basic}, conversational ${row.conversational}, fluent ${row.fluent} at death`),
     `  Skill points gained: school ${r.points.school}, paid classes ${r.points.classes}, immersion ${r.points.immersion}; unused skill points lost ${r.points.faded}`,
+    `  Mean skill points per simulated year: school ${years ? (r.points.school / years).toFixed(3) : "n/a"}, paid classes ${years ? (r.points.classes / years).toFixed(3) : "n/a"}, immersion ${years ? (r.points.immersion / years).toFixed(3) : "n/a"}, fading ${years ? (r.points.faded / years).toFixed(3) : "n/a"}`,
     `  Paid courses: ${r.classCourses} (${r.lives ? (r.classCourses / r.lives).toFixed(2) : 'n/a'} per life)`,
     `  Open job opportunities: ${r.jobs.openings}; language-eligible ${r.jobs.eligible}; blocked by language ${r.jobs.blocked} (${pct(r.jobs.blocked, r.jobs.openings)}; other requirements not assessed here)`,
     `  Employed adult years: ${pct(r.jobs.employedYears, r.jobs.adultYears)}`,

@@ -1,4 +1,6 @@
-import { content } from '../content';
+// Read data directly: migrations also run in Node tools without Vite's import.meta.env.
+import compiled from '../content/compiled/content.json' with { type: 'json' };
+import type { ContentBundle } from '../content/schemas';
 import { emptyLanguageLearning, legacyLanguages, householdLanguages } from '../engine/languages';
 import { languageSkillSchema, type LanguageSkill } from '../content/schemas/languages';
 import { CURRENT_SCHEMA_VERSION, type SaveEnvelope } from './envelope';
@@ -486,6 +488,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 function upgradeLanguageData(data: unknown): unknown {
+  const content = compiled as ContentBundle;
   if (!isRecord(data) || !isRecord(data.character) || !isRecord(data.people)) return data;
   const year = typeof data.currentYear === 'number' ? data.currentYear : 0;
   const people = Object.fromEntries(Object.entries(data.people).map(([id, p]) => [id, isRecord(p) && typeof p.cityId === 'string' ? { ...p, languages: p.languages ?? legacyLanguages(p.cityId, year, `${String(data.seed)}:${id}`, content) } : p]));

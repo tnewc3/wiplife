@@ -1670,7 +1670,7 @@ export function formatReport(report: SimulationReport, content: ContentBundle): 
   lines.push('', ...formatWeb(report.web, content), '  targets (src/content/balance/targets.yaml):', ...webTargets(report, content).map((r) => target(r.label, r.value, r.goal, r.met)));
   lines.push(...formatEulogy(report.eulogy, content), '  targets (src/content/balance/targets.yaml):', ...eulogyTargets(report, content).map((r) => target(r.label, r.value, r.goal, r.met)));
   lines.push(...formatLater(report.later, content), '  targets (src/content/balance/targets.yaml):', ...laterTargets(report, content).map((r) => target(r.label, r.value, r.goal, r.met)));
-  lines.push(...formatLanguages(report.languages, content));
+  lines.push(...formatLanguages(report.languages, content, Object.values(report.eventsPerYear).reduce((sum, row) => sum + row.years, 0)));
   lines.push(...formatCountries(report.countries, content), '  targets (src/content/balance/countries.yaml):', ...countryTargets(report.countries, content).map((r) => target(r.label, r.value, r.goal, r.met)));
   lines.push(...formatBelonging(report.belonging, content), '  targets (src/content/balance/targets.yaml):', ...belongingTargets(report, content).map((r) => target(r.label, r.value, r.goal, r.met)));
   lines.push(...formatBusiness(report.business, content), '  targets (src/content/balance/targets.yaml):', ...businessTargets(report, content).map((r) => target(r.label, r.value, r.goal, r.met)));

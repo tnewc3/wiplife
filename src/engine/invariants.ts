@@ -45,7 +45,7 @@ export function checkInvariants(state: LifeState, content: ContentBundle): strin
     if (!ls.length || !ls.some((l) => l.native)) failures.push(`${who}: no native language`);
     if (new Set(ls.map((l) => l.id)).size !== ls.length) failures.push(`${who}: duplicate language`);
     for (const l of ls) {
-      if (!content.languages[l.id] || !Number.isInteger(l.skill) || l.skill < 0 || l.skill > 100 || typeof l.native !== 'boolean' || !Number.isInteger(l.lastUsed) || l.lastUsed > state.currentYear) failures.push(`${who}: invalid language ${l.id}`);
+      if (content.languages[l.id]?.id !== l.id || !Number.isInteger(l.skill) || l.skill < 0 || l.skill > 100 || typeof l.native !== 'boolean' || !Number.isInteger(l.lastUsed) || l.lastUsed > state.currentYear) failures.push(`${who}: invalid language ${l.id}`);
     }
   }
   const fail = (message: string) => failures.push(message);

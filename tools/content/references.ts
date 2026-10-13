@@ -168,9 +168,9 @@ export function checkReferences(
 
   for (const id of bundle.registries.languages.classes.events) {
     const def = bundle.events[id];
-    if (!def || !def.followUpOnly) errors.push({ file: 'registries/languages.yaml', message: `classes: ${id} must name a followUpOnly event` });
+    if ((!def && options.partialEvents !== true) || (def && !def.followUpOnly)) errors.push({ file: 'registries/languages.yaml', message: `classes: ${id} must name a followUpOnly event` });
   }
-  const knownLanguage = (id: string) => { if (!bundle.languages[id]) errors.push({ file: 'balance/languages.yaml', message: `unknown language ${id}` }); };
+  const knownLanguage = (id: string) => { if (bundle.languages[id]?.id !== id) errors.push({ file: 'balance/languages.yaml', message: `unknown language ${id}` }); };
   for (const c of Object.values(bundle.countries)) [...c.languages.official, ...c.languages.common].forEach(knownLanguage);
   for (const c of Object.values(bundle.cities)) if (c.languages) [...c.languages.official, ...c.languages.common].forEach(knownLanguage);
   Object.values(bundle.balance.languages.heritage).flat().forEach(knownLanguage);

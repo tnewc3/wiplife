@@ -77,6 +77,16 @@ describe('learning and fading', () => {
     expect(floor.character.languages.find((l) => l.id === 'en')!.skill).toBe(content.balance.languages.fading.nativeFloor);
     expect(floor.character.languages.find((l) => l.id === 'en')!.native).toBe(true);
   });
+  it('keeps a language in use when an English-compatible Montreal job needs it', () => {
+    const life = produce(adult(), (d) => {
+      d.character.cityId = 'montreal'; d.housing.kind = 'renting';
+      d.character.languages = [speaks('en', d.currentYear - 20)];
+      d.career.job = { jobId: 'warehouse_worker', level: 1, yearsAtLevel: 1, performance: 50, salary: 30_000, since: d.currentYear - 1, employer: 'Test' };
+      runLanguages(d, content);
+    });
+    expect(languageSkill(life.character.languages, 'en')).toBe(100);
+    expect(life.character.languages.find((l) => l.id === 'en')!.lastUsed).toBe(life.currentYear);
+  });
   it('charges classes once per year, validates input, and displays the exact cost and new balance', () => {
     const life = adult(); const price = content.balance.languages.classes.cost;
     const next = performAction(life, 'take_language_classes', { languageId: 'fr' }, content);
@@ -86,7 +96,7 @@ describe('learning and fading', () => {
     expect(getEventCard(next, 0, content)!.text).toContain('French');
     const closed = finishAction(resolveChoice(next, next.pending[0]!.instanceId, 'continue', content));
     expect(isLifeActionAvailable(closed, 'take_language_classes', { languageId: 'es' }, content)).toBe(false);
-    expect(() => performAction(life, 'take_language_classes', { languageId: 'missing' }, content)).toThrow();
+    for (const id of ['missing', 'constructor', '__proto__']) expect(() => performAction(life, 'take_language_classes', { languageId: id }, content)).toThrow();
     expect(() => performAction(life, 'take_language_classes', { languageId: 'fr', cost: 0 }, content)).toThrow();
     const poor = produce(life, (d) => { d.finances.savings = price - 1; });
     expect(isLifeActionAvailable(poor, 'take_language_classes', { languageId: 'fr' }, content)).toBe(false);

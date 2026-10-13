@@ -142,7 +142,7 @@ export const LIFE_ACTIONS: Record<LifeActionId, LifeActionRule> = {
   take_language_classes: {
     parse: (params, content) => {
       const id = field(params, 'languageId');
-      return typeof id === 'string' && content.languages[id] && typeof params === 'object' && params !== null && Object.keys(params).length === 1 ? { languageId: id } : null;
+      return typeof id === 'string' && content.languages[id]?.id === id && typeof params === 'object' && params !== null && Object.keys(params).length === 1 ? { languageId: id } : null;
     },
     allowed: (state, p, content) => p.languageId !== undefined && canTakeLanguageClasses(state, p.languageId, content) && fittingResults(state, content.registries.languages.classes.events, {}, content).length > 0,
     apply: (state, p, content) => {
