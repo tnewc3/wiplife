@@ -1,0 +1,71 @@
+{
+  "id": "travel_work_room",
+  "title": "The room between shifts",
+  "text": "The room you rent in {destination} is louder than it looked when you arrived.",
+  "category": "travel",
+  "tone": "neutral",
+  "rarity": "common",
+  "lifeStages": [
+    "youngAdult",
+    "adult",
+    "senior"
+  ],
+  "followUpOnly": true,
+  "requires": {
+    "all": [
+      {
+        "age": {
+          "gte": 18
+        }
+      },
+      {
+        "travel": {
+          "active": true,
+          "kind": "work"
+        }
+      }
+    ]
+  },
+  "weight": {
+    "base": 1
+  },
+  "choices": [
+    {
+      "id": "choose",
+      "label": "Pay for soundproofing supplies",
+      "outcome": {
+        "text": "You pay for a few small fixes and sleep better.",
+        "effects": [
+          {
+            "type": "money",
+            "delta": -100
+          },
+          {
+            "type": "stat",
+            "key": "health",
+            "delta": 2
+          }
+        ]
+      }
+    },
+    {
+      "id": "leave",
+      "label": "Adjust your sleep schedule",
+      "outcome": {
+        "text": "You save the expense but reshape your evenings around the noise.",
+        "effects": [
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": 2
+          },
+          {
+            "type": "stat",
+            "key": "discipline",
+            "delta": 1
+          }
+        ]
+      }
+    }
+  ]
+}

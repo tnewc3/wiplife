@@ -7,7 +7,7 @@ import { isDraft, original } from 'immer';
 import type { ContentBundle, EventDef } from '../../content/schemas';
 import { evaluate } from '../conditions';
 import { castEvent, uncast } from '../events/casting';
-import { eventIndex, eventWeight, fitsSetting } from '../events/selection';
+import { categoryYears, eventIndex, eventWeight, fitsSetting } from '../events/selection';
 import { weightedPick } from '../random';
 import { consistencyProblems } from '../presence';
 import { isFamilyKind, kindSince, romanceAllowed } from '../relationships';
@@ -105,7 +105,8 @@ export function runPacing(state: LifeState, content: ContentBundle): void {
     (def) => !picked.some((p) => p.def.id === def.id),
   );
   // Weights read `view`, which doesn't change while picking: work them out once.
-  const weights = new Map(pool.map((def) => [def, eventWeight(view, def, content)]));
+  const lastByCategory = categoryYears(view, content);
+  const weights = new Map(pool.map((def) => [def, eventWeight(view, def, content, undefined, lastByCategory)]));
   while (picked.length < budget && pool.length > 0) {
     const options = pool.map((def) => [def, weights.get(def)!] as const);
     const total = options.reduce((sum, [, w]) => sum + w, 0);

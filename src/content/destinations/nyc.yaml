@@ -1,0 +1,7 @@
+id: nyc
+name: "New York"
+country: "United States"
+languageId: en
+cityId: nyc
+costLevel: 1.6
+kind: city

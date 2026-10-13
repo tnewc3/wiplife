@@ -1,0 +1,7 @@
+id: toronto
+name: "Toronto"
+country: "Canada"
+languageId: en
+cityId: toronto
+costLevel: 1.1
+kind: city

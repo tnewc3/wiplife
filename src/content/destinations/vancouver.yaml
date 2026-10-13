@@ -1,0 +1,7 @@
+id: vancouver
+name: "Vancouver"
+country: "Canada"
+languageId: en
+cityId: vancouver
+costLevel: 1.15
+kind: city

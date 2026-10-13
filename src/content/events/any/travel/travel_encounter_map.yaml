@@ -1,0 +1,86 @@
+{
+  "id": "travel_encounter_map",
+  "title": "The folded map",
+  "text": "During your trip to {destination}, {npc.name}, another traveler, asks what you made of a route.",
+  "category": "travel",
+  "tone": "neutral",
+  "rarity": "common",
+  "lifeStages": [
+    "youngAdult",
+    "adult",
+    "senior"
+  ],
+  "followUpOnly": true,
+  "requires": {
+    "all": [
+      {
+        "age": {
+          "gte": 18
+        }
+      },
+      {
+        "travel": {
+          "active": true,
+          "kind": "trip",
+          "encounter": true
+        }
+      }
+    ]
+  },
+  "weight": {
+    "base": 1
+  },
+  "choices": [
+    {
+      "id": "choose",
+      "label": "Trade contact details",
+      "outcome": {
+        "text": "You keep a way to reach {npc.them} after the trip.",
+        "effects": [
+          {
+            "type": "relationship",
+            "role": "npc",
+            "affection": 8,
+            "trust": 3,
+            "kind": "friend"
+          },
+          {
+            "type": "history",
+            "text": "You made a friend, {npc.name}, on a trip to {destination}.",
+            "importance": 2
+          }
+        ]
+      }
+    },
+    {
+      "id": "leave",
+      "label": "Keep it a conversation",
+      "outcome": {
+        "text": "You enjoy the exchange without promising more.",
+        "effects": [
+          {
+            "type": "relationship",
+            "role": "npc",
+            "affection": 2,
+            "trust": 0
+          },
+          {
+            "type": "stat",
+            "key": "happiness",
+            "delta": 1
+          }
+        ]
+      }
+    }
+  ],
+  "cast": {
+    "npc": {
+      "kind": "acquaintance",
+      "presence": "anywhere",
+      "age": {
+        "min": 18,
+        "max": 100
+      }
+    }
+  }
+}

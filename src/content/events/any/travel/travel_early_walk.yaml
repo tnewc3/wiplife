@@ -1,0 +1,72 @@
+{
+  "id": "travel_early_walk",
+  "title": "Before the shutters open",
+  "text": "Your first morning in {destination} starts before the streets are busy.",
+  "category": "travel",
+  "tone": "neutral",
+  "rarity": "common",
+  "lifeStages": [
+    "youngAdult",
+    "adult",
+    "senior"
+  ],
+  "followUpOnly": true,
+  "requires": {
+    "all": [
+      {
+        "age": {
+          "gte": 18
+        }
+      },
+      {
+        "travel": {
+          "active": true,
+          "kind": "trip"
+        }
+      }
+    ]
+  },
+  "weight": {
+    "base": 1
+  },
+  "choices": [
+    {
+      "id": "choose",
+      "label": "Head out early",
+      "outcome": {
+        "text": "You see deliveries and commuters instead of a postcard view.",
+        "effects": [
+          {
+            "type": "stat",
+            "key": "fitness",
+            "delta": 2
+          },
+          {
+            "type": "stat",
+            "key": "happiness",
+            "delta": 2
+          }
+        ]
+      }
+    },
+    {
+      "id": "leave",
+      "label": "Go back to sleep",
+      "outcome": {
+        "text": "You miss the quiet streets and wake rested.",
+        "effects": [
+          {
+            "type": "stat",
+            "key": "health",
+            "delta": 2
+          },
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": -2
+          }
+        ]
+      }
+    }
+  ]
+}

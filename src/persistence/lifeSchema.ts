@@ -998,6 +998,14 @@ const historyEntry = historyEntrySchema;
 
 export { pronouns as pronounsSchema, stats as statsSchema };
 
+
+const travelState = z.strictObject({
+  residence: z.strictObject({ country: filled, destinationId: id, type: z.enum(['visitor', 'student', 'temporary_worker']), startYear: int, endYear: int, homeCityId: id, homeHousing: housing, route: z.enum(['vacation', 'semester', 'year', 'working_holiday', 'transfer']) }).nullable(),
+  active: z.strictObject({ kind: z.enum(['trip', 'study', 'work']), destinationId: id, companions: z.array(id), encounterId: id.nullable(), romanceId: id.nullable() }).nullable(),
+  tripYear: int.nullable(),
+  totals: z.strictObject({ trips: int.nonnegative(), spent: dollars, encounters: int.nonnegative(), romances: int.nonnegative(), study: int.nonnegative(), work: int.nonnegative(), returns: int.nonnegative(), immersion: int.nonnegative(), distanceLost: int.nonnegative(), happiness: int, stress: int, destinations: z.record(id, int.nonnegative()) }),
+});
+
 export const lifeStateSchema: z.ZodType<LifeState> = z.strictObject({
   id,
   seed: z.string().min(1),
@@ -1006,6 +1014,7 @@ export const lifeStateSchema: z.ZodType<LifeState> = z.strictObject({
   currentYear: int,
   phase: z.enum(['yearStart', 'events', 'yearEnd', 'dead', 'action']),
   character,
+  travel: travelState,
   languages: z.strictObject({ schoolId: id.nullable(), classId: id.nullable(), classYear: int.nullable(), totals: z.strictObject({ school: int.nonnegative(), classes: int.nonnegative(), immersion: int.nonnegative(), faded: int.nonnegative() }) }),
   people: z.record(z.string(), person),
   relationships: z.record(z.string(), relationship),

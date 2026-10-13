@@ -8,6 +8,7 @@ export function MoreTab() {
   const navigate = useAppStore((s) => s.navigate);
   const openSettings = useAppStore((s) => s.openSettings);
   const openLifeHistory = useAppStore((s) => s.openLifeHistory);
+  const openTravel = useAppStore((s) => s.openTravel);
   const openHome = useAppStore((s) => s.openHome);
   const openHealth = useAppStore((s) => s.openHealth);
   const openFamily = useAppStore((s) => s.openFamily);
@@ -27,6 +28,7 @@ export function MoreTab() {
   const adult = useAppStore((s) => s.life !== null && canPlanEstate(s.life, content));
   return (
     <div className="flex flex-col gap-2">
+      <Button variant="secondary" block onClick={openTravel}>Plan a trip</Button>
       <Button variant="secondary" block onClick={openHome}>
         Home
       </Button>

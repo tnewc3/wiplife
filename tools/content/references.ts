@@ -1,3 +1,4 @@
+import { checkTravel } from './travel';
 import {
   RELATIONSHIP_KINDS,
   CAREER_HISTORY_VALUES,
@@ -124,6 +125,7 @@ export function checkReferences(
 
   // W4a: cities, name pools, money and every country-specific rule are checked in tools/content/countries.ts.
   errors.push(...checkCountries(bundle, fileOf));
+  errors.push(...checkTravel(bundle, fileOf, options.partialEvents === true));
   errors.push(...checkCountryTags(bundle, fileOf, options.partialEvents === true));
 
   const creation = bundle.balance.creation;
@@ -492,6 +494,9 @@ function implies(required: Condition, part: Condition): boolean {
     // W2: every field the contract names must be asked for the same way.
     return Object.entries(part.group).every(([key, value]) => JSON.stringify((required.group as Record<string, unknown>)[key]) === JSON.stringify(value));
   }
+  if ('travel' in part && 'travel' in required) {
+    return Object.entries(part.travel).every(([key, value]) => JSON.stringify((required.travel as Record<string, unknown>)[key]) === JSON.stringify(value));
+  }
   if ('legal' in part && 'legal' in required) {
     return (part.legal.incarcerated === undefined || part.legal.incarcerated === required.legal.incarcerated) &&
       (part.legal.probation === undefined || part.legal.probation === required.legal.probation);
@@ -517,6 +522,7 @@ function checkEvents(bundle: ContentBundle, fileOf: (typeKey: CollectionKey, id:
   const workEvents = new Set(Object.values(bundle.registries.work.results).flatMap((r) => r.events));
   const doctorEvents = new Set(Object.values(bundle.registries.health.doctor).flatMap((r) => r.events));
   const systemEvents = new Set([
+    ...Object.values(bundle.registries.travel).flat(),
     ...bundle.registries.languages.classes.events,
     ...doctorEvents,
     // M1: what a therapist's visit answers with.

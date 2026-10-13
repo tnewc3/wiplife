@@ -1,0 +1,13 @@
+minAge: 18
+maxCompanions: 3
+budgets:
+  budget: { cost: 800, effects: { happiness: 4, stress: -3 } }
+  comfortable: { cost: 2000, effects: { happiness: 7, stress: -5 } }
+  splurge: { cost: 5000, effects: { happiness: 9, stress: -7 } }
+companionCostShare: 0.5
+companionAffection: 3
+tripImmersion: 3
+distanceAffection: 3
+exchange: { cost: 1800, semesterGain: 6, yearGain: 12 }
+work: { cost: 1600, holidayMaxAge: 35, years: 2 }
+simulation: { tripChance: 0.08, companionChance: 0.35, studyChance: 0.2, workChance: 0.025 }

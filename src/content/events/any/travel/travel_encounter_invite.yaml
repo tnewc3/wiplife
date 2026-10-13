@@ -1,0 +1,85 @@
+{
+  "id": "travel_encounter_invite",
+  "title": "The extra chair",
+  "text": "Fellow traveler {npc.name} invites you to a small outing in {destination}.",
+  "category": "travel",
+  "tone": "neutral",
+  "rarity": "common",
+  "lifeStages": [
+    "youngAdult",
+    "adult",
+    "senior"
+  ],
+  "followUpOnly": true,
+  "requires": {
+    "all": [
+      {
+        "age": {
+          "gte": 18
+        }
+      },
+      {
+        "travel": {
+          "active": true,
+          "kind": "trip",
+          "encounter": true
+        }
+      }
+    ]
+  },
+  "weight": {
+    "base": 1
+  },
+  "choices": [
+    {
+      "id": "choose",
+      "label": "Join the outing",
+      "outcome": {
+        "text": "You pay your share of the outing and keep in touch afterward.",
+        "effects": [
+          {
+            "type": "money",
+            "delta": -70
+          },
+          {
+            "type": "relationship",
+            "role": "npc",
+            "affection": 8,
+            "trust": 2,
+            "kind": "friend"
+          }
+        ]
+      }
+    },
+    {
+      "id": "leave",
+      "label": "Keep your own plans",
+      "outcome": {
+        "text": "You wish {npc.them} a good afternoon and go your own way.",
+        "effects": [
+          {
+            "type": "stat",
+            "key": "confidence",
+            "delta": 2
+          },
+          {
+            "type": "relationship",
+            "role": "npc",
+            "affection": -1,
+            "trust": 0
+          }
+        ]
+      }
+    }
+  ],
+  "cast": {
+    "npc": {
+      "kind": "acquaintance",
+      "presence": "anywhere",
+      "age": {
+        "min": 18,
+        "max": 100
+      }
+    }
+  }
+}

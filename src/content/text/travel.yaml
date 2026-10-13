@@ -1,0 +1,6 @@
+departed:
+  - 'You left for a temporary stay in {destination}. Your return is planned for {endYear}.'
+returned:
+  - 'Your temporary stay in {destination} ended. You returned to {homeCity}.'
+vacation:
+  - 'You took a trip to {destination}.'

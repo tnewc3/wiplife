@@ -1,0 +1,7 @@
+id: los_angeles
+name: "Los Angeles"
+country: "United States"
+languageId: en
+cityId: los_angeles
+costLevel: 1.4
+kind: city

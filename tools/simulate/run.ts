@@ -1,3 +1,4 @@
+import { emptyTravelReport, TravelWatcher, chooseTravelAction, formatTravel, type TravelReport } from './travel';
 import { emptyLanguagesReport, formatLanguages, LanguagesWatcher, chooseLanguageClass, type LanguagesReport } from './languages';
 /**
  * Simulation runner: plays many random lives with random choices (and a
@@ -158,6 +159,7 @@ export interface SimulationReport {
   later: LaterReport;
   /** W4a: each country's lives, measured against its own targets. */
   countries: CountriesReport;
+  travel: TravelReport;
   languages: LanguagesReport;
   /** W2: belonging, measured: groups by type, roles, the people there, what they cost, faith and its changes, and what long membership does to values and reputation. */
   belonging: BelongingReport;
@@ -817,6 +819,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
   const later = emptyLaterReport(content);
   const belonging = emptyBelongingReport(content);
   const countries = emptyCountriesReport();
+  const travel = emptyTravelReport();
   const languages = emptyLanguagesReport();
   const business = emptyBusinessReport(content);
   const mental = emptyMentalReport(content);
@@ -881,6 +884,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
     const belongingProfile = rollBelongingProfile(belongingRng);
     const belongingWatcher = new BelongingWatcher(belonging, content);
     const countriesWatcher = new CountriesWatcher(countries, content);
+    const travelWatcher = new TravelWatcher(travel);
     const languagesWatcher = new LanguagesWatcher(languages, content);
     // W3: how this life behaves about businesses.
     const businessRng = createRng(`${seed}:business`);
@@ -923,6 +927,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
     const firesThisLife = new Map<string, number>();
     let firstBenefit: number | null = null;
     let seniorShort = false;
+    const seenActionInstances = new Set<string>();
     const watch = (l: LifeState) => {
       check(l);
       familyWatcher.observe(l, content);
@@ -932,8 +937,9 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
       work.observe(l, content);
       nine.observe(l);
       // A management action's result event, just queued.
-      const queued = l.phase === 'action' && l.pending.length === 1 ? l.pending[0]! : null;
-      if (queued && queued.resolvedChoiceId === undefined) {
+      for (const queued of l.phase === 'action' ? l.pending : []) {
+        if (queued.resolvedChoiceId !== undefined || seenActionInstances.has(queued.instanceId)) continue;
+        seenActionInstances.add(queued.instanceId);
         fired.set(queued.eventId, (fired.get(queued.eventId) ?? 0) + 1);
         seenThisLife.add(queued.eventId);
         firesThisLife.set(queued.eventId, (firesThisLife.get(queued.eventId) ?? 0) + 1);
@@ -989,6 +995,8 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
         life = takeLifeAction(life, actionId, params);
         money.actionsTaken[actionId]++;
       }
+      const travelAction = chooseTravelAction(life, content);
+      if (travelAction) { life = takeLifeAction(life, travelAction[0], travelAction[1]); money.actionsTaken[travelAction[0]]++; }
       const languageClass = chooseLanguageClass(life, content);
       if (languageClass !== null) { life = takeLifeAction(life, 'take_language_classes', { languageId: languageClass }); money.actionsTaken.take_language_classes++; }
       // ...and on work...
@@ -1138,6 +1146,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
       laterWatcher.observe(yearBefore, life);
       belongingWatcher.observe(yearBefore, life);
       countriesWatcher.observe(life);
+      travelWatcher.observe(yearBefore, life);
       languagesWatcher.observe(yearBefore, life);
       businessWatcher.observe(yearBefore, life);
       webWatcher.observe(yearBefore, life);
@@ -1189,6 +1198,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
     laterWatcher.finish(life);
     belongingWatcher.finish(life);
     countriesWatcher.finish(life);
+    travelWatcher.finish(life);
     languagesWatcher.finish(life);
     businessWatcher.finish(life);
     mentalWatcher.finish(life);
@@ -1528,6 +1538,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
     later,
     belonging,
     countries,
+    travel,
     languages,
     business,
     mental,
@@ -1670,6 +1681,7 @@ export function formatReport(report: SimulationReport, content: ContentBundle): 
   lines.push('', ...formatWeb(report.web, content), '  targets (src/content/balance/targets.yaml):', ...webTargets(report, content).map((r) => target(r.label, r.value, r.goal, r.met)));
   lines.push(...formatEulogy(report.eulogy, content), '  targets (src/content/balance/targets.yaml):', ...eulogyTargets(report, content).map((r) => target(r.label, r.value, r.goal, r.met)));
   lines.push(...formatLater(report.later, content), '  targets (src/content/balance/targets.yaml):', ...laterTargets(report, content).map((r) => target(r.label, r.value, r.goal, r.met)));
+  lines.push(...formatTravel(report.travel, content));
   lines.push(...formatLanguages(report.languages, content, Object.values(report.eventsPerYear).reduce((sum, row) => sum + row.years, 0)));
   lines.push(...formatCountries(report.countries, content), '  targets (src/content/balance/countries.yaml):', ...countryTargets(report.countries, content).map((r) => target(r.label, r.value, r.goal, r.met)));
   lines.push(...formatBelonging(report.belonging, content), '  targets (src/content/balance/targets.yaml):', ...belongingTargets(report, content).map((r) => target(r.label, r.value, r.goal, r.met)));

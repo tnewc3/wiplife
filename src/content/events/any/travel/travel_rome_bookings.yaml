@@ -1,0 +1,67 @@
+{
+  "id": "travel_rome_bookings",
+  "title": "The booked-out afternoon",
+  "text": "In Rome, the exhibition you hoped to see has no spaces left.",
+  "category": "travel",
+  "tone": "neutral",
+  "rarity": "common",
+  "lifeStages": [
+    "youngAdult",
+    "adult",
+    "senior"
+  ],
+  "followUpOnly": true,
+  "requires": {
+    "all": [
+      {
+        "age": {
+          "gte": 18
+        }
+      },
+      {
+        "travel": {
+          "active": true,
+          "kind": "trip",
+          "destinationId": "rome"
+        }
+      }
+    ]
+  },
+  "weight": {
+    "base": 1
+  },
+  "choices": [
+    {
+      "id": "choose",
+      "label": "Book a different exhibition",
+      "outcome": {
+        "text": "The substitute costs more and becomes your afternoon.",
+        "effects": [
+          {
+            "type": "money",
+            "delta": -55
+          },
+          {
+            "type": "stat",
+            "key": "smarts",
+            "delta": 2
+          }
+        ]
+      }
+    },
+    {
+      "id": "leave",
+      "label": "Leave the afternoon open",
+      "outcome": {
+        "text": "You find a shady bench and stop consulting the schedule.",
+        "effects": [
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": -3
+          }
+        ]
+      }
+    }
+  ]
+}

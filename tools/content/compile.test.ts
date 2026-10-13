@@ -45,6 +45,10 @@ afterEach(async () => {
 async function write(file: string, text: string): Promise<void> {
   await mkdir(path.dirname(path.join(dir, file)), { recursive: true });
   await writeFile(path.join(dir, file), text);
+  // W5: a new playable city also needs a travel destination.
+  if (file === 'cities/test_city.yaml') {
+    await write('destinations/test_city.yaml', 'id: test_city\nname: Test City\ncountry: United States\nlanguageId: en\ncityId: test_city\ncostLevel: 1\nkind: city\n');
+  }
 }
 
 async function compile(): Promise<CompileResult> {

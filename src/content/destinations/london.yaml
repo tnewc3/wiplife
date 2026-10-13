@@ -1,0 +1,7 @@
+id: london
+name: "London"
+country: "United Kingdom"
+languageId: en
+cityId: london
+costLevel: 1.35
+kind: city

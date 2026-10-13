@@ -1,0 +1,71 @@
+{
+  "id": "travel_wrong_train",
+  "title": "The other platform",
+  "text": "The train doors close. The next station is not the one on your itinerary.",
+  "category": "travel",
+  "tone": "light",
+  "rarity": "common",
+  "lifeStages": [
+    "youngAdult",
+    "adult",
+    "senior"
+  ],
+  "followUpOnly": true,
+  "requires": {
+    "all": [
+      {
+        "age": {
+          "gte": 18
+        }
+      },
+      {
+        "travel": {
+          "active": true,
+          "kind": "trip"
+        }
+      }
+    ]
+  },
+  "weight": {
+    "base": 1
+  },
+  "choices": [
+    {
+      "id": "choose",
+      "label": "Turn back immediately",
+      "outcome": {
+        "text": "You buy another ticket and recover most of the day.",
+        "effects": [
+          {
+            "type": "money",
+            "delta": -40
+          },
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": 2
+          }
+        ]
+      }
+    },
+    {
+      "id": "leave",
+      "label": "Give the detour an hour",
+      "outcome": {
+        "text": "You arrive late at your intended stop, with an unexpected walk in between.",
+        "effects": [
+          {
+            "type": "stat",
+            "key": "happiness",
+            "delta": 3
+          },
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": 1
+          }
+        ]
+      }
+    }
+  ]
+}

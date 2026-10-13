@@ -1,0 +1,72 @@
+{
+  "id": "travel_barcelona_water",
+  "title": "Between two plans",
+  "text": "In Barcelona, you have time for either the waterfront or the museum.",
+  "category": "travel",
+  "tone": "neutral",
+  "rarity": "common",
+  "lifeStages": [
+    "youngAdult",
+    "adult",
+    "senior"
+  ],
+  "followUpOnly": true,
+  "requires": {
+    "all": [
+      {
+        "age": {
+          "gte": 18
+        }
+      },
+      {
+        "travel": {
+          "active": true,
+          "kind": "trip",
+          "destinationId": "barcelona"
+        }
+      }
+    ]
+  },
+  "weight": {
+    "base": 1
+  },
+  "choices": [
+    {
+      "id": "choose",
+      "label": "Choose the museum",
+      "outcome": {
+        "text": "You pay admission and stay until the staff start closing rooms.",
+        "effects": [
+          {
+            "type": "money",
+            "delta": -30
+          },
+          {
+            "type": "stat",
+            "key": "smarts",
+            "delta": 2
+          }
+        ]
+      }
+    },
+    {
+      "id": "leave",
+      "label": "Walk by the water",
+      "outcome": {
+        "text": "The wind makes a mess of your map.",
+        "effects": [
+          {
+            "type": "stat",
+            "key": "fitness",
+            "delta": 2
+          },
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": -2
+          }
+        ]
+      }
+    }
+  ]
+}

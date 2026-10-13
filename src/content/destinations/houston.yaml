@@ -1,0 +1,7 @@
+id: houston
+name: "Houston"
+country: "United States"
+languageId: en
+cityId: houston
+costLevel: 0.95
+kind: city

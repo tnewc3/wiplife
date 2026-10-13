@@ -1,0 +1,77 @@
+{
+  "id": "travel_study_project",
+  "title": "A group beyond the syllabus",
+  "text": "Your exchange course in {destination} offers a community project outside class.",
+  "category": "travel",
+  "tone": "neutral",
+  "rarity": "common",
+  "lifeStages": [
+    "youngAdult",
+    "adult",
+    "senior"
+  ],
+  "followUpOnly": true,
+  "requires": {
+    "all": [
+      {
+        "age": {
+          "gte": 18
+        }
+      },
+      {
+        "travel": {
+          "active": true,
+          "kind": "study"
+        }
+      }
+    ]
+  },
+  "weight": {
+    "base": 1
+  },
+  "choices": [
+    {
+      "id": "choose",
+      "label": "Make time for the project",
+      "outcome": {
+        "text": "The extra work gives you new questions and longer days.",
+        "effects": [
+          {
+            "type": "stat",
+            "key": "smarts",
+            "delta": 3
+          },
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": 3
+          },
+          {
+            "type": "history",
+            "text": "You joined a community project during your exchange in {destination}.",
+            "importance": 2
+          }
+        ]
+      }
+    },
+    {
+      "id": "leave",
+      "label": "Keep the time for your own study",
+      "outcome": {
+        "text": "You protect your study time and let the opportunity go.",
+        "effects": [
+          {
+            "type": "stat",
+            "key": "smarts",
+            "delta": 1
+          },
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": -2
+          }
+        ]
+      }
+    }
+  ]
+}

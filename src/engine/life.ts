@@ -1,3 +1,4 @@
+import { emptyTravel } from './travel/types';
 import { emptyLanguageLearning, householdLanguages } from './languages';
 /**
  * Life lifecycle (docs/technical.md, section M): createLife, then each year
@@ -162,6 +163,7 @@ export function createLife(input: CreateLifeOptions, content: ContentBundle): Li
     currentYear: birthYear,
     phase: 'yearStart',
     character,
+    travel: emptyTravel(),
     languages: emptyLanguageLearning(),
     people: Object.fromEntries(family.people.map((p) => [p.id, p])),
     relationships: Object.fromEntries(family.relationships.map((r) => [r.personId, r])),

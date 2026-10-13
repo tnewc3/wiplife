@@ -1,0 +1,86 @@
+{
+  "id": "travel_arrest",
+  "title": "The night at the station",
+  "text": "After a confrontation in {destination}, officers detain you. You are released with a citation before returning home.",
+  "category": "travel",
+  "tone": "dark",
+  "rarity": "common",
+  "lifeStages": [
+    "youngAdult",
+    "adult",
+    "senior"
+  ],
+  "followUpOnly": true,
+  "requires": {
+    "all": [
+      {
+        "age": {
+          "gte": 18
+        }
+      },
+      {
+        "travel": {
+          "active": true,
+          "kind": "trip"
+        }
+      }
+    ]
+  },
+  "weight": {
+    "base": 1
+  },
+  "choices": [
+    {
+      "id": "choose",
+      "label": "Pay the fine and own your part",
+      "outcome": {
+        "text": "You settle the citation. You do not get to erase the night.",
+        "effects": [
+          {
+            "type": "legal",
+            "offenseId": "disorderly_conduct",
+            "outcome": "fine"
+          },
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": 5
+          },
+          {
+            "type": "history",
+            "text": "You were detained abroad after a confrontation in {destination}.",
+            "importance": 2
+          }
+        ]
+      }
+    },
+    {
+      "id": "leave",
+      "label": "Contest the fine",
+      "outcome": {
+        "text": "You pay for representation. The citation and its fine remain.",
+        "effects": [
+          {
+            "type": "money",
+            "delta": -300
+          },
+          {
+            "type": "legal",
+            "offenseId": "disorderly_conduct",
+            "outcome": "fine"
+          },
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": 3
+          },
+          {
+            "type": "history",
+            "text": "You contested a fine after being detained abroad in {destination}.",
+            "importance": 2
+          }
+        ]
+      }
+    }
+  ]
+}

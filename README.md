@@ -33,3 +33,5 @@ Development and test builds have an event sandbox at `/?sandbox`: it previews an
 App icons in `public/` are generated from `public/favicon.svg` with `npx pwa-assets-generator`.
 
 Language skills (W4b) appear on Profile, where adults can take one paid course per year. School classes, living locally and household use also build skills; unused languages fade slowly. `balance/languages.yaml` controls the rates, social effects and local job requirements. The simulation's Languages section reports native and learned skills, learning/fading, language-blocked job opportunities and friendship observations.
+
+W5 adds More → Plan a trip and Work/School → study or temporary work abroad. Its simulation section reports travel, destinations, encounters, temporary stays, return rates, immersion and distance effects. Countries outside the four full country models are vacation-only destinations.

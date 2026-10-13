@@ -1,0 +1,76 @@
+{
+  "id": "travel_quiet_day",
+  "title": "A blank square",
+  "text": "You have left one day in {destination} entirely unplanned.",
+  "category": "travel",
+  "tone": "neutral",
+  "rarity": "common",
+  "lifeStages": [
+    "youngAdult",
+    "adult",
+    "senior"
+  ],
+  "followUpOnly": true,
+  "requires": {
+    "all": [
+      {
+        "age": {
+          "gte": 18
+        }
+      },
+      {
+        "travel": {
+          "active": true,
+          "kind": "trip"
+        }
+      }
+    ]
+  },
+  "weight": {
+    "base": 1
+  },
+  "choices": [
+    {
+      "id": "choose",
+      "label": "Keep it empty",
+      "outcome": {
+        "text": "You sit long enough to stop checking the time.",
+        "effects": [
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": -4
+          },
+          {
+            "type": "stat",
+            "key": "happiness",
+            "delta": 2
+          }
+        ]
+      }
+    },
+    {
+      "id": "leave",
+      "label": "Fill it with a guided visit",
+      "outcome": {
+        "text": "You pay for a tour and go back with pages of notes.",
+        "effects": [
+          {
+            "type": "money",
+            "delta": -90
+          },
+          {
+            "type": "stat",
+            "key": "smarts",
+            "delta": 2
+          },
+          {
+            "type": "stat",
+            "key": "happiness",
+            "delta": 3
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,76 @@
+{
+  "id": "travel_work_boundary",
+  "title": "The extra shift",
+  "text": "During your temporary stint in {destination}, you are offered an extra shift on your only free day.",
+  "category": "travel",
+  "tone": "neutral",
+  "rarity": "common",
+  "lifeStages": [
+    "youngAdult",
+    "adult",
+    "senior"
+  ],
+  "followUpOnly": true,
+  "requires": {
+    "all": [
+      {
+        "age": {
+          "gte": 18
+        }
+      },
+      {
+        "travel": {
+          "active": true,
+          "kind": "work"
+        }
+      }
+    ]
+  },
+  "weight": {
+    "base": 1
+  },
+  "choices": [
+    {
+      "id": "choose",
+      "label": "Take the paid shift",
+      "outcome": {
+        "text": "The extra pay comes with a lost day of rest.",
+        "effects": [
+          {
+            "type": "money",
+            "delta": 120
+          },
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": 4
+          },
+          {
+            "type": "stat",
+            "key": "health",
+            "delta": -1
+          }
+        ]
+      }
+    },
+    {
+      "id": "leave",
+      "label": "Keep the day free",
+      "outcome": {
+        "text": "You make room to see the city beyond the commute.",
+        "effects": [
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": -3
+          },
+          {
+            "type": "stat",
+            "key": "happiness",
+            "delta": 2
+          }
+        ]
+      }
+    }
+  ]
+}

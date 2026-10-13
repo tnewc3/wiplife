@@ -1,0 +1,7 @@
+id: chicago
+name: "Chicago"
+country: "United States"
+languageId: en
+cityId: chicago
+costLevel: 1.1
+kind: city

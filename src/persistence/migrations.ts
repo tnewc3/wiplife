@@ -1,3 +1,4 @@
+import { emptyTravel } from '../engine/travel/types';
 // Read data directly: migrations also run in Node tools without Vite's import.meta.env.
 import compiled from '../content/compiled/content.json' with { type: 'json' };
 import type { ContentBundle } from '../content/schemas';
@@ -481,7 +482,21 @@ export const migrations: readonly Migration[] = [
     description: 'W4b: languages from saved birth city and family; no guessed ancestry. Existing skills are preserved.',
     migrate: upgradeLanguageData,
   },
+  {
+    from: 25,
+    description: 'W5: empty travel and residence; preserve existing life and replay snapshots.',
+    migrate: upgradeTravelData,
+  },
 ];
+
+function upgradeTravelData(data: unknown): unknown {
+  if (!isRecord(data)) return data;
+  const inputLog = Array.isArray(data.inputLog) ? data.inputLog.map((entry: unknown) => {
+    if (!isRecord(entry) || !isRecord(entry.payload) || !isRecord(entry.payload.snapshot)) return entry;
+    return { ...entry, payload: { ...entry.payload, snapshot: upgradeTravelData(entry.payload.snapshot) } };
+  }) : data.inputLog;
+  return { ...data, inputLog, travel: data.travel ?? emptyTravel() };
+}
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);

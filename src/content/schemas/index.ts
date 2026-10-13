@@ -1,3 +1,4 @@
+import { destinationSchema, travelBalanceSchema, travelRegistrySchema, travelTextSchema } from './travel';
 import { languageSchema, languagesBalanceSchema, languagesRegistrySchema } from './languages';
 import { z } from 'zod';
 import {
@@ -41,6 +42,7 @@ export * from './character';
 export * from './city';
 export * from './country';
 export * from './languages';
+export * from './travel';
 export * from './common';
 export * from './economy';
 export * from './education';
@@ -81,6 +83,7 @@ export const collectionTypes = {
   crews: { folder: 'crews', schema: crewSchema },
   cities: { folder: 'cities', schema: citySchema },
   countries: { folder: 'countries', schema: countrySchema },
+  destinations: { folder: 'destinations', schema: destinationSchema },
   languages: { folder: 'languages', schema: languageSchema },
   conditions: { folder: 'conditions', schema: conditionDefSchema },
   /** Nested by life stage and category, and chain files hold several events (see compile.ts). */
@@ -116,6 +119,7 @@ export type CollectionKey = keyof typeof collectionTypes;
 export const singletonTypes = {
   'balance/creation': creationBalanceSchema,
   'balance/countries': countriesBalanceSchema,
+  'balance/travel': travelBalanceSchema,
   'balance/languages': languagesBalanceSchema,
   'balance/aging': agingBalanceSchema,
   'balance/mortality': mortalityBalanceSchema,
@@ -150,6 +154,7 @@ export const singletonTypes = {
   'text/obituary': obituaryTextSchema,
   'text/legal': legalTextSchema,
   'text/discovery': discoveryTextSchema,
+  'text/travel': travelTextSchema,
   'text/time': timeTextSchema,
   'text/heir': heirTextSchema,
   'text/eulogy': eulogyTextSchema,
@@ -169,6 +174,7 @@ export const singletonTypes = {
   'registries/actions': actionRegistrySchema,
   'registries/triggers': triggerRegistrySchema,
   'registries/work': workRegistrySchema,
+  'registries/travel': travelRegistrySchema,
   'registries/languages': languagesRegistrySchema,
   'registries/health': healthRegistrySchema,
   'registries/legal': legalRegistrySchema,
@@ -205,6 +211,7 @@ export const contentBundleSchema = z.strictObject({
   cities: z.record(z.string(), citySchema),
   countries: z.record(z.string(), countrySchema),
   languages: z.record(z.string(), languageSchema),
+  destinations: z.record(z.string(), destinationSchema),
   conditions: z.record(z.string(), conditionDefSchema),
   businesses: z.record(z.string(), businessSchema),
   chains: z.record(z.string(), chainSchema),
@@ -229,6 +236,7 @@ export const contentBundleSchema = z.strictObject({
   balance: z.strictObject({
     creation: creationBalanceSchema,
     countries: countriesBalanceSchema,
+    travel: travelBalanceSchema,
     languages: languagesBalanceSchema,
     aging: agingBalanceSchema,
     mortality: mortalityBalanceSchema,
@@ -264,6 +272,7 @@ export const contentBundleSchema = z.strictObject({
     obituary: obituaryTextSchema,
     legal: legalTextSchema,
     discovery: discoveryTextSchema,
+    travel: travelTextSchema,
     time: timeTextSchema,
     heir: heirTextSchema,
     eulogy: eulogyTextSchema,
@@ -285,6 +294,7 @@ export const contentBundleSchema = z.strictObject({
     actions: actionRegistrySchema,
     triggers: triggerRegistrySchema,
     work: workRegistrySchema,
+    travel: travelRegistrySchema,
     languages: languagesRegistrySchema,
     health: healthRegistrySchema,
     legal: legalRegistrySchema,

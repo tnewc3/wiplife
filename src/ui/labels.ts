@@ -1513,3 +1513,15 @@ export const businessStakeLine = (share: number, role: 'you' | 'investor' | 'cof
 export const LANGUAGE_LEVEL_LABELS: Record<string, string> = { beginner: 'Beginner', basic: 'Basic', conversational: 'Conversational', fluent: 'Fluent' };
 
 export const LANGUAGE_NATIVE_LABEL = 'Native';
+
+/** W5: fixed interface words for travel choices. */
+export const TRIP_BUDGET_LABELS = { budget: 'Budget', comfortable: 'Comfortable', splurge: 'Splurge' } as const;
+export const STAY_ROUTE_LABELS = { semester: 'Semester', year: 'Academic year', working_holiday: 'Working holiday', transfer: 'Employer transfer' } as const;
+export const STAY_BLOCK_LABELS: Record<string, string> = {
+  unavailable: 'Travel is unavailable now. Check your age, legal restrictions and whether you already traveled this year.',
+  destination: 'Choose a city in another country.', household: 'Temporary stays need a rental or family home and no dependent children or relatives in your care at home.',
+  commitment: 'Your business, crew or public career needs you here.', college: 'An exchange needs current college enrollment and no full-time job.',
+  money: 'You need enough saved for the up-front cost.', school: 'Finish or leave your current program before working abroad.',
+  holiday: 'This working-holiday route is unavailable for your age or current employment.',
+  job: 'An employer transfer needs a current job and its language requirements met at the destination.', route: 'Choose an available route.',
+};

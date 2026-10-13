@@ -1,0 +1,72 @@
+{
+  "id": "travel_study_library",
+  "title": "The unfamiliar library",
+  "text": "The library at your partner school in {destination} has a different catalog and no familiar corners.",
+  "category": "travel",
+  "tone": "neutral",
+  "rarity": "common",
+  "lifeStages": [
+    "youngAdult",
+    "adult",
+    "senior"
+  ],
+  "followUpOnly": true,
+  "requires": {
+    "all": [
+      {
+        "age": {
+          "gte": 18
+        }
+      },
+      {
+        "travel": {
+          "active": true,
+          "kind": "study"
+        }
+      }
+    ]
+  },
+  "weight": {
+    "base": 1
+  },
+  "choices": [
+    {
+      "id": "choose",
+      "label": "Learn the catalog with a librarian",
+      "outcome": {
+        "text": "Your next search takes minutes instead of an afternoon.",
+        "effects": [
+          {
+            "type": "stat",
+            "key": "smarts",
+            "delta": 3
+          },
+          {
+            "type": "stat",
+            "key": "confidence",
+            "delta": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "leave",
+      "label": "Study in your room",
+      "outcome": {
+        "text": "You find a quiet routine, with fewer people in it.",
+        "effects": [
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": -2
+          },
+          {
+            "type": "stat",
+            "key": "happiness",
+            "delta": -1
+          }
+        ]
+      }
+    }
+  ]
+}

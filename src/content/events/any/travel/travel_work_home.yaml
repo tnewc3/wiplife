@@ -1,0 +1,72 @@
+{
+  "id": "travel_work_home",
+  "title": "The time difference",
+  "text": "Your shift in {destination} ends when the people at home are going to sleep.",
+  "category": "travel",
+  "tone": "neutral",
+  "rarity": "common",
+  "lifeStages": [
+    "youngAdult",
+    "adult",
+    "senior"
+  ],
+  "followUpOnly": true,
+  "requires": {
+    "all": [
+      {
+        "age": {
+          "gte": 18
+        }
+      },
+      {
+        "travel": {
+          "active": true,
+          "kind": "work"
+        }
+      }
+    ]
+  },
+  "weight": {
+    "base": 1
+  },
+  "choices": [
+    {
+      "id": "choose",
+      "label": "Arrange a regular call",
+      "outcome": {
+        "text": "Planning it gives the week an anchor and takes up some of your free time.",
+        "effects": [
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": -2
+          },
+          {
+            "type": "stat",
+            "key": "happiness",
+            "delta": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "leave",
+      "label": "Send messages when you can",
+      "outcome": {
+        "text": "The messages are warm; the replies are rarely immediate.",
+        "effects": [
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": 1
+          },
+          {
+            "type": "stat",
+            "key": "confidence",
+            "delta": 1
+          }
+        ]
+      }
+    }
+  ]
+}

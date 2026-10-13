@@ -1,0 +1,27 @@
+{
+  "id": "travel_study_booking",
+  "title": "An exchange place",
+  "text": "Your arrangements for {destination} are settled.",
+  "category": "travel",
+  "tone": "neutral",
+  "rarity": "common",
+  "lifeStages": [
+    "youngAdult",
+    "adult",
+    "senior"
+  ],
+  "followUpOnly": true,
+  "requires": {
+    "travel": {
+      "active": true,
+      "kind": "study"
+    }
+  },
+  "weight": {
+    "base": 1
+  },
+  "autoOutcome": {
+    "text": "Your stay ends in {endYear}. You have a place to return to.",
+    "effects": []
+  }
+}

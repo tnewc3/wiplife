@@ -1,0 +1,7 @@
+id: small_town
+name: "Small Town"
+country: "United States"
+languageId: en
+cityId: small_town
+costLevel: 0.75
+kind: city

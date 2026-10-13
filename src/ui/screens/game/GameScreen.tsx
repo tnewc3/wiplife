@@ -1,3 +1,4 @@
+import { TravelScreen } from '../more/TravelScreen';
 import type { LifeState } from '../../../engine/types';
 import { useAppStore, type TabId } from '../../../store/appStore';
 import { AgeUpButton } from '../../components/AgeUpButton';
@@ -69,6 +70,7 @@ export function GameScreen({ life }: { life: LifeState }) {
   const closeHome = useAppStore((s) => s.closeHome);
   const current = tabs.find((t) => t.id === tab) ?? tabs[0]!;
   const person = tab === 'people' && personId !== null && life.people[personId] ? personId : null;
+  const travel = tab === 'more' && moreView === 'travel';
   const home = tab === 'more' && moreView === 'home';
   const health = tab === 'more' && moreView === 'health';
   const family = tab === 'more' && moreView === 'family';
@@ -80,13 +82,13 @@ export function GameScreen({ life }: { life: LifeState }) {
   const pet = tab === 'people' && personId !== null && life.possessions.items.some((p) => p.id === personId && p.kind === 'pet') ? personId : null;
   const back = person || pet
     ? { onBack: closePerson, backLabel: 'Back to People' }
-    : home || health || family || will || later || belongings || groups || teen
+    : travel || home || health || family || will || later || belongings || groups || teen
       ? { onBack: closeHome, backLabel: 'Back to More' }
       : {};
 
   return (
     <Screen
-      title={home ? 'Home' : health ? 'Health' : family ? 'Family' : will ? 'Your will' : later ? 'Later life' : belongings ? 'Belongings' : groups ? 'Groups' : teen ? 'Teen years' : current.label}
+      title={travel ? 'Plan a trip' : home ? 'Home' : health ? 'Health' : family ? 'Family' : will ? 'Your will' : later ? 'Later life' : belongings ? 'Belongings' : groups ? 'Groups' : teen ? 'Teen years' : current.label}
       {...back}
       footer={
         <>
@@ -110,6 +112,8 @@ export function GameScreen({ life }: { life: LifeState }) {
         <WorkTab life={life} />
       ) : tab === 'money' ? (
         <MoneyTab life={life} />
+      ) : travel ? (
+        <TravelScreen life={life} />
       ) : home ? (
         <HousingScreen life={life} />
       ) : health ? (

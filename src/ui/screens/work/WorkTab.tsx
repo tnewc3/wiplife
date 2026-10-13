@@ -1,3 +1,4 @@
+import { AbroadCard } from './AbroadCard';
 import { content } from '../../../content';
 import { getWorkView } from '../../../engine/selectors';
 import type { LifeState } from '../../../engine/types';
@@ -22,6 +23,7 @@ export function WorkTab({ life }: { life: LifeState }) {
     <div className="flex flex-col gap-4">
       {life.character.age >= view.minAge - 2 && <JobCard life={life} />}
       <SchoolCard life={life} />
+      <AbroadCard life={life} />
       <BusinessCard life={life} />
       <CrimeCard life={life} />
       <FameCard life={life} />

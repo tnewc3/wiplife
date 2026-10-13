@@ -1,3 +1,4 @@
+import { runTravel } from './travel/travel';
 import { runLanguages } from './languages';
 /**
  * The year pipeline (docs/technical.md, section M): the steps beginYear runs,
@@ -86,6 +87,7 @@ export const YEAR_PIPELINE: readonly PipelineStep[] = [
   { id: 'later', run: runLater },
   { id: 'belonging', run: runBelonging },
   { id: 'web', run: runWeb },
+  { id: 'travel', run: runTravel },
   { id: 'pacing', run: runPacing },
 ];
 

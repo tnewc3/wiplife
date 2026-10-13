@@ -1,0 +1,72 @@
+{
+  "id": "travel_homesick",
+  "title": "The familiar ringtone",
+  "text": "You wake in {destination} wanting the sounds of home.",
+  "category": "travel",
+  "tone": "serious",
+  "rarity": "common",
+  "lifeStages": [
+    "youngAdult",
+    "adult",
+    "senior"
+  ],
+  "followUpOnly": true,
+  "requires": {
+    "all": [
+      {
+        "age": {
+          "gte": 18
+        }
+      },
+      {
+        "travel": {
+          "active": true,
+          "kind": "trip"
+        }
+      }
+    ]
+  },
+  "weight": {
+    "base": 1
+  },
+  "choices": [
+    {
+      "id": "choose",
+      "label": "Spend the evening on calls",
+      "outcome": {
+        "text": "The voices settle you; an evening of the trip slips away.",
+        "effects": [
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": -3
+          },
+          {
+            "type": "stat",
+            "key": "happiness",
+            "delta": -1
+          }
+        ]
+      }
+    },
+    {
+      "id": "leave",
+      "label": "Go out despite it",
+      "outcome": {
+        "text": "The feeling stays, but it no longer fills the room.",
+        "effects": [
+          {
+            "type": "stat",
+            "key": "confidence",
+            "delta": 2
+          },
+          {
+            "type": "stat",
+            "key": "happiness",
+            "delta": 2
+          }
+        ]
+      }
+    }
+  ]
+}
