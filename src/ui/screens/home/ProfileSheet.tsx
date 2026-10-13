@@ -13,7 +13,7 @@ import { SingleChoice, Suggestions } from '../../components/Choices';
 import { Sheet } from '../../components/Sheet';
 import { StatBar } from '../../components/StatBar';
 import { TextField } from '../../components/TextField';
-import { ATTRACTION_LABELS, FAITH_STRENGTH_WORDS, LANGUAGE_LEVEL_LABELS, money, GROUPS_TITLES, recordLine, roleLine, TRAIT_LABELS, VALUE_LABELS } from '../../labels';
+import { ATTRACTION_LABELS, FAITH_STRENGTH_WORDS, LANGUAGE_LEVEL_LABELS, LANGUAGE_NATIVE_LABEL, money, GROUPS_TITLES, recordLine, roleLine, TRAIT_LABELS, VALUE_LABELS } from '../../labels';
 
 const PRONOUN_FIELDS: { key: Exclude<keyof Pronouns, 'verbPlural'>; label: string; example: string }[] = [
   { key: 'subject', label: 'Subject', example: 'they' },
@@ -233,7 +233,7 @@ export function ProfileSheet({ life, open, onClose }: { life: LifeState; open: b
           <section aria-labelledby="profile-languages" data-testid="profile-languages">
             <h3 id="profile-languages" className="mb-2 text-lg font-bold">Languages</h3>
             <ul className="divide-y divide-border" aria-label="Languages">
-              {view.languages.map((l) => <li key={l.id} className="flex justify-between gap-3 py-2"><span>{l.name}</span><span className="text-muted capitalize">{LANGUAGE_LEVEL_LABELS[l.level]}{l.native ? ' · Native' : ''}</span></li>)}
+              {view.languages.map((l) => <li key={l.id} className="flex justify-between gap-3 py-2"><span>{l.name}</span><span className="text-muted capitalize">{LANGUAGE_LEVEL_LABELS[l.level]}{l.native ? ` · ${LANGUAGE_NATIVE_LABEL}` : ''}</span></li>)}
             </ul>
             {life.character.age >= content.balance.languages.classes.minAge && view.languageClasses.length > 0 && (
               <div className="mt-3 flex flex-col gap-3">

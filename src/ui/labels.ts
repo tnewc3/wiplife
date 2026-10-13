@@ -1511,3 +1511,5 @@ export const BUSINESS_HOW_LABELS = { started: 'Started', bought: 'Bought', inher
 export const businessStakeLine = (share: number, role: 'you' | 'investor' | 'cofounder'): string => `${share}%${role === 'investor' ? ' · investor' : role === 'cofounder' ? ' · co-founder' : ''}`;
 
 export const LANGUAGE_LEVEL_LABELS: Record<string, string> = { beginner: 'Beginner', basic: 'Basic', conversational: 'Conversational', fluent: 'Fluent' };
+
+export const LANGUAGE_NATIVE_LABEL = 'Native';
