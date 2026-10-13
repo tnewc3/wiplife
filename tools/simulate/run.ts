@@ -13,7 +13,7 @@
  * player picks event choices by personality (./bot.ts); the careless one
  * picks at random. Later stages add their own reports.
  */
-import { ACTION_IDS, DISCOVERY_KINDS, type ActionId, type ContentBundle, type DiscoveryKind, type Effect } from '../../src/content/schemas';
+import { ACTION_IDS, DISCOVERY_KINDS, type ActionId, type ContentBundle, type CountryId, type DiscoveryKind, type Effect } from '../../src/content/schemas';
 import { hasLatent } from '../../src/engine/discovery';
 import { canAffordGift } from '../../src/engine/interactions/links';
 import { isInteractionAvailable } from '../../src/engine/interactions/availability';
@@ -66,6 +66,7 @@ import { emptyMentalReport, formatMental, mentalTargets, MentalWatcher, type Men
 import { choosePetInteractions, choosePossessionActions, emptyPossessionsReport, formatPossessions, possessionsTargets, PossessionsWatcher, rollPossessionProfile, type PossessionsReport } from './possessions';
 import { emptyEulogyReport, EulogyWatcher, eulogyTargets, formatEulogy, type EulogyReport } from './eulogy';
 import { BusinessWatcher, businessTargets, chooseBusinessActions, emptyBusinessReport, formatBusiness, rollBusinessProfile, type BusinessReport } from './business';
+import { CountriesWatcher, countryTargets, emptyCountriesReport, formatCountries, type CountriesReport } from './countries';
 import { BelongingWatcher, belongingTargets, chooseBelongingActions, emptyBelongingReport, formatBelonging, rollBelongingProfile, type BelongingReport } from './belonging';
 import { chooseGrandparentPlans, chooseLaterActions, emptyLaterReport, formatLater, LaterWatcher, laterTargets, rollLaterProfile, type LaterReport } from './later';
 import { emptyWebReport, formatWeb, webTargets, WebWatcher, type WebReport } from './web';
@@ -76,6 +77,7 @@ import { chooseSportsActions, emptySportsReport, formatSports, rollAthleteProfil
 import { chooseTeenActions, emptyTeenReport, formatTeen, rollTeenProfile, teenTargets, TeenWatcher, type TeenReport } from './teen';
 import { YEAR_PIPELINE } from '../../src/engine/pipeline';
 import { chooseFamilyActions, chooseParentingPlans, emptyFamilyReport, FamilyWatcher, formatFamily, familyTargets, rollFamilyProfile, type FamilyReport } from './family';
+import { pensionAge } from '../../src/engine/country';
 
 /** One life in this many is rebuilt from its input log and compared with the life as played (E1). */
 const REPLAY_EVERY = 100;
@@ -105,6 +107,8 @@ export interface SimulationOptions {
    * many there are, and each is played with the usual player model, seeded by its own seed.
    */
   starts?: readonly LifeState[];
+  /** W4a: start every new life in this country (left out: any, by the start weights). */
+  country?: CountryId;
 }
 
 export type SimulatedPlayer = 'careful' | 'careless' | 'spammer' | 'criminal' | 'star' | 'athlete';
@@ -151,6 +155,8 @@ export interface SimulationReport {
   eulogy: EulogyReport;
   /** L1: later life, measured: grandchildren, care, foreseen deaths and final wishes, amends, the life review. */
   later: LaterReport;
+  /** W4a: each country's lives, measured against its own targets. */
+  countries: CountriesReport;
   /** W2: belonging, measured: groups by type, roles, the people there, what they cost, faith and its changes, and what long membership does to values and reputation. */
   belonging: BelongingReport;
   /** W3: businesses, measured: who starts or buys one, how long they last by kind, style and how well the owner decides, profit, failures and what is left owing, staff, investors and co-founders, and how owning one compares with a career. */
@@ -717,7 +723,6 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
     dropouts: { highSchool: 0, postSecondary: 0 },
   };
   const studentDebts25: number[] = [];
-  const retirementAge = content.balance.economy.retirement.age;
   const firstBenefits: number[] = [];
   const mostFires = new Map<string, number>();
   const careers: CareerReport = {
@@ -809,6 +814,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
   const eulogyWatcher = new EulogyWatcher(eulogy, content);
   const later = emptyLaterReport(content);
   const belonging = emptyBelongingReport(content);
+  const countries = emptyCountriesReport();
   const business = emptyBusinessReport(content);
   const mental = emptyMentalReport(content);
   const possessions = emptyPossessionsReport(content);
@@ -871,6 +877,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
     const belongingRng = createRng(`${seed}:belonging`);
     const belongingProfile = rollBelongingProfile(belongingRng);
     const belongingWatcher = new BelongingWatcher(belonging, content);
+    const countriesWatcher = new CountriesWatcher(countries, content);
     // W3: how this life behaves about businesses.
     const businessRng = createRng(`${seed}:business`);
     const businessProfile = rollBusinessProfile(businessRng);
@@ -939,7 +946,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
       }
       return next;
     };
-    let life = startLife ?? createLife({ mode: 'random', seed, birthYear: 2026 }, content);
+    let life = startLife ?? createLife({ mode: 'random', seed, birthYear: 2026, ...(options.country ? { countryId: options.country } : {}) }, content);
     watch(life);
     mentalWatcher.begin(life);
     while (life.phase !== 'dead') {
@@ -1124,6 +1131,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
       peopleWatcher.observe(yearBefore, life);
       laterWatcher.observe(yearBefore, life);
       belongingWatcher.observe(yearBefore, life);
+      countriesWatcher.observe(life);
       businessWatcher.observe(yearBefore, life);
       webWatcher.observe(yearBefore, life);
       mentalWatcher.observe(yearBefore, life);
@@ -1147,7 +1155,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
         firesThisLife.set(p.eventId, (firesThisLife.get(p.eventId) ?? 0) + 1);
       }
       const ledger = life.finances.lastLedger;
-      if (life.character.age >= retirementAge && ledger?.year === life.currentYear) {
+      if (life.character.age >= pensionAge(life, content) && ledger?.year === life.currentYear) {
         money.seniors.years++;
         if (ledger.retirement > 0) firstBenefit ??= ledger.retirement;
         if (ledger.borrowed > 0 || life.finances.debts.some((d) => d.missed > 0)) {
@@ -1173,6 +1181,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
     eulogyWatcher.finish(life);
     laterWatcher.finish(life);
     belongingWatcher.finish(life);
+    countriesWatcher.finish(life);
     businessWatcher.finish(life);
     mentalWatcher.finish(life);
     crimeWatcher.finish(life);
@@ -1235,14 +1244,14 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
     money.largest.savings = Math.max(money.largest.savings, wallet.maxSavings);
     money.largest.debt = Math.max(money.largest.debt, wallet.maxDebt);
     if (wallet.maxNetWorth > money.largest.netWorth) money.largest = { ...money.largest, netWorth: wallet.maxNetWorth, netWorthSeed: seed };
-    if (life.character.age >= retirementAge) {
+    if (life.character.age >= pensionAge(life, content)) {
       money.retirement.reached++;
       if (firstBenefit !== null) {
         money.retirement.withBenefit++;
         firstBenefits.push(firstBenefit);
       }
       if (seniorShort) money.seniors.livesShort++;
-      if (life.history.some((e) => e.tags.includes('evicted') && e.age >= retirementAge)) money.seniors.livesEvicted++;
+      if (life.history.some((e) => e.tags.includes('evicted') && e.age >= pensionAge(life, content))) money.seniors.livesEvicted++;
     }
     if (life.character.age >= independenceAge) {
       money.adults++;
@@ -1510,6 +1519,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
     eulogy,
     later,
     belonging,
+    countries,
     business,
     mental,
     possessions,
@@ -1603,9 +1613,9 @@ export function formatReport(report: SimulationReport, content: ContentBundle): 
   );
   const { retirement: ret, seniors } = m;
   lines.push(
-    `  retirement (${ret.reached} lives reached ${content.balance.economy.retirement.age}): benefit paid to ${pct(ret.withBenefit, ret.reached)}, ` +
+    `  retirement (${ret.reached} lives reached the pension age): benefit paid to ${pct(ret.withBenefit, ret.reached)}, ` +
       `median first-year benefit ${dollars(ret.medianBenefit)}; seniors ran short (borrowed or missed a payment) in ${pct(seniors.shortYears, seniors.years)} ` +
-      `of ${seniors.years} years, ${pct(seniors.livesShort, ret.reached)} of lives at least once; evicted after ${content.balance.economy.retirement.age}: ${pct(seniors.livesEvicted, ret.reached)}`,
+      `of ${seniors.years} years, ${pct(seniors.livesShort, ret.reached)} of lives at least once; evicted after the pension age: ${pct(seniors.livesEvicted, ret.reached)}`,
   );
   lines.push(`  actions taken: ${LIFE_ACTION_IDS.map((id) => `${id} ${m.actionsTaken[id]}`).join(', ')}`);
   lines.push(
@@ -1651,6 +1661,7 @@ export function formatReport(report: SimulationReport, content: ContentBundle): 
   lines.push('', ...formatWeb(report.web, content), '  targets (src/content/balance/targets.yaml):', ...webTargets(report, content).map((r) => target(r.label, r.value, r.goal, r.met)));
   lines.push(...formatEulogy(report.eulogy, content), '  targets (src/content/balance/targets.yaml):', ...eulogyTargets(report, content).map((r) => target(r.label, r.value, r.goal, r.met)));
   lines.push(...formatLater(report.later, content), '  targets (src/content/balance/targets.yaml):', ...laterTargets(report, content).map((r) => target(r.label, r.value, r.goal, r.met)));
+  lines.push(...formatCountries(report.countries, content), '  targets (src/content/balance/countries.yaml):', ...countryTargets(report.countries, content).map((r) => target(r.label, r.value, r.goal, r.met)));
   lines.push(...formatBelonging(report.belonging, content), '  targets (src/content/balance/targets.yaml):', ...belongingTargets(report, content).map((r) => target(r.label, r.value, r.goal, r.met)));
   lines.push(...formatBusiness(report.business, content), '  targets (src/content/balance/targets.yaml):', ...businessTargets(report, content).map((r) => target(r.label, r.value, r.goal, r.met)));
   lines.push('', ...formatMental(report.mental, content, report.events), '  targets (src/content/balance/targets.yaml):', ...mentalTargets(report, content).map((r) => target(r.label, r.value, r.goal, r.met)));

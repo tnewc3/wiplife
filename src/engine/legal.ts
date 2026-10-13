@@ -19,9 +19,10 @@ import { moveInCost, moveTo, ownsHome, refreshHousingCost, supportingParent } fr
 import { curveAt } from './curve';
 import { unsealedRecord } from './record';
 import { weightedPick } from './random';
-import { nextInt, type RngState } from './rng';
+import { nextInt } from './rng';
 import { writeFromGroup } from './systems/history';
 import type { Id, LifeState, RecordOutcome } from './types';
+import { countryOf, formatMoney, moneyDisplayOf } from './country';
 
 /** In prison now. */
 export function isIncarcerated(state: LifeState): boolean {
@@ -48,16 +49,18 @@ export function yearsText(years: number, content: ContentBundle): string {
 
 /**
  * The weights a court decides by: the offense's likely outcomes, times the
- * prior-record multipliers once for each entry already on your record, and
- * the juvenile multipliers before the independence age (no jail for a minor).
+ * prior-record multipliers once for each entry already on your record,
+ * the juvenile multipliers before the independence age (no jail for a minor)
+ * and the country's own leanings (countries/*.yaml sentencing).
  */
 export function sentenceWeights(state: LifeState, def: OffenseDef, content: ContentBundle): Record<RecordOutcome, number> {
   const s = content.balance.legal.sentencing;
+  const local = countryOf(state, content).sentencing.outcomes;
   const weights = { ...def.outcomes };
   const priors = unsealedRecord(state).length;
   const juvenile = !isIndependent(state, content);
   for (const outcome of Object.keys(weights) as RecordOutcome[]) {
-    let w = weights[outcome];
+    let w = weights[outcome] * local[outcome];
     for (let i = 0; i < priors; i++) w *= s.priorRecord[outcome];
     if (juvenile) w *= s.juvenile[outcome];
     weights[outcome] = w;
@@ -67,9 +70,10 @@ export function sentenceWeights(state: LifeState, def: OffenseDef, content: Cont
   return weights;
 }
 
-function rollYears(rng: RngState, range: { min: number; max: number } | undefined, fallback: { min: number; max: number }): number {
+/** Years a court rolls for probation or jail, scaled by the country (countries/*.yaml sentencing.termYears); at least one. */
+function rollYears(state: LifeState, range: { min: number; max: number } | undefined, fallback: { min: number; max: number }, content: ContentBundle): number {
   const r = range ?? fallback;
-  return nextInt(rng, r.min, r.max);
+  return Math.max(1, Math.round(nextInt(state.rng, r.min, r.max) * countryOf(state, content).sentencing.termYears));
 }
 
 function legalHistory(state: LifeState, key: 'warning' | 'fine' | 'probation' | 'jail' | 'released' | 'probationEnded', values: Record<string, string>, content: ContentBundle): void {
@@ -158,14 +162,15 @@ export function sentence(
       legalHistory(state, 'warning', { offense }, content);
       break;
     case 'fine': {
-      const amount = def.fine ? nextInt(state.rng, def.fine.min, def.fine.max) : 0;
+      // Fines are written at US prices; the country's fines multiplier scales them (countries/*.yaml sentencing.fines).
+      const amount = def.fine ? Math.round(nextInt(state.rng, def.fine.min, def.fine.max) * countryOf(state, content).sentencing.fines) : 0;
       result.amount = amount;
       spend(state, amount, content);
-      legalHistory(state, 'fine', { offense, amount: `$${amount.toLocaleString('en-US')}` }, content);
+      legalHistory(state, 'fine', { offense, amount: formatMoney(amount, moneyDisplayOf(state, content)) }, content);
       break;
     }
     case 'probation': {
-      const n = years ?? rollYears(state.rng, def.probationYears, def.jailYears ?? { min: 1, max: 2 });
+      const n = years ?? rollYears(state, def.probationYears, def.jailYears ?? { min: 1, max: 2 }, content);
       result.years = n;
       if (isIncarcerated(state)) {
         // Inside, probation means nothing: it becomes more time.
@@ -179,7 +184,7 @@ export function sentence(
       break;
     }
     case 'jail': {
-      const n = years ?? rollYears(state.rng, def.jailYears, def.probationYears ?? { min: 1, max: 2 });
+      const n = years ?? rollYears(state, def.jailYears, def.probationYears ?? { min: 1, max: 2 }, content);
       result.years = n;
       legalHistory(state, 'jail', { offense, years: yearsText(n, content) }, content);
       if (isIncarcerated(state)) state.legal.incarceratedUntil = (state.legal.incarceratedUntil ?? state.currentYear) + n;
@@ -201,7 +206,7 @@ export function sentenceText(state: LifeState, content: ContentBundle): string {
   if (!last || last.year !== state.currentYear) return '';
   const template = content.text.legal.sentence[last.outcome];
   return template
-    .replace('{amount}', `$${(last.amount ?? 0).toLocaleString('en-US')}`)
+    .replace('{amount}', formatMoney(last.amount ?? 0, moneyDisplayOf(state, content)))
     .replace('{years}', yearsText(last.years ?? 1, content));
 }
 
@@ -223,7 +228,7 @@ export function release(state: LifeState, content: ContentBundle): void {
     spend(state, moveInCost(state, city, content), content);
     moveTo(state, 'renting', city, content);
   } else moveTo(state, 'homeless', city, content);
-  const parole = content.balance.legal.release.paroleYears;
+  const parole = countryOf(state, content).sentencing.paroleYears;
   if (parole > 0) state.legal.probationUntil = state.currentYear + parole - 1;
   legalHistory(state, 'released', {}, content);
   queueLegalEvent(state, 'released', state.currentYear, content);

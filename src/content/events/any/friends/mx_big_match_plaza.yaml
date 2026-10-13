@@ -1,0 +1,41 @@
+id: mx_big_match_plaza
+title: The match in the plaza
+text: >-
+  The national team is playing a big match, and the town has hung a screen on
+  the side of the church. By the first whistle the square is full of folding
+  chairs, shirts in green and a vendor who sells everything to everyone.
+tone: light
+category: friends
+rarity: common
+countries: [mx]
+lifeStages: [child, teen, youngAdult, adult, senior]
+requires: { age: { gte: 8 } }
+weight: { base: 6 }
+cooldownYears: 4
+cast:
+  friend: { kind: friend, presence: city }
+choices:
+  - id: plaza
+    label: Watch it in the plaza with the crowd
+    outcome:
+      text: >-
+        A goal, a hundred strangers hugging and a plastic chair that does not
+        survive. You come home hoarse and happy. The snacks and drinks cost
+        {$14}.
+      effects:
+        - { type: money, delta: -14 }
+        - { type: relationship, role: friend, affection: 6 }
+        - { type: stat, key: happiness, delta: 3 }
+  - id: home
+    label: Watch it at {friend.name}'s house
+    outcome:
+      text: A small TV, a big family, a relative who explains every foul and another who falls asleep during the penalties.
+      effects:
+        - { type: relationship, role: friend, affection: 5 }
+        - { type: stat, key: happiness, delta: 2 }
+  - id: ignore
+    label: Stay out of it
+    outcome:
+      text: The street is empty for ninety minutes, then loud for three hours. You hear the result before you check it.
+      effects:
+        - { type: stat, key: stress, delta: -1 }

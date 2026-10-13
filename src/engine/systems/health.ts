@@ -26,6 +26,7 @@ import { clampInt, wholeChange } from '../random';
 import { chance } from '../rng';
 import type { LifeState } from '../types';
 import { applyStatEffects, scaledEffects } from './economy';
+import { countryOf, medicalPrice } from '../country';
 
 /** Step 6: progress conditions and roll for new ones. */
 export function runHealth(state: LifeState, content: ContentBundle): void {
@@ -50,8 +51,8 @@ export function runHealth(state: LifeState, content: ContentBundle): void {
     if (yearly) {
       const amount = Math.round((yearly * still.severity) / 100);
       // Medication is a medical cost; an addiction's habit is ordinary spending.
-      if (still.treated) payMedical(state, amount, content);
-      else spend(state, amount, content);
+      if (still.treated) payMedical(state, amount * medicalPrice(state, 'medication', content), content);
+      else spend(state, amount * countryOf(state, content).priceLevel, content);
     }
   }
 

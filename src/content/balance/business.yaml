@@ -19,6 +19,17 @@ cities:
   chicago: { size: 1.4, wealth: 1.1, competition: 1.05 }
   houston: { size: 1.3, wealth: 1.0, competition: 1.0 }
   small_town: { size: 0.35, wealth: 0.8, competition: 0.8 }
+  toronto: { size: 1.7, wealth: 1.1, competition: 1.1 }
+  vancouver: { size: 1.2, wealth: 1.1, competition: 1.05 }
+  montreal: { size: 1.3, wealth: 0.95, competition: 1.0 }
+  small_town_ca: { size: 0.35, wealth: 0.8, competition: 0.8 }
+  london: { size: 2.0, wealth: 1.2, competition: 1.2 }
+  manchester: { size: 1.2, wealth: 0.9, competition: 1.0 }
+  small_town_uk: { size: 0.35, wealth: 0.75, competition: 0.8 }
+  mexico_city: { size: 2.0, wealth: 0.6, competition: 1.2 }
+  guadalajara: { size: 1.2, wealth: 0.5, competition: 1.0 }
+  monterrey: { size: 1.2, wealth: 0.6, competition: 1.0 }
+  small_town_mx: { size: 0.3, wealth: 0.4, competition: 0.8 }
 
 levels:
   price:

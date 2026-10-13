@@ -12,6 +12,7 @@ import { buyOut, closeBusiness, expandBlock, openLocation, sellBusiness } from '
 import { nominalRevenue } from './model';
 import { businessById, castBusinessId } from './query';
 import { fireStaff, hireBlock, hireStaff, raiseStaff, removeStaff } from './staff';
+import { scaledAmount } from '../country';
 
 /** The business an effect acts on: the one the event is about, or the first you own. */
 function target(state: LifeState, cast: Record<string, Id>): Business | undefined {
@@ -34,7 +35,7 @@ export function applyBusinessEffect(state: LifeState, effect: BusinessEffect, ca
   switch (effect.action) {
     case 'pay':
     case 'receive': {
-      const amount = Math.max(effect.floor ?? 300, wholeDollars(revenueOf(b, content) * (effect.share ?? 0.02)));
+      const amount = Math.max(scaledAmount(state, effect.floor ?? 300, content), wholeDollars(revenueOf(b, content) * (effect.share ?? 0.02)));
       if (effect.action === 'pay') spend(state, amount, content);
       else earn(state, amount);
       return;

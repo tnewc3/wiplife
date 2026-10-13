@@ -9,7 +9,7 @@ rarity: common
 lifeStages: [youngAdult, adult, senior]
 requires:
   all:
-    - { age: { gte: 21 } }
+    - { legalAge: gambling }
     - { money: { gte: 500 } }
 weight:
   base: 4

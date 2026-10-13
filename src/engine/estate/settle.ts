@@ -30,6 +30,7 @@ import { attachedDebtIds } from '../possessions/query';
 import { planBusinesses } from '../business/estate';
 import { planPossessions } from './possessions';
 import { fullName, livingWill } from './will';
+import { countryOf } from '../country';
 
 /** A beneficiary before money: who, how related, and their percent. */
 interface Share extends WillShare {
@@ -203,7 +204,7 @@ export function settleEstate(life: LifeState, content: ContentBundle): Settlemen
 
   // Estate tax on what is left to share out, from cash; a home that would have to be sold to pay it is sold.
   const estateValue = cash + (home === 'passes' ? equity : 0);
-  const taxDue = wholeDollars(estateValue * curveAt(estate.tax, estateValue));
+  const taxDue = wholeDollars(estateValue * curveAt(countryOf(life, content).estateTax, estateValue));
   if (taxDue > cash && home === 'passes') sell();
   const tax = Math.min(taxDue, cash);
   cash -= tax;

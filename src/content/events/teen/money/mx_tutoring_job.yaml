@@ -1,0 +1,54 @@
+id: mx_tutoring_job
+title: Tutoring the little ones
+text: >-
+  A neighbour stops you on the stairs. Their youngest has trouble with
+  fractions, and word has gotten around that you are good at them. A small
+  fee and a plate of food are on offer.
+tone: light
+category: money
+rarity: common
+countries: [mx]
+lifeStages: [teen]
+requires:
+  all:
+    - { age: { gte: 14 } }
+    - { education: { program: [middle, high] } }
+weight: { base: 7 }
+cooldownYears: 4
+choices:
+  - id: yes
+    label: Take the job
+    check:
+      base: 55
+      stats: [{ key: smarts, weight: 0.3 }, { key: kindness, weight: 0.3 }]
+      success:
+        text: >-
+          Three afternoons a week for a term. Their marks go up, yours do too, and
+          the {$150} is the most you have ever earned from being right.
+        effects:
+          - { type: money, delta: 150 }
+          - { type: education, action: grades, value: 0.1 }
+          - { type: stat, key: confidence, delta: 2 }
+      failure:
+        text: >-
+          Fractions turn out to be easier to know than to teach. After six weeks,
+          you part kindly, with {$40} for your trouble.
+        effects:
+          - { type: money, delta: 40 }
+          - { type: stat, key: stress, delta: 2 }
+  - id: group
+    label: Start a study group for several children
+    outcome:
+      text: >-
+        Five kids, a table and a lot of pencils. It is chaos and you earn {$220}
+        over the term. The mothers all say your name in the stairwell.
+      effects:
+        - { type: money, delta: 220 }
+        - { type: stat, key: sociability, delta: 2 }
+        - { type: stat, key: stress, delta: 2 }
+  - id: no
+    label: Say you do not have the time
+    outcome:
+      text: The neighbour thanks you and asks someone else. You tell yourself you needed the afternoons, and you did.
+      effects:
+        - { type: stat, key: stress, delta: -1 }

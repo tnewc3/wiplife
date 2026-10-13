@@ -1,0 +1,34 @@
+# Name pool for Mexico, grouped by heritage so families' names hang together. How often each heritage appears is set in
+# countries/mx.yaml (names.heritageWeights). `nonbinary` holds names commonly used across genders.
+id: mx
+heritages:
+  general:
+    first:
+      man: [José, Luis, Juan, Carlos, Miguel, Jorge, Alejandro, Ricardo, Fernando, Eduardo, Javier, Diego, Santiago, Mateo, Sebastián, Emiliano, Daniel, Rodrigo, Andrés, Roberto, Francisco, Héctor, Manuel, Óscar, Pablo, Iván, Adrián]
+      woman: [María, Guadalupe, Sofía, Valentina, Camila, Ximena, Regina, Fernanda, Mariana, Daniela, Alejandra, Gabriela, Paola, Andrea, Renata, Isabela, Lucía, Carmen, Rosa, Ana, Verónica, Patricia, Leticia, Citlali, Itzel]
+      nonbinary: [Alex, Ariel, Cruz, Guadalupe, Noel, Sol, René, Dani, Ángel, Reyes, Jesús, Amparo]
+    last: [Hernández, García, Martínez, López, González, Pérez, Rodríguez, Sánchez, Ramírez, Flores, Gómez, Cruz, Morales, Reyes, Jiménez, Torres, Díaz, Vázquez, Ruiz, Mendoza, Aguilar, Ortiz, Castillo, Moreno, Romero, Gutiérrez, Chávez, Ramos, Herrera, Medina, Vargas, Castro, Guerrero, Rojas, Salazar, Domínguez, Cortés, Estrada, Navarro, Ríos, Luna, Mora, Salinas, Fuentes, Delgado]
+  european:
+    first:
+      man: [Hans, Marco, Lorenzo, Pierre, Stefan, Andreas, Bruno, Mario, Sergio, Rafael, Alberto, Enrique, Gonzalo, Ignacio, Tomás, Federico, Gustavo, Leonardo, Maximiliano, Nicolás]
+      woman: [Ingrid, Clara, Elena, Beatriz, Margarita, Cecilia, Inés, Sabina, Silvia, Julieta, Lorena, Magdalena, Rebeca, Gisela, Mónica, Paulina, Sara, Victoria, Ana-Sofía, Marina]
+      nonbinary: [Alex, Dani, Sasha, Rafa, Nico, Maxi]
+    last: [Schmidt, Weber, Müller, Fischer, Meyer, Rossi, Bianchi, Ferrari, Dubois, Laurent, Lefèvre, Fernández, Álvarez, Iglesias, Santos, Abascal, Echeverría, Arriaga, Ibarra, Zubiría, Urquiza, Larrea, Garza, Treviño, Elizondo]
+  arab:
+    first:
+      man: [Carlos, Antonio, Jorge, Miguel, Salim, Elías, Jorge-Luis, Alejandro, Ricardo, Fernando, Sami, Nicolás, Rafael, Marcos, Yusef, Omar, Amín, Tarek, Ramón, Julián]
+      woman: [María, Nadia, Layla, Salma, Yasmín, Marcela, Sofía, Rosa, Leila, Karina, Jimena, Mariam, Ana, Andrea, Soraya, Dalia, Samira, Camila, Alejandra, Gloria]
+      nonbinary: [Alex, Sami, Dani, Noor, Yasin, Lou]
+    last: [Haddad, Hayek, Abed, Nacif, Chedraui, Salame, Atala, Zaga, Sarquis, Kuri, Saade, Daher, Elías, Hasbún, Majul, Zarur, Barquet, Saab, Maloof]
+  east_asian:
+    first:
+      man: [Wei, Jun, Kenji, Hiroshi, Daniel, Kevin, David, Eric, Carlos, Alan, Min-jun, Hao, Kai, Taro, Ryo, Miguel, Bruce, Jorge, Andrés, Ming]
+      woman: [Mei, Yuki, Akiko, Sofía, Jimena, Valeria, Ana, Camila, Lucía, Grace, Sakura, Lin, Hana, Mariana, Michelle, Yuna, Ariana, Karen, Emi, Fernanda]
+      nonbinary: [Alex, Jun, Ari, Sol, Ming, Dani, Kai]
+    last: [Wong, Chan, Chen, Lee, Kim, Park, Tanaka, Nakamura, Ito, Wang, Lin, Zhang, Liu, Yamamoto, Takeda, Sato, Ching, Lam, Kuo, Ng]
+  afro_mexican:
+    first:
+      man: [Juan, Luis, Carlos, Miguel, José, Eusebio, Marcos, Abel, Ismael, Moisés, Lázaro, Gregorio, Santiago, Pedro, Efraín, Elías, Tomás, Alberto, Rubén, Ezequiel]
+      woman: [María, Dolores, Guadalupe, Rosa, Esperanza, Candelaria, Josefina, Teresa, Lucila, Aurora, Matilde, Rufina, Socorro, Juana, Marta, Estela, Berta, Yolanda, Griselda, Catalina]
+      nonbinary: [Alex, Cruz, Guadalupe, Ariel, Noel, Dani, Sol]
+    last: [Cisneros, Ortega, Salinas, Montalvo, Zavala, Noyola, Rosas, Mendoza, Vargas, Cruz, Santos, Flores, Ramírez, Peralta, Bautista, Casas, Zárate, Mayo, Nolasco, Ayala]

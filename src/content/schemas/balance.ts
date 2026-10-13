@@ -3,7 +3,7 @@ import { genderCategorySchema } from './character';
 
 const weightSchema = z.number().nonnegative();
 /** Relative weights keyed by option; at least one must be positive. */
-const weightsSchema = <K extends z.ZodType<string>>(key: K) =>
+export const weightsSchema = <K extends z.ZodType<string>>(key: K) =>
   z.record(key, weightSchema).refine((w) => Object.values(w).some((v) => (v as number) > 0), 'needs a positive weight');
 
 const probabilitySchema = z.number().min(0).max(1);
@@ -52,13 +52,6 @@ export const creationBalanceSchema = z.strictObject({
   }),
   /** Chance a character has a hidden talent at all. */
   talentChance: probabilitySchema,
-  familyWealth: weightsSchema(familyWealthSchema),
-  names: z.strictObject({
-    /** How often each heritage in the name pools starts a family. */
-    heritageWeights: weightsSchema(z.string()),
-    /** Chance two parents share a heritage. */
-    sameHeritageParentsChance: probabilitySchema,
-  }),
   appearance: z.strictObject({
     /** Chance of one extra distinguishing feature. */
     featureChance: probabilitySchema,

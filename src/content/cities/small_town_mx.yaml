@@ -1,0 +1,21 @@
+# A small Mexican town — very cheap to live, with few formal jobs.
+id: small_town_mx
+countryId: mx
+name: Small Town
+blurb: "Very cheap to live · Few job openings"
+costOfLiving: 0.32
+baseRent: 3500
+baseHomePrice: 45000
+carDependence: 0.7
+salaryMultiplier: 0.235
+jobMarket:
+  professional: 22
+  trade: 40
+  gig: 35
+schools:
+  high: Preparatoria Benito Juárez
+  community: Universidad Tecnológica Regional
+  state: Universidad Pública del Estado
+  elite: Universidad del Bajío
+  trade: Instituto Técnico del Pueblo
+  grad: Escuela de Posgrado Regional

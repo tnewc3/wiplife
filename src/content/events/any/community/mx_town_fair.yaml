@@ -1,0 +1,47 @@
+id: mx_town_fair
+title: The patron saint's fair
+text: >-
+  Once a year the town celebrates its patron saint with a week of bands, food
+  stalls and a mechanical ride that has been "safe" since 1987. The square is
+  strung with paper flags, and everyone you have ever met is walking through it.
+tone: light
+category: community
+rarity: common
+countries: [mx]
+lifeStages: [child, teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 6 } }
+    - { city: small_town_mx }
+weight: { base: 8 }
+cooldownYears: 3
+cast:
+  friend: { kind: friend, presence: city, createIfMissing: true, newChance: 0.5 }
+choices:
+  - id: dance
+    label: Stay for the dance in the square
+    outcome:
+      text: >-
+        A brass band, a floor of people of all ages and {friend.name} dragging
+        you into a circle. You get home at two in the morning with sore feet.
+      effects:
+        - { type: relationship, role: friend, affection: 7 }
+        - { type: stat, key: happiness, delta: 3 }
+  - id: eat
+    label: Eat your way down the street
+    outcome:
+      text: >-
+        Elote, churros, a plate of something you cannot name and a lemonade the
+        colour of sunshine. The whole afternoon costs {$16}.
+      effects:
+        - { type: money, delta: -16 }
+        - { type: stat, key: happiness, delta: 2 }
+  - id: help
+    label: Help the committee with the evening's fireworks
+    outcome:
+      text: >-
+        Three hours of sweeping, lifting and standing near a man who says "step
+        back." You earn a free dinner and the quiet respect of the town council.
+      effects:
+        - { type: relationship, role: friend, affection: 4 }
+        - { type: stat, key: kindness, delta: 2 }

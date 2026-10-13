@@ -149,7 +149,7 @@ describe("the people step", () => {
     const a = step(lifeWith([{ id: 'b', age: 30, kind: 'friend' }, { id: 'c', age: 26, kind: 'sibling' }]));
     const b = step(lifeWith([{ id: 'b', age: 30, kind: 'friend' }, { id: 'c', age: 26, kind: 'sibling' }]));
     expect(b).toEqual(a);
-    let life = createLife({ mode: 'random', seed: 'lives-replay', birthYear: 2026 }, content);
+    let life = createLife({ mode: 'random', seed: 'lives-replay', birthYear: 2026, countryId: 'us' }, content);
     for (let i = 0; i < 30 && life.phase !== 'dead'; i++) life = playYear(life, content);
     expect(life.news.length).toBeGreaterThan(0);
     expect(replayLife(life.inputLog, content)).toEqual(life);

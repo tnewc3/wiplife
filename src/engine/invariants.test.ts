@@ -8,7 +8,7 @@ import type { LifeState } from './types';
 const SEEDS = 10_000;
 
 function random(seed: string): LifeState {
-  return createLife({ mode: 'random', seed, birthYear: 2026 }, content);
+  return createLife({ mode: 'random', seed, birthYear: 2026, countryId: 'us' }, content);
 }
 
 describe('10,000 random lives', () => {

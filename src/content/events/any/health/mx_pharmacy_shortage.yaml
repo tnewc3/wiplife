@@ -1,0 +1,44 @@
+id: mx_pharmacy_shortage
+title: Out of stock
+text: >-
+  The third pharmacy has the same answer as the first two: the medicine on the
+  prescription is out of stock. The pharmacist writes the name of another
+  brand on a slip, which is not the same, and on the back of the slip a
+  phone number for the next town.
+tone: neutral
+category: health
+rarity: common
+countries: [mx]
+lifeStages: [youngAdult, adult, senior]
+requires: { age: { gte: 18 } }
+weight: { base: 5 }
+cooldownYears: 5
+choices:
+  - id: alternative
+    label: Ask the doctor about a different brand
+    outcome:
+      text: >-
+        A phone call, a new prescription and a drug that works almost as well. It
+        costs {$38}, and you learn what "bioequivalent" means.
+      effects:
+        - { type: money, delta: -38 }
+        - { type: stat, key: stress, delta: 1 }
+  - id: drive
+    label: Travel to the next town for the right one
+    outcome:
+      text: >-
+        Two hours on a bus and an exchange with a pharmacist who finds the last
+        box under the counter. The fare and the medicine cost {$55}.
+      effects:
+        - { type: money, delta: -55 }
+        - { type: stat, key: stress, delta: 3 }
+        - { type: stat, key: health, delta: 1 }
+  - id: wait
+    label: Go without until next week
+    outcome:
+      text: >-
+        The week without it is long. The pharmacist calls on Monday, and the
+        delivery has finally come.
+      effects:
+        - { type: stat, key: health, delta: -2 }
+        - { type: stat, key: stress, delta: 3 }

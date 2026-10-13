@@ -8,7 +8,7 @@ import { runEconomy, taxOn } from './systems/economy';
 import { lifeAtAge } from './testFixtures';
 import type { LifeState } from './types';
 
-const r = content.balance.economy.retirement;
+const r = content.countries.us!.pension;
 /** Content whose gig pay never swings. */
 const steady: ContentBundle = produce(content, (c) => {
   c.balance.economy.gig.swing = { min: 1, max: 1 };
@@ -77,7 +77,7 @@ describe('the ledger and retirement', () => {
     const after = ledger(retiree, steady);
     const l = after.finances.lastLedger!;
     expect(l.retirement).toBe(Math.round(formula(30_000)));
-    expect(l.tax).toBe(taxOn(l.gross, content));
+    expect(l.tax).toBe(taxOn(l.gross, after, content));
     expect(l.net).toBe(l.gross + l.retirement + l.interest - l.tax - l.housing - l.living - l.debtPayments);
     expect(after.finances.earnings.years).toBe(l.gross >= r.creditIncome ? 41 : 40);
     expect(checkInvariants({ ...after, scheduled: [] }, content)).toEqual([]);

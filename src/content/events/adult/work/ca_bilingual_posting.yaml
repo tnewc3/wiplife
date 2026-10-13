@@ -1,0 +1,52 @@
+id: ca_bilingual_posting
+title: Bilingual preferred
+text: >-
+  A senior role opens up, one level above yours. The posting says "bilingual
+  preferred" and the hiring manager has already mentioned, kindly, that
+  the clients will be French and English in the same meeting.
+tone: neutral
+category: work
+rarity: common
+countries: [ca]
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 22 } }
+    - { city: montreal }
+    - { career: { employed: true, retired: false } }
+weight: { base: 6 }
+cooldownYears: 6
+choices:
+  - id: class
+    label: Sign up for evening French classes ({$600})
+    visibleIf: { money: { gte: 600 } }
+    outcome:
+      text: >-
+        Twice a week, a classroom of people from everywhere and a teacher who
+        corrects your accent with a smile. You do not get the role this year, but
+        the next time the question comes up, you answer in French.
+      effects:
+        - { type: money, delta: -600 }
+        - { type: stat, key: smarts, delta: 1 }
+        - { type: stat, key: ambition, delta: 2 }
+  - id: apply
+    label: Apply anyway and let your work speak for you
+    check:
+      base: 35
+      stats: [{ key: confidence, weight: 0.3 }, { key: ambition, weight: 0.3 }]
+      success:
+        text: The manager is more interested in what you have done than what you say. You get the promotion, and a plan to learn on the job.
+        effects:
+          - { type: money, delta: 4200 }
+          - { type: stat, key: ambition, delta: 2 }
+      failure:
+        text: The other candidate moves smoothly between the two languages. You are a close second, which is not the same.
+        effects:
+          - { type: stat, key: stress, delta: 3 }
+          - { type: stat, key: ambition, delta: -1 }
+  - id: stay
+    label: Stay where you are
+    outcome:
+      text: A quiet year doing the work you know in the language you do it in. You tell yourself that is enough, and mostly it is.
+      effects:
+        - { type: stat, key: stress, delta: -1 }

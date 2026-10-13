@@ -16,6 +16,7 @@ import { castCandidates, castEvent, uncast } from './casting';
 import { successChance } from './checks';
 import { applyEffects } from './effects';
 import { eventIndex, eventWeight } from './selection';
+import { US_WORDS } from '../testFixtures';
 import { SELF_ROLE, sinceText, type EVENT_TEXT_VALUES } from './text';
 
 /** An event with test defaults; override anything. */
@@ -285,7 +286,7 @@ describe('selection', () => {
 describe('pacing director', () => {
   const years = (seed: string, count: number, bundle = content) => {
     const out: LifeState[] = [];
-    let life = createLife({ mode: 'random', seed, birthYear: 2026 }, bundle);
+    let life = createLife({ mode: 'random', seed, birthYear: 2026, countryId: 'us' }, bundle);
     const choices = createRng(`${seed}:c`);
     for (let i = 0; i < count && life.phase !== 'dead'; i++) {
       life = beginYear(life, bundle);
@@ -356,7 +357,7 @@ describe('pacing director', () => {
     // stray_dog → dog_chews_shoes in 1–2 years (if the dog was kept).
     let checked = 0;
     for (let s = 0; s < 400 && checked < 5; s++) {
-      const life = playLife(createLife({ mode: 'random', seed: `chain-${s}`, birthYear: 2026 }, content), content);
+      const life = playLife(createLife({ mode: 'random', seed: `chain-${s}`, birthYear: 2026, countryId: 'us' }, content), content);
       const kept = life.history.find((e) => e.tags.includes('stray_dog'));
       if (!kept || !life.eventLog.dog_chews_shoes) continue;
       const delay = life.eventLog.dog_chews_shoes.lastYear - kept.year;
@@ -440,14 +441,14 @@ describe('resolveChoice', () => {
 
 describe('whole lives with events', () => {
   it('replay identically for the same seed and choices', () => {
-    const a = playLife(createLife({ mode: 'random', seed: 'replay', birthYear: 2026 }, content), content);
-    const b = playLife(createLife({ mode: 'random', seed: 'replay', birthYear: 2026 }, content), content);
+    const a = playLife(createLife({ mode: 'random', seed: 'replay', birthYear: 2026, countryId: 'us' }, content), content);
+    const b = playLife(createLife({ mode: 'random', seed: 'replay', birthYear: 2026, countryId: 'us' }, content), content);
     expect(a).toEqual(b);
     expect(a.inputLog.filter((r) => r.kind === 'choice').length).toBeGreaterThan(20);
   });
 
   it('keep the same queue after saving and reloading with events pending', () => {
-    let life = createLife({ mode: 'random', seed: 'reload-events', birthYear: 2026 }, content);
+    let life = createLife({ mode: 'random', seed: 'reload-events', birthYear: 2026, countryId: 'us' }, content);
     while (life.phase === 'yearStart') {
       life = beginYear(life, content);
       if (life.phase === 'events') break;
@@ -462,7 +463,7 @@ describe('whole lives with events', () => {
   });
 
   it('track lifetime happiness for the obituary', () => {
-    const life = playLife(createLife({ mode: 'random', seed: 'happy', birthYear: 2026 }, content), content);
+    const life = playLife(createLife({ mode: 'random', seed: 'happy', birthYear: 2026, countryId: 'us' }, content), content);
     expect(life.lifetime.years).toBe(life.character.age);
     const average = lifetimeHappiness(life);
     expect(average).toBeGreaterThanOrEqual(0);
@@ -543,8 +544,9 @@ describe('event text', () => {
           bizCity: 'Chicago',
           bizStyle: 'neighborhood café',
           bizTitle: 'barista',
+          ...US_WORDS,
         } satisfies Record<(typeof EVENT_TEXT_VALUES)[number] | 'petKind' | 'vehicle' | 'homeCity', string | number>;
-        const context = { roles, values };
+        const context = { roles, values, money: (n: number) => `$${n}` };
         const texts = [def.title, def.text, ...(def.choices ?? []).map((c) => c.label)];
         const outcomes = def.autoOutcome ? [def.autoOutcome] : (def.choices ?? []).flatMap((c) => (c.outcome ? [c.outcome] : [c.check!.success, c.check!.failure]));
         for (const o of outcomes) {

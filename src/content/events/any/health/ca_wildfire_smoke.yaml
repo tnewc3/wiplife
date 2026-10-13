@@ -1,0 +1,46 @@
+id: ca_wildfire_smoke
+title: The orange sky
+text: >-
+  The sun comes up like a coin in a glass of dirty water. Wildfires hundreds
+  of kilometres away have put smoke over the city, and the air-quality app
+  has gone from yellow to dark red.
+tone: serious
+category: health
+rarity: uncommon
+countries: [ca]
+lifeStages: [child, teen, youngAdult, adult, senior]
+requires:
+  any:
+    - { city: vancouver }
+    - { city: small_town_ca }
+weight: { base: 5 }
+cooldownYears: 6
+choices:
+  - id: indoors
+    label: Stay indoors with the windows shut
+    outcome:
+      text: >-
+        Three days of damp towels on the sills and a filter you bought in a hurry
+        ({$90}). By the weekend the sky returns, and so does your patience.
+      effects:
+        - { type: money, delta: -90 }
+        - { type: stat, key: stress, delta: 2 }
+  - id: mask
+    label: Carry on and wear a mask outside
+    outcome:
+      text: >-
+        You go to work in a good mask and come home with a cough. The mask
+        helps. The cough shows how much.
+      effects:
+        - { type: stat, key: health, delta: -2 }
+        - { type: stat, key: stress, delta: 2 }
+  - id: leave
+    label: Drive somewhere with clear air for a few days
+    outcome:
+      text: >-
+        A motel, a long drive and a lake with no smell of smoke on it. You pay
+        {$320} and come back feeling like a person.
+      effects:
+        - { type: money, delta: -320 }
+        - { type: stat, key: health, delta: 1 }
+        - { type: stat, key: happiness, delta: 2 }

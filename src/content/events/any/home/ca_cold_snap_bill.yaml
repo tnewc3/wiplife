@@ -1,0 +1,48 @@
+id: ca_cold_snap_bill
+title: Minus thirty-five
+text: >-
+  The cold snap lasts nine days. The thermostat never leaves the dial, and the
+  electricity bill that follows arrives in an envelope that feels heavier than
+  it should.
+tone: neutral
+category: home
+rarity: common
+countries: [ca]
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { home: { kind: [owned, renting] } }
+weight: { base: 5 }
+cooldownYears: 5
+cast:
+  mate: { kind: partner, presence: household, optional: true }
+choices:
+  - id: pay
+    label: Pay it and add a draft seal to the windows
+    outcome:
+      text: >-
+        You pay {$420} and spend a Saturday with a hair dryer and a roll of
+        window film. The apartment is warmer than it has ever been.
+      effects:
+        - { type: money, delta: -420 }
+        - { type: stat, key: discipline, delta: 1 }
+  - id: plan
+    label: Move to a levelled billing plan
+    outcome:
+      text: >-
+        The utility spreads the cost into a flat monthly figure. You pay a little
+        more each month and never open an envelope with dread again. This year
+        costs {$300}.
+      effects:
+        - { type: money, delta: -300 }
+        - { type: stat, key: stress, delta: -2 }
+  - id: ignore
+    label: Lower the thermostat and put on a sweater
+    outcome:
+      text: >-
+        You wear two sweaters and a toque indoors for the rest of the winter. The
+        next bill is smaller by {$150}, and so is your mood.
+      effects:
+        - { type: money, delta: 150 }
+        - { type: stat, key: happiness, delta: -2 }

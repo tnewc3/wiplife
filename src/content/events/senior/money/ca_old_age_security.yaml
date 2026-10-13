@@ -1,0 +1,41 @@
+id: ca_old_age_security
+title: The first deposit
+text: >-
+  The deposit arrives on a quiet Wednesday, a month after your sixty-fifth
+  birthday. Old Age Security is small and steady, and after forty years of
+  paycheques it feels strange to be paid just for having kept going.
+tone: light
+category: money
+rarity: uncommon
+countries: [ca]
+lifeStages: [senior]
+requires: { age: { gte: 65 } }
+weight: { base: 20 }
+once: true
+choices:
+  - id: save
+    label: Put it all aside
+    outcome:
+      text: Every month the same small deposit goes into the same account. You are not sure what it is for, but it feels good to have {$400} more behind you.
+      effects:
+        - { type: money, delta: 400 }
+        - { type: stat, key: stress, delta: -2 }
+  - id: treat
+    label: Spend the first one on a proper dinner
+    outcome:
+      text: >-
+        Candles, a good bottle and a table by the window. The bill is {$180} and
+        you do not look at it twice.
+      effects:
+        - { type: money, delta: 400 }
+        - { type: money, delta: -180 }
+        - { type: stat, key: happiness, delta: 3 }
+  - id: gift
+    label: Give it to a grandchild for school
+    outcome:
+      text: The first deposit and {$250} more become a laptop for a grandchild. You tell yourself it is practical, and it is.
+      effects:
+        - { type: money, delta: 400 }
+        - { type: money, delta: -250 }
+        - { type: stat, key: kindness, delta: 1 }
+        - { type: stat, key: happiness, delta: 2 }

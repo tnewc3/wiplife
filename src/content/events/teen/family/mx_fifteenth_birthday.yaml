@@ -1,0 +1,48 @@
+id: mx_fifteenth_birthday
+title: Your fifteenth
+text: >-
+  Turning fifteen is a big birthday in many Mexican families, and yours has been
+  talked about for a year. Some relatives want a hall, a cake with tiers and a
+  dance. Others quietly suggest that the money could go somewhere else.
+tone: light
+category: family
+rarity: common
+countries: [mx]
+lifeStages: [teen]
+requires: { age: { gte: 15, lte: 15 } }
+weight: { base: 30 }
+once: true
+cast:
+  parent: { kind: parent, presence: household }
+choices:
+  - id: big
+    label: Have the big party
+    outcome:
+      text: >-
+        A hall, a band, relatives from three cities and someone who cries before
+        the first song. The party costs {$3200}, and you will remember all of it.
+      effects:
+        - { type: money, delta: -3200 }
+        - { type: relationship, role: parent, affection: 6 }
+        - { type: stat, key: happiness, delta: 4 }
+  - id: small
+    label: Have a dinner at home with the people who matter
+    outcome:
+      text: >-
+        A table in the courtyard, a cake {parent.name} baked and forty people
+        who actually know you. It costs {$400} and means just as much.
+      effects:
+        - { type: money, delta: -400 }
+        - { type: relationship, role: parent, affection: 7 }
+        - { type: stat, key: happiness, delta: 3 }
+  - id: gift
+    label: Ask for the money to go toward school instead
+    outcome:
+      text: >-
+        {parent.name} is quiet for a moment and then puts {$1500} into an
+        envelope with your name on it. The family stays quiet for a week, and
+        then everyone pretends it was their idea.
+      effects:
+        - { type: money, delta: 1500 }
+        - { type: stat, key: ambition, delta: 2 }
+        - { type: relationship, role: parent, affection: 3 }

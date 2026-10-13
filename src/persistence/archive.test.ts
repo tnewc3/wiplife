@@ -23,7 +23,7 @@ function freshDb(name = `wiplife-archive-test-${++n}`): WiplifeDb {
   return db;
 }
 
-const random = (seed: string) => createLife({ mode: 'random', seed, birthYear: 2026 }, content);
+const random = (seed: string) => createLife({ mode: 'random', seed, birthYear: 2026, countryId: 'us' }, content);
 const finished = (seed: string): ArchivedLife => archiveEntry(liveOut(random(seed)), content);
 const at = (minute: number) => new Date(`2026-05-01T10:${String(minute).padStart(2, '0')}:00.000Z`);
 

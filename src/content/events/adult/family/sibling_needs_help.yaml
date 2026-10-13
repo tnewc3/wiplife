@@ -3,7 +3,7 @@ title: A favor between siblings
 text: >-
   {sibling.name} calls late, voice tight. {sibling.They} {sibling:is|are} in a
   hole: behind on rent, a car repossessed, the works. {sibling.They}
-  {sibling:needs|need} $3,000 and {sibling:hates|hate} asking.
+  {sibling:needs|need} {$3000} and {sibling:hates|hate} asking.
 tone: serious
 category: family
 rarity: common

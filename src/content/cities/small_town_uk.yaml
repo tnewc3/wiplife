@@ -1,0 +1,21 @@
+# A small British town — cheap to live, with few job openings.
+id: small_town_uk
+countryId: uk
+name: Small Town
+blurb: "Cheap to live · Few job openings"
+costOfLiving: 0.72
+baseRent: 11000
+baseHomePrice: 190000
+carDependence: 0.85
+salaryMultiplier: 0.66
+jobMarket:
+  professional: 28
+  trade: 45
+  gig: 35
+schools:
+  high: Marshfield Comprehensive School
+  community: Fenland Further Education College
+  state: Midshire University
+  elite: Greyfriars University
+  trade: Market Street Technical College
+  grad: Shire Graduate School

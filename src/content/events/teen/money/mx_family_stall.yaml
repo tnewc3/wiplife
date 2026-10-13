@@ -1,0 +1,49 @@
+id: mx_family_stall
+title: Saturdays at the stall
+text: >-
+  {parent.name} has run the same stall at the market for twenty years, and
+  the stall has a saying: whoever turns up on Saturday morning is family.
+  You are fourteen, and you are on the schedule.
+tone: light
+category: money
+rarity: common
+countries: [mx]
+lifeStages: [teen]
+requires: { age: { gte: 14 } }
+weight: { base: 8 }
+cooldownYears: 4
+cast:
+  parent: { kind: parent, presence: household }
+choices:
+  - id: work
+    label: Work the whole day
+    outcome:
+      text: >-
+        Five a.m. setup, a thousand small transactions and a regular who tells
+        you that you have {parent.name}'s smile. You earn {$38} and learn more than
+        school taught you that week.
+      effects:
+        - { type: money, delta: 38 }
+        - { type: relationship, role: parent, affection: 6 }
+        - { type: stat, key: discipline, delta: 2 }
+        - { type: stat, key: sociability, delta: 1 }
+  - id: half
+    label: Help in the morning and meet friends after
+    outcome:
+      text: >-
+        Four hours at the stall, an afternoon in the plaza and an arrangement
+        that suits everyone. You earn {$20}, and {parent.name} says nothing, which is
+        a kind of approval.
+      effects:
+        - { type: money, delta: 20 }
+        - { type: relationship, role: parent, affection: 3 }
+        - { type: stat, key: happiness, delta: 2 }
+  - id: skip
+    label: Say you have homework
+    outcome:
+      text: >-
+        {parent.name} nods slowly. The stall is quieter without you, and the
+        homework gets done in an hour, with the rest of the day to wonder.
+      effects:
+        - { type: relationship, role: parent, affection: -3 }
+        - { type: stat, key: smarts, delta: 1 }

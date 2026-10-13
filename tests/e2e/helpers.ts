@@ -5,6 +5,8 @@ export interface OpenOptions {
   seed?: string;
   /** Load the test content pack (tests/e2e/content) instead of the real events. */
   testPack?: boolean;
+  /** The next new life starts in this country (test builds only); a seeded life is a US life when left out. */
+  country?: string;
 }
 
 /** Opens the app and confirms the age gate. */
@@ -12,6 +14,7 @@ export async function passAgeGate(page: Page, options: OpenOptions = {}): Promis
   const params = new URLSearchParams();
   if (options.testPack) params.set('content', 'test');
   if (options.seed) params.set('seed', options.seed);
+  if (options.country) params.set('country', options.country);
   const query = params.toString();
   await page.goto(query ? `/?${query}` : '/');
   await expect(page.getByRole('heading', { name: 'Content notice' })).toBeVisible();
@@ -81,6 +84,8 @@ export interface CustomLifeData {
   /** "None", "1", "2"... */
   siblings: string;
   wealth: string;
+  /** The country's name; the United States when left out. */
+  country?: string;
   city: string;
 }
 
@@ -142,6 +147,7 @@ export async function createCustomLife(page: Page, data: CustomLifeData, onStep?
   await next();
 
   await expect(page.getByText('Step 4 of 6')).toBeVisible();
+  await page.getByRole('radio', { name: data.country ?? 'United States' }).click();
   await page.getByRole('radio', { name: data.city }).click();
   await next();
 

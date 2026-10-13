@@ -16,19 +16,20 @@ import { chance, nextInt } from '../rng';
 import type { HealthCondition, Id, LifeState, MentalCare } from '../types';
 import { noteNoticed, rollReaction } from './notice';
 import { careOf, closePeople, isNamed, isMentalKind, professionalCare } from './query';
+import { healthShare, medicalScale } from '../country';
 
 const costOfLiving = (state: LifeState, content: ContentBundle): number => content.cities[state.character.cityId]?.costOfLiving ?? 1;
 
 /** What therapy or medication costs in your city: the first visit, or each year of it. */
 export function careCost(state: LifeState, care: 'therapy' | 'medication', which: 'intake' | 'yearly', content: ContentBundle): number {
-  return wholeDollars(content.balance.mentalHealth.care[care][which] * costOfLiving(state, content));
+  return wholeDollars(content.balance.mentalHealth.care[care][which] * medicalScale(state, care, content));
 }
 
 /** What a one-time cost item (balance/mental-health.yaml costs) comes to in your city. Throws for an unknown item (the content build checks them). */
 export function mentalCostPrice(state: LifeState, item: string, content: ContentBundle): number {
   const def = content.balance.mentalHealth.costs[item];
   if (!def) throw new Error(`Unknown mental health cost item "${item}".`);
-  return wholeDollars(def.amount * costOfLiving(state, content));
+  return wholeDollars(def.amount * costOfLiving(state, content) * (def.health ? healthShare(state, def.health, content) : 1));
 }
 
 /** Pays a one-time mental health cost: a medical cost (savings, then medical debt; a child's family pays). */

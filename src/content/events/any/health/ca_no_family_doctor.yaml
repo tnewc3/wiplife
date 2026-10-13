@@ -1,0 +1,49 @@
+id: ca_no_family_doctor
+title: The waiting list
+text: >-
+  Your family doctor retired last spring, and the province's list for a new
+  one is long. Every prescription renewal now means a different clinic, a
+  different face and the same question: "who usually sees you?"
+tone: serious
+category: health
+rarity: common
+countries: [ca]
+lifeStages: [youngAdult, adult, senior]
+requires: { age: { gte: 20 } }
+weight: { base: 4 }
+cooldownYears: 8
+justified:
+  money: "The membership choice charges a clinic fee; the other choices cost nothing because the province pays for the doctor."
+cast:
+  mate: { kind: partner, presence: household, optional: true }
+choices:
+  - id: list
+    label: Stay on the list and use walk-in clinics
+    outcome:
+      text: >-
+        Two years of waiting rooms. You learn which clinics open at eight, which
+        run out of appointments by nine and which receptionist will find you a
+        gap.
+      effects:
+        - { type: stat, key: stress, delta: 3 }
+        - { type: stat, key: health, delta: -1 }
+  - id: private
+    label: Pay a private clinic for quicker visits ({$900} a year)
+    visibleIf: { money: { gte: 900 } }
+    outcome:
+      text: >-
+        A doctor who knows your name and answers the phone. It costs {$900} for the
+        year, and you feel a little uneasy about how much better it works.
+      effects:
+        - { type: money, delta: -900 }
+        - { type: stat, key: stress, delta: -2 }
+        - { type: stat, key: health, delta: 1 }
+  - id: nurse
+    label: See a nurse practitioner at the community health centre
+    outcome:
+      text: >-
+        The nurse practitioner spends twenty unhurried minutes on you and orders
+        the tests nobody had mentioned. The centre is across town, but it works.
+      effects:
+        - { type: stat, key: health, delta: 2 }
+        - { type: stat, key: stress, delta: -1 }

@@ -1,0 +1,46 @@
+id: mx_housing_credit
+title: The housing credit points
+text: >-
+  The statement from the workers' housing fund arrives with a number on it: the
+  points you have built up through years of contributions. Enough points, the
+  letter says, and you can apply for a loan to buy a home.
+tone: neutral
+category: money
+rarity: uncommon
+countries: [mx]
+lifeStages: [adult, senior]
+requires:
+  all:
+    - { age: { gte: 25 } }
+    - { career: { employed: true, retired: false } }
+    - { home: { kind: [renting, with_parents] } }
+weight: { base: 6 }
+once: true
+choices:
+  - id: apply
+    label: Apply for the credit and start looking
+    outcome:
+      text: >-
+        A month of forms, an appraisal and a visit to a notary. The credit is
+        approved, and so is the first of many fees ({$600}).
+      effects:
+        - { type: money, delta: -600 }
+        - { type: stat, key: ambition, delta: 2 }
+        - { type: stat, key: stress, delta: 2 }
+  - id: wait
+    label: Keep contributing and wait for more points
+    outcome:
+      text: >-
+        You file the statement. Every year the number grows a little and the
+        prices grow a little more.
+      effects:
+        - { type: stat, key: stress, delta: 1 }
+  - id: ask
+    label: Ask a relative who already did it how it went
+    outcome:
+      text: >-
+        An hour at a kitchen table with a very honest uncle. "It is worth it, but
+        read every line," is the verdict. You do.
+      effects:
+        - { type: stat, key: smarts, delta: 1 }
+        - { type: stat, key: stress, delta: -1 }

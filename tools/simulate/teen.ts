@@ -21,6 +21,7 @@ import { romanceUnderAgeFailures } from '../../src/engine/teen/invariants';
 import { isJuvenileEntry } from '../../src/engine/teen/trouble';
 import type { LifeState } from '../../src/engine/types';
 import type { SimulationReport, TargetResult } from './run';
+import { legalAgeOf } from '../../src/engine/country';
 
 type TeenAction = [LifeActionId, LifeActionParams];
 export type FocusPlan = TeenFocusId | 'none';
@@ -102,7 +103,7 @@ export function chooseTeenActions(life: LifeState, content: ContentBundle, rng: 
     if (t.license.stage === 'none' && chance(rng, POLICY.permit)) out.push(['get_permit', {}]);
     if (chance(rng, POLICY.lesson)) out.push(['driving_lesson', {}]);
     if (chance(rng, POLICY.lesson)) out.push(['driving_lesson', {}]);
-    if (age >= content.balance.teen.license.licenseAge && chance(rng, POLICY.test)) out.push(['take_license_test', {}]);
+    if (age >= legalAgeOf(life, 'driving', content) && chance(rng, POLICY.test)) out.push(['take_license_test', {}]);
   }
   if (t.license.stage === 'licensed' && vehiclesOf(life).length === 0 && age >= 16 && chance(rng, POLICY.firstCar)) {
     const ids = Object.keys(content.vehicles).sort().filter((id) => content.vehicles[id]!.used);

@@ -1,0 +1,34 @@
+id: ca_northern_lights
+title: Green over the lake
+text: >-
+  The phone buzzes at midnight with a message from {friend.name}: look up. Over
+  the lake a green ribbon is moving across the sky as if someone is slowly
+  pulling a curtain.
+tone: light
+category: wonder
+rarity: rare
+countries: [ca]
+lifeStages: [teen, youngAdult, adult, senior]
+requires: { age: { gte: 14 } }
+weight: { base: 3 }
+once: true
+cast:
+  friend: { kind: friend, presence: city, createIfMissing: true, newChance: 0.4 }
+choices:
+  - id: watch
+    label: Drive out to see it properly
+    outcome:
+      text: >-
+        Forty minutes of dark road and a field with other cars parked at odd
+        angles, engines off, people whispering. You stay until your toes stop
+        reporting.
+      effects:
+        - { type: relationship, role: friend, affection: 4 }
+        - { type: stat, key: happiness, delta: 4 }
+        - { type: history, text: 'You stood in a cold field and watched the northern lights.', importance: 2 }
+  - id: window
+    label: Watch from the window
+    outcome:
+      text: You watch it from the kitchen with a tea going cold. It is smaller than the photos, and better than the photos.
+      effects:
+        - { type: stat, key: happiness, delta: 2 }

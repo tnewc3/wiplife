@@ -20,6 +20,7 @@ import type { LifeState, Person, Relationship } from '../types';
 import { styleOf } from './parenting';
 import { livingChildren } from './children';
 import { renderText } from '../text';
+import { countryOf } from '../country';
 
 type Lines = Record<ParentingKey, number>;
 
@@ -108,7 +109,7 @@ function growChild(state: LifeState, rng: RngState, person: Person & { child: No
   d.fitness = clampInt(d.fitness + (health.fitnessBase - d.fitness) * health.rate + rollNormal(rng, { mean: 0, sd: health.noiseSd }), 0, 100);
 
   // Grades, from kindergarten through high school.
-  const school = content.balance.education.school;
+  const school = countryOf(state, content).school;
   if (age >= school.startAge && age < school.startAge + school.elementary + school.middle + school.high) {
     const g = children.grades;
     const grade =

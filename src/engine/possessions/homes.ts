@@ -15,6 +15,7 @@ import { writeFromGroup } from '../systems/history';
 import type { Id, LifeState, Possession, Renovation } from '../types';
 import { dropPossession } from './vehicles';
 import { homeOf, loanIdOf, nextPossessionId, possessionById, vacationHomesOf, VACATION_HOME } from './query';
+import { countryOf, sameCountry } from '../country';
 
 
 const hb = (content: ContentBundle) => content.balance.possessions.homes;
@@ -45,16 +46,17 @@ export function vacationQuote(state: LifeState, cityId: Id, content: ContentBund
   const city = content.cities[cityId];
   const price = city ? wholeDollars(city.baseHomePrice * v.priceShare) : 0;
   const closingCosts = wholeDollars(price * eco.ownership.closingCosts);
-  const downPayment = wholeDollars(price * eco.ownership.downPayment);
+  const downPayment = wholeDollars(price * countryOf(state, content).housing.downPayment);
   const mortgage = price - downPayment;
-  const rate = eco.interest.debts.mortgage + v.rateExtra;
+  const rate = countryOf(state, content).housing.mortgageRate + v.rateExtra;
   const yearlyPayment = mortgage > 0 ? Math.max(eco.debts.minPayment, amortizedPayment(mortgage, rate, eco.debts.termYears.mortgage)) : 0;
   const cashNeeded = downPayment + closingCosts;
   const income = (state.finances.lastLedger?.gross ?? 0) + (state.finances.lastLedger?.retirement ?? 0);
   const existing = state.finances.debts.filter((d) => d.kind === 'mortgage').reduce((sum, d) => sum + d.minPayment, 0);
   const bankrupt = state.finances.bankruptcyYear;
   let blocked: VacationBlock | null = null;
-  if (!city || city.retired) blocked = 'unknown';
+  // A vacation home abroad is for travel (W5) and emigration (W6) to answer.
+  if (!city || city.retired || !sameCountry(state.character.cityId, cityId, content)) blocked = 'unknown';
   else if (!isIndependent(state, content)) blocked = 'age';
   else if (state.housing.kind === 'incarcerated') blocked = 'prison';
   else if (vacationHomesOf(state).length >= content.balance.possessions.limits.vacationHomes) blocked = 'limit';

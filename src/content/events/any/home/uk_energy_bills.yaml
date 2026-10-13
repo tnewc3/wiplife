@@ -1,0 +1,57 @@
+id: uk_energy_bills
+title: The new unit rate
+text: >-
+  The regulator announces a new price cap, and your supplier follows with a
+  letter that has a lot of numbers and one sentence that matters: from next
+  month, your direct debit goes up.
+tone: serious
+category: home
+rarity: common
+countries: [uk]
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { home: { kind: [owned, renting] } }
+weight: { base: 6 }
+cooldownYears: 5
+cast:
+  mate: { kind: partner, presence: household, optional: true }
+choices:
+  - id: absorb
+    label: Pay the increase and say nothing
+    outcome:
+      text: >-
+        {$520} more across the year. You wear a jumper indoors from October and
+        learn what a "standing charge" is.
+      effects:
+        - { type: money, delta: -520 }
+        - { type: stat, key: stress, delta: 2 }
+  - id: switch
+    label: Spend an evening comparing suppliers
+    check:
+      base: 55
+      stats: [{ key: smarts, weight: 0.3 }, { key: discipline, weight: 0.3 }]
+      success:
+        text: Three comparison sites, one phone call and a fixed deal that holds the rate for two years. The saving is {$310}.
+        effects:
+          - { type: money, delta: 310 }
+          - { type: stat, key: confidence, delta: 1 }
+      failure:
+        text: >-
+          Every deal on the list is as high as the old one, and the cheapest
+          supplier has gone bust by the time you ring. The increase stands, at
+          {$520}.
+        effects:
+          - { type: money, delta: -520 }
+          - { type: stat, key: stress, delta: 2 }
+  - id: cut
+    label: Turn the heating down and live by the hot water bottle
+    outcome:
+      text: >-
+        A hot water bottle, a blanket and a very careful use of the oven. You
+        save {$240} and catch two colds.
+      effects:
+        - { type: money, delta: 240 }
+        - { type: stat, key: health, delta: -2 }
+        - { type: stat, key: happiness, delta: -1 }

@@ -1,0 +1,43 @@
+id: uk_bonfire_night
+title: Fifth of November
+text: >-
+  The sky over the park is full of bangs and smoke, and the smell of burnt
+  sugar drifts across the field. Somebody's dad has been in charge of the
+  bonfire for twenty years and nobody has asked how.
+tone: light
+category: community
+rarity: common
+countries: [uk]
+lifeStages: [child, teen, youngAdult, adult, senior]
+requires: { age: { gte: 5 } }
+weight: { base: 5 }
+cooldownYears: 3
+cast:
+  friend: { kind: friend, presence: city, createIfMissing: true, newChance: 0.4 }
+choices:
+  - id: park
+    label: Go to the organised display
+    outcome:
+      text: >-
+        A toffee apple, a sparkler and a firework that lights the whole field.
+        The ticket is {$9}, and you watch the crowd more than the sky.
+      effects:
+        - { type: money, delta: -9 }
+        - { type: relationship, role: friend, affection: 3 }
+        - { type: stat, key: happiness, delta: 2 }
+  - id: garden
+    label: Have your own display in the garden
+    outcome:
+      text: >-
+        A box of fireworks, a bucket of water and a careful safety talk. It goes
+        better than any of you expected, and the dog hides in the bath.
+      effects:
+        - { type: money, delta: -45 }
+        - { type: relationship, role: friend, affection: 4 }
+        - { type: stat, key: happiness, delta: 2 }
+  - id: window
+    label: Stay indoors and watch from the window
+    outcome:
+      text: The curtains rattle, the whole street flashes and you hold a mug of tea. It is the best seat in the house.
+      effects:
+        - { type: stat, key: stress, delta: -1 }

@@ -1,0 +1,47 @@
+id: ca_cottage_weekend
+title: A weekend at the lake
+text: >-
+  {friend.name}'s family has a cottage two hours north, and the invitation comes
+  with a packing list that includes bug spray, a sleeping bag and a long
+  tolerance for a shared bathroom. The lake is cold. The company is not.
+tone: light
+category: friends
+rarity: common
+countries: [ca]
+lifeStages: [youngAdult, adult]
+requires: { age: { gte: 19 } }
+weight: { base: 6 }
+cooldownYears: 4
+cast:
+  friend: { kind: friend, presence: city }
+choices:
+  - id: go
+    label: Pack the car and go
+    outcome:
+      text: >-
+        Dock-end conversations that last until midnight, a canoe that goes
+        in circles and a thunderstorm that makes everyone laugh. You pay for the
+        groceries ({$120}).
+      effects:
+        - { type: money, delta: -120 }
+        - { type: relationship, role: friend, affection: 8 }
+        - { type: stat, key: happiness, delta: 3 }
+        - { type: stat, key: stress, delta: -3 }
+  - id: day
+    label: Go up for the day only
+    outcome:
+      text: >-
+        Four hours on the road for six on the dock. You make it home before dark
+        and sleep like a person who has been outdoors.
+      effects:
+        - { type: relationship, role: friend, affection: 3 }
+        - { type: stat, key: happiness, delta: 1 }
+  - id: decline
+    label: Say you have too much on
+    outcome:
+      text: >-
+        {friend.name} says that is fine. You see the photos on Monday, and
+        count the number of inside jokes that now exist without you.
+      effects:
+        - { type: relationship, role: friend, affection: -3 }
+        - { type: stat, key: stress, delta: 1 }

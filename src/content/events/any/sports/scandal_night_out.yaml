@@ -12,7 +12,8 @@ recurring: true
 lifeStages: [youngAdult, adult, senior]
 requires:
   all:
-    - { age: { gte: 21 } }
+    - { age: { gte: 18 } }
+    - { legalAge: drinking }
     - { sports: { active: true } }
     - { sports: { level: [pro] } }
     - { fame: { fame: { gte: 25 } } }

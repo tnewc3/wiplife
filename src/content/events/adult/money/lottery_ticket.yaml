@@ -1,6 +1,6 @@
 id: lottery_ticket
-title: Two dollars
-text: The jackpot is enormous this week, and a ticket costs two dollars.
+title: A {$2} ticket
+text: The jackpot is enormous this week, and a ticket costs {$2}.
 tone: light
 category: money
 rarity: common
@@ -11,7 +11,7 @@ cooldownYears: 12
 recurring: true
 # C1: reviewed build warnings kept on purpose (docs/consistency-review.md).
 justified:
-  money: "Keeping your two dollars is the point: nothing is spent."
+  money: "Keeping your {$2} is the point: nothing is spent."
 choices:
   - id: buy
     label: Buy a ticket
@@ -19,7 +19,7 @@ choices:
       base: 0
       stats: [{ key: luck, weight: 0.1 }]
       success:
-        text: Not the jackpot, but you win $5,000. You check the numbers eleven times.
+        text: Not the jackpot, but you win {$5000}. You check the numbers eleven times.
         effects:
           - { type: money, delta: 5000 }
           - { type: stat, key: happiness, delta: 5 }
@@ -28,6 +28,6 @@ choices:
         effects:
           - { type: money, delta: -2 }
   - id: save
-    label: Keep your two dollars
+    label: Keep your {$2}
     outcome:
-      text: Your two dollars remain safe.
+      text: Your {$2} remains safe.

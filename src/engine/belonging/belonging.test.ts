@@ -63,7 +63,7 @@ describe('faith at birth', () => {
     let raised = 0;
     const seen = new Set<string>();
     for (let i = 0; i < 300; i++) {
-      const life = createLife({ mode: 'random', seed: `faith-${i}`, birthYear: 2000 }, content);
+      const life = createLife({ mode: 'random', seed: `faith-${i}`, birthYear: 2000, countryId: 'us' }, content);
       const b = life.belonging;
       if (b.faith.id !== null) {
         withFaith++;
@@ -83,8 +83,8 @@ describe('faith at birth', () => {
   });
 
   it('is the same for the same seed, and the family shares the household’s faith', () => {
-    const a = createLife({ mode: 'random', seed: 'faith-same', birthYear: 2000 }, content);
-    const b = createLife({ mode: 'random', seed: 'faith-same', birthYear: 2000 }, content);
+    const a = createLife({ mode: 'random', seed: 'faith-same', birthYear: 2000, countryId: 'us' }, content);
+    const b = createLife({ mode: 'random', seed: 'faith-same', birthYear: 2000, countryId: 'us' }, content);
     expect(a.belonging).toEqual(b.belonging);
     // Parents get the household's faith (most of the time), each worked out from the seed and no randomness of the life's.
     const parent = Object.values(a.people).find((p) => a.relationships[p.id]?.kind === 'parent')!;
@@ -594,7 +594,7 @@ describe('events about groups', () => {
 describe('lives with groups stay consistent', () => {
   it('whole lives with a player who joins groups keep every invariant', () => {
     for (let i = 0; i < 4; i++) {
-      const start = produce(createLife({ mode: 'random', seed: `whole-${i}`, birthYear: 1990 }, content), () => {});
+      const start = produce(createLife({ mode: 'random', seed: `whole-${i}`, birthYear: 1990, countryId: 'us' }, content), () => {});
       const aged = produce(lifeAtAge(`whole-${i}`, 20), (d) => {
         ensureCity(d, d.character.cityId, content);
         const g = cityGroups(d, d.character.cityId, content).find((x) => content.groups[x.defId]!.maxAge === undefined && content.groups[x.defId]!.minAge <= 18);

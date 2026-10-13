@@ -1,0 +1,51 @@
+id: ca_rink_fees
+title: The registration form
+text: >-
+  {kid.name} wants to play youth hockey. The registration form has a line for the
+  league, a line for the equipment and a line for the ice time, and the total
+  at the bottom is a number you read twice.
+tone: neutral
+category: parenting
+rarity: common
+countries: [ca]
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 20 } }
+    - { family: { minors: { gte: 1 } } }
+weight: { base: 6 }
+cooldownYears: 5
+cast:
+  kid: { kind: child, presence: household, age: { min: 6, max: 14 } }
+choices:
+  - id: sign
+    label: Sign up for the full season ({$1400})
+    visibleIf: { money: { gte: 1400 } }
+    outcome:
+      text: >-
+        Five a.m. practices, cold rinks and a hockey bag that follows you around
+        the house. {kid.name} is as happy as {kid.they} {kid:has|have} ever looked, and you
+        are as cold as you can stand.
+      effects:
+        - { type: money, delta: -1400 }
+        - { type: relationship, role: kid, affection: 6 }
+        - { type: stat, key: stress, delta: 2 }
+  - id: used
+    label: Buy used equipment and join a smaller league ({$500})
+    visibleIf: { money: { gte: 500 } }
+    outcome:
+      text: >-
+        The league is friendlier and the gear smells of other people's winters.
+        {kid.name} makes two friends and a goal in November.
+      effects:
+        - { type: money, delta: -500 }
+        - { type: relationship, role: kid, affection: 4 }
+  - id: skates
+    label: Pick a pair of skates and the local free skate
+    outcome:
+      text: >-
+        Sunday afternoons at the public rink. {kid.name} spends most of them
+        holding your hand and the rest falling over, and loves all of it.
+      effects:
+        - { type: relationship, role: kid, affection: 3 }
+        - { type: stat, key: happiness, delta: 1 }

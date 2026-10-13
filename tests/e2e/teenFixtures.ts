@@ -33,7 +33,7 @@ export interface TeenLife {
 export function teenLife(options: TeenLife): LifeState {
   const content = pack();
   const age = options.age ?? 15;
-  const base = createLife({ mode: 'random', seed: options.seed, birthYear: 2000 }, content);
+  const base = createLife({ mode: 'random', seed: options.seed, birthYear: 2000, countryId: 'us' }, content);
   // Move to two years before the age (without living them), then live those two: the teen step runs and sets up the school and the rules at home.
   const from = age - 2;
   let life = produce(base, (d) => {

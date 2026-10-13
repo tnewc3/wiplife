@@ -10,6 +10,7 @@ import type { RngState } from '../rng';
 import type { Id, LifeState } from '../types';
 import { rollJob } from './career';
 import { ageOfPerson, defaultLife } from './model';
+import { pensionAge } from '../country';
 
 export type HelpAction = 'bail' | 'rehab' | 'treatment' | 'job_lead' | 'move_in' | 'pay_care' | 'leave_care';
 
@@ -38,7 +39,7 @@ export function lifeHelp(state: LifeState, personId: Id, action: HelpAction, rng
     case 'job_lead': {
       const { adultAge } = content.balance.relationships;
       const age = ageOfPerson(state, person);
-      if (person.occupation !== undefined || age < adultAge || age >= content.balance.economy.retirement.age || life.retired) return;
+      if (person.occupation !== undefined || age < adultAge || age >= pensionAge(state, content) || life.retired) return;
       const job = rollJob(rng, content, content.balance.people, person, person.wealthLevel, life.background, age);
       person.occupation = job.jobId;
       person.wealthLevel = job.wealth;

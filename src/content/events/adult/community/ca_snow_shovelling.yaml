@@ -1,0 +1,48 @@
+id: ca_snow_shovelling
+title: The shared sidewalk
+text: >-
+  The city's rule is that you clear the sidewalk in front of your house within
+  a day of a snowfall. {neighbor.name} next door clears a neat rectangle exactly
+  as wide as the property line and not an inch past it.
+tone: neutral
+category: community
+rarity: common
+countries: [ca]
+lifeStages: [adult, senior]
+requires:
+  all:
+    - { age: { gte: 25 } }
+    - { home: { kind: [owned, renting] } }
+weight: { base: 6 }
+cooldownYears: 4
+cast:
+  neighbor: { kind: acquaintance, ageOffset: { min: -20, max: 20 }, createIfMissing: true, newChance: 0.5, presence: city }
+choices:
+  - id: both
+    label: Do both sides of the line
+    outcome:
+      text: >-
+        You do both sidewalks at six in the morning. A week later a coffee
+        appears on your step. Nobody mentions it.
+      effects:
+        - { type: relationship, role: neighbor, affection: 6 }
+        - { type: stat, key: fitness, delta: 1 }
+        - { type: stat, key: stress, delta: 1 }
+  - id: blower
+    label: Chip in for a snow blower together ({$450})
+    visibleIf: { money: { gte: 450 } }
+    outcome:
+      text: >-
+        You and {neighbor.name} split the machine and a handshake. It is the
+        loudest friendship on the street, and the most efficient.
+      effects:
+        - { type: money, delta: -450 }
+        - { type: relationship, role: neighbor, affection: 8 }
+  - id: ignore
+    label: Clear only your own
+    outcome:
+      text: >-
+        You keep exactly to your rectangle. Neither of you says anything, and
+        both of you know.
+      effects:
+        - { type: relationship, role: neighbor, affection: -3 }

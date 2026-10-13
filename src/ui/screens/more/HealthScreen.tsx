@@ -68,7 +68,7 @@ export function HealthScreen({ life }: { life: LifeState }) {
         <p className="mt-1 text-muted">
           {view.familyPays
             ? 'Your family takes you and pays the bill.'
-            : `A visit costs about ${money(view.doctor.visitCost)}${view.doctor.treatmentCost > 0 ? `, and treatment up to ${money(view.doctor.treatmentCost)} more` : ''}. What your savings can’t cover becomes medical debt.`}
+            : `A visit costs about ${money(view.doctor.visitCost)}${view.doctor.treatmentCost > 0 ? `, and treatment up to ${money(view.doctor.treatmentCost)} more` : ''}. What your savings can’t cover becomes medical debt. ${view.careBlurb}`}
         </p>
         {view.doctor.block ? (
           <p className="mt-2" data-testid="doctor-status">

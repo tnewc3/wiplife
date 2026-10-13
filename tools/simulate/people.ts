@@ -365,7 +365,7 @@ export class PipelineTimer {
  * and the slowest, in milliseconds.
  */
 export function measureFullCircle(content: ContentBundle, people: number, years: number): { people: number; meanMs: number; maxMs: number } {
-  let life = createLife({ mode: 'random', seed: 'circle', birthYear: 2000 }, content);
+  let life = createLife({ mode: 'random', seed: 'circle', birthYear: 2000, countryId: 'us' }, content);
   // Grow up to 35 without events getting in the way: only the date and age matter for the step.
   life = produce(life, (d) => {
     d.currentYear = d.birthYear + 35;

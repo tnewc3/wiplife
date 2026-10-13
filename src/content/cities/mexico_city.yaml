@@ -1,0 +1,21 @@
+# Mexico City — the capital: the country's biggest job market and its highest prices.
+id: mexico_city
+countryId: mx
+name: Mexico City
+blurb: "Biggest job market · Highest prices in the country"
+costOfLiving: 0.52
+baseRent: 7800
+baseHomePrice: 120000
+carDependence: 0.35
+salaryMultiplier: 0.4
+jobMarket:
+  professional: 80
+  trade: 60
+  gig: 80
+schools:
+  high: Preparatoria Chapultepec
+  community: Universidad Tecnológica del Valle
+  state: Universidad Pública del Centro
+  elite: Universidad Alameda
+  trade: Instituto Técnico Reforma
+  grad: Escuela de Posgrado Insurgentes

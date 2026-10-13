@@ -50,6 +50,7 @@ import { addHistory } from '../systems/history';
 import { renderText, type TextContext } from '../text';
 import type { Id, LifeState } from '../types';
 import { keepPossessionText, textContext } from './text';
+import { healthShare, scaledAmount } from '../country';
 
 export interface EffectContext {
   /** The event (or, for E1 interactions, the interaction) the effects come from: its id and rarity. */
@@ -83,9 +84,10 @@ const handlers: { [T in Effect['type']]: Handler<T> } = {
   stat: (state, effect) => adjustScore(state, effect.key, effect.delta),
 
   money: (state, effect, ctx) => {
-    // Savings never go below zero: past the independence age the rest is debt.
-    if (effect.delta >= 0) earn(state, effect.delta);
-    else spend(state, -effect.delta, ctx.content);
+    // Savings never go below zero: past the independence age the rest is debt. Amounts are written at US prices (W4a).
+    const delta = scaledAmount(state, effect.delta, ctx.content);
+    if (delta >= 0) earn(state, delta);
+    else spend(state, -delta, ctx.content);
   },
 
   rentMonths: (state, effect, ctx) => {
@@ -101,7 +103,11 @@ const handlers: { [T in Effect['type']]: Handler<T> } = {
     if (!isIndependent(state, ctx.content)) return;
     switch (effect.action) {
       case 'add':
-        if (effect.kind && (effect.amount || effect.item)) addDebt(state, effect.kind, effect.amount ?? costPrice(state, effect.item!, ctx.content), ctx.content);
+        // A fixed amount is written at US prices (W4a); a medical debt is also only the share of the bill you pay where you live.
+        if (effect.kind && (effect.amount || effect.item)) {
+          const amount = effect.amount !== undefined ? scaledAmount(state, effect.amount * (effect.kind === 'medical' ? healthShare(state, 'treatment', ctx.content) : 1), ctx.content) : costPrice(state, effect.item!, ctx.content);
+          addDebt(state, effect.kind, amount, ctx.content);
+        }
         return;
       case 'forgive':
         forgiveDebts(state, effect.share ?? 0, ctx.content, effect.kinds);
@@ -163,7 +169,7 @@ const handlers: { [T in Effect['type']]: Handler<T> } = {
         if (edu.current) edu.current.boost = Math.min(2, Math.max(-2, edu.current.boost + (effect.value ?? 0)));
         return;
       case 'scholarship':
-        addScholarshipFund(state, effect.value ?? 0);
+        addScholarshipFund(state, scaledAmount(state, effect.value ?? 0, ctx.content));
         return;
       case 'drop_out':
         leaveSchool(state, 'droppedOut', ctx.content);

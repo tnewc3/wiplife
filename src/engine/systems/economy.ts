@@ -47,10 +47,11 @@ import { chance } from '../rng';
 import type { Debt, LifeState, StatKey } from '../types';
 import { yearIncome } from './career';
 import { writeFromGroup } from './history';
+import { countryOf } from '../country';
 
-/** Estimated tax on a year's gross income: marginal brackets from balance, rounded to whole dollars. */
-export function taxOn(gross: number, content: ContentBundle): number {
-  const { brackets } = content.balance.economy.tax;
+/** Estimated tax on a year's gross income: the country's marginal brackets (countries/*.yaml tax), rounded to whole dollars. */
+export function taxOn(gross: number, state: LifeState, content: ContentBundle): number {
+  const { brackets } = countryOf(state, content).tax;
   let tax = 0;
   brackets.forEach((bracket, i) => {
     const top = brackets[i + 1]?.from ?? Infinity;
@@ -139,12 +140,12 @@ export function runEconomy(state: LifeState, content: ContentBundle): void {
   }
   // A home you own keeps its value while you're in prison (Stage 9).
   if (state.housing.homeValue !== undefined) {
-    state.housing.homeValue = Math.max(0, wholeDollars(state.housing.homeValue * (1 + eco.ownership.appreciation)));
+    state.housing.homeValue = Math.max(0, wholeDollars(state.housing.homeValue * (1 + countryOf(state, content).housing.appreciation)));
   }
 
   // 3. Income, tax and garnishment. The benefit comes from the record so far.
   const gross = yearIncome(state, content);
-  const tax = taxOn(gross, content);
+  const tax = taxOn(gross, state, content);
   const retirement = retirementBenefit(state, content);
   recordEarnings(state, gross, content);
   const garnishedOn = new Map<string, number>();

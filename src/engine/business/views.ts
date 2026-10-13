@@ -24,6 +24,7 @@ import { fitMult, managerWage, salePrice, totalToStart, typicalLocation, valuati
 import { hasLicenseHolder, livingStaff, managerOf, myBusinesses, yourShare, youHoldLicense } from './query';
 import { hireCandidates, hiringCost, staffRoom, type Hireable } from './staff';
 import { buyoutPrice, expandCost } from './found';
+import { sameCountryCities } from '../country';
 
 export interface ReportView {
   year: number;
@@ -368,9 +369,7 @@ export function getBusinessScreen(state: LifeState, content: ContentBundle): Bus
     owned: myBusinesses(state).map((b) => businessView(state, b, content)),
     full: state.business.items.length >= lim.businesses,
     past: state.business.past,
-    cities: Object.keys(content.cities)
-      .sort()
-      .filter((id) => !content.cities[id]!.retired)
+    cities: sameCountryCities(state.character.cityId, content)
       .map((id) => ({ id, name: content.cities[id]!.name })),
     options: startOptions(state, state.character.cityId, content),
     savings: state.finances.savings,

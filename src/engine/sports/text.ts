@@ -12,6 +12,7 @@ import { wholeDollars } from '../finance';
 import { writeFromGroup } from '../systems/history';
 import type { LifeState, SportsSeason } from '../types';
 import { ordinal, positionOf, sportPath, thisSeason } from './query';
+import { proTeamsIn } from './team';
 
 export { SPORTS_TEXT_VALUES };
 
@@ -52,7 +53,7 @@ export function sportsTextValues(state: LifeState, content: ContentBundle): Reco
       const nicks = def.sport.leagues[s.team.level].nicknames;
       return `the ${nicks[spin % nicks.length]!}`;
     }
-    const teams = def.sport.leagues.pro.teams.filter((t) => t.id !== s.team?.id);
+    const teams = proTeamsIn(def.sport, state.character.cityId, content).filter((t) => t.id !== s.team?.id);
     return teams.length === 0 ? '' : teams[spin % teams.length]!.name;
   };
   const injury = def ? state.health.conditions.find((c) => def.sport.injuries.some((i) => i.id === c.conditionId)) : undefined;

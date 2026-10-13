@@ -4,5 +4,5 @@ type: cleaning
 style: standard
 blurb: "Uniformed crews, an app for booking and recurring contracts across the metro area."
 locations: { min: 3, max: 7 }
-cities: [nyc, los_angeles, houston, chicago]
+cities: [nyc, los_angeles, houston, chicago, toronto, london, mexico_city]
 reputation: { mean: 57, sd: 7 }

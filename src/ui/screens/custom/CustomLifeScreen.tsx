@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { content } from '../../../content';
 import { GENDER_CATEGORIES } from '../../../content/schemas';
 import { InvalidInputError, maxSiblings } from '../../../engine/creation/input';
-import { getCityOptions, getPronounPresets } from '../../../engine/selectors';
+import { getCountryOptions, getPronounPresets } from '../../../engine/selectors';
 import type { FamilyWealth, Personality, Pronouns, Stats } from '../../../engine/types';
 import { useAppStore } from '../../../store/appStore';
 import { Button } from '../../components/Button';
@@ -226,24 +226,50 @@ function FamilyStep({ draft, update, errors }: StepProps) {
 }
 
 function CityStep({ draft, update, errors }: StepProps) {
+  const countries = getCountryOptions(content);
+  const country = countries.find((c) => c.id === draft.countryId);
   return (
-    <SingleChoice
-      label="Where you’re born"
-      value={draft.cityId}
-      columns={1}
-      error={errors.cityId}
-      choices={getCityOptions(content).map((c) => ({
-        value: c.id,
-        name: c.name,
-        label: (
-          <span className="flex flex-col items-start text-left">
-            <span className="text-base">{c.name}</span>
-            <span className="text-xs font-normal opacity-80">{c.blurb}</span>
-          </span>
-        ),
-      }))}
-      onChange={(cityId) => update({ cityId })}
-    />
+    <div className="flex flex-col gap-6">
+      <SingleChoice<string>
+        label="Country"
+        value={draft.countryId}
+        columns={1}
+        error={errors.countryId}
+        choices={countries.map((c) => ({
+          value: c.id,
+          name: c.name,
+          label: (
+            <span className="flex flex-col items-start text-left">
+              <span className="text-base">{c.name}</span>
+              <span className="text-xs font-normal opacity-80">
+                {c.blurb} · {c.currency}
+              </span>
+            </span>
+          ),
+        }))}
+        // Another country has other cities: the city is chosen again.
+        onChange={(countryId) => update(countryId === draft.countryId ? {} : { countryId, cityId: null })}
+      />
+      {country && (
+        <SingleChoice
+          label="City"
+          value={draft.cityId}
+          columns={1}
+          error={errors.cityId}
+          choices={country.cities.map((c) => ({
+            value: c.id,
+            name: c.name,
+            label: (
+              <span className="flex flex-col items-start text-left">
+                <span className="text-base">{c.name}</span>
+                <span className="text-xs font-normal opacity-80">{c.blurb}</span>
+              </span>
+            ),
+          }))}
+          onChange={(cityId) => update({ cityId })}
+        />
+      )}
+    </div>
   );
 }
 
@@ -292,6 +318,7 @@ function ReviewStep({ draft }: StepProps) {
     ['Family', `${draft.parents === 1 ? 'One parent' : 'Two parents'}, ${draft.siblings === 0 ? 'no' : draft.siblings} older sibling${draft.siblings === 1 ? '' : 's'}`],
     ['Wealth', draft.familyWealth ? WEALTH_LABELS[draft.familyWealth] : ''],
     ['Faith', draft.faith === 'family' ? 'Surprise me' : draft.faith === 'none' ? content.registries.belonging.noneName : (content.registries.belonging.faiths[draft.faith]?.name ?? '')],
+    ['Country', draft.countryId ? (content.countries[draft.countryId]?.name ?? '') : ''],
     ['City', city ?? ''],
   ];
   return (
@@ -328,12 +355,13 @@ const ERROR_PATHS: Record<keyof Draft, string> = {
   siblings: 'family.siblings',
   familyWealth: 'familyWealth',
   faith: 'faith',
+  countryId: 'countryId',
   cityId: 'cityId',
   stats: 'stats',
   personality: 'personality',
 };
 
-/** Multi-step custom creation: name → identity → family → city → stats → review. */
+/** Multi-step custom creation: name → identity → family → country and city → stats → review. */
 export function CustomLifeScreen() {
   const navigate = useAppStore((s) => s.navigate);
   const startCustomLife = useAppStore((s) => s.startCustomLife);

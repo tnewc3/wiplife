@@ -8,7 +8,7 @@ tone: serious
 category: work
 rarity: common
 lifeStages: [youngAdult, adult, senior]
-requires: { all: [{ age: { gte: 21 } }, { career: { employed: true } }] }
+requires: { all: [{ legalAge: drinking }, { career: { employed: true } }] }
 weight:
   base: 4
   modifiers:

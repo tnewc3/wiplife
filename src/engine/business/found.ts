@@ -17,6 +17,7 @@ import { salePrice, startupCost, totalToStart, valuation, workingCapital } from 
 import { refreshWorth } from './value';
 import { businessById, loanBalance, livingStaff, managerOf, youHoldLicense } from './query';
 import { hireStaff, hiringCost, removeStaff } from './staff';
+import { sameCountry } from '../country';
 
 type HistoryKey = keyof ContentBundle['text']['business']['history'];
 function history(state: LifeState, key: HistoryKey, values: Record<string, string>, content: ContentBundle): void {
@@ -135,7 +136,7 @@ export function startBlock(state: LifeState, p: StartParams, content: ContentBun
   if (!def || def.retired) return 'type';
   if (cleanName(p.name, content) === null) return 'name';
   if (nameTaken(state, cleanName(p.name, content)!)) return 'name';
-  if (!content.cities[p.cityId]) return 'city';
+  if (!content.cities[p.cityId] || !sameCountry(state.character.cityId, p.cityId, content)) return 'city';
   if (!(BUSINESS_STYLES as readonly string[]).includes(p.style)) return 'style';
   if (!(OWNER_ROLES as readonly string[]).includes(p.role)) return 'role';
   if (state.business.items.length >= bal.limits.businesses) return 'full';
@@ -345,7 +346,7 @@ export function expandBlock(state: LifeState, p: ExpandParams, content: ContentB
   const def = b && content.businesses[b.defId];
   if (!b || !def) return 'unknown';
   if (b.locations.length >= content.balance.business.limits.locations) return 'full';
-  if (!content.cities[p.cityId]) return 'city';
+  if (!content.cities[p.cityId] || !sameCountry(state.character.cityId, p.cityId, content)) return 'city';
   if (!(BUSINESS_STYLES as readonly string[]).includes(p.style)) return 'style';
   if (state.housing.kind === 'incarcerated') return 'away';
   const cost = expandCost(def, p.cityId, p.style, content);

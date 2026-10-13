@@ -1,0 +1,51 @@
+id: uk_pub_quiz
+title: Tuesday quiz night
+text: >-
+  The pub down the road runs a quiz every Tuesday. {friend.name} has formed a
+  team and needs one more person who knows something about geography, music
+  or, ideally, both. You know something about neither.
+tone: light
+category: friends
+rarity: common
+countries: [uk]
+lifeStages: [youngAdult, adult, senior]
+requires: { age: { gte: 18 } }
+weight: { base: 6 }
+cooldownYears: 4
+cast:
+  friend: { kind: friend, presence: city }
+choices:
+  - id: join
+    label: Join the team
+    check:
+      base: 45
+      stats: [{ key: smarts, weight: 0.4 }]
+      success:
+        text: >-
+          You know exactly one answer, the one about the Eurovision winner. The
+          team comes second, wins a bar tab and has to sing for it.
+        effects:
+          - { type: relationship, role: friend, affection: 7 }
+          - { type: stat, key: happiness, delta: 3 }
+      failure:
+        text: >-
+          The team comes second to last and wins the wooden spoon. You spend
+          {$18} on rounds and make a plan to improve at geography.
+        effects:
+          - { type: money, delta: -18 }
+          - { type: relationship, role: friend, affection: 5 }
+          - { type: stat, key: happiness, delta: 1 }
+  - id: spectate
+    label: Watch from the bar
+    outcome:
+      text: You listen to the questions, cheer when your team gets one and do not have to hold a pen. Nobody minds.
+      effects:
+        - { type: relationship, role: friend, affection: 3 }
+  - id: no
+    label: Say next week
+    outcome:
+      text: >-
+        {friend.name} says that is fine. The next week turns into the week
+        after, and the team finds someone else.
+      effects:
+        - { type: relationship, role: friend, affection: -3 }

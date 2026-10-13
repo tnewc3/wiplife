@@ -457,6 +457,20 @@ export const migrations: readonly Migration[] = [
       };
     },
   },
+  {
+    from: 23,
+    description:
+      'W4a: countries. A life now belongs to the country of its city (nothing new is stored), and a random life asks for its country when it is made. Every life saved before was lived in the United States, so the creation entry in its input log now says so: it replays as the life it was.',
+    migrate: (data) => {
+      if (!isRecord(data) || !Array.isArray(data.inputLog)) return data;
+      const inputLog = data.inputLog.map((entry: unknown) => {
+        if (!isRecord(entry) || entry.kind !== 'create' || !isRecord(entry.payload)) return entry;
+        if (entry.payload.mode !== 'random' || entry.payload.countryId !== undefined) return entry;
+        return { ...entry, payload: { ...entry.payload, countryId: 'us' } };
+      });
+      return { ...data, inputLog };
+    },
+  },
 ];
 
 function isRecord(value: unknown): value is Record<string, unknown> {

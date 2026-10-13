@@ -27,7 +27,7 @@ choices:
         - { role: npc, key: trust, weight: 0.3 }
       success:
         text: >-
-          "I'll pay you back every dollar," {npc.name} says, and sends the first
+          "I'll pay you back every penny," {npc.name} says, and sends the first
           part the next week, with a note.
         effects:
           - { type: cost, item: loan_small }

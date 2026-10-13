@@ -1,0 +1,47 @@
+id: ca_walk_in_wait
+title: Four hours in a chair
+text: >-
+  The cough has turned into something with a rattle, and the only clinic open
+  on a Sunday has a line out of the door. The sign says the wait is "about
+  ninety minutes." The sign has not been updated since the morning.
+tone: neutral
+category: health
+rarity: common
+countries: [ca]
+lifeStages: [youngAdult, adult, senior]
+requires: { age: { gte: 18 } }
+weight: { base: 5 }
+cooldownYears: 5
+cast:
+  mate: { kind: partner, presence: household, optional: true }
+choices:
+  - id: wait
+    label: Wait it out
+    outcome:
+      text: >-
+        A child asleep on a coat, a man reading the same page for an hour. At the
+        end of it a doctor with kind, tired eyes listens for ninety seconds and
+        gets it right.
+      effects:
+        - { type: stat, key: stress, delta: 2 }
+        - { type: stat, key: health, delta: 1 }
+  - id: pharmacy
+    label: Ask the pharmacist and go home
+    outcome:
+      text: >-
+        The pharmacist reads the box, asks three good questions and sends you home
+        with something over the counter and instructions to come back if it
+        gets worse. It does not, quite.
+      effects:
+        - { type: money, delta: -30 }
+        - { type: stat, key: health, delta: -1 }
+  - id: emergency
+    label: Go to the emergency department instead
+    outcome:
+      text: >-
+        Triage puts you well down the queue, which is the right call. It takes
+        six hours, a chest X-ray and a lot of vending-machine crackers. It is not
+        pneumonia, and nobody asks you for a card at the desk.
+      effects:
+        - { type: stat, key: stress, delta: 3 }
+        - { type: stat, key: health, delta: 1 }

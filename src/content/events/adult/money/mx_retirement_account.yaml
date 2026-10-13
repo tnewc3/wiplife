@@ -1,0 +1,45 @@
+id: mx_retirement_account
+title: The account statement
+text: >-
+  A letter from the retirement account manager lists your balance, the fees
+  you have paid and the sum your contributions are expected to become at
+  sixty-five. The sum is smaller than your imagination, and larger than your
+  fear.
+tone: neutral
+category: money
+rarity: common
+countries: [mx]
+lifeStages: [adult, senior]
+requires:
+  all:
+    - { age: { gte: 30 } }
+    - { career: { employed: true, retired: false } }
+weight: { base: 6 }
+cooldownYears: 8
+choices:
+  - id: voluntary
+    label: Start voluntary contributions ({$600} a year)
+    visibleIf: { money: { gte: 600 } }
+    outcome:
+      text: >-
+        A small extra deduction from every paycheque. The adviser calls this
+        "paying your future self", and the word "future" does a lot of work.
+      effects:
+        - { type: money, delta: -600 }
+        - { type: stat, key: discipline, delta: 2 }
+  - id: switch
+    label: Move your account to a manager with lower fees
+    outcome:
+      text: >-
+        Forms, a signature and a phone call that takes forty minutes of hold music.
+        Next year's statement shows {$80} less in fees.
+      effects:
+        - { type: money, delta: 80 }
+        - { type: stat, key: smarts, delta: 1 }
+        - { type: stat, key: stress, delta: 1 }
+  - id: ignore
+    label: File the letter and stop looking at it
+    outcome:
+      text: You put it in the drawer where the other envelopes live. The number does not change and neither does your attitude.
+      effects:
+        - { type: stat, key: stress, delta: -1 }

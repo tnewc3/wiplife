@@ -1,0 +1,46 @@
+id: uk_nhs_dentist
+title: Not taking new patients
+text: >-
+  Your dentist has left the NHS list. The next three practices you phone are
+  not taking new patients. The fourth is, but only for people who will pay
+  privately, and the receptionist says the price in a flat voice.
+tone: serious
+category: health
+rarity: common
+countries: [uk]
+lifeStages: [youngAdult, adult, senior]
+requires: { age: { gte: 18 } }
+weight: { base: 4 }
+cooldownYears: 8
+cast:
+  mate: { kind: partner, presence: household, optional: true }
+choices:
+  - id: private
+    label: Pay privately for the check-up and the filling ({$480})
+    visibleIf: { money: { gte: 480 } }
+    outcome:
+      text: >-
+        {$480} for a seat that is free of a wait. The filling is neat and the
+        receptionist smiles, and you try not to do the sums for a year.
+      effects:
+        - { type: money, delta: -480 }
+        - { type: stat, key: health, delta: 2 }
+  - id: list
+    label: Join a waiting list and hope
+    outcome:
+      text: >-
+        You join a list that has a letter-heavy name. The tooth gets worse
+        before the letter comes, and you start to avoid hot drinks on the left.
+      effects:
+        - { type: stat, key: health, delta: -2 }
+        - { type: stat, key: stress, delta: 2 }
+  - id: travel
+    label: Travel two hours for an NHS appointment
+    outcome:
+      text: >-
+        A train, a bus, a mouth that is numb for the whole ride back and a
+        receipt for the fare ({$38}). It costs a day, not a fortune.
+      effects:
+        - { type: money, delta: -38 }
+        - { type: stat, key: health, delta: 2 }
+        - { type: stat, key: stress, delta: 1 }

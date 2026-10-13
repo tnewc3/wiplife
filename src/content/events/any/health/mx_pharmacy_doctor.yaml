@@ -1,0 +1,45 @@
+id: mx_pharmacy_doctor
+title: The doctor next to the pharmacy
+text: >-
+  Next to the pharmacy there is a small consulting room with a blue sign and
+  a doctor who sees patients for a modest fee, no appointment needed. Half
+  your street goes there for the cough, the sore throat and the questions that
+  do not seem to deserve a whole clinic.
+tone: light
+category: health
+rarity: common
+countries: [mx]
+lifeStages: [child, teen, youngAdult, adult, senior]
+requires: { age: { gte: 5 } }
+weight: { base: 7 }
+cooldownYears: 3
+choices:
+  - id: go
+    label: Walk in and see the doctor
+    outcome:
+      text: >-
+        Ten minutes, a quick listen and a prescription for three things. The
+        visit costs {$18} and the medicine another {$22}, and you are better by
+        the weekend.
+      effects:
+        - { type: money, delta: -40 }
+        - { type: stat, key: health, delta: 2 }
+  - id: ask
+    label: Ask the pharmacist what they would take
+    outcome:
+      text: >-
+        The pharmacist asks four sensible questions and suggests one thing. It
+        costs {$11} and does not quite work, and you go back for a second
+        opinion from the doctor.
+      effects:
+        - { type: money, delta: -11 }
+        - { type: stat, key: health, delta: -1 }
+  - id: home
+    label: Rest at home and drink a lot of tea
+    outcome:
+      text: >-
+        A blanket, a pot of tea and a day of doing nothing. It does not feel
+        like medicine, and it works better than you expected.
+      effects:
+        - { type: stat, key: stress, delta: -2 }
+        - { type: stat, key: health, delta: 1 }

@@ -1,7 +1,7 @@
 id: chore_chart
 title: The chore chart
 text: >-
-  {parent.name} has made a chore chart with gold stars and a promise: a dollar
+  {parent.name} has made a chore chart with gold stars and a promise: {$1}
   a star. The chart has a lot of boxes.
 tone: light
 category: family
@@ -24,7 +24,7 @@ choices:
         - { type: stat, key: discipline, delta: 3 }
         - { type: relationship, role: parent, affection: 2 }
   - id: negotiate
-    label: Negotiate two dollars a star
+    label: Negotiate {$2} a star
     check:
       base: 35
       stats: [{ key: confidence, weight: 0.4 }, { key: smarts, weight: 0.2 }]

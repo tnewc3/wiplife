@@ -1,0 +1,42 @@
+id: ca_snow_day
+title: Snow day
+text: >-
+  The radio says it before the sun is up: all the schools are closed. By nine
+  the street is full of kids, shovels and one adult trying to look like they
+  are not enjoying it as much as everyone else.
+tone: light
+category: school
+rarity: common
+countries: [ca]
+lifeStages: [child]
+requires: { education: { program: [elementary, middle] } }
+weight: { base: 7 }
+cooldownYears: 3
+cast:
+  friend: { kind: friend, presence: city, createIfMissing: true, newChance: 0.4 }
+choices:
+  - id: fort
+    label: Build a fort with {friend.name}
+    outcome:
+      text: >-
+        Four hours, two walls and a roof that collapses on the person who built
+        it. It is the best fort in the street for about a day.
+      effects:
+        - { type: relationship, role: friend, affection: 5 }
+        - { type: stat, key: happiness, delta: 3 }
+  - id: shovel
+    label: Shovel the driveways for pocket money
+    outcome:
+      text: >-
+        Three driveways, one cold hand and {$30} in an envelope. A neighbour tells
+        you that you are hired for the whole winter.
+      effects:
+        - { type: money, delta: 30 }
+        - { type: stat, key: discipline, delta: 1 }
+  - id: homework
+    label: Stay in and read
+    outcome:
+      text: A blanket, a book and a very quiet house. The snow can wait, you decide, and it does.
+      effects:
+        - { type: stat, key: smarts, delta: 1 }
+        - { type: stat, key: happiness, delta: 1 }

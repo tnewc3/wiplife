@@ -17,13 +17,13 @@ choices:
     label: Play the numbers
     outcome:
       text: >-
-        Five of six. Not the jackpot, but $150,000 and a photo with an
+        Five of six. Not the jackpot, but {$150000} and a photo with an
         enormous check. You never dream the numbers again.
       effects:
         - { type: money, delta: 150000 }
         - { type: stat, key: happiness, delta: 8 }
         - { type: stat, key: luck, delta: 5 }
-        - { type: history, text: 'You dreamed six numbers three nights running, played them, and won $150,000.', importance: 3 }
+        - { type: history, text: 'You dreamed six numbers three nights running, played them, and won {$150000}.', importance: 3 }
   - id: ignore
     label: Keep walking; dreams are dreams
     outcome:

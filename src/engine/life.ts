@@ -14,7 +14,6 @@ import { produce } from 'immer';
 import { BUSINESS_ROLE, POSSESSION_ROLES, type ChoiceDef, type ContentBundle, type Outcome } from '../content/schemas';
 import { evaluate } from './conditions';
 import {
-  activeIds,
   completeAppearance,
   rollAppearance,
   rollGenderCategory,
@@ -55,6 +54,7 @@ import { terminalDeathChance, TERMINAL_ID } from './later/terminal';
 import { emptyBelonging } from './belonging/query';
 import { emptyBusiness } from './business/query';
 import { startBelonging } from './belonging/start';
+import { citiesOfCountry, startWeights } from './country';
 
 export type { CreateLifeOptions, CustomLifeInput } from './creation/input';
 
@@ -68,8 +68,6 @@ export function createLife(input: CreateLifeOptions, content: ContentBundle): Li
   const options = parseCreateLifeOptions(input, content);
   const { seed, birthYear } = options;
   const rng = createRng(seed);
-  const creation = content.balance.creation;
-
   let personCount = 0;
   const nextId = (): Id => `p${++personCount}`;
 
@@ -77,8 +75,13 @@ export function createLife(input: CreateLifeOptions, content: ContentBundle): Li
   let familyRequest: { parents?: 1 | 2; siblings?: number; lastName?: string; characterFirstName?: string };
 
   if (options.mode === 'random') {
-    const cityId = pick(rng, activeIds(content.cities));
-    const familyWealth = weightedKey(rng, creation.familyWealth);
+    // W4a: a random life starts in a country by balance/countries.yaml startWeights, in one of its cities.
+    // The country comes from its own generator (the seed and "country"), so choosing it draws nothing from the life's:
+    // a seed that lands in the United States plays out as it did before countries existed. A random life can also be
+    // asked to start in one country (the simulation does, per country).
+    const country = content.countries[options.countryId ?? weightedKey(createRng(`${seed}:country`), startWeights(content))]!;
+    const cityId = pick(rng, citiesOfCountry(country.id, content));
+    const familyWealth = weightedKey(rng, country.familyWealth);
     const identity = rollIdentity(rng, content, rollGenderCategory(rng, content));
     // E2a: women can carry a pregnancy, men can't; a nonbinary character rolls it (only that draws a number).
     const canCarry = rollCanCarry(rng, identity.genderCategory, content);

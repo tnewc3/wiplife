@@ -1,0 +1,43 @@
+id: mx_altar
+title: The altar
+text: >-
+  The first of November comes with marigolds, candles and a table in the
+  living room covered in the things {gone.name} loved: a photograph, a cup of
+  coffee, a small bottle and a plate of food that nobody will eat. The
+  house smells of copal and oranges.
+tone: neutral
+category: family
+rarity: common
+countries: [mx]
+lifeStages: [child, teen, youngAdult, adult, senior]
+requires: { age: { gte: 8 } }
+weight: { base: 8 }
+cooldownYears: 3
+cast:
+  gone: { kind: grandparent, presence: anywhere, deceased: true }
+choices:
+  - id: build
+    label: Build the altar with the family
+    outcome:
+      text: >-
+        You cut paper flowers, set out the photograph and tell the stories the
+        older relatives tell every year. This year you tell one of your own.
+      effects:
+        - { type: money, delta: -45 }
+        - { type: stat, key: happiness, delta: 3 }
+        - { type: stat, key: stress, delta: -2 }
+  - id: cemetery
+    label: Spend the night at the cemetery with relatives
+    outcome:
+      text: >-
+        Candles on every grave, a guitar somewhere in the dark and your cousins
+        asleep on blankets. It is not sad exactly, and it is not ordinary.
+      effects:
+        - { type: stat, key: happiness, delta: 2 }
+        - { type: stat, key: stress, delta: -1 }
+  - id: quiet
+    label: Light a candle alone
+    outcome:
+      text: A single flame, a minute of silence and the photograph looking back at you. It is enough.
+      effects:
+        - { type: stat, key: stress, delta: -2 }

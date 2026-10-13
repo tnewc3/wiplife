@@ -12,6 +12,7 @@ import { custodyHearings } from './custody';
 import { livingChildren } from './children';
 import { styleLevels, styleOf, type StyleLevel } from './parenting';
 import { processView, type ProcessView } from './process';
+import { countryOf } from '../country';
 
 export interface ChildView {
   stepchild: boolean;
@@ -38,7 +39,7 @@ export function getChildView(state: LifeState, personId: Id, content: ContentBun
   const d = person?.child;
   if (!person || !rel || !d) return null;
   const age = (person.deathYear ?? state.currentYear) - person.birthYear;
-  const school = content.balance.education.school;
+  const school = countryOf(state, content).school;
   const inSchool = age >= school.startAge && age < school.startAge + school.elementary + school.middle + school.high;
   const other = d.otherParentId === undefined ? undefined : state.people[d.otherParentId];
   return {

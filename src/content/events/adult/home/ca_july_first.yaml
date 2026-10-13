@@ -1,0 +1,59 @@
+id: ca_july_first
+title: Moving day
+text: >-
+  In Montreal, almost every lease ends on the same day. By the end of June the
+  whole city has boxes on the sidewalk, and anyone who still needs a place to
+  live is looking at the same dozen listings as everyone else.
+tone: neutral
+category: home
+rarity: common
+countries: [ca]
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { city: montreal }
+    - { home: { kind: [renting] } }
+weight: { base: 7 }
+cooldownYears: 4
+cast:
+  mate: { kind: partner, presence: household, optional: true }
+choices:
+  - id: stay
+    label: Stay and accept the increase
+    outcome:
+      text: >-
+        The landlord raises the rent by {$600} for the year, politely, and you
+        decide the unknowns elsewhere are worse.
+      effects:
+        - { type: money, delta: -600 }
+        - { type: stat, key: stress, delta: 1 }
+  - id: negotiate
+    label: Push back on the increase
+    check:
+      base: 45
+      stats: [{ key: confidence, weight: 0.3 }, { key: smarts, weight: 0.2 }]
+      success:
+        text: >-
+          You point to the tribunal's guidelines and ask for a smaller increase.
+          The landlord looks at the paperwork and agrees to {$150} instead.
+        effects:
+          - { type: money, delta: -150 }
+          - { type: stat, key: confidence, delta: 2 }
+      failure:
+        text: >-
+          The landlord is polite and immovable. You pay the {$600} anyway, and
+          the conversation was awkward for nothing.
+        effects:
+          - { type: money, delta: -600 }
+          - { type: stat, key: stress, delta: 2 }
+  - id: move
+    label: Move with the rest of the city
+    outcome:
+      text: >-
+        Eleven hours, a rented van and two friends who will want a favour back.
+        The new place is better. The deposit and the movers are {$900}.
+      effects:
+        - { type: money, delta: -900 }
+        - { type: stat, key: happiness, delta: 2 }
+        - { type: stat, key: stress, delta: 3 }

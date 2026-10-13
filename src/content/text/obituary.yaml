@@ -43,18 +43,18 @@ education:
     - "{self.They} never finished school, and never let that stop {self.them} from having opinions."
     - "School and {self.they} never quite got along."
   highSchool:
-    - "{self.They} finished high school and went straight out into the world."
-    - "A high school diploma was all the schooling {self.they} needed, or so {self.they} always said."
+    - "{self.They} finished {highSchool} and went straight out into the world."
+    - "Finishing {highSchool} was all the schooling {self.they} needed, or so {self.they} always said."
   ged:
-    - "{self.They} earned {self.their} high school equivalency the hard way, after leaving school."
+    - "{self.They} earned {self.their} {equivalency} the hard way, after leaving school."
   trade:
     - "{self.They} trained in {subject} and earned {self.their} {license}."
     - "{self.They} went to trade school for {subject}, and {self:was|were} proud of the {license} on the wall."
   associate:
-    - "{self.They} earned an associate degree in {subject}."
+    - "{self.They} earned {self.their} {associateDegree} in {subject}."
   bachelor:
-    - "{self.They} studied {subject} in college and earned {self.their} degree."
-    - "{self.They} earned a bachelor's degree in {subject}."
+    - "{self.They} studied {subject} at {college} and earned {self.their} degree."
+    - "{self.They} earned {self.their} {bachelorDegree} in {subject}."
   grad:
     - "{self.They} went on to earn {degree}."
     - "{self.They} earned {degree}, which {self.they} brought up more often than strictly necessary."
@@ -145,8 +145,8 @@ deeds:
   ran_marathon: "{self.They} ran a marathon, and kept the medal."
   jumped_from_plane: "{self.They} jumped out of a plane, on purpose, well past the age most people would."
   whistleblower: "{self.They} blew the whistle when it cost {self.them} something."
-  valedictorian: "{self.They} {self:was|were} valedictorian of {self.their} high school class."
-  studied_abroad: "{self.They} spent a semester studying abroad and talked about it for years."
+  valedictorian: "{self.They} {self:was|were} valedictorian of {self.their} {highSchool} class."
+  studied_abroad: "{self.They} spent time studying abroad and talked about it for years."
   came_out: "{self.They} found the courage to tell the people {self.they} loved who {self.they} really {self:was|were}."
   in_recovery: "{self.They} fought an addiction and got into recovery."
   recruited_athlete: "{self.They} {self:was|were} a recruited athlete in {self.their} school days."

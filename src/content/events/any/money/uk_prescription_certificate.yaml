@@ -1,0 +1,43 @@
+id: uk_prescription_certificate
+title: Paying per item
+text: >-
+  The pharmacist rings up the fourth prescription in two months and you notice
+  that each item has a charge. A poster behind the counter advertises a
+  prepayment certificate, and a tired person in the queue behind you says it is
+  worth it.
+tone: light
+category: money
+rarity: common
+countries: [uk]
+lifeStages: [youngAdult, adult, senior]
+requires: { age: { gte: 19 } }
+weight: { base: 4 }
+cooldownYears: 5
+choices:
+  - id: certificate
+    label: Buy the yearly certificate ({$115})
+    visibleIf: { money: { gte: 115 } }
+    outcome:
+      text: >-
+        {$115} for the year and every prescription after it is free. By the
+        spring you are ahead, and you tell anyone who will listen.
+      effects:
+        - { type: money, delta: -115 }
+        - { type: stat, key: stress, delta: -1 }
+  - id: item
+    label: Keep paying per item
+    outcome:
+      text: >-
+        The charge is small each time, and by the end of the year it comes to
+        {$145}, which is exactly what the pharmacist said it would be.
+      effects:
+        - { type: money, delta: -145 }
+  - id: skip
+    label: Skip the prescription this month
+    outcome:
+      text: >-
+        A week later you are back in the queue, with a worse cough and the same
+        charge. The certificate poster is still on the wall.
+      effects:
+        - { type: stat, key: health, delta: -2 }
+        - { type: stat, key: stress, delta: 1 }

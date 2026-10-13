@@ -9,6 +9,7 @@
 import type { ContentBundle } from '../../content/schemas';
 import { ageOf, isRomanticKind } from '../relationships';
 import type { LifeState } from '../types';
+import { legalAgeOf } from '../country';
 
 /** Failures of the rule that no romance involves anyone under the adult age. Also counted by the simulation. */
 export function romanceUnderAgeFailures(state: LifeState, content: ContentBundle): string[] {
@@ -81,8 +82,8 @@ export function teenFailures(state: LifeState, content: ContentBundle): string[]
   }
   // The license.
   const lic = t.license;
-  if (lic.stage === 'permit' && age < b.license.permitAge) fail(`a learner's permit under ${b.license.permitAge}`);
-  if (lic.stage === 'licensed' && age < b.license.licenseAge) fail(`a license under ${b.license.licenseAge}`);
+  if (lic.stage === 'permit' && age < legalAgeOf(state, 'permit', content)) fail(`a learner's permit under ${legalAgeOf(state, 'permit', content)}`);
+  if (lic.stage === 'licensed' && age < legalAgeOf(state, 'driving', content)) fail(`a license under ${legalAgeOf(state, 'driving', content)}`);
   if (lic.lessons > b.license.lessons.max) fail('more driving lessons than the limit');
   // A teen job and teams and clubs.
   if (t.job) {

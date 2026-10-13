@@ -1,0 +1,47 @@
+id: uk_ucas_choices
+title: Five choices
+text: >-
+  The application lets you choose five universities. Your teacher says choose
+  one that is a stretch, three you can reach and one that is safe. {parent.name}
+  says choose the one near home. Your own list has seven.
+tone: neutral
+category: future
+rarity: common
+countries: [uk]
+lifeStages: [teen]
+requires: { education: { program: [high], final: true } }
+weight: { base: 8 }
+once: true
+cast:
+  parent: { kind: parent, presence: household }
+choices:
+  - id: stretch
+    label: Apply to a famous place, just in case
+    outcome:
+      text: >-
+        You write a personal statement that reads like it was written by someone
+        braver than you. The application costs {$35}.
+      effects:
+        - { type: money, delta: -35 }
+        - { type: stat, key: ambition, delta: 2 }
+        - { type: stat, key: confidence, delta: 1 }
+  - id: home
+    label: Choose near home, so you can live there
+    outcome:
+      text: >-
+        {parent.name} is relieved, and cooks you a celebratory meal. You apply for
+        {$35} and save on rent by staying in your bedroom.
+      effects:
+        - { type: money, delta: -35 }
+        - { type: relationship, role: parent, affection: 4 }
+        - { type: stat, key: stress, delta: -1 }
+  - id: away
+    label: Choose as far away as you can find
+    outcome:
+      text: >-
+        Distance becomes the whole list. {parent.name} says nothing and starts
+        looking at train times. The application costs {$35}.
+      effects:
+        - { type: money, delta: -35 }
+        - { type: relationship, role: parent, affection: -2 }
+        - { type: stat, key: confidence, delta: 2 }

@@ -6,7 +6,7 @@ import { createLife } from './life';
 import { lifeTone, OBITUARY_SECTIONS, writeObituary, type ObituarySection } from './obituary';
 import { getFamily } from './selectors';
 import { renderText, type TextRole } from './text';
-import { customInput, liveOut } from './testFixtures';
+import { US_WORDS, customInput, liveOut } from './testFixtures';
 import type { LifeState, Pronouns } from './types';
 
 const custom = (seed: string, pronouns?: Pronouns) => {
@@ -63,6 +63,7 @@ describe('obituary', () => {
     const o = content.text.obituary;
     const h = content.text.history;
     const values = {
+      ...US_WORDS,
       age: 70,
       year: 2096,
       city: 'Chicago',

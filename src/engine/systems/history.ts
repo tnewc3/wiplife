@@ -7,6 +7,7 @@ import type { ContentBundle } from '../../content/schemas';
 import { pick } from '../rng';
 import { renderText, type TextContext } from '../text';
 import type { HistoryEntry, LifeState } from '../types';
+import { countryTextValues, priceText } from '../country';
 
 /**
  * Adds an entry for the current year. Past the balance limit, the oldest
@@ -32,6 +33,6 @@ export function writeFromGroup(
   context: TextContext,
   content: ContentBundle,
 ): void {
-  const text = renderText(pick(state.rng, group.variants), context);
+  const text = renderText(pick(state.rng, group.variants), { ...context, values: { ...countryTextValues(state, content), ...context.values }, money: (amount) => priceText(state, amount, content) });
   addHistory(state, { text, tags, importance: group.importance }, content);
 }

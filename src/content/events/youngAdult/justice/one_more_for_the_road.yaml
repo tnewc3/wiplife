@@ -9,7 +9,7 @@ rarity: rare
 lifeStages: [youngAdult, adult, senior]
 requires:
   all:
-    - { age: { gte: 21 } }
+    - { legalAge: drinking }
     - { hidden: vice, gt: 40 }
     - { belongings: { vehicles: { gte: 1 } } }
 weight:
@@ -42,7 +42,7 @@ choices:
   - id: ride
     label: Call a ride
     outcome:
-      text: Forty dollars and a driver with strong opinions about jazz. Worth every cent.
+      text: '{$40} and a driver with strong opinions about jazz. Worth every cent.'
       effects:
         - { type: money, delta: -40 }
         - { type: stat, key: discipline, delta: 2 }

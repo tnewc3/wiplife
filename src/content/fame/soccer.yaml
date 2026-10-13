@@ -97,3 +97,21 @@ sport:
         - { id: "new_york_harbor_fc", name: "New York Harbor FC", city: "nyc", quality: 64 }
         - { id: "new_york_five_boroughs_sc", name: "New York Five Boroughs SC", city: "nyc", quality: 40 }
         - { id: "new_york_liberty_hill_united", name: "New York Liberty Hill United", city: "nyc", quality: 55 }
+        - { id: "toronto_lakeshore_fc", name: "Toronto Lakeshore FC", city: "toronto", quality: 58 }
+        - { id: "toronto_don_valley_sc", name: "Toronto Don Valley SC", city: "toronto", quality: 44 }
+        - { id: "vancouver_harbourside_fc", name: "Vancouver Harbourside FC", city: "vancouver", quality: 56 }
+        - { id: "vancouver_cascadia_united", name: "Vancouver Cascadia United", city: "vancouver", quality: 47 }
+        - { id: "montreal_mount_royal_fc", name: "Montreal Mount Royal FC", city: "montreal", quality: 60 }
+        - { id: "montreal_saint_laurent_sc", name: "Montreal Saint-Laurent SC", city: "montreal", quality: 45 }
+        - { id: "london_riverside_fc", name: "London Riverside FC", city: "london", quality: 66 }
+        - { id: "london_canal_street_united", name: "London Canal Street United", city: "london", quality: 45 }
+        - { id: "manchester_mill_town_fc", name: "Manchester Mill Town FC", city: "manchester", quality: 62 }
+        - { id: "manchester_piccadilly_athletic", name: "Manchester Piccadilly Athletic", city: "manchester", quality: 48 }
+        - { id: "london_southbank_rovers", name: "London Southbank Rovers", city: "london", quality: 52 }
+        - { id: "manchester_northern_quarter_fc", name: "Manchester Northern Quarter FC", city: "manchester", quality: 54 }
+        - { id: "mexico_city_zocalo_fc", name: "Mexico City Zócalo FC", city: "mexico_city", quality: 68 }
+        - { id: "mexico_city_chapultepec_united", name: "Mexico City Chapultepec United", city: "mexico_city", quality: 47 }
+        - { id: "guadalajara_jacaranda_fc", name: "Guadalajara Jacaranda FC", city: "guadalajara", quality: 58 }
+        - { id: "guadalajara_minerva_sc", name: "Guadalajara Minerva SC", city: "guadalajara", quality: 44 }
+        - { id: "monterrey_cerro_azul_fc", name: "Monterrey Cerro Azul FC", city: "monterrey", quality: 66 }
+        - { id: "monterrey_fundidora_sc", name: "Monterrey Fundidora SC", city: "monterrey", quality: 46 }

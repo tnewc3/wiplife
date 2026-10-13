@@ -1,0 +1,46 @@
+id: uk_screening_letter
+title: A letter from the screening service
+text: >-
+  An envelope with a health service logo arrives on the mat. It invites you
+  to a screening appointment, offers three dates and explains in plain words
+  what it is for. It is not an emergency. It is also the kind of thing that
+  gets put on the fridge and forgotten.
+tone: serious
+category: health
+rarity: common
+countries: [uk]
+lifeStages: [adult, senior]
+requires: { age: { gte: 40 } }
+weight: { base: 5 }
+cooldownYears: 5
+cast:
+  mate: { kind: partner, presence: household, optional: true }
+choices:
+  - id: go
+    label: Book the earliest date
+    outcome:
+      text: >-
+        Twenty minutes in a clinic in a retail park, a kind nurse and a results
+        letter ten days later that says all is well. You leave the building
+        two inches taller.
+      effects:
+        - { type: stat, key: health, delta: 2 }
+        - { type: stat, key: stress, delta: -1 }
+  - id: delay
+    label: Put it on the fridge
+    outcome:
+      text: >-
+        The letter stays under a pizza magnet for two months, and a reminder
+        arrives with a more urgent tone. You book it, and you are cross with
+        yourself.
+      effects:
+        - { type: stat, key: stress, delta: 2 }
+        - { type: stat, key: health, delta: 1 }
+  - id: ignore
+    label: Bin it
+    outcome:
+      text: >-
+        The letter goes in the recycling. Nothing happens, and nothing continues
+        to happen until the day something does.
+      effects:
+        - { type: stat, key: health, delta: -2 }

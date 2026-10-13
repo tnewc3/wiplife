@@ -1,0 +1,45 @@
+id: ca_community_hall
+title: Pancakes at the hall
+text: >-
+  Once a year the community hall puts on a pancake breakfast for the volunteer
+  fire department. The whole town turns up, and the line moves at the speed
+  of a good conversation.
+tone: light
+category: community
+rarity: common
+countries: [ca]
+lifeStages: [child, teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 8 } }
+    - { city: small_town_ca }
+weight: { base: 7 }
+cooldownYears: 3
+cast:
+  neighbor: { kind: acquaintance, presence: city, createIfMissing: true, newChance: 0.6 }
+choices:
+  - id: eat
+    label: Go for breakfast
+    outcome:
+      text: >-
+        Syrup, volunteers in aprons and half the town in a room. You sit next to
+        {neighbor.name}, and the {$12} ticket buys more than pancakes.
+      effects:
+        - { type: money, delta: -12 }
+        - { type: relationship, role: neighbor, affection: 5 }
+        - { type: stat, key: happiness, delta: 2 }
+  - id: flip
+    label: Volunteer to flip pancakes
+    outcome:
+      text: >-
+        Three hours at the griddle. Your arms ache, you smell of butter and a child
+        you do not know tells you that you are the best pancake person in the world.
+      effects:
+        - { type: relationship, role: neighbor, affection: 6 }
+        - { type: stat, key: kindness, delta: 2 }
+  - id: skip
+    label: Skip it this year
+    outcome:
+      text: You hear about it from three different people on Monday. Each of them saved you a place.
+      effects:
+        - { type: relationship, role: neighbor, affection: -2 }

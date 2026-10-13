@@ -7,7 +7,7 @@ tradition: "Shia"
 blurb: "An Islamic center with a community hall, a library and an annual calendar of gatherings."
 minAge: 0
 weight: 0.45
-cities: {small_town: 0.0}
+cities: {small_town: 0.0, small_town_ca: 0.0, small_town_uk: 0.0, small_town_mx: 0.0}
 count: { min: 1, max: 1 }
 traits:
   welcome: { mean: 60, sd: 22 }

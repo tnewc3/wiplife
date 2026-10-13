@@ -6,6 +6,7 @@ text: >-
 tone: serious
 category: money
 rarity: common
+countries: [us]
 lifeStages: [youngAdult, adult, senior]
 requires: { age: { gte: 18 } }
 weight: { base: 3 }

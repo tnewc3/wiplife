@@ -1,0 +1,56 @@
+id: uk_deposit_dispute
+title: The deposit
+text: >-
+  The tenancy ends and the landlord's list of deductions arrives: a carpet, a
+  mark on a wall and "general cleaning." Your deposit was held in a protection
+  scheme, which means there is someone to complain to.
+tone: neutral
+category: home
+rarity: common
+countries: [uk]
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { home: { kind: [renting] } }
+weight: { base: 5 }
+cooldownYears: 5
+choices:
+  - id: accept
+    label: Accept the deductions
+    outcome:
+      text: >-
+        {$380} is taken from the deposit. You tell yourself that the mark on the
+        wall was there when you arrived, and that fighting would take longer than
+        the money is worth.
+      effects:
+        - { type: money, delta: -380 }
+        - { type: stat, key: stress, delta: 1 }
+  - id: dispute
+    label: Challenge it through the protection scheme
+    check:
+      base: 55
+      stats: [{ key: discipline, weight: 0.3 }, { key: smarts, weight: 0.3 }]
+      success:
+        text: >-
+          Dated photos, an inventory and an email chain. The adjudicator sides
+          with you on most of it, and you get back {$310} of the {$380}.
+        effects:
+          - { type: money, delta: 310 }
+          - { type: stat, key: confidence, delta: 3 }
+      failure:
+        text: >-
+          Without photographs the adjudicator splits the difference. You lose
+          {$250}, a month and the will to argue with landlords.
+        effects:
+          - { type: money, delta: -250 }
+          - { type: stat, key: stress, delta: 3 }
+  - id: clean
+    label: Go back and clean it yourself
+    outcome:
+      text: >-
+        A Sunday with rubber gloves and a mop. The landlord waives the cleaning
+        charge. The carpet is still gone ({$220}).
+      effects:
+        - { type: money, delta: -220 }
+        - { type: stat, key: stress, delta: 1 }

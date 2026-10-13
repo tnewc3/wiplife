@@ -82,7 +82,7 @@ export const chainSchema = baseDefSchema.extend({
   /** How many locations it has when for sale. */
   locations: z.strictObject({ min: z.int().min(2).max(12), max: z.int().min(2).max(12) }),
   /** The cities it has locations in, in the order it opens them; it is for sale in the first. */
-  cities: z.array(idSchema).min(1).max(5),
+  cities: z.array(idSchema).min(1).max(8),
   /** Its reputation when for sale (0–100). */
   reputation: spread,
 });

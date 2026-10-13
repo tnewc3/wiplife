@@ -1,0 +1,21 @@
+# London — the country's centre of finance, culture and rents.
+id: london
+countryId: uk
+name: London
+blurb: "Very expensive · Huge professional market"
+costOfLiving: 1.35
+baseRent: 31000
+baseHomePrice: 500000
+carDependence: 0.1
+salaryMultiplier: 1.05
+jobMarket:
+  professional: 90
+  trade: 65
+  gig: 85
+schools:
+  high: Thames Park Academy
+  community: Southbank College
+  state: Riverside University
+  elite: King’s Cross University
+  trade: Docklands Technical College
+  grad: Bloomsbury Graduate School

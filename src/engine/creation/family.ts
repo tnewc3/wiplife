@@ -18,6 +18,7 @@ import { npcDeathChance } from '../systems/mortality';
 import type { FamilyWealth, Id, Person, Relationship } from '../types';
 import { rollCanCarry } from '../family/carrying';
 import { rollGenderCategory, rollIdentity, rollRelativeTraits } from './character';
+import { sameCountryCities } from '../country';
 
 export interface FamilyRequest {
   birthYear: number;
@@ -54,7 +55,8 @@ export function pickUnused(rng: RngState, options: readonly string[], used: Set<
 
 /** Heritages in this pool with their weights, in a fixed order. */
 function heritageOptions(content: ContentBundle, pool: NamePool, allowed?: readonly string[]): (readonly [string, number])[] {
-  const weights = content.balance.creation.names.heritageWeights;
+  // A name pool is the pool of the country it is named after: that country says how often each heritage starts a family.
+  const weights = content.countries[pool.id]?.names.heritageWeights ?? {};
   return Object.keys(pool.heritages)
     .sort()
     .filter((id) => !allowed || allowed.includes(id))
@@ -84,8 +86,9 @@ function partnerCategory(rng: RngState, content: ContentBundle, first: GenderCat
 }
 
 export function generateFamily(rng: RngState, content: ContentBundle, request: FamilyRequest): GeneratedFamily {
-  const { family, names } = content.balance.creation;
+  const { family } = content.balance.creation;
   const { birthYear, cityId, pool } = request;
+  const names = content.countries[pool.id]!.names;
 
   const parentCount = request.parents ?? (chance(rng, family.singleParentChance) ? 1 : 2);
   const siblingCount = request.siblings ?? weightedPick(rng, family.siblingWeights.map((w, i) => [i, w] as const));
@@ -201,9 +204,7 @@ export function generateFamily(rng: RngState, content: ContentBundle, request: F
   }
 
   // Grandparents (C1): each parent's two parents.
-  const otherCities = Object.keys(content.cities)
-    .sort()
-    .filter((id) => id !== cityId && !content.cities[id]!.retired);
+  const otherCities = sameCountryCities(cityId, content).filter((id) => id !== cityId);
   for (const { person: parent, heritage: parentHeritage } of parents) {
     const names = heritage(parentHeritage);
     const age = rollInRange(rng, ageRange, ageRange.min, ageRange.max);

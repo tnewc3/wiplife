@@ -4,11 +4,15 @@ import { content } from '../content';
 import type { ContentBundle } from '../content/schemas';
 import type { CustomLifeInput } from './creation/input';
 import { playLife } from './autoplay';
+import { countryTextValues } from './country';
 import { createLife } from './life';
 import { lifeStageForAge } from './systems/aging';
 import { startingTeen } from './teen/query';
 import type { LifeState } from './types';
 import { pruneWeb } from './web/ties';
+
+/** The country words (school, currency, pension) of a life in a US city, for tests that render text by hand. */
+export const US_WORDS = countryTextValues({ character: { cityId: 'chicago' } } as LifeState, content);
 
 /** A complete, valid custom character; override any part. */
 export function customInput(overrides: Partial<CustomLifeInput> = {}): CustomLifeInput {
@@ -44,7 +48,7 @@ export function customInput(overrides: Partial<CustomLifeInput> = {}): CustomLif
  * Relatives who would be past the maximum age are marked dead.
  */
 export function lifeAtAge(seed: string, age: number, contentBundle: ContentBundle = content): LifeState {
-  const life = createLife({ mode: 'random', seed, birthYear: 2000 }, contentBundle);
+  const life = createLife({ mode: 'random', seed, birthYear: 2000, countryId: 'us' }, contentBundle);
   return produce(life, (draft) => {
     draft.currentYear = draft.birthYear + age;
     draft.character.age = age;

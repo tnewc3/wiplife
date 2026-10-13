@@ -37,7 +37,7 @@ export interface FamilyLife {
 export function familyLife(options: FamilyLife): LifeState {
   const content = pack();
   const age = options.age ?? 52;
-  const base = createLife({ mode: 'random', seed: options.seed, birthYear: 1990 }, content);
+  const base = createLife({ mode: 'random', seed: options.seed, birthYear: 1990, countryId: 'us' }, content);
   return produce(base, (d) => {
     d.currentYear = d.birthYear + age;
     d.character.age = age;

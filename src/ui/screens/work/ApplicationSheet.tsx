@@ -5,7 +5,8 @@ import type { LifeState } from '../../../engine/types';
 import { useAppStore } from '../../../store/appStore';
 import { Button } from '../../components/Button';
 import { Sheet } from '../../components/Sheet';
-import { APPLY_BLOCK_LABELS, money, oddsLabel, TIER_LABELS } from '../../labels';
+import type { SchoolWords } from '../../../content/schemas';
+import { applyBlockLabel, capitalized, money, oddsLabel, tierLabel } from '../../labels';
 import { MajorPicker } from './MajorPicker';
 
 type Step =
@@ -23,9 +24,9 @@ function costLine(o: ApplyOptionView): string {
   return parts.join(' · ');
 }
 
-function OptionButton({ option, onPick }: { option: ApplyOptionView; onPick: () => void }) {
+function OptionButton({ option, words, onPick }: { option: ApplyOptionView; words: SchoolWords; onPick: () => void }) {
   const status =
-    option.result === true ? 'Accepted' : option.result === false ? 'Turned down this year' : option.block ? APPLY_BLOCK_LABELS[option.block] : oddsLabel(option.chance);
+    option.result === true ? 'Accepted' : option.result === false ? 'Turned down this year' : option.block ? applyBlockLabel(option.block, words) : oddsLabel(option.chance);
   const years = option.years === 1 ? '1 year' : `${option.years} years`;
   return (
     <li>
@@ -37,7 +38,7 @@ function OptionButton({ option, onPick }: { option: ApplyOptionView; onPick: () 
       >
         <span className="font-semibold break-words">{option.name}</span>
         <span className="text-sm text-muted">
-          {option.tier ? `${TIER_LABELS[option.tier]} · ` : ''}
+          {option.tier ? `${tierLabel(option.tier, words)} · ` : ''}
           {years}
         </span>
         {option.blurb && <span className="text-sm break-words text-muted">{option.blurb}</span>}
@@ -48,14 +49,14 @@ function OptionButton({ option, onPick }: { option: ApplyOptionView; onPick: () 
   );
 }
 
-function Section({ title, options, onPick }: { title: string; options: ApplyOptionView[]; onPick: (o: ApplyOptionView) => void }) {
+function Section({ title, options, words, onPick }: { title: string; options: ApplyOptionView[]; words: SchoolWords; onPick: (o: ApplyOptionView) => void }) {
   if (options.length === 0) return null;
   return (
     <section aria-label={title} className="mt-2">
       <h3 className="text-lg font-bold">{title}</h3>
       <ul className="flex flex-col divide-y divide-border" aria-label={title}>
         {options.map((o) => (
-          <OptionButton key={o.key} option={o} onPick={() => onPick(o)} />
+          <OptionButton key={o.key} option={o} words={words} onPick={() => onPick(o)} />
         ))}
       </ul>
     </section>
@@ -99,9 +100,9 @@ export function ApplicationSheet({ life, open, onClose }: { life: LifeState; ope
     body = (
       <>
         <p className="text-muted">Each application costs {money(options.fee)}. You hear back right away, and a place starts next year.</p>
-        <Section title="College" options={options.college} onPick={pick} />
-        <Section title="Trade school" options={options.trade} onPick={pick} />
-        {options.grad.some((o) => o.block !== 'bachelor') && <Section title="Grad school" options={options.grad} onPick={pick} />}
+        <Section title={capitalized(options.words.college)} options={options.college} words={options.words} onPick={pick} />
+        <Section title="Trade school" options={options.trade} words={options.words} onPick={pick} />
+        {options.grad.some((o) => o.block !== 'bachelor') && <Section title="Grad school" options={options.grad} words={options.words} onPick={pick} />}
       </>
     );
     footer = (

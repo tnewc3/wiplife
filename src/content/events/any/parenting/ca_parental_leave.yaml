@@ -1,0 +1,54 @@
+id: ca_parental_leave
+title: Sharing the leave
+text: >-
+  The employment insurance leave covers most of a year, at a fraction of your
+  pay, and the paperwork lets you split it with {mate.name}. There are three
+  ways to divide it, and all of them will be remembered at dinner for years.
+tone: neutral
+category: parenting
+rarity: uncommon
+countries: [ca]
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 20 } }
+    - { family: { minors: { gte: 1 } } }
+    - { career: { employed: true, retired: false } }
+    - { romance: [married, engaged, dating] }
+weight: { base: 6 }
+cooldownYears: 10
+cast:
+  mate: { kind: partner, presence: household }
+choices:
+  - id: you
+    label: Take most of the leave yourself
+    outcome:
+      text: >-
+        Months of small mornings with the baby, and a paycheque that has shrunk by
+        {$1800}. {mate.name} covers the rent without complaint, mostly.
+      effects:
+        - { type: money, delta: -1800 }
+        - { type: stat, key: happiness, delta: 3 }
+        - { type: stat, key: stress, delta: 1 }
+        - { type: relationship, role: mate, affection: 3 }
+  - id: split
+    label: Split it evenly
+    outcome:
+      text: >-
+        Six months each. Both of you find out what the other's day actually
+        involves, and neither of you is allowed to forget it. The pay drops by
+        {$900} for each of you.
+      effects:
+        - { type: money, delta: -900 }
+        - { type: stat, key: happiness, delta: 2 }
+        - { type: relationship, role: mate, affection: 6 }
+  - id: back
+    label: Go back to work early and let {mate.name} take the rest
+    outcome:
+      text: >-
+        You are back at your desk before the leave is half spent. The money is
+        better and the first steps are somebody else's story to tell you.
+      effects:
+        - { type: money, delta: 600 }
+        - { type: stat, key: stress, delta: 2 }
+        - { type: relationship, role: mate, affection: -3 }

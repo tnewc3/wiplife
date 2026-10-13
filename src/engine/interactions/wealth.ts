@@ -9,6 +9,7 @@ import { isFamilyKind } from '../relationships';
 import { weightedKey } from '../random';
 import { chance, nextInt, pick, type RngState } from '../rng';
 import type { FamilyWealth, Id, LifeState } from '../types';
+import { countryOf, pensionAge } from '../country';
 
 export const WEALTH_LEVELS: readonly FamilyWealth[] = ['poor', 'working', 'middle', 'affluent', 'rich'];
 
@@ -45,9 +46,9 @@ export function rollWealth(state: LifeState, kind: RelationshipKindId, age: numb
 
   const background: FamilyWealth = chance(rng, balance.peerChance)
     ? state.character.familyWealth
-    : weightedKey(rng, content.balance.creation.familyWealth);
+    : weightedKey(rng, countryOf(state, content).familyWealth);
 
-  const working = age >= content.balance.economy.independenceAge && age < content.balance.economy.retirement.age;
+  const working = age >= content.balance.economy.independenceAge && age < pensionAge(state, content);
   const colleague = (kind === 'coworker' || kind === 'boss') && state.career.job !== null;
   if (!working || !(colleague || chance(rng, balance.employedShare))) return { wealthLevel: background };
 

@@ -84,10 +84,14 @@ describe('content build with the real content', () => {
   it('compiles every content type', async () => {
     const result = await compileContent({ contentDir: realContentDir, appVersion: '1.2.3' });
     if (!result.ok) throw new Error(formatErrors(result.errors));
-    expect(Object.keys(result.bundle.cities)).toEqual(['chicago', 'houston', 'los_angeles', 'nyc', 'small_town']);
+    expect(Object.keys(result.bundle.cities)).toEqual([
+      'chicago', 'guadalajara', 'houston', 'london', 'los_angeles', 'manchester', 'mexico_city', 'monterrey', 'montreal', 'nyc',
+      'small_town', 'small_town_ca', 'small_town_mx', 'small_town_uk', 'toronto', 'vancouver',
+    ]);
     expect(result.bundle.contentVersion).toMatch(/^1\.2\.3\+[0-9a-f]{10}$/);
-    for (const city of Object.values(result.bundle.cities)) expect(city.countryId).toBe('us');
-    expect(Object.keys(result.bundle.names)).toEqual(['us']);
+    expect(Object.keys(result.bundle.countries).sort()).toEqual(['ca', 'mx', 'uk', 'us']);
+    for (const city of Object.values(result.bundle.cities)) expect(result.bundle.countries[city.countryId]).toBeDefined();
+    expect(Object.keys(result.bundle.names).sort()).toEqual(['ca', 'mx', 'uk', 'us']);
     expect(Object.keys(result.bundle.pronouns)).toContain('they_them');
     expect(Object.keys(result.bundle.talents).length).toBeGreaterThan(0);
     expect(result.bundle.balance.creation.family.siblingWeights.length).toBeGreaterThan(0);
@@ -200,7 +204,7 @@ describe('content build with fixture files', { timeout: 90_000 }, () => {
   });
 
   it('reports every broken file in one run', async () => {
-    await write('cities/test_city.yaml', validCity.replace('countryId: us', 'countryId: ca'));
+    await write('cities/test_city.yaml', validCity.replace('countryId: us', 'countryId: zz'));
     await write('cities/second.yaml', validCity.replace('id: test_city', 'id: second').replace('gig: 50', 'gig: -1'));
     const result = await compile();
     if (result.ok) throw new Error('expected failure');
@@ -230,7 +234,7 @@ describe('content build with fixture files', { timeout: 90_000 }, () => {
   });
 
   it('rejects a heritage weight for a heritage the name pool lacks', async () => {
-    const file = path.join(dir, 'balance', 'creation.yaml');
+    const file = path.join(dir, 'countries', 'us.yaml');
     await writeFile(file, (await readFile(file, 'utf8')).replace('    general: 56', '    general: 56\n    atlantean: 3'));
     expect(await expectErrors()).toContain('heritage "atlantean" is not in names/us.yaml');
   });
@@ -313,6 +317,47 @@ choices:
 ${extra}`;
     const file = 'events/adult/family/test_event.yaml';
 
+    describe('country tags (W4a)', () => {
+      it('puts the tag into the event’s requirements, so it only happens in those countries', async () => {
+        await write(file, event('countries: [ca, uk]\n'));
+        const result = await compile();
+        if (!result.ok) throw new Error(formatErrors(result.errors));
+        expect(result.bundle.events.test_event?.requires).toMatchObject({ country: ['ca', 'uk'] });
+      });
+
+      it('refuses a hand-written country condition, an unknown country and an empty tag', async () => {
+        await write(file, event('countries: [ca]\nrequires: { country: [uk] }\n'));
+        expect(await expectErrors()).toContain('ask for a country with the countries tag');
+        await write(file, event('countries: [atlantis]\n'));
+        expect(await expectErrors()).toContain('countries[0]');
+        await write(file, event('countries: []\n'));
+        expect(await expectErrors()).toContain('countries');
+      });
+
+      it('refuses US-only words in an event for every country, and accepts them once tagged', async () => {
+        const us = event().replace("text: '{npc.name} waves.'", "text: '{npc.name} waves from the Fourth of July parade.'");
+        await write(file, us);
+        expect(await expectErrors()).toContain('belongs to us only');
+        await write(file, `${us}countries: [us]\n`);
+        const result = await compile();
+        if (!result.ok) throw new Error(formatErrors(result.errors));
+        await write(file, `${us}countries: [ca]\n`);
+        expect(await expectErrors()).toContain('belongs to us only');
+      });
+
+      it('wants words said differently in each country as placeholders, and money as {$300}', async () => {
+        await write(file, event().replace("text: '{npc.name} waves.'", "text: '{npc.name} waves outside high school.'"));
+        expect(await expectErrors()).toContain('{highSchool}');
+        await write(file, event().replace("text: '{npc.name} waves.'", "text: '{npc.name} waves outside {highSchool}.'"));
+        const ok = await compile();
+        if (!ok.ok) throw new Error(formatErrors(ok.errors));
+        await write(file, event().replace("text: '{npc.name} waves.'", "text: '{npc.name} owes you $300.'"));
+        expect(await expectErrors()).toContain('{$300}');
+        await write(file, event().replace("text: '{npc.name} waves.'", "text: '{npc.name} owes you 300 dollars.'"));
+        expect(await expectErrors()).toContain('{currency}');
+      });
+    });
+
     it('accepts a valid event', async () => {
       await write(file, event());
       const result = await compile();
@@ -393,12 +438,12 @@ ${extra}`;
 
     it('warns on money talk without money, past claims without evidence, and fixed gaps in follow-ups (C1)', async () => {
       // Money: the label lends money, the outcome changes none.
-      await write(file, event().replace('label: Wave back', 'label: Lend {npc.them} $50'));
+      await write(file, event().replace('label: Wave back', 'label: Lend {npc.them} {$50}'));
       let result = await compile();
       if (!result.ok) throw new Error(formatErrors(result.errors));
       expect(result.warnings.map((w) => [w.eventId, w.kind])).toEqual([['test_event', 'money']]);
       // Justified: no warning.
-      await write(file, `${event().replace('label: Wave back', 'label: Lend {npc.them} $50')}justified: { money: "A test of the justification field." }\n`);
+      await write(file, `${event().replace('label: Wave back', 'label: Lend {npc.them} {$50}')}justified: { money: "A test of the justification field." }\n`);
       result = await compile();
       if (!result.ok) throw new Error(formatErrors(result.errors));
       expect(result.warnings).toEqual([]);
@@ -745,18 +790,17 @@ choices:
         'id: divinity\nname: Divinity school\nsubject: divinity\ndegree: a divinity degree\nblurb: Faith.\ncareers: Ministry\nyears: 3\ndifficulty: 3\nmajors: [theology]\n',
       );
       const text = await expectErrors();
-      expect(text).toContain('stonemason: no tuition in balance/education.yaml');
-      expect(text).toContain('divinity: no tuition in balance/education.yaml');
+      expect(text).toContain('countries/us.yaml: tuition.trade.stonemason: no tuition for the trade "stonemason"');
+      expect(text).toContain('countries/us.yaml: tuition.grad.divinity: no tuition for the grad program "divinity"');
       expect(text).toContain('divinity: no admission model');
       expect(text).toContain('divinity: unknown major "theology"');
     });
 
     it('rejects balance entries for unknown programs and flags', async () => {
       const balance = await readFile(path.join(dir, 'balance/education.yaml'), 'utf8');
-      await write(
-        'balance/education.yaml',
-        balance.replace('    electrician: 7500', '    electrician: 7500\n    juggler: 100').replace('{ research_assistant: 8 }', '{ research_assistant: 8, made_up_flag: 3 }'),
-      );
+      await write('balance/education.yaml', balance.replace('{ research_assistant: 8 }', '{ research_assistant: 8, made_up_flag: 3 }'));
+      const us = await readFile(path.join(dir, 'countries/us.yaml'), 'utf8');
+      await write('countries/us.yaml', us.replace('    electrician:', '    juggler: 100\n    electrician:'));
       const text = await expectErrors();
       expect(text).toContain('tuition.trade: unknown trade "juggler"');
       expect(text).toContain('flag "made_up_flag" is not in registries/flags.yaml');
@@ -1345,8 +1389,10 @@ describe('the teen years (T1)', () => {
 
   it('checks the teen balance: ages, license ages, rule levels and enough crowds for a school', { timeout: 90_000 }, async () => {
     const real = await readFile(path.join(dir, 'balance/teen.yaml'), 'utf8');
-    await write('balance/teen.yaml', real.replace('permitAge: 15', 'permitAge: 17').replace('licenseAge: 16', 'licenseAge: 16'));
-    expect(await expectErrors()).toContain('permitAge is greater than licenseAge');
+    const us = await readFile(path.join(dir, 'countries/us.yaml'), 'utf8');
+    await write('countries/us.yaml', us.replace('permit: 15', 'permit: 17'));
+    expect(await expectErrors()).toContain('legalAges: the permit age is after the driving age');
+    await write('countries/us.yaml', us);
     await write('balance/teen.yaml', real.replace('cliques: { min: 4, max: 5 }', 'cliques: { min: 4, max: 9 }'));
     expect(await expectErrors()).toContain('is more than the 8 crowds');
     await write('balance/teen.yaml', real.replace('levelAt: [53, 63]', 'levelAt: [63, 53]'));
@@ -1478,11 +1524,11 @@ describe('crime careers (E6a)', () => {
 
   it('refuses a crew that is not real: an unknown city, rival or crew in a condition, a rival in no shared city, and a city with fewer than two crews', { timeout: 90_000 }, async () => {
     const crew = await read('crews/cinder_row_outfit.yaml');
-    await write('crews/cinder_row_outfit.yaml', crew.replace('[chicago, houston, small_town]', '[chicago, houston, atlantis]'));
+    await write('crews/cinder_row_outfit.yaml', crew.replace('[chicago, houston, small_town, toronto, small_town_ca, manchester, small_town_uk, monterrey, small_town_mx]', '[chicago, houston, atlantis]'));
     expect(await expectErrors()).toContain('unknown city "atlantis"');
     await write('crews/cinder_row_outfit.yaml', crew.replace('rivals: [marrow_street_crew, harrowgate_freight]', 'rivals: [nobody_at_all]'));
     expect(await expectErrors()).toContain('unknown rival crew "nobody_at_all"');
-    await write('crews/cinder_row_outfit.yaml', crew.replace('cities: [chicago, houston, small_town]', 'cities: [small_town]').replace('rivals: [marrow_street_crew, harrowgate_freight]', 'rivals: [marrow_street_crew]'));
+    await write('crews/cinder_row_outfit.yaml', crew.replace('cities: [chicago, houston, small_town, toronto, small_town_ca, manchester, small_town_uk, monterrey, small_town_mx]', 'cities: [small_town]').replace('rivals: [marrow_street_crew, harrowgate_freight]', 'rivals: [marrow_street_crew]'));
     expect(await expectErrors()).toContain('works in none of');
     await write('crews/cinder_row_outfit.yaml', crew);
     const event = await read('events/any/crime/close_call_followed.yaml');
@@ -1604,13 +1650,17 @@ describe('fame in arts and media (E6b)', () => {
 describe('sports (E6c)', () => {
   const read = (file: string) => readFile(path.join(dir, file), 'utf8');
 
-  it('accepts the real content: five sports with twelve teams each, awards, brands, about fifty-five events, and no warnings', { timeout: 90_000 }, async () => {
+  it('accepts the real content: five sports with twelve US teams each and a league in every country, awards, brands, about fifty-five events, and no warnings', { timeout: 90_000 }, async () => {
     const result = await compile();
     if (!result.ok) throw new Error(formatErrors(result.errors));
     const sports = Object.values(result.bundle.famePaths).filter((p) => p.sport);
     expect(sports.map((p) => p.id).sort()).toEqual(['baseball', 'basketball', 'football', 'hockey', 'soccer']);
     for (const sport of sports) {
-      expect(sport.sport!.leagues.pro.teams).toHaveLength(12);
+      // Twelve teams in the US and at least six in every other country (a player plays in their own country's league).
+      const teams = sport.sport!.leagues.pro.teams;
+      const inCountry = (id: string) => teams.filter((t) => result.bundle.cities[t.city]?.countryId === id).length;
+      expect(inCountry('us')).toBe(12);
+      for (const id of ['ca', 'uk', 'mx']) expect(inCountry(id)).toBeGreaterThanOrEqual(6);
       expect(sport.rungs).toHaveLength(8);
       expect(sport.sport!.positions.length).toBeGreaterThanOrEqual(4);
     }
@@ -1835,7 +1885,7 @@ describe('businesses (W3)', () => {
     const chain = await read('chains/hearth_and_hammer.yaml');
     await write('chains/hearth_and_hammer.yaml', chain.replace('type: shop', 'type: kiosk'));
     expect(await expectErrors()).toContain('unknown business "kiosk"');
-    await write('chains/hearth_and_hammer.yaml', chain.replace('cities: [chicago, nyc, los_angeles]', 'cities: [chicago, atlantis]'));
+    await write('chains/hearth_and_hammer.yaml', chain.replace('cities: [chicago, nyc, los_angeles, vancouver, monterrey]', 'cities: [chicago, atlantis]'));
     expect(await expectErrors()).toContain('unknown city "atlantis"');
     await write('chains/hearth_and_hammer.yaml', chain);
     const plumbing = await read('businesses/plumbing.yaml');

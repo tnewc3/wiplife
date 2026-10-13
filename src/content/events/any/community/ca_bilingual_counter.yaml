@@ -1,0 +1,45 @@
+id: ca_bilingual_counter
+title: Bonjour, hi
+text: >-
+  At the bakery counter the clerk greets you in French, notices something in
+  your face and slides into English without being asked. In Montreal, that
+  happens a dozen times a day, in both directions.
+tone: light
+category: community
+rarity: common
+countries: [ca]
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 14 } }
+    - { city: montreal }
+weight: { base: 6 }
+cooldownYears: 4
+cast:
+  clerk: { kind: acquaintance, presence: city, createIfMissing: true, newChance: 0.6 }
+choices:
+  - id: try
+    label: Order in French anyway
+    outcome:
+      text: >-
+        The order is wrong. The clerk grins, fixes it and teaches you the word
+        for the thing you actually wanted. You leave with a bag and a new
+        friend.
+      effects:
+        - { type: relationship, role: clerk, affection: 5 }
+        - { type: stat, key: confidence, delta: 2 }
+  - id: english
+    label: Stay in English
+    outcome:
+      text: The clerk is perfectly pleasant. The line behind you is quicker. You tell yourself you will learn properly later.
+      effects:
+        - { type: stat, key: stress, delta: -1 }
+  - id: ask
+    label: Ask the clerk to speak French with you
+    outcome:
+      text: >-
+        The clerk is delighted, and speaks slowly in French for as long as the
+        line allows. It is the best coffee you have had in a month.
+      effects:
+        - { type: relationship, role: clerk, affection: 4 }
+        - { type: stat, key: sociability, delta: 1 }

@@ -16,6 +16,8 @@ import { countedRecord } from './record';
 import { isCurrentPartner } from './relationships';
 import { writeFromGroup } from './systems/history';
 import type { Id, LifeState, Person } from './types';
+import { careScale } from './country';
+import { countryOf } from './country';
 
 function cityOf(state: LifeState, content: ContentBundle, cityId: Id = state.character.cityId): CityDef {
   const city = content.cities[cityId];
@@ -65,7 +67,7 @@ export function housingCost(state: LifeState, content: ContentBundle): number {
       return isIndependent(state, content) ? wholeDollars(city.baseRent * eco.withParents.rentShare[state.character.familyWealth]) : 0;
     case 'renting':
       // L1: assisted living costs what it costs there, meals and care of the place included.
-      if (h.assisted) return wholeDollars(content.balance.later.care.cost.assisted * city.costOfLiving * shared);
+      if (h.assisted) return wholeDollars(content.balance.later.care.cost.assisted * careScale(state, content) * shared);
       return wholeDollars(rentIn(city, h.roommate === true, content) * (h.rentFactor ?? 1) * shared);
     case 'owned':
       return wholeDollars((h.homeValue ?? 0) * eco.ownership.upkeep * shared);
@@ -246,7 +248,7 @@ export function moveInCost(state: LifeState, cityId: Id, content: ContentBundle)
   const moving = cityId === state.character.cityId ? housing.movingCost : housing.relocationCost;
   const flagged = countedRecord(state, content).some((r) => (r.outcome === 'probation' || r.outcome === 'jail') && state.currentYear - r.year <= record.recentYears);
   const deposit = housing.deposit * (flagged ? record.depositMultiplier : 1);
-  return wholeDollars(moving + rentIn(cityOf(state, content, cityId), false, content) * deposit);
+  return wholeDollars(moving * countryOf(state, content).priceLevel + rentIn(cityOf(state, content, cityId), false, content) * deposit);
 }
 
 export type PurchaseBlock = 'savings' | 'income' | 'bankruptcy';
@@ -271,12 +273,12 @@ export function purchaseQuote(state: LifeState, content: ContentBundle): Purchas
   const own = eco.ownership;
   const price = cityOf(state, content).baseHomePrice;
   const closingCosts = wholeDollars(price * own.closingCosts);
-  const minDown = wholeDollars(price * own.downPayment);
+  const minDown = wholeDollars(price * countryOf(state, content).housing.downPayment);
   const cashNeeded = minDown + closingCosts;
   const savings = state.finances.savings;
-  const downPayment = Math.min(price, Math.max(minDown, savings - closingCosts - own.cashReserve));
+  const downPayment = Math.min(price, Math.max(minDown, savings - closingCosts - wholeDollars(own.cashReserve * countryOf(state, content).priceLevel)));
   const mortgage = price - downPayment;
-  const rate = eco.interest.debts.mortgage;
+  const rate = countryOf(state, content).housing.mortgageRate;
   const yearlyPayment = mortgage > 0 ? Math.max(eco.debts.minPayment, amortizedPayment(mortgage, rate, eco.debts.termYears.mortgage)) : 0;
   const income = (state.finances.lastLedger?.gross ?? 0) + (state.finances.lastLedger?.retirement ?? 0);
   const bankrupt = state.finances.bankruptcyYear;

@@ -9,6 +9,7 @@ import type { ContentBundle } from '../../content/schemas';
 import type { LifeState } from '../types';
 import { validPetName } from './pets';
 import { petAge, VACATION_HOME } from './query';
+import { legalAgeOf } from '../country';
 
 export function possessionsFailures(state: LifeState, content: ContentBundle): string[] {
   const failures: string[] = [];
@@ -69,7 +70,7 @@ export function possessionsFailures(state: LifeState, content: ContentBundle): s
       }
       vehicles += 1;
       if (!content.vehicles[p.defId]) fail(`${label} is an unknown vehicle "${p.defId}"`);
-      if (age < b.drivingAge) fail(`${label}: you own a vehicle under the driving age ${b.drivingAge}`);
+      if (age < legalAgeOf(state, 'driving', content)) fail(`${label}: you own a vehicle under the driving age ${legalAgeOf(state, 'driving', content)}`);
       if (!Number.isInteger(v.startAge) || v.startAge < 0) fail(`${label}.startAge is not a whole number of years`);
       if (v.loanDebtId !== undefined) {
         const debt = state.finances.debts.find((d) => d.id === v.loanDebtId);

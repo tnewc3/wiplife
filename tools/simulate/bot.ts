@@ -20,6 +20,7 @@ import { weightedPick } from '../../src/engine/random';
 import { chance, nextFloat, pick, type RngState } from '../../src/engine/rng';
 import { getApplicationOptions } from '../../src/engine/selectors';
 import type { FamilyWealth, LifeState, MentalCare } from '../../src/engine/types';
+import { pensionAge } from '../../src/engine/country';
 
 /** Yearly chance the bot takes each action when it can, by how the person feels about you. */
 const POLICY: Record<ActionId, (affection: number) => number> = {
@@ -112,7 +113,7 @@ export function chooseMoneyActions(life: LifeState, content: ContentBundle, rng:
   const adult = age >= content.balance.economy.independenceAge;
   const struggling = (life.finances.lastLedger?.borrowed ?? 0) > 0 || life.finances.debts.some((d) => d.missed > 0);
 
-  const retired = age >= content.balance.economy.retirement.age || life.career.retired;
+  const retired = age >= pensionAge(life, content) || life.career.retired;
   if (profile.worker && !retired && can('start_gig') && (adult || chance(rng, MONEY_POLICY.teenGig))) out.push(['start_gig', {}]);
   if (retired && can('stop_gig') && chance(rng, MONEY_POLICY.retire)) out.push(['stop_gig', {}]);
   if (!adult) return out;
@@ -301,7 +302,7 @@ export function chooseCareerActions(life: LifeState, content: ContentBundle, rng
   const ledger = life.finances.lastLedger;
   const yearlyCosts = ledger ? ledger.housing + ledger.living + ledger.debtPayments : 0;
   const affordable =
-    life.character.age >= content.balance.economy.retirement.age || life.finances.savings >= yearlyCosts * CAREER_POLICY.earlyRetireYears;
+    life.character.age >= pensionAge(life, content) || life.finances.savings >= yearlyCosts * CAREER_POLICY.earlyRetireYears;
   if (life.character.age >= profile.retireAge && settled && affordable && canRetire(life, content)) return [['retire', {}]];
   if (job) {
     if (chance(rng, CAREER_POLICY.quit)) return [['quit_job', {}]];

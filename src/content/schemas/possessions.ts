@@ -141,8 +141,6 @@ const perSeverity = <T extends z.ZodType>(value: T) => z.strictObject({ minor: v
 export const possessionsBalanceSchema = z.strictObject({
   /** The most you can own of each kind at once. */
   limits: z.strictObject({ pets: z.int().min(1).max(20), vehicles: z.int().min(1).max(10), vacationHomes: z.int().min(1).max(10) }),
-  /** The youngest age you can drive (and buy a vehicle for cash). */
-  drivingAge: z.int().min(14).max(21),
   pets: z.strictObject({
     /** The youngest age you can adopt or buy a pet yourself (a family pet comes through events). */
     adoptAge: z.int().min(10).max(30),

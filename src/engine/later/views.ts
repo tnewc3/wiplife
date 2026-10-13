@@ -14,6 +14,7 @@ import { careProviders } from './care';
 import { grandchildren, raisedGrandchildren, willOutOfDate } from './query';
 import { canSetWishes, canSpeak } from './terminal';
 import { wholeDollars } from '../finance';
+import { careScale } from '../country';
 
 export interface LaterPersonView {
   id: Id;
@@ -93,13 +94,13 @@ export function getLaterView(state: LifeState, content: ContentBundle): LaterVie
           option: c.option,
           provider: c.providerId !== undefined && state.people[c.providerId] && state.relationships[c.providerId] ? personView(state, c.providerId) : null,
           family: careProviders(state, content).map((p) => ({ ...personView(state, p.id), returning: p.returning })),
-          paidCost: wholeDollars(content.balance.later.care.cost.paid * (content.cities[state.character.cityId]?.costOfLiving ?? 1)),
-          assistedCost: wholeDollars(content.balance.later.care.cost.assisted * (content.cities[state.character.cityId]?.costOfLiving ?? 1)),
+          paidCost: wholeDollars(content.balance.later.care.cost.paid * careScale(state, content)),
+          assistedCost: wholeDollars(content.balance.later.care.cost.assisted * careScale(state, content)),
           canAssisted: canMoveToAssisted(state, content) || state.housing.assisted !== undefined,
         };
   const t = state.later.terminal;
   const b = content.balance.later.terminal;
-  const city = content.cities[state.character.cityId]?.costOfLiving ?? 1;
+  const city = careScale(state, content);
   const terminal: TerminalView | null =
     t === null
       ? null

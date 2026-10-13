@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
 import { content } from '../content';
-import type { ActionId, ContentBundle, GiftTier } from '../content/schemas';
+import { COUNTRY_IDS, type ActionId, type ContentBundle, type CountryId, type GiftTier } from '../content/schemas';
 import { finishAction, performAction, type LifeActionId, type LifeActionParams } from '../engine/actions';
 import type { IdentityEditInput } from '../engine/discovery';
 import { archiveEntry } from '../engine/archive';
@@ -31,6 +31,8 @@ import {
   type Theme,
   type WiplifeDb,
 } from '../persistence';
+import { moneyDisplayOf } from '../engine/country';
+import { BASE_MONEY_DISPLAY, setMoneyDisplay } from './moneyDisplay';
 
 /** Top-level screens. The age gate is not a screen: it shows until confirmed. */
 export type ScreenId =
@@ -243,14 +245,26 @@ function testHookSeed(): string {
   if (import.meta.env.VITE_TEST_HOOKS === 'true') {
     const url = new URL(window.location.href);
     const seed = url.searchParams.get('seed');
+    const country = url.searchParams.get('country');
+    if (country !== null) {
+      url.searchParams.delete('country');
+      if (COUNTRY_IDS.includes(country as CountryId)) testCountry = country as CountryId;
+    }
     if (seed !== null) {
       url.searchParams.delete('seed');
       window.history.replaceState(window.history.state, '', url);
-      if (TEST_SEED.test(seed)) return seed;
+      // A seeded test life is a US life unless ?country= says otherwise (a random start would pick any country).
+      if (TEST_SEED.test(seed)) {
+        testCountry ??= 'us';
+        return seed;
+      }
     }
   }
   return randomSeed();
 }
+
+/** The country a seeded test life starts in (test builds only; left unset, a random life picks one by the start weights). */
+let testCountry: CountryId | undefined;
 
 export function createAppStore({
   db = defaultDb,
@@ -259,7 +273,7 @@ export function createAppStore({
   currentYear = () => new Date().getFullYear(),
   checkInvariants = import.meta.env.DEV,
 }: StoreOptions = {}) {
-  return create<AppState>()(
+  const store = create<AppState>()(
     immer((set, get) => {
       /** Autosave: every engine result is saved before the UI moves on. */
       const commit = async (life: LifeState) => {
@@ -558,7 +572,10 @@ export function createAppStore({
           }),
 
         startRandomLife: () =>
-          start(() => createLife({ mode: 'random', seed: makeSeed(), birthYear: currentYear() }, bundle)),
+          start(() => {
+            const seed = makeSeed();
+            return createLife({ mode: 'random', seed, birthYear: currentYear(), ...(testCountry ? { countryId: testCountry } : {}) }, bundle);
+          }),
 
         startCustomLife: (custom) =>
           start(() => createLife({ mode: 'custom', seed: makeSeed(), birthYear: currentYear(), custom }, bundle)),
@@ -846,6 +863,9 @@ export function createAppStore({
       };
     }),
   );
+  // W4a: money is shown in the currency of the country the active life is lived in.
+  store.subscribe((state) => setMoneyDisplay(state.life ? moneyDisplayOf(state.life, bundle) : BASE_MONEY_DISPLAY));
+  return store;
 }
 
 export const useAppStore = createAppStore();

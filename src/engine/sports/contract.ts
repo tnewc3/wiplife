@@ -14,7 +14,7 @@ import { wholeDollars } from '../finance';
 import { chance, nextInt, type RngState } from '../rng';
 import type { Id, LifeState, SportsContract } from '../types';
 import { sportsHistory } from './text';
-import { anotherTeam, draftingTeam, proTeam, proTeamDef, relocateForTeam } from './team';
+import { anotherTeam, draftingTeam, proTeam, proTeamDef, proTeamsIn, relocateForTeam } from './team';
 import { recentRating } from './query';
 
 type SportPath = FamePathDef & { sport: SportDef };
@@ -89,9 +89,9 @@ export function declineDraft(state: LifeState): void {
 }
 
 /** Where in the draft a prospect goes: the pick (0 for undrafted) and the round. */
-export function draftSlot(score: number, def: SportDef, content: ContentBundle): { pick: number; round: number } {
+export function draftSlot(score: number, def: SportDef, home: Id, content: ContentBundle): { pick: number; round: number } {
   const d = content.balance.sports.draft;
-  const teams = def.leagues.pro.teams.length;
+  const teams = Math.max(1, proTeamsIn(def, home, content).length);
   const total = teams * def.draft.rounds;
   const pick = Math.max(1, Math.round(1 + Math.max(0, d.top - score) * d.perPick));
   if (pick > total) return { pick: 0, round: 0 };
@@ -99,14 +99,14 @@ export function draftSlot(score: number, def: SportDef, content: ContentBundle):
 }
 
 /** A team makes you an offer after the draft passes you by. */
-export function undraftedOffer(def: SportPath, rating: number, content: ContentBundle, rng: RngState): Id | null {
+export function undraftedOffer(def: SportPath, rating: number, home: Id, content: ContentBundle, rng: RngState): Id | null {
   if (!chance(rng, curveAt(content.balance.sports.draft.undrafted, rating))) return null;
-  return anotherTeam(def.sport, null, content, rng).id;
+  return anotherTeam(def.sport, null, home, content, rng).id;
 }
 
 /** The team that holds the pick. */
-export function pickTeamId(def: SportDef, pick: number, content: ContentBundle): Id | null {
-  return pick > 0 ? draftingTeam(def, pick, content).id : null;
+export function pickTeamId(def: SportDef, pick: number, home: Id, content: ContentBundle): Id | null {
+  return pick > 0 ? draftingTeam(def, pick, home, content).id : null;
 }
 
 /** You sign again with your own team, on terms: the market (fair), more because you pushed (rich, which may fail), or less out of loyalty (cheap). */
@@ -158,7 +158,7 @@ export function tradePlayer(state: LifeState, content: ContentBundle, rng: RngSt
   const s = state.sports;
   const def = s.sport ? content.famePaths[s.sport] : undefined;
   if (!def?.sport || !s.contract) return false;
-  const team = anotherTeam((def as SportPath).sport, s.contract.teamId, content, rng);
+  const team = anotherTeam((def as SportPath).sport, s.contract.teamId, state.character.cityId, content, rng);
   if (!moveToTeam(state, team.id, false, content, rng)) return false;
   s.totals.trades += 1;
   s.traded = state.currentYear;

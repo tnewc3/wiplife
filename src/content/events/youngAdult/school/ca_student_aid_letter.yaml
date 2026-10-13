@@ -1,0 +1,52 @@
+id: ca_student_aid_letter
+title: The student aid letter
+text: >-
+  The provincial student aid office sends its answer in an envelope marked
+  "important." Inside is a mix of grants you do not have to repay and loans you
+  do, and a page of terms that is clearer than it needs to be.
+tone: neutral
+category: school
+rarity: common
+countries: [ca]
+lifeStages: [youngAdult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { education: { program: [college] } }
+weight: { base: 6 }
+once: true
+choices:
+  - id: accept
+    label: Accept it as offered
+    outcome:
+      text: >-
+        You sign for a grant of {$1500}, and the loan for the rest. It is less
+        frightening in a spreadsheet than it was in your head.
+      effects:
+        - { type: education, action: scholarship, value: 1500 }
+        - { type: stat, key: stress, delta: -1 }
+  - id: appeal
+    label: Appeal for more, with a letter from your parents' situation
+    check:
+      base: 40
+      stats: [{ key: discipline, weight: 0.3 }, { key: smarts, weight: 0.2 }]
+      success:
+        text: >-
+          Three weeks of back and forth, and the office raises the grant by
+          {$2500}. The caseworker signs off with "good luck."
+        effects:
+          - { type: education, action: scholarship, value: 2500 }
+          - { type: stat, key: confidence, delta: 2 }
+      failure:
+        text: The answer comes back unchanged, in the same polite tone, along with a link to the appeal rules.
+        effects:
+          - { type: stat, key: stress, delta: 2 }
+  - id: work
+    label: Take it, and work extra hours at a part-time job
+    outcome:
+      text: >-
+        Evenings behind a counter pay {$1200} through the winter. Your grades
+        slip, but the loan is smaller.
+      effects:
+        - { type: money, delta: 1200 }
+        - { type: stat, key: stress, delta: 3 }

@@ -19,7 +19,7 @@ choices:
     outcome:
       text: >-
         Sirens, wires, a very calm nurse. A blocked artery, caught in time.
-        You wake up with a stent, a bill, and a strong opinion about stairs.
+        You wake up with a stent, a prescription list, and a strong opinion about stairs.
       effects:
         - { type: health, conditionId: heart_disease, severity: 10 }
         - { type: health, conditionId: heart_disease, treated: true }

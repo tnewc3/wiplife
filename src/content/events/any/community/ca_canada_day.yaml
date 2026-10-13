@@ -1,0 +1,41 @@
+id: ca_canada_day
+title: The first of July
+text: >-
+  The city goes red and white for a day. There are flags on the bus, a parade
+  on the main street and a lot of people who do not usually speak to each other
+  sharing a patch of grass to watch the fireworks.
+tone: light
+category: community
+rarity: common
+countries: [ca]
+lifeStages: [child, teen, youngAdult, adult, senior]
+requires: { age: { gte: 6 } }
+weight: { base: 5 }
+cooldownYears: 5
+cast:
+  mate: { kind: friend, presence: city, createIfMissing: true, newChance: 0.4 }
+choices:
+  - id: parade
+    label: Go to the parade and the fireworks
+    outcome:
+      text: >-
+        A hot sidewalk, a face-painted stranger and a sparkler held a little too
+        close. You ride home on a full bus, tired and happy.
+      effects:
+        - { type: stat, key: happiness, delta: 3 }
+        - { type: relationship, role: mate, affection: 3 }
+  - id: quiet
+    label: Watch the fireworks from a rooftop with friends
+    outcome:
+      text: >-
+        Someone has a speaker, someone has a barbecue and the whole sky goes off
+        at the same time. You get home late and cannot hear properly until noon.
+      effects:
+        - { type: stat, key: happiness, delta: 2 }
+        - { type: relationship, role: mate, affection: 4 }
+  - id: stay
+    label: Spend the long weekend at home
+    outcome:
+      text: A day with no plans, a window open and the sound of the city celebrating without you. It is exactly what you wanted.
+      effects:
+        - { type: stat, key: stress, delta: -3 }

@@ -41,7 +41,7 @@ export function sportsLife(options: SportsLife): LifeState {
   const content = pack();
   const age = options.age ?? (options.pro ? 25 : 15);
   const sport = options.sport ?? 'basketball';
-  const base = createLife({ mode: 'random', seed: options.seed, birthYear: 1990 }, content);
+  const base = createLife({ mode: 'random', seed: options.seed, birthYear: 1990, countryId: 'us' }, content);
   const life = produce(base, (d) => {
     d.currentYear = d.birthYear + age;
     d.character.age = age;
@@ -66,7 +66,7 @@ export function sportsLife(options: SportsLife): LifeState {
     enterPath(d as LifeState, sport, route, content);
     const rng = createRng(`${options.seed}:sports`);
     if (options.pro) {
-      d.sports.draft = { year: d.currentYear, pick: 4, round: 1, teamId: draftingTeam(def.sport!, 4, content).id };
+      d.sports.draft = { year: d.currentYear, pick: 4, round: 1, teamId: draftingTeam(def.sport!, 4, d.character.cityId, content).id };
       signDraftDeal(d as LifeState, content, rng);
       d.fame.agent = { agentId: 'quill_and_marlow', since: d.currentYear - 1 };
       d.fame.paths[sport]!.rung = 5;

@@ -12,6 +12,9 @@
  *   one only when its requirements guarantee it (the content build checks).
  * - `{role:singular|plural}` picks the verb form that agrees with the role's
  *   pronouns: `{npc:is|are}`, `{self:was|were}`.
+ * - `{$300}` (W4a) is an amount written at US prices: it is scaled to the price
+ *   level of the country you live in and shown in its currency ("$300",
+ *   "£290", "$5,100" in pesos), the same amount the event's money effects use.
  *
  * The obituary casts the player character as `self`. The content build checks
  * every placeholder against the roles and values its template may use.
@@ -34,6 +37,8 @@ export interface TextRole {
 export interface TextContext {
   roles?: Record<string, TextRole>;
   values?: Record<string, string | number>;
+  /** W4a: writes an amount given at US prices as the player reads it where they live (`{$300}`). */
+  money?: (amount: number) => string;
 }
 
 const PRONOUN_FORMS = {
@@ -51,6 +56,7 @@ export const LIFE_FIELDS = ['relation', 'partner', 'city', 'job'] as const;
 
 export type Placeholder =
   | { kind: 'value'; raw: string; name: string }
+  | { kind: 'money'; raw: string; amount: number }
   | { kind: 'role'; raw: string; role: string; field: string; capitalized: boolean }
   | { kind: 'verb'; raw: string; role: string; singular: string; plural: string };
 
@@ -63,6 +69,10 @@ const IDENT = /^[a-zA-Z][a-zA-Z0-9]*$/;
 
 function parsePlaceholder(raw: string): Placeholder {
   const body = raw.slice(1, -1);
+  if (body.startsWith('$')) {
+    if (!/^\$[0-9]+$/.test(body)) throw new TextError(`"${raw}" must look like {$300}`);
+    return { kind: 'money', raw, amount: Number(body.slice(1)) };
+  }
   const colon = body.indexOf(':');
   if (colon >= 0) {
     const role = body.slice(0, colon);
@@ -100,7 +110,7 @@ export function placeholders(template: string): Placeholder[] {
  * Lists what is wrong with a template given the roles and values it may use
  * (empty when fine). Used by the content build.
  */
-export function checkTemplate(template: string, allowed: { roles?: readonly string[]; values?: readonly string[] }): string[] {
+export function checkTemplate(template: string, allowed: { roles?: readonly string[]; values?: readonly string[]; money?: boolean }): string[] {
   let found: Placeholder[];
   try {
     found = placeholders(template);
@@ -109,6 +119,10 @@ export function checkTemplate(template: string, allowed: { roles?: readonly stri
   }
   const errors: string[] = [];
   for (const p of found) {
+    if (p.kind === 'money') {
+      if (allowed.money !== true) errors.push(`${p.raw}: amounts like this are for event text`);
+      continue;
+    }
     if (p.kind === 'value' && !allowed.values?.includes(p.name)) {
       errors.push(`${p.raw}: unknown value (allowed: ${allowed.values?.join(', ') || 'none'})`);
     }
@@ -147,6 +161,10 @@ export function renderText(template: string, context: TextContext = {}): string 
   let i = 0;
   return template.replace(PLACEHOLDER, () => {
     const p = found[i++]!;
+    if (p.kind === 'money') {
+      if (!context.money) throw new TextError(`no money format for ${p.raw}`);
+      return context.money(p.amount);
+    }
     if (p.kind === 'value') {
       const value = context.values?.[p.name];
       if (value === undefined) throw new TextError(`no value for ${p.raw}`);

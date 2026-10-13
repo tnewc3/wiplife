@@ -1,0 +1,22 @@
+# A small Canadian town — cheap to live, with few job openings.
+id: small_town_ca
+countryId: ca
+name: Small Town
+blurb: "Cheap to live · Few job openings"
+costOfLiving: 0.7
+baseRent: 9600
+baseHomePrice: 190000
+carDependence: 1.0
+salaryMultiplier: 0.75
+jobMarket:
+  professional: 30
+  trade: 50
+  gig: 35
+schools:
+  high: Northern Pines Secondary School
+  community: Lakehead Community College
+  state: Prairie Provincial University
+  elite: Whitecap University
+  trade: Riverbend Trade School
+  grad: Provincial Graduate School
+legalAges: { drinking: 19, gambling: 19 }

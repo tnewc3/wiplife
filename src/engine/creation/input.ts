@@ -4,7 +4,7 @@
  * trimmed, single spaces).
  */
 import { z } from 'zod';
-import { genderCategorySchema, idSchema, type ContentBundle } from '../../content/schemas';
+import { countryIdSchema, genderCategorySchema, idSchema, type ContentBundle } from '../../content/schemas';
 
 const codePoints = (s: string) => [...s].length;
 
@@ -118,6 +118,8 @@ export const createLifeOptionsSchema = z.discriminatedUnion('mode', [
     mode: z.literal('random'),
     seed: z.string().min(1).max(64),
     birthYear: z.int().min(1800).max(3000),
+    /** W4a: start in this country (left out: any, by balance/countries.yaml startWeights). */
+    countryId: countryIdSchema.optional(),
   }),
   z.strictObject({
     mode: z.literal('custom'),
@@ -157,6 +159,12 @@ export function parseCreateLifeOptions(input: unknown, content: ContentBundle): 
     throw new InvalidInputError(result.error.issues.map((i) => ({ path: i.path.join('.'), message: i.message })));
   }
   const options = result.data;
+  if (options.mode === 'random' && options.countryId !== undefined) {
+    const country = content.countries[options.countryId];
+    if (!country || country.retired || Object.values(content.cities).every((c) => c.countryId !== options.countryId || c.retired)) {
+      throw new InvalidInputError([{ path: 'countryId', message: 'Choose a country' }]);
+    }
+  }
   if (options.mode === 'custom') {
     const issues: InputIssue[] = [];
     const city = content.cities[options.custom.cityId];

@@ -1,0 +1,143 @@
+# Canada. Figures are in the game's base currency (US dollars); a Canadian dollar is shown at the rate in
+# balance/countries.yaml. Pay and prices are national averages across the cities in src/content/cities.
+id: ca
+name: Canada
+adjective: Canadian
+blurb: "Public health care, English and French, four very different places"
+currency: { code: CAD, symbol: "$", name: dollar, plural: dollars, locale: en-CA }
+priceLevel: 0.95
+salaryMultiplier: 0.9
+
+# The drinking age is 19 in most provinces (18 in Quebec): cities/montreal.yaml overrides it.
+legalAges: { drinking: 19, gambling: 19, driving: 16, permit: 16, marriage: 18 }
+
+school:
+  startAge: 5
+  # Kindergarten to grade 5, grades 6 to 8, grades 9 to 12.
+  elementary: 6
+  middle: 3
+  high: 4
+  dropoutAge: 16
+  repeatBelow: 1.0
+  maxRepeats: 1
+  applyAge: 17
+
+words:
+  elementary: elementary school
+  middle: middle school
+  high: high school
+  college: college
+  principal: principal
+  gradeWord: average
+  gradeDisplay: percent
+  tiers: { community: College, state: University, elite: Leading university }
+  credentials:
+    hs_diploma: High school diploma
+    ged: GED
+    associate: College diploma
+    bachelor: Bachelor’s degree
+    trade_license: Trade certificate
+    grad: Graduate degree
+  exams: { entrance: grade 12 marks, leaving: high school diploma }
+  gradeLabels: [Kindergarten, Grade 1, Grade 2, Grade 3, Grade 4, Grade 5, Grade 6, Grade 7, Grade 8, Grade 9, Grade 10, Grade 11, Grade 12]
+
+# A college diploma takes two years; a bachelor's degree four.
+collegeYears: { community: 2, state: 4, elite: 4 }
+
+# Public colleges and universities charge far less than American ones; the elite tier is the most selective, not private.
+tuition:
+  college: { community: 2800, state: 5400, elite: 9500 }
+  trade:
+    electrician: 3400
+    plumber: 3400
+    welder: 4000
+    hvac_technician: 3800
+    auto_mechanic: 3600
+    cosmetologist: 4800
+  grad:
+    law: 15000
+    medicine: 19000
+    mba: 28000
+    masters: 7000
+
+studentFinance:
+  blurb: "Public tuition is moderate; grants help, and student loans cover the rest."
+  scholarships:
+    merit:
+      - { at: 3.0, x: 0 }
+      - { at: 3.5, x: 0.1 }
+      - { at: 4.0, x: 0.25 }
+    need: { poor: 0.5, working: 0.3, middle: 0.1, affluent: 0, rich: 0 }
+    gradNeed: 0.3
+    maxShare: 0.9
+  loanRate: 0.045
+  applicationFee: 105
+
+housing:
+  mortgageRate: 0.052
+  downPayment: 0.2
+  appreciation: 0.025
+
+healthcare:
+  model: public
+  blurb: "Doctors and hospitals are covered by the provincial plan; drugs, dental, therapy and long-term care mostly are not."
+  shares: { visit: 0, treatment: 0.08, therapy: 0.7, medication: 0.4, care: 0.5 }
+
+tax:
+  blurb: "Federal and provincial income tax, with pension and employment insurance contributions."
+  brackets:
+    - { from: 0, rate: 0 }
+    - { from: 11000, rate: 0.15 }
+    - { from: 38000, rate: 0.26 }
+    - { from: 73000, rate: 0.33 }
+    - { from: 120000, rate: 0.4 }
+    - { from: 220000, rate: 0.47 }
+
+# No estate tax: what is owed is probate fees and the tax on what the person held, which a straight 1.5% stands for
+# (rising for very large estates so wealth can't snowball).
+estateTax:
+  - { at: 0, x: 0 }
+  - { at: 50000, x: 0.015 }
+  - { at: 2000000, x: 0.1 }
+  - { at: 6000000, x: 0.3 }
+  - { at: 12000000, x: 0.5 }
+
+pension:
+  name: Canada Pension Plan and Old Age Security
+  age: 65
+  minYears: 10
+  fullYears: 39
+  creditIncome: 4500
+  earningsCap: 80000
+  formula:
+    - { from: 0, rate: 0.9 }
+    - { from: 8000, rate: 0.25 }
+    - { from: 55000, rate: 0.05 }
+
+jobs:
+  salaryByCategory: { professional: 0.95, trade: 1.05, gig: 1 }
+  salaryByJob: { physician: 0.75, lawyer: 0.85 }
+
+sentencing:
+  outcomes: { warning: 1.2, fine: 1, probation: 1.1, jail: 0.8 }
+  termYears: 0.8
+  fines: 0.9
+  paroleYears: 1
+
+languages: { official: [en, fr], common: [zh, pa, es, ar, tl] }
+
+names:
+  heritageWeights:
+    general: 52
+    french: 17
+    south_asian: 8
+    chinese: 7
+    filipino: 3
+    black: 3.5
+    arab: 3
+    hispanic: 2.5
+    korean: 1.5
+    west_african: 1
+  sameHeritageParentsChance: 0.85
+
+familyWealth: { poor: 12, working: 28, middle: 38, affluent: 17, rich: 5 }

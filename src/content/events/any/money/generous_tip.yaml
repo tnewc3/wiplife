@@ -2,7 +2,7 @@ id: generous_tip
 title: Keep the change
 text: >-
   An elderly customer signs for the groceries, looks at you for a long
-  moment, and presses a folded $500 into your hand: "Somebody did this for
+  moment, and presses a folded {$500} into your hand: "Somebody did this for
   me once."
 tone: light
 category: money

@@ -129,11 +129,11 @@ confide:
 
 # One-time costs for the `pay` effect (balance/mental-health.yaml costs).
 costs:
-  assessment: { amount: 900, familyHelp: false }
-  psych_evaluation: { amount: 350, familyHelp: false }
-  therapy_session: { amount: 160, familyHelp: false }
-  hospital_stay: { amount: 5200, familyHelp: false }
-  crisis_visit: { amount: 1400, familyHelp: false }
+  assessment: { amount: 900, familyHelp: false, health: therapy }
+  psych_evaluation: { amount: 350, familyHelp: false, health: therapy }
+  therapy_session: { amount: 160, familyHelp: false, health: therapy }
+  hospital_stay: { amount: 5200, familyHelp: false, health: treatment }
+  crisis_visit: { amount: 1400, familyHelp: false, health: treatment }
   support_group: { amount: 40, familyHelp: false }
 
 crisis:

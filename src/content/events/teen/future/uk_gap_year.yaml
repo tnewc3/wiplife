@@ -1,0 +1,47 @@
+id: uk_gap_year
+title: A year out
+text: >-
+  Half your friends are heading to university. The other half have a plan
+  that involves a hostel, a rucksack and the word "somewhere". A year out
+  sounds like a luxury, and a risk, and perhaps a good idea.
+tone: neutral
+category: future
+rarity: common
+countries: [uk]
+lifeStages: [teen]
+requires: { education: { program: [high], final: true } }
+weight: { base: 6 }
+once: true
+cast:
+  parent: { kind: parent, presence: household }
+choices:
+  - id: work
+    label: Work for the year and save
+    outcome:
+      text: >-
+        Four jobs in twelve months, from a coffee van to a warehouse. You save
+        {$5200}, and you learn a lot about what you do not want to do for a
+        living.
+      effects:
+        - { type: money, delta: 5200 }
+        - { type: stat, key: ambition, delta: 2 }
+        - { type: relationship, role: parent, affection: 2 }
+  - id: travel
+    label: Spend the year travelling on a shoestring
+    outcome:
+      text: >-
+        A rucksack, a rail pass and a lot of new people. You come back with
+        fewer pounds and more stories. The year costs {$4300}.
+      effects:
+        - { type: money, delta: -4300 }
+        - { type: stat, key: confidence, delta: 3 }
+        - { type: relationship, role: parent, affection: -2 }
+  - id: no
+    label: Go straight to university
+    outcome:
+      text: >-
+        You have the offer. You take the offer. {parent.name} nods, and you tell
+        yourself the sensible choice was always the right one.
+      effects:
+        - { type: relationship, role: parent, affection: 3 }
+        - { type: stat, key: stress, delta: 1 }

@@ -32,7 +32,7 @@ interface Spec {
 export function webLife(seed: string): LifeState {
   const content = pack();
   const age = 40;
-  const base = createLife({ mode: 'random', seed, birthYear: 1990 }, content);
+  const base = createLife({ mode: 'random', seed, birthYear: 1990, countryId: 'us' }, content);
   return produce(base, (d) => {
     d.currentYear = d.birthYear + age;
     d.character.age = age;

@@ -20,7 +20,7 @@ cast:
   kid: { kind: child, presence: household, age: { min: 5, max: 12 } }
 choices:
   - id: yes
-    label: Say yes, and adopt a dog from the shelter ($300)
+    label: Say yes, and adopt a dog from the shelter ({$300})
     visibleIf: { money: { gte: 300 } }
     outcome:
       text: >-

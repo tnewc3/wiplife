@@ -33,7 +33,7 @@ export interface FameLife {
 export function fameLife(options: FameLife): LifeState {
   const content = pack();
   const age = options.age ?? 29;
-  const base = createLife({ mode: 'random', seed: options.seed, birthYear: 1990 }, content);
+  const base = createLife({ mode: 'random', seed: options.seed, birthYear: 1990, countryId: 'us' }, content);
   return produce(base, (d) => {
     d.currentYear = d.birthYear + age;
     d.character.age = age;

@@ -1,8 +1,8 @@
 # Follow-up of coworker_short_on_cash.
 id: coworker_payday
-title: About that $200
+title: About that {$200}
 text: >-
-  You lent {npc.name} $200 {since}. Payday has come and gone more than once
+  You lent {npc.name} {$200} {since}. Payday has come and gone more than once
   since then.
 tone: neutral
 category: work
@@ -16,7 +16,7 @@ weight: { base: 10 }
 followUpOnly: true
 # C1: reviewed build warnings kept on purpose (docs/consistency-review.md).
 justified:
-  money: "The $200 left your savings when you lent it (coworker_short_on_cash); letting it go changes nothing now."
+  money: "The {$200} left your savings when you lent it (coworker_short_on_cash); letting it go changes nothing now."
 cast:
   npc: { kind: coworker, presence: city }
 choices:
@@ -39,7 +39,7 @@ choices:
   - id: forget
     label: Let it go
     outcome:
-      text: Two hundred dollars is the price of never having to bring it up. You decide it's worth it.
+      text: '{$200} is the price of never having to bring it up. You decide it''s worth it.'
       effects:
         - { type: memory, role: npc, tag: never_paid_back }
         - { type: stat, key: kindness, delta: 2 }

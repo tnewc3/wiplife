@@ -44,7 +44,7 @@ choices:
           - { type: stat, key: riskTaking, delta: 2 }
       failure:
         text: >-
-          It goes wrong in the loudest possible way, and the vice principal is
+          It goes wrong in the loudest possible way, and the assistant {principal} is
           standing there for the best part of it. You get a lecture and a week
           of afternoons in a classroom.
         effects:

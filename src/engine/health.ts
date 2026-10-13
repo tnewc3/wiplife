@@ -20,6 +20,7 @@ import { clampInt } from './random';
 import { chance, nextInt } from './rng';
 import { writeFromGroup } from './systems/history';
 import type { HealthCondition, Id, LifeState } from './types';
+import { healthShare, medicalPrice } from './country';
 
 /** An active (not retired) condition, or undefined. */
 export function activeCondition(content: ContentBundle, id: Id): ConditionDef | undefined {
@@ -194,12 +195,12 @@ export function canSeeDoctor(state: LifeState): boolean {
 /** What a visit costs now: the visit (city cost of living) and the treatment of every untreated treatable condition. */
 export function doctorQuote(state: LifeState, content: ContentBundle): { visit: number; treatment: number } {
   const city = content.cities[state.character.cityId];
-  const visit = wholeDollars(content.balance.health.doctor.visitCost * (city?.costOfLiving ?? 1));
+  const visit = wholeDollars(content.balance.health.doctor.visitCost * (city?.costOfLiving ?? 1) * healthShare(state, 'visit', content));
   const treatment = state.health.conditions.reduce((sum, c) => {
     const def = content.conditions[c.conditionId];
     return sum + (def && def.treatable && !c.treated && !isMentalKind(def.kind) ? (def.costs?.treatment ?? 0) : 0);
   }, 0);
-  return { visit, treatment: wholeDollars(treatment) };
+  return { visit, treatment: wholeDollars(treatment * medicalPrice(state, 'treatment', content)) };
 }
 
 /**
@@ -222,7 +223,7 @@ export function seeDoctor(state: LifeState, content: ContentBundle): DoctorResul
     if (!def || condition.treated || isMentalKind(def.kind)) continue;
     if (def.treatable) {
       if (chance(state.rng, curveAt(d.treatChance, condition.severity))) {
-        cost += def.costs?.treatment ?? 0;
+        cost += (def.costs?.treatment ?? 0) * medicalPrice(state, 'treatment', content);
         setTreated(state, def.id, true, content);
         treated = true;
       } else {

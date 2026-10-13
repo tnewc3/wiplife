@@ -8,12 +8,13 @@
 import type { ContentBundle } from '../content/schemas';
 import { spend, wholeDollars } from './finance';
 import type { LifeState } from './types';
+import { healthShare } from './country';
 
 /** The cost item's full price in your city. Throws for an unknown item (the content build checks them). */
 export function costPrice(state: LifeState, item: string, content: ContentBundle): number {
   const def = content.balance.economy.costs[item];
   if (!def) throw new Error(`Unknown cost item "${item}".`);
-  return wholeDollars(def.amount * (content.cities[state.character.cityId]?.costOfLiving ?? 1));
+  return wholeDollars(def.amount * (content.cities[state.character.cityId]?.costOfLiving ?? 1) * (def.health ? healthShare(state, def.health, content) : 1));
 }
 
 /**

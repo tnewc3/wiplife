@@ -18,7 +18,7 @@ cast:
   kid: { kind: child, presence: household, age: { min: 9, max: 14 } }
 choices:
   - id: buy
-    label: Get {kid.them} one, with rules attached ($250)
+    label: Get {kid.them} one, with rules attached ({$250})
     visibleIf: { money: { gte: 250 } }
     outcome:
       text: >-

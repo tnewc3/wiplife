@@ -131,6 +131,21 @@ function LifestyleCard({ life }: { life: LifeState }) {
   );
 }
 
+/** W4a: the money rules of the country you live in: its currency, tax, health care and student finance. */
+function CountryCard({ life }: { life: LifeState }) {
+  const { country } = getMoneyView(life, content);
+  return (
+    <Card role="region" aria-labelledby="country-money-title">
+      <h2 id="country-money-title" className="mb-1 text-lg font-bold">
+        Money in {country.name}
+      </h2>
+      <p className="text-sm text-muted" data-testid="country-money">
+        Amounts are in {country.currency} ({country.code}). {country.tax} {country.health} {country.students}
+      </p>
+    </Card>
+  );
+}
+
 /** The retirement benefit your earnings record adds up to. */
 function RetirementCard({ life }: { life: LifeState }) {
   const { retirement: r } = getMoneyView(life, content);
@@ -138,7 +153,7 @@ function RetirementCard({ life }: { life: LifeState }) {
   return (
     <Card role="region" aria-labelledby="retirement-title">
       <h2 id="retirement-title" className="mb-1 text-lg font-bold">
-        Retirement
+        Retirement · {r.name}
       </h2>
       <p data-testid="retirement-line">
         {r.receiving
@@ -243,6 +258,7 @@ export function MoneyTab({ life }: { life: LifeState }) {
       <CustodyCard life={life} />
       <LifestyleCard life={life} />
       <RetirementCard life={life} />
+      <CountryCard life={life} />
 
       <Card role="region" aria-labelledby="debts-title">
         <h2 id="debts-title" className="mb-1 text-lg font-bold">

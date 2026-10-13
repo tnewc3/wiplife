@@ -4,5 +4,5 @@ type: shop
 style: budget
 blurb: "Fifteen cheerful discount stores in towns that did not have one before."
 locations: { min: 5, max: 10 }
-cities: [small_town, houston]
+cities: [small_town, houston, toronto, manchester, monterrey]
 reputation: { mean: 55, sd: 8 }

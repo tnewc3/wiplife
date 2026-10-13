@@ -163,6 +163,26 @@ describe('migrations', () => {
   });
 });
 
+describe('the W4a migration (countries)', () => {
+  const step = migrations.find((m) => m.from === 23)!;
+  const create = (payload: Record<string, unknown>) => ({ year: 2026, kind: 'create', payload });
+
+  it('says a random life made before countries was lived in the US, so it replays as it was', () => {
+    const data = { inputLog: [create({ mode: 'random', seed: 's', birthYear: 2026 }), { year: 2027, kind: 'ageUp', payload: {} }] };
+    const out = step.migrate(data) as typeof data;
+    expect(out.inputLog[0]).toEqual(create({ mode: 'random', seed: 's', birthYear: 2026, countryId: 'us' }));
+    expect(out.inputLog[1]).toEqual(data.inputLog[1]);
+  });
+
+  it('leaves a custom life, a life that already names its country and odd data alone', () => {
+    const custom = { inputLog: [create({ mode: 'custom', seed: 's' })] };
+    expect(step.migrate(custom)).toEqual(custom);
+    const named = { inputLog: [create({ mode: 'random', seed: 's', countryId: 'uk' })] };
+    expect(step.migrate(named)).toEqual(named);
+    expect(step.migrate(null)).toBeNull();
+  });
+});
+
 describe('settings table', () => {
   it('returns defaults on first launch', async () => {
     expect(await loadSettings(freshDb())).toEqual(DEFAULT_SETTINGS);

@@ -22,6 +22,7 @@ import { writeFromGroup } from '../systems/history';
 import type { HospiceChoice, Id, LastVisit, LifeState, ServiceStyle, Terminal } from '../types';
 import { offerOnce } from './grandchildren';
 import { willOutOfDate } from './query';
+import { careScale } from '../country';
 
 const byId = (a: Id, b: Id) => a.localeCompare(b, 'en', { numeric: true });
 
@@ -40,7 +41,7 @@ export function terminalDeathChance(state: LifeState, content: ContentBundle): n
 export function hospiceCost(state: LifeState, content: ContentBundle): number {
   const t = state.later.terminal;
   if (t === null || t.hospice === null || state.housing.kind === 'incarcerated') return 0;
-  return wholeDollars(content.balance.later.terminal.hospice[t.hospice].cost * (content.cities[state.character.cityId]?.costOfLiving ?? 1));
+  return wholeDollars(content.balance.later.terminal.hospice[t.hospice].cost * careScale(state, content));
 }
 
 /** Rolls whether a warning begins this year, and why. Draws only when something could. */

@@ -1,0 +1,63 @@
+id: mx_private_hospital
+title: Public bed or private room
+text: >-
+  {parent.name} needs surgery. The public hospital can do it, in four
+  months, in a shared ward, at no cost. The private one can do it next week,
+  in a room with a window, and the estimate is a number that makes the family go
+  quiet.
+tone: serious
+category: health
+rarity: uncommon
+countries: [mx]
+lifeStages: [adult, senior]
+requires:
+  all:
+    - { age: { gte: 35 } }
+    - { role: parent, alive: true, age: { gte: 60 } }
+weight: { base: 4 }
+cooldownYears: 10
+cast:
+  parent: { kind: parent, presence: anywhere }
+choices:
+  - id: public
+    label: Choose the public hospital and wait
+    outcome:
+      text: >-
+        Four months of pain pills and phone calls to a scheduling office. The
+        surgery, when it happens, is excellent, and the nurses are
+        extraordinary and overworked.
+      effects:
+        - { type: relationship, role: parent, affection: 4 }
+        - { type: stat, key: stress, delta: 4 }
+  - id: private
+    label: Pay for the private hospital ({$6500})
+    visibleIf: { money: { gte: 6500 } }
+    outcome:
+      text: >-
+        Next week, a quiet room, a young surgeon and a cousin who offers to
+        chip in. The bill is {$6500}, and {parent.name} is home in four days.
+      effects:
+        - { type: money, delta: -6500 }
+        - { type: relationship, role: parent, affection: 8 }
+        - { type: stat, key: stress, delta: -1 }
+  - id: family
+    label: Gather the family and split the cost
+    check:
+      base: 50
+      stats: [{ key: sociability, weight: 0.3 }, { key: kindness, weight: 0.3 }]
+      success:
+        text: >-
+          Six siblings and cousins, a group chat and a spreadsheet. Everyone
+          pitches in, and your share is {$1400}. {parent.name} will never know the
+          number.
+        effects:
+          - { type: money, delta: -1400 }
+          - { type: relationship, role: parent, affection: 7 }
+          - { type: stat, key: kindness, delta: 2 }
+      failure:
+        text: >-
+          The group chat turns into an argument about who gave what last time.
+          You pay {$3000} yourself and the cousins send their regrets.
+        effects:
+          - { type: money, delta: -3000 }
+          - { type: stat, key: stress, delta: 4 }

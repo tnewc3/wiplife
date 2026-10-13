@@ -11,6 +11,7 @@
  */
 import type { ContentBundle, DebtKind } from '../content/schemas';
 import { businessValue } from './business/value';
+import { countryOf } from './country';
 import { detachDebt, possessionsValue } from './possessions/query';
 import { writeFromGroup } from './systems/history';
 import type { Debt, Id, LifeState } from './types';
@@ -74,6 +75,13 @@ function nextDebtId(state: LifeState): Id {
   return `d${n}`;
 }
 
+/** A debt kind's usual yearly rate: from the economy balance, and for a student loan the country's (countries/*.yaml studentFinance.loanRate). */
+function defaultRate(state: LifeState, kind: DebtKind, content: ContentBundle): number {
+  if (kind === 'student') return countryOf(state, content).studentFinance.loanRate;
+  if (kind === 'mortgage') return countryOf(state, content).housing.mortgageRate;
+  return content.balance.economy.interest.debts[kind];
+}
+
 /**
  * Adds a new debt of `amount` (at the kind's usual rate unless given) and
  * returns it. The caller checks the player is independent.
@@ -89,7 +97,7 @@ export function addDebt(
     id: nextDebtId(state),
     kind,
     balance: wholeDollars(Math.max(0, amount)),
-    annualRate: terms.annualRate ?? content.balance.economy.interest.debts[kind],
+    annualRate: terms.annualRate ?? defaultRate(state, kind, content),
     minPayment: 0,
     missed: 0,
   };
@@ -127,7 +135,7 @@ export function borrow(state: LifeState, amount: number, content: ContentBundle)
 export function takeStudentLoan(state: LifeState, amount: number, content: ContentBundle): number {
   const owed = wholeDollars(Math.max(0, amount));
   if (owed === 0) return 0;
-  const rate = content.balance.economy.interest.debts.student;
+  const rate = defaultRate(state, 'student', content);
   const existing = state.finances.debts.find((d) => d.kind === 'student' && d.annualRate === rate);
   if (existing) grow(existing, owed, content);
   else addDebt(state, 'student', owed, content);

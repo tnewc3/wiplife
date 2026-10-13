@@ -1,0 +1,51 @@
+id: mx_metro_rush
+title: The metro at eight
+text: >-
+  The platform is a river of people. The carriages for women and children are
+  on the left, the doors open for exactly nine seconds and the whole day
+  depends on whether you get on the first train or the third.
+tone: neutral
+category: work
+rarity: common
+countries: [mx]
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { career: { employed: true, retired: false } }
+    - any:
+        - { city: mexico_city }
+        - { city: monterrey }
+        - { city: guadalajara }
+weight: { base: 6 }
+cooldownYears: 3
+choices:
+  - id: early
+    label: Leave an hour earlier to beat the rush
+    outcome:
+      text: >-
+        A quiet train, a seat and thirty minutes with a book. You get to the
+        office before anyone else, and your manager notices.
+      effects:
+        - { type: stat, key: discipline, delta: 1 }
+        - { type: stat, key: stress, delta: -1 }
+  - id: ride
+    label: Take the rush as it comes
+    outcome:
+      text: >-
+        You are pressed against a door for forty minutes, with an elbow in your ribs
+        and someone else's umbrella. You arrive late, crumpled and strangely
+        calm.
+      effects:
+        - { type: stat, key: stress, delta: 3 }
+  - id: bike
+    label: Buy a bicycle and cycle in ({$180})
+    visibleIf: { money: { gte: 180 } }
+    outcome:
+      text: >-
+        {$180} for a second-hand bike and a helmet. The route has two scary
+        junctions and a lot of green space, and your legs thank you in a month.
+      effects:
+        - { type: money, delta: -180 }
+        - { type: stat, key: fitness, delta: 3 }
+        - { type: stat, key: health, delta: 1 }

@@ -1,0 +1,51 @@
+id: ca_transit_or_bike
+title: The monthly pass
+text: >-
+  The transit fare went up again. A monthly pass, a used bike and a long coat
+  are on the table, and the weather has opinions about all three.
+tone: light
+category: money
+rarity: common
+countries: [ca]
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - any:
+        - { city: toronto }
+        - { city: vancouver }
+        - { city: montreal }
+weight: { base: 5 }
+cooldownYears: 5
+choices:
+  - id: pass
+    label: Buy the annual pass ({$1100})
+    visibleIf: { money: { gte: 1100 } }
+    outcome:
+      text: >-
+        The pass costs {$1100} up front and pays for itself by April. You fall
+        asleep on the train twice and miss your stop once.
+      effects:
+        - { type: money, delta: -1100 }
+        - { type: stat, key: stress, delta: -1 }
+  - id: bike
+    label: Buy a used bike and ride year-round ({$280})
+    visibleIf: { money: { gte: 280 } }
+    outcome:
+      text: >-
+        You ride through rain, wind and, once, sideways snow. Your legs get
+        stronger, your gloves get warmer and the commute becomes the best hour of
+        your day.
+      effects:
+        - { type: money, delta: -280 }
+        - { type: stat, key: fitness, delta: 3 }
+        - { type: stat, key: health, delta: 1 }
+  - id: walk
+    label: Walk and pay by trip
+    outcome:
+      text: >-
+        You pay the fare each time and walk when you can. By the end of the
+        year the extra comes to {$260}.
+      effects:
+        - { type: money, delta: -260 }
+        - { type: stat, key: fitness, delta: 1 }

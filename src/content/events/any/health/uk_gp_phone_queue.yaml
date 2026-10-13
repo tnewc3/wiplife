@@ -1,0 +1,46 @@
+id: uk_gp_phone_queue
+title: Eight o'clock sharp
+text: >-
+  The surgery takes appointments from eight a.m., by phone, and by 8:02 the
+  recorded voice says you are number twenty-three in the queue. The cough is not
+  going away. Neither, apparently, is the queue.
+tone: neutral
+category: health
+rarity: common
+countries: [uk]
+lifeStages: [youngAdult, adult, senior]
+requires: { age: { gte: 18 } }
+weight: { base: 6 }
+cooldownYears: 4
+cast:
+  mate: { kind: partner, presence: household, optional: true }
+choices:
+  - id: hold
+    label: Hold, and hold, and hold
+    outcome:
+      text: >-
+        Forty minutes of the same piece of music later, a receptionist offers
+        you a slot in nine days. You take it, because it is a slot.
+      effects:
+        - { type: stat, key: stress, delta: 2 }
+        - { type: stat, key: health, delta: 1 }
+  - id: online
+    label: Use the online form and wait for a call back
+    outcome:
+      text: >-
+        The form asks eleven questions and promises a call the same day. The
+        call comes at ten past five, from a clinician who has already read your
+        answers and gets to the point.
+      effects:
+        - { type: stat, key: health, delta: 1 }
+        - { type: stat, key: stress, delta: -1 }
+  - id: walkin
+    label: Go to the walk-in centre
+    outcome:
+      text: >-
+        Two hours in a plastic chair with a vending machine for company. A nurse
+        listens, checks and gives you a short list of things to try, and a
+        longer list of reasons to come back.
+      effects:
+        - { type: stat, key: stress, delta: 2 }
+        - { type: stat, key: health, delta: 1 }

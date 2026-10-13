@@ -31,6 +31,7 @@ import { instanceOf } from '../belonging/query';
 import { BUSINESS_ROLE, GROUP_ROLE } from '../../content/schemas';
 import { businessById, livingStaff, managerOf } from '../business/query';
 import { businessPool } from '../business/pool';
+import { sameCountryCities } from '../country';
 
 function personAge(state: LifeState, person: Person): number {
   return state.currentYear - person.birthYear;
@@ -364,9 +365,7 @@ export function castEvent(
 
 /** A city other than yours (for someone who lives elsewhere), from the active cities. */
 export function otherCity(state: LifeState, rng: RngState, content: ContentBundle): Id {
-  const options = Object.keys(content.cities)
-    .sort()
-    .filter((id) => id !== state.character.cityId && !content.cities[id]!.retired);
+  const options = sameCountryCities(state.character.cityId, content).filter((id) => id !== state.character.cityId);
   return options.length > 0 ? pick(rng, options) : state.character.cityId;
 }
 

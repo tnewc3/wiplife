@@ -1,0 +1,44 @@
+id: ca_exam_week
+title: Provincial exam week
+text: >-
+  The gym is set out in rows, a clock is on the wall and the invigilator reads
+  the rules like a flight attendant. Two hours for the paper that counts toward
+  your final mark.
+tone: neutral
+category: school
+rarity: common
+countries: [ca]
+lifeStages: [teen]
+requires: { education: { program: [high], final: true } }
+weight: { base: 8 }
+once: true
+choices:
+  - id: cram
+    label: Cram the night before
+    check:
+      base: 45
+      stats: [{ key: smarts, weight: 0.3 }, { key: discipline, weight: 0.2 }]
+      success:
+        text: Four hours of coffee and flash cards, then a paper that asks exactly the thing you studied. You walk out lighter by ten pounds.
+        effects:
+          - { type: education, action: grades, value: 0.2 }
+          - { type: stat, key: stress, delta: 2 }
+      failure:
+        text: The paper asks the three things you skipped. You write a polite essay on what you do know.
+        effects:
+          - { type: education, action: grades, value: -0.2 }
+          - { type: stat, key: stress, delta: 4 }
+  - id: steady
+    label: Study a little every week
+    check:
+      base: 60
+      stats: [{ key: discipline, weight: 0.4 }]
+      success:
+        text: The paper is long and fair, and you walk out feeling like the exam was written for you.
+        effects:
+          - { type: education, action: grades, value: 0.3 }
+          - { type: stat, key: stress, delta: -1 }
+      failure:
+        text: Weeks of steady effort turn out to be steady enough. The mark is average and so is the mood.
+        effects:
+          - { type: stat, key: stress, delta: 1 }

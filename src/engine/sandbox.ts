@@ -65,7 +65,7 @@ export function previewEvent(content: ContentBundle, options: SandboxOptions): S
   const others = pronounsFromPreset(content, options.castPronouns);
   const age = Math.max(0, Math.min(content.balance.mortality.maxAge, Math.round(options.age)));
 
-  const base = createLife({ mode: 'random', seed: options.seed, birthYear: 2026 }, content);
+  const base = createLife({ mode: 'random', seed: options.seed, birthYear: 2026, countryId: 'us' }, content);
   const life = produce(base, (d) => {
     d.currentYear = d.birthYear + age;
     d.character.age = age;

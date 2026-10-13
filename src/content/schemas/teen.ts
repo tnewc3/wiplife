@@ -250,9 +250,7 @@ export const teenBalanceSchema = z.strictObject({
   }),
   friends: z.strictObject({ people: z.int().min(1).max(12) }),
   license: z.strictObject({
-    /** The youngest age for a learner's permit, and for the license itself. */
-    permitAge: z.int().min(14).max(17),
-    licenseAge: z.int().min(15).max(18),
+    /** The ages for a learner's permit and for the license itself are the country's (legalAges). */
     /** Fees in whole dollars at a cost of living of 1 (a minor's family covers what savings can't). */
     permitFee: dollarsSchema,
     lessonFee: dollarsSchema,

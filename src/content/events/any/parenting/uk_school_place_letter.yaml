@@ -1,0 +1,60 @@
+id: uk_school_place_letter
+title: The allocation letter
+text: >-
+  On the first of March, every parent in the street opens the same letter. It
+  says which secondary school {kid.name} has been offered a place at. Yours is
+  the third choice, and it is forty minutes away.
+tone: serious
+category: parenting
+rarity: uncommon
+countries: [uk]
+lifeStages: [adult, senior]
+requires:
+  all:
+    - { age: { gte: 28 } }
+    - { family: { minors: { gte: 1 } } }
+weight: { base: 5 }
+once: true
+cast:
+  kid: { kind: child, presence: household, age: { min: 10, max: 11 } }
+choices:
+  - id: accept
+    label: Accept the place
+    outcome:
+      text: >-
+        The school is better than the letter made it sound. {kid.name} makes a
+        friend on the bus on day one, and you learn the timetable by heart.
+      effects:
+        - { type: relationship, role: kid, affection: 3 }
+        - { type: stat, key: stress, delta: -1 }
+  - id: appeal
+    label: Appeal for a closer school
+    check:
+      base: 35
+      stats: [{ key: discipline, weight: 0.3 }, { key: confidence, weight: 0.2 }]
+      success:
+        text: >-
+          A panel, a folder and a very small room. The appeal succeeds on the
+          grounds of the journey, and {kid.name} starts at the school ten
+          minutes away.
+        effects:
+          - { type: relationship, role: kid, affection: 5 }
+          - { type: stat, key: confidence, delta: 2 }
+      failure:
+        text: >-
+          The panel is courteous and the answer is no. {kid.name} accepts the
+          place with the kind of grace children show on days like this.
+        effects:
+          - { type: relationship, role: kid, affection: 1 }
+          - { type: stat, key: stress, delta: 3 }
+  - id: tutor
+    label: Pay for a tutor to try for a place elsewhere ({$900})
+    visibleIf: { money: { gte: 900 } }
+    outcome:
+      text: >-
+        A year of Saturday tutoring and a lot of timed papers. It costs {$900},
+        and {kid.name} learns more about nerves than about verbal reasoning.
+      effects:
+        - { type: money, delta: -900 }
+        - { type: relationship, role: kid, affection: -3 }
+        - { type: stat, key: stress, delta: 3 }

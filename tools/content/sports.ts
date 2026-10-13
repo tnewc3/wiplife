@@ -86,7 +86,11 @@ export function checkSports(bundle: ContentBundle, fileOf: (typeKey: CollectionK
     const teams = sport.leagues.pro.teams;
     if (new Set(teams.map((t) => t.id)).size !== teams.length) e('duplicate team ids');
     for (const t of teams) if (!bundle.cities[t.city]) e(`team ${t.id}: unknown city "${t.city}"`);
-    if (teams.filter((t) => bundle.cities[t.city]).length < sport.season.playoffTeams + 2) e('more teams than playoff places, please');
+    // W4a: a player can only play for a team in their own country, so every country needs a league to play in.
+    for (const country of Object.values(bundle.countries)) {
+      const here = teams.filter((t) => bundle.cities[t.city]?.countryId === country.id);
+      if (here.length < 6) e(`country ${country.id}: ${here.length} pro teams; every country needs at least 6 in every sport`);
+    }
     if (sport.draft.rounds * teams.length < 12) e('the draft must have room for a dozen players');
     for (const i of sport.injuries) {
       const c = bundle.conditions[i.id];

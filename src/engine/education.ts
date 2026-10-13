@@ -15,6 +15,7 @@ import { groupGradeDrag } from './belonging/load';
 import type { ApplyProgram, ChanceModel, ContentBundle, CredentialType, EducationHistoryKey, Program, Tier } from '../content/schemas';
 import { curveAt } from './curve';
 import { scoreOf } from './events/checks';
+import { countryOf } from './country';
 import { isIndependent, MAX_MONEY, takeStudentLoan, wholeDollars } from './finance';
 import { supportingParent } from './housing';
 import { nextFloat, type RngState } from './rng';
@@ -33,9 +34,9 @@ export function roundGpa(gpa: number): number {
   return Math.min(4, Math.max(0, Math.round(gpa * 100) / 100));
 }
 
-/** Ages that bound automatic school, from balance/education.yaml. */
-export function schoolAges(content: ContentBundle) {
-  const s = content.balance.education.school;
+/** Ages that bound automatic school, from the country you live in (countries/*.yaml school). */
+export function schoolAges(state: LifeState, content: ContentBundle) {
+  const s = countryOf(state, content).school;
   const middleStart = s.startAge + s.elementary;
   const highStart = middleStart + s.middle;
   /** High school normally ends (the diploma) as you turn this old. */
@@ -46,9 +47,9 @@ export function schoolAges(content: ContentBundle) {
 }
 
 /** The automatic school program (and year) for an age, if it is a school age. */
-export function placeForAge(age: number, content: ContentBundle): { program: Program; year: number; lengthYears: number } | null {
-  const s = content.balance.education.school;
-  const a = schoolAges(content);
+export function placeForAge(age: number, state: LifeState, content: ContentBundle): { program: Program; year: number; lengthYears: number } | null {
+  const s = countryOf(state, content).school;
+  const a = schoolAges(state, content);
   if (age < a.startAge || age >= a.highEnd) return null;
   if (age < a.middleStart) return { program: 'elementary', year: age - a.startAge + 1, lengthYears: s.elementary };
   if (age < a.highStart) return { program: 'middle', year: age - a.middleStart + 1, lengthYears: s.middle };
@@ -76,24 +77,35 @@ export function inFinalYear(state: LifeState): boolean {
   return cur !== null && cur.year >= cur.lengthYears;
 }
 
-/** A letter grade for a GPA (balance/education.yaml grades.letters). */
-export function letterGrade(gpa: number, content: ContentBundle): string {
-  const letters = content.balance.education.grades.letters;
-  return (letters.find((l) => gpa >= l.min) ?? letters[letters.length - 1]!).letter;
+/**
+ * A year's grade as the country writes it: a letter (balance/education.yaml grades.letters), a percentage (a GPA
+ * of 4 is 100%) or a ten-point average (countries/*.yaml words.gradeDisplay).
+ */
+export function letterGrade(gpa: number, state: LifeState, content: ContentBundle): string {
+  switch (countryOf(state, content).words.gradeDisplay) {
+    case 'percent':
+      return `${Math.round(gpa * 25)}%`;
+    case 'tenPoint':
+      return (Math.round(gpa * 25) / 10).toFixed(1);
+    case 'letters': {
+      const letters = content.balance.education.grades.letters;
+      return (letters.find((l) => gpa >= l.min) ?? letters[letters.length - 1]!).letter;
+    }
+  }
 }
 
 /** Years a program takes. */
-export function programLength(place: SchoolPlace, content: ContentBundle): number {
-  const edu = content.balance.education;
+export function programLength(state: LifeState, place: SchoolPlace, content: ContentBundle): number {
+  const country = countryOf(state, content);
   switch (place.program) {
     case 'elementary':
-      return edu.school.elementary;
+      return country.school.elementary;
     case 'middle':
-      return edu.school.middle;
+      return country.school.middle;
     case 'high':
-      return edu.school.high;
+      return country.school.high;
     case 'college':
-      return edu.college.years[place.tier ?? 'state'];
+      return country.collegeYears[place.tier ?? 'state'];
     case 'trade':
       return content.trades[place.tradeId ?? '']?.years ?? 1;
     case 'grad':
@@ -238,7 +250,7 @@ export type ApplyBlock = 'age' | 'enrolled' | 'highSchool' | 'bachelor' | 'major
 export function applyBlock(state: LifeState, target: ApplyTarget, content: ContentBundle): ApplyBlock | null {
   const edu = state.education;
   if (!validTarget(target, content)) return 'unknown';
-  if (state.character.age < content.balance.education.school.applyAge) return 'age';
+  if (state.character.age < countryOf(state, content).school.applyAge) return 'age';
   // Only when you're not in school, or finishing what you're in.
   if (edu.current && edu.current.year < edu.current.lengthYears) return 'enrolled';
   if (edu.current && (edu.current.program === 'elementary' || edu.current.program === 'middle')) return 'enrolled';
@@ -269,8 +281,8 @@ export function validTarget(target: ApplyTarget, content: ContentBundle): boolea
 }
 
 /** Yearly tuition for a program (none for automatic school). */
-export function tuitionFor(place: SchoolPlace, content: ContentBundle): number {
-  const t = content.balance.education.tuition;
+export function tuitionFor(state: LifeState, place: SchoolPlace, content: ContentBundle): number {
+  const t = countryOf(state, content).tuition;
   if (place.program === 'college') return t.college[place.tier ?? 'state'];
   if (place.program === 'trade') return t.trade[place.tradeId ?? ''] ?? 0;
   if (place.program === 'grad') return t.grad[place.gradProgramId ?? ''] ?? 0;
@@ -279,7 +291,7 @@ export function tuitionFor(place: SchoolPlace, content: ContentBundle): number {
 
 /** The share of tuition scholarships would cover if you were accepted now: merit (by GPA) and need (by family wealth). */
 export function scholarshipShare(state: LifeState, program: ApplyProgram, content: ContentBundle): number {
-  const s = content.balance.education.scholarships;
+  const s = countryOf(state, content).studentFinance.scholarships;
   const merit = curveAt(s.merit, applicationGpa(state, program, content));
   const need = s.need[state.character.familyWealth] * (program === 'grad' ? s.gradNeed : 1);
   return Math.min(s.maxShare, merit + need);
@@ -305,7 +317,7 @@ export function billFor(
   nextYear = false,
 ): Omit<SchoolBill, 'year'> {
   const at = nextYear ? { ...state, character: { ...state.character, age: state.character.age + 1 } } : state;
-  const tuition = tuitionFor(place, content);
+  const tuition = tuitionFor(state, place, content);
   const covered = wholeDollars(tuition * Math.min(1, Math.max(0, scholarship)));
   const rest = tuition - covered;
   let family = wholeDollars(rest * familyHelpShare(at, content));
@@ -370,7 +382,7 @@ export function placeOf(place: SchoolPlace): SchoolPlace {
 
 /** Starts automatic school at the right year for your age (kindergarten, or catching up). */
 export function enrollForAge(state: LifeState, content: ContentBundle): boolean {
-  const place = placeForAge(state.character.age, content);
+  const place = placeForAge(state.character.age, state, content);
   if (!place) return false;
   const enrollment: Enrollment = {
     program: place.program,
@@ -403,7 +415,7 @@ export function startAdmission(state: LifeState, content: ContentBundle): void {
     schoolHistory(state, 'withdrawn', values, content);
     return;
   }
-  const lengthYears = admission.resume?.lengthYears ?? programLength(admission, content);
+  const lengthYears = admission.resume?.lengthYears ?? programLength(state, admission, content);
   let year = admission.resume?.year ?? 1;
   let gpa = admission.resume?.gpa;
   if (!admission.resume && admission.program === 'college' && admission.tier !== 'community') {
@@ -469,12 +481,12 @@ export function graduate(state: LifeState, content: ContentBundle): void {
   const credential = credentialFor(cur, state.currentYear);
   if (credential) edu.credentials.push(credential);
   if (edu.left && edu.left.program === cur.program) edu.left = null;
-  const grade = letterGrade(cur.gpa, content);
+  const grade = letterGrade(cur.gpa, state, content);
   const values = { school: schoolName(state, cur, content), subject: subjectOf(cur, content), grade };
   switch (cur.program) {
     case 'elementary':
     case 'middle': {
-      const next = placeForAge(state.character.age, content);
+      const next = placeForAge(state.character.age, state, content);
       if (next && next.program !== cur.program) {
         enrollForAge(state, content);
         schoolHistory(state, next.program === 'middle' ? 'startedMiddle' : 'startedHigh', {}, content);
@@ -500,7 +512,7 @@ export function graduate(state: LifeState, content: ContentBundle): void {
 export function canLeaveSchool(state: LifeState, content: ContentBundle): boolean {
   const cur = state.education.current;
   if (!cur) return false;
-  if (cur.program === 'high') return state.character.age >= content.balance.education.school.dropoutAge;
+  if (cur.program === 'high') return state.character.age >= countryOf(state, content).school.dropoutAge;
   return isPostSecondary(cur.program);
 }
 
@@ -535,7 +547,7 @@ export function canReturn(state: LifeState, content: ContentBundle): boolean {
   if (finishedHighSchool(state)) return false;
   // You start again next year; the diploma must come by the last diploma age.
   const diplomaAge = state.character.age + 1 + (left.lengthYears - left.year) + 1;
-  return diplomaAge <= schoolAges(content).lastDiplomaAge;
+  return diplomaAge <= schoolAges(state, content).lastDiplomaAge;
 }
 
 /** Decides to go back to the program you left: you pick up where you stopped as the next year begins. */

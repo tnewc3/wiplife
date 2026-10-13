@@ -22,7 +22,7 @@ export function JobCard({ life }: { life: LifeState }) {
   const sheet = confirm
     ? workConfirmation(confirm, {
         ...(job ? { employer: job.employer } : {}),
-        retirementAge: content.balance.economy.retirement.age,
+        retirementAge: view.pensionAge,
         age: life.character.age,
       })
     : null;

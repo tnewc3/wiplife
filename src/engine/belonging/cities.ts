@@ -68,7 +68,10 @@ export function findGroup(state: LifeState, groupId: Id | undefined, content: Co
   if (known) return known;
   const m = /^g_(.+)_[a-z0-9_]+_\d+$/.exec(groupId);
   if (!m) return undefined;
-  const cityId = Object.keys(content.cities).find((c) => groupId.startsWith(`g_${c}_`));
+  // Several city ids start the same way (small_town, small_town_ca): the longest one that fits is the city.
+  const cityId = Object.keys(content.cities)
+    .filter((c) => groupId.startsWith(`g_${c}_`))
+    .sort((a, b) => b.length - a.length)[0];
   return cityId ? generateCity(state.seed, cityId, content).find((g) => g.id === groupId) : undefined;
 }
 

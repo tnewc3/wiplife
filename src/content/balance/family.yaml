@@ -232,15 +232,7 @@ stepchildren:
 estate:
   funeral: 9000
   settlementShare: 0.03
-  # Estate tax, as a share of the whole estate by its size (dollars): nothing
-  # on a small estate, rising to 70% on a very large one.
-  tax:
-    - { at: 0, x: 0 }
-    - { at: 600000, x: 0 }
-    - { at: 1200000, x: 0.2 }
-    - { at: 2500000, x: 0.4 }
-    - { at: 6000000, x: 0.55 }
-    - { at: 12000000, x: 0.7 }
+  # Estate tax is the country's (countries/*.yaml estateTax).
   # A will has between one and this many shares.
   maxShares: 8
   default:

@@ -114,7 +114,7 @@ describe('home actions', () => {
       d.finances.lastLedger = { year: d.currentYear, gross: 120_000, retirement: 0, tax: 0, housing: 0, living: 0, debtPayments: 0, interest: 0, debtInterest: 0, borrowed: 0, support: 0, children: 0, care: 0, supportPaid: 0, supportReceived: 0, upkeep: 0, insurance: 0, giving: 0, business: 0, net: 120_000 };
     });
     const quote = purchaseQuote(base, content);
-    expect(quote.cashNeeded).toBe(Math.round(quote.price * eco.ownership.downPayment) + Math.round(quote.price * eco.ownership.closingCosts));
+    expect(quote.cashNeeded).toBe(Math.round(quote.price * content.countries.us!.housing.downPayment) + Math.round(quote.price * eco.ownership.closingCosts));
     expect(quote.blocked).toBe('savings');
     expect(() => act(base, 'buy_home')).toThrow(InvalidInputError);
 
@@ -122,7 +122,7 @@ describe('home actions', () => {
     const bought = act(ready, 'buy_home');
     const mortgage = bought.finances.debts.find((d) => d.kind === 'mortgage')!;
     expect(bought.housing).toMatchObject({ kind: 'owned', homeValue: quote.price, mortgageDebtId: mortgage.id });
-    expect(mortgage.balance).toBe(quote.price - Math.round(quote.price * eco.ownership.downPayment));
+    expect(mortgage.balance).toBe(quote.price - Math.round(quote.price * content.countries.us!.housing.downPayment));
     expect(bought.finances.savings).toBe(0);
     expect(checkInvariants(bought, content)).toEqual([]);
 

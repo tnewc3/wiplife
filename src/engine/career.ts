@@ -31,6 +31,7 @@ import { clampInt } from './random';
 import { chance, nextFloat, pick } from './rng';
 import { writeFromGroup } from './systems/history';
 import type { Id, Job, JobEnd, LifeState } from './types';
+import { jobPayFactor } from './country';
 
 /** An active (not retired) job track, or undefined. */
 export function activeJob(content: ContentBundle, jobId: Id): JobDef | undefined {
@@ -48,11 +49,11 @@ export function marketStrength(state: LifeState, def: JobDef, content: ContentBu
   return content.cities[state.character.cityId]?.jobMarket[def.category] ?? 50;
 }
 
-/** A level's pay in your city: its base salary × the city's salary multiplier. */
+/** A level's pay in your city: its base salary × the city's salary multiplier × the country's pay for that kind of work and that job. */
 export function levelPay(state: LifeState, def: JobDef, level: number, content: ContentBundle): number {
   const city = content.cities[state.character.cityId];
   const base = def.levels[Math.min(def.levels.length, Math.max(1, level)) - 1]!.salary;
-  return wholeDollars(base * (city?.salaryMultiplier ?? 1));
+  return wholeDollars(base * (city?.salaryMultiplier ?? 1) * jobPayFactor(state, def.id, def.category, content));
 }
 
 /**

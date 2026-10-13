@@ -1,0 +1,66 @@
+id: uk_council_tax_bill
+title: Council tax
+text: >-
+  The bill for the year arrives in April. It is based on a valuation of your
+  home that was made in 1991 and is, somehow, still the number. You can pay in
+  ten instalments or twelve, and one of them is always wrong.
+tone: neutral
+category: home
+rarity: common
+countries: [uk]
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { home: { kind: [owned, renting] } }
+weight: { base: 5 }
+cooldownYears: 4
+cast:
+  mate: { kind: partner, presence: household, optional: true }
+choices:
+  - id: pay
+    label: Pay it in ten monthly instalments
+    outcome:
+      text: >-
+        Ten payments of the same number. You stop noticing them by June, which
+        is the whole point of ten.
+      effects:
+        - { type: money, delta: -1700 }
+        - { type: stat, key: stress, delta: 1 }
+  - id: discount
+    label: Apply for a discount you might be eligible for
+    check:
+      base: 50
+      stats: [{ key: discipline, weight: 0.3 }, { key: smarts, weight: 0.2 }]
+      success:
+        text: >-
+          A form, a proof of address and two weeks of silence. The council writes
+          back with a reduction, and the bill comes down to {$1200}.
+        effects:
+          - { type: money, delta: -1200 }
+          - { type: stat, key: confidence, delta: 1 }
+      failure:
+        text: >-
+          The council writes back to explain, kindly, that you do not qualify.
+          You pay the {$1700} you were always going to.
+        effects:
+          - { type: money, delta: -1700 }
+          - { type: stat, key: stress, delta: 2 }
+  - id: band
+    label: Challenge the band of the house
+    check:
+      base: 25
+      stats: [{ key: smarts, weight: 0.3 }, { key: confidence, weight: 0.2 }]
+      success:
+        text: >-
+          The valuation office agrees that the house next door, which is the
+          same, is in a lower band. A lower bill ({$1100}) is backdated by two
+          years.
+        effects:
+          - { type: money, delta: -1100 }
+          - { type: stat, key: confidence, delta: 3 }
+      failure:
+        text: The letter is polite, the band is unchanged, and the form took a month.
+        effects:
+          - { type: money, delta: -1700 }
+          - { type: stat, key: stress, delta: 2 }

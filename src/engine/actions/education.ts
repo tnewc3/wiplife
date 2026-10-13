@@ -29,6 +29,7 @@ import { spend } from '../finance';
 import { chance } from '../rng';
 import type { LifeState } from '../types';
 import type { LifeActionParams, LifeActionRule } from './life';
+import { countryOf, scaledAmount } from '../country';
 
 export const EDUCATION_ACTION_IDS = ['apply_school', 'choose_major', 'drop_out', 'return_to_school', 'take_ged', 'decline_admission'] as const;
 export type EducationActionId = (typeof EDUCATION_ACTION_IDS)[number];
@@ -87,7 +88,7 @@ export const EDUCATION_ACTIONS: Record<EducationActionId, LifeActionRule> = {
     // The application fee, then the school decides. A yes replaces any place you held.
     apply: (state, p, content) => {
       const target = targetOf(p)!;
-      spend(state, content.balance.education.admission.fee, content);
+      spend(state, countryOf(state, content).studentFinance.applicationFee, content);
       const accepted = chance(state.rng, admissionChance(state, target, content));
       decide(state, optionKey(target), accepted);
       const school = schoolName(state, target, content);
@@ -135,7 +136,7 @@ export const EDUCATION_ACTIONS: Record<EducationActionId, LifeActionRule> = {
     // The fee, then the exam. Passing is your high school equivalency.
     apply: (state, _p, content) => {
       const ged = content.balance.education.ged;
-      spend(state, ged.fee, content);
+      spend(state, scaledAmount(state, ged.fee, content), content);
       const passed = chance(state.rng, modelChance(state, ged.pass, undefined, content));
       decide(state, 'ged', passed);
       if (passed) {

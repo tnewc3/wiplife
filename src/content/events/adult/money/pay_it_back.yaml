@@ -35,7 +35,7 @@ choices:
   - id: dinner
     label: Take {helper.them} somewhere wildly expensive
     outcome:
-      text: Two hours, four courses, one waiter who cries when you explain why you're there. Worth every dollar.
+      text: Two hours, four courses, one waiter who cries when you explain why you're there. Worth every penny.
       effects:
         - { type: money, delta: -600 }
         - { type: relationship, role: helper, affection: 12 }

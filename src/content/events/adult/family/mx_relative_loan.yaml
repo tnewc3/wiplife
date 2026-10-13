@@ -1,0 +1,48 @@
+id: mx_relative_loan
+title: A loan within the family
+text: >-
+  {relative.name} calls on a Sunday and asks, with a lot of preamble, to borrow
+  a little money for a few months. The family has an unwritten rule about these
+  conversations, and neither of you says it out loud.
+tone: neutral
+category: family
+rarity: common
+countries: [mx]
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 22 } }
+    - { money: { gte: 400 } }
+weight: { base: 5 }
+cooldownYears: 5
+cast:
+  relative: { kind: relative, presence: city, age: { min: 20, max: 70 } }
+choices:
+  - id: lend
+    label: Lend them {$300}
+    outcome:
+      text: >-
+        You hand over the money in an envelope and make a joke about interest.
+        {relative.name} pays it back in four months, with a bag of oranges.
+      effects:
+        - { type: money, delta: -300 }
+        - { type: relationship, role: relative, affection: 6 }
+        - { type: stat, key: kindness, delta: 1 }
+  - id: part
+    label: Give them {$100} and say that is what you can do
+    outcome:
+      text: >-
+        It is less than they needed, and more than most would have given. They
+        thank you, quietly, and you do not ask about it again.
+      effects:
+        - { type: money, delta: -100 }
+        - { type: relationship, role: relative, affection: 3 }
+  - id: no
+    label: Say you cannot
+    outcome:
+      text: >-
+        You say it as gently as you can. A silence, a thank-you and a phone call
+        that ends. At the next family lunch, you sit at the far end.
+      effects:
+        - { type: relationship, role: relative, affection: -5 }
+        - { type: stat, key: stress, delta: 2 }

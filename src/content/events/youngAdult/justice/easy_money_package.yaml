@@ -1,7 +1,7 @@
 id: easy_money_package
 title: Don't open it
 text: >-
-  {contact.name}, someone you know from around, offers you $2,000 to drive a
+  {contact.name}, someone you know from around, offers you {$2000} to drive a
   backpack across town. The only rule is that you don't open it.
 tone: dark
 category: justice

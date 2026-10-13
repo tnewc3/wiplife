@@ -1,0 +1,48 @@
+id: uk_london_zones
+title: Zone 4 and hope
+text: >-
+  Every flat inside zone 2 is out of reach, so the search has crept outward:
+  zone 3, zone 4, a place that is technically London and spiritually a train
+  line. The commute is an hour each way and the rent is lower, by roughly the
+  price of a monthly travelcard.
+tone: neutral
+category: home
+rarity: common
+countries: [uk]
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { city: london }
+    - { home: { kind: [renting] } }
+weight: { base: 7 }
+cooldownYears: 5
+choices:
+  - id: out
+    label: Move out to zone 4
+    outcome:
+      text: >-
+        The rent drops, the commute grows and the audiobook list becomes a
+        lifestyle. After six months the rent has saved you more than the extra
+        travel costs, barely.
+      effects:
+        - { type: housing, action: rent_change, percent: -15 }
+        - { type: stat, key: stress, delta: 2 }
+        - { type: stat, key: happiness, delta: 1 }
+  - id: stay
+    label: Stay where you are and live small
+    outcome:
+      text: >-
+        A bedroom you can touch both walls of and a window facing a wall. The
+        location is perfect. The rest is a compromise.
+      effects:
+        - { type: stat, key: stress, delta: 1 }
+  - id: share
+    label: Take a room in a flatshare of five
+    outcome:
+      text: >-
+        Five people, one bathroom and a chore rota with a laminated border. The
+        rent is halved, and so are your evenings alone.
+      effects:
+        - { type: housing, action: roommate }
+        - { type: stat, key: sociability, delta: 1 }

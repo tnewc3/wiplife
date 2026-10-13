@@ -2,7 +2,7 @@ id: lifeguard_job
 title: Summer at the pool
 text: >-
   The public pool is hiring lifeguards for the summer: a red swimsuit, a
-  whistle, a tall chair and $12 an hour. There's a swim test first.
+  whistle, a tall chair and {$12} an hour. There's a swim test first.
 tone: light
 category: money
 rarity: common

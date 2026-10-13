@@ -27,7 +27,7 @@ choices:
         - { type: stat, key: happiness, delta: 8 }
         - { type: history, text: 'You sang a duet in the subway with a famous musician in disguise. Someone filmed it, and millions watched.', importance: 3 }
   - id: listen
-    label: Drop a few dollars and listen
+    label: Drop a few coins and listen
     outcome:
       text: >-
         You listen to the whole song. The next day the video is everywhere:

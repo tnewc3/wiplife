@@ -25,6 +25,7 @@ import { lifeStageForAge } from './systems/aging';
 import { meetsJobRequirements } from './career';
 import { finishedHighSchool, hasCredential, inFinalYear, isPostSecondary, schoolAges } from './education';
 import type { Enrollment, Identity, LifeState, Pronouns, SchoolPlace } from './types';
+import { countryOf, pensionOf } from './country';
 
 const LIFE_STAGES = new Set(['early', 'child', 'teen', 'youngAdult', 'adult', 'senior']);
 const PHASES = new Set(['yearStart', 'events', 'yearEnd', 'dead', 'action']);
@@ -137,7 +138,7 @@ export function checkInvariants(state: LifeState, content: ContentBundle): strin
   }
   if (state.career.gig && c.age < content.balance.economy.gig.minAge) fail('gig work before the minimum age');
   const { earnings } = f;
-  const { earningsCap } = content.balance.economy.retirement;
+  const { earningsCap } = pensionOf(state, content);
   money('finances.earnings.total', earnings.total);
   if (!Number.isInteger(earnings.years) || earnings.years < 0 || earnings.years > c.age) fail('finances.earnings.years is out of range');
   if (earnings.total < 0 || earnings.total > earnings.years * earningsCap) fail('finances.earnings.total is out of range');
@@ -418,7 +419,7 @@ function educationFailures(state: LifeState, content: ContentBundle): string[] {
   const fail = (message: string) => failures.push(message);
   const edu = state.education;
   const age = state.character.age;
-  const ages = schoolAges(content);
+  const ages = schoolAges(state, content);
   const known = (label: string, place: SchoolPlace) => {
     const needs = {
       tier: place.program === 'college',
@@ -439,7 +440,7 @@ function educationFailures(state: LifeState, content: ContentBundle): string[] {
     if (!(e.gpa >= 0 && e.gpa <= 4)) fail(`${label}: GPA ${e.gpa} is outside 0–4`);
     if (!(e.boost >= -2 && e.boost <= 2)) fail(`${label}: grade boost ${e.boost} is out of range`);
     if (!(e.scholarship >= 0 && e.scholarship <= 1)) fail(`${label}: scholarship share is out of range`);
-    if (!Number.isInteger(e.repeats) || e.repeats < 0 || e.repeats > (e.program === 'high' ? content.balance.education.school.maxRepeats : 0)) {
+    if (!Number.isInteger(e.repeats) || e.repeats < 0 || e.repeats > (e.program === 'high' ? countryOf(state, content).school.maxRepeats : 0)) {
       fail(`${label}: ${e.repeats} repeated years`);
     }
     if (e.since > state.currentYear || e.since < state.birthYear) fail(`${label}: started outside the life`);

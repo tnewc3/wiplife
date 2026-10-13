@@ -7,7 +7,7 @@ tradition: "Buddhist"
 blurb: "A quiet center with cushions in rows, a teacher, tea after, and a donation box by the door."
 minAge: 0
 weight: 0.8
-cities: {small_town: 0.35}
+cities: {small_town: 0.35, small_town_ca: 0.35, small_town_uk: 0.35, small_town_mx: 0.35}
 count: { min: 1, max: 2 }
 traits:
   welcome: { mean: 60, sd: 22 }

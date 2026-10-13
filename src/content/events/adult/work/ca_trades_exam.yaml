@@ -1,0 +1,53 @@
+id: ca_trades_exam
+title: The certification exam
+text: >-
+  After the apprenticeship hours, the classroom blocks and the last signature
+  from your journeyperson, there is one thing left: a three-hour exam that
+  decides whether your certificate is recognised across the country.
+tone: neutral
+category: work
+rarity: uncommon
+countries: [ca]
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 20 } }
+    - { career: { employed: true, retired: false } }
+    - { education: { credential: [trade_license] } }
+weight: { base: 6 }
+once: true
+choices:
+  - id: study
+    label: Spend six weeks of evenings with the practice papers
+    check:
+      base: 60
+      stats: [{ key: discipline, weight: 0.4 }, { key: smarts, weight: 0.2 }]
+      success:
+        text: >-
+          You pass with the second-highest score the exam centre has seen that
+          year. The endorsement comes with a raise of {$2200} over the year.
+        effects:
+          - { type: money, delta: 2200 }
+          - { type: stat, key: confidence, delta: 3 }
+          - { type: stat, key: stress, delta: -2 }
+          - { type: history, text: 'You earned your interprovincial trade endorsement.', importance: 2 }
+      failure:
+        text: You miss the pass mark by two points. The retake is in four months, and so is the extra course fee ({$180}).
+        effects:
+          - { type: money, delta: -180 }
+          - { type: stat, key: stress, delta: 4 }
+  - id: wing
+    label: Walk in cold, you know the work
+    check:
+      base: 40
+      stats: [{ key: confidence, weight: 0.3 }, { key: smarts, weight: 0.2 }]
+      success:
+        text: The work knowledge carries you through. You pass, and tell nobody how close it was.
+        effects:
+          - { type: money, delta: 1800 }
+          - { type: stat, key: confidence, delta: 2 }
+      failure:
+        text: The exam asks questions that the job never has. You fail, and the retake costs {$180}.
+        effects:
+          - { type: money, delta: -180 }
+          - { type: stat, key: stress, delta: 4 }

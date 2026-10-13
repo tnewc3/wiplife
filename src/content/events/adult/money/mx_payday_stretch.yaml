@@ -1,0 +1,46 @@
+id: mx_payday_stretch
+title: Two weeks is a long time
+text: >-
+  Many jobs pay on the fifteenth and the last day of the month. The money
+  arrives, the rent leaves and then there are fifteen days between you and
+  the next payday, with a lot of small things that cannot wait.
+tone: neutral
+category: money
+rarity: common
+countries: [mx]
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { finances: { income: { lt: 12000 } } }
+weight: { base: 5 }
+cooldownYears: 3
+choices:
+  - id: budget
+    label: Plan the fortnight line by line
+    outcome:
+      text: >-
+        A notebook, a small envelope for each week and a lot of arithmetic. You
+        end the month with {$40} left, which feels enormous.
+      effects:
+        - { type: money, delta: 40 }
+        - { type: stat, key: discipline, delta: 2 }
+        - { type: stat, key: stress, delta: -1 }
+  - id: loan
+    label: Take a small loan from a lender at the corner
+    outcome:
+      text: >-
+        {$90} in your hand, and {$120} to pay back a fortnight later. It solves
+        the week and shapes the next one.
+      effects:
+        - { type: money, delta: -30 }
+        - { type: stat, key: stress, delta: 3 }
+  - id: late
+    label: Pay the electricity bill a few days late
+    outcome:
+      text: >-
+        A call from the utility, a surcharge of {$20} and a promise to pay on
+        the fifteenth. The lights stay on, and so does your worry.
+      effects:
+        - { type: money, delta: -20 }
+        - { type: stat, key: stress, delta: 2 }

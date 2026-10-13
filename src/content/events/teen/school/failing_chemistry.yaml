@@ -23,7 +23,7 @@ choices:
     label: Pay for a tutor
     visibleIf: { money: { gte: 400 } }
     outcome:
-      text: The tutor is a grad student who explains things like a human being. It costs $400 and it's worth it.
+      text: The tutor is a grad student who explains things like a human being. It costs {$400} and it's worth it.
       effects:
         - { type: money, delta: -400 }
         - { type: education, action: grades, value: 0.5 }

@@ -13,6 +13,7 @@ import { canVisitVet, petBlock, petPrice, vetCost, type PetBlock } from './pets'
 import { possessionCosts } from './costs';
 import { homeOf, livingPets, owedOn, petAge, petDef, petOf, possessionsValue, vacationHomesOf, vehicleAge, vehicleDef, vehicleOf, vehiclesOf } from './query';
 import { canService, premium, recentClaims, saleNet, sellBlock, serviceCost, vehicleQuote, vehicleUpkeep, type VehicleQuote } from './vehicles';
+import { sameCountryCities } from '../country';
 
 export interface PetView {
   id: Id;
@@ -215,10 +216,8 @@ export function getBelongingsView(state: LifeState, content: ContentBundle): Bel
       usedQuote: def.used ? vehicleQuote(state, def.id, true, content) : null,
     }));
 
-  const vacationOptions: VacationOption[] = Object.keys(content.cities)
-    .sort()
+  const vacationOptions: VacationOption[] = sameCountryCities(state.character.cityId, content)
     .map((id) => content.cities[id]!)
-    .filter((c) => !c.retired)
     .map((c) => ({ cityId: c.id, city: c.name, quote: vacationQuote(state, c.id, content) }));
 
   const sites: { target: RenovationTarget; label: string }[] = [

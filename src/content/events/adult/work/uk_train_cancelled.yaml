@@ -1,0 +1,46 @@
+id: uk_train_cancelled
+title: The 7:42 is cancelled
+text: >-
+  Your regular train has been cancelled, and so has the next one. The board
+  says "delays due to a signalling problem" and a crowd of silent commuters
+  stands on the platform, looking at their phones, doing the same maths.
+tone: neutral
+category: work
+rarity: common
+countries: [uk]
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { career: { employed: true, retired: false } }
+weight: { base: 6 }
+cooldownYears: 3
+choices:
+  - id: wait
+    label: Wait and claim the delay repay
+    outcome:
+      text: >-
+        An hour late, a short email to your manager and a refund request that is
+        approved in a week. The refund is {$14}.
+      effects:
+        - { type: money, delta: 14 }
+        - { type: stat, key: stress, delta: 2 }
+  - id: taxi
+    label: Share a taxi with two strangers
+    outcome:
+      text: >-
+        You split a taxi to the office with two strangers. By the third roundabout
+        you know where they work, where they grew up and what they think of the
+        rail company. The fare is {$22}.
+      effects:
+        - { type: money, delta: -22 }
+        - { type: stat, key: sociability, delta: 1 }
+  - id: home
+    label: Go home and work from the kitchen table
+    outcome:
+      text: >-
+        The kitchen table is quieter than the office. You get more done by
+        eleven than you usually do all day, and your manager notices.
+      effects:
+        - { type: stat, key: stress, delta: -1 }
+        - { type: stat, key: discipline, delta: 1 }

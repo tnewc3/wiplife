@@ -5,6 +5,8 @@ import {
   type ApplyProgram,
   type ChoiceDef,
   type ContentBundle,
+  type SchoolWords,
+  type CountryId,
   type CredentialType,
   type DebtKind,
   type JobCategory,
@@ -153,6 +155,7 @@ import type {
   SchoolPlace,
   StatKey,
 } from './types';
+import { birthCountryOf, citiesOfCountry, countryOf, pensionAge, pensionOf, sameCountry, scaledAmount } from './country';
 
 export { netWorth } from './finance';
 
@@ -208,6 +211,8 @@ export interface CharacterSummary {
   age: number;
   lifeStage: LifeStage;
   cityName: string;
+  /** W4a: the country you live in. */
+  countryName: string;
   /** e.g. "she/her" or "xe/xem". */
   pronounLabel: string;
   housing: HousingKind;
@@ -229,6 +234,8 @@ export interface SchoolLine {
   program: Program;
   /** Kindergarten to 12th grade (0 is kindergarten); null after high school. */
   gradeLevel: number | null;
+  /** The grade's name where you live ("3rd grade", "Year 4"); null after school. */
+  gradeLabel: string | null;
   schoolName: string;
   /** Your major, trade or grad program (null in automatic school). */
   studying: string | null;
@@ -243,6 +250,7 @@ export function getCharacterSummary(state: LifeState, content: ContentBundle): C
     age: c.age,
     lifeStage: c.lifeStage,
     cityName: content.cities[c.cityId]?.name ?? c.cityId,
+    countryName: countryOf(state, content).name,
     pronounLabel: `${c.identity.pronouns.subject}/${c.identity.pronouns.object}`,
     housing: state.housing.kind,
     savings: state.finances.savings,
@@ -263,8 +271,8 @@ export function getCharacterSummary(state: LifeState, content: ContentBundle): C
 }
 
 /** Kindergarten (0) to 12th grade for a year of automatic school; null otherwise. */
-export function gradeLevel(program: Program, year: number, content: ContentBundle): number | null {
-  const s = content.balance.education.school;
+export function gradeLevel(program: Program, year: number, state: LifeState, content: ContentBundle): number | null {
+  const s = countryOf(state, content).school;
   if (program === 'elementary') return year - 1;
   if (program === 'middle') return s.elementary + year - 1;
   if (program === 'high') return s.elementary + s.middle + year - 1;
@@ -282,7 +290,8 @@ export function studyingName(place: SchoolPlace, content: ContentBundle): string
 function schoolLine(state: LifeState, place: SchoolPlace & { year?: number }, content: ContentBundle): SchoolLine {
   return {
     program: place.program,
-    gradeLevel: place.year === undefined ? null : gradeLevel(place.program, place.year, content),
+    gradeLevel: place.year === undefined ? null : gradeLevel(place.program, place.year, state, content),
+    gradeLabel: place.year === undefined ? null : (countryOf(state, content).words.gradeLabels[gradeLevel(place.program, place.year, state, content) ?? -1] ?? null),
     schoolName: schoolName(state, place, content),
     studying: studyingName(place, content),
   };
@@ -324,6 +333,9 @@ export interface SchoolView {
   startAge: number;
   /** High school can be left from this age. */
   dropoutAge: number;
+  /** W4a: the words your country uses for school, and how its students pay. */
+  words: SchoolWords;
+  financeBlurb: string;
   current: EnrollmentView | null;
   /** A place you start at when the next year begins. */
   admission: (SchoolLine & { tier: Tier | null; returning: boolean; scholarship: number }) | null;
@@ -346,14 +358,15 @@ export function getSchoolView(state: LifeState, content: ContentBundle): SchoolV
   // School actions happen between years, and never from prison (Stage 9).
   const between = state.phase === 'yearStart' && state.housing.kind !== 'incarcerated';
   const cur = edu.current;
-  const school = content.balance.education.school;
+  const country = countryOf(state, content);
+  const school = country.school;
   const current: EnrollmentView | null = cur
     ? {
         ...schoolLine(state, cur, content),
         tier: cur.tier ?? null,
         year: cur.year,
         lengthYears: cur.lengthYears,
-        letter: letterGrade(cur.gpa, content),
+        letter: letterGrade(cur.gpa, state, content),
         final: cur.year >= cur.lengthYears,
         repeats: cur.repeats,
         canDropOut: between && canLeaveSchool(state, content),
@@ -374,7 +387,7 @@ export function getSchoolView(state: LifeState, content: ContentBundle): SchoolV
             ? (content.gradPrograms[c.refId ?? '']?.degree ?? null)
             : null,
     year: c.year,
-    letter: c.gpa === undefined ? null : letterGrade(c.gpa, content),
+    letter: c.gpa === undefined ? null : letterGrade(c.gpa, state, content),
     tier: c.tier ?? null,
   }));
   const gedTry = edu.applied.find((a) => a.option === 'ged');
@@ -384,6 +397,8 @@ export function getSchoolView(state: LifeState, content: ContentBundle): SchoolV
     age: state.character.age,
     startAge: school.startAge,
     dropoutAge: school.dropoutAge,
+    words: country.words,
+    financeBlurb: country.studentFinance.blurb,
     current,
     admission: edu.admission
       ? { ...schoolLine(state, edu.admission, content), tier: edu.admission.tier ?? null, returning: edu.admission.resume !== undefined, scholarship: edu.admission.scholarship }
@@ -453,6 +468,8 @@ export interface ApplicationOptions {
   majors: MajorOption[];
   /** Each application costs this. */
   fee: number;
+  /** W4a: the words your country uses for school and what it awards. */
+  words: SchoolWords;
 }
 
 const byName = <T extends { name: string }>(a: T, b: T) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0);
@@ -482,7 +499,7 @@ export function getApplicationOptions(state: LifeState, content: ContentBundle):
       schoolName: schoolName(state, target, content),
       blurb,
       careers,
-      years: programLength(target, content),
+      years: programLength(state, target, content),
       bill: billFor(state, target, scholarshipShare(state, target.program, content), content, true),
       chance: admissionChance(state, target, content),
       block: !between && block === null ? 'enrolled' : block,
@@ -501,7 +518,8 @@ export function getApplicationOptions(state: LifeState, content: ContentBundle):
       .sort(byName)
       .map((g) => view({ program: 'grad', gradProgramId: g.id }, g.name, g.blurb, g.careers)),
     majors,
-    fee: content.balance.education.admission.fee,
+    fee: countryOf(state, content).studentFinance.applicationFee,
+    words: countryOf(state, content).words,
   };
 }
 
@@ -659,11 +677,27 @@ export function getPersonDetail(state: LifeState, personId: Id, content: Content
 }
 
 /** Active cities for pickers, sorted by name. */
-export function getCityOptions(content: ContentBundle): { id: string; name: string; blurb: string }[] {
+export function getCityOptions(content: ContentBundle): { id: string; name: string; blurb: string; countryId: CountryId }[] {
   return Object.values(content.cities)
     .filter((c) => !c.retired)
-    .map((c) => ({ id: c.id, name: c.name, blurb: c.blurb }))
+    .map((c) => ({ id: c.id, name: c.name, blurb: c.blurb, countryId: c.countryId }))
     .sort((a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0));
+}
+
+/** Active countries for pickers, with their cities (W4a): in the order of the country files. */
+export function getCountryOptions(content: ContentBundle): { id: CountryId; name: string; blurb: string; currency: string; cities: { id: string; name: string; blurb: string }[] }[] {
+  return Object.keys(content.countries)
+    .sort()
+    .map((id) => content.countries[id]!)
+    .filter((c) => !c.retired)
+    .map((c) => ({
+      id: c.id,
+      name: c.name,
+      blurb: c.blurb,
+      currency: `${c.currency.plural} (${c.currency.code})`,
+      cities: citiesOfCountry(c.id, content).map((id) => ({ id, name: content.cities[id]!.name, blurb: content.cities[id]!.blurb })),
+    }))
+    .filter((c) => c.cities.length > 0);
 }
 
 /** Active pronoun presets for pickers, most commonly used first (by creation weights). */
@@ -780,8 +814,10 @@ export interface MoneyView {
   debtPlan: boolean;
   /** The lifestyle can change now: between years, and not from prison (Stage 9). */
   canChangeLifestyle: boolean;
+  /** W4a: the country's money rules in a line each: its currency, taxes, health care and how students pay. */
+  country: { name: string; currency: string; code: string; tax: string; health: string; students: string };
   /** The retirement benefit: from what age, the years of earnings so far, and what the record pays now. */
-  retirement: { age: number; years: number; minYears: number; yearlyBenefit: number; receiving: boolean };
+  retirement: { name: string; age: number; years: number; minYears: number; yearlyBenefit: number; receiving: boolean };
   /** E2b: money an heir under 18 inherited, held until `releaseAge`. */
   trust: { balance: number; releaseAge: number } | null;
 }
@@ -811,12 +847,21 @@ export function getMoneyView(state: LifeState, content: ContentBundle): MoneyVie
     })),
     debtPlan: between && canStartDebtPlan(state, content),
     canChangeLifestyle: between && state.housing.kind !== 'incarcerated',
+    country: {
+      name: countryOf(state, content).name,
+      currency: countryOf(state, content).currency.plural,
+      code: countryOf(state, content).currency.code,
+      tax: countryOf(state, content).tax.blurb,
+      health: countryOf(state, content).healthcare.blurb,
+      students: countryOf(state, content).studentFinance.blurb,
+    },
     retirement: {
-      age: content.balance.economy.retirement.age,
+      name: pensionOf(state, content).name,
+      age: pensionOf(state, content).age,
       years: f.earnings.years,
-      minYears: content.balance.economy.retirement.minYears,
+      minYears: pensionOf(state, content).minYears,
       yearlyBenefit: benefitFromRecord(state, content),
-      receiving: state.character.age >= content.balance.economy.retirement.age && benefitFromRecord(state, content) > 0,
+      receiving: state.character.age >= pensionOf(state, content).age && benefitFromRecord(state, content) > 0,
     },
     trust: f.trust ? { balance: f.trust.balance, releaseAge: f.trust.releaseAge } : null,
   };
@@ -859,6 +904,8 @@ export interface WorkView {
   retired: boolean;
   canRetire: boolean;
   retireAge: number;
+  /** The age the retirement benefit starts where you live. */
+  pensionAge: number;
   /** Why you can't look for work now, or null. */
   searchBlock: SearchBlock | null;
   minAge: number;
@@ -903,6 +950,7 @@ export function getWorkView(state: LifeState, content: ContentBundle): WorkView 
     retired: c.retired,
     canRetire: canRetire(state, content) && state.housing.kind !== 'incarcerated',
     retireAge: b.retireAge,
+    pensionAge: pensionAge(state, content),
     searchBlock: searchBlock(state, content),
     minAge: b.minAge,
     openings: getJobSearch(state, content).options.filter((o) => o.block === null).length,
@@ -1070,7 +1118,7 @@ export function getHomeView(state: LifeState, content: ContentBundle): HomeView 
   const living = (cityId: string) => livingCost({ ...state, character: { ...state.character, cityId }, housing: { ...h, kind: 'renting' } }, content, 'comfortable');
   const cities: CityMove[] = mover
     ? getCityOptions(content)
-        .filter((c) => c.id !== state.character.cityId)
+        .filter((c) => c.id !== state.character.cityId && sameCountry(c.id, state.character.cityId, content))
         .map((c) => {
           const cost = moveInCost(state, c.id, content);
           return {
@@ -1140,7 +1188,7 @@ export interface ChoiceMoney {
 function outcomeMoney(state: LifeState, outcome: Outcome | undefined, content: ContentBundle): Required<Omit<ChoiceMoney, 'credit'>> {
   const out = { money: 0, familyHelp: 0, rent: 0 };
   for (const e of outcome?.effects ?? []) {
-    if (e.type === 'money') out.money += e.delta;
+    if (e.type === 'money') out.money += scaledAmount(state, e.delta, content);
     else if (e.type === 'rentMonths') out.money += rentMonthsAmount(state, e.months);
     else if (e.type === 'cost') {
       out.money -= costToYou(state, e.item, content);
@@ -1226,6 +1274,8 @@ export interface HealthView {
   doctor: { visitCost: number; treatmentCost: number; block: DoctorBlock | null };
   /** Your family pays for your visits while you're a child. */
   familyPays: boolean;
+  /** W4a: how health care is paid for where you live, in a line. */
+  careBlurb: string;
   /** Medical debt you owe. */
   medicalDebt: number;
   /** M1: your mind: the conditions that have been named, how to care for them, who has noticed, and a therapist. */
@@ -1255,6 +1305,7 @@ export function getHealthView(state: LifeState, content: ContentBundle): HealthV
     conditions,
     doctor: { visitCost: quote.visit, treatmentCost: quote.treatment, block },
     familyPays: !isIndependent(state, content),
+    careBlurb: countryOf(state, content).healthcare.blurb,
     medicalDebt: wholeDollars(state.finances.debts.filter((d) => d.kind === 'medical').reduce((sum, d) => sum + d.balance, 0)),
     mental: getMentalView(state, content),
   };
@@ -1291,6 +1342,9 @@ export interface RecordRow {
 /** The Profile sheet (Stage 9): who you are, your personality, your record, and whether you can edit now. */
 export interface ProfileView {
   fullName: string;
+  /** W4a: the country you live in, and the one you were born in. */
+  country: string;
+  bornIn: string;
   identity: Identity;
   personality: Personality;
   record: RecordRow[];
@@ -1302,6 +1356,8 @@ export function getProfileView(state: LifeState, content: ContentBundle): Profil
   const c = state.character;
   return {
     fullName: `${c.name.first} ${c.name.last}`,
+    country: countryOf(state, content).name,
+    bornIn: `${content.cities[c.birthCityId]?.name ?? c.birthCityId}, ${birthCountryOf(state, content).name}`,
     identity: c.identity,
     personality: c.personality,
     record: [...state.legal.record].reverse().map((r) => ({
