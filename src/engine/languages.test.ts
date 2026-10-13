@@ -113,6 +113,11 @@ describe('language effects', () => {
     const life = produce(adult(), (d) => { d.character.languages = [speaks('es', d.currentYear)]; });
     expect(meetsJobRequirements(life, content.jobs.retail_associate!, content)).toBe(false);
   });
+  it('supports country job overrides through the same eligibility check', () => {
+    const policy = produce(content, (d) => { d.balance.languages.jobs.countries.uk = { warehouse_worker: { any: ['fr'], level: 'conversational' } }; });
+    expect(meetsLanguageJob([speaks('en', 2026)], policy.jobs.warehouse_worker!, 'manchester', policy)).toBe(false);
+    expect(meetsLanguageJob([speaks('fr', 2026, 40)], policy.jobs.warehouse_worker!, 'manchester', policy)).toBe(true);
+  });
   it('weights shared-language encounters and changes interaction scores and wording without blocking contact', () => {
     const life = produce(adult(), (d) => {
       const id = Object.keys(d.people)[0]!;
@@ -138,6 +143,15 @@ describe('language effects', () => {
     expect(evaluate({ language: { sharedWith: 'npc' } }, life, { content, roles: 'strict' })).toBe(false);
     expect(evaluate({ language: { sharedWith: 'npc' } }, life, { content, cast: { npc: id } })).toBe(true);
     expect(conditionSchema.safeParse({ language: {} }).success).toBe(false);
+  });
+  it('keeps beginner stories from native speakers and requires conversational skill for the accent story', () => {
+    const native = produce(adult(), (d) => { d.character.languages = [speaks('es', d.currentYear), speaks('fr', d.currentYear), speaks('en', d.currentYear)]; });
+    expect(evaluate(content.events.language_first_sentence!.requires, native, { content })).toBe(false);
+    const learner = produce(native, (d) => { d.character.languages = [speaks('en', d.currentYear), speaks('es', d.currentYear, 12, false), speaks('fr', d.currentYear, 39, false)]; });
+    expect(evaluate(content.events.language_first_sentence!.requires, learner, { content })).toBe(true);
+    expect(evaluate(content.events.language_accent!.requires, learner, { content })).toBe(false);
+    const conversational = produce(learner, (d) => { d.character.languages.find((l) => l.id === 'fr')!.skill = 40; });
+    expect(evaluate(content.events.language_accent!.requires, conversational, { content })).toBe(true);
   });
   it('selects barrier text in events and shows language levels in the Profile view', () => {
     const life = produce(adult(), (d) => {

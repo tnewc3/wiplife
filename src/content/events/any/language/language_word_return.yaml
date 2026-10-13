@@ -18,6 +18,7 @@ requires:
         id: fr
         skill:
           gt: 0
+          lt: 80
 weight:
   base: 2
 once: true

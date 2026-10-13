@@ -2,7 +2,7 @@
 import type { ContentBundle, JobDef, LanguageLevel, LanguageSkill } from '../content/schemas';
 import { countryIdOfCity, countryOfCity, scaledAmount } from './country';
 import { spend } from './finance';
-import { chance, createRng, pick, type RngState } from './rng';
+import { chance, pick, type RngState } from './rng';
 import type { LifeState, Person } from './types';
 
 export interface LanguageLearning {
@@ -42,8 +42,8 @@ export function householdLanguages(cityId: string, parents: readonly { languages
   return [...ids].sort().map((id) => ({ id, skill: content.balance.languages.nativeSkill, native: true, lastUsed: year }));
 }
 /** Used when old saves lack an ancestry record: retain local background, with no invented heritage. */
-export function legacyLanguages(cityId: string, year: number, key: string, content: ContentBundle): LanguageSkill[] {
-  return nativeLanguages(cityId, 'general', year, createRng(`${key}:languages-upgrade`), content);
+export function legacyLanguages(cityId: string, year: number, _key: string, content: ContentBundle): LanguageSkill[] {
+  return [{ id: localLanguages(cityId, content).official[0]!, skill: content.balance.languages.nativeSkill, native: true, lastUsed: year }];
 }
 export function sharedLanguage(a: readonly LanguageSkill[], b: readonly LanguageSkill[], content: ContentBundle): string | null {
   const level = content.balance.languages.levels.conversational;
@@ -90,7 +90,7 @@ export function runLanguages(state: LifeState, content: ContentBundle): void {
   if (state.education.current && c.age >= b.school.minAge && ['elementary', 'middle', 'high'].includes(state.education.current.program)) {
     if (!state.languages.schoolId) {
       const choices = b.school.choices[countryIdOfCity(c.cityId, content)]!.filter((id) => !c.languages.some((l) => l.id === id && l.native));
-      if (choices.length) state.languages.schoolId = pick(createRng(`${state.seed}:language-school`), choices);
+      if (choices.length) state.languages.schoolId = choices[0]!;
     }
     if (state.languages.schoolId) state.languages.totals.school += gainLanguage(c.languages, state.languages.schoolId, b.school.gain, year);
   }
@@ -129,7 +129,7 @@ export function runLanguages(state: LifeState, content: ContentBundle): void {
     const finishes = school.startAge + school.elementary + school.middle + school.high;
     if (age >= b.school.minAge && age < finishes) {
       const choices = b.school.choices[countryIdOfCity(person.cityId, content)]!.filter((id) => !person.languages.some((l) => l.id === id && l.native));
-      if (choices.length) gainLanguage(person.languages, pick(createRng(`${state.seed}:${person.id}:language-school`), choices), b.school.gain, year);
+      if (choices.length) gainLanguage(person.languages, choices[0]!, b.school.gain, year);
     }
     const atHome = person.child?.custody === 'you' || homeIds.size > 0 && household.some((p) => p.id === person.id);
     advance(person.languages, person.cityId, year - person.birthYear, atHome ? new Set(c.languages.filter((l) => l.native).map((l) => l.id)) : new Set(), person.occupation);

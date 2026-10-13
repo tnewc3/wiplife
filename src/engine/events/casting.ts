@@ -1,5 +1,4 @@
 import { meetingWeight, nativeLanguages, sharedLanguage } from '../languages';
-import { createRng } from '../rng';
 /**
  * Casting: fills each role of an event with an existing person who fits, or
  * (for friends, classmates and acquaintances) someone new. Romantic roles are
@@ -238,7 +237,7 @@ export function createPerson(state: LifeState, spec: CastSpec, rng: RngState, co
   };
   // E1: their occupation and wealth level, and the mood they start in.
   const person = state.people[id]!;
-  person.languages = nativeLanguages(person.cityId, heritageId, state.currentYear, createRng(`${state.seed}:${id}:languages`), content);
+  person.languages = nativeLanguages(person.cityId, heritageId, state.currentYear, rng, content);
   if (!sharedLanguage(state.character.languages, person.languages, content) && ["friend", "acquaintance", "classmate"].includes(kind)) state.relationships[id]!.affection = Math.max(0, state.relationships[id]!.affection - content.balance.languages.meeting.affectionPenalty);
   const wealth = rollWealth(state, kind, age, rng, content, person.languages, person.cityId);
   if (wealth.occupation !== undefined) person.occupation = wealth.occupation;

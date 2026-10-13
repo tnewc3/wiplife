@@ -175,6 +175,13 @@ export function checkReferences(
   for (const c of Object.values(bundle.cities)) if (c.languages) [...c.languages.official, ...c.languages.common].forEach(knownLanguage);
   Object.values(bundle.balance.languages.heritage).flat().forEach(knownLanguage);
   Object.values(bundle.balance.languages.school.choices).flat().forEach(knownLanguage);
+  for (const requirements of Object.values(bundle.balance.languages.jobs.countries)) {
+    if (!requirements) continue;
+    for (const [job, requirement] of Object.entries(requirements)) {
+      if (!bundle.jobs[job]) errors.push({ file: 'balance/languages.yaml', message: `unknown job ${job}` });
+      requirement.any.forEach(knownLanguage);
+    }
+  }
   for (const [city, requirements] of Object.entries(bundle.balance.languages.jobs.cities)) {
     if (!bundle.cities[city]) errors.push({ file: 'balance/languages.yaml', message: `unknown city ${city}` });
     for (const [job, requirement] of Object.entries(requirements)) { if (!bundle.jobs[job]) errors.push({ file: 'balance/languages.yaml', message: `unknown job ${job}` }); requirement.any.forEach(knownLanguage); }
@@ -569,7 +576,7 @@ function checkEvents(bundle: ContentBundle, fileOf: (typeKey: CollectionKey, id:
       for (const f of refs.flags) if (!flags[f]) err(`${field}: flag "${f}" is not in registries/flags.yaml`);
       for (const t of refs.memories) if (!tags[t]) err(`${field}: memory "${t}" is not in registries/memories.yaml`);
       for (const e of refs.events) if (!bundle.events[e]) err(`${field}: unknown event "${e}"`);
-      for (const l of refs.languages) if (!bundle.languages[l]) err(`${field}: unknown language "${l}"`);
+      for (const l of refs.languages) if (bundle.languages[l]?.id !== l) err(`${field}: unknown language "${l}"`);
       for (const c of refs.cities) if (!bundle.cities[c]) err(`${field}: unknown city "${c}"`);
       for (const m of refs.majors) if (!bundle.majors[m]) err(`${field}: unknown major "${m}"`);
       for (const t of refs.trades) if (!bundle.trades[t]) err(`${field}: unknown trade "${t}"`);
@@ -633,7 +640,7 @@ function checkEvents(bundle: ContentBundle, fileOf: (typeKey: CollectionKey, id:
       }
       for (const effect of outcome.effects as Effect[]) {
         const where = `outcome[${i}] ${effect.type}`;
-        if (effect.type === 'language' && !bundle.languages[effect.id]) err(`unknown language ${effect.id}`);
+        if (effect.type === 'language' && bundle.languages[effect.id]?.id !== effect.id) err(`unknown language ${effect.id}`);
       if ('role' in effect && effect.role !== undefined && !roles.includes(effect.role)) err(`${where}: role "${effect.role}" is not in the cast`);
         if (effect.type === 'memory' && !tags[effect.tag]) err(`${where}: memory "${effect.tag}" is not in registries/memories.yaml`);
         if (effect.type === 'flag' && !flags[effect.key]) err(`${where}: flag "${effect.key}" is not in registries/flags.yaml`);

@@ -50,8 +50,8 @@ export function checkInvariants(state: LifeState, content: ContentBundle): strin
   }
   const fail = (message: string) => failures.push(message);
   const study = state.languages;
-  if (study.schoolId !== null && !content.languages[study.schoolId]) fail('unknown school language');
-  if (study.classId !== null && !content.languages[study.classId]) fail('unknown class language');
+  if (study.schoolId !== null && content.languages[study.schoolId]?.id !== study.schoolId) fail('unknown school language');
+  if (study.classId !== null && content.languages[study.classId]?.id !== study.classId) fail('unknown class language');
   if ((study.classId === null) !== (study.classYear === null) || (study.classYear !== null && (!Number.isInteger(study.classYear) || study.classYear > state.currentYear))) fail('invalid language class record');
   for (const value of Object.values(study.totals)) if (!Number.isSafeInteger(value) || value < 0) fail('invalid language learning total');
 

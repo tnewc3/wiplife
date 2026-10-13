@@ -26,7 +26,8 @@ bilingualChance: { montreal: 0.35, houston: 0.16, ca: 0.12, us: 0.06, uk: 0.03, 
 school:
   minAge: 11
   gain: 6
-  choices: { us: [es, fr], ca: [fr, en], uk: [fr, es], mx: [en, fr] }
+  # The first offered language that is not already native is the school class.
+  choices: { us: [es, fr], ca: [fr, en, es], uk: [fr, es], mx: [en, fr] }
 classes: { minAge: 18, gain: 12, cost: 600, interestChance: 0.12 }
 immersion: { minAge: 3, gain: 8, householdGain: 4 }
 fading: { graceYears: 3, loss: 1, nativeFloor: 40 }

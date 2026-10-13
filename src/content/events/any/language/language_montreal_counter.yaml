@@ -18,6 +18,8 @@ requires:
         id: fr
         skill:
           gt: 0
+          lt: 100
+        native: false
     - city: montreal
     - language:
         id: fr

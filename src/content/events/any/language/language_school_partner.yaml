@@ -18,6 +18,8 @@ requires:
         id: es
         skill:
           gt: 0
+          lt: 100
+        native: false
     - education:
         program:
           - middle

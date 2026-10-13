@@ -18,6 +18,8 @@ requires:
         id: en
         skill:
           gt: 0
+          lt: 100
+        native: false
 weight:
   base: 2
 once: true
