@@ -1,4 +1,5 @@
-import { describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { setAutoFreeze } from 'immer';
 import { content } from '../../src/content';
 import { produce } from 'immer';
 import { lifeAtAge } from '../../src/engine/testFixtures';
@@ -7,6 +8,9 @@ import { choiceTraits, choiceWeight, personalityChoice } from './bot';
 import { consistencyTargets, formatComparison, formatReport, interactionTargets, recurringEvents, runSimulation, stage9Targets, targetResults } from './run';
 
 describe('simulation runner', () => {
+  // Match the CLI and lifespan statistical runs; immutability is checked in engine unit tests.
+  beforeAll(() => setAutoFreeze(false));
+  afterAll(() => setAutoFreeze(true));
   // Whole lives with every system: give them time.
   it('plays lives and reports invariants, lifespans, events per year and event frequency', { timeout: 60_000 }, () => {
     const report = runSimulation(content, { lives: 20, seedPrefix: 'sim-test' });
