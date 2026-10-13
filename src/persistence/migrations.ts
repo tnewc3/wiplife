@@ -1,3 +1,6 @@
+import { content } from '../content';
+import { emptyLanguageLearning, legacyLanguages, householdLanguages } from '../engine/languages';
+import { languageSkillSchema, type LanguageSkill } from '../content/schemas/languages';
 import { CURRENT_SCHEMA_VERSION, type SaveEnvelope } from './envelope';
 
 /** Upgrades saved data from schemaVersion `from` to `from + 1`. */
@@ -471,10 +474,35 @@ export const migrations: readonly Migration[] = [
       return { ...data, inputLog };
     },
   },
+  {
+    from: 24,
+    description: 'W4b: languages from saved birth city and family; no guessed ancestry. Existing skills are preserved.',
+    migrate: upgradeLanguageData,
+  },
 ];
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function upgradeLanguageData(data: unknown): unknown {
+  if (!isRecord(data) || !isRecord(data.character) || !isRecord(data.people)) return data;
+  const year = typeof data.currentYear === 'number' ? data.currentYear : 0;
+  const people = Object.fromEntries(Object.entries(data.people).map(([id, p]) => [id, isRecord(p) && typeof p.cityId === 'string' ? { ...p, languages: p.languages ?? legacyLanguages(p.cityId, year, `${String(data.seed)}:${id}`, content) } : p]));
+  const parents: { languages: LanguageSkill[] }[] = [];
+  if (isRecord(data.relationships)) for (const [id, rel] of Object.entries(data.relationships)) {
+    const p = people[id];
+    if (isRecord(rel) && rel.kind === 'parent' && isRecord(p)) {
+      const parsed = languageSkillSchema.array().safeParse(p.languages);
+      if (parsed.success) parents.push({ languages: parsed.data });
+    }
+  }
+  const city = typeof data.character.birthCityId === 'string' ? data.character.birthCityId : String(data.character.cityId);
+  const inputLog = Array.isArray(data.inputLog) ? data.inputLog.map((entry: unknown) => {
+    if (!isRecord(entry) || !isRecord(entry.payload) || !isRecord(entry.payload.snapshot)) return entry;
+    return { ...entry, payload: { ...entry.payload, snapshot: upgradeLanguageData(entry.payload.snapshot) } };
+  }) : data.inputLog;
+  return { ...data, inputLog, people, character: { ...data.character, languages: data.character.languages ?? householdLanguages(city, parents, year, content) }, languages: data.languages ?? emptyLanguageLearning() };
 }
 
 export class MigrationError extends Error {

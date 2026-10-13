@@ -1,0 +1,39 @@
+id: language_song
+title: A song makes sense
+text: You have heard this Spanish song several times without following it. Today
+  a line catches your ear before you look at the words.
+tone: neutral
+category: language
+rarity: common
+lifeStages:
+  - teen
+  - youngAdult
+  - adult
+  - senior
+requires:
+  all:
+    - age:
+        gte: 11
+    - language:
+        id: es
+        skill:
+          gt: 0
+weight:
+  base: 2
+once: true
+choices:
+  - id: try
+    label: Follow the rest of the lyrics
+    outcome:
+      text: The melody gives the new phrases somewhere to stay.
+      effects:
+        - type: language
+          id: es
+        - type: stat
+          key: confidence
+          delta: 1
+  - id: leave
+    label: Let it pass
+    outcome:
+      text: You leave the moment there. There will be other chances.
+      effects: []

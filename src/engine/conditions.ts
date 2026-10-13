@@ -1,3 +1,4 @@
+import { languageSkill, sharedLanguage } from './languages';
 /**
  * Condition evaluator (docs/technical.md, "Condition language"). Conditions
  * are structured data from content; each case below matches one entry of
@@ -79,6 +80,26 @@ export function evaluate(condition: Condition | undefined, state: LifeState, ctx
   if ('money' in condition) return compare(state.finances.savings / priceLevelOf(state, ctx), condition.money);
   if ('city' in condition) return c.cityId === condition.city;
   // W4a: the country (needs the content to know which country the city is in) and the legal ages there.
+  if ('language' in condition) {
+    const q = condition.language;
+    const subject = q.role ? ctx.cast?.[q.role] : undefined;
+    if (q.role && subject === undefined) return ctx.roles === 'assumeTrue';
+    const languages = q.role ? state.people[subject!]?.languages : c.languages;
+    if (!languages) return false;
+    if (q.id !== undefined) {
+      if (q.skill && !compare(languageSkill(languages, q.id), q.skill)) return false;
+      const known = languages.find((l) => l.id === q.id);
+      if (!q.skill && !known) return false;
+      if (q.native !== undefined && (known?.native ?? false) !== q.native) return false;
+    }
+    if (q.sharedWith) {
+      const otherId = ctx.cast?.[q.sharedWith];
+      if (otherId === undefined) return ctx.roles === 'assumeTrue';
+      const other = state.people[otherId];
+      if (!other || !ctx.content || !sharedLanguage(languages, other.languages, ctx.content)) return false;
+    }
+    return true;
+  }
   if ('country' in condition) return ctx.content !== undefined && condition.country.includes(countryIdOfCity(c.cityId, ctx.content));
   if ('legalAge' in condition) return ctx.content !== undefined && c.age >= legalAge(condition.legalAge, c.cityId, ctx.content);
   if ('familyWealth' in condition) return condition.familyWealth.includes(c.familyWealth);
@@ -295,6 +316,7 @@ export function mentionsRole(condition: Condition): boolean {
   if ('all' in condition) return condition.all.some(mentionsRole);
   if ('any' in condition) return condition.any.some(mentionsRole);
   if ('not' in condition) return mentionsRole(condition.not);
+  if ('language' in condition) return !!(condition.language.role || condition.language.sharedWith);
   return 'memory' in condition || 'role' in condition || 'tie' in condition;
 }
 
@@ -304,6 +326,7 @@ export function rolesIn(condition: Condition | undefined): string[] {
   if ('all' in condition) return condition.all.flatMap(rolesIn);
   if ('any' in condition) return condition.any.flatMap(rolesIn);
   if ('not' in condition) return rolesIn(condition.not);
+  if ('language' in condition) return [condition.language.role, condition.language.sharedWith].filter((r): r is string => r !== undefined);
   if ('memory' in condition) return [condition.memory.role];
   if ('role' in condition) return [condition.role];
   if ('tie' in condition) return [condition.tie.a, condition.tie.b];
@@ -316,6 +339,7 @@ export function referencesIn(condition: Condition | undefined): {
   memories: string[];
   events: string[];
   cities: string[];
+  languages: string[];
   majors: string[];
   trades: string[];
   /** Majors, trades or grad programs a credential is in (education field). */
@@ -332,6 +356,7 @@ export function referencesIn(condition: Condition | undefined): {
     memories: [] as string[],
     events: [] as string[],
     cities: [] as string[],
+    languages: [] as string[],
     majors: [] as string[],
     trades: [] as string[],
     fields: [] as string[],
@@ -348,6 +373,7 @@ export function referencesIn(condition: Condition | undefined): {
     else if ('flag' in cond) out.flags.push(cond.flag);
     else if ('memory' in cond) out.memories.push(cond.memory.tag);
     else if ('fired' in cond) out.events.push(cond.fired);
+    else if ('language' in cond && cond.language.id) out.languages.push(cond.language.id);
     else if ('city' in cond) out.cities.push(cond.city);
     else if ('education' in cond) {
       out.majors.push(...(cond.education.major ?? []));

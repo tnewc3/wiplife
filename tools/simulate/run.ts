@@ -1,3 +1,4 @@
+import { emptyLanguagesReport, formatLanguages, LanguagesWatcher, chooseLanguageClass, type LanguagesReport } from './languages';
 /**
  * Simulation runner: plays many random lives with random choices (and a
  * simple player model for relationship actions, and from Stage 6 for money
@@ -157,6 +158,7 @@ export interface SimulationReport {
   later: LaterReport;
   /** W4a: each country's lives, measured against its own targets. */
   countries: CountriesReport;
+  languages: LanguagesReport;
   /** W2: belonging, measured: groups by type, roles, the people there, what they cost, faith and its changes, and what long membership does to values and reputation. */
   belonging: BelongingReport;
   /** W3: businesses, measured: who starts or buys one, how long they last by kind, style and how well the owner decides, profit, failures and what is left owing, staff, investors and co-founders, and how owning one compares with a career. */
@@ -815,6 +817,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
   const later = emptyLaterReport(content);
   const belonging = emptyBelongingReport(content);
   const countries = emptyCountriesReport();
+  const languages = emptyLanguagesReport();
   const business = emptyBusinessReport(content);
   const mental = emptyMentalReport(content);
   const possessions = emptyPossessionsReport(content);
@@ -878,6 +881,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
     const belongingProfile = rollBelongingProfile(belongingRng);
     const belongingWatcher = new BelongingWatcher(belonging, content);
     const countriesWatcher = new CountriesWatcher(countries, content);
+    const languagesWatcher = new LanguagesWatcher(languages, content);
     // W3: how this life behaves about businesses.
     const businessRng = createRng(`${seed}:business`);
     const businessProfile = rollBusinessProfile(businessRng);
@@ -985,6 +989,8 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
         life = takeLifeAction(life, actionId, params);
         money.actionsTaken[actionId]++;
       }
+      const languageClass = chooseLanguageClass(life, content);
+      if (languageClass !== null) { life = takeLifeAction(life, 'take_language_classes', { languageId: languageClass }); money.actionsTaken.take_language_classes++; }
       // ...and on work...
       for (const [actionId, params] of careless ? [] : chooseCareerActions(life, content, player, profile)) {
         // One new job a year is enough.
@@ -1132,6 +1138,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
       laterWatcher.observe(yearBefore, life);
       belongingWatcher.observe(yearBefore, life);
       countriesWatcher.observe(life);
+      languagesWatcher.observe(yearBefore, life);
       businessWatcher.observe(yearBefore, life);
       webWatcher.observe(yearBefore, life);
       mentalWatcher.observe(yearBefore, life);
@@ -1182,6 +1189,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
     laterWatcher.finish(life);
     belongingWatcher.finish(life);
     countriesWatcher.finish(life);
+    languagesWatcher.finish(life);
     businessWatcher.finish(life);
     mentalWatcher.finish(life);
     crimeWatcher.finish(life);
@@ -1520,6 +1528,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
     later,
     belonging,
     countries,
+    languages,
     business,
     mental,
     possessions,
@@ -1661,6 +1670,7 @@ export function formatReport(report: SimulationReport, content: ContentBundle): 
   lines.push('', ...formatWeb(report.web, content), '  targets (src/content/balance/targets.yaml):', ...webTargets(report, content).map((r) => target(r.label, r.value, r.goal, r.met)));
   lines.push(...formatEulogy(report.eulogy, content), '  targets (src/content/balance/targets.yaml):', ...eulogyTargets(report, content).map((r) => target(r.label, r.value, r.goal, r.met)));
   lines.push(...formatLater(report.later, content), '  targets (src/content/balance/targets.yaml):', ...laterTargets(report, content).map((r) => target(r.label, r.value, r.goal, r.met)));
+  lines.push(...formatLanguages(report.languages, content));
   lines.push(...formatCountries(report.countries, content), '  targets (src/content/balance/countries.yaml):', ...countryTargets(report.countries, content).map((r) => target(r.label, r.value, r.goal, r.met)));
   lines.push(...formatBelonging(report.belonging, content), '  targets (src/content/balance/targets.yaml):', ...belongingTargets(report, content).map((r) => target(r.label, r.value, r.goal, r.met)));
   lines.push(...formatBusiness(report.business, content), '  targets (src/content/balance/targets.yaml):', ...businessTargets(report, content).map((r) => target(r.label, r.value, r.goal, r.met)));

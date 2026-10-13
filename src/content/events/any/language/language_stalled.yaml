@@ -1,0 +1,39 @@
+id: language_stalled
+title: The plateau
+text: Your French practice has stopped feeling like a string of breakthroughs.
+  You can say more, but you notice more of what you cannot say.
+tone: neutral
+category: language
+rarity: common
+lifeStages:
+  - teen
+  - youngAdult
+  - adult
+  - senior
+requires:
+  all:
+    - age:
+        gte: 11
+    - language:
+        id: fr
+        skill:
+          gt: 0
+weight:
+  base: 2
+once: true
+choices:
+  - id: try
+    label: Try a different kind of practice
+    outcome:
+      text: Explaining an ordinary day gives you useful gaps to work on.
+      effects:
+        - type: language
+          id: fr
+        - type: stat
+          key: confidence
+          delta: 1
+  - id: leave
+    label: Let it pass
+    outcome:
+      text: You leave the moment there. There will be other chances.
+      effects: []

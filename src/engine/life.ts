@@ -1,3 +1,4 @@
+import { emptyLanguageLearning, householdLanguages } from './languages';
 /**
  * Life lifecycle (docs/technical.md, section M): createLife, then each year
  * beginYear → (the player resolves pending events) → endYear.
@@ -30,7 +31,7 @@ import { defaultCanCarry, rollCanCarry } from './family/carrying';
 import { InvalidInputError, parseCreateLifeOptions, type CreateLifeOptions } from './creation/input';
 import { successChance } from './events/checks';
 import { applyEffects } from './events/effects';
-import { keepPossessionText, textContext } from './events/text';
+import { eventLanguageText, keepPossessionText, textContext } from './events/text';
 import { familyHelp } from './costs';
 import { moodBaseline } from './interactions/mood';
 import { totalDebt } from './finance';
@@ -90,6 +91,7 @@ export function createLife(input: CreateLifeOptions, content: ContentBundle): Li
     const descriptors = rollAppearance(rng, content);
     character = {
       // Named once the family (and its heritage) is known.
+      languages: [],
       name: { first: '', last: '' },
       age: 0,
       lifeStage: 'early',
@@ -109,6 +111,7 @@ export function createLife(input: CreateLifeOptions, content: ContentBundle): Li
   } else {
     const custom = options.custom;
     character = {
+      languages: [],
       name: { ...custom.name },
       age: 0,
       lifeStage: 'early',
@@ -148,6 +151,8 @@ export function createLife(input: CreateLifeOptions, content: ContentBundle): Li
     ...familyRequest,
   });
   character.name = { first: family.firstName, last: family.lastName };
+  const caregivers = family.people.filter((p) => family.relationships.some((r) => r.personId === p.id && r.kind === "parent"));
+  character.languages = householdLanguages(character.birthCityId, caregivers, birthYear, content);
 
   const life: LifeState = {
     id: `life_${seed}`,
@@ -157,6 +162,7 @@ export function createLife(input: CreateLifeOptions, content: ContentBundle): Li
     currentYear: birthYear,
     phase: 'yearStart',
     character,
+    languages: emptyLanguageLearning(),
     people: Object.fromEntries(family.people.map((p) => [p.id, p])),
     relationships: Object.fromEntries(family.relationships.map((r) => [r.personId, r])),
     education: { current: null, credentials: [], admission: null, left: null, applied: [], fund: 0 },
@@ -381,10 +387,10 @@ export function resolveChoice(state: LifeState, instanceId: Id, choiceId: Id, co
         const help = outcome.effects.reduce((sum, e) => sum + (e.type === 'cost' ? familyHelp(draft, e.item, content) : 0), 0);
         // E5: a possession the outcome removes is still named in its text.
         const named = def.bind ? textContext(draft, instance.cast, content, instance.since) : undefined;
-        if (named) target.card = { title: renderText(def.title, named), text: renderText(def.text, named) };
+        if (named) target.card = { title: renderText(def.title, named), text: renderText(eventLanguageText(draft, def, instance.cast, content), named) };
         // E6c: a pinned card keeps the words it was shown with (a playoff series moves on when you choose).
         const pinned = def.pin ? textContext(draft, instance.cast, content, instance.since) : undefined;
-        if (pinned) target.card = { title: renderText(def.title, pinned), text: renderText(def.text, pinned) };
+        if (pinned) target.card = { title: renderText(def.title, pinned), text: renderText(eventLanguageText(draft, def, instance.cast, content), pinned) };
         applyEffects(draft, outcome.effects, { def, cast: instance.cast, rng: draft.rng, content, ...(instance.since !== undefined ? { since: instance.since } : {}), ...(named ? { named } : {}) });
         // Written after the effects, so it can tell what they did ({sentence}, new pronouns).
         if (outcome.text) {

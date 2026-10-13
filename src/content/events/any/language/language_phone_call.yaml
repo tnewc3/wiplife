@@ -1,0 +1,39 @@
+id: language_phone_call
+title: Without the gestures
+text: A short call in French feels harder than a long conversation in person.
+  There are no pointing hands to help you along.
+tone: neutral
+category: language
+rarity: common
+lifeStages:
+  - teen
+  - youngAdult
+  - adult
+  - senior
+requires:
+  all:
+    - age:
+        gte: 11
+    - language:
+        id: fr
+        skill:
+          gt: 0
+weight:
+  base: 2
+once: true
+choices:
+  - id: try
+    label: Ask for a slower explanation
+    outcome:
+      text: The caller slows down. You find your way back into the conversation.
+      effects:
+        - type: language
+          id: fr
+        - type: stat
+          key: confidence
+          delta: 1
+  - id: leave
+    label: Let it pass
+    outcome:
+      text: You leave the moment there. There will be other chances.
+      effects: []

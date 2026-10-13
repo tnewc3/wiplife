@@ -106,6 +106,7 @@ categories:
   school:
     label: School life
     requires: { education: { program: [elementary, middle, high, college, trade, grad] } }
+  language: { label: Languages and learning }
   friends: { label: Friends }
   romance: { label: Love and dating, romance: true }
   people: { label: People }

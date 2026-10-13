@@ -264,3 +264,7 @@ Every existing event was checked for US-only references by the content build's n
 | Health bills | `chest_pains` | Reworded; the medical cost items pay the country's share (`health:` key), so a public system charges little. |
 
 The 91 new events (31 Canadian, 30 British, 30 Mexican) were written against AGENTS.md and the second-wave writing guidance: no national stereotypes, no named real brands or people, every NPC a placeholder (relatives who may not exist are written as "a relative"), every amount `{$N}` with a matching money effect, every event tagged `countries: [..]`. Warnings the build raised were fixed by rewording; none is justified.
+
+## W4b — Language
+
+Reviewed the twenty `events/any/language/language_*.yaml` ordinary events and `language_class_result`, plus the chat barrier variants. Language-learning claims require an existing skill; family-language stories require the relevant native flag; the school-partner event requires enrollment. Montreal's counter story requires Montreal and a French skill below conversational level. The two social events cast an adult acquaintance in the player's city and provide barrier wording from the same shared-language check as interactions. No language event is romantic. The class action charges through finance and its existing event-result money record shows the charge and new savings. No event assumes a fixed time gap or writes a literal currency amount.

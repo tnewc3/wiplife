@@ -1,0 +1,42 @@
+id: language_family_recipe
+title: More than ingredients
+text: A family recipe in Spanish includes instructions that do not quite carry
+  over word for word. The rhythm is part of what makes it familiar.
+tone: neutral
+category: language
+rarity: common
+lifeStages:
+  - teen
+  - youngAdult
+  - adult
+  - senior
+requires:
+  all:
+    - age:
+        gte: 11
+    - language:
+        id: es
+        skill:
+          gt: 0
+    - language:
+        id: es
+        native: true
+weight:
+  base: 2
+once: true
+choices:
+  - id: try
+    label: Keep the original wording
+    outcome:
+      text: You write a note beside the translation instead of replacing it.
+      effects:
+        - type: language
+          id: es
+        - type: stat
+          key: confidence
+          delta: 1
+  - id: leave
+    label: Let it pass
+    outcome:
+      text: You leave the moment there. There will be other chances.
+      effects: []

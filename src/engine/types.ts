@@ -1,3 +1,5 @@
+import type { LanguageSkill } from '../content/schemas/languages';
+import type { LanguageLearning } from './languages';
 /**
  * Saved game state (docs/technical.md, section N). Everything here is plain
  * JSON: no classes, no Dates, no functions. Money is whole dollars; stats are
@@ -102,6 +104,7 @@ export interface HiddenValues {
 }
 
 export interface Character {
+  languages: LanguageSkill[];
   name: { first: string; last: string };
   age: number;
   lifeStage: LifeStage;
@@ -128,6 +131,7 @@ export interface Character {
 }
 
 export interface Person {
+  languages: LanguageSkill[];
   id: Id;
   name: { first: string; last: string };
   birthYear: number;
@@ -1094,6 +1098,7 @@ export interface PendingInteraction {
 }
 
 export interface LifeState {
+  languages: LanguageLearning;
   id: Id;
   seed: string;
   /** Continues across saves. */

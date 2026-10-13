@@ -106,6 +106,7 @@ const choiceOptionSchema = z.strictObject({
 /** One outcome tier: 2–3 wordings, its consequences and, for a big moment, a choice. */
 export const interactionTierSchema = z.strictObject({
   text: z.array(templateSchema).min(2).max(3),
+  barrierText: z.array(templateSchema).min(1).max(3).optional(),
   ...consequenceFields,
   choice: z
     .strictObject({

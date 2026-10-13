@@ -41,6 +41,7 @@ export function lifeHelp(state: LifeState, personId: Id, action: HelpAction, rng
       const age = ageOfPerson(state, person);
       if (person.occupation !== undefined || age < adultAge || age >= pensionAge(state, content) || life.retired) return;
       const job = rollJob(rng, content, content.balance.people, person, person.wealthLevel, life.background, age);
+      if (!job) return;
       person.occupation = job.jobId;
       person.wealthLevel = job.wealth;
       life.level = job.level;

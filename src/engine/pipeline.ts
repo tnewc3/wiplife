@@ -1,3 +1,4 @@
+import { runLanguages } from './languages';
 /**
  * The year pipeline (docs/technical.md, section M): the steps beginYear runs,
  * in this fixed order. The legal step (Stage 9) comes before school and work,
@@ -71,6 +72,7 @@ export const YEAR_PIPELINE: readonly PipelineStep[] = [
   { id: 'fame', run: runFame },
   { id: 'business', run: runBusiness },
   { id: 'education', run: runEducation },
+  { id: 'languages', run: runLanguages },
   { id: 'teen', run: runTeen },
   { id: 'career', run: runCareer },
   { id: 'economy', run: runEconomy },

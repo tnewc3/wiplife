@@ -1,3 +1,4 @@
+import { languageSkillSchema } from '../content/schemas/languages';
 /**
  * Validates a saved LifeState when it is loaded. Typed against the engine's
  * LifeState, so TypeScript reports any drift between the two. Strict objects:
@@ -62,7 +63,9 @@ const stats = z.strictObject({
 
 const name = z.strictObject({ first: filled, last: filled });
 
+const languages = z.array(languageSkillSchema).min(1).refine((ls) => new Set(ls.map((l) => l.id)).size === ls.length, "duplicate language").refine((ls) => ls.some((l) => l.native), "needs a native language");
 const character = z.strictObject({
+  languages,
   name,
   age: int,
   lifeStage: z.enum(['early', 'child', 'teen', 'youngAdult', 'adult', 'senior']),
@@ -191,6 +194,7 @@ const newsYear = z.strictObject({
 });
 
 const person = z.strictObject({
+  languages,
   id,
   name,
   birthYear: int,
@@ -1002,6 +1006,7 @@ export const lifeStateSchema: z.ZodType<LifeState> = z.strictObject({
   currentYear: int,
   phase: z.enum(['yearStart', 'events', 'yearEnd', 'dead', 'action']),
   character,
+  languages: z.strictObject({ schoolId: id.nullable(), classId: id.nullable(), classYear: int.nullable(), totals: z.strictObject({ school: int.nonnegative(), classes: int.nonnegative(), immersion: int.nonnegative(), faded: int.nonnegative() }) }),
   people: z.record(z.string(), person),
   relationships: z.record(z.string(), relationship),
   education,

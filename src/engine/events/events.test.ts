@@ -544,6 +544,7 @@ describe('event text', () => {
           bizCity: 'Chicago',
           bizStyle: 'neighborhood café',
           bizTitle: 'barista',
+          studiedLanguage: 'French',
           ...US_WORDS,
         } satisfies Record<(typeof EVENT_TEXT_VALUES)[number] | 'petKind' | 'vehicle' | 'homeCity', string | number>;
         const context = { roles, values, money: (n: number) => `$${n}` };

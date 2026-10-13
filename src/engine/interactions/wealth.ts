@@ -1,3 +1,5 @@
+import { meetsLanguageJob } from '../languages';
+import type { LanguageSkill } from '../../content/schemas/languages';
 /**
  * Wealth levels for the people in your life (E1): how well off someone is,
  * from their occupation and family background. Family shares your family's
@@ -40,7 +42,7 @@ export interface RolledWealth {
  * working-age adults often have a job (your coworkers and boss work in your
  * own field), and the job's pay is blended with the background.
  */
-export function rollWealth(state: LifeState, kind: RelationshipKindId, age: number, rng: RngState, content: ContentBundle): RolledWealth {
+export function rollWealth(state: LifeState, kind: RelationshipKindId, age: number, rng: RngState, content: ContentBundle, languages?: readonly LanguageSkill[], cityId = state.character.cityId): RolledWealth {
   const balance = content.balance.interactions.wealth;
   if (isFamilyKind(kind)) return { wealthLevel: state.character.familyWealth };
 
@@ -54,8 +56,10 @@ export function rollWealth(state: LifeState, kind: RelationshipKindId, age: numb
 
   const jobIds = Object.keys(content.jobs)
     .sort()
-    .filter((id) => !content.jobs[id]!.retired);
+    .filter((id) => !content.jobs[id]!.retired && (!languages || meetsLanguageJob(languages, content.jobs[id]!, cityId, content)));
+  if (!jobIds.length) return { wealthLevel: background };
   const jobId = colleague ? state.career.job!.jobId : pick(rng, jobIds);
+  if (languages && !meetsLanguageJob(languages, content.jobs[jobId]!, cityId, content)) return { wealthLevel: background };
   const levels = content.jobs[jobId]?.levels ?? [];
   if (levels.length === 0) return { wealthLevel: background };
   // A boss sits in the upper levels of the track; anyone else is somewhere along it.

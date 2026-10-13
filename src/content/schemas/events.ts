@@ -91,6 +91,7 @@ export type Condition =
   | ({ hidden: (typeof HIDDEN_KEYS)[number] } & Compare)
   | { money: Compare }
   | { city: string }
+  | { language: { id?: string; skill?: Compare; native?: boolean; role?: string; sharedWith?: string } }
   | { country: CountryId[] }
   | { legalAge: keyof LegalAges }
   | { familyWealth: z.infer<typeof familyWealthSchema>[] }
@@ -778,6 +779,7 @@ export const conditionSchema: z.ZodType<Condition> = z.lazy(() =>
     z.strictObject({ hidden: z.enum(HIDDEN_KEYS), ...compareFields }).refine(hasBound, 'needs a bound'),
     z.strictObject({ money: compareSchema }),
     z.strictObject({ city: idSchema }),
+    z.strictObject({ language: z.strictObject({ id: idSchema.optional(), skill: compareSchema.optional(), native: z.boolean().optional(), role: idSchema.optional(), sharedWith: idSchema.optional() }).refine((l) => l.id !== undefined || l.sharedWith !== undefined, 'needs id or sharedWith') }),
     z.strictObject({ country: z.array(countryIdSchema).min(1) }),
     z.strictObject({ legalAge: z.enum(['drinking', 'gambling', 'driving', 'permit', 'marriage']) }),
     z.strictObject({ familyWealth: z.array(familyWealthSchema).min(1) }),
@@ -1298,6 +1300,7 @@ export type IdentityField = (typeof IDENTITY_FIELDS)[number];
 
 /** Effect types. Adding one means a schema here and a handler in src/engine/events/effects.ts. */
 export const effectSchema = z.discriminatedUnion('type', [
+  z.strictObject({ type: z.literal('language'), id: idSchema }),
   z.strictObject({ type: z.literal('stat'), key: statKeySchema, delta: z.int().min(-100).max(100) }),
   /**
    * Savings. Savings never go below zero: from the independence age, a cost
@@ -2017,6 +2020,7 @@ export const eventSchema = baseDefSchema
      * to tagged events.
      */
     countries: z.array(countryIdSchema).min(1).max(4).optional(),
+    languageBarrier: z.strictObject({ role: idSchema, text: templateSchema }).optional(),
     weight: z.strictObject({
       base: z.number().positive(),
       modifiers: z.array(z.strictObject({ if: conditionSchema, x: z.number().nonnegative() })).optional(),

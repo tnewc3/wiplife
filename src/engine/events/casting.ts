@@ -1,3 +1,5 @@
+import { meetingWeight, nativeLanguages, sharedLanguage } from '../languages';
+import { createRng } from '../rng';
 /**
  * Casting: fills each role of an event with an existing person who fits, or
  * (for friends, classmates and acquaintances) someone new. Romantic roles are
@@ -200,12 +202,14 @@ export function createPerson(state: LifeState, spec: CastSpec, rng: RngState, co
 
   const age = nextInt(rng, range.min, range.max);
   const category = romantic ?? rollGenderCategory(rng, content);
-  const heritage = pool.heritages[rollHeritage(rng, content, pool)]!;
+  const heritageId = rollHeritage(rng, content, pool);
+  const heritage = pool.heritages[heritageId]!;
   const used = new Set([state.character.name.first, ...Object.values(state.people).map((p) => p.name.first)]);
   const family = content.balance.creation.family;
   const id = nextPersonId(state);
   state.people[id] = {
     id,
+    languages: [],
     name: { first: pickUnused(rng, heritage.first[category], used), last: pick(rng, heritage.last) },
     birthYear: state.currentYear - age,
     alive: true,
@@ -234,7 +238,9 @@ export function createPerson(state: LifeState, spec: CastSpec, rng: RngState, co
   };
   // E1: their occupation and wealth level, and the mood they start in.
   const person = state.people[id]!;
-  const wealth = rollWealth(state, kind, age, rng, content);
+  person.languages = nativeLanguages(person.cityId, heritageId, state.currentYear, createRng(`${state.seed}:${id}:languages`), content);
+  if (!sharedLanguage(state.character.languages, person.languages, content) && ["friend", "acquaintance", "classmate"].includes(kind)) state.relationships[id]!.affection = Math.max(0, state.relationships[id]!.affection - content.balance.languages.meeting.affectionPenalty);
+  const wealth = rollWealth(state, kind, age, rng, content, person.languages, person.cityId);
   if (wealth.occupation !== undefined) person.occupation = wealth.occupation;
   person.wealthLevel = wealth.wealthLevel;
   person.mood = person.moodBase = moodBaseline(state, person, content);
@@ -327,7 +333,7 @@ export function castEvent(
     const wantsNew = canCreate && spec.newChance !== undefined && chance(rng, spec.newChance);
     let id: Id | null = null;
     // A support or noticed role goes to the most trusted (closest) person; others to anyone who fits.
-    if (options.length > 0 && !wantsNew) id = spec.support || spec.noticed ? options[0]!.id : pick(rng, options).id;
+    if (options.length > 0 && !wantsNew) id = spec.support || spec.noticed ? options[0]!.id : weightedPick(rng, options.map((p) => [p, meetingWeight(state.character.languages, p, content)] as const)).id;
     else if (canCreate) {
       id = createPerson(state, spec.fan && spec.fan !== 'stalker' ? { ...spec, age: fanAgeRange(state, spec.fan, content) } : spec, rng, content);
       if (id) {

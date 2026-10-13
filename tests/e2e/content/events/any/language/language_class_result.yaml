@@ -1,0 +1,13 @@
+id: language_class_result
+title: Language classes
+text: 'You join a {studiedLanguage} class. The first conversation is awkward, and the next one is a little easier.'
+tone: neutral
+category: language
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires: { age: { gte: 18 } }
+weight: { base: 1 }
+followUpOnly: true
+autoOutcome:
+  text: 'You leave with new words to try outside the classroom.'
+  effects: []

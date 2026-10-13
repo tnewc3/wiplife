@@ -1,0 +1,47 @@
+id: language_two_versions
+title: Two versions of you
+text: You tell the same small story in English and Spanish. The detail everyone
+  laughs at changes with the telling.
+tone: neutral
+category: language
+rarity: common
+lifeStages:
+  - teen
+  - youngAdult
+  - adult
+  - senior
+requires:
+  all:
+    - age:
+        gte: 11
+    - language:
+        id: es
+        skill:
+          gt: 0
+    - language:
+        id: en
+        skill:
+          gte: 40
+    - language:
+        id: es
+        skill:
+          gte: 40
+weight:
+  base: 2
+once: true
+choices:
+  - id: try
+    label: Let both versions stand
+    outcome:
+      text: Neither telling is the whole of you. Both belong.
+      effects:
+        - type: language
+          id: es
+        - type: stat
+          key: confidence
+          delta: 1
+  - id: leave
+    label: Let it pass
+    outcome:
+      text: You leave the moment there. There will be other chances.
+      effects: []

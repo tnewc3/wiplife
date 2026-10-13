@@ -166,6 +166,19 @@ export function checkReferences(
   const dupe = groupIds.find((id, i) => groupIds.indexOf(id) !== i);
   if (dupe) errors.push({ file: 'character/appearance.yaml', message: `duplicate group id "${dupe}"` });
 
+  for (const id of bundle.registries.languages.classes.events) {
+    const def = bundle.events[id];
+    if (!def || !def.followUpOnly) errors.push({ file: 'registries/languages.yaml', message: `classes: ${id} must name a followUpOnly event` });
+  }
+  const knownLanguage = (id: string) => { if (!bundle.languages[id]) errors.push({ file: 'balance/languages.yaml', message: `unknown language ${id}` }); };
+  for (const c of Object.values(bundle.countries)) [...c.languages.official, ...c.languages.common].forEach(knownLanguage);
+  for (const c of Object.values(bundle.cities)) if (c.languages) [...c.languages.official, ...c.languages.common].forEach(knownLanguage);
+  Object.values(bundle.balance.languages.heritage).flat().forEach(knownLanguage);
+  Object.values(bundle.balance.languages.school.choices).flat().forEach(knownLanguage);
+  for (const [city, requirements] of Object.entries(bundle.balance.languages.jobs.cities)) {
+    if (!bundle.cities[city]) errors.push({ file: 'balance/languages.yaml', message: `unknown city ${city}` });
+    for (const [job, requirement] of Object.entries(requirements)) { if (!bundle.jobs[job]) errors.push({ file: 'balance/languages.yaml', message: `unknown job ${job}` }); requirement.any.forEach(knownLanguage); }
+  }
   errors.push(...checkAgingAndMortality(bundle, fileOf));
   errors.push(...checkTemplates(bundle, options.partialEvents === true));
   errors.push(...checkEvents(bundle, fileOf));
@@ -497,6 +510,7 @@ function checkEvents(bundle: ContentBundle, fileOf: (typeKey: CollectionKey, id:
   const workEvents = new Set(Object.values(bundle.registries.work.results).flatMap((r) => r.events));
   const doctorEvents = new Set(Object.values(bundle.registries.health.doctor).flatMap((r) => r.events));
   const systemEvents = new Set([
+    ...bundle.registries.languages.classes.events,
     ...doctorEvents,
     // M1: what a therapist's visit answers with.
     ...Object.values(bundle.registries.mental.therapist).flatMap((r) => r.events),
@@ -555,6 +569,7 @@ function checkEvents(bundle: ContentBundle, fileOf: (typeKey: CollectionKey, id:
       for (const f of refs.flags) if (!flags[f]) err(`${field}: flag "${f}" is not in registries/flags.yaml`);
       for (const t of refs.memories) if (!tags[t]) err(`${field}: memory "${t}" is not in registries/memories.yaml`);
       for (const e of refs.events) if (!bundle.events[e]) err(`${field}: unknown event "${e}"`);
+      for (const l of refs.languages) if (!bundle.languages[l]) err(`${field}: unknown language "${l}"`);
       for (const c of refs.cities) if (!bundle.cities[c]) err(`${field}: unknown city "${c}"`);
       for (const m of refs.majors) if (!bundle.majors[m]) err(`${field}: unknown major "${m}"`);
       for (const t of refs.trades) if (!bundle.trades[t]) err(`${field}: unknown trade "${t}"`);
@@ -573,6 +588,10 @@ function checkEvents(bundle: ContentBundle, fileOf: (typeKey: CollectionKey, id:
     }
     template('title', def.title);
     template('text', def.text);
+    if (def.languageBarrier) {
+      if (!roles.includes(def.languageBarrier.role)) err('languageBarrier role is not in the cast');
+      template('languageBarrier.text', def.languageBarrier.text);
+    }
     condition('requires', def.requires);
     (def.weight.modifiers ?? []).forEach((m, i) => condition(`weight.modifiers[${i}]`, m.if));
     for (const [role, spec] of Object.entries(def.cast ?? {})) {
@@ -614,7 +633,8 @@ function checkEvents(bundle: ContentBundle, fileOf: (typeKey: CollectionKey, id:
       }
       for (const effect of outcome.effects as Effect[]) {
         const where = `outcome[${i}] ${effect.type}`;
-        if ('role' in effect && effect.role !== undefined && !roles.includes(effect.role)) err(`${where}: role "${effect.role}" is not in the cast`);
+        if (effect.type === 'language' && !bundle.languages[effect.id]) err(`unknown language ${effect.id}`);
+      if ('role' in effect && effect.role !== undefined && !roles.includes(effect.role)) err(`${where}: role "${effect.role}" is not in the cast`);
         if (effect.type === 'memory' && !tags[effect.tag]) err(`${where}: memory "${effect.tag}" is not in registries/memories.yaml`);
         if (effect.type === 'flag' && !flags[effect.key]) err(`${where}: flag "${effect.key}" is not in registries/flags.yaml`);
         if (effect.type === 'death' && !bundle.causes[effect.cause]) err(`${where}: unknown cause "${effect.cause}"`);
@@ -1060,7 +1080,7 @@ function checkInteractions(bundle: ContentBundle, fileOf: (typeKey: CollectionKe
     const texts: string[] = [];
     for (const [tierId, tier] of tiersOf(def)) {
       const groups = [
-        { where: tierId, effects: tier.effects as Effect[], extras: tier.extras, text: tier.text },
+        { where: tierId, effects: tier.effects as Effect[], extras: tier.extras, text: [...tier.text, ...(tier.barrierText ?? [])] },
         ...(tier.choice?.options ?? []).map((o) => ({ where: `${tierId}.${o.id}`, effects: o.effects as Effect[], extras: o.extras, text: [o.text, o.label] })),
       ];
       for (const g of groups) {
@@ -1293,7 +1313,7 @@ function checkFamily(bundle: ContentBundle, fileOf: (typeKey: CollectionKey, id:
     if (def.romance || def.intimate) e('is available with a child, so it can\'t be romance: never romance or sexual content involving a child');
     for (const tier of Object.values(def.outcomes)) {
       if (!tier) continue;
-      const texts = [...tier.text, ...(tier.choice ? [tier.choice.prompt, ...tier.choice.options.flatMap((o) => [o.label, o.text])] : []), ...tier.extras.flatMap((x) => (x.note ? [x.note] : []))];
+      const texts = [...tier.text, ...(tier.barrierText ?? []), ...(tier.choice ? [tier.choice.prompt, ...tier.choice.options.flatMap((o) => [o.label, o.text])] : []), ...tier.extras.flatMap((x) => (x.note ? [x.note] : []))];
       for (const text of texts) {
         const hit = text.match(ROMANCE_WORDS);
         if (hit) e(`is available with a child but uses romantic or sexual wording ("${hit[0]}")`);

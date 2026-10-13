@@ -1,0 +1,44 @@
+id: language_montreal_counter
+title: At the counter
+text: The conversation at the counter in Montreal switches into French. You know
+  a few words, but lose the question in the middle.
+tone: neutral
+category: language
+rarity: common
+lifeStages:
+  - teen
+  - youngAdult
+  - adult
+  - senior
+requires:
+  all:
+    - age:
+        gte: 11
+    - language:
+        id: fr
+        skill:
+          gt: 0
+    - city: montreal
+    - language:
+        id: fr
+        skill:
+          lt: 40
+weight:
+  base: 2
+once: true
+choices:
+  - id: try
+    label: Ask to try that again
+    outcome:
+      text: The question comes slowly this time. You answer a piece of it yourself.
+      effects:
+        - type: language
+          id: fr
+        - type: stat
+          key: confidence
+          delta: 1
+  - id: leave
+    label: Let it pass
+    outcome:
+      text: You leave the moment there. There will be other chances.
+      effects: []
