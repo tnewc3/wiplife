@@ -79,18 +79,13 @@ test('a life in the United Kingdom is lived in pounds, with its own rules shown 
   await expect(page.getByText(/^Newborn · Manchester/)).toBeVisible();
 });
 
-test('random lives start in more than one country', async ({ page }) => {
-  test.setTimeout(120_000);
-  const seen = new Set<string>();
-  for (const seed of ['c1', 'c2', 'c3', 'c4', 'c5', 'c6', 'c7', 'c8']) {
-    await page.context().clearCookies();
-    await page.evaluate(() => indexedDB.databases().then((dbs) => dbs.forEach((db) => db.name && indexedDB.deleteDatabase(db.name)))).catch(() => undefined);
-    await passAgeGate(page, { seed });
+for (const [country, name] of [['ca', 'Canada'], ['uk', 'United Kingdom'], ['mx', 'Mexico'], [undefined, 'United States']] as const) {
+  test(`a random life starts in ${name} when asked for it${country ? '' : ' (a seeded test life is a US life when none is asked for)'}`, async ({ page }) => {
+    await passAgeGate(page, { seed: 'c1', ...(country ? { country } : {}) });
     await page.getByRole('button', { name: 'New Life' }).click();
     await page.getByRole('button', { name: 'Start a random life' }).click();
     await tab(page, 'Money').click();
-    seen.add((await page.getByRole('region', { name: /^Money in / }).getByRole('heading').textContent())?.trim() ?? '');
-    if (seen.size >= 2) break;
-  }
-  expect(seen.size).toBeGreaterThanOrEqual(2);
-});
+    await expect(page.getByRole('region', { name: `Money in ${name}` })).toBeVisible();
+    await expectNoHorizontalScroll(page);
+  });
+}

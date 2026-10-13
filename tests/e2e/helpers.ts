@@ -5,6 +5,8 @@ export interface OpenOptions {
   seed?: string;
   /** Load the test content pack (tests/e2e/content) instead of the real events. */
   testPack?: boolean;
+  /** The next new life starts in this country (test builds only); a seeded life is a US life when left out. */
+  country?: string;
 }
 
 /** Opens the app and confirms the age gate. */
@@ -12,6 +14,7 @@ export async function passAgeGate(page: Page, options: OpenOptions = {}): Promis
   const params = new URLSearchParams();
   if (options.testPack) params.set('content', 'test');
   if (options.seed) params.set('seed', options.seed);
+  if (options.country) params.set('country', options.country);
   const query = params.toString();
   await page.goto(query ? `/?${query}` : '/');
   await expect(page.getByRole('heading', { name: 'Content notice' })).toBeVisible();

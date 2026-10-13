@@ -422,7 +422,8 @@ export function programYearLabel(year: number, lengthYears: number): string {
 
 /** Where you are in school, for the Life tab: "In 10th grade", "Studying Nursing at Prairie State University". */
 export function schoolStatusLine(school: SchoolLine): string {
-  if (school.gradeLevel !== null) return school.gradeLabel !== null ? `In ${school.gradeLabel}` : 'In school';
+  // A one-word stage ("Kindergarten", "Reception") reads in lower case inside the sentence; "Year 4" and "10th grade" stay.
+  if (school.gradeLevel !== null) return school.gradeLabel !== null ? `In ${/^[A-Z][a-z]+$/.test(school.gradeLabel) ? school.gradeLabel.toLowerCase() : school.gradeLabel}` : 'In school';
   if (school.program === 'trade') return `Training as ${articled(school.studying ?? 'a tradesperson')} at ${school.schoolName}`;
   if (school.program === 'grad') return `In ${(school.studying ?? 'grad school').toLowerCase()} at ${school.schoolName}`;
   return `Studying ${school.studying ?? ''} at ${school.schoolName}`;
