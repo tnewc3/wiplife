@@ -1,0 +1,76 @@
+{
+  "id": "travel_crowded_route",
+  "title": "Everybody had the same idea",
+  "text": "The attraction you came to see has a queue around the block.",
+  "category": "travel",
+  "tone": "light",
+  "rarity": "common",
+  "lifeStages": [
+    "youngAdult",
+    "adult",
+    "senior"
+  ],
+  "followUpOnly": true,
+  "requires": {
+    "all": [
+      {
+        "age": {
+          "gte": 18
+        }
+      },
+      {
+        "travel": {
+          "active": true,
+          "kind": "trip"
+        }
+      }
+    ]
+  },
+  "weight": {
+    "base": 1
+  },
+  "choices": [
+    {
+      "id": "choose",
+      "label": "Wait for your turn",
+      "outcome": {
+        "text": "You see it. Your feet remember the wait.",
+        "effects": [
+          {
+            "type": "stat",
+            "key": "happiness",
+            "delta": 3
+          },
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": 2
+          }
+        ]
+      }
+    },
+    {
+      "id": "leave",
+      "label": "Try the smaller gallery",
+      "outcome": {
+        "text": "You pay for a quiet gallery instead.",
+        "effects": [
+          {
+            "type": "money",
+            "delta": -25
+          },
+          {
+            "type": "stat",
+            "key": "smarts",
+            "delta": 2
+          },
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": -2
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,80 @@
+{
+  "id": "travel_missed_flight",
+  "title": "The gate has closed",
+  "text": "On your way home from {destination}, you reach the gate after the last boarding call.",
+  "category": "travel",
+  "tone": "serious",
+  "rarity": "common",
+  "lifeStages": [
+    "youngAdult",
+    "adult",
+    "senior"
+  ],
+  "followUpOnly": true,
+  "requires": {
+    "all": [
+      {
+        "age": {
+          "gte": 18
+        }
+      },
+      {
+        "travel": {
+          "active": true,
+          "kind": "trip"
+        }
+      }
+    ]
+  },
+  "weight": {
+    "base": 1
+  },
+  "choices": [
+    {
+      "id": "choose",
+      "label": "Book the next flight",
+      "outcome": {
+        "text": "The replacement flight gets you home, with less saved.",
+        "effects": [
+          {
+            "type": "money",
+            "delta": -650
+          },
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": 4
+          },
+          {
+            "type": "history",
+            "text": "You missed your flight home from {destination}.",
+            "importance": 2
+          }
+        ]
+      }
+    },
+    {
+      "id": "leave",
+      "label": "Take the slower route",
+      "outcome": {
+        "text": "A long connection eats the rest of your break.",
+        "effects": [
+          {
+            "type": "money",
+            "delta": -250
+          },
+          {
+            "type": "stat",
+            "key": "health",
+            "delta": -2
+          },
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": 6
+          }
+        ]
+      }
+    }
+  ]
+}

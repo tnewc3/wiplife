@@ -1,3 +1,5 @@
+import { destinations, travelCompanions, tripCost, stayBlock, type TripInput, type StayInput } from './travel/travel';
+import { countryIdOfCity } from './country';
 import { languageLevel, languageClassCost, languageSkill } from './languages';
 /** Read-only helpers the UI uses to show a life. */
 import {
@@ -1410,4 +1412,37 @@ export function problemReport(state: LifeState, index: number, content: ContentB
     if (problems.length > 0) lines.push(`consistency: ${problems.join('; ')}`);
   }
   return lines.join('\n');
+}
+
+/** W5: the More planner reads travel state through this view. */
+export function getTravelView(state: LifeState, input: TripInput, content: ContentBundle) {
+  const options = destinations(content).filter((d) => d.cityId !== state.character.cityId);
+  const ids = travelCompanions(state);
+  const trip = { ...input, destinationId: options.some((d) => d.id === input.destinationId) ? input.destinationId : options[0]?.id ?? '', companions: input.companions.filter((id) => ids.includes(id)) };
+  const r = state.travel.residence;
+  return {
+    options, trip, cost: tripCost(trip, content), maxCompanions: content.balance.travel.maxCompanions,
+    companions: ids.map((id) => ({ id, name: `${state.people[id]!.name.first} ${state.people[id]!.name.last}` })),
+    residence: r ? { name: content.destinations[r.destinationId]?.name ?? '', endYear: r.endYear } : null,
+    minAge: content.balance.travel.minAge, oldEnough: state.character.age >= content.balance.travel.minAge,
+    alreadyTraveled: state.travel.tripYear === state.currentYear,
+    affordable: state.finances.savings >= tripCost(trip, content),
+    canBook: isLifeActionAvailable(state, 'plan_trip', { trip }, content),
+  };
+}
+/** W5: the education/career card uses the same availability as the action. */
+export function getAbroadView(state: LifeState, stay: StayInput, content: ContentBundle) {
+  const student = state.education.current?.program === 'college';
+  const r = state.travel.residence;
+  const action: 'study_abroad' | 'work_abroad' = student ? 'study_abroad' : 'work_abroad';
+  return {
+    student, action,
+    oldEnough: state.character.age >= content.balance.travel.minAge,
+    cities: destinations(content).filter((d) => d.cityId && countryIdOfCity(d.cityId, content) !== countryIdOfCity(state.character.cityId, content)),
+    residence: r ? { name: content.destinations[r.destinationId]?.name ?? '', endYear: r.endYear } : null,
+    cost: content.balance.travel[student ? 'exchange' : 'work'].cost,
+    years: content.balance.travel.work.years, holidayMaxAge: content.balance.travel.work.holidayMaxAge,
+    block: stayBlock(state, stay, content),
+    canStart: isLifeActionAvailable(state, action, { stay }, content),
+  };
 }

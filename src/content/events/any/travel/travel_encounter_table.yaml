@@ -1,0 +1,86 @@
+{
+  "id": "travel_encounter_table",
+  "title": "The shared table",
+  "text": "In {destination}, a crowded waiting area puts you beside {npc.name}.",
+  "category": "travel",
+  "tone": "neutral",
+  "rarity": "common",
+  "lifeStages": [
+    "youngAdult",
+    "adult",
+    "senior"
+  ],
+  "followUpOnly": true,
+  "requires": {
+    "all": [
+      {
+        "age": {
+          "gte": 18
+        }
+      },
+      {
+        "travel": {
+          "active": true,
+          "kind": "trip",
+          "encounter": true
+        }
+      }
+    ]
+  },
+  "weight": {
+    "base": 1
+  },
+  "choices": [
+    {
+      "id": "choose",
+      "label": "Talk through the delay",
+      "outcome": {
+        "text": "You leave knowing where to find {npc.them} online.",
+        "effects": [
+          {
+            "type": "relationship",
+            "role": "npc",
+            "affection": 6,
+            "trust": 4,
+            "kind": "friend"
+          },
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": -2
+          }
+        ]
+      }
+    },
+    {
+      "id": "leave",
+      "label": "Keep your headphones on",
+      "outcome": {
+        "text": "You get a quiet hour, and the conversation ends.",
+        "effects": [
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": -3
+          },
+          {
+            "type": "relationship",
+            "role": "npc",
+            "affection": -2,
+            "trust": 0
+          }
+        ]
+      }
+    }
+  ],
+  "cast": {
+    "npc": {
+      "kind": "acquaintance",
+      "presence": "anywhere",
+      "age": {
+        "min": 18,
+        "max": 100
+      }
+    }
+  }
+}

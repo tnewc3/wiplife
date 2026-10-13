@@ -1,0 +1,48 @@
+{
+  "trips": [
+    "travel_trip_booking",
+    "travel_rain",
+    "travel_missed_flight",
+    "travel_theft",
+    "travel_injury",
+    "travel_arrest",
+    "travel_wrong_train",
+    "travel_quiet_day",
+    "travel_crowded_route",
+    "travel_lost_phone",
+    "travel_homesick",
+    "travel_photo",
+    "travel_overbooked",
+    "travel_early_walk",
+    "travel_companion_plans",
+    "travel_paris_river",
+    "travel_rome_bookings",
+    "travel_barcelona_water",
+    "travel_kyoto_bus",
+    "travel_chiang_mai_weather",
+    "travel_negril_coast",
+    "travel_encounter_map",
+    "travel_encounter_table",
+    "travel_encounter_words",
+    "travel_encounter_invite",
+    "travel_romance_last_evening",
+    "travel_romance_shared_detour",
+    "travel_romance_airport"
+  ],
+  "study": [
+    "travel_study_booking",
+    "travel_study_orientation",
+    "travel_study_seminar",
+    "travel_study_home_call",
+    "travel_study_library",
+    "travel_study_project"
+  ],
+  "work": [
+    "travel_work_booking",
+    "travel_work_first_shift",
+    "travel_work_room",
+    "travel_work_home",
+    "travel_work_boundary",
+    "travel_work_return"
+  ]
+}

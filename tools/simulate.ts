@@ -3,6 +3,7 @@
  * plays random lives headless and prints a report: the careful player's in
  * full, then (with both, the default) a careful vs careless comparison on
  * the same seeds, and (E1) the careless player's interactions beside it. `all`
+ * W5 reports trips, destinations, encounters, temporary study/work and their effects.
  * W4b reports native and learned languages, learning/fading rates, local-job language gates and shared-language social contacts.
  * adds the spammer, who repeats one interaction with one person over and
  * over (it is slower: use fewer lives). Exits with code 1 if any invariant

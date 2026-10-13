@@ -1,0 +1,72 @@
+{
+  "id": "travel_study_seminar",
+  "title": "The first seminar",
+  "text": "In your exchange seminar in {destination}, you need a moment longer to find the words.",
+  "category": "travel",
+  "tone": "neutral",
+  "rarity": "common",
+  "lifeStages": [
+    "youngAdult",
+    "adult",
+    "senior"
+  ],
+  "followUpOnly": true,
+  "requires": {
+    "all": [
+      {
+        "age": {
+          "gte": 18
+        }
+      },
+      {
+        "travel": {
+          "active": true,
+          "kind": "study"
+        }
+      }
+    ]
+  },
+  "weight": {
+    "base": 1
+  },
+  "choices": [
+    {
+      "id": "choose",
+      "label": "Speak despite the pause",
+      "outcome": {
+        "text": "Your question reaches the table. The pause feels less frightening.",
+        "effects": [
+          {
+            "type": "stat",
+            "key": "confidence",
+            "delta": 3
+          },
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": 2
+          }
+        ]
+      }
+    },
+    {
+      "id": "leave",
+      "label": "Write the question afterward",
+      "outcome": {
+        "text": "The written answer helps, though the conversation has moved on.",
+        "effects": [
+          {
+            "type": "stat",
+            "key": "smarts",
+            "delta": 2
+          },
+          {
+            "type": "stat",
+            "key": "happiness",
+            "delta": -1
+          }
+        ]
+      }
+    }
+  ]
+}

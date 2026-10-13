@@ -1,3 +1,4 @@
+import { emptyTravel } from '../travel/types';
 import { emptyLanguageLearning, legacyLanguages } from '../languages';
 /**
  * Heir conversion (E2b): when a life ends, any living child can carry on, at
@@ -406,6 +407,7 @@ export function continueAsHeir(dead: LifeState, heirId: Id, content: ContentBund
     later: emptyLater(),
     belonging: emptyBelonging(),
     business: emptyBusiness(),
+    travel: emptyTravel(),
     languages: emptyLanguageLearning(),
   };
 

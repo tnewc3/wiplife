@@ -1,0 +1,98 @@
+{
+  "id": "travel_romance_airport",
+  "title": "Two departure boards",
+  "text": "You and {date.name} stand beneath different departure boards after your trip to {destination}. Neither of you seems ready to end the conversation.",
+  "category": "travel",
+  "tone": "neutral",
+  "rarity": "common",
+  "lifeStages": [
+    "youngAdult",
+    "adult",
+    "senior"
+  ],
+  "followUpOnly": true,
+  "requires": {
+    "all": [
+      {
+        "age": {
+          "gte": 18
+        }
+      },
+      {
+        "travel": {
+          "active": true,
+          "kind": "trip",
+          "romance": true
+        }
+      },
+      {
+        "romance": [
+          "single"
+        ]
+      }
+    ]
+  },
+  "weight": {
+    "base": 1
+  },
+  "choices": [
+    {
+      "id": "choose",
+      "label": "Try a relationship at a distance",
+      "outcome": {
+        "text": "You agree to keep dating after returning to separate cities.",
+        "effects": [
+          {
+            "type": "relationship",
+            "role": "date",
+            "affection": 15,
+            "trust": 5,
+            "kind": "partner"
+          },
+          {
+            "type": "memory",
+            "role": "date",
+            "tag": "started_dating"
+          },
+          {
+            "type": "history",
+            "text": "You began a long-distance relationship with {date.name} after a trip to {destination}.",
+            "importance": 2
+          }
+        ]
+      }
+    },
+    {
+      "id": "leave",
+      "label": "Keep the connection as a friendship",
+      "outcome": {
+        "text": "You exchange a warm goodbye and agree to keep in touch as friends.",
+        "effects": [
+          {
+            "type": "relationship",
+            "role": "date",
+            "affection": 6,
+            "trust": 3,
+            "kind": "friend"
+          },
+          {
+            "type": "stat",
+            "key": "happiness",
+            "delta": 2
+          }
+        ]
+      }
+    }
+  ],
+  "cast": {
+    "date": {
+      "kind": "acquaintance",
+      "presence": "anywhere",
+      "romantic": true,
+      "age": {
+        "min": 18,
+        "max": 100
+      }
+    }
+  }
+}

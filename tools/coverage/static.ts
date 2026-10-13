@@ -67,6 +67,7 @@ export function rootEvents(content: ContentBundle): Set<string> {
   const r = content.registries;
   const lists: { events: string[] }[] = [
     r.languages.classes,
+    ...Object.values(r.travel).map((events) => ({ events })),
     ...Object.values(r.actions.actions),
     ...Object.values(r.triggers.triggers),
     ...Object.values(r.work.results),

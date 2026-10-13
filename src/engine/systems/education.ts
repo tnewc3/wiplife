@@ -1,3 +1,4 @@
+import { educationCountry } from '../travel/travel';
 /**
  * Education (year pipeline step 3): grades the school year just finished,
  * handles being held back and graduating, starts the next school (automatic
@@ -24,13 +25,13 @@ import {
 } from '../education';
 import type { LifeState } from '../types';
 import { applyStatEffects } from './economy';
-import { countryOf } from '../country';
+
 
 /** Grades the year you were in, then moves you on: the next year, held back, or graduation. */
 export function finishSchoolYear(state: LifeState, content: ContentBundle): void {
   const cur = state.education.current;
   if (!cur) return;
-  const school = countryOf(state, content).school;
+  const school = educationCountry(state, content).school;
   const grade = yearGrade(state, cur, content, state.rng);
   const graded = cur.year - 1 + cur.repeats;
   cur.gpa = roundGpa((cur.gpa * graded + grade) / (graded + 1));

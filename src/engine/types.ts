@@ -1,3 +1,4 @@
+import type { TravelState } from './travel/types';
 import type { LanguageSkill } from '../content/schemas/languages';
 import type { LanguageLearning } from './languages';
 /**
@@ -1098,6 +1099,7 @@ export interface PendingInteraction {
 }
 
 export interface LifeState {
+  travel: TravelState;
   languages: LanguageLearning;
   id: Id;
   seed: string;

@@ -1,0 +1,67 @@
+{
+  "id": "travel_photo",
+  "title": "Outside the frame",
+  "text": "You realize you have photographed most of {destination} through a screen.",
+  "category": "travel",
+  "tone": "neutral",
+  "rarity": "common",
+  "lifeStages": [
+    "youngAdult",
+    "adult",
+    "senior"
+  ],
+  "followUpOnly": true,
+  "requires": {
+    "all": [
+      {
+        "age": {
+          "gte": 18
+        }
+      },
+      {
+        "travel": {
+          "active": true,
+          "kind": "trip"
+        }
+      }
+    ]
+  },
+  "weight": {
+    "base": 1
+  },
+  "choices": [
+    {
+      "id": "choose",
+      "label": "Put the phone away",
+      "outcome": {
+        "text": "You remember one afternoon without a picture to prove it.",
+        "effects": [
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": -3
+          }
+        ]
+      }
+    },
+    {
+      "id": "leave",
+      "label": "Make a small photo journal",
+      "outcome": {
+        "text": "Choosing the pictures makes you look more closely.",
+        "effects": [
+          {
+            "type": "stat",
+            "key": "smarts",
+            "delta": 1
+          },
+          {
+            "type": "stat",
+            "key": "happiness",
+            "delta": 2
+          }
+        ]
+      }
+    }
+  ]
+}

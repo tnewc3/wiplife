@@ -1,0 +1,72 @@
+{
+  "id": "travel_study_orientation",
+  "title": "A new timetable",
+  "text": "At your partner school in {destination}, two classes on your timetable overlap.",
+  "category": "travel",
+  "tone": "neutral",
+  "rarity": "common",
+  "lifeStages": [
+    "youngAdult",
+    "adult",
+    "senior"
+  ],
+  "followUpOnly": true,
+  "requires": {
+    "all": [
+      {
+        "age": {
+          "gte": 18
+        }
+      },
+      {
+        "travel": {
+          "active": true,
+          "kind": "study"
+        }
+      }
+    ]
+  },
+  "weight": {
+    "base": 1
+  },
+  "choices": [
+    {
+      "id": "choose",
+      "label": "Ask for help before choosing",
+      "outcome": {
+        "text": "The adviser helps you keep the credits that count at home.",
+        "effects": [
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": -2
+          },
+          {
+            "type": "stat",
+            "key": "confidence",
+            "delta": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "leave",
+      "label": "Work it out yourself",
+      "outcome": {
+        "text": "You learn the timetable rules, slowly.",
+        "effects": [
+          {
+            "type": "stat",
+            "key": "smarts",
+            "delta": 2
+          },
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": 3
+          }
+        ]
+      }
+    }
+  ]
+}

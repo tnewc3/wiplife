@@ -91,6 +91,7 @@ export type Condition =
   | ({ hidden: (typeof HIDDEN_KEYS)[number] } & Compare)
   | { money: Compare }
   | { city: string }
+  | { travel: { active?: boolean; destinationId?: string; kind?: 'trip' | 'study' | 'work'; encounter?: boolean; romance?: boolean; companion?: boolean } }
   | { language: { id?: string; skill?: Compare; native?: boolean; role?: string; sharedWith?: string } }
   | { country: CountryId[] }
   | { legalAge: keyof LegalAges }
@@ -779,6 +780,7 @@ export const conditionSchema: z.ZodType<Condition> = z.lazy(() =>
     z.strictObject({ hidden: z.enum(HIDDEN_KEYS), ...compareFields }).refine(hasBound, 'needs a bound'),
     z.strictObject({ money: compareSchema }),
     z.strictObject({ city: idSchema }),
+    z.strictObject({ travel: z.strictObject({ active: z.boolean().optional(), destinationId: idSchema.optional(), kind: z.enum(['trip', 'study', 'work']).optional(), encounter: z.boolean().optional(), romance: z.boolean().optional(), companion: z.boolean().optional() }) }),
     z.strictObject({ language: z.strictObject({ id: idSchema.optional(), skill: compareSchema.optional(), native: z.boolean().optional(), role: idSchema.optional(), sharedWith: idSchema.optional() }).refine((l) => l.id !== undefined || l.sharedWith !== undefined, 'needs id or sharedWith') }),
     z.strictObject({ country: z.array(countryIdSchema).min(1) }),
     z.strictObject({ legalAge: z.enum(['drinking', 'gambling', 'driving', 'permit', 'marriage']) }),

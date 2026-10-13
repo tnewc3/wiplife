@@ -1,3 +1,5 @@
+import { TRAVEL_ACTION_IDS, TRAVEL_ACTIONS } from './travel';
+import type { TripInput, StayInput } from '../travel/travel';
 import { canTakeLanguageClasses, takeLanguageClasses, languageClassCost } from '../languages';
 import { fittingResults, queueResult } from './result';
 /**
@@ -36,7 +38,7 @@ import { sameCountry } from '../country';
 
 export const MONEY_ACTION_IDS = ['set_lifestyle', 'start_gig', 'stop_gig', 'pay_debt', 'debt_plan'] as const;
 export const HOME_ACTION_IDS = ['rent_home', 'move_home', 'relocate', 'buy_home', 'sell_home', 'find_roommate', 'live_alone'] as const;
-export const LIFE_ACTION_IDS = ['take_language_classes', ...MONEY_ACTION_IDS, ...HOME_ACTION_IDS, ...EDUCATION_ACTION_IDS, ...CAREER_ACTION_IDS, ...PERSONAL_ACTION_IDS, ...FAMILY_ACTION_IDS, ...ESTATE_ACTION_IDS, ...POSSESSION_ACTION_IDS, ...TEEN_ACTION_IDS, ...CRIME_ACTION_IDS, ...FAME_ACTION_IDS, ...SPORTS_ACTION_IDS, ...LATER_ACTION_IDS, ...BELONGING_ACTION_IDS, ...BUSINESS_ACTION_IDS] as const;
+export const LIFE_ACTION_IDS = [...TRAVEL_ACTION_IDS, 'take_language_classes', ...MONEY_ACTION_IDS, ...HOME_ACTION_IDS, ...EDUCATION_ACTION_IDS, ...CAREER_ACTION_IDS, ...PERSONAL_ACTION_IDS, ...FAMILY_ACTION_IDS, ...ESTATE_ACTION_IDS, ...POSSESSION_ACTION_IDS, ...TEEN_ACTION_IDS, ...CRIME_ACTION_IDS, ...FAME_ACTION_IDS, ...SPORTS_ACTION_IDS, ...LATER_ACTION_IDS, ...BELONGING_ACTION_IDS, ...BUSINESS_ACTION_IDS] as const;
 
 /** The only money, home, school, work and personal actions you can take in prison (Stage 9). */
 export const PRISON_LIFE_ACTIONS: readonly LifeActionId[] = ['pay_debt', 'debt_plan', 'stop_gig', 'edit_identity', 'write_will'];
@@ -44,6 +46,8 @@ export type LifeActionId = (typeof LIFE_ACTION_IDS)[number];
 
 /** Parameters, after validation. */
 export interface LifeActionParams {
+  trip?: TripInput;
+  stay?: StayInput;
   languageId?: string;
   lifestyle?: Lifestyle;
   debtId?: string;
@@ -280,6 +284,7 @@ export const LIFE_ACTIONS: Record<LifeActionId, LifeActionRule> = {
       refreshHousingCost(state, content);
     },
   },
+  ...TRAVEL_ACTIONS,
   ...EDUCATION_ACTIONS,
   ...CAREER_ACTIONS,
   ...PERSONAL_ACTIONS,
@@ -298,6 +303,7 @@ export const LIFE_ACTIONS: Record<LifeActionId, LifeActionRule> = {
 /** True when the action can be taken now with these (validated) parameters. In prison, only a few can. */
 export function isLifeActionAvailable(state: LifeState, actionId: LifeActionId, params: LifeActionParams, content: ContentBundle): boolean {
   if (state.phase !== 'yearStart') return false;
+  if (state.travel.residence && [...HOME_ACTION_IDS, 'apply_school', 'return_to_school', 'start_business', 'buy_business', 'start_fame', 'start_sport'].includes(actionId)) return false;
   if (isIncarcerated(state) && !PRISON_LIFE_ACTIONS.includes(actionId)) return false;
   return LIFE_ACTIONS[actionId].allowed(state, params, content);
 }

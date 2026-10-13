@@ -1,3 +1,4 @@
+import { travelFailures } from './travel/invariants';
 /**
  * Sanity checks on a life (docs/technical.md, sections M and Q). Used in
  * development and tests; each later stage adds the checks for its systems.
@@ -25,7 +26,7 @@ import { lifeStageForAge } from './systems/aging';
 import { meetsJobRequirements } from './career';
 import { finishedHighSchool, hasCredential, inFinalYear, isPostSecondary, schoolAges } from './education';
 import type { Enrollment, Identity, LifeState, Pronouns, SchoolPlace } from './types';
-import { countryOf, pensionOf } from './country';
+import { countryOf } from './country';
 
 const LIFE_STAGES = new Set(['early', 'child', 'teen', 'youngAdult', 'adult', 'senior']);
 const PHASES = new Set(['yearStart', 'events', 'yearEnd', 'dead', 'action']);
@@ -40,7 +41,7 @@ export class InvariantError extends Error {
 
 /** Returns every invariant the life breaks (empty when healthy). */
 export function checkInvariants(state: LifeState, content: ContentBundle): string[] {
-  const failures: string[] = [];
+  const failures: string[] = [...travelFailures(state, content)];
   for (const [who, ls] of [["character", state.character.languages] as const, ...Object.values(state.people).map((p) => [p.id, p.languages] as const)]) {
     if (!ls.length || !ls.some((l) => l.native)) failures.push(`${who}: no native language`);
     if (new Set(ls.map((l) => l.id)).size !== ls.length) failures.push(`${who}: duplicate language`);
@@ -151,7 +152,9 @@ export function checkInvariants(state: LifeState, content: ContentBundle): strin
   }
   if (state.career.gig && c.age < content.balance.economy.gig.minAge) fail('gig work before the minimum age');
   const { earnings } = f;
-  const { earningsCap } = pensionOf(state, content);
+  // W5: the record can include years earned under a different country’s cap.
+  // Moving temporarily must not make a legitimate historical total invalid.
+  const earningsCap = Math.max(...Object.values(content.countries).map((country) => country.pension.earningsCap));
   money('finances.earnings.total', earnings.total);
   if (!Number.isInteger(earnings.years) || earnings.years < 0 || earnings.years > c.age) fail('finances.earnings.years is out of range');
   if (earnings.total < 0 || earnings.total > earnings.years * earningsCap) fail('finances.earnings.total is out of range');

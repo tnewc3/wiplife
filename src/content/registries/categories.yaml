@@ -348,3 +348,7 @@ categories:
   bizpast:
     label: After a business
     requires: { business: { failedWithin: 8 } }
+
+  travel:
+    label: Travel
+    requires: { travel: { active: true } }

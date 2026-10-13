@@ -1,0 +1,72 @@
+{
+  "id": "travel_study_home_call",
+  "title": "A call between classes",
+  "text": "During your exchange in {destination}, messages from home arrive while you are walking to class.",
+  "category": "travel",
+  "tone": "neutral",
+  "rarity": "common",
+  "lifeStages": [
+    "youngAdult",
+    "adult",
+    "senior"
+  ],
+  "followUpOnly": true,
+  "requires": {
+    "all": [
+      {
+        "age": {
+          "gte": 18
+        }
+      },
+      {
+        "travel": {
+          "active": true,
+          "kind": "study"
+        }
+      }
+    ]
+  },
+  "weight": {
+    "base": 1
+  },
+  "choices": [
+    {
+      "id": "choose",
+      "label": "Set aside an evening to call",
+      "outcome": {
+        "text": "You make room for home and miss an evening with your new classmates.",
+        "effects": [
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": -3
+          },
+          {
+            "type": "stat",
+            "key": "happiness",
+            "delta": -1
+          }
+        ]
+      }
+    },
+    {
+      "id": "leave",
+      "label": "Answer briefly and stay out",
+      "outcome": {
+        "text": "You keep exploring. Home feels farther away tonight.",
+        "effects": [
+          {
+            "type": "stat",
+            "key": "happiness",
+            "delta": 3
+          },
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": 2
+          }
+        ]
+      }
+    }
+  ]
+}

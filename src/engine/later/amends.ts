@@ -18,7 +18,8 @@ import { chance } from '../rng';
 import { writeFromGroup } from '../systems/history';
 import type { AmendsRecord, Id, LifeState } from '../types';
 
-const byId = (a: Id, b: Id) => a.localeCompare(b, 'en', { numeric: true });
+// Travel grows the circle: reuse the same numeric collation instead of constructing it for every comparison.
+const byId = new Intl.Collator('en', { numeric: true }).compare;
 
 export interface AmendsCandidate {
   source: string;

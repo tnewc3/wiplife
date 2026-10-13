@@ -1,0 +1,77 @@
+{
+  "id": "travel_work_return",
+  "title": "An end date on the calendar",
+  "text": "You look at the return date for your temporary stay in {destination}. The weeks suddenly seem countable.",
+  "category": "travel",
+  "tone": "neutral",
+  "rarity": "common",
+  "lifeStages": [
+    "youngAdult",
+    "adult",
+    "senior"
+  ],
+  "followUpOnly": true,
+  "requires": {
+    "all": [
+      {
+        "age": {
+          "gte": 18
+        }
+      },
+      {
+        "travel": {
+          "active": true,
+          "kind": "work"
+        }
+      }
+    ]
+  },
+  "weight": {
+    "base": 1
+  },
+  "choices": [
+    {
+      "id": "choose",
+      "label": "Start planning the handover",
+      "outcome": {
+        "text": "A clear handover makes the ending easier, and uses evenings you wanted for yourself.",
+        "effects": [
+          {
+            "type": "stat",
+            "key": "discipline",
+            "delta": 2
+          },
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": 2
+          },
+          {
+            "type": "history",
+            "text": "You planned the handover for your temporary work in {destination}.",
+            "importance": 2
+          }
+        ]
+      }
+    },
+    {
+      "id": "leave",
+      "label": "Use your time outside work",
+      "outcome": {
+        "text": "You put effort into knowing the place while you are here.",
+        "effects": [
+          {
+            "type": "stat",
+            "key": "happiness",
+            "delta": 3
+          },
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": -1
+          }
+        ]
+      }
+    }
+  ]
+}

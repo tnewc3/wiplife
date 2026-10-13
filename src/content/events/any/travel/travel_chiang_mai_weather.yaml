@@ -1,0 +1,67 @@
+{
+  "id": "travel_chiang_mai_weather",
+  "title": "The weather window",
+  "text": "Outside Chiang Mai, your planned walking route closes after heavy rain.",
+  "category": "travel",
+  "tone": "neutral",
+  "rarity": "common",
+  "lifeStages": [
+    "youngAdult",
+    "adult",
+    "senior"
+  ],
+  "followUpOnly": true,
+  "requires": {
+    "all": [
+      {
+        "age": {
+          "gte": 18
+        }
+      },
+      {
+        "travel": {
+          "active": true,
+          "kind": "trip",
+          "destinationId": "chiang_mai"
+        }
+      }
+    ]
+  },
+  "weight": {
+    "base": 1
+  },
+  "choices": [
+    {
+      "id": "choose",
+      "label": "Pay for an indoor workshop",
+      "outcome": {
+        "text": "You try a new craft and take an imperfect piece home.",
+        "effects": [
+          {
+            "type": "money",
+            "delta": -45
+          },
+          {
+            "type": "stat",
+            "key": "smarts",
+            "delta": 2
+          }
+        ]
+      }
+    },
+    {
+      "id": "leave",
+      "label": "Keep the day quiet",
+      "outcome": {
+        "text": "You wait out the rain with no new plan.",
+        "effects": [
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": -3
+          }
+        ]
+      }
+    }
+  ]
+}

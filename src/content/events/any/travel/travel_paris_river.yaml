@@ -1,0 +1,72 @@
+{
+  "id": "travel_paris_river",
+  "title": "The river path",
+  "text": "Along the river in Paris, you keep passing the same closed walkway.",
+  "category": "travel",
+  "tone": "neutral",
+  "rarity": "common",
+  "lifeStages": [
+    "youngAdult",
+    "adult",
+    "senior"
+  ],
+  "followUpOnly": true,
+  "requires": {
+    "all": [
+      {
+        "age": {
+          "gte": 18
+        }
+      },
+      {
+        "travel": {
+          "active": true,
+          "kind": "trip",
+          "destinationId": "paris"
+        }
+      }
+    ]
+  },
+  "weight": {
+    "base": 1
+  },
+  "choices": [
+    {
+      "id": "choose",
+      "label": "Join a small boat trip",
+      "outcome": {
+        "text": "You pay to see the route from the water.",
+        "effects": [
+          {
+            "type": "money",
+            "delta": -65
+          },
+          {
+            "type": "stat",
+            "key": "happiness",
+            "delta": 3
+          }
+        ]
+      }
+    },
+    {
+      "id": "leave",
+      "label": "Find another path",
+      "outcome": {
+        "text": "The long walk changes what you came to see.",
+        "effects": [
+          {
+            "type": "stat",
+            "key": "fitness",
+            "delta": 3
+          },
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": 1
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,72 @@
+{
+  "id": "travel_kyoto_bus",
+  "title": "One stop too far",
+  "text": "In Kyoto, you stay on the bus past the stop on your map.",
+  "category": "travel",
+  "tone": "neutral",
+  "rarity": "common",
+  "lifeStages": [
+    "youngAdult",
+    "adult",
+    "senior"
+  ],
+  "followUpOnly": true,
+  "requires": {
+    "all": [
+      {
+        "age": {
+          "gte": 18
+        }
+      },
+      {
+        "travel": {
+          "active": true,
+          "kind": "trip",
+          "destinationId": "kyoto"
+        }
+      }
+    ]
+  },
+  "weight": {
+    "base": 1
+  },
+  "choices": [
+    {
+      "id": "choose",
+      "label": "Walk back",
+      "outcome": {
+        "text": "A residential street becomes part of your visit.",
+        "effects": [
+          {
+            "type": "stat",
+            "key": "fitness",
+            "delta": 2
+          },
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "leave",
+      "label": "Buy a ticket back",
+      "outcome": {
+        "text": "You pay for the return bus and keep your appointment.",
+        "effects": [
+          {
+            "type": "money",
+            "delta": -15
+          },
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": -1
+          }
+        ]
+      }
+    }
+  ]
+}

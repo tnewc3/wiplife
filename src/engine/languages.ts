@@ -122,6 +122,7 @@ export function runLanguages(state: LifeState, content: ContentBundle): void {
   };
   const mine = advance(c.languages, c.cityId, c.age, homeIds, state.career.job?.jobId);
   state.languages.totals.immersion += mine.gained;
+  if (state.travel.residence && state.travel.residence.type !== 'visitor') state.travel.totals.immersion += mine.gained;
   state.languages.totals.faded += mine.faded;
   for (const person of Object.values(state.people)) if (person.alive) {
     const age = year - person.birthYear;

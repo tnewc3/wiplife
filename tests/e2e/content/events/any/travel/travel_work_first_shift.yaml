@@ -1,0 +1,72 @@
+{
+  "id": "travel_work_first_shift",
+  "title": "A different first day",
+  "text": "Your temporary work in {destination} starts with a routine nobody has explained yet.",
+  "category": "travel",
+  "tone": "neutral",
+  "rarity": "common",
+  "lifeStages": [
+    "youngAdult",
+    "adult",
+    "senior"
+  ],
+  "followUpOnly": true,
+  "requires": {
+    "all": [
+      {
+        "age": {
+          "gte": 18
+        }
+      },
+      {
+        "travel": {
+          "active": true,
+          "kind": "work"
+        }
+      }
+    ]
+  },
+  "weight": {
+    "base": 1
+  },
+  "choices": [
+    {
+      "id": "choose",
+      "label": "Ask the questions now",
+      "outcome": {
+        "text": "You spend a tiring first shift learning what the others take for granted.",
+        "effects": [
+          {
+            "type": "stat",
+            "key": "confidence",
+            "delta": 2
+          },
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": 3
+          }
+        ]
+      }
+    },
+    {
+      "id": "leave",
+      "label": "Watch before joining in",
+      "outcome": {
+        "text": "You learn quietly and remain longer feeling like a newcomer.",
+        "effects": [
+          {
+            "type": "stat",
+            "key": "smarts",
+            "delta": 1
+          },
+          {
+            "type": "stat",
+            "key": "happiness",
+            "delta": -1
+          }
+        ]
+      }
+    }
+  ]
+}

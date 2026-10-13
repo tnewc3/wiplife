@@ -80,6 +80,17 @@ export function evaluate(condition: Condition | undefined, state: LifeState, ctx
   if ('money' in condition) return compare(state.finances.savings / priceLevelOf(state, ctx), condition.money);
   if ('city' in condition) return c.cityId === condition.city;
   // W4a: the country (needs the content to know which country the city is in) and the legal ages there.
+  if ('travel' in condition) {
+    const asked = condition.travel;
+    const trip = state.travel.active;
+    if (asked.active !== undefined && asked.active !== (trip !== null)) return false;
+    if (asked.kind !== undefined && trip?.kind !== asked.kind) return false;
+    if (asked.destinationId !== undefined && trip?.destinationId !== asked.destinationId) return false;
+    if (asked.encounter !== undefined && asked.encounter !== (trip?.encounterId !== null && trip?.encounterId !== undefined)) return false;
+    if (asked.romance !== undefined && asked.romance !== (trip?.romanceId !== null && trip?.romanceId !== undefined)) return false;
+    if (asked.companion !== undefined && asked.companion !== ((trip?.companions.length ?? 0) > 0)) return false;
+    return true;
+  }
   if ('language' in condition) {
     const q = condition.language;
     const subject = q.role ? ctx.cast?.[q.role] : undefined;

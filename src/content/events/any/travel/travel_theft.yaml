@@ -1,0 +1,80 @@
+{
+  "id": "travel_theft",
+  "title": "An empty pocket",
+  "text": "In {destination}, your bag is open and your wallet is gone.",
+  "category": "travel",
+  "tone": "serious",
+  "rarity": "common",
+  "lifeStages": [
+    "youngAdult",
+    "adult",
+    "senior"
+  ],
+  "followUpOnly": true,
+  "requires": {
+    "all": [
+      {
+        "age": {
+          "gte": 18
+        }
+      },
+      {
+        "travel": {
+          "active": true,
+          "kind": "trip"
+        }
+      }
+    ]
+  },
+  "weight": {
+    "base": 1
+  },
+  "choices": [
+    {
+      "id": "choose",
+      "label": "Report it and replace the essentials",
+      "outcome": {
+        "text": "You finish the trip with replacement essentials and a report number.",
+        "effects": [
+          {
+            "type": "money",
+            "delta": -220
+          },
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": 3
+          },
+          {
+            "type": "history",
+            "text": "Your wallet was stolen during a trip to {destination}.",
+            "importance": 2
+          }
+        ]
+      }
+    },
+    {
+      "id": "leave",
+      "label": "Cut the trip short",
+      "outcome": {
+        "text": "You get home early and pay to change your transport.",
+        "effects": [
+          {
+            "type": "money",
+            "delta": -400
+          },
+          {
+            "type": "stat",
+            "key": "happiness",
+            "delta": -4
+          },
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": -1
+          }
+        ]
+      }
+    }
+  ]
+}

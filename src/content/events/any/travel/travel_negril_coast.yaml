@@ -1,0 +1,67 @@
+{
+  "id": "travel_negril_coast",
+  "title": "The changed water",
+  "text": "In Negril, rough water cancels the outing you wanted.",
+  "category": "travel",
+  "tone": "neutral",
+  "rarity": "common",
+  "lifeStages": [
+    "youngAdult",
+    "adult",
+    "senior"
+  ],
+  "followUpOnly": true,
+  "requires": {
+    "all": [
+      {
+        "age": {
+          "gte": 18
+        }
+      },
+      {
+        "travel": {
+          "active": true,
+          "kind": "trip",
+          "destinationId": "negril"
+        }
+      }
+    ]
+  },
+  "weight": {
+    "base": 1
+  },
+  "choices": [
+    {
+      "id": "choose",
+      "label": "Book a guided coastal walk",
+      "outcome": {
+        "text": "You pay for a walk and hear about the changing shoreline.",
+        "effects": [
+          {
+            "type": "money",
+            "delta": -50
+          },
+          {
+            "type": "stat",
+            "key": "fitness",
+            "delta": 2
+          }
+        ]
+      }
+    },
+    {
+      "id": "leave",
+      "label": "Stay on the beach",
+      "outcome": {
+        "text": "You watch the water from a safe distance.",
+        "effects": [
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": -3
+          }
+        ]
+      }
+    }
+  ]
+}

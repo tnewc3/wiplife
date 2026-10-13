@@ -1,0 +1,80 @@
+{
+  "id": "travel_encounter_words",
+  "title": "Different words",
+  "text": "On your trip to {destination}, you and fellow traveler {npc.name} struggle to explain your plans.",
+  "category": "travel",
+  "tone": "neutral",
+  "rarity": "common",
+  "lifeStages": [
+    "youngAdult",
+    "adult",
+    "senior"
+  ],
+  "followUpOnly": true,
+  "requires": {
+    "all": [
+      {
+        "age": {
+          "gte": 18
+        }
+      },
+      {
+        "travel": {
+          "active": true,
+          "kind": "trip",
+          "encounter": true
+        }
+      }
+    ]
+  },
+  "weight": {
+    "base": 1
+  },
+  "choices": [
+    {
+      "id": "choose",
+      "label": "Give the conversation time",
+      "outcome": {
+        "text": "Gestures and a translation tool leave you laughing at the same missed turn.",
+        "effects": [
+          {
+            "type": "relationship",
+            "role": "npc",
+            "affection": 7,
+            "trust": 2,
+            "kind": "friend"
+          },
+          {
+            "type": "stat",
+            "key": "confidence",
+            "delta": 2
+          }
+        ]
+      }
+    },
+    {
+      "id": "leave",
+      "label": "Let the conversation finish",
+      "outcome": {
+        "text": "You keep the exchange brief and move on.",
+        "effects": [
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": -1
+          }
+        ]
+      }
+    }
+  ],
+  "cast": {
+    "npc": {
+      "kind": "acquaintance",
+      "presence": "anywhere",
+      "age": {
+        "min": 18,
+        "max": 100
+      }
+    }
+  }
+}

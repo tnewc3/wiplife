@@ -1,0 +1,81 @@
+{
+  "id": "travel_companion_plans",
+  "title": "Two different days",
+  "text": "In {destination}, {companion.name} wants a full itinerary. You want an afternoon off.",
+  "category": "travel",
+  "tone": "neutral",
+  "rarity": "common",
+  "lifeStages": [
+    "youngAdult",
+    "adult",
+    "senior"
+  ],
+  "followUpOnly": true,
+  "requires": {
+    "all": [
+      {
+        "age": {
+          "gte": 18
+        }
+      },
+      {
+        "travel": {
+          "active": true,
+          "kind": "trip",
+          "companion": true
+        }
+      }
+    ]
+  },
+  "weight": {
+    "base": 1
+  },
+  "choices": [
+    {
+      "id": "choose",
+      "label": "Spend the morning together, then split up",
+      "outcome": {
+        "text": "You find room for both versions of the day.",
+        "effects": [
+          {
+            "type": "relationship",
+            "role": "companion",
+            "affection": 3,
+            "trust": 2
+          },
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "leave",
+      "label": "Go along with the full plan",
+      "outcome": {
+        "text": "{companion.name} enjoys the day. You need quiet afterward.",
+        "effects": [
+          {
+            "type": "relationship",
+            "role": "companion",
+            "affection": 5,
+            "trust": 0
+          },
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": 3
+          }
+        ]
+      }
+    }
+  ],
+  "cast": {
+    "companion": {
+      "kind": "friend",
+      "presence": "anywhere"
+    }
+  }
+}

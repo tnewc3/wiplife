@@ -39,6 +39,16 @@ function lastCategoryYear(state: LifeState, category: string, content: ContentBu
   return last;
 }
 
+/** Category cooldowns read one fixed view while pacing; scan its growing log once. */
+export function categoryYears(state: LifeState, content: ContentBundle): ReadonlyMap<string, number> {
+  const years = new Map<string, number>();
+  for (const [id, log] of Object.entries(state.eventLog)) {
+    const category = content.events[id]?.category;
+    if (category !== undefined) years.set(category, Math.max(years.get(category) ?? -Infinity, log.lastYear));
+  }
+  return years;
+}
+
 /** A prison event (its category is marked prison): it happens only while you're in prison, and only these happen then (Stage 9). */
 export function isPrisonEvent(def: EventDef, content: ContentBundle): boolean {
   return content.registries.categories.categories[def.category]?.prison === true;
@@ -58,7 +68,7 @@ export function fitsSetting(state: LifeState, def: EventDef, content: ContentBun
  * after casting. With `cast` (the possessions an event was queued about, E5),
  * conditions on them are checked against those.
  */
-export function eventWeight(state: LifeState, def: EventDef, content: ContentBundle, cast?: Record<string, string>): number {
+export function eventWeight(state: LifeState, def: EventDef, content: ContentBundle, cast?: Record<string, string>, categoryLastYears?: ReadonlyMap<string, number>): number {
   if (state.character.age < content.balance.relationships.adultAge && isRomanceEvent(def, content)) return 0;
   if (!fitsSetting(state, def, content)) return 0;
   const log = state.eventLog[def.id];
@@ -66,7 +76,7 @@ export function eventWeight(state: LifeState, def: EventDef, content: ContentBun
   if (def.cooldownYears && log && state.currentYear - log.lastYear < def.cooldownYears) return 0;
   const categoryCooldown = content.registries.categories.categories[def.category]?.cooldownYears;
   if (categoryCooldown) {
-    const last = lastCategoryYear(state, def.category, content);
+    const last = categoryLastYears ? categoryLastYears.get(def.category) : lastCategoryYear(state, def.category, content);
     if (last !== undefined && state.currentYear - last < categoryCooldown) return 0;
   }
   const ctx = { roles: 'assumeTrue' as const, content, ...(cast ? { cast } : {}) };

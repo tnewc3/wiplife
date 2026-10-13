@@ -1,3 +1,4 @@
+import { closeTravelAction } from '../travel/travel';
 /**
  * Management actions (docs/technical.md, "Engine API": performAction). An
  * action is taken between years, on a person's page; it records the input
@@ -152,6 +153,7 @@ export function finishAction(state: LifeState): LifeState {
     throw new InvalidInputError([{ path: 'action', message: 'The action’s result is still waiting for a choice.' }]);
   }
   return produce(state, (draft) => {
+    closeTravelAction(draft);
     draft.pending = [];
     draft.phase = 'yearStart';
   });
