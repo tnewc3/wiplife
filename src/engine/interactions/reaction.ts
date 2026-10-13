@@ -1,3 +1,4 @@
+import { sharedLanguage } from '../languages';
 /**
  * The reaction roll and diminishing returns (E1, docs/expansion.md): how a
  * person reacts to an interaction depends on their personality and mood,
@@ -64,6 +65,9 @@ export function reactionScore(
 
   score -= profile.repeat.same * repeats.same + profile.repeat.total * repeats.total;
   if (giftTier) score += balance.gifts.tiers[giftTier].score * balance.gifts.wealthValue[person.wealthLevel];
+  const language = content.balance.languages.interaction;
+  const verbal = language.nonverbal.includes(def.id) ? language.nonverbalFactor : 1;
+  score += verbal * (sharedLanguage(state.character.languages, person.languages, content) ? language.sharedBonus : language.barrierPenalty);
   return score;
 }
 

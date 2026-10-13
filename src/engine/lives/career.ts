@@ -1,3 +1,4 @@
+import { meetsLanguageJob } from '../languages';
 /**
  * Career and money for the people you know (E3). The same rules your own
  * work follows, as a summary: the firing, layoff and promotion odds come from
@@ -22,15 +23,15 @@ function wealthFor(ctx: Ctx, s: Subject, jobId: string, level: number): void {
 }
 
 /** A track for them to take: its starting pay near their wealth, and degrees only for the sharp. */
-function pickTrack(rng: RngState, content: ContentBundle, bal: PeopleBalance, wealth: FamilyWealth, smarts: number, age: number) {
+function pickTrack(rng: RngState, content: ContentBundle, bal: PeopleBalance, wealth: FamilyWealth, smarts: number, age: number, person: Person) {
   const here = WEALTH_LEVELS.indexOf(wealth);
-  const options = jobTracks(content).map((t) => {
+  const options = jobTracks(content).filter((t) => meetsLanguageJob(person.languages, t.def, person.cityId, content)).map((t) => {
     const needsDegree = t.def.requires !== undefined;
     const sharp = smarts >= bal.career.credentialSmarts && age >= 22;
     const gap = Math.abs(WEALTH_LEVELS.indexOf(t.entryWealth) - here);
     return [t, needsDegree && !sharp ? 0 : (bal.career.trackFit[Math.min(bal.career.trackFit.length - 1, gap)] ?? 0)] as const;
   });
-  return weightedPick(rng, options);
+  return options.some(([, weight]) => weight > 0) ? weightedPick(rng, options) : null;
 }
 
 export interface NewJob {
@@ -44,9 +45,10 @@ export interface NewJob {
 }
 
 /** Finds someone a job: a track that suits them, at a level that suits their age (draws from `rng`). */
-export function rollJob(rng: RngState, content: ContentBundle, bal: PeopleBalance, person: Person, wealth: FamilyWealth, background: FamilyWealth, age: number): NewJob {
+export function rollJob(rng: RngState, content: ContentBundle, bal: PeopleBalance, person: Person, wealth: FamilyWealth, background: FamilyWealth, age: number): NewJob | null {
   const c = bal.career;
-  const track = pickTrack(rng, content, bal, wealth, person.smarts, age);
+  const track = pickTrack(rng, content, bal, wealth, person.smarts, age, person);
+  if (!track) return null;
   const level = clampInt(Math.round(rollNormal(rng, { mean: curveAt(c.hireLevel, age), sd: c.hireLevelSd })), 1, track.def.levels.length);
   const pay = track.def.levels[level - 1]!.salary;
   return {
@@ -61,6 +63,7 @@ export function rollJob(rng: RngState, content: ContentBundle, bal: PeopleBalanc
 /** Hires them into a job. */
 function hire(ctx: Ctx, s: Subject, key: 'hired' | 'switched'): void {
   const job = rollJob(ctx.state.rng, ctx.content, ctx.bal, s.person, s.wealth, s.life.background, s.age);
+  if (!job) return;
   s.occupation = job.jobId;
   s.life.level = job.level;
   s.life.levelSince = ctx.year;
@@ -98,6 +101,7 @@ export function careerStep(ctx: Ctx, s: Subject): void {
     s.life.level = 0;
     return;
   }
+  if (!meetsLanguageJob(s.person.languages, def, s.cityId, ctx.content)) { lose(ctx, s, "laid_off", def.levels[0]!.title); return; }
   if (s.life.level < 1) s.life.level = 1;
   const title = def.levels[Math.min(def.levels.length, s.life.level) - 1]!.title;
 

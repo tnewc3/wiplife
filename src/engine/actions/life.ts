@@ -1,3 +1,5 @@
+import { canTakeLanguageClasses, takeLanguageClasses, languageClassCost } from '../languages';
+import { fittingResults, queueResult } from './result';
 /**
  * Money, home, school and work management actions (docs/design.md, sections C and L): the
  * Money tab (lifestyle, paying off a debt, a debt plan), the Work/School tab (gig
@@ -34,7 +36,7 @@ import { sameCountry } from '../country';
 
 export const MONEY_ACTION_IDS = ['set_lifestyle', 'start_gig', 'stop_gig', 'pay_debt', 'debt_plan'] as const;
 export const HOME_ACTION_IDS = ['rent_home', 'move_home', 'relocate', 'buy_home', 'sell_home', 'find_roommate', 'live_alone'] as const;
-export const LIFE_ACTION_IDS = [...MONEY_ACTION_IDS, ...HOME_ACTION_IDS, ...EDUCATION_ACTION_IDS, ...CAREER_ACTION_IDS, ...PERSONAL_ACTION_IDS, ...FAMILY_ACTION_IDS, ...ESTATE_ACTION_IDS, ...POSSESSION_ACTION_IDS, ...TEEN_ACTION_IDS, ...CRIME_ACTION_IDS, ...FAME_ACTION_IDS, ...SPORTS_ACTION_IDS, ...LATER_ACTION_IDS, ...BELONGING_ACTION_IDS, ...BUSINESS_ACTION_IDS] as const;
+export const LIFE_ACTION_IDS = ['take_language_classes', ...MONEY_ACTION_IDS, ...HOME_ACTION_IDS, ...EDUCATION_ACTION_IDS, ...CAREER_ACTION_IDS, ...PERSONAL_ACTION_IDS, ...FAMILY_ACTION_IDS, ...ESTATE_ACTION_IDS, ...POSSESSION_ACTION_IDS, ...TEEN_ACTION_IDS, ...CRIME_ACTION_IDS, ...FAME_ACTION_IDS, ...SPORTS_ACTION_IDS, ...LATER_ACTION_IDS, ...BELONGING_ACTION_IDS, ...BUSINESS_ACTION_IDS] as const;
 
 /** The only money, home, school, work and personal actions you can take in prison (Stage 9). */
 export const PRISON_LIFE_ACTIONS: readonly LifeActionId[] = ['pay_debt', 'debt_plan', 'stop_gig', 'edit_identity', 'write_will'];
@@ -42,6 +44,7 @@ export type LifeActionId = (typeof LIFE_ACTION_IDS)[number];
 
 /** Parameters, after validation. */
 export interface LifeActionParams {
+  languageId?: string;
   lifestyle?: Lifestyle;
   debtId?: string;
   cityId?: string;
@@ -136,6 +139,19 @@ function history(state: LifeState, content: ContentBundle, key: keyof ContentBun
 const independent = (state: LifeState, content: ContentBundle) => isIndependent(state, content);
 
 export const LIFE_ACTIONS: Record<LifeActionId, LifeActionRule> = {
+  take_language_classes: {
+    parse: (params, content) => {
+      const id = field(params, 'languageId');
+      return typeof id === 'string' && content.languages[id]?.id === id && typeof params === 'object' && params !== null && Object.keys(params).length === 1 ? { languageId: id } : null;
+    },
+    allowed: (state, p, content) => p.languageId !== undefined && canTakeLanguageClasses(state, p.languageId, content) && fittingResults(state, content.registries.languages.classes.events, {}, content).length > 0,
+    apply: (state, p, content) => {
+      const cost = languageClassCost(state, content);
+      takeLanguageClasses(state, p.languageId!, content);
+      queueResult(state, fittingResults(state, content.registries.languages.classes.events, {}, content), {});
+      state.pending[0]!.money = { change: -cost, balance: state.finances.savings, debtChange: 0 };
+    },
+  },
   set_lifestyle: {
     parse: (params) => {
       const lifestyle = field(params, 'lifestyle');

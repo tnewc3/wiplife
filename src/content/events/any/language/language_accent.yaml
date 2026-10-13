@@ -1,0 +1,43 @@
+id: language_accent
+title: Your own voice
+text: You understand French well enough to follow a conversation, but you
+  hesitate because your accent sounds different.
+tone: neutral
+category: language
+rarity: common
+lifeStages:
+  - teen
+  - youngAdult
+  - adult
+  - senior
+requires:
+  all:
+    - age:
+        gte: 11
+    - language:
+        id: fr
+        skill:
+          gt: 0
+          lt: 100
+          gte: 40
+        native: false
+weight:
+  base: 2
+once: true
+choices:
+  - id: try
+    label: Speak anyway
+    outcome:
+      text: The answer is about what you said. Your voice gets to be part of the
+        conversation.
+      effects:
+        - type: language
+          id: fr
+        - type: stat
+          key: confidence
+          delta: 1
+  - id: leave
+    label: Let it pass
+    outcome:
+      text: You leave the moment there. There will be other chances.
+      effects: []

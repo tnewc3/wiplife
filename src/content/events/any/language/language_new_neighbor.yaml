@@ -1,0 +1,44 @@
+id: language_new_neighbor
+title: Across the landing
+text: A new neighbor stops to introduce {npc.themself}. You trade names and talk
+  about the building.
+tone: neutral
+category: language
+rarity: common
+lifeStages:
+  - youngAdult
+  - adult
+  - senior
+requires:
+  age:
+    gte: 18
+weight:
+  base: 2
+once: true
+choices:
+  - id: try
+    label: Make time for the introduction
+    outcome:
+      text: You both leave knowing who lives across the landing.
+      effects:
+        - type: relationship
+          role: npc
+          affection: 2
+          trust: 1
+  - id: leave
+    label: Let it pass
+    outcome:
+      text: You leave the moment there. There will be other chances.
+      effects: []
+cast:
+  npc:
+    kind: acquaintance
+    presence: city
+    age:
+      min: 18
+      max: 100
+    createIfMissing: true
+languageBarrier:
+  role: npc
+  text: A new neighbor introduces {npc.themself}. You exchange names, but neither
+    of you can find enough shared words to keep going.

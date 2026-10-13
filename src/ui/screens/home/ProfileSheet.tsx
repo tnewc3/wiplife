@@ -13,7 +13,7 @@ import { SingleChoice, Suggestions } from '../../components/Choices';
 import { Sheet } from '../../components/Sheet';
 import { StatBar } from '../../components/StatBar';
 import { TextField } from '../../components/TextField';
-import { ATTRACTION_LABELS, FAITH_STRENGTH_WORDS, GROUPS_TITLES, recordLine, roleLine, TRAIT_LABELS, VALUE_LABELS } from '../../labels';
+import { ATTRACTION_LABELS, FAITH_STRENGTH_WORDS, LANGUAGE_LEVEL_LABELS, LANGUAGE_NATIVE_LABEL, money, GROUPS_TITLES, recordLine, roleLine, TRAIT_LABELS, VALUE_LABELS } from '../../labels';
 
 const PRONOUN_FIELDS: { key: Exclude<keyof Pronouns, 'verbPlural'>; label: string; example: string }[] = [
   { key: 'subject', label: 'Subject', example: 'they' },
@@ -189,6 +189,9 @@ function IdentityForm({ life, onDone }: { life: LifeState; onDone: () => void })
  */
 export function ProfileSheet({ life, open, onClose }: { life: LifeState; open: boolean; onClose: () => void }) {
   const view = getProfileView(life, content);
+  const act = useAppStore((s) => s.takeLifeAction);
+  const busy = useAppStore((s) => s.aging);
+  const [languageChoice, setLanguageChoice] = useState("");
   const belonging = getBelongingView(life, content);
   const [editing, setEditing] = useState(false);
   const close = () => {
@@ -226,6 +229,24 @@ export function ProfileSheet({ life, open, onClose }: { life: LifeState; open: b
             <Button variant="secondary" block className="mt-3" disabled={!view.canEdit} onClick={() => setEditing(true)}>
               Edit pronouns, gender and expression
             </Button>
+          </section>
+          <section aria-labelledby="profile-languages" data-testid="profile-languages">
+            <h3 id="profile-languages" className="mb-2 text-lg font-bold">Languages</h3>
+            <ul className="divide-y divide-border" aria-label="Languages">
+              {view.languages.map((l) => <li key={l.id} className="flex justify-between gap-3 py-2"><span>{l.name}</span><span className="text-muted capitalize">{LANGUAGE_LEVEL_LABELS[l.level]}{l.native ? ` · ${LANGUAGE_NATIVE_LABEL}` : ''}</span></li>)}
+            </ul>
+            {life.character.age >= content.balance.languages.classes.minAge && view.languageClasses.length > 0 && (
+              <div className="mt-3 flex flex-col gap-3">
+                <label className="flex flex-col gap-1">Language to learn
+                  <select className="min-h-11 rounded border border-border bg-surface px-3" value={languageChoice} onChange={(e) => setLanguageChoice(e.target.value)}>
+                    <option value="">Choose a language</option>
+                    {view.languageClasses.map((l) => <option key={l.id} value={l.id}>{l.name}</option>)}
+                  </select>
+                </label>
+                <p className="text-sm text-muted">One course each year. School and everyday use also build your skills.</p>
+                <Button block disabled={busy || !view.languageClasses.some((l) => l.id === languageChoice && l.available)} onClick={() => { close(); void act('take_language_classes', { languageId: languageChoice }); }}>Take language classes · {money(view.languageClassCost)}</Button>
+              </div>
+            )}
           </section>
           <section aria-labelledby="profile-personality">
             <h3 id="profile-personality" className="mb-2 text-lg font-bold">

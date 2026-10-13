@@ -1,0 +1,44 @@
+id: language_patient_friend
+title: Room for the words
+text: You and {npc.name} find yourselves talking about an ordinary day. The
+  conversation takes its own pace.
+tone: neutral
+category: language
+rarity: common
+lifeStages:
+  - youngAdult
+  - adult
+  - senior
+requires:
+  age:
+    gte: 18
+weight:
+  base: 2
+once: true
+choices:
+  - id: try
+    label: Keep listening
+    outcome:
+      text: You give the conversation time instead of rushing to fill it.
+      effects:
+        - type: relationship
+          role: npc
+          affection: 2
+          trust: 1
+  - id: leave
+    label: Let it pass
+    outcome:
+      text: You leave the moment there. There will be other chances.
+      effects: []
+cast:
+  npc:
+    kind: acquaintance
+    presence: city
+    age:
+      min: 18
+      max: 100
+    createIfMissing: true
+languageBarrier:
+  role: npc
+  text: You and {npc.name} try to talk about an ordinary day. Words keep getting
+    lost between you, and you slow down to check what each of you means.

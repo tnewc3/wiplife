@@ -1,0 +1,41 @@
+id: language_evening_circle
+title: An evening of practice
+text: An informal English conversation circle leaves room for mistakes. Nobody
+  has to sound impressive to take a turn.
+tone: neutral
+category: language
+rarity: common
+lifeStages:
+  - teen
+  - youngAdult
+  - adult
+  - senior
+requires:
+  all:
+    - age:
+        gte: 11
+    - language:
+        id: en
+        skill:
+          gt: 0
+          lt: 100
+        native: false
+weight:
+  base: 2
+once: true
+choices:
+  - id: try
+    label: Join the conversation
+    outcome:
+      text: You lose a word and find another way to say what you mean.
+      effects:
+        - type: language
+          id: en
+        - type: stat
+          key: confidence
+          delta: 1
+  - id: leave
+    label: Let it pass
+    outcome:
+      text: You leave the moment there. There will be other chances.
+      effects: []

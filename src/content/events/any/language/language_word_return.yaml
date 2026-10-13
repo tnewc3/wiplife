@@ -1,0 +1,40 @@
+id: language_word_return
+title: A word comes back
+text: A French word you struggled to recall returns while you are doing
+  something else. You had remembered the meaning all along.
+tone: neutral
+category: language
+rarity: common
+lifeStages:
+  - teen
+  - youngAdult
+  - adult
+  - senior
+requires:
+  all:
+    - age:
+        gte: 11
+    - language:
+        id: fr
+        skill:
+          gt: 0
+          lt: 80
+weight:
+  base: 2
+once: true
+choices:
+  - id: try
+    label: Use it in a new sentence
+    outcome:
+      text: The word feels less far away when you say it again.
+      effects:
+        - type: language
+          id: fr
+        - type: stat
+          key: confidence
+          delta: 1
+  - id: leave
+    label: Let it pass
+    outcome:
+      text: You leave the moment there. There will be other chances.
+      effects: []

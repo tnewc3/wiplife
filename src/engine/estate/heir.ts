@@ -1,3 +1,4 @@
+import { emptyLanguageLearning, legacyLanguages } from '../languages';
 /**
  * Heir conversion (E2b): when a life ends, any living child can carry on, at
  * whatever age they are. `continueAsHeir` builds the new life from the dead
@@ -137,6 +138,7 @@ export function createFosterCarer(life: LifeState, rng: RngState, content: Conte
   const id = nextPersonId(life);
   const person: Person = {
     id,
+    languages: legacyLanguages(life.character.cityId, life.currentYear, `${life.seed}:${id}`, content),
     name: { first: pickUnused(rng, heritage.first[category], used), last: pick(rng, heritage.last) },
     birthYear: life.currentYear - nextInt(rng, fosterAge.min, fosterAge.max),
     alive: true,
@@ -228,6 +230,7 @@ export function continueAsHeir(dead: LifeState, heirId: Id, content: ContentBund
   const c = dead.character;
   people[parentId] = {
     id: parentId,
+    languages: cloneJson(c.languages),
     name: { ...c.name },
     birthYear: dead.birthYear,
     alive: false,
@@ -338,6 +341,7 @@ export function continueAsHeir(dead: LifeState, heirId: Id, content: ContentBund
   // The family's name goes before them: their own reputation starts from the line's.
   hidden.reputation = clampInt(hidden.reputation + Math.round((dead.lineage.reputation - 50) * hb.reputation.carry), 0, 100);
   const character: Character = {
+    languages: cloneJson(candidate.languages),
     name: { ...candidate.name },
     age,
     lifeStage: lifeStageForAge(age, content),
@@ -402,6 +406,7 @@ export function continueAsHeir(dead: LifeState, heirId: Id, content: ContentBund
     later: emptyLater(),
     belonging: emptyBelonging(),
     business: emptyBusiness(),
+    languages: emptyLanguageLearning(),
   };
 
   // ── What they inherit ────────────────────────────────────────────────────

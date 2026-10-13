@@ -66,6 +66,7 @@ export function rootEvents(content: ContentBundle): Set<string> {
   for (const def of Object.values(content.events)) if (!def.retired && !def.followUpOnly) roots.add(def.id);
   const r = content.registries;
   const lists: { events: string[] }[] = [
+    r.languages.classes,
     ...Object.values(r.actions.actions),
     ...Object.values(r.triggers.triggers),
     ...Object.values(r.work.results),

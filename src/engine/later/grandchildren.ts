@@ -1,3 +1,4 @@
+import { householdLanguages } from '../languages';
 /**
  * Grandchildren (L1). The children of your children are summaries in E3
  * (`PersonLife.children`: a first name and a birth year). Once one is born
@@ -66,6 +67,7 @@ export function createGrandchild(state: LifeState, rng: RngState, parentId: Id, 
   const neuro = rollNeuro(rng, content, [parent.neuro]);
   const person: Person = {
     id,
+    languages: householdLanguages(parent.cityId, [parent], state.currentYear, content),
     name: { first: kid.first, last: parent.name.last },
     birthYear: kid.birthYear,
     alive: true,

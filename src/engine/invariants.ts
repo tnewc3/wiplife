@@ -41,7 +41,20 @@ export class InvariantError extends Error {
 /** Returns every invariant the life breaks (empty when healthy). */
 export function checkInvariants(state: LifeState, content: ContentBundle): string[] {
   const failures: string[] = [];
+  for (const [who, ls] of [["character", state.character.languages] as const, ...Object.values(state.people).map((p) => [p.id, p.languages] as const)]) {
+    if (!ls.length || !ls.some((l) => l.native)) failures.push(`${who}: no native language`);
+    if (new Set(ls.map((l) => l.id)).size !== ls.length) failures.push(`${who}: duplicate language`);
+    for (const l of ls) {
+      if (content.languages[l.id]?.id !== l.id || !Number.isInteger(l.skill) || l.skill < 0 || l.skill > 100 || typeof l.native !== 'boolean' || !Number.isInteger(l.lastUsed) || l.lastUsed > state.currentYear) failures.push(`${who}: invalid language ${l.id}`);
+    }
+  }
   const fail = (message: string) => failures.push(message);
+  const study = state.languages;
+  if (study.schoolId !== null && content.languages[study.schoolId]?.id !== study.schoolId) fail('unknown school language');
+  if (study.classId !== null && content.languages[study.classId]?.id !== study.classId) fail('unknown class language');
+  if ((study.classId === null) !== (study.classYear === null) || (study.classYear !== null && (!Number.isInteger(study.classYear) || study.classYear > state.currentYear))) fail('invalid language class record');
+  for (const value of Object.values(study.totals)) if (!Number.isSafeInteger(value) || value < 0) fail('invalid language learning total');
+
 
   const score = (label: string, value: unknown) => {
     if (typeof value !== 'number' || !Number.isInteger(value) || value < 0 || value > 100) {

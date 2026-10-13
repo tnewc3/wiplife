@@ -1,0 +1,45 @@
+id: language_school_partner
+title: Different strengths
+text: Your language-class partner can pronounce a Spanish phrase easily but
+  cannot remember its spelling. You have the opposite problem.
+tone: neutral
+category: language
+rarity: common
+lifeStages:
+  - teen
+  - youngAdult
+  - adult
+  - senior
+requires:
+  all:
+    - age:
+        gte: 11
+    - language:
+        id: es
+        skill:
+          gt: 0
+          lt: 100
+        native: false
+    - education:
+        program:
+          - middle
+          - high
+weight:
+  base: 2
+once: true
+choices:
+  - id: try
+    label: Practise together
+    outcome:
+      text: You work through the phrase twice, helping in different ways.
+      effects:
+        - type: language
+          id: es
+        - type: stat
+          key: confidence
+          delta: 1
+  - id: leave
+    label: Let it pass
+    outcome:
+      text: You leave the moment there. There will be other chances.
+      effects: []

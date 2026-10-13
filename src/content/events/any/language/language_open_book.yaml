@@ -1,0 +1,41 @@
+id: language_open_book
+title: A page at a time
+text: You find a short book in Spanish that you can almost read. Looking up
+  every unfamiliar word would take the whole afternoon.
+tone: neutral
+category: language
+rarity: common
+lifeStages:
+  - teen
+  - youngAdult
+  - adult
+  - senior
+requires:
+  all:
+    - age:
+        gte: 11
+    - language:
+        id: es
+        skill:
+          gt: 0
+          lt: 100
+        native: false
+weight:
+  base: 2
+once: true
+choices:
+  - id: try
+    label: Read for the story first
+    outcome:
+      text: You follow the story, then go back for the words that matter.
+      effects:
+        - type: language
+          id: es
+        - type: stat
+          key: confidence
+          delta: 1
+  - id: leave
+    label: Let it pass
+    outcome:
+      text: You leave the moment there. There will be other chances.
+      effects: []

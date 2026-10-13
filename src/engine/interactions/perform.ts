@@ -1,3 +1,4 @@
+import { sharedLanguage } from '../languages';
 /**
  * Doing an interaction (E1): validates the input, records it in the input
  * log, rolls the reaction with the life's seeded generator, applies the
@@ -117,6 +118,8 @@ function applyConsequence(draft: Draft<LifeState>, moment: Moment, c: Consequenc
   const rel = draft.relationships[personId]!;
   const person = draft.people[personId]!;
   const year = draft.currentYear;
+  const spoken = sharedLanguage(draft.character.languages, person.languages, content);
+  if (spoken) { draft.character.languages.find((l) => l.id === spoken)!.lastUsed = year; person.languages.find((l) => l.id === spoken)!.lastUsed = year; }
   const cap = content.balance.interactions.returns.yearlyCap;
   const count = counters(rel, year);
   const before = { affection: rel.affection, trust: rel.trust, mood: person.mood };
@@ -219,7 +222,8 @@ export function performInteraction(state: LifeState, params: unknown, content: C
     let factor = returnsFactor(repeats, content);
     if (p.giftTier) factor *= balance.gifts.tiers[p.giftTier].warmth * balance.gifts.wealthValue[person.wealthLevel];
 
-    const variant = outcome.text[nextInt(draft.rng, 0, outcome.text.length - 1)]!;
+    const texts = !sharedLanguage(draft.character.languages, person.languages, content) && outcome.barrierText ? outcome.barrierText : outcome.text;
+    const variant = texts[nextInt(draft.rng, 0, texts.length - 1)]!;
     const pending: PendingInteraction = {
       interactionId: def.id,
       personId: p.personId,

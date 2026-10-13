@@ -1,0 +1,41 @@
+id: language_helpful_sign
+title: A sign you can read
+text: An English notice is suddenly easier to follow. You understand the
+  important line before reaching for a translation.
+tone: neutral
+category: language
+rarity: common
+lifeStages:
+  - teen
+  - youngAdult
+  - adult
+  - senior
+requires:
+  all:
+    - age:
+        gte: 11
+    - language:
+        id: en
+        skill:
+          gt: 0
+          lt: 100
+        native: false
+weight:
+  base: 2
+once: true
+choices:
+  - id: try
+    label: Read the rest yourself
+    outcome:
+      text: You check one unfamiliar word, then finish on your own.
+      effects:
+        - type: language
+          id: en
+        - type: stat
+          key: confidence
+          delta: 1
+  - id: leave
+    label: Let it pass
+    outcome:
+      text: You leave the moment there. There will be other chances.
+      effects: []

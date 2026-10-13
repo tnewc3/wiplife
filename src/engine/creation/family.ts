@@ -1,3 +1,4 @@
+import { nativeLanguages, householdLanguages } from '../languages';
 /**
  * Generates the family a character is born into: one or two parents, any
  * older siblings and (C1) each parent's two parents, with believable ages,
@@ -138,6 +139,7 @@ export function generateFamily(rng: RngState, content: ContentBundle, request: F
     const identity = rollIdentity(rng, content, category, mustBeAttractedTo);
     const person: Person = {
       id: request.nextId(),
+      languages: [],
       name: { first: pickUnused(rng, nameSource.first[category], usedFirst), last: personLastName },
       birthYear: personBirthYear,
       alive: true,
@@ -153,6 +155,8 @@ export function generateFamily(rng: RngState, content: ContentBundle, request: F
       wealthLevel: request.familyWealth,
       canCarry: rollCanCarry(rng, category, content),
     };
+    const origin = Object.keys(pool.heritages).find((id) => pool.heritages[id] === nameSource) ?? primary;
+    person.languages = nativeLanguages(cityId, origin, birthYear, rng, content);
     const scores = {
       parent: [family.parentAffection, family.parentTrust],
       sibling: [family.siblingAffection, family.siblingTrust],
@@ -233,6 +237,7 @@ export function generateFamily(rng: RngState, content: ContentBundle, request: F
     }
   }
 
+  for (const p of people) if (relationships.some((r) => r.personId === p.id && r.kind === "sibling")) p.languages = householdLanguages(cityId, parents.map((p) => p.person), birthYear, content);
   return { firstName, lastName, people, relationships };
 }
 

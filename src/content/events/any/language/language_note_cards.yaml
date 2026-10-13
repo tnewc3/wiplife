@@ -1,0 +1,41 @@
+id: language_note_cards
+title: Words in your pocket
+text: Your English vocabulary cards have become a little battered. A phrase you
+  kept forgetting suddenly comes to mind when you need it.
+tone: neutral
+category: language
+rarity: common
+lifeStages:
+  - teen
+  - youngAdult
+  - adult
+  - senior
+requires:
+  all:
+    - age:
+        gte: 11
+    - language:
+        id: en
+        skill:
+          gt: 0
+          lt: 100
+        native: false
+weight:
+  base: 2
+once: true
+choices:
+  - id: try
+    label: Keep practising
+    outcome:
+      text: You add the phrase to a sentence of your own.
+      effects:
+        - type: language
+          id: en
+        - type: stat
+          key: confidence
+          delta: 1
+  - id: leave
+    label: Let it pass
+    outcome:
+      text: You leave the moment there. There will be other chances.
+      effects: []

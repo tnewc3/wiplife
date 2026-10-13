@@ -1,0 +1,50 @@
+# Skill is 0–100 internally; the Profile only shows these words.
+levels: { basic: 10, conversational: 40, fluent: 80 }
+nativeSkill: 100
+# Heritage suggests a household language, never guarantees it from a surname.
+heritageChance: 0.65
+heritage:
+  general: []
+  hispanic: [es]
+  french: [fr]
+  chinese: [zh]
+  korean: [ko]
+  vietnamese: [vi]
+  japanese: [ja]
+  south_asian: [hi, pa, ur]
+  arab: [ar]
+  west_african: [yo, ig]
+  filipino: [tl]
+  polish: [pl]
+  irish: [ga]
+  black: []
+  european: []
+  east_asian: [zh, ko, ja]
+  afro_mexican: []
+# A second locally common language in bilingual households.
+bilingualChance: { montreal: 0.35, houston: 0.16, ca: 0.12, us: 0.06, uk: 0.03, mx: 0.04 }
+school:
+  minAge: 11
+  gain: 6
+  # The first offered language that is not already native is the school class.
+  choices: { us: [es, fr], ca: [fr, en, es], uk: [fr, es], mx: [en, fr] }
+classes: { minAge: 18, gain: 12, cost: 600, interestChance: 0.12 }
+immersion: { minAge: 3, gain: 8, householdGain: 4 }
+fading: { graceYears: 3, loss: 1, nativeFloor: 40 }
+meeting: { shared: 1.5, barrier: 0.5, affectionPenalty: 8 }
+interaction:
+  sharedBonus: 2
+  barrierPenalty: -12
+  nonverbalFactor: 0.25
+  nonverbal: [hug, give_gift, play_together, pick_a_fight]
+jobs:
+  byCategory: { professional: fluent, trade: conversational, gig: conversational }
+  countries: {}
+  cities:
+    montreal:
+      # Software, warehouse and kitchen work can be done in English; public-facing
+      # and regulated tracks retain the city's French requirement.
+      software_engineer: { any: [fr, en], level: fluent }
+      warehouse_worker: { any: [fr, en], level: conversational }
+      food_service: { any: [fr, en], level: conversational }
+eventGain: 3

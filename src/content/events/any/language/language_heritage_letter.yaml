@@ -1,0 +1,42 @@
+id: language_heritage_letter
+title: A letter in another voice
+text: A letter in your family's French is full of ordinary details. Reading it
+  in the original brings you closer to the voice behind it.
+tone: neutral
+category: language
+rarity: common
+lifeStages:
+  - teen
+  - youngAdult
+  - adult
+  - senior
+requires:
+  all:
+    - age:
+        gte: 11
+    - language:
+        id: fr
+        skill:
+          gt: 0
+    - language:
+        id: fr
+        native: true
+weight:
+  base: 2
+once: true
+choices:
+  - id: try
+    label: Read it without rushing
+    outcome:
+      text: You leave a few unfamiliar words for later and stay with the letter.
+      effects:
+        - type: language
+          id: fr
+        - type: stat
+          key: confidence
+          delta: 1
+  - id: leave
+    label: Let it pass
+    outcome:
+      text: You leave the moment there. There will be other chances.
+      effects: []

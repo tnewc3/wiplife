@@ -44,6 +44,7 @@ export function parentLife(opts: ParentOptions = {}, bundle: ContentBundle = con
       const sp: Person = {
         ...template,
         id: 'sp',
+        languages: cloneJson(d.character.languages),
         name: { first: 'Sam', last: 'Spouse' },
         birthYear: d.currentYear - 48,
         alive: true,

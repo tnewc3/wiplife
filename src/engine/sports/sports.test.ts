@@ -342,7 +342,10 @@ describe('injuries', () => {
     expect(injuryRisk(life, sportPath(content, 'football')!.sport, 'pro', content)).toBeGreaterThan(injuryRisk(life, sportPath(content, 'baseball')!.sport, 'pro', content) * 0.5);
     const hurt = many(80, (i) => apply(life, (d) => void rollInjury(d, sportPath(content, 'football')!, 'pro', content, createRng(`inj${i}`)))).find((l) => l.sports.totals.injuries > 0)!;
     expect(hurt.health.conditions.some((c) => sportPath(content, 'football')!.sport.injuries.some((x) => x.id === c.conditionId))).toBe(true);
-    expect(hurt.health.conditions.every((c) => content.conditions[c.conditionId]!.kind === 'injury')).toBe(true);
+    const added = hurt.health.conditions.filter((c) => !life.health.conditions.some((before) => before.conditionId === c.conditionId));
+    expect(added.length).toBeGreaterThan(0);
+    expect(added.every((c) => content.conditions[c.conditionId]!.kind === 'injury')).toBe(true);
+    expect(hurt.health.conditions).toEqual(expect.arrayContaining(life.health.conditions));
   });
 
   it('keep you from playing part of the season, and from your best', () => {

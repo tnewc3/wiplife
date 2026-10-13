@@ -1,3 +1,4 @@
+import { gainLanguage } from '../languages';
 /**
  * Effect handlers (docs/technical.md, "Event engine internals"). Each effect
  * type has one handler; adding a type means a schema in
@@ -81,6 +82,7 @@ function adjustScore(state: LifeState, key: EffectStatKey, delta: number): void 
 }
 
 const handlers: { [T in Effect['type']]: Handler<T> } = {
+  language: (state, effect, ctx) => { gainLanguage(state.character.languages, effect.id, ctx.content.balance.languages.eventGain, state.currentYear); },
   stat: (state, effect) => adjustScore(state, effect.key, effect.delta),
 
   money: (state, effect, ctx) => {

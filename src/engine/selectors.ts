@@ -1,3 +1,4 @@
+import { languageLevel, languageClassCost, languageSkill } from './languages';
 /** Read-only helpers the UI uses to show a life. */
 import {
   LIFESTYLES,
@@ -128,7 +129,7 @@ import {
   type SearchBlock,
 } from './career';
 import { canGig, expectedGigPay } from './systems/career';
-import { textContext } from './events/text';
+import { eventLanguageText, textContext } from './events/text';
 import { CONTINUE_CHOICE } from './life';
 import { currentPartner, FAMILY_KINDS, isCurrentPartner, romanceStatus, ROMANTIC_KINDS, WORK_KINDS } from './relationships';
 import { renderText } from './text';
@@ -1238,7 +1239,7 @@ export function getEventCard(state: LifeState, index: number, content: ContentBu
         .filter((c) => evaluate(c.visibleIf, state, { cast: instance.cast, roles: 'strict', content }))
         .map((c) => ({ id: c.id, label: renderText(c.label, ctx), ...knownChoiceMoney(state, c, content) }))
     : [{ id: CONTINUE_CHOICE, label: 'Continue' }];
-  return { ...base, title: renderText(def.title, ctx), text: renderText(def.text, ctx), tone: def.tone, choices };
+  return { ...base, title: renderText(def.title, ctx), text: renderText(eventLanguageText(state, def, instance.cast, content), ctx), tone: def.tone, choices };
 }
 
 /** Index of the first pending event still waiting for the player, or null. */
@@ -1342,6 +1343,9 @@ export interface RecordRow {
 /** The Profile sheet (Stage 9): who you are, your personality, your record, and whether you can edit now. */
 export interface ProfileView {
   fullName: string;
+  languages: { id: string; name: string; level: string; native: boolean }[];
+  languageClasses: { id: string; name: string; available: boolean }[];
+  languageClassCost: number;
   /** W4a: the country you live in, and the one you were born in. */
   country: string;
   bornIn: string;
@@ -1356,6 +1360,9 @@ export function getProfileView(state: LifeState, content: ContentBundle): Profil
   const c = state.character;
   return {
     fullName: `${c.name.first} ${c.name.last}`,
+    languages: c.languages.map((l) => ({ id: l.id, name: content.languages[l.id]?.name ?? l.id, level: languageLevel(l.skill, content), native: l.native })),
+    languageClasses: Object.values(content.languages).filter((l) => !l.retired && languageSkill(c.languages, l.id) < 100).map((l) => ({ id: l.id, name: l.name, available: isLifeActionAvailable(state, "take_language_classes", { languageId: l.id }, content) })),
+    languageClassCost: languageClassCost(state, content),
     country: countryOf(state, content).name,
     bornIn: `${content.cities[c.birthCityId]?.name ?? c.birthCityId}, ${birthCountryOf(state, content).name}`,
     identity: c.identity,

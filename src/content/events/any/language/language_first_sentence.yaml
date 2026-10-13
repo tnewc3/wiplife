@@ -1,0 +1,41 @@
+id: language_first_sentence
+title: A whole sentence
+text: The words on your Spanish worksheet finally fit together. You can ask a
+  question without translating each piece in your head.
+tone: neutral
+category: language
+rarity: common
+lifeStages:
+  - teen
+  - youngAdult
+  - adult
+  - senior
+requires:
+  all:
+    - age:
+        gte: 11
+    - language:
+        id: es
+        skill:
+          gt: 0
+          lt: 100
+        native: false
+weight:
+  base: 2
+once: true
+choices:
+  - id: try
+    label: Say it aloud
+    outcome:
+      text: Your voice sounds unfamiliar. The sentence still works.
+      effects:
+        - type: language
+          id: es
+        - type: stat
+          key: confidence
+          delta: 1
+  - id: leave
+    label: Let it pass
+    outcome:
+      text: You leave the moment there. There will be other chances.
+      effects: []

@@ -1,0 +1,41 @@
+id: language_wrong_word
+title: One small difference
+text: You use the wrong Spanish word at the counter. The person serving you
+  points at two very different things and waits for you to choose.
+tone: neutral
+category: language
+rarity: common
+lifeStages:
+  - teen
+  - youngAdult
+  - adult
+  - senior
+requires:
+  all:
+    - age:
+        gte: 11
+    - language:
+        id: es
+        skill:
+          gt: 0
+          lt: 100
+        native: false
+weight:
+  base: 2
+once: true
+choices:
+  - id: try
+    label: Ask what you actually said
+    outcome:
+      text: The correction is gentle. You remember both words now.
+      effects:
+        - type: language
+          id: es
+        - type: stat
+          key: confidence
+          delta: 1
+  - id: leave
+    label: Let it pass
+    outcome:
+      text: You leave the moment there. There will be other chances.
+      effects: []

@@ -1,0 +1,41 @@
+id: language_subtitles
+title: Keep the subtitles
+text: A French film is moving faster than your classroom exercises. You catch
+  the joke a moment after everyone on screen laughs.
+tone: neutral
+category: language
+rarity: common
+lifeStages:
+  - teen
+  - youngAdult
+  - adult
+  - senior
+requires:
+  all:
+    - age:
+        gte: 11
+    - language:
+        id: fr
+        skill:
+          gt: 0
+          lt: 100
+        native: false
+weight:
+  base: 2
+once: true
+choices:
+  - id: try
+    label: Watch the scene again
+    outcome:
+      text: This time you hear the words as well as reading them.
+      effects:
+        - type: language
+          id: fr
+        - type: stat
+          key: confidence
+          delta: 1
+  - id: leave
+    label: Let it pass
+    outcome:
+      text: You leave the moment there. There will be other chances.
+      effects: []
