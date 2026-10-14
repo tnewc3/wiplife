@@ -16,6 +16,7 @@ import { birthCitizenships } from './citizenship';
 import { purchaseQuote } from '../housing';
 import { loanOffer } from '../business/funding';
 import { entryBlock, entryOdds, naturalizationBlock, permanentBlock, regularizationBlock, type EntryInput } from './routes';
+import { getMigrationView } from './view';
 import { removalRisk, runMigration } from './step';
 import { statusKind } from './query';
 
@@ -401,5 +402,41 @@ describe('W6 life without papers', () => {
       life = playYear(life, content, { choices: createRng(`years-${i}`) });
       expect(checkInvariants(life, content), `year ${i}`).toEqual([]);
     }
+  });
+});
+
+describe('W6 screen view', () => {
+  const pick = { countryId: '' as const, cityId: '', route: 'work_sponsor' as const, majorId: '', tier: 'state' as const };
+  it('offers the other countries and all four routes to a citizen, with the reason a route is closed', () => {
+    const view = getMigrationView(adult('us'), pick, content);
+    expect(view.status).toBe('citizen');
+    expect(view.destinations.map((d) => d.id).sort()).toEqual(['ca', 'mx', 'uk']);
+    expect(view.routes.map((r) => r.route)).toEqual([...ROUTES]);
+    expect(view.permanent).toBeNull();
+    expect(view.citizenship).toBeNull();
+    expect(view.regular).toEqual([]);
+    expect(view.routes.find((r) => r.route === 'family')!.block).toBe('sponsor');
+    expect(view.withoutPapers?.can).toBe(true);
+  });
+  it('shows citizenship to a permanent resident and the routes to status to someone without papers', () => {
+    const pr = emigrated('investment', 'us', 'ca');
+    const v1 = getMigrationView(pr, pick, content);
+    expect(v1.status).toBe('permanent');
+    expect(v1.citizenship).not.toBeNull();
+    expect(v1.returnCities.length).toBeGreaterThan(0);
+    const undoc = produce(pr, (d) => { d.travel.residence = { ...d.travel.residence!, type: 'undocumented', route: 'overstay' }; d.migration.undocumented = { sinceYear: d.currentYear, origin: 'overstay', closeCalls: 0 }; });
+    const v2 = getMigrationView(undoc, pick, content);
+    expect(v2.status).toBe('undocumented');
+    expect(v2.regular.map((r) => r.basis)).toEqual(['marriage', 'long_residence', 'rule_change']);
+    expect(v2.undocumented?.risk).toBeGreaterThan(0);
+  });
+});
+
+describe('W6 and temporary stays (W5)', () => {
+  it('does not let someone who moved for good start a study or work stay elsewhere, which would lose their permit', () => {
+    const pr = emigrated('investment', 'us', 'ca');
+    const stay = { destinationId: 'london', route: 'working_holiday' as const };
+    expect(isLifeActionAvailable(pr, 'work_abroad', { stay }, content)).toBe(false);
+    expect(isLifeActionAvailable(produce(pr, (d) => { d.finances.savings = 500000; }), 'plan_trip', { trip: { destinationId: 'chicago', budget: 'budget', companions: [] } }, content)).toBe(true);
   });
 });

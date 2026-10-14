@@ -43,7 +43,7 @@
       "id": "explain",
       "label": "Explain your situation to the school office",
       "outcome": {
-        "text": "The secretary finds another way to fill the line. Your child's place was never the question.",
+        "text": "The secretary finds another way to fill in the line, and the form goes in.",
         "effects": [
           {
             "type": "stat",

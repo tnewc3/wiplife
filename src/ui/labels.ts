@@ -320,6 +320,7 @@ export const LEDGER_LABELS = {
   upkeep: 'Upkeep: pets, vehicles, vacation homes',
   insurance: 'Insurance',
   giving: 'Dues and donations to your groups',
+  remittances: 'Money sent to relatives abroad',
   business: 'Put into your businesses to cover a loss',
   supportPaid: 'Child support you paid',
   supportReceived: 'Child support you received',

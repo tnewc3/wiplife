@@ -3,6 +3,7 @@
  * plays random lives headless and prints a report: the careful player's in
  * full, then (with both, the default) a careful vs careless comparison on
  * the same seeds, and (E1) the careless player's interactions beside it. `all`
+ * W6 reports emigration by route and country, approvals and refusals, time to citizenship, undocumented outcomes (regularized, removed, went home, still without papers), pay with and without papers, remittances through the ledger, the people you know who emigrated and children's citizenship, with the rules that must always hold.
  * W5 reports trips, destinations, encounters, temporary study/work and their effects.
  * W4b reports native and learned languages, learning/fading rates, local-job language gates and shared-language social contacts.
  * adds the spammer, who repeats one interaction with one person over and

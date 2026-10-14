@@ -46,8 +46,10 @@ test('an investor applies, waits, is approved, moves abroad and becomes a perman
     await page.getByRole('button', { name: 'More', exact: true }).click();
     await page.getByTestId('more-migration').click();
     await expect(page.getByTestId('migration-status')).toContainText('Permanent resident');
+    await page.getByRole('button', { name: 'Life', exact: true }).click();
     await page.getByRole('button', { name: 'Profile', exact: true }).click();
     await expect(page.getByText('Citizen of', { exact: false })).toBeVisible();
+    await expect(page.getByText('Permanent resident', { exact: false })).toBeVisible();
   }
 });
 

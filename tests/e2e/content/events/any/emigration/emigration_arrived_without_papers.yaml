@@ -1,0 +1,39 @@
+{
+  "id": "emigration_arrived_without_papers",
+  "title": "Arrival, quietly",
+  "text": "You reach {newCity} without permission to stay. Nothing about the place has changed since you arrived, but you walk differently in it.",
+  "category": "emigration",
+  "tone": "serious",
+  "rarity": "common",
+  "lifeStages": [
+    "youngAdult",
+    "adult",
+    "senior"
+  ],
+  "followUpOnly": true,
+  "requires": {
+    "all": [
+      {
+        "age": {
+          "gte": 18
+        }
+      },
+      {
+        "migration": {
+          "settled": true,
+          "arrivedNow": true,
+          "status": [
+            "undocumented"
+          ]
+        }
+      }
+    ]
+  },
+  "weight": {
+    "base": 1
+  },
+  "autoOutcome": {
+    "text": "The first task is to find a room and someone who will say a kind word without asking questions. Whatever comes next, you will be learning it as you go.",
+    "effects": []
+  }
+}

@@ -50,7 +50,7 @@
       "id": "answer",
       "label": "Call through the door",
       "outcome": {
-        "text": "The flyer is for a community meeting. It is silly and it is not: the meeting is a good one.",
+        "text": "The flyer is for a community meeting. The relief is brief, and the meeting turns out to be a good one.",
         "effects": [
           {
             "type": "stat",

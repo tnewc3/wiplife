@@ -43,7 +43,8 @@ export function canPlanTrip(state: LifeState, input: TripInput, content: Content
 /** Stays are solo; a dependent's housing cannot silently move or leave them unattended. */
 export function stayBlock(state: LifeState, input: StayInput, content: ContentBundle): string | null {
   const d = content.destinations[input.destinationId];
-  if (!canTravel(state, content)) return 'unavailable';
+  // W6: someone who moved to a country for good (and is not its citizen) cannot also start a temporary stay somewhere else: their permit would be lost.
+  if (!canTravel(state, content) || state.travel.residence !== null) return 'unavailable';
   if (!d?.cityId || d.retired || countryIdOfCity(d.cityId, content) === countryIdOfCity(state.character.cityId, content)) return 'destination';
   if (!['renting', 'with_parents'].includes(state.housing.kind) || state.housing.guardianId || Object.values(state.people).some((p) => p.alive && (livesWithYou(state, p.id) && state.currentYear - p.birthYear < content.balance.relationships.adultAge || p.life?.care === 'home'))) return 'household';
   if (state.business.items.length || state.crime.crew || state.fame.active || state.sports.pro) return 'commitment';

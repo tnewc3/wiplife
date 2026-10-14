@@ -72,7 +72,7 @@
     },
     {
       "id": "community_night",
-      "label": "Go to the community evening you have been avoiding",
+      "label": "Go to a community evening",
       "outcome": {
         "text": "A room of people who all know what you are carrying. Nobody asks. Someone passes you a plate.",
         "effects": [

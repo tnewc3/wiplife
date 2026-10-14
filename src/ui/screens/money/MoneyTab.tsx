@@ -41,6 +41,7 @@ function LedgerCard({ life }: { life: LifeState }) {
           {ledger.care > 0 && <Row label={LEDGER_LABELS.care} value={money(-ledger.care)} />}
           {ledger.upkeep > 0 && <Row label={LEDGER_LABELS.upkeep} value={money(-ledger.upkeep)} />}
           {ledger.giving > 0 && <Row label={LEDGER_LABELS.giving} value={money(-ledger.giving)} />}
+          {(ledger.remittances ?? 0) > 0 && <Row label={LEDGER_LABELS.remittances} value={money(-(ledger.remittances ?? 0))} />}
           {ledger.business > 0 && <Row label={LEDGER_LABELS.business} value={money(-ledger.business)} />}
           {ledger.insurance > 0 && <Row label={LEDGER_LABELS.insurance} value={money(-ledger.insurance)} />}
           {ledger.supportPaid > 0 && <Row label={LEDGER_LABELS.supportPaid} value={money(-ledger.supportPaid)} />}

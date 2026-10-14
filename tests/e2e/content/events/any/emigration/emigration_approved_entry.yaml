@@ -1,0 +1,100 @@
+{
+  "id": "emigration_approved_entry",
+  "title": "The letter arrives",
+  "text": "The answer from {appCountry} is yes. You read it twice, then once more for the dates. The move is possible now, and it has a deadline.",
+  "category": "emigration",
+  "tone": "light",
+  "rarity": "common",
+  "lifeStages": [
+    "youngAdult",
+    "adult",
+    "senior"
+  ],
+  "followUpOnly": true,
+  "requires": {
+    "all": [
+      {
+        "age": {
+          "gte": 18
+        }
+      },
+      {
+        "migration": {
+          "application": [
+            "approved"
+          ],
+          "kind": [
+            "entry"
+          ]
+        }
+      }
+    ]
+  },
+  "weight": {
+    "base": 1
+  },
+  "choices": [
+    {
+      "id": "tell_everyone",
+      "label": "Tell everyone at once",
+      "outcome": {
+        "text": "The call is half congratulations and half goodbye. Someone cries, and someone says they will visit before you have an address.",
+        "effects": [
+          {
+            "type": "migration",
+            "action": "ties",
+            "delta": 3
+          },
+          {
+            "type": "stat",
+            "key": "happiness",
+            "delta": 4
+          },
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": 2
+          }
+        ]
+      }
+    },
+    {
+      "id": "quiet_first",
+      "label": "Keep it quiet until the plans are firm",
+      "outcome": {
+        "text": "A few days of private joy and private dread. When you do tell people, you already know what you want to say.",
+        "effects": [
+          {
+            "type": "stat",
+            "key": "happiness",
+            "delta": 2
+          },
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": 2
+          }
+        ]
+      }
+    },
+    {
+      "id": "ask_someone",
+      "label": "Call someone who made this move before you",
+      "outcome": {
+        "text": "They tell you what they wish they had known: bring more patience than you think, and fewer things.",
+        "effects": [
+          {
+            "type": "stat",
+            "key": "happiness",
+            "delta": 3
+          },
+          {
+            "type": "stat",
+            "key": "smarts",
+            "delta": 1
+          }
+        ]
+      }
+    }
+  ]
+}

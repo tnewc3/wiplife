@@ -1,0 +1,40 @@
+{
+  "id": "emigration_applied_status",
+  "title": "A careful step",
+  "text": "You have asked {appCountry} for legal status after living there without it. Filing puts your name in front of the system that could remove you.",
+  "category": "emigration",
+  "tone": "serious",
+  "rarity": "common",
+  "lifeStages": [
+    "youngAdult",
+    "adult",
+    "senior"
+  ],
+  "followUpOnly": true,
+  "requires": {
+    "all": [
+      {
+        "age": {
+          "gte": 18
+        }
+      },
+      {
+        "migration": {
+          "application": [
+            "pending"
+          ],
+          "kind": [
+            "regularization"
+          ]
+        }
+      }
+    ]
+  },
+  "weight": {
+    "base": 1
+  },
+  "autoOutcome": {
+    "text": "A decision is expected by {decisionYear}. Many people wait through this holding their breath.",
+    "effects": []
+  }
+}

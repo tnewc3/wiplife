@@ -1,7 +1,7 @@
 {
   "id": "emigration_status_granted",
   "title": "Papers at last",
-  "text": "After {yearsHere} years of living around the edges, the answer is yes. The card in your hand says you may stay, work and plan. For a moment you cannot speak.",
+  "text": "After {yearsHere} years in {country}, much of it lived around the edges of the rules, the answer is yes. The card in your hand says you may stay, work and plan. For a moment you cannot speak.",
   "category": "emigration",
   "tone": "light",
   "rarity": "common",

@@ -417,7 +417,6 @@ export function continueAsHeir(dead: LifeState, heirId: Id, content: ContentBund
     migration: emptyMigration(),
     languages: emptyLanguageLearning(),
   };
-  inheritStanding(life, dead, content);
 
   // ── What they inherit ────────────────────────────────────────────────────
   const line: EstateLine | undefined = dead.estate.lines.find((l) => l.kind === 'person' && l.id === heirId);
@@ -536,6 +535,8 @@ export function continueAsHeir(dead: LifeState, heirId: Id, content: ContentBund
   // The input log starts with a snapshot, so the life can be replayed from here (src/engine/replay.ts).
   const snapshot = JSON.parse(JSON.stringify({ ...life, inputLog: [] })) as Record<string, unknown>;
   life.inputLog = [{ year, kind: 'create', payload: { heir: true, startAge: age, parentLifeId: dead.id, snapshot } }];
+  // W6: they live where the guardian or the family home is; if that is not a country they are a citizen of, they hold the standing of the household that raised them.
+  inheritStanding(life, dead, content);
   return life;
 }
 
