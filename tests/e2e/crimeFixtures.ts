@@ -58,7 +58,7 @@ export function crimeLife(options: CrimeLife): LifeState {
       d.crime.standing = options.standing ?? 55;
     }
     if (options.away && d.crime.crew) {
-      d.character.cityId = Object.keys(content.cities).find((c) => c !== d.crime.crew!.cityId)!;
+      d.character.cityId = Object.keys(content.cities).find((c) => c !== d.crime.crew!.cityId && content.cities[c]!.countryId === content.cities[d.crime.crew!.cityId]!.countryId)!;
       d.housing.cityId = d.character.cityId;
       d.crime.awayYears = options.away.years;
       d.crime.crew.away = { since: d.currentYear - options.away.years, standing: d.crime.standing, suspicion: options.away.suspicion };
