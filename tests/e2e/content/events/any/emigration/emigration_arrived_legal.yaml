@@ -1,0 +1,40 @@
+{
+  "id": "emigration_arrived_legal",
+  "title": "Arrival",
+  "text": "You land in {newCity}. The air smells different, the signs are in another order, and your documents are finally in a bag you can stop checking.",
+  "category": "emigration",
+  "tone": "neutral",
+  "rarity": "common",
+  "lifeStages": [
+    "youngAdult",
+    "adult",
+    "senior"
+  ],
+  "followUpOnly": true,
+  "requires": {
+    "all": [
+      {
+        "age": {
+          "gte": 18
+        }
+      },
+      {
+        "migration": {
+          "settled": true,
+          "arrivedNow": true,
+          "status": [
+            "temporary",
+            "permanent"
+          ]
+        }
+      }
+    ]
+  },
+  "weight": {
+    "base": 1
+  },
+  "autoOutcome": {
+    "text": "The first weeks are for small things: a key, a transit card, the name of a street. Everything else can wait for tomorrow.",
+    "effects": []
+  }
+}

@@ -1,0 +1,81 @@
+{
+  "id": "abroad_homesick",
+  "title": "Homesick",
+  "text": "A smell on the stairs, a song through a wall, and you are suddenly somewhere else entirely, in {originCity}, with someone you love. Then it is gone and you are here again.",
+  "category": "abroad",
+  "tone": "neutral",
+  "rarity": "common",
+  "lifeStages": [
+    "youngAdult",
+    "adult",
+    "senior"
+  ],
+  "followUpOnly": true,
+  "requires": {
+    "all": [
+      {
+        "age": {
+          "gte": 18
+        }
+      },
+      {
+        "migration": {
+          "settled": true
+        }
+      }
+    ]
+  },
+  "weight": {
+    "base": 3
+  },
+  "cooldownYears": 4,
+  "choices": [
+    {
+      "id": "call",
+      "label": "Call someone back home",
+      "outcome": {
+        "text": "It is the wrong time of day there, and they answer anyway.",
+        "effects": [
+          {
+            "type": "migration",
+            "action": "ties",
+            "delta": 3
+          },
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": -2
+          }
+        ]
+      }
+    },
+    {
+      "id": "cook",
+      "label": "Cook something from home",
+      "outcome": {
+        "text": "The first try is not right. The second is close enough to make you quiet.",
+        "effects": [
+          {
+            "type": "stat",
+            "key": "happiness",
+            "delta": 3
+          }
+        ]
+      }
+    },
+    {
+      "id": "push_through",
+      "label": "Push through and get on with the day",
+      "outcome": {
+        "text": "It lifts, as it does. It returns, as it does.",
+        "effects": [
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": 2
+          }
+        ]
+      }
+    }
+  ]
+}

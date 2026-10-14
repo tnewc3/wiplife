@@ -1,0 +1,95 @@
+{
+  "id": "emigration_denied_entry",
+  "title": "Not this time",
+  "text": "The answer from {appCountry} is no. The letter is polite and does not say much. The plans you built around it need somewhere else to go.",
+  "category": "emigration",
+  "tone": "serious",
+  "rarity": "common",
+  "lifeStages": [
+    "youngAdult",
+    "adult",
+    "senior"
+  ],
+  "followUpOnly": true,
+  "requires": {
+    "all": [
+      {
+        "age": {
+          "gte": 18
+        }
+      },
+      {
+        "migration": {
+          "application": [
+            "denied"
+          ],
+          "kind": [
+            "entry"
+          ]
+        }
+      }
+    ]
+  },
+  "weight": {
+    "base": 1
+  },
+  "choices": [
+    {
+      "id": "try_again",
+      "label": "Plan to apply again when your situation is stronger",
+      "outcome": {
+        "text": "You keep the letter, and the list of what could be better: skills, language, savings. Hope fits in a folder.",
+        "effects": [
+          {
+            "type": "stat",
+            "key": "discipline",
+            "delta": 2
+          },
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": 2
+          }
+        ]
+      }
+    },
+    {
+      "id": "other_door",
+      "label": "Look at a different country or a different route",
+      "outcome": {
+        "text": "It is an odd relief to have the question open again. There are many ways to build a life.",
+        "effects": [
+          {
+            "type": "stat",
+            "key": "smarts",
+            "delta": 1
+          },
+          {
+            "type": "stat",
+            "key": "happiness",
+            "delta": -1
+          }
+        ]
+      }
+    },
+    {
+      "id": "let_go",
+      "label": "Let the dream go and put your energy into where you are",
+      "outcome": {
+        "text": "Grief first, then something steadier. The place you are in begins to look more like a choice.",
+        "effects": [
+          {
+            "type": "stat",
+            "key": "happiness",
+            "delta": -2
+          },
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": -2
+          }
+        ]
+      }
+    }
+  ]
+}

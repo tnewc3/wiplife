@@ -1,0 +1,74 @@
+{
+  "id": "undoc_marriage_question",
+  "title": "A question over dinner",
+  "text": "Someone you love is a citizen here. Marriage could change your papers, and applying would put your name in front of the system. You both know the arithmetic, and neither wants it to be the reason.",
+  "category": "undocumented",
+  "tone": "serious",
+  "rarity": "common",
+  "lifeStages": [
+    "youngAdult",
+    "adult",
+    "senior"
+  ],
+  "followUpOnly": true,
+  "requires": {
+    "all": [
+      {
+        "age": {
+          "gte": 18
+        }
+      },
+      {
+        "migration": {
+          "status": [
+            "undocumented"
+          ]
+        }
+      },
+      {
+        "migration": {
+          "spouse": true
+        }
+      }
+    ]
+  },
+  "weight": {
+    "base": 3
+  },
+  "cooldownYears": 4,
+  "choices": [
+    {
+      "id": "talk_it_through",
+      "label": "Talk it through, honestly",
+      "outcome": {
+        "text": "It is a conversation about love and about risk, and you cannot pull them apart. By the end you understand each other better.",
+        "effects": [
+          {
+            "type": "stat",
+            "key": "happiness",
+            "delta": 2
+          },
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": -1
+          }
+        ]
+      }
+    },
+    {
+      "id": "hold_off",
+      "label": "Hold off and say nothing more",
+      "outcome": {
+        "text": "The question stays in the room like furniture.",
+        "effects": [
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": 2
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,3 +1,4 @@
+import { migrationHolds } from './migration/conditions';
 import { languageSkill, sharedLanguage } from './languages';
 /**
  * Condition evaluator (docs/technical.md, "Condition language"). Conditions
@@ -111,6 +112,7 @@ export function evaluate(condition: Condition | undefined, state: LifeState, ctx
     }
     return true;
   }
+  if ('migration' in condition) return migrationHolds(condition.migration, state, ctx.content);
   if ('country' in condition) return ctx.content !== undefined && condition.country.includes(countryIdOfCity(c.cityId, ctx.content));
   if ('legalAge' in condition) return ctx.content !== undefined && c.age >= legalAge(condition.legalAge, c.cityId, ctx.content);
   if ('familyWealth' in condition) return condition.familyWealth.includes(c.familyWealth);

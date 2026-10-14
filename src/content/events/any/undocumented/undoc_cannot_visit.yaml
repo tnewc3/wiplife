@@ -1,0 +1,116 @@
+{
+  "id": "undoc_cannot_visit",
+  "title": "Come home",
+  "text": "{npc.name} asks you to come home for a visit. You can't leave and be sure of coming back. You say you'll try, and the sentence sits on the line between you.",
+  "category": "undocumented",
+  "tone": "dark",
+  "rarity": "uncommon",
+  "lifeStages": [
+    "youngAdult",
+    "adult",
+    "senior"
+  ],
+  "followUpOnly": true,
+  "requires": {
+    "all": [
+      {
+        "age": {
+          "gte": 18
+        }
+      },
+      {
+        "migration": {
+          "status": [
+            "undocumented"
+          ]
+        }
+      },
+      {
+        "migration": {
+          "relatives": true
+        }
+      },
+      {
+        "role": "npc",
+        "alive": true,
+        "age": {
+          "gte": 18
+        },
+        "where": [
+          "elsewhere"
+        ]
+      }
+    ]
+  },
+  "weight": {
+    "base": 1
+  },
+  "cooldownYears": 4,
+  "cast": {
+    "npc": {
+      "support": true,
+      "presence": "elsewhere"
+    }
+  },
+  "choices": [
+    {
+      "id": "video_call",
+      "label": "Make it a video call, a long one",
+      "outcome": {
+        "text": "You show them the room, the food, the window. They show you the kitchen where the table is set for six.",
+        "effects": [
+          {
+            "type": "relationship",
+            "role": "npc",
+            "affection": 4,
+            "trust": 2
+          },
+          {
+            "type": "stat",
+            "key": "happiness",
+            "delta": 2
+          }
+        ]
+      }
+    },
+    {
+      "id": "promise",
+      "label": "Promise to come when you can",
+      "outcome": {
+        "text": "A promise is not a visit, and both of you know it. It holds anyway.",
+        "effects": [
+          {
+            "type": "relationship",
+            "role": "npc",
+            "affection": 2
+          },
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": 2
+          }
+        ]
+      }
+    },
+    {
+      "id": "tell_the_truth",
+      "label": "Tell them plainly why you cannot",
+      "outcome": {
+        "text": "A long silence. Then: 'I know. I just wanted to say it.' They say it again before the call ends.",
+        "effects": [
+          {
+            "type": "relationship",
+            "role": "npc",
+            "affection": 4,
+            "trust": 4
+          },
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": 1
+          }
+        ]
+      }
+    }
+  ]
+}

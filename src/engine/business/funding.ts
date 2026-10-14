@@ -7,6 +7,7 @@
  * investors and a co-founder put in comes from outside your finances.
  */
 import type { BusinessDef, BusinessFunding, ContentBundle } from '../../content/schemas';
+import { creditBlocked } from '../migration/query';
 import { addDebt, totalDebt, wholeDollars } from '../finance';
 import type { BusinessOwner, FamilyWealth, Id, LifeState, Person } from '../types';
 import { ageOf, isFamilyKind } from '../relationships';
@@ -56,7 +57,7 @@ export interface LoanOffer {
   rate: number;
   termYears: number;
   /** Why the bank says no, if it does. */
-  block: 'bankruptcy' | 'missed' | 'debt' | null;
+  block: 'bankruptcy' | 'missed' | 'debt' | 'status' | null;
   /** The savings you must put in yourself. */
   ownNeeded: number;
 }
@@ -67,7 +68,8 @@ export function loanOffer(state: LifeState, need: number, def: BusinessDef | und
   const f0 = state.finances;
   const missed = f0.debts.reduce((most, d) => Math.max(most, d.missed), 0);
   let block: LoanOffer['block'] = null;
-  if (f0.bankruptcyYear !== undefined && state.currentYear - f0.bankruptcyYear < f.bankruptcyYears) block = 'bankruptcy';
+  if (creditBlocked(state)) block = 'status';
+  else if (f0.bankruptcyYear !== undefined && state.currentYear - f0.bankruptcyYear < f.bankruptcyYears) block = 'bankruptcy';
   else if (missed > 0) block = 'missed';
   // A plan is a trade licence, a year of experience, or a related job.
   const planned =

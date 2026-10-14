@@ -1,0 +1,92 @@
+{
+  "id": "abroad_holiday_far",
+  "title": "A holiday from home",
+  "text": "A holiday from home comes round, one that this country does not mark. The day goes ahead like any other, only quieter.",
+  "category": "abroad",
+  "tone": "neutral",
+  "rarity": "common",
+  "lifeStages": [
+    "youngAdult",
+    "adult",
+    "senior"
+  ],
+  "followUpOnly": true,
+  "requires": {
+    "all": [
+      {
+        "age": {
+          "gte": 18
+        }
+      },
+      {
+        "migration": {
+          "settled": true
+        }
+      },
+      {
+        "migration": {
+          "years": {
+            "gte": 1
+          }
+        }
+      }
+    ]
+  },
+  "weight": {
+    "base": 1
+  },
+  "cooldownYears": 4,
+  "choices": [
+    {
+      "id": "cook_the_food",
+      "label": "Cook the food and invite whoever will come",
+      "outcome": {
+        "text": "The room fills with neighbors who have never heard of the holiday and know exactly what a feast is.",
+        "effects": [
+          {
+            "type": "money",
+            "delta": -90
+          },
+          {
+            "type": "stat",
+            "key": "happiness",
+            "delta": 4
+          }
+        ]
+      }
+    },
+    {
+      "id": "call_family",
+      "label": "Spend the evening on a call with everyone",
+      "outcome": {
+        "text": "A dozen faces in a grid. Somebody holds a baby up to the camera.",
+        "effects": [
+          {
+            "type": "migration",
+            "action": "ties",
+            "delta": 4
+          },
+          {
+            "type": "stat",
+            "key": "happiness",
+            "delta": 2
+          }
+        ]
+      }
+    },
+    {
+      "id": "let_it_pass",
+      "label": "Let it pass this year",
+      "outcome": {
+        "text": "You work, you sleep, you notice the date after midnight.",
+        "effects": [
+          {
+            "type": "stat",
+            "key": "happiness",
+            "delta": -1
+          }
+        ]
+      }
+    }
+  ]
+}

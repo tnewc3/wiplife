@@ -1,0 +1,76 @@
+{
+  "id": "emigration_denied_permanent",
+  "title": "Still temporary",
+  "text": "The answer on permanent residence is no, for now. Your permit stays what it was, and so does the clock on it.",
+  "category": "emigration",
+  "tone": "serious",
+  "rarity": "common",
+  "lifeStages": [
+    "youngAdult",
+    "adult",
+    "senior"
+  ],
+  "followUpOnly": true,
+  "requires": {
+    "all": [
+      {
+        "age": {
+          "gte": 18
+        }
+      },
+      {
+        "migration": {
+          "application": [
+            "denied"
+          ],
+          "kind": [
+            "permanent"
+          ]
+        }
+      }
+    ]
+  },
+  "weight": {
+    "base": 1
+  },
+  "choices": [
+    {
+      "id": "ask_why",
+      "label": "Ask what would change the answer",
+      "outcome": {
+        "text": "The caseworker is patient and honest. The list is long but it is a list, and lists can be worked through.",
+        "effects": [
+          {
+            "type": "stat",
+            "key": "smarts",
+            "delta": 1
+          },
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": 2
+          }
+        ]
+      }
+    },
+    {
+      "id": "plan_again",
+      "label": "Plan to apply again before the permit runs out",
+      "outcome": {
+        "text": "Dates go on the wall. You count backwards from the end of your permit.",
+        "effects": [
+          {
+            "type": "stat",
+            "key": "discipline",
+            "delta": 2
+          },
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": 3
+          }
+        ]
+      }
+    }
+  ]
+}

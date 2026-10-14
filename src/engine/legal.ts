@@ -15,7 +15,7 @@ import { endJob, meetsJobRequirements } from './career';
 import { eventWeight } from './events/selection';
 import { isIndependent, spend } from './finance';
 import { leaveSchool } from './education';
-import { moveInCost, moveTo, ownsHome, refreshHousingCost, supportingParent } from './housing';
+import { joinableParent, moveInCost, moveTo, ownsHome, refreshHousingCost } from './housing';
 import { curveAt } from './curve';
 import { unsealedRecord } from './record';
 import { weightedPick } from './random';
@@ -219,7 +219,7 @@ export function sentenceText(state: LifeState, content: ContentBundle): string {
 export function release(state: LifeState, content: ContentBundle): void {
   delete state.legal.incarceratedUntil;
   const city = state.character.cityId;
-  const parent = supportingParent(state);
+  const parent = joinableParent(state, content);
   if (ownsHome(state)) {
     state.housing.kind = 'owned';
     refreshHousingCost(state, content);

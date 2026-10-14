@@ -27,6 +27,8 @@ import { fameBandSchema, fameCommitmentSchema, fameSceneSchema, fameSizeSchema, 
 import { FOCUS_KEYS, LICENSE_STAGE_IDS, ruleDomainSchema, type RuleDomainId, type TeenFocusId } from './teen';
 import { relationshipKindSchema, relationshipStatusSchema, romanceStatusSchema } from './relationships';
 import { AMENDS_RESULTS, CARE_OPTIONS, HOSPICE_CHOICES, LATER_ACTIONS, TEACH_KEYS } from './laterIds';
+import { APPLICATION_KINDS, APPLICATION_STATUSES, MIGRATION_ACTIONS, REMIT_LEVELS, ROUTES, STATUS_KINDS, type ApplicationKind, type ApplicationStatus, type RouteId, type StatusKind } from './immigrationIds';
+import { STAY_ROUTES } from './travel';
 import { COMMITMENTS, FAITH_ACTIONS, GROUP_ACTIONS, GROUP_NEWS_KINDS, GROUP_TYPES, VALUE_IDS } from './belongingIds';
 import { BUSINESS_ACTIONS, BUSINESS_KINDS, BUSINESS_PEOPLE, BUSINESS_STYLES, OWNER_ROLES } from './businessIds';
 import { templateSchema } from './text';
@@ -94,6 +96,7 @@ export type Condition =
   | { travel: { active?: boolean; destinationId?: string; kind?: 'trip' | 'study' | 'work'; encounter?: boolean; romance?: boolean; companion?: boolean } }
   | { language: { id?: string; skill?: Compare; native?: boolean; role?: string; sharedWith?: string } }
   | { country: CountryId[] }
+  | { migration: MigrationCondition }
   | { legalAge: keyof LegalAges }
   | { familyWealth: z.infer<typeof familyWealthSchema>[] }
   | { flag: string; eq?: number | boolean | string }
@@ -155,6 +158,39 @@ export type Condition =
   | { tie: TieCondition };
 
 /**
+ * W6, emigration and citizenship. Every field given must hold. settled: you moved to the country you live in and are
+ * not a citizen (with or without papers); status: where you stand there (citizen, permanent, temporary, undocumented);
+ * application: the state of your application ('none' for no application); kind and route: what it is for; via: how
+ * your permit began; years: years since you arrived; dual: you hold two citizenships; remitting: you send money home;
+ * relatives: someone close lives in another country than you; removed: a country has removed you; closeCall: this
+ * year brought one; expiring: your permit ends this year; ruleChange: a window to ask for status is open; testFails:
+ * citizenship tests failed; eligible: you could apply for this now; spouse: married to a citizen of where you live;
+ * arrivedNow: you arrived this year; removedNow: a country removed you this year; childCitizen: a child of yours is a citizen of the country you live in and you are not.
+ */
+export interface MigrationCondition {
+  settled?: boolean;
+  status?: StatusKind[];
+  application?: (ApplicationStatus | 'none')[];
+  kind?: ApplicationKind[];
+  route?: RouteId[];
+  via?: (typeof STAY_ROUTES)[number][];
+  years?: Compare;
+  dual?: boolean;
+  remitting?: boolean;
+  relatives?: boolean;
+  removed?: boolean;
+  closeCall?: boolean;
+  expiring?: boolean;
+  ruleChange?: boolean;
+  testFails?: Compare;
+  eligible?: ('permanent' | 'naturalization' | 'regularization')[];
+  spouse?: boolean;
+  arrivedNow?: boolean;
+  removedNow?: boolean;
+  childCitizen?: boolean;
+}
+
+/**
  * E3: a cast person's own life. Every field given must hold. tier: how
  * closely their life is followed; employed: they have a job (or not);
  * partner: their partner's status, 'none' for no partner; ended: how their
@@ -179,6 +215,9 @@ export interface LifeCondition {
   care?: ('needed' | 'home' | 'paid' | 'sibling' | 'none')[];
   wealth?: z.infer<typeof familyWealthSchema>[];
   recovered?: number;
+  /** W6: they moved to another country, and (papers) with or without papers. */
+  emigrated?: boolean;
+  papers?: boolean;
 }
 
 /**
@@ -712,6 +751,8 @@ const lifeConditionSchema = z
     care: z.array(z.enum(['needed', 'home', 'paid', 'sibling', 'none'])).min(1).optional(),
     wealth: z.array(familyWealthSchema).min(1).optional(),
     recovered: z.int().min(1).max(50).optional(),
+    emigrated: z.boolean().optional(),
+    papers: z.boolean().optional(),
   })
   .refine(atLeastOneField, 'needs at least one field');
 /** E4: what a person has heard about you (or about someone else): a kind of knowledge, a version, how they came to know it. */
@@ -783,6 +824,30 @@ export const conditionSchema: z.ZodType<Condition> = z.lazy(() =>
     z.strictObject({ travel: z.strictObject({ active: z.boolean().optional(), destinationId: idSchema.optional(), kind: z.enum(['trip', 'study', 'work']).optional(), encounter: z.boolean().optional(), romance: z.boolean().optional(), companion: z.boolean().optional() }) }),
     z.strictObject({ language: z.strictObject({ id: idSchema.optional(), skill: compareSchema.optional(), native: z.boolean().optional(), role: idSchema.optional(), sharedWith: idSchema.optional() }).refine((l) => l.id !== undefined || l.sharedWith !== undefined, 'needs id or sharedWith') }),
     z.strictObject({ country: z.array(countryIdSchema).min(1) }),
+    z.strictObject({
+      migration: z.strictObject({
+        settled: z.boolean().optional(),
+        status: z.array(z.enum(STATUS_KINDS)).min(1).optional(),
+        application: z.array(z.enum([...APPLICATION_STATUSES, 'none'])).min(1).optional(),
+        kind: z.array(z.enum(APPLICATION_KINDS)).min(1).optional(),
+        route: z.array(z.enum(ROUTES)).min(1).optional(),
+        via: z.array(z.enum(STAY_ROUTES)).min(1).optional(),
+        years: compareSchema.optional(),
+        dual: z.boolean().optional(),
+        remitting: z.boolean().optional(),
+        relatives: z.boolean().optional(),
+        removed: z.boolean().optional(),
+        closeCall: z.boolean().optional(),
+        expiring: z.boolean().optional(),
+        ruleChange: z.boolean().optional(),
+        testFails: compareSchema.optional(),
+        eligible: z.array(z.enum(['permanent', 'naturalization', 'regularization'])).min(1).optional(),
+        spouse: z.boolean().optional(),
+        arrivedNow: z.boolean().optional(),
+        removedNow: z.boolean().optional(),
+        childCitizen: z.boolean().optional(),
+      }).refine((m) => Object.keys(m).length > 0, 'needs at least one field'),
+    }),
     z.strictObject({ legalAge: z.enum(['drinking', 'gambling', 'driving', 'permit', 'marriage']) }),
     z.strictObject({ familyWealth: z.array(familyWealthSchema).min(1) }),
     z.strictObject({ flag: idSchema, eq: flagValueSchema.optional() }),
@@ -1755,6 +1820,24 @@ export const effectSchema = z.discriminatedUnion('type', [
     .refine((e) => (e.action === 'buzz' || e.action === 'rival') === (e.years !== undefined), 'buzz and rival need years (and only they have it)')
     .refine((e) => (['staffQuit', 'staffFire', 'staffRaise', 'staffMorale', 'hire', 'theft', 'buyout'] as string[]).includes(e.action) === (e.role !== undefined), 'staffQuit, staffFire, staffRaise, staffMorale, hire, theft and buyout need role (and only they have one)'),
   /** W2: a value moves by `delta`; a share of it sticks to your temperament (balance/belonging.yaml values.sticks). */
+  /**
+   * W6, emigration. remit: you send `level` of your income home from now on; overstay: your permit ends and you stay
+   * without papers; leave: you go home; ties: everyone close who lives in another country than you feels `delta`
+   * more (or less) for you; prepare: you prepare for the citizenship test; withheld: pay is kept back from you, a
+   * `share` of last year's earnings; risk: you drew attention (`delta` percentage points of risk added to next year's).
+   * The engine ignores what does not fit now.
+   */
+  z
+    .strictObject({
+      type: z.literal('migration'),
+      action: z.enum(MIGRATION_ACTIONS),
+      level: z.enum(REMIT_LEVELS).optional(),
+      delta: z.int().min(-30).max(30).optional(),
+      share: z.number().gt(0).max(0.5).optional(),
+    })
+    .refine((e) => (e.action === 'remit') === (e.level !== undefined), 'remit needs level (and only remit has one)')
+    .refine((e) => (e.action === 'ties' || e.action === 'risk') === (e.delta !== undefined && e.delta !== 0), 'ties and risk need a non-zero delta (and only they have one)')
+    .refine((e) => (e.action === 'withheld') === (e.share !== undefined), 'withheld needs share (and only withheld has one)'),
   z.strictObject({ type: z.literal('value'), key: z.enum(VALUE_IDS), delta: z.int().min(-30).max(30).refine((n) => n !== 0, 'delta must not be 0') }),
   z.strictObject({ type: z.literal('innerConflict'), delta: z.int().min(-100).max(100) }),
   /** You discover your hidden talent, if you have one you haven't found (Stage 9). */

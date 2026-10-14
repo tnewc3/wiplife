@@ -1,4 +1,5 @@
 import { travelFailures } from './travel/invariants';
+import { migrationFailures } from './migration/invariants';
 /**
  * Sanity checks on a life (docs/technical.md, sections M and Q). Used in
  * development and tests; each later stage adds the checks for its systems.
@@ -41,7 +42,7 @@ export class InvariantError extends Error {
 
 /** Returns every invariant the life breaks (empty when healthy). */
 export function checkInvariants(state: LifeState, content: ContentBundle): string[] {
-  const failures: string[] = [...travelFailures(state, content)];
+  const failures: string[] = [...travelFailures(state, content), ...migrationFailures(state, content)];
   for (const [who, ls] of [["character", state.character.languages] as const, ...Object.values(state.people).map((p) => [p.id, p.languages] as const)]) {
     if (!ls.length || !ls.some((l) => l.native)) failures.push(`${who}: no native language`);
     if (new Set(ls.map((l) => l.id)).size !== ls.length) failures.push(`${who}: duplicate language`);
@@ -147,7 +148,7 @@ export function checkInvariants(state: LifeState, content: ContentBundle): strin
       if (l[key] < 0) fail(`lastLedger.${key} must not be negative`);
     }
     money('lastLedger.net', l.net);
-    if (l.net !== l.gross + l.retirement + l.interest + l.supportReceived - l.tax - l.housing - l.living - l.children - l.care - l.supportPaid - l.upkeep - l.insurance - l.giving - l.business - l.debtPayments) fail('lastLedger.net does not add up');
+    if (l.net !== l.gross + l.retirement + l.interest + l.supportReceived - l.tax - l.housing - l.living - l.children - l.care - l.supportPaid - l.upkeep - l.insurance - l.giving - (l.remittances ?? 0) - l.business - l.debtPayments) fail('lastLedger.net does not add up');
     if (l.year > state.currentYear || l.year <= state.birthYear) fail('lastLedger is for a year outside the life');
   }
   if (state.career.gig && c.age < content.balance.economy.gig.minAge) fail('gig work before the minimum age');

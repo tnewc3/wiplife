@@ -1,3 +1,4 @@
+import { onTemporaryStay } from '../migration/query';
 import { lapseMoved } from '../belonging/leave';
 /** W5 orchestrates finance, education, careers, people and language; those systems remain authoritative. */
 import type { ContentBundle } from '../../content/schemas';
@@ -33,7 +34,7 @@ export function tripCost(input: TripInput, content: ContentBundle): number {
   return wholeDollars(content.balance.travel.budgets[input.budget].cost * d.costLevel * (1 + input.companions.length * content.balance.travel.companionCostShare));
 }
 export function canTravel(state: LifeState, content: ContentBundle): boolean {
-  return state.character.age >= content.balance.travel.minAge && state.housing.kind !== 'incarcerated' && !onProbation(state) && state.travel.residence === null && state.travel.tripYear !== state.currentYear && !state.later.terminal && !state.housing.assisted;
+  return state.character.age >= content.balance.travel.minAge && state.housing.kind !== 'incarcerated' && !onProbation(state) && !onTemporaryStay(state) && state.travel.tripYear !== state.currentYear && !state.later.terminal && !state.housing.assisted;
 }
 export function canPlanTrip(state: LifeState, input: TripInput, content: ContentBundle): boolean {
   const d = content.destinations[input.destinationId];
@@ -42,7 +43,8 @@ export function canPlanTrip(state: LifeState, input: TripInput, content: Content
 /** Stays are solo; a dependent's housing cannot silently move or leave them unattended. */
 export function stayBlock(state: LifeState, input: StayInput, content: ContentBundle): string | null {
   const d = content.destinations[input.destinationId];
-  if (!canTravel(state, content)) return 'unavailable';
+  // W6: someone who moved to a country for good (and is not its citizen) cannot also start a temporary stay somewhere else: their permit would be lost.
+  if (!canTravel(state, content) || state.travel.residence !== null) return 'unavailable';
   if (!d?.cityId || d.retired || countryIdOfCity(d.cityId, content) === countryIdOfCity(state.character.cityId, content)) return 'destination';
   if (!['renting', 'with_parents'].includes(state.housing.kind) || state.housing.guardianId || Object.values(state.people).some((p) => p.alive && (livesWithYou(state, p.id) && state.currentYear - p.birthYear < content.balance.relationships.adultAge || p.life?.care === 'home'))) return 'household';
   if (state.business.items.length || state.crime.crew || state.fame.active || state.sports.pro) return 'commitment';
@@ -108,9 +110,23 @@ export function planTrip(state: LifeState, input: TripInput, content: ContentBun
   for (const id of input.companions) state.relationships[id]!.affection = clampInt(state.relationships[id]!.affection + content.balance.travel.companionAffection, 0, 100);
   state.travel.totals.immersion += gainLanguage(state.character.languages, content.destinations[input.destinationId]!.languageId, content.balance.travel.tripImmersion, state.currentYear);
   state.travel.active = context(state, 'trip', input.destinationId, input.companions, content);
-  state.travel.residence = { country: content.destinations[input.destinationId]!.country, destinationId: input.destinationId, type: 'visitor', route: 'vacation', startYear: state.currentYear, endYear: state.currentYear, homeCityId: state.character.cityId, homeHousing: { ...state.housing } };
+  // W6: someone who moved for good keeps their own record while away; the trip is still within the year.
+  if (state.travel.residence === null) state.travel.residence = { country: content.destinations[input.destinationId]!.country, destinationId: input.destinationId, type: 'visitor', route: 'vacation', startYear: state.currentYear, endYear: state.currentYear, homeCityId: state.character.cityId, homeHousing: { ...state.housing } };
+  visitHome(state, input.destinationId, content);
   writeFromGroup(state, { importance: 2, variants: content.text.travel.vacation }, ['travel', 'trip'], { values: travelValues(state, content) }, content);
   result(state, content.registries.travel.trips, cost, content);
+}
+/** W6: a trip to the country you came from refreshes your ties with the people who live in that city. */
+function visitHome(state: LifeState, destinationId: string, content: ContentBundle): void {
+  const d = content.destinations[destinationId]!;
+  if (!state.travel.residence?.settled || !d.cityId || !state.character.citizenships.includes(countryIdOfCity(d.cityId, content))) return;
+  let seen = false;
+  for (const r of Object.values(state.relationships)) {
+    if (r.status !== 'active' || state.people[r.personId]?.cityId !== d.cityId || !state.people[r.personId]!.alive) continue;
+    r.affection = clampInt(r.affection + content.balance.immigration.visits.affection, 0, 100);
+    seen = true;
+  }
+  if (seen) state.migration.counts.visits = (state.migration.counts.visits ?? 0) + 1;
 }
 /** Detach coworkers rather than teleporting them; the existing workplace system supplies the host office. */
 function changeOffice(state: LifeState, content: ContentBundle): void {
@@ -153,7 +169,8 @@ export function travelValues(state: LifeState, content: ContentBundle): Record<s
 /** After the host year's school, immersion, pay and relationships, return before next year's home events. */
 export function runTravel(state: LifeState, content: ContentBundle): void {
   const r = state.travel.residence;
-  if (!r || r.type === 'visitor') return;
+  // W6: someone who moved for good has no return planned; the migration step handles their permit.
+  if (!r || r.type === 'visitor' || r.settled) return;
   for (const [id, rel] of Object.entries(state.relationships)) {
     if (rel.status !== 'active' || !state.people[id]?.alive || state.people[id]!.cityId !== r.homeCityId) continue;
     const before = rel.affection;
@@ -175,7 +192,7 @@ export function runTravel(state: LifeState, content: ContentBundle): void {
   state.character.cityId = r.homeCityId;
   if (jailed) state.housing.cityId = r.homeCityId;
   else {
-    state.housing = { ...r.homeHousing };
+    state.housing = { ...r.homeHousing! };
     const partner = state.housing.partnerId;
     if (partner && (!state.people[partner]?.alive || state.people[partner]!.cityId !== r.homeCityId || !isPartnerKind(state.relationships[partner]!.kind))) delete state.housing.partnerId;
     refreshHousingCost(state, content);

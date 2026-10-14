@@ -1,0 +1,40 @@
+{
+  "id": "emigration_applied_citizenship",
+  "title": "Asking to belong",
+  "text": "You have applied for citizenship of {appCountry}. A test, and the questions people ask about belonging, lie ahead.",
+  "category": "emigration",
+  "tone": "neutral",
+  "rarity": "common",
+  "lifeStages": [
+    "youngAdult",
+    "adult",
+    "senior"
+  ],
+  "followUpOnly": true,
+  "requires": {
+    "all": [
+      {
+        "age": {
+          "gte": 18
+        }
+      },
+      {
+        "migration": {
+          "application": [
+            "pending"
+          ],
+          "kind": [
+            "naturalization"
+          ]
+        }
+      }
+    ]
+  },
+  "weight": {
+    "base": 1
+  },
+  "autoOutcome": {
+    "text": "The test is expected by {decisionYear}. There is time to prepare for it.",
+    "effects": []
+  }
+}

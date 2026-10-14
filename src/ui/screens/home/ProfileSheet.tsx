@@ -13,7 +13,7 @@ import { SingleChoice, Suggestions } from '../../components/Choices';
 import { Sheet } from '../../components/Sheet';
 import { StatBar } from '../../components/StatBar';
 import { TextField } from '../../components/TextField';
-import { ATTRACTION_LABELS, FAITH_STRENGTH_WORDS, LANGUAGE_LEVEL_LABELS, LANGUAGE_NATIVE_LABEL, money, GROUPS_TITLES, recordLine, roleLine, TRAIT_LABELS, VALUE_LABELS } from '../../labels';
+import { ATTRACTION_LABELS, STATUS_LABELS, FAITH_STRENGTH_WORDS, LANGUAGE_LEVEL_LABELS, LANGUAGE_NATIVE_LABEL, money, GROUPS_TITLES, recordLine, roleLine, TRAIT_LABELS, VALUE_LABELS } from '../../labels';
 
 const PRONOUN_FIELDS: { key: Exclude<keyof Pronouns, 'verbPlural'>; label: string; example: string }[] = [
   { key: 'subject', label: 'Subject', example: 'they' },
@@ -202,6 +202,8 @@ export function ProfileSheet({ life, open, onClose }: { life: LifeState; open: b
   const rows: [string, string][] = [
     ['Lives in', view.country],
     ['Born in', view.bornIn],
+    ['Citizen of', view.standing.citizenships.join(' and ')],
+    ...(view.standing.settled ? ([['Where you stand', `${STATUS_LABELS[view.standing.status]}${view.standing.permitEnd ? ` · until ${view.standing.permitEnd}` : ''}`]] as [string, string][]) : []),
     ['Gender identity', id.genderIdentity],
     ['Gender expression', id.genderExpression],
     ['Pronouns', `${id.pronouns.subject}/${id.pronouns.object}/${id.pronouns.possessivePronoun}`],

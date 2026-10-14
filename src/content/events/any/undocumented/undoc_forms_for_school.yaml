@@ -1,0 +1,95 @@
+{
+  "id": "undoc_forms_for_school",
+  "title": "Forms for the school",
+  "text": "The school asks for documents you cannot easily produce. The secretary is kind and the form is not. You take it home to think.",
+  "category": "undocumented",
+  "tone": "serious",
+  "rarity": "common",
+  "lifeStages": [
+    "youngAdult",
+    "adult",
+    "senior"
+  ],
+  "followUpOnly": true,
+  "requires": {
+    "all": [
+      {
+        "age": {
+          "gte": 18
+        }
+      },
+      {
+        "migration": {
+          "status": [
+            "undocumented"
+          ]
+        }
+      },
+      {
+        "family": {
+          "minors": {
+            "gte": 1
+          }
+        }
+      }
+    ]
+  },
+  "weight": {
+    "base": 1
+  },
+  "cooldownYears": 4,
+  "choices": [
+    {
+      "id": "explain",
+      "label": "Explain your situation to the school office",
+      "outcome": {
+        "text": "The secretary finds another way to fill in the line, and the form goes in.",
+        "effects": [
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": -2
+          },
+          {
+            "type": "stat",
+            "key": "happiness",
+            "delta": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "ask_group",
+      "label": "Ask a family you trust how they handled it",
+      "outcome": {
+        "text": "They share their folder and their mistakes. It becomes yours.",
+        "effects": [
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": -1
+          },
+          {
+            "type": "stat",
+            "key": "smarts",
+            "delta": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "delay",
+      "label": "Put it off a little longer",
+      "outcome": {
+        "text": "The deadline comes closer. You tell yourself there is still time.",
+        "effects": [
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": 3
+          }
+        ]
+      }
+    }
+  ]
+}

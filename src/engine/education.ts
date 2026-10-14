@@ -17,7 +17,9 @@ import type { ApplyProgram, ChanceModel, ContentBundle, CredentialType, Educatio
 import { curveAt } from './curve';
 import { scoreOf } from './events/checks';
 
-import { isIndependent, MAX_MONEY, takeStudentLoan, wholeDollars } from './finance';
+import { isIndependent, MAX_MONEY, spend, takeStudentLoan, wholeDollars } from './finance';
+import { creditBlocked, isUndocumented } from './migration/query';
+import { countryIdOfCity } from './country';
 import { supportingParent } from './housing';
 import { nextFloat, type RngState } from './rng';
 import { writeFromGroup } from './systems/history';
@@ -284,7 +286,10 @@ export function validTarget(target: ApplyTarget, content: ContentBundle): boolea
 /** Yearly tuition for a program (none for automatic school). */
 export function tuitionFor(state: LifeState, place: SchoolPlace, content: ContentBundle): number {
   const t = educationCountry(state, content).tuition;
-  if (place.program === 'college') return t.college[place.tier ?? 'state'];
+  // W6: someone who came to study pays the international rate.
+  const r = state.travel.residence;
+  const abroad = r?.settled && r.type === 'student' && r.route === 'study_work' ? content.balance.immigration.countries[countryIdOfCity(state.character.cityId, content)].study_work.tuitionFactor : 1;
+  if (place.program === 'college') return wholeDollars(t.college[place.tier ?? 'state'] * abroad);
   if (place.program === 'trade') return t.trade[place.tradeId ?? ''] ?? 0;
   if (place.program === 'grad') return t.grad[place.gradProgramId ?? ''] ?? 0;
   return 0;
@@ -338,7 +343,9 @@ export function payTuition(state: LifeState, content: ContentBundle): void {
   if (!cur || !isPostSecondary(cur.program)) return;
   const bill = billFor(state, cur, cur.scholarship, content);
   state.education.fund -= bill.fund;
-  takeStudentLoan(state, bill.loan, content);
+  // W6: without papers there is no student loan; the rest is paid from what you have.
+  if (creditBlocked(state)) spend(state, bill.loan, content);
+  else takeStudentLoan(state, bill.loan, content);
   state.education.lastBill = { year: state.currentYear, ...bill };
 }
 
@@ -480,7 +487,9 @@ export function graduate(state: LifeState, content: ContentBundle): void {
   if (!cur) return;
   edu.current = null;
   const credential = credentialFor(cur, state.currentYear);
-  if (credential) edu.credentials.push(credential);
+  // W6: a trade license needs papers; the training is finished, the license is not issued.
+  const unlicensed = cur.program === 'trade' && isUndocumented(state);
+  if (credential && !unlicensed) edu.credentials.push(credential);
   if (edu.left && edu.left.program === cur.program) edu.left = null;
   const grade = letterGrade(cur.gpa, state, content);
   const values = { school: schoolName(state, cur, content), subject: subjectOf(cur, content), grade };
@@ -501,6 +510,10 @@ export function graduate(state: LifeState, content: ContentBundle): void {
       schoolHistory(state, cur.tier === 'community' ? 'graduatedAssociate' : 'graduatedBachelor', values, content);
       return;
     case 'trade':
+      if (unlicensed) {
+        writeFromGroup(state, { importance: 2, variants: content.text.immigration.unlicensed }, ['education', 'unlicensed'], { values: { school: values.school } }, content);
+        return;
+      }
       schoolHistory(state, 'licensed', { school: values.school, license: content.trades[cur.tradeId ?? '']?.license ?? '' }, content);
       return;
     case 'grad':

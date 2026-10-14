@@ -1,0 +1,90 @@
+{
+  "id": "removal_flight_home",
+  "title": "The way back",
+  "text": "You are taken out of {removedFrom} and returned to the country that is yours. Whatever you owned there fits in two bags. The streets here are familiar, and nothing about them feels like home.",
+  "category": "emigration",
+  "tone": "dark",
+  "rarity": "common",
+  "lifeStages": [
+    "youngAdult",
+    "adult",
+    "senior"
+  ],
+  "followUpOnly": true,
+  "requires": {
+    "all": [
+      {
+        "age": {
+          "gte": 18
+        }
+      },
+      {
+        "migration": {
+          "removedNow": true
+        }
+      }
+    ]
+  },
+  "weight": {
+    "base": 1
+  },
+  "choices": [
+    {
+      "id": "call_family",
+      "label": "Call everyone you left behind",
+      "outcome": {
+        "text": "You tell them you are safe, and then you tell them the rest. It takes all night.",
+        "effects": [
+          {
+            "type": "migration",
+            "action": "ties",
+            "delta": 4
+          },
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": 3
+          }
+        ]
+      }
+    },
+    {
+      "id": "go_quiet",
+      "label": "Be quiet for a while",
+      "outcome": {
+        "text": "You sleep in the room you grew up in or one like it. For days nobody asks you anything. It is kind of them.",
+        "effects": [
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": -2
+          },
+          {
+            "type": "stat",
+            "key": "happiness",
+            "delta": -2
+          }
+        ]
+      }
+    },
+    {
+      "id": "start_over",
+      "label": "Start making plans for what comes next",
+      "outcome": {
+        "text": "The ban on returning is long, but there are other places, other routes, other years. You start the list.",
+        "effects": [
+          {
+            "type": "stat",
+            "key": "discipline",
+            "delta": 2
+          },
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": 3
+          }
+        ]
+      }
+    }
+  ]
+}

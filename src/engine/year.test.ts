@@ -27,6 +27,7 @@ describe('year pipeline', () => {
       'business',
       'education',
       'languages',
+      'migration',
       'teen',
       'career',
       'economy',

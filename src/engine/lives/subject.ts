@@ -3,7 +3,7 @@
  * person's working copy (changed freely and written back at the end), and the
  * two things a change can lead to: a line of news and a request.
  */
-import type { ContentBundle, NewsKind, PeopleBalance, RequestTrigger } from '../../content/schemas';
+import type { ContentBundle, CountryId, NewsKind, PeopleBalance, RequestTrigger } from '../../content/schemas';
 import { chance, pick } from '../rng';
 import { renderText, type TextRole } from '../text';
 import type { FamilyWealth, Id, LifeState, LifeTier, Person, PersonLife, Relationship } from '../types';
@@ -52,6 +52,8 @@ export interface Subject {
   occupation: string | undefined;
   wealth: FamilyWealth;
   cityId: Id;
+  /** W6: the countries whose citizen they are (a working copy). */
+  citizenships: CountryId[];
   /** News lines this person has made this year. */
   said: number;
 }

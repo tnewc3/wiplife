@@ -1,4 +1,5 @@
 import { giveSampleTravel } from './travel/sample';
+import { giveSampleMigration } from './migration/sample';
 /**
  * Event sandbox (Stage 10, development only): previews any event with any
  * cast, pronoun set and character state, without a real life behind it. The
@@ -116,6 +117,7 @@ export function previewEvent(content: ContentBundle, options: SandboxOptions): S
     // W3: the business, its people and its trouble the event asks for.
     giveSampleBusiness(d as LifeState, def, cast, content);
     giveSampleTravel(d as LifeState, def, cast, content);
+    giveSampleMigration(d as LifeState, def, cast, content);
     d.phase = def.category === 'travel' ? 'action' : 'events';
     d.pending = [{ instanceId: SANDBOX_INSTANCE, eventId: def.id, cast }];
   });

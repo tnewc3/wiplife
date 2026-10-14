@@ -18,17 +18,18 @@ export function travelFailures(state: LifeState, content: ContentBundle): string
     for (const id of [...a.companions, ...[a.encounterId, a.romanceId].filter((p): p is string => p !== null)]) if (!state.people[id] || !state.relationships[id]) fail('missing travel contact');
     if (a.romanceId && (!state.people[a.romanceId] || state.character.age < content.balance.relationships.adultAge || state.currentYear - state.people[a.romanceId]!.birthYear < content.balance.relationships.adultAge)) fail('romance under 18');
   }
-  if (r) {
+  // W6: a life lived in a new country is checked by src/engine/migration/invariants.ts.
+  if (r && !r.settled) {
     const d = content.destinations[r.destinationId];
     if (!d || d.country !== r.country) fail('residence destination/country mismatch');
-    if (!content.cities[r.homeCityId] || r.homeHousing.cityId !== r.homeCityId) fail('invalid return home');
+    if (!content.cities[r.homeCityId] || r.homeHousing?.cityId !== r.homeCityId) fail('invalid return home');
     if (r.startYear > state.currentYear || r.startYear < state.birthYear || r.endYear < r.startYear) fail('residence dates out of order');
     if (r.type === 'visitor') {
       if (r.route !== 'vacation' || r.endYear !== r.startYear || state.phase !== 'action' || t.active?.kind !== 'trip' || state.character.cityId !== r.homeCityId) fail('visitor outside within-year trip');
     } else {
       const length = r.type === 'student' ? 1 : content.balance.travel.work.years;
       if (r.endYear !== r.startYear + length) fail('stay length does not match permission');
-      if (!['renting', 'with_parents'].includes(r.homeHousing.kind)) fail('unsupported return housing');
+      if (!['renting', 'with_parents'].includes(r.homeHousing?.kind ?? '')) fail('unsupported return housing');
       if (!d?.cityId || state.character.cityId !== d.cityId || countryIdOfCity(d.cityId, content) === countryIdOfCity(r.homeCityId, content)) fail('temporary stay is not in host country');
       if (r.type === 'student' && !['semester', 'year'].includes(r.route)) fail('student route mismatch');
       if (r.type === 'temporary_worker' && !['working_holiday', 'transfer'].includes(r.route)) fail('worker route mismatch');

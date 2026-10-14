@@ -1,0 +1,43 @@
+{
+  "id": "emigration_applied_family",
+  "title": "Papers for the family",
+  "text": "Someone who loves you is sponsoring your move to {appCountry}, and the forms are filed.",
+  "category": "emigration",
+  "tone": "neutral",
+  "rarity": "common",
+  "lifeStages": [
+    "youngAdult",
+    "adult",
+    "senior"
+  ],
+  "followUpOnly": true,
+  "requires": {
+    "all": [
+      {
+        "age": {
+          "gte": 18
+        }
+      },
+      {
+        "migration": {
+          "application": [
+            "pending"
+          ],
+          "kind": [
+            "entry"
+          ],
+          "route": [
+            "family"
+          ]
+        }
+      }
+    ]
+  },
+  "weight": {
+    "base": 1
+  },
+  "autoOutcome": {
+    "text": "Every form asked about your life together. A decision is expected by {decisionYear}.",
+    "effects": []
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "id": "emigration_returned_home",
+  "title": "Home",
+  "text": "You are home, in the country that is yours. The streets know your accent, and the paperwork you carried abroad can finally go in a drawer.",
+  "category": "emigration",
+  "tone": "neutral",
+  "rarity": "common",
+  "lifeStages": [
+    "youngAdult",
+    "adult",
+    "senior"
+  ],
+  "followUpOnly": true,
+  "requires": {
+    "age": {
+      "gte": 18
+    }
+  },
+  "weight": {
+    "base": 1
+  },
+  "autoOutcome": {
+    "text": "Coming back is its own kind of arrival. The people who stayed have changed as much as you have.",
+    "effects": []
+  }
+}

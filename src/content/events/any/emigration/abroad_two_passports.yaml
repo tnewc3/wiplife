@@ -1,0 +1,64 @@
+{
+  "id": "abroad_two_passports",
+  "title": "Two passports",
+  "text": "You hold two passports now. At borders you choose which to hand over, and each choice says something a little different about who you are.",
+  "category": "emigration",
+  "tone": "light",
+  "rarity": "common",
+  "lifeStages": [
+    "youngAdult",
+    "adult",
+    "senior"
+  ],
+  "requires": {
+    "all": [
+      {
+        "age": {
+          "gte": 18
+        }
+      },
+      {
+        "migration": {
+          "dual": true,
+          "status": [
+            "citizen"
+          ]
+        }
+      }
+    ]
+  },
+  "weight": {
+    "base": 1
+  },
+  "cooldownYears": 10,
+  "choices": [
+    {
+      "id": "both_matter",
+      "label": "Treat both as home",
+      "outcome": {
+        "text": "It is not a division of loyalty; it is a larger map. You remember the date each one became yours.",
+        "effects": [
+          {
+            "type": "stat",
+            "key": "happiness",
+            "delta": 3
+          }
+        ]
+      }
+    },
+    {
+      "id": "practical",
+      "label": "Treat them as tools and move on",
+      "outcome": {
+        "text": "One for each situation. Useful, and nothing more is required of you.",
+        "effects": [
+          {
+            "type": "stat",
+            "key": "discipline",
+            "delta": 1
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,90 @@
+{
+  "id": "emigration_status_denied",
+  "title": "The answer is no",
+  "text": "The application for status was refused. The letter does not say what happens to people who applied. You read it more than once, looking for an answer it does not give.",
+  "category": "emigration",
+  "tone": "dark",
+  "rarity": "common",
+  "lifeStages": [
+    "youngAdult",
+    "adult",
+    "senior"
+  ],
+  "followUpOnly": true,
+  "requires": {
+    "all": [
+      {
+        "age": {
+          "gte": 18
+        }
+      },
+      {
+        "migration": {
+          "application": [
+            "denied"
+          ],
+          "kind": [
+            "regularization"
+          ]
+        }
+      }
+    ]
+  },
+  "weight": {
+    "base": 1
+  },
+  "choices": [
+    {
+      "id": "talk_to_someone",
+      "label": "Ask someone who understands the rules what is possible",
+      "outcome": {
+        "text": "A volunteer at a community office explains what the refusal means and does not promise anything. It helps more than comfort would.",
+        "effects": [
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": -2
+          },
+          {
+            "type": "stat",
+            "key": "smarts",
+            "delta": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "lie_low",
+      "label": "Keep your head down and say nothing to anyone",
+      "outcome": {
+        "text": "You go through the days with the news folded small inside you. The days are heavier for it.",
+        "effects": [
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": 4
+          },
+          {
+            "type": "stat",
+            "key": "happiness",
+            "delta": -2
+          }
+        ]
+      }
+    },
+    {
+      "id": "think_of_home",
+      "label": "Think about whether to go home",
+      "outcome": {
+        "text": "Home is real, and so is the life you have built here. Neither answer is easy, and both are yours to weigh.",
+        "effects": [
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": 2
+          }
+        ]
+      }
+    }
+  ]
+}

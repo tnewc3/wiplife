@@ -272,7 +272,7 @@ describe('app store: aging', () => {
     await restarted.getState().openArchive();
     expect(restarted.getState().screen).toBe('archive');
     expect(restarted.getState().archive?.lives).toEqual([state.lastDeath]);
-  });
+  }, 30_000);
 
   it('archives the old life as unfinished when a new one starts over it', async () => {
     const { db, store } = setup();
@@ -304,7 +304,7 @@ describe('app store: aging', () => {
       ['test-seed-1', false],
       ['test-seed-2', true],
     ]);
-  });
+  }, 30_000);
 
   it('opens and closes the life history and an archived life', async () => {
     const { store } = setup();

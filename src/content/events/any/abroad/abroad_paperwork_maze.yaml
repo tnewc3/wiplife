@@ -1,0 +1,89 @@
+{
+  "id": "abroad_paperwork_maze",
+  "title": "The paperwork maze",
+  "text": "A form needs a document that needs another form. The office answers questions in a language you are still learning. Someone is helpful and then someone is not.",
+  "category": "abroad",
+  "tone": "neutral",
+  "rarity": "common",
+  "lifeStages": [
+    "youngAdult",
+    "adult",
+    "senior"
+  ],
+  "followUpOnly": true,
+  "requires": {
+    "all": [
+      {
+        "age": {
+          "gte": 18
+        }
+      },
+      {
+        "migration": {
+          "settled": true
+        }
+      }
+    ]
+  },
+  "weight": {
+    "base": 1
+  },
+  "cooldownYears": 4,
+  "choices": [
+    {
+      "id": "ask_group",
+      "label": "Ask at a newcomers' evening",
+      "outcome": {
+        "text": "A volunteer sorts the pile in twenty minutes. You leave with a stamp and a new acquaintance.",
+        "effects": [
+          {
+            "type": "money",
+            "delta": -30
+          },
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": -2
+          }
+        ]
+      }
+    },
+    {
+      "id": "hire_help",
+      "label": "Pay someone to handle it",
+      "outcome": {
+        "text": "It costs money you had planned for other things. The forms go in correctly the first time.",
+        "effects": [
+          {
+            "type": "money",
+            "delta": -150
+          },
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": -3
+          }
+        ]
+      }
+    },
+    {
+      "id": "do_it_yourself",
+      "label": "Work through it yourself, one office at a time",
+      "outcome": {
+        "text": "It takes weeks. You learn more about the city than you ever meant to.",
+        "effects": [
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": 3
+          },
+          {
+            "type": "stat",
+            "key": "smarts",
+            "delta": 1
+          }
+        ]
+      }
+    }
+  ]
+}

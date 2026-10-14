@@ -1,0 +1,26 @@
+{
+  "id": "emigration_turned_back",
+  "title": "Turned back",
+  "text": "You were stopped on the way and sent back. The journey took what you had put aside, and the plans you built around it are gone.",
+  "category": "emigration",
+  "tone": "dark",
+  "rarity": "common",
+  "lifeStages": [
+    "youngAdult",
+    "adult",
+    "senior"
+  ],
+  "followUpOnly": true,
+  "requires": {
+    "age": {
+      "gte": 18
+    }
+  },
+  "weight": {
+    "base": 1
+  },
+  "autoOutcome": {
+    "text": "You return with the same bag and a different weight to carry. Others have tried again; others have chosen to stay home. It is yours to decide.",
+    "effects": []
+  }
+}

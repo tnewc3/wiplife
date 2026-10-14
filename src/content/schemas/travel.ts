@@ -2,7 +2,10 @@ import { z } from 'zod';
 import { baseDefSchema, idSchema, scoreSchema } from './common';
 
 export const TRIP_BUDGETS = ['budget', 'comfortable', 'splurge'] as const;
-export const STAY_TYPES = ['visitor', 'student', 'temporary_worker'] as const;
+/** W5 gave the first three; W6 adds permanent residence and living without papers. */
+export const STAY_TYPES = ['visitor', 'student', 'temporary_worker', 'permanent_resident', 'undocumented'] as const;
+/** How a stay began: W5's trips and temporary stays, W6's legal routes and the ways someone ends up without papers. */
+export const STAY_ROUTES = ['vacation', 'semester', 'year', 'working_holiday', 'transfer', 'work_sponsor', 'study_work', 'family', 'investment', 'overstay', 'irregular', 'regularized'] as const;
 export const destinationSchema = baseDefSchema.extend({
   name: z.string().min(1), country: z.string().min(1), languageId: idSchema,
   cityId: idSchema.optional(), costLevel: z.number().positive(),

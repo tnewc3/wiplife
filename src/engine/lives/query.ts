@@ -30,5 +30,7 @@ export function lifeHolds(q: LifeCondition, person: Person, year: number, seriou
   if (q.care && !q.care.includes(life.care ?? 'none')) return false;
   if (q.wealth && !q.wealth.includes(person.wealthLevel)) return false;
   if (q.recovered !== undefined && !life.recovered.some((r) => year - r.year <= q.recovered!)) return false;
+  if (q.emigrated !== undefined && (life.emigrated !== undefined) !== q.emigrated) return false;
+  if (q.papers !== undefined && life.emigrated?.papers !== q.papers) return false;
   return true;
 }

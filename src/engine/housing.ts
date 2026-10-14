@@ -8,6 +8,7 @@
  * own and pay their share of it; they move with you, and move out when the
  * romance ends. Actions, effects and the yearly ledger all use these rules.
  */
+import { creditBlocked } from './migration/query';
 import type { CityDef, ContentBundle, HousingKind, Lifestyle } from '../content/schemas';
 import { addDebt, amortizedPayment, borrow, isIndependent, wholeDollars } from './finance';
 import { relocateChildren } from './family/household';
@@ -16,7 +17,8 @@ import { countedRecord } from './record';
 import { isCurrentPartner } from './relationships';
 import { writeFromGroup } from './systems/history';
 import type { Id, LifeState, Person } from './types';
-import { careScale } from './country';
+import { careScale, countryIdOfCity } from './country';
+import { endSettledStanding } from './migration/standing';
 import { countryOf } from './country';
 
 function cityOf(state: LifeState, content: ContentBundle, cityId: Id = state.character.cityId): CityDef {
@@ -42,6 +44,17 @@ export function supportingParent(state: LifeState): Person | null {
     }
   }
   return best;
+}
+
+/**
+ * W6: the parent who would take you in, if you could live where they are: in the country you live in, or in one whose
+ * citizen you are. A parent in a country that is not yours is somewhere you would have to emigrate to.
+ */
+export function joinableParent(state: LifeState, content: ContentBundle): Person | null {
+  const parent = supportingParent(state);
+  if (!parent) return null;
+  const there = countryIdOfCity(parent.cityId, content);
+  return there === countryIdOfCity(state.character.cityId, content) || state.character.citizenships.includes(there) ? parent : null;
 }
 
 /** A year's rent in a city, alone or with a roommate. */
@@ -146,7 +159,10 @@ export function refreshHousingCost(state: LifeState, content: ContentBundle): vo
  */
 export function moveTo(state: LifeState, kind: Exclude<HousingKind, 'owned'>, cityId: Id, content: ContentBundle): void {
   const partnerId = kind === 'renting' ? state.housing.partnerId : undefined;
+  const before = countryIdOfCity(state.character.cityId, content);
   state.character.cityId = cityId;
+  // W6: going to a country whose citizen you are ends a permit record (you are home).
+  if (countryIdOfCity(cityId, content) !== before && state.character.citizenships.includes(countryIdOfCity(cityId, content))) endSettledStanding(state);
   state.finances.hardshipYears = 0;
   state.housing = { kind, cityId, annualCost: 0, since: state.currentYear };
   if (partnerId !== undefined) livingTogether(state, partnerId);
@@ -251,7 +267,7 @@ export function moveInCost(state: LifeState, cityId: Id, content: ContentBundle)
   return wholeDollars(moving * countryOf(state, content).priceLevel + rentIn(cityOf(state, content, cityId), false, content) * deposit);
 }
 
-export type PurchaseBlock = 'savings' | 'income' | 'bankruptcy';
+export type PurchaseBlock = 'savings' | 'income' | 'bankruptcy' | 'status';
 
 export interface PurchaseQuote {
   price: number;
@@ -284,6 +300,7 @@ export function purchaseQuote(state: LifeState, content: ContentBundle): Purchas
   const bankrupt = state.finances.bankruptcyYear;
   let blocked: PurchaseBlock | null = null;
   if (savings < cashNeeded) blocked = 'savings';
+  else if (mortgage > 0 && creditBlocked(state)) blocked = 'status';
   else if (mortgage > 0 && bankrupt !== undefined && state.currentYear - bankrupt < eco.bankruptcy.noMortgageYears) blocked = 'bankruptcy';
   else if (mortgage > 0 && yearlyPayment > income * own.maxPaymentShare) blocked = 'income';
   return { price, downPayment, closingCosts, mortgage, yearlyPayment, cashNeeded, blocked };

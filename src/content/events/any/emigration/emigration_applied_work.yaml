@@ -1,0 +1,43 @@
+{
+  "id": "emigration_applied_work",
+  "title": "An employer's letter",
+  "text": "An employer in {appCountry} has agreed to sponsor you, and the application is filed.",
+  "category": "emigration",
+  "tone": "neutral",
+  "rarity": "common",
+  "lifeStages": [
+    "youngAdult",
+    "adult",
+    "senior"
+  ],
+  "followUpOnly": true,
+  "requires": {
+    "all": [
+      {
+        "age": {
+          "gte": 18
+        }
+      },
+      {
+        "migration": {
+          "application": [
+            "pending"
+          ],
+          "kind": [
+            "entry"
+          ],
+          "route": [
+            "work_sponsor"
+          ]
+        }
+      }
+    ]
+  },
+  "weight": {
+    "base": 1
+  },
+  "autoOutcome": {
+    "text": "Now comes the waiting. A decision is expected by {decisionYear}, and until then your life here goes on as it was.",
+    "effects": []
+  }
+}

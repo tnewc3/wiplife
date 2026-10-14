@@ -5,6 +5,7 @@
  * another guardian, or into foster care; foster care ends when they reach the
  * independence age, and a guardian's home becomes just home.
  */
+import { reconcileStanding } from '../migration/standing';
 import type { ContentBundle } from '../../content/schemas';
 import { earn, wholeDollars } from '../finance';
 import { moveTo, refreshHousingCost } from '../housing';
@@ -49,6 +50,8 @@ export function runHeritage(state: LifeState, content: ContentBundle): void {
         h.guardianId = next.id;
         delete state.flags.in_foster_care;
         state.character.cityId = h.cityId = state.people[next.id]!.cityId;
+        // W6: a guardian in another country.
+        reconcileStanding(state, content);
       } else {
         const carer = createFosterCarer(state, state.rng, content);
         h.guardianId = carer;

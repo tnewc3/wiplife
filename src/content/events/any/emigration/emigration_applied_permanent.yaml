@@ -1,0 +1,40 @@
+{
+  "id": "emigration_applied_permanent",
+  "title": "Asking to stay for good",
+  "text": "You have asked {appCountry} for permanent residence: no end date on your permission to live there.",
+  "category": "emigration",
+  "tone": "neutral",
+  "rarity": "common",
+  "lifeStages": [
+    "youngAdult",
+    "adult",
+    "senior"
+  ],
+  "followUpOnly": true,
+  "requires": {
+    "all": [
+      {
+        "age": {
+          "gte": 18
+        }
+      },
+      {
+        "migration": {
+          "application": [
+            "pending"
+          ],
+          "kind": [
+            "permanent"
+          ]
+        }
+      }
+    ]
+  },
+  "weight": {
+    "base": 1
+  },
+  "autoOutcome": {
+    "text": "The office will decide by {decisionYear}. Your current permit keeps you here until then.",
+    "effects": []
+  }
+}

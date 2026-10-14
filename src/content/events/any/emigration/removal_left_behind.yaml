@@ -1,0 +1,109 @@
+{
+  "id": "removal_left_behind",
+  "title": "A call across the distance",
+  "text": "{npc.name} calls from {npc.city}. You are on opposite sides of a border now, and the call is mostly silence and breathing. Then you both start talking at once.",
+  "category": "emigration",
+  "tone": "dark",
+  "rarity": "common",
+  "lifeStages": [
+    "youngAdult",
+    "adult",
+    "senior"
+  ],
+  "followUpOnly": true,
+  "requires": {
+    "all": [
+      {
+        "age": {
+          "gte": 18
+        }
+      },
+      {
+        "migration": {
+          "removedNow": true,
+          "relatives": true
+        }
+      },
+      {
+        "role": "npc",
+        "alive": true,
+        "age": {
+          "gte": 18
+        },
+        "where": [
+          "elsewhere"
+        ]
+      }
+    ]
+  },
+  "weight": {
+    "base": 1
+  },
+  "cast": {
+    "npc": {
+      "support": true,
+      "presence": "elsewhere"
+    }
+  },
+  "choices": [
+    {
+      "id": "promise",
+      "label": "Promise you will find a way back to each other",
+      "outcome": {
+        "text": "Neither of you knows how. You say it anyway, and it holds you for the night.",
+        "effects": [
+          {
+            "type": "relationship",
+            "role": "npc",
+            "affection": 5,
+            "trust": 3
+          },
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": 3
+          }
+        ]
+      }
+    },
+    {
+      "id": "practical",
+      "label": "Talk through what each of you needs to do next",
+      "outcome": {
+        "text": "Lists and dates are a comfort in the dark. You end the call a little steadier.",
+        "effects": [
+          {
+            "type": "relationship",
+            "role": "npc",
+            "affection": 3,
+            "trust": 3
+          },
+          {
+            "type": "stat",
+            "key": "discipline",
+            "delta": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "cannot_talk",
+      "label": "Say you cannot talk about it yet",
+      "outcome": {
+        "text": "You stay on the line a minute longer, saying nothing. It counts for something.",
+        "effects": [
+          {
+            "type": "relationship",
+            "role": "npc",
+            "affection": 1
+          },
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": 2
+          }
+        ]
+      }
+    }
+  ]
+}

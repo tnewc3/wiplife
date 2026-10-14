@@ -7,6 +7,7 @@
  */
 import type { ContentBundle, DamageSeverityId } from '../../content/schemas';
 import { curveAt, powInt } from '../curve';
+import { creditBlocked } from '../migration/query';
 import { addDebt, amortizedPayment, borrow, earn, isIndependent, spend, wholeDollars } from '../finance';
 import { clampInt } from '../random';
 import { nextInt } from '../rng';
@@ -60,7 +61,7 @@ export function vehicleUpkeep(state: LifeState, p: Possession, content: ContentB
 }
 
 export type VehicleBlock = 'age' | 'limit' | 'savings' | 'unknown' | 'used' | 'license';
-export type LoanBlock = 'independent' | 'bankruptcy' | 'income';
+export type LoanBlock = 'independent' | 'bankruptcy' | 'income' | 'status';
 
 export interface VehicleQuote {
   defId: Id;
@@ -107,6 +108,7 @@ export function vehicleQuote(state: LifeState, defId: Id, used: boolean, content
   if (loanBlock === null) {
     if (!isIndependent(state, content)) loanBlock = 'independent';
     else if (state.finances.savings < down) loanBlock = 'savings';
+    else if (creditBlocked(state)) loanBlock = 'status';
     else if (bankrupt !== undefined && state.currentYear - bankrupt < content.balance.economy.bankruptcy.noMortgageYears) loanBlock = 'bankruptcy';
     else if (yearlyPayment > income * b.loan.maxPaymentShare) loanBlock = 'income';
   }

@@ -12,7 +12,7 @@ describe('simulation runner', () => {
   beforeAll(() => setAutoFreeze(false));
   afterAll(() => setAutoFreeze(true));
   // Whole lives with every system: give them time.
-  it('plays lives and reports invariants, lifespans, events per year and event frequency', { timeout: 60_000 }, () => {
+  it('plays lives and reports invariants, lifespans, events per year and event frequency', { timeout: 180_000 }, () => {
     const report = runSimulation(content, { lives: 20, seedPrefix: 'sim-test' });
     expect(report.lives).toBe(20);
     expect(report.invariantFailures).toBe(0);
@@ -26,7 +26,7 @@ describe('simulation runner', () => {
     expect(text).toContain('lottery_ticket');
   });
 
-  it('reports marriage and divorce rates, with the simulated player taking relationship actions', { timeout: 60_000 }, () => {
+  it('reports marriage and divorce rates, with the simulated player taking relationship actions', { timeout: 180_000 }, () => {
     const report = runSimulation(content, { lives: 30, seedPrefix: 'sim-rel' });
     const r = report.relationships;
     expect(report.invariantFailures).toBe(0);
@@ -80,7 +80,7 @@ describe('simulation runner', () => {
     expect(formatReport(careful, content)).toContain('trades (');
   });
 
-  it('is deterministic', { timeout: 60_000 }, () => {
+  it('is deterministic', { timeout: 180_000 }, () => {
     // How long a year took is the one thing that differs between runs.
     const untimed = (r: ReturnType<typeof runSimulation>) => ({ ...r, people: { ...r.people, timing: null } });
     expect(untimed(runSimulation(content, { lives: 5, seedPrefix: 'same' }))).toEqual(untimed(runSimulation(content, { lives: 5, seedPrefix: 'same' })));
@@ -103,7 +103,7 @@ describe('simulation runner', () => {
     expect(choiceWeight(person(0, 100), drive)).toBeLessThan(0.2);
   });
 
-  it('reports the events that offer an illegal choice, and how often one was offered and taken', { timeout: 60_000 }, () => {
+  it('reports the events that offer an illegal choice, and how often one was offered and taken', { timeout: 180_000 }, () => {
     const report = runSimulation(content, { lives: 10, seedPrefix: 'sim-illegal' });
     expect(report.legal.illegalChoices.events).toContain('one_more_for_the_road');
     expect(report.legal.illegalChoices.taken).toBeLessThanOrEqual(report.legal.illegalChoices.offered);

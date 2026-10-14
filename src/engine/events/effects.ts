@@ -23,7 +23,7 @@ import { applyIdentity, discoverTalent } from '../discovery';
 import { changeSeverity, setTreated } from '../health';
 import { applyMentalEffect } from '../mental/effects';
 import { sentence } from '../legal';
-import { changeRent, moveInTogether, moveTo, refreshHousingCost, sellHome, settleHousehold, supportingParent } from '../housing';
+import { changeRent, joinableParent, moveInTogether, moveTo, refreshHousingCost, sellHome, settleHousehold } from '../housing';
 import { costPrice, payCost, rentMonthsAmount } from '../costs';
 import { createStepchildren } from '../family/children';
 import { applyCustody } from '../family/custody';
@@ -42,6 +42,7 @@ import { applySportsEffect } from '../sports/effects';
 import { applyLaterEffect } from '../later/effects';
 import { applyFaithEffect, applyGroupEffect, applyValueEffect } from '../belonging/effects';
 import { applyBusinessEffect } from '../business/effects';
+import { applyMigrationEffect } from '../migration/effects';
 import { whereabouts } from '../presence';
 import { clampInt } from '../random';
 import { otherCity } from './casting';
@@ -82,6 +83,7 @@ function adjustScore(state: LifeState, key: EffectStatKey, delta: number): void 
 }
 
 const handlers: { [T in Effect['type']]: Handler<T> } = {
+  migration: (state, effect, ctx) => applyMigrationEffect(state, effect, ctx.content),
   language: (state, effect, ctx) => { gainLanguage(state.character.languages, effect.id, ctx.content.balance.languages.eventGain, state.currentYear); },
   stat: (state, effect) => adjustScore(state, effect.key, effect.delta),
 
@@ -130,7 +132,7 @@ const handlers: { [T in Effect['type']]: Handler<T> } = {
     const city = state.character.cityId;
     switch (effect.action) {
       case 'move_home': {
-        const parent = supportingParent(state);
+        const parent = joinableParent(state, ctx.content);
         if (parent && h.kind !== 'owned' && h.kind !== 'with_parents' && h.kind !== 'incarcerated') {
           moveTo(state, 'with_parents', parent.cityId, ctx.content);
           afterMove(state, city, ctx.content);

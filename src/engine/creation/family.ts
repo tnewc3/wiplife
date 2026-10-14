@@ -1,4 +1,5 @@
 import { nativeLanguages, householdLanguages } from '../languages';
+import { citizenshipsFromCity } from '../migration/citizenship';
 /**
  * Generates the family a character is born into: one or two parents, any
  * older siblings and (C1) each parent's two parents, with believable ages,
@@ -140,6 +141,7 @@ export function generateFamily(rng: RngState, content: ContentBundle, request: F
     const person: Person = {
       id: request.nextId(),
       languages: [],
+      citizenships: citizenshipsFromCity(cityId, content),
       name: { first: pickUnused(rng, nameSource.first[category], usedFirst), last: personLastName },
       birthYear: personBirthYear,
       alive: true,

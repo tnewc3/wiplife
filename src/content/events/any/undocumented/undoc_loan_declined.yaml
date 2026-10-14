@@ -1,0 +1,79 @@
+{
+  "id": "undoc_loan_declined",
+  "title": "A short conversation at the bank",
+  "text": "The repair cannot wait, and savings will not cover it. At the bank the form has a line for identification you do not have. The conversation is short and polite.",
+  "category": "undocumented",
+  "tone": "serious",
+  "rarity": "common",
+  "lifeStages": [
+    "youngAdult",
+    "adult",
+    "senior"
+  ],
+  "followUpOnly": true,
+  "requires": {
+    "all": [
+      {
+        "age": {
+          "gte": 18
+        }
+      },
+      {
+        "migration": {
+          "status": [
+            "undocumented"
+          ]
+        }
+      }
+    ]
+  },
+  "weight": {
+    "base": 1
+  },
+  "cooldownYears": 4,
+  "choices": [
+    {
+      "id": "ask_neighbor",
+      "label": "Ask a neighbor for a short loan",
+      "outcome": {
+        "text": "The neighbor lends it without making you explain. You will repay the kindness in meals as well as money.",
+        "effects": [
+          {
+            "type": "money",
+            "delta": 250
+          },
+          {
+            "type": "debt",
+            "action": "add",
+            "kind": "personal",
+            "amount": 250
+          },
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "do_without",
+      "label": "Do without",
+      "outcome": {
+        "text": "The thing stays broken. You work around it, and the workaround becomes a habit.",
+        "effects": [
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": 2
+          },
+          {
+            "type": "stat",
+            "key": "happiness",
+            "delta": -1
+          }
+        ]
+      }
+    }
+  ]
+}

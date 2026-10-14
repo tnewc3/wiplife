@@ -1,0 +1,87 @@
+{
+  "id": "emigration_waiting_doubt",
+  "title": "Second thoughts",
+  "text": "Somewhere between the forms and the waiting, you start to wonder what you are leaving. Every familiar street looks a little more precious.",
+  "category": "emigration",
+  "tone": "neutral",
+  "rarity": "common",
+  "lifeStages": [
+    "youngAdult",
+    "adult",
+    "senior"
+  ],
+  "followUpOnly": true,
+  "requires": {
+    "all": [
+      {
+        "age": {
+          "gte": 18
+        }
+      },
+      {
+        "migration": {
+          "application": [
+            "pending"
+          ]
+        }
+      }
+    ]
+  },
+  "weight": {
+    "base": 1
+  },
+  "choices": [
+    {
+      "id": "tell_someone",
+      "label": "Tell the person closest to you what you are afraid of",
+      "outcome": {
+        "text": "Saying it out loud makes it smaller. They do not tell you what to do; they say they will help whichever way it goes.",
+        "effects": [
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": -3
+          },
+          {
+            "type": "stat",
+            "key": "happiness",
+            "delta": 2
+          }
+        ]
+      }
+    },
+    {
+      "id": "keep_it_close",
+      "label": "Keep the doubts to yourself",
+      "outcome": {
+        "text": "You carry on as if nothing is wrong. The doubts keep their own hours.",
+        "effects": [
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": 3
+          }
+        ]
+      }
+    },
+    {
+      "id": "make_a_list",
+      "label": "Write down what you want from the move",
+      "outcome": {
+        "text": "The list is shorter than you expected, and clearer. You put it where you will see it.",
+        "effects": [
+          {
+            "type": "stat",
+            "key": "discipline",
+            "delta": 2
+          },
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": -1
+          }
+        ]
+      }
+    }
+  ]
+}

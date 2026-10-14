@@ -1,0 +1,51 @@
+# The events emigration and citizenship (W6) queue. Every event listed is followUpOnly. The first event of the
+# receipt groups (applied, arrived, turnedBack, returned) is a cast-free automatic receipt; the others in the group
+# are alternatives that fit a different situation (an application's kind or route, a way of arriving).
+triggers:
+  applied:
+    - emigration_applied_work
+    - emigration_applied_study
+    - emigration_applied_family
+    - emigration_applied_investment
+    - emigration_applied_permanent
+    - emigration_applied_citizenship
+    - emigration_applied_status
+  # While a longer wait goes on.
+  waiting: [emigration_waiting_doubt, emigration_waiting_language, abroad_test_study]
+  approved: [emigration_approved_entry, emigration_residence_granted, emigration_citizenship_passed, emigration_status_granted]
+  denied: [emigration_denied_entry, emigration_denied_permanent, emigration_citizenship_failed, emigration_status_denied]
+  arrived: [emigration_arrived_legal, emigration_arrived_without_papers]
+  visaEnding: [permit_ending_work, permit_ending_study]
+  deported: [removal_flight_home, removal_left_behind]
+  ruleChange: [rules_change_window]
+  turnedBack: [emigration_turned_back]
+  returned: [emigration_returned_home]
+yearly:
+  # Pay kept back, unsafe work, a threat: a year of informal work.
+  exploitation: [undoc_wages_held_back, undoc_unsafe_work, undoc_threat]
+  closeCall: [undoc_close_call_stop, undoc_close_call_knock, undoc_close_call_rumor]
+  undocumented:
+    - undoc_long_evenings
+    - undoc_community_table
+    - undoc_license_closed
+    - undoc_loan_declined
+    - undoc_forms_for_school
+    - undoc_sick_without_care
+    - undoc_cannot_visit
+    - undoc_marriage_question
+    - undoc_helped_newcomer
+    - undoc_legal_clinic
+  # Life in a new country with or without a permit.
+  abroad:
+    - abroad_first_week
+    - abroad_homesick
+    - abroad_paperwork_maze
+    - abroad_neighbors_welcome
+    - abroad_holiday_far
+    - abroad_relative_asks_money
+    - abroad_remittance_thanks
+    - abroad_visit_home
+    - abroad_children_papers
+    - abroad_staying_for_good
+    - abroad_citizenship_question
+    - abroad_return_question

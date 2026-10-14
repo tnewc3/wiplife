@@ -1,4 +1,7 @@
 import { emptyTravel } from '../travel/types';
+import { emptyMigration } from '../migration/types';
+import { citizenshipsFromCity } from '../migration/citizenship';
+import { inheritStanding } from '../migration/heir';
 import { emptyLanguageLearning, legacyLanguages } from '../languages';
 /**
  * Heir conversion (E2b): when a life ends, any living child can carry on, at
@@ -139,6 +142,7 @@ export function createFosterCarer(life: LifeState, rng: RngState, content: Conte
   const id = nextPersonId(life);
   const person: Person = {
     id,
+    citizenships: citizenshipsFromCity(life.character.cityId, content),
     languages: legacyLanguages(life.character.cityId, life.currentYear, `${life.seed}:${id}`, content),
     name: { first: pickUnused(rng, heritage.first[category], used), last: pick(rng, heritage.last) },
     birthYear: life.currentYear - nextInt(rng, fosterAge.min, fosterAge.max),
@@ -232,6 +236,7 @@ export function continueAsHeir(dead: LifeState, heirId: Id, content: ContentBund
   people[parentId] = {
     id: parentId,
     languages: cloneJson(c.languages),
+    citizenships: cloneJson(c.citizenships),
     name: { ...c.name },
     birthYear: dead.birthYear,
     alive: false,
@@ -343,6 +348,7 @@ export function continueAsHeir(dead: LifeState, heirId: Id, content: ContentBund
   hidden.reputation = clampInt(hidden.reputation + Math.round((dead.lineage.reputation - 50) * hb.reputation.carry), 0, 100);
   const character: Character = {
     languages: cloneJson(candidate.languages),
+    citizenships: cloneJson(candidate.citizenships),
     name: { ...candidate.name },
     age,
     lifeStage: lifeStageForAge(age, content),
@@ -408,6 +414,7 @@ export function continueAsHeir(dead: LifeState, heirId: Id, content: ContentBund
     belonging: emptyBelonging(),
     business: emptyBusiness(),
     travel: emptyTravel(),
+    migration: emptyMigration(),
     languages: emptyLanguageLearning(),
   };
 
@@ -528,6 +535,8 @@ export function continueAsHeir(dead: LifeState, heirId: Id, content: ContentBund
   // The input log starts with a snapshot, so the life can be replayed from here (src/engine/replay.ts).
   const snapshot = JSON.parse(JSON.stringify({ ...life, inputLog: [] })) as Record<string, unknown>;
   life.inputLog = [{ year, kind: 'create', payload: { heir: true, startAge: age, parentLifeId: dead.id, snapshot } }];
+  // W6: they live where the guardian or the family home is; if that is not a country they are a citizen of, they hold the standing of the household that raised them.
+  inheritStanding(life, dead, content);
   return life;
 }
 

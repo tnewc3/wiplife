@@ -1135,7 +1135,7 @@ describe("people's own lives (E3)", () => {
     expect([...registered].every((id) => result.bundle.events[id])).toBe(true);
     const lines = Object.values(result.bundle.text.news.lines).reduce((sum, l) => sum + l.length, 0);
     expect(lines).toBeGreaterThanOrEqual(55);
-    expect(lines).toBeLessThanOrEqual(70);
+    expect(lines).toBeLessThanOrEqual(80);
     expect(result.warnings).toEqual([]);
   });
 

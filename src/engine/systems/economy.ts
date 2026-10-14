@@ -39,6 +39,7 @@ import { housingCost, livingCost, moveTo, ownsHome, refreshHousingCost, sellHome
 import { childCosts, childSupportDue } from '../family/costs';
 import { careCosts } from '../lives/care';
 import { groupCosts } from '../belonging/groups';
+import { remittanceDue } from '../migration/remit';
 import { sceneCost } from '../fame/step';
 import { possessionCosts } from '../possessions/costs';
 import { recordEarnings, retirementBenefit } from '../retirement';
@@ -186,8 +187,11 @@ export function runEconomy(state: LifeState, content: ContentBundle): void {
     housing -= support - covered;
   }
 
+  // W6: money sent home comes from what is left after the essentials, never into debt.
+  const remittances = remittanceDue(state, gross, before - housing - living - kids - care - supportPaid - upkeep - insurance - giving - businessPut, content);
+
   // 5. Minimum payments from what is left, then any shortfall is borrowed.
-  let available = before - housing - living - kids - care - supportPaid - upkeep - insurance - giving - businessPut;
+  let available = before - housing - living - kids - care - supportPaid - upkeep - insurance - giving - businessPut - remittances;
   let debtPayments = garnished;
   let missedAny = false;
   const ordered = [...f.debts].sort((a, b) => PAYMENT_ORDER[a.kind] - PAYMENT_ORDER[b.kind]);
@@ -207,7 +211,7 @@ export function runEconomy(state: LifeState, content: ContentBundle): void {
       debt.missed = 0;
     }
   }
-  const net = gross + retirement + interest + supportReceived - tax - housing - living - kids - care - supportPaid - upkeep - insurance - giving - businessPut - debtPayments;
+  const net = gross + retirement + interest + supportReceived - tax - housing - living - kids - care - supportPaid - upkeep - insurance - giving - businessPut - remittances - debtPayments;
   let borrowed = 0;
   if (available >= 0) {
     f.savings = wholeDollars(available);
@@ -265,6 +269,7 @@ export function runEconomy(state: LifeState, content: ContentBundle): void {
     upkeep,
     insurance,
     giving,
+    ...(remittances > 0 ? { remittances } : {}),
     business: businessPut,
     net,
   };

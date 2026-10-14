@@ -9,6 +9,8 @@ export function MoreTab() {
   const openSettings = useAppStore((s) => s.openSettings);
   const openLifeHistory = useAppStore((s) => s.openLifeHistory);
   const openTravel = useAppStore((s) => s.openTravel);
+  const openMigration = useAppStore((s) => s.openMigration);
+  const grown = useAppStore((s) => s.life !== null && s.life.character.age >= content.balance.immigration.minAge);
   const openHome = useAppStore((s) => s.openHome);
   const openHealth = useAppStore((s) => s.openHealth);
   const openFamily = useAppStore((s) => s.openFamily);
@@ -29,6 +31,11 @@ export function MoreTab() {
   return (
     <div className="flex flex-col gap-2">
       <Button variant="secondary" block onClick={openTravel}>Plan a trip</Button>
+      {grown && (
+        <Button variant="secondary" block onClick={openMigration} data-testid="more-migration">
+          Move abroad and citizenship
+        </Button>
+      )}
       <Button variant="secondary" block onClick={openHome}>
         Home
       </Button>

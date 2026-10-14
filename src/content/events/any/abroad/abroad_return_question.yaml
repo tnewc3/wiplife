@@ -1,0 +1,88 @@
+{
+  "id": "abroad_return_question",
+  "title": "Would you go back?",
+  "text": "On a bad day, the question appears without being asked: would you go back? On a good day it is the same question, in a different light.",
+  "category": "abroad",
+  "tone": "neutral",
+  "rarity": "common",
+  "lifeStages": [
+    "youngAdult",
+    "adult",
+    "senior"
+  ],
+  "followUpOnly": true,
+  "requires": {
+    "all": [
+      {
+        "age": {
+          "gte": 18
+        }
+      },
+      {
+        "migration": {
+          "settled": true
+        }
+      },
+      {
+        "migration": {
+          "years": {
+            "gte": 2
+          }
+        }
+      }
+    ]
+  },
+  "weight": {
+    "base": 2
+  },
+  "cooldownYears": 4,
+  "choices": [
+    {
+      "id": "stay",
+      "label": "Decide to give this place another year",
+      "outcome": {
+        "text": "The decision brings an odd calm. You notice things you like about your street.",
+        "effects": [
+          {
+            "type": "stat",
+            "key": "happiness",
+            "delta": 2
+          }
+        ]
+      }
+    },
+    {
+      "id": "plan_return",
+      "label": "Start sketching a plan for returning",
+      "outcome": {
+        "text": "On paper it looks possible, which is a relief and a loss. You keep the sketch where you can find it.",
+        "effects": [
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": 1
+          },
+          {
+            "type": "stat",
+            "key": "discipline",
+            "delta": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "visit_first",
+      "label": "Visit first and see how it feels",
+      "outcome": {
+        "text": "A decision that depends on a feeling you won't have until you arrive. Reasonable, and a little frightening.",
+        "effects": [
+          {
+            "type": "stat",
+            "key": "smarts",
+            "delta": 1
+          }
+        ]
+      }
+    }
+  ]
+}

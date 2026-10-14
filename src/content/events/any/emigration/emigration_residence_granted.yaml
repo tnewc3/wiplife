@@ -1,0 +1,80 @@
+{
+  "id": "emigration_residence_granted",
+  "title": "No end date",
+  "text": "The letter says permanent. There is no expiry to count down toward, no renewal to dread. You are allowed to stay in {appCountry} for good.",
+  "category": "emigration",
+  "tone": "light",
+  "rarity": "common",
+  "lifeStages": [
+    "youngAdult",
+    "adult",
+    "senior"
+  ],
+  "followUpOnly": true,
+  "requires": {
+    "all": [
+      {
+        "age": {
+          "gte": 18
+        }
+      },
+      {
+        "migration": {
+          "application": [
+            "approved"
+          ],
+          "kind": [
+            "permanent"
+          ]
+        }
+      }
+    ]
+  },
+  "weight": {
+    "base": 1
+  },
+  "choices": [
+    {
+      "id": "celebrate",
+      "label": "Mark it with a meal for the people who helped",
+      "outcome": {
+        "text": "A long table, mismatched chairs, and speeches nobody planned.",
+        "effects": [
+          {
+            "type": "money",
+            "delta": -120
+          },
+          {
+            "type": "stat",
+            "key": "happiness",
+            "delta": 5
+          },
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": -3
+          }
+        ]
+      }
+    },
+    {
+      "id": "quiet",
+      "label": "Let it sink in on your own",
+      "outcome": {
+        "text": "You walk home the long way and keep touching the paper in your pocket.",
+        "effects": [
+          {
+            "type": "stat",
+            "key": "happiness",
+            "delta": 4
+          },
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": -4
+          }
+        ]
+      }
+    }
+  ]
+}

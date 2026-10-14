@@ -1,0 +1,95 @@
+{
+  "id": "undoc_community_table",
+  "title": "A seat at the table",
+  "text": "A neighbor invites you to an evening run by a newcomers' group: shared food, conversation practice, someone who knows how to read the forms. 'Nobody asks questions you do not want to answer,' the neighbor says.",
+  "category": "undocumented",
+  "tone": "light",
+  "rarity": "common",
+  "lifeStages": [
+    "youngAdult",
+    "adult",
+    "senior"
+  ],
+  "followUpOnly": true,
+  "requires": {
+    "all": [
+      {
+        "age": {
+          "gte": 18
+        }
+      },
+      {
+        "migration": {
+          "status": [
+            "undocumented"
+          ]
+        }
+      }
+    ]
+  },
+  "weight": {
+    "base": 3
+  },
+  "cooldownYears": 4,
+  "choices": [
+    {
+      "id": "join",
+      "label": "Go, and keep going",
+      "outcome": {
+        "text": "The first evening you say little. By the third, you are chopping onions beside a stranger who becomes a friend.",
+        "effects": [
+          {
+            "type": "group",
+            "action": "join",
+            "level": "casual",
+            "defId": "newcomers_network"
+          },
+          {
+            "type": "stat",
+            "key": "happiness",
+            "delta": 3
+          }
+        ]
+      }
+    },
+    {
+      "id": "commit",
+      "label": "Join in properly and offer to help",
+      "outcome": {
+        "text": "Fixing chairs and pouring tea is not what you expected to be doing here, and it feels like belonging.",
+        "effects": [
+          {
+            "type": "group",
+            "action": "join",
+            "level": "committed",
+            "defId": "newcomers_network"
+          },
+          {
+            "type": "stat",
+            "key": "happiness",
+            "delta": 3
+          },
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": -1
+          }
+        ]
+      }
+    },
+    {
+      "id": "not_yet",
+      "label": "Say thank you, and not yet",
+      "outcome": {
+        "text": "The neighbor nods as if the answer were understood, and it is. The invitation stays open.",
+        "effects": [
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": 1
+          }
+        ]
+      }
+    }
+  ]
+}

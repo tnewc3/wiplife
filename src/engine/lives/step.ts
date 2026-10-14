@@ -14,6 +14,7 @@ import { isChildKind, isPartnerKind } from '../relationships';
 import type { Id, LifeState, Person, Relationship } from '../types';
 import { careerStep } from './career';
 import { childrenStep, growingStep, movingStep } from './family';
+import { emigrationStep } from './emigrate';
 import { loveStep } from './love';
 import { ageOfPerson, cloneLife, defaultLife, levelForWealth, tierFor } from './model';
 import { queueRequests } from './requests';
@@ -58,7 +59,7 @@ function subjectFor(ctx: Ctx, id: Id, person: Person, rel: Relationship): Subjec
   } else if (!track && life.level !== 0) {
     life.level = 0;
   }
-  return { id, person, rel, life, tier: life.tier, age: ageOfPerson(ctx.view, person), occupation: person.occupation, wealth: person.wealthLevel, cityId: person.cityId, said: 0 };
+  return { id, person, rel, life, tier: life.tier, age: ageOfPerson(ctx.view, person), occupation: person.occupation, wealth: person.wealthLevel, cityId: person.cityId, citizenships: [...person.citizenships], said: 0 };
 }
 
 function stepPerson(ctx: Ctx, id: Id, person: Person, rel: Relationship): void {
@@ -67,7 +68,7 @@ function stepPerson(ctx: Ctx, id: Id, person: Person, rel: Relationship): void {
   if (d.has('growing')) growingStep(ctx, s);
   if (d.has('career')) careerStep(ctx, s);
   if (d.has('love')) loveStep(ctx, s);
-  if (d.has('moving')) movingStep(ctx, s);
+  if (d.has('moving') && !emigrationStep(ctx, s)) movingStep(ctx, s);
   if (d.has('children')) childrenStep(ctx, s);
   if (d.has('trouble')) {
     troubleStep(ctx, s);
@@ -75,7 +76,7 @@ function stepPerson(ctx: Ctx, id: Id, person: Person, rel: Relationship): void {
   }
   // Write back what changed (most years nothing does, and an untouched person costs nothing).
   const lifeChanged = person.life === undefined || JSON.stringify(person.life) !== JSON.stringify(s.life);
-  if (!lifeChanged && s.occupation === person.occupation && s.wealth === person.wealthLevel && s.cityId === person.cityId) return;
+  if (!lifeChanged && s.occupation === person.occupation && s.wealth === person.wealthLevel && s.cityId === person.cityId && s.citizenships.length === person.citizenships.length) return;
   const target = ctx.state.people[id]!;
   if (lifeChanged) target.life = s.life;
   if (s.occupation !== person.occupation) {
@@ -84,6 +85,7 @@ function stepPerson(ctx: Ctx, id: Id, person: Person, rel: Relationship): void {
   }
   if (s.wealth !== person.wealthLevel) target.wealthLevel = s.wealth;
   if (s.cityId !== person.cityId) target.cityId = s.cityId;
+  if (s.citizenships.length !== person.citizenships.length) target.citizenships = s.citizenships;
 }
 
 /** Keeps the year's lines: each change once, the biggest first, up to the cap; older years beyond the balance's few are dropped. */

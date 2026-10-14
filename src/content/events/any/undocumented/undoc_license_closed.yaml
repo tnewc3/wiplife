@@ -1,0 +1,69 @@
+{
+  "id": "undoc_license_closed",
+  "title": "A course you cannot finish",
+  "text": "You finished the course, and you passed. The license at the end needs papers you do not have. The clerk says it gently and does not look up.",
+  "category": "undocumented",
+  "tone": "serious",
+  "rarity": "common",
+  "lifeStages": [
+    "youngAdult",
+    "adult",
+    "senior"
+  ],
+  "followUpOnly": true,
+  "requires": {
+    "all": [
+      {
+        "age": {
+          "gte": 18
+        }
+      },
+      {
+        "migration": {
+          "status": [
+            "undocumented"
+          ]
+        }
+      }
+    ]
+  },
+  "weight": {
+    "base": 1
+  },
+  "cooldownYears": 4,
+  "choices": [
+    {
+      "id": "work_informally",
+      "label": "Use the skill in informal work",
+      "outcome": {
+        "text": "People still need what you can do. It earns less and carries no protection, and you do it well.",
+        "effects": [
+          {
+            "type": "stat",
+            "key": "smarts",
+            "delta": 1
+          },
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": 2
+          }
+        ]
+      }
+    },
+    {
+      "id": "save_for_later",
+      "label": "Keep the certificate for when your status changes",
+      "outcome": {
+        "text": "It goes in the folder of things that wait. The folder is getting thick.",
+        "effects": [
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": 1
+          }
+        ]
+      }
+    }
+  ]
+}

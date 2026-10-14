@@ -26,7 +26,9 @@ function anotherCity(ctx: Ctx, avoid: Id): Id {
 export function movingStep(ctx: Ctx, s: Subject): void {
   const { adultAge } = ctx.content.balance.relationships;
   const rng = ctx.state.rng;
-  const yours = ctx.view.character.cityId;
+  // W5: while you are abroad for a while, nobody moves to the city you are visiting.
+  const stay = ctx.view.travel.residence;
+  const yours = stay && !stay.settled ? stay.homeCityId : ctx.view.character.cityId;
   if (s.age < adultAge || isJailed(s.life) || s.life.care === 'home') return;
   if (whereabouts(ctx.view, s.id, ctx.content) === 'household') return;
   if (!chance(rng, curveAt(ctx.bal.moving.rate, s.age))) return;

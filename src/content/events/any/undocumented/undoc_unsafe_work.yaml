@@ -1,0 +1,98 @@
+{
+  "id": "undoc_unsafe_work",
+  "title": "A job that is not safe",
+  "text": "The work is not safe. A guard is missing from a machine, a ladder is held together with tape. Everyone knows. Nobody says it, because everyone needs the shift.",
+  "category": "undocumented",
+  "tone": "serious",
+  "rarity": "common",
+  "lifeStages": [
+    "youngAdult",
+    "adult",
+    "senior"
+  ],
+  "followUpOnly": true,
+  "requires": {
+    "all": [
+      {
+        "age": {
+          "gte": 18
+        }
+      },
+      {
+        "migration": {
+          "status": [
+            "undocumented"
+          ]
+        }
+      }
+    ]
+  },
+  "weight": {
+    "base": 1
+  },
+  "cooldownYears": 4,
+  "choices": [
+    {
+      "id": "speak_up",
+      "label": "Say something to the person in charge",
+      "outcome": {
+        "text": "They agree it should be fixed, and it is, slowly. You are not asked back for a week.",
+        "effects": [
+          {
+            "type": "migration",
+            "action": "risk",
+            "delta": 2
+          },
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": 2
+          },
+          {
+            "type": "stat",
+            "key": "happiness",
+            "delta": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "work_carefully",
+      "label": "Keep working, and be careful",
+      "outcome": {
+        "text": "You are careful. It does not make the ladder safer, only you more tired.",
+        "effects": [
+          {
+            "type": "stat",
+            "key": "health",
+            "delta": -3
+          },
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": 2
+          }
+        ]
+      }
+    },
+    {
+      "id": "walk_away",
+      "label": "Walk away and find other work",
+      "outcome": {
+        "text": "It takes a few days of looking. Nobody asks why you left, and you are grateful for that.",
+        "effects": [
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": 1
+          },
+          {
+            "type": "stat",
+            "key": "happiness",
+            "delta": 1
+          }
+        ]
+      }
+    }
+  ]
+}

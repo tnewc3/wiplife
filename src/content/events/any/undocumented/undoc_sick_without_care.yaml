@@ -1,0 +1,73 @@
+{
+  "id": "undoc_sick_without_care",
+  "title": "Sick, and counting",
+  "text": "You are ill, and you are doing the arithmetic. The clinic that sees everyone has a queue; the one that asks for papers does not. Staying home is the option that costs nothing now.",
+  "category": "undocumented",
+  "tone": "serious",
+  "rarity": "common",
+  "lifeStages": [
+    "youngAdult",
+    "adult",
+    "senior"
+  ],
+  "followUpOnly": true,
+  "requires": {
+    "all": [
+      {
+        "age": {
+          "gte": 18
+        }
+      },
+      {
+        "migration": {
+          "status": [
+            "undocumented"
+          ]
+        }
+      }
+    ]
+  },
+  "weight": {
+    "base": 1
+  },
+  "cooldownYears": 4,
+  "choices": [
+    {
+      "id": "clinic",
+      "label": "Go to the clinic that sees everyone",
+      "outcome": {
+        "text": "The wait is long. The doctor is tired, kind, and doesn't ask for anything you do not have.",
+        "effects": [
+          {
+            "type": "money",
+            "delta": -90
+          },
+          {
+            "type": "stat",
+            "key": "health",
+            "delta": 3
+          }
+        ]
+      }
+    },
+    {
+      "id": "wait_it_out",
+      "label": "Wait it out at home",
+      "outcome": {
+        "text": "You are better by the weekend, or enough better. You do not like how close it was.",
+        "effects": [
+          {
+            "type": "stat",
+            "key": "health",
+            "delta": -3
+          },
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": 1
+          }
+        ]
+      }
+    }
+  ]
+}

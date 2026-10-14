@@ -1,0 +1,76 @@
+{
+  "id": "undoc_helped_newcomer",
+  "title": "Someone newer than you",
+  "text": "Someone at the market is lost in the way newcomers are, with an overcareful politeness. You can see the whole story of their first days at a glance.",
+  "category": "undocumented",
+  "tone": "light",
+  "rarity": "common",
+  "lifeStages": [
+    "youngAdult",
+    "adult",
+    "senior"
+  ],
+  "followUpOnly": true,
+  "requires": {
+    "all": [
+      {
+        "age": {
+          "gte": 18
+        }
+      },
+      {
+        "migration": {
+          "status": [
+            "undocumented"
+          ]
+        }
+      },
+      {
+        "migration": {
+          "years": {
+            "gte": 1
+          }
+        }
+      }
+    ]
+  },
+  "weight": {
+    "base": 1
+  },
+  "cooldownYears": 4,
+  "choices": [
+    {
+      "id": "show_around",
+      "label": "Walk the newcomer through the neighborhood",
+      "outcome": {
+        "text": "You point out the places that matter: the bakery, the bus that goes everywhere, the room with the free forms. The newcomer writes it all down.",
+        "effects": [
+          {
+            "type": "stat",
+            "key": "happiness",
+            "delta": 3
+          },
+          {
+            "type": "group",
+            "action": "community",
+            "delta": 3
+          }
+        ]
+      }
+    },
+    {
+      "id": "give_number",
+      "label": "Give the newcomer a number to call",
+      "outcome": {
+        "text": "A small kindness, delivered quickly. It is the kind of thing that matters more than it looks.",
+        "effects": [
+          {
+            "type": "stat",
+            "key": "happiness",
+            "delta": 1
+          }
+        ]
+      }
+    }
+  ]
+}

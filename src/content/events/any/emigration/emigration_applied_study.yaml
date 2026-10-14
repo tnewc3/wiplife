@@ -1,0 +1,43 @@
+{
+  "id": "emigration_applied_study",
+  "title": "A place to study",
+  "text": "Your application to study in {appCountry} is in: a program, a city and a permit that depends on both.",
+  "category": "emigration",
+  "tone": "neutral",
+  "rarity": "common",
+  "lifeStages": [
+    "youngAdult",
+    "adult",
+    "senior"
+  ],
+  "followUpOnly": true,
+  "requires": {
+    "all": [
+      {
+        "age": {
+          "gte": 18
+        }
+      },
+      {
+        "migration": {
+          "application": [
+            "pending"
+          ],
+          "kind": [
+            "entry"
+          ],
+          "route": [
+            "study_work"
+          ]
+        }
+      }
+    ]
+  },
+  "weight": {
+    "base": 1
+  },
+  "autoOutcome": {
+    "text": "The answer is expected by {decisionYear}. Until then you can plan, and try not to plan too much.",
+    "effects": []
+  }
+}

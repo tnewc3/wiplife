@@ -1,3 +1,4 @@
+import { birthCitizenships, parentStanding } from '../migration/citizenship';
 import { householdLanguages } from '../languages';
 /**
  * Children as people (E2a): creating one (born to you, adopted, through IVF
@@ -144,6 +145,7 @@ export function createChild(state: LifeState, rng: RngState, spec: NewChild, con
   const canCarry = rollCanCarry(rng, category, content);
   const person: Person = {
     id,
+    citizenships: birthCitizenships(state.character.cityId, step && parentPerson ? [{ citizenships: parentPerson.citizenships }] : [parentStanding(state, content), ...(parentPerson ? [{ citizenships: parentPerson.citizenships }] : [])], content),
     languages: householdLanguages(state.character.cityId, step && parentPerson ? [parentPerson] : [state.character, ...(parentPerson ? [parentPerson] : [])], state.currentYear, content),
     name: { first, last },
     birthYear: state.currentYear - spec.age,

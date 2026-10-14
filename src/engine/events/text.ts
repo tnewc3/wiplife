@@ -1,4 +1,5 @@
 import { travelValues } from '../travel/travel';
+import { MIGRATION_TEXT_VALUES, migrationTextValues } from '../migration/text';
 import { sharedLanguage } from '../languages';
 import type { EventDef } from '../../content/schemas';
 /**
@@ -51,7 +52,7 @@ export function textContext(state: LifeState, cast: Record<string, Id>, content:
   const holderId = cast.npc ?? cast.person;
   const heard = holderId === undefined ? '' : heardFor(state, holderId, cast[ITEM_ROLE], content);
   // E5: a bound pet is the role `pet` ({pet.name}); a bound vehicle and vacation home give {vehicle}, {homeCity}, and a pet's species {petKind}.
-  const values: Record<string, string | number> = { ...travelValues(state, content), studiedLanguage: content.languages[state.languages.classId ?? ""]?.name ?? "", ...countryTextValues(state, content), age: c.age, ...discoveryValues(state, content), sentence: sentenceText(state, content), since: sinceText(state, since, content), heard, ...teenTextValues(state, content), ...crimeTextValues(state, content), ...fameTextValues(state, content), ...sportsTextValues(state, content), ...belongingTextValues(state, cast, content), ...businessTextValues(state, cast, content) };
+  const values: Record<string, string | number> = { ...travelValues(state, content), ...migrationTextValues(state, content), studiedLanguage: content.languages[state.languages.classId ?? ""]?.name ?? "", ...countryTextValues(state, content), age: c.age, ...discoveryValues(state, content), sentence: sentenceText(state, content), since: sinceText(state, since, content), heard, ...teenTextValues(state, content), ...crimeTextValues(state, content), ...fameTextValues(state, content), ...sportsTextValues(state, content), ...belongingTextValues(state, cast, content), ...businessTextValues(state, cast, content) };
   const pet = castPossession(state, cast, 'pet', 'pet');
   if (pet) {
     roles.pet = { name: { first: pet.name ?? '', last: '' }, pronouns: IT };
@@ -75,7 +76,7 @@ export function textContext(state: LifeState, cast: Record<string, Id>, content:
  * person in the story (npc or person) has heard about you, as a phrase ("that
  * you were fired for stealing"; only where the event requires that they have).
  */
-export const EVENT_TEXT_VALUES = ['destination', 'destinationCountry', 'endYear', 'homeCity', 'travelCost', ...COUNTRY_TEXT_VALUES, 'studiedLanguage', 'age', 'talent', 'latentPeople', 'latentGender', 'latentExpression', 'latentTrait', 'sentence', 'since', 'heard', ...TEEN_TEXT_VALUES, ...CRIME_TEXT_VALUES, ...FAME_TEXT_VALUES, ...SPORTS_TEXT_VALUES, ...BELONGING_TEXT_VALUES, ...BUSINESS_TEXT_VALUES] as const;
+export const EVENT_TEXT_VALUES = [...MIGRATION_TEXT_VALUES, 'destination', 'destinationCountry', 'endYear', 'homeCity', 'travelCost', ...COUNTRY_TEXT_VALUES, 'studiedLanguage', 'age', 'talent', 'latentPeople', 'latentGender', 'latentExpression', 'latentTrait', 'sentence', 'since', 'heard', ...TEEN_TEXT_VALUES, ...CRIME_TEXT_VALUES, ...FAME_TEXT_VALUES, ...SPORTS_TEXT_VALUES, ...BELONGING_TEXT_VALUES, ...BUSINESS_TEXT_VALUES] as const;
 /** E5: values an event may use only when it binds the possession: a pet's species, a vehicle's name, a vacation home's city. */
 export const POSSESSION_TEXT_VALUES = { pet: ['petKind'], vehicle: ['vehicle'], home: ['homeCity'] } as const;
 

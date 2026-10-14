@@ -1,0 +1,74 @@
+{
+  "id": "abroad_citizenship_question",
+  "title": "Will you become one of us?",
+  "text": "Neighbors ask whether you will become a citizen. They mean it kindly. You have started to ask yourself, and the answer has more than one part.",
+  "category": "abroad",
+  "tone": "neutral",
+  "rarity": "common",
+  "lifeStages": [
+    "youngAdult",
+    "adult",
+    "senior"
+  ],
+  "followUpOnly": true,
+  "requires": {
+    "all": [
+      {
+        "age": {
+          "gte": 18
+        }
+      },
+      {
+        "migration": {
+          "settled": true
+        }
+      },
+      {
+        "migration": {
+          "eligible": [
+            "naturalization"
+          ]
+        }
+      }
+    ]
+  },
+  "weight": {
+    "base": 3
+  },
+  "cooldownYears": 4,
+  "choices": [
+    {
+      "id": "study_questions",
+      "label": "Start learning what the test asks",
+      "outcome": {
+        "text": "The questions are about history, rights and how things work. You find yourself reading with a curiosity you did not expect.",
+        "effects": [
+          {
+            "type": "stat",
+            "key": "smarts",
+            "delta": 1
+          },
+          {
+            "type": "stat",
+            "key": "discipline",
+            "delta": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "not_sure",
+      "label": "Admit you are not sure what it would mean",
+      "outcome": {
+        "text": "Belonging is not a form. You decide that is the beginning of an answer.",
+        "effects": [
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": 1
+          }
+        ]
+      }
+    }
+  ]
+}

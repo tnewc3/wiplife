@@ -46,12 +46,17 @@ export async function settle(page: Page): Promise<void> {
 
 /** Answers every event card with its first choice, through to the end of the recap. */
 export async function playThroughEvents(page: Page): Promise<void> {
-  while (await eventSheet(page).isVisible()) {
-    const sheet = eventSheet(page);
-    const next = sheet.getByRole('button', { name: 'Continue' });
-    if (await next.isVisible()) await next.click();
-    else await sheet.getByRole('button').first().click();
-    await settle(page);
+  for (;;) {
+    while (await eventSheet(page).isVisible()) {
+      const sheet = eventSheet(page);
+      const next = sheet.getByRole('button', { name: 'Continue' });
+      if (await next.isVisible()) await next.click();
+      else await sheet.getByRole('button').first().click();
+      await settle(page);
+    }
+    // On a slow machine the next card can open a moment after the last closes: look once more before stopping.
+    await page.waitForTimeout(400);
+    if (!(await eventSheet(page).isVisible())) return;
   }
 }
 

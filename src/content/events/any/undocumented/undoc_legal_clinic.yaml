@@ -1,0 +1,74 @@
+{
+  "id": "undoc_legal_clinic",
+  "title": "An evening with a volunteer lawyer",
+  "text": "A flyer on a noticeboard: a free evening with a volunteer who explains what the rules say and, honestly, what they do not promise. It is easy to walk past.",
+  "category": "undocumented",
+  "tone": "neutral",
+  "rarity": "common",
+  "lifeStages": [
+    "youngAdult",
+    "adult",
+    "senior"
+  ],
+  "followUpOnly": true,
+  "requires": {
+    "all": [
+      {
+        "age": {
+          "gte": 18
+        }
+      },
+      {
+        "migration": {
+          "status": [
+            "undocumented"
+          ]
+        }
+      }
+    ]
+  },
+  "weight": {
+    "base": 1
+  },
+  "cooldownYears": 4,
+  "choices": [
+    {
+      "id": "go",
+      "label": "Go, and write everything down",
+      "outcome": {
+        "text": "You leave with a clearer map and fewer illusions. The volunteer shook your hand like a person, which you remember more than the advice.",
+        "effects": [
+          {
+            "type": "stat",
+            "key": "smarts",
+            "delta": 1
+          },
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": -2
+          },
+          {
+            "type": "migration",
+            "action": "risk",
+            "delta": -2
+          }
+        ]
+      }
+    },
+    {
+      "id": "skip",
+      "label": "Stay home",
+      "outcome": {
+        "text": "The flyer goes back in your pocket. Maybe next month.",
+        "effects": [
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": 1
+          }
+        ]
+      }
+    }
+  ]
+}

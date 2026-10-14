@@ -1,0 +1,104 @@
+{
+  "id": "emigration_citizenship_passed",
+  "title": "The oath",
+  "text": "You passed. In a plain room with a few dozen others, you say the words that make {appCountry} yours on paper, and, to your surprise, a little in your chest too.",
+  "category": "emigration",
+  "tone": "light",
+  "rarity": "common",
+  "lifeStages": [
+    "youngAdult",
+    "adult",
+    "senior"
+  ],
+  "followUpOnly": true,
+  "requires": {
+    "all": [
+      {
+        "age": {
+          "gte": 18
+        }
+      },
+      {
+        "migration": {
+          "application": [
+            "approved"
+          ],
+          "kind": [
+            "naturalization"
+          ]
+        }
+      }
+    ]
+  },
+  "weight": {
+    "base": 1
+  },
+  "choices": [
+    {
+      "id": "invite",
+      "label": "Invite the people who got you here",
+      "outcome": {
+        "text": "They clap in the wrong places and cry in the right ones. Someone brings a flag for a photograph.",
+        "effects": [
+          {
+            "type": "money",
+            "delta": -150
+          },
+          {
+            "type": "stat",
+            "key": "happiness",
+            "delta": 6
+          },
+          {
+            "type": "history",
+            "text": "You became a citizen of {appCountry} among people who had helped you get there.",
+            "importance": 3
+          }
+        ]
+      }
+    },
+    {
+      "id": "simple",
+      "label": "Keep it simple",
+      "outcome": {
+        "text": "A short walk, a coffee, a call to the people who matter. It is enough.",
+        "effects": [
+          {
+            "type": "stat",
+            "key": "happiness",
+            "delta": 5
+          },
+          {
+            "type": "history",
+            "text": "You became a citizen of {appCountry} and kept the day quiet.",
+            "importance": 3
+          }
+        ]
+      }
+    },
+    {
+      "id": "keep_both",
+      "label": "Think about what it means for where you came from",
+      "outcome": {
+        "text": "Becoming a citizen does not cancel the place you are from. You hold both, and you mean to.",
+        "effects": [
+          {
+            "type": "stat",
+            "key": "happiness",
+            "delta": 3
+          },
+          {
+            "type": "migration",
+            "action": "ties",
+            "delta": 2
+          },
+          {
+            "type": "history",
+            "text": "You took the citizenship of {appCountry} without letting go of where you are from.",
+            "importance": 3
+          }
+        ]
+      }
+    }
+  ]
+}

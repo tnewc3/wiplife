@@ -1,4 +1,6 @@
 import { emptyTravel } from './travel/types';
+import { emptyMigration } from './migration/types';
+import { birthCitizenships } from './migration/citizenship';
 import { emptyLanguageLearning, householdLanguages } from './languages';
 /**
  * Life lifecycle (docs/technical.md, section M): createLife, then each year
@@ -93,6 +95,7 @@ export function createLife(input: CreateLifeOptions, content: ContentBundle): Li
     character = {
       // Named once the family (and its heritage) is known.
       languages: [],
+      citizenships: [],
       name: { first: '', last: '' },
       age: 0,
       lifeStage: 'early',
@@ -113,6 +116,7 @@ export function createLife(input: CreateLifeOptions, content: ContentBundle): Li
     const custom = options.custom;
     character = {
       languages: [],
+      citizenships: [],
       name: { ...custom.name },
       age: 0,
       lifeStage: 'early',
@@ -154,6 +158,8 @@ export function createLife(input: CreateLifeOptions, content: ContentBundle): Li
   character.name = { first: family.firstName, last: family.lastName };
   const caregivers = family.people.filter((p) => family.relationships.some((r) => r.personId === p.id && r.kind === "parent"));
   character.languages = householdLanguages(character.birthCityId, caregivers, birthYear, content);
+  // W6: born to citizens of the country (no draws, so replays do not shift).
+  character.citizenships = birthCitizenships(character.birthCityId, caregivers.map((p) => ({ citizenships: p.citizenships })), content);
 
   const life: LifeState = {
     id: `life_${seed}`,
@@ -164,6 +170,7 @@ export function createLife(input: CreateLifeOptions, content: ContentBundle): Li
     phase: 'yearStart',
     character,
     travel: emptyTravel(),
+    migration: emptyMigration(),
     languages: emptyLanguageLearning(),
     people: Object.fromEntries(family.people.map((p) => [p.id, p])),
     relationships: Object.fromEntries(family.relationships.map((r) => [r.personId, r])),

@@ -1,0 +1,64 @@
+{
+  "id": "undoc_close_call_stop",
+  "title": "A stop on the way home",
+  "text": "An officer waves down the car ahead of you and then the one behind. Everyone in the line does their best to look unremarkable. Your hands are steady only because you are watching them.",
+  "category": "undocumented",
+  "tone": "dark",
+  "rarity": "common",
+  "lifeStages": [
+    "youngAdult",
+    "adult",
+    "senior"
+  ],
+  "followUpOnly": true,
+  "requires": {
+    "all": [
+      {
+        "age": {
+          "gte": 18
+        }
+      },
+      {
+        "migration": {
+          "status": [
+            "undocumented"
+          ]
+        }
+      }
+    ]
+  },
+  "weight": {
+    "base": 1
+  },
+  "cooldownYears": 4,
+  "choices": [
+    {
+      "id": "stay_calm",
+      "label": "Stay calm, polite, and plain",
+      "outcome": {
+        "text": "Your turn comes and goes. A nod, a wave. You drive a mile before your breath returns.",
+        "effects": [
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": 4
+          }
+        ]
+      }
+    },
+    {
+      "id": "turn_around",
+      "label": "Turn off at the next street",
+      "outcome": {
+        "text": "Nothing follows you. You sit in a car park until your heart slows and take a longer way home.",
+        "effects": [
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": 3
+          }
+        ]
+      }
+    }
+  ]
+}
