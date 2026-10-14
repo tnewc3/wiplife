@@ -5,7 +5,7 @@
  */
 import type { ContentBundle, CountryId } from '../../content/schemas';
 import { admit, leaveSchool } from '../education';
-import { endJob, afterMove, startJob } from '../career';
+import { endJob, afterMove, startJob, meetsJobRequirements } from '../career';
 import { citiesOfCountry, countryIdOfCity } from '../country';
 import { spend } from '../finance';
 import { canMoveInTogether, moveInCost, moveInTogether, moveTo, ownsHome, sellHome } from '../housing';
@@ -93,7 +93,8 @@ export function emigrate(state: LifeState, content: ContentBundle): void {
   state.migration.application = null;
   bump(state, `arrived:${route}:${app.countryId}`);
   bump(state, `arrivedFrom:${origin}`);
-  if (route === 'work_sponsor' && app.jobId) startJob(state, app.jobId, content);
+  // The language may have faded since the offer: a job you no longer qualify for is not taken.
+  if (route === 'work_sponsor' && app.jobId && meetsJobRequirements(state, content.jobs[app.jobId]!, content)) startJob(state, app.jobId, content);
   if (route === 'study_work' && app.majorId && app.tier) admit(state, { program: 'college', tier: app.tier, majorId: app.majorId }, content);
   if (route === 'family' && app.sponsorId && canMoveInTogether(state, app.sponsorId, content)) moveInTogether(state, app.sponsorId, content);
   stats(state, content.balance.immigration.settle.arrival.happiness, content.balance.immigration.settle.arrival.stress);

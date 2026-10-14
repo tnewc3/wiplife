@@ -101,6 +101,16 @@ describe('W6 citizenship by birthplace and parentage', () => {
   });
 });
 
+describe('W6 sponsored job on arrival', () => {
+  it('is not taken if the local language faded below the job’s requirement since the offer', () => {
+    const approved = decide(settle(performAction(withJob(adult('us')), 'apply_entry', { entry: entry('work_sponsor', 'mx') }, content)), 1);
+    const faded = produce(approved, (d) => { d.character.languages = d.character.languages.map((l) => (l.id === 'es' ? { ...l, skill: 0 } : l)); });
+    const moved = settle(performAction(faded, 'move_abroad', {}, content));
+    expect(moved.travel.residence?.settled).toBe(true);
+    expect(checkInvariants(moved, content)).toEqual([]);
+  });
+});
+
 describe('W6 legal routes, per country', () => {
   for (const to of COUNTRY_IDS) {
     const from: CountryId = to === 'us' ? 'mx' : 'us';
