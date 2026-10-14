@@ -1,3 +1,4 @@
+import { immigrationBalanceSchema, immigrationRegistrySchema, immigrationTextSchema } from './immigration';
 import { destinationSchema, travelBalanceSchema, travelRegistrySchema, travelTextSchema } from './travel';
 import { languageSchema, languagesBalanceSchema, languagesRegistrySchema } from './languages';
 import { z } from 'zod';
@@ -43,6 +44,7 @@ export * from './city';
 export * from './country';
 export * from './languages';
 export * from './travel';
+export * from './immigration';
 export * from './common';
 export * from './economy';
 export * from './education';
@@ -120,6 +122,7 @@ export const singletonTypes = {
   'balance/creation': creationBalanceSchema,
   'balance/countries': countriesBalanceSchema,
   'balance/travel': travelBalanceSchema,
+  'balance/immigration': immigrationBalanceSchema,
   'balance/languages': languagesBalanceSchema,
   'balance/aging': agingBalanceSchema,
   'balance/mortality': mortalityBalanceSchema,
@@ -155,6 +158,7 @@ export const singletonTypes = {
   'text/legal': legalTextSchema,
   'text/discovery': discoveryTextSchema,
   'text/travel': travelTextSchema,
+  'text/immigration': immigrationTextSchema,
   'text/time': timeTextSchema,
   'text/heir': heirTextSchema,
   'text/eulogy': eulogyTextSchema,
@@ -175,6 +179,7 @@ export const singletonTypes = {
   'registries/triggers': triggerRegistrySchema,
   'registries/work': workRegistrySchema,
   'registries/travel': travelRegistrySchema,
+  'registries/immigration': immigrationRegistrySchema,
   'registries/languages': languagesRegistrySchema,
   'registries/health': healthRegistrySchema,
   'registries/legal': legalRegistrySchema,
@@ -237,6 +242,7 @@ export const contentBundleSchema = z.strictObject({
     creation: creationBalanceSchema,
     countries: countriesBalanceSchema,
     travel: travelBalanceSchema,
+    immigration: immigrationBalanceSchema,
     languages: languagesBalanceSchema,
     aging: agingBalanceSchema,
     mortality: mortalityBalanceSchema,
@@ -273,6 +279,7 @@ export const contentBundleSchema = z.strictObject({
     legal: legalTextSchema,
     discovery: discoveryTextSchema,
     travel: travelTextSchema,
+    immigration: immigrationTextSchema,
     time: timeTextSchema,
     heir: heirTextSchema,
     eulogy: eulogyTextSchema,
@@ -295,6 +302,7 @@ export const contentBundleSchema = z.strictObject({
     triggers: triggerRegistrySchema,
     work: workRegistrySchema,
     travel: travelRegistrySchema,
+    immigration: immigrationRegistrySchema,
     languages: languagesRegistrySchema,
     health: healthRegistrySchema,
     legal: legalRegistrySchema,

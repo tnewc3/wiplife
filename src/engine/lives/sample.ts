@@ -6,6 +6,7 @@
  */
 import type { Condition, ContentBundle, LifeCondition } from '../../content/schemas';
 import type { Id, LifeState } from '../types';
+import { countryIdOfCity } from '../country';
 import { defaultLife } from './model';
 
 /** The `life` condition the event's requirements put on a role, if any. */
@@ -65,6 +66,7 @@ export function giveSampleLife(state: LifeState, personId: Id, q: LifeCondition 
     life.care = q.care[0]!;
     life.careSince = year;
   }
+  if (q?.emigrated) life.emigrated = { year: year - 1, countryId: countryIdOfCity(person.cityId, content), from: state.character.cityId, papers: q.papers ?? true };
   if (q?.recovered) {
     const def = condition('addiction');
     if (def) life.recovered.push({ refId: def.id, year: year - 1 });

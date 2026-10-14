@@ -1,0 +1,43 @@
+{
+  "id": "emigration_applied_investment",
+  "title": "A large commitment",
+  "text": "Your application to settle in {appCountry} as an investor is filed, with a large sum held while it is decided.",
+  "category": "emigration",
+  "tone": "neutral",
+  "rarity": "common",
+  "lifeStages": [
+    "youngAdult",
+    "adult",
+    "senior"
+  ],
+  "followUpOnly": true,
+  "requires": {
+    "all": [
+      {
+        "age": {
+          "gte": 18
+        }
+      },
+      {
+        "migration": {
+          "application": [
+            "pending"
+          ],
+          "kind": [
+            "entry"
+          ],
+          "route": [
+            "investment"
+          ]
+        }
+      }
+    ]
+  },
+  "weight": {
+    "base": 1
+  },
+  "autoOutcome": {
+    "text": "A decision is expected by {decisionYear}. If the answer is no, what was held comes back to you.",
+    "effects": []
+  }
+}

@@ -1,4 +1,5 @@
 import { emptyTravel } from '../engine/travel/types';
+import { emptyMigration } from '../engine/migration/types';
 // Read data directly: migrations also run in Node tools without Vite's import.meta.env.
 import compiled from '../content/compiled/content.json' with { type: 'json' };
 import type { ContentBundle } from '../content/schemas';
@@ -487,7 +488,35 @@ export const migrations: readonly Migration[] = [
     description: 'W5: empty travel and residence; preserve existing life and replay snapshots.',
     migrate: upgradeTravelData,
   },
+  {
+    from: 26,
+    description: 'W6: citizenships from the birth city (you) and the city each person lives in; empty migration record. Nobody had emigrated before this version, so no status is invented.',
+    migrate: upgradeMigrationData,
+  },
 ];
+
+function upgradeMigrationData(data: unknown): unknown {
+  const content = compiled as ContentBundle;
+  if (!isRecord(data) || !isRecord(data.character)) return data;
+  const countryOf = (cityId: unknown): string => {
+    const city = typeof cityId === 'string' ? content.cities[cityId] : undefined;
+    return city?.countryId ?? 'us';
+  };
+  const people = isRecord(data.people)
+    ? Object.fromEntries(Object.entries(data.people).map(([id, p]) => [id, isRecord(p) ? { ...p, citizenships: p.citizenships ?? [countryOf(p.cityId)] } : p]))
+    : data.people;
+  const inputLog = Array.isArray(data.inputLog) ? data.inputLog.map((entry: unknown) => {
+    if (!isRecord(entry) || !isRecord(entry.payload) || !isRecord(entry.payload.snapshot)) return entry;
+    return { ...entry, payload: { ...entry.payload, snapshot: upgradeMigrationData(entry.payload.snapshot) } };
+  }) : data.inputLog;
+  return {
+    ...data,
+    inputLog,
+    people,
+    character: { ...data.character, citizenships: data.character.citizenships ?? [countryOf(data.character.birthCityId ?? data.character.cityId)] },
+    migration: data.migration ?? emptyMigration(),
+  };
+}
 
 function upgradeTravelData(data: unknown): unknown {
   if (!isRecord(data)) return data;

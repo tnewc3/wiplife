@@ -1,4 +1,5 @@
 import { runTravel } from './travel/travel';
+import { runMigration } from './migration/step';
 import { runLanguages } from './languages';
 /**
  * The year pipeline (docs/technical.md, section M): the steps beginYear runs,
@@ -74,6 +75,7 @@ export const YEAR_PIPELINE: readonly PipelineStep[] = [
   { id: 'business', run: runBusiness },
   { id: 'education', run: runEducation },
   { id: 'languages', run: runLanguages },
+  { id: 'migration', run: runMigration },
   { id: 'teen', run: runTeen },
   { id: 'career', run: runCareer },
   { id: 'economy', run: runEconomy },

@@ -1,5 +1,5 @@
 # Test pack: a death asks for a funeral, and every other change in a life asks nothing the tests use.
-priority: [death, careNeeded, arrest, illness, relapse, intervention, divorce, jobLoss, wedding, newBaby, jailed, released, moneyTrouble, moveAway, moveToYou, engaged, newPartner, promotion, recovered, cameOfAge]
+priority: [death, careNeeded, arrest, illness, relapse, intervention, divorce, jobLoss, wedding, newBaby, jailed, released, moneyTrouble, moveAway, moveToYou, emigrates, emigrantAsks, engaged, newPartner, promotion, recovered, cameOfAge]
 requests:
   engaged: { events: [test_request] }
   newPartner: { events: [test_request] }
@@ -19,5 +19,7 @@ requests:
   death: { events: [test_funeral] }
   moveAway: { events: [test_request] }
   moveToYou: { events: [test_request] }
+  emigrates: { events: [test_request] }
+  emigrantAsks: { events: [test_request] }
   careNeeded: { events: [test_request] }
   cameOfAge: { events: [test_request] }

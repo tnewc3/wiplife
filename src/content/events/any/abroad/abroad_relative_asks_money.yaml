@@ -1,0 +1,113 @@
+{
+  "id": "abroad_relative_asks_money",
+  "title": "A request from home",
+  "text": "{npc.name} calls from {npc.city}, hesitates, and then asks: is there anything you could spare? There is a bill, a repair, a school term. The question is asked gently, and it is not small.",
+  "category": "abroad",
+  "tone": "neutral",
+  "rarity": "common",
+  "lifeStages": [
+    "youngAdult",
+    "adult",
+    "senior"
+  ],
+  "followUpOnly": true,
+  "requires": {
+    "all": [
+      {
+        "age": {
+          "gte": 18
+        }
+      },
+      {
+        "migration": {
+          "settled": true
+        }
+      },
+      {
+        "migration": {
+          "relatives": true
+        }
+      },
+      {
+        "role": "npc",
+        "alive": true,
+        "age": {
+          "gte": 18
+        },
+        "where": [
+          "elsewhere"
+        ]
+      }
+    ]
+  },
+  "weight": {
+    "base": 2
+  },
+  "cooldownYears": 4,
+  "cast": {
+    "npc": {
+      "support": true,
+      "presence": "elsewhere"
+    }
+  },
+  "choices": [
+    {
+      "id": "send_once",
+      "label": "Send what you can this time",
+      "outcome": {
+        "text": "{npc.They} {npc:thanks|thank} you three times and then change the subject, which is how you know it mattered.",
+        "effects": [
+          {
+            "type": "money",
+            "delta": -300
+          },
+          {
+            "type": "relationship",
+            "role": "npc",
+            "affection": 6,
+            "trust": 3
+          }
+        ]
+      }
+    },
+    {
+      "id": "send_regularly",
+      "label": "Set up something regular",
+      "outcome": {
+        "text": "A fixed amount each year takes the guesswork out of it for both of you. It also takes some of your own room to breathe.",
+        "effects": [
+          {
+            "type": "migration",
+            "action": "remit",
+            "level": "some"
+          },
+          {
+            "type": "relationship",
+            "role": "npc",
+            "affection": 5,
+            "trust": 4
+          }
+        ]
+      }
+    },
+    {
+      "id": "not_now",
+      "label": "Say honestly that it isn't possible right now",
+      "outcome": {
+        "text": "A pause. 'Of course,' {npc.they} {npc:says|say}. Both of you pretend that the pause was shorter than it was.",
+        "effects": [
+          {
+            "type": "relationship",
+            "role": "npc",
+            "affection": -3
+          },
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": 2
+          }
+        ]
+      }
+    }
+  ]
+}

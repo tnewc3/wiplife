@@ -384,6 +384,7 @@ export function homeConfirmation(
 export const PURCHASE_BLOCK_LABELS = {
   savings: 'You need more saved for the down payment and closing costs.',
   income: 'A bank won’t lend you that much on your income.',
+  status: 'A bank won’t lend to someone without papers.',
   bankruptcy: 'No bank will give you a mortgage so soon after a bankruptcy.',
 } as const;
 
@@ -509,6 +510,7 @@ export const SEARCH_BLOCK_LABELS: Record<SearchBlock, string> = {
   age: 'You’re too young for a full-time job.',
   school: 'You can line up a job in your last year of school. Until then, gig work fits around classes.',
   away: 'You can’t work while you’re in prison.',
+  status: 'Without papers you can’t take a regular job. Informal work is still possible.',
 };
 
 /** Why you can't apply for an opening now. */
@@ -1005,6 +1007,7 @@ export const VEHICLE_BLOCK_LABELS: Record<VehicleBlock | LoanBlock, string> = {
   independent: 'You have to be old enough to borrow.',
   bankruptcy: 'Lenders won’t say yes so soon after a bankruptcy.',
   income: 'The payments would be more than a lender will allow for your income.',
+  status: 'Lenders won’t lend to someone without papers.',
 };
 
 export const VACATION_BLOCK_LABELS: Record<VacationBlock, string> = {
@@ -1015,6 +1018,7 @@ export const VACATION_BLOCK_LABELS: Record<VacationBlock, string> = {
   income: 'Your payments on both homes would be more than a lender will allow for your income.',
   prison: 'Not while you are in prison.',
   unknown: 'Not available.',
+  status: 'Lenders won’t lend to someone without papers.',
 };
 
 export const RENOVATION_BLOCK_LABELS: Record<RenovationBlock, string> = {
@@ -1524,4 +1528,42 @@ export const STAY_BLOCK_LABELS: Record<string, string> = {
   money: 'You need enough saved for the up-front cost.', school: 'Finish or leave your current program before working abroad.',
   holiday: 'This working-holiday route is unavailable for your age or current employment.',
   job: 'An employer transfer needs a current job and its language requirements met at the destination.', route: 'Choose an available route.',
+};
+
+/** W6: fixed interface words for emigration and citizenship. */
+export const ROUTE_LABELS = {
+  work_sponsor: 'Work sponsorship',
+  study_work: 'Study, then work',
+  family: 'Family or marriage',
+  investment: 'Investment',
+} as const;
+export const ROUTE_BLURBS = {
+  work_sponsor: 'An employer there sponsors you. Needs a qualification or experience in a sponsorable job, and enough of the language.',
+  study_work: 'Study there at the international rate; a degree can lead to a work permit.',
+  family: 'A spouse, partner or parent who is a citizen there sponsors you. You arrive in their city.',
+  investment: 'A large sum is held while the application is decided, and returned if you are refused.',
+} as const;
+export const STATUS_LABELS = { citizen: 'Citizen', permanent: 'Permanent resident', temporary: 'Temporary permit', undocumented: 'Without papers' } as const;
+export const PERMIT_LABELS = { student: 'Study permit', temporary_worker: 'Work permit', permanent_resident: 'Permanent residence', undocumented: 'No permit', visitor: 'Visitor' } as const;
+export const APPLICATION_KIND_LABELS = { entry: 'Move to', permanent: 'Permanent residence in', naturalization: 'Citizenship of', regularization: 'Legal status in' } as const;
+export const APPLICATION_STATUS_LABELS = { pending: 'Waiting', approved: 'Approved', denied: 'Refused' } as const;
+export const BASIS_LABELS = { marriage: 'Marriage to a citizen', long_residence: 'Long residence', rule_change: 'A change in the rules' } as const;
+export const REMIT_LABELS = { none: 'None', some: 'Some', steady: 'Steady' } as const;
+export const approvalLabel = (odds: number): string => (odds < 0.25 ? 'Unlikely' : odds < 0.5 ? 'Uncertain' : odds < 0.75 ? 'Likely' : 'Very likely');
+export const ENTRY_BLOCK_LABELS: Record<string, string> = {
+  unavailable: 'Not available for this country.', age: 'Your age does not fit this route.', law: 'Not while you are on probation or in prison.',
+  pending: 'You already have an application waiting.', stay: 'Finish your temporary stay first.', citizen: 'You are already a citizen there.',
+  removed: 'You cannot apply there for now.', here: 'You already live there.', city: 'Choose a city in that country.', denied: 'You were refused this year; try again next year.',
+  record: 'A recent prison sentence closes this route.', money: 'You need more saved for the cost.', school: 'Finish or leave your current program first.',
+  skills: 'You need a qualification or enough work experience.', language: 'You need more of the language.', job: 'No sponsor can be found for your skills.',
+  schooling: 'You need to have finished secondary school.', program: 'Choose a program.', sponsor: 'You need a relative there who is a citizen.',
+};
+export const STATUS_BLOCK_LABELS: Record<string, string> = {
+  status: 'Not for your situation.', unavailable: 'Not available here.', pending: 'You already have an application waiting.', denied: 'Refused this year; try again next year.',
+  student: 'Finish your studies first.', years: 'You have not lived there long enough yet.', job: 'You need a job.', record: 'A recent conviction closes this for now.',
+  language: 'You need more of the language.', money: 'You need more saved for the cost.', spouse: 'You need a spouse who is a citizen.', window: 'No window is open now.', law: 'Not while you are in prison.',
+};
+export const MOVE_BLOCK_LABELS: Record<string, string> = {
+  age: 'Too young.', law: 'Not while on probation or in prison.', stay: 'Finish your temporary stay first.', care: 'Not while you need care.',
+  commitment: 'Your business, crew or public career needs you here.', money: 'You need more saved to move.',
 };

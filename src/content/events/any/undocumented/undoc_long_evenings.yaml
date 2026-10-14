@@ -1,0 +1,93 @@
+{
+  "id": "undoc_long_evenings",
+  "title": "The long evenings",
+  "text": "The evenings are the hardest. Work keeps you busy; nights give the worry room. You find yourself listening for things that are not there.",
+  "category": "undocumented",
+  "tone": "serious",
+  "rarity": "common",
+  "lifeStages": [
+    "youngAdult",
+    "adult",
+    "senior"
+  ],
+  "followUpOnly": true,
+  "requires": {
+    "all": [
+      {
+        "age": {
+          "gte": 18
+        }
+      },
+      {
+        "migration": {
+          "status": [
+            "undocumented"
+          ]
+        }
+      }
+    ]
+  },
+  "weight": {
+    "base": 1
+  },
+  "cooldownYears": 4,
+  "choices": [
+    {
+      "id": "write_home",
+      "label": "Write to someone at home",
+      "outcome": {
+        "text": "You keep the letter cheerful, then not. The reply comes quickly and says: tell me more.",
+        "effects": [
+          {
+            "type": "migration",
+            "action": "ties",
+            "delta": 3
+          },
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": -2
+          }
+        ]
+      }
+    },
+    {
+      "id": "walk",
+      "label": "Walk until you are tired enough to sleep",
+      "outcome": {
+        "text": "The city at night is generous with strangers. You come home slow-footed and sleepy.",
+        "effects": [
+          {
+            "type": "stat",
+            "key": "fitness",
+            "delta": 1
+          },
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": -1
+          }
+        ]
+      }
+    },
+    {
+      "id": "community_night",
+      "label": "Go to the community evening you have been avoiding",
+      "outcome": {
+        "text": "A room of people who all know what you are carrying. Nobody asks. Someone passes you a plate.",
+        "effects": [
+          {
+            "type": "stat",
+            "key": "happiness",
+            "delta": 3
+          },
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": -3
+          }
+        ]
+      }
+    }
+  ]
+}

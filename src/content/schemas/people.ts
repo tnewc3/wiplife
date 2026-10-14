@@ -46,6 +46,8 @@ export const REQUEST_TRIGGERS = [
   'death',
   'moveAway',
   'moveToYou',
+  'emigrates',
+  'emigrantAsks',
   'careNeeded',
   'cameOfAge',
 ] as const;
@@ -76,6 +78,9 @@ export const NEWS_VALUES = {
   widowed: ['partner'],
   moved: ['city'],
   moved_near: ['city'],
+  // W6: someone you know moved to another country, and later took up its citizenship.
+  emigrated: ['city', 'country'],
+  became_citizen: ['country'],
   had_child: ['child'],
   child_grew: ['child'],
   came_of_age: [],

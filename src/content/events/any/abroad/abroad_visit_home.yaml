@@ -1,0 +1,97 @@
+{
+  "id": "abroad_visit_home",
+  "title": "Going home for a visit",
+  "text": "You have been away long enough that a visit is a question rather than a habit. The ticket is a lot of money, and home will be both familiar and not.",
+  "category": "abroad",
+  "tone": "neutral",
+  "rarity": "common",
+  "lifeStages": [
+    "youngAdult",
+    "adult",
+    "senior"
+  ],
+  "followUpOnly": true,
+  "requires": {
+    "all": [
+      {
+        "age": {
+          "gte": 18
+        }
+      },
+      {
+        "migration": {
+          "settled": true
+        }
+      },
+      {
+        "migration": {
+          "relatives": true
+        }
+      },
+      {
+        "role": "npc",
+        "alive": true,
+        "age": {
+          "gte": 18
+        },
+        "where": [
+          "elsewhere"
+        ]
+      }
+    ]
+  },
+  "weight": {
+    "base": 2
+  },
+  "cooldownYears": 4,
+  "cast": {
+    "npc": {
+      "support": true,
+      "presence": "elsewhere"
+    }
+  },
+  "choices": [
+    {
+      "id": "book_it",
+      "label": "Book the ticket",
+      "outcome": {
+        "text": "The airport is the first place you feel the pull both ways. Home is warm, loud, a little smaller than you remembered.",
+        "effects": [
+          {
+            "type": "cost",
+            "item": "reunion_trip"
+          },
+          {
+            "type": "migration",
+            "action": "ties",
+            "delta": 8
+          },
+          {
+            "type": "stat",
+            "key": "happiness",
+            "delta": 4
+          }
+        ]
+      }
+    },
+    {
+      "id": "not_this_year",
+      "label": "Not this year",
+      "outcome": {
+        "text": "It is the sensible choice. It is also a small ache you put on the shelf with the others.",
+        "effects": [
+          {
+            "type": "migration",
+            "action": "ties",
+            "delta": -2
+          },
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": 1
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,3 +1,4 @@
+import { emptyMigrationReport, MigrationWatcher, chooseMigrationActions, formatMigration, type MigrationReport } from './migration';
 import { emptyTravelReport, TravelWatcher, chooseTravelAction, formatTravel, type TravelReport } from './travel';
 import { emptyLanguagesReport, formatLanguages, LanguagesWatcher, chooseLanguageClass, type LanguagesReport } from './languages';
 /**
@@ -160,6 +161,8 @@ export interface SimulationReport {
   /** W4a: each country's lives, measured against its own targets. */
   countries: CountriesReport;
   travel: TravelReport;
+  /** W6: emigration and citizenship. */
+  migration: MigrationReport;
   languages: LanguagesReport;
   /** W2: belonging, measured: groups by type, roles, the people there, what they cost, faith and its changes, and what long membership does to values and reputation. */
   belonging: BelongingReport;
@@ -820,6 +823,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
   const belonging = emptyBelongingReport(content);
   const countries = emptyCountriesReport();
   const travel = emptyTravelReport();
+  const migration = emptyMigrationReport();
   const languages = emptyLanguagesReport();
   const business = emptyBusinessReport(content);
   const mental = emptyMentalReport(content);
@@ -849,6 +853,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
       violations += failures.filter((f) => f.startsWith('consistency:')).length;
       possessions.invariantFailures += failures.filter((f) => /possession|\bpet\b|vehicle|car loan|vacation|renovation|insurance|upkeep/i.test(f)).length;
       crime.invariantFailures += failures.filter((f) => /crime|crew|dirty/i.test(f)).length;
+      migration.invariantFailures += failures.filter((f) => /^migration/i.test(f)).length;
       fame.invariantFailures += failures.filter((f) => /^fame|fame\./i.test(f)).length;
       sports.invariantFailures += failures.filter((f) => /^sports/i.test(f)).length;
       teen.invariantFailures += failures.filter((f) => /crowd|teen|license|learner|house rule|rule |romance|couple with someone under|under 18|is under \d+ and|they are under|you are under/i.test(f)).length;
@@ -885,6 +890,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
     const belongingWatcher = new BelongingWatcher(belonging, content);
     const countriesWatcher = new CountriesWatcher(countries, content);
     const travelWatcher = new TravelWatcher(travel);
+    const migrationWatcher = new MigrationWatcher(migration);
     const languagesWatcher = new LanguagesWatcher(languages, content);
     // W3: how this life behaves about businesses.
     const businessRng = createRng(`${seed}:business`);
@@ -992,6 +998,12 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
       for (const [actionId, params] of careless ? [] : chooseBusinessActions(life, content, businessRng, businessProfile)) {
         if (!isLifeActionAvailable(life, actionId, params, content)) continue;
         if ((actionId === 'start_business' || actionId === 'buy_business') && params.biz?.plan) businessWatcher.planned(params.biz.plan.source);
+        life = takeLifeAction(life, actionId, params);
+        money.actionsTaken[actionId]++;
+      }
+      // ...and across borders (W6): a few look for a way to leave, those who left apply for permanent residence, citizenship or status...
+      if (!careless) for (const [actionId, params] of chooseMigrationActions(life, content)) {
+        if (!isLifeActionAvailable(life, actionId, params, content)) continue;
         life = takeLifeAction(life, actionId, params);
         money.actionsTaken[actionId]++;
       }
@@ -1147,6 +1159,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
       belongingWatcher.observe(yearBefore, life);
       countriesWatcher.observe(life);
       travelWatcher.observe(yearBefore, life);
+      migrationWatcher.observe(yearBefore, life);
       languagesWatcher.observe(yearBefore, life);
       businessWatcher.observe(yearBefore, life);
       webWatcher.observe(yearBefore, life);
@@ -1199,6 +1212,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
     belongingWatcher.finish(life);
     countriesWatcher.finish(life);
     travelWatcher.finish(life);
+    migrationWatcher.finish(life, content);
     languagesWatcher.finish(life);
     businessWatcher.finish(life);
     mentalWatcher.finish(life);
@@ -1539,6 +1553,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
     belonging,
     countries,
     travel,
+    migration,
     languages,
     business,
     mental,
@@ -1682,6 +1697,7 @@ export function formatReport(report: SimulationReport, content: ContentBundle): 
   lines.push(...formatEulogy(report.eulogy, content), '  targets (src/content/balance/targets.yaml):', ...eulogyTargets(report, content).map((r) => target(r.label, r.value, r.goal, r.met)));
   lines.push(...formatLater(report.later, content), '  targets (src/content/balance/targets.yaml):', ...laterTargets(report, content).map((r) => target(r.label, r.value, r.goal, r.met)));
   lines.push(...formatTravel(report.travel, content));
+  lines.push(...formatMigration(report.migration, content));
   lines.push(...formatLanguages(report.languages, content, Object.values(report.eventsPerYear).reduce((sum, row) => sum + row.years, 0)));
   lines.push(...formatCountries(report.countries, content), '  targets (src/content/balance/countries.yaml):', ...countryTargets(report.countries, content).map((r) => target(r.label, r.value, r.goal, r.met)));
   lines.push(...formatBelonging(report.belonging, content), '  targets (src/content/balance/targets.yaml):', ...belongingTargets(report, content).map((r) => target(r.label, r.value, r.goal, r.met)));

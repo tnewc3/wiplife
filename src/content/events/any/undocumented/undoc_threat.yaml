@@ -1,0 +1,93 @@
+{
+  "id": "undoc_threat",
+  "title": "A remark in passing",
+  "text": "A supervisor, tired and short-tempered, mentions that people who make a fuss tend to find their shifts cut, and that calls can be made. The sentence is delivered like weather.",
+  "category": "undocumented",
+  "tone": "dark",
+  "rarity": "uncommon",
+  "lifeStages": [
+    "youngAdult",
+    "adult",
+    "senior"
+  ],
+  "followUpOnly": true,
+  "requires": {
+    "all": [
+      {
+        "age": {
+          "gte": 18
+        }
+      },
+      {
+        "migration": {
+          "status": [
+            "undocumented"
+          ]
+        }
+      }
+    ]
+  },
+  "weight": {
+    "base": 1
+  },
+  "cooldownYears": 4,
+  "choices": [
+    {
+      "id": "stay_quiet",
+      "label": "Say nothing and do the work",
+      "outcome": {
+        "text": "You get through the day. The sentence follows you home and sits on the edge of the bed.",
+        "effects": [
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": 4
+          },
+          {
+            "type": "stat",
+            "key": "happiness",
+            "delta": -2
+          }
+        ]
+      }
+    },
+    {
+      "id": "look_elsewhere",
+      "label": "Start looking for somewhere else",
+      "outcome": {
+        "text": "There is something sad about the speed with which you do it. You have done this before.",
+        "effects": [
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": 2
+          },
+          {
+            "type": "stat",
+            "key": "discipline",
+            "delta": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "tell_someone",
+      "label": "Tell someone you trust",
+      "outcome": {
+        "text": "The relief of saying it is bigger than you expected. They do not fix it, but you are no longer carrying it alone.",
+        "effects": [
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": -2
+          },
+          {
+            "type": "migration",
+            "action": "risk",
+            "delta": 1
+          }
+        ]
+      }
+    }
+  ]
+}

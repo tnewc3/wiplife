@@ -1,0 +1,71 @@
+{
+  "id": "abroad_neighbors_welcome",
+  "title": "A plate at the door",
+  "text": "A neighbor you've only nodded at leaves a covered plate on your doormat with a note in careful handwriting. It is a recipe you don't know, and it's good.",
+  "category": "abroad",
+  "tone": "light",
+  "rarity": "common",
+  "lifeStages": [
+    "youngAdult",
+    "adult",
+    "senior"
+  ],
+  "followUpOnly": true,
+  "requires": {
+    "all": [
+      {
+        "age": {
+          "gte": 18
+        }
+      },
+      {
+        "migration": {
+          "settled": true
+        }
+      }
+    ]
+  },
+  "weight": {
+    "base": 1
+  },
+  "cooldownYears": 4,
+  "choices": [
+    {
+      "id": "return_plate",
+      "label": "Return the plate with something of your own",
+      "outcome": {
+        "text": "You cook the closest thing you can manage. It becomes a habit, then a friendship.",
+        "effects": [
+          {
+            "type": "money",
+            "delta": -25
+          },
+          {
+            "type": "stat",
+            "key": "happiness",
+            "delta": 3
+          }
+        ]
+      }
+    },
+    {
+      "id": "say_thanks",
+      "label": "Knock and say thank you in their language",
+      "outcome": {
+        "text": "They laugh, kindly, and correct one word. You use it correctly for the rest of the year.",
+        "effects": [
+          {
+            "type": "stat",
+            "key": "happiness",
+            "delta": 2
+          },
+          {
+            "type": "stat",
+            "key": "smarts",
+            "delta": 1
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,3 +1,4 @@
+import { getStandingView } from './migration/view';
 import { destinations, travelCompanions, tripCost, stayBlock, type TripInput, type StayInput } from './travel/travel';
 import { countryIdOfCity } from './country';
 import { languageLevel, languageClassCost, languageSkill } from './languages';
@@ -1343,6 +1344,8 @@ export interface RecordRow {
 }
 
 /** The Profile sheet (Stage 9): who you are, your personality, your record, and whether you can edit now. */
+export { getMigrationView, getStandingView, type MigrationPick, type MigrationView } from './migration/view';
+
 export interface ProfileView {
   fullName: string;
   languages: { id: string; name: string; level: string; native: boolean }[];
@@ -1351,6 +1354,8 @@ export interface ProfileView {
   /** W4a: the country you live in, and the one you were born in. */
   country: string;
   bornIn: string;
+  /** W6: your citizenships, and where you stand in the country you live in. */
+  standing: ReturnType<typeof getStandingView>;
   identity: Identity;
   personality: Personality;
   record: RecordRow[];
@@ -1366,6 +1371,7 @@ export function getProfileView(state: LifeState, content: ContentBundle): Profil
     languageClasses: Object.values(content.languages).filter((l) => !l.retired && languageSkill(c.languages, l.id) < 100).map((l) => ({ id: l.id, name: l.name, available: isLifeActionAvailable(state, "take_language_classes", { languageId: l.id }, content) })),
     languageClassCost: languageClassCost(state, content),
     country: countryOf(state, content).name,
+    standing: getStandingView(state, content),
     bornIn: `${content.cities[c.birthCityId]?.name ?? c.birthCityId}, ${birthCountryOf(state, content).name}`,
     identity: c.identity,
     personality: c.personality,

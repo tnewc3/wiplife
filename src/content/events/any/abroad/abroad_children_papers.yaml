@@ -1,0 +1,72 @@
+{
+  "id": "abroad_children_papers",
+  "title": "Every form has a line for citizenship",
+  "text": "Every form for your children asks for citizenship, and the answers are not the same for everyone at the table. Your children belong here by birth. You are still learning how.",
+  "category": "abroad",
+  "tone": "neutral",
+  "rarity": "common",
+  "lifeStages": [
+    "youngAdult",
+    "adult",
+    "senior"
+  ],
+  "followUpOnly": true,
+  "requires": {
+    "all": [
+      {
+        "age": {
+          "gte": 18
+        }
+      },
+      {
+        "migration": {
+          "settled": true
+        }
+      },
+      {
+        "migration": {
+          "childCitizen": true
+        }
+      }
+    ]
+  },
+  "weight": {
+    "base": 1
+  },
+  "cooldownYears": 4,
+  "choices": [
+    {
+      "id": "explain_to_kids",
+      "label": "Explain to them what it means in a way they can hold",
+      "outcome": {
+        "text": "They listen with the seriousness of children who have noticed more than you thought. One asks if you will be allowed to stay. You tell them the truth as gently as you can.",
+        "effects": [
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": 2
+          },
+          {
+            "type": "stat",
+            "key": "happiness",
+            "delta": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "keep_it_light",
+      "label": "Keep it light and fill in the forms yourself",
+      "outcome": {
+        "text": "You answer their questions in single sentences. The forms go in without drama.",
+        "effects": [
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": 1
+          }
+        ]
+      }
+    }
+  ]
+}

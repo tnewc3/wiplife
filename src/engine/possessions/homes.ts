@@ -8,6 +8,7 @@
  * src/content/balance/possessions.yaml and the economy's ownership numbers.
  */
 import type { ContentBundle, DamageSeverityId, RenovationDef } from '../../content/schemas';
+import { creditBlocked } from '../migration/query';
 import { addDebt, amortizedPayment, borrow, earn, isIndependent, spend, wholeDollars } from '../finance';
 import { refreshHousingCost } from '../housing';
 import { clampInt } from '../random';
@@ -24,7 +25,7 @@ function cityName(content: ContentBundle, cityId: Id): string {
   return content.cities[cityId]?.name ?? cityId;
 }
 
-export type VacationBlock = 'age' | 'limit' | 'savings' | 'bankruptcy' | 'income' | 'prison' | 'unknown';
+export type VacationBlock = 'age' | 'limit' | 'savings' | 'bankruptcy' | 'income' | 'prison' | 'unknown' | 'status';
 
 export interface VacationQuote {
   cityId: Id;
@@ -61,6 +62,7 @@ export function vacationQuote(state: LifeState, cityId: Id, content: ContentBund
   else if (state.housing.kind === 'incarcerated') blocked = 'prison';
   else if (vacationHomesOf(state).length >= content.balance.possessions.limits.vacationHomes) blocked = 'limit';
   else if (state.finances.savings < cashNeeded) blocked = 'savings';
+  else if (mortgage > 0 && creditBlocked(state)) blocked = 'status';
   else if (bankrupt !== undefined && state.currentYear - bankrupt < eco.bankruptcy.noMortgageYears) blocked = 'bankruptcy';
   else if (existing + yearlyPayment > income * v.maxPaymentShare) blocked = 'income';
   return { cityId, price, downPayment, closingCosts, mortgage, yearlyPayment, rate, cashNeeded, blocked };

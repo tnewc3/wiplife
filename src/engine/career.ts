@@ -1,3 +1,4 @@
+import { workBlocked } from './migration/query';
 import { meetsLanguageJob } from './languages';
 /**
  * Career rules (docs/design.md, section I; docs/technical.md, Stage 8): who
@@ -67,12 +68,14 @@ export function inSchool(state: LifeState): boolean {
 }
 
 /** Why you can't look for work now, or null when you can. */
-export type SearchBlock = 'age' | 'school' | 'away';
+export type SearchBlock = 'age' | 'school' | 'away' | 'status';
 
 export function searchBlock(state: LifeState, content: ContentBundle): SearchBlock | null {
   if (state.character.age < content.balance.careers.minAge) return 'age';
   if (inSchool(state) && !inFinalYear(state)) return 'school';
   if (state.housing.kind === 'incarcerated') return 'away';
+  // W6: without papers, regular employment is closed (informal work is not).
+  if (workBlocked(state)) return 'status';
   return null;
 }
 
@@ -81,7 +84,7 @@ export function searchBlock(state: LifeState, content: ContentBundle): SearchBlo
  * counting the credential you're finishing this year.
  */
 export function meetsJobRequirements(state: LifeState, def: JobDef, content: ContentBundle): boolean {
-  if (state.character.age < content.balance.careers.minAge) return false;
+  if (state.character.age < content.balance.careers.minAge || workBlocked(state)) return false;
   const finishing = finishingCredential(state);
   // Employers see the record that counts: from 18, offenses from before 18 don't (Stage 9).
   const record = countedRecord(state, content);

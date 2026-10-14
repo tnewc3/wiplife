@@ -1,0 +1,71 @@
+{
+  "id": "emigration_citizenship_failed",
+  "title": "One answer short",
+  "text": "You did not pass the test. It was closer than the letter makes it sound, and cold comfort. You can sit it again.",
+  "category": "emigration",
+  "tone": "serious",
+  "rarity": "common",
+  "lifeStages": [
+    "youngAdult",
+    "adult",
+    "senior"
+  ],
+  "followUpOnly": true,
+  "requires": {
+    "all": [
+      {
+        "age": {
+          "gte": 18
+        }
+      },
+      {
+        "migration": {
+          "application": [
+            "denied"
+          ],
+          "kind": [
+            "naturalization"
+          ]
+        }
+      }
+    ]
+  },
+  "weight": {
+    "base": 1
+  },
+  "choices": [
+    {
+      "id": "study_again",
+      "label": "Study with a group and sit it again",
+      "outcome": {
+        "text": "Learning the same facts with other people makes them feel like yours. The second time will be different.",
+        "effects": [
+          {
+            "type": "stat",
+            "key": "smarts",
+            "delta": 1
+          },
+          {
+            "type": "stat",
+            "key": "discipline",
+            "delta": 2
+          }
+        ]
+      }
+    },
+    {
+      "id": "rest",
+      "label": "Take a season off before you decide",
+      "outcome": {
+        "text": "You do not touch the study guide for weeks. The country is still yours to join when you are ready.",
+        "effects": [
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": -2
+          }
+        ]
+      }
+    }
+  ]
+}

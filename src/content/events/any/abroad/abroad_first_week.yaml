@@ -1,0 +1,94 @@
+{
+  "id": "abroad_first_week",
+  "title": "The first week",
+  "text": "Everything is new and none of it is yours yet: the keys, the meter, the way the bus numbers are written. You make a list of things to learn and the list grows faster than you cross it off.",
+  "category": "abroad",
+  "tone": "light",
+  "rarity": "common",
+  "lifeStages": [
+    "youngAdult",
+    "adult",
+    "senior"
+  ],
+  "followUpOnly": true,
+  "requires": {
+    "all": [
+      {
+        "age": {
+          "gte": 18
+        }
+      },
+      {
+        "migration": {
+          "settled": true,
+          "years": {
+            "lte": 1
+          }
+        }
+      }
+    ]
+  },
+  "weight": {
+    "base": 1
+  },
+  "cooldownYears": 4,
+  "choices": [
+    {
+      "id": "explore",
+      "label": "Walk until you find a place you like",
+      "outcome": {
+        "text": "A bakery with a handwritten sign. A bench by the river. By evening you have two places to call yours.",
+        "effects": [
+          {
+            "type": "stat",
+            "key": "happiness",
+            "delta": 3
+          },
+          {
+            "type": "stat",
+            "key": "fitness",
+            "delta": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "unpack",
+      "label": "Stay in and make the room feel like yours",
+      "outcome": {
+        "text": "A photograph on the wall, a plant on the sill. The room starts to forgive you.",
+        "effects": [
+          {
+            "type": "stat",
+            "key": "happiness",
+            "delta": 2
+          },
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": -1
+          }
+        ]
+      }
+    },
+    {
+      "id": "call_home",
+      "label": "Call home and tell them everything",
+      "outcome": {
+        "text": "You describe the bus numbers for twenty minutes. They listen to every word.",
+        "effects": [
+          {
+            "type": "migration",
+            "action": "ties",
+            "delta": 3
+          },
+          {
+            "type": "stat",
+            "key": "happiness",
+            "delta": 2
+          }
+        ]
+      }
+    }
+  ]
+}

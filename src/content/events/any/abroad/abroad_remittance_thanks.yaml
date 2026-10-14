@@ -1,0 +1,77 @@
+{
+  "id": "abroad_remittance_thanks",
+  "title": "A thank-you from home",
+  "text": "A message from home: a photograph of the repaired roof, a child holding a school certificate, a list of names of everyone who says thank you.",
+  "category": "abroad",
+  "tone": "light",
+  "rarity": "common",
+  "lifeStages": [
+    "youngAdult",
+    "adult",
+    "senior"
+  ],
+  "followUpOnly": true,
+  "requires": {
+    "all": [
+      {
+        "age": {
+          "gte": 18
+        }
+      },
+      {
+        "migration": {
+          "settled": true
+        }
+      },
+      {
+        "migration": {
+          "remitting": true
+        }
+      }
+    ]
+  },
+  "weight": {
+    "base": 1
+  },
+  "cooldownYears": 4,
+  "choices": [
+    {
+      "id": "reply",
+      "label": "Reply to each one",
+      "outcome": {
+        "text": "You take your time and write something for each. The distance feels shorter for an evening.",
+        "effects": [
+          {
+            "type": "migration",
+            "action": "ties",
+            "delta": 3
+          },
+          {
+            "type": "stat",
+            "key": "happiness",
+            "delta": 4
+          }
+        ]
+      }
+    },
+    {
+      "id": "keep_it",
+      "label": "Keep the photograph where you will see it",
+      "outcome": {
+        "text": "It goes on the wall by the door. On the long days you look at it on your way out.",
+        "effects": [
+          {
+            "type": "stat",
+            "key": "happiness",
+            "delta": 3
+          },
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": -1
+          }
+        ]
+      }
+    }
+  ]
+}

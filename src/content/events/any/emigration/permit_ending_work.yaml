@@ -1,0 +1,100 @@
+{
+  "id": "permit_ending_work",
+  "title": "The permit runs out",
+  "text": "Your permit to live in {country} ends this year. After that, staying would mean doing so without permission, and the calendar is now a fact.",
+  "category": "emigration",
+  "tone": "serious",
+  "rarity": "common",
+  "lifeStages": [
+    "youngAdult",
+    "adult",
+    "senior"
+  ],
+  "followUpOnly": true,
+  "requires": {
+    "all": [
+      {
+        "age": {
+          "gte": 18
+        }
+      },
+      {
+        "migration": {
+          "expiring": true,
+          "settled": true,
+          "status": [
+            "temporary"
+          ],
+          "via": [
+            "work_sponsor"
+          ]
+        }
+      }
+    ]
+  },
+  "weight": {
+    "base": 1
+  },
+  "choices": [
+    {
+      "id": "go_home",
+      "label": "Go home before it ends",
+      "outcome": {
+        "text": "You pack in an orderly way, say your goodbyes while you still have a door to close, and return with a plan.",
+        "effects": [
+          {
+            "type": "migration",
+            "action": "leave"
+          },
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": 4
+          },
+          {
+            "type": "stat",
+            "key": "happiness",
+            "delta": -2
+          }
+        ]
+      }
+    },
+    {
+      "id": "stay_on",
+      "label": "Stay on after it ends",
+      "outcome": {
+        "text": "You choose to stay. Work through your employer closes, and so do many other doors. You will be living with that choice.",
+        "effects": [
+          {
+            "type": "migration",
+            "action": "overstay"
+          },
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": 6
+          }
+        ]
+      }
+    },
+    {
+      "id": "look_for_options",
+      "label": "Ask around for what options exist",
+      "outcome": {
+        "text": "Everyone has a story and an opinion. You write down what is checkable and put the rest aside; there is not much time.",
+        "effects": [
+          {
+            "type": "stat",
+            "key": "smarts",
+            "delta": 1
+          },
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": 4
+          }
+        ]
+      }
+    }
+  ]
+}

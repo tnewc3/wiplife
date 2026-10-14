@@ -1,0 +1,100 @@
+{
+  "id": "emigration_status_granted",
+  "title": "Papers at last",
+  "text": "After {yearsHere} years of living around the edges, the answer is yes. The card in your hand says you may stay, work and plan. For a moment you cannot speak.",
+  "category": "emigration",
+  "tone": "light",
+  "rarity": "common",
+  "lifeStages": [
+    "youngAdult",
+    "adult",
+    "senior"
+  ],
+  "followUpOnly": true,
+  "requires": {
+    "all": [
+      {
+        "age": {
+          "gte": 18
+        }
+      },
+      {
+        "migration": {
+          "application": [
+            "approved"
+          ],
+          "kind": [
+            "regularization"
+          ]
+        }
+      }
+    ]
+  },
+  "weight": {
+    "base": 1
+  },
+  "choices": [
+    {
+      "id": "call_home",
+      "label": "Call home before anyone else",
+      "outcome": {
+        "text": "The line is quiet, then everyone talks at once. Someone says they never stopped hoping.",
+        "effects": [
+          {
+            "type": "migration",
+            "action": "ties",
+            "delta": 5
+          },
+          {
+            "type": "stat",
+            "key": "happiness",
+            "delta": 6
+          },
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": -8
+          }
+        ]
+      }
+    },
+    {
+      "id": "tell_the_group",
+      "label": "Tell the people who stood by you here",
+      "outcome": {
+        "text": "The room that gave you food and advice goes loud. You are thanked for something you only did by surviving.",
+        "effects": [
+          {
+            "type": "stat",
+            "key": "happiness",
+            "delta": 6
+          },
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": -6
+          }
+        ]
+      }
+    },
+    {
+      "id": "sit_with_it",
+      "label": "Sit with it and let the fear leave slowly",
+      "outcome": {
+        "text": "The vigilance does not switch off at once. Days pass before you walk down a street without checking it.",
+        "effects": [
+          {
+            "type": "stat",
+            "key": "happiness",
+            "delta": 3
+          },
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": -6
+          }
+        ]
+      }
+    }
+  ]
+}

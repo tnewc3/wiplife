@@ -1,4 +1,6 @@
 import type { TravelState } from './travel/types';
+import type { MigrationState } from './migration/types';
+import type { CountryId } from '../content/schemas';
 import type { LanguageSkill } from '../content/schemas/languages';
 import type { LanguageLearning } from './languages';
 /**
@@ -106,6 +108,8 @@ export interface HiddenValues {
 
 export interface Character {
   languages: LanguageSkill[];
+  /** W6: the countries whose citizen you are (never empty; the first is the one you were born into). */
+  citizenships: CountryId[];
   name: { first: string; last: string };
   age: number;
   lifeStage: LifeStage;
@@ -133,6 +137,8 @@ export interface Character {
 
 export interface Person {
   languages: LanguageSkill[];
+  /** W6: the countries whose citizen they are (never empty). */
+  citizenships: CountryId[];
   id: Id;
   name: { first: string; last: string };
   birthYear: number;
@@ -255,6 +261,8 @@ export interface PersonLife {
   gossip: number;
   /** The last year a request from them came to you. */
   requestYear?: number;
+  /** W6: they moved to another country: the year, the country, and whether with papers. */
+  emigrated?: { year: number; countryId: CountryId; from: Id; papers: boolean };
 }
 
 export type ChildOrigin = 'birth' | 'adopted' | 'ivf' | 'surrogacy' | 'step' | 'grandchild';
@@ -562,6 +570,8 @@ export interface Ledger {
   insurance: number;
   /** W2: dues, collections and donations to the groups you belong to this year. */
   giving: number;
+  /** W6: money sent home to relatives in another country (absent in ledgers from before W6). */
+  remittances?: number;
   /** W3: money you put into your businesses to cover a loss (their draws to you are in `gross`). */
   business: number;
   /** gross + retirement + interest + supportReceived − tax − housing − living − children − care − supportPaid − upkeep − insurance − giving − debtPayments (savings change by net + borrowed). */
@@ -1100,6 +1110,8 @@ export interface PendingInteraction {
 
 export interface LifeState {
   travel: TravelState;
+  /** W6: applications, life without papers, remittances and the record of how you came to live where you do. */
+  migration: MigrationState;
   languages: LanguageLearning;
   id: Id;
   seed: string;

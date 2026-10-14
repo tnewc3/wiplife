@@ -1,0 +1,69 @@
+{
+  "id": "undoc_close_call_knock",
+  "title": "A knock at the door",
+  "text": "Someone knocks twice, then once more. You hold still and listen. It is only a neighbor with a flyer, but you do not know that for a long minute.",
+  "category": "undocumented",
+  "tone": "dark",
+  "rarity": "common",
+  "lifeStages": [
+    "youngAdult",
+    "adult",
+    "senior"
+  ],
+  "followUpOnly": true,
+  "requires": {
+    "all": [
+      {
+        "age": {
+          "gte": 18
+        }
+      },
+      {
+        "migration": {
+          "status": [
+            "undocumented"
+          ]
+        }
+      }
+    ]
+  },
+  "weight": {
+    "base": 1
+  },
+  "cooldownYears": 4,
+  "choices": [
+    {
+      "id": "wait",
+      "label": "Wait in silence until the steps go away",
+      "outcome": {
+        "text": "The stairwell empties. You exhale and realize you have been standing for ten minutes.",
+        "effects": [
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": 3
+          }
+        ]
+      }
+    },
+    {
+      "id": "answer",
+      "label": "Call through the door",
+      "outcome": {
+        "text": "The flyer is for a community meeting. It is silly and it is not: the meeting is a good one.",
+        "effects": [
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": 2
+          },
+          {
+            "type": "stat",
+            "key": "happiness",
+            "delta": 1
+          }
+        ]
+      }
+    }
+  ]
+}

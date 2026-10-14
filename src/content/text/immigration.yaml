@@ -1,0 +1,25 @@
+# History lines for emigration and citizenship (W6). The player is "you".
+arrived:
+  - 'You left {oldCity} and made a new home in {newCity}, {newCountry}.'
+  - 'You moved to {newCity}, {newCountry}, and began again among strangers.'
+entry:
+  - 'You made your way to {newCity}, {newCountry}, without permission to stay.'
+returned:
+  - 'You went back to {newCity}, {newCountry}, the country that is yours.'
+  - 'You came home to {newCity}.'
+deported:
+  - 'You were made to leave {oldCountry} and taken to {newCity}.'
+overstay:
+  - 'Your permit ended and you stayed in {newCountry} without papers.'
+permanent:
+  - 'You were granted permanent residence in {newCountry}.'
+citizen:
+  - 'You became a citizen of {newCountry}.'
+regularized:
+  - 'You were given legal status in {newCountry} after years without it.'
+applied:
+  - 'You applied to move to {newCountry}.'
+turnedBack:
+  - 'You tried to reach {newCountry} and were turned back.'
+unlicensed:
+  - 'You finished your training at {school}, but the license needs papers you do not have.'

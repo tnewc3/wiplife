@@ -1,0 +1,105 @@
+{
+  "id": "emigrant_asks_fees",
+  "title": "A favor, and a form",
+  "text": "{npc.name} writes from {npc.city}. The paperwork for staying is harder than {npc.they} {npc:expected|expected}, and there is a fee due before a deadline. {npc.They} {npc:asks|ask} if you could help.",
+  "category": "lives",
+  "tone": "neutral",
+  "rarity": "common",
+  "lifeStages": [
+    "youngAdult",
+    "adult",
+    "senior"
+  ],
+  "followUpOnly": true,
+  "requires": {
+    "all": [
+      {
+        "age": {
+          "gte": 16
+        }
+      },
+      {
+        "role": "npc",
+        "alive": true,
+        "age": {
+          "gte": 18
+        },
+        "where": [
+          "elsewhere"
+        ],
+        "life": {
+          "emigrated": true
+        }
+      }
+    ]
+  },
+  "weight": {
+    "base": 8
+  },
+  "cast": {
+    "npc": {
+      "support": true,
+      "presence": "elsewhere"
+    }
+  },
+  "choices": [
+    {
+      "id": "pay_fee",
+      "label": "Send what is needed",
+      "outcome": {
+        "text": "The money goes, and a message comes back the same night, with a photograph of the stamped form.",
+        "effects": [
+          {
+            "type": "money",
+            "delta": -300
+          },
+          {
+            "type": "relationship",
+            "role": "npc",
+            "affection": 7,
+            "trust": 5
+          },
+          {
+            "type": "memory",
+            "role": "npc",
+            "tag": "kept_in_touch"
+          }
+        ]
+      }
+    },
+    {
+      "id": "write_letter",
+      "label": "Write a letter of support instead",
+      "outcome": {
+        "text": "You find the right words and the right sentences. It is not what was asked for, but it carries weight in the right office.",
+        "effects": [
+          {
+            "type": "relationship",
+            "role": "npc",
+            "affection": 4,
+            "trust": 4
+          },
+          {
+            "type": "stat",
+            "key": "discipline",
+            "delta": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "cannot",
+      "label": "Say you can't help this time",
+      "outcome": {
+        "text": "'I understand,' {npc.they} {npc:writes|write}. The sentence is gracious and a little too brief.",
+        "effects": [
+          {
+            "type": "relationship",
+            "role": "npc",
+            "affection": -4
+          }
+        ]
+      }
+    }
+  ]
+}

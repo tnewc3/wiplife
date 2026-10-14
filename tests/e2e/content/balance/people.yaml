@@ -22,7 +22,7 @@ news:
   keepYears: 4
   perPerson: 2
   # Near and far people only make the news with these.
-  major: [engaged, married, divorced, widowed, had_child, diagnosed, addiction_started, jailed, moved]
+  major: [engaged, married, divorced, widowed, had_child, diagnosed, addiction_started, jailed, moved, emigrated]
 
 career:
   performance: { mean: 56, sd: 18 }
@@ -143,6 +143,8 @@ requests:
     death: { chance: 1, tiers: [close, near] }
     moveAway: { chance: 0, tiers: [close] }
     moveToYou: { chance: 0, tiers: [close] }
+    emigrates: { chance: 0, tiers: [close] }
+    emigrantAsks: { chance: 0, tiers: [close] }
     careNeeded: { chance: 0, tiers: [close] }
     cameOfAge: { chance: 0, tiers: [close] }
 

@@ -1,4 +1,7 @@
 import { emptyTravel } from '../travel/types';
+import { emptyMigration } from '../migration/types';
+import { citizenshipsFromCity } from '../migration/citizenship';
+import { inheritStanding } from '../migration/heir';
 import { emptyLanguageLearning, legacyLanguages } from '../languages';
 /**
  * Heir conversion (E2b): when a life ends, any living child can carry on, at
@@ -139,6 +142,7 @@ export function createFosterCarer(life: LifeState, rng: RngState, content: Conte
   const id = nextPersonId(life);
   const person: Person = {
     id,
+    citizenships: citizenshipsFromCity(life.character.cityId, content),
     languages: legacyLanguages(life.character.cityId, life.currentYear, `${life.seed}:${id}`, content),
     name: { first: pickUnused(rng, heritage.first[category], used), last: pick(rng, heritage.last) },
     birthYear: life.currentYear - nextInt(rng, fosterAge.min, fosterAge.max),
@@ -232,6 +236,7 @@ export function continueAsHeir(dead: LifeState, heirId: Id, content: ContentBund
   people[parentId] = {
     id: parentId,
     languages: cloneJson(c.languages),
+    citizenships: cloneJson(c.citizenships),
     name: { ...c.name },
     birthYear: dead.birthYear,
     alive: false,
@@ -343,6 +348,7 @@ export function continueAsHeir(dead: LifeState, heirId: Id, content: ContentBund
   hidden.reputation = clampInt(hidden.reputation + Math.round((dead.lineage.reputation - 50) * hb.reputation.carry), 0, 100);
   const character: Character = {
     languages: cloneJson(candidate.languages),
+    citizenships: cloneJson(candidate.citizenships),
     name: { ...candidate.name },
     age,
     lifeStage: lifeStageForAge(age, content),
@@ -408,8 +414,10 @@ export function continueAsHeir(dead: LifeState, heirId: Id, content: ContentBund
     belonging: emptyBelonging(),
     business: emptyBusiness(),
     travel: emptyTravel(),
+    migration: emptyMigration(),
     languages: emptyLanguageLearning(),
   };
+  inheritStanding(life, dead, content);
 
   // ── What they inherit ────────────────────────────────────────────────────
   const line: EstateLine | undefined = dead.estate.lines.find((l) => l.kind === 'person' && l.id === heirId);

@@ -1,0 +1,95 @@
+{
+  "id": "abroad_test_study",
+  "title": "Study night",
+  "text": "The citizenship test is coming. Some neighbors have formed a study group at the library: questions on cards, a plate of food in the middle of the table.",
+  "category": "abroad",
+  "tone": "light",
+  "rarity": "common",
+  "lifeStages": [
+    "youngAdult",
+    "adult",
+    "senior"
+  ],
+  "followUpOnly": true,
+  "requires": {
+    "all": [
+      {
+        "age": {
+          "gte": 18
+        }
+      },
+      {
+        "migration": {
+          "settled": true,
+          "application": [
+            "pending"
+          ],
+          "kind": [
+            "naturalization"
+          ]
+        }
+      }
+    ]
+  },
+  "weight": {
+    "base": 4
+  },
+  "cooldownYears": 4,
+  "choices": [
+    {
+      "id": "join_group",
+      "label": "Study with the group",
+      "outcome": {
+        "text": "You learn the answers and the stories behind them. Someone brings a cake the night before the test.",
+        "effects": [
+          {
+            "type": "migration",
+            "action": "prepare"
+          },
+          {
+            "type": "stat",
+            "key": "smarts",
+            "delta": 1
+          },
+          {
+            "type": "stat",
+            "key": "happiness",
+            "delta": 2
+          }
+        ]
+      }
+    },
+    {
+      "id": "study_alone",
+      "label": "Study alone, your own way",
+      "outcome": {
+        "text": "The cards are well worn by the end. You feel as ready as you can alone.",
+        "effects": [
+          {
+            "type": "migration",
+            "action": "prepare"
+          },
+          {
+            "type": "stat",
+            "key": "discipline",
+            "delta": 2
+          }
+        ]
+      }
+    },
+    {
+      "id": "trust_luck",
+      "label": "Trust what you already know",
+      "outcome": {
+        "text": "You are not wrong to trust yourself. You may be wrong about how much it will ask.",
+        "effects": [
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": 1
+          }
+        ]
+      }
+    }
+  ]
+}

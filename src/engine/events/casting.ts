@@ -1,3 +1,4 @@
+import { citizenshipsFromCity } from '../migration/citizenship';
 import { meetingWeight, nativeLanguages, sharedLanguage } from '../languages';
 /**
  * Casting: fills each role of an event with an existing person who fits, or
@@ -209,6 +210,7 @@ export function createPerson(state: LifeState, spec: CastSpec, rng: RngState, co
   state.people[id] = {
     id,
     languages: [],
+    citizenships: [],
     name: { first: pickUnused(rng, heritage.first[category], used), last: pick(rng, heritage.last) },
     birthYear: state.currentYear - age,
     alive: true,
@@ -238,6 +240,7 @@ export function createPerson(state: LifeState, spec: CastSpec, rng: RngState, co
   // E1: their occupation and wealth level, and the mood they start in.
   const person = state.people[id]!;
   person.languages = nativeLanguages(person.cityId, heritageId, state.currentYear, rng, content);
+  person.citizenships = citizenshipsFromCity(person.cityId, content);
   if (!sharedLanguage(state.character.languages, person.languages, content) && ["friend", "acquaintance", "classmate"].includes(kind)) state.relationships[id]!.affection = Math.max(0, state.relationships[id]!.affection - content.balance.languages.meeting.affectionPenalty);
   const wealth = rollWealth(state, kind, age, rng, content, person.languages, person.cityId);
   if (wealth.occupation !== undefined) person.occupation = wealth.occupation;

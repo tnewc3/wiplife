@@ -1,0 +1,79 @@
+{
+  "id": "abroad_staying_for_good",
+  "title": "Long enough to ask",
+  "text": "You have lived here long enough that the question of staying for good is no longer abstract. A neighbor says, as if it were obvious: 'You should ask to stay.'",
+  "category": "abroad",
+  "tone": "neutral",
+  "rarity": "common",
+  "lifeStages": [
+    "youngAdult",
+    "adult",
+    "senior"
+  ],
+  "followUpOnly": true,
+  "requires": {
+    "all": [
+      {
+        "age": {
+          "gte": 18
+        }
+      },
+      {
+        "migration": {
+          "settled": true
+        }
+      },
+      {
+        "migration": {
+          "eligible": [
+            "permanent"
+          ]
+        }
+      }
+    ]
+  },
+  "weight": {
+    "base": 3
+  },
+  "cooldownYears": 4,
+  "choices": [
+    {
+      "id": "think_about_it",
+      "label": "Think it over properly",
+      "outcome": {
+        "text": "It is a decision about where your future will be kept. You make lists, cross them out, and begin again.",
+        "effects": [
+          {
+            "type": "stat",
+            "key": "smarts",
+            "delta": 1
+          },
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "talk_to_family",
+      "label": "Talk to the people who would be affected",
+      "outcome": {
+        "text": "Everyone has a different hope. You come out of it knowing what you need, if not yet what you will do.",
+        "effects": [
+          {
+            "type": "migration",
+            "action": "ties",
+            "delta": 2
+          },
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": -1
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -50,6 +50,8 @@ function changesMoney(outcome: Outcome | undefined): boolean {
       (e.type === 'sports' && (e.action === 'sign' || e.action === 'extend' || (e.action === 'injury' && (e.what === 'rest' || e.what === 'surgery')))) ||
       // W3: a business effect that pays, receives, sells, closes, buys out, hires or expands moves your money.
       (e.type === 'business' && ['pay', 'receive', 'theft', 'sell', 'close', 'buyout', 'expand', 'hire', 'staffFire', 'staffRaise'].includes(e.action)) ||
+      // W6: pay kept back from you.
+      (e.type === 'migration' && e.action === 'withheld') ||
       e.type === 'repay' ||
       e.type === 'rentMonths' ||
       e.type === 'cost' ||

@@ -54,7 +54,9 @@ export function FundingPicker({ life, need, defId, plan, onChange }: { life: Lif
         <p className="mt-2 text-sm" data-testid="loan-offer">
           {view.loan.limit > 0 && view.loan.block === null
             ? `The bank would lend up to ${money(view.loan.limit)} at ${rateLabel(view.loan.rate)} over ${view.loan.termYears} years. You put in the rest.`
-            : view.loan.block === 'bankruptcy'
+            : view.loan.block === 'status'
+              ? 'The bank won’t lend to someone without papers.'
+              : view.loan.block === 'bankruptcy'
               ? 'The bank won’t lend so soon after a bankruptcy.'
               : view.loan.block === 'missed'
                 ? 'The bank won’t lend while you are behind on a payment.'

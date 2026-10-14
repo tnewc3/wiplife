@@ -8,6 +8,7 @@
  * src/content/balance/economy.yaml (gig) and careers.yaml; the job rules
  * live in ../career.ts.
  */
+import { isUndocumented } from '../migration/query';
 import type { ContentBundle } from '../../content/schemas';
 import {
   atTop,
@@ -41,7 +42,9 @@ export function expectedGigPay(state: LifeState, content: ContentBundle, age = s
   const { gig } = content.balance.economy;
   const city = content.cities[state.character.cityId];
   if (!city) return 0;
-  return wholeDollars(gig.pay * city.salaryMultiplier * countryOf(state, content).jobs.salaryByCategory.gig * curveAt(gig.market, city.jobMarket.gig) * curveAt(gig.byAge, age));
+  // W6: informal work without papers pays less.
+  const informal = isUndocumented(state) ? content.balance.immigration.undocumented.informalPay : 1;
+  return wholeDollars(gig.pay * city.salaryMultiplier * countryOf(state, content).jobs.salaryByCategory.gig * curveAt(gig.market, city.jobMarket.gig) * curveAt(gig.byAge, age) * informal);
 }
 
 /**

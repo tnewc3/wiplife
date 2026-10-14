@@ -101,6 +101,16 @@ countryTags:
         - '\bThanksgiving\b'
 
 categories:
+  # W6: applications, approvals and moving; the first years abroad; life without papers.
+  emigration:
+    label: Moving abroad
+    requires: { age: { gte: 18 } }
+  abroad:
+    label: A new country
+    requires: { migration: { settled: true } }
+  undocumented:
+    label: Without papers
+    requires: { migration: { status: [undocumented] } }
   family: { label: Family }
   play: { label: Play }
   school:

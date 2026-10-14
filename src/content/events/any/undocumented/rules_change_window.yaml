@@ -1,0 +1,93 @@
+{
+  "id": "rules_change_window",
+  "title": "The rules are changing",
+  "text": "The news says a window has opened for people in your situation to ask for status. Everyone has a theory about how long it will last, and whether it is safe to try.",
+  "category": "undocumented",
+  "tone": "neutral",
+  "rarity": "common",
+  "lifeStages": [
+    "youngAdult",
+    "adult",
+    "senior"
+  ],
+  "followUpOnly": true,
+  "requires": {
+    "all": [
+      {
+        "age": {
+          "gte": 18
+        }
+      },
+      {
+        "migration": {
+          "status": [
+            "undocumented"
+          ],
+          "ruleChange": true
+        }
+      }
+    ]
+  },
+  "weight": {
+    "base": 1
+  },
+  "cooldownYears": 4,
+  "choices": [
+    {
+      "id": "gather_records",
+      "label": "Gather your records and copies",
+      "outcome": {
+        "text": "Receipts, letters, old rental agreements: a life in paper. You spend a weekend on it and some of the cost of copies.",
+        "effects": [
+          {
+            "type": "money",
+            "delta": -60
+          },
+          {
+            "type": "stat",
+            "key": "discipline",
+            "delta": 2
+          },
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": 2
+          }
+        ]
+      }
+    },
+    {
+      "id": "ask_the_group",
+      "label": "Ask the people who have been through the process",
+      "outcome": {
+        "text": "A woman who has helped dozens of people through the maze draws it out on a napkin and says plainly what can and cannot be promised.",
+        "effects": [
+          {
+            "type": "stat",
+            "key": "smarts",
+            "delta": 1
+          },
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": -2
+          }
+        ]
+      }
+    },
+    {
+      "id": "wait_and_see",
+      "label": "Wait and see what happens to others first",
+      "outcome": {
+        "text": "Fear and caution look very alike from the inside. You decide to wait, and know the window may close.",
+        "effects": [
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": 2
+          }
+        ]
+      }
+    }
+  ]
+}

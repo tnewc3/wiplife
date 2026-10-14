@@ -44,6 +44,12 @@ lines:
   moved:
     - "Your {npc.relation} {npc.name} moved to {city}."
     - "{npc.name} packed up and moved to {city}."
+  emigrated:
+    - "Your {npc.relation} {npc.name} emigrated to {country}, settling in {city}."
+    - "{npc.name} has moved abroad, to {city} in {country}."
+  became_citizen:
+    - "Your {npc.relation} {npc.name} became a citizen of {country}."
+    - "{npc.name} is now a citizen of {country}."
   moved_near:
     - "Your {npc.relation} {npc.name} moved to {city}, your city."
     - "{npc.name} moved to {city}. That's close enough to drop by."

@@ -1,0 +1,73 @@
+{
+  "id": "undoc_close_call_rumor",
+  "title": "A rumor about a visit",
+  "text": "Word goes around that officials will visit a workplace nearby, maybe yours. It could be nothing. Nobody wants to be the one who finds out.",
+  "category": "undocumented",
+  "tone": "serious",
+  "rarity": "common",
+  "lifeStages": [
+    "youngAdult",
+    "adult",
+    "senior"
+  ],
+  "followUpOnly": true,
+  "requires": {
+    "all": [
+      {
+        "age": {
+          "gte": 18
+        }
+      },
+      {
+        "migration": {
+          "status": [
+            "undocumented"
+          ]
+        }
+      }
+    ]
+  },
+  "weight": {
+    "base": 1
+  },
+  "cooldownYears": 4,
+  "choices": [
+    {
+      "id": "stay_home",
+      "label": "Stay home for a few days",
+      "outcome": {
+        "text": "Nothing happens at the place. The days you missed cost you money you could not spare.",
+        "effects": [
+          {
+            "type": "money",
+            "delta": -80
+          },
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": 2
+          }
+        ]
+      }
+    },
+    {
+      "id": "go_in",
+      "label": "Go in as normal",
+      "outcome": {
+        "text": "The day is ordinary, which feels like a small miracle. Your coworkers tell the same story over lunch.",
+        "effects": [
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": 3
+          },
+          {
+            "type": "stat",
+            "key": "happiness",
+            "delta": 1
+          }
+        ]
+      }
+    }
+  ]
+}

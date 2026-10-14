@@ -243,7 +243,7 @@ describe('the crew year', () => {
   });
 });
 
-const movedAway = (seed: string) => apply(inCrewLife(seed), (d) => void (d.character.cityId = Object.keys(content.cities).find((c) => c !== d.crime.crew!.cityId && Object.values(content.crews).some((x) => x.cities.includes(c)))!));
+const movedAway = (seed: string) => apply(inCrewLife(seed), (d) => void (d.character.cityId = Object.keys(content.cities).find((c) => c !== d.crime.crew!.cityId && content.cities[c]!.countryId === content.cities[d.character.cityId]!.countryId && Object.values(content.crews).some((x) => x.cities.includes(c)))!));
 
 describe('moving away from the crew', () => {
   it('freezes your rank, fades standing to a floor and grows what the crew suspects, without forgetting you at once', () => {

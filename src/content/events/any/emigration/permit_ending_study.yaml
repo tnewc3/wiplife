@@ -1,0 +1,100 @@
+{
+  "id": "permit_ending_study",
+  "title": "After the degree",
+  "text": "Your study permit runs out this year. You made the plan to work here afterwards, but the paperwork and the plan do not quite match.",
+  "category": "emigration",
+  "tone": "serious",
+  "rarity": "common",
+  "lifeStages": [
+    "youngAdult",
+    "adult",
+    "senior"
+  ],
+  "followUpOnly": true,
+  "requires": {
+    "all": [
+      {
+        "age": {
+          "gte": 18
+        }
+      },
+      {
+        "migration": {
+          "expiring": true,
+          "settled": true,
+          "status": [
+            "temporary"
+          ],
+          "via": [
+            "study_work"
+          ]
+        }
+      }
+    ]
+  },
+  "weight": {
+    "base": 1
+  },
+  "choices": [
+    {
+      "id": "go_home",
+      "label": "Go home with what you learned",
+      "outcome": {
+        "text": "It is not the ending you pictured. You leave with a credential and a story worth telling.",
+        "effects": [
+          {
+            "type": "migration",
+            "action": "leave"
+          },
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": 3
+          },
+          {
+            "type": "stat",
+            "key": "happiness",
+            "delta": -1
+          }
+        ]
+      }
+    },
+    {
+      "id": "stay_on",
+      "label": "Stay on without permission",
+      "outcome": {
+        "text": "You decide to stay, knowing what that means: informal work, no safety net, and a watchful kind of life.",
+        "effects": [
+          {
+            "type": "migration",
+            "action": "overstay"
+          },
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": 6
+          }
+        ]
+      }
+    },
+    {
+      "id": "look_for_options",
+      "label": "Spend the last weeks looking for another way to stay",
+      "outcome": {
+        "text": "A teacher writes you a long letter. A friend knows someone. None of it is certain; all of it counts.",
+        "effects": [
+          {
+            "type": "stat",
+            "key": "smarts",
+            "delta": 1
+          },
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": 4
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,87 @@
+{
+  "id": "emigration_waiting_language",
+  "title": "Practice",
+  "text": "While the application waits, the main language of {appCountry} becomes your evening habit: audio on the walk, the dictionary open at dinner.",
+  "category": "emigration",
+  "tone": "light",
+  "rarity": "common",
+  "lifeStages": [
+    "youngAdult",
+    "adult",
+    "senior"
+  ],
+  "followUpOnly": true,
+  "requires": {
+    "all": [
+      {
+        "age": {
+          "gte": 18
+        }
+      },
+      {
+        "migration": {
+          "application": [
+            "pending"
+          ]
+        }
+      }
+    ]
+  },
+  "weight": {
+    "base": 1
+  },
+  "choices": [
+    {
+      "id": "daily",
+      "label": "Make it daily, even when it is dull",
+      "outcome": {
+        "text": "Some days it is only five minutes. Added together they feel like something.",
+        "effects": [
+          {
+            "type": "stat",
+            "key": "smarts",
+            "delta": 1
+          },
+          {
+            "type": "stat",
+            "key": "discipline",
+            "delta": 2
+          }
+        ]
+      }
+    },
+    {
+      "id": "find_partner",
+      "label": "Look for someone to practice with",
+      "outcome": {
+        "text": "A stranger on the other end of a language exchange laughs kindly at your mistakes and corrects them anyway.",
+        "effects": [
+          {
+            "type": "stat",
+            "key": "happiness",
+            "delta": 2
+          },
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": -1
+          }
+        ]
+      }
+    },
+    {
+      "id": "later",
+      "label": "Leave it for when you get there",
+      "outcome": {
+        "text": "Learning on arrival has its own charm, and its own difficulties in the first months.",
+        "effects": [
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": 1
+          }
+        ]
+      }
+    }
+  ]
+}

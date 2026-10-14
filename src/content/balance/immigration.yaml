@@ -1,0 +1,176 @@
+# Emigration and citizenship (W6, docs/expansion.md). Money is in the base currency (US dollars), at the prices of the
+# country that sets the fee; the game models each country's rules at a high level and takes no political position.
+# Starting proposals; Stage 12 (balancing) tunes them against simulation runs.
+
+minAge: 18
+# After a removal, years before a country will take an application from you again.
+banYears: 10
+# Years you have to use an approval before it lapses.
+approvedWindow: 2
+
+eligibility:
+  # A prison sentence within this many years blocks every legal route.
+  recordYears: 10
+  work_sponsor:
+    minAge: 21
+    maxAge: 58
+    # One of these, or years of work in a job track that can be sponsored.
+    credentials: [associate, bachelor, trade_license, grad]
+    experienceYears: 3
+    # Skill (0-100) in the country's main language; 10 is basic, 40 conversational.
+    language: 25
+    # The job categories an employer abroad will sponsor.
+    categories: [professional, trade]
+  study_work:
+    minAge: 17
+    maxAge: 32
+    language: 10
+  family:
+    minAge: 18
+    kinds: [spouse, fiance, partner, parent, child]
+  investment:
+    minAge: 21
+
+# Approval odds: the country's base for the route, plus these, kept between min and max.
+odds:
+  min: 0.05
+  max: 0.92
+  education: { associate: 0.04, trade_license: 0.07, bachelor: 0.1, grad: 0.14 }
+  languagePerPoint: 0.002
+  languageCap: 0.1
+  smartsPerPoint: 0.002
+  experiencePerYear: 0.02
+  experienceCap: 0.1
+  # A conviction that is not a warning.
+  record: -0.2
+  # Preparing for the citizenship test with a study group.
+  prepare: 0.1
+  # Married to a citizen when applying for citizenship.
+  married: 0.04
+
+# The first years in a new country.
+settle:
+  arrival: { happiness: -3, stress: 6 }
+  firstYears: 3
+  yearly: { happiness: -1, stress: 1 }
+  # Affection lost each year with relatives left behind, until you visit.
+  ties: 2
+  homesickChance: 0.25
+
+# Sending money home. Shares of a year's gross income, paid through the yearly ledger from what is left after
+# housing and living costs, never into debt.
+remit:
+  levels: { none: 0, some: 0.05, steady: 0.12 }
+  maxShare: 0.25
+  affection: 3
+  happiness: 1
+
+visits: { affection: 8, returnCost: 1800 }
+
+undocumented:
+  # Informal work pays this share of the going gig rate.
+  informalPay: 0.7
+  # Yearly chance an employer takes advantage, and the share of a year's pay it costs.
+  exploitation: 0.3
+  stolenShare: 0.12
+  stress: { perYear: 3, limit: 85 }
+  happiness: -2
+  deportation:
+    # Added to the country's base risk.
+    policeContact: 0.06
+    record: 0.05
+    applying: 0.03
+    denied: 0.04
+    # The risk falls a little each year you have lived there, to this share of the base.
+    yearsDecay: 0.03
+    floor: 0.45
+    # Belonging to a community group that backs newcomers (at this standing or more) multiplies the risk by this.
+    community: 0.6
+    communityStanding: 35
+    # A non-citizen sentenced to prison: the chance of removal on release.
+    serious: 0.5
+  entry: { cost: 4500, turnedBack: 0.22, hardship: 8 }
+  ruleChange: { yearlyChance: 0.025, window: 2, minYears: 5, odds: 0.6, fee: 900 }
+  # Groups (src/content/groups) that welcome newcomers and stand by people without papers.
+  supportGroups: [newcomers_network, food_bank, neighborhood_assoc]
+  closeCall: { chance: 0.12 }
+
+people:
+  # Yearly chance an adult you know who lives apart from you emigrates.
+  yearlyChance: 0.0008
+  undocumentedShare: 0.15
+  towardYourCountry: 0.3
+  # An emigrant takes up their new country's citizenship after this many years, with this yearly chance.
+  naturalizeYears: 5
+  naturalizeChance: 0.15
+  askChance: 0.5
+
+# What the simulation's players do (tools/simulate).
+simulation:
+  # Yearly chance an adult citizen at home looks for a way to leave; and, of those with no legal route open to them and little money, the share who go without papers.
+  explore: 0.004
+  applyChance: 0.25
+  entryChance: 0.9
+  undocumentedEntryChance: 0.4
+  remitChance: 0.6
+  visitChance: 0.12
+  returnChance: 0.02
+  naturalizeChance: 0.85
+
+countries:
+  us:
+    birthright: anyone
+    descent: true
+    dual: true
+    work_sponsor: { available: true, fee: 4800, wait: 2, odds: 0.34, stayYears: 3 }
+    study_work: { available: true, fee: 1800, wait: 1, odds: 0.55, tuitionFactor: 1.8, graduateYears: 3 }
+    family: { available: true, fee: 2200, wait: 2, odds: 0.72 }
+    investment: { available: true, fee: 12000, wait: 1, odds: 0.85, amount: 500000 }
+    permanent: { available: true, fee: 1900, wait: 1, odds: 0.72, afterYears: 3 }
+    naturalization: { available: true, fee: 700, wait: 1, odds: 0.8, years: 5, marriedYears: 3, language: 40, cleanYears: 5 }
+    undocumented:
+      deportation: 0.035
+      marriage: { available: true, fee: 2600, wait: 1, odds: 0.5 }
+      longResidence: { available: false, fee: 1800, wait: 1, odds: 0.3, years: 10 }
+  ca:
+    birthright: anyone
+    descent: true
+    dual: true
+    work_sponsor: { available: true, fee: 3200, wait: 1, odds: 0.45, stayYears: 3 }
+    study_work: { available: true, fee: 1500, wait: 1, odds: 0.62, tuitionFactor: 1.6, graduateYears: 3 }
+    family: { available: true, fee: 1500, wait: 1, odds: 0.76 }
+    investment: { available: true, fee: 9000, wait: 1, odds: 0.85, amount: 400000 }
+    permanent: { available: true, fee: 1300, wait: 1, odds: 0.78, afterYears: 2 }
+    naturalization: { available: true, fee: 600, wait: 1, odds: 0.84, years: 3, marriedYears: 2, language: 40, cleanYears: 4 }
+    undocumented:
+      deportation: 0.02
+      marriage: { available: true, fee: 2000, wait: 1, odds: 0.52 }
+      longResidence: { available: true, fee: 1500, wait: 2, odds: 0.3, years: 10 }
+  uk:
+    birthright: parent_status
+    descent: true
+    dual: true
+    work_sponsor: { available: true, fee: 3600, wait: 1, odds: 0.4, stayYears: 5 }
+    study_work: { available: true, fee: 1700, wait: 1, odds: 0.58, tuitionFactor: 1.7, graduateYears: 2 }
+    family: { available: true, fee: 3000, wait: 1, odds: 0.7 }
+    investment: { available: true, fee: 11000, wait: 1, odds: 0.82, amount: 600000 }
+    permanent: { available: true, fee: 2400, wait: 1, odds: 0.7, afterYears: 4 }
+    naturalization: { available: true, fee: 1500, wait: 1, odds: 0.78, years: 5, marriedYears: 3, language: 40, cleanYears: 5 }
+    undocumented:
+      deportation: 0.03
+      marriage: { available: true, fee: 2800, wait: 1, odds: 0.48 }
+      longResidence: { available: true, fee: 2400, wait: 2, odds: 0.28, years: 10 }
+  mx:
+    birthright: anyone
+    descent: true
+    dual: true
+    work_sponsor: { available: true, fee: 1200, wait: 1, odds: 0.5, stayYears: 4 }
+    study_work: { available: true, fee: 900, wait: 1, odds: 0.62, tuitionFactor: 1.3, graduateYears: 2 }
+    family: { available: true, fee: 900, wait: 1, odds: 0.8 }
+    investment: { available: true, fee: 5000, wait: 1, odds: 0.88, amount: 150000 }
+    permanent: { available: true, fee: 800, wait: 1, odds: 0.8, afterYears: 3 }
+    naturalization: { available: true, fee: 500, wait: 1, odds: 0.85, years: 5, marriedYears: 2, language: 40, cleanYears: 3 }
+    undocumented:
+      deportation: 0.012
+      marriage: { available: true, fee: 1000, wait: 1, odds: 0.6 }
+      longResidence: { available: true, fee: 900, wait: 1, odds: 0.45, years: 5 }

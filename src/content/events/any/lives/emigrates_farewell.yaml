@@ -1,0 +1,105 @@
+{
+  "id": "emigrates_farewell",
+  "title": "A goodbye with a date on it",
+  "text": "{npc.name} is leaving for {npc.city}, for good as far as anyone can say. The going-away gathering is warm and a little too loud, as if volume could keep the day from arriving.",
+  "category": "lives",
+  "tone": "neutral",
+  "rarity": "common",
+  "lifeStages": [
+    "youngAdult",
+    "adult",
+    "senior"
+  ],
+  "followUpOnly": true,
+  "requires": {
+    "all": [
+      {
+        "age": {
+          "gte": 16
+        }
+      },
+      {
+        "role": "npc",
+        "alive": true,
+        "age": {
+          "gte": 18
+        },
+        "where": [
+          "elsewhere"
+        ],
+        "life": {
+          "emigrated": true
+        }
+      }
+    ]
+  },
+  "weight": {
+    "base": 8
+  },
+  "cast": {
+    "npc": {
+      "support": true,
+      "presence": "elsewhere"
+    }
+  },
+  "choices": [
+    {
+      "id": "see_off",
+      "label": "See {npc.them} off",
+      "outcome": {
+        "text": "You carry a bag you shouldn't, and hug at the barrier longer than the queue allows. It is not goodbye, you both say.",
+        "effects": [
+          {
+            "type": "cost",
+            "item": "celebration_dinner"
+          },
+          {
+            "type": "relationship",
+            "role": "npc",
+            "affection": 7,
+            "trust": 4
+          },
+          {
+            "type": "memory",
+            "role": "npc",
+            "tag": "kept_in_touch"
+          }
+        ]
+      }
+    },
+    {
+      "id": "send_note",
+      "label": "Send a note and a promise to visit",
+      "outcome": {
+        "text": "You write the note three times. The promise is real. {npc.They} {npc:keeps|keep} the note in a coat pocket.",
+        "effects": [
+          {
+            "type": "relationship",
+            "role": "npc",
+            "affection": 4,
+            "trust": 2
+          }
+        ]
+      }
+    },
+    {
+      "id": "drift",
+      "label": "Wish {npc.them} well and let the distance do what it does",
+      "outcome": {
+        "text": "You mean to write. The messages get shorter, then rarer. It happens so gently you almost miss it.",
+        "effects": [
+          {
+            "type": "relationship",
+            "role": "npc",
+            "affection": -5
+          },
+          {
+            "type": "memory",
+            "role": "npc",
+            "tag": "lost_touch"
+          }
+        ]
+      }
+    }
+  ]
+}

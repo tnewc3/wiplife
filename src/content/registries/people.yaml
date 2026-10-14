@@ -19,6 +19,8 @@ priority:
   - moneyTrouble
   - moveAway
   - moveToYou
+  - emigrates
+  - emigrantAsks
   - engaged
   - newPartner
   - promotion
@@ -62,6 +64,10 @@ requests:
     events: [after_they_leave]
   moveToYou:
     events: [old_friend_in_town]
+  emigrates:
+    events: [emigrates_farewell]
+  emigrantAsks:
+    events: [emigrant_asks_fees]
   careNeeded:
     events: [care_needed]
   cameOfAge:

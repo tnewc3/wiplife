@@ -1,0 +1,108 @@
+{
+  "id": "undoc_wages_held_back",
+  "title": "A week of work unpaid",
+  "text": "The people who hired you by the day have not paid for a full week of work. They say next week, next week. You have rent, and they know it.",
+  "category": "undocumented",
+  "tone": "serious",
+  "rarity": "common",
+  "lifeStages": [
+    "youngAdult",
+    "adult",
+    "senior"
+  ],
+  "followUpOnly": true,
+  "requires": {
+    "all": [
+      {
+        "age": {
+          "gte": 18
+        }
+      },
+      {
+        "migration": {
+          "status": [
+            "undocumented"
+          ]
+        }
+      }
+    ]
+  },
+  "weight": {
+    "base": 1
+  },
+  "cooldownYears": 4,
+  "choices": [
+    {
+      "id": "ask_again",
+      "label": "Ask again, plainly, and keep asking",
+      "outcome": {
+        "text": "Part of it arrives, with a look that says you are being difficult. Being seen is its own risk.",
+        "effects": [
+          {
+            "type": "migration",
+            "action": "withheld",
+            "share": 0.04
+          },
+          {
+            "type": "migration",
+            "action": "risk",
+            "delta": 2
+          },
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": 2
+          }
+        ]
+      }
+    },
+    {
+      "id": "let_go",
+      "label": "Let it go and look for other work",
+      "outcome": {
+        "text": "You swallow it. The loss stays in your calculations, and you find another set of days to work.",
+        "effects": [
+          {
+            "type": "migration",
+            "action": "withheld",
+            "share": 0.12
+          },
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": 2
+          },
+          {
+            "type": "stat",
+            "key": "happiness",
+            "delta": -1
+          }
+        ]
+      }
+    },
+    {
+      "id": "community_help",
+      "label": "Take it to someone who helps people in your position",
+      "outcome": {
+        "text": "A volunteer writes a firm, polite letter that does not mention your name. Most of what is owed arrives.",
+        "effects": [
+          {
+            "type": "migration",
+            "action": "withheld",
+            "share": 0.05
+          },
+          {
+            "type": "stat",
+            "key": "stress",
+            "delta": -1
+          },
+          {
+            "type": "stat",
+            "key": "smarts",
+            "delta": 1
+          }
+        ]
+      }
+    }
+  ]
+}

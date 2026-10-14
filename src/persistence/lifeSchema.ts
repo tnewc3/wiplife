@@ -1,4 +1,5 @@
 import { languageSkillSchema } from '../content/schemas/languages';
+import { APPLICATION_KINDS, APPLICATION_STATUSES, COUNTRY_IDS, REGULARIZATION_BASES, REMIT_LEVELS, ROUTES, STAY_ROUTES, STAY_TYPES } from '../content/schemas';
 /**
  * Validates a saved LifeState when it is loaded. Typed against the engine's
  * LifeState, so TypeScript reports any drift between the two. Strict objects:
@@ -64,8 +65,11 @@ const stats = z.strictObject({
 const name = z.strictObject({ first: filled, last: filled });
 
 const languages = z.array(languageSkillSchema).min(1).refine((ls) => new Set(ls.map((l) => l.id)).size === ls.length, "duplicate language").refine((ls) => ls.some((l) => l.native), "needs a native language");
+// (Duplicates are an invariant, checked once per life with the rest of the migration rules.)
+const citizenships = z.array(z.enum(COUNTRY_IDS)).min(1);
 const character = z.strictObject({
   languages,
+  citizenships,
   name,
   age: int,
   lifeStage: z.enum(['early', 'child', 'teen', 'youngAdult', 'adult', 'senior']),
@@ -151,6 +155,7 @@ const personLife = z.strictObject({
   careSince: int.exactOptional(),
   gossip: score,
   requestYear: int.exactOptional(),
+  emigrated: z.strictObject({ year: int, countryId: z.enum(COUNTRY_IDS), from: id, papers: z.boolean() }).exactOptional(),
 });
 // E4: the social web.
 const tie = z.strictObject({
@@ -195,6 +200,7 @@ const newsYear = z.strictObject({
 
 const person = z.strictObject({
   languages,
+  citizenships,
   id,
   name,
   birthYear: int,
@@ -371,6 +377,7 @@ const finances = z.strictObject({
       upkeep: dollars,
       insurance: dollars,
       giving: dollars,
+      remittances: dollars.exactOptional(),
       business: dollars,
       net: dollars,
     })
@@ -1000,10 +1007,44 @@ export { pronouns as pronounsSchema, stats as statsSchema };
 
 
 const travelState = z.strictObject({
-  residence: z.strictObject({ country: filled, destinationId: id, type: z.enum(['visitor', 'student', 'temporary_worker']), startYear: int, endYear: int, homeCityId: id, homeHousing: housing, route: z.enum(['vacation', 'semester', 'year', 'working_holiday', 'transfer']) }).nullable(),
+  residence: z.strictObject({ country: filled, destinationId: id, type: z.enum(STAY_TYPES), startYear: int, endYear: int, homeCityId: id, homeHousing: housing.exactOptional(), route: z.enum(STAY_ROUTES), settled: z.literal(true).exactOptional() }).nullable(),
   active: z.strictObject({ kind: z.enum(['trip', 'study', 'work']), destinationId: id, companions: z.array(id), encounterId: id.nullable(), romanceId: id.nullable() }).nullable(),
   tripYear: int.nullable(),
   totals: z.strictObject({ trips: int.nonnegative(), spent: dollars, encounters: int.nonnegative(), romances: int.nonnegative(), study: int.nonnegative(), work: int.nonnegative(), returns: int.nonnegative(), immersion: int.nonnegative(), distanceLost: int.nonnegative(), happiness: int, stress: int, destinations: z.record(id, int.nonnegative()) }),
+});
+
+const application = z.strictObject({
+  kind: z.enum(APPLICATION_KINDS),
+  route: z.enum(ROUTES).exactOptional(),
+  basis: z.enum(REGULARIZATION_BASES).exactOptional(),
+  countryId: z.enum(COUNTRY_IDS),
+  cityId: id.exactOptional(),
+  sinceYear: int,
+  decisionYear: int,
+  status: z.enum(APPLICATION_STATUSES),
+  decidedYear: int.exactOptional(),
+  expiresYear: int.exactOptional(),
+  fee: dollars,
+  odds: z.number().min(0).max(1),
+  jobId: id.exactOptional(),
+  majorId: id.exactOptional(),
+  tier: z.enum(['community', 'state', 'elite']).exactOptional(),
+  sponsorId: id.exactOptional(),
+  invested: dollars.exactOptional(),
+  prepared: z.boolean().exactOptional(),
+});
+const migrationState = z.strictObject({
+  application: application.nullable(),
+  denied: z.record(z.string(), int),
+  arrivedYear: int.nullable(),
+  undocumented: z.strictObject({ sinceYear: int, origin: z.enum(['overstay', 'irregular']), closeCalls: int.nonnegative() }).nullable(),
+  removed: z.record(z.string(), int),
+  ruleChangeUntil: int.nullable(),
+  remit: z.strictObject({ level: z.enum(REMIT_LEVELS), sent: dollars }),
+  testFails: int.nonnegative(),
+  exposure: z.number().min(0).max(1),
+  year: z.strictObject({ year: int, risk: z.number().min(0).max(1), closeCall: z.boolean(), policeContact: z.boolean(), stolen: dollars }),
+  counts: z.record(z.string(), int.nonnegative()),
 });
 
 export const lifeStateSchema: z.ZodType<LifeState> = z.strictObject({
@@ -1015,6 +1056,7 @@ export const lifeStateSchema: z.ZodType<LifeState> = z.strictObject({
   phase: z.enum(['yearStart', 'events', 'yearEnd', 'dead', 'action']),
   character,
   travel: travelState,
+  migration: migrationState,
   languages: z.strictObject({ schoolId: id.nullable(), classId: id.nullable(), classYear: int.nullable(), totals: z.strictObject({ school: int.nonnegative(), classes: int.nonnegative(), immersion: int.nonnegative(), faded: int.nonnegative() }) }),
   people: z.record(z.string(), person),
   relationships: z.record(z.string(), relationship),

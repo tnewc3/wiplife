@@ -1,4 +1,5 @@
 import { TravelScreen } from '../more/TravelScreen';
+import { MigrationScreen } from '../more/MigrationScreen';
 import type { LifeState } from '../../../engine/types';
 import { useAppStore, type TabId } from '../../../store/appStore';
 import { AgeUpButton } from '../../components/AgeUpButton';
@@ -71,6 +72,7 @@ export function GameScreen({ life }: { life: LifeState }) {
   const current = tabs.find((t) => t.id === tab) ?? tabs[0]!;
   const person = tab === 'people' && personId !== null && life.people[personId] ? personId : null;
   const travel = tab === 'more' && moreView === 'travel';
+  const migration = tab === 'more' && moreView === 'migration';
   const home = tab === 'more' && moreView === 'home';
   const health = tab === 'more' && moreView === 'health';
   const family = tab === 'more' && moreView === 'family';
@@ -82,13 +84,13 @@ export function GameScreen({ life }: { life: LifeState }) {
   const pet = tab === 'people' && personId !== null && life.possessions.items.some((p) => p.id === personId && p.kind === 'pet') ? personId : null;
   const back = person || pet
     ? { onBack: closePerson, backLabel: 'Back to People' }
-    : travel || home || health || family || will || later || belongings || groups || teen
+    : travel || migration || home || health || family || will || later || belongings || groups || teen
       ? { onBack: closeHome, backLabel: 'Back to More' }
       : {};
 
   return (
     <Screen
-      title={travel ? 'Plan a trip' : home ? 'Home' : health ? 'Health' : family ? 'Family' : will ? 'Your will' : later ? 'Later life' : belongings ? 'Belongings' : groups ? 'Groups' : teen ? 'Teen years' : current.label}
+      title={travel ? 'Plan a trip' : migration ? 'Move abroad' : home ? 'Home' : health ? 'Health' : family ? 'Family' : will ? 'Your will' : later ? 'Later life' : belongings ? 'Belongings' : groups ? 'Groups' : teen ? 'Teen years' : current.label}
       {...back}
       footer={
         <>
@@ -114,6 +116,8 @@ export function GameScreen({ life }: { life: LifeState }) {
         <MoneyTab life={life} />
       ) : travel ? (
         <TravelScreen life={life} />
+      ) : migration ? (
+        <MigrationScreen life={life} />
       ) : home ? (
         <HousingScreen life={life} />
       ) : health ? (
