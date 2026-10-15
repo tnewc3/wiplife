@@ -1344,7 +1344,9 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
       if (life.education.credentials.some((c) => c.type === 'trade_license' && c.refId === row.tradeId)) row.licensed++;
       if (row.jobIds.some((jobId) => work.tracks.has(jobId))) row.worked++;
     }
-    if (life.character.age >= t.careers.earningsAge) {
+    // (Famous lives are left out, as from the net worth target: a few stars' and pros' fortunes swing a mean of thousands of careers, and a run whose few
+    // high-school-only stars out-earn its graduates would read 0.95 where the other three read 1.5-1.6.)
+    if (life.character.age >= t.careers.earningsAge && peakRung(life) < content.balance.fame.crossover.rung) {
       earningsByPath[educationPath(life)].push(work.earnings);
       if (life.education.credentials.some((c) => c.type === 'bachelor')) bachelorEarnings.push(work.earnings);
     }

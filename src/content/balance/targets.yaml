@@ -413,7 +413,8 @@ coverage:
 # Batch 0: the simulation's speed. The most milliseconds a simulated year may take on average (the whole headless
 # year: the player's actions, the events and every invariant check), on the machine that runs it. Measured value
 # plus headroom; tools/simulate.ts fails when it is exceeded. See docs/technical.md, Batch 0 as built.
-# Measured (Batch 0, one careful life at a time on the development container): 17.5 ms before the CI figure is known; headroom
-# is more than double, because a CI machine is slower and busier. The first CI run's figure replaces this guess (docs/technical.md).
+# Measured (Batch 0): on GitHub's CI machine the careful player took 11.0 ms a year, the careless 10.0 (both running at once in the
+# 500-life step) and the spammer 11.4; on the development container (about half as fast) one careful life at a time 17.5 ms. 25 is
+# more than twice CI's figure and above the container's. Raise it only with the reason in docs/technical.md.
 performance:
-  maxMsPerYear: 40
+  maxMsPerYear: 25
