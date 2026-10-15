@@ -19,7 +19,7 @@ import { formatInteractions } from './simulate/interactions';
 import { continueAsHeirs, startChains } from './simulate/generations';
 import { formatHeirs, heirTargets } from './simulate/heirs';
 import { measureFullCircle } from './simulate/people';
-import { formatComparison, formatReport, interactionTargets, runSimulation, type SimulatedPlayer } from './simulate/run';
+import { formatComparison, formatReport, interactionTargets, performanceTargets, runSimulation, type SimulatedPlayer } from './simulate/run';
 import { crimeTargets, formatCrime } from './simulate/crime';
 import { fameTargets, formatFame } from './simulate/fame';
 import { formatSports, sportsTargets } from './simulate/sports';
@@ -124,9 +124,16 @@ for (const report of reports.slice(1)) {
     ].join('\n'),
   );
 }
+// Batch 0: the performance budget. The careful and careless players are held to it (the others do extra work by design and are only reported).
+const speed = reports.flatMap((r) => performanceTargets(r, content).map((t) => ({ player: r.player, ...t })));
+console.log('');
+console.log('Speed (src/content/balance/targets.yaml, performance):');
+for (const t of speed) console.log(`  ${t.met ? 'MET    ' : 'NOT MET'} ${t.player}: ${t.label}: ${t.value} (target ${t.goal})`);
+const overBudget = speed.filter((t) => !t.met && (t.player === 'careful' || t.player === 'careless'));
 console.log(`Finished in ${((Date.now() - started) / 1000).toFixed(1)}s.`);
 if (values.json) {
   const body = reports.length > 1 ? Object.fromEntries(reports.map((r) => [r.player, r])) : reports[0];
   await writeFile(values.json, `${JSON.stringify(heirRun ? { ...body, heirs: heirRun.report } : body, null, 2)}\n`);
 }
-if (reports.some((r) => r.invariantFailures > 0) || (heirRun?.reports ?? []).some((r) => r.invariantFailures > 0)) process.exit(1);
+if (overBudget.length > 0) console.error(`Over the speed budget: ${overBudget.map((t) => t.player).join(', ')}.`);
+if (overBudget.length > 0 || reports.some((r) => r.invariantFailures > 0) || (heirRun?.reports ?? []).some((r) => r.invariantFailures > 0)) process.exit(1);

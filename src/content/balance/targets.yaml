@@ -398,3 +398,9 @@ coverage:
   legendaryLives: { min: 0.001, max: 0.02 }
   # Design section G: about 300 events at launch.
   launch: { childhood: 50, teen: 70, youngAdult: 70, adult: 70, senior: 40 }
+
+# Batch 0: the simulation's speed. The most milliseconds a simulated year may take on average (the whole headless
+# year: the player's actions, the events and every invariant check), on the machine that runs it. Measured value
+# plus headroom; tools/simulate.ts fails when it is exceeded. See docs/technical.md, Batch 0 as built.
+performance:
+  maxMsPerYear: 60
