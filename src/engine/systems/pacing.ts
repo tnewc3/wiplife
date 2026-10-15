@@ -107,6 +107,8 @@ export function runPacing(state: LifeState, content: ContentBundle): void {
   // Weights read `view`, which doesn't change while picking: work them out once.
   const lastByCategory = categoryYears(view, content);
   const weights = new Map(pool.map((def) => [def, eventWeight(view, def, content, undefined, lastByCategory)]));
+  // An event with no weight can't be picked (and adds nothing to the total): leave it out of every round below.
+  for (let i = pool.length - 1; i >= 0; i--) if (!(weights.get(pool[i]!)! > 0)) pool.splice(i, 1);
   while (picked.length < budget && pool.length > 0) {
     const options = pool.map((def) => [def, weights.get(def)!] as const);
     const total = options.reduce((sum, [, w]) => sum + w, 0);

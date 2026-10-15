@@ -37,8 +37,57 @@ export function sinceText(state: LifeState, since: number | undefined, content: 
   return years === 1 ? t.since.one : t.since.many.replace('{n}', t.numbers[years] ?? String(years));
 }
 
-/** `since`: for a follow-up, the year the event that scheduled it happened ({since}). */
-export function textContext(state: LifeState, cast: Record<string, Id>, content: ContentBundle, since?: number): TextContext {
+const TRAVEL_VALUES = ['destination', 'destinationCountry', 'endYear', 'homeCity', 'travelCost'] as const;
+const DISCOVERY_VALUES = ['talent', 'latentPeople', 'latentGender', 'latentExpression', 'latentTrait'] as const;
+
+/**
+ * The names each system supplies as text values, in the order they were once merged into one object (a later
+ * group wins over an earlier one for a name they share).
+ */
+const VALUE_GROUPS: readonly (readonly string[])[] = [
+  TRAVEL_VALUES,
+  MIGRATION_TEXT_VALUES,
+  ['studiedLanguage'],
+  COUNTRY_TEXT_VALUES,
+  DISCOVERY_VALUES,
+  ['sentence'],
+  ['heard'],
+  TEEN_TEXT_VALUES,
+  CRIME_TEXT_VALUES,
+  FAME_TEXT_VALUES,
+  SPORTS_TEXT_VALUES,
+  BELONGING_TEXT_VALUES,
+  BUSINESS_TEXT_VALUES,
+];
+const GROUP_OF = new Map<string, number>();
+VALUE_GROUPS.forEach((keys, i) => keys.forEach((key) => GROUP_OF.set(key, i)));
+
+/**
+ * Event text uses a few of the many values a context offers, so each system's values are worked out the first time
+ * one of its names is read, and then kept: the object is a Proxy that answers from `own` (the cheap values, and
+ * the possessions an event is about) or from the group the name belongs to. Spreading it works out everything.
+ * `eager` works everything out now, for a context made before the effects of an outcome that is rendered after
+ * them (its text must say what was true before).
+ */
+function lazyValues(own: Record<string, string | number>, make: (group: number) => Record<string, string | number>, eager: boolean): Record<string, string | number> {
+  const made: (Record<string, string | number> | undefined)[] = [];
+  const read = (key: string): string | number | undefined => {
+    if (Object.hasOwn(own, key)) return own[key];
+    const group = GROUP_OF.get(key);
+    return group === undefined ? undefined : (made[group] ??= make(group))[key];
+  };
+  const values = new Proxy(own, {
+    get: (_target, key) => (typeof key === 'string' ? read(key) : undefined),
+    has: (_target, key) => typeof key === 'string' && (Object.hasOwn(own, key) || GROUP_OF.has(key)),
+    ownKeys: () => [...new Set([...Object.keys(own), ...GROUP_OF.keys()])],
+    getOwnPropertyDescriptor: (_target, key) => (typeof key === 'string' && (Object.hasOwn(own, key) || GROUP_OF.has(key)) ? { value: read(key), enumerable: true, configurable: true, writable: true } : undefined),
+  });
+  if (eager) for (const key of GROUP_OF.keys()) void read(key);
+  return values;
+}
+
+/** `since`: for a follow-up, the year the event that scheduled it happened ({since}). `eager`: see lazyValues. */
+export function textContext(state: LifeState, cast: Record<string, Id>, content: ContentBundle, since?: number, eager = false): TextContext {
   const c = state.character;
   const roles: NonNullable<TextContext['roles']> = { [SELF_ROLE]: { name: c.name, pronouns: c.identity.pronouns } };
   for (const [role, id] of Object.entries(cast)) {
@@ -50,9 +99,28 @@ export function textContext(state: LifeState, cast: Record<string, Id>, content:
   }
   // E4: what the person in the story has heard about you (the item the event or interaction is about).
   const holderId = cast.npc ?? cast.person;
-  const heard = holderId === undefined ? '' : heardFor(state, holderId, cast[ITEM_ROLE], content);
   // E5: a bound pet is the role `pet` ({pet.name}); a bound vehicle and vacation home give {vehicle}, {homeCity}, and a pet's species {petKind}.
-  const values: Record<string, string | number> = { ...travelValues(state, content), ...migrationTextValues(state, content), studiedLanguage: content.languages[state.languages.classId ?? ""]?.name ?? "", ...countryTextValues(state, content), age: c.age, ...discoveryValues(state, content), sentence: sentenceText(state, content), since: sinceText(state, since, content), heard, ...teenTextValues(state, content), ...crimeTextValues(state, content), ...fameTextValues(state, content), ...sportsTextValues(state, content), ...belongingTextValues(state, cast, content), ...businessTextValues(state, cast, content) };
+  const values = lazyValues(
+    { age: c.age, since: sinceText(state, since, content) },
+    (group) => {
+      switch (group) {
+        case 0: return travelValues(state, content);
+        case 1: return migrationTextValues(state, content);
+        case 2: return { studiedLanguage: content.languages[state.languages.classId ?? '']?.name ?? '' };
+        case 3: return countryTextValues(state, content);
+        case 4: return discoveryValues(state, content);
+        case 5: return { sentence: sentenceText(state, content) };
+        case 6: return { heard: holderId === undefined ? '' : heardFor(state, holderId, cast[ITEM_ROLE], content) };
+        case 7: return teenTextValues(state, content);
+        case 8: return crimeTextValues(state, content);
+        case 9: return fameTextValues(state, content);
+        case 10: return sportsTextValues(state, content);
+        case 11: return belongingTextValues(state, cast, content);
+        default: return businessTextValues(state, cast, content);
+      }
+    },
+    eager,
+  );
   const pet = castPossession(state, cast, 'pet', 'pet');
   if (pet) {
     roles.pet = { name: { first: pet.name ?? '', last: '' }, pronouns: IT };

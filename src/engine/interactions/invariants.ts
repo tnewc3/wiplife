@@ -4,6 +4,8 @@
  * no romance interaction in the input log ever involved a minor or family.
  */
 import type { ContentBundle } from '../../content/schemas';
+import { foundHealthy, healthyIn, markHealthy } from '../healthy';
+import { summarizeLog } from '../logSummary';
 import { isFamilyKind } from '../relationships';
 import type { LifeState } from '../types';
 import { WEALTH_LEVELS } from './wealth';
@@ -16,16 +18,27 @@ export function interactionFailures(state: LifeState, content: ContentBundle): s
     if (typeof value !== 'number' || !Number.isInteger(value) || value < 0 || value > 100) fail(`${label} must be an integer from 0 to 100 (got ${String(value)})`);
   };
 
-  for (const [id, person] of Object.entries(state.people)) {
+  // (Unchanged people and relationships already found healthy this year are not checked again: see healthy.ts.)
+  const seen = healthyIn(content, 'interactions');
+  const unchanged = foundHealthy(content, 'interactions', state.people, [state.relationships], state.currentYear);
+  const loopsBefore = failures.length;
+  for (const id in state.people) {
+    if (unchanged) break;
+    const person = state.people[id]!;
+    if (seen.get(person) === state.currentYear) continue;
+    const before = failures.length;
     score(`person ${id}.mood`, person.mood);
     score(`person ${id}.moodBase`, person.moodBase);
     if (!WEALTH_LEVELS.includes(person.wealthLevel)) fail(`person ${id} has an unknown wealth level "${String(person.wealthLevel)}"`);
     if (person.occupation !== undefined && !content.jobs[person.occupation]) fail(`person ${id} works in an unknown job "${person.occupation}"`);
+    if (failures.length === before) seen.set(person, state.currentYear);
   }
 
-  for (const [id, rel] of Object.entries(state.relationships)) {
-    const c = rel.interactions;
-    if (!c) continue;
+  for (const id in state.relationships) {
+    if (unchanged) break;
+    const c = state.relationships[id]!.interactions;
+    if (!c || seen.get(c) === state.currentYear) continue;
+    const before = failures.length;
     const label = `relationship ${id}.interactions`;
     if (!Number.isInteger(c.year) || c.year > state.currentYear) fail(`${label} is from a year that hasn't happened`);
     for (const [interactionId, n] of Object.entries(c.counts)) {
@@ -35,7 +48,10 @@ export function interactionFailures(state: LifeState, content: ContentBundle): s
     const cap = balance.returns.yearlyCap;
     if (c.gained.affection < 0 || c.gained.affection > cap.affection) fail(`${label} gained ${c.gained.affection} affection (cap ${cap.affection})`);
     if (c.gained.trust < 0 || c.gained.trust > cap.trust) fail(`${label} gained ${c.gained.trust} trust (cap ${cap.trust})`);
+    if (failures.length === before) seen.set(c, state.currentYear);
   }
+
+  if (failures.length === loopsBefore) markHealthy(content, 'interactions', state.people, [state.relationships], state.currentYear);
 
   const pending = state.pendingInteraction;
   if (pending) {
@@ -59,10 +75,8 @@ export function interactionFailures(state: LifeState, content: ContentBundle): s
 
   // The adults-only rule, checked against everything the player ever did.
   const { adultAge } = content.balance.relationships;
-  for (const record of state.inputLog) {
-    if (record.kind !== 'interact') continue;
-    const def = content.interactions[String(record.payload.interactionId)];
-    if (!def?.romance) continue;
+  for (const record of summarizeLog(state.inputLog, content).romance) {
+    const def = content.interactions[String(record.payload.interactionId)]!;
     const personId = String(record.payload.personId);
     const person = state.people[personId];
     const rel = state.relationships[personId];

@@ -22,6 +22,8 @@ import { businessFailures } from './business/invariants';
 import { attachedDebtIds } from './possessions/query';
 import { ITEM_ROLE } from './web/query';
 import { consistencyProblems } from './presence';
+import { healthyIn } from './healthy';
+import { summarizeLog } from './logSummary';
 import { isRngState } from './rng';
 import { lifeStageForAge } from './systems/aging';
 import { meetsJobRequirements } from './career';
@@ -33,6 +35,24 @@ const LIFE_STAGES = new Set(['early', 'child', 'teen', 'youngAdult', 'adult', 's
 const PHASES = new Set(['yearStart', 'events', 'yearEnd', 'dead', 'action']);
 const CATEGORIES = new Set(['man', 'woman', 'nonbinary']);
 
+const earningsCaps = new WeakMap<ContentBundle, number>();
+/** The highest earnings cap of any modeled country (the content doesn't change, so it is worked out once). */
+function highestEarningsCap(content: ContentBundle): number {
+  let cap = earningsCaps.get(content);
+  if (cap === undefined) {
+    cap = Math.max(...Object.values(content.countries).map((country) => country.pension.earningsCap));
+    earningsCaps.set(content, cap);
+  }
+  return cap;
+}
+
+const relBlocks = new WeakMap<ContentBundle, WeakMap<object, { people: object; year: number; heir: boolean }>>();
+function relationshipBlocks(content: ContentBundle): WeakMap<object, { people: object; year: number; heir: boolean }> {
+  let m = relBlocks.get(content);
+  if (!m) relBlocks.set(content, (m = new WeakMap()));
+  return m;
+}
+
 export class InvariantError extends Error {
   override name = 'InvariantError';
   constructor(readonly failures: string[]) {
@@ -43,13 +63,18 @@ export class InvariantError extends Error {
 /** Returns every invariant the life breaks (empty when healthy). */
 export function checkInvariants(state: LifeState, content: ContentBundle): string[] {
   const failures: string[] = [...travelFailures(state, content), ...migrationFailures(state, content)];
-  for (const [who, ls] of [["character", state.character.languages] as const, ...Object.values(state.people).map((p) => [p.id, p.languages] as const)]) {
+  const seen = healthyIn(content, 'core');
+  const checkLanguages = (who: string, ls: LifeState['character']['languages']) => {
+    if (seen.get(ls) === state.currentYear) return;
+    const before = failures.length;
     if (!ls.length || !ls.some((l) => l.native)) failures.push(`${who}: no native language`);
-    if (new Set(ls.map((l) => l.id)).size !== ls.length) failures.push(`${who}: duplicate language`);
+    if (ls.length > 1 && new Set(ls.map((l) => l.id)).size !== ls.length) failures.push(`${who}: duplicate language`);
     for (const l of ls) {
       if (content.languages[l.id]?.id !== l.id || !Number.isInteger(l.skill) || l.skill < 0 || l.skill > 100 || typeof l.native !== 'boolean' || !Number.isInteger(l.lastUsed) || l.lastUsed > state.currentYear) failures.push(`${who}: invalid language ${l.id}`);
     }
-  }
+    if (failures.length === before) seen.set(ls, state.currentYear);
+  };
+  checkLanguages('character', state.character.languages);
   const fail = (message: string) => failures.push(message);
   const study = state.languages;
   if (study.schoolId !== null && content.languages[study.schoolId]?.id !== study.schoolId) fail('unknown school language');
@@ -58,31 +83,35 @@ export function checkInvariants(state: LifeState, content: ContentBundle): strin
   for (const value of Object.values(study.totals)) if (!Number.isSafeInteger(value) || value < 0) fail('invalid language learning total');
 
 
-  const score = (label: string, value: unknown) => {
+  // (Labels are `label + suffix`, joined only when something fails: these run for every person, every check.)
+  const score = (label: string, value: unknown, suffix = '') => {
     if (typeof value !== 'number' || !Number.isInteger(value) || value < 0 || value > 100) {
-      fail(`${label} must be an integer from 0 to 100 (got ${String(value)})`);
+      fail(`${label}${suffix} must be an integer from 0 to 100 (got ${String(value)})`);
     }
   };
   const money = (label: string, value: unknown) => {
     if (typeof value !== 'number' || !Number.isSafeInteger(value)) fail(`${label} must be a whole-dollar amount (got ${String(value)})`);
   };
-  const text = (label: string, value: unknown) => {
-    if (typeof value !== 'string' || value.trim().length === 0) fail(`${label} must not be empty`);
+  const text = (label: string, value: unknown, suffix = '') => {
+    if (typeof value !== 'string' || value.trim().length === 0) fail(`${label}${suffix} must not be empty`);
   };
   const pronouns = (label: string, p: Pronouns) => {
-    for (const form of ['subject', 'object', 'possessive', 'possessivePronoun', 'reflexive'] as const) {
-      text(`${label}.pronouns.${form}`, p[form]);
-    }
+    text(label, p.subject, '.pronouns.subject');
+    text(label, p.object, '.pronouns.object');
+    text(label, p.possessive, '.pronouns.possessive');
+    text(label, p.possessivePronoun, '.pronouns.possessivePronoun');
+    text(label, p.reflexive, '.pronouns.reflexive');
     if (typeof p.verbPlural !== 'boolean') fail(`${label}.pronouns.verbPlural must be a boolean`);
   };
   const identity = (label: string, id: Identity) => {
-    text(`${label}.genderIdentity`, id.genderIdentity);
-    text(`${label}.genderExpression`, id.genderExpression);
+    text(label, id.genderIdentity, '.genderIdentity');
+    text(label, id.genderExpression, '.genderExpression');
     if (!CATEGORIES.has(id.genderCategory)) fail(`${label}.genderCategory is invalid`);
     pronouns(label, id.pronouns);
-    if (new Set(id.attractedTo).size !== id.attractedTo.length || id.attractedTo.some((c) => !CATEGORIES.has(c))) {
-      fail(`${label}.attractedTo must list distinct gender categories`);
-    }
+    const attracted = id.attractedTo;
+    let bad = false;
+    for (let i = 0; i < attracted.length && !bad; i++) bad = !CATEGORIES.has(attracted[i]!) || attracted.indexOf(attracted[i]!) !== i;
+    if (bad) fail(`${label}.attractedTo must list distinct gender categories`);
   };
   const city = (label: string, cityId: string) => {
     if (!content.cities[cityId]) fail(`${label} "${cityId}" is not a known city`);
@@ -155,7 +184,7 @@ export function checkInvariants(state: LifeState, content: ContentBundle): strin
   const { earnings } = f;
   // W5: the record can include years earned under a different country’s cap.
   // Moving temporarily must not make a legitimate historical total invalid.
-  const earningsCap = Math.max(...Object.values(content.countries).map((country) => country.pension.earningsCap));
+  const earningsCap = highestEarningsCap(content);
   money('finances.earnings.total', earnings.total);
   if (!Number.isInteger(earnings.years) || earnings.years < 0 || earnings.years > c.age) fail('finances.earnings.years is out of range');
   if (earnings.total < 0 || earnings.total > earnings.years * earningsCap) fail('finances.earnings.total is out of range');
@@ -244,15 +273,22 @@ export function checkInvariants(state: LifeState, content: ContentBundle): strin
 
   // People and relationships.
   const { parentAgeAtBirth } = content.balance.creation.family;
-  for (const [id, person] of Object.entries(state.people)) {
-    const label = `person ${id}`;
-    if (person.id !== id) fail(`${label} is stored under the wrong key`);
-    text(`${label}.name.first`, person.name.first);
-    text(`${label}.name.last`, person.name.last);
+  // The same people (as one object) already found healthy this year need no second look at all.
+  const peopleBefore = failures.length;
+  for (const id in state.people) {
+    if (seen.get(state.people) === state.currentYear) break;
+    const person = state.people[id]!;
+    checkLanguages(person.id, person.languages);
+    if (person.id !== id) fail(`person ${id} is stored under the wrong key`);
+    if (seen.get(person) === state.currentYear) continue;
+    const before = failures.length;
+    const label = 'person ' + id;
+    text(label, person.name.first, '.name.first');
+    text(label, person.name.last, '.name.last');
     identity(`${label}.identity`, person.identity);
-    score(`${label}.looks`, person.looks);
-    score(`${label}.smarts`, person.smarts);
-    for (const [key, value] of Object.entries(person.traits)) score(`${label}.traits.${key}`, value);
+    score(label, person.looks, '.looks');
+    score(label, person.smarts, '.smarts');
+    for (const key in person.traits) score(label, person.traits[key as keyof typeof person.traits], '.traits.' + key);
     if (person.birthYear > state.currentYear) fail(`${label} is born in the future`);
     if (person.alive === (person.deathYear !== undefined)) fail(`${label} alive flag and deathYear disagree`);
     if (person.deathYear !== undefined && (person.deathYear < person.birthYear || person.deathYear > state.currentYear)) {
@@ -260,87 +296,108 @@ export function checkInvariants(state: LifeState, content: ContentBundle): strin
     }
     if (person.alive && state.currentYear - person.birthYear >= maxAge) fail(`${label} is alive at or past the maximum age`);
     city(`${label}.cityId`, person.cityId);
+    if (failures.length === before) seen.set(person, state.currentYear);
   }
+  if (failures.length === peopleBefore) seen.set(state.people, state.currentYear);
 
-  const parents = [];
-  const siblings = [];
-  for (const [id, rel] of Object.entries(state.relationships)) {
-    const label = `relationship ${id}`;
-    if (rel.personId !== id) fail(`${label} is stored under the wrong key`);
-    const person = state.people[rel.personId];
-    if (!person) {
-      fail(`${label} points to a missing person`);
-      continue;
+  // Relationships, family and romance depend only on the people, the relationships, the year and whether the family was generated:
+  // when those are the same objects as in a check that found them healthy, there is nothing new to find.
+  const relSeen = relationshipBlocks(content);
+  const lastRel = relSeen.get(state.relationships);
+  if (!(lastRel && lastRel.people === state.people && lastRel.year === state.currentYear && lastRel.heir === (state.lineage.parentLifeId !== undefined))) {
+    const relBefore = failures.length;
+    const parents = [];
+    const siblings = [];
+    for (const id in state.relationships) {
+      const rel = state.relationships[id]!;
+      const label = 'relationship ' + id;
+      if (rel.personId !== id) fail(`${label} is stored under the wrong key`);
+      const person = state.people[rel.personId];
+      if (!person) {
+        fail(`${label} points to a missing person`);
+        continue;
+      }
+      if (seen.get(rel) !== state.currentYear) {
+        const before = failures.length;
+        score(label, rel.affection, '.affection');
+        score(label, rel.trust, '.trust');
+        if (rel.since > state.currentYear) fail(`${label} starts in the future`);
+        if (rel.kindSince !== undefined && (!Number.isInteger(rel.kindSince) || rel.kindSince < rel.since || rel.kindSince > state.currentYear)) {
+          fail(`${label}.kindSince is outside the relationship's years`);
+        }
+        if (rel.lastActionYear !== undefined && (!Number.isInteger(rel.lastActionYear) || rel.lastActionYear > state.currentYear)) {
+          fail(`${label}.lastActionYear is in the future`);
+        }
+        if (rel.wasSpouse !== undefined && rel.wasSpouse !== true) fail(`${label}.wasSpouse is only ever true (or absent)`);
+        if (rel.wasSpouse && isFamilyKind(rel.kind)) fail(`${label} is family but was your spouse`);
+        if (failures.length === before) seen.set(rel, state.currentYear);
+      }
+      if (rel.kind === 'parent') parents.push(person);
+      if (rel.kind === 'sibling') siblings.push(person);
     }
-    score(`${label}.affection`, rel.affection);
-    score(`${label}.trust`, rel.trust);
-    if (rel.since > state.currentYear) fail(`${label} starts in the future`);
-    if (rel.kindSince !== undefined && (!Number.isInteger(rel.kindSince) || rel.kindSince < rel.since || rel.kindSince > state.currentYear)) {
-      fail(`${label}.kindSince is outside the relationship's years`);
-    }
-    if (rel.lastActionYear !== undefined && (!Number.isInteger(rel.lastActionYear) || rel.lastActionYear > state.currentYear)) {
-      fail(`${label}.lastActionYear is in the future`);
-    }
-    if (rel.wasSpouse !== undefined && rel.wasSpouse !== true) fail(`${label}.wasSpouse is only ever true (or absent)`);
-    if (rel.wasSpouse && isFamilyKind(rel.kind)) fail(`${label} is family but was your spouse`);
-    if (rel.kind === 'parent') parents.push(person);
-    if (rel.kind === 'sibling') siblings.push(person);
-  }
 
-  // Family believability: every child was born while each parent was of a
-  // plausible age; siblings are distinct from the character in age.
-  if (parents.length > 2) fail(`a character has ${parents.length} parents`);
-  const childBirthYears = [
-    { label: 'character', year: state.birthYear },
-    ...siblings.map((s) => ({ label: `sibling ${s.id}`, year: s.birthYear })),
-  ];
-  // An heir's family comes from the life they continued, not from the generator: skip these checks for them.
-  const generated = state.lineage.parentLifeId === undefined;
-  for (const parent of generated ? parents : []) {
-    for (const child of childBirthYears) {
-      const parentAge = child.year - parent.birthYear;
-      if (parentAge < parentAgeAtBirth.min || parentAge > parentAgeAtBirth.max) {
-        fail(`parent ${parent.id} was ${parentAge} when ${child.label} was born`);
+    // Family believability: every child was born while each parent was of a
+    // plausible age; siblings are distinct from the character in age.
+    if (parents.length > 2) fail(`a character has ${parents.length} parents`);
+    const childBirthYears = [
+      { label: 'character', year: state.birthYear },
+      ...siblings.map((s) => ({ label: `sibling ${s.id}`, year: s.birthYear })),
+    ];
+    // An heir's family comes from the life they continued, not from the generator: skip these checks for them.
+    const generated = state.lineage.parentLifeId === undefined;
+    for (const parent of generated ? parents : []) {
+      for (const child of childBirthYears) {
+        const parentAge = child.year - parent.birthYear;
+        if (parentAge < parentAgeAtBirth.min || parentAge > parentAgeAtBirth.max) {
+          fail(`parent ${parent.id} was ${parentAge} when ${child.label} was born`);
+        }
       }
     }
-  }
-  for (const sibling of generated ? siblings : []) {
-    if (sibling.birthYear === state.birthYear) fail(`sibling ${sibling.id} has the same birth year as the character`);
-  }
-
-  // Romance: adults only, one partner at a time, and a current partner is
-  // alive and in your life.
-  const { adultAge } = content.balance.relationships;
-  let partners = 0;
-  for (const [id, rel] of Object.entries(state.relationships)) {
-    const person = state.people[id];
-    if (!person || !isRomanticKind(rel.kind)) continue;
-    const label = `relationship ${id} (${rel.kind})`;
-    if (rel.kindSince === undefined) fail(`${label} has no kindSince`);
-    // When it took this kind (for an ex: when the romance ended), both were adults.
-    const at = kindSince(rel);
-    if (at - state.birthYear < adultAge) fail(`${label}: you were under ${adultAge}`);
-    if (at - person.birthYear < adultAge || ageOf(state, person) < adultAge) fail(`${label}: they were under ${adultAge}`);
-    if (rel.kind === 'spouse' && rel.wasSpouse !== true) fail(`${label} is a spouse without wasSpouse`);
-    if (isPartnerKind(rel.kind) && person.alive) {
-      if (rel.status !== 'active') fail(`${label} is a current partner but "${rel.status}"`);
-      if (isCurrentPartner(state, rel)) partners++;
+    for (const sibling of generated ? siblings : []) {
+      if (sibling.birthYear === state.birthYear) fail(`sibling ${sibling.id} has the same birth year as the character`);
     }
+
+    // Romance: adults only, one partner at a time, and a current partner is
+    // alive and in your life.
+    const { adultAge } = content.balance.relationships;
+    let partners = 0;
+    for (const id in state.relationships) {
+      const rel = state.relationships[id]!;
+      if (!isRomanticKind(rel.kind)) continue;
+      const person = state.people[id];
+      if (!person) continue;
+      const label = `relationship ${id} (${rel.kind})`;
+      if (rel.kindSince === undefined) fail(`${label} has no kindSince`);
+      // When it took this kind (for an ex: when the romance ended), both were adults.
+      const at = kindSince(rel);
+      if (at - state.birthYear < adultAge) fail(`${label}: you were under ${adultAge}`);
+      if (at - person.birthYear < adultAge || ageOf(state, person) < adultAge) fail(`${label}: they were under ${adultAge}`);
+      if (rel.kind === 'spouse' && rel.wasSpouse !== true) fail(`${label} is a spouse without wasSpouse`);
+      if (isPartnerKind(rel.kind) && person.alive) {
+        if (rel.status !== 'active') fail(`${label} is a current partner but "${rel.status}"`);
+        if (isCurrentPartner(state, rel)) partners++;
+      }
+    }
+    if (partners > 1) fail(`the character has ${partners} current partners (no one is married to two people)`);
+    if (failures.length === relBefore) relSeen.set(state.relationships, { people: state.people, year: state.currentYear, heir: state.lineage.parentLifeId !== undefined });
   }
-  if (partners > 1) fail(`the character has ${partners} current partners (no one is married to two people)`);
 
   // Logs.
   if (state.inputLog[0]?.kind !== 'create') fail('the input log must start with the create input');
   // An heir's log starts from the age they continued at (E2b).
   const startAge = typeof state.inputLog[0]?.payload.startAge === 'number' ? state.inputLog[0].payload.startAge : 0;
-  const ageUps = state.inputLog.filter((r) => r.kind === 'ageUp').length;
+  const { ageUps } = summarizeLog(state.inputLog, content);
   if (ageUps !== c.age - startAge) fail(`the input log has ${ageUps} age-ups for age ${c.age} (started at ${startAge})`);
-  for (let i = 1; i < state.history.length; i++) {
-    if (state.history[i]!.year < state.history[i - 1]!.year) fail('history years must only go forward');
-  }
-  for (const entry of state.history) {
-    if (entry.age !== entry.year - state.birthYear) fail(`history entry for ${entry.year} has age ${entry.age}`);
-    if (entry.year > state.currentYear) fail(`history entry for ${entry.year} is in the future`);
+  if (seen.get(state.history) !== state.currentYear) {
+    const before = failures.length;
+    for (let i = 1; i < state.history.length; i++) {
+      if (state.history[i]!.year < state.history[i - 1]!.year) fail('history years must only go forward');
+    }
+    for (const entry of state.history) {
+      if (entry.age !== entry.year - state.birthYear) fail(`history entry for ${entry.year} has age ${entry.age}`);
+      if (entry.year > state.currentYear) fail(`history entry for ${entry.year} is in the future`);
+    }
+    if (failures.length === before) seen.set(state.history, state.currentYear);
   }
   const { maxEntries } = content.balance.aging.history;
   if (state.history.length > maxEntries) fail(`history has ${state.history.length} entries (limit ${maxEntries})`);
@@ -402,17 +459,30 @@ export function checkInvariants(state: LifeState, content: ContentBundle): strin
     // E5: a possession a follow-up is about may be gone by the time it is due (it is then dropped).
     for (const [role, id] of Object.entries(s.cast)) if (!role.startsWith('@') && !castExists(role, id)) fail(`scheduled ${s.eventId} casts missing ${role.startsWith('@') ? 'possession' : 'person'} ${id} as ${role}`);
   }
-  for (const [id, log] of Object.entries(state.eventLog)) {
-    if (!(log.count >= 1) || log.lastYear > state.currentYear || log.lastYear < state.birthYear) fail(`event log for ${id} is invalid`);
+  if (seen.get(state.eventLog) !== state.currentYear) {
+    const before = failures.length;
+    for (const id in state.eventLog) {
+      const log = state.eventLog[id]!;
+      if (!(log.count >= 1) || log.lastYear > state.currentYear || log.lastYear < state.birthYear) fail(`event log for ${id} is invalid`);
+    }
+    if (failures.length === before) seen.set(state.eventLog, state.currentYear);
   }
   const { tags } = content.registries.memories;
-  for (const [id, rel] of Object.entries(state.relationships)) {
-    for (const m of rel.memories) {
+  for (const id in state.relationships) {
+    const memories = state.relationships[id]!.memories;
+    if (memories.length === 0 || seen.get(memories) === state.currentYear) continue;
+    const before = failures.length;
+    for (const m of memories) {
       if (!tags[m.tag]) fail(`relationship ${id} has unregistered memory "${m.tag}"`);
       if (m.year > state.currentYear) fail(`relationship ${id} has a memory from the future`);
     }
+    if (failures.length === before) seen.set(memories, state.currentYear);
   }
-  for (const key of Object.keys(state.flags)) if (!content.registries.flags.flags[key]) fail(`flag "${key}" is not registered`);
+  if (seen.get(state.flags) !== state.currentYear) {
+    const before = failures.length;
+    for (const key in state.flags) if (!content.registries.flags.flags[key]) fail(`flag "${key}" is not registered`);
+    if (failures.length === before) seen.set(state.flags, state.currentYear);
+  }
 
   if (state.death) {
     if (state.death.year !== state.currentYear || state.death.age !== c.age) fail('the death record does not match the final year');

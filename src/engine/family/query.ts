@@ -33,7 +33,8 @@ function childAges(state: LifeState): { children: number[]; steps: number[] } {
 /** True when every field of the family condition holds. `adultAge` defaults to 18 (the schema never allows less). */
 export function familyHolds(q: FamilyCondition, state: LifeState, adultAge = 18): boolean {
   const f = state.family;
-  const { children, steps } = childAges(state);
+  // (The children are only counted for a condition about them: most family conditions ask about something else.)
+  const { children, steps } = q.children || q.minors || q.youngest || q.oldest || q.steps ? childAges(state) : { children: [], steps: [] };
   if (q.pregnant !== undefined && (f.pregnancy !== null) !== q.pregnant) return false;
   if (q.children && !compare(children.length, q.children)) return false;
   if (q.minors && !compare(children.filter((a) => a < adultAge).length, q.minors)) return false;
