@@ -22,7 +22,7 @@ Requires Node 22.22+ or 24.15+ (see `.nvmrc`).
 | `npm run samples` | Plays 20 lives and writes them, with their obituaries and life histories, to `docs/sample-lives.md` for human review (`--lives`, `--seed`, `--out`) |
 | `npm run lint` | ESLint, including the engine boundary rules |
 | `npm run typecheck` | TypeScript for the app, the engine (without DOM types) and the Node tools |
-| `npm test` | Unit tests (Vitest), including a 2,500-life lifespan and invariant test; the nightly workflow runs 10,000 (`LIFESPAN_LIVES=10000 npx vitest run src/engine/lifespan`) and a 10,000-life simulation |
+| `npm test` | Unit tests (Vitest), including a 2,500-life lifespan and invariant test (4 shards of 625 lives); the nightly workflow runs 10,000 as 16 shards of 625 (`LIFESPAN_LIVES=10000 npx vitest run src/engine/lifespan`) and a 10,000-life simulation as four parallel jobs of 2,500. `tools/simulate/golden.test.ts` replays fixed-seed lives and compares them whole with `golden.json`: a change meant only to speed things up must leave it unchanged (`GOLDEN_UPDATE=1` rewrites it when a rule or content change moves the lives on purpose) |
 | `npm run test:e2e` | End-to-end tests at phone size (Playwright; builds and serves the app first) |
 | `npm run check` | Lint, typecheck, unit tests and build |
 
@@ -31,6 +31,8 @@ First-time Playwright setup: `npx playwright install chromium`.
 Development and test builds have an event sandbox at `/?sandbox`: it previews any event with any pronoun set and character state. Production builds leave it out.
 
 App icons in `public/` are generated from `public/favicon.svg` with `npx pwa-assets-generator`.
+
+`npm run simulate` also reports the mean milliseconds per simulated year (the whole headless year, invariant checks included) and fails when the careful or careless player exceeds `performance.maxMsPerYear` in `balance/targets.yaml`, so a stage that makes the game slower is caught in its own pull request.
 
 Language skills (W4b) appear on Profile, where adults can take one paid course per year. School classes, living locally and household use also build skills; unused languages fade slowly. `balance/languages.yaml` controls the rates, social effects and local job requirements. The simulation's Languages section reports native and learned skills, learning/fading, language-blocked job opportunities and friendship observations.
 

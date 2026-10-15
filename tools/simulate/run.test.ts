@@ -5,7 +5,7 @@ import { produce } from 'immer';
 import { lifeAtAge } from '../../src/engine/testFixtures';
 import { createRng } from '../../src/engine/rng';
 import { choiceTraits, choiceWeight, personalityChoice } from './bot';
-import { consistencyTargets, formatComparison, formatReport, interactionTargets, recurringEvents, runSimulation, stage9Targets, targetResults } from './run';
+import { consistencyTargets, formatComparison, performanceTargets, formatReport, interactionTargets, recurringEvents, runSimulation, stage9Targets, targetResults } from './run';
 
 describe('simulation runner', () => {
   // Match the CLI and lifespan statistical runs; immutability is checked in engine unit tests.
@@ -213,5 +213,16 @@ describe('interactions report (E1)', () => {
     expect(text).toContain('businesses still going after 5 years');
     const careless = runSimulation(content, { lives: 20, seedPrefix: 'sim-biz', player: 'careless' });
     expect(careless.business.begun.total).toBe(0);
+  });
+});
+
+describe('speed budget', () => {
+  it('judges the mean milliseconds per simulated year against balance/targets.yaml', () => {
+    const budget = content.balance.targets.performance.maxMsPerYear;
+    const at = (msPerYear: number) => performanceTargets({ performance: { years: 1000, ms: msPerYear * 1000 } } as Parameters<typeof performanceTargets>[0], content)[0]!;
+    expect(at(budget * 0.5).met).toBe(true);
+    expect(at(budget).met).toBe(true);
+    expect(at(budget * 1.01).met).toBe(false);
+    expect(at(budget * 1.01).goal).toBe(`at most ${budget} ms`);
   });
 });
