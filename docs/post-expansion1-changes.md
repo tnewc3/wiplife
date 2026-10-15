@@ -48,7 +48,7 @@
 1. **CI's large runs have been failing for a week, and two stages merged without their gates.** The nightly job failed every night from 2026-10-08 to 10-14: all four 2,500-life lifespan shards hit their fixed 600-second timeout (`src/engine/lifespanShard.ts`). The nightly 10,000-life simulation step has no `if: always()`, so it hasn't run since 10-07. W5 (PR #37) merged with its CI cancelled, and `main`'s push CI then failed on the travel e2e test (run 38467127039). W6 turned `main` green again (run 38622584296). W4b's and W5's 10,000-life gates were never completed, and W6's 10,000-life totals were recorded before its last fix.
 2. **The simulation is getting slower with every stage.** The CI 500-life step took 10m07s at the W5 merge and 18m03s at W6. The nightly 2,000-life coverage run took 2,426 s (about 1.2 s a life). Each new batch adds more, so the 60-minute CI limit is at risk without a performance budget.
 3. **Same-sex romance is effectively broken for everyone you already know** (note 1). The game isn't wrong about attraction: it requires attraction both ways, then hides the menu. Combined with the population weights, this means a gay or lesbian player almost never sees a romance option.
-4. **Invariant failures.** The nightly 2,000-life coverage run on the W5 merge commit reported 12 invariant failures, and this review's 1,000-life run reports its own (see below).
+4. **Invariant failures and targets that have slipped.** The nightly 2,000-life coverage run on the W5 merge commit reported 12 invariant failures. This review's 1,000-life run on `main` had none, but 11 of the careful player's targets were not met, including business owners earning 6.3× what workers earn (target at most 3.2×) and `beginYear` at 28 ms (target at most 20 ms). See the results below.
 5. **A W5 block that blocks nothing.** The temporary-stay blocklist names `start_fame` and `start_sport` (`src/engine/actions/life.ts:315`), but neither action exists. The real one is `enter_fame`, so you can start a fame or sports career while on an exchange or working holiday abroad.
 6. **Sports dead ends:** an open-tryout entry at 24–26 ends after one season, and training raises injury risk (note 8).
 7. **Music has no route forward from an open mic,** and without a talent the climb stops at "local" (note 6).
@@ -63,7 +63,34 @@
 
 ## 1,000-life simulation (run for this review)
 
-<!-- SIM-RESULTS -->
+Command: `npm run simulate -- --lives 1000 --seed postexp1` (the defaults: careful and careless players on the same seeds, careful lives continued as heirs for three generations). Code at `8a9fbb9`, content `0.1.0+10d9f36ef0` (1,719 definitions). It ran in this review's cloud container, so the timing doesn't compare directly with CI's.
+
+**Result: 0 invariant failures** in every generation (1,000, 415 and 33 lives). 10 of 10 sampled lives rebuilt exactly from their input logs. The W6 "must be zero" checks were 0. It took **5,382 s** (about 90 minutes). The 12 invariant failures from the nightly coverage run on `238e0fb` didn't appear on this seed set; Batch 0 still reproduces them from that run's seeds.
+
+**Careful-player targets NOT MET:**
+
+| Target | Result | Target range |
+|---|---|---|
+| Bankruptcy | 25.4% of adults | at most 15% (already unmet before W4a; see the W4a as-built notes) |
+| Bachelor's vs high school lifetime earnings | 1.26× | at least 1.3× |
+| Lives with PTSD | 1.5% | 3–16% |
+| Drug possession on record | 2.9% | 6–20% |
+| Shoplifting on record | 7.8% | 10–30% |
+| Underage drinking on record | 1.8% | 2–25% |
+| Lives reaching 50 with a child | 46.0% | 50–90% |
+| `beginYear` time, full circle of 60 | 28.38 ms | at most 20 ms |
+| Eulogy pieces used at least once | 79.2% | 80–100% (a 1,000-life sample may be too small for this one) |
+| Business owners' yearly income vs workers' | 6.32× | 0.60–3.20× |
+| Owners' median net worth at 65 vs everyone else's | 3.66× | 0.50–2.60× |
+
+**Other observations:**
+- Average `beginYear` was 15.56 ms, with the slowest year at 408 ms.
+- `language_class_result` was the most repeated event not marked recurring (5,355 repeats), followed by `travel_trip_booking` (2,970).
+- 95.6% of lives took a trip, at 3.9 trips a life.
+- 4.1% moved abroad.
+- Median lifespan was 82, and the per-country targets (lifespan, pay at 40, net worth at 65) were all met.
+
+The business ratios look like a regression since W3 (its four 2,500-life runs had owners at 1.7–2.8× workers' income). Whether one of the later stages caused it, and which, is **unverified**. Many unmet targets come from a single 1,000-life sample (PTSD, the offense records, children by 50); the 10,000-life runs in Batch 0 decide which are real. The careless player's unmet targets are reported but not tuned for, as the simulation runner says.
 
 ---
 
@@ -127,7 +154,8 @@ These come from AGENTS.md and the expansion gates. Each prompt repeats the short
   - Profile a year of the pipeline (`beginYear`, the events, people, web, fame, business, travel and migration steps) and fix the largest costs without changing outcomes. The fixed-seed replay must give identical lives, proven by a golden-life test.
   - Bring the CI 500-life step back to about W5's time or better.
   - Add a performance budget the CI run checks: mean milliseconds per simulated year, set in `balance/targets.yaml` from the measured value plus headroom, reported by `tools/simulate.ts` and failing CI when exceeded.
-- Every invariant failure from the nightly coverage run and from this review's 1,000-life run is reproduced by seed, root-caused, fixed and covered by a regression test.
+- Every invariant failure from the nightly coverage run is reproduced by seed, root-caused, fixed and covered by a regression test.
+- Every careful-player target NOT MET in this review's 1,000-life run is checked at 10,000 lives. Each one still unmet is either fixed at its cause (business income and net worth ratios, `beginYear` time first) or retuned in balance with the reason recorded in `docs/technical.md`.
 - The W5 blocklist uses real action ids and is checked by a test that every id in an action allow/block list exists.
 - W4b and W5 finish their gates:
   - 10,000-life runs (four shards of 2,500, recorded seeds) with zero invariant failures.
@@ -147,7 +175,8 @@ Read AGENTS.md, docs/design.md, docs/technical.md (section Q and the W4b, W5 and
 Build only Batch 0. No new game features.
 - Nightly: shard the 10,000-life lifespan test so each shard fits the existing per-test timeout (for example 16 shards of 625 lives), keeping the same seeds as today's runs; give the nightly simulation steps if: always() so they run and upload reports even when an earlier step fails. Do not raise timeouts to hide slowness.
 - Performance: profile a simulated year step by step (tools/simulate.ts already measures beginYear) and fix the largest costs without changing any outcome. Prove it with a fixed-seed golden-life test that compares whole lives before and after. Bring the CI 500-life simulation step back to about its W5 duration (10 minutes) or better. Add a mean-milliseconds-per-simulated-year budget to balance/targets.yaml (measured value plus headroom), reported by tools/simulate.ts, that fails the run when exceeded.
-- Invariants: reproduce every invariant failure listed in docs/post-expansion1-changes.md (the nightly coverage run on 238e0fb and the 1,000-life review run) by seed, find the root cause, fix it in the system that owns it, and add a regression test for each.
+- Invariants: reproduce every invariant failure from the nightly coverage run on 238e0fb by seed, find the root cause, fix it in the system that owns it, and add a regression test for each.
+- Targets: check every careful-player target listed as NOT MET in the 1,000-life section of docs/post-expansion1-changes.md at 10,000 lives. For each still unmet, fix the cause (start with the business owners' income and net worth ratios, which look like a regression since W3, and beginYear time) or retune balance with the reason recorded in docs/technical.md.
 - Bugs: fix the W5 temporary-stay blocklist in src/engine/actions/life.ts (it names start_fame and start_sport, which do not exist; the real action is enter_fame). Add a test that every action id in an allow or block list exists in LIFE_ACTION_IDS.
 - W4b and W5 gates: run 10,000 lives for each (four shards of 2,500 with recorded seeds, --player careful --generations 1 plus the default run), with zero invariant failures. Check every W4b and W5 acceptance criterion in docs/expansion.md and record met or not met with the evidence. Review language_class_result's frequency (2.0% of all events fired, 6.7 per life) and either justify it as recurring or add a cooldown. Write the figures into the W4b and W5 as-built notes in docs/technical.md and mark docs/w4b-validation.md and docs/w5-validation.md as superseded by those notes.
 - W6: re-run its 10,000-life simulation on the fixed code and replace the recorded figures.
