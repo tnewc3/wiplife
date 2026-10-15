@@ -182,6 +182,8 @@ export function removeFromCountry(state: LifeState, content: ContentBundle): voi
   if (state.migration.undocumented) bump(state, `deportedUndocumented:${here}`);
   if (state.career.job) endJob(state, 'moved', content);
   if (ownsHome(state)) sellHome(state, content);
+  // Removed from prison: the sentence is no longer served here (the legal state must say so as the housing does).
+  if (state.housing.kind === 'incarcerated') delete state.legal.incarceratedUntil;
   moveTo(state, 'renting', city, content);
   afterMove(state, state.character.cityId, content);
   state.career.gig = false;

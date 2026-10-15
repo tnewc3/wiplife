@@ -202,8 +202,9 @@ export class EulogyWatcher {
       byName.set(name, [...(byName.get(name) ?? []), id]);
     }
     const find = (name: string, unable: boolean): Id | undefined => {
-      const ids = byName.get(name) ?? [];
-      return ids.find((id) => (couldNotAttend(life, id, this.content) !== null) === unable) ?? ids[0];
+      const ids = (byName.get(name) ?? []).filter((id) => (couldNotAttend(life, id, this.content) !== null) === unable);
+      // Two guests with one name (the name pools are small, and a long life uses them up): the one the list means is the one with a cause to stay away.
+      return ids.find((id) => absenceCauses(life, id, speakerId, this.content).length > 0) ?? ids[0] ?? byName.get(name)?.[0];
     };
     const strongest = (id: Id) => {
       const hits = absenceCauses(life, id, speakerId, this.content);

@@ -14,7 +14,7 @@ import { emptyLanguageLearning, householdLanguages } from './languages';
  */
 import { giveNeuro, rollNeuro } from './mental/neuro';
 import { emptyMental } from './mental/query';
-import { produce } from 'immer';
+import { produce, setUseStrictIteration } from 'immer';
 import { BUSINESS_ROLE, POSSESSION_ROLES, type ChoiceDef, type ContentBundle, type Outcome } from '../content/schemas';
 import { evaluate } from './conditions';
 import {
@@ -59,6 +59,9 @@ import { emptyBelonging } from './belonging/query';
 import { emptyBusiness } from './business/query';
 import { startBelonging } from './belonging/start';
 import { citiesOfCountry, startWeights } from './country';
+
+// A life state is plain data (no symbols, no hidden properties), so Immer can walk it with the faster Object.keys instead of Reflect.ownKeys.
+setUseStrictIteration(false);
 
 export type { CreateLifeOptions, CustomLifeInput } from './creation/input';
 
