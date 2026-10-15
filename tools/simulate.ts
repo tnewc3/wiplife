@@ -39,6 +39,7 @@ const { values } = parseArgs({
     generations: { type: 'string', default: '3' },
     country: { type: 'string' },
     threads: { type: 'string', default: '1' },
+    'speed-budget': { type: 'string', default: 'on' },
   },
 });
 
@@ -148,7 +149,8 @@ const speed = reports.flatMap((r) => performanceTargets(r, content).map((t) => (
 console.log('');
 console.log('Speed (src/content/balance/targets.yaml, performance):');
 for (const t of speed) console.log(`  ${t.met ? 'MET    ' : 'NOT MET'} ${t.player}: ${t.label}: ${t.value} (target ${t.goal})`);
-const overBudget = speed.filter((t) => !t.met && (t.player === 'careful' || t.player === 'careless'));
+// (`--speed-budget off` still reports the figures but does not fail the run: for tests and for machines that are busy or slow.)
+const overBudget = values['speed-budget'] === 'off' ? [] : speed.filter((t) => !t.met && (t.player === 'careful' || t.player === 'careless'));
 console.log(`Finished in ${((Date.now() - started) / 1000).toFixed(1)}s.`);
 if (values.json) {
   const body = reports.length > 1 ? Object.fromEntries(reports.map((r) => [r.player, r])) : reports[0];

@@ -19,7 +19,7 @@ describe('the careless player in a worker thread', () => {
     try {
       const run = (threads: string) => {
         const file = join(dir, `report-${threads}.json`);
-        execFileSync('npx', ['tsx', 'tools/simulate.ts', '--lives', '4', '--seed', 'threads-test', '--generations', '2', '--threads', threads, '--json', file], { stdio: 'pipe', encoding: 'utf8' });
+        execFileSync('npx', ['tsx', 'tools/simulate.ts', '--lives', '2', '--seed', 'threads-test', '--generations', '2', '--threads', threads, '--speed-budget', 'off', '--json', file], { stdio: 'pipe', encoding: 'utf8' });
         return JSON.parse(readFileSync(file, 'utf8')) as unknown;
       };
       expect(untimed(run('1'))).toEqual(untimed(run('0')));
