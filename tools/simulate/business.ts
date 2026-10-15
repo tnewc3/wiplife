@@ -18,6 +18,7 @@ import { totalToStart } from '../../src/engine/business/model';
 import { ownerSkill } from '../../src/engine/business/step';
 import { youHoldLicense } from '../../src/engine/business/query';
 import { hireBlock } from '../../src/engine/business/staff';
+import { peakRung } from '../../src/engine/fame/query';
 import { totalDebt } from '../../src/engine/finance';
 import { weightedPick } from '../../src/engine/random';
 import { chance, nextInt, pick, type RngState } from '../../src/engine/rng';
@@ -297,8 +298,10 @@ export class BusinessWatcher {
       r.people.namedPeak = Math.max(r.people.namedPeak, b.staff.length);
     }
     // Owner income against workers' (the year's gross: pay plus what the businesses paid out).
+    // (Famous lives are left out of every comparison with careers, as they are from the net worth target: a star's or a pro's pay swamps the average.)
+    const famous = peakRung(life) >= this.content.balance.fame.crossover.rung;
     const gross = life.finances.lastLedger?.year === life.currentYear ? life.finances.lastLedger.gross : null;
-    if (gross !== null && life.character.age >= 25 && life.character.age <= 60) {
+    if (gross !== null && !famous && life.character.age >= 25 && life.character.age <= 60) {
       if (life.business.items.some((b) => b.report?.year === life.currentYear)) {
         r.compare.ownerYears++;
         r.compare.ownerIncome += gross;
@@ -412,7 +415,7 @@ export class BusinessWatcher {
     r.ends.estateSold += life.estate ? life.business.items.length - life.estate.businesses.length : 0;
     // Careers against ownership.
     const c = r.compare;
-    if (age >= 65) {
+    if (age >= 65 && peakRung(life) < this.content.balance.fame.crossover.rung) {
       const worth = life.finances.savings + (life.housing.homeValue ?? 0) - totalDebt(life);
       if (this.everOwned) {
         c.owners65.push(worth);

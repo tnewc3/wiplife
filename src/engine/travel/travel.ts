@@ -178,6 +178,16 @@ export function runTravel(state: LifeState, content: ContentBundle): void {
     state.travel.totals.distanceLost += before - rel.affection;
   }
   if (state.currentYear < r.endYear && (r.type !== 'student' || state.education.current?.program === 'college') && state.housing.kind !== 'incarcerated') return;
+  endStay(state, content);
+}
+
+/**
+ * A temporary stay ends (W5): the planned return, or a forced one (an eviction abroad that sends you home to family).
+ * You go back to the housing you left, with the language gains, and work on the host permit ends.
+ */
+export function endStay(state: LifeState, content: ContentBundle): void {
+  const r = state.travel.residence;
+  if (!r || r.type === 'visitor' || r.settled) return;
   const d = content.destinations[r.destinationId]!;
   const extra = r.type === 'student' ? content.balance.travel.exchange[r.route === 'semester' ? 'semesterGain' : 'yearGain'] : 0;
   state.travel.totals.immersion += gainLanguage(state.character.languages, d.languageId, extra, state.currentYear);

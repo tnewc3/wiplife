@@ -78,6 +78,11 @@ function lazyValues(own: Record<string, string | number>, make: (group: number) 
   };
   const values = new Proxy(own, {
     get: (_target, key) => (typeof key === 'string' ? read(key) : undefined),
+    // (Assigning a name sets it on `own`, which then wins over the group's value.)
+    set: (target, key, value: string | number) => {
+      (target as Record<string | symbol, string | number>)[key] = value;
+      return true;
+    },
     has: (_target, key) => typeof key === 'string' && (Object.hasOwn(own, key) || GROUP_OF.has(key)),
     ownKeys: () => [...new Set([...Object.keys(own), ...GROUP_OF.keys()])],
     getOwnPropertyDescriptor: (_target, key) => (typeof key === 'string' && (Object.hasOwn(own, key) || GROUP_OF.has(key)) ? { value: read(key), enumerable: true, configurable: true, writable: true } : undefined),

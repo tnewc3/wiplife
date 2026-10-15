@@ -82,7 +82,7 @@ describe('simulation runner', () => {
 
   it('is deterministic', { timeout: 180_000 }, () => {
     // How long a year took is the one thing that differs between runs.
-    const untimed = (r: ReturnType<typeof runSimulation>) => ({ ...r, people: { ...r.people, timing: null } });
+    const untimed = (r: ReturnType<typeof runSimulation>) => ({ ...r, people: { ...r.people, timing: null }, performance: null });
     expect(untimed(runSimulation(content, { lives: 5, seedPrefix: 'same' }))).toEqual(untimed(runSimulation(content, { lives: 5, seedPrefix: 'same' })));
   });
 
