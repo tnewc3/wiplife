@@ -50,13 +50,15 @@ function tieFits(state: LifeState, id: Id, def: AmendsSource): boolean {
 export function amendsCandidates(state: LifeState, content: ContentBundle): AmendsCandidate[] {
   const out: AmendsCandidate[] = [];
   const sources = content.registries.later.amends.sources;
+  let ids: Id[] | undefined; // (every source looks through the same people: sort them once)
   for (const source of Object.keys(sources).sort()) {
     const def = sources[source]!;
     if (def.kind === 'goal') {
       if (def.when && evaluate(def.when, state, { roles: 'strict', content })) out.push({ source, def });
       continue;
     }
-    for (const id of Object.keys(state.relationships).sort(byId)) if (tieFits(state, id, def)) out.push({ source, def, personId: id });
+    ids ??= Object.keys(state.relationships).sort(byId);
+    for (const id of ids) if (tieFits(state, id, def)) out.push({ source, def, personId: id });
   }
   return out;
 }

@@ -237,14 +237,14 @@ export function isChild(person: Person | undefined): person is Person & { child:
 
 /** Your living children (not stepchildren) and, with `steps`, stepchildren too, in id order. */
 export function livingChildren(state: LifeState, steps = false): (Person & { child: ChildData })[] {
-  return Object.keys(state.people)
-    .sort()
-    .flatMap((id) => {
-      const person = state.people[id]!;
-      const rel = state.relationships[id];
-      if (!person.alive || !person.child || !rel) return [];
-      if (rel.kind === 'child' || (steps && rel.kind === 'stepchild')) return [person as Person & { child: ChildData }];
-      return [];
-    });
+  // Filter first and sort the few that remain: most of a big circle is neither a child nor a stepchild.
+  const found: string[] = [];
+  for (const id in state.relationships) {
+    const rel = state.relationships[id]!;
+    if (rel.kind !== 'child' && !(steps && rel.kind === 'stepchild')) continue;
+    const person = state.people[id];
+    if (person?.alive && person.child) found.push(id);
+  }
+  return found.sort().map((id) => state.people[id] as Person & { child: ChildData });
 }
 

@@ -11,6 +11,9 @@
 import type { ContentBundle } from '../../src/content/schemas';
 import { produce } from 'immer';
 import { beginYear, createLife } from '../../src/engine/life';
+import { businessPeople } from '../../src/engine/business/query';
+import { fanIds } from '../../src/engine/fame/query';
+import { isFamilyKind, isRomanticKind } from '../../src/engine/relationships';
 import type { LifeState, Person } from '../../src/engine/types';
 import type { SimulationReport, TargetResult } from './run';
 
@@ -315,16 +318,17 @@ export class PeopleWatcher {
 /** People outside family and romance who are still in your life (your boss stays while you work): what the pruning keeps within `maxPeople`. */
 function crowdSize(life: LifeState): number {
   let n = 0;
+  const protectedIds = new Set<string>([...businessPeople(life), ...(life.crime.crew?.members ?? []), ...(life.fame.active ? fanIds(life) : [])]);
   for (const rel of Object.values(life.relationships)) {
     if (rel.status !== 'active' || !life.people[rel.personId]?.alive) continue;
-    if (FAMILY.has(rel.kind) || ROMANTIC.has(rel.kind)) continue;
+    if (isFamilyKind(rel.kind) || isRomanticKind(rel.kind)) continue;
     if (rel.kind === 'boss' && life.career.job !== null) continue;
+    // The pruning keeps these too, whatever the cap: the people in your businesses, your crew and (while you work in the business) your fans.
+    if (protectedIds.has(rel.personId)) continue;
     n++;
   }
   return n;
 }
-const FAMILY = new Set(['parent', 'stepparent', 'grandparent', 'relative', 'sibling', 'child', 'stepchild']);
-const ROMANTIC = new Set(['partner', 'fiance', 'spouse', 'ex']);
 
 /** Timing for beginYear: wraps the pipeline's steps so each one's time is kept. */
 export class PipelineTimer {

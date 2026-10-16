@@ -47,6 +47,11 @@ export const LIFE_ACTION_IDS = [...TRAVEL_ACTION_IDS, ...MIGRATION_ACTION_IDS, '
 
 /** The only money, home, school, work and personal actions you can take in prison (Stage 9). */
 export const PRISON_LIFE_ACTIONS: readonly LifeActionId[] = ['pay_debt', 'debt_plan', 'stop_gig', 'edit_identity', 'write_will'];
+/**
+ * W5: what you can't start while on a temporary stay abroad (an exchange or a working holiday): a new home, school,
+ * business or fame/sports career (`enter_fame` starts both). Typed as action ids, so a name that isn't one won't compile.
+ */
+export const TEMPORARY_STAY_BLOCKED: readonly LifeActionId[] = [...HOME_ACTION_IDS, 'apply_school', 'return_to_school', 'start_business', 'buy_business', 'enter_fame'];
 export type LifeActionId = (typeof LIFE_ACTION_IDS)[number];
 
 /** Parameters, after validation. */
@@ -316,7 +321,7 @@ export const LIFE_ACTIONS: Record<LifeActionId, LifeActionRule> = {
 /** True when the action can be taken now with these (validated) parameters. In prison, only a few can. */
 export function isLifeActionAvailable(state: LifeState, actionId: LifeActionId, params: LifeActionParams, content: ContentBundle): boolean {
   if (state.phase !== 'yearStart') return false;
-  if (onTemporaryStay(state) && [...HOME_ACTION_IDS, 'apply_school', 'return_to_school', 'start_business', 'buy_business', 'start_fame', 'start_sport'].includes(actionId)) return false;
+  if (onTemporaryStay(state) && TEMPORARY_STAY_BLOCKED.includes(actionId)) return false;
   if (isIncarcerated(state) && !PRISON_LIFE_ACTIONS.includes(actionId)) return false;
   return LIFE_ACTIONS[actionId].allowed(state, params, content);
 }

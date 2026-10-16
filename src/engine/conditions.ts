@@ -54,18 +54,55 @@ export function compare(value: number, c: Compare): boolean {
 
 const FAMILY_ALIVE_DEFAULT = true;
 
+/** How costly a condition is to check: 0 is a field read, 1 a short scan, 2 a walk over people or a cast lookup. */
+function costOf(condition: Condition): number {
+  if ('all' in condition) return Math.max(0, ...condition.all.map(costOf));
+  if ('any' in condition) return Math.max(0, ...condition.any.map(costOf));
+  if ('not' in condition) return costOf(condition.not);
+  if ('age' in condition && !('role' in condition)) return 0;
+  for (const key of CHEAP) if (key in condition) return 0;
+  for (const key of SCANS) if (key in condition) return 2;
+  return 1;
+}
+/** Conditions that read one field (no loops). */
+const CHEAP = ['lifeStage', 'stat', 'trait', 'hidden', 'money', 'city', 'country', 'legalAge', 'familyWealth', 'flag', 'fired', 'romance', 'value', 'legal', 'travel'] as const;
+/** Conditions that walk the people or relationships, or need a cast. */
+const SCANS = ['relative', 'family', 'later', 'mental', 'role', 'memory', 'tie', 'belongings', 'group', 'business', 'teen', 'language'] as const;
+
+const orderCache = new WeakMap<readonly Condition[], readonly Condition[]>();
+/**
+ * The parts of an `all` or `any`, cheapest first. Checking a condition has no effects, so the order cannot change
+ * the answer, but a part that fails early (age, a flag) now spares the long scans after it. Worked out once per list.
+ */
+function cheapestFirst(parts: readonly Condition[]): readonly Condition[] {
+  let ordered = orderCache.get(parts);
+  if (!ordered) {
+    ordered = parts.length < 2 ? parts : parts.map((part, i) => ({ part, i, cost: costOf(part) })).sort((a, b) => a.cost - b.cost || a.i - b.i).map((x) => x.part);
+    orderCache.set(parts, ordered);
+  }
+  return ordered;
+}
+
+/** A condition on a cast role: true when there is no such role yet and roles are assumed (before casting). */
+function roleCheck(ctx: ConditionContext, role: string, check: (personId: Id) => boolean): boolean {
+  const id = ctx.cast?.[role];
+  if (id === undefined) return ctx.roles === 'assumeTrue';
+  return check(id);
+}
+
 /** True when the condition holds for this life (and cast). A missing condition always holds. */
 export function evaluate(condition: Condition | undefined, state: LifeState, ctx: ConditionContext = {}): boolean {
   if (condition === undefined) return true;
   const c = state.character;
-  const roleCheck = (role: string, check: (personId: Id) => boolean): boolean => {
-    const id = ctx.cast?.[role];
-    if (id === undefined) return ctx.roles === 'assumeTrue';
-    return check(id);
-  };
 
-  if ('all' in condition) return condition.all.every((sub) => evaluate(sub, state, ctx));
-  if ('any' in condition) return condition.any.some((sub) => evaluate(sub, state, ctx));
+  if ('all' in condition) {
+    for (const sub of cheapestFirst(condition.all)) if (!evaluate(sub, state, ctx)) return false;
+    return true;
+  }
+  if ('any' in condition) {
+    for (const sub of cheapestFirst(condition.any)) if (evaluate(sub, state, ctx)) return true;
+    return false;
+  }
   if ('not' in condition) {
     // Unknown roles make "not" unknowable too; stay optimistic before casting.
     if (ctx.roles === 'assumeTrue' && mentionsRole(condition.not)) return true;
@@ -249,10 +286,10 @@ export function evaluate(condition: Condition | undefined, state: LifeState, ctx
   if ('later' in condition) return laterHolds(condition.later, state);
   if ('memory' in condition) {
     const { role, tag } = condition.memory;
-    return roleCheck(role, (id) => state.relationships[id]?.memories.some((m) => m.tag === tag) ?? false);
+    return roleCheck(ctx, role, (id) => state.relationships[id]?.memories.some((m) => m.tag === tag) ?? false);
   }
   if ('role' in condition) {
-    return roleCheck(condition.role, (id) => {
+    return roleCheck(ctx, condition.role, (id) => {
       const person = state.people[id];
       if (!person) return false;
       const rel = state.relationships[id];

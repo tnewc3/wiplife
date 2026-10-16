@@ -784,5 +784,14 @@ export const targetsBalanceSchema = z.strictObject({
       senior: z.int().min(0),
     }),
   }),
+  /**
+   * Batch 0: how long the simulation takes. The most milliseconds a simulated year (everything the headless run does
+   * in it: the year, the player's actions, the events and every invariant check) may take on average, on the
+   * machine that runs it. `tools/simulate.ts` reports the careful and careless players' figure and fails when
+   * it is exceeded, so each stage's slowdown shows up in the pull request that causes it.
+   */
+  performance: z.strictObject({
+    maxMsPerYear: z.number().positive(),
+  }),
 });
 export type TargetsBalance = z.infer<typeof targetsBalanceSchema>;

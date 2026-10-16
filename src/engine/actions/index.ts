@@ -43,6 +43,7 @@ export {
   LIFE_ACTION_IDS,
   MONEY_ACTION_IDS,
   PRISON_LIFE_ACTIONS,
+  TEMPORARY_STAY_BLOCKED,
   type LifeActionId,
   type LifeActionParams,
 } from './life';

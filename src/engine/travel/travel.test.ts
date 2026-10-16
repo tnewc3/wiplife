@@ -142,6 +142,24 @@ describe('W5 travel', () => {
     expect(life.finances.earnings.years).toBeGreaterThan(0);
     expect(checkInvariants(life, content)).toEqual([]);
   });
+  it('ends a temporary stay when an eviction abroad sends you home to family (seed coverage-1972 of the nightly coverage run on 238e0fb)', () => {
+    // The nightly run found a transfer worker in London, evicted, who chose "come home" in the eviction event: they were
+    // moved in with their parents in Los Angeles but still marked as on a stay in London ("temporary stay is not in host country").
+    let life = settle(performAction(adult(), 'work_abroad', { stay: { destinationId: 'london', route: 'working_holiday' } }, content));
+    expect(life.travel.residence).not.toBeNull();
+    life = produce(life, (d) => { d.housing = { kind: 'homeless', cityId: d.character.cityId, annualCost: 0, since: d.currentYear }; });
+    const parent = Object.values(life.relationships).find((r) => r.kind === 'parent' && r.status === 'active' && life.people[r.personId]!.alive);
+    expect(parent, 'the fixture has a living parent').toBeDefined();
+    const def = content.events.eviction_notice!;
+    const after = produce(life, (d) => {
+      applyEffects(d, def.choices!.find((c) => c.id === 'home')!.outcome!.effects, { def, cast: { parent: parent!.personId }, rng: d.rng, content });
+    });
+    expect(after.travel.residence).toBeNull();
+    expect(after.travel.totals.returns).toBe(1);
+    expect(after.character.cityId).toBe('chicago');
+    expect(after.housing.kind).toBe('with_parents');
+    expect(checkInvariants(after, content)).toEqual([]);
+  });
   it('transfers keep a job but not its old office colleagues, with language gating', () => {
     const life = produce(adult(), (d) => { startJob(d, 'retail_associate', content); });
     expect(stayBlock(life, { destinationId: 'montreal', route: 'transfer' }, content)).toBe('job');

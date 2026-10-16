@@ -14,7 +14,7 @@ import { emptyLanguageLearning, householdLanguages } from './languages';
  */
 import { giveNeuro, rollNeuro } from './mental/neuro';
 import { emptyMental } from './mental/query';
-import { produce } from 'immer';
+import { produce, setUseStrictIteration } from 'immer';
 import { BUSINESS_ROLE, POSSESSION_ROLES, type ChoiceDef, type ContentBundle, type Outcome } from '../content/schemas';
 import { evaluate } from './conditions';
 import {
@@ -59,6 +59,9 @@ import { emptyBelonging } from './belonging/query';
 import { emptyBusiness } from './business/query';
 import { startBelonging } from './belonging/start';
 import { citiesOfCountry, startWeights } from './country';
+
+// A life state is plain data (no symbols, no hidden properties), so Immer can walk it with the faster Object.keys instead of Reflect.ownKeys.
+setUseStrictIteration(false);
 
 export type { CreateLifeOptions, CustomLifeInput } from './creation/input';
 
@@ -396,10 +399,10 @@ export function resolveChoice(state: LifeState, instanceId: Id, choiceId: Id, co
         const housing = draft.housing.annualCost;
         const help = outcome.effects.reduce((sum, e) => sum + (e.type === 'cost' ? familyHelp(draft, e.item, content) : 0), 0);
         // E5: a possession the outcome removes is still named in its text.
-        const named = def.bind ? textContext(draft, instance.cast, content, instance.since) : undefined;
+        const named = def.bind ? textContext(draft, instance.cast, content, instance.since, true) : undefined;
         if (named) target.card = { title: renderText(def.title, named), text: renderText(eventLanguageText(draft, def, instance.cast, content), named) };
         // E6c: a pinned card keeps the words it was shown with (a playoff series moves on when you choose).
-        const pinned = def.pin ? textContext(draft, instance.cast, content, instance.since) : undefined;
+        const pinned = def.pin ? textContext(draft, instance.cast, content, instance.since, true) : undefined;
         if (pinned) target.card = { title: renderText(def.title, pinned), text: renderText(eventLanguageText(draft, def, instance.cast, content), pinned) };
         applyEffects(draft, outcome.effects, { def, cast: instance.cast, rng: draft.rng, content, ...(instance.since !== undefined ? { since: instance.since } : {}), ...(named ? { named } : {}) });
         // Written after the effects, so it can tell what they did ({sentence}, new pronouns).

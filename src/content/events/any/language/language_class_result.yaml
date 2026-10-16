@@ -8,6 +8,8 @@ lifeStages: [youngAdult, adult, senior]
 requires: { age: { gte: 18 } }
 weight: { base: 1 }
 followUpOnly: true
+# The receipt of a paid course the player chose (one a year at most, by rule), not a random event: it recurs as often as the player signs up.
+recurring: true
 autoOutcome:
   text: 'You leave with new words to try outside the classroom.'
   effects: []

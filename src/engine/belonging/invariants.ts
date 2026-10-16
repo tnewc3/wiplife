@@ -5,6 +5,7 @@
  * what a child can be, and the people a group brought are real.
  */
 import { VALUE_IDS, type ContentBundle } from '../../content/schemas';
+import { foundHealthy, healthyIn, markHealthy } from '../healthy';
 import type { LifeState } from '../types';
 
 const whole = (n: unknown): n is number => typeof n === 'number' && Number.isInteger(n);
@@ -63,10 +64,19 @@ export function belongingFailures(state: LifeState, content: ContentBundle): str
     if (!content.cities[city]) fail(`groups for unknown city "${city}"`);
     for (const id of ids) if (!b.groups[id]) fail(`city ${city} lists group ${id}, which is missing`);
   }
-  for (const [id, p] of Object.entries(state.people)) {
-    if (p.faith && p.faith.id !== null && !faiths[p.faith.id]) fail(`person ${id} has an unknown faith "${p.faith.id}"`);
-    if (p.faith && (p.faith.id === null) !== (p.faith.strength === 0)) fail(`person ${id}: faith and strength disagree`);
+  const healthy = healthyIn(content, 'belonging');
+  const peopleBefore = failures.length;
+  const unchanged = foundHealthy(content, 'belonging', state.people, [], state.currentYear);
+  for (const id in state.people) {
+    if (unchanged) break;
+    const p = state.people[id]!;
+    if (!p.faith || healthy.get(p.faith) === state.currentYear) continue;
+    const before = failures.length;
+    if (p.faith.id !== null && !faiths[p.faith.id]) fail(`person ${id} has an unknown faith "${p.faith.id}"`);
+    if ((p.faith.id === null) !== (p.faith.strength === 0)) fail(`person ${id}: faith and strength disagree`);
+    if (failures.length === before) healthy.set(p.faith, state.currentYear);
   }
+  if (failures.length === peopleBefore) markHealthy(content, 'belonging', state.people, [], state.currentYear);
   for (const past of b.past) if (past.toYear < past.fromYear) fail(`past membership ${past.groupId} ended before it began`);
   return failures;
 }

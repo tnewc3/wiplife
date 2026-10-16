@@ -7,8 +7,17 @@
  * the point the yearly pruning has run: events add people between years.)
  */
 import type { ContentBundle } from '../../content/schemas';
+import { foundHealthy, healthyIn, markHealthy } from '../healthy';
 import { isPartnerKind } from '../relationships';
 import type { LifeState } from '../types';
+
+/** Who the relationship and city were when a person was last found healthy (what the checks above also read). */
+const relations = new WeakMap<object, WeakMap<object, { rel: unknown; city: string }>>();
+function healthyRelations(content: object): WeakMap<object, { rel: unknown; city: string }> {
+  let m = relations.get(content);
+  if (!m) relations.set(content, (m = new WeakMap()));
+  return m;
+}
 
 export function livesFailures(state: LifeState, content: ContentBundle): string[] {
   const failures: string[] = [];
@@ -16,13 +25,22 @@ export function livesFailures(state: LifeState, content: ContentBundle): string[
   const { adultAge } = content.balance.relationships;
   const bal = content.balance.people;
 
-  for (const id of Object.keys(state.people).sort()) {
+  // A person who is the same object, with the same relationship, in the same year and city, gives the same answer: see healthy.ts.
+  const seen = healthyIn(content, 'lives');
+  const remembered = healthyRelations(content);
+  const deps = [state.relationships, state.character.cityId];
+  const unchanged = foundHealthy(content, 'lives', state.people, deps, state.currentYear);
+  const peopleBefore = failures.length;
+  for (const id in state.people) {
+    if (unchanged) break;
     const person = state.people[id]!;
     const life = person.life;
     if (!life) continue;
+    const rel = state.relationships[id];
+    if (seen.get(person) === state.currentYear && remembered.get(person)?.rel === rel && remembered.get(person)?.city === state.character.cityId) continue;
+    const before = failures.length;
     const label = `person ${id}`;
     const age = (person.deathYear ?? state.currentYear) - person.birthYear;
-    const rel = state.relationships[id];
 
     if (!['close', 'near', 'far'].includes(life.tier)) fail(`${label}: tier "${life.tier}" is not a tier`);
     // Work: a job that exists, a level on its track, and no level without a job (someone who has faded from your life isn't followed any more).
@@ -72,7 +90,13 @@ export function livesFailures(state: LifeState, content: ContentBundle): string[
     // Care: someone you've taken in lives with you and is alive.
     if (life.care === 'home' && person.alive && person.cityId !== state.character.cityId) fail(`${label}: cared for at your home but not living there`);
     if (!Number.isInteger(life.gossip) || life.gossip < 0 || life.gossip > 100) fail(`${label}: gossip tendency is out of range`);
+    if (failures.length === before) {
+      seen.set(person, state.currentYear);
+      remembered.set(person, { rel, city: state.character.cityId });
+    }
   }
+
+  if (failures.length === peopleBefore) markHealthy(content, 'lives', state.people, deps, state.currentYear);
 
   // The news log: a few years, each within its cap, each change once.
   if (state.news.length > bal.news.keepYears) fail(`the news keeps ${state.news.length} years (at most ${bal.news.keepYears})`);

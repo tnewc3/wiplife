@@ -1,5 +1,7 @@
 # W4b validation record
 
+> **Superseded (Batch 0, PR #40).** This record describes validation that was stopped on 2026-10-13. The W4b gate was finished in Batch 0: 10,000-life runs with zero invariant failures, every W4b acceptance criterion checked, and the figures are in [docs/technical.md](technical.md) ("W4b — as built", "Gate (Batch 0)", and "Batch 0 — Stabilize and validate (as built)"). Kept for history.
+
 Validation stopped on 2026-10-13 at the user's request to finish the tests already running, document bugs, and start no further runs. This is not a claim that every acceptance gate passed.
 
 ## Verified results
