@@ -129,6 +129,8 @@ test('custom creation asks a nonbinary character whether they can carry a pregna
   await page.getByRole('button', { name: 'Next' }).click();
   await expect(page.getByText('Choose whether you can carry a pregnancy')).toBeVisible();
   await carry.getByRole('radio', { name: 'Yes', exact: true }).click();
+  // Who you are attracted to is a required choice too (B1); "No one" counts.
+  await page.getByRole('button', { name: 'No one', exact: true }).click();
   await page.getByRole('button', { name: 'Next' }).click();
   await expect(page.getByText('Step 3 of 6')).toBeVisible();
 });
