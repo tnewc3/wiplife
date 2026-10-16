@@ -52,6 +52,8 @@ export const creationBalanceSchema = z.strictObject({
   }),
   /** Chance a character has a hidden talent at all. */
   talentChance: probabilitySchema,
+  /** B1: every heritage in a name pool has at least this many first names for each gender category and this many last names (the content build checks it). */
+  namePool: z.strictObject({ minFirstPerCategory: z.int().min(1).max(500), minLast: z.int().min(1).max(500) }),
   appearance: z.strictObject({
     /** Chance of one extra distinguishing feature. */
     featureChance: probabilitySchema,
@@ -647,6 +649,17 @@ export const targetsBalanceSchema = z.strictObject({
     allStarLives: shareRangeSchema,
     medianEarnings: numberRangeSchema,
     signedShare: shareRangeSchema,
+  }),
+  /**
+   * B1, romance by attraction (tools/simulate/attraction.ts), on the careful player's lives that reach 50: lives
+   * attracted to the same gender (or more than one) stay within these distances of lives attracted to another gender,
+   * in the share who ever have a partner (ages 18–49) and in the mean years spent single. A group with fewer lives than
+   * minSample is not judged.
+   */
+  attraction: z.strictObject({
+    minSample: z.int().min(1).max(5000),
+    everPartneredGap: z.number().min(0).max(1),
+    yearsSingleGap: z.number().min(0).max(32),
   }),
   /**
    * W1, the eulogy (tools/simulate/eulogy.ts), on the careful player's lives

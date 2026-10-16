@@ -67,6 +67,8 @@ export function rootEvents(content: ContentBundle): Set<string> {
   const r = content.registries;
   const lists: { events: string[] }[] = [
     r.languages.classes,
+    // B1: what "Find a date" answers with.
+    ...Object.values(r.love.findDate).map((events) => ({ events })),
     ...Object.values(r.travel).map((events) => ({ events })),
     // W6: what applications, permits, life without papers and life abroad queue.
     ...Object.values(r.immigration.triggers).map((events) => ({ events })),

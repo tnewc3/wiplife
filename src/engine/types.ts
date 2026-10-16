@@ -133,6 +133,8 @@ export interface Character {
   custom: boolean;
   /** E2a: you can carry a pregnancy (women can, men can't; nonbinary characters choose). It stays as it was at birth. */
   canCarry: boolean;
+  /** B1: the name heritage (an id in the name pool) your names come from. Unset when it can't be known (older lives). */
+  heritage?: string;
 }
 
 export interface Person {
@@ -160,6 +162,8 @@ export interface Person {
   /** E1: how well off they are, from their occupation and family background. */
   wealthLevel: FamilyWealth;
   /** E2a: they can carry a pregnancy. */
+  /** B1: the name heritage (an id in a name pool) their names come from. Unset when it can't be known (older lives). */
+  heritage?: string;
   canCarry: boolean;
   /** E2a: a potential partner's children from before, by birth year; they become your stepchildren if you marry. */
   priorChildren?: number[];
@@ -1094,6 +1098,8 @@ export interface PendingInteraction {
   otherId?: Id;
   itemId?: string;
   tier: OutcomeTier;
+  /** B1: a romance interaction with someone who isn't attracted to you: they said no, kindly. */
+  declined?: true;
   giftTier?: GiftTier;
   /** The outcome text, written (pronouns filled in) when it happened. */
   text: string;

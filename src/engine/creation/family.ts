@@ -42,6 +42,8 @@ export interface FamilyRequest {
 }
 
 export interface GeneratedFamily {
+  /** B1: the heritage your names come from. */
+  heritage: string;
   firstName: string;
   lastName: string;
   people: Person[];
@@ -56,19 +58,39 @@ export function pickUnused(rng: RngState, options: readonly string[], used: Set<
 }
 
 /** Heritages in this pool with their weights, in a fixed order. */
-function heritageOptions(content: ContentBundle, pool: NamePool, allowed?: readonly string[]): (readonly [string, number])[] {
-  // A name pool is the pool of the country it is named after: that country says how often each heritage starts a family.
-  const weights = content.countries[pool.id]?.names.heritageWeights ?? {};
+function heritageOptions(content: ContentBundle, pool: NamePool, allowed?: readonly string[], cityId?: Id): (readonly [string, number])[] {
+  // A name pool is the pool of the country it is named after: that country says how often each heritage starts a family,
+  // unless the city (B1: Houston, Montreal) sets its own.
+  const weights = (cityId !== undefined ? content.cities[cityId]?.heritageWeights : undefined) ?? content.countries[pool.id]?.names.heritageWeights ?? {};
   return Object.keys(pool.heritages)
     .sort()
     .filter((id) => !allowed || allowed.includes(id))
     .map((id) => [id, weights[id] ?? 0] as const);
 }
 
-export function rollHeritage(rng: RngState, content: ContentBundle, pool: NamePool, allowed?: readonly string[]): string {
-  const options = heritageOptions(content, pool, allowed);
+export function rollHeritage(rng: RngState, content: ContentBundle, pool: NamePool, allowed?: readonly string[], cityId?: Id): string {
+  const options = heritageOptions(content, pool, allowed, cityId);
   if (options.some(([, w]) => w > 0)) return weightedPick(rng, options);
   return pick(rng, options.map(([id]) => id));
+}
+
+/**
+ * B1: a child's heritage comes from a parent's. Parents whose heritage is not in this pool (or not known) are left
+ * out; with none left, it is rolled for the city. Two different heritages give either, by the city's weights.
+ */
+export function heritageFromParents(rng: RngState, content: ContentBundle, pool: NamePool, parents: readonly (string | undefined)[], cityId: Id): string {
+  const known = [...new Set(parents.filter((h): h is string => h !== undefined && pool.heritages[h] !== undefined))].sort();
+  if (known.length === 0) return rollHeritage(rng, content, pool, undefined, cityId);
+  if (known.length === 1) return known[0]!;
+  return rollHeritage(rng, content, pool, known, cityId);
+}
+
+/** Heritages whose first names (of any category) include this one (case-insensitive), for custom characters. */
+export function heritagesForFirstName(pool: NamePool, firstName: string): string[] {
+  const wanted = firstName.toLocaleLowerCase('en-US');
+  return Object.keys(pool.heritages)
+    .sort()
+    .filter((id) => GENDER_CATEGORIES.some((c) => pool.heritages[id]!.first[c].some((n) => n.toLocaleLowerCase('en-US') === wanted)));
 }
 
 /** Heritages whose last names include this one (case-insensitive), for custom families. */
@@ -110,20 +132,27 @@ export function generateFamily(rng: RngState, content: ContentBundle, request: F
   // Heritage: the family's last name comes from the first parent's heritage;
   // a second parent usually shares it. A custom last name found in a heritage
   // picks that heritage.
-  const matching = request.lastName ? heritagesForLastName(pool, request.lastName) : [];
-  const primary = rollHeritage(rng, content, pool, matching.length > 0 ? matching : undefined);
+  // B1: a custom first or last name found in a heritage picks it (a name found in both picks one that has both).
+  const lastMatching = request.lastName ? heritagesForLastName(pool, request.lastName) : [];
+  const firstMatching = request.characterFirstName ? heritagesForFirstName(pool, request.characterFirstName) : [];
+  const both = lastMatching.filter((h) => firstMatching.includes(h));
+  const matching = both.length > 0 ? both : lastMatching.length > 0 ? lastMatching : firstMatching;
+  const primary = rollHeritage(rng, content, pool, matching.length > 0 ? matching : undefined, cityId);
   const otherHeritages = Object.keys(pool.heritages).filter((h) => h !== primary);
   const partner =
     parentCount === 2 && otherHeritages.length > 0 && !chance(rng, names.sameHeritageParentsChance)
-      ? rollHeritage(rng, content, pool, otherHeritages)
+      ? rollHeritage(rng, content, pool, otherHeritages, cityId)
       : primary;
   const heritage = (id: string): HeritageNames => pool.heritages[id]!;
   /** Children's first names come from either parent's heritage. */
-  const childHeritage = () => heritage(partner === primary ? primary : pick(rng, [primary, partner]));
+  const childHeritageId = () => (partner === primary ? primary : pick(rng, [primary, partner]));
+  const childHeritage = () => heritage(childHeritageId());
 
   const lastName = request.lastName ?? pick(rng, heritage(primary).last);
   const usedFirst = new Set<string>();
-  const firstName = request.characterFirstName ?? pickUnused(rng, childHeritage().first[request.characterCategory], usedFirst);
+  // Your own heritage: the one your custom first name belongs to if a parent has it, otherwise either parent's.
+  const ownHeritage = [primary, partner].find((h) => firstMatching.includes(h)) ?? childHeritageId();
+  const firstName = request.characterFirstName ?? pickUnused(rng, heritage(ownHeritage).first[request.characterCategory], usedFirst);
   usedFirst.add(firstName);
 
   const people: Person[] = [];
@@ -138,8 +167,10 @@ export function generateFamily(rng: RngState, content: ContentBundle, request: F
     mustBeAttractedTo?: GenderCategory,
   ): Person => {
     const identity = rollIdentity(rng, content, category, mustBeAttractedTo);
+    const origin = Object.keys(pool.heritages).find((id) => pool.heritages[id] === nameSource) ?? primary;
     const person: Person = {
       id: request.nextId(),
+      heritage: origin,
       languages: [],
       citizenships: citizenshipsFromCity(cityId, content),
       name: { first: pickUnused(rng, nameSource.first[category], usedFirst), last: personLastName },
@@ -157,7 +188,6 @@ export function generateFamily(rng: RngState, content: ContentBundle, request: F
       wealthLevel: request.familyWealth,
       canCarry: rollCanCarry(rng, category, content),
     };
-    const origin = Object.keys(pool.heritages).find((id) => pool.heritages[id] === nameSource) ?? primary;
     person.languages = nativeLanguages(cityId, origin, birthYear, rng, content);
     const scores = {
       parent: [family.parentAffection, family.parentTrust],
@@ -240,7 +270,7 @@ export function generateFamily(rng: RngState, content: ContentBundle, request: F
   }
 
   for (const p of people) if (relationships.some((r) => r.personId === p.id && r.kind === "sibling")) p.languages = householdLanguages(cityId, parents.map((p) => p.person), birthYear, content);
-  return { firstName, lastName, people, relationships };
+  return { heritage: ownHeritage, firstName, lastName, people, relationships };
 }
 
 /**

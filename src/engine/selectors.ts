@@ -61,6 +61,7 @@ import { moodView, type MoodView } from './interactions/mood';
 import { getNews, getPersonLifeView, type NewsItem, type PersonLifeView } from './lives/views';
 import { getConnections, getHeard, getIntroduceChoices, getTopicChoices, type ConnectionView, type HeardView, type PickView } from './web/views';
 export { getInteractionMenu, getInteractionOutcome } from './interactions/views';
+export { getFindDateView, type FindDateOptionView, type FindDateView } from './actions/love';
 export { getConnections, getHeard, getIntroduceChoices, getTopicChoices };
 export type { ConnectionView, HeardView, PickView };
 export {

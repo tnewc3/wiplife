@@ -1,10 +1,11 @@
 import { content } from '../../../content';
-import { getPeople, getPets, PEOPLE_GROUPS, type PeopleGroupId, type PersonRow } from '../../../engine/selectors';
+import { getFindDateView, getPeople, getPets, PEOPLE_GROUPS, type PeopleGroupId, type PersonRow } from '../../../engine/selectors';
 import type { LifeState } from '../../../engine/types';
 import { useAppStore } from '../../../store/appStore';
 import { BondBars } from '../../components/BondBars';
+import { Button } from '../../components/Button';
 import { Card } from '../../components/Card';
-import { bondWords, moodPhrase, PEOPLE_GROUP_EMPTY, PEOPLE_GROUP_LABELS, PET_PERSONALITY_LABELS, personLine, petHealthWords, yearsOld } from '../../labels';
+import { FIND_DATE_LABELS, money, bondWords, moodPhrase, PEOPLE_GROUP_EMPTY, PEOPLE_GROUP_LABELS, PET_PERSONALITY_LABELS, personLine, petHealthWords, yearsOld } from '../../labels';
 
 /** Groups always shown, even when empty; the others appear once someone is in them. */
 const ALWAYS_SHOWN: readonly PeopleGroupId[] = ['family', 'friends'];
@@ -31,6 +32,35 @@ function PersonButton({ row }: { row: PersonRow }) {
   );
 }
 
+/** B1: "Find a date": a dating app, a friend's set-up or a night out, for single adults who are attracted to someone. */
+function FindDateCard({ life }: { life: LifeState }) {
+  const view = getFindDateView(life, content);
+  const busy = useAppStore((s) => s.aging);
+  const act = useAppStore((s) => s.takeLifeAction);
+  if (!view.shown) return null;
+  return (
+    <Card role="region" aria-labelledby="find-a-date" data-testid="find-date">
+      <h2 id="find-a-date" className="mb-1 text-lg font-bold">
+        Find a date
+      </h2>
+      <p className="mb-3 text-sm text-muted">
+        Looking for someone new. Each try this year is a little less likely to turn anyone up ({view.tries} of {view.max} used).
+      </p>
+      <div className="flex flex-col gap-2">
+        {view.options.map((o) => (
+          <div key={o.way} className="flex flex-col gap-1">
+            <Button variant="secondary" block disabled={busy || o.block !== null} data-testid={`find-date-${o.way}`} onClick={() => void act('find_date', { dateWay: o.way })}>
+              {FIND_DATE_LABELS[o.way].label}
+              {o.cost > 0 ? ` · ${money(o.cost)}` : ''}
+            </Button>
+            <p className="text-sm text-muted">{o.block ?? FIND_DATE_LABELS[o.way].blurb}</p>
+          </div>
+        ))}
+      </div>
+    </Card>
+  );
+}
+
 /** The People tab: everyone in your life, grouped into family, love, friends and work. */
 export function PeopleTab({ life }: { life: LifeState }) {
   const groups = getPeople(life, content);
@@ -38,6 +68,7 @@ export function PeopleTab({ life }: { life: LifeState }) {
   const openPet = useAppStore((s) => s.openPet);
   return (
     <div className="flex flex-col gap-4">
+      <FindDateCard life={life} />
       {PEOPLE_GROUPS.filter((g) => groups[g].length > 0 || ALWAYS_SHOWN.includes(g)).map((group) => (
         <Card key={group} role="region" aria-labelledby={`people-${group}`}>
           <h2 id={`people-${group}`} className="mb-1 text-lg font-bold">

@@ -592,3 +592,61 @@ describe('the conditions, text values and helpers', () => {
     }
   });
 });
+
+describe('B1: injuries come from games, never from training', () => {
+  const sportDef = sportPath(content, 'football')!.sport;
+
+  it('has the same injury risk whatever the training focus', () => {
+    const life = pro('focus-risk', 'football');
+    const risks = (['skills', 'conditioning', 'film'] as const).map((focus) => injuryRisk(apply(life, (d) => void (d.sports.focus = focus)), sportDef, 'pro', content));
+    expect(new Set(risks).size).toBe(1);
+    expect(risks[0]).toBeGreaterThan(0);
+  });
+
+  it('rolls the same injury (or none) for every focus on the same seed, and taking the set_focus action adds no condition', () => {
+    const life = pro('focus-roll', 'football');
+    for (let i = 0; i < 60; i++) {
+      const results = (['skills', 'conditioning', 'film'] as const).map((focus) => {
+        const next = apply(life, (d) => {
+          d.sports.focus = focus;
+          rollInjury(d, sportPath(content, 'football')!, 'pro', content, createRng(`same-${i}`));
+        });
+        return { conditions: next.health.conditions, injuries: next.sports.totals.injuries };
+      });
+      expect(results[1]).toEqual(results[0]);
+      expect(results[2]).toEqual(results[0]);
+    }
+    const changed = performAction(life, 'set_focus', { sportFocus: 'conditioning' }, content);
+    expect(changed.health.conditions).toEqual(life.health.conditions);
+    expect(changed.sports.totals.injuries).toBe(life.sports.totals.injuries);
+  });
+
+  it('scales with the share of the season played: no games, no injury', () => {
+    const life = pro('share', 'football');
+    const full = injuryRisk(life, sportDef, 'pro', content, 1);
+    expect(injuryRisk(life, sportDef, 'pro', content, 0.5)).toBeCloseTo(full / 2, 10);
+    expect(injuryRisk(life, sportDef, 'pro', content, 0)).toBe(0);
+  });
+
+  it('has no training risk number left in the balance', () => {
+    for (const focus of Object.values(content.balance.sports.performance.focus)) expect(Object.keys(focus)).not.toContain('risk');
+  });
+});
+
+describe('B1: the open-tryout route and the age-out agree', () => {
+  for (const id of ['basketball', 'football', 'baseball', 'hockey', 'soccer']) {
+    it(`${id}: someone entering at the route's last age plays a first season and meets the draft, never aged out`, () => {
+      const def = sportPath(content, id)!;
+      const route = def.routes.find((r) => r.id === 'open_tryout')!;
+      expect(route.maxAge! + 1).toBeLessThanOrEqual(def.sport.ageOut[(route.rung ?? 1) - 1]!);
+      for (const entry of [route.minAge, route.maxAge!]) {
+        let life = player(`late-${id}-${entry}`, entry, id, 'open_tryout', 'athletics');
+        life = yearStep(life);
+        expect(life.sports.agedOut).toBe(0);
+        expect(life.sports.totals.seasons).toBeGreaterThanOrEqual(1);
+        // Old enough that the draft is forced: the first season ends in a draft outcome.
+        if (entry + 1 >= def.sport.draft.force) expect(life.sports.draft !== null || life.sports.pro).toBe(true);
+      }
+    });
+  }
+});

@@ -790,3 +790,61 @@ describe('whole lives with relationships', () => {
     }
   });
 });
+
+describe('B1: romance with people you already know, whatever their attraction to you', () => {
+  /** A man attracted to men, with these people. */
+  const gayLife = (people: PersonSpec[], seed = 'b1') =>
+    produce(lifeWith(30, people, seed), (d) => {
+      d.character.identity.attractedTo = ['man'];
+    });
+  const known: PersonSpec[] = [
+    { id: 'friend_no', age: 30, kind: 'friend', category: 'man', attractedTo: ['woman'] },
+    { id: 'cowork_no', age: 31, kind: 'coworker', category: 'man', attractedTo: ['woman'] },
+    { id: 'friend_yes', age: 29, kind: 'friend', category: 'man', attractedTo: ['man'] },
+    { id: 'woman', age: 29, kind: 'friend', category: 'woman', attractedTo: ['man'] },
+  ];
+
+  it('offers "Ask out" for same-gender friends and coworkers you are attracted to, and not for people you are not attracted to', () => {
+    const life = gayLife(known);
+    for (const id of ['friend_no', 'cowork_no', 'friend_yes']) expect(isActionAvailable(life, 'ask_out', id, content)).toBe(true);
+    expect(isActionAvailable(life, 'ask_out', 'woman', content)).toBe(false);
+  });
+
+  it('answers with a kind, clear no (never a partner) when they are not attracted to you, over many seeds', () => {
+    for (let i = 0; i < 30; i++) {
+      const life = gayLife(known, `no-${i}`);
+      const acted = performAction(life, 'ask_out', { personId: 'friend_no' }, content);
+      expect(acted.pending[0]!.eventId).toMatch(/^ask_out_declined_/);
+      let done = resolveChoice(acted, acted.pending[0]!.instanceId, CONTINUE_CHOICE, content);
+      done = finishAction(done);
+      expect(done.relationships.friend_no!.kind).toBe('friend');
+      expect(currentPartner(done)).toBeNull();
+      expect(done.relationships.friend_no!.memories.some((m) => m.tag === 'turned_you_down')).toBe(true);
+    }
+  });
+
+  it('can still lead to dating when they are attracted to you', () => {
+    const dated = Array.from({ length: 60 }, (_, i) => {
+      const acted = performAction(gayLife(known, `yes-${i}`), 'ask_out', { personId: 'friend_yes' }, content);
+      expect(acted.pending[0]!.eventId).toBe('ask_out_result');
+      const choice = acted.pending[0]!.eventId && Object.keys(content.events.ask_out_result!.choices ?? []).length > 0 ? content.events.ask_out_result!.choices![0]!.id : CONTINUE_CHOICE;
+      return currentPartner(finishAction(resolveChoice(acted, acted.pending[0]!.instanceId, choice, content)))?.personId === 'friend_yes';
+    });
+    expect(dated.some(Boolean)).toBe(true);
+  });
+
+  it('never makes someone who is not attracted to you a partner, whatever an event says', () => {
+    const life = gayLife(known);
+    expect(canChangeKind(life, 'friend_no', 'partner', content)).toBe(false);
+    expect(canChangeKind(life, 'friend_yes', 'partner', content)).toBe(true);
+  });
+
+  it('keeps the adults-only and no-family rules: no romance with minors or relatives', () => {
+    const life = gayLife([
+      { id: 'teen', age: 16, kind: 'friend', category: 'man', attractedTo: ['man'] },
+      { id: 'bro', age: 28, kind: 'sibling', category: 'man', attractedTo: ['man'] },
+    ]);
+    expect(isActionAvailable(life, 'ask_out', 'teen', content)).toBe(false);
+    expect(isActionAvailable(life, 'ask_out', 'bro', content)).toBe(false);
+  });
+});

@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { weightsSchema } from './balance';
 import { baseDefSchema, dollarsSchema, scoreSchema } from './common';
 import { cityLegalAgesSchema, countryIdSchema } from './country';
 import { citySchoolsSchema } from './education';
@@ -44,6 +45,8 @@ export const citySchema = baseDefSchema.extend({
   schools: citySchoolsSchema,
   /** W4a: ages the law sets differently here than in the country (Quebec's drinking age is 18, Ontario's 19). */
   legalAges: cityLegalAgesSchema.optional(),
+  /** B1: how often each of the country's name heritages starts a person here, when it differs from the country's (Houston leans Hispanic, Montreal French). Ids come from the country's name pool. */
+  heritageWeights: weightsSchema(z.string()).optional(),
   /** W4a: the languages spoken here when they differ from the country's (Montreal is French-speaking). Used by W4b. */
   languages: z.strictObject({ official: z.array(z.string()).min(1), common: z.array(z.string()) }).optional(),
 });

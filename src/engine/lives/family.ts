@@ -6,7 +6,7 @@
  * leave for another city.
  */
 import { rollGenderCategory } from '../creation/character';
-import { pickUnused, rollHeritage } from '../creation/family';
+import { heritageFromParents, pickUnused } from '../creation/family';
 import { curveAt, powInt } from '../curve';
 import { carrierFactorFor } from '../family/carrying';
 import { chance, pick } from '../rng';
@@ -71,7 +71,8 @@ export function childrenStep(ctx: Ctx, s: Subject): void {
   const pool = ctx.content.names[ctx.content.cities[s.cityId]?.countryId ?? ''];
   if (!pool) return;
   const category = rollGenderCategory(rng, ctx.content);
-  const heritage = pool.heritages[rollHeritage(rng, ctx.content, pool)]!;
+  // B1: their child takes their heritage (or one rolled for their city when it isn't known).
+  const heritage = pool.heritages[heritageFromParents(rng, ctx.content, pool, [s.person.heritage], s.cityId)]!;
   const first = pickUnused(rng, heritage.first[category], usedNames(ctx));
   life.children.push({ first, birthYear: ctx.year });
   say(ctx, s, 'had_child', { child: first }, 'newBaby');

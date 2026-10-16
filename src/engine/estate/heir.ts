@@ -137,7 +137,8 @@ export function createFosterCarer(life: LifeState, rng: RngState, content: Conte
   if (!pool) throw new Error(`No name pool for city "${life.character.cityId}"`);
   const { fosterAge, bonds } = content.balance.family.heir;
   const category = rollGenderCategory(rng, content);
-  const heritage = pool.heritages[rollHeritage(rng, content, pool)]!;
+  const heritageId = rollHeritage(rng, content, pool, undefined, life.character.cityId);
+  const heritage = pool.heritages[heritageId]!;
   const used = new Set([life.character.name.first, ...Object.values(life.people).map((p) => p.name.first)]);
   const id = nextPersonId(life);
   const person: Person = {
@@ -145,6 +146,7 @@ export function createFosterCarer(life: LifeState, rng: RngState, content: Conte
     citizenships: citizenshipsFromCity(life.character.cityId, content),
     languages: legacyLanguages(life.character.cityId, life.currentYear, `${life.seed}:${id}`, content),
     name: { first: pickUnused(rng, heritage.first[category], used), last: pick(rng, heritage.last) },
+    heritage: heritageId,
     birthYear: life.currentYear - nextInt(rng, fosterAge.min, fosterAge.max),
     alive: true,
     identity: rollIdentity(rng, content, category),
@@ -363,6 +365,7 @@ export function continueAsHeir(dead: LifeState, heirId: Id, content: ContentBund
     familyWealth: yourWealth(dead, content),
     custom: false,
     canCarry: candidate.canCarry,
+    ...(candidate.heritage !== undefined ? { heritage: candidate.heritage } : {}),
   };
 
   const life: LifeState = {

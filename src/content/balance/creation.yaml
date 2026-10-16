@@ -52,6 +52,12 @@ hidden:
 
 talentChance: 0.7
 
+# B1: the smallest every name heritage may be (the content build checks it), so
+# a big family or a long life rarely repeats a name.
+namePool:
+  minFirstPerCategory: 50
+  minLast: 50
+
 # How family wealth is spread, which name heritages start families and where a random life starts are the
 # country's (countries/*.yaml familyWealth, names; balance/countries.yaml startWeights).
 

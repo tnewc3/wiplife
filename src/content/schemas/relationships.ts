@@ -86,6 +86,18 @@ export const relationshipsBalanceSchema = z.strictObject({
   meeting: z.strictObject({ younger: curveSchema, older: curveSchema }),
   /** Who steps in during a crisis: someone close whose trust and affection reach these. */
   support: z.strictObject({ minTrust: scoreSchema, minAffection: scoreSchema }),
+  /**
+   * B1: the "Find a date" life action. Each way has the chance it brings someone new and what it costs (base-currency
+   * dollars, scaled by where you live). Each attempt this year multiplies the chance by repeatFactor, and at most
+   * yearlyMax attempts a year.
+   */
+  findDate: z.strictObject({
+    app: z.strictObject({ chance: z.number().min(0).max(1), cost: z.number().min(0).max(1000) }),
+    friend: z.strictObject({ chance: z.number().min(0).max(1), cost: z.number().min(0).max(1000) }),
+    night_out: z.strictObject({ chance: z.number().min(0).max(1), cost: z.number().min(0).max(1000) }),
+    repeatFactor: z.number().min(0).max(1),
+    yearlyMax: z.int().min(1).max(10),
+  }),
 });
 export type RelationshipsBalance = z.infer<typeof relationshipsBalanceSchema>;
 
@@ -103,3 +115,21 @@ export const actionRegistrySchema = z.strictObject({
   ),
 });
 export type ActionRegistry = z.infer<typeof actionRegistrySchema>;
+
+/** B1: the ways to look for a date (the "Find a date" life action). */
+export const FIND_DATE_WAYS = ['app', 'friend', 'night_out'] as const;
+export type FindDateWay = (typeof FIND_DATE_WAYS)[number];
+
+/**
+ * Which events answer "Find a date" (registries/love.yaml): one list per way, and the events for a try that brings
+ * no one new. A way's events cast a new potential partner (the existing romantic casting) as `date`.
+ */
+export const loveRegistrySchema = z.strictObject({
+  findDate: z.strictObject({
+    app: z.array(idSchema).min(1),
+    friend: z.array(idSchema).min(1),
+    night_out: z.array(idSchema).min(1),
+    nobody: z.array(idSchema).min(1),
+  }),
+});
+export type LoveRegistry = z.infer<typeof loveRegistrySchema>;

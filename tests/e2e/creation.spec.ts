@@ -97,7 +97,24 @@ test('custom creation validates each step', async ({ page }) => {
   await expect(page.getByText('Step 2 of 6')).toBeVisible();
   await expect(page.getByText(/Enter the reflexive form/)).toBeVisible();
 
+  // B1: "Attracted to" must be chosen; "No one" is a valid choice, and choosing someone clears it.
+  await page.getByRole('radiogroup', { name: 'Pronouns' }).getByRole('radio', { name: 'they/them' }).click();
+  await page.getByRole('radiogroup', { name: 'Can you carry a pregnancy?' }).getByRole('radio', { name: 'No', exact: true }).click();
+  await page.getByRole('button', { name: 'Next' }).click();
+  await expect(page.getByText('Step 2 of 6')).toBeVisible();
+  await expect(page.getByText('Choose who you are attracted to (or No one)')).toBeVisible();
+  const noOne = page.getByRole('button', { name: 'No one', exact: true });
+  await noOne.click();
+  await expect(noOne).toHaveAttribute('aria-pressed', 'true');
+  await page.getByRole('button', { name: 'Women', exact: true }).click();
+  await expect(noOne).toHaveAttribute('aria-pressed', 'false');
+  await noOne.click();
+  await expect(page.getByRole('button', { name: 'Women', exact: true })).toHaveAttribute('aria-pressed', 'false');
+  await page.getByRole('button', { name: 'Next' }).click();
+  await expect(page.getByText('Step 3 of 6')).toBeVisible();
+
   // Back keeps what was entered.
+  await page.getByRole('button', { name: 'Previous step' }).click();
   await page.getByRole('button', { name: 'Previous step' }).click();
   await expect(page.getByLabel('First name')).toHaveValue('Sam');
 });

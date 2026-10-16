@@ -1,0 +1,13 @@
+id: test_find_nobody
+title: Nobody this time
+text: No one catches your eye tonight.
+tone: neutral
+category: romance
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires: { age: { gte: 18 } }
+weight: { base: 10 }
+followUpOnly: true
+autoOutcome:
+  text: It is fine. You try again another time.
+  effects: []

@@ -309,6 +309,16 @@ fame:
   unsignedMinorDeals: { min: 0, max: 0 }
   breakOverCeiling: { min: 0, max: 0 }
 
+# B1: romance by attraction, on the careful player's lives that reach 50 (ages
+# 18-49): lives attracted to the same gender (or to more than one) are within
+# these distances of lives attracted to another gender, in the share who ever
+# have a partner and in the mean years single. Groups under minSample lives
+# are not judged.
+attraction:
+  minSample: 40
+  everPartneredGap: 0.1
+  yearsSingleGap: 4
+
 sports:
   # Nobody under 18 is ever in the pros or under a pro contract.
   underAgePros: { min: 0, max: 0 }

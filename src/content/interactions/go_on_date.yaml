@@ -56,3 +56,13 @@ outcomes:
     mood: -10
     effects:
       - { type: memory, role: person, tag: bad_first_date }
+  # B1: they are not attracted to you: a kind, clear no, never a romantic result.
+  declined:
+    text:
+      - "Halfway through the evening {person.name} says, carefully, that {person.they} thought this was something else. {person.They} {person:is|are} not interested in you that way, and {person.they} {person:wants|want} to say so before it goes further."
+      - "The evening is warm and then, at the door, honest: {person.name} likes your company and nothing more. It stings. It is also better to know."
+    affection: -1
+    mood: -3
+    effects:
+      - { type: memory, role: person, tag: turned_you_down }
+      - { type: stat, key: confidence, delta: -1 }

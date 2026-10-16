@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { content } from '../../../content';
-import { changeCategory, initialDraft, type Draft } from './draft';
+import { changeCategory, initialDraft, toCustomInput, validateDraft, type Draft } from './draft';
 
 /** Applies a category change the way the screen does. */
 function choose(draft: Draft, category: Draft['genderCategory'] & string): Draft {
@@ -53,5 +53,19 @@ describe('changing gender category in custom creation', () => {
     const draft = choose(cleared, 'man');
     expect(draft.genderIdentity).toBe(man.identities[0]);
     expect(draft.genderExpression).toBe(man.defaultExpression);
+  });
+});
+
+describe('B1: "Attracted to" is an explicit choice', () => {
+  it('starts unchosen and is reported until it is chosen, and "No one" (an empty list) is a valid answer', () => {
+    const draft = initialDraft(content);
+    expect(draft.attractedTo).toBeNull();
+    expect(validateDraft(draft, content)['identity.attractedTo']).toBeDefined();
+    const noOne = { ...draft, attractedTo: [] };
+    expect(validateDraft(noOne, content)['identity.attractedTo']).toBeUndefined();
+    expect(toCustomInput(noOne, content).identity.attractedTo).toEqual([]);
+    const some = { ...draft, attractedTo: ['woman' as const, 'man' as const] };
+    expect(validateDraft(some, content)['identity.attractedTo']).toBeUndefined();
+    expect(toCustomInput(some, content).identity.attractedTo).toEqual(['woman', 'man']);
   });
 });

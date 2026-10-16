@@ -1,0 +1,7 @@
+# Test pack: every way of finding a date answers with one predictable event
+# (a new potential partner), and a try that brings no one answers with a quiet card.
+findDate:
+  app: [test_find_date]
+  friend: [test_find_date]
+  night_out: [test_find_date]
+  nobody: [test_find_nobody]

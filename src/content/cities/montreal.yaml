@@ -22,3 +22,15 @@ schools:
 # Quebec sets the drinking and gambling age at 18.
 legalAges: { drinking: 18, gambling: 18 }
 languages: { official: [fr], common: [en, es, ar] }
+# B1: Montreal is French-speaking: most people start from French-Quebec names.
+heritageWeights:
+  french: 56
+  general: 14
+  arab: 8
+  hispanic: 4.5
+  black: 5.5
+  south_asian: 4
+  chinese: 3
+  west_african: 3
+  filipino: 1.5
+  korean: 0.5

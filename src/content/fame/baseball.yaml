@@ -70,7 +70,7 @@ sport:
   stages: ["the division series", "the league championship series", "the final series"]
   title: "the championship"
   proRung: 4
-  ageOut: [14, 18, 23]
+  ageOut: [14, 18, 27]
   draft: { name: "the draft", age: 18, force: 21, rounds: 4 }
   ageCurve: [{ at: 8, x: -6 }, { at: 12, x: -4 }, { at: 14, x: -3 }, { at: 16, x: -2 }, { at: 18, x: -1 }, { at: 21, x: 0 }, { at: 24, x: 1 }, { at: 27, x: 3 }, { at: 30, x: 3 }, { at: 32, x: 2 }, { at: 34, x: -3 }, { at: 36, x: -9 }, { at: 38, x: -15 }, { at: 41, x: -24 }, { at: 45, x: -34 }]
   hazard: 0.8

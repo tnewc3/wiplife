@@ -20,3 +20,15 @@ schools:
   trade: Don Valley Trades Institute
   grad: Bloor Graduate School
 legalAges: { drinking: 19, gambling: 19 }
+# B1: Toronto is one of the most diverse cities anywhere: South Asian and Chinese communities are among the largest.
+heritageWeights:
+  general: 32
+  south_asian: 20
+  chinese: 14
+  filipino: 6
+  black: 8
+  arab: 4
+  hispanic: 3
+  korean: 2
+  west_african: 1
+  french: 3

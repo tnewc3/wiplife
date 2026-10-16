@@ -42,7 +42,7 @@ export function InteractionCard({ life }: { life: LifeState }) {
           <article className="overflow-hidden rounded-card border border-border bg-surface" data-testid="interaction-card" data-tier={view.tier}>
             <div className={`h-2 ${TONE_ACCENT[OUTCOME_TIER_TONE[view.tier]]}`} aria-hidden="true" />
             <div className="flex flex-col gap-3 p-5">
-              <p className="text-sm font-semibold tracking-wide text-muted uppercase">{OUTCOME_TIER_LABELS[view.tier]}</p>
+              <p className="text-sm font-semibold tracking-wide text-muted uppercase">{view.declined ? 'Not interested that way' : OUTCOME_TIER_LABELS[view.tier]}</p>
               <h2
                 id="interaction-title"
                 ref={headingRef}

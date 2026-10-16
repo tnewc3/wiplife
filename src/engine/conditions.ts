@@ -21,7 +21,7 @@ import { laterHolds } from './later/query';
 import { faithHolds, groupHolds } from './belonging/query';
 import { businessHolds } from './business/query';
 import { faithOf } from './belonging/faith';
-import { romanceStatus, yearsInKind } from './relationships';
+import { attractedTo, romanceStatus, yearsInKind } from './relationships';
 import type { Id, LifeState } from './types';
 import { countryIdOfCity, countryOfCity, legalAge } from './country';
 
@@ -284,6 +284,7 @@ export function evaluate(condition: Condition | undefined, state: LifeState, ctx
         if (q.id && !q.id.includes(theirs.id ?? 'none')) return false;
         if (q.strength && !compare(theirs.strength, q.strength)) return false;
       }
+      if (condition.attractedToYou !== undefined && attractedTo(person.identity, state.character.identity) !== condition.attractedToYou) return false;
       if (condition.life && !lifeHolds(condition.life, person, state.currentYear, ctx.content?.balance.people.trouble.serious ?? 35)) return false;
       if (condition.heard && !heardHolds(condition.heard, state, id, ctx.content, ctx.cast?.[ITEM_ROLE])) return false;
       if (condition.mental) {

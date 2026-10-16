@@ -6,7 +6,7 @@
  * anyone under the adult age start a relationship (`mayStartRelationship`),
  * whatever the numbers say, and the invariants check every partner.
  */
-import type { ContentBundle } from '../../content/schemas';
+import type { ContentBundle, GenderCategory } from '../../content/schemas';
 import { pickUnused, rollHeritage } from '../creation/family';
 import { rollCanCarry } from '../family/carrying';
 import { curveAt } from '../curve';
@@ -22,15 +22,23 @@ export function mayStartRelationship(age: number, partnerAge: number, content: C
   return age >= adultAge && partnerAge >= adultAge;
 }
 
-/** A new partner for this person: someone their age they could be attracted to, of a gender they like. Null when they're attracted to no one. */
+/** A new partner for this person: someone their age they could be attracted to, of a gender they like who is likely to like them back (attraction goes both ways). Null when no one fits. */
 function newPartner(ctx: Ctx, s: Subject): OutsidePartner | null {
   const { content } = ctx;
   const rng = ctx.state.rng;
   const attracted = s.person.identity.attractedTo;
   if (attracted.length === 0) return null;
+  // B1: attraction goes both ways: the chance a partner of each gender category likes this person's category back weighs the choice.
   const weights = content.balance.creation.genderCategory;
-  const options = attracted.map((c) => [c, weights[c] ?? 0] as const);
-  const category = options.some(([, w]) => w > 0) ? weightedPick(rng, options) : pick(rng, attracted);
+  const mine = s.person.identity.genderCategory;
+  const likesBack = (c: GenderCategory): number => {
+    const rows = content.balance.creation.attraction[c];
+    const total = rows.reduce((sum, r) => sum + r.weight, 0);
+    return total > 0 ? rows.filter((r) => r.to.includes(mine)).reduce((sum, r) => sum + r.weight, 0) / total : 0;
+  };
+  const options = attracted.map((c) => [c, (weights[c] ?? 0) * likesBack(c)] as const);
+  if (!options.some(([, w]) => w > 0)) return null;
+  const category = weightedPick(rng, options);
   const { adultAge } = content.balance.relationships;
   const offset = ctx.bal.love.partnerAgeOffset;
   const age = Math.max(adultAge, s.age + nextInt(rng, offset.min, offset.max));
@@ -38,7 +46,7 @@ function newPartner(ctx: Ctx, s: Subject): OutsidePartner | null {
   const city = content.cities[s.cityId];
   const pool = city && content.names[city.countryId];
   if (!pool) return null;
-  const heritage = pool.heritages[rollHeritage(rng, content, pool)]!;
+  const heritage = pool.heritages[rollHeritage(rng, content, pool, undefined, s.cityId)]!;
   return {
     name: { first: pickUnused(rng, heritage.first[category], usedNames(ctx)), last: pick(rng, heritage.last) },
     genderCategory: category,

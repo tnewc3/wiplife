@@ -131,8 +131,6 @@ const focusSchema = z.strictObject({
   craft: z.number().min(0).max(3),
   /** Fitness gained a year (minus is lost). */
   fitness: z.number().min(-3).max(3),
-  /** A multiple on the year's risk of injury. */
-  risk: z.number().min(0.2).max(2),
   /** Points on a season's rating. */
   rating: z.number().min(-5).max(10),
 });

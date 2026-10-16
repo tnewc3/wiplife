@@ -1,0 +1,27 @@
+# B1: answers the "ask out" action when the person is not attracted to you (first). A kind, clear no; never a romantic result.
+id: ask_out_declined_kind
+title: Not that way
+text: >-
+  You ask {person.name} if {person.they}'d like to go out sometime, just the two of you. {person.They} {person:takes|take} a moment before answering.
+tone: neutral
+category: romance
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { role: person, age: { gte: 18 } }
+    - { role: person, attractedToYou: false }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  # Filled by the action: the person you're asking.
+  person: { kind: acquaintance, presence: city, age: { min: 18, max: 120 } }
+autoOutcome:
+  text: >-
+    "I'm really glad you asked, and I want to be honest: I don't feel that way about you," {person.name} says. {person.They} {person:means|mean} it kindly. It still stings, and you thank {person.them} for being straight with you.
+  effects:
+    - { type: memory, role: person, tag: turned_you_down }
+    - { type: relationship, role: person, affection: -1 }
+    - { type: stat, key: happiness, delta: -3 }
+    - { type: stat, key: confidence, delta: -2 }

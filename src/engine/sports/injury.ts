@@ -18,10 +18,13 @@ import { chance, nextInt, type RngState } from '../rng';
 import type { LifeState } from '../types';
 import { injuryNow } from './query';
 
-/** The chance of getting hurt this season. */
-export function injuryRisk(state: LifeState, def: SportDef, level: keyof ContentBundle['balance']['sports']['injury']['level'], content: ContentBundle): number {
+/**
+ * The chance of getting hurt this season, from games played: the sport's hazard, the level of play, age, Fitness, how
+ * hard you commit, playing through pain, and `played`, the share of the season's games you are fit to play (a hurt
+ * player misses games, so has fewer to be hurt in). Training and practice are not here: they never change it.
+ */
+export function injuryRisk(state: LifeState, def: SportDef, level: keyof ContentBundle['balance']['sports']['injury']['level'], content: ContentBundle, played = 1): number {
   const b = content.balance.sports;
-  const focus = b.performance.focus[state.sports.focus].risk;
   const pain = state.sports.pain ? b.injury.pain : 1;
   const p =
     b.injury.base *
@@ -30,14 +33,15 @@ export function injuryRisk(state: LifeState, def: SportDef, level: keyof Content
     curveAt(b.injury.age, state.character.age) *
     curveAt(b.injury.fitness, state.character.stats.fitness) *
     b.injury.commitment[state.fame.commitment] *
-    focus *
-    pain;
+    pain *
+    Math.max(0, Math.min(1, played));
   return Math.min(0.9, Math.max(0, p));
 }
 
 /** Rolls the season's injury. Returns it (and gives it to you) or null. A condition you already have gets worse instead. */
 export function rollInjury(state: LifeState, path: FamePathDef & { sport: SportDef }, level: keyof ContentBundle['balance']['sports']['injury']['level'], content: ContentBundle, rng: RngState): { conditionId: string; severity: number } | null {
-  if (!chance(rng, injuryRisk(state, path.sport, level, content))) return null;
+  // The games you can be hurt in are the ones an injury you carry has not already cost you.
+  if (!chance(rng, injuryRisk(state, path.sport, level, content, 1 - missedShare(state, path.sport, content)))) return null;
   const options = path.sport.injuries.filter((i) => content.conditions[i.id] && !content.conditions[i.id]!.retired).map((i) => [i, i.weight] as const);
   if (options.length === 0) return null;
   const injury = weightedPick(rng, options);

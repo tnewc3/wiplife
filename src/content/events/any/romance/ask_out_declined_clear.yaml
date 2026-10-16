@@ -1,0 +1,27 @@
+# B1: answers the "ask out" action when the person is not attracted to you (third). A kind, clear no; never a romantic result.
+id: ask_out_declined_clear
+title: Not that way
+text: >-
+  You catch {person.name} at the right moment and ask {person.them} out. {person.Their} face softens before {person.they} {person:speaks|speak}.
+tone: neutral
+category: romance
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { role: person, age: { gte: 18 } }
+    - { role: person, attractedToYou: false }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  # Filled by the action: the person you're asking.
+  person: { kind: acquaintance, presence: city, age: { min: 18, max: 120 } }
+autoOutcome:
+  text: >-
+    "You're a good person, and the answer is no," {person.name} says. "Not because of anything you did. It's just not what I feel." You nod, and let it be the end of it.
+  effects:
+    - { type: memory, role: person, tag: turned_you_down }
+    - { type: relationship, role: person, affection: -1 }
+    - { type: stat, key: happiness, delta: -3 }
+    - { type: stat, key: confidence, delta: -2 }

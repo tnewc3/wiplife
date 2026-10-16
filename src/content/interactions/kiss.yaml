@@ -51,3 +51,13 @@ outcomes:
     affection: -7
     trust: -6
     mood: -11
+  # B1: they are not attracted to you: a kind, clear no, never a romantic result.
+  declined:
+    text:
+      - "{person.name} puts a hand on your chest, gently. 'I care about you. I don't feel that way. I'm sorry.' It is the kindest way to hear it."
+      - "You lean in; {person.name} turns away, softly, before it happens. {person.They} {person:says|say} it plainly: not like that, not with you. Then {person.they} {person:stays|stay} for a while, and the air slowly settles."
+    affection: -1
+    mood: -3
+    effects:
+      - { type: memory, role: person, tag: turned_you_down }
+      - { type: stat, key: confidence, delta: -1 }

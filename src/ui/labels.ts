@@ -1304,10 +1304,16 @@ export const TEAM_QUALITY_WORDS = ['A weak side', 'An average side', 'A good sid
 export const FIT_WORDS = ['A poor fit', 'A fair fit', 'A good fit', 'A natural fit'] as const;
 export const INJURY_SEVERITY_WORDS = ['Minor', 'Moderate', 'Serious', 'Severe'] as const;
 export const PLAYOFF_RESULT_LABELS = { missed: 'Missed the playoffs', out: 'Lost in the playoffs', final: 'Lost the final', champion: 'Won it all' } as const;
+/** B1: the ways to look for a date (the "Find a date" card on the People tab). */
+export const FIND_DATE_LABELS = {
+  app: { label: 'Use a dating app', blurb: 'Swipe, message, see who is out there.' },
+  friend: { label: 'Ask a friend to set you up', blurb: 'A friend who knows someone.' },
+  night_out: { label: 'Go out for the night', blurb: 'Dress up and see who you meet.' },
+} as const;
 export const SPORT_FOCUS_LABELS = { skills: 'Skills', conditioning: 'Conditioning', film: 'Film study' } as const;
 export const SPORT_FOCUS_BLURBS = {
   skills: 'Drills and repetition. The craft grows fastest.',
-  conditioning: 'Gym, track and recovery. Fitness grows, injuries are rarer, and you are sharper for it.',
+  conditioning: 'Gym, track and recovery. Fitness grows and you are sharper for it. (Training never causes or prevents injuries; games do.)',
   film: 'Hours with the tape. A smart player reads the game earlier.',
 } as const;
 export const CONTRACT_KIND_LABELS = { minimum: 'A minimum deal', rookie: 'A rookie deal', standard: 'A standard deal', star: 'A star deal' } as const;

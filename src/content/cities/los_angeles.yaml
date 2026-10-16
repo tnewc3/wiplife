@@ -19,3 +19,15 @@ schools:
   elite: Halvorsen Institute
   trade: Harbor Trades College
   grad: Westwood Graduate School
+# B1: Los Angeles leans Hispanic, with large Asian communities.
+heritageWeights:
+  general: 26
+  hispanic: 40
+  black: 8
+  chinese: 6
+  korean: 4.5
+  vietnamese: 2
+  japanese: 3
+  south_asian: 3
+  arab: 2.5
+  west_african: 0.5

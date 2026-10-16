@@ -77,12 +77,12 @@ describe('createLife (random)', () => {
       {
         "city": "chicago",
         "family": [
-          "parent Samantha 20",
-          "parent Liam 19",
-          "grandparent Henry 50",
-          "grandparent Hannah 50",
-          "grandparent Patrick 43",
-          "grandparent Natalie 41",
+          "parent Audrey 20",
+          "parent Warren 19",
+          "grandparent Russell 50",
+          "grandparent Sarah 50",
+          "grandparent Anthony 43",
+          "grandparent Hailey 41",
         ],
         "identity": "man",
         "languages": [
@@ -94,8 +94,8 @@ describe('createLife (random)', () => {
           },
         ],
         "name": {
-          "first": "Thomas",
-          "last": "Sullivan",
+          "first": "Eric",
+          "last": "Kennedy",
         },
         "stats": {
           "fitness": 66,

@@ -20,3 +20,15 @@ schools:
   trade: Granville Trades College
   grad: Cascade Graduate School
 legalAges: { drinking: 19, gambling: 19 }
+# B1: Vancouver has a large Chinese and South Asian population.
+heritageWeights:
+  general: 40
+  chinese: 24
+  south_asian: 14
+  filipino: 6
+  korean: 4
+  arab: 2
+  black: 2
+  hispanic: 3
+  french: 3
+  west_african: 0.5

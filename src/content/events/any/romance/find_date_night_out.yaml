@@ -1,0 +1,45 @@
+id: find_date_night_out
+title: A night out
+text: >-
+  You get dressed up and go out with no plan except to be around people. Around eleven, you end up talking with {date.name} by the bar, and the noise falls away.
+tone: light
+category: romance
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { romance: [single] }
+weight: { base: 5 }
+followUpOnly: true
+cast:
+  date: { kind: acquaintance, romantic: true, createIfMissing: true, newChance: 1, presence: city }
+choices:
+  - id: date
+    label: Ask {date.them} out properly
+    check:
+      base: 45
+      stats: [{ key: looks, weight: 0.25 }, { key: sociability, weight: 0.25 }]
+      success:
+        text: >-
+          {date.name} laughs at the right moments, and you leave together, then see each other again the next evening.
+        effects:
+          - { type: relationship, role: date, kind: partner, affection: 16 }
+          - { type: memory, role: date, tag: started_dating }
+          - { type: stat, key: happiness, delta: 6 }
+          - { type: history, text: 'You started dating {date.name}.', importance: 2 }
+      failure:
+        text: >-
+          {date.name} drifts back to {date.their} friends halfway through a sentence. You stay for one more drink alone.
+        effects:
+          - { type: memory, role: date, tag: bad_first_date }
+          - { type: relationship, role: date, affection: -4 }
+          - { type: stat, key: happiness, delta: -2 }
+  - id: slow
+    label: Keep it casual and see where it goes
+    outcome:
+      text: >-
+        You swap numbers, and say goodnight at the door. It feels like the start of something, or nothing.
+      effects:
+        - { type: relationship, role: date, affection: 9 }
+        - { type: memory, role: date, tag: swapped_numbers }

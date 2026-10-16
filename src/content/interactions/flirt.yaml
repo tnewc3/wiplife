@@ -48,3 +48,14 @@ outcomes:
     affection: -5
     trust: -4
     mood: -9
+  # B1: they are not attracted to you: a kind, clear no, never a romantic result.
+  declined:
+    text:
+      - "{person.name} smiles, a little sorry, and says {person.they} {person:likes|like} you a lot, just not that way. {person.They} {person:means|mean} it kindly, and it still lands."
+      - "It is gentle, and it is clear: {person.name} is not interested in you that way. {person.They} {person:hopes|hope} you can stay friends anyway."
+      - "{person.name} laughs, then sees your face and stops. 'I'm flattered, honestly. It's just not what I feel.'"
+    affection: -1
+    mood: -3
+    effects:
+      - { type: memory, role: person, tag: turned_you_down }
+      - { type: stat, key: confidence, delta: -1 }

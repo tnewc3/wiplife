@@ -11,6 +11,7 @@ lifeStages: [youngAdult, adult, senior]
 requires:
   all:
     - { age: { gte: 18 } }
+    - { role: person, attractedToYou: true }
     - { role: person, kind: [ex] }
 weight: { base: 10 }
 followUpOnly: true

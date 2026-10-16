@@ -55,6 +55,11 @@ export function mutualAttraction(state: LifeState, person: Person): boolean {
   return attractedTo(state.character.identity, person.identity) && attractedTo(person.identity, state.character.identity);
 }
 
+/** True when this person is attracted to your gender category (whether or not you are attracted to them). */
+export function attractedToYou(state: LifeState, person: Person): boolean {
+  return attractedTo(person.identity, state.character.identity);
+}
+
 /** True when you and this person are both old enough for romance. */
 export function bothAdults(state: LifeState, person: Person, content: ContentBundle): boolean {
   const { adultAge } = content.balance.relationships;
@@ -77,14 +82,23 @@ export function partnerAgeRange(age: number, content: ContentBundle): { min: num
 }
 
 /**
- * A possible partner: a living adult (and you an adult too), not family,
- * with attraction both ways.
+ * Someone you could try romance with (B1): a living adult (and you an adult
+ * too), not family and not taken, whom you are attracted to. Whether they are
+ * attracted to you decides how it goes, not whether you can try.
  */
-export function isRomanticMatch(state: LifeState, person: Person, content: ContentBundle): boolean {
+export function isRomanceCandidate(state: LifeState, person: Person, content: ContentBundle): boolean {
   const rel = state.relationships[person.id];
   // E3: someone who has a partner of their own (off your list) isn't a possible partner; neither (E4) is someone in a couple with another of the people you know.
   if (!person.alive || person.life?.partner || hasRomanticTie(state.web, person.id) || (rel && isFamilyKind(rel.kind))) return false;
-  return bothAdults(state, person, content) && mutualAttraction(state, person);
+  return bothAdults(state, person, content) && attractedTo(state.character.identity, person.identity);
+}
+
+/**
+ * A possible partner: a romance candidate who is attracted to you too
+ * (attraction both ways). Casting for events uses this.
+ */
+export function isRomanticMatch(state: LifeState, person: Person, content: ContentBundle): boolean {
+  return isRomanceCandidate(state, person, content) && attractedToYou(state, person);
 }
 
 /**
