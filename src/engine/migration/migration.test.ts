@@ -17,6 +17,7 @@ import { purchaseQuote } from '../housing';
 import { loanOffer } from '../business/funding';
 import { entryBlock, entryOdds, naturalizationBlock, permanentBlock, regularizationBlock, type EntryInput } from './routes';
 import { getMigrationView } from './view';
+import { removeFromCountry } from './move';
 import { removalRisk, runMigration } from './step';
 import { statusKind } from './query';
 
@@ -363,6 +364,18 @@ describe('W6 life without papers', () => {
     expect(gone.migration.undocumented).toBeNull();
     expect(entryBlock(produce(gone, (d) => { d.finances.savings = 2_000_000; }), entry('investment', 'ca'), content)).toBe('removed');
     sound(gone);
+  });
+  it('removes someone who is in prison without leaving the sentence behind (seeds batch0-careful-3-1403 and batch0-careful-4-853)', () => {
+    // Found by the 10,000-life run: removed while serving a sentence, they were housed again but still "incarcerated until" a year.
+    const life = produce(lapsed(), (d) => {
+      d.housing = { kind: 'incarcerated', cityId: d.character.cityId, annualCost: 0, since: d.currentYear };
+      d.legal.incarceratedUntil = d.currentYear + 3;
+      d.legal.record.push({ offenseId: 'fraud', year: d.currentYear, outcome: 'jail', years: 4 });
+    });
+    const gone = produce(life, (d) => { removeFromCountry(d, content); });
+    expect(gone.housing.kind).toBe('renting');
+    expect(gone.legal.incarceratedUntil).toBeUndefined();
+    expect(checkInvariants(gone, content).filter((f) => /prison/.test(f))).toEqual([]);
   });
   it('keeps a citizen partner in the country when the other is removed', () => {
     const life = produce(lapsed(), (d) => { sponsorIn(d, 'ca'); d.housing.partnerId = 'sponsor'; d.people.sponsor!.cityId = d.character.cityId; d.migration.exposure = 0.5; });

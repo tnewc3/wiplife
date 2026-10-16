@@ -3,6 +3,7 @@ import { content } from '../content';
 import { checkInvariants } from './invariants';
 import { createLife } from './life';
 import { getFamily } from './selectors';
+import { cloneJson } from './testFixtures';
 import type { LifeState } from './types';
 
 const SEEDS = 10_000;
@@ -106,7 +107,9 @@ describe('invariant checks catch broken lives', () => {
   it.each(broken)('flags %s', (_label, breakIt, pattern) => {
     const life = random('break-me');
     expect(checkInvariants(life, content)).toEqual([]);
-    breakIt(life);
-    expect(checkInvariants(life, content).join('\n')).toMatch(pattern);
+    // (A check remembers parts of a life it found healthy, which a life never changes: break a copy, as a real change would.)
+    const copy = cloneJson(life);
+    breakIt(copy);
+    expect(checkInvariants(copy, content).join('\n')).toMatch(pattern);
   });
 });

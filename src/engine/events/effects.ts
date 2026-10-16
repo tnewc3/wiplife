@@ -43,6 +43,8 @@ import { applyLaterEffect } from '../later/effects';
 import { applyFaithEffect, applyGroupEffect, applyValueEffect } from '../belonging/effects';
 import { applyBusinessEffect } from '../business/effects';
 import { applyMigrationEffect } from '../migration/effects';
+import { onTemporaryStay } from '../migration/query';
+import { endStay } from '../travel/travel';
 import { whereabouts } from '../presence';
 import { clampInt } from '../random';
 import { otherCity } from './casting';
@@ -134,8 +136,11 @@ const handlers: { [T in Effect['type']]: Handler<T> } = {
       case 'move_home': {
         const parent = joinableParent(state, ctx.content);
         if (parent && h.kind !== 'owned' && h.kind !== 'with_parents' && h.kind !== 'incarcerated') {
+          // Sent home from a temporary stay abroad (an eviction, say): the stay ends first, then you move in with family.
+          if (onTemporaryStay(state)) endStay(state, ctx.content);
+          const from = state.character.cityId;
           moveTo(state, 'with_parents', parent.cityId, ctx.content);
-          afterMove(state, city, ctx.content);
+          afterMove(state, from, ctx.content);
         }
         return;
       }

@@ -128,6 +128,8 @@ export interface StageYears {
 export interface SimulationReport {
   lives: number;
   player: SimulatedPlayer;
+  /** Batch 0: the life-years simulated and the milliseconds the whole run took (everything: actions, events, invariant checks). */
+  performance: { years: number; ms: number };
   invariantFailures: number;
   failureMessages: string[];
   lifespan: { median: number; p10: number; p90: number; youngest: number; oldest: number; under18: number };
@@ -640,6 +642,7 @@ const STAGES: LifeStage[] = ['early', 'child', 'teen', 'youngAdult', 'adult', 's
 export function runSimulation(content: ContentBundle, options: SimulationOptions): SimulationReport {
   const playerKind: SimulatedPlayer = options.player ?? 'careful';
   const careless = playerKind === 'careless';
+  const startedAt = performance.now();
   // The money ages, and the age the net worth target is about.
   const moneyAges = [...new Set([...MONEY_AGES, content.balance.targets.money.netWorthAge])].sort((a, b) => a - b);
   const maxMessages = options.maxFailureMessages ?? 20;
@@ -1341,7 +1344,9 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
       if (life.education.credentials.some((c) => c.type === 'trade_license' && c.refId === row.tradeId)) row.licensed++;
       if (row.jobIds.some((jobId) => work.tracks.has(jobId))) row.worked++;
     }
-    if (life.character.age >= t.careers.earningsAge) {
+    // (Famous lives are left out, as from the net worth target: a few stars' and pros' fortunes swing a mean of thousands of careers, and a run whose few
+    // high-school-only stars out-earn its graduates would read 0.95 where the other three read 1.5-1.6.)
+    if (life.character.age >= t.careers.earningsAge && peakRung(life) < content.balance.fame.crossover.rung) {
       earningsByPath[educationPath(life)].push(work.earnings);
       if (life.education.credentials.some((c) => c.type === 'bachelor')) bachelorEarnings.push(work.earnings);
     }
@@ -1522,6 +1527,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
   return {
     lives: options.lives,
     player: playerKind,
+    performance: { years: STAGES.reduce((sum, stage) => sum + perYear[stage].years, 0), ms: performance.now() - startedAt },
     invariantFailures,
     failureMessages,
     lifespan: {
@@ -1769,6 +1775,14 @@ function formatCareers(report: SimulationReport, content: ContentBundle): string
   for (const r of targetResults(report, content)) lines.push(target(r.label, r.value, r.goal, r.met));
   if (unentered.length > 0) lines.push(`  job tracks nobody entered: ${unentered.join(', ')}`);
   return lines;
+}
+
+/** Batch 0: the simulated year's average time against the budget in balance/targets.yaml (performance.maxMsPerYear). */
+export function performanceTargets(report: SimulationReport, content: ContentBundle): TargetResult[] {
+  const budget = content.balance.targets.performance.maxMsPerYear;
+  const { years, ms } = report.performance;
+  const perYear = years > 0 ? ms / years : 0;
+  return [{ label: 'milliseconds per simulated year, on average', value: `${perYear.toFixed(2)} ms over ${years} years`, short: `${perYear.toFixed(1)}ms`, goal: `at most ${budget} ms`, met: perYear <= budget }];
 }
 
 export interface TargetResult {

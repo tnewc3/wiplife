@@ -121,6 +121,8 @@ These come from AGENTS.md and the expansion gates. Each prompt repeats the short
 
 ## Batch 0 — Stabilize and validate
 
+> **Built in PR #40;** see "Batch 0 — Stabilize and validate (as built)" in docs/technical.md for what was done, the figures and the deviations.
+
 **Objective:** Get CI and the nightly runs green, stop the simulation from getting slower with every stage, finish the acceptance gates W4b and W5 skipped, and fix the bugs found in this review, before any new feature work.
 
 ### Starting facts

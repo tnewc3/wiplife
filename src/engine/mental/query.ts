@@ -48,8 +48,8 @@ export function namedMental(state: LifeState, content: ContentBundle): HeldCondi
 
 /** The people close enough to lean on: active, living, supportive kinds, closest (by trust, then affection) first. */
 export function closePeople(state: LifeState): Id[] {
+  // (No need to sort the ids first: the comparator below ends in the id, so the order is total.)
   return Object.keys(state.relationships)
-    .sort()
     .filter((id) => {
       const rel = state.relationships[id]!;
       const person = state.people[id];
