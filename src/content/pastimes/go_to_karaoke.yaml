@@ -19,7 +19,7 @@ tiers:
       - "{companion.name} dares you to take the stage, and you do. It goes better than anyone expected."
     effects:
       - { type: stat, key: happiness, delta: 5 }
-      - { type: stat, key: stress, delta: -2 }
+      - { type: stat, key: stress, delta: -1 }
       - { type: stat, key: sociability, delta: 1 }
     companion: { affection: 5, trust: 2 }
     events: [nightlife_met_someone, nightlife_hookup, nightlife_temptation]

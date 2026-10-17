@@ -18,7 +18,7 @@ tiers:
       - "You and {companion.name} drift through the day in matching robes, talking in low voices, laughing too loudly in the quiet room."
       - "The two of you spend the whole day being looked after, and agree on the way out that you should do it more often."
     effects:
-      - { type: stat, key: stress, delta: -5 }
+      - { type: stat, key: stress, delta: -1 }
       - { type: stat, key: looks, delta: 2 }
       - { type: stat, key: happiness, delta: 4 }
     companion: { affection: 6, trust: 3 }
@@ -30,7 +30,7 @@ tiers:
       - "{companion.name} comes with you, and you pass the afternoon in a warm, drowsy haze. It was {cost} for the two of you."
       - "You and {companion.name} share the pool and the quiet. Neither of you checks a phone all day."
     effects:
-      - { type: stat, key: stress, delta: -3 }
+      - { type: stat, key: stress, delta: -1 }
       - { type: stat, key: looks, delta: 1 }
       - { type: stat, key: happiness, delta: 3 }
     companion: { affection: 4, trust: 2 }

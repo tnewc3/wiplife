@@ -18,7 +18,7 @@ tiers:
       - "{companion.name} matches your pace, and you talk about nothing and everything. It is the best hour of the week."
       - "You and {companion.name} walk until the light changes, and neither of you wants to turn back."
     effects:
-      - { type: stat, key: stress, delta: -2 }
+      - { type: stat, key: stress, delta: -1 }
       - { type: stat, key: happiness, delta: 3 }
     companion: { affection: 5, trust: 3 }
   good:

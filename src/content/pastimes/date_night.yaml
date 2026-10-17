@@ -16,7 +16,7 @@ tiers:
       - "Dinner, a walk, and a long talk at the door. {companion.name} squeezes your hand, and it says everything."
     effects:
       - { type: stat, key: happiness, delta: 5 }
-      - { type: stat, key: stress, delta: -2 }
+      - { type: stat, key: stress, delta: -1 }
     companion: { affection: 7, trust: 4 }
   good:
     together:

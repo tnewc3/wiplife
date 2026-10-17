@@ -15,7 +15,7 @@ tiers:
       - "The air is cool, the route is empty, and you run farther than you planned."
     effects:
       - { type: stat, key: fitness, delta: 2 }
-      - { type: stat, key: stress, delta: -2 }
+      - { type: stat, key: stress, delta: -1 }
       - { type: stat, key: happiness, delta: 2 }
   good:
     text:

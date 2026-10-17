@@ -14,7 +14,7 @@ tiers:
       - "For one long minute at the end, lying flat, your mind goes completely quiet. You walk out lighter than you walked in."
       - "The teacher talks you through a pose you thought you could not hold, and you hold it."
     effects:
-      - { type: stat, key: stress, delta: -3 }
+      - { type: stat, key: stress, delta: -1 }
       - { type: stat, key: fitness, delta: 1 }
       - { type: stat, key: happiness, delta: 3 }
       - { type: stat, key: discipline, delta: 1 }

@@ -15,7 +15,7 @@ tiers:
       - "You beat your own numbers on the last set and leave the gym light on your feet."
     effects:
       - { type: stat, key: fitness, delta: 2 }
-      - { type: stat, key: stress, delta: -2 }
+      - { type: stat, key: stress, delta: -1 }
       - { type: stat, key: happiness, delta: 2 }
       - { type: stat, key: discipline, delta: 1 }
   good:

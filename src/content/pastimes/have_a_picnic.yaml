@@ -19,7 +19,7 @@ tiers:
       - "{companion.name} has packed all your favorites. You laugh, eat too much, and nap in the sun."
     effects:
       - { type: stat, key: happiness, delta: 4 }
-      - { type: stat, key: stress, delta: -2 }
+      - { type: stat, key: stress, delta: -1 }
     companion: { affection: 5, trust: 2 }
     extras:
       - chance: allergy

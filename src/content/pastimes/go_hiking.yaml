@@ -19,7 +19,7 @@ tiers:
       - "{companion.name} sets a quick pace and you keep up. The view at the top is worth every step."
     effects:
       - { type: stat, key: happiness, delta: 4 }
-      - { type: stat, key: stress, delta: -2 }
+      - { type: stat, key: stress, delta: -1 }
       - { type: stat, key: fitness, delta: 1 }
     companion: { affection: 5, trust: 2 }
     extras:
