@@ -63,6 +63,16 @@ prune:
   # Most people outside family and romance who stay in your life.
   maxPeople: 30
 
+# B1: "Find a date" (a life action, adults only): the chance each way brings
+# someone new, and what it costs (base-currency dollars, scaled by where you
+# live). Each attempt this year multiplies the chance by repeatFactor.
+findDate:
+  app: { chance: 0.7, cost: 0 }
+  friend: { chance: 0.6, cost: 0 }
+  night_out: { chance: 0.55, cost: 60 }
+  repeatFactor: 0.55
+  yearlyMax: 4
+
 actions:
   # Youngest age to cut contact with (or reconcile with) family, and anyone else.
   minAge: { family: 18, others: 13 }

@@ -19,3 +19,13 @@ schools:
   elite: King’s Cross University
   trade: Docklands Technical College
   grad: Bloomsbury Graduate School
+# B1: London is far more mixed than the rest of the country.
+heritageWeights:
+  general: 50
+  south_asian: 16
+  black: 14
+  polish: 4
+  irish: 3
+  chinese: 3
+  arab: 5
+  west_african: 5

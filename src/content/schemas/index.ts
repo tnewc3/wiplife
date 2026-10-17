@@ -10,7 +10,7 @@ import {
   pacingBalanceSchema,
   targetsBalanceSchema,
 } from './balance';
-import { actionRegistrySchema, relationshipsBalanceSchema } from './relationships';
+import { actionRegistrySchema, loveRegistrySchema, relationshipsBalanceSchema } from './relationships';
 import { careersBalanceSchema, jobSchema, workRegistrySchema } from './careers';
 import { appearanceOptionsSchema, identityOptionsSchema, namePoolSchema, pronounPresetSchema, talentSchema } from './character';
 import { citySchema } from './city';
@@ -181,6 +181,7 @@ export const singletonTypes = {
   'registries/travel': travelRegistrySchema,
   'registries/immigration': immigrationRegistrySchema,
   'registries/languages': languagesRegistrySchema,
+  'registries/love': loveRegistrySchema,
   'registries/health': healthRegistrySchema,
   'registries/legal': legalRegistrySchema,
   'registries/discovery': discoveryRegistrySchema,
@@ -304,6 +305,7 @@ export const contentBundleSchema = z.strictObject({
     travel: travelRegistrySchema,
     immigration: immigrationRegistrySchema,
     languages: languagesRegistrySchema,
+    love: loveRegistrySchema,
     health: healthRegistrySchema,
     legal: legalRegistrySchema,
     discovery: discoveryRegistrySchema,

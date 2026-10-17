@@ -171,6 +171,8 @@ export const interactionSchema = baseDefSchema
       neutral: interactionTierSchema,
       bad: interactionTierSchema,
       backfire: interactionTierSchema.optional(),
+      /** B1: a romance interaction with someone who isn't attracted to you: a kind, clear "no" (never a romantic result). */
+      declined: interactionTierSchema.optional(),
     }),
   })
   .refine((d) => d.group !== 'romance' || d.romance === true, 'an interaction in the romance group must be marked romance: true')

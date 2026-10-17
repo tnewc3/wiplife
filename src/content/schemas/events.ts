@@ -154,6 +154,8 @@ export type Condition =
       heard?: HeardCondition;
       /** M1: they have noticed you struggling (or not), and took it this way. */
       mental?: { noticed?: boolean; reaction?: ReactionId[] };
+      /** B1: they are attracted to your gender category (true) or not (false). */
+      attractedToYou?: boolean;
     }
   | { tie: TieCondition };
 
@@ -1203,6 +1205,7 @@ export const conditionSchema: z.ZodType<Condition> = z.lazy(() =>
         .optional(),
       life: lifeConditionSchema.optional(),
       heard: heardConditionSchema.optional(),
+      attractedToYou: z.boolean().optional(),
       mental: z
         .strictObject({ noticed: z.boolean().optional(), reaction: z.array(reactionSchema).min(1).optional() })
         .refine(atLeastOneField, 'needs at least one field')

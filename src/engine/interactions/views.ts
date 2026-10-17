@@ -46,6 +46,8 @@ export interface InteractionOutcomeView {
   personName: string;
   personId: Id;
   tier: OutcomeTier;
+  /** B1: they said no, kindly (not attracted to you). */
+  declined?: true;
   giftTier?: GiftTier;
   text: string;
   notes: string[];
@@ -68,6 +70,7 @@ export function getInteractionOutcome(state: LifeState, content: ContentBundle):
     personName: petName ?? person?.name.first ?? '',
     personId: p.personId,
     tier: p.tier,
+    ...(p.declined ? { declined: true as const } : {}),
     ...(p.giftTier ? { giftTier: p.giftTier } : {}),
     text: p.text,
     notes: p.notes,

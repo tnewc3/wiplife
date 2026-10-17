@@ -20,7 +20,8 @@ export interface Draft {
   /** A pronoun preset id, 'custom', or not chosen yet. */
   pronounChoice: string | null;
   customPronouns: Pronouns;
-  attractedTo: GenderCategory[];
+  /** B1: who you are attracted to; null until chosen (an empty list is the choice "No one"). */
+  attractedTo: GenderCategory[] | null;
   /** E2a: a nonbinary character chooses whether they can carry a pregnancy; null until chosen. */
   canCarry: boolean | null;
   parents: 1 | 2;
@@ -59,7 +60,7 @@ export function initialDraft(content: ContentBundle): Draft {
     genderExpression: '',
     pronounChoice: null,
     customPronouns: { subject: '', object: '', possessive: '', possessivePronoun: '', reflexive: '', verbPlural: false },
-    attractedTo: [],
+    attractedTo: null,
     canCarry: null,
     parents: 2,
     siblings: 0,
@@ -133,7 +134,7 @@ export function toCustomInput(draft: Draft, content: ContentBundle): CustomLifeI
       genderCategory: draft.genderCategory ?? 'nonbinary',
       genderExpression: draft.genderExpression,
       pronouns: draftPronouns(draft, content),
-      attractedTo: draft.attractedTo,
+      attractedTo: draft.attractedTo ?? [],
     },
     // Women can carry a pregnancy and men can't; only a nonbinary character chooses.
     ...(draft.genderCategory === 'nonbinary' && draft.canCarry !== null ? { canCarry: draft.canCarry } : {}),
@@ -152,6 +153,7 @@ export function validateDraft(draft: Draft, content: ContentBundle): Errors {
   const errors: Errors = {};
   if (!draft.genderCategory) errors['identity.genderCategory'] = 'Choose the one that fits best';
   if (!draft.pronounChoice) errors['identity.pronouns'] = 'Choose pronouns';
+  if (draft.attractedTo === null) errors['identity.attractedTo'] = 'Choose who you are attracted to (or No one)';
   if (draft.genderCategory === 'nonbinary' && draft.canCarry === null) errors.canCarry = 'Choose whether you can carry a pregnancy';
   if (!draft.familyWealth) errors.familyWealth = 'Choose how well off your family is';
   if (!draft.countryId || !content.countries[draft.countryId]) errors.countryId = 'Choose a country';

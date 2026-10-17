@@ -1,0 +1,8 @@
+# B1: what answers the "Find a date" life action. Each way's events cast a new
+# potential partner as `date` (the existing romantic casting); `nobody` answers a
+# try that brings no one new. All are followUpOnly.
+findDate:
+  app: [find_date_app]
+  friend: [find_date_friend]
+  night_out: [find_date_night_out]
+  nobody: [find_date_nobody]

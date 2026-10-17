@@ -1,0 +1,45 @@
+id: find_date_app
+title: Someone new on the app
+text: >-
+  You spend an evening on the dating app and one profile stops you: {date.name}. The first message is short, and funny, and there is no pressure in it.
+tone: light
+category: romance
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { romance: [single] }
+weight: { base: 5 }
+followUpOnly: true
+cast:
+  date: { kind: acquaintance, romantic: true, createIfMissing: true, newChance: 1, presence: city }
+choices:
+  - id: date
+    label: Ask {date.them} out properly
+    check:
+      base: 45
+      stats: [{ key: looks, weight: 0.25 }, { key: sociability, weight: 0.25 }]
+      success:
+        text: >-
+          A drink turns into a long walk, and the second date is booked before you part.
+        effects:
+          - { type: relationship, role: date, kind: partner, affection: 16 }
+          - { type: memory, role: date, tag: started_dating }
+          - { type: stat, key: happiness, delta: 6 }
+          - { type: history, text: 'You started dating {date.name}.', importance: 2 }
+      failure:
+        text: >-
+          {date.name} is perfectly nice and there is no spark either way. You split the check and wave goodnight.
+        effects:
+          - { type: memory, role: date, tag: bad_first_date }
+          - { type: relationship, role: date, affection: -4 }
+          - { type: stat, key: happiness, delta: -2 }
+  - id: slow
+    label: Keep it casual and see where it goes
+    outcome:
+      text: >-
+        You trade messages for a couple of weeks. It is easy, and you let it stay that way for now.
+      effects:
+        - { type: relationship, role: date, affection: 9 }
+        - { type: memory, role: date, tag: swapped_numbers }

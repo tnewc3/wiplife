@@ -34,6 +34,7 @@ import { clampInt } from '../random';
 import { chance, cloneRng, nextInt } from '../rng';
 import { renderText } from '../text';
 import type { Id, InteractionCounters, LifeState, MoneyChange, PendingInteraction } from '../types';
+import { attractedToYou, isPartnerKind } from '../relationships';
 import { INTERACTION_ROLE, isInteractionAvailable } from './availability';
 import { isPetInteractionInput, performPetInteraction } from '../possessions/interact';
 import { canAffordGift, extraChance, giftPrice } from './links';
@@ -209,15 +210,18 @@ export function performInteraction(state: LifeState, params: unknown, content: C
     const balance = content.balance.interactions;
     const profile = balance.profiles[def.profile]!;
     const score = reactionScore(state, def, state.relationships[p.personId]!, state.people[p.personId]!, repeats, p.giftTier, content);
-    const tier: OutcomeTier = availableTier(def, rollTier(draft.rng, score, content));
-    const outcome = def.outcomes[tier]!;
+    const rolled: OutcomeTier = availableTier(def, rollTier(draft.rng, score, content));
+    // B1: someone who isn't attracted to you gives a kind, clear "no", whatever the roll said (never a romantic result). A partner, fiancé or spouse is past that.
+    const declined = def.romance === true && !isPartnerKind(rel.kind) && !attractedToYou(state, state.people[p.personId]!) && def.outcomes.declined !== undefined;
+    const tier: OutcomeTier = declined ? 'bad' : rolled;
+    const outcome = declined ? def.outcomes.declined! : def.outcomes[tier]!;
 
     // A gift costs real money: savings first, then (a little) debt, through the finance module.
     if (p.giftTier) spend(draft, giftPrice(state, p.giftTier, content), content);
 
     const count = counters(rel, year);
     count.counts[def.id] = (count.counts[def.id] ?? 0) + 1;
-    if (tier === 'bad' || tier === 'backfire' || repeats.same + 1 >= balance.reaction.annoyedAfter) count.annoyed = true;
+    if ((!declined && (tier === 'bad' || tier === 'backfire')) || repeats.same + 1 >= balance.reaction.annoyedAfter) count.annoyed = true;
 
     let factor = returnsFactor(repeats, content);
     if (p.giftTier) factor *= balance.gifts.tiers[p.giftTier].warmth * balance.gifts.wealthValue[person.wealthLevel];
@@ -230,6 +234,7 @@ export function performInteraction(state: LifeState, params: unknown, content: C
       ...(p.otherId ? { otherId: p.otherId } : {}),
       ...(p.itemId ? { itemId: p.itemId } : {}),
       tier,
+      ...(declined ? { declined: true as const } : {}),
       ...(p.giftTier ? { giftTier: p.giftTier } : {}),
       text: '',
       notes: [],

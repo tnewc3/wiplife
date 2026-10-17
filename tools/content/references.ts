@@ -174,6 +174,13 @@ export function checkReferences(
     const def = bundle.events[id];
     if ((!def && options.partialEvents !== true) || (def && !def.followUpOnly)) errors.push({ file: 'registries/languages.yaml', message: `classes: ${id} must name a followUpOnly event` });
   }
+  // B1: what "Find a date" answers with.
+  for (const [way, ids] of Object.entries(bundle.registries.love.findDate)) {
+    for (const id of ids) {
+      const def = bundle.events[id];
+      if ((!def && options.partialEvents !== true) || (def && !def.followUpOnly)) errors.push({ file: 'registries/love.yaml', message: `findDate.${way}: ${id} must name a followUpOnly event` });
+    }
+  }
   const knownLanguage = (id: string) => { if (bundle.languages[id]?.id !== id) errors.push({ file: 'balance/languages.yaml', message: `unknown language ${id}` }); };
   for (const c of Object.values(bundle.countries)) [...c.languages.official, ...c.languages.common].forEach(knownLanguage);
   for (const c of Object.values(bundle.cities)) if (c.languages) [...c.languages.official, ...c.languages.common].forEach(knownLanguage);
@@ -533,6 +540,7 @@ function checkEvents(bundle: ContentBundle, fileOf: (typeKey: CollectionKey, id:
     ...Object.values(bundle.registries.immigration.triggers).flat(),
     ...Object.values(bundle.registries.immigration.yearly).flat(),
     ...bundle.registries.languages.classes.events,
+    ...Object.values(bundle.registries.love.findDate).flat(),
     ...doctorEvents,
     // M1: what a therapist's visit answers with.
     ...Object.values(bundle.registries.mental.therapist).flatMap((r) => r.events),
@@ -1148,7 +1156,11 @@ function checkInteractions(bundle: ContentBundle, fileOf: (typeKey: CollectionKe
       if ((a.them.min ?? 0) < adultAge) err(`romance: availability.them.min must be at least ${adultAge} (adults only)`);
       const family = a.kinds.filter((k) => FAMILY_KINDS.includes(k));
       if (family.length > 0) err(`romance: can't be available with family (${family.join(', ')})`);
+      // B1: you can try romance with anyone you are attracted to; someone who isn't attracted to you gives a kind, clear no.
+      if (!def.outcomes.declined) err('romance: needs a declined outcome (B1: the kind, clear no from someone who is not attracted to you)');
+      else if ((def.outcomes.declined.effects as Effect[]).some((e) => e.type === 'infidelity' || e.type === 'relationship') || def.outcomes.declined.extras.length > 0) err('romance: the declined outcome must not be romantic (no infidelity or relationship effects)');
     }
+    if (!romantic && def.outcomes.declined) err('only a romance interaction has a declined outcome');
     if (!romantic && allEffects.some((e) => e.type === 'infidelity' || (e.type === 'relationship' && e.kind !== undefined))) {
       err('only a romance interaction can be unfaithful or change a relationship kind');
     }

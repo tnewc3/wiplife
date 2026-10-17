@@ -62,7 +62,7 @@ sport:
   stages: ["the first round", "the conference final", "the final"]
   title: "the cup"
   proRung: 4
-  ageOut: [14, 18, 23]
+  ageOut: [14, 18, 27]
   draft: { name: "the draft", age: 18, force: 21, rounds: 4 }
   ageCurve: [{ at: 8, x: -6 }, { at: 12, x: -4 }, { at: 14, x: -3 }, { at: 16, x: -2 }, { at: 18, x: -1 }, { at: 21, x: 0 }, { at: 24, x: 2 }, { at: 27, x: 3 }, { at: 30, x: 1 }, { at: 32, x: -2 }, { at: 34, x: -10 }, { at: 36, x: -16 }, { at: 38, x: -22 }, { at: 42, x: -32 }]
   hazard: 1.2

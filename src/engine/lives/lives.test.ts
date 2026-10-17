@@ -170,6 +170,38 @@ describe("the people step", () => {
   });
 });
 
+describe('B1: love lives need attraction both ways', () => {
+  const manyFriends = (attractedTo: GenderCategory[], category: GenderCategory, n = 60): LifeState =>
+    produce(lifeWith(Array.from({ length: n }, (_, i) => ({ id: `f${i}`, age: 30, kind: 'friend' as const, category })), 35, 'both-ways'), (d) => {
+      for (const p of Object.values(d.people)) p.identity.attractedTo = [...attractedTo];
+    });
+  const partnerCategories = (life: LifeState) => Object.values(life.people).flatMap((p) => (p.life?.partner ? [p.life.partner.genderCategory] : []));
+
+  it('picks a partner’s gender among those the person likes, weighted by how likely that gender is to like them back', () => {
+    const next = step(manyFriends(['man', 'woman'], 'woman'), withPeople(BUSY));
+    const categories = partnerCategories(next);
+    expect(categories.length).toBeGreaterThan(40);
+    // Men like women back far more often than women do (94% against 15% in the starting weights), so most of their partners are men.
+    const men = categories.filter((c) => c === 'man').length;
+    expect(men / categories.length).toBeGreaterThan(0.7);
+  });
+
+  it('gives no one a partner who could not like them back', () => {
+    const noWomenLikeWomen = {
+      ...withPeople(BUSY),
+      balance: {
+        ...withPeople(BUSY).balance,
+        creation: { ...content.balance.creation, attraction: { ...content.balance.creation.attraction, woman: [{ to: ['man' as const], weight: 1 }], nonbinary: [{ to: ['man' as const], weight: 1 }] } },
+      },
+    } as ContentBundle;
+    const next = step(manyFriends(['woman'], 'woman'), noWomenLikeWomen);
+    expect(partnerCategories(next)).toEqual([]);
+    // Someone attracted to men still finds a partner, who is a man.
+    expect(partnerCategories(step(manyFriends(['man'], 'woman'), noWomenLikeWomen)).every((c) => c === 'man')).toBe(true);
+    expect(partnerCategories(step(manyFriends(['man'], 'woman'), noWomenLikeWomen)).length).toBeGreaterThan(40);
+  });
+});
+
 describe('love lives are for adults only', () => {
   it('never starts a relationship for anyone under the adult age, whatever the rates say', () => {
     const bundle = withPeople(BUSY);

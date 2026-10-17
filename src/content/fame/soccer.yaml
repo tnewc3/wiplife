@@ -68,7 +68,7 @@ sport:
   stages: ["the quarter-final", "the semi-final", "the cup final"]
   title: "the cup"
   proRung: 4
-  ageOut: [14, 18, 23]
+  ageOut: [14, 18, 27]
   draft: { name: "the academy intake", age: 18, force: 21, rounds: 3 }
   ageCurve: [{ at: 8, x: -6 }, { at: 12, x: -4 }, { at: 14, x: -3 }, { at: 16, x: -2 }, { at: 18, x: -1 }, { at: 21, x: 0 }, { at: 23, x: 1 }, { at: 26, x: 3 }, { at: 29, x: 3 }, { at: 31, x: 1 }, { at: 33, x: -5 }, { at: 35, x: -11 }, { at: 37, x: -18 }, { at: 40, x: -28 }]
   hazard: 0.9

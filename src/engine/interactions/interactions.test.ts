@@ -473,11 +473,63 @@ describe('availability', () => {
       for (const def of romance) expect(isInteractionAvailable(life, def, 'sis', content)).toBe(false);
     });
 
-    it('needs attraction both ways outside a current romance', () => {
-      const life = produce(lifeWith(30, [friend({ affection: 80 })]), (d) => {
+    it('needs you to be attracted to them outside a current romance (whether they are attracted to you decides the outcome)', () => {
+      const notYou = produce(lifeWith(30, [friend({ affection: 80 })]), (d) => {
+        d.character.identity.attractedTo = [];
+      });
+      for (const def of romance) expect(isInteractionAvailable(notYou, def, 'f1', content)).toBe(false);
+      // They are not attracted to you, but you are attracted to them: you can still try.
+      const notThem = produce(lifeWith(30, [friend({ affection: 80 })]), (d) => {
         d.people.f1!.identity.attractedTo = [];
       });
-      for (const def of romance) expect(isInteractionAvailable(life, def, 'f1', content)).toBe(false);
+      for (const def of romance) expect(isInteractionAvailable(notThem, def, 'f1', content)).toBe(true);
+    });
+
+    it('B1: is available with same-gender friends, coworkers and classmates you are attracted to', () => {
+      for (const kind of ['friend', 'coworker', 'acquaintance'] as const) {
+        for (const [mine, theirs] of [['man', 'man'], ['woman', 'woman']] as const) {
+          const life = produce(lifeWith(30, [{ id: 'x', age: 30, kind, category: theirs, affection: 80 }]), (d) => {
+            d.character.identity.genderCategory = mine;
+            d.character.identity.attractedTo = [mine];
+            // They roll their attraction from the population, with no link to you: here they are attracted to the other gender.
+            d.people.x!.identity.attractedTo = [mine === 'man' ? 'woman' : 'man'];
+          });
+          expect(ids(life, 'x')).toEqual(expect.arrayContaining(['flirt', 'go_on_date']));
+        }
+      }
+    });
+
+    it('B1: someone not attracted to you gives a kind, clear no and never a romantic result', () => {
+      const start = produce(lifeWith(30, [friend({ affection: 80, category: 'man' })]), (d) => {
+        d.character.identity.genderCategory = 'man';
+        d.character.identity.attractedTo = ['man'];
+        d.people.f1!.identity.attractedTo = ['woman'];
+      });
+      // Even the best possible roll cannot turn the answer.
+      const luckiest = forced('great');
+      for (const interactionId of ['flirt', 'go_on_date', 'kiss'] as const) {
+        const life = performInteraction(start, { interactionId, personId: 'f1' }, luckiest);
+        const card = life.pendingInteraction!;
+        expect(card.declined).toBe(true);
+        expect(card.tier).toBe('bad');
+        expect(luckiest.interactions[interactionId]!.outcomes.declined!.text.some((t) => t.length > 0)).toBe(true);
+        expect(card.text).toMatch(/not|just|isn't|aren't|don't/i);
+        expect(card.text).not.toMatch(/\{|\}/);
+        // No romantic memory or cheating, and nothing becomes a relationship.
+        expect(life.relationships.f1!.kind).toBe('friend');
+        expect(life.relationships.f1!.memories.some((m) => ['shared_a_kiss', 'romantic_date', 'started_dating'].includes(m.tag))).toBe(false);
+        expect(life.relationships.f1!.memories.some((m) => m.tag === 'turned_you_down')).toBe(true);
+        expect(life.relationships.f1!.affection).toBeLessThan(80);
+      }
+    });
+
+    it('B1: the same moment with someone who is attracted to you is not declined, and a partner is never declined', () => {
+      const attracted = lifeWith(30, [friend({ affection: 80 })]);
+      expect(performInteraction(attracted, { interactionId: 'flirt', personId: 'f1' }, forced('great')).pendingInteraction!.declined).toBeUndefined();
+      const partner = produce(lifeWith(30, [{ id: 'p', age: 30, kind: 'partner', affection: 70 }]), (d) => {
+        d.people.p!.identity.attractedTo = [];
+      });
+      expect(performInteraction(partner, { interactionId: 'flirt', personId: 'p' }, forced('great')).pendingInteraction!.declined).toBeUndefined();
     });
 
     it('needs affection for a kiss or a night, and a current partner for a partner kind', () => {

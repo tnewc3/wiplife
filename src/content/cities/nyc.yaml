@@ -20,3 +20,15 @@ schools:
   elite: Carrow University
   trade: Hudson Technical Institute
   grad: Morningside Graduate School
+# B1: New York is the most mixed: Hispanic, Black and Asian communities all large.
+heritageWeights:
+  general: 32
+  hispanic: 26
+  black: 18
+  chinese: 9
+  south_asian: 6
+  korean: 2
+  arab: 2
+  west_african: 2
+  vietnamese: 1
+  japanese: 1

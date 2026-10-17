@@ -57,6 +57,25 @@ export function checkCountries(bundle: ContentBundle, fileOf: FileOf): ContentEr
     }
   }
 
+  // B1: name pools are big enough, and a city's heritage weights name heritages its country's pool has.
+  const minNames = bundle.balance.creation.namePool;
+  for (const pool of Object.values(bundle.names)) {
+    for (const [hid, h] of Object.entries(pool.heritages)) {
+      for (const category of ['man', 'woman', 'nonbinary'] as const) {
+        const n = new Set(h.first[category].map((x) => x.toLocaleLowerCase('en-US'))).size;
+        if (n < minNames.minFirstPerCategory) errors.push({ file: `names/${pool.id}.yaml`, message: `${hid}: ${n} distinct ${category} first names; needs at least ${minNames.minFirstPerCategory}` });
+      }
+      const last = new Set(h.last.map((x) => x.toLocaleLowerCase('en-US'))).size;
+      if (last < minNames.minLast) errors.push({ file: `names/${pool.id}.yaml`, message: `${hid}: ${last} distinct last names; needs at least ${minNames.minLast}` });
+    }
+  }
+  for (const [id, city] of Object.entries(bundle.cities)) {
+    const heritages = bundle.names[city.countryId]?.heritages ?? {};
+    for (const hid of Object.keys(city.heritageWeights ?? {})) {
+      if (!heritages[hid]) errors.push({ file: fileOf('cities', id), message: `${id}: heritageWeights names "${hid}", which is not a heritage in names/${city.countryId}.yaml` });
+    }
+  }
+
   for (const country of Object.values(bundle.countries)) {
     const file = `countries/${country.id}.yaml`;
     const err = (message: string) => errors.push({ file, message });

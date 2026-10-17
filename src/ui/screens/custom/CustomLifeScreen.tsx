@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { content } from '../../../content';
-import { GENDER_CATEGORIES } from '../../../content/schemas';
+import { GENDER_CATEGORIES, type GenderCategory } from '../../../content/schemas';
 import { InvalidInputError, maxSiblings } from '../../../engine/creation/input';
 import { getCountryOptions, getPronounPresets } from '../../../engine/selectors';
 import type { FamilyWealth, Personality, Pronouns, Stats } from '../../../engine/types';
@@ -146,15 +146,21 @@ function IdentityStep({ draft, update, errors }: StepProps) {
         </Card>
       )}
 
-      <MultiChoice
+      <MultiChoice<GenderCategory | 'none'>
         label="Attracted to"
-        value={draft.attractedTo}
+        value={draft.attractedTo === null ? [] : draft.attractedTo.length === 0 ? ['none'] : draft.attractedTo}
         columns={1}
         error={errors['identity.attractedTo']}
-        choices={GENDER_CATEGORIES.map((c) => ({ value: c, label: ATTRACTION_LABELS[c] }))}
-        onChange={(attractedTo) => update({ attractedTo })}
+        choices={[...GENDER_CATEGORIES.map((c) => ({ value: c, label: ATTRACTION_LABELS[c] })), { value: 'none' as const, label: 'No one' }]}
+        onChange={(next) => {
+          // "No one" is its own answer: choosing it clears the rest, and choosing anyone clears it.
+          const had = draft.attractedTo !== null && draft.attractedTo.length === 0;
+          if (next.includes('none') && !had) return update({ attractedTo: [] });
+          const people = next.filter((v): v is GenderCategory => v !== 'none');
+          update({ attractedTo: people.length === 0 ? null : people });
+        }}
       />
-      <p className="-mt-3 text-sm text-muted">Choose none if you’re not attracted to anyone. Who you are can change over a lifetime.</p>
+      <p className="-mt-3 text-sm text-muted">Choose who you are attracted to, or No one. Who you are can change over a lifetime.</p>
 
       {draft.genderCategory === 'nonbinary' && (
         <>
@@ -314,7 +320,7 @@ function ReviewStep({ draft }: StepProps) {
     ['Identity', `${draft.genderIdentity} · ${draft.genderExpression}`],
     ['Pronouns', `${pronouns.subject}/${pronouns.object}/${pronouns.possessivePronoun}`],
     ...(draft.genderCategory === 'nonbinary' ? ([['Can carry a pregnancy', draft.canCarry ? 'Yes' : 'No']] as [string, string][]) : []),
-    ['Attracted to', draft.attractedTo.length ? draft.attractedTo.map((c) => ATTRACTION_LABELS[c]).join(', ') : 'No one'],
+    ['Attracted to', draft.attractedTo && draft.attractedTo.length ? draft.attractedTo.map((c) => ATTRACTION_LABELS[c]).join(', ') : 'No one'],
     ['Family', `${draft.parents === 1 ? 'One parent' : 'Two parents'}, ${draft.siblings === 0 ? 'no' : draft.siblings} older sibling${draft.siblings === 1 ? '' : 's'}`],
     ['Wealth', draft.familyWealth ? WEALTH_LABELS[draft.familyWealth] : ''],
     ['Faith', draft.faith === 'family' ? 'Surprise me' : draft.faith === 'none' ? content.registries.belonging.noneName : (content.registries.belonging.faiths[draft.faith]?.name ?? '')],

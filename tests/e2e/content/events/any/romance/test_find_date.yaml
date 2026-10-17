@@ -1,0 +1,17 @@
+id: test_find_date
+title: Someone new
+text: Looking for a date, you end up talking with {date.name}.
+tone: light
+category: romance
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires: { age: { gte: 18 } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  date: { kind: acquaintance, romantic: true, createIfMissing: true, newChance: 1, presence: city }
+autoOutcome:
+  text: You swap numbers before you part.
+  effects:
+    - { type: relationship, role: date, affection: 30 }
+    - { type: memory, role: date, tag: swapped_numbers }

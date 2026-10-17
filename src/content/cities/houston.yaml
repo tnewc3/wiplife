@@ -19,3 +19,15 @@ schools:
   elite: Whitlock University
   trade: Ship Channel Technical College
   grad: Magnolia Graduate School
+# B1: Houston leans Hispanic and Black against the country's mix.
+heritageWeights:
+  general: 28
+  hispanic: 37
+  black: 21
+  vietnamese: 3.5
+  south_asian: 3
+  chinese: 2.5
+  arab: 1.5
+  west_african: 2
+  korean: 0.7
+  japanese: 0.3

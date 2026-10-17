@@ -159,6 +159,7 @@ export function createLife(input: CreateLifeOptions, content: ContentBundle): Li
     ...familyRequest,
   });
   character.name = { first: family.firstName, last: family.lastName };
+  character.heritage = family.heritage;
   const caregivers = family.people.filter((p) => family.relationships.some((r) => r.personId === p.id && r.kind === "parent"));
   character.languages = householdLanguages(character.birthCityId, caregivers, birthYear, content);
   // W6: born to citizens of the country (no draws, so replays do not shift).

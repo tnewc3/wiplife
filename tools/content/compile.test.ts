@@ -62,6 +62,12 @@ async function expectErrors(): Promise<string> {
   return formatErrors(result.errors);
 }
 
+/** B1: a romance interaction also needs the kind no for someone who is not attracted to you. */
+const DECLINED = `  declined:
+    text: ["{person.name} says no, kindly.", "{person.name} is not interested that way."]
+    affection: -1
+`;
+
 /** A small valid interaction, to break one thing at a time (E1). */
 const interaction = (id = 'test_move') => `id: ${id}
 name: Test move
@@ -955,7 +961,7 @@ describe('interactions (E1)', () => {
   });
 
   it('rejects a romance interaction that does not require both people to be adults', { timeout: 90_000 }, async () => {
-    const romance = interaction().replace('group: everyday', 'group: romance\nromance: true');
+    const romance = interaction().replace('group: everyday', 'group: romance\nromance: true') + DECLINED;
     await write(file, romance);
     expect(await expectErrors()).toContain('romance: availability.you.min must be at least 18');
     await write(file, romance.replace('you: { min: 8 }', 'you: { min: 18 }'));
@@ -970,7 +976,7 @@ describe('interactions (E1)', () => {
 
   it('rejects romance or intimacy with family, and romance that is not marked', { timeout: 90_000 }, async () => {
     const adults = interaction().replace('you: { min: 8 }', 'you: { min: 18 }').replace('them: { min: 8 }', 'them: { min: 18 }');
-    const romance = adults.replace('group: everyday', 'group: romance\nromance: true');
+    const romance = adults.replace('group: everyday', 'group: romance\nromance: true') + DECLINED;
     await write(file, romance.replace('kinds: [friend]', 'kinds: [friend, sibling]'));
     expect(await expectErrors()).toContain("romance: can't be available with family (sibling)");
     await write(file, romance.replace('kinds: [friend]', 'kinds: [parent]'));
@@ -1942,5 +1948,45 @@ describe('businesses (W3)', () => {
     expect(result.ok).toBe(true);
     if (!result.ok) return;
     expect(result.warnings.some((w) => w.eventId === 'biz_equipment_breaks' && /money/.test(w.message))).toBe(true);
+  });
+});
+
+describe('B1 content checks', () => {
+  it('rejects a name heritage with too few names', { timeout: 90_000 }, async () => {
+    const names = await readFile(path.join(dir, 'names/uk.yaml'), 'utf8');
+    // Cut the first line of men's names in the first heritage down to three.
+    const cut = names.replace(/(\n {6}man: \[)([^\]]+)(\])/, (_m, a: string, list: string, c: string) => `${a}${list.split(', ').slice(0, 3).join(', ')}${c}`);
+    expect(cut).not.toBe(names);
+    await write('names/uk.yaml', cut);
+    expect(await expectErrors()).toMatch(/names\/uk\.yaml[\s\S]*3 distinct man first names; needs at least 50/);
+  });
+
+  it('rejects city heritage weights that name a heritage the country has no names for', { timeout: 90_000 }, async () => {
+    const houston = await readFile(path.join(dir, 'cities/houston.yaml'), 'utf8');
+    await write('cities/houston.yaml', houston.replace('  hispanic: 37', '  atlantean: 37'));
+    expect(await expectErrors()).toContain('heritageWeights names "atlantean"');
+  });
+
+  it('requires a declined outcome on a romance interaction, and keeps it unromantic', { timeout: 90_000 }, async () => {
+    const flirt = await readFile(path.join(dir, 'interactions/flirt.yaml'), 'utf8');
+    await write('interactions/flirt.yaml', flirt.slice(0, flirt.indexOf('  # B1:')));
+    expect(await expectErrors()).toContain('needs a declined outcome');
+    await write('interactions/flirt.yaml', flirt.replace('    effects:\n      - { type: memory, role: person, tag: turned_you_down }', '    effects:\n      - { type: infidelity, role: person, act: flirt }'));
+    expect(await expectErrors()).toContain('the declined outcome must not be romantic');
+  });
+
+  it('rejects an open-tryout age that would age the entrant out before their first season', { timeout: 90_000 }, async () => {
+    const file = path.join(dir, 'fame/basketball.yaml');
+    const text = await readFile(file, 'utf8');
+    await write('fame/basketball.yaml', text.replace('ageOut: [14, 18, 27]', 'ageOut: [14, 18, 23]'));
+    expect(await expectErrors()).toMatch(/route open_tryout: maxAge 26 is too old for the level's age-out \(23\)/);
+  });
+
+  it('checks the events that answer Find a date', { timeout: 90_000 }, async () => {
+    const love = await readFile(path.join(dir, 'registries/love.yaml'), 'utf8');
+    await write('registries/love.yaml', love.replace('app: [find_date_app]', 'app: [no_such_event]'));
+    expect(await expectErrors()).toContain('no_such_event');
+    await write('registries/love.yaml', love.replace('app: [find_date_app]', 'app: [road_trip]'));
+    expect(await expectErrors()).toContain('must name a followUpOnly event');
   });
 });

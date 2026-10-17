@@ -97,6 +97,7 @@ const character = z.strictObject({
   familyWealth: z.enum(['poor', 'working', 'middle', 'affluent', 'rich']),
   custom: z.boolean(),
   canCarry: z.boolean(),
+  heritage: z.string().min(1).max(40).exactOptional(),
 });
 
 const childData = z.strictObject({
@@ -217,6 +218,7 @@ const person = z.strictObject({
   moodBase: score,
   wealthLevel,
   canCarry: z.boolean(),
+  heritage: z.string().min(1).max(40).exactOptional(),
   priorChildren: z.array(int).min(1).exactOptional(),
   child: childData.exactOptional(),
   life: personLife.exactOptional(),
@@ -904,6 +906,7 @@ const pendingInteraction = z.strictObject({
   otherId: id.exactOptional(),
   itemId: z.string().min(1).exactOptional(),
   tier: z.enum(['great', 'good', 'neutral', 'bad', 'backfire']),
+  declined: z.literal(true).exactOptional(),
   giftTier: z.enum(['small', 'medium', 'big']).exactOptional(),
   text: filled,
   notes: z.array(filled),

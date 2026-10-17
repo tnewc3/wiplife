@@ -8,7 +8,7 @@ import type { ContentBundle, InteractionDef, InteractionGroup } from '../../cont
 import { INTERACTION_GROUPS } from '../../content/schemas';
 import { evaluate } from '../conditions';
 import { whereabouts } from '../presence';
-import { ageOf, bothAdults, isCurrentPartner, isFamilyKind, isPartnerKind, mutualAttraction } from '../relationships';
+import { ageOf, attractedTo, bothAdults, isCurrentPartner, isFamilyKind, isPartnerKind } from '../relationships';
 import type { Id, LifeState } from '../types';
 import { introduceCandidates, topicItems } from '../web/actions';
 import { hasRomanticTie } from '../web/query';
@@ -32,7 +32,8 @@ export function activeInteractions(content: ContentBundle): InteractionDef[] {
  * True when this interaction can be done with this person right now: between
  * years, a living person you know, the interaction's own rules, and for
  * romance both of you adults, not family, and (outside a current romance)
- * attraction both ways.
+ * you attracted to them (B1: whether they are attracted to you decides how
+ * it goes, not whether you can try).
  */
 export function isInteractionAvailable(state: LifeState, def: InteractionDef, personId: Id, content: ContentBundle): boolean {
   if (state.phase !== 'yearStart') return false;
@@ -50,7 +51,7 @@ export function isInteractionAvailable(state: LifeState, def: InteractionDef, pe
 
   if (def.romance) {
     if (isFamilyKind(rel.kind) || !bothAdults(state, person, content)) return false;
-    if (isPartnerKind(rel.kind) ? !isCurrentPartner(state, rel) : !mutualAttraction(state, person) || person.life?.partner || hasRomanticTie(state.web, personId)) return false;
+    if (isPartnerKind(rel.kind) ? !isCurrentPartner(state, rel) : !attractedTo(state.character.identity, person.identity) || person.life?.partner || hasRomanticTie(state.web, personId)) return false;
   }
   // E4: an introduction needs someone to introduce them to; a story needs one they have heard.
   if (def.other && introduceCandidates(state, personId, content).length === 0) return false;

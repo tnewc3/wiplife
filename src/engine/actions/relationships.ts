@@ -14,7 +14,7 @@ import {
   isCurrentPartner,
   isFamilyKind,
   isPartnerKind,
-  isRomanticMatch,
+  isRomanceCandidate,
   yearsInKind,
 } from '../relationships';
 import type { LifeState, Person, Relationship } from '../types';
@@ -35,13 +35,14 @@ function oldEnoughToDecide(state: LifeState, rel: Relationship, content: Content
 export const RELATIONSHIP_ACTIONS: Record<ActionId, ActionRule> = {
   ask_out: {
     irreversible: false,
-    // Someone you know (not family, not already yours), both adults, attraction
-    // both ways, and you're single.
+    // Someone you know (not family, not already yours), both adults, someone you
+    // are attracted to (B1: whether they are attracted to you decides the answer),
+    // and you're single.
     allowed: (state, rel, person, content) =>
       ASKABLE_KINDS.includes(rel.kind) &&
       rel.status === 'active' &&
       currentPartner(state) === null &&
-      isRomanticMatch(state, person, content),
+      isRomanceCandidate(state, person, content),
   },
   propose: {
     irreversible: false,

@@ -15,7 +15,7 @@ import { rollNeuro } from '../mental/neuro';
 import { ownNeuro } from '../mental/query';
 import type { ContentBundle, Distribution } from '../../content/schemas';
 import { PERSONALITY_TRAITS, rollGenderCategory, rollIdentity, rollLatent, activeIds } from '../creation/character';
-import { pickUnused, rollHeritage } from '../creation/family';
+import { heritageFromParents, pickUnused } from '../creation/family';
 import { curveAt } from '../curve';
 import { nextPersonId } from '../events/casting';
 import { moodBaseline } from '../interactions/mood';
@@ -102,7 +102,9 @@ export function createChild(state: LifeState, rng: RngState, spec: NewChild, con
   const city = content.cities[state.character.cityId];
   const pool = city && content.names[city.countryId];
   if (!pool) throw new Error(`No name pool for city "${state.character.cityId}"`);
-  const heritage = pool.heritages[rollHeritage(rng, content, pool)]!;
+  // B1: a child takes a parent's heritage (two different ones give either, by the city's weights); an adopted child's is rolled for the city.
+  const heritageId = heritageFromParents(rng, content, pool, bio.map((b) => (b === 'you' ? state.character.heritage : state.people[b]?.heritage)), state.character.cityId);
+  const heritage = pool.heritages[heritageId]!;
   const used = new Set([state.character.name.first, ...Object.values(state.people).map((p) => p.name.first)]);
   const first = pickUnused(rng, heritage.first[category], used);
   const parentPerson = spec.otherParentId === undefined ? undefined : state.people[spec.otherParentId];
@@ -148,6 +150,7 @@ export function createChild(state: LifeState, rng: RngState, spec: NewChild, con
     citizenships: birthCitizenships(state.character.cityId, step && parentPerson ? [{ citizenships: parentPerson.citizenships }] : [parentStanding(state, content), ...(parentPerson ? [{ citizenships: parentPerson.citizenships }] : [])], content),
     languages: householdLanguages(state.character.cityId, step && parentPerson ? [parentPerson] : [state.character, ...(parentPerson ? [parentPerson] : [])], state.currentYear, content),
     name: { first, last },
+    heritage: heritageId,
     birthYear: state.currentYear - spec.age,
     alive: true,
     identity,

@@ -1,0 +1,21 @@
+id: find_date_nobody
+title: Nobody this time
+text: >-
+  You put yourself out there, and no one catches your eye. Or you don't catch
+  theirs. The evening ends early, and quietly.
+tone: neutral
+category: romance
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { romance: [single] }
+weight: { base: 5 }
+followUpOnly: true
+autoOutcome:
+  text: >-
+    It is a little deflating, and also fine. These things take more than one
+    try, and you have not lost anything but an evening.
+  effects:
+    - { type: stat, key: happiness, delta: -1 }

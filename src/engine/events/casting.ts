@@ -202,7 +202,9 @@ export function createPerson(state: LifeState, spec: CastSpec, rng: RngState, co
 
   const age = nextInt(rng, range.min, range.max);
   const category = romantic ?? rollGenderCategory(rng, content);
-  const heritageId = rollHeritage(rng, content, pool);
+  // B1: they live in a city of their own (yours, or another for someone who lives elsewhere), whose weights decide their heritage.
+  const cityId = spec.presence === 'elsewhere' ? otherCity(state, rng, content) : state.character.cityId;
+  const heritageId = rollHeritage(rng, content, pool, undefined, cityId);
   const heritage = pool.heritages[heritageId]!;
   const used = new Set([state.character.name.first, ...Object.values(state.people).map((p) => p.name.first)]);
   const family = content.balance.creation.family;
@@ -218,7 +220,8 @@ export function createPerson(state: LifeState, spec: CastSpec, rng: RngState, co
     traits: rollRelativeTraits(rng, content),
     looks: rollScore(rng, family.relativeLooks),
     smarts: rollScore(rng, family.relativeSmarts),
-    cityId: spec.presence === 'elsewhere' ? otherCity(state, rng, content) : state.character.cityId,
+    cityId,
+    heritage: heritageId,
     tags: [kind],
     // E1: set below, once they're in your life.
     mood: 50,

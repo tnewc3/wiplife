@@ -15,9 +15,9 @@ performance:
   # Per point of form events gave you.
   form: 1.2
   focus:
-    skills: { craft: 1.6, fitness: 0, risk: 1, rating: 0 }
-    conditioning: { craft: 1, fitness: 0.8, risk: 0.75, rating: 1.5 }
-    film: { craft: 1.3, fitness: 0, risk: 1, rating: 1 }
+    skills: { craft: 1.6, fitness: 0, rating: 0 }
+    conditioning: { craft: 1, fitness: 0.8, rating: 1.5 }
+    film: { craft: 1.3, fitness: 0, rating: 1 }
   film: 0.08
   switchCraft: 4
 
@@ -42,6 +42,9 @@ playoffs:
   fame: { series: 1.5, title: 8 }
   mood: 15
 
+# B1: injuries come only from games played (the chance below is for a whole season
+# and scales with the share of it you play), from playoff and big-moment events,
+# and from playing through pain. Training and practice never change the risk.
 injury:
   base: 0.16
   level: { youth: 0.3, school: 0.5, college: 0.8, pro: 1 }

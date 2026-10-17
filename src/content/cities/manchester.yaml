@@ -19,3 +19,13 @@ schools:
   elite: Victoria Park University
   trade: Canalside Technical College
   grad: Mill Street Graduate School
+# B1: Manchester has large South Asian and Black communities.
+heritageWeights:
+  general: 62
+  south_asian: 16
+  black: 8
+  polish: 3
+  irish: 3
+  chinese: 2.5
+  arab: 2.5
+  west_african: 3

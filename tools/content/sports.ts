@@ -105,6 +105,8 @@ export function checkSports(bundle: ContentBundle, fileOf: (typeKey: CollectionK
       if (r.minAge < ask) e(`route ${r.id}: starts younger than its rung allows (${ask})`);
       if (r.maxAge === undefined) e(`route ${r.id}: needs a maxAge`);
       else if (r.maxAge < r.minAge) e(`route ${r.id}: maxAge is below minAge`);
+      // B1: someone who enters at the route's last age plays that season and at least one more before the level's age-out.
+      else if (r.maxAge + 1 > (sport.ageOut[rung - 1] ?? Infinity)) e(`route ${r.id}: maxAge ${r.maxAge} is too old for the level's age-out (${sport.ageOut[rung - 1]}): entries at that age would be aged out after their first season`);
     }
     if (!bundle.fameAwards || !Object.values(bundle.fameAwards).some((a) => a.path === def.id && a.minRung < sport.proRung && !a.retired)) e('an award for amateurs');
     if (!Object.values(bundle.fameAwards).some((a) => a.path === def.id && a.minRung >= sport.proRung && !a.retired)) e('an award for pros');

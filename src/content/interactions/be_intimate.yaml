@@ -153,3 +153,13 @@ outcomes:
     mood: -12
     effects:
       - { type: stat, key: stress, delta: 3 }
+  # B1: they are not attracted to you: a kind, clear no, never a romantic result.
+  declined:
+    text:
+      - "{person.name} stops you, kindly and without any doubt. 'No. I'm not interested in you like that.' You step back at once, and the evening ends quietly."
+      - "It is not a question for {person.name}: {person.they} {person:is|are} not interested in you that way, and {person.they} {person:says|say} so plainly. You take it as given, and go home."
+    affection: -1
+    mood: -3
+    effects:
+      - { type: memory, role: person, tag: turned_you_down }
+      - { type: stat, key: confidence, delta: -1 }

@@ -493,7 +493,47 @@ export const migrations: readonly Migration[] = [
     description: 'W6: citizenships from the birth city (you) and the city each person lives in; empty migration record. Nobody had emigrated before this version, so no status is invented.',
     migrate: upgradeMigrationData,
   },
+  {
+    from: 27,
+    description:
+      'B1: name heritage on the character and each person. It is filled only where the saved names show it (exactly one ' +
+      'heritage in the city\'s country name pool holds both their first and last name); otherwise it stays unset. ' +
+      'Heir replay snapshots are upgraded the same way.',
+    migrate: upgradeHeritageData,
+  },
 ];
+
+/** The one heritage of this name pool that has both names, or undefined (none, or more than one). */
+function heritageOfNames(cityId: unknown, name: unknown): string | undefined {
+  const content = compiled as ContentBundle;
+  const city = typeof cityId === 'string' ? content.cities[cityId] : undefined;
+  const pool = city ? content.names[city.countryId] : undefined;
+  if (!pool || !isRecord(name) || typeof name.first !== 'string' || typeof name.last !== 'string') return undefined;
+  const first = name.first.toLocaleLowerCase('en-US');
+  const last = name.last.toLocaleLowerCase('en-US');
+  const found = Object.entries(pool.heritages).filter(
+    ([, h]) => h.last.some((n) => n.toLocaleLowerCase('en-US') === last) && (['man', 'woman', 'nonbinary'] as const).some((c) => h.first[c].some((n) => n.toLocaleLowerCase('en-US') === first)),
+  );
+  return found.length === 1 ? found[0]![0] : undefined;
+}
+
+function upgradeHeritageData(data: unknown): unknown {
+  if (!isRecord(data)) return data;
+  const inputLog = Array.isArray(data.inputLog) ? data.inputLog.map((entry: unknown) => {
+    if (!isRecord(entry) || !isRecord(entry.payload) || !isRecord(entry.payload.snapshot)) return entry;
+    return { ...entry, payload: { ...entry.payload, snapshot: upgradeHeritageData(entry.payload.snapshot) } };
+  }) : data.inputLog;
+  const withHeritage = (who: unknown, cityId: unknown): unknown => {
+    if (!isRecord(who) || who.heritage !== undefined) return who;
+    const heritage = heritageOfNames(cityId, who.name);
+    return heritage === undefined ? who : { ...who, heritage };
+  };
+  const people = isRecord(data.people)
+    ? Object.fromEntries(Object.entries(data.people).map(([id, p]) => [id, isRecord(p) ? withHeritage(p, p.cityId) : p]))
+    : data.people;
+  const character = isRecord(data.character) ? withHeritage(data.character, data.character.birthCityId ?? data.character.cityId) : data.character;
+  return { ...data, inputLog, people, character };
+}
 
 function upgradeMigrationData(data: unknown): unknown {
   const content = compiled as ContentBundle;
