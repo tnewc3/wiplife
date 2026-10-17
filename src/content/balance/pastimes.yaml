@@ -103,7 +103,7 @@ profiles:
   movie:
     { great: 1.5, good: 4, neutral: 3, bad: 1, backfire: 0, tilt: [] }
   night:
-    { great: 2, good: 4, neutral: 3, bad: 2, backfire: 0.8, tilt: [{ key: sociability, weight: 0.4 }, { key: confidence, weight: 0.2 }] }
+    { great: 2, good: 4, neutral: 3, bad: 2, backfire: 0.35, tilt: [{ key: sociability, weight: 0.4 }, { key: confidence, weight: 0.2 }] }
   outdoor:
     { great: 1.5, good: 5, neutral: 2, bad: 1, backfire: 0.2, tilt: [] }
   luxury:
@@ -122,7 +122,7 @@ chances:
     repeat: 1.6
     quality: true
   bar_fight:
-    base: 0.02
+    base: 0.008
     factors:
       - { key: riskTaking, curve: [{ at: 0, x: 0.4 }, { at: 50, x: 1 }, { at: 100, x: 2.4 }] }
       - { key: discipline, curve: [{ at: 0, x: 1.6 }, { at: 100, x: 0.5 }] }
