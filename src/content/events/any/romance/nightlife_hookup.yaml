@@ -57,11 +57,10 @@ choices:
       failure:
         text: >-
           You are not so lucky. There is a clinic visit, a test, and a long,
-          quiet evening trying to work out what comes next.
+          quiet evening wondering how you let yourself be so careless.
         effects:
           - { type: relationship, role: fling, affection: 2 }
           - { type: health, conditionId: treatable_infection, severity: 25 }
-          - { type: pregnancy, action: begin, how: unplanned, role: fling }
           - { type: stat, key: stress, delta: 8 }
           - { type: stat, key: discipline, delta: -1 }
   - id: goodnight
