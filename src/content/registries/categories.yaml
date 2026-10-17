@@ -196,6 +196,10 @@ categories:
   pets: { label: Pets, household: true }
   vehicles: { label: Cars and driving }
   property: { label: Property }
+  # Batch 2a: jewelry, designer goods, art and boats. Each event is about a valuable you own.
+  valuables:
+    label: Your valuables
+    requires: { belongings: { valuables: { gte: 1 } } }
 
   # T1: the teen years. Crowds at school and the rules at home have their own contracts.
   crowds:

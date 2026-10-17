@@ -778,7 +778,7 @@ Meet every M1 acceptance criterion. Run all checks and a 10,000-life simulation,
 
 | Area | Decision |
 |---|---|
-| Possessions | Pets, vehicles, and extra homes with renovations (no valuables) |
+| Possessions | Pets, vehicles, and extra homes with renovations (no valuables; **reversed in Batch 2a**, see the note below the table) |
 | Pets | Moderate: care needs, vet costs, personality, events |
 | Vehicles | Moderate: buy, sell, condition, accidents, insurance |
 | Extra homes | Vacation homes and renovations; no renting out |
@@ -796,6 +796,8 @@ Meet every M1 acceptance criterion. Run all checks and a 10,000-life simulation,
 | Fame depth | Deep: agents, contracts, tours, awards seasons |
 | Sports depth | Deep: team, position, contract years, injuries, trades, and choices in big games and playoff runs |
 | Fame and secrets | Tabloids can expose secrets to everyone |
+
+**Reversed in Batch 2a (post-expansion-1 changes), at the playtester's request: possessions now include valuables.** E5 decided on "no valuables" (jewelry, designer goods, art, boats). The first playtest after the full expansion wave asked for a Luxury category, and a Luxury category with nothing to own would only be a money sink, so valuables are a fourth possession kind beside pets, vehicles and vacation homes: a value that moves each year by its class (jewelry and art hold or grow, designer goods and boats lose value, with a seeded swing), yearly upkeep and insurance as shares of the value, a yearly chance of theft (an event; the insurer pays out a share of the value when the item is insured), a sale at a share of the value, and passing through the estate like any possession. Valuables are bought through Luxury activities (More → Activities), never as a free-standing market, and they never create money (a sale brings less than the value, and upkeep and insurance run every year). See technical.md, "Batch 2a — Activities (as built)".
 
 E6 is split into **E6a** (crime careers), **E6b** (fame in arts and media) and **E6c** (sports), since each is a full system.
 

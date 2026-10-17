@@ -7,10 +7,12 @@
 import type { BelongingsCondition, ContentBundle } from '../../content/schemas';
 import type { Id, LifeState, Possession } from '../types';
 import { compare } from '../conditions';
-import { castPossession, livingPets, petAge, petOf, vacationHomesOf, vehicleAge, vehicleOf, vehiclesOf } from './query';
+import { castPossession, livingPets, petAge, petOf, vacationHomesOf, valuablesOf, vehicleAge, vehicleOf, vehiclesOf } from './query';
 
 const PET_FIELDS = ['species', 'personality', 'petAge', 'petHealth', 'petBond', 'petIll'] as const;
 const VEHICLE_FIELDS = ['vehicleKind', 'vehicleDef', 'vehicleAge', 'vehicleCondition', 'insured', 'loan'] as const;
+
+const VALUABLE_FIELDS = ['valuableClass', 'valuableInsured'] as const;
 
 const has = (q: BelongingsCondition, keys: readonly (keyof BelongingsCondition)[]) => keys.some((k) => q[k] !== undefined);
 
@@ -50,6 +52,17 @@ export function belongingsHolds(q: BelongingsCondition, state: LifeState, cast: 
       return true;
     };
     if (!(bound ? fits(bound) : vehicles.some(fits))) return false;
+  }
+
+  if (q.valuables && !compare(valuablesOf(state).length, q.valuables)) return false;
+  if (has(q, VALUABLE_FIELDS)) {
+    const bound = castPossession(state, cast, 'valuable', 'valuable');
+    const fits = (p: Possession): boolean => {
+      if (q.valuableClass && !(content && q.valuableClass.includes(content.valuables[p.defId]?.class ?? 'jewelry'))) return false;
+      if (q.valuableInsured !== undefined && p.valuable?.insured !== q.valuableInsured) return false;
+      return true;
+    };
+    if (!(bound ? fits(bound) : valuablesOf(state).some(fits))) return false;
   }
 
   if (q.renovated !== undefined) {

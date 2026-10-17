@@ -1,0 +1,40 @@
+id: buy_a_sailboat
+category: luxury
+label: "Buy a sailboat"
+blurb: "A small cruising boat with a berth, a cabin and a pile of upkeep."
+minAge: 18
+inPerson: true
+companion: none
+cost: sailboat
+profile: luxury
+yearlyLimit: 1
+buys: sailboat
+tiers:
+  great:
+    text:
+      - "On the first morning out, the wind fills the sail and everything quiets. You name the boat before you reach the dock, and pay {cost} without a flinch."
+      - "The water is flat and gold, and the boat moves under you like it knows the way. {cost}, and a dream come true."
+    effects:
+      - { type: stat, key: happiness, delta: 6 }
+      - { type: stat, key: confidence, delta: 2 }
+      - { type: stat, key: looks, delta: 1 }
+  good:
+    text:
+      - "A solid little boat in good order. {cost}, a berth fee and a year of weekends ahead."
+      - "The survey comes back clean and the sea trial goes well. You pay {cost} and head for the dock."
+    effects:
+      - { type: stat, key: happiness, delta: 4 }
+      - { type: stat, key: confidence, delta: 1 }
+  neutral:
+    text:
+      - "The boat is fine, and the list of things it needs is long. You paid {cost}, and the list has only begun."
+      - "It sails well enough. You are learning how much more it takes to keep it."
+    effects:
+      - { type: stat, key: happiness, delta: 2 }
+  bad:
+    text:
+      - "The survey missed a soft patch in the deck, and the surprises have only begun. {cost}, and a project."
+      - "It leaks in a way the broker did not mention. You paid {cost} for the privilege of learning to fix it."
+    effects:
+      - { type: stat, key: happiness, delta: -1 }
+      - { type: stat, key: stress, delta: 3 }

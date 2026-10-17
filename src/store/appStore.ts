@@ -97,7 +97,7 @@ export interface AppState {
   /** The person open on the People tab, if any (E5: or a pet, by its possession id). */
   personId: string | null;
   /** A page open on the More tab (More → Home, More → Health), if any. */
-  moreView: 'home' | 'health' | 'family' | 'will' | 'belongings' | 'teen' | 'later' | 'groups' | 'travel' | 'migration' | null;
+  moreView: 'home' | 'health' | 'family' | 'will' | 'belongings' | 'teen' | 'later' | 'groups' | 'travel' | 'migration' | 'activities' | null;
   /** E1: the Interact sheet open on a person's page: the grouped menu, or the gift price tiers. */
   /** The Interact sheet: the menu, a gift's price tiers, or (E4) the picker for an interaction that needs another person or a story first. */
   interactSheet: { personId: string; view: 'menu' | 'gift' | 'pick'; /** The interaction a picker is for. */ pick?: string } | null;
@@ -174,6 +174,8 @@ export interface AppState {
   openLater: () => void;
   /** W2: opens More → Groups. */
   openGroups: () => void;
+  /** Batch 2a: opens More → Activities. */
+  openActivities: () => void;
   /** E5: More → Belongings. */
   openBelongings: () => void;
   /** T1: More → Teen years. */
@@ -798,6 +800,11 @@ export function createAppStore({
         openGroups: () =>
           set((s) => {
             if (s.life) s.moreView = 'groups';
+          }),
+
+        openActivities: () =>
+          set((s) => {
+            if (s.life) s.moreView = 'activities';
           }),
 
         openTeen: () =>

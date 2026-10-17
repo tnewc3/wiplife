@@ -15,7 +15,7 @@ import { fittingResults, queueResult } from './result';
  * nothing is charged twice. The common checks (between years, input
  * validation, the input log) live in ./index.ts.
  */
-import { LIFESTYLES, type FindDateWay, type ApplyProgram, type ContentBundle, type Lifestyle, type MentalCareId, type PetSourceId, type TeenFocusId, type Tier } from '../../content/schemas';
+import { LIFESTYLES, type FindDateWay, type ApplyProgram, type ContentBundle, type Lifestyle, type MentalCareId, type PastimeQuality, type PetSourceId, type TeenFocusId, type Tier } from '../../content/schemas';
 import { canStartDebtPlan, isIndependent, payDebt, spend, startDebtPlan } from '../finance';
 import { buyHome, joinableParent, moveInCost, moveTo, purchaseQuote, refreshHousingCost, sellHome } from '../housing';
 import { afterMove } from '../career';
@@ -35,6 +35,7 @@ import { SPORTS_ACTION_IDS, SPORTS_ACTIONS } from './sports';
 import { LATER_ACTION_IDS, LATER_ACTIONS } from './later';
 import { BELONGING_ACTION_IDS, BELONGING_ACTIONS } from './belonging';
 import { LOVE_ACTION_IDS, LOVE_ACTIONS } from './love';
+import { PASTIME_ACTION_IDS, PASTIME_ACTIONS } from './pastimes';
 import { BUSINESS_ACTION_IDS, BUSINESS_ACTIONS, type BusinessActionParams } from './business';
 import type { WishesInput } from '../later/terminal';
 import type { IdentityEdit } from '../discovery';
@@ -43,7 +44,7 @@ import { sameCountry } from '../country';
 
 export const MONEY_ACTION_IDS = ['set_lifestyle', 'start_gig', 'stop_gig', 'pay_debt', 'debt_plan'] as const;
 export const HOME_ACTION_IDS = ['rent_home', 'move_home', 'relocate', 'buy_home', 'sell_home', 'find_roommate', 'live_alone'] as const;
-export const LIFE_ACTION_IDS = [...TRAVEL_ACTION_IDS, ...MIGRATION_ACTION_IDS, 'take_language_classes', ...MONEY_ACTION_IDS, ...HOME_ACTION_IDS, ...EDUCATION_ACTION_IDS, ...CAREER_ACTION_IDS, ...PERSONAL_ACTION_IDS, ...FAMILY_ACTION_IDS, ...ESTATE_ACTION_IDS, ...POSSESSION_ACTION_IDS, ...TEEN_ACTION_IDS, ...CRIME_ACTION_IDS, ...FAME_ACTION_IDS, ...SPORTS_ACTION_IDS, ...LATER_ACTION_IDS, ...BELONGING_ACTION_IDS, ...BUSINESS_ACTION_IDS, ...LOVE_ACTION_IDS] as const;
+export const LIFE_ACTION_IDS = [...TRAVEL_ACTION_IDS, ...MIGRATION_ACTION_IDS, 'take_language_classes', ...MONEY_ACTION_IDS, ...HOME_ACTION_IDS, ...EDUCATION_ACTION_IDS, ...CAREER_ACTION_IDS, ...PERSONAL_ACTION_IDS, ...FAMILY_ACTION_IDS, ...ESTATE_ACTION_IDS, ...POSSESSION_ACTION_IDS, ...TEEN_ACTION_IDS, ...CRIME_ACTION_IDS, ...FAME_ACTION_IDS, ...SPORTS_ACTION_IDS, ...LATER_ACTION_IDS, ...BELONGING_ACTION_IDS, ...BUSINESS_ACTION_IDS, ...LOVE_ACTION_IDS, ...PASTIME_ACTION_IDS] as const;
 
 /** The only money, home, school, work and personal actions you can take in prison (Stage 9). */
 export const PRISON_LIFE_ACTIONS: readonly LifeActionId[] = ['pay_debt', 'debt_plan', 'stop_gig', 'edit_identity', 'write_will'];
@@ -127,6 +128,10 @@ export interface LifeActionParams {
   dateWay?: FindDateWay;
   /** W3: what a business action is about (see ./business.ts). */
   biz?: BusinessActionParams;
+  /** Batch 2a: an activity (an id in src/content/pastimes), who comes along and, for one with price tiers, which tier. */
+  pastimeId?: string;
+  companionId?: string;
+  quality?: PastimeQuality;
 }
 
 export interface LifeActionRule {
@@ -316,6 +321,7 @@ export const LIFE_ACTIONS: Record<LifeActionId, LifeActionRule> = {
   ...BELONGING_ACTIONS,
   ...BUSINESS_ACTIONS,
   ...LOVE_ACTIONS,
+  ...PASTIME_ACTIONS,
 };
 
 /** True when the action can be taken now with these (validated) parameters. In prison, only a few can. */

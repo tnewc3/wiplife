@@ -1,0 +1,38 @@
+id: meditate
+category: mind_body
+label: "Meditate"
+blurb: "Sit still, close your eyes and let the noise settle."
+minAge: 10
+inPerson: true
+companion: none
+cost: meditate
+profile: calm
+yearlyLimit: 8
+tiers:
+  great:
+    text:
+      - "For a few minutes, everything lets go. You open your eyes feeling like you slept for a week."
+      - "Something shifts in your chest. The worry is still there, but it is smaller and farther away."
+    effects:
+      - { type: stat, key: stress, delta: -6 }
+      - { type: stat, key: happiness, delta: 3 }
+      - { type: stat, key: discipline, delta: 1 }
+  good:
+    text:
+      - "You sit, you breathe, you wander off a hundred times and come back a hundred times. It helps."
+      - "Twenty quiet minutes. The day looks less sharp afterward."
+    effects:
+      - { type: stat, key: stress, delta: -3 }
+      - { type: stat, key: happiness, delta: 1 }
+  neutral:
+    text:
+      - "Your mind will not settle, but you stay on the cushion anyway."
+      - "You mostly think about dinner. It is still a pause in the day."
+    effects:
+      - { type: stat, key: stress, delta: -1 }
+  bad:
+    text:
+      - "Sitting alone with your thoughts turns out to be the opposite of relaxing. You get up restless and on edge."
+      - "Every worry you own turns up at once. You stop early and go for a walk instead."
+    effects:
+      - { type: stat, key: stress, delta: 2 }

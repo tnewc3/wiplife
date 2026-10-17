@@ -1,0 +1,39 @@
+id: visit_a_bookstore
+category: shopping
+label: "Browse a bookstore"
+blurb: "Shelves of paper and plenty of time."
+minAge: 8
+inPerson: true
+companion: none
+cost: books
+profile: shop
+yearlyLimit: 6
+tiers:
+  great:
+    text:
+      - "You pick up a book at random, read the first page, and know it is going to change something. You buy it for part of {cost} and read the rest that night."
+      - "The perfect afternoon: coffee, shelves, and a stack of books you cannot wait to start. It came to {cost}."
+    effects:
+      - { type: stat, key: smarts, delta: 3 }
+      - { type: stat, key: happiness, delta: 3 }
+      - { type: stat, key: stress, delta: -2 }
+  good:
+    text:
+      - "A calm hour of browsing and a couple of books to carry home. {cost} well spent."
+      - "You find a few good books and a quiet corner to read the first chapter. It was {cost}."
+    effects:
+      - { type: stat, key: smarts, delta: 2 }
+      - { type: stat, key: happiness, delta: 1 }
+      - { type: stat, key: stress, delta: -1 }
+  neutral:
+    text:
+      - "You wander the shelves, buy a paperback for {cost}, and leave without a plan to read it."
+      - "The store is nice, and your to-read pile gets taller."
+    effects:
+      - { type: stat, key: smarts, delta: 1 }
+  bad:
+    text:
+      - "You cannot find anything you want, and the store is closing. You buy a postcard for {cost} out of guilt."
+      - "The shop is crowded and the staff are brusque. You leave with nothing but a headache."
+    effects:
+      - { type: stat, key: stress, delta: 1 }

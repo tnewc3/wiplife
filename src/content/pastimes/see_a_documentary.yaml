@@ -1,0 +1,56 @@
+id: see_a_documentary
+category: movies
+label: "See a documentary"
+blurb: "A true story on a big screen, with a bit of something to learn."
+minAge: 10
+inPerson: true
+companion: optional
+companionKinds: [partner, friend, family]
+cost: movie_ticket
+profile: movie
+yearlyLimit: 4
+tiers:
+  great:
+    text:
+      - "The film opens a door you did not know was there. You read about its subject for days. The ticket was {cost}, and it changed how you see something."
+      - "A fascinating, beautifully made film. You walk out wanting to learn more."
+    together:
+      - "You and {companion.name} sit through the credits and then talk about it for an hour. A great night for {cost}."
+      - "{companion.name} knows more about the subject than you do and fills you in on the way out."
+    effects:
+      - { type: stat, key: happiness, delta: 4 }
+      - { type: stat, key: stress, delta: -3 }
+      - { type: memory, role: companion, tag: movie_night }
+    companion: { affection: 5, trust: 2 }
+  good:
+    text:
+      - "An interesting film and a good conversation starter. You learn something for {cost}."
+      - "The story is gripping and well told, and you leave better informed."
+    together:
+      - "A good film to watch with {companion.name}. You trade opinions over coffee afterward."
+      - "You and {companion.name} learn the same things and argue about the rest, which is half the fun."
+    effects:
+      - { type: stat, key: happiness, delta: 2 }
+      - { type: stat, key: stress, delta: -2 }
+      - { type: memory, role: companion, tag: movie_night }
+    companion: { affection: 3, trust: 1 }
+  neutral:
+    text:
+      - "The subject is interesting, but the film is slow. You learn a few things and doze through a few more."
+      - "A decent documentary. You will remember about half of it."
+    together:
+      - "The documentary is just alright, but the company makes up for it. It was {cost} and a pleasant evening."
+      - "{companion.name} dozes off for ten minutes. You do not tell anyone."
+    effects:
+      - { type: stat, key: stress, delta: -1 }
+    companion: { affection: 1, trust: 0 }
+  bad:
+    text:
+      - "The film is one-sided and long. You wish you had read the article instead."
+      - "It was {cost} for an hour and a half of narration and not much else."
+    together:
+      - "The film is dull, and you and {companion.name} spend the credits making jokes about it. That is the best part."
+      - "It was {cost}, and a long ninety minutes. {companion.name} suggests next time you pick."
+    effects:
+      - { type: stat, key: happiness, delta: -1 }
+    companion: { affection: -1, trust: 0 }

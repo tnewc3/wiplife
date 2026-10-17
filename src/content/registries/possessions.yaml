@@ -6,3 +6,4 @@ accidents:
   total: { events: [totaled_on_the_road] }
   drunk: { events: [drove_home_drunk] }
 petDied: { events: [pet_passed_away, dog_passed_away] }
+valuableStolen: { events: [valuable_stolen, valuable_burglary] }

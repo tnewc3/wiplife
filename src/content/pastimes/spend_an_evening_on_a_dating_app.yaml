@@ -1,0 +1,42 @@
+id: spend_an_evening_on_a_dating_app
+category: love
+label: "Spend an evening on a dating app"
+blurb: "Swipe, talk and see who is out there tonight."
+minAge: 18
+inPerson: true
+companion: none
+cost: hookup_app
+profile: love
+yearlyLimit: 4
+requires: { romance: [single] }
+tiers:
+  great:
+    text:
+      - "You write one good opening line and the replies roll in. The subscription was {cost}, and tonight it earned it."
+      - "A burst of good conversations, a couple of laughs, and a plan before bedtime."
+    effects:
+      - { type: stat, key: happiness, delta: 3 }
+      - { type: stat, key: confidence, delta: 1 }
+    events: [app_match, find_date_app]
+    eventChance: love_match
+  good:
+    text:
+      - "A few matches and one real conversation. The app is {cost}, and not a total waste."
+      - "You scroll and chat, and by midnight you have at least one story to tell."
+    effects:
+      - { type: stat, key: happiness, delta: 2 }
+    events: [app_match, find_date_app]
+    eventChance: love_match
+  neutral:
+    text:
+      - "A lot of swiping and not much talking. You close the app with {cost} spent and no one to show for it."
+      - "Nothing sticks. You go to bed on time."
+    effects:
+      - { type: stat, key: happiness, delta: 1 }
+  bad:
+    text:
+      - "Every conversation dies after a greeting. You put the phone down feeling a little worse than when you picked it up."
+      - "A rude message, a dull message, a message from someone who is obviously a bot. You close the app. {cost}."
+    effects:
+      - { type: stat, key: happiness, delta: -2 }
+      - { type: stat, key: stress, delta: 1 }

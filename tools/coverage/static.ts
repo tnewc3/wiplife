@@ -97,6 +97,9 @@ export function rootEvents(content: ContentBundle): Set<string> {
     // E5: the accidents and the death of a pet the possessions step queues.
     ...Object.values(r.possessions.accidents),
     r.possessions.petDied,
+    r.possessions.valuableStolen,
+    // Batch 2a: the follow-up events an activity can open after its outcome.
+    ...Object.values(content.pastimes).map((p) => ({ events: Object.values(p.tiers).flatMap((t) => t?.events ?? []) })),
     // T1: what the teen step queues (a catch at home, an invitation, a clash, a juvenile case).
     ...Object.values(r.teen.triggers),
     // E6a: what the crime step queues (a year's jobs, a promotion, an arrest, a raid, the past catching up...).

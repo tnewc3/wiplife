@@ -1,0 +1,56 @@
+id: see_an_animated_film
+category: movies
+label: "See an animated film"
+blurb: "Bright colors, big songs and a story for all ages."
+minAge: 0
+inPerson: true
+companion: optional
+companionKinds: [partner, friend, family]
+cost: movie_ticket
+profile: movie
+yearlyLimit: 4
+tiers:
+  great:
+    text:
+      - "The film is clever, funny and warm, and you tear up near the end. You hum the song on the way out."
+      - "A wonderful film that makes you feel like a kid. It was {cost} and you would pay it twice."
+    together:
+      - "You and {companion.name} laugh at the same jokes and sing the same song on the way out. A happy afternoon for {cost}."
+      - "{companion.name} cries at the end and pretends not to. So do you."
+    effects:
+      - { type: stat, key: happiness, delta: 4 }
+      - { type: stat, key: stress, delta: -3 }
+      - { type: memory, role: companion, tag: movie_night }
+    companion: { affection: 5, trust: 2 }
+  good:
+    text:
+      - "A sweet, funny film that holds your attention. You come out smiling."
+      - "The animation is lovely and the story is better than you expected. {cost} for a pleasant afternoon."
+    together:
+      - "A cheerful afternoon with {companion.name}. You split the popcorn and compare favorite characters."
+      - "You and {companion.name} enjoy the film more than you thought you would."
+    effects:
+      - { type: stat, key: happiness, delta: 2 }
+      - { type: stat, key: stress, delta: -2 }
+      - { type: memory, role: companion, tag: movie_night }
+    companion: { affection: 3, trust: 1 }
+  neutral:
+    text:
+      - "The film is bright and cheerful, if forgettable. You enjoy the popcorn."
+      - "Not the best of its kind, but it is a nice afternoon."
+    together:
+      - "The film is fine, and {companion.name} is better. You share a snack and head home."
+      - "A pleasant, undemanding afternoon with {companion.name}."
+    effects:
+      - { type: stat, key: stress, delta: -1 }
+    companion: { affection: 1, trust: 0 }
+  bad:
+    text:
+      - "The movie is loud and repetitive. You spend the final act checking the time."
+      - "The theater is full of restless kids, and nobody can hear the film. It was {cost} for noise."
+    together:
+      - "The theater is too loud and too crowded, and you and {companion.name} leave before the end. It was {cost}."
+      - "{companion.name} gets restless, you get restless, and the afternoon ends early."
+    effects:
+      - { type: stat, key: happiness, delta: -1 }
+    companion: { affection: -1, trust: 0 }

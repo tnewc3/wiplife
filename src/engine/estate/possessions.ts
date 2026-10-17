@@ -1,6 +1,6 @@
 /**
  * Possessions in an estate (E5, the extension point E2b left): pets,
- * vehicles and vacation homes pass in kind, not as cash.
+ * vehicles, vacation homes and (Batch 2a) valuables pass in kind, not as cash.
  *
  * `planPossessions` runs before the cash is worked out. Debts attached to a
  * possession (a car loan, a vacation home's mortgage) are not the estate's
@@ -22,6 +22,7 @@ import { addDebt, wholeDollars } from '../finance';
 import { whereabouts } from '../presence';
 import { clampInt } from '../random';
 import { loanIdOf, nextPossessionId } from '../possessions/query';
+import { valuableSaleValue } from '../possessions/valuables';
 import type { Id, LifeState, Possession, PossessionTransfer, WillShare } from '../types';
 import { legalAge } from '../country';
 
@@ -73,6 +74,13 @@ export function planPossessions(life: LifeState, shares: readonly Taker[], insol
         return score(y) - score(x) || y.percent - x.percent || byId(x.id, y.id);
       })[0];
       if (best) pass(p, best, 0);
+      continue;
+    }
+    if (p.kind === 'valuable') {
+      // A valuable has no loan: it goes to the beneficiary with the largest share who is old enough to own one, else it is sold.
+      const taker = insolvent ? undefined : largest(people.filter((t) => ageOfPerson(life, t.id) >= independence));
+      if (taker) pass(p, taker, 0);
+      else plan.sold += valuableSaleValue(p, content);
       continue;
     }
     const isHome = p.kind === 'home';

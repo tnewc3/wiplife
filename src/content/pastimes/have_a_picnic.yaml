@@ -1,0 +1,83 @@
+id: have_a_picnic
+category: outdoor
+label: "Have a picnic"
+blurb: "A blanket, a basket and a patch of grass."
+minAge: 4
+inPerson: true
+companion: optional
+companionKinds: [partner, friend, family]
+cost: picnic
+profile: outdoor
+yearlyLimit: 6
+tiers:
+  great:
+    text:
+      - "The weather holds, the sandwiches are perfect, and you lie on your back and watch the clouds. A beautiful afternoon for {cost}."
+      - "A long, lazy afternoon on the grass. The simplest plans are often the best."
+    together:
+      - "You and {companion.name} lie on the blanket and watch the clouds drift, talking about nothing. It was only {cost}, and the best day in weeks."
+      - "{companion.name} has packed all your favorites. You laugh, eat too much, and nap in the sun."
+    effects:
+      - { type: stat, key: happiness, delta: 4 }
+      - { type: stat, key: stress, delta: -4 }
+      - { type: stat, key: health, delta: 1 }
+      - { type: memory, role: companion, tag: picnic_together }
+    companion: { affection: 5, trust: 2 }
+    extras:
+      - chance: allergy
+        effects:
+          - { type: stat, key: health, delta: -1 }
+          - { type: stat, key: stress, delta: 2 }
+        note: "Pollen finds you before the sandwiches do. You sneeze through the whole afternoon."
+  good:
+    text:
+      - "A pleasant afternoon with food and sunshine. {cost} for the basket."
+      - "You find a shady spot and settle in with a book and a sandwich."
+    together:
+      - "You and {companion.name} share a blanket and a bottle of lemonade. A nice afternoon for {cost}."
+      - "A simple, easy picnic with {companion.name}."
+    effects:
+      - { type: stat, key: happiness, delta: 2 }
+      - { type: stat, key: stress, delta: -2 }
+      - { type: stat, key: health, delta: 1 }
+      - { type: memory, role: companion, tag: picnic_together }
+    companion: { affection: 3, trust: 1 }
+    extras:
+      - chance: allergy
+        effects:
+          - { type: stat, key: health, delta: -1 }
+          - { type: stat, key: stress, delta: 2 }
+        note: "Pollen finds you before the sandwiches do. You sneeze through the whole afternoon."
+  neutral:
+    text:
+      - "The grass is a little damp and the ants are interested. Still, it is pleasant."
+      - "An ordinary picnic. The sandwiches are fine."
+    together:
+      - "You and {companion.name} eat, chat, and head home. {cost}."
+      - "An easy hour with {companion.name}, ants and all."
+    effects:
+      - { type: stat, key: stress, delta: -1 }
+    companion: { affection: 1, trust: 0 }
+    extras:
+      - chance: allergy
+        effects:
+          - { type: stat, key: health, delta: -1 }
+          - { type: stat, key: stress, delta: 2 }
+        note: "Pollen finds you before the sandwiches do. You sneeze through the whole afternoon."
+  bad:
+    text:
+      - "It starts to rain just as you sit down, and the sandwiches are soaked. You eat in the car."
+      - "Wasps arrive in force. You pack up and go home hungry."
+    together:
+      - "You and {companion.name} forget the drinks, the blanket, and the plan. You eat in the car."
+      - "The weather turns, and you and {companion.name} run for shelter laughing, and then not laughing."
+    effects:
+      - { type: stat, key: stress, delta: 2 }
+      - { type: stat, key: happiness, delta: -1 }
+    companion: { affection: -1, trust: 0 }
+    extras:
+      - chance: allergy
+        effects:
+          - { type: stat, key: health, delta: -1 }
+          - { type: stat, key: stress, delta: 2 }
+        note: "Pollen finds you before the sandwiches do. You sneeze through the whole afternoon."

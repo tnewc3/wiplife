@@ -1,0 +1,40 @@
+id: go_to_the_gym
+category: mind_body
+label: "Hit the gym"
+blurb: "A session on the machines and weights."
+minAge: 14
+inPerson: true
+companion: none
+cost: gym_session
+profile: steady
+yearlyLimit: 6
+tiers:
+  great:
+    text:
+      - "The session clicks. Every set goes the way it should, and you walk out feeling like a stronger version of yourself."
+      - "You beat your own numbers on the last set and leave the gym light on your feet."
+    effects:
+      - { type: stat, key: fitness, delta: 4 }
+      - { type: stat, key: stress, delta: -4 }
+      - { type: stat, key: happiness, delta: 2 }
+      - { type: stat, key: discipline, delta: 1 }
+  good:
+    text:
+      - "A solid hour of work. Your muscles ache in the right way and your head is clearer than it was."
+      - "You get through the whole routine, shower, and head home feeling pleased with yourself."
+    effects:
+      - { type: stat, key: fitness, delta: 2 }
+      - { type: stat, key: stress, delta: -2 }
+      - { type: stat, key: happiness, delta: 1 }
+  neutral:
+    text:
+      - "You go through the motions, watch the clock more than the weights, and call it done."
+      - "It is an ordinary workout, neither good nor bad, and it counts anyway."
+    effects:
+      - { type: stat, key: fitness, delta: 1 }
+  bad:
+    text:
+      - "You are tired and distracted, and nothing feels right. You leave early, a little annoyed with yourself."
+      - "The gym is crowded and loud, and you wait for every machine. You come away more irritated than fit."
+    effects:
+      - { type: stat, key: stress, delta: 2 }

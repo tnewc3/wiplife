@@ -1,0 +1,39 @@
+id: manicure
+category: salon_spa
+label: "Get a manicure"
+blurb: "Nails done, hands cared for."
+minAge: 14
+inPerson: true
+companion: none
+cost: manicure
+profile: grooming
+yearlyLimit: 4
+tiers:
+  great:
+    text:
+      - "The nail tech is an artist. You spend the rest of the day holding your hands out where people can see them."
+      - "Perfect color, perfect shape. You keep looking down at your hands and smiling."
+    effects:
+      - { type: stat, key: looks, delta: 2 }
+      - { type: stat, key: happiness, delta: 3 }
+      - { type: stat, key: stress, delta: -2 }
+  good:
+    text:
+      - "A neat, clean manicure and twenty minutes of quiet. Worth {cost}."
+      - "Your hands look cared for, and that is exactly the point."
+    effects:
+      - { type: stat, key: looks, delta: 1 }
+      - { type: stat, key: happiness, delta: 2 }
+      - { type: stat, key: stress, delta: -1 }
+  neutral:
+    text:
+      - "It is a quick job at a busy counter. The polish is even, at least."
+      - "A fine manicure, and an unremarkable afternoon."
+    effects:
+      - { type: stat, key: looks, delta: 1 }
+  bad:
+    text:
+      - "One nail chips on the way to the car. {cost} for twenty minutes of regret."
+      - "The polish smudges before it dries, and you spend the rest of the afternoon careful with your hands."
+    effects:
+      - { type: stat, key: happiness, delta: -1 }

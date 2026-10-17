@@ -4,8 +4,8 @@
  * them are in the files beside this one.
  */
 import { businessLoanIds } from '../business/query';
-import { POSSESSION_ROLES, type ContentBundle, type PetDef, type VehicleDef } from '../../content/schemas';
-import type { Id, LifeState, PetState, Possession, PossessionKind, PossessionsState, VacationState, VehicleState } from '../types';
+import { POSSESSION_ROLES, type ContentBundle, type PetDef, type ValuableDef, type VehicleDef } from '../../content/schemas';
+import type { Id, LifeState, PetState, Possession, PossessionKind, PossessionsState, VacationState, ValuableState, VehicleState } from '../types';
 
 /** A life with nothing yet. */
 export function emptyPossessions(): PossessionsState {
@@ -23,6 +23,8 @@ export function ownedOf(state: LifeState, kind: PossessionKind): Possession[] {
 export const livingPets = (state: LifeState): Possession[] => ownedOf(state, 'pet');
 export const vehiclesOf = (state: LifeState): Possession[] => ownedOf(state, 'vehicle');
 export const vacationHomesOf = (state: LifeState): Possession[] => ownedOf(state, 'home');
+/** Batch 2a: jewelry, designer goods, art and boats. */
+export const valuablesOf = (state: LifeState): Possession[] => ownedOf(state, 'valuable');
 
 export function possessionById(state: LifeState, id: Id | undefined): Possession | undefined {
   return id === undefined ? undefined : state.possessions.items.find((p) => p.id === id);
@@ -37,6 +39,7 @@ export function hasVehicle(state: LifeState): boolean {
 export const petOf = (p: Possession): PetState => p.pet!;
 export const vehicleOf = (p: Possession): VehicleState => p.vehicle!;
 export const homeOf = (p: Possession): VacationState => p.home!;
+export const valuableOf = (p: Possession): ValuableState => p.valuable!;
 
 /** A pet's age in whole years: how old it was, plus the years since. */
 export function petAge(state: LifeState, p: Possession): number {
@@ -51,6 +54,12 @@ export function vehicleAge(state: LifeState, p: Possession): number {
 export function petDef(content: ContentBundle, p: Possession): PetDef {
   const def = content.pets[p.defId];
   if (!def) throw new Error(`Unknown pet "${p.defId}"`);
+  return def;
+}
+
+export function valuableDef(content: ContentBundle, p: Possession): ValuableDef {
+  const def = content.valuables[p.defId];
+  if (!def) throw new Error(`Unknown valuable "${p.defId}"`);
   return def;
 }
 
@@ -88,7 +97,7 @@ export function attachedDebtIds(state: LifeState): Set<Id> {
   return ids;
 }
 
-/** What your vehicles and vacation homes are worth in all (a pet is worth nothing). */
+/** What your vehicles, vacation homes and valuables are worth in all (a pet is worth nothing). */
 export function possessionsValue(state: LifeState): number {
   let total = 0;
   for (const p of state.possessions.items) if (p.kind !== 'pet') total += p.value;
@@ -101,10 +110,11 @@ export function castPossession(state: LifeState, cast: Record<string, Id> | unde
   return p && p.kind === kind ? p : undefined;
 }
 
-/** A readable name for a possession's text: a pet's species, a vehicle's name, a vacation home's city. */
+/** A readable name for a possession's text: a pet's species, a vehicle's or valuable's name, a vacation home's city. */
 export function possessionNoun(p: Possession, content: ContentBundle): string {
   if (p.kind === 'pet') return content.pets[p.defId]?.name ?? 'pet';
   if (p.kind === 'vehicle') return content.vehicles[p.defId]?.name ?? 'vehicle';
+  if (p.kind === 'valuable') return content.valuables[p.defId]?.name ?? 'valuable';
   return content.cities[p.home?.cityId ?? '']?.name ?? 'home';
 }
 

@@ -501,6 +501,13 @@ export const migrations: readonly Migration[] = [
       'Heir replay snapshots are upgraded the same way.',
     migrate: upgradeHeritageData,
   },
+  {
+    from: 28,
+    description:
+      'Batch 2a: activities. Adds this year\'s activity record (nothing done yet, in the life\'s current year). Valuables are a new ' +
+      'possession kind and nothing owned one before, so no possession changes. Heir replay snapshots are upgraded the same way.',
+    migrate: upgradePastimesData,
+  },
 ];
 
 /** The one heritage of this name pool that has both names, or undefined (none, or more than one). */
@@ -565,6 +572,15 @@ function upgradeTravelData(data: unknown): unknown {
     return { ...entry, payload: { ...entry.payload, snapshot: upgradeTravelData(entry.payload.snapshot) } };
   }) : data.inputLog;
   return { ...data, inputLog, travel: data.travel ?? emptyTravel() };
+}
+
+function upgradePastimesData(data: unknown): unknown {
+  if (!isRecord(data)) return data;
+  const inputLog = Array.isArray(data.inputLog) ? data.inputLog.map((entry: unknown) => {
+    if (!isRecord(entry) || !isRecord(entry.payload) || !isRecord(entry.payload.snapshot)) return entry;
+    return { ...entry, payload: { ...entry.payload, snapshot: upgradePastimesData(entry.payload.snapshot) } };
+  }) : data.inputLog;
+  return { ...data, inputLog, pastimes: data.pastimes ?? { year: typeof data.currentYear === 'number' ? data.currentYear : 0, counts: {}, receipts: [] } };
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

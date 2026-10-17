@@ -1,0 +1,60 @@
+id: spa_day
+category: salon_spa
+label: "Spend a spa day"
+blurb: "Steam, pools, treatments and a long, slow day."
+minAge: 18
+inPerson: true
+companion: optional
+companionKinds: [partner, friend, family]
+cost: spa_day
+profile: pamper
+yearlyLimit: 2
+tiers:
+  great:
+    text:
+      - "You lose the whole day to warm water and quiet music, and come out feeling like a new person."
+      - "A perfect day. The worries stay in the locker with your phone, and you do not miss them."
+    together:
+      - "You and {companion.name} drift through the day in matching robes, talking in low voices, laughing too loudly in the quiet room."
+      - "The two of you spend the whole day being looked after, and agree on the way out that you should do it more often."
+    effects:
+      - { type: stat, key: stress, delta: -10 }
+      - { type: stat, key: looks, delta: 2 }
+      - { type: stat, key: health, delta: 1 }
+      - { type: stat, key: happiness, delta: 4 }
+      - { type: memory, role: companion, tag: spa_together }
+    companion: { affection: 6, trust: 3 }
+  good:
+    text:
+      - "A slow, soft day of pools and treatments. You pay {cost} and call it an investment in being a person."
+      - "You drift from the sauna to the pool to the treatment room and back. By evening your shoulders are down."
+    together:
+      - "{companion.name} comes with you, and you pass the afternoon in a warm, drowsy haze. It was {cost} for the two of you."
+      - "You and {companion.name} share the pool and the quiet. Neither of you checks a phone all day."
+    effects:
+      - { type: stat, key: stress, delta: -6 }
+      - { type: stat, key: looks, delta: 1 }
+      - { type: stat, key: happiness, delta: 3 }
+    companion: { affection: 4, trust: 2 }
+  neutral:
+    text:
+      - "The spa is nicer than your apartment, and that is most of what you get for {cost}."
+      - "It is relaxing enough, though you spend a good deal of the day on your phone."
+    together:
+      - "You and {companion.name} spend most of the day in separate rooms with a robe each. It is pleasant enough."
+      - "{companion.name} enjoys it more than you do. You find the robes itchy."
+    effects:
+      - { type: stat, key: stress, delta: -3 }
+      - { type: stat, key: happiness, delta: 1 }
+    companion: { affection: 1, trust: 0 }
+  bad:
+    text:
+      - "The place is packed and loud, and the treatment is rushed. You leave with a lighter wallet and a heavier mood."
+      - "Wet floors, a long wait, and a treatment you did not choose. It is not what the brochure promised."
+    together:
+      - "The place is packed, the treatments are late, and you and {companion.name} spend the day complaining. It cost {cost}."
+      - "The spa day is a disappointment, and {companion.name} is kind enough not to say so."
+    effects:
+      - { type: stat, key: stress, delta: 1 }
+      - { type: stat, key: happiness, delta: -1 }
+    companion: { affection: -1, trust: 0 }

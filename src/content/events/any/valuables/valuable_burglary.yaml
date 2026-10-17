@@ -1,0 +1,26 @@
+# Queued by the possessions step (registries/possessions.yaml valuableStolen), Batch 2a.
+id: valuable_burglary
+title: The back window
+text: >-
+  The back window is open and the glass is on the floor. The first thing you
+  look for is the {valuable}, and it is the first thing that is gone.
+tone: dark
+category: valuables
+rarity: uncommon
+lifeStages: [youngAdult, adult, senior]
+requires: { belongings: { valuables: { gte: 1 } } }
+weight: { base: 2 }
+followUpOnly: true
+bind: [valuable]
+autoOutcome:
+  text: >-
+    You stand in the doorway for a long time before you call anyone. The
+    police come, the insurer is notified, and you sleep with the lights on.
+    The {valuable} is gone.
+  effects:
+    - { type: possession, action: valuable_stolen }
+    - { type: flag, key: valuable_stolen, value: true }
+    - { type: history, text: 'Someone broke in and took your {valuable}.', importance: 3 }
+    - { type: mental, action: trauma, amount: 6 }
+    - { type: stat, key: stress, delta: 8 }
+    - { type: stat, key: happiness, delta: -4 }

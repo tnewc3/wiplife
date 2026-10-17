@@ -1,0 +1,48 @@
+id: hair_color
+category: salon_spa
+label: "Color your hair"
+blurb: "A new shade, if you are feeling bold."
+minAge: 14
+inPerson: true
+companion: none
+cost: hair_color
+profile: grooming
+yearlyLimit: 3
+tiers:
+  great:
+    text:
+      - "The color comes out better than the swatch. People notice it, and say so."
+      - "A new shade, a new mood. You keep checking it in every window you pass."
+    effects:
+      - { type: stat, key: looks, delta: 4 }
+      - { type: stat, key: confidence, delta: 1 }
+      - { type: stat, key: happiness, delta: 2 }
+  good:
+    text:
+      - "A nice, even color that suits you. It cost {cost} and you do not regret it."
+      - "You walk out with a fresh shade and a lighter mood."
+    effects:
+      - { type: stat, key: looks, delta: 2 }
+      - { type: stat, key: happiness, delta: 1 }
+  neutral:
+    text:
+      - "The color is a little different from what you pictured, but it is fine."
+      - "It is not dramatic. Mostly you notice it in the bathroom light."
+    effects:
+      - { type: stat, key: looks, delta: 1 }
+  bad:
+    text:
+      - "The color comes out patchy and a shade too far from what you wanted. {cost} for a lesson."
+      - "It is brassy, uneven, and very much not the picture. You book a fix."
+    effects:
+      - { type: stat, key: looks, delta: -2 }
+      - { type: stat, key: happiness, delta: -2 }
+      - { type: stat, key: stress, delta: 2 }
+  backfire:
+    text:
+      - "Something in the dye does not agree with your scalp. You end up itchy, red and wearing a scarf indoors."
+      - "The color burns your scalp and washes out in blotches. You get a full refund of nothing and a headache."
+    effects:
+      - { type: stat, key: looks, delta: -3 }
+      - { type: stat, key: health, delta: -1 }
+      - { type: stat, key: stress, delta: 4 }

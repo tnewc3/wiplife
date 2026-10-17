@@ -502,7 +502,7 @@ const relationKind = z.enum([
 const renovation = z.strictObject({ id, year: int });
 const possession = z.strictObject({
   id,
-  kind: z.enum(['pet', 'vehicle', 'home']),
+  kind: z.enum(['pet', 'vehicle', 'home', 'valuable']),
   defId: id,
   acquired: int,
   value: dollars,
@@ -524,6 +524,7 @@ const possession = z.strictObject({
     .exactOptional(),
   vehicle: z.strictObject({ startAge: int.min(0), insured: z.boolean(), serviceYear: int.exactOptional(), loanDebtId: id.exactOptional() }).exactOptional(),
   home: z.strictObject({ cityId: id, insured: z.boolean(), mortgageDebtId: id.exactOptional(), renovations: z.array(renovation) }).exactOptional(),
+  valuable: z.strictObject({ insured: z.boolean() }).exactOptional(),
 });
 const possessions = z.strictObject({ items: z.array(possession), nextId: int.min(1), claims: z.array(int), noVehicleYears: int.min(0) });
 
@@ -923,6 +924,26 @@ const pendingInteraction = z.strictObject({
     .exactOptional(),
 });
 
+// Batch 2a: activities this year.
+const pastimeReceipt = z.strictObject({
+  year: int,
+  pastimeId: id,
+  tier: z.enum(['great', 'good', 'neutral', 'bad', 'backfire']),
+  text: filled,
+  notes: z.array(filled),
+  money: moneyChange.exactOptional(),
+  companion: z.strictObject({ id, name: filled, affection: int }).exactOptional(),
+  changes: z.strictObject({
+    health: int.exactOptional(),
+    happiness: int.exactOptional(),
+    smarts: int.exactOptional(),
+    looks: int.exactOptional(),
+    fitness: int.exactOptional(),
+    stress: int.exactOptional(),
+  }),
+});
+const pastimes = z.strictObject({ year: int, counts: z.record(z.string(), int.min(1)), receipts: z.array(pastimeReceipt) });
+
 // L1: later life.
 const careOption = z.enum(['family', 'paid', 'assisted']);
 const later = z.strictObject({
@@ -1113,6 +1134,7 @@ export const lifeStateSchema: z.ZodType<LifeState> = z.strictObject({
   later,
   belonging,
   business: businessState,
+  pastimes,
 });
 
 /**

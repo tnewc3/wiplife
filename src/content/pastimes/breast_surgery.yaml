@@ -1,0 +1,83 @@
+id: breast_surgery
+category: surgery
+label: "Breast surgery"
+blurb: "Enlarge, reduce or reshape. Done for comfort or confidence, and a recovery to match."
+minAge: 18
+inPerson: true
+companion: none
+cost: breast_surgery
+profile: surgery
+quality: true
+yearlyLimit: 1
+tiers:
+  great:
+    text:
+      - "You wake up to a body that finally feels like yours. You stand up straighter, and it shows in everything you do."
+      - "The recovery is slow, but the result is exactly right. You feel at ease in your clothes for the first time in years."
+    effects:
+      - { type: flag, key: cosmetic_surgery, value: true }
+      - { type: stat, key: health, delta: -2 }
+      - { type: stat, key: looks, delta: 7 }
+      - { type: stat, key: happiness, delta: 5 }
+      - { type: stat, key: confidence, delta: 2 }
+    extras:
+      - chance: surgery_complication
+        effects:
+          - { type: health, conditionId: surgical_complication, severity: 35 }
+        note: "A few days later a fever and a swollen, angry scar send you back to the clinic. It needs proper treatment."
+  good:
+    text:
+      - "A good result and a manageable recovery. You are glad you made the decision on your own terms."
+      - "The change is what you asked for, and you start wearing clothes you had been avoiding."
+    effects:
+      - { type: flag, key: cosmetic_surgery, value: true }
+      - { type: stat, key: health, delta: -2 }
+      - { type: stat, key: looks, delta: 4 }
+      - { type: stat, key: happiness, delta: 3 }
+    extras:
+      - chance: surgery_complication
+        effects:
+          - { type: health, conditionId: surgical_complication, severity: 35 }
+        note: "A few days later a fever and a swollen, angry scar send you back to the clinic. It needs proper treatment."
+  neutral:
+    text:
+      - "The result is fine, if not dramatic. It will take some months to know how you feel about it."
+      - "It is a quiet change, and you are still getting used to it."
+    effects:
+      - { type: flag, key: cosmetic_surgery, value: true }
+      - { type: stat, key: health, delta: -2 }
+      - { type: stat, key: looks, delta: 1 }
+      - { type: stat, key: stress, delta: 2 }
+    extras:
+      - chance: surgery_complication
+        effects:
+          - { type: health, conditionId: surgical_complication, severity: 35 }
+        note: "A few days later a fever and a swollen, angry scar send you back to the clinic. It needs proper treatment."
+  bad:
+    text:
+      - "The shape is not quite what you imagined, and one side is not quite like the other. The surgeon talks about revisions."
+      - "You are sore, uneven and disappointed. The decision feels heavier than it did."
+    effects:
+      - { type: flag, key: cosmetic_surgery, value: true }
+      - { type: stat, key: health, delta: -2 }
+      - { type: stat, key: looks, delta: -2 }
+      - { type: stat, key: happiness, delta: -4 }
+      - { type: stat, key: stress, delta: 4 }
+      - { type: flag, key: surgery_regret, value: true }
+    extras:
+      - chance: surgery_complication
+        effects:
+          - { type: health, conditionId: surgical_complication, severity: 35 }
+        note: "A few days later a fever and a swollen, angry scar send you back to the clinic. It needs proper treatment."
+  backfire:
+    text:
+      - "The recovery goes wrong. There is a serious infection, a second operation, and a long time before you feel like yourself."
+      - "A complication keeps you in the hospital and out of work, and the result is the least of your worries."
+    effects:
+      - { type: flag, key: cosmetic_surgery, value: true }
+      - { type: stat, key: health, delta: -2 }
+      - { type: stat, key: looks, delta: -4 }
+      - { type: stat, key: happiness, delta: -6 }
+      - { type: stat, key: stress, delta: 7 }
+      - { type: flag, key: surgery_regret, value: true }
+      - { type: health, conditionId: surgical_complication, severity: 30 }

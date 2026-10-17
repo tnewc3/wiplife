@@ -1,0 +1,37 @@
+# Reads the flag a cosmetic procedure that went badly sets (Batch 2a). Frank, never graphic.
+id: surgery_regret
+title: The mirror
+text: >-
+  You catch your reflection in a shop window and look away too fast. The
+  procedure did not give you what you had pictured, and you are the only one
+  who thinks about it every day.
+tone: serious
+category: people
+rarity: uncommon
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { flag: surgery_regret, eq: true }
+weight: { base: 5 }
+cooldownYears: 6
+choices:
+  - id: talk_to_someone
+    label: Talk it over with someone you trust
+    outcome:
+      text: >-
+        It is hard to say out loud and easier once you have. Someone you trust
+        listens and tells you, kindly, that you are more than a reflection.
+      effects:
+        - { type: stat, key: stress, delta: -3 }
+        - { type: stat, key: happiness, delta: 2 }
+        - { type: flag, key: surgery_regret, value: false }
+  - id: avoid_mirrors
+    label: Stop looking and carry on
+    outcome:
+      text: >-
+        You go a week without a mirror. It does not fix anything, but it makes
+        the days easier.
+      effects:
+        - { type: stat, key: stress, delta: 1 }
+        - { type: stat, key: confidence, delta: -1 }

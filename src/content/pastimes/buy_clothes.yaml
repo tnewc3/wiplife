@@ -1,0 +1,58 @@
+id: buy_clothes
+category: shopping
+label: "Shop for clothes"
+blurb: "A day at the stores, trying things on."
+minAge: 12
+inPerson: true
+companion: optional
+companionKinds: [partner, friend, family]
+cost: clothes
+profile: shop
+yearlyLimit: 4
+tiers:
+  great:
+    text:
+      - "You find the jacket, the jeans and the shoes, all in one trip, all on sale. You walk out with {cost} spent and a new wardrobe."
+      - "Everything fits and everything suits you. The mirror in the fitting room is on your side today."
+    together:
+      - "{companion.name} has a good eye, and everything you pick together looks right. It comes to {cost}, and neither of you regrets a thing."
+      - "You and {companion.name} turn the trip into an event. You walk out with armfuls of bags and a lot of laughter."
+    effects:
+      - { type: stat, key: looks, delta: 3 }
+      - { type: stat, key: happiness, delta: 3 }
+      - { type: stat, key: confidence, delta: 1 }
+      - { type: memory, role: companion, tag: shopped_together }
+    companion: { affection: 4, trust: 2 }
+  good:
+    text:
+      - "A productive trip. You buy a few things you will actually wear, for {cost} all told."
+      - "You leave with one great find and two good ones. That is a win."
+    together:
+      - "{companion.name} talks you into the better pair of shoes, and is right. The trip comes to {cost}."
+      - "A good afternoon with {companion.name}, with bags to show for it."
+    effects:
+      - { type: stat, key: looks, delta: 2 }
+      - { type: stat, key: happiness, delta: 2 }
+    companion: { affection: 3, trust: 1 }
+  neutral:
+    text:
+      - "You try on a dozen things and buy two. {cost} later you are not sure you needed them."
+      - "It is a fine trip, with not much to remember. You buy a couple of basics."
+    together:
+      - "You and {companion.name} drift through the stores. You buy a couple of basics, for {cost}, and have a coffee."
+      - "A quiet afternoon with {companion.name}, most of it spent holding bags."
+    effects:
+      - { type: stat, key: looks, delta: 1 }
+      - { type: stat, key: happiness, delta: 1 }
+    companion: { affection: 1, trust: 0 }
+  bad:
+    text:
+      - "Nothing fits and everything is overpriced. You buy something out of boredom for {cost}, and regret it by the time you reach the car."
+      - "You come home with bags and no outfit. The receipts say {cost}."
+    together:
+      - "{companion.name} hates everything you try on, and you buy a shirt just to end the argument. It was {cost}."
+      - "You and {companion.name} get tired and cross, and the trip ends with a purchase neither of you likes."
+    effects:
+      - { type: stat, key: happiness, delta: -1 }
+      - { type: stat, key: stress, delta: 1 }
+    companion: { affection: -1, trust: 0 }

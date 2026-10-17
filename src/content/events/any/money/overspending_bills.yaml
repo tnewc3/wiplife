@@ -1,0 +1,39 @@
+# Reads the flag a shopping spree sets (Batch 2a).
+id: overspending_bills
+title: The statements
+text: >-
+  The statements come in a stack, and for the first time in a while you read
+  every line. A good deal of it is your last big shopping spree.
+tone: serious
+category: money
+rarity: uncommon
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { flag: overspent, eq: true }
+weight: { base: 6 }
+cooldownYears: 4
+choices:
+  - id: pay_down
+    label: Pay a chunk of it down and cut back
+    outcome:
+      text: >-
+        You pay down a good part of the balance, cancel two subscriptions, and
+        put a number on the grocery list. It hurts, and it helps.
+      effects:
+        - { type: money, delta: -300 }
+        - { type: flag, key: overspent, value: false }
+        - { type: stat, key: discipline, delta: 2 }
+        - { type: stat, key: stress, delta: 2 }
+  - id: let_it_ride
+    label: Put it on a card and think about it later
+    outcome:
+      text: >-
+        You add it to the pile with a shrug that does not quite convince you.
+        The interest will not wait.
+      effects:
+        - { type: debt, action: add, kind: personal, amount: 400 }
+        - { type: flag, key: overspent, value: false }
+        - { type: stat, key: stress, delta: 4 }
+        - { type: stat, key: discipline, delta: -1 }

@@ -1,0 +1,139 @@
+id: go_clubbing
+category: nightlife
+label: "Go clubbing"
+blurb: "Dance floors, lights and music loud enough to feel in your chest."
+minAge: 18
+legalAge: drinking
+inPerson: true
+companion: optional
+companionKinds: [partner, friend]
+cost: club_night
+profile: night
+yearlyLimit: 4
+tiers:
+  great:
+    text:
+      - "The beat finds you and the floor opens up. You dance for hours and lose track of everything. Entry and drinks came to {cost}."
+      - "It is one of those nights when everything is right: the music, the crowd, the way you move. You come home at dawn, ringing and happy."
+    together:
+      - "You and {companion.name} dance until your feet give up. You come out into the early morning laughing, with {cost} less in your pocket and no regrets."
+      - "{companion.name} pulls you onto the floor, and the night does the rest."
+    effects:
+      - { type: stat, key: happiness, delta: 5 }
+      - { type: stat, key: stress, delta: -4 }
+      - { type: stat, key: sociability, delta: 1 }
+      - { type: memory, role: companion, tag: night_out_together }
+    companion: { affection: 5, trust: 2 }
+    extras:
+      - chance: drink_addiction
+        effects:
+          - { type: health, conditionId: alcohol_addiction, severity: 25 }
+        note: "You notice that you look forward to the drink more than the company."
+      - chance: hangover
+        effects:
+          - { type: stat, key: health, delta: -1 }
+          - { type: stat, key: stress, delta: 2 }
+          - { type: stat, key: happiness, delta: -1 }
+        note: "The next morning is a slow, grim negotiation with a glass of water."
+    events: [nightlife_met_someone, nightlife_hookup, nightlife_temptation]
+    eventChance: meet_someone
+    drunkDrive: drunk_drive
+  good:
+    text:
+      - "A fun night on the floor. You dance, you sweat, you shout lyrics at strangers. {cost}."
+      - "The DJ is good and the crowd is friendly. You go home hoarse and happy."
+    together:
+      - "You and {companion.name} hold a patch of floor all night. A great evening for {cost}."
+      - "A loud, bright night out with {companion.name}."
+    effects:
+      - { type: stat, key: happiness, delta: 3 }
+      - { type: stat, key: stress, delta: -2 }
+      - { type: memory, role: companion, tag: night_out_together }
+    companion: { affection: 3, trust: 1 }
+    extras:
+      - chance: drink_addiction
+        effects:
+          - { type: health, conditionId: alcohol_addiction, severity: 25 }
+        note: "You notice that you look forward to the drink more than the company."
+      - chance: hangover
+        effects:
+          - { type: stat, key: health, delta: -1 }
+          - { type: stat, key: stress, delta: 2 }
+          - { type: stat, key: happiness, delta: -1 }
+        note: "The next morning is a slow, grim negotiation with a glass of water."
+    events: [nightlife_met_someone, nightlife_hookup, nightlife_temptation]
+    eventChance: meet_someone_low
+    drunkDrive: drunk_drive
+  neutral:
+    text:
+      - "The line is long, the drinks are dear, and the music is fine. You stay an hour and head home. {cost}."
+      - "It is loud and crowded and you feel a little old. You stay for one more song, then leave."
+    together:
+      - "You and {companion.name} dance a bit, drink a bit, and give up around one. {cost}."
+      - "{companion.name} wants to stay and you want to go. You compromise by staying half an hour."
+    effects:
+      - { type: stat, key: happiness, delta: 1 }
+    companion: { affection: 1, trust: 0 }
+    extras:
+      - chance: drink_addiction
+        effects:
+          - { type: health, conditionId: alcohol_addiction, severity: 25 }
+        note: "You notice that you look forward to the drink more than the company."
+      - chance: hangover
+        effects:
+          - { type: stat, key: health, delta: -1 }
+          - { type: stat, key: stress, delta: 2 }
+          - { type: stat, key: happiness, delta: -1 }
+        note: "The next morning is a slow, grim negotiation with a glass of water."
+    drunkDrive: drunk_drive
+  bad:
+    text:
+      - "The floor is packed, the air is thick, and someone steps on your foot every few minutes. You pay {cost} to be miserable."
+      - "You lose your friends, then your jacket, then your patience. You leave with a pounding head."
+    together:
+      - "You and {companion.name} lose each other in the crowd and spend an hour texting across the room. It was {cost} for that."
+      - "{companion.name} is not enjoying it and neither are you. The night ends in the line for the coat check."
+    effects:
+      - { type: stat, key: happiness, delta: -2 }
+      - { type: stat, key: stress, delta: 2 }
+    companion: { affection: -2, trust: -1 }
+    extras:
+      - chance: drink_addiction
+        effects:
+          - { type: health, conditionId: alcohol_addiction, severity: 25 }
+        note: "You notice that you look forward to the drink more than the company."
+      - chance: hangover
+        effects:
+          - { type: stat, key: health, delta: -1 }
+          - { type: stat, key: stress, delta: 2 }
+          - { type: stat, key: happiness, delta: -1 }
+        note: "The next morning is a slow, grim negotiation with a glass of water."
+      - chance: bar_fight
+        effects:
+          - { type: stat, key: health, delta: -3 }
+          - { type: legal, offenseId: disorderly_conduct, outcome: sentence }
+          - { type: flag, key: nightlife_fight, value: true }
+          - { type: stat, key: reputation, delta: -2 }
+        note: "Someone calls the police, and you are the one they write down."
+    drunkDrive: drunk_drive
+  backfire:
+    text:
+      - "A push near the bar becomes a fight on the floor. The bouncers get involved and then the police do."
+      - "Somebody throws a punch and you are suddenly in the middle of it. You leave with a black eye and a ticket."
+    together:
+      - "A drunk stranger grabs {companion.name}. You step in, and things go wrong. You both go home hurt and angry."
+      - "The night with {companion.name} ends outside the club with the police. A bad ending to a night out."
+    effects:
+      - { type: stat, key: happiness, delta: -4 }
+      - { type: stat, key: stress, delta: 5 }
+      - { type: stat, key: health, delta: -4 }
+      - { type: stat, key: reputation, delta: -3 }
+      - { type: flag, key: nightlife_fight, value: true }
+      - { type: legal, offenseId: disorderly_conduct, outcome: sentence }
+    companion: { affection: -4, trust: -2 }
+    extras:
+      - chance: drink_addiction
+        effects:
+          - { type: health, conditionId: alcohol_addiction, severity: 25 }
+        note: "You notice that you look forward to the drink more than the company."
+    drunkDrive: drunk_drive

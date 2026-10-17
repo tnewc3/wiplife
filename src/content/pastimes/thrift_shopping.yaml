@@ -1,0 +1,38 @@
+id: thrift_shopping
+category: shopping
+label: "Go thrift shopping"
+blurb: "Racks of second-hand finds, if you have the patience."
+minAge: 10
+inPerson: true
+companion: none
+cost: thrift
+profile: shop
+yearlyLimit: 4
+tiers:
+  great:
+    text:
+      - "At the very back of the rack, there is the coat. It fits like it was made for you, for almost nothing. Total: {cost}."
+      - "You come home with a bag of treasures and an unreasonable sense of victory. It was {cost}."
+    effects:
+      - { type: stat, key: looks, delta: 3 }
+      - { type: stat, key: happiness, delta: 3 }
+      - { type: stat, key: smarts, delta: 1 }
+  good:
+    text:
+      - "A couple of good finds and a pleasant afternoon. {cost} well spent."
+      - "The racks are full and the prices are low. You carry home a few things you will wear for years."
+    effects:
+      - { type: stat, key: looks, delta: 2 }
+      - { type: stat, key: happiness, delta: 2 }
+  neutral:
+    text:
+      - "You dig through a dozen racks and find one decent shirt. Fair enough for {cost}."
+      - "Mostly you look. You leave with a mug and a belt."
+    effects:
+      - { type: stat, key: happiness, delta: 1 }
+  bad:
+    text:
+      - "Everything smells of mothballs and nothing fits. You buy a lamp you do not need just to feel it was not wasted. {cost}."
+      - "It is the wrong day, the wrong store, and the wrong mood. You go home with very little."
+    effects:
+      - { type: stat, key: happiness, delta: -1 }

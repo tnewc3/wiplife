@@ -1,0 +1,62 @@
+id: go_to_karaoke
+category: nightlife
+label: "Go to karaoke night"
+blurb: "A microphone, a screen of lyrics and a room that wants you to try."
+minAge: 18
+inPerson: true
+companion: optional
+companionKinds: [partner, friend]
+cost: live_show
+profile: night
+yearlyLimit: 4
+tiers:
+  great:
+    text:
+      - "You sing the song you have been practicing in the shower, and the whole room joins in. It is a perfect, ridiculous moment. {cost}."
+      - "Someone takes the microphone, hands it to you, and you nail it. You are a star for three and a half minutes."
+    together:
+      - "You and {companion.name} sing a duet that brings the house down. You are hoarse and thrilled, and it was only {cost}."
+      - "{companion.name} dares you to take the stage, and you do. It goes better than anyone expected."
+    effects:
+      - { type: stat, key: happiness, delta: 5 }
+      - { type: stat, key: stress, delta: -4 }
+      - { type: stat, key: sociability, delta: 1 }
+      - { type: memory, role: companion, tag: night_out_together }
+    companion: { affection: 5, trust: 2 }
+    events: [nightlife_met_someone, nightlife_hookup, nightlife_temptation]
+    eventChance: meet_someone
+  good:
+    text:
+      - "You sing, you laugh, and you clap for strangers. A fun night for {cost}."
+      - "Your voice cracks on the high note, and the room cheers anyway."
+    together:
+      - "You and {companion.name} take turns at the microphone and laugh at each other. {cost}."
+      - "A silly, warm night with {companion.name}."
+    effects:
+      - { type: stat, key: happiness, delta: 3 }
+      - { type: stat, key: stress, delta: -2 }
+      - { type: memory, role: companion, tag: night_out_together }
+    companion: { affection: 3, trust: 1 }
+    events: [nightlife_met_someone, nightlife_hookup, nightlife_temptation]
+    eventChance: meet_someone_low
+  neutral:
+    text:
+      - "You wait for your turn and then sing it a half-step flat. It is over fast, and you survive."
+      - "You mostly listen. The singing is mixed, and the night is pleasant."
+    together:
+      - "You and {companion.name} sing one song and give up. The tickets were {cost}."
+      - "A quiet night, with a few good songs and a few awkward ones."
+    effects:
+      - { type: stat, key: happiness, delta: 1 }
+    companion: { affection: 1, trust: 0 }
+  bad:
+    text:
+      - "The microphone cuts out, you forget the words, and the room goes silent. You smile and pretend it was a joke."
+      - "You pick a song too high for your voice. The room is kind, which is worse."
+    together:
+      - "You and {companion.name} sing a song neither of you knows, in front of a room that knows it well."
+      - "The night is a flop: wrong songs, wrong mood. You go home laughing about it, eventually."
+    effects:
+      - { type: stat, key: happiness, delta: -2 }
+      - { type: stat, key: stress, delta: 2 }
+    companion: { affection: -2, trust: -1 }

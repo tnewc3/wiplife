@@ -1,0 +1,163 @@
+# Batch 2a: activities (leisure and self). Every number the activities use. The
+# costs are US prices: the engine scales them to the price level of the country
+# you live in and your city's cost of living (and shows them in local money).
+# Starting proposals; the simulation targets (balance/targets.yaml, pastimes)
+# say where they should land.
+
+returns:
+  # Each earlier time you do the same activity in a year, gains (a stat that rises,
+  # stress that falls, a companion's affection) are multiplied by this, down to the floor,
+  # and the great and good outcomes get less likely.
+  repeat: 0.6
+  tierShift: 0.8
+  floor: 0.1
+
+# Paying for someone who comes along (tickets, drinks, a second seat).
+companionCost: 1.7
+
+# Surgeon's quality: price, how often it goes wrong, how often it goes well.
+quality:
+  budget: { price: 0.55, complication: 2.4, odds: 0.7 }
+  standard: { price: 1, complication: 1, odds: 1 }
+  premier: { price: 1.9, complication: 0.35, odds: 1.35 }
+
+# How many of this year's receipts the Activities screen keeps.
+receipts: 12
+
+costs:
+  # Mind & body.
+  walk: 0
+  run: 0
+  meditate: 0
+  gym_session: 25
+  yoga_class: 18
+  martial_arts_class: 35
+  diet_plan: 45
+  # Salon & spa.
+  haircut: 35
+  hair_color: 110
+  manicure: 45
+  massage: 95
+  facial: 85
+  spa_day: 240
+  # Plastic surgery.
+  rhinoplasty: 7500
+  facelift: 9500
+  liposuction: 6500
+  breast_surgery: 8500
+  hair_transplant: 6800
+  laser_skin: 2800
+  # Shopping.
+  clothes: 120
+  thrift: 40
+  gadget: 450
+  books: 55
+  spree: 1200
+  online_order: 150
+  # Movie theater.
+  movie_ticket: 16
+  # Nightlife.
+  bar_night: 60
+  club_night: 90
+  house_party: 20
+  live_show: 70
+  comedy_night: 45
+  # Outdoor.
+  hike: 0
+  camping: 80
+  beach_day: 25
+  fishing: 30
+  gardening: 35
+  picnic: 20
+  # Luxury (the price of a valuable, which is worth that much when you buy it).
+  pearl_necklace: 2200
+  gold_watch: 4800
+  diamond_earrings: 6500
+  designer_handbag: 2400
+  tailored_suit: 1800
+  signed_print: 3200
+  oil_painting: 14000
+  sailboat: 38000
+  # Love.
+  speed_dating: 40
+  matchmaker: 450
+  hookup_app: 15
+  date_night: 130
+  couples_class: 90
+
+# The relative odds of each tier. tilt: traits (50 is neutral) that move the odds
+# toward the good side (above 50) or the bad side (below); weight 1 is a full swing at 0 or 100.
+profiles:
+  steady:
+    { great: 1.2, good: 5, neutral: 3, bad: 0.6, backfire: 0, tilt: [{ key: discipline, weight: 0.35 }] }
+  calm:
+    { great: 1.5, good: 5, neutral: 2.5, bad: 0.5, backfire: 0, tilt: [] }
+  pamper:
+    { great: 1.5, good: 5, neutral: 2, bad: 0.4, backfire: 0, tilt: [] }
+  grooming:
+    { great: 1.2, good: 4.5, neutral: 3, bad: 1, backfire: 0.1, tilt: [] }
+  surgery:
+    { great: 2.2, good: 5, neutral: 1.5, bad: 1.1, backfire: 0.3, tilt: [{ key: confidence, weight: 0.25 }] }
+  shop:
+    { great: 1, good: 4, neutral: 3, bad: 1, backfire: 0, tilt: [{ key: discipline, weight: 0.3 }] }
+  movie:
+    { great: 1.5, good: 4, neutral: 3, bad: 1, backfire: 0, tilt: [] }
+  night:
+    { great: 2, good: 4, neutral: 3, bad: 2, backfire: 0.8, tilt: [{ key: sociability, weight: 0.4 }, { key: confidence, weight: 0.2 }] }
+  outdoor:
+    { great: 1.5, good: 5, neutral: 2, bad: 1, backfire: 0.2, tilt: [] }
+  luxury:
+    { great: 1, good: 4, neutral: 3, bad: 1.2, backfire: 0, tilt: [] }
+  love:
+    { great: 1.5, good: 4, neutral: 3, bad: 2, backfire: 0.3, tilt: [{ key: confidence, weight: 0.3 }, { key: sociability, weight: 0.3 }, { key: looks, weight: 0.2 }] }
+
+# Chances inside an outcome (and the chance a follow-up event comes about). A chance is its base,
+# times the curves over the stats and traits it lists, times `repeat` for each earlier time this year,
+# and (quality: true) times the surgeon's complication multiplier.
+chances:
+  surgery_complication:
+    base: 0.06
+    factors:
+      - { key: health, curve: [{ at: 0, x: 2.5 }, { at: 50, x: 1.2 }, { at: 100, x: 0.7 }] }
+    repeat: 1.6
+    quality: true
+  bar_fight:
+    base: 0.05
+    factors:
+      - { key: riskTaking, curve: [{ at: 0, x: 0.4 }, { at: 50, x: 1 }, { at: 100, x: 2.4 }] }
+      - { key: discipline, curve: [{ at: 0, x: 1.6 }, { at: 100, x: 0.5 }] }
+    repeat: 1.2
+  drink_addiction:
+    base: 0.012
+    factors:
+      - { key: vice, curve: [{ at: 0, x: 0.1 }, { at: 40, x: 1 }, { at: 70, x: 3 }, { at: 100, x: 6 }] }
+    repeat: 1.3
+  drunk_drive:
+    base: 0.3
+    factors:
+      - { key: vice, curve: [{ at: 0, x: 0.5 }, { at: 100, x: 1.5 }] }
+  hangover:
+    base: 0.3
+    repeat: 1.1
+  meet_someone:
+    base: 0.5
+    factors:
+      - { key: sociability, curve: [{ at: 0, x: 0.6 }, { at: 50, x: 1 }, { at: 100, x: 1.5 }] }
+    repeat: 0.8
+  meet_someone_low:
+    base: 0.3
+    factors:
+      - { key: sociability, curve: [{ at: 0, x: 0.6 }, { at: 50, x: 1 }, { at: 100, x: 1.5 }] }
+    repeat: 0.8
+  love_match:
+    base: 0.6
+    factors:
+      - { key: confidence, curve: [{ at: 0, x: 0.7 }, { at: 100, x: 1.3 }] }
+    repeat: 0.7
+  outdoor_mishap:
+    base: 0.03
+    repeat: 1.1
+  sunburn:
+    base: 0.15
+  allergy:
+    base: 0.08

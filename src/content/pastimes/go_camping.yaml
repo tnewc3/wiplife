@@ -1,0 +1,84 @@
+id: go_camping
+category: outdoor
+label: "Go camping"
+blurb: "A tent, a fire and a sky with no streetlights in it."
+minAge: 8
+inPerson: true
+companion: optional
+companionKinds: [partner, friend, family]
+cost: camping
+profile: outdoor
+yearlyLimit: 3
+tiers:
+  great:
+    text:
+      - "The fire holds, the stars come out, and the quiet is total. You fall asleep in your clothes and wake to birdsong and a perfect morning."
+      - "A clear night, a good fire, and the best sleep you have had in months. Camping costs {cost} and gives you back far more."
+    together:
+      - "You and {companion.name} watch the stars until you can name constellations that do not exist. It cost {cost} and you will remember the night."
+      - "{companion.name} tells the best ghost story anyone has ever told around a fire."
+    effects:
+      - { type: stat, key: happiness, delta: 4 }
+      - { type: stat, key: stress, delta: -4 }
+      - { type: stat, key: health, delta: 1 }
+      - { type: stat, key: happiness, delta: 1 }
+      - { type: memory, role: companion, tag: camped_together }
+    companion: { affection: 5, trust: 2 }
+    extras:
+      - chance: outdoor_mishap
+        effects:
+          - { type: stat, key: health, delta: -4 }
+          - { type: stat, key: stress, delta: 3 }
+        note: "You burn your hand on a pot handle at the fire, and the first-aid kit gets its first use."
+  good:
+    text:
+      - "A nice weekend away: a fire, a lake, and no signal at all. Gear and fees were {cost}."
+      - "The tent goes up on the first try, and the weather holds. A restful trip."
+    together:
+      - "You and {companion.name} cook over the fire and talk until it dies. A good weekend for {cost}."
+      - "A quiet trip with {companion.name}, with good food and better company."
+    effects:
+      - { type: stat, key: happiness, delta: 2 }
+      - { type: stat, key: stress, delta: -2 }
+      - { type: stat, key: health, delta: 1 }
+      - { type: memory, role: companion, tag: camped_together }
+    companion: { affection: 3, trust: 1 }
+    extras:
+      - chance: outdoor_mishap
+        effects:
+          - { type: stat, key: health, delta: -4 }
+          - { type: stat, key: stress, delta: 3 }
+        note: "You burn your hand on a pot handle at the fire, and the first-aid kit gets its first use."
+  neutral:
+    text:
+      - "It is chilly at night and you sleep badly, but the morning is lovely."
+      - "A fair trip. Some of it is wonderful, and some of it is a cold, hard ground."
+    together:
+      - "You and {companion.name} get through the cold night and enjoy the morning. {cost}."
+      - "It is a modest trip. You and {companion.name} get along fine."
+    effects:
+      - { type: stat, key: stress, delta: -1 }
+    companion: { affection: 1, trust: 0 }
+    extras:
+      - chance: outdoor_mishap
+        effects:
+          - { type: stat, key: health, delta: -4 }
+          - { type: stat, key: stress, delta: 3 }
+        note: "You burn your hand on a pot handle at the fire, and the first-aid kit gets its first use."
+  bad:
+    text:
+      - "It rains all night and the tent leaks. By morning you are wet, cold and done. {cost} for the lesson."
+      - "Mosquitoes find you in the dark. You sleep two hours and go home early."
+    together:
+      - "The tent collapses at midnight, and you and {companion.name} laugh until you are cross. You pack up at dawn. {cost}."
+      - "You and {companion.name} spend a miserable night in a damp tent and agree never to mention it."
+    effects:
+      - { type: stat, key: stress, delta: 2 }
+      - { type: stat, key: happiness, delta: -1 }
+    companion: { affection: -1, trust: 0 }
+    extras:
+      - chance: outdoor_mishap
+        effects:
+          - { type: stat, key: health, delta: -4 }
+          - { type: stat, key: stress, delta: 3 }
+        note: "You burn your hand on a pot handle at the fire, and the first-aid kit gets its first use."

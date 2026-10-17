@@ -138,3 +138,9 @@ flags:
   left_faith: You stopped believing
   # W3: businesses.
   thinking_about_a_business: You started to think about a business of your own
+  # Batch 2a: activities and valuables.
+  overspent: You went on a spending spree you could not really afford
+  cosmetic_surgery: You have had cosmetic surgery
+  surgery_regret: You regret a cosmetic procedure
+  valuable_stolen: A valuable of yours was stolen
+  nightlife_fight: You were in a fight on a night out

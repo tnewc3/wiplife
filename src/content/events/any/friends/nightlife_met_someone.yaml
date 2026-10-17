@@ -1,0 +1,38 @@
+# Opened by a night out (Batch 2a, src/content/pastimes: nightlife). Adults only.
+id: nightlife_met_someone
+title: Someone new
+text: >-
+  Somewhere between the second song and the third, {stranger.name} turns to you,
+  says something you cannot quite hear, laughs, and starts again. Soon you are
+  having an actual conversation over the noise.
+tone: light
+category: friends
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires: { age: { gte: 18 } }
+weight: { base: 5 }
+followUpOnly: true
+cast:
+  stranger: { kind: acquaintance, age: { min: 18, max: 70 }, createIfMissing: true, newChance: 1, presence: city }
+choices:
+  - id: trade_numbers
+    label: Trade numbers
+    outcome:
+      text: >-
+        {stranger.name} types {stranger.their} number into your phone with a
+        flourish, and you do the same. It might turn into something, or just
+        a good story.
+      effects:
+        - { type: relationship, role: stranger, affection: 8, trust: 3 }
+        - { type: memory, role: stranger, tag: met_at_night_out }
+        - { type: stat, key: happiness, delta: 2 }
+        - { type: stat, key: sociability, delta: 1 }
+  - id: enjoy_it
+    label: Enjoy the conversation and leave it there
+    outcome:
+      text: >-
+        You talk until the lights come up, then say goodnight like old
+        acquaintances. It was a nice bit of a night, and it ends as one.
+      effects:
+        - { type: relationship, role: stranger, affection: 3 }
+        - { type: stat, key: happiness, delta: 1 }

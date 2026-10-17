@@ -59,6 +59,7 @@ import { checkBelonging } from './belonging';
 import { checkCountries, checkCountryTags } from './countries';
 import { checkBusiness } from './business';
 import { checkPossessions } from './possessions';
+import { checkPastimes } from './pastimes';
 import { checkTeen } from './teen';
 import { checkCrime } from './crime';
 import { checkFame } from './fame';
@@ -213,6 +214,7 @@ export function checkReferences(
   errors.push(...checkPeople(bundle, fileOf, options.partialEvents === true));
   errors.push(...checkWeb(bundle, fileOf, options.partialEvents === true));
   errors.push(...checkPossessions(bundle, fileOf, options.partialEvents === true));
+  errors.push(...checkPastimes(bundle, fileOf, options.partialEvents === true));
   errors.push(...checkTeen(bundle, fileOf, options.partialEvents === true));
   errors.push(...checkCrime(bundle, fileOf, options.partialEvents === true));
   errors.push(...checkFame(bundle, fileOf, options.partialEvents === true));
@@ -561,6 +563,9 @@ function checkEvents(bundle: ContentBundle, fileOf: (typeKey: CollectionKey, id:
     // E5: accidents and the death of a pet.
     ...Object.values(bundle.registries.possessions.accidents).flatMap((r) => r.events),
     ...bundle.registries.possessions.petDied.events,
+    ...bundle.registries.possessions.valuableStolen.events,
+    // Batch 2a: the follow-up events an activity can open after its outcome.
+    ...Object.values(bundle.pastimes).flatMap((p) => Object.values(p.tiers).flatMap((t) => t?.events ?? [])),
     // T1: what the teen step queues (caught, invited, clash, juvenile).
     ...Object.values(bundle.registries.teen.triggers).flatMap((r) => r.events),
     // L1: what the later-life step queues (a first grandchild, a grandchild who needs a home, care, a warning, amends).
@@ -703,7 +708,7 @@ function checkEvents(bundle: ContentBundle, fileOf: (typeKey: CollectionKey, id:
           err(`${where}: unknown pronoun preset "${effect.value}"`);
         }
         if (effect.type === 'possession') {
-          const need = effect.action.startsWith('vehicle_') ? 'vehicle' : effect.action === 'home_damage' ? 'home' : effect.action.startsWith('pet_') && effect.action !== 'pet_adopt' ? 'pet' : null;
+          const need = effect.action.startsWith('vehicle_') ? 'vehicle' : effect.action === 'home_damage' ? 'home' : effect.action === 'valuable_stolen' ? 'valuable' : effect.action.startsWith('pet_') && effect.action !== 'pet_adopt' ? 'pet' : null;
           if (need && !(def.bind ?? []).includes(need)) err(`${where}: ${effect.action} acts on a ${need}, so the event must bind it (bind: [${need}])`);
           if (effect.species !== undefined && !bundle.pets[effect.species]) err(`${where}: unknown pet "${effect.species}"`);
           if (effect.action === 'pet_adopt' && effect.source !== 'stray' && effect.source !== 'shelter') err(`${where}: an event can bring a pet from a shelter or a stray, not a breeder (that is a purchase)`);
@@ -718,7 +723,7 @@ function checkEvents(bundle: ContentBundle, fileOf: (typeKey: CollectionKey, id:
           if (!target) err(`${where}: unknown event "${effect.eventId}"`);
           for (const role of effect.cast ?? []) {
             // E5: the pet, vehicle or vacation home an event is about travels to a follow-up that binds the same kind.
-            if (role === 'pet' || role === 'vehicle' || role === 'home') {
+            if (role === 'pet' || role === 'vehicle' || role === 'home' || role === 'valuable') {
               const kind = role;
               if (!(def.bind ?? []).includes(kind)) err(`${where}: "${role}" is not bound by this event (bind: [${kind}])`);
               if (target && !(target.bind ?? []).includes(kind)) err(`${where}: "${effect.eventId}" doesn't bind a ${kind}`);

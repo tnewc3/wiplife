@@ -1,0 +1,56 @@
+id: see_a_horror_movie
+category: movies
+label: "See a horror movie"
+blurb: "Dark theater, loud sound and a good reason to hold on to the armrest."
+minAge: 14
+inPerson: true
+companion: optional
+companionKinds: [partner, friend, family]
+cost: movie_ticket
+profile: movie
+yearlyLimit: 4
+tiers:
+  great:
+    text:
+      - "You jump so hard you spill the popcorn, and then laugh at yourself for the rest of the movie. A great scare for {cost}."
+      - "The film builds and builds, and the last ten minutes have the whole theater on its feet. You sleep with the light on, happily."
+    together:
+      - "{companion.name} grips your arm at the worst moment and you both shriek. You laugh the whole way home."
+      - "You and {companion.name} scream, giggle, and share a bucket of popcorn at a very good horror movie. It was {cost}."
+    effects:
+      - { type: stat, key: happiness, delta: 4 }
+      - { type: stat, key: stress, delta: -3 }
+      - { type: memory, role: companion, tag: movie_night }
+    companion: { affection: 5, trust: 2 }
+  good:
+    text:
+      - "A properly scary movie. You are on edge the whole way and glad you went."
+      - "You get a few good jumps and enjoy the adrenaline. It was {cost}."
+    together:
+      - "A good scare with good company. {companion.name} hides behind a hand and peeks through the fingers."
+      - "You and {companion.name} jump together at the same moment, and laugh about it for an hour."
+    effects:
+      - { type: stat, key: happiness, delta: 2 }
+      - { type: stat, key: stress, delta: -2 }
+      - { type: memory, role: companion, tag: movie_night }
+    companion: { affection: 3, trust: 1 }
+  neutral:
+    text:
+      - "It is more silly than scary. You eat the popcorn and wait for the sequel."
+      - "Not much of a scare, but a fun enough evening for {cost}."
+    together:
+      - "The movie is only mildly frightening, but {companion.name} makes it better. You pay {cost} and make a late-night snack."
+      - "You and {companion.name} spend half the film making fun of the monster."
+    effects:
+      - { type: stat, key: stress, delta: -1 }
+    companion: { affection: 1, trust: 0 }
+  bad:
+    text:
+      - "The movie is gory and dull, and you spend more time with your eyes shut than open. You leave tense and uneasy."
+      - "You will not sleep tonight. You paid {cost} for it, and it was not even good."
+    together:
+      - "The film is too much for {companion.name} and you leave early, relieved to be out in the air."
+      - "{companion.name} has nightmares, and blames you. It was {cost} for a bad night."
+    effects:
+      - { type: stat, key: happiness, delta: -1 }
+    companion: { affection: -1, trust: 0 }

@@ -1,0 +1,83 @@
+id: laser_skin
+category: surgery
+label: "Laser skin treatment"
+blurb: "Resurfacing for scars, sun damage and fine lines. Peeling for a week, then a clean slate."
+minAge: 18
+inPerson: true
+companion: none
+cost: laser_skin
+profile: surgery
+quality: true
+yearlyLimit: 1
+tiers:
+  great:
+    text:
+      - "After a week of peeling and a month of sunscreen, your skin looks younger and clearer than it has in years."
+      - "The marks that bothered you fade almost to nothing. People say you look healthy."
+    effects:
+      - { type: flag, key: cosmetic_surgery, value: true }
+      - { type: stat, key: health, delta: -2 }
+      - { type: stat, key: looks, delta: 6 }
+      - { type: stat, key: happiness, delta: 5 }
+      - { type: stat, key: confidence, delta: 2 }
+    extras:
+      - chance: surgery_complication
+        effects:
+          - { type: health, conditionId: surgical_complication, severity: 35 }
+        note: "A few days later a fever and a swollen, angry scar send you back to the clinic. It needs proper treatment."
+  good:
+    text:
+      - "A solid result: smoother, clearer skin and a lot less to cover up."
+      - "The peeling is a nuisance, and the result is a quiet, steady improvement."
+    effects:
+      - { type: flag, key: cosmetic_surgery, value: true }
+      - { type: stat, key: health, delta: -2 }
+      - { type: stat, key: looks, delta: 4 }
+      - { type: stat, key: happiness, delta: 3 }
+    extras:
+      - chance: surgery_complication
+        effects:
+          - { type: health, conditionId: surgical_complication, severity: 35 }
+        note: "A few days later a fever and a swollen, angry scar send you back to the clinic. It needs proper treatment."
+  neutral:
+    text:
+      - "The treatment helps a little. The deeper marks stay where they were."
+      - "You look about the same, a bit brighter. You expected more for {cost}."
+    effects:
+      - { type: flag, key: cosmetic_surgery, value: true }
+      - { type: stat, key: health, delta: -2 }
+      - { type: stat, key: looks, delta: 1 }
+      - { type: stat, key: stress, delta: 2 }
+    extras:
+      - chance: surgery_complication
+        effects:
+          - { type: health, conditionId: surgical_complication, severity: 35 }
+        note: "A few days later a fever and a swollen, angry scar send you back to the clinic. It needs proper treatment."
+  bad:
+    text:
+      - "The skin comes out blotchy and pink, and it stays that way for weeks. You hide at home and read about aftercare."
+      - "The healing is slow and uneven. By the time it settles you are not sure you improved anything."
+    effects:
+      - { type: flag, key: cosmetic_surgery, value: true }
+      - { type: stat, key: health, delta: -2 }
+      - { type: stat, key: looks, delta: -2 }
+      - { type: stat, key: happiness, delta: -4 }
+      - { type: stat, key: stress, delta: 4 }
+      - { type: flag, key: surgery_regret, value: true }
+    extras:
+      - chance: surgery_complication
+        effects:
+          - { type: health, conditionId: surgical_complication, severity: 35 }
+        note: "A few days later a fever and a swollen, angry scar send you back to the clinic. It needs proper treatment."
+  backfire:
+    text:
+      - "The laser burns more than it should, and the skin heals badly. There is scarring where there was none."
+      - "A bad reaction leaves red, painful patches. You see two doctors before anyone is sure what to do."
+    effects:
+      - { type: flag, key: cosmetic_surgery, value: true }
+      - { type: stat, key: health, delta: -2 }
+      - { type: stat, key: looks, delta: -4 }
+      - { type: stat, key: happiness, delta: -6 }
+      - { type: stat, key: stress, delta: 7 }
+      - { type: flag, key: surgery_regret, value: true }
+      - { type: health, conditionId: surgical_complication, severity: 30 }

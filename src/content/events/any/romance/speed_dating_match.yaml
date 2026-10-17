@@ -1,0 +1,51 @@
+# Opened by speed dating (Batch 2a, Love). Adults only.
+id: speed_dating_match
+title: Round four
+text: >-
+  The bell rings and you slide into the next seat. Four minutes. {date.name}
+  looks up, smiles, and for once you have no trouble finding something to say.
+tone: light
+category: romance
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { romance: [single] }
+weight: { base: 5 }
+followUpOnly: true
+cast:
+  date: { kind: acquaintance, romantic: true, createIfMissing: true, newChance: 1, presence: city }
+choices:
+  - id: mark_yes
+    label: Tick the box for {date.them}
+    check:
+      base: 55
+      stats: [{ key: sociability, weight: 0.25 }, { key: looks, weight: 0.2 }]
+      success:
+        text: >-
+          The organizers send both your contact details the next morning.
+          {date.name} has already written first.
+        effects:
+          - { type: relationship, role: date, kind: partner, affection: 14 }
+          - { type: memory, role: date, tag: speed_dating_met }
+          - { type: memory, role: date, tag: started_dating }
+          - { type: stat, key: happiness, delta: 5 }
+          - { type: history, text: 'You started dating {date.name}, who you met at speed dating.', importance: 2 }
+      failure:
+        text: >-
+          The match does not come. {date.name} did not tick your box, and the
+          email is polite and brief.
+        effects:
+          - { type: memory, role: date, tag: speed_dating_met }
+          - { type: relationship, role: date, affection: -2 }
+          - { type: stat, key: happiness, delta: -1 }
+  - id: just_talk
+    label: Just enjoy the conversation
+    outcome:
+      text: >-
+        You talk until the bell, then trade numbers on the back of a name tag.
+      effects:
+        - { type: relationship, role: date, affection: 8 }
+        - { type: memory, role: date, tag: speed_dating_met }
+        - { type: memory, role: date, tag: swapped_numbers }

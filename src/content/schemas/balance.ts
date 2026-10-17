@@ -517,6 +517,27 @@ export const targetsBalanceSchema = z.strictObject({
     illShare: shareRangeSchema,
   }),
   /**
+   * Batch 2a: activities (tools/simulate/pastimes.ts), judged on the careful player's lives (spamRatio on the
+   * spamming player's). Ranges may leave out min or max.
+   */
+  pastimes: z.strictObject({
+    /** Activities per life, and the share of lives that did at least one. */
+    perLife: numberRangeSchema,
+    livesWith: shareRangeSchema,
+    /** Of lifetime earnings, the share spent on activities. */
+    spendShare: shareRangeSchema,
+    /** Of surgeries, the share with a complication. */
+    complicationRate: shareRangeSchema,
+    /** Of nightlife outings, the share that start an addiction, and the share that meet someone. */
+    nightlifeAddiction: shareRangeSchema,
+    nightlifeMeetings: shareRangeSchema,
+    /** Of all lives, the share that ever owned a valuable; and thefts per 100 valuable-years. */
+    valuableLives: shareRangeSchema,
+    theftPer100Years: numberRangeSchema,
+    /** The spammer: the benefit of the fourth time in a year as a share of the first time's, at most. */
+    spamRatio: z.number().min(0).max(1),
+  }),
+  /**
    * T1: the teen years (tools/simulate/teen.ts), judged on the careful
    * player's lives, which follow one yearly focus plan each (or none).
    */

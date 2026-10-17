@@ -1,0 +1,62 @@
+id: go_to_a_comedy_night
+category: nightlife
+label: "Go to a comedy night"
+blurb: "A small stage, a two-drink minimum and people trying to be funny."
+minAge: 18
+inPerson: true
+companion: optional
+companionKinds: [partner, friend]
+cost: comedy_night
+profile: night
+yearlyLimit: 4
+tiers:
+  great:
+    text:
+      - "The comic is sharp, the room is with them, and you laugh until you cry. Tickets: {cost}."
+      - "One comedian has you in tears with a story you cannot forget. You walk out wiping your eyes."
+    together:
+      - "You and {companion.name} laugh so hard that people turn around. The tickets were {cost}, and it was worth it."
+      - "{companion.name} has the loudest laugh in the room, and so do you."
+    effects:
+      - { type: stat, key: happiness, delta: 5 }
+      - { type: stat, key: stress, delta: -4 }
+      - { type: stat, key: sociability, delta: 1 }
+      - { type: memory, role: companion, tag: night_out_together }
+    companion: { affection: 5, trust: 2 }
+    events: [nightlife_met_someone, nightlife_hookup, nightlife_temptation]
+    eventChance: meet_someone
+  good:
+    text:
+      - "A funny night. A couple of the acts are great and the rest are fine. {cost}."
+      - "You laugh a lot and leave in a good mood."
+    together:
+      - "You and {companion.name} spend the drive home retelling the best jokes. {cost}."
+      - "A good night out with {companion.name}, and a few good lines to steal."
+    effects:
+      - { type: stat, key: happiness, delta: 3 }
+      - { type: stat, key: stress, delta: -2 }
+      - { type: memory, role: companion, tag: night_out_together }
+    companion: { affection: 3, trust: 1 }
+    events: [nightlife_met_someone, nightlife_hookup, nightlife_temptation]
+    eventChance: meet_someone_low
+  neutral:
+    text:
+      - "A mixed bill. Some of it lands, and some of it dies. {cost}."
+      - "The comics are fine. You chuckle more than you laugh."
+    together:
+      - "A middling night with {companion.name}. You pay {cost} and go home."
+      - "You and {companion.name} laugh at the same two jokes."
+    effects:
+      - { type: stat, key: happiness, delta: 1 }
+    companion: { affection: 1, trust: 0 }
+  bad:
+    text:
+      - "The comic picks on you from the stage and you cannot think of a thing to say. You laugh a bit too hard and wish you were home."
+      - "A long, flat set. You paid {cost} for the privilege."
+    together:
+      - "The comic picks on you and {companion.name}, and neither of you enjoys it. The tickets were {cost}."
+      - "You and {companion.name} sit through a bad hour, then agree never to speak of it."
+    effects:
+      - { type: stat, key: happiness, delta: -2 }
+      - { type: stat, key: stress, delta: 2 }
+    companion: { affection: -2, trust: -1 }

@@ -1,0 +1,38 @@
+id: buy_a_gadget
+category: shopping
+label: "Buy a new gadget"
+blurb: "The latest phone, headphones or whatever is on your wish list."
+minAge: 14
+inPerson: true
+companion: none
+cost: gadget
+profile: shop
+yearlyLimit: 3
+tiers:
+  great:
+    text:
+      - "It is everything the reviews promised. For weeks you find new things it does, and each one pleases you. Total: {cost}."
+      - "You open the box and it feels like the best purchase you have ever made. It cost {cost}, and it is worth it."
+    effects:
+      - { type: stat, key: happiness, delta: 4 }
+      - { type: stat, key: smarts, delta: 1 }
+  good:
+    text:
+      - "A good purchase for {cost}. It works, it looks good, and it makes your days a bit easier."
+      - "You enjoy the new gadget more than you expected to. It was {cost} well spent."
+    effects:
+      - { type: stat, key: happiness, delta: 2 }
+      - { type: stat, key: smarts, delta: 1 }
+  neutral:
+    text:
+      - "It is nice for a week and then it is just another thing in your pocket. {cost}."
+      - "The gadget works as advertised. The thrill lasts about as long as the unboxing."
+    effects:
+      - { type: stat, key: happiness, delta: 1 }
+  bad:
+    text:
+      - "Within the month the newer model comes out, and it is what you wanted all along. You paid {cost} and feel foolish."
+      - "The gadget is flawed in a way the reviews did not mention. You use it twice and put it in a drawer."
+    effects:
+      - { type: stat, key: happiness, delta: -2 }
+      - { type: stat, key: stress, delta: 1 }

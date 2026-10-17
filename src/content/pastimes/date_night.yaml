@@ -1,0 +1,45 @@
+id: date_night
+category: love
+label: "Plan a date night"
+blurb: "Dinner, a show or just an evening, with the person you love."
+minAge: 18
+inPerson: true
+companion: required
+companionKinds: [partner]
+cost: date_night
+profile: love
+yearlyLimit: 6
+tiers:
+  great:
+    together:
+      - "The evening is easy and warm from the first minute. You and {companion.name} laugh across the table, and neither of you wants it to end. {cost}."
+      - "Dinner, a walk, and a long talk at the door. {companion.name} squeezes your hand, and it says everything."
+    effects:
+      - { type: stat, key: happiness, delta: 5 }
+      - { type: stat, key: stress, delta: -4 }
+      - { type: memory, role: companion, tag: date_night }
+    companion: { affection: 7, trust: 4 }
+  good:
+    together:
+      - "A lovely evening out. You and {companion.name} trade stories over dinner, and the check is {cost}."
+      - "You and {companion.name} take the long way home and make plans for the weekend."
+    effects:
+      - { type: stat, key: happiness, delta: 3 }
+      - { type: stat, key: stress, delta: -2 }
+      - { type: memory, role: companion, tag: date_night }
+    companion: { affection: 4, trust: 2 }
+  neutral:
+    together:
+      - "An ordinary evening out. You and {companion.name} talk about work and the weekend. {cost}."
+      - "The meal is fine, the conversation is fine, and you go home content."
+    effects:
+      - { type: stat, key: happiness, delta: 1 }
+    companion: { affection: 1, trust: 0 }
+  bad:
+    together:
+      - "You and {companion.name} are both tired, and the evening goes wrong in small ways. It cost {cost}, and the mood is worse than the food."
+      - "A small argument over nothing sours the evening. You and {companion.name} go home quietly."
+    effects:
+      - { type: stat, key: happiness, delta: -2 }
+      - { type: stat, key: stress, delta: 2 }
+    companion: { affection: -3, trust: -1 }

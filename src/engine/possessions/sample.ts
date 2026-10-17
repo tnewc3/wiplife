@@ -35,6 +35,11 @@ export function giveSamplePossessions(state: LifeState, def: EventDef, cast: Rec
       state.possessions.items.push({ id, kind: 'vehicle', defId, acquired: state.currentYear, value: 0, condition: 70, vehicle: { startAge: 2, insured: true } });
       refreshVehicleValue(state, state.possessions.items.at(-1)!, content);
       cast[POSSESSION_ROLES.vehicle] = id;
+    } else if (kind === 'valuable') {
+      const id = nextPossessionId(state);
+      const defId = Object.keys(content.valuables).sort()[0]!;
+      state.possessions.items.push({ id, kind: 'valuable', defId, acquired: state.currentYear, value: 2_000, condition: 100, valuable: { insured: true } });
+      cast[POSSESSION_ROLES.valuable] = id;
     } else {
       const id = nextPossessionId(state);
       const city = otherCity(state, createRng(`${state.seed}:sample-city`), content);

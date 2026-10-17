@@ -28,6 +28,7 @@ export function possessionsFailures(state: LifeState, content: ContentBundle): s
   let pets = 0;
   let vehicles = 0;
   let homes = 0;
+  let valuables = 0;
   for (const p of P.items) {
     const label = `possession ${p.id}`;
     if (!/^q[1-9][0-9]*$/.test(p.id)) fail(`${label} has a badly formed id`);
@@ -37,7 +38,7 @@ export function possessionsFailures(state: LifeState, content: ContentBundle): s
     if (!Number.isInteger(p.acquired) || p.acquired < state.birthYear || p.acquired > state.currentYear) fail(`${label} was acquired outside the life`);
     if (!Number.isSafeInteger(p.value) || p.value < 0) fail(`${label}.value must be a whole-dollar amount of at least 0`);
     score(`${label}.condition`, p.condition);
-    const subs = [p.pet !== undefined, p.vehicle !== undefined, p.home !== undefined].filter(Boolean).length;
+    const subs = [p.pet !== undefined, p.vehicle !== undefined, p.home !== undefined, p.valuable !== undefined].filter(Boolean).length;
     if (subs !== 1) fail(`${label} has ${subs} kind records`);
 
     if (p.kind === 'pet') {
@@ -78,6 +79,15 @@ export function possessionsFailures(state: LifeState, content: ContentBundle): s
         if (loans.has(v.loanDebtId)) fail(`loan ${v.loanDebtId} is on two possessions`);
         loans.set(v.loanDebtId, p.id);
       }
+    } else if (p.kind === 'valuable') {
+      valuables += 1;
+      if (!p.valuable) {
+        fail(`${label} is a valuable without a valuable record`);
+        continue;
+      }
+      if (!content.valuables[p.defId]) fail(`${label} is an unknown valuable "${p.defId}"`);
+      if (age < independence) fail(`${label}: you own a valuable under the independence age`);
+      if (p.condition !== 100) fail(`${label}: a valuable's condition is always 100`);
     } else {
       const h = p.home;
       if (!h) {
@@ -101,6 +111,7 @@ export function possessionsFailures(state: LifeState, content: ContentBundle): s
   if (pets > b.limits.pets) fail(`${pets} pets (the limit is ${b.limits.pets})`);
   if (vehicles > b.limits.vehicles) fail(`${vehicles} vehicles (the limit is ${b.limits.vehicles})`);
   if (homes > b.limits.vacationHomes) fail(`${homes} vacation homes (the limit is ${b.limits.vacationHomes})`);
+  if (valuables > b.limits.valuables) fail(`${valuables} valuables (the limit is ${b.limits.valuables})`);
 
   // Loans: a car loan is on a vehicle; the only mortgage besides your home's is on a vacation home.
   for (const d of state.finances.debts) {

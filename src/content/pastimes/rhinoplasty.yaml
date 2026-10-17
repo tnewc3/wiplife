@@ -1,0 +1,84 @@
+id: rhinoplasty
+category: surgery
+label: "Nose surgery"
+blurb: "Reshape the nose. Weeks of swelling, a mirror that takes getting used to."
+minAge: 18
+inPerson: true
+companion: none
+cost: rhinoplasty
+profile: surgery
+quality: true
+yearlyLimit: 1
+tiers:
+  great:
+    text:
+      - "After the swelling goes down, the nose that looks back from the mirror is the one you pictured. People tell you that you look well and cannot say why."
+      - "It takes weeks to settle, but the result is subtle and right. You catch yourself smiling at your own profile."
+    effects:
+      - { type: flag, key: cosmetic_surgery, value: true }
+      - { type: stat, key: health, delta: -2 }
+      - { type: stat, key: looks, delta: 8 }
+      - { type: stat, key: happiness, delta: 5 }
+      - { type: stat, key: confidence, delta: 2 }
+      - { type: history, text: "You had surgery on your nose and were happy with the result.", importance: 2 }
+    extras:
+      - chance: surgery_complication
+        effects:
+          - { type: health, conditionId: surgical_complication, severity: 35 }
+        note: "A few days later a fever and a swollen, angry scar send you back to the clinic. It needs proper treatment."
+  good:
+    text:
+      - "The recovery is slow and uncomfortable, and then the bandages come off. You like what you see, and so does everyone who knows."
+      - "The change is real and tasteful, and it was worth the weeks of looking like you lost a fight."
+    effects:
+      - { type: flag, key: cosmetic_surgery, value: true }
+      - { type: stat, key: health, delta: -2 }
+      - { type: stat, key: looks, delta: 5 }
+      - { type: stat, key: happiness, delta: 3 }
+    extras:
+      - chance: surgery_complication
+        effects:
+          - { type: health, conditionId: surgical_complication, severity: 35 }
+        note: "A few days later a fever and a swollen, angry scar send you back to the clinic. It needs proper treatment."
+  neutral:
+    text:
+      - "The nose is a little different, which is the most you can say. It takes a while to know whether it was worth it."
+      - "You spend the recovery on the couch and come out with a small change you mostly notice yourself."
+    effects:
+      - { type: flag, key: cosmetic_surgery, value: true }
+      - { type: stat, key: health, delta: -2 }
+      - { type: stat, key: looks, delta: 2 }
+      - { type: stat, key: stress, delta: 2 }
+    extras:
+      - chance: surgery_complication
+        effects:
+          - { type: health, conditionId: surgical_complication, severity: 35 }
+        note: "A few days later a fever and a swollen, angry scar send you back to the clinic. It needs proper treatment."
+  bad:
+    text:
+      - "The result is not what the pictures promised. It is a little crooked, a little off, and it is yours for good."
+      - "You look in the mirror and feel like a stranger did something to your face. A second operation is possible, but not soon."
+    effects:
+      - { type: flag, key: cosmetic_surgery, value: true }
+      - { type: stat, key: health, delta: -2 }
+      - { type: stat, key: looks, delta: -2 }
+      - { type: stat, key: happiness, delta: -4 }
+      - { type: stat, key: stress, delta: 4 }
+      - { type: flag, key: surgery_regret, value: true }
+    extras:
+      - chance: surgery_complication
+        effects:
+          - { type: health, conditionId: surgical_complication, severity: 35 }
+        note: "A few days later a fever and a swollen, angry scar send you back to the clinic. It needs proper treatment."
+  backfire:
+    text:
+      - "The surgery goes wrong. There is pain, an infection, and a long recovery before anyone will talk about fixing it."
+      - "Your breathing is worse than before and the nose is not what it should be. You are back at the clinic more than once."
+    effects:
+      - { type: flag, key: cosmetic_surgery, value: true }
+      - { type: stat, key: health, delta: -2 }
+      - { type: stat, key: looks, delta: -4 }
+      - { type: stat, key: happiness, delta: -6 }
+      - { type: stat, key: stress, delta: 7 }
+      - { type: flag, key: surgery_regret, value: true }
+      - { type: health, conditionId: surgical_complication, severity: 30 }

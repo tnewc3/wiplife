@@ -1,0 +1,40 @@
+id: buy_diamond_earrings
+category: luxury
+label: "Buy diamond earrings"
+blurb: "Small, bright stones in a simple setting."
+minAge: 18
+inPerson: true
+companion: none
+cost: diamond_earrings
+profile: luxury
+yearlyLimit: 1
+buys: diamond_earrings
+tiers:
+  great:
+    text:
+      - "The stones catch the light and you catch yourself in the mirror, twice. {cost}, and you would do it twice."
+      - "The jeweler brings them out on a tray and the whole counter seems brighter. You pay {cost} and wear them home."
+    effects:
+      - { type: stat, key: happiness, delta: 6 }
+      - { type: stat, key: confidence, delta: 2 }
+      - { type: stat, key: looks, delta: 1 }
+  good:
+    text:
+      - "A sparkling pair, well set and well priced for what they are. {cost}."
+      - "The earrings are everything you hoped. You pay {cost} and feel elegant."
+    effects:
+      - { type: stat, key: happiness, delta: 4 }
+      - { type: stat, key: confidence, delta: 1 }
+  neutral:
+    text:
+      - "A nice pair of earrings. They cost {cost}, which is more than nice."
+      - "They are lovely, though you wonder whether anyone will notice them."
+    effects:
+      - { type: stat, key: happiness, delta: 2 }
+  bad:
+    text:
+      - "On the first evening you notice a chip in one of the settings. The jeweler will repair it, but you had expected perfect for {cost}."
+      - "Beautiful, and the price, {cost}, will take a while to forget."
+    effects:
+      - { type: stat, key: happiness, delta: -1 }
+      - { type: stat, key: stress, delta: 3 }

@@ -1,0 +1,37 @@
+id: online_orders
+category: shopping
+label: "Order things online"
+blurb: "A few clicks and a pile of boxes on the doorstep."
+minAge: 14
+inPerson: true
+companion: none
+cost: online_order
+profile: shop
+yearlyLimit: 4
+tiers:
+  great:
+    text:
+      - "Everything arrives on time, everything fits, and the box of surprises is just what you needed. {cost} well spent."
+      - "Three parcels and three good surprises. It cost {cost} and it is hard to complain."
+    effects:
+      - { type: stat, key: happiness, delta: 3 }
+      - { type: stat, key: looks, delta: 1 }
+  good:
+    text:
+      - "The parcels arrive and mostly please. The total was {cost}."
+      - "A few good finds and one that goes back. {cost} on balance."
+    effects:
+      - { type: stat, key: happiness, delta: 2 }
+  neutral:
+    text:
+      - "You open the boxes with moderate interest. {cost} for a pile of things that are fine."
+      - "The parcels come, and most of them are just what you ordered."
+    effects:
+      - { type: stat, key: happiness, delta: 1 }
+  bad:
+    text:
+      - "Half the order is wrong and the other half does not fit. Returning it costs time you do not have. It was {cost} to learn."
+      - "The photos lied. You pay {cost} for a pile of disappointment and a return label."
+    effects:
+      - { type: stat, key: happiness, delta: -1 }
+      - { type: stat, key: stress, delta: 1 }

@@ -1,0 +1,14 @@
+id: surgical_complication
+name: Surgical complication
+noun: a complication after surgery
+kind: illness
+blurb: A procedure that did not go as planned. It needs a follow-up with a doctor, and it can leave marks if it is not treated.
+course: { untreated: 5, treated: -55 }
+effects:
+  health: { perYear: -2, limit: 40 }
+  looks: { perYear: -2, limit: 30 }
+  stress: { perYear: 3, limit: 60 }
+treatable: true
+costs: { treatment: 3500 }
+mortality: 0.004
+cause: complications

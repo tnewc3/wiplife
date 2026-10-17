@@ -137,10 +137,24 @@ const shareRange = z
 const perSource = <T extends z.ZodType>(value: T) => z.strictObject({ shelter: value, breeder: value, stray: value });
 const perSeverity = <T extends z.ZodType>(value: T) => z.strictObject({ minor: value, major: value, total: value });
 
+/** One class of valuable: yearly numbers as shares of the value. */
+const valuableClass = z.strictObject({
+  /** How its value moves each year (a share; below 0 it loses value), and how far a year can stray from that. */
+  drift: z.number().min(-0.5).max(0.5),
+  volatility: z.number().min(0).max(0.5),
+  /** Yearly upkeep (storage, cleaning, mooring) and insurance, as shares of the value; insurance only when insured. */
+  upkeep: share,
+  insurance: share,
+  /** The yearly chance it is stolen. */
+  theft: share,
+  /** A sale brings this share of the value. */
+  sellShare: share,
+});
+
 /** The possessions numbers (src/content/balance/possessions.yaml). */
 export const possessionsBalanceSchema = z.strictObject({
   /** The most you can own of each kind at once. */
-  limits: z.strictObject({ pets: z.int().min(1).max(20), vehicles: z.int().min(1).max(10), vacationHomes: z.int().min(1).max(10) }),
+  limits: z.strictObject({ pets: z.int().min(1).max(20), vehicles: z.int().min(1).max(10), vacationHomes: z.int().min(1).max(10), valuables: z.int().min(1).max(40) }),
   pets: z.strictObject({
     /** The youngest age you can adopt or buy a pet yourself (a family pet comes through events). */
     adoptAge: z.int().min(10).max(30),
@@ -300,6 +314,12 @@ export const possessionsBalanceSchema = z.strictObject({
       maxActive: z.int().min(1).max(20),
     }),
   }),
+  /** Batch 2a: valuables (E5 extended). Yearly shares of the value, by class; the price is the cost of the activity that buys one. */
+  valuables: z.strictObject({
+    classes: z.strictObject({ jewelry: valuableClass, designer: valuableClass, art: valuableClass, boat: valuableClass }),
+    /** A theft of an insured valuable pays this share of its value. */
+    payout: share,
+  }),
   estate: z.strictObject({
     /** Who is best placed to take a pet: points for living in the household, in your city, elsewhere. */
     petPresence: z.strictObject({ household: z.number(), city: z.number(), elsewhere: z.number() }),
@@ -317,6 +337,8 @@ export const possessionsRegistrySchema = z.strictObject({
     Object.fromEntries(ACCIDENT_KINDS.map((k) => [k, z.strictObject({ events: z.array(idSchema).min(1) })])) as Record<AccidentKind, z.ZodObject<{ events: z.ZodArray<typeof idSchema> }>>,
   ),
   petDied: z.strictObject({ events: z.array(idSchema).min(1) }),
+  /** Batch 2a: the events a theft of a valuable queues (each binds the valuable). */
+  valuableStolen: z.strictObject({ events: z.array(idSchema).min(1) }),
 });
 export type PossessionsRegistry = z.infer<typeof possessionsRegistrySchema>;
 
@@ -335,6 +357,8 @@ export const POSSESSION_HISTORY_KEYS = [
   'vacationForeclosed',
   'renovated',
   'noVehicleJobLost',
+  'valuableBought',
+  'valuableSold',
 ] as const;
 export type PossessionHistoryKey = (typeof POSSESSION_HISTORY_KEYS)[number];
 export const possessionsTextSchema = z.strictObject({

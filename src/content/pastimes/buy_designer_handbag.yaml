@@ -1,0 +1,40 @@
+id: buy_designer_handbag
+category: luxury
+label: "Buy a designer handbag"
+blurb: "The one with the name, the leather and the waiting list."
+minAge: 18
+inPerson: true
+companion: none
+cost: designer_handbag
+profile: luxury
+yearlyLimit: 1
+buys: designer_handbag
+tiers:
+  great:
+    text:
+      - "The bag comes in a box inside another box. You carry it out like a trophy. {cost}, and it is gorgeous."
+      - "The leather smells new and expensive. You pay {cost} and feel, for a day, like someone else."
+    effects:
+      - { type: stat, key: happiness, delta: 6 }
+      - { type: stat, key: confidence, delta: 2 }
+      - { type: stat, key: looks, delta: 1 }
+  good:
+    text:
+      - "A beautiful bag that goes with everything. {cost} and you do not look back."
+      - "It is well made, and people notice it. You pay {cost} and enjoy that."
+    effects:
+      - { type: stat, key: happiness, delta: 4 }
+      - { type: stat, key: confidence, delta: 1 }
+  neutral:
+    text:
+      - "The bag is lovely, though you carry it more carefully than you would like. {cost}."
+      - "It looks good and weighs a lot. {cost} for something you will use on special days."
+    effects:
+      - { type: stat, key: happiness, delta: 2 }
+  bad:
+    text:
+      - "The thrill wears off before you reach the car. You paid {cost} for a handbag and a head full of second thoughts."
+      - "Very expensive, very nice, and very much a bag. {cost}."
+    effects:
+      - { type: stat, key: happiness, delta: -1 }
+      - { type: stat, key: stress, delta: 3 }

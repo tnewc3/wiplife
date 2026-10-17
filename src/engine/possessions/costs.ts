@@ -14,6 +14,7 @@ import type { LifeState } from '../types';
 import { vacationUpkeep } from './homes';
 import { petUpkeep } from './pets';
 import { vehiclesOf } from './query';
+import { valuableCosts } from './valuables';
 import { premium, vehicleUpkeep } from './vehicles';
 
 export interface PossessionCosts {
@@ -24,6 +25,10 @@ export interface PossessionCosts {
 export function possessionCosts(state: LifeState, content: ContentBundle): PossessionCosts {
   if (!isIndependent(state, content) || state.possessions.items.length === 0) return { upkeep: 0, insurance: 0 };
   const homes = vacationUpkeep(state, content);
+  // Batch 2a: valuables cost upkeep and insurance too (stored away, free, in prison).
+  const valuables = valuableCosts(state, content);
+  homes.upkeep += valuables.upkeep;
+  homes.insurance += valuables.insurance;
   if (state.housing.kind === 'incarcerated') return homes;
   const cars = vehiclesOf(state);
   // Living costs already pay for getting around: owning a vehicle replaces that, upkeep first, then insurance.

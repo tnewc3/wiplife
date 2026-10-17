@@ -25,7 +25,7 @@ function required(condition: Condition | undefined): Condition[] {
 }
 
 /** True when the event always requires that you own one of this kind (a count of at least 1, or a field about one). */
-function requiresOwning(def: EventDef, kind: 'pet' | 'vehicle' | 'home'): boolean {
+function requiresOwning(def: EventDef, kind: 'pet' | 'vehicle' | 'home' | 'valuable'): boolean {
   return required(def.requires).some((c) => {
     if (!('belongings' in c)) return false;
     const b = c.belongings;
@@ -33,6 +33,7 @@ function requiresOwning(def: EventDef, kind: 'pet' | 'vehicle' | 'home'): boolea
       cmp !== undefined && Math.max(cmp.gte ?? -Infinity, cmp.gt === undefined ? -Infinity : cmp.gt + 1, cmp.eq ?? -Infinity) >= 1;
     if (kind === 'pet') return atLeastOne(b.pets) || b.species !== undefined || b.personality !== undefined || b.petAge !== undefined || b.petHealth !== undefined || b.petBond !== undefined || b.petIll === true;
     if (kind === 'vehicle') return atLeastOne(b.vehicles) || b.vehicleKind !== undefined || b.vehicleDef !== undefined || b.vehicleAge !== undefined || b.vehicleCondition !== undefined || b.insured !== undefined || b.loan === true;
+    if (kind === 'valuable') return atLeastOne(b.valuables) || b.valuableClass !== undefined || b.valuableInsured !== undefined;
     return atLeastOne(b.vacationHomes) || b.renovated !== undefined;
   });
 }
@@ -44,9 +45,10 @@ export function checkPossessions(bundle: ContentBundle, fileOf: (typeKey: Collec
   const b = bundle.balance.possessions;
 
   // The events the possessions step queues.
-  const queued: { where: string; id: string; kind: 'pet' | 'vehicle' }[] = [
+  const queued: { where: string; id: string; kind: 'pet' | 'vehicle' | 'valuable' }[] = [
     ...ACCIDENT_KINDS.flatMap((k) => reg.accidents[k].events.map((id) => ({ where: `accidents.${k}`, id, kind: 'vehicle' as const }))),
     ...reg.petDied.events.map((id) => ({ where: 'petDied', id, kind: 'pet' as const })),
+    ...reg.valuableStolen.events.map((id) => ({ where: 'valuableStolen', id, kind: 'valuable' as const })),
   ];
   if (!partialEvents) {
     for (const { where, id, kind } of queued) {
@@ -119,6 +121,8 @@ export function checkPossessions(bundle: ContentBundle, fileOf: (typeKey: Collec
     vacationForeclosed: ['city'],
     renovated: ['renovation', 'city'],
     noVehicleJobLost: [],
+    valuableBought: ['valuable'],
+    valuableSold: ['valuable'],
   };
   for (const [key, group] of Object.entries(text.history)) {
     group.variants.forEach((t, i) => {

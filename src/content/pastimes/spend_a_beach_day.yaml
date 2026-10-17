@@ -1,0 +1,87 @@
+id: spend_a_beach_day
+category: outdoor
+label: "Spend a day at the beach"
+blurb: "Sun, sand and the sound of the water."
+minAge: 5
+inPerson: true
+companion: optional
+companionKinds: [partner, friend, family]
+cost: beach_day
+profile: outdoor
+yearlyLimit: 5
+tiers:
+  great:
+    text:
+      - "The water is warm and the sky is huge. You swim, doze, and eat sandwiches full of sand. A perfect day for {cost}."
+      - "A long, lazy day by the water with nothing at all to do. You come home salty and soft."
+    together:
+      - "You and {companion.name} swim, build nothing, and watch the tide come in. A perfect day for {cost}."
+      - "{companion.name} buries your feet in the sand and falls asleep beside you. You do not move for an hour."
+    effects:
+      - { type: stat, key: happiness, delta: 4 }
+      - { type: stat, key: stress, delta: -4 }
+      - { type: stat, key: health, delta: 1 }
+      - { type: memory, role: companion, tag: beach_together }
+    companion: { affection: 5, trust: 2 }
+    extras:
+      - chance: sunburn
+        effects:
+          - { type: stat, key: health, delta: -1 }
+          - { type: stat, key: looks, delta: -1 }
+          - { type: stat, key: stress, delta: 1 }
+        note: "You forget the sunscreen. By evening your shoulders are the color of a lobster."
+  good:
+    text:
+      - "A fine beach day: some sun, some swimming, some reading. {cost} for parking and a drink."
+      - "The waves are good and the sun is gentle. You are in no hurry to leave."
+    together:
+      - "You and {companion.name} share a towel, a book and a cooler. A good day for {cost}."
+      - "An easy, sunny day with {companion.name}."
+    effects:
+      - { type: stat, key: happiness, delta: 2 }
+      - { type: stat, key: stress, delta: -2 }
+      - { type: stat, key: health, delta: 1 }
+      - { type: memory, role: companion, tag: beach_together }
+    companion: { affection: 3, trust: 1 }
+    extras:
+      - chance: sunburn
+        effects:
+          - { type: stat, key: health, delta: -1 }
+          - { type: stat, key: looks, delta: -1 }
+          - { type: stat, key: stress, delta: 1 }
+        note: "You forget the sunscreen. By evening your shoulders are the color of a lobster."
+  neutral:
+    text:
+      - "The beach is crowded and the sand is hot. Still, you can hear the waves."
+      - "A decent day. You swim once and read a chapter."
+    together:
+      - "You and {companion.name} find a patch of sand and make the best of it. {cost}."
+      - "A middling day at the beach with {companion.name}."
+    effects:
+      - { type: stat, key: stress, delta: -1 }
+    companion: { affection: 1, trust: 0 }
+    extras:
+      - chance: sunburn
+        effects:
+          - { type: stat, key: health, delta: -1 }
+          - { type: stat, key: looks, delta: -1 }
+          - { type: stat, key: stress, delta: 1 }
+        note: "You forget the sunscreen. By evening your shoulders are the color of a lobster."
+  bad:
+    text:
+      - "The wind picks up, the sand stings, and the water is too cold. You go home early."
+      - "It rains by noon and you are left with a soggy towel and a lost afternoon."
+    together:
+      - "The beach is packed and the weather turns. You and {companion.name} give up after an hour."
+      - "You and {companion.name} cannot agree on where to sit, and the day turns grey."
+    effects:
+      - { type: stat, key: stress, delta: 2 }
+      - { type: stat, key: happiness, delta: -1 }
+    companion: { affection: -1, trust: 0 }
+    extras:
+      - chance: sunburn
+        effects:
+          - { type: stat, key: health, delta: -1 }
+          - { type: stat, key: looks, delta: -1 }
+          - { type: stat, key: stress, delta: 1 }
+        note: "You forget the sunscreen. By evening your shoulders are the color of a lobster."

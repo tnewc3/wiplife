@@ -11,7 +11,8 @@ import { activeRenovations, renovationQuote, vacationQuote, vacationSaleNet, typ
 import { petInteractionMenu } from './interact';
 import { canVisitVet, petBlock, petPrice, vetCost, type PetBlock } from './pets';
 import { possessionCosts } from './costs';
-import { homeOf, livingPets, owedOn, petAge, petDef, petOf, possessionsValue, vacationHomesOf, vehicleAge, vehicleDef, vehicleOf, vehiclesOf } from './query';
+import { homeOf, livingPets, owedOn, petAge, petDef, petOf, possessionsValue, vacationHomesOf, valuableDef, valuableOf, valuablesOf, vehicleAge, vehicleDef, vehicleOf, vehiclesOf } from './query';
+import { valuablePremium, valuableSaleValue, valuableUpkeep } from './valuables';
 import { canService, premium, recentClaims, saleNet, sellBlock, serviceCost, vehicleQuote, vehicleUpkeep, type VehicleQuote } from './vehicles';
 import { sameCountryCities } from '../country';
 
@@ -66,6 +67,22 @@ export interface VacationHomeView {
   renovations: string[];
 }
 
+/** Batch 2a: a valuable you own. */
+export interface ValuableView {
+  id: Id;
+  name: string;
+  class: string;
+  /** What it is worth now, what you paid, and the year it became yours. */
+  value: number;
+  acquired: number;
+  insured: boolean;
+  /** This year's premium (0 uninsured) and upkeep. */
+  premium: number;
+  upkeep: number;
+  /** What selling would bring now. */
+  saleValue: number;
+}
+
 export interface MainHomeView {
   value: number;
   renovations: string[];
@@ -112,8 +129,10 @@ export interface BelongingsView {
   pets: PetView[];
   vehicles: VehicleView[];
   vacationHomes: VacationHomeView[];
+  /** Batch 2a: jewelry, designer goods, art and boats. */
+  valuables: ValuableView[];
   mainHome: MainHomeView | null;
-  /** What you own is worth (vehicles and vacation homes). */
+  /** What you own is worth (vehicles, vacation homes and valuables). */
   worth: number;
   savings: number;
   /** What it costs to keep this year, and the claims that raise your premium. */
@@ -186,7 +205,7 @@ export function getBelongingsView(state: LifeState, content: ContentBundle): Bel
   const costs = possessionCosts(state, content);
   const h = state.housing;
   const owns = (h.kind === 'owned' || (h.kind === 'incarcerated' && h.homeValue !== undefined)) && h.homeValue !== undefined;
-  const insurable = [...vehiclesOf(state), ...homes];
+  const insurable = [...vehiclesOf(state), ...homes, ...valuablesOf(state)];
 
   const adopt: AdoptOption[] = Object.keys(content.pets)
     .sort()
@@ -243,6 +262,17 @@ export function getBelongingsView(state: LifeState, content: ContentBundle): Bel
     canAdopt: state.character.age >= content.balance.possessions.pets.adoptAge,
     pets,
     vehicles,
+    valuables: valuablesOf(state).map((p) => ({
+      id: p.id,
+      name: valuableDef(content, p).name,
+      class: valuableDef(content, p).class,
+      value: p.value,
+      acquired: p.acquired,
+      insured: valuableOf(p).insured,
+      premium: valuablePremium(p, content),
+      upkeep: valuableUpkeep(p, content),
+      saleValue: valuableSaleValue(p, content),
+    })),
     vacationHomes: homes.map((p) => ({
       id: p.id,
       cityId: homeOf(p).cityId,
@@ -261,7 +291,7 @@ export function getBelongingsView(state: LifeState, content: ContentBundle): Bel
     insurance: costs.insurance,
     recentClaims: recentClaims(state, content),
     hasInsurable: insurable.length > 0,
-    allInsured: insurable.length > 0 && insurable.every((p) => (p.vehicle?.insured ?? p.home?.insured) === true),
+    allInsured: insurable.length > 0 && insurable.every((p) => (p.vehicle?.insured ?? p.home?.insured ?? p.valuable?.insured) === true),
     adopt,
     vehicleOptions,
     vacationOptions,

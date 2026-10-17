@@ -11,6 +11,7 @@ import type { Id, LifeState } from '../types';
 import { damageHome, setHomeInsurance } from './homes';
 import { addPet, petDiesNow, petLeaves, randomPetName, vetCost } from './pets';
 import { castPossession, livingPets, petOf } from './query';
+import { stealValuable } from './valuables';
 import { damageVehicle, refreshVehicleValue, sellVehicle, setVehicleInsurance, stealVehicle } from './vehicles';
 import { spend } from '../finance';
 
@@ -73,6 +74,11 @@ export function applyPossessionEffect(state: LifeState, effect: PossessionEffect
     case 'pet_dies':
       if (pet) petDiesNow(state, pet, content);
       return;
+    case 'valuable_stolen': {
+      const p = castPossession(state, cast, 'valuable', 'valuable');
+      if (p) stealValuable(state, p, content);
+      return;
+    }
     case 'insure':
       setVehicleInsurance(state, effect.insured!);
       setHomeInsurance(state, effect.insured!);
