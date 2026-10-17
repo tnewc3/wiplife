@@ -20,7 +20,6 @@ tiers:
     effects:
       - { type: stat, key: stress, delta: -10 }
       - { type: stat, key: looks, delta: 2 }
-      - { type: stat, key: health, delta: 1 }
       - { type: stat, key: happiness, delta: 4 }
     companion: { affection: 6, trust: 3 }
   good:

@@ -15,7 +15,6 @@ tiers:
       - "You float out of the room, boneless and happy, and sleep ten hours that night."
     effects:
       - { type: stat, key: stress, delta: -8 }
-      - { type: stat, key: health, delta: 1 }
       - { type: stat, key: happiness, delta: 3 }
   good:
     text:

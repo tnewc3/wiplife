@@ -14,8 +14,7 @@ tiers:
       - "You find a rhythm in the first mile and keep it all the way home. For a while there is nothing in your head but breathing."
       - "The air is cool, the route is empty, and you run farther than you planned."
     effects:
-      - { type: stat, key: fitness, delta: 3 }
-      - { type: stat, key: health, delta: 1 }
+      - { type: stat, key: fitness, delta: 2 }
       - { type: stat, key: stress, delta: -4 }
       - { type: stat, key: happiness, delta: 2 }
   good:
@@ -23,7 +22,7 @@ tiers:
       - "A steady, honest run. You are out of breath at the end and glad you went."
       - "You pick up the pace on the last stretch and finish tired in a good way."
     effects:
-      - { type: stat, key: fitness, delta: 2 }
+      - { type: stat, key: fitness, delta: 1 }
       - { type: stat, key: stress, delta: -2 }
       - { type: stat, key: happiness, delta: 1 }
   neutral:

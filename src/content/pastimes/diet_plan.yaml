@@ -14,8 +14,7 @@ tiers:
       - "The plan works. You feel lighter, sleep better, and the way you look in the mirror starts to match how you feel."
       - "It takes real effort, but you stick with it, and by the end you are proud of the habit you built."
     effects:
-      - { type: stat, key: health, delta: 3 }
-      - { type: stat, key: fitness, delta: 2 }
+      - { type: stat, key: fitness, delta: 1 }
       - { type: stat, key: looks, delta: 2 }
       - { type: stat, key: happiness, delta: 2 }
       - { type: stat, key: discipline, delta: 2 }
@@ -24,7 +23,6 @@ tiers:
       - "You eat better for a while. Not perfectly, but enough to notice the difference."
       - "Planning your meals takes some getting used to, and then it just works."
     effects:
-      - { type: stat, key: health, delta: 2 }
       - { type: stat, key: fitness, delta: 1 }
       - { type: stat, key: looks, delta: 1 }
       - { type: stat, key: discipline, delta: 1 }
@@ -32,8 +30,7 @@ tiers:
     text:
       - "You follow the plan on weekdays and give up on it on weekends. It moves the needle a little."
       - "Counting everything gets tedious. You keep a few of the habits and drop the rest."
-    effects:
-      - { type: stat, key: health, delta: 1 }
+    effects: []
   bad:
     text:
       - "The plan turns food into a chore. You get irritable, cheat, and feel guilty about cheating."

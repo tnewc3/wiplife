@@ -14,7 +14,7 @@ tiers:
       - "Something finally clicks: the stance, the timing, the way your whole body moves together. The teacher nods once, and it feels like a medal."
       - "You land the technique cleanly and the whole class sees it. You are standing a little taller on the way out."
     effects:
-      - { type: stat, key: fitness, delta: 3 }
+      - { type: stat, key: fitness, delta: 2 }
       - { type: stat, key: confidence, delta: 2 }
       - { type: stat, key: discipline, delta: 2 }
       - { type: stat, key: happiness, delta: 2 }
@@ -23,7 +23,7 @@ tiers:
       - "A hard, orderly hour of drills. You sweat, you bow, you learn one new thing."
       - "You get a kick right at last and keep practicing it until the class ends."
     effects:
-      - { type: stat, key: fitness, delta: 2 }
+      - { type: stat, key: fitness, delta: 1 }
       - { type: stat, key: confidence, delta: 1 }
       - { type: stat, key: discipline, delta: 1 }
   neutral:
