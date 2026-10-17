@@ -19,7 +19,7 @@ tiers:
       - "{companion.name} tells the best ghost story anyone has ever told around a fire."
     effects:
       - { type: stat, key: happiness, delta: 4 }
-      - { type: stat, key: stress, delta: -4 }
+      - { type: stat, key: stress, delta: -2 }
       - { type: stat, key: happiness, delta: 1 }
     companion: { affection: 5, trust: 2 }
     extras:
@@ -37,7 +37,7 @@ tiers:
       - "A quiet trip with {companion.name}, with good food and better company."
     effects:
       - { type: stat, key: happiness, delta: 2 }
-      - { type: stat, key: stress, delta: -2 }
+      - { type: stat, key: stress, delta: -1 }
     companion: { affection: 3, trust: 1 }
     extras:
       - chance: outdoor_mishap

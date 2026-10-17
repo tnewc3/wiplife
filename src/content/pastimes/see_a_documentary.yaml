@@ -19,7 +19,7 @@ tiers:
       - "{companion.name} knows more about the subject than you do and fills you in on the way out."
     effects:
       - { type: stat, key: happiness, delta: 4 }
-      - { type: stat, key: stress, delta: -3 }
+      - { type: stat, key: stress, delta: -1 }
     companion: { affection: 5, trust: 2 }
   good:
     text:
@@ -30,7 +30,7 @@ tiers:
       - "You and {companion.name} learn the same things and argue about the rest, which is half the fun."
     effects:
       - { type: stat, key: happiness, delta: 2 }
-      - { type: stat, key: stress, delta: -2 }
+      - { type: stat, key: stress, delta: -1 }
     companion: { affection: 3, trust: 1 }
   neutral:
     text:

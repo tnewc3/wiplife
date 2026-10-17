@@ -19,7 +19,7 @@ tiers:
       - "{companion.name} has the loudest laugh in the room, and so do you."
     effects:
       - { type: stat, key: happiness, delta: 5 }
-      - { type: stat, key: stress, delta: -4 }
+      - { type: stat, key: stress, delta: -2 }
       - { type: stat, key: sociability, delta: 1 }
     companion: { affection: 5, trust: 2 }
     events: [nightlife_met_someone, nightlife_hookup, nightlife_temptation]
@@ -33,7 +33,7 @@ tiers:
       - "A good night out with {companion.name}, and a few good lines to steal."
     effects:
       - { type: stat, key: happiness, delta: 3 }
-      - { type: stat, key: stress, delta: -2 }
+      - { type: stat, key: stress, delta: -1 }
     companion: { affection: 3, trust: 1 }
     events: [nightlife_met_someone, nightlife_hookup, nightlife_temptation]
     eventChance: meet_someone_low

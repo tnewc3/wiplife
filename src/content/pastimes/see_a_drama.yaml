@@ -19,7 +19,7 @@ tiers:
       - "{companion.name} is quiet on the way out, and then says exactly what you were thinking."
     effects:
       - { type: stat, key: happiness, delta: 4 }
-      - { type: stat, key: stress, delta: -3 }
+      - { type: stat, key: stress, delta: -1 }
     companion: { affection: 5, trust: 2 }
   good:
     text:
@@ -30,7 +30,7 @@ tiers:
       - "{companion.name} reaches for a tissue at the end, and so do you."
     effects:
       - { type: stat, key: happiness, delta: 2 }
-      - { type: stat, key: stress, delta: -2 }
+      - { type: stat, key: stress, delta: -1 }
     companion: { affection: 3, trust: 1 }
   neutral:
     text:

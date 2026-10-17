@@ -15,7 +15,7 @@ tiers:
       - "The facial leaves you looking rested for the first time in weeks."
     effects:
       - { type: stat, key: looks, delta: 3 }
-      - { type: stat, key: stress, delta: -4 }
+      - { type: stat, key: stress, delta: -2 }
       - { type: stat, key: happiness, delta: 2 }
   good:
     text:
@@ -23,7 +23,7 @@ tiers:
       - "You come out of the facial looking a little brighter than you went in."
     effects:
       - { type: stat, key: looks, delta: 2 }
-      - { type: stat, key: stress, delta: -2 }
+      - { type: stat, key: stress, delta: -1 }
       - { type: stat, key: happiness, delta: 1 }
   neutral:
     text:
