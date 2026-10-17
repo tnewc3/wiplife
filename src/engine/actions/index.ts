@@ -42,6 +42,7 @@ export {
   isLifeActionAvailable,
   isLifeActionId,
   LIFE_ACTION_IDS,
+  LIFE_ACTIONS,
   MONEY_ACTION_IDS,
   PRISON_LIFE_ACTIONS,
   TEMPORARY_STAY_BLOCKED,

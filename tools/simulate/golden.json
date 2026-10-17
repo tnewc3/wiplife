@@ -1,62 +1,62 @@
 {
-  "contentVersion": "0.1.0+3330ae6a0e",
+  "contentVersion": "0.1.0+7c2276167c",
   "lives": {
     "careful": [
       {
         "seed": "golden-careful-0-0",
-        "years": 53,
-        "ageAtDeath": 53,
-        "yearsHash": "4f9ace0af99b8942d9a2",
-        "finalHash": "9baedd0a5f0ec79bc74a"
+        "years": 91,
+        "ageAtDeath": 91,
+        "yearsHash": "d0901739da49c9763e3b",
+        "finalHash": "302fb26b00464fcd3910"
       },
       {
         "seed": "golden-careful-1-0",
-        "years": 82,
-        "ageAtDeath": 82,
-        "yearsHash": "55e6867a775e799bd007",
-        "finalHash": "96d08772a6bee003490e"
+        "years": 86,
+        "ageAtDeath": 86,
+        "yearsHash": "ad51ef8464a308f8e44a",
+        "finalHash": "47cf9416a14c5406bcbe"
       },
       {
         "seed": "golden-careful-2-0",
-        "years": 80,
-        "ageAtDeath": 80,
-        "yearsHash": "05f4a340b7ea6f48337a",
-        "finalHash": "7b5a21e068aa06ea2979"
+        "years": 90,
+        "ageAtDeath": 90,
+        "yearsHash": "260ea665a6b462fb7350",
+        "finalHash": "ecd134ef3465e1e74edd"
       },
       {
         "seed": "golden-careful-3-0",
-        "years": 79,
-        "ageAtDeath": 79,
-        "yearsHash": "ca6cd418f7477bd0e50d",
-        "finalHash": "edbcb4a26acf2bf34c1f"
+        "years": 81,
+        "ageAtDeath": 81,
+        "yearsHash": "46b559b61e0f0b53cae6",
+        "finalHash": "adcdf8bc4ed090feb3e5"
       },
       {
         "seed": "golden-careful-4-0",
-        "years": 76,
-        "ageAtDeath": 76,
-        "yearsHash": "1165edc337a077e54f9e",
-        "finalHash": "28bd2ac9cbd422f593df"
+        "years": 83,
+        "ageAtDeath": 83,
+        "yearsHash": "5ee392930d355a80ad76",
+        "finalHash": "29748ae803aa4e66c7da"
       },
       {
         "seed": "golden-careful-5-0",
-        "years": 93,
-        "ageAtDeath": 93,
-        "yearsHash": "cdf2d1d95ef8b9a77317",
-        "finalHash": "e781415e57ebc1da485c"
+        "years": 90,
+        "ageAtDeath": 90,
+        "yearsHash": "1ddbd57862c307d57569",
+        "finalHash": "1ffa70eb87363dc60d8e"
       },
       {
         "seed": "golden-careful-6-0",
-        "years": 84,
-        "ageAtDeath": 84,
-        "yearsHash": "6b078217dcb5860b3920",
-        "finalHash": "f4856cdcd8befc8c41d3"
+        "years": 60,
+        "ageAtDeath": 60,
+        "yearsHash": "acf6ab34b8af96622599",
+        "finalHash": "3bac5f9f210849529b86"
       },
       {
         "seed": "golden-careful-7-0",
-        "years": 64,
-        "ageAtDeath": 64,
-        "yearsHash": "19f39eccc32058c596c1",
-        "finalHash": "b2567a254560d729c647"
+        "years": 76,
+        "ageAtDeath": 76,
+        "yearsHash": "7bdf9ddbb556cd58717e",
+        "finalHash": "90403e55bc47217e12d3"
       }
     ],
     "careless": [
@@ -64,70 +64,70 @@
         "seed": "golden-careless-0-0",
         "years": 76,
         "ageAtDeath": 76,
-        "yearsHash": "3693d71a464856eebcfd",
-        "finalHash": "fb7a5f2bf824e50b830a"
+        "yearsHash": "efcac21b12e64ec312b6",
+        "finalHash": "1a9e92cfb79448b77b52"
       },
       {
         "seed": "golden-careless-1-0",
-        "years": 69,
-        "ageAtDeath": 69,
-        "yearsHash": "6bc52d674ae91bb0f369",
-        "finalHash": "4416f83e571768ccaba1"
+        "years": 57,
+        "ageAtDeath": 57,
+        "yearsHash": "a5194aa4ff3f545f0a3a",
+        "finalHash": "0f97bc8b5653d37f05c3"
       },
       {
         "seed": "golden-careless-2-0",
-        "years": 79,
-        "ageAtDeath": 79,
-        "yearsHash": "47107488cf72608aa180",
-        "finalHash": "fe8388aab71c88118082"
+        "years": 93,
+        "ageAtDeath": 93,
+        "yearsHash": "292fc441040be9ab50cb",
+        "finalHash": "3d474b6be21113f56e99"
       }
     ],
     "criminal": [
       {
         "seed": "golden-criminal-0-0",
-        "years": 84,
-        "ageAtDeath": 84,
-        "yearsHash": "0acc58a227f9daaef3df",
-        "finalHash": "8ee0639fb1e73a38eecb"
+        "years": 95,
+        "ageAtDeath": 95,
+        "yearsHash": "7c6280fba1d4bf21d2fe",
+        "finalHash": "d75f71069f01e6d1b22a"
       },
       {
         "seed": "golden-criminal-1-0",
-        "years": 73,
-        "ageAtDeath": 73,
-        "yearsHash": "c3d333cd5f1df182201d",
-        "finalHash": "8e9f26cc900fba53488d"
+        "years": 88,
+        "ageAtDeath": 88,
+        "yearsHash": "2eba7c57df4031590c7f",
+        "finalHash": "019cae15749a8537b875"
       }
     ],
     "star": [
       {
         "seed": "golden-star-0-0",
-        "years": 76,
-        "ageAtDeath": 76,
-        "yearsHash": "f927dea3a21525829f94",
-        "finalHash": "411749011f34557f1178"
+        "years": 81,
+        "ageAtDeath": 81,
+        "yearsHash": "664be4b148b76da70d74",
+        "finalHash": "5c65ebb28c2a529f34d9"
       },
       {
         "seed": "golden-star-1-0",
-        "years": 86,
-        "ageAtDeath": 86,
-        "yearsHash": "46d8755c26a96e734b4e",
-        "finalHash": "ddc1f6f5b95cadf4ccc8"
+        "years": 91,
+        "ageAtDeath": 91,
+        "yearsHash": "6f924fb9c68e845fa9b3",
+        "finalHash": "8c691058505fd7651d4e"
       }
     ],
     "athlete": [
       {
         "seed": "golden-athlete-0-0",
-        "years": 82,
-        "ageAtDeath": 82,
-        "yearsHash": "598477b64d7f57d616cf",
-        "finalHash": "bf7dd57e5626657e564d"
+        "years": 83,
+        "ageAtDeath": 83,
+        "yearsHash": "7547caf3cb4d07351709",
+        "finalHash": "ede4278428c59a5d6cbc"
       },
       {
         "seed": "golden-athlete-1-0",
-        "years": 71,
-        "ageAtDeath": 71,
-        "yearsHash": "839f80c47de75c1e2533",
-        "finalHash": "a38669d0afed18f1f422"
+        "years": 90,
+        "ageAtDeath": 90,
+        "yearsHash": "8ad65388bbad23c436f0",
+        "finalHash": "f394c5bdcaae0f5e9043"
       }
     ]
   }

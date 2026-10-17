@@ -360,7 +360,7 @@ export function formatPastimes(r: PastimesReport, content: ContentBundle): strin
   );
   lines.push(`  love: ${r.love.outings} outings; ${r.love.matches} matches opened (${pct(r.love.matches, r.love.outings)}); ${r.love.partnered} became couples`);
   const v = r.valuables;
-  lines.push(`  valuables: ${v.bought} bought for ${dollars(v.spent)} in ${v.lives} lives (${pct(v.lives, r.lives)}); ${v.stolen} stolen in ${v.valuableYears} valuable-years (${per(100 * v.stolen, v.valuableYears)} per 100)`);
+  lines.push(`  valuables: ${v.bought} bought for ${dollars(v.spent)} in ${v.lives} lives (${pct(v.lives, r.lives)}); ${v.thefts} stolen in ${v.valuableYears} valuable-years (${per(100 * v.thefts, v.valuableYears)} per 100)`);
   const rows = r.byRepeat.map((b, i) => `${i === 4 ? '4+' : i}: ${per(b.benefit, b.outings, 2)} (${pct(b.goodShare, b.outings)} good)`);
   lines.push(`  benefit per outing by earlier times the same activity this year: ${rows.join(' · ')}`);
   void content;
@@ -389,7 +389,7 @@ export function pastimesTargets(report: SimulationReport, content: ContentBundle
   range('nightlife outings that start an addiction', share(r.nightlife.addictions, r.nightlife.outings), t.nightlifeAddiction);
   range('nightlife outings that meet someone', share(r.nightlife.meetings, r.nightlife.outings), t.nightlifeMeetings);
   range('lives that ever owned a valuable', share(r.valuables.lives, r.lives), t.valuableLives);
-  range('valuables stolen per 100 valuable-years', share(100 * r.valuables.stolen, r.valuables.valuableYears), t.theftPer100Years, (n) => n.toFixed(2));
+  range('valuables stolen per 100 valuable-years', share(100 * r.valuables.thefts, r.valuables.valuableYears), t.theftPer100Years, (n) => n.toFixed(2));
   out.push({ label: 'receipts that showed money coming in', value: String(r.moneyCreated), short: String(r.moneyCreated), goal: '0', met: r.moneyCreated === 0 });
   out.push({ label: 'under-18s in adults-only activities, or cast in a nightlife follow-up', value: String(r.minorBreaches + r.nightlife.adultsOnlyBreaches), short: String(r.minorBreaches + r.nightlife.adultsOnlyBreaches), goal: '0', met: r.minorBreaches + r.nightlife.adultsOnlyBreaches === 0 });
   out.push({ label: 'invariant failures in the activity checks', value: String(r.invariantFailures), short: String(r.invariantFailures), goal: '0', met: r.invariantFailures === 0 });
