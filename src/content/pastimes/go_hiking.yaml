@@ -25,7 +25,7 @@ tiers:
     extras:
       - chance: outdoor_mishap
         effects:
-          - { type: health, conditionId: broken_bone, severity: 20 }
+          - { type: stat, key: health, delta: -5 }
           - { type: stat, key: stress, delta: 4 }
         note: "Your foot slips on a loose rock, and something in your ankle gives way."
   good:
@@ -43,7 +43,7 @@ tiers:
     extras:
       - chance: outdoor_mishap
         effects:
-          - { type: health, conditionId: broken_bone, severity: 20 }
+          - { type: stat, key: health, delta: -5 }
           - { type: stat, key: stress, delta: 4 }
         note: "Your foot slips on a loose rock, and something in your ankle gives way."
   neutral:
@@ -59,7 +59,7 @@ tiers:
     extras:
       - chance: outdoor_mishap
         effects:
-          - { type: health, conditionId: broken_bone, severity: 20 }
+          - { type: stat, key: health, delta: -5 }
           - { type: stat, key: stress, delta: 4 }
         note: "Your foot slips on a loose rock, and something in your ankle gives way."
   bad:
@@ -76,6 +76,6 @@ tiers:
     extras:
       - chance: outdoor_mishap
         effects:
-          - { type: health, conditionId: broken_bone, severity: 20 }
+          - { type: stat, key: health, delta: -5 }
           - { type: stat, key: stress, delta: 4 }
         note: "Your foot slips on a loose rock, and something in your ankle gives way."
