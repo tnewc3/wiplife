@@ -45,7 +45,6 @@ choices:
         different, and the guilt arrives before the coffee does.
       effects:
         - { type: infidelity, role: stranger, act: intimate }
-        - { type: memory, role: stranger, tag: fling }
         - { type: stat, key: stress, delta: 9 }
         - { type: stat, key: discipline, delta: -2 }
         - { type: stat, key: reputation, delta: -2 }

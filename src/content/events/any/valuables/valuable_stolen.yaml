@@ -20,7 +20,6 @@ autoOutcome:
     and the room feels a little less yours.
   effects:
     - { type: possession, action: valuable_stolen }
-    - { type: flag, key: valuable_stolen, value: true }
     - { type: history, text: 'Your {valuable} was stolen.', importance: 2 }
     - { type: stat, key: stress, delta: 6 }
     - { type: stat, key: happiness, delta: -3 }

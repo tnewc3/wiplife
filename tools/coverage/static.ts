@@ -202,6 +202,22 @@ export function analyzeContent(content: ContentBundle): StaticCoverage {
       for (const flag of refs.flags) addTo(flagReads, flag, who);
     }
   }
+  // Batch 2a: the memories and flags activities write, and the conditions they read.
+  for (const def of Object.values(content.pastimes)) {
+    if (def.retired) continue;
+    const who = `pastimes/${def.id}`;
+    for (const tier of Object.values(def.tiers)) {
+      for (const effect of [...(tier?.effects ?? []), ...(tier?.extras ?? []).flatMap((x) => x.effects)]) {
+        if (effect.type === 'memory') addTo(memoryWrites, effect.tag, who);
+        if (effect.type === 'flag') addTo(flagWrites, effect.key, who);
+        if (effect.type === 'infidelity') {
+          for (const tag of ['cheated_on_them', 'affair_with_you', 'flirted_behind_their_back']) addTo(memoryWrites, tag, `${who} (engine)`);
+          addTo(flagWrites, 'unfaithful', `${who} (engine)`);
+        }
+      }
+    }
+    for (const flag of referencesIn(def.requires).flags) addTo(flagReads, flag, who);
+  }
   for (const profile of Object.values(content.balance.interactions.profiles)) {
     for (const tag of Object.keys(profile.memories)) addTo(memoryReads, tag, 'balance/interactions.yaml');
   }

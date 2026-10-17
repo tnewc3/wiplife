@@ -21,7 +21,6 @@ tiers:
       - { type: stat, key: happiness, delta: 5 }
       - { type: stat, key: stress, delta: -4 }
       - { type: stat, key: sociability, delta: 1 }
-      - { type: memory, role: companion, tag: night_out_together }
     companion: { affection: 5, trust: 2 }
     events: [nightlife_met_someone, nightlife_hookup, nightlife_temptation]
     eventChance: meet_someone
@@ -35,7 +34,6 @@ tiers:
     effects:
       - { type: stat, key: happiness, delta: 3 }
       - { type: stat, key: stress, delta: -2 }
-      - { type: memory, role: companion, tag: night_out_together }
     companion: { affection: 3, trust: 1 }
     events: [nightlife_met_someone, nightlife_hookup, nightlife_temptation]
     eventChance: meet_someone_low

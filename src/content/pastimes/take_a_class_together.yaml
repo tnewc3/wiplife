@@ -17,7 +17,6 @@ tiers:
     effects:
       - { type: stat, key: happiness, delta: 4 }
       - { type: stat, key: smarts, delta: 1 }
-      - { type: memory, role: companion, tag: cooked_together }
     companion: { affection: 6, trust: 3 }
   good:
     together:
@@ -25,7 +24,6 @@ tiers:
       - "You and {companion.name} learn the basics and laugh at the rest."
     effects:
       - { type: stat, key: happiness, delta: 3 }
-      - { type: memory, role: companion, tag: cooked_together }
     companion: { affection: 4, trust: 2 }
   neutral:
     together:

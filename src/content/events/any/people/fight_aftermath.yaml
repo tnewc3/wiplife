@@ -1,0 +1,37 @@
+# Reads the flag a fight on a night out sets (Batch 2a).
+id: fight_aftermath
+title: The story gets around
+text: >-
+  Someone has told the story of the fight on your night out, and it has grown
+  in the telling. You get a look from a neighbor, and a text asking whether
+  you are all right.
+tone: serious
+category: people
+rarity: uncommon
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { flag: nightlife_fight, eq: true }
+weight: { base: 6 }
+cooldownYears: 4
+choices:
+  - id: own_it
+    label: Own it, and say you are not proud of it
+    outcome:
+      text: >-
+        It is uncomfortable to say out loud. People nod, and the story loses
+        some of its edge.
+      effects:
+        - { type: flag, key: nightlife_fight, value: false }
+        - { type: stat, key: discipline, delta: 1 }
+        - { type: stat, key: stress, delta: 1 }
+  - id: brush_off
+    label: Laugh it off
+    outcome:
+      text: >-
+        You laugh, and nobody quite laughs with you. The story takes its time
+        going away.
+      effects:
+        - { type: flag, key: nightlife_fight, value: false }
+        - { type: stat, key: reputation, delta: -1 }

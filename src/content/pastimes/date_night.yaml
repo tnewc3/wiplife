@@ -17,7 +17,6 @@ tiers:
     effects:
       - { type: stat, key: happiness, delta: 5 }
       - { type: stat, key: stress, delta: -4 }
-      - { type: memory, role: companion, tag: date_night }
     companion: { affection: 7, trust: 4 }
   good:
     together:
@@ -26,7 +25,6 @@ tiers:
     effects:
       - { type: stat, key: happiness, delta: 3 }
       - { type: stat, key: stress, delta: -2 }
-      - { type: memory, role: companion, tag: date_night }
     companion: { affection: 4, trust: 2 }
   neutral:
     together:

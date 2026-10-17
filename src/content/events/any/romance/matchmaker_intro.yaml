@@ -29,7 +29,6 @@ choices:
           you both laugh and agree to do it again.
         effects:
           - { type: relationship, role: date, kind: partner, affection: 15 }
-          - { type: memory, role: date, tag: matchmaker_met }
           - { type: memory, role: date, tag: started_dating }
           - { type: stat, key: happiness, delta: 5 }
           - { type: history, text: 'You started dating {date.name}, who a matchmaker introduced you to.', importance: 2 }
@@ -38,7 +37,6 @@ choices:
           The folder was right about everything but the chemistry. It is a
           polite dinner, and you part with a handshake.
         effects:
-          - { type: memory, role: date, tag: matchmaker_met }
           - { type: relationship, role: date, affection: 2 }
           - { type: stat, key: happiness, delta: -1 }
   - id: coffee_first
@@ -48,4 +46,3 @@ choices:
         Coffee is easy. You part with a promise to talk again, and mean it.
       effects:
         - { type: relationship, role: date, affection: 8 }
-        - { type: memory, role: date, tag: matchmaker_met }

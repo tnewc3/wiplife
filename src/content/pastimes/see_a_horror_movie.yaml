@@ -20,7 +20,6 @@ tiers:
     effects:
       - { type: stat, key: happiness, delta: 4 }
       - { type: stat, key: stress, delta: -3 }
-      - { type: memory, role: companion, tag: movie_night }
     companion: { affection: 5, trust: 2 }
   good:
     text:
@@ -32,7 +31,6 @@ tiers:
     effects:
       - { type: stat, key: happiness, delta: 2 }
       - { type: stat, key: stress, delta: -2 }
-      - { type: memory, role: companion, tag: movie_night }
     companion: { affection: 3, trust: 1 }
   neutral:
     text:

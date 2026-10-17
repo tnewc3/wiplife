@@ -19,7 +19,6 @@ autoOutcome:
     The {valuable} is gone.
   effects:
     - { type: possession, action: valuable_stolen }
-    - { type: flag, key: valuable_stolen, value: true }
     - { type: history, text: 'Someone broke in and took your {valuable}.', importance: 3 }
     - { type: mental, action: trauma, amount: 6 }
     - { type: stat, key: stress, delta: 8 }

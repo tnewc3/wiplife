@@ -24,7 +24,6 @@ choices:
         a good story.
       effects:
         - { type: relationship, role: stranger, affection: 8, trust: 3 }
-        - { type: memory, role: stranger, tag: met_at_night_out }
         - { type: stat, key: happiness, delta: 2 }
         - { type: stat, key: sociability, delta: 1 }
   - id: enjoy_it

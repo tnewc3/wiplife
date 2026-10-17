@@ -29,7 +29,6 @@ choices:
           is coffee, a shy goodbye, and a number neither of you promises to use.
         effects:
           - { type: relationship, role: fling, affection: 8 }
-          - { type: memory, role: fling, tag: fling }
           - { type: stat, key: happiness, delta: 4 }
           - { type: stat, key: stress, delta: -2 }
       failure:
@@ -39,7 +38,6 @@ choices:
           you tell.
         effects:
           - { type: relationship, role: fling, affection: 4 }
-          - { type: memory, role: fling, tag: fling }
           - { type: health, conditionId: treatable_infection, severity: 20 }
           - { type: stat, key: happiness, delta: -1 }
           - { type: stat, key: stress, delta: 5 }
@@ -54,7 +52,6 @@ choices:
           Looking back, you got away with it.
         effects:
           - { type: relationship, role: fling, affection: 6 }
-          - { type: memory, role: fling, tag: fling }
           - { type: stat, key: happiness, delta: 3 }
           - { type: stat, key: discipline, delta: -1 }
       failure:
@@ -63,7 +60,6 @@ choices:
           quiet evening trying to work out what comes next.
         effects:
           - { type: relationship, role: fling, affection: 2 }
-          - { type: memory, role: fling, tag: fling }
           - { type: health, conditionId: treatable_infection, severity: 25 }
           - { type: pregnancy, action: begin, how: unplanned, role: fling }
           - { type: stat, key: stress, delta: 8 }

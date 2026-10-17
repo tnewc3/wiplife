@@ -29,8 +29,6 @@ choices:
           promised. The details are for you and {date.them} to keep.
         effects:
           - { type: relationship, role: date, affection: 9 }
-          - { type: memory, role: date, tag: app_match }
-          - { type: memory, role: date, tag: fling }
           - { type: stat, key: happiness, delta: 3 }
       failure:
         text: >-
@@ -38,7 +36,6 @@ choices:
           treatable and embarrassing, and it makes you think harder next time.
         effects:
           - { type: relationship, role: date, affection: 3 }
-          - { type: memory, role: date, tag: app_match }
           - { type: health, conditionId: treatable_infection, severity: 20 }
           - { type: stat, key: stress, delta: 5 }
   - id: coffee_date
@@ -49,7 +46,6 @@ choices:
         with a plan and a slightly absurd smile.
       effects:
         - { type: relationship, role: date, affection: 9 }
-        - { type: memory, role: date, tag: app_match }
         - { type: stat, key: happiness, delta: 2 }
   - id: unmatch
     label: Close the app for tonight

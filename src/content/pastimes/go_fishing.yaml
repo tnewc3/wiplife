@@ -21,7 +21,6 @@ tiers:
       - { type: stat, key: happiness, delta: 4 }
       - { type: stat, key: stress, delta: -4 }
       - { type: stat, key: smarts, delta: 1 }
-      - { type: memory, role: companion, tag: fished_together }
     companion: { affection: 5, trust: 2 }
     extras:
       - chance: outdoor_mishap
@@ -40,7 +39,6 @@ tiers:
       - { type: stat, key: happiness, delta: 2 }
       - { type: stat, key: stress, delta: -2 }
       - { type: stat, key: smarts, delta: 1 }
-      - { type: memory, role: companion, tag: fished_together }
     companion: { affection: 3, trust: 1 }
     extras:
       - chance: outdoor_mishap
