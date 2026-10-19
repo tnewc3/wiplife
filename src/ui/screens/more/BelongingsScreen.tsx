@@ -16,6 +16,7 @@ import {
   petHealthWords,
   RENOVATION_BLOCK_LABELS,
   VACATION_BLOCK_LABELS,
+  VALUABLE_CLASS_LABELS,
   VEHICLE_BLOCK_LABELS,
   yearsOld,
 } from '../../labels';
@@ -30,6 +31,7 @@ type Sheeted =
 type Confirming =
   | { kind: 'sell_vehicle'; id: string; name: string; net: number }
   | { kind: 'sell_vacation_home'; id: string; city: string; net: number }
+  | { kind: 'sell_valuable'; id: string; name: string; value: number }
   | { kind: 'vet'; id: string; name: string; cost: number }
   | { kind: 'service'; id: string; name: string; cost: number }
   | { kind: 'insurance_off' }
@@ -81,6 +83,12 @@ export function BelongingsScreen({ life }: { life: LifeState }) {
               : `It sells for ${money(-confirming.net)} less than you owe on it. The rest becomes personal debt.`,
           label: 'Sell it',
         };
+      case 'sell_valuable':
+        return {
+          title: `Sell your ${confirming.name}?`,
+          body: `It brings ${money(confirming.value)}, which goes to your savings. You now have ${money(life.finances.savings)}.`,
+          label: 'Sell it',
+        };
       case 'vet':
         return { title: `Take ${confirming.name} to the vet?`, body: `The visit costs ${money(confirming.cost)}. You have ${money(life.finances.savings)} saved.`, label: 'Go to the vet' };
       case 'service':
@@ -113,6 +121,9 @@ export function BelongingsScreen({ life }: { life: LifeState }) {
       case 'sell_vacation_home':
         void act('sell_vacation_home', { possessionId: c.id });
         break;
+      case 'sell_valuable':
+        void act('sell_valuable', { possessionId: c.id });
+        break;
       case 'vet':
         void act('vet_visit', { possessionId: c.id });
         break;
@@ -140,10 +151,10 @@ export function BelongingsScreen({ life }: { life: LifeState }) {
           What you own
         </h2>
         {view.empty ? (
-          <p className="mt-1 text-muted">Nothing yet beyond what you live in. Pets, cars and a place to get away to all start here.</p>
+          <p className="mt-1 text-muted">Nothing yet beyond what you live in. Pets, cars, a place to get away to and valuables all start here.</p>
         ) : (
           <dl className="mt-2 flex flex-col" aria-label="What your belongings cost">
-            {view.worth > 0 && <Line label="Vehicles and vacation homes are worth" value={money(view.worth)} />}
+            {view.worth > 0 && <Line label="What you own is worth" value={money(view.worth)} />}
             <Line label="Upkeep each year" value={money(view.upkeep)} />
             <Line label="Insurance each year" value={money(view.insurance)} />
           </dl>
@@ -199,6 +210,32 @@ export function BelongingsScreen({ life }: { life: LifeState }) {
         <Button block className="mt-2" disabled={disabled} data-testid="buy-vehicle" onClick={() => setSheet({ kind: 'vehicle' })}>
           Buy a vehicle
         </Button>
+      </Card>
+
+      <Card role="region" aria-labelledby="valuables-title" data-testid="belongings-valuables">
+        <h3 id="valuables-title" className="text-lg font-bold">
+          Valuables
+        </h3>
+        {view.valuables.length === 0 ? (
+          <p className="mt-1 text-muted">Jewelry, designer goods, art and boats are bought under Luxury in More → Activities.</p>
+        ) : (
+          <ul className="mt-1 flex flex-col divide-y divide-border" aria-label="Your valuables">
+            {view.valuables.map((v) => (
+              <li key={v.id} className="flex min-w-0 flex-col gap-1 py-3" data-testid={`valuable-${v.id}`}>
+                <span className="flex justify-between gap-3 font-semibold">
+                  <span className="min-w-0 break-words capitalize">{v.name}</span>
+                  <span className="shrink-0 tabular-nums">{money(v.value)}</span>
+                </span>
+                <span className="text-sm text-muted">
+                  {VALUABLE_CLASS_LABELS[v.class] ?? v.class} · bought in {v.acquired} · {v.insured ? `insured, ${money(v.premium)} a year` : 'not insured'} · upkeep {money(v.upkeep)} a year
+                </span>
+                <Button variant="secondary" block className="mt-1" disabled={disabled} data-testid={`sell-${v.id}`} onClick={() => setConfirming({ kind: 'sell_valuable', id: v.id, name: v.name, value: v.saleValue })}>
+                  Sell · {money(v.saleValue)}
+                </Button>
+              </li>
+            ))}
+          </ul>
+        )}
       </Card>
 
       <Card role="region" aria-labelledby="homes-title" data-testid="belongings-homes">

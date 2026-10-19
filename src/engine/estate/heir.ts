@@ -72,6 +72,7 @@ import { emptySports } from '../sports/query';
 import { emptyLater } from '../later/query';
 import { emptyBelonging } from '../belonging/query';
 import { emptyBusiness } from '../business/query';
+import { emptyPastimes } from '../pastimes/query';
 import { receiveBusinesses } from '../business/estate';
 import { startBelonging } from '../belonging/start';
 import { scaledAmount } from '../country';
@@ -416,6 +417,7 @@ export function continueAsHeir(dead: LifeState, heirId: Id, content: ContentBund
     later: emptyLater(),
     belonging: emptyBelonging(),
     business: emptyBusiness(),
+    pastimes: emptyPastimes(),
     travel: emptyTravel(),
     migration: emptyMigration(),
     languages: emptyLanguageLearning(),

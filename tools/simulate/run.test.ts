@@ -226,3 +226,21 @@ describe('speed budget', () => {
     expect(at(budget * 1.01).goal).toBe(`at most ${budget} ms`);
   });
 });
+
+describe('activities report (Batch 2a)', () => {
+  it('measures every player; the spammer gets less each time and nothing creates money', { timeout: 240_000 }, () => {
+    const careful = runSimulation(content, { lives: 12, seedPrefix: 'b2a', player: 'careful' });
+    const spammer = runSimulation(content, { lives: 12, seedPrefix: 'b2a', player: 'spammer' });
+    for (const report of [careful, spammer]) {
+      expect(report.invariantFailures).toBe(0);
+      expect(report.pastimes.moneyCreated).toBe(0);
+      expect(report.pastimes.minorBreaches).toBe(0);
+      expect(report.pastimes.activities).toBeGreaterThan(0);
+    }
+    const [first, , , fourth] = spammer.pastimes.byRepeat;
+    expect(first!.outings).toBeGreaterThan(0);
+    expect(fourth!.outings).toBeGreaterThan(0);
+    expect(fourth!.benefit / fourth!.outings).toBeLessThan(first!.benefit / first!.outings);
+    expect(formatReport(careful, content)).toContain('Activities (Batch 2a)');
+  });
+});

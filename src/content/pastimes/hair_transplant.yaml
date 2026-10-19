@@ -1,0 +1,83 @@
+id: hair_transplant
+category: surgery
+label: "Hair transplant"
+blurb: "Move hair from where you have it to where you do not. The results take most of a year."
+minAge: 18
+inPerson: true
+companion: none
+cost: hair_transplant
+profile: surgery
+quality: true
+yearlyLimit: 1
+tiers:
+  great:
+    text:
+      - "Over the following months, the hair comes in thick and natural. The hairline you had at twenty is back, and so is the version of you that wore it."
+      - "It takes patience, and then one morning you realize you have stopped thinking about your hairline at all."
+    effects:
+      - { type: flag, key: cosmetic_surgery, value: true }
+      - { type: stat, key: health, delta: -2 }
+      - { type: stat, key: looks, delta: 6 }
+      - { type: stat, key: happiness, delta: 5 }
+      - { type: stat, key: confidence, delta: 2 }
+    extras:
+      - chance: surgery_complication
+        effects:
+          - { type: health, conditionId: surgical_complication, severity: 35 }
+        note: "A few days later a fever and a swollen, angry scar send you back to the clinic. It needs proper treatment."
+  good:
+    text:
+      - "The grafts take well, and the new growth looks like your own. You stop wearing the hat."
+      - "A good result: not perfect, but more than you started with, and it keeps coming in."
+    effects:
+      - { type: flag, key: cosmetic_surgery, value: true }
+      - { type: stat, key: health, delta: -2 }
+      - { type: stat, key: looks, delta: 4 }
+      - { type: stat, key: happiness, delta: 3 }
+    extras:
+      - chance: surgery_complication
+        effects:
+          - { type: health, conditionId: surgical_complication, severity: 35 }
+        note: "A few days later a fever and a swollen, angry scar send you back to the clinic. It needs proper treatment."
+  neutral:
+    text:
+      - "The transplant takes unevenly. There is more than before, but less than you hoped."
+      - "It is an improvement you notice more than others do, and you wonder if you will need another round."
+    effects:
+      - { type: flag, key: cosmetic_surgery, value: true }
+      - { type: stat, key: health, delta: -2 }
+      - { type: stat, key: looks, delta: 1 }
+      - { type: stat, key: stress, delta: 2 }
+    extras:
+      - chance: surgery_complication
+        effects:
+          - { type: health, conditionId: surgical_complication, severity: 35 }
+        note: "A few days later a fever and a swollen, angry scar send you back to the clinic. It needs proper treatment."
+  bad:
+    text:
+      - "The grafts do not take well, and what grows is thin and patchy. It cost {cost} to learn that."
+      - "The new growth looks a little unnatural at the hairline. You start wearing the hat."
+    effects:
+      - { type: flag, key: cosmetic_surgery, value: true }
+      - { type: stat, key: health, delta: -2 }
+      - { type: stat, key: looks, delta: -2 }
+      - { type: stat, key: happiness, delta: -4 }
+      - { type: stat, key: stress, delta: 4 }
+      - { type: flag, key: surgery_regret, value: true }
+    extras:
+      - chance: surgery_complication
+        effects:
+          - { type: health, conditionId: surgical_complication, severity: 35 }
+        note: "A few days later a fever and a swollen, angry scar send you back to the clinic. It needs proper treatment."
+  backfire:
+    text:
+      - "The scalp becomes infected and the grafts fail. You are left with scars and no new hair."
+      - "A bad reaction, a long recovery and almost nothing to show for it."
+    effects:
+      - { type: flag, key: cosmetic_surgery, value: true }
+      - { type: stat, key: health, delta: -2 }
+      - { type: stat, key: looks, delta: -4 }
+      - { type: stat, key: happiness, delta: -6 }
+      - { type: stat, key: stress, delta: 7 }
+      - { type: flag, key: surgery_regret, value: true }
+      - { type: health, conditionId: surgical_complication, severity: 30 }

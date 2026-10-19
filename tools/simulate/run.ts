@@ -66,6 +66,7 @@ import {
 import { chooseWillActions, rollWillProfile } from './heirs';
 import { emptyPeopleReport, formatPeople, peopleTargets, PeopleWatcher, PipelineTimer, type PeopleReport } from './people';
 import { emptyMentalReport, formatMental, mentalTargets, MentalWatcher, type MentalReport } from './mental';
+import { choosePastimePlans, emptyPastimesReport, formatPastimes, pastimesSpamTargets, pastimesTargets, PastimesWatcher, rollPastimeProfile, type PastimesReport } from './pastimes';
 import { choosePetInteractions, choosePossessionActions, emptyPossessionsReport, formatPossessions, possessionsTargets, PossessionsWatcher, rollPossessionProfile, type PossessionsReport } from './possessions';
 import { emptyEulogyReport, EulogyWatcher, eulogyTargets, formatEulogy, type EulogyReport } from './eulogy';
 import { BusinessWatcher, businessTargets, chooseBusinessActions, emptyBusinessReport, formatBusiness, rollBusinessProfile, type BusinessReport } from './business';
@@ -175,6 +176,8 @@ export interface SimulationReport {
   mental: MentalReport;
   /** E5: pets, vehicles and homes, measured. */
   possessions: PossessionsReport;
+  /** Batch 2a: activities (leisure and self), valuables, nightlife and surgery. */
+  pastimes: PastimesReport;
   /** T1: the teen years, measured. */
   teen: TeenReport;
   /** E6a: crime careers, measured. */
@@ -834,6 +837,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
   const business = emptyBusinessReport(content);
   const mental = emptyMentalReport(content);
   const possessions = emptyPossessionsReport(content);
+  const pastimes = emptyPastimesReport(playerKind === 'spammer' ? 'spammer' : careless ? 'careless' : 'careful');
   const teen = emptyTeenReport(content);
   const crime = emptyCrimeReport(playerKind, content);
   const fame = emptyFameReport(playerKind, content);
@@ -858,6 +862,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
       const failures = checkInvariants(life, content);
       invariantFailures += failures.length;
       violations += failures.filter((f) => f.startsWith('consistency:')).length;
+      pastimes.invariantFailures += failures.filter((f) => /activit|receipt|valuable/i.test(f)).length;
       possessions.invariantFailures += failures.filter((f) => /possession|\bpet\b|vehicle|car loan|vacation|renovation|insurance|upkeep/i.test(f)).length;
       crime.invariantFailures += failures.filter((f) => /crime|crew|dirty/i.test(f)).length;
       migration.invariantFailures += failures.filter((f) => /^migration/i.test(f)).length;
@@ -912,6 +917,10 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
     const possessionsWatcher = new PossessionsWatcher(possessions, content);
     const possessionRng = createRng(`${seed}:possessions`);
     const possessionProfile = rollPossessionProfile(possessionRng);
+    // Batch 2a: this life's leisure: what it is into, and its activities.
+    const pastimeRng = createRng(`${seed}:pastimes`);
+    const pastimeProfile = rollPastimeProfile(pastimeRng);
+    const pastimesWatcher = new PastimesWatcher(pastimes, content);
     // T1: the teen years: this life's plan for its yearly focus and what kind of teenager it is.
     const teenRng = createRng(`${seed}:teen`);
     const teenProfile = rollTeenProfile(teenRng);
@@ -1125,6 +1134,28 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
         }
         check(life);
       }
+      // ...and in their leisure (Batch 2a): the Activities screen.
+      for (const plan of choosePastimePlans(life, content, pastimeRng, pastimeProfile, playerKind === 'spammer' ? 'spammer' : careless ? 'careless' : 'careful')) {
+        const params: LifeActionParams = { pastimeId: plan.pastimeId, ...(plan.companionId ? { companionId: plan.companionId } : {}), ...(plan.quality ? { quality: plan.quality } : {}) };
+        if (!isLifeActionAvailable(life, 'do_activity', params, content)) continue;
+        life = pastimesWatcher.play(
+          life,
+          plan,
+          (l) => {
+            const next = performAction(l, 'do_activity', params, content);
+            watch(next);
+            return next;
+          },
+          (l) => {
+            if (l.phase !== 'action') return l;
+            const resolved = finishAction(resolveAll(l, content, choices, watch, picker));
+            watch(resolved);
+            return resolved;
+          },
+        );
+        money.actionsTaken['do_activity']++;
+      }
+      check(life);
       // ...and on relationships.
       for (const [actionId, personId] of careless ? chooseCarelessActions(life, content, player) : chooseActions(life, content, player)) {
         if (!isActionAvailable(life, actionId, personId, content)) continue;
@@ -1184,6 +1215,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
       sportsWatcher.observe(yearBefore, life);
       attractionWatcher.observe(life);
       possessionsWatcher.observe(yearBefore, life, content);
+      pastimesWatcher.observe(yearBefore, life);
       if (!careless) teenWatcher?.observe(yearBefore, life);
       watch(life);
       options.onYear?.(life);
@@ -1237,6 +1269,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
     sportsWatcher.finish(life);
     attractionWatcher.finish(life);
     possessionsWatcher.finish(life);
+    pastimesWatcher.finish(life);
     if (!careless) teenWatcher?.finish(life);
     familyWatcher.finish(life, firesThisLife);
     // E1: who reached maximum affection, being found out, and a sample of lives rebuilt from their input logs.
@@ -1578,6 +1611,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
     business,
     mental,
     possessions,
+    pastimes,
     teen,
     crime,
     fame: { ...fame, famousAtTarget },
@@ -1725,6 +1759,7 @@ export function formatReport(report: SimulationReport, content: ContentBundle): 
   lines.push(...formatBusiness(report.business, content), '  targets (src/content/balance/targets.yaml):', ...businessTargets(report, content).map((r) => target(r.label, r.value, r.goal, r.met)));
   lines.push('', ...formatMental(report.mental, content, report.events), '  targets (src/content/balance/targets.yaml):', ...mentalTargets(report, content).map((r) => target(r.label, r.value, r.goal, r.met)));
   lines.push(...formatPossessions(report.possessions, content, report.events), '  targets (src/content/balance/targets.yaml):', ...possessionsTargets(report, content).map((r) => target(r.label, r.value, r.goal, r.met)));
+  lines.push(...formatPastimes(report.pastimes, content), report.player === 'spammer' ? '  targets (the spammer: repeating gives less):' : '  targets (src/content/balance/targets.yaml):', ...(report.player === 'spammer' ? pastimesSpamTargets(report, content) : pastimesTargets(report, content)).map((r) => target(r.label, r.value, r.goal, r.met)));
   lines.push(...formatTeen(report.teen, content), '  targets (src/content/balance/targets.yaml):', ...teenTargets(report, content).map((r) => target(r.label, r.value, r.goal, r.met)));
   lines.push(...formatCrime(report.crime, content), '  targets (src/content/balance/targets.yaml):', ...crimeTargets(report, content).map((r) => target(r.label, r.value, r.goal, r.met)));
   lines.push(...formatFame(report.fame, content), '  targets (src/content/balance/targets.yaml):', ...fameTargets(report, content).map((r) => target(r.label, r.value, r.goal, r.met)));

@@ -1,0 +1,50 @@
+# Opened by a night out (Batch 2a, nightlife), for someone with a partner. Adults only. Consequences are real.
+id: nightlife_temptation
+title: A different kind of night
+text: >-
+  {stranger.name} laughs at everything you say, stands a little closer each
+  time, and makes it plain that the evening could go somewhere. You are not
+  alone at home tonight, and you both know it.
+tone: serious
+category: romance
+rarity: uncommon
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { romance: [dating, engaged, married] }
+weight: { base: 3 }
+followUpOnly: true
+cast:
+  stranger: { kind: acquaintance, romantic: true, createIfMissing: true, newChance: 1, presence: city }
+choices:
+  - id: walk_away
+    label: Smile, say thanks, and go home
+    outcome:
+      text: >-
+        You say it kindly and mean it. On the way home you feel steadier than
+        you have in a while, and a little proud.
+      effects:
+        - { type: stat, key: discipline, delta: 2 }
+        - { type: stat, key: happiness, delta: 1 }
+  - id: flirt_back
+    label: Flirt back, just a little
+    outcome:
+      text: >-
+        It feels harmless until you are on the way home. Then it feels like
+        something you will have to carry.
+      effects:
+        - { type: infidelity, role: stranger, act: flirt }
+        - { type: stat, key: happiness, delta: 1 }
+        - { type: stat, key: stress, delta: 4 }
+  - id: go_home_together
+    label: Go home with {stranger.them}
+    outcome:
+      text: >-
+        The night goes where it was always going. In the morning it all looks
+        different, and the guilt arrives before the coffee does.
+      effects:
+        - { type: infidelity, role: stranger, act: intimate }
+        - { type: stat, key: stress, delta: 9 }
+        - { type: stat, key: discipline, delta: -2 }
+        - { type: stat, key: reputation, delta: -2 }

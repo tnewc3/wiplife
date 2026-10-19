@@ -16,7 +16,7 @@ import {
   STAT_KEYS,
   TRAIT_KEYS,
 } from './common';
-import { DAMAGE_SEVERITIES, PET_PERSONALITIES, PET_SOURCES, POSSESSION_EFFECT_ACTIONS, POSSESSION_KINDS, VEHICLE_KINDS } from './belongings';
+import { DAMAGE_SEVERITIES, PET_PERSONALITIES, PET_SOURCES, POSSESSION_EFFECT_ACTIONS, POSSESSION_KINDS, VALUABLE_CLASSES, VEHICLE_KINDS } from './belongings';
 import { debtKindSchema, housingKindSchema, lifestyleSchema } from './economy';
 import { FAMILY_DEEDS, GUARDIAN_KINDS, familyProcessSchema, parentingKeySchema } from './family';
 import { credentialTypeSchema, programSchema, tierSchema } from './education';
@@ -737,6 +737,10 @@ export interface BelongingsCondition {
   loan?: boolean;
   renovated?: boolean;
   claims?: Compare;
+  /** Batch 2a: valuables you own (a count), the class of the one the event is about or any you own, and whether it is insured. */
+  valuables?: Compare;
+  valuableClass?: (typeof VALUABLE_CLASSES)[number][];
+  valuableInsured?: boolean;
 }
 
 const atLeastOneField = (c: Record<string, unknown>) => Object.values(c).some((v) => v !== undefined);
@@ -1232,6 +1236,9 @@ export const conditionSchema: z.ZodType<Condition> = z.lazy(() =>
           loan: z.boolean().optional(),
           renovated: z.boolean().optional(),
           claims: compareSchema.optional(),
+          valuables: compareSchema.optional(),
+          valuableClass: z.array(z.enum(VALUABLE_CLASSES)).min(1).optional(),
+          valuableInsured: z.boolean().optional(),
         })
         .refine(atLeastOneField, 'needs at least one field'),
     }),

@@ -1,0 +1,63 @@
+id: tend_a_garden
+category: outdoor
+label: "Tend a garden"
+blurb: "Soil, seeds and a slow reward."
+minAge: 8
+inPerson: true
+companion: none
+cost: gardening
+profile: outdoor
+yearlyLimit: 6
+tiers:
+  great:
+    text:
+      - "Everything you planted comes up at once. You stand in the garden with dirt on your hands and a ridiculous grin."
+      - "The tomatoes are red, the flowers are loud, and the whole yard looks like a gift. {cost} for seeds and tools, and it paid you back."
+    effects:
+      - { type: stat, key: happiness, delta: 4 }
+      - { type: stat, key: stress, delta: -1 }
+      - { type: stat, key: smarts, delta: 1 }
+    extras:
+      - chance: allergy
+        effects:
+          - { type: stat, key: health, delta: -1 }
+          - { type: stat, key: stress, delta: 2 }
+        note: "The pollen is brutal, and you sneeze until your eyes water."
+  good:
+    text:
+      - "A calm, productive afternoon of weeding and watering. The beds look better by the end."
+      - "You plant, you water, you watch things grow. It costs {cost} and is worth every cent."
+    effects:
+      - { type: stat, key: happiness, delta: 2 }
+      - { type: stat, key: stress, delta: -1 }
+    extras:
+      - chance: allergy
+        effects:
+          - { type: stat, key: health, delta: -1 }
+          - { type: stat, key: stress, delta: 2 }
+        note: "The pollen is brutal, and you sneeze until your eyes water."
+  neutral:
+    text:
+      - "A few seedlings come up and a few do not. Gardening is mostly patience."
+      - "You spend an hour pulling weeds and an hour wondering why you started. {cost}."
+    effects:
+      - { type: stat, key: stress, delta: -1 }
+    extras:
+      - chance: allergy
+        effects:
+          - { type: stat, key: health, delta: -1 }
+          - { type: stat, key: stress, delta: 2 }
+        note: "The pollen is brutal, and you sneeze until your eyes water."
+  bad:
+    text:
+      - "A frost takes the seedlings. You spend {cost} on replacements and a lesson about timing."
+      - "The rabbits get everything. You stand in the wreckage of the vegetable bed and laugh, a little."
+    effects:
+      - { type: stat, key: stress, delta: 2 }
+      - { type: stat, key: happiness, delta: -1 }
+    extras:
+      - chance: allergy
+        effects:
+          - { type: stat, key: health, delta: -1 }
+          - { type: stat, key: stress, delta: 2 }
+        note: "The pollen is brutal, and you sneeze until your eyes water."

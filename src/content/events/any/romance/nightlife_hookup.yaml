@@ -1,0 +1,76 @@
+# Opened by a night out (Batch 2a, nightlife), for someone single. Adults only, suggestive and never graphic.
+id: nightlife_hookup
+title: Closing time
+text: >-
+  The room is loud and warm and the night has gone soft at the edges. {fling.name}
+  has been standing close for a while now, and it is clear that {fling.they}
+  would like the night to go on somewhere quieter.
+tone: neutral
+category: romance
+rarity: uncommon
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { romance: [single] }
+weight: { base: 4 }
+followUpOnly: true
+cast:
+  fling: { kind: acquaintance, romantic: true, createIfMissing: true, newChance: 1, presence: city }
+choices:
+  - id: careful
+    label: Go home together, and be careful about it
+    check:
+      base: 93
+      stats: [{ key: luck, weight: 0.1 }]
+      success:
+        text: >-
+          The rest of the night does not need describing. In the morning there
+          is coffee, a shy goodbye, and a number neither of you promises to use.
+        effects:
+          - { type: relationship, role: fling, affection: 8 }
+          - { type: stat, key: happiness, delta: 4 }
+          - { type: stat, key: stress, delta: -2 }
+      failure:
+        text: >-
+          The night is fine. The call from the clinic afterward is not. It
+          is treatable, and awkward, and you will be more careful about who
+          you tell.
+        effects:
+          - { type: relationship, role: fling, affection: 4 }
+          - { type: health, conditionId: treatable_infection, severity: 20 }
+          - { type: stat, key: happiness, delta: -1 }
+          - { type: stat, key: stress, delta: 5 }
+  - id: careless
+    label: Go home together and don't think about it
+    check:
+      base: 70
+      stats: [{ key: luck, weight: 0.1 }]
+      success:
+        text: >-
+          You wake up with a headache and a warm feeling, and nothing worse.
+          Looking back, you got away with it.
+        effects:
+          - { type: relationship, role: fling, affection: 6 }
+          - { type: stat, key: happiness, delta: 3 }
+          - { type: stat, key: discipline, delta: -1 }
+      failure:
+        text: >-
+          You are not so lucky. There is a clinic visit, a test, and a long,
+          quiet evening wondering how you let yourself be so careless.
+        effects:
+          - { type: relationship, role: fling, affection: 2 }
+          - { type: health, conditionId: treatable_infection, severity: 25 }
+          - { type: stat, key: stress, delta: 8 }
+          - { type: stat, key: discipline, delta: -1 }
+  - id: goodnight
+    label: Say goodnight with a smile
+    outcome:
+      text: >-
+        {fling.name} takes it well, and you part with a laugh and a hug. You
+        sleep in your own bed with a clear head, a little proud of yourself.
+      effects:
+        - { type: relationship, role: fling, affection: 4 }
+        - { type: memory, role: fling, tag: swapped_numbers }
+        - { type: stat, key: discipline, delta: 1 }
+        - { type: stat, key: happiness, delta: 1 }

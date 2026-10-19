@@ -1,0 +1,81 @@
+id: go_hiking
+category: outdoor
+label: "Go hiking"
+blurb: "A trail, a pack and a view at the top."
+minAge: 8
+inPerson: true
+companion: optional
+companionKinds: [partner, friend, family]
+cost: hike
+profile: outdoor
+yearlyLimit: 6
+tiers:
+  great:
+    text:
+      - "You reach the top just as the clouds break. The whole valley lies open below you, and you stay until your legs insist on moving."
+      - "The trail is empty and the light is gold. You come down tired, happy and clear-headed."
+    together:
+      - "You and {companion.name} hit the summit together and share a sandwich on a rock. The view says everything."
+      - "{companion.name} sets a quick pace and you keep up. The view at the top is worth every step."
+    effects:
+      - { type: stat, key: happiness, delta: 4 }
+      - { type: stat, key: stress, delta: -1 }
+      - { type: stat, key: fitness, delta: 1 }
+    companion: { affection: 5, trust: 2 }
+    extras:
+      - chance: outdoor_mishap
+        effects:
+          - { type: stat, key: health, delta: -5 }
+          - { type: stat, key: stress, delta: 4 }
+        note: "Your foot slips on a loose rock, and something in your ankle gives way."
+  good:
+    text:
+      - "A good, steady climb and a view worth the effort. You sleep like a stone that night."
+      - "The trail is long and the air is clean. You come back tired in the best way."
+    together:
+      - "You and {companion.name} walk and talk and turn back only when the light does. A very good day."
+      - "A pleasant hike with {companion.name}, with a long lunch halfway up."
+    effects:
+      - { type: stat, key: happiness, delta: 2 }
+      - { type: stat, key: stress, delta: -1 }
+      - { type: stat, key: fitness, delta: 1 }
+    companion: { affection: 3, trust: 1 }
+    extras:
+      - chance: outdoor_mishap
+        effects:
+          - { type: stat, key: health, delta: -5 }
+          - { type: stat, key: stress, delta: 4 }
+        note: "Your foot slips on a loose rock, and something in your ankle gives way."
+  neutral:
+    text:
+      - "The trail is crowded and the view is hazy. Still, a day outside."
+      - "You walk, you rest, you walk back. The air is pleasant."
+    together:
+      - "You and {companion.name} walk the trail without much to say. It is fine."
+      - "A decent hike. {companion.name} takes more pictures than steps."
+    effects:
+      - { type: stat, key: stress, delta: -1 }
+    companion: { affection: 1, trust: 0 }
+    extras:
+      - chance: outdoor_mishap
+        effects:
+          - { type: stat, key: health, delta: -5 }
+          - { type: stat, key: stress, delta: 4 }
+        note: "Your foot slips on a loose rock, and something in your ankle gives way."
+  bad:
+    text:
+      - "It rains halfway up and the trail turns to mud. You slog back down, cold and cross."
+      - "You take a wrong turn and spend an hour finding the path. You are tired and your feet hurt."
+    together:
+      - "You and {companion.name} get lost, argue about the map, and find the trail by sheer luck."
+      - "The weather turns, the trail is slick, and you and {companion.name} turn back, soaked and silent."
+    effects:
+      - { type: stat, key: stress, delta: 2 }
+      - { type: stat, key: happiness, delta: -1 }
+    companion: { affection: -1, trust: 0 }
+    extras:
+      - chance: outdoor_mishap
+        effects:
+          - { type: stat, key: health, delta: -5 }
+          - { type: stat, key: stress, delta: 4 }
+        note: "Your foot slips on a loose rock, and something in your ankle gives way."

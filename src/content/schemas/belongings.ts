@@ -4,8 +4,8 @@
  * schema can use them without importing the larger file.
  */
 
-/** What you can own: a pet, a vehicle, or a vacation home (the home you live in is housing, not a possession). */
-export const POSSESSION_KINDS = ['pet', 'vehicle', 'home'] as const;
+/** What you can own: a pet, a vehicle, a vacation home (the home you live in is housing, not a possession), or (Batch 2a, reversing E5's "no valuables") a valuable: jewelry, designer goods, art or a boat. */
+export const POSSESSION_KINDS = ['pet', 'vehicle', 'home', 'valuable'] as const;
 export type PossessionKindId = (typeof POSSESSION_KINDS)[number];
 
 /** A pet's personality: it changes events and how it takes to an interaction. */
@@ -25,7 +25,7 @@ export const PET_SOURCES = ['shelter', 'breeder', 'stray'] as const;
 export type PetSourceId = (typeof PET_SOURCES)[number];
 
 /** Pseudo-roles in an event's cast: the possession the event is about (a possession's id, like the story in E4). */
-export const POSSESSION_ROLES = { pet: '@pet', vehicle: '@vehicle', home: '@home' } as const;
+export const POSSESSION_ROLES = { pet: '@pet', vehicle: '@vehicle', home: '@home', valuable: '@valuable' } as const;
 export type PossessionRoleKey = keyof typeof POSSESSION_ROLES;
 
 /** The effect actions on possessions (events only; the Belongings screen has its own actions). */
@@ -42,9 +42,14 @@ export const POSSESSION_EFFECT_ACTIONS = [
   'pet_leaves',
   'pet_dies',
   'insure',
+  'valuable_stolen',
 ] as const;
 export type PossessionEffectAction = (typeof POSSESSION_EFFECT_ACTIONS)[number];
 
 /** The events the possessions step queues (registries/possessions.yaml). */
 export const ACCIDENT_KINDS = ['minor', 'major', 'total', 'drunk'] as const;
 export type AccidentKind = (typeof ACCIDENT_KINDS)[number];
+
+/** Batch 2a: the kinds of valuable (src/content/valuables), each with its own appreciation, upkeep, insurance and theft numbers in balance/possessions.yaml. */
+export const VALUABLE_CLASSES = ['jewelry', 'designer', 'art', 'boat'] as const;
+export type ValuableClassId = (typeof VALUABLE_CLASSES)[number];

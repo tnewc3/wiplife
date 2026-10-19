@@ -1,0 +1,42 @@
+id: use_a_matchmaker
+category: love
+label: "Hire a matchmaker"
+blurb: "A professional who learns who you are and who you might like."
+minAge: 18
+inPerson: true
+companion: none
+cost: matchmaker
+profile: love
+yearlyLimit: 1
+requires: { romance: [single] }
+tiers:
+  great:
+    text:
+      - "The matchmaker asks questions nobody has asked you in years, and listens to the answers. By the end you feel known, and the folder has your name on it. {cost}."
+      - "An excellent interview and a short list that actually looks right. You leave with hope and a calendar."
+    effects:
+      - { type: stat, key: happiness, delta: 4 }
+      - { type: stat, key: confidence, delta: 2 }
+    events: [matchmaker_intro, find_date_friend]
+    eventChance: love_match
+  good:
+    text:
+      - "A thorough process and a shortlist that makes sense. You pay {cost} and wait for the first call."
+      - "The matchmaker takes notes and nods a lot. You leave feeling like a project, in a good way."
+    effects:
+      - { type: stat, key: happiness, delta: 2 }
+    events: [matchmaker_intro, find_date_friend]
+    eventChance: love_match
+  neutral:
+    text:
+      - "A long conversation and a promise to be in touch. You paid {cost} and mostly got to talk about yourself."
+      - "The matchmaker is kind and slow. You wait a while for any news."
+    effects:
+      - { type: stat, key: happiness, delta: 1 }
+  bad:
+    text:
+      - "The questions are intrusive, the matches are mismatched, and the price, {cost}, rankles. You leave feeling processed."
+      - "The shortlist is full of people who are nothing like you. The matchmaker shrugs."
+    effects:
+      - { type: stat, key: happiness, delta: -2 }
+      - { type: stat, key: stress, delta: 2 }

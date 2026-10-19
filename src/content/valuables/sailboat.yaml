@@ -1,0 +1,4 @@
+id: sailboat
+name: "sailboat"
+blurb: "A small cruising sailboat with a berth and a cabin."
+class: boat

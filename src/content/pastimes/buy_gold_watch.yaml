@@ -1,0 +1,40 @@
+id: buy_gold_watch
+category: luxury
+label: "Buy a gold watch"
+blurb: "A serious watch, the kind that gets handed down."
+minAge: 18
+inPerson: true
+companion: none
+cost: gold_watch
+profile: luxury
+yearlyLimit: 1
+buys: gold_watch
+tiers:
+  great:
+    text:
+      - "The weight on your wrist is a small, steady pleasure. You paid {cost}, and every glance at the time feels like a good decision."
+      - "It ticks like a promise. The watchmaker polishes it a final time before you leave with it. {cost}."
+    effects:
+      - { type: stat, key: happiness, delta: 6 }
+      - { type: stat, key: confidence, delta: 2 }
+      - { type: stat, key: looks, delta: 1 }
+  good:
+    text:
+      - "A handsome watch that fits. You pay {cost} and wear it the next day."
+      - "It runs perfectly and looks like it cost more than {cost}."
+    effects:
+      - { type: stat, key: happiness, delta: 4 }
+      - { type: stat, key: confidence, delta: 1 }
+  neutral:
+    text:
+      - "The watch is good. The price, {cost}, still takes a while to get used to."
+      - "You like it, and you check the time more often than you need to."
+    effects:
+      - { type: stat, key: happiness, delta: 2 }
+  bad:
+    text:
+      - "The strap does not fit well, and the jeweler's shrug when you mention it is expensive. {cost} spent, and a little irritation."
+      - "It is heavier than you thought and the clasp is stiff. You paid {cost} and are still deciding."
+    effects:
+      - { type: stat, key: happiness, delta: -1 }
+      - { type: stat, key: stress, delta: 3 }

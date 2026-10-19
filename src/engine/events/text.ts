@@ -135,6 +135,8 @@ export function textContext(state: LifeState, cast: Record<string, Id>, content:
   if (vehicle) values.vehicle = possessionNoun(vehicle, content);
   const home = castPossession(state, cast, 'home', 'home');
   if (home) values.homeCity = possessionNoun(home, content);
+  const valuable = castPossession(state, cast, 'valuable', 'valuable');
+  if (valuable) values.valuable = possessionNoun(valuable, content);
   return { roles, values, money: (amount) => priceText(state, amount, content) };
 }
 
@@ -151,7 +153,7 @@ export function textContext(state: LifeState, cast: Record<string, Id>, content:
  */
 export const EVENT_TEXT_VALUES = [...MIGRATION_TEXT_VALUES, 'destination', 'destinationCountry', 'endYear', 'homeCity', 'travelCost', ...COUNTRY_TEXT_VALUES, 'studiedLanguage', 'age', 'talent', 'latentPeople', 'latentGender', 'latentExpression', 'latentTrait', 'sentence', 'since', 'heard', ...TEEN_TEXT_VALUES, ...CRIME_TEXT_VALUES, ...FAME_TEXT_VALUES, ...SPORTS_TEXT_VALUES, ...BELONGING_TEXT_VALUES, ...BUSINESS_TEXT_VALUES] as const;
 /** E5: values an event may use only when it binds the possession: a pet's species, a vehicle's name, a vacation home's city. */
-export const POSSESSION_TEXT_VALUES = { pet: ['petKind'], vehicle: ['vehicle'], home: ['homeCity'] } as const;
+export const POSSESSION_TEXT_VALUES = { pet: ['petKind'], vehicle: ['vehicle'], home: ['homeCity'], valuable: ['valuable'] } as const;
 
 /**
  * E5: a possession an effect removed (a pet that died, a car that was stolen)
@@ -163,7 +165,7 @@ export function keepPossessionText(after: TextContext, before: TextContext): Tex
   const values = { ...after.values };
   const money = after.money ?? before.money;
   if (roles.pet === undefined && before.roles?.pet !== undefined) roles.pet = before.roles.pet;
-  for (const key of ['petKind', 'vehicle', 'homeCity'] as const) {
+  for (const key of ['petKind', 'vehicle', 'homeCity', 'valuable'] as const) {
     const was = before.values?.[key];
     if (values[key] === undefined && was !== undefined) values[key] = was;
   }

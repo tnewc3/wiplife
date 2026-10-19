@@ -8,15 +8,14 @@
  * goes through the finance module and shows on the result.
  */
 import { FIND_DATE_WAYS, type ContentBundle, type FindDateWay } from '../../content/schemas';
-import { evaluate } from '../conditions';
-import { castEvent, castCandidates, uncast } from '../events/casting';
+import { castCandidates } from '../events/casting';
 import { scaledAmount } from '../country';
 import { spend } from '../finance';
-import { consistencyProblems } from '../presence';
-import { currentPartner, romanceAllowed } from '../relationships';
-import { chance, pick } from '../rng';
+import { currentPartner } from '../relationships';
+import { chance } from '../rng';
 import type { LifeState } from '../types';
 import type { LifeActionRule } from './life';
+import { tryQueueCastEvent } from './castResult';
 import { queueResult } from './result';
 
 export const LOVE_ACTION_IDS = ['find_date'] as const;
@@ -74,20 +73,7 @@ export const LOVE_ACTIONS: Record<LoveActionId, LifeActionRule> = {
       const debt = state.finances.debts.reduce((sum, d) => sum + d.balance, 0);
       spend(state, cost, content);
       const registry = content.registries.love.findDate;
-      let queued = false;
-      if (chance(state.rng, findDateChance(way, before, content))) {
-        const options = registry[way].map((id) => content.events[id]).filter((d) => d !== undefined && !d.retired);
-        if (options.length > 0) {
-          const def = pick(state.rng, options)!;
-          const cast = castEvent(state, def, state.rng, content);
-          if (cast && evaluate(def.requires, state, { cast: cast.cast, roles: 'strict', content }) && romanceAllowed(state, def, cast.cast, content) && consistencyProblems(state, def, cast.cast, content).length === 0) {
-            queueResult(state, [[def, 1]], cast.cast);
-            queued = true;
-          } else if (cast) {
-            uncast(state, cast.created);
-          }
-        }
-      }
+      const queued = chance(state.rng, findDateChance(way, before, content)) && tryQueueCastEvent(state, registry[way], content);
       if (!queued) {
         const nobody = registry.nobody.map((id) => content.events[id]).filter((d) => d !== undefined && !d.retired);
         queueResult(state, nobody.map((d) => [d!, d!.weight.base] as const), {});

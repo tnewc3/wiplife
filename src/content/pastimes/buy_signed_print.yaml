@@ -1,0 +1,40 @@
+id: buy_signed_print
+category: luxury
+label: "Buy a signed print"
+blurb: "A numbered edition from an artist you like."
+minAge: 18
+inPerson: true
+companion: none
+cost: signed_print
+profile: luxury
+yearlyLimit: 1
+buys: signed_print
+tiers:
+  great:
+    text:
+      - "You hang it that evening and stand back from it with a glass of something. {cost}, and the wall finally means something."
+      - "The print has a presence the photo did not show. You paid {cost} and it was worth it."
+    effects:
+      - { type: stat, key: happiness, delta: 6 }
+      - { type: stat, key: confidence, delta: 2 }
+      - { type: stat, key: looks, delta: 1 }
+  good:
+    text:
+      - "A good print, framed well, in just the right place. {cost}."
+      - "The artist's signature and the number are both there, and so is a bit of pride."
+    effects:
+      - { type: stat, key: happiness, delta: 4 }
+      - { type: stat, key: confidence, delta: 1 }
+  neutral:
+    text:
+      - "The print is nice, if not astonishing. It cost {cost} and brightens the room a little."
+      - "You like it. Maybe you would like it more at half the price."
+    effects:
+      - { type: stat, key: happiness, delta: 2 }
+  bad:
+    text:
+      - "The colors are duller than the photo, and the frame cost almost as much as the print. {cost} and a sigh."
+      - "It looks smaller on the wall than it did in the gallery. You paid {cost} to learn that."
+    effects:
+      - { type: stat, key: happiness, delta: -1 }
+      - { type: stat, key: stress, delta: 3 }

@@ -1,0 +1,48 @@
+# Opened by a matchmaker (Batch 2a, Love). Adults only.
+id: matchmaker_intro
+title: An introduction
+text: >-
+  The matchmaker has a folder, a pen, and a very good memory for who you
+  said you wanted to meet. {date.name} is the first name on the list, and
+  you can see why.
+tone: light
+category: romance
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { romance: [single] }
+weight: { base: 5 }
+followUpOnly: true
+cast:
+  date: { kind: acquaintance, romantic: true, createIfMissing: true, newChance: 1, presence: city }
+choices:
+  - id: go_for_dinner
+    label: Meet {date.them} for dinner
+    check:
+      base: 62
+      stats: [{ key: confidence, weight: 0.25 }, { key: sociability, weight: 0.2 }]
+      success:
+        text: >-
+          Dinner goes on for three hours. When the staff start stacking chairs,
+          you both laugh and agree to do it again.
+        effects:
+          - { type: relationship, role: date, kind: partner, affection: 15 }
+          - { type: memory, role: date, tag: started_dating }
+          - { type: stat, key: happiness, delta: 5 }
+          - { type: history, text: 'You started dating {date.name}, who a matchmaker introduced you to.', importance: 2 }
+      failure:
+        text: >-
+          The folder was right about everything but the chemistry. It is a
+          polite dinner, and you part with a handshake.
+        effects:
+          - { type: relationship, role: date, affection: 2 }
+          - { type: stat, key: happiness, delta: -1 }
+  - id: coffee_first
+    label: Start with a coffee instead
+    outcome:
+      text: >-
+        Coffee is easy. You part with a promise to talk again, and mean it.
+      effects:
+        - { type: relationship, role: date, affection: 8 }

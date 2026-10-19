@@ -17,7 +17,9 @@ import type {
   TieKindId,
   TieStatusId,
 } from '../content/schemas';
-import type { PetPersonalityId, TeenFocusId } from '../content/schemas';
+import type { PastimeCategory, PastimeQuality, PetPersonalityId, TeenFocusId } from '../content/schemas';
+import type { PastimeBlock } from '../engine/pastimes/query';
+import type { PastimeReceipt } from '../engine/types';
 import type { ActivityBlock } from '../engine/teen/activities';
 import type { JoinBlock } from '../engine/teen/cliques';
 import type { FocusBlock } from '../engine/teen/focus';
@@ -1574,3 +1576,77 @@ export const MOVE_BLOCK_LABELS: Record<string, string> = {
   age: 'Too young.', law: 'Not while on probation or in prison.', stay: 'Finish your temporary stay first.', care: 'Not while you need care.',
   commitment: 'Your business, crew or public career needs you here.', money: 'You need more saved to move.',
 };
+
+// Batch 2a: activities (More → Activities).
+
+export const PASTIME_CATEGORY_LABELS: Record<PastimeCategory, string> = {
+  mind_body: 'Mind & body',
+  salon_spa: 'Salon & spa',
+  surgery: 'Plastic surgery',
+  shopping: 'Shopping',
+  movies: 'Movie theater',
+  nightlife: 'Nightlife',
+  outdoor: 'Outdoor',
+  luxury: 'Luxury',
+  love: 'Love',
+};
+
+/** Why an activity on offer can't be done right now. */
+export const PASTIME_BLOCK_LABELS: Partial<Record<PastimeBlock, string>> = {
+  limit: 'You have done enough of this for one year.',
+  afford: 'You can’t afford this yet.',
+  companion: 'Choose who comes along.',
+  quality: 'Choose a price tier.',
+};
+
+export const PASTIME_QUALITY_LABELS: Record<PastimeQuality, string> = {
+  budget: 'Budget surgeon',
+  standard: 'Standard surgeon',
+  premier: 'Top surgeon',
+};
+
+export const PASTIME_QUALITY_NOTES: Record<PastimeQuality, string> = {
+  budget: 'Cheaper, with more that can go wrong.',
+  standard: 'A fair price and fair odds.',
+  premier: 'Costs more, and fewer things go wrong.',
+};
+
+/** What an activity did to you, in words (never numbers). */
+export function pastimeChangeWords(changes: PastimeReceipt['changes']): string[] {
+  const size = (n: number) => (Math.abs(n) >= 6 ? 'a lot ' : Math.abs(n) <= 1 ? 'a little ' : '');
+  const words: Record<keyof PastimeReceipt['changes'], [string, string]> = {
+    health: ['healthier', 'less healthy'],
+    happiness: ['happier', 'less happy'],
+    smarts: ['sharper', 'duller'],
+    looks: ['better looking', 'not looking your best'],
+    fitness: ['fitter', 'less fit'],
+    stress: ['more stressed', 'calmer'],
+  };
+  const out: string[] = [];
+  for (const key of Object.keys(words) as (keyof PastimeReceipt['changes'])[]) {
+    const n = changes[key];
+    if (n === undefined || n === 0) continue;
+    const [up, down] = words[key];
+    out.push(`You feel ${size(n)}${n > 0 ? up : down}.`);
+  }
+  return out;
+}
+
+/** How an activity moved things with whoever came along. */
+export function companionChangeWords(name: string, affection: number): string | null {
+  if (affection >= 4) return `You feel a lot closer to ${name}.`;
+  if (affection >= 1) return `You feel closer to ${name}.`;
+  if (affection <= -3) return `${name} seems more distant.`;
+  if (affection <= -1) return `${name} seems a little distant.`;
+  return null;
+}
+
+/** The kinds of people who can come along, for "Take …". */
+export const PASTIME_COMPANION_LABELS: Record<'partner' | 'friend' | 'family', string> = {
+  partner: 'your partner',
+  friend: 'a friend',
+  family: 'family',
+};
+
+/** Valuable classes, as the Belongings screen reads them. */
+export const VALUABLE_CLASS_LABELS: Record<string, string> = { jewelry: 'Jewelry', designer: 'Designer goods', art: 'Art', boat: 'Boat' };

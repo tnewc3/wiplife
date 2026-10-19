@@ -1,0 +1,42 @@
+id: go_speed_dating
+category: love
+label: "Try speed dating"
+blurb: "A dozen four-minute conversations and a scorecard."
+minAge: 18
+inPerson: true
+companion: none
+cost: speed_dating
+profile: love
+yearlyLimit: 2
+requires: { romance: [single] }
+tiers:
+  great:
+    text:
+      - "The bell rings, and for the first time all night the conversation does not stop when it should. You write a name on your card and underline it. Entry was {cost}."
+      - "You find yourself laughing at the third table and still smiling at the sixth. The night is better than you had any right to expect."
+    effects:
+      - { type: stat, key: happiness, delta: 3 }
+      - { type: stat, key: confidence, delta: 1 }
+    events: [speed_dating_match, find_date_night_out]
+    eventChance: love_match
+  good:
+    text:
+      - "A friendly room, a lot of nervous laughter, and a couple of people you would like to meet after tonight. Entry was {cost}."
+      - "You are better at this than you expected, and the evening is more fun than awkward."
+    effects:
+      - { type: stat, key: happiness, delta: 2 }
+    events: [speed_dating_match, find_date_night_out]
+    eventChance: love_match
+  neutral:
+    text:
+      - "Twelve conversations, none of them memorable. You go home with a pen mark on your hand and {cost} less."
+      - "A pleasant night of meeting strangers. Nothing clicks, but nothing hurts."
+    effects:
+      - { type: stat, key: happiness, delta: 1 }
+  bad:
+    text:
+      - "You freeze at the first table and recover too late. Every conversation is slightly off. {cost} for a lesson in your own nerves."
+      - "The room is loud and the clock is cruel. You leave tired and a little deflated."
+    effects:
+      - { type: stat, key: happiness, delta: -2 }
+      - { type: stat, key: confidence, delta: -1 }

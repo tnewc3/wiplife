@@ -1,5 +1,5 @@
 # History lines the possessions systems write. The player is "you".
-# Values: {pet}, {species}, {vehicle}, {city}, {renovation}.
+# Values: {pet}, {species}, {vehicle}, {city}, {renovation}, {valuable}.
 petNames: [Biscuit, Juniper, Pepper, Waffles, Mochi, Bean, Clover, Otis, Maple, Pickles, Ziggy, Willow, Tofu, Nugget, Poppy, Ranger, Olive, Pretzel, Basil, Sprout]
 
 history:
@@ -58,3 +58,13 @@ history:
     variants:
       - "Without a vehicle you couldn't keep up with the work, and the job ended."
       - "The job needed a way to get around, and without one it fell through."
+  valuableBought:
+    importance: 2
+    variants:
+      - "You bought a {valuable}."
+      - "A {valuable} became yours."
+  valuableSold:
+    importance: 1
+    variants:
+      - "You sold your {valuable}."
+      - "Your {valuable} went to someone else."

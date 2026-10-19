@@ -1,0 +1,39 @@
+id: go_for_a_run
+category: mind_body
+label: "Go for a run"
+blurb: "Shoes on, headphones in, a loop around the neighborhood."
+minAge: 10
+inPerson: true
+companion: none
+cost: run
+profile: steady
+yearlyLimit: 8
+tiers:
+  great:
+    text:
+      - "You find a rhythm in the first mile and keep it all the way home. For a while there is nothing in your head but breathing."
+      - "The air is cool, the route is empty, and you run farther than you planned."
+    effects:
+      - { type: stat, key: fitness, delta: 2 }
+      - { type: stat, key: stress, delta: -1 }
+      - { type: stat, key: happiness, delta: 2 }
+  good:
+    text:
+      - "A steady, honest run. You are out of breath at the end and glad you went."
+      - "You pick up the pace on the last stretch and finish tired in a good way."
+    effects:
+      - { type: stat, key: fitness, delta: 1 }
+      - { type: stat, key: stress, delta: -1 }
+      - { type: stat, key: happiness, delta: 1 }
+  neutral:
+    text:
+      - "A short, slow loop. It is not your best, but you did it."
+      - "You jog around the block more than you run it, and call that enough."
+    effects:
+      - { type: stat, key: fitness, delta: 1 }
+  bad:
+    text:
+      - "Your legs feel like lead from the first step. You walk the second half and go home annoyed."
+      - "A cold, gray run with a cramp at the halfway mark. You are glad when it is over."
+    effects:
+      - { type: stat, key: stress, delta: 1 }

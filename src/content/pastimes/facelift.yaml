@@ -1,0 +1,84 @@
+id: facelift
+category: surgery
+label: "Facelift"
+blurb: "Lift and tighten the face. Recovery takes a month and a lot of patience."
+minAge: 35
+inPerson: true
+companion: none
+cost: facelift
+profile: surgery
+quality: true
+yearlyLimit: 1
+tiers:
+  great:
+    text:
+      - "The result looks like you on a very good night, not like someone else. People say you look rested, and you let them think it is a vacation."
+      - "Weeks of bruising, then a face that looks ten years younger and still like yours."
+    effects:
+      - { type: flag, key: cosmetic_surgery, value: true }
+      - { type: stat, key: health, delta: -2 }
+      - { type: stat, key: looks, delta: 9 }
+      - { type: stat, key: happiness, delta: 5 }
+      - { type: stat, key: confidence, delta: 2 }
+      - { type: history, text: "You had a facelift.", importance: 2 }
+    extras:
+      - chance: surgery_complication
+        effects:
+          - { type: health, conditionId: surgical_complication, severity: 35 }
+        note: "A few days later a fever and a swollen, angry scar send you back to the clinic. It needs proper treatment."
+  good:
+    text:
+      - "The change is natural and flattering. You look refreshed, and the recovery was easier than you feared."
+      - "You look well rested, a few years back in time, and happy about it."
+    effects:
+      - { type: flag, key: cosmetic_surgery, value: true }
+      - { type: stat, key: health, delta: -2 }
+      - { type: stat, key: looks, delta: 6 }
+      - { type: stat, key: happiness, delta: 3 }
+    extras:
+      - chance: surgery_complication
+        effects:
+          - { type: health, conditionId: surgical_complication, severity: 35 }
+        note: "A few days later a fever and a swollen, angry scar send you back to the clinic. It needs proper treatment."
+  neutral:
+    text:
+      - "The result is gentle. The surgeon calls it conservative, and you wish you had asked for a little more."
+      - "You look a little tighter and a little less tired, and nobody can say exactly why."
+    effects:
+      - { type: flag, key: cosmetic_surgery, value: true }
+      - { type: stat, key: health, delta: -2 }
+      - { type: stat, key: looks, delta: 2 }
+      - { type: stat, key: stress, delta: 2 }
+    extras:
+      - chance: surgery_complication
+        effects:
+          - { type: health, conditionId: surgical_complication, severity: 35 }
+        note: "A few days later a fever and a swollen, angry scar send you back to the clinic. It needs proper treatment."
+  bad:
+    text:
+      - "The face is tighter, but it looks it. There is a stiffness to your expression that was not there before."
+      - "Friends are polite. You can tell from the way they look at you that the result is not what you hoped."
+    effects:
+      - { type: flag, key: cosmetic_surgery, value: true }
+      - { type: stat, key: health, delta: -2 }
+      - { type: stat, key: looks, delta: -2 }
+      - { type: stat, key: happiness, delta: -4 }
+      - { type: stat, key: stress, delta: 4 }
+      - { type: flag, key: surgery_regret, value: true }
+    extras:
+      - chance: surgery_complication
+        effects:
+          - { type: health, conditionId: surgical_complication, severity: 35 }
+        note: "A few days later a fever and a swollen, angry scar send you back to the clinic. It needs proper treatment."
+  backfire:
+    text:
+      - "Something goes wrong in the healing. There is scarring, numbness, and months before you can tell what the face will settle into."
+      - "An infection takes weeks to clear, and what is left is not what you paid for."
+    effects:
+      - { type: flag, key: cosmetic_surgery, value: true }
+      - { type: stat, key: health, delta: -2 }
+      - { type: stat, key: looks, delta: -4 }
+      - { type: stat, key: happiness, delta: -6 }
+      - { type: stat, key: stress, delta: 7 }
+      - { type: flag, key: surgery_regret, value: true }
+      - { type: health, conditionId: surgical_complication, severity: 30 }

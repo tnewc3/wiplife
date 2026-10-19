@@ -35,6 +35,7 @@ import { crewSchema, crimeBalanceSchema, crimeRegistrySchema, crimeTextSchema, f
 import { sportsBalanceSchema, sportsRegistrySchema, sportsTextSchema } from './sports';
 import { fameAgentSchema, fameAwardSchema, fameBalanceSchema, fameCompanySchema, famePathSchema, fameRegistrySchema, fameTextSchema } from './fame';
 import { activitySchema, cliqueSchema, houseRuleSchema, teenBalanceSchema, teenJobSchema, teenRegistrySchema, teenTextSchema } from './teen';
+import { pastimeSchema, pastimesBalanceSchema, valuableSchema } from './pastimes';
 import { estateRegistrySchema, familyBalanceSchema, familyRegistrySchema, heirRegistrySchema, heirTextSchema } from './family';
 
 export * from './balance';
@@ -68,6 +69,7 @@ export * from './eulogy';
 export * from './later';
 export * from './belonging';
 export * from './business';
+export * from './pastimes';
 
 /**
  * Collections: a folder under src/content with one YAML file per definition,
@@ -102,12 +104,14 @@ export const collectionTypes = {
   names: { folder: 'names', schema: namePoolSchema },
   offenses: { folder: 'offenses', schema: offenseSchema },
   petInteractions: { folder: 'petInteractions', schema: petInteractionSchema },
+  pastimes: { folder: 'pastimes', schema: pastimeSchema },
   pets: { folder: 'pets', schema: petSchema },
   pronouns: { folder: 'pronouns', schema: pronounPresetSchema },
   renovations: { folder: 'renovations', schema: renovationSchema },
   talents: { folder: 'talents', schema: talentSchema },
   teenJobs: { folder: 'teenJobs', schema: teenJobSchema },
   trades: { folder: 'trades', schema: tradeSchema },
+  valuables: { folder: 'valuables', schema: valuableSchema },
   vehicles: { folder: 'vehicles', schema: vehicleSchema },
 } as const;
 
@@ -145,6 +149,7 @@ export const singletonTypes = {
   'balance/business': businessBalanceSchema,
   'balance/mental-health': mentalHealthBalanceSchema,
   'balance/possessions': possessionsBalanceSchema,
+  'balance/pastimes': pastimesBalanceSchema,
   'balance/teen': teenBalanceSchema,
   'balance/crime': crimeBalanceSchema,
   'balance/fame': fameBalanceSchema,
@@ -232,12 +237,14 @@ export const contentBundleSchema = z.strictObject({
   names: z.record(z.string(), namePoolSchema),
   offenses: z.record(z.string(), offenseSchema),
   petInteractions: z.record(z.string(), petInteractionSchema),
+  pastimes: z.record(z.string(), pastimeSchema),
   pets: z.record(z.string(), petSchema),
   pronouns: z.record(z.string(), pronounPresetSchema),
   renovations: z.record(z.string(), renovationSchema),
   talents: z.record(z.string(), talentSchema),
   teenJobs: z.record(z.string(), teenJobSchema),
   trades: z.record(z.string(), tradeSchema),
+  valuables: z.record(z.string(), valuableSchema),
   vehicles: z.record(z.string(), vehicleSchema),
   balance: z.strictObject({
     creation: creationBalanceSchema,
@@ -266,6 +273,7 @@ export const contentBundleSchema = z.strictObject({
     business: businessBalanceSchema,
     mentalHealth: mentalHealthBalanceSchema,
     possessions: possessionsBalanceSchema,
+    pastimes: pastimesBalanceSchema,
     teen: teenBalanceSchema,
     crime: crimeBalanceSchema,
     fame: fameBalanceSchema,

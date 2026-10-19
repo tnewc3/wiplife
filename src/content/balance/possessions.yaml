@@ -1,7 +1,7 @@
 # E5: pets, vehicles and homes. Every number here is a starting proposal; the
 # simulation targets (balance/targets.yaml, possessions) say where they should land.
 
-limits: { pets: 4, vehicles: 3, vacationHomes: 2 }
+limits: { pets: 4, vehicles: 3, vacationHomes: 2, valuables: 12 }
 
 # The youngest age you can drive, and buy a vehicle for cash, is the country's driving age (countries/*.yaml legalAges).
 
@@ -145,6 +145,17 @@ homes:
     max: 2
     limit: 90
     maxActive: 5
+
+# Batch 2a: valuables (jewelry, designer goods, art, boats). This reverses E5's "no valuables" decision at the
+# playtester's request. Yearly shares of the value, by class; the price is the cost of the Luxury activity
+# that buys one (balance/pastimes.yaml costs).
+valuables:
+  classes:
+    jewelry: { drift: 0.02, volatility: 0.03, upkeep: 0.004, insurance: 0.012, theft: 0.02, sellShare: 0.7 }
+    designer: { drift: -0.12, volatility: 0.03, upkeep: 0.002, insurance: 0.01, theft: 0.02, sellShare: 0.45 }
+    art: { drift: 0.04, volatility: 0.09, upkeep: 0.01, insurance: 0.015, theft: 0.006, sellShare: 0.65 }
+    boat: { drift: -0.07, volatility: 0.02, upkeep: 0.09, insurance: 0.03, theft: 0.01, sellShare: 0.8 }
+  payout: 0.85
 
 estate:
   # Who is best placed to take a pet.

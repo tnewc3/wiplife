@@ -9,7 +9,8 @@
 import { PET_SOURCES, type ContentBundle, type PetSourceId } from '../../content/schemas';
 import { canVisitVet, petBlock, takePetIn, validPetName, visitVet } from '../possessions/pets';
 import { buyVacationHome, renovate, renovationQuote, sellVacationHome, vacationQuote } from '../possessions/homes';
-import { possessionById, vacationHomesOf, vehiclesOf } from '../possessions/query';
+import { possessionById, vacationHomesOf, valuablesOf, vehiclesOf } from '../possessions/query';
+import { sellValuable, setValuableInsurance } from '../possessions/valuables';
 import { buyVehicle, canService, sellBlock, sellVehicle, serviceVehicle, setVehicleInsurance, vehicleQuote } from '../possessions/vehicles';
 import { setHomeInsurance } from '../possessions/homes';
 import type { LifeState } from '../types';
@@ -25,6 +26,7 @@ export const POSSESSION_ACTION_IDS = [
   'buy_vacation_home',
   'sell_vacation_home',
   'renovate',
+  'sell_valuable',
 ] as const;
 export type PossessionActionId = (typeof POSSESSION_ACTION_IDS)[number];
 
@@ -39,7 +41,7 @@ const text = (params: unknown, key: string): string | undefined => {
 const only = (params: unknown, keys: readonly string[]): boolean =>
   typeof params === 'object' && params !== null && Object.keys(params).every((k) => keys.includes(k));
 
-const owns = (state: LifeState, id: string | undefined, kind: 'pet' | 'vehicle' | 'home') => {
+const owns = (state: LifeState, id: string | undefined, kind: 'pet' | 'vehicle' | 'home' | 'valuable') => {
   const p = possessionById(state, id);
   return p !== undefined && p.kind === kind && p.pet?.died === undefined ? p : undefined;
 };
@@ -110,12 +112,13 @@ export const POSSESSION_ACTIONS: Record<PossessionActionId, LifeActionRule> = {
       return only(params, ['insured']) && typeof insured === 'boolean' ? { insured } : null;
     },
     allowed: (state, p) => {
-      const items = [...vehiclesOf(state), ...vacationHomesOf(state)];
-      return items.length > 0 && items.some((i) => (i.vehicle?.insured ?? i.home?.insured) !== p.insured);
+      const items = [...vehiclesOf(state), ...vacationHomesOf(state), ...valuablesOf(state)];
+      return items.length > 0 && items.some((i) => (i.vehicle?.insured ?? i.home?.insured ?? i.valuable?.insured) !== p.insured);
     },
     apply: (state, p) => {
       setVehicleInsurance(state, p.insured!);
       setHomeInsurance(state, p.insured!);
+      setValuableInsurance(state, p.insured!);
     },
   },
   buy_vacation_home: {
@@ -142,6 +145,14 @@ export const POSSESSION_ACTIONS: Record<PossessionActionId, LifeActionRule> = {
     },
     allowed: (state, p, content) => p.renovationId !== undefined && p.target !== undefined && renovationQuote(state, p.target, content.renovations[p.renovationId], content).blocked === null,
     apply: (state, p, content) => renovate(state, p.target!, content.renovations[p.renovationId!]!, content),
+  },
+  sell_valuable: {
+    parse: (params) => {
+      const possessionId = text(params, 'possessionId');
+      return only(params, ['possessionId']) && possessionId !== undefined ? { possessionId } : null;
+    },
+    allowed: (state, p) => owns(state, p.possessionId, 'valuable') !== undefined,
+    apply: (state, p, content) => sellValuable(state, p.possessionId!, content),
   },
 };
 

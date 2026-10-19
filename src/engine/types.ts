@@ -791,9 +791,15 @@ export interface Possession {
   pet?: PetState;
   vehicle?: VehicleState;
   home?: VacationState;
+  valuable?: ValuableState;
 }
 
-export type PossessionKind = 'pet' | 'vehicle' | 'home';
+/** Batch 2a: a valuable's own record (jewelry, designer goods, art or a boat): whether it is insured against theft. */
+export interface ValuableState {
+  insured: boolean;
+}
+
+export type PossessionKind = 'pet' | 'vehicle' | 'home' | 'valuable';
 
 /** E5: what you own. */
 export interface PossessionsState {
@@ -1183,6 +1189,34 @@ export interface LifeState {
   belonging: BelongingState;
   /** W3: your businesses, the ones you have had, and what they paid or cost you this year. */
   business: BusinessState;
+  /** Batch 2a: this year's activities (leisure and self): how many of each, and the receipts of the last few. */
+  pastimes: PastimesState;
+}
+
+/** Batch 2a: what an activity did, as the Activities screen shows it: the words, the money and (as numbers the screen turns into words) the stats that moved. */
+export interface PastimeReceipt {
+  year: number;
+  pastimeId: Id;
+  tier: 'great' | 'good' | 'neutral' | 'bad' | 'backfire';
+  /** What happened, already written (pronouns and amounts filled in). */
+  text: string;
+  /** Extra lines: a chance that came up (a complication, a stranger's number). */
+  notes: string[];
+  /** The money it cost, with the balance after (absent for a free activity). */
+  money?: MoneyChange;
+  /** Who came along. */
+  companion?: { id: Id; name: string; affection: number };
+  /** Stats that moved (after the activity's effects), by key. */
+  changes: Partial<Record<'health' | 'happiness' | 'smarts' | 'looks' | 'fitness' | 'stress', number>>;
+}
+
+/** Batch 2a: activities this year. A new year starts from nothing (counts of an earlier year are ignored). */
+export interface PastimesState {
+  year: number;
+  /** How many times each activity was done this year. */
+  counts: Record<Id, number>;
+  /** The latest activities this year, newest last. */
+  receipts: PastimeReceipt[];
 }
 
 /** W3: one owner of a business: you, an investor from your circle or a co-founder. */

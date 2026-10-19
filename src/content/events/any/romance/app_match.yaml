@@ -1,0 +1,57 @@
+# Opened by a dating app evening (Batch 2a, Love). Adults only, suggestive and never graphic.
+id: app_match
+title: It's a match
+text: >-
+  After an hour of swiping and one very good opening line, {date.name} writes
+  back. The conversation moves fast, and soon it is somewhere between a joke
+  and an invitation.
+tone: light
+category: romance
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { romance: [single] }
+weight: { base: 5 }
+followUpOnly: true
+cast:
+  date: { kind: acquaintance, romantic: true, createIfMissing: true, newChance: 1, presence: city }
+choices:
+  - id: meet_up
+    label: Meet up tonight
+    check:
+      base: 90
+      stats: [{ key: luck, weight: 0.1 }]
+      success:
+        text: >-
+          You meet in person, and the evening takes the turn the messages
+          promised. The details are for you and {date.them} to keep.
+        effects:
+          - { type: relationship, role: date, affection: 9 }
+          - { type: stat, key: happiness, delta: 3 }
+      failure:
+        text: >-
+          The evening goes fine. The clinic call that follows does not. It is
+          treatable and embarrassing, and it makes you think harder next time.
+        effects:
+          - { type: relationship, role: date, affection: 3 }
+          - { type: health, conditionId: treatable_infection, severity: 20 }
+          - { type: stat, key: stress, delta: 5 }
+  - id: coffee_date
+    label: Suggest a proper first date
+    outcome:
+      text: >-
+        {date.name} says yes before you finish typing. You leave the evening
+        with a plan and a slightly absurd smile.
+      effects:
+        - { type: relationship, role: date, affection: 9 }
+        - { type: stat, key: happiness, delta: 2 }
+  - id: unmatch
+    label: Close the app for tonight
+    outcome:
+      text: >-
+        You put the phone face down and do something else with the evening.
+        It feels like a small, sensible victory.
+      effects:
+        - { type: stat, key: stress, delta: -1 }

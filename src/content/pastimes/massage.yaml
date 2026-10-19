@@ -1,0 +1,37 @@
+id: massage
+category: salon_spa
+label: "Book a massage"
+blurb: "An hour of someone working out the knots."
+minAge: 16
+inPerson: true
+companion: none
+cost: massage
+profile: pamper
+yearlyLimit: 3
+tiers:
+  great:
+    text:
+      - "The tension in your shoulders you have carried for months just lets go. You nearly fall asleep on the table."
+      - "You float out of the room, boneless and happy, and sleep ten hours that night."
+    effects:
+      - { type: stat, key: stress, delta: -1 }
+      - { type: stat, key: happiness, delta: 3 }
+  good:
+    text:
+      - "An hour of kneading and quiet. You leave looser and calmer, for {cost}."
+      - "The therapist finds the knot you did not know you had. It hurts, and then it does not."
+    effects:
+      - { type: stat, key: stress, delta: -1 }
+      - { type: stat, key: happiness, delta: 2 }
+  neutral:
+    text:
+      - "It is pleasant enough. The room is warm and the music is soft."
+      - "A decent massage, but not a transformative one."
+    effects:
+      - { type: stat, key: stress, delta: -1 }
+  bad:
+    text:
+      - "The pressure is too hard and the therapist keeps chatting. You leave a little sore and a little cross."
+      - "You cannot relax with a stranger working on your back. {cost} down, and still tense."
+    effects:
+      - { type: stat, key: stress, delta: 1 }

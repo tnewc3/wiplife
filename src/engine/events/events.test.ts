@@ -495,6 +495,7 @@ describe('event text', () => {
           heard: 'that you were let go',
           petKind: 'dog',
           vehicle: 'sedan',
+          valuable: 'gold watch',
           homeCity: 'Chicago',
           clique: 'Back Bleacher',
           rival: 'Afterburn',
@@ -564,7 +565,7 @@ describe('event text', () => {
           localLanguage: 'English',
           citizenOf: 'Mexico',
           ...US_WORDS,
-        } satisfies Record<(typeof EVENT_TEXT_VALUES)[number] | 'petKind' | 'vehicle' | 'homeCity', string | number>;
+        } satisfies Record<(typeof EVENT_TEXT_VALUES)[number] | 'petKind' | 'vehicle' | 'valuable' | 'homeCity', string | number>;
         const context = { roles, values, money: (n: number) => `$${n}` };
         const texts = [def.title, def.text, ...(def.choices ?? []).map((c) => c.label)];
         const outcomes = def.autoOutcome ? [def.autoOutcome] : (def.choices ?? []).flatMap((c) => (c.outcome ? [c.outcome] : [c.check!.success, c.check!.failure]));

@@ -97,6 +97,9 @@ export function rootEvents(content: ContentBundle): Set<string> {
     // E5: the accidents and the death of a pet the possessions step queues.
     ...Object.values(r.possessions.accidents),
     r.possessions.petDied,
+    r.possessions.valuableStolen,
+    // Batch 2a: the follow-up events an activity can open after its outcome.
+    ...Object.values(content.pastimes).map((p) => ({ events: Object.values(p.tiers).flatMap((t) => t?.events ?? []) })),
     // T1: what the teen step queues (a catch at home, an invitation, a clash, a juvenile case).
     ...Object.values(r.teen.triggers),
     // E6a: what the crime step queues (a year's jobs, a promotion, an arrest, a raid, the past catching up...).
@@ -198,6 +201,22 @@ export function analyzeContent(content: ContentBundle): StaticCoverage {
       for (const tag of refs.memories) addTo(memoryReads, tag, who);
       for (const flag of refs.flags) addTo(flagReads, flag, who);
     }
+  }
+  // Batch 2a: the memories and flags activities write, and the conditions they read.
+  for (const def of Object.values(content.pastimes)) {
+    if (def.retired) continue;
+    const who = `pastimes/${def.id}`;
+    for (const tier of Object.values(def.tiers)) {
+      for (const effect of [...(tier?.effects ?? []), ...(tier?.extras ?? []).flatMap((x) => x.effects)]) {
+        if (effect.type === 'memory') addTo(memoryWrites, effect.tag, who);
+        if (effect.type === 'flag') addTo(flagWrites, effect.key, who);
+        if (effect.type === 'infidelity') {
+          for (const tag of ['cheated_on_them', 'affair_with_you', 'flirted_behind_their_back']) addTo(memoryWrites, tag, `${who} (engine)`);
+          addTo(flagWrites, 'unfaithful', `${who} (engine)`);
+        }
+      }
+    }
+    for (const flag of referencesIn(def.requires).flags) addTo(flagReads, flag, who);
   }
   for (const profile of Object.values(content.balance.interactions.profiles)) {
     for (const tag of Object.keys(profile.memories)) addTo(memoryReads, tag, 'balance/interactions.yaml');

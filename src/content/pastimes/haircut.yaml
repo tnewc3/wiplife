@@ -1,0 +1,39 @@
+id: haircut
+category: salon_spa
+label: "Get a haircut"
+blurb: "A trim and a new look from the stylist."
+minAge: 12
+inPerson: true
+companion: none
+cost: haircut
+profile: grooming
+yearlyLimit: 4
+tiers:
+  great:
+    text:
+      - "The stylist gets exactly what you meant, and a bit more. You catch your reflection all the way to the car."
+      - "It is the best cut you have ever had. Everything about your face looks sharper for it."
+    effects:
+      - { type: stat, key: looks, delta: 3 }
+      - { type: stat, key: confidence, delta: 1 }
+      - { type: stat, key: happiness, delta: 2 }
+  good:
+    text:
+      - "A clean, flattering cut. You feel fresh and a bit lighter."
+      - "The stylist chats the whole time, and you leave with hair that behaves."
+    effects:
+      - { type: stat, key: looks, delta: 2 }
+      - { type: stat, key: happiness, delta: 1 }
+  neutral:
+    text:
+      - "It looks like what you asked for. You pay {cost} and carry on."
+      - "A tidy trim, nothing more. It was {cost}, and it will do."
+    effects:
+      - { type: stat, key: looks, delta: 1 }
+  bad:
+    text:
+      - "The cut is a little too short and not quite even. It will grow, but not before the weekend."
+      - "You asked for one thing and got another. You pay {cost} and wear a hat for a week."
+    effects:
+      - { type: stat, key: looks, delta: -1 }
+      - { type: stat, key: happiness, delta: -1 }

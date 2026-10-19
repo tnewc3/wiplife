@@ -35,12 +35,14 @@ export { FAME_ACTION_IDS, type FameActionId } from './fame';
 export { SPORTS_ACTION_IDS, type SportsActionId } from './sports';
 export { LATER_ACTION_IDS, type LaterActionId } from './later';
 export { BELONGING_ACTION_IDS, type BelongingActionId } from './belonging';
+export { PASTIME_ACTION_IDS, type PastimeActionId } from './pastimes';
 export { BUSINESS_ACTION_IDS, type BusinessActionId, type BusinessActionParams } from './business';
 export {
   HOME_ACTION_IDS,
   isLifeActionAvailable,
   isLifeActionId,
   LIFE_ACTION_IDS,
+  LIFE_ACTIONS,
   MONEY_ACTION_IDS,
   PRISON_LIFE_ACTIONS,
   TEMPORARY_STAY_BLOCKED,

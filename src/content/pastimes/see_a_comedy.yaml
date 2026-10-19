@@ -1,0 +1,54 @@
+id: see_a_comedy
+category: movies
+label: "See a comedy"
+blurb: "Something light, with a big bucket of popcorn."
+minAge: 5
+inPerson: true
+companion: optional
+companionKinds: [partner, friend, family]
+cost: movie_ticket
+profile: movie
+yearlyLimit: 4
+tiers:
+  great:
+    text:
+      - "The whole theater laughs in the same place, and you laugh until your sides hurt. The ticket was {cost}, and the best laughter you had all month."
+      - "It is exactly the movie you needed. You quote lines to yourself all the way home."
+    together:
+      - "{companion.name} laughs so hard at the funny parts that you laugh at {companion.them}. You share the popcorn and the best night in weeks."
+      - "You and {companion.name} spend the movie in whispered running commentary. The tickets came to {cost}, and it was worth it."
+    effects:
+      - { type: stat, key: happiness, delta: 4 }
+      - { type: stat, key: stress, delta: -1 }
+    companion: { affection: 5, trust: 2 }
+  good:
+    text:
+      - "A funny, easy movie. You laugh more than you expected to, and the popcorn is good."
+      - "The jokes land, and you walk out smiling. The ticket cost {cost}."
+    together:
+      - "You and {companion.name} laugh in all the right places. A good night out for {cost}."
+      - "{companion.name} leans over to whisper the best joke. It is a fun evening."
+    effects:
+      - { type: stat, key: happiness, delta: 2 }
+      - { type: stat, key: stress, delta: -1 }
+    companion: { affection: 3, trust: 1 }
+  neutral:
+    text:
+      - "A few good laughs and a lot of filler. It was {cost} for a pleasant evening."
+      - "The movie is fine. You forget the plot before you reach the car."
+    together:
+      - "It is a middling comedy, but {companion.name} is good company. {cost}, and the popcorn was the best part."
+      - "You and {companion.name} enjoy the popcorn more than the movie."
+    effects:
+      - { type: stat, key: stress, delta: -1 }
+    companion: { affection: 1, trust: 0 }
+  bad:
+    text:
+      - "The jokes fall flat, the seats are sticky, and someone behind you talks the whole way through."
+      - "You paid {cost} for ninety minutes of wishing you were somewhere else."
+    together:
+      - "The movie is a letdown, and you and {companion.name} spend the drive home picking it apart. It was {cost}."
+      - "{companion.name} falls asleep in the second half. You do not blame {companion.them}."
+    effects:
+      - { type: stat, key: happiness, delta: -1 }
+    companion: { affection: -1, trust: 0 }

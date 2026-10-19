@@ -1,0 +1,54 @@
+id: see_a_drama
+category: movies
+label: "See a drama"
+blurb: "A serious film with a story you might think about for days."
+minAge: 12
+inPerson: true
+companion: optional
+companionKinds: [partner, friend, family]
+cost: movie_ticket
+profile: movie
+yearlyLimit: 4
+tiers:
+  great:
+    text:
+      - "The film stays with you. You sit through the credits in silence and walk home slowly, turning it over. The ticket was {cost}."
+      - "A beautiful, devastating movie. You come out changed in some small way."
+    together:
+      - "You and {companion.name} sit in the dark and then talk for an hour afterward about nothing but the film. It was {cost} for a whole evening."
+      - "{companion.name} is quiet on the way out, and then says exactly what you were thinking."
+    effects:
+      - { type: stat, key: happiness, delta: 4 }
+      - { type: stat, key: stress, delta: -1 }
+    companion: { affection: 5, trust: 2 }
+  good:
+    text:
+      - "A thoughtful, well-made story. You leave with plenty to think about, for {cost}."
+      - "The acting is excellent and the ending lands. You are quiet on the way out, in a good way."
+    together:
+      - "A strong film. You and {companion.name} discuss it over a late snack, and agree on most of it."
+      - "{companion.name} reaches for a tissue at the end, and so do you."
+    effects:
+      - { type: stat, key: happiness, delta: 2 }
+      - { type: stat, key: stress, delta: -1 }
+    companion: { affection: 3, trust: 1 }
+  neutral:
+    text:
+      - "The movie is slow, but it has its moments. You are not sure what to say about it afterward."
+      - "It is a respectable film, if not a memorable one. {cost}."
+    together:
+      - "The movie is a bit long, but {companion.name} is good company. You pay {cost} and share a ride home."
+      - "You and {companion.name} think the movie is overrated and the company underrated."
+    effects:
+      - { type: stat, key: stress, delta: -1 }
+    companion: { affection: 1, trust: 0 }
+  bad:
+    text:
+      - "The story drags and the ending is a muddle. You paid {cost} to be bored."
+      - "You spend the second half looking at the exit sign."
+    together:
+      - "The film is a drag, and you and {companion.name} look at each other twice to see who will suggest leaving first."
+      - "It was {cost} for a slow film. {companion.name} makes the best of it and you laugh in the car."
+    effects:
+      - { type: stat, key: happiness, delta: -1 }
+    companion: { affection: -1, trust: 0 }

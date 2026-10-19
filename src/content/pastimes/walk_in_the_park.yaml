@@ -1,0 +1,54 @@
+id: walk_in_the_park
+category: mind_body
+label: "Take a walk"
+blurb: "Fresh air, a path and nowhere in particular to be."
+minAge: 6
+inPerson: true
+companion: optional
+companionKinds: [partner, friend, family]
+cost: walk
+profile: calm
+yearlyLimit: 10
+tiers:
+  great:
+    text:
+      - "The light is perfect, the path is quiet, and you walk much farther than you meant to. Your head is clear by the end."
+      - "You come back from the walk feeling better about nearly everything."
+    together:
+      - "{companion.name} matches your pace, and you talk about nothing and everything. It is the best hour of the week."
+      - "You and {companion.name} walk until the light changes, and neither of you wants to turn back."
+    effects:
+      - { type: stat, key: stress, delta: -1 }
+      - { type: stat, key: happiness, delta: 3 }
+    companion: { affection: 5, trust: 3 }
+  good:
+    text:
+      - "A slow lap through the park. Birds, trees, and a little breathing room."
+      - "You walk and think, and the thinking goes easier on your feet."
+    together:
+      - "{companion.name} comes along, and the conversation drifts easily from one thing to the next."
+      - "You walk the long way round with {companion.name}, and neither of you is in a hurry."
+    effects:
+      - { type: stat, key: stress, delta: -1 }
+      - { type: stat, key: happiness, delta: 1 }
+    companion: { affection: 3, trust: 2 }
+  neutral:
+    text:
+      - "A short walk, mostly looking at your phone. Still, you are outside."
+      - "You walk around the block twice and head back in."
+    together:
+      - "{companion.name} walks beside you. You talk a little, and say goodbye at the corner."
+      - "A quiet walk with {companion.name}, with more silence than talk."
+    effects:
+      - { type: stat, key: stress, delta: -1 }
+    companion: { affection: 1, trust: 0 }
+  bad:
+    text:
+      - "It starts to rain ten minutes in, and you walk home soaked and in a worse mood."
+      - "The path is crowded and noisy. You turn around before you get anywhere."
+    together:
+      - "It starts to rain, and you and {companion.name} run for the car, laughing, then not laughing."
+      - "You and {companion.name} cannot agree on a route, and the walk ends in a sulk."
+    effects:
+      - { type: stat, key: stress, delta: 1 }
+    companion: { affection: -1, trust: 0 }

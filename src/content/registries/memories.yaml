@@ -245,3 +245,4 @@ tags:
   stole_from_your_business: "{npc.they} took money from your business"
   you_gave_them_work: "You gave {npc.them} work"
   you_were_there_for_their_family: "You were there for {npc.them} when family needed {npc.them}"
+  # Batch 2a: activities with someone along.

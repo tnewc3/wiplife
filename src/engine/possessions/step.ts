@@ -9,6 +9,7 @@
  * 3. Vehicles lose value and condition; in a year you're free, an accident
  *    or a drunk-driving incident may be queued as an event
  *    (registries/possessions.yaml), with the vehicle it is about.
+ * 3b. Valuables (Batch 2a) gain or lose value by their class; one may be stolen (an event, paying out when insured).
  * 4. Pets have their year: health, illness, bond, ageing and death (a death queues its event).
  * 5. A job that needs a vehicle you don't have is lost after the grace years.
  */
@@ -25,7 +26,8 @@ import { hasLicense } from '../teen/query';
 import { comfortPull, foreclosePossession } from './homes';
 import { jobDependence, jobNeedsVehicle } from './jobs';
 import { petYear } from './pets';
-import { homeOf, livingPets, vacationHomesOf, vehicleAge, vehicleOf, vehiclesOf } from './query';
+import { homeOf, livingPets, vacationHomesOf, valuablesOf, vehicleAge, vehicleOf, vehiclesOf } from './query';
+import { driftValuable, theftChance } from './valuables';
 import { accidentChance, drunkChance, refreshVehicleValue } from './vehicles';
 import { atLegalAge } from '../country';
 
@@ -93,6 +95,14 @@ export function runPossessions(state: LifeState, content: ContentBundle): void {
         queuePossessionEvent(state, content.registries.possessions.accidents[severity as AccidentKind].events, { [POSSESSION_ROLES.vehicle]: p.id }, content);
         break;
       }
+    }
+  }
+
+  // 3b. Valuables: their value moves, and (unless they are stored away while you are inside) one may be stolen.
+  for (const p of [...valuablesOf(state)]) {
+    driftValuable(state, p, content);
+    if (!inside && chance(state.rng, theftChance(p, content))) {
+      queuePossessionEvent(state, content.registries.possessions.valuableStolen.events, { [POSSESSION_ROLES.valuable]: p.id }, content);
     }
   }
 

@@ -1,0 +1,81 @@
+id: go_fishing
+category: outdoor
+label: "Go fishing"
+blurb: "A rod, a line and a lot of waiting."
+minAge: 8
+inPerson: true
+companion: optional
+companionKinds: [partner, friend, family]
+cost: fishing
+profile: outdoor
+yearlyLimit: 5
+tiers:
+  great:
+    text:
+      - "A tug on the line, a long fight, and a fish worth the story. You will tell it for years. Gear and license: {cost}."
+      - "The lake is still and the fish are biting. You catch your limit and come home with a smile."
+    together:
+      - "You and {companion.name} compete for the biggest catch, and it is close. A great day on the water."
+      - "{companion.name} lands a big one, and you cheer as loud as anyone has ever cheered over a fish."
+    effects:
+      - { type: stat, key: happiness, delta: 4 }
+      - { type: stat, key: stress, delta: -1 }
+      - { type: stat, key: smarts, delta: 1 }
+    companion: { affection: 5, trust: 2 }
+    extras:
+      - chance: outdoor_mishap
+        effects:
+          - { type: stat, key: health, delta: -3 }
+          - { type: stat, key: stress, delta: 2 }
+        note: "A hook finds your thumb, and the first-aid kit finds its use."
+  good:
+    text:
+      - "A peaceful day on the water. You catch a couple and lose a few. {cost}."
+      - "The fish are shy, the morning is quiet, and you like it that way."
+    together:
+      - "You and {companion.name} sit in companionable silence for hours. A couple of bites and a lot of peace."
+      - "A good day on the water with {companion.name}. {cost}."
+    effects:
+      - { type: stat, key: happiness, delta: 2 }
+      - { type: stat, key: stress, delta: -1 }
+      - { type: stat, key: smarts, delta: 1 }
+    companion: { affection: 3, trust: 1 }
+    extras:
+      - chance: outdoor_mishap
+        effects:
+          - { type: stat, key: health, delta: -3 }
+          - { type: stat, key: stress, delta: 2 }
+        note: "A hook finds your thumb, and the first-aid kit finds its use."
+  neutral:
+    text:
+      - "Nothing bites. You enjoy the quiet anyway."
+      - "It is a slow day. You catch nothing and relax a little."
+    together:
+      - "You and {companion.name} sit on the bank and catch up. The fish do not join the conversation."
+      - "No fish, but a good day with {companion.name}."
+    effects:
+      - { type: stat, key: stress, delta: -1 }
+    companion: { affection: 1, trust: 0 }
+    extras:
+      - chance: outdoor_mishap
+        effects:
+          - { type: stat, key: health, delta: -3 }
+          - { type: stat, key: stress, delta: 2 }
+        note: "A hook finds your thumb, and the first-aid kit finds its use."
+  bad:
+    text:
+      - "Your line tangles, your bait spills, and the fish want nothing to do with you. You go home empty and sunburnt."
+      - "Rain, wind and a hook in your thumb. A poor day by any measure."
+    together:
+      - "You and {companion.name} tangle two lines into one knot. You go home with no fish and a story."
+      - "The day on the water is a bust. You and {companion.name} blame the weather."
+    effects:
+      - { type: stat, key: stress, delta: 2 }
+      - { type: stat, key: happiness, delta: -1 }
+    companion: { affection: -1, trust: 0 }
+    extras:
+      - chance: outdoor_mishap
+        effects:
+          - { type: stat, key: health, delta: -3 }
+          - { type: stat, key: stress, delta: 2 }
+        note: "A hook finds your thumb, and the first-aid kit finds its use."

@@ -1,0 +1,40 @@
+id: buy_pearl_necklace
+category: luxury
+label: "Buy a pearl necklace"
+blurb: "A strand of real pearls from a jeweler you trust."
+minAge: 18
+inPerson: true
+companion: none
+cost: pearl_necklace
+profile: luxury
+yearlyLimit: 1
+buys: pearl_necklace
+tiers:
+  great:
+    text:
+      - "The jeweler lays the strand on velvet and the room goes quiet. You pay {cost} and wear it out of the shop."
+      - "It sits against your collarbone like it was always there. {cost} is a lot, and you do not regret a cent."
+    effects:
+      - { type: stat, key: happiness, delta: 6 }
+      - { type: stat, key: confidence, delta: 2 }
+      - { type: stat, key: looks, delta: 1 }
+  good:
+    text:
+      - "A beautiful, well-chosen strand. You pay {cost} and the jeweler wraps it as if it were a baby."
+      - "The pearls are even and warm, and they suit you. {cost}, and you leave smiling."
+    effects:
+      - { type: stat, key: happiness, delta: 4 }
+      - { type: stat, key: confidence, delta: 1 }
+  neutral:
+    text:
+      - "A fine necklace, if not an inspired one. It was {cost}, and you will wear it twice a year."
+      - "The pearls are nice. You are not sure what you were expecting."
+    effects:
+      - { type: stat, key: happiness, delta: 2 }
+  bad:
+    text:
+      - "On the way home you realize you could have bought a car part for the same {cost}. The buyer's remorse is quick."
+      - "Pretty, and heavy on the conscience. You paid {cost} and cannot quite justify it."
+    effects:
+      - { type: stat, key: happiness, delta: -1 }
+      - { type: stat, key: stress, delta: 3 }

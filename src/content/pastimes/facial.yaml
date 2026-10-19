@@ -1,0 +1,40 @@
+id: facial
+category: salon_spa
+label: "Get a facial"
+blurb: "Cleansing, steam and a face mask."
+minAge: 16
+inPerson: true
+companion: none
+cost: facial
+profile: pamper
+yearlyLimit: 3
+tiers:
+  great:
+    text:
+      - "Your skin glows afterward, and someone asks what you did differently. You smile and say nothing."
+      - "The facial leaves you looking rested for the first time in weeks."
+    effects:
+      - { type: stat, key: looks, delta: 3 }
+      - { type: stat, key: stress, delta: -1 }
+      - { type: stat, key: happiness, delta: 2 }
+  good:
+    text:
+      - "A calm hour with warm towels and a cool mask. Your skin looks fresher."
+      - "You come out of the facial looking a little brighter than you went in."
+    effects:
+      - { type: stat, key: looks, delta: 2 }
+      - { type: stat, key: stress, delta: -1 }
+      - { type: stat, key: happiness, delta: 1 }
+  neutral:
+    text:
+      - "It is nice to lie still for an hour. If it did anything to your skin, it is subtle."
+      - "The facial is pleasant, and {cost} for pleasant is fine."
+    effects:
+      - { type: stat, key: stress, delta: -1 }
+  bad:
+    text:
+      - "Your skin turns red and blotchy within the hour. It settles, but it ruins the evening."
+      - "Something in the treatment is too strong for your skin. You go home with a pink face and a lesson."
+    effects:
+      - { type: stat, key: looks, delta: -1 }
+      - { type: stat, key: stress, delta: 2 }

@@ -1,0 +1,37 @@
+# Reads the flag a cosmetic procedure sets (Batch 2a). Frank, never graphic.
+id: surgery_pride
+title: Someone notices
+text: >-
+  Someone you have not seen for a while says you look well. They cannot say
+  why, and you do not explain. You carry the compliment around for the rest
+  of the day.
+tone: light
+category: people
+rarity: uncommon
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { flag: cosmetic_surgery, eq: true }
+    - { not: { flag: surgery_regret, eq: true } }
+weight: { base: 3 }
+cooldownYears: 8
+choices:
+  - id: smile
+    label: Smile and say thank you
+    outcome:
+      text: >-
+        It is a small thing, and it sits in your chest like warmth. You decide
+        the decision was your own, and the right one.
+      effects:
+        - { type: stat, key: happiness, delta: 2 }
+        - { type: stat, key: confidence, delta: 1 }
+  - id: tell_them
+    label: Tell them what you had done
+    outcome:
+      text: >-
+        There is a short pause and then a smile. They say it was brave, and you
+        feel lighter for having said it out loud.
+      effects:
+        - { type: stat, key: happiness, delta: 1 }
+        - { type: stat, key: confidence, delta: 2 }

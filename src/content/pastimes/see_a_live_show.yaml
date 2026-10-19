@@ -1,0 +1,60 @@
+id: see_a_live_show
+category: nightlife
+label: "See a live show"
+blurb: "A band, a crowd and a sound that fills the room."
+minAge: 18
+inPerson: true
+companion: optional
+companionKinds: [partner, friend]
+cost: live_show
+profile: night
+yearlyLimit: 4
+tiers:
+  great:
+    text:
+      - "The band is on fire. The crowd roars every chorus back, and you come out ringing and in love with everything. Tickets: {cost}."
+      - "The encore goes on and on, and you sing every word. You will remember this show for years."
+    together:
+      - "You and {companion.name} find the sweet spot near the front and sing every word together. {cost} for a night you will remember."
+      - "{companion.name} cries during the last song and so do you. A perfect night out."
+    effects:
+      - { type: stat, key: happiness, delta: 5 }
+      - { type: stat, key: stress, delta: -1 }
+      - { type: stat, key: sociability, delta: 1 }
+    companion: { affection: 5, trust: 2 }
+    events: [nightlife_met_someone, nightlife_hookup, nightlife_temptation]
+    eventChance: meet_someone
+  good:
+    text:
+      - "A good set, a fun crowd, and a night of sound. Tickets were {cost}."
+      - "The band is tight, the room is warm, and you are glad you came."
+    together:
+      - "You and {companion.name} sway through the set and talk over the encore. {cost}."
+      - "A good gig with good company."
+    effects:
+      - { type: stat, key: happiness, delta: 3 }
+      - { type: stat, key: stress, delta: -1 }
+    companion: { affection: 3, trust: 1 }
+    events: [nightlife_met_someone, nightlife_hookup, nightlife_temptation]
+    eventChance: meet_someone_low
+  neutral:
+    text:
+      - "You can barely see the stage, and the sound is muddy. It is still music."
+      - "A good enough show. You came for one song and heard it."
+    together:
+      - "You and {companion.name} spend most of the show talking about other things. The tickets were {cost}."
+      - "The show is fine, the company is better."
+    effects:
+      - { type: stat, key: happiness, delta: 1 }
+    companion: { affection: 1, trust: 0 }
+  bad:
+    text:
+      - "The band is late, the sound is awful, and a tall man stands in front of you the whole time. {cost} to be disappointed."
+      - "The venue is stuffy and the set is short. You walk out wondering why you bothered."
+    together:
+      - "You and {companion.name} cannot hear a thing over the people behind you. {cost}, wasted."
+      - "The show is a letdown. {companion.name} suggests leaving early, and you agree at once."
+    effects:
+      - { type: stat, key: happiness, delta: -2 }
+      - { type: stat, key: stress, delta: 2 }
+    companion: { affection: -2, trust: -1 }

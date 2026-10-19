@@ -1,0 +1,40 @@
+id: diet_plan
+category: mind_body
+label: "Follow a diet plan"
+blurb: "A year of planned meals, a scale and a bit of discipline."
+minAge: 14
+inPerson: true
+companion: none
+cost: diet_plan
+profile: steady
+yearlyLimit: 3
+tiers:
+  great:
+    text:
+      - "The plan works. You feel lighter, sleep better, and the way you look in the mirror starts to match how you feel."
+      - "It takes real effort, but you stick with it, and by the end you are proud of the habit you built."
+    effects:
+      - { type: stat, key: fitness, delta: 1 }
+      - { type: stat, key: looks, delta: 2 }
+      - { type: stat, key: happiness, delta: 2 }
+      - { type: stat, key: discipline, delta: 2 }
+  good:
+    text:
+      - "You eat better for a while. Not perfectly, but enough to notice the difference."
+      - "Planning your meals takes some getting used to, and then it just works."
+    effects:
+      - { type: stat, key: fitness, delta: 1 }
+      - { type: stat, key: looks, delta: 1 }
+      - { type: stat, key: discipline, delta: 1 }
+  neutral:
+    text:
+      - "You follow the plan on weekdays and give up on it on weekends. It moves the needle a little."
+      - "Counting everything gets tedious. You keep a few of the habits and drop the rest."
+    effects: []
+  bad:
+    text:
+      - "The plan turns food into a chore. You get irritable, cheat, and feel guilty about cheating."
+      - "You are hungry, cranky and not sure it is worth it. The plan ends with a pizza."
+    effects:
+      - { type: stat, key: stress, delta: 3 }
+      - { type: stat, key: happiness, delta: -2 }

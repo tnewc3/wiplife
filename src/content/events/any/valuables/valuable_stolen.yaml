@@ -1,0 +1,25 @@
+# Queued by the possessions step (registries/possessions.yaml valuableStolen), Batch 2a.
+id: valuable_stolen
+title: Gone
+text: >-
+  You reach for the {valuable} and it is not where you left it. You check the
+  drawer, the car, the coat you wore last. By the third time you are checking
+  places you know are empty.
+tone: dark
+category: valuables
+rarity: uncommon
+lifeStages: [youngAdult, adult, senior]
+requires: { belongings: { valuables: { gte: 1 } } }
+weight: { base: 3 }
+followUpOnly: true
+bind: [valuable]
+autoOutcome:
+  text: >-
+    The police take the report and are kind about it. If it was insured, the
+    insurer will make good on part of it. Either way, the {valuable} is gone,
+    and the room feels a little less yours.
+  effects:
+    - { type: possession, action: valuable_stolen }
+    - { type: history, text: 'Your {valuable} was stolen.', importance: 2 }
+    - { type: stat, key: stress, delta: 6 }
+    - { type: stat, key: happiness, delta: -3 }

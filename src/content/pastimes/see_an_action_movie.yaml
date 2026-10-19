@@ -1,0 +1,54 @@
+id: see_an_action_movie
+category: movies
+label: "See an action movie"
+blurb: "Explosions, car chases and a very large screen."
+minAge: 10
+inPerson: true
+companion: optional
+companionKinds: [partner, friend, family]
+cost: movie_ticket
+profile: movie
+yearlyLimit: 4
+tiers:
+  great:
+    text:
+      - "Chases, explosions, a ridiculous plot, and you love every minute. The seats shake with the sound. {cost} well spent."
+      - "It is two hours of pure fun. You walk out feeling like you could jump off a building."
+    together:
+      - "You and {companion.name} cheer at the same moments and argue over the plot on the way out. A good night, and only {cost}."
+      - "{companion.name} knows every actor by name and fills you in on the way out. It is fun."
+    effects:
+      - { type: stat, key: happiness, delta: 4 }
+      - { type: stat, key: stress, delta: -1 }
+    companion: { affection: 5, trust: 2 }
+  good:
+    text:
+      - "A loud, well-made action movie. You enjoy the spectacle for {cost}."
+      - "The stunts are great and the plot makes just enough sense. A fun night."
+    together:
+      - "A fun, noisy night out with {companion.name}. You share a big popcorn and spend the drive home reenacting the best scenes."
+      - "{companion.name} loves it, you like it, and the night goes well."
+    effects:
+      - { type: stat, key: happiness, delta: 2 }
+      - { type: stat, key: stress, delta: -1 }
+    companion: { affection: 3, trust: 1 }
+  neutral:
+    text:
+      - "The action is fine, but you have seen it all before. {cost}."
+      - "It is a blur of noise and cars. You eat a lot of popcorn."
+    together:
+      - "The movie is nothing special, but it is a good excuse to see {companion.name}. It was {cost}."
+      - "You and {companion.name} spend most of the film whispering about other things."
+    effects:
+      - { type: stat, key: stress, delta: -1 }
+    companion: { affection: 1, trust: 0 }
+  bad:
+    text:
+      - "The plot makes no sense, the noise gives you a headache, and you wonder why you paid {cost}."
+      - "The movie is loud, long and empty. You go home with ringing ears."
+    together:
+      - "The movie is dreadful. You and {companion.name} fill the drive home with sarcastic summaries. That, at least, is fun."
+      - "It was {cost} for explosions and a headache. {companion.name} agrees."
+    effects:
+      - { type: stat, key: happiness, delta: -1 }
+    companion: { affection: -1, trust: 0 }

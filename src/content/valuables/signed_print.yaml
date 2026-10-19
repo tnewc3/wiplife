@@ -1,0 +1,4 @@
+id: signed_print
+name: "signed print"
+blurb: "A limited edition, numbered and signed by the artist."
+class: art

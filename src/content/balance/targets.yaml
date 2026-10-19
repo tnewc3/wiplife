@@ -70,6 +70,7 @@ health:
     # content is reachable by the careful player (who steers away from illegal choices), not a claim about real prevalence.
     ptsd: { min: 0.01, max: 0.16 }
     treatable_infection: { min: 0, max: 0.25 }
+    surgical_complication: { min: 0, max: 0.05 }
     type_2_diabetes: { min: 0.1, max: 0.25 }
     # E6c: sports injuries only happen to the few who play a sport.
     concussion: { min: 0, max: 0.2 }
@@ -242,6 +243,18 @@ possessions:
   vacationHomeLives: { min: 0.002, max: 0.08 }
   renovationLives: { min: 0.05, max: 0.85 }
   illShare: { min: 0.02, max: 0.25 }
+
+# Batch 2a: activities. Starting proposals, to be set from the first 10,000-life run.
+pastimes:
+  perLife: { min: 5, max: 80 }
+  livesWith: { min: 0.8, max: 1 }
+  spendShare: { min: 0.001, max: 0.06 }
+  complicationRate: { min: 0.02, max: 0.35 }
+  nightlifeAddiction: { min: 0, max: 0.02 }
+  nightlifeMeetings: { min: 0.05, max: 0.7 }
+  valuableLives: { min: 0.005, max: 0.3 }
+  theftPer100Years: { min: 0, max: 8 }
+  spamRatio: 0.6
 
 teen:
   crowdMembers: { min: 0.5, max: 0.95 }

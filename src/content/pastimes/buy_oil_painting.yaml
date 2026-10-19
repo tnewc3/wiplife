@@ -1,0 +1,40 @@
+id: buy_oil_painting
+category: luxury
+label: "Buy an oil painting"
+blurb: "An original canvas from a painter who is going places."
+minAge: 18
+inPerson: true
+companion: none
+cost: oil_painting
+profile: luxury
+yearlyLimit: 1
+buys: oil_painting
+tiers:
+  great:
+    text:
+      - "The painting hangs in the light and changes with the hour. You have a hard time looking away. {cost}."
+      - "The gallery owner shakes your hand like a conspirator. You have a piece of the future on your wall, for {cost}."
+    effects:
+      - { type: stat, key: happiness, delta: 6 }
+      - { type: stat, key: confidence, delta: 2 }
+      - { type: stat, key: looks, delta: 1 }
+  good:
+    text:
+      - "A strong work by a painter with a future. You pay {cost} and feel like a patron."
+      - "The painting settles into the room as if it had always been there. {cost}."
+    effects:
+      - { type: stat, key: happiness, delta: 4 }
+      - { type: stat, key: confidence, delta: 1 }
+  neutral:
+    text:
+      - "The painting is good. You are not sure whether it is a good investment, and {cost} is a lot to wonder about."
+      - "It is lovely and large, and it takes over the wall. You paid {cost}."
+    effects:
+      - { type: stat, key: happiness, delta: 2 }
+  bad:
+    text:
+      - "Within days you read a review that is not kind. The painting is the same, and so is the receipt: {cost}."
+      - "The painter's next show is a flop. The canvas on your wall suddenly feels like a bet you lost."
+    effects:
+      - { type: stat, key: happiness, delta: -1 }
+      - { type: stat, key: stress, delta: 3 }

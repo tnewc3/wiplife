@@ -1,0 +1,42 @@
+id: shopping_spree
+category: shopping
+label: "Go on a shopping spree"
+blurb: "Spend with no budget at all, just for the feeling."
+minAge: 18
+inPerson: true
+companion: none
+cost: spree
+profile: shop
+yearlyLimit: 2
+tiers:
+  great:
+    text:
+      - "For one glorious afternoon, nothing is too much. You buy everything you ever wanted. The bill is {cost}, and you are floating anyway."
+      - "You spoil yourself completely and the feeling lasts all the way home. It came to {cost}."
+    effects:
+      - { type: stat, key: happiness, delta: 6 }
+      - { type: stat, key: looks, delta: 2 }
+      - { type: flag, key: overspent, value: true }
+  good:
+    text:
+      - "It is a lot of bags and a lot of fun. The total is {cost}, and you try not to look at it."
+      - "You buy things because they are pretty and because you can. It was {cost}, and a good day."
+    effects:
+      - { type: stat, key: happiness, delta: 4 }
+      - { type: stat, key: looks, delta: 1 }
+      - { type: flag, key: overspent, value: true }
+  neutral:
+    text:
+      - "The thrill of the first few purchases wears off, and by the end you are spending on autopilot. The total is {cost}."
+      - "You spend and spend and the feeling does not come. {cost} later, you go home."
+    effects:
+      - { type: stat, key: happiness, delta: 1 }
+      - { type: flag, key: overspent, value: true }
+  bad:
+    text:
+      - "By evening the buzz turns into dread. You add up the receipts, {cost}, and sit on the edge of the bed with the bags."
+      - "You spent {cost}, and your stomach turns when you think about it. You are not sure you even like what you bought."
+    effects:
+      - { type: stat, key: happiness, delta: -3 }
+      - { type: stat, key: stress, delta: 5 }
+      - { type: flag, key: overspent, value: true }

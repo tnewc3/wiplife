@@ -1,0 +1,40 @@
+id: buy_tailored_suit
+category: luxury
+label: "Order a tailored suit"
+blurb: "Measured, cut and fitted until it is exactly yours."
+minAge: 18
+inPerson: true
+companion: none
+cost: tailored_suit
+profile: luxury
+yearlyLimit: 1
+buys: tailored_suit
+tiers:
+  great:
+    text:
+      - "The tailor steps back, squints, and nods once. The fit is absolute. {cost}, and you stand straighter in it."
+      - "You look at yourself in the three-way mirror and do not recognize the person in the suit. In a good way. {cost}."
+    effects:
+      - { type: stat, key: happiness, delta: 6 }
+      - { type: stat, key: confidence, delta: 2 }
+      - { type: stat, key: looks, delta: 1 }
+  good:
+    text:
+      - "A sharp, comfortable suit that makes you stand taller. {cost}."
+      - "Fitted perfectly, down to the cuffs. You pay {cost} and wear it out."
+    effects:
+      - { type: stat, key: happiness, delta: 4 }
+      - { type: stat, key: confidence, delta: 1 }
+  neutral:
+    text:
+      - "A good suit that fits. You do not wear it often enough to justify {cost}."
+      - "The suit is fine. The process was longer than you expected."
+    effects:
+      - { type: stat, key: happiness, delta: 2 }
+  bad:
+    text:
+      - "One sleeve is a touch off and the tailor sighs and promises a fix. {cost} for something you have to take back."
+      - "The suit is smart, and it pinches in the shoulders. {cost} to find that out."
+    effects:
+      - { type: stat, key: happiness, delta: -1 }
+      - { type: stat, key: stress, delta: 3 }
