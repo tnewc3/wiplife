@@ -1,0 +1,51 @@
+id: sued_by_a_former_employer
+title: Breach
+text: >-
+  A solicitor's letter from a former employer says that what went missing from
+  the books is on you, and that they want {$6000} back before they take it
+  further.
+tone: serious
+category: justice
+rarity: uncommon
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { any: [{ flag: stole_from_work }, { flag: cooked_books }] }
+    - { not: { flag: sued_by_someone } }
+weight: { base: 3 }
+once: true
+choices:
+  - id: settle
+    label: Pay it back to make it stop
+    outcome:
+      text: You hand over {$6000} and a signature on a paper that says nothing happened. Something did, and you both know it.
+      effects:
+        - { type: cost, item: lawsuit_settlement }
+        - { type: flag, key: sued_by_someone, value: true }
+        - { type: stat, key: stress, delta: 3 }
+  - id: defend
+    label: Hire a lawyer and deny it
+    check:
+      base: 40
+      stats: [{ key: smarts, weight: 0.25 }, { key: discipline, weight: 0.2 }, { key: luck, weight: 0.15 }]
+      success:
+        text: The paper trail is thinner than they said. The claim is dismissed, and your lawyer's bill is {$3000}.
+        effects:
+          - { type: cost, item: lawsuit_defense }
+          - { type: flag, key: sued_by_someone, value: true }
+      failure:
+        text: The paper trail is thicker than you hoped. You owe {$16000} between the judgment and the costs, and the news gets around your industry.
+        effects:
+          - { type: cost, item: lawsuit_judgment }
+          - { type: flag, key: sued_by_someone, value: true }
+          - { type: stat, key: reputation, delta: -6 }
+          - { type: stat, key: stress, delta: 6 }
+  - id: ignore
+    label: Bury the letter
+    outcome:
+      text: You say nothing, and nothing is done for you. A default judgment of {$16000} arrives in the post.
+      effects:
+        - { type: cost, item: lawsuit_judgment }
+        - { type: flag, key: sued_by_someone, value: true }
+        - { type: stat, key: stress, delta: 7 }

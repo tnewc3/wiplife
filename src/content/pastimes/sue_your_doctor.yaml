@@ -1,0 +1,70 @@
+id: sue_your_doctor
+category: lawsuits
+label: "Sue a doctor"
+blurb: "A claim over treatment that went wrong."
+minAge: 18
+mechanic: lawsuit
+inPerson: false
+companion: none
+cost: lawyer_doctor
+quality: true
+yearlyLimit: 1
+requires: { not: { flag: sued_doctor } }
+evidence:
+  - { health: { conditions: [surgical_complication] } }
+  - { flag: surgery_regret }
+  - { flag: painkillers }
+tiers:
+  great:
+    text:
+      - "The expert witness is clear and the records are damning. The court finds for you in full, and you are awarded {amount}. It does not undo what happened."
+      - "After a long case the court finds the treatment fell short and awards you {amount}. You feel more tired than triumphant."
+    money: { key: claim_doctor, share: 1.0 }
+    effects:
+      - { type: stat, key: happiness, delta: 4 }
+      - { type: stat, key: reputation, delta: 2 }
+      - { type: flag, key: won_a_lawsuit, value: true }
+      - { type: flag, key: sued_doctor, value: true }
+  good:
+    text:
+      - "The court finds partly for you and awards {amount}. The lawyer says it is a good result in a hard type of case."
+      - "A narrower win than you hoped, but a win: {amount}, and a record that says it was not your fault."
+    settle:
+      - "The doctor's insurer offers {amount} to make it go away, and you sign. It is quiet, and it is something."
+      - "A settlement of {amount}, with no admission of anything. The lawyer says it is the best you can hope for."
+    money: { key: claim_doctor, share: 0.5 }
+    effects:
+      - { type: stat, key: happiness, delta: 2 }
+      - { type: flag, key: won_a_lawsuit, value: true }
+      - { type: flag, key: sued_doctor, value: true }
+  neutral:
+    text:
+      - "The expert reports disagree, and the case is dismissed without a ruling. The lawyer's bill arrives, and the doctor's name stays clean."
+      - "Neither side can prove its story. The case ends in a shrug and a bill."
+    settle:
+      - "The insurer will not move, and the lawyer advises you to let it go. You do, with only the bill to show for it."
+      - "Talks fall through. The other side's offer is an insult, and you drop the claim."
+    effects:
+      - { type: stat, key: stress, delta: 3 }
+      - { type: flag, key: sued_doctor, value: true }
+  bad:
+    text:
+      - "The court rules for the doctor. The costs, {amount}, are yours, and the door on the matter closes."
+      - "The medical records tell a different story than you remember. The court rules against you, and the costs come to {amount}."
+    money: { key: court_costs, share: 1.0, mode: loss }
+    effects:
+      - { type: stat, key: stress, delta: 5 }
+      - { type: stat, key: happiness, delta: -3 }
+      - { type: flag, key: lost_a_lawsuit, value: true }
+      - { type: flag, key: sued_doctor, value: true }
+  backfire:
+    text:
+      - "The cross-examination is long and cruel. You lose, you pay {amount} in costs, and it gets around that you tried to blame a doctor."
+      - "The other side has an excellent expert and a better story. The court rules against you and the costs, {amount}, are yours."
+    money: { key: court_costs, share: 1.6, mode: loss }
+    effects:
+      - { type: stat, key: stress, delta: 8 }
+      - { type: stat, key: happiness, delta: -5 }
+      - { type: stat, key: reputation, delta: -4 }
+      - { type: flag, key: lost_a_lawsuit, value: true }
+      - { type: flag, key: sued_doctor, value: true }

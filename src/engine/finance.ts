@@ -194,7 +194,7 @@ export function payDebt(state: LifeState, debtId: Id, amount: number, content: C
 }
 
 /** Kinds help or forgiveness can reach by default: everything but the mortgage. */
-const FORGIVABLE: readonly DebtKind[] = ['student', 'personal', 'medical', 'collections', 'business'];
+const FORGIVABLE: readonly DebtKind[] = ['student', 'personal', 'medical', 'collections', 'business', 'bank', 'payday'];
 
 /** Writes off `share` of every debt of these kinds (someone helped, or a lender settled). */
 export function forgiveDebts(state: LifeState, share: number, content: ContentBundle, kinds: readonly DebtKind[] = FORGIVABLE): void {
@@ -209,8 +209,8 @@ export function forgiveDebts(state: LifeState, share: number, content: ContentBu
   clearPaidDebts(state, content);
 }
 
-/** Debts bankruptcy clears. Student loans survive it, and a mortgage stays with its home. */
-const DISCHARGED: readonly DebtKind[] = ['personal', 'medical', 'collections', 'business'];
+/** Debts bankruptcy clears. Student loans survive it, a mortgage stays with its home, and a loan shark does not care what a court says. */
+const DISCHARGED: readonly DebtKind[] = ['personal', 'medical', 'collections', 'business', 'bank', 'payday'];
 
 /** Files for bankruptcy: personal, medical and collections debt are cleared. */
 export function declareBankruptcy(state: LifeState): void {
@@ -221,7 +221,7 @@ export function declareBankruptcy(state: LifeState): void {
 }
 
 /** Debts a debt plan rolls together. */
-const PLANNED: readonly DebtKind[] = ['personal', 'medical', 'collections'];
+const PLANNED: readonly DebtKind[] = ['personal', 'medical', 'collections', 'payday'];
 
 /**
  * A debt plan is possible when a personal, medical or collections debt is

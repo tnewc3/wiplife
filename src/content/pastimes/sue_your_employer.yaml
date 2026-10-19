@@ -1,0 +1,70 @@
+id: sue_your_employer
+category: lawsuits
+label: "Sue your employer"
+blurb: "A claim over how work treated you."
+minAge: 18
+mechanic: lawsuit
+inPerson: false
+companion: none
+cost: lawyer_employer
+quality: true
+yearlyLimit: 1
+requires: { not: { flag: sued_employer } }
+evidence:
+  - { career: { lostWithin: 3 } }
+  - { flag: whistleblower }
+  - { flag: burned_out }
+tiers:
+  great:
+    text:
+      - "The judge reads your file, then theirs, and the room shifts. You win the case in full and walk out with {amount}. The lawyer shakes your hand twice."
+      - "After months of letters and hearings, the court finds for you and orders {amount} paid. You sit in your car for a long time afterwards."
+    money: { key: claim_employer, share: 1.0 }
+    effects:
+      - { type: stat, key: happiness, delta: 4 }
+      - { type: stat, key: reputation, delta: 2 }
+      - { type: flag, key: won_a_lawsuit, value: true }
+      - { type: flag, key: sued_employer, value: true }
+  good:
+    text:
+      - "It is not everything you asked for, but the court finds in your favor and awards {amount}. The lawyer calls it a fair result."
+      - "The judge splits the difference and you are awarded {amount}. It is less than you hoped and more than you feared."
+    settle:
+      - "The employer's lawyer calls before the hearing, and you agree to a settlement of {amount}. Nobody admits anything."
+      - "A settlement is signed in a quiet meeting room: {amount} and a letter you will never frame."
+    money: { key: claim_employer, share: 0.5 }
+    effects:
+      - { type: stat, key: happiness, delta: 2 }
+      - { type: flag, key: won_a_lawsuit, value: true }
+      - { type: flag, key: sued_employer, value: true }
+  neutral:
+    text:
+      - "The case is dismissed on a technicality. You have the lawyer's bill and the sense that nobody has been heard."
+      - "A long hearing ends with no ruling either way. The lawyer sends the bill, and you wait for a letter that never comes."
+    settle:
+      - "The talks go nowhere. The other side will not move, and you let the claim drop with only the lawyer's bill to show for it."
+      - "After weeks of letters, both sides walk away with nothing. The lawyer sends the bill."
+    effects:
+      - { type: stat, key: stress, delta: 3 }
+      - { type: flag, key: sued_employer, value: true }
+  bad:
+    text:
+      - "The court rules against you. Your old employer's lawyer is polished and thorough, and the costs, {amount}, are yours."
+      - "A ruling for the other side, and a bill for {amount} in court costs. The lawyer tells you not to take it personally."
+    money: { key: court_costs, share: 1.0, mode: loss }
+    effects:
+      - { type: stat, key: stress, delta: 5 }
+      - { type: stat, key: happiness, delta: -3 }
+      - { type: flag, key: lost_a_lawsuit, value: true }
+      - { type: flag, key: sued_employer, value: true }
+  backfire:
+    text:
+      - "It goes badly in the box, in public. The court rules against you, orders {amount} in costs, and the story gets around your industry."
+      - "The other side has files you wish you had not forgotten. You lose, you pay {amount}, and you are known for it."
+    money: { key: court_costs, share: 1.6, mode: loss }
+    effects:
+      - { type: stat, key: stress, delta: 8 }
+      - { type: stat, key: happiness, delta: -5 }
+      - { type: stat, key: reputation, delta: -4 }
+      - { type: flag, key: lost_a_lawsuit, value: true }
+      - { type: flag, key: sued_employer, value: true }

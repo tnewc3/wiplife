@@ -306,6 +306,44 @@ legal:
     importance: 1
     variants:
       - "Your probation ended."
+  fakeIdCaught:
+    importance: 2
+    variants:
+      - "Your fake ID was taken off you at the door, and the record of it stayed."
+      - "Someone looked at your fake ID a little too long. It did not go well."
+
+# Batch 2b: a legal name change, a loan, a lawsuit. Values: {oldName}, {newName}; {amount}, {lender}; {amount}.
+risk:
+  nameChanged:
+    importance: 3
+    variants:
+      - "A court made it official: you were {newName} from then on."
+      - "You changed your legal name from {oldName} to {newName}."
+  loanTaken:
+    importance: 2
+    variants:
+      - "You borrowed {amount} from {lender}."
+      - "You took a loan of {amount} from {lender}."
+  lawsuitWon:
+    importance: 3
+    variants:
+      - "You won your case in court and were awarded {amount}."
+      - "A judge ruled in your favor: {amount}."
+  lawsuitSettled:
+    importance: 2
+    variants:
+      - "You settled your claim out of court for {amount}."
+      - "The other side settled, and you were paid {amount}."
+  sharkSettled:
+    importance: 3
+    variants:
+      - "The people you owed stopped calling. What they did instead is something you still carry."
+      - "A loan shark's patience ran out, and the debt was settled in a way you do not talk about."
+  lawsuitLost:
+    importance: 3
+    variants:
+      - "You lost your case in court, and the costs were yours."
+      - "The judge ruled against you, and you went home with a bill."
 
 # Your children (E2a). Role: npc, the child. No values.
 family:

@@ -151,7 +151,7 @@ export function checkInvariants(state: LifeState, content: ContentBundle): strin
   money('finances.savings', f.savings);
   if (f.savings < 0) fail('finances.savings must not be negative');
   const debtIds = new Set<string>();
-  const DEBT_KINDS = new Set(['student', 'personal', 'mortgage', 'medical', 'collections', 'auto', 'business']);
+  const DEBT_KINDS = new Set(['student', 'personal', 'mortgage', 'medical', 'collections', 'auto', 'business', 'bank', 'payday', 'shark']);
   for (const debt of f.debts) {
     const label = `debt ${debt.id}`;
     if (debtIds.has(debt.id)) fail(`${label} appears twice`);
@@ -161,7 +161,7 @@ export function checkInvariants(state: LifeState, content: ContentBundle): strin
     money(`${label} minPayment`, debt.minPayment);
     if (!(debt.balance > 0)) fail(`${label} is paid off but still listed`);
     if (!(debt.minPayment >= 0)) fail(`${label} has a negative minimum payment`);
-    if (!Number.isFinite(debt.annualRate) || debt.annualRate < 0 || debt.annualRate > 1) fail(`${label} has an invalid rate`);
+    if (!Number.isFinite(debt.annualRate) || debt.annualRate < 0 || debt.annualRate > 3) fail(`${label} has an invalid rate`);
     if (!Number.isInteger(debt.missed) || debt.missed < 0) fail(`${label}.missed must be a whole number of at least 0`);
   }
   if (!Number.isInteger(f.hardshipYears) || f.hardshipYears < 0) fail('finances.hardshipYears must be a whole number of at least 0');

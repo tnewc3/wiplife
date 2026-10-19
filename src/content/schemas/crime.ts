@@ -239,7 +239,7 @@ export const crimeBalanceSchema = z.strictObject({
 export type CrimeBalance = z.infer<typeof crimeBalanceSchema>;
 
 /** The events the crime step queues (registries/crime.yaml). */
-export const CRIME_TRIGGERS = ['promotion', 'pushedOut', 'investigation', 'arrest', 'rival', 'informant', 'raid', 'theft', 'laundering', 'past', 'cut', 'away', 'awayCut', 'back'] as const;
+export const CRIME_TRIGGERS = ['promotion', 'pushedOut', 'investigation', 'arrest', 'rival', 'informant', 'raid', 'theft', 'laundering', 'past', 'cut', 'away', 'awayCut', 'back', 'shark'] as const;
 export type CrimeTrigger = (typeof CRIME_TRIGGERS)[number];
 
 export const crimeRegistrySchema = z.strictObject({

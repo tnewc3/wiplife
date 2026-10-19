@@ -1,0 +1,48 @@
+id: shark_collector_calls
+title: The patient voice
+text: >-
+  The calls start at odd hours. The voice is calm, never loud, and always knows
+  where you are. It says that you are behind, that this is a friendly reminder,
+  and that friendly does not last.
+tone: dark
+category: crimelaw
+rarity: common
+recurring: true
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { finances: { kinds: [shark] } }
+    - { finances: { missed: { gte: 1 } } }
+weight: { base: 10 }
+followUpOnly: true
+choices:
+  - id: pay
+    label: Send what you can, now
+    outcome:
+      text: You send {$800} the same day. The voice thanks you, and the next call takes longer to come.
+      effects:
+        - { type: money, delta: -800 }
+        - { type: debt, action: forgive, share: 0.08, kinds: [shark] }
+        - { type: stat, key: stress, delta: 4 }
+  - id: ask
+    label: Ask for more time
+    check:
+      base: 40
+      stats: [{ key: confidence, weight: 0.25 }, { key: sociability, weight: 0.15 }]
+      success:
+        text: There is a long pause, and then an agreement. You have until the next year, and the voice does not forget the favor.
+        effects:
+          - { type: stat, key: stress, delta: 4 }
+      failure:
+        text: The line goes quiet, and the next call is not a call. Someone is waiting outside your home the next morning, and says nothing.
+        effects:
+          - { type: stat, key: stress, delta: 8 }
+          - { type: stat, key: happiness, delta: -3 }
+  - id: ignore
+    label: Let it ring
+    outcome:
+      text: You turn the phone face down. The ringing stops, and that is worse.
+      effects:
+        - { type: stat, key: stress, delta: 7 }
+        - { type: stat, key: happiness, delta: -2 }

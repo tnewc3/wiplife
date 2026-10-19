@@ -1,0 +1,53 @@
+id: sued_by_a_neighbor
+title: Papers from next door
+text: >-
+  A process server finds you on your own doorstep. The neighbor you fell out
+  with claims that you owe for noise, a damaged hedge and distress. The claim
+  is {$6000}, and the date for a hearing is already set.
+tone: serious
+category: justice
+rarity: uncommon
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { home: { kind: [owned, renting] } }
+    - { flag: neighbor_dispute }
+    - { not: { flag: sued_by_someone } }
+weight: { base: 3 }
+once: true
+choices:
+  - id: settle
+    label: Settle quietly
+    outcome:
+      text: A lawyer's letter, a signature and {$6000} later, it is over. Nobody thanks you, and the hedge is not discussed again.
+      effects:
+        - { type: cost, item: lawsuit_settlement }
+        - { type: flag, key: sued_by_someone, value: true }
+        - { type: stat, key: stress, delta: 3 }
+  - id: defend
+    label: Hire a lawyer and fight it
+    check:
+      base: 50
+      stats: [{ key: smarts, weight: 0.25 }, { key: confidence, weight: 0.2 }, { key: luck, weight: 0.15 }]
+      success:
+        text: The judge reads the claim, then your evidence, and throws it out. Your lawyer's bill is {$3000}, and the neighbor's smile is gone.
+        effects:
+          - { type: cost, item: lawsuit_defense }
+          - { type: flag, key: sued_by_someone, value: true }
+          - { type: stat, key: confidence, delta: 2 }
+      failure:
+        text: The judge finds for your neighbor. You owe {$16000} between the judgment and the costs, and the street takes sides.
+        effects:
+          - { type: cost, item: lawsuit_judgment }
+          - { type: flag, key: sued_by_someone, value: true }
+          - { type: stat, key: reputation, delta: -3 }
+          - { type: stat, key: stress, delta: 6 }
+  - id: ignore
+    label: Throw it in a drawer
+    outcome:
+      text: You do not answer, and the court does not wait. A default judgment of {$16000} arrives in the post.
+      effects:
+        - { type: cost, item: lawsuit_judgment }
+        - { type: flag, key: sued_by_someone, value: true }
+        - { type: stat, key: stress, delta: 7 }

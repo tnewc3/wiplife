@@ -1,0 +1,55 @@
+id: pickpocket
+category: crime
+label: "Pick a pocket"
+blurb: "A crowd, a distracted stranger, a very fast hand."
+minAge: 14
+inPerson: true
+companion: none
+cost: nothing
+profile: crime_petty
+yearlyLimit: 3
+tiers:
+  great:
+    text:
+      - "The press of the crowd closes around you like water, and what you lift is heavier than you hoped: {amount} by the time it is sorted. You are three streets away before you breathe."
+      - "It is almost too easy. {amount} changes hands without its owner noticing, and your face has never felt so calm."
+    money: { key: loot_pickpocket, share: 1.5, mode: earn }
+    effects:
+      - { type: stat, key: happiness, delta: 3 }
+      - { type: stat, key: stress, delta: -2 }
+      - { type: crime, action: heat, delta: 2 }
+  good:
+    text:
+      - "A brush in the press, a soft step away, and you are {amount} better off. It is not pride you feel, quite."
+      - "You take what is easy: {amount}. Nobody looks up from their phone."
+    money: { key: loot_pickpocket, share: 1, mode: earn }
+    effects:
+      - { type: stat, key: happiness, delta: 1 }
+      - { type: crime, action: heat, delta: 2 }
+  neutral:
+    text:
+      - "You follow someone for three blocks and never find the moment. You go home with clean hands and a guilty conscience."
+      - "The wallet is there, the stranger turns, and the moment is gone. You walk off as if you were never near."
+    effects:
+      - { type: stat, key: stress, delta: 2 }
+  bad:
+    text:
+      - "A grip on your wrist and a voice that carries. A crowd gathers to watch you be taken away, and the court gives you {sentence}."
+      - "The stranger was quicker than you, and louder. The police are there in minutes, and you leave with {sentence}."
+    effects:
+      - { type: legal, offenseId: petty_theft, outcome: sentence }
+      - { type: stat, key: reputation, delta: -4 }
+      - { type: stat, key: stress, delta: 5 }
+      - { type: stat, key: happiness, delta: -3 }
+      - { type: crime, action: heat, delta: 3 }
+  backfire:
+    text:
+      - "The stranger's friends are close, and nobody is gentle. By the time the police arrive you are hurt, and the court gives you {sentence}."
+      - "A plain-clothes officer was watching the crowd, and watching you. The cuffs are cold and the court gives you {sentence}."
+    effects:
+      - { type: legal, offenseId: petty_theft, outcome: sentence }
+      - { type: stat, key: reputation, delta: -7 }
+      - { type: stat, key: stress, delta: 8 }
+      - { type: stat, key: happiness, delta: -5 }
+      - { type: stat, key: health, delta: -4 }
+      - { type: crime, action: heat, delta: 3 }

@@ -1,0 +1,69 @@
+id: sue_your_neighbor
+category: lawsuits
+label: "Sue a neighbor"
+blurb: "A claim over what happened next door."
+minAge: 18
+mechanic: lawsuit
+inPerson: false
+companion: none
+cost: lawyer_neighbor
+quality: true
+yearlyLimit: 1
+requires: { all: [{ not: { flag: sued_neighbor } }, { home: { kind: [owned, renting] } }] }
+evidence:
+  - { flag: neighbor_dispute }
+  - { flag: neighbor_damage }
+tiers:
+  great:
+    text:
+      - "The judge is plain with your neighbor, and the ruling is clear. You are awarded {amount}, and the fence goes up with a clean conscience."
+      - "Everything you hoped for: the court finds for you in full and orders {amount} paid. The street will talk for a year."
+    money: { key: claim_neighbor, share: 1.0 }
+    effects:
+      - { type: stat, key: happiness, delta: 4 }
+      - { type: stat, key: reputation, delta: 2 }
+      - { type: flag, key: won_a_lawsuit, value: true }
+      - { type: flag, key: sued_neighbor, value: true }
+  good:
+    text:
+      - "A partial win: the court orders {amount} paid and your neighbor to put things right. The street goes quiet."
+      - "The judge splits the difference. You are awarded {amount}, and nothing else changes except the tone of the street."
+    settle:
+      - "Your neighbor's lawyer calls first. You settle for {amount} and a handshake that neither of you means."
+      - "A settlement of {amount}, signed in a lawyer's office. The street quietly exhales."
+    money: { key: claim_neighbor, share: 0.5 }
+    effects:
+      - { type: stat, key: happiness, delta: 2 }
+      - { type: flag, key: won_a_lawsuit, value: true }
+      - { type: flag, key: sued_neighbor, value: true }
+  neutral:
+    text:
+      - "The case is thrown out. Your neighbor smiles on the way out, and you pay the lawyer's bill in silence."
+      - "A long hearing and no ruling. The two of you leave through different doors."
+    settle:
+      - "Nobody budges, and you let it drop. The lawyer's bill is the only thing that comes of it."
+      - "The two of you cannot agree on anything, and the claim fizzles out."
+    effects:
+      - { type: stat, key: stress, delta: 3 }
+      - { type: flag, key: sued_neighbor, value: true }
+  bad:
+    text:
+      - "The court rules for your neighbor. The costs, {amount}, are yours, and the next time you meet in the street neither of you looks up."
+      - "You lose, and the bill for {amount} lands on your doormat the next week."
+    money: { key: court_costs, share: 1.0, mode: loss }
+    effects:
+      - { type: stat, key: stress, delta: 5 }
+      - { type: stat, key: happiness, delta: -3 }
+      - { type: flag, key: lost_a_lawsuit, value: true }
+      - { type: flag, key: sued_neighbor, value: true }
+  backfire:
+    text:
+      - "The hearing airs more than you wanted. You lose, you pay {amount} in costs, and the whole street knows the details."
+      - "The judge is unimpressed by both of you, and most by you. You lose, you pay {amount}, and the neighborhood takes sides."
+    money: { key: court_costs, share: 1.6, mode: loss }
+    effects:
+      - { type: stat, key: stress, delta: 8 }
+      - { type: stat, key: happiness, delta: -5 }
+      - { type: stat, key: reputation, delta: -4 }
+      - { type: flag, key: lost_a_lawsuit, value: true }
+      - { type: flag, key: sued_neighbor, value: true }

@@ -1,0 +1,20 @@
+id: return_to_a_former_name
+category: identity
+label: "Go back to a former name"
+blurb: "Take back a name you once let go of."
+minAge: 16
+mechanic: name
+nameChange: former
+inPerson: false
+companion: none
+cost: name_change
+yearlyLimit: 1
+requires: { flag: changed_name }
+tiers:
+  good:
+    text:
+      - "It takes a form, a fee of {cost} and a short wait, and then you are {self.fullName}. Nothing about it feels like going backwards."
+      - "The clerk checks the old records and finds your old name. {self.fullName} is yours at last for {cost}, and it fits better than you remembered."
+    effects:
+      - { type: stat, key: happiness, delta: 2 }
+      - { type: stat, key: confidence, delta: 1 }

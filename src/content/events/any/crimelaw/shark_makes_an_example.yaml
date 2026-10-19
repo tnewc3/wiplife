@@ -1,0 +1,38 @@
+id: shark_makes_an_example
+title: A message
+text: >-
+  It is not a conversation. You are walking home when a car draws up beside
+  you, and by the time you understand what is happening you are in the back of
+  it. The ride is short, and the message is clear.
+tone: dark
+category: crimelaw
+rarity: rare
+recurring: true
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { finances: { kinds: [shark] } }
+    - { finances: { missed: { gte: 2 } } }
+weight: { base: 8 }
+followUpOnly: true
+choices:
+  - id: pay
+    label: Promise them everything you can find
+    outcome:
+      text: You come to in a stairwell with a cut brow, a bruised side and the clear sense that you have been given one last chance. You send {$3000} the next day.
+      effects:
+        - { type: money, delta: -3000 }
+        - { type: debt, action: forgive, share: 0.25, kinds: [shark] }
+        - { type: stat, key: health, delta: -10 }
+        - { type: stat, key: stress, delta: 10 }
+        - { type: stat, key: happiness, delta: -5 }
+  - id: hospital
+    label: Get yourself to a hospital
+    outcome:
+      text: A nurse asks what happened, and you say you fell. The nurse looks at you for a moment, and does not write it down. The bill arrives anyway.
+      effects:
+        - { type: cost, item: treatment_help }
+        - { type: stat, key: health, delta: -8 }
+        - { type: stat, key: stress, delta: 9 }
+        - { type: stat, key: happiness, delta: -4 }

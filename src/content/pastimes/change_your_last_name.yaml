@@ -1,0 +1,19 @@
+id: change_your_last_name
+category: identity
+label: "Change your family name"
+blurb: "Choose the surname you want to carry."
+minAge: 16
+mechanic: name
+nameChange: last
+inPerson: false
+companion: none
+cost: name_change
+yearlyLimit: 1
+tiers:
+  good:
+    text:
+      - "The court makes it official. {self.fullName} is yours now, and the old name goes in a drawer. The fee was {cost}."
+      - "A form, a fee of {cost} and a short wait. When the letter comes it says {self.fullName}, and you read it three times."
+    effects:
+      - { type: stat, key: happiness, delta: 2 }
+      - { type: stat, key: confidence, delta: 1 }

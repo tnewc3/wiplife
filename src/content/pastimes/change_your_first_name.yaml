@@ -1,0 +1,19 @@
+id: change_your_first_name
+category: identity
+label: "Change your first name"
+blurb: "Choose the name you want to be called by."
+minAge: 16
+mechanic: name
+nameChange: first
+inPerson: false
+companion: none
+cost: name_change
+yearlyLimit: 1
+tiers:
+  good:
+    text:
+      - "The clerk stamps the paper and slides it across. From now on you are {self.name}, and the paperwork takes longer than the feeling does. The fee was {cost}."
+      - "A short hearing, a signature, and it is official. You step out as {self.fullName}. The fee was {cost}, and it feels like the cheapest thing you have ever bought."
+    effects:
+      - { type: stat, key: happiness, delta: 2 }
+      - { type: stat, key: confidence, delta: 1 }

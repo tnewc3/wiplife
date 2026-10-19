@@ -1,0 +1,7 @@
+id: petty_theft
+name: petty theft
+class: misdemeanor
+severity: 1
+outcomes: { warning: 4, fine: 4, probation: 1.5, jail: 0 }
+fine: { min: 150, max: 900 }
+probationYears: { min: 1, max: 2 }

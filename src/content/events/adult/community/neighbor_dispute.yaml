@@ -26,6 +26,7 @@ choices:
       failure:
         text: '{neighbor.name} takes the cookies and keeps parking there.'
         effects:
+          - { type: flag, key: neighbor_dispute, value: true }
           - { type: relationship, role: neighbor, affection: -2 }
           - { type: stat, key: stress, delta: 3 }
   - id: note
@@ -33,6 +34,7 @@ choices:
     outcome:
       text: '{neighbor.name} leaves an angrier one. This could go on for years.'
       effects:
+        - { type: flag, key: neighbor_dispute, value: true }
         - { type: relationship, role: neighbor, affection: -8 }
         - { type: stat, key: stress, delta: 2 }
   - id: city
@@ -40,5 +42,6 @@ choices:
     outcome:
       text: A parking ticket appears. {neighbor.name} knows exactly who called.
       effects:
+        - { type: flag, key: neighbor_dispute, value: true }
         - { type: relationship, role: neighbor, affection: -12 }
         - { type: stat, key: stress, delta: -1 }

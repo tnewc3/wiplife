@@ -1,0 +1,60 @@
+id: play_roulette
+category: gambling
+label: "Play roulette"
+blurb: "A wheel, a ball and a lot of hope."
+minAge: 18
+legalAge: gambling
+mechanic: gamble
+game: roulette
+inPerson: true
+companion: none
+cost: casino_roulette
+yearlyLimit: 6
+tiers:
+  great:
+    text:
+      - "Your number comes up, and the croupier slides the stack across. The {cost} stake becomes {amount}, and you cannot stop grinning."
+      - "The ball drops where you hoped and the table roars. {cost} in, {amount} out."
+    effects:
+      - { type: stat, key: happiness, delta: 4 }
+      - { type: stat, key: stress, delta: -2 }
+    extras:
+      - chance: gambling_addiction
+        effects:
+          - { type: health, conditionId: gambling_addiction, severity: 25 }
+        note: "You notice that you are thinking about the next bet before this one is settled."
+  good:
+    text:
+      - "Red, and then red. The {cost} you put down becomes {amount}."
+      - "A quiet, comfortable run. You leave with {amount} for the {cost} you started with."
+    effects:
+      - { type: stat, key: happiness, delta: 2 }
+    extras:
+      - chance: gambling_addiction
+        effects:
+          - { type: health, conditionId: gambling_addiction, severity: 25 }
+        note: "You notice that you are thinking about the next bet before this one is settled."
+  bad:
+    text:
+      - "The ball skips past your number and settles somewhere else. The {cost} goes with it."
+      - "Black, black, black. The stake of {cost} is swept away."
+    effects:
+      - { type: stat, key: happiness, delta: -1 }
+      - { type: stat, key: stress, delta: 2 }
+    extras:
+      - chance: gambling_addiction
+        effects:
+          - { type: health, conditionId: gambling_addiction, severity: 25 }
+        note: "You notice that you are thinking about the next bet before this one is settled."
+  backfire:
+    text:
+      - "You double your stake to win it back, and then double that. When the wheel stops, the {cost} is gone and your hands are cold."
+      - "One more spin, you tell yourself, and the {cost} goes. The wheel is patient. You are less so."
+    effects:
+      - { type: stat, key: happiness, delta: -3 }
+      - { type: stat, key: stress, delta: 4 }
+    extras:
+      - chance: gambling_addiction
+        effects:
+          - { type: health, conditionId: gambling_addiction, severity: 25 }
+        note: "You notice that you are thinking about the next bet before this one is settled."

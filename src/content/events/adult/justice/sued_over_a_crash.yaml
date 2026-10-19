@@ -1,0 +1,49 @@
+id: sued_over_a_crash
+title: The other driver
+text: >-
+  The other driver in your accident has a lawyer, and the lawyer has a figure:
+  {$6000} for the car, the injury and the time off work.
+tone: serious
+category: justice
+rarity: uncommon
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { flag: had_car_accident }
+    - { not: { flag: sued_by_someone } }
+weight: { base: 3 }
+once: true
+choices:
+  - id: settle
+    label: Settle through your insurer
+    outcome:
+      text: The insurer pays most of it, and you pay {$6000} of the rest. The letter goes in a drawer.
+      effects:
+        - { type: cost, item: lawsuit_settlement }
+        - { type: flag, key: sued_by_someone, value: true }
+        - { type: stat, key: stress, delta: 3 }
+  - id: defend
+    label: Fight it in court
+    check:
+      base: 45
+      stats: [{ key: smarts, weight: 0.2 }, { key: discipline, weight: 0.2 }, { key: luck, weight: 0.2 }]
+      success:
+        text: The traffic report and the photographs settle it. The claim is dismissed, and your lawyer's bill is {$3000}.
+        effects:
+          - { type: cost, item: lawsuit_defense }
+          - { type: flag, key: sued_by_someone, value: true }
+      failure:
+        text: The court finds you mostly at fault. You owe {$16000} between the judgment and the costs.
+        effects:
+          - { type: cost, item: lawsuit_judgment }
+          - { type: flag, key: sued_by_someone, value: true }
+          - { type: stat, key: stress, delta: 6 }
+  - id: ignore
+    label: Let it ride
+    outcome:
+      text: You do not answer, and the court does. A default judgment of {$16000} arrives in the post.
+      effects:
+        - { type: cost, item: lawsuit_judgment }
+        - { type: flag, key: sued_by_someone, value: true }
+        - { type: stat, key: stress, delta: 7 }

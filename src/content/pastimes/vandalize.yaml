@@ -1,0 +1,52 @@
+id: vandalize
+category: crime
+label: "Vandalize something"
+blurb: "Leave your mark where it is not wanted."
+minAge: 13
+inPerson: true
+companion: none
+cost: nothing
+profile: crime_petty
+yearlyLimit: 3
+tiers:
+  great:
+    text:
+      - "The paint goes on in long clean strokes and by morning half the neighborhood is talking about it. You feel taller than you have in months."
+      - "You take it out on a wall that deserves it, and walk home lighter. Nobody saw you, and the whole town sees it in the morning."
+    effects:
+      - { type: stat, key: happiness, delta: 3 }
+      - { type: stat, key: stress, delta: -2 }
+      - { type: flag, key: tagged_bridge, value: true }
+      - { type: stat, key: stress, delta: -2 }
+  good:
+    text:
+      - "It takes ten minutes and a lot of nerve. By the time you are home the anger has gone out of you."
+      - "You leave your mark and slip away. It is not much, but it is yours."
+    effects:
+      - { type: stat, key: happiness, delta: 1 }
+      - { type: flag, key: tagged_bridge, value: true }
+  neutral:
+    text:
+      - "A light comes on in a window and you freeze, then run. The wall stays clean and your heart does not slow down for an hour."
+      - "You stand there with the can in your hand until the urge goes. You walk home with nothing to show for it."
+    effects:
+      - { type: stat, key: stress, delta: 2 }
+  bad:
+    text:
+      - "A patrol car rolls slowly around the corner, and the light finds you with the can in your hand. In the end you get {sentence}."
+      - "Someone had been watching from a window. The police arrive before the paint dries, and the court gives you {sentence}."
+    effects:
+      - { type: legal, offenseId: vandalism, outcome: sentence }
+      - { type: stat, key: reputation, delta: -4 }
+      - { type: stat, key: stress, delta: 5 }
+      - { type: stat, key: happiness, delta: -3 }
+  backfire:
+    text:
+      - "The owner is quick and furious, and the police are quicker. The damage is more than you thought, and the court gives you {sentence}."
+      - "You are caught in the act, and a bad night turns worse when the damage is counted. The court gives you {sentence}."
+    effects:
+      - { type: legal, offenseId: vandalism, outcome: sentence }
+      - { type: stat, key: reputation, delta: -7 }
+      - { type: stat, key: stress, delta: 8 }
+      - { type: stat, key: happiness, delta: -5 }
+      - { type: stat, key: health, delta: -4 }

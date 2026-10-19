@@ -1,0 +1,7 @@
+id: fake_id
+name: using a fake ID
+class: misdemeanor
+severity: 1
+outcomes: { warning: 4, fine: 4, probation: 1, jail: 0 }
+fine: { min: 200, max: 1000 }
+probationYears: { min: 1, max: 1 }

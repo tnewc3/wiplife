@@ -1,0 +1,42 @@
+id: landlord_keeps_the_deposit
+title: The deposit
+text: >-
+  When you hand back the keys, the landlord walks the rooms with a clipboard
+  and comes out with a list. Most of it was there when you moved in. The total
+  is {$1200}, and it is more than a little convenient.
+tone: serious
+category: justice
+rarity: uncommon
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { home: { kind: [renting] } }
+    - { not: { flag: landlord_dispute } }
+weight: { base: 4 }
+once: true
+choices:
+  - id: argue
+    label: Go through the list item by item
+    check:
+      base: 50
+      stats: [{ key: smarts, weight: 0.25 }, { key: confidence, weight: 0.2 }]
+      success:
+        text: You have photographs, a receipt, and a very quiet voice. The landlord crosses off most of the list, and you leave with your deposit back and a note in the landlord's file.
+        effects:
+          - { type: flag, key: landlord_dispute, value: true }
+          - { type: stat, key: confidence, delta: 2 }
+      failure:
+        text: The landlord's clipboard is thicker than your folder. You pay {$1200} and keep every photograph, just in case.
+        effects:
+          - { type: money, delta: -1200 }
+          - { type: flag, key: landlord_dispute, value: true }
+          - { type: stat, key: stress, delta: 4 }
+  - id: pay
+    label: Pay it and move on
+    outcome:
+      text: It is {$1200} you did not budget for, and it is not the first time you have been told it is only business. You keep the paperwork anyway.
+      effects:
+        - { type: money, delta: -1200 }
+        - { type: flag, key: landlord_dispute, value: true }
+        - { type: stat, key: stress, delta: 3 }

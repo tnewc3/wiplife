@@ -1,0 +1,52 @@
+id: buy_counterfeit_goods
+category: black_market
+label: "Buy counterfeit goods"
+blurb: "A boot full of knock-offs and a plan to sell them on."
+minAge: 18
+inPerson: true
+companion: none
+cost: counterfeit_goods
+profile: market_goods
+yearlyLimit: 2
+tiers:
+  great:
+    text:
+      - "The knock-offs sell out in a weekend. You paid {cost} and clear {amount} of other people's wishful thinking, with nobody the wiser."
+      - "Word gets around, the stock moves fast, and you come out {amount} ahead on a {cost} outlay."
+    money: { key: resale_counterfeit, share: 1.3 }
+    effects:
+      - { type: stat, key: happiness, delta: 2 }
+      - { type: crime, action: heat, delta: 2 }
+  good:
+    text:
+      - "It takes a few weeks of quiet selling, but the box empties. You paid {cost} and take in {amount}."
+      - "You move most of it at the market and the rest to friends. It comes to {amount}, and you ask yourself if it was worth it."
+    money: { key: resale_counterfeit, share: 1 }
+    effects:
+      - { type: crime, action: heat, delta: 2 }
+  neutral:
+    text:
+      - "The buyers are fewer and pickier than you were told. You sell some at a loss and give the rest away. {amount} comes back, less than you hoped."
+      - "Half the box sells at half price, and the rest sits in your hall. You recover {amount} of the {cost}."
+    money: { key: resale_counterfeit, share: 0.5 }
+    effects:
+      - { type: stat, key: stress, delta: 1 }
+  bad:
+    text:
+      - "A trading standards officer takes the whole box on a Saturday morning. What you paid is gone, and the court gives you {sentence}."
+      - "Someone talks. The stock is seized, the money is gone, and the court gives you {sentence}."
+    effects:
+      - { type: legal, offenseId: counterfeit_goods, outcome: sentence }
+      - { type: stat, key: reputation, delta: -4 }
+      - { type: stat, key: stress, delta: 4 }
+      - { type: crime, action: heat, delta: 3 }
+  backfire:
+    text:
+      - "The seller was watched, and so are you. A raid takes the stock, the money and a good deal of your pride, and the court gives you {sentence}."
+      - "What you thought was a side hustle is an investigation. You lose it all, and the court gives you {sentence}."
+    effects:
+      - { type: legal, offenseId: counterfeit_goods, outcome: sentence }
+      - { type: stat, key: reputation, delta: -8 }
+      - { type: stat, key: stress, delta: 7 }
+      - { type: stat, key: happiness, delta: -4 }
+      - { type: crime, action: heat, delta: 6 }

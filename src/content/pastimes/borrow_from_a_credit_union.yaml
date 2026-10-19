@@ -1,0 +1,19 @@
+id: borrow_from_a_credit_union
+category: loans
+label: "Borrow from a credit union"
+blurb: "A smaller loan, from people who know your neighborhood."
+minAge: 18
+mechanic: loan
+loan: credit_union
+lender: "a credit union"
+inPerson: false
+companion: none
+cost: nothing
+yearlyLimit: 1
+tiers:
+  good:
+    text:
+      - "The loan officer at the credit union has seen years like yours before. The credit union approves {amount} at {rate} a year, less a fee of {cost}, and tells you to call if it gets hard."
+      - "They are kind about it and careful. The credit union lends you {amount} at {rate} a year, with a fee of {cost}, and a sensible schedule."
+    effects:
+      - { type: stat, key: stress, delta: -2 }

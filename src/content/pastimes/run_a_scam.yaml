@@ -1,0 +1,57 @@
+id: run_a_scam
+category: crime
+label: "Run a scam"
+blurb: "A story that is almost true, and someone who wants to believe it."
+minAge: 18
+inPerson: true
+companion: none
+cost: nothing
+profile: crime_serious
+yearlyLimit: 2
+tiers:
+  great:
+    text:
+      - "The story lands, the trust is easy, and the money changes hands: {amount}. You are surprised how little guilt you can feel, and then you are not."
+      - "Everyone you deal with believes every word. By the end of the week you have {amount}, and a quiet dread about what you have become."
+    money: { key: loot_con, share: 1.5, mode: dirty }
+    effects:
+      - { type: stat, key: happiness, delta: 3 }
+      - { type: stat, key: stress, delta: -2 }
+      - { type: crime, action: heat, delta: 5 }
+      - { type: stat, key: kindness, delta: -1 }
+  good:
+    text:
+      - "It is slower than you hoped, but it works: {amount} from someone who wanted to believe you."
+      - "A little charm, a little patience, and you come away with {amount}. The charm feels cheaper every time you use it."
+    money: { key: loot_con, share: 1, mode: dirty }
+    effects:
+      - { type: stat, key: happiness, delta: 1 }
+      - { type: crime, action: heat, delta: 5 }
+      - { type: stat, key: kindness, delta: -1 }
+  neutral:
+    text:
+      - "The mark goes cold halfway through and you let it drop with a joke. You walk away with a story and nothing else."
+      - "Something about the conversation is off. You let the moment pass and walk away before it turns."
+    effects:
+      - { type: stat, key: stress, delta: 2 }
+  bad:
+    text:
+      - "Someone checks your story. Someone else makes a call. The court gives you {sentence}, and a name nobody wants to be called."
+      - "The person you fooled has a lawyer in the family. Within a month the police are at your door, and the court gives you {sentence}."
+    effects:
+      - { type: legal, offenseId: fraud, outcome: sentence }
+      - { type: stat, key: reputation, delta: -4 }
+      - { type: stat, key: stress, delta: 5 }
+      - { type: stat, key: happiness, delta: -3 }
+      - { type: crime, action: heat, delta: 9 }
+  backfire:
+    text:
+      - "The whole thing comes apart in public. You lose more than you ever had to lose, and the court gives you {sentence}."
+      - "A paper trail you did not know you were leaving leads straight to your door. In court you are given {sentence}."
+    effects:
+      - { type: legal, offenseId: fraud, outcome: sentence }
+      - { type: stat, key: reputation, delta: -7 }
+      - { type: stat, key: stress, delta: 8 }
+      - { type: stat, key: happiness, delta: -5 }
+      - { type: stat, key: health, delta: -4 }
+      - { type: crime, action: heat, delta: 9 }

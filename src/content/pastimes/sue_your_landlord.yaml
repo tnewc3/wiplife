@@ -1,0 +1,70 @@
+id: sue_your_landlord
+category: lawsuits
+label: "Sue your landlord"
+blurb: "A claim over your rented home."
+minAge: 18
+mechanic: lawsuit
+inPerson: false
+companion: none
+cost: lawyer_landlord
+quality: true
+yearlyLimit: 1
+requires: { all: [{ not: { flag: sued_landlord } }, { home: { kind: [renting] } }] }
+evidence:
+  - { flag: was_evicted }
+  - { flag: landlord_dispute }
+  - { flag: unsafe_rental }
+tiers:
+  great:
+    text:
+      - "The magistrate looks over the photographs and the lease and finds for you in full. The landlord is ordered to pay {amount}, and you sit through the rest with a straight face."
+      - "A short hearing and a clear ruling: the landlord owes you {amount}. You walk out into the sun."
+    money: { key: claim_landlord, share: 1.0 }
+    effects:
+      - { type: stat, key: happiness, delta: 4 }
+      - { type: stat, key: reputation, delta: 2 }
+      - { type: flag, key: won_a_lawsuit, value: true }
+      - { type: flag, key: sued_landlord, value: true }
+  good:
+    text:
+      - "The magistrate finds partly for you. You are awarded {amount}, and the landlord is told to fix what needs fixing."
+      - "Not everything, but enough: the court orders {amount} paid to you."
+    settle:
+      - "The landlord's agent offers {amount} on the courthouse steps, and you take it. The matter ends there."
+      - "A settlement of {amount}, signed on a folding table. The lawyer calls it sensible."
+    money: { key: claim_landlord, share: 0.5 }
+    effects:
+      - { type: stat, key: happiness, delta: 2 }
+      - { type: flag, key: won_a_lawsuit, value: true }
+      - { type: flag, key: sued_landlord, value: true }
+  neutral:
+    text:
+      - "The hearing is adjourned, then dismissed. The landlord gets a lecture, you get nothing, and the lawyer sends a bill."
+      - "The landlord's paperwork is in order, and so is the court's patience. The case is struck out."
+    settle:
+      - "The landlord's agent will not budge, and you let the claim go. The lawyer's bill is the only thing that comes of it."
+      - "No deal, no ruling. You drop the claim with a sour taste."
+    effects:
+      - { type: stat, key: stress, delta: 3 }
+      - { type: flag, key: sued_landlord, value: true }
+  bad:
+    text:
+      - "The landlord's paperwork is thicker than yours, and the court rules against you. The costs, {amount}, are yours."
+      - "A ruling for the landlord, and a bill for {amount} in costs. Your next rental application will need an explanation."
+    money: { key: court_costs, share: 1.0, mode: loss }
+    effects:
+      - { type: stat, key: stress, delta: 5 }
+      - { type: stat, key: happiness, delta: -3 }
+      - { type: flag, key: lost_a_lawsuit, value: true }
+      - { type: flag, key: sued_landlord, value: true }
+  backfire:
+    text:
+      - "The landlord counterclaims, and wins. You pay {amount} in costs, and word gets around the letting agents."
+      - "The hearing turns on a clause you never read. The court rules against you, orders {amount} in costs, and your reference gets a little shorter."
+    money: { key: court_costs, share: 1.6, mode: loss }
+    effects:
+      - { type: stat, key: stress, delta: 8 }
+      - { type: stat, key: happiness, delta: -5 }
+      - { type: stat, key: reputation, delta: -4 }
+      - { type: flag, key: lost_a_lawsuit, value: true }
+      - { type: flag, key: sued_landlord, value: true }

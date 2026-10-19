@@ -98,6 +98,7 @@ const character = z.strictObject({
   custom: z.boolean(),
   canCarry: z.boolean(),
   heritage: z.string().min(1).max(40).exactOptional(),
+  formerNames: z.array(z.strictObject({ first: filled, last: filled, year: int })).max(20).exactOptional(),
 });
 
 const childData = z.strictObject({
@@ -351,9 +352,9 @@ const finances = z.strictObject({
   debts: z.array(
     z.strictObject({
       id,
-      kind: z.enum(['student', 'personal', 'mortgage', 'medical', 'collections', 'auto', 'business']),
+      kind: z.enum(['student', 'personal', 'mortgage', 'medical', 'collections', 'auto', 'business', 'bank', 'payday', 'shark']),
       balance: dollars,
-      annualRate: z.number().min(0).max(1),
+      annualRate: z.number().min(0).max(3),
       minPayment: dollars,
       missed: int.min(0),
     }),

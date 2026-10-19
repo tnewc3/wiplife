@@ -1,0 +1,19 @@
+id: take_a_payday_loan
+category: loans
+label: "Take a payday loan"
+blurb: "Fast money against your next paycheck, at a price."
+minAge: 18
+mechanic: loan
+loan: payday_advance
+lender: "a payday lender"
+inPerson: false
+companion: none
+cost: nothing
+yearlyLimit: 1
+tiers:
+  good:
+    text:
+      - "The shop is bright and the form is short. In ten minutes you have {amount}, less a fee of {cost}, at {rate} a year. It is due at the next ledger, and you are already counting."
+      - "No questions, no wait. The lender hands you {amount} at {rate} a year, with a fee of {cost}, and a date that comes round faster than you think."
+    effects:
+      - { type: stat, key: stress, delta: 2 }

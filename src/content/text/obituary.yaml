@@ -125,6 +125,11 @@ moments:
 # Deeds: things the life did (by flag), kept to ones that set a life apart.
 # Values: none.
 deeds:
+  # Batch 2b: risk and legal.
+  won_a_lawsuit: "{self.They} took someone to court, and came away with more than the lawyer's bill."
+  lost_a_lawsuit: "{self.They} lost a case in court, and said afterwards it was still worth saying out loud."
+  changed_name: "{self.They} chose {self.their} own name, in a courtroom, with a signature."
+  shark_debt_cleared: "{self.They} once owed the wrong people, and paid in a currency that was not money."
   # E2b: a family and what it passed on.
   contested_will: "{self.They} went to court over a parent's will, and said it was never about the money."
   kept_the_family_home: "{self.They} kept the family home, and filled it with new life."

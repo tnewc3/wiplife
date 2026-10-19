@@ -1,0 +1,48 @@
+id: buy_a_lottery_ticket
+category: gambling
+label: "Buy a lottery ticket"
+blurb: "A small ticket and a very long shot."
+minAge: 18
+legalAge: gambling
+mechanic: gamble
+game: lottery
+inPerson: false
+companion: none
+cost: lottery_ticket
+yearlyLimit: 8
+tiers:
+  great:
+    text:
+      - "The numbers on the screen match the numbers on the ticket, and you read them three times before you let yourself believe it. {cost} turns into {amount}."
+      - "You scratch, you stare, you call your family. The ticket that cost {cost} is worth {amount}."
+    effects:
+      - { type: stat, key: happiness, delta: 4 }
+      - { type: stat, key: stress, delta: -2 }
+    extras:
+      - chance: gambling_addiction
+        effects:
+          - { type: health, conditionId: gambling_addiction, severity: 25 }
+        note: "You notice that you are thinking about the next bet before this one is settled."
+  good:
+    text:
+      - "A small win: {amount} on a ticket that cost {cost}. It pays for a good dinner and a daydream."
+      - "Three numbers match. You collect {amount} for the {cost} you spent and buy another ticket with a grin."
+    effects:
+      - { type: stat, key: happiness, delta: 2 }
+    extras:
+      - chance: gambling_addiction
+        effects:
+          - { type: health, conditionId: gambling_addiction, severity: 25 }
+        note: "You notice that you are thinking about the next bet before this one is settled."
+  bad:
+    text:
+      - "Nothing. You fold the {cost} ticket in half and drop it in the nearest bin, and tell yourself it was only a bit of fun."
+      - "Not a number close. The ticket goes in the drawer with the others, a {cost} reminder of how it usually goes."
+    effects:
+      - { type: stat, key: happiness, delta: -1 }
+      - { type: stat, key: stress, delta: 2 }
+    extras:
+      - chance: gambling_addiction
+        effects:
+          - { type: health, conditionId: gambling_addiction, severity: 25 }
+        note: "You notice that you are thinking about the next bet before this one is settled."

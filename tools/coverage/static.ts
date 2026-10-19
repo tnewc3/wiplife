@@ -217,7 +217,17 @@ export function analyzeContent(content: ContentBundle): StaticCoverage {
       }
     }
     for (const flag of referencesIn(def.requires).flags) addTo(flagReads, flag, who);
+    // Batch 2b: what a lawsuit has to go on.
+    for (const condition of def.evidence ?? []) {
+      const refs = referencesIn(condition);
+      for (const flag of refs.flags) addTo(flagReads, flag, who);
+      for (const tag of refs.memories) addTo(memoryReads, tag, who);
+    }
   }
+  // Batch 2b: the engine reads a fake ID (it opens a bar below the drinking age) and writes the flags of a settled loan shark debt and a name change.
+  addTo(flagReads, 'fake_id', 'pastimes (engine)');
+  addTo(flagWrites, 'changed_name', 'pastimes (engine)');
+  addTo(flagWrites, 'shark_debt_cleared', 'economy (engine)');
   for (const profile of Object.values(content.balance.interactions.profiles)) {
     for (const tag of Object.keys(profile.memories)) addTo(memoryReads, tag, 'balance/interactions.yaml');
   }

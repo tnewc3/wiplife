@@ -115,8 +115,24 @@ export const LEGAL_HISTORY_VALUES = {
   jail: ['offense', 'years'],
   released: [],
   probationEnded: [],
+  /** Batch 2b: a fake ID was caught. */
+  fakeIdCaught: [],
 } as const satisfies Record<string, readonly string[]>;
 export type LegalHistoryKey = keyof typeof LEGAL_HISTORY_VALUES;
+
+/**
+ * Batch 2b milestones in text/history.yaml (risk): a legal name change ({oldName}, {newName}, full names), a loan
+ * ({amount} borrowed, {lender} "the bank", "a payday lender", "a loan shark"), and how a lawsuit ended ({amount} won or paid).
+ */
+export const RISK_HISTORY_VALUES = {
+  nameChanged: ['oldName', 'newName'],
+  loanTaken: ['amount', 'lender'],
+  lawsuitWon: ['amount'],
+  lawsuitSettled: ['amount'],
+  lawsuitLost: [],
+  sharkSettled: [],
+} as const satisfies Record<string, readonly string[]>;
+export type RiskHistoryKey = keyof typeof RISK_HISTORY_VALUES;
 
 /**
  * Self-discovery milestones in text/history.yaml (discovery, Stage 9):
@@ -203,6 +219,13 @@ export const historyTextSchema = z.strictObject({
   legal: z.strictObject(
     Object.fromEntries(Object.keys(LEGAL_HISTORY_VALUES).map((k) => [k, historyGroupSchema])) as Record<
       LegalHistoryKey,
+      typeof historyGroupSchema
+    >,
+  ),
+  /** Batch 2b: a name change, a loan, a lawsuit. The values each one may use are in RISK_HISTORY_VALUES. */
+  risk: z.strictObject(
+    Object.fromEntries(Object.keys(RISK_HISTORY_VALUES).map((k) => [k, historyGroupSchema])) as Record<
+      RiskHistoryKey,
       typeof historyGroupSchema
     >,
   ),

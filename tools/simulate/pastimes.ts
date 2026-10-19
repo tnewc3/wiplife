@@ -17,20 +17,34 @@
  * The watcher compares the life before and after each activity, so nothing
  * here touches the engine.
  */
-import { OUTCOME_TIERS, PASTIME_CATEGORIES, PASTIME_QUALITIES, type ContentBundle, type PastimeCategory, type PastimeQuality } from '../../src/content/schemas';
+import { OUTCOME_TIERS, PASTIME_CATEGORIES, PASTIME_QUALITIES, RISK_CATEGORIES, type ContentBundle, type PastimeCategory, type PastimeQuality, type PastimeRoute, type PastimeStake } from '../../src/content/schemas';
 import { allPastimes, companionOptions, pastimeBlock, pastimeCount, pastimePrice } from '../../src/engine/pastimes/query';
 import { valuablesOf } from '../../src/engine/possessions/query';
 import { weightedPick } from '../../src/engine/random';
 import { chance, nextFloat, nextInt, pick, type RngState } from '../../src/engine/rng';
 import type { LifeState, PastimeReceipt } from '../../src/engine/types';
+import { emptyRiskReport, RiskWatcher, type RiskReport } from './risk';
+import { evidenceCount, fakeIdUsable } from '../../src/engine/pastimes/risk';
 import type { SimulationReport, TargetResult } from './run';
 
-export type PastimePlayer = 'careful' | 'careless' | 'spammer';
+export type PastimePlayer = 'careful' | 'careless' | 'spammer' | 'criminal';
 
 export interface PastimePlan {
   pastimeId: string;
   companionId?: string;
   quality?: PastimeQuality;
+  /** Batch 2b: gambling (a stake, chasing a loss), a lawsuit (the route), a name change (typed names and the parent who agrees). */
+  stake?: PastimeStake;
+  chase?: true;
+  route?: PastimeRoute;
+  first?: string;
+  last?: string;
+  consentId?: string;
+}
+
+/** The action's params for a plan. */
+export function paramsOfPlan(plan: PastimePlan): Record<string, unknown> {
+  return { ...plan };
 }
 
 /** Chances describing the simulated player (not the game). */
@@ -73,7 +87,7 @@ export interface PastimeProfile {
 export function rollPastimeProfile(rng: RngState): PastimeProfile {
   const w = () => 0.3 + 1.4 * nextFloat(rng);
   return {
-    interests: { mind_body: w(), salon_spa: w(), surgery: 0.3, shopping: w(), movies: w() * 1.2, nightlife: w(), outdoor: w(), luxury: 0.3, love: 1 },
+    interests: { mind_body: w(), salon_spa: w(), surgery: 0.3, shopping: w(), movies: w() * 1.2, nightlife: w(), outdoor: w(), luxury: 0.3, love: 1, crime: 0, black_market: 0, gambling: 0, lawsuits: 0, identity: 0, loans: 0 },
     vain: chance(rng, 0.18),
     collector: chance(rng, 0.2),
   };
@@ -115,8 +129,9 @@ export function choosePastimePlans(life: LifeState, content: ContentBundle, rng:
 
   if (player === 'careless') {
     const n = nextInt(rng, 0, POLICY.carelessMax);
+    const ordinary = defs.filter((d) => !(RISK_CATEGORIES as readonly string[]).includes(d.category));
     for (let i = 0; i < n; i++) {
-      const plan = options(pick(rng, defs), true);
+      const plan = options(pick(rng, ordinary), true);
       if (plan) plans.push(plan);
     }
     return plans;
@@ -128,7 +143,8 @@ export function choosePastimePlans(life: LifeState, content: ContentBundle, rng:
   for (let i = 0; i < n; i++) {
     const candidates: [PastimePlan, number][] = [];
     for (const def of defs) {
-      if (['surgery', 'luxury', 'love'].includes(def.category)) continue;
+      // (Batch 2b: crime, gambling, lawsuits, names and loans are chosen by ./risk.ts.)
+      if (['surgery', 'luxury', 'love'].includes(def.category) || (RISK_CATEGORIES as readonly string[]).includes(def.category)) continue;
       const plan = options(def, false);
       if (!plan) continue;
       const price = pastimePrice(life, def, plan, content);
@@ -194,6 +210,8 @@ export interface PastimesReport {
   moneyCreated: number;
   minorBreaches: number;
   invariantFailures: number;
+  /** Batch 2b: crime, the black market, gambling, lawsuits, names and loans. */
+  risk: RiskReport;
 }
 
 export function emptyPastimesReport(player: PastimePlayer): PastimesReport {
@@ -216,6 +234,7 @@ export function emptyPastimesReport(player: PastimePlayer): PastimesReport {
     moneyCreated: 0,
     minorBreaches: 0,
     invariantFailures: 0,
+    risk: emptyRiskReport(),
   };
 }
 
@@ -233,11 +252,19 @@ export class PastimesWatcher {
   private surgery = false;
   private addiction = false;
   private owned = false;
+  private readonly risk: RiskWatcher;
 
   constructor(
     private readonly r: PastimesReport,
     private readonly content: ContentBundle,
-  ) {}
+  ) {
+    this.risk = new RiskWatcher(r.risk, content);
+  }
+
+  /** The engine refused a plan (a name that is not valid, say). */
+  refused(plan: PastimePlan): void {
+    this.risk.refused(plan);
+  }
 
   /** Runs one activity: `act` performs it and returns the life before it is settled; `settle` plays out the result events. */
   play(life: LifeState, plan: PastimePlan, act: (life: LifeState) => LifeState, settle: (life: LifeState) => LifeState): LifeState {
@@ -262,8 +289,16 @@ export class PastimesWatcher {
     row.tiers[receipt.tier]++;
     const spent = receipt.money ? -receipt.money.change : 0;
     cat.spent += spent;
-    r.spent += Math.max(0, spent);
-    if (receipt.money && (receipt.money.change > 0 || receipt.money.debtChange < 0)) r.moneyCreated++;
+    // (Crime, gambling, lawsuits and loans bring money in by design; the leisure activities never do.)
+    const isRisk = (RISK_CATEGORIES as readonly string[]).includes(def.category);
+    if (!isRisk) r.spent += Math.max(0, spent);
+    if (!isRisk && receipt.money && (receipt.money.change > 0 || receipt.money.debtChange < 0)) r.moneyCreated++;
+    if (isRisk) {
+      this.risk.played(before, after, plan, receipt);
+      if (def.mechanic === 'lawsuit' && evidenceCount(before, def, plan.companionId, content) === 0) r.risk.lawsuits.withoutEvidence++;
+      if (def.legalAge === 'drinking') this.fakeId(before, after, def);
+    }
+    if (!isRisk && def.legalAge === 'drinking') this.fakeId(before, after, def);
     const bucket = r.byRepeat[Math.min(repeats, 4)]!;
     bucket.outings++;
     bucket.benefit += benefit(receipt.changes);
@@ -312,10 +347,18 @@ export class PastimesWatcher {
     return after;
   }
 
+  /** A nightlife outing with a fake ID: used to get in, and perhaps caught. */
+  private fakeId(before: LifeState, after: LifeState, def: (typeof this.content.pastimes)[string]): void {
+    if (!fakeIdUsable(before, def, this.content)) return;
+    this.r.risk.market.fakeIdUses++;
+    if (before.flags.fake_id === true && after.flags.fake_id !== true) this.r.risk.market.fakeIdCaught++;
+  }
+
   /** A year has passed: valuables kept, stolen, and the receipts the engine kept. */
   observe(before: LifeState, after: LifeState): void {
     const r = this.r;
     r.years++;
+    this.risk.observeYear(before, after);
     const items = valuablesOf(after);
     if (items.length > 0) this.owned = true;
     r.valuables.valuableYears += items.length;
@@ -333,6 +376,7 @@ export class PastimesWatcher {
     if (this.surgery) r.surgery.lives++;
     if (this.addiction) r.nightlife.livesWithAddiction++;
     if (this.owned) r.valuables.lives++;
+    this.risk.finish(life);
   }
 }
 

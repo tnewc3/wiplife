@@ -1,0 +1,47 @@
+id: buy_a_fake_id
+category: black_market
+label: "Get a fake ID"
+blurb: "A card that says you are older than you are."
+minAge: 16
+inPerson: true
+companion: none
+cost: fake_id
+profile: market_papers
+yearlyLimit: 1
+requires: { not: { flag: fake_id } }
+tiers:
+  great:
+    text:
+      - "The card is better than you hoped, and it feels like a key. For {cost} you have a way into rooms that were closed to you."
+      - "It looks real, it scans, and it fits in your wallet. You paid {cost} and you feel like someone else."
+    effects:
+      - { type: flag, key: fake_id, value: true }
+      - { type: stat, key: confidence, delta: 1 }
+  good:
+    text:
+      - "It is not perfect, but it will do in a dark doorway. {cost} for the chance."
+      - "The card is plastic, the photo is yours, and the age is not. You pay {cost} and put it where nobody will look."
+    effects:
+      - { type: flag, key: fake_id, value: true }
+  neutral:
+    text:
+      - "The card is so obviously fake that you are embarrassed to carry it. {cost} for a souvenir."
+      - "The seller lets you down: the card is poor and the seller will not take it back. You throw it away."
+    effects:
+      - { type: stat, key: happiness, delta: -1 }
+  bad:
+    text:
+      - "The seller takes your {cost} and the number you gave. The card never comes, and you tell nobody."
+      - "You hand over {cost} and wait for a card that never arrives. The sting is mostly shame."
+    effects:
+      - { type: stat, key: stress, delta: 3 }
+      - { type: stat, key: happiness, delta: -3 }
+  backfire:
+    text:
+      - "It was a trap, or a mistake, or both. The card is taken off you by someone with a badge, and you get {sentence}."
+      - "You hand over {cost}, and the person you meet is not who you thought. The court gives you {sentence}."
+    effects:
+      - { type: legal, offenseId: fake_id, outcome: sentence }
+      - { type: stat, key: reputation, delta: -5 }
+      - { type: stat, key: stress, delta: 6 }
+      - { type: stat, key: happiness, delta: -4 }

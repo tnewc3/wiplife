@@ -1,0 +1,211 @@
+# Batch 2b: activities that carry risk and law: crime, the black market, gambling, lawsuits, a legal name change and
+# loans. The prices of these activities are in pastimes.yaml (costs); the rates and terms of the new debt kinds are in
+# economy.yaml (interest.debts and debts.termYears). Amounts here are US prices: the engine scales them to the
+# price level of the country you live in and your city's cost of living. Starting proposals; the simulation targets
+# (targets.yaml, risk) say where they should land.
+
+# Crime and the black market. The chance of the two bad tiers (caught, caught and hurt) is multiplied by
+# 1 + heat × (the heat on you) + record × (entries on your counted record, at most recordMax) + crew (if you are in a crew).
+exposure:
+  heat: 0.015
+  record: 0.25
+  recordMax: 4
+  crew: 0.2
+
+# A crew member who works alone: the heat added is multiplied by this, and the crew resents the freelancing (standing lost).
+crew:
+  heat: 1.5
+  standing: 6
+
+# What comes in or goes out of an outcome, by key. A range is rolled, then scaled.
+amounts:
+  # Crime: small cash from a petty theft goes into savings; a serious crime pays dirty money (E6a).
+  loot_shoplift: { min: 25, max: 160 }
+  loot_pickpocket: { min: 60, max: 320 }
+  loot_burglary: { min: 1200, max: 5200 }
+  loot_car: { min: 2400, max: 7600 }
+  loot_robbery: { min: 2200, max: 9000 }
+  loot_con: { min: 1800, max: 7000 }
+  # The black market: what a resale brings, and what a deal on the side brings (dirty money).
+  resale_counterfeit: { min: 500, max: 1500 }
+  resale_electronics: { min: 450, max: 1100 }
+  dealing: { min: 900, max: 3200 }
+  # Lawsuits: what you claim (a settlement or a win pays a share of it) and the court costs of losing.
+  claim_employer: { min: 12000, max: 42000 }
+  claim_doctor: { min: 20000, max: 80000 }
+  claim_landlord: { min: 1500, max: 8000 }
+  claim_neighbor: { min: 2500, max: 11000 }
+  claim_ex: { min: 6000, max: 28000 }
+  court_costs: { min: 1500, max: 6000 }
+
+# Gambling: the payout table of each game. Each outcome is shown as one of the five tiers, with its chance and what
+# the stake is multiplied by (0 loses it). The chances add up to 1, and the house keeps at least minEdge of
+# every stake on average (the content build checks both). The expected return is the sum of chance × multiple.
+games:
+  # Return 0.94.
+  slots:
+    minEdge: 0.04
+    outcomes:
+      - { tier: great, chance: 0.02, multiple: 20 }
+      - { tier: good, chance: 0.2, multiple: 2 }
+      - { tier: neutral, chance: 0.14, multiple: 1 }
+      - { tier: bad, chance: 0.59, multiple: 0 }
+      - { tier: backfire, chance: 0.05, multiple: 0 }
+  # Return 0.96.
+  blackjack:
+    minEdge: 0.02
+    outcomes:
+      - { tier: great, chance: 0.045, multiple: 2.5 }
+      - { tier: good, chance: 0.38, multiple: 2 }
+      - { tier: neutral, chance: 0.09, multiple: 1 }
+      - { tier: bad, chance: 0.43, multiple: 0 }
+      - { tier: backfire, chance: 0.055, multiple: 0 }
+  # Return 0.95.
+  roulette:
+    minEdge: 0.02
+    outcomes:
+      - { tier: great, chance: 0.0135, multiple: 20 }
+      - { tier: good, chance: 0.34, multiple: 2 }
+      - { tier: bad, chance: 0.6, multiple: 0 }
+      - { tier: backfire, chance: 0.0465, multiple: 0 }
+  # Return 0.49.
+  lottery:
+    minEdge: 0.3
+    outcomes:
+      - { tier: great, chance: 0.001, multiple: 250 }
+      - { tier: good, chance: 0.08, multiple: 3 }
+      - { tier: bad, chance: 0.919, multiple: 0 }
+  # Return 0.90.
+  sports_bet:
+    minEdge: 0.05
+    outcomes:
+      - { tier: great, chance: 0.05, multiple: 5 }
+      - { tier: good, chance: 0.34, multiple: 1.9 }
+      - { tier: neutral, chance: 0.03, multiple: 1 }
+      - { tier: bad, chance: 0.5, multiple: 0 }
+      - { tier: backfire, chance: 0.08, multiple: 0 }
+  # Return 0.80.
+  horse_race:
+    minEdge: 0.1
+    outcomes:
+      - { tier: great, chance: 0.02, multiple: 10 }
+      - { tier: good, chance: 0.25, multiple: 2.4 }
+      - { tier: bad, chance: 0.6, multiple: 0 }
+      - { tier: backfire, chance: 0.13, multiple: 0 }
+
+# The stakes you can choose: what the game's base price is multiplied by, and how much likelier a gambling problem is.
+stakes:
+  low: { price: 0.5, addiction: 0.6 }
+  medium: { price: 1, addiction: 1 }
+  high: { price: 4, addiction: 2.4 }
+
+# Chasing a loss: you bet what you just lost (never less than the stake you chose), at most cap, and may borrow up to
+# borrow to cover it. It makes a gambling problem more likely (pastimes.yaml chances).
+chase:
+  share: 1
+  cap: 3000
+  borrow: 1500
+
+lawsuits:
+  # Each piece of evidence multiplies the odds of winning by 1 + this (and divides the odds of losing by it).
+  evidenceStep: 0.35
+  routes:
+    # A settlement: a better chance of something, but a smaller payout (share of what a win would pay).
+    settle:
+      weights: { great: 0, good: 6, neutral: 3, bad: 0, backfire: 0 }
+      share: 0.6
+    trial:
+      weights: { great: 1.5, good: 3, neutral: 1, bad: 4, backfire: 1.5 }
+      share: 1
+
+# A fake ID: the chance each use is caught (the offense is a legal-system entry).
+fakeId:
+  caught: 0.12
+  offense: fake_id
+
+# A legal name change. An adult needs nobody's agreement. From minorAge, a living parent in your home or city who cares
+# for you at least this much can agree. reactions: the affection change with your parents when you drop the name they
+# gave you, and with a partner when you take their name or choose another.
+identity:
+  minorAge: 16
+  consentAffection: 45
+  reactions: { parents: -3, partnerTakes: 4, partnerOther: -1 }
+  formerMax: 5
+
+# Lenders. A bank and a credit union look at your income, your record and any bankruptcy; a payday lender asks for little;
+# a loan shark asks for nothing but a contact.
+loans:
+  bank_personal:
+    kind: bank
+    incomeShare: 0.25
+    amount: { min: 1500, max: 12000 }
+    minIncome: 18000
+    maxRecord: 1
+    bankruptcyYears: 7
+    maxDebtShare: 0.8
+    maxOpen: 1
+    fee: 0.02
+  bank_large:
+    kind: bank
+    incomeShare: 0.6
+    amount: { min: 4000, max: 35000 }
+    minIncome: 40000
+    maxRecord: 0
+    bankruptcyYears: 7
+    maxDebtShare: 0.6
+    maxOpen: 1
+    fee: 0.03
+  credit_union:
+    kind: bank
+    incomeShare: 0.15
+    amount: { min: 800, max: 5000 }
+    minIncome: 9000
+    maxRecord: 3
+    bankruptcyYears: 3
+    maxDebtShare: 1
+    maxOpen: 1
+    fee: 0.01
+  payday_advance:
+    kind: payday
+    incomeShare: 0.05
+    amount: { min: 200, max: 1200 }
+    minIncome: 6000
+    maxRecord: 50
+    bankruptcyYears: 0
+    maxDebtShare: 0
+    maxOpen: 1
+    fee: 0.15
+  shark_small:
+    kind: shark
+    incomeShare: 0.1
+    amount: { min: 500, max: 3000 }
+    minIncome: 0
+    maxRecord: 50
+    bankruptcyYears: 0
+    maxDebtShare: 0
+    maxOpen: 1
+    fee: 0
+    contacts: true
+  shark_large:
+    kind: shark
+    incomeShare: 0.5
+    amount: { min: 5000, max: 25000 }
+    minIncome: 0
+    maxRecord: 50
+    bankruptcyYears: 0
+    maxDebtShare: 0
+    maxOpen: 1
+    fee: 0
+    contacts: true
+
+# A loan shark's collectors: the chance each year with a missed payment that they come (registries/crime.yaml, shark). After
+# settleAfter missed payments in a row they settle it their own way: the debt is gone, they take this share of your savings,
+# and you lose this much health and happiness and gain this much stress.
+collectors:
+  visit: 0.85
+  settleAfter: 3
+  settleAbove: 150000
+  savings: 0.8
+  health: 25
+  stress: 15
+  happiness: 10

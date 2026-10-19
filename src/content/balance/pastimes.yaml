@@ -84,6 +84,30 @@ costs:
   hookup_app: 15
   date_night: 130
   couples_class: 90
+  # Batch 2b: nothing up front (crime, a loan's fee is a share of the loan: risk.yaml loans).
+  nothing: 0
+  # The black market.
+  counterfeit_goods: 500
+  stolen_electronics: 350
+  fake_id: 180
+  pills: 120
+  illegal_drugs: 220
+  dealing_stock: 400
+  # Gambling: the base stake (the stake you choose multiplies it: risk.yaml stakes).
+  casino_slots: 40
+  casino_blackjack: 80
+  casino_roulette: 60
+  lottery_ticket: 4
+  sports_bet: 50
+  horse_race: 45
+  # Lawsuits: the lawyer's fee at a standard tier (the tiers multiply it: quality).
+  lawyer_employer: 3500
+  lawyer_doctor: 6000
+  lawyer_landlord: 1500
+  lawyer_neighbor: 1200
+  lawyer_ex: 3000
+  # Identity: the court's fee for a legal name change.
+  name_change: 250
 
 # The relative odds of each tier. tilt: traits (50 is neutral) that move the odds
 # toward the good side (above 50) or the bad side (below); weight 1 is a full swing at 0 or 100.
@@ -110,6 +134,17 @@ profiles:
     { great: 1, good: 4, neutral: 3, bad: 1.2, backfire: 0, tilt: [] }
   love:
     { great: 1.5, good: 4, neutral: 3, bad: 2, backfire: 0.3, tilt: [{ key: confidence, weight: 0.3 }, { key: sociability, weight: 0.3 }, { key: looks, weight: 0.2 }] }
+  # Batch 2b. Luck and wits favor the good side; heat, a record and a crew make the two bad tiers likelier (risk.yaml exposure).
+  crime_petty:
+    { great: 1, good: 4, neutral: 2.5, bad: 2.2, backfire: 0.3, tilt: [{ key: luck, weight: 0.3 }, { key: smarts, weight: 0.15 }, { key: confidence, weight: 0.1 }] }
+  crime_serious:
+    { great: 0.8, good: 3, neutral: 2, bad: 3.2, backfire: 1.1, tilt: [{ key: luck, weight: 0.3 }, { key: smarts, weight: 0.3 }, { key: confidence, weight: 0.1 }] }
+  market_goods:
+    { great: 1.4, good: 4, neutral: 2, bad: 2, backfire: 0.5, tilt: [{ key: smarts, weight: 0.25 }, { key: luck, weight: 0.15 }] }
+  market_papers:
+    { great: 1, good: 5, neutral: 1, bad: 2, backfire: 0.4, tilt: [{ key: luck, weight: 0.2 }, { key: smarts, weight: 0.15 }] }
+  market_use:
+    { great: 1.5, good: 4, neutral: 2, bad: 2.4, backfire: 0.8, tilt: [{ key: discipline, weight: 0.3 }] }
 
 # Chances inside an outcome (and the chance a follow-up event comes about). A chance is its base,
 # times the curves over the stats and traits it lists, times `repeat` for each earlier time this year,
@@ -144,6 +179,30 @@ chances:
     factors:
       - { key: sociability, curve: [{ at: 0, x: 0.6 }, { at: 50, x: 1 }, { at: 100, x: 1.5 }] }
     repeat: 0.8
+  # Batch 2b: a gambling problem. Likelier with the Vice value, the stake you chose, each night this year and above all when chasing a loss.
+  gambling_addiction:
+    base: 0.006
+    factors:
+      - { key: vice, curve: [{ at: 0, x: 0.1 }, { at: 40, x: 1 }, { at: 70, x: 3 }, { at: 100, x: 6 }] }
+      - { key: riskTaking, curve: [{ at: 0, x: 0.5 }, { at: 50, x: 1 }, { at: 100, x: 2 }] }
+    repeat: 1.25
+    chase: 3
+    stake: true
+  # Pills and drugs: dependence is likelier with Vice and with each time in a year.
+  pill_dependence:
+    base: 0.06
+    factors:
+      - { key: vice, curve: [{ at: 0, x: 0.15 }, { at: 40, x: 1 }, { at: 70, x: 2.5 }, { at: 100, x: 4 }] }
+    repeat: 1.5
+  drug_dependence:
+    base: 0.12
+    factors:
+      - { key: vice, curve: [{ at: 0, x: 0.2 }, { at: 40, x: 1 }, { at: 70, x: 2.2 }, { at: 100, x: 3.5 }] }
+    repeat: 1.5
+  # Pills and drugs: the chance, whatever the evening was like, that someone finds what you are carrying.
+  possession_caught:
+    base: 0.03
+    repeat: 1.3
   meet_someone_low:
     base: 0.3
     factors:

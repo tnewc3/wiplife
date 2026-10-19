@@ -71,3 +71,35 @@ describe('Batch 2a saves', () => {
     expect(loadedLifeSchema(content).parse(JSON.parse(JSON.stringify(life)))).toEqual(life);
   });
 });
+
+describe('Batch 2b saves', () => {
+  it('upgrades a save from before the risk activities without changing it, in the life and in an heir snapshot', () => {
+    const life = lifeAtAge('b2b-migrate', 30);
+    const old = cloneJson(life) as unknown as Record<string, unknown>;
+    const saved = { ...old, inputLog: [{ year: life.currentYear, kind: 'create', payload: { heir: true, snapshot: cloneJson(old) } }] };
+    const after = migrateEnvelope({ ...makeEnvelope(saved, content.contentVersion), schemaVersion: 29 }).data as typeof life;
+    expect(after.character.formerNames).toBeUndefined();
+    expect(after.finances.debts).toEqual(life.finances.debts);
+    expect(after.inputLog[0]!.payload.snapshot).toMatchObject({ pastimes: { counts: {}, receipts: [] } });
+    expect(lifeStateSchema.safeParse(after).success).toBe(true);
+  });
+
+  it('roundtrips a life with a bank loan, a payday loan, a loan shark debt, a former name and a receipt that shows dirty money', () => {
+    const life = produce(lifeAtAge('b2b-save', 35), (d) => {
+      d.finances.debts.push(
+        { id: 'd1', kind: 'bank', balance: 8000, annualRate: 0.11, minPayment: 2200, missed: 0 },
+        { id: 'd2', kind: 'payday', balance: 900, annualRate: 0.9, minPayment: 1710, missed: 1 },
+        { id: 'd3', kind: 'shark', balance: 4000, annualRate: 1.3, minPayment: 6400, missed: 2 },
+      );
+      d.character.formerNames = [{ first: 'Sam', last: 'Hale', year: d.currentYear - 4 }];
+      d.pastimes = {
+        year: d.currentYear,
+        counts: { burglary: 1 },
+        receipts: [{ year: d.currentYear, pastimeId: 'burglary', tier: 'good', text: 'Out and gone.', notes: [], money: { change: 0, balance: 100, debtChange: 0, dirty: { change: 3000, balance: 3000 } }, changes: {} }],
+      };
+    });
+    expect(loadedLifeSchema(content).parse(JSON.parse(JSON.stringify(life)))).toEqual(life);
+    expect(lifeStateSchema.safeParse(produce(life, (d) => void (d.finances.debts[0]!.kind = 'loan' as never))).success).toBe(false);
+    expect(lifeStateSchema.safeParse(produce(life, (d) => void (d.character.formerNames = [{ first: '', last: 'x', year: 1 }]))).success).toBe(false);
+  });
+});

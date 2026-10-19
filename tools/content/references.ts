@@ -10,6 +10,8 @@ import {
   LATENT_KINDS,
   LEGAL_HISTORY_VALUES,
   LEGAL_TRIGGERS,
+  RISK_HISTORY_VALUES,
+  type RiskHistoryKey,
   type DiscoveryHistoryKey,
   type HealthHistoryKey,
   type LegalHistoryKey,
@@ -302,6 +304,9 @@ function checkTemplates(bundle: ContentBundle, partialEvents: boolean): ContentE
   }
   for (const [key, group] of Object.entries(history.legal)) {
     all(HISTORY, `legal.${key}.variants`, group.variants, { values: [...LEGAL_HISTORY_VALUES[key as LegalHistoryKey]] });
+  }
+  for (const [key, group] of Object.entries(history.risk)) {
+    all(HISTORY, `risk.${key}.variants`, group.variants, { values: [...RISK_HISTORY_VALUES[key as RiskHistoryKey]] });
   }
   for (const [key, group] of Object.entries(history.discovery)) {
     all(HISTORY, `discovery.${key}.variants`, group.variants, { values: [...DISCOVERY_HISTORY_VALUES[key as DiscoveryHistoryKey]] });
