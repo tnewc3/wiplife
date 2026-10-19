@@ -222,6 +222,18 @@ describe('W6 residence, permanent status and citizenship', () => {
     expect(moved.education.current).toBeNull();
     expect(checkInvariants(moved, content).filter((m) => m.includes('in school'))).toEqual([]);
   });
+  it('keeps a child from applying for citizenship, permanent residence or status (every answer to an application is an adult\'s event)', () => {
+    const settled = produce(emigrated('investment', 'us', 'ca'), (d) => {
+      d.currentYear -= d.character.age - 14;
+      d.character.age = 14;
+      d.travel.residence!.type = 'permanent_resident';
+      d.travel.residence!.settled = true;
+    });
+    expect(naturalizationBlock(settled, content)).toBe('age');
+    expect(permanentBlock(settled, content)).toBe('age');
+    expect(regularizationBlock(settled, 'long_residence' as never, content)).toBe('age');
+    expect(isLifeActionAvailable(settled, 'apply_status', { status: { kind: 'naturalization' } }, content)).toBe(false);
+  });
   it('asks for permanent residence after the years the country sets, with a job, and grants it', () => {
     const moved = emigrated('work_sponsor', 'us', 'ca');
     expect(permanentBlock(moved, content)).toBe('years');

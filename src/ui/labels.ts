@@ -1571,7 +1571,7 @@ export const ENTRY_BLOCK_LABELS: Record<string, string> = {
   schooling: 'You need to have finished secondary school.', program: 'Choose a program.', sponsor: 'You need a relative there who is a citizen.',
 };
 export const STATUS_BLOCK_LABELS: Record<string, string> = {
-  status: 'Not for your situation.', unavailable: 'Not available here.', pending: 'You already have an application waiting.', denied: 'Refused this year; try again next year.',
+  age: 'You have to be an adult.', status: 'Not for your situation.', unavailable: 'Not available here.', pending: 'You already have an application waiting.', denied: 'Refused this year; try again next year.',
   student: 'Finish your studies first.', years: 'You have not lived there long enough yet.', job: 'You need a job.', record: 'A recent conviction closes this for now.',
   language: 'You need more of the language.', money: 'You need more saved for the cost.', spouse: 'You need a spouse who is a citizen.', window: 'No window is open now.', law: 'Not while you are in prison.',
 };
