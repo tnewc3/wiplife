@@ -185,7 +185,7 @@ export const pastimeSchema = baseDefSchema
     } else {
       for (const t of OUTCOME_TIERS) if (def.tiers[t]?.settle !== undefined) issue(`tiers.${t}.settle is for lawsuits`);
     }
-    if (m === 'gamble' && !def.quality && def.legalAge !== 'gambling') issue('gambling needs legalAge: gambling');
+    if (m === 'gamble' && def.legalAge !== 'gambling') issue('gambling follows the legal gambling age: legalAge: gambling');
     if (def.companion !== 'none' && !def.inPerson && def.mechanic !== 'lawsuit') issue('a companion needs inPerson: true (a lawsuit may be against someone far away)');
     for (const tier of OUTCOME_TIERS) {
       const t = def.tiers[tier];

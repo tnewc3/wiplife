@@ -123,11 +123,11 @@ fakeId:
   caught: 0.12
   offense: fake_id
 
-# A legal name change. An adult needs nobody's agreement. From minorAge, a living parent in your home or city who cares
+# A legal name change. An adult needs nobody's agreement. From minorAge (13), a living parent in your city who cares
 # for you at least this much can agree. reactions: the affection change with your parents when you drop the name they
 # gave you, and with a partner when you take their name or choose another.
 identity:
-  minorAge: 16
+  minorAge: 13
   consentAffection: 45
   reactions: { parents: -3, partnerTakes: 4, partnerOther: -1 }
   formerMax: 5

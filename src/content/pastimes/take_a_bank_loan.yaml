@@ -1,6 +1,6 @@
 id: take_a_bank_loan
 category: loans
-label: "Apply for a personal loan"
+label: "Apply for a bank loan"
 blurb: "A bank looks at your income and your record."
 minAge: 18
 mechanic: loan

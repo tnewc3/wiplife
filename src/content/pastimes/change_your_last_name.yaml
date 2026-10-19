@@ -2,7 +2,7 @@ id: change_your_last_name
 category: identity
 label: "Change your family name"
 blurb: "Choose the surname you want to carry."
-minAge: 16
+minAge: 13
 mechanic: name
 nameChange: last
 inPerson: false

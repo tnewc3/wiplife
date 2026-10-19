@@ -2,7 +2,7 @@ id: take_your_partners_name
 category: identity
 label: "Take your partner's family name"
 blurb: "Share a surname with the person you share a life with."
-minAge: 16
+minAge: 13
 mechanic: name
 nameChange: partner
 inPerson: false

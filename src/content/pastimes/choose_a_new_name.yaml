@@ -2,7 +2,7 @@ id: choose_a_new_name
 category: identity
 label: "Choose an entirely new name"
 blurb: "A new first name and a new family name."
-minAge: 16
+minAge: 13
 mechanic: name
 nameChange: both
 inPerson: false

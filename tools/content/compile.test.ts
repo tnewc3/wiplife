@@ -2060,8 +2060,8 @@ describe('risk and legal activities (Batch 2b)', { timeout: 90_000 }, () => {
 
   it('wants a name change to be for the youngest age with a parent, and a typed name never to reach the text', async () => {
     const name = await read('pastimes/change_your_first_name.yaml');
-    await write('pastimes/change_your_first_name.yaml', name.replace('minAge: 16', 'minAge: 12'));
-    expect(await expectErrors()).toContain('minAge must be at least 16');
+    await write('pastimes/change_your_first_name.yaml', name.replace('minAge: 13', 'minAge: 10'));
+    expect(await expectErrors()).toContain('minAge must be at least 13');
     await write('pastimes/change_your_first_name.yaml', name.replace('{self.name}', '{typed}'));
     expect(await expectErrors()).toContain('unknown');
   });

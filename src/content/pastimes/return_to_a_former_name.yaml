@@ -2,7 +2,7 @@ id: return_to_a_former_name
 category: identity
 label: "Go back to a former name"
 blurb: "Take back a name you once let go of."
-minAge: 16
+minAge: 13
 mechanic: name
 nameChange: former
 inPerson: false

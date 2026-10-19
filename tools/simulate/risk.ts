@@ -34,7 +34,10 @@ const BAD_NAMES = ['', '  ', '12345', 'x'.repeat(60), '<b>Zed</b>', 'Anna{name}'
 /** Chances describing the simulated player (not the game). */
 export const RISK_POLICY = {
   careful: { gamble: 0.05, lawsuit: 0.5, partnerName: 0.3, nameChange: 0.004, loanWhenShort: 0.25, shortBelow: 800 },
-  criminal: { teenPetty: 0.3, crime: 0.6, market: 0.3, fakeId: 0.15, gamble: 0.3, chase: 0.5, payday: 0.4, shark: 0.25, lawsuit: 0.5 },
+  // A criminal life is mostly the crew's (E6a's targets judge it): the solo crimes, the black market and the loans come now and then.
+  criminal: { teenPetty: 0.05, crime: 0.03, extraCrime: 0.05, market: 0.03, fakeId: 0.08, nightWithFakeId: 0.5, gamble: 0.12, chase: 0.5, payday: 0.1, shark: 0.05, lawsuit: 0.5 },
+  /** A teenager asks a parent about a new first name now and then (every player but the spammer). */
+  teenName: 0.012,
   carelessMax: 4,
 };
 
@@ -97,6 +100,7 @@ export function chooseRiskPlans(life: LifeState, content: ContentBundle, rng: Rn
   if (player === 'careless') {
     const n = (chance(rng, 0.5) ? 1 : 0) + (chance(rng, 0.25) ? 1 : 0) + (chance(rng, 0.1) ? 2 : 0);
     for (let i = 0; i < Math.min(RISK_POLICY.carelessMax, n); i++) add(pick(rng, defs), 'random', 0.5);
+    if (adult && life.flags.fake_id === true && chance(rng, 0.5)) add(pick(rng, [content.pastimes.go_to_a_bar!, content.pastimes.go_clubbing!]), 'random');
     return plans;
   }
 
@@ -107,8 +111,10 @@ export function chooseRiskPlans(life: LifeState, content: ContentBundle, rng: Rn
     if (!adult && chance(rng, p.teenPetty)) add(pick(rng, crimes.filter((d) => d.minAge < content.balance.relationships.adultAge)), 'bold');
     if (adult && chance(rng, p.crime)) {
       add(pick(rng, crimes), 'bold');
-      if (chance(rng, 0.25)) add(pick(rng, crimes), 'bold');
+      if (chance(rng, p.extraCrime)) add(pick(rng, crimes), 'bold');
     }
+    // With a fake ID, an adult below the drinking age goes out to a bar.
+    if (adult && life.flags.fake_id === true && chance(rng, p.nightWithFakeId)) add(pick(rng, [content.pastimes.go_to_a_bar!, content.pastimes.go_clubbing!, content.pastimes.go_to_a_house_party!]), 'bold');
     const market = byCategory('black_market');
     if (age >= 16 && age < 18 && chance(rng, p.fakeId)) add(content.pastimes.buy_a_fake_id, 'bold');
     if (adult && chance(rng, p.market)) add(pick(rng, market), 'bold');
@@ -116,6 +122,9 @@ export function chooseRiskPlans(life: LifeState, content: ContentBundle, rng: Rn
     if (adult && savings < 500 && chance(rng, p.payday)) add(content.pastimes.take_a_payday_loan, 'bold');
     if (adult && totalDebt(life) > 0 && chance(rng, p.shark)) add(pick(rng, [content.pastimes.borrow_from_a_loan_shark!, content.pastimes.borrow_a_lot_from_a_loan_shark!]), 'bold');
   }
+
+  // A teenager asks a parent about a new first name.
+  if (age >= content.balance.risk.identity.minorAge && !adult && chance(rng, RISK_POLICY.teenName)) add(content.pastimes.change_your_first_name, 'sensible');
 
   // The careful player's share (the criminal player lives this way too).
   const c = RISK_POLICY.careful;

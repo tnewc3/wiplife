@@ -380,11 +380,11 @@ describe('a legal name change', () => {
     expect(back.character.formerNames!.at(-1)!.last).toBe('Marlowe');
     expect(pastimeBlock(life, content.pastimes.take_your_partners_name!, {}, content)).toBe('requires');
   });
-  it('lets a 16-year-old do it only with a parent who agrees', () => {
-    const teen = rich(lifeAtAge('b2b-name-teen', 16), 5000);
+  it('lets a young teenager do it only with a parent who agrees', () => {
+    const teen = rich(lifeAtAge('b2b-name-teen', 14), 5000);
     const def = content.pastimes.change_your_first_name!;
     expect(pastimeBlock(teen, def, { first: 'Rowan' }, content)).toBe('consent');
-    expect(pastimeBlock(rich(lifeAtAge('b2b-name-15', 15), 5000), def, { first: 'Rowan' }, content)).toBe('age');
+    expect(pastimeBlock(rich(lifeAtAge('b2b-name-12', 12), 5000), def, { first: 'Rowan' }, content)).toBe('age');
     const parents = consentOptions(teen, content);
     if (parents.length > 0) {
       expect(isLifeActionAvailable(teen, 'do_activity', { pastimeId: def.id, first: 'Rowan', consentId: parents[0]!.id }, content)).toBe(true);
