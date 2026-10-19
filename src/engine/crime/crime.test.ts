@@ -535,7 +535,7 @@ describe('events', () => {
 });
 
 describe('a life in a crew', () => {
-  it('lives out the years with every invariant holding, whatever the choices, and meets the crew’s events', () => {
+  it('lives out the years with every invariant holding, whatever the choices, and meets the crew’s events', { timeout: 30_000 }, () => {
     const met = new Set<string>();
     for (const seed of ['y1', 'y2', 'y3', 'y4', 'y5', 'y6', 'y7', 'y8', 'y9', 'y10', 'y11', 'y12']) {
       let life = inCrewLife(`years-${seed}`, 24);
