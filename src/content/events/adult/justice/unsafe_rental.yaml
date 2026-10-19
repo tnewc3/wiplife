@@ -13,7 +13,7 @@ requires:
     - { age: { gte: 18 } }
     - { home: { kind: [renting] } }
     - { not: { flag: unsafe_rental } }
-weight: { base: 3 }
+weight: { base: 0.7 }
 once: true
 choices:
   - id: document

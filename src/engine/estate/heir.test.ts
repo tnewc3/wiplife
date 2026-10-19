@@ -47,6 +47,24 @@ describe('who can carry on', () => {
   });
 });
 
+describe('an heir raised without papers (W6)', () => {
+  it('starts in no job that needs papers: the standing of the household is settled before the heir is put to work', () => {
+    const base = parentLife({ kids: [30], seed: 'heir-papers' });
+    const kid = Object.keys(base.people).find((id) => base.people[id]!.child)!;
+    const dead = die(
+      produce(base, (d) => {
+        d.people[kid]!.occupation = 'police_officer';
+        d.people[kid]!.citizenships = ['mx'];
+        d.travel.residence = { country: 'United States', type: 'undocumented', route: 'overstay', startYear: d.currentYear - 9, endYear: d.currentYear - 9, homeCityId: d.character.birthCityId, settled: true } as never;
+      }),
+    );
+    const heir = continueAsHeir(dead, kid, content);
+    expect(heir.migration.undocumented).toBeDefined();
+    expect(heir.career.job?.jobId).not.toBe('police_officer');
+    expect(checkInvariants(heir, content)).toEqual([]);
+  });
+});
+
 describe('continuing as a grown heir', () => {
   const dead = die(parentLife({ kids: [28, 33], spouse: true, savings: 200_000, home: { value: 300_000, mortgage: 100_000 }, reputation: 58, seed: 'grown' }));
   const [elder, younger] = heirCandidates(dead).sort((a, b) => dead.people[a]!.birthYear - dead.people[b]!.birthYear).reverse();

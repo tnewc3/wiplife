@@ -5,7 +5,7 @@ import type { CountryId, RouteId } from '../../content/schemas';
 import { COUNTRY_IDS, ROUTES } from '../../content/schemas';
 import { finishAction, isLifeActionAvailable, performAction } from '../actions';
 import { playYear, resolveAll } from '../autoplay';
-import { startJob } from '../career';
+import { endJob, startJob } from '../career';
 import { checkInvariants } from '../invariants';
 import { migrationFailures } from './invariants';
 import { createRng } from '../rng';
@@ -208,6 +208,19 @@ describe('W6 residence, permanent status and citizenship', () => {
     expect(graduated.travel.residence).toMatchObject({ type: 'temporary_worker', route: 'study_work' });
     const dropped = produce(base, (d) => { d.currentYear += 1; d.education.admission = null; d.education.current = null; runMigration(d, content); });
     expect(dropped.travel.residence!.endYear).toBeLessThanOrEqual(dropped.currentYear);
+  });
+  it('takes a sponsored job only by leaving school: someone who enrolled after the offer holds no job in school', () => {
+    let life = settle(performAction(withJob(adult('us')), 'apply_entry', { entry: entry('work_sponsor', 'ca') }, content));
+    life = decide(life);
+    expect(life.migration.application?.status).toBe('approved');
+    life = produce(life, (d) => {
+      endJob(d, 'quit', content);
+      d.education.current = { program: 'grad', gradProgramId: 'masters', year: 1, lengthYears: 2, gpa: 3.5, boost: 0, repeats: 0, scholarship: 0, since: d.currentYear } as never;
+    });
+    const moved = settle(performAction(life, 'move_abroad', {}, content));
+    expect(moved.career.job).not.toBeNull();
+    expect(moved.education.current).toBeNull();
+    expect(checkInvariants(moved, content).filter((m) => m.includes('in school'))).toEqual([]);
   });
   it('asks for permanent residence after the years the country sets, with a job, and grants it', () => {
     const moved = emigrated('work_sponsor', 'us', 'ca');

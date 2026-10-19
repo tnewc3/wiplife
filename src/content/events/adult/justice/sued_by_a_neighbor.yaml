@@ -14,7 +14,7 @@ requires:
     - { home: { kind: [owned, renting] } }
     - { flag: neighbor_dispute }
     - { not: { flag: sued_by_someone } }
-weight: { base: 3 }
+weight: { base: 1.2 }
 once: true
 choices:
   - id: settle

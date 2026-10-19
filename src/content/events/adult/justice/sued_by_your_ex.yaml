@@ -12,7 +12,7 @@ requires:
   all:
     - { age: { gte: 18 } }
     - { not: { flag: sued_by_someone } }
-weight: { base: 3 }
+weight: { base: 0.8 }
 once: true
 cast:
   ex: { kind: ex, presence: anywhere }

@@ -479,6 +479,10 @@ export function continueAsHeir(dead: LifeState, heirId: Id, content: ContentBund
   refreshHousingCost(life, content);
   life.character.birthCityId = candidate.cityId;
 
+  // W6: they live where the guardian or the family home is; if that is not a country they are a citizen of, they hold the standing of the household that raised them
+  // (before work: an heir without papers does not start in a job that needs them).
+  inheritStanding(life, dead, content);
+
   // ── School and work ──────────────────────────────────────────────────────
   const ages = schoolAges(life, content);
   if (age >= ages.highEnd) life.education.credentials.push({ type: 'hs_diploma', year: candidate.birthYear + ages.highEnd });
@@ -540,8 +544,6 @@ export function continueAsHeir(dead: LifeState, heirId: Id, content: ContentBund
   // The input log starts with a snapshot, so the life can be replayed from here (src/engine/replay.ts).
   const snapshot = JSON.parse(JSON.stringify({ ...life, inputLog: [] })) as Record<string, unknown>;
   life.inputLog = [{ year, kind: 'create', payload: { heir: true, startAge: age, parentLifeId: dead.id, snapshot } }];
-  // W6: they live where the guardian or the family home is; if that is not a country they are a citizen of, they hold the standing of the household that raised them.
-  inheritStanding(life, dead, content);
   return life;
 }
 

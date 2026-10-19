@@ -13,7 +13,7 @@ requires:
     - { age: { gte: 18 } }
     - { any: [{ flag: stole_from_work }, { flag: cooked_books }] }
     - { not: { flag: sued_by_someone } }
-weight: { base: 3 }
+weight: { base: 1.5 }
 once: true
 choices:
   - id: settle

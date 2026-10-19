@@ -33,9 +33,9 @@ const BAD_NAMES = ['', '  ', '12345', 'x'.repeat(60), '<b>Zed</b>', 'Anna{name}'
 
 /** Chances describing the simulated player (not the game). */
 export const RISK_POLICY = {
-  careful: { gamble: 0.05, lawsuit: 0.5, partnerName: 0.3, nameChange: 0.004, loanWhenShort: 0.25, shortBelow: 800 },
+  careful: { gamble: 0.05, lawsuit: 0.12, partnerName: 0.3, nameChange: 0.004, loanWhenShort: 0.25, shortBelow: 800 },
   // A criminal life is mostly the crew's (E6a's targets judge it): the solo crimes, the black market and the loans come now and then.
-  criminal: { teenPetty: 0.05, crime: 0.03, extraCrime: 0.05, market: 0.03, fakeId: 0.08, nightWithFakeId: 0.5, gamble: 0.12, chase: 0.5, payday: 0.1, shark: 0.05, lawsuit: 0.5 },
+  criminal: { teenPetty: 0.05, crime: 0.03, extraCrime: 0.05, market: 0.03, fakeId: 0.08, nightWithFakeId: 0.5, gamble: 0.12, chase: 0.5, payday: 0.1, shark: 0.05 },
   /** A teenager asks a parent about a new first name now and then (every player but the spammer). */
   teenName: 0.012,
   carelessMax: 4,

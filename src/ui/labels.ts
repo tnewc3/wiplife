@@ -1635,6 +1635,20 @@ export const LOAN_BLOCK_LABELS: Record<string, string> = {
   contacts: 'You do not know anyone who lends this way.',
 };
 
+/** How much you have to go on in a lawsuit, in words. */
+export function evidenceWords(n: number): string {
+  return n === 0 ? 'You have little to go on.' : n === 1 ? 'You have something to go on.' : 'You have a good deal to go on.';
+}
+
+/** What a lender offers: who, how much, the yearly rate, how long, and the fee. */
+export function loanOfferWords(lender: string, amount: string, ratePercent: number, termYears: number, fee: string | null): string {
+  const who = lender ? lender.charAt(0).toUpperCase() + lender.slice(1) : 'They';
+  const term = termYears === 1 ? 'a year' : `${termYears} years`;
+  return `${who} would lend you ${amount} at ${ratePercent}% a year, over ${term}${fee ? `, less a ${fee} fee` : ''}.`;
+}
+
+export const CHASE_LABEL = (loss: string, on: boolean): string => `Chase your losses: bet back the ${loss} you just lost${on ? ' (on)' : ''}`;
+
 export const PASTIME_STAKE_LABELS: Record<PastimeStake, string> = { low: 'Small stake', medium: 'Medium stake', high: 'High stakes' };
 export const PASTIME_STAKE_NOTES: Record<PastimeStake, string> = { low: 'Gentler on the wallet.', medium: 'A fair evening’s money.', high: 'Big swings, and a bigger pull.' };
 export const PASTIME_ROUTE_LABELS: Record<PastimeRoute, string> = { settle: 'Settle out of court', trial: 'Go to trial' };

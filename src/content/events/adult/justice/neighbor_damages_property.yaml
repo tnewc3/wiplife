@@ -14,7 +14,7 @@ requires:
     - { age: { gte: 18 } }
     - { home: { kind: [owned, renting] } }
     - { not: { flag: neighbor_damage } }
-weight: { base: 3 }
+weight: { base: 0.7 }
 once: true
 cast:
   neighbor: { kind: acquaintance, ageOffset: { min: -15, max: 15 }, createIfMissing: true, newChance: 0.5, presence: city }

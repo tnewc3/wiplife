@@ -11,7 +11,7 @@ requires:
   all:
     - { age: { gte: 18 } }
     - { business: { owned: true } }
-weight: { base: 4 }
+weight: { base: 3 }
 cooldownYears: 8
 choices:
   - id: insurer

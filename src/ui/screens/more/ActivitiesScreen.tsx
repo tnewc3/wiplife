@@ -7,8 +7,11 @@ import { useAppStore } from '../../../store/appStore';
 import { Button } from '../../components/Button';
 import { Card } from '../../components/Card';
 import {
+  CHASE_LABEL,
   companionChangeWords,
+  evidenceWords,
   LAWYER_QUALITY_LABELS,
+  loanOfferWords,
   LAWYER_QUALITY_NOTES,
   LOAN_BLOCK_LABELS,
   money,
@@ -192,7 +195,7 @@ function EntryRow({
 
       {entry.evidence !== null && (
         <span className="text-sm text-muted" data-testid={`evidence-${entry.id}`}>
-          {entry.evidence === 0 ? 'You have little to go on.' : entry.evidence === 1 ? 'You have something to go on.' : 'You have a good deal to go on.'}
+          {evidenceWords(entry.evidence)}
         </span>
       )}
 
@@ -214,7 +217,7 @@ function EntryRow({
           onClick={() => onPick({ chase: !chasing })}
           className={`min-h-11 rounded-xl border px-4 py-2 text-left text-sm font-medium disabled:opacity-50 ${chasing ? 'border-danger bg-surface-2 text-text' : 'border-border bg-surface text-text active:bg-surface-2'}`}
         >
-          Chase your losses: bet back the {money(entry.chase.loss)} you just lost{chasing ? ' (on)' : ''}
+          {CHASE_LABEL(money(entry.chase.loss), chasing)}
         </button>
       )}
 
@@ -270,7 +273,7 @@ function EntryRow({
           <span className="text-sm" data-testid={`loan-${entry.id}`}>
             {entry.loan.block
               ? LOAN_BLOCK_LABELS[entry.loan.block]
-              : `${entry.loan.lender ? entry.loan.lender.charAt(0).toUpperCase() + entry.loan.lender.slice(1) : 'They'} would lend you ${money(entry.loan.amount)} at ${Math.round(entry.loan.rate * 100)}% a year, over ${entry.loan.termYears === 1 ? 'a year' : `${entry.loan.termYears} years`}${entry.loan.fee > 0 ? `, less a ${money(entry.loan.fee)} fee` : ''}.`}
+              : loanOfferWords(entry.loan.lender, money(entry.loan.amount), Math.round(entry.loan.rate * 100), entry.loan.termYears, entry.loan.fee > 0 ? money(entry.loan.fee) : null)}
           </span>
           <Button variant="secondary" block disabled={disabled || entry.block !== null || blockedNow} data-testid={`do-${entry.id}`} onClick={() => onDo()}>
             {entry.label}{entry.loan.block ? '' : ` · ${money(entry.loan.amount)}`}
