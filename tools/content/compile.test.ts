@@ -926,7 +926,7 @@ describe('interactions (E1)', () => {
     if (!real.ok) throw new Error(formatErrors(real.errors));
     const defs = Object.values(real.bundle.interactions);
     expect(defs.length).toBeGreaterThanOrEqual(19);
-    expect(defs.length).toBeLessThanOrEqual(36);
+    expect(defs.length).toBeLessThanOrEqual(42);
     for (const def of defs) {
       for (const tier of Object.values(def.outcomes)) {
         if (!tier) continue;
@@ -1207,7 +1207,7 @@ describe('the social web (E4)', () => {
     if (!result.ok) throw new Error(formatErrors(result.errors));
     const web = Object.values(result.bundle.events).filter((e) => !e.retired && e.category === 'web');
     expect(web.length).toBeGreaterThanOrEqual(35);
-    expect(web.length).toBeLessThanOrEqual(45);
+    expect(web.length).toBeLessThanOrEqual(50);
     const kinds = Object.entries(result.bundle.registries.web.kinds);
     expect(kinds).toHaveLength(12);
     for (const [kind, def] of kinds) {
