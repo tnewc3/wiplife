@@ -8,6 +8,7 @@ levels:
   - { title: "carpenter", salary: 44000 }
   - { title: "crew lead", salary: 55000 }
   - { title: "site supervisor", salary: 70000 }
+workplace: large
 performance:
   - { key: fitness, weight: 0.35 }
   - { key: discipline, weight: 0.25 }

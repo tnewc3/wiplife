@@ -9,6 +9,7 @@ levels:
   - { title: "registered nurse", salary: 71000 }
   - { title: "charge nurse", salary: 82000 }
   - { title: "nurse manager", salary: 96000 }
+workplace: large
 performance:
   - { key: smarts, weight: 0.2 }
   - { key: kindness, weight: 0.25 }

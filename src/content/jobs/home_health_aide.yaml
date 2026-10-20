@@ -7,6 +7,7 @@ levels:
   - { title: "home health aide", salary: 29000, years: 1 }
   - { title: "senior aide", salary: 33000 }
   - { title: "care coordinator", salary: 40000 }
+workplace: medium
 performance:
   - { key: kindness, weight: 0.35 }
   - { key: discipline, weight: 0.25 }

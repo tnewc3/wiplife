@@ -8,6 +8,7 @@ levels:
   - { title: "senior associate", salary: 128000 }
   - { title: "counsel", salary: 165000 }
   - { title: "partner", salary: 235000 }
+workplace: medium
 performance:
   - { key: smarts, weight: 0.35 }
   - { key: confidence, weight: 0.2 }

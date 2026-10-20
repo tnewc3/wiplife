@@ -1,0 +1,53 @@
+id: parent_teacher_night
+title: Parent and teacher night
+text: >-
+  {parent.name} sits in a chair built for someone much smaller. {teacher.name}
+  has your file open on the desk and is about to say what the last few months
+  looked like from the other side of the room.
+tone: neutral
+category: school
+rarity: common
+lifeStages: [child, teen]
+requires:
+  all:
+    - { education: { program: [elementary, middle, high] } }
+    - { age: { lte: 16 } }
+weight: { base: 6 }
+cooldownYears: 3
+cast:
+  parent: { kind: parent, presence: household }
+  teacher: { kind: teacher, presence: city }
+choices:
+  - id: sit_in
+    label: Sit in, and listen to every word
+    outcome:
+      text: >-
+        {teacher.name} is kind about the parts that need work and specific about
+        the parts that don't. {parent.name} nods through all of it and, in the
+        car afterward, says it was a good report.
+      effects:
+        - { type: relationship, role: parent, trust: 3, affection: 2 }
+        - { type: relationship, role: teacher, trust: 2 }
+  - id: wait_outside
+    label: Wait in the corridor
+    outcome:
+      text: The corridor has posters of famous scientists and a clock that is exactly one minute fast. When {parent.name} comes out, the face gives nothing away.
+      effects:
+        - { type: stat, key: stress, delta: 2 }
+  - id: speak_up
+    label: Speak up about something you want to change
+    check:
+      base: 45
+      stats: [{ key: confidence, weight: 0.35 }]
+      success:
+        text: >-
+          You say it clearly, and {teacher.name} takes it seriously. The seating
+          plan changes the following week.
+        effects:
+          - { type: relationship, role: teacher, trust: 3, affection: 2 }
+          - { type: relationship, role: parent, trust: 2 }
+          - { type: stat, key: confidence, delta: 2 }
+      failure:
+        text: The words come out in the wrong order, and {parent.name} finishes your sentence. Nothing changes, but nobody laughs.
+        effects:
+          - { type: stat, key: confidence, delta: -1 }

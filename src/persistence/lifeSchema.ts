@@ -247,6 +247,7 @@ const relationship = z.strictObject({
     'coworker',
     'boss',
     'classmate',
+    'teacher',
     'acquaintance',
   ]),
   status: z.enum(['active', 'estranged', 'ended']),
@@ -290,8 +291,29 @@ const enrollmentFields = {
   since: int,
 };
 
+const examId = z.enum(['gcse', 'alevels', 'sat', 'provincial', 'mx_placement', 'mx_entrance']);
+const schoolLife = z.strictObject({
+  key: z.string().nullable(),
+  classmates: z.array(id),
+  staff: z.strictObject({ homeroom: id.exactOptional(), head: id.exactOptional(), support: id.exactOptional() }),
+  spread: z.record(id, z.number().min(-2).max(2)),
+  year: z.strictObject({
+    year: int,
+    effort: z.enum(['study', 'slack']).nullable(),
+    subject: id.exactOptional(),
+    tutor: dollars.min(0),
+    cheated: int.min(0),
+    skipped: int.min(0),
+    caught: z.boolean(),
+  }),
+  exams: z.array(z.strictObject({ id: examId, year: int, score: z.number().min(0).max(100), band: z.enum(['top', 'pass', 'fail']) })),
+  choice: z.strictObject({ path: z.enum(['stay', 'college', 'apprenticeship', 'work']), tradeId: id.exactOptional(), year: int }).nullable(),
+  shift: z.number().min(-1).max(1),
+  chosen: z.boolean(),
+});
+
 const education = z.strictObject({
-  current: z.strictObject(enrollmentFields).nullable(),
+  current: z.strictObject({ ...enrollmentFields, venue: z.literal('college').exactOptional(), apprentice: z.literal(true).exactOptional() }).nullable(),
   credentials: z.array(
     z.strictObject({
       type: z.enum(['hs_diploma', 'ged', 'associate', 'bachelor', 'trade_license', 'grad']),
@@ -307,14 +329,16 @@ const education = z.strictObject({
       scholarship: share,
       decided: int,
       resume: z.strictObject({ year: int.min(1), lengthYears: int.min(1), gpa, repeats: int.min(0) }).exactOptional(),
+      conditional: z.strictObject({ exam: examId, min: z.number().min(0).max(100) }).exactOptional(),
     })
     .nullable(),
-  left: z.strictObject({ ...enrollmentFields, leftYear: int }).nullable(),
+  left: z.strictObject({ ...enrollmentFields, venue: z.literal('college').exactOptional(), apprentice: z.literal(true).exactOptional(), leftYear: int }).nullable(),
   applied: z.array(z.strictObject({ option: z.string().min(1), accepted: z.boolean() })),
   fund: dollars.min(0),
   lastBill: z
     .strictObject({ year: int, tuition: dollars, scholarship: dollars, family: dollars, fund: dollars, loan: dollars })
     .exactOptional(),
+  school: schoolLife,
 });
 
 const career = z.strictObject({
@@ -345,6 +369,7 @@ const career = z.strictObject({
   ),
   applied: z.array(z.strictObject({ jobId: id, hired: z.boolean() })),
   openings: z.array(id),
+  work: z.strictObject({ year: int, effort: z.enum(['hard', 'slack']).nullable(), socialized: int.min(0), party: z.boolean(), reported: int.min(0) }),
 });
 
 const finances = z.strictObject({
@@ -496,7 +521,7 @@ const will = z.strictObject({
 });
 
 const relationKind = z.enum([
-  'parent', 'stepparent', 'sibling', 'grandparent', 'relative', 'child', 'stepchild', 'grandchild', 'friend', 'partner', 'fiance', 'spouse', 'ex', 'coworker', 'boss', 'classmate', 'acquaintance',
+  'parent', 'stepparent', 'sibling', 'grandparent', 'relative', 'child', 'stepchild', 'grandchild', 'friend', 'partner', 'fiance', 'spouse', 'ex', 'coworker', 'boss', 'classmate', 'teacher', 'acquaintance',
 ]);
 
 // E5: what you own.

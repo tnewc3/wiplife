@@ -1,0 +1,155 @@
+# School life (Batch 3): the class you are in and your teachers, the report card,
+# the things you can do in a school year, and the exams. Starting proposals;
+# the simulation's school section checks them (balance/targets.yaml school).
+#
+# Gains and losses to a school year's grade are in GPA points (0–4), added to
+# this year's grade like any event's `education` effect.
+
+classes:
+  # Classmates in a class, by the stage you are in. A class is made when you
+  # start a stage (or a new school) and kept while you share the school.
+  size: { elementary: 4, middle: 4, high: 5, college: 4, trade: 4, grad: 4 }
+  # Minors' classmates are your age, give or take this many years.
+  minorSpread: 1
+  # Adults' classmates are this far below and above your age (never under the adult age).
+  adultSpread: { below: 2, above: 8 }
+  # Each school year, the chance a classmate has moved on (a new one takes the place).
+  churn: 0.1
+  affection: { mean: 48, sd: 10 }
+
+teachers:
+  # The staff each stage has: a homeroom (form) teacher or professor, the head of the school, and someone who looks after students.
+  roles:
+    elementary: [homeroom, head]
+    middle: [homeroom, head, support]
+    high: [homeroom, head, support]
+    college: [homeroom, support]
+    trade: [homeroom]
+    grad: [homeroom]
+  age:
+    homeroom: { min: 25, max: 62 }
+    head: { min: 38, max: 64 }
+    support: { min: 27, max: 60 }
+  # The chance of a new homeroom teacher each school year.
+  homeroomChange: { elementary: 0.8, middle: 0.5, high: 0.3, college: 0.6, trade: 0.4, grad: 0.4 }
+  affection: { mean: 46, sd: 10 }
+
+report:
+  spread:
+    # A subject's grade sits around your year's grade: its stat's weight × (value − 50) GPA points, plus a random draw.
+    sd: 0.28
+    stat: 0.006
+    # Never further than this from your grade; each year this share is drawn again.
+    max: 0.7
+    redraw: 0.25
+  # The chance a new year's card brings an event (a subject you shine in, or are failing).
+  eventChance: 0.3
+  # The words a subject's grade earns, best first (the words themselves are in src/ui/labels.ts).
+  bands:
+    - { min: 3.6, id: top }
+    - { min: 3.2, id: strong }
+    - { min: 2.7, id: solid }
+    - { min: 2.1, id: fair }
+    - { min: 1.4, id: weak }
+    - { min: 0, id: failing }
+
+actions:
+  # Study harder: a better grade this year for stress. Naming a subject lifts that subject more.
+  study: { grades: 0.12, stress: 4, subject: 0.2, discipline: 0.3 }
+  # Slack off: an easier year and a worse grade.
+  slack: { grades: -0.15, stress: -4, happiness: 2 }
+  # A tutor, once a year (written at US prices; a poor family finds it harder).
+  tutor: { cost: 600, grades: 0.2, stress: -1 }
+  # Cheat on a test: a better grade, a chance of being caught each time, and a worse one if you are.
+  cheat:
+    grades: 0.25
+    catch: { base: 0.22, perTry: 0.1, max: 0.8 }
+    maxPerYear: 3
+    minAge: 11
+    caught: { grades: -0.3, stress: 6, standing: 8, teacherAffection: -15, parentTrust: -8, suspend: 0.3 }
+    stress: 2
+  # Skip class: a lighter day, a worse grade, and the school may notice (the truancy trouble of the teen years).
+  skip:
+    grades: -0.08
+    stress: -3
+    happiness: 2
+    catch: { base: 0.2, perTry: 0.08, max: 0.7 }
+    maxPerYear: 4
+    minAge: 11
+    offenseAge: 14
+    teacherAffection: -8
+
+# Exams. The score is the model's chance in percent plus a swing; `top` and `pass` cut it into bands.
+exams:
+  # The GCSEs (the UK): the result decides which choices at 16 are open.
+  gcse:
+    kind: gate
+    model: { base: 52, gpa: 16, stats: [{ key: smarts, weight: 0.3 }, { key: discipline, weight: 0.15 }], wealth: { poor: -3, affluent: 2, rich: 4 }, min: 4, max: 97 }
+    swing: 9
+    top: 62
+    pass: 38
+  # A-levels (the UK): they confirm a conditional place at university.
+  alevels:
+    kind: confirm
+    model: { base: 52, gpa: 17, stats: [{ key: smarts, weight: 0.3 }, { key: discipline, weight: 0.15 }], wealth: { poor: -3, affluent: 2, rich: 4 }, min: 4, max: 97 }
+    swing: 8
+    top: 62
+    pass: 35
+  # The SAT or ACT (the US): it counts toward college applications.
+  sat:
+    kind: entrance
+    model: { base: 50, gpa: 14, stats: [{ key: smarts, weight: 0.35 }, { key: discipline, weight: 0.1 }], wealth: { poor: -3, affluent: 3, rich: 6 }, min: 4, max: 97 }
+    swing: 10
+    top: 72
+    pass: 40
+  # Provincial exams (Canada): they count toward the final mark.
+  provincial:
+    kind: leaving
+    model: { base: 52, gpa: 15, stats: [{ key: smarts, weight: 0.3 }, { key: discipline, weight: 0.2 }], wealth: { poor: -2, affluent: 2, rich: 3 }, min: 4, max: 97 }
+    swing: 9
+    top: 70
+    pass: 38
+  # The placement exam (Mexico): it decides how good your preparatoria is.
+  mx_placement:
+    kind: placement
+    model: { base: 50, gpa: 15, stats: [{ key: smarts, weight: 0.3 }, { key: discipline, weight: 0.2 }], wealth: { poor: -4, affluent: 3, rich: 5 }, min: 4, max: 97 }
+    swing: 10
+    top: 70
+    pass: 38
+  # The university entrance exam (Mexico): it counts toward admission, more than the grades do.
+  mx_entrance:
+    kind: entrance
+    model: { base: 48, gpa: 14, stats: [{ key: smarts, weight: 0.35 }, { key: discipline, weight: 0.15 }], wealth: { poor: -4, affluent: 3, rich: 6 }, min: 4, max: 97 }
+    swing: 10
+    top: 70
+    pass: 38
+
+# How you spent the year moves the score: study (the study-harder stance), a tutor, slacking.
+prep: { study: 5, tutor: 6, slack: -5 }
+
+# An entrance exam adds to a college application: percentage points per score point above the pivot, by tier.
+admission:
+  pivot: 50
+  college: { community: 0.05, state: 0.2, elite: 0.35 }
+  trade: 0.04
+
+# A leaving exam adds (score − 50) × this to the year's grade; a placement exam shifts the next school's grades the same way.
+leaving: 0.006
+placement: 0.004
+
+# A conditional place (the UK): the A-level score each tier asks for.
+conditional: { community: 20, state: 42, elite: 62 }
+
+# The choice at the end of compulsory school, from the exam result.
+choice:
+  # Staying on for the sixth form asks for a pass at least this good.
+  stay: { min: 38 }
+  # An apprenticeship needs an employer to take you on.
+  apprenticeship:
+    min: 30
+    model: { base: 60, gpa: 8, stats: [{ key: discipline, weight: 0.2 }, { key: smarts, weight: 0.1 }], min: 15, max: 90 }
+  # A further education college has a different pace.
+  college: { grades: 0.05 }
+
+# Stress an exam year brings.
+examStress: 3

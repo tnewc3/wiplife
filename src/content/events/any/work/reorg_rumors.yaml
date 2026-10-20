@@ -1,0 +1,49 @@
+id: reorg_rumors
+title: Something is changing
+text: >-
+  A meeting appears on every calendar with the title "Update." {npc.name}
+  has a theory by the time you reach the kitchen, and another one by the time
+  you leave it. {boss.name} is saying nothing.
+tone: neutral
+category: work
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires: { career: { employed: true, retired: false } }
+weight: { base: 5 }
+cooldownYears: 4
+cast:
+  npc: { kind: coworker, presence: city }
+  boss: { kind: boss, presence: city }
+choices:
+  - id: ask_boss
+    label: Ask {boss.name} directly
+    check:
+      base: 50
+      stats: [{ key: confidence, weight: 0.25 }, { role: boss, key: trust, weight: 0.2 }]
+      success:
+        text: >-
+          {boss.name} lowers {boss.their} voice and tells you what is and is
+          not known, which is more than anyone else got. You walk away calmer, and
+          carrying a secret you did not want.
+        effects:
+          - { type: relationship, role: boss, trust: 4 }
+          - { type: stat, key: stress, delta: -2 }
+      failure:
+        text: '"Nothing I can discuss," says {boss.name}. It is exactly the answer you expected, and the one you did not want.'
+        effects:
+          - { type: relationship, role: boss, trust: -1 }
+          - { type: stat, key: stress, delta: 3 }
+  - id: trade_theories
+    label: Compare theories with {npc.name}
+    outcome:
+      text: By Friday you have come up with five possible futures, one of which is good. The meeting itself is a disappointment of the best kind.
+      effects:
+        - { type: relationship, role: npc, affection: 4 }
+        - { type: stat, key: stress, delta: 1 }
+  - id: keep_working
+    label: Put your head down and do good work
+    outcome:
+      text: It is the thing you can control, and you control it well. Whatever comes, you will meet it with your best quarter on paper.
+      effects:
+        - { type: job, action: performance, value: 3 }
+        - { type: stat, key: stress, delta: 1 }

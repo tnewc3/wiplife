@@ -1,0 +1,63 @@
+id: argue_with_teacher
+name: Argue your case
+blurb: Push back on a grade, a rule or a decision.
+group: conflict
+profile: sharp
+inPerson: true
+availability:
+  kinds: [teacher]
+  you: { min: 11 }
+  them: { min: 21 }
+  requires: { education: { program: [middle, high, college, trade, grad] } }
+outcomes:
+  great:
+    text:
+      - "You lay it out calmly, point by point, with the page open between you. {person.name} reads it again and changes the mark. 'You were right,' {person.they} {person:says|say}, and it is not easy for {person.them} to say."
+      - "You bring the rule, the page number and the example, and you don't raise your voice once. {person.name} goes quiet, checks, and gives you the point back."
+    affection: 2
+    trust: 3
+    mood: 1
+    effects:
+      - { type: education, action: grades, value: 0.1 }
+      - { type: stat, key: confidence, delta: 2 }
+      - { type: memory, role: person, tag: argued_with_teacher }
+  good:
+    text:
+      - "{person.name} listens to the whole argument, doesn't change the mark, and admits the question was badly worded. It isn't a win, but you were heard."
+      - "'I see what you mean,' says {person.name}, and for once it sounds like {person.they} {person:does|do}. The mark stays where it is, but the next one will be read more carefully."
+    affection: 0
+    trust: 1
+    mood: 0
+    effects:
+      - { type: stat, key: confidence, delta: 1 }
+      - { type: memory, role: person, tag: argued_with_teacher }
+  neutral:
+    text:
+      - "Neither of you moves. 'We can agree to disagree,' says {person.name}, and the bell rings on the next breath."
+      - "It goes in a circle for five minutes, polite the whole way round, and ends exactly where it began."
+    affection: -1
+    mood: -1
+    effects:
+      - { type: memory, role: person, tag: argued_with_teacher }
+  bad:
+    text:
+      - "{person.name} is not in the mood. The argument turns from the grade to your tone, and you leave with the mark unchanged and a note about attitude."
+      - "You say more than you meant to, and {person.name} writes something in a notebook."
+    affection: -4
+    trust: -3
+    mood: -4
+    effects:
+      - { type: education, action: grades, value: -0.08 }
+      - { type: stat, key: stress, delta: 2 }
+      - { type: memory, role: person, tag: argued_with_teacher }
+  backfire:
+    text:
+      - "It goes loud, and there is a conversation in the office afterward. A parent will be called."
+      - "{person.name} sends you out of the room, and you spend the rest of the lesson in the corridor with your face burning."
+    affection: -8
+    trust: -6
+    mood: -8
+    effects:
+      - { type: education, action: grades, value: -0.15 }
+      - { type: stat, key: stress, delta: 4 }
+      - { type: memory, role: person, tag: argued_with_teacher }

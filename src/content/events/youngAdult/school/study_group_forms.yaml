@@ -1,0 +1,45 @@
+id: study_group_forms
+title: The study group
+text: >-
+  {classmate.name} stops you after the lecture. "A few of us are getting
+  together on Thursday to go through the material. You should come." It's a
+  library room with a whiteboard and a bag of something that used to be
+  crisps.
+tone: light
+category: school
+rarity: common
+lifeStages: [youngAdult, adult]
+requires: { education: { program: [college, trade, grad] } }
+weight: { base: 6 }
+cooldownYears: 3
+cast:
+  classmate: { kind: classmate, presence: city, createIfMissing: true, newChance: 0.4 }
+choices:
+  - id: join
+    label: Go on Thursday
+    check:
+      base: 62
+      stats: [{ key: sociability, weight: 0.2 }, { key: discipline, weight: 0.15 }]
+      success:
+        text: >-
+          It's the most useful two hours of the week. Between the five of you,
+          the whole course gets explained, argued about and understood, and a
+          group chat is born that will outlast the course.
+        effects:
+          - { type: relationship, role: classmate, affection: 6, trust: 3 }
+          - { type: education, action: grades, value: 0.1 }
+      failure:
+        text: >-
+          It turns out to be a group for talking about the course rather than
+          studying it. You learn a lot about the others and very little about
+          the exam.
+        effects:
+          - { type: relationship, role: classmate, affection: 4 }
+          - { type: stat, key: happiness, delta: 1 }
+  - id: study_alone
+    label: Say you work better on your own
+    outcome:
+      text: '{classmate.name} says no problem, and means it. You catch yourself checking the group chat on Thursday night anyway.'
+      effects:
+        - { type: relationship, role: classmate, affection: -1 }
+        - { type: stat, key: discipline, delta: 1 }

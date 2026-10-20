@@ -21,6 +21,31 @@ school:
   repeatBelow: 1.0
   maxRepeats: 1
   applyAge: 17
+  # Grade 12 provincial exams count toward the final mark.
+  exams:
+    - { id: provincial, program: high, year: 4 }
+  curriculum:
+    elementary:
+      - { id: english, name: English, stat: smarts }
+      - { id: math, name: Math, stat: smarts }
+      - { id: science, name: Science, stat: smarts }
+      - { id: social, name: Social studies, stat: discipline }
+      - { id: french, name: French, stat: sociability }
+      - { id: pe, name: Physical education, stat: fitness }
+    middle:
+      - { id: english, name: English, stat: smarts }
+      - { id: math, name: Math, stat: smarts }
+      - { id: science, name: Science, stat: smarts }
+      - { id: social, name: Social studies, stat: discipline }
+      - { id: french, name: French, stat: sociability }
+      - { id: pe, name: Physical education, stat: fitness }
+    high:
+      - { id: english, name: English, stat: smarts }
+      - { id: math, name: Math, stat: smarts }
+      - { id: science, name: Science, stat: smarts }
+      - { id: social, name: Social studies, stat: discipline }
+      - { id: french, name: French, stat: sociability }
+      - { id: pe, name: Physical education, stat: fitness }
 
 words:
   elementary: elementary school
@@ -40,6 +65,9 @@ words:
     grad: Graduate degree
   exams: { entrance: grade 12 marks, leaving: high school diploma }
   gradeLabels: [Kindergarten, Grade 1, Grade 2, Grade 3, Grade 4, Grade 5, Grade 6, Grade 7, Grade 8, Grade 9, Grade 10, Grade 11, Grade 12]
+  homeroom: homeroom teacher
+  support: guidance counsellor
+  examNames: { provincial: the provincial exams }
 
 # A college diploma takes two years; a bachelor's degree four.
 collegeYears: { community: 2, state: 4, elite: 4 }

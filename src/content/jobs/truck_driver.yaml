@@ -9,6 +9,7 @@ levels:
   - { title: "truck driver", salary: 52000 }
   - { title: "senior driver", salary: 62000 }
   - { title: "fleet trainer", salary: 70000 }
+workplace: small
 performance:
   - { key: discipline, weight: 0.35 }
   - { key: fitness, weight: 0.15 }

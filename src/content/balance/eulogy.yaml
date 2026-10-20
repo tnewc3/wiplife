@@ -16,7 +16,7 @@ speaker:
     elder: [parent, stepparent, grandparent, relative]
     sibling: [sibling]
     friend: [friend]
-    other: [coworker, boss, classmate, acquaintance]
+    other: [coworker, boss, classmate, teacher, acquaintance]
 
 # Affection plus trust at or above `warm` is a warm eulogy; below `cool`, a
 # cool one (dutiful, distant); in between, measured.

@@ -295,6 +295,33 @@ teen:
   focusTalent: { min: 0.08, max: 0.6 }
   romanceUnder18: { min: 0, max: 0 }
 
+# Batch 3: school and work life. Effects are measured when an action is taken, so they hold for any number of
+# lives; the plan comparisons need a few hundred lives to be steady.
+school:
+  classmates: { min: 3.5, max: 6.5 }
+  teachers: { min: 1.8, max: 3.2 }
+  studyGrades: { min: 0.05, max: 0.3 }
+  studyStress: { min: 1, max: 10 }
+  slackGrades: { min: -0.4, max: -0.05 }
+  slackStress: { min: -10, max: -1 }
+  studyVsSlack: { min: 0.03, max: 0.8 }
+  tutorThroughFinance: { min: 1, max: 1 }
+  cheatCaught: { min: 0.2, max: 0.6 }
+  skipCaught: { min: 0.15, max: 0.5 }
+  askHelp: { min: 0.02, max: 0.2 }
+  entranceGap: { min: 4, max: 30 }
+  cegepSkipped: { min: 0, max: 0 }
+  hardPerformance: { min: 2, max: 10 }
+  hardStress: { min: 0.5, max: 10 }
+  slackPerformance: { min: -12, max: -2 }
+  hardVsSlack: { min: 1, max: 40 }
+  sizeGap: { min: 1.5, max: 8 }
+  mostCoworkers: { min: 0, max: 8 }
+  coworkerTieLives: { min: 0.05, max: 0.95 }
+  overCap: { min: 0, max: 0 }
+  romanceTeacher: { min: 0, max: 0 }
+  romanceUnder18: { min: 0, max: 0 }
+
 # E6a: crime careers. Set from 10,000 criminal-player lives (four runs of 2,500 lives): about four lives in ten reach 30
 # having entered a crew (the criminal player says yes to every offer), a third of those reach the third rank and
 # about one in ten runs a crew; a little over four in ten are arrested and about one in five goes to prison, and

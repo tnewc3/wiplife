@@ -1,0 +1,29 @@
+id: ca_exam_low
+title: A mark that stings
+text: >-
+  The gym is set out in rows, a clock is on the wall and the invigilator reads
+  the rules like a flight attendant. The paper asks for the three things you
+  skipped. The mark arrives, and it is lower than you had braced for.
+tone: serious
+category: future
+rarity: common
+countries: [ca]
+lifeStages: [teen, youngAdult]
+followUpOnly: true
+requires: { flag: exam_provincial, eq: fail }
+weight: { base: 8 }
+once: true
+choices:
+  - id: face_it
+    label: Look at what you got wrong
+    outcome:
+      text: It takes an hour with the paper open and a pencil in your hand. By the end you know exactly where the marks went, and exactly how not to lose them again.
+      effects:
+        - { type: stat, key: discipline, delta: 2 }
+        - { type: stat, key: stress, delta: 2 }
+  - id: shrug
+    label: Tell yourself it is only one paper
+    outcome:
+      text: It is, and the final mark is made of more than this. You say it a few more times until it sounds true.
+      effects:
+        - { type: stat, key: stress, delta: 1 }

@@ -14,7 +14,7 @@ import { clampInt } from '../random';
 import { chance, nextInt } from '../rng';
 import type { LifeState } from '../types';
 import { teenHistory } from './cliques';
-import { inTeenYears, isGrounded } from './query';
+import { isGrounded } from './query';
 import { applyFriendGain } from './focus';
 
 export type ActivityBlock = 'age' | 'unknown' | 'member' | 'limit' | 'turnedAway' | 'away';
@@ -31,7 +31,9 @@ export function activityBlock(state: LifeState, id: string, content: ContentBund
   const def = activityDef(content, id);
   if (!def) return 'unknown';
   if (state.housing.kind === 'incarcerated') return 'away';
-  if (!inTeenYears(state, content) || state.character.age < def.minAge) return 'age';
+  // Batch 3: open from the age the definition allows, to the adult age; a child's club belongs to the school they are in.
+  if (state.character.age >= content.balance.relationships.adultAge || state.character.age < def.minAge) return 'age';
+  if (state.character.age < content.balance.teen.ages.from && !state.education.current) return 'age';
   if (inActivity(state, id)) return 'member';
   if (state.teen.activities.length >= content.balance.teen.activities.max) return 'limit';
   const cut = state.teen.turnedAway[id];
@@ -82,7 +84,7 @@ export function activityPassion(state: LifeState, content: ContentBundle): numbe
 export function runActivities(state: LifeState, content: ContentBundle): void {
   const t = state.teen;
   if (t.activities.length === 0) return;
-  if (!inTeenYears(state, content) || state.housing.kind === 'incarcerated') {
+  if (state.character.age >= content.balance.relationships.adultAge || state.housing.kind === 'incarcerated') {
     t.activities = [];
     return;
   }

@@ -1,0 +1,58 @@
+id: mx_placement_exam
+title: The placement exam
+text: >-
+  Every student finishing {middleSchool} in the city takes the same exam on the
+  same Saturday. You listed your preferred schools in order; the exam score,
+  not your wishes, decides where you will spend the next three years. The
+  list is posted on the wall outside.
+tone: serious
+category: future
+rarity: common
+countries: [mx]
+lifeStages: [child, teen]
+followUpOnly: true
+requires:
+  any:
+    - { flag: exam_mx_placement, eq: top }
+    - { flag: exam_mx_placement, eq: pass }
+weight: { base: 12 }
+once: true
+cast:
+  parent: { kind: parent, presence: household }
+choices:
+  - id: top_first
+    label: Look for your name at the top of the list
+    visibleIf: { flag: exam_mx_placement, eq: top }
+    outcome:
+      text: >-
+        Your first choice. {parent.name} reads the list three times and then
+        goes to tell the neighbours.
+      effects:
+        - { type: relationship, role: parent, affection: 5 }
+        - { type: stat, key: confidence, delta: 3 }
+  - id: top_celebrate
+    label: Go for tacos with {parent.name} before you tell anyone
+    visibleIf: { flag: exam_mx_placement, eq: top }
+    outcome:
+      text: You eat standing up, grinning, and neither of you says very much. That is how you know it was important.
+      effects:
+        - { type: relationship, role: parent, affection: 4 }
+        - { type: stat, key: happiness, delta: 3 }
+  - id: pass_list
+    label: Follow the list down with your finger
+    visibleIf: { flag: exam_mx_placement, eq: pass }
+    outcome:
+      text: >-
+        Your second choice, close to home. It is a good school with a good
+        reputation among the people who stay, and {parent.name} is relieved.
+      effects:
+        - { type: relationship, role: parent, affection: 3 }
+        - { type: stat, key: stress, delta: -2 }
+  - id: pass_plan
+    label: Work out the bus route with {parent.name}
+    visibleIf: { flag: exam_mx_placement, eq: pass }
+    outcome:
+      text: Two buses and a walk, forty minutes each way. You make it a plan and not a complaint.
+      effects:
+        - { type: relationship, role: parent, trust: 3 }
+        - { type: stat, key: discipline, delta: 1 }

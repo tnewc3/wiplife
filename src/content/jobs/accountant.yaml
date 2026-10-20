@@ -9,6 +9,7 @@ levels:
   - { title: "accounting manager", salary: 88000 }
   - { title: "controller", salary: 112000 }
   - { title: "chief financial officer", salary: 150000 }
+workplace: medium
 performance:
   - { key: smarts, weight: 0.3 }
   - { key: discipline, weight: 0.4 }

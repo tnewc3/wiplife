@@ -8,6 +8,7 @@ levels:
   - { title: "stylist", salary: 36000 }
   - { title: "senior stylist", salary: 47000 }
   - { title: "salon manager", salary: 58000 }
+workplace: small
 performance:
   - { key: sociability, weight: 0.3 }
   - { key: looks, weight: 0.15 }

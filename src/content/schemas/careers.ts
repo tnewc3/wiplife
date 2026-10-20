@@ -52,6 +52,8 @@ export const jobSchema = baseDefSchema
       .refine((levels) => levels.every((l, i) => i === 0 || l.salary >= levels[i - 1]!.salary), 'salaries must not go down a level'),
     /** Yearly performance: weight × (value − 50) points for each of your stats, traits or hidden values. */
     performance: z.array(z.strictObject({ key: scoreKeySchema, weight: z.number().min(-1).max(1) })).min(1),
+    /** Batch 3: how big the workplace is (balance careers.yaml workplace.sizes); by default from the category. */
+    workplace: z.enum(['small', 'medium', 'large']).optional(),
     /** Fictional employers; one is picked when you're hired. */
     employers: z.array(z.string().trim().min(1).max(40)).min(1).max(12),
   });
@@ -129,11 +131,21 @@ export const careersBalanceSchema = z.strictObject({
   jobLoss: z.strictObject({ fired: share, laid_off: share }),
   /** The people you work with. */
   workplace: z.strictObject({
-    /** Coworkers you get to know when you start a job... */
-    coworkers: z.int().min(0).max(10),
-    /** ...the chance each year someone new joins while you have fewer than maxCoworkers... */
+    /**
+     * Batch 3: how many coworkers a workplace has, by its size: the ones you get to know when you start a job and
+     * the most you will have (so the People list and the year's work stay in bounds).
+     */
+    sizes: z
+      .strictObject({
+        small: z.strictObject({ coworkers: z.int().min(0).max(10), max: z.int().min(0).max(10) }),
+        medium: z.strictObject({ coworkers: z.int().min(0).max(10), max: z.int().min(0).max(10) }),
+        large: z.strictObject({ coworkers: z.int().min(0).max(10), max: z.int().min(0).max(10) }),
+      })
+      .refine((s) => Object.values(s).every((x) => x.coworkers <= x.max), 'a size starts with no more coworkers than its most'),
+    /** The size of a workplace when the job doesn't say, by its category. */
+    categorySize: perCategory(z.enum(['small', 'medium', 'large'])),
+    /** ...the chance each year someone new joins while you have fewer than the most for the size... */
     newCoworkerChance: share,
-    maxCoworkers: z.int().min(0).max(10),
     /** ...their age relative to yours (never under minAge)... */
     coworkerAgeOffset: range,
     /** ...and your boss's age. */
@@ -141,6 +153,43 @@ export const careersBalanceSchema = z.strictObject({
   }),
   /** The youngest age you can retire. */
   retireAge: z.int().min(30).max(100),
+  /**
+   * Batch 3: things you can do at work. Performance changes are points on your 0–100 job performance now; `aim` is
+   * added to the aim of the next yearly review, which blends it into the performance you carry.
+   */
+  workActions: z.strictObject({
+    hard: z.strictObject({ performance: z.int().min(0).max(30), stress: z.int().min(0).max(20), aim: z.number().min(0).max(30) }),
+    slack: z.strictObject({ performance: z.int().min(-30).max(0), stress: z.int().min(-20).max(0), happiness: z.int().min(0).max(10), aim: z.number().min(-30).max(0) }),
+    socialize: z.strictObject({
+      stress: z.int().min(-20).max(0),
+      happiness: z.int().min(0).max(10),
+      /** How many coworkers you spend the time with, and how much closer it brings each. */
+      people: z.int().min(1).max(10),
+      affection: z.int().min(0).max(20),
+      /** The time it takes from the work: points on performance. */
+      performance: z.int().min(-10).max(10),
+      maxPerYear: z.int().min(1).max(10),
+    }),
+    party: z.strictObject({
+      /** The chance it goes well: base + sociability and confidence above 50 − risk-taking above 50, in points of chance. */
+      good: z.strictObject({ base: share, sociability: z.number().min(0).max(0.02), confidence: z.number().min(0).max(0.02), riskTaking: z.number().min(0).max(0.02), min: share, max: share }),
+      /** Of the rest, the share that goes badly (the others are unremarkable). */
+      badShare: share,
+      great: z.strictObject({ happiness: z.int().min(0).max(10), performance: z.int().min(0).max(20), bossAffection: z.int().min(0).max(20), coworkerAffection: z.int().min(0).max(20) }),
+      bad: z.strictObject({ stress: z.int().min(0).max(20), performance: z.int().min(-30).max(0), bossAffection: z.int().min(-30).max(0), coworkerAffection: z.int().min(-30).max(0) }),
+    }),
+    report: z.strictObject({
+      /** What reporting a coworker does: they cool toward you, the boss warms, the others are wary. */
+      coworkerAffection: z.int().min(-60).max(0),
+      coworkerTrust: z.int().min(-60).max(0),
+      bossAffection: z.int().min(0).max(20),
+      bossTrust: z.int().min(0).max(20),
+      performance: z.int().min(0).max(20),
+      othersAffection: z.int().min(-20).max(0),
+      stress: z.int().min(0).max(20),
+      maxPerYear: z.int().min(1).max(5),
+    }),
+  }),
 });
 export type CareersBalance = z.infer<typeof careersBalanceSchema>;
 

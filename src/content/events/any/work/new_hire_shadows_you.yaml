@@ -1,0 +1,55 @@
+id: new_hire_shadows_you
+title: Show them the ropes
+text: >-
+  {boss.name} stops at your desk with someone who looks as though they
+  have not slept and want to. "{npc.name} starts today. Would you take {npc.them} under your wing for the first few weeks?"
+tone: neutral
+category: work
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { career: { employed: true, retired: false } }
+    - { career: { years: { gte: 1 } } }
+weight: { base: 5 }
+cooldownYears: 4
+cast:
+  boss: { kind: boss, presence: city }
+  npc: { kind: coworker, presence: city }
+choices:
+  - id: mentor
+    label: Say yes, and mean it
+    check:
+      base: 62
+      stats: [{ key: kindness, weight: 0.25 }, { job: performance, weight: 0.15 }]
+      success:
+        text: >-
+          You show {npc.name} where the good coffee is, how the system actually
+          works and which emails to answer first. By the end of the month
+          {npc.they} {npc:is|are} faster than you were at the same stage.
+          {boss.name} notices who did that.
+        effects:
+          - { type: relationship, role: npc, affection: 8, trust: 6 }
+          - { type: relationship, role: boss, trust: 3 }
+          - { type: job, action: performance, value: 3 }
+      failure:
+        text: >-
+          The weeks are busier than you expected, and the teaching happens in
+          the gaps. {npc.name} gets there on {npc.their} own, and politely
+          pretends you had a lot to do with it.
+        effects:
+          - { type: relationship, role: npc, affection: 3 }
+          - { type: stat, key: stress, delta: 2 }
+  - id: decline
+    label: Say your plate is full
+    outcome:
+      text: '{boss.name} nods and finds someone else. You are fine with it, and you do not ask yourself how fine.'
+      effects:
+        - { type: relationship, role: boss, affection: -2 }
+  - id: share
+    label: Offer to share the job with another coworker
+    outcome:
+      text: It is a fair compromise. {npc.name} gets two guides instead of one, and you each get a free afternoon a week.
+      effects:
+        - { type: relationship, role: npc, affection: 4 }
+        - { type: relationship, role: boss, trust: 1 }

@@ -2,7 +2,7 @@ id: basketball_team
 name: The basketball team
 kind: team
 blurb: Gym time, a bench you have to earn and a season that comes down to one stubborn free throw.
-minAge: 13
+minAge: 10
 tryout:
   base: 40
   stats: [{ key: fitness, weight: 0.45 }, { key: confidence, weight: 0.15 }]

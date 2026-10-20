@@ -1,0 +1,48 @@
+id: uk_gcse_missed
+title: Not the results you needed
+text: >-
+  The envelope is thin and the school hall is full. You open yours standing a
+  little apart from everyone else, and read it twice. Two subjects short of what
+  you needed.
+tone: serious
+category: future
+rarity: common
+countries: [uk]
+lifeStages: [teen]
+followUpOnly: true
+requires: { flag: exam_gcse, eq: fail }
+weight: { base: 12 }
+once: true
+cast:
+  parent: { kind: parent, presence: household }
+choices:
+  - id: tell_them
+    label: Tell {parent.name} straight away
+    outcome:
+      text: >-
+        {parent.name} is quiet for a moment, then says it is only a set of exams
+        and not the last word on anything. The next steps are harder than they
+        were yesterday, but they are still there.
+      effects:
+        - { type: relationship, role: parent, trust: 4, affection: 3 }
+        - { type: stat, key: stress, delta: -1 }
+  - id: keep_it
+    label: Keep it to yourself for a few days
+    check:
+      base: 50
+      stats: [{ key: confidence, weight: 0.3 }]
+      success:
+        text: >-
+          You turn it over alone, and by the weekend you have a plan. When you
+          tell {parent.name}, you are mostly telling {parent.them} what you
+          decided.
+        effects:
+          - { type: stat, key: confidence, delta: 2 }
+          - { type: relationship, role: parent, trust: 2 }
+      failure:
+        text: >-
+          {parent.name} finds the envelope in the recycling. It is not the
+          grades that hurt; it is that you hid them.
+        effects:
+          - { type: relationship, role: parent, trust: -6, affection: -2 }
+          - { type: stat, key: stress, delta: 4 }

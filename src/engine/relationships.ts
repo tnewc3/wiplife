@@ -18,6 +18,8 @@ export const PARTNER_KINDS: readonly RelationshipKind[] = ['partner', 'fiance', 
 /** Every romantic kind, including exes. */
 export const ROMANTIC_KINDS: readonly RelationshipKind[] = [...PARTNER_KINDS, 'ex'];
 export const WORK_KINDS: readonly RelationshipKind[] = ['coworker', 'boss'];
+/** Batch 3: the people of your school: classmates and the teachers and staff. Teachers are never romance, whatever the content says. */
+export const SCHOOL_KINDS: readonly RelationshipKind[] = ['classmate', 'teacher'];
 /** Kinds a content effect may turn a relationship into (family and work come from their own systems). */
 export const EFFECT_KINDS: readonly RelationshipKind[] = ['friend', 'classmate', 'acquaintance', 'partner', 'fiance', 'spouse', 'ex'];
 /** Kinds that can step in during a crisis (support roles). */
@@ -25,6 +27,7 @@ export const SUPPORT_KINDS: readonly RelationshipKind[] = [...FAMILY_KINDS.filte
 /** Kinds you can ask out: people you know who aren't family and aren't already your partner. */
 export const ASKABLE_KINDS: readonly RelationshipKind[] = ['friend', 'acquaintance', 'classmate', 'coworker', 'boss', 'ex'];
 
+export const isTeacherKind = (kind: RelationshipKind) => kind === 'teacher';
 export const isFamilyKind = (kind: RelationshipKind) => FAMILY_KINDS.includes(kind);
 export const isChildKind = (kind: RelationshipKind) => CHILD_KINDS.includes(kind);
 export const isPartnerKind = (kind: RelationshipKind) => PARTNER_KINDS.includes(kind);
@@ -89,7 +92,7 @@ export function partnerAgeRange(age: number, content: ContentBundle): { min: num
 export function isRomanceCandidate(state: LifeState, person: Person, content: ContentBundle): boolean {
   const rel = state.relationships[person.id];
   // E3: someone who has a partner of their own (off your list) isn't a possible partner; neither (E4) is someone in a couple with another of the people you know.
-  if (!person.alive || person.life?.partner || hasRomanticTie(state.web, person.id) || (rel && isFamilyKind(rel.kind))) return false;
+  if (!person.alive || person.life?.partner || hasRomanticTie(state.web, person.id) || (rel && (isFamilyKind(rel.kind) || isTeacherKind(rel.kind)))) return false;
   return bothAdults(state, person, content) && attractedTo(state.character.identity, person.identity);
 }
 
@@ -108,7 +111,7 @@ export function isRomanticMatch(state: LifeState, person: Person, content: Conte
  */
 export function isAdmirerMatch(state: LifeState, person: Person, content: ContentBundle): boolean {
   const rel = state.relationships[person.id];
-  if (!person.alive || person.life?.partner || hasRomanticTie(state.web, person.id) || (rel && isFamilyKind(rel.kind))) return false;
+  if (!person.alive || person.life?.partner || hasRomanticTie(state.web, person.id) || (rel && (isFamilyKind(rel.kind) || isTeacherKind(rel.kind)))) return false;
   const me = state.character.identity;
   return bothAdults(state, person, content) && attractedTo(person.identity, me) && !attractedTo(me, person.identity);
 }
@@ -138,6 +141,7 @@ export function romanceStatus(state: LifeState): RomanceStatus {
  * checks every kind change against these rules, whatever the content says:
  *
  * - Family stays family, and nobody becomes family through an event.
+ * - A teacher stays a teacher (never a partner, whatever the content says).
  * - Romance (partner, fiancé, spouse) needs both people to be living adults
  *   with attraction both ways, and you can have only one partner at a time.
  * - Dating comes before an engagement; a wedding follows dating or an
@@ -151,6 +155,8 @@ export function canChangeKind(state: LifeState, personId: Id, to: RelationshipKi
   const from = rel.kind;
   if (from === to) return true;
   if (isFamilyKind(from) || isFamilyKind(to)) return false;
+  // Batch 3: a teacher is a teacher; nobody becomes one through an event, and no teacher becomes a friend, a partner or anything else.
+  if (isTeacherKind(from) || isTeacherKind(to)) return false;
   if (!person.alive) return false;
 
   if (isPartnerKind(to)) {
@@ -212,6 +218,7 @@ export function romanceAllowed(state: LifeState, def: EventDef, cast: Record<str
   return Object.entries(cast).every(([role, id]) => {
     if (role === ITEM_ROLE || role.startsWith('@')) return true;
     const person = state.people[id];
-    return person !== undefined && ageOf(state, person) >= adultAge;
+    // Batch 3: and nobody who is your teacher.
+    return person !== undefined && ageOf(state, person) >= adultAge && state.relationships[id]?.kind !== 'teacher';
   });
 }

@@ -8,6 +8,7 @@ levels:
   - { title: "position coach", salary: 52000 }
   - { title: "head coach", salary: 82000 }
   - { title: "director of coaching", salary: 120000 }
+workplace: small
 performance:
   - { key: discipline, weight: 0.25 }
   - { key: smarts, weight: 0.2 }

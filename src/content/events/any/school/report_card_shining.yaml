@@ -1,0 +1,41 @@
+id: report_card_shining
+title: A subject you are good at
+text: >-
+  The new report card has a row that stands out from the rest, one grade
+  higher than anything near it. Whatever you do in that class is working.
+tone: light
+category: school
+rarity: common
+lifeStages: [child, teen]
+followUpOnly: true
+requires:
+  all:
+    - { flag: report_shining }
+    - { education: { program: [elementary, middle, high] } }
+weight: { base: 5 }
+cooldownYears: 2
+cast:
+  parent: { kind: parent, presence: household, optional: true }
+choices:
+  - id: show_parent
+    label: Show it to {parent.name}
+    visibleIf: { role: parent }
+    outcome:
+      text: '{parent.name} looks at the row for a long time and then at you. The card goes on the fridge, where it stays until the next one comes.'
+      effects:
+        - { type: relationship, role: parent, affection: 3, trust: 2 }
+        - { type: stat, key: happiness, delta: 3 }
+  - id: keep_going
+    label: Look for more of the same next term
+    outcome:
+      text: You read the row again on the bus. Being good at one thing makes the other things look a little less impossible.
+      effects:
+        - { type: stat, key: confidence, delta: 2 }
+        - { type: stat, key: ambition, delta: 1 }
+  - id: brag
+    label: Tell everyone who will listen
+    outcome:
+      text: It is a long lunchtime. Some of it is admiration and some of it is eyes rolling, and you can tell the difference by now.
+      effects:
+        - { type: stat, key: happiness, delta: 2 }
+        - { type: stat, key: confidence, delta: 1 }

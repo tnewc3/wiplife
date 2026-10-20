@@ -7,6 +7,7 @@ levels:
   - { title: "bartender", salary: 30000, years: 1 }
   - { title: "head bartender", salary: 36000 }
   - { title: "bar manager", salary: 48000 }
+workplace: small
 performance:
   - { key: sociability, weight: 0.35 }
   - { key: looks, weight: 0.1 }

@@ -81,6 +81,7 @@ import { chooseFameActions, emptyFameReport, FameWatcher, fameTargets, formatFam
 import { peakRung } from '../../src/engine/fame/query';
 import { AttractionWatcher, attractionTargets, chooseDateActions, emptyAttractionReport, formatAttraction, type AttractionReport } from './attraction';
 import { chooseSportsActions, emptySportsReport, formatSports, rollAthleteProfile, SportsWatcher, sportsTargets, type SportsReport } from './sports';
+import { chooseSchoolLifeActions, chooseSchoolLifeInteractions, emptySchoolLifeReport, formatSchoolLife, rollSchoolLifeProfile, SchoolLifeWatcher, schoolLifeTargets, type SchoolLifeReport } from './school';
 import { chooseTeenActions, emptyTeenReport, formatTeen, rollTeenProfile, teenTargets, TeenWatcher, type TeenReport } from './teen';
 import { YEAR_PIPELINE } from '../../src/engine/pipeline';
 import { chooseFamilyActions, chooseParentingPlans, emptyFamilyReport, FamilyWatcher, formatFamily, familyTargets, rollFamilyProfile, type FamilyReport } from './family';
@@ -182,6 +183,8 @@ export interface SimulationReport {
   pastimes: PastimesReport;
   /** T1: the teen years, measured. */
   teen: TeenReport;
+  /** Batch 3: school and work life, measured. */
+  schoolLife: SchoolLifeReport;
   /** E6a: crime careers, measured. */
   crime: CrimeReport;
   /** E6b: fame in arts and media, measured. */
@@ -842,6 +845,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
   const pastimePlayer: PastimePlayer = playerKind === 'spammer' ? 'spammer' : careless ? 'careless' : playerKind === 'criminal' ? 'criminal' : 'careful';
   const pastimes = emptyPastimesReport(pastimePlayer);
   const teen = emptyTeenReport(content);
+  const schoolLife = emptySchoolLifeReport();
   const crime = emptyCrimeReport(playerKind, content);
   const fame = emptyFameReport(playerKind, content);
   const sports = emptySportsReport(playerKind, content);
@@ -871,6 +875,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
       migration.invariantFailures += failures.filter((f) => /^migration/i.test(f)).length;
       fame.invariantFailures += failures.filter((f) => /^fame|fame\./i.test(f)).length;
       sports.invariantFailures += failures.filter((f) => /^sports/i.test(f)).length;
+      schoolLife.invariantFailures += failures.filter((f) => /teacher|class member|^exam |an exam is|venue|coworkers at a workplace/i.test(f)).length;
       teen.invariantFailures += failures.filter((f) => /crowd|teen|license|learner|house rule|rule |romance|couple with someone under|under 18|is under \d+ and|they are under|you are under/i.test(f)).length;
       for (const f of failures) if (failureMessages.length < maxMessages) failureMessages.push(`${seed} age ${life.character.age}: ${f}`);
     };
@@ -929,6 +934,10 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
     const teenRng = createRng(`${seed}:teen`);
     const teenProfile = rollTeenProfile(teenRng);
     let teenWatcher: TeenWatcher | undefined;
+    // Batch 3: this life's school plan and work plan, and the talks with teachers and classmates.
+    const schoolRng = createRng(`${seed}:schoolLife`);
+    const schoolProfile = rollSchoolLifeProfile(schoolRng);
+    let schoolWatcher: SchoolLifeWatcher | undefined;
     const profile = rollMoneyProfile(player);
     // E2b: whether this life writes a will, and who it names.
     const mentalRng = createRng(`${seed}:mental`);
@@ -1121,6 +1130,23 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
           teenWatcher.acted(actionId, params, beforeAction, life);
         }
       }
+      // ...at school and at work (Batch 3): how hard to work, a tutor, the choice at 16, coworkers, and talks with teachers...
+      if (!careless) {
+        schoolWatcher ??= new SchoolLifeWatcher(schoolLife, content, schoolProfile);
+        for (const [actionId, params] of chooseSchoolLifeActions(life, content, schoolRng, schoolProfile)) {
+          if (!isLifeActionAvailable(life, actionId, params, content)) continue;
+          const beforeAction = life;
+          life = takeLifeAction(life, actionId, params);
+          money.actionsTaken[actionId]++;
+          schoolWatcher.acted(actionId, params, beforeAction, life);
+        }
+        for (const [interactionId, personId] of chooseSchoolLifeInteractions(life, schoolRng, schoolProfile)) {
+          if (life.phase !== 'yearStart' || life.pendingInteraction !== null || !isInteractionAvailable(life, content.interactions[interactionId]!, personId, content)) continue;
+          const beforeTalk = life;
+          life = closeInteraction(performInteraction(life, { interactionId, personId }, content), content);
+          schoolWatcher.talked(interactionId, personId, beforeTalk, life);
+        }
+      }
       // ...and on what they own (E5): pets, vehicles, a vacation home, renovations...
       for (const [actionId, params] of careless ? [] : choosePossessionActions(life, content, possessionRng, possessionProfile)) {
         if (!isLifeActionAvailable(life, actionId, params, content)) continue;
@@ -1231,6 +1257,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
       possessionsWatcher.observe(yearBefore, life, content);
       pastimesWatcher.observe(yearBefore, life);
       if (!careless) teenWatcher?.observe(yearBefore, life);
+      if (!careless) schoolWatcher?.observe(yearBefore, life);
       watch(life);
       options.onYear?.(life);
       const stage = perYear[life.character.lifeStage];
@@ -1285,6 +1312,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
     possessionsWatcher.finish(life);
     pastimesWatcher.finish(life);
     if (!careless) teenWatcher?.finish(life);
+    if (!careless) schoolWatcher?.finish(life);
     familyWatcher.finish(life, firesThisLife);
     // E1: who reached maximum affection, being found out, and a sample of lives rebuilt from their input logs.
     interactions.lives++;
@@ -1627,6 +1655,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
     possessions,
     pastimes,
     teen,
+    schoolLife,
     crime,
     fame: { ...fame, famousAtTarget },
     sports,
@@ -1776,6 +1805,7 @@ export function formatReport(report: SimulationReport, content: ContentBundle): 
   lines.push(...formatPastimes(report.pastimes, content), report.player === 'spammer' ? '  targets (the spammer: repeating gives less):' : '  targets (src/content/balance/targets.yaml):', ...(report.player === 'spammer' ? pastimesSpamTargets(report, content) : pastimesTargets(report, content)).map((r) => target(r.label, r.value, r.goal, r.met)));
   lines.push(...formatRisk(report.pastimes.risk, report.lives, report.events, content), '  targets (src/content/balance/targets.yaml):', ...riskTargets(report, content).map((r) => target(r.label, r.value, r.goal, r.met)));
   lines.push(...formatTeen(report.teen, content), '  targets (src/content/balance/targets.yaml):', ...teenTargets(report, content).map((r) => target(r.label, r.value, r.goal, r.met)));
+  lines.push(...formatSchoolLife(report.schoolLife, content), '  targets (src/content/balance/targets.yaml):', ...schoolLifeTargets(report, content).map((r) => target(r.label, r.value, r.goal, r.met)));
   lines.push(...formatCrime(report.crime, content), '  targets (src/content/balance/targets.yaml):', ...crimeTargets(report, content).map((r) => target(r.label, r.value, r.goal, r.met)));
   lines.push(...formatFame(report.fame, content), '  targets (src/content/balance/targets.yaml):', ...fameTargets(report, content).map((r) => target(r.label, r.value, r.goal, r.met)));
   lines.push(...formatSports(report.sports, content), '  targets (src/content/balance/targets.yaml):', ...sportsTargets(report, content).map((r) => target(r.label, r.value, r.goal, r.met)));

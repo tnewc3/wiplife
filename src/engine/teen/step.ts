@@ -41,7 +41,12 @@ export function runTeen(state: LifeState, content: ContentBundle): void {
     growUp(state, content);
     return;
   }
-  if (age < content.balance.teen.ages.from || state.housing.kind === 'incarcerated') return;
+  // Batch 3: clubs and teams are open from the age their definitions allow, before the teen years too.
+  if (age < content.balance.teen.ages.from) {
+    if (state.housing.kind !== 'incarcerated') runActivities(state, content);
+    return;
+  }
+  if (state.housing.kind === 'incarcerated') return;
   runRules(state, content);
   runCliques(state, content);
   runFocus(state, content);

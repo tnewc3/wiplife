@@ -113,6 +113,16 @@ export const webBalanceSchema = z.strictObject({
       /** A drawn pair of single, unrelated adults who are attracted to each other becomes a couple with this chance. */
       romance: probability,
     }),
+    /** Batch 3: coworkers who share a workplace: a few pairs are drawn each year and become friends, or rivals (a tie that starts low and can sour into a feud). Never a couple. */
+    work: z.strictObject({
+      draws: z.int().min(0).max(30),
+      chance: probability,
+      maxPerYear: z.int().min(0).max(10),
+      /** Of the ties formed, the share that start as rivalries... */
+      rivalChance: probability,
+      /** ...and the affection they start at. */
+      rivalStart: z.strictObject({ mean: z.number().min(0).max(100), sd: z.number().min(0).max(50) }),
+    }),
     couple: z.strictObject({
       /** Yearly chance a couple who have been dating at least `afterYears` marry. */
       marry: probability,

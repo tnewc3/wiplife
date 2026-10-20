@@ -1,0 +1,50 @@
+id: entrance_exam
+title: The score comes back
+text: >-
+  Saturday, 7:45 a.m., a gym full of number-two pencils, three hours and fifty
+  minutes. The {entranceExam} come back in an envelope that is thinner than you
+  expected.
+tone: neutral
+category: future
+rarity: common
+countries: [us]
+lifeStages: [teen]
+followUpOnly: true
+requires:
+  any:
+    - { flag: exam_sat, eq: top }
+    - { flag: exam_sat, eq: pass }
+weight: { base: 7 }
+once: true
+choices:
+  - id: top_flag
+    label: Put it where your counselor will see it
+    visibleIf: { flag: exam_sat, eq: top }
+    outcome:
+      text: The score is high enough that your counselor reads it twice. It will be the first thing on your applications.
+      effects:
+        - { type: flag, key: high_test_scores, value: true }
+        - { type: stat, key: confidence, delta: 4 }
+        - { type: history, text: You aced the college entrance exam., importance: 2 }
+  - id: top_quiet
+    label: Tell nobody for a day
+    visibleIf: { flag: exam_sat, eq: top }
+    outcome:
+      text: You carry it around all day like something that might break. By evening you have told everyone.
+      effects:
+        - { type: flag, key: high_test_scores, value: true }
+        - { type: stat, key: happiness, delta: 3 }
+  - id: pass_retake
+    label: Think about taking it again
+    visibleIf: { flag: exam_sat, eq: pass }
+    outcome:
+      text: The score is ordinary. You could retake it, and for about an afternoon you plan to. Then you look at the calendar and put it aside.
+      effects:
+        - { type: stat, key: stress, delta: 1 }
+  - id: pass_move_on
+    label: Move on to the applications
+    visibleIf: { flag: exam_sat, eq: pass }
+    outcome:
+      text: It is about what you would expect. You put it in the folder and start on the essay.
+      effects:
+        - { type: stat, key: stress, delta: -1 }

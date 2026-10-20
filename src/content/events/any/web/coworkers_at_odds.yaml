@@ -1,0 +1,59 @@
+# Web (tieStrained): two of your coworkers are at odds.
+id: coworkers_at_odds
+title: A cold front by the printer
+text: >-
+  {a.name} and {b.name} compete for the same promotion, the same projects and, by
+  now, the same corner of the kitchen. Each of them has said a sharp thing about
+  the other to you, in a different week.
+tone: neutral
+category: web
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { career: { employed: true, retired: false } }
+    - { tie: { a: a, b: b, kind: [friends], status: [strained] } }
+    - { role: a, alive: true, kind: [coworker] }
+    - { role: b, alive: true, kind: [coworker] }
+weight: { base: 6 }
+followUpOnly: true
+cast:
+  a: { support: true, presence: anywhere }
+  b: { support: true, presence: anywhere }
+choices:
+  - id: mediate
+    label: Suggest the three of you get lunch
+    check:
+      base: 45
+      stats: [{ key: kindness, weight: 0.25 }, { key: sociability, weight: 0.2 }]
+      success:
+        text: >-
+          It starts stiff and ends with the two of them agreeing, with some
+          surprise, on a restaurant. They are not friends, but they are
+          colleagues again.
+        effects:
+          - { type: relationship, role: a, trust: 3 }
+          - { type: relationship, role: b, trust: 3 }
+          - { type: tie, a: a, b: b, action: mend, delta: 12 }
+      failure:
+        text: >-
+          You pick the wrong table and the wrong subject. They agree on one
+          thing, which is that you should not do that again.
+        effects:
+          - { type: relationship, role: a, affection: -2 }
+          - { type: relationship, role: b, affection: -2 }
+          - { type: stat, key: stress, delta: 2 }
+  - id: ignore
+    label: Keep your distance from it
+    outcome:
+      text: It is the sensible choice, and it draws no fire today. The cold front stays by the printer.
+      effects:
+        - { type: stat, key: stress, delta: 1 }
+  - id: agree_with_each
+    label: Nod along with whichever one is talking
+    outcome:
+      text: It works until they compare notes. The coffee machine goes quiet when you walk past, for a week.
+      effects:
+        - { type: relationship, role: a, trust: -4 }
+        - { type: relationship, role: b, trust: -4 }
+        - { type: tie, a: a, b: b, action: worsen, delta: 12 }

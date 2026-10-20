@@ -34,15 +34,15 @@ priority:
 
 triggers:
   feudBegan:
-    events: [feud_siblings_side, feud_parents_side, feud_friends_side, feud_in_law_side, couple_falling_apart]
+    events: [feud_siblings_side, feud_parents_side, feud_friends_side, feud_in_law_side, couple_falling_apart, coworker_feud_side]
   feudLong:
     events: [mediate_dinner, mediate_one_on_one, feud_neutral_wears]
   feudEnded:
     events: [feud_ends_hug]
   tieStrained:
-    events: [parents_marriage_strain, siblings_rivalry, inlaw_never_accepts, inlaw_holiday_dinner]
+    events: [parents_marriage_strain, siblings_rivalry, inlaw_never_accepts, inlaw_holiday_dinner, coworkers_at_odds]
   tieClose:
-    events: [siblings_close, inlaw_wins_over, parents_renew_vows]
+    events: [siblings_close, inlaw_wins_over, parents_renew_vows, coworkers_grow_close]
   partnerMet:
     events: [partner_meets_friends]
   coupleFormed:

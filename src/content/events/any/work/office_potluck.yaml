@@ -1,0 +1,43 @@
+id: office_potluck
+title: Everyone brings something
+text: >-
+  The sign-up sheet on the kitchen door has been filled in every line but
+  yours. {npc.name} points at the empty space and raises an eyebrow, and the
+  hall smells already of other people's best recipes.
+tone: light
+category: work
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires: { career: { employed: true, retired: false } }
+weight: { base: 6 }
+cooldownYears: 3
+cast:
+  npc: { kind: coworker, presence: city }
+choices:
+  - id: bake
+    label: Bring something you made yourself
+    check:
+      base: 55
+      stats: [{ key: discipline, weight: 0.15 }, { key: luck, weight: 0.15 }]
+      success:
+        text: Gone in ten minutes, and three people ask for the recipe. {npc.name} saves you the last piece, which says more than the compliments do.
+        effects:
+          - { type: relationship, role: npc, affection: 5 }
+          - { type: stat, key: happiness, delta: 2 }
+      failure:
+        text: It is edible. Nobody says it isn't. It sits at the end of the table, getting politely smaller, until someone takes the last piece out of pity.
+        effects:
+          - { type: relationship, role: npc, affection: 2 }
+          - { type: stat, key: confidence, delta: -1 }
+  - id: buy
+    label: Pick something up on the way in
+    outcome:
+      text: The container is a different colour from the other dishes, and everyone knows it. Nobody minds, and it vanishes anyway.
+      effects:
+        - { type: relationship, role: npc, affection: 2 }
+  - id: skip
+    label: Be in a meeting at lunchtime
+    outcome:
+      text: It is a good meeting, and you are late back to the leftovers. The potluck goes on without you, as such things do.
+      effects:
+        - { type: relationship, role: npc, affection: -1 }

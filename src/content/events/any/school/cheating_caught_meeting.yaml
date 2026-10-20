@@ -1,0 +1,65 @@
+id: cheating_caught_meeting
+title: Called into the office
+text: >-
+  {teacher.name} is waiting at the door of the {principal}'s office with the
+  test in one hand. The answers on yours match the answers on the page
+  beside it, and nobody in the room is going to pretend that they don't.
+tone: serious
+category: school
+rarity: common
+lifeStages: [child, teen, youngAdult, adult]
+followUpOnly: true
+requires:
+  all:
+    - { flag: caught_cheating }
+    - { age: { gte: 11 } }
+    - { education: { program: [elementary, middle, high, college, trade, grad] } }
+weight: { base: 8 }
+cooldownYears: 3
+cast:
+  teacher: { kind: teacher, presence: city }
+  parent: { kind: parent, presence: household, optional: true }
+choices:
+  - id: admit
+    label: Admit it, and say you are sorry
+    outcome:
+      text: >-
+        It takes a long, awful minute to say it. {teacher.name} listens, nods
+        once and says that owning it counts for something. The zero on the test
+        stays.
+      effects:
+        - { type: relationship, role: teacher, trust: 3 }
+        - { type: stat, key: stress, delta: 3 }
+        - { type: stat, key: discipline, delta: 1 }
+  - id: deny
+    label: Insist you did your own work
+    check:
+      base: 30
+      stats: [{ key: confidence, weight: 0.3 }, { key: riskTaking, weight: 0.1 }]
+      success:
+        text: >-
+          You hold the line, and without more than a suspicion, the school has
+          to let it go. {teacher.name} watches you for the rest of the term,
+          and doesn't say a word.
+        effects:
+          - { type: relationship, role: teacher, affection: -4, trust: -4 }
+          - { type: stat, key: stress, delta: 2 }
+      failure:
+        text: >-
+          It makes everything worse. {teacher.name} produces the second copy
+          and a long silence follows, and the lie is now the problem as well as
+          the cheating.
+        effects:
+          - { type: relationship, role: teacher, affection: -8, trust: -8 }
+          - { type: stat, key: stress, delta: 5 }
+          - { type: stat, key: confidence, delta: -2 }
+  - id: blame
+    label: Say everyone does it
+    outcome:
+      text: >-
+        'Everyone' turns out to mean two other people, and now they are in the
+        office too. You are not popular by the end of the day.
+      effects:
+        - { type: relationship, role: teacher, trust: -3 }
+        - { type: stat, key: stress, delta: 3 }
+        - { type: stat, key: kindness, delta: -1 }

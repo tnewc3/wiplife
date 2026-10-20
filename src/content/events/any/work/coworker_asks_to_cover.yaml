@@ -1,0 +1,38 @@
+id: coworker_asks_to_cover
+title: Can you cover for me?
+text: >-
+  {npc.name} catches you at the end of a long day. There is something on
+  Thursday, something that cannot be moved, and {npc.they} would be grateful
+  if you could take {npc.their} hours for an afternoon.
+tone: neutral
+category: work
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires: { career: { employed: true, retired: false } }
+weight: { base: 6 }
+cooldownYears: 3
+cast:
+  npc: { kind: coworker, presence: city }
+choices:
+  - id: cover
+    label: Say yes
+    outcome:
+      text: >-
+        It makes for a long Thursday. {npc.name} comes in on Friday with a
+        coffee and a story that is, as promised, a good reason.
+      effects:
+        - { type: relationship, role: npc, affection: 6, trust: 5 }
+        - { type: memory, role: npc, tag: covered_for_them }
+        - { type: stat, key: stress, delta: 2 }
+  - id: swap
+    label: Cover it, if {npc.they} {npc:takes|take} yours next week
+    outcome:
+      text: A fair trade, written on a sticky note and honoured on both sides. Neither of you mentions it again.
+      effects:
+        - { type: relationship, role: npc, affection: 3, trust: 3 }
+  - id: no
+    label: Say you cannot
+    outcome:
+      text: '{npc.name} says of course, and you can hear that it stings. The afternoon is arranged some other way.'
+      effects:
+        - { type: relationship, role: npc, affection: -3 }

@@ -1,0 +1,55 @@
+id: teacher_stays_after_class
+title: A word after class
+text: >-
+  "Do you have a minute?" {teacher.name} waits until the room has emptied,
+  closes the door halfway and sits on the edge of the desk. It is not what you
+  expected, and it is not what you were afraid of.
+tone: neutral
+category: school
+rarity: common
+lifeStages: [child, teen]
+requires:
+  all:
+    - { education: { program: [elementary, middle, high] } }
+    - { age: { lte: 17 } }
+weight: { base: 6 }
+cooldownYears: 3
+cast:
+  teacher: { kind: teacher, presence: city }
+choices:
+  - id: listen
+    label: Hear {teacher.them} out
+    outcome:
+      text: >-
+        {teacher.name} has noticed something about the way you work, good and
+        bad, and says it plainly. You walk out knowing what to try next.
+      effects:
+        - { type: relationship, role: teacher, trust: 3, affection: 2 }
+        - { type: education, action: grades, value: 0.05 }
+        - { type: stat, key: confidence, delta: 1 }
+  - id: open_up
+    label: Tell {teacher.them} what is really going on
+    check:
+      base: 50
+      stats: [{ role: teacher, key: trust, weight: 0.2 }, { key: confidence, weight: 0.2 }]
+      success:
+        text: >-
+          It comes out more easily than you thought it would. {teacher.name}
+          doesn't try to fix it, just writes down a name and a number, and you
+          leave lighter than you came.
+        effects:
+          - { type: relationship, role: teacher, trust: 6, affection: 4 }
+          - { type: stat, key: stress, delta: -4 }
+      failure:
+        text: >-
+          The words stall halfway. {teacher.name} waits, then says the offer is
+          always there. It is more than you expected, and not enough yet.
+        effects:
+          - { type: relationship, role: teacher, trust: 2 }
+          - { type: stat, key: stress, delta: 1 }
+  - id: deflect
+    label: Say everything is fine
+    outcome:
+      text: '"Okay," says {teacher.name}, in the tone of someone who has heard that before. The door is left half open anyway.'
+      effects:
+        - { type: relationship, role: teacher, trust: -1 }

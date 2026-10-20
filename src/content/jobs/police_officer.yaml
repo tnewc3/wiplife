@@ -10,6 +10,7 @@ levels:
   - { title: "detective", salary: 63000 }
   - { title: "sergeant", salary: 71000 }
   - { title: "lieutenant", salary: 82000 }
+workplace: large
 performance:
   - { key: fitness, weight: 0.25 }
   - { key: discipline, weight: 0.25 }

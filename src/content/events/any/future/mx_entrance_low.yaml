@@ -1,0 +1,34 @@
+id: mx_entrance_low
+title: Short of the cut-off
+text: >-
+  The {entranceExam} results are posted online at midnight. You find your number
+  in the list, and then you find the cut-off for the course you wanted, and
+  the gap between them.
+tone: serious
+category: future
+rarity: common
+countries: [mx]
+lifeStages: [teen]
+followUpOnly: true
+requires: { flag: exam_mx_entrance, eq: fail }
+weight: { base: 10 }
+once: true
+cast:
+  parent: { kind: parent, presence: household }
+choices:
+  - id: try_again
+    label: Tell {parent.name} you will sit it again
+    outcome:
+      text: >-
+        {parent.name} nods slowly, then asks what will be different. You have
+        some answers. Not all of them are good ones yet.
+      effects:
+        - { type: relationship, role: parent, trust: 3 }
+        - { type: stat, key: discipline, delta: 2 }
+  - id: other_route
+    label: Look at the technical schools instead
+    outcome:
+      text: Not what you wanted, but there is a course in it that you can see yourself doing, and a way in that doesn't depend on one morning.
+      effects:
+        - { type: stat, key: confidence, delta: 1 }
+        - { type: stat, key: stress, delta: -1 }

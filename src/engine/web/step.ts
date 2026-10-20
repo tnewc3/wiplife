@@ -148,7 +148,8 @@ function contextTies(ctx: Ctx): void {
     const ageA = ageOf(view, pa);
     const ageB = ageOf(view, pb);
     if (!agesFit(ageA, ageB, content)) continue;
-    if (mayBeCouple(cur, a, b, content) && Math.abs(ageA - ageB) <= content.balance.web.ties.couple.maxAgeGap && chance(rng, c.romance)) {
+    const colleagues = view.relationships[a]!.kind === 'coworker' || view.relationships[b]!.kind === 'coworker';
+    if (!colleagues && mayBeCouple(cur, a, b, content) && Math.abs(ageA - ageB) <= content.balance.web.ties.couple.maxAgeGap && chance(rng, c.romance)) {
       addTie(web, a, b, 'dating', startAffection(rng, content.balance.web.ties.start.dating), 'context', year);
       addNews(ctx, closer(ctx, a, b), 'couple_formed', closer(ctx, a, b) === a ? b : a);
       if (chance(rng, content.balance.web.events.formedChance)) addCandidate(ctx, 'coupleFormed', a, b);
@@ -157,6 +158,32 @@ function contextTies(ctx: Ctx): void {
       addTie(web, a, b, 'friends', startAffection(rng, content.balance.web.ties.start.friends), 'context', year);
       made += 1;
     }
+  }
+}
+
+/**
+ * Batch 3: coworkers who share a workplace. A few pairs are drawn each year; a pair that is tied becomes friends, or rivals
+ * (a tie that starts low, so that it is strained and can sour into a feud). Never a couple.
+ */
+function workTies(ctx: Ctx): void {
+  const { view, web, content, rng, year } = ctx;
+  const c = content.balance.web.ties.work;
+  const cap = content.balance.web.ties.maxPerPerson;
+  const pool = Object.keys(view.relationships)
+    .sort()
+    .filter((id) => view.relationships[id]!.kind === 'coworker' && view.relationships[id]!.status === 'active' && inCircle(view, id));
+  if (pool.length < 2) return;
+  let made = 0;
+  const cur = { ...view, web };
+  for (let i = 0; i < c.draws; i++) {
+    const a = pool[nextInt(rng, 0, pool.length - 1)]!;
+    const b = pool[nextInt(rng, 0, pool.length - 1)]!;
+    if (made >= c.maxPerYear) break;
+    if (a === b || !canTie(cur, a, b) || tieCount(web, a) >= cap || tieCount(web, b) >= cap) continue;
+    if (!agesFit(ageOf(view, view.people[a]!), ageOf(view, view.people[b]!), content) || !chance(rng, c.chance)) continue;
+    const rivals = chance(rng, c.rivalChance);
+    addTie(web, a, b, 'friends', rivals ? startAffection(rng, c.rivalStart) : startAffection(rng, content.balance.web.ties.start.friends), 'context', year);
+    made += 1;
   }
 }
 
@@ -400,6 +427,7 @@ export function runWeb(state: LifeState, content: ContentBundle): void {
   ensureStructure(view, web, state.rng, content, year);
   partnerMeets(ctx);
   contextTies(ctx);
+  workTies(ctx);
   couples(ctx);
   driftAndFeuds(ctx);
 

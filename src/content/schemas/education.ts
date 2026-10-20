@@ -8,6 +8,7 @@ import { z } from 'zod';
 import { curveSchema } from './balance';
 import { baseDefSchema, dollarsSchema, idSchema, scoreKeySchema } from './common';
 import { statEffectsSchema } from './economy';
+import { curriculumSchema, examSlotSchema, schoolChoiceSchema } from './schoolIds';
 
 /** Automatic school (elementary, middle, high) and the programs you apply to. */
 export const PROGRAMS = ['elementary', 'middle', 'high', 'college', 'trade', 'grad'] as const;
@@ -125,6 +126,14 @@ export const schoolStructureSchema = z.strictObject({
   maxRepeats: z.int().min(0).max(2),
   /** From this age you can apply to college, trade school or grad school. */
   applyAge: z.int().min(14).max(21),
+  /** Batch 3: the exams the country holds, and when (the year of a stage that finishes with the exam). */
+  exams: z.array(examSlotSchema).default([]),
+  /** Batch 3: the choice at the end of compulsory school (the UK's sixth form, college, apprenticeship or work). */
+  choice: schoolChoiceSchema.optional(),
+  /** Batch 3: universities ask for a college diploma first (Quebec's CEGEP): the community tier comes before the state and elite ones. */
+  preUniversity: z.literal(true).optional(),
+  /** Batch 3: the subjects of the report card, by stage. */
+  curriculum: curriculumSchema,
 });
 export type SchoolStructure = z.infer<typeof schoolStructureSchema>;
 

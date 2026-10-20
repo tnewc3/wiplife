@@ -1,0 +1,53 @@
+id: mx_entrance_exam
+title: The entrance exam results
+text: >-
+  The {entranceExam} was one long morning in a lecture hall that smelled of
+  chalk and nerves. The results are posted online at midnight, and half the
+  city is awake to read them.
+tone: neutral
+category: future
+rarity: common
+countries: [mx]
+lifeStages: [teen]
+followUpOnly: true
+requires:
+  any:
+    - { flag: exam_mx_entrance, eq: top }
+    - { flag: exam_mx_entrance, eq: pass }
+weight: { base: 10 }
+once: true
+cast:
+  parent: { kind: parent, presence: household }
+choices:
+  - id: top_call
+    label: Wake {parent.name} up to tell {parent.them}
+    visibleIf: { flag: exam_mx_entrance, eq: top }
+    outcome:
+      text: >-
+        {parent.name} sits on the edge of the bed in the dark and reads it with
+        you. Neither of you can stop smiling, and neither of you goes back to
+        sleep.
+      effects:
+        - { type: relationship, role: parent, affection: 5 }
+        - { type: stat, key: happiness, delta: 4 }
+  - id: top_wait
+    label: Wait until morning to tell anyone
+    visibleIf: { flag: exam_mx_entrance, eq: top }
+    outcome:
+      text: You lie awake with the screen turned down on your chest, a very high score keeping you company.
+      effects:
+        - { type: stat, key: confidence, delta: 3 }
+  - id: pass_refresh
+    label: Refresh the page until it settles
+    visibleIf: { flag: exam_mx_entrance, eq: pass }
+    outcome:
+      text: It doesn't change. It is a decent score, a middle-of-the-list score, one that opens some doors and tests others.
+      effects:
+        - { type: stat, key: stress, delta: -1 }
+  - id: pass_options
+    label: Make a list of the places it still gets you into
+    visibleIf: { flag: exam_mx_entrance, eq: pass }
+    outcome:
+      text: The list is longer than you feared. By the time the sky is grey you have crossed off two and starred three.
+      effects:
+        - { type: stat, key: discipline, delta: 1 }

@@ -42,7 +42,7 @@ test('from high school to a college degree, paid with a student loan', async ({ 
   await ageUpTimes(page, 12);
   await tab(page, 'Work/School').click();
   const school = page.getByRole('region', { name: 'High school' });
-  await expect(school.getByTestId('school-status')).toContainText('12th grade · Lakeview High School');
+  await expect(school.getByTestId('school-status')).toContainText('Senior year · Lakeview High School');
   await expect(school.getByTestId('school-grades')).toHaveText(/^Grades: (A|A-|B\+|B|B-|C\+|C|C-|D\+|D|D-|F)$/);
   await expectNoHorizontalScroll(page);
   await expectTouchTargets(page);
