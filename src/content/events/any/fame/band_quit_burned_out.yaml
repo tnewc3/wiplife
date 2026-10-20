@@ -14,7 +14,11 @@ requires:
     - { age: { gte: 18 } }
     - { fame: { active: true } }
     - { fame: { band: true } }
-weight: { base: 8 }
+weight:
+  base: 8
+  # Someone you have clashed with is readier to walk.
+  modifiers:
+    - { if: { memory: { role: bandmate, tag: band_clashed } }, x: 2 }
 followUpOnly: true
 cast:
   bandmate: { kind: friend, band: member, presence: nearby }

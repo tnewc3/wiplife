@@ -10,6 +10,7 @@ import { content } from '../../content';
 import { isLifeActionAvailable, performAction } from '../actions';
 import { InvalidInputError } from '../creation/input';
 import { checkInvariants } from '../invariants';
+import { cloneRng } from '../rng';
 import { lifeAtAge } from '../testFixtures';
 import type { LifeState } from '../types';
 import { applyBandEffect, bandQuality, bandYear, formBand, leaveBand, liveMembers, memberAgeRange } from './band';
@@ -246,7 +247,7 @@ describe('your sound', () => {
     const def = content.famePaths.music!;
     const kind = def.kinds[0]!;
     // The same draws for both, so only the genre differs.
-    const roll = (genre: string) => rollWork(life, { path: 'music', kind: kind.id, style: 'commercial', risk: 'safe', press: false, genre }, life.fame.paths.music!, def, kind, content, structuredClone(life.rng));
+    const roll = (genre: string) => rollWork(life, { path: 'music', kind: kind.id, style: 'commercial', risk: 'safe', press: false, genre }, life.fame.paths.music!, def, kind, content, cloneRng(life.rng));
     const on = roll('alt_rock');
     const off = roll('regional_mexican');
     expect(off.critics).toBe(on.critics);
@@ -334,7 +335,7 @@ describe('shows', () => {
     const outcome = after.fame.grind.lastShow!.outcome;
     expect(after.fame.band!.chemistry).toBe(band.fame.band!.chemistry + b.shows.chemistry[outcome]);
     // In a band, your share of the pay is the band's cut.
-    expect(after.fame.grind.lastShow!.pay).toBeLessThanOrEqual(apply(low, (d) => void playShow(d, content, structuredClone(band.rng))).fame.grind.lastShow!.pay * 2);
+    expect(after.fame.grind.lastShow!.pay).toBeLessThanOrEqual(apply(low, (d) => void playShow(d, content, cloneRng(band.rng))).fame.grind.lastShow!.pay * 2);
   });
 });
 
@@ -415,7 +416,7 @@ describe('practice', () => {
     const skilled = apply(life, (d) => void (d.fame.paths.music!.skills = { vocals: 100, songwriting: 100 }));
     const def = content.famePaths.music!;
     const kind = def.kinds.find((k) => k.id === 'single')!;
-    const q = (l: LifeState) => rollWork(l, { path: 'music', kind: 'single', style: 'commercial', risk: 'safe', press: false }, l.fame.paths.music!, def, kind, content, structuredClone(l.rng)).quality;
+    const q = (l: LifeState) => rollWork(l, { path: 'music', kind: 'single', style: 'commercial', risk: 'safe', press: false }, l.fame.paths.music!, def, kind, content, cloneRng(l.rng)).quality;
     expect(q(skilled)).toBeGreaterThan(q(life));
     // Practise is generic: a path registers skills in content; one without them has nothing to practise.
     const actor = apply(lifeAtAge('actor', 25), (d) => void enterPath(d, 'acting', content.famePaths.acting!.routes[0]!.id, content));
