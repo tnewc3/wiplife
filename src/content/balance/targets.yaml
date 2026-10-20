@@ -318,7 +318,8 @@ school:
   hardVsSlack: { min: 1, max: 40 }
   sizeGap: { min: 1.5, max: 8 }
   mostCoworkers: { min: 0, max: 8 }
-  coworkerTieLives: { min: 0.05, max: 0.95 }
+  # Over a whole career nearly everyone who works sees two coworkers become friends or rivals; "none at all" is what would be wrong.
+  coworkerTieLives: { min: 0.3, max: 1 }
   overCap: { min: 0, max: 0 }
   romanceTeacher: { min: 0, max: 0 }
   romanceUnder18: { min: 0, max: 0 }

@@ -10,6 +10,7 @@ import { rungDef } from '../fame/query';
 import { runFame } from '../fame/step';
 import { checkInvariants } from '../invariants';
 import { resolveChoice } from '../life';
+import { sameCountry } from '../country';
 import { createRng } from '../rng';
 import { getSportsView } from '../selectors';
 import { yearIncome } from '../systems/career';
@@ -327,6 +328,18 @@ describe('contracts, trades and releases', () => {
     const other = proTeamsIn(def.sport, 'chicago', content).find((t) => t.city !== life.character.cityId)!;
     const next = apply(life, (d) => void moveToTeam(d, other.id, true, content, createRng('m')));
     expect(next.character.cityId).toBe(other.city);
+    ok(next);
+  });
+
+  it('never moves you to a team in another country than the one you live in (a draft settled during a stay abroad)', () => {
+    const life = pro('abroad');
+    const def = sportPath(content, 'basketball')!;
+    const home = life.character.cityId;
+    const abroad = def.sport.leagues.pro.teams.find((t) => content.cities[t.city] !== undefined && !sameCountry(home, t.city, content));
+    if (!abroad) return;
+    const next = apply(life, (d) => void moveToTeam(d, abroad.id, true, content, createRng('m')));
+    expect(sameCountry(next.character.cityId, home, content)).toBe(true);
+    expect(sameCountry(next.sports.team!.city, home, content)).toBe(true);
     ok(next);
   });
 });

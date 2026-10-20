@@ -55,7 +55,7 @@ report:
 
 actions:
   # Study harder: a better grade this year for stress. Naming a subject lifts that subject more.
-  study: { grades: 0.12, stress: 4, subject: 0.2, discipline: 0.3 }
+  study: { grades: 0.2, stress: 3, subject: 0.2, discipline: 0.3 }
   # Slack off: an easier year and a worse grade.
   slack: { grades: -0.15, stress: -4, happiness: 2 }
   # A tutor, once a year (written at US prices; a poor family finds it harder).
