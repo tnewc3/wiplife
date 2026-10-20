@@ -1,0 +1,57 @@
+id: burglary
+category: crime
+label: "Break into a house"
+blurb: "An empty place and a long night."
+minAge: 18
+inPerson: true
+companion: none
+cost: nothing
+profile: crime_serious
+yearlyLimit: 2
+tiers:
+  great:
+    text:
+      - "The house is empty and the night is kind. By morning {amount} in cash and things that sell is hidden where nobody will look, and you cannot sleep."
+      - "Everything falls your way. You are in, out and gone with {amount} worth of other people's things before the street wakes up."
+    money: { key: loot_burglary, share: 1.5, mode: dirty }
+    effects:
+      - { type: stat, key: happiness, delta: 3 }
+      - { type: stat, key: stress, delta: -2 }
+      - { type: crime, action: heat, delta: 6 }
+      - { type: stat, key: kindness, delta: -1 }
+  good:
+    text:
+      - "It is slower and more frightening than you imagined, but you leave with {amount} and no one the wiser."
+      - "You take what you can carry: {amount} in all. Every sound on the way home feels like a siren."
+    money: { key: loot_burglary, share: 1, mode: dirty }
+    effects:
+      - { type: stat, key: happiness, delta: 1 }
+      - { type: crime, action: heat, delta: 6 }
+      - { type: stat, key: kindness, delta: -1 }
+  neutral:
+    text:
+      - "A dog barks somewhere and a light comes on. You walk away with nothing, shaking, and do not sleep."
+      - "The house is not as empty as you were told. You leave before you have touched anything, and your hands shake for an hour."
+    effects:
+      - { type: stat, key: stress, delta: 2 }
+  bad:
+    text:
+      - "The alarm you did not know about brings the police in minutes. In the cells you have a long night to think, and the court gives you {sentence}."
+      - "A neighbor writes down your face and the police are waiting at your door by dawn. The court gives you {sentence}."
+    effects:
+      - { type: legal, offenseId: burglary, outcome: sentence }
+      - { type: stat, key: reputation, delta: -4 }
+      - { type: stat, key: stress, delta: 5 }
+      - { type: stat, key: happiness, delta: -3 }
+      - { type: crime, action: heat, delta: 10 }
+  backfire:
+    text:
+      - "The owner is home, and what happens in the dark hallway is something you will carry. You are hurt, you are caught, and the court gives you {sentence}."
+      - "It ends in shouting, a fall, and a police officer kneeling on your back. The charge is heavier than you had braced for: {sentence}."
+    effects:
+      - { type: legal, offenseId: burglary, outcome: sentence }
+      - { type: stat, key: reputation, delta: -7 }
+      - { type: stat, key: stress, delta: 8 }
+      - { type: stat, key: happiness, delta: -5 }
+      - { type: stat, key: health, delta: -4 }
+      - { type: crime, action: heat, delta: 10 }

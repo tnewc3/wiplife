@@ -1,0 +1,57 @@
+id: steal_a_car
+category: crime
+label: "Steal a car"
+blurb: "Somebody else's keys, somebody else's road."
+minAge: 18
+inPerson: true
+companion: none
+cost: nothing
+profile: crime_serious
+yearlyLimit: 2
+tiers:
+  great:
+    text:
+      - "The car is quiet, quick and yours for one night. By the time it changes hands you have {amount} in an envelope and a shake in your hands."
+      - "You drive it out of the city and nobody follows. When it is sold on, you are {amount} richer and sure you will be sick."
+    money: { key: loot_car, share: 1.5, mode: dirty }
+    effects:
+      - { type: stat, key: happiness, delta: 3 }
+      - { type: stat, key: stress, delta: -2 }
+      - { type: crime, action: heat, delta: 7 }
+      - { type: flag, key: joyrode, value: true }
+  good:
+    text:
+      - "It runs and nobody chases you. The car is gone by morning, and you have {amount} to show for a night of fear."
+      - "You hand it over and take your share: {amount}. The street is the same when you walk home, and you are not."
+    money: { key: loot_car, share: 1, mode: dirty }
+    effects:
+      - { type: stat, key: happiness, delta: 1 }
+      - { type: crime, action: heat, delta: 7 }
+      - { type: flag, key: joyrode, value: true }
+  neutral:
+    text:
+      - "You sit in the driver's seat and do not move. Then you walk away, with a pulse like a drum and nothing taken."
+      - "A patrol car comes slowly down the street, and you walk the other way as if you had never stopped."
+    effects:
+      - { type: stat, key: stress, delta: 2 }
+  bad:
+    text:
+      - "Blue lights fill the mirror three miles in. The court gives you {sentence}, and the story is all over your street by the weekend."
+      - "The owner's phone tracks the car to a street corner, and the police are there before you are out of it. The court gives you {sentence}."
+    effects:
+      - { type: legal, offenseId: car_theft, outcome: sentence }
+      - { type: stat, key: reputation, delta: -4 }
+      - { type: stat, key: stress, delta: 5 }
+      - { type: stat, key: happiness, delta: -3 }
+      - { type: crime, action: heat, delta: 11 }
+  backfire:
+    text:
+      - "It ends in a crash, a chase, or both. Hurt and in handcuffs, you wait for the court to name the damage: {sentence}."
+      - "A chase that should never have started ends against a wall. The injuries heal, and the court gives you {sentence}."
+    effects:
+      - { type: legal, offenseId: car_theft, outcome: sentence }
+      - { type: stat, key: reputation, delta: -7 }
+      - { type: stat, key: stress, delta: 8 }
+      - { type: stat, key: happiness, delta: -5 }
+      - { type: stat, key: health, delta: -4 }
+      - { type: crime, action: heat, delta: 11 }

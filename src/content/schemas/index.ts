@@ -35,7 +35,7 @@ import { crewSchema, crimeBalanceSchema, crimeRegistrySchema, crimeTextSchema, f
 import { sportsBalanceSchema, sportsRegistrySchema, sportsTextSchema } from './sports';
 import { fameAgentSchema, fameAwardSchema, fameBalanceSchema, fameCompanySchema, famePathSchema, fameRegistrySchema, fameTextSchema } from './fame';
 import { activitySchema, cliqueSchema, houseRuleSchema, teenBalanceSchema, teenJobSchema, teenRegistrySchema, teenTextSchema } from './teen';
-import { pastimeSchema, pastimesBalanceSchema, valuableSchema } from './pastimes';
+import { pastimeSchema, pastimesBalanceSchema, riskBalanceSchema, valuableSchema } from './pastimes';
 import { estateRegistrySchema, familyBalanceSchema, familyRegistrySchema, heirRegistrySchema, heirTextSchema } from './family';
 
 export * from './balance';
@@ -150,6 +150,7 @@ export const singletonTypes = {
   'balance/mental-health': mentalHealthBalanceSchema,
   'balance/possessions': possessionsBalanceSchema,
   'balance/pastimes': pastimesBalanceSchema,
+  'balance/risk': riskBalanceSchema,
   'balance/teen': teenBalanceSchema,
   'balance/crime': crimeBalanceSchema,
   'balance/fame': fameBalanceSchema,
@@ -274,6 +275,7 @@ export const contentBundleSchema = z.strictObject({
     mentalHealth: mentalHealthBalanceSchema,
     possessions: possessionsBalanceSchema,
     pastimes: pastimesBalanceSchema,
+    risk: riskBalanceSchema,
     teen: teenBalanceSchema,
     crime: crimeBalanceSchema,
     fame: fameBalanceSchema,

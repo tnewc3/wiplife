@@ -143,3 +143,19 @@ flags:
   cosmetic_surgery: You have had cosmetic surgery
   surgery_regret: You regret a cosmetic procedure
   nightlife_fight: You were in a fight on a night out
+  # Batch 2b: risk and legal.
+  fake_id: You are carrying a fake ID
+  changed_name: You changed your legal name
+  won_a_lawsuit: You won money in court or by settling a claim
+  lost_a_lawsuit: You lost a case in court
+  sued_by_someone: Someone took you to court
+  neighbor_dispute: You and a neighbor fell out
+  neighbor_damage: A neighbor damaged your property
+  landlord_dispute: A landlord kept money that was yours
+  unsafe_rental: You lived in a rental that was not safe
+  shark_debt_cleared: You worked off a debt to a loan shark
+  sued_employer: You have taken an employer to court
+  sued_doctor: You have taken a doctor to court
+  sued_landlord: You have taken a landlord to court
+  sued_neighbor: You have taken a neighbor to court
+  sued_ex: You have taken an ex to court

@@ -135,6 +135,8 @@ export interface Character {
   canCarry: boolean;
   /** B1: the name heritage (an id in the name pool) your names come from. Unset when it can't be known (older lives). */
   heritage?: string;
+  /** Batch 2b: the names you had before a legal name change, oldest first, with the year you left each (at most risk.yaml identity.formerMax). */
+  formerNames?: { first: string; last: string; year: number }[];
 }
 
 export interface Person {

@@ -1,0 +1,52 @@
+id: buy_stolen_electronics
+category: black_market
+label: "Buy stolen electronics"
+blurb: "A good price, no receipt and no questions."
+minAge: 18
+inPerson: true
+companion: none
+cost: stolen_electronics
+profile: market_goods
+yearlyLimit: 2
+tiers:
+  great:
+    text:
+      - "The laptop is pristine and the deal sweet. You pay {cost}, and when you flip it you net {amount} and tell yourself that nobody was hurt."
+      - "The phone is clean and the buyer is quick: {cost} out, {amount} in. You do not ask where it came from."
+    money: { key: resale_electronics, share: 1.3 }
+    effects:
+      - { type: stat, key: happiness, delta: 2 }
+      - { type: crime, action: heat, delta: 2 }
+  good:
+    text:
+      - "It works, it sells, and the price you get is {amount} against the {cost} you paid."
+      - "A tablet with a cracked corner sells for {amount} after a bit of haggling. The {cost} you paid is long forgotten."
+    money: { key: resale_electronics, share: 1 }
+    effects:
+      - { type: crime, action: heat, delta: 2 }
+  neutral:
+    text:
+      - "The box is locked and the seller has stopped answering. You are out the {cost} and left holding a paperweight."
+      - "The screen lights and goes dark for good. {cost} for a very expensive lesson."
+    effects:
+      - { type: stat, key: stress, delta: 2 }
+      - { type: stat, key: happiness, delta: -1 }
+  bad:
+    text:
+      - "The device is on a police list and so is the shop that sold it. You are caught holding it, and the court gives you {sentence}."
+      - "A routine check turns up a serial number it should not. The court gives you {sentence}."
+    effects:
+      - { type: legal, offenseId: handling_stolen_goods, outcome: sentence }
+      - { type: stat, key: reputation, delta: -4 }
+      - { type: stat, key: stress, delta: 4 }
+      - { type: crime, action: heat, delta: 3 }
+  backfire:
+    text:
+      - "The seller's whole stock is traced, and you are in the book with the rest. The court gives you {sentence}."
+      - "A raid on the seller turns up your name, your number and your {cost}. The court gives you {sentence}."
+    effects:
+      - { type: legal, offenseId: handling_stolen_goods, outcome: sentence }
+      - { type: stat, key: reputation, delta: -8 }
+      - { type: stat, key: stress, delta: 7 }
+      - { type: stat, key: happiness, delta: -4 }
+      - { type: crime, action: heat, delta: 6 }

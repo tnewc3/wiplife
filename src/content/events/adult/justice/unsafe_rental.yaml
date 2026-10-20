@@ -1,0 +1,42 @@
+id: unsafe_rental
+title: The wall that breathes
+text: >-
+  The bedroom wall has a dark patch that grows every week, and the cough you
+  woke up with a month ago has not gone. The landlord's replies get shorter
+  each time you write.
+tone: serious
+category: justice
+rarity: uncommon
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { home: { kind: [renting] } }
+    - { not: { flag: unsafe_rental } }
+weight: { base: 0.7 }
+once: true
+choices:
+  - id: document
+    label: Take photographs and write it all down
+    outcome:
+      text: You photograph the wall, the date and the cough, and keep it all in one folder. The landlord does nothing, and you have a file that says so.
+      effects:
+        - { type: flag, key: unsafe_rental, value: true }
+        - { type: stat, key: health, delta: -2 }
+        - { type: stat, key: stress, delta: 3 }
+  - id: move
+    label: Look for somewhere else
+    outcome:
+      text: It takes weeks to find a place you can afford, and you leave with a cough that takes months to clear. You keep the photographs.
+      effects:
+        - { type: flag, key: unsafe_rental, value: true }
+        - { type: stat, key: health, delta: -3 }
+        - { type: stat, key: stress, delta: 4 }
+  - id: endure
+    label: Open a window and wait
+    outcome:
+      text: The patch grows, the cough stays, and you tell yourself it is only a bad winter.
+      effects:
+        - { type: flag, key: unsafe_rental, value: true }
+        - { type: stat, key: health, delta: -5 }
+        - { type: stat, key: stress, delta: 3 }

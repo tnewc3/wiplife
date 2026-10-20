@@ -1,0 +1,76 @@
+id: sue_your_ex
+category: lawsuits
+label: "Sue an ex"
+blurb: "A claim against someone you used to share a life with."
+minAge: 18
+mechanic: lawsuit
+inPerson: false
+companion: required
+companionKinds: [ex]
+cost: lawyer_ex
+quality: true
+yearlyLimit: 1
+requires: { not: { flag: sued_ex } }
+evidence:
+  - { memory: { role: companion, tag: divorced } }
+  - { memory: { role: companion, tag: never_paid_back } }
+  - { flag: fought_for_custody }
+tiers:
+  great:
+    together:
+      - "The judge listens to {companion.name}'s lawyer, then to yours, and finds for you in full. You are awarded {amount}. Neither of you looks at the other on the way out."
+      - "A clear ruling: {companion.name} owes you {amount}. You thought you would feel more."
+    money: { key: claim_ex, share: 1.0 }
+    effects:
+      - { type: stat, key: happiness, delta: 4 }
+      - { type: stat, key: reputation, delta: 2 }
+      - { type: flag, key: won_a_lawsuit, value: true }
+      - { type: flag, key: sued_ex, value: true }
+    companion: { affection: -6, trust: -4 }
+  good:
+    together:
+      - "The court finds partly for you and awards {amount}. {companion.name} stares at the table throughout."
+      - "The judge splits the difference between you and {companion.name}. You are awarded {amount}, and you both know what it cost."
+    settle:
+      - "{companion.name}'s lawyer calls with an offer of {amount}. You take it, and neither of you says anything for a long time."
+      - "A settlement of {amount}, signed apart. {companion.name} does not look up."
+    money: { key: claim_ex, share: 0.5 }
+    effects:
+      - { type: stat, key: happiness, delta: 2 }
+      - { type: flag, key: won_a_lawsuit, value: true }
+      - { type: flag, key: sued_ex, value: true }
+    companion: { affection: -6, trust: -4 }
+  neutral:
+    together:
+      - "The case is dismissed, and {companion.name} gives you a look you will remember. You pay the lawyer in silence."
+      - "A day in court and no ruling. {companion.name} leaves first."
+    settle:
+      - "{companion.name} will not move, and you are too tired to push. The claim lapses, and the lawyer's bill is yours."
+      - "Talks with {companion.name} go nowhere. You let the claim lapse."
+    effects:
+      - { type: stat, key: stress, delta: 3 }
+      - { type: flag, key: sued_ex, value: true }
+    companion: { affection: -6, trust: -4 }
+  bad:
+    together:
+      - "The court rules for {companion.name}. The costs, {amount}, are yours, and it is the end of whatever was left between you."
+      - "You lose, and the bill for {amount} lands in your hand while {companion.name} is still within earshot."
+    money: { key: court_costs, share: 1.0, mode: loss }
+    effects:
+      - { type: stat, key: stress, delta: 5 }
+      - { type: stat, key: happiness, delta: -3 }
+      - { type: flag, key: lost_a_lawsuit, value: true }
+      - { type: flag, key: sued_ex, value: true }
+    companion: { affection: -6, trust: -4 }
+  backfire:
+    together:
+      - "{companion.name}'s lawyer is thorough and unkind. You lose, you pay {amount} in costs, and the people you both know will hear about it by the weekend."
+      - "The worst of your history is read aloud. You lose, you pay {amount}, and {companion.name} is not the only one who stops speaking to you."
+    money: { key: court_costs, share: 1.6, mode: loss }
+    effects:
+      - { type: stat, key: stress, delta: 8 }
+      - { type: stat, key: happiness, delta: -5 }
+      - { type: stat, key: reputation, delta: -4 }
+      - { type: flag, key: lost_a_lawsuit, value: true }
+      - { type: flag, key: sued_ex, value: true }
+    companion: { affection: -6, trust: -4 }

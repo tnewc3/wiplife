@@ -15,7 +15,7 @@ import { fittingResults, queueResult } from './result';
  * nothing is charged twice. The common checks (between years, input
  * validation, the input log) live in ./index.ts.
  */
-import { LIFESTYLES, type FindDateWay, type ApplyProgram, type ContentBundle, type Lifestyle, type MentalCareId, type PastimeQuality, type PetSourceId, type TeenFocusId, type Tier } from '../../content/schemas';
+import { LIFESTYLES, type FindDateWay, type ApplyProgram, type ContentBundle, type Lifestyle, type MentalCareId, type PastimeQuality, type PastimeRoute, type PastimeStake, type PetSourceId, type TeenFocusId, type Tier } from '../../content/schemas';
 import { canStartDebtPlan, isIndependent, payDebt, spend, startDebtPlan } from '../finance';
 import { buyHome, joinableParent, moveInCost, moveTo, purchaseQuote, refreshHousingCost, sellHome } from '../housing';
 import { afterMove } from '../career';
@@ -132,6 +132,13 @@ export interface LifeActionParams {
   pastimeId?: string;
   companionId?: string;
   quality?: PastimeQuality;
+  /** Batch 2b: gambling (the stake, and whether you are chasing a loss), a lawsuit (settle or go to trial), a legal name change (the typed names and a parent who agrees). */
+  stake?: PastimeStake;
+  chase?: true;
+  route?: PastimeRoute;
+  first?: string;
+  last?: string;
+  consentId?: string;
 }
 
 export interface LifeActionRule {

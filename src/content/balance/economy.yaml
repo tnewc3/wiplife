@@ -61,6 +61,11 @@ interest:
     auto: 0.07
     # W3: a business loan (a new business's own rate is set when it is taken: balance/business.yaml funding.loan).
     business: 0.085
+    # Batch 2b: loans you ask for. A bank's personal loan, a payday loan (a short loan at a very high rate) and a loan shark's
+    # (higher still). These are yearly rates: the rate is what the debt grows by each year it is not paid.
+    bank: 0.11
+    payday: 0.9
+    shark: 1.3
 
 debts:
   # A debt's yearly minimum payment would pay it off in this many years.
@@ -72,6 +77,10 @@ debts:
     collections: 4
     auto: 5
     business: 7
+    # Batch 2b: a bank loan runs five years, a payday loan is due at the next ledger, a shark's is meant to be paid in two.
+    bank: 5
+    payday: 1
+    shark: 2
   # No minimum payment is smaller than this (or the balance, if less).
   minPayment: 300
 
@@ -193,6 +202,10 @@ costs:
   group_donation: { amount: 400, familyHelp: false }
   holiday_travel: { amount: 600, familyHelp: false }
   faith_retreat: { amount: 450, familyHelp: false }
+  # Batch 2b: being sued. What it costs to settle, to lose in court, and a lawyer who defends you.
+  lawsuit_settlement: { amount: 6000, familyHelp: false }
+  lawsuit_judgment: { amount: 16000, familyHelp: false }
+  lawsuit_defense: { amount: 3000, familyHelp: false }
 
 # C1: the share of a cost your family covers, by family wealth, times how
 # close you are to your closest living parent (affection ÷ 100). Nothing

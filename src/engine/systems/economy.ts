@@ -33,22 +33,25 @@ import {
   isIndependent,
   paymentDue,
   sendToCollections,
+  setMinPayment,
   wholeDollars,
 } from '../finance';
 import { housingCost, livingCost, moveTo, ownsHome, refreshHousingCost, sellHome, settleHousehold, supportingParent } from '../housing';
 import { childCosts, childSupportDue } from '../family/costs';
+import { queueCrimeEvent } from '../crime/step';
 import { careCosts } from '../lives/care';
 import { groupCosts } from '../belonging/groups';
 import { remittanceDue } from '../migration/remit';
 import { sceneCost } from '../fame/step';
 import { possessionCosts } from '../possessions/costs';
+import { detachDebt } from '../possessions/query';
 import { recordEarnings, retirementBenefit } from '../retirement';
 import { clampInt, weightedPick } from '../random';
 import { chance } from '../rng';
 import type { Debt, LifeState, StatKey } from '../types';
 import { yearIncome } from './career';
 import { writeFromGroup } from './history';
-import { countryOf } from '../country';
+import { countryOf, scaledAmount } from '../country';
 
 /** Estimated tax on a year's gross income: the country's marginal brackets (countries/*.yaml tax), rounded to whole dollars. */
 export function taxOn(gross: number, state: LifeState, content: ContentBundle): number {
@@ -63,7 +66,7 @@ export function taxOn(gross: number, state: LifeState, content: ContentBundle): 
 }
 
 /** Debts are paid in this order when money is short: the home first, collections last. */
-const PAYMENT_ORDER: Record<Debt['kind'], number> = { mortgage: 0, auto: 1, business: 2, student: 3, medical: 4, personal: 5, collections: 6 };
+const PAYMENT_ORDER: Record<Debt['kind'], number> = { mortgage: 0, shark: 1, auto: 2, business: 3, bank: 4, student: 5, payday: 6, medical: 7, personal: 8, collections: 9 };
 
 /** Applies yearly stat pulls (fractions happen by chance). */
 /** A condition's yearly stat pulls at this share of their full size (its severity, softened by treatment). */
@@ -123,6 +126,7 @@ export function runEconomy(state: LifeState, content: ContentBundle): void {
   const adult = isIndependent(state, content);
   const triggers = new Set<TriggerId>();
   const history = content.text.history;
+  const risk = content.balance.risk;
 
   // 1. Nobody left to live with.
   settleHousehold(state, content);
@@ -138,6 +142,9 @@ export function runEconomy(state: LifeState, content: ContentBundle): void {
     const added = wholeDollars(debt.balance * debt.annualRate);
     debt.balance = wholeDollars(debt.balance + added);
     debtInterest += added;
+    // Batch 2b: loans at a high rate are paid down on a reducing balance (the payment follows what is owed), so a missed year
+    // costs what the rate says and paying keeps shrinking the debt.
+    if (debt.kind === 'bank' || debt.kind === 'payday' || debt.kind === 'shark') setMinPayment(debt, content);
   }
   // A home you own keeps its value while you're in prison (Stage 9).
   if (state.housing.homeValue !== undefined) {
@@ -225,10 +232,25 @@ export function runEconomy(state: LifeState, content: ContentBundle): void {
 
   // 6. Consequences of falling behind.
   for (const debt of [...f.debts]) {
-    if (debt.kind === 'mortgage' || debt.kind === 'collections' || debt.missed < eco.missed.collectionsAfter) continue;
+    // (A bank or payday loan grown past the cap goes to collections too, however many payments were made in between.)
+    const grown = (debt.kind === 'bank' || debt.kind === 'payday') && debt.balance > scaledAmount(state, risk.collectors.settleAbove, content);
+    if (debt.kind === 'mortgage' || debt.kind === 'collections' || debt.kind === 'shark' || (debt.missed < eco.missed.collectionsAfter && !grown)) continue;
     sendToCollections(state, debt, content);
     if (!triggers.has('collections')) writeFromGroup(state, history.money.collections, ['money', 'collections'], {}, content);
     triggers.add('collections');
+  }
+  // Batch 2b: a loan shark does not wait for a court. After enough missed payments in a row the debt is settled their own way.
+  for (const debt of [...f.debts]) {
+    if (debt.kind !== 'shark' || (debt.missed < risk.collectors.settleAfter && debt.balance <= scaledAmount(state, risk.collectors.settleAbove, content))) continue;
+    f.debts = f.debts.filter((d) => d.id !== debt.id);
+    detachDebt(state, debt.id);
+    f.savings = wholeDollars(f.savings * (1 - risk.collectors.savings));
+    const stats = state.character.stats;
+    stats.health = clampInt(stats.health - risk.collectors.health, 0, 100);
+    stats.stress = clampInt(stats.stress + risk.collectors.stress, 0, 100);
+    stats.happiness = clampInt(stats.happiness - risk.collectors.happiness, 0, 100);
+    state.flags.shark_debt_cleared = true;
+    writeFromGroup(state, history.risk.sharkSettled, ['risk', 'sharkSettled'], {}, content);
   }
   const mortgage = f.debts.find((d) => d.id === state.housing.mortgageDebtId);
   if (ownsHome(state) && mortgage && mortgage.missed >= eco.missed.foreclosureAfter) {
@@ -275,4 +297,6 @@ export function runEconomy(state: LifeState, content: ContentBundle): void {
   };
   refreshHousingCost(state, content);
   queueTrigger(state, triggers, content);
+  // Batch 2b: a loan shark's collectors come for a missed payment (a crime-registry event).
+  if (f.debts.some((d) => d.kind === 'shark' && d.missed > 0) && chance(state.rng, content.balance.risk.collectors.visit)) queueCrimeEvent(state, 'shark', content);
 }

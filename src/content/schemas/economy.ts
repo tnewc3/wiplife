@@ -8,7 +8,8 @@ import { z } from 'zod';
 import { curveSchema } from './balance';
 import { dollarsSchema, idSchema, scoreSchema } from './common';
 
-export const DEBT_KINDS = ['student', 'personal', 'mortgage', 'medical', 'collections', 'auto', 'business'] as const;
+/** Batch 2b: `bank` (a bank or credit union personal loan), `payday` (a short loan at a very high rate) and `shark` (a loan from someone who collects in other ways). */
+export const DEBT_KINDS = ['student', 'personal', 'mortgage', 'medical', 'collections', 'auto', 'business', 'bank', 'payday', 'shark'] as const;
 export const debtKindSchema = z.enum(DEBT_KINDS);
 export type DebtKind = z.infer<typeof debtKindSchema>;
 
@@ -34,7 +35,7 @@ export const healthShareKeySchema = z.enum(HEALTH_SHARE_KEYS);
 export type HealthShareKey = z.infer<typeof healthShareKeySchema>;
 
 const share = z.number().min(0).max(1);
-const rate = z.number().min(0).max(1);
+const rate = z.number().min(0).max(3);
 const years = z.int().min(1).max(100);
 
 /**
@@ -58,7 +59,7 @@ export type StatEffects = z.infer<typeof statEffectsSchema>;
 const perWealth = <T extends z.ZodType>(value: T) =>
   z.strictObject({ poor: value, working: value, middle: value, affluent: value, rich: value });
 const perDebtKind = <T extends z.ZodType>(value: T) =>
-  z.strictObject({ student: value, personal: value, mortgage: value, medical: value, collections: value, auto: value, business: value });
+  z.strictObject({ student: value, personal: value, mortgage: value, medical: value, collections: value, auto: value, business: value, bank: value, payday: value, shark: value });
 
 const lifestyleTierSchema = z.strictObject({
   /** Multiplies living costs. */

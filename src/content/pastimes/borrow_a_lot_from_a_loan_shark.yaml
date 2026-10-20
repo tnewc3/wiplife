@@ -1,0 +1,21 @@
+id: borrow_a_lot_from_a_loan_shark
+category: loans
+label: "Borrow big from a loan shark"
+blurb: "A large sum, no questions, and a very long memory."
+minAge: 18
+mechanic: loan
+loan: shark_large
+lender: "a loan shark"
+inPerson: false
+companion: none
+cost: nothing
+yearlyLimit: 1
+tiers:
+  good:
+    text:
+      - "The conversation is short. The money is large: {amount} at {rate} a year, no papers, and a name you will not say aloud."
+      - "A handshake that you feel in your teeth. You take {amount} at {rate} a year, and someone in the room smiles."
+    effects:
+      - { type: stat, key: stress, delta: 8 }
+      - { type: stat, key: happiness, delta: -2 }
+      - { type: crime, action: heat, delta: 3 }

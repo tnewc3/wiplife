@@ -1,0 +1,20 @@
+id: take_your_partners_name
+category: identity
+label: "Take your partner's family name"
+blurb: "Share a surname with the person you share a life with."
+minAge: 13
+mechanic: name
+nameChange: partner
+inPerson: false
+companion: none
+cost: name_change
+yearlyLimit: 1
+requires: { romance: [engaged, married] }
+tiers:
+  good:
+    text:
+      - "At the registry you give up the name you were born with and take the one you chose. You are {self.fullName}. The fee was {cost}, and you are surprised how emotional it feels."
+      - "A form, a fee of {cost} and a signature. {self.fullName} is the name on the mail from now on, and your partner smiles at the first envelope."
+    effects:
+      - { type: stat, key: happiness, delta: 2 }
+      - { type: stat, key: confidence, delta: 1 }

@@ -1,0 +1,85 @@
+id: buy_illegal_drugs
+category: black_market
+label: "Buy illegal drugs"
+blurb: "A deal in a car park and a night you may not remember."
+minAge: 18
+inPerson: true
+companion: none
+cost: illegal_drugs
+profile: market_use
+yearlyLimit: 3
+tiers:
+  great:
+    text:
+      - "The night is bright and big and the world feels generous. In the morning there is only a low hum, and the memory of how easy it was."
+      - "For a few hours nothing is wrong. You come down slowly and not unhappily, with a little less in your pocket and a lot more in your head."
+    effects:
+      - { type: stat, key: happiness, delta: 5 }
+      - { type: stat, key: stress, delta: -4 }
+    extras:
+      - chance: drug_dependence
+        effects:
+          - { type: health, conditionId: drug_addiction, severity: 30 }
+        note: "Coming down is harder than it was. You are already planning the next one."
+      - chance: possession_caught
+        effects:
+          - { type: legal, offenseId: drug_possession, outcome: sentence }
+          - { type: stat, key: reputation, delta: -5 }
+        note: "A routine stop finds what is in your pocket."
+  good:
+    text:
+      - "It does what you wanted, and the evening is easy. {cost} for a few hours off from yourself."
+      - "A good night, a long morning and a promise to be careful that you do not entirely believe."
+    effects:
+      - { type: stat, key: happiness, delta: 2 }
+      - { type: stat, key: stress, delta: -2 }
+    extras:
+      - chance: drug_dependence
+        effects:
+          - { type: health, conditionId: drug_addiction, severity: 30 }
+        note: "Coming down is harder than it was. You are already planning the next one."
+      - chance: possession_caught
+        effects:
+          - { type: legal, offenseId: drug_possession, outcome: sentence }
+          - { type: stat, key: reputation, delta: -5 }
+        note: "A routine stop finds what is in your pocket."
+  neutral:
+    text:
+      - "Nothing much happens. You pay {cost} for a long, flat evening and a headache."
+      - "The deal is a letdown and so is the night. You come away poorer and no happier."
+    effects:
+      - { type: stat, key: happiness, delta: -1 }
+    extras:
+      - chance: possession_caught
+        effects:
+          - { type: legal, offenseId: drug_possession, outcome: sentence }
+          - { type: stat, key: reputation, delta: -5 }
+        note: "A routine stop finds what is in your pocket."
+  bad:
+    text:
+      - "The night turns on you: panic, dread, a morning like a hangover from hell. You swear you are done."
+      - "Everything goes dark and loud. You lose a day of your life and part of a friendship."
+    effects:
+      - { type: stat, key: health, delta: -4 }
+      - { type: stat, key: stress, delta: 6 }
+      - { type: stat, key: happiness, delta: -4 }
+    extras:
+      - chance: drug_dependence
+        effects:
+          - { type: health, conditionId: drug_addiction, severity: 30 }
+        note: "Even so, some part of you is already counting down."
+  backfire:
+    text:
+      - "It ends in an ambulance. You come to under bright lights, with a doctor's tired face and a police officer by the door, and later the court gives you {sentence}."
+      - "What you took was far stronger than you knew. You are lucky to wake up at all, and the court gives you {sentence}."
+    effects:
+      - { type: stat, key: health, delta: -12 }
+      - { type: stat, key: stress, delta: 9 }
+      - { type: stat, key: happiness, delta: -6 }
+      - { type: legal, offenseId: drug_possession, outcome: sentence }
+      - { type: stat, key: reputation, delta: -7 }
+    extras:
+      - chance: drug_dependence
+        effects:
+          - { type: health, conditionId: drug_addiction, severity: 40 }
+        note: "Something in you has changed, and you know it."

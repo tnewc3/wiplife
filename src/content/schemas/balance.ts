@@ -538,6 +538,26 @@ export const targetsBalanceSchema = z.strictObject({
     spamRatio: z.number().min(0).max(1),
   }),
   /**
+   * Batch 2b: risk and legal activities (tools/simulate/risk.ts). The careful player never uses crime, the black market, a payday
+   * lender or a loan shark; the criminal player is judged on the crime ranges; every player on gambling, loans and lawsuits.
+   * A judgment waits for a sample of at least the `min` it names.
+   */
+  risk: z.strictObject({
+    /** Across a player's gambling, what comes back for every dollar staked (the house edge makes it less than 1); judged once this much is staked. */
+    gamblingReturn: z.strictObject({ max: z.number().min(0).max(1), minStaked: z.number().min(0) }),
+    /** Each game's observed return is within this of what its table says, once this much is staked on it (the lottery's rare jackpot is left out). */
+    gameTolerance: z.strictObject({ within: z.number().min(0).max(5), minStaked: z.number().min(0) }),
+    /** The ledger charges the debt's rate: interest per balance-year is within this of the rate, once there are this many balance-years of a kind. */
+    interestTolerance: z.strictObject({ within: z.number().min(0).max(1), minBalanceYears: z.number().min(0) }),
+    /** The criminal player: lives that commit a crime, and the share of attempts that end in a charge. */
+    criminalLives: shareRangeSchema,
+    chargeShare: shareRangeSchema,
+    /** Of the lawsuits filed (judged from this many), the share that win or settle. */
+    lawsuitSuccess: z.strictObject({ range: shareRangeSchema, minFiled: z.int().min(0) }),
+    /** Of the times a fake ID got someone in, the share that were caught (judged from this many uses). */
+    fakeIdCaught: z.strictObject({ range: shareRangeSchema, minUses: z.int().min(0) }),
+  }),
+  /**
    * T1: the teen years (tools/simulate/teen.ts), judged on the careful
    * player's lives, which follow one yearly focus plan each (or none).
    */

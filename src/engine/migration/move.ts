@@ -94,7 +94,11 @@ export function emigrate(state: LifeState, content: ContentBundle): void {
   bump(state, `arrived:${route}:${app.countryId}`);
   bump(state, `arrivedFrom:${origin}`);
   // The language may have faded since the offer: a job you no longer qualify for is not taken.
-  if (route === 'work_sponsor' && app.jobId && meetsJobRequirements(state, content.jobs[app.jobId]!, content)) startJob(state, app.jobId, content);
+  if (route === 'work_sponsor' && app.jobId && meetsJobRequirements(state, content.jobs[app.jobId]!, content)) {
+    // Moving for the sponsored job means leaving school if you have since enrolled (a job is not held in school).
+    if (state.education.current) leaveSchool(state, 'droppedOut', content);
+    startJob(state, app.jobId, content);
+  }
   if (route === 'study_work' && app.majorId && app.tier) admit(state, { program: 'college', tier: app.tier, majorId: app.majorId }, content);
   if (route === 'family' && app.sponsorId && canMoveInTogether(state, app.sponsorId, content)) moveInTogether(state, app.sponsorId, content);
   stats(state, content.balance.immigration.settle.arrival.happiness, content.balance.immigration.settle.arrival.stress);

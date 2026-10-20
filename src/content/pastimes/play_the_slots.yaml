@@ -1,0 +1,69 @@
+id: play_the_slots
+category: gambling
+label: "Play the slots"
+blurb: "Lights, bells and a very patient machine."
+minAge: 18
+legalAge: gambling
+mechanic: gamble
+game: slots
+inPerson: true
+companion: none
+cost: casino_slots
+yearlyLimit: 6
+tiers:
+  great:
+    text:
+      - "The machine goes off like a fire alarm and the whole floor turns to look. The stake was {cost} and the payout is {amount}."
+      - "Three of a kind, then a fourth, then a noise you will remember for years. {cost} in, {amount} out."
+    effects:
+      - { type: stat, key: happiness, delta: 4 }
+      - { type: stat, key: stress, delta: -2 }
+    extras:
+      - chance: gambling_addiction
+        effects:
+          - { type: health, conditionId: gambling_addiction, severity: 25 }
+        note: "You notice that you are thinking about the next bet before this one is settled."
+  good:
+    text:
+      - "A small win, then a bigger one. You walk away from the machine {amount} richer than the {cost} you started with, mostly."
+      - "The reels land kindly. The {cost} comes back as {amount}, and you leave before it changes its mind."
+    effects:
+      - { type: stat, key: happiness, delta: 2 }
+    extras:
+      - chance: gambling_addiction
+        effects:
+          - { type: health, conditionId: gambling_addiction, severity: 25 }
+        note: "You notice that you are thinking about the next bet before this one is settled."
+  neutral:
+    text:
+      - "The machine gives back what you put in, as if apologizing: {cost}, and no more."
+      - "You win a little, lose a little and finish with {amount} for your {cost}. The evening goes nowhere."
+    extras:
+      - chance: gambling_addiction
+        effects:
+          - { type: health, conditionId: gambling_addiction, severity: 25 }
+        note: "You notice that you are thinking about the next bet before this one is settled."
+  bad:
+    text:
+      - "The reels go round and the money goes with them. {cost} is gone, and the machine does not care."
+      - "Every spin takes a little and gives nothing back. You leave with {cost} less and the sound of the bells in your head."
+    effects:
+      - { type: stat, key: happiness, delta: -1 }
+      - { type: stat, key: stress, delta: 2 }
+    extras:
+      - chance: gambling_addiction
+        effects:
+          - { type: health, conditionId: gambling_addiction, severity: 25 }
+        note: "You notice that you are thinking about the next bet before this one is settled."
+  backfire:
+    text:
+      - "You mean to stop at {cost} and do not. The lights, the sounds, and a clock on the wall that is wrong: you walk out into the dawn with nothing."
+      - "It is much later than you thought when you stop. The stake of {cost} is lost, and you sit in the car for a while before you drive."
+    effects:
+      - { type: stat, key: happiness, delta: -3 }
+      - { type: stat, key: stress, delta: 4 }
+    extras:
+      - chance: gambling_addiction
+        effects:
+          - { type: health, conditionId: gambling_addiction, severity: 25 }
+        note: "You notice that you are thinking about the next bet before this one is settled."

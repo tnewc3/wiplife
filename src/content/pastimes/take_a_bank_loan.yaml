@@ -1,0 +1,19 @@
+id: take_a_bank_loan
+category: loans
+label: "Apply for a bank loan"
+blurb: "A bank looks at your income and your record."
+minAge: 18
+mechanic: loan
+loan: bank_personal
+lender: "the bank"
+inPerson: false
+companion: none
+cost: nothing
+yearlyLimit: 1
+tiers:
+  good:
+    text:
+      - "The loan officer reads your file and nods. The bank lends you {amount} at {rate} a year, and the fee of {cost} comes out of it. The first payment is a year away, and it is already on your mind."
+      - "A form, a credit check and a short wait. The bank approves {amount} at {rate} a year, less a fee of {cost}. It is a relief, and a promise."
+    effects:
+      - { type: stat, key: stress, delta: -2 }

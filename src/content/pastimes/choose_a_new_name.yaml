@@ -1,0 +1,19 @@
+id: choose_a_new_name
+category: identity
+label: "Choose an entirely new name"
+blurb: "A new first name and a new family name."
+minAge: 13
+mechanic: name
+nameChange: both
+inPerson: false
+companion: none
+cost: name_change
+yearlyLimit: 1
+tiers:
+  good:
+    text:
+      - "After the hearing you read it aloud in the car: {self.fullName}. It sounds like someone you have been meaning to meet. The fee was {cost}."
+      - "The clerk reads it back to you: {self.fullName}. It is a long list of forms and a fee of {cost}, and then it is simply your name."
+    effects:
+      - { type: stat, key: happiness, delta: 2 }
+      - { type: stat, key: confidence, delta: 1 }

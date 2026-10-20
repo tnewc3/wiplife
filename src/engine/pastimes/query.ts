@@ -9,6 +9,8 @@ import {
   OUTCOME_TIERS,
   PASTIME_CATEGORIES,
   type ContentBundle,
+  type PastimeRoute,
+  type PastimeStake,
   type OutcomeTier,
   type PastimeCategory,
   type PastimeCompanionKind,
@@ -22,6 +24,7 @@ import { whereabouts } from '../presence';
 import type { Id, LifeState, PastimesState } from '../types';
 import { costOfLiving, valuablesOf } from '../possessions/query';
 import { valuableBlock } from '../possessions/valuables';
+import { chaseStake, evidenceCount, lastGamblingLoss, fakeIdUsable, loanOffer, nameBlock, scaledFor, stakeMultiplier, type NameChoice } from './risk';
 
 export function emptyPastimes(year = 0): PastimesState {
   return { year, counts: {}, receipts: [] };
@@ -32,6 +35,7 @@ const COMPANION_KINDS: Record<PastimeCompanionKind, readonly string[]> = {
   partner: ['partner', 'fiance', 'spouse'],
   friend: ['friend'],
   family: ['parent', 'stepparent', 'sibling', 'grandparent', 'relative', 'child', 'stepchild', 'grandchild'],
+  ex: ['ex'],
 };
 
 /** All the activities that exist, in a fixed order (not retired). */
@@ -56,8 +60,11 @@ export function pastimeMinAge(state: LifeState, def: PastimeDef, content: Conten
 export function pastimePrice(state: LifeState, def: PastimeDef, choice: PastimeChoice, content: ContentBundle): number {
   const base = content.balance.pastimes.costs[def.cost] ?? 0;
   const tier = def.quality && choice.quality ? content.balance.pastimes.quality[choice.quality].price : 1;
-  const together = choice.companionId !== undefined ? content.balance.pastimes.companionCost : 1;
-  return wholeDollars(scaledAmount(state, base, content) * costOfLiving(state, content) * tier * together);
+  // Someone who comes along shares an outing; a lawyer's fee is the same whoever you are suing.
+  const together = choice.companionId !== undefined && def.mechanic === 'roll' ? content.balance.pastimes.companionCost : 1;
+  const price = wholeDollars(scaledAmount(state, base, content) * costOfLiving(state, content) * tier * together * (def.mechanic === 'gamble' ? stakeMultiplier(choice.stake, content) : 1));
+  // Chasing a loss bets the loss back (never less than the stake chosen).
+  return def.mechanic === 'gamble' && choice.chase === true ? chaseStake(state, price, content) : price;
 }
 
 /** Does this relationship count as a companion of this kind? */
@@ -90,23 +97,34 @@ export function companionOptions(state: LifeState, def: PastimeDef, content: Con
 }
 
 /** Why you can't do it now. 'age' to 'requires' mean it is not on offer to you; 'limit', 'afford', 'companion' and 'quality' mean it is, but not right now. */
-export type PastimeBlock = 'phase' | 'prison' | 'age' | 'country' | 'city' | 'requires' | 'valuable' | 'limit' | 'afford' | 'companion' | 'quality';
+export type PastimeBlock =
+  | 'phase' | 'prison' | 'age' | 'country' | 'city' | 'requires' | 'valuable' | 'contacts' | 'limit' | 'afford' | 'companion' | 'quality'
+  // Batch 2b: choose a stake, choose how a lawsuit ends, a loan is refused, a name is missing or can't be, a minor needs a parent's agreement, nothing was lost to chase.
+  | 'stake' | 'route' | 'approval' | 'name' | 'consent' | 'partner' | 'former' | 'chase';
 
 /** The blocks that hide an activity from the Activities screen (the others show it, disabled, with the reason). */
-export const HIDING_BLOCKS: readonly PastimeBlock[] = ['phase', 'prison', 'age', 'country', 'city', 'requires', 'valuable'];
+export const HIDING_BLOCKS: readonly PastimeBlock[] = ['phase', 'prison', 'age', 'country', 'city', 'requires', 'valuable', 'contacts', 'partner', 'former'];
 
-export interface PastimeChoice {
+export interface PastimeChoice extends NameChoice {
   companionId?: Id | undefined;
   quality?: PastimeQuality | undefined;
+  /** Gambling: how much you put down, and whether you are chasing what you just lost. */
+  stake?: PastimeStake | undefined;
+  chase?: boolean | undefined;
+  /** A lawsuit: settle or go to trial. */
+  route?: PastimeRoute | undefined;
 }
 
 export function pastimeBlock(state: LifeState, def: PastimeDef, choice: PastimeChoice, content: ContentBundle): PastimeBlock | null {
   if (state.phase !== 'yearStart') return 'phase';
   if (state.housing.kind === 'incarcerated') return 'prison';
-  if (state.character.age < def.minAge || (def.legalAge !== undefined && !atLegalAge(state, def.legalAge, content))) return 'age';
+  if (state.character.age < def.minAge || (def.legalAge !== undefined && !atLegalAge(state, def.legalAge, content) && !fakeIdUsable(state, def, content))) return 'age';
   if (def.countries && !def.countries.includes(countryIdOfCity(state.character.cityId, content))) return 'country';
   if (def.cities && !def.cities.includes(state.character.cityId)) return 'city';
   if (def.requires && !evaluate(def.requires, state, { cast: {}, roles: 'strict', content })) return 'requires';
+  // A lawsuit needs something to go on; a shark needs someone who lends that way.
+  if (def.evidence && def.companion !== 'required' && evidenceCount(state, def, undefined, content) === 0) return 'requires';
+  if (def.mechanic === 'loan' && loanOffer(state, def, content).block === 'contacts') return 'contacts';
   if (def.buys !== undefined && valuableBlock(state, def.buys, content) !== null) return 'valuable';
   if (pastimeCount(state, def.id) >= def.yearlyLimit) return 'limit';
   if (def.quality && choice.quality === undefined) return 'quality';
@@ -116,7 +134,23 @@ export function pastimeBlock(state: LifeState, def: PastimeDef, choice: PastimeC
   } else if (def.companion === 'required') {
     return 'companion';
   }
-  if (state.finances.savings < pastimePrice(state, def, choice, content)) return 'afford';
+  if (def.evidence && def.companion === 'required' && evidenceCount(state, def, choice.companionId, content) === 0) return 'requires';
+  if (def.mechanic === 'gamble') {
+    if (choice.stake === undefined) return 'stake';
+    if (choice.chase === true && lastLoss(state, content) === 0) return 'chase';
+  } else if (choice.stake !== undefined || choice.chase !== undefined) return 'stake';
+  if (def.mechanic === 'lawsuit') {
+    if (choice.route === undefined) return 'route';
+  } else if (choice.route !== undefined) return 'route';
+  if (def.mechanic === 'loan' && loanOffer(state, def, content).block !== null) return 'approval';
+  if (def.mechanic === 'name') {
+    const block = nameBlock(state, def, choice, content);
+    if (block !== null) return block;
+  } else if (choice.first !== undefined || choice.last !== undefined || choice.consentId !== undefined) return 'name';
+  // Chasing a loss may borrow a little; every other price comes from savings.
+  const price = pastimePrice(state, def, choice, content);
+  const borrow = def.mechanic === 'gamble' && choice.chase === true && state.character.age >= content.balance.economy.independenceAge ? scaledFor(state, content.balance.risk.chase.borrow, content) : 0;
+  if (state.finances.savings + borrow < price) return 'afford';
   return null;
 }
 
@@ -129,3 +163,7 @@ export const CATEGORY_ORDER: readonly PastimeCategory[] = PASTIME_CATEGORIES;
 
 /** How many valuables you own: the Luxury screen mentions it. */
 export const ownedValuables = (state: LifeState): number => valuablesOf(state).length;
+
+function lastLoss(state: LifeState, content: ContentBundle): number {
+  return lastGamblingLoss(state, content);
+}

@@ -1,0 +1,80 @@
+id: buy_pills
+category: black_market
+label: "Buy pills"
+blurb: "Small, white and no questions asked."
+minAge: 18
+inPerson: true
+companion: none
+cost: pills
+profile: market_use
+yearlyLimit: 3
+tiers:
+  great:
+    text:
+      - "The week softens at the edges. For {cost} you get a smooth, easy evening with nothing in it that hurts."
+      - "Everything slows down in a good way. You lose the knot in your shoulders, and you did not know how tight it was."
+    effects:
+      - { type: stat, key: stress, delta: -4 }
+      - { type: stat, key: happiness, delta: 3 }
+    extras:
+      - chance: pill_dependence
+        effects:
+          - { type: health, conditionId: drug_addiction, severity: 25 }
+        note: "You notice how much you look forward to the next time."
+      - chance: possession_caught
+        effects:
+          - { type: legal, offenseId: drug_possession, outcome: sentence }
+          - { type: stat, key: reputation, delta: -4 }
+        note: "A routine stop finds what is in your pocket."
+  good:
+    text:
+      - "It does what you hoped: the edges go soft and the evening is quiet. {cost} well spent, you tell yourself."
+      - "A calm, fuzzy evening. The relief is real, and so is the thought about next time."
+    effects:
+      - { type: stat, key: stress, delta: -2 }
+      - { type: stat, key: happiness, delta: 1 }
+    extras:
+      - chance: pill_dependence
+        effects:
+          - { type: health, conditionId: drug_addiction, severity: 25 }
+        note: "You notice how much you look forward to the next time."
+      - chance: possession_caught
+        effects:
+          - { type: legal, offenseId: drug_possession, outcome: sentence }
+          - { type: stat, key: reputation, delta: -4 }
+        note: "A routine stop finds what is in your pocket."
+  neutral:
+    text:
+      - "They do very little. You sit with a glass of water and the feeling that you wasted {cost} and an evening."
+      - "Whatever was in them was not much. You wait for something that never comes."
+    effects:
+      - { type: stat, key: happiness, delta: -1 }
+    extras:
+      - chance: possession_caught
+        effects:
+          - { type: legal, offenseId: drug_possession, outcome: sentence }
+          - { type: stat, key: reputation, delta: -4 }
+        note: "A routine stop finds what is in your pocket."
+  bad:
+    text:
+      - "A bad evening: the room tilts, your stomach turns, and the morning is worse. You promise yourself that this is the end of it."
+      - "They hit wrong. You spend the night on the bathroom floor and the day after in bed."
+    effects:
+      - { type: stat, key: health, delta: -3 }
+      - { type: stat, key: stress, delta: 4 }
+      - { type: stat, key: happiness, delta: -3 }
+    extras:
+      - chance: pill_dependence
+        effects:
+          - { type: health, conditionId: drug_addiction, severity: 25 }
+        note: "Even so, you notice that you are already thinking about the next time."
+  backfire:
+    text:
+      - "It goes wrong in a way you cannot take back: a night in the emergency room, a doctor's quiet look, and a police report. The court gives you {sentence}."
+      - "What you took was not what you were sold. You wake in a hospital bed, and later the court gives you {sentence}."
+    effects:
+      - { type: stat, key: health, delta: -9 }
+      - { type: stat, key: stress, delta: 8 }
+      - { type: stat, key: happiness, delta: -5 }
+      - { type: legal, offenseId: drug_possession, outcome: sentence }
+      - { type: stat, key: reputation, delta: -6 }

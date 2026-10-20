@@ -1,0 +1,57 @@
+id: shoplift
+category: crime
+label: "Shoplift"
+blurb: "Take something you have not paid for."
+minAge: 13
+inPerson: true
+companion: none
+cost: nothing
+profile: crime_petty
+yearlyLimit: 3
+tiers:
+  great:
+    text:
+      - "Your heart is going like a drum, and then you are outside with the cold air on your face and a bag nobody stopped. It is worth {amount} to you. You are not sure what to feel."
+      - "Nobody looks twice. You walk out with more than you meant to and trade it on for {amount}, buzzing the whole way home."
+    money: { key: loot_shoplift, share: 1.5, mode: earn }
+    effects:
+      - { type: stat, key: happiness, delta: 3 }
+      - { type: stat, key: stress, delta: -2 }
+      - { type: flag, key: shoplifted, value: true }
+  good:
+    text:
+      - "You get out the door with your pulse in your ears. What you took is worth {amount}, and the shaking takes an hour to stop."
+      - "It is over in a minute. You leave with {amount} worth of someone else's stock and a strange, sour pride."
+    money: { key: loot_shoplift, share: 1, mode: earn }
+    effects:
+      - { type: stat, key: happiness, delta: 1 }
+      - { type: flag, key: shoplifted, value: true }
+  neutral:
+    text:
+      - "You pick it up, put it down, pick it up. The guard looks your way and you walk out with nothing, hands shaking."
+      - "Your nerve goes at the last second. You leave the store empty-handed and a little ashamed of how close you came."
+    effects:
+      - { type: stat, key: stress, delta: 2 }
+  bad:
+    text:
+      - "A hand closes on your arm at the door. The wait for the police feels longer than the whole year before it. In the end you get {sentence}."
+      - "The alarm goes, the guard is quicker than you thought, and the manager makes the call. The court gives you {sentence}."
+    effects:
+      - { type: legal, offenseId: shoplifting, outcome: sentence }
+      - { type: stat, key: reputation, delta: -4 }
+      - { type: stat, key: stress, delta: 5 }
+      - { type: stat, key: happiness, delta: -3 }
+      - { type: flag, key: shoplifted, value: true }
+      - { type: flag, key: caught_shoplifting, value: true }
+  backfire:
+    text:
+      - "It goes wrong all at once: a shout, a chase through the aisles, and a floor that comes up fast. Hurt, humiliated and in handcuffs, you end up with {sentence}."
+      - "The store has watched you for weeks. They take you into the back, call the police, and your name is on a list in every shop on the street. The court gives you {sentence}."
+    effects:
+      - { type: legal, offenseId: shoplifting, outcome: sentence }
+      - { type: stat, key: reputation, delta: -7 }
+      - { type: stat, key: stress, delta: 8 }
+      - { type: stat, key: happiness, delta: -5 }
+      - { type: stat, key: health, delta: -4 }
+      - { type: flag, key: shoplifted, value: true }
+      - { type: flag, key: caught_shoplifting, value: true }

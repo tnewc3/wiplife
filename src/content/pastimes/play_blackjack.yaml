@@ -1,0 +1,69 @@
+id: play_blackjack
+category: gambling
+label: "Play blackjack"
+blurb: "A table, a dealer and a very short decision."
+minAge: 18
+legalAge: gambling
+mechanic: gamble
+game: blackjack
+inPerson: true
+companion: none
+cost: casino_blackjack
+yearlyLimit: 6
+tiers:
+  great:
+    text:
+      - "A natural, then another, then a run that has the whole table cheering. The {cost} stake becomes {amount}."
+      - "The dealer busts three times in a row and the chips keep arriving. You pay out {cost} and take home {amount}."
+    effects:
+      - { type: stat, key: happiness, delta: 4 }
+      - { type: stat, key: stress, delta: -2 }
+    extras:
+      - chance: gambling_addiction
+        effects:
+          - { type: health, conditionId: gambling_addiction, severity: 25 }
+        note: "You notice that you are thinking about the next bet before this one is settled."
+  good:
+    text:
+      - "A steady hour and a few good hands. You leave the table with {amount} for your {cost}."
+      - "You play it carefully and the cards are kind enough. The {cost} turns into {amount}."
+    effects:
+      - { type: stat, key: happiness, delta: 2 }
+    extras:
+      - chance: gambling_addiction
+        effects:
+          - { type: health, conditionId: gambling_addiction, severity: 25 }
+        note: "You notice that you are thinking about the next bet before this one is settled."
+  neutral:
+    text:
+      - "Push after push. You stand up with exactly what you sat down with: {cost}, and a whole evening's tension."
+      - "A dull, even hour. You win some, lose some, and finish with {amount} against your {cost}."
+    extras:
+      - chance: gambling_addiction
+        effects:
+          - { type: health, conditionId: gambling_addiction, severity: 25 }
+        note: "You notice that you are thinking about the next bet before this one is settled."
+  bad:
+    text:
+      - "The dealer has an answer for everything. {cost} goes across the felt in small pieces and does not come back."
+      - "A bad run and a worse hunch. You stand up from the table {cost} lighter than you sat down."
+    effects:
+      - { type: stat, key: happiness, delta: -1 }
+      - { type: stat, key: stress, delta: 2 }
+    extras:
+      - chance: gambling_addiction
+        effects:
+          - { type: health, conditionId: gambling_addiction, severity: 25 }
+        note: "You notice that you are thinking about the next bet before this one is settled."
+  backfire:
+    text:
+      - "You raise on a hunch, then raise to cover it. By the time you stand, the {cost} is gone and so is the evening's good mood."
+      - "One hand too many. You lose the stake of {cost} and sit very still for a minute before you can stand."
+    effects:
+      - { type: stat, key: happiness, delta: -3 }
+      - { type: stat, key: stress, delta: 4 }
+    extras:
+      - chance: gambling_addiction
+        effects:
+          - { type: health, conditionId: gambling_addiction, severity: 25 }
+        note: "You notice that you are thinking about the next bet before this one is settled."

@@ -17,7 +17,7 @@ import type {
   TieKindId,
   TieStatusId,
 } from '../content/schemas';
-import type { PastimeCategory, PastimeQuality, PetPersonalityId, TeenFocusId } from '../content/schemas';
+import type { PastimeCategory, PastimeQuality, PastimeRoute, PastimeStake, PetPersonalityId, TeenFocusId } from '../content/schemas';
 import type { PastimeBlock } from '../engine/pastimes/query';
 import type { PastimeReceipt } from '../engine/types';
 import type { ActivityBlock } from '../engine/teen/activities';
@@ -288,6 +288,9 @@ export const DEBT_LABELS: Record<DebtKind, string> = {
   collections: 'In collections',
   business: 'Business loan',
   auto: 'Car loan',
+  bank: 'Bank loan',
+  payday: 'Payday loan',
+  shark: 'Loan from a shark',
 };
 
 /** How a debt is going: on track, paused while you study, missed payments, or in collections. */
@@ -1568,7 +1571,7 @@ export const ENTRY_BLOCK_LABELS: Record<string, string> = {
   schooling: 'You need to have finished secondary school.', program: 'Choose a program.', sponsor: 'You need a relative there who is a citizen.',
 };
 export const STATUS_BLOCK_LABELS: Record<string, string> = {
-  status: 'Not for your situation.', unavailable: 'Not available here.', pending: 'You already have an application waiting.', denied: 'Refused this year; try again next year.',
+  age: 'You have to be an adult.', status: 'Not for your situation.', unavailable: 'Not available here.', pending: 'You already have an application waiting.', denied: 'Refused this year; try again next year.',
   student: 'Finish your studies first.', years: 'You have not lived there long enough yet.', job: 'You need a job.', record: 'A recent conviction closes this for now.',
   language: 'You need more of the language.', money: 'You need more saved for the cost.', spouse: 'You need a spouse who is a citizen.', window: 'No window is open now.', law: 'Not while you are in prison.',
 };
@@ -1589,6 +1592,23 @@ export const PASTIME_CATEGORY_LABELS: Record<PastimeCategory, string> = {
   outdoor: 'Outdoor',
   luxury: 'Luxury',
   love: 'Love',
+  // Batch 2b: risk and legal.
+  crime: 'Crime',
+  black_market: 'Black market',
+  gambling: 'Gambling',
+  lawsuits: 'Lawsuits',
+  identity: 'Identity',
+  loans: 'Loans',
+};
+
+/** A line under a risk category's heading: what to know before you choose. */
+export const PASTIME_CATEGORY_NOTES: Partial<Record<PastimeCategory, string>> = {
+  crime: 'Being caught is a court, a record and, for the serious ones, prison. Heat stays with you. Teens only get the small ones, and a juvenile record is sealed at 18.',
+  black_market: 'Money in one hand and trouble in the other. Pills and drugs can take hold of you.',
+  gambling: 'The house always has the edge: over time, you lose. Chasing a loss is how it gets worse.',
+  lawsuits: 'A lawyer costs money whether or not you win. What you can prove changes your odds.',
+  identity: 'Your legal name changes everywhere, from now on.',
+  loans: 'A loan is money now and a bill later. Shorter and faster usually means dearer.',
 };
 
 /** Why an activity on offer can't be done right now. */
@@ -1597,7 +1617,42 @@ export const PASTIME_BLOCK_LABELS: Partial<Record<PastimeBlock, string>> = {
   afford: 'You can’t afford this yet.',
   companion: 'Choose who comes along.',
   quality: 'Choose a price tier.',
+  stake: 'Choose a stake.',
+  route: 'Choose how it ends.',
+  chase: 'You have not lost anything to chase.',
+  name: 'Enter a name you can use.',
+  consent: 'A parent has to agree.',
 };
+
+/** Batch 2b: why a lender said no. */
+export const LOAN_BLOCK_LABELS: Record<string, string> = {
+  status: 'Lenders will not lend to you without papers.',
+  income: 'Your income last year is too low for this lender.',
+  record: 'Your record counts against you here.',
+  bankruptcy: 'It is too soon after your bankruptcy.',
+  debt: 'You owe too much already.',
+  open: 'You already have a loan from this kind of lender.',
+  contacts: 'You do not know anyone who lends this way.',
+};
+
+/** How much you have to go on in a lawsuit, in words. */
+export function evidenceWords(n: number): string {
+  return n === 0 ? 'You have little to go on.' : n === 1 ? 'You have something to go on.' : 'You have a good deal to go on.';
+}
+
+/** What a lender offers: who, how much, the yearly rate, how long, and the fee. */
+export function loanOfferWords(lender: string, amount: string, ratePercent: number, termYears: number, fee: string | null): string {
+  const who = lender ? lender.charAt(0).toUpperCase() + lender.slice(1) : 'They';
+  const term = termYears === 1 ? 'a year' : `${termYears} years`;
+  return `${who} would lend you ${amount} at ${ratePercent}% a year, over ${term}${fee ? `, less a ${fee} fee` : ''}.`;
+}
+
+export const CHASE_LABEL = (loss: string, on: boolean): string => `Chase your losses: bet back the ${loss} you just lost${on ? ' (on)' : ''}`;
+
+export const PASTIME_STAKE_LABELS: Record<PastimeStake, string> = { low: 'Small stake', medium: 'Medium stake', high: 'High stakes' };
+export const PASTIME_STAKE_NOTES: Record<PastimeStake, string> = { low: 'Gentler on the wallet.', medium: 'A fair evening’s money.', high: 'Big swings, and a bigger pull.' };
+export const PASTIME_ROUTE_LABELS: Record<PastimeRoute, string> = { settle: 'Settle out of court', trial: 'Go to trial' };
+export const PASTIME_ROUTE_NOTES: Record<PastimeRoute, string> = { settle: 'A smaller, likelier payout.', trial: 'All or nothing, and costs if you lose.' };
 
 export const PASTIME_QUALITY_LABELS: Record<PastimeQuality, string> = {
   budget: 'Budget surgeon',
@@ -1609,6 +1664,14 @@ export const PASTIME_QUALITY_NOTES: Record<PastimeQuality, string> = {
   budget: 'Cheaper, with more that can go wrong.',
   standard: 'A fair price and fair odds.',
   premier: 'Costs more, and fewer things go wrong.',
+};
+
+/** Batch 2b: lawyer tiers share the price tiers of surgeons. */
+export const LAWYER_QUALITY_LABELS: Record<PastimeQuality, string> = { budget: 'Budget lawyer', standard: 'Standard lawyer', premier: 'Top lawyer' };
+export const LAWYER_QUALITY_NOTES: Record<PastimeQuality, string> = {
+  budget: 'Cheaper, with weaker odds.',
+  standard: 'A fair fee and fair odds.',
+  premier: 'Costs more, with the best odds.',
 };
 
 /** What an activity did to you, in words (never numbers). */

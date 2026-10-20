@@ -204,6 +204,7 @@ const spouseCitizen = (state: LifeState, countryId: CountryId, content: ContentB
 export { spouseCitizen };
 
 export function permanentBlock(state: LifeState, content: ContentBundle): string | null {
+  if (state.character.age < content.balance.relationships.adultAge) return 'age';
   const r = state.travel.residence;
   const b = content.balance.immigration;
   if (!r || !r.settled || (r.type !== 'student' && r.type !== 'temporary_worker')) return 'status';
@@ -250,6 +251,8 @@ export function naturalizationYears(state: LifeState, content: ContentBundle): n
 }
 
 export function naturalizationBlock(state: LifeState, content: ContentBundle): string | null {
+  // (Every answer to an application is an adult's event: a child of a settled household does not apply.)
+  if (state.character.age < content.balance.relationships.adultAge) return 'age';
   const r = state.travel.residence;
   if (!r || !r.settled || r.type !== 'permanent_resident') return 'status';
   const countryId = livingCountry(state, content);
@@ -286,6 +289,7 @@ export function startNaturalization(state: LifeState, content: ContentBundle): v
 // ---- Status for someone without papers ----
 
 export function regularizationBlock(state: LifeState, basis: RegularizationBasis, content: ContentBundle): string | null {
+  if (state.character.age < content.balance.relationships.adultAge) return 'age';
   const r = state.travel.residence;
   if (!r || r.type !== 'undocumented') return 'status';
   const countryId = livingCountry(state, content);

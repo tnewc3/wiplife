@@ -1,0 +1,47 @@
+id: neighbor_damages_property
+title: What came through the fence
+text: >-
+  A crash and a shout, and when you reach the window there is a gap where your
+  fence used to be and {neighbor.name}'s contractor standing in it. The repair
+  will be {$800}, and {neighbor.name} is already saying it was not anyone's
+  fault.
+tone: serious
+category: justice
+rarity: uncommon
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { home: { kind: [owned, renting] } }
+    - { not: { flag: neighbor_damage } }
+weight: { base: 0.7 }
+once: true
+cast:
+  neighbor: { kind: acquaintance, ageOffset: { min: -15, max: 15 }, createIfMissing: true, newChance: 0.5, presence: city }
+choices:
+  - id: ask
+    label: Ask {neighbor.them} to pay
+    check:
+      base: 45
+      stats: [{ key: kindness, weight: 0.2 }, { key: confidence, weight: 0.2 }]
+      success:
+        text: After a long talk over the gap in the fence, {neighbor.name} agrees to cover most of it. It is stiff, and it is fair.
+        effects:
+          - { type: money, delta: -200 }
+          - { type: flag, key: neighbor_damage, value: true }
+          - { type: relationship, role: neighbor, affection: -2 }
+      failure:
+        text: '{neighbor.name} says it was your fence that was crooked. You pay {$800} yourself and do not forget the tone.'
+        effects:
+          - { type: money, delta: -800 }
+          - { type: flag, key: neighbor_damage, value: true }
+          - { type: relationship, role: neighbor, affection: -8 }
+          - { type: stat, key: stress, delta: 3 }
+  - id: pay
+    label: Fix it yourself and say nothing
+    outcome:
+      text: You pay {$800} and keep the receipt and the photograph, and the street gets a little cooler.
+      effects:
+        - { type: money, delta: -800 }
+        - { type: flag, key: neighbor_damage, value: true }
+        - { type: relationship, role: neighbor, affection: -4 }

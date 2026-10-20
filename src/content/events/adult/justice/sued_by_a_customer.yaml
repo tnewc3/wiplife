@@ -1,0 +1,45 @@
+id: sued_by_a_customer
+title: The claim form
+text: >-
+  A customer slipped on your premises and a lawyer has written to say so. The
+  letter asks for {$6000} and gives you twenty-one days.
+tone: serious
+category: justice
+rarity: uncommon
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { business: { owned: true } }
+weight: { base: 3 }
+cooldownYears: 8
+choices:
+  - id: insurer
+    label: Hand it to your insurer and settle
+    outcome:
+      text: The insurer takes the file and settles for {$6000}. Your premium goes up and the matter goes away.
+      effects:
+        - { type: cost, item: lawsuit_settlement }
+        - { type: stat, key: stress, delta: 2 }
+  - id: defend
+    label: Hire a lawyer and defend it
+    check:
+      base: 50
+      stats: [{ key: smarts, weight: 0.25 }, { key: discipline, weight: 0.2 }, { key: luck, weight: 0.15 }]
+      success:
+        text: Your records show the floor was inspected that morning, and the claim collapses. The lawyer's bill is {$3000}.
+        effects:
+          - { type: cost, item: lawsuit_defense }
+          - { type: stat, key: confidence, delta: 2 }
+      failure:
+        text: The court finds that the floor should have been dry. You owe {$16000} between the judgment and the costs.
+        effects:
+          - { type: cost, item: lawsuit_judgment }
+          - { type: stat, key: stress, delta: 6 }
+  - id: ignore
+    label: Do nothing and hope it goes away
+    outcome:
+      text: It does not. A default judgment of {$16000} lands on your desk the following month.
+      effects:
+        - { type: cost, item: lawsuit_judgment }
+        - { type: stat, key: stress, delta: 7 }

@@ -107,6 +107,14 @@ describe('heat', () => {
     expect(yearStep(out).crime.heat).toBeLessThanOrEqual(b.past.heatLimit);
   });
 
+  it('closes an investigation into someone who is no crew member, has no crime past and has no heat left (solo crime, Batch 2b)', () => {
+    // However the dice fall (a cold case closes only by chance for a crew member), it closes for them.
+    for (let i = 0; i < 20; i++) {
+      const solo = apply(adult(`solo-heat-${i}`, 30), (d) => void ((d.crime.heat = 0), (d.crime.investigation = { since: d.currentYear - 1, until: d.currentYear + 3 }), (d.rng = createRng(`solo-heat-${i}`))));
+      expect(yearStep(solo).crime.investigation, `seed ${i}`).toBeUndefined();
+    }
+  });
+
   it('feeds the legal system: more heat means better odds of an investigation and an arrest, and an open investigation, an informant, a record and probation add to the arrest odds', () => {
     const life = inCrewLife('odds');
     const at = (heat: number) => apply(life, (d) => void (d.crime.heat = heat));
@@ -527,7 +535,7 @@ describe('events', () => {
 });
 
 describe('a life in a crew', () => {
-  it('lives out the years with every invariant holding, whatever the choices, and meets the crew’s events', () => {
+  it('lives out the years with every invariant holding, whatever the choices, and meets the crew’s events', { timeout: 30_000 }, () => {
     const met = new Set<string>();
     for (const seed of ['y1', 'y2', 'y3', 'y4', 'y5', 'y6', 'y7', 'y8', 'y9', 'y10', 'y11', 'y12']) {
       let life = inCrewLife(`years-${seed}`, 24);

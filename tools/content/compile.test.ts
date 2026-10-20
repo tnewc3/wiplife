@@ -1448,7 +1448,8 @@ describe('crime careers (E6a)', () => {
     const events = Object.values(result.bundle.events).filter((e) => !e.retired && categories.includes(e.category));
     for (const city of Object.values(result.bundle.cities)) expect(Object.values(result.bundle.crews).filter((c) => c.cities.includes(city.id)).length, city.id).toBeGreaterThanOrEqual(2);
     expect(events.length).toBeGreaterThanOrEqual(54);
-    expect(events.length).toBeLessThanOrEqual(62);
+    // (Batch 2b adds the loan shark's four events to the crime category crimelaw.)
+    expect(events.length).toBeLessThanOrEqual(66);
     expect(result.warnings).toEqual([]);
   });
 
@@ -1988,5 +1989,80 @@ describe('B1 content checks', () => {
     expect(await expectErrors()).toContain('no_such_event');
     await write('registries/love.yaml', love.replace('app: [find_date_app]', 'app: [road_trip]'));
     expect(await expectErrors()).toContain('must name a followUpOnly event');
+  });
+});
+
+describe('risk and legal activities (Batch 2b)', { timeout: 90_000 }, () => {
+  const read = (file: string) => readFile(path.join(dir, file), 'utf8');
+  it('refuses a game the house does not win, a gambling activity with no legal age, and a game nobody plays', async () => {
+    const risk = await read('balance/risk.yaml');
+    await write('balance/risk.yaml', risk.replace('      - { tier: great, chance: 0.02, multiple: 20 }\n      - { tier: good, chance: 0.2, multiple: 2 }', '      - { tier: great, chance: 0.02, multiple: 60 }\n      - { tier: good, chance: 0.2, multiple: 3 }'));
+    expect(await expectErrors()).toContain('games.slots: the house keeps');
+    await write('balance/risk.yaml', risk);
+    const slots = await read('pastimes/play_the_slots.yaml');
+    await write('pastimes/play_the_slots.yaml', slots.replace('legalAge: gambling\n', ''));
+    expect(await expectErrors()).toContain('gambling follows the legal gambling age');
+    await write('pastimes/play_the_slots.yaml', slots.replace('game: slots', 'game: nonesuch'));
+    expect(await expectErrors()).toContain('unknown game "nonesuch"');
+  });
+
+  it('refuses a teenager who can do a serious crime, dirty money or a drug problem', async () => {
+    const burglary = await read('pastimes/burglary.yaml');
+    await write('pastimes/burglary.yaml', burglary.replace('minAge: 18', 'minAge: 15'));
+    expect(await expectErrors()).toContain('a minor can only do petty crime');
+    const pills = await read('pastimes/buy_pills.yaml');
+    await write('pastimes/burglary.yaml', burglary);
+    await write('pastimes/buy_pills.yaml', pills.replace('minAge: 18', 'minAge: 15'));
+    expect(await expectErrors()).toContain('not for an activity a minor can do');
+  });
+
+  it('keeps crime, the black market, gambling, lawsuits and loans at the level of story', async () => {
+    const shoplift = await read('pastimes/shoplift.yaml');
+    await write('pastimes/shoplift.yaml', shoplift.replace('Nobody looks twice.', "Here's how it is done, step by step."));
+    expect(await expectErrors()).toContain('instruction wording');
+    await write('pastimes/shoplift.yaml', shoplift.replace('Nobody looks twice.', 'Nobody looks twice, and the forged receipt holds.'));
+    expect(await expectErrors()).toContain('instruction wording');
+    await write('pastimes/shoplift.yaml', shoplift);
+    const drugs = await read('pastimes/buy_illegal_drugs.yaml');
+    await write('pastimes/buy_illegal_drugs.yaml', drugs.replace('The night is bright and big', 'Two grams, a cut with sugar, and the night is bright and big'));
+    expect(await expectErrors()).toContain('instruction wording');
+    await write('pastimes/buy_illegal_drugs.yaml', drugs.replace('A deal in a car park', 'Where to buy it: a car park'));
+    expect(await expectErrors()).toContain('instruction wording');
+    await write('pastimes/buy_illegal_drugs.yaml', drugs);
+    const loan = await read('pastimes/take_a_payday_loan.yaml');
+    await write('pastimes/take_a_payday_loan.yaml', loan.replace('The shop is bright and the form is short.', 'You can use a burner phone and avoid detection.'));
+    expect(await expectErrors()).toContain('instruction wording');
+  });
+
+  it('wants a crime to end in the law, a lawsuit to have evidence that exists, and a loan to be for someone who can borrow', async () => {
+    const suit = await read('pastimes/sue_your_landlord.yaml');
+    await write('pastimes/sue_your_landlord.yaml', suit.replace('  - { flag: unsafe_rental }', '  - { flag: made_up_flag }'));
+    expect(await expectErrors()).toContain('flag "made_up_flag" is not in registries/flags.yaml');
+    await write('pastimes/sue_your_landlord.yaml', suit.replace('  - { flag: landlord_dispute }\n  - { flag: unsafe_rental }\n', ''));
+    expect(await expectErrors()).toContain('at least two pieces of evidence');
+    await write('pastimes/sue_your_landlord.yaml', suit);
+    const loan = await read('pastimes/take_a_bank_loan.yaml');
+    await write('pastimes/take_a_bank_loan.yaml', loan.replace('minAge: 18', 'minAge: 16'));
+    expect(await expectErrors()).toContain('minAge must be at least 18');
+    await write('pastimes/take_a_bank_loan.yaml', loan);
+    const car = await read('pastimes/steal_a_car.yaml');
+    await write('pastimes/steal_a_car.yaml', car.replace(/legal, offenseId: car_theft, outcome: sentence/g, 'stat, key: stress, delta: 1').replace(/\{ type: stat, key: stress, delta: 1 \}/g, '{ type: stat, key: stress, delta: 1 }'));
+    expect(await expectErrors()).toContain('a crime ends in the law somewhere');
+  });
+
+  it('keeps the loan rates in order, a payday loan due at once, and the lawsuit costs the events use', async () => {
+    const eco = await read('balance/economy.yaml');
+    await write('balance/economy.yaml', eco.replace('    payday: 0.9\n', '    payday: 0.05\n'));
+    expect(await expectErrors()).toContain('a bank loan costs less than a payday loan');
+    await write('balance/economy.yaml', eco.replace('  lawsuit_defense: { amount: 3000, familyHelp: false }\n', ''));
+    expect(await expectErrors()).toContain('lawsuit_defense');
+  });
+
+  it('wants a name change to be for the youngest age with a parent, and a typed name never to reach the text', async () => {
+    const name = await read('pastimes/change_your_first_name.yaml');
+    await write('pastimes/change_your_first_name.yaml', name.replace('minAge: 13', 'minAge: 10'));
+    expect(await expectErrors()).toContain('minAge must be at least 13');
+    await write('pastimes/change_your_first_name.yaml', name.replace('{self.name}', '{typed}'));
+    expect(await expectErrors()).toContain('unknown');
   });
 });

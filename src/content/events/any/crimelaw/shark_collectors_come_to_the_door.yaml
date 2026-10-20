@@ -1,0 +1,50 @@
+id: shark_collectors_come_to_the_door
+title: Two people on the doorstep
+text: >-
+  Two people you have never met are waiting at your door, politely, with their
+  hands in their pockets. They say you know why they are here, and they say
+  how much is owed.
+tone: dark
+category: crimelaw
+rarity: common
+recurring: true
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { finances: { kinds: [shark] } }
+    - { finances: { missed: { gte: 1 } } }
+weight: { base: 8 }
+followUpOnly: true
+choices:
+  - id: pay
+    label: Hand over what you have
+    outcome:
+      text: You give them {$1500}, all the cash in the house. They count it twice, thank you for your time, and leave without saying when they will be back.
+      effects:
+        - { type: money, delta: -1500 }
+        - { type: debt, action: forgive, share: 0.12, kinds: [shark] }
+        - { type: stat, key: stress, delta: 6 }
+  - id: stand
+    label: Tell them to leave
+    check:
+      base: 40
+      stats: [{ key: confidence, weight: 0.3 }, { key: luck, weight: 0.15 }]
+      success:
+        text: They look at you for a long time. Then they leave, and you do not breathe until the sound of the car has gone. It is not over.
+        effects:
+          - { type: stat, key: stress, delta: 6 }
+          - { type: stat, key: confidence, delta: 1 }
+      failure:
+        text: It is over quickly, and it is not gentle. You wake on the floor with a split lip, bruised ribs and a number to call.
+        effects:
+          - { type: stat, key: health, delta: -8 }
+          - { type: stat, key: stress, delta: 10 }
+          - { type: stat, key: happiness, delta: -4 }
+  - id: police
+    label: Call the police
+    outcome:
+      text: An officer takes a statement and a card. Nobody was threatened on the record, and nothing comes of it.
+      effects:
+        - { type: stat, key: stress, delta: 5 }
+        - { type: stat, key: reputation, delta: -1 }

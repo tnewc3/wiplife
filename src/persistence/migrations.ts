@@ -508,6 +508,13 @@ export const migrations: readonly Migration[] = [
       'possession kind and nothing owned one before, so no possession changes. Heir replay snapshots are upgraded the same way.',
     migrate: upgradePastimesData,
   },
+  {
+    from: 29,
+    description:
+      'Batch 2b: risk and legal activities. New debt kinds (bank, payday, shark) and an optional list of former names on the character; ' +
+      'no existing data changes, so the save is kept as it is. Heir replay snapshots need nothing either.',
+    migrate: (data) => data,
+  },
 ];
 
 /** The one heritage of this name pool that has both names, or undefined (none, or more than one). */

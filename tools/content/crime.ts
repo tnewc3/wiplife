@@ -48,7 +48,7 @@ function requiresCrime(def: EventDef, test: (c: NonNullable<Extract<Condition, {
 }
 
 /** Words that would turn a story into instructions: methods, tools, named products. */
-const INSTRUCTION_WORDS =
+export const INSTRUCTION_WORDS =
   /\b(?:lock\s?pick\w*|hot[- ]?wir\w*|bypass\w*|disable the alarm|jam(?:ming)? the signal|step[- ]by[- ]step|tutorial|here'?s how|how to|recipe|synthesi[sz]\w*|detonat\w*|explosive\w*|fentanyl|heroin|cocaine|meth(?:amphetamine)?|glock|ar-?15|ak-?47|silencer|suppressor|untraceable|burner phone|vpn|crypto\w*|bitcoin)\b/i;
 
 const STEREOTYPE_WORDS =

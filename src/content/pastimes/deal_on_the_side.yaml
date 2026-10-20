@@ -1,0 +1,54 @@
+id: deal_on_the_side
+category: black_market
+label: "Move product for someone"
+blurb: "A friend of a friend with a bag and a promise."
+minAge: 18
+inPerson: true
+companion: none
+cost: dealing_stock
+profile: crime_serious
+yearlyLimit: 2
+tiers:
+  great:
+    text:
+      - "The product moves quickly and the people who wanted it pay on time. By the end of the month you hold {amount} and a worry about every phone call."
+      - "A quiet month and a long list of regulars. You clear {amount} on a {cost} outlay and tell yourself it is only for now."
+    money: { key: dealing, share: 1.5, mode: dirty }
+    effects:
+      - { type: stat, key: kindness, delta: -2 }
+      - { type: crime, action: heat, delta: 7 }
+  good:
+    text:
+      - "It takes some doing, but the stock goes. You hold {amount} against the {cost} you put in, and a new set of people you would rather not know."
+      - "Everything sells, and everyone is polite about it. You count {amount} in a drawer and cannot quite meet your own eyes."
+    money: { key: dealing, share: 1, mode: dirty }
+    effects:
+      - { type: stat, key: kindness, delta: -1 }
+      - { type: crime, action: heat, delta: 6 }
+  neutral:
+    text:
+      - "The buyers dry up and the stock sits in your wardrobe. You hand it back at a loss and decide that this is not who you are."
+      - "Nobody calls, nobody pays, and a week of waiting leaves you shaking. You give the rest back."
+    effects:
+      - { type: stat, key: stress, delta: 4 }
+  bad:
+    text:
+      - "A buyer talks. Within a week the police are at your door, and the court gives you {sentence}."
+      - "You are stopped with more in your bag than a friend would carry. The court gives you {sentence}."
+    effects:
+      - { type: legal, offenseId: drug_dealing, outcome: sentence }
+      - { type: stat, key: reputation, delta: -8 }
+      - { type: stat, key: stress, delta: 7 }
+      - { type: stat, key: happiness, delta: -4 }
+      - { type: crime, action: heat, delta: 10 }
+  backfire:
+    text:
+      - "The whole chain comes apart at once. You are arrested at home with the people you trusted, and the court gives you {sentence}."
+      - "A raid, a witness and a long night in the cells. In the end the court gives you {sentence}."
+    effects:
+      - { type: legal, offenseId: drug_dealing, outcome: sentence }
+      - { type: stat, key: reputation, delta: -12 }
+      - { type: stat, key: stress, delta: 10 }
+      - { type: stat, key: happiness, delta: -6 }
+      - { type: stat, key: health, delta: -3 }
+      - { type: crime, action: heat, delta: 14 }

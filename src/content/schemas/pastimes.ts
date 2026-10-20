@@ -24,11 +24,32 @@ import { OUTCOME_TIERS } from './interactions';
 import { templateSchema } from './text';
 
 /** The groups on the Activities screen, in the order they appear. */
-export const PASTIME_CATEGORIES = ['mind_body', 'salon_spa', 'surgery', 'shopping', 'movies', 'nightlife', 'outdoor', 'luxury', 'love'] as const;
+export const PASTIME_CATEGORIES = [
+  'mind_body', 'salon_spa', 'surgery', 'shopping', 'movies', 'nightlife', 'outdoor', 'luxury', 'love',
+  // Batch 2b: risk and legal.
+  'crime', 'black_market', 'gambling', 'lawsuits', 'identity', 'loans',
+] as const;
 export type PastimeCategory = (typeof PASTIME_CATEGORIES)[number];
 
-/** Who can come along: your partner, a friend, or family. */
-export const PASTIME_COMPANIONS = ['partner', 'friend', 'family'] as const;
+/** Batch 2b: the categories whose outcomes may move money in (loot, winnings, a settlement, a loan) and that have their own rules. */
+export const RISK_CATEGORIES = ['crime', 'black_market', 'gambling', 'lawsuits', 'identity', 'loans'] as const satisfies readonly PastimeCategory[];
+
+/** How an activity is worked out: `roll` (odds profile and tiers), `gamble` (a game's payout table), `lawsuit` (evidence, a lawyer, settle or trial), `loan` (approval, then a debt), `name` (a legal name change). */
+export const PASTIME_MECHANICS = ['roll', 'gamble', 'lawsuit', 'loan', 'name'] as const;
+export type PastimeMechanic = (typeof PASTIME_MECHANICS)[number];
+
+/** Stakes at the tables (balance/risk.yaml stakes), and how a lawsuit ends (settle or go to trial). */
+export const PASTIME_STAKES = ['low', 'medium', 'high'] as const;
+export type PastimeStake = (typeof PASTIME_STAKES)[number];
+export const PASTIME_ROUTES = ['settle', 'trial'] as const;
+export type PastimeRoute = (typeof PASTIME_ROUTES)[number];
+
+/** Which part of a legal name an identity activity changes. */
+export const NAME_CHANGES = ['first', 'last', 'both', 'partner', 'former'] as const;
+export type NameChange = (typeof NAME_CHANGES)[number];
+
+/** Who can come along: your partner, a friend, or family (and, for a lawsuit, the ex you are suing). */
+export const PASTIME_COMPANIONS = ['partner', 'friend', 'family', 'ex'] as const;
 export type PastimeCompanionKind = (typeof PASTIME_COMPANIONS)[number];
 
 /** Price tiers of an activity that has them (a surgeon's quality): cheaper means likelier trouble. */
@@ -43,7 +64,7 @@ export const PASTIME_LEGAL_AGES = ['drinking', 'gambling', 'driving'] as const;
  * effect, a repayment or dirty money is not allowed (the cost is the only
  * money that moves, through the finance module).
  */
-export const PASTIME_EFFECT_TYPES = ['stat', 'memory', 'flag', 'history', 'health', 'legal', 'relationship', 'innerConflict', 'value', 'infidelity'] as const;
+export const PASTIME_EFFECT_TYPES = ['stat', 'memory', 'flag', 'history', 'health', 'legal', 'relationship', 'innerConflict', 'value', 'infidelity', 'crime'] as const;
 const pastimeEffectSchema = effectSchema.refine(
   (e) => (PASTIME_EFFECT_TYPES as readonly string[]).includes(e.type),
   `activities may only use these effects: ${PASTIME_EFFECT_TYPES.join(', ')}`,
@@ -61,11 +82,25 @@ const pastimeExtraSchema = z.strictObject({
   note: templateSchema.optional(),
 });
 
+/**
+ * Batch 2b: money that comes in or goes out because of this outcome (loot, a sale, a settlement, court costs).
+ * `key` names an entry in balance/risk.yaml amounts (US prices, scaled to your country and city); `share` multiplies it.
+ * `earn` pays into savings, `dirty` into dirty money (cash from crime, E6a), `loss` is spent through the finance module.
+ */
+const pastimeMoneySchema = z.strictObject({
+  key: idSchema,
+  share: z.number().min(0).max(3).default(1),
+  mode: z.enum(['earn', 'dirty', 'loss']).default('earn'),
+});
+
 export const pastimeTierSchema = z.strictObject({
   /** Wordings when you go alone (2-3). */
   text: wordings.optional(),
   /** Wordings when someone comes along (2-3); the companion is {companion.name}, {companion.they}... */
   together: wordings.optional(),
+  /** Lawsuits: wordings when you settle instead of going to trial (2-3; with the ex you are suing as {companion.name} when one is involved). */
+  settle: wordings.optional(),
+  money: pastimeMoneySchema.optional(),
   effects: z.array(pastimeEffectSchema).default([]),
   /** What it does between you and the companion (gains shrink with repeats). */
   companion: z.strictObject({ affection: z.int().min(-30).max(30), trust: z.int().min(-30).max(30).default(0) }).optional(),
@@ -101,8 +136,20 @@ export const pastimeSchema = baseDefSchema
     companionKinds: z.array(z.enum(PASTIME_COMPANIONS)).min(1).optional(),
     /** The price: a key of balance/pastimes.yaml costs (US prices, scaled to the country's price level and your city). */
     cost: idSchema,
-    /** The odds of each tier: a key of balance/pastimes.yaml profiles. */
-    profile: idSchema,
+    /** The odds of each tier: a key of balance/pastimes.yaml profiles (roll and lawsuit activities). */
+    profile: idSchema.optional(),
+    /** How it is worked out (roll by default). */
+    mechanic: z.enum(PASTIME_MECHANICS).default('roll'),
+    /** Gambling: the game, a key of balance/risk.yaml games (its payout table and house edge). */
+    game: idSchema.optional(),
+    /** Loans: the lender's terms, a key of balance/risk.yaml loans. */
+    loan: idSchema.optional(),
+    /** Lawsuits: what you have to go on. Each one that holds raises your odds; at least one must hold for the lawsuit to be on offer. The ex you are suing is the role `companion`. */
+    evidence: z.array(conditionSchema).min(1).optional(),
+    /** Loans: who lends, as it reads in your life history ("the bank", "a loan shark"). */
+    lender: z.string().trim().min(1).max(30).optional(),
+    /** Identity: which part of your legal name this changes. */
+    nameChange: z.enum(NAME_CHANGES).optional(),
     /** It has price tiers (budget, standard, premier): you choose one, and it changes the price and the odds. */
     quality: z.boolean().optional(),
     /** The most times a year. */
@@ -114,7 +161,7 @@ export const pastimeSchema = baseDefSchema
     tiers: z.strictObject({
       great: pastimeTierSchema.optional(),
       good: pastimeTierSchema,
-      neutral: pastimeTierSchema,
+      neutral: pastimeTierSchema.optional(),
       bad: pastimeTierSchema.optional(),
       backfire: pastimeTierSchema.optional(),
     }),
@@ -124,7 +171,22 @@ export const pastimeSchema = baseDefSchema
   .superRefine((def, ctx) => {
     const issue = (message: string) => ctx.addIssue({ code: 'custom', message });
     if ((def.companion === 'none') !== (def.companionKinds === undefined)) issue('companionKinds goes with companion: optional or required (and only with it)');
-    if (def.companion !== 'none' && !def.inPerson) issue('a companion needs inPerson: true');
+    const m = def.mechanic;
+    if (m === 'roll' && def.profile === undefined) issue('profile is needed (an odds profile of balance/pastimes.yaml)');
+    if (m === 'roll' && def.tiers.neutral === undefined) issue('tiers.neutral is needed');
+    if ((m === 'gamble') !== (def.game !== undefined)) issue('game goes with mechanic: gamble (and only with it)');
+    if ((m === 'loan') !== (def.loan !== undefined)) issue('loan goes with mechanic: loan (and only with it)');
+    if ((m === 'loan') !== (def.lender !== undefined)) issue('lender goes with mechanic: loan (and only with it)');
+    if ((m === 'lawsuit') !== (def.evidence !== undefined)) issue('evidence goes with mechanic: lawsuit (and only with it)');
+    if ((m === 'name') !== (def.nameChange !== undefined)) issue('nameChange goes with mechanic: name (and only with it)');
+    if (m === 'lawsuit') {
+      if (!def.quality) issue('a lawsuit has lawyer tiers: quality: true');
+      for (const t of ['good', 'neutral'] as const) if (def.tiers[t]?.settle === undefined) issue(`tiers.${t}.settle is needed (a lawsuit can be settled)`);
+    } else {
+      for (const t of OUTCOME_TIERS) if (def.tiers[t]?.settle !== undefined) issue(`tiers.${t}.settle is for lawsuits`);
+    }
+    if (m === 'gamble' && def.legalAge !== 'gambling') issue('gambling follows the legal gambling age: legalAge: gambling');
+    if (def.companion !== 'none' && !def.inPerson && def.mechanic !== 'lawsuit') issue('a companion needs inPerson: true (a lawsuit may be against someone far away)');
     for (const tier of OUTCOME_TIERS) {
       const t = def.tiers[tier];
       if (!t) continue;
@@ -135,6 +197,7 @@ export const pastimeSchema = baseDefSchema
       if (together && t.together === undefined) issue(`tiers.${tier}.together is needed (someone can come along)`);
       if (!together && t.together !== undefined) issue(`tiers.${tier}.together is not used (nobody can come along)`);
       if (t.companion && def.companion === 'none') issue(`tiers.${tier}.companion is for an activity someone can join`);
+      if (t.settle !== undefined && def.companion === 'required' && t.text !== undefined) issue(`tiers.${tier}.text is not used (a companion is required): write together`);
     }
   });
 export type PastimeDef = z.infer<typeof pastimeSchema>;
@@ -189,9 +252,99 @@ export const pastimesBalanceSchema = z.strictObject({
       factors: z.array(z.strictObject({ key: scoreKeySchema, curve: curveSchema })).default([]),
       repeat: z.number().min(0).max(5).default(1),
       quality: z.boolean().default(false),
+      /** Gambling: multiplied by this when you are chasing a loss. */
+      chase: z.number().min(0).max(10).default(1),
+      /** Gambling: multiplied by the stake's `addiction` factor (balance/risk.yaml stakes). */
+      stake: z.boolean().default(false),
     }),
   ),
   /** The receipts kept for the Activities screen: this many of this year's, newest last. */
   receipts: z.int().min(1).max(50),
 });
 export type PastimesBalance = z.infer<typeof pastimesBalanceSchema>;
+
+
+const amountRange = z.strictObject({ min: dollarsSchema, max: dollarsSchema }).refine((r) => r.min <= r.max, 'min must not be greater than max');
+const tierWeights = z.strictObject({ great: weight, good: weight, neutral: weight, bad: weight, backfire: weight });
+
+/** One payout of a game: the tier it is shown as, how likely it is, and what the stake is multiplied by (0 loses it). */
+const gameOutcomeSchema = z.strictObject({ tier: z.enum(OUTCOME_TIERS), chance: z.number().gt(0).max(1), multiple: z.number().min(0).max(1000) });
+
+/** A lender's terms (balance/risk.yaml loans). Rates and terms by debt kind are in balance/economy.yaml. */
+const loanProductSchema = z.strictObject({
+  kind: z.enum(['bank', 'payday', 'shark']),
+  /** What you borrow: this share of last year's income, between these amounts (US prices, scaled). */
+  incomeShare: z.number().min(0).max(5),
+  amount: amountRange,
+  /** The lender wants this much income last year (US prices, scaled); 0 asks nothing. */
+  minIncome: dollarsSchema,
+  /** The most entries a counted criminal record can have; a jail entry within the recent years of balance/legal.yaml record counts as `jailCounts` more. */
+  maxRecord: z.int().min(0).max(50),
+  /** Turned down for this many years after filing for bankruptcy (0: not asked). */
+  bankruptcyYears: z.int().min(0).max(50),
+  /** Turned down when what you already owe is more than this share of last year's income (0: not asked). */
+  maxDebtShare: z.number().min(0).max(20),
+  /** The most loans of this kind you can have at once. */
+  maxOpen: z.int().min(1).max(10),
+  /** The fee paid when the loan is made, as a share of what you borrow. */
+  fee: z.number().min(0).max(1),
+  /** A loan shark: you need to know someone who lends this way (you are in a crew, have heat, or a crew works in your city). */
+  contacts: z.boolean().default(false),
+});
+export type LoanProduct = z.infer<typeof loanProductSchema>;
+
+/** Risk and legal activities (balance/risk.yaml; Batch 2b). */
+export const riskBalanceSchema = z.strictObject({
+  /** Crime and the black market: the worse odds of getting caught. Heat, a record and being in a crew multiply the chance of the two bad tiers. */
+  exposure: z.strictObject({ heat: z.number().min(0).max(1), record: z.number().min(0).max(5), recordMax: z.int().min(1).max(20), crew: z.number().min(0).max(5) }),
+  /** A crew member who works alone: the heat it adds is multiplied by `heat`, and it costs standing in the crew. */
+  crew: z.strictObject({ heat: z.number().min(1).max(5), standing: z.int().min(0).max(50) }),
+  /** Money that comes in or goes out of an outcome, by key (US prices; a range is rolled, then scaled to your country and city). */
+  amounts: z.record(idSchema, amountRange),
+  /** Gambling: the payout table of each game. The chances add up to 1 and the house always keeps at least `minEdge` of the stakes on average. */
+  games: z.record(
+    idSchema,
+    z.strictObject({ minEdge: z.number().min(0.005).max(0.9), outcomes: z.array(gameOutcomeSchema).min(2) }).refine((g) => Math.abs(g.outcomes.reduce((s, o) => s + o.chance, 0) - 1) < 1e-9, 'the chances must add up to 1'),
+  ),
+  /** The stakes: what the base price is multiplied by, and how much likelier a gambling problem is. */
+  stakes: z.record(z.enum(PASTIME_STAKES), z.strictObject({ price: z.number().min(0.05).max(100), addiction: z.number().min(0).max(10) })),
+  /** Chasing a loss: the stake is this share of the last loss (never less than the stake chosen), at most `cap`; you can borrow up to `borrow` to cover it. */
+  chase: z.strictObject({ share: z.number().min(0.1).max(5), cap: dollarsSchema, borrow: dollarsSchema }),
+  /** Lawsuits: the route's odds and payout, and what each piece of evidence does for you. */
+  lawsuits: z.strictObject({
+    /** Each piece of evidence multiplies the good tiers' odds by 1 + step (and divides the bad tiers' by it). */
+    evidenceStep: z.number().min(0).max(5),
+    routes: z.record(z.enum(PASTIME_ROUTES), z.strictObject({ weights: tierWeights, share: z.number().min(0).max(1) })),
+  }),
+  /** A fake ID: how likely each use is to be caught (the offense and flag are fixed by the content build). */
+  fakeId: z.strictObject({ caught: z.number().min(0).max(1), offense: idSchema }),
+  /** A legal name change. */
+  identity: z.strictObject({
+    /** The youngest age with a parent's agreement (an adult needs nobody's). */
+    minorAge: z.int().min(0).max(17),
+    /** A parent agrees when they care at least this much about you. */
+    consentAffection: z.int().min(0).max(100),
+    /** Your closest people's answer: parents when you change your first or last name away from theirs, and a partner when you take their name. */
+    reactions: z.strictObject({ parents: z.int().min(-30).max(30), partnerTakes: z.int().min(-30).max(30), partnerOther: z.int().min(-30).max(30) }),
+    /** Names kept: the most former names remembered. */
+    formerMax: z.int().min(1).max(20),
+  }),
+  /** Lenders. */
+  loans: z.record(idSchema, loanProductSchema),
+  /**
+   * A loan shark's collectors: the chance each year with a missed payment that they come (an event), and what happens when payments
+   * have been missed `settleAfter` years in a row: they settle it their own way. The debt is gone, they take this share of your
+   * savings, and you are hurt (these points of health, and of stress and happiness).
+   */
+  collectors: z.strictObject({
+    visit: z.number().min(0).max(1),
+    settleAfter: z.int().min(1).max(10),
+    /** A loan that has grown past this (US prices) is not waited on: a shark settles it, a bank or payday lender sends it to collections. */
+    settleAbove: dollarsSchema,
+    savings: z.number().min(0).max(1),
+    health: z.int().min(0).max(80),
+    stress: z.int().min(0).max(80),
+    happiness: z.int().min(0).max(80),
+  }),
+});
+export type RiskBalance = z.infer<typeof riskBalanceSchema>;

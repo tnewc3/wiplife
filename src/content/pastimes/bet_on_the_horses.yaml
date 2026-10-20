@@ -1,0 +1,60 @@
+id: bet_on_the_horses
+category: gambling
+label: "Bet on the horses"
+blurb: "A day at the track and a program full of names."
+minAge: 18
+legalAge: gambling
+mechanic: gamble
+game: horse_race
+inPerson: true
+companion: none
+cost: horse_race
+yearlyLimit: 6
+tiers:
+  great:
+    text:
+      - "Your horse comes from behind in the last furlong and the crowd rises. The {cost} bet pays {amount}."
+      - "A long shot with a good name. The ticket you bought for {cost} is worth {amount}, and you buy a round."
+    effects:
+      - { type: stat, key: happiness, delta: 4 }
+      - { type: stat, key: stress, delta: -2 }
+    extras:
+      - chance: gambling_addiction
+        effects:
+          - { type: health, conditionId: gambling_addiction, severity: 25 }
+        note: "You notice that you are thinking about the next bet before this one is settled."
+  good:
+    text:
+      - "A good day at the track. A winner in the fourth race pays {amount} on your {cost}."
+      - "You back the favorite and the favorite delivers: {amount} for {cost}."
+    effects:
+      - { type: stat, key: happiness, delta: 2 }
+    extras:
+      - chance: gambling_addiction
+        effects:
+          - { type: health, conditionId: gambling_addiction, severity: 25 }
+        note: "You notice that you are thinking about the next bet before this one is settled."
+  bad:
+    text:
+      - "Your horse is last out of the gate and stays there. The {cost} ticket goes in your pocket as a souvenir."
+      - "Six races, six near misses. The {cost} you came with is gone by the afternoon."
+    effects:
+      - { type: stat, key: happiness, delta: -1 }
+      - { type: stat, key: stress, delta: 2 }
+    extras:
+      - chance: gambling_addiction
+        effects:
+          - { type: health, conditionId: gambling_addiction, severity: 25 }
+        note: "You notice that you are thinking about the next bet before this one is settled."
+  backfire:
+    text:
+      - "You put more on the last race to win it all back, and it finishes in the middle of the field. You leave in the dusk with nothing and your head down."
+      - "The day starts well and ends badly. By the last race you are betting what you came with, and then some, and the {cost} is gone."
+    effects:
+      - { type: stat, key: happiness, delta: -3 }
+      - { type: stat, key: stress, delta: 4 }
+    extras:
+      - chance: gambling_addiction
+        effects:
+          - { type: health, conditionId: gambling_addiction, severity: 25 }
+        note: "You notice that you are thinking about the next bet before this one is settled."

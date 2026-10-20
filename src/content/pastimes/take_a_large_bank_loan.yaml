@@ -1,0 +1,19 @@
+id: take_a_large_bank_loan
+category: loans
+label: "Apply for a larger loan"
+blurb: "A bigger sum from the bank, for people with a steady income."
+minAge: 18
+mechanic: loan
+loan: bank_large
+lender: "the bank"
+inPerson: false
+companion: none
+cost: nothing
+yearlyLimit: 1
+tiers:
+  good:
+    text:
+      - "The bank looks at your steady income and approves {amount} at {rate} a year, less a fee of {cost}. It is a lot of money, and a lot of years."
+      - "After a long conversation and a stack of papers, the bank agrees to lend you {amount} at {rate} a year. The fee was {cost}, and the first payment is already on your mind."
+    effects:
+      - { type: stat, key: stress, delta: -1 }

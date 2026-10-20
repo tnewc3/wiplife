@@ -1,0 +1,69 @@
+id: bet_on_a_game
+category: gambling
+label: "Bet on a game"
+blurb: "A team you believe in and a number on a screen."
+minAge: 18
+legalAge: gambling
+mechanic: gamble
+game: sports_bet
+inPerson: false
+companion: none
+cost: sports_bet
+yearlyLimit: 6
+tiers:
+  great:
+    text:
+      - "Your long shot comes in at the last minute, and you shout loudly enough that the neighbors knock. The {cost} bet pays {amount}."
+      - "Everyone said it was impossible. The {cost} slip in your pocket is worth {amount}."
+    effects:
+      - { type: stat, key: happiness, delta: 4 }
+      - { type: stat, key: stress, delta: -2 }
+    extras:
+      - chance: gambling_addiction
+        effects:
+          - { type: health, conditionId: gambling_addiction, severity: 25 }
+        note: "You notice that you are thinking about the next bet before this one is settled."
+  good:
+    text:
+      - "Your team does what they were meant to. The {cost} bet pays {amount}, and you pretend you never doubted it."
+      - "A comfortable win, a comfortable payout: {amount} for your {cost}."
+    effects:
+      - { type: stat, key: happiness, delta: 2 }
+    extras:
+      - chance: gambling_addiction
+        effects:
+          - { type: health, conditionId: gambling_addiction, severity: 25 }
+        note: "You notice that you are thinking about the next bet before this one is settled."
+  neutral:
+    text:
+      - "The match ends in a draw and the bet is returned: {cost}, and a long evening's worth of nerves."
+      - "A pushed bet. You get back {amount} for your {cost} and a stomach ache."
+    extras:
+      - chance: gambling_addiction
+        effects:
+          - { type: health, conditionId: gambling_addiction, severity: 25 }
+        note: "You notice that you are thinking about the next bet before this one is settled."
+  bad:
+    text:
+      - "The team folds in the second half, and so does your {cost}. You watch the last ten minutes with your hands over your face."
+      - "You were sure. You were wrong. The {cost} is gone and the match is not even over."
+    effects:
+      - { type: stat, key: happiness, delta: -1 }
+      - { type: stat, key: stress, delta: 2 }
+    extras:
+      - chance: gambling_addiction
+        effects:
+          - { type: health, conditionId: gambling_addiction, severity: 25 }
+        note: "You notice that you are thinking about the next bet before this one is settled."
+  backfire:
+    text:
+      - "You put more on the next game to make up for it, and the one after. By the end of the weekend you are a lot poorer than the {cost} you meant to risk."
+      - "A last-minute goal against, and you are looking at your phone with a sinking feeling. The {cost} is gone, and so is your temper."
+    effects:
+      - { type: stat, key: happiness, delta: -3 }
+      - { type: stat, key: stress, delta: 4 }
+    extras:
+      - chance: gambling_addiction
+        effects:
+          - { type: health, conditionId: gambling_addiction, severity: 25 }
+        note: "You notice that you are thinking about the next bet before this one is settled."

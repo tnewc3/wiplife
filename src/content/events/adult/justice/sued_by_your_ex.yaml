@@ -1,0 +1,55 @@
+id: sued_by_your_ex
+title: A letter from {ex.name}'s lawyer
+text: >-
+  {ex.name} is asking a court for {$6000} that {ex.they} {ex:says|say} you owe
+  from before. It is the first time you have heard from {ex.them} in a while,
+  and it is a lawyer's letter.
+tone: serious
+category: justice
+rarity: uncommon
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { not: { flag: sued_by_someone } }
+weight: { base: 0.8 }
+once: true
+cast:
+  ex: { kind: ex, presence: anywhere }
+choices:
+  - id: settle
+    label: Settle it and be done
+    outcome:
+      text: You agree to pay {$6000} and sign without reading the last page. {ex.name} does not call afterward.
+      effects:
+        - { type: cost, item: lawsuit_settlement }
+        - { type: relationship, role: ex, affection: -4 }
+        - { type: flag, key: sued_by_someone, value: true }
+        - { type: stat, key: stress, delta: 3 }
+  - id: defend
+    label: Hire a lawyer and contest it
+    check:
+      base: 50
+      stats: [{ key: smarts, weight: 0.25 }, { key: confidence, weight: 0.2 }, { key: luck, weight: 0.15 }]
+      success:
+        text: The judge dismisses the claim. Your lawyer's bill is {$3000}, and {ex.name} leaves first.
+        effects:
+          - { type: cost, item: lawsuit_defense }
+          - { type: relationship, role: ex, affection: -8 }
+          - { type: flag, key: sued_by_someone, value: true }
+      failure:
+        text: The judge finds for {ex.name}. You owe {$16000} between the judgment and the costs.
+        effects:
+          - { type: cost, item: lawsuit_judgment }
+          - { type: relationship, role: ex, affection: -12 }
+          - { type: flag, key: sued_by_someone, value: true }
+          - { type: stat, key: stress, delta: 6 }
+  - id: ignore
+    label: Ignore it
+    outcome:
+      text: You leave the letter in a drawer, and a default judgment of {$16000} arrives in the post.
+      effects:
+        - { type: cost, item: lawsuit_judgment }
+        - { type: relationship, role: ex, affection: -10 }
+        - { type: flag, key: sued_by_someone, value: true }
+        - { type: stat, key: stress, delta: 7 }

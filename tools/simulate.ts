@@ -23,6 +23,7 @@ import { formatHeirs, heirTargets } from './simulate/heirs';
 import { measureFullCircle } from './simulate/people';
 import { formatComparison, formatReport, interactionTargets, performanceTargets, runSimulation, type SimulatedPlayer, type SimulationReport } from './simulate/run';
 import { crimeTargets, formatCrime } from './simulate/crime';
+import { formatRisk, riskTargets } from './simulate/risk';
 import { fameTargets, formatFame } from './simulate/fame';
 import { formatSports, sportsTargets } from './simulate/sports';
 import { withCountryTargets } from './simulate/countries';
@@ -133,6 +134,10 @@ for (const report of reports.slice(1)) {
       ...formatCrime(report.crime, content),
       '  targets (src/content/balance/targets.yaml):',
       ...crimeTargets(report, content).map((r) => `  ${r.met ? 'MET    ' : 'NOT MET'} ${r.label}: ${r.value} (target ${r.goal})`),
+      // Batch 2b: every other player's risk and legal activities, too (the criminal player's crime ranges are judged; the careless player's are reported).
+      ...formatRisk(report.pastimes.risk, report.lives, report.events, content),
+      '  targets (src/content/balance/targets.yaml):',
+      ...riskTargets(report, content).map((r) => `  ${r.met ? 'MET    ' : 'NOT MET'} ${r.label}: ${r.value} (target ${r.goal})`),
       // E6b: every other player's fame, too (the star player's is judged).
       ...formatFame(report.fame, content),
       '  targets (src/content/balance/targets.yaml):',

@@ -70,7 +70,9 @@ function runInvestigation(state: LifeState, content: ContentBundle): void {
   const inv = state.crime.investigation;
   if (!inv) return;
   const p = content.balance.crime.police;
-  if (inv.until < state.currentYear || (state.crime.heat < p.coldBelow && chance(state.rng, p.coldChance))) {
+  // (Batch 2b: someone who is not in a crew and has no crime past, with nothing left of the heat that drew the police, is not investigated.)
+  const forgotten = !inCrew(state) && state.crime.heat === 0 && state.crime.past.length === 0;
+  if (inv.until < state.currentYear || (state.crime.heat < p.coldBelow && chance(state.rng, p.coldChance)) || forgotten) {
     closeInvestigation(state, content);
   }
 }

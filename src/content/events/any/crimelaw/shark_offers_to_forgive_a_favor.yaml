@@ -1,0 +1,44 @@
+id: shark_offers_to_forgive_a_favor
+title: A way to work it off
+text: >-
+  The patient voice has a proposal. There is a job, nothing you would have to
+  think about for long, and half of what you owe goes away when it is done. The
+  answer is expected tonight.
+tone: dark
+category: crimelaw
+rarity: uncommon
+recurring: true
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { finances: { kinds: [shark] } }
+    - { finances: { missed: { gte: 1 } } }
+weight: { base: 5 }
+followUpOnly: true
+choices:
+  - id: do
+    label: Do the job
+    check:
+      base: 55
+      stats: [{ key: discipline, weight: 0.2 }, { key: luck, weight: 0.2 }, { crime: heat, weight: -0.2 }]
+      success:
+        text: It takes a night, a car and an address. Half the debt is gone by morning, with a little cash left over for the trouble.
+        effects:
+          - { type: debt, action: forgive, share: 0.5, kinds: [shark] }
+          - { type: dirtyMoney, gain: petty }
+          - { type: crime, action: heat, delta: 6 }
+          - { type: stat, key: kindness, delta: -2 }
+          - { type: stat, key: stress, delta: 5 }
+      failure:
+        text: It goes wrong at the address. You get away, but not clean, and the favor counts for nothing.
+        effects:
+          - { type: crime, action: heat, delta: 10 }
+          - { type: stat, key: health, delta: -4 }
+          - { type: stat, key: stress, delta: 8 }
+  - id: decline
+    label: Say no
+    outcome:
+      text: The line goes quiet. You are told that the offer will not come again, and you spend the night with the lights on.
+      effects:
+        - { type: stat, key: stress, delta: 6 }

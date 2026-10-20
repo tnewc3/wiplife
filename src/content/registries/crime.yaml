@@ -35,6 +35,7 @@ jobs:
 # away        the crew reaches out while you live far from it (favors, threats, suspicion)
 # awayCut     the crew writes you off after years away
 # back        you are home again and the crew has to decide what you are now
+# shark       a loan shark's collectors come for a missed payment (Batch 2b; queued by the economy step)
 deathCauses: [crime_job_gone_wrong, crew_war_killing, crew_reprisal, crew_fight]
 triggers:
   promotion: { events: [promotion_offered] }
@@ -51,3 +52,4 @@ triggers:
   away: { events: [away_favor, away_threat, away_police_rumor, away_new_crew_notices] }
   awayCut: { events: [away_written_off] }
   back: { events: [back_in_town] }
+  shark: { events: [shark_collector_calls, shark_collectors_come_to_the_door, shark_offers_to_forgive_a_favor, shark_makes_an_example] }

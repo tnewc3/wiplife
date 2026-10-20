@@ -1,0 +1,21 @@
+id: borrow_from_a_loan_shark
+category: loans
+label: "Borrow from a loan shark"
+blurb: "Someone who lends when nobody else will, and collects in other ways."
+minAge: 18
+mechanic: loan
+loan: shark_small
+lender: "a loan shark"
+inPerson: false
+companion: none
+cost: nothing
+yearlyLimit: 1
+tiers:
+  good:
+    text:
+      - "You meet in the back of a shop and nobody writes anything down. You walk out with {amount} at {rate} a year, and a phone number you are not to lose."
+      - "The person across the table is polite, patient and unhurried. {amount} is counted out, a rate of {rate} a year is named, and you are told when to call."
+    effects:
+      - { type: stat, key: stress, delta: 6 }
+      - { type: stat, key: happiness, delta: -1 }
+      - { type: crime, action: heat, delta: 2 }
