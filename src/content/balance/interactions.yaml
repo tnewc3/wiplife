@@ -32,7 +32,7 @@ profiles:
     their: { kindness: 0.12, sociability: 0.15 }
     you: { kindness: 0.1, confidence: 0.06, happiness: 0.05 }
     repeat: { same: 8, total: 1.5 }
-    memories: { humiliated_them: -12, big_fight: -6, great_time_together: 4, stepfamily_welcomed: 4, stepfamily_kept_distance: -4, expecting_together: 3, placed_a_baby: -3, you_sided_against_them: -8, you_stayed_neutral: -3, mediated_for_them: 4, got_to_know_at_work: 3, covered_for_them: 4, made_you_welcome_at_school: 3, let_them_copy: 2 }
+    memories: { humiliated_them: -12, big_fight: -6, great_time_together: 4, stepfamily_welcomed: 4, stepfamily_kept_distance: -4, expecting_together: 3, placed_a_baby: -3, you_sided_against_them: -8, you_stayed_neutral: -3, mediated_for_them: 4, got_to_know_at_work: 3, covered_for_them: 4, made_you_welcome_at_school: 3, let_them_copy: 2, saw_you_at_the_party: 2 }
   admiring:
     base: 3
     their: { kindness: 0.1, confidence: 0.05 }
@@ -50,7 +50,7 @@ profiles:
     their: { kindness: 0.15, discipline: 0.1 }
     you: { confidence: 0.1, kindness: 0.1 }
     repeat: { same: 10, total: 2 }
-    memories: { big_fight: -10, made_peace: 6, humiliated_them: -8, argued_with_teacher: -6 }
+    memories: { big_fight: -10, made_peace: 6, humiliated_them: -8, argued_with_teacher: -6, reported_you: -10 }
   hostile:
     base: -20
     their: { kindness: 0.12, riskTaking: -0.08 }

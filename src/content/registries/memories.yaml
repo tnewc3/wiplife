@@ -255,3 +255,5 @@ tags:
   made_you_welcome_at_school: Made you feel welcome when you were new at school
   let_them_copy: You let {npc.them} copy off your paper
   covered_for_them: You covered {npc.their} hours when {npc.they} {npc:needed|needed} you to
+  saw_you_at_the_party: Saw you at the office party
+  reported_you: You reported {npc.them} to the boss

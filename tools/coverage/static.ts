@@ -263,6 +263,7 @@ export function analyzeContent(content: ContentBundle): StaticCoverage {
   // Batch 3: the school step writes a flag for each exam and report card, and for a missed offer.
   for (const id of Object.keys(content.balance.school.exams)) addTo(flagWrites, `exam_${id}`, 'school (engine)');
   for (const flag of ['missed_offer', 'report_failing', 'report_shining', 'school_path']) addTo(flagWrites, flag, 'school (engine)');
+  for (const tag of ['saw_you_at_the_party', 'reported_you']) addTo(memoryWrites, tag, 'work (engine)');
   // The choice at 16 is kept as a flag that the life report and the school card read.
   addTo(flagReads, 'school_path', 'school (engine)');
   // E6c: the sports step writes this when an injury ends a career.
