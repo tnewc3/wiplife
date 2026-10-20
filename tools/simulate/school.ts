@@ -425,7 +425,9 @@ export class SchoolLifeWatcher {
       this.everCegep = true;
       r.cegep.lives++;
     }
-    if (country.school.preUniversity === true && cur?.program === 'college' && cur.tier !== 'community' && cur.since === after.currentYear) {
+    // (Lived in Quebec the whole year: someone who moves there after starting a degree elsewhere is not held to the rule.)
+    const wasThere = countryOfCity(before.character.cityId, c).school.preUniversity === true;
+    if (country.school.preUniversity === true && wasThere && cur?.program === 'college' && cur.tier !== 'community' && cur.since === after.currentYear) {
       r.cegep.bachelorStarts++;
       if (!after.education.credentials.some((x) => x.type === 'associate')) r.cegep.universityWithoutIt++;
     }
