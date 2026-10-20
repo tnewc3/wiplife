@@ -14,7 +14,7 @@
 import type { ContentBundle, ExamId } from '../../src/content/schemas';
 import { SCHOOL_PATHS } from '../../src/content/schemas';
 import { isLifeActionAvailable, type LifeActionId, type LifeActionParams } from '../../src/engine/actions';
-import { countryOfCity } from '../../src/engine/country';
+import { educationCountry } from '../../src/engine/travel/travel';
 import { isIndependent } from '../../src/engine/finance';
 import { weightedPick } from '../../src/engine/random';
 import { chance, pick, type RngState } from '../../src/engine/rng';
@@ -420,14 +420,13 @@ export class SchoolLifeWatcher {
     }
 
     // Quebec: a university needs the college diploma first.
-    const country = countryOfCity(after.character.cityId, c);
+    // (The school rules are those of the country whose system you are in: an international student keeps their home country's.)
+    const country = educationCountry(after, c);
     if (country.school.preUniversity === true && !this.everCegep) {
       this.everCegep = true;
       r.cegep.lives++;
     }
-    // (Lived in Quebec the whole year: someone who moves there after starting a degree elsewhere is not held to the rule.)
-    const wasThere = countryOfCity(before.character.cityId, c).school.preUniversity === true;
-    if (country.school.preUniversity === true && wasThere && cur?.program === 'college' && cur.tier !== 'community' && cur.since === after.currentYear) {
+    if (country.school.preUniversity === true && cur?.program === 'college' && cur.tier !== 'community' && cur.since === after.currentYear) {
       r.cegep.bachelorStarts++;
       if (!after.education.credentials.some((x) => x.type === 'associate')) r.cegep.universityWithoutIt++;
     }
