@@ -57,7 +57,7 @@ ties:
   # Batch 3: coworkers who share a workplace become friends, or rivals (a tie that starts low and can sour into a feud).
   work:
     draws: 4
-    chance: 0.12
+    chance: 0.06
     maxPerYear: 1
     rivalChance: 0.3
     rivalStart: { mean: 24, sd: 6 }
