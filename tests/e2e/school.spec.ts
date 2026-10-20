@@ -24,7 +24,7 @@ const STUDENT: CustomLifeData = {
 
 test('from high school to a college degree, paid with a student loan', async ({ page }) => {
   test.setTimeout(180_000);
-  await passAgeGate(page, { testPack: true, seed: 'e2e-school' });
+  await passAgeGate(page, { testPack: true, seed: 'e2e-school-b3' });
   await page.getByRole('button', { name: 'New Life' }).click();
   await createCustomLife(page, STUDENT);
 

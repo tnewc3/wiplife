@@ -5,6 +5,7 @@ import type { LifeState } from '../../../engine/types';
 import { useAppStore } from '../../../store/appStore';
 import { Button } from '../../components/Button';
 import { Card } from '../../components/Card';
+import { InteractSheet } from '../../components/InteractSheet';
 import { money } from '../../labels';
 import { BusinessCard } from './BusinessCard';
 import { CrimeCard } from './CrimeCard';
@@ -28,6 +29,8 @@ export function WorkTab({ life }: { life: LifeState }) {
       <CrimeCard life={life} />
       <FameCard life={life} />
       <SportsCard life={life} />
+      {/* The Talk buttons on the school and job cards open the interaction menu here. */}
+      <InteractSheet life={life} />
       <Card role="region" aria-labelledby="gig-title">
         <h2 id="gig-title" className="text-lg font-bold">
           Gig work
