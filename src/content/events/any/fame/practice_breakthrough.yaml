@@ -1,0 +1,33 @@
+id: practice_breakthrough
+title: It clicks
+text: >-
+  After months of practice, something that has never worked works: a run
+  you could never play, a note you could never hold. You do it again to
+  make sure it was not luck.
+tone: light
+category: fame
+rarity: common
+recurring: true
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { fame: { active: true } }
+    - { fame: { sport: false } }
+weight: { base: 10 }
+followUpOnly: true
+choices:
+  - id: keep_going
+    label: Practise until it is easy
+    outcome:
+      text: By the end of the night it is yours. It is in every set from then on.
+      effects:
+        - { type: fame, action: craft, delta: 2 }
+        - { type: stat, key: happiness, delta: 3 }
+  - id: write
+    label: Write a song around it
+    outcome:
+      text: The song comes fast, the way the good ones do.
+      effects:
+        - { type: fame, action: craft, delta: 1 }
+        - { type: stat, key: happiness, delta: 4 }

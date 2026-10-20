@@ -1,0 +1,38 @@
+id: band_minor_garage
+title: The garage
+text: >-
+  {bandName} practises in your garage now. Your {parent.relation} has rules
+  about the hours and the volume, and has started, without being asked,
+  making sandwiches.
+tone: light
+category: fame
+rarity: common
+recurring: true
+lifeStages: [child, teen]
+requires:
+  all:
+    - { age: { lte: 17 } }
+    - { fame: { active: true } }
+    - { fame: { band: true } }
+    - { home: { kind: [with_parents] } }
+weight: { base: 8 }
+followUpOnly: true
+cast:
+  parent: { kind: parent, presence: household }
+choices:
+  - id: keep_rules
+    label: Keep to the rules
+    outcome:
+      text: You stop at nine every time. Your {parent.relation} starts staying to listen to the last song.
+      effects:
+        - { type: relationship, role: parent, affection: 4 }
+        - { type: relationship, role: parent, trust: 4 }
+        - { type: band, action: chemistry, delta: 2 }
+  - id: push
+    label: Play until the neighbours knock
+    outcome:
+      text: The neighbours knock. Your {parent.relation} answers the door, and the band is grounded for a week, which nobody knew was possible.
+      effects:
+        - { type: relationship, role: parent, trust: -4 }
+        - { type: band, action: chemistry, delta: 1 }
+        - { type: stat, key: happiness, delta: 2 }

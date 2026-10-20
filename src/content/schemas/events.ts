@@ -340,6 +340,14 @@ export interface FameCondition {
   crossable?: boolean;
   top?: boolean;
   plan?: boolean;
+  /** Batch 4: you are in a band; you lead it; this year's release was outside your sound; you went on tour as this year began; shows you played going into this year; you have a main genre; a band has asked you in. */
+  band?: boolean;
+  leader?: boolean;
+  offGenre?: boolean;
+  toured?: boolean;
+  shows?: Compare;
+  genre?: boolean;
+  offer?: boolean;
 }
 
 /**
@@ -1066,6 +1074,13 @@ export const conditionSchema: z.ZodType<Condition> = z.lazy(() =>
           crossable: z.boolean().optional(),
           top: z.boolean().optional(),
           plan: z.boolean().optional(),
+          band: z.boolean().optional(),
+          leader: z.boolean().optional(),
+          offGenre: z.boolean().optional(),
+          toured: z.boolean().optional(),
+          shows: compareSchema.optional(),
+          genre: z.boolean().optional(),
+          offer: z.boolean().optional(),
         })
         .refine(atLeastOneField, 'needs at least one field'),
     }),
@@ -1339,6 +1354,12 @@ export const castSpecSchema = z
      * they need no kind.
      */
     business: z.enum(BUSINESS_PEOPLE).optional(),
+    /**
+     * Batch 4: someone from your band: a member (or the one who leads it, when
+     * you don't). A friend, found only, never created (the fame step names the
+     * member a band event is about).
+     */
+    band: z.enum(['member', 'leader']).optional(),
   })
   .refine((s) => (s.kind !== undefined && s.support === true) === false && (s.kind !== undefined || s.support === true || s.noticed !== undefined || s.business !== undefined), 'a role needs one of kind or support: true (or noticed, alone or with a kind; or business)')
   .refine((s) => s.deceased !== true || (s.presence === 'anywhere' && s.support !== true && !s.romantic && !s.admirer && !s.createIfMissing && s.newChance === undefined), 'a deceased role has presence anywhere and is only passed in')
@@ -1362,6 +1383,10 @@ export const castSpecSchema = z
   .refine(
     (s) => s.business === undefined || (s.kind === undefined && !s.crew && !s.crowd && !s.fan && !s.group && !s.support && !s.noticed && !s.romantic && !s.admirer && !s.createIfMissing && s.newChance === undefined),
     'a business role is found, never created, and has no kind and is not a crew, crowd, fan, group, support, noticed, romantic or admirer role',
+  )
+  .refine(
+    (s) => s.band === undefined || (s.kind === 'friend' && !s.crew && !s.crowd && !s.fan && !s.group && s.business === undefined && !s.support && !s.noticed && !s.romantic && !s.admirer && !s.createIfMissing && s.newChance === undefined),
+    'a band role is a friend who is found, never created, and not a crew, crowd, fan, group, business, support, noticed, romantic or admirer role',
   )
   .refine(
     (s) => s.fan === undefined || (s.kind === 'acquaintance' && !s.crew && !s.crowd && !s.support && !s.noticed && !s.romantic && !s.admirer && (s.fan !== 'stalker' || (!s.createIfMissing && s.newChance === undefined))),
@@ -1676,6 +1701,21 @@ export const effectSchema = z.discriminatedUnion('type', [
     .refine((e) => (e.action === 'end_contract') === (e.how !== undefined), 'end_contract needs how (and only it has one)')
     .refine((e) => (e.action === 'stalker') === (e.step !== undefined), 'stalker needs step (and only it has one)')
     .refine((e) => e.role === undefined || (e.action === 'stalker' && e.step === 'start'), 'only a stalker start takes a role'),
+  /**
+   * Batch 4, bands. chemistry: the band's chemistry moves by `delta`. quit:
+   * the member in `role` leaves the band (quits, or is poached away). split:
+   * the band breaks up. join: you take up the newest offer from a band in
+   * your city. lead: you take over leading the band.
+   */
+  z
+    .strictObject({
+      type: z.literal('band'),
+      action: z.enum(['chemistry', 'quit', 'split', 'join', 'lead']),
+      delta: z.int().min(-50).max(50).optional(),
+      role: roleSchema.optional(),
+    })
+    .refine((e) => (e.action === 'chemistry') === (e.delta !== undefined && e.delta !== 0), 'chemistry needs a non-zero delta (and only it has one)')
+    .refine((e) => (e.action === 'quit') === (e.role !== undefined), 'quit needs role (and only it has one)'),
   /**
    * E6b, money from the work, sized for where you are on the ladder: gain pays
    * a size of payment (a share of your rung's usual year, with a floor), cost

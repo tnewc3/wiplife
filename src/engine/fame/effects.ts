@@ -46,7 +46,7 @@ export function applyFameEffect(state: LifeState, effect: FameEffect, cast: Reco
   const delta = effect.delta ?? 0;
   switch (effect.action) {
     case 'enter':
-      enterPath(state, effect.path!, effect.route, content);
+      enterPath(state, effect.path!, effect.route, content, rng);
       return;
     case 'comeback':
       comeback(state, content);

@@ -1,3 +1,4 @@
+import { bandPeople } from '../fame/band';
 import { citizenshipsFromCity } from '../migration/citizenship';
 import { meetingWeight, nativeLanguages, sharedLanguage } from '../languages';
 /**
@@ -85,6 +86,9 @@ export function castCandidates(state: LifeState, spec: CastSpec, content: Conten
       } else if (spec.business) {
         // W3: someone from the business the event is about (or from any business of yours).
         if (!businessPeopleFor(state, spec.business, businessId).includes(id) || rel.status !== 'active') return [];
+      } else if (spec.band) {
+        // Batch 4: one of your bandmates (or the one who leads the band).
+        if (!bandPeople(state, spec.band).includes(id) || rel.kind !== 'friend' || rel.status !== 'active') return [];
       } else if (spec.fan) {
         // E6b: one of your fan people (or the stalker among your superfans).
         if (!fanPeople(state, spec.fan).includes(id) || rel.status !== 'active') return [];

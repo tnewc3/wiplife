@@ -1,0 +1,35 @@
+id: tour_home_child_missed
+title: What you missed
+text: >-
+  While you were away on {tourNoun}, {child.name} had a school show, and you
+  watched it on a phone in a dressing room. {child.They} {child:says|say} it
+  is fine. {child.They} {child:has|have} been saying that a lot.
+tone: serious
+category: famelife
+rarity: common
+recurring: true
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { fame: { active: true } }
+    - { fame: { toured: true } }
+weight: { base: 8 }
+followUpOnly: true
+cast:
+  child: { kind: child, presence: household, age: { min: 4, max: 17 } }
+choices:
+  - id: make_up
+    label: Make a day of it when you get home
+    outcome:
+      text: The whole day is {child.theirs} to plan. It involves a lot of pancakes and no phones.
+      effects:
+        - { type: relationship, role: child, affection: 6 }
+        - { type: stat, key: happiness, delta: 3 }
+  - id: explain
+    label: Explain why the road matters
+    outcome:
+      text: '{child.name} listens politely, the way {child.they} would to a teacher. It does not land.'
+      effects:
+        - { type: relationship, role: child, affection: -3 }
+        - { type: stat, key: stress, delta: 2 }

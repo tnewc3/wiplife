@@ -665,6 +665,19 @@ export const targetsBalanceSchema = z.strictObject({
     unsignedMinorDeals: numberRangeSchema,
     /** A big break taking someone with no fitting talent above the ceiling: none, ever. */
     breakOverCeiling: numberRangeSchema,
+    /**
+     * Batch 4: music careers begun as a teen, by 28: with a fitting talent, the share
+     * that reached rung 4 (signed); without, the share that reached rung 3 and the
+     * share that went past the middle (rung 5 or higher).
+     */
+    talentRung4By28: shareRangeSchema,
+    noTalentRung3By28: shareRangeSchema,
+    noTalentPastMiddleBy28: shareRangeSchema,
+    /** Batch 4: shows and tours a music career year, music careers that were ever in a band, practice sessions a career year. */
+    showsPerYear: numberRangeSchema,
+    toursPerYear: numberRangeSchema,
+    bandLives: shareRangeSchema,
+    practicePerYear: numberRangeSchema,
   }),
   /**
    * E6c: sports (tools/simulate/sports.ts). The athlete player (one who goes

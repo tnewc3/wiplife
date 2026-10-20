@@ -1,0 +1,60 @@
+id: band_clash_late
+title: Late again
+text: >-
+  Rehearsal was at seven. {bandmate.name} walks in at quarter to nine with a
+  coffee and a story, and the rest of you have run the set without
+  {bandmate.their} part twice.
+tone: neutral
+category: fame
+rarity: common
+recurring: true
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { fame: { active: true } }
+    - { fame: { band: true } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  bandmate: { kind: friend, band: member, presence: nearby }
+choices:
+  - id: have_it_out
+    label: Say what everyone is thinking
+    check:
+      base: 50
+      stats: [{ key: confidence, weight: 0.25 }, { role: bandmate, key: affection, weight: 0.15 }]
+      success:
+        text: >-
+          {bandmate.name} goes quiet, then apologises properly. From then on
+          {bandmate.they} {bandmate:is|are} the first one there.
+        effects:
+          - { type: band, action: chemistry, delta: 5 }
+          - { type: relationship, role: bandmate, trust: 3 }
+      failure:
+        text: >-
+          It turns into a shouting match about everything except being late.
+          Nobody plays anything else that night.
+        effects:
+          - { type: relationship, role: bandmate, affection: -6 }
+          - { type: band, action: chemistry, delta: -5 }
+          - { type: memory, role: bandmate, tag: band_clashed }
+  - id: let_it_go
+    label: Count them in and play
+    outcome:
+      text: >-
+        You say nothing and count the song in. It works for tonight. The
+        others notice that you said nothing.
+      effects:
+        - { type: band, action: chemistry, delta: -2 }
+        - { type: stat, key: stress, delta: 2 }
+  - id: ask_why
+    label: Ask {bandmate.them} what is going on
+    outcome:
+      text: >-
+        It is more than traffic. {bandmate.name} tells you some of it, and you
+        work out a later start that suits everyone.
+      effects:
+        - { type: relationship, role: bandmate, affection: 5 }
+        - { type: relationship, role: bandmate, trust: 4 }
+        - { type: band, action: chemistry, delta: 2 }

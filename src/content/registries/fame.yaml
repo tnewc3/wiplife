@@ -18,6 +18,16 @@
 # retire     a natural time to stop
 # crossover  a door into a second path
 # tour, press   something happens on a tour or a press run
+#
+# Batch 4 (cast: the bandmate an event is about, named by the step, as `bandmate`):
+# bandClash   a fight in the band          bandQuit    a member wants out
+# bandPoached a member is offered more     bandSplit   the band is coming apart
+# bandOffer   a band in your city asks you in (the offer is on the Fame screen)
+# bandFormed  the first rehearsal of the band you formed
+# show        a story from a show you played between years
+# tourHome    the people at home while you were on the road
+# genreSwitch you changed your sound        offGenre    a release outside your sound
+# practice    the hours of practice between years
 triggers:
   flop: { events: [release_flop] }
   solid: { events: [release_solid] }
@@ -42,5 +52,16 @@ triggers:
   stalker: { events: [stalker_too_close, stalker_escalates, stalker_order_violated] }
   retire: { events: [retire_farewell] }
   crossover: { events: [crossover_to_music, crossover_to_acting, crossover_to_social, crossover_to_arts] }
-  tour: { events: [tour_bus_breakdown, tour_empty_room, tour_after_party] }
+  tour: { events: [tour_bus_breakdown, tour_empty_room, tour_after_party, tour_sold_out_night, tour_band_fight_on_road, tour_minor_chaperone] }
   press: { events: [press_bad_interview, press_great_profile, press_hit_piece] }
+  bandClash: { events: [band_clash_creative, band_clash_late, band_clash_spotlight, band_clash_money] }
+  bandQuit: { events: [band_quit_day_job, band_quit_burned_out, band_minor_falls_apart] }
+  bandPoached: { events: [band_poached_bigger_act, band_poached_solo_deal] }
+  bandSplit: { events: [band_split_last_rehearsal, band_split_slow_fade, band_minor_falls_apart] }
+  bandOffer: { events: [band_offer_local, band_offer_after_show, band_offer_minor] }
+  bandFormed: { events: [band_first_rehearsal, band_minor_garage] }
+  show: { events: [show_packed_room, show_heckler, show_sound_failure, show_promoter_notices, show_clip_goes_round, show_minor_all_ages] }
+  tourHome: { events: [tour_home_partner_calls, tour_home_child_missed, tour_home_empty_flat] }
+  genreSwitch: { events: [genre_switch_fans_revolt, genre_switch_new_crowd, genre_switch_critics_curious] }
+  offGenre: { events: [offgenre_old_fans_letters, offgenre_critics_take_note, offgenre_band_disagrees] }
+  practice: { events: [practice_breakthrough, practice_neighbours, practice_minor_parent] }

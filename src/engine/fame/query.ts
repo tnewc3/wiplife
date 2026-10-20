@@ -6,7 +6,7 @@
  */
 import type { ContentBundle, FameBand, FamePathDef, FameRungDef, FameSize } from '../../content/schemas';
 import { wholeDollars } from '../finance';
-import type { FamePathState, FameState, Id, LifeState } from '../types';
+import type { FameGrind, FamePathState, FameState, Id, LifeState } from '../types';
 
 export const emptyFame = (): FameState => ({
   active: false,
@@ -27,8 +27,42 @@ export const emptyFame = (): FameState => ({
   people: { super: [], hater: [], critic: [] },
   stalker: null,
   headlines: [],
-  income: { year: 0, gross: 0, agent: 0, company: 0, trust: 0, scene: 0 },
-  totals: { projects: 0, hits: 0, flops: 0, breaks: 0, fades: 0, comebacks: 0, nominations: 0, wins: 0, scandals: 0, tours: 0, burnouts: 0, crossovers: 0, stalkers: 0, earned: 0 },
+  income: { year: 0, gross: 0, agent: 0, company: 0, trust: 0, scene: 0, tour: 0 },
+  band: null,
+  pastBands: [],
+  offers: [],
+  instrument: null,
+  grind: emptyGrind(0),
+  played: { year: 0, shows: 0, tour: null },
+  totals: emptyFameTotals(),
+});
+
+/** Batch 4: nothing played, booked or practised yet between years. */
+export const emptyGrind = (year: number): FameGrind => ({ year, shows: 0, showPay: 0, tour: null, practice: 0, bySkill: {} });
+
+export const emptyFameTotals = (): FameState['totals'] => ({
+  projects: 0,
+  hits: 0,
+  flops: 0,
+  breaks: 0,
+  fades: 0,
+  comebacks: 0,
+  nominations: 0,
+  wins: 0,
+  scandals: 0,
+  tours: 0,
+  burnouts: 0,
+  crossovers: 0,
+  stalkers: 0,
+  earned: 0,
+  shows: 0,
+  practice: 0,
+  bandsFormed: 0,
+  bandsJoined: 0,
+  bandSplits: 0,
+  memberChanges: 0,
+  genreSwitches: 0,
+  offGenre: 0,
 });
 
 /** A path's definition, or undefined. */

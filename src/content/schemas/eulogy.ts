@@ -34,6 +34,8 @@ export const EULOGY_MILESTONES = [
   'tooSoon',
   'longLife',
   'famous',
+  // Batch 4: the best-received work of a career in arts and media. Values: {work}, {noun}.
+  'bestWork',
   'hallOfFame',
 ] as const;
 export type EulogyMilestone = (typeof EULOGY_MILESTONES)[number];
@@ -133,7 +135,7 @@ export const eulogyTextSchema = z.strictObject({
   }),
   /** What the speaker never knew: a secret they were not told (one line for each secret kind). */
   unknown: z.strictObject(Object.fromEntries(UNKNOWN_KINDS.map((k) => [k, templateSchema])) as Record<(typeof UNKNOWN_KINDS)[number], typeof templateSchema>),
-  /** Moments of your life. Values: career {title}, {employer}; retired {years}; marriage {partner}; divorce {partner}; children {children}; prison {years}; bankruptcy {year}; tooSoon and longLife {age}. */
+  /** Moments of your life. Values: career {title}, {employer}; retired {years}; marriage {partner}; divorce {partner}; children {children}; prison {years}; bankruptcy {year}; tooSoon and longLife {age}; bestWork {work}, {noun} (Batch 4). */
   milestones: z.strictObject(Object.fromEntries(EULOGY_MILESTONES.map((m) => [m, templateSchema])) as Record<EulogyMilestone, typeof templateSchema>),
   closing: tonedVariants,
   /** "a child" and "{n} children", for {children}. */

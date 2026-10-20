@@ -1,0 +1,51 @@
+id: band_poached_solo_deal
+title: Just one of you
+text: >-
+  A label has been to two of your shows. It wants {bandmate.name}, on
+  {bandmate.their} own, and has said so in writing. Everyone in the band has
+  read the email.
+tone: serious
+category: fame
+rarity: uncommon
+recurring: true
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { fame: { active: true } }
+    - { fame: { band: true } }
+    - { fame: { rung: { gte: 2 } } }
+weight: { base: 6 }
+followUpOnly: true
+cast:
+  bandmate: { kind: friend, band: member, presence: nearby }
+choices:
+  - id: blessing
+    label: Give {bandmate.them} your blessing
+    outcome:
+      text: >-
+        {bandmate.name} signs. The band plays a farewell show, and the crowd is
+        bigger than usual, because of {bandmate.them}.
+      effects:
+        - { type: band, action: quit, role: bandmate }
+        - { type: relationship, role: bandmate, affection: 6 }
+        - { type: fame, action: fans, delta: 3 }
+  - id: band_or_nothing
+    label: Tell the label it is the band or nobody
+    check:
+      base: 30
+      stats: [{ role: bandmate, key: affection, weight: 0.3 }, { key: confidence, weight: 0.1 }]
+      success:
+        text: >-
+          {bandmate.name} backs you. The label sulks, then comes to another
+          show and listens to the whole band this time.
+        effects:
+          - { type: band, action: chemistry, delta: 8 }
+          - { type: fame, action: image, delta: 2 }
+      failure:
+        text: >-
+          {bandmate.name} signs anyway. The band reads about it on the label's
+          page, the same as everyone else.
+        effects:
+          - { type: band, action: quit, role: bandmate }
+          - { type: relationship, role: bandmate, affection: -8 }

@@ -1,0 +1,34 @@
+id: practice_minor_parent
+title: Practice at home
+text: >-
+  You have been practising every day after school. Your {parent.relation}
+  has started standing in the doorway to listen, then pretending
+  {parent.they} {parent:was|were} just passing.
+tone: light
+category: fame
+rarity: common
+recurring: true
+lifeStages: [child, teen]
+requires:
+  all:
+    - { age: { lte: 17 } }
+    - { fame: { active: true } }
+    - { fame: { sport: false } }
+cast:
+  parent: { kind: parent, presence: household }
+weight: { base: 10 }
+followUpOnly: true
+choices:
+  - id: play_for
+    label: Play something for {parent.them}
+    outcome:
+      text: '{parent.They} {parent:sits|sit} on the end of your bed and listens to all of it. Neither of you says much.'
+      effects:
+        - { type: relationship, role: parent, affection: 6 }
+        - { type: stat, key: happiness, delta: 3 }
+  - id: close_door
+    label: Close the door and keep going
+    outcome:
+      text: You get through the hard part twice before dinner.
+      effects:
+        - { type: fame, action: craft, delta: 1 }

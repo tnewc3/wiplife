@@ -1,0 +1,34 @@
+id: tour_minor_chaperone
+title: On the road with a parent
+text: >-
+  Your {parent.relation} came with you on {tourNoun}, as part of the deal.
+  {parent.They} {parent:checks|check} the hotel doors, makes you do homework
+  in the van and knows the words to every song by the end.
+tone: light
+category: fame
+rarity: common
+recurring: true
+lifeStages: [child, teen]
+requires:
+  all:
+    - { age: { lte: 17 } }
+    - { fame: { active: true } }
+    - { fame: { toured: true } }
+cast:
+  parent: { kind: parent, presence: household }
+weight: { base: 12 }
+followUpOnly: true
+choices:
+  - id: grateful
+    label: Thank {parent.them} at the last show
+    outcome:
+      text: You say it into the microphone. The crowd cheers for your {parent.relation}, who has to sit down.
+      effects:
+        - { type: relationship, role: parent, affection: 6 }
+        - { type: stat, key: happiness, delta: 3 }
+  - id: space
+    label: Ask for a little more space next time
+    outcome:
+      text: "{parent.They} {parent:agrees|agree} to a room next door instead of the same one. It feels like a promotion."
+      effects:
+        - { type: relationship, role: parent, trust: 3 }

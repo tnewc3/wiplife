@@ -247,6 +247,7 @@ milestones:
   tooSoon: "{self.They} {self:was|were} only {age}. It isn't enough, and it isn't fair."
   longLife: "{self.They} lived to {age}, which is a great deal of living."
   famous: "A lot of strangers knew {self.their} name. To us, {self.they} {self:was|were} just {self.name}."
+  bestWork: "Strangers still bring up the {noun} \"{work}\" when they hear {self.their} name. {self.They} pretended not to mind."
   hallOfFame: "{self.They} made the hall of fame. Anyone who knows that sport knows what that means."
 
 closing:

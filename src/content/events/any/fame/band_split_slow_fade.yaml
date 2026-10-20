@@ -1,0 +1,36 @@
+id: band_split_slow_fade
+title: Nobody books the room
+text: >-
+  It has been weeks since anyone booked the rehearsal room. The group chat
+  for {bandName} is mostly old photos. {bandmate.name} asks, half joking,
+  whether you are still a band.
+tone: neutral
+category: fame
+rarity: common
+recurring: true
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { fame: { active: true } }
+    - { fame: { band: true } }
+weight: { base: 8 }
+followUpOnly: true
+cast:
+  bandmate: { kind: friend, band: member, presence: nearby }
+choices:
+  - id: let_go
+    label: Admit it is over
+    outcome:
+      text: You all agree, by message, that {bandName} had a good run. It is a quiet way to end something loud.
+      effects:
+        - { type: band, action: split }
+  - id: book_it
+    label: Book the room and a show
+    outcome:
+      text: >-
+        You book both before you can think better of it. Everyone turns up.
+        Nobody says how relieved they are.
+      effects:
+        - { type: band, action: chemistry, delta: 10 }
+        - { type: relationship, role: bandmate, affection: 3 }

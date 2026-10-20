@@ -1,0 +1,58 @@
+id: band_split_last_rehearsal
+title: The last rehearsal
+text: >-
+  Nobody says it is the last rehearsal, but it plays like one. {bandmate.name}
+  packs up early. The songs are fine; the band is not, and everyone in the
+  room can feel {bandName} coming apart.
+tone: serious
+category: fame
+rarity: common
+recurring: true
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { fame: { active: true } }
+    - { fame: { band: true } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  bandmate: { kind: friend, band: member, presence: nearby }
+choices:
+  - id: call_it
+    label: Say it out loud and end it
+    outcome:
+      text: >-
+        You say it. Somebody laughs, somebody cries, and you all go for a
+        drink of something. {bandName} is over, and you are still friends with most of them.
+      effects:
+        - { type: band, action: split }
+        - { type: stat, key: stress, delta: -3 }
+  - id: one_more
+    label: Ask for one more try
+    check:
+      base: 40
+      stats: [{ key: sociability, weight: 0.2 }, { role: bandmate, key: affection, weight: 0.2 }]
+      success:
+        text: >-
+          One more try becomes a good month. Something about almost losing it
+          makes everyone play like they mean it.
+        effects:
+          - { type: band, action: chemistry, delta: 15 }
+      failure:
+        text: >-
+          The try lasts a week. Then {bandmate.name} stops answering messages,
+          and the others follow. {bandName} ends without anyone ending it.
+        effects:
+          - { type: band, action: split }
+          - { type: stat, key: happiness, delta: -4 }
+  - id: take_charge
+    label: Take charge of the band
+    visibleIf: { fame: { leader: false } }
+    outcome:
+      text: >-
+        You start booking rehearsals and setting the list. It is not your band
+        to run, but nobody else is running it, and they let you.
+      effects:
+        - { type: band, action: lead }
+        - { type: band, action: chemistry, delta: 8 }

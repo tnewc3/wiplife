@@ -220,6 +220,16 @@ tags:
   fan_stalker: Would not stop following you
   answered_their_letter: You answered their letter or stopped to talk
   turned_them_away: You walked past them
+  # Batch 4: bands.
+  band_founded_with_you: Started a band with you
+  band_joined_you: Joined your band
+  band_took_you_in: Took you into the band
+  band_you_left: You left the band {npc.they} {npc:was|were} in
+  band_kicked_out: You threw {npc.them} out of the band
+  band_split_up: Was in the band with you until it broke up
+  band_quit_on_you: Quit the band
+  band_clashed: Clashed with you in the band
+  band_backed_you: Backed you up in the band
   # L1: later life.
   looks_after_you: Looks after you in your last years
   at_your_bedside: Was at your bedside at the end

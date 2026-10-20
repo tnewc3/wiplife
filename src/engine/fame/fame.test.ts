@@ -64,7 +64,7 @@ const planOf = (life: LifeState, over: Partial<FamePlan> = {}): FamePlan => {
   const def = content.famePaths[life.fame.main!]!;
   const path = life.fame.paths[life.fame.main!]!;
   const kind = [...def.kinds].filter((k) => k.minRung <= path.rung).pop()!;
-  return { path: life.fame.main!, kind: kind.id, style: 'commercial', risk: 'safe', tour: false, press: false, ...over };
+  return { path: life.fame.main!, kind: kind.id, style: 'commercial', risk: 'safe', press: false, ...over };
 };
 const workYear = (life: LifeState, over: Partial<FamePlan> = {}) => yearStep(apply(life, (d) => void (d.fame.plan = planOf(d, over))));
 /** Many lives, one measure each. */
@@ -159,8 +159,9 @@ describe('the quality of the work', () => {
     const all = [...commercial, ...artistic];
     expect(all.filter((r) => Math.abs(r.critics - r.fans) >= 20).length / all.length).toBeGreaterThan(0.08);
     // So a bold flop can win critics, and a safe hit can be panned.
-    expect(all.some((r) => r.band === 'cult')).toBe(true);
-    expect(all.some((r) => r.band === 'crowd')).toBe(true);
+    const swings = [...all, ...sample('artistic', 'bold'), ...sample('commercial', 'bold')];
+    expect(swings.some((r) => r.band === 'cult')).toBe(true);
+    expect(swings.some((r) => r.band === 'crowd')).toBe(true);
     expect(bandFor(80, 80, 0.5, content)).toBe('acclaimed');
     expect(bandFor(80, 30, 0.5, content)).toBe('cult');
     expect(bandFor(30, 80, 0.5, content)).toBe('crowd');
@@ -786,17 +787,18 @@ describe('conditions, effects, text and the screen', () => {
 describe('planning a project', () => {
   it('is validated: a kind your rung allows, the extras your rung allows, between years, one path you work in', () => {
     const life = star('plan', 26, 'music', 'music');
-    const good = { pathId: 'music', kindId: 'single', style: 'artistic', risk: 'bold', tour: false, press: false } as const;
+    const good = { pathId: 'music', kindId: 'single', style: 'artistic', risk: 'bold', press: false } as const;
     expect(isLifeActionAvailable(life, 'plan_project', good, content)).toBe(true);
     expect(isLifeActionAvailable(life, 'plan_project', { ...good, kindId: 'album' }, content)).toBe(false);
-    expect(isLifeActionAvailable(life, 'plan_project', { ...good, tour: true }, content)).toBe(false);
+    // Batch 4: a tour is booked on its own; the press run still needs its rung.
+    expect(() => performAction(life, 'plan_project', { ...good, tour: true }, content)).toThrow(InvalidInputError);
     expect(isLifeActionAvailable(life, 'plan_project', { ...good, pathId: 'acting', kindId: 'tv_role' }, content)).toBe(false);
-    expect(planBlock(life, { path: 'music', kind: 'single', style: 'artistic', risk: 'bold', tour: false, press: false }, content)).toBeNull();
+    expect(planBlock(life, { path: 'music', kind: 'single', style: 'artistic', risk: 'bold', press: false }, content)).toBeNull();
     const next = performAction(life, 'plan_project', good, content);
-    expect(next.fame.plan).toEqual({ path: 'music', kind: 'single', style: 'artistic', risk: 'bold', tour: false, press: false });
+    expect(next.fame.plan).toEqual({ path: 'music', kind: 'single', style: 'artistic', risk: 'bold', press: false });
     expect(performAction(next, 'cancel_project', {}, content).fame.plan).toBeNull();
     expect(() => performAction(life, 'plan_project', { ...good, style: 'loud' }, content)).toThrow(InvalidInputError);
-    expect(() => performAction(life, 'plan_project', { ...good, tour: 'yes' }, content)).toThrow(InvalidInputError);
+    expect(() => performAction(life, 'plan_project', { ...good, press: 'yes' }, content)).toThrow(InvalidInputError);
     expect(() => performAction(life, 'plan_project', { pathId: 'music' }, content)).toThrow(InvalidInputError);
     // The project comes out as the year begins, with the choices it was made with.
     const year = yearStep(next);

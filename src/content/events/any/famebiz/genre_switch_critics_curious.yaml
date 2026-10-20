@@ -1,0 +1,39 @@
+id: genre_switch_critics_curious
+title: The critics notice
+text: >-
+  A music writer who never once wrote about you has noticed that you have
+  gone {genre}, and wants an interview about why.
+tone: neutral
+category: famebiz
+rarity: uncommon
+recurring: true
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { fame: { active: true } }
+    - { fame: { genre: true } }
+    - { fame: { rung: { gte: 2 } } }
+weight: { base: 6 }
+followUpOnly: true
+choices:
+  - id: interview
+    label: Give the interview
+    check:
+      base: 50
+      stats: [{ key: smarts, weight: 0.2 }, { key: confidence, weight: 0.15 }]
+      success:
+        text: The piece is thoughtful and kind. People who would never have heard of you read it.
+        effects:
+          - { type: fame, action: image, delta: 4 }
+          - { type: fame, action: fame, delta: 1 }
+      failure:
+        text: You ramble. The headline makes you sound like you are chasing a trend.
+        effects:
+          - { type: fame, action: image, delta: -3 }
+  - id: decline
+    label: Let the music speak
+    outcome:
+      text: They write about you anyway, from a distance, and get some of it wrong.
+      effects:
+        - { type: fame, action: image, delta: -1 }

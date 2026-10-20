@@ -1,0 +1,32 @@
+id: show_clip_goes_round
+title: Someone filmed it
+text: >-
+  A clip of you playing {venue} has gone round. Not everywhere, but far
+  enough that strangers are sending it to you and asking if it is you.
+tone: light
+category: fame
+rarity: uncommon
+recurring: true
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { fame: { active: true } }
+    - { fame: { shows: { gte: 1 } } }
+    - { fame: { sport: false } }
+weight: { base: 6 }
+followUpOnly: true
+choices:
+  - id: lean_in
+    label: Share it everywhere
+    outcome:
+      text: It travels further with your help. A few hundred strangers become a few hundred fans.
+      effects:
+        - { type: fame, action: fans, delta: 6 }
+        - { type: fame, action: fame, delta: 1 }
+  - id: leave_it
+    label: Let it find its own way
+    outcome:
+      text: It fades in a week, as clips do. A few of the people who found it stay.
+      effects:
+        - { type: fame, action: fans, delta: 2 }

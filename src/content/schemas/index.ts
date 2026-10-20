@@ -33,7 +33,7 @@ import { mentalHealthBalanceSchema, mentalRegistrySchema } from './mental';
 import { petInteractionSchema, petSchema, possessionsBalanceSchema, possessionsRegistrySchema, possessionsTextSchema, renovationSchema, vehicleSchema } from './possessions';
 import { crewSchema, crimeBalanceSchema, crimeRegistrySchema, crimeTextSchema, frontSchema } from './crime';
 import { sportsBalanceSchema, sportsRegistrySchema, sportsTextSchema } from './sports';
-import { fameAgentSchema, fameAwardSchema, fameBalanceSchema, fameCompanySchema, famePathSchema, fameRegistrySchema, fameTextSchema } from './fame';
+import { fameAgentSchema, fameAwardSchema, fameBalanceSchema, fameCompanySchema, fameGenreSchema, famePathSchema, fameRegistrySchema, fameTextSchema } from './fame';
 import { activitySchema, cliqueSchema, houseRuleSchema, teenBalanceSchema, teenJobSchema, teenRegistrySchema, teenTextSchema } from './teen';
 import { pastimeSchema, pastimesBalanceSchema, riskBalanceSchema, valuableSchema } from './pastimes';
 import { estateRegistrySchema, familyBalanceSchema, familyRegistrySchema, heirRegistrySchema, heirTextSchema } from './family';
@@ -82,6 +82,7 @@ export const collectionTypes = {
   fameAwards: { folder: 'awards', schema: fameAwardSchema },
   famePaths: { folder: 'fame', schema: famePathSchema },
   fameCompanies: { folder: 'studios', schema: fameCompanySchema },
+  fameGenres: { folder: 'genres', schema: fameGenreSchema },
   causes: { folder: 'causes', schema: causeSchema },
   cliques: { folder: 'cliques', schema: cliqueSchema },
   crews: { folder: 'crews', schema: crewSchema },
@@ -217,6 +218,7 @@ export const contentBundleSchema = z.strictObject({
   fameAwards: z.record(z.string(), fameAwardSchema),
   famePaths: z.record(z.string(), famePathSchema),
   fameCompanies: z.record(z.string(), fameCompanySchema),
+  fameGenres: z.record(z.string(), fameGenreSchema),
   causes: z.record(z.string(), causeSchema),
   cliques: z.record(z.string(), cliqueSchema),
   crews: z.record(z.string(), crewSchema),

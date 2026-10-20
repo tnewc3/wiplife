@@ -1,0 +1,46 @@
+id: tour_home_partner_calls
+title: The call from home
+text: >-
+  {partner.name} calls on a night off from {tourNoun}. {partner.They}
+  {partner:is|are} fine, the house is fine, everything is fine, and
+  {partner.they} {partner:sounds|sound} like someone who has been fine alone for too long.
+tone: serious
+category: famelife
+rarity: common
+recurring: true
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { fame: { active: true } }
+    - { fame: { toured: true } }
+    - { home: { partner: true } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  partner: { support: true, presence: household }
+choices:
+  - id: talk
+    label: Stay on the phone with {partner.them}
+    outcome:
+      text: It is a long call, and you miss soundcheck. It is the right trade.
+      effects:
+        - { type: relationship, role: partner, affection: 5 }
+        - { type: relationship, role: partner, trust: 3 }
+  - id: promise
+    label: Promise the next stretch will be different
+    outcome:
+      text: '{partner.They} {partner:says|say} "ok". You both know how many times you have said it.'
+      effects:
+        - { type: relationship, role: partner, trust: -2 }
+        - { type: stat, key: stress, delta: 2 }
+  - id: fly_home
+    label: Fly home for the night off
+    outcome:
+      text: >-
+        You are home for eleven hours. The flights cost more than the show
+        paid, and {partner.name} meets you at the door.
+      effects:
+        - { type: famePay, cost: small }
+        - { type: relationship, role: partner, affection: 8 }
+        - { type: fame, action: burnout, delta: 3 }

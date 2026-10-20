@@ -3,6 +3,8 @@
  * ledger, so the year's pay is in it): as each year begins, for someone with a
  * career in arts and media:
  *
+ * - Batch 4: what you did between years comes in: the shows you played are
+ *   paid, and a tour you booked goes out on the road.
  * - The awards night for last year's nomination is held.
  * - The project lined up last year (or the one a contract assigns) comes out:
  *   quality, then critics' and fans' separate reception, then fame, fans,
@@ -11,6 +13,8 @@
  * - Craft grows; without new work fame fades and a rung goes with it.
  * - The commitment you chose takes its toll on the people close to you, your
  *   health and your stress, and burnout builds or breaks.
+ * - Batch 4: your band's year (chemistry, drama, members gone) or, with no
+ *   band, an offer from one in your city.
  * - Fans, haters and critics turn up as people; a superfan may cross a line.
  * - The tabloids may turn a secret of yours into the news.
  * - Offers arrive: an agent, a contract, a second path, a comeback, a farewell.
@@ -36,6 +40,10 @@ import { exposableSecrets, addHeadline, exposeSecret, closestHolder, stalkerChan
 import { playSeason, queueSeasonEvents, runSportsRetired } from '../sports/season';
 import { allPaths, isMinorStar, kindDef, pathDef, rungDef, topRung, usualYear, workedPaths } from './query';
 import { agentDef, agentTier, assignedPlan, craftGrowth, planBlock, projectTitle, releaseGross, retainer, rollWork, RECENT, type Roll } from './work';
+import { bandYear } from './band';
+import { runTour, strainCircle } from './grind';
+import { emptyGrind } from './query';
+import { genreDistance, hasGenres, offGenreFans } from './sound';
 
 const COMMITMENT_ORDER = { back: 0, steady: 1, all: 2 } as const;
 
@@ -55,26 +63,14 @@ export function queueFameEvent(state: LifeState, trigger: FameTrigger, content: 
   return true;
 }
 
-/** The kinds of people who count as close to you for fame's toll: your partner and children (and, while you are young, your parents). */
-const CLOSE = ['partner', 'fiance', 'spouse', 'child', 'stepchild'];
-const OTHERS = ['friend', 'sibling', 'parent', 'stepparent', 'grandparent', 'relative'];
-
 /** What the commitment you chose costs the people around you, your health and your stress this year, and what it does to burnout. */
 function commitmentToll(state: LifeState, worked: boolean, content: ContentBundle, rng: RngState): void {
   const f = state.fame;
   const b = content.balance.fame.commitment;
   const s = b.strain[f.commitment];
-  const young = isMinorStar(state, content);
   // The toll is for years of work; a year with none only lets burnout ease.
   if (worked) {
-    for (const id of Object.keys(state.relationships).sort()) {
-      const rel = state.relationships[id]!;
-      if (rel.status !== 'active' || state.people[id]?.alive !== true) continue;
-      const close = CLOSE.includes(rel.kind) || (young && (rel.kind === 'parent' || rel.kind === 'stepparent'));
-      if (!close && !OTHERS.includes(rel.kind)) continue;
-      const loss = wholeChange(rng, close ? s.close : s.other);
-      if (loss > 0) rel.affection = clampInt(rel.affection - loss, 0, 100);
-    }
+    strainCircle(state, s.close, s.other, content, rng);
     const stats = state.character.stats;
     stats.health = clampInt(stats.health - wholeChange(rng, s.health), 0, 100);
     stats.stress = clampInt(stats.stress + wholeChange(rng, s.stress), 0, 100);
@@ -83,8 +79,8 @@ function commitmentToll(state: LifeState, worked: boolean, content: ContentBundl
   f.burnout = clampInt(f.burnout + b.burnout.perYear[f.commitment] - (worked ? 0 : b.burnout.recover), 0, 100);
 }
 
-/** Puts a plan's work out: the quality roll, the reception, and everything that moves with it. */
-function release(state: LifeState, content: ContentBundle, rng: RngState): { project: FameProject; release: number } | null {
+/** Puts a plan's work out: the quality roll, the reception, and everything that moves with it. `toured`: a tour went out with it. */
+function release(state: LifeState, content: ContentBundle, rng: RngState, toured: boolean): { project: FameProject; release: number } | null {
   const f = state.fame;
   let plan = f.plan;
   let assigned = false;
@@ -103,8 +99,11 @@ function release(state: LifeState, content: ContentBundle, rng: RngState): { pro
   const kind = kindDef(def, plan.kind)!;
   const roll = rollWork(state, plan, path, def, kind, content, rng);
   const pay = releaseGross(state, plan, path, def, kind, roll.fans, content);
-  const project = landProject(state, content, rng, { plan, def, path, kind, roll, title: projectTitle(state, plan.path, content, rng), earned: pay.release + pay.tour, assigned });
-  return { project, release: pay.release };
+  const title = plan.title ?? projectTitle(state, plan.path, content, rng);
+  const project = landProject(state, content, rng, { plan, def, path, kind, roll, title, earned: pay, assigned, toured });
+  // Batch 4: what you put out, by title; and the best of it, for your life summaries.
+  fameHistory(state, 'released', content);
+  return { project, release: pay };
 }
 
 /**
@@ -116,18 +115,19 @@ export function landProject(
   state: LifeState,
   content: ContentBundle,
   rng: RngState,
-  input: { plan: FamePlan; def: FamePathDef; path: FamePathState; kind: FameKindDef; roll: Roll; title: string; earned: number; assigned: boolean },
+  input: { plan: FamePlan; def: FamePathDef; path: FamePathState; kind: FameKindDef; roll: Roll; title: string; earned: number; assigned: boolean; toured?: boolean },
 ): FameProject {
   const f = state.fame;
   const b = content.balance.fame;
   const { plan, def, path, kind, roll } = input;
+  const toured = input.toured === true;
   const reception = roll.critics * def.criticWeight + roll.fans * (1 - def.criticWeight);
 
   // Fame.
   let gain = curveAt(b.gain.reception, reception);
   const scale = b.gain.rung[Math.min(path.rung, b.gain.rung.length) - 1]!;
   if (gain > 0) {
-    let mult = kind.reach * scale * b.gain.commitment[f.commitment] * (plan.press ? b.gain.press : 1) * (plan.tour ? b.gain.tour : 1) * (1 + agentTier(state, content) * b.gain.agent);
+    let mult = kind.reach * scale * b.gain.commitment[f.commitment] * (plan.press ? b.gain.press : 1) * (toured ? b.gain.tour : 1) * (1 + agentTier(state, content) * b.gain.agent);
     if (f.fadedFrom !== undefined && path.rung < path.peak) mult *= b.gain.comeback;
     gain *= mult;
   } else {
@@ -148,6 +148,11 @@ export function landProject(
   const styleImage = (plan.style === 'artistic' ? 0.5 : -0.5) + (plan.risk === 'bold' ? 1 : 0);
   f.image = clampInt(f.image + b.gain.imageShare * (roll.critics - 50) + styleImage, 0, 100);
 
+  // Batch 4: a release outside your sound: some fans leave, some new ones come.
+  const distance = plan.genre !== undefined ? genreDistance(path.genre, plan.genre, content) : 0;
+  if (path.genre === undefined && plan.genre !== undefined && hasGenres(content, plan.path)) path.genre = plan.genre;
+  offGenreFans(state, distance, roll.fans, content);
+  const band = f.band && f.band.path === plan.path ? f.band.name : undefined;
   const project: FameProject = {
     year: state.currentYear,
     path: plan.path,
@@ -155,7 +160,7 @@ export function landProject(
     title: input.title,
     style: plan.style,
     risk: plan.risk,
-    tour: plan.tour,
+    tour: toured,
     press: plan.press,
     quality: roll.quality,
     critics: roll.critics,
@@ -164,11 +169,17 @@ export function landProject(
     gain: Math.round(gain * 10) / 10,
     earned: input.earned,
     ...(input.assigned ? { assigned: true as const } : {}),
+    ...(plan.genre !== undefined ? { genre: plan.genre } : {}),
+    ...(distance >= content.balance.fame.sound.offGenre ? { offGenre: Math.round(distance * 100) / 100 } : {}),
+    ...(plan.tracks !== undefined && plan.tracks.length > 0 ? { tracks: [...plan.tracks] } : {}),
+    ...(band !== undefined ? { bandName: band } : {}),
   };
   f.projects.push(project);
+  if (!def.sport && (f.best === undefined || reception > f.best.score)) {
+    f.best = { title: input.title, path: plan.path, kind: plan.kind, year: state.currentYear, score: Math.round(reception * 10) / 10, ...(band !== undefined ? { bandName: band } : {}) };
+  }
   if (f.projects.length > 12) f.projects.splice(0, f.projects.length - 12);
   f.totals.projects += 1;
-  if (plan.tour) f.totals.tours += 1;
   if (roll.band === 'flop') f.totals.flops += 1;
   else if (roll.band !== 'solid') f.totals.hits += 1;
 
@@ -254,8 +265,12 @@ export function runFame(state: LifeState, content: ContentBundle): void {
   const rng = state.rng;
   const year = state.currentYear;
   const b = content.balance.fame;
-  f.income = { year, gross: 0, agent: 0, company: 0, trust: 0, scene: 0 };
+  f.income = { year, gross: 0, agent: 0, company: 0, trust: 0, scene: 0, tour: 0 };
   if (f.ceremony && f.ceremony.year !== year) delete f.ceremony;
+  // Batch 4: what was done between years comes in now: the shows' pay, and the tour that goes out.
+  const grind = f.grind;
+  f.grind = emptyGrind(year);
+  f.played = { year, shows: grind.shows, tour: null, ...(grind.lastShow ? { lastShow: grind.lastShow } : {}) };
   f.headlines = f.headlines.filter((h) => year - h.year <= b.tabloids.keep);
 
   // Someone who has retired: royalties, and fans who drift off.
@@ -291,16 +306,21 @@ export function runFame(state: LifeState, content: ContentBundle): void {
   const night = ceremony(state, content, rng);
   if (night) events.push(night);
 
+  // Batch 4: a tour booked between years goes out as the year begins.
+  const tour = !prison && grind.tour ? runTour(state, grind.tour, content, rng) : null;
+  if (tour && grind.tour) f.played.tour = grind.tour.size;
+
   // The work: a project lined up (arts and media), and a season if you play a sport (E6c).
   const sportOut = prison ? null : playSeason(state, content, rng);
-  const planOut = prison ? null : release(state, content, rng);
+  const planOut = prison ? null : release(state, content, rng, tour !== null);
   const out = planOut;
-  const worked = planOut !== null || sportOut?.project !== undefined;
+  const worked = planOut !== null || sportOut?.project !== undefined || tour !== null;
   const project = planOut?.project;
   const seasonProject = sportOut?.project;
   if (prison) f.plan = null;
   if (project) events.push(project.band);
-  const playedIds = new Set([project?.path, seasonProject?.path].filter((p): p is string => p !== undefined));
+  const playedIds = new Set([project?.path, seasonProject?.path, tour?.path].filter((p): p is string => p !== undefined));
+  if (project?.offGenre !== undefined) events.push('offGenre');
 
   // Craft, fading, and the climb or the fall.
   for (const id of workedPaths(state)) {
@@ -356,7 +376,8 @@ export function runFame(state: LifeState, content: ContentBundle): void {
     state.character.stats.happiness = clampInt(state.character.stats.happiness + wholeChange(rng, sc.perks.happiness), 0, 100);
   }
 
-  // People.
+  // People. Batch 4: your band's year, or an offer from a band in your city.
+  const bandEvents = prison ? [] : bandYear(state, content, rng);
   tendFans(state, content, rng);
   if (!prison) {
     if (chance(rng, stalkerChance(state, content))) events.push('stalker');
@@ -404,20 +425,28 @@ export function runFame(state: LifeState, content: ContentBundle): void {
       const gap = year - main.last;
       if (hasFaded(state) && gap >= 2 && chance(rng, curveAt(b.comeback.chance, gap))) events.push('comeback');
     }
-    if (project?.tour && chance(rng, 0.35)) events.push('tour');
+    if (tour && chance(rng, 0.35)) events.push('tour');
+    if (tour && chance(rng, 0.3)) events.push('tourHome');
     if (project?.press && chance(rng, 0.3)) events.push('press');
   }
 
   // A career that never got going: nothing put out for years on the first rung, and it has simply ended.
   if (main && main.rung === 1 && year - main.last >= b.fade.dormant && f.contract === null) retire(state, content);
 
-  // What the year earned, for the ledger.
-  const gross = (out ? out.project.earned : 0) + (sportOut?.earned ?? 0) + (prison ? 0 : retainer(state, content));
+  // What the year earned, for the ledger (Batch 4: with the shows played between years, and a tour's takings and its cost).
+  const gross = (out ? out.project.earned : 0) + (sportOut?.earned ?? 0) + (prison ? 0 : retainer(state, content)) + grind.showPay + (tour?.revenue ?? 0);
   f.totals.earned += gross;
   settleIncome(state, gross, content, out?.release ?? 0);
+  f.income.tour = tour?.cost ?? 0;
 
   // The sports events (E6c): the season's own, then the shared turning points are queued above.
   if (sportOut) queueSeasonEvents(state, content, sportOut.triggers, sportsBreak);
+
+  // Batch 4: the band's drama is about one member (the step names them); it waits its turn with the rest.
+  for (const e of bandEvents) {
+    if (e.trigger === 'bandOffer') events.push('bandOffer');
+    else if (queueFameEvent(state, e.trigger, content, e.cast)) break;
+  }
 
   // Queue the events, most pressing first, up to the cap (the release's own event always comes).
   let room = b.events.maxQueued;
@@ -457,6 +486,7 @@ function settleIncome(state: LifeState, gross: number, content: ContentBundle, r
     company,
     trust,
     scene,
+    tour: 0,
   };
 }
 
@@ -470,4 +500,10 @@ export function fameIncome(state: LifeState): number {
 export function sceneCost(state: LifeState): number {
   const i = state.fame.income;
   return i.year === state.currentYear ? i.scene : 0;
+}
+
+/** Batch 4: what this year's tour cost to put on (charged with living costs). */
+export function tourCost(state: LifeState): number {
+  const i = state.fame.income;
+  return i.year === state.currentYear ? i.tour : 0;
 }

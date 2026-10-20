@@ -11,7 +11,10 @@ import { curveAt } from '../curve';
 import { clampInt, rollNormal } from '../random';
 import { pick, type RngState } from '../rng';
 import type { FamePathState, FamePlan, FameProject, LifeState } from '../types';
+import { bandQuality } from './band';
+import { skillQuality } from './grind';
 import { hasTalentFor, kindDef, payLevel, rungDef, usualYear } from './query';
+import { genreDistance, isGenreOf, offGenreFanScore } from './sound';
 
 /** What the path draws on besides talent: your traits and stats, weighted by the path (0–1). */
 export function aptitude(state: LifeState, def: FamePathDef): number {
@@ -79,15 +82,20 @@ export function rollWork(state: LifeState, plan: FamePlan, path: FamePathState, 
     q.aptitude * aptitude(state, def) +
     talent +
     path.craft * q.craft +
+    // Batch 4: the skills you have practised that this kind of work draws on, and your band.
+    skillQuality(path, kind.skills, content) +
+    (plan.path === state.fame.band?.path ? bandQuality(state, content) : 0) +
     q.team.agent * agentTier(state, content) +
     q.team.company * companyTier(state, content) +
     (state.character.hidden.luck - 50) * q.luck +
     kind.difficulty;
   const quality = clampInt(Math.round(base + rollNormal(rng, { mean: 0, sd: q.noise * spread })), 0, 100);
   const f = state.fame;
+  // Batch 4: critics judge a release outside your sound on its own; fans take it by how far it sits from what they came for.
+  const offGenre = offGenreFanScore(genreDistance(path.genre, plan.genre, content), content);
   const critics = clampInt(Math.round(quality + r.style[plan.style].critic + r.risk[plan.risk].critic + rollNormal(rng, { mean: 0, sd: r.noise * spread })), 0, 100);
   const fans = clampInt(
-    Math.round(quality + r.style[plan.style].fan + r.risk[plan.risk].fan + (f.mood - 50) * r.mood + (f.image - 50) * r.image + rollNormal(rng, { mean: 0, sd: r.noise * spread })),
+    Math.round(quality + r.style[plan.style].fan + r.risk[plan.risk].fan + (f.mood - 50) * r.mood + (f.image - 50) * r.image - offGenre + rollNormal(rng, { mean: 0, sd: r.noise * spread })),
     0,
     100,
   );
@@ -113,13 +121,12 @@ export function craftGrowth(state: LifeState, def: FamePathDef, path: FamePathSt
   return Math.min(room, curveAt(q.craftGain, path.craft) * Math.max(0.3, discipline) * talent * focus * (worked ? 1 : q.craftIdle));
 }
 
-/** What a release earns before anyone takes a cut: the rung's usual year times the kind's pay, by how fans took it, at your commitment's output; and a tour on top. */
-export function releaseGross(state: LifeState, plan: FamePlan, path: FamePathState, def: FamePathDef, kind: FameKindDef, fans: number, content: ContentBundle): { release: number; tour: number } {
+/** What a release earns you before anyone takes a cut: the rung's usual year times the kind's pay, by how fans took it, at your commitment's output (Batch 4: your share, in a band). Tours are booked and paid on their own. */
+export function releaseGross(state: LifeState, plan: FamePlan, path: FamePathState, def: FamePathDef, kind: FameKindDef, fans: number, content: ContentBundle): number {
   const b = content.balance.fame;
   const usual = usualYear(state, def, path.rung, content);
-  const release = usual * kind.pay * curveAt(b.income.release, fans) * b.commitment.output[state.fame.commitment];
-  const tour = plan.tour ? usual * b.income.tour : 0;
-  return { release: Math.round(release), tour: Math.round(tour) };
+  const cut = state.fame.band && state.fame.band.path === plan.path ? b.band.cut : 1;
+  return Math.round(usual * kind.pay * curveAt(b.income.release, fans) * b.commitment.output[state.fame.commitment] * cut);
 }
 
 /** What your name brings in a year with no new work: gigs, royalties, retainers and brands, in each path you work. */
@@ -143,7 +150,9 @@ export function assignedPlan(state: LifeState, content: ContentBundle): FamePlan
   const def = c ? content.famePaths[c.path] : undefined;
   if (!c || !path || !def || def.sport) return null;
   const kind = def.kinds.find((k) => k.minRung <= path.rung);
-  return kind ? { path: c.path, kind: kind.id, style: 'commercial', risk: 'safe', tour: false, press: false } : null;
+  if (!kind) return null;
+  const genre = path.genre;
+  return { path: c.path, kind: kind.id, style: 'commercial', risk: 'safe', press: false, ...(genre !== undefined ? { genre } : {}) };
 }
 
 /** Whether a plan can be carried out now: your path, a kind your rung allows, and the extras your rung allows. Returns the reason it can't, or null. */
@@ -158,8 +167,10 @@ export function planBlock(state: LifeState, plan: FamePlan, content: ContentBund
   const kind = kindDef(def, plan.kind);
   if (!kind) return 'kind';
   if (kind.minRung > path.rung) return 'rung';
-  if (plan.tour && path.rung < def.tour.minRung) return 'tour';
   if (plan.press && path.rung < def.press.minRung) return 'press';
+  // Batch 4: a genre must be one of the path's; track titles only for a kind that has tracks, and no more than it has.
+  if (plan.genre !== undefined && !isGenreOf(content, plan.path, plan.genre)) return 'genre';
+  if (plan.tracks !== undefined && plan.tracks.length > (kind.tracks ?? 0)) return 'tracks';
   if (f.contract?.exclusive && f.contract.path !== plan.path) return 'exclusive';
   return null;
 }

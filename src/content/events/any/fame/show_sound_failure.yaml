@@ -1,0 +1,40 @@
+id: show_sound_failure
+title: The power goes
+text: >-
+  Three songs into your set at {venue}, the sound cut out completely. No
+  speakers, no monitors, just a room full of people looking at you in the quiet.
+tone: neutral
+category: fame
+rarity: common
+recurring: true
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { fame: { active: true } }
+    - { fame: { shows: { gte: 1 } } }
+    - { fame: { sport: false } }
+weight: { base: 8 }
+followUpOnly: true
+choices:
+  - id: unplugged
+    label: Step off the stage and play it unplugged
+    check:
+      base: 45
+      stats: [{ fame: craft, weight: 0.25 }, { key: sociability, weight: 0.15 }]
+      success:
+        text: The crowd closes in around you and sings the parts the speakers cannot. People talk about it for a long time.
+        effects:
+          - { type: fame, action: fame, delta: 1 }
+          - { type: fame, action: mood, delta: 4 }
+          - { type: stat, key: happiness, delta: 5 }
+      failure:
+        text: Nobody past the third row can hear you. It is a brave try, and a quiet ending.
+        effects:
+          - { type: stat, key: stress, delta: 3 }
+  - id: wait
+    label: Wait for the sound to come back
+    outcome:
+      text: It comes back after twenty long minutes. Half the room has gone, and the half that stayed is yours.
+      effects:
+        - { type: fame, action: mood, delta: 1 }

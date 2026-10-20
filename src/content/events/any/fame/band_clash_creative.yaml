@@ -1,0 +1,61 @@
+id: band_clash_creative
+title: Whose song is it
+text: >-
+  {bandmate.name} has rewritten the bridge of the song you brought in, and
+  {bandmate.they} {bandmate:thinks|think} it is better. It might be. It is
+  also not what you wrote, and the whole room is waiting to see what you do.
+tone: neutral
+category: fame
+rarity: common
+recurring: true
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { fame: { active: true } }
+    - { fame: { band: true } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  bandmate: { kind: friend, band: member, presence: nearby }
+choices:
+  - id: their_way
+    label: Try it {bandmate.their} way
+    outcome:
+      text: >-
+        You play it through twice, and the second time you hear it. {bandmate.name}
+        does not say anything smug, which you appreciate more than the bridge.
+      effects:
+        - { type: relationship, role: bandmate, affection: 5 }
+        - { type: band, action: chemistry, delta: 4 }
+        - { type: memory, role: bandmate, tag: band_backed_you }
+  - id: your_way
+    label: Keep it the way you wrote it
+    outcome:
+      text: >-
+        You keep your bridge. {bandmate.name} plays it, correctly and without
+        any joy, for the rest of the night.
+      effects:
+        - { type: relationship, role: bandmate, affection: -5 }
+        - { type: band, action: chemistry, delta: -4 }
+        - { type: memory, role: bandmate, tag: band_clashed }
+  - id: together
+    label: Sit down and write a third version together
+    check:
+      base: 50
+      stats: [{ key: kindness, weight: 0.2 }, { key: smarts, weight: 0.15 }]
+      success:
+        text: >-
+          It takes until after midnight. The new bridge belongs to both of you,
+          and it is the best part of the song.
+        effects:
+          - { type: relationship, role: bandmate, affection: 6 }
+          - { type: band, action: chemistry, delta: 6 }
+          - { type: fame, action: craft, delta: 1 }
+      failure:
+        text: >-
+          Two hours later you have three versions, none of them good, and
+          everyone has gone home annoyed with everyone.
+        effects:
+          - { type: band, action: chemistry, delta: -3 }
+          - { type: stat, key: stress, delta: 3 }

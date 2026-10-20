@@ -16,6 +16,8 @@ import { breakCeiling, isMinorStar, pathDef, rungDef, topRung, usualYear, worked
 import { fameTextValues } from './text';
 import { startSports } from '../sports/start';
 import { recentQuality } from './work';
+import { formBand, leaveBand } from './band';
+import { bandNameSuggestion } from './sound';
 
 /** Writes one of the fame history lines. */
 export function fameHistory(state: LifeState, key: FameHistoryKey, content: ContentBundle, extra: Record<string, string> = {}): void {
@@ -64,8 +66,12 @@ export function enterBlock(state: LifeState, pathId: string, routeId: string | u
   return null;
 }
 
-/** You start a career in a path (by a route, which gives you a head start in craft). */
-export function enterPath(state: LifeState, pathId: string, routeId: string | undefined, content: ContentBundle): boolean {
+/**
+ * You start a career in a path (by a route, which gives you a head start in
+ * craft). Batch 4: the route is kept, and the band way in starts you in a
+ * band of your own (named from the suggestions; you can rename it).
+ */
+export function enterPath(state: LifeState, pathId: string, routeId: string | undefined, content: ContentBundle, rng: RngState = state.rng): boolean {
   if (enterBlock(state, pathId, routeId, content) !== null) return false;
   const def = pathDef(content, pathId)!;
   const e = content.balance.fame.entry;
@@ -79,7 +85,9 @@ export function enterPath(state: LifeState, pathId: string, routeId: string | un
   f.main = pathId;
   f.second = null;
   const rung = Math.min(def.rungs.length, route?.rung ?? 1);
-  f.paths = { [pathId]: { rung, peak: rung, fame: Math.max(e.fame, rung > 1 ? rungDef(def, rung).fame + 1 : 0), craft: route?.craft ?? e.craft, since: year, last: year, recent: [], breakYear: 0 } };
+  f.paths = {
+    [pathId]: { rung, peak: rung, fame: Math.max(e.fame, rung > 1 ? rungDef(def, rung).fame + 1 : 0), craft: route?.craft ?? e.craft, since: year, last: year, recent: [], breakYear: 0, ...(route ? { route: route.id } : {}) },
+  };
   f.image = e.image;
   f.mood = e.mood;
   f.fans = e.fans;
@@ -88,8 +96,12 @@ export function enterPath(state: LifeState, pathId: string, routeId: string | un
   f.agent = null;
   f.contract = null;
   f.commitment = 'steady';
+  f.band = null;
+  f.offers = [];
+  f.instrument = null;
   fameHistory(state, 'entered', content);
   if (def.sport) startSports(state, def, content);
+  if (route?.id === 'band' && def.bands) formBand(state, bandNameSuggestion(state, 0, content), undefined, content, rng, 'route');
   return true;
 }
 
@@ -371,6 +383,8 @@ export function endContract(state: LifeState, how: 'ended' | 'broken', content: 
 export function retire(state: LifeState, content: ContentBundle): boolean {
   const f = state.fame;
   if (!f.active) return false;
+  // Batch 4: you walk away from your band too.
+  if (f.band) leaveBand(state, false, content);
   f.active = false;
   f.retired = state.currentYear;
   f.plan = null;

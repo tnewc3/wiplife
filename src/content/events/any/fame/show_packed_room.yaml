@@ -1,0 +1,41 @@
+id: show_packed_room
+title: A full room
+text: >-
+  When you played {venue}, the room was full, properly full, with people
+  standing at the back who had come for you. You could see some of them
+  singing along.
+tone: light
+category: fame
+rarity: common
+recurring: true
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { fame: { active: true } }
+    - { fame: { shows: { gte: 1 } } }
+    - { fame: { sport: false } }
+weight: { base: 10 }
+followUpOnly: true
+choices:
+  - id: new_song
+    label: Play them the new song
+    check:
+      base: 50
+      stats: [{ fame: craft, weight: 0.3 }, { key: confidence, weight: 0.15 }]
+      success:
+        text: They go quiet for it, then loud. Somebody films it, and the new song has fans before it has a title.
+        effects:
+          - { type: fame, action: fans, delta: 4 }
+          - { type: fame, action: fame, delta: 1 }
+      failure:
+        text: It falls a little flat. You go back to the old ones, and the room forgives you.
+        effects:
+          - { type: fame, action: mood, delta: -1 }
+  - id: hits
+    label: Give them the ones they know
+    outcome:
+      text: Every word comes back at you. You will remember this one.
+      effects:
+        - { type: fame, action: mood, delta: 3 }
+        - { type: stat, key: happiness, delta: 4 }

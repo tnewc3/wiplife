@@ -1,0 +1,33 @@
+id: tour_sold_out_night
+title: Sold out
+text: >-
+  One night of {tourNoun} sells out. The sign is on the door when you arrive,
+  and there are people outside without tickets, asking if there is any way in.
+tone: light
+category: fame
+rarity: common
+recurring: true
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { fame: { active: true } }
+    - { fame: { toured: true } }
+    - { fame: { sport: false } }
+weight: { base: 10 }
+followUpOnly: true
+choices:
+  - id: outside
+    label: Play a few songs outside first
+    outcome:
+      text: You play three songs on the pavement for the people who could not get in. That is the clip everyone shares.
+      effects:
+        - { type: fame, action: image, delta: 3 }
+        - { type: fame, action: mood, delta: 4 }
+  - id: inside
+    label: Save it all for the show
+    outcome:
+      text: The show is the best of the run. You come offstage shaking.
+      effects:
+        - { type: stat, key: happiness, delta: 5 }
+        - { type: fame, action: fame, delta: 1 }

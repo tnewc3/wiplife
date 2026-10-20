@@ -1,0 +1,59 @@
+id: band_quit_day_job
+title: A steady offer
+text: >-
+  {bandmate.name} has been offered a steady job, the kind with weekends off
+  and no van. {bandmate.They} {bandmate:wants|want} to take it, and
+  {bandmate.they} {bandmate:wants|want} you to tell {bandmate.them} it is the right call.
+tone: serious
+category: fame
+rarity: common
+recurring: true
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { fame: { active: true } }
+    - { fame: { band: true } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  bandmate: { kind: friend, band: member, presence: nearby }
+choices:
+  - id: let_go
+    label: Tell {bandmate.them} to take it
+    outcome:
+      text: >-
+        {bandmate.name} plays one last rehearsal and hugs everyone on the way
+        out. The band is smaller, and {bandmate.they} {bandmate:is|are} still your friend.
+      effects:
+        - { type: band, action: quit, role: bandmate }
+        - { type: relationship, role: bandmate, affection: 5 }
+  - id: talk_them_round
+    label: Ask {bandmate.them} to give it one more year
+    check:
+      base: 40
+      stats: [{ role: bandmate, key: affection, weight: 0.3 }, { key: confidence, weight: 0.15 }]
+      success:
+        text: >-
+          {bandmate.They} {bandmate:turns|turn} the job down. It is a big thing to
+          do for a band, and everyone knows it.
+        effects:
+          - { type: band, action: chemistry, delta: 6 }
+          - { type: relationship, role: bandmate, trust: 4 }
+      failure:
+        text: >-
+          {bandmate.name} takes the job anyway, and leaves a little hurt that
+          you asked. The band carries on without {bandmate.them}.
+        effects:
+          - { type: band, action: quit, role: bandmate }
+          - { type: relationship, role: bandmate, affection: -4 }
+  - id: pay_more
+    label: Offer {bandmate.them} a bigger share
+    outcome:
+      text: >-
+        You put some of your own money behind the offer. {bandmate.name}
+        stays, and the band costs you more than it did.
+      effects:
+        - { type: famePay, cost: small }
+        - { type: band, action: chemistry, delta: 2 }
+        - { type: relationship, role: bandmate, affection: 3 }

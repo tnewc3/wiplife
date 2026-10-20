@@ -63,5 +63,14 @@ export function fameHolds(c: FameCondition, state: LifeState, content?: ContentB
     if ((def !== undefined && main !== undefined && main.rung >= def.rungs.length) !== c.top) return false;
   }
   if (c.plan !== undefined && (f.plan !== null) !== c.plan) return false;
+  // Batch 4: bands, your sound and the road.
+  if (c.band !== undefined && (f.active && f.band !== null) !== c.band) return false;
+  if (c.leader !== undefined && (f.active && f.band?.leader === 'you') !== c.leader) return false;
+  if (c.offGenre !== undefined && (project !== undefined && (project.offGenre ?? 0) > 0) !== c.offGenre) return false;
+  const played = f.played.year === year ? f.played : undefined;
+  if (c.toured !== undefined && (played?.tour !== null && played?.tour !== undefined) !== c.toured) return false;
+  if (c.shows && !within(played?.shows ?? 0, c.shows)) return false;
+  if (c.genre !== undefined && (main?.genre !== undefined) !== c.genre) return false;
+  if (c.offer !== undefined && (f.active && f.band === null && f.offers.length > 0) !== c.offer) return false;
   return true;
 }

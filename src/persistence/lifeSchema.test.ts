@@ -2,6 +2,7 @@ import 'fake-indexeddb/auto';
 import { produce } from 'immer';
 import { joinCrew } from '../engine/crime/crew';
 import { enterPath } from '../engine/fame/ladder';
+import { emptyFameTotals } from '../engine/fame/query';
 import { afterEach, describe, expect, it } from 'vitest';
 import { content } from '../content';
 import { performAction } from '../engine/actions';
@@ -1088,13 +1089,13 @@ describe('fame in arts and media (E6b)', () => {
       d.fame.scene = 'entourage';
       d.fame.agent = { agentId: 'dunmore_talent', since: d.currentYear - 2 };
       d.fame.contract = { company: 'brightline_music', path: 'music', since: d.currentYear - 1, until: d.currentYear + 2, advance: 24_000, share: 0.25, terms: 'standard', exclusive: false, byParent: false };
-      d.fame.plan = { path: 'music', kind: 'ep', style: 'artistic', risk: 'bold', tour: false, press: true };
+      d.fame.plan = { path: 'music', kind: 'ep', style: 'artistic', risk: 'bold', press: true };
       d.fame.projects.push({ year: d.currentYear - 1, path: 'music', kind: 'ep', title: 'Glass Weather', style: 'artistic', risk: 'bold', tour: false, press: true, quality: 66, critics: 78, fans: 52, band: 'cult', gain: 6.5, earned: 31_000 });
       d.fame.awards.push({ awardId: 'halcyon_music_prize', year: d.currentYear - 1, path: 'music', project: 'Glass Weather', won: false });
       d.fame.nominated = { awardId: 'halcyon_music_prize', project: 'Glass Weather', due: d.currentYear + 1, score: 71 };
       d.fame.headlines.push({ year: d.currentYear, text: 'A Night Out That Went On', kind: 'scandal' });
-      d.fame.income = { year: d.currentYear, gross: 90_000, agent: 13_500, company: 6_000, trust: 0, scene: 7_000 };
-      d.fame.totals = { projects: 6, hits: 3, flops: 1, breaks: 1, fades: 2, comebacks: 1, nominations: 3, wins: 1, scandals: 2, tours: 1, burnouts: 1, crossovers: 0, stalkers: 0, earned: 310_000 };
+      d.fame.income = { year: d.currentYear, gross: 90_000, agent: 13_500, company: 6_000, trust: 0, scene: 7_000, tour: 0 };
+      d.fame.totals = { ...emptyFameTotals(), projects: 6, hits: 3, flops: 1, breaks: 1, fades: 2, comebacks: 1, nominations: 3, wins: 1, scandals: 2, tours: 1, burnouts: 1, crossovers: 0, stalkers: 0, earned: 310_000 };
     });
 
   it('round trips a life with a career, an agent, a contract, a project and an awards shelf', async () => {

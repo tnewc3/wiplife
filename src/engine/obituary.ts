@@ -157,6 +157,17 @@ export const OBITUARY_SECTIONS: readonly ObituarySection[] = [
     },
   },
   {
+    // Batch 4: the best-received work of a career in arts and media, by title (and the band that made it).
+    id: 'fame',
+    write: (ctx) => {
+      const best = ctx.life.fame.best;
+      const def = best ? ctx.content.famePaths[best.path] : undefined;
+      if (!best || !def) return null;
+      const values = { work: best.title, noun: def.kinds.find((k) => k.id === best.kind)?.noun ?? 'work', pathNoun: def.noun, band: best.bandName ?? '' };
+      return ctx.write(best.bandName ? ctx.content.text.obituary.fame.band : ctx.content.text.obituary.fame.best, values);
+    },
+  },
+  {
     id: 'love',
     write: (ctx) => {
       const { life, content } = ctx;

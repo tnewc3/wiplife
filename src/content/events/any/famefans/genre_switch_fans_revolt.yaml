@@ -1,0 +1,39 @@
+id: genre_switch_fans_revolt
+title: Not what they signed up for
+text: >-
+  You have gone {genre}, and some of the people who loved the old you are
+  taking it personally. The comments are full of the word "sellout", and a
+  few of them are from people who used to be at every show.
+tone: neutral
+category: famefans
+rarity: common
+recurring: true
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { fame: { active: true } }
+    - { fame: { genre: true } }
+weight: { base: 10 }
+followUpOnly: true
+choices:
+  - id: explain
+    label: Explain why you changed
+    check:
+      base: 45
+      stats: [{ key: sociability, weight: 0.2 }, { fame: image, weight: 0.2 }]
+      success:
+        text: Your post is honest and a little funny. Some of the angriest ones come round, and say so.
+        effects:
+          - { type: fame, action: mood, delta: 5 }
+      failure:
+        text: It reads as defensive. It gives them something new to quote.
+        effects:
+          - { type: fame, action: mood, delta: -3 }
+          - { type: stat, key: stress, delta: 2 }
+  - id: ignore
+    label: Let the music answer
+    outcome:
+      text: You say nothing and keep making it. The noise fades, and the people who stay are the ones who wanted to.
+      effects:
+        - { type: fame, action: fans, delta: -2 }
+        - { type: fame, action: image, delta: 1 }

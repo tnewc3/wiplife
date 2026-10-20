@@ -79,6 +79,9 @@ const kindSchema = z.strictObject({
   /** How much fame it can win, and how much it pays, as multiples of the usual. */
   reach: z.number().min(0.2).max(3),
   pay: z.number().min(0.1).max(5),
+  /** Batch 4: the skills (the path's `skills`) the work draws on, and how many track titles you may give it (none: it is one piece). */
+  skills: z.array(idSchema).max(4).optional(),
+  tracks: z.int().min(1).max(20).optional(),
 });
 
 const routeSchema = z.strictObject({
@@ -91,6 +94,35 @@ const routeSchema = z.strictObject({
   /** E6c: the rung you start on (1 when left out) and the oldest age this way in is open to. */
   rung: z.int().min(1).max(8).optional(),
   maxAge: z.int().min(5).max(90).optional(),
+});
+
+/** Batch 4: a skill you can practise in a path (vocals, songwriting): practice raises it, and it adds to the work that draws on it. */
+const skillSchema = z.strictObject({
+  id: idSchema,
+  label: z.string().trim().min(2).max(40),
+  blurb: z.string().trim().min(8).max(140),
+  /** The skill is playing your instrument: you choose one (the path's `instruments`) before you practise it. */
+  instrument: z.literal(true).optional(),
+});
+
+/** Batch 4: an instrument (or a part in a band, like the lead vocals): what you play, and what a bandmate plays. */
+const instrumentSchema = z.strictObject({
+  id: idSchema,
+  label: z.string().trim().min(2).max(40),
+  /** Who plays it, in a sentence ("a drummer", "the singer"). */
+  player: z.string().trim().min(2).max(40),
+  /** Only a band part, never your own instrument to practise (the lead vocals are a skill of their own). */
+  partOnly: z.literal(true).optional(),
+});
+
+/** Batch 4: a kind of show you can play, by rung. */
+const venueSchema = z.strictObject({
+  id: idSchema,
+  label: z.string().trim().min(2).max(40),
+  /** In a sentence ("an open mic", "a festival slot"). */
+  noun: z.string().trim().min(2).max(40),
+  blurb: z.string().trim().min(8).max(140),
+  minRung: z.int().min(1).max(8),
 });
 
 /** A path (src/content/fame): music, acting, social media or writing and art. */
@@ -119,7 +151,33 @@ export const famePathSchema = baseDefSchema.extend({
   royalties: probability,
   /** E6c: a sport. It is a path like any other (rungs, fame, fans, agents, awards) with a season in place of projects. */
   sport: sportSchema.optional(),
+  /**
+   * Batch 4: the skills you can practise here (any path can register them;
+   * Batch 5 adds a sport's). Numbers: balance/fame.yaml practice.
+   */
+  skills: z.array(skillSchema).max(8).optional(),
+  /** Batch 4: instruments and band parts (music). */
+  instruments: z.array(instrumentSchema).max(30).optional(),
+  /** Batch 4: bands: the part you take when you sing (an instrument id with partOnly). */
+  bands: z.strictObject({ singer: idSchema }).optional(),
+  /** Batch 4: the shows you can play, by rung, and the skills a show draws on. Numbers: balance/fame.yaml shows. */
+  shows: z.strictObject({ skills: z.array(idSchema).max(4), venues: z.array(venueSchema).min(1).max(8) }).optional(),
+  /** Batch 4: genres (src/content/genres) belong to this path: you choose a main one and one for each release. */
+  genres: z.literal(true).optional(),
 });
+export type FameSkillDef = z.infer<typeof skillSchema>;
+export type FameInstrumentDef = z.infer<typeof instrumentSchema>;
+export type FameVenueDef = z.infer<typeof venueSchema>;
+
+/** Batch 4: a genre (src/content/genres). Affinities between genres are in balance/fame.yaml sound. */
+export const fameGenreSchema = baseDefSchema.extend({
+  name: z.string().trim().min(2).max(40),
+  /** In a sentence, lower case where it should be ("alt rock", "R&B"). */
+  noun: z.string().trim().min(2).max(40),
+  path: idSchema,
+  blurb: z.string().trim().min(8).max(160),
+});
+export type FameGenreDef = z.infer<typeof fameGenreSchema>;
 export type FamePathDef = z.infer<typeof famePathSchema>;
 export type FameRungDef = z.infer<typeof rungSchema>;
 export type FameKindDef = z.infer<typeof kindSchema>;
@@ -230,7 +288,7 @@ export const fameBalanceSchema = z.strictObject({
     /** A multiple by rung (rung 1 first): the higher you are, the slower the climb. */
     rung: z.array(z.number().min(0.05).max(3)).min(4).max(8),
     commitment: perCommitment(z.number().min(0).max(4)),
-    /** Multiples: a press run, a tour, and per tier of agent. */
+    /** Multiples: a press run, a tour on the road as the release came out (Batch 4: booked on its own), and per tier of agent. */
     press: z.number().min(1).max(3),
     tour: z.number().min(1).max(3),
     agent: z.number().min(0).max(1),
@@ -250,8 +308,6 @@ export const fameBalanceSchema = z.strictObject({
     release: curveSchema,
     /** Gigs, royalties and retainers pay this share of the usual year with no new work, as long as you are active. */
     retainer: probability,
-    /** A tour adds this share of the usual year; a press run costs nothing and earns nothing but the fame. */
-    tour: z.number().min(0).max(3),
     /** Brands: the share added by public image above 50 (per point). */
     image: z.number().min(0).max(0.1),
     /** Money events pay (or cost) this share of the rung's usual year, by size. */
@@ -413,6 +469,122 @@ export const fameBalanceSchema = z.strictObject({
   }),
   /** The yearly jobs the fame step queues are capped: events from the registry, most pressing first. */
   events: z.strictObject({ maxQueued: z.int().min(1).max(6) }),
+  /**
+   * Batch 4: practice. Sessions a year by commitment (a minor has at most
+   * steady's), the points a session adds by the skill so far (slower as it
+   * grows), each session of the same skill in a year worth this share of the
+   * one before (diminishing returns), the most a skill reaches with a talent
+   * that fits and without, the multiple for a talent and per point of
+   * discipline above 50, the share of a session's gain that also goes to craft,
+   * and the quality points per point of the skills a kind of work draws on.
+   * Practice never touches health: it causes no injury.
+   */
+  practice: z.strictObject({
+    sessions: perCommitment(z.int().min(0).max(40)),
+    gain: curveSchema,
+    repeat: probability,
+    cap: z.strictObject({ talent: z.number().min(0).max(100), none: z.number().min(0).max(100) }),
+    talent: z.number().min(1).max(3),
+    discipline: z.number().min(0).max(0.05),
+    craft: probability,
+    quality: z.number().min(0).max(0.5),
+    /** A skill you have not touched starts here; changing your instrument keeps this share of it. */
+    start: z.number().min(0).max(50),
+    switchKeep: probability,
+  }),
+  /**
+   * Batch 4: shows. At most `perYear` a year. A show's score (0–100) comes from
+   * `base`, the aptitude blend, a talent that fits, the show skills, craft, the
+   * band and a roll; it lands great, good or rough (`bands`), which multiplies
+   * what it brings. By venue: pay (a share of the rung's usual year), fame
+   * points, fans (a share of the fans your fame supports, with a floor), craft
+   * and stress. A band takes its share of the pay and brings more people in.
+   */
+  shows: z.strictObject({
+    perYear: z.int().min(1).max(20),
+    base: z.number().min(0).max(60),
+    aptitude: z.number().min(0).max(40),
+    talent: z.number().min(0).max(40),
+    skills: z.number().min(0).max(1),
+    craft: z.number().min(0).max(1),
+    noise: z.number().min(0).max(30),
+    bands: z.strictObject({ great: z.int().min(0).max(100), good: z.int().min(0).max(100) }),
+    outcome: z.strictObject({ great: z.number().min(0).max(3), good: z.number().min(0).max(3), rough: z.number().min(-1).max(3) }),
+    venues: z.record(idSchema, z.strictObject({ pay: z.number().min(0).max(1), fame: z.number().min(0).max(10), fans: z.number().min(0).max(0.2), fansFloor: z.int().min(0).max(10000), craft: z.number().min(0).max(5), stress: z.number().min(0).max(10) })),
+    /** Bandmates' feelings and the band's chemistry after a show: great, good, rough. */
+    affection: z.strictObject({ great: z.number().min(-10).max(10), good: z.number().min(-10).max(10), rough: z.number().min(-10).max(10) }),
+    chemistry: z.strictObject({ great: z.number().min(-10).max(10), good: z.number().min(-10).max(10), rough: z.number().min(-10).max(10) }),
+    /** The chance a show leaves a story for the coming year (an event). */
+    event: probability,
+  }),
+  /**
+   * Batch 4: tours, at most one a year (booked between years, on the road as
+   * the year begins). The size goes by how far up the ladder you are (a share
+   * of its rungs). By size: what it costs up front and brings in (shares of the
+   * rung's usual year; what it brings moves with fan mood), fame points
+   * (before the rung's multiple and your commitment's), the share added to
+   * your fans, the extra strain on the people close to you and on everyone
+   * else, stress and burnout.
+   */
+  tours: z.strictObject({
+    perYear: z.int().min(1).max(4),
+    sizes: z.strictObject(Object.fromEntries(['local', 'regional', 'national', 'world'].map((k) => [k, z.strictObject({ from: probability, cost: z.number().min(0).max(5), revenue: z.number().min(0).max(5), fame: z.number().min(0).max(20), fans: z.number().min(0).max(1), close: z.number().min(0).max(20), other: z.number().min(0).max(20), stress: z.number().min(0).max(20), burnout: z.number().min(0).max(40) })])) as Record<'local' | 'regional' | 'national' | 'world', z.ZodObject<{ from: z.ZodNumber; cost: z.ZodNumber; revenue: z.ZodNumber; fame: z.ZodNumber; fans: z.ZodNumber; close: z.ZodNumber; other: z.ZodNumber; stress: z.ZodNumber; burnout: z.ZodNumber }>>),
+    /** What it brings in at fan mood 0 and at 100 (a multiple, linear between). */
+    mood: z.strictObject({ low: z.number().min(0).max(3), high: z.number().min(0).max(3) }),
+  }),
+  /**
+   * Batch 4: bands. Members besides you (auditions bring between min and
+   * max), their skill (0–100) by your rung, how they feel about you at first,
+   * the starting chemistry, your share of what the band earns, and what the
+   * band adds to the work (per point of the members' mean skill, and per
+   * point of chemistry above 50). Yearly: chemistry follows how members feel by this
+   * share; drama by chemistry (the chance of a clash, a member quitting and
+   * a split), a poaching chance per member by their skill, and the chance of
+   * an offer from a band in your city by rung. Leaving: affection lost by
+   * members, and the share of fans that stay with you (going solo keeps more).
+   */
+  band: z.strictObject({
+    size: z.strictObject({ min: z.int().min(1).max(6), max: z.int().min(1).max(8) }),
+    skill: curveSchema,
+    affection: z.int().min(0).max(100),
+    chemistry: z.int().min(0).max(100),
+    cut: probability,
+    quality: z.strictObject({ skill: z.number().min(0).max(0.5), chemistry: z.number().min(0).max(0.5) }),
+    showFans: z.number().min(1).max(3),
+    drift: probability,
+    clash: curveSchema,
+    quit: curveSchema,
+    split: curveSchema,
+    poach: curveSchema,
+    offer: curveSchema,
+    /** Kicking someone out: their affection lost, and chemistry lost (or won, when they were the trouble). */
+    kick: z.strictObject({ affection: z.int().min(0).max(100), chemistry: z.number().min(-30).max(30) }),
+    leave: z.strictObject({ affection: z.int().min(0).max(100), fans: probability }),
+    solo: z.strictObject({ affection: z.int().min(0).max(100), fans: probability }),
+    /** The youngest a bandmate of an adult can be; a minor's bandmates are within this many years of their age. */
+    adultMin: z.int().min(16).max(30),
+    minorSpread: z.int().min(1).max(5),
+  }),
+  /**
+   * Batch 4: your sound. Affinity between two genres (0–1; pairs not listed
+   * have `other`); distance is 1 minus it. A release outside your genre:
+   * critics judge it as they would any (no change); fans' score moves by
+   * `fanScore` per point of distance, fan mood by `mood`, a share of fans
+   * leave (`leave`) and new ones come by how fans took it (`gain`, at a fan
+   * score of 100). Changing your main genre: fans leave and mood falls by
+   * distance.
+   */
+  sound: z.strictObject({
+    affinity: z.array(z.strictObject({ a: idSchema, b: idSchema, x: probability })),
+    other: probability,
+    offGenre: z.number().min(0).max(1),
+    fanScore: z.number().min(0).max(40),
+    mood: z.number().min(0).max(40),
+    leave: probability,
+    gain: probability,
+    switchLeave: probability,
+    switchMood: z.number().min(0).max(40),
+  }),
 });
 export type FameBalance = z.infer<typeof fameBalanceSchema>;
 
@@ -443,6 +615,18 @@ export const FAME_TRIGGERS = [
   'crossover',
   'tour',
   'press',
+  // Batch 4: bands, shows, tours, your sound and practice.
+  'bandClash',
+  'bandQuit',
+  'bandPoached',
+  'bandSplit',
+  'bandOffer',
+  'bandFormed',
+  'show',
+  'tourHome',
+  'genreSwitch',
+  'offGenre',
+  'practice',
 ] as const;
 export type FameTrigger = (typeof FAME_TRIGGERS)[number];
 
@@ -459,7 +643,31 @@ export type FameRegistry = z.infer<typeof fameRegistrySchema>;
 const historyLine = z.strictObject({ importance: z.union([z.literal(1), z.literal(2), z.literal(3)]), variants: z.array(z.string().trim().min(1)).min(1) });
 
 /** The history lines the fame systems write (text/fame.yaml). Values: {path}, {rung}, {project}, {company}, {award}. */
-export const FAME_HISTORY_KEYS = ['entered', 'climbed', 'faded', 'break', 'signed', 'agent', 'award', 'burnout', 'retired', 'comeback', 'crossover', 'stalker', 'tabloid'] as const;
+export const FAME_HISTORY_KEYS = [
+  'entered',
+  'climbed',
+  'faded',
+  'break',
+  'signed',
+  'agent',
+  'award',
+  'burnout',
+  'retired',
+  'comeback',
+  'crossover',
+  'stalker',
+  'tabloid',
+  // Batch 4: what you put out (by title), bands and your sound.
+  'released',
+  'bandFormed',
+  'bandJoined',
+  'bandLeft',
+  'bandSolo',
+  'bandSplit',
+  'bandRenamed',
+  'genre',
+  'tour',
+] as const;
 export type FameHistoryKey = (typeof FAME_HISTORY_KEYS)[number];
 
 const quotes = z.strictObject(Object.fromEntries(FAME_BANDS.map((b) => [b, z.array(z.string().trim().min(8)).min(2)])) as Record<FameBand, z.ZodArray<z.ZodString>>);
@@ -469,13 +677,17 @@ export const fameTextSchema = z.strictObject({
   /** Short quotes from critics and from fans, by how the work was received. Values: {project}, {noun}. */
   critic: quotes,
   fan: quotes,
-  /** Titles for projects, by path. */
+  /** Titles for projects, by path (Batch 4: the suggestions the project step offers). */
   titles: z.record(idSchema, z.array(z.string().trim().min(2).max(40)).min(8)),
+  /** Batch 4: band names: suggestions when you form one, and the names of bands that ask you to join. */
+  bandNames: z.array(z.string().trim().min(2).max(40)).min(20),
+  /** Batch 4: the word for each size of tour ("a {size} tour"). */
+  tourSizes: z.strictObject({ local: z.string().trim().min(2).max(20), regional: z.string().trim().min(2).max(20), national: z.string().trim().min(2).max(20), world: z.string().trim().min(2).max(20) }),
   /** Tabloid headlines, by the kind of story (registries/web.yaml kinds) and a few general ones. Values: {name}. */
   tabloid: z.record(idSchema, z.array(z.string().trim().min(8)).min(1)),
 });
 export type FameText = z.infer<typeof fameTextSchema>;
 
 /** The text values fame events can use: see src/engine/fame/text.ts. */
-export const FAME_TEXT_VALUES = ['project', 'noun', 'review', 'fanLine', 'rungTitle', 'nextTitle', 'pathNoun', 'company', 'agent', 'award', 'headline', 'secondPath'] as const;
+export const FAME_TEXT_VALUES = ['project', 'noun', 'review', 'fanLine', 'rungTitle', 'nextTitle', 'pathNoun', 'company', 'agent', 'award', 'headline', 'secondPath', 'bandName', 'genre', 'releaseGenre', 'venue', 'tourNoun', 'offerName'] as const;
 export type FameTextValue = (typeof FAME_TEXT_VALUES)[number];

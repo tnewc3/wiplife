@@ -3,7 +3,10 @@
  * a rung on its ladder, scores in range, people and companies that are real), a
  * contract signed for anyone under 18 was signed by a parent and never binds them
  * exclusively, nobody under 18 goes all in or is stalked, a retired star has no
- * plan or contract, and a stalker is one of your superfans.
+ * plan or contract, and a stalker is one of your superfans. Batch 4: shows,
+ * tours and practice stay within their yearly limits, skills are in range, a
+ * band is only held while in a career and its members are real people you
+ * know (once each, never you), and a genre or instrument is one of content's.
  */
 import type { ContentBundle } from '../../content/schemas';
 import type { LifeState } from '../types';
@@ -73,6 +76,35 @@ export function fameFailures(state: LifeState, content: ContentBundle): string[]
   if (f.headlines.length > b.tabloids.keep) fail('fame: too many headlines kept');
   for (const award of f.awards) if (!content.fameAwards[award.awardId]) fail(`fame: unknown award "${award.awardId}"`);
   if (f.nominated && !content.fameAwards[f.nominated.awardId]) fail('fame: nominated for an unknown award');
+  // Batch 4: the grind and bands.
+  const g = f.grind;
+  if (g.year === state.currentYear) {
+    if (g.shows > b.shows.perYear) fail(`fame: ${g.shows} shows this year (at most ${b.shows.perYear})`);
+    if (g.practice > b.practice.sessions.all) fail(`fame: ${g.practice} practice sessions this year (at most ${b.practice.sessions.all})`);
+  }
+  if (g.tour && !f.paths[g.tour.path]) fail('fame: a tour booked in a path you are not in');
+  for (const [id, p] of Object.entries(f.paths)) {
+    for (const [skill, v] of Object.entries(p.skills ?? {})) {
+      if (typeof v !== 'number' || v < 0 || v > 100) fail(`fame: skill ${skill} in ${id} is out of range`);
+      if (!content.famePaths[id]?.skills?.some((sk) => sk.id === skill)) fail(`fame: unknown skill "${skill}" in ${id}`);
+    }
+    if (p.genre !== undefined && content.fameGenres[p.genre]?.path !== id) fail(`fame: genre "${p.genre}" is not one of ${id}'s`);
+  }
+  if (f.instrument !== null && !Object.values(content.famePaths).some((d) => d.instruments?.some((i) => i.id === f.instrument && !i.partOnly))) fail(`fame: unknown instrument "${f.instrument}"`);
+  const band = f.band;
+  if (band) {
+    if (!f.active) fail('fame: a band without a career');
+    if (!f.paths[band.path]) fail('fame: a band in a path you are not in');
+    const ids = band.members.map((m) => m.id);
+    if (new Set(ids).size !== ids.length) fail('fame: a bandmate appears twice');
+    for (const m of band.members) {
+      if (!state.people[m.id] || !state.relationships[m.id]) fail(`fame: bandmate ${m.id} is not someone you know`);
+      score(`fame.band member ${m.id} skill`, m.skill);
+    }
+    if (band.leader !== 'you' && !ids.includes(band.leader)) fail('fame: the band is led by someone not in it');
+    score('fame.band.chemistry', band.chemistry);
+  }
+  if (f.offers.length > 3) fail('fame: more than three band offers');
   for (const [k, v] of Object.entries(f.income)) if (!Number.isSafeInteger(v) || v < 0) fail(`fame.income.${k} must be a whole number of at least 0`);
   for (const [k, v] of Object.entries(f.totals)) if (!Number.isSafeInteger(v) || v < 0) fail(`fame.totals.${k} must be a whole number of at least 0`);
   return failures;

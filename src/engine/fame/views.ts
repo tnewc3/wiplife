@@ -21,7 +21,27 @@ import {
 } from './ladder';
 import { allPaths, bandOf, fanAlive, isMinorStar, mainPath, moodBand, pathDef, rungDef, usualYear, withArticle, workedPaths } from './query';
 import { planBlock, recentQuality } from './work';
-import type { Id, LifeState } from '../types';
+import { bandPathOf, formBlock, liveMembers, openParts, partsOf, type BandBlock } from './band';
+import {
+  grindView,
+  instrumentsOf,
+  practiceBlock,
+  practiceBudget,
+  practiceGain,
+  showBlock,
+  showQuote,
+  skillCap,
+  skillLevel,
+  skillsOf,
+  tourBlock,
+  tourNoun,
+  tourQuote,
+  type PracticeBlock,
+  type ShowBlock,
+  type TourBlock,
+} from './grind';
+import { bandNameSuggestion, genreDistance, genresOf, parseTitle, parseTracks, titleSuggestion, TRACKS_MAX } from './sound';
+import type { Id, LifeState, TourSize } from '../types';
 
 export interface FameRungView {
   title: string;
@@ -48,10 +68,25 @@ export interface FamePathView {
   press: { label: string; allowed: boolean; minRung: number };
   /** A typical year at this rung, in your city. */
   usualYear: number;
+  /** Batch 4: the way in you took, your main genre and the genres of the path (none for a path without them), and how many track titles each kind can have. */
+  route: string | null;
+  genre: { id: Id; name: string } | null;
+  genres: { id: Id; name: string; blurb: string; distance: number }[];
+  tracks: Record<Id, number>;
+  /** Batch 4: a tour: what one would be now, and why it can't be booked (or null). */
+  tourQuote: { size: TourSize; noun: string; cost: number; revenue: number } | null;
+  tourBlock: TourBlock | null;
+  /** Batch 4: the skills you can practise here, where each stands and what the next session would add. */
+  skills: { id: Id; label: string; blurb: string; level: number; cap: number; gain: number; block: PracticeBlock | null; instrument: boolean }[];
 }
 
 export interface FameProjectView {
   title: string;
+  /** Batch 4: its genre, whether it was outside your sound, its track titles and the band that made it. */
+  genre: string | null;
+  offGenre: boolean;
+  tracks: string[];
+  bandName: string | null;
   year: number;
   pathName: string;
   noun: string;
@@ -101,7 +136,7 @@ export interface FameView {
   agentBlocks: Record<Id, AgentBlock | null>;
   contract: { company: string; kind: string; until: number; share: number; advance: number; exclusive: boolean; byParent: boolean; terms: 'standard' | 'tough' | 'generous' } | null;
   contractBlock: ReturnType<typeof contractBlock>;
-  plan: { pathId: Id; kindLabel: string; style: 'commercial' | 'artistic'; risk: 'safe' | 'bold'; tour: boolean; press: boolean } | null;
+  plan: { pathId: Id; kindLabel: string; style: 'commercial' | 'artistic'; risk: 'safe' | 'bold'; press: boolean; title: string | null; genre: string | null; offGenre: boolean } | null;
   projects: FameProjectView[];
   awards: { name: string; category: string; year: number; project: string; won: boolean }[];
   nominated: { name: string; category: string; project: string; due: number } | null;
@@ -111,10 +146,43 @@ export interface FameView {
   entry: FameEntryView[];
   cross: { pathId: Id; name: string; block: CrossBlock | null }[];
   /** Last year's pay through the ledger, the cuts taken and the scene. */
-  income: { gross: number; agent: number; company: number; trust: number; scene: number } | null;
+  income: { gross: number; agent: number; company: number; trust: number; scene: number; tour: number } | null;
   totals: { projects: number; hits: number; breaks: number; wins: number; nominations: number };
   /** Reasons you can't line up a project now (null when you can). */
   projectBlock: string | null;
+  /** Batch 4: your band, the offers from bands in your city, why you can't form one, and the bands you were in. */
+  band: {
+    name: string;
+    leader: boolean;
+    leaderName: string | null;
+    part: string;
+    chemistry: number;
+    chemistryBand: number;
+    since: number;
+    members: { id: Id; name: string; part: string; skill: number; affection: number }[];
+    openParts: { id: Id; label: string }[];
+  } | null;
+  offers: { name: string; genre: string; size: number; part: string }[];
+  formBlock: BandBlock | null;
+  parts: { id: Id; label: string }[];
+  pastBands: { name: string; from: number; to: number; how: 'left' | 'solo' | 'split' }[];
+  /** Batch 4: the instruments you can take up, and yours. */
+  instruments: { id: Id; label: string }[];
+  instrument: { id: Id; label: string } | null;
+  /** Batch 4: shows: how many this year and the most, the show your rung gives and what a good night pays, why you can't (or null), and the last one. */
+  shows: {
+    played: number;
+    max: number;
+    venue: { id: Id; label: string; blurb: string } | null;
+    pay: number;
+    block: ShowBlock | null;
+    last: { venue: string; outcome: 'great' | 'good' | 'rough'; pay: number; fans: number } | null;
+    owed: number;
+  };
+  /** Batch 4: a tour booked for the coming year. */
+  tour: { pathId: Id; noun: string; cost: number } | null;
+  /** Batch 4: practice sessions used this year and the yearly budget. */
+  practice: { used: number; budget: number };
 }
 
 const name = (state: LifeState, id: Id): string => {
@@ -144,6 +212,25 @@ export function pathView(state: LifeState, id: Id, content: ContentBundle): Fame
     tour: { label: def.tour.label, allowed: p.rung >= def.tour.minRung, minRung: def.tour.minRung },
     press: { label: def.press.label, allowed: p.rung >= def.press.minRung, minRung: def.press.minRung },
     usualYear: usualYear(state, def, p.rung, content),
+    route: p.route ? (def.routes.find((r) => r.id === p.route)?.label ?? null) : null,
+    genre: p.genre && content.fameGenres[p.genre] ? { id: p.genre, name: content.fameGenres[p.genre]!.name } : null,
+    genres: def.genres ? genresOf(content, id).map((g) => ({ id: g.id, name: g.name, blurb: g.blurb, distance: Math.round(genreDistance(p.genre, g.id, content) * 100) / 100 })) : [],
+    tracks: Object.fromEntries(def.kinds.map((k) => [k.id, k.tracks ?? 0])),
+    tourQuote: (() => {
+      const q = def.sport ? null : tourQuote(state, id, content);
+      return q ? { ...q, noun: tourNoun(def, q.size, content) } : null;
+    })(),
+    tourBlock: tourBlock(state, id, content),
+    skills: skillsOf(def).map((sk) => ({
+      id: sk.id,
+      label: sk.label,
+      blurb: sk.blurb,
+      level: Math.round(skillLevel(p, sk.id, content)),
+      cap: skillCap(state, def, content),
+      gain: Math.round(practiceGain(state, id, sk.id, content) * 10) / 10,
+      block: practiceBlock(state, id, sk.id, content),
+      instrument: sk.instrument === true,
+    })),
   };
 }
 
@@ -201,7 +288,16 @@ export function getFameView(state: LifeState, content: ContentBundle): FameView 
     contract: contract && company ? { company: company.name, kind: company.kind, until: contract.until, share: contract.share, advance: contract.advance, exclusive: contract.exclusive, byParent: contract.byParent, terms: contract.terms } : null,
     contractBlock: contractBlock(state, content),
     plan: f.plan
-      ? { pathId: f.plan.path, kindLabel: pathDef(content, f.plan.path)?.kinds.find((k) => k.id === f.plan!.kind)?.label ?? '', style: f.plan.style, risk: f.plan.risk, tour: f.plan.tour, press: f.plan.press }
+      ? {
+          pathId: f.plan.path,
+          kindLabel: pathDef(content, f.plan.path)?.kinds.find((k) => k.id === f.plan!.kind)?.label ?? '',
+          style: f.plan.style,
+          risk: f.plan.risk,
+          press: f.plan.press,
+          title: f.plan.title ?? null,
+          genre: f.plan.genre ? (content.fameGenres[f.plan.genre]?.name ?? null) : null,
+          offGenre: f.plan.genre !== undefined && genreDistance(f.paths[f.plan.path]?.genre, f.plan.genre, content) >= content.balance.fame.sound.offGenre,
+        }
       : null,
     projects: f.projects
       .filter((p) => pathDef(content, p.path)?.sport === undefined)
@@ -209,6 +305,10 @@ export function getFameView(state: LifeState, content: ContentBundle): FameView 
       .slice(0, 6)
       .map((p) => ({
         title: p.title,
+        genre: p.genre ? (content.fameGenres[p.genre]?.name ?? null) : null,
+        offGenre: p.offGenre !== undefined,
+        tracks: p.tracks ?? [],
+        bandName: p.bandName ?? null,
         year: p.year,
         pathName: pathDef(content, p.path)?.name ?? '',
         noun: pathDef(content, p.path)?.kinds.find((k) => k.id === p.kind)?.noun ?? 'work',
@@ -245,16 +345,91 @@ export function getFameView(state: LifeState, content: ContentBundle): FameView 
           routes: d.routes.map((r) => ({ id: r.id, label: r.label, blurb: r.blurb, minAge: Math.max(r.minAge, d.minAge), block: enterBlock(state, d.id, r.id, content) })),
         })),
     cross: f.active && f.second === null ? allPaths(content).filter((d) => d.id !== f.main).map((d) => ({ pathId: d.id, name: d.name, block: crossBlock(state, d.id, content) })) : [],
-    income: f.income.year === state.currentYear || f.income.year === state.currentYear - 1 ? { gross: f.income.gross, agent: f.income.agent, company: f.income.company, trust: f.income.trust, scene: f.income.scene } : null,
+    income: f.income.year === state.currentYear || f.income.year === state.currentYear - 1 ? { gross: f.income.gross, agent: f.income.agent, company: f.income.company, trust: f.income.trust, scene: f.income.scene, tour: f.income.tour } : null,
     totals: { projects: f.totals.projects, hits: f.totals.hits, breaks: f.totals.breaks, wins: f.totals.wins, nominations: f.totals.nominations },
     projectBlock,
+    ...grindView2(state, content),
+  };
+}
+
+/** Batch 4: the band, the instrument, shows, a tour and practice, for the Fame screen. */
+function grindView2(state: LifeState, content: ContentBundle): Pick<FameView, 'band' | 'offers' | 'formBlock' | 'parts' | 'pastBands' | 'instruments' | 'instrument' | 'shows' | 'tour' | 'practice'> {
+  const f = state.fame;
+  const bandPath = bandPathOf(state, content);
+  const bandDef = pathDef(content, f.band?.path ?? bandPath);
+  const partLabel = (id: Id) => partsOf(bandDef).find((p) => p.id === id)?.label ?? id;
+  const band = f.band;
+  const grind = grindView(state);
+  const quote = showQuote(state, content);
+  const mainDef = pathDef(content, f.main);
+  const last = grind.lastShow;
+  const venueLabel = (id: Id) => {
+    for (const def of Object.values(content.famePaths)) {
+      const v = def.shows?.venues.find((x) => x.id === id);
+      if (v) return v.label;
+    }
+    return id;
+  };
+  const tourDef = grind.tour ? pathDef(content, grind.tour.path) : undefined;
+  return {
+    band: band
+      ? {
+          name: band.name,
+          leader: band.leader === 'you',
+          leaderName: band.leader === 'you' ? null : name(state, band.leader),
+          part: partLabel(band.part),
+          chemistry: band.chemistry,
+          chemistryBand: bandOf(band.chemistry, [30, 50, 70]),
+          since: band.since,
+          members: liveMembers(state).map((m) => ({ id: m.id, name: name(state, m.id), part: partLabel(m.part), skill: m.skill, affection: state.relationships[m.id]?.affection ?? 0 })),
+          openParts: openParts(state, content).map((p) => ({ id: p.id, label: p.label })),
+        }
+      : null,
+    offers: band ? [] : f.offers.map((o) => ({ name: o.name, genre: content.fameGenres[o.genre]?.name ?? '', size: o.size, part: partLabel(o.part) })),
+    formBlock: formBlock(state, content),
+    parts: partsOf(bandDef).map((p) => ({ id: p.id, label: p.label })),
+    pastBands: [...f.pastBands].reverse(),
+    instruments: instrumentsOf(mainDef).map((i) => ({ id: i.id, label: i.label })),
+    instrument: f.instrument ? { id: f.instrument, label: instrumentsOf(mainDef).find((i) => i.id === f.instrument)?.label ?? f.instrument } : null,
+    shows: {
+      played: grind.shows,
+      max: content.balance.fame.shows.perYear,
+      venue: quote ? { id: quote.venue.id, label: quote.venue.label, blurb: quote.venue.blurb } : null,
+      pay: quote?.pay ?? 0,
+      block: showBlock(state, content),
+      last: last ? { venue: venueLabel(last.venue), outcome: last.outcome, pay: last.pay, fans: last.fans } : null,
+      owed: grind.showPay,
+    },
+    tour: grind.tour && tourDef ? { pathId: grind.tour.path, noun: tourNoun(tourDef, grind.tour.size, content), cost: grind.tour.cost } : null,
+    practice: { used: grind.practice, budget: practiceBudget(state, content) },
   };
 }
 
 /** Why a project with these choices can't be lined up now, or null. */
-export function getProjectBlock(state: LifeState, params: { pathId: Id; kindId: Id; style: 'commercial' | 'artistic'; risk: 'safe' | 'bold'; tour: boolean; press: boolean }, content: ContentBundle): string | null {
-  return planBlock(state, { path: params.pathId, kind: params.kindId, style: params.style, risk: params.risk, tour: params.tour, press: params.press }, content);
+export function getProjectBlock(
+  state: LifeState,
+  params: { pathId: Id; kindId: Id; style: 'commercial' | 'artistic'; risk: 'safe' | 'bold'; press: boolean; genreId?: Id; title?: string; tracks?: string[] },
+  content: ContentBundle,
+): string | null {
+  if (params.title !== undefined && parseTitle(params.title) === null) return 'title';
+  if (params.tracks !== undefined && parseTracks(params.tracks, TRACKS_MAX) === null) return 'tracks';
+  return planBlock(
+    state,
+    {
+      path: params.pathId,
+      kind: params.kindId,
+      style: params.style,
+      risk: params.risk,
+      press: params.press,
+      ...(params.genreId !== undefined ? { genre: params.genreId } : {}),
+      ...(params.tracks !== undefined ? { tracks: params.tracks } : {}),
+    },
+    content,
+  );
 }
+
+/** Batch 4: title and band name suggestions for the screen (n = 0, 1, 2... for "another"). */
+export { bandNameSuggestion, parseTitle, titleSuggestion };
 
 /** A rung's title with its article, for sentences in the UI. */
 export function titleWithArticle(text: string): string {

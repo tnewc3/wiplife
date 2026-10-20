@@ -1,0 +1,32 @@
+id: practice_neighbours
+title: Through the wall
+text: >-
+  A note has been pushed under your door. Your neighbour has heard the same
+  eight bars four hundred times this month, and would like to discuss it.
+tone: light
+category: fame
+rarity: common
+recurring: true
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { fame: { active: true } }
+    - { fame: { sport: false } }
+    - { home: { kind: [renting, owned] } }
+weight: { base: 8 }
+followUpOnly: true
+choices:
+  - id: hours
+    label: Agree on practice hours
+    outcome:
+      text: You practise between ten and six. Your neighbour starts humming the eight bars in the hallway.
+      effects:
+        - { type: stat, key: stress, delta: -1 }
+  - id: room
+    label: Rent a practice room by the hour
+    outcome:
+      text: You start renting a room across town. It costs, and you play louder than you ever could at home.
+      effects:
+        - { type: famePay, cost: petty }
+        - { type: fame, action: craft, delta: 1 }

@@ -1,0 +1,41 @@
+id: show_promoter_notices
+title: Someone was watching
+text: >-
+  A promoter who books bigger rooms saw you play {venue}. Their message is
+  short: they liked it, and they have a slot coming up with your name on it.
+tone: light
+category: fame
+rarity: uncommon
+recurring: true
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { fame: { active: true } }
+    - { fame: { shows: { gte: 2 } } }
+    - { fame: { sport: false } }
+weight: { base: 6 }
+followUpOnly: true
+choices:
+  - id: take_it
+    label: Take the slot
+    outcome:
+      text: The bigger room pays better and holds more people, and you fill more of it than anyone expected.
+      effects:
+        - { type: famePay, gain: small }
+        - { type: fame, action: fame, delta: 2 }
+        - { type: fame, action: fans, delta: 3 }
+  - id: hold_out
+    label: Hold out for a better slot
+    check:
+      base: 35
+      stats: [{ fame: fame, weight: 0.3 }, { key: confidence, weight: 0.1 }]
+      success:
+        text: They come back with the better slot, and it pays like one.
+        effects:
+          - { type: famePay, gain: solid }
+          - { type: fame, action: fame, delta: 2 }
+      failure:
+        text: They give the slot to someone else, and stop answering your messages.
+        effects:
+          - { type: stat, key: stress, delta: 2 }

@@ -346,7 +346,7 @@ export function playSeason(state: LifeState, content: ContentBundle, rng: RngSta
   }
 
   const kind = path.kinds[0]!;
-  const plan: FamePlan = { path: path.id, kind: kind.id, style: 'commercial', risk: 'safe', tour: false, press: false };
+  const plan: FamePlan = { path: path.id, kind: kind.id, style: 'commercial', risk: 'safe', press: false };
   const title = pick(rng, content.text.sports.seasons).replace('{year}', String(year)).replace('{team}', team.name);
   const project = landProject(state, content, rng, { plan, def: path, path: pstate, kind, roll, title, earned: salary, assigned: false });
 

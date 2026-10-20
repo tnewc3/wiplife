@@ -1,0 +1,41 @@
+id: band_clash_money
+title: The split
+text: >-
+  The last few shows paid, which is new. {bandmate.name} thinks the money
+  should not be split evenly, because {bandmate.they} {bandmate:does|do} the
+  driving and the booking. {bandmate.They} {bandmate:is|are} not wrong about the driving.
+tone: neutral
+category: fame
+rarity: uncommon
+recurring: true
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { fame: { active: true } }
+    - { fame: { band: true } }
+    - { fame: { rung: { gte: 2 } } }
+weight: { base: 6 }
+followUpOnly: true
+cast:
+  bandmate: { kind: friend, band: member, presence: nearby }
+choices:
+  - id: give
+    label: Give {bandmate.them} part of your cut
+    outcome:
+      text: >-
+        You hand over part of your share for the driving. {bandmate.name}
+        stops keeping a list of the miles.
+      effects:
+        - { type: famePay, cost: petty }
+        - { type: relationship, role: bandmate, affection: 6 }
+        - { type: band, action: chemistry, delta: 4 }
+  - id: even
+    label: An even split, always
+    outcome:
+      text: >-
+        Even it stays. {bandmate.name} keeps driving, and starts reading
+        the fuel gauge out loud at every stop.
+      effects:
+        - { type: relationship, role: bandmate, affection: -4 }
+        - { type: band, action: chemistry, delta: -3 }
