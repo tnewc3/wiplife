@@ -30,7 +30,9 @@ export function schoolFailures(state: LifeState, content: ContentBundle): string
   const sc = state.education.school;
   const adultAge = content.balance.relationships.adultAge;
   for (const id of sc.classmates) {
-    if (state.relationships[id]?.kind !== 'classmate') failures.push(`class member ${id} is not a classmate`);
+    // A classmate may become a friend or a partner and stays in the class; never a teacher, and never gone.
+    const kind = state.relationships[id]?.kind;
+    if (kind === undefined || kind === 'teacher') failures.push(`class member ${id} is not a classmate`);
   }
   for (const [role, id] of Object.entries(sc.staff)) {
     const rel = state.relationships[id];
