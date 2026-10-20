@@ -543,6 +543,12 @@ describe('amends', () => {
     expect(found).toContain('old_friend:pal');
     expect(found).toContain('unfinished_degree:');
     expect(found.some((x) => x.endsWith(':fine'))).toBe(false);
+    // Batch 4: a cold friend who is in your band now is someone you see every week, not a friend you lost touch with.
+    const inBand = produce(life, (d) => {
+      d.fame.active = true;
+      d.fame.band = { name: 'Late Bloomers', path: 'music', leader: 'you', members: [{ id: 'pal', part: 'drums', skill: 50, since: d.currentYear }], part: 'vocals', chemistry: 50, since: d.currentYear, how: 'formed' };
+    });
+    expect(amendsCandidates(inBand, content).map((c) => `${c.source}:${c.personId ?? ''}`)).not.toContain('old_friend:pal');
   });
 
   it('are offered at most once in the gap, never twice for the same source and person within the cooldown, and a few in a life', () => {
