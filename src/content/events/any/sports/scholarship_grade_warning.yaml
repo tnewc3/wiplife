@@ -1,0 +1,55 @@
+id: scholarship_grade_warning
+title: A letter from the academic office
+text: >-
+  The letter is two paragraphs long and the second one is the one that matters: your
+  grades have fallen under the floor your {scholarship} requires. This is a warning. One
+  more year like it and you lose your place on the team, and the aid that came with it.
+tone: serious
+category: sports
+rarity: common
+lifeStages: [teen, youngAdult]
+requires:
+  all:
+    - { sports: { active: true } }
+    - { sports: { scholarship: true, warned: true } }
+weight: { base: 1 }
+followUpOnly: true
+justified:
+  money: The warning is about keeping a scholarship that takes a share off the tuition bill; no money moves in the event.
+choices:
+  - id: study_hall
+    label: Join the team's study hall every night
+    outcome:
+      text: >-
+        Two hours at a long table with teammates who are all pretending not to be nervous.
+        The grades move slowly, then they move.
+      effects:
+        - { type: education, action: grades, value: 1 }
+        - { type: stat, key: stress, delta: 2 }
+  - id: tutor
+    label: Ask your professor for help
+    check:
+      base: 55
+      stats: [{ key: smarts, weight: 0.3 }, { key: confidence, weight: 0.15 }]
+      success:
+        text: >-
+          Your professor sets aside an hour a week and goes through everything you missed.
+          By midterms you understand it.
+        effects:
+          - { type: education, action: grades, value: 1 }
+          - { type: stat, key: smarts, delta: 2 }
+      failure:
+        text: >-
+          Your professor is kind and busy. You get one office hour and a reading list,
+          and you are not sure which one will help.
+        effects:
+          - { type: stat, key: stress, delta: 1 }
+  - id: cut_back
+    label: Ask the coach to cut back your hours
+    outcome:
+      text: >-
+        The coach does not love the idea, and says so. But the practices shorten, and for
+        a while your form pays for your grades.
+      effects:
+        - { type: sports, action: form, delta: -1 }
+        - { type: education, action: grades, value: 1 }

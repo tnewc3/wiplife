@@ -1,0 +1,45 @@
+id: tryout_pro_camp
+title: Camp opens on Monday
+text: >-
+  The camp roster has eighty names on it for a team with a dozen open spots. The staff wear
+  the team's colours and nobody in the building is in a hurry to be friendly. You are a
+  number on a jersey, and numbers get cut.
+tone: neutral
+category: sportstryout
+rarity: common
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { sports: { tryout: true } }
+    - { age: { gte: 18 } }
+weight: { base: 1 }
+followUpOnly: true
+choices:
+  - id: steady
+    label: Make the plays that are there
+    outcome:
+      text: >-
+        No heroics, just the work, done to the standard of the room you are in. {tryout}
+      effects:
+        - { type: sports, action: tryout, approach: steady }
+  - id: hustle
+    label: Be the hardest worker in camp
+    outcome:
+      text: >-
+        You are first on the field, last to leave, and the staff have seen you do both. {tryout}
+      effects:
+        - { type: sports, action: tryout, approach: hustle }
+  - id: showoff
+    label: Make them remember your number
+    outcome:
+      text: >-
+        You swing for the plays that turn heads. {tryout}
+      effects:
+        - { type: sports, action: tryout, approach: showoff }
+  - id: listen
+    label: Learn their system overnight
+    outcome:
+      text: >-
+        You spend the evenings with the playbook, and the days show it. {tryout}
+      effects:
+        - { type: sports, action: tryout, approach: listen }

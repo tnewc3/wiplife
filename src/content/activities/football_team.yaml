@@ -1,0 +1,18 @@
+id: football_team
+name: The football team
+kind: team
+blurb: Two-a-days in the August heat, film on Mondays and a Friday night under lights that make everything feel bigger.
+minAge: 12
+tryout:
+  base: 45
+  stats: [{ key: fitness, weight: 0.5 }, { key: discipline, weight: 0.2 }]
+cost: 210
+effects:
+  fitness: { perYear: 1.3, limit: 88 }
+  health: { perYear: 0.1, limit: 80 }
+grades: -0.05
+friends: 5
+talent: athletics
+passion: 5
+injury: 0.1
+sport: football

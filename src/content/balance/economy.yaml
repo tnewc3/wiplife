@@ -172,6 +172,11 @@ costs:
   care_extras: { amount: 500, familyHelp: false, health: care }
   # E5: pets, vehicles and homes. A treat, a vet in an emergency, a small and a big car repair, a tow, what a
   # break-in takes, and a repair to the home you live in.
+  # Batch 5: sport. A summer camp, a block of sessions with a private coach, a week of pre-draft workouts with a trainer, and a trip to a camp or open tryout.
+  summer_camp: { amount: 900, familyHelp: true }
+  private_coach_block: { amount: 1400, familyHelp: true }
+  combine_prep: { amount: 800, familyHelp: false }
+  camp_travel: { amount: 400, familyHelp: false }
   pet_treat: { amount: 8, familyHelp: false }
   pet_supplies: { amount: 90, familyHelp: false }
   vet_emergency: { amount: 900, familyHelp: false }

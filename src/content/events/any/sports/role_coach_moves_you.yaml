@@ -1,0 +1,52 @@
+id: role_coach_moves_you
+title: The lineup changes
+text: >-
+  The sheet outside the locker room has changed. The coach has moved the lineup around,
+  and your name is somewhere you did not expect it to be. You can feel the room watching
+  how you take it.
+tone: neutral
+category: sports
+rarity: common
+lifeStages: [child, teen, youngAdult, adult]
+requires:
+  all:
+    - { sports: { active: true } }
+    - { sports: { seasons: { gte: 2 } } }
+weight: { base: 1 }
+followUpOnly: true
+choices:
+  - id: accept
+    label: Take it professionally and do the job
+    outcome:
+      text: >-
+        You nod at the coach, tape your wrists and go to work. People notice who handles it
+        well, and who does not.
+      effects:
+        - { type: stat, key: discipline, delta: 1 }
+        - { type: sports, action: form, delta: 1 }
+  - id: push_back
+    label: Ask the coach why
+    check:
+      base: 45
+      stats: [{ key: confidence, weight: 0.25 }, { sports: rating, weight: 0.3 }]
+      success:
+        text: >-
+          The coach explains it and, when you push, adjusts it. You walk out with more than you
+          came in with.
+        effects:
+          - { type: sports, action: role, delta: 1 }
+      failure:
+        text: >-
+          The explanation is a good one. You nod through it and the conversation ends with
+          nothing changed.
+        effects:
+          - { type: stat, key: confidence, delta: -1 }
+  - id: sulk
+    label: Let it show on your face
+    outcome:
+      text: >-
+        For the rest of the week you play half a step behind where you should. The coach
+        notices, and so do your teammates.
+      effects:
+        - { type: sports, action: role, delta: -1 }
+        - { type: sports, action: form, delta: -1 }

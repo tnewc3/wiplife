@@ -58,6 +58,16 @@ export function SportsCard({ life }: { life: LifeState }) {
           <p className="mt-2 text-sm text-muted" data-testid="sports-next">
             {path.next ? `Next: ${path.next.title}. ${path.next.milestone}.` : 'You are at the top of the ladder.'}
           </p>
+          {view.offers.length > 0 && !view.scholarship && (
+            <p className="mt-1 text-sm font-semibold" data-testid="sports-offers">
+              {view.offers.length === 1 ? 'A program has made you an offer.' : `${view.offers.length} programs have made you offers.`}
+            </p>
+          )}
+          {view.teamless && (
+            <p className="mt-1 text-sm" data-testid="sports-teamless">
+              You have no team this year. Open Sports to try out, or to train.
+            </p>
+          )}
         </>
       ) : view.retired ? (
         <p className="mt-1 text-muted" data-testid="sports-retired">

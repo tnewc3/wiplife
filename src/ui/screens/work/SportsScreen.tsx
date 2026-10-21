@@ -16,8 +16,7 @@ import {
   COMMITMENT_LABELS,
   CONTRACT_KIND_LABELS,
   CONTRACT_OPTION_LABELS,
-  FAME_ENTER_BLOCK_LABELS,
-  FAME_WORDS,
+    FAME_WORDS,
   FAN_MOOD_WORDS,
   FIT_WORDS,
   IMAGE_WORDS,
@@ -39,17 +38,9 @@ import {
   salaryLabel,
 } from '../../labels';
 import { Ladder } from './FameScreen';
+import { DraftSection, ScholarshipSection, Section, TeamsList, TeamStanding, TrainingSection } from './SportsGrind';
 
 const cap = (text: string) => text[0]!.toUpperCase() + text.slice(1);
-
-function Section({ title, children, testId }: { title: string; children: React.ReactNode; testId?: string }) {
-  return (
-    <section className="mt-5" aria-label={title} {...(testId ? { 'data-testid': testId } : {})}>
-      <h3 className="text-base font-bold">{title}</h3>
-      {children}
-    </section>
-  );
-}
 
 function SeasonLine({ s }: { s: SportsSeasonView }) {
   return (
@@ -130,7 +121,26 @@ export function SportsScreen({ life, open, onClose }: { life: LifeState; open: b
                   ))}
                 </div>
                 <p className="mt-1 text-sm text-muted">Moving to another position costs a little of the craft you have built.</p>
+                <TeamStanding view={view} disabled={disabled} act={act} />
               </Section>
+
+              <Section title="Try out for a team" testId="teams">
+                <p className="mt-1 text-sm text-muted">Pick a team and play the scrimmage. Each team has its own bar, and a cut is not the end: the next team down may take you.</p>
+                <TeamsList teams={view.teams} pathId={view.sport.id} disabled={disabled} act={act} label="Teams" />
+                {view.tried.length > 0 && (
+                  <ul className="mt-2 flex flex-col gap-1 text-sm" aria-label="Your tryouts" data-testid="tryout-history">
+                    {view.tried.slice(0, 3).map((t, i) => (
+                      <li key={`${t.year}-${i}`} className="break-words">
+                        {t.year}: {t.made ? `made ${t.name}` : t.landedName ? `cut from ${t.name}, took a place with ${t.landedName}` : `cut from ${t.name}`}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </Section>
+
+              <TrainingSection view={view} disabled={disabled} act={act} />
+              <ScholarshipSection view={view} disabled={disabled} act={act} />
+              <DraftSection view={view} />
 
               <Section title="This year’s training" testId="focus">
                 <div role="radiogroup" aria-label="Training focus" className="mt-2 flex flex-col gap-2">
@@ -463,21 +473,7 @@ export function SportsScreen({ life, open, onClose }: { life: LifeState; open: b
                 <Card key={e.pathId} className="mt-2">
                   <p className="font-semibold">{e.name}</p>
                   <p className="text-sm text-muted">{e.blurb}</p>
-                  <ul className="mt-1 flex flex-col divide-y divide-border" aria-label={`${e.name} routes`}>
-                    {e.routes.map((r) => (
-                      <li key={r.id} className="flex min-w-0 flex-col gap-1 py-2">
-                        <span className="font-semibold break-words">{r.label}</span>
-                        <span className="text-sm text-muted">{r.blurb}</span>
-                        {r.block ? (
-                          <span className="text-sm text-muted">{r.block === 'age' ? `From age ${r.minAge}.` : FAME_ENTER_BLOCK_LABELS[r.block]}</span>
-                        ) : (
-                          <Button variant="secondary" disabled={disabled} onClick={() => void act('enter_fame', { pathId: e.pathId, routeId: r.id })} data-testid={`enter-${e.pathId}-${r.id}`}>
-                            Start
-                          </Button>
-                        )}
-                      </li>
-                    ))}
-                  </ul>
+                  <TeamsList teams={e.teams} pathId={e.pathId} disabled={disabled} act={act} label={`${e.name} teams`} />
                 </Card>
               ))}
             </Section>

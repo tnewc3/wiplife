@@ -1,0 +1,55 @@
+id: role_battle_for_the_start
+title: Two of you for one spot
+text: >-
+  The coach has said it plainly: there is one starting place at your position, and there
+  are two of you. It will be decided in practice, in front of everyone, over the next few
+  weeks. Your rival nods at you in the locker room like someone who has already made up
+  their mind.
+tone: serious
+category: sports
+rarity: common
+lifeStages: [child, teen, youngAdult, adult]
+requires:
+  all:
+    - { sports: { active: true } }
+    - { sports: { seasons: { gte: 2 } } }
+    - { sports: { role: [rotation, reserve] } }
+weight: { base: 1 }
+followUpOnly: true
+choices:
+  - id: outwork
+    label: Outwork them every single day
+    check:
+      base: 45
+      stats: [{ key: discipline, weight: 0.3 }, { key: fitness, weight: 0.25 }]
+      success:
+        text: >-
+          It takes a month of early mornings and late finishes, and then the coach reads the
+          lineup and your name is in it.
+        effects:
+          - { type: sports, action: role, delta: 1 }
+          - { type: stat, key: confidence, delta: 3 }
+      failure:
+        text: >-
+          You give it all you have, and it is not quite enough. The coach thanks you for the
+          effort in a tone that tells you what the lineup looks like.
+        effects:
+          - { type: stat, key: confidence, delta: -2 }
+  - id: learn_other
+    label: Learn a second position to make yourself harder to cut
+    outcome:
+      text: >-
+        You spend extra hours learning another spot on the field. You do not win the
+        battle, but the coach starts using you in places that the lineup did not have.
+      effects:
+        - { type: fame, action: craft, delta: 2 }
+        - { type: sports, action: form, delta: 1 }
+  - id: talk_it_out
+    label: Talk it out with your rival
+    outcome:
+      text: >-
+        You grab a coffee with the other player and say it out loud: you are both good, and
+        only one of you can start. It makes the weeks easier, whoever wins.
+      effects:
+        - { type: stat, key: stress, delta: -1 }
+        - { type: stat, key: happiness, delta: 1 }

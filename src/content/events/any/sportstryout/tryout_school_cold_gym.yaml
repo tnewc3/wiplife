@@ -1,0 +1,44 @@
+id: tryout_school_cold_gym
+title: A tryout in a cold gym
+text: >-
+  The gym heating is not working, so tryouts happen in coats until the drills warm everyone
+  up. The coach is new this year and does not know anybody's name yet, only what they do
+  with the ball in the next five minutes.
+tone: neutral
+category: sportstryout
+rarity: common
+lifeStages: [teen]
+requires:
+  all:
+    - { sports: { tryout: true } }
+weight: { base: 1 }
+followUpOnly: true
+choices:
+  - id: steady
+    label: Stay loose and play your game
+    outcome:
+      text: >-
+        You are warm by the second drill and consistent through the third. {tryout}
+      effects:
+        - { type: sports, action: tryout, approach: steady }
+  - id: hustle
+    label: Be the loudest worker in the room
+    outcome:
+      text: >-
+        Your breath fogs in the cold and your effort is the easiest thing in the gym to read. {tryout}
+      effects:
+        - { type: sports, action: tryout, approach: hustle }
+  - id: showoff
+    label: Make an impression on the new coach
+    outcome:
+      text: >-
+        You try to be the player the new coach will remember, for better or for worse. {tryout}
+      effects:
+        - { type: sports, action: tryout, approach: showoff }
+  - id: listen
+    label: Ask the new coach what the team needs
+    outcome:
+      text: >-
+        You ask what the team is short of, and then you play to fill it. {tryout}
+      effects:
+        - { type: sports, action: tryout, approach: listen }

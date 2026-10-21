@@ -48,7 +48,7 @@ export function giveSampleSports(state: LifeState, def: EventDef, _cast: Record<
   s.sport = sportId;
   s.position = bestPosition(state, path.sport).id;
   s.pro = levelOfRung(path.sport, final) === 'pro';
-  s.team = s.pro ? proTeam(draftingTeam(path.sport, 3, state.character.cityId, content)) : amateurTeam(state, path.sport, levelOfRung(path.sport, final) as 'youth' | 'school' | 'college', 50, content, state.rng);
+  s.team = s.pro ? proTeam(draftingTeam(path.sport, 3, state.character.cityId, content)) : amateurTeam(state, path.sport, levelOfRung(path.sport, final) as 'youth' | 'school' | 'college', 50, content);
   if (s.pro) state.character.cityId = s.team.city;
   if (s.pro && want.freeAgent !== true) {
     s.contract = { teamId: s.team.id!, since: year - 1, until: want.contractYear === true ? year : year + 2, salary: rungDef(path, final).income, kind: 'standard', option: 'none' };

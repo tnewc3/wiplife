@@ -29,6 +29,21 @@ export const SPORT_RESULTS = ['missed', 'out', 'final', 'champion'] as const;
 export type SportResult = (typeof SPORT_RESULTS)[number];
 export const SPORT_RETIRE_ROUTES = ['coaching', 'broadcast', 'normal'] as const;
 export type SportRetireRoute = (typeof SPORT_RETIRE_ROUTES)[number];
+/** Batch 5: the kinds of team you can try out for: youth clubs, school teams, college programs. (Pro teams are camps.) */
+export const TEAM_TIERS = ['rec', 'club', 'travel', 'academy', 'jv', 'varsity', 'community', 'state', 'elite'] as const;
+export type TeamTier = (typeof TEAM_TIERS)[number];
+/** How you play a tryout scrimmage (the choices of the tryout events). */
+export const TRYOUT_APPROACHES = ['steady', 'hustle', 'showoff', 'listen'] as const;
+export type TryoutApproach = (typeof TRYOUT_APPROACHES)[number];
+/** How a tryout ended: you made the team, a fallback took you, or no team did. */
+export const TRYOUT_RESULTS = ['made', 'fallback', 'cut'] as const;
+export type TryoutResult = (typeof TRYOUT_RESULTS)[number];
+/** Where you stand on your team. */
+export const SPORT_ROLES = ['starter', 'rotation', 'reserve'] as const;
+export type SportRole = (typeof SPORT_ROLES)[number];
+/** The ways to train: with your team's coaches and facilities, at a gym, or with a private coach. */
+export const TRAINING_MODES = ['team', 'gym', 'coach'] as const;
+export type TrainingMode = (typeof TRAINING_MODES)[number];
 
 const text = (max: number) => z.string().trim().min(2).max(max);
 /** A curve whose values may be negative (an age's effect on play). */
@@ -137,6 +152,23 @@ const focusSchema = z.strictObject({
 
 const share = probability;
 
+const tierSchema = z.strictObject({
+  /** The level of play. */
+  level: z.enum(SPORT_LEVELS).refine((l) => l !== 'pro', 'a team tier is below the pros'),
+  /** Which of `league.quality` this tier starts from, and the shift from it. */
+  base: z.enum(['youth', 'high', 'community', 'state', 'elite']),
+  shift: z.int().min(-30).max(30),
+  /** The rating a prospect needs to make the team on a normal day. */
+  bar: z.int().min(0).max(100),
+  /** What a year costs, whole dollars in the base currency (scaled to where you live). */
+  fee: z.int().min(0).max(100000),
+  /** Ages that can try out. */
+  minAge: z.int().min(5).max(30),
+  maxAge: z.int().min(5).max(40),
+  /** The tier of the same level that takes you if you are cut (none for the bottom of a level). */
+  fallback: z.enum(TEAM_TIERS).nullable(),
+});
+
 /** Sports numbers (src/content/balance/sports.yaml). */
 export const sportsBalanceSchema = z.strictObject({
   performance: z.strictObject({
@@ -221,6 +253,11 @@ export const sportsBalanceSchema = z.strictObject({
     perPick: z.number().min(0.1).max(5),
     /** The chance an undrafted prospect gets a minimum deal, by rating. */
     undrafted: curveSchema,
+    /** Batch 5: the league's need for your position that year moves your score by up to this much either way; combine events add up to `combine` either way. */
+    need: z.number().min(0).max(20),
+    combine: z.number().min(0).max(30),
+    /** The words for where you are projected to go: a pick share (pick over total picks) up to which each phrase holds, in order. */
+    projection: z.array(z.strictObject({ upTo: z.number().min(0).max(1.5), id: idSchema })).min(2).max(8),
   }),
   contract: z.strictObject({
     /** A contract's yearly pay as a multiple of the rung's usual year (the league's pay, not the city's), by kind. */
@@ -240,14 +277,17 @@ export const sportsBalanceSchema = z.strictObject({
     option: z.strictObject({ chance: share, team: share }),
     /** Pushing for a better deal (a negotiated extension): the pay multiple when it works and when the team refuses, and the chance by rating. */
     push: z.strictObject({ win: z.number().min(1).max(2), lose: z.number().min(0.3).max(1), cheap: z.number().min(0.3).max(1), chance: curveSchema }),
-    /** A rookie deal's multiple by round of the draft (the last applies to every later round). */
-    rookieRound: z.array(z.number().min(0.1).max(5)).min(1),
     /** A team that lets you go pays out this share of what is left on the deal. */
     buyout: share,
     /** The least rating a team will re-sign you at without being talked into it, and the chance it keeps a player under that. */
     keep: z.strictObject({ rating: z.int().min(0).max(100), chance: share }),
-    /** The years you may go without a team before the phone stops ringing. */
-    unsigned: z.int().min(0).max(5),
+    /** The age after which a player who is unsigned is done (the phone stops ringing). Until then they can keep going to camps and open tryouts. */
+    chaseAge: z.int().min(20).max(50),
+    /** Batch 5: a rookie deal's pay as a multiple of the rung's usual year, by overall pick (straight lines between the points), and the signing bonus as a share of a year's pay by pick. */
+    rookiePick: curveSchema,
+    signing: curveSchema,
+    /** Skill incentives: the most a year can add, as a share of the salary, and the rating at which it starts and at which it is all paid. */
+    incentive: z.strictObject({ share: share, from: z.int().min(0).max(100), full: z.int().min(0).max(100) }),
     /** The chance a free agent finds a team in a year, by rating. */
     freeAgent: curveSchema,
   }),
@@ -277,7 +317,82 @@ export const sportsBalanceSchema = z.strictObject({
     /** Fame a Hall of Fame class needs (rung and titles are in the event). */
     hallRung: z.int().min(1).max(8),
   }),
-  events: z.strictObject({ maxQueued: z.int().min(1).max(6) }),
+  events: z.strictObject({
+    maxQueued: z.int().min(1).max(6),
+    /** Batch 5: the yearly chance of each season choice: the pre-draft workouts for a prospect, the captain's band for a starter who qualifies, a fight for a place (and, for a reserve or rotation player, the chance of one anyway), and the offseason plan. */
+    combine: z.number().min(0).max(1),
+    captain: z.number().min(0).max(1),
+    role: z.strictObject({ starter: z.number().min(0).max(1), other: z.number().min(0).max(1) }),
+    offseason: z.number().min(0).max(1),
+  }),
+  /** Batch 5: tryouts for specific teams. */
+  tryout: z.strictObject({
+    tiers: z.strictObject(Object.fromEntries(TEAM_TIERS.map((t) => [t, tierSchema])) as Record<TeamTier, typeof tierSchema>),
+    /** The spread (standard deviation, in rating points) of how a day goes. */
+    luck: z.number().min(0).max(30),
+    /** How each way of playing the scrimmage moves your rating and the day's spread (a multiple). */
+    approach: z.strictObject(Object.fromEntries(TRYOUT_APPROACHES.map((a) => [a, z.strictObject({ bonus: z.number().min(-10).max(10), spread: z.number().min(0).max(4) })])) as Record<TryoutApproach, z.ZodObject<{ bonus: z.ZodNumber; spread: z.ZodNumber }>>),
+    /** Rating points per point of discipline and of smarts above 50 for hustling and for listening. */
+    hustleDiscipline: z.number().min(0).max(0.5),
+    listenSmarts: z.number().min(0).max(0.5),
+    /** Years before a team that cut you looks at you again. */
+    cutWait: z.int().min(0).max(5),
+    /** A fallback team asks this many points less of you than its bar (cut from the top, the next one down is kinder). */
+    fallbackEase: z.number().min(0).max(20),
+    /** When the engine tries out for you (you did not choose), it aims at the best team whose bar is within this many points of your rating. */
+    autoSlack: z.number().min(-20).max(20),
+    /** A pro camp's bar: this plus `perQuality` for each point the team's quality stands above 50. */
+    camp: z.strictObject({ bar: z.int().min(0).max(100), perQuality: z.number().min(0).max(1), fee: z.int().min(0).max(100000) }),
+    /** Fame at least this much of the new level's rung is given when you make a team a level up. */
+    fameFloor: z.int().min(0).max(20),
+    /** The most tryouts in a year. */
+    perYear: z.int().min(1).max(10),
+  }),
+  /** Batch 5: training sessions (Batch 4's practice system, with a sport's skills). */
+  training: z.strictObject({
+    /** With a team: a multiple on the gain, plus this for each point its quality stands above 50 (coaches and facilities). */
+    team: z.strictObject({ gain: z.number().min(0).max(3), quality: z.number().min(0).max(0.02) }),
+    /** A gym: a lower multiple, and a membership paid once a year (whole dollars, scaled to where you live). */
+    gym: z.strictObject({ gain: z.number().min(0).max(3), fee: z.int().min(0).max(100000) }),
+    /** A private coach: a multiple, and a fee for each session. */
+    coach: z.strictObject({ gain: z.number().min(0).max(3), fee: z.int().min(0).max(100000) }),
+    /** Rating points for each point the mean of a sport's skills stands above where skills start. */
+    rating: z.number().min(0).max(0.5),
+    /** A club or travel team alongside a school team: craft a year, and extra sessions a year. */
+    club: z.strictObject({ craft: z.number().min(0).max(10), sessions: z.int().min(0).max(8) }),
+  }),
+  /** Batch 5: athletic scholarships. */
+  scholarship: z.strictObject({
+    /** Offers come to players of these ages (the last years of high school). */
+    ages: z.strictObject({ from: z.int().min(14).max(20), to: z.int().min(14).max(22) }),
+    /** What a recruiter sees: recent rating, fame, grades (points per GPA point above 2) and the program's need for your position. */
+    score: z.strictObject({ rating: z.number().min(0).max(2), fame: z.number().min(0).max(2), gpa: z.number().min(0).max(30), need: z.number().min(0).max(3) }),
+    /** For each program: the recruiting score where an offer begins, and where it is the most the country pays. */
+    tiers: z.strictObject({
+      community: z.strictObject({ from: z.number(), full: z.number() }),
+      state: z.strictObject({ from: z.number(), full: z.number() }),
+      elite: z.strictObject({ from: z.number(), full: z.number() }),
+    }),
+    /** The smallest share an offer is, and the yearly chance a program that qualifies makes an offer. */
+    minShare: share,
+    chance: share,
+    /** The grade you must hold to stay eligible. */
+    floor: z.number().min(0).max(4),
+    /** Years under the floor before eligibility goes (the first is a warning). */
+    warnYears: z.int().min(1).max(3),
+    /** The spread of a program's need for a position, in recruiting score points. */
+    need: z.number().min(0).max(30),
+  }),
+  /** Batch 5: roles on a team, captaincy. */
+  role: z.strictObject({
+    /** How much of the games each role plays (a multiple). */
+    played: z.strictObject({ starter: z.number().min(0.1).max(1), rotation: z.number().min(0.1).max(1), reserve: z.number().min(0.1).max(1) }),
+    /** Your rating less the team's quality: at or above `starter` you start, at or above `rotation` you rotate, under it you sit. */
+    starter: z.number().min(-60).max(60),
+    rotation: z.number().min(-60).max(60),
+    /** A captain: rating points, fan mood a year. */
+    captain: z.strictObject({ rating: z.number().min(0).max(10), mood: z.number().min(0).max(10), after: z.int().min(0).max(10) }),
+  }),
 });
 export type SportsBalance = z.infer<typeof sportsBalanceSchema>;
 
@@ -306,21 +421,51 @@ export const SPORTS_TRIGGERS = [
   'rookie',
   'rivalry',
   'endorsement',
+  // Batch 5: recruiting and scholarships, the combine, camps for players without a team, and the season's choices.
+  'recruited',
+  'probation',
+  'scholarshipLost',
+  'combine',
+  'camp',
+  'role',
+  'offseason',
+  'number',
+  'captain',
 ] as const;
 export type SportsTrigger = (typeof SPORTS_TRIGGERS)[number];
 
 export const sportsRegistrySchema = z.strictObject({
   triggers: z.strictObject(Object.fromEntries(SPORTS_TRIGGERS.map((id) => [id, z.strictObject({ events: z.array(idSchema).min(1) })])) as Record<SportsTrigger, z.ZodObject<{ events: z.ZodArray<typeof idSchema> }>>),
+  /** Batch 5: the scrimmage events a tryout plays, by the level of the team. */
+  tryouts: z.strictObject({
+    youth: z.array(idSchema).min(1),
+    school: z.array(idSchema).min(1),
+    college: z.array(idSchema).min(1),
+    pro: z.array(idSchema).min(1),
+  }),
 });
 export type SportsRegistry = z.infer<typeof sportsRegistrySchema>;
+
+/** The tryout scrimmage events (registries/sports.yaml `tryouts`): one list for each level of play. */
+export const TRYOUT_LEVELS = ['youth', 'school', 'college', 'pro'] as const;
 
 const historyLine = z.strictObject({ importance: z.union([z.literal(1), z.literal(2), z.literal(3)]), variants: z.array(z.string().trim().min(1)).min(1) });
 
 /** The history lines the sports systems write (text/sports.yaml). Values: {sport}, {team}, {league}, {pick}, {round}, {position}. */
-export const SPORTS_HISTORY_KEYS = ['drafted', 'undrafted', 'signed', 'traded', 'released', 'title', 'allStar', 'retired', 'aged'] as const;
+export const SPORTS_HISTORY_KEYS = ['drafted', 'undrafted', 'signed', 'traded', 'released', 'title', 'allStar', 'retired', 'aged', 'madeTeam', 'cutTeam', 'scholarship', 'scholarshipEnded', 'captain', 'signedCamp'] as const;
 export type SportsHistoryKey = (typeof SPORTS_HISTORY_KEYS)[number];
 
+const lines = (min = 8) => z.array(z.string().trim().min(min)).min(2);
+
 export const sportsTextSchema = z.strictObject({
+  /** Batch 5: the kinds of team you try out for, in words. */
+  tiers: z.strictObject(Object.fromEntries(TEAM_TIERS.map((t) => [t, z.strictObject({ label: z.string().trim().min(2).max(40), blurb: z.string().trim().min(8).max(120), suffix: z.string().trim().max(12).default('') })])) as Record<TeamTier, z.ZodObject<{ label: z.ZodString; blurb: z.ZodString; suffix: z.ZodDefault<z.ZodString> }>>),
+  /** What the list says after a tryout (values {team}, {tier}, {sport}): you made it, a fallback team took you, nobody did, and the pro camps. */
+  tryout: z.strictObject({ made: lines(), fallback: lines(), cut: lines(), signed: lines(), camp: lines() }),
+  /** A pro camp, in words. */
+  camp: z.strictObject({ label: z.string().trim().min(2).max(40), blurb: z.string().trim().min(8).max(120) }),
+  /** Where a prospect is projected to go, by `balance/sports.yaml draft.projection` ids. */
+  projection: z.record(idSchema, z.strictObject({ label: z.string().trim().min(3).max(40), line: z.string().trim().min(8).max(160) })),
   history: z.strictObject(Object.fromEntries(SPORTS_HISTORY_KEYS.map((k) => [k, historyLine])) as Record<SportsHistoryKey, typeof historyLine>),
   /** A season's name, as the work in the season report: values {year}, {team}. */
   seasons: z.array(z.string().trim().min(4)).min(4),
@@ -331,5 +476,5 @@ export const sportsTextSchema = z.strictObject({
 export type SportsText = z.infer<typeof sportsTextSchema>;
 
 /** The text values sports events can use: see src/engine/sports/text.ts. */
-export const SPORTS_TEXT_VALUES = ['sport', 'team', 'league', 'position', 'stage', 'trophy', 'pick', 'draftRound', 'draftTeam', 'record', 'statLine', 'opponent', 'injury', 'salary', 'season'] as const;
+export const SPORTS_TEXT_VALUES = ['sport', 'team', 'league', 'position', 'stage', 'trophy', 'pick', 'draftRound', 'draftTeam', 'record', 'statLine', 'opponent', 'injury', 'salary', 'season', 'number', 'tryout', 'tier', 'campus', 'share', 'scholarship', 'prospect'] as const;
 export type SportsTextValue = (typeof SPORTS_TEXT_VALUES)[number];

@@ -1936,6 +1936,8 @@ export interface SportsTeam {
   level: 'youth' | 'school' | 'college' | 'pro';
   /** 0–100. */
   quality: number;
+  /** Batch 5: the kind of amateur team it is (a pro team has none). */
+  tier?: 'rec' | 'club' | 'travel' | 'academy' | 'jv' | 'varsity' | 'community' | 'state' | 'elite';
 }
 
 export interface SportsContract {
@@ -1947,6 +1949,8 @@ export interface SportsContract {
   salary: number;
   kind: 'minimum' | 'rookie' | 'standard' | 'star';
   option: 'none' | 'team' | 'player';
+  /** Batch 5: the most a year of play can add in incentives (paid by how well you played; 0 or missing for none). */
+  incentive?: number;
 }
 
 /** E6c: one season as it went: the team, your rating and numbers, the record and how the playoffs ended. */
@@ -2007,6 +2011,67 @@ export interface SportsTotals {
   /** Salary and bonuses paid by teams, before the agent's cut and tax. */
   earned: number;
   bestRating: number;
+  /** Batch 5: tryouts taken and made, scholarships won and lost, training sessions by where they happened, and undrafted or unsigned players who later signed. */
+  tryouts: number;
+  tryoutsMade: number;
+  scholarships: number;
+  scholarshipsLost: number;
+  trainedTeam: number;
+  trainedGym: number;
+  trainedCoach: number;
+  signedAfterUndrafted: number;
+}
+
+/** Batch 5: a tryout you have chosen and are about to play (the scrimmage is an event; its choice decides how you play it). */
+export interface SportsTryout {
+  /** The sport (a fame path); the key of the team (see `teamOptions`). */
+  sport: Id;
+  key: string;
+  year: number;
+}
+
+/** Batch 5: how a tryout went. `landed` is the key of the team you ended up on (the one you tried for, a fallback, or null for none). */
+export interface SportsTryoutRecord {
+  year: number;
+  key: string;
+  /** The team tried for, and the team you ended up on (a fallback), as named. */
+  name: string;
+  landedName: string | null;
+  level: 'youth' | 'school' | 'college' | 'pro';
+  made: boolean;
+  landed: string | null;
+  /** Rating going in against the team's bar. */
+  rating: number;
+  bar: number;
+}
+
+/** Batch 5: this year's training: where the sessions happened and what they cost. */
+export interface SportsTraining {
+  year: number;
+  team: number;
+  gym: number;
+  coach: number;
+  /** A gym membership has been paid for this year. */
+  member: boolean;
+  spent: number;
+}
+
+/** Batch 5: a college program's offer of an athletic scholarship (good through the year after `year`). */
+export interface SportsOffer {
+  year: number;
+  tier: 'community' | 'state' | 'elite';
+  /** The share of tuition it pays (0–1). */
+  share: number;
+}
+
+/** Batch 5: an athletic scholarship you hold: the program, its share of tuition and where your eligibility stands. */
+export interface SportsScholarship {
+  tier: 'community' | 'state' | 'elite';
+  share: number;
+  /** The year you accepted. */
+  since: number;
+  /** Years in a row under the grade floor (one is a warning; the next loses it). */
+  warned: number;
 }
 
 export interface SportsState {
@@ -2040,6 +2105,28 @@ export interface SportsState {
   agedOut: number;
   retired?: { year: number; route: 'coaching' | 'broadcast' | 'normal' | null };
   totals: SportsTotals;
+  /** Batch 5: the tryout you chose and have not played yet. */
+  tryout: SportsTryout | null;
+  /** The last ten tryouts. */
+  tried: SportsTryoutRecord[];
+  /** Teams (by key) that cut you, with the year: a team will not look at you again for a while. */
+  cut: Record<string, number>;
+  /** You left your team (or lost your place), so none is found for you until you try out. */
+  teamless: boolean;
+  /** A club or travel team you play for alongside a school team (youth only). */
+  club: SportsTeam | null;
+  training: SportsTraining;
+  offers: SportsOffer[];
+  scholarship: SportsScholarship | null;
+  /** Points from combine and pre-draft events, spent at the draft. */
+  combine: number;
+  /** The last year the draft passed you by (0 for never). */
+  passed: number;
+  /** Your place on the team: a starter, in the rotation or a reserve. */
+  role: 'starter' | 'rotation' | 'reserve';
+  /** Your jersey number (null until you pick one) and whether you are the captain. */
+  number: number | null;
+  captain: boolean;
 }
 
 /** T1: a social group at your school (a definition in src/content/cliques, made real for one school). */
@@ -2114,7 +2201,7 @@ export interface TeenState {
   /** Your teen job, if you have one (src/content/teenJobs). */
   job: { jobId: Id; employer: string; since: number } | null;
   /** Teams and clubs you belong to (src/content/activities). */
-  activities: { id: Id; since: number }[];
+  activities: { id: Id; since: number; /** Batch 5: a school sports team is varsity or junior varsity. */ tier?: 'jv' | 'varsity' }[];
   /** The rules at home: each parent's style (worked out once from who they are), and the rules they set. */
   home: { styles: Record<Id, ParentingStyle>; rules: TeenRule[]; year: number } | null;
   /** Punishments in force. */

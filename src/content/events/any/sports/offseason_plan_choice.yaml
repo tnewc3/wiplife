@@ -1,0 +1,55 @@
+id: offseason_plan_choice
+title: The long summer
+text: >-
+  The season is over, the equipment is in a bag in the closet and the days are your own for
+  a while. Everyone you play with has a plan for the offseason, and everyone says theirs is
+  the one that matters. You have a few weeks to decide yours.
+tone: neutral
+category: sports
+rarity: common
+lifeStages: [child, teen, youngAdult, adult]
+requires:
+  all:
+    - { sports: { active: true } }
+    - { sports: { seasons: { gte: 1 } } }
+weight: { base: 1 }
+followUpOnly: true
+choices:
+  - id: strength
+    label: A strength and conditioning block
+    outcome:
+      text: >-
+        Mornings in the weight room, evenings on the track, and by August you are carrying
+        yourself differently.
+      effects:
+        - { type: stat, key: fitness, delta: 2 }
+        - { type: sports, action: form, delta: 1 }
+        - { type: stat, key: stress, delta: 1 }
+  - id: camp
+    label: A summer skills camp
+    outcome:
+      text: >-
+        Six weeks of drills with coaches who spend all day on the little details that you
+        have been getting wrong for years.
+      effects:
+        - { type: cost, item: summer_camp }
+        - { type: fame, action: craft, delta: 3 }
+  - id: film
+    label: Film and rest
+    outcome:
+      text: >-
+        You watch every game from last season again with a notebook and a clear head, and
+        then you sleep for the first time in weeks.
+      effects:
+        - { type: stat, key: smarts, delta: 1 }
+        - { type: stat, key: stress, delta: -2 }
+        - { type: sports, action: form, delta: 1 }
+  - id: nothing
+    label: Take the summer off completely
+    outcome:
+      text: >-
+        You do not touch a ball for the whole summer. It is the first time in a long time that you
+        remember who you are without it.
+      effects:
+        - { type: stat, key: happiness, delta: 3 }
+        - { type: stat, key: stress, delta: -3 }

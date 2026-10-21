@@ -50,5 +50,19 @@ export function sportsFailures(state: LifeState, content: ContentBundle): string
   for (const [k, v] of Object.entries(s.totals)) if (!Number.isFinite(v) || v < 0) fail(`sports.totals.${k} must be at least 0`);
   if (!Number.isSafeInteger(s.totals.earned)) fail('sports.totals.earned must be a whole number');
   if (!['skills', 'conditioning', 'film'].includes(s.focus)) fail(`sports: unknown focus "${String(s.focus)}"`);
+
+  // Batch 5: tryouts, the school team, training, scholarships and your place on a team.
+  if (s.tryout !== null && state.phase !== 'action') fail('sports: a tryout lined up outside the scrimmage');
+  if (s.teamless && s.team !== null) fail('sports: without a team, and on one');
+  if (s.club !== null && age >= adultAge) fail(`sports: a club team alongside a school team at ${age}`);
+  if (s.number !== null && (!Number.isInteger(s.number) || s.number < 0 || s.number > 99)) fail('sports: a jersey number off the roster');
+  if (s.scholarship) {
+    if (s.scholarship.share < 0 || s.scholarship.share > 1) fail('sports: a scholarship share outside 0–1');
+    if (s.sport === null) fail('sports: a scholarship without a sport');
+  }
+  if (s.tried.length > 10) fail('sports: too many tryouts kept');
+  const playing = f.active && def !== undefined && f.main === def.id && s.retired === undefined;
+  if (playing && s.team?.level === 'school' && age < adultAge && !Object.values(content.activities).some((a) => a.sport === s.sport && state.teen.activities.some((x) => x.id === a.id))) fail('sports: on a school team that is not in your teams and clubs');
+  if (s.training.team + s.training.gym + s.training.coach < 0) fail('sports: training sessions below zero');
   return failures;
 }

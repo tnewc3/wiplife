@@ -7,6 +7,7 @@ import type { Compare, ContentBundle, SportsCondition } from '../../content/sche
 import type { LifeState } from '../types';
 import { injuryNow, levelNow, mySport, sportPath, thisSeason } from './query';
 import { nextSeries } from './playoffs';
+import { liveOffers } from './scholarship';
 
 function within(value: number, c: Compare): boolean {
   if (c.gt !== undefined && !(value > c.gt)) return false;
@@ -61,5 +62,26 @@ export function sportsHolds(c: SportsCondition, state: LifeState, content?: Cont
     const level = content ? levelNow(state, content) : null;
     if ((level !== null && level !== 'pro') !== c.amateur) return false;
   }
+  // Batch 5.
+  if (c.tryout !== undefined && (s.tryout !== null) !== c.tryout) return false;
+  if (c.tried) {
+    const last = s.tried.at(-1);
+    const result = last && last.year >= year - 1 ? (last.made ? 'made' : last.landed !== null ? 'fallback' : 'cut') : null;
+    if (result === null || !c.tried.includes(result)) return false;
+  }
+  if (c.offers && !c.offers.some((tier) => liveOffers(state).some((o) => o.tier === tier))) return false;
+  if (c.scholarship !== undefined && (s.scholarship !== null) !== c.scholarship) return false;
+  if (c.warned !== undefined && ((s.scholarship?.warned ?? 0) > 0) !== c.warned) return false;
+  if (c.role && !c.role.includes(s.role)) return false;
+  if (c.captain !== undefined && s.captain !== c.captain) return false;
+  if (c.number !== undefined && (s.number !== null) !== c.number) return false;
+  if (c.teamless !== undefined && (playing && (s.teamless || (s.pro && s.contract === null))) !== c.teamless) return false;
+  if (c.passed !== undefined && (s.passed > 0 && !s.pro) !== c.passed) return false;
+  if (c.prospect !== undefined) {
+    const level = content ? levelNow(state, content) : null;
+    if ((playing && !s.pro && level === 'college' && def !== undefined && state.character.age >= def.sport.draft.age - 1) !== c.prospect) return false;
+  }
+  if (c.combine && !within(s.combine, c.combine)) return false;
+  if (c.club !== undefined && (s.club !== null) !== c.club) return false;
   return true;
 }

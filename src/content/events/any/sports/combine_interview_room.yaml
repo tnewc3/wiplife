@@ -1,0 +1,52 @@
+id: combine_interview_room
+title: Fifteen minutes with a front office
+text: >-
+  The interview room has a long table, a pitcher of water and four people from a team's
+  front office. They have your film, your numbers and a list of questions designed to find
+  out what you are like on a bad day. The first one is: why should we pick you?
+tone: serious
+category: sports
+rarity: common
+lifeStages: [teen, youngAdult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { sports: { active: true } }
+    - { sports: { prospect: true } }
+weight: { base: 1 }
+followUpOnly: true
+choices:
+  - id: honest
+    label: Tell them honestly what you are not yet good at
+    outcome:
+      text: >-
+        The man at the end of the table writes something down and nods. It is the first
+        time anyone in the room seems to relax.
+      effects:
+        - { type: sports, action: combine, delta: 2 }
+        - { type: stat, key: confidence, delta: 1 }
+  - id: sell
+    label: Sell yourself as hard as you can
+    check:
+      base: 45
+      stats: [{ key: confidence, weight: 0.3 }, { key: smarts, weight: 0.15 }]
+      success:
+        text: >-
+          You are clear, specific and impossible to forget. They ask you to come back for a
+          second round, which they do not do for everyone.
+        effects:
+          - { type: sports, action: combine, delta: 4 }
+      failure:
+        text: >-
+          Somewhere in the third answer you hear yourself overselling. The room cools and
+          stays that way.
+        effects:
+          - { type: sports, action: combine, delta: -3 }
+  - id: say_what_they_want
+    label: Say whatever you think they want to hear
+    outcome:
+      text: >-
+        The answers come out smooth. They are also the answers everyone else gave, and the
+        room has heard them all before.
+      effects:
+        - { type: stat, key: stress, delta: 1 }

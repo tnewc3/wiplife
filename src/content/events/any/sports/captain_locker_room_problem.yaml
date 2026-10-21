@@ -1,0 +1,53 @@
+id: captain_locker_room_problem
+title: Two teammates, one problem
+text: >-
+  Two of your teammates have stopped passing to each other. It started with a joke in
+  practice and has grown into something that you can feel when you walk into the locker
+  room. Everyone is waiting for the captain to say something, and you are the captain.
+tone: serious
+category: sports
+rarity: common
+lifeStages: [child, teen, youngAdult, adult]
+requires:
+  all:
+    - { sports: { active: true } }
+    - { sports: { captain: true } }
+weight: { base: 1 }
+followUpOnly: true
+choices:
+  - id: private
+    label: Talk to each of them privately
+    check:
+      base: 50
+      stats: [{ key: kindness, weight: 0.25 }, { key: sociability, weight: 0.2 }]
+      success:
+        text: >-
+          You hear both versions and find the thing they have in common. By the weekend they
+          are sharing a joke you were not told.
+        effects:
+          - { type: sports, action: form, delta: 1 }
+          - { type: stat, key: confidence, delta: 2 }
+      failure:
+        text: >-
+          Both of them say what they think you want to hear. Nothing is fixed, and you are
+          not sure anything was heard.
+        effects:
+          - { type: stat, key: stress, delta: 2 }
+  - id: team_meeting
+    label: Call a team meeting
+    outcome:
+      text: >-
+        Everyone sits in the locker room with their arms folded and, by the end, with their
+        arms unfolded. It is awkward and it is useful.
+      effects:
+        - { type: sports, action: form, delta: 1 }
+        - { type: fame, action: image, delta: 1 }
+  - id: let_it_ride
+    label: Let them work it out themselves
+    outcome:
+      text: >-
+        You say nothing and hope. The silence in the locker room gets heavier through the
+        week, and everyone notices that you noticed.
+      effects:
+        - { type: sports, action: form, delta: -1 }
+        - { type: stat, key: stress, delta: 1 }

@@ -1,0 +1,53 @@
+id: role_ask_for_minutes
+title: Knocking on the coach's door
+text: >-
+  You have watched most of the season from where the bench starts. You have a speech
+  prepared in your head, and a door with the coach's name on it, and a little time before
+  film starts. This is the moment you either ask or do not.
+tone: neutral
+category: sports
+rarity: common
+lifeStages: [child, teen, youngAdult, adult]
+requires:
+  all:
+    - { sports: { active: true } }
+    - { sports: { seasons: { gte: 2 } } }
+    - { sports: { role: [reserve, rotation] } }
+weight: { base: 1 }
+followUpOnly: true
+choices:
+  - id: ask_direct
+    label: Ask for a bigger role directly
+    check:
+      base: 40
+      stats: [{ key: confidence, weight: 0.3 }, { sports: rating, weight: 0.3 }]
+      success:
+        text: >-
+          The coach listens, nods and says that you have earned a longer look. Your name
+          moves up on the board that week.
+        effects:
+          - { type: sports, action: role, delta: 1 }
+          - { type: stat, key: confidence, delta: 2 }
+      failure:
+        text: >-
+          The coach is polite and short. The answer is not yet, and for a week the room
+          feels like it has a tilt.
+        effects:
+          - { type: stat, key: confidence, delta: -2 }
+          - { type: sports, action: form, delta: -1 }
+  - id: ask_what
+    label: Ask what you would need to do
+    outcome:
+      text: >-
+        The coach lists three things, one at a time, and you write them down. They are
+        smaller than you feared.
+      effects:
+        - { type: fame, action: craft, delta: 2 }
+  - id: wait
+    label: Say nothing, and let your play do the talking
+    outcome:
+      text: >-
+        You back out of the doorway before the coach looks up. Whatever you say now, you will
+        say on the floor.
+      effects:
+        - { type: sports, action: form, delta: 1 }

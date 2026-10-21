@@ -68,11 +68,12 @@ export function skillCap(state: LifeState, def: FamePathDef, content: ContentBun
   return hasTalentFor(state, def) ? c.talent : c.none;
 }
 
-/** Practice sessions a year: by your commitment (under 18, at most a steady one's). */
+/** Practice sessions a year: by your commitment (under 18, at most a steady one's); an athlete with a club or travel team alongside gets a few more (Batch 5). */
 export function practiceBudget(state: LifeState, content: ContentBundle): number {
   const b = content.balance.fame;
   const setting = isMinorStar(state, content) && state.fame.commitment === 'all' ? b.commitment.minorsMax : state.fame.commitment;
-  return b.practice.sessions[setting];
+  const club = state.sports.club !== null && pathDef(content, state.fame.main)?.sport !== undefined ? content.balance.sports.training.club.sessions : 0;
+  return b.practice.sessions[setting] + club;
 }
 
 export type PracticeBlock = 'inactive' | 'prison' | 'path' | 'skill' | 'instrument' | 'budget' | 'maxed';
@@ -93,8 +94,8 @@ export function practiceBlock(state: LifeState, pathId: Id, skillId: Id, content
   return null;
 }
 
-/** What one more session of this skill would add now (0 when it can't). Reads only. */
-export function practiceGain(state: LifeState, pathId: Id, skillId: Id, content: ContentBundle): number {
+/** What one more session of this skill would add now (0 when it can't). Reads only. `multiplier`: Batch 5, where the session happens (a sport's team, gym or coach). */
+export function practiceGain(state: LifeState, pathId: Id, skillId: Id, content: ContentBundle, multiplier = 1): number {
   const def = pathDef(content, pathId);
   const path = state.fame.paths[pathId];
   if (!def || !path) return 0;
@@ -102,16 +103,16 @@ export function practiceGain(state: LifeState, pathId: Id, skillId: Id, content:
   const level = skillLevel(path, skillId, content);
   const repeats = grindView(state).bySkill[skillId] ?? 0;
   const discipline = Math.max(0.5, 1 + (state.character.personality.discipline - 50) * p.discipline);
-  const raw = curveAt(p.gain, level) * Math.pow(p.repeat, repeats) * discipline * (hasTalentFor(state, def) ? p.talent : 1);
+  const raw = curveAt(p.gain, level) * Math.pow(p.repeat, repeats) * discipline * (hasTalentFor(state, def) ? p.talent : 1) * multiplier;
   return Math.max(0, Math.min(skillCap(state, def, content) - level, raw));
 }
 
 /** One session: the skill rises (less each time), a share goes to craft. Returns the points gained. Never touches health. */
-export function practise(state: LifeState, pathId: Id, skillId: Id, content: ContentBundle): number {
+export function practise(state: LifeState, pathId: Id, skillId: Id, content: ContentBundle, multiplier = 1): number {
   if (practiceBlock(state, pathId, skillId, content) !== null) return 0;
   const def = pathDef(content, pathId)!;
   const path = state.fame.paths[pathId]!;
-  const gain = practiceGain(state, pathId, skillId, content);
+  const gain = practiceGain(state, pathId, skillId, content, multiplier);
   const g = grindNow(state);
   path.skills = { ...(path.skills ?? {}), [skillId]: Math.round((skillLevel(path, skillId, content) + gain) * 10) / 10 };
   const q = content.balance.fame.quality;
@@ -121,7 +122,7 @@ export function practise(state: LifeState, pathId: Id, skillId: Id, content: Con
   g.bySkill[skillId] = (g.bySkill[skillId] ?? 0) + 1;
   state.fame.totals.practice += 1;
   // Now and then the hours leave a story for the coming year.
-  if (g.practice === practiceBudget(state, content) && chance(state.rng, 0.25)) queueFameEvent(state, 'practice', content, {}, state.currentYear + 1);
+  if (!def.sport && g.practice === practiceBudget(state, content) && chance(state.rng, 0.25)) queueFameEvent(state, 'practice', content, {}, state.currentYear + 1);
   return Math.round(gain * 10) / 10;
 }
 

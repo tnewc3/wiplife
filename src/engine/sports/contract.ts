@@ -11,7 +11,7 @@ import { curveAt } from '../curve';
 import { payFameMoney } from '../fame/ladder';
 import { rungDef } from '../fame/query';
 import { wholeDollars } from '../finance';
-import { chance, nextInt, type RngState } from '../rng';
+import { chance, createRng, nextFloat, nextInt, type RngState } from '../rng';
 import type { Id, LifeState, SportsContract } from '../types';
 import { sportsHistory } from './text';
 import { anotherTeam, draftingTeam, proTeam, proTeamDef, proTeamsIn, relocateForTeam, teamAtHome } from './team';
@@ -24,15 +24,35 @@ export function leaguePay(def: SportPath, rung: number): number {
   return rungDef(def, rung).income;
 }
 
-/** What a deal of this kind pays a year, from the rung it is for and (for a deal struck now) your rating. */
-export function salaryFor(def: SportPath, kind: SportContractKind, rung: number, rating: number, content: ContentBundle, round = 1): number {
-  const b = content.balance.sports.contract;
-  const market = kind === 'rookie' || kind === 'minimum' ? 1 : curveAt(b.market, rating);
-  const scale = kind === 'rookie' ? (b.rookieRound[Math.min(b.rookieRound.length, Math.max(1, round)) - 1] ?? 1) : 1;
-  return wholeDollars(leaguePay(def, rung) * b.kind[kind] * market * scale);
+/** The share of the draft's picks gone before a pick (percent): 0 for the first pick, near 100 for the last. */
+export function pickShare(pick: number, total: number): number {
+  return total <= 1 ? 0 : (100 * (Math.max(1, Math.min(total, pick)) - 1)) / total;
 }
 
-function newContract(state: LifeState, def: SportPath, kind: SportContractKind, teamId: Id, rung: number, rating: number, content: ContentBundle, rng: RngState, round = 1): SportsContract {
+/**
+ * What a rookie is paid by where they were picked: the rung's usual year in the league times a smooth curve by the share of
+ * picks gone (the first pick is paid most), the signing bonus (a share of that year's pay, also by the pick), and the most
+ * skill incentives can add a year.
+ */
+export function rookiePay(def: SportPath, pick: number, total: number, content: ContentBundle): { salary: number; signing: number; incentive: number } {
+  const b = content.balance.sports.contract;
+  const share = pickShare(pick, total);
+  const salary = wholeDollars(leaguePay(def, def.sport.proRung) * b.kind.rookie * curveAt(b.rookiePick, share));
+  return { salary, signing: wholeDollars(salary * curveAt(b.signing, share)), incentive: wholeDollars(salary * b.incentive.share) };
+}
+
+/** What a deal of this kind pays a year, from the rung it is for and (for a deal struck now) your rating. A rookie deal is by the pick (about the middle without one). */
+export function salaryFor(def: SportPath, kind: SportContractKind, rung: number, rating: number, content: ContentBundle, pickAt?: { pick: number; total: number }): number {
+  const b = content.balance.sports.contract;
+  if (kind === 'rookie') return pickAt ? rookiePay(def, pickAt.pick, pickAt.total, content).salary : rookiePay(def, 1 + Math.floor(DEFAULT_TOTAL / 2), DEFAULT_TOTAL, content).salary;
+  const market = kind === 'minimum' ? 1 : curveAt(b.market, rating);
+  return wholeDollars(leaguePay(def, rung) * b.kind[kind] * market);
+}
+
+/** Picks assumed for a rookie deal struck outside a draft (a pick in the middle). */
+const DEFAULT_TOTAL = 40;
+
+function newContract(state: LifeState, def: SportPath, kind: SportContractKind, teamId: Id, rung: number, rating: number, content: ContentBundle, rng: RngState, pickAt?: { pick: number; total: number }): SportsContract {
   const b = content.balance.sports.contract;
   const years = nextInt(rng, b.years[kind].min, Math.max(b.years[kind].min, b.years[kind].max));
   const hasOption = chance(rng, b.option.chance);
@@ -40,26 +60,28 @@ function newContract(state: LifeState, def: SportPath, kind: SportContractKind, 
     teamId,
     since: state.currentYear,
     until: state.currentYear + years - 1,
-    salary: salaryFor(def, kind, rung, rating, content, round),
+    salary: salaryFor(def, kind, rung, rating, content, pickAt),
     kind,
     option: hasOption ? (chance(rng, b.option.team) ? 'team' : 'player') : 'none',
+    ...(kind === 'rookie' ? { incentive: rookiePay(def, pickAt?.pick ?? 1 + Math.floor(DEFAULT_TOTAL / 2), pickAt?.total ?? DEFAULT_TOTAL, content).incentive } : {}),
   };
 }
 
-/** Takes you onto a pro team: the deal, the move, the bonus. */
-function joinTeam(state: LifeState, def: SportPath, teamId: Id, contract: SportsContract, content: ContentBundle): void {
+/** Takes you onto a pro team: the deal, the move, the bonus (a rookie's by the pick; otherwise a share of a year's pay). */
+function joinTeam(state: LifeState, def: SportPath, teamId: Id, contract: SportsContract, content: ContentBundle, bonus?: number): void {
   const team = teamAtHome(def.sport, proTeamDef(def.sport, teamId), state.character.cityId, content);
   if (!team) return;
   const s = state.sports;
   contract = { ...contract, teamId: team.id };
   s.pro = true;
   s.team = proTeam(team);
+  s.teamless = false;
   s.contract = contract;
   s.unsigned = 0;
   s.playOut = false;
   s.ask = null;
   relocateForTeam(state, team.city, content);
-  payFameMoney(state, contract.salary * content.balance.sports.contract.bonus, content);
+  payFameMoney(state, bonus ?? contract.salary * content.balance.sports.contract.bonus, content);
 }
 
 /** You are drafted or signed after the draft: the deal on offer takes you to the team that wants you. Returns whether you signed. */
@@ -73,20 +95,59 @@ export function signDraftDeal(state: LifeState, content: ContentBundle, rng: Rng
   const kind: SportContractKind = kindOverride ?? (d.pick > 0 ? 'rookie' : 'minimum');
   const rung = sport.sport.proRung;
   const rating = recentRating(state);
-  const contract = newContract(state, sport, kind, d.teamId, rung, rating, content, rng, d.round);
-  joinTeam(state, sport, d.teamId, contract, content);
+  const total = draftTotal(sport.sport, state.character.cityId, content);
+  const pickAt = d.pick > 0 ? { pick: d.pick, total } : undefined;
+  const contract = newContract(state, sport, kind, d.teamId, rung, rating, content, rng, pickAt);
+  const signing = kind === 'rookie' && pickAt ? rookiePay(sport, pickAt.pick, pickAt.total, content).signing : undefined;
+  joinTeam(state, sport, d.teamId, contract, content, signing);
   if (!state.sports.pro) return false;
   path.rung = Math.max(path.rung, rung);
   path.peak = Math.max(path.peak, path.rung);
   path.fame = Math.max(path.fame, rungDef(def, path.rung).fame + 1);
   sportsHistory(state, d.pick > 0 ? 'drafted' : 'signed', content);
+  if (s.passed > 0) s.totals.signedAfterUndrafted += 1;
   s.draft = null;
+  s.passed = 0;
+  s.combine = 0;
+  return true;
+}
+
+/**
+ * A camp, an open tryout or a call from a team signs you (Batch 5), for a player the draft passed by or a pro without a deal. The
+ * deal is a minimum one unless you rate well above what the rung asks. Returns whether you signed.
+ */
+export function signCampDeal(state: LifeState, teamId: Id, content: ContentBundle, rng: RngState): boolean {
+  const s = state.sports;
+  const def = s.sport ? content.famePaths[s.sport] : undefined;
+  const path = s.sport ? state.fame.paths[s.sport] : undefined;
+  if (!def?.sport || !path || state.character.age < def.sport.draft.age) return false;
+  const sport = def as SportPath;
+  const rung = sport.sport.proRung;
+  const rating = recentRating(state);
+  const kind: SportContractKind = rating >= rungDef(sport, rung).quality + 8 ? 'standard' : 'minimum';
+  const afterDraft = !s.pro;
+  const contract = newContract(state, sport, kind, teamId, Math.max(path.rung, rung), rating, content, rng);
+  joinTeam(state, sport, teamId, contract, content);
+  if (!state.sports.pro) return false;
+  path.rung = Math.max(path.rung, rung);
+  path.peak = Math.max(path.peak, path.rung);
+  path.fame = Math.max(path.fame, rungDef(def, path.rung).fame + 1);
+  sportsHistory(state, 'signedCamp', content);
+  if (s.passed > 0 || !afterDraft) s.totals.signedAfterUndrafted += 1;
+  s.draft = null;
+  s.passed = 0;
+  s.combine = 0;
   return true;
 }
 
 /** You turn the draft down and stay an amateur another year (it comes round again). */
 export function declineDraft(state: LifeState): void {
   state.sports.draft = null;
+}
+
+/** The picks in the draft: every team, every round. */
+export function draftTotal(def: SportDef, home: Id, content: ContentBundle): number {
+  return Math.max(1, proTeamsIn(def, home, content).length) * def.draft.rounds;
 }
 
 /** Where in the draft a prospect goes: the pick (0 for undrafted) and the round. */
@@ -97,6 +158,23 @@ export function draftSlot(score: number, def: SportDef, home: Id, content: Conte
   const pick = Math.max(1, Math.round(1 + Math.max(0, d.top - score) * d.perPick));
   if (pick > total) return { pick: 0, round: 0 };
   return { pick, round: Math.ceil(pick / teams) };
+}
+
+/**
+ * The league's need for your position this year, in score points (stable for a life and a year): a team short at the position
+ * lifts a prospect, a crowded position costs one.
+ */
+export function positionNeed(state: LifeState, content: ContentBundle): number {
+  const position = state.sports.position ?? '';
+  const u = nextFloat(createRng(`${state.seed}:need:${state.currentYear}:${position}`));
+  return Math.round((u * 2 - 1) * content.balance.sports.draft.need * 10) / 10;
+}
+
+/** What scouts make of you before the noise: recent rating, fame, the combine and the league's need for your position. */
+export function draftScoreBase(state: LifeState, pathFame: number, content: ContentBundle): number {
+  const d = content.balance.sports.draft;
+  const combine = Math.max(-d.combine, Math.min(d.combine, state.sports.combine));
+  return recentRating(state) * d.score.quality + pathFame * d.score.fame + combine + positionNeed(state, content);
 }
 
 /** A team makes you an offer after the draft passes you by. */
@@ -146,6 +224,7 @@ export function moveToTeam(state: LifeState, teamId: Id, newDeal: boolean, conte
   const contract: SportsContract = newDeal || !old ? newContract(state, sport, path.rung >= sport.sport.proRung + 2 ? 'star' : 'standard', teamId, path.rung, recentRating(state), content, rng) : { ...old, teamId };
   s.pro = true;
   s.team = proTeam(team);
+  s.teamless = false;
   s.contract = contract;
   s.unsigned = 0;
   s.playOut = false;
@@ -187,3 +266,21 @@ export function releasePlayer(state: LifeState, content: ContentBundle): number 
 }
 
 export type { SportRetireRoute };
+
+/**
+ * Where scouts project you in the draft, in words (Batch 5): the band your score falls in on average, and the best and worst
+ * bands it could fall in (one spread of the day's noise either way). Reads only. Null before a player is old enough to be drafted.
+ */
+export function draftProjection(state: LifeState, def: SportPath, content: ContentBundle): { likely: string; best: string; worst: string } | null {
+  const d = content.balance.sports.draft;
+  const path = state.fame.paths[def.id];
+  if (!path || state.sports.pro || state.character.age < def.sport.draft.age - 1) return null;
+  const total = draftTotal(def.sport, state.character.cityId, content);
+  const score = draftScoreBase(state, path.fame, content);
+  const bandAt = (x: number): string => {
+    const pick = Math.max(1, Math.round(1 + Math.max(0, d.top - x) * d.perPick));
+    const share = pick / total;
+    return (d.projection.find((b) => share <= b.upTo) ?? d.projection[d.projection.length - 1]!).id;
+  };
+  return { likely: bandAt(score), best: bandAt(score + d.score.noise), worst: bandAt(score - d.score.noise) };
+}

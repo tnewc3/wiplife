@@ -7,12 +7,20 @@
  * team helps; nothing is charged), and a partner living with you comes along.
  * Numbers: balance/sports.yaml.
  */
-import type { ContentBundle, SportDef, SportLevel, SportProTeamDef } from '../../content/schemas';
+import type { ContentBundle, SportDef, SportLevel, SportProTeamDef, TeamTier } from '../../content/schemas';
 import { afterMove } from '../career';
 import { moveTo, sellHome } from '../housing';
-import { pick, type RngState } from '../rng';
+import { createRng, nextInt, pick, type RngState } from '../rng';
 import type { Id, LifeState, SportsTeam } from '../types';
 import { sameCountry } from '../country';
+
+/**
+ * A pick that does not touch the life's generator: the same life and key always give the same item, so a team keeps its
+ * nickname however often the list of teams is read.
+ */
+export function stablePick<T>(state: LifeState, key: string, items: readonly T[]): T {
+  return items[nextInt(createRng(`${state.seed}:${key}`), 0, items.length - 1)]!;
+}
 
 /** A pro team by id. */
 export function proTeamDef(def: SportDef, id: Id | null | undefined): SportProTeamDef | undefined {
@@ -36,17 +44,25 @@ export function collegeTier(rating: number): 'community' | 'state' | 'elite' {
   return rating >= 62 ? 'elite' : rating >= 48 ? 'state' : 'community';
 }
 
-/** A team in your city at a level below pro, named from the city's schools or the city itself. */
-export function amateurTeam(state: LifeState, def: SportDef, level: Exclude<SportLevel, 'pro'>, rating: number, content: ContentBundle, rng: RngState): SportsTeam {
+/**
+ * The amateur team of this kind in your city (Batch 5): a youth team is the city plus a nickname, a school team is a school of
+ * the city plus one, a college team is one of the city's colleges plus one. The nickname is stable for a life, and each kind of
+ * team has its own, so the junior varsity is not the varsity.
+ */
+export function tierTeam(state: LifeState, def: SportDef, tier: TeamTier, content: ContentBundle): SportsTeam {
+  const t = content.balance.sports.tryout.tiers[tier];
+  const quality = Math.max(0, Math.min(100, content.balance.sports.league.quality[t.base] + t.shift));
   const city = content.cities[state.character.cityId];
-  const q = content.balance.sports.league.quality;
-  const nick = pick(rng, def.leagues[level].nicknames);
   const cityName = city?.name ?? 'Your city';
-  if (level === 'youth') return { id: null, name: `${cityName} ${nick}`, city: state.character.cityId, level, quality: q.youth };
-  if (level === 'school') return { id: null, name: `${city?.schools.high ?? cityName} ${nick}`, city: state.character.cityId, level, quality: q.high };
-  const tier = collegeTier(rating);
-  const school = city?.schools[tier] ?? cityName;
-  return { id: null, name: `${school} ${nick}`, city: state.character.cityId, level, quality: q[tier] };
+  const nick = stablePick(state, `team:${def.leagues[t.level] ? t.level : 'youth'}:${tier}:${state.character.cityId}`, def.leagues[t.level].nicknames);
+  const suffix = content.text.sports.tiers[tier].suffix;
+  const place = t.level === 'youth' ? cityName : t.level === 'school' ? (city?.schools.high ?? cityName) : (city?.schools[t.base as 'community' | 'state' | 'elite'] ?? cityName);
+  return { id: null, name: [place, nick, suffix].filter((x) => x !== '').join(' '), city: state.character.cityId, level: t.level, quality, tier };
+}
+
+/** The usual team of a level below the pros (a club team, the varsity, or a college program by how good you look). */
+export function amateurTeam(state: LifeState, def: SportDef, level: Exclude<SportLevel, 'pro'>, rating: number, content: ContentBundle, _rng?: RngState): SportsTeam {
+  return tierTeam(state, def, level === 'youth' ? 'club' : level === 'school' ? 'varsity' : collegeTier(rating), content);
 }
 
 /** The pro team that picks at this place in a draft: the weakest side picks first, round after round. */

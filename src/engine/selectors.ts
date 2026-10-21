@@ -113,7 +113,7 @@ export { getCrimeView, getDirtyView, getLaunderBlock, getSpendBlock } from './cr
 export type { CrimeMemberView, CrimeView, DirtyView, FrontView } from './crime/views';
 export { bandNameSuggestion, fanCount, getFameView, getProjectBlock, parseTitle, titleSuggestion } from './fame/views';
 export { getSportsView } from './sports/views';
-export type { SportsSeasonView, SportsView } from './sports/views';
+export type { OfferView, SportsSeasonView, SportsView, TeamOptionView, TrainingSkillView, TrainingView } from './sports/views';
 export type { FameEntryView, FamePathView, FameProjectView, FameRungView, FameView } from './fame/views';
 export type { ActivityOptionView, CrowdView, JobOptionView, RuleView, TeenView } from './teen/views';
 export type { AdoptOption, BelongingsView, MainHomeView, PetDetailView, PetView, RenovationOption, VacationHomeView, VacationOption, VehicleOption, VehicleView } from './possessions/views';

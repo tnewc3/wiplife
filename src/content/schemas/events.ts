@@ -19,10 +19,10 @@ import {
 import { DAMAGE_SEVERITIES, PET_PERSONALITIES, PET_SOURCES, POSSESSION_EFFECT_ACTIONS, POSSESSION_KINDS, VALUABLE_CLASSES, VEHICLE_KINDS } from './belongings';
 import { debtKindSchema, housingKindSchema, lifestyleSchema } from './economy';
 import { FAMILY_DEEDS, GUARDIAN_KINDS, familyProcessSchema, parentingKeySchema } from './family';
-import { credentialTypeSchema, programSchema, tierSchema } from './education';
+import { credentialTypeSchema, programSchema, tierSchema, type Tier } from './education';
 import { lifeTierSchema } from './people';
 import { jobSizeSchema } from './crime';
-import { SPORT_LEVELS, SPORT_RESULTS, SPORT_RETIRE_ROUTES, SPORT_CONTRACT_KINDS, type SportLevel, type SportResult } from './sports';
+import { SPORT_LEVELS, SPORT_RESULTS, SPORT_RETIRE_ROUTES, SPORT_CONTRACT_KINDS, SPORT_ROLES, TRYOUT_APPROACHES, TRYOUT_RESULTS, type SportLevel, type SportResult, type SportRole, type TryoutResult } from './sports';
 import { fameBandSchema, fameCommitmentSchema, fameSceneSchema, fameSizeSchema, fameTermsSchema, FAME_FAN_TYPES, FAME_STALKER_STAGES, type FameBand, type FameCommitment, type FameStalkerStage } from './fame';
 import { FOCUS_KEYS, LICENSE_STAGE_IDS, ruleDomainSchema, type RuleDomainId, type TeenFocusId } from './teen';
 import { relationshipKindSchema, relationshipStatusSchema, romanceStatusSchema } from './relationships';
@@ -391,6 +391,27 @@ export interface SportsCondition {
   allStars?: Compare;
   retired?: boolean;
   amateur?: boolean;
+  /** Batch 5: a tryout is waiting to be played (the scrimmage events require it). */
+  tryout?: boolean;
+  /** How the latest tryout this year went: you made the team, a fallback took you, or none did. */
+  tried?: TryoutResult[];
+  /** A program's offer of an athletic scholarship is on the table (of one of these tiers), and whether you hold a scholarship now (`warned`: under the grade floor). */
+  offers?: Tier[];
+  scholarship?: boolean;
+  warned?: boolean;
+  /** Where you stand on the team; whether you captain it; whether you have picked a jersey number. */
+  role?: SportRole[];
+  captain?: boolean;
+  number?: boolean;
+  /** You have no team (a pro without a deal, or an amateur who left or was cut) / the draft passed you by and no team signed you. */
+  teamless?: boolean;
+  passed?: boolean;
+  /** Old enough to be drafted, and still an amateur. */
+  prospect?: boolean;
+  /** Your combine points. */
+  combine?: Compare;
+  /** You play for a club or travel team alongside your school team. */
+  club?: boolean;
 }
 
 /** Your money situation. Every field given must hold. */
@@ -1113,6 +1134,19 @@ export const conditionSchema: z.ZodType<Condition> = z.lazy(() =>
           allStars: compareSchema.optional(),
           retired: z.boolean().optional(),
           amateur: z.boolean().optional(),
+          tryout: z.boolean().optional(),
+          tried: z.array(z.enum(TRYOUT_RESULTS)).min(1).optional(),
+          offers: z.array(tierSchema).min(1).optional(),
+          scholarship: z.boolean().optional(),
+          warned: z.boolean().optional(),
+          role: z.array(z.enum(SPORT_ROLES)).min(1).optional(),
+          captain: z.boolean().optional(),
+          number: z.boolean().optional(),
+          teamless: z.boolean().optional(),
+          passed: z.boolean().optional(),
+          prospect: z.boolean().optional(),
+          combine: compareSchema.optional(),
+          club: z.boolean().optional(),
         })
         .refine(atLeastOneField, 'needs at least one field'),
     }),
@@ -1745,8 +1779,12 @@ export const effectSchema = z.discriminatedUnion('type', [
   z
     .strictObject({
       type: z.literal('sports'),
-      action: z.enum(['form', 'rating', 'series', 'sign', 'decline', 'extend', 'playout', 'trade', 'ask', 'refuse', 'injury', 'suspend', 'retire', 'position']),
+      action: z.enum(['form', 'rating', 'series', 'sign', 'decline', 'extend', 'playout', 'trade', 'ask', 'refuse', 'injury', 'suspend', 'retire', 'position', 'tryout', 'role', 'number', 'captain', 'scholarship', 'combine', 'camp']),
       delta: z.int().min(-30).max(30).optional(),
+      approach: z.enum(TRYOUT_APPROACHES).optional(),
+      tier: tierSchema.optional(),
+      value: z.int().min(0).max(99).optional(),
+      on: z.boolean().optional(),
       result: z.enum(['win', 'lose']).optional(),
       terms: z.enum(['fair', 'rich', 'cheap']).optional(),
       what: z.enum(['trade', 'contract', 'rest', 'pain', 'surgery']).optional(),
@@ -1754,7 +1792,11 @@ export const effectSchema = z.discriminatedUnion('type', [
       position: idSchema.optional(),
       kind: z.enum(SPORT_CONTRACT_KINDS).optional(),
     })
-    .refine((e) => (e.action === 'form' || e.action === 'rating') === (e.delta !== undefined && e.delta !== 0), 'form and rating need a non-zero delta (and only they have one)')
+    .refine((e) => (e.action === 'form' || e.action === 'rating' || e.action === 'role' || e.action === 'combine') === (e.delta !== undefined && e.delta !== 0), 'form, rating, role and combine need a non-zero delta (and only they have one)')
+    .refine((e) => (e.action === 'tryout') === (e.approach !== undefined), 'tryout needs approach (and only it has one)')
+    .refine((e) => (e.action === 'number') === (e.value !== undefined), 'number needs value (and only it has one)')
+    .refine((e) => (e.action === 'captain') === (e.on !== undefined), 'captain needs on (and only it has one)')
+    .refine((e) => e.tier === undefined || e.action === 'scholarship', 'only scholarship takes tier (leave it out to turn the offers down)')
     .refine((e) => (e.action === 'series') === (e.result !== undefined), 'series needs result (and only it has one)')
     .refine((e) => (e.action === 'extend') === (e.terms !== undefined), 'extend needs terms (and only it has them)')
     .refine((e) => (e.action === 'ask' || e.action === 'injury') === (e.what !== undefined), 'ask and injury need what (and only they have one)')

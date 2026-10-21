@@ -1,0 +1,48 @@
+id: tryout_youth_trials
+title: Trials at the rec centre
+text: >-
+  A Saturday morning at the rec centre: a folding table, a clipboard and a line of kids in
+  shirts big enough to grow into. The coaches have whistles around their necks and
+  one question for everybody. Show us what you can do at {sport}.
+tone: neutral
+category: sportstryout
+rarity: common
+lifeStages: [child, teen]
+requires:
+  all:
+    - { sports: { tryout: true } }
+weight: { base: 1 }
+followUpOnly: true
+choices:
+  - id: steady
+    label: Play your game
+    outcome:
+      text: >-
+        You do what you do, nothing flashier, and the coaches write on their clipboards
+        without looking up. {tryout}
+      effects:
+        - { type: sports, action: tryout, approach: steady }
+  - id: hustle
+    label: Outwork everyone on the floor
+    outcome:
+      text: >-
+        You are first to every ball and last to leave the drill. Your legs are shaking by the
+        end, and you notice a coach noticing. {tryout}
+      effects:
+        - { type: sports, action: tryout, approach: hustle }
+  - id: showoff
+    label: Go for the highlight plays
+    outcome:
+      text: >-
+        You try the thing you saw on a screen at home. Sometimes it works, and sometimes
+        everyone sees it not work. {tryout}
+      effects:
+        - { type: sports, action: tryout, approach: showoff }
+  - id: listen
+    label: Watch the coach and do just what is asked
+    outcome:
+      text: >-
+        You ask one question, do the drill the way it was explained, and fix what the coach
+        points at. It is not glamorous. {tryout}
+      effects:
+        - { type: sports, action: tryout, approach: listen }

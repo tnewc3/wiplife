@@ -1,0 +1,44 @@
+id: after_the_cut
+title: What the coach said
+text: >-
+  You were cut. You went home, ate nothing and told nobody, and the next morning the coach
+  sent a message that said only: if you want to know what to fix, come by. It is the kind of
+  message you can read as a kindness or as a challenge.
+tone: serious
+category: sports
+rarity: common
+lifeStages: [child, teen, youngAdult]
+requires:
+  all:
+    - { sports: { active: true } }
+    - { sports: { tried: [cut] } }
+weight: { base: 14 }
+cooldownYears: 2
+choices:
+  - id: go_see
+    label: Go and hear it out
+    outcome:
+      text: >-
+        The coach has a list. It is shorter than you thought, and every item on it is
+        something you can actually change.
+      effects:
+        - { type: fame, action: craft, delta: 2 }
+        - { type: sports, action: form, delta: 1 }
+  - id: work_alone
+    label: Say nothing, and work harder on your own
+    outcome:
+      text: >-
+        You stay late with a ball and an empty gym. Nobody sees it, and you do not need
+        anyone to.
+      effects:
+        - { type: stat, key: fitness, delta: 1 }
+        - { type: stat, key: discipline, delta: 1 }
+  - id: sulk
+    label: Take a break from the whole thing
+    outcome:
+      text: >-
+        For a while you do other things. Your phone has fewer notifications and you sleep
+        better, and you are not sure which of them you miss.
+      effects:
+        - { type: stat, key: stress, delta: -2 }
+        - { type: stat, key: happiness, delta: -1 }

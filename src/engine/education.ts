@@ -22,6 +22,7 @@ import { isIndependent, MAX_MONEY, spend, takeStudentLoan, wholeDollars } from '
 import { creditBlocked, isUndocumented } from './migration/query';
 import { countryIdOfCity } from './country';
 import { supportingParent } from './housing';
+import { athleticShare } from './sports/aid';
 import { nextFloat, type RngState } from './rng';
 import { writeFromGroup } from './systems/history';
 import type { Admission, Credential, Enrollment, Id, LifeState, SchoolBill, SchoolPlace } from './types';
@@ -356,7 +357,8 @@ export function billFor(
 export function payTuition(state: LifeState, content: ContentBundle): void {
   const cur = state.education.current;
   if (!cur || !isPostSecondary(cur.program)) return;
-  const bill = billFor(state, cur, cur.scholarship, content);
+  // Batch 5: an athletic scholarship pays its share on top of merit and need aid (together, at most the whole bill).
+  const bill = billFor(state, cur, Math.min(1, cur.scholarship + athleticShare(state, cur)), content);
   state.education.fund -= bill.fund;
   // W6: without papers there is no student loan; the rest is paid from what you have.
   if (creditBlocked(state)) spend(state, bill.loan, content);

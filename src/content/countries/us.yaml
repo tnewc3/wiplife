@@ -104,6 +104,12 @@ studentFinance:
   # Each application to a college, trade school or grad school costs this.
   applicationFee: 75
 
+# Batch 5: sport at school and college. Colleges recruit athletes and a full ride is possible at the top.
+athletics:
+  scholarships: { available: true, maxShare: 1, word: athletic scholarship, tiers: [community, state, elite] }
+  academy: false
+  system: college
+
 housing:
   mortgageRate: 0.065
   downPayment: 0.2

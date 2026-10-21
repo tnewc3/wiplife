@@ -26,6 +26,12 @@ tour: { label: "Tour", noun: "tour", minRung: 8 }
 press: { label: "Press run", minRung: 8 }
 retire: { from: 33, chance: [{ at: 33, x: 0.02 }, { at: 45, x: 0.2 }] }
 royalties: 0.05
+# Batch 5: what you train (Batch 4's practice system): where you train it matters (balance/sports.yaml training).
+skills:
+  - { id: passing, label: Passing, blurb: "Hundreds of passes against a wall until your first touch is the pass." }
+  - { id: dribbling, label: Dribbling, blurb: "Close control in a space the size of a doorway, then a doorway with a defender in it." }
+  - { id: finishing, label: Finishing, blurb: "Shots from every angle until the goalkeeper is the only thing in your head." }
+  - { id: stamina, label: Stamina, blurb: "Runs that never feel long enough until the eighty-fifth minute." }
 sport:
   positions:
     - id: goalkeeper

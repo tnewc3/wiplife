@@ -17,7 +17,7 @@ import { teenHistory } from './cliques';
 import { isGrounded } from './query';
 import { applyFriendGain } from './focus';
 
-export type ActivityBlock = 'age' | 'unknown' | 'member' | 'limit' | 'turnedAway' | 'away';
+export type ActivityBlock = 'age' | 'unknown' | 'member' | 'limit' | 'turnedAway' | 'away' | 'sport';
 
 export function activityDef(content: ContentBundle, id: string): ActivityDef | undefined {
   const def = content.activities[id];
@@ -35,10 +35,44 @@ export function activityBlock(state: LifeState, id: string, content: ContentBund
   if (state.character.age >= content.balance.relationships.adultAge || state.character.age < def.minAge) return 'age';
   if (state.character.age < content.balance.teen.ages.from && !state.education.current) return 'age';
   if (inActivity(state, id)) return 'member';
-  if (state.teen.activities.length >= content.balance.teen.activities.max) return 'limit';
+  // Batch 5: a school team in a sport is the sports career's school rung; you try out for it from the Sports screen.
+  if (def.sport !== undefined) return 'sport';
+  if (state.teen.activities.filter((a) => content.activities[a.id]?.sport === undefined).length >= content.balance.teen.activities.max) return 'limit';
   const cut = state.teen.turnedAway[id];
   if (cut !== undefined && state.currentYear - cut < content.balance.teen.activities.cutWait) return 'turnedAway';
   return null;
+}
+
+/** The school team in a sport (Batch 5), if the game has one. */
+export function sportActivity(content: ContentBundle, sportId: string | null): ActivityDef | undefined {
+  if (sportId === null) return undefined;
+  return Object.values(content.activities).find((a) => a.sport === sportId && !a.retired);
+}
+
+/** Why you cannot be on a school team in a sport now (age, school, prison), or null. Cuts and the team limit are the sports system's (a sports team does not count toward the limit). */
+export function schoolTeamBlock(state: LifeState, def: ActivityDef, content: ContentBundle): 'age' | 'away' | null {
+  if (state.housing.kind === 'incarcerated') return 'away';
+  if (state.character.age >= content.balance.relationships.adultAge || state.character.age < def.minAge) return 'age';
+  if (state.character.age < content.balance.teen.ages.from && !state.education.current) return 'age';
+  return null;
+}
+
+/** Puts you on the school team of a sport as its varsity or junior varsity (one record with the sports career); a better place replaces a lesser one. */
+export function seatOnSchoolTeam(state: LifeState, def: ActivityDef, tier: 'jv' | 'varsity'): void {
+  const mine = state.teen.activities.find((a) => a.id === def.id);
+  if (mine) {
+    mine.tier = tier;
+    return;
+  }
+  state.teen.activities.push({ id: def.id, since: state.currentYear, tier });
+}
+
+/** Takes you off the school team of a sport (it ended, or you moved up or away). */
+export function leaveSchoolTeam(state: LifeState, sportId: string | null, content: ContentBundle): boolean {
+  const def = sportActivity(content, sportId);
+  if (!def || !inActivity(state, def.id)) return false;
+  state.teen.activities = state.teen.activities.filter((a) => a.id !== def.id);
+  return true;
 }
 
 /** The chance of making it: a club takes everyone (1). */
@@ -72,6 +106,12 @@ export function leaveActivity(state: LifeState, id: string, content: ContentBund
   if (!inActivity(state, id)) return false;
   state.teen.activities = state.teen.activities.filter((a) => a.id !== id);
   teenHistory(state, 'activityLeft', { activity: content.activities[id]?.name ?? 'the team' }, content);
+  // Batch 5: a school sports team and the sports career share one record: leaving the team leaves it in both.
+  const sport = content.activities[id]?.sport;
+  if (sport !== undefined && state.sports.sport === sport && state.sports.team?.level === 'school') {
+    state.sports.team = null;
+    state.sports.teamless = true;
+  }
   return true;
 }
 
@@ -86,6 +126,11 @@ export function runActivities(state: LifeState, content: ContentBundle): void {
   if (t.activities.length === 0) return;
   if (state.character.age >= content.balance.relationships.adultAge || state.housing.kind === 'incarcerated') {
     t.activities = [];
+    // Batch 5: a school sports team goes with the record.
+    if (state.sports.team?.level === 'school') {
+      state.sports.team = null;
+      state.sports.teamless = true;
+    }
     return;
   }
   const grounded = isGrounded(state) ? content.balance.teen.rules.groundedGain : 1;
@@ -101,6 +146,8 @@ export function runActivities(state: LifeState, content: ContentBundle): void {
     const cur = state.education.current;
     if (cur) cur.boost += def.grades;
     applyFriendGain(state, Math.round(def.friends * grounded), content);
-    if (def.injury > 0 && chance(state.rng, def.injury)) changeSeverity(state, 'broken_bone', nextInt(state.rng, 25, 60), content);
+    // A team of a sport you play does not roll an injury: the sports season does (and training never does).
+    const playsIt = def.sport !== undefined && state.sports.sport === def.sport && state.fame.active && state.fame.main === def.sport;
+    if (!playsIt && def.injury > 0 && chance(state.rng, def.injury)) changeSeverity(state, 'broken_bone', nextInt(state.rng, 25, 60), content);
   }
 }

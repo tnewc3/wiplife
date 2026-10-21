@@ -98,8 +98,13 @@ export const activitySchema = baseDefSchema.extend({
   /** The talent it feeds (an id in src/content/talents), and the passion points a year. */
   talent: idSchema.optional(),
   passion: z.int().min(0).max(10),
-  /** Chance each year of getting hurt (a broken bone). */
+  /** Chance each year of getting hurt (a broken bone). A team of a sport you play (`sport`) does not roll this: the sports season does. */
   injury: probability,
+  /**
+   * Batch 5: the team is a school team in a sport (a fame path with a `sport` block). Making it starts or continues
+   * your sports career at the school rung, and the two share one record: leaving either leaves both.
+   */
+  sport: idSchema.optional(),
 });
 export type ActivityDef = z.infer<typeof activitySchema>;
 

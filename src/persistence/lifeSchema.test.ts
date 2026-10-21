@@ -1163,7 +1163,7 @@ describe('sports (E6c)', () => {
       d.sports.seasons.push({ year: d.currentYear - 1, sport: 'hockey', level: 'pro', team: 'Chicago Frostbite', position: 'centre', rating: 71, played: 90, wins: 50, draws: 0, losses: 32, rank: 2, of: 12, result: 'final', stats: { goals: 24, assists: 31 }, salary: 910_000, allStar: true, injury: 'muscle_tear' });
       d.sports.run = { year: d.currentYear, won: 1, alive: true, strength: 64, rival: 58 };
       d.sports.draft = { year: d.currentYear - 3, pick: 0, round: 0, teamId: null };
-      d.sports.totals = { seasons: 6, proSeasons: 3, playoffs: 3, finals: 1, titles: 0, allStars: 1, injuries: 2, serious: 1, playedThrough: 1, trades: 1, releases: 0, suspensions: 0, earned: 2_100_000, bestRating: 74 };
+      d.sports.totals = { seasons: 6, proSeasons: 3, playoffs: 3, finals: 1, titles: 0, allStars: 1, injuries: 2, serious: 1, playedThrough: 1, trades: 1, releases: 0, suspensions: 0, earned: 2_100_000, bestRating: 74, tryouts: 3, tryoutsMade: 2, scholarships: 0, scholarshipsLost: 0, trainedTeam: 5, trainedGym: 2, trainedCoach: 1, signedAfterUndrafted: 0 };
     });
 
   it('round trips a life with a team, a deal, a season, a playoff run and a draft', async () => {

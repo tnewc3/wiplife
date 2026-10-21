@@ -1,0 +1,18 @@
+id: baseball_team
+name: The baseball team
+kind: team
+blurb: Early spring practices in cold gloves, long bus rides to away games and a season that is mostly waiting and then suddenly not.
+minAge: 10
+tryout:
+  base: 45
+  stats: [{ key: fitness, weight: 0.5 }, { key: discipline, weight: 0.2 }]
+cost: 170
+effects:
+  fitness: { perYear: 0.9, limit: 85 }
+  health: { perYear: 0.2, limit: 80 }
+grades: -0.03
+friends: 4
+talent: athletics
+passion: 5
+injury: 0.1
+sport: baseball

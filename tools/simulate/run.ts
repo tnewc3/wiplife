@@ -80,7 +80,7 @@ import { chooseCrimeActions, CrimeWatcher, crimeTargets, emptyCrimeReport, forma
 import { chooseFameActions, emptyFameReport, FameWatcher, fameTargets, formatFame, rollStarProfile, type FameReport } from './fame';
 import { peakRung } from '../../src/engine/fame/query';
 import { AttractionWatcher, attractionTargets, chooseDateActions, emptyAttractionReport, formatAttraction, type AttractionReport } from './attraction';
-import { chooseSportsActions, emptySportsReport, formatSports, rollAthleteProfile, SportsWatcher, sportsTargets, type SportsReport } from './sports';
+import { athleteChoice, chooseSportsActions, emptySportsReport, formatSports, rollAthleteProfile, SportsWatcher, sportsTargets, type SportsReport } from './sports';
 import { chooseSchoolLifeActions, chooseSchoolLifeInteractions, emptySchoolLifeReport, formatSchoolLife, rollSchoolLifeProfile, SchoolLifeWatcher, schoolLifeTargets, type SchoolLifeReport } from './school';
 import { chooseTeenActions, emptyTeenReport, formatTeen, rollTeenProfile, teenTargets, TeenWatcher, type TeenReport } from './teen';
 import { YEAR_PIPELINE } from '../../src/engine/pipeline';
@@ -953,7 +953,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
       const eventId = l.pending.find((p) => p.instanceId === card.instanceId)?.eventId ?? '';
       // Starting an adoption, IVF cycle or surrogacy: the player came here to begin.
       const starts = [...content.registries.family.adoption.start, ...content.registries.family.ivf.start, ...content.registries.family.surrogacy.start];
-      const id = starts.includes(eventId) ? card.choices[0]!.id : careless ? pick(rng, card.choices).id : playerKind === 'criminal' ? criminalChoice(l, card, rng) : playerKind === 'star' || playerKind === 'athlete' ? starChoice(l, card, rng) : carefulChoice(l, card, rng);
+      const id = starts.includes(eventId) ? card.choices[0]!.id : careless ? pick(rng, card.choices).id : playerKind === 'criminal' ? criminalChoice(l, card, rng) : playerKind === 'athlete' ? (athleteChoice(eventId, card.choices, content, athleteProfile) ?? starChoice(l, card, rng)) : playerKind === 'star' ? starChoice(l, card, rng) : carefulChoice(l, card, rng);
       if (illegal.size > 0) {
         legal.illegalChoices.offered++;
         if (illegal.has(id)) legal.illegalChoices.taken++;

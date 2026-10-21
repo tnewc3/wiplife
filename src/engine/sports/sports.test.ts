@@ -247,9 +247,9 @@ describe('the draft and the first deal', () => {
 
   it('pays a first-round pick more than a later one, and a minimum deal less than either', () => {
     const def = sportPath(content, 'basketball')!;
-    const rookie = (round: number) => salaryFor(def, 'rookie', def.sport.proRung, 60, content, round);
-    expect(rookie(1)).toBeGreaterThan(rookie(2));
-    expect(salaryFor(def, 'minimum', def.sport.proRung, 60, content)).toBeLessThan(rookie(2));
+    const rookie = (pick: number) => salaryFor(def, 'rookie', def.sport.proRung, 60, content, { pick, total: 24 });
+    expect(rookie(1)).toBeGreaterThan(rookie(20));
+    expect(salaryFor(def, 'minimum', def.sport.proRung, 60, content)).toBeLessThan(rookie(20));
   });
 
   it('can be turned down, and the prospect stays an amateur', () => {
@@ -307,7 +307,7 @@ describe('contracts, trades and releases', () => {
     expect(next.sports.totals.releases).toBe(1);
   });
 
-  it('ends a free agent’s career after too many years without a team', () => {
+  it('ends a free agent’s career once they are past the age limit, and not before', () => {
     let life = pro('shut', 'basketball', (d) => {
       releasePlayer(d, content);
       d.sports.seasons = [];
@@ -315,8 +315,12 @@ describe('contracts, trades and releases', () => {
     life = apply(life, (d) => {
       d.character.stats.fitness = 5;
       d.fame.paths.basketball!.recent = [10];
-      d.sports.unsigned = b.contract.unsigned;
+      d.sports.unsigned = 5;
+      d.character.age = b.contract.chaseAge - 1;
     });
+    // At the limit and years without a team, they are still looking.
+    expect(yearStep(life).sports.retired).toBeUndefined();
+    life = apply(life, (d) => void (d.character.age = b.contract.chaseAge));
     const next = yearStep(life);
     expect(next.sports.retired).toBeDefined();
     expect(next.fame.active).toBe(false);

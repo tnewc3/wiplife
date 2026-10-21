@@ -573,6 +573,8 @@ function checkEvents(bundle: ContentBundle, fileOf: (typeKey: CollectionKey, id:
     ...bundle.registries.possessions.valuableStolen.events,
     // Batch 2a: the follow-up events an activity can open after its outcome.
     ...Object.values(bundle.pastimes).flatMap((p) => Object.values(p.tiers).flatMap((t) => t?.events ?? [])),
+    // Batch 5: the scrimmage a tryout plays.
+    ...Object.values(bundle.registries.sports.tryouts).flat(),
     // T1: what the teen step queues (caught, invited, clash, juvenile).
     ...Object.values(bundle.registries.teen.triggers).flatMap((r) => r.events),
     // Batch 3: what the school step queues (exam results, getting caught, the report card).

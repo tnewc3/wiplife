@@ -19,24 +19,30 @@
  *
  * Numbers: balance/sports.yaml (and balance/fame.yaml for what is shared).
  */
-import type { ContentBundle, FamePathDef, SportDef, SportsTrigger } from '../../content/schemas';
+import type { ContentBundle, SportRole, SportsTrigger } from '../../content/schemas';
 import { curveAt } from '../curve';
 import { landProject } from '../fame/step';
-import { hasTalentFor, rungDef } from '../fame/query';
-import { agentTier, aptitude, bandFor, type Roll } from '../fame/work';
+import { rungDef } from '../fame/query';
+import { bandFor, type Roll } from '../fame/work';
 import { clampInt, rollNormal, wholeChange } from '../random';
 import { chance, pick, type RngState } from '../rng';
+import { spend } from '../finance';
+import { scaledAmount } from '../country';
 import type { FamePlan, FameProject, LifeState, SportsSeason } from '../types';
-import { draftSlot, extend, moveToTeam, pickTeamId, releasePlayer, tradePlayer, undraftedOffer } from './contract';
+import { draftScoreBase, draftSlot, extend, moveToTeam, pickTeamId, releasePlayer, tradePlayer, undraftedOffer } from './contract';
 import { agePain, missedShare, rollInjury } from './injury';
 import { settleRun } from './playoffs';
 import { queueSportsEvent } from './queue';
-import { bestPosition, fitFor, injuryNow, levelOfRung, positionOf, recentRating, sportPath } from './query';
+import { bestPosition, injuryNow, levelOfRung, positionOf, recentRating, sportPath } from './query';
+import { prospectRating, ratingFor, type SportPath } from './rating';
 import { retireSports } from './retire';
-import { amateurTeam, anotherTeam, proTeamsIn } from './team';
+import { scholarshipStarting, scholarshipStep } from './scholarship';
+import { anotherTeam, proTeamsIn, tierTeam } from './team';
 import { sportsHistory } from './text';
+import { autoTeam, campOpen, levelRung } from './tryout';
+import { leaveSchoolTeam, seatOnSchoolTeam, sportActivity } from '../teen/activities';
 
-type SportPath = FamePathDef & { sport: SportDef };
+export { ratingFor };
 
 export interface SeasonOut {
   /** The season as a piece of work, when one was played. */
@@ -47,33 +53,6 @@ export interface SeasonOut {
 }
 
 const logistic = (x: number) => 1 / (1 + Math.exp(-x));
-
-/** A season's rating (0–100) and the pieces it was made of. */
-export function ratingFor(state: LifeState, path: SportPath, team: { quality: number }, severity: number, content: ContentBundle, rng: RngState): number {
-  const q = content.balance.fame.quality;
-  const p = content.balance.sports.performance;
-  const s = state.sports;
-  const pstate = state.fame.paths[path.id]!;
-  const position = positionOf(path.sport, s.position) ?? bestPosition(state, path.sport);
-  const talent = hasTalentFor(state, path) ? q.talent + (state.character.hidden.talentDiscovered ? q.talentFound : 0) : 0;
-  const film = s.focus === 'film' ? p.film * (state.character.stats.smarts - 50) : 0;
-  const base =
-    q.base +
-    q.aptitude * aptitude(state, path) +
-    talent +
-    pstate.craft * q.craft +
-    q.team.agent * agentTier(state, content) +
-    (state.character.hidden.luck - 50) * q.luck +
-    p.fitness * (state.character.stats.fitness - 50) +
-    p.fit * 2 * (fitFor(state, position) - 0.5) +
-    p.team * (team.quality - 50) +
-    p.form * s.form +
-    p.focus[s.focus].rating +
-    film +
-    curveAt(path.sport.ageCurve, state.character.age) -
-    p.injury * severity;
-  return clampInt(Math.round(base + rollNormal(rng, { mean: 0, sd: q.noise })), 0, 100);
-}
 
 interface Standing {
   wins: number;
@@ -155,8 +134,9 @@ function proMoves(state: LifeState, path: SportPath, content: ContentBundle, rng
   let earned = 0;
 
   if (!s.contract || !s.team) {
-    // A free agent: a team signs you, or the year passes. Shut out too long, the game is over for you.
-    if (s.unsigned >= b.contract.unsigned) return { playing: false, earned: -1 };
+    // A free agent: a team signs you, or the year passes. Batch 5: nothing shuts you out while you keep trying (camps, open
+    // tryouts, calls); past the age limit in balance the phone stops ringing.
+    if (state.character.age > b.contract.chaseAge) return { playing: false, earned: -1 };
     if (chance(rng, curveAt(b.contract.freeAgent, rating))) {
       const team = anotherTeam(path.sport, null, state.character.cityId, content, rng);
       moveToTeam(state, team.id, true, content, rng);
@@ -164,6 +144,7 @@ function proMoves(state: LifeState, path: SportPath, content: ContentBundle, rng
       return { playing: true, earned };
     }
     s.unsigned += 1;
+    if (campOpen(state, path, content)) triggers.push('camp');
     return { playing: false, earned };
   }
 
@@ -226,6 +207,30 @@ function proMoves(state: LifeState, path: SportPath, content: ContentBundle, rng
   return { playing: true, earned };
 }
 
+/** Seasons in a row you have played for this team. */
+export function seasonsWithTeam(state: LifeState, teamName: string): number {
+  let n = 0;
+  for (let i = state.sports.seasons.length - 1; i >= 0 && state.sports.seasons[i]!.team === teamName; i--) n += 1;
+  return n;
+}
+
+/**
+ * Your place on the team this year (Batch 5): your rating against the team's quality sets where you should be, and a place
+ * moves one step a year toward it (a new team starts you at it). Role events move you a step as well.
+ */
+function roleFor(state: LifeState, path: SportPath, team: { quality: number; name: string }, content: ContentBundle): SportRole {
+  const s = state.sports;
+  const R = content.balance.sports.role;
+  const rating = s.seasons.length === 0 ? prospectRating(state, path, content) : recentRating(state);
+  const gap = rating - team.quality;
+  const target: SportRole = gap >= R.starter ? 'starter' : gap >= R.rotation ? 'rotation' : 'reserve';
+  if (seasonsWithTeam(state, team.name) === 0) return target;
+  const order: SportRole[] = ['reserve', 'rotation', 'starter'];
+  const now = order.indexOf(s.role);
+  const want = order.indexOf(target);
+  return order[now + Math.sign(want - now)] ?? target;
+}
+
 /** Plays the year's season for someone whose main path is a sport; null otherwise. */
 export function playSeason(state: LifeState, content: ContentBundle, rng: RngState): SeasonOut | null {
   const f = state.fame;
@@ -247,6 +252,12 @@ export function playSeason(state: LifeState, content: ContentBundle, rng: RngSta
 
   const level = levelOfRung(path.sport, pstate.rung);
   const age = state.character.age;
+  // Batch 5: a club or travel team alongside a school team is for the young; a school team is also a team in your teams and clubs (one record).
+  if (s.club && age >= content.balance.relationships.adultAge) s.club = null;
+  if (s.team?.level === 'school' && age < content.balance.relationships.adultAge) {
+    const act = sportActivity(content, path.id);
+    if (act && !state.teen.activities.some((a) => a.id === act.id)) seatOnSchoolTeam(state, act, s.team.tier === 'jv' ? 'jv' : 'varsity');
+  }
   if (level !== 'pro') {
     const out = path.sport.ageOut[Math.min(path.sport.ageOut.length, pstate.rung) - 1];
     if (out !== undefined && age > out) {
@@ -254,7 +265,27 @@ export function playSeason(state: LifeState, content: ContentBundle, rng: RngSta
       retireSports(state, null, 'aged', content, rng);
       return { earned: 0, triggers: ['agedOut'] };
     }
-    if (!s.team || s.team.level !== level) s.team = amateurTeam(state, path.sport, level, recentRating(state), content, rng);
+    // Batch 5: a scholarship you hold is a place on that program's team (recruited, no tryout) once you are going there.
+    if (s.scholarship && scholarshipStarting(state) && (!s.team || s.team.tier !== s.scholarship.tier)) {
+      const want = levelRung('college');
+      if (pstate.rung < want) {
+        pstate.rung = want;
+        pstate.peak = Math.max(pstate.peak, want);
+        pstate.fame = Math.max(pstate.fame, rungDef(path, want).fame + content.balance.sports.tryout.fameFloor);
+      }
+      s.team = tierTeam(state, path.sport, s.scholarship.tier, content);
+      s.teamless = false;
+      leaveSchoolTeam(state, path.id, content);
+    }
+    const here = levelOfRung(path.sport, pstate.rung);
+    // The engine tries out for you when you reach a level with no team (not when you left your team yourself).
+    if ((!s.team || s.team.level !== here) && !s.teamless && !autoTeam(state, path, here as Exclude<typeof here, 'pro'>, content, rng)) s.teamless = true;
+    if (s.teamless) {
+      // No team, no season. You can still train and try out.
+      s.form = 0;
+      return { earned, triggers };
+    }
+    if (!s.pro && s.passed > 0 && campOpen(state, path, content)) triggers.push('camp');
   } else {
     const moves = proMoves(state, path, content, rng, triggers);
     if (moves.earned === -1) {
@@ -276,6 +307,19 @@ export function playSeason(state: LifeState, content: ContentBundle, rng: RngSta
   const position = positionOf(path.sport, s.position) ?? bestPosition(state, path.sport);
   s.position = position.id;
 
+  // Batch 5: a new team means a new number and no captain's band; a club or travel team alongside a school team costs and teaches.
+  if (seasonsWithTeam(state, team.name) === 0) {
+    s.captain = false;
+    s.number = null;
+  }
+  s.role = roleFor(state, path, team, content);
+  if (s.club) {
+    const tier = s.club.tier;
+    const fee = tier ? scaledAmount(state, content.balance.sports.tryout.tiers[tier].fee, content) : 0;
+    if (fee > 0) spend(state, fee, content);
+    if (pstate.craft < 100) pstate.craft = Math.min(100, pstate.craft + b.training.club.craft);
+  }
+
   // Injury: one you carry, and a new one.
   const hurt = rollInjury(state, path, level, content, rng);
   // A very bad injury can end a career on the spot.
@@ -288,7 +332,7 @@ export function playSeason(state: LifeState, content: ContentBundle, rng: RngSta
   const worst = injuryNow(state, path.sport);
   const severity = worst?.severity ?? 0;
   const missed = Math.min(0.9, missedShare(state, path.sport, content) * (hurt ? 0.6 : 1));
-  const played = 1 - missed;
+  const played = (1 - missed) * b.role.played[s.role];
   s.pain = false;
 
   const rating = ratingFor(state, path, team, severity, content, rng);
@@ -306,7 +350,10 @@ export function playSeason(state: LifeState, content: ContentBundle, rng: RngSta
   );
   const roll: Roll = { quality: rating, critics, fans, band: bandFor(critics, fans, path.criticWeight, content) };
 
-  const salary = level === 'pro' && s.contract ? s.contract.salary : 0;
+  // Skill incentives (a rookie deal's): paid by how well you played.
+  const inc = b.contract.incentive;
+  const incentive = level === 'pro' && s.contract?.incentive ? Math.round(s.contract.incentive * Math.max(0, Math.min(1, (rating - inc.from) / Math.max(1, inc.full - inc.from)))) : 0;
+  const salary = level === 'pro' && s.contract ? s.contract.salary + incentive : 0;
   earned += salary;
   s.totals.earned += salary;
   s.totals.seasons += 1;
@@ -358,10 +405,10 @@ export function playSeason(state: LifeState, content: ContentBundle, rng: RngSta
   const focusFitness = b.performance.focus[s.focus].fitness;
   if (focusFitness !== 0) state.character.stats.fitness = clampInt(state.character.stats.fitness + wholeChange(rng, focusFitness), 0, 100);
 
-  // The draft, for a college prospect old enough.
+  // The draft, for a college prospect old enough. Batch 5: scouts see your rating, fame, the combine and the league's need for your position.
   if (level === 'college' && !s.pro && age >= path.sport.draft.age && s.draft === null) {
     const d = b.draft;
-    const score = recentRating(state) * d.score.quality + pstate.fame * d.score.fame + rollNormal(rng, { mean: 0, sd: d.score.noise });
+    const score = draftScoreBase(state, pstate.fame, content) + rollNormal(rng, { mean: 0, sd: d.score.noise });
     if (score >= d.declare || age >= path.sport.draft.force) {
       const slot = draftSlot(score, path.sport, state.character.cityId, content);
       if (slot.pick > 0) {
@@ -369,9 +416,25 @@ export function playSeason(state: LifeState, content: ContentBundle, rng: RngSta
         triggers.unshift('draft');
       } else {
         s.draft = { year, pick: 0, round: 0, teamId: undraftedOffer(path, recentRating(state), state.character.cityId, content, rng) };
+        s.passed = year;
         triggers.unshift('undrafted');
       }
+      s.combine = 0;
     }
+  }
+  if (level === 'college' && !s.pro && s.draft === null && age >= path.sport.draft.age - 1 && chance(rng, b.events.combine)) triggers.push('combine');
+
+  // Batch 5: scholarships (offers, the grade floor, eligibility).
+  scholarshipStep(state, path, content, rng, triggers);
+
+  // The choices a season brings: where you stand, a number, the captain's band, the summer.
+  if (s.team) {
+    const withTeam = seasonsWithTeam(state, team.name);
+    if (s.number === null) triggers.push('number');
+    if (!s.captain && withTeam > b.role.captain.after && s.role === 'starter' && rating >= team.quality && chance(rng, b.events.captain)) triggers.push('captain');
+    if (s.captain) state.fame.mood = clampInt(state.fame.mood + b.role.captain.mood, 0, 100);
+    if (s.seasons.length >= 2 && chance(rng, s.role === 'starter' ? b.events.role.starter : b.events.role.other)) triggers.push('role');
+    if (chance(rng, b.events.offseason)) triggers.push('offseason');
   }
 
   // Slowing down, and the thought of stopping.
@@ -394,9 +457,9 @@ export function playSeason(state: LifeState, content: ContentBundle, rng: RngSta
 }
 
 /** Priority of the sports events a year can ask for, most pressing first. */
-const ORDER: SportsTrigger[] = ['ended', 'draft', 'undrafted', 'agedOut', 'stalled', 'playoffs', 'injury', 'suspended', 'released', 'traded', 'freeAgency', 'signed', 'contractYear', 'retirement', 'rookie', 'breakout', 'slump', 'declining', 'endorsement', 'bigGame', 'locker', 'rivalry'];
+const ORDER: SportsTrigger[] = ['ended', 'draft', 'undrafted', 'agedOut', 'stalled', 'playoffs', 'recruited', 'scholarshipLost', 'probation', 'camp', 'combine', 'injury', 'suspended', 'released', 'traded', 'freeAgency', 'signed', 'contractYear', 'retirement', 'rookie', 'breakout', 'slump', 'declining', 'endorsement', 'captain', 'role', 'number', 'offseason', 'bigGame', 'locker', 'rivalry'];
 /** The ones that must always come (the player has to decide, or the run needs its first series). */
-const MUST = new Set<SportsTrigger>(['ended', 'draft', 'undrafted', 'agedOut', 'stalled', 'playoffs']);
+const MUST = new Set<SportsTrigger>(['ended', 'draft', 'undrafted', 'agedOut', 'stalled', 'playoffs', 'recruited', 'scholarshipLost']);
 
 /** Queues the season's events, most pressing first, up to the cap (the ones that need a decision always come). */
 export function queueSeasonEvents(state: LifeState, content: ContentBundle, triggers: SportsTrigger[], _break: boolean): void {
