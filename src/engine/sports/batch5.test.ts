@@ -24,7 +24,7 @@ import { prospectRating } from './rating';
 import { levelOfRung, sportPath } from './query';
 import { acceptBlock, offerShare, recruitScore, scholarshipStep } from './scholarship';
 import { hasTeam, sessionsLeft, trainBlock, trainCost, trainGain } from './training';
-import { draftingTeam } from './team';
+import { draftingTeam, relocateForTeam } from './team';
 import { payTuition } from '../education';
 import { runActivities } from '../teen/activities';
 
@@ -854,5 +854,18 @@ describe('events', () => {
     expect(text.length).toBeGreaterThan(30);
     expect(text).not.toMatch(/[{}]/);
     expect(optionFor(resolved, def, 'school:varsity', content)).toBeDefined();
+  });
+});
+
+describe('a team in another city during a temporary stay abroad', () => {
+  it('does not move you out of the stay’s city', () => {
+    const life = lifeAtAge('stay-move', 24);
+    const other = Object.keys(content.cities).find((id) => id !== life.character.cityId)!;
+    const stay = apply(life, (d) => {
+      // Only the fields relocateForTeam reads; the stay itself is checked by the travel invariants.
+      d.travel.residence = { settled: false, type: 'student' } as unknown as typeof d.travel.residence;
+    });
+    expect(produce(stay, (d) => void relocateForTeam(d as LifeState, other, content)).character.cityId).toBe(life.character.cityId);
+    expect(produce(life, (d) => void relocateForTeam(d as LifeState, other, content)).character.cityId).toBe(other);
   });
 });

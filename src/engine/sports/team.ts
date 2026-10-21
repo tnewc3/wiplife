@@ -94,6 +94,9 @@ export function anotherTeam(def: SportDef, not: Id | null, home: Id, content: Co
  */
 export function relocateForTeam(state: LifeState, cityId: Id, content: ContentBundle): void {
   if (state.character.cityId === cityId || state.housing.kind === 'incarcerated' || !content.cities[cityId]) return;
+  // A temporary stay abroad (study or work) is tied to its city: the move waits until you are home.
+  const stay = state.travel.residence;
+  if (stay && !stay.settled) return;
   const from = state.character.cityId;
   if (state.housing.kind === 'owned') sellHome(state, content);
   moveTo(state, 'renting', cityId, content);
