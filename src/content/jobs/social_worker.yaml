@@ -9,6 +9,7 @@ levels:
   - { title: "social worker", salary: 50000 }
   - { title: "senior social worker", salary: 60000 }
   - { title: "program director", salary: 76000 }
+workplace: medium
 performance:
   - { key: kindness, weight: 0.35 }
   - { key: discipline, weight: 0.2 }

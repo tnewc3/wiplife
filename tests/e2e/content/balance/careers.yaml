@@ -112,11 +112,32 @@ jobLoss:
   laid_off: 0.5
 
 workplace:
-  coworkers: 2
+  # Batch 3: coworkers by the size of the workplace: the ones you get to know on your first day, and the most you will have.
+  sizes:
+    small: { coworkers: 2, max: 4 }
+    medium: { coworkers: 3, max: 6 }
+    large: { coworkers: 5, max: 8 }
+  # When a job doesn't say how big its workplace is.
+  categorySize: { professional: medium, trade: small, gig: small }
   newCoworkerChance: 0.3
-  maxCoworkers: 4
   coworkerAgeOffset: { min: -10, max: 12 }
   bossAge: { min: 28, max: 64 }
+
+# Batch 3: things you can do at work.
+workActions:
+  # Work harder: a better review and more stress. Slack off: the opposite.
+  hard: { performance: 5, stress: 2, aim: 4 }
+  slack: { performance: -6, stress: -3, happiness: 1, aim: -5 }
+  # Spend time with the people you work with.
+  socialize: { stress: -2, happiness: 1, people: 3, affection: 4, performance: -1, maxPerYear: 3 }
+  # The office party: it goes well, badly or unremarkably, by who you are.
+  party:
+    good: { base: 0.4, sociability: 0.006, confidence: 0.004, riskTaking: 0.003, min: 0.15, max: 0.75 }
+    badShare: 0.4
+    great: { happiness: 2, performance: 3, bossAffection: 6, coworkerAffection: 5 }
+    bad: { stress: 4, performance: -4, bossAffection: -5, coworkerAffection: -4 }
+  # Reporting a coworker to the boss.
+  report: { coworkerAffection: -30, coworkerTrust: -30, bossAffection: 3, bossTrust: 6, performance: 2, othersAffection: -2, stress: 3, maxPerYear: 1 }
 
 # The youngest age you can retire (the retirement benefit itself starts at
 # economy.yaml retirement.age).

@@ -34,3 +34,50 @@ heritageWeights:
   west_african: 3
   filipino: 1.5
   korean: 0.5
+# Batch 3: Quebec's schools. Primary school is kindergarten and grades 1 to 6, secondary school is Secondary I to V
+# (ending at 17), and a CEGEP diploma comes before university, whose bachelor's degree is then three years.
+education:
+  school:
+    startAge: 5
+    elementary: 7
+    middle: 2
+    high: 3
+    dropoutAge: 16
+    applyAge: 16
+    preUniversity: true
+    exams:
+      - { id: provincial, program: high, year: 3 }
+    curriculum:
+      elementary:
+        - { id: french, name: French, stat: smarts }
+        - { id: math, name: Math, stat: smarts }
+        - { id: science, name: Science, stat: smarts }
+        - { id: social, name: Social studies, stat: discipline }
+        - { id: english, name: English, stat: sociability }
+        - { id: pe, name: Physical education, stat: fitness }
+      middle:
+        - { id: french, name: French, stat: smarts }
+        - { id: math, name: Math, stat: smarts }
+        - { id: science, name: Science, stat: smarts }
+        - { id: history, name: History, stat: discipline }
+        - { id: english, name: English, stat: sociability }
+        - { id: pe, name: Physical education, stat: fitness }
+      high:
+        - { id: french, name: French, stat: smarts }
+        - { id: math, name: Math, stat: smarts }
+        - { id: science, name: Science, stat: smarts }
+        - { id: history, name: History, stat: discipline }
+        - { id: english, name: English, stat: sociability }
+        - { id: pe, name: Physical education, stat: fitness }
+  words:
+    middle: secondary school
+    high: secondary school
+    tiers: { community: CEGEP, state: University, elite: Leading university }
+    credentials:
+      hs_diploma: Secondary school diploma
+      associate: CEGEP diploma
+    exams: { entrance: your CEGEP application marks, leaving: secondary school diploma }
+    gradeLabels: [Kindergarten, Grade 1, Grade 2, Grade 3, Grade 4, Grade 5, Grade 6, Secondary I, Secondary II, Secondary III, Secondary IV, Secondary V]
+  collegeYears: { community: 2, state: 3, elite: 3 }
+  tuition:
+    college: { community: 250 }

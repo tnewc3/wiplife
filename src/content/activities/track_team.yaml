@@ -2,7 +2,7 @@ id: track_team
 name: Track and field
 kind: team
 blurb: Early mornings, long runs and a stopwatch that doesn't care how your day went.
-minAge: 13
+minAge: 9
 tryout:
   base: 55
   stats: [{ key: fitness, weight: 0.45 }, { key: discipline, weight: 0.3 }]

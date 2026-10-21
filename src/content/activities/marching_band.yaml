@@ -2,7 +2,7 @@ id: marching_band
 name: The marching band
 kind: club
 blurb: Rehearsals in the heat, uniforms that never quite fit, and a halftime show that makes it all worth it.
-minAge: 13
+minAge: 10
 cost: 120
 effects:
   happiness: { perYear: 0.6, limit: 85 }

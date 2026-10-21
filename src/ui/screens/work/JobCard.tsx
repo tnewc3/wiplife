@@ -9,6 +9,7 @@ import { ConfirmSheet } from '../../components/ConfirmSheet';
 import { StatBar } from '../../components/StatBar';
 import { capitalized, money, performanceLabel, SEARCH_BLOCK_LABELS, workConfirmation, yearsLabel } from '../../labels';
 import { JobSearchSheet } from './JobSearchSheet';
+import { WorkLifeSections } from './WorkLifeSections';
 
 /** The Work tab's job card: your job, how it's going, and what you can do (look for work, ask for a raise, quit, retire). */
 export function JobCard({ life }: { life: LifeState }) {
@@ -65,6 +66,8 @@ export function JobCard({ life }: { life: LifeState }) {
           You don’t have a job. {view.openings === 0 ? 'Nothing you qualify for is hiring this year.' : view.openings === 1 ? '1 opening fits you.' : `${view.openings} openings fit you.`}
         </p>
       )}
+
+      {job && <WorkLifeSections life={life} />}
 
       <div className="mt-3 flex flex-col gap-2" role="group" aria-label="Work actions">
         {view.searchBlock === null && (

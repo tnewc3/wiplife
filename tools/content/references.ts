@@ -63,6 +63,7 @@ import { checkBusiness } from './business';
 import { checkPossessions } from './possessions';
 import { checkPastimes } from './pastimes';
 import { checkTeen } from './teen';
+import { checkSchool } from './school';
 import { checkCrime } from './crime';
 import { checkFame } from './fame';
 import { checkSports } from './sports';
@@ -218,6 +219,7 @@ export function checkReferences(
   errors.push(...checkPossessions(bundle, fileOf, options.partialEvents === true));
   errors.push(...checkPastimes(bundle, fileOf, options.partialEvents === true));
   errors.push(...checkTeen(bundle, fileOf, options.partialEvents === true));
+  errors.push(...checkSchool(bundle, fileOf, options.partialEvents === true));
   errors.push(...checkCrime(bundle, fileOf, options.partialEvents === true));
   errors.push(...checkFame(bundle, fileOf, options.partialEvents === true));
   errors.push(...checkSports(bundle, fileOf, options.partialEvents === true));
@@ -573,6 +575,8 @@ function checkEvents(bundle: ContentBundle, fileOf: (typeKey: CollectionKey, id:
     ...Object.values(bundle.pastimes).flatMap((p) => Object.values(p.tiers).flatMap((t) => t?.events ?? [])),
     // T1: what the teen step queues (caught, invited, clash, juvenile).
     ...Object.values(bundle.registries.teen.triggers).flatMap((r) => r.events),
+    // Batch 3: what the school step queues (exam results, getting caught, the report card).
+    ...Object.values(bundle.registries.school.triggers).flatMap((r) => r.events),
     // L1: what the later-life step queues (a first grandchild, a grandchild who needs a home, care, a warning, amends).
     ...laterResults(bundle.registries.later).flatMap((r) => r.events),
     // W2: what the belonging step queues (an invitation, a role, a decision about drifting away).
@@ -888,7 +892,6 @@ function checkCareers(bundle: ContentBundle, fileOf: (typeKey: CollectionKey, id
   }
 
   const w = bundle.balance.careers.workplace;
-  if (w.coworkers > w.maxCoworkers) errors.push({ file: CAREERS, message: 'workplace.coworkers must not be more than maxCoworkers' });
   if (w.bossAge.max < bundle.balance.careers.minAge) errors.push({ file: CAREERS, message: 'workplace.bossAge.max must reach minAge' });
 
   const scheduled = new Set(

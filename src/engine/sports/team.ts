@@ -55,6 +55,16 @@ export function draftingTeam(def: SportDef, pickNumber: number, home: Id, conten
   return teams[(pickNumber - 1) % teams.length]!;
 }
 
+/**
+ * The team that can take you: a draft or an offer is settled while you may have been living elsewhere (a temporary stay
+ * abroad), and a team in another country than the one you live in would move you there with no right to stay. Then the
+ * weakest side of your own country takes you instead.
+ */
+export function teamAtHome(def: SportDef, team: SportProTeamDef | undefined, home: Id, content: ContentBundle): SportProTeamDef | undefined {
+  if (!team || sameCountry(home, team.city, content)) return team;
+  return draftingTeam(def, 1, home, content);
+}
+
 /** A pro team other than `not`, picked at random (weighted toward stronger teams for a better player). */
 export function anotherTeam(def: SportDef, not: Id | null, home: Id, content: ContentBundle, rng: RngState): SportProTeamDef {
   const options = proTeamsIn(def, home, content).filter((t) => t.id !== not);

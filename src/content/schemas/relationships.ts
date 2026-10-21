@@ -24,6 +24,7 @@ export const RELATIONSHIP_KINDS = [
   'coworker',
   'boss',
   'classmate',
+  'teacher',
   'acquaintance',
 ] as const;
 export const relationshipKindSchema = z.enum(RELATIONSHIP_KINDS);
@@ -66,6 +67,8 @@ export const relationshipsBalanceSchema = z.strictObject({
   prune: z.strictObject({
     /** Acquaintances and classmates with no new memory for this many years drop out of your life. */
     forgetAfterYears: z.int().min(1).max(100),
+    /** Batch 3: classmates and teachers who are no longer in your class or school fade after this many years without a new memory. */
+    schoolForgetAfterYears: z.int().min(0).max(20),
     /** Friends and other non-family people whose affection falls to this drift apart. */
     driftApartAt: scoreSchema,
     /** Most people outside family and romance who stay in your life; the least close go first. */

@@ -2,7 +2,7 @@ id: robotics_club
 name: The robotics club
 kind: club
 blurb: A cage of aluminum parts, a regional competition and a robot that works perfectly until it is on the table.
-minAge: 13
+minAge: 11
 cost: 100
 effects:
   smarts: { perYear: 0.8, limit: 88 }

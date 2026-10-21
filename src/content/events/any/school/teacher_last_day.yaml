@@ -1,0 +1,41 @@
+id: teacher_last_day
+title: The last day
+text: >-
+  There is a cake in the staff room and a card that went round the whole
+  school. {teacher.name} is leaving after a long time here, and half the
+  corridor has come to say something.
+tone: neutral
+category: school
+rarity: uncommon
+lifeStages: [child, teen]
+requires:
+  all:
+    - { education: { program: [elementary, middle, high] } }
+    - { age: { lte: 17 } }
+weight: { base: 4 }
+cooldownYears: 4
+cast:
+  teacher: { kind: teacher, presence: city, age: { min: 55, max: 80 } }
+choices:
+  - id: sign
+    label: Write something in the card
+    outcome:
+      text: You write three drafts and send the shortest one. It says thank you, and means it.
+      effects:
+        - { type: relationship, role: teacher, affection: 4, trust: 2 }
+  - id: say_it
+    label: Wait in line to say it in person
+    outcome:
+      text: >-
+        You say less than you planned to, and {teacher.name} says more than you
+        expected. It is not a speech. It is a handshake that goes on a little
+        too long.
+      effects:
+        - { type: relationship, role: teacher, affection: 6, trust: 4 }
+        - { type: stat, key: happiness, delta: 1 }
+  - id: skip
+    label: Be somewhere else
+    outcome:
+      text: Somebody will say it better. You're not sure what that means about you, and you decide not to look at it too closely.
+      effects:
+        - { type: relationship, role: teacher, affection: -1 }

@@ -9,6 +9,7 @@ levels:
   - { title: "attending physician", salary: 225000 }
   - { title: "senior physician", salary: 270000 }
   - { title: "chief of medicine", salary: 330000 }
+workplace: large
 performance:
   - { key: smarts, weight: 0.35 }
   - { key: discipline, weight: 0.25 }

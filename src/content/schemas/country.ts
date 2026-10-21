@@ -15,6 +15,7 @@ import { z } from 'zod';
 import { curveSchema, familyWealthSchema, weightsSchema } from './balance';
 import { baseDefSchema, dollarsSchema, idSchema } from './common';
 import { scholarshipsSchema, schoolStructureSchema } from './education';
+import { examIdSchema, schoolPathWordsSchema } from './schoolIds';
 
 /** The countries the game has. Adding one means adding its id here, its file in src/content/countries and its name pool. */
 export const COUNTRY_IDS = ['us', 'ca', 'uk', 'mx'] as const;
@@ -85,6 +86,15 @@ export const schoolWordsSchema = z.strictObject({
   exams: z.strictObject({ entrance: wordSchema, leaving: wordSchema }),
   /** The name of each automatic school year, in order from the first; one per year of school. */
   gradeLabels: z.array(wordSchema).min(1),
+  /** Batch 3: the form or homeroom teacher and the person who looks after students, as the country calls them ("homeroom teacher", "form tutor"). */
+  homeroom: wordSchema,
+  support: wordSchema,
+  /** The years after the choice at 16 ("sixth form"), where the country has them. */
+  upper: wordSchema.optional(),
+  /** What the choices at the end of compulsory school are called. */
+  choices: schoolPathWordsSchema.optional(),
+  /** The exams by name ("GCSEs", "SAT or ACT"). */
+  examNames: z.partialRecord(examIdSchema, wordSchema),
 });
 export type SchoolWords = z.infer<typeof schoolWordsSchema>;
 

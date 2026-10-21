@@ -1,0 +1,61 @@
+id: uk_alevel_missed
+title: One grade short
+text: >-
+  The A-level results post at eight in the morning. You read the screen once,
+  slowly, and it does not change when you read it again.
+tone: serious
+category: future
+rarity: common
+countries: [uk]
+lifeStages: [teen, youngAdult]
+followUpOnly: true
+requires: { flag: exam_alevels, eq: fail }
+weight: { base: 12 }
+once: true
+cast:
+  parent: { kind: parent, presence: household }
+choices:
+  - id: ring_university
+    label: Ring the university that made you an offer
+    visibleIf: { flag: missed_offer }
+    outcome:
+      text: >-
+        The line is busy for an hour, and then a patient voice tells you the
+        place has gone. By evening you have found another, with a course you had
+        not planned on, and {parent.name} has stopped saying "it is fine" and
+        started saying "what next".
+      effects:
+        - { type: relationship, role: parent, trust: 2, affection: 2 }
+        - { type: stat, key: stress, delta: 3 }
+        - { type: stat, key: happiness, delta: -2 }
+  - id: retake
+    label: Decide to retake next year
+    visibleIf: { flag: missed_offer }
+    outcome:
+      text: >-
+        You say it to the kitchen, and nobody argues. It is a lost year in one
+        light and a second chance in another.
+      effects:
+        - { type: stat, key: discipline, delta: 2 }
+        - { type: stat, key: stress, delta: 2 }
+        - { type: stat, key: happiness, delta: -1 }
+  - id: look_for_work
+    label: Start looking for work
+    visibleIf: { not: { flag: missed_offer } }
+    outcome:
+      text: >-
+        The grades close some doors and leave others open. You spend the weekend
+        writing out what you can do rather than what you could not.
+      effects:
+        - { type: stat, key: confidence, delta: 1 }
+        - { type: stat, key: stress, delta: 1 }
+  - id: talk_it_through
+    label: Talk it through with {parent.name}
+    visibleIf: { not: { flag: missed_offer } }
+    outcome:
+      text: >-
+        {parent.name} makes a list of everything that was not decided by a
+        single morning. It helps more than either of you expected.
+      effects:
+        - { type: relationship, role: parent, trust: 3, affection: 3 }
+        - { type: stat, key: stress, delta: -2 }

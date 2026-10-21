@@ -1,0 +1,44 @@
+id: lunch_table_invite
+title: The lunch table
+text: >-
+  For weeks you have eaten at your desk. Today {npc.name} stops by with a tray
+  and says that a few of the team eat together by the window, and there is
+  always room for one more.
+tone: light
+category: work
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires: { career: { employed: true, retired: false } }
+weight: { base: 7 }
+cooldownYears: 4
+cast:
+  npc: { kind: coworker, presence: city }
+choices:
+  - id: join
+    label: Take your lunch and go
+    check:
+      base: 65
+      stats: [{ key: sociability, weight: 0.25 }, { key: kindness, weight: 0.1 }]
+      success:
+        text: >-
+          The conversation is about nothing in particular, and that is what makes
+          it good. By Friday you know who has a new puppy and who is hiding a
+          job offer. You go back to your desk lighter.
+        effects:
+          - { type: relationship, role: npc, affection: 6, trust: 3 }
+          - { type: memory, role: npc, tag: got_to_know_at_work }
+          - { type: stat, key: happiness, delta: 2 }
+      failure:
+        text: >-
+          The table has its own jokes, and you do not know them. Nobody is
+          unkind about it. You eat your sandwich and nod at the right moments.
+        effects:
+          - { type: relationship, role: npc, affection: 2 }
+          - { type: stat, key: confidence, delta: -1 }
+  - id: decline
+    label: Say you have work to catch up on
+    outcome:
+      text: '{npc.name} says no problem. The offer is not repeated for a while, and you notice that.'
+      effects:
+        - { type: relationship, role: npc, affection: -2 }
+        - { type: job, action: performance, value: 1 }

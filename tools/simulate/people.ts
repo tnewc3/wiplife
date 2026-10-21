@@ -316,7 +316,7 @@ export class PeopleWatcher {
 }
 
 /** People outside family and romance who are still in your life (your boss stays while you work): what the pruning keeps within `maxPeople`. */
-function crowdSize(life: LifeState): number {
+export function crowdSize(life: LifeState): number {
   let n = 0;
   const protectedIds = new Set<string>([...businessPeople(life), ...(life.crime.crew?.members ?? []), ...(life.fame.active ? fanIds(life) : [])]);
   for (const rel of Object.values(life.relationships)) {

@@ -88,7 +88,7 @@ admission:
       base: 58
       gpa: 28
       stats: [{ key: smarts, weight: 0.25 }, { key: ambition, weight: 0.1 }]
-      flags: { high_test_scores: 6, strong_essay: 4, teacher_recommendation: 4, recruited_athlete: 10, valedictorian: 6, caught_cheating: -8, suspended: -4, plans_college: 3, passion_scholarship: 6 }
+      flags: { advanced_classes: 3, high_test_scores: 6, strong_essay: 4, teacher_recommendation: 4, recruited_athlete: 10, valedictorian: 6, caught_cheating: -8, suspended: -4, plans_college: 3, passion_scholarship: 6 }
       min: 5
       max: 95
     # Never guaranteed, never quite impossible.

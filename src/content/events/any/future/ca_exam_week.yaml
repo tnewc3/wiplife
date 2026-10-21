@@ -1,0 +1,49 @@
+id: ca_exam_week
+title: Provincial exam week
+text: >-
+  The gym is set out in rows, a clock is on the wall and the invigilator reads
+  the rules like a flight attendant. Two hours for the paper that counts toward
+  your final mark. The marks arrive on a quiet afternoon, and you open them at
+  the kitchen table.
+tone: neutral
+category: future
+rarity: common
+countries: [ca]
+lifeStages: [teen, youngAdult]
+followUpOnly: true
+requires:
+  any:
+    - { flag: exam_provincial, eq: top }
+    - { flag: exam_provincial, eq: pass }
+weight: { base: 8 }
+once: true
+choices:
+  - id: top_pin
+    label: Pin the page to the fridge
+    visibleIf: { flag: exam_provincial, eq: top }
+    outcome:
+      text: The paper asked for exactly what you had studied. It is the best mark in the house, and everyone who comes through the kitchen reads it.
+      effects:
+        - { type: stat, key: happiness, delta: 3 }
+        - { type: stat, key: confidence, delta: 2 }
+  - id: top_text
+    label: Text the group chat a single number
+    visibleIf: { flag: exam_provincial, eq: top }
+    outcome:
+      text: Eleven replies in a minute, three of them in capital letters. It is a good morning to be you.
+      effects:
+        - { type: stat, key: happiness, delta: 3 }
+  - id: pass_fold
+    label: Fold it up and be glad it is done
+    visibleIf: { flag: exam_provincial, eq: pass }
+    outcome:
+      text: The mark is average and so is the mood, which is a relief after a week of being neither.
+      effects:
+        - { type: stat, key: stress, delta: -3 }
+  - id: pass_regret
+    label: Wonder about the question you skipped
+    visibleIf: { flag: exam_provincial, eq: pass }
+    outcome:
+      text: It would not have changed much. You think about it anyway, for a day, and then you don't.
+      effects:
+        - { type: stat, key: stress, delta: 1 }

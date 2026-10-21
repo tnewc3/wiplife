@@ -1,0 +1,60 @@
+id: report_problem
+name: Report a problem
+blurb: Tell someone in charge about something that isn't right.
+group: practical
+profile: counsel
+inPerson: true
+availability:
+  kinds: [teacher]
+  you: { min: 6 }
+  them: { min: 21 }
+  requires: { education: { program: [elementary, middle, high, college, trade, grad] } }
+outcomes:
+  great:
+    text:
+      - "{person.name} listens to all of it without interrupting, writes it down, and does something about it that same week. By Friday it has stopped."
+      - "You expected to be told it was nothing. Instead {person.name} thanks you for telling {person.them}, and sorts it out so quietly nobody can tell it was you."
+    affection: 4
+    trust: 6
+    mood: 4
+    effects:
+      - { type: stat, key: stress, delta: -4 }
+      - { type: memory, role: person, tag: reported_a_problem }
+  good:
+    text:
+      - "{person.name} takes it seriously, says {person.they} will look into it, and keeps {person.their} word. It isn't fixed, but it is better."
+      - "It helps to have said it out loud to somebody who could do something about it."
+    affection: 2
+    trust: 3
+    mood: 2
+    effects:
+      - { type: stat, key: stress, delta: -2 }
+      - { type: memory, role: person, tag: reported_a_problem }
+  neutral:
+    text:
+      - "{person.name} nods, says it will be passed along, and you can't tell what that means."
+      - "You are thanked for telling {person.them}. Nothing visible changes."
+    affection: 0
+    trust: 1
+    mood: 0
+    effects:
+      - { type: memory, role: person, tag: reported_a_problem }
+  bad:
+    text:
+      - "'Try to work it out among yourselves,' says {person.name}. You came for more than that."
+      - "{person.name} is stretched thin and it shows. You leave with a pat on the shoulder and the same problem."
+    affection: -1
+    trust: -3
+    mood: -2
+    effects:
+      - { type: stat, key: stress, delta: 2 }
+  backfire:
+    text:
+      - "Word gets around that you went to a teacher. It does not help."
+      - "{person.name} raises it in front of everyone, with the best of intentions, and the worst possible result."
+    affection: -2
+    trust: -5
+    mood: -4
+    effects:
+      - { type: stat, key: stress, delta: 4 }
+      - { type: stat, key: happiness, delta: -2 }

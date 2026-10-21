@@ -8,6 +8,7 @@ levels:
   - { title: "personal banker", salary: 40000 }
   - { title: "loan officer", salary: 54000 }
   - { title: "branch manager", salary: 70000 }
+workplace: medium
 performance:
   - { key: discipline, weight: 0.3 }
   - { key: sociability, weight: 0.2 }

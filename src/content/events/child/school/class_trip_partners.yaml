@@ -1,0 +1,43 @@
+id: class_trip_partners
+title: Buddy system
+text: >-
+  The coach is idling at the gate. {teacher.name} is holding a clipboard and
+  a very firm expression. Everyone will be paired up, and the pairs will hold
+  hands in a line, and no one will be left alone.
+tone: light
+category: school
+rarity: common
+lifeStages: [child]
+requires:
+  all:
+    - { education: { program: [elementary, middle] } }
+    - { age: { lte: 12 } }
+weight: { base: 7 }
+cooldownYears: 3
+cast:
+  teacher: { kind: teacher, presence: city }
+  classmate: { kind: classmate, presence: city, createIfMissing: true, newChance: 0.3, ageOffset: { min: -1, max: 1 } }
+choices:
+  - id: pick_friend
+    label: Grab {classmate.name} before anyone else does
+    outcome:
+      text: It's the best seat on the coach, and the best afternoon of the term. You come back sunburnt and loud.
+      effects:
+        - { type: relationship, role: classmate, affection: 6 }
+        - { type: stat, key: happiness, delta: 3 }
+  - id: wait
+    label: Wait to see who is left
+    outcome:
+      text: >-
+        You end up with {classmate.name}, which you wouldn't have chosen and
+        wouldn't undo. By the museum doors you've found out you both hate the
+        same cartoon.
+      effects:
+        - { type: relationship, role: classmate, affection: 4 }
+  - id: help_out
+    label: Offer to be {teacher.name}'s helper
+    outcome:
+      text: You carry the first-aid bag and count heads at every door. {teacher.name} says you're the most reliable person on the trip, and you try not to show how much that matters.
+      effects:
+        - { type: relationship, role: teacher, trust: 4, affection: 3 }
+        - { type: stat, key: confidence, delta: 1 }

@@ -14,7 +14,7 @@ import { wholeDollars } from '../finance';
 import { chance, nextInt, type RngState } from '../rng';
 import type { Id, LifeState, SportsContract } from '../types';
 import { sportsHistory } from './text';
-import { anotherTeam, draftingTeam, proTeam, proTeamDef, proTeamsIn, relocateForTeam } from './team';
+import { anotherTeam, draftingTeam, proTeam, proTeamDef, proTeamsIn, relocateForTeam, teamAtHome } from './team';
 import { recentRating } from './query';
 
 type SportPath = FamePathDef & { sport: SportDef };
@@ -48,9 +48,10 @@ function newContract(state: LifeState, def: SportPath, kind: SportContractKind, 
 
 /** Takes you onto a pro team: the deal, the move, the bonus. */
 function joinTeam(state: LifeState, def: SportPath, teamId: Id, contract: SportsContract, content: ContentBundle): void {
-  const team = proTeamDef(def.sport, teamId);
+  const team = teamAtHome(def.sport, proTeamDef(def.sport, teamId), state.character.cityId, content);
   if (!team) return;
   const s = state.sports;
+  contract = { ...contract, teamId: team.id };
   s.pro = true;
   s.team = proTeam(team);
   s.contract = contract;
@@ -138,8 +139,9 @@ export function moveToTeam(state: LifeState, teamId: Id, newDeal: boolean, conte
   const path = s.sport ? state.fame.paths[s.sport] : undefined;
   if (!def?.sport || !path) return false;
   const sport = def as SportPath;
-  const team = proTeamDef(sport.sport, teamId);
+  const team = teamAtHome(sport.sport, proTeamDef(sport.sport, teamId), state.character.cityId, content);
   if (!team) return false;
+  teamId = team.id;
   const old = s.contract;
   const contract: SportsContract = newDeal || !old ? newContract(state, sport, path.rung >= sport.sport.proRung + 2 ? 'star' : 'standard', teamId, path.rung, recentRating(state), content, rng) : { ...old, teamId };
   s.pro = true;

@@ -111,6 +111,7 @@ const RELATIONSHIP_LABELS: Record<RelationshipKind, Record<GenderCategory, strin
   coworker: same('Coworker'),
   boss: same('Boss'),
   classmate: same('Classmate'),
+  teacher: same('Teacher'),
   acquaintance: same('Acquaintance'),
 };
 
@@ -138,6 +139,7 @@ export const PEOPLE_GROUP_LABELS: Record<PeopleGroupId, string> = {
   grandchildren: 'Grandchildren',
   romance: 'Love',
   friends: 'Friends',
+  school: 'School',
   work: 'Work',
 };
 
@@ -148,6 +150,7 @@ export const PEOPLE_GROUP_EMPTY: Record<PeopleGroupId, string> = {
   grandchildren: 'No grandchildren.',
   romance: 'No one right now.',
   friends: 'No friends yet.',
+  school: 'No one from school.',
   work: 'No one from work yet.',
 };
 
@@ -429,8 +432,8 @@ export function programYearLabel(year: number, lengthYears: number): string {
 
 /** Where you are in school, for the Life tab: "In 10th grade", "Studying Nursing at Prairie State University". */
 export function schoolStatusLine(school: SchoolLine): string {
-  // A one-word stage ("Kindergarten", "Reception") reads in lower case inside the sentence; "Year 4" and "10th grade" stay.
-  if (school.gradeLevel !== null) return school.gradeLabel !== null ? `In ${/^[A-Z][a-z]+$/.test(school.gradeLabel) ? school.gradeLabel.toLowerCase() : school.gradeLabel}` : 'In school';
+  // A one-word stage ("Kindergarten", "Reception", "Senior year") reads in lower case inside the sentence; "Year 4" and "10th grade" stay.
+  if (school.gradeLevel !== null) return school.gradeLabel !== null ? `In ${/^[A-Z][a-z]+( year)?$/.test(school.gradeLabel) ? school.gradeLabel.toLowerCase() : school.gradeLabel}` : 'In school';
   if (school.program === 'trade') return `Training as ${articled(school.studying ?? 'a tradesperson')} at ${school.schoolName}`;
   if (school.program === 'grad') return `In ${(school.studying ?? 'grad school').toLowerCase()} at ${school.schoolName}`;
   return `Studying ${school.studying ?? ''} at ${school.schoolName}`;
@@ -471,6 +474,8 @@ export function applyBlockLabel(block: ApplyBlock, words: SchoolWords): string {
       return 'You can apply when you’re in your last year, or out of school.';
     case 'highSchool':
       return `Needs your ${words.credentials.hs_diploma} or ${words.credentials.ged}.`;
+    case 'preUniversity':
+      return `Needs your ${words.credentials.associate} first.`;
     case 'bachelor':
       return `Needs a ${words.credentials.bachelor.toLowerCase()}.`;
     case 'major':
@@ -832,6 +837,7 @@ export const ESTATE_RELATION_LABELS: Record<RelationshipKind | 'cause', string> 
   coworker: 'Coworker',
   boss: 'Boss',
   classmate: 'Classmate',
+  teacher: 'Teacher',
   acquaintance: 'Acquaintance',
   cause: 'Cause',
 };
@@ -1713,3 +1719,53 @@ export const PASTIME_COMPANION_LABELS: Record<'partner' | 'friend' | 'family', s
 
 /** Valuable classes, as the Belongings screen reads them. */
 export const VALUABLE_CLASS_LABELS: Record<string, string> = { jewelry: 'Jewelry', designer: 'Designer goods', art: 'Art', boat: 'Boat' };
+
+// ---- Batch 3: school and work life ----
+
+/** A subject's grade in words (balance/school.yaml report.bands holds the cut-offs). */
+export const GRADE_BAND_WORDS: Record<'top' | 'strong' | 'solid' | 'fair' | 'weak' | 'failing', string> = {
+  top: 'Excellent',
+  strong: 'Very good',
+  solid: 'Good',
+  fair: 'Fair',
+  weak: 'Struggling',
+  failing: 'Failing',
+};
+
+/** An exam result in words. */
+export const EXAM_BAND_WORDS: Record<'top' | 'pass' | 'fail', string> = {
+  top: 'Did very well',
+  pass: 'Passed',
+  fail: 'Missed the mark',
+};
+
+/** Why you can't do a school action now. */
+export const SCHOOL_ACTION_BLOCK_LABELS: Record<'school' | 'away' | 'age' | 'done' | 'stance' | 'money' | 'limit' | 'subject', string> = {
+  school: 'You’re not in school.',
+  away: 'You’re away.',
+  age: 'You’re too young for this.',
+  done: 'You’ve done this already this year.',
+  stance: 'You’ve already settled on how to spend this year.',
+  money: 'You can’t afford it.',
+  limit: 'That’s as far as you’ll push it this year.',
+  subject: 'That subject isn’t on your timetable.',
+};
+
+/** What each path at the end of compulsory school asks of the exam result (in words). */
+export const SCHOOL_PATH_HINTS: Record<'stay' | 'college' | 'apprenticeship' | 'work', string> = {
+  stay: 'Needs a pass in your exams.',
+  college: 'Takes everyone.',
+  apprenticeship: 'Needs a decent result and an employer who’ll take you on.',
+  work: 'You can go back to school later.',
+};
+
+/** Why you can't do a work action now. */
+export const WORK_ACTION_BLOCK_LABELS: Record<'job' | 'away' | 'done' | 'stance' | 'people' | 'limit' | 'unknown', string> = {
+  job: 'You don’t have a job.',
+  away: 'You’re away.',
+  done: 'You’ve done this already this year.',
+  stance: 'You’ve already settled on how to spend this year.',
+  people: 'There’s no one to do it with.',
+  limit: 'That’s enough of that this year.',
+  unknown: 'Not possible.',
+};

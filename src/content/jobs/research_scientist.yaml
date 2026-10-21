@@ -9,6 +9,7 @@ levels:
   - { title: "scientist", salary: 76000 }
   - { title: "senior scientist", salary: 98000 }
   - { title: "research director", salary: 128000 }
+workplace: medium
 performance:
   - { key: smarts, weight: 0.45 }
   - { key: discipline, weight: 0.25 }

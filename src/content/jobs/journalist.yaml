@@ -9,6 +9,7 @@ levels:
   - { title: "reporter", salary: 50000 }
   - { title: "senior editor", salary: 68000 }
   - { title: "editor-in-chief", salary: 95000 }
+workplace: medium
 performance:
   - { key: smarts, weight: 0.25 }
   - { key: confidence, weight: 0.2 }

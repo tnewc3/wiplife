@@ -2,7 +2,7 @@ id: soccer_team
 name: The school soccer team
 kind: team
 blurb: Practice four afternoons a week, a bus to away games, and a coach who says "again" more often than "good."
-minAge: 13
+minAge: 8
 tryout:
   base: 45
   stats: [{ key: fitness, weight: 0.5 }, { key: discipline, weight: 0.2 }]

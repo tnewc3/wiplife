@@ -593,6 +593,50 @@ export const targetsBalanceSchema = z.strictObject({
     romanceUnder18: numberRangeSchema,
   }),
   /**
+   * Batch 3: school and work life (tools/simulate/school.ts), judged on the careful player's lives, which follow
+   * one school plan and one work plan each. Action effects are measured the moment an action is taken (GPA points
+   * on the year's grade, performance points, stress), so they hold for any number of lives; the plan comparisons
+   * (diploma GPA, job performance) need enough lives to be steady.
+   */
+  school: z.strictObject({
+    /** Classmates and teachers per school year with a class. */
+    classmates: numberRangeSchema,
+    teachers: numberRangeSchema,
+    /** Study harder and slack off: what each does to the year's grade and to stress when taken. */
+    studyGrades: signedRangeSchema,
+    studyStress: signedRangeSchema,
+    slackGrades: signedRangeSchema,
+    slackStress: signedRangeSchema,
+    /** Diploma GPA: the study plan minus the slack plan. */
+    studyVsSlack: signedRangeSchema,
+    /** Adults' tutors paid for exactly through finance. */
+    tutorThroughFinance: shareRangeSchema,
+    /** The share of cheating tries and of skipped classes that were noticed. */
+    cheatCaught: shareRangeSchema,
+    skipCaught: shareRangeSchema,
+    /** What asking a teacher for help adds to the year's grade when taken. */
+    askHelp: signedRangeSchema,
+    /** What an entrance exam is worth to a state university application: top band minus fail band, in percentage points. */
+    entranceGap: signedRangeSchema,
+    /** Quebec lives that started university without the CEGEP diploma: none. */
+    cegepSkipped: numberRangeSchema,
+    /** Work harder and slack off: performance points and stress when taken; the plans compared by job performance. */
+    hardPerformance: signedRangeSchema,
+    hardStress: signedRangeSchema,
+    slackPerformance: signedRangeSchema,
+    hardVsSlack: signedRangeSchema,
+    /** Coworkers: a large workplace minus a small one, and the most anywhere. */
+    sizeGap: signedRangeSchema,
+    mostCoworkers: numberRangeSchema,
+    /** Of lives with a job, the share with a tie between two coworkers at some point. */
+    coworkerTieLives: shareRangeSchema,
+    /** Years the People list ended over its cap: none. */
+    overCap: numberRangeSchema,
+    /** Romance with a teacher, and romance involving anyone under 18: none, ever. */
+    romanceTeacher: numberRangeSchema,
+    romanceUnder18: numberRangeSchema,
+  }),
+  /**
    * E6a: crime careers (tools/simulate/crime.ts). The law-abiding careful
    * player must never enter a crew; the criminal player (one who says yes to
    * every offer and plays the crew's life) is judged on how far it gets, what

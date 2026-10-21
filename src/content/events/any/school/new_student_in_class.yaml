@@ -1,0 +1,53 @@
+id: new_student_in_class
+title: The new kid
+text: >-
+  {classmate.name} stands at the front with {classmate.their} bag still
+  on {classmate.their} shoulder while the teacher tries to pronounce the
+  name on the list. The only empty chair in the room is the one next to you.
+tone: neutral
+category: school
+rarity: common
+lifeStages: [child, teen]
+requires:
+  all:
+    - { education: { program: [elementary, middle, high] } }
+    - { age: { lte: 17 } }
+weight: { base: 6 }
+cooldownYears: 3
+cast:
+  classmate: { kind: classmate, presence: city, createIfMissing: true, newChance: 0.5, ageOffset: { min: -1, max: 1 } }
+choices:
+  - id: welcome
+    label: Move your bag off the chair
+    check:
+      base: 62
+      stats: [{ key: kindness, weight: 0.3 }, { key: sociability, weight: 0.15 }]
+      success:
+        text: >-
+          By lunch {classmate.name} knows where the good tables are and who to
+          avoid. By the end of the week, you're being asked to save a seat.
+        effects:
+          - { type: relationship, role: classmate, affection: 8, trust: 4 }
+          - { type: memory, role: classmate, tag: made_you_welcome_at_school }
+      failure:
+        text: >-
+          It's an awkward lunch. {classmate.name} thanks you with the polite
+          warmth of someone who has done this many times and is waiting to find
+          the real one.
+        effects:
+          - { type: relationship, role: classmate, affection: 2 }
+  - id: ignore
+    label: Keep your head down
+    outcome:
+      text: You know exactly how it feels to be stared at, and you spare the new kid your own stare. It's neither kind nor cruel, and nothing comes of it.
+      effects:
+        - { type: relationship, role: classmate, affection: -1 }
+  - id: ask_questions
+    label: Ask about where {classmate.they} came from
+    outcome:
+      text: >-
+        {classmate.name} talks for the whole bus ride home, and you listen. It
+        turns out to be a good story, and the first of several.
+      effects:
+        - { type: relationship, role: classmate, affection: 5 }
+        - { type: stat, key: happiness, delta: 1 }

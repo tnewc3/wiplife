@@ -1,0 +1,34 @@
+id: mx_placement_low
+title: The last school on your list
+text: >-
+  The list is posted on the wall outside, and you read down it three times
+  before you find your name. It is beside the last school you wrote, a long bus
+  ride across the city.
+tone: serious
+category: future
+rarity: common
+countries: [mx]
+lifeStages: [child, teen]
+followUpOnly: true
+requires: { flag: exam_mx_placement, eq: fail }
+weight: { base: 12 }
+once: true
+cast:
+  parent: { kind: parent, presence: household }
+choices:
+  - id: tell_parent
+    label: Tell {parent.name} before someone else does
+    outcome:
+      text: >-
+        {parent.name} is quiet in the car, and then says that good students come
+        out of every school, and the school is never the whole story.
+      effects:
+        - { type: relationship, role: parent, trust: 3, affection: 2 }
+        - { type: stat, key: stress, delta: 1 }
+  - id: prove_it
+    label: Decide that nobody will be able to say you did not try
+    outcome:
+      text: You write it on the first page of a new notebook and then are embarrassed by it. It stays there all year.
+      effects:
+        - { type: stat, key: discipline, delta: 2 }
+        - { type: stat, key: ambition, delta: 1 }

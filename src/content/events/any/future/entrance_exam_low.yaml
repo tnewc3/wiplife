@@ -1,0 +1,36 @@
+id: entrance_exam_low
+title: A score you did not want
+text: >-
+  The {entranceExam} come back in an envelope that is thinner than you expected.
+  You read the number twice in the hallway, and then folded the paper small.
+tone: serious
+category: future
+rarity: common
+countries: [us]
+lifeStages: [teen]
+followUpOnly: true
+requires: { flag: exam_sat, eq: fail }
+weight: { base: 7 }
+once: true
+choices:
+  - id: retake
+    label: Sign up to take it again
+    outcome:
+      text: >-
+        The second time you know what the room feels like, and what the clock
+        does to you. It will not be the same test. You hope it will not be the
+        same score.
+      effects:
+        - { type: stat, key: discipline, delta: 2 }
+        - { type: stat, key: stress, delta: 3 }
+        - { type: stat, key: happiness, delta: -2 }
+  - id: let_it_go
+    label: Decide the score is not the whole application
+    outcome:
+      text: >-
+        You make a list of everything else that went into the folder: the
+        classes, the clubs, the one essay you actually like. It is a better
+        list than the number.
+      effects:
+        - { type: stat, key: confidence, delta: 1 }
+        - { type: stat, key: stress, delta: -1 }

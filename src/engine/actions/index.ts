@@ -24,6 +24,8 @@ import { fittingResults, queueResult } from './result';
 
 export { RELATIONSHIP_ACTIONS } from './relationships';
 export { EDUCATION_ACTION_IDS, targetOf, type EducationActionId } from './education';
+export { SCHOOL_ACTION_IDS, type SchoolActionId } from './school';
+export { WORK_ACTION_IDS, type WorkActionId } from './work';
 export { CAREER_ACTION_IDS, type CareerActionId } from './career';
 export { PERSONAL_ACTION_IDS, type PersonalActionId } from './personal';
 export { ACTION_PROCESS, FAMILY_ACTION_IDS, type FamilyActionId } from './family';

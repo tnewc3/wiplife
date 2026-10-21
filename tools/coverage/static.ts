@@ -102,6 +102,8 @@ export function rootEvents(content: ContentBundle): Set<string> {
     ...Object.values(content.pastimes).map((p) => ({ events: Object.values(p.tiers).flatMap((t) => t?.events ?? []) })),
     // T1: what the teen step queues (a catch at home, an invitation, a clash, a juvenile case).
     ...Object.values(r.teen.triggers),
+    // Batch 3: what the school step queues (exam results, a report card, a caught cheat, a skipped class).
+    ...Object.values(r.school.triggers),
     // E6a: what the crime step queues (a year's jobs, a promotion, an arrest, a raid, the past catching up...).
     { events: r.crime.jobs },
     ...Object.values(r.crime.triggers),
@@ -258,6 +260,12 @@ export function analyzeContent(content: ContentBundle): StaticCoverage {
   for (const tag of [...Object.values(HEIR_MEMORY_MAP), 'lost_the_same_parent', 'took_you_in', 'foster_carer']) addTo(memoryWrites, tag, 'heir (engine)');
   // E6b: fame writes these itself (a burnout, a stalker, a contract broken, a rung of fame reached).
   for (const flag of ['fame_broke_contract', 'fame_burned_out', 'fame_stalked', 'fame_famous']) addTo(flagWrites, flag, 'fame (engine)');
+  // Batch 3: the school step writes a flag for each exam and report card, and for a missed offer.
+  for (const id of Object.keys(content.balance.school.exams)) addTo(flagWrites, `exam_${id}`, 'school (engine)');
+  for (const flag of ['missed_offer', 'report_failing', 'report_shining', 'school_path']) addTo(flagWrites, flag, 'school (engine)');
+  for (const tag of ['saw_you_at_the_party', 'reported_you']) addTo(memoryWrites, tag, 'work (engine)');
+  // The choice at 16 is kept as a flag that the life report and the school card read.
+  addTo(flagReads, 'school_path', 'school (engine)');
   // E6c: the sports step writes this when an injury ends a career.
   addTo(flagWrites, 'sports_career_ended_by_injury', 'sports (engine)');
   for (const flag of ['estate_will', 'estate_no_will', 'left_out_of_will', 'inherited_a_home', 'in_foster_care', 'grew_up_in_foster_care']) addTo(flagWrites, flag, 'heir (engine)');

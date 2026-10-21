@@ -36,6 +36,7 @@ import { sportsBalanceSchema, sportsRegistrySchema, sportsTextSchema } from './s
 import { fameAgentSchema, fameAwardSchema, fameBalanceSchema, fameCompanySchema, famePathSchema, fameRegistrySchema, fameTextSchema } from './fame';
 import { activitySchema, cliqueSchema, houseRuleSchema, teenBalanceSchema, teenJobSchema, teenRegistrySchema, teenTextSchema } from './teen';
 import { pastimeSchema, pastimesBalanceSchema, riskBalanceSchema, valuableSchema } from './pastimes';
+import { schoolBalanceSchema, schoolRegistrySchema, schoolTextSchema } from './school';
 import { estateRegistrySchema, familyBalanceSchema, familyRegistrySchema, heirRegistrySchema, heirTextSchema } from './family';
 
 export * from './balance';
@@ -49,6 +50,7 @@ export * from './immigration';
 export * from './common';
 export * from './economy';
 export * from './education';
+export * from './school';
 export * from './events';
 export * from './relationships';
 export * from './text';
@@ -152,6 +154,7 @@ export const singletonTypes = {
   'balance/pastimes': pastimesBalanceSchema,
   'balance/risk': riskBalanceSchema,
   'balance/teen': teenBalanceSchema,
+  'balance/school': schoolBalanceSchema,
   'balance/crime': crimeBalanceSchema,
   'balance/fame': fameBalanceSchema,
   'balance/sports': sportsBalanceSchema,
@@ -175,6 +178,7 @@ export const singletonTypes = {
   'text/news': newsTextSchema,
   'text/possessions': possessionsTextSchema,
   'text/teen': teenTextSchema,
+  'text/school': schoolTextSchema,
   'text/crime': crimeTextSchema,
   'text/fame': fameTextSchema,
   'text/sports': sportsTextSchema,
@@ -200,6 +204,7 @@ export const singletonTypes = {
   'registries/mental': mentalRegistrySchema,
   'registries/possessions': possessionsRegistrySchema,
   'registries/teen': teenRegistrySchema,
+  'registries/school': schoolRegistrySchema,
   'registries/crime': crimeRegistrySchema,
   'registries/fame': fameRegistrySchema,
   'registries/sports': sportsRegistrySchema,
@@ -277,6 +282,7 @@ export const contentBundleSchema = z.strictObject({
     pastimes: pastimesBalanceSchema,
     risk: riskBalanceSchema,
     teen: teenBalanceSchema,
+    school: schoolBalanceSchema,
     crime: crimeBalanceSchema,
     fame: fameBalanceSchema,
     sports: sportsBalanceSchema,
@@ -301,6 +307,7 @@ export const contentBundleSchema = z.strictObject({
     news: newsTextSchema,
     possessions: possessionsTextSchema,
     teen: teenTextSchema,
+    school: schoolTextSchema,
     crime: crimeTextSchema,
     fame: fameTextSchema,
     sports: sportsTextSchema,
@@ -328,6 +335,7 @@ export const contentBundleSchema = z.strictObject({
     mental: mentalRegistrySchema,
     possessions: possessionsRegistrySchema,
     teen: teenRegistrySchema,
+    school: schoolRegistrySchema,
     crime: crimeRegistrySchema,
     fame: fameRegistrySchema,
     sports: sportsRegistrySchema,

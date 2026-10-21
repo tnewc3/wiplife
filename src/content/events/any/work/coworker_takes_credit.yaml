@@ -1,0 +1,57 @@
+id: coworker_takes_credit
+title: Whose idea was that?
+text: >-
+  In the meeting, {npc.name} presents the plan you sketched on a napkin last
+  week as though it had arrived fully formed. {boss.name} is nodding. The slide
+  does not have your name on it.
+tone: serious
+category: work
+rarity: common
+lifeStages: [youngAdult, adult]
+requires: { career: { employed: true, retired: false } }
+weight: { base: 5 }
+cooldownYears: 4
+cast:
+  npc: { kind: coworker, presence: city }
+  boss: { kind: boss, presence: city }
+choices:
+  - id: speak_up
+    label: Say, in the meeting, whose idea it was
+    check:
+      base: 45
+      stats: [{ key: confidence, weight: 0.35 }, { job: performance, weight: 0.15 }]
+      success:
+        text: >-
+          You say it evenly, and {boss.name} asks you to walk the room through
+          it. {npc.name} goes pale and then agrees. It is the most uncomfortable
+          five minutes of the quarter, and the most useful.
+        effects:
+          - { type: job, action: performance, value: 4 }
+          - { type: relationship, role: boss, trust: 4, affection: 2 }
+          - { type: relationship, role: npc, affection: -10, trust: -10 }
+      failure:
+        text: >-
+          It comes out sounding petty. {boss.name} says you can talk about it
+          later, and later does not come. {npc.name} apologises, too smoothly.
+        effects:
+          - { type: relationship, role: boss, affection: -2 }
+          - { type: relationship, role: npc, affection: -5 }
+          - { type: stat, key: stress, delta: 3 }
+          - { type: stat, key: happiness, delta: -2 }
+  - id: talk_after
+    label: Have a quiet word with {npc.them} afterward
+    outcome:
+      text: >-
+        {npc.name} says it was a mix-up and promises it will not happen again.
+        You decide to believe it, mostly, and to put your name on the next one.
+      effects:
+        - { type: relationship, role: npc, trust: -3 }
+        - { type: stat, key: stress, delta: 1 }
+  - id: let_it_go
+    label: Let it go, and write everything down from now on
+    outcome:
+      text: You smile in the meeting and start a folder when you get home. It's the best-documented year you have ever had.
+      effects:
+        - { type: stat, key: discipline, delta: 1 }
+        - { type: stat, key: stress, delta: 2 }
+        - { type: stat, key: happiness, delta: -1 }

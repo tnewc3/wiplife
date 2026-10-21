@@ -61,6 +61,12 @@ ties:
     chance: 0.12
     maxPerYear: 2
     romance: 0.06
+  work:
+    draws: 0
+    chance: 0.2
+    maxPerYear: 2
+    rivalChance: 0.3
+    rivalStart: { mean: 24, sd: 6 }
   couple:
     marry: 0
     afterYears: 2

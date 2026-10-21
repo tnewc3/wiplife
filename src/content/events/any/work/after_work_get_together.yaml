@@ -1,0 +1,50 @@
+id: after_work_get_together
+title: Something after work
+text: >-
+  Somebody's last day, somebody's good news, nobody remembers which. By five
+  thirty half the floor is putting on coats, and {npc.name} asks whether you are
+  coming along.
+tone: light
+category: work
+rarity: common
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { career: { employed: true, retired: false } }
+    - { age: { gte: 18 } }
+weight: { base: 6 }
+cooldownYears: 3
+cast:
+  npc: { kind: coworker, presence: city }
+  boss: { kind: boss, presence: city }
+choices:
+  - id: go
+    label: Go for an hour
+    check:
+      base: 62
+      stats: [{ key: sociability, weight: 0.2 }, { key: riskTaking, weight: -0.1 }]
+      success:
+        text: >-
+          The hour is two, and the best part of the week. You hear things about
+          the building that nobody writes down, and {boss.name} turns out to be
+          very good company away from the desk.
+        effects:
+          - { type: relationship, role: npc, affection: 5 }
+          - { type: relationship, role: boss, affection: 3 }
+          - { type: memory, role: npc, tag: got_to_know_at_work }
+          - { type: stat, key: happiness, delta: 2 }
+      failure:
+        text: >-
+          You say something that is funnier in your head than in the room, and
+          the table does a very kind thing, which is pretend not to hear it. The
+          hour is long.
+        effects:
+          - { type: relationship, role: npc, affection: 1 }
+          - { type: stat, key: confidence, delta: -2 }
+  - id: head_home
+    label: Wish them a good night and go home
+    outcome:
+      text: The evening is yours, and you spend it well. The next morning, there is a story you do not know and everybody else does.
+      effects:
+        - { type: relationship, role: npc, affection: -1 }
+        - { type: stat, key: stress, delta: -1 }

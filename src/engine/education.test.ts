@@ -56,6 +56,8 @@ function year(life: LifeState, bundle: ContentBundle = content): LifeState {
     d.lifetime.happinessTotal += d.character.stats.happiness;
     advanceAge(d, bundle);
     runEducation(d, bundle);
+    // (Only these two steps run here: the events the school step queues are not played.)
+    d.scheduled = [];
     d.recap = { year: d.currentYear, age: d.character.age, statsBefore: { ...d.character.stats }, statsAfter: { ...d.character.stats } };
   });
 }

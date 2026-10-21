@@ -1,0 +1,46 @@
+# Web (tieClose): two of your coworkers have become friends.
+id: coworkers_grow_close
+title: The two who finish each other's sentences
+text: >-
+  {a.name} and {b.name} have started leaving at the same time, taking the same
+  lunch break, and laughing at things in the middle of meetings that nobody
+  else gets. The team is a little warmer for it.
+tone: light
+category: web
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { career: { employed: true, retired: false } }
+    - { tie: { a: a, b: b, kind: [friends], status: [close] } }
+    - { role: a, alive: true, kind: [coworker] }
+    - { role: b, alive: true, kind: [coworker] }
+weight: { base: 6 }
+followUpOnly: true
+cast:
+  a: { support: true, presence: anywhere }
+  b: { support: true, presence: anywhere }
+choices:
+  - id: join_them
+    label: Ask if you can join them for lunch
+    outcome:
+      text: >-
+        They make room as though they had been waiting for you to ask. It is a
+        small thing, and it makes the workplace feel smaller and kinder.
+      effects:
+        - { type: relationship, role: a, affection: 4 }
+        - { type: relationship, role: b, affection: 4 }
+        - { type: stat, key: happiness, delta: 2 }
+  - id: tease
+    label: Tease them about it
+    outcome:
+      text: 'They answer in unison: "Shut up." You decide, on balance, that it counts as a yes.'
+      effects:
+        - { type: relationship, role: a, affection: 2 }
+        - { type: relationship, role: b, affection: 2 }
+  - id: leave_them
+    label: Leave them to it
+    outcome:
+      text: You are glad for them, and you stay glad from your own desk. It is a good floor to work on.
+      effects:
+        - { type: stat, key: happiness, delta: 1 }

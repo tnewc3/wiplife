@@ -8,7 +8,7 @@ import type { ContentBundle, InteractionDef, InteractionGroup } from '../../cont
 import { INTERACTION_GROUPS } from '../../content/schemas';
 import { evaluate } from '../conditions';
 import { whereabouts } from '../presence';
-import { ageOf, attractedTo, bothAdults, isCurrentPartner, isFamilyKind, isPartnerKind } from '../relationships';
+import { ageOf, attractedTo, bothAdults, isCurrentPartner, isFamilyKind, isPartnerKind, isTeacherKind } from '../relationships';
 import type { Id, LifeState } from '../types';
 import { introduceCandidates, topicItems } from '../web/actions';
 import { hasRomanticTie } from '../web/query';
@@ -50,7 +50,7 @@ export function isInteractionAvailable(state: LifeState, def: InteractionDef, pe
   if (def.inPerson && whereabouts(state, personId, content) === 'elsewhere') return false;
 
   if (def.romance) {
-    if (isFamilyKind(rel.kind) || !bothAdults(state, person, content)) return false;
+    if (isFamilyKind(rel.kind) || isTeacherKind(rel.kind) || !bothAdults(state, person, content)) return false;
     if (isPartnerKind(rel.kind) ? !isCurrentPartner(state, rel) : !attractedTo(state.character.identity, person.identity) || person.life?.partner || hasRomanticTie(state.web, personId)) return false;
   }
   // E4: an introduction needs someone to introduce them to; a story needs one they have heard.

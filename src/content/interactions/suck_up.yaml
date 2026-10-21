@@ -1,0 +1,57 @@
+id: suck_up
+name: Suck up
+blurb: Laugh at the joke, carry the box, volunteer for everything.
+group: everyday
+profile: admiring
+inPerson: true
+availability:
+  kinds: [teacher]
+  you: { min: 8 }
+  them: { min: 21 }
+  requires: { education: { program: [elementary, middle, high, college, trade, grad] } }
+outcomes:
+  great:
+    text:
+      - "You hold the door, you wipe the board and you laugh at exactly the right moment. {person.name} starts calling on you first, and means it kindly."
+      - "{person.name} notices the effort and, to your surprise, appreciates it. 'I wish more of the class were like you,' {person.they} {person:says|say}."
+    affection: 4
+    trust: 3
+    mood: 3
+    effects:
+      - { type: education, action: grades, value: 0.1 }
+      - { type: memory, role: person, tag: sucked_up_to }
+  good:
+    text:
+      - "You volunteer to hand out the worksheets and compliment the lesson. {person.name} smiles, and your name is easier to find on the roll."
+      - "It is a little shameless, and it works a little. {person.name} is friendlier at the start of the next class."
+    affection: 2
+    trust: 1
+    mood: 2
+    effects:
+      - { type: education, action: grades, value: 0.04 }
+      - { type: memory, role: person, tag: sucked_up_to }
+  neutral:
+    text:
+      - "{person.name} says thank you in the voice of someone who says it forty times a day."
+      - "Nothing comes of it. {person.name} may not have noticed, or may have noticed and decided not to say."
+    affection: 0
+    mood: 0
+  bad:
+    text:
+      - "{person.name} sees straight through it. 'You don't need to do that,' {person.they} {person:says|say}, and the class is quiet for a moment."
+      - "Somebody in the back coughs the word 'teacher's pet'. {person.name} pretends not to hear, which is somehow worse."
+    affection: -1
+    trust: -2
+    mood: -2
+    effects:
+      - { type: stat, key: confidence, delta: -1 }
+  backfire:
+    text:
+      - "It lands badly, in front of everyone. {person.name} is polite about it and you spend the rest of the period wishing you could be somewhere else."
+      - "You overdo it, and a laugh goes round the room that is not at the teacher's expense. {person.name} looks away."
+    affection: -2
+    trust: -3
+    mood: -4
+    effects:
+      - { type: stat, key: stress, delta: 2 }
+      - { type: stat, key: confidence, delta: -2 }

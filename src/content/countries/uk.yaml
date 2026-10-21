@@ -21,6 +21,39 @@ school:
   repeatBelow: 1.0
   maxRepeats: 0
   applyAge: 17
+  # GCSEs are sat at the end of Year 11 (the second year here); A-levels at the end of Year 13. At 16 you choose what comes next.
+  exams:
+    - { id: gcse, program: high, year: 2 }
+    - { id: alevels, program: high, year: 4 }
+  choice: { year: 2, exam: gcse, options: [stay, college, apprenticeship, work] }
+  curriculum:
+    elementary:
+      - { id: english, name: English, stat: smarts }
+      - { id: maths, name: Maths, stat: smarts }
+      - { id: science, name: Science, stat: smarts }
+      - { id: humanities, name: History and geography, stat: discipline }
+      - { id: art, name: Art and design, stat: confidence }
+      - { id: pe, name: PE, stat: fitness }
+    middle:
+      - { id: english, name: English, stat: smarts }
+      - { id: maths, name: Maths, stat: smarts }
+      - { id: science, name: Science, stat: smarts }
+      - { id: humanities, name: Humanities, stat: discipline }
+      - { id: languages, name: Modern languages, stat: sociability }
+      - { id: pe, name: PE, stat: fitness }
+    high:
+      - { id: english, name: English, stat: smarts }
+      - { id: maths, name: Maths, stat: smarts }
+      - { id: science, name: Science, stat: smarts }
+      - { id: humanities, name: Humanities, stat: discipline }
+      - { id: languages, name: Modern languages, stat: sociability }
+      - { id: pe, name: PE, stat: fitness }
+    upper:
+      - { id: english_lit, name: English literature, stat: smarts }
+      - { id: maths, name: Mathematics, stat: smarts }
+      - { id: sciences, name: Sciences, stat: smarts }
+      - { id: history, name: History, stat: discipline }
+      - { id: languages, name: Modern languages, stat: sociability }
 
 words:
   elementary: primary school
@@ -40,6 +73,11 @@ words:
     grad: Postgraduate degree
   exams: { entrance: A-level results, leaving: A-levels }
   gradeLabels: [Reception, Year 1, Year 2, Year 3, Year 4, Year 5, Year 6, Year 7, Year 8, Year 9, Year 10, Year 11, Year 12, Year 13]
+  homeroom: form tutor
+  support: pastoral lead
+  upper: sixth form
+  choices: { stay: Sixth form, college: Further education college, apprenticeship: Apprenticeship, work: Go to work }
+  examNames: { gcse: the GCSEs, alevels: the A-levels }
 
 # A foundation degree takes two years; a bachelor's degree three.
 collegeYears: { community: 2, state: 3, elite: 3 }

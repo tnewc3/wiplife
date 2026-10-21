@@ -137,7 +137,7 @@ import {
 import { canGig, expectedGigPay } from './systems/career';
 import { eventLanguageText, textContext } from './events/text';
 import { CONTINUE_CHOICE } from './life';
-import { currentPartner, FAMILY_KINDS, isCurrentPartner, romanceStatus, ROMANTIC_KINDS, WORK_KINDS } from './relationships';
+import { currentPartner, FAMILY_KINDS, isCurrentPartner, romanceStatus, ROMANTIC_KINDS, SCHOOL_KINDS, WORK_KINDS } from './relationships';
 import { renderText } from './text';
 import { doctorQuote } from './health';
 import { getMentalView, type MentalView } from './mental/views';
@@ -532,8 +532,8 @@ export function getApplicationOptions(state: LifeState, content: ContentBundle):
 
 
 /** Groups on the People screen (docs/design.md, section L). */
-export type PeopleGroupId = 'family' | 'children' | 'grandchildren' | 'romance' | 'friends' | 'work';
-export const PEOPLE_GROUPS: readonly PeopleGroupId[] = ['family', 'children', 'grandchildren', 'romance', 'friends', 'work'];
+export type PeopleGroupId = 'family' | 'children' | 'grandchildren' | 'romance' | 'friends' | 'school' | 'work';
+export const PEOPLE_GROUPS: readonly PeopleGroupId[] = ['family', 'children', 'grandchildren', 'romance', 'friends', 'school', 'work'];
 
 export interface PersonRow {
   id: Id;
@@ -561,6 +561,8 @@ function groupOf(kind: RelationshipKind): PeopleGroupId {
   if (FAMILY_KINDS.includes(kind)) return 'family';
   if (ROMANTIC_KINDS.includes(kind)) return 'romance';
   if (WORK_KINDS.includes(kind)) return 'work';
+  // Batch 3: your class and your teachers.
+  if (SCHOOL_KINDS.includes(kind)) return 'school';
   return 'friends';
 }
 
@@ -596,6 +598,7 @@ const KIND_ORDER: RelationshipKind[] = [
   'ex',
   'friend',
   'classmate',
+  'teacher',
   'acquaintance',
   'boss',
   'coworker',
@@ -608,7 +611,7 @@ const KIND_ORDER: RelationshipKind[] = [
  * kind, then (family) oldest first or (others) closest first.
  */
 export function getPeople(state: LifeState, content: ContentBundle): Record<PeopleGroupId, PersonRow[]> {
-  const groups: Record<PeopleGroupId, PersonRow[]> = { family: [], children: [], grandchildren: [], romance: [], friends: [], work: [] };
+  const groups: Record<PeopleGroupId, PersonRow[]> = { family: [], children: [], grandchildren: [], romance: [], friends: [], school: [], work: [] };
   for (const id of Object.keys(state.relationships).sort()) {
     const rel = state.relationships[id]!;
     const person = state.people[id];

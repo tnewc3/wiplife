@@ -1,0 +1,50 @@
+id: class_clown_act
+title: The class clown
+text: >-
+  {classmate.name} has found the one joke that works on every teacher in the
+  building, and tells it at the start of every lesson. {teacher.name} is trying
+  to look stern. It's a losing battle, and everyone knows it.
+tone: light
+category: school
+rarity: common
+lifeStages: [child, teen]
+requires:
+  all:
+    - { education: { program: [elementary, middle, high] } }
+    - { age: { lte: 15 } }
+weight: { base: 5 }
+cooldownYears: 3
+cast:
+  classmate: { kind: classmate, presence: city, createIfMissing: true, newChance: 0.3 }
+  teacher: { kind: teacher, presence: city }
+choices:
+  - id: laugh
+    label: Laugh, loudly
+    outcome:
+      text: It's a wonderful, dangerous noise. {teacher.name} gives you a look. {classmate.name} gives you a grin that lasts a month.
+      effects:
+        - { type: relationship, role: classmate, affection: 5 }
+        - { type: relationship, role: teacher, affection: -1 }
+  - id: add_one
+    label: Add a joke of your own
+    check:
+      base: 45
+      stats: [{ key: confidence, weight: 0.3 }, { key: sociability, weight: 0.15 }]
+      success:
+        text: Perfect timing. The whole room goes, including {teacher.name}, who covers it with a cough. For once the joke is yours.
+        effects:
+          - { type: relationship, role: classmate, affection: 6 }
+          - { type: stat, key: confidence, delta: 2 }
+          - { type: stat, key: happiness, delta: 2 }
+      failure:
+        text: It lands in a silence the exact size of a classroom. {teacher.name} lets it sit there, which is its own punishment.
+        effects:
+          - { type: relationship, role: teacher, affection: -2 }
+          - { type: stat, key: confidence, delta: -2 }
+  - id: eyes_front
+    label: Keep your eyes on the board
+    outcome:
+      text: '{teacher.name} notices, and moves on to the lesson with something like gratitude.'
+      effects:
+        - { type: relationship, role: teacher, affection: 2 }
+        - { type: relationship, role: classmate, affection: -2 }
