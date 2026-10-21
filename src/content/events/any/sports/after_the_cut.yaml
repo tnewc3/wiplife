@@ -22,7 +22,7 @@ choices:
         The coach has a list. It is shorter than you thought, and every item on it is
         something you can actually change.
       effects:
-        - { type: fame, action: craft, delta: 2 }
+        - { type: fame, action: craft, delta: 1 }
         - { type: sports, action: form, delta: 1 }
   - id: work_alone
     label: Say nothing, and work harder on your own

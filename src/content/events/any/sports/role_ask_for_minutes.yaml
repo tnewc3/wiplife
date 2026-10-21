@@ -42,7 +42,7 @@ choices:
         The coach lists three things, one at a time, and you write them down. They are
         smaller than you feared.
       effects:
-        - { type: fame, action: craft, delta: 2 }
+        - { type: fame, action: craft, delta: 1 }
   - id: wait
     label: Say nothing, and let your play do the talking
     outcome:

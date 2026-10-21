@@ -83,7 +83,7 @@ export function train(state: LifeState, skillId: Id, mode: TrainingMode, content
   if (trainBlock(state, skillId, mode, content) !== null) return 0;
   const def = mySport(state, content)!;
   const cost = trainCost(state, mode, content);
-  const gain = practise(state, def.id, skillId, content, trainMultiplier(state, mode, content));
+  const gain = practise(state, def.id, skillId, content, trainMultiplier(state, mode, content), content.balance.sports.training.craft);
   const t = trainingNow(state);
   if (cost > 0) spend(state, cost, content);
   t.spent += cost;

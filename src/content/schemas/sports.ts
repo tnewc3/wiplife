@@ -341,8 +341,8 @@ export const sportsBalanceSchema = z.strictObject({
     fallbackEase: z.number().min(0).max(20),
     /** When the engine tries out for you (you did not choose), it aims at the best team whose bar is within this many points of your rating. */
     autoSlack: z.number().min(-20).max(20),
-    /** A pro camp's bar: this plus `perQuality` for each point the team's quality stands above 50. */
-    camp: z.strictObject({ bar: z.int().min(0).max(100), perQuality: z.number().min(0).max(1), fee: z.int().min(0).max(100000) }),
+    /** A pro camp's bar: this plus `perQuality` for each point the team's quality stands above 50, and `perYear` for each year you are older than `ageFrom` (teams prefer the young). */
+    camp: z.strictObject({ bar: z.int().min(0).max(100), perQuality: z.number().min(0).max(1), ageFrom: z.int().min(18).max(40), perYear: z.number().min(0).max(5), fee: z.int().min(0).max(100000) }),
     /** Fame at least this much of the new level's rung is given when you make a team a level up. */
     fameFloor: z.int().min(0).max(20),
     /** The most tryouts in a year. */
@@ -358,6 +358,8 @@ export const sportsBalanceSchema = z.strictObject({
     coach: z.strictObject({ gain: z.number().min(0).max(3), fee: z.int().min(0).max(100000) }),
     /** Rating points for each point the mean of a sport's skills stands above where skills start. */
     rating: z.number().min(0).max(0.5),
+    /** The share of a session's gain that also goes to craft (a sport's craft grows with its seasons; training adds a little). */
+    craft: z.number().min(0).max(1),
     /** A club or travel team alongside a school team: craft a year, and extra sessions a year. */
     club: z.strictObject({ craft: z.number().min(0).max(10), sessions: z.int().min(0).max(8) }),
   }),

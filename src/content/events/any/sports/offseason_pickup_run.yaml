@@ -31,7 +31,7 @@ choices:
         Between games, one of them shows you how the game reads before it happens. You
         practise it for weeks.
       effects:
-        - { type: fame, action: craft, delta: 3 }
+        - { type: fame, action: craft, delta: 2 }
   - id: bring_friends
     label: Bring your friends and keep it casual
     outcome:

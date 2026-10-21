@@ -1676,8 +1676,9 @@ describe('sports (E6c)', () => {
       expect(sport.sport!.positions.length).toBeGreaterThanOrEqual(4);
     }
     const events = Object.values(result.bundle.events).filter((e) => !e.retired && (e.category.startsWith('sports') || ['break_scout_in_the_stands', 'break_breakout_game', 'sports_superfan_at_the_gate'].includes(e.id)));
-    expect(events.length).toBeGreaterThanOrEqual(48);
-    expect(events.length).toBeLessThanOrEqual(62);
+    // The 52 of E6c and the 30 of Batch 5 (tryouts, recruiting, the combine, camps and the season's choices).
+    expect(events.length).toBeGreaterThanOrEqual(78);
+    expect(events.length).toBeLessThanOrEqual(95);
     expect(result.warnings).toEqual([]);
   });
 
@@ -1743,6 +1744,66 @@ describe('sports (E6c)', () => {
     expect(await expectErrors()).toContain('unknown city "atlantis"');
     await write('fame/hockey.yaml', hockey.replace('{ id: "torn_ligament", weight: 16, min: 40, max: 75 }', '{ id: "cancer", weight: 16, min: 40, max: 75 }'));
     expect(await expectErrors()).toContain('must be a condition of kind injury');
+  });
+});
+
+describe('sports I: the grind and the road to the pros (Batch 5)', () => {
+  const read = (file: string) => readFile(path.join(dir, file), 'utf8');
+
+  it('accepts the real content: every level has a bottom team, every tryout level a scrimmage, every sport a school team and skills, every country its rules', { timeout: 90_000 }, async () => {
+    const result = await compile();
+    if (!result.ok) throw new Error(formatErrors(result.errors));
+    const b = result.bundle.balance.sports.tryout;
+    for (const level of ['youth', 'school', 'college'] as const) expect(Object.values(b.tiers).some((t) => t.level === level && t.fallback === null)).toBe(true);
+    for (const ids of Object.values(result.bundle.registries.sports.tryouts)) for (const id of ids) expect(result.bundle.events[id]?.category).toBe('sportstryout');
+    for (const id of ['basketball', 'football', 'soccer', 'baseball', 'hockey']) {
+      expect(Object.values(result.bundle.activities).some((a) => a.sport === id)).toBe(true);
+      expect(result.bundle.famePaths[id]!.skills!.length).toBeGreaterThanOrEqual(3);
+    }
+    for (const country of Object.values(result.bundle.countries)) expect(country.athletics.scholarships.maxShare).toBeGreaterThan(0);
+    expect(result.warnings).toEqual([]);
+  });
+
+  it('wants a fallback that is easier to make than the team and on the same level, and a team at the bottom of each level', { timeout: 90_000 }, async () => {
+    const real = await read('balance/sports.yaml');
+    await write('balance/sports.yaml', real.replace('varsity: { level: school, base: high, shift: 2, bar: 38, fee: 0, minAge: 13, maxAge: 17, fallback: jv }', 'varsity: { level: school, base: high, shift: 2, bar: 20, fee: 0, minAge: 13, maxAge: 17, fallback: jv }'));
+    expect(await expectErrors()).toContain('tryout.tiers.varsity: the fallback must be easier to make than the team');
+    await write('balance/sports.yaml', real.replace('varsity: { level: school, base: high, shift: 2, bar: 38, fee: 0, minAge: 13, maxAge: 17, fallback: jv }', 'varsity: { level: school, base: high, shift: 2, bar: 36, fee: 0, minAge: 13, maxAge: 17, fallback: club }'));
+    expect(await expectErrors()).toContain('tryout.tiers.varsity: the fallback must be a team of the same level');
+    await write('balance/sports.yaml', real.replace('jv: { level: school, base: high, shift: -4, bar: 26, fee: 0, minAge: 13, maxAge: 17, fallback: null }', 'jv: { level: school, base: high, shift: -4, bar: 24, fee: 0, minAge: 13, maxAge: 17, fallback: rec }'));
+    expect(await expectErrors()).toContain('school needs a team at the bottom');
+  });
+
+  it('keeps recruiting for the last years of school, and the draft words for every band', { timeout: 90_000 }, async () => {
+    const real = await read('balance/sports.yaml');
+    await write('balance/sports.yaml', real.replace('ages: { from: 16, to: 18 }', 'ages: { from: 14, to: 18 }'));
+    expect(await expectErrors()).toContain('recruiting starts at 16 at the earliest');
+    await write('balance/sports.yaml', real);
+    const text = await read('text/sports.yaml');
+    await write('text/sports.yaml', text.replace(/ {2}lottery: \{[^\n]*\n/, ''));
+    expect(await expectErrors()).toContain('projection: words for "lottery"');
+  });
+
+  it('wants a school team and skills for every sport, and athletics rules that make sense for every country', { timeout: 90_000 }, async () => {
+    const team = await read('activities/hockey_team.yaml');
+    await write('activities/hockey_team.yaml', team.replace('sport: hockey\n', ''));
+    expect(await expectErrors()).toContain('needs a school team in teams and clubs with sport: hockey');
+    await write('activities/hockey_team.yaml', team);
+    const us = await read('countries/us.yaml');
+    await write('countries/us.yaml', us.replace('tiers: [community, state, elite] }', 'tiers: [] }'));
+    expect(await expectErrors()).toContain('available, but no program recruits');
+    await write('countries/us.yaml', us.replace('{ available: true, maxShare: 1,', '{ available: false, maxShare: 1,'));
+    expect(await expectErrors()).toContain('not available, but pays a share');
+  });
+
+  it('keeps a tryout scrimmage a scrimmage: three ways to play it, in its category, and a pro camp for adults', { timeout: 90_000 }, async () => {
+    const camp = await read('events/any/sportstryout/tryout_pro_camp.yaml');
+    await write('events/any/sportstryout/tryout_pro_camp.yaml', camp.replace('    - { age: { gte: 18 } }\n', ''));
+    expect(await expectErrors()).toContain('a pro camp is for adults');
+    await write('events/any/sportstryout/tryout_pro_camp.yaml', camp);
+    const gym = await read('events/any/sportstryout/tryout_school_gym.yaml');
+    await write('events/any/sportstryout/tryout_school_gym.yaml', gym.replace('followUpOnly: true\n', ''));
+    expect(await expectErrors()).toContain('a tryout scrimmage must be followUpOnly');
   });
 });
 

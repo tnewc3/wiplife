@@ -279,7 +279,10 @@ export function playSeason(state: LifeState, content: ContentBundle, rng: RngSta
     }
     const here = levelOfRung(path.sport, pstate.rung);
     // The engine tries out for you when you reach a level with no team (not when you left your team yourself).
-    if ((!s.team || s.team.level !== here) && !s.teamless && !autoTeam(state, path, here as Exclude<typeof here, 'pro'>, content, rng)) s.teamless = true;
+    if ((!s.team || s.team.level !== here) && !s.teamless && !autoTeam(state, path, here as Exclude<typeof here, 'pro'>, content, rng)) {
+      s.team = null;
+      s.teamless = true;
+    }
     if (s.teamless) {
       // No team, no season. You can still train and try out.
       s.form = 0;

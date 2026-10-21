@@ -33,7 +33,7 @@ choices:
         have been getting wrong for years.
       effects:
         - { type: cost, item: summer_camp }
-        - { type: fame, action: craft, delta: 3 }
+        - { type: fame, action: craft, delta: 2 }
   - id: film
     label: Film and rest
     outcome:

@@ -42,7 +42,7 @@ choices:
         You spend extra hours learning another spot on the field. You do not win the
         battle, but the coach starts using you in places that the lineup did not have.
       effects:
-        - { type: fame, action: craft, delta: 2 }
+        - { type: fame, action: craft, delta: 1 }
         - { type: sports, action: form, delta: 1 }
   - id: talk_it_out
     label: Talk it out with your rival

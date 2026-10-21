@@ -35,6 +35,7 @@ const { values } = parseArgs({
   options: {
     lives: { type: 'string', default: '1000' },
     seed: { type: 'string', default: 'sim' },
+    first: { type: 'string', default: '0' },
     json: { type: 'string' },
     player: { type: 'string', default: 'both' },
     generations: { type: 'string', default: '3' },
@@ -91,7 +92,7 @@ const worker = (player: SimulatedPlayer): Promise<SimulationReport> =>
   });
 const carelessLater = parallel ? worker('careless') : null;
 const run = (player: SimulatedPlayer): SimulationReport =>
-  runSimulation(content, { lives, seedPrefix: values.seed, player, ...(country ? { country } : {}), ...(player === 'careful' && generations > 1 ? { onLife: chains.onLife } : {}) });
+  runSimulation(content, { lives, firstLife: Number(values.first), seedPrefix: values.seed, player, ...(country ? { country } : {}), ...(player === 'careful' && generations > 1 ? { onLife: chains.onLife } : {}) });
 const done = new Map<SimulatedPlayer, SimulationReport>();
 for (const player of players) if (!(player === 'careless' && carelessLater)) done.set(player, run(player));
 // E2b: heirs, generation after generation (while the careless player's worker, if there is one, is still running).

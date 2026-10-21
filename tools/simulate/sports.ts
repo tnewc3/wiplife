@@ -262,6 +262,7 @@ const percentile = (xs: number[], p: number): number => {
   return s[Math.min(s.length - 1, Math.floor(s.length * p))]!;
 };
 
+
 /** Watches one life. */
 export class SportsWatcher {
   private entered = false;

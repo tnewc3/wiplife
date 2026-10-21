@@ -25,7 +25,7 @@ choices:
         back together in the right order.
       effects:
         - { type: cost, item: private_coach_block }
-        - { type: fame, action: craft, delta: 4 }
+        - { type: fame, action: craft, delta: 2 }
         - { type: sports, action: form, delta: 2 }
   - id: share
     label: Split it with a teammate
@@ -35,7 +35,7 @@ choices:
         still more than most people get.
       effects:
         - { type: cost, item: summer_camp }
-        - { type: fame, action: craft, delta: 2 }
+        - { type: fame, action: craft, delta: 1 }
         - { type: sports, action: form, delta: 1 }
   - id: decline
     label: Thank the coach and train on your own

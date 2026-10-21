@@ -108,7 +108,7 @@ export function practiceGain(state: LifeState, pathId: Id, skillId: Id, content:
 }
 
 /** One session: the skill rises (less each time), a share goes to craft. Returns the points gained. Never touches health. */
-export function practise(state: LifeState, pathId: Id, skillId: Id, content: ContentBundle, multiplier = 1): number {
+export function practise(state: LifeState, pathId: Id, skillId: Id, content: ContentBundle, multiplier = 1, craftShare = content.balance.fame.practice.craft): number {
   if (practiceBlock(state, pathId, skillId, content) !== null) return 0;
   const def = pathDef(content, pathId)!;
   const path = state.fame.paths[pathId]!;
@@ -117,7 +117,7 @@ export function practise(state: LifeState, pathId: Id, skillId: Id, content: Con
   path.skills = { ...(path.skills ?? {}), [skillId]: Math.round((skillLevel(path, skillId, content) + gain) * 10) / 10 };
   const q = content.balance.fame.quality;
   const craftCap = hasTalentFor(state, def) ? q.craftCap.talent : q.craftCap.none;
-  if (path.craft < craftCap) path.craft = Math.min(craftCap, Math.round((path.craft + gain * content.balance.fame.practice.craft) * 10) / 10);
+  if (path.craft < craftCap) path.craft = Math.min(craftCap, Math.round((path.craft + gain * craftShare) * 10) / 10);
   g.practice += 1;
   g.bySkill[skillId] = (g.bySkill[skillId] ?? 0) + 1;
   state.fame.totals.practice += 1;

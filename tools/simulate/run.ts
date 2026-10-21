@@ -92,6 +92,8 @@ const REPLAY_EVERY = 100;
 
 export interface SimulationOptions {
   lives: number;
+  /** The index of the first life (default 0): a run of `lives` lives from this one, with the same seeds as in a longer run. */
+  firstLife?: number;
   /** Seeds are `${seedPrefix}-${i}`. */
   seedPrefix: string;
   /** Stops collecting invariant failure messages past this many (they are still counted). */
@@ -862,7 +864,8 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
   const repeatShares: number[] = [];
   const repeatsByEvent = new Map<string, number>();
 
-  for (let i = 0; i < options.lives; i++) {
+  const firstLife = options.firstLife ?? 0;
+  for (let i = firstLife; i < firstLife + options.lives; i++) {
     const startLife = options.starts?.[i];
     const seed = startLife ? startLife.seed : `${options.seedPrefix}-${i}`;
     const check = (life: LifeState) => {

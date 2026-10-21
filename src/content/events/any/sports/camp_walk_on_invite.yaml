@@ -41,7 +41,7 @@ choices:
         The coach gives you three things to work on and one to stop doing. It is more than
         you expected and exactly what you needed.
       effects:
-        - { type: fame, action: craft, delta: 2 }
+        - { type: fame, action: craft, delta: 1 }
   - id: pass
     label: Say thanks, and keep your options open
     outcome:

@@ -40,10 +40,10 @@ test('you choose a school team to try out for, play the scrimmage as an event an
   // The tryout is an event with choices: how you play the scrimmage.
   const card = page.getByTestId('event-card');
   await expect(card).toContainText('The list on the door');
-  await expect(card.getByRole('button')).toHaveCount(4);
+  for (const label of ['Play the way you practised', 'Dive on everything', 'Make sure they see you', 'Do exactly what the coach asked in the drills']) await expect(page.getByRole('button', { name: label })).toBeVisible();
   await expectTouchTargets(page);
   await page.getByRole('button', { name: 'Dive on everything' }).click();
-  await expect(card).toContainText(/You made /);
+  await expect(page.getByTestId('event-outcome')).toContainText(/You made|took you|kept you/);
   await page.getByRole('button', { name: 'Continue' }).click();
   // The sports career starts on the school team: one record with your teams and clubs.
   await expect(page.getByTestId('team-line')).toContainText(/school team/i);
@@ -108,7 +108,7 @@ test('when the draft passes you by you can go to a camp and sign, with a draft c
   const card = page.getByTestId('event-card');
   await expect(card).toContainText('Camp opens on Monday');
   await page.getByRole('button', { name: 'Make the plays that are there' }).click();
-  await expect(card).toContainText(/signed you out of camp/);
+  await expect(page.getByTestId('event-outcome')).toContainText(/signed you out of camp|left with a deal from/);
   await page.getByRole('button', { name: 'Continue' }).click();
   await expect(page.getByTestId('contract-line')).toContainText(/minimum deal|standard deal/i);
   await expect(page.getByTestId('contract-line')).toContainText(/\$[\d,]+ a year/);

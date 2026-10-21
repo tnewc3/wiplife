@@ -171,7 +171,7 @@ events:
   combine: 0.7
   captain: 0.18
   role: { starter: 0.12, other: 0.5 }
-  offseason: 0.3
+  offseason: 0.2
 
 # Batch 5: tryouts for specific teams. A team's bar is compared with your rating going in (what scouts would say of you today),
 # your way of playing the scrimmage and the luck of the day. Cut from a team, the next tier down at the same level looks at
@@ -183,11 +183,11 @@ tryout:
     club: { level: youth, base: youth, shift: 0, bar: 20, fee: 280, minAge: 8, maxAge: 17, fallback: rec }
     travel: { level: youth, base: youth, shift: 9, bar: 32, fee: 900, minAge: 9, maxAge: 17, fallback: club }
     academy: { level: youth, base: youth, shift: 14, bar: 38, fee: 0, minAge: 9, maxAge: 17, fallback: club }
-    jv: { level: school, base: high, shift: -4, bar: 22, fee: 0, minAge: 13, maxAge: 17, fallback: null }
-    varsity: { level: school, base: high, shift: 2, bar: 32, fee: 0, minAge: 13, maxAge: 17, fallback: jv }
-    community: { level: college, base: community, shift: 0, bar: 28, fee: 0, minAge: 17, maxAge: 26, fallback: null }
-    state: { level: college, base: state, shift: 0, bar: 42, fee: 0, minAge: 17, maxAge: 26, fallback: community }
-    elite: { level: college, base: elite, shift: 0, bar: 56, fee: 0, minAge: 17, maxAge: 26, fallback: state }
+    jv: { level: school, base: high, shift: -4, bar: 26, fee: 0, minAge: 13, maxAge: 17, fallback: null }
+    varsity: { level: school, base: high, shift: 2, bar: 38, fee: 0, minAge: 13, maxAge: 17, fallback: jv }
+    community: { level: college, base: community, shift: 0, bar: 38, fee: 0, minAge: 17, maxAge: 26, fallback: null }
+    state: { level: college, base: state, shift: 0, bar: 48, fee: 0, minAge: 17, maxAge: 26, fallback: community }
+    elite: { level: college, base: elite, shift: 0, bar: 60, fee: 0, minAge: 17, maxAge: 26, fallback: state }
   luck: 7
   approach:
     steady: { bonus: 0, spread: 1 }
@@ -199,8 +199,8 @@ tryout:
   cutWait: 1
   fallbackEase: 6
   autoSlack: 2
-  camp: { bar: 38, perQuality: 0.35, fee: 0 }
-  fameFloor: 1
+  camp: { bar: 56, perQuality: 0.4, ageFrom: 24, perYear: 1.2, fee: 0 }
+  fameFloor: 0
   perYear: 3
 
 # Batch 5: training sessions (balance/fame.yaml practice has the budget by commitment, the gain curve and the caps). With a team
@@ -210,8 +210,9 @@ training:
   team: { gain: 1, quality: 0.004 }
   gym: { gain: 0.55, fee: 480 }
   coach: { gain: 0.8, fee: 140 }
-  rating: 0.09
-  club: { craft: 2, sessions: 2 }
+  rating: 0.04
+  craft: 0.03
+  club: { craft: 0.3, sessions: 2 }
 
 # Batch 5: athletic scholarships. A recruiter sees recent rating, fame, grades and the program's need for your position.
 scholarship:

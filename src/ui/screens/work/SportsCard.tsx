@@ -81,7 +81,8 @@ export function SportsCard({ life }: { life: LifeState }) {
       <Button variant={view.active ? 'secondary' : 'primary'} block className="mt-3" onClick={() => setOpen(true)} data-testid="sports-open">
         {view.active ? 'Open Sports' : view.retired ? 'Look back' : 'See the ways in'}
       </Button>
-      <SportsScreen life={life} open={open} onClose={() => setOpen(false)} />
+      {/* A tryout answers with an event (its scrimmage): the Sports screen waits behind it and comes back when it is over. */}
+      <SportsScreen life={life} open={open && life.phase !== 'action' && life.phase !== 'events'} onClose={() => setOpen(false)} />
     </Card>
   );
 }

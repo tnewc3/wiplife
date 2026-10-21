@@ -116,7 +116,7 @@ function campOption(state: LifeState, def: SportPath, teamId: Id, content: Conte
   const team = def.sport.leagues.pro.teams.find((t) => t.id === teamId);
   if (!team) return null;
   const c = content.balance.sports.tryout.camp;
-  return { key: `pro:${team.id}`, level: 'pro', tier: null, name: team.name, city: team.city, quality: team.quality, bar: clampInt(Math.round(c.bar + c.perQuality * (team.quality - 50)), 0, 100), fee: feeOf(state, null, content), club: false, teamId: team.id, block: null };
+  return { key: `pro:${team.id}`, level: 'pro', tier: null, name: team.name, city: team.city, quality: team.quality, bar: clampInt(Math.round(c.bar + c.perQuality * (team.quality - 50) + c.perYear * Math.max(0, state.character.age - c.ageFrom)), 0, 100), fee: feeOf(state, null, content), club: false, teamId: team.id, block: null };
 }
 
 /** The year's tryouts so far (chosen or about to be played). */
@@ -229,7 +229,6 @@ export function tryoutBlock(state: LifeState, sportId: Id, key: string, content:
   if (!def) return 'unknown';
   const o = optionFor(state, def, key, content);
   if (!o) return 'gone';
-  if (o.fee > 0 && o.club === false && o.level === 'youth' && state.finances.savings < 0) return 'unknown';
   return o.block;
 }
 
@@ -355,7 +354,8 @@ export function resolveTryout(state: LifeState, approach: TryoutApproach, conten
  */
 export function autoTeam(state: LifeState, def: SportPath, level: AmateurLevel, content: ContentBundle, rng: RngState): boolean {
   const B = content.balance.sports.tryout;
-  const tiers = tiersOf(level, content).filter((t) => tierOpen(state, t, content));
+  // The level was earned (a big break can put a young player there): age does not close the bottom team of it.
+  const tiers = tiersOf(level, content).filter((t) => t !== 'academy' || countryOf(state, content).athletics.academy);
   if (tiers.length === 0) return false;
   const rating = prospectRating(state, def, content);
   const score = rating + rollNormal(rng, { mean: 0, sd: B.luck });
