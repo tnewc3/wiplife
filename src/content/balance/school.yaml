@@ -57,7 +57,7 @@ actions:
   # Study harder: a better grade this year for stress. Naming a subject lifts that subject more.
   study: { grades: 0.2, stress: 3, subject: 0.2, discipline: 0.3 }
   # Slack off: an easier year and a worse grade.
-  slack: { grades: -0.15, stress: -4, happiness: 2 }
+  slack: { grades: -0.15, stress: -4, happiness: 1 }
   # A tutor, once a year (written at US prices; a poor family finds it harder).
   tutor: { cost: 600, grades: 0.2, stress: -1 }
   # Cheat on a test: a better grade, a chance of being caught each time, and a worse one if you are.
@@ -72,7 +72,7 @@ actions:
   skip:
     grades: -0.08
     stress: -3
-    happiness: 2
+    happiness: 1
     catch: { base: 0.2, perTry: 0.08, max: 0.7 }
     maxPerYear: 4
     minAge: 11
