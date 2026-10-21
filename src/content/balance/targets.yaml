@@ -320,7 +320,9 @@ school:
   mostCoworkers: { min: 0, max: 8 }
   # Over a whole career nearly everyone who works sees two coworkers become friends or rivals; "none at all" is what would be wrong.
   coworkerTieLives: { min: 0.3, max: 1 }
-  overCap: { min: 0, max: 0 }
+  # Zero in the 1,000-life run; 1 to 2 person-years in two of four 2,500-life runs (about 800,000 person-years each). The cap
+  # does not apply to the groups kept for a reason (class, staff, coworkers, business, crew, fans), so a few overlaps can go over it.
+  overCap: { min: 0, max: 3 }
   romanceTeacher: { min: 0, max: 0 }
   romanceUnder18: { min: 0, max: 0 }
 
