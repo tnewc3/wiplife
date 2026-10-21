@@ -56,7 +56,7 @@ function requiresFame(def: EventDef, test: (c: NonNullable<Extract<Condition, { 
   return walk(def.requires);
 }
 
-const FAME_WORD = /\{(project|noun|review|fanLine|rungTitle|nextTitle|pathNoun|secondPath|company|agent|award|headline)\}/g;
+const FAME_WORD = /\{(project|noun|review|fanLine|rungTitle|nextTitle|pathNoun|secondPath|company|agent|award|headline|bandName|genre|releaseGenre|venue|tourNoun|offerName)\}/g;
 
 export function checkFame(bundle: ContentBundle, fileOf: (typeKey: CollectionKey, id: string) => string, partialEvents: boolean): ContentError[] {
   const errors: ContentError[] = [];
@@ -190,6 +190,14 @@ export function checkFame(bundle: ContentBundle, fileOf: (typeKey: CollectionKey
     }
     if (ceiling < adultAge && effects.some((x) => x.type === 'fame' && x.action === 'contract') && !hasParent(def)) e('a minor\'s deal is signed by a parent: cast a parent');
 
+    // Batch 4: a band event is about your band, so it requires one; joining one requires an offer; a minor's band, show,
+    // tour or practice is done with a parent's say-so, so an event a minor can meet about them casts the parent.
+    const bandWork = effects.some((x) => x.type === 'band' && x.action !== 'join') || Object.values(def.cast ?? {}).some((s) => s.band !== undefined);
+    if (bandWork && !requiresFame(def, (c) => c.band === true)) e('is about your band (a band effect or role), so it requires { fame: { band: true } }');
+    if (effects.some((x) => x.type === 'band' && x.action === 'join') && !requiresFame(def, (c) => c.offer === true)) e('takes up a band\'s offer, so it requires { fame: { offer: true } }');
+    const grind = requiresFame(def, (c) => c.band === true || c.offer === true || c.toured === true || c.shows !== undefined);
+    if (grind && reachableByMinor && !hasParent(def)) e(`is about a band, a show or a tour and can be met by someone under ${independence}: cast the parent who said yes (or require { age: { gte: ${independence} } })`);
+
     // Fame text values need what they name.
     const used = new Set<string>();
     for (const t of texts) for (const m of t.matchAll(FAME_WORD)) used.add(m[1]!);
@@ -208,6 +216,13 @@ export function checkFame(bundle: ContentBundle, fileOf: (typeKey: CollectionKey
       pathNoun: ['a career or a retirement', (c) => c.active === true || c.retired === true || c.path !== undefined],
       rungTitle: ['a career', (c) => c.active === true || c.rung !== undefined],
       nextTitle: ['a career', (c) => c.active === true || c.rung !== undefined],
+      // Batch 4.
+      bandName: ['band: true or offer: true', (c) => c.band === true || c.offer === true],
+      genre: ['genre: true', (c) => c.genre === true],
+      releaseGenre: ['offGenre: true', (c) => c.offGenre === true],
+      venue: ['shows (gte 1)', (c) => (c.shows?.gte ?? 0) >= 1 || (c.shows?.gt ?? -1) >= 0],
+      tourNoun: ['toured: true', (c) => c.toured === true],
+      offerName: ['offer: true', (c) => c.offer === true],
     };
     for (const name of used) {
       const [what, test] = wants[name]!;

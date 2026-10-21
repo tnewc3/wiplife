@@ -359,7 +359,7 @@ describe('every piece of text', () => {
   });
 
   it('renders with four pronoun sets, with nothing left unfilled and no hardcoded pronoun', () => {
-    const values = { known: '41 years', age: 80, year: 2096, since: 'three years ago', title: 'senior accountant', employer: 'Ledgerwise Partners', years: '40 years', partner: 'Sam', children: 'two children', n: 2, heard: 'that you were arrested', speaker: 'Sam' };
+    const values = { known: '41 years', age: 80, year: 2096, since: 'three years ago', title: 'senior accountant', employer: 'Ledgerwise Partners', years: '40 years', partner: 'Sam', children: 'two children', n: 2, heard: 'that you were arrested', speaker: 'Sam', work: 'Glass Weather', noun: 'album' };
     for (const preset of sets) {
       const role = (first: string): TextRole => ({ name: { first, last: 'Ruiz' }, pronouns: preset, relation: 'sister', city: 'Chicago' });
       for (const piece of [...eulogyPieces(content), ...reasonPieces(content)]) {

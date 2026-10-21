@@ -1,5 +1,8 @@
 import { emptyTravel } from '../engine/travel/types';
 import { emptyMigration } from '../engine/migration/types';
+import { emptyGrind } from '../engine/fame/query';
+import { tourSizeFor } from '../engine/fame/grind';
+import type { TourSize } from '../engine/types';
 import { countryOfCity } from '../engine/country';
 import { emptySchoolLife, emptyWorkYear } from '../engine/school/state';
 // Read data directly: migrations also run in Node tools without Vite's import.meta.env.
@@ -525,7 +528,46 @@ export const migrations: readonly Migration[] = [
       'done yet). Heir replay snapshots are upgraded the same way.',
     migrate: upgradeSchoolWorkData,
   },
+  {
+    from: 31,
+    description:
+      'Batch 4: music, bands and the grind. Fame gains a band (none), past bands and band offers (none), an instrument (none), ' +
+      'this year\'s shows, tour and practice (none yet, in the life\'s current year), what was played going into the year (nothing), ' +
+      'a tour cost in the year\'s income (0) and new totals (0). A tour used to be a box ticked on a project: a project lined up ' +
+      'with it ticked keeps its tour, now booked on its own for the coming year at the size your rung gives, at no cost (it was ' +
+      'free before). Heir replay snapshots are upgraded the same way.',
+    migrate: upgradeGrindData,
+  },
 ];
+
+function upgradeGrindData(data: unknown): unknown {
+  if (!isRecord(data)) return data;
+  const content = compiled as ContentBundle;
+  const inputLog = Array.isArray(data.inputLog) ? data.inputLog.map((entry: unknown) => {
+    if (!isRecord(entry) || !isRecord(entry.payload) || !isRecord(entry.payload.snapshot)) return entry;
+    return { ...entry, payload: { ...entry.payload, snapshot: upgradeGrindData(entry.payload.snapshot) } };
+  }) : data.inputLog;
+  if (!isRecord(data.fame)) return { ...data, inputLog };
+  const fame = data.fame;
+  const year = typeof data.currentYear === 'number' ? data.currentYear : 0;
+  let tour: { path: string; size: TourSize; cost: number } | null = null;
+  let plan = fame.plan;
+  if (isRecord(plan)) {
+    const { tour: ticked, ...rest } = plan;
+    plan = rest;
+    const pathId = typeof rest.path === 'string' ? rest.path : '';
+    const def = content.famePaths[pathId];
+    const path = isRecord(fame.paths) ? fame.paths[pathId] : undefined;
+    if (ticked === true && def && isRecord(path) && typeof path.rung === 'number') tour = { path: pathId, size: tourSizeFor(def, path.rung, content), cost: 0 };
+  }
+  const income = isRecord(fame.income) ? { ...fame.income, tour: 0 } : fame.income;
+  const totals = isRecord(fame.totals) ? { shows: 0, practice: 0, bandsFormed: 0, bandsJoined: 0, bandSplits: 0, memberChanges: 0, genreSwitches: 0, offGenre: 0, ...fame.totals } : fame.totals;
+  return {
+    ...data,
+    inputLog,
+    fame: { ...fame, plan, income, totals, band: null, pastBands: [], offers: [], instrument: null, grind: tour ? { ...emptyGrind(year), tour } : emptyGrind(0), played: { year: 0, shows: 0, tour: null } },
+  };
+}
 
 /** The one heritage of this name pool that has both names, or undefined (none, or more than one). */
 function heritageOfNames(cityId: unknown, name: unknown): string | undefined {

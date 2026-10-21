@@ -1,0 +1,29 @@
+id: genre_switch_new_crowd
+title: New faces
+text: >-
+  Since you went {genre}, the crowds look different. Younger in some places,
+  older in others, and dressed for a kind of music you did not used to make.
+tone: light
+category: famefans
+rarity: common
+recurring: true
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { fame: { active: true } }
+    - { fame: { genre: true } }
+weight: { base: 8 }
+followUpOnly: true
+choices:
+  - id: welcome
+    label: Welcome them in
+    outcome:
+      text: You talk to the new faces after shows. They tell their friends, and their friends come too.
+      effects:
+        - { type: fame, action: fans, delta: 5 }
+  - id: both
+    label: Play something for the old crowd too
+    outcome:
+      text: An old song in the middle of the set. The old crowd cheers loudest, and the new one learns it.
+      effects:
+        - { type: fame, action: mood, delta: 3 }

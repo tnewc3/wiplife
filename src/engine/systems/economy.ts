@@ -42,7 +42,7 @@ import { queueCrimeEvent } from '../crime/step';
 import { careCosts } from '../lives/care';
 import { groupCosts } from '../belonging/groups';
 import { remittanceDue } from '../migration/remit';
-import { sceneCost } from '../fame/step';
+import { sceneCost, tourCost } from '../fame/step';
 import { possessionCosts } from '../possessions/costs';
 import { detachDebt } from '../possessions/query';
 import { recordEarnings, retirementBenefit } from '../retirement';
@@ -170,8 +170,8 @@ export function runEconomy(state: LifeState, content: ContentBundle): void {
 
   // 4. Costs. E2a: your children cost money, and child support is paid or received.
   let housing = housingCost(state, content);
-  // E6b: the scene that goes with fame (parties, an entourage, the clothes) is part of what you live on.
-  let living = livingCost(state, content) + sceneCost(state);
+  // E6b: the scene that goes with fame (parties, an entourage, the clothes) is part of what you live on; Batch 4: so is putting on a tour.
+  let living = livingCost(state, content) + sceneCost(state) + tourCost(state);
   let kids = childCosts(state, content);
   const { paid: supportPaid, received: supportReceived } = childSupportDue(state, gross, content);
   const care = careCosts(state, content, gross);

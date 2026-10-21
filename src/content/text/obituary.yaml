@@ -87,6 +87,16 @@ career:
 # Values: {year} the wedding year. widowed: the spouse died first (role npc),
 # values {year}. divorced: values {exes} ("Ana Ruiz and Sam Lee").
 # single: never married (adults over 30 only).
+# Batch 4: the best-received work of a career in arts and media. Values: {work},
+# {noun}, {pathNoun}; band adds {band}.
+fame:
+  best:
+    - "In {pathNoun}, {self.they} {self:is|are} best remembered for the {noun} \"{work}\"."
+    - "{self.Their} best-loved work was the {noun} \"{work}\"."
+  band:
+    - "{self.They} made music with {band}, and their {noun} \"{work}\" is the one people still know."
+    - "With {band}, {self.they} put out \"{work}\", the {noun} {self.they} {self:is|are} best remembered for."
+
 love:
   married:
     bright:

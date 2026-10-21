@@ -1497,6 +1497,7 @@ const EULOGY_MILESTONE_VALUES: Record<string, string[]> = {
   bankruptcy: ['year'],
   tooSoon: ['age'],
   longLife: ['age'],
+  bestWork: ['work', 'noun'],
 };
 
 /**

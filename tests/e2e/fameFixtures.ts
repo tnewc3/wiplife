@@ -28,6 +28,8 @@ export interface FameLife {
   /** A tabloid headline from this year. */
   headline?: boolean;
   pathId?: string;
+  /** Batch 4: just started at an open mic (rung 1, nothing released yet), with a genre set. */
+  fresh?: boolean;
 }
 
 export function fameLife(options: FameLife): LifeState {
@@ -55,6 +57,10 @@ export function fameLife(options: FameLife): LifeState {
     const pathId = options.pathId ?? 'music';
     const route = age < 14 ? 'lessons' : 'open_mic';
     enterPath(d as LifeState, pathId, route, content);
+    if (options.fresh) {
+      d.fame.paths[pathId]!.genre = 'alt_rock';
+      return;
+    }
     const p = d.fame.paths[pathId]!;
     p.rung = 3;
     p.peak = 3;

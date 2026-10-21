@@ -1,0 +1,40 @@
+id: show_heckler
+title: The heckler
+text: >-
+  Halfway through your set at {venue}, someone near the front started
+  shouting. Not a request: the same insult, over and over, timed between songs.
+tone: neutral
+category: fame
+rarity: common
+recurring: true
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { fame: { active: true } }
+    - { fame: { shows: { gte: 1 } } }
+    - { fame: { sport: false } }
+weight: { base: 8 }
+followUpOnly: true
+choices:
+  - id: answer
+    label: Answer back from the stage
+    check:
+      base: 45
+      stats: [{ key: confidence, weight: 0.25 }, { key: smarts, weight: 0.15 }]
+      success:
+        text: Your answer gets the biggest laugh of the night, and the heckler leaves. Somebody quotes it online.
+        effects:
+          - { type: fame, action: image, delta: 3 }
+          - { type: fame, action: fans, delta: 2 }
+      failure:
+        text: Your answer comes out mean, and the room turns on you a little. The heckler looks delighted.
+        effects:
+          - { type: fame, action: image, delta: -3 }
+          - { type: stat, key: stress, delta: 3 }
+  - id: ignore
+    label: Play louder and ignore it
+    outcome:
+      text: Security walks them out by the fourth song. You never stopped playing.
+      effects:
+        - { type: fame, action: image, delta: 1 }

@@ -1,0 +1,50 @@
+id: band_clash_spotlight
+title: Somebody else's turn
+text: >-
+  {bandmate.name} wants to sing two songs of {bandmate.their} own in the set,
+  and has already told the others. The question is whether you are going to
+  be the one who says no.
+tone: neutral
+category: fame
+rarity: common
+recurring: true
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { fame: { active: true } }
+    - { fame: { band: true } }
+weight:
+  base: 8
+  # Someone who has backed you before is less likely to make it a fight.
+  modifiers:
+    - { if: { memory: { role: bandmate, tag: band_backed_you } }, x: 0.5 }
+followUpOnly: true
+cast:
+  bandmate: { kind: friend, band: member, presence: nearby }
+choices:
+  - id: yes
+    label: Give {bandmate.them} the two songs
+    outcome:
+      text: >-
+        The first one is rough and the second one is good. {bandmate.name} is
+        lit up for a week, and the set breathes a little more.
+      effects:
+        - { type: relationship, role: bandmate, affection: 6 }
+        - { type: band, action: chemistry, delta: 4 }
+  - id: one
+    label: One song, at the end
+    outcome:
+      text: It is a compromise, and it sounds like one. Nobody is unhappy enough to say so.
+      effects:
+        - { type: band, action: chemistry, delta: 1 }
+  - id: no
+    label: Keep the set as it is
+    outcome:
+      text: >-
+        {bandmate.name} says it is fine in a way that makes clear it is not.
+        You can feel it in the next three rehearsals.
+      effects:
+        - { type: relationship, role: bandmate, affection: -6 }
+        - { type: band, action: chemistry, delta: -5 }
+        - { type: memory, role: bandmate, tag: band_clashed }

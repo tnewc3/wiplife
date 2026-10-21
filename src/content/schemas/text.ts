@@ -269,6 +269,8 @@ export const obituaryTextSchema = z.strictObject({
   ),
   /** peak (above a first level) and worked (a first level): values {title}, {employer}, {years}. retired: {years}. never: none. */
   career: z.strictObject({ peak: tonedSchema, worked: variantsSchema, retired: variantsSchema, never: variantsSchema }),
+  /** Batch 4: the best-received work of a career in arts and media. best: values {work} (its title), {noun} (single, film...), {pathNoun}; band: the same and {band}, the band that made it. */
+  fame: z.strictObject({ best: variantsSchema, band: variantsSchema }),
   /** married and widowed: role npc, values {year}. divorced: {exes}. single: none. */
   love: z.strictObject({ married: tonedSchema, widowed: variantsSchema, divorced: variantsSchema, single: variantsSchema }),
   /** Notable events by event id, one line each. No values. */

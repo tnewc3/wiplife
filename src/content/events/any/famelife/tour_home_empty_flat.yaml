@@ -1,0 +1,32 @@
+id: tour_home_empty_flat
+title: Coming home to nobody
+text: >-
+  After {tourNoun}, you come home to a quiet place and a fridge with nothing
+  alive in it. After weeks of crowds every night, the silence is very loud.
+tone: neutral
+category: famelife
+rarity: common
+recurring: true
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { fame: { active: true } }
+    - { fame: { toured: true } }
+    - { home: { partner: false } }
+weight: { base: 8 }
+followUpOnly: true
+choices:
+  - id: call_friends
+    label: Call everyone you have not seen
+    outcome:
+      text: Half of them come round. It is the best night of the month, and none of them asks about the tour.
+      effects:
+        - { type: stat, key: happiness, delta: 5 }
+        - { type: stat, key: stress, delta: -3 }
+  - id: sleep
+    label: Sleep for two days
+    outcome:
+      text: You sleep, then sleep again. When you wake up properly you feel like a person.
+      effects:
+        - { type: fame, action: burnout, delta: -5 }

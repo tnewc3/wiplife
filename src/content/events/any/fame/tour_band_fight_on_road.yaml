@@ -1,0 +1,43 @@
+id: tour_band_fight_on_road
+title: Too long in the van
+text: >-
+  Somewhere on {tourNoun}, {bandmate.name} and you stop speaking. It starts
+  with the music in the van and ends up being about everything else.
+tone: neutral
+category: fame
+rarity: common
+recurring: true
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { fame: { active: true } }
+    - { fame: { toured: true } }
+    - { fame: { band: true } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  bandmate: { kind: friend, band: member, presence: nearby }
+choices:
+  - id: clear_air
+    label: Clear the air at the next stop
+    check:
+      base: 50
+      stats: [{ key: kindness, weight: 0.2 }, { role: bandmate, key: affection, weight: 0.2 }]
+      success:
+        text: Two hours in a car park, and it is done. The rest of the run is the best the band has sounded.
+        effects:
+          - { type: relationship, role: bandmate, affection: 5 }
+          - { type: band, action: chemistry, delta: 6 }
+      failure:
+        text: It gets worse before it gets anywhere. You finish the run and do not look at each other on stage.
+        effects:
+          - { type: relationship, role: bandmate, affection: -6 }
+          - { type: band, action: chemistry, delta: -6 }
+          - { type: memory, role: bandmate, tag: band_clashed }
+  - id: separate
+    label: Ride with the crew for a while
+    outcome:
+      text: A few days apart in different vehicles does more than any talk would have.
+      effects:
+        - { type: band, action: chemistry, delta: 2 }

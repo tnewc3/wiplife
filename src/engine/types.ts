@@ -1701,6 +1701,79 @@ export interface FamePathState {
   recent: number[];
   /** The year of your last big break (0 for none). */
   breakYear: number;
+  /** Batch 4: the way in you took (a route of the path), when known. */
+  route?: Id;
+  /** Batch 4: your main genre (src/content/genres), once you have one. */
+  genre?: Id;
+  /** Batch 4: the skills you have practised here (0–100), by the path's skill id. */
+  skills?: Record<Id, number>;
+}
+
+/** Batch 4: a bandmate: a person in your life, the part they play and how good they are at it. */
+export interface BandMember {
+  id: Id;
+  /** The part they play (an instrument of the path, or the lead vocals). */
+  part: Id;
+  /** 0–100. */
+  skill: number;
+  since: number;
+}
+
+/** Batch 4: the band you are in. */
+export interface BandState {
+  name: string;
+  /** The path it belongs to (music). */
+  path: Id;
+  /** Who leads it: you (you founded it, or took it over), or the member who does. */
+  leader: 'you' | Id;
+  /** The other members (never you). */
+  members: BandMember[];
+  /** The part you play. */
+  part: Id;
+  /** How well it works together (0–100). */
+  chemistry: number;
+  since: number;
+  /** How you came to it: you formed it (auditions), it came with your way in, or you joined one. */
+  how: 'formed' | 'route' | 'joined';
+}
+
+/** Batch 4: a band in your city that wants you (good until the next year begins). */
+export interface BandOffer {
+  name: string;
+  genre: Id;
+  /** How many members it has besides you, how good they are, and the part they want you for. */
+  size: number;
+  skill: number;
+  part: Id;
+  year: number;
+}
+
+/** Batch 4: a tour's size, by how far up the ladder you are. */
+export type TourSize = 'local' | 'regional' | 'national' | 'world';
+
+/** Batch 4: how a show went (the last one is shown on the Fame screen). */
+export interface ShowResult {
+  venue: Id;
+  outcome: 'great' | 'good' | 'rough';
+  /** What it pays (before the cuts), paid through the yearly ledger as the next year begins. */
+  pay: number;
+  fans: number;
+  fame: number;
+}
+
+/** Batch 4: what you do between years toward the coming one: shows played, a tour booked and practice. */
+export interface FameGrind {
+  /** The year (between years: the year just ended) it belongs to. */
+  year: number;
+  shows: number;
+  /** What the shows paid, before the cuts. */
+  showPay: number;
+  /** A tour booked for the year about to begin, with the path it is for and what it cost up front. */
+  tour: { path: Id; size: TourSize; cost: number } | null;
+  /** Practice sessions, in all and by skill. */
+  practice: number;
+  bySkill: Record<Id, number>;
+  lastShow?: ShowResult;
 }
 
 /** E6b: how a release was made and what critics and fans made of it. */
@@ -1723,16 +1796,24 @@ export interface FameProject {
   earned: number;
   /** A company or agent picked it for you (a contract's yearly work). */
   assigned?: true;
+  /** Batch 4: its genre, how far that sits from your sound (0 on it, 1 as far as can be), the track titles you gave it, and the band that made it. */
+  genre?: Id;
+  offGenre?: number;
+  tracks?: string[];
+  bandName?: string;
 }
 
-/** E6b: a project lined up for the coming year, with its creative choices. */
+/** E6b: a project lined up for the coming year, with its creative choices. Batch 4: a tour is booked on its own (FameGrind), not on a project. */
 export interface FamePlan {
   path: Id;
   kind: Id;
   style: 'commercial' | 'artistic';
   risk: 'safe' | 'bold';
-  tour: boolean;
   press: boolean;
+  /** Batch 4: the genre (music), the title you typed (left out: one is suggested), and track titles (optional). */
+  genre?: Id;
+  title?: string;
+  tracks?: string[];
 }
 
 export interface FameContract {
@@ -1771,6 +1852,8 @@ export interface FameIncome {
   trust: number;
   /** What the scene (your lifestyle) costs this year, charged with your living costs. */
   scene: number;
+  /** Batch 4: what this year's tour cost to put on (crew, travel, the van), charged with your living costs. */
+  tour: number;
 }
 
 export interface FameState {
@@ -1807,6 +1890,17 @@ export interface FameState {
   income: FameIncome;
   /** The rung you stood on before your fame faded (for a comeback). */
   fadedFrom?: number;
+  /** Batch 4: your band (null for a solo act), the bands you were in before, and offers from bands in your city. */
+  band: BandState | null;
+  pastBands: { name: string; from: number; to: number; how: 'left' | 'solo' | 'split' }[];
+  offers: BandOffer[];
+  /** Batch 4: the instrument you play (an instrument of your main path), once chosen. */
+  instrument: Id | null;
+  /** Batch 4: shows, a tour and practice between years; and what was played going into this year. */
+  grind: FameGrind;
+  played: { year: number; shows: number; tour: TourSize | null; lastShow?: ShowResult };
+  /** Batch 4: the best-received thing you ever put out (for your life summaries). */
+  best?: { title: string; path: Id; kind: Id; year: number; score: number; bandName?: string };
   totals: {
     projects: number;
     hits: number;
@@ -1822,6 +1916,15 @@ export interface FameState {
     crossovers: number;
     stalkers: number;
     earned: number;
+    /** Batch 4: shows played, practice sessions, bands formed and joined, splits, members who came or went, and changes of main genre. */
+    shows: number;
+    practice: number;
+    bandsFormed: number;
+    bandsJoined: number;
+    bandSplits: number;
+    memberChanges: number;
+    genreSwitches: number;
+    offGenre: number;
   };
 }
 

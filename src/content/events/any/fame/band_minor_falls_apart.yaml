@@ -1,0 +1,41 @@
+id: band_minor_falls_apart
+title: The band from the garage
+text: >-
+  {bandmate.name} has quit {bandName} for the school play, and the others are
+  drifting off to their own things. You come home quiet, and your
+  {parent.relation} notices.
+tone: neutral
+category: fame
+rarity: common
+recurring: true
+lifeStages: [child, teen]
+requires:
+  all:
+    - { age: { lte: 17 } }
+    - { fame: { active: true } }
+    - { fame: { band: true } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  bandmate: { kind: friend, band: member, presence: nearby }
+  parent: { kind: parent, presence: household }
+choices:
+  - id: let_it_end
+    label: Let the band end
+    outcome:
+      text: >-
+        Your {parent.relation} says the first band is never the last one, and
+        helps you carry the amp up to your room.
+      effects:
+        - { type: band, action: split }
+        - { type: relationship, role: parent, affection: 4 }
+  - id: keep_it_going
+    label: Ask your {parent.relation} to help you keep it going
+    outcome:
+      text: >-
+        {parent.They} {parent:offers|offer} the garage on Saturdays and drives
+        whoever is left. It is a smaller band, and still a band.
+      effects:
+        - { type: band, action: quit, role: bandmate }
+        - { type: band, action: chemistry, delta: 6 }
+        - { type: relationship, role: parent, trust: 3 }

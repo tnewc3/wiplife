@@ -30,6 +30,8 @@ import {
   STYLE_LABELS,
   fansLabel,
 } from '../../labels';
+import { BandSection } from './BandSection';
+import { GrindSection } from './GrindSection';
 import { ProjectSheet } from './ProjectSheet';
 
 const cap = (text: string) => text[0]!.toUpperCase() + text.slice(1);
@@ -150,10 +152,11 @@ export function FameScreen({ life, open, onClose }: { life: LifeState; open: boo
               </Section>
               <Section title="This year’s project" testId="project">
                 {view.plan ? (
-                  <p className="mt-1" data-testid="plan-summary">
-                    {view.plan.kindLabel}: {STYLE_LABELS[view.plan.style].toLowerCase()}, {RISK_LABELS[view.plan.risk].toLowerCase()}
-                    {view.plan.tour ? ', with a tour' : ''}
-                    {view.plan.press ? ', with a press run' : ''}. It comes out as the year begins.
+                  <p className="mt-1 break-words" data-testid="plan-summary">
+                    {view.plan.kindLabel}
+                    {view.plan.title ? ` called “${view.plan.title}”` : ''}: {view.plan.genre ? `${view.plan.genre.toLowerCase()}, ` : ''}
+                    {STYLE_LABELS[view.plan.style].toLowerCase()}, {RISK_LABELS[view.plan.risk].toLowerCase()}
+                    {view.plan.press ? ', with a press run' : ''}. It comes out as the year begins.{view.plan.offGenre ? ' It is outside your usual sound.' : ''}
                   </p>
                 ) : (
                   <p className="mt-1 text-muted">Nothing lined up. Without new work, fame slowly fades.{view.contract ? ' Your contract will assign you something.' : ''}</p>
@@ -169,6 +172,8 @@ export function FameScreen({ life, open, onClose }: { life: LifeState; open: boo
                   )}
                 </div>
               </Section>
+              {(view.band !== null || view.formBlock !== 'path') && <BandSection life={life} view={view} disabled={disabled} />}
+              <GrindSection view={view} disabled={disabled} />
               <Section title="Agent and contract" testId="business">
                 <p className="mt-1" data-testid="agent-line">
                   {view.agent ? `${view.agent.name} · takes ${Math.round(view.agent.cut * 100)}%` : 'No agent.'}
@@ -243,9 +248,13 @@ export function FameScreen({ life, open, onClose }: { life: LifeState; open: boo
                           {p.title} <span className="font-normal text-muted">· {p.year}</span>
                         </span>
                         <span className="text-sm text-muted">
-                          {cap(p.noun)} · {STYLE_LABELS[p.style].toLowerCase()}, {RISK_LABELS[p.risk].toLowerCase()}
+                          {cap(p.noun)}
+                          {p.genre ? ` · ${p.genre.toLowerCase()}${p.offGenre ? ' (outside your sound)' : ''}` : ''} · {STYLE_LABELS[p.style].toLowerCase()}, {RISK_LABELS[p.risk].toLowerCase()}
+                          {p.bandName ? ` · with ${p.bandName}` : ''}
+                          {p.tour ? ' · toured' : ''}
                           {p.assigned ? ' · assigned by your company' : ''}
                         </span>
+                        {p.tracks.length > 0 && <span className="text-sm break-words text-muted">Tracks: {p.tracks.join(', ')}</span>}
                         <span className="text-sm">
                           {RECEPTION_LABELS[p.band]}. Critics: {reactionWord(p.critics).toLowerCase()}. Fans: {reactionWord(p.fans).toLowerCase()}. It earned {money(p.earned)} before the cuts.
                         </span>
@@ -257,7 +266,8 @@ export function FameScreen({ life, open, onClose }: { life: LifeState; open: boo
                   <p className="mt-2 text-sm text-muted" data-testid="fame-income">
                     The year’s pay went through your yearly ledger: {money(view.income.gross)} earned
                     {view.income.agent + view.income.company > 0 ? `, ${money(view.income.agent + view.income.company)} to your agent and company` : ''}
-                    {view.income.trust > 0 ? `, ${money(view.income.trust)} held in trust` : ''}.
+                    {view.income.trust > 0 ? `, ${money(view.income.trust)} held in trust` : ''}
+                    {view.income.tour > 0 ? `, ${money(view.income.tour)} to put on the tour` : ''}.
                   </p>
                 )}
               </Section>

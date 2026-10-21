@@ -1,0 +1,56 @@
+id: band_poached_bigger_act
+title: A better offer
+text: >-
+  {bandmate.name} has been asked to join a bigger act, with a real label and a
+  real tour. {bandmate.They} {bandmate:tells|tell} you before {bandmate.they}
+  {bandmate:answers|answer}, which counts for something.
+tone: serious
+category: fame
+rarity: common
+recurring: true
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { fame: { active: true } }
+    - { fame: { band: true } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  bandmate: { kind: friend, band: member, presence: nearby }
+choices:
+  - id: wish_well
+    label: Tell {bandmate.them} to go
+    outcome:
+      text: >-
+        {bandmate.name} goes. The next time you see {bandmate.them}, it is on a
+        poster, and you are glad, mostly.
+      effects:
+        - { type: band, action: quit, role: bandmate }
+        - { type: relationship, role: bandmate, affection: 6 }
+  - id: match
+    label: Match what they are offering, as far as you can
+    outcome:
+      text: >-
+        You cannot match a label, but you pay what you can. {bandmate.name}
+        stays, for the band and for the gesture.
+      effects:
+        - { type: famePay, cost: solid }
+        - { type: band, action: chemistry, delta: 4 }
+        - { type: relationship, role: bandmate, affection: 4 }
+  - id: loyalty
+    label: Ask {bandmate.them} where {bandmate.their} loyalty is
+    check:
+      base: 35
+      stats: [{ role: bandmate, key: affection, weight: 0.35 }]
+      success:
+        text: "{bandmate.name} turns them down. {bandmate.They} {bandmate:does|do} not mention it again, and neither do you."
+        effects:
+          - { type: band, action: chemistry, delta: 3 }
+      failure:
+        text: >-
+          {bandmate.name} takes the offer and leaves without a goodbye. The
+          last thing you said to {bandmate.them} was about loyalty.
+        effects:
+          - { type: band, action: quit, role: bandmate }
+          - { type: relationship, role: bandmate, affection: -10 }

@@ -1,0 +1,36 @@
+id: show_minor_all_ages
+title: The all-ages show
+text: >-
+  You played {venue}, an all-ages one on a Saturday afternoon. Your
+  {parent.relation} drove you there, carried an amp in and stood at the back
+  with {parent.their} arms folded, nodding along when {parent.they} thought nobody could see.
+tone: light
+category: fame
+rarity: common
+recurring: true
+lifeStages: [child, teen]
+requires:
+  all:
+    - { age: { lte: 17 } }
+    - { fame: { active: true } }
+    - { fame: { shows: { gte: 1 } } }
+    - { fame: { sport: false } }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  parent: { kind: parent, presence: household }
+choices:
+  - id: wave
+    label: Wave to your {parent.relation} from the stage
+    outcome:
+      text: '{parent.They} {parent:pretends|pretend} to be embarrassed, and talks about it for weeks.'
+      effects:
+        - { type: relationship, role: parent, affection: 5 }
+        - { type: stat, key: happiness, delta: 3 }
+  - id: play
+    label: Keep your eyes on the crowd
+    outcome:
+      text: You play the best set you have played. On the drive home, your {parent.relation} says so first.
+      effects:
+        - { type: fame, action: craft, delta: 1 }
+        - { type: relationship, role: parent, affection: 2 }

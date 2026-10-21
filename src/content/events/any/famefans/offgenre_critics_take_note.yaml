@@ -1,0 +1,31 @@
+id: offgenre_critics_take_note
+title: A swerve
+text: >-
+  Critics have decided your {releaseGenre} {noun} is the most interesting
+  thing you have done, whatever your fans think. {review}
+tone: light
+category: famefans
+rarity: common
+recurring: true
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { fame: { active: true } }
+    - { fame: { released: true } }
+    - { fame: { offGenre: true } }
+weight: { base: 8 }
+followUpOnly: true
+choices:
+  - id: stay
+    label: Keep exploring
+    outcome:
+      text: You start writing more in the new style. Some fans follow you; the critics certainly do.
+      effects:
+        - { type: fame, action: image, delta: 3 }
+        - { type: fame, action: craft, delta: 1 }
+  - id: one_off
+    label: Call it a one-off
+    outcome:
+      text: You say it was an experiment. Your old fans exhale.
+      effects:
+        - { type: fame, action: mood, delta: 2 }

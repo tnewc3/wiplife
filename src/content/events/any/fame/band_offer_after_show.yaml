@@ -1,0 +1,32 @@
+id: band_offer_after_show
+title: After your set
+text: >-
+  After you played {venue}, someone from {offerName} found you at the bar and
+  said they need exactly what you just did. They left a number on a coaster.
+tone: light
+category: fame
+rarity: common
+recurring: true
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { fame: { active: true } }
+    - { fame: { offer: true } }
+    - { fame: { shows: { gte: 1 } } }
+weight: { base: 12 }
+followUpOnly: true
+choices:
+  - id: join
+    label: Call the number
+    outcome:
+      text: You call. Soon after, you are the newest member of {bandName}, with the coaster pinned above your desk.
+      effects:
+        - { type: band, action: join }
+        - { type: stat, key: happiness, delta: 4 }
+  - id: keep
+    label: Keep the coaster and decide later
+    outcome:
+      text: The coaster sits on your desk. The offer is there on your Fame screen until the new year.
+      effects:
+        - { type: stat, key: stress, delta: 1 }

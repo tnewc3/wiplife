@@ -617,7 +617,8 @@ const crime = z.strictObject({
   totals: z.strictObject({ jobs: int.min(0), earned: dollars.min(0), cleaned: dollars.min(0), fees: dollars.min(0), lost: dollars.min(0), spent: dollars.min(0), arrests: int.min(0), years: int.min(0) }),
 });
 
-// E6b: fame in arts and media.
+// E6b: fame in arts and media. Batch 4: a title or a band name the player typed (checked again by the action that takes it).
+const fameTitle = z.string().min(1).max(60);
 const fameProjectSchema = z.strictObject({
   year: int,
   path: id,
@@ -634,7 +635,19 @@ const fameProjectSchema = z.strictObject({
   gain: z.number(),
   earned: dollars.min(0),
   assigned: z.literal(true).exactOptional(),
+  genre: id.exactOptional(),
+  offGenre: z.number().min(0).max(1).exactOptional(),
+  tracks: z.array(fameTitle).max(20).exactOptional(),
+  bandName: fameTitle.exactOptional(),
 });
+const showResult = z.strictObject({
+  venue: id,
+  outcome: z.enum(['great', 'good', 'rough']),
+  pay: dollars.min(0),
+  fans: int.min(0),
+  fame: z.number(),
+});
+const tourSize = z.enum(['local', 'regional', 'national', 'world']);
 const fame = z.strictObject({
   active: z.boolean(),
   retired: int.exactOptional(),
@@ -651,6 +664,9 @@ const fame = z.strictObject({
       last: int,
       recent: z.array(score).max(3),
       breakYear: int.min(0),
+      route: id.exactOptional(),
+      genre: id.exactOptional(),
+      skills: z.record(z.string(), z.number().min(0).max(100)).exactOptional(),
     }),
   ),
   image: score,
@@ -674,7 +690,16 @@ const fame = z.strictObject({
     })
     .nullable(),
   plan: z
-    .strictObject({ path: id, kind: id, style: z.enum(['commercial', 'artistic']), risk: z.enum(['safe', 'bold']), tour: z.boolean(), press: z.boolean() })
+    .strictObject({
+      path: id,
+      kind: id,
+      style: z.enum(['commercial', 'artistic']),
+      risk: z.enum(['safe', 'bold']),
+      press: z.boolean(),
+      genre: id.exactOptional(),
+      title: fameTitle.exactOptional(),
+      tracks: z.array(fameTitle).max(20).exactOptional(),
+    })
     .nullable(),
   projects: z.array(fameProjectSchema).max(12),
   awards: z.array(z.strictObject({ awardId: id, year: int, path: id, project: z.string(), won: z.boolean() })).max(30),
@@ -683,8 +708,34 @@ const fame = z.strictObject({
   people: z.strictObject({ super: z.array(id), hater: z.array(id), critic: z.array(id) }),
   stalker: z.strictObject({ id, since: int, stage: z.enum(['watching', 'reported', 'ordered', 'charged']) }).nullable(),
   headlines: z.array(z.strictObject({ year: int, text: z.string(), kind: z.string() })).max(20),
-  income: z.strictObject({ year: int, gross: dollars.min(0), agent: dollars.min(0), company: dollars.min(0), trust: dollars.min(0), scene: dollars.min(0) }),
+  income: z.strictObject({ year: int, gross: dollars.min(0), agent: dollars.min(0), company: dollars.min(0), trust: dollars.min(0), scene: dollars.min(0), tour: dollars.min(0) }),
   fadedFrom: int.exactOptional(),
+  band: z
+    .strictObject({
+      name: fameTitle,
+      path: id,
+      leader: z.union([z.literal('you'), id]),
+      members: z.array(z.strictObject({ id, part: id, skill: score, since: int })).max(8),
+      part: id,
+      chemistry: score,
+      since: int,
+      how: z.enum(['formed', 'route', 'joined']),
+    })
+    .nullable(),
+  pastBands: z.array(z.strictObject({ name: fameTitle, from: int, to: int, how: z.enum(['left', 'solo', 'split']) })).max(12),
+  offers: z.array(z.strictObject({ name: fameTitle, genre: id, size: int.min(1).max(8), skill: score, part: id, year: int })).max(3),
+  instrument: id.nullable(),
+  grind: z.strictObject({
+    year: int,
+    shows: int.min(0),
+    showPay: dollars.min(0),
+    tour: z.strictObject({ path: id, size: tourSize, cost: dollars.min(0) }).nullable(),
+    practice: int.min(0),
+    bySkill: z.record(z.string(), int.min(0)),
+    lastShow: showResult.exactOptional(),
+  }),
+  played: z.strictObject({ year: int, shows: int.min(0), tour: tourSize.nullable(), lastShow: showResult.exactOptional() }),
+  best: z.strictObject({ title: fameTitle, path: id, kind: id, year: int, score: z.number(), bandName: fameTitle.exactOptional() }).exactOptional(),
   totals: z.strictObject({
     projects: int.min(0),
     hits: int.min(0),
@@ -700,6 +751,14 @@ const fame = z.strictObject({
     crossovers: int.min(0),
     stalkers: int.min(0),
     earned: dollars.min(0),
+    shows: int.min(0),
+    practice: int.min(0),
+    bandsFormed: int.min(0),
+    bandsJoined: int.min(0),
+    bandSplits: int.min(0),
+    memberChanges: int.min(0),
+    genreSwitches: int.min(0),
+    offGenre: int.min(0),
   }),
 });
 

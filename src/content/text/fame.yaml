@@ -57,6 +57,53 @@ history:
     variants:
       - "You crossed over into {secondPath}, and brought your name with you."
       - "With a name behind you, you tried {secondPath}."
+  # Batch 4: what you put out, bands, your sound and the road. Values: {project}
+  # and {noun} (the release), {bandName}, {genre} (your main genre), {tourNoun}.
+  released:
+    importance: 1
+    variants:
+      - "You put out \"{project}\", your new {noun}."
+      - "Your {noun} \"{project}\" came out."
+  bandFormed:
+    importance: 2
+    variants:
+      - "You held auditions and started a band: {bandName}."
+      - "You put a band together and called it {bandName}."
+  bandJoined:
+    importance: 2
+    variants:
+      - "You joined {bandName}."
+      - "{bandName} asked you in, and you said yes."
+  bandLeft:
+    importance: 2
+    variants:
+      - "You left {bandName}."
+      - "You walked out of {bandName} and did not look back, much."
+  bandSolo:
+    importance: 2
+    variants:
+      - "You left {bandName} to go solo."
+      - "You went out on your own, and {bandName} went on without you."
+  bandSplit:
+    importance: 2
+    variants:
+      - "{bandName} broke up."
+      - "{bandName} played its last show, though nobody called it that at the time."
+  bandRenamed:
+    importance: 1
+    variants:
+      - "Your band became {bandName}."
+      - "You renamed the band {bandName}, and had the stickers reprinted."
+  genre:
+    importance: 1
+    variants:
+      - "You changed your sound to {genre}."
+      - "You started making {genre}, and not everyone came with you."
+  tour:
+    importance: 1
+    variants:
+      - "You went out on {tourNoun}."
+      - "You spent part of the year on {tourNoun}."
   stalker:
     importance: 3
     variants:
@@ -123,6 +170,147 @@ titles:
     - Borrowed Light
     - Rooms I Left
     - Highway Hymn
+    - Neon Saints
+    - Kitchen Light
+    - Gravel Road Gospel
+    - Velvet Hours
+    - Second Hand Sun
+    - Wild Card Summer
+    - Tin Roof Thunder
+    - Heartbreak Motel
+    - Satellite Love Song
+    - The Ninth Floor
+    - Rust and Roses
+    - Cold Coffee Morning
+    - All the Pretty Lies
+    - Electric Lullaby
+    - "Dance Like Nobody's Home"
+    - Ghost Town Radio
+    - Paper Crowns
+    - Silver Linings Club
+    - Burn the Map
+    - Copper Moon
+    - Sugar on the Floor
+    - Back Seat Kings
+    - River Under the City
+    - Out of Tune Piano
+    - Lights Out Love
+    - Last Bus Home
+    - Concrete Garden
+    - Stay a Little Longer
+    - Bleach and Bubblegum
+    - Sundown Choir
+    - The Weight of Summer
+    - Holy Smoke
+    - Black Coffee Blues
+    - Fever Dream
+    - Golden Hour
+    - Run It Back
+    - Small Town Static
+    - Wolves at the Door
+    - Paper Planes and Promises
+    - Mirror Ball
+    - Two Lanes Wide
+    - Faded Denim
+    - Count to Ten
+    - Ocean in a Jar
+    - Northern Lights Out
+    - Shadow Boxing
+    - Velvet Revolver Heart
+    - Hometown Hero
+    - The Kind That Stays
+    - Loud Little Life
+    - Sweet Static
+    - Wildfire Season
+    - Diamonds in the Rough
+    - Push and Pull
+    - Strangers on a Train
+    - Head in the Clouds
+    - Late Checkout
+    - City of Sparks
+    - Something Borrowed
+    - Thunder Road Revival
+    - Glow in the Dark
+    - Pink Smoke
+    - Phone Off
+    - Sunday Sermon
+    - Broken Compass
+    - Cherry Bomb Sky
+    - Last Call Lullaby
+    - Dead Air
+    - The Long Goodbye
+    - Moonlight Mile Marker
+    - Cassette Heart
+    - Higher Ground
+    - Dirt Roads and Daydreams
+    - Blue Neon
+    - Flowers for the Living
+    - Too Loud to Sleep
+    - Spare Key
+    - Firefly Summer
+    - Heavy Water
+    - Velvet Underground Parking
+    - Open Windows
+    - Lost and Found
+    - Riot in the Choir
+    - Comet Tail
+    - Asphalt Angel
+    - Something to Hold
+    - Southbound
+    - Afterglow
+    - Paper Tiger
+    - Chasing Daylight
+    - House of Cards
+    - Hold the Line
+    - Fast Cars and Slow Songs
+    - Better Days
+    - Echo Park Sunset
+    - Rain on Tin
+    - Mercury Rising
+    - Burn Slow
+    - Satellite Town
+    - Gold Teeth
+    - Sleepwalker
+    - Cold Front
+    - Lucky Strike
+    - No Sleep Till Sunday
+    - Shine
+    - Undertow
+    - Heart of Glass Houses
+    - Tidal
+    - Night Bloom
+    - Long Way Home
+    - Thin Walls
+    - Corner Store Romance
+    - Feral
+    - Seventeen Again
+    - Wire and Wood
+    - Ritual
+    - Overgrown
+    - Saltwater
+    - Static Bloom
+    - Driving With the Lights Off
+    - Little Earthquakes
+    - Wonder Years
+    - Sweat
+    - Mile High
+    - Porch Light
+    - Smoke Signals
+    - Daydream Nation State
+    - Kerosene
+    - Good Trouble
+    - Peach Fuzz
+    - Blood Orange Sky
+    - Two Hearts One Radio
+    - Gasoline Rainbow
+    - Velvet Morning
+    - The Static Years
+    - Hard Candy
+    - Cheap Thrills Theory
+    - Everything Now
+    - Calling It a Night
+    - Window Seat
+    - Stars in the Gutter
   acting:
     - The Understudy
     - Second Spring
@@ -162,6 +350,88 @@ titles:
     - The Weight of Water
     - After the Flood
     - Tenant of Light
+
+# Batch 4: band names, for suggestions when you form one and for bands that ask you to join.
+bandNames:
+  - The Late Arrivals
+  - Paper Kites Over Ohio
+  - Velvet Static
+  - The Spare Keys
+  - Neon Choir
+  - Low Tide Club
+  - The Borrowed Coats
+  - Glass Animals Anonymous
+  - Kitchen Table Saints
+  - The Night Shift Union
+  - Copper Wolves
+  - Second Hand Thunder
+  - The Quiet Riots
+  - Sugar Rust
+  - Midnight Laundromat
+  - The Parking Lot Prophets
+  - Tin Can Radio
+  - The Wrong Exits
+  - Saltwater Kings
+  - Ghost Town Choir
+  - The Hollow Pines
+  - Static Bloom
+  - Cherry Bomb Society
+  - The Last Bus
+  - Moth and Lantern
+  - The Velvet Overdrive
+  - Black Coffee Club
+  - The Basement Tapes Collective
+  - Wild Card Revival
+  - Sundown Syndicate
+  - The Paper Crowns
+  - Faded Denim
+  - The Weekday Heroes
+  - Electric Orchard
+  - The Strange Weather
+  - Gravel and Grace
+  - The Lost Receipts
+  - Satellite Hearts
+  - The Garage Door Band
+  - Northern Static
+  - The Blue Hour
+  - Rust Belt Radio
+  - The Fire Exits
+  - Silver Fillings
+  - The Neighbours Complained
+  - Honey and Ash
+  - The Last Call Choir
+  - Concrete Daisies
+  - The Night Owls Club
+  - Thunder in the Attic
+  - The Rented Tuxedos
+  - Pocket Full of Fuses
+  - The Sleepwalkers
+  - Mirror Ball Mafia
+  - The Overgrown
+  - Kerosene Kids
+  - The Bad Reception
+  - Comet Tail Comets
+  - The Leftover Saints
+  - Wire and Wood
+  - The Odd Socks
+  - Driftwood Engine
+  - The Static Years
+  - Lucky Strike Union
+  - The Open Windows
+  - Velvet Morning
+  - The Back Seat Kings
+  - Riot Choir
+  - The Spare Parts
+  - Fever Dreamers
+  - The Long Goodbyes
+  - Small Town Static
+  - The Cardboard Castles
+  - Moonlight Mechanics
+  - The Pink Smoke
+  - Southbound Saints
+
+# Batch 4: the word for each size of tour, as in "a regional tour".
+tourSizes: { local: local, regional: regional, national: national, world: world }
 
 # Tabloid headlines. The key is the kind of story (registries/web.yaml, in snake case) or
 # "scandal" for one the scene gave them. {name} is the player's full name.

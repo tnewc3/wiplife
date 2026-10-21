@@ -75,10 +75,12 @@ test('commitment changes with one tap, and the project step takes the creative c
   await sheet.getByTestId('project-kind-ep').click();
   await sheet.getByTestId('project-style-artistic').click();
   await sheet.getByTestId('project-risk-bold').click();
-  await sheet.getByTestId('project-tour').check();
+  // Batch 4: no tour box on a project (tours are booked on their own); the press run stays.
+  await expect(sheet.getByTestId('project-tour')).toHaveCount(0);
+  await sheet.getByTestId('project-press').check();
   await expectTouchTargets(page);
   await sheet.getByTestId('project-save').click();
-  await expect(page.getByTestId('plan-summary')).toContainText('An EP: artistic, bold, with a tour');
+  await expect(page.getByTestId('plan-summary')).toContainText(/An EP called “.+”: .*artistic, bold, with a press run/);
 });
 
 test('with no career the Fame screen shows the ways in, and starting one puts you on the ladder', async ({ page }) => {

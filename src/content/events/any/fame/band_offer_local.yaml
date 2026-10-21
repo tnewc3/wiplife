@@ -1,0 +1,40 @@
+id: band_offer_local
+title: A band needs you
+text: >-
+  {offerName}, a band from your side of town, needs someone, and someone
+  told them about you. They want you at their next rehearsal, and they sound
+  like they mean it.
+tone: light
+category: fame
+rarity: common
+recurring: true
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { fame: { active: true } }
+    - { fame: { offer: true } }
+weight: { base: 10 }
+followUpOnly: true
+choices:
+  - id: join
+    label: Join {offerName}
+    outcome:
+      text: >-
+        You go to the rehearsal and stay for three hours. By the end of it you
+        are in {bandName}, and the songs sound different with you in them.
+      effects:
+        - { type: band, action: join }
+        - { type: stat, key: happiness, delta: 4 }
+  - id: think
+    label: Say you will think about it
+    outcome:
+      text: They give you until the new year. The offer is there on your Fame screen if you want it.
+      effects:
+        - { type: stat, key: stress, delta: 1 }
+  - id: no
+    label: Tell them you work alone
+    outcome:
+      text: They take it well. When you hear them play, they sound good without you, which is annoying.
+      effects:
+        - { type: stat, key: happiness, delta: -1 }

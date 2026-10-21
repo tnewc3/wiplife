@@ -9,6 +9,7 @@
  * events themselves check what they are about. Nothing comes up for a life
  * without that history.
  */
+import { bandPeople } from '../fame/band';
 import type { AmendsSource, ContentBundle } from '../../content/schemas';
 import { evaluate } from '../conditions';
 import { queueFamilyEvent } from '../family/step';
@@ -38,6 +39,8 @@ function tieFits(state: LifeState, id: Id, def: AmendsSource): boolean {
   if (def.status && !def.status.includes(rel.status)) return false;
   if (def.wasSpouse !== undefined && (rel.wasSpouse === true) !== def.wasSpouse) return false;
   if (def.below) {
+    // Batch 4: someone in your band now is someone you see every week, not a tie gone cold.
+    if (bandPeople(state, 'member').includes(id) || bandPeople(state, 'leader').includes(id)) return false;
     const coldAffection = def.below.affection !== undefined && rel.affection < def.below.affection;
     const coldTrust = def.below.trust !== undefined && rel.trust < def.below.trust;
     if (!coldAffection && !coldTrust) return false;

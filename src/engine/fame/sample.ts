@@ -83,7 +83,7 @@ export function giveSampleFame(state: LifeState, def: EventDef, cast: Record<str
   }
   if (want.plan === true) {
     const kind = path.kinds[0]!;
-    f.plan = { path: pathId, kind: kind.id, style: 'commercial', risk: 'safe', tour: false, press: false };
+    f.plan = { path: pathId, kind: kind.id, style: 'commercial', risk: 'safe', press: false };
   }
   if (want.released === true || want.last !== undefined || FAME_WORDS.test(text.replace(/\{(rungTitle|nextTitle|pathNoun|secondPath|company|agent|award|headline)\}/g, ''))) {
     const kind = path.kinds[0]!;

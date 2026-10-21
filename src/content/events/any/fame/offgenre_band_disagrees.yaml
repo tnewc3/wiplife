@@ -1,0 +1,36 @@
+id: offgenre_band_disagrees
+title: Not their kind of music
+text: >-
+  {bandmate.name} never wanted to make a {releaseGenre} record, and now that
+  "{project}" is out, {bandmate.they} {bandmate:wants|want} everyone to know it.
+tone: neutral
+category: fame
+rarity: common
+recurring: true
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { fame: { active: true } }
+    - { fame: { released: true } }
+    - { fame: { offGenre: true } }
+    - { fame: { band: true } }
+weight: { base: 8 }
+followUpOnly: true
+cast:
+  bandmate: { kind: friend, band: member, presence: nearby }
+choices:
+  - id: listen
+    label: Hear {bandmate.them} out
+    outcome:
+      text: '{bandmate.They} {bandmate:has|have} a point about the drums. You agree the next one is {bandmate.theirs} to steer.'
+      effects:
+        - { type: relationship, role: bandmate, affection: 5 }
+        - { type: band, action: chemistry, delta: 4 }
+  - id: stand_by
+    label: Stand by the record
+    outcome:
+      text: You stand by it. {bandmate.name} stops arguing, and starts playing a little less.
+      effects:
+        - { type: band, action: chemistry, delta: -5 }
+        - { type: relationship, role: bandmate, affection: -4 }

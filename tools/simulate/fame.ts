@@ -17,6 +17,8 @@ import type { ContentBundle, FameBand } from '../../src/content/schemas';
 import { isLifeActionAvailable, type LifeActionId, type LifeActionParams } from '../../src/engine/actions';
 import { enterBlock, openAgents } from '../../src/engine/fame/ladder';
 import { allPaths, hasTalentFor, mainPath, peakRung, workedPaths } from '../../src/engine/fame/query';
+import { instrumentsOf, practiceBudget, skillLevel, skillsOf } from '../../src/engine/fame/grind';
+import { bandNameSuggestion, genresOf, titleSuggestion } from '../../src/engine/fame/sound';
 import { netWorth } from '../../src/engine/finance';
 import { weightedPick } from '../../src/engine/random';
 import { chance, pick, type RngState } from '../../src/engine/rng';
@@ -39,6 +41,11 @@ export interface StarProfile {
   /** The yearly chance it tries a new commitment... and takes up a second path. */
   crosses: number;
   retiresAt: number;
+  /** Batch 4: whether it wants a band, shows it plays a year, the chance it books a tour, practises, and steps outside its sound. */
+  bandMinded: boolean;
+  shows: number;
+  practises: boolean;
+  offGenre: number;
 }
 
 export function rollStarProfile(rng: RngState): StarProfile {
@@ -52,7 +59,52 @@ export function rollStarProfile(rng: RngState): StarProfile {
     scene: weightedPick(rng, [['low', 2], ['social', 5], ['entourage', 2], ['lavish', 1]] as const),
     crosses: pick(rng, [0.1, 0.4, 0.7]),
     retiresAt: pick(rng, [55, 62, 70, 80]),
+    bandMinded: chance(rng, 0.55),
+    shows: pick(rng, [2, 4, 6]),
+    practises: chance(rng, 0.85),
+    offGenre: pick(rng, [0, 0.1, 0.25]),
   };
+}
+
+/** Batch 4: the grind and bands: an instrument and a genre, practice, shows, a tour, and a band (formed, joined, kept up or left). */
+function grindActions(life: LifeState, content: ContentBundle, rng: RngState, profile: StarProfile, ok: (id: LifeActionId, params: LifeActionParams) => boolean, out: FameAction[]): void {
+  const f = life.fame;
+  const main = f.main;
+  const def = main ? content.famePaths[main] : undefined;
+  if (!main || !def || def.sport) return;
+  const path = f.paths[main]!;
+  const instruments = instrumentsOf(def);
+  if (f.instrument === null && instruments.length > 0) out.push(['set_instrument', { instrumentId: pick(rng, instruments).id }]);
+  const genres = genresOf(content, main);
+  if (genres.length > 0) {
+    if (path.genre === undefined) out.push(['set_genre', { pathId: main, genreId: pick(rng, genres).id }]);
+    else if (chance(rng, 0.03)) out.push(['set_genre', { pathId: main, genreId: pick(rng, genres).id }]);
+  }
+  // A band: form one or take an offer; as leader, replace someone who has turned; now and then, leave.
+  if (profile.bandMinded && f.band === null) {
+    if (f.offers.length > 0 && chance(rng, 0.6) && ok('join_band', { offer: 0 })) out.push(['join_band', { offer: 0 }]);
+    else if (chance(rng, 0.5)) out.push(['form_band', { bandName: bandNameSuggestion(life, 0, content) }]);
+  } else if (f.band) {
+    if (f.band.leader === 'you') {
+      const cold = f.band.members.find((m) => (life.relationships[m.id]?.affection ?? 100) < 30);
+      if (cold && chance(rng, 0.5)) {
+        out.push(['kick_member', { personId: cold.id }]);
+        out.push(['recruit_member', { part: cold.part }]);
+      } else if (chance(rng, 0.01)) out.push(['rename_band', { bandName: bandNameSuggestion(life, 3, content) }]);
+    }
+    if (chance(rng, profile.bandMinded ? 0.02 : 0.15)) out.push(['leave_band', { solo: chance(rng, 0.5) }]);
+  }
+  // Practice: the whole year's sessions, the weakest skill first.
+  if (profile.practises) {
+    const skills = skillsOf(def).map((sk) => sk.id);
+    const budget = practiceBudget(life, content);
+    for (let i = 0; i < budget; i++) {
+      const id = [...skills].sort((a, b) => skillLevel(path, a, content) - skillLevel(path, b, content))[i % Math.max(1, skills.length)];
+      if (id !== undefined) out.push(['practice', { pathId: main, skillId: id }]);
+    }
+  }
+  for (let i = 0; i < profile.shows; i++) out.push(['play_show', {}]);
+  if (chance(rng, profile.tourPress)) out.push(['book_tour', { pathId: main }]);
 }
 
 export function chooseFameActions(life: LifeState, content: ContentBundle, rng: RngState, profile: StarProfile): FameAction[] {
@@ -88,6 +140,7 @@ export function chooseFameActions(life: LifeState, content: ContentBundle, rng: 
     const options = allPaths(content).filter((p) => ok('cross_over', { pathId: p.id }));
     if (options.length > 0) out.push(['cross_over', { pathId: pick(rng, options).id }]);
   }
+  grindActions(life, content, rng, profile, ok, out);
   // This year's project, with its creative choices.
   const paths = workedPaths(life);
   const pathId = paths.length > 1 && chance(rng, 0.4) ? paths[1]! : paths[0]!;
@@ -97,13 +150,17 @@ export function chooseFameActions(life: LifeState, content: ContentBundle, rng: 
     const kinds = def.kinds.filter((k) => k.minRung <= path.rung);
     const kind = kinds.length > 0 ? (chance(rng, 0.6) ? kinds[kinds.length - 1]! : pick(rng, kinds)) : undefined;
     const style = profile.style === 'mixed' ? pick(rng, ['commercial', 'artistic'] as const) : profile.style;
-    const plan = {
+    const genres = genresOf(content, pathId);
+    const genreId = genres.length === 0 ? undefined : chance(rng, profile.offGenre) ? pick(rng, genres).id : path.genre;
+    const plan: LifeActionParams = {
       pathId,
       kindId: kind?.id ?? '',
       style,
       risk: chance(rng, profile.bold) ? ('bold' as const) : ('safe' as const),
-      tour: path.rung >= def.tour.minRung && chance(rng, profile.tourPress),
       press: path.rung >= def.press.minRung && chance(rng, profile.tourPress),
+      // Batch 4: a typed title (a suggestion stands in for typing), and the genre.
+      title: titleSuggestion(life, pathId, 0, content),
+      ...(genreId !== undefined ? { genreId } : {}),
     };
     if (kind && ok('plan_project', plan)) out.push(['plan_project', plan]);
   }
@@ -182,6 +239,12 @@ export interface FameReport {
   minors: { lives: number; allIn: number; stalked: number; parentDeals: number; unsignedDeals: number };
   events: Record<string, number>;
   invariantFailures: number;
+  /** Batch 4: music careers begun as a teen (19 or younger) that reached 28: the highest rung by 28, with a fitting talent and without. */
+  musicAt28: { talent: number[]; none: number[] };
+  /** Careers without a fitting talent, by path: how many, and how many went past the middle of the ladder. */
+  noneByPath: Record<string, { lives: number; pastMiddle: number; quality: number; projects: number }>;
+  /** Batch 4: music careers and their years; shows, tours, practice; bands formed, joined, split; members who came and went; genre switches and off-genre releases; careers ever in a band. */
+  grind: { careers: number; years: number; shows: number; tours: number; practice: number; formed: number; joined: number; splits: number; memberChanges: number; genreSwitches: number; offGenre: number; bandLives: number };
 }
 
 export function emptyFameReport(player: string, content: ContentBundle): FameReport {
@@ -236,6 +299,9 @@ export function emptyFameReport(player: string, content: ContentBundle): FameRep
     minors: { lives: 0, allIn: 0, stalked: 0, parentDeals: 0, unsignedDeals: 0 },
     events: {},
     invariantFailures: 0,
+    musicAt28: { talent: [], none: [] },
+    noneByPath: {},
+    grind: { careers: 0, years: 0, shows: 0, tours: 0, practice: 0, formed: 0, joined: 0, splits: 0, memberChanges: 0, genreSwitches: 0, offGenre: 0, bandLives: 0 },
   };
 }
 
@@ -278,6 +344,7 @@ export class FameWatcher {
   private enteredPath = '';
   private enteredTalent = false;
   private fanSeen = new Set<string>();
+  private musicYears = 0;
 
   constructor(
     private readonly r: FameReport,
@@ -328,6 +395,7 @@ export class FameWatcher {
       const row = r.commitment[setting];
       r.careerYears++;
       row.years++;
+      if (before.fame.main === 'music') this.musicYears++;
       if (main) {
         r.rungYears[main.rung - 1] = (r.rungYears[main.rung - 1] ?? 0) + 1;
         r.rungIncome[main.rung - 1] = (r.rungIncome[main.rung - 1] ?? 0) + f.income.gross;
@@ -349,6 +417,11 @@ export class FameWatcher {
         const side = this.enteredTalent ? r.talent : r.none;
         side.qualitySum += project.quality;
         side.projects++;
+        if (!this.enteredTalent) {
+          const row = (r.noneByPath[project.path] ??= { lives: 0, pastMiddle: 0, quality: 0, projects: 0 });
+          row.quality += project.quality;
+          row.projects++;
+        }
         // Climb: the fame a release won on the first three rungs, before the wall at the next rung holds it back (higher up the same effort buys less).
         if (main && main.rung <= 3) {
           row.releaseYears++;
@@ -441,6 +514,11 @@ export class FameWatcher {
         }
       }
     }
+    // Batch 4: how far a music career begun as a teen has climbed by 28.
+    if (age === 28 && this.enteredPath === 'music' && this.enteredAt <= 19) {
+      const music = f.paths.music;
+      if (music) (this.enteredTalent ? r.musicAt28.talent : r.musicAt28.none).push(music.peak);
+    }
     const headline = f.headlines.find((h) => h.year === after.currentYear);
     if (headline && !['scandal'].includes(headline.kind)) r.secretsOut++;
     book();
@@ -461,6 +539,11 @@ export class FameWatcher {
       r.peak[def.id]![Math.min(def.rungs.length, Math.max(1, high)) - 1]!++;
       const side = this.enteredTalent ? r.talent : r.none;
       if (high > Math.ceil(def.rungs.length / 2)) side.pastMiddle++;
+      if (!this.enteredTalent) {
+        const row = (r.noneByPath[def.id] ??= { lives: 0, pastMiddle: 0, quality: 0, projects: 0 });
+        row.lives++;
+        if (high > Math.ceil(def.rungs.length / 2)) row.pastMiddle++;
+      }
       if (high >= def.rungs.length) side.topRung++;
     }
     if (this.everBreak) r.breakLives++;
@@ -474,6 +557,22 @@ export class FameWatcher {
     if (this.everAgent) r.agentLives++;
     if (f.retired !== undefined) r.retiredLives++;
     if (this.enteredMinor) void this.enteredAt;
+    if (this.enteredPath === 'music') {
+      const g = r.grind;
+      const t = f.totals;
+      g.careers++;
+      g.years += this.musicYears;
+      g.shows += t.shows;
+      g.tours += t.tours;
+      g.practice += t.practice;
+      g.formed += t.bandsFormed;
+      g.joined += t.bandsJoined;
+      g.splits += t.bandSplits;
+      g.memberChanges += t.memberChanges;
+      g.genreSwitches += t.genreSwitches;
+      g.offGenre += t.offGenre;
+      if (t.bandsFormed + t.bandsJoined > 0) g.bandLives++;
+    }
     const famous = high >= this.content.balance.fame.crossover.rung;
     (famous ? r.famousWealth : r.otherWealth).push(netWorth(life));
   }
@@ -500,8 +599,13 @@ export function formatFame(r: FameReport, content: ContentBundle): string[] {
     lines.push(`  ${def.name} — highest rung: ${def.rungs.map((rung, i) => `${rung.title} ${pct(counts[i]!, total)}`).join('; ')}`);
   }
   lines.push(`  talent: ${r.talent.lives} careers with a fitting talent (past the middle of the ladder ${pct(r.talent.pastMiddle, r.talent.lives)}, top rung ${pct(r.talent.topRung, r.talent.lives)}, mean quality ${per(r.talent.qualitySum, r.talent.projects)}); ${r.none.lives} without (past the middle ${pct(r.none.pastMiddle, r.none.lives)}, top rung ${pct(r.none.topRung, r.none.lives)}, mean quality ${per(r.none.qualitySum, r.none.projects)})`);
+  lines.push(`  without a fitting talent, past the middle by path: ${Object.entries(r.noneByPath).map(([id, x]) => `${content.famePaths[id]?.name ?? id} ${pct(x.pastMiddle, x.lives)} of ${x.lives} (mean quality ${per(x.quality, x.projects)})`).join(', ')}`);
   lines.push(`  years in the business ${r.careerYears} (${per(r.careerYears, r.entered)} a career); projects ${r.projectYears}; reception: ${Object.entries(r.bands).map(([b, n]) => `${b} ${pct(n, r.projectYears)}`).join(', ')}`);
   lines.push(`  critics and fans 20+ points apart on ${pct(r.disagree.far, r.disagree.releases)} of releases; commercial work: critics ${per(r.bySetting.commercial.critic, r.bySetting.commercial.n)}, fans ${per(r.bySetting.commercial.fan, r.bySetting.commercial.n)}; artistic work: critics ${per(r.bySetting.artistic.critic, r.bySetting.artistic.n)}, fans ${per(r.bySetting.artistic.fan, r.bySetting.artistic.n)}; spread of reception: safe ${per(sd(r.byRisk.safe), 1)}, bold ${per(sd(r.byRisk.bold), 1)}`);
+  const at28 = (xs: number[]) => `${xs.length} careers, median rung ${median(xs)}, rung 3+ ${pct(xs.filter((x) => x >= 3).length, xs.length)}, rung 4+ ${pct(xs.filter((x) => x >= 4).length, xs.length)}, past the middle ${pct(xs.filter((x) => x > 4).length, xs.length)}`;
+  lines.push(`  music begun as a teen, highest rung by 28: with a fitting talent ${at28(r.musicAt28.talent)}; without ${at28(r.musicAt28.none)}`);
+  const g = r.grind;
+  lines.push(`  music grind: ${g.careers} music careers, ${g.years} career years; shows ${per(g.shows, g.years, 2)} and tours ${per(g.tours, g.years, 2)} a career year; practice ${per(g.practice, g.years, 1)} sessions a career year; bands formed ${g.formed}, joined ${g.joined}, splits ${g.splits}, member changes ${g.memberChanges}; careers ever in a band ${pct(g.bandLives, g.careers)}; genre switches ${g.genreSwitches}, off-genre releases ${g.offGenre}`);
   lines.push(`  big breaks: ${r.breaks} in ${r.breakLives} careers (${pct(r.breakLives, r.entered)}), ${per(r.breaks, r.careerYears, 3)} a career year; over the talent ceiling: ${r.breakOverCeiling}`);
   for (const id of ['back', 'steady', 'all'] as const) {
     const c = r.commitment[id];
@@ -554,6 +658,15 @@ export function fameTargets(report: SimulationReport, content: ContentBundle): T
   range('careers with a tabloid story', share(r.tabloidLives, r.entered), t.tabloidLives);
   range('careers with a stalker', share(r.stalkerLives, r.entered), t.stalkerLives);
   range('careers that crossed into a second path', share(r.crossoverLives, r.entered), t.crossoverLives);
+  const share28 = (xs: number[], test: (x: number) => boolean) => share(xs.filter(test).length, xs.length);
+  range('music begun as a teen, with a fitting talent: reached rung 4 by 28', share28(r.musicAt28.talent, (x) => x >= 4), t.talentRung4By28);
+  range('music begun as a teen, without a fitting talent: reached rung 3 by 28', share28(r.musicAt28.none, (x) => x >= 3), t.noTalentRung3By28);
+  range('music begun as a teen, without a fitting talent: past the middle by 28', share28(r.musicAt28.none, (x) => x > 4), t.noTalentPastMiddleBy28);
+  const g = r.grind;
+  range('shows a music career year', share(g.shows, g.years), t.showsPerYear, (n) => n.toFixed(2));
+  range('tours a music career year', share(g.tours, g.years), t.toursPerYear, (n) => n.toFixed(2));
+  range('music careers ever in a band', share(g.bandLives, g.careers), t.bandLives);
+  range('practice sessions a music career year', share(g.practice, g.years), t.practicePerYear, (n) => n.toFixed(1));
   range('famous lives’ net worth at death as a multiple of the other careers’', share(median(r.famousWealth), Math.max(1, median(r.otherWealth))), t.famousWealthRatio, (n) => n.toFixed(2));
   return out;
 }

@@ -1298,6 +1298,57 @@ export function reactionWord(score: number): string {
   return REACTION_WORDS[Math.min(4, Math.max(0, Math.floor(score / 20)))]!;
 }
 
+// ── Batch 4: bands, shows, tours, practice ─────────────────────────────────
+
+export const SHOW_OUTCOME_LABELS = { great: 'A great night', good: 'A good night', rough: 'A rough night' } as const;
+export const SHOW_BLOCK_LABELS = {
+  inactive: 'You have no career.',
+  prison: 'Not from prison.',
+  path: 'No shows in this line of work.',
+  limit: 'That is all the shows you can fit in this year.',
+  parent: 'A parent has to say yes first.',
+} as const;
+export const TOUR_BLOCK_LABELS = {
+  inactive: 'You have no career.',
+  prison: 'Not from prison.',
+  path: 'No tours in this line of work.',
+  rung: 'You are not high enough on the ladder to tour yet.',
+  booked: 'One tour a year, and this year’s is booked.',
+  parent: 'A parent has to say yes first.',
+} as const;
+export const PRACTICE_BLOCK_LABELS = {
+  inactive: 'You have no career.',
+  prison: 'Not from prison.',
+  path: 'Nothing to practise here.',
+  skill: 'Not a skill of this path.',
+  instrument: 'Choose your instrument first.',
+  budget: 'No practice time left this year.',
+  maxed: 'As good as practice alone can make it.',
+} as const;
+export const BAND_BLOCK_LABELS = {
+  inactive: 'You have no career.',
+  prison: 'Not from prison.',
+  path: 'No bands in this line of work.',
+  have: 'You are already in a band.',
+  none: 'You are not in a band.',
+  parent: 'A parent has to say yes first.',
+  leader: 'Only the band’s leader can do that.',
+  member: 'They are not in the band.',
+  full: 'The band is full.',
+  part: 'That part is taken.',
+  same: 'That is already its name.',
+  offer: 'That offer has gone.',
+} as const;
+export const PAST_BAND_LABELS = { left: 'you left', solo: 'you went solo', split: 'it broke up' } as const;
+/** How well a band plays together, by chemistry (bands of 30, 50, 70). */
+export const CHEMISTRY_WORDS = ['Falling apart', 'Uneasy', 'Tight', 'Like one person'] as const;
+/** How good a bandmate (or a skill) is, in words. */
+export function skillWord(score: number): string {
+  return score >= 80 ? 'Excellent' : score >= 60 ? 'Good' : score >= 40 ? 'Decent' : score >= 20 ? 'Rough' : 'Beginner';
+}
+/** A title or band name that can't be used: what to fix. */
+export const TITLE_ERROR = 'Use letters, numbers, spaces and simple punctuation, up to 60 characters.';
+
 // ── E6c: sports ──────────────────────────────────────────────────────────────
 
 export const SPORT_LEVEL_LABELS = { youth: 'Youth team', school: 'School team', college: 'College or academy', pro: 'Pro' } as const;

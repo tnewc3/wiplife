@@ -115,8 +115,18 @@ export interface LifeActionParams {
   kindId?: string;
   style?: 'commercial' | 'artistic';
   risk?: 'safe' | 'bold';
-  tour?: boolean;
   press?: boolean;
+  /** Batch 4: a project's genre, typed title and track titles; a skill to practise and an instrument; a band's name, your part in it, an offer (its place in the list), whether you go solo, and a bandmate. */
+  genreId?: string;
+  title?: string;
+  tracks?: string[];
+  skillId?: string;
+  instrumentId?: string;
+  bandName?: string;
+  part?: string;
+  offer?: number;
+  solo?: boolean;
+  personId?: string;
   commitment?: 'back' | 'steady' | 'all';
   scene?: 'low' | 'social' | 'entourage' | 'lavish';
   agentId?: string;

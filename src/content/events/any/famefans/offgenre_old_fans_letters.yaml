@@ -1,0 +1,33 @@
+id: offgenre_old_fans_letters
+title: Where did you go
+text: >-
+  Your {noun} "{project}" is {releaseGenre}, a long way from what you usually
+  make. Messages arrive from people who loved the old sound, some of them hurt,
+  some of them curious, a few of them thrilled.
+tone: neutral
+category: famefans
+rarity: common
+recurring: true
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { fame: { active: true } }
+    - { fame: { released: true } }
+    - { fame: { offGenre: true } }
+weight: { base: 10 }
+followUpOnly: true
+choices:
+  - id: reply
+    label: Answer as many as you can
+    outcome:
+      text: It takes a week of evenings. Most of the people you answer stay with you, wherever you go next.
+      effects:
+        - { type: fame, action: mood, delta: 5 }
+        - { type: stat, key: stress, delta: 2 }
+  - id: promise_back
+    label: Promise the old sound will be back
+    outcome:
+      text: It calms them down. It also means the next one has to sound like the old ones.
+      effects:
+        - { type: fame, action: mood, delta: 3 }
+        - { type: fame, action: image, delta: -1 }

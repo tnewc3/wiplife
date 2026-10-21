@@ -375,6 +375,17 @@ fame:
   minorsHarmed: { min: 0, max: 0 }
   unsignedMinorDeals: { min: 0, max: 0 }
   breakOverCeiling: { min: 0, max: 0 }
+  # Batch 4: music careers begun as a teen, by 28. Before Batch 4 (2,000 star lives,
+  # seeds b4before-a to d): with a talent 92.9-100% reached rung 4 (median rung 5);
+  # without, 6.3-14.5% reached rung 3 and none went past the middle.
+  talentRung4By28: { min: 0.5, max: 1 }
+  noTalentRung3By28: { min: 0.2, max: 1 }
+  noTalentPastMiddleBy28: { min: 0, max: 0.06 }
+  # The star player plays shows, tours, practises and is often in a band.
+  showsPerYear: { min: 1, max: 6 }
+  toursPerYear: { min: 0.1, max: 1 }
+  bandLives: { min: 0.2, max: 1 }
+  practicePerYear: { min: 1, max: 14 }
 
 # B1: romance by attraction, on the careful player's lives that reach 50 (ages
 # 18-49): lives attracted to the same gender (or to more than one) are within

@@ -1,0 +1,40 @@
+id: band_first_rehearsal
+title: The first rehearsal
+text: >-
+  The first full rehearsal of {bandName}. Nobody knows anybody's songs yet,
+  the drummer has brought the wrong cables and somebody's amp hums. It is
+  also, unmistakably, a band.
+tone: light
+category: fame
+rarity: common
+recurring: true
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { fame: { active: true } }
+    - { fame: { band: true } }
+    - { fame: { leader: true } }
+weight: { base: 10 }
+followUpOnly: true
+choices:
+  - id: rules
+    label: Set a few rules from the start
+    outcome:
+      text: Rehearsals start on time and nobody brings a partner to them. It is not glamorous, and it works.
+      effects:
+        - { type: band, action: chemistry, delta: 5 }
+  - id: jam
+    label: Forget the songs and just play
+    outcome:
+      text: Two hours of noise, and then ten minutes that sound like something. Everyone goes home grinning.
+      effects:
+        - { type: stat, key: happiness, delta: 4 }
+        - { type: band, action: chemistry, delta: 3 }
+  - id: write
+    label: Write something new, all of you
+    outcome:
+      text: The first song you write together is rough, and it is yours. It goes straight into the set.
+      effects:
+        - { type: fame, action: craft, delta: 2 }
+        - { type: band, action: chemistry, delta: 2 }

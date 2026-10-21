@@ -1583,7 +1583,7 @@ describe('fame in arts and media (E6b)', () => {
     expect(Object.keys(result.bundle.fameCompanies).length).toBeGreaterThanOrEqual(12);
     const events = Object.values(result.bundle.events).filter((e) => !e.retired && e.category.startsWith('fame'));
     expect(events.length).toBeGreaterThanOrEqual(65);
-    expect(events.length).toBeLessThanOrEqual(90);
+    expect(events.length).toBeLessThanOrEqual(130);
     expect(result.warnings).toEqual([]);
   });
 

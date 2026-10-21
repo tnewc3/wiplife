@@ -1,0 +1,54 @@
+id: band_quit_burned_out
+title: Running on empty
+text: >-
+  {bandmate.name} sits on an amp after rehearsal and says {bandmate.they}
+  {bandmate:does|do} not want to do this any more. Not the band, not you,
+  just all of it. {bandmate.They} {bandmate:sounds|sound} more tired than angry.
+tone: serious
+category: fame
+rarity: common
+recurring: true
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { fame: { active: true } }
+    - { fame: { band: true } }
+weight:
+  base: 8
+  # Someone you have clashed with is readier to walk.
+  modifiers:
+    - { if: { memory: { role: bandmate, tag: band_clashed } }, x: 2 }
+followUpOnly: true
+cast:
+  bandmate: { kind: friend, band: member, presence: nearby }
+choices:
+  - id: accept
+    label: Say you understand
+    outcome:
+      text: >-
+        {bandmate.They} {bandmate:packs|pack} up for the last time. You find
+        someone else in time, but the songs remember how {bandmate.they} played them.
+      effects:
+        - { type: band, action: quit, role: bandmate }
+        - { type: relationship, role: bandmate, affection: 4 }
+  - id: break
+    label: Suggest a month off for everyone
+    outcome:
+      text: >-
+        Nobody plays for a month. When you come back, {bandmate.name} is the
+        first one tuning up.
+      effects:
+        - { type: band, action: chemistry, delta: 5 }
+        - { type: stat, key: stress, delta: -3 }
+        - { type: relationship, role: bandmate, affection: 4 }
+  - id: guilt
+    label: Remind {bandmate.them} what the band has put into this
+    outcome:
+      text: >-
+        It works, in the worst way. {bandmate.name} stays, and plays like
+        someone serving a sentence.
+      effects:
+        - { type: band, action: chemistry, delta: -6 }
+        - { type: relationship, role: bandmate, affection: -6 }
+        - { type: memory, role: bandmate, tag: band_clashed }

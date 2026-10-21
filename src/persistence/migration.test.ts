@@ -3,6 +3,9 @@ import { describe, expect, it } from 'vitest';
 import { content } from '../content';
 import { cloneJson, lifeAtAge } from '../engine/testFixtures';
 import { emptyMigration } from '../engine/migration/types';
+import { tourSizeFor } from '../engine/fame/grind';
+import { enterPath } from '../engine/fame/ladder';
+import type { LifeState } from '../engine/types';
 import { makeEnvelope } from './envelope';
 import { migrateEnvelope } from './migrations';
 import { lifeStateSchema, loadedLifeSchema } from './lifeSchema';
@@ -101,5 +104,64 @@ describe('Batch 2b saves', () => {
     expect(loadedLifeSchema(content).parse(JSON.parse(JSON.stringify(life)))).toEqual(life);
     expect(lifeStateSchema.safeParse(produce(life, (d) => void (d.finances.debts[0]!.kind = 'loan' as never))).success).toBe(false);
     expect(lifeStateSchema.safeParse(produce(life, (d) => void (d.character.formerNames = [{ first: '', last: 'x', year: 1 }]))).success).toBe(false);
+  });
+});
+
+describe('Batch 4 saves', () => {
+  /** A schema 31 save: a musician with a project lined up and its tour box ticked, without any Batch 4 field. */
+  const oldSave = (seed: string, ticked: boolean) => {
+    const life = produce(lifeAtAge(seed, 30), (d) => {
+      enterPath(d as LifeState, 'music', 'open_mic', content);
+      d.fame.paths.music!.rung = 4;
+      d.fame.paths.music!.peak = 4;
+      d.fame.plan = { path: 'music', kind: 'album', style: 'artistic', risk: 'safe', press: false };
+    });
+    const old = cloneJson(life) as unknown as Record<string, unknown> & { fame: Record<string, unknown> & { plan: Record<string, unknown>; income: Record<string, unknown>; totals: Record<string, unknown> } };
+    for (const key of ['band', 'pastBands', 'offers', 'instrument', 'grind', 'played']) delete old.fame[key];
+    delete old.fame.income.tour;
+    for (const key of ['shows', 'practice', 'bandsFormed', 'bandsJoined', 'bandSplits', 'memberChanges', 'genreSwitches', 'offGenre']) delete old.fame.totals[key];
+    old.fame.plan.tour = ticked;
+    return { life, old };
+  };
+
+  it('upgrades a save: a ticked tour box becomes a tour booked for the coming year at no cost, in the life and in an heir snapshot', () => {
+    const { life, old } = oldSave('b4-migrate', true);
+    const saved = { ...old, inputLog: [{ year: life.currentYear, kind: 'create', payload: { heir: true, snapshot: cloneJson(old) } }] };
+    const after = migrateEnvelope({ ...makeEnvelope(saved, content.contentVersion), schemaVersion: 31 }).data as LifeState;
+    expect(after.fame.plan).toEqual({ path: 'music', kind: 'album', style: 'artistic', risk: 'safe', press: false });
+    expect(after.fame.grind.tour).toEqual({ path: 'music', size: tourSizeFor(content.famePaths.music!, 4, content), cost: 0 });
+    expect(after.fame.grind.year).toBe(life.currentYear);
+    expect(after.fame.band).toBeNull();
+    expect(after.fame.income.tour).toBe(0);
+    expect(after.fame.totals.shows).toBe(0);
+    expect(after.inputLog[0]!.payload.snapshot).toMatchObject({ fame: { band: null, grind: { tour: { path: 'music' } } } });
+    expect(lifeStateSchema.safeParse(after).success).toBe(true);
+  });
+
+  it('upgrades a plan without a tour to no booking, and the result is a valid life', () => {
+    const { old } = oldSave('b4-no-tour', false);
+    const after = migrateEnvelope({ ...makeEnvelope(old, content.contentVersion), schemaVersion: 31 }).data as LifeState;
+    expect(after.fame.grind.tour).toBeNull();
+    expect('tour' in after.fame.plan!).toBe(false);
+    expect(loadedLifeSchema(content).safeParse(after).success).toBe(true);
+  });
+
+  it('roundtrips a life with a band, offers, skills, a booked tour and a typed title', () => {
+    const life = produce(lifeAtAge('b4-save', 28), (d) => {
+      enterPath(d as LifeState, 'music', 'band', content);
+      d.fame.instrument = 'guitar';
+      d.fame.paths.music!.genre = 'indie';
+      d.fame.paths.music!.skills = { vocals: 31.5, instrument: 12 };
+      d.fame.paths.music!.rung = 3;
+      d.fame.paths.music!.peak = 3;
+      d.fame.grind = { year: d.currentYear, shows: 2, showPay: 120, tour: { path: 'music', size: 'regional', cost: 4000 }, practice: 3, bySkill: { vocals: 3 }, lastShow: { venue: 'club', outcome: 'good', pay: 60, fans: 40, fame: 0.5 } };
+      d.fame.plan = { path: 'music', kind: 'album', style: 'commercial', risk: 'bold', press: true, genre: 'metal', title: 'Rooms I Left', tracks: ['Intro', 'Outro'] };
+      d.fame.pastBands.push({ name: 'The First Try', from: d.currentYear - 4, to: d.currentYear - 2, how: 'split' });
+      d.fame.best = { title: 'Glass Weather', path: 'music', kind: 'single', year: d.currentYear - 1, score: 61.5, bandName: d.fame.band!.name };
+    });
+    expect(life.fame.band).not.toBeNull();
+    expect(loadedLifeSchema(content).parse(JSON.parse(JSON.stringify(life)))).toEqual(life);
+    // A title the player could never have typed is rejected on load.
+    expect(lifeStateSchema.safeParse(produce(life, (d) => void (d.fame.plan!.title = 'x'.repeat(61)))).success).toBe(false);
   });
 });

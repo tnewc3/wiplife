@@ -38,6 +38,7 @@ import { applyPossessionEffect } from '../possessions/effects';
 import { applyTeenEffect } from '../teen/effects';
 import { applyCrimeEffect, applyDirtyMoneyEffect } from '../crime/effects';
 import { applyFameEffect, applyFamePayEffect } from '../fame/effects';
+import { applyBandEffect } from '../fame/band';
 import { applySportsEffect } from '../sports/effects';
 import { applyLaterEffect } from '../later/effects';
 import { applyFaithEffect, applyGroupEffect, applyValueEffect } from '../belonging/effects';
@@ -397,6 +398,7 @@ const handlers: { [T in Effect['type']]: Handler<T> } = {
 
   // E6b: fame in arts and media, and money from the work.
   fame: (state, effect, ctx) => applyFameEffect(state, effect, ctx.cast, ctx.content, ctx.rng),
+  band: (state, effect, ctx) => applyBandEffect(state, effect, ctx.cast, ctx.content, ctx.rng),
   famePay: (state, effect, ctx) => applyFamePayEffect(state, effect, ctx.content),
   // E6c: sports.
   sports: (state, effect, ctx) => applySportsEffect(state, effect, ctx.cast, ctx.content, ctx.rng, ctx.def.id),

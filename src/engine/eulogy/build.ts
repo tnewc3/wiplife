@@ -98,6 +98,9 @@ function milestonesOf(w: Writer): Map<EulogyMilestone, Record<string, string | n
   if (age < content.balance.aging.obituary.youngAge) out.set('tooSoon', { age });
   if (age >= content.balance.eulogy.longLifeAge) out.set('longLife', { age });
   if (life.flags.fame_famous) out.set('famous', {});
+  const best = life.fame.best;
+  const bestDef = best ? content.famePaths[best.path] : undefined;
+  if (best && bestDef && best.score >= content.balance.fame.reception.bands.solid) out.set('bestWork', { work: best.title, noun: bestDef.kinds.find((k) => k.id === best.kind)?.noun ?? 'work' });
   if (life.flags.sports_hall_of_fame) out.set('hallOfFame', {});
   return out;
 }
