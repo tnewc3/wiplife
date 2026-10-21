@@ -14,6 +14,7 @@ import { webFailures } from './web/invariants';
 import { possessionsFailures } from './possessions/invariants';
 import { pastimesFailures } from './pastimes/invariants';
 import { teenFailures } from './teen/invariants';
+import { schoolFailures } from './school/invariants';
 import { crimeFailures } from './crime/invariants';
 import { fameFailures } from './fame/invariants';
 import { sportsFailures } from './sports/invariants';
@@ -264,6 +265,7 @@ export function checkInvariants(state: LifeState, content: ContentBundle): strin
 
   // The teen years (T1), including that no romance involves anyone under 18.
   failures.push(...teenFailures(state, content));
+  failures.push(...schoolFailures(state, content));
 
   // Crime careers (E6a), including that nobody under 18 is in a crew.
   failures.push(...crimeFailures(state, content));
@@ -541,7 +543,7 @@ function educationFailures(state: LifeState, content: ContentBundle): string[] {
     if (cur.program === 'elementary' && cur.year !== age - ages.startAge + 1) fail(`elementary school year ${cur.year} at age ${age}`);
     if (cur.program === 'middle' && cur.year !== age - ages.middleStart + 1) fail(`middle school year ${cur.year} at age ${age}`);
     if (cur.program === 'high' && (age < ages.highStart || age >= ages.lastDiplomaAge)) fail(`in high school at age ${age}`);
-    if ((cur.program === 'college' || cur.program === 'trade') && !finishedHighSchool(state)) fail(`in ${cur.program} without finishing high school`);
+    if ((cur.program === 'college' || cur.program === 'trade') && !finishedHighSchool(state) && cur.apprentice !== true) fail(`in ${cur.program} without finishing high school`);
     if (cur.program === 'grad' && !hasCredential(state, ['bachelor'])) fail('in grad school without a bachelor’s degree');
     if (cur.program === 'high' && finishedHighSchool(state)) fail('in high school after finishing it');
   }

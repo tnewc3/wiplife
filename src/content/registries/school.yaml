@@ -1,0 +1,31 @@
+# The events the school step queues. Each trigger lists the events that may
+# answer it; the step picks one that fits (requirements, cooldowns, one-time
+# rules) by weight. An exam's events are told by band: the flag exam_<id>
+# holds top, pass or fail, and each event requires the band it tells.
+#
+# gcse, alevels, sat, provincial, mx_placement, mx_entrance: the exam's results
+#   are in.
+# caught_cheating: you were caught cheating; your teacher is cast as {teacher}.
+# skipped: school noticed you skipping class; your teacher is cast as {teacher}
+#   (the truancy letter of the teen years may follow).
+# report: a yearly report card worth a moment (a subject you shine in, or are
+#   failing); the flags report_shining and report_failing say which.
+triggers:
+  gcse:
+    events: [uk_gcse_results, uk_gcse_missed]
+  alevels:
+    events: [uk_alevel_results, uk_alevel_missed]
+  sat:
+    events: [entrance_exam, entrance_exam_low]
+  provincial:
+    events: [ca_exam_week, ca_exam_low]
+  mx_placement:
+    events: [mx_placement_exam, mx_placement_low]
+  mx_entrance:
+    events: [mx_entrance_exam, mx_entrance_low]
+  caught_cheating:
+    events: [cheating_caught_meeting]
+  skipped:
+    events: [skipped_class_noticed, truancy_letter]
+  report:
+    events: [report_card_shining, report_card_failing_subject]

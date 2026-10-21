@@ -8,6 +8,7 @@ levels:
   - { title: "office assistant", salary: 36000 }
   - { title: "office manager", salary: 47000 }
   - { title: "operations coordinator", salary: 57000 }
+workplace: medium
 performance:
   - { key: discipline, weight: 0.35 }
   - { key: sociability, weight: 0.2 }

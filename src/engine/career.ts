@@ -34,6 +34,7 @@ import { chance, nextFloat, pick } from './rng';
 import { writeFromGroup } from './systems/history';
 import type { Id, Job, JobEnd, LifeState } from './types';
 import { jobPayFactor } from './country';
+import { workEffortAim } from './work/actions';
 
 /** An active (not retired) job track, or undefined. */
 export function activeJob(content: ContentBundle, jobId: Id): JobDef | undefined {
@@ -216,11 +217,19 @@ function addCoworker(state: LifeState, content: ContentBundle): void {
 export function staffWorkplace(state: LifeState, content: ContentBundle, newJob: boolean): void {
   const w = content.balance.careers.workplace;
   if (currentBoss(state) === null) createPerson(state, { kind: 'boss', age: w.bossAge, presence: 'city' }, state.rng, content);
+  const size = workplaceSize(state, content);
   if (newJob) {
-    for (let i = 0; i < w.coworkers; i++) addCoworker(state, content);
-  } else if (currentCoworkers(state).length < w.maxCoworkers && chance(state.rng, w.newCoworkerChance)) {
+    for (let i = 0; i < size.coworkers; i++) addCoworker(state, content);
+  } else if (currentCoworkers(state).length < size.max && chance(state.rng, w.newCoworkerChance)) {
     addCoworker(state, content);
   }
+}
+
+/** How many coworkers your workplace starts with and has at most: from the job's size, or its category's (balance careers.yaml workplace). */
+export function workplaceSize(state: LifeState, content: ContentBundle): { coworkers: number; max: number } {
+  const w = content.balance.careers.workplace;
+  const def = state.career.job && content.jobs[state.career.job.jobId];
+  return w.sizes[def ? (def.workplace ?? w.categorySize[def.category]) : 'small'];
 }
 
 /** The people from a job you leave become acquaintances: former coworkers and a former boss. */
@@ -334,6 +343,8 @@ export function performanceAim(state: LifeState, def: JobDef, content: ContentBu
   if (state.fame.active) aim += content.balance.fame.commitment.job[state.fame.commitment];
   // E5: getting to work without a vehicle where the work needs one (or where one helps) costs you.
   aim -= missingVehiclePenalty(state, content);
+  // Batch 3: last year's stance at work (harder or slack) carries into this review.
+  aim += workEffortAim(state, content);
   return aim;
 }
 

@@ -1,0 +1,59 @@
+# Web (feudBegan): two of your coworkers have fallen out.
+id: coworker_feud_side
+title: Two desks, no words
+text: >-
+  {a.name} and {b.name} used to share a joke across the partition. Now they send
+  each other emails with the whole team copied in. Everyone on the floor has
+  noticed, and everyone is waiting to see whose side you are on.
+tone: neutral
+category: web
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { career: { employed: true, retired: false } }
+    - { tie: { a: a, b: b, kind: [friends], status: [feuding] } }
+    - { role: a, alive: true, kind: [coworker] }
+    - { role: b, alive: true, kind: [coworker] }
+weight: { base: 9 }
+followUpOnly: true
+cast:
+  a: { support: true, presence: anywhere }
+  b: { support: true, presence: anywhere }
+choices:
+  - id: side_a
+    label: Back {a.name}
+    outcome:
+      text: >-
+        You make it clear where you stand. {a.name} is grateful. {b.name} takes
+        it quietly, and the tone of the next meeting is a little colder.
+      effects:
+        - { type: tie, a: a, b: b, action: side, with: a }
+        - { type: relationship, role: a, affection: 6, trust: 4 }
+        - { type: relationship, role: b, affection: -7, trust: -3 }
+        - { type: stat, key: stress, delta: 2 }
+        - { type: stat, key: happiness, delta: -1 }
+  - id: side_b
+    label: Back {b.name}
+    outcome:
+      text: >-
+        {b.name} thanks you with a look across the room. {a.name} stops saving
+        you a seat, and neither of you says why.
+      effects:
+        - { type: tie, a: a, b: b, action: side, with: b }
+        - { type: relationship, role: b, affection: 6, trust: 4 }
+        - { type: relationship, role: a, affection: -7, trust: -3 }
+        - { type: stat, key: stress, delta: 2 }
+        - { type: stat, key: happiness, delta: -1 }
+  - id: neutral
+    label: Stay out of it, and be pleasant to both
+    outcome:
+      text: >-
+        Being pleasant to both is harder than it sounds, and it works better
+        than it should. By the next quarter you are the one person they both
+        still talk to.
+      effects:
+        - { type: tie, a: a, b: b, action: neutral }
+        - { type: relationship, role: a, affection: 1 }
+        - { type: relationship, role: b, affection: 1 }
+        - { type: stat, key: stress, delta: 1 }

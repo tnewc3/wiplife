@@ -8,6 +8,7 @@ levels:
   - { title: "forklift operator", salary: 38000 }
   - { title: "team lead", salary: 43000 }
   - { title: "warehouse supervisor", salary: 53000 }
+workplace: large
 performance:
   - { key: fitness, weight: 0.35 }
   - { key: discipline, weight: 0.3 }

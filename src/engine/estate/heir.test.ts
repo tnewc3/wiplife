@@ -206,15 +206,17 @@ describe('continuing as a minor heir', () => {
     const held = heir.finances.trust!.balance;
     for (let i = 0; i < 8; i++) heir = playYear(heir, content);
     expect(heir.character.age).toBe(17);
-    expect(heir.finances.trust?.balance).toBe(held);
+    // (A young star's parents add to the trust, E6b; nothing takes from it.)
+    const grown = heir.finances.trust!.balance;
+    expect(grown).toBeGreaterThanOrEqual(held);
     const savings = heir.finances.savings;
     const released = produce(heir, (d) => {
       d.character.age = 18;
       d.currentYear = d.birthYear + 18;
-      expect(releaseTrust(d)).toBe(held);
+      expect(releaseTrust(d)).toBe(grown);
     });
     expect(released.finances.trust).toBeUndefined();
-    expect(released.finances.savings).toBe(savings + held);
+    expect(released.finances.savings).toBe(savings + grown);
   });
 
   it('is released by the year pipeline when the heir turns 18', () => {

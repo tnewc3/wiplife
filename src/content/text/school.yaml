@@ -1,0 +1,57 @@
+# History lines the school systems write. Values: {exam} (the exam, "the GCSEs"), {school}, {path}.
+history:
+  examTop:
+    importance: 2
+    variants:
+      - "You did very well in {exam}."
+      - "Your results in {exam} were among the best in your year."
+  examPass:
+    importance: 1
+    variants:
+      - "You passed {exam}."
+      - "You got through {exam} without drama."
+  examFail:
+    importance: 2
+    variants:
+      - "You didn't do well in {exam}."
+      - "{exam} did not go the way you hoped."
+  choseStay:
+    importance: 2
+    variants:
+      - "You stayed on for {path}."
+  choseCollege:
+    importance: 2
+    variants:
+      - "You went to {path}."
+  choseApprenticeship:
+    importance: 2
+    variants:
+      - "You started an apprenticeship."
+  choseWork:
+    importance: 2
+    variants:
+      - "You left school at 16 to go to work."
+  noApprenticeship:
+    importance: 1
+    variants:
+      - "No employer took you on as an apprentice."
+  fellBack:
+    importance: 1
+    variants:
+      - "You didn't get the place you wanted and went to {path} instead."
+  offerMissed:
+    importance: 2
+    variants:
+      - "You missed the grades for your place at {school}."
+  newClass:
+    importance: 1
+    variants:
+      - "You started at {school} and met a new class."
+  caughtCheating:
+    importance: 2
+    variants:
+      - "You were caught cheating at school."
+  skippedCaught:
+    importance: 1
+    variants:
+      - "School noticed you skipping class."

@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { content } from '../content';
 import { InvalidInputError } from './creation/input';
+import { emptySchoolLife, emptyWorkYear } from './school/state';
 import { checkInvariants } from './invariants';
 import { createLife } from './life';
 import { getFamily } from './selectors';
@@ -33,8 +34,8 @@ describe('createLife (random)', () => {
     expect(life.birthYear).toBe(BIRTH_YEAR);
     expect(life.phase).toBe('yearStart');
     expect(life.character.custom).toBe(false);
-    expect(life.education).toEqual({ current: null, credentials: [], admission: null, left: null, applied: [], fund: 0 });
-    expect(life.career).toEqual({ job: null, gig: false, retired: false, history: [], applied: [], openings: [] });
+    expect(life.education).toEqual({ current: null, credentials: [], admission: null, left: null, applied: [], fund: 0, school: emptySchoolLife() });
+    expect(life.career).toEqual({ job: null, gig: false, retired: false, history: [], applied: [], openings: [], work: emptyWorkYear() });
     expect(life.finances).toEqual({ savings: 0, debts: [], lifestyle: 'comfortable', earnings: { years: 0, total: 0 }, hardshipYears: 0, dirty: 0 });
     expect(life.housing).toEqual({ kind: 'with_parents', cityId: life.character.cityId, annualCost: 0, since: life.birthYear });
     expect(life.character.birthCityId).toBe(life.character.cityId);

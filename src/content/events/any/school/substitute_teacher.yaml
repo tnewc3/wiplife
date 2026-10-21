@@ -1,0 +1,56 @@
+id: substitute_teacher
+title: The substitute
+text: >-
+  {teacher.name} is away, and the person at the front of the room is holding the
+  register like a map of a country they've never been to. The first prank
+  is a whisper. By the end of the row, it's a plan.
+tone: light
+category: school
+rarity: common
+lifeStages: [child, teen]
+requires:
+  all:
+    - { education: { program: [elementary, middle, high] } }
+    - { age: { lte: 17 } }
+weight: { base: 6 }
+cooldownYears: 3
+cast:
+  teacher: { kind: teacher, presence: city }
+  classmate: { kind: classmate, presence: city, createIfMissing: true, newChance: 0.3 }
+choices:
+  - id: join
+    label: Join in
+    check:
+      base: 50
+      stats: [{ key: riskTaking, weight: 0.25 }, { key: sociability, weight: 0.15 }]
+      success:
+        text: >-
+          It's the best forty minutes of the term. Nobody gets caught, the
+          substitute goes home pale, and {classmate.name} tells the story
+          for weeks.
+        effects:
+          - { type: relationship, role: classmate, affection: 6 }
+          - { type: stat, key: happiness, delta: 3 }
+      failure:
+        text: >-
+          The substitute knows more about teenagers than you'd expect. Your name
+          goes on a list, and {teacher.name} reads it on Monday.
+        effects:
+          - { type: relationship, role: teacher, affection: -4 }
+          - { type: relationship, role: classmate, affection: 2 }
+          - { type: stat, key: stress, delta: 2 }
+          - { type: stat, key: happiness, delta: -1 }
+  - id: behave
+    label: Be exactly as polite as you would be on any other day
+    outcome:
+      text: The substitute leaves a note for {teacher.name}, and your name is on it for good reasons.
+      effects:
+        - { type: relationship, role: teacher, affection: 3, trust: 3 }
+        - { type: relationship, role: classmate, affection: -1 }
+  - id: help
+    label: Quietly help the substitute find the lesson plan
+    outcome:
+      text: It takes ten minutes of looking, and by the end of it the substitute is grateful in the way people are who've just been rescued.
+      effects:
+        - { type: relationship, role: teacher, trust: 2 }
+        - { type: stat, key: kindness, delta: 1 }

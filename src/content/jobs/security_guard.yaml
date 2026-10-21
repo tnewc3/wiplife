@@ -9,6 +9,7 @@ levels:
   - { title: "senior guard", salary: 35000 }
   - { title: "security supervisor", salary: 42000 }
   - { title: "security manager", salary: 55000 }
+workplace: small
 performance:
   - { key: fitness, weight: 0.25 }
   - { key: discipline, weight: 0.3 }

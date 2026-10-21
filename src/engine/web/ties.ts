@@ -26,7 +26,8 @@ export function inCircle(state: LifeState, id: Id): boolean {
 }
 
 /** The kinds a person can be to you for a friends tie between them (your friends and the people you go to school with). */
-export const FRIEND_TIE_KINDS: readonly Relationship['kind'][] = ['friend', 'classmate'];
+/** Batch 3: coworkers can be tied to each other too (friends, or rivals when it sours); teachers and bosses are never tied. */
+export const FRIEND_TIE_KINDS: readonly Relationship['kind'][] = ['friend', 'classmate', 'coworker'];
 
 const PARENT_GENERATION: readonly Relationship['kind'][] = ['parent', 'stepparent'];
 
@@ -55,6 +56,7 @@ export function areRelated(state: LifeState, a: Id, b: Id): boolean {
  */
 export function mayBeCouple(state: LifeState, a: Id, b: Id, content: ContentBundle): boolean {
   if (a === b || !inCircle(state, a) || !inCircle(state, b)) return false;
+  if (state.relationships[a]!.kind === 'teacher' || state.relationships[b]!.kind === 'teacher') return false;
   const pa = state.people[a]!;
   const pb = state.people[b]!;
   const { adultAge } = content.balance.relationships;
@@ -77,7 +79,7 @@ export function tieCount(web: WebState, id: Id): number {
 
 /** Whether two people can be given a (new) tie: both in your circle, no tie yet. */
 export function canTie(state: LifeState, a: Id, b: Id): boolean {
-  return a !== b && inCircle(state, a) && inCircle(state, b) && getTie(state.web, a, b) === undefined;
+  return a !== b && inCircle(state, a) && inCircle(state, b) && state.relationships[a]!.kind !== 'teacher' && state.relationships[b]!.kind !== 'teacher' && getTie(state.web, a, b) === undefined;
 }
 
 /** The kind of tie two friends can have. */

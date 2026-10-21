@@ -1,0 +1,53 @@
+id: unfair_mark
+title: It should have been higher
+text: >-
+  The marked paper is on your desk face down, and you already know from the
+  way {teacher.name} placed it. Then you read the comments, and half of them
+  are about something the paper doesn't say.
+tone: serious
+category: school
+rarity: common
+lifeStages: [teen]
+requires:
+  all:
+    - { education: { program: [middle, high] } }
+    - { age: { gte: 13 } }
+weight: { base: 5 }
+cooldownYears: 3
+cast:
+  teacher: { kind: teacher, presence: city }
+choices:
+  - id: ask_politely
+    label: Ask to go through it together
+    check:
+      base: 50
+      stats: [{ role: teacher, key: affection, weight: 0.2 }, { key: confidence, weight: 0.2 }]
+      success:
+        text: >-
+          {teacher.name} reads the paragraph again and winces. The mark goes up
+          by a grade, and so does your opinion of {teacher.them}.
+        effects:
+          - { type: education, action: grades, value: 0.08 }
+          - { type: relationship, role: teacher, trust: 3 }
+      failure:
+        text: >-
+          {teacher.name} stands by the mark, and the conversation is a polite
+          dead end. You walk away with the same grade and a lot to think about.
+        effects:
+          - { type: relationship, role: teacher, affection: -1 }
+          - { type: stat, key: stress, delta: 2 }
+          - { type: stat, key: happiness, delta: -1 }
+  - id: let_it_go
+    label: Let it go
+    outcome:
+      text: It's one mark among a hundred. You tell yourself that for most of the week.
+      effects:
+        - { type: stat, key: stress, delta: 1 }
+  - id: sulk
+    label: Make a show of being offended
+    outcome:
+      text: The class notices. {teacher.name} does too, and keeps a polite distance for the rest of the term.
+      effects:
+        - { type: relationship, role: teacher, affection: -4 }
+        - { type: stat, key: stress, delta: 2 }
+        - { type: stat, key: happiness, delta: -1 }

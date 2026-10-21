@@ -108,7 +108,7 @@ describe('Batch 2b saves', () => {
 });
 
 describe('Batch 4 saves', () => {
-  /** A schema 30 save: a musician with a project lined up and its tour box ticked, without any Batch 4 field. */
+  /** A schema 31 save: a musician with a project lined up and its tour box ticked, without any Batch 4 field. */
   const oldSave = (seed: string, ticked: boolean) => {
     const life = produce(lifeAtAge(seed, 30), (d) => {
       enterPath(d as LifeState, 'music', 'open_mic', content);
@@ -127,7 +127,7 @@ describe('Batch 4 saves', () => {
   it('upgrades a save: a ticked tour box becomes a tour booked for the coming year at no cost, in the life and in an heir snapshot', () => {
     const { life, old } = oldSave('b4-migrate', true);
     const saved = { ...old, inputLog: [{ year: life.currentYear, kind: 'create', payload: { heir: true, snapshot: cloneJson(old) } }] };
-    const after = migrateEnvelope({ ...makeEnvelope(saved, content.contentVersion), schemaVersion: 30 }).data as LifeState;
+    const after = migrateEnvelope({ ...makeEnvelope(saved, content.contentVersion), schemaVersion: 31 }).data as LifeState;
     expect(after.fame.plan).toEqual({ path: 'music', kind: 'album', style: 'artistic', risk: 'safe', press: false });
     expect(after.fame.grind.tour).toEqual({ path: 'music', size: tourSizeFor(content.famePaths.music!, 4, content), cost: 0 });
     expect(after.fame.grind.year).toBe(life.currentYear);
@@ -140,7 +140,7 @@ describe('Batch 4 saves', () => {
 
   it('upgrades a plan without a tour to no booking, and the result is a valid life', () => {
     const { old } = oldSave('b4-no-tour', false);
-    const after = migrateEnvelope({ ...makeEnvelope(old, content.contentVersion), schemaVersion: 30 }).data as LifeState;
+    const after = migrateEnvelope({ ...makeEnvelope(old, content.contentVersion), schemaVersion: 31 }).data as LifeState;
     expect(after.fame.grind.tour).toBeNull();
     expect('tour' in after.fame.plan!).toBe(false);
     expect(loadedLifeSchema(content).safeParse(after).success).toBe(true);

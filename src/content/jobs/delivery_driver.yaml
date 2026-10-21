@@ -7,6 +7,7 @@ levels:
   - { title: "courier", salary: 32000, years: 1 }
   - { title: "route driver", salary: 38000 }
   - { title: "lead driver", salary: 43000 }
+workplace: small
 performance:
   - { key: discipline, weight: 0.35 }
   - { key: fitness, weight: 0.15 }

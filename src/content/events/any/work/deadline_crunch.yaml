@@ -1,0 +1,64 @@
+id: deadline_crunch
+title: The crunch
+text: >-
+  The project is due Friday and it will not be ready on Friday, not unless
+  somebody decides to make it so. {boss.name} has called the team into the
+  room and written a number on the whiteboard, and then underlined it twice.
+tone: serious
+category: work
+rarity: common
+lifeStages: [youngAdult, adult]
+requires: { career: { employed: true, retired: false } }
+weight: { base: 6 }
+cooldownYears: 3
+cast:
+  boss: { kind: boss, presence: city }
+  npc: { kind: coworker, presence: city }
+choices:
+  - id: stay_late
+    label: Stay late with the team
+    outcome:
+      text: >-
+        Three evenings of cold takeaway and warm banter. {npc.name} falls asleep
+        on the sofa in the break room and wakes up apologising. It gets done.
+        It is a thing you will mention to each other for years.
+      effects:
+        - { type: job, action: performance, value: 5 }
+        - { type: relationship, role: npc, affection: 6, trust: 4 }
+        - { type: relationship, role: boss, trust: 3 }
+        - { type: stat, key: stress, delta: 6 }
+        - { type: stat, key: happiness, delta: -2 }
+        - { type: stat, key: health, delta: -2 }
+  - id: set_limits
+    label: Do your share, and go home on time
+    outcome:
+      text: >-
+        You finish what is yours and leave at a decent hour. The team notices
+        the empty chair, the way teams do. The deadline moves by a day, and
+        nobody can say whether that was your doing.
+      effects:
+        - { type: job, action: performance, value: -1 }
+        - { type: relationship, role: npc, affection: -2 }
+        - { type: stat, key: stress, delta: 1 }
+  - id: push_back
+    label: Tell {boss.name} the deadline is not realistic
+    check:
+      base: 40
+      stats: [{ key: confidence, weight: 0.3 }, { role: boss, key: trust, weight: 0.2 }]
+      success:
+        text: >-
+          {boss.name} does not like it and takes it seriously. The date moves,
+          and so does the shape of the plan. You are, for now, the person who
+          said it.
+        effects:
+          - { type: relationship, role: boss, trust: 4 }
+          - { type: relationship, role: npc, affection: 3 }
+          - { type: job, action: performance, value: 2 }
+      failure:
+        text: >-
+          "I hear you," says {boss.name}, in a tone that means the opposite. The
+          date stays, and you are now the one who has to prove it can be done.
+        effects:
+          - { type: relationship, role: boss, affection: -3, trust: -3 }
+          - { type: stat, key: stress, delta: 4 }
+          - { type: stat, key: happiness, delta: -2 }

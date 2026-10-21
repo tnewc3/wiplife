@@ -13,6 +13,7 @@ import {
   afterMove,
   currentBoss,
   currentCoworkers,
+  workplaceSize,
   hireChance,
   jobApplyBlock,
   jobLossPay,
@@ -221,7 +222,7 @@ describe('the job market and hiring', () => {
     expect(content.jobs.bank_teller!.employers).toContain(job.employer);
     expect(life.career.gig).toBe(false);
     expect(currentBoss(life)).not.toBeNull();
-    expect(currentCoworkers(life)).toHaveLength(careers.workplace.coworkers);
+    expect(currentCoworkers(life)).toHaveLength(workplaceSize(life, content).coworkers);
     expect(life.history.at(-1)!.tags).toEqual(['career', 'hired']);
     expect(checkInvariants(life, content)).toEqual([]);
   });

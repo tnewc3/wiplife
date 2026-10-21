@@ -20,6 +20,8 @@ import type {
   DebtKind,
   DiscoveryKind,
   EulogyGroup,
+  ExamBand,
+  ExamId,
   Commitment,
   EulogyTone,
   FamilyProcessKind,
@@ -32,6 +34,7 @@ import type {
   PetPersonalityId,
   Program,
   RuleDomainId,
+  SchoolPath,
   TeenFocusId,
   Tier,
   ValueId,
@@ -366,6 +369,7 @@ export type RelationshipKind =
   | 'coworker'
   | 'boss'
   | 'classmate'
+  | 'teacher'
   | 'acquaintance';
 
 export type RelationshipStatus = 'active' | 'estranged' | 'ended';
@@ -436,6 +440,10 @@ export interface Enrollment extends SchoolPlace {
   scholarship: number;
   /** The calendar year you started (or went back to) this program. */
   since: number;
+  /** Batch 3: where you take the last years of secondary school when it isn't the school you started at (the UK's further education college). */
+  venue?: 'college';
+  /** Batch 3: a trade learned as an apprenticeship from the choice at the end of compulsory school (no school diploma was needed). */
+  apprentice?: true;
 }
 
 /** A place you take up when the next year begins: an admission, or going back to a program you left. */
@@ -445,6 +453,56 @@ export interface Admission extends SchoolPlace {
   decided: number;
   /** Going back to a program you left: where you pick up. */
   resume?: { year: number; lengthYears: number; gpa: number; repeats: number };
+  /** Batch 3: the place depends on an exam result (the UK's A-levels): the score the place asks for. */
+  conditional?: { exam: ExamId; min: number };
+}
+
+/** Batch 3: an exam you sat: the year, the score (0–100) and the band it fell in. */
+export interface ExamResult {
+  id: ExamId;
+  year: number;
+  score: number;
+  band: ExamBand;
+}
+
+/** Batch 3: what you did in a school year (the year it was done in). */
+export interface SchoolYearActions {
+  year: number;
+  /** Your stance this year: studying harder or slacking off. */
+  effort: 'study' | 'slack' | null;
+  /** The subject you are working on, if you named one. */
+  subject?: string;
+  /** What a tutor cost this year, in whole dollars (0 without one; a minor's family pays it). */
+  tutor: number;
+  /** Tests you cheated on, classes you skipped, and whether you were caught at either this year. */
+  cheated: number;
+  skipped: number;
+  caught: boolean;
+}
+
+/**
+ * Batch 3: school life beyond the grade. The school you are at (a new school is a new class and new teachers), the
+ * people there, the spread of your grades across subjects, what you have done this year, the exams you have sat
+ * and the choice you made at the end of compulsory school.
+ */
+export interface SchoolLife {
+  /** `${cityId}:${program}:${venue}`: moving city, changing stage or going to a college is a new school. Null out of school. */
+  key: string | null;
+  /** Your class (living classmates; the pruning keeps them while you are in this school). */
+  classmates: Id[];
+  /** Teachers and staff, by role. */
+  staff: { homeroom?: Id; head?: Id; support?: Id };
+  /** Each subject's grade against your year's grade, in GPA points (positive: you are better at it). */
+  spread: Record<string, number>;
+  year: SchoolYearActions;
+  /** Exams you have sat, the latest of each. */
+  exams: ExamResult[];
+  /** The choice at the end of compulsory school, made before the year ends. */
+  choice: { path: SchoolPath; tradeId?: Id; year: number } | null;
+  /** How a placement exam shifted your grades at the school after it, in GPA points. */
+  shift: number;
+  /** The choice at the end of compulsory school has been settled (or the country has none). */
+  chosen: boolean;
 }
 
 export interface Credential {
@@ -482,6 +540,8 @@ export interface EducationState {
   fund: number;
   /** The current (or last) school year's tuition. */
   lastBill?: SchoolBill;
+  /** Batch 3: the class, the teachers, the report card's spread, this year's actions and the exams. */
+  school: SchoolLife;
 }
 
 /** The job you have now (Stage 8). */
@@ -528,6 +588,18 @@ export interface CareerState {
   applied: { jobId: Id; hired: boolean }[];
   /** Job tracks hiring in your city this year (rolled as each year begins, and when you move city). */
   openings: Id[];
+  /** Batch 3: what you have done at work this year (the year it was done in). */
+  work: WorkYearActions;
+}
+
+/** Batch 3: work actions in a year: your stance, how often you socialized, the office party and the coworkers you reported. */
+export interface WorkYearActions {
+  year: number;
+  /** Working harder or slacking off this year (the yearly review reads last year's). */
+  effort: 'hard' | 'slack' | null;
+  socialized: number;
+  party: boolean;
+  reported: number;
 }
 
 export interface Debt {

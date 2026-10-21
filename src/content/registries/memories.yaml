@@ -256,3 +256,14 @@ tags:
   you_gave_them_work: "You gave {npc.them} work"
   you_were_there_for_their_family: "You were there for {npc.them} when family needed {npc.them}"
   # Batch 2a: activities with someone along.
+  # School and work life (Batch 3).
+  got_to_know_at_work: You spent time together at work
+  helped_with_schoolwork: Helped you with your schoolwork
+  sucked_up_to: You tried hard to impress {npc.them}
+  argued_with_teacher: You argued with {npc.them} in class
+  reported_a_problem: You came to {npc.them} with a problem
+  made_you_welcome_at_school: Made you feel welcome when you were new at school
+  let_them_copy: You let {npc.them} copy off your paper
+  covered_for_them: You covered {npc.their} hours when {npc.they} {npc:needed|needed} you to
+  saw_you_at_the_party: Saw you at the office party
+  reported_you: You reported {npc.them} to the boss

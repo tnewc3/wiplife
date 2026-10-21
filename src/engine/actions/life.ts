@@ -15,7 +15,7 @@ import { fittingResults, queueResult } from './result';
  * nothing is charged twice. The common checks (between years, input
  * validation, the input log) live in ./index.ts.
  */
-import { LIFESTYLES, type FindDateWay, type ApplyProgram, type ContentBundle, type Lifestyle, type MentalCareId, type PastimeQuality, type PastimeRoute, type PastimeStake, type PetSourceId, type TeenFocusId, type Tier } from '../../content/schemas';
+import { LIFESTYLES, type FindDateWay, type ApplyProgram, type ContentBundle, type Lifestyle, type MentalCareId, type PastimeQuality, type PastimeRoute, type PastimeStake, type PetSourceId, type SchoolPath, type TeenFocusId, type Tier } from '../../content/schemas';
 import { canStartDebtPlan, isIndependent, payDebt, spend, startDebtPlan } from '../finance';
 import { buyHome, joinableParent, moveInCost, moveTo, purchaseQuote, refreshHousingCost, sellHome } from '../housing';
 import { afterMove } from '../career';
@@ -24,6 +24,8 @@ import { writeFromGroup } from '../systems/history';
 import type { LifeState, WillShare } from '../types';
 import { CAREER_ACTION_IDS, CAREER_ACTIONS } from './career';
 import { EDUCATION_ACTION_IDS, EDUCATION_ACTIONS } from './education';
+import { SCHOOL_ACTION_IDS, SCHOOL_ACTIONS } from './school';
+import { WORK_ACTION_IDS, WORK_ACTIONS } from './work';
 import { ESTATE_ACTION_IDS, ESTATE_ACTIONS } from './estate';
 import { FAMILY_ACTION_IDS, FAMILY_ACTIONS } from './family';
 import { PERSONAL_ACTION_IDS, PERSONAL_ACTIONS } from './personal';
@@ -44,7 +46,7 @@ import { sameCountry } from '../country';
 
 export const MONEY_ACTION_IDS = ['set_lifestyle', 'start_gig', 'stop_gig', 'pay_debt', 'debt_plan'] as const;
 export const HOME_ACTION_IDS = ['rent_home', 'move_home', 'relocate', 'buy_home', 'sell_home', 'find_roommate', 'live_alone'] as const;
-export const LIFE_ACTION_IDS = [...TRAVEL_ACTION_IDS, ...MIGRATION_ACTION_IDS, 'take_language_classes', ...MONEY_ACTION_IDS, ...HOME_ACTION_IDS, ...EDUCATION_ACTION_IDS, ...CAREER_ACTION_IDS, ...PERSONAL_ACTION_IDS, ...FAMILY_ACTION_IDS, ...ESTATE_ACTION_IDS, ...POSSESSION_ACTION_IDS, ...TEEN_ACTION_IDS, ...CRIME_ACTION_IDS, ...FAME_ACTION_IDS, ...SPORTS_ACTION_IDS, ...LATER_ACTION_IDS, ...BELONGING_ACTION_IDS, ...BUSINESS_ACTION_IDS, ...LOVE_ACTION_IDS, ...PASTIME_ACTION_IDS] as const;
+export const LIFE_ACTION_IDS = [...TRAVEL_ACTION_IDS, ...MIGRATION_ACTION_IDS, 'take_language_classes', ...MONEY_ACTION_IDS, ...HOME_ACTION_IDS, ...EDUCATION_ACTION_IDS, ...SCHOOL_ACTION_IDS, ...CAREER_ACTION_IDS, ...WORK_ACTION_IDS, ...PERSONAL_ACTION_IDS, ...FAMILY_ACTION_IDS, ...ESTATE_ACTION_IDS, ...POSSESSION_ACTION_IDS, ...TEEN_ACTION_IDS, ...CRIME_ACTION_IDS, ...FAME_ACTION_IDS, ...SPORTS_ACTION_IDS, ...LATER_ACTION_IDS, ...BELONGING_ACTION_IDS, ...BUSINESS_ACTION_IDS, ...LOVE_ACTION_IDS, ...PASTIME_ACTION_IDS] as const;
 
 /** The only money, home, school, work and personal actions you can take in prison (Stage 9). */
 export const PRISON_LIFE_ACTIONS: readonly LifeActionId[] = ['pay_debt', 'debt_plan', 'stop_gig', 'edit_identity', 'write_will'];
@@ -73,6 +75,11 @@ export interface LifeActionParams {
   majorId?: string;
   tradeId?: string;
   gradProgramId?: string;
+  /** Batch 3: the subject to study harder at, and the path chosen at the end of compulsory school. */
+  subject?: string;
+  path?: SchoolPath;
+  /** Batch 3: a coworker a work action is about. */
+  coworkerId?: string;
   /** Job applications (Stage 8). */
   jobId?: string;
   /** An identity edit from the Profile sheet (Stage 9). */
@@ -325,6 +332,8 @@ export const LIFE_ACTIONS: Record<LifeActionId, LifeActionRule> = {
   ...TRAVEL_ACTIONS,
   ...MIGRATION_ACTIONS,
   ...EDUCATION_ACTIONS,
+  ...SCHOOL_ACTIONS,
+  ...WORK_ACTIONS,
   ...CAREER_ACTIONS,
   ...PERSONAL_ACTIONS,
   ...FAMILY_ACTIONS,

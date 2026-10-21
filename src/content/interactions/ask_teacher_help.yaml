@@ -1,0 +1,58 @@
+id: ask_teacher_help
+name: Ask for help
+blurb: Stay after class and ask about what you don't understand.
+group: practical
+profile: counsel
+inPerson: true
+availability:
+  kinds: [teacher]
+  you: { min: 5 }
+  them: { min: 21 }
+  requires: { education: { program: [elementary, middle, high, college, trade, grad] } }
+outcomes:
+  great:
+    text:
+      - "{person.name} pulls up a chair and works through it with you until the page makes sense. 'You were closer than you thought,' {person.they} {person:says|say}."
+      - "It takes ten minutes, and {person.name} makes it look easy. You leave knowing how to do the next three problems, too."
+    affection: 3
+    trust: 3
+    mood: 4
+    effects:
+      - { type: education, action: grades, value: 0.15 }
+      - { type: stat, key: stress, delta: -2 }
+      - { type: memory, role: person, tag: helped_with_schoolwork }
+  good:
+    text:
+      - "{person.name} stays a few minutes after class and goes over the part that was tripping you up."
+      - "'Good question,' says {person.name}, and gives you an example that actually helps."
+    affection: 2
+    trust: 2
+    mood: 2
+    effects:
+      - { type: education, action: grades, value: 0.08 }
+      - { type: memory, role: person, tag: helped_with_schoolwork }
+  neutral:
+    text:
+      - "{person.name} points you back to the chapter and tells you to try again. It's fair, and it doesn't help much."
+      - "There's a line of students waiting, and you get two minutes. You take what you can."
+    affection: 0
+    mood: 0
+  bad:
+    text:
+      - "{person.name} sighs, says it was covered last week, and gives you a short answer. You leave feeling worse about asking."
+      - "The answer you get is quick and a little impatient, and the part you didn't understand is still a mystery."
+    affection: -1
+    trust: -1
+    mood: -2
+    effects:
+      - { type: stat, key: stress, delta: 1 }
+  backfire:
+    text:
+      - "'If you had been paying attention,' {person.name} begins, in front of the people still packing up their bags. You do not ask again this year."
+      - "{person.name} makes a joke at your expense, and the people nearby laugh. The question can wait. It will have to."
+    affection: -3
+    trust: -3
+    mood: -5
+    effects:
+      - { type: stat, key: stress, delta: 2 }
+      - { type: education, action: grades, value: -0.05 }

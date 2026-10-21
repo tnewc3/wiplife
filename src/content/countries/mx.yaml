@@ -20,10 +20,36 @@ school:
   repeatBelow: 1.0
   maxRepeats: 1
   applyAge: 17
+  # One exam places you in a preparatoria when secundaria ends; another decides your place at university.
+  exams:
+    - { id: mx_placement, program: middle, year: 3 }
+    - { id: mx_entrance, program: high, year: 2 }
+  curriculum:
+    elementary:
+      - { id: spanish, name: Spanish, stat: smarts }
+      - { id: math, name: Mathematics, stat: smarts }
+      - { id: science, name: Natural sciences, stat: smarts }
+      - { id: civics, name: History and civics, stat: discipline }
+      - { id: arts, name: Arts, stat: confidence }
+      - { id: pe, name: Physical education, stat: fitness }
+    middle:
+      - { id: spanish, name: Spanish, stat: smarts }
+      - { id: math, name: Mathematics, stat: smarts }
+      - { id: science, name: Sciences, stat: smarts }
+      - { id: civics, name: History and civics, stat: discipline }
+      - { id: english, name: English, stat: sociability }
+      - { id: pe, name: Physical education, stat: fitness }
+    high:
+      - { id: spanish, name: Spanish, stat: smarts }
+      - { id: math, name: Mathematics, stat: smarts }
+      - { id: science, name: Sciences, stat: smarts }
+      - { id: history, name: History, stat: discipline }
+      - { id: english, name: English, stat: sociability }
+      - { id: pe, name: Physical education, stat: fitness }
 
 words:
   elementary: primary school
-  middle: secondary school
+  middle: secundaria
   high: preparatoria
   college: university
   principal: director
@@ -52,6 +78,9 @@ words:
     - Preparatoria, year 1
     - Preparatoria, year 2
     - Preparatoria, year 3
+  homeroom: class teacher
+  support: school counselor
+  examNames: { mx_placement: the placement exam, mx_entrance: the university entrance exam }
 
 collegeYears: { community: 2, state: 4, elite: 4 }
 

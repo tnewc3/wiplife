@@ -1,0 +1,47 @@
+id: teacher_recommendation
+title: A letter, if you ask for it
+text: >-
+  Applications are due soon, and the form wants a letter from someone who
+  has taught you. {teacher.name} is packing up at the end of the day, with
+  the room mostly empty and the light coming in low.
+tone: neutral
+category: school
+rarity: common
+lifeStages: [teen]
+requires:
+  all:
+    - { education: { program: [high], final: true } }
+    - { age: { gte: 16 } }
+weight: { base: 8 }
+once: true
+cast:
+  teacher: { kind: teacher, presence: city }
+choices:
+  - id: ask
+    label: Ask {teacher.name} for a letter
+    check:
+      base: 55
+      stats: [{ role: teacher, key: affection, weight: 0.3 }, { key: discipline, weight: 0.15 }]
+      success:
+        text: >-
+          {teacher.name} says yes before you've finished the sentence, and asks
+          you to come back on Thursday with a list of what you'd like it to say.
+          It is a good letter, and you can tell by how long it takes {teacher.them}.
+        effects:
+          - { type: flag, key: teacher_recommendation, value: true }
+          - { type: relationship, role: teacher, trust: 3, affection: 3 }
+          - { type: stat, key: confidence, delta: 2 }
+      failure:
+        text: >-
+          {teacher.name} says that {teacher.they} {teacher:doesn't|don't} know you
+          well enough to write the kind of letter you deserve. It's honest and
+          it hurts, and you leave with the advice to ask someone else.
+        effects:
+          - { type: relationship, role: teacher, affection: -1 }
+          - { type: stat, key: confidence, delta: -1 }
+  - id: skip
+    label: Leave without asking
+    outcome:
+      text: You put your bag on your shoulder and say goodnight. The form has an empty line on it, and you'll think about that line later.
+      effects:
+        - { type: stat, key: stress, delta: 1 }

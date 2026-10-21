@@ -1,0 +1,61 @@
+id: uk_alevel_results
+title: Results day
+text: >-
+  The A-level results post at eight in the morning, and by five past the house
+  has been through every emotion. You are sitting on the stairs with the phone
+  in both hands.
+tone: neutral
+category: future
+rarity: common
+countries: [uk]
+lifeStages: [teen, youngAdult]
+followUpOnly: true
+requires:
+  any:
+    - { flag: exam_alevels, eq: top }
+    - { flag: exam_alevels, eq: pass }
+weight: { base: 12 }
+once: true
+cast:
+  parent: { kind: parent, presence: household }
+choices:
+  - id: top_open
+    label: Open it
+    visibleIf: { flag: exam_alevels, eq: top }
+    outcome:
+      text: >-
+        Better than the predictions. {parent.name} reads the screen over your
+        shoulder, then makes a noise that is half laugh, half sob.
+      effects:
+        - { type: relationship, role: parent, affection: 4 }
+        - { type: stat, key: happiness, delta: 4 }
+  - id: top_year
+    label: Say it out loud, then say you want a year out
+    visibleIf: { flag: exam_alevels, eq: top }
+    outcome:
+      text: >-
+        You say it before you have thought about it, and the room goes quiet.
+        {parent.name} asks what you will do with the year. You say you do not
+        know yet, and for once it feels like a luxury.
+      effects:
+        - { type: relationship, role: parent, affection: -1 }
+        - { type: stat, key: confidence, delta: 2 }
+  - id: pass_open
+    label: Open it
+    visibleIf: { flag: exam_alevels, eq: pass }
+    outcome:
+      text: >-
+        Enough. Not the grades on the poster in the hall, but enough, and
+        {parent.name} hugs you in the kitchen anyway.
+      effects:
+        - { type: relationship, role: parent, affection: 3 }
+        - { type: stat, key: stress, delta: -3 }
+  - id: pass_wait
+    label: Leave it for an hour and make tea first
+    visibleIf: { flag: exam_alevels, eq: pass }
+    outcome:
+      text: >-
+        You make three cups of tea nobody wants. When you finally look, the
+        number is fine, and the hour was longer than the exam.
+      effects:
+        - { type: stat, key: stress, delta: -2 }

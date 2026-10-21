@@ -17,6 +17,7 @@ import {
 } from '../../labels';
 import { ApplicationSheet } from './ApplicationSheet';
 import { MajorPicker } from './MajorPicker';
+import { SchoolLifeSections } from './SchoolLifeSections';
 
 type Confirm = 'drop_out' | 'decline_admission' | 'return_to_school' | 'take_ged';
 
@@ -172,6 +173,8 @@ export function SchoolCard({ life }: { life: LifeState }) {
           </Button>
         )}
       </div>
+
+      <SchoolLifeSections life={life} />
 
       {view.credentials.length > 0 && (
         <section className="mt-4" aria-labelledby="credentials-title">

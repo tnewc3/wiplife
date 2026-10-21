@@ -1,0 +1,44 @@
+id: report_card_failing_subject
+title: A row in red
+text: >-
+  One row on the new report card is the colour of a warning. It sits there between
+  the others like a splinter, and every time you look at the page, your eye
+  goes straight to it.
+tone: serious
+category: school
+rarity: common
+lifeStages: [child, teen]
+followUpOnly: true
+requires:
+  all:
+    - { flag: report_failing }
+    - { education: { program: [elementary, middle, high] } }
+weight: { base: 5 }
+cooldownYears: 2
+cast:
+  teacher: { kind: teacher, presence: city }
+choices:
+  - id: ask_for_help
+    label: Go and ask {teacher.name} what went wrong
+    outcome:
+      text: >-
+        {teacher.name} spreads the year's work across the desk and shows you
+        where it started to slip. It isn't as hopeless as it looked in red.
+      effects:
+        - { type: relationship, role: teacher, trust: 3, affection: 2 }
+        - { type: education, action: grades, value: 0.1 }
+        - { type: stat, key: stress, delta: -1 }
+  - id: bury_it
+    label: Put it at the bottom of the bag
+    outcome:
+      text: It is there when you get home, and again the next morning. Ignoring it does not make it smaller.
+      effects:
+        - { type: stat, key: stress, delta: 3 }
+        - { type: stat, key: happiness, delta: -2 }
+  - id: promise
+    label: Promise yourself that next term will be different
+    outcome:
+      text: It is a good promise, made in the spirit of a good promise, and you keep it for exactly as long as it takes to need to.
+      effects:
+        - { type: stat, key: discipline, delta: 1 }
+        - { type: stat, key: stress, delta: 1 }

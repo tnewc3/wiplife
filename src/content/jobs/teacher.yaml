@@ -9,6 +9,7 @@ levels:
   - { title: "senior teacher", salary: 58000 }
   - { title: "assistant principal", salary: 72000 }
   - { title: "principal", salary: 88000 }
+workplace: medium
 performance:
   - { key: kindness, weight: 0.25 }
   - { key: discipline, weight: 0.25 }

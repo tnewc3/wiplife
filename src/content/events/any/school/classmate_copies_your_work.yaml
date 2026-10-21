@@ -1,0 +1,51 @@
+id: classmate_copies_your_work
+title: Eyes on your paper
+text: >-
+  In the middle of the test you notice {classmate.name} leaning a little
+  more than the desks require. The angle of {classmate.their} paper is wrong,
+  the angle of {classmate.their} eyes is wrong, and {teacher.name} is looking
+  the other way.
+tone: serious
+category: school
+rarity: common
+lifeStages: [teen, youngAdult]
+requires:
+  all:
+    - { education: { program: [middle, high, college] } }
+    - { age: { gte: 12 } }
+weight: { base: 5 }
+cooldownYears: 3
+cast:
+  classmate: { kind: classmate, presence: city, createIfMissing: true, newChance: 0.3 }
+  teacher: { kind: teacher, presence: city }
+choices:
+  - id: cover_paper
+    label: Quietly cover your answers
+    outcome:
+      text: A forearm over the page does it. {classmate.name} gets the message and slumps back, and you finish the test with your arm aching.
+      effects:
+        - { type: relationship, role: classmate, affection: -3 }
+        - { type: stat, key: stress, delta: 1 }
+  - id: let_them
+    label: Let it slide
+    outcome:
+      text: >-
+        You angle the paper a few degrees and look out the window. Nobody is
+        caught, and you can't decide how you feel about it for the rest of the day.
+      effects:
+        - { type: relationship, role: classmate, affection: 5, trust: 2 }
+        - { type: stat, key: stress, delta: 2 }
+        - { type: stat, key: happiness, delta: -1 }
+        - { type: memory, role: classmate, tag: let_them_copy }
+  - id: tell
+    label: Tell {teacher.name} afterward
+    outcome:
+      text: >-
+        {teacher.name} thanks you, with the look of someone who has been told
+        things like this before, and who will remember who told. {classmate.name}
+        is moved to the front row the next week and knows exactly why.
+      effects:
+        - { type: relationship, role: teacher, trust: 4 }
+        - { type: relationship, role: classmate, affection: -12, trust: -8 }
+        - { type: stat, key: stress, delta: 2 }
+        - { type: stat, key: happiness, delta: -1 }

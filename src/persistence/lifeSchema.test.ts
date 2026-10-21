@@ -361,6 +361,8 @@ describe('lives from Stage 7 on', () => {
       left: null,
       applied: [],
       fund: 0,
+      // (Batch 3: an empty school record; an adult is past the choice at the end of compulsory school.)
+      school: expect.objectContaining({ classmates: [], staff: {}, exams: [], choice: null, chosen: true }),
     });
   });
 
@@ -410,7 +412,7 @@ describe('lives from Stage 8 on', () => {
     expect(result.status).toBe('ok');
     if (result.status !== 'ok') return;
     expect(result.envelope.schemaVersion).toBe(CURRENT_SCHEMA_VERSION);
-    expect(result.envelope.data.career).toEqual({ job: null, gig: true, retired: false, history: [], applied: [], openings: [] });
+    expect(result.envelope.data.career).toEqual({ job: null, gig: true, retired: false, history: [], applied: [], openings: [], work: expect.objectContaining({ effort: null, socialized: 0, party: false, reported: 0 }) });
     // The next year rolls the openings.
     expect(beginYear(result.envelope.data, content).career.openings.length).toBeGreaterThan(0);
   });

@@ -336,7 +336,8 @@ describe('W6 life without papers', () => {
   /** A work permit that ends this year: playing the next year leaves its holder without papers. */
   const lapsed = (): LifeState => {
     const base = emigrated('work_sponsor', 'us', 'ca');
-    return advance(produce(base, (d) => { d.travel.residence!.endYear = d.currentYear - 1; }), 1);
+    // (Which events the year brings depends on the random stream; the tests that follow measure the risk from a known start.)
+    return produce(advance(produce(base, (d) => { d.travel.residence!.endYear = d.currentYear - 1; }), 1), (d) => { d.migration.year.policeContact = false; d.legal.record = []; d.migration.exposure = 0; });
   };
   it('turns a lapsed permit into life without papers: no regular job, informal work, no loans, no licenses', () => {
     const life = lapsed();

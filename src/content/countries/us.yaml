@@ -20,6 +20,31 @@ school:
   repeatBelow: 1.0
   maxRepeats: 1
   applyAge: 17
+  # The SAT or ACT is sat in the junior year; its score counts toward college applications.
+  exams:
+    - { id: sat, program: high, year: 3 }
+  curriculum:
+    elementary:
+      - { id: english, name: English, stat: smarts }
+      - { id: math, name: Math, stat: smarts }
+      - { id: science, name: Science, stat: smarts }
+      - { id: social, name: Social studies, stat: discipline }
+      - { id: art, name: Art and music, stat: confidence }
+      - { id: pe, name: Physical education, stat: fitness }
+    middle:
+      - { id: english, name: English, stat: smarts }
+      - { id: math, name: Math, stat: smarts }
+      - { id: science, name: Science, stat: smarts }
+      - { id: social, name: Social studies, stat: discipline }
+      - { id: language, name: World language, stat: sociability }
+      - { id: pe, name: Physical education, stat: fitness }
+    high:
+      - { id: english, name: English, stat: smarts }
+      - { id: math, name: Math, stat: smarts }
+      - { id: science, name: Science, stat: smarts }
+      - { id: history, name: History, stat: discipline }
+      - { id: language, name: World language, stat: sociability }
+      - { id: pe, name: Physical education, stat: fitness }
 
 words:
   elementary: elementary school
@@ -38,7 +63,11 @@ words:
     trade_license: Trade license
     grad: Graduate degree
   exams: { entrance: SAT or ACT scores, leaving: high school diploma }
-  gradeLabels: [Kindergarten, 1st grade, 2nd grade, 3rd grade, 4th grade, 5th grade, 6th grade, 7th grade, 8th grade, 9th grade, 10th grade, 11th grade, 12th grade]
+  # High school years go by their class names.
+  gradeLabels: [Kindergarten, 1st grade, 2nd grade, 3rd grade, 4th grade, 5th grade, 6th grade, 7th grade, 8th grade, Freshman year, Sophomore year, Junior year, Senior year]
+  homeroom: homeroom teacher
+  support: school counselor
+  examNames: { sat: the SAT or ACT }
 
 # Community college earns an associate degree; state and elite universities a bachelor's.
 collegeYears: { community: 2, state: 4, elite: 4 }

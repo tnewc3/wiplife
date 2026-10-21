@@ -9,6 +9,7 @@ levels:
   - { title: "senior engineer", salary: 120000 }
   - { title: "staff engineer", salary: 150000 }
   - { title: "engineering director", salary: 185000 }
+workplace: large
 performance:
   - { key: smarts, weight: 0.4 }
   - { key: discipline, weight: 0.25 }

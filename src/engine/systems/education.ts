@@ -25,6 +25,7 @@ import {
 } from '../education';
 import type { LifeState } from '../types';
 import { applyStatEffects } from './economy';
+import { runExams, startSchoolYear } from '../school/step';
 
 
 /** Grades the year you were in, then moves you on: the next year, held back, or graduation. */
@@ -49,6 +50,8 @@ export function finishSchoolYear(state: LifeState, content: ContentBundle): void
 export function runEducation(state: LifeState, content: ContentBundle): void {
   const edu = state.education;
   edu.applied = [];
+  // Batch 3: the exams this year ends with are sat before it is graded.
+  runExams(state, content);
   finishSchoolYear(state, content);
 
   // A place you can't take up yet (you were held back) is withdrawn.
@@ -61,6 +64,9 @@ export function runEducation(state: LifeState, content: ContentBundle): void {
     // School age, and school isn't finished or left: automatic school.
     else if (!edu.left && !finishedHighSchool(state)) enrollForAge(state, content);
   }
+
+  // Batch 3: the choice at 16, the class and teachers, the report card.
+  startSchoolYear(state, content);
 
   const cur = edu.current;
   if (!cur) return;

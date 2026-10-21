@@ -1,0 +1,50 @@
+id: college_office_hours
+title: Office hours
+text: >-
+  The corridor outside {teacher.name}'s office has a single plastic chair and a
+  sign-up sheet with one name on it, which is yours. You've rehearsed the
+  question a dozen times, and it still sounds smaller out loud.
+tone: neutral
+category: school
+rarity: common
+lifeStages: [youngAdult, adult]
+requires: { education: { program: [college, trade, grad] } }
+weight: { base: 6 }
+cooldownYears: 2
+cast:
+  teacher: { kind: teacher, presence: city }
+choices:
+  - id: go_in
+    label: Knock and go in
+    check:
+      base: 55
+      stats: [{ key: confidence, weight: 0.25 }, { key: smarts, weight: 0.15 }]
+      success:
+        text: >-
+          {teacher.name} puts down the pen and gives you the whole half hour.
+          By the end you've been given a reading list, a better question and
+          an invitation to come back.
+        effects:
+          - { type: relationship, role: teacher, trust: 4, affection: 3 }
+          - { type: education, action: grades, value: 0.1 }
+      failure:
+        text: >-
+          {teacher.name} is mid-email and has a meeting in five minutes. The
+          answer is short and technically correct. You leave knowing less than
+          you hoped, but more than you did.
+        effects:
+          - { type: relationship, role: teacher, affection: 1 }
+          - { type: stat, key: stress, delta: 1 }
+  - id: email_instead
+    label: Send an email and hope
+    outcome:
+      text: The reply arrives at midnight and is exactly three lines long. It is, to be fair, useful.
+      effects:
+        - { type: education, action: grades, value: 0.03 }
+  - id: leave
+    label: Tell yourself you'll work it out
+    outcome:
+      text: You put the sheet back where it was. You do work it out, eventually. It takes a good deal longer than the half hour would have.
+      effects:
+        - { type: stat, key: stress, delta: 2 }
+        - { type: stat, key: happiness, delta: -1 }

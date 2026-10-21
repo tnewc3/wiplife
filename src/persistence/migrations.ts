@@ -3,6 +3,8 @@ import { emptyMigration } from '../engine/migration/types';
 import { emptyGrind } from '../engine/fame/query';
 import { tourSizeFor } from '../engine/fame/grind';
 import type { TourSize } from '../engine/types';
+import { countryOfCity } from '../engine/country';
+import { emptySchoolLife, emptyWorkYear } from '../engine/school/state';
 // Read data directly: migrations also run in Node tools without Vite's import.meta.env.
 import compiled from '../content/compiled/content.json' with { type: 'json' };
 import type { ContentBundle } from '../content/schemas';
@@ -521,6 +523,14 @@ export const migrations: readonly Migration[] = [
   {
     from: 30,
     description:
+      'Batch 3: school and work life. Adds the school record (no class or teachers yet: the first school year makes them, and the ' +
+      'choice at the end of compulsory school counts as settled for anyone already past it) and this year\'s work record (nothing ' +
+      'done yet). Heir replay snapshots are upgraded the same way.',
+    migrate: upgradeSchoolWorkData,
+  },
+  {
+    from: 31,
+    description:
       'Batch 4: music, bands and the grind. Fame gains a band (none), past bands and band offers (none), an instrument (none), ' +
       'this year\'s shows, tour and practice (none yet, in the life\'s current year), what was played going into the year (nothing), ' +
       'a tour cost in the year\'s income (0) and new totals (0). A tour used to be a box ticked on a project: a project lined up ' +
@@ -630,6 +640,28 @@ function upgradePastimesData(data: unknown): unknown {
     return { ...entry, payload: { ...entry.payload, snapshot: upgradePastimesData(entry.payload.snapshot) } };
   }) : data.inputLog;
   return { ...data, inputLog, pastimes: data.pastimes ?? { year: typeof data.currentYear === 'number' ? data.currentYear : 0, counts: {}, receipts: [] } };
+}
+
+/** Batch 3: the school and work records a save from before it lacks. */
+function upgradeSchoolWorkData(data: unknown): unknown {
+  if (!isRecord(data)) return data;
+  const content = compiled as ContentBundle;
+  const year = typeof data.currentYear === 'number' ? data.currentYear : 0;
+  const inputLog = Array.isArray(data.inputLog) ? data.inputLog.map((entry: unknown) => {
+    if (!isRecord(entry) || !isRecord(entry.payload) || !isRecord(entry.payload.snapshot)) return entry;
+    return { ...entry, payload: { ...entry.payload, snapshot: upgradeSchoolWorkData(entry.payload.snapshot) } };
+  }) : data.inputLog;
+  let education = data.education;
+  if (isRecord(education) && education.school === undefined) {
+    const cur = isRecord(education.current) ? education.current : null;
+    const cityId = isRecord(data.character) && typeof data.character.cityId === 'string' ? data.character.cityId : '';
+    const choice = countryOfCity(cityId, content).school.choice;
+    // Anyone already past the year the choice is made in has made it (or never had one).
+    const before = choice !== undefined && cur !== null && cur.program === 'high' && typeof cur.year === 'number' && cur.year <= choice.year;
+    education = { ...education, school: { ...emptySchoolLife(), year: { ...emptySchoolLife().year, year }, chosen: !before } };
+  }
+  const career = isRecord(data.career) && data.career.work === undefined ? { ...data.career, work: emptyWorkYear(year) } : data.career;
+  return { ...data, inputLog, education, career };
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

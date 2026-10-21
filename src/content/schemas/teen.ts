@@ -80,7 +80,7 @@ export const activitySchema = baseDefSchema.extend({
   name: z.string().trim().min(2).max(40),
   kind: z.enum(['team', 'club']),
   blurb: z.string().trim().min(10).max(200),
-  minAge: z.int().min(10).max(17),
+  minAge: z.int().min(6).max(17),
   /** Teams cut people: the chance of making it is `base` plus each stat's weight times its distance from 50. Clubs take everyone. */
   tryout: z
     .strictObject({

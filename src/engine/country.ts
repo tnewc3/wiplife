@@ -7,7 +7,7 @@
  * the law, careers and creation read the country definition (src/content/countries) through these functions rather than
  * assuming the United States.
  */
-import type { CountryDef, CountryId, ContentBundle, JobCategory, LegalAges } from '../content/schemas';
+import type { CityDef, CountryDef, CountryId, ContentBundle, JobCategory, LegalAges } from '../content/schemas';
 import type { Id, LifeState } from './types';
 
 /** The country the game assumes when a city has gone missing from the content (every shipped city names one). */
@@ -18,9 +18,38 @@ export function countryIdOfCity(cityId: Id, content: ContentBundle): CountryId {
   return content.cities[cityId]?.countryId ?? DEFAULT_COUNTRY;
 }
 
-/** The country's definition for a city. */
+/** The pieces of a country definition a city's `education` may change, merged over the country's own (objects merge, lists and words replace). */
+function mergeEducation(country: CountryDef, over: NonNullable<CityDef['education']>): CountryDef {
+  return {
+    ...country,
+    school: { ...country.school, ...over.school },
+    words: {
+      ...country.words,
+      ...over.words,
+      tiers: { ...country.words.tiers, ...over.words?.tiers },
+      credentials: { ...country.words.credentials, ...over.words?.credentials },
+      exams: { ...country.words.exams, ...over.words?.exams },
+    },
+    collegeYears: { ...country.collegeYears, ...over.collegeYears },
+    tuition: { ...country.tuition, college: { ...country.tuition.college, ...over.tuition?.college } },
+  } as CountryDef;
+}
+
+const merged = new WeakMap<ContentBundle, Map<Id, CountryDef>>();
+
+/**
+ * The country's definition for a city, with the school rules the city changes (Batch 3: Montreal's secondary school
+ * and its CEGEP) applied. A city without `education` gets the country's own definition.
+ */
 export function countryOfCity(cityId: Id, content: ContentBundle): CountryDef {
-  return content.countries[countryIdOfCity(cityId, content)] ?? content.countries[DEFAULT_COUNTRY]!;
+  const country = content.countries[countryIdOfCity(cityId, content)] ?? content.countries[DEFAULT_COUNTRY]!;
+  const over = content.cities[cityId]?.education;
+  if (!over) return country;
+  let byCity = merged.get(content);
+  if (!byCity) merged.set(content, (byCity = new Map()));
+  let result = byCity.get(cityId);
+  if (!result) byCity.set(cityId, (result = mergeEducation(country, over)));
+  return result;
 }
 
 /** The country you live in now. */
@@ -169,10 +198,10 @@ export function medicalPrice(state: LifeState, kind: keyof CountryDef['healthcar
 /**
  * The words of the country you live in that text may use: {country} ("Canada"), {countryAdj} ("Canadian"),
  * {currency} (the plural, "dollars"), {elementarySchool}, {middleSchool}, {highSchool}, {college} ("university"),
- * {principal}, {entranceExam}, {leavingExam}, {pension} (the retirement benefit's name), {gradeWord}, and what school and
+ * {principal}, {homeroomTeacher}, {supportStaff}, {entranceExam}, {leavingExam}, {pension} (the retirement benefit's name), {gradeWord}, and what school and
  * college award: {diploma}, {equivalency}, {associateDegree}, {bachelorDegree}.
  */
-export const COUNTRY_TEXT_VALUES = ['country', 'countryAdj', 'currency', 'elementarySchool', 'middleSchool', 'highSchool', 'college', 'principal', 'entranceExam', 'leavingExam', 'pension', 'gradeWord', 'diploma', 'equivalency', 'associateDegree', 'bachelorDegree'] as const;
+export const COUNTRY_TEXT_VALUES = ['country', 'countryAdj', 'currency', 'elementarySchool', 'middleSchool', 'highSchool', 'college', 'principal', 'homeroomTeacher', 'supportStaff', 'entranceExam', 'leavingExam', 'pension', 'gradeWord', 'diploma', 'equivalency', 'associateDegree', 'bachelorDegree'] as const;
 
 /** A word as it reads inside a sentence: "Associate degree" becomes "associate degree", "GED" and "A-levels" stay as they are. */
 function sentenceWord(word: string): string {
@@ -191,6 +220,8 @@ export function countryTextValues(state: LifeState, content: ContentBundle): Rec
     highSchool: w.high,
     college: w.college,
     principal: w.principal,
+    homeroomTeacher: w.homeroom,
+    supportStaff: w.support,
     entranceExam: w.exams.entrance,
     leavingExam: w.exams.leaving,
     pension: country.pension.name,

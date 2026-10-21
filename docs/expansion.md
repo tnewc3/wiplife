@@ -490,11 +490,13 @@ Meet every E2b acceptance criterion. Run all checks and a 10,000-life, three-gen
 | How you find out | A yearly "news from your people" feed, plus event cards for big news |
 | How much their lives pull you in | Often: they ask for help, invite you and need you |
 | Who is simulated | Everyone you know, in more detail the closer they are to you |
-| Relationships between other people | Family with each other, your partner with your family and friends, friends with each other (coworkers aren't included) |
+| Relationships between other people | Family with each other, your partner with your family and friends, friends with each other. **Changed in Batch 3 (at the playtester's request): coworkers can be tied to each other too,** as friends or as rivals (a tie that starts low and can sour into a feud), never as a couple. Teachers are never tied to anyone. |
 | Gossip | Spreads through people who know each other, and stories get twisted or made up |
 | Secrets gossip can expose | Any, including affairs, crimes and identity |
 | Your role in the web | Introduce people and take sides |
 | Staying neutral in a feud | Possible, but it costs you with both sides |
+
+> **Batch 3 (2026-10-20):** the row "coworkers aren't included" no longer holds. `balance/web.yaml ties.work` draws a few pairs of coworkers each year; of the ties made, `rivalChance` start low (`rivalStart`) so they read as strained and can become feuds. Three web events (`coworker_feud_side`, `coworkers_at_odds`, `coworkers_grow_close`) answer these ties. The adults-only rule still covers everyone, and a coworker pair is never a couple.
 
 ### Writing guidance for E3 and E4
 

@@ -1,4 +1,5 @@
 import { educationCountry } from './travel/travel';
+import { admissionExamPoints, confirmExam, placementShift } from './school/exams';
 /**
  * Education rules (docs/design.md, section I; docs/technical.md, Stage 7):
  * school years and grades, admissions, tuition and who pays it, credentials,
@@ -137,6 +138,8 @@ export function expectedGrade(state: LifeState, place: SchoolPlace, content: Con
   grade += gradeDrag(state, content);
   // W2: the time your groups take.
   grade += groupGradeDrag(state, content);
+  // Batch 3: how good the school a placement exam sent you to is.
+  if (place.program === 'high') grade += placementShift(state);
   return roundGpa(grade);
 }
 
@@ -219,7 +222,10 @@ function admissionModel(target: ApplyTarget, content: ContentBundle): ChanceMode
 /** Your chance of being accepted (0–1). */
 export function admissionChance(state: LifeState, target: ApplyTarget, content: ContentBundle): number {
   const model = admissionModel(target, content);
-  return model ? modelChance(state, model, applicationGpa(state, target.program, content), content) : 0;
+  if (!model) return 0;
+  // Batch 3: an entrance exam you have sat (the SAT, a university entrance exam) adds to, or takes from, the chance.
+  const points = target.program === 'college' ? admissionExamPoints(state, 'college', target.tier, content) : target.program === 'trade' ? admissionExamPoints(state, 'trade', undefined, content) : 0;
+  return modelChance(state, model, applicationGpa(state, target.program, content), content, { points });
 }
 
 /** Your bachelor's majors: finished degrees, and the one you're finishing now. */
@@ -236,7 +242,10 @@ function bachelorMajors(state: LifeState, includeFinishing: boolean): Id[] {
 export function meetsRequirements(state: LifeState, place: SchoolPlace, content: ContentBundle, includeFinishing = false): boolean {
   const cur = state.education.current;
   if (place.program === 'college' || place.program === 'trade') {
-    return finishedHighSchool(state) || (includeFinishing && cur?.program === 'high' && cur.year >= cur.lengthYears);
+    const school = finishedHighSchool(state) || (includeFinishing && cur?.program === 'high' && cur.year >= cur.lengthYears);
+    if (!school) return false;
+    // Batch 3: where a college diploma comes first (Quebec's CEGEP), a university needs it.
+    return place.program !== 'college' || place.tier === 'community' || !educationCountry(state, content).school.preUniversity || hasCegep(state, includeFinishing);
   }
   if (place.program === 'grad') {
     const majors = bachelorMajors(state, includeFinishing);
@@ -247,8 +256,14 @@ export function meetsRequirements(state: LifeState, place: SchoolPlace, content:
   return true;
 }
 
+/** You hold a college diploma (the CEGEP, in Quebec), or are finishing one. */
+function hasCegep(state: LifeState, includeFinishing: boolean): boolean {
+  const cur = state.education.current;
+  return hasCredential(state, ['associate']) || (includeFinishing && cur?.program === 'college' && cur.tier === 'community' && cur.year >= cur.lengthYears);
+}
+
 /** Why you can't apply here now, or null when you can. */
-export type ApplyBlock = 'age' | 'enrolled' | 'highSchool' | 'bachelor' | 'major' | 'tried' | 'holding' | 'unknown';
+export type ApplyBlock = 'age' | 'enrolled' | 'highSchool' | 'preUniversity' | 'bachelor' | 'major' | 'tried' | 'holding' | 'unknown';
 
 export function applyBlock(state: LifeState, target: ApplyTarget, content: ContentBundle): ApplyBlock | null {
   const edu = state.education;
@@ -261,7 +276,7 @@ export function applyBlock(state: LifeState, target: ApplyTarget, content: Conte
     if (bachelorMajors(state, true).length === 0) return 'bachelor';
     if (!meetsRequirements(state, target, content, true)) return 'major';
   } else if (!meetsRequirements(state, target, content, true)) {
-    return 'highSchool';
+    return finishedHighSchool(state) || (edu.current?.program === 'high' && edu.current.year >= edu.current.lengthYears) ? 'preUniversity' : 'highSchool';
   }
   const key = optionKey(target);
   if (edu.applied.some((a) => a.option === key)) return 'tried';
@@ -350,7 +365,7 @@ export function payTuition(state: LifeState, content: ContentBundle): void {
 }
 
 /** The name of the school for a program, in the city you live in. */
-export function schoolName(state: LifeState, place: SchoolPlace, content: ContentBundle): string {
+export function schoolName(state: LifeState, place: SchoolPlace & { venue?: 'college' }, content: ContentBundle): string {
   const schools = content.cities[state.character.cityId]?.schools;
   if (!schools) return '';
   switch (place.program) {
@@ -361,7 +376,7 @@ export function schoolName(state: LifeState, place: SchoolPlace, content: Conten
     case 'grad':
       return schools.grad;
     default:
-      return schools.high;
+      return place.venue === 'college' ? schools.community : schools.high;
   }
 }
 
@@ -426,7 +441,8 @@ export function startAdmission(state: LifeState, content: ContentBundle): void {
   const lengthYears = admission.resume?.lengthYears ?? programLength(state, admission, content);
   let year = admission.resume?.year ?? 1;
   let gpa = admission.resume?.gpa;
-  if (!admission.resume && admission.program === 'college' && admission.tier !== 'community') {
+  // (Where a college diploma is required first, the university starts from its first year.)
+  if (!admission.resume && admission.program === 'college' && admission.tier !== 'community' && !educationCountry(state, content).school.preUniversity) {
     const associate = bestCredential(state, ['associate']);
     if (associate) {
       year = 1 + Math.min(content.balance.education.college.transferCredit, lengthYears - 1);
@@ -579,6 +595,11 @@ export function returnToSchool(state: LifeState): void {
 /** Accepts you: the place replaces any place you held. */
 export function admit(state: LifeState, target: ApplyTarget, content: ContentBundle): void {
   const admission: Admission = { ...placeOf(target), scholarship: scholarshipShare(state, target.program, content), decided: state.currentYear };
+  // Batch 3: where the country's last exam is still to come (the UK's A-levels), the place waits on it.
+  if (target.program === 'college') {
+    const exam = confirmExam(state, content);
+    if (exam) admission.conditional = { exam, min: content.balance.school.conditional[target.tier] };
+  }
   state.education.admission = admission;
 }
 

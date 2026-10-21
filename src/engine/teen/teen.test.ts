@@ -446,6 +446,9 @@ describe('teams and clubs', () => {
       d.teen.activities[0]!.since = d.currentYear - 1;
       d.teen.penalties = [];
       d.teen.passion = 0;
+      // (No crowd and no focus: only the club's passion counts, whichever way the life went before.)
+      d.teen.member = null;
+      d.teen.focus = null;
     }), (d) => {
       d.education.current!.boost = 0;
       runFocus(d, content);
@@ -596,10 +599,13 @@ describe('house rules', () => {
   });
 
   it('can be negotiated: a chance by the relationship, the parent and your grades, once a year, never below relaxed', () => {
-    const base = homeOf('rules-nego', () => {});
-    const rule = base.teen.home!.rules.find((r) => r.level > 0) ?? (() => {
-      throw new Error('this seed has no rule above relaxed');
+    // (A home with a rule above relaxed: which seed has one depends on how the life before it went.)
+    const base = ['rules-nego', 'rules-nego-2', 'rules-nego-3', 'rules-nego-4', 'rules-nego-5', 'rules-nego-6']
+      .map((seed) => homeOf(seed, () => {}))
+      .find((l) => l.teen.home!.rules.some((r) => r.level > 0)) ?? (() => {
+      throw new Error('no seed has a rule above relaxed');
     })();
+    const rule = base.teen.home!.rules.find((r) => r.level > 0)!;
     const domain = rule.ruleId;
     expect(negotiateBlock(base, domain, content)).toBeNull();
     const close = edit(base, (d) => {

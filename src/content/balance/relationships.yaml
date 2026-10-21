@@ -25,6 +25,7 @@ drift:
     coworker: 2
     boss: 2
     classmate: 2
+    teacher: 1
     acquaintance: 2
   # Drift alone never takes affection below this.
   floor:
@@ -44,6 +45,7 @@ drift:
     coworker: 5
     boss: 5
     classmate: 0
+    teacher: 0
     acquaintance: 0
   # No drift with someone you made a memory with this year or in the last
   # graceYears years.
@@ -58,10 +60,12 @@ prune:
   # Acquaintances and classmates with no new memory for this long fade out of
   # your life (they stop appearing on the People screen).
   forgetAfterYears: 6
+  # Batch 3: classmates and teachers who are no longer in your class (or school) fade after this many years without a new memory.
+  schoolForgetAfterYears: 1
   # Friends, coworkers and acquaintances whose affection falls this low drift apart.
   driftApartAt: 8
   # Most people outside family and romance who stay in your life.
-  maxPeople: 30
+  maxPeople: 40
 
 # B1: "Find a date" (a life action, adults only): the chance each way brings
 # someone new, and what it costs (base-currency dollars, scaled by where you

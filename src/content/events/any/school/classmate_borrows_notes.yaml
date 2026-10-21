@@ -1,0 +1,38 @@
+id: classmate_borrows_notes
+title: Can I see your notes?
+text: >-
+  {classmate.name} was away for the lesson that mattered and comes straight
+  to your desk afterward. "You take good notes. Could I take a look?"
+tone: light
+category: school
+rarity: common
+lifeStages: [child, teen, youngAdult, adult]
+requires: { education: { program: [middle, high, college, grad] } }
+weight: { base: 7 }
+cooldownYears: 2
+cast:
+  classmate: { kind: classmate, presence: city, createIfMissing: true, newChance: 0.3 }
+choices:
+  - id: share
+    label: Hand them over
+    outcome:
+      text: >-
+        {classmate.name} photographs every page and returns them with a note in
+        the margin: "you're a lifesaver". It turns out to be a long friendship
+        for two sets of notes.
+      effects:
+        - { type: relationship, role: classmate, affection: 5, trust: 3 }
+        - { type: memory, role: classmate, tag: helped_with_schoolwork }
+  - id: swap
+    label: Trade for the notes from the one you missed
+    outcome:
+      text: It's a fair swap. Both sets of notes are better than either one was alone, and you each understand something you hadn't before.
+      effects:
+        - { type: relationship, role: classmate, affection: 3 }
+        - { type: education, action: grades, value: 0.05 }
+  - id: refuse
+    label: Say you need them yourself
+    outcome:
+      text: It's true, and {classmate.name} says so, kindly enough. The pause that follows is longer than it needs to be.
+      effects:
+        - { type: relationship, role: classmate, affection: -3 }

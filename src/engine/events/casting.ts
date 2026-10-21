@@ -143,6 +143,8 @@ export function nextPersonId(state: LifeState): Id {
 function newPersonAgeRange(state: LifeState, spec: CastSpec, content: ContentBundle): { min: number; max: number } | null {
   let min = 0;
   let max = content.balance.events.newPerson.maxAge;
+  // Batch 3: a teacher is always an adult, whatever made them (the school step asks for its own ages).
+  if (spec.kind === 'teacher') min = content.balance.school.teachers.age.homeroom.min;
   if (spec.age) {
     min = Math.max(min, spec.age.min);
     max = Math.min(max, spec.age.max);

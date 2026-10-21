@@ -159,3 +159,14 @@ flags:
   sued_landlord: You have taken a landlord to court
   sued_neighbor: You have taken a neighbor to court
   sued_ex: You have taken an ex to court
+  # School and work life (Batch 3). The exam flags hold the band of your result: top, pass or fail.
+  exam_gcse: How you did in your GCSEs (top, pass or fail)
+  exam_alevels: How you did in your A-levels (top, pass or fail)
+  exam_sat: How you did in the SAT or ACT (top, pass or fail)
+  exam_provincial: How you did in the provincial exams (top, pass or fail)
+  exam_mx_placement: How you did in the placement exam for preparatoria (top, pass or fail)
+  exam_mx_entrance: How you did in the university entrance exam (top, pass or fail)
+  missed_offer: You missed the grades for the university place you were offered
+  school_path: What you chose at the end of compulsory school (stay, college, apprenticeship or work)
+  report_failing: A subject on this year's report card is failing
+  report_shining: A subject on this year's report card is excellent
