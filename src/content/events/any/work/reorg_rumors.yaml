@@ -33,6 +33,7 @@ choices:
         effects:
           - { type: relationship, role: boss, trust: -1 }
           - { type: stat, key: stress, delta: 3 }
+          - { type: stat, key: happiness, delta: -2 }
   - id: trade_theories
     label: Compare theories with {npc.name}
     outcome:

@@ -27,6 +27,7 @@ choices:
       effects:
         - { type: relationship, role: parent, trust: 2, affection: 2 }
         - { type: stat, key: stress, delta: 3 }
+        - { type: stat, key: happiness, delta: -2 }
   - id: retake
     label: Decide to retake next year
     visibleIf: { flag: missed_offer }
@@ -37,6 +38,7 @@ choices:
       effects:
         - { type: stat, key: discipline, delta: 2 }
         - { type: stat, key: stress, delta: 2 }
+        - { type: stat, key: happiness, delta: -1 }
   - id: look_for_work
     label: Start looking for work
     visibleIf: { not: { flag: missed_offer } }

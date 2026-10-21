@@ -32,6 +32,7 @@ choices:
         - { type: relationship, role: a, affection: 6, trust: 4 }
         - { type: relationship, role: b, affection: -7, trust: -3 }
         - { type: stat, key: stress, delta: 2 }
+        - { type: stat, key: happiness, delta: -1 }
   - id: side_b
     label: Back {b.name}
     outcome:
@@ -43,6 +44,7 @@ choices:
         - { type: relationship, role: b, affection: 6, trust: 4 }
         - { type: relationship, role: a, affection: -7, trust: -3 }
         - { type: stat, key: stress, delta: 2 }
+        - { type: stat, key: happiness, delta: -1 }
   - id: neutral
     label: Stay out of it, and be pleasant to both
     outcome:

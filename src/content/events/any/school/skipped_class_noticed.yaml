@@ -37,6 +37,7 @@ choices:
         text: The excuse is good enough. {teacher.name} accepts it with a look that says the next one will need to be better.
         effects:
           - { type: stat, key: stress, delta: 2 }
+          - { type: stat, key: happiness, delta: -1 }
       failure:
         text: >-
           {teacher.name} has already checked. The meeting that follows is
@@ -44,6 +45,7 @@ choices:
         effects:
           - { type: relationship, role: teacher, affection: -5, trust: -6 }
           - { type: stat, key: stress, delta: 4 }
+          - { type: stat, key: happiness, delta: -2 }
   - id: shrug
     label: Shrug and say it will not happen again
     outcome:

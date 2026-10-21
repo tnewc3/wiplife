@@ -39,6 +39,7 @@ choices:
           - { type: relationship, role: teacher, affection: -4 }
           - { type: relationship, role: classmate, affection: 2 }
           - { type: stat, key: stress, delta: 2 }
+          - { type: stat, key: happiness, delta: -1 }
   - id: behave
     label: Be exactly as polite as you would be on any other day
     outcome:

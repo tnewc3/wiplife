@@ -37,6 +37,7 @@ choices:
           - { type: relationship, role: boss, affection: -2 }
           - { type: relationship, role: npc, affection: -5 }
           - { type: stat, key: stress, delta: 3 }
+          - { type: stat, key: happiness, delta: -2 }
   - id: talk_after
     label: Have a quiet word with {npc.them} afterward
     outcome:
@@ -53,3 +54,4 @@ choices:
       effects:
         - { type: stat, key: discipline, delta: 1 }
         - { type: stat, key: stress, delta: 2 }
+        - { type: stat, key: happiness, delta: -1 }

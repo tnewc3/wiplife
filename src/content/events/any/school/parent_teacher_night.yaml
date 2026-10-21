@@ -34,6 +34,7 @@ choices:
       text: The corridor has posters of famous scientists and a clock that is exactly one minute fast. When {parent.name} comes out, the face gives nothing away.
       effects:
         - { type: stat, key: stress, delta: 2 }
+        - { type: stat, key: happiness, delta: -1 }
   - id: speak_up
     label: Speak up about something you want to change
     check:

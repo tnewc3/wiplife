@@ -30,6 +30,7 @@ choices:
       effects:
         - { type: relationship, role: teacher, trust: 3 }
         - { type: stat, key: stress, delta: 3 }
+        - { type: stat, key: happiness, delta: -2 }
         - { type: stat, key: discipline, delta: 1 }
   - id: deny
     label: Insist you did your own work
@@ -44,6 +45,7 @@ choices:
         effects:
           - { type: relationship, role: teacher, affection: -4, trust: -4 }
           - { type: stat, key: stress, delta: 2 }
+          - { type: stat, key: happiness, delta: -1 }
       failure:
         text: >-
           It makes everything worse. {teacher.name} produces the second copy
@@ -52,6 +54,7 @@ choices:
         effects:
           - { type: relationship, role: teacher, affection: -8, trust: -8 }
           - { type: stat, key: stress, delta: 5 }
+          - { type: stat, key: happiness, delta: -2 }
           - { type: stat, key: confidence, delta: -2 }
   - id: blame
     label: Say everyone does it
@@ -62,4 +65,5 @@ choices:
       effects:
         - { type: relationship, role: teacher, trust: -3 }
         - { type: stat, key: stress, delta: 3 }
+        - { type: stat, key: happiness, delta: -2 }
         - { type: stat, key: kindness, delta: -1 }

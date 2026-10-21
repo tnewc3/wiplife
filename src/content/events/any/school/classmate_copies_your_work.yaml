@@ -35,6 +35,7 @@ choices:
       effects:
         - { type: relationship, role: classmate, affection: 5, trust: 2 }
         - { type: stat, key: stress, delta: 2 }
+        - { type: stat, key: happiness, delta: -1 }
         - { type: memory, role: classmate, tag: let_them_copy }
   - id: tell
     label: Tell {teacher.name} afterward
@@ -47,3 +48,4 @@ choices:
         - { type: relationship, role: teacher, trust: 4 }
         - { type: relationship, role: classmate, affection: -12, trust: -8 }
         - { type: stat, key: stress, delta: 2 }
+        - { type: stat, key: happiness, delta: -1 }
