@@ -1346,13 +1346,13 @@ describe('pets, vehicles and homes (E5)', () => {
 });
 
 describe('the teen years (T1)', () => {
-  it('accepts the real content: eight crowds, nine house rules, nine jobs, eight teams and clubs, about fifty-five events, and no warnings', { timeout: 90_000 }, async () => {
+  it('accepts the real content: eight crowds, nine house rules, nine jobs, eleven teams and clubs, about fifty-five events, and no warnings', { timeout: 90_000 }, async () => {
     const result = await compile();
     if (!result.ok) throw new Error(formatErrors(result.errors));
     expect(Object.keys(result.bundle.cliques)).toHaveLength(8);
     expect(Object.keys(result.bundle.houseRules)).toHaveLength(9);
     expect(Object.keys(result.bundle.teenJobs)).toHaveLength(9);
-    expect(Object.keys(result.bundle.activities)).toHaveLength(8);
+    expect(Object.keys(result.bundle.activities)).toHaveLength(11);
     const categories = ['crowds', 'houserules', 'driving', 'teenwork', 'teamsclubs', 'future'];
     const events = Object.values(result.bundle.events).filter((e) => !e.retired && categories.includes(e.category));
     expect(events.length).toBeGreaterThanOrEqual(35);
