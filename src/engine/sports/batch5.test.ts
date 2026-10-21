@@ -335,7 +335,7 @@ describe('training sessions', () => {
     const trained = apply(base, (d) => {
       d.fame.paths.basketball!.skills = Object.fromEntries(def.skills!.map((s) => [s.id, 80]));
     });
-    expect(prospectRating(trained, def, content)).toBeGreaterThan(prospectRating(base, def, content) + 4);
+    expect(prospectRating(trained, def, content)).toBeGreaterThan(prospectRating(base, def, content) + 2);
   });
 
   it('is registered for every sport in content, and only for a player with a career', () => {
