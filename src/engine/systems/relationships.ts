@@ -151,8 +151,13 @@ function purgeForgotten(state: LifeState, view: LifeState, ended: readonly strin
     for (let i = gone.length - 1; i >= 0; i--) if (told.has(gone[i]!)) gone.splice(i, 1);
     if (gone.length === 0) return;
   }
-  const set = new Set(gone);
-  for (const id of gone) {
+  // The newest person stays: ids come from the highest one in use, and a forgotten id handed to a later person would make the
+  // log of what you did with them read as if it was about the newcomer.
+  const newest = Math.max(...Object.keys(state.people).map((id) => Number(id.slice(1))).filter(Number.isInteger));
+  const kept = gone.filter((id) => Number(id.slice(1)) !== newest);
+  if (kept.length === 0) return;
+  const set = new Set(kept);
+  for (const id of kept) {
     delete state.relationships[id];
     delete state.people[id];
   }
