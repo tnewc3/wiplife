@@ -1,0 +1,55 @@
+id: scholarship_eligibility_lost
+title: You are no longer eligible
+text: >-
+  The athletic director has a folder and a sad face. Your grades stayed under the line
+  for a second year, and the rules do not bend: you are off the team, and the aid that
+  came with your place on it is gone. The tuition bill will not care which of these
+  things hurts more.
+tone: serious
+category: sports
+rarity: common
+lifeStages: [teen, youngAdult]
+requires:
+  all:
+    - { age: { gte: 17 } }
+    - { sports: { active: true } }
+    - { sports: { amateur: true, teamless: true, scholarship: false } }
+weight: { base: 1 }
+followUpOnly: true
+justified:
+  money: Losing the scholarship raises the tuition bill the education system charges; no money moves in the event itself.
+choices:
+  - id: appeal
+    label: Appeal to the committee
+    check:
+      base: 30
+      stats: [{ key: confidence, weight: 0.2 }, { key: smarts, weight: 0.2 }]
+      success:
+        text: >-
+          You sit in front of five people with a folder of your own and explain what
+          happened. They give you one more semester, and no more than that.
+        effects:
+          - { type: stat, key: confidence, delta: 2 }
+      failure:
+        text: >-
+          The committee listens and thanks you. The decision stands, and the hallway
+          outside feels very long.
+        effects:
+          - { type: stat, key: happiness, delta: -4 }
+  - id: study
+    label: Put the sport aside and fix the grades
+    outcome:
+      text: >-
+        For the first time in years your days do not have a practice in them. It feels
+        like a hole, and then slowly like room.
+      effects:
+        - { type: education, action: grades, value: 1 }
+        - { type: stat, key: stress, delta: -2 }
+  - id: move_on
+    label: Look for another team to play for
+    outcome:
+      text: >-
+        You make a list of programs that might take a player with a gap in the season. It
+        is shorter than you hoped and longer than you feared.
+      effects:
+        - { type: stat, key: stress, delta: 1 }

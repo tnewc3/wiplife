@@ -1,0 +1,44 @@
+id: tryout_school_gym
+title: The list on the door
+text: >-
+  Three days of tryouts end on a Thursday afternoon with a sheet of paper that has not been
+  posted yet. The coach is somewhere with a pencil, and the hallway smells of floor wax and
+  nerves. Your last scrimmage is in ten minutes.
+tone: neutral
+category: sportstryout
+rarity: common
+lifeStages: [teen]
+requires:
+  all:
+    - { sports: { tryout: true } }
+weight: { base: 1 }
+followUpOnly: true
+choices:
+  - id: steady
+    label: Play the way you practised
+    outcome:
+      text: >-
+        You do the simple things right and let the coaches decide what they want to see. {tryout}
+      effects:
+        - { type: sports, action: tryout, approach: steady }
+  - id: hustle
+    label: Dive on everything
+    outcome:
+      text: >-
+        You leave skin on the floor and your lungs somewhere in the second half. {tryout}
+      effects:
+        - { type: sports, action: tryout, approach: hustle }
+  - id: showoff
+    label: Make sure they see you
+    outcome:
+      text: >-
+        You call for the ball and try the hard thing every time you touch it. {tryout}
+      effects:
+        - { type: sports, action: tryout, approach: showoff }
+  - id: listen
+    label: Do exactly what the coach asked in the drills
+    outcome:
+      text: >-
+        You are the only one who remembers the coach's instructions from the first day. {tryout}
+      effects:
+        - { type: sports, action: tryout, approach: listen }

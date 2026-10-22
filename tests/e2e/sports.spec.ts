@@ -91,14 +91,17 @@ test('position, training focus and commitment change with one tap', async ({ pag
   await expect(page.getByTestId('position-line')).toContainText(label);
 });
 
-test('with no career the Sports screen shows the ways in, and starting one puts you on the ladder', async ({ page }) => {
+test('with no career the Sports screen shows the teams you can try out for, and making one puts you on the ladder', async ({ page }) => {
   await open(page, { seed: 'e2e-sports-5', none: true, age: 11 });
   await tab(page, 'Work/School').click();
   await expect(page.getByTestId('sports-prompt')).toBeVisible();
   await page.getByTestId('sports-open').click();
   await expect(page.getByTestId('entry')).toBeVisible();
-  await expect(page.getByRole('list', { name: 'Hockey routes' }).getByRole('listitem')).toHaveCount(3);
-  await page.getByTestId('enter-hockey-youth_league').click();
+  await expect(page.getByRole('list', { name: 'Youth team options' }).first().getByRole('listitem')).toHaveCount(3);
+  // The rec league takes everyone who shows up.
+  await page.getByTestId('tryout-hockey-youth:rec').click();
+  await page.getByRole('button', { name: 'Play your game' }).click();
+  await page.getByRole('button', { name: 'Continue' }).click();
   await expect(page.getByRole('list', { name: 'Hockey ladder' }).locator('[aria-current="step"]')).toContainText('Youth league player');
   await expectNoHorizontalScroll(page);
 });

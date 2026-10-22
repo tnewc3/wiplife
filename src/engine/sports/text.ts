@@ -11,6 +11,11 @@ import { SPORTS_TEXT_VALUES, type ContentBundle, type SportsHistoryKey } from '.
 import { wholeDollars } from '../finance';
 import { writeFromGroup } from '../systems/history';
 import type { LifeState, SportsSeason } from '../types';
+import { countryOf } from '../country';
+import { schoolName } from '../education';
+import { draftProjection } from './contract';
+import { liveOffers } from './scholarship';
+import { tryoutSentence } from './tryout';
 import { ordinal, positionOf, sportPath, thisSeason } from './query';
 import { proTeamsIn } from './team';
 
@@ -42,7 +47,7 @@ export function recordText(season: SportsSeason): string {
 
 export function sportsTextValues(state: LifeState, content: ContentBundle): Record<string, string> {
   const s = state.sports;
-  const def = sportPath(content, s.sport);
+  const def = sportPath(content, s.sport ?? s.tryout?.sport ?? null);
   const season = thisSeason(state) ?? s.seasons.at(-1);
   const run = s.run;
   // The other side in a series: a pro team of the league, or a school or club of the same league's level.
@@ -74,5 +79,26 @@ export function sportsTextValues(state: LifeState, content: ContentBundle): Reco
     injury: injury ? (content.conditions[injury.conditionId]?.noun ?? '') : '',
     salary: s.contract ? `$${wholeDollars(s.contract.salary).toLocaleString('en-US')}` : '',
     season: season ? String(season.year) : '',
+    number: s.number === null ? '' : String(s.number),
+    ...batch5Values(state, content),
+  };
+}
+
+/** Batch 5: the last tryout in words, the tier of the team, the program that recruits you and what it pays, and where scouts project you. */
+function batch5Values(state: LifeState, content: ContentBundle): Record<string, string> {
+  const s = state.sports;
+  const def = sportPath(content, s.sport) ?? sportPath(content, s.tryout?.sport ?? null);
+  const rec = s.tried.at(-1);
+  const sch = s.scholarship;
+  const offer = sch ? { tier: sch.tier, share: sch.share } : liveOffers(state).sort((a, b) => b.share - a.share)[0];
+  const rules = countryOf(state, content).athletics.scholarships;
+  const projection = def ? draftProjection(state, def, content) : null;
+  return {
+    tryout: rec && rec.year === state.currentYear ? tryoutSentence(state, rec, content) : '',
+    tier: s.team?.tier ? (content.text.sports.tiers[s.team.tier]?.label.toLowerCase() ?? '') : '',
+    campus: offer ? schoolName(state, { program: 'college', tier: offer.tier }, content) : '',
+    share: offer ? `${Math.round(offer.share * 100)}%` : '',
+    scholarship: rules.word,
+    prospect: projection ? (content.text.sports.projection[projection.likely]?.line ?? '') : '',
   };
 }

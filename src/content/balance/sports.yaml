@@ -78,6 +78,17 @@ draft:
     - { at: 40, x: 0.1 }
     - { at: 50, x: 0.4 }
     - { at: 60, x: 0.8 }
+  # Batch 5: the league's need for your position that year moves your score by up to this much either way, and combine events
+  # by up to this much either way.
+  need: 4
+  combine: 8
+  # Where a prospect is projected to go, by the share of the draft's picks gone before them (the words are in text/sports.yaml).
+  projection:
+    - { upTo: 0.1, id: lottery }
+    - { upTo: 0.3, id: early }
+    - { upTo: 0.6, id: middle }
+    - { upTo: 1, id: late }
+    - { upTo: 1.5, id: unlikely }
 
 contract:
   kind: { minimum: 0.35, rookie: 1, standard: 1, star: 1.15 }
@@ -102,10 +113,28 @@ contract:
       - { at: 30, x: 0.15 }
       - { at: 60, x: 0.4 }
       - { at: 90, x: 0.7 }
-  rookieRound: [1.4, 1, 0.8, 0.6]
   buyout: 0.5
   keep: { rating: 50, chance: 0.4 }
-  unsigned: 2
+  # Batch 5: no automatic stall. An unsigned player keeps going to camps and open tryouts until this age.
+  chaseAge: 33
+  # A rookie deal's pay as a multiple of the rung's usual year, and the signing bonus as a share of a year's pay, by the share
+  # of the draft's picks gone before you (percent): the first pick is paid most, and the curve eases down to the last.
+  rookiePick:
+    - { at: 0, x: 2.4 }
+    - { at: 5, x: 2 }
+    - { at: 15, x: 1.5 }
+    - { at: 30, x: 1.15 }
+    - { at: 50, x: 0.85 }
+    - { at: 75, x: 0.65 }
+    - { at: 100, x: 0.5 }
+  signing:
+    - { at: 0, x: 1 }
+    - { at: 10, x: 0.6 }
+    - { at: 30, x: 0.3 }
+    - { at: 60, x: 0.15 }
+    - { at: 100, x: 0.08 }
+  # Skill incentives: up to this share of the salary a year, paid by how well you play: nothing at the rating `from`, all of it at `full`.
+  incentive: { share: 0.25, from: 45, full: 85 }
   freeAgent:
     - { at: 30, x: 0.1 }
     - { at: 45, x: 0.5 }
@@ -138,3 +167,70 @@ retire:
 
 events:
   maxQueued: 3
+  # Batch 5: the yearly chance of each season choice.
+  combine: 0.7
+  captain: 0.18
+  role: { starter: 0.12, other: 0.5 }
+  offseason: 0.2
+
+# Batch 5: tryouts for specific teams. A team's bar is compared with your rating going in (what scouts would say of you today),
+# your way of playing the scrimmage and the luck of the day. Cut from a team, the next tier down at the same level looks at
+# you, a little more kindly. Youth teams are for children (the youth level ends at 14); club and travel teams also run
+# alongside a school team for teenagers.
+tryout:
+  tiers:
+    rec: { level: youth, base: youth, shift: -6, bar: 0, fee: 90, minAge: 8, maxAge: 17, fallback: null }
+    club: { level: youth, base: youth, shift: 0, bar: 20, fee: 280, minAge: 8, maxAge: 17, fallback: rec }
+    travel: { level: youth, base: youth, shift: 9, bar: 32, fee: 900, minAge: 9, maxAge: 17, fallback: club }
+    academy: { level: youth, base: youth, shift: 14, bar: 38, fee: 0, minAge: 9, maxAge: 17, fallback: club }
+    jv: { level: school, base: high, shift: -4, bar: 26, fee: 0, minAge: 13, maxAge: 17, fallback: null }
+    varsity: { level: school, base: high, shift: 2, bar: 38, fee: 0, minAge: 13, maxAge: 17, fallback: jv }
+    community: { level: college, base: community, shift: 0, bar: 38, fee: 0, minAge: 17, maxAge: 26, fallback: null }
+    state: { level: college, base: state, shift: 0, bar: 48, fee: 0, minAge: 17, maxAge: 26, fallback: community }
+    elite: { level: college, base: elite, shift: 0, bar: 60, fee: 0, minAge: 17, maxAge: 26, fallback: state }
+  luck: 7
+  approach:
+    steady: { bonus: 0, spread: 1 }
+    hustle: { bonus: 2, spread: 1 }
+    showoff: { bonus: 0, spread: 2.2 }
+    listen: { bonus: 1, spread: 0.6 }
+  hustleDiscipline: 0.06
+  listenSmarts: 0.06
+  cutWait: 1
+  fallbackEase: 6
+  autoSlack: 2
+  camp: { bar: 56, perQuality: 0.4, ageFrom: 24, perYear: 1.2, fee: 0 }
+  fameFloor: 0
+  perYear: 3
+
+# Batch 5: training sessions (balance/fame.yaml practice has the budget by commitment, the gain curve and the caps). With a team
+# the coaches and facilities make a session worth full value (more with a stronger team); a gym or a private coach works without a
+# team at a lower gain, for a fee (a gym membership once a year, a coach each session). Training never injures.
+training:
+  team: { gain: 1, quality: 0.004 }
+  gym: { gain: 0.55, fee: 480 }
+  coach: { gain: 0.8, fee: 140 }
+  rating: 0.04
+  craft: 0.03
+  club: { craft: 0.3, sessions: 2 }
+
+# Batch 5: athletic scholarships. A recruiter sees recent rating, fame, grades and the program's need for your position.
+scholarship:
+  ages: { from: 16, to: 18 }
+  score: { rating: 1, fame: 0.4, gpa: 8, need: 1 }
+  tiers:
+    community: { from: 35, full: 60 }
+    state: { from: 52, full: 78 }
+    elite: { from: 68, full: 92 }
+  minShare: 0.2
+  chance: 0.6
+  floor: 2
+  warnYears: 1
+  need: 6
+
+# Batch 5: where you stand on a team and captaincy.
+role:
+  played: { starter: 1, rotation: 0.9, reserve: 0.7 }
+  starter: -4
+  rotation: -16
+  captain: { rating: 1, mood: 2, after: 2 }

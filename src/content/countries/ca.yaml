@@ -101,6 +101,12 @@ studentFinance:
   loanRate: 0.045
   applicationFee: 105
 
+# Batch 5: sport at school and college. University and college teams recruit, with smaller awards and no full rides at the junior level.
+athletics:
+  scholarships: { available: true, maxShare: 0.7, word: athletic scholarship, tiers: [state, elite] }
+  academy: false
+  system: college
+
 housing:
   mortgageRate: 0.052
   downPayment: 0.2

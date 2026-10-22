@@ -1,0 +1,42 @@
+id: offseason_pickup_run
+title: The summer pickup games
+text: >-
+  Every evening in the summer the same group turns up at the same park: players from three
+  different programs, a couple of retired pros and a kid who is better than everyone and
+  does not know it yet. Nobody keeps score and everyone does.
+tone: light
+category: sports
+rarity: common
+lifeStages: [child, teen, youngAdult, adult]
+requires:
+  all:
+    - { sports: { active: true } }
+    - { sports: { seasons: { gte: 1 } } }
+weight: { base: 1 }
+followUpOnly: true
+choices:
+  - id: play_every_night
+    label: Play every night
+    outcome:
+      text: >-
+        By the end of the summer you have played more hours than during the whole season,
+        and enjoyed all of them.
+      effects:
+        - { type: sports, action: form, delta: 2 }
+        - { type: stat, key: happiness, delta: 3 }
+  - id: learn_from_vets
+    label: Pick the retired pros' brains
+    outcome:
+      text: >-
+        Between games, one of them shows you how the game reads before it happens. You
+        practise it for weeks.
+      effects:
+        - { type: fame, action: craft, delta: 2 }
+  - id: bring_friends
+    label: Bring your friends and keep it casual
+    outcome:
+      text: >-
+        You laugh more than you play, and the summer is better for it.
+      effects:
+        - { type: stat, key: happiness, delta: 4 }
+        - { type: stat, key: stress, delta: -2 }

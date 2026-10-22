@@ -69,3 +69,5 @@ Sports (E6c): the playoff series events (`playoffs_opening_series`,
 `playoffs_semifinal_swing`, `playoffs_final_game_seven`) and the two that
 follow a final (`title_parade`, `title_lost_heartbreak`) are copies of the real
 ones, so the sports tests can play a short run through the event sheet.
+
+Sports (Batch 5): four tryout scrimmages (`tryout_youth_trials`, `tryout_school_gym`, `tryout_college_walk_on` and `tryout_pro_camp`, copies of the real ones) so the sports tests can try out for a chosen team and for a pro camp through the event sheet. The other events the sports step queues are not in this pack.

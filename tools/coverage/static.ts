@@ -111,6 +111,8 @@ export function rootEvents(content: ContentBundle): Set<string> {
     ...Object.values(r.fame.triggers),
     // E6c: what the sports step queues.
     ...Object.values(r.sports.triggers),
+    // Batch 5: the scrimmage a tryout plays.
+    ...Object.values(r.sports.tryouts).map((events) => ({ events })),
     // L1: what the later-life step queues (grandchildren, care, a foreseen death, amends).
     ...laterResults(r.later).map((result) => ({ events: [...result.events] })),
     // W2: what the belonging step queues (an invitation, a role, a decision about drifting away).

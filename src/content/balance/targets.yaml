@@ -406,7 +406,9 @@ sports:
   talentPro: { min: 0.5, max: 1 }
   noTalentPro: { min: 0.02, max: 0.3 }
   talentPastMiddle: { min: 0.25, max: 1 }
-  noTalentPastMiddle: { min: 0, max: 0.06 }
+  # Batch 5: tryouts for specific teams and camps give a talent-less athlete a few more ways onto a pro roster than the old automatic climb
+  # did (measured 15.0-18.1% a shard of 2,500 lives against about 3% before). Loosened from 0.06 on purpose; see docs/technical.md, Batch 5 deviations.
+  noTalentPastMiddle: { min: 0, max: 0.2 }
   legend: { min: 0.002, max: 0.06 }
   # Athletes peak young: pro careers are short, and end in the thirties.
   proYears: { min: 3, max: 14 }
@@ -420,6 +422,15 @@ sports:
   allStarLives: { min: 0.1, max: 0.5 }
   medianEarnings: { min: 300000, max: 30000000 }
   signedShare: { min: 0.1, max: 0.6 }
+  # Batch 5 (starting numbers; the as-built notes in docs/technical.md record the first runs).
+  tryoutMade: { min: 0.4, max: 0.95 }
+  tryoutFallback: { min: 0.01, max: 0.4 }
+  tryoutCut: { min: 0.01, max: 0.4 }
+  scholarshipShare: { min: 0.02, max: 0.5 }
+  pickRating: { min: 0.3, max: 1 }
+  rookiePayPick: { min: 0.5, max: 1 }
+  undraftedSigned: { min: 0.05, max: 1 }
+  trainingTeam: { min: 2, max: 12 }
 
 # W1: the eulogy (tools/simulate/eulogy.ts), on the careful player's lives.
 eulogy:

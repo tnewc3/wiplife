@@ -112,8 +112,9 @@ export { getTeenView } from './teen/views';
 export { getCrimeView, getDirtyView, getLaunderBlock, getSpendBlock } from './crime/views';
 export type { CrimeMemberView, CrimeView, DirtyView, FrontView } from './crime/views';
 export { bandNameSuggestion, fanCount, getFameView, getProjectBlock, parseTitle, titleSuggestion } from './fame/views';
+import { athleticShare } from './sports/aid';
 export { getSportsView } from './sports/views';
-export type { SportsSeasonView, SportsView } from './sports/views';
+export type { OfferView, SportsSeasonView, SportsView, TeamOptionView, TrainingSkillView, TrainingView } from './sports/views';
 export type { FameEntryView, FamePathView, FameProjectView, FameRungView, FameView } from './fame/views';
 export type { ActivityOptionView, CrowdView, JobOptionView, RuleView, TeenView } from './teen/views';
 export type { AdoptOption, BelongingsView, MainHomeView, PetDetailView, PetView, RenovationOption, VacationHomeView, VacationOption, VehicleOption, VehicleView } from './possessions/views';
@@ -345,7 +346,7 @@ export interface SchoolView {
   financeBlurb: string;
   current: EnrollmentView | null;
   /** A place you start at when the next year begins. */
-  admission: (SchoolLine & { tier: Tier | null; returning: boolean; scholarship: number }) | null;
+  admission: (SchoolLine & { tier: Tier | null; returning: boolean; scholarship: number; athletic: number }) | null;
   /** The program you left, and whether you can go back to it now. */
   left: (SchoolLine & { tier: Tier | null; canReturn: boolean }) | null;
   credentials: CredentialView[];
@@ -408,7 +409,7 @@ export function getSchoolView(state: LifeState, content: ContentBundle): SchoolV
     financeBlurb: country.studentFinance.blurb,
     current,
     admission: edu.admission
-      ? { ...schoolLine(state, edu.admission, content), tier: edu.admission.tier ?? null, returning: edu.admission.resume !== undefined, scholarship: edu.admission.scholarship }
+      ? { ...schoolLine(state, edu.admission, content), tier: edu.admission.tier ?? null, returning: edu.admission.resume !== undefined, scholarship: edu.admission.scholarship, athletic: athleticShare(state, edu.admission) }
       : null,
     left: edu.left ? { ...schoolLine(state, edu.left, content), tier: edu.left.tier ?? null, canReturn: between && canReturn(state, content) } : null,
     credentials,

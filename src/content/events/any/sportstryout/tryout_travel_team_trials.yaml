@@ -1,0 +1,44 @@
+id: tryout_travel_team_trials
+title: Trials for the long bus rides
+text: >-
+  The team that travels holds its trials on a field with real lines and real parents. Nobody
+  says out loud that this is the serious one. Everybody is playing like it is, and the
+  parents on the sideline have stopped pretending to look at their phones.
+tone: neutral
+category: sportstryout
+rarity: common
+lifeStages: [child, teen]
+requires:
+  all:
+    - { sports: { tryout: true } }
+weight: { base: 1 }
+followUpOnly: true
+choices:
+  - id: steady
+    label: Keep it simple and do it well
+    outcome:
+      text: >-
+        You make the plays that are there and none that are not. {tryout}
+      effects:
+        - { type: sports, action: tryout, approach: steady }
+  - id: hustle
+    label: Give them everything you have
+    outcome:
+      text: >-
+        You press every moment of the scrimmage, and you are blowing hard by the end of it. {tryout}
+      effects:
+        - { type: sports, action: tryout, approach: hustle }
+  - id: showoff
+    label: Take the chances when they come
+    outcome:
+      text: >-
+        Two of your gambles land in front of the coaches. The third lands somewhere else. {tryout}
+      effects:
+        - { type: sports, action: tryout, approach: showoff }
+  - id: listen
+    label: Read the game and find your place
+    outcome:
+      text: >-
+        You watch where the space is and put yourself there, quietly, again and again. {tryout}
+      effects:
+        - { type: sports, action: tryout, approach: listen }

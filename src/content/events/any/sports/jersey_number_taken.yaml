@@ -1,0 +1,53 @@
+id: jersey_number_taken
+title: That number is taken
+text: >-
+  The number you wanted is already on somebody's back: a veteran who has worn it for years
+  and does not look inclined to give it up. The equipment manager shrugs. It is between the
+  two of you.
+tone: light
+category: sports
+rarity: common
+lifeStages: [teen, youngAdult, adult]
+requires:
+  all:
+    - { sports: { active: true } }
+    - { sports: { number: false } }
+    - { sports: { seasons: { gte: 1 } } }
+weight: { base: 1 }
+followUpOnly: true
+choices:
+  - id: ask
+    label: Ask the veteran politely
+    check:
+      base: 40
+      stats: [{ key: kindness, weight: 0.2 }, { key: confidence, weight: 0.2 }]
+      success:
+        text: >-
+          The veteran thinks about it, laughs and says it was never theirs anyway. By the
+          next day your locker has a {number} on the front of it.
+        effects:
+          - { type: sports, action: number, value: 23 }
+          - { type: stat, key: happiness, delta: 2 }
+      failure:
+        text: >-
+          The veteran is not moved, and tells you why. You take a different number, and
+          somehow it feels like yours by the end of the week: {number}.
+        effects:
+          - { type: sports, action: number, value: 9 }
+  - id: dinner
+    label: Buy the veteran dinner and ask again
+    outcome:
+      text: >-
+        Over a long meal you hear the story of the number. The veteran keeps it, and gives
+        you a better one instead: the {number}.
+      effects:
+        - { type: cost, item: celebration_dinner }
+        - { type: sports, action: number, value: 14 }
+        - { type: stat, key: confidence, delta: 1 }
+  - id: new_number
+    label: Pick another and make it yours
+    outcome:
+      text: >-
+        You shrug, take the {number} and decide that it will mean whatever you make it mean.
+      effects:
+        - { type: sports, action: number, value: 5 }

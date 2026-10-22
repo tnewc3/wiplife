@@ -21,6 +21,17 @@
 # bigGame       a moment that could define the season
 # slump, breakout, locker, rookie, rivalry   the colour of a season
 # endorsement   a brand wants your name
+# recruited     college programs have offers on the table (Batch 5)
+# probation     a grade under the floor: a warning on your scholarship
+# scholarshipLost  a second year under the floor: eligibility gone
+# combine       pre-draft workouts and interviews for a prospect
+# camp          a camp, an open tryout or a call for a player with no team
+# role          a fight for a place, a bigger role to ask for, a coach's move
+# offseason     a plan for the summer
+# number        a jersey number to pick on a new team
+# captain       the team wants a captain
+#
+# tryouts       the scrimmage a tryout plays, by the level of the team (the choice is how you play it)
 triggers:
   draft: { events: [draft_night_first_round, draft_night_later_round] }
   undrafted: { events: [undrafted_phone_calls] }
@@ -45,3 +56,18 @@ triggers:
   rookie: { events: [rookie_first_game] }
   rivalry: { events: [rivalry_trash_talk] }
   endorsement: { events: [endorsement_offer] }
+  recruited: { events: [recruiting_offers_on_the_table, recruiting_campus_visit] }
+  probation: { events: [scholarship_grade_warning] }
+  scholarshipLost: { events: [scholarship_eligibility_lost] }
+  combine: { events: [combine_workout_day, combine_interview_room, combine_stock_rumour] }
+  camp: { events: [camp_open_tryout_day, camp_walk_on_invite, camp_practice_squad_call] }
+  role: { events: [role_battle_for_the_start, role_ask_for_minutes, role_coach_moves_you] }
+  offseason: { events: [offseason_plan_choice, offseason_private_coach_offer, offseason_pickup_run] }
+  number: { events: [jersey_number_choice, jersey_number_taken] }
+  captain: { events: [captain_vote, captain_locker_room_problem] }
+
+tryouts:
+  youth: [tryout_youth_trials, tryout_travel_team_trials]
+  school: [tryout_school_gym, tryout_school_cold_gym]
+  college: [tryout_college_walk_on, tryout_college_open_run]
+  pro: [tryout_pro_camp, tryout_pro_open_workout]

@@ -26,6 +26,12 @@ tour: { label: "Tour", noun: "tour", minRung: 8 }
 press: { label: "Press run", minRung: 8 }
 retire: { from: 33, chance: [{ at: 33, x: 0.02 }, { at: 45, x: 0.2 }] }
 royalties: 0.05
+# Batch 5: what you train (Batch 4's practice system): where you train it matters (balance/sports.yaml training).
+skills:
+  - { id: skating, label: Skating, blurb: "Edges, crossovers and the stride that gets you to the puck first." }
+  - { id: stickhandling, label: Stickhandling, blurb: "Pucks through cones, pucks through traffic, and soft hands under pressure." }
+  - { id: shooting, label: Shooting, blurb: "Wrist shots into a corner of the net the size of a mailbox slot." }
+  - { id: checking, label: Checking and defense, blurb: "Angles, gap control and the timing of a clean hit." }
 sport:
   positions:
     - id: goaltender

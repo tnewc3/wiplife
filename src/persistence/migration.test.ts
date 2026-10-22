@@ -165,3 +165,72 @@ describe('Batch 4 saves', () => {
     expect(lifeStateSchema.safeParse(produce(life, (d) => void (d.fame.plan!.title = 'x'.repeat(61)))).success).toBe(false);
   });
 });
+
+describe('Batch 5 saves', () => {
+  /** A schema 32 save: a school-team player without any Batch 5 field. */
+  const oldSave = (seed: string, withTeam = true) => {
+    const life = produce(lifeAtAge(seed, 15), (d) => {
+      d.character.hidden.talent = 'athletics';
+      enterPath(d as LifeState, 'basketball', 'school_tryout', content);
+      // Before Batch 5 the school team in the sport was the sports career's own, and not one of your teams and clubs.
+      d.teen.activities = withTeam ? [] : d.teen.activities;
+    });
+    const old = cloneJson(life) as unknown as Record<string, unknown> & { sports: Record<string, unknown>; teen: { activities: unknown[] } };
+    for (const key of ['tryout', 'tried', 'cut', 'teamless', 'club', 'training', 'offers', 'scholarship', 'combine', 'passed', 'role', 'number', 'captain']) delete old.sports[key];
+    for (const key of ['tryouts', 'tryoutsMade', 'scholarships', 'scholarshipsLost', 'trainedTeam', 'trainedGym', 'trainedCoach', 'signedAfterUndrafted']) delete (old.sports.totals as Record<string, unknown>)[key];
+    old.teen.activities = [];
+    return { life, old };
+  };
+
+  it('upgrades a save: new records are empty, and a school-team player keeps the career and gains the team in their teams and clubs', () => {
+    const { life, old } = oldSave('b5-migrate');
+    const saved = { ...old, inputLog: [{ year: life.currentYear, kind: 'create', payload: { heir: true, snapshot: cloneJson(old) } }] };
+    const after = migrateEnvelope({ ...makeEnvelope(saved, content.contentVersion), schemaVersion: 32 }).data as LifeState;
+    expect(after.sports.sport).toBe('basketball');
+    expect(after.sports.team).toEqual(life.sports.team);
+    expect(after.fame.active).toBe(true);
+    expect(after.sports).toMatchObject({ tryout: null, tried: [], cut: {}, teamless: false, club: null, offers: [], scholarship: null, combine: 0, passed: 0, role: 'starter', number: null, captain: false });
+    expect(after.sports.totals).toMatchObject({ tryouts: 0, scholarships: 0, trainedTeam: 0, signedAfterUndrafted: 0 });
+    const act = Object.values(content.activities).find((a) => a.sport === 'basketball')!;
+    expect(after.teen.activities).toEqual([{ id: act.id, since: life.currentYear, tier: 'varsity' }]);
+    // An heir's replay snapshot is upgraded the same way.
+    expect(after.inputLog[0]!.payload.snapshot).toMatchObject({ sports: { teamless: false, role: 'starter' }, teen: { activities: [{ id: act.id }] } });
+    expect(lifeStateSchema.safeParse(after).success).toBe(true);
+    expect(loadedLifeSchema(content).safeParse(migrateEnvelope({ ...makeEnvelope(old, content.contentVersion), schemaVersion: 32 }).data).success).toBe(true);
+  });
+
+  it('leaves a life with no career alone, and does not add the team twice', () => {
+    const none = cloneJson(lifeAtAge('b5-none', 15)) as unknown as Record<string, unknown> & { sports: Record<string, unknown> };
+    for (const key of ['tryout', 'tried', 'cut', 'teamless', 'club', 'training', 'offers', 'scholarship', 'combine', 'passed', 'role', 'number', 'captain']) delete none.sports[key];
+    const after = migrateEnvelope({ ...makeEnvelope(none, content.contentVersion), schemaVersion: 32 }).data as LifeState;
+    expect(after.sports.sport).toBeNull();
+    expect(after.teen.activities.every((a) => content.activities[a.id]?.sport === undefined)).toBe(true);
+    const { old } = oldSave('b5-twice');
+    const act = Object.values(content.activities).find((a) => a.sport === 'basketball')!;
+    old.teen.activities = [{ id: act.id, since: 2000, tier: 'jv' }];
+    const again = migrateEnvelope({ ...makeEnvelope(old, content.contentVersion), schemaVersion: 32 }).data as LifeState;
+    expect(again.teen.activities).toEqual([{ id: act.id, since: 2000, tier: 'jv' }]);
+  });
+
+  it('roundtrips a life with a tryout record, a club team, training, a scholarship and offers', () => {
+    const life = produce(lifeAtAge('b5-save', 17), (d) => {
+      d.character.hidden.talent = 'athletics';
+      enterPath(d as LifeState, 'basketball', 'school_tryout', content);
+      d.sports.tried.push({ year: d.currentYear - 1, key: 'school:varsity', name: 'Westfield Comets', landedName: 'Westfield Comets JV', level: 'school', made: false, landed: 'school:jv', rating: 31, bar: 32 });
+      d.sports.cut['school:varsity'] = d.currentYear - 1;
+      d.sports.club = { id: null, name: 'Chicago Rim Rockers Travel', city: d.character.cityId, level: 'youth', quality: 54, tier: 'travel' };
+      d.sports.training = { year: d.currentYear, team: 3, gym: 1, coach: 0, member: true, spent: 480 };
+      d.sports.offers = [{ year: d.currentYear, tier: 'state', share: 0.55 }];
+      d.sports.scholarship = { tier: 'elite', share: 0.9, since: d.currentYear, warned: 1 };
+      d.sports.role = 'rotation';
+      d.sports.number = 23;
+      d.sports.captain = true;
+      d.sports.combine = 4;
+    });
+    expect(loadedLifeSchema(content).parse(JSON.parse(JSON.stringify(life)))).toEqual(life);
+    // A jersey number nobody could wear, a share over a full ride and a missing tryout key are rejected on load.
+    expect(lifeStateSchema.safeParse(produce(life, (d) => void (d.sports.number = 100))).success).toBe(false);
+    expect(lifeStateSchema.safeParse(produce(life, (d) => void (d.sports.scholarship!.share = 1.2))).success).toBe(false);
+    expect(lifeStateSchema.safeParse(produce(life, (d) => void (d.sports.tried[0]!.key = ''))).success).toBe(false);
+  });
+});

@@ -570,7 +570,7 @@ const teen = z.strictObject({
   passion: score,
   license: z.strictObject({ stage: z.enum(['none', 'permit', 'licensed']), since: int.exactOptional(), lessons: int.min(0), fails: int.min(0), testYear: int.exactOptional() }),
   job: z.strictObject({ jobId: id, employer: z.string().min(1), since: int }).nullable(),
-  activities: z.array(z.strictObject({ id, since: int })),
+  activities: z.array(z.strictObject({ id, since: int, tier: z.enum(['jv', 'varsity']).exactOptional() })),
   home: z
     .strictObject({
       styles: z.record(z.string(), z.strictObject({ warmth: score, strictness: score, involvement: score })),
@@ -768,7 +768,7 @@ const sports = z.strictObject({
   sport: id.nullable(),
   position: id.nullable(),
   pro: z.boolean(),
-  team: z.strictObject({ id: id.nullable(), name: z.string(), city: id, level: sportsLevel, quality: score }).nullable(),
+  team: z.strictObject({ id: id.nullable(), name: z.string(), city: id, level: sportsLevel, quality: score, tier: z.enum(['rec', 'club', 'travel', 'academy', 'jv', 'varsity', 'community', 'state', 'elite']).exactOptional() }).nullable(),
   contract: z
     .strictObject({
       teamId: id,
@@ -777,6 +777,7 @@ const sports = z.strictObject({
       salary: dollars.min(0),
       kind: z.enum(['minimum', 'rookie', 'standard', 'star']),
       option: z.enum(['none', 'team', 'player']),
+      incentive: dollars.min(0).exactOptional(),
     })
     .nullable(),
   unsigned: int.min(0),
@@ -831,7 +832,31 @@ const sports = z.strictObject({
     suspensions: int.min(0),
     earned: dollars.min(0),
     bestRating: score,
+    tryouts: int.min(0),
+    tryoutsMade: int.min(0),
+    scholarships: int.min(0),
+    scholarshipsLost: int.min(0),
+    trainedTeam: int.min(0),
+    trainedGym: int.min(0),
+    trainedCoach: int.min(0),
+    signedAfterUndrafted: int.min(0),
   }),
+  // Batch 5: tryouts, training, scholarships, the draft's combine, and your place on a team.
+  tryout: z.strictObject({ sport: id, key: z.string().min(1).max(60), year: int }).nullable(),
+  tried: z
+    .array(z.strictObject({ year: int, key: z.string().min(1).max(60), name: z.string().max(120), landedName: z.string().max(120).nullable(), level: sportsLevel, made: z.boolean(), landed: z.string().min(1).max(60).nullable(), rating: z.number(), bar: z.number() }))
+    .max(10),
+  cut: z.record(z.string(), int),
+  teamless: z.boolean(),
+  club: z.strictObject({ id: id.nullable(), name: z.string(), city: id, level: sportsLevel, quality: score, tier: z.enum(['rec', 'club', 'travel', 'academy', 'jv', 'varsity', 'community', 'state', 'elite']).exactOptional() }).nullable(),
+  training: z.strictObject({ year: int, team: int.min(0), gym: int.min(0), coach: int.min(0), member: z.boolean(), spent: dollars.min(0) }),
+  offers: z.array(z.strictObject({ year: int, tier: z.enum(['community', 'state', 'elite']), share: z.number().min(0).max(1) })).max(3),
+  scholarship: z.strictObject({ tier: z.enum(['community', 'state', 'elite']), share: z.number().min(0).max(1), since: int, warned: int.min(0) }).nullable(),
+  combine: z.number().min(-30).max(30),
+  passed: int.min(0),
+  role: z.enum(['starter', 'rotation', 'reserve']),
+  number: int.min(0).max(99).nullable(),
+  captain: z.boolean(),
 });
 
 // W3: businesses.

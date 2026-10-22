@@ -13,6 +13,8 @@ import { inFinalYear } from '../education';
 import { addCondition, conditionOf } from '../health';
 import { chance, type RngState } from '../rng';
 import type { LifeState } from '../types';
+import { leaveSchoolTeam } from '../teen/activities';
+import { endScholarship } from './scholarship';
 import { sportsHistory } from './text';
 import { mySport } from './query';
 
@@ -83,10 +85,17 @@ export function retireSports(state: LifeState, route: SportRetireRoute | null, w
   if (!def || !state.fame.active || state.fame.main !== def.id) return false;
   const b = content.balance.sports;
   s.team = null;
+  s.club = null;
   s.contract = null;
   s.run = null;
   s.draft = null;
+  s.tryout = null;
+  s.offers = [];
+  s.captain = false;
   s.pain = false;
+  // Batch 5: the school team and a scholarship go with the career.
+  leaveSchoolTeam(state, def.id, content);
+  endScholarship(state, content);
   s.ask = null;
   s.playOut = false;
   s.retired = { year: state.currentYear, route };

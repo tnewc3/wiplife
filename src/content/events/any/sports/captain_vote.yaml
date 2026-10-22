@@ -1,0 +1,46 @@
+id: captain_vote
+title: The captain's band
+text: >-
+  The coach reads the names off a sheet and yours is on it twice. Your teammates voted, and
+  the band goes to the player they trust most when a game is going wrong. It is yours if you
+  want it, and it comes with a handshake before every game and a phone call in every crisis.
+tone: serious
+category: sports
+rarity: uncommon
+lifeStages: [child, teen, youngAdult, adult]
+requires:
+  all:
+    - { sports: { active: true } }
+    - { sports: { captain: false, role: [starter] } }
+    - { sports: { seasons: { gte: 3 } } }
+weight: { base: 1 }
+followUpOnly: true
+choices:
+  - id: accept
+    label: Take it, and mean it
+    outcome:
+      text: >-
+        The band is a strip of tape with a letter on it. You wear it on your arm in the next
+        game, and the locker room is quieter than it used to be when you speak.
+      effects:
+        - { type: sports, action: captain, on: true }
+        - { type: stat, key: confidence, delta: 3 }
+        - { type: stat, key: stress, delta: 1 }
+  - id: share
+    label: Take it, and ask the others to share the job
+    outcome:
+      text: >-
+        You say it in front of everyone: the band is yours, and the work is everyone's. A few
+        of the older players grin, and the rest look relieved.
+      effects:
+        - { type: sports, action: captain, on: true }
+        - { type: fame, action: image, delta: 1 }
+  - id: decline
+    label: Say no, and name someone else
+    outcome:
+      text: >-
+        You point to a teammate who wants it more and deserves it as much. It is the kind of
+        thing a locker room remembers.
+      effects:
+        - { type: stat, key: happiness, delta: 1 }
+        - { type: fame, action: image, delta: 1 }

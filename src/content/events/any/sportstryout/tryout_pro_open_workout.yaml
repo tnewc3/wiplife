@@ -1,0 +1,45 @@
+id: tryout_pro_open_workout
+title: An open workout
+text: >-
+  The email was two lines long: an open workout, a Tuesday, bring your own gear. The team has
+  invited forty players who are not on anyone's roster, and the scouts in the stands are
+  there to see whether any of them were overlooked.
+tone: neutral
+category: sportstryout
+rarity: common
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { sports: { tryout: true } }
+    - { age: { gte: 18 } }
+weight: { base: 1 }
+followUpOnly: true
+choices:
+  - id: steady
+    label: Show them you are a pro
+    outcome:
+      text: >-
+        You play the way a professional plays when nobody is cheering. {tryout}
+      effects:
+        - { type: sports, action: tryout, approach: steady }
+  - id: hustle
+    label: Show them your engine
+    outcome:
+      text: >-
+        You outwork the room and make sure the scouts have no doubts about your conditioning. {tryout}
+      effects:
+        - { type: sports, action: tryout, approach: hustle }
+  - id: showoff
+    label: Show them what you can do that others cannot
+    outcome:
+      text: >-
+        Every touch is a statement. Some of them are the ones you wanted. {tryout}
+      effects:
+        - { type: sports, action: tryout, approach: showoff }
+  - id: listen
+    label: Show them you can be coached
+    outcome:
+      text: >-
+        You take every correction on the first try, and you can see the staff noticing. {tryout}
+      effects:
+        - { type: sports, action: tryout, approach: listen }

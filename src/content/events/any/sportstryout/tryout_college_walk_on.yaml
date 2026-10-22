@@ -1,0 +1,44 @@
+id: tryout_college_walk_on
+title: A walk-on tryout
+text: >-
+  The sign says open tryouts for the program, no scholarship and no promises. A hundred
+  players are on the practice floor, all of them the best player their school ever had. The
+  coaches have a stopwatch, a spreadsheet and very little patience.
+tone: neutral
+category: sportstryout
+rarity: common
+lifeStages: [teen, youngAdult]
+requires:
+  all:
+    - { sports: { tryout: true } }
+weight: { base: 1 }
+followUpOnly: true
+choices:
+  - id: steady
+    label: Be reliable and efficient
+    outcome:
+      text: >-
+        You do not make mistakes, and in a room like this that is its own kind of standout. {tryout}
+      effects:
+        - { type: sports, action: tryout, approach: steady }
+  - id: hustle
+    label: Outwork everybody in the building
+    outcome:
+      text: >-
+        You run harder than a hundred people who are also running hard. {tryout}
+      effects:
+        - { type: sports, action: tryout, approach: hustle }
+  - id: showoff
+    label: Show the coaches what only you can do
+    outcome:
+      text: >-
+        You pick your moments to try the big plays and hope the coaches picked theirs to look. {tryout}
+      effects:
+        - { type: sports, action: tryout, approach: showoff }
+  - id: listen
+    label: Learn the system quickly and play inside it
+    outcome:
+      text: >-
+        You pick up the drills faster than the others and run them cleaner. {tryout}
+      effects:
+        - { type: sports, action: tryout, approach: listen }

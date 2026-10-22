@@ -26,6 +26,12 @@ tour: { label: "Tour", noun: "tour", minRung: 8 }
 press: { label: "Press run", minRung: 8 }
 retire: { from: 33, chance: [{ at: 33, x: 0.02 }, { at: 45, x: 0.2 }] }
 royalties: 0.05
+# Batch 5: what you train (Batch 4's practice system): where you train it matters (balance/sports.yaml training).
+skills:
+  - { id: shooting, label: Shooting, blurb: "Form shooting until your elbow stops drifting and the ball lands where you meant it to." }
+  - { id: handling, label: Ball handling, blurb: "Cones, two balls, weak hand, and the patience to look bad before you look good." }
+  - { id: defense, label: Defense, blurb: "Footwork, reading the pass and the stubbornness to stay in front of someone faster." }
+  - { id: strength, label: Strength and leaping, blurb: "Weights, plyometrics and the stairs at the end of the block, again." }
 sport:
   positions:
     - id: point_guard

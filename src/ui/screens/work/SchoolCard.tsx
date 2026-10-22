@@ -121,6 +121,7 @@ export function SchoolCard({ life }: { life: LifeState }) {
         <p className="mt-3 font-semibold" data-testid="admission-line">
           {view.admission.returning ? 'You go back to' : 'You start at'} {view.admission.program === 'high' ? 'high school' : view.admission.schoolName} next year
           {view.admission.studying ? `, studying ${view.admission.studying}` : ''}.
+          {view.admission.athletic > 0 ? ` Your athletic scholarship covers ${Math.round(view.admission.athletic * 100)}% of tuition.` : ''}
         </p>
       )}
       {view.left && !cur && !view.admission && (

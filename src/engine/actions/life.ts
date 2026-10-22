@@ -134,6 +134,9 @@ export interface LifeActionParams {
   positionId?: string;
   sportFocus?: 'skills' | 'conditioning' | 'film';
   routeKey?: 'coaching' | 'broadcast' | 'normal';
+  /** Batch 5: a team to try out for (see src/engine/sports/tryout.ts) and where a training session happens. */
+  teamKey?: string;
+  trainMode?: 'team' | 'gym' | 'coach';
   /** L1: your final wishes; how care is provided and, for family care, who by. */
   wishes?: WishesInput;
   careOption?: 'family' | 'paid' | 'assisted';

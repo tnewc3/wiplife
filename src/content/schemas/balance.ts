@@ -747,6 +747,15 @@ export const targetsBalanceSchema = z.strictObject({
     allStarLives: shareRangeSchema,
     medianEarnings: numberRangeSchema,
     signedShare: shareRangeSchema,
+    /** Batch 5: tryouts (made the team tried for, landed on a fallback, ended with none), athletic scholarships taken, the draft's pick against rating and pay against pick, undrafted players who later signed, and training sessions a year with a team. */
+    tryoutMade: shareRangeSchema,
+    tryoutFallback: shareRangeSchema,
+    tryoutCut: shareRangeSchema,
+    scholarshipShare: shareRangeSchema,
+    pickRating: numberRangeSchema,
+    rookiePayPick: numberRangeSchema,
+    undraftedSigned: shareRangeSchema,
+    trainingTeam: numberRangeSchema,
   }),
   /**
    * B1, romance by attraction (tools/simulate/attraction.ts), on the careful player's lives that reach 50: lives

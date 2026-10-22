@@ -1,0 +1,51 @@
+id: jersey_number_choice
+title: Pick a number
+text: >-
+  The equipment manager sets a cardboard box on the table. Inside are jerseys with the
+  numbers that are still free, and a sheet that says what you get to choose. Everyone in
+  a locker room has a story about theirs. You are about to start yours.
+tone: light
+category: sports
+rarity: common
+lifeStages: [child, teen, youngAdult, adult]
+requires:
+  all:
+    - { sports: { active: true } }
+    - { sports: { number: false } }
+weight: { base: 1 }
+followUpOnly: true
+choices:
+  - id: lucky
+    label: Take number 7, your lucky number
+    outcome:
+      text: >-
+        You pull the {number} jersey over your head and it fits. It does not make you any
+        better. It does make you feel like you belong.
+      effects:
+        - { type: sports, action: number, value: 7 }
+        - { type: stat, key: confidence, delta: 1 }
+  - id: eleven
+    label: Take number 11
+    outcome:
+      text: >-
+        Eleven was nobody's favourite, which is why it was in the box. You decide to change
+        that. The {number} on your back is yours now.
+      effects:
+        - { type: sports, action: number, value: 11 }
+  - id: thirty_three
+    label: Take number 33
+    outcome:
+      text: >-
+        It looks good on a back, and it looks better in the mirror. You tape a small card to
+        the inside of your locker with the {number} on it.
+      effects:
+        - { type: sports, action: number, value: 33 }
+        - { type: stat, key: happiness, delta: 1 }
+  - id: whatever
+    label: Take whatever is left on top
+    outcome:
+      text: >-
+        You grab the nearest jersey and look at the number on it. {number}, then. It is the
+        sort of thing you stop thinking about, and then you cannot imagine anything else.
+      effects:
+        - { type: sports, action: number, value: 44 }

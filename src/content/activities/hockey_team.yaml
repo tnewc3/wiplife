@@ -1,0 +1,18 @@
+id: hockey_team
+name: The hockey team
+kind: team
+blurb: Ice time at six in the morning, a bag that smells like a locker room and teammates who would drive an hour for a practice.
+minAge: 10
+tryout:
+  base: 45
+  stats: [{ key: fitness, weight: 0.5 }, { key: discipline, weight: 0.2 }]
+cost: 320
+effects:
+  fitness: { perYear: 1.2, limit: 87 }
+  health: { perYear: 0.2, limit: 80 }
+grades: -0.04
+friends: 4
+talent: athletics
+passion: 5
+injury: 0.1
+sport: hockey

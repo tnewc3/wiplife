@@ -538,7 +538,59 @@ export const migrations: readonly Migration[] = [
       'free before). Heir replay snapshots are upgraded the same way.',
     migrate: upgradeGrindData,
   },
+  {
+    from: 32,
+    description:
+      'Batch 5: sports I. A life\'s sports record gains the tryout in hand (none), the last tryouts (none), the teams that cut you (none), ' +
+      'whether you are without a team (no), a club team (none), this year\'s training (none), scholarship offers and the scholarship you hold ' +
+      '(none), combine points (0), the year the draft passed you by (0), your role on the team (starter), your jersey number (none) and ' +
+      'captaincy (no), and new totals (0). A school team in a sport is now the sports career\'s school rung and one record: a life playing ' +
+      'a sport at the school level, under 18, gains the matching school team in its teams and clubs (if there is room), and a school sports ' +
+      'team joined by a life with no career starts one when the next year begins. Nobody loses a career. Heir replay snapshots are upgraded the same way.',
+    migrate: upgradeSportsFiveData,
+  },
 ];
+
+function upgradeSportsFiveData(data: unknown): unknown {
+  if (!isRecord(data)) return data;
+  const content = compiled as ContentBundle;
+  const inputLog = Array.isArray(data.inputLog) ? data.inputLog.map((entry: unknown) => {
+    if (!isRecord(entry) || !isRecord(entry.payload) || !isRecord(entry.payload.snapshot)) return entry;
+    return { ...entry, payload: { ...entry.payload, snapshot: upgradeSportsFiveData(entry.payload.snapshot) } };
+  }) : data.inputLog;
+  if (!isRecord(data.sports)) return { ...data, inputLog };
+  const old = data.sports;
+  const totals = isRecord(old.totals) ? old.totals : {};
+  const sports = {
+    ...old,
+    totals: { tryouts: 0, tryoutsMade: 0, scholarships: 0, scholarshipsLost: 0, trainedTeam: 0, trainedGym: 0, trainedCoach: 0, signedAfterUndrafted: 0, ...totals },
+    tryout: null,
+    tried: [],
+    cut: {},
+    teamless: false,
+    club: null,
+    training: { year: 0, team: 0, gym: 0, coach: 0, member: false, spent: 0 },
+    offers: [],
+    scholarship: null,
+    combine: 0,
+    passed: 0,
+    role: 'starter',
+    number: null,
+    captain: false,
+  };
+  let teen = data.teen;
+  const age = isRecord(data.character) && typeof data.character.age === 'number' ? data.character.age : 99;
+  const year = typeof data.currentYear === 'number' ? data.currentYear : 0;
+  const team = isRecord(old.team) ? old.team : null;
+  if (isRecord(teen) && Array.isArray(teen.activities) && team?.level === 'school' && typeof old.sport === 'string' && age < content.balance.relationships.adultAge) {
+    const def = Object.values(content.activities).find((a) => a.sport === old.sport && !a.retired);
+    const have = teen.activities.some((a: unknown) => isRecord(a) && a.id === def?.id);
+    if (def && !have && teen.activities.length < content.balance.teen.activities.max) {
+      teen = { ...teen, activities: [...teen.activities, { id: def.id, since: year, tier: 'varsity' }] };
+    }
+  }
+  return { ...data, inputLog, sports, teen };
+}
 
 function upgradeGrindData(data: unknown): unknown {
   if (!isRecord(data)) return data;

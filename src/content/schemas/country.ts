@@ -159,6 +159,22 @@ export const countrySchema = baseDefSchema.extend({
     /** One line: how students pay, for the school screen. */
     blurb: z.string().trim().min(1).max(160),
   }),
+  /**
+   * Batch 5: sport at school and college. `scholarships`: whether colleges here give athletic scholarships, the most of
+   * tuition one pays (a full ride is 1), the words for it and the programs that recruit (`word` is "athletic
+   * scholarship", "sport scholarship", "beca deportiva"). `academy`: club academies take promising young players.
+   * `system` names the kind of school sport: a college team (the United States, Canada) or a university team.
+   */
+  athletics: z.strictObject({
+    scholarships: z.strictObject({
+      available: z.boolean(),
+      maxShare: share,
+      word: wordSchema,
+      tiers: z.array(z.enum(['community', 'state', 'elite'])).max(3),
+    }),
+    academy: z.boolean(),
+    system: z.enum(['college', 'university']),
+  }),
   /** Buying a home: the mortgage rate, the smallest down payment (a share of the price) and how home values move each year. */
   housing: z.strictObject({ mortgageRate: rate, downPayment: share, appreciation: z.number().min(-0.2).max(0.2) }),
   healthcare: z.strictObject({

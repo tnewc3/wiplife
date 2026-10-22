@@ -26,6 +26,12 @@ tour: { label: "Tour", noun: "tour", minRung: 8 }
 press: { label: "Press run", minRung: 8 }
 retire: { from: 33, chance: [{ at: 33, x: 0.02 }, { at: 45, x: 0.2 }] }
 royalties: 0.05
+# Batch 5: what you train (Batch 4's practice system): where you train it matters (balance/sports.yaml training).
+skills:
+  - { id: hands, label: Hands and throwing, blurb: "Catching in traffic and a throw that does what you told it to do." }
+  - { id: speed, label: Speed and agility, blurb: "Ladders, cuts, starts, and the first three steps that decide most plays." }
+  - { id: strength, label: Strength, blurb: "Squats, sleds and the gym at six in the morning." }
+  - { id: playbook, label: Reading the game, blurb: "Film, the playbook and learning to see the play before it happens." }
 sport:
   positions:
     - id: quarterback

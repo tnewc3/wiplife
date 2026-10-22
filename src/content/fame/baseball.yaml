@@ -26,6 +26,12 @@ tour: { label: "Tour", noun: "tour", minRung: 8 }
 press: { label: "Press run", minRung: 8 }
 retire: { from: 33, chance: [{ at: 33, x: 0.02 }, { at: 45, x: 0.2 }] }
 royalties: 0.05
+# Batch 5: what you train (Batch 4's practice system): where you train it matters (balance/sports.yaml training).
+skills:
+  - { id: hitting, label: Hitting, blurb: "Cage work, tee work and the discipline to wait for your pitch." }
+  - { id: fielding, label: Fielding, blurb: "Ground balls off the grass and the glove that knows where the ball is going." }
+  - { id: throwing, label: Throwing, blurb: "Long toss, mechanics and an arm you learn to look after." }
+  - { id: baserunning, label: Baserunning, blurb: "Leads, jumps and the instinct to know when to go." }
 sport:
   positions:
     - id: pitcher

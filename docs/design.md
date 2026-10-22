@@ -383,7 +383,7 @@ Affection and trust move separately, so someone can love you without trusting yo
 - **About 10 majors,** each leading to specific jobs.
 - **Trade school** with about 6 trades, each with a license that leads to trade jobs.
 - **Grad school:** law, medicine, MBA and master's degrees.
-- **Paying for school:** scholarships (from GPA and events), family help (from family wealth), and student loans.
+- **Paying for school:** scholarships (from GPA and events, and for athletes a college program's offer, which takes a share of tuition while you play for the team and keep your grades up), family help (from family wealth), and student loans.
 
 ### Careers
 

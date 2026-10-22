@@ -1,0 +1,43 @@
+id: first_week_with_the_new_team
+title: The first week on a new roster
+text: >-
+  Your name is on the roster, in your own handwriting on the sign-in sheet, and for the first
+  time in days nobody is judging you. Now there is only the work, and a locker room full of
+  players who have been together longer than you have.
+tone: light
+category: sports
+rarity: common
+lifeStages: [child, teen, youngAdult]
+requires:
+  all:
+    - { sports: { active: true } }
+    - { sports: { tried: [made, fallback] } }
+weight: { base: 14 }
+cooldownYears: 2
+choices:
+  - id: introduce
+    label: Introduce yourself to everyone
+    outcome:
+      text: >-
+        You go down the row of lockers and say your name, and by the time you get to the end
+        you are a person and not a new kid.
+      effects:
+        - { type: stat, key: happiness, delta: 2 }
+        - { type: stat, key: confidence, delta: 1 }
+  - id: head_down
+    label: Keep your head down and learn the system
+    outcome:
+      text: >-
+        You say little and learn a lot. The plays make sense by the end of the week, and so
+        do the people.
+      effects:
+        - { type: fame, action: craft, delta: 1 }
+  - id: ask_vet
+    label: Ask the oldest player to show you how things work
+    outcome:
+      text: >-
+        The oldest player on the roster takes you through everything unwritten: where to
+        park, who to listen to, what to ignore.
+      effects:
+        - { type: sports, action: form, delta: 1 }
+        - { type: stat, key: smarts, delta: 1 }

@@ -1,0 +1,53 @@
+id: camp_practice_squad_call
+title: A call about the bottom of a roster
+text: >-
+  The number on the screen is a team you have been calling. They do not have a spot on the
+  roster, but there is a place to practise with the squad, be seen and be called up when
+  somebody gets hurt.
+tone: neutral
+category: sports
+rarity: common
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { sports: { active: true } }
+    - { any: [{ sports: { teamless: true } }, { sports: { passed: true } }] }
+weight: { base: 1 }
+followUpOnly: true
+choices:
+  - id: take_it
+    label: Take the spot and make yourself useful
+    check:
+      base: 50
+      stats: [{ key: discipline, weight: 0.25 }, { sports: rating, weight: 0.4 }]
+      success:
+        text: >-
+          You do every drill like a starter, and by the third month a coach is asking for
+          you by name. The call-up comes in the spring.
+        effects:
+          - { type: sports, action: camp }
+          - { type: stat, key: happiness, delta: 4 }
+      failure:
+        text: >-
+          The spot is a hard one. You practise, you watch, you wait, and the call-up goes to
+          someone else.
+        effects:
+          - { type: stat, key: stress, delta: 2 }
+          - { type: stat, key: fitness, delta: 1 }
+  - id: ask_more
+    label: Ask what it would take to be on the roster
+    outcome:
+      text: >-
+        The coach is honest: there are better players on the squad right now, and the way
+        up is to be better than they are.
+      effects:
+        - { type: fame, action: craft, delta: 1 }
+  - id: decline
+    label: Say no and look for something better
+    outcome:
+      text: >-
+        You hang up and stare at the wall. It was the call you wanted, and you did not
+        answer it the way you thought you would.
+      effects:
+        - { type: stat, key: happiness, delta: -1 }

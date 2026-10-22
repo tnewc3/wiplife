@@ -1083,6 +1083,7 @@ export const ACTIVITY_BLOCK_LABELS: Record<ActivityBlock, string> = {
   limit: 'You’re in as many as you can handle.',
   turnedAway: 'You were cut, and it’s too soon to try again.',
   away: 'You’re away.',
+  sport: 'Try out from your Sports card.',
 };
 
 export const LICENSE_BLOCK_LABELS: Record<LicenseBlock, string> = {
@@ -1378,6 +1379,44 @@ export const SPORT_FOCUS_BLURBS = {
   conditioning: 'Gym, track and recovery. Fitness grows and you are sharper for it. (Training never causes or prevents injuries; games do.)',
   film: 'Hours with the tape. A smart player reads the game earlier.',
 } as const;
+/** Batch 5: tryouts, training, scholarships and your place on a team. */
+export const TRYOUT_BLOCK_LABELS = {
+  unknown: 'Not open to you.',
+  busy: 'You are in another career.',
+  prison: 'You are away.',
+  age: 'Not for your age.',
+  parent: 'A parent has to sign for you.',
+  member: 'You are already on this team.',
+  cut: 'They cut you recently. Too soon to ask again.',
+  year: 'You have tried out as often as you can this year.',
+  pending: 'A tryout is already lined up.',
+  level: 'Not open at your level.',
+  country: 'Not offered where you live.',
+  gone: 'No longer on the list.',
+} as const;
+export const ODDS_WORDS = ['A long shot', 'Unlikely', 'Even odds', 'Likely', 'Almost certain'] as const;
+export const TRAINING_MODE_LABELS = { team: 'With your team', gym: 'At a gym', coach: 'With a private coach' } as const;
+export const TRAINING_MODE_BLURBS = {
+  team: 'Its coaches and facilities, at no charge. A stronger team teaches more.',
+  gym: 'Works without a team, for less gain. The membership is paid once a year.',
+  coach: 'Works without a team, with a better gain than a gym. You pay for each session.',
+} as const;
+export const TRAIN_BLOCK_LABELS = {
+  inactive: 'You are not playing.',
+  prison: 'You are away.',
+  path: 'Not your sport.',
+  skill: 'Not a skill of your sport.',
+  instrument: 'Not available.',
+  budget: 'No sessions left this year.',
+  maxed: 'As far as practice alone takes you.',
+  team: 'You have no team to train with.',
+  money: 'You cannot afford it.',
+} as const;
+export const SKILL_WORDS = ['Raw', 'Learning', 'Solid', 'Sharp', 'Elite'] as const;
+export const ROLE_LABELS = { starter: 'Starter', rotation: 'In the rotation', reserve: 'Reserve' } as const;
+export const SCHOLARSHIP_SYSTEM_LABELS = { college: 'College teams recruit.', university: 'University teams recruit, and club academies take young players.' } as const;
+export const OFFER_BLOCK_LABELS = { none: 'The offer is gone.', held: 'You already hold one.', school: 'You are in a program that does not allow it.', prison: 'You are away.', between: 'Choices wait until the year is over.' } as const;
+
 export const CONTRACT_KIND_LABELS = { minimum: 'A minimum deal', rookie: 'A rookie deal', standard: 'A standard deal', star: 'A star deal' } as const;
 export const CONTRACT_OPTION_LABELS = { none: 'no option', team: 'a team option on the last year', player: 'a player option on the last year' } as const;
 export const SPORT_EXIT_LABELS = {

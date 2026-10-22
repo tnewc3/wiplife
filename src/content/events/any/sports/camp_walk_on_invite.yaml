@@ -1,0 +1,52 @@
+id: camp_walk_on_invite
+title: A coach with a thin roster
+text: >-
+  The message is short. A coach whose team is thin at your position says there is a
+  practice on Thursday that a few extra bodies are welcome at, and that nobody is making
+  promises. It could be nothing. It could be the only door open.
+tone: neutral
+category: sports
+rarity: common
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { sports: { active: true } }
+    - { any: [{ sports: { teamless: true } }, { sports: { passed: true } }] }
+weight: { base: 1 }
+followUpOnly: true
+choices:
+  - id: go
+    label: Go and give them everything
+    check:
+      base: 40
+      stats: [{ key: fitness, weight: 0.25 }, { key: discipline, weight: 0.2 }, { sports: rating, weight: 0.4 }]
+      success:
+        text: >-
+          You practise like you are fighting for a spot, because you are. By the end of the
+          week a trainer hands you a locker key.
+        effects:
+          - { type: sports, action: camp }
+          - { type: stat, key: happiness, delta: 6 }
+      failure:
+        text: >-
+          Practice goes fine and the answer is still no. The coach says to stay in shape, and
+          you leave with the quiet of someone who has been told that before.
+        effects:
+          - { type: stat, key: stress, delta: 2 }
+  - id: ask_feedback
+    label: Ask for honest feedback instead of a spot
+    outcome:
+      text: >-
+        The coach gives you three things to work on and one to stop doing. It is more than
+        you expected and exactly what you needed.
+      effects:
+        - { type: fame, action: craft, delta: 1 }
+  - id: pass
+    label: Say thanks, and keep your options open
+    outcome:
+      text: >-
+        You do not go. The practice happens without you, and you spend Thursday wondering
+        what it was like.
+      effects:
+        - { type: stat, key: happiness, delta: -1 }

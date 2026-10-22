@@ -37,8 +37,8 @@ function choiceAges(def: EventDef, choice: { visibleIf?: Condition | undefined }
   };
 }
 
-const VALUE = /\{(sport|team|league|position|stage|trophy|pick|draftRound|draftTeam|record|statLine|opponent|injury|salary|season)\}/g;
-const PRO_ACTIONS = new Set(['sign', 'extend', 'playout', 'trade', 'ask']);
+const VALUE = /\{(sport|team|league|position|stage|trophy|pick|draftRound|draftTeam|record|statLine|opponent|injury|salary|season|number|tryout|tier|campus|share|scholarship|prospect)\}/g;
+const PRO_ACTIONS = new Set(['sign', 'extend', 'playout', 'trade', 'ask', 'camp']);
 
 export function checkSports(bundle: ContentBundle, fileOf: (typeKey: CollectionKey, id: string) => string, partialEvents: boolean): ContentError[] {
   const errors: ContentError[] = [];
@@ -57,6 +57,44 @@ export function checkSports(bundle: ContentBundle, fileOf: (typeKey: CollectionK
   if (!(b.injury.level.youth <= b.injury.level.school && b.injury.level.school <= b.injury.level.college && b.injury.level.college <= b.injury.level.pro)) err(BALANCE, 'injury.level must grow with the level of play');
   if (b.injury.aggravate.min > b.injury.aggravate.max) err(BALANCE, 'injury.aggravate: min is greater than max');
   for (const kind of ['minimum', 'rookie', 'standard', 'star'] as const) if (b.contract.years[kind].min > b.contract.years[kind].max) err(BALANCE, `contract.years.${kind}: min is greater than max`);
+
+  // Batch 5: tryouts, training, scholarships and the draft.
+  const tiers = b.tryout.tiers;
+  for (const [id, t] of Object.entries(tiers)) {
+    if (t.minAge > t.maxAge) err(BALANCE, `tryout.tiers.${id}: minAge is above maxAge`);
+    if (t.minAge < 8) err(BALANCE, `tryout.tiers.${id}: no team takes anyone under 8`);
+    if (t.fallback !== null) {
+      const f = tiers[t.fallback];
+      if (f.level !== t.level) err(BALANCE, `tryout.tiers.${id}: the fallback must be a team of the same level`);
+      if (f.bar >= t.bar) err(BALANCE, `tryout.tiers.${id}: the fallback must be easier to make than the team`);
+    }
+  }
+  for (const level of ['youth', 'school', 'college'] as const) {
+    if (!Object.values(tiers).some((t) => t.level === level && t.fallback === null)) err(BALANCE, `tryout.tiers: ${level} needs a team at the bottom (no fallback) that takes everyone who earned the level`);
+    if (bundle.text.sports.tiers && !Object.keys(tiers).every((id) => id in bundle.text.sports.tiers)) err('text/sports.yaml', 'tiers: words for every team tier');
+  }
+  if (b.tryout.tiers.academy.minAge < 8) err(BALANCE, 'tryout.tiers.academy: minAge');
+  if (b.scholarship.ages.from > b.scholarship.ages.to) err(BALANCE, 'scholarship.ages: from is above to');
+  if (b.scholarship.ages.from < 16) err(BALANCE, 'scholarship.ages: recruiting starts at 16 at the earliest');
+  for (const t of ['community', 'state', 'elite'] as const) if (b.scholarship.tiers[t].from >= b.scholarship.tiers[t].full) err(BALANCE, `scholarship.tiers.${t}: an offer begins below the score of the best one`);
+  for (let i = 1; i < b.draft.projection.length; i++) if (b.draft.projection[i]!.upTo <= b.draft.projection[i - 1]!.upTo) err(BALANCE, 'draft.projection must be in increasing upTo order');
+  for (const band of b.draft.projection) if (!bundle.text.sports.projection[band.id]) err('text/sports.yaml', `projection: words for "${band.id}"`);
+  for (const [country, c] of Object.entries(bundle.countries)) {
+    const a = c.athletics;
+    if (a.scholarships.available && a.scholarships.tiers.length === 0) err(`countries/${country}.yaml`, 'athletics.scholarships: available, but no program recruits');
+    if (!a.scholarships.available && a.scholarships.maxShare > 0) err(`countries/${country}.yaml`, 'athletics.scholarships: not available, but pays a share');
+  }
+  // Every sport has a school team (one record with the sports career) and skills to train.
+  for (const def of sports) {
+    if (!Object.values(bundle.activities).some((a) => a.sport === def.id && !a.retired)) err(fileOf('famePaths', def.id), `${def.id}: needs a school team in teams and clubs with sport: ${def.id}`);
+    if ((def.skills ?? []).length < 3) err(fileOf('famePaths', def.id), `${def.id}: needs at least three skills to train`);
+  }
+  for (const a of Object.values(bundle.activities)) {
+    if (a.sport === undefined) continue;
+    const sp = bundle.famePaths[a.sport];
+    if (!sp?.sport) err(`activities/${a.id}.yaml`, `sport "${a.sport}" is not a sport`);
+    if (a.kind !== 'team') err(`activities/${a.id}.yaml`, 'a sport belongs to a team, not a club');
+  }
 
   // Sports.
   for (const def of sports) {
@@ -115,6 +153,19 @@ export function checkSports(bundle: ContentBundle, fileOf: (typeKey: CollectionK
 
   // The events the sports step queues.
   if (!partialEvents) {
+    for (const [level, ids] of Object.entries(bundle.registries.sports.tryouts)) {
+      for (const id of ids) {
+        const ev = bundle.events[id];
+        if (!ev) err(REGISTRY, `tryouts.${level}: unknown event "${id}"`);
+        else {
+          if (!ev.followUpOnly) err(fileOf('events', id), `${id}: a tryout scrimmage must be followUpOnly`);
+          if (ev.category !== 'sportstryout') err(fileOf('events', id), `${id}: a tryout scrimmage is in the sportstryout category`);
+          const approaches = new Set((ev.choices ?? []).flatMap((c) => (c.outcome ? [c.outcome] : c.check ? [c.check.success, c.check.failure] : []).flatMap((o) => (o.effects as Effect[]).flatMap((x) => (x.type === 'sports' && x.action === 'tryout' ? [x.approach ?? ''] : [])))));
+          if (approaches.size < 3) err(fileOf('events', id), `${id}: a tryout scrimmage offers at least three ways to play it`);
+          if (level === 'pro' && ageFloor(ev.requires) < bundle.balance.relationships.adultAge) err(fileOf('events', id), `${id}: a pro camp is for adults`);
+        }
+      }
+    }
     for (const trigger of SPORTS_TRIGGERS) {
       for (const id of bundle.registries.sports.triggers[trigger].events) {
         const def = bundle.events[id];
@@ -210,6 +261,13 @@ export function checkSports(bundle: ContentBundle, fileOf: (typeKey: CollectionK
       season: ['a season this year', requiresSports(def, (c) => c.result !== undefined || c.rating !== undefined) || JSON.stringify(def.requires ?? {}).includes('"released":true')],
       injury: ['{ sports: { injured: true } }', requiresSports(def, (c) => c.injured === true)],
       salary: ['{ sports: { contract: true } }', requiresSports(def, (c) => c.contract === true)],
+      number: ['a sports condition', any],
+      tryout: ['{ sports: { tryout: true } }', requiresSports(def, (c) => c.tryout === true)],
+      tier: ['a sports condition', any],
+      campus: ['{ sports: { offers: [...] } } or { sports: { scholarship: true } }', requiresSports(def, (c) => c.offers !== undefined || c.scholarship === true)],
+      share: ['{ sports: { offers: [...] } } or { sports: { scholarship: true } }', requiresSports(def, (c) => c.offers !== undefined || c.scholarship === true)],
+      scholarship: ['a sports condition', any],
+      prospect: ['{ sports: { prospect: true } }', requiresSports(def, (c) => c.prospect === true)],
     };
     for (const name of used) {
       const [what, ok] = wants[name]!;

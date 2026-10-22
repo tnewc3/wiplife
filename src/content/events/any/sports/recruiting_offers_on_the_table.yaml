@@ -1,0 +1,62 @@
+id: recruiting_offers_on_the_table
+title: Letters from the programs
+text: >-
+  The envelopes have been arriving all month, and now you have a stack of them on the
+  kitchen table next to the one from the coach who has called twice this week. The
+  strongest offer is from {campus}, and it would take care of {share} of what the place
+  costs, through a {scholarship}. Every one of them wants an answer before the season
+  turns.
+tone: light
+category: sports
+rarity: uncommon
+lifeStages: [teen]
+requires:
+  all:
+    - { age: { gte: 16, lte: 19 } }
+    - { sports: { active: true } }
+    - { sports: { offers: [community, state, elite] } }
+    - { sports: { scholarship: false } }
+weight: { base: 1 }
+followUpOnly: true
+justified:
+  money: The scholarship takes a share off the tuition bill that the education system charges when the place is taken up; it does not move savings now.
+choices:
+  - id: take_elite
+    label: Sign with the elite program
+    visibleIf: { sports: { offers: [elite] } }
+    outcome:
+      text: >-
+        You sign in an office with a crest on the wall, under a coach who says your name
+        like it is already on a roster. The place is yours, and so is the {scholarship}.
+      effects:
+        - { type: sports, action: scholarship, tier: elite }
+        - { type: stat, key: happiness, delta: 6 }
+  - id: take_state
+    label: Sign with the state program
+    visibleIf: { sports: { offers: [state] } }
+    outcome:
+      text: >-
+        The state program is not the biggest name, but it is a school with a real team and
+        a real place for you on it. You sign with the {scholarship} behind you.
+      effects:
+        - { type: sports, action: scholarship, tier: state }
+        - { type: stat, key: happiness, delta: 5 }
+  - id: take_community
+    label: Sign with the community college program
+    visibleIf: { sports: { offers: [community] } }
+    outcome:
+      text: >-
+        A smaller program, a closer drive and a coach who remembers every player's name.
+        You sign, and it feels less like a step down than like a way in.
+      effects:
+        - { type: sports, action: scholarship, tier: community }
+        - { type: stat, key: happiness, delta: 4 }
+  - id: wait
+    label: Thank them and keep your options open
+    outcome:
+      text: >-
+        You write the same polite note six times. The coaches say the door stays open, in
+        the voice of people who say that to a lot of kids.
+      effects:
+        - { type: sports, action: scholarship }
+        - { type: stat, key: stress, delta: -1 }

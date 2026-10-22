@@ -1,0 +1,55 @@
+id: camp_open_tryout_day
+title: An open tryout across the country
+text: >-
+  The phone is not ringing, so you go to where the phones are. There is an open tryout for
+  a team that is short of players, three time zones away, with a sign-up sheet that does not
+  ask where you have played. You can book the trip tonight.
+tone: neutral
+category: sports
+rarity: common
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { sports: { active: true } }
+    - { any: [{ sports: { teamless: true } }, { sports: { passed: true } }] }
+weight: { base: 1 }
+followUpOnly: true
+choices:
+  - id: book_trip
+    label: Book the trip and go
+    check:
+      base: 35
+      stats: [{ key: fitness, weight: 0.3 }, { key: discipline, weight: 0.15 }, { sports: rating, weight: 0.5 }]
+      success:
+        text: >-
+          Two days of drills in a gym you have never seen, and on the second evening a
+          coach finds you in the parking lot with a clipboard and a number.
+        effects:
+          - { type: cost, item: camp_travel }
+          - { type: sports, action: camp }
+          - { type: stat, key: happiness, delta: 5 }
+      failure:
+        text: >-
+          The camp is full of players better than you, or maybe just luckier that week.
+          You fly home on the cheapest seat.
+        effects:
+          - { type: cost, item: camp_travel }
+          - { type: stat, key: confidence, delta: -2 }
+  - id: local_gym
+    label: Work out at the local gym until the next chance
+    outcome:
+      text: >-
+        You keep your body honest and your phone close. The gym smells the same as every
+        gym you have ever been in.
+      effects:
+        - { type: sports, action: form, delta: 1 }
+        - { type: stat, key: fitness, delta: 1 }
+  - id: wait
+    label: Wait for the phone to ring
+    outcome:
+      text: >-
+        You wait. The phone does not ring, and by the end of the week you cannot stand the
+        sound of your own waiting.
+      effects:
+        - { type: stat, key: stress, delta: 2 }

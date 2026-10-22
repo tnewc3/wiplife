@@ -1,0 +1,44 @@
+id: tryout_college_open_run
+title: The open run
+text: >-
+  The program holds an open run in the old gym, the kind with a scoreboard that only works on
+  one side. Current players watch from the bleachers with their arms folded, and the coach
+  stands at midcourt. Everyone knows who is being measured against whom.
+tone: neutral
+category: sportstryout
+rarity: common
+lifeStages: [teen, youngAdult]
+requires:
+  all:
+    - { sports: { tryout: true } }
+weight: { base: 1 }
+followUpOnly: true
+choices:
+  - id: steady
+    label: Play within yourself
+    outcome:
+      text: >-
+        You do not try to be anyone else out there, and the coach seems to approve. {tryout}
+      effects:
+        - { type: sports, action: tryout, approach: steady }
+  - id: hustle
+    label: Make the current players work for it
+    outcome:
+      text: >-
+        You make everything difficult for them, and a couple of the veterans smile at you for it. {tryout}
+      effects:
+        - { type: sports, action: tryout, approach: hustle }
+  - id: showoff
+    label: Take the big moments
+    outcome:
+      text: >-
+        You are not shy about wanting the ball with the game on the line. {tryout}
+      effects:
+        - { type: sports, action: tryout, approach: showoff }
+  - id: listen
+    label: Watch how the veterans play and match it
+    outcome:
+      text: >-
+        You study the room and slot yourself into it, the way the best role players do. {tryout}
+      effects:
+        - { type: sports, action: tryout, approach: listen }

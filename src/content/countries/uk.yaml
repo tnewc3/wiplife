@@ -111,6 +111,12 @@ studentFinance:
   loanRate: 0.045
   applicationFee: 35
 
+# Batch 5: sport at school and college. Club academies sign young players; universities give sport bursaries, small beside the fee.
+athletics:
+  scholarships: { available: true, maxShare: 0.3, word: sport scholarship, tiers: [state, elite] }
+  academy: true
+  system: university
+
 housing:
   mortgageRate: 0.055
   downPayment: 0.15

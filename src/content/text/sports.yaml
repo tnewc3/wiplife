@@ -1,5 +1,50 @@
 # Lines the sports systems write (E6c). The player is "you". Everything named
 # here is made up. History values: {sport}, {team}, {league}, {pick}, {draftRound}, {position}.
+
+# Batch 5: the kinds of team you try out for.
+tiers:
+  rec: { label: Rec league, suffix: Rec, blurb: "Everyone plays, nobody keeps score for long, and the snacks are better than the coaching." }
+  club: { label: Club team, blurb: "Practices twice a week, a real schedule and parents who bring folding chairs." }
+  travel: { label: Travel team, suffix: Travel, blurb: "Tournaments in other towns, a team bus and a coach who knows who is watching." }
+  academy: { label: Club academy, suffix: Academy, blurb: "The club's own youth system: trained like a professional, judged like one too." }
+  jv: { label: Junior varsity, suffix: JV, blurb: "The team below the team: real games, a real bench and a way up if you earn it." }
+  varsity: { label: Varsity, blurb: "The school's team, with its name on the front of the jersey and its pride on the line." }
+  community: { label: Community college team, blurb: "A smaller program with open doors, long bus rides and coaches who remember every player." }
+  state: { label: State program, blurb: "A big school with a real schedule, a real crowd and a roster that is hard to crack." }
+  elite: { label: Elite program, blurb: "A national name, scouts in the stands and a line of players behind you waiting for your spot." }
+
+# A pro camp, in words.
+camp: { label: Pro camp, blurb: "A camp: coaches, a roster with spots and a few days to be noticed." }
+
+# What the list says after a tryout. Values: {team}, {tier}, {sport}.
+tryout:
+  made:
+    - "You made {team}. Your name was on the list, third from the top, and you read it four times."
+    - "The coaches kept you: {team}. Someone you did not know slapped your shoulder in the hall."
+    - "{team} took you. The sheet on the door had your name, spelled right."
+  fallback:
+    - "{team} did not keep you, but {fallback} did. It is not the team you wanted, and it is a team."
+    - "You were cut from {team}. {fallback} called the same afternoon and said they had a place."
+    - "The list at {team} did not have your name. {fallback} did."
+  cut:
+    - "{team} did not have a place for you, and neither did any team one step down. The gym emptied around you."
+    - "You were cut from {team}. Nobody else called. You can try again next year, and you will know what to work on."
+    - "No team kept you this time. The coach said the door was not shut, and you could not tell if that was kindness."
+  signed:
+    - "{team} signed you out of camp. The paperwork was one page and the pen did not work the first time."
+    - "You came to camp as a name on a list and left with a deal from {team}."
+  camp:
+    - "The camp ended without an offer from {team}. The coach shook your hand anyway."
+    - "{team} thanked you for coming. You drove home counting what you would do differently."
+
+# Where a prospect is projected to go (the bands are in balance/sports.yaml draft.projection).
+projection:
+  lottery: { label: the top of the board, line: "Scouts have you near the top of the board: a first pick is possible." }
+  early: { label: an early pick, line: "You are projected as an early pick, in the first round." }
+  middle: { label: the middle of the draft, line: "You are projected in the middle of the draft, a pick that could go either way." }
+  late: { label: a late pick, line: "You are projected as a late pick, if your name is called at all." }
+  unlikely: { label: undrafted, line: "You are unlikely to be drafted. Camps and open tryouts are where you will earn a look." }
+
 history:
   drafted:
     importance: 3
@@ -46,6 +91,36 @@ history:
     variants:
       - "You did not make the next team, and that was the end of {sport} as a thing you did every week."
       - "The next level did not have a place for you. You turned in your kit and went home."
+  madeTeam:
+    importance: 2
+    variants:
+      - "You made {team}."
+      - "{team} kept you after the tryout."
+  cutTeam:
+    importance: 2
+    variants:
+      - "You were cut at a tryout and no team kept you."
+      - "You went to a tryout and left without a place."
+  scholarship:
+    importance: 3
+    variants:
+      - "You signed for {campus}. The {scholarship} covers {share} of the fee."
+      - "{campus} wanted you, and the {scholarship} pays {share} of the fee."
+  scholarshipEnded:
+    importance: 2
+    variants:
+      - "Your {scholarship} at {campus} ended."
+      - "The {scholarship} at {campus} was gone, and the bill was yours."
+  captain:
+    importance: 2
+    variants:
+      - "Your teammates made you captain of {team}."
+      - "You wore the captain's band for {team}."
+  signedCamp:
+    importance: 3
+    variants:
+      - "You earned a deal at camp: {team} signed you."
+      - "After a camp and a long wait, {team} gave you a deal."
 
 # Names for a season, in the season report. Values: {year}, {team}.
 seasons:

@@ -527,7 +527,10 @@ describe('your class and your teachers', () => {
     const left = produce(released, (d) => void runRelationships(d, content));
     expect(left.relationships[people[0]!]).toBeDefined();
     expect(left.relationships[people[0]!]!.status).toBe('active');
+    // (The newest person stays, so that an id is never handed to someone else later.)
+    const newest = Math.max(...Object.keys(left.people).map((id) => Number(id.slice(1))));
     for (const id of people.slice(1)) {
+      if (Number(id.slice(1)) === newest) continue;
       expect(left.relationships[id]).toBeUndefined();
       expect(left.people[id]).toBeUndefined();
     }

@@ -1,0 +1,53 @@
+id: combine_workout_day
+title: The workout day
+text: >-
+  The scouts' stopwatches come out first, then the tape measures, then the clipboards with
+  your name at the top. This is the day the draft boards get rewritten: forty yards, a
+  vertical leap, and a room of strangers deciding what you are worth.
+tone: serious
+category: sports
+rarity: common
+lifeStages: [teen, youngAdult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { sports: { active: true } }
+    - { sports: { prospect: true } }
+weight: { base: 1 }
+followUpOnly: true
+choices:
+  - id: full_speed
+    label: Go all out on every drill
+    check:
+      base: 45
+      stats: [{ key: fitness, weight: 0.4 }, { key: discipline, weight: 0.15 }]
+      success:
+        text: >-
+          The numbers come up and people in the room lean forward. Someone writes a circle
+          around your name.
+        effects:
+          - { type: sports, action: combine, delta: 4 }
+          - { type: stat, key: confidence, delta: 2 }
+      failure:
+        text: >-
+          Your hamstring grabs at the end of the last drill, and the number on the board is
+          worse than your best by a margin you can feel in your stomach.
+        effects:
+          - { type: sports, action: combine, delta: -2 }
+  - id: trainer
+    label: Hire a trainer for the week before
+    outcome:
+      text: >-
+        Seven days of drills built around the exact tests you will face. You show up
+        sharp, and the numbers say so.
+      effects:
+        - { type: cost, item: combine_prep }
+        - { type: sports, action: combine, delta: 3 }
+  - id: hold_back
+    label: Run the drills you are best at and skip the rest
+    outcome:
+      text: >-
+        You keep to your strengths. The scouts note the drills you skipped, and they note
+        what you did in the others.
+      effects:
+        - { type: sports, action: combine, delta: 1 }

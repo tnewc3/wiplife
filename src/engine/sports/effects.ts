@@ -10,11 +10,15 @@ import type { ContentBundle, Effect } from '../../content/schemas';
 import { clampInt } from '../random';
 import type { RngState } from '../rng';
 import type { Id, LifeState } from '../types';
-import { declineDraft, extend, signDraftDeal, tradePlayer } from './contract';
+import { declineDraft, extend, signCampDeal, signDraftDeal, tradePlayer } from './contract';
 import { easeInjury, treatInjury } from './injury';
 import { applySeries } from './playoffs';
 import { inSports, mySport, positionOf, thisSeason } from './query';
 import { retireSports, takeRoute } from './retire';
+import { acceptOffer, declineOffers } from './scholarship';
+import { anotherTeam } from './team';
+import { campOpen, resolveTryout } from './tryout';
+import { sportsHistory } from './text';
 
 type SportsEffect = Extract<Effect, { type: 'sports' }>;
 
@@ -28,7 +32,19 @@ export function movePosition(state: LifeState, positionId: Id, content: ContentB
   return true;
 }
 
+/** A camp, an open tryout or a call signs you with a team that has room (a player the draft passed by, or a pro without a deal). */
+export function campSign(state: LifeState, content: ContentBundle, rng: RngState): boolean {
+  const def = mySport(state, content);
+  if (!def || !campOpen(state, def, content)) return false;
+  return signCampDeal(state, anotherTeam(def.sport, null, state.character.cityId, content, rng).id, content, rng);
+}
+
 export function applySportsEffect(state: LifeState, effect: SportsEffect, _cast: Record<string, Id>, content: ContentBundle, rng: RngState, eventId?: string): void {
+  // A tryout is also the way into a sport: it needs no career yet.
+  if (effect.action === 'tryout') {
+    resolveTryout(state, effect.approach!, content, rng);
+    return;
+  }
   const justEnded = state.sports.retired?.year === state.currentYear && state.sports.retired.route === null;
   if (!inSports(state, content) && !(effect.action === 'retire' && justEnded)) return;
   const s = state.sports;
@@ -88,6 +104,32 @@ export function applySportsEffect(state: LifeState, effect: SportsEffect, _cast:
       return;
     case 'position':
       movePosition(state, effect.position!, content);
+      return;
+    case 'role': {
+      const order = ['reserve', 'rotation', 'starter'] as const;
+      s.role = order[clampInt(order.indexOf(s.role) + Math.sign(delta), 0, 2)]!;
+      return;
+    }
+    case 'number':
+      s.number = effect.value!;
+      return;
+    case 'captain':
+      if (effect.on && !s.captain && s.team) {
+        s.captain = true;
+        sportsHistory(state, 'captain', content);
+      } else if (!effect.on) {
+        s.captain = false;
+      }
+      return;
+    case 'scholarship':
+      if (effect.tier) acceptOffer(state, effect.tier, content);
+      else declineOffers(state);
+      return;
+    case 'combine':
+      s.combine = clampInt(s.combine + delta, -30, 30);
+      return;
+    case 'camp':
+      campSign(state, content, rng);
       return;
   }
 }

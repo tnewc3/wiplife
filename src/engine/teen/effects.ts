@@ -13,6 +13,7 @@ import { crowdToJoin, endClash, joinClique, leaveClique, queueTeenEvent, rankOf,
 import { hireJob, endTeenJob } from './jobs';
 import { addLesson, grantStage, revokeLicense } from './license';
 import { adjustRule, breakRule } from './rules';
+import { enrollSchoolTeam } from '../sports/tryout';
 import { householdParents, livingMembers, myClique, rivalClique } from './query';
 
 type TeenEffect = Extract<Effect, { type: 'teen' }>;
@@ -81,9 +82,16 @@ export function applyTeenEffect(state: LifeState, effect: TeenEffect, _cast: Rec
     case 'quit':
       endTeenJob(state, content);
       return;
-    case 'enroll':
+    case 'enroll': {
+      // Batch 5: the school team of a sport is the sports career's school rung: making it (the event had its say) starts or continues the career.
+      const sport = content.activities[effect.activityId!]?.sport;
+      if (sport !== undefined) {
+        enrollSchoolTeam(state, sport, content, state.rng);
+        return;
+      }
       if (activityBlock(state, effect.activityId!, content) === null) joinActivity(state, effect.activityId!, content);
       return;
+    }
     case 'withdraw':
       leaveActivity(state, effect.activityId!, content);
       return;

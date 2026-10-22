@@ -1,0 +1,47 @@
+id: offseason_private_coach_offer
+title: Someone who works with the serious ones
+text: >-
+  A private coach, {coach.name}, who has worked with players a level up from yours, offers
+  you a block of sessions over the summer. {coach.They} {coach:is|are} blunt and booked
+  solid, and {coach.they} {coach:has|have} an opening because somebody else got hurt.
+tone: neutral
+category: sports
+rarity: uncommon
+lifeStages: [teen, youngAdult, adult]
+requires:
+  all:
+    - { sports: { active: true } }
+    - { sports: { seasons: { gte: 1 } } }
+weight: { base: 1 }
+followUpOnly: true
+cast:
+  coach: { kind: acquaintance, presence: city, createIfMissing: true, age: { min: 28, max: 60 } }
+choices:
+  - id: take_block
+    label: Take the whole block
+    outcome:
+      text: >-
+        Six weeks of one-on-one sessions, with someone who takes your game apart and puts it
+        back together in the right order.
+      effects:
+        - { type: cost, item: private_coach_block }
+        - { type: fame, action: craft, delta: 2 }
+        - { type: sports, action: form, delta: 2 }
+  - id: share
+    label: Split it with a teammate
+    outcome:
+      text: >-
+        You take half the sessions and a teammate takes the rest. Half the attention is
+        still more than most people get.
+      effects:
+        - { type: cost, item: summer_camp }
+        - { type: fame, action: craft, delta: 1 }
+        - { type: sports, action: form, delta: 1 }
+  - id: decline
+    label: Thank the coach and train on your own
+    outcome:
+      text: >-
+        You say you will think about it and mean it. The next morning you run the track by
+        yourself and wonder.
+      effects:
+        - { type: stat, key: fitness, delta: 1 }

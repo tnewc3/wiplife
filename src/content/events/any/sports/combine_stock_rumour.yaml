@@ -1,0 +1,54 @@
+id: combine_stock_rumour
+title: Your name on a draft board
+text: >-
+  A website you were told not to read has a mock draft, and your name is on it. The pick
+  next to it is not the one you hoped for, and the comments underneath have strong
+  opinions about a player they have never seen.
+tone: neutral
+category: sports
+rarity: common
+lifeStages: [teen, youngAdult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { sports: { active: true } }
+    - { sports: { prospect: true } }
+weight: { base: 1 }
+followUpOnly: true
+choices:
+  - id: ignore
+    label: Close the tab and go to practice
+    outcome:
+      text: >-
+        You put the phone in a drawer. It is easier to be good at your sport than to be good
+        at being discussed.
+      effects:
+        - { type: stat, key: stress, delta: -1 }
+  - id: agent
+    label: Call your agent and ask what the teams are saying
+    visibleIf: { fame: { agent: { gte: 1 } } }
+    outcome:
+      text: >-
+        Your agent tells you which of it is noise and which is real, and what to do about
+        the part that is real.
+      effects:
+        - { type: sports, action: combine, delta: 2 }
+        - { type: stat, key: confidence, delta: 1 }
+  - id: prove_it
+    label: Use it as fuel
+    check:
+      base: 45
+      stats: [{ key: discipline, weight: 0.25 }, { key: ambition, weight: 0.2 }]
+      success:
+        text: >-
+          You turn the grudge into a stretch of games the scouts cannot ignore.
+        effects:
+          - { type: sports, action: combine, delta: 3 }
+          - { type: sports, action: form, delta: 1 }
+      failure:
+        text: >-
+          You press, and the harder you press the worse it looks. You lose a week to a bad
+          mood.
+        effects:
+          - { type: sports, action: combine, delta: -2 }
+          - { type: stat, key: stress, delta: 2 }

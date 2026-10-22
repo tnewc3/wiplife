@@ -289,6 +289,10 @@ categories:
   sports:
     label: The game
     requires: { sports: { active: true } }
+  # Batch 5: the scrimmage of a tryout you chose (it can be the way into a sport, so it needs no career yet).
+  sportstryout:
+    label: Tryouts
+    requires: { sports: { tryout: true } }
   sportsdeal:
     label: Contracts and trades
     requires:

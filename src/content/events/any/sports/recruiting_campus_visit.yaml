@@ -1,0 +1,56 @@
+id: recruiting_campus_visit
+title: A weekend on campus
+text: >-
+  A program that wants you has flown you in for a weekend. A current player is your host,
+  a second-year player with a lanyard and a dozen opinions about the dining hall. You have two days
+  to find out whether you could live here, and the coaches have the same two days to find
+  out whether you could play here.
+tone: light
+category: sports
+rarity: uncommon
+lifeStages: [teen]
+requires:
+  all:
+    - { age: { gte: 16, lte: 19 } }
+    - { sports: { active: true } }
+    - { sports: { offers: [community, state, elite] } }
+weight: { base: 1 }
+followUpOnly: true
+choices:
+  - id: pickup
+    label: Join the open run with the team
+    check:
+      base: 45
+      stats: [{ key: fitness, weight: 0.4 }, { key: confidence, weight: 0.2 }]
+      success:
+        text: >-
+          You play like someone who belongs, and by the end of the night two of the players
+          are arguing about who gets to pick you next.
+        effects:
+          - { type: sports, action: form, delta: 1 }
+          - { type: stat, key: confidence, delta: 3 }
+      failure:
+        text: >-
+          You are a step slower than everyone and know it by the second possession. The
+          host tells you it is an off night for everyone, which is kind and not true.
+        effects:
+          - { type: stat, key: confidence, delta: -2 }
+  - id: advisers
+    label: Spend the time with the academic advisers
+    outcome:
+      text: >-
+        You ask about the course load, the tutoring rooms and what happens to players who
+        fall behind. The adviser's answers are specific, and you leave with a plan.
+      effects:
+        - { type: education, action: grades, value: 1 }
+        - { type: stat, key: smarts, delta: 1 }
+  - id: honest
+    label: Ask the players the honest questions
+    outcome:
+      text: >-
+        Over a late dinner a senior tells you what the coaches do not: the hours, the
+        injuries, who got a real chance and who did not. It is not the brochure, and it is
+        better for it.
+      effects:
+        - { type: stat, key: happiness, delta: 2 }
+        - { type: stat, key: confidence, delta: 1 }

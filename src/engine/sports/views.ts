@@ -6,8 +6,11 @@
  * fame bars (fame, image, fan mood, commitment, agent) and the ways in before
  * a career and out after one. Read-only; the words are in src/ui/labels.ts.
  */
-import type { ContentBundle, FameBand, SportLevel, SportRetireRoute } from '../../content/schemas';
-import { SPORT_RETIRE_ROUTES } from '../../content/schemas';
+import type { ContentBundle, FameBand, SportLevel, SportRetireRoute, SportRole, TeamTier, Tier, TrainingMode } from '../../content/schemas';
+import { SPORT_RETIRE_ROUTES, TRAINING_MODES } from '../../content/schemas';
+import { countryOf } from '../country';
+import { schoolName } from '../education';
+import { grindView, practiceBudget, skillLevel, skillsOf, skillCap } from '../fame/grind';
 import { commitmentCeiling, commitmentFloor } from '../fame/effects';
 import { enterBlock, openAgents, type AgentBlock, type EnterBlock } from '../fame/ladder';
 import { bandOf, fanAlive, isMinorStar, moodBand } from '../fame/query';
@@ -15,7 +18,11 @@ import { pathView, type FamePathView } from '../fame/views';
 import { isIncarcerated } from '../legal';
 import { renderText } from '../text';
 import type { Id, LifeState, SportsSeason } from '../types';
+import { draftProjection } from './contract';
 import { allSports, contractYearsLeft, fitFor, injuryNow, levelNow, mySport, positionOf, sportPath } from './query';
+import { liveOffers } from './scholarship';
+import { hasTeam, trainBlock, trainCost, trainGain, trainingView, type TrainBlock } from './training';
+import { teamOptions, tryoutOdds, type TryoutBlock } from './tryout';
 import { routeBlock } from './retire';
 import { recordText, statLine } from './text';
 
@@ -40,6 +47,60 @@ export interface SportsSeasonView {
   press: string | null;
   fans: string | null;
   fameGain: number | null;
+}
+
+/** Batch 5: a team you could try out for. */
+export interface TeamOptionView {
+  key: string;
+  level: SportLevel;
+  tier: TeamTier | null;
+  /** "Varsity", "Elite program"; "Pro camp" for a pro team. */
+  tierLabel: string;
+  blurb: string;
+  name: string;
+  city: string;
+  qualityBand: number;
+  /** How hard to make: the team's bar (rating) and your chance playing it steady, in percent. */
+  bar: number;
+  odds: number;
+  oddsBand: number;
+  fee: number;
+  club: boolean;
+  block: TryoutBlock | null;
+}
+
+export interface TrainingSkillView {
+  id: string;
+  label: string;
+  blurb: string;
+  /** Where the skill stands (0–100) and the most you can reach without more talent. */
+  level: number;
+  levelBand: number;
+  cap: number;
+  /** What one more session adds in each place. */
+  gains: Record<TrainingMode, number>;
+  blocks: Record<TrainingMode, TrainBlock | null>;
+}
+
+export interface TrainingView {
+  available: boolean;
+  /** Sessions used and the year's budget (more with a stronger commitment). */
+  used: number;
+  budget: number;
+  left: number;
+  hasTeam: boolean;
+  member: boolean;
+  spent: number;
+  modes: { id: TrainingMode; cost: number; available: boolean }[];
+  skills: TrainingSkillView[];
+}
+
+export interface OfferView {
+  tier: Tier;
+  school: string;
+  share: number;
+  year: number;
+  block: string | null;
 }
 
 export interface SportsView {
@@ -90,8 +151,25 @@ export interface SportsView {
   stalker: { name: string; stage: 'watching' | 'reported' | 'ordered' | 'charged' } | null;
   headlines: { year: number; text: string }[];
   income: { gross: number; agent: number } | null;
-  entry: { pathId: Id; name: string; blurb: string; routes: { id: Id; label: string; blurb: string; minAge: number; block: EnterBlock | null }[] }[];
+  entry: { pathId: Id; name: string; blurb: string; routes: { id: Id; label: string; blurb: string; minAge: number; block: EnterBlock | null }[]; teams: TeamOptionView[] }[];
   exits: { route: SportRetireRoute; block: string | null }[];
+  /** Batch 5. */
+  teams: TeamOptionView[];
+  tried: { year: number; name: string; landedName: string | null; made: boolean; level: SportLevel }[];
+  training: TrainingView;
+  club: { name: string; tierLabel: string } | null;
+  role: SportRole | null;
+  number: number | null;
+  captain: boolean;
+  teamless: boolean;
+  /** Athletic scholarships: the country's rules in words, the offers on the table and the one you hold. */
+  aid: { available: boolean; word: string; maxShare: number; system: 'college' | 'university' };
+  offers: OfferView[];
+  scholarship: { school: string; tier: Tier; share: number; warned: boolean; gpa: number | null; floor: number } | null;
+  /** The draft card: where scouts project you, in words (null before a prospect's age), and whether the draft passed you by. */
+  prospect: { likely: string; best: string; worst: string; line: string; passed: boolean; combine: number } | null;
+  /** A camp, an open tryout or a call for a player with no team: open now. */
+  camps: boolean;
 }
 
 function seasonView(state: LifeState, season: SportsSeason, content: ContentBundle): SportsSeasonView {
@@ -135,6 +213,29 @@ const name = (state: LifeState, id: Id): string => {
   return p ? `${p.name.first} ${p.name.last}` : '';
 };
 
+function teamViews(state: LifeState, def: NonNullable<ReturnType<typeof mySport>>, content: ContentBundle): TeamOptionView[] {
+  const tierText = content.text.sports.tiers;
+  return teamOptions(state, def, content).map((o) => {
+    const odds = tryoutOdds(state, def, o, content);
+    return {
+      key: o.key,
+      level: o.level,
+      tier: o.tier,
+      tierLabel: o.tier ? tierText[o.tier].label : content.text.sports.camp.label,
+      blurb: o.tier ? tierText[o.tier].blurb : content.text.sports.camp.blurb,
+      name: o.name,
+      city: content.cities[o.city]?.name ?? '',
+      qualityBand: bandOf(o.quality, [35, 50, 65]),
+      bar: o.bar,
+      odds: Math.round(odds * 100),
+      oddsBand: bandOf(odds * 100, [20, 45, 70, 90]),
+      fee: o.fee,
+      club: o.club,
+      block: o.block,
+    };
+  });
+}
+
 export function getSportsView(state: LifeState, content: ContentBundle): SportsView {
   const s = state.sports;
   const f = state.fame;
@@ -162,6 +263,12 @@ export function getSportsView(state: LifeState, content: ContentBundle): SportsV
   const here = positions.find((p) => p.current);
   const teamQuality = s.team?.quality ?? 0;
   const year = state.currentYear;
+  const tierText = content.text.sports.tiers;
+  const teams: TeamOptionView[] = def ? teamViews(state, def, content) : [];
+  const training = trainingSection(state, content, between);
+  const sch = s.scholarship;
+  const rules = countryOf(state, content).athletics;
+  const prospectProjection = def ? draftProjection(state, def, content) : null;
   const view: SportsView = {
     show: playing || s.retired !== undefined || age >= minAge,
     active: playing,
@@ -242,8 +349,64 @@ export function getSportsView(state: LifeState, content: ContentBundle): SportsV
           name: d.name,
           blurb: d.blurb,
           routes: d.routes.map((r) => ({ id: r.id, label: r.label, blurb: r.blurb, minAge: Math.max(r.minAge, d.minAge), block: enterBlock(state, d.id, r.id, content) })),
+          teams: teamViews(state, d, content),
         })),
     exits: playing ? SPORT_RETIRE_ROUTES.map((route) => ({ route, block: routeBlock(state, route, content) })) : [],
+    teams,
+    tried: [...s.tried].reverse().map((t) => ({ year: t.year, name: t.name, landedName: t.landedName, made: t.made, level: t.level })),
+    training,
+    club: s.club ? { name: s.club.name, tierLabel: s.club.tier ? tierText[s.club.tier].label : '' } : null,
+    role: playing ? s.role : null,
+    number: s.number,
+    captain: s.captain,
+    teamless: playing && (s.teamless || (s.pro && s.contract === null)),
+    aid: { available: rules.scholarships.available, word: rules.scholarships.word, maxShare: rules.scholarships.maxShare, system: rules.system },
+    offers: liveOffers(state).map((o) => ({ tier: o.tier, school: schoolName(state, { program: 'college', tier: o.tier }, content), share: o.share, year: o.year, block: between ? null : 'between' })),
+    scholarship: sch ? { school: schoolName(state, { program: 'college', tier: sch.tier }, content), tier: sch.tier, share: sch.share, warned: sch.warned > 0, gpa: state.education.current?.program === 'college' ? state.education.current.gpa : null, floor: content.balance.sports.scholarship.floor } : null,
+    prospect:
+      prospectProjection && playing
+        ? {
+            likely: content.text.sports.projection[prospectProjection.likely]?.label ?? '',
+            best: content.text.sports.projection[prospectProjection.best]?.label ?? '',
+            worst: content.text.sports.projection[prospectProjection.worst]?.label ?? '',
+            line: content.text.sports.projection[prospectProjection.likely]?.line ?? '',
+            passed: s.passed > 0,
+            combine: s.combine,
+          }
+        : null,
+    camps: teams.some((t) => t.level === 'pro'),
   };
   return view;
+}
+
+function trainingSection(state: LifeState, content: ContentBundle, between: boolean): TrainingView {
+  const def = mySport(state, content);
+  const playing = state.fame.active && def !== undefined && state.fame.main === def.id;
+  const t = trainingView(state);
+  const empty: TrainingView = { available: false, used: 0, budget: 0, left: 0, hasTeam: false, member: t.member, spent: t.spent, modes: [], skills: [] };
+  if (!playing || !def) return empty;
+  const budget = practiceBudget(state, content);
+  const used = grindView(state).practice;
+  const path = state.fame.paths[def.id];
+  const modeRow = (id: TrainingMode) => {
+    const cost = trainCost(state, id, content);
+    const block = skillsOf(def).map((s) => trainBlock(state, s.id, id, content));
+    return { id, cost, available: between && block.some((b) => b === null) };
+  };
+  return {
+    available: between,
+    used,
+    budget,
+    left: Math.max(0, budget - used),
+    hasTeam: hasTeam(state),
+    member: t.member,
+    spent: t.spent,
+    modes: TRAINING_MODES.map(modeRow),
+    skills: skillsOf(def).map((sk) => {
+      const level = skillLevel(path, sk.id, content);
+      const gains = Object.fromEntries(TRAINING_MODES.map((m) => [m, Math.round(trainGain(state, sk.id, m, content) * 10) / 10])) as Record<TrainingMode, number>;
+      const blocks = Object.fromEntries(TRAINING_MODES.map((m) => [m, between ? trainBlock(state, sk.id, m, content) : ('budget' as TrainBlock)])) as Record<TrainingMode, TrainBlock | null>;
+      return { id: sk.id, label: sk.label, blurb: sk.blurb, level: Math.round(level), levelBand: bandOf(level, [25, 45, 65, 85]), cap: skillCap(state, def, content), gains, blocks };
+    }),
+  };
 }
