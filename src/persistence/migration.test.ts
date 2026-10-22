@@ -234,3 +234,85 @@ describe('Batch 5 saves', () => {
     expect(lifeStateSchema.safeParse(produce(life, (d) => void (d.sports.tried[0]!.key = ''))).success).toBe(false);
   });
 });
+
+describe('Batch 6 saves', () => {
+  /** A schema 33 save: a soccer pro without any Batch 6 field. */
+  const oldSave = (seed: string) => {
+    const club = content.famePaths.soccer!.sport!.leagues.pro.teams.find((t) => t.city === 'chicago')!;
+    const life = produce(lifeAtAge(seed, 24), (d) => {
+      d.character.hidden.talent = 'athletics';
+      enterPath(d as LifeState, 'soccer', 'open_tryout', content);
+      d.sports.pro = true;
+      d.sports.team = { id: club.id, name: club.name, city: 'chicago', level: 'pro', quality: club.quality, division: 1 };
+      d.sports.contract = { teamId: club.id, since: d.currentYear, until: d.currentYear + 2, salary: 600_000, kind: 'standard', option: 'none' };
+      d.fame.paths.soccer!.rung = 4;
+      d.fame.paths.soccer!.peak = 4;
+    });
+    const old = cloneJson(life) as unknown as Record<string, unknown> & { sports: Record<string, unknown> & { team: Record<string, unknown> } };
+    delete old.league;
+    for (const key of ['academy', 'loan', 'loanOffer', 'transfer', 'calledUp', 'academyOut', 'abroadYear', 'moved']) delete old.sports[key];
+    delete old.sports.team.division;
+    for (const key of ['loans', 'transfers', 'fees', 'graduates', 'abroad', 'caps', 'tournaments', 'tournamentTitles', 'goneUp', 'goneDown']) delete (old.sports.totals as Record<string, unknown>)[key];
+    return { life, old };
+  };
+
+  it('upgrades a save: the game’s own teams, no academy, loan, offers or call-ups, a soccer club in the top league, and heir snapshots the same way', () => {
+    const { life, old } = oldSave('b6-migrate');
+    const saved = { ...old, inputLog: [{ year: life.currentYear, kind: 'create', payload: { heir: true, snapshot: cloneJson(old) } }] };
+    const after = migrateEnvelope({ ...makeEnvelope(saved, content.contentVersion), schemaVersion: 33 }).data as LifeState;
+    expect(after.league).toEqual({ setup: { renamed: {}, moved: {}, added: [] }, pending: null, tiers: {}, tierYear: 0 });
+    expect(after.sports).toMatchObject({ academy: null, loan: null, loanOffer: null, transfer: null, calledUp: 0, academyOut: 0, abroadYear: 0, moved: null });
+    expect(after.sports.totals).toMatchObject({ loans: 0, transfers: 0, fees: 0, graduates: 0, abroad: 0, caps: 0, tournaments: 0, tournamentTitles: 0, goneUp: 0, goneDown: 0 });
+    expect(after.sports.team).toMatchObject({ division: 1 });
+    expect(after.sports.contract).toEqual(life.sports.contract);
+    expect(after.inputLog[0]!.payload.snapshot).toMatchObject({ league: { pending: null }, sports: { loan: null } });
+    expect(lifeStateSchema.safeParse(after).success).toBe(true);
+    expect(loadedLifeSchema(content).parse(migrateEnvelope({ ...makeEnvelope(old, content.contentVersion), schemaVersion: 33 }).data)).toEqual(life);
+  });
+
+  it('roundtrips a life with its own teams, a loan, transfer offers, a release clause and a pending change', () => {
+    const life = produce(lifeAtAge('b6-save', 24), (d) => {
+      d.league = {
+        setup: { renamed: { chicago_lakefront_fc: { name: 'Chicago Lakeshore Rovers', nickname: 'Rovers' } }, moved: { houston_gulf_city_fc: 'nyc' }, added: [{ id: 'custom_1', sport: 'soccer', name: 'Garden City Albion', city: 'chicago', strength: 4, tier: 1 }] },
+        pending: { applyYear: d.currentYear + 1, moved: {}, added: [] },
+        tiers: { chicago_union_yard_sc: 2 },
+        tierYear: d.currentYear - 1,
+      };
+      d.sports.sport = 'soccer';
+      d.sports.pro = true;
+      d.sports.loan = { parentId: 'chicago_lakefront_fc', hostId: 'chicago_union_yard_sc', since: d.currentYear, until: d.currentYear + 1 };
+      d.sports.loanOffer = null;
+      d.sports.transfer = { year: d.currentYear, offers: [{ id: `${d.currentYear}-0`, clubId: 'chicago_ashgrove_united', fee: 4_500_000, wage: 900_000, years: 3, clause: 11_000_000 }] };
+      d.sports.contract = { teamId: 'chicago_lakefront_fc', since: d.currentYear, until: d.currentYear + 2, salary: 600_000, kind: 'standard', option: 'none', release: 9_000_000 };
+      d.sports.moved = { year: d.currentYear - 1, dir: 'up' };
+      d.sports.calledUp = d.currentYear;
+      d.sports.team = { id: 'chicago_union_yard_sc', name: 'Chicago Union Yard SC', city: 'chicago', level: 'pro', quality: 45, division: 2, place: 'Boston', away: 'city', country: 'es' };
+    });
+    expect(loadedLifeSchema(content).parse(JSON.parse(JSON.stringify(life)))).toEqual(life);
+    // A division nobody plays in, a city with no id and a made-up team with no name are rejected on load.
+    expect(lifeStateSchema.safeParse(produce(life, (d) => void ((d.league.tiers as Record<string, number>)['x'] = 3))).success).toBe(false);
+    expect(lifeStateSchema.safeParse(produce(life, (d) => void (d.league.setup.moved['x'] = ''))).success).toBe(false);
+    expect(lifeStateSchema.safeParse(produce(life, (d) => void (d.league.setup.added[0]!.name = ''))).success).toBe(false);
+    expect(lifeStateSchema.safeParse(produce(life, (d) => void (d.sports.transfer!.offers[0]!.years = 0))).success).toBe(false);
+  });
+
+  it('roundtrips a child in an academy abroad, and refuses one who is also a pro', () => {
+    const kid = produce(lifeAtAge('b6-kid', 13), (d) => {
+      d.character.cityId = 'london';
+      d.character.birthCityId = 'london';
+      d.character.citizenships = ['uk'];
+      d.housing.cityId = 'london';
+      for (const p of Object.values(d.people)) {
+        p.cityId = 'london';
+        p.citizenships = ['uk'];
+      }
+      d.character.hidden.talent = 'athletics';
+      enterPath(d as LifeState, 'soccer', 'youth_league', content);
+      const club = content.famePaths.soccer!.sport!.leagues.pro.teams.find((t) => t.country === 'es')!;
+      d.sports.academy = { clubId: club.id, since: d.currentYear, abroad: true };
+      d.sports.team = { id: null, name: `${club.name} Academy`, city: 'london', level: 'youth', quality: 52, tier: 'academy', place: club.cityName!, away: 'country', country: 'es' };
+    });
+    expect(loadedLifeSchema(content).parse(JSON.parse(JSON.stringify(kid)))).toEqual(kid);
+    expect(loadedLifeSchema(content).safeParse(produce(kid, (d) => void (d.sports.academy!.clubId = 'nobody_fc'))).success).toBe(false);
+  });
+});

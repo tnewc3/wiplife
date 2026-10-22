@@ -1,0 +1,49 @@
+id: tryout_academy_trial_abroad
+title: A trial in another country
+text: >-
+  The scout's email came with a time and a place, and the club has sent the tickets. At the
+  training ground the signs are in a language you are still learning, and the other
+  children have been together since the autumn. Everyone has one afternoon.
+tone: neutral
+category: sportstryout
+rarity: common
+lifeStages: [child, teen]
+requires:
+  all:
+    - { sports: { tryout: true } }
+    - { sports: { trial: [abroad] } }
+weight: { base: 10 }
+followUpOnly: true
+choices:
+  - id: steady
+    label: Play the way you always do
+    outcome:
+      text: >-
+        Football is football in every language. You make the simple pass and the harder run,
+        and the staff compare notes in a corner. {tryout}
+      effects:
+        - { type: sports, action: tryout, approach: steady }
+  - id: hustle
+    label: Work harder than anyone
+    outcome:
+      text: >-
+        You cannot explain yourself, so you run. By the last drill a coach has learned your
+        name, spelled wrong. {tryout}
+      effects:
+        - { type: sports, action: tryout, approach: hustle }
+  - id: showoff
+    label: Show them the thing you do best
+    outcome:
+      text: >-
+        You try the trick that works at home. The coaches do not stop it, and do not look away.
+        {tryout}
+      effects:
+        - { type: sports, action: tryout, approach: showoff }
+  - id: listen
+    label: Watch, then fit in with the drills
+    outcome:
+      text: >-
+        You copy the first drill, then the second, and by the third you are early to it. The
+        coaches notice who adapts. {tryout}
+      effects:
+        - { type: sports, action: tryout, approach: listen }

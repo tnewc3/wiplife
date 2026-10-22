@@ -48,7 +48,7 @@ export function giveSampleSports(state: LifeState, def: EventDef, _cast: Record<
   s.sport = sportId;
   s.position = bestPosition(state, path.sport).id;
   s.pro = levelOfRung(path.sport, final) === 'pro';
-  s.team = s.pro ? proTeam(draftingTeam(path.sport, 3, state.character.cityId, content)) : amateurTeam(state, path.sport, levelOfRung(path.sport, final) as 'youth' | 'school' | 'college', 50, content);
+  s.team = s.pro ? proTeam(state, draftingTeam(state, sportId, 3, state.character.cityId, content), sportId, content) : amateurTeam(state, path.sport, levelOfRung(path.sport, final) as 'youth' | 'school' | 'college', 50, content, undefined, sportId);
   if (s.pro) state.character.cityId = s.team.city;
   if (s.pro && want.freeAgent !== true) {
     s.contract = { teamId: s.team.id!, since: year - 1, until: want.contractYear === true ? year : year + 2, salary: rungDef(path, final).income, kind: 'standard', option: 'none' };
@@ -96,7 +96,7 @@ export function giveSampleSports(state: LifeState, def: EventDef, _cast: Record<
   if (want.pain === true) s.pain = true;
   if (want.drafted === true || want.undrafted === true || want.offered === true || /\{(pick|draftRound|draftTeam)\}/.test(text)) {
     const pick = bound(want.pick) ?? (want.undrafted === true ? 0 : 5);
-    s.draft = { year, pick, round: pick === 0 ? 0 : Math.ceil(pick / proTeamsIn(path.sport, state.character.cityId, content).length), teamId: draftingTeam(path.sport, Math.max(1, pick), state.character.cityId, content).id };
+    s.draft = { year, pick, round: pick === 0 ? 0 : Math.ceil(pick / proTeamsIn(state, sportId, state.character.cityId, content).length), teamId: draftingTeam(state, sportId, Math.max(1, pick), state.character.cityId, content).id };
   }
   if (want.traded === true) s.traded = year;
   if (want.released === true) s.released = year;

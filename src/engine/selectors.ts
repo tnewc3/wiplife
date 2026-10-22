@@ -114,6 +114,8 @@ export type { CrimeMemberView, CrimeView, DirtyView, FrontView } from './crime/v
 export { bandNameSuggestion, fanCount, getFameView, getProjectBlock, parseTitle, titleSuggestion } from './fame/views';
 import { athleticShare } from './sports/aid';
 export { getSportsView } from './sports/views';
+export { getTeamEditorView, type TeamEditorRow, type TeamEditorSport, type TeamEditorView } from './sports/editor';
+export { SetupError, firstSetupProblem, parseTeamSetup, setupIssues, teamRenames, withTeamNames, emptySetup, type AddedTeam, type TeamRename, type TeamSetup } from './sports/setup';
 export type { OfferView, SportsSeasonView, SportsView, TeamOptionView, TrainingSkillView, TrainingView } from './sports/views';
 export type { FameEntryView, FamePathView, FameProjectView, FameRungView, FameView } from './fame/views';
 export type { ActivityOptionView, CrowdView, JobOptionView, RuleView, TeenView } from './teen/views';

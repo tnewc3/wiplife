@@ -1,0 +1,49 @@
+id: tryout_academy_trial_home
+title: A trial at the club's academy
+text: >-
+  The academy pitches are floodlit and fenced, and the coaches at the touchline wear the
+  club's crest on their chests. Forty children are here for six places. Nobody tells you
+  how many are looking at you.
+tone: neutral
+category: sportstryout
+rarity: common
+lifeStages: [child, teen]
+requires:
+  all:
+    - { sports: { tryout: true } }
+    - { sports: { trial: [academy] } }
+weight: { base: 10 }
+followUpOnly: true
+choices:
+  - id: steady
+    label: Play your game
+    outcome:
+      text: >-
+        You pass, move and track back. Nothing you do is wrong, and nobody writes anything
+        down while you are looking. {tryout}
+      effects:
+        - { type: sports, action: tryout, approach: steady }
+  - id: hustle
+    label: Run until the whistle
+    outcome:
+      text: >-
+        You press every ball, recover every run and come off with your lungs on fire. One coach
+        nods. {tryout}
+      effects:
+        - { type: sports, action: tryout, approach: hustle }
+  - id: showoff
+    label: Try the skill you practised in the garden
+    outcome:
+      text: >-
+        The first nutmeg works and the crowd of parents hums. The second does not work, and the
+        hum changes. {tryout}
+      effects:
+        - { type: sports, action: tryout, approach: showoff }
+  - id: listen
+    label: Do exactly what the coach asks
+    outcome:
+      text: >-
+        You ask where the coach wants you, then stay there and read the game from it. It is
+        quiet football, the kind coaches remember. {tryout}
+      effects:
+        - { type: sports, action: tryout, approach: listen }

@@ -8,7 +8,7 @@
  * all the names are made up.
  */
 import type { CollectionKey, Condition, ContentBundle, Effect, EventDef } from '../../src/content/schemas';
-import { SPORTS_TRIGGERS } from '../../src/content/schemas';
+import { FUTURE_COUNTRIES, SPORTS_TRIGGERS } from '../../src/content/schemas';
 import type { ContentError } from './compile';
 import { ageCeiling, ageFloor, outcomesOf } from './fame';
 import { ROMANCE_WORDS } from './references';
@@ -37,8 +37,8 @@ function choiceAges(def: EventDef, choice: { visibleIf?: Condition | undefined }
   };
 }
 
-const VALUE = /\{(sport|team|league|position|stage|trophy|pick|draftRound|draftTeam|record|statLine|opponent|injury|salary|season|number|tryout|tier|campus|share|scholarship|prospect)\}/g;
-const PRO_ACTIONS = new Set(['sign', 'extend', 'playout', 'trade', 'ask', 'camp']);
+const VALUE = /\{(sport|team|league|position|stage|trophy|pick|draftRound|draftTeam|record|statLine|opponent|injury|salary|season|number|tryout|tier|campus|share|scholarship|prospect|teamNick|place|parent|host|suitor|derbyRival|nation|tournament|caps|clubCountry)\}/g;
+const PRO_ACTIONS = new Set(['sign', 'extend', 'playout', 'trade', 'ask', 'camp', 'loan', 'transfer', 'cap', 'tournament']);
 
 export function checkSports(bundle: ContentBundle, fileOf: (typeKey: CollectionKey, id: string) => string, partialEvents: boolean): ContentError[] {
   const errors: ContentError[] = [];
@@ -123,12 +123,37 @@ export function checkSports(bundle: ContentBundle, fileOf: (typeKey: CollectionK
     if (new Set(sport.positions.map((p) => p.id)).size !== sport.positions.length) e('duplicate position ids');
     const teams = sport.leagues.pro.teams;
     if (new Set(teams.map((t) => t.id)).size !== teams.length) e('duplicate team ids');
-    for (const t of teams) if (!bundle.cities[t.city]) e(`team ${t.id}: unknown city "${t.city}"`);
-    // W4a: a player can only play for a team in their own country, so every country needs a league to play in.
-    for (const country of Object.values(bundle.countries)) {
-      const here = teams.filter((t) => bundle.cities[t.city]?.countryId === country.id);
-      if (here.length < 6) e(`country ${country.id}: ${here.length} pro teams; every country needs at least 6 in every sport`);
+    const tierNames = sport.leagues.pro.tiers;
+    for (const t of teams) {
+      if (!bundle.cities[t.city]) e(`team ${t.id}: unknown city "${t.city}"`);
+      if (t.nearestCityId !== undefined) {
+        // Batch 6: a team away from the modeled cities: you live in the nearest modeled city (of the same country; a club in a country
+        // the game does not model has a UK city) and commute. The list of these is printed by the content build.
+        const near = bundle.cities[t.nearestCityId];
+        if (!near) e(`team ${t.id}: unknown nearestCityId "${t.nearestCityId}"`);
+        else if (t.futureCountry === true && near.countryId !== 'uk') e(`team ${t.id}: a club in a country the game does not model has a UK city to commute from (not "${t.nearestCityId}")`);
+        else if (t.futureCity === true && Object.values(bundle.cities).some((c) => c.name === t.cityName && !c.retired)) e(`team ${t.id}: "${t.cityName}" is a city of the game: use city, not futureCity`);
+      }
+      if (t.tier === 2 && tierNames === undefined) e(`team ${t.id}: a second league needs leagues.pro.tiers`);
+      if (t.futureCountry === true && !sport.leagues.pro.markets?.some((g) => g.includes('uk') && g.includes(t.country!))) e(`team ${t.id}: a club in ${t.country} needs a market group of ${t.country} and uk (leagues.pro.markets)`);
     }
+    // Batch 6: a country's league: at home, every country needs a league to play in; with two leagues, each needs clubs to move between.
+    const countryOfTeam = (t: (typeof teams)[number]): string => t.country ?? bundle.cities[t.city]?.countryId ?? '';
+    for (const country of Object.values(bundle.countries)) {
+      const here = teams.filter((t) => countryOfTeam(t) === country.id);
+      if (here.length < 6) e(`country ${country.id}: ${here.length} pro teams; every country needs at least 6 in every sport`);
+      if (tierNames !== undefined && (here.filter((t) => t.tier === 1).length < 6 || here.filter((t) => t.tier === 2).length < 4)) e(`country ${country.id}: a league with two tiers needs at least 6 clubs in the first and 4 in the second`);
+    }
+    if (tierNames !== undefined) {
+      for (const g of sport.leagues.pro.markets ?? []) for (const c of g) {
+        if (!(FUTURE_COUNTRIES as readonly string[]).includes(c)) continue;
+        const here = teams.filter((t) => t.country === c);
+        if (here.filter((t) => t.tier === 1).length < 6 || here.filter((t) => t.tier === 2).length < 4) e(`country ${c}: needs at least 6 clubs in the first league and 4 in the second`);
+      }
+    }
+    if (sport.academy !== undefined && sport.academy.minAge > sport.academy.maxAge) e('academy: minAge is above maxAge');
+    if (sport.academy !== undefined && sport.academy.abroadMinAge > sport.academy.maxAge) e('academy: a trial abroad must be open before the academy age ends');
+    if (sport.academy !== undefined && sport.academy.minAge < 8) e('academy: no academy takes anyone under 8');
     if (sport.draft.rounds * teams.length < 12) e('the draft must have room for a dozen players');
     for (const i of sport.injuries) {
       const c = bundle.conditions[i.id];
@@ -268,6 +293,16 @@ export function checkSports(bundle: ContentBundle, fileOf: (typeKey: CollectionK
       share: ['{ sports: { offers: [...] } } or { sports: { scholarship: true } }', requiresSports(def, (c) => c.offers !== undefined || c.scholarship === true)],
       scholarship: ['a sports condition', any],
       prospect: ['{ sports: { prospect: true } }', requiresSports(def, (c) => c.prospect === true)],
+      teamNick: ['a sports condition', any],
+      place: ['a sports condition', any],
+      parent: ['{ sports: { loan: true } } or { sports: { academy: true } }', requiresSports(def, (c) => c.loan === true || c.loanOffered === true || c.academy === true || c.graduated === true || c.academyOut === true)],
+      host: ['{ sports: { loan: true } } or { sports: { loanOffered: true } }', requiresSports(def, (c) => c.loan === true || c.loanOffered === true)],
+      suitor: ['{ sports: { window: true } }', requiresSports(def, (c) => c.window === true)],
+      derbyRival: ['{ sports: { derby: true } }', requiresSports(def, (c) => c.derby === true)],
+      nation: ['{ sports: { calledUp: true } }', requiresSports(def, (c) => c.calledUp === true || c.tournament === true)],
+      tournament: ['{ sports: { calledUp: true } } or { sports: { tournament: true } }', requiresSports(def, (c) => c.calledUp === true || c.tournament === true)],
+      caps: ['{ sports: { calledUp: true } } or { sports: { tournament: true } }', requiresSports(def, (c) => c.calledUp === true || c.tournament === true)],
+      clubCountry: ['{ sports: { abroad: true } } or { sports: { away: [...] } }', requiresSports(def, (c) => c.abroad === true || c.away !== undefined)],
     };
     for (const name of used) {
       const [what, ok] = wants[name]!;
@@ -276,4 +311,17 @@ export function checkSports(bundle: ContentBundle, fileOf: (typeKey: CollectionK
     // The category contracts hold the rest (the build rejects an event missing its category's requirements).
   }
   return errors;
+}
+
+/** Batch 6: the teams away from the modeled cities, by sport: the list that is ready when those cities (and countries) are added. */
+export function futureTeams(bundle: ContentBundle): { sport: string; id: string; name: string; cityName: string; nearestCityId: string; kind: 'city' | 'country'; country: string; tier: number }[] {
+  const out: { sport: string; id: string; name: string; cityName: string; nearestCityId: string; kind: 'city' | 'country'; country: string; tier: number }[] = [];
+  for (const def of Object.values(bundle.famePaths)) {
+    if (def.retired || !def.sport) continue;
+    for (const t of def.sport.leagues.pro.teams) {
+      if (t.nearestCityId === undefined || t.cityName === undefined) continue;
+      out.push({ sport: def.id, id: t.id, name: t.name, cityName: t.cityName, nearestCityId: t.nearestCityId, kind: t.futureCountry === true ? 'country' : 'city', country: t.country ?? bundle.cities[t.nearestCityId]?.countryId ?? '', tier: t.tier });
+    }
+  }
+  return out.sort((a, b) => (a.kind === b.kind ? 0 : a.kind === 'city' ? -1 : 1) || a.country.localeCompare(b.country) || a.cityName.localeCompare(b.cityName) || a.sport.localeCompare(b.sport));
 }

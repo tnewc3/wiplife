@@ -1,0 +1,46 @@
+id: transfer_rumour_mill
+title: Your name in the papers
+text: >-
+  A website you have never heard of says you are on your way to {suitor}. A second site
+  copies it. A third adds a detail you did not know. By lunchtime, strangers on the street
+  are telling you which club you should join.
+tone: light
+category: sportsdeal
+rarity: common
+recurring: true
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { sports: { active: true } }
+    - { sports: { level: [pro] } }
+    - { sports: { window: true } }
+weight: { base: 9 }
+cooldownYears: 2
+followUpOnly: true
+choices:
+  - id: deny
+    label: Put out a statement saying it is not true
+    outcome:
+      text: >-
+        The statement is clear and short, and it helps, a bit. The fans like it. The clubs read it
+        as an opening bid.
+      effects:
+        - { type: fame, action: mood, delta: 2 }
+        - { type: fame, action: image, delta: 1 }
+  - id: silence
+    label: Say nothing at all
+    outcome:
+      text: >-
+        You say nothing and the rumour grows. It is oddly restful, being talked about by people
+        who have no idea.
+      effects:
+        - { type: stat, key: stress, delta: 1 }
+  - id: enjoy
+    label: Enjoy it and keep your head down
+    outcome:
+      text: >-
+        You read the comments at midnight, which does you no good, and laugh at the one
+        suggesting you play in goal.
+      effects:
+        - { type: stat, key: happiness, delta: 2 }

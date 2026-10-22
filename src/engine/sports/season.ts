@@ -30,6 +30,9 @@ import { spend } from '../finance';
 import { scaledAmount } from '../country';
 import type { FamePlan, FameProject, LifeState, SportsSeason } from '../types';
 import { draftScoreBase, draftSlot, extend, moveToTeam, pickTeamId, releasePlayer, tradePlayer, undraftedOffer } from './contract';
+import { divisionOf, hasDivisions, sameLeague, teamById, homeLeagueTeams } from './league';
+import { academyIntake, clubStrength, endLoan, loanStep, openWindow, settleLeagues } from './soccer';
+import { commuteStrain, worldTriggers } from './world';
 import { agePain, missedShare, rollInjury } from './injury';
 import { settleRun } from './playoffs';
 import { queueSportsEvent } from './queue';
@@ -37,7 +40,7 @@ import { bestPosition, injuryNow, levelOfRung, positionOf, recentRating, sportPa
 import { prospectRating, ratingFor, type SportPath } from './rating';
 import { retireSports } from './retire';
 import { scholarshipStarting, scholarshipStep } from './scholarship';
-import { anotherTeam, proTeamsIn, tierTeam } from './team';
+import { anotherTeam, tierTeam } from './team';
 import { sportsHistory } from './text';
 import { autoTeam, campOpen, levelRung } from './tryout';
 import { leaveSchoolTeam, seatOnSchoolTeam, sportActivity } from '../teen/activities';
@@ -65,6 +68,20 @@ interface Standing {
   rival: number;
 }
 
+/**
+ * The strengths of the other sides in a pro team's league. Soccer's clubs have a strength in a year that depends on nothing but the
+ * life's seed, the club and the year (so the leagues can be settled for every club without drawing from the life's generator); the
+ * other sports draw each side's luck as they always did.
+ */
+function proOthers(state: LifeState, path: SportPath, team: { quality: number; id: string | null }, content: ContentBundle, rng: RngState): number[] {
+  const L = content.balance.sports.league;
+  const me = team.id !== null ? teamById(state, path.id, team.id, content) : undefined;
+  const league = me ? sameLeague(state, path.id, me, content) : homeLeagueTeams(state, path.id, state.character.cityId, content);
+  const rivals = league.filter((t) => t.id !== team.id);
+  if (hasDivisions(path.sport)) return rivals.map((t) => clubStrength(state, t, state.currentYear, content));
+  return rivals.map((t) => t.quality + rollNormal(rng, { mean: 0, sd: L.strengthSd }));
+}
+
 /** The team's year: its strength (quality, luck and what you add) against the rest of the league's. */
 function standing(state: LifeState, path: SportPath, level: 'youth' | 'school' | 'college' | 'pro', team: { quality: number; id: string | null }, rating: number, played: number, content: ContentBundle, rng: RngState): Standing {
   const L = content.balance.sports.league;
@@ -73,9 +90,7 @@ function standing(state: LifeState, path: SportPath, level: 'youth' | 'school' |
   const own = team.quality + rollNormal(rng, { mean: 0, sd: L.strengthSd }) + (rating - 50) * L.playerShare * impact * played;
   const others: number[] =
     level === 'pro'
-      ? proTeamsIn(path.sport, state.character.cityId, content)
-          .filter((t) => t.id !== team.id)
-          .map((t) => t.quality + rollNormal(rng, { mean: 0, sd: L.strengthSd }))
+      ? proOthers(state, path, team, content, rng)
       : Array.from({ length: L.rivals }, () => team.quality + rollNormal(rng, { mean: 0, sd: 9 }) + rollNormal(rng, { mean: 0, sd: L.strengthSd }));
   const rank = 1 + others.filter((o) => o > own).length;
   const mean = others.reduce((a, b) => a + b, 0) / Math.max(1, others.length);
@@ -133,12 +148,17 @@ function proMoves(state: LifeState, path: SportPath, content: ContentBundle, rng
   const rating = recentRating(state);
   let earned = 0;
 
+  // Batch 6: last year's window is closed, and a loan that has run its season ends (you are back with your own club) before the deal is looked at.
+  s.transfer = null;
+  if (!s.loan) s.loanOffer = null;
+  if (s.loan && (s.loan.until < year || !s.contract || s.contract.until < year)) endLoan(state, path, content);
+
   if (!s.contract || !s.team) {
     // A free agent: a team signs you, or the year passes. Batch 5: nothing shuts you out while you keep trying (camps, open
     // tryouts, calls); past the age limit in balance the phone stops ringing.
     if (state.character.age > b.contract.chaseAge) return { playing: false, earned: -1 };
     if (chance(rng, curveAt(b.contract.freeAgent, rating))) {
-      const team = anotherTeam(path.sport, null, state.character.cityId, content, rng);
+      const team = anotherTeam(state, path.id, null, state.character.cityId, content, rng, hasDivisions(path.sport) ? rating : undefined);
       moveToTeam(state, team.id, true, content, rng);
       triggers.push('signed');
       return { playing: true, earned };
@@ -156,7 +176,7 @@ function proMoves(state: LifeState, path: SportPath, content: ContentBundle, rng
     if (kept) {
       if (extend(state, 'fair', content, rng)) triggers.push(tested ? 'freeAgency' : 'signed');
     } else {
-      const team = chance(rng, curveAt(b.contract.freeAgent, rating)) ? anotherTeam(path.sport, c.teamId, state.character.cityId, content, rng) : null;
+      const team = chance(rng, curveAt(b.contract.freeAgent, rating)) ? anotherTeam(state, path.id, c.teamId, state.character.cityId, content, rng, hasDivisions(path.sport) ? rating : undefined) : null;
       if (team) {
         s.contract = null;
         moveToTeam(state, team.id, true, content, rng);
@@ -183,27 +203,34 @@ function proMoves(state: LifeState, path: SportPath, content: ContentBundle, rng
   // Cut: when the rating has fallen short of the rung.
   const need = rungDef(path, Math.max(pstate.rung, path.sport.proRung)).quality;
   const gap = need - rating - b.release.slack;
-  if (s.seasons.length > 0 && deal.since < year && gap > 0 && chance(rng, Math.min(b.release.max, gap * b.release.perPoint))) {
+  if (!s.loan && s.seasons.length > 0 && deal.since < year && gap > 0 && chance(rng, Math.min(b.release.max, gap * b.release.perPoint))) {
     earned += releasePlayer(state, content);
     triggers.push('released');
     return { playing: false, earned };
   }
 
-  // Traded, or refused when you asked (asking decides it: the team gives in, or does not).
-  const asked = s.ask === 'trade';
-  if (deal.since < year || asked) {
-    if (asked) {
-      if (chance(rng, b.trade.grant)) {
-        if (tradePlayer(state, content, rng)) triggers.push('traded');
-      } else {
-        state.fame.mood = clampInt(state.fame.mood - b.trade.refusedMood, 0, 100);
+  if (hasDivisions(path.sport)) {
+    // Batch 6, soccer: no trades. The club holds your contract and may send you on loan; each year the transfer window brings offers.
+    if (loanStep(state, path, content, rng)) triggers.push('loan');
+    if (!s.loan && openWindow(state, path, content, rng) > 0) triggers.push('window');
+    s.ask = s.ask === 'trade' ? null : s.ask;
+  } else {
+    // Traded, or refused when you asked (asking decides it: the team gives in, or does not).
+    const asked = s.ask === 'trade';
+    if (deal.since < year || asked) {
+      if (asked) {
+        if (chance(rng, b.trade.grant)) {
+          if (tradePlayer(state, content, rng)) triggers.push('traded');
+        } else {
+          state.fame.mood = clampInt(state.fame.mood - b.trade.refusedMood, 0, 100);
+        }
+      } else if (chance(rng, b.trade.chance) && tradePlayer(state, content, rng)) {
+        triggers.push('traded');
       }
-    } else if (chance(rng, b.trade.chance) && tradePlayer(state, content, rng)) {
-      triggers.push('traded');
     }
   }
   if (s.contract && s.contract.until === year && !s.playOut) triggers.push('contractYear');
-  s.ask = null;
+  if (s.ask !== 'loan') s.ask = null;
   return { playing: true, earned };
 }
 
@@ -273,11 +300,13 @@ export function playSeason(state: LifeState, content: ContentBundle, rng: RngSta
         pstate.peak = Math.max(pstate.peak, want);
         pstate.fame = Math.max(pstate.fame, rungDef(path, want).fame + content.balance.sports.tryout.fameFloor);
       }
-      s.team = tierTeam(state, path.sport, s.scholarship.tier, content);
+      s.team = tierTeam(state, path.sport, s.scholarship.tier, content, path.id);
       s.teamless = false;
       leaveSchoolTeam(state, path.id, content);
     }
     const here = levelOfRung(path.sport, pstate.rung);
+    // Batch 6: an academy player who moves up a level keeps the academy alongside the school team.
+    if (s.academy && s.team?.tier === 'academy' && here !== 'youth' && s.team.level === 'youth') s.club = s.team;
     // The engine tries out for you when you reach a level with no team (not when you left your team yourself).
     if ((!s.team || s.team.level !== here) && !s.teamless && !autoTeam(state, path, here as Exclude<typeof here, 'pro'>, content, rng)) {
       s.team = null;
@@ -386,6 +415,8 @@ export function playSeason(state: LifeState, content: ContentBundle, rng: RngSta
     salary,
     allStar,
     ...(worst ? { injury: worst.conditionId } : {}),
+    ...(team.division !== undefined ? { division: team.division } : {}),
+    ...(s.loan ? { loan: true } : {}),
   };
   s.seasons.push(season);
   if (s.seasons.length > 12) s.seasons.splice(0, s.seasons.length - 12);
@@ -408,17 +439,25 @@ export function playSeason(state: LifeState, content: ContentBundle, rng: RngSta
   const focusFitness = b.performance.focus[s.focus].fitness;
   if (focusFitness !== 0) state.character.stats.fitness = clampInt(state.character.stats.fitness + wholeChange(rng, focusFitness), 0, 100);
 
+  // Batch 6: an academy graduate old enough is offered a first-team deal by the club, or let go.
+  if (s.academy && !s.pro && s.draft === null && age >= path.sport.draft.age) {
+    const d = b.draft;
+    const score = draftScoreBase(state, pstate.fame, content) + rollNormal(rng, { mean: 0, sd: d.score.noise });
+    const out = academyIntake(state, path, score, content, draftSlot(state, path.id, score, state.character.cityId, content));
+    if (out !== null) triggers.unshift(out);
+  }
+
   // The draft, for a college prospect old enough. Batch 5: scouts see your rating, fame, the combine and the league's need for your position.
   if (level === 'college' && !s.pro && age >= path.sport.draft.age && s.draft === null) {
     const d = b.draft;
     const score = draftScoreBase(state, pstate.fame, content) + rollNormal(rng, { mean: 0, sd: d.score.noise });
     if (score >= d.declare || age >= path.sport.draft.force) {
-      const slot = draftSlot(score, path.sport, state.character.cityId, content);
+      const slot = draftSlot(state, path.id, score, state.character.cityId, content);
       if (slot.pick > 0) {
-        s.draft = { year, pick: slot.pick, round: slot.round, teamId: pickTeamId(path.sport, slot.pick, state.character.cityId, content) };
+        s.draft = { year, pick: slot.pick, round: slot.round, teamId: pickTeamId(state, path.id, slot.pick, state.character.cityId, content) };
         triggers.unshift('draft');
       } else {
-        s.draft = { year, pick: 0, round: 0, teamId: undraftedOffer(path, recentRating(state), state.character.cityId, content, rng) };
+        s.draft = { year, pick: 0, round: 0, teamId: undraftedOffer(state, path, recentRating(state), state.character.cityId, content, rng) };
         s.passed = year;
         triggers.unshift('undrafted');
       }
@@ -449,6 +488,25 @@ export function playSeason(state: LifeState, content: ContentBundle, rng: RngSta
     if (s.totals.proSeasons === 1) triggers.push('rookie');
   }
 
+  // Batch 6: the leagues are settled (soccer), the trip to a team far from home, a derby, the national side.
+  if (level === 'pro' && hasDivisions(path.sport) && s.team?.id) {
+    const moved = settleLeagues(state, path.id, content, { teamId: s.team.id, strength: row.own });
+    if (moved) {
+      const t = teamById(state, path.id, s.team.id, content);
+      if (t) s.team = { ...s.team, division: divisionOf(state, t) };
+      s.moved = { year, dir: moved };
+      if (moved === 'up') s.totals.goneUp += 1;
+      else s.totals.goneDown += 1;
+      state.fame.mood = clampInt(state.fame.mood + (moved === 'up' ? content.balance.sports.soccer.tiers.promotedMood : content.balance.sports.soccer.tiers.relegatedMood), 0, 100);
+      sportsHistory(state, moved === 'up' ? 'goingUp' : 'goingDown', content);
+      triggers.push(moved === 'up' ? 'goingUp' : 'goingDown');
+    }
+  }
+  if (level === 'pro') {
+    commuteStrain(state, content);
+    worldTriggers(state, path, rating, content, rng, triggers);
+  }
+
   // Colour: a big game, the locker room, a rival, a deal.
   if (level !== 'youth' || age >= 10) {
     if (chance(rng, 0.3)) triggers.push('bigGame');
@@ -460,9 +518,9 @@ export function playSeason(state: LifeState, content: ContentBundle, rng: RngSta
 }
 
 /** Priority of the sports events a year can ask for, most pressing first. */
-const ORDER: SportsTrigger[] = ['ended', 'draft', 'undrafted', 'agedOut', 'stalled', 'playoffs', 'recruited', 'scholarshipLost', 'probation', 'camp', 'combine', 'injury', 'suspended', 'released', 'traded', 'freeAgency', 'signed', 'contractYear', 'retirement', 'rookie', 'breakout', 'slump', 'declining', 'endorsement', 'captain', 'role', 'number', 'offseason', 'bigGame', 'locker', 'rivalry'];
+const ORDER: SportsTrigger[] = ['ended', 'draft', 'academy', 'academyReleased', 'undrafted', 'agedOut', 'stalled', 'playoffs', 'recruited', 'scholarshipLost', 'probation', 'camp', 'combine', 'injury', 'suspended', 'released', 'traded', 'loan', 'window', 'abroad', 'goingUp', 'goingDown', 'freeAgency', 'signed', 'tournament', 'callUp', 'contractYear', 'retirement', 'rookie', 'breakout', 'slump', 'declining', 'endorsement', 'captain', 'role', 'number', 'offseason', 'derby', 'commute', 'bigGame', 'locker', 'rivalry'];
 /** The ones that must always come (the player has to decide, or the run needs its first series). */
-const MUST = new Set<SportsTrigger>(['ended', 'draft', 'undrafted', 'agedOut', 'stalled', 'playoffs', 'recruited', 'scholarshipLost']);
+const MUST = new Set<SportsTrigger>(['ended', 'draft', 'academy', 'academyReleased', 'undrafted', 'agedOut', 'stalled', 'playoffs', 'recruited', 'scholarshipLost']);
 
 /** Queues the season's events, most pressing first, up to the cap (the ones that need a decision always come). */
 export function queueSeasonEvents(state: LifeState, content: ContentBundle, triggers: SportsTrigger[], _break: boolean): void {

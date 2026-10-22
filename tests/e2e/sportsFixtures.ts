@@ -35,13 +35,18 @@ export interface SportsLife {
   sport?: string;
   /** A playoff series waiting in the event sheet (the first series). */
   series?: boolean;
+  /** Batch 6: a life in the UK; the club you are under contract with; a club that offers to send you on loan; a club with a transfer offer on the table. */
+  country?: 'uk';
+  teamId?: string;
+  loanOffer?: string;
+  offer?: string;
 }
 
 export function sportsLife(options: SportsLife): LifeState {
   const content = pack();
   const age = options.age ?? (options.pro ? 25 : 15);
   const sport = options.sport ?? 'basketball';
-  const base = createLife({ mode: 'random', seed: options.seed, birthYear: 1990, countryId: 'us' }, content);
+  const base = createLife({ mode: 'random', seed: options.seed, birthYear: 1990, countryId: options.country ?? 'us' }, content);
   const life = produce(base, (d) => {
     d.currentYear = d.birthYear + age;
     d.character.age = age;
@@ -66,7 +71,7 @@ export function sportsLife(options: SportsLife): LifeState {
     enterPath(d as LifeState, sport, route, content);
     const rng = createRng(`${options.seed}:sports`);
     if (options.pro) {
-      d.sports.draft = { year: d.currentYear, pick: 4, round: 1, teamId: draftingTeam(def.sport!, 4, d.character.cityId, content).id };
+      d.sports.draft = { year: d.currentYear, pick: 4, round: 1, teamId: options.teamId ?? draftingTeam(d as LifeState, def.id, 4, d.character.cityId, content).id };
       signDraftDeal(d as LifeState, content, rng);
       d.fame.agent = { agentId: 'quill_and_marlow', since: d.currentYear - 1 };
       d.fame.paths[sport]!.rung = 5;
@@ -96,6 +101,10 @@ export function sportsLife(options: SportsLife): LifeState {
     d.fame.projects.push({ year: d.currentYear - 1, path: sport, kind: def.kinds[0]!.id, title: 'The season', style: 'commercial', risk: 'safe', tour: false, press: false, quality: 66, critics: 62, fans: 70, band: 'hit', gain: 4, earned: d.sports.contract?.salary ?? 0 });
     d.sports.totals.seasons = 3;
     d.sports.totals.proSeasons = options.pro ? 2 : 0;
+    if (options.loanOffer) d.sports.loanOffer = { hostId: options.loanOffer, year: d.currentYear };
+    // A release clause the offer meets: the club has no say, so the move is certain.
+    if (options.offer && d.sports.contract) d.sports.contract.release = 1;
+    if (options.offer) d.sports.transfer = { year: d.currentYear, offers: [{ id: `${d.currentYear}-0`, clubId: options.offer, fee: 3_000_000, wage: 700_000, years: 3, clause: 0 }] };
     if (options.retired) retireSports(d as LifeState, 'normal', 'retired', content, rng);
   });
   if (!options.series) return life;

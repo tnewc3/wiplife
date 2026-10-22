@@ -1,0 +1,48 @@
+id: league_relegation_aftermath
+title: Going down
+text: >-
+  It ends on a Sunday with a goal that came a minute too late. {team} are in the second
+  league next season. The away end is silent, and then, which you did not expect, it
+  starts to sing.
+tone: serious
+category: sports
+rarity: uncommon
+recurring: true
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { sports: { active: true } }
+    - { sports: { level: [pro] } }
+    - { sports: { moved: [down] } }
+weight: { base: 12 }
+followUpOnly: true
+choices:
+  - id: stay
+    label: Tell the club you are staying to fix it
+    outcome:
+      text: >-
+        You say it in the tunnel and again to the cameras. The supporters remember, and for a
+        long time afterwards it is the thing they sing about you.
+      effects:
+        - { type: fame, action: mood, delta: 5 }
+        - { type: stat, key: stress, delta: 3 }
+  - id: ask_out
+    label: Ask your agent to find you a way out
+    visibleIf: { fame: { agent: { gte: 1 } } }
+    outcome:
+      text: >-
+        Your agent says it will be handled quietly. Nothing is quiet in football, but the
+        phone rings more often now.
+      effects:
+        - { type: sports, action: ask, what: trade }
+        - { type: fame, action: mood, delta: -3 }
+  - id: owe_it
+    label: Go round the stadium and thank the fans
+    outcome:
+      text: >-
+        You walk the whole pitch. A woman in the front row presses a hand-knitted scarf into
+        yours, and does not say anything.
+      effects:
+        - { type: fame, action: fans, delta: 3 }
+        - { type: stat, key: happiness, delta: -1 }

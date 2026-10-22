@@ -8,6 +8,8 @@ import type { LifeState } from '../types';
 import { injuryNow, levelNow, mySport, sportPath, thisSeason } from './query';
 import { nextSeries } from './playoffs';
 import { liveOffers } from './scholarship';
+import { divisionOf, rivalOf, teamById } from './league';
+import { tournamentYear } from './world';
 
 function within(value: number, c: Compare): boolean {
   if (c.gt !== undefined && !(value > c.gt)) return false;
@@ -45,10 +47,10 @@ export function sportsHolds(c: SportsCondition, state: LifeState, content?: Cont
     if (((sport ? injuryNow(state, sport.sport) : null) !== null) !== c.injured) return false;
   }
   if (c.pain !== undefined && s.pain !== c.pain) return false;
-  if (c.drafted !== undefined && (s.draft !== null && s.draft.year === year && s.draft.pick > 0) !== c.drafted) return false;
+  if (c.drafted !== undefined && (s.draft !== null && s.draft.year === year && s.draft.pick > 0 && s.draft.academy !== true) !== c.drafted) return false;
   if (c.undrafted !== undefined && (s.draft !== null && s.draft.year === year && s.draft.pick === 0) !== c.undrafted) return false;
-  if (c.offered !== undefined && (s.draft !== null && s.draft.teamId !== null) !== c.offered) return false;
-  if (c.pick && !within(s.draft && s.draft.year === year ? s.draft.pick : 0, c.pick)) return false;
+  if (c.offered !== undefined && (s.draft !== null && s.draft.teamId !== null && s.draft.academy !== true) !== c.offered) return false;
+  if (c.pick && !within(s.draft && s.draft.year === year && s.draft.academy !== true ? s.draft.pick : 0, c.pick)) return false;
   if (c.traded !== undefined && (s.traded === year) !== c.traded) return false;
   if (c.released !== undefined && (s.released === year) !== c.released) return false;
   if (c.agedOut !== undefined && (s.agedOut === year) !== c.agedOut) return false;
@@ -83,5 +85,33 @@ export function sportsHolds(c: SportsCondition, state: LifeState, content?: Cont
   }
   if (c.combine && !within(s.combine, c.combine)) return false;
   if (c.club !== undefined && (s.club !== null) !== c.club) return false;
+  // Batch 6.
+  if (c.loan !== undefined && (s.loan !== null) !== c.loan) return false;
+  if (c.loanOffered !== undefined && (s.loanOffer !== null) !== c.loanOffered) return false;
+  if (c.academy !== undefined && (s.academy !== null) !== c.academy) return false;
+  if (c.academyAbroad !== undefined && (s.academy?.abroad === true) !== c.academyAbroad) return false;
+  if (c.graduated !== undefined && (s.draft !== null && s.draft.academy === true && s.draft.pick > 0) !== c.graduated) return false;
+  if (c.academyOut !== undefined && (s.academyOut === year) !== c.academyOut) return false;
+  if (c.window !== undefined && ((s.transfer?.offers.length ?? 0) > 0) !== c.window) return false;
+  if (c.division) {
+    const t = content && def && s.team?.id ? teamById(state, def.id, s.team.id, content) : undefined;
+    if (!t || !c.division.includes(divisionOf(state, t))) return false;
+  }
+  if (c.moved && (s.moved === null || s.moved.year !== year || !c.moved.includes(s.moved.dir))) return false;
+  if (c.calledUp !== undefined && (s.calledUp === year) !== c.calledUp) return false;
+  if (c.tournament !== undefined && (def !== undefined && tournamentYear(state, def)) !== c.tournament) return false;
+  if (c.derby !== undefined) {
+    const t = content && def && s.team?.id ? teamById(state, def.id, s.team.id, content) : undefined;
+    if ((t !== undefined && content !== undefined && def !== undefined && rivalOf(state, def.id, t, content) !== undefined) !== c.derby) return false;
+  }
+  if (c.away && (s.team?.away === undefined || !c.away.includes(s.team.away))) return false;
+  if (c.abroad !== undefined && (s.abroadYear === year) !== c.abroad) return false;
+  if (c.caps && !within(s.totals.caps, c.caps)) return false;
+  if (c.clause !== undefined && (s.contract?.release !== undefined) !== c.clause) return false;
+  if (c.trial) {
+    const key = s.tryout?.key;
+    const kind = key === undefined ? null : key.startsWith('academy:') ? 'abroad' : key === 'youth:academy' ? 'academy' : null;
+    if (kind === null || !c.trial.includes(kind)) return false;
+  }
   return true;
 }

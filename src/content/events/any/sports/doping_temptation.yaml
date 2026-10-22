@@ -25,7 +25,7 @@ weight:
     - { if: { trait: discipline, gt: 70 }, x: 0.5 }
 cooldownYears: 5
 cast:
-  mate: { kind: acquaintance, presence: city, createIfMissing: true }
+  mate: { kind: acquaintance, presence: city, createIfMissing: true, heritage: team }
 choices:
   - id: take_it
     label: Take it, just this once

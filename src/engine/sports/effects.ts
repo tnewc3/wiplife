@@ -18,6 +18,8 @@ import { retireSports, takeRoute } from './retire';
 import { acceptOffer, declineOffers } from './scholarship';
 import { anotherTeam } from './team';
 import { campOpen, resolveTryout } from './tryout';
+import { bestOffer, openWindow, takeLoan, takeTransfer } from './soccer';
+import { chance } from '../rng';
 import { sportsHistory } from './text';
 
 type SportsEffect = Extract<Effect, { type: 'sports' }>;
@@ -36,7 +38,7 @@ export function movePosition(state: LifeState, positionId: Id, content: ContentB
 export function campSign(state: LifeState, content: ContentBundle, rng: RngState): boolean {
   const def = mySport(state, content);
   if (!def || !campOpen(state, def, content)) return false;
-  return signCampDeal(state, anotherTeam(def.sport, null, state.character.cityId, content, rng).id, content, rng);
+  return signCampDeal(state, anotherTeam(state, def.id, null, state.character.cityId, content, rng).id, content, rng);
 }
 
 export function applySportsEffect(state: LifeState, effect: SportsEffect, _cast: Record<string, Id>, content: ContentBundle, rng: RngState, eventId?: string): void {
@@ -130,6 +132,57 @@ export function applySportsEffect(state: LifeState, effect: SportsEffect, _cast:
       return;
     case 'camp':
       campSign(state, content, rng);
+      return;
+    // Batch 6.
+    case 'loan':
+      if (effect.on) takeLoan(state, def, content);
+      else if (s.loanOffer) {
+        // The club decides: it may send you anyway.
+        if (chance(rng, content.balance.sports.soccer.loan.force)) {
+          takeLoan(state, def, content);
+          state.fame.mood = clampInt(state.fame.mood - content.balance.sports.soccer.loan.refusedMood, 0, 100);
+        } else s.loanOffer = null;
+      }
+      return;
+    case 'transfer': {
+      if (effect.mode === 'stay') {
+        s.transfer = null;
+        return;
+      }
+      // Shopping around: the agent asks every club again, and the best of what comes back is the one he pushes for.
+      if (effect.mode === 'shop' && state.fame.agent) {
+        s.ask = 'trade';
+        openWindow(state, def, content, rng);
+        s.ask = null;
+      }
+      const offer = bestOffer(state, content);
+      if (offer) takeTransfer(state, def, offer.id, effect.mode === 'shop', content, rng);
+      return;
+    }
+    case 'cap': {
+      s.totals.caps += 1;
+      const I = content.balance.sports.international;
+      const path = state.fame.paths[def.id];
+      if (path) path.fame = Math.min(100, path.fame + I.fame.cap);
+      if (s.totals.caps === 1) sportsHistory(state, 'capped', content);
+      return;
+    }
+    case 'tournament': {
+      const I = content.balance.sports.international;
+      const path = state.fame.paths[def.id];
+      s.totals.tournaments += 1;
+      if (effect.result === 'win') {
+        s.totals.tournamentTitles += 1;
+        if (path) path.fame = Math.min(100, path.fame + I.fame.title);
+        state.fame.mood = clampInt(state.fame.mood + I.mood, 0, 100);
+      } else if (path) {
+        path.fame = Math.min(100, path.fame + I.fame.round);
+      }
+      return;
+    }
+    case 'derby':
+      s.form = clampInt(s.form + (effect.result === 'win' ? 1 : -1), -10, 10);
+      state.fame.mood = clampInt(state.fame.mood + (effect.result === 'win' ? 3 : -3), 0, 100);
       return;
   }
 }

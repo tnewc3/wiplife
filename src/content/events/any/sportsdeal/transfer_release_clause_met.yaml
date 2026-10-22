@@ -1,0 +1,49 @@
+id: transfer_release_clause_met
+title: The clause in the contract
+text: >-
+  The release clause you signed and forgot is suddenly the most important page in your
+  life. {suitor} have met it, which means your club no longer gets a say. A letter has
+  gone from one lawyer to another, and what happens next is up to you.
+tone: serious
+category: sportsdeal
+rarity: uncommon
+recurring: true
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { sports: { active: true } }
+    - { sports: { level: [pro] } }
+    - { sports: { window: true } }
+    - { sports: { clause: true } }
+weight: { base: 8 }
+followUpOnly: true
+choices:
+  - id: go
+    label: Go to {suitor}
+    outcome:
+      text: >-
+        Your club says goodbye in a statement, and the dressing room says it in person. The
+        move is done by the end of the week.
+      effects:
+        - { type: sports, action: transfer, mode: best }
+        - { type: stat, key: stress, delta: 2 }
+  - id: ask_new_deal
+    label: Use it to ask your club for a better deal
+    visibleIf: { fame: { agent: { gte: 1 } } }
+    outcome:
+      text: >-
+        Your agent sets the letter on the table of the club's office, face up. The conversation
+        that follows is the longest and politest you have ever had.
+      effects:
+        - { type: sports, action: ask, what: contract }
+        - { type: sports, action: transfer, mode: stay }
+  - id: stay
+    label: Stay, and let the clause lie
+    outcome:
+      text: >-
+        You thank {suitor}, and mean it. The page goes back in the drawer, where it was
+        safer to have it.
+      effects:
+        - { type: sports, action: transfer, mode: stay }
+        - { type: fame, action: mood, delta: 3 }

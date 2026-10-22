@@ -31,6 +31,18 @@
 # number        a jersey number to pick on a new team
 # captain       the team wants a captain
 #
+# Batch 6:
+# academy       the club offers its academy graduate a place in the first team
+# academyReleased  the academy lets you go
+# loan          your club offers to send you on loan
+# window        the transfer window brings offers
+# goingUp, goingDown   your club moved between the two leagues of its country
+# callUp        the national side calls you up
+# tournament    the international tournament, for a player who has been called up
+# derby         the game against your club's rival (same city or region)
+# commute       the trip to a team that plays away from the city you live in
+# abroad        you moved to another country for a club
+#
 # tryouts       the scrimmage a tryout plays, by the level of the team (the choice is how you play it)
 triggers:
   draft: { events: [draft_night_first_round, draft_night_later_round] }
@@ -65,9 +77,20 @@ triggers:
   offseason: { events: [offseason_plan_choice, offseason_private_coach_offer, offseason_pickup_run] }
   number: { events: [jersey_number_choice, jersey_number_taken] }
   captain: { events: [captain_vote, captain_locker_room_problem] }
+  academy: { events: [academy_first_team_offer, academy_graduation_dinner] }
+  academyReleased: { events: [academy_let_go_meeting] }
+  loan: { events: [loan_offer_to_host] }
+  window: { events: [transfer_window_opens, transfer_release_clause_met, transfer_deadline_day, transfer_rumour_mill, transfer_agent_negotiates] }
+  goingUp: { events: [league_promotion_parade] }
+  goingDown: { events: [league_relegation_aftermath] }
+  callUp: { events: [national_callup_letter, national_camp_club_row] }
+  tournament: { events: [national_tournament_group_stage, national_tournament_knockout] }
+  derby: { events: [derby_week_city, derby_regional_trip, derby_fans_in_the_street] }
+  commute: { events: [commute_long_ride_home, commute_flight_to_training, commute_partner_calendar, commute_room_near_the_ground] }
+  abroad: { events: [abroad_first_week_club, abroad_teammates_settle] }
 
 tryouts:
-  youth: [tryout_youth_trials, tryout_travel_team_trials]
+  youth: [tryout_youth_trials, tryout_travel_team_trials, tryout_academy_trial_home, tryout_academy_trial_abroad]
   school: [tryout_school_gym, tryout_school_cold_gym]
   college: [tryout_college_walk_on, tryout_college_open_run]
   pro: [tryout_pro_camp, tryout_pro_open_workout]

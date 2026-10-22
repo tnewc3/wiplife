@@ -116,6 +116,8 @@ athletics:
   scholarships: { available: true, maxShare: 0.3, word: sport scholarship, tiers: [state, elite] }
   academy: true
   system: university
+  soccerWord: football
+  footballWord: "American football"
 
 housing:
   mortgageRate: 0.055

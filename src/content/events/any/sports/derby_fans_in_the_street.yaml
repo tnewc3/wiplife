@@ -1,0 +1,58 @@
+id: derby_fans_in_the_street
+title: A shirt of the wrong colour
+text: >-
+  You are at the supermarket when {neighbour.name} walks up in a shirt of the colours of {derbyRival}.
+  There is a long moment in the cereal aisle. Then {neighbour.they} {neighbour:grins|grin}, and
+  tells you the score of the next game, down to the last point, with perfect confidence.
+tone: light
+category: sports
+rarity: common
+recurring: true
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { sports: { active: true } }
+    - { sports: { level: [pro] } }
+    - { sports: { derby: true } }
+weight: { base: 8 }
+cooldownYears: 3
+followUpOnly: true
+cast:
+  neighbour: { kind: acquaintance, presence: city, createIfMissing: true }
+choices:
+  - id: banter
+    label: Give as good as you get
+    outcome:
+      text: >-
+        You trade predictions for ten minutes. Neither of you is right, and both of you are sure.
+        The cashier asks for a photograph.
+      effects:
+        - { type: relationship, role: neighbour, affection: 5 }
+        - { type: stat, key: happiness, delta: 2 }
+  - id: polite
+    label: Smile and pick up your bread
+    outcome:
+      text: >-
+        You say "good luck" in the voice you use for press conferences. The aisle clears. The
+        bread is excellent.
+      effects:
+        - { type: stat, key: stress, delta: 1 }
+  - id: bet
+    label: Take the bet
+    check:
+      base: 45
+      stats: [{ sports: team, weight: 0.2 }, { sports: rating, weight: 0.1 }]
+      success:
+        text: >-
+          {team} win, and {neighbour.name} delivers the promised dinner with a very long speech
+          about sportsmanship.
+        effects:
+          - { type: relationship, role: neighbour, affection: 4 }
+          - { type: stat, key: happiness, delta: 3 }
+      failure:
+        text: >-
+          {team} lose, and you cook for {neighbour.name} while being told, in detail, how it went wrong.
+        effects:
+          - { type: famePay, cost: petty }
+          - { type: relationship, role: neighbour, affection: 3 }

@@ -1,0 +1,12 @@
+# Name pool for Spain: the clubs of a country the game does not model yet (futureCountry) hire teammates and staff from it, so a
+# player who signs there meets names that fit the club. The country has no cities of its own, so how often a heritage appears is
+# not set in a country file: with one heritage, every person made for a club here gets it. `nonbinary` holds names commonly used
+# across genders.
+id: es
+heritages:
+  spanish:
+    first:
+      man: [Alejandro, Pablo, Javier, Sergio, Adrián, Álvaro, Daniel, David, Diego, Carlos, Miguel, Manuel, Antonio, José, Francisco, Juan, Luis, Jorge, Rubén, Iván, Raúl, Rafael, Fernando, Andrés, Marcos, Mario, Hugo, Gonzalo, Enrique, Ángel, Pedro, Santiago, Joaquín, Ignacio, Nicolás, Óscar, Víctor, Alberto, Eduardo, Ricardo, Roberto, Tomás, Guillermo, Lucas, Mateo, Martín, Samuel, Unai, Iker, Aitor, Xavier, Jordi, Oriol, Pau, Marc, Arnau, Joan, Cristian, Rodrigo, Emilio]
+      woman: [Lucía, María, Carmen, Paula, Sofía, Marta, Laura, Elena, Sara, Andrea, Claudia, Alba, Carla, Irene, Cristina, Ana, Isabel, Patricia, Raquel, Beatriz, Silvia, Rocío, Nuria, Pilar, Teresa, Rosa, Mercedes, Inés, Natalia, Julia, Noelia, Lorena, Marina, Eva, Lidia, Sandra, Alicia, Celia, Clara, Daniela, Valeria, Emma, Martina, Nerea, Ainhoa, Leire, Maite, Montserrat, Anna, Júlia, Núria, Mireia, Aitana, Gabriela, Verónica, Esther, Rebeca, Olga]
+      nonbinary: [Alex, Cris, Nico, Sasha, Ariel, Gael, Noa, Dani, Andrea, Mar, Luca, Eden, Ale, Jan, Kai, Lou, Ona, Dídac, Sol, Vega, Río, Lía, Sky, Abril, Cruz, Reyes, Ángeles, Rocío, Carmen, Jesús, Guadalupe, Maxi, Fran, Josu, Alejandro, Pablo, Javier, Sergio, Adrián, Álvaro, Daniel, David, Diego, Carlos, Miguel, Manuel, Antonio, José, Lucía, María, Paula, Sofía, Marta, Laura, Elena, Sara, Claudia, Alba, Carla, Irene]
+    last: [García, Rodríguez, González, Fernández, López, Martínez, Sánchez, Pérez, Gómez, Martín, Jiménez, Ruiz, Hernández, Díaz, Moreno, Muñoz, Álvarez, Romero, Alonso, Gutiérrez, Navarro, Torres, Domínguez, Vázquez, Ramos, Gil, Ramírez, Serrano, Blanco, Molina, Morales, Suárez, Ortega, Delgado, Castro, Ortiz, Rubio, Marín, Sanz, Iglesias, Núñez, Medina, Garrido, Cortés, Castillo, Santos, Lozano, Guerrero, Cano, Prieto, Méndez, Cruz, Flores, Herrera, Peña, León, Márquez, Cabrera, Gallego, Calvo, Vidal, Campos, Vega, Fuentes, Carrasco, Diez, Reyes, Caballero, Nieto, Aguilar, Pascual, Santana, Herrero, Montero, Hidalgo, Giménez, Lorenzo, Ibáñez, Ferrer, Durán]

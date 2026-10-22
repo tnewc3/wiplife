@@ -1,9 +1,11 @@
 import { getTimeline } from '../../engine/selectors';
 import type { HistoryEntry } from '../../engine/types';
 import { timelineAgeLabel } from '../labels';
+import { useTeamText } from '../useTeamNames';
 
 /** A life's history grouped by year, oldest first. */
 export function HistoryTimeline({ history, label }: { history: readonly HistoryEntry[]; label: string }) {
+  const teamText = useTeamText();
   const groups = getTimeline(history);
   if (groups.length === 0) return <p className="text-muted">Nothing has happened yet.</p>;
   return (
@@ -17,7 +19,7 @@ export function HistoryTimeline({ history, label }: { history: readonly HistoryE
           <ul className="flex min-w-0 flex-1 flex-col gap-1">
             {g.entries.map((e, i) => (
               <li key={i} className={`break-words [overflow-wrap:anywhere] ${e.importance === 3 ? 'font-semibold' : ''}`}>
-                {e.text}
+                {teamText(e.text)}
               </li>
             ))}
           </ul>

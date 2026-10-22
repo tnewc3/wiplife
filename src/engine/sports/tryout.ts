@@ -26,7 +26,9 @@ import { spend } from '../finance';
 import { signCampDeal } from './contract';
 import { levelOfRung, sportPath } from './query';
 import { prospectRating } from './rating';
-import { proTeamsIn, tierTeam } from './team';
+import { tierTeam } from './team';
+import { marketTeams, teamById } from './league';
+import { abroadAcademyClubs, academyTeam, homeAcademyClub } from './soccer';
 import { sportsHistory } from './text';
 import { renderText } from '../text';
 
@@ -51,8 +53,10 @@ export interface TeamOption {
   fee: number;
   /** A club or travel team you play for alongside a school team (youth teams for teenagers). */
   club: boolean;
-  /** A pro team, for a camp. */
+  /** A pro team, for a camp; the club of a trial abroad. */
   teamId: Id | null;
+  /** Batch 6: a trial at a club's academy in a country the game does not model (a UK child commutes). */
+  abroad?: boolean;
   block: TryoutBlock | null;
 }
 
@@ -65,11 +69,13 @@ export function tiersOf(level: AmateurLevel, content: ContentBundle): TeamTier[]
 const LEVEL_RUNG: Record<AmateurLevel, number> = { youth: 1, school: 2, college: 3 };
 
 /** Whether a tier is open to this person's age and country. */
-function tierOpen(state: LifeState, tier: TeamTier, content: ContentBundle): boolean {
+function tierOpen(state: LifeState, tier: TeamTier, content: ContentBundle, def?: SportPath): boolean {
   const t = content.balance.sports.tryout.tiers[tier];
   const age = state.character.age;
-  if (age < t.minAge || age > t.maxAge) return false;
-  if (tier === 'academy' && !countryOf(state, content).athletics.academy) return false;
+  // Batch 6: a sport with academies tied to a club (soccer) has them everywhere, for the ages its definition says.
+  const academy = tier === 'academy' ? def?.sport.academy : undefined;
+  if (age < (academy?.minAge ?? t.minAge) || age > (academy?.maxAge ?? t.maxAge)) return false;
+  if (tier === 'academy' && academy === undefined && !countryOf(state, content).athletics.academy) return false;
   return true;
 }
 
@@ -107,13 +113,26 @@ function feeOf(state: LifeState, tier: TeamTier | null, content: ContentBundle):
 /** One amateur team as an option (no blocks checked). */
 function amateurOption(state: LifeState, def: SportPath, tier: TeamTier, club: boolean, content: ContentBundle): TeamOption {
   const t = content.balance.sports.tryout.tiers[tier];
-  const team = tierTeam(state, def.sport, tier, content);
+  const team = tierTeam(state, def.sport, tier, content, def.id);
   return { key: `${t.level}:${tier}`, level: t.level, tier, name: team.name, city: team.city, quality: team.quality, bar: t.bar, fee: feeOf(state, tier, content), club, teamId: null, block: null };
+}
+
+/** The trials a UK child can take at the academies of clubs in a country the game does not model (Batch 6). */
+function abroadOptions(state: LifeState, def: SportPath, club: boolean, content: ContentBundle): TeamOption[] {
+  const a = def.sport.academy;
+  const age = state.character.age;
+  if (!a || age < a.abroadMinAge || age > a.maxAge) return [];
+  const T = content.balance.sports.soccer.academy.abroad;
+  const t = content.balance.sports.tryout.tiers.academy;
+  return abroadAcademyClubs(state, def.id, content).map((c) => {
+    const team = academyTeam(state, c, def.id, Math.max(0, Math.min(100, content.balance.sports.league.quality[t.base] + t.shift)), content);
+    return { key: `academy:${c.country!}`, level: 'youth' as const, tier: 'academy' as const, name: team.name, city: team.city, quality: team.quality, bar: T.bar, fee: scaledAmount(state, T.fee, content), club, teamId: c.id, abroad: true, block: null };
+  });
 }
 
 /** A pro camp as an option (no blocks checked). */
 function campOption(state: LifeState, def: SportPath, teamId: Id, content: ContentBundle): TeamOption | null {
-  const team = def.sport.leagues.pro.teams.find((t) => t.id === teamId);
+  const team = teamById(state, def.id, teamId, content);
   if (!team) return null;
   const c = content.balance.sports.tryout.camp;
   return { key: `pro:${team.id}`, level: 'pro', tier: null, name: team.name, city: team.city, quality: team.quality, bar: clampInt(Math.round(c.bar + c.perQuality * (team.quality - 50) + c.perYear * Math.max(0, state.character.age - c.ageFrom)), 0, 100), fee: feeOf(state, null, content), club: false, teamId: team.id, block: null };
@@ -157,7 +176,7 @@ export function teamOptions(state: LifeState, def: SportPath, content: ContentBu
     // A child's youth team: the youth level ends at the age you age out of it, so a teenager's only youth teams are alongside a school team.
     const asClub = level === 'youth' && here !== null && here !== 'youth';
     for (const tier of tiersOf(level, content).reverse()) {
-      if (!tierOpen(state, tier, content)) continue;
+      if (!tierOpen(state, tier, content, def)) continue;
       if (level === 'youth' && here !== 'youth' && here !== null) continue;
       if (level === 'youth' && here === null && age > (sport.ageOut[0] ?? 14) - 1) continue;
       if (level === 'youth' && here === 'youth' && age > (sport.ageOut[0] ?? 14) - 1) continue;
@@ -165,16 +184,20 @@ export function teamOptions(state: LifeState, def: SportPath, content: ContentBu
       out.push(amateurOption(state, def, tier, false, content));
     }
   }
+  // Batch 6: a trial at an academy abroad, for a child who lives in the UK (the club is in a country the game does not model).
+  if (here === null || here === 'youth' || (here === 'school' && age <= content.balance.relationships.adultAge - 1)) {
+    out.push(...abroadOptions(state, def, here === 'school', content).filter((o) => !(s.academy && s.academy.abroad === true && o.teamId === s.academy.clubId)));
+  }
   // A club or travel team alongside a school or college team.
   if (here !== null && here !== 'youth' && here !== 'pro' && age <= content.balance.relationships.adultAge - 1) {
     for (const tier of tiersOf('youth', content).reverse()) {
-      if (!tierOpen(state, tier, content) || rank(tier, content) === 0) continue;
+      if (!tierOpen(state, tier, content, def) || rank(tier, content) === 0) continue;
       if (s.club?.tier !== undefined && rank(tier, content) < rank(s.club.tier, content)) continue;
       out.push(amateurOption(state, def, tier, true, content));
     }
   }
   if (campOpen(state, def, content)) {
-    for (const team of proTeamsIn(sport, state.character.cityId, content)) {
+    for (const team of marketTeams(state, def.id, state.character.cityId, content)) {
       const o = campOption(state, def, team.id, content);
       if (o) out.push(o);
     }
@@ -267,7 +290,11 @@ function landOn(state: LifeState, def: SportPath, o: TeamOption, content: Conten
   // Starting a career replaces the sports record: read it from here on.
   const s = state.sports;
   const path = state.fame.paths[def.id]!;
-  const team: SportsTeam = tierTeam(state, def.sport, o.tier!, content);
+  const abroadClub = o.abroad === true && o.teamId !== null ? teamById(state, def.id, o.teamId, content) : undefined;
+  const team: SportsTeam = abroadClub ? academyTeam(state, abroadClub, def.id, o.quality, content) : tierTeam(state, def.sport, o.tier!, content, def.id);
+  // Batch 6: an academy is a club's: remember which club, so it can promote you.
+  const academyClub = o.tier === 'academy' && def.sport.academy !== undefined ? (abroadClub ?? homeAcademyClub(state, def.id, content)) : undefined;
+  if (academyClub) s.academy = { clubId: academyClub.id, since: state.currentYear, abroad: abroadClub !== undefined };
   if (o.club) {
     s.club = team;
     if (o.fee > 0) spend(state, o.fee, content);
@@ -355,7 +382,7 @@ export function resolveTryout(state: LifeState, approach: TryoutApproach, conten
 export function autoTeam(state: LifeState, def: SportPath, level: AmateurLevel, content: ContentBundle, rng: RngState): boolean {
   const B = content.balance.sports.tryout;
   // The level was earned (a big break can put a young player there): age does not close the bottom team of it.
-  const tiers = tiersOf(level, content).filter((t) => t !== 'academy' || countryOf(state, content).athletics.academy);
+  const tiers = tiersOf(level, content).filter((t) => t !== 'academy' || countryOf(state, content).athletics.academy || def.sport.academy !== undefined);
   if (tiers.length === 0) return false;
   const rating = prospectRating(state, def, content);
   const score = rating + rollNormal(rng, { mean: 0, sd: B.luck });

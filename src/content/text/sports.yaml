@@ -13,6 +13,9 @@ tiers:
   state: { label: State program, blurb: "A big school with a real schedule, a real crowd and a roster that is hard to crack." }
   elite: { label: Elite program, blurb: "A national name, scouts in the stands and a line of players behind you waiting for your spot." }
 
+# Batch 6: the countries the game does not model yet.
+countries: { es: Spain, it: Italy, de: Germany, fr: France }
+
 # A pro camp, in words.
 camp: { label: Pro camp, blurb: "A camp: coaches, a roster with spots and a few days to be noticed." }
 
@@ -121,6 +124,46 @@ history:
     variants:
       - "You earned a deal at camp: {team} signed you."
       - "After a camp and a long wait, {team} gave you a deal."
+  loan:
+    importance: 2
+    variants:
+      - "You went on loan to {host} for a season, with {parent} still holding your contract."
+      - "{parent} sent you to {host} for a year, to play."
+  transfer:
+    importance: 3
+    variants:
+      - "You signed for {suitor}. The fee was settled between the clubs, and your name was on the front of a new shirt by the weekend."
+      - "{suitor} bought your contract, and you went to meet them with a bag you had packed in an hour."
+  academy:
+    importance: 3
+    variants:
+      - "{parent} took you from its academy into the first team. You signed in the same office where you had once been told to wait outside."
+      - "The academy at {parent} let you go up: a first-team contract, and a locker with your name on it."
+  academyReleased:
+    importance: 2
+    variants:
+      - "The academy at {parent} did not keep you. The kit bag went back, and the boots did not."
+      - "{parent} let you go from its academy. It was kind and quick, and it hurt for longer than either."
+  goingUp:
+    importance: 2
+    variants:
+      - "{team} went up to the top league. The pitch was full before the whistle had finished."
+      - "Promotion: {team} are in the top league, and you were there for it."
+  goingDown:
+    importance: 2
+    variants:
+      - "{team} went down to the second league. The away end sang anyway."
+      - "Relegation: {team} dropped a league, and the season ended in silence."
+  capped:
+    importance: 3
+    variants:
+      - "You played for {nation} for the first time. The anthem was louder than you had imagined."
+      - "Your first game for {nation}: a shirt with a crest on it, and a family in the stand."
+  abroad:
+    importance: 3
+    variants:
+      - "You moved to {country} to play for {team}. The club arranged the permit, and the flat, and the first week of food."
+      - "{team} took you to {country}. You landed with a bag and a plan, and the plan lasted until the first training session."
 
 # Names for a season, in the season report. Values: {year}, {team}.
 seasons:

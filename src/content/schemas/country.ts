@@ -174,6 +174,9 @@ export const countrySchema = baseDefSchema.extend({
     }),
     academy: z.boolean(),
     system: z.enum(['college', 'university']),
+    /** Batch 6: what the country calls soccer, and the other football ("football" in the United States and Canada, "American football" elsewhere). */
+    soccerWord: z.enum(['soccer', 'football']),
+    footballWord: z.enum(['football', 'American football']),
   }),
   /** Buying a home: the mortgage rate, the smallest down payment (a share of the price) and how home values move each year. */
   housing: z.strictObject({ mortgageRate: rate, downPayment: share, appreciation: z.number().min(-0.2).max(0.2) }),

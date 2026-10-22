@@ -79,12 +79,14 @@ sport:
     - { id: "shoulder_injury", weight: 14, min: 30, max: 65 }
     - { id: "broken_bone", weight: 14, min: 30, max: 60 }
     - { id: "stress_fracture", weight: 6, min: 30, max: 50 }
+  international: { side: "the national team", tournament: "the Polar Cup", cycle: 4 }
   leagues:
     youth: { name: "The Community Hockey League", nicknames: ["Pucksters", "Snowhawks", "Zambonis", "Icecaps", "Frost"] }
     school: { name: "The Scholastic Hockey Conference", nicknames: ["Wolves", "Huskies", "Polar Bears", "Blizzard", "Yeti", "Moose"] }
     college: { name: "The Collegiate Hockey Conference", nicknames: ["Glaciers", "Ice Bears", "Northmen", "Lumberjacks", "Gophers", "Pioneers"] }
     pro:
       name: "The Northern Ice League"
+      markets: [[us, ca]]
       teams:
         - { id: "chicago_frostbite", name: "Chicago Frostbite", city: "chicago", quality: 63 }
         - { id: "chicago_northwinds", name: "Chicago Northwinds", city: "chicago", quality: 45 }
@@ -116,3 +118,19 @@ sport:
         - { id: "guadalajara_rinkside", name: "Guadalajara Rinkside", city: "guadalajara", quality: 38 }
         - { id: "monterrey_sierra_ice", name: "Monterrey Sierra Ice", city: "monterrey", quality: 52 }
         - { id: "monterrey_foundry_blades", name: "Monterrey Foundry Blades", city: "monterrey", quality: 42 }
+        - { id: "boston_harborfrost", name: "Boston Harborfrost", cityName: "Boston", nearestCityId: "nyc", futureCity: true, quality: 60 }
+        - { id: "philadelphia_rowhouse_rams", name: "Philadelphia Rowhouse Rams", cityName: "Philadelphia", nearestCityId: "nyc", futureCity: true, quality: 47 }
+        - { id: "detroit_gearwheel_ghosts", name: "Detroit Gearwheel Ghosts", cityName: "Detroit", nearestCityId: "chicago", futureCity: true, quality: 49 }
+        - { id: "minneapolis_tenthousand_lakers", name: "Minneapolis Tenthousand Lakers", cityName: "Minneapolis", nearestCityId: "chicago", futureCity: true, quality: 58 }
+        - { id: "seattle_sleet_rain", name: "Seattle Sleet Rain", cityName: "Seattle", nearestCityId: "los_angeles", futureCity: true, quality: 51 }
+        - { id: "denver_altitude_icemen", name: "Denver Altitude Icemen", cityName: "Denver", nearestCityId: "los_angeles", futureCity: true, quality: 55 }
+        - { id: "washington_capitol_chill", name: "Washington Capitol Chill", cityName: "Washington", nearestCityId: "nyc", futureCity: true, quality: 46 }
+        - { id: "pittsburgh_steel_valley_frost", name: "Pittsburgh Steel Valley Frost", cityName: "Pittsburgh", nearestCityId: "nyc", futureCity: true, quality: 57 }
+        - { id: "st_louis_riverfront_blades", name: "St. Louis Riverfront Blades", cityName: "St. Louis", nearestCityId: "chicago", futureCity: true, quality: 43 }
+        - { id: "cleveland_lakeshore_gales", name: "Cleveland Lakeshore Gales", cityName: "Cleveland", nearestCityId: "chicago", futureCity: true, quality: 44 }
+        - { id: "dallas_mesquite_frost", name: "Dallas Mesquite Frost", cityName: "Dallas", nearestCityId: "houston", futureCity: true, quality: 48 }
+        - { id: "san_francisco_foghorn_freeze", name: "San Francisco Foghorn Freeze", cityName: "San Francisco", nearestCityId: "los_angeles", futureCity: true, quality: 50 }
+        - { id: "ottawa_rideau_ravens", name: "Ottawa Rideau Ravens", cityName: "Ottawa", nearestCityId: "toronto", futureCity: true, quality: 56 }
+        - { id: "calgary_chinook_flames_guild", name: "Calgary Chinook Flames Guild", cityName: "Calgary", nearestCityId: "vancouver", futureCity: true, quality: 59 }
+        - { id: "edmonton_oilbelt_icemen", name: "Edmonton Oilbelt Icemen", cityName: "Edmonton", nearestCityId: "vancouver", futureCity: true, quality: 52 }
+        - { id: "winnipeg_forks_frostbite", name: "Winnipeg Forks Frostbite", cityName: "Winnipeg", nearestCityId: "toronto", futureCity: true, quality: 45 }

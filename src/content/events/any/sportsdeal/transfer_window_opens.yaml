@@ -1,0 +1,48 @@
+id: transfer_window_opens
+title: The window is open
+text: >-
+  The transfer window has opened and your phone has not stopped. {suitor} are the club asking
+  loudest, and your agent's name keeps coming up in the group chats you are not in. Your
+  own club has not said a word, which is its own kind of answer.
+tone: neutral
+category: sportsdeal
+rarity: common
+recurring: true
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { sports: { active: true } }
+    - { sports: { level: [pro] } }
+    - { sports: { window: true } }
+weight: { base: 12 }
+followUpOnly: true
+choices:
+  - id: best
+    label: Take the best offer on the table
+    outcome:
+      text: >-
+        The talks run through the night. By morning there is a medical, a photograph in a new
+        shirt, and a kit bag that is not yours any more.
+      effects:
+        - { type: sports, action: transfer, mode: best }
+        - { type: stat, key: happiness, delta: 3 }
+  - id: shop
+    label: Have your agent see who else is interested
+    visibleIf: { fame: { agent: { gte: 1 } } }
+    outcome:
+      text: >-
+        Your agent rings every club that ever asked about you. By the end of the week the best of them is
+        better than the first, and the one you take is not the one you expected.
+      effects:
+        - { type: sports, action: transfer, mode: shop }
+        - { type: fame, action: image, delta: 1 }
+  - id: stay
+    label: Tell everyone you are staying
+    outcome:
+      text: >-
+        You say it to the club and to the cameras. The phone goes quiet, and the dressing room
+        looks at you differently on the Monday.
+      effects:
+        - { type: sports, action: transfer, mode: stay }
+        - { type: fame, action: mood, delta: 3 }

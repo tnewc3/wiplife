@@ -73,13 +73,43 @@ const positionSchema = z.strictObject({
   stats: z.array(z.strictObject({ id: idSchema, low: z.number(), high: z.number() })).min(2).max(4),
 });
 
-const proTeamSchema = z.strictObject({
+/** Batch 6: the countries a club can be in: the four modeled ones, and four that are not (yet), whose clubs a UK player signs with and commutes to. */
+export const TEAM_COUNTRIES = ['us', 'ca', 'uk', 'mx', 'es', 'it', 'de', 'fr'] as const;
+export type TeamCountry = (typeof TEAM_COUNTRIES)[number];
+/** The countries that have clubs but no cities in the game: a placeholder until they are added (`futureCountry`). */
+export const FUTURE_COUNTRIES = ['es', 'it', 'de', 'fr'] as const;
+
+const proTeamInputSchema = z.strictObject({
   id: idSchema,
   name: text(40),
-  /** One of the game's cities (src/content/cities): a pro player lives where the team plays. */
-  city: idSchema,
+  /** Batch 6: a short name for headlines ("the Lakefront"); the name stands in when there is none. */
+  nickname: text(30).optional(),
+  /**
+   * One of the game's cities (src/content/cities): a pro player lives where the team plays. A team in a city the game
+   * does not have leaves this out and names `nearestCityId` instead.
+   */
+  city: idSchema.optional(),
+  /** Batch 6: where the team really plays, in words, when that is not a city of the game. */
+  cityName: text(40).optional(),
+  /** Batch 6: the modeled city (of the same country, or the UK for a club abroad) you live in when you sign with it. */
+  nearestCityId: idSchema.optional(),
+  /** A team in a US or Canadian city the game does not model yet (the list is printed by the content build). */
+  futureCity: z.literal(true).optional(),
+  /** A club in a country the game does not model yet: a UK player signs with it and commutes. */
+  futureCountry: z.literal(true).optional(),
+  /** Batch 6: the country a futureCountry club is in. */
+  country: z.enum(FUTURE_COUNTRIES).optional(),
+  /** Batch 6: the league a club plays in (soccer has two per country; every other sport has one). */
+  tier: z.union([z.literal(1), z.literal(2)]).optional(),
   quality: z.int().min(0).max(100),
 });
+
+const proTeamSchema = proTeamInputSchema
+  .refine((t) => (t.city !== undefined || t.nearestCityId !== undefined) && (t.city === undefined || t.nearestCityId === undefined || t.city === t.nearestCityId), 'a team has a city, or (for a place the game does not model) a nearestCityId instead (the compiled form has both, the same)')
+  .refine((t) => t.nearestCityId === undefined || (t.cityName !== undefined && (t.futureCity === true) !== (t.futureCountry === true)), 'a team away from the modeled cities needs a cityName and exactly one of futureCity or futureCountry')
+  .refine((t) => t.nearestCityId !== undefined || (t.futureCity === undefined && t.futureCountry === undefined && t.cityName === undefined), 'only a team away from the modeled cities has cityName, futureCity or futureCountry')
+  .refine((t) => (t.futureCountry === true) === (t.country !== undefined), 'a futureCountry club names its country (and only it does)')
+  .transform((t) => ({ ...t, city: (t.city ?? t.nearestCityId)!, tier: t.tier ?? (1 as 1 | 2) }));
 
 const amateurLeagueSchema = z.strictObject({
   name: text(50),
@@ -124,6 +154,23 @@ export const sportSchema = z.strictObject({
     age: z.int().min(18).max(25),
     force: z.int().min(18).max(28),
     rounds: z.int().min(1).max(8),
+    /** Batch 6: which team picks first: the weakest side (a draft, the default) or the strongest (an intake, where the best prospect goes to the best club). */
+    order: z.enum(['weakest', 'strongest']).optional(),
+  }),
+  /**
+   * Batch 6: youth academies, tied to a pro club (soccer). A child of these ages can be taken by an academy; the club
+   * can promote the player to its first team at the draft age. A trial abroad asks for the second age.
+   */
+  academy: z.strictObject({ minAge: z.int().min(8).max(14), maxAge: z.int().min(12).max(17), abroadMinAge: z.int().min(10).max(17) }).optional(),
+  /** Batch 6: which of the country's words names the sport ("soccer" or "football" for soccer; "football" or "American football" for the other): see `athletics` in src/content/countries. */
+  countryWord: z.enum(['soccerWord', 'footballWord']).optional(),
+  /** Batch 6: the international game: the sides' name, the tournament (made up) and how often it is played. */
+  international: z.strictObject({
+    /** What the national side is called in a sentence ("the national side"). */
+    side: text(40),
+    tournament: text(50),
+    /** The tournament comes round every this many years. */
+    cycle: z.int().min(2).max(8),
   }),
   /** Points added to a season's rating by age: where a player peaks and how fast they decline. */
   ageCurve: signedCurveSchema,
@@ -134,7 +181,17 @@ export const sportSchema = z.strictObject({
     youth: amateurLeagueSchema,
     school: amateurLeagueSchema,
     college: amateurLeagueSchema,
-    pro: z.strictObject({ name: text(50), teams: z.array(proTeamSchema).min(8).max(32) }),
+    pro: z.strictObject({
+      name: text(50),
+      teams: z.array(proTeamSchema).min(8).max(160),
+      /** Batch 6: the names of the two leagues (soccer: a top league and a second one, with promotion and relegation between them). */
+      tiers: z.array(text(50)).length(2).optional(),
+      /**
+       * Batch 6: groups of countries whose clubs share a market: a player can sign with a club of any country in his group
+       * (and then lives in its nearest modeled city). A country in no group plays only at home.
+       */
+      markets: z.array(z.array(z.enum(TEAM_COUNTRIES)).min(2)).max(4).optional(),
+    }),
   }),
 });
 export type SportDef = z.infer<typeof sportSchema>;
@@ -324,6 +381,9 @@ export const sportsBalanceSchema = z.strictObject({
     captain: z.number().min(0).max(1),
     role: z.strictObject({ starter: z.number().min(0).max(1), other: z.number().min(0).max(1) }),
     offseason: z.number().min(0).max(1),
+    /** Batch 6: the yearly chance of an event about the trip to a team far from home, and about a derby with your club's rival. */
+    commute: z.number().min(0).max(1),
+    derby: z.number().min(0).max(1),
   }),
   /** Batch 5: tryouts for specific teams. */
   tryout: z.strictObject({
@@ -385,6 +445,86 @@ export const sportsBalanceSchema = z.strictObject({
     /** The spread of a program's need for a position, in recruiting score points. */
     need: z.number().min(0).max(30),
   }),
+  /** Batch 6: the wider world: strength levels for teams a player adds, commuting to a team away from the modeled cities, and moving abroad for a club. */
+  world: z.strictObject({
+    /** What the five strength levels (1 to 5) a player can give an added team mean in team quality. */
+    strength: z.array(z.int().min(0).max(100)).length(5),
+    /** A yearly commute: stress and happiness for a team whose home is away from the city you live in (nearby, and in another country). */
+    commute: z.strictObject({ city: z.strictObject({ stress: z.number().min(0).max(10), happiness: z.number().min(-10).max(0) }), country: z.strictObject({ stress: z.number().min(0).max(10), happiness: z.number().min(-10).max(0) }) }),
+    /** Moving to another country for a club: the age it takes, and the years the work permit runs past the end of the deal. */
+    abroad: z.strictObject({ minAge: z.int().min(18).max(30), permitYears: z.int().min(0).max(5), stress: z.number().min(0).max(20), homesick: probability, share: probability }),
+    /** The most teams a player can add, and how many characters of a name and a nickname. */
+    added: z.strictObject({ max: z.int().min(1).max(40) }),
+  }),
+  /** Batch 6: soccer's world: academies, loans, transfers and the two leagues of a country. */
+  soccer: z.strictObject({
+    tiers: z.strictObject({
+      /** Pay at a club of the second league, as a multiple of the first league's pay. */
+      pay: z.number().min(0.05).max(1),
+      /** Clubs relegated from the top league, and promoted from the second, each year. */
+      moves: z.int().min(1).max(4),
+      /** Fan mood when your club is promoted or relegated. */
+      promotedMood: z.number().min(0).max(30),
+      relegatedMood: z.number().min(-30).max(0),
+    }),
+    academy: z.strictObject({
+      /** A trial abroad: the bar, the fee for the trip (whole dollars at US prices) and the extra the trial asks beyond a home academy. */
+      abroad: z.strictObject({ bar: z.int().min(0).max(100), fee: z.int().min(0).max(100000) }),
+      /** Points added to a graduate's score at the intake (the club knows you), and how far under the declare score a graduate may fall and still be kept. */
+      promote: z.strictObject({ bonus: z.number().min(0).max(30), keep: z.number().min(0).max(30) }),
+      /** Craft a year an academy teaches, in addition to the team's. */
+      craft: z.number().min(0).max(10),
+    }),
+    loan: z.strictObject({
+      /** The oldest player a club loans out, and the yearly chance it loans out a reserve (and a rotation player) it wants to develop. */
+      maxAge: z.int().min(18).max(40),
+      reserve: probability,
+      rotation: probability,
+      /** The chance the club agrees when you ask for a loan. */
+      asked: probability,
+      /** The club you go to is this much weaker than your own, and the pay share the host club adds on top of your wage (a multiple of it). */
+      drop: z.int().min(0).max(40),
+      /** A refusal costs this much fan mood, and the chance the club sends you anyway (the club makes the call). */
+      refusedMood: z.number().min(0).max(20),
+      force: probability,
+    }),
+    transfer: z.strictObject({
+      /** Offers in a window: the expected number by rating, up to a limit; more when you asked to be sold. */
+      offers: curveSchema,
+      max: z.int().min(1).max(6),
+      asked: z.number().min(1).max(5),
+      /** A transfer fee as a multiple of a year's pay, then times these by rating, by age and for each year left on the deal. */
+      fee: z.number().min(0.1).max(30),
+      value: curveSchema,
+      age: curveSchema,
+      yearsLeft: z.number().min(0).max(1),
+      /** The chance your club agrees to sell: at the fee over the value, and what a role as a reserve adds. A release clause that is met leaves it no say. */
+      consent: z.strictObject({ base: probability, slope: z.number().min(0).max(5), reserve: probability }),
+      /** The share of the fee the player gets as a signing-on payment (through the yearly ledger). */
+      signing: probability,
+      /** The wage a new club offers: a multiple of the market wage, by how much the club wants you. */
+      wage: z.strictObject({ min: z.number().min(0.3).max(3), max: z.number().min(0.3).max(3) }),
+      /** Letting your agent negotiate: the pay multiple when it works, the chance (by agent tier), and the chance the club walks away when it does not. */
+      push: z.strictObject({ win: z.number().min(1).max(2), chance: curveSchema, walk: probability }),
+      /** A release clause: the chance a new deal carries one, and its size as a multiple of the fee. */
+      clause: z.strictObject({ chance: probability, multiple: z.number().min(1).max(6) }),
+      /** Years a new deal runs. */
+      years: z.strictObject({ min: z.int().min(1).max(6), max: z.int().min(1).max(8) }),
+    }),
+    /** Where the intake (soccer's draft) happens in the year, for words only. */
+  }),
+  /** Batch 6: the national side and the international tournament. */
+  international: z.strictObject({
+    /** Players this old and over are called up, and the yearly chance by rating. */
+    minAge: z.int().min(16).max(30),
+    callUp: curveSchema,
+    /** The rungs of the pro rung and above that are considered. */
+    fameMin: z.number().min(0).max(100),
+    /** How a tournament goes: the chance your side wins a round by the side's strength (the player's rating over 100 sets it), and fame won. */
+    side: z.strictObject({ base: z.number().min(0).max(100), perRating: z.number().min(0).max(2) }),
+    fame: z.strictObject({ cap: z.number().min(0).max(10), round: z.number().min(0).max(10), title: z.number().min(0).max(30) }),
+    mood: z.number().min(0).max(30),
+  }),
   /** Batch 5: roles on a team, captaincy. */
   role: z.strictObject({
     /** How much of the games each role plays (a multiple). */
@@ -433,6 +573,18 @@ export const SPORTS_TRIGGERS = [
   'offseason',
   'number',
   'captain',
+  // Batch 6: soccer's academies, loans, transfer windows and leagues; the national side; derbies; teams far from home.
+  'academy',
+  'academyReleased',
+  'loan',
+  'window',
+  'goingUp',
+  'goingDown',
+  'callUp',
+  'tournament',
+  'derby',
+  'commute',
+  'abroad',
 ] as const;
 export type SportsTrigger = (typeof SPORTS_TRIGGERS)[number];
 
@@ -454,7 +606,7 @@ export const TRYOUT_LEVELS = ['youth', 'school', 'college', 'pro'] as const;
 const historyLine = z.strictObject({ importance: z.union([z.literal(1), z.literal(2), z.literal(3)]), variants: z.array(z.string().trim().min(1)).min(1) });
 
 /** The history lines the sports systems write (text/sports.yaml). Values: {sport}, {team}, {league}, {pick}, {round}, {position}. */
-export const SPORTS_HISTORY_KEYS = ['drafted', 'undrafted', 'signed', 'traded', 'released', 'title', 'allStar', 'retired', 'aged', 'madeTeam', 'cutTeam', 'scholarship', 'scholarshipEnded', 'captain', 'signedCamp'] as const;
+export const SPORTS_HISTORY_KEYS = ['drafted', 'undrafted', 'signed', 'traded', 'released', 'title', 'allStar', 'retired', 'aged', 'madeTeam', 'cutTeam', 'scholarship', 'scholarshipEnded', 'captain', 'signedCamp', 'loan', 'transfer', 'academy', 'academyReleased', 'goingUp', 'goingDown', 'capped', 'abroad'] as const;
 export type SportsHistoryKey = (typeof SPORTS_HISTORY_KEYS)[number];
 
 const lines = (min = 8) => z.array(z.string().trim().min(min)).min(2);
@@ -464,6 +616,8 @@ export const sportsTextSchema = z.strictObject({
   tiers: z.strictObject(Object.fromEntries(TEAM_TIERS.map((t) => [t, z.strictObject({ label: z.string().trim().min(2).max(40), blurb: z.string().trim().min(8).max(120), suffix: z.string().trim().max(12).default('') })])) as Record<TeamTier, z.ZodObject<{ label: z.ZodString; blurb: z.ZodString; suffix: z.ZodDefault<z.ZodString> }>>),
   /** What the list says after a tryout (values {team}, {tier}, {sport}): you made it, a fallback team took you, nobody did, and the pro camps. */
   tryout: z.strictObject({ made: lines(), fallback: lines(), cut: lines(), signed: lines(), camp: lines() }),
+  /** Batch 6: the names of the countries the game does not model, for {country}. */
+  countries: z.strictObject({ es: z.string().trim().min(2).max(30), it: z.string().trim().min(2).max(30), de: z.string().trim().min(2).max(30), fr: z.string().trim().min(2).max(30) }),
   /** A pro camp, in words. */
   camp: z.strictObject({ label: z.string().trim().min(2).max(40), blurb: z.string().trim().min(8).max(120) }),
   /** Where a prospect is projected to go, by `balance/sports.yaml draft.projection` ids. */
@@ -478,5 +632,5 @@ export const sportsTextSchema = z.strictObject({
 export type SportsText = z.infer<typeof sportsTextSchema>;
 
 /** The text values sports events can use: see src/engine/sports/text.ts. */
-export const SPORTS_TEXT_VALUES = ['sport', 'team', 'league', 'position', 'stage', 'trophy', 'pick', 'draftRound', 'draftTeam', 'record', 'statLine', 'opponent', 'injury', 'salary', 'season', 'number', 'tryout', 'tier', 'campus', 'share', 'scholarship', 'prospect'] as const;
+export const SPORTS_TEXT_VALUES = ['sport', 'team', 'league', 'position', 'stage', 'trophy', 'pick', 'draftRound', 'draftTeam', 'record', 'statLine', 'opponent', 'injury', 'salary', 'season', 'number', 'tryout', 'tier', 'campus', 'share', 'scholarship', 'prospect', 'teamNick', 'place', 'parent', 'host', 'suitor', 'derbyRival', 'nation', 'tournament', 'caps', 'clubCountry'] as const;
 export type SportsTextValue = (typeof SPORTS_TEXT_VALUES)[number];

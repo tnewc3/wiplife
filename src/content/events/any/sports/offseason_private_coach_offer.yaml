@@ -15,7 +15,7 @@ requires:
 weight: { base: 1 }
 followUpOnly: true
 cast:
-  coach: { kind: acquaintance, presence: city, createIfMissing: true, age: { min: 28, max: 60 } }
+  coach: { kind: acquaintance, presence: city, createIfMissing: true, age: { min: 28, max: 60 }, heritage: team }
 choices:
   - id: take_block
     label: Take the whole block

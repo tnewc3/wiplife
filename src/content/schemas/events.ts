@@ -412,6 +412,35 @@ export interface SportsCondition {
   combine?: Compare;
   /** You play for a club or travel team alongside your school team. */
   club?: boolean;
+  /** Batch 6: you are on loan at another club; you belong to a club's academy; the club promoted you from it this year; it let you go this year. */
+  loan?: boolean;
+  /** Your club has offered to send you on loan (you have not answered). */
+  loanOffered?: boolean;
+  academy?: boolean;
+  /** Your academy is at a club in a country the game does not model (you commute to it). */
+  academyAbroad?: boolean;
+  graduated?: boolean;
+  academyOut?: boolean;
+  /** Clubs have offers on the table (the transfer window). */
+  window?: boolean;
+  /** The league your club plays in (1 is the top league, 2 the second), and whether it moved between them this year. */
+  division?: (1 | 2)[];
+  moved?: ('up' | 'down')[];
+  /** The national side called you up this year; it is a year of the international tournament and you were called up. */
+  calledUp?: boolean;
+  tournament?: boolean;
+  /** Your club has a rival (same city or region). */
+  derby?: boolean;
+  /** Your club plays away from the city you live in: in a city the game does not model yet, or in another country (you commute). */
+  away?: ('city' | 'country')[];
+  /** You moved to another country for a club this year. */
+  abroad?: boolean;
+  /** Games for the national side so far. */
+  caps?: Compare;
+  /** Your contract has a release clause. */
+  clause?: boolean;
+  /** The tryout waiting to be played is for a club's academy (`academy`), or for one in another country (`abroad`). */
+  trial?: ('academy' | 'abroad')[];
 }
 
 /** Your money situation. Every field given must hold. */
@@ -1147,6 +1176,23 @@ export const conditionSchema: z.ZodType<Condition> = z.lazy(() =>
           prospect: z.boolean().optional(),
           combine: compareSchema.optional(),
           club: z.boolean().optional(),
+          loan: z.boolean().optional(),
+          loanOffered: z.boolean().optional(),
+          academy: z.boolean().optional(),
+          academyAbroad: z.boolean().optional(),
+          graduated: z.boolean().optional(),
+          academyOut: z.boolean().optional(),
+          window: z.boolean().optional(),
+          division: z.array(z.union([z.literal(1), z.literal(2)])).min(1).optional(),
+          moved: z.array(z.enum(['up', 'down'])).min(1).optional(),
+          calledUp: z.boolean().optional(),
+          tournament: z.boolean().optional(),
+          derby: z.boolean().optional(),
+          away: z.array(z.enum(['city', 'country'])).min(1).optional(),
+          abroad: z.boolean().optional(),
+          caps: compareSchema.optional(),
+          clause: z.boolean().optional(),
+          trial: z.array(z.enum(['academy', 'abroad'])).min(1).optional(),
         })
         .refine(atLeastOneField, 'needs at least one field'),
     }),
@@ -1394,6 +1440,11 @@ export const castSpecSchema = z
      * member a band event is about).
      */
     band: z.enum(['member', 'leader']).optional(),
+    /**
+     * Batch 6: a person made for this role takes the name pool of the country your team plays in (a club in a country the game
+     * does not model, or the country of its city) instead of your city's. Only for a role that may be created.
+     */
+    heritage: z.literal('team').optional(),
   })
   .refine((s) => (s.kind !== undefined && s.support === true) === false && (s.kind !== undefined || s.support === true || s.noticed !== undefined || s.business !== undefined), 'a role needs one of kind or support: true (or noticed, alone or with a kind; or business)')
   .refine((s) => s.deceased !== true || (s.presence === 'anywhere' && s.support !== true && !s.romantic && !s.admirer && !s.createIfMissing && s.newChance === undefined), 'a deceased role has presence anywhere and is only passed in')
@@ -1422,6 +1473,7 @@ export const castSpecSchema = z
     (s) => s.band === undefined || (s.kind === 'friend' && !s.crew && !s.crowd && !s.fan && !s.group && s.business === undefined && !s.support && !s.noticed && !s.romantic && !s.admirer && !s.createIfMissing && s.newChance === undefined),
     'a band role is a friend who is found, never created, and not a crew, crowd, fan, group, business, support, noticed, romantic or admirer role',
   )
+  .refine((s) => s.heritage === undefined || (s.createIfMissing === true || s.newChance !== undefined), 'a heritage role is made up for the team: it needs createIfMissing or newChance')
   .refine(
     (s) => s.fan === undefined || (s.kind === 'acquaintance' && !s.crew && !s.crowd && !s.support && !s.noticed && !s.romantic && !s.admirer && (s.fan !== 'stalker' || (!s.createIfMissing && s.newChance === undefined))),
     'a fan role is an acquaintance (a stalker is found, never created) and not a crew, crowd, support, noticed, romantic or admirer role: fans are never romantic',
@@ -1774,12 +1826,17 @@ export const effectSchema = z.discriminatedUnion('type', [
    * (the injury is treated, you sit), pain (you play through it), surgery
    * (treated, and the best chance of healing). suspend: a ban for a season.
    * retire: you leave your sport by `route`. position: you move to another
-   * position (the one in `position`).
+   * position (the one in `position`). Batch 6: loan: accept the loan on offer
+   * (`on: true`) or turn it down (`on: false`; the club may make you go).
+   * transfer: handle the window's offers: take the best one (`mode: best`),
+   * ask your agent to shop around for more (`shop`), or stay (`stay`).
+   * cap: you play for the national side. tournament and derby: the result
+   * (`win` or `lose`) of the international tournament or the derby.
    */
   z
     .strictObject({
       type: z.literal('sports'),
-      action: z.enum(['form', 'rating', 'series', 'sign', 'decline', 'extend', 'playout', 'trade', 'ask', 'refuse', 'injury', 'suspend', 'retire', 'position', 'tryout', 'role', 'number', 'captain', 'scholarship', 'combine', 'camp']),
+      action: z.enum(['form', 'rating', 'series', 'sign', 'decline', 'extend', 'playout', 'trade', 'ask', 'refuse', 'injury', 'suspend', 'retire', 'position', 'tryout', 'role', 'number', 'captain', 'scholarship', 'combine', 'camp', 'loan', 'transfer', 'cap', 'tournament', 'derby']),
       delta: z.int().min(-30).max(30).optional(),
       approach: z.enum(TRYOUT_APPROACHES).optional(),
       tier: tierSchema.optional(),
@@ -1791,13 +1848,15 @@ export const effectSchema = z.discriminatedUnion('type', [
       route: z.enum(SPORT_RETIRE_ROUTES).optional(),
       position: idSchema.optional(),
       kind: z.enum(SPORT_CONTRACT_KINDS).optional(),
+      mode: z.enum(['best', 'shop', 'stay']).optional(),
     })
     .refine((e) => (e.action === 'form' || e.action === 'rating' || e.action === 'role' || e.action === 'combine') === (e.delta !== undefined && e.delta !== 0), 'form, rating, role and combine need a non-zero delta (and only they have one)')
     .refine((e) => (e.action === 'tryout') === (e.approach !== undefined), 'tryout needs approach (and only it has one)')
     .refine((e) => (e.action === 'number') === (e.value !== undefined), 'number needs value (and only it has one)')
-    .refine((e) => (e.action === 'captain') === (e.on !== undefined), 'captain needs on (and only it has one)')
+    .refine((e) => (e.action === 'captain' || e.action === 'loan') === (e.on !== undefined), 'captain and loan need on (and only they have one)')
     .refine((e) => e.tier === undefined || e.action === 'scholarship', 'only scholarship takes tier (leave it out to turn the offers down)')
-    .refine((e) => (e.action === 'series') === (e.result !== undefined), 'series needs result (and only it has one)')
+    .refine((e) => (e.action === 'series' || e.action === 'tournament' || e.action === 'derby') === (e.result !== undefined), 'series, tournament and derby need result (and only they have one)')
+    .refine((e) => (e.action === 'transfer') === (e.mode !== undefined), 'transfer needs mode (and only it has one)')
     .refine((e) => (e.action === 'extend') === (e.terms !== undefined), 'extend needs terms (and only it has them)')
     .refine((e) => (e.action === 'ask' || e.action === 'injury') === (e.what !== undefined), 'ask and injury need what (and only they have one)')
     .refine((e) => e.action !== 'ask' || e.what === 'trade' || e.what === 'contract', 'ask is for a trade or a contract')

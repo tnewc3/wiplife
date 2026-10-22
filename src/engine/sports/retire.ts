@@ -90,6 +90,10 @@ export function retireSports(state: LifeState, route: SportRetireRoute | null, w
   s.run = null;
   s.draft = null;
   s.tryout = null;
+  s.academy = null;
+  s.loan = null;
+  s.loanOffer = null;
+  s.transfer = null;
   s.offers = [];
   s.captain = false;
   s.pain = false;

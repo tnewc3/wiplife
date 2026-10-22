@@ -1,0 +1,49 @@
+id: transfer_deadline_day
+title: Deadline day
+text: >-
+  On the last day of the window the phones are never quiet. A fax machine wakes up
+  somewhere. Your agent says there is something close with {suitor}, and your club says
+  there is not.
+tone: serious
+category: sportsdeal
+rarity: common
+recurring: true
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { sports: { active: true } }
+    - { sports: { level: [pro] } }
+    - { sports: { window: true } }
+weight: { base: 8 }
+cooldownYears: 2
+followUpOnly: true
+choices:
+  - id: sign_now
+    label: Say yes and get in the car
+    outcome:
+      text: >-
+        You make the medical with eleven minutes to spare. The paperwork reaches the right
+        office, the right way, with a minute to go, and somebody in the corridor cries.
+      effects:
+        - { type: sports, action: transfer, mode: best }
+        - { type: stat, key: stress, delta: 3 }
+  - id: wait
+    label: Wait for the deadline to pass
+    outcome:
+      text: >-
+        The deadline passes at midnight. You watch the clock with your club's staff, who are
+        very kind to you, and rather quiet.
+      effects:
+        - { type: sports, action: transfer, mode: stay }
+        - { type: stat, key: stress, delta: 1 }
+  - id: agent
+    label: Let your agent decide
+    visibleIf: { fame: { agent: { gte: 1 } } }
+    outcome:
+      text: >-
+        Your agent sits in a corridor with a phone against each ear. When it is over, you are
+        told only where to be in the morning.
+      effects:
+        - { type: sports, action: transfer, mode: shop }
+        - { type: fame, action: image, delta: 1 }

@@ -1,0 +1,60 @@
+id: national_tournament_group_stage
+title: The first game of {tournament}
+text: >-
+  {tournament} comes round again, and {nation} are in it. The anthem is louder than any
+  you have heard at a club ground, and a flag as big as a house moves in the stand behind
+  the bench. You have been waiting four years for this, or maybe all your life.
+tone: serious
+category: sports
+rarity: uncommon
+recurring: true
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { sports: { active: true } }
+    - { sports: { level: [pro] } }
+    - { sports: { tournament: true } }
+weight: { base: 10 }
+cooldownYears: 3
+followUpOnly: true
+choices:
+  - id: lead
+    label: Take the big moments
+    check:
+      base: 38
+      stats: [{ sports: rating, weight: 0.3 }, { key: confidence, weight: 0.15 }, { sports: form, weight: 0.1 }]
+      success:
+        text: >-
+          You start the move that wins it, and finish it the way you finished it in the garden. The
+          stand behind the bench moves like a sea, and your phone does not work for a day.
+        effects:
+          - { type: sports, action: tournament, result: win }
+          - { type: fame, action: fans, delta: 6 }
+          - { type: stat, key: happiness, delta: 6 }
+      failure:
+        text: >-
+          You take the big moments and the big moments take you. {nation} go out in the group,
+          and the dressing room is silent for an hour.
+        effects:
+          - { type: sports, action: tournament, result: lose }
+          - { type: stat, key: happiness, delta: -4 }
+  - id: team
+    label: Do the simple things well
+    check:
+      base: 40
+      stats: [{ sports: team, weight: 0.2 }, { sports: rating, weight: 0.15 }, { key: discipline, weight: 0.1 }]
+      success:
+        text: >-
+          Nobody remembers the simple passes, and the scoreline remembers them for you. {nation}
+          go through, and you are asleep before the bus has left the ground.
+        effects:
+          - { type: sports, action: tournament, result: win }
+          - { type: fame, action: image, delta: 2 }
+      failure:
+        text: >-
+          The simple things are not enough. {nation} lose to a side they should beat, and
+          you are left to explain it to the press, politely, for twenty minutes.
+        effects:
+          - { type: sports, action: tournament, result: lose }
+          - { type: stat, key: stress, delta: 3 }

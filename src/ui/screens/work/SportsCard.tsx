@@ -6,6 +6,7 @@ import { Button } from '../../components/Button';
 import { Card } from '../../components/Card';
 import { FAME_WORDS, FAN_MOOD_WORDS, SPORT_LEVEL_LABELS, SPORT_RETIRED_LABELS } from '../../labels';
 import { SportsScreen } from './SportsScreen';
+import { renameDeep, useTeamText } from '../../useTeamNames';
 
 const cap = (text: string) => text[0]!.toUpperCase() + text.slice(1);
 
@@ -17,7 +18,8 @@ const cap = (text: string) => text[0]!.toUpperCase() + text.slice(1);
  */
 export function SportsCard({ life }: { life: LifeState }) {
   const [open, setOpen] = useState(false);
-  const view = getSportsView(life, content);
+  const teamText = useTeamText();
+  const view = renameDeep(getSportsView(life, content), teamText);
   if (!view.show) return null;
   const path = view.path;
   return (

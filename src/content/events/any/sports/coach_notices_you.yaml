@@ -20,7 +20,7 @@ weight:
     - { if: { discovery: { talent: found } }, x: 1.5 }
 cooldownYears: 3
 cast:
-  coach: { kind: acquaintance, presence: city, createIfMissing: true, age: { min: 28, max: 60 } }
+  coach: { kind: acquaintance, presence: city, createIfMissing: true, age: { min: 28, max: 60 }, heritage: team }
 choices:
   - id: extra_work
     label: Stay, and do the drill until it's right

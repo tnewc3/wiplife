@@ -1,0 +1,51 @@
+id: commute_partner_calendar
+title: Match day is a whole day
+text: >-
+  {partner.name} stands at the front door with {partner.their} coat on. "I would like to see
+  one game at {place}," {partner.they} {partner:says|say}. "Not on the television. In person.
+  With you somewhere I can see you." The travel takes the whole day, there and back.
+tone: neutral
+category: sportslife
+rarity: common
+recurring: true
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { sports: { active: true } }
+    - { sports: { level: [pro] } }
+    - { sports: { away: [city, country] } }
+    - { home: { partner: true } }
+weight: { base: 9 }
+cooldownYears: 3
+followUpOnly: true
+cast:
+  partner: { kind: partner, presence: household }
+choices:
+  - id: take_them
+    label: Take {partner.them} to the next home game
+    outcome:
+      text: >-
+        {partner.They} {partner:sits|sit} in the family section and {partner:learns|learn} three new
+        songs by half-time. On the way home {partner.they} {partner:falls|fall} asleep on your shoulder.
+      effects:
+        - { type: relationship, role: partner, affection: 6 }
+        - { type: stat, key: happiness, delta: 3 }
+  - id: tickets
+    label: Get {partner.them} a seat with a view of the tunnel
+    outcome:
+      text: >-
+        The seats are good, and the day is long. {partner.They} {partner:waves|wave} at you before
+        kick-off and again at the final whistle, and you carry both waves with you.
+      effects:
+        - { type: famePay, cost: petty }
+        - { type: relationship, role: partner, affection: 5 }
+  - id: busy
+    label: Say the season is too hectic for visits
+    outcome:
+      text: >-
+        {partner.They} {partner:nods|nod}. The coat goes back on its hook, and the evening is a
+        little cooler than the weather.
+      effects:
+        - { type: relationship, role: partner, affection: -6 }
+        - { type: stat, key: stress, delta: 2 }

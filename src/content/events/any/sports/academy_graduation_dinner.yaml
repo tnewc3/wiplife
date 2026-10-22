@@ -1,0 +1,48 @@
+id: academy_graduation_dinner
+title: The night before the contract
+text: >-
+  Tomorrow you sign. Tonight the academy kit bag is on the chair by the door, and the
+  house is quieter than it has ever been. Something needs saying to somebody, and you
+  are not sure who.
+tone: light
+category: sports
+rarity: common
+lifeStages: [teen, youngAdult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { sports: { active: true } }
+    - { sports: { graduated: true } }
+weight: { base: 8 }
+followUpOnly: true
+cast:
+  relative: { kind: parent, presence: nearby, optional: true }
+choices:
+  - id: dinner
+    label: Take {relative.name} out to dinner
+    visibleIf: { role: relative }
+    outcome:
+      text: >-
+        {relative.They} {relative:says|say} very little and {relative:pays|pay} attention to
+        everything you say. The waiter brings the bill to you, and you are happy to take it.
+      effects:
+        - { type: famePay, cost: small }
+        - { type: relationship, role: relative, affection: 6 }
+        - { type: stat, key: happiness, delta: 4 }
+  - id: coach
+    label: Write the old youth coach a letter
+    outcome:
+      text: >-
+        It takes four drafts to get it down to the one sentence that matters. You post it
+        before you can tear it up.
+      effects:
+        - { type: stat, key: happiness, delta: 3 }
+  - id: alone
+    label: Go for a run, alone, in the dark
+    outcome:
+      text: >-
+        The streets belong to you. By the time you are home, the nerves have turned into
+        something closer to hunger.
+      effects:
+        - { type: stat, key: fitness, delta: 1 }
+        - { type: stat, key: stress, delta: -2 }

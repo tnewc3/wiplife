@@ -16,8 +16,9 @@ import { schoolName } from '../education';
 import { draftProjection } from './contract';
 import { liveOffers } from './scholarship';
 import { tryoutSentence } from './tryout';
-import { ordinal, positionOf, sportPath, thisSeason } from './query';
-import { proTeamsIn } from './team';
+import { ordinal, positionOf, sportPath, sportWords, thisSeason } from './query';
+import { homeLeagueTeams, teamById, rivalOf, type ProTeam } from './league';
+import { bestOffer } from './soccer';
 
 export { SPORTS_TEXT_VALUES };
 
@@ -58,20 +59,20 @@ export function sportsTextValues(state: LifeState, content: ContentBundle): Reco
       const nicks = def.sport.leagues[s.team.level].nicknames;
       return `the ${nicks[spin % nicks.length]!}`;
     }
-    const teams = proTeamsIn(def.sport, state.character.cityId, content).filter((t) => t.id !== s.team?.id);
+    const teams = homeLeagueTeams(state, def.id, state.character.cityId, content).filter((t) => t.id !== s.team?.id);
     return teams.length === 0 ? '' : teams[spin % teams.length]!.name;
   };
   const injury = def ? state.health.conditions.find((c) => def.sport.injuries.some((i) => i.id === c.conditionId)) : undefined;
   const draft = s.draft;
   return {
-    sport: def?.noun ?? '',
+    sport: def ? sportWords(state, def, content).noun : '',
     position: def ? (positionOf(def.sport, s.position)?.label.toLowerCase() ?? '') : '',
     team: s.team?.name ?? season?.team ?? '',
     league: def && s.team ? (s.team.level === 'pro' ? def.sport.leagues.pro.name : def.sport.leagues[s.team.level].name) : '',
     stage: def ? (def.sport.stages[Math.min(2, run?.won ?? 0)] ?? '') : '',
     trophy: def?.sport.title ?? '',
     pick: draft && draft.pick > 0 ? ordinal(draft.pick) : '',
-    draftTeam: def && draft?.teamId ? (def.sport.leagues.pro.teams.find((t) => t.id === draft.teamId)?.name ?? '') : '',
+    draftTeam: def && draft?.teamId ? (teamById(state, def.id, draft.teamId, content)?.name ?? '') : '',
     draftRound: draft && draft.round > 0 ? ordinal(draft.round) : '',
     record: season ? recordText(season) : '',
     statLine: season ? statLine(season, content) : '',
@@ -81,6 +82,7 @@ export function sportsTextValues(state: LifeState, content: ContentBundle): Reco
     season: season ? String(season.year) : '',
     number: s.number === null ? '' : String(s.number),
     ...batch5Values(state, content),
+    ...batch6Values(state, content),
   };
 }
 
@@ -100,5 +102,39 @@ function batch5Values(state: LifeState, content: ContentBundle): Record<string, 
     share: offer ? `${Math.round(offer.share * 100)}%` : '',
     scholarship: rules.word,
     prospect: projection ? (content.text.sports.projection[projection.likely]?.line ?? '') : '',
+  };
+}
+
+/** A team's short name: the one it was given, else its name without the city in front. */
+export function nicknameOf(t: ProTeam, content: ContentBundle): string {
+  if (t.nickname !== undefined) return t.nickname;
+  for (const place of [t.cityName, content.cities[t.city]?.name]) {
+    if (place !== undefined && t.name.startsWith(`${place} `) && t.name.length > place.length + 1) return t.name.slice(place.length + 1);
+  }
+  return t.name;
+}
+
+/** Batch 6: where the team plays, the clubs in the story (the parent, the host, a suitor, the rival), the national side and the country. */
+function batch6Values(state: LifeState, content: ContentBundle): Record<string, string> {
+  const s = state.sports;
+  const def = sportPath(content, s.sport ?? s.tryout?.sport ?? null);
+  const name = (id: string | null | undefined): string => (def && id ? (teamById(state, def.id, id, content)?.name ?? '') : '');
+  const mine = def && s.team?.id ? teamById(state, def.id, s.team.id, content) : undefined;
+  const offer = def ? bestOffer(state, content) : undefined;
+  const rival = def && mine ? rivalOf(state, def.id, mine, content) : undefined;
+  const parent = s.loan?.parentId ?? s.academy?.clubId ?? (s.draft?.academy === true ? s.draft.teamId : null) ?? s.contract?.teamId ?? null;
+  const countryId = s.team?.country ?? (s.team ? (content.cities[s.team.city]?.countryId ?? '') : '');
+  const country = (s.team?.country !== undefined ? content.text.sports.countries[s.team.country] : content.countries[countryId]?.name) ?? '';
+  return {
+    teamNick: mine ? nicknameOf(mine, content) : (s.team?.name ?? ''),
+    place: s.team?.place ?? (s.team ? (content.cities[s.team.city]?.name ?? '') : ''),
+    parent: name(parent),
+    host: name(s.loan?.hostId ?? s.loanOffer?.hostId),
+    suitor: name(offer?.clubId),
+    derbyRival: rival?.name ?? '',
+    nation: def?.sport.international.side ?? '',
+    tournament: def?.sport.international.tournament ?? '',
+    caps: String(s.totals.caps),
+    clubCountry: country,
   };
 }

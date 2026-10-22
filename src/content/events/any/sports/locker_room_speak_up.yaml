@@ -19,7 +19,7 @@ weight: { base: 10 }
 cooldownYears: 3
 followUpOnly: true
 cast:
-  mate: { kind: acquaintance, presence: city, createIfMissing: true }
+  mate: { kind: acquaintance, presence: city, createIfMissing: true, heritage: team }
 choices:
   - id: speak
     label: Say it, plainly and to the room

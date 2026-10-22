@@ -5,6 +5,7 @@ import { getEventCard, problemReport } from '../../engine/selectors';
 import type { LifeState } from '../../engine/types';
 import { useAppStore } from '../../store/appStore';
 import { ageLabel, choiceMoneyLabel, familyHelpLabel, housingChangeLabel, outcomeDebtLabel, outcomeDirtyLabel, outcomeMoneyLabel } from '../labels';
+import { useTeamText } from '../useTeamNames';
 import { Button } from './Button';
 import { YearRecapList } from './YearRecapList';
 
@@ -66,6 +67,7 @@ export function EventSheet({ life }: { life: LifeState }) {
   const choose = useAppStore((s) => s.chooseEvent);
   const next = useAppStore((s) => s.continueEvents);
   const headingRef = useRef<HTMLHeadingElement>(null);
+  const teamText = useTeamText();
 
   const card = sheet && !sheet.recap ? getEventCard(life, sheet.index, content) : null;
   const key = sheet ? (sheet.recap ? 'recap' : `${sheet.index}:${card?.resolved ? 'out' : 'in'}`) : null;
@@ -78,7 +80,7 @@ export function EventSheet({ life }: { life: LifeState }) {
   if (!sheet) return null;
 
   const accent = card ? TONE_ACCENT[card.tone] : 'bg-accent';
-  const title = sheet.recap ? `${sheet.recap.year} · ${ageLabel(sheet.recap.age)}` : (card?.title ?? '');
+  const title = sheet.recap ? `${sheet.recap.year} · ${ageLabel(sheet.recap.age)}` : teamText(card?.title ?? '');
 
   return (
     <div className="fixed inset-0 z-40 flex justify-center bg-scrim" role="dialog" aria-modal="true" aria-labelledby="event-title">
@@ -101,10 +103,10 @@ export function EventSheet({ life }: { life: LifeState }) {
               ) : (
                 card && (
                   <>
-                    <p className="leading-relaxed break-words [overflow-wrap:anywhere]">{card.text}</p>
+                    <p className="leading-relaxed break-words [overflow-wrap:anywhere]">{teamText(card.text)}</p>
                     {card.resolved && card.outcomeText && (
                       <p className="border-l-4 border-border pl-3 leading-relaxed break-words [overflow-wrap:anywhere]" data-testid="event-outcome">
-                        {card.outcomeText}
+                        {teamText(card.outcomeText)}
                       </p>
                     )}
                     {card.resolved && card.money && (
@@ -135,7 +137,7 @@ export function EventSheet({ life }: { life: LifeState }) {
                 onClick={() => void choose(card.instanceId, choice.id)}
               >
                 <span className="flex w-full flex-col">
-                  <span>{choice.label}</span>
+                  <span>{teamText(choice.label)}</span>
                   {(choice.money !== undefined || choice.familyHelp !== undefined || choice.rent !== undefined) && (
                     <span className="text-sm font-normal text-muted" data-testid="choice-money">
                       {choiceMoneyLabel(choice)}

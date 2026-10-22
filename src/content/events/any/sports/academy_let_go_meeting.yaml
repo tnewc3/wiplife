@@ -1,0 +1,53 @@
+id: academy_let_go_meeting
+title: The meeting you saw coming
+text: >-
+  The academy director does not ask you to sit down. The club has decided not to take
+  you into the first team, and the news comes in three calm sentences. Your locker will be
+  cleared by the weekend, and there is a coach in the corridor who cannot meet your eye.
+tone: serious
+category: sports
+rarity: common
+lifeStages: [teen, youngAdult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { sports: { active: true } }
+    - { sports: { academyOut: true } }
+weight: { base: 12 }
+followUpOnly: true
+choices:
+  - id: ask_around
+    label: Ask the coaches to ring round other clubs
+    check:
+      base: 40
+      stats: [{ key: sociability, weight: 0.2 }, { sports: rating, weight: 0.2 }]
+      success:
+        text: >-
+          Two calls become five. A club further down the pyramid wants a look, and you walk out
+          with something you did not have when you walked in.
+        effects:
+          - { type: fame, action: craft, delta: 2 }
+          - { type: stat, key: happiness, delta: 2 }
+      failure:
+        text: >-
+          The coaches try, and the answers are polite. Nobody is rude, and nobody has a place.
+        effects:
+          - { type: stat, key: stress, delta: 3 }
+  - id: stay_in_the_game
+    label: Keep playing wherever they will have you
+    outcome:
+      text: >-
+        You go back to the pitch behind the school, where the goalposts have no nets and the
+        game does not care what the club decided. It helps more than you expected.
+      effects:
+        - { type: sports, action: form, delta: 1 }
+        - { type: stat, key: happiness, delta: 1 }
+  - id: walk_away
+    label: Say it is over
+    outcome:
+      text: >-
+        You hand in the kit bag and keep the boots. The game goes on without you the next
+        weekend, which is a hard thing to watch from the other side of a fence.
+      effects:
+        - { type: sports, action: retire, route: normal }
+        - { type: stat, key: happiness, delta: -4 }

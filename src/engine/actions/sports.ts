@@ -13,12 +13,17 @@ import { inSports, mySport, sportPath } from '../sports/query';
 import { retireSports, routeBlock } from '../sports/retire';
 import { acceptBlock, acceptOffer, declineOffers, endScholarship } from '../sports/scholarship';
 import { optionFor, resolveTryout, startTryout, tryoutBlock } from '../sports/tryout';
+import { hasDivisions } from '../sports/league';
+import { takeLoan, takeTransfer, transferBlock } from '../sports/soccer';
+import { chance } from '../rng';
+import { clampInt } from '../random';
+import { setupChangeSchema, setupIssues, type SetupChange } from '../sports/setup';
 import { trainBlock, train } from '../sports/training';
 import type { LifeState } from '../types';
 import type { LifeActionRule } from './life';
 import { fittingResults, queueResult } from './result';
 
-export const SPORTS_ACTION_IDS = ['set_position', 'set_focus', 'ask_trade', 'ask_contract', 'cancel_ask', 'retire_sports', 'try_out', 'train', 'accept_scholarship', 'decline_scholarship', 'leave_team', 'leave_club'] as const;
+export const SPORTS_ACTION_IDS = ['set_position', 'set_focus', 'ask_trade', 'ask_contract', 'cancel_ask', 'retire_sports', 'try_out', 'train', 'accept_scholarship', 'decline_scholarship', 'leave_team', 'leave_club', 'ask_loan', 'take_loan', 'refuse_loan', 'accept_transfer', 'decline_transfers', 'sync_teams'] as const;
 export type SportsActionId = (typeof SPORTS_ACTION_IDS)[number];
 
 const field = (params: unknown, key: string): unknown => (typeof params === 'object' && params !== null ? (params as Record<string, unknown>)[key] : undefined);
@@ -115,6 +120,7 @@ export const SPORTS_ACTIONS: Record<SportsActionId, LifeActionRule> = {
     allowed: (state, _p, content) => inSports(state, content) && !state.sports.pro && state.sports.team !== null,
     apply: (state, _p, content) => {
       const def = mySport(state, content)!;
+      if (state.sports.team?.tier === 'academy') state.sports.academy = null;
       state.sports.team = null;
       state.sports.teamless = true;
       leaveSchoolTeam(state, def.id, content);
@@ -125,7 +131,67 @@ export const SPORTS_ACTIONS: Record<SportsActionId, LifeActionRule> = {
     parse: none,
     allowed: (state) => state.sports.club !== null,
     apply: (state) => {
+      if (state.sports.club?.tier === 'academy') state.sports.academy = null;
       state.sports.club = null;
+    },
+  },
+  // Batch 6: soccer's loans, the transfer window and a change of the life's teams.
+  ask_loan: {
+    parse: none,
+    allowed: (state, _p, content) => inSports(state, content) && hasDivisions(mySport(state, content)!.sport) && state.sports.pro && state.sports.contract !== null && state.sports.loan === null && state.sports.loanOffer === null && state.sports.ask === null,
+    apply: (state) => {
+      state.sports.ask = 'loan';
+    },
+  },
+  take_loan: {
+    parse: none,
+    allowed: (state, _p, content) => inSports(state, content) && state.sports.loanOffer !== null && state.sports.contract !== null,
+    apply: (state, _p, content) => void takeLoan(state, mySport(state, content)!, content),
+  },
+  refuse_loan: {
+    parse: none,
+    allowed: (state, _p, content) => inSports(state, content) && state.sports.loanOffer !== null,
+    apply: (state, _p, content) => {
+      const s = state.sports;
+      // The club that holds your deal decides: it may send you anyway.
+      if (chance(state.rng, content.balance.sports.soccer.loan.force)) {
+        takeLoan(state, mySport(state, content)!, content);
+        state.fame.mood = clampInt(state.fame.mood - content.balance.sports.soccer.loan.refusedMood, 0, 100);
+      } else s.loanOffer = null;
+    },
+  },
+  accept_transfer: {
+    parse: (params) => {
+      const offerId = field(params, 'offerId');
+      const push = field(params, 'push');
+      return only(params, ['offerId', 'push']) && typeof offerId === 'string' && offerId.length > 0 && offerId.length <= 20 && (push === undefined || typeof push === 'boolean') ? { offerId, ...(push === undefined ? {} : { push }) } : null;
+    },
+    allowed: (state, p, content) => inSports(state, content) && p.offerId !== undefined && transferBlock(state, p.offerId, content) === null && (p.push !== true || state.fame.agent !== null),
+    apply: (state, p, content) => void takeTransfer(state, mySport(state, content)!, p.offerId!, p.push === true, content, state.rng),
+  },
+  decline_transfers: {
+    parse: none,
+    allowed: (state) => state.sports.transfer !== null,
+    apply: (state) => {
+      state.sports.transfer = null;
+    },
+  },
+  // The teams of this life change (a moved team, a team added or removed): they take effect from next season.
+  sync_teams: {
+    parse: (params) => {
+      if (!only(params, ['teamChange'])) return null;
+      const parsed = setupChangeSchema.safeParse(field(params, 'teamChange'));
+      return parsed.success ? { teamChange: parsed.data } : null;
+    },
+    allowed: (state, p, content) => {
+      const c = p.teamChange;
+      if (!c) return false;
+      if (setupIssues({ ...state.league.setup, moved: c.moved, added: c.added }, content).length > 0) return false;
+      return !sameChange(c, { moved: state.league.pending?.moved ?? state.league.setup.moved, added: state.league.pending?.added ?? state.league.setup.added });
+    },
+    apply: (state, p) => {
+      const c = p.teamChange!;
+      state.league.pending = { applyYear: state.currentYear + 1, moved: { ...c.moved }, added: c.added.map((a) => ({ ...a })) };
     },
   },
   retire_sports: {
@@ -137,3 +203,9 @@ export const SPORTS_ACTIONS: Record<SportsActionId, LifeActionRule> = {
     apply: (state, p, content) => void retireSports(state, p.routeKey!, 'retired', content, state.rng),
   },
 };
+
+/** The same moves and the same added teams, in any order. */
+export function sameChange(a: SetupChange, b: SetupChange): boolean {
+  const key = (c: SetupChange): string => JSON.stringify([Object.entries(c.moved).sort(), [...c.added].sort((x, y) => (x.id < y.id ? -1 : 1))]);
+  return key(a) === key(b);
+}

@@ -1,0 +1,49 @@
+id: academy_first_team_offer
+title: A place in the first team
+text: >-
+  The academy director asks you into the office with the glass wall, and for once the news
+  is not about next week's fixture. {parent} wants to offer you a place in its first team.
+  The papers are already on the desk, and your name is spelled right on every page.
+tone: light
+category: sports
+rarity: common
+lifeStages: [teen, youngAdult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { sports: { active: true } }
+    - { sports: { graduated: true } }
+weight: { base: 12 }
+followUpOnly: true
+choices:
+  - id: sign
+    label: Sign for {parent}
+    outcome:
+      text: >-
+        You sign before the director has finished the sentence. The first-team squad is a corridor
+        away, and the corridor has never looked so long.
+      effects:
+        - { type: sports, action: sign }
+        - { type: stat, key: happiness, delta: 8 }
+        - { type: fame, action: fans, delta: 4 }
+  - id: agent
+    label: Let your agent read it first
+    visibleIf: { fame: { agent: { gte: 1 } } }
+    outcome:
+      text: >-
+        Your agent reads it twice, changes a line and nods. The director is not
+        surprised, and by evening you are a first-team player.
+      effects:
+        - { type: sports, action: sign }
+        - { type: fame, action: image, delta: 1 }
+        - { type: stat, key: happiness, delta: 6 }
+  - id: stay
+    label: Ask for one more year in the academy
+    visibleIf: { age: { lte: 20 } }
+    outcome:
+      text: >-
+        The director raises an eyebrow, then smiles. The offer will keep, and so will the
+        doubt about whether it will be there next year.
+      effects:
+        - { type: sports, action: decline }
+        - { type: stat, key: stress, delta: 3 }

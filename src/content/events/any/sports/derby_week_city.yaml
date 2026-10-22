@@ -1,0 +1,60 @@
+id: derby_week_city
+title: The game everybody circles
+text: >-
+  {team} meet {derbyRival} on Saturday, and the city has been counting down since August.
+  {neighbour.name} stops you in the street to explain, with real feeling, what is at stake.
+  You nod. You already knew. You have been losing sleep over it since the fixtures came out.
+tone: neutral
+category: sports
+rarity: common
+recurring: true
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { sports: { active: true } }
+    - { sports: { level: [pro] } }
+    - { sports: { derby: true } }
+weight: { base: 12 }
+cooldownYears: 2
+followUpOnly: true
+cast:
+  neighbour: { kind: acquaintance, presence: city, createIfMissing: true }
+choices:
+  - id: lead
+    label: Tell the dressing room it is just another game, and mean it
+    check:
+      base: 42
+      stats: [{ sports: rating, weight: 0.2 }, { key: confidence, weight: 0.15 }, { sports: team, weight: 0.1 }]
+      success:
+        text: >-
+          Your calm spreads down the bench. {team} win the game everybody circled, and {neighbour.name}
+          tells you about it for twenty minutes the next time you meet.
+        effects:
+          - { type: sports, action: derby, result: win }
+          - { type: relationship, role: neighbour, affection: 4 }
+      failure:
+        text: >-
+          Nobody believes you, including you. {team} lose to {derbyRival}, and the city hears about it
+          the whole next week.
+        effects:
+          - { type: sports, action: derby, result: lose }
+          - { type: stat, key: stress, delta: 3 }
+  - id: fans
+    label: Walk the fan zone the night before
+    outcome:
+      text: >-
+        You shake hands with people who will never forgive you if you lose. They send you home with
+        a scarf and a speech.
+      effects:
+        - { type: fame, action: fans, delta: 3 }
+        - { type: sports, action: form, delta: 1 }
+  - id: hide
+    label: Stay in, phone off
+    outcome:
+      text: >-
+        You eat dinner at the kitchen table and go to bed early. The game, when it comes,
+        feels as if it were played by somebody else.
+      effects:
+        - { type: stat, key: stress, delta: -1 }
+        - { type: sports, action: form, delta: -1 }

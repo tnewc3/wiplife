@@ -549,7 +549,46 @@ export const migrations: readonly Migration[] = [
       'team joined by a life with no career starts one when the next year begins. Nobody loses a career. Heir replay snapshots are upgraded the same way.',
     migrate: upgradeSportsFiveData,
   },
+  {
+    from: 33,
+    description:
+      'Batch 6: sports II. A life gains the teams it plays with (the game\'s own: no renames, moves or added teams) and each league moved between ' +
+      '(none). A life\'s sports record gains the academy, loan and loan offer (none), the transfer window (none), the year the national side ' +
+      'last called you up (never), the year an academy let you go (never), the year you moved abroad for a club (never), your club\'s last move ' +
+      'between leagues (none), and new totals (0). A soccer club on record is in the top league. Heir replay snapshots are upgraded the same way.',
+    migrate: upgradeSportsSixData,
+  },
 ];
+
+function upgradeSportsSixData(data: unknown): unknown {
+  if (!isRecord(data)) return data;
+  const content = compiled as ContentBundle;
+  const inputLog = Array.isArray(data.inputLog) ? data.inputLog.map((entry: unknown) => {
+    if (!isRecord(entry) || !isRecord(entry.payload) || !isRecord(entry.payload.snapshot)) return entry;
+    return { ...entry, payload: { ...entry.payload, snapshot: upgradeSportsSixData(entry.payload.snapshot) } };
+  }) : data.inputLog;
+  const league = data.league ?? { setup: { renamed: {}, moved: {}, added: [] }, pending: null, tiers: {}, tierYear: 0 };
+  if (!isRecord(data.sports)) return { ...data, inputLog, league };
+  const old = data.sports;
+  const totals = isRecord(old.totals) ? old.totals : {};
+  const sportId = typeof old.sport === 'string' ? old.sport : '';
+  const twoLeagues = content.famePaths[sportId]?.sport?.leagues.pro.tiers !== undefined;
+  const team = isRecord(old.team) && old.team.level === 'pro' && twoLeagues && old.team.division === undefined ? { ...old.team, division: 1 } : old.team;
+  const sports = {
+    ...old,
+    team,
+    totals: { loans: 0, transfers: 0, fees: 0, graduates: 0, abroad: 0, caps: 0, tournaments: 0, tournamentTitles: 0, goneUp: 0, goneDown: 0, ...totals },
+    academy: null,
+    loan: null,
+    loanOffer: null,
+    transfer: null,
+    calledUp: 0,
+    academyOut: 0,
+    abroadYear: 0,
+    moved: null,
+  };
+  return { ...data, inputLog, league, sports };
+}
 
 function upgradeSportsFiveData(data: unknown): unknown {
   if (!isRecord(data)) return data;

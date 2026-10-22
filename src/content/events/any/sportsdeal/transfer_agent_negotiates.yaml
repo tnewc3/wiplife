@@ -1,0 +1,48 @@
+id: transfer_agent_negotiates
+title: The agent's number
+text: >-
+  Your agent arrives with a folder and a smile. {suitor} want you, the clubs have agreed terms
+  between them, and the only open question is what you are worth to them. "There's a number," your agent
+  says. "Let me get you a better one."
+tone: neutral
+category: sportsdeal
+rarity: uncommon
+recurring: true
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { fame: { agent: { gte: 1 } } }
+    - { sports: { active: true } }
+    - { sports: { level: [pro] } }
+    - { sports: { window: true } }
+weight: { base: 9 }
+cooldownYears: 2
+followUpOnly: true
+choices:
+  - id: push
+    label: Let your agent push for more
+    outcome:
+      text: >-
+        The meeting runs for two days. Your agent comes out holding a better contract than the one
+        that went in, or very nearly.
+      effects:
+        - { type: sports, action: transfer, mode: shop }
+        - { type: fame, action: image, delta: 1 }
+  - id: take
+    label: Take the first number
+    outcome:
+      text: >-
+        You sign what is on the table. Your agent sighs, forgives you, and puts the folder
+        away.
+      effects:
+        - { type: sports, action: transfer, mode: best }
+  - id: hold
+    label: Say you will think about it
+    outcome:
+      text: >-
+        The answer is no, for now. The clubs wait, and so does the part of you that wants to
+        be asked a second time.
+      effects:
+        - { type: sports, action: transfer, mode: stay }
+        - { type: stat, key: stress, delta: 1 }

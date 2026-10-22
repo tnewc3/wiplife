@@ -1,0 +1,49 @@
+id: abroad_first_week_club
+title: The first week in {clubCountry}
+text: >-
+  The club found you a flat, a driver for the first fortnight and a permit that is a single sheet
+  of paper in a plastic wallet. The language on the street is not the one you grew up in. The
+  fridge is empty. The training ground is twelve minutes away, and your legs know the way
+  already.
+tone: neutral
+category: sports
+rarity: common
+recurring: true
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { sports: { active: true } }
+    - { sports: { level: [pro] } }
+    - { sports: { abroad: true } }
+weight: { base: 12 }
+cooldownYears: 2
+followUpOnly: true
+choices:
+  - id: explore
+    label: Walk the neighbourhood until you know it
+    outcome:
+      text: >-
+        You find a bakery, a park with a goalmouth worn into the grass and a small shop that
+        stocks the tea you like. By Sunday, you have a route.
+      effects:
+        - { type: stat, key: happiness, delta: 3 }
+        - { type: stat, key: stress, delta: -1 }
+  - id: call_home
+    label: Call home every evening
+    outcome:
+      text: >-
+        The calls are short and warm and end with "tell me about the weather". You sleep better
+        for them, and so do the people on the other end.
+      effects:
+        - { type: stat, key: stress, delta: -2 }
+        - { type: stat, key: happiness, delta: 1 }
+  - id: lessons
+    label: Ask the club for language lessons
+    outcome:
+      text: >-
+        The lessons start on Thursday in a room off the canteen. By the end of the month you can
+        order lunch and understand the coach, at least when the coach is slow.
+      effects:
+        - { type: stat, key: smarts, delta: 1 }
+        - { type: sports, action: form, delta: 1 }

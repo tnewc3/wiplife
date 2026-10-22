@@ -1,0 +1,49 @@
+id: derby_regional_trip
+title: The away end at {derbyRival}
+text: >-
+  The coach to {derbyRival} has police on both sides, and the road has been cleared for it. Every
+  window you pass shows a scarf of the wrong colour. The home end knows your name before
+  you step off the bus, and the words are not warm.
+tone: neutral
+category: sports
+rarity: common
+recurring: true
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { sports: { active: true } }
+    - { sports: { level: [pro] } }
+    - { sports: { derby: true } }
+weight: { base: 10 }
+cooldownYears: 2
+followUpOnly: true
+choices:
+  - id: earplugs
+    label: Pull your hood up and think about the first pass
+    check:
+      base: 40
+      stats: [{ key: discipline, weight: 0.2 }, { sports: rating, weight: 0.2 }]
+      success:
+        text: >-
+          You hear nothing but your own breathing. {team} take a point away from the loudest ground in
+          the league, and you are quietly pleased with yourself.
+        effects:
+          - { type: sports, action: derby, result: win }
+          - { type: fame, action: image, delta: 1 }
+      failure:
+        text: >-
+          The noise gets in under the hood. You give the ball away in the first minute and never quite
+          recover.
+        effects:
+          - { type: sports, action: derby, result: lose }
+          - { type: stat, key: stress, delta: 3 }
+  - id: wave
+    label: Wave to the home end
+    outcome:
+      text: >-
+        A few people laugh and a few boo. A child in the front row waves back, and is told off
+        by someone, and waves again.
+      effects:
+        - { type: fame, action: fans, delta: 2 }
+        - { type: stat, key: happiness, delta: 1 }
