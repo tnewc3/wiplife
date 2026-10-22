@@ -86,12 +86,14 @@ sport:
     - { id: "torn_ligament", weight: 16, min: 40, max: 75 }
     - { id: "broken_bone", weight: 8, min: 30, max: 55 }
     - { id: "concussion", weight: 4, min: 20, max: 45 }
+  international: { side: "the national nine", tournament: "the Pennant Classic", cycle: 4 }
   leagues:
     youth: { name: "The Little League", nicknames: ["Orioles", "Cubs", "Sluggers", "Aces", "Bobcats"] }
     school: { name: "The Scholastic Baseball Conference", nicknames: ["Raiders", "Bears", "Cougars", "Eagles", "Generals", "Pirates"] }
     college: { name: "The Collegiate Baseball Conference", nicknames: ["Skippers", "Bulls", "Diamondbacks", "Barons", "Chiefs", "Lancers"] }
     pro:
       name: "The Grand Diamond League"
+      markets: [[us, ca]]
       teams:
         - { id: "chicago_steelworkers", name: "Chicago Steelworkers", city: "chicago", quality: 61 }
         - { id: "chicago_gaslights", name: "Chicago Gaslights", city: "chicago", quality: 44 }
@@ -123,3 +125,17 @@ sport:
         - { id: "guadalajara_rosales_nine", name: "Guadalajara Rosales Nine", city: "guadalajara", quality: 41 }
         - { id: "monterrey_sierra_sluggers", name: "Monterrey Sierra Sluggers", city: "monterrey", quality: 62 }
         - { id: "monterrey_fundidores", name: "Monterrey Fundidores", city: "monterrey", quality: 46 }
+        - { id: "boston_common_greens", name: "Boston Common Greens", cityName: "Boston", nearestCityId: "nyc", futureCity: true, quality: 59 }
+        - { id: "philadelphia_rowhouse_nine", name: "Philadelphia Rowhouse Nine", cityName: "Philadelphia", nearestCityId: "nyc", futureCity: true, quality: 49 }
+        - { id: "atlanta_magnolia_sluggers", name: "Atlanta Magnolia Sluggers", cityName: "Atlanta", nearestCityId: "chicago", futureCity: true, quality: 56 }
+        - { id: "dallas_lone_star_swingers", name: "Dallas Lone Star Swingers", cityName: "Dallas", nearestCityId: "houston", futureCity: true, quality: 58 }
+        - { id: "denver_altitude_aces", name: "Denver Altitude Aces", cityName: "Denver", nearestCityId: "los_angeles", futureCity: true, quality: 52 }
+        - { id: "phoenix_cactus_nine", name: "Phoenix Cactus Nine", cityName: "Phoenix", nearestCityId: "los_angeles", futureCity: true, quality: 48 }
+        - { id: "seattle_sound_whalers", name: "Seattle Sound Whalers", cityName: "Seattle", nearestCityId: "los_angeles", futureCity: true, quality: 57 }
+        - { id: "detroit_gearhead_nine", name: "Detroit Gearhead Nine", cityName: "Detroit", nearestCityId: "chicago", futureCity: true, quality: 45 }
+        - { id: "minneapolis_northwoods_nine", name: "Minneapolis Northwoods Nine", cityName: "Minneapolis", nearestCityId: "chicago", futureCity: true, quality: 51 }
+        - { id: "san_francisco_cable_car_sluggers", name: "San Francisco Cable Car Sluggers", cityName: "San Francisco", nearestCityId: "los_angeles", futureCity: true, quality: 61 }
+        - { id: "st_louis_riverboat_nine", name: "St. Louis Riverboat Nine", cityName: "St. Louis", nearestCityId: "chicago", futureCity: true, quality: 54 }
+        - { id: "miami_palmetto_pelicans", name: "Miami Palmetto Pelicans", cityName: "Miami", nearestCityId: "houston", futureCity: true, quality: 50 }
+        - { id: "ottawa_canal_nine", name: "Ottawa Canal Nine", cityName: "Ottawa", nearestCityId: "toronto", futureCity: true, quality: 44 }
+        - { id: "calgary_foothills_nine", name: "Calgary Foothills Nine", cityName: "Calgary", nearestCityId: "vancouver", futureCity: true, quality: 47 }

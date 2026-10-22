@@ -5,6 +5,7 @@
  */
 import { z } from 'zod';
 import { countryIdSchema, genderCategorySchema, idSchema, type ContentBundle } from '../../content/schemas';
+import { setupIssues, teamSetupSchema } from '../sports/setup';
 
 const codePoints = (s: string) => [...s].length;
 
@@ -120,12 +121,15 @@ export const createLifeOptionsSchema = z.discriminatedUnion('mode', [
     birthYear: z.int().min(1800).max(3000),
     /** W4a: start in this country (left out: any, by balance/countries.yaml startWeights). */
     countryId: countryIdSchema.optional(),
+    /** Batch 6: the player's team settings, copied into the life (left out: the game's own teams). */
+    teamSetup: teamSetupSchema.optional(),
   }),
   z.strictObject({
     mode: z.literal('custom'),
     seed: z.string().min(1).max(64),
     birthYear: z.int().min(1800).max(3000),
     custom: customLifeInputSchema,
+    teamSetup: teamSetupSchema.optional(),
   }),
 ]);
 
@@ -159,6 +163,10 @@ export function parseCreateLifeOptions(input: unknown, content: ContentBundle): 
     throw new InvalidInputError(result.error.issues.map((i) => ({ path: i.path.join('.'), message: i.message })));
   }
   const options = result.data;
+  if (options.teamSetup !== undefined) {
+    const issues = setupIssues(options.teamSetup, content);
+    if (issues.length > 0) throw new InvalidInputError(issues.map((i) => ({ path: `teamSetup.${i.path}`, message: i.message })));
+  }
   if (options.mode === 'random' && options.countryId !== undefined) {
     const country = content.countries[options.countryId];
     if (!country || country.retired || Object.values(content.cities).every((c) => c.countryId !== options.countryId || c.retired)) {

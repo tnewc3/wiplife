@@ -3,6 +3,7 @@ import type { MigrationState } from './migration/types';
 import type { CountryId } from '../content/schemas';
 import type { LanguageSkill } from '../content/schemas/languages';
 import type { LanguageLearning } from './languages';
+import type { AddedTeam, TeamSetup } from './sports/setup';
 /**
  * Saved game state (docs/technical.md, section N). Everything here is plain
  * JSON: no classes, no Dates, no functions. Money is whole dollars; stats are
@@ -1257,6 +1258,8 @@ export interface LifeState {
   fame: FameState;
   /** E6c: your sports career: sport, position, team, contract, seasons, injuries and the playoff run under way (the ladder, fame and fans are in `fame`). */
   sports: SportsState;
+  /** Batch 6: the teams this life plays with (a snapshot of the player's team settings), and soccer's leagues. */
+  league: LeagueState;
   /** L1: later life: care you need, a foreseen death and your final wishes, and the amends you have made. */
   later: LaterState;
   /** W2: belonging: your faith and values, the groups of your city and the ones you belong to. */
@@ -1938,6 +1941,14 @@ export interface SportsTeam {
   quality: number;
   /** Batch 5: the kind of amateur team it is (a pro team has none). */
   tier?: 'rec' | 'club' | 'travel' | 'academy' | 'jv' | 'varsity' | 'community' | 'state' | 'elite';
+  /** Batch 6: where the team plays, in words, when that is not the city you live in (a city or a country the game does not model yet). */
+  place?: string;
+  /** Batch 6: how far from home the team plays: in a city nearby that the game does not model, or in another country. You live in the nearest modeled city. */
+  away?: 'city' | 'country';
+  /** Batch 6: the league a soccer club plays in (1 is the top league). */
+  division?: 1 | 2;
+  /** Batch 6: the country a club plays in when the game does not model it. */
+  country?: 'es' | 'it' | 'de' | 'fr';
 }
 
 export interface SportsContract {
@@ -1951,6 +1962,8 @@ export interface SportsContract {
   option: 'none' | 'team' | 'player';
   /** Batch 5: the most a year of play can add in incentives (paid by how well you played; 0 or missing for none). */
   incentive?: number;
+  /** Batch 6 (soccer): the sum a club can pay to take you without your club's say (missing for none). */
+  release?: number;
 }
 
 /** E6c: one season as it went: the team, your rating and numbers, the record and how the playoffs ended. */
@@ -1975,6 +1988,9 @@ export interface SportsSeason {
   salary: number;
   allStar: boolean;
   injury?: Id;
+  /** Batch 6: the league the club played in (soccer's two leagues), and whether you played the season on loan. */
+  division?: 1 | 2;
+  loan?: boolean;
 }
 
 /** E6c: a playoff run in progress: `won` series won of three; `alive` until you lose one. */
@@ -1993,6 +2009,8 @@ export interface SportsDraft {
   pick: number;
   round: number;
   teamId: Id | null;
+  /** Batch 6: the offer is your academy's first-team contract (a graduate), not a draft pick. */
+  academy?: true;
 }
 
 export interface SportsTotals {
@@ -2020,6 +2038,17 @@ export interface SportsTotals {
   trainedGym: number;
   trainedCoach: number;
   signedAfterUndrafted: number;
+  /** Batch 6: loans taken, transfers made, the fees those moved (base units; the fee is the clubs', your cut is paid through the ledger), academy graduates, moves to another country, caps for the national side, tournaments played and won, and the league moves of your clubs. */
+  loans: number;
+  transfers: number;
+  fees: number;
+  graduates: number;
+  abroad: number;
+  caps: number;
+  tournaments: number;
+  tournamentTitles: number;
+  goneUp: number;
+  goneDown: number;
 }
 
 /** Batch 5: a tryout you have chosen and are about to play (the scrimmage is an event; its choice decides how you play it). */
@@ -2074,6 +2103,36 @@ export interface SportsScholarship {
   warned: number;
 }
 
+/** Batch 6: a club's offer in the transfer window. */
+export interface TransferOffer {
+  id: string;
+  clubId: Id;
+  /** The fee between the clubs, whole base dollars (not yours: your share is paid as a signing-on payment). */
+  fee: number;
+  /** The yearly wage on offer, whole base dollars. */
+  wage: number;
+  years: number;
+  /** The release clause the new deal would carry (0 for none). */
+  clause: number;
+}
+
+/** Batch 6: the academy of a club you belong to. */
+export interface SportsAcademy {
+  clubId: Id;
+  since: number;
+  /** The club is in a country the game does not model, or another country than yours (a trial abroad). */
+  abroad: boolean;
+}
+
+/** Batch 6: a season at another club: the club that holds your contract (`parentId`) decides. */
+export interface SportsLoan {
+  parentId: Id;
+  hostId: Id;
+  since: number;
+  /** The last year of the loan. */
+  until: number;
+}
+
 export interface SportsState {
   /** The sport (a fame path) you play, or last played. */
   sport: Id | null;
@@ -2091,8 +2150,8 @@ export interface SportsState {
   pain: boolean;
   /** You rested an injury this year. */
   rest: boolean;
-  /** You asked for a trade or a new deal through your agent. */
-  ask: 'trade' | 'contract' | null;
+  /** You asked for a trade (a transfer, in soccer), a new deal or (soccer) a loan through your agent or your club. */
+  ask: 'trade' | 'contract' | 'loan' | null;
   /** You are playing out your contract to test free agency. */
   playOut: boolean;
   seasons: SportsSeason[];
@@ -2127,6 +2186,27 @@ export interface SportsState {
   /** Your jersey number (null until you pick one) and whether you are the captain. */
   number: number | null;
   captain: boolean;
+  /** Batch 6 (soccer): the academy you belong to, the loan you are on, the transfer window's offers, and the year the national side last called you up (0 for never). */
+  academy: SportsAcademy | null;
+  loan: SportsLoan | null;
+  /** Your club wants to send you on loan to this club (you have not answered). */
+  loanOffer: { hostId: Id; year: number } | null;
+  transfer: { year: number; offers: TransferOffer[] } | null;
+  calledUp: number;
+  /** The year an academy let you go (0 for never). */
+  academyOut: number;
+  /** The year you moved to another country for a club (0 for never), and the year (and way) your club last moved between leagues. */
+  abroadYear: number;
+  moved: { year: number; dir: 'up' | 'down' } | null;
+}
+
+/** Batch 6: the teams the life plays with. `setup` is the snapshot of the player's team settings the life began with (renames are in it for good); `pending` is a change taken up from `applyYear`; `tiers` holds the league of each soccer club that is not in the one it started in. */
+export interface LeagueState {
+  setup: TeamSetup;
+  pending: { applyYear: number; moved: Record<Id, Id>; added: AddedTeam[] } | null;
+  tiers: Record<Id, 1 | 2>;
+  /** The last year the leagues were settled (clubs promoted and relegated). */
+  tierYear: number;
 }
 
 /** T1: a social group at your school (a definition in src/content/cliques, made real for one school). */

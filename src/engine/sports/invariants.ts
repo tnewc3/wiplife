@@ -8,6 +8,7 @@
 import type { ContentBundle } from '../../content/schemas';
 import type { LifeState } from '../types';
 import { levelOfRung, sportPath } from './query';
+import { divisionOf, hasDivisions, teamById } from './league';
 
 export function sportsFailures(state: LifeState, content: ContentBundle): string[] {
   const failures: string[] = [];
@@ -21,9 +22,9 @@ export function sportsFailures(state: LifeState, content: ContentBundle): string
   if (def) {
     if (s.position !== null && !def.sport.positions.some((p) => p.id === s.position)) fail(`sports: ${def.id} has no position "${String(s.position)}"`);
     if (s.team && !content.cities[s.team.city]) fail(`sports: a team in unknown city "${s.team.city}"`);
-    if (s.team?.level === 'pro' && !def.sport.leagues.pro.teams.some((t) => t.id === s.team!.id)) fail(`sports: unknown pro team "${String(s.team.id)}"`);
-    if (s.contract && !def.sport.leagues.pro.teams.some((t) => t.id === s.contract!.teamId)) fail(`sports: a contract with unknown team "${s.contract.teamId}"`);
-    if (s.contract && s.team && s.team.id !== s.contract.teamId) fail('sports: you are under contract with one team and play for another');
+    if (s.team?.level === 'pro' && teamById(state, def.id, s.team.id, content) === undefined) fail(`sports: unknown pro team "${String(s.team.id)}"`);
+    if (s.contract && teamById(state, def.id, s.contract.teamId, content) === undefined) fail(`sports: a contract with unknown team "${s.contract.teamId}"`);
+    if (s.contract && s.team && s.team.id !== s.contract.teamId && s.loan === null) fail('sports: you are under contract with one team and play for another');
   }
   if (s.contract) {
     if (!s.pro) fail('sports: a contract without being a pro');
@@ -64,5 +65,35 @@ export function sportsFailures(state: LifeState, content: ContentBundle): string
   const playing = f.active && def !== undefined && f.main === def.id && s.retired === undefined;
   if (playing && s.team?.level === 'school' && age < adultAge && !Object.values(content.activities).some((a) => a.sport === s.sport && state.teen.activities.some((x) => x.id === a.id))) fail('sports: on a school team that is not in your teams and clubs');
   if (s.training.team + s.training.gym + s.training.coach < 0) fail('sports: training sessions below zero');
+
+  // Batch 6: leagues, loans, transfers, academies and moves to another country.
+  if (def) {
+    if (s.loan) {
+      if (!s.contract) fail('sports: on loan without a contract');
+      else if (s.loan.parentId !== s.contract.teamId) fail('sports: a loan from a club that does not hold your contract');
+      if (s.team?.id !== s.loan.hostId) fail('sports: on loan, but not playing for the club you are loaned to');
+      if (s.loan.until < s.loan.since) fail('sports: a loan that ends before it begins');
+      if (teamById(state, def.id, s.loan.hostId, content) === undefined) fail('sports: loaned to an unknown club');
+    }
+    if (s.loanOffer && (!s.contract || s.loan)) fail('sports: a loan offered to someone without a deal, or already on loan');
+    if (s.transfer) {
+      if (!s.contract) fail('sports: transfer offers without a contract');
+      for (const o of s.transfer.offers) {
+        if (teamById(state, def.id, o.clubId, content) === undefined) fail(`sports: a transfer offer from unknown club "${o.clubId}"`);
+        if (!Number.isSafeInteger(o.fee) || o.fee < 0 || !Number.isSafeInteger(o.wage) || o.wage < 0 || o.years < 1) fail('sports: a malformed transfer offer');
+      }
+    }
+    if (s.academy) {
+      if (teamById(state, def.id, s.academy.clubId, content) === undefined) fail('sports: an academy of an unknown club');
+      if (s.pro) fail('sports: in an academy and a pro');
+      if (def.sport.academy === undefined) fail('sports: an academy in a sport without them');
+    }
+    if (s.team?.level === 'pro' && hasDivisions(def.sport) && s.team.id !== null) {
+      const t = teamById(state, def.id, s.team.id, content);
+      if (t && s.team.division !== divisionOf(state, t)) fail('sports: the record of your club\'s league is out of date');
+    }
+  }
+  if (s.academyOut > state.currentYear || s.abroadYear > state.currentYear || s.calledUp > state.currentYear) fail('sports: a record from the future');
+  for (const [id, div] of Object.entries(state.league.tiers)) if (div !== 1 && div !== 2) fail(`league: team "${id}" in league ${String(div)}`);
   return failures;
 }

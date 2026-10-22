@@ -75,7 +75,7 @@ sport:
   title: "the cup"
   proRung: 4
   ageOut: [14, 18, 27]
-  draft: { name: "the academy intake", age: 18, force: 21, rounds: 3 }
+  draft: { name: "the academy intake", age: 18, force: 21, rounds: 3, order: strongest }
   ageCurve: [{ at: 8, x: -6 }, { at: 12, x: -4 }, { at: 14, x: -3 }, { at: 16, x: -2 }, { at: 18, x: -1 }, { at: 21, x: 0 }, { at: 23, x: 1 }, { at: 26, x: 3 }, { at: 29, x: 3 }, { at: 31, x: 1 }, { at: 33, x: -5 }, { at: 35, x: -11 }, { at: 37, x: -18 }, { at: 40, x: -28 }]
   hazard: 0.9
   injuries:
@@ -84,12 +84,17 @@ sport:
     - { id: "stress_fracture", weight: 14, min: 30, max: 55 }
     - { id: "concussion", weight: 8, min: 20, max: 50 }
     - { id: "broken_bone", weight: 8, min: 30, max: 55 }
+  countryWord: soccerWord
+  international: { side: "the national side", tournament: "the Concord Cup", cycle: 4 }
+  academy: { minAge: 8, maxAge: 16, abroadMinAge: 12 }
   leagues:
     youth: { name: "The Community Soccer League", nicknames: ["Rovers", "Strikers", "United", "Athletic", "Juniors"] }
     school: { name: "The Scholastic Soccer Conference", nicknames: ["Lions", "Hawks", "Thistles", "Foxes", "Ospreys", "Rangers"] }
     college: { name: "The Collegiate Soccer Conference", nicknames: ["Mariners", "Stags", "Cardinals", "Herons", "Colonels", "Pilgrims"] }
     pro:
       name: "The Premier Soccer Federation"
+      markets: [[us, ca, mx, uk, es, it, de, fr]]
+      tiers: ["The Premier Soccer Federation", "The Federation Second Division"]
       teams:
         - { id: "chicago_lakefront_fc", name: "Chicago Lakefront FC", city: "chicago", quality: 60 }
         - { id: "chicago_union_yard_sc", name: "Chicago Union Yard SC", city: "chicago", quality: 45 }
@@ -121,3 +126,111 @@ sport:
         - { id: "guadalajara_minerva_sc", name: "Guadalajara Minerva SC", city: "guadalajara", quality: 44 }
         - { id: "monterrey_cerro_azul_fc", name: "Monterrey Cerro Azul FC", city: "monterrey", quality: 66 }
         - { id: "monterrey_fundidora_sc", name: "Monterrey Fundidora SC", city: "monterrey", quality: 46 }
+        - { id: "boston_lakeside_fc", name: "Boston Lakeside FC", cityName: "Boston", nearestCityId: "nyc", futureCity: true, tier: 1, quality: 58 }
+        - { id: "philadelphia_union_square_sc", name: "Philadelphia Union Square SC", cityName: "Philadelphia", nearestCityId: "nyc", futureCity: true, tier: 1, quality: 47 }
+        - { id: "atlanta_founders_united", name: "Atlanta Founders United", cityName: "Atlanta", nearestCityId: "chicago", futureCity: true, tier: 1, quality: 52 }
+        - { id: "seattle_riverbend_athletic", name: "Seattle Riverbend Athletic", cityName: "Seattle", nearestCityId: "los_angeles", futureCity: true, tier: 1, quality: 63 }
+        - { id: "dallas_old_mill_rovers", name: "Dallas Old Mill Rovers", cityName: "Dallas", nearestCityId: "houston", futureCity: true, tier: 1, quality: 44 }
+        - { id: "miami_harbor_gate_town", name: "Miami Harbor Gate Town", cityName: "Miami", nearestCityId: "houston", futureCity: true, tier: 1, quality: 55 }
+        - { id: "denver_prairie_union", name: "Denver Prairie Union", cityName: "Denver", nearestCityId: "los_angeles", futureCity: true, tier: 1, quality: 49 }
+        - { id: "washington_ironbridge_wanderers", name: "Washington Ironbridge Wanderers", cityName: "Washington", nearestCityId: "nyc", futureCity: true, tier: 1, quality: 60 }
+        - { id: "portland_beacon_sc", name: "Portland Beacon SC", cityName: "Portland", nearestCityId: "los_angeles", futureCity: true, tier: 2, quality: 40 }
+        - { id: "sacramento_copperline_united", name: "Sacramento Copperline United", cityName: "Sacramento", nearestCityId: "los_angeles", futureCity: true, tier: 2, quality: 34 }
+        - { id: "nashville_tidewater_athletic", name: "Nashville Tidewater Athletic", cityName: "Nashville", nearestCityId: "houston", futureCity: true, tier: 2, quality: 37 }
+        - { id: "columbus_stonegate_rovers", name: "Columbus Stonegate Rovers", cityName: "Columbus", nearestCityId: "chicago", futureCity: true, tier: 2, quality: 31 }
+        - { id: "pittsburgh_brickyard_town", name: "Pittsburgh Brickyard Town", cityName: "Pittsburgh", nearestCityId: "nyc", futureCity: true, tier: 2, quality: 43 }
+        - { id: "charlotte_cedar_row_union", name: "Charlotte Cedar Row Union", cityName: "Charlotte", nearestCityId: "nyc", futureCity: true, tier: 2, quality: 36 }
+        - { id: "san_diego_sunbelt_wanderers", name: "San Diego Sunbelt Wanderers", cityName: "San Diego", nearestCityId: "los_angeles", futureCity: true, tier: 2, quality: 29 }
+        - { id: "las_vegas_highland_fc", name: "Las Vegas Highland FC", cityName: "Las Vegas", nearestCityId: "los_angeles", futureCity: true, tier: 2, quality: 41 }
+        - { id: "kansas_city_northgate_sc", name: "Kansas City Northgate SC", cityName: "Kansas City", nearestCityId: "chicago", futureCity: true, tier: 2, quality: 33 }
+        - { id: "indianapolis_quarry_united", name: "Indianapolis Quarry United", cityName: "Indianapolis", nearestCityId: "chicago", futureCity: true, tier: 2, quality: 38 }
+        - { id: "st_louis_willowbank_athletic", name: "St. Louis Willowbank Athletic", cityName: "St. Louis", nearestCityId: "chicago", futureCity: true, tier: 2, quality: 35 }
+        - { id: "tampa_summit_rovers", name: "Tampa Summit Rovers", cityName: "Tampa", nearestCityId: "houston", futureCity: true, tier: 2, quality: 30 }
+        - { id: "ottawa_riverbend_athletic", name: "Ottawa Riverbend Athletic", cityName: "Ottawa", nearestCityId: "toronto", futureCity: true, tier: 1, quality: 58 }
+        - { id: "calgary_old_mill_rovers", name: "Calgary Old Mill Rovers", cityName: "Calgary", nearestCityId: "vancouver", futureCity: true, tier: 1, quality: 47 }
+        - { id: "edmonton_harbor_gate_town", name: "Edmonton Harbor Gate Town", cityName: "Edmonton", nearestCityId: "vancouver", futureCity: true, tier: 1, quality: 52 }
+        - { id: "winnipeg_prairie_union", name: "Winnipeg Prairie Union", cityName: "Winnipeg", nearestCityId: "toronto", futureCity: true, tier: 1, quality: 63 }
+        - { id: "hamilton_cedar_row_union", name: "Hamilton Cedar Row Union", cityName: "Hamilton", nearestCityId: "toronto", futureCity: true, tier: 2, quality: 40 }
+        - { id: "halifax_sunbelt_wanderers", name: "Halifax Sunbelt Wanderers", cityName: "Halifax", nearestCityId: "montreal", futureCity: true, tier: 2, quality: 34 }
+        - { id: "quebec_city_highland_fc", name: "Quebec City Highland FC", cityName: "Quebec City", nearestCityId: "montreal", futureCity: true, tier: 2, quality: 37 }
+        - { id: "victoria_northgate_sc", name: "Victoria Northgate SC", cityName: "Victoria", nearestCityId: "vancouver", futureCity: true, tier: 2, quality: 31 }
+        - { id: "saskatoon_quarry_united", name: "Saskatoon Quarry United", cityName: "Saskatoon", nearestCityId: "vancouver", futureCity: true, tier: 2, quality: 43 }
+        - { id: "kitchener_willowbank_athletic", name: "Kitchener Willowbank Athletic", cityName: "Kitchener", nearestCityId: "toronto", futureCity: true, tier: 2, quality: 36 }
+        - { id: "liverpool_dockside_fc", name: "Liverpool Dockside FC", cityName: "Liverpool", nearestCityId: "manchester", futureCity: true, tier: 1, quality: 58 }
+        - { id: "birmingham_canalside_town", name: "Birmingham Canalside Town", cityName: "Birmingham", nearestCityId: "manchester", futureCity: true, tier: 1, quality: 47 }
+        - { id: "leeds_railway_united", name: "Leeds Railway United", cityName: "Leeds", nearestCityId: "manchester", futureCity: true, tier: 1, quality: 52 }
+        - { id: "newcastle_foundry_road_athletic", name: "Newcastle Foundry Road Athletic", cityName: "Newcastle", nearestCityId: "manchester", futureCity: true, tier: 1, quality: 63 }
+        - { id: "sheffield_market_square_albion", name: "Sheffield Market Square Albion", cityName: "Sheffield", nearestCityId: "manchester", futureCity: true, tier: 2, quality: 40 }
+        - { id: "bristol_gasworks_wanderers", name: "Bristol Gasworks Wanderers", cityName: "Bristol", nearestCityId: "london", futureCity: true, tier: 2, quality: 34 }
+        - { id: "cardiff_abbey_borough", name: "Cardiff Abbey Borough", cityName: "Cardiff", nearestCityId: "london", futureCity: true, tier: 2, quality: 37 }
+        - { id: "nottingham_bridgewater_fc", name: "Nottingham Bridgewater FC", cityName: "Nottingham", nearestCityId: "manchester", futureCity: true, tier: 2, quality: 31 }
+        - { id: "glasgow_old_quarter_town", name: "Glasgow Old Quarter Town", cityName: "Glasgow", nearestCityId: "manchester", futureCity: true, tier: 2, quality: 43 }
+        - { id: "southampton_kingsway_united", name: "Southampton Kingsway United", cityName: "Southampton", nearestCityId: "london", futureCity: true, tier: 2, quality: 36 }
+        - { id: "leicester_parkside_athletic", name: "Leicester Parkside Athletic", cityName: "Leicester", nearestCityId: "manchester", futureCity: true, tier: 2, quality: 29 }
+        - { id: "norwich_mersey_rovers", name: "Norwich Mersey Rovers", cityName: "Norwich", nearestCityId: "london", futureCity: true, tier: 2, quality: 41 }
+        - { id: "puebla_volcan_fc", name: "Puebla Volcán FC", cityName: "Puebla", nearestCityId: "mexico_city", futureCity: true, tier: 1, quality: 58 }
+        - { id: "leon_jacarandas_sc", name: "León Jacarandas SC", cityName: "León", nearestCityId: "guadalajara", futureCity: true, tier: 1, quality: 47 }
+        - { id: "tijuana_cantera_unidos", name: "Tijuana Cantera Unidos", cityName: "Tijuana", nearestCityId: "guadalajara", futureCity: true, tier: 1, quality: 52 }
+        - { id: "toluca_pirules_atletico", name: "Toluca Pirules Atlético", cityName: "Toluca", nearestCityId: "mexico_city", futureCity: true, tier: 1, quality: 63 }
+        - { id: "queretaro_mercado_deportivo", name: "Querétaro Mercado Deportivo", cityName: "Querétaro", nearestCityId: "mexico_city", futureCity: true, tier: 2, quality: 40 }
+        - { id: "merida_alameda_fc", name: "Mérida Alameda FC", cityName: "Mérida", nearestCityId: "mexico_city", futureCity: true, tier: 2, quality: 34 }
+        - { id: "chihuahua_tianguis_sc", name: "Chihuahua Tianguis SC", cityName: "Chihuahua", nearestCityId: "monterrey", futureCity: true, tier: 2, quality: 37 }
+        - { id: "veracruz_cerro_verde_unidos", name: "Veracruz Cerro Verde Unidos", cityName: "Veracruz", nearestCityId: "mexico_city", futureCity: true, tier: 2, quality: 31 }
+        - { id: "san_luis_potosi_acueducto_atletico", name: "San Luis Potosí Acueducto Atlético", cityName: "San Luis Potosí", nearestCityId: "monterrey", futureCity: true, tier: 2, quality: 43 }
+        - { id: "oaxaca_ladrilleros_deportivo", name: "Oaxaca Ladrilleros Deportivo", cityName: "Oaxaca", nearestCityId: "mexico_city", futureCity: true, tier: 2, quality: 36 }
+        - { id: "madrid_retiro_deportivo", name: "Madrid Retiro Deportivo", cityName: "Madrid", nearestCityId: "london", futureCountry: true, country: "es", tier: 1, quality: 58 }
+        - { id: "barcelona_ramblas_balompie", name: "Barcelona Ramblas Balompié", cityName: "Barcelona", nearestCityId: "london", futureCountry: true, country: "es", tier: 1, quality: 47 }
+        - { id: "valencia_turia_deportivo", name: "Valencia Turia Deportivo", cityName: "Valencia", nearestCityId: "london", futureCountry: true, country: "es", tier: 1, quality: 52 }
+        - { id: "seville_giralda_balompie", name: "Seville Giralda Balompié", cityName: "Seville", nearestCityId: "london", futureCountry: true, country: "es", tier: 1, quality: 63 }
+        - { id: "bilbao_nervion_deportivo", name: "Bilbao Nervión Deportivo", cityName: "Bilbao", nearestCityId: "london", futureCountry: true, country: "es", tier: 1, quality: 44 }
+        - { id: "malaga_alcazaba_balompie", name: "Málaga Alcazaba Balompié", cityName: "Málaga", nearestCityId: "london", futureCountry: true, country: "es", tier: 1, quality: 55 }
+        - { id: "zaragoza_ebro_deportivo", name: "Zaragoza Ebro Deportivo", cityName: "Zaragoza", nearestCityId: "london", futureCountry: true, country: "es", tier: 1, quality: 49 }
+        - { id: "vigo_atlantico_balompie", name: "Vigo Atlántico Balompié", cityName: "Vigo", nearestCityId: "london", futureCountry: true, country: "es", tier: 1, quality: 60 }
+        - { id: "granada_albaicin_deportivo", name: "Granada Albaicín Deportivo", cityName: "Granada", nearestCityId: "london", futureCountry: true, country: "es", tier: 2, quality: 30 }
+        - { id: "valladolid_pisuerga_balompie", name: "Valladolid Pisuerga Balompié", cityName: "Valladolid", nearestCityId: "london", futureCountry: true, country: "es", tier: 2, quality: 40 }
+        - { id: "palma_catedral_deportivo", name: "Palma Catedral Deportivo", cityName: "Palma", nearestCityId: "london", futureCountry: true, country: "es", tier: 2, quality: 34 }
+        - { id: "alicante_palmeral_balompie", name: "Alicante Palmeral Balompié", cityName: "Alicante", nearestCityId: "london", futureCountry: true, country: "es", tier: 2, quality: 37 }
+        - { id: "gijon_cimadevilla_deportivo", name: "Gijón Cimadevilla Deportivo", cityName: "Gijón", nearestCityId: "london", futureCountry: true, country: "es", tier: 2, quality: 31 }
+        - { id: "cordoba_mezquita_balompie", name: "Córdoba Mezquita Balompié", cityName: "Córdoba", nearestCityId: "london", futureCountry: true, country: "es", tier: 2, quality: 43 }
+        - { id: "milan_navigli_fc", name: "Milan Navigli FC", cityName: "Milan", nearestCityId: "manchester", futureCountry: true, country: "it", tier: 1, quality: 58 }
+        - { id: "rome_trastevere_sportiva", name: "Rome Trastevere Sportiva", cityName: "Rome", nearestCityId: "manchester", futureCountry: true, country: "it", tier: 1, quality: 47 }
+        - { id: "turin_po_athletic", name: "Turin Po Athletic", cityName: "Turin", nearestCityId: "manchester", futureCountry: true, country: "it", tier: 1, quality: 52 }
+        - { id: "naples_vesuvio_calcio", name: "Naples Vesuvio Calcio", cityName: "Naples", nearestCityId: "manchester", futureCountry: true, country: "it", tier: 1, quality: 63 }
+        - { id: "genoa_lanterna_unione", name: "Genoa Lanterna Unione", cityName: "Genoa", nearestCityId: "manchester", futureCountry: true, country: "it", tier: 1, quality: 44 }
+        - { id: "florence_arno_fc", name: "Florence Arno FC", cityName: "Florence", nearestCityId: "manchester", futureCountry: true, country: "it", tier: 1, quality: 55 }
+        - { id: "bologna_torri_sportiva", name: "Bologna Torri Sportiva", cityName: "Bologna", nearestCityId: "manchester", futureCountry: true, country: "it", tier: 1, quality: 49 }
+        - { id: "verona_adige_athletic", name: "Verona Adige Athletic", cityName: "Verona", nearestCityId: "manchester", futureCountry: true, country: "it", tier: 1, quality: 60 }
+        - { id: "bari_lungomare_calcio", name: "Bari Lungomare Calcio", cityName: "Bari", nearestCityId: "manchester", futureCountry: true, country: "it", tier: 2, quality: 30 }
+        - { id: "palermo_conca_d_oro_unione", name: "Palermo Conca d'Oro Unione", cityName: "Palermo", nearestCityId: "manchester", futureCountry: true, country: "it", tier: 2, quality: 40 }
+        - { id: "cagliari_poetto_fc", name: "Cagliari Poetto FC", cityName: "Cagliari", nearestCityId: "manchester", futureCountry: true, country: "it", tier: 2, quality: 34 }
+        - { id: "trieste_molo_sportiva", name: "Trieste Molo Sportiva", cityName: "Trieste", nearestCityId: "manchester", futureCountry: true, country: "it", tier: 2, quality: 37 }
+        - { id: "parma_ducale_athletic", name: "Parma Ducale Athletic", cityName: "Parma", nearestCityId: "manchester", futureCountry: true, country: "it", tier: 2, quality: 31 }
+        - { id: "lecce_salento_calcio", name: "Lecce Salento Calcio", cityName: "Lecce", nearestCityId: "manchester", futureCountry: true, country: "it", tier: 2, quality: 43 }
+        - { id: "munich_isar_sv", name: "Munich Isar SV", cityName: "Munich", nearestCityId: "london", futureCountry: true, country: "de", tier: 1, quality: 58 }
+        - { id: "hamburg_elbufer_04", name: "Hamburg Elbufer 04", cityName: "Hamburg", nearestCityId: "london", futureCountry: true, country: "de", tier: 1, quality: 47 }
+        - { id: "berlin_spree_sv", name: "Berlin Spree SV", cityName: "Berlin", nearestCityId: "london", futureCountry: true, country: "de", tier: 1, quality: 52 }
+        - { id: "cologne_dom_04", name: "Cologne Dom 04", cityName: "Cologne", nearestCityId: "london", futureCountry: true, country: "de", tier: 1, quality: 63 }
+        - { id: "frankfurt_main_sv", name: "Frankfurt Main SV", cityName: "Frankfurt", nearestCityId: "london", futureCountry: true, country: "de", tier: 1, quality: 44 }
+        - { id: "stuttgart_neckar_04", name: "Stuttgart Neckar 04", cityName: "Stuttgart", nearestCityId: "london", futureCountry: true, country: "de", tier: 1, quality: 55 }
+        - { id: "dortmund_westfalen_sv", name: "Dortmund Westfalen SV", cityName: "Dortmund", nearestCityId: "london", futureCountry: true, country: "de", tier: 1, quality: 49 }
+        - { id: "dusseldorf_rhein_04", name: "Düsseldorf Rhein 04", cityName: "Düsseldorf", nearestCityId: "london", futureCountry: true, country: "de", tier: 1, quality: 60 }
+        - { id: "leipzig_messe_sv", name: "Leipzig Messe SV", cityName: "Leipzig", nearestCityId: "london", futureCountry: true, country: "de", tier: 2, quality: 30 }
+        - { id: "bremen_weser_04", name: "Bremen Weser 04", cityName: "Bremen", nearestCityId: "london", futureCountry: true, country: "de", tier: 2, quality: 40 }
+        - { id: "hanover_leine_sv", name: "Hanover Leine SV", cityName: "Hanover", nearestCityId: "london", futureCountry: true, country: "de", tier: 2, quality: 34 }
+        - { id: "nuremberg_burg_04", name: "Nuremberg Burg 04", cityName: "Nuremberg", nearestCityId: "london", futureCountry: true, country: "de", tier: 2, quality: 37 }
+        - { id: "dresden_elbtal_sv", name: "Dresden Elbtal SV", cityName: "Dresden", nearestCityId: "london", futureCountry: true, country: "de", tier: 2, quality: 31 }
+        - { id: "mannheim_kurpfalz_04", name: "Mannheim Kurpfalz 04", cityName: "Mannheim", nearestCityId: "london", futureCountry: true, country: "de", tier: 2, quality: 43 }
+        - { id: "paris_montmartre_as", name: "Paris Montmartre AS", cityName: "Paris", nearestCityId: "london", futureCountry: true, country: "fr", tier: 1, quality: 58 }
+        - { id: "marseille_vieux_port_stade", name: "Marseille Vieux-Port Stade", cityName: "Marseille", nearestCityId: "london", futureCountry: true, country: "fr", tier: 1, quality: 47 }
+        - { id: "lyon_confluence_as", name: "Lyon Confluence AS", cityName: "Lyon", nearestCityId: "london", futureCountry: true, country: "fr", tier: 1, quality: 52 }
+        - { id: "lille_grand_place_stade", name: "Lille Grand Place Stade", cityName: "Lille", nearestCityId: "london", futureCountry: true, country: "fr", tier: 1, quality: 63 }
+        - { id: "toulouse_capitole_as", name: "Toulouse Capitole AS", cityName: "Toulouse", nearestCityId: "london", futureCountry: true, country: "fr", tier: 1, quality: 44 }
+        - { id: "nice_promenade_stade", name: "Nice Promenade Stade", cityName: "Nice", nearestCityId: "london", futureCountry: true, country: "fr", tier: 1, quality: 55 }
+        - { id: "bordeaux_chartrons_as", name: "Bordeaux Chartrons AS", cityName: "Bordeaux", nearestCityId: "london", futureCountry: true, country: "fr", tier: 1, quality: 49 }
+        - { id: "nantes_erdre_stade", name: "Nantes Erdre Stade", cityName: "Nantes", nearestCityId: "london", futureCountry: true, country: "fr", tier: 1, quality: 60 }
+        - { id: "strasbourg_petite_france_as", name: "Strasbourg Petite France AS", cityName: "Strasbourg", nearestCityId: "london", futureCountry: true, country: "fr", tier: 2, quality: 30 }
+        - { id: "rennes_vilaine_stade", name: "Rennes Vilaine Stade", cityName: "Rennes", nearestCityId: "london", futureCountry: true, country: "fr", tier: 2, quality: 40 }
+        - { id: "montpellier_ecusson_as", name: "Montpellier Écusson AS", cityName: "Montpellier", nearestCityId: "london", futureCountry: true, country: "fr", tier: 2, quality: 34 }
+        - { id: "toulon_mourillon_stade", name: "Toulon Mourillon Stade", cityName: "Toulon", nearestCityId: "london", futureCountry: true, country: "fr", tier: 2, quality: 37 }
+        - { id: "reims_cathedrale_as", name: "Reims Cathédrale AS", cityName: "Reims", nearestCityId: "london", futureCountry: true, country: "fr", tier: 2, quality: 31 }
+        - { id: "dijon_moutarde_stade", name: "Dijon Moutarde Stade", cityName: "Dijon", nearestCityId: "london", futureCountry: true, country: "fr", tier: 2, quality: 43 }

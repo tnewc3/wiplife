@@ -764,11 +764,39 @@ const fame = z.strictObject({
 
 // E6c: sports.
 const sportsLevel = z.enum(['youth', 'school', 'college', 'pro']);
+const division = z.union([z.literal(1), z.literal(2)]);
+const sportsTeam = z.strictObject({
+  id: id.nullable(),
+  name: z.string(),
+  city: id,
+  level: sportsLevel,
+  quality: score,
+  tier: z.enum(['rec', 'club', 'travel', 'academy', 'jv', 'varsity', 'community', 'state', 'elite']).exactOptional(),
+  // Batch 6: where the team plays when it is away from the city you live in, how far, the league and the country of a club the game does not model.
+  place: z.string().max(60).exactOptional(),
+  away: z.enum(['city', 'country']).exactOptional(),
+  division: division.exactOptional(),
+  country: z.enum(['es', 'it', 'de', 'fr']).exactOptional(),
+});
+const teamSetupShape = z.strictObject({
+  renamed: z.record(id, z.strictObject({ name: z.string().min(2).max(40).exactOptional(), nickname: z.string().min(2).max(30).exactOptional() })),
+  moved: z.record(id, id),
+  added: z
+    .array(z.strictObject({ id: z.string().min(1).max(40), sport: id, name: z.string().min(2).max(40), nickname: z.string().min(2).max(30).exactOptional(), city: id, strength: z.union([z.literal(1), z.literal(2), z.literal(3), z.literal(4), z.literal(5)]), tier: division.exactOptional() }))
+    .max(40),
+});
+// Batch 6: the teams this life plays with.
+const league = z.strictObject({
+  setup: teamSetupShape,
+  pending: z.strictObject({ applyYear: int, moved: z.record(id, id), added: teamSetupShape.shape.added }).nullable(),
+  tiers: z.record(id, division),
+  tierYear: int.min(0),
+});
 const sports = z.strictObject({
   sport: id.nullable(),
   position: id.nullable(),
   pro: z.boolean(),
-  team: z.strictObject({ id: id.nullable(), name: z.string(), city: id, level: sportsLevel, quality: score, tier: z.enum(['rec', 'club', 'travel', 'academy', 'jv', 'varsity', 'community', 'state', 'elite']).exactOptional() }).nullable(),
+  team: sportsTeam.nullable(),
   contract: z
     .strictObject({
       teamId: id,
@@ -778,6 +806,7 @@ const sports = z.strictObject({
       kind: z.enum(['minimum', 'rookie', 'standard', 'star']),
       option: z.enum(['none', 'team', 'player']),
       incentive: dollars.min(0).exactOptional(),
+      release: dollars.min(0).exactOptional(),
     })
     .nullable(),
   unsigned: int.min(0),
@@ -785,7 +814,7 @@ const sports = z.strictObject({
   form: z.number().min(-10).max(10),
   pain: z.boolean(),
   rest: z.boolean(),
-  ask: z.enum(['trade', 'contract']).nullable(),
+  ask: z.enum(['trade', 'contract', 'loan']).nullable(),
   playOut: z.boolean(),
   seasons: z
     .array(
@@ -807,11 +836,13 @@ const sports = z.strictObject({
         salary: dollars.min(0),
         allStar: z.boolean(),
         injury: id.exactOptional(),
+        division: division.exactOptional(),
+        loan: z.boolean().exactOptional(),
       }),
     )
     .max(12),
   run: z.strictObject({ year: int, won: int.min(0).max(3), alive: z.boolean(), strength: z.number(), rival: z.number() }).nullable(),
-  draft: z.strictObject({ year: int, pick: int.min(0), round: int.min(0), teamId: id.nullable() }).nullable(),
+  draft: z.strictObject({ year: int, pick: int.min(0), round: int.min(0), teamId: id.nullable(), academy: z.literal(true).exactOptional() }).nullable(),
   suspended: int.min(0),
   traded: int.min(0),
   released: int.min(0),
@@ -840,6 +871,16 @@ const sports = z.strictObject({
     trainedGym: int.min(0),
     trainedCoach: int.min(0),
     signedAfterUndrafted: int.min(0),
+    loans: int.min(0),
+    transfers: int.min(0),
+    fees: int.min(0),
+    graduates: int.min(0),
+    abroad: int.min(0),
+    caps: int.min(0),
+    tournaments: int.min(0),
+    tournamentTitles: int.min(0),
+    goneUp: int.min(0),
+    goneDown: int.min(0),
   }),
   // Batch 5: tryouts, training, scholarships, the draft's combine, and your place on a team.
   tryout: z.strictObject({ sport: id, key: z.string().min(1).max(60), year: int }).nullable(),
@@ -848,7 +889,7 @@ const sports = z.strictObject({
     .max(10),
   cut: z.record(z.string(), int),
   teamless: z.boolean(),
-  club: z.strictObject({ id: id.nullable(), name: z.string(), city: id, level: sportsLevel, quality: score, tier: z.enum(['rec', 'club', 'travel', 'academy', 'jv', 'varsity', 'community', 'state', 'elite']).exactOptional() }).nullable(),
+  club: sportsTeam.nullable(),
   training: z.strictObject({ year: int, team: int.min(0), gym: int.min(0), coach: int.min(0), member: z.boolean(), spent: dollars.min(0) }),
   offers: z.array(z.strictObject({ year: int, tier: z.enum(['community', 'state', 'elite']), share: z.number().min(0).max(1) })).max(3),
   scholarship: z.strictObject({ tier: z.enum(['community', 'state', 'elite']), share: z.number().min(0).max(1), since: int, warned: int.min(0) }).nullable(),
@@ -857,6 +898,20 @@ const sports = z.strictObject({
   role: z.enum(['starter', 'rotation', 'reserve']),
   number: int.min(0).max(99).nullable(),
   captain: z.boolean(),
+  // Batch 6 (soccer): the academy you belong to, a loan or an offer of one, the window's offers, the national side, the year an academy let you go, a move abroad and your club's last move between leagues.
+  academy: z.strictObject({ clubId: id, since: int, abroad: z.boolean() }).nullable(),
+  loan: z.strictObject({ parentId: id, hostId: id, since: int, until: int }).nullable(),
+  loanOffer: z.strictObject({ hostId: id, year: int }).nullable(),
+  transfer: z
+    .strictObject({
+      year: int,
+      offers: z.array(z.strictObject({ id: z.string().min(1).max(20), clubId: id, fee: dollars.min(0), wage: dollars.min(0), years: int.min(1).max(10), clause: dollars.min(0) })).max(6),
+    })
+    .nullable(),
+  calledUp: int.min(0),
+  academyOut: int.min(0),
+  abroadYear: int.min(0),
+  moved: z.strictObject({ year: int, dir: z.enum(['up', 'down']) }).nullable(),
 });
 
 // W3: businesses.
@@ -1241,6 +1296,7 @@ export const lifeStateSchema: z.ZodType<LifeState> = z.strictObject({
   crime,
   fame,
   sports,
+  league,
   later,
   belonging,
   business: businessState,

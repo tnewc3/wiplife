@@ -1,0 +1,49 @@
+id: loan_new_dressing_room
+title: The new boy on loan
+text: >-
+  At {host}, everyone knows where you are from and why you are here. {mate.name} shows
+  you the peg that will be yours and says the thing you were hoping somebody would: you
+  are here to play.
+tone: light
+category: sports
+rarity: common
+recurring: true
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { sports: { active: true } }
+    - { sports: { loan: true } }
+weight: { base: 10 }
+cooldownYears: 2
+cast:
+  mate: { kind: acquaintance, presence: city, createIfMissing: true, heritage: team }
+choices:
+  - id: earn_it
+    label: Ask what the team needs and do it
+    outcome:
+      text: >-
+        {mate.They} {mate:laughs|laugh} and {mate:tells|tell} you. By the weekend you are
+        doing the dirty job in midfield that nobody else wanted.
+      effects:
+        - { type: sports, action: form, delta: 1 }
+        - { type: relationship, role: mate, affection: 4 }
+  - id: keep_distance
+    label: Be polite and keep your eyes on the parent club
+    outcome:
+      text: >-
+        You do the work, say the right things and check the parent club's results first every
+        morning. The dressing room can feel it.
+      effects:
+        - { type: relationship, role: mate, affection: -3 }
+        - { type: stat, key: stress, delta: 1 }
+  - id: dinner
+    label: Organise a team night out
+    outcome:
+      text: >-
+        The restaurant is loud and the team's reputation for singing is deserved. Somebody
+        takes a photograph that will outlast the season.
+      effects:
+        - { type: famePay, cost: small }
+        - { type: relationship, role: mate, affection: 5 }
+        - { type: stat, key: happiness, delta: 3 }

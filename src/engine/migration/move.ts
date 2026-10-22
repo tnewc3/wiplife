@@ -105,6 +105,39 @@ export function emigrate(state: LifeState, content: ContentBundle): void {
   writeFromGroup(state, { importance: 3, variants: content.text.immigration.arrived }, ['migration', 'arrived'], { values: values(state, content) }, content);
 }
 
+/**
+ * A club in another country takes you: the move is made (the caller moved you), and the club arranges a work permit that runs a
+ * little past the end of the deal. A citizen of the country holds no permit. Someone who already holds a permit there has it
+ * extended, never shortened.
+ */
+export function settleForClub(state: LifeState, from: Id, untilYear: number, content: ContentBundle): void {
+  const countryId = countryIdOfCity(state.character.cityId, content);
+  if (state.character.citizenships.includes(countryId)) {
+    // Home again (or a second citizenship): no permit to hold.
+    if (state.travel.residence?.settled) {
+      state.travel.residence = null;
+      state.migration.arrivedYear = null;
+      state.migration.undocumented = null;
+      state.migration.application = null;
+    }
+    return;
+  }
+  const end = untilYear + content.balance.sports.world.abroad.permitYears;
+  const r = state.travel.residence;
+  if (r?.settled && r.country === content.countries[countryId]?.name && r.type !== 'undocumented') {
+    if (r.type === 'temporary_worker' || r.type === 'student') state.travel.residence = { ...r, endYear: Math.max(r.endYear, end) };
+    return;
+  }
+  state.migration.application = null;
+  state.migration.undocumented = null;
+  setResidence(state, { country: content.countries[countryId]?.name ?? '', type: 'temporary_worker', route: 'work_sponsor', homeCityId: from, endYear: end }, content);
+  state.migration.arrivedYear = state.currentYear;
+  bump(state, `arrived:work_sponsor:${countryId}`);
+  bump(state, `arrivedFrom:${countryIdOfCity(from, content)}`);
+  const s = content.balance.sports.world.abroad;
+  stats(state, 0, s.stress);
+}
+
 /** Moves you without permission. The caller checked moveBlock and the cost; the sum is paid either way. Returns false if you were turned back. */
 export function enterWithoutPapers(state: LifeState, cityId: Id, turnedBack: boolean, content: ContentBundle): boolean {
   const u = content.balance.immigration.undocumented;

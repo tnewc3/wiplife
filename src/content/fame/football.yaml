@@ -86,12 +86,15 @@ sport:
     - { id: "shoulder_injury", weight: 14, min: 30, max: 65 }
     - { id: "broken_bone", weight: 12, min: 35, max: 60 }
     - { id: "stress_fracture", weight: 6, min: 30, max: 55 }
+  countryWord: footballWord
+  international: { side: "the national squad", tournament: "the Continental Bowl", cycle: 4 }
   leagues:
     youth: { name: "The Pee-Wee Football League", nicknames: ["Raiders", "Bulldogs", "Hurricanes", "Eagles", "Cobras"] }
     school: { name: "The Friday Night Conference", nicknames: ["Gladiators", "Panthers", "Vikings", "Warriors", "Titans", "Spartans"] }
     college: { name: "The Collegiate Gridiron Conference", nicknames: ["Rams", "Centurions", "Buccaneers", "Trojans", "Sentinels", "Wolverines"] }
     pro:
       name: "The Heartland Gridiron League"
+      markets: [[us, ca]]
       teams:
         - { id: "chicago_smokestacks", name: "Chicago Smokestacks", city: "chicago", quality: 64 }
         - { id: "chicago_lakeshore_lancers", name: "Chicago Lakeshore Lancers", city: "chicago", quality: 46 }
@@ -123,3 +126,18 @@ sport:
         - { id: "guadalajara_rosales_rangers", name: "Guadalajara Rosales Rangers", city: "guadalajara", quality: 40 }
         - { id: "monterrey_sierra_steel", name: "Monterrey Sierra Steel", city: "monterrey", quality: 60 }
         - { id: "monterrey_foundry_forgers", name: "Monterrey Foundry Forgers", city: "monterrey", quality: 45 }
+        - { id: "boston_harbor_bruisers", name: "Boston Harbor Bruisers", cityName: "Boston", nearestCityId: "nyc", futureCity: true, quality: 57 }
+        - { id: "philadelphia_brotherly_anvils", name: "Philadelphia Brotherly Anvils", cityName: "Philadelphia", nearestCityId: "nyc", futureCity: true, quality: 50 }
+        - { id: "atlanta_peachtree_wardens", name: "Atlanta Peachtree Wardens", cityName: "Atlanta", nearestCityId: "chicago", futureCity: true, quality: 55 }
+        - { id: "dallas_longhaul_marshals", name: "Dallas Longhaul Marshals", cityName: "Dallas", nearestCityId: "houston", futureCity: true, quality: 62 }
+        - { id: "denver_highline_wolves", name: "Denver Highline Wolves", cityName: "Denver", nearestCityId: "los_angeles", futureCity: true, quality: 56 }
+        - { id: "phoenix_saguaro_scorchers", name: "Phoenix Saguaro Scorchers", cityName: "Phoenix", nearestCityId: "los_angeles", futureCity: true, quality: 46 }
+        - { id: "seattle_cascade_ravens", name: "Seattle Cascade Ravens", cityName: "Seattle", nearestCityId: "los_angeles", futureCity: true, quality: 58 }
+        - { id: "detroit_motor_lions", name: "Detroit Motor Lions", cityName: "Detroit", nearestCityId: "chicago", futureCity: true, quality: 45 }
+        - { id: "minneapolis_northstar_haulers", name: "Minneapolis Northstar Haulers", cityName: "Minneapolis", nearestCityId: "chicago", futureCity: true, quality: 53 }
+        - { id: "san_francisco_bayfront_prospectors", name: "San Francisco Bayfront Prospectors", cityName: "San Francisco", nearestCityId: "los_angeles", futureCity: true, quality: 60 }
+        - { id: "miami_biscayne_marauders", name: "Miami Biscayne Marauders", cityName: "Miami", nearestCityId: "houston", futureCity: true, quality: 52 }
+        - { id: "cleveland_lakefront_ironclads", name: "Cleveland Lakefront Ironclads", cityName: "Cleveland", nearestCityId: "chicago", futureCity: true, quality: 44 }
+        - { id: "calgary_stampede_riders", name: "Calgary Stampede Riders", cityName: "Calgary", nearestCityId: "vancouver", futureCity: true, quality: 50 }
+        - { id: "edmonton_prairie_jacks", name: "Edmonton Prairie Jacks", cityName: "Edmonton", nearestCityId: "vancouver", futureCity: true, quality: 46 }
+        - { id: "winnipeg_forks_fusiliers", name: "Winnipeg Forks Fusiliers", cityName: "Winnipeg", nearestCityId: "toronto", futureCity: true, quality: 43 }

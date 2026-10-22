@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { emptySetup, teamSetupSchema } from '../engine/sports/setup';
 import type { WiplifeDb } from './db';
 
 export const themeSchema = z.enum(['system', 'light', 'dark']);
@@ -9,6 +10,8 @@ export const settingsSchema = z.object({
   theme: themeSchema,
   persistRequested: z.boolean(),
   installPromptShown: z.boolean(),
+  /** Batch 6: the player's changes to the world of teams (renamed, moved and added teams), copied into every new life. */
+  teams: teamSetupSchema,
 });
 
 export type Settings = z.infer<typeof settingsSchema>;
@@ -18,7 +21,26 @@ export const DEFAULT_SETTINGS: Settings = {
   theme: 'system',
   persistRequested: false,
   installPromptShown: false,
+  teams: emptySetup(),
 };
+
+/** The version of the settings row (Batch 6). A row without one is version 1: it has no teams. */
+export const SETTINGS_VERSION = 2;
+
+/**
+ * Brings a stored settings row up to the current version: version 1 (a row from before the teams setting) gains an empty set of
+ * team changes. A row from a newer version is left as it is (fields this version does not know are ignored).
+ */
+export function migrateSettings(stored: unknown): Record<string, unknown> {
+  if (typeof stored !== 'object' || stored === null || Array.isArray(stored)) return {};
+  const row = { ...(stored as Record<string, unknown>) };
+  const version = typeof row.version === 'number' ? row.version : 1;
+  if (version < 2) {
+    row.teams = emptySetup();
+    row.version = 2;
+  }
+  return row;
+}
 
 const SETTINGS_KEY = 'app';
 
@@ -29,9 +51,9 @@ const SETTINGS_KEY = 'app';
 export async function loadSettings(db: WiplifeDb): Promise<Settings> {
   const row = await db.settings.get(SETTINGS_KEY);
   const stored: unknown = row?.value;
-  const result: Settings = { ...DEFAULT_SETTINGS };
+  const result: Settings = { ...DEFAULT_SETTINGS, teams: emptySetup() };
   if (typeof stored !== 'object' || stored === null) return result;
-  const record = stored as Record<string, unknown>;
+  const record = migrateSettings(stored);
   const shape = settingsSchema.shape;
   for (const key of Object.keys(shape) as (keyof Settings)[]) {
     const parsed = shape[key].safeParse(record[key]);
@@ -44,7 +66,7 @@ export async function loadSettings(db: WiplifeDb): Promise<Settings> {
 export async function updateSettings(db: WiplifeDb, patch: Partial<Settings>): Promise<Settings> {
   return db.transaction('rw', db.settings, async () => {
     const next = settingsSchema.parse({ ...(await loadSettings(db)), ...patch });
-    await db.settings.put({ key: SETTINGS_KEY, value: next });
+    await db.settings.put({ key: SETTINGS_KEY, value: { ...next, version: SETTINGS_VERSION } });
     return next;
   });
 }

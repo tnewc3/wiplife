@@ -37,6 +37,8 @@ import {
   fansLabel,
   salaryLabel,
 } from '../../labels';
+import { renameDeep, useTeamText } from '../../useTeamNames';
+import { WorldSection } from './SportsWorld';
 import { Ladder } from './FameScreen';
 import { DraftSection, ScholarshipSection, Section, TeamsList, TeamStanding, TrainingSection } from './SportsGrind';
 
@@ -65,7 +67,8 @@ function SeasonLine({ s }: { s: SportsSeasonView }) {
  * bars, never numbers for the scores; everything tappable is 44px or more.
  */
 export function SportsScreen({ life, open, onClose }: { life: LifeState; open: boolean; onClose: () => void }) {
-  const view = getSportsView(life, content);
+  const teamText = useTeamText();
+  const view = renameDeep(getSportsView(life, content), teamText);
   const act = useAppStore((s) => s.takeLifeAction);
   const busy = useAppStore((s) => s.aging);
   const [confirm, setConfirm] = useState<SportRetireRoute | null>(null);
@@ -88,7 +91,7 @@ export function SportsScreen({ life, open, onClose }: { life: LifeState; open: b
                 {view.team ? (
                   <p className="mt-1" data-testid="team-line">
                     {view.team.name} · {SPORT_LEVEL_LABELS[view.team.level].toLowerCase()}
-                    {view.team.city ? ` · ${view.team.city}` : ''} · {TEAM_QUALITY_WORDS[view.team.qualityBand]!.toLowerCase()}
+                    {view.team.place ? ` · ${view.team.place}` : view.team.city ? ` · ${view.team.city}` : ''} · {TEAM_QUALITY_WORDS[view.team.qualityBand]!.toLowerCase()}
                     {view.team.level === 'pro' ? ` · ${view.sport.league}` : ''}
                   </p>
                 ) : (
@@ -123,6 +126,8 @@ export function SportsScreen({ life, open, onClose }: { life: LifeState; open: b
                 <p className="mt-1 text-sm text-muted">Moving to another position costs a little of the craft you have built.</p>
                 <TeamStanding view={view} disabled={disabled} act={act} />
               </Section>
+
+              <WorldSection view={view} disabled={disabled} act={act} />
 
               <Section title="Try out for a team" testId="teams">
                 <p className="mt-1 text-sm text-muted">Pick a team and play the scrimmage. Each team has its own bar, and a cut is not the end: the next team down may take you.</p>
@@ -181,13 +186,13 @@ export function SportsScreen({ life, open, onClose }: { life: LifeState; open: b
                 {view.playOut && <p className="mt-1 text-sm text-muted">You are playing out your deal to test the market.</p>}
                 {view.ask && (
                   <p className="mt-1 text-sm" data-testid="ask-line">
-                    {view.ask === 'trade' ? 'Your agent is working on a trade.' : 'Your agent is pushing for a new deal.'}
+                    {view.ask === 'trade' ? (view.soccer ? 'Your agent is shopping you around for the next window.' : 'Your agent is working on a trade.') : view.ask === 'loan' ? 'You have asked your club for a loan.' : 'Your agent is pushing for a new deal.'}
                   </p>
                 )}
                 {view.contract && (
                   <div className="mt-2 flex flex-col gap-2">
                     <Button variant="secondary" disabled={disabled || !view.canAskTrade} onClick={() => void act('ask_trade')} data-testid="ask-trade">
-                      Ask your agent for a trade
+                      {view.soccer ? 'Ask your agent to find you a new club' : 'Ask your agent for a trade'}
                     </Button>
                     <Button variant="secondary" disabled={disabled || !view.canAskContract} onClick={() => void act('ask_contract')} data-testid="ask-contract">
                       Ask your agent for a new deal

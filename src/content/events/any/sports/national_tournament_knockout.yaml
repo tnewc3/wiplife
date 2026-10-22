@@ -1,0 +1,59 @@
+id: national_tournament_knockout
+title: Win or go home
+text: >-
+  It is the knockout stage of {tournament} and the whole squad has stopped joking. {nation}
+  play at nine, and by seven the corridor outside the dressing room is full of people who
+  are not allowed to say how they feel.
+tone: serious
+category: sports
+rarity: rare
+recurring: true
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { sports: { active: true } }
+    - { sports: { level: [pro] } }
+    - { sports: { tournament: true } }
+weight: { base: 8 }
+cooldownYears: 3
+followUpOnly: true
+choices:
+  - id: calm
+    label: Calm the younger players down
+    check:
+      base: 40
+      stats: [{ key: sociability, weight: 0.2 }, { sports: rating, weight: 0.15 }, { sports: team, weight: 0.15 }]
+      success:
+        text: >-
+          A teenager next to you is shaking, so you make a joke that is not funny, and the shaking
+          stops. {nation} win it in overtime, and you are the first one on your knees.
+        effects:
+          - { type: sports, action: tournament, result: win }
+          - { type: fame, action: fans, delta: 7 }
+      failure:
+        text: >-
+          The joke lands badly. {nation} lose it on the last play, and you walk to the dressing room past the
+          players who could not watch.
+        effects:
+          - { type: sports, action: tournament, result: lose }
+          - { type: stat, key: happiness, delta: -5 }
+  - id: focus
+    label: Shut it all out and play
+    check:
+      base: 38
+      stats: [{ sports: rating, weight: 0.3 }, { key: discipline, weight: 0.15 }]
+      success:
+        text: >-
+          You hear nothing for the whole game. {nation} go through, and afterwards a teammate
+          says you looked like you were playing somewhere else.
+        effects:
+          - { type: sports, action: tournament, result: win }
+          - { type: fame, action: image, delta: 2 }
+      failure:
+        text: >-
+          The whole game passes in a blur. {nation} are out, and you replay one touch for the rest
+          of the night.
+        effects:
+          - { type: sports, action: tournament, result: lose }
+          - { type: stat, key: stress, delta: 4 }

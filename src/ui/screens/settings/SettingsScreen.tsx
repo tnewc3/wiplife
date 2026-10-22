@@ -7,6 +7,7 @@ import { Card } from '../../components/Card';
 import { ContentNotice } from '../../components/ContentNotice';
 import { Screen } from '../../components/Screen';
 import { Sheet } from '../../components/Sheet';
+import { TeamsEditor } from './TeamsEditor';
 
 const themeOptions: { value: Theme; label: string }[] = [
   { value: 'system', label: 'System' },
@@ -46,6 +47,7 @@ export function SettingsScreen() {
   const [noticeOpen, setNoticeOpen] = useState(false);
   const [resetOpen, setResetOpen] = useState(false);
   const [resetting, setResetting] = useState(false);
+  const [teamsOpen, setTeamsOpen] = useState(false);
 
   const closeNotice = useCallback(() => setNoticeOpen(false), []);
   const closeReset = useCallback(() => setResetOpen(false), []);
@@ -60,6 +62,8 @@ export function SettingsScreen() {
     }
   };
 
+  if (teamsOpen) return <TeamsEditor onBack={() => setTeamsOpen(false)} />;
+
   return (
     <Screen title="Settings" onBack={closeSettings}>
       <div className="flex flex-col gap-6">
@@ -68,6 +72,15 @@ export function SettingsScreen() {
             Appearance
           </h2>
           <ThemePicker />
+        </section>
+
+        <section className="flex flex-col gap-2" aria-labelledby="settings-teams">
+          <h2 id="settings-teams" className="text-sm font-semibold tracking-wide text-muted uppercase">
+            Teams
+          </h2>
+          <Button variant="secondary" block onClick={() => setTeamsOpen(true)} data-testid="settings-teams">
+            Teams
+          </Button>
         </section>
 
         <section className="flex flex-col gap-2" aria-labelledby="settings-content">

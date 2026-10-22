@@ -54,6 +54,8 @@ import { emptyTeen } from './teen/query';
 import { emptyCrime } from './crime/query';
 import { emptyFame } from './fame/query';
 import { emptySports } from './sports/query';
+import { emptyLeague } from './sports/league';
+import { emptySetup } from './sports/setup';
 import { emptyLater } from './later/query';
 import { terminalDeathChance, TERMINAL_ID } from './later/terminal';
 import { emptyBelonging } from './belonging/query';
@@ -208,6 +210,7 @@ export function createLife(input: CreateLifeOptions, content: ContentBundle): Li
     crime: emptyCrime(),
     fame: emptyFame(),
     sports: emptySports(),
+    league: { ...emptyLeague(), setup: options.teamSetup ?? emptySetup() },
     later: emptyLater(),
     belonging: emptyBelonging(),
     business: emptyBusiness(),

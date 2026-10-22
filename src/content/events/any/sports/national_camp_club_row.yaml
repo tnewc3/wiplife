@@ -1,0 +1,58 @@
+id: national_camp_club_row
+title: Club or country
+text: >-
+  The camp starts on Monday and your club has a fixture on Wednesday. The two coaches have not
+  been on the phone to each other, which in your experience means they have been on the
+  phone to you. Both of them think you are the sensible one.
+tone: neutral
+category: sports
+rarity: common
+recurring: true
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { sports: { active: true } }
+    - { sports: { level: [pro] } }
+    - { sports: { calledUp: true } }
+weight: { base: 8 }
+cooldownYears: 2
+followUpOnly: true
+choices:
+  - id: club
+    label: Play for your club, report late to camp
+    outcome:
+      text: >-
+        You win the Wednesday game and arrive at camp at midnight on Thursday. The national
+        staff say all the right things. Their faces say something else.
+      effects:
+        - { type: sports, action: form, delta: 1 }
+        - { type: fame, action: image, delta: -1 }
+  - id: country
+    label: Go to camp on time
+    outcome:
+      text: >-
+        Your club plays without you and loses narrowly. Your name is read out with the
+        word "unavailable" next to it, and you hate that.
+      effects:
+        - { type: sports, action: cap }
+        - { type: fame, action: mood, delta: -2 }
+  - id: compromise
+    label: Fly in and out the same day
+    check:
+      base: 42
+      stats: [{ key: health, weight: 0.15 }, { key: fitness, weight: 0.15 }]
+      success:
+        text: >-
+          You land, train, sleep for six hours and play on Wednesday. Both coaches decide it was
+          their idea.
+        effects:
+          - { type: sports, action: cap }
+          - { type: sports, action: form, delta: 1 }
+      failure:
+        text: >-
+          You are on three planes in forty hours and play the Wednesday game on fumes. Neither
+          coach is pleased, and one of them says so.
+        effects:
+          - { type: stat, key: stress, delta: 4 }
+          - { type: sports, action: form, delta: -1 }

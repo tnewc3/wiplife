@@ -44,6 +44,12 @@ export interface AthleteProfile {
   takesScholarship: boolean;
   retriesCamps: boolean;
   approach: 'steady' | 'hustle' | 'showoff' | 'listen';
+  /** Batch 6: how often it takes a loan its club offers, asks for one, takes a transfer offer (and whether its agent pushes), and goes for a trial abroad. */
+  takesLoan: number;
+  asksForLoan: number;
+  takesTransfer: number;
+  pushes: boolean;
+  triesAbroad: boolean;
 }
 
 export function rollAthleteProfile(rng: RngState): AthleteProfile {
@@ -61,6 +67,11 @@ export function rollAthleteProfile(rng: RngState): AthleteProfile {
     takesScholarship: chance(rng, 0.85),
     retriesCamps: chance(rng, 0.8),
     approach: weightedPick(rng, [['steady', 4], ['hustle', 3], ['listen', 2], ['showoff', 1]] as const),
+    takesLoan: pick(rng, [0.3, 0.7, 1]),
+    asksForLoan: pick(rng, [0, 0.1, 0.3]),
+    takesTransfer: pick(rng, [0.1, 0.4, 0.8]),
+    pushes: chance(rng, 0.5),
+    triesAbroad: chance(rng, 0.4),
   };
 }
 
@@ -76,7 +87,7 @@ export function chooseSportsActions(life: LifeState, content: ContentBundle, rng
     const fitting = sports.filter((s) => hasTalentFor(life, s));
     const sport = profile.followsTalent && fitting.length > 0 ? pick(rng, fitting) : pick(rng, sports);
     // Batch 5: it tries out for a team: the hardest it has decent odds of making, or the easiest open to it.
-    const open = teamOptions(life, sport, content).filter((o) => o.block === null && o.level !== 'pro' && !o.club);
+    const open = teamOptions(life, sport, content).filter((o) => o.block === null && o.level !== 'pro' && !o.club && (profile.triesAbroad || o.abroad !== true));
     const team = aim(life, sport, open, content, 0.4);
     if (team) {
       out.push(['try_out', { pathId: sport.id, teamKey: team.key }]);
@@ -105,7 +116,7 @@ export function chooseSportsActions(life: LifeState, content: ContentBundle, rng
       if (camp) out.push(['try_out', { pathId: def.id, teamKey: camp.key }]);
     } else if (profile.triesUp && !life.sports.pro) {
       const here = life.sports.team;
-      const better = teamOptions(life, def, content).filter((o) => o.block === null && o.level !== 'pro' && !o.club && (here === null || o.bar > (content.balance.sports.tryout.tiers[here.tier ?? 'rec']?.bar ?? 0)));
+      const better = teamOptions(life, def, content).filter((o) => o.block === null && o.level !== 'pro' && !o.club && (profile.triesAbroad || o.abroad !== true) && (here === null || o.bar > (content.balance.sports.tryout.tiers[here.tier ?? 'rec']?.bar ?? 0)));
       const up = aim(life, def, better, content, 0.35);
       if (up && chance(rng, 0.6)) out.push(['try_out', { pathId: def.id, teamKey: up.key }]);
     }
@@ -122,6 +133,18 @@ export function chooseSportsActions(life: LifeState, content: ContentBundle, rng
     const skill = skills[i % skills.length]!;
     const mode = hasTeam(life) ? 'team' : profile.gymWithoutTeam ? 'gym' : 'coach';
     out.push(['train', { skillId: skill.id, trainMode: mode }]);
+  }
+  // Batch 6: a loan the club offers, a loan asked for, and the transfer window's best offer.
+  if (life.sports.loanOffer) {
+    if (chance(rng, profile.takesLoan) && ok('take_loan', {})) out.push(['take_loan', {}]);
+    else if (ok('refuse_loan', {})) out.push(['refuse_loan', {}]);
+  }
+  if (chance(rng, profile.asksForLoan) && ok('ask_loan', {})) out.push(['ask_loan', {}]);
+  const window = life.sports.transfer?.offers ?? [];
+  if (window.length > 0 && chance(rng, profile.takesTransfer)) {
+    const best = [...window].sort((a, b) => b.wage - a.wage)[0]!;
+    const push = profile.pushes && life.fame.agent !== null;
+    if (ok('accept_transfer', { offerId: best.id, push })) out.push(['accept_transfer', { offerId: best.id, push }]);
   }
   if (life.sports.pro && life.sports.contract) {
     if (chance(rng, profile.asksForTrade) && ok('ask_trade', {})) out.push(['ask_trade', {}]);
@@ -341,7 +364,7 @@ export class SportsWatcher {
     const d = s.draft;
     if (def && d && d.year === after.currentYear && !this.picks.has(d.year)) {
       this.picks.add(d.year);
-      const total = draftTotal(def.sport, after.character.cityId, this.content);
+      const total = draftTotal(after, def.id, after.character.cityId, this.content);
       r.picks.push({ rating: recentRating(after), pick: d.pick, total });
       this.lastPick = d.pick > 0 ? { pick: d.pick, total } : null;
     }

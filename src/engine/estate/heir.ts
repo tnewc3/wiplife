@@ -69,6 +69,7 @@ import { startingTeen } from '../teen/query';
 import { emptyCrime } from '../crime/query';
 import { emptyFame } from '../fame/query';
 import { emptySports } from '../sports/query';
+import { emptyLeague } from '../sports/league';
 import { emptyLater } from '../later/query';
 import { emptyBelonging } from '../belonging/query';
 import { emptyBusiness } from '../business/query';
@@ -415,6 +416,8 @@ export function continueAsHeir(dead: LifeState, heirId: Id, content: ContentBund
     crime: emptyCrime(),
     fame: emptyFame(),
     sports: emptySports(),
+    // Batch 6: an heir plays in the world their parent's life did.
+    league: { ...emptyLeague(), setup: cloneJson(dead.league.setup) },
     later: emptyLater(),
     belonging: emptyBelonging(),
     business: emptyBusiness(),

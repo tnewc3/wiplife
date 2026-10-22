@@ -9,6 +9,7 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { compileContent, formatErrors } from './content/compile';
+import { futureTeams } from './content/sports';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const contentDir = path.join(root, 'src', 'content');
@@ -38,6 +39,19 @@ for (const build of builds) {
   console.log(
     `${build.label} OK: ${result.definitionCount} definition(s), version ${result.bundle.contentVersion} → ${path.relative(root, build.out)}`,
   );
+  // Batch 6: the teams that play away from the modeled cities, ready for when those cities and countries are added.
+  if (build.label === 'Content') {
+    const future = futureTeams(result.bundle);
+    for (const kind of ['city', 'country'] as const) {
+      const rows = future.filter((t) => t.kind === kind);
+      const places = new Set(rows.map((t) => `${t.cityName} (${t.country})`));
+      console.log(`futureCity teams (${kind === 'city' ? 'cities' : 'countries'} the game does not model yet): ${rows.length} teams in ${places.size} places`);
+      for (const place of [...places].sort()) {
+        const here = rows.filter((t) => `${t.cityName} (${t.country})` === place);
+        console.log(`  ${place}, lives in ${[...new Set(here.map((t) => t.nearestCityId))].join('/')}: ${here.map((t) => `${t.name} [${t.sport}${t.tier === 2 ? ' II' : ''}]`).join('; ')}`);
+      }
+    }
+  }
   // C1 wording checks: warnings for review, not failures (tools/content/consistency.ts).
   if (result.warnings.length > 0) {
     console.warn(`${build.label}: ${result.warnings.length} consistency warning(s) to review (or justify in the event's "justified"):`);

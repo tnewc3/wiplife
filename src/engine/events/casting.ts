@@ -185,6 +185,13 @@ function admirerCategory(state: LifeState, rng: RngState, content: ContentBundle
   return options.length === 0 ? null : weightedPick(rng, options);
 }
 
+/** The country whose names a teammate made up for your club takes: the country the club plays in (a pro team only). */
+function teamNameCountry(state: LifeState, content: ContentBundle): string | undefined {
+  const team = state.sports.team;
+  if (!team || team.level !== 'pro') return undefined;
+  return team.country ?? content.cities[team.city]?.countryId;
+}
+
 /**
  * Creates someone new for a role and adds them (and the relationship) to the
  * life. A romantic role creates an adult you're attracted to who is attracted
@@ -201,7 +208,9 @@ export function createPerson(state: LifeState, spec: CastSpec, rng: RngState, co
   const range = newPersonAgeRange(state, spec, content);
   if (!range) return null;
   const city = content.cities[state.character.cityId];
-  const pool = city && content.names[city.countryId];
+  // Batch 6: a teammate made up for a club takes the names of the club's country.
+  const clubCountry = spec.heritage === 'team' ? teamNameCountry(state, content) : undefined;
+  const pool = (clubCountry !== undefined && content.names[clubCountry]) || (city && content.names[city.countryId]);
   if (!pool) return null;
   const romantic = spec.romantic ? romanticCategory(state, rng, content) : spec.admirer ? admirerCategory(state, rng, content) : null;
   if ((spec.romantic || spec.admirer) && romantic === null) return null;
@@ -210,7 +219,7 @@ export function createPerson(state: LifeState, spec: CastSpec, rng: RngState, co
   const category = romantic ?? rollGenderCategory(rng, content);
   // B1: they live in a city of their own (yours, or another for someone who lives elsewhere), whose weights decide their heritage.
   const cityId = spec.presence === 'elsewhere' ? otherCity(state, rng, content) : state.character.cityId;
-  const heritageId = rollHeritage(rng, content, pool, undefined, cityId);
+  const heritageId = rollHeritage(rng, content, pool, undefined, clubCountry === undefined ? cityId : undefined);
   const heritage = pool.heritages[heritageId]!;
   const used = new Set([state.character.name.first, ...Object.values(state.people).map((p) => p.name.first)]);
   const family = content.balance.creation.family;

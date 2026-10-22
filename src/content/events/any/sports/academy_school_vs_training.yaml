@@ -1,0 +1,56 @@
+id: academy_school_vs_training
+title: Homework or the extra session
+text: >-
+  The academy has an extra session on Thursday nights, the kind nobody makes you attend
+  and everybody notices who does. The exam is on Friday morning.
+tone: neutral
+category: sports
+rarity: common
+recurring: true
+lifeStages: [child, teen]
+requires:
+  all:
+    - { age: { gte: 13 } }
+    - { age: { lte: 17 } }
+    - { sports: { active: true } }
+    - { sports: { academy: true } }
+weight: { base: 10 }
+cooldownYears: 2
+choices:
+  - id: train
+    label: Go to the session
+    outcome:
+      text: >-
+        You come home late with grass in your socks and a half-finished page of notes. The
+        coach says nothing, which from this coach is high praise.
+      effects:
+        - { type: fame, action: craft, delta: 2 }
+        - { type: stat, key: smarts, delta: -1 }
+  - id: study
+    label: Stay in and revise
+    outcome:
+      text: >-
+        The exam goes well. On Friday a teammate tells you what you missed, and it was less
+        than you feared.
+      effects:
+        - { type: stat, key: smarts, delta: 2 }
+        - { type: stat, key: stress, delta: -1 }
+  - id: both
+    label: Go for the first half, then leave early
+    check:
+      base: 45
+      stats: [{ key: discipline, weight: 0.2 }, { key: smarts, weight: 0.1 }]
+      success:
+        text: >-
+          You sprint to the bus, write the last page on your knee, and the coach holds the door.
+          Nobody says anything, and everybody saw.
+        effects:
+          - { type: fame, action: craft, delta: 1 }
+          - { type: stat, key: smarts, delta: 1 }
+      failure:
+        text: >-
+          You leave at the wrong moment, and the coach notices. The exam goes badly anyway, because you
+          spent the revision hour thinking about the session.
+        effects:
+          - { type: stat, key: stress, delta: 3 }
+          - { type: stat, key: smarts, delta: -1 }

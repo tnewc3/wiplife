@@ -1,0 +1,46 @@
+id: league_promotion_parade
+title: Going up
+text: >-
+  The last whistle goes and the pitch is full before the stewards can stop it. {team} are in
+  the top league for the first time in years. Somebody has found a trumpet.
+tone: light
+category: sports
+rarity: uncommon
+recurring: true
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { sports: { active: true } }
+    - { sports: { level: [pro] } }
+    - { sports: { moved: [up] } }
+weight: { base: 12 }
+followUpOnly: true
+choices:
+  - id: parade
+    label: Ride the open-top bus through town
+    outcome:
+      text: >-
+        The streets are packed from kerb to kerb. A child holds up a banner with your name
+        on it, spelled right, and the driver has to stop the bus twice.
+      effects:
+        - { type: fame, action: fans, delta: 6 }
+        - { type: stat, key: happiness, delta: 6 }
+  - id: dressing_room
+    label: Stay with the squad until sunrise
+    outcome:
+      text: >-
+        The songs go on until the cleaners arrive. In the morning the shirts are still
+        wet, and nobody wants to be the first to leave.
+      effects:
+        - { type: sports, action: form, delta: 1 }
+        - { type: stat, key: happiness, delta: 4 }
+  - id: quiet
+    label: Slip home before the party gets loud
+    outcome:
+      text: >-
+        You watch it on a phone from your sofa, which is its own kind of pleasure. The top
+        league starts in the summer, and you cannot sleep for thinking about it.
+      effects:
+        - { type: stat, key: stress, delta: -2 }
+        - { type: stat, key: happiness, delta: 3 }

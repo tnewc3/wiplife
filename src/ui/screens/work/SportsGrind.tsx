@@ -38,7 +38,7 @@ function TeamRow({ team, pathId, disabled, act }: { team: TeamOptionView; pathId
       <span className="font-semibold break-words">{team.name}</span>
       <span className="text-sm text-muted">
         {camp ? 'Pro camp' : team.tierLabel} · {SPORT_LEVEL_LABELS[team.level].toLowerCase()}
-        {team.club ? ' · alongside your school team' : ''} · {TEAM_QUALITY_WORDS[team.qualityBand]!.toLowerCase()}
+        {team.club ? ' · alongside your school team' : ''}{team.abroad ? ' · a trial abroad' : ''} · {TEAM_QUALITY_WORDS[team.qualityBand]!.toLowerCase()}
       </span>
       <span className="text-sm" data-testid={`odds-${pathId}-${team.key}`}>
         {ODDS_WORDS[team.oddsBand]} to make it

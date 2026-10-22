@@ -7,6 +7,7 @@
  */
 import type { ContentBundle, FamePathDef, SportDef, SportLevel, SportPositionDef } from '../../content/schemas';
 import type { Id, LifeState, SportsSeason, SportsState } from '../types';
+import { countryOf } from '../country';
 
 export const emptySports = (): SportsState => ({
   sport: null,
@@ -51,6 +52,16 @@ export const emptySports = (): SportsState => ({
     trainedGym: 0,
     trainedCoach: 0,
     signedAfterUndrafted: 0,
+    loans: 0,
+    transfers: 0,
+    fees: 0,
+    graduates: 0,
+    abroad: 0,
+    caps: 0,
+    tournaments: 0,
+    tournamentTitles: 0,
+    goneUp: 0,
+    goneDown: 0,
   },
   tryout: null,
   tried: [],
@@ -65,7 +76,26 @@ export const emptySports = (): SportsState => ({
   role: 'starter',
   number: null,
   captain: false,
+  academy: null,
+  loan: null,
+  loanOffer: null,
+  transfer: null,
+  calledUp: 0,
+  academyOut: 0,
+  abroadYear: 0,
+  moved: null,
 });
+
+/**
+ * What the country you live in calls a sport (Batch 6): soccer is "football" in the UK and Mexico, and the other football is
+ * "American football" there. A sport the country does not rename keeps its own words.
+ */
+export function sportWords(state: LifeState, def: FamePathDef, content: ContentBundle): { name: string; noun: string } {
+  const key = def.sport?.countryWord;
+  if (key === undefined) return { name: def.name, noun: def.noun };
+  const word = countryOf(state, content).athletics[key];
+  return { name: word.charAt(0).toUpperCase() + word.slice(1), noun: word.toLowerCase() };
+}
 
 /** A sport's fame path, or undefined for anything that is not a sport. */
 export function sportPath(content: ContentBundle, id: Id | null | undefined): (FamePathDef & { sport: SportDef }) | undefined {

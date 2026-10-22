@@ -1,0 +1,50 @@
+id: abroad_teammates_settle
+title: Somebody to show you round
+text: >-
+  {mate.name} was the first teammate who spoke to you without being asked to. On Wednesday
+  {mate.they} {mate:knocks|knock} on your door with a map, a list of places to avoid and a
+  recipe. "We do not need to be best friends," {mate.they} {mate:says|say}. "But you need to
+  eat."
+tone: light
+category: sports
+rarity: common
+recurring: true
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { sports: { active: true } }
+    - { sports: { level: [pro] } }
+    - { sports: { abroad: true } }
+weight: { base: 10 }
+cooldownYears: 2
+followUpOnly: true
+cast:
+  mate: { kind: acquaintance, presence: city, createIfMissing: true, heritage: team }
+choices:
+  - id: accept
+    label: Say yes and go with {mate.them}
+    outcome:
+      text: >-
+        The recipe is simple and the kitchen is crowded, and the evening is better than anything
+        you cooked alone. By the dessert you have been invited to a Sunday lunch.
+      effects:
+        - { type: relationship, role: mate, affection: 8 }
+        - { type: stat, key: happiness, delta: 4 }
+  - id: polite
+    label: Thank {mate.them} and keep your own counsel
+    outcome:
+      text: >-
+        {mate.They} {mate:shrugs|shrug} kindly. The list stays on your fridge for a month,
+        and you follow most of it.
+      effects:
+        - { type: relationship, role: mate, affection: 2 }
+  - id: language
+    label: Ask {mate.them} to teach you how it is really said
+    outcome:
+      text: >-
+        You learn the words nobody puts in a phrasebook and the phrase that opens every door in
+        the dressing room. It is mostly swearing, and it works.
+      effects:
+        - { type: relationship, role: mate, affection: 5 }
+        - { type: stat, key: smarts, delta: 1 }

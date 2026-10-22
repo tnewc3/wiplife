@@ -1,0 +1,52 @@
+id: loan_offer_to_host
+title: A season somewhere else
+text: >-
+  The manager calls you in. You are not in the plans for the first team this season, and
+  {parent} thinks you need real minutes more than a seat on the bench. The idea is a
+  season at {host}, on loan, with your contract staying where it is. It is put as a favour,
+  and it is also a decision.
+tone: neutral
+category: sportsdeal
+rarity: common
+recurring: true
+# "Loan" is the football sense (a season at another club), not money.
+justified:
+  money: "On loan means a player lent to another club for a season; no money changes hands for the player."
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { sports: { active: true } }
+    - { sports: { level: [pro] } }
+    - { sports: { loanOffered: true } }
+weight: { base: 12 }
+followUpOnly: true
+choices:
+  - id: accept
+    label: Go to {host}
+    outcome:
+      text: >-
+        You pack the car and say goodbye to a dressing room that did not quite know your name.
+        At {host} somebody hands you a shirt before you have found the toilets.
+      effects:
+        - { type: sports, action: loan, on: true }
+        - { type: stat, key: happiness, delta: 2 }
+  - id: agent
+    label: Have your agent sell it to you as a step forward
+    visibleIf: { fame: { agent: { gte: 1 } } }
+    outcome:
+      text: >-
+        Your agent frames it as the season that makes your name. It is hard to tell if it works
+        on you or on the people at the club. You go anyway.
+      effects:
+        - { type: sports, action: loan, on: true }
+        - { type: fame, action: image, delta: 1 }
+  - id: refuse
+    label: Say you want to fight for your place here
+    outcome:
+      text: >-
+        The manager says it is your right to say so, and it is the club's right to decide. The
+        answer comes in a week.
+      effects:
+        - { type: sports, action: loan, on: false }
+        - { type: stat, key: stress, delta: 2 }

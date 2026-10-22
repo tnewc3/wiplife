@@ -23,7 +23,7 @@ export function startSports(state: LifeState, def: FamePathDef & { sport?: Sport
   state.sports.position = bestPosition(state, sport).id;
   const level = levelOfRung(sport, path.rung);
   if (level === 'pro') return;
-  state.sports.team = amateurTeam(state, sport, level, 0, content);
+  state.sports.team = amateurTeam(state, sport, level, 0, content, undefined, def.id);
   const act = sportActivity(content, def.id);
   if (level === 'school' && act) seatOnSchoolTeam(state, act, 'varsity');
 }

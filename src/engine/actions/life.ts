@@ -40,6 +40,7 @@ import { LOVE_ACTION_IDS, LOVE_ACTIONS } from './love';
 import { PASTIME_ACTION_IDS, PASTIME_ACTIONS } from './pastimes';
 import { BUSINESS_ACTION_IDS, BUSINESS_ACTIONS, type BusinessActionParams } from './business';
 import type { WishesInput } from '../later/terminal';
+import type { SetupChange } from '../sports/setup';
 import type { IdentityEdit } from '../discovery';
 import { isIncarcerated, onProbation } from '../legal';
 import { sameCountry } from '../country';
@@ -137,6 +138,10 @@ export interface LifeActionParams {
   /** Batch 5: a team to try out for (see src/engine/sports/tryout.ts) and where a training session happens. */
   teamKey?: string;
   trainMode?: 'team' | 'gym' | 'coach';
+  /** Batch 6: a transfer offer to take (and whether your agent negotiates it), and a change to the teams of the life (moved and added teams, taken up next season). */
+  offerId?: string;
+  push?: boolean;
+  teamChange?: SetupChange;
   /** L1: your final wishes; how care is provided and, for family care, who by. */
   wishes?: WishesInput;
   careOption?: 'family' | 'paid' | 'assisted';

@@ -1,0 +1,46 @@
+id: commute_long_ride_home
+title: Home games are away
+text: >-
+  The team plays its home games in {place}, and you live where the flat is cheap and the
+  train station is close. On match days, "home" means ninety minutes there, ninety back, and a
+  bag that is never quite packed. You know every announcement on the line by heart.
+tone: neutral
+category: sportslife
+rarity: common
+recurring: true
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { sports: { active: true } }
+    - { sports: { level: [pro] } }
+    - { sports: { away: [city] } }
+weight: { base: 10 }
+cooldownYears: 2
+followUpOnly: true
+choices:
+  - id: work_on_train
+    label: Use the journey to study the game
+    outcome:
+      text: >-
+        You watch film on a tablet with headphones in, and by the second month you can read an
+        opposing team better than you read your own post.
+      effects:
+        - { type: sports, action: form, delta: 1 }
+        - { type: stat, key: smarts, delta: 1 }
+  - id: sleep
+    label: Sleep all the way there
+    outcome:
+      text: >-
+        You wake as the train pulls in, a little ashamed and a lot rested. A stranger across the
+        aisle has watched over your bag the whole way.
+      effects:
+        - { type: stat, key: stress, delta: -2 }
+  - id: team_bus
+    label: Ride the team bus for the company
+    outcome:
+      text: >-
+        The bus is slow, loud and full of songs. You arrive late, happy, and slightly hoarse.
+      effects:
+        - { type: stat, key: happiness, delta: 2 }
+        - { type: stat, key: fitness, delta: -1 }

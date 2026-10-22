@@ -20,6 +20,8 @@ export { readSave, writeSave, type LoadResult } from './saves';
 export {
   DEFAULT_SETTINGS,
   loadSettings,
+  migrateSettings,
+  SETTINGS_VERSION,
   settingsSchema,
   themeSchema,
   updateSettings,

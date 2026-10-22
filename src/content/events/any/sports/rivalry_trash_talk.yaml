@@ -19,7 +19,7 @@ weight: { base: 10 }
 cooldownYears: 3
 followUpOnly: true
 cast:
-  rival: { kind: acquaintance, presence: city, createIfMissing: true }
+  rival: { kind: acquaintance, presence: city, createIfMissing: true, heritage: team }
 choices:
   - id: ignore
     label: Say nothing and let the game answer

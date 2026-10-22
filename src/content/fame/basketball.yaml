@@ -84,12 +84,14 @@ sport:
     - { id: "stress_fracture", weight: 14, min: 30, max: 60 }
     - { id: "concussion", weight: 12, min: 20, max: 55 }
     - { id: "broken_bone", weight: 8, min: 30, max: 55 }
+  international: { side: "the national team", tournament: "the Meridian Cup", cycle: 4 }
   leagues:
     youth: { name: "The Neighbourhood Youth League", nicknames: ["Hoopsters", "Rim Rockers", "Fast Break", "Little Kings", "Court Kids"] }
     school: { name: "The Scholastic Hoops Conference", nicknames: ["Wildcats", "Comets", "Pioneers", "Rangers", "Mustangs", "Knights"] }
     college: { name: "The Collegiate Hoops Association", nicknames: ["Falcons", "Stags", "Bruins", "Mavericks", "Hornets", "Pilots"] }
     pro:
       name: "The Continental Hoops League"
+      markets: [[us, ca]]
       teams:
         - { id: "chicago_foundrymen", name: "Chicago Foundrymen", city: "chicago", quality: 62 }
         - { id: "chicago_lamplighters", name: "Chicago Lamplighters", city: "chicago", quality: 44 }
@@ -121,3 +123,18 @@ sport:
         - { id: "guadalajara_rosales", name: "Guadalajara Rosales", city: "guadalajara", quality: 40 }
         - { id: "monterrey_sierra_titans", name: "Monterrey Sierra Titans", city: "monterrey", quality: 58 }
         - { id: "monterrey_foundry_lions", name: "Monterrey Foundry Lions", city: "monterrey", quality: 46 }
+        - { id: "boston_harbor_lanterns", name: "Boston Harbor Lanterns", cityName: "Boston", nearestCityId: "nyc", futureCity: true, quality: 58 }
+        - { id: "philadelphia_cobblestone_bells", name: "Philadelphia Cobblestone Bells", cityName: "Philadelphia", nearestCityId: "nyc", futureCity: true, quality: 48 }
+        - { id: "atlanta_kudzu_kings", name: "Atlanta Kudzu Kings", cityName: "Atlanta", nearestCityId: "chicago", futureCity: true, quality: 54 }
+        - { id: "dallas_mesquite_riders", name: "Dallas Mesquite Riders", cityName: "Dallas", nearestCityId: "houston", futureCity: true, quality: 61 }
+        - { id: "denver_switchback_elks", name: "Denver Switchback Elks", cityName: "Denver", nearestCityId: "los_angeles", futureCity: true, quality: 55 }
+        - { id: "phoenix_dustdevils", name: "Phoenix Dustdevils", cityName: "Phoenix", nearestCityId: "los_angeles", futureCity: true, quality: 47 }
+        - { id: "seattle_rainmakers", name: "Seattle Rainmakers", cityName: "Seattle", nearestCityId: "los_angeles", futureCity: true, quality: 57 }
+        - { id: "detroit_assembly_kings", name: "Detroit Assembly Kings", cityName: "Detroit", nearestCityId: "chicago", futureCity: true, quality: 44 }
+        - { id: "minneapolis_lakewalkers", name: "Minneapolis Lakewalkers", cityName: "Minneapolis", nearestCityId: "chicago", futureCity: true, quality: 52 }
+        - { id: "san_francisco_foghorns", name: "San Francisco Foghorns", cityName: "San Francisco", nearestCityId: "los_angeles", futureCity: true, quality: 63 }
+        - { id: "miami_causeway_gulls", name: "Miami Causeway Gulls", cityName: "Miami", nearestCityId: "houston", futureCity: true, quality: 60 }
+        - { id: "washington_capitol_quills", name: "Washington Capitol Quills", cityName: "Washington", nearestCityId: "nyc", futureCity: true, quality: 50 }
+        - { id: "calgary_chinook_riders", name: "Calgary Chinook Riders", cityName: "Calgary", nearestCityId: "vancouver", futureCity: true, quality: 51 }
+        - { id: "edmonton_oilbelt_pilots", name: "Edmonton Oilbelt Pilots", cityName: "Edmonton", nearestCityId: "vancouver", futureCity: true, quality: 45 }
+        - { id: "ottawa_rideau_heralds", name: "Ottawa Rideau Heralds", cityName: "Ottawa", nearestCityId: "toronto", futureCity: true, quality: 49 }

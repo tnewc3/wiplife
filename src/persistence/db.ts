@@ -24,7 +24,7 @@ export interface ArchiveRow {
 
 export interface SettingsRow {
   key: string;
-  value: Settings;
+  value: Settings & { version?: number };
 }
 
 export type WiplifeDb = Dexie & {

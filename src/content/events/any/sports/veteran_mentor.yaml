@@ -19,7 +19,7 @@ weight: { base: 10 }
 cooldownYears: 3
 followUpOnly: true
 cast:
-  mate: { kind: acquaintance, presence: city, createIfMissing: true, age: { min: 33, max: 45 } }
+  mate: { kind: acquaintance, presence: city, createIfMissing: true, age: { min: 33, max: 45 }, heritage: team }
 choices:
   - id: listen
     label: Say yes and take notes

@@ -32,6 +32,7 @@ import {
   type WiplifeDb,
 } from '../persistence';
 import { moneyDisplayOf } from '../engine/country';
+import { isEmptySetup, parseTeamSetup, usableSetup, type TeamSetup } from '../engine/sports/setup';
 import { BASE_MONEY_DISPLAY, setMoneyDisplay } from './moneyDisplay';
 
 /** Top-level screens. The age gate is not a screen: it shows until confirmed. */
@@ -105,6 +106,8 @@ export interface AppState {
   init: () => Promise<void>;
   confirmAge: () => Promise<void>;
   setTheme: (theme: Theme) => Promise<void>;
+  /** Batch 6: saves the player's team settings (renamed, moved and added teams) for every new life. Throws SetupError for input that fails the checks. */
+  saveTeams: (setup: TeamSetup) => Promise<void>;
   resetAllData: () => Promise<void>;
   navigate: (screen: Exclude<ScreenId, 'settings'>) => void;
   openSettings: () => void;
@@ -415,6 +418,11 @@ export function createAppStore({
         });
       };
 
+      // Batch 6: the player's team settings go into a new life (a snapshot: the life replays whatever the settings say later).
+      const teamOption = (): { teamSetup?: TeamSetup } => {
+        const setup = usableSetup(get().settings.teams, bundle);
+        return isEmptySetup(setup) ? {} : { teamSetup: setup };
+      };
       const start = async (build: () => LifeState) => {
         if (get().creating) return;
         set((s) => {
@@ -530,6 +538,15 @@ export function createAppStore({
           });
         },
 
+        saveTeams: async (setup) => {
+          // Validated against the content before anything is stored; a setting that fails never reaches the database.
+          const valid = parseTeamSetup(setup, bundle);
+          const settings = await updateSettings(db, { teams: valid });
+          set((s) => {
+            s.settings = settings;
+          });
+        },
+
         resetAllData: async () => {
           await clearAllData(db);
           set((s) => {
@@ -578,11 +595,11 @@ export function createAppStore({
         startRandomLife: () =>
           start(() => {
             const seed = makeSeed();
-            return createLife({ mode: 'random', seed, birthYear: currentYear(), ...(testCountry ? { countryId: testCountry } : {}) }, bundle);
+            return createLife({ mode: 'random', seed, birthYear: currentYear(), ...(testCountry ? { countryId: testCountry } : {}), ...teamOption() }, bundle);
           }),
 
         startCustomLife: (custom) =>
-          start(() => createLife({ mode: 'custom', seed: makeSeed(), birthYear: currentYear(), custom }, bundle)),
+          start(() => createLife({ mode: 'custom', seed: makeSeed(), birthYear: currentYear(), custom, ...teamOption() }, bundle)),
 
         continueLife: () => {
           const life = get().life;

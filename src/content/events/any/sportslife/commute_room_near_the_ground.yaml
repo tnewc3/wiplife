@@ -1,0 +1,47 @@
+id: commute_room_near_the_ground
+title: A room near the ground
+text: >-
+  The club's physio has a suggestion: the squad has a handful of rooms near the ground in
+  {place}, for nights before a game. You would still live where you live. You would just not
+  be on a train at six on match mornings.
+tone: neutral
+category: sportslife
+rarity: common
+recurring: true
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { sports: { active: true } }
+    - { sports: { level: [pro] } }
+    - { sports: { away: [city, country] } }
+weight: { base: 8 }
+cooldownYears: 3
+followUpOnly: true
+choices:
+  - id: take_room
+    label: Take a room for match weeks
+    outcome:
+      text: >-
+        The room is small, quiet and ten minutes' walk from the tunnel. You sleep better there than at
+        home, which feels like a betrayal, and then like a relief.
+      effects:
+        - { type: famePay, cost: small }
+        - { type: stat, key: stress, delta: -2 }
+        - { type: sports, action: form, delta: 1 }
+  - id: keep_travelling
+    label: Keep making the journey
+    outcome:
+      text: >-
+        You decide you would rather sleep in your own bed, and tell yourself it is a principle.
+      effects:
+        - { type: stat, key: stress, delta: 1 }
+  - id: share
+    label: Share a floor with two teammates
+    outcome:
+      text: >-
+        The floor is an inflatable mattress and a kettle with one setting. It is the loudest night
+        of sleep you have had in years, and the best.
+      effects:
+        - { type: stat, key: happiness, delta: 2 }
+        - { type: sports, action: form, delta: 1 }

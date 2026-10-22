@@ -66,7 +66,7 @@ export function sportsLife(options: SportsLife): LifeState {
     enterPath(d as LifeState, sport, route, content);
     const rng = createRng(`${options.seed}:sports`);
     if (options.pro) {
-      d.sports.draft = { year: d.currentYear, pick: 4, round: 1, teamId: draftingTeam(def.sport!, 4, d.character.cityId, content).id };
+      d.sports.draft = { year: d.currentYear, pick: 4, round: 1, teamId: draftingTeam(d as LifeState, def.id, 4, d.character.cityId, content).id };
       signDraftDeal(d as LifeState, content, rng);
       d.fame.agent = { agentId: 'quill_and_marlow', since: d.currentYear - 1 };
       d.fame.paths[sport]!.rung = 5;

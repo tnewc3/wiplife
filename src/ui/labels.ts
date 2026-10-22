@@ -1859,3 +1859,29 @@ export const WORK_ACTION_BLOCK_LABELS: Record<'job' | 'away' | 'done' | 'stance'
   limit: 'That’s enough of that this year.',
   unknown: 'Not possible.',
 };
+
+/** Batch 6: Settings → Teams, in words. */
+export const TEAM_EDITOR_WORDS = {
+  intro: 'Rename any team, move it to another city, or add teams of your own. Every new life plays with the teams as you leave them here.',
+  lifeNote: 'Your life in progress shows new team names at once. Teams you moved, added or removed reach it from next season.',
+  sync: 'Use these changes in my current life',
+  pending: 'Changes to teams are waiting for next season in your current life.',
+} as const;
+
+/** Batch 6: the Sports screen's world of clubs, in words. */
+export const SPORTS_WORLD_WORDS = {
+  title: 'Clubs, loans and moves',
+  awayCity: (place: string, city: string) => `Your team plays its home games in ${place}. You live in ${city} and make the trip.`,
+  awayCountry: (place: string, country: string, city: string) => `Your club is in ${place}${country ? `, ${country}` : ''}. You live in ${city} and commute.`,
+  rival: (rival: string) => `Your rival: ${rival}.`,
+  academy: (club: string, abroad: boolean) => `You are in the academy at ${club}${abroad ? ', in another country, and you travel to it' : ''}.`,
+  onLoan: (host: string, parent: string, until: number) => `On loan at ${host} until ${until}. ${parent} still holds your deal.`,
+  loanOffer: (parent: string, host: string) => `${parent} wants to send you on loan to ${host} for a season.`,
+  window: 'The transfer window is open',
+  terms: (wage: string, years: number, fee: string, clause: string | null) =>
+    `${wage} a year for ${years} ${years === 1 ? 'year' : 'years'}. The clubs agree a fee of ${fee}; you are paid a share when you sign.${clause ? ` A release clause of ${clause}.` : ''}`,
+  national: (side: string, caps: number, tournaments: number, titles: number) =>
+    `${side.charAt(0).toUpperCase() + side.slice(1)}: ${caps} ${caps === 1 ? 'cap' : 'caps'}${tournaments > 0 ? `, ${tournaments} ${tournaments === 1 ? 'tournament' : 'tournaments'}, ${titles} won` : ''}.`,
+  totals: (transfers: number, loans: number, fees: string) => `${transfers} ${transfers === 1 ? 'transfer' : 'transfers'} (fees of ${fees} between the clubs), ${loans} ${loans === 1 ? 'loan' : 'loans'}.`,
+  blocked: { none: 'Not now.', gone: 'The offer has gone.', loan: 'Not while you are on loan.', prison: 'Not from where you are.', between: 'Choices wait until the year is over.' } as Record<string, string>,
+} as const;

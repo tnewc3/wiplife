@@ -1,0 +1,51 @@
+id: academy_commute_homesick
+title: The long way to training
+text: >-
+  The academy is in {clubCountry}, and getting there takes a train, a ferry or a plane, and a
+  bag packed the night before. By the third week the journey is longer than the session. A
+  letter from school is on the kitchen table, unopened.
+tone: neutral
+category: sportslife
+rarity: common
+recurring: true
+lifeStages: [child, teen]
+requires:
+  all:
+    - { age: { gte: 12 } }
+    - { age: { lte: 17 } }
+    - { sports: { active: true } }
+    - { sports: { academy: true } }
+    - { sports: { academyAbroad: true } }
+    - { sports: { away: [country] } }
+weight: { base: 10 }
+cooldownYears: 2
+cast:
+  parent: { kind: parent, presence: household, optional: true }
+choices:
+  - id: tell_parent
+    label: Tell {parent.name} how tired you are
+    visibleIf: { role: parent }
+    outcome:
+      text: >-
+        {parent.They} {parent:listens|listen}, then {parent:rearranges|rearrange} the week so the
+        worst of the travelling lands on the weekend. It is not everything, and it is something.
+      effects:
+        - { type: relationship, role: parent, affection: 4 }
+        - { type: stat, key: stress, delta: -3 }
+  - id: push_through
+    label: Say nothing and make the train
+    outcome:
+      text: >-
+        You sleep against the window and wake up in time to play. The coaches like what they
+        see, and the tiredness comes later.
+      effects:
+        - { type: fame, action: craft, delta: 1 }
+        - { type: stat, key: stress, delta: 3 }
+  - id: homework
+    label: Do the schoolwork on the journey
+    outcome:
+      text: >-
+        You finish it on the way out and mark it on the way back. The coaches laugh at the
+        sight of you with a pencil, and then ask to see it.
+      effects:
+        - { type: stat, key: smarts, delta: 1 }

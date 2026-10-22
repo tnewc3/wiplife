@@ -1,0 +1,57 @@
+id: commute_flight_to_training
+title: The early flight
+text: >-
+  The club is in {clubCountry}, and you live where you live. Your week is a boarding pass: out on
+  Monday before it is light, home on Friday night after the last game. The baggage handlers
+  know you by name, and the cabin crew know your seat.
+tone: neutral
+category: sportslife
+rarity: common
+recurring: true
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { sports: { active: true } }
+    - { sports: { level: [pro] } }
+    - { sports: { away: [country] } }
+weight: { base: 10 }
+cooldownYears: 2
+followUpOnly: true
+choices:
+  - id: routine
+    label: Make a ritual of it
+    outcome:
+      text: >-
+        The same coffee, the same seat, the same podcast. By the second season the journey is
+        part of getting ready, and you feel better for it.
+      effects:
+        - { type: stat, key: stress, delta: -1 }
+        - { type: sports, action: form, delta: 1 }
+  - id: rest_in_lounge
+    label: Insist the club books you a day earlier
+    outcome:
+      text: >-
+        The club agrees, with a look. You arrive rested, which is its own argument.
+      effects:
+        - { type: stat, key: health, delta: 1 }
+        - { type: fame, action: mood, delta: -1 }
+  - id: ground_it
+    label: Ask the club if you can train near home
+    check:
+      base: 42
+      stats: [{ sports: rating, weight: 0.2 }, { key: confidence, weight: 0.1 }]
+      success:
+        text: >-
+          Two days of the week become training at home with the club's fitness coach on a video
+          call. It is not what the coach wanted, and it works.
+        effects:
+          - { type: stat, key: stress, delta: -3 }
+          - { type: sports, action: form, delta: 1 }
+      failure:
+        text: >-
+          The club says the squad trains together, and the tone makes it clear this is not the
+          first time somebody has asked.
+        effects:
+          - { type: stat, key: stress, delta: 2 }
+          - { type: fame, action: mood, delta: -2 }

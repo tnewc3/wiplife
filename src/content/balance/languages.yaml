@@ -21,6 +21,9 @@ heritage:
   european: []
   east_asian: [zh, ko, ja]
   afro_mexican: []
+  spanish: [es]
+  italian: [it]
+  german: []
 # A second locally common language in bilingual households.
 bilingualChance: { montreal: 0.35, houston: 0.16, ca: 0.12, us: 0.06, uk: 0.03, mx: 0.04 }
 school:

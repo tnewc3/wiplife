@@ -38,6 +38,7 @@ import type { FamePathState, FamePlan, FameProject, Id, LifeState } from '../typ
 import { bigBreak, breakChance, climb, contractBlock, crossBlock, endContract, fade, fadeThin, fameHistory, hasFaded, openAgents, retire } from './ladder';
 import { exposableSecrets, addHeadline, exposeSecret, closestHolder, stalkerChance, stalkerYear, tabloidChance, tendFans } from './people';
 import { playSeason, queueSeasonEvents, runSportsRetired } from '../sports/season';
+import { applyPending } from '../sports/world';
 import { allPaths, isMinorStar, kindDef, pathDef, rungDef, topRung, usualYear, workedPaths } from './query';
 import { agentDef, agentTier, assignedPlan, craftGrowth, planBlock, projectTitle, releaseGross, retainer, rollWork, RECENT, type Roll } from './work';
 import { bandYear } from './band';
@@ -265,6 +266,8 @@ export function runFame(state: LifeState, content: ContentBundle): void {
   const rng = state.rng;
   const year = state.currentYear;
   const b = content.balance.fame;
+  // Batch 6: a change of teams the player asked for (moved teams, teams added or removed) takes effect as the season begins.
+  applyPending(state, content);
   f.income = { year, gross: 0, agent: 0, company: 0, trust: 0, scene: 0, tour: 0 };
   if (f.ceremony && f.ceremony.year !== year) delete f.ceremony;
   // Batch 4: what was done between years comes in now: the shows' pay, and the tour that goes out.

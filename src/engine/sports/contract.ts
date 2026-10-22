@@ -15,6 +15,7 @@ import { chance, createRng, nextFloat, nextInt, type RngState } from '../rng';
 import type { Id, LifeState, SportsContract } from '../types';
 import { sportsHistory } from './text';
 import { anotherTeam, draftingTeam, proTeam, proTeamDef, proTeamsIn, relocateForTeam, teamAtHome } from './team';
+import { divisionOf, hasDivisions } from './league';
 import { recentRating } from './query';
 
 type SportPath = FamePathDef & { sport: SportDef };
@@ -52,35 +53,46 @@ export function salaryFor(def: SportPath, kind: SportContractKind, rung: number,
 /** Picks assumed for a rookie deal struck outside a draft (a pick in the middle). */
 const DEFAULT_TOTAL = 40;
 
-function newContract(state: LifeState, def: SportPath, kind: SportContractKind, teamId: Id, rung: number, rating: number, content: ContentBundle, rng: RngState, pickAt?: { pick: number; total: number }): SportsContract {
+/** What a club pays against the league's usual pay: the second league of a sport with two pays less (Batch 6). */
+export function clubPay(state: LifeState, def: SportPath, teamId: Id | null | undefined, content: ContentBundle): number {
+  if (!hasDivisions(def.sport)) return 1;
+  const team = proTeamDef(state, def.id, teamId, content);
+  return team && divisionOf(state, team) === 2 ? content.balance.sports.soccer.tiers.pay : 1;
+}
+
+export function newContract(state: LifeState, def: SportPath, kind: SportContractKind, teamId: Id, rung: number, rating: number, content: ContentBundle, rng: RngState, pickAt?: { pick: number; total: number }): SportsContract {
   const b = content.balance.sports.contract;
   const years = nextInt(rng, b.years[kind].min, Math.max(b.years[kind].min, b.years[kind].max));
   const hasOption = chance(rng, b.option.chance);
+  const pay = clubPay(state, def, teamId, content);
   return {
     teamId,
     since: state.currentYear,
     until: state.currentYear + years - 1,
-    salary: salaryFor(def, kind, rung, rating, content, pickAt),
+    salary: wholeDollars(salaryFor(def, kind, rung, rating, content, pickAt) * pay),
     kind,
     option: hasOption ? (chance(rng, b.option.team) ? 'team' : 'player') : 'none',
-    ...(kind === 'rookie' ? { incentive: rookiePay(def, pickAt?.pick ?? 1 + Math.floor(DEFAULT_TOTAL / 2), pickAt?.total ?? DEFAULT_TOTAL, content).incentive } : {}),
+    ...(kind === 'rookie' ? { incentive: wholeDollars(rookiePay(def, pickAt?.pick ?? 1 + Math.floor(DEFAULT_TOTAL / 2), pickAt?.total ?? DEFAULT_TOTAL, content).incentive * pay) } : {}),
   };
 }
 
 /** Takes you onto a pro team: the deal, the move, the bonus (a rookie's by the pick; otherwise a share of a year's pay). */
 function joinTeam(state: LifeState, def: SportPath, teamId: Id, contract: SportsContract, content: ContentBundle, bonus?: number): void {
-  const team = teamAtHome(def.sport, proTeamDef(def.sport, teamId), state.character.cityId, content);
+  const team = teamAtHome(state, def.id, proTeamDef(state, def.id, teamId, content), state.character.cityId, content);
   if (!team) return;
   const s = state.sports;
   contract = { ...contract, teamId: team.id };
   s.pro = true;
-  s.team = proTeam(team);
+  s.team = proTeam(state, team, def.id, content);
   s.teamless = false;
   s.contract = contract;
   s.unsigned = 0;
   s.playOut = false;
   s.ask = null;
-  relocateForTeam(state, team.city, content);
+  s.academy = null;
+  s.loan = null;
+  s.transfer = null;
+  relocateForTeam(state, team.city, content, contract.until);
   payFameMoney(state, bonus ?? contract.salary * content.balance.sports.contract.bonus, content);
 }
 
@@ -95,7 +107,7 @@ export function signDraftDeal(state: LifeState, content: ContentBundle, rng: Rng
   const kind: SportContractKind = kindOverride ?? (d.pick > 0 ? 'rookie' : 'minimum');
   const rung = sport.sport.proRung;
   const rating = recentRating(state);
-  const total = draftTotal(sport.sport, state.character.cityId, content);
+  const total = draftTotal(state, sport.id, state.character.cityId, content);
   const pickAt = d.pick > 0 ? { pick: d.pick, total } : undefined;
   const contract = newContract(state, sport, kind, d.teamId, rung, rating, content, rng, pickAt);
   const signing = kind === 'rookie' && pickAt ? rookiePay(sport, pickAt.pick, pickAt.total, content).signing : undefined;
@@ -104,7 +116,8 @@ export function signDraftDeal(state: LifeState, content: ContentBundle, rng: Rng
   path.rung = Math.max(path.rung, rung);
   path.peak = Math.max(path.peak, path.rung);
   path.fame = Math.max(path.fame, rungDef(def, path.rung).fame + 1);
-  sportsHistory(state, d.pick > 0 ? 'drafted' : 'signed', content);
+  sportsHistory(state, d.academy === true ? 'academy' : d.pick > 0 ? 'drafted' : 'signed', content);
+  if (d.academy === true) s.totals.graduates += 1;
   if (s.passed > 0) s.totals.signedAfterUndrafted += 1;
   s.draft = null;
   s.passed = 0;
@@ -146,14 +159,16 @@ export function declineDraft(state: LifeState): void {
 }
 
 /** The picks in the draft: every team, every round. */
-export function draftTotal(def: SportDef, home: Id, content: ContentBundle): number {
-  return Math.max(1, proTeamsIn(def, home, content).length) * def.draft.rounds;
+export function draftTotal(state: LifeState, sportId: Id, home: Id, content: ContentBundle): number {
+  const def = content.famePaths[sportId]!.sport!;
+  return Math.max(1, proTeamsIn(state, sportId, home, content).length) * def.draft.rounds;
 }
 
 /** Where in the draft a prospect goes: the pick (0 for undrafted) and the round. */
-export function draftSlot(score: number, def: SportDef, home: Id, content: ContentBundle): { pick: number; round: number } {
+export function draftSlot(state: LifeState, sportId: Id, score: number, home: Id, content: ContentBundle): { pick: number; round: number } {
+  const def = content.famePaths[sportId]!.sport!;
   const d = content.balance.sports.draft;
-  const teams = Math.max(1, proTeamsIn(def, home, content).length);
+  const teams = Math.max(1, proTeamsIn(state, sportId, home, content).length);
   const total = teams * def.draft.rounds;
   const pick = Math.max(1, Math.round(1 + Math.max(0, d.top - score) * d.perPick));
   if (pick > total) return { pick: 0, round: 0 };
@@ -178,14 +193,14 @@ export function draftScoreBase(state: LifeState, pathFame: number, content: Cont
 }
 
 /** A team makes you an offer after the draft passes you by. */
-export function undraftedOffer(def: SportPath, rating: number, home: Id, content: ContentBundle, rng: RngState): Id | null {
+export function undraftedOffer(state: LifeState, def: SportPath, rating: number, home: Id, content: ContentBundle, rng: RngState): Id | null {
   if (!chance(rng, curveAt(content.balance.sports.draft.undrafted, rating))) return null;
-  return anotherTeam(def.sport, null, home, content, rng).id;
+  return anotherTeam(state, def.id, null, home, content, rng).id;
 }
 
 /** The team that holds the pick. */
-export function pickTeamId(def: SportDef, pick: number, home: Id, content: ContentBundle): Id | null {
-  return pick > 0 ? draftingTeam(def, pick, home, content).id : null;
+export function pickTeamId(state: LifeState, sportId: Id, pick: number, home: Id, content: ContentBundle): Id | null {
+  return pick > 0 ? draftingTeam(state, sportId, pick, home, content).id : null;
 }
 
 /** You sign again with your own team, on terms: the market (fair), more because you pushed (rich, which may fail), or less out of loyalty (cheap). */
@@ -217,19 +232,21 @@ export function moveToTeam(state: LifeState, teamId: Id, newDeal: boolean, conte
   const path = s.sport ? state.fame.paths[s.sport] : undefined;
   if (!def?.sport || !path) return false;
   const sport = def as SportPath;
-  const team = teamAtHome(sport.sport, proTeamDef(sport.sport, teamId), state.character.cityId, content);
+  const team = teamAtHome(state, sport.id, proTeamDef(state, sport.id, teamId, content), state.character.cityId, content);
   if (!team) return false;
   teamId = team.id;
   const old = s.contract;
   const contract: SportsContract = newDeal || !old ? newContract(state, sport, path.rung >= sport.sport.proRung + 2 ? 'star' : 'standard', teamId, path.rung, recentRating(state), content, rng) : { ...old, teamId };
   s.pro = true;
-  s.team = proTeam(team);
+  s.team = proTeam(state, team, sport.id, content);
   s.teamless = false;
   s.contract = contract;
   s.unsigned = 0;
   s.playOut = false;
   s.ask = null;
-  relocateForTeam(state, team.city, content);
+  s.loan = null;
+  s.transfer = null;
+  relocateForTeam(state, team.city, content, contract.until);
   if (newDeal) payFameMoney(state, contract.salary * content.balance.sports.contract.bonus, content);
   return true;
 }
@@ -239,7 +256,7 @@ export function tradePlayer(state: LifeState, content: ContentBundle, rng: RngSt
   const s = state.sports;
   const def = s.sport ? content.famePaths[s.sport] : undefined;
   if (!def?.sport || !s.contract) return false;
-  const team = anotherTeam((def as SportPath).sport, s.contract.teamId, state.character.cityId, content, rng);
+  const team = anotherTeam(state, (def as SportPath).id, s.contract.teamId, state.character.cityId, content, rng);
   if (!moveToTeam(state, team.id, false, content, rng)) return false;
   s.totals.trades += 1;
   s.traded = state.currentYear;
@@ -275,7 +292,7 @@ export function draftProjection(state: LifeState, def: SportPath, content: Conte
   const d = content.balance.sports.draft;
   const path = state.fame.paths[def.id];
   if (!path || state.sports.pro || state.character.age < def.sport.draft.age - 1) return null;
-  const total = draftTotal(def.sport, state.character.cityId, content);
+  const total = draftTotal(state, def.id, state.character.cityId, content);
   const score = draftScoreBase(state, path.fame, content);
   const bandAt = (x: number): string => {
     const pick = Math.max(1, Math.round(1 + Math.max(0, d.top - x) * d.perPick));

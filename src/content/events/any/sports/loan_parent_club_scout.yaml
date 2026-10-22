@@ -1,0 +1,46 @@
+id: loan_parent_club_scout
+title: A familiar face in the stand
+text: >-
+  Halfway through the season, a scout in a {parent} jacket takes a seat behind the dugout
+  with a notebook and a flask. There is no wave. There is no need.
+tone: neutral
+category: sports
+rarity: common
+recurring: true
+lifeStages: [youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { sports: { active: true } }
+    - { sports: { loan: true } }
+weight: { base: 10 }
+cooldownYears: 2
+choices:
+  - id: show_off
+    label: Play for the notebook
+    check:
+      base: 40
+      stats: [{ sports: rating, weight: 0.25 }, { key: confidence, weight: 0.15 }]
+      success:
+        text: >-
+          Everything you try comes off. At the final whistle the notebook is closed and the scout
+          is already on the phone.
+        effects:
+          - { type: sports, action: form, delta: 2 }
+          - { type: fame, action: image, delta: 1 }
+      failure:
+        text: >-
+          You try too hard and give the ball away twice before half-time. The scout does not write
+          anything down, which is somehow worse.
+        effects:
+          - { type: sports, action: form, delta: -1 }
+          - { type: stat, key: stress, delta: 3 }
+  - id: ignore
+    label: Play the game in front of you
+    outcome:
+      text: >-
+        You forget the scout by the first tackle. When you think of the stand again, the seat is empty, and the
+        game was the best you have played in a month.
+      effects:
+        - { type: sports, action: form, delta: 1 }
+        - { type: stat, key: stress, delta: -1 }

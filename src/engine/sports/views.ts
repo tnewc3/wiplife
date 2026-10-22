@@ -8,7 +8,7 @@
  */
 import type { ContentBundle, FameBand, SportLevel, SportRetireRoute, SportRole, TeamTier, Tier, TrainingMode } from '../../content/schemas';
 import { SPORT_RETIRE_ROUTES, TRAINING_MODES } from '../../content/schemas';
-import { countryOf } from '../country';
+import { countryIdOfCity, countryOf } from '../country';
 import { schoolName } from '../education';
 import { grindView, practiceBudget, skillLevel, skillsOf, skillCap } from '../fame/grind';
 import { commitmentCeiling, commitmentFloor } from '../fame/effects';
@@ -19,7 +19,9 @@ import { isIncarcerated } from '../legal';
 import { renderText } from '../text';
 import type { Id, LifeState, SportsSeason } from '../types';
 import { draftProjection } from './contract';
-import { allSports, contractYearsLeft, fitFor, injuryNow, levelNow, mySport, positionOf, sportPath } from './query';
+import { allSports, contractYearsLeft, fitFor, injuryNow, levelNow, mySport, positionOf, sportPath, sportWords } from './query';
+import { hasDivisions, rivalOf, teamById } from './league';
+import { transferBlock } from './soccer';
 import { liveOffers } from './scholarship';
 import { hasTeam, trainBlock, trainCost, trainGain, trainingView, type TrainBlock } from './training';
 import { teamOptions, tryoutOdds, type TryoutBlock } from './tryout';
@@ -66,6 +68,8 @@ export interface TeamOptionView {
   oddsBand: number;
   fee: number;
   club: boolean;
+  /** Batch 6: a trial at an academy in a country the game does not model (a UK child commutes). */
+  abroad: boolean;
   block: TryoutBlock | null;
 }
 
@@ -113,14 +117,14 @@ export interface SportsView {
   sport: { id: Id; name: string; noun: string; blurb: string; league: string; title: string } | null;
   path: FamePathView | null;
   level: SportLevel | null;
-  team: { name: string; level: SportLevel; qualityBand: number; city: string } | null;
+  team: { name: string; level: SportLevel; qualityBand: number; city: string; place: string | null; away: 'city' | 'country' | null; division: 1 | 2 | null; divisionName: string | null; country: string | null } | null;
   position: { id: Id; label: string; blurb: string; fit: number; fitBand: number } | null;
   positions: { id: Id; label: string; blurb: string; fit: number; fitBand: number; current: boolean; allowed: boolean }[];
   focus: 'skills' | 'conditioning' | 'film';
-  contract: { team: string; salary: number; until: number; yearsLeft: number; kind: string; option: string } | null;
+  contract: { team: string; salary: number; until: number; yearsLeft: number; kind: string; option: string; release: number | null } | null;
   freeAgent: boolean;
   playOut: boolean;
-  ask: 'trade' | 'contract' | null;
+  ask: 'trade' | 'contract' | 'loan' | null;
   canAskTrade: boolean;
   canAskContract: boolean;
   draft: { pick: number; round: number; team: string | null } | null;
@@ -170,6 +174,18 @@ export interface SportsView {
   prospect: { likely: string; best: string; worst: string; line: string; passed: boolean; combine: number } | null;
   /** A camp, an open tryout or a call for a player with no team: open now. */
   camps: boolean;
+  /** Batch 6: the academy you belong to, a loan (on, or offered), the transfer window, the national side, your club's rival, and what you may ask. */
+  soccer: boolean;
+  academy: { club: string; abroad: boolean; place: string | null } | null;
+  loan: { host: string; parent: string; until: number } | null;
+  loanOffer: { host: string; parent: string } | null;
+  canAskLoan: boolean;
+  transfer: { id: string; club: string; place: string; country: string | null; fee: number; wage: number; years: number; clause: number; abroad: boolean; canPush: boolean; block: string | null }[];
+  international: { side: string; tournament: string; caps: number; calledUp: boolean; tournaments: number; titles: number } | null;
+  rival: string | null;
+  worldTotals: { loans: number; transfers: number; fees: number; graduates: number; abroad: number; caps: number; goneUp: number; goneDown: number };
+  /** Batch 6: a change to the teams of this life waits for next season. */
+  teamsPending: boolean;
 }
 
 function seasonView(state: LifeState, season: SportsSeason, content: ContentBundle): SportsSeasonView {
@@ -231,6 +247,7 @@ function teamViews(state: LifeState, def: NonNullable<ReturnType<typeof mySport>
       oddsBand: bandOf(odds * 100, [20, 45, 70, 90]),
       fee: o.fee,
       club: o.club,
+      abroad: o.abroad === true,
       block: o.block,
     };
   });
@@ -275,16 +292,28 @@ export function getSportsView(state: LifeState, content: ContentBundle): SportsV
     retired: s.retired ?? null,
     between,
     minor,
-    sport: def ? { id: def.id, name: def.name, noun: def.noun, blurb: def.blurb, league: def.sport.leagues.pro.name, title: def.sport.title } : null,
+    sport: def ? { id: def.id, name: sportWords(state, def, content).name, noun: sportWords(state, def, content).noun, blurb: def.blurb, league: def.sport.leagues.pro.name, title: def.sport.title } : null,
     path,
     level: levelNow(state, content),
-    team: s.team ? { name: s.team.name, level: s.team.level, qualityBand: bandOf(teamQuality, [35, 50, 65]), city: content.cities[s.team.city]?.name ?? '' } : null,
+    team: s.team
+      ? {
+          name: s.team.name,
+          level: s.team.level,
+          qualityBand: bandOf(teamQuality, [35, 50, 65]),
+          city: content.cities[s.team.city]?.name ?? '',
+          place: s.team.place ?? null,
+          away: s.team.away ?? null,
+          division: s.team.division ?? null,
+          divisionName: def && s.team.division !== undefined ? (def.sport.leagues.pro.tiers?.[s.team.division - 1] ?? null) : null,
+          country: s.team.country !== undefined ? content.text.sports.countries[s.team.country] : null,
+        }
+      : null,
     position: here && def ? { id: here.id, label: here.label, blurb: here.blurb, fit: here.fit, fitBand: here.fitBand } : null,
     positions,
     focus: s.focus,
     contract:
       s.contract && def
-        ? { team: def.sport.leagues.pro.teams.find((t) => t.id === s.contract!.teamId)?.name ?? '', salary: s.contract.salary, until: s.contract.until, yearsLeft: contractYearsLeft(state), kind: s.contract.kind, option: s.contract.option }
+        ? { team: teamById(state, def.id, s.contract.teamId, content)?.name ?? '', salary: s.contract.salary, until: s.contract.until, yearsLeft: contractYearsLeft(state), kind: s.contract.kind, option: s.contract.option, release: s.contract.release ?? null }
         : null,
     freeAgent: playing && s.pro && s.contract === null,
     playOut: s.playOut,
@@ -293,7 +322,7 @@ export function getSportsView(state: LifeState, content: ContentBundle): SportsV
     canAskContract: between && sentinel && f.agent !== null && s.ask === null,
     draft:
       s.draft && def
-        ? { pick: s.draft.pick, round: s.draft.round, team: def.sport.leagues.pro.teams.find((t) => t.id === s.draft!.teamId)?.name ?? null }
+        ? { pick: s.draft.pick, round: s.draft.round, team: teamById(state, def.id, s.draft.teamId, content)?.name ?? null }
         : null,
     injury: worst && condition ? { name: content.conditions[worst.conditionId]?.noun ?? '', severityBand: bandOf(worst.severity, [25, 50, 75]), treated: condition.treated, pain: s.pain } : null,
     latest: latest ? seasonView(state, latest, content) : null,
@@ -346,7 +375,7 @@ export function getSportsView(state: LifeState, content: ContentBundle): SportsV
       ? []
       : sports.map((d) => ({
           pathId: d.id,
-          name: d.name,
+          name: sportWords(state, d, content).name,
           blurb: d.blurb,
           routes: d.routes.map((r) => ({ id: r.id, label: r.label, blurb: r.blurb, minAge: Math.max(r.minAge, d.minAge), block: enterBlock(state, d.id, r.id, content) })),
           teams: teamViews(state, d, content),
@@ -375,6 +404,7 @@ export function getSportsView(state: LifeState, content: ContentBundle): SportsV
           }
         : null,
     camps: teams.some((t) => t.level === 'pro'),
+    ...worldView(state, def, playing, between, content),
   };
   return view;
 }
@@ -408,5 +438,42 @@ function trainingSection(state: LifeState, content: ContentBundle, between: bool
       const blocks = Object.fromEntries(TRAINING_MODES.map((m) => [m, between ? trainBlock(state, sk.id, m, content) : ('budget' as TrainBlock)])) as Record<TrainingMode, TrainBlock | null>;
       return { id: sk.id, label: sk.label, blurb: sk.blurb, level: Math.round(level), levelBand: bandOf(level, [25, 45, 65, 85]), cap: skillCap(state, def, content), gains, blocks };
     }),
+  };
+}
+
+/** Batch 6: soccer's academy, loan and transfer window, the national side and the rival. */
+function worldView(state: LifeState, def: ReturnType<typeof mySport>, playing: boolean, between: boolean, content: ContentBundle): Pick<SportsView, 'soccer' | 'academy' | 'loan' | 'loanOffer' | 'canAskLoan' | 'transfer' | 'international' | 'rival' | 'worldTotals' | 'teamsPending'> {
+  const s = state.sports;
+  const name = (id: string | null | undefined): string => (def && id ? (teamById(state, def.id, id, content)?.name ?? '') : '');
+  const soccer = def !== undefined && hasDivisions(def.sport);
+  const home = countryIdOfCity(state.character.cityId, content);
+  const mine = def && s.team?.id ? teamById(state, def.id, s.team.id, content) : undefined;
+  const rival = def && mine ? rivalOf(state, def.id, mine, content) : undefined;
+  return {
+    soccer,
+    academy: s.academy && def ? { club: name(s.academy.clubId), abroad: s.academy.abroad, place: teamById(state, def.id, s.academy.clubId, content)?.cityName ?? null } : null,
+    loan: s.loan ? { host: name(s.loan.hostId), parent: name(s.loan.parentId), until: s.loan.until } : null,
+    loanOffer: s.loanOffer && s.contract ? { host: name(s.loanOffer.hostId), parent: name(s.contract.teamId) } : null,
+    canAskLoan: playing && between && soccer && s.pro && s.contract !== null && s.loan === null && s.loanOffer === null && s.ask === null,
+    transfer: (s.transfer?.offers ?? []).map((o) => {
+      const club = def ? teamById(state, def.id, o.clubId, content) : undefined;
+      return {
+        id: o.id,
+        club: club?.name ?? '',
+        place: club ? (club.cityName ?? content.cities[club.city]?.name ?? '') : '',
+        country: club ? (club.country !== undefined ? content.text.sports.countries[club.country] : (content.countries[countryIdOfCity(club.city, content)]?.name ?? null)) : null,
+        fee: o.fee,
+        wage: o.wage,
+        years: o.years,
+        clause: o.clause,
+        abroad: club ? countryIdOfCity(club.city, content) !== home : false,
+        canPush: state.fame.agent !== null,
+        block: between && playing ? transferBlock(state, o.id, content) : 'between',
+      };
+    }),
+    international: def ? { side: def.sport.international.side, tournament: def.sport.international.tournament, caps: s.totals.caps, calledUp: s.calledUp === state.currentYear, tournaments: s.totals.tournaments, titles: s.totals.tournamentTitles } : null,
+    rival: rival?.name ?? null,
+    worldTotals: { loans: s.totals.loans, transfers: s.totals.transfers, fees: s.totals.fees, graduates: s.totals.graduates, abroad: s.totals.abroad, caps: s.totals.caps, goneUp: s.totals.goneUp, goneDown: s.totals.goneDown },
+    teamsPending: state.league.pending !== null,
   };
 }

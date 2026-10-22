@@ -16,7 +16,7 @@ import { createRng } from '../rng';
 import { getSportsView } from '../selectors';
 import { lifeAtAge } from '../testFixtures';
 import type { LifeState } from '../types';
-import { draftProjection, draftScoreBase, draftSlot, pickShare, rookiePay, salaryFor, signCampDeal } from './contract';
+import { draftProjection, draftScoreBase, draftSlot, pickShare, rookiePay, salaryFor, signCampDeal, draftTotal } from './contract';
 import { sportsHolds } from './holds';
 import { injuryRisk } from './injury';
 import { campOpen, optionFor, teamOptions, tryoutBlock } from './tryout';
@@ -530,7 +530,7 @@ describe('the draft and rookie pay', () => {
     });
 
   it('puts a prospect where their skill puts them: a stronger prospect goes earlier', () => {
-    const slot = (score: number) => draftSlot(score, def.sport, 'chicago', content).pick;
+    const slot = (score: number) => draftSlot(college('slot'), def.id, score, 'chicago', content).pick;
     expect(slot(90)).toBeLessThan(slot(70));
     expect(slot(70)).toBeLessThan(slot(60));
     expect(slot(20)).toBe(0);
@@ -598,7 +598,7 @@ describe('the draft and rookie pay', () => {
   it('adds skill incentives: a better season within the same slot pays more through the ledger', () => {
     const signed = (seed: string, skill: number) =>
       apply(college(seed), (d) => {
-        d.sports.draft = { year: d.currentYear, pick: 10, round: 1, teamId: draftingTeam(def.sport, 10, 'chicago', content).id };
+        d.sports.draft = { year: d.currentYear, pick: 10, round: 1, teamId: draftingTeam(d, def.id, 10, 'chicago', content).id };
         applyEffects(d, [{ type: 'sports', action: 'sign' }], { def: content.events.draft_night_first_round!, cast: {}, rng: d.rng, content });
         d.fame.paths.basketball!.skills = Object.fromEntries(def.skills!.map((s) => [s.id, skill]));
         d.sports.seasons = [];
@@ -607,8 +607,9 @@ describe('the draft and rookie pay', () => {
     const first = signed('inc-0', 10);
     const c = first.sports.contract!;
     expect(c.kind).toBe('rookie');
-    expect(c.salary).toBe(rookiePay(def, 10, 24, content).salary);
-    expect(c.incentive).toBe(rookiePay(def, 10, 24, content).incentive);
+    const slots = draftTotal(first, def.id, 'chicago', content);
+    expect(c.salary).toBe(rookiePay(def, 10, slots, content).salary);
+    expect(c.incentive).toBe(rookiePay(def, 10, slots, content).incentive);
     expect(c.incentive).toBeGreaterThan(0);
     // The signing bonus is by the pick and reaches savings at once.
     expect(first.finances.savings).toBeGreaterThan(prospect('inc-0', 21).finances.savings);

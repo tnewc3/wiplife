@@ -1,0 +1,50 @@
+id: national_callup_letter
+title: A letter with a crest on it
+text: >-
+  The envelope is heavy and cream-coloured, and the crest in the corner is the one on {nation}'s
+  shirt. You are called up for the next camp. Your club has been told, which explains the way
+  the physio looked at you this morning.
+tone: light
+category: sports
+rarity: uncommon
+recurring: true
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { sports: { active: true } }
+    - { sports: { level: [pro] } }
+    - { sports: { calledUp: true } }
+weight: { base: 12 }
+cooldownYears: 1
+followUpOnly: true
+choices:
+  - id: answer
+    label: Say yes and pack
+    outcome:
+      text: >-
+        The camp is a hotel, a practice ground and forty names you half know. You put on the shirt in front
+        of a mirror with nobody watching, then take it off, then put it on again.
+      effects:
+        - { type: sports, action: cap }
+        - { type: stat, key: happiness, delta: 6 }
+        - { type: fame, action: fans, delta: 3 }
+  - id: agent
+    label: Ask your agent what it means for your club deal
+    visibleIf: { fame: { agent: { gte: 1 } } }
+    outcome:
+      text: >-
+        "It means they've noticed," your agent says. "It also means you'll be tired in
+        March." You go anyway, with a plan.
+      effects:
+        - { type: sports, action: cap }
+        - { type: fame, action: image, delta: 1 }
+  - id: rest
+    label: Turn it down and rest
+    outcome:
+      text: >-
+        You phone the federation and give a reason that is half true. The reply is polite and
+        short, and you spend the break on a beach you cannot enjoy.
+      effects:
+        - { type: stat, key: stress, delta: -2 }
+        - { type: fame, action: image, delta: -1 }
