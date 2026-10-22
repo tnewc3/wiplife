@@ -150,6 +150,7 @@ function proMoves(state: LifeState, path: SportPath, content: ContentBundle, rng
 
   // Batch 6: last year's window is closed, and a loan that has run its season ends (you are back with your own club) before the deal is looked at.
   s.transfer = null;
+  if (!s.loan) s.loanOffer = null;
   if (s.loan && (s.loan.until < year || !s.contract)) endLoan(state, path, content);
 
   if (!s.contract || !s.team) {

@@ -15,7 +15,7 @@ import type { Id, LifeState, SportsTeam } from '../types';
 import { countryIdOfCity } from '../country';
 import { weightedPick } from '../random';
 import { settleForClub } from '../migration/move';
-import { awayOf, divisionOf, hasDivisions, homeLeagueTeams, marketTeams, teamById, type ProTeam } from './league';
+import { awayOf, divisionOf, hasDivisions, homeLeagueTeams, marketTeams, playingCountry, teamById, type ProTeam } from './league';
 import { academyTeam, homeAcademyClub } from './soccer';
 import { sportsHistory } from './text';
 
@@ -118,10 +118,14 @@ export function anotherTeam(state: LifeState, sportId: Id, not: Id | null, home:
   const all = marketTeams(state, sportId, home, content).filter((t) => adult || countryIdOfCity(t.city, content) === here);
   let options = all.filter((t) => t.id !== not);
   if (options.length === 0) options = homeLeagueTeams(state, sportId, home, content);
+  // Clubs in another country share `abroad.share` of the odds between them; clubs at home share the rest.
+  const away = (t: ProTeam): boolean => playingCountry(t, content) !== here;
+  const homeCount = options.filter((t) => !away(t)).length;
+  const awayCount = options.length - homeCount;
+  const awayWeight = homeCount === 0 ? 1 : awayCount === 0 ? 0 : (homeCount * W.share) / (1 - W.share) / awayCount;
   const weights = options.map((t) => {
-    const abroad = countryIdOfCity(t.city, content) !== here ? W.weight : 1;
     const fit = rating === undefined ? 1 : 1 / (1 + Math.abs(t.quality - rating) / 15);
-    return [t, abroad * fit] as const;
+    return [t, (away(t) ? awayWeight : 1) * fit] as const;
   });
   // Without weights to tell teams apart this is the plain pick it always was (the generator is read once either way).
   return rating === undefined && weights.every(([, w]) => w === 1) ? pick(rng, options) : weightedPick(rng, weights);
@@ -149,4 +153,16 @@ export function relocateForTeam(state: LifeState, cityId: Id, content: ContentBu
     state.sports.totals.abroad += 1;
     sportsHistory(state, 'abroad', content);
   }
+}
+
+/**
+ * A deal signed or extended while you hold a work permit the club arranged keeps the permit running past the end of the deal
+ * (a long career abroad on a string of extensions is never left without papers). Nothing changes for anyone else.
+ */
+export function keepPermit(state: LifeState, content: ContentBundle): void {
+  const c = state.sports.contract;
+  const r = state.travel.residence;
+  if (!c || !r?.settled || r.type !== 'temporary_worker' || r.route !== 'work_sponsor') return;
+  const end = c.until + content.balance.sports.world.abroad.permitYears;
+  if (end > r.endYear) state.travel.residence = { ...r, endYear: end };
 }

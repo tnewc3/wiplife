@@ -14,7 +14,7 @@ import { wholeDollars } from '../finance';
 import { chance, createRng, nextFloat, nextInt, type RngState } from '../rng';
 import type { Id, LifeState, SportsContract } from '../types';
 import { sportsHistory } from './text';
-import { anotherTeam, draftingTeam, proTeam, proTeamDef, proTeamsIn, relocateForTeam, teamAtHome } from './team';
+import { anotherTeam, draftingTeam, keepPermit, proTeam, proTeamDef, proTeamsIn, relocateForTeam, teamAtHome } from './team';
 import { divisionOf, hasDivisions } from './league';
 import { recentRating } from './query';
 
@@ -93,6 +93,7 @@ function joinTeam(state: LifeState, def: SportPath, teamId: Id, contract: Sports
   s.loan = null;
   s.transfer = null;
   relocateForTeam(state, team.city, content, contract.until);
+  keepPermit(state, content);
   payFameMoney(state, bonus ?? contract.salary * content.balance.sports.contract.bonus, content);
 }
 
@@ -221,6 +222,7 @@ export function extend(state: LifeState, terms: 'fair' | 'rich' | 'cheap', conte
   s.contract = { ...base, since: old.since, until: Math.max(old.until, state.currentYear) + (base.until - base.since + 1), salary: wholeDollars(base.salary * mult) };
   s.playOut = false;
   s.ask = null;
+  keepPermit(state, content);
   payFameMoney(state, s.contract.salary * b.bonus * (terms === 'cheap' ? 1 : 0.5), content);
   return true;
 }
@@ -247,6 +249,7 @@ export function moveToTeam(state: LifeState, teamId: Id, newDeal: boolean, conte
   s.loan = null;
   s.transfer = null;
   relocateForTeam(state, team.city, content, contract.until);
+  keepPermit(state, content);
   if (newDeal) payFameMoney(state, contract.salary * content.balance.sports.contract.bonus, content);
   return true;
 }

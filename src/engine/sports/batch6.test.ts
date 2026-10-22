@@ -12,12 +12,13 @@ import { createRng } from '../rng';
 import { getSportsView } from '../selectors';
 import { lifeAtAge } from '../testFixtures';
 import type { LifeState } from '../types';
-import { signDraftDeal, moveToTeam } from './contract';
+import { extend, signDraftDeal, moveToTeam } from './contract';
+import { anotherTeam } from './team';
 import { sportsHolds } from './holds';
-import { divisionOf, hasDivisions, homeLeagueTeams, marketTeams, rivalOf, sameLeague, teamById, teamsOf } from './league';
+import { divisionOf, hasDivisions, homeLeagueTeams, marketTeams, playingCountry, rivalOf, sameLeague, teamById, teamsOf } from './league';
 import { allSports, sportPath, sportWords } from './query';
 import { emptySetup, parseTeamSetup, setupIssues, SetupError, teamRenames, usableSetup, withTeamNames, type TeamSetup } from './setup';
-import { abroadAcademyClubs, academyIntake, bestOffer, homeAcademyClub, loanHosts, offerLoan, openWindow, settleLeagues, takeLoan, takeTransfer, endLoan, transferBlock } from './soccer';
+import { abroadAcademyClubs, academyIntake, bestOffer, homeAcademyClub, loanHosts, offerLoan, openWindow, settleLeagues, takeLoan, takeTransfer, endLoan, transferBlock, transferValue } from './soccer';
 import { startTryout, teamOptions } from './tryout';
 import { applySportsEffect } from './effects';
 import { nationalStep, tournamentYear } from './world';
@@ -181,6 +182,38 @@ describe('clubs outside your country', () => {
     expect(sportsHolds({ abroad: true }, next, content)).toBe(true);
     expect(next.history.some((h) => h.text.includes('Canada'))).toBe(true);
     ok(next);
+  });
+
+  it('keeps the permit running past every new deal at a club abroad: a string of extensions is never left without papers', () => {
+    const toronto = sportPath(content, 'basketball')!.sport.leagues.pro.teams.find((t) => t.city === 'toronto')!;
+    const chicago = sportPath(content, 'basketball')!.sport.leagues.pro.teams.find((t) => t.city === 'chicago')!;
+    const abroad = apply(pro(lifeAtAge('permit', 22), 'basketball', chicago.id), (d) => void moveToTeam(d, toronto.id, true, content, createRng('t')));
+    const until = abroad.sports.contract!.until;
+    expect(abroad.travel.residence!.endYear).toBe(until + content.balance.sports.world.abroad.permitYears);
+    const later = apply(abroad, (d) => {
+      d.currentYear = until + 1;
+      d.character.age += until + 1 - abroad.currentYear;
+      extend(d, 'fair', content, createRng('e'));
+    });
+    expect(later.sports.contract!.until).toBeGreaterThan(until);
+    expect(later.travel.residence!.endYear).toBe(later.sports.contract!.until + content.balance.sports.world.abroad.permitYears);
+  });
+
+  it('picks a club abroad now and then, not as often as one at home', () => {
+    const life = lifeAtAge('share', 26);
+    const rng = createRng('share');
+    let abroad = 0;
+    const n = 600;
+    for (let i = 0; i < n; i++) {
+      const t = anotherTeam(life, 'soccer', null, 'chicago', content, rng, 55);
+      if (playingCountry(t, content) !== 'us') abroad++;
+    }
+    const share = abroad / n;
+    expect(share).toBeGreaterThan(0.04);
+    expect(share).toBeLessThan(0.3);
+    // A sport with no market beyond the continent does not look further.
+    const uk = ukLife('share-uk', 26);
+    for (let i = 0; i < 100; i++) expect(playingCountry(anotherTeam(uk, 'basketball', null, 'london', content, rng), content)).toBe('uk');
   });
 
   it('keeps a sport out of countries its market does not include', () => {
@@ -415,6 +448,8 @@ describe('transfers', () => {
     const win = apply(star('clause'), (d) => {
       d.sports.seasons[0]!.rating = 90;
       openWindow(d, path, content, createRng('clause'));
+      // A fee a little over what the player is worth: the club listens.
+      d.sports.transfer!.offers = d.sports.transfer!.offers.map((o) => ({ ...o, fee: Math.round(transferValue(d, path, content) * 1.3) }));
     });
     const offer = bestOffer(win, content)!;
     expect(transferBlock(win, offer.id, content)).toBeNull();

@@ -231,6 +231,21 @@ export interface SportsReport {
   undrafted: { lives: number; signedLater: number; camps: number; campsMade: number };
   /** Training: years with and without a team, the sessions in them, and by where they happened. */
   training: { yearsWithTeam: number; sessionsWithTeam: number; yearsWithout: number; sessionsWithout: number; gym: number; coach: number; team: number };
+  /** Batch 6: leagues and countries, academies, loans, transfers, commuting, moves abroad and the national side. */
+  world: {
+    soccerCareers: number;
+    soccerPro: number;
+    /** Pro seasons by league ("us 1", "es 2"), and pro careers by the country of their last club. */
+    seasonsByLeague: Record<string, number>;
+    careersByCountry: Record<string, number>;
+    academy: { joined: number; abroad: number; graduated: number; released: number; atAge: number };
+    loans: { taken: number; lives: number };
+    transfers: { count: number; lives: number; fees: number[]; abroad: number; share: number };
+    commuting: { lives: number; city: number; country: number; seasons: number; proLives: number };
+    moves: { up: number; down: number; seasons: number };
+    abroad: { lives: number; moves: number; minors: number };
+    nation: { calledUp: number; capped: number; tournaments: number; titles: number; proLives: number };
+  };
   events: Record<string, number>;
   invariantFailures: number;
 }
@@ -267,6 +282,19 @@ export function emptySportsReport(player: string, content: ContentBundle): Sport
     rookies: [],
     undrafted: { lives: 0, signedLater: 0, camps: 0, campsMade: 0 },
     training: { yearsWithTeam: 0, sessionsWithTeam: 0, yearsWithout: 0, sessionsWithout: 0, gym: 0, coach: 0, team: 0 },
+    world: {
+      soccerCareers: 0,
+      soccerPro: 0,
+      seasonsByLeague: {},
+      careersByCountry: {},
+      academy: { joined: 0, abroad: 0, graduated: 0, released: 0, atAge: 0 },
+      loans: { taken: 0, lives: 0 },
+      transfers: { count: 0, lives: 0, fees: [], abroad: 0, share: 0 },
+      commuting: { lives: 0, city: 0, country: 0, seasons: 0, proLives: 0 },
+      moves: { up: 0, down: 0, seasons: 0 },
+      abroad: { lives: 0, moves: 0, minors: 0 },
+      nation: { calledUp: 0, capped: 0, tournaments: 0, titles: 0, proLives: 0 },
+    },
     events: {},
     invariantFailures: 0,
   };
@@ -305,9 +333,18 @@ export class SportsWatcher {
   private seenTries = new Set<string>();
   private offeredSeen = false;
   private undraftedSeen = false;
+  private undraftedSigned = false;
   private lastPick: { pick: number; total: number } | null = null;
   private rookieSeen = new Set<number>();
   private last5 = { scholarships: 0, scholarshipsLost: 0, signedAfterUndrafted: 0 };
+  private last6 = { loans: 0, transfers: 0, fees: 0, graduates: 0, abroad: 0, caps: 0, tournaments: 0, tournamentTitles: 0, goneUp: 0, goneDown: 0 };
+  private everLoan = false;
+  private everTransfer = false;
+  private everAway: Set<string> = new Set();
+  private everAbroad = false;
+  private lastCountry = '';
+  private academyJoined = false;
+  private seenAcademyOut = 0;
 
   constructor(
     private readonly r: SportsReport,
@@ -357,7 +394,10 @@ export class SportsWatcher {
       this.undraftedSeen = true;
       r.undrafted.lives++;
     }
-    if (t.signedAfterUndrafted > this.last5.signedAfterUndrafted) r.undrafted.signedLater++;
+    if (t.signedAfterUndrafted > this.last5.signedAfterUndrafted && !this.undraftedSigned) {
+      this.undraftedSigned = true;
+      r.undrafted.signedLater++;
+    }
     this.last5 = { scholarships: t.scholarships, scholarshipsLost: t.scholarshipsLost, signedAfterUndrafted: t.signedAfterUndrafted };
     // The draft's pick against the rating going in, and what a rookie deal paid for the pick.
     const def = sportPath(this.content, s.sport);
@@ -391,12 +431,85 @@ export class SportsWatcher {
   }
   private picks = new Set<number>();
 
+  /** Batch 6: leagues, academies, loans, transfers, commuting, moves abroad and the national side. */
+  private observeWorld(before: LifeState, after: LifeState): void {
+    const w = this.r.world;
+    const s = after.sports;
+    const t = s.totals;
+    const l = this.last6;
+    const def = sportPath(this.content, s.sport);
+    const soccer = def?.sport.leagues.pro.tiers !== undefined;
+    if (s.academy && !before.sports.academy) {
+      w.academy.joined++;
+      if (s.academy.abroad) w.academy.abroad++;
+    }
+    if (s.academy && after.character.age >= (def?.sport.draft.age ?? 18) && !this.academyJoined) this.academyJoined = true;
+    if (t.graduates > l.graduates) {
+      w.academy.graduated += t.graduates - l.graduates;
+      w.academy.atAge++;
+    }
+    if (s.academyOut === after.currentYear && this.seenAcademyOut !== after.currentYear) {
+      this.seenAcademyOut = after.currentYear;
+      w.academy.released++;
+      w.academy.atAge++;
+    }
+    if (t.loans > l.loans) {
+      w.loans.taken += t.loans - l.loans;
+      if (!this.everLoan) {
+        this.everLoan = true;
+        w.loans.lives++;
+      }
+    }
+    if (t.transfers > l.transfers) {
+      w.transfers.count += t.transfers - l.transfers;
+      w.transfers.share += (t.fees - l.fees) * this.content.balance.sports.soccer.transfer.signing;
+      w.transfers.fees.push(t.fees - l.fees);
+      if (!this.everTransfer) {
+        this.everTransfer = true;
+        w.transfers.lives++;
+      }
+    }
+    if (t.abroad > l.abroad) {
+      w.abroad.moves += t.abroad - l.abroad;
+      if (!this.everAbroad) {
+        this.everAbroad = true;
+        w.abroad.lives++;
+      }
+      if (after.character.age < this.content.balance.relationships.adultAge) w.abroad.minors++;
+      if (t.transfers > l.transfers) w.transfers.abroad++;
+    }
+    w.moves.up += t.goneUp - l.goneUp;
+    w.moves.down += t.goneDown - l.goneDown;
+    w.nation.tournaments += t.tournaments - l.tournaments;
+    w.nation.titles += t.tournamentTitles - l.tournamentTitles;
+    w.nation.capped += t.caps > 0 && l.caps === 0 ? 1 : 0;
+    const season = s.seasons.at(-1);
+    if (season && season.year === after.currentYear && season.level === 'pro') {
+      const team = s.team;
+      const country = team ? (team.country ?? this.content.cities[team.city]?.countryId ?? '?') : '?';
+      this.lastCountry = country;
+      const key = `${country} ${season.division ?? 1}`;
+      w.seasonsByLeague[key] = (w.seasonsByLeague[key] ?? 0) + 1;
+      if (soccer) w.moves.seasons++;
+      if (team?.away) {
+        w.commuting.seasons++;
+        if (!this.everAway.has(team.away)) {
+          this.everAway.add(team.away);
+          w.commuting[team.away]++;
+        }
+      }
+    }
+    if (s.calledUp === after.currentYear && before.sports.calledUp !== after.currentYear) w.nation.calledUp++;
+    this.last6 = { loans: t.loans, transfers: t.transfers, fees: t.fees, graduates: t.graduates, abroad: t.abroad, caps: t.caps, tournaments: t.tournaments, tournamentTitles: t.tournamentTitles, goneUp: t.goneUp, goneDown: t.goneDown };
+  }
+
   observe(before: LifeState, after: LifeState): void {
     const { r } = this;
     const s = after.sports;
     const f = after.fame;
     const adultAge = this.content.balance.relationships.adultAge;
     this.observeGrind(before, after);
+    this.observeWorld(before, after);
     if ((s.pro || s.contract) && after.character.age < adultAge) r.underAgePros++;
     for (const p of after.pending) {
       const def = this.content.events[p.eventId];
@@ -521,6 +634,16 @@ export class SportsWatcher {
     if (s.pro) side.pro++;
     if (high > Math.ceil(def.rungs.length / 2)) side.pastMiddle++;
     if (high >= def.rungs.length) side.top++;
+    const w = r.world;
+    if (def.sport?.leagues.pro.tiers !== undefined) {
+      w.soccerCareers++;
+      if (s.totals.proSeasons > 0) w.soccerPro++;
+    }
+    if (s.totals.proSeasons > 0) {
+      w.careersByCountry[this.lastCountry] = (w.careersByCountry[this.lastCountry] ?? 0) + 1;
+      w.nation.proLives++;
+      if (this.everAway.size > 0) w.commuting.proLives++;
+    }
     if (s.totals.proSeasons > 0) {
       r.proCareers.push(s.totals.proSeasons);
       r.proEndAges.push(this.lastProAge);
@@ -622,6 +745,18 @@ export function formatSports(r: SportsReport, content: ContentBundle): string[] 
   lines.push(
     `  training sessions a year: with a team ${per(t5.sessionsWithTeam, t5.yearsWithTeam)} (${t5.yearsWithTeam} years), without ${per(t5.sessionsWithout, t5.yearsWithout)} (${t5.yearsWithout} years); where: team ${t5.team}, gym ${t5.gym}, private coach ${t5.coach}`,
   );
+  // Batch 6.
+  const w = r.world;
+  lines.push(`  leagues and countries (Batch 6) — pro seasons by country and league: ${Object.entries(w.seasonsByLeague).sort().map(([k, n]) => `${k} ${n}`).join(', ') || 'none'}; pro careers by the country of the last club: ${Object.entries(w.careersByCountry).sort().map(([k, n]) => `${k} ${n}`).join(', ') || 'none'}`);
+  lines.push(`  soccer: ${w.soccerCareers} careers, ${w.soccerPro} turned pro; clubs moved between leagues: ${w.moves.up} up and ${w.moves.down} down in ${w.moves.seasons} pro seasons`);
+  lines.push(`  academies: ${w.academy.joined} joined (${w.academy.abroad} abroad, commuting from the UK); at the draft age ${w.academy.graduated} graduated to a first-team deal and ${w.academy.released} were let go`);
+  lines.push(`  loans: ${w.loans.taken} taken in ${w.loans.lives} lives (${per(w.loans.taken, Math.max(1, w.soccerPro), 2)} per soccer pro career)`);
+  lines.push(
+    `  transfers: ${w.transfers.count} in ${w.transfers.lives} lives (${per(w.transfers.count, Math.max(1, w.soccerPro), 2)} per soccer pro career); median fee ${dollars(median(w.transfers.fees))}, fees between clubs ${dollars(sum(w.transfers.fees))}, the players' share paid through the ledger ${dollars(w.transfers.share)}; ${w.transfers.abroad} moved to another country`,
+  );
+  lines.push(`  commuting: ${w.commuting.proLives} pro careers (${pct(w.commuting.proLives, Math.max(1, r.proCareers.length))}) played for a team away from the city they lived in (${w.commuting.city} in a city the game does not model yet, ${w.commuting.country} in a country it does not), ${w.commuting.seasons} seasons`);
+  lines.push(`  moves abroad for a club: ${w.abroad.moves} in ${w.abroad.lives} lives; by anyone under 18: ${w.abroad.minors}`);
+  lines.push(`  the national side: ${w.nation.calledUp} call-ups, ${w.nation.capped} lives capped (${pct(w.nation.capped, Math.max(1, w.nation.proLives))} of pro careers), ${w.nation.tournaments} tournaments played, ${w.nation.titles} won`);
   lines.push(`  sports events: ${sum(Object.values(r.events))} in ${Object.keys(r.events).length} kinds; invariant failures about sports: ${r.invariantFailures}`);
   return lines;
 }
@@ -667,5 +802,15 @@ export function sportsTargets(report: SimulationReport, content: ContentBundle):
   range('how strongly an earlier pick is paid more (minus the correlation of the pick with rookie pay)', -correlation(r.rookies.map((x) => x.share), r.rookies.map((x) => x.salary)), t.rookiePayPick, (n) => n.toFixed(2));
   range('undrafted or unsigned players who later signed', share(r.undrafted.signedLater, r.undrafted.lives), t.undraftedSigned);
   range('training sessions a year with a team', share(r.training.sessionsWithTeam, r.training.yearsWithTeam), t.trainingTeam, (n) => n.toFixed(1));
+  // Batch 6.
+  const w = r.world;
+  range('anyone under 18 who moved to another country for a club', w.abroad.minors, t.minorsAbroad, (n) => n.toFixed(0));
+  range('soccer academy members who were promoted at the draft age', share(w.academy.graduated, w.academy.atAge), t.academyGraduates);
+  range('loans per soccer pro career', share(w.loans.taken, Math.max(1, w.soccerPro)), t.loansPerCareer, (n) => n.toFixed(2));
+  range('transfers per soccer pro career', share(w.transfers.count, Math.max(1, w.soccerPro)), t.transfersPerCareer, (n) => n.toFixed(2));
+  range('the players’ share of transfer fees, as a share of the fees', share(w.transfers.share, Math.max(1, sum(w.transfers.fees))), t.feeShare, (n) => n.toFixed(3));
+  range('pro seasons in which a soccer club moved between leagues', share(w.moves.up + w.moves.down, Math.max(1, w.moves.seasons)), t.leagueMoves);
+  range('pro careers that played for a team away from the city they lived in', share(w.commuting.proLives, Math.max(1, r.proCareers.length)), t.commuting);
+  range('pro careers with a call-up to the national side', share(w.nation.capped, Math.max(1, w.nation.proLives)), t.capped);
   return out;
 }

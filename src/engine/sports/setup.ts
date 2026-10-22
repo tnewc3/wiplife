@@ -147,6 +147,13 @@ export function setupIssues(setup: TeamSetup, content: ContentBundle): SetupIssu
   return issues;
 }
 
+/** The first thing wrong with a setup, in words: its shape, then the content (null when it is fine). For forms. */
+export function firstSetupProblem(input: unknown, content: ContentBundle): string | null {
+  const shape = teamSetupSchema.safeParse(input);
+  if (!shape.success) return shape.error.issues[0]?.message ?? 'Check the team details.';
+  return setupIssues(shape.data, content)[0]?.message ?? null;
+}
+
 /** Validates unknown input into a setup: the shape first, then the content. Throws SetupError listing every problem. */
 export class SetupError extends Error {
   override name = 'SetupError';

@@ -38,7 +38,7 @@ import {
   salaryLabel,
 } from '../../labels';
 import { renameDeep, useTeamText } from '../../useTeamNames';
-import { WorldSection } from './SportsWorld';
+import { LeaguesSection, WorldSection } from './SportsWorld';
 import { Ladder } from './FameScreen';
 import { DraftSection, ScholarshipSection, Section, TeamsList, TeamStanding, TrainingSection } from './SportsGrind';
 
@@ -128,6 +128,7 @@ export function SportsScreen({ life, open, onClose }: { life: LifeState; open: b
               </Section>
 
               <WorldSection view={view} disabled={disabled} act={act} />
+              <LeaguesSection view={view} />
 
               <Section title="Try out for a team" testId="teams">
                 <p className="mt-1 text-sm text-muted">Pick a team and play the scrimmage. Each team has its own bar, and a cut is not the end: the next team down may take you.</p>
@@ -483,6 +484,7 @@ export function SportsScreen({ life, open, onClose }: { life: LifeState; open: b
               ))}
             </Section>
           )}
+          {!view.active && !view.retired && <LeaguesSection view={view} />}
         </div>
       </Sheet>
       <ConfirmSheet

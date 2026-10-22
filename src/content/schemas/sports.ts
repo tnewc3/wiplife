@@ -452,7 +452,7 @@ export const sportsBalanceSchema = z.strictObject({
     /** A yearly commute: stress and happiness for a team whose home is away from the city you live in (nearby, and in another country). */
     commute: z.strictObject({ city: z.strictObject({ stress: z.number().min(0).max(10), happiness: z.number().min(-10).max(0) }), country: z.strictObject({ stress: z.number().min(0).max(10), happiness: z.number().min(-10).max(0) }) }),
     /** Moving to another country for a club: the age it takes, and the years the work permit runs past the end of the deal. */
-    abroad: z.strictObject({ minAge: z.int().min(18).max(30), permitYears: z.int().min(0).max(5), stress: z.number().min(0).max(20), homesick: probability, weight: z.number().min(0).max(1) }),
+    abroad: z.strictObject({ minAge: z.int().min(18).max(30), permitYears: z.int().min(0).max(5), stress: z.number().min(0).max(20), homesick: probability, share: probability }),
     /** The most teams a player can add, and how many characters of a name and a nickname. */
     added: z.strictObject({ max: z.int().min(1).max(40) }),
   }),

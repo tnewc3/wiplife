@@ -20,7 +20,7 @@ import { renderText } from '../text';
 import type { Id, LifeState, SportsSeason } from '../types';
 import { draftProjection } from './contract';
 import { allSports, contractYearsLeft, fitFor, injuryNow, levelNow, mySport, positionOf, sportPath, sportWords } from './query';
-import { hasDivisions, rivalOf, teamById } from './league';
+import { divisionOf, hasDivisions, marketTeams, rivalOf, teamById } from './league';
 import { transferBlock } from './soccer';
 import { liveOffers } from './scholarship';
 import { hasTeam, trainBlock, trainCost, trainGain, trainingView, type TrainBlock } from './training';
@@ -174,6 +174,8 @@ export interface SportsView {
   prospect: { likely: string; best: string; worst: string; line: string; passed: boolean; combine: number } | null;
   /** A camp, an open tryout or a call for a player with no team: open now. */
   camps: boolean;
+  /** Batch 6: the teams you could play for in each sport you are looking at (your sport, or every sport before a career), by name. */
+  leagues: { sportId: Id; sport: string; league: string; teams: { id: string; name: string; place: string; division: 1 | 2 | null; yours: boolean }[]; more: number }[];
   /** Batch 6: the academy you belong to, a loan (on, or offered), the transfer window, the national side, your club's rival, and what you may ask. */
   soccer: boolean;
   academy: { club: string; abroad: boolean; place: string | null } | null;
@@ -251,6 +253,20 @@ function teamViews(state: LifeState, def: NonNullable<ReturnType<typeof mySport>
       block: o.block,
     };
   });
+}
+
+/** The teams a player could play for in a sport: at home and in the sport's market, the league's name, and a limit on how many are listed. */
+const LEAGUE_LIST = 60;
+function leagueView(state: LifeState, d: NonNullable<ReturnType<typeof mySport>>, content: ContentBundle): SportsView['leagues'][number] {
+  const home = state.character.cityId;
+  const all = marketTeams(state, d.id, home, content)
+    .map((t) => ({ id: t.id, name: t.name, place: t.cityName ?? content.cities[t.city]?.name ?? '', division: (hasDivisions(d.sport) ? divisionOf(state, t) : null) as 1 | 2 | null, yours: state.sports.team?.id === t.id }))
+    .sort((a, b) => (a.division ?? 0) - (b.division ?? 0) || (a.name < b.name ? -1 : 1));
+  const first = all.slice(0, LEAGUE_LIST);
+  // The team you play for is always on the list.
+  const mine = all.find((t) => t.yours);
+  if (mine && !first.includes(mine)) first.push(mine);
+  return { sportId: d.id, sport: sportWords(state, d, content).name, league: d.sport.leagues.pro.name, teams: first, more: Math.max(0, all.length - first.length) };
 }
 
 export function getSportsView(state: LifeState, content: ContentBundle): SportsView {
@@ -404,6 +420,7 @@ export function getSportsView(state: LifeState, content: ContentBundle): SportsV
           }
         : null,
     camps: teams.some((t) => t.level === 'pro'),
+    leagues: (def ? [def] : sports).map((d) => leagueView(state, d, content)),
     ...worldView(state, def, playing, between, content),
   };
   return view;

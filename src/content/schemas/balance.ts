@@ -755,6 +755,15 @@ export const targetsBalanceSchema = z.strictObject({
     pickRating: numberRangeSchema,
     rookiePayPick: numberRangeSchema,
     undraftedSigned: shareRangeSchema,
+    // Batch 6.
+    minorsAbroad: numberRangeSchema,
+    academyGraduates: shareRangeSchema,
+    loansPerCareer: numberRangeSchema,
+    transfersPerCareer: numberRangeSchema,
+    feeShare: shareRangeSchema,
+    leagueMoves: shareRangeSchema,
+    commuting: shareRangeSchema,
+    capped: shareRangeSchema,
     trainingTeam: numberRangeSchema,
   }),
   /**

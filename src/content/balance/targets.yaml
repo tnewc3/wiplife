@@ -431,6 +431,17 @@ sports:
   rookiePayPick: { min: 0.5, max: 1 }
   undraftedSigned: { min: 0.05, max: 1 }
   trainingTeam: { min: 2, max: 12 }
+  # Batch 6 (starting numbers; the as-built notes in docs/technical.md record the first runs). Nobody under 18 moves to another
+  # country for a club; academies promote some of their graduates; loans and transfers are occasional; players keep a small share of
+  # fees; clubs move between the two leagues a little each year; a good share of pros play for a team away from their city.
+  minorsAbroad: { min: 0, max: 0 }
+  academyGraduates: { min: 0.05, max: 0.9 }
+  loansPerCareer: { min: 0, max: 3 }
+  transfersPerCareer: { min: 0.05, max: 6 }
+  feeShare: { min: 0, max: 0.15 }
+  leagueMoves: { min: 0.02, max: 0.4 }
+  commuting: { min: 0.05, max: 0.9 }
+  capped: { min: 0, max: 0.6 }
 
 # W1: the eulogy (tools/simulate/eulogy.ts), on the careful player's lives.
 eulogy:

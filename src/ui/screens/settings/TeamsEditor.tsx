@@ -1,6 +1,6 @@
 import { useId, useMemo, useState } from 'react';
 import { content } from '../../../content';
-import { getTeamEditorView, setupIssues, teamRenames, type AddedTeam, type TeamEditorRow, type TeamSetup } from '../../../engine/selectors';
+import { firstSetupProblem, getTeamEditorView, teamRenames, type AddedTeam, type TeamEditorRow, type TeamSetup } from '../../../engine/selectors';
 import { useAppStore } from '../../../store/appStore';
 import { Button } from '../../components/Button';
 import { Card } from '../../components/Card';
@@ -213,9 +213,9 @@ function TeamSheet({
 
   const save = async () => {
     const next = build();
-    const issues = setupIssues(next, content);
-    if (issues.length > 0) {
-      setIssue(issues[0]!.message);
+    const problem = firstSetupProblem(next, content);
+    if (problem !== null) {
+      setIssue(problem);
       return;
     }
     setIssue(null);

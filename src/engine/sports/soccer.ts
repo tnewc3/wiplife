@@ -28,7 +28,7 @@ import { clubPay, leaguePay, salaryFor } from './contract';
 import { awayOf, divisionOf, hasDivisions, homeLeagueTeams, teamById, teamsOf, playingCountry, type ProTeam } from './league';
 import { recentRating } from './query';
 import { sportsHistory } from './text';
-import { anotherTeam, proTeam, relocateForTeam, stablePick } from './team';
+import { anotherTeam, keepPermit, proTeam, relocateForTeam, stablePick } from './team';
 
 type SportPath = FamePathDef & { sport: SportDef };
 
@@ -167,6 +167,9 @@ export function endLoan(state: LifeState, path: SportPath, content: ContentBundl
   if (parent && s.contract) {
     s.team = proTeam(state, parent, path.id, content);
     relocateForTeam(state, parent.city, content, s.contract.until);
+  } else {
+    // The deal ended while you were away: you are without a team.
+    s.team = null;
   }
 }
 
@@ -319,6 +322,7 @@ export function takeTransfer(state: LifeState, path: SportPath, offerId: string,
   s.totals.transfers += 1;
   s.totals.fees += offer.fee;
   relocateForTeam(state, club.city, content, contract.until);
+  keepPermit(state, content);
   payFameMoney(state, offer.fee * T.signing, content);
   sportsHistory(state, 'transfer', content, { suitor: club.name });
   return 'moved';

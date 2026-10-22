@@ -4,6 +4,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { compileContent, formatErrors, type CompileResult } from './compile';
+import { futureTeams } from './sports';
 
 const realContentDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../src/content');
 
@@ -101,7 +102,7 @@ describe('content build with the real content', () => {
     expect(result.bundle.contentVersion).toMatch(/^1\.2\.3\+[0-9a-f]{10}$/);
     expect(Object.keys(result.bundle.countries).sort()).toEqual(['ca', 'mx', 'uk', 'us']);
     for (const city of Object.values(result.bundle.cities)) expect(result.bundle.countries[city.countryId]).toBeDefined();
-    expect(Object.keys(result.bundle.names).sort()).toEqual(['ca', 'mx', 'uk', 'us']);
+    expect(Object.keys(result.bundle.names).sort()).toEqual(['ca', 'de', 'es', 'fr', 'it', 'mx', 'uk', 'us']);
     expect(Object.keys(result.bundle.pronouns)).toContain('they_them');
     expect(Object.keys(result.bundle.talents).length).toBeGreaterThan(0);
     expect(result.bundle.balance.creation.family.siblingWeights.length).toBeGreaterThan(0);
@@ -1661,7 +1662,7 @@ describe('fame in arts and media (E6b)', () => {
 describe('sports (E6c)', () => {
   const read = (file: string) => readFile(path.join(dir, file), 'utf8');
 
-  it('accepts the real content: five sports with twelve US teams each and a league in every country, awards, brands, about fifty-five events, and no warnings', { timeout: 90_000 }, async () => {
+  it('accepts the real content: five sports with at least twelve US teams each and a league in every country, teams in ten US cities the game does not model, the soccer leagues of four more countries, awards, brands, about a hundred and ten events, and no warnings', { timeout: 90_000 }, async () => {
     const result = await compile();
     if (!result.ok) throw new Error(formatErrors(result.errors));
     const sports = Object.values(result.bundle.famePaths).filter((p) => p.sport);
@@ -1670,16 +1671,42 @@ describe('sports (E6c)', () => {
       // Twelve teams in the US and at least six in every other country (a player plays in their own country's league).
       const teams = sport.sport!.leagues.pro.teams;
       const inCountry = (id: string) => teams.filter((t) => result.bundle.cities[t.city]?.countryId === id).length;
-      expect(inCountry('us')).toBe(12);
+      expect(inCountry('us')).toBeGreaterThanOrEqual(12);
       for (const id of ['ca', 'uk', 'mx']) expect(inCountry(id)).toBeGreaterThanOrEqual(6);
       expect(sport.rungs).toHaveLength(8);
       expect(sport.sport!.positions.length).toBeGreaterThanOrEqual(4);
     }
+    // Batch 6: teams in at least ten US cities the game does not model, each with a nearest modeled city; the four soccer leagues abroad.
+    const future = sports.flatMap((p) => p.sport!.leagues.pro.teams.filter((t) => t.futureCity === true));
+    expect(new Set(future.filter((t) => result.bundle.cities[t.nearestCityId!]?.countryId === 'us').map((t) => t.cityName)).size).toBeGreaterThanOrEqual(10);
+    expect(future.every((t) => result.bundle.cities[t.nearestCityId!] !== undefined && t.city === t.nearestCityId)).toBe(true);
+    const soccerClubs = result.bundle.famePaths['soccer']!.sport!.leagues.pro.teams;
+    for (const c of ['es', 'it', 'de', 'fr']) expect(soccerClubs.filter((t) => t.futureCountry === true && t.country === c).length).toBeGreaterThanOrEqual(10);
     const events = Object.values(result.bundle.events).filter((e) => !e.retired && (e.category.startsWith('sports') || ['break_scout_in_the_stands', 'break_breakout_game', 'sports_superfan_at_the_gate'].includes(e.id)));
-    // The 52 of E6c and the 30 of Batch 5 (tryouts, recruiting, the combine, camps and the season's choices).
-    expect(events.length).toBeGreaterThanOrEqual(78);
-    expect(events.length).toBeLessThanOrEqual(95);
+    // The 52 of E6c, the 30 of Batch 5 (tryouts, recruiting, the combine, camps and the season's choices) and the 30 of Batch 6.
+    expect(events.length).toBeGreaterThanOrEqual(108);
+    expect(events.length).toBeLessThanOrEqual(125);
     expect(result.warnings).toEqual([]);
+  });
+
+  it('checks teams away from the modeled cities (Batch 6): a future city must be one the game lacks, a club abroad lives in a UK city, a second league needs a name, and the list is printed', { timeout: 90_000 }, async () => {
+    const soccer = await read('fame/soccer.yaml');
+    expect(soccer).toContain('cityName: "Boston"');
+    await write('fame/soccer.yaml', soccer.replace('cityName: "Boston"', 'cityName: "Chicago"'));
+    expect(await expectErrors()).toContain('"Chicago" is a city of the game');
+    await write('fame/soccer.yaml', soccer.replace('cityName: "Madrid", nearestCityId: "london"', 'cityName: "Madrid", nearestCityId: "chicago"'));
+    expect(await expectErrors()).toContain('has a UK city to commute from');
+    await write('fame/soccer.yaml', soccer.replace(/ {6}tiers: \[[^\n]*\]\n/, ''));
+    expect(await expectErrors()).toContain('a second league needs leagues.pro.tiers');
+    await write('fame/soccer.yaml', soccer.replace('markets: [[us, ca, mx, uk, es, it, de, fr]]', 'markets: [[us, ca, mx, uk]]'));
+    expect(await expectErrors()).toContain('needs a market group of es and uk');
+    await write('fame/soccer.yaml', soccer);
+    const result = await compile();
+    if (!result.ok) throw new Error(formatErrors(result.errors));
+    const list = futureTeams(result.bundle);
+    expect(list.filter((t) => t.kind === 'city').length).toBeGreaterThanOrEqual(100);
+    expect(list.filter((t) => t.kind === 'country').map((t) => t.country).sort().filter((c, i, a) => a.indexOf(c) === i)).toEqual(['de', 'es', 'fr', 'it']);
+    expect(list.every((t) => t.name !== '' && t.cityName !== '' && result.bundle.cities[t.nearestCityId] !== undefined)).toBe(true);
   });
 
   it('keeps the pros for adults: the pro rung, the draft and any signing ask for 18', { timeout: 90_000 }, async () => {

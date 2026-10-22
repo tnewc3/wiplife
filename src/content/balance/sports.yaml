@@ -246,8 +246,8 @@ world:
   commute:
     city: { stress: 1, happiness: 0 }
     country: { stress: 2, happiness: -1 }
-  # `weight`: how likely a club abroad is next to a club at home when a team in the market is picked for you.
-  abroad: { minAge: 18, permitYears: 2, stress: 4, homesick: 0.15, weight: 0.25 }
+  # `share`: the chance that the club picked for you (free agency, a camp) is in another country, when the market has any.
+  abroad: { minAge: 18, permitYears: 2, stress: 4, homesick: 0.15, share: 0.12 }
   added: { max: 12 }
 
 # Batch 6: soccer's world. Two leagues in every country (a top league and a second one) with clubs moving between them; youth
