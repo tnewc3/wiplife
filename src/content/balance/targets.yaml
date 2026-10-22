@@ -404,7 +404,9 @@ sports:
   entered: { min: 0.8, max: 1 }
   # Talent and Fitness matter most: with a fitting talent most turn pro and many go far; without, few do.
   talentPro: { min: 0.5, max: 1 }
-  noTalentPro: { min: 0.02, max: 0.3 }
+  # Batch 6: more clubs (112 in cities and countries the game does not model, second-tier soccer clubs, clubs a player adds) give a
+  # talent-less athlete more rosters to land on (measured 30.8-33.0% a shard of 2,500 lives against 21-26% before). Loosened from 0.3.
+  noTalentPro: { min: 0.02, max: 0.36 }
   talentPastMiddle: { min: 0.25, max: 1 }
   # Batch 5: tryouts for specific teams and camps give a talent-less athlete a few more ways onto a pro roster than the old automatic climb
   # did (measured 15.0-18.1% a shard of 2,500 lives against about 3% before). Loosened from 0.06 on purpose; see docs/technical.md, Batch 5 deviations.

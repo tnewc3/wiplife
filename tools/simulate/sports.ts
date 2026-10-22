@@ -439,11 +439,12 @@ export class SportsWatcher {
     const l = this.last6;
     const def = sportPath(this.content, s.sport);
     const soccer = def?.sport.leagues.pro.tiers !== undefined;
-    if (s.academy && !before.sports.academy) {
+    // Joined in a tryout between two yearly steps, so the life is checked once for ever having held a place.
+    if (s.academy && !this.academyJoined) {
+      this.academyJoined = true;
       w.academy.joined++;
       if (s.academy.abroad) w.academy.abroad++;
     }
-    if (s.academy && after.character.age >= (def?.sport.draft.age ?? 18) && !this.academyJoined) this.academyJoined = true;
     if (t.graduates > l.graduates) {
       w.academy.graduated += t.graduates - l.graduates;
       w.academy.atAge++;
