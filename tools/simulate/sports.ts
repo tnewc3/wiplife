@@ -805,7 +805,8 @@ export function sportsTargets(report: SimulationReport, content: ContentBundle):
   // Batch 6.
   const w = r.world;
   range('anyone under 18 who moved to another country for a club', w.abroad.minors, t.minorsAbroad, (n) => n.toFixed(0));
-  range('soccer academy members who were promoted at the draft age', share(w.academy.graduated, w.academy.atAge), t.academyGraduates);
+  // Too few academy members to judge a rate (a short run): the line is left out rather than marked missed.
+  if (w.academy.atAge >= 10) range('soccer academy members who were promoted at the draft age', share(w.academy.graduated, w.academy.atAge), t.academyGraduates);
   range('loans per soccer pro career', share(w.loans.taken, Math.max(1, w.soccerPro)), t.loansPerCareer, (n) => n.toFixed(2));
   range('transfers per soccer pro career', share(w.transfers.count, Math.max(1, w.soccerPro)), t.transfersPerCareer, (n) => n.toFixed(2));
   range('the players’ share of transfer fees, as a share of the fees', share(w.transfers.share, Math.max(1, sum(w.transfers.fees))), t.feeShare, (n) => n.toFixed(3));

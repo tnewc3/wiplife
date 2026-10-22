@@ -276,6 +276,8 @@ export function releasePlayer(state: LifeState, content: ContentBundle): number 
   const buyout = wholeDollars(c.salary * left * content.balance.sports.contract.buyout);
   s.contract = null;
   s.team = null;
+  s.loan = null;
+  s.loanOffer = null;
   s.totals.releases += 1;
   s.released = state.currentYear;
   s.unsigned = 0;

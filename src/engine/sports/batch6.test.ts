@@ -12,6 +12,7 @@ import { createRng } from '../rng';
 import { getSportsView } from '../selectors';
 import { lifeAtAge } from '../testFixtures';
 import type { LifeState } from '../types';
+import { playSeason } from './season';
 import { extend, signDraftDeal, moveToTeam } from './contract';
 import { anotherTeam } from './team';
 import { sportsHolds } from './holds';
@@ -365,6 +366,26 @@ describe('loans', () => {
     expect(back.sports.loan).toBeNull();
     expect(back.sports.team!.id).toBe(parent.id);
     ok(back);
+  });
+
+  it('brings a loaned player back before the parent deal is judged, so a deal that runs out mid-loan never strands the loan', () => {
+    const life = soccerPro('loan-expiry', (d) => void (d.sports.role = 'reserve'));
+    const path = sportPath(content, 'soccer')!;
+    const away = apply(life, (d) => {
+      offerLoan(d, path, content, createRng('o'));
+      takeLoan(d, path, content);
+    });
+    expect(away.sports.loan).not.toBeNull();
+    for (let i = 0; i < 6; i++) {
+      const next = apply(away, (d) => {
+        d.currentYear = away.sports.contract!.until + 1;
+        d.character.age += d.currentYear - away.currentYear;
+        d.sports.loan!.until = d.currentYear;
+        playSeason(d, content, createRng(`x${i}`));
+      });
+      if (next.sports.loan) expect(next.sports.contract).not.toBeNull();
+      ok(next);
+    }
   });
 
   it('is the club’s decision: a refusal may be overruled, a request may be granted', () => {
