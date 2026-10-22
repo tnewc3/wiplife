@@ -32,6 +32,7 @@ The MVP (Stages 1–10) covers a full life. The expansions are what make WIPlife
 | W4b | Language | Speak, learn and lose languages, with effects on jobs and friendships |
 | W5 | Travel & time abroad | Take vacations, meet people abroad, and study or work overseas |
 | W6 | Emigration & citizenship | Move countries legally or without papers, and work toward citizenship |
+| B2 | Business depth (post-expansion 1) | Run a business with products, stock, suppliers, a changing economy, headcount per location, location managers and franchises |
 
 ### Order
 
@@ -1730,6 +1731,219 @@ Build only W6:
 - Upgrade existing saves. Extend tools/simulate.ts with W6 reports.
 
 Meet every W6 acceptance criterion. Run all checks and a 10,000-life simulation, open a pull request into main, wait for CI, and report what you built, the simulation results, deviations and why, and open questions. Report only verified facts.
+```
+
+---
+
+## B2 — Business depth
+
+**Status:** plan (Batch 7a of `docs/post-expansion1-changes.md`). Nothing here is built. It waits for the user's approval of this gate.
+
+**Objective:** Turn a business from a set of dials into a shop you run: what you sell, what it costs, how much you stock, who works where, and a market that pushes back. It extends W3 (`src/engine/business`); it does not replace it.
+
+### What W3 has today (checked against the code)
+
+- One price setting for the whole business (`low`, `fair`, `high`: 0.85, 1, 1.25). Location demand is style demand × city fit × reputation × quality × price × marketing × owner skill × saturation × attention × maturity × luck × shocks (`model.ts: locationFigures`). Revenue is customers × `spend` × price × the city's price scale. **Supplies are a share of revenue** (`style.supplies`), with no products and no stock.
+- The city `competition` value (0.8–1.2 in `balance/business.yaml cities`) is returned by `cityNumbers` but **nothing reads it**.
+- Staff: named workers are capped at **4** per business, besides a manager (`limits.namedStaff`, `staff.ts: staffRoom`, `hireBlock`, and the invariant). The rest of a location's need is computed crew at the market wage (`staffNeed = round(style.staff × staffing mult)`, at most 8 workers at a location). Staff have one location each, and a manager works across the business.
+- **The hire bug is in the UI only.** The `hire_staff` action already accepts a `locationId` (it defaults to the first location), but `HireSheet` in `BusinessScreen.tsx` never sends one. Nothing moves a worker from one location to another.
+- Limits: 3 businesses, 12 locations a business (`balance/business.yaml limits`, `invariants.ts`). Chains in the market have at most 12.
+- There is no yearly economy index anywhere in balance. A business's year gets only a random "season" swing and its shocks (a viral moment, a rival).
+- Not built in W3 (its open questions): franchising, seasonal trade, a market that follows the economy.
+
+### Player experience
+
+- **What you sell.** Each business has product lines. A café sells coffee, tea, cold drinks, pastries and sandwiches. A bakery sells bread, rolls, cakes, pastries and custom orders. A shop owner picks what the shop carries (groceries, clothes, electronics, books, home goods, toys, gifts and more) and a bigger style carries more lines. Salon, plumbing and cleaning sell services: haircuts, colour and treatments; repairs, installs and call-outs; home, office and deep cleans. Services use up supplies (colour, pipe and parts, cleaning chemicals) instead of selling shelves of goods.
+- **Prices and margins.** Each line has its own price (below, at or above the going rate) and you see its margin. Coffee is cheap to make and easy to compare; a custom cake is the opposite.
+- **Ordering.** Each year you tell the business how heavily to stock each line: lean, normal or heavy. Lean saves money and risks running out. Heavy never runs out and throws bread away. Perishables spoil. Run out and customers leave, tell people, and your reputation slips.
+- **A market that pushes back.** A crowded city takes some of your trade, more for products that are easy to get elsewhere. Suppliers raise and cut prices; a shortage can leave you short whatever you ordered. A yearly economy (boom, steady, slowdown, recession) lifts and cuts what people spend, more on treats than on plumbing. You see all of it in words ("coffee beans are getting dearer") and numbers.
+- **Who works where.** You choose how many people work at each location in each role (manager, shift lead, the craft role such as barista or baker or stylist or plumber, cashier) instead of a lean/normal/generous setting alone. You hire to a particular location, move a person between locations, make someone a location manager, train people and pay them. A few people (managers, leads, the licensed, people you know, standouts) are real people with ties, memories and gossip. The rest are a crew counted per location and role, so a 30-person chain does not mean 30 people in your People list.
+- **Growing.** More businesses and more locations than W3 allowed, held back by your attention, money and managers instead of a hard wall at 3 and 12. A business that has earned it can license its name to franchisees in other cities and collect royalties, and its reputation is then partly in their hands.
+- **Reading it.** The yearly report adds the economy, supplier moves, per-product sales, stockouts and waste, headcount and turnover, and royalties, in words and numbers.
+
+### Decisions this gate settles
+
+These are the design choices made here. The open questions at the end of the pull request ask the user to confirm or change the ones marked (ask).
+
+1. **The year stays the unit.** Stock, orders and spoilage are worked out once a year in aggregate (units per product per location), never per customer or per day. The pipeline step is still one `business` step.
+2. **Old totals are the baseline.** The default product lines are built so that, at fair prices and normal stock, a location's revenue and supplies match W3's within 3% (a test). Per-product detail splits the old totals; it does not change the economics of an average business. The W3 and Batch 0 targets stay in force.
+3. **One catalogue for goods and services.** A product line is either `goods` (stock: units on a shelf) or a `service` (it draws on a supply pool). Both go through the same stock arithmetic, so services have supplies and no shelves without a second system.
+4. **Prices stay three levels per line** (low/fair/high, the existing multipliers), not free-typed numbers: it keeps the screen a phone can use and the validation simple. A "set all" shortcut keeps W3's one-tap pricing.
+5. **Ordering is a level per line** (lean/normal/heavy of a forecast), applied at every location. The business computes the units.
+6. **Accrual accounting for stock.** Profit counts the cost of what was sold, plus waste. Stock bought and not sold is inventory: it leaves cash now, counts in `assets` for the valuation at cost, and comes back as cost of goods when sold. (The alternative, expensing everything bought, would make a heavy order look like a loss.)
+7. **The economy and the supplier series come from the life's seed and the year**, not from the live rng, the way the market is made (`createRng(`${state.seed}:market:...`)`). So they are the same whenever asked, a life with no business draws nothing from the rng (such lives stay bit-identical, which keeps the golden-life test meaningful), and a history of past years can be shown. Event-made changes (a better deal, a shortage) are stored on the business.
+8. **The line between a person and the crew** (below). Named people are capped by a rule, never by a flat 4.
+9. **Other systems do not follow the economy index in B2** (ask). The index is exposed through one function so jobs, raises, house prices and interest rates *could* follow it later; that belongs to a later balancing pass, because it would change every life, not only business owners'.
+10. **Franchising out is in; franchising in is not** (ask). See Limits.
+
+### Systems
+
+#### Products and stock
+
+- **Product definitions** (content, in each kind's YAML). A product has: an id and name; a `group` (for trends and sales words); `type` (`goods` or `service`); a `share` of the style's spend at fair prices (the shares of a business's lines sum to 1, which is what keeps W3's revenue); the fair `price` as a multiple of the style's `spend` per unit (so units per customer follow from share ÷ price); `costShare` (unit cost as a share of the fair price); a `supplier` category; `elasticity` (a multiplier on the style's); `competition` exposure (0–1.5); `economy` sensitivity (0–1.5); `trend` group; `perishable` (a spoilage rate per year, 0 for durable goods); `styles` it is sold in (for example specialty beans only at premium); `core` (always sold) or optional; and for services a `pool` (the supply pool it uses, and the supply units per job).
+- **Supply pools** (content): a service business has one to three, for example `salon_supplies`, `pipe_and_parts`, `cleaning_supplies`. A pool is stocked and ordered like a line. Goods lines are their own stock. Both are keyed by a `stockId`.
+- **Shops choose.** A shop has no core line. The player picks lines up to a number per style (`balance products.maxLines`: 3, 4, 6 for budget, standard, premium) and switches lines on and off in Products (switching costs a small restock fee). A shop with nothing on cannot trade. Café and bakery have a core menu and optional lines. Service businesses have all their services on, with optional extras.
+- **Demand for a line** at a location = the location's customers (the existing demand and capacity maths, with W3's reputation, quality, marketing, skill, saturation, attention, maturity, luck and shocks) × units per customer × the line's own multipliers:
+  - **price:** `priceMult ^ −(style elasticity × line elasticity)`;
+  - **trend:** the line's trend group, a yearly index around 1 from the seed and year (a craze and its end are events);
+  - **competition:** a city with competition above 1 takes a share from each line by its `competition` exposure; quality above 50 wins some of it back; a small town with competition below 1 gives a bonus. The city value is `balance/business.yaml cities.*.competition`, finally used, normalised so the national average of 1 is neutral;
+  - **economy:** `1 + (phase demand − 1) × line sensitivity`;
+  - **supply:** a shortage can cap what arrives.
+  Customers who can't get a core line walk out: a share (`products.walkout`) of the spend on their other lines is lost.
+- **Forecast and order.** The business orders for next year from last year's *demand* in units for each line at each location (so stockouts don't shrink the forecast and cause a spiral), scaled by the known growth in maturity. Order = forecast × cover (`lean`, `normal`, `heavy`) − stock carried in, never below 0. A new line or location uses its nominal demand. The forecast does not know about a price change, a viral week or a recession, which is how stockouts and waste happen to good players.
+- **Stock arithmetic per line per location per year:** available = carried + ordered (capped by any shortage). Sold = min(demand, available). Lost = demand − sold. Perishables: the leftover spoils at the line's rate, plus a floor of waste on what was ordered (the loaf baked and not sold). Durables: the leftover carries over at a small holding cost (storage, shrink, going out of fashion for fashion lines). Cost of goods = sold × unit cost; waste = spoiled units × unit cost. The unit cost is the line's cost × the supplier index of its category × any deal.
+- **Stockouts:** the lost share of demand is reported per line. A lost share over `products.stockout.line` costs reputation in proportion, up to a cap per year, and queues a stockout event. A service out of supplies simply can't do the jobs.
+- **What `supplies` means now.** `LocationResult.supplies` and `BusinessReport.supplies` stay as cost of goods plus waste (so the report, the sim and the Money tab keep working); new lines show waste, lost sales and stock held separately. The old `style.supplies` share becomes the default product cost shares' average and is removed once the cost shares carry it (a build check that they agree).
+
+#### Supply and demand
+
+- **Supplier price index** per supplier category (coffee, flour and grain, dairy, produce, textiles, electronics, books, hair products, pipe and parts, cleaning chemicals, packaging, fuel…), around 1, mean-reverting with a yearly shock, bounded (`balance suppliers`). It sets unit cost. A fraction (`suppliers.passThrough`, about half) of a move shows up in the going rate customers will pay, so a supplier rise squeezes margins unless you raise prices, and you can't pass on all of it.
+- **Supplier events** (follow-ups queued by the step): a large rise in a category you buy (above `suppliers.riseThreshold`); a shortage (a chance per category you buy: this year only a share of the order arrives); a better deal or bulk offer (a stored cost discount for some years, or a one-off bulk buy at a discount with the spoilage risk). Their choices raise prices, absorb the cost, change supplier (a fee, a new deal), or buy ahead (money through finance).
+- **The economy index** (`balance economy`): four phases, boom, steady, slowdown and recession, with a transition table and, per phase, a demand multiplier, a lift on supplier drift and a morale/bank effect (a loan officer is less generous in a recession; the existing funding rule reads one number). The phase for a year is a pure function of the seed and the year (a chain of the last `window` years). It is the same for every business in the life and for every country in the life (one world index; per-country economies are out of scope). The Business screen shows it as one word with a line of explanation, and a phase change queues an event.
+- **Seasonal trade** (W3's open question) is out of scope: a year is one step. (Open question.)
+
+#### Employees
+
+- **Roles** (content, per kind): an id, a title, a `share` of the style's `staff` for the preset headcount, a capacity `weight` (how much a head of this role adds to what a location can serve), a wage multiplier, whether the role can be a `lead` or `manager`, the licence flag for the trade role, and minimum and maximum per location. Examples: café — manager, shift lead, barista, cashier; bakery — manager, shift lead, baker, counter; shop — manager, shift lead, sales, stock; salon — manager, stylist, assistant; plumbing — manager, plumber (licensed), apprentice, dispatcher; cleaning — manager, crew lead, cleaner.
+- **Headcount you choose.** For each location and role, a target (`headcount[locationId][roleId]`), within the role's range and a per-location cap that scales with the style (`headcount.maxMultiple` × the style's `staff`, so a premium café can run 12, a coffee counter 6). The existing staffing level (lean, normal, generous) stays as a **preset** that fills the targets; steppers adjust from there. The business cap replaces `namedStaff` (the 4) and the 8-worker computed cap.
+- **Staffed ratio and performance.** The location's staffed ratio is the weighted sum of heads in each role (capped per role at 125% of its need) over the weighted need. It feeds the same capacity formula as today. Short-staffing hurts quality (`short`) as today, and a new workload term pulls morale down when customers per head run above a limit. At the preset headcount, with all roles filled, the result matches W3's (a test).
+- **Hire to a location.** `hire_staff` takes `locationId` and `roleId`. A named hire is a person (someone you know, or someone newly met in that location's city). A crew hire just raises the target (and the crew is hired the next step, with a hiring cost per head). The Hire sheet picks a location and a role (this fixes the known bug).
+- **Transfers.** `transfer_staff` moves a named person to another location of the business. Same city: free, one fee, morale dips a little. Different city: the person must be willing (a deterministic willingness score from morale, affection and their ties; the sheet shows it as likely, unsure or unlikely, never a hidden roll), they move to that city (`cityId` changes), and the move costs a relocation fee. Someone who lives with their own partner or children in your life can't be moved across cities. Crew move by lowering a target in one place and raising it in the other (no special action).
+- **Location managers.** A named person with the manager role at a location. `appoint_manager` / `remove_manager`. Who runs a location: you, if you run the business yourself and are in that location's city; else its manager; else the general manager (W3's "who runs it" setting stays and now means the general manager, stretched thinner across more locations: `owner.span`); else nobody (W3's away effort). A location manager has skill, effort, honesty and a skim risk like W3's manager, and a bad one drags that location's quality and morale. This replaces the all-or-nothing business-wide effort.
+- **Wages.** Per person for named staff (existing: market × pay level × skill × licence × raises). The crew's pay is their role's multiplier × market × pay level × the pool's average skill. Business pay level stays one setting; per-person raises stay.
+- **Training** is a sixth yearly decision (none, some, lots: a share of payroll) that lifts crew skill and named skill toward a ceiling, and lifts morale. Skill gain per year is in balance.
+- **Morale and turnover.** As W3 for named staff, now per crew pool too (pulled toward an aim from pay, workload, training, the business doing well, and the location's manager). A pool loses heads at the quit chance for its morale (one roll per pool per year, not per head) and refills automatically to its target at a hiring cost, so turnover is a cost and a morale problem, not clicking.
+- **Where the line is (people versus the crew).** A *person* with ties, memories and gossip is: the general manager, a location manager, a shift or crew lead, any licensed worker, anyone you hire from the people you know, and anyone an event promotes out of the crew (a star employee, a thief, a quarrel: the event picks one crew member and creates them as a person). Everyone else is a *crew pool* per location and role: a count, an average skill and morale, and no identity. Named people are capped by rule, not by 4: `limits.namedPerLocation` (3) and `limits.namedTotal` (40). The pool provides people on demand, so the cap never blocks an event, and a person who leaves goes back to the world as an ordinary person; they don't come back to a pool.
+- **Performance.** The yearly step costs O(locations × (lines + roles)), no per-head loops. A business with 20 locations touches a few hundred small records, which the Batch 0 budget has to absorb (the sim reports ms per year with and without businesses).
+
+#### Limits and franchising
+
+- **Limits become attention and money, with a wall far out.** `limits.businesses` 3 → 5, `limits.locations` 12 → 24 a business, `limits.totalLocations` 36, `limits.franchises` 20 a business. Every extra business you run yourself takes a share of your effort (`owner.attention.perExtraBusiness`), so more than two or three needs managers. Saturation (each extra location in one city takes a share of demand) stays. Chains in the market may have up to 24 locations. (ask)
+- **Franchising out.** A business that has traded `franchise.minYears` years with at least `franchise.minLocations` locations, quality and reputation above their floors, and no failing year recently, can sell franchises. A franchise is a franchisee in a city: not a location you run. It pays a one-off fee and a yearly royalty (a share of its revenue) and costs the brand yearly support. It is simulated in aggregate: a franchisee with a skill draw, the location maths with a standard crew, no staff of your own. A franchisee is a person you know or an unnamed operator. A franchisee that does badly or cuts corners puts your reputation and quality at risk (brand risk is a stored number that events move). A franchise can be bought back or ended. Franchises count toward your business's value (royalty multiple) and the estate passes them with it.
+- **Franchising in** (taking a franchise from a chain) is **not** built. W3's chains for sale cover buying a big brand. (ask)
+
+### Content
+
+- **Per kind (six files extended):** products (about 45 across the six), roles (about 26), supply pools (service kinds), sales words per group. Each kind's files get `products`, `roles` and `pools` sections; the fixed words for stock, trend and phase (labels, not story) go in `src/ui/labels.ts`.
+- **`registries/business.yaml`:** supplier categories (with a label, a volatility and a list of fictional supplier names for events and the report), trend groups, new triggers (`supplierRise`, `shortage`, `deal`, `stockout`, `waste`, `economy`, `staffRequest`, `franchise`) and their events.
+- **`balance/business.yaml`** gains `products`, `competition`, `economy`, `suppliers`, `headcount`, `crew`, `training`, `locationManagers`, `franchise` and the new `limits`. See Data.
+- **`text/business.yaml`:** report words for stock, waste, the economy and suppliers; history lines for franchising, a transfer, a location manager.
+- **About 40 new events** (W3 had 47), all fictional names, all following the consistency rules:
+  - Supply (about 9): a supplier rise (beans; flour; stock in general), a shortage, a better deal, a bulk offer, a late delivery, a cold-chain failure that spoils stock, switching supplier.
+  - Products and market (about 7): a craze for a product, the craze ends, a rival undercuts one line, a chain store opens (competition), a complaint about a line, a big custom order, a viral product.
+  - The economy (about 4): a boom lifts treats, a recession and customers trade down, a bank tightens, a slowdown.
+  - Staff (about 10): a key employee asks for a raise, a transfer or a promotion; a location manager offered; a location manager quits or goes bad; the crew walks out over short staffing; a rival poaches a lead; a training offer; a crew member turns out to be a star; theft at one location.
+  - Locations and limits (about 4): the second location struggles, you are stretched too thin (a partner who lives with you is cast), a chain pitches to buy, a manager pitches to run a new location.
+  - Franchise (about 6): an inquiry, a first franchisee opens, a franchisee cuts corners, a brand scandal, a franchisee thrives, a dispute over royalties or wanting out.
+- **Event rules** (AGENTS.md): any event that mentions money changes money, with the amount scaled to a share of a year's goods cost or revenue and shown with the new balance; product events require the line be sold (`business: { sells: product }`); stock or supplier history in the text requires the flag or the earlier event that proves it; no fixed "years later" (use `{since}`); text about a partner who lives with you branches or casts them; text that depends on a manager, role or franchise requires it. No romance or sexual content in any staff event. Names of suppliers, brands and franchisees are fictional.
+- New condition fields on `business` (`sells`, `stocked`, `economy`, `locations`, `headcount`, `franchises`, `hasLocationManager`); new `business` effect operations (set a line's price level or order level, a supplier deal or shock, buy or write off stock by a share of a year's goods cost, promote a crew member to a person, move a person, franchise operations); new text values `{product}`, `{supplier}`, `{location}` and `{locCity}`.
+
+### Data
+
+- **`Business`** gains: `lines` (per line: `productId`, `on`, `price` level, `order` level), `headcount` (target per location and role), `crew` (pools: `locationId`, `roleId`, `count`, `skill`, `morale`), `training` level, `franchises` (each: id, city, style, franchisee person or null, since, fee, last year's revenue and royalty, brand risk) and `brand` (a 0–100 risk or standing). `staffing` stays (the preset), `prices` stays as the "set all" default. The `shocks` kinds gain `shortage` and `deal` with a supplier `category`. `cash` is still never negative; a new `stockValue` holds inventory at cost.
+- **`BusinessLocation`** gains `stock` (carry per `stockId`: units), `manager` (a person id or none) and last year's `products` results in `result`.
+- **`BusinessStaff`** gains `roleId`. `manager: true` still means the general manager; a location manager has `roleId` of the manager role and a `locationId`.
+- **`BusinessReport` / `LocationResult`** gain per-line results (demand, sold, lost, waste, revenue, cost), `goodsCost`, `waste`, `lostSales`, `hiring` and `training` costs, `royalties`, and the economy phase and supplier moves in force.
+- **Derived, not stored:** the economy phase, supplier indices and trend indices for a year, from `${state.seed}:world:${series}` and the year.
+- **Balance** (every number; starting proposals the 10,000-life runs set):
+
+| Section | What it holds | Example starting values |
+|---|---|---|
+| `limits` | businesses, locations, totalLocations, franchises, namedPerLocation, namedTotal (drops `namedStaff`) | 5, 24, 36, 20, 3, 40 |
+| `products` | order cover per level, `maxLines` per style, holding cost, waste floor, `stockout` (line threshold, reputation per share, yearly cap), `walkout`, switching fee, forecast growth | lean 0.85, normal 1.05, heavy 1.3; 3/4/6; 0.04; 0.03 |
+| `competition` | weight on exposure, quality edge | 0.35, 0.5 |
+| `economy` | phases (demand multiplier, drift lift, bank multiplier), transition table, window, start weights | boom 1.06, steady 1, slowdown 0.96, recession 0.88 |
+| `suppliers` | volatility, reversion, bounds, pass-through, shortage chance and supply share, deal chance and size, rise threshold | 0.08, 0.35, 0.7–1.6, 0.5 |
+| `headcount` | `maxMultiple` per style, workload limit and its morale effect, short-staffing quality | 2.0 |
+| `crew` | refill hiring cost share, skill mean and spread, turnover scale, skill ceiling | 0.08 |
+| `training` | per level: payroll share, skill gain, morale | none 0; some 0.02, +1.5, +3; lots 0.05, +3, +5 |
+| `locationManagers` | effort curve, skim chance, quality and morale drag, appoint and transfer fees, willingness weights | |
+| `owner` | `attention.perExtraBusiness`, `span` for a general manager | 0.25, 0.08 |
+| `franchise` | minimums, fee, royalty, support cost, franchisee skill, brand-risk drift | 5 years, 3 locations, 6% |
+
+- **Saves:** schema version 34 → 35. For each existing business the migration: turns the business-wide price level into every line's level; sets orders to normal; builds the default lines for its kind; derives `headcount` from its staffing preset and its named staff (their roles by their title and licence); makes the crew pools from the computed crew (skill 50 as the old model assumed, morale the business's); sets stock to zero with the first forecast from last year's customers; and leaves `report`, `profits`, `cash`, `assets` and `worth` as they were. Nobody gets a franchise, a location manager or an economy by the upgrade.
+
+### UI
+
+- **Business screen** (a phone first redesign of the card, not a second screen): a top strip with the economy phase and the suppliers' mood in words; each business card with tabs or segments — **Report**, **Products**, **Team**, **Places** (and **Franchise** when eligible or held). The decisions stay at the top of Report (marketing, quality, pay, training, who runs it).
+- **Products:** one row per line: name, price level (three buttons), margin in words and percent, order level (three buttons), last year's sold, lost and wasted (units and words: "sold out in March"? — no: the year is the unit, so "ran out", "about right", "a lot left over"), a supplier arrow. Shops get "Choose what you sell" with the line count and limit. Services show the supply pool with its level.
+- **Team:** by location and role: a stepper (touch target 44px or more) for each role's headcount with its wage and the number of named people in it; named people as cards (skill and mood in words, ties, raise, let go, transfer, appoint as location manager); the crew as one line per role ("4 baristas, steady"). The Hire sheet gains a location and a role.
+- **Places:** each location with its city, style, manager (or "you"), headcount, stock in words, last year's result, and open, close, transfer-in and transfer-out. The expansion sheet stays.
+- **Franchise:** conditions in words and what is met; a sheet to sell a franchise (city, fee, royalty); a list of franchisees with last year's royalty and brand risk in words.
+- **Words** (fixed interface words in `src/ui/labels.ts`): economy phases, supplier and trend arrows, stock levels, order levels, morale words, the headcount range text. Product names, role titles, supplier names and every story line are content.
+- Everything works with touch alone, sheets respect safe areas, text wraps at 390px width, nothing depends on hover.
+- Money: the Money tab's business card and ledger are unchanged in structure; the new costs (goods, waste, hiring, training) and royalty income appear in the business report; a franchise fee is a business cash receipt.
+
+### Dependencies
+
+- W3 as built (business, funding, market, estate, staff), E3 and E4 for people and ties, the finance module, the careers licences.
+- Batch 0 merged: the performance budget (`balance/targets.yaml performance`) and the corrected business income and net worth ratio targets this gate must not break.
+- Independent of Batches 1–6 and 8–9. The save schema version is 35 when this lands first after the current 34; if another batch lands first, take the next number.
+
+### Acceptance criteria
+
+1. Every kind has product lines in content; a shop can choose its lines within the limit; services use supply pools. The content build checks shares sum to 1, unit costs, supplier categories, that every product is sold in some style, that a shop's `maxLines` fits its catalogue, and that the default lines reproduce W3's revenue and supplies within 3% for every kind, style and city.
+2. Each line has its own price level and order level, set by validated actions, replayed from the input log, and reported with units sold, lost and wasted. Stockouts lose sales and reputation; perishables spoil; durables carry and cost to hold. A lean order runs out more often and a heavy one wastes more (tests).
+3. `competition` changes demand: the same business in a city with more competition sells less of a competitive line than in a small town, and less of an exposed line than of a protected one.
+4. Supplier prices move yearly; a rise, a shortage and a deal each change unit cost or supply as described and queue their events. The economy phase changes demand by line sensitivity. Both are the same for a given seed and year however asked, and a life without a business draws nothing from the rng.
+5. Headcount is chosen per location and role within caps, with no 4-named-staff limit; named people are capped by `namedPerLocation` and `namedTotal`. At the preset headcount a location's capacity and quality match W3's (a test).
+6. A hire goes to the chosen location and role (the first-location bug is fixed and tested end to end); named staff can be transferred, across cities with their consent and move; location managers run their location, and a business with several locations and no managers does measurably worse than one with managers (simulation).
+7. Key staff are people (ties, memories, gossip, protected from pruning, picked by events); the rest are crew pools with no People entries; promotion from a pool creates a person; nobody is in two places; no pool has a negative count; a person's city matches their location (invariants).
+8. Training, turnover and morale work for crew and named staff; high turnover costs money.
+9. The new limits are in force and in the invariants; extra self-run businesses cost effort; a business of 24 locations is valid and stays within the time budget.
+10. A business meeting the franchise conditions can sell franchises; royalties, support cost, fees and brand risk go through the ledger and the report; franchises pass with a business to heirs and count in its value; a franchise can end.
+11. About 40 new events pass the content build, consistency checks and wording warnings; every one of them is reachable in a 10,000-life run (or listed as legitimately rare).
+12. Existing saves load: a migrated business keeps its last report, profits, cash, assets and worth; the migration is tested from a W3 save.
+13. All money (goods, waste, wages, hiring, training, fees, royalties, sales) goes through the finance module and the report.
+14. The simulation reports and targets below are met on 10,000 careful lives in four shards, the Batch 0 performance budget holds, and all W3 and Batch 0 business targets (survival, decision gap, owners' income and net worth ratios) stay inside their ranges, or the retune is recorded in `docs/technical.md` with its reason.
+
+### Simulation
+
+The business player in `tools/simulate/business.ts` gains, as chances that describe the simulated player (not the game), so they stay in the tool:
+
+- **Products and orders:** per policy (good, random, poor). *Good* keeps fair prices, raises a line whose supplier moved, orders normal, goes heavy on a line that ran out and lean on one that spoiled, and for a shop picks lines by margin and demand. *Poor* mis-prices, orders lean or heavy at the extremes, and picks lines badly. *Random* picks at random.
+- **Staff:** sets headcount near the preset with some drift by policy; hires to the location that is short; appoints a location manager when it has two or more locations and does not run the business in person; transfers now and then; trains by policy; franchises when eligible with a chance.
+- **Report:** stockouts (share of line-years with lost sales over the threshold, mean lost share, by kind and policy); waste (spoilage as a share of purchases, by kind, perishable and not); gross margin by product group and kind; headcount per location by style, named and crew per business, and headcount by business size (1, 2–3, 4–8, 9+ locations); location managers (share of multi-location businesses with one and the gap in profit and survival); turnover a year; survival after 1, 5 and 10 years (existing), now also by ordering policy and by the economy phase in the founding year; profit in each economy phase; supplier shock years against margin; franchises (how many, royalty, ended, brand incidents); businesses per owner against the limit; and milliseconds per simulated year with and without a business.
+- **Targets** (`balance/targets.yaml business`, starting ranges that the first runs set): mean lost share of demand; waste share for perishable kinds; gross margin range by kind; named staff per business never above the cap; good ordering beating poor ordering in profit; a recession year earning less than a boom year; managers beating no managers across several locations; survival and income ratios as before; time per year within the budget.
+
+### Testing
+
+- **Unit** (engine, no DOM): the baseline match test (default lines against W3's maths for every kind, style and city); stock arithmetic (lean, normal, heavy; perishable and durable; shortage); forecast uses demand, not sales; competition and economy multipliers; supplier index and economy phase determinism by seed and year; headcount preset equals W3; named cap and pool arithmetic; promotion from pool; transfer rules and willingness; location manager effort and span; franchise conditions and yearly maths; the migration from a W3 save; every new invariant.
+- **Content build tests:** product and role schemas, share sums, supplier and trend ids, event conditions and bindings, the category contract for new event kinds.
+- **Phone-sized end-to-end** (`npm run test:e2e`, `tests/e2e/business.spec.ts` extended): set a line's price and order level and see next year's per-line result; hire to the second location and see it there; change a role's headcount with the steppers; transfer a named person and appoint a location manager; read the economy and a supplier move; sell a franchise. 390 × 844, touch targets 44px or more.
+- **Simulation:** a 1,000-life smoke run, then 10,000 lives in four shards; the fixed-seed golden-life test shows a life without a business is unchanged.
+
+### Failure modes
+
+- **Balance drift.** Per-product detail changes the average business's profit, and the owners' income ratio (a Batch 0 target) moves. The baseline match test and the target checks catch it; the shares and cost shares are calibrated before anything else is tuned.
+- **A stockout spiral** (run out → reputation falls → demand falls → forecast falls → runs out). The forecast uses demand, and the reputation hit is capped per year.
+- **Recession kills every new business.** The phase effects are small and bounded; the report shows survival by founding phase, and the target needs it to differ, not collapse.
+- **Inventory and cash.** Accrual can leave cash negative after a big order; the order is paid from cash first, the rest is put in by the owners like any loss, and a heavy order you can't afford fails the business the way a loss does. The invariants check `stockValue` and `cash` are whole and not negative.
+- **People leaks.** A transferred person ends up in the wrong city and is removed as "away" by `reconcile`; a promoted crew member is counted twice; a pool and a target drift apart. Invariants check city against location, one place each, and counts.
+- **Time cost.** Franchises and 24-location chains slow `beginYear` (already over its target). Pools are aggregated and per-step work is bounded; the sim reports ms per year with a big business.
+- **Event text contradicts state** (a recession story in a boom, a franchisee line with no franchise). Conditions and the content build's evidence and status rules block them; warnings need a `justified` reason.
+- **A franchise exploit** (royalties with no risk). Royalty is net of support, fees are one-off, and brand risk costs reputation and quality.
+- **Saves.** A migration that changes a migrated business's last report or value. The test compares them.
+
+### Coding-AI prompt
+
+```text
+You are implementing B2 (Business depth) of WIPlife, from the approved gate "B2 — Business depth" in docs/expansion.md.
+
+Read AGENTS.md, docs/design.md, docs/technical.md (W3 as built), docs/expansion.md (second-wave decisions, W3 and B2) and docs/post-expansion1-changes.md (Batch 7). Inspect src/engine/business (model, step, staff, found, market, funding, estate, invariants, views), src/engine/actions/business.ts, src/content/businesses, src/content/balance/business.yaml and registries/business.yaml, the Business screen (src/ui/screens/work), and tools/simulate/business.ts first. Extend them; do not build a second business system.
+
+Build only B2, as the gate describes:
+- Products: product lines and supply pools per kind in content; per-line price level and order level; stock, forecast from demand, spoilage and holding; stockouts that lose sales and reputation; accrual accounting for inventory; shop line choice within a limit. The default lines must reproduce W3's revenue and supplies within 3% (a test).
+- Demand: per-line demand with price, trend, the city's competition value (finally used), economy phase and supplier shortage. Supplier price indices and the economy phase as pure functions of the life's seed and the year (createRng with a derived string, as the market does); a life with no business must draw nothing from the rng.
+- Employees: headcount per location and role replacing limits.namedStaff, with the staffing level kept as a preset; hire to a location and a role (fix the UI so HireSheet sends locationId); transfer_staff; appoint_manager and remove_manager for location managers; per-role crew pools aggregated per location, named people only where the gate says; training; morale and turnover for pools.
+- Limits and franchising: the new limits in balance and invariants; owner attention per extra business; franchising out (conditions, fee, royalty, support, brand risk, heirs, value). Do not build franchising in.
+- About 40 events following AGENTS.md and the gate's event rules; new conditions, effects and text values; content-build checks.
+- UI: the Business screen's Report, Products, Team, Places and Franchise sections, with the economy strip; fixed words in src/ui/labels.ts; 44px touch targets; safe areas.
+- Upgrade saves (schema 34 → 35 or the next number): existing businesses get default lines, stock and headcount without changing their last report, profits, cash, assets or worth.
+- Every number in balance YAML; no content in code; all randomness from the seeded rng; persistence only in src/persistence.
+- Extend tools/simulate/business.ts with the gate's player behaviour, reports and targets in balance/targets.yaml, and stay within the Batch 0 performance budget.
+
+Meet every B2 acceptance criterion. Run npm run check, npm run test:e2e (the gate's phone flows), a 1,000-life smoke run and 10,000 lives in four shards. Open a pull request into main, wait for green CI, and report what you built, the simulation results, deviations and why, and open questions. Report only verified facts.
 ```
 
 ---
