@@ -1,0 +1,36 @@
+id: biz_deal_bulk_offer
+title: Buy a lot, save a lot
+text: >-
+  A rep from {supplier} stops by with a bulk offer: a deep discount on {product} if you take much more than usual. The catch is on the back of the sheet, in smaller type: it will not keep forever.
+tone: neutral
+category: business
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { business: { owned: true } }
+    - { age: { gte: 18 } }
+    - { business: { owned: true, years: { gte: 1 } } }
+weight: { base: 5 }
+cooldownYears: 5
+followUpOnly: true
+bindBusiness: true
+choices:
+  - id: bulk
+    label: Take the whole offer
+    outcome:
+      text: A pallet arrives and then another. The shelves are generous, and the back room is a problem you now own.
+      effects:
+        - { type: business, action: buyAhead, share: 0.2, floor: 800 }
+  - id: half
+    label: Take half
+    outcome:
+      text: You take what fits and what you can imagine selling.
+      effects:
+        - { type: business, action: buyAhead, share: 0.1, floor: 400 }
+  - id: no
+    label: Pass
+    outcome:
+      text: A bargain you cannot sell is not a bargain. The rep leaves a card.
+      effects:
+        - { type: stat, key: confidence, delta: 1 }

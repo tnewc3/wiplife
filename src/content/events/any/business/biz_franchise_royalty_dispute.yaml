@@ -1,0 +1,45 @@
+id: biz_franchise_royalty_dispute
+title: About that royalty
+text: >-
+  The operator of a franchise of {business} asks for a conversation about the royalty. It has been a hard year, and the number on the statement looks bigger than it once did.
+tone: serious
+category: business
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { business: { owned: true } }
+    - { age: { gte: 18 } }
+    - { business: { owned: true, franchises: { gte: 1 } } }
+weight: { base: 5 }
+cooldownYears: 5
+followUpOnly: true
+bindBusiness: true
+choices:
+  - id: waive
+    label: Waive a season of the royalty
+    outcome:
+      text: It is a gesture, and it is received like one. The operator's next report is thoughtful, and early.
+      effects:
+        - { type: business, action: pay, share: 0.01, floor: 300 }
+        - { type: business, action: brand, delta: -6 }
+  - id: hold
+    label: Hold to the contract
+    check:
+      base: 45
+      stats: [{ key: confidence, weight: 0.2 }, { key: discipline, weight: 0.2 }]
+      success:
+        text: The contract is clear, and so is your explanation. The operator grumbles and signs.
+        effects:
+          - { type: business, action: brand, delta: 2 }
+      failure:
+        text: The conversation goes cold. The operator signs, and then starts counting what they hand over instead of what they make.
+        effects:
+          - { type: business, action: brand, delta: 10 }
+          - { type: stat, key: stress, delta: 2 }
+  - id: end
+    label: Let them go
+    outcome:
+      text: You end it quickly and politely. The sign comes down on the weekend.
+      effects:
+        - { type: business, action: franchiseEnd }

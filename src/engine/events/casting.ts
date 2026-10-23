@@ -33,6 +33,8 @@ import { groupPool } from '../belonging/cities';
 import { instanceOf } from '../belonging/query';
 import { BUSINESS_ROLE, GROUP_ROLE } from '../../content/schemas';
 import { businessById, livingStaff, managerOf } from '../business/query';
+import { leaveStaff } from '../business/roster';
+import { promoteFromCrew } from '../business/staff';
 import { businessPool } from '../business/pool';
 import { sameCountryCities } from '../country';
 
@@ -122,6 +124,10 @@ function businessPeopleFor(state: LifeState, role: NonNullable<CastSpec['busines
   const list = businessId !== undefined ? [businessById(state, businessId)].filter((b) => b !== undefined) : state.business.items;
   return list.flatMap((b) => {
     if (role === 'investor' || role === 'cofounder') return b!.owners.filter((o) => o.role === role).map((o) => o.id);
+    if (role === 'franchisee') return b!.franchises.flatMap((f) => (f.personId !== null ? [f.personId] : []));
+    // B2: someone from the crew becomes a person when an event picks them (see castEvent), so there is no one to find.
+    if (role === 'crew') return [];
+    if (role === 'locationManager') return b!.locations.flatMap((l) => (l.manager !== undefined && livingStaff(state, b!).some((s) => s.personId === l.manager) ? [l.manager] : []));
     const staff = livingStaff(state, b!);
     if (role === 'manager') return managerOf(b!) ? [managerOf(b!)!.personId] : [];
     if (role === 'licensed') return staff.filter((s) => s.licensed).map((s) => s.personId);
@@ -347,6 +353,19 @@ export function castEvent(
     if (cast[role] !== undefined) continue;
     const spec = def.cast![role]!;
     const preferHousehold = content.registries.categories.categories[def.category]?.household === true;
+    // B2: one of the crew is made a person (a named worker) when an event picks them out.
+    if (spec.business === 'crew') {
+      const biz = businessById(state, cast[BUSINESS_ROLE]);
+      const made = biz ? promoteFromCrew(state, biz, content, view.business.items.find((x) => x.id === biz.id)?.focus?.locationId) : null;
+      if (made === null) {
+        if (spec.optional) continue;
+        return fail();
+      }
+      created.push(made);
+      cast[role] = made;
+      used.add(made);
+      continue;
+    }
     const options = castCandidates(view, spec, content, preferHousehold, cast[GROUP_ROLE], cast[BUSINESS_ROLE]).filter((p) => !used.has(p.id));
     const canCreate =
       spec.createIfMissing === true && spec.kind !== undefined && (CREATABLE_KINDS as readonly string[]).includes(spec.kind) && (spec.crew === undefined || (spec.crew === 'rival' && state.crime.crew !== null)) && (spec.fan === undefined || (spec.fan !== 'stalker' && state.fame.active));
@@ -398,6 +417,11 @@ export function otherCity(state: LifeState, rng: RngState, content: ContentBundl
 /** Removes people created for a cast that was then rejected. */
 export function uncast(state: LifeState, created: readonly Id[]): void {
   forgetFans(state, created);
+  // A crew member made a person for an event that did not happen goes back to the crew (and their ties with it).
+  for (const id of created) {
+    leaveStaff(state, id);
+    for (const [key, tie] of Object.entries(state.web.ties)) if (tie.a === id || tie.b === id) delete state.web.ties[key];
+  }
   for (const id of created) {
     if (state.crime.crew) state.crime.crew.rivalMembers = state.crime.crew.rivalMembers.filter((m) => m !== id);
     delete state.people[id];

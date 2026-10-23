@@ -1737,7 +1737,7 @@ Meet every W6 acceptance criterion. Run all checks and a 10,000-life simulation,
 
 ## B2 — Business depth
 
-**Status:** plan (Batch 7a of `docs/post-expansion1-changes.md`). Nothing here is built. It waits for the user's approval of this gate.
+**Status:** built (Batch 7b of `docs/post-expansion1-changes.md`); see "B2 — Business depth (as built)" in `docs/technical.md` for how, and for the deviations from this gate.
 
 **Objective:** Turn a business from a set of dials into a shop you run: what you sell, what it costs, how much you stock, who works where, and a market that pushes back. It extends W3 (`src/engine/business`); it does not replace it.
 

@@ -499,6 +499,23 @@ business:
   incomeRatio: { min: 0.6, max: 3.2 }
   bankruptGap: { min: -6, max: 60 }
   netWorthRatio: { min: 0.5, max: 2.6 }
+  # B2 (business depth): starting ranges; the first 10,000-life run sets them.
+  lostShare: { min: 0.002, max: 0.2 }
+  stockoutLines: { min: 0.02, max: 0.5 }
+  wastePerishable: { min: 0.01, max: 0.3 }
+  grossMargin: { min: 0.2, max: 0.95 }
+  namedOverCap: { min: 0, max: 0 }
+  orderGap: { min: 0.5, max: 30 }
+  phaseGap: { min: 0, max: 30 }
+  managerGap: { min: -40, max: 40 }
+  turnover: { min: 0.01, max: 0.5 }
+  shockGap: { min: 0, max: 30 }
+  franchisesSold: { min: 1, max: 100000 }
+  msWithBusiness: { min: 0, max: 50 }
+  unreachedEvents: { min: 0, max: 0 }
+  # Events that need a rare mix (a franchise in trouble, a co-founder or investor with a grievance, a manager who skims):
+  # across 10,000 careful lives each fired in at most some shards, so they are listed, not required.
+  rareEvents: [biz_franchise_scandal, biz_stretched_thin, biz_investor_lost_money_family, biz_investor_lost_money_friend, biz_investor_wants_out, biz_cofounder_new_idea, biz_cofounder_wants_out, biz_partner_resents_hours, biz_location_manager_skims, biz_license_lapse, biz_family_joins, biz_offer_to_buy, biz_catering_order]
 
 coverage:
   minEvents: 300

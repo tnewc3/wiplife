@@ -1,0 +1,43 @@
+id: biz_stretched_thin
+title: Stretched too thin
+text: >-
+  Between {business} and everything else, you have not been home before dark in weeks. {partner.name} stopped asking when you will be back, and started leaving the porch light on.
+tone: serious
+category: business
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { business: { owned: true } }
+    - { age: { gte: 18 } }
+    - { business: { owned: true, role: [self], locations: { gte: 2 } } }
+    - { role: partner, alive: true }
+weight: { base: 5 }
+cooldownYears: 5
+followUpOnly: true
+bindBusiness: true
+cast:
+  partner: { kind: partner, presence: household }
+choices:
+  - id: delegate
+    label: Hand a place to someone else
+    outcome:
+      text: You give a key to a person you trust and take an evening off. It is odd how quickly the place goes on without you.
+      effects:
+        - { type: business, action: morale, delta: 2 }
+        - { type: relationship, role: partner, affection: 4, trust: 3 }
+        - { type: stat, key: stress, delta: -3 }
+  - id: promise
+    label: Promise to slow down
+    outcome:
+      text: You mean it when you say it, and the list on the fridge starts getting shorter.
+      effects:
+        - { type: relationship, role: partner, affection: 2 }
+        - { type: stat, key: stress, delta: -1 }
+  - id: push
+    label: Push through one more season
+    outcome:
+      text: "Just one more season, you say. {partner.name} says nothing, and the light stays on."
+      effects:
+        - { type: relationship, role: partner, affection: -5, trust: -3 }
+        - { type: stat, key: stress, delta: 3 }

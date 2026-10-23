@@ -1,0 +1,47 @@
+id: biz_location_manager_quits
+title: Notice from the manager
+text: >-
+  {lm.name} asks for a minute at the end of a long day. {lm.they} {lm:has|have} been running the place at {location}, and {lm.they} {lm:is|are} leaving.
+tone: serious
+category: business
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { business: { owned: true } }
+    - { age: { gte: 18 } }
+    - { business: { owned: true, hasLocationManager: true, years: { gte: 1 } } }
+weight: { base: 3 }
+cooldownYears: 6
+followUpOnly: true
+bindBusiness: true
+cast:
+  lm: { business: locationManager, presence: city }
+choices:
+  - id: counter
+    label: Offer more to stay
+    check:
+      base: 45
+      stats: [{ key: kindness, weight: 0.2 }, { key: confidence, weight: 0.15 }]
+      success:
+        text: "{lm.name} thinks about it, and says yes. It turns out that being asked was most of it."
+        effects:
+          - { type: business, action: staffRaise, role: lm }
+      failure:
+        text: The answer is still no, and kinder than you deserve.
+        effects:
+          - { type: business, action: staffQuit, role: lm }
+          - { type: business, action: quality, delta: -3 }
+  - id: wish
+    label: Wish {lm.them} well
+    outcome:
+      text: A handshake and a card from the crew. The place goes on, a little differently.
+      effects:
+        - { type: business, action: staffQuit, role: lm }
+        - { type: relationship, role: lm, affection: 3 }
+  - id: ask
+    label: Ask what would change {lm.their} mind
+    outcome:
+      text: "{lm.name} tells you, plainly. You have to decide whether you can hear it."
+      effects:
+        - { type: business, action: staffMorale, role: lm, delta: 4 }

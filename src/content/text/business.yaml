@@ -52,6 +52,23 @@ history:
     importance: 2
     variants:
       - "People who had put money into {business} did not get it back."
+  franchised:
+    importance: 3
+    variants:
+      - "{business} sold a franchise in {city}: the name went somewhere you will not be every day."
+      - "A franchise of {business} opened in {city}."
+  franchiseEnded:
+    importance: 2
+    variants:
+      - "The {business} franchise in {city} closed."
+  transferred:
+    importance: 1
+    variants:
+      - "Someone from {business} moved to {city} to work there."
+  locationManager:
+    importance: 1
+    variants:
+      - "You put someone in charge of {business} in {city}."
 
 report:
   customers:
@@ -84,3 +101,26 @@ report:
     rival: "A competitor is taking customers."
     buzz: "Word of mouth is working for you."
     skimmed: "The books show money that was taken."
+    ranOut: "Some of what people wanted ran out before the year did, and some of them said so."
+    leftover: "A lot was left over on the shelves at the end of the year."
+    spoiled: "A good deal of stock spoiled before it could be sold."
+    supplierUp: "Your suppliers raised their prices."
+    supplierDown: "Your suppliers' prices eased."
+    shortage: "A supplier could not deliver everything that was ordered."
+    deal: "A better deal with a supplier lowered what you paid."
+    economyBoom: "A boom: people had money and spent it."
+    economySlowdown: "A slowdown: people spent more carefully."
+    economyRecession: "A recession: people cut back where they could."
+    turnover: "People came and went on the crew, and replacing them cost money."
+    overworked: "There were more customers than the crew could comfortably serve."
+    brandRisk: "How the franchises are run is starting to hurt the name."
+    royalties: "The franchises paid royalties."
+  economy:
+    boom: "The economy is booming. People are spending on treats."
+    steady: "The economy is steady."
+    slowdown: "The economy is slowing. People are spending more carefully."
+    recession: "The economy is in a recession. People are trading down and putting off what they can."
+  suppliers:
+    up: "getting dearer"
+    down: "getting cheaper"
+    steady: "steady"

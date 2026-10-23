@@ -1,0 +1,37 @@
+id: biz_shortage_scramble
+title: Short on the truck
+text: >-
+  The delivery from {supplier} is thin. The driver shrugs: there is not enough to go around, and the big accounts come first. {business} will have less of everything than the order said.
+tone: neutral
+category: business
+rarity: uncommon
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { business: { owned: true } }
+    - { age: { gte: 18 } }
+    - { business: { owned: true, years: { gte: 1 } } }
+weight: { base: 4 }
+cooldownYears: 4
+followUpOnly: true
+bindBusiness: true
+choices:
+  - id: spot
+    label: Pay a premium for what you can find elsewhere
+    outcome:
+      text: A second supplier answers on the first ring, for a price. The shelves are full by afternoon.
+      effects:
+        - { type: business, action: pay, share: 0.025, floor: 500 }
+  - id: ration
+    label: Make do and tell customers why
+    outcome:
+      text: A note on the door explains. People are kinder than you expected, and some still leave empty-handed.
+      effects:
+        - { type: business, action: reputation, delta: -1 }
+        - { type: stat, key: stress, delta: 2 }
+  - id: lean
+    label: Lean on what you hold and trim the order
+    outcome:
+      text: You stretch the stock you have and trim next year's order, on the theory that the supply will come back.
+      effects:
+        - { type: business, action: order, level: heavy }

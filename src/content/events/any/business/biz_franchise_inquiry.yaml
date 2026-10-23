@@ -1,0 +1,37 @@
+id: biz_franchise_inquiry
+title: Can I use your name?
+text: >-
+  A letter arrives at {business}, then a phone call. Someone in another town wants to open a place under your name, with your recipes and your sign. "Everyone says it is the best in the region," the voice says, "and I want to be part of it."
+tone: light
+category: business
+rarity: uncommon
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { business: { owned: true } }
+    - { age: { gte: 18 } }
+    - { business: { owned: true, franchiseReady: true } }
+weight: { base: 6 }
+cooldownYears: 6
+followUpOnly: true
+bindBusiness: true
+choices:
+  - id: talk
+    label: Hear them out
+    outcome:
+      text: An afternoon of questions and a long handshake. You do not sign anything, but you take a consulting fee for your time.
+      effects:
+        - { type: business, action: receive, share: 0.005, floor: 400 }
+        - { type: business, action: reputation, delta: 1 }
+  - id: later
+    label: Say that you are not ready
+    outcome:
+      text: They thank you politely, and leave a card. The idea does not leave with them.
+      effects:
+        - { type: stat, key: confidence, delta: 1 }
+  - id: no
+    label: Say that the name stays where it is
+    outcome:
+      text: You like knowing what your sign stands for. It is a small, tidy comfort.
+      effects:
+        - { type: stat, key: stress, delta: -1 }

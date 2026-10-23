@@ -1,0 +1,38 @@
+id: biz_ran_out_complaints
+title: Sorry, we are out
+text: >-
+  For the third time this week someone asks for {product} at {business} and gets the same answer. The look on their faces is polite and a little tired.
+tone: neutral
+category: business
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { business: { owned: true } }
+    - { age: { gte: 18 } }
+    - { business: { owned: true, years: { gte: 1 }, stocked: [short] } }
+weight: { base: 6 }
+cooldownYears: 3
+followUpOnly: true
+bindBusiness: true
+choices:
+  - id: order
+    label: Order more of it next year
+    outcome:
+      text: You write a heavier order and a note to yourself to look at the sales numbers before the next one.
+      effects:
+        - { type: business, action: order, level: heavy }
+  - id: sorry
+    label: Make it up to the people who came
+    outcome:
+      text: A small gift for each disappointed customer, and an honest apology at the counter. Most of them smile.
+      effects:
+        - { type: business, action: pay, share: 0.006, floor: 150 }
+        - { type: business, action: reputation, delta: 2 }
+  - id: ration
+    label: Charge more for it so it lasts
+    outcome:
+      text: A higher number on the board and shorter lines. The ones who still want it do not seem to mind.
+      effects:
+        - { type: business, action: price, level: high }
+        - { type: business, action: reputation, delta: -1 }

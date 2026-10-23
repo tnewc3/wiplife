@@ -1,0 +1,46 @@
+id: biz_economy_bank_tightens
+title: The bank gets careful
+text: >-
+  A letter from the bank says that, "in light of conditions," its terms are changing. The loan for {business} is not in danger, but the manager's tone is.
+tone: serious
+category: business
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { business: { owned: true } }
+    - { age: { gte: 18 } }
+    - { business: { owned: true, loan: true, economy: [recession, slowdown] } }
+weight: { base: 5 }
+cooldownYears: 6
+followUpOnly: true
+bindBusiness: true
+choices:
+  - id: pay
+    label: Pay some of it down
+    outcome:
+      text: A bigger payment than you had planned. The letter that comes back is warmer.
+      effects:
+        - { type: business, action: pay, share: 0.05, floor: 1000 }
+        - { type: stat, key: stress, delta: -2 }
+  - id: ask
+    label: Ask for patience
+    check:
+      base: 45
+      stats: [{ key: confidence, weight: 0.2 }, { key: sociability, weight: 0.2 }]
+      success:
+        text: The manager gives you more room than the letter promised, and a cup of coffee while you sign.
+        effects:
+          - { type: stat, key: confidence, delta: 2 }
+      failure:
+        text: The bank has rules, and the rules do not care about your story. You leave with a smaller smile.
+        effects:
+          - { type: business, action: pay, share: 0.02, floor: 400 }
+          - { type: stat, key: stress, delta: 2 }
+  - id: cut
+    label: Cut what you can and keep the payments on time
+    outcome:
+      text: A shorter order sheet, fewer hours on the schedule. It is not pleasant and it is not permanent.
+      effects:
+        - { type: business, action: order, level: lean }
+        - { type: business, action: morale, delta: -3 }

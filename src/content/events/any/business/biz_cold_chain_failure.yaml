@@ -1,0 +1,41 @@
+id: biz_cold_chain_failure
+title: The fridge gave out
+text: >-
+  The compressor quit overnight. In the morning the back room is warm and everything in it is a question. {business} cannot sell what the crew would not eat.
+tone: neutral
+category: business
+rarity: uncommon
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { business: { owned: true } }
+    - { age: { gte: 18 } }
+    - { any: [ { business: { type: [cafe, bakery] } }, { business: { sells: [groceries] } } ] }
+weight: { base: 3 }
+cooldownYears: 6
+followUpOnly: true
+bindBusiness: true
+choices:
+  - id: replace
+    label: Throw it out, replace the stock and fix the fridge
+    outcome:
+      text: The bins fill up and the fridge man leaves a long bill. By evening the shelves look normal.
+      effects:
+        - { type: business, action: writeOff, share: 0.4 }
+        - { type: business, action: pay, share: 0.03, floor: 800 }
+  - id: sort
+    label: Sort out what is still good
+    check:
+      base: 50
+      stats: [{ key: discipline, weight: 0.25 }, { key: smarts, weight: 0.15 }]
+      success:
+        text: You are strict and careful and save a good half of it. The inspector would have approved.
+        effects:
+          - { type: business, action: writeOff, share: 0.2 }
+          - { type: business, action: pay, share: 0.015, floor: 400 }
+      failure:
+        text: Someone misses a tray. A customer gets sick, a rumor gets started, and you spend the week undoing it.
+        effects:
+          - { type: business, action: writeOff, share: 0.3 }
+          - { type: business, action: pay, share: 0.025, floor: 600 }
+          - { type: business, action: reputation, delta: -4 }

@@ -1967,15 +1967,15 @@ describe('belonging (W2)', () => {
 describe('businesses (W3)', () => {
   const read = (file: string) => readFile(path.join(dir, file), 'utf8');
 
-  it('accepts the real content: six kinds with three styles each, fictional chains and about forty-seven events, with no warnings', { timeout: 90_000 }, async () => {
+  it('accepts the real content: six kinds with three styles each, fictional chains and about ninety business events, with no warnings', { timeout: 90_000 }, async () => {
     const result = await compile();
     if (!result.ok) throw new Error(formatErrors(result.errors));
     expect(Object.keys(result.bundle.businesses).sort()).toEqual(['bakery', 'cafe', 'cleaning', 'plumbing', 'salon', 'shop']);
     for (const d of Object.values(result.bundle.businesses)) expect(Object.keys(d.styles)).toEqual(['budget', 'standard', 'premium']);
     expect(Object.keys(result.bundle.chains).length).toBeGreaterThanOrEqual(6);
     const events = Object.values(result.bundle.events).filter((e) => ['business', 'bizstart', 'bizpast'].includes(e.category));
-    expect(events.length).toBeGreaterThanOrEqual(42);
-    expect(events.length).toBeLessThanOrEqual(52);
+    expect(events.length).toBeGreaterThanOrEqual(88);
+    expect(events.length).toBeLessThanOrEqual(100);
     expect(result.warnings.filter((w) => w.eventId.startsWith('biz_'))).toEqual([]);
     expect(Object.keys(result.bundle.balance.business.cities).sort()).toEqual(Object.keys(result.bundle.cities).sort());
   });
@@ -1998,7 +1998,7 @@ describe('businesses (W3)', () => {
     const cafe = await read('businesses/cafe.yaml');
     await write('businesses/cafe.yaml', cafe.replace('startup: 220000', 'startup: 20000'));
     expect(await expectErrors()).toContain('startup costs must rise from budget to premium');
-    await write('businesses/cafe.yaml', cafe.replace('    elasticity: 1.0\nfit:', 'fit:'));
+    await write('businesses/cafe.yaml', cafe.replace('    elasticity: 1.0\n', ''));
     expect(await expectErrors()).toContain('elasticity');
   });
 

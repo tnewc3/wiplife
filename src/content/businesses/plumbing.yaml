@@ -29,6 +29,7 @@ styles:
     wage: 48000
     quality: 42
     elasticity: 1.7
+    costScale: 1.045
   standard:
     label: Local plumbing company
     blurb: "Three trucks, a dispatcher and a name on the side people trust."
@@ -42,6 +43,7 @@ styles:
     wage: 50000
     quality: 52
     elasticity: 1.5
+    costScale: 1.045
   premium:
     label: Design and install
     blurb: "Bathrooms, kitchens and whole-house repipes for people who want it done once."
@@ -55,6 +57,7 @@ styles:
     wage: 60000
     quality: 66
     elasticity: 0.8
+    costScale: 1.207
 fit:
   budget: { size: 0.3, wealth: -0.1 }
   standard: { size: 0.3, wealth: 0.2 }
@@ -72,3 +75,16 @@ names:
   - "Hollis Heating & Pipe"
   - "Bluecap Plumbing"
   - "Mainline Fixers"
+lineMode: services
+products:
+  - { id: repairs, name: Repairs, group: trades, type: service, share: 0.45, price: 0.6, costShare: 0.24, elasticity: 0.5, competition: 0.6, economy: 0.3, trend: trades, perishable: 0.0, core: true, pool: { id: pipe_and_parts, units: 0.65 } }
+  - { id: installs, name: Installs, group: trades, type: service, share: 0.25, price: 1.6, costShare: 0.32, elasticity: 0.8, competition: 0.7, economy: 0.9, trend: trades, perishable: 0.0, core: true, pool: { id: pipe_and_parts, units: 2.3 } }
+  - { id: call_outs, name: Emergency call-outs, group: trades, type: service, share: 0.2, price: 0.3, costShare: 0.18, elasticity: 0.3, competition: 0.3, economy: 0.1, trend: trades, perishable: 0.0, core: true, pool: { id: pipe_and_parts, units: 0.25 } }
+  - { id: service_plans, name: Service plans, group: trades, type: service, share: 0.1, price: 0.4, costShare: 0.15, elasticity: 0.5, competition: 0.5, economy: 0.5, trend: trades, perishable: 0.0, styles: [standard, premium], pool: { id: pipe_and_parts, units: 0.27 } }
+pools:
+  - { id: pipe_and_parts, name: Pipe and parts, supplier: pipe_parts, cost: 0.22, perishable: 0 }
+roles:
+  - { id: manager, title: office manager, share: 0, weight: 1.0, wage: 1.35, min: 0, max: 1, manager: true }
+  - { id: plumber, title: plumber, share: 0.3, weight: 1.1, wage: 1.4, min: 0, max: 8, licensed: true }
+  - { id: mate, title: plumber’s mate, share: 0.45, weight: 1.0, wage: 0.8, min: 0, max: 10, craft: true }
+  - { id: dispatcher, title: dispatcher, share: 0.25, weight: 0.85, wage: 0.88, min: 0, max: 6 }

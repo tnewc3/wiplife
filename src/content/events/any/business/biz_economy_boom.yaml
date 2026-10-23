@@ -1,0 +1,38 @@
+id: biz_economy_boom
+title: Everyone is spending
+text: >-
+  The whole town seems to have money in its pockets. Lines at {business} are longer, orders are bigger and people no longer ask what things cost before they ask for them.
+tone: light
+category: business
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { business: { owned: true } }
+    - { age: { gte: 18 } }
+    - { business: { owned: true, economy: [boom] } }
+weight: { base: 6 }
+cooldownYears: 5
+followUpOnly: true
+bindBusiness: true
+choices:
+  - id: marketing
+    label: Spend on getting noticed while it lasts
+    outcome:
+      text: Window signs, a few ads and a small stand out front. New faces turn up, and some of them stay.
+      effects:
+        - { type: business, action: pay, share: 0.03, floor: 600 }
+        - { type: business, action: buzz, delta: 8, years: 2 }
+  - id: price
+    label: Let the prices drift up
+    outcome:
+      text: Nobody blinks. You write a bigger number on the board and keep an eye out for the day somebody does.
+      effects:
+        - { type: business, action: price, level: high }
+  - id: keep
+    label: Keep your head and your prices
+    outcome:
+      text: Good times do not last, you tell yourself, and put the extra into the till. The crew gets a small thank-you.
+      effects:
+        - { type: business, action: morale, delta: 3 }
+        - { type: business, action: reputation, delta: 1 }

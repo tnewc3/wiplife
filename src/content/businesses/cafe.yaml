@@ -25,6 +25,7 @@ styles:
     wage: 28000
     quality: 38
     elasticity: 2.0
+    costScale: 1.136
   standard:
     label: Neighborhood café
     blurb: "Tables by the window, a small menu, a loyal crowd."
@@ -38,6 +39,7 @@ styles:
     wage: 31000
     quality: 50
     elasticity: 1.7
+    costScale: 1.02
   premium:
     label: Specialty roastery
     blurb: "Single-origin everything, a roaster in the back and a very good espresso machine."
@@ -51,6 +53,7 @@ styles:
     wage: 38000
     quality: 66
     elasticity: 1.0
+    costScale: 0.952
 fit:
   budget: { size: 0.35, wealth: -0.3 }
   standard: { size: 0.3, wealth: 0.2 }
@@ -68,3 +71,17 @@ names:
   - "The Patient Cup"
   - "Hollow Oak Espresso"
   - "Velvet Teaspoon"
+lineMode: menu
+products:
+  - { id: coffee, name: Coffee, group: drinks, type: goods, share: 0.38, price: 0.38, costShare: 0.2, supplier: coffee, elasticity: 1.0, competition: 1.4, economy: 0.6, trend: drinks, perishable: 0.1, core: true }
+  - { id: tea, name: Tea, group: drinks, type: goods, share: 0.07, price: 0.32, costShare: 0.16, supplier: coffee, elasticity: 1.0, competition: 1.0, economy: 0.5, trend: drinks, perishable: 0.05, core: true }
+  - { id: cold_drinks, name: Cold drinks, group: drinks, type: goods, share: 0.1, price: 0.38, costShare: 0.22, supplier: produce, elasticity: 1.1, competition: 1.1, economy: 1.0, trend: drinks, perishable: 0.3, core: true }
+  - { id: pastries, name: Pastries, group: baked, type: goods, share: 0.22, price: 0.45, costShare: 0.38, supplier: flour_grain, elasticity: 0.9, competition: 0.8, economy: 1.1, trend: baked, perishable: 0.8, core: true }
+  - { id: sandwiches, name: Sandwiches, group: meals, type: goods, share: 0.23, price: 0.85, costShare: 0.36, supplier: produce, elasticity: 0.8, competition: 0.9, economy: 0.8, trend: meals, perishable: 0.7, styles: [standard, premium], core: true }
+  - { id: beans_to_go, name: Beans to take home, group: drinks, type: goods, share: 0.1, price: 1.4, costShare: 0.35, supplier: coffee, elasticity: 1.3, competition: 0.6, economy: 1.2, trend: drinks, perishable: 0.05, styles: [premium] }
+  - { id: breakfast_plates, name: Breakfast plates, group: meals, type: goods, share: 0.12, price: 1.2, costShare: 0.34, supplier: produce, elasticity: 0.9, competition: 0.9, economy: 0.9, trend: meals, perishable: 0.7, styles: [standard, premium] }
+roles:
+  - { id: manager, title: café manager, share: 0, weight: 1.0, wage: 1.35, min: 0, max: 1, manager: true }
+  - { id: shift_lead, title: shift lead, share: 0.15, weight: 1.15, wage: 1.25, min: 0, max: 3, lead: true }
+  - { id: barista, title: barista, share: 0.55, weight: 1.0, wage: 1.0, min: 0, max: 12, craft: true }
+  - { id: cashier, title: cashier, share: 0.3, weight: 0.85, wage: 0.88, min: 0, max: 8 }

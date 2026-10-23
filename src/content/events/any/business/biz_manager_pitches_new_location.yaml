@@ -1,0 +1,40 @@
+id: biz_manager_pitches_new_location
+title: A pitch for a new place
+text: >-
+  {staff.name} comes to you with a plan on a legal pad: a new place for {business}, nearby, with {staff.them} running the floor. The numbers on the pad are rough, and the idea is not bad.
+tone: neutral
+category: business
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { business: { owned: true } }
+    - { age: { gte: 18 } }
+    - { business: { owned: true, staff: { gte: 1 }, years: { gte: 3 }, profit: { gt: 0 }, locations: { lte: 5 } } }
+weight: { base: 4 }
+cooldownYears: 6
+followUpOnly: true
+bindBusiness: true
+cast:
+  staff: { business: staff, presence: city }
+choices:
+  - id: fund
+    label: Fund it
+    outcome:
+      text: A lease, a new sign, and a handshake with {staff.name}. It is exciting and a little frightening.
+      effects:
+        - { type: business, action: expand }
+        - { type: relationship, role: staff, affection: 4, trust: 4 }
+  - id: test
+    label: Test the idea with a pop-up first
+    outcome:
+      text: A weekend stall in the neighborhood, with {staff.name} at the counter. It tells you more than the pad does.
+      effects:
+        - { type: business, action: pay, share: 0.01, floor: 400 }
+        - { type: business, action: buzz, delta: 5, years: 1 }
+  - id: no
+    label: Not now
+    outcome:
+      text: "{staff.name} nods, folds the legal pad, and keeps the idea somewhere safe."
+      effects:
+        - { type: business, action: staffMorale, role: staff, delta: -5 }

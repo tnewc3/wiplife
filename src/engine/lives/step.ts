@@ -8,6 +8,7 @@
  * counted in the pacing budget). Runs just before the pacing director, so a
  * request is picked up the same year.
  */
+import { leaveStaff } from '../business/roster';
 import { isDraft, original } from 'immer';
 import type { ContentBundle, LifeDomain } from '../../content/schemas';
 import { isChildKind, isPartnerKind } from '../relationships';
@@ -84,7 +85,11 @@ function stepPerson(ctx: Ctx, id: Id, person: Person, rel: Relationship): void {
     else target.occupation = s.occupation;
   }
   if (s.wealth !== person.wealthLevel) target.wealthLevel = s.wealth;
-  if (s.cityId !== person.cityId) target.cityId = s.cityId;
+  if (s.cityId !== person.cityId) {
+    // Someone who works in one of your businesses and moves away leaves the job.
+    if (target.tags.includes('staff')) leaveStaff(ctx.state, id);
+    target.cityId = s.cityId;
+  }
   if (s.citizenships.length !== person.citizenships.length) target.citizenships = s.citizenships;
 }
 

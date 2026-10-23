@@ -48,8 +48,8 @@ function changesMoney(outcome: Outcome | undefined): boolean {
       (e.type === 'fame' && (e.action === 'contract' || (e.action === 'end_contract' && e.how === 'broken'))) ||
       // E6c: a signing bonus, a new deal's bonus and an injury treated at your own cost.
       (e.type === 'sports' && (e.action === 'sign' || e.action === 'extend' || (e.action === 'injury' && (e.what === 'rest' || e.what === 'surgery')))) ||
-      // W3: a business effect that pays, receives, sells, closes, buys out, hires or expands moves your money.
-      (e.type === 'business' && ['pay', 'receive', 'theft', 'sell', 'close', 'buyout', 'expand', 'hire', 'staffFire', 'staffRaise'].includes(e.action)) ||
+      // W3: a business effect that pays, receives, sells, closes, buys out, hires or expands moves your money. B2: so does one that buys stock ahead, sets a price or an order, or changes what a supplier charges (from now on), moves someone or appoints a manager (a fee).
+      (e.type === 'business' && ['pay', 'receive', 'theft', 'sell', 'close', 'buyout', 'expand', 'hire', 'staffFire', 'staffRaise', 'buyAhead', 'price', 'order', 'supplier', 'transfer', 'appoint'].includes(e.action)) ||
       // W6: pay kept back from you.
       (e.type === 'migration' && e.action === 'withheld') ||
       e.type === 'repay' ||

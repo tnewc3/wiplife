@@ -11,19 +11,26 @@ import {
   BUSINESS_FUNDING,
   BUSINESS_STYLES,
   MARKETING_LEVELS,
+  ORDER_LEVELS,
   OWNER_ROLES,
   PAY_LEVELS,
   PRICE_LEVELS,
   QUALITY_LEVELS,
   STAFFING_LEVELS,
+  TRAINING_LEVELS,
   type BusinessFunding,
+  type OrderLevel,
+  type PriceLevel,
   type BusinessStyle,
   type OwnerRole,
 } from '../../content/schemas';
-import { buyBlock, buyBusiness, buyOut, buyoutBlock, closeBusiness, closeLocation, closeLocationBlock, decisionsValid, expandBlock, openLocation, roleBlock, sellBlock, sellBusiness, setDecisions, setRole, startBlock, startBusiness, type Decisions } from '../business/found';
+import { buyBlock, buyBusiness, buyOut, buyoutBlock, closeBusiness, closeLocation, closeLocationBlock, decisionsValid, expandBlock, lineBlock, openLocation, roleBlock, sellBlock, sellBusiness, setDecisions, setLine, setOrder, setRole, startBlock, startBusiness, type Decisions } from '../business/found';
+import { headcountBlock, setHeadcount } from '../business/crew';
+import { endFranchise, sellBlock as franchiseBlock, sellFranchise } from '../business/franchise';
 import type { FundingPlan } from '../business/funding';
 import { businessById } from '../business/query';
-import { fireStaff, hireBlock, hireStaff, raiseStaff } from '../business/staff';
+import { appointBlock, appointManager, fireStaff, hireBlock, hireCrew, hireStaff, raiseStaff, removeLocationManager, removeManagerBlock, transferBlock, transferStaff } from '../business/staff';
+import { craftRole, crewRoles } from '../business/headcount';
 import type { LifeActionParams, LifeActionRule } from './life';
 
 export const BUSINESS_ACTION_IDS = [
@@ -39,6 +46,15 @@ export const BUSINESS_ACTION_IDS = [
   'open_location',
   'close_location',
   'buyout_owner',
+  // B2
+  'set_line',
+  'set_order',
+  'set_headcount',
+  'transfer_staff',
+  'appoint_manager',
+  'remove_manager',
+  'sell_franchise',
+  'end_franchise',
 ] as const;
 export type BusinessActionId = (typeof BUSINESS_ACTION_IDS)[number];
 
@@ -59,6 +75,18 @@ export interface BusinessActionParams {
   plan?: FundingPlan;
   licensedPersonId?: string;
   decisions?: Decisions;
+  /** B2 */
+  productId?: string;
+  stockId?: string;
+  roleId?: string;
+  franchiseId?: string;
+  price?: PriceLevel;
+  level?: OrderLevel;
+  on?: boolean;
+  crew?: boolean;
+  count?: number;
+  royalty?: number;
+  how?: 'end' | 'buyback';
 }
 
 const isRecord = (v: unknown): v is Record<string, unknown> => typeof v === 'object' && v !== null && !Array.isArray(v);
@@ -102,10 +130,10 @@ function parsePlan(raw: unknown): FundingPlan | null {
 function parseBusiness(params: unknown, need: readonly (keyof BusinessActionParams)[]): LifeActionParams | null {
   if (!isRecord(params) || !isRecord(params.biz) || Object.keys(params).length !== 1) return null;
   const raw = params.biz;
-  const known = ['businessId', 'listingId', 'defId', 'name', 'cityId', 'style', 'role', 'personId', 'locationId', 'licensed', 'funding', 'ownerId', 'plan', 'licensedPersonId', 'decisions'];
+  const known = ['businessId', 'listingId', 'defId', 'name', 'cityId', 'style', 'role', 'personId', 'locationId', 'licensed', 'funding', 'ownerId', 'plan', 'licensedPersonId', 'decisions', 'productId', 'stockId', 'roleId', 'franchiseId', 'price', 'level', 'on', 'crew', 'count', 'royalty', 'how'];
   if (Object.keys(raw).some((k) => !known.includes(k))) return null;
   const out: BusinessActionParams = {};
-  for (const key of ['businessId', 'listingId', 'defId', 'cityId', 'personId', 'locationId', 'ownerId', 'licensedPersonId'] as const) {
+  for (const key of ['businessId', 'listingId', 'defId', 'cityId', 'personId', 'locationId', 'ownerId', 'licensedPersonId', 'productId', 'stockId', 'roleId', 'franchiseId'] as const) {
     if (raw[key] === undefined) continue;
     const v = idOf(raw[key]);
     if (v === undefined) return null;
@@ -129,6 +157,34 @@ function parseBusiness(params: unknown, need: readonly (keyof BusinessActionPara
     if (typeof raw.licensed !== 'boolean') return null;
     out.licensed = raw.licensed;
   }
+  for (const key of ['on', 'crew'] as const) {
+    if (raw[key] === undefined) continue;
+    if (typeof raw[key] !== 'boolean') return null;
+    out[key] = raw[key];
+  }
+  if (raw.price !== undefined) {
+    const v = oneOf<PriceLevel>(PRICE_LEVELS, raw.price);
+    if (!v) return null;
+    out.price = v;
+  }
+  if (raw.level !== undefined) {
+    const v = oneOf<OrderLevel>(ORDER_LEVELS, raw.level);
+    if (!v) return null;
+    out.level = v;
+  }
+  if (raw.how !== undefined) {
+    const v = oneOf(['end', 'buyback'] as const, raw.how);
+    if (!v) return null;
+    out.how = v;
+  }
+  if (raw.count !== undefined) {
+    if (typeof raw.count !== 'number' || !Number.isInteger(raw.count) || raw.count < 0 || raw.count > 200) return null;
+    out.count = raw.count;
+  }
+  if (raw.royalty !== undefined) {
+    if (typeof raw.royalty !== 'number' || !Number.isFinite(raw.royalty) || raw.royalty <= 0 || raw.royalty > 1) return null;
+    out.royalty = raw.royalty;
+  }
   if (raw.funding !== undefined) {
     const v = oneOf(['savings', 'loan'] as const, raw.funding);
     if (!v) return null;
@@ -142,7 +198,7 @@ function parseBusiness(params: unknown, need: readonly (keyof BusinessActionPara
   if (raw.decisions !== undefined) {
     if (!isRecord(raw.decisions)) return null;
     const d: Decisions = {};
-    const lists = { prices: PRICE_LEVELS, marketing: MARKETING_LEVELS, qualityInvest: QUALITY_LEVELS, pay: PAY_LEVELS, staffing: STAFFING_LEVELS } as const;
+    const lists = { prices: PRICE_LEVELS, marketing: MARKETING_LEVELS, qualityInvest: QUALITY_LEVELS, pay: PAY_LEVELS, staffing: STAFFING_LEVELS, training: TRAINING_LEVELS } as const;
     for (const key of Object.keys(raw.decisions)) {
       if (!(key in lists)) return null;
     }
@@ -197,7 +253,7 @@ export const BUSINESS_ACTIONS: Record<BusinessActionId, LifeActionRule> = {
   set_business_decisions: {
     parse: (params) => parseBusiness(params, ['businessId', 'decisions']),
     allowed: (state, p) => businessById(state, biz(p).businessId) !== undefined && Object.keys(biz(p).decisions ?? {}).length > 0,
-    apply: (state, p) => void setDecisions(state, biz(p).businessId!, biz(p).decisions!),
+    apply: (state, p, content) => void setDecisions(state, biz(p).businessId!, biz(p).decisions!, content),
   },
   set_business_role: {
     parse: (params) => parseBusiness(params, ['businessId', 'role']),
@@ -209,11 +265,24 @@ export const BUSINESS_ACTIONS: Record<BusinessActionId, LifeActionRule> = {
     allowed: (state, p, content) => {
       const b = businessById(state, biz(p).businessId);
       const def = b && content.businesses[b.defId];
-      return b !== undefined && def !== undefined && hireBlock(state, b, def, { ...(biz(p).personId !== undefined ? { personId: biz(p).personId } : {}), locationId: biz(p).locationId ?? b.locations[0]!.id, licensed: biz(p).licensed === true }, content) === null;
+      if (!b || !def) return false;
+      const loc = biz(p).locationId ?? b.locations[0]!.id;
+      if (biz(p).crew === true) {
+        // A crew hire raises the target (the head is hired and paid for when the year turns).
+        const role = crewRoles(def).find((r) => r.id === (biz(p).roleId ?? craftRole(def).id));
+        return role !== undefined && biz(p).personId === undefined && headcountBlock(b, def, loc, role.id, (b.headcount[loc]?.[role.id] ?? 0) + 1, content) === null;
+      }
+      return hireBlock(state, b, def, { ...(biz(p).personId !== undefined ? { personId: biz(p).personId } : {}), locationId: loc, ...(biz(p).roleId !== undefined ? { roleId: biz(p).roleId } : {}), licensed: biz(p).licensed === true }, content) === null;
     },
     apply: (state, p, content) => {
       const b = businessById(state, biz(p).businessId)!;
-      hireStaff(state, b, { ...(biz(p).personId !== undefined ? { personId: biz(p).personId } : {}), locationId: biz(p).locationId ?? b.locations[0]!.id, licensed: biz(p).licensed === true }, content);
+      const def = content.businesses[b.defId]!;
+      const loc = biz(p).locationId ?? b.locations[0]!.id;
+      if (biz(p).crew === true) {
+        hireCrew(b, def, loc, biz(p).roleId ?? craftRole(def).id, content);
+        return;
+      }
+      hireStaff(state, b, { ...(biz(p).personId !== undefined ? { personId: biz(p).personId } : {}), locationId: loc, ...(biz(p).roleId !== undefined ? { roleId: biz(p).roleId } : {}), licensed: biz(p).licensed === true }, content);
     },
   },
   fire_staff: {
@@ -240,5 +309,82 @@ export const BUSINESS_ACTIONS: Record<BusinessActionId, LifeActionRule> = {
     parse: (params) => parseBusiness(params, ['businessId', 'ownerId']),
     allowed: (state, p, content) => buyoutBlock(state, biz(p).businessId!, biz(p).ownerId!, content) === null,
     apply: (state, p, content) => void buyOut(state, biz(p).businessId!, biz(p).ownerId!, content),
+  },
+  set_line: {
+    parse: (params) => parseBusiness(params, ['businessId', 'productId']),
+    allowed: (state, p, content) => {
+      const b = businessById(state, biz(p).businessId);
+      const def = b && content.businesses[b.defId];
+      return b !== undefined && def !== undefined && (biz(p).price !== undefined || biz(p).on !== undefined) && lineBlock(state, b, def, biz(p).productId!, biz(p).on, content) === null;
+    },
+    apply: (state, p, content) => void setLine(state, biz(p).businessId!, biz(p).productId!, { ...(biz(p).price !== undefined ? { price: biz(p).price! } : {}), ...(biz(p).on !== undefined ? { on: biz(p).on! } : {}) }, content),
+  },
+  set_order: {
+    parse: (params) => parseBusiness(params, ['businessId', 'stockId', 'level']),
+    allowed: (state, p, content) => {
+      const b = businessById(state, biz(p).businessId);
+      const def = b && content.businesses[b.defId];
+      return b !== undefined && def !== undefined && (def.products.some((x) => x.id === biz(p).stockId && x.type === 'goods') || def.pools.some((x) => x.id === biz(p).stockId));
+    },
+    apply: (state, p) => void setOrder(state, biz(p).businessId!, biz(p).stockId!, biz(p).level!),
+  },
+  set_headcount: {
+    parse: (params) => parseBusiness(params, ['businessId', 'locationId', 'roleId', 'count']),
+    allowed: (state, p, content) => {
+      const b = businessById(state, biz(p).businessId);
+      const def = b && content.businesses[b.defId];
+      return b !== undefined && def !== undefined && headcountBlock(b, def, biz(p).locationId!, biz(p).roleId!, biz(p).count!, content) === null;
+    },
+    apply: (state, p, content) => {
+      const b = businessById(state, biz(p).businessId)!;
+      setHeadcount(b, content.businesses[b.defId]!, biz(p).locationId!, biz(p).roleId!, biz(p).count!, content);
+    },
+  },
+  transfer_staff: {
+    parse: (params) => parseBusiness(params, ['businessId', 'personId', 'locationId']),
+    allowed: (state, p, content) => {
+      const b = businessById(state, biz(p).businessId);
+      return b !== undefined && transferBlock(state, b, biz(p).personId!, biz(p).locationId!, content) === null;
+    },
+    apply: (state, p, content) => void transferStaff(state, businessById(state, biz(p).businessId)!, biz(p).personId!, biz(p).locationId!, content),
+  },
+  appoint_manager: {
+    parse: (params) => parseBusiness(params, ['businessId', 'personId', 'locationId']),
+    allowed: (state, p, content) => {
+      const b = businessById(state, biz(p).businessId);
+      const def = b && content.businesses[b.defId];
+      return b !== undefined && def !== undefined && appointBlock(state, b, def, biz(p).personId!, biz(p).locationId!, content) === null;
+    },
+    apply: (state, p, content) => {
+      const b = businessById(state, biz(p).businessId)!;
+      appointManager(state, b, content.businesses[b.defId]!, biz(p).personId!, biz(p).locationId!, content);
+    },
+  },
+  remove_manager: {
+    parse: (params) => parseBusiness(params, ['businessId', 'locationId']),
+    allowed: (state, p) => {
+      const b = businessById(state, biz(p).businessId);
+      return b !== undefined && removeManagerBlock(b, biz(p).locationId!) === null;
+    },
+    apply: (state, p, content) => {
+      const b = businessById(state, biz(p).businessId)!;
+      removeLocationManager(b, content.businesses[b.defId]!, biz(p).locationId!);
+    },
+  },
+  sell_franchise: {
+    parse: (params) => parseBusiness(params, ['businessId', 'cityId', 'style', 'royalty']),
+    allowed: (state, p, content) => {
+      const b = businessById(state, biz(p).businessId);
+      return b !== undefined && franchiseBlock(state, b, { businessId: b.id, cityId: biz(p).cityId!, style: biz(p).style!, royalty: biz(p).royalty!, ...(biz(p).personId !== undefined ? { personId: biz(p).personId } : {}) }, content) === null;
+    },
+    apply: (state, p, content) => {
+      const b = businessById(state, biz(p).businessId)!;
+      sellFranchise(state, b, { businessId: b.id, cityId: biz(p).cityId!, style: biz(p).style!, royalty: biz(p).royalty!, ...(biz(p).personId !== undefined ? { personId: biz(p).personId } : {}) }, state.rng, content);
+    },
+  },
+  end_franchise: {
+    parse: (params) => parseBusiness(params, ['businessId', 'franchiseId', 'how']),
+    allowed: (state, p) => businessById(state, biz(p).businessId)?.franchises.some((f) => f.id === biz(p).franchiseId) === true,
+    apply: (state, p, content) => void endFranchise(state, businessById(state, biz(p).businessId)!, biz(p).franchiseId!, biz(p).how!, content),
   },
 };

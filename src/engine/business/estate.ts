@@ -17,6 +17,7 @@ import { addDebt, wholeDollars } from '../finance';
 import { ageOf } from '../relationships';
 import type { Business, BusinessTransfer, Id, LifeState, WillShare } from '../types';
 import { loanBalance, yourShare } from './query';
+import { reconcileHeadcount } from './crew';
 import { salePrice } from './model';
 import { refreshWorth } from './value';
 
@@ -66,6 +67,11 @@ export function receiveBusinesses(heir: LifeState, transfers: readonly BusinessT
       remap.set(l.id, id);
       return { ...l, id };
     });
+    // B2: the headcount and the crew follow their locations to the new ids.
+    b.headcount = Object.fromEntries(Object.entries(b.headcount).flatMap(([id, roles]) => (remap.has(id) ? [[remap.get(id)!, roles] as const] : [])));
+    b.crew = b.crew.flatMap((p) => (remap.has(p.locationId) ? [{ ...p, locationId: remap.get(p.locationId)! }] : []));
+    // Franchisees who are no longer in the heir's life carry on as operators the heir never meets.
+    b.franchises = b.franchises.map((f) => ({ ...f, personId: f.personId !== null && heir.people[f.personId]?.alive === true && heir.relationships[f.personId] !== undefined ? f.personId : null }));
     delete b.auditedYear;
     b.loanIds = [];
     b.report = null;
@@ -77,10 +83,16 @@ export function receiveBusinesses(heir: LifeState, transfers: readonly BusinessT
       const p = heir.people[s.personId];
       const rel = heir.relationships[s.personId];
       if (!p || !p.alive || !rel || rel.status === 'ended') return [];
+      const locationId = s.locationId === null ? null : (remap.get(s.locationId) ?? b.locations[0]!.id);
+      // Someone who has moved away from the place they worked is no longer there.
+      if (locationId !== null && p.cityId !== b.locations.find((l) => l.id === locationId)?.cityId) return [];
       if (!p.tags.includes('staff')) p.tags.push('staff');
-      return [{ ...s, locationId: s.locationId === null ? null : (remap.get(s.locationId) ?? b.locations[0]!.id) }];
+      return [{ ...s, locationId }];
     });
     if (b.role === 'manager' && !b.staff.some((s) => s.manager)) b.role = 'self';
+    // A location manager who is no longer there leaves the post empty; heads follow the people who stayed.
+    for (const l of b.locations) if (l.manager !== undefined && !b.staff.some((s) => s.personId === l.manager)) delete l.manager;
+    reconcileHeadcount(b, content.businesses[b.defId]!, content);
     for (const o of b.owners) {
       if (o.id === 'you') {
         o.name = `${heir.character.name.first} ${heir.character.name.last}`;
@@ -93,3 +105,4 @@ export function receiveBusinesses(heir: LifeState, transfers: readonly BusinessT
   }
   refreshWorth(heir, content);
 }
+

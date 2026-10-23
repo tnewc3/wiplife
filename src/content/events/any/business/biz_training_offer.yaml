@@ -1,0 +1,39 @@
+id: biz_training_offer
+title: A course for the crew
+text: >-
+  A trainer who works with local businesses stops by {business} with a simple offer: a few days with your crew, a short course, and a certificate for each. The brochure has a stock photo of someone laughing at a spreadsheet.
+tone: light
+category: business
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { business: { owned: true } }
+    - { age: { gte: 18 } }
+    - { business: { owned: true, years: { gte: 1 }, staff: { gte: 0 } } }
+weight: { base: 4 }
+cooldownYears: 6
+followUpOnly: true
+bindBusiness: true
+choices:
+  - id: full
+    label: Book the whole course
+    outcome:
+      text: Three afternoons of exercises and role-play. The crew rolls their eyes through the first one and then does not.
+      effects:
+        - { type: business, action: pay, share: 0.02, floor: 500 }
+        - { type: business, action: quality, delta: 4 }
+        - { type: business, action: morale, delta: 4 }
+  - id: part
+    label: Send one person
+    outcome:
+      text: One person comes back with a certificate and a few new ideas, and tries to teach the rest on the job.
+      effects:
+        - { type: business, action: pay, share: 0.007, floor: 200 }
+        - { type: business, action: quality, delta: 2 }
+  - id: no
+    label: Say thanks and pass
+    outcome:
+      text: You say you will think about it. The trainer leaves a brochure on the counter.
+      effects:
+        - { type: stat, key: stress, delta: 0 }

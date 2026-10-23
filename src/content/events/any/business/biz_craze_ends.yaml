@@ -1,0 +1,39 @@
+id: biz_craze_ends
+title: The craze is over
+text: >-
+  The line for {product} is gone. What was everywhere last season is now a few orders a day at {business}, and a shelf you filled with optimism.
+tone: neutral
+category: business
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { business: { owned: true } }
+    - { age: { gte: 18 } }
+    - { business: { owned: true, years: { gte: 2 } } }
+    - { fired: biz_craze_product }
+weight: { base: 8 }
+cooldownYears: 8
+followUpOnly: true
+bindBusiness: true
+choices:
+  - id: discount
+    label: Move what is left at a lower price
+    outcome:
+      text: A sign by the register moves most of it. The last of it goes to the crew.
+      effects:
+        - { type: business, action: price, level: low }
+        - { type: business, action: order, level: lean }
+  - id: lean
+    label: Order lean from now on
+    outcome:
+      text: Back to the boring order. It was a good run and it ended the way those do.
+      effects:
+        - { type: business, action: order, level: lean }
+        - { type: stat, key: stress, delta: -1 }
+  - id: hold
+    label: Keep it on the shelf and hope
+    outcome:
+      text: Some things come back. This one costs you a shelf and a mild embarrassment each time you pass it.
+      effects:
+        - { type: business, action: pay, share: 0.01, floor: 200 }

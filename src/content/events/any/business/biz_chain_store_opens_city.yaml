@@ -1,0 +1,38 @@
+id: biz_chain_store_opens_city
+title: A chain moves in
+text: >-
+  A national chain has taken a lease in {locCity}, a few streets from the {business} place there. The sign is up before the paint is dry.
+tone: serious
+category: business
+rarity: uncommon
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { business: { owned: true } }
+    - { age: { gte: 18 } }
+    - { business: { owned: true, years: { gte: 2 }, locations: { gte: 2 }, rival: false, kind: [food, retail] } }
+weight: { base: 3 }
+cooldownYears: 8
+followUpOnly: true
+bindBusiness: true
+choices:
+  - id: fight
+    label: Spend to keep your regulars
+    outcome:
+      text: A loyalty card, a new menu board and a better sign. The chain opens to a crowd, and so do you.
+      effects:
+        - { type: business, action: pay, share: 0.025, floor: 600 }
+        - { type: business, action: rival, delta: -8, years: 3 }
+  - id: lean
+    label: Order closer to what you sell there
+    outcome:
+      text: A thinner order for that place and a note to the manager to keep an eye on the waste.
+      effects:
+        - { type: business, action: order, level: lean }
+        - { type: business, action: rival, delta: -14, years: 3 }
+  - id: ignore
+    label: Keep going as you are
+    outcome:
+      text: You have other places to look after. The chain does not know that, and does not care.
+      effects:
+        - { type: business, action: rival, delta: -16, years: 3 }
