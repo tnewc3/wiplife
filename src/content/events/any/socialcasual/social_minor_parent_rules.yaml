@@ -1,0 +1,67 @@
+id: social_minor_parent_rules
+title: The rules for your account
+text: >-
+  {npc.name} has written the rules for @{handle} on the back of an envelope and
+  put it on the table. They are, mostly, fair. {npc.They} {npc:has|have} the
+  password. {npc.They} {npc:will|will} look at who follows you. No posting from
+  your room after a set hour. {npc.They} {npc:says|say} the account is yours,
+  and also that it is theirs to keep an eye on until you are old enough.
+tone: neutral
+category: socialcasual
+rarity: common
+recurring: true
+lifeStages: [teen]
+requires:
+  all:
+    - { age: { gte: 13 } }
+    - { age: { lte: 17 } }
+    - { social: { account: true } }
+    - { social: { happened: [minor] } }
+    - { role: npc, alive: true, kind: [parent, stepparent] }
+weight: { base: 8 }
+cooldownYears: 3
+followUpOnly: true
+cast:
+  npc: { kind: parent, presence: household }
+choices:
+  - id: agree
+    label: Agree to all of it
+    outcome:
+      text: >-
+        You sign the envelope, as a joke that is not entirely a joke. There
+        are fewer nights of staring at the screen, and a few more of
+        something else.
+      effects:
+        - { type: relationship, role: npc, trust: 3, affection: 1 }
+        - { type: stat, key: stress, delta: -1 }
+  - id: negotiate
+    label: Ask for a little more room
+    check:
+      base: 45
+      stats:
+        - { role: npc, key: trust, weight: 0.25 }
+        - { key: smarts, weight: 0.1 }
+      success:
+        text: >-
+          You come with a short list and a calm voice. {npc.name} changes the
+          hour, drops one rule, and keeps the others. It is a deal, and you
+          both feel you won.
+        effects:
+          - { type: relationship, role: npc, trust: 2 }
+      failure:
+        text: >-
+          You ask, and {npc.name} hears a challenge. The rules get one line
+          longer, and the evening goes on in a silence you can both hear.
+        effects:
+          - { type: relationship, role: npc, trust: -2, affection: -2 }
+  - id: say_yes_then_ignore
+    label: Say yes and ignore most of it
+    outcome:
+      text: >-
+        For a while it works. You post from the bathroom and keep a story
+        straight. When it comes out, as it always does, the rules are longer
+        and the conversation is not about the rules any more.
+      effects:
+        - { type: relationship, role: npc, trust: -5 }
+        - { type: social, action: private, value: true }
+        - { type: stat, key: stress, delta: 3 }

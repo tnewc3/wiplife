@@ -1,0 +1,43 @@
+# The events the social step queues (Batch 8). Every event listed must be
+# followUpOnly: it only happens this way. Each is picked by weight among those
+# whose requirements fit now. Every event of a trigger must require
+# { social: { happened: [trigger] } } (the content build checks it), so it only
+# comes when the thing it is about has just happened.
+#
+# monetized       a platform has started paying you (cast: none)
+# viral           a post of a creator's went viral (a big break)
+# viralCasual     a post of yours went viral, and you are not a creator
+# algorithmUp     the algorithm began to favour a platform you are on
+# algorithmDown   ... or stopped favouring it
+# demonetized     a platform stopped paying you
+# burnout         the posting treadmill caught up with you
+# controversy     a row is brewing (an event decides: it blows over or you are cancelled)
+# cancelled       the year after a cancellation
+# foundEmployer   a post you did not mean for them reached your boss (cast: npc, the boss)
+# foundPartner    ... your partner (cast: npc)
+# foundEx         ... an ex (cast: npc)
+# foundFamily     ... your family (cast: npc)
+# collab          the year after you made something with a creator you know (cast: npc)
+# sponsor         a brand you work with wants something
+# crossover       the fans of your music, acting or sport find you online
+# minor           a parent keeps an eye on your account (cast: npc, the parent)
+# milestone       an account passed 1,000, 10,000 ... followers
+triggers:
+  monetized: { events: [social_first_payout, social_first_payout_minor, social_sponsor_offer] }
+  viral: { events: [social_viral_overnight, social_viral_old_post, social_sponsor_offer] }
+  viralCasual: { events: [social_casual_viral_joke, social_casual_viral_embarrassing] }
+  algorithmUp: { events: [social_algorithm_smiles] }
+  algorithmDown: { events: [social_algorithm_buries] }
+  demonetized: { events: [social_demonetized_appeal] }
+  burnout: { events: [social_burnout_break, social_burnout_numbers] }
+  controversy: { events: [social_row_old_post, social_row_hot_take] }
+  cancelled: { events: [social_cancelled_aftermath] }
+  foundEmployer: { events: [social_boss_saw_post, social_hr_meeting] }
+  foundPartner: { events: [social_partner_saw_post] }
+  foundEx: { events: [social_ex_comments] }
+  foundFamily: { events: [social_family_saw_post, social_parent_saw_post] }
+  collab: { events: [social_collab_great, social_collab_falling_out] }
+  sponsor: { events: [social_sponsor_script] }
+  crossover: { events: [social_crossover_behind_the_scenes] }
+  minor: { events: [social_minor_parent_rules, social_minor_school_sees] }
+  milestone: { events: [social_milestone_thousand, social_sponsor_offer] }

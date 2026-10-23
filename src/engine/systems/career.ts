@@ -28,6 +28,7 @@ import { inPostSecondary } from '../education';
 import { wholeDollars } from '../finance';
 import { chance, nextFloat, type RngState } from '../rng';
 import { fameIncome } from '../fame/step';
+import { socialIncome } from '../social/query';
 import { teenIncome } from '../teen/jobs';
 import type { LifeState } from '../types';
 import { countryOf } from '../country';
@@ -68,7 +69,9 @@ export function yearIncome(state: LifeState, content: ContentBundle): number {
   // T1: a teen job's pay (or odd jobs, for a teen who made work their focus).
   // W3: what your businesses paid out to you this year (the business step set it aside).
   const business = state.business.year.year === state.currentYear ? state.business.year.draw : 0;
-  return wholeDollars((state.career.job?.salary ?? 0) + jobLossPay(state, content) + gigPay(state, content, state.rng) + teenIncome(state, content) + fame + business);
+  // Batch 8: what the platforms paid you (the social step set it aside, less an agent's cut and a minor's share held in trust).
+  const social = socialIncome(state);
+  return wholeDollars((state.career.job?.salary ?? 0) + jobLossPay(state, content) + gigPay(state, content, state.rng) + teenIncome(state, content) + fame + business + social);
 }
 
 /**

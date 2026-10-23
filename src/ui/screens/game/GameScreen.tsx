@@ -17,6 +17,7 @@ import { GroupsScreen } from '../more/GroupsScreen';
 import { BelongingsScreen } from '../more/BelongingsScreen';
 import { TeenScreen } from '../more/TeenScreen';
 import { ActivitiesScreen } from '../more/ActivitiesScreen';
+import { SocialScreen } from '../more/SocialScreen';
 import { PetScreen } from '../people/PetScreen';
 import { LegalBanner } from '../../components/LegalBanner';
 import { MoreTab } from '../more/MoreTab';
@@ -83,16 +84,18 @@ export function GameScreen({ life }: { life: LifeState }) {
   const groups = tab === 'more' && moreView === 'groups';
   const teen = tab === 'more' && moreView === 'teen';
   const activities = tab === 'more' && moreView === 'activities';
+  const social = tab === 'more' && moreView === 'social';
+  const socialFrom = useAppStore((s) => s.socialFrom);
   const pet = tab === 'people' && personId !== null && life.possessions.items.some((p) => p.id === personId && p.kind === 'pet') ? personId : null;
   const back = person || pet
     ? { onBack: closePerson, backLabel: 'Back to People' }
-    : travel || migration || home || health || family || will || later || belongings || groups || teen || activities
-      ? { onBack: closeHome, backLabel: 'Back to More' }
+    : travel || migration || home || health || family || will || later || belongings || groups || teen || activities || social
+      ? { onBack: closeHome, backLabel: social && socialFrom === 'work' ? 'Back to Work' : 'Back to More' }
       : {};
 
   return (
     <Screen
-      title={travel ? 'Plan a trip' : migration ? 'Move abroad' : home ? 'Home' : health ? 'Health' : family ? 'Family' : will ? 'Your will' : later ? 'Later life' : belongings ? 'Belongings' : groups ? 'Groups' : teen ? 'Teen years' : activities ? 'Activities' : current.label}
+      title={travel ? 'Plan a trip' : migration ? 'Move abroad' : home ? 'Home' : health ? 'Health' : family ? 'Family' : will ? 'Your will' : later ? 'Later life' : belongings ? 'Belongings' : groups ? 'Groups' : teen ? 'Teen years' : activities ? 'Activities' : social ? 'Social media' : current.label}
       {...back}
       footer={
         <>
@@ -138,6 +141,8 @@ export function GameScreen({ life }: { life: LifeState }) {
         <TeenScreen life={life} />
       ) : activities ? (
         <ActivitiesScreen life={life} />
+      ) : social ? (
+        <SocialScreen life={life} />
       ) : (
         <MoreTab />
       )}

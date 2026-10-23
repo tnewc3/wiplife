@@ -15,6 +15,7 @@ import { bandQuality } from './band';
 import { skillQuality } from './grind';
 import { hasTalentFor, kindDef, payLevel, rungDef, usualYear } from './query';
 import { genreDistance, isGenreOf, offGenreFanScore } from './sound';
+import { legacyScale } from '../social/query';
 
 /** What the path draws on besides talent: your traits and stats, weighted by the path (0–1). */
 export function aptitude(state: LifeState, def: FamePathDef): number {
@@ -126,7 +127,8 @@ export function releaseGross(state: LifeState, plan: FamePlan, path: FamePathSta
   const b = content.balance.fame;
   const usual = usualYear(state, def, path.rung, content);
   const cut = state.fame.band && state.fame.band.path === plan.path ? b.band.cut : 1;
-  return Math.round(usual * kind.pay * curveAt(b.income.release, fans) * b.commitment.output[state.fame.commitment] * cut);
+  // Batch 8: once you have accounts, the platforms pay for the social media path, and its projects are a smaller part of it.
+  return Math.round(usual * kind.pay * curveAt(b.income.release, fans) * b.commitment.output[state.fame.commitment] * cut * legacyScale(state, plan.path, 'project', content));
 }
 
 /** What your name brings in a year with no new work: gigs, royalties, retainers and brands, in each path you work. */
@@ -138,7 +140,7 @@ export function retainer(state: LifeState, content: ContentBundle): number {
     if (id === null) continue;
     const def = content.famePaths[id];
     const path = state.fame.paths[id];
-    if (def && path) total += usualYear(state, def, path.rung, content) * b.income.retainer * brand;
+    if (def && path) total += usualYear(state, def, path.rung, content) * b.income.retainer * brand * legacyScale(state, id, 'retainer', content);
   }
   return Math.round(total);
 }

@@ -1,0 +1,52 @@
+id: social_casual_viral_joke
+title: A joke that got out
+text: >-
+  You put a joke on {platform} for your friends, the kind of thing nobody was
+  meant to think about twice. Somebody with a large audience shared it, and by
+  morning @{handle} has {followerWords} and your phone is warm in your hand.
+  People you have never met are telling you that you are funny.
+tone: light
+category: socialcasual
+rarity: uncommon
+recurring: true
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { social: { account: true } }
+    - { social: { creator: false } }
+    - { social: { happened: [viralCasual] } }
+weight: { base: 10 }
+cooldownYears: 3
+followUpOnly: true
+choices:
+  - id: enjoy_it
+    label: Enjoy it, and go back to normal
+    outcome:
+      text: >-
+        For three days you are a little famous. By the end of the week the
+        internet has moved on to something else, and you are left with a few
+        hundred new followers and a nice story.
+      effects:
+        - { type: stat, key: happiness, delta: 4 }
+        - { type: social, action: followers, delta: 5 }
+  - id: try_to_do_it_again
+    label: Try to do it again
+    check:
+      base: 35
+      stats:
+        - { key: confidence, weight: 0.2 }
+        - { key: sociability, weight: 0.15 }
+      success:
+        text: >-
+          The second one lands too, which almost never happens. People start
+          to say you have a voice, and you are not sure what to do with that.
+        effects:
+          - { type: social, action: followers, delta: 20 }
+          - { type: stat, key: happiness, delta: 3 }
+      failure:
+        text: >-
+          Nothing lands. It turns out it is hard to be funny on purpose for
+          an audience you can see. You go quiet for a while.
+        effects:
+          - { type: stat, key: happiness, delta: -2 }
+          - { type: social, action: engagement, delta: -4 }

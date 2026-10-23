@@ -1,0 +1,65 @@
+id: social_cancelled_aftermath
+title: The quiet afterwards
+text: >-
+  The noise has stopped, and what it left behind is easy to
+  see. @{handle} has {followerWords}, down by a third. Messages that used to
+  come in daily do not come. Some of the people you worked with have stopped
+  returning calls. The row is over, and you are on the other side of it.
+tone: serious
+category: socialcreator
+rarity: uncommon
+recurring: true
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { social: { creator: true } }
+    - { social: { happened: [cancelled] } }
+    - { social: { controversy: [cancelled] } }
+weight: { base: 10 }
+cooldownYears: 4
+followUpOnly: true
+choices:
+  - id: rebuild
+    label: Start again, slowly, and show your work
+    check:
+      base: 45
+      stats:
+        - { key: discipline, weight: 0.25 }
+        - { key: ambition, weight: 0.15 }
+      success:
+        text: >-
+          You show up every week and you do not talk about it. Over a year the
+          people who left come back one at a time, and the ones who never
+          left say so out loud.
+        effects:
+          - { type: social, action: followers, delta: 12 }
+          - { type: fame, action: image, delta: 3 }
+      failure:
+        text: >-
+          Every post is read through the row. It is exhausting to be watched
+          for the next slip, and you begin to wonder if the audience you want
+          is still there to be won back.
+        effects:
+          - { type: social, action: engagement, delta: -4 }
+          - { type: stat, key: stress, delta: 4 }
+  - id: change_direction
+    label: Make something different, under the same name
+    outcome:
+      text: >-
+        You put out something you would not have made before. Half of the
+        audience does not follow you there. The half that does is quieter,
+        and kinder, and you can breathe.
+      effects:
+        - { type: social, action: followers, delta: -5 }
+        - { type: stat, key: happiness, delta: 2 }
+  - id: step_away
+    label: Close the account for good
+    outcome:
+      text: >-
+        You close it, and it is oddly easy: a button and a confirmation. For a
+        month your hands reach for the phone and find nothing there. Then they
+        stop.
+      effects:
+        - { type: social, action: close }
+        - { type: stat, key: stress, delta: -4 }
+        - { type: stat, key: happiness, delta: -1 }

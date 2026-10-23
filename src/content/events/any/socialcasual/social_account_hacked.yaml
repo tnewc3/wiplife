@@ -1,0 +1,53 @@
+id: social_account_hacked
+title: That was not you
+text: >-
+  A friend sends you a message: "was that you?" Your @{handle} account on
+  {platform} has been posting links all morning, to things you would never
+  share, to a long list of people. By the time you are in, it has sent them
+  to everyone you follow.
+tone: serious
+category: socialcasual
+rarity: uncommon
+recurring: true
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 13 } }
+    - { social: { account: true } }
+    - { legal: { incarcerated: false } }
+weight: { base: 1.5 }
+cooldownYears: 6
+choices:
+  - id: lock_it_down
+    label: Change everything and tell your followers
+    check:
+      base: 60
+      stats:
+        - { key: smarts, weight: 0.25 }
+        - { key: discipline, weight: 0.15 }
+      success:
+        text: >-
+          You catch it within the hour, change every password and post a
+          short apology. A couple of people clicked, and most of them are
+          cheerful about it. You come out of it more careful.
+        effects:
+          - { type: stat, key: stress, delta: 3 }
+          - { type: stat, key: smarts, delta: 1 }
+      failure:
+        text: >-
+          It takes a day to get back in, and by then the damage is done. Some
+          of your followers think you did it, and some leave. You rebuild
+          from a smaller number.
+        effects:
+          - { type: social, action: followers, delta: -12 }
+          - { type: stat, key: stress, delta: 5 }
+  - id: start_over
+    label: Close it and start something new
+    outcome:
+      text: >-
+        You let it go and open a new account on a clean address. It is very
+        quiet at first, and then your friends find you, one by one, and
+        that is enough.
+      effects:
+        - { type: social, action: followers, delta: -40 }
+        - { type: stat, key: stress, delta: 2 }

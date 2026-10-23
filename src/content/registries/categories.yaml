@@ -278,6 +278,23 @@ categories:
     label: Looking back
     requires: { fame: { retired: true } }
 
+  # Batch 8: social media. A way in is for someone with no account. The rest are for someone with one; creator events
+  # for someone who works as a creator; finds (a post reaching someone it was not meant for) account for a partner who
+  # lives with you (the household rule).
+  socialentry:
+    label: Getting online
+    requires: { social: { account: false } }
+  socialcasual:
+    label: Your accounts
+    requires: { social: { account: true } }
+  socialcreator:
+    label: The creator life
+    requires: { social: { creator: true } }
+  socialfound:
+    label: Found online
+    household: true
+    requires: { social: { account: true } }
+
   # E6c: sports. A way in is for someone with no career and no seasons behind them; the rest are for someone who plays
   # (or, after the game, someone who did). Life in the game at home accounts for a partner who lives with you.
   sportsentry:

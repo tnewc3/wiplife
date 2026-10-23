@@ -1,0 +1,61 @@
+id: social_burnout_numbers
+title: Refreshing
+text: >-
+  You have caught yourself refreshing the numbers on {platform} eleven times in
+  an hour. @{handle} is doing fine, in fact, but fine has stopped being a
+  feeling, and every dip has begun to feel like a verdict. Your friends have
+  stopped asking how it is going, because the answer is always a number.
+tone: serious
+category: socialcreator
+rarity: uncommon
+recurring: true
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { social: { creator: true } }
+    - { social: { happened: [burnout] } }
+    - { fame: { burnout: { gte: 30 } } }
+weight: { base: 7 }
+cooldownYears: 3
+followUpOnly: true
+choices:
+  - id: hide_the_numbers
+    label: Turn off the numbers and make things for a month
+    check:
+      base: 50
+      stats:
+        - { key: discipline, weight: 0.25 }
+      success:
+        text: >-
+          The first week is miserable. The second is odd. By the fourth you
+          are making things again for the pleasure of it, and you cannot
+          remember when that last happened.
+        effects:
+          - { type: stat, key: stress, delta: -5 }
+          - { type: stat, key: happiness, delta: 3 }
+          - { type: fame, action: burnout, delta: -8 }
+      failure:
+        text: >-
+          You last two days. The third night you check and you are down
+          forty followers, and the whole thing comes back at once.
+        effects:
+          - { type: stat, key: stress, delta: 3 }
+  - id: see_a_professional
+    label: Make an appointment to talk to someone
+    outcome:
+      text: >-
+        The person you see is not impressed or alarmed. They ask what the
+        numbers are for, and you cannot answer in a way that satisfies either
+        of you, and you start going back the next week.
+      effects:
+        - { type: stat, key: stress, delta: -3 }
+        - { type: stat, key: happiness, delta: 2 }
+  - id: keep_going
+    label: It is fine, everyone checks
+    outcome:
+      text: >-
+        You do not change a thing. The number goes up and you feel nothing,
+        and goes down and you feel everything, and that is the deal.
+      effects:
+        - { type: stat, key: stress, delta: 3 }
+        - { type: fame, action: burnout, delta: 5 }

@@ -1,0 +1,62 @@
+id: social_algorithm_buries
+title: The numbers drop
+text: >-
+  Your posts on {platform} are reaching half the people they used to. You did
+  not change anything, and neither, as far as anyone can tell, did you do
+  anything wrong. {platform} has decided something new about what people want
+  to see, and it is not what you make. The forums are full of people saying the
+  same thing.
+tone: serious
+category: socialcreator
+rarity: common
+recurring: true
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { social: { creator: true } }
+    - { social: { happened: [algorithmDown] } }
+weight: { base: 8 }
+cooldownYears: 2
+followUpOnly: true
+choices:
+  - id: chase_it
+    label: Change what you make to fit
+    check:
+      base: 45
+      stats:
+        - { key: smarts, weight: 0.2 }
+        - { key: ambition, weight: 0.2 }
+      success:
+        text: >-
+          You work out what the new system rewards and bend your work toward
+          it. It is a little less yours than it was, and it works, and the
+          numbers come back.
+        effects:
+          - { type: social, action: followers, delta: 4 }
+          - { type: fame, action: image, delta: -1 }
+      failure:
+        text: >-
+          You chase it, and the target moves. The new work is worse than the
+          old, and the audience can tell you stopped being yourself.
+        effects:
+          - { type: social, action: engagement, delta: -5 }
+          - { type: stat, key: stress, delta: 4 }
+  - id: stay_the_course
+    label: Make what you make and wait it out
+    outcome:
+      text: >-
+        You decide you will not be a person who rebuilds their work every time
+        a company changes its mind. The numbers do not come back quickly, but
+        the people who do stay are yours.
+      effects:
+        - { type: stat, key: stress, delta: 2 }
+        - { type: social, action: engagement, delta: 2 }
+  - id: go_elsewhere
+    label: Put more into another platform
+    outcome:
+      text: >-
+        You tell your followers where else to find you. A fair number of them
+        follow, and it is a relief to depend on more than one company.
+      effects:
+        - { type: stat, key: stress, delta: -1 }
+        - { type: stat, key: smarts, delta: 1 }

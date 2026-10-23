@@ -34,6 +34,7 @@ import { petInteractionSchema, petSchema, possessionsBalanceSchema, possessionsR
 import { crewSchema, crimeBalanceSchema, crimeRegistrySchema, crimeTextSchema, frontSchema } from './crime';
 import { sportsBalanceSchema, sportsRegistrySchema, sportsTextSchema } from './sports';
 import { fameAgentSchema, fameAwardSchema, fameBalanceSchema, fameCompanySchema, fameGenreSchema, famePathSchema, fameRegistrySchema, fameTextSchema } from './fame';
+import { socialBalanceSchema, socialNicheSchema, socialPlatformSchema, socialRegistrySchema, socialTextSchema } from './social';
 import { activitySchema, cliqueSchema, houseRuleSchema, teenBalanceSchema, teenJobSchema, teenRegistrySchema, teenTextSchema } from './teen';
 import { pastimeSchema, pastimesBalanceSchema, riskBalanceSchema, valuableSchema } from './pastimes';
 import { schoolBalanceSchema, schoolRegistrySchema, schoolTextSchema } from './school';
@@ -67,6 +68,7 @@ export * from './teen';
 export * from './crime';
 export * from './fame';
 export * from './sports';
+export * from './social';
 export * from './eulogy';
 export * from './later';
 export * from './belonging';
@@ -109,6 +111,8 @@ export const collectionTypes = {
   petInteractions: { folder: 'petInteractions', schema: petInteractionSchema },
   pastimes: { folder: 'pastimes', schema: pastimeSchema },
   pets: { folder: 'pets', schema: petSchema },
+  platforms: { folder: 'platforms', schema: socialPlatformSchema },
+  niches: { folder: 'niches', schema: socialNicheSchema },
   pronouns: { folder: 'pronouns', schema: pronounPresetSchema },
   renovations: { folder: 'renovations', schema: renovationSchema },
   talents: { folder: 'talents', schema: talentSchema },
@@ -159,6 +163,7 @@ export const singletonTypes = {
   'balance/crime': crimeBalanceSchema,
   'balance/fame': fameBalanceSchema,
   'balance/sports': sportsBalanceSchema,
+  'balance/social': socialBalanceSchema,
   'balance/targets': targetsBalanceSchema,
   'character/identity': identityOptionsSchema,
   'character/appearance': appearanceOptionsSchema,
@@ -183,6 +188,7 @@ export const singletonTypes = {
   'text/crime': crimeTextSchema,
   'text/fame': fameTextSchema,
   'text/sports': sportsTextSchema,
+  'text/social': socialTextSchema,
   'registries/memories': memoryRegistrySchema,
   'registries/flags': flagRegistrySchema,
   'registries/categories': categoryRegistrySchema,
@@ -209,6 +215,7 @@ export const singletonTypes = {
   'registries/crime': crimeRegistrySchema,
   'registries/fame': fameRegistrySchema,
   'registries/sports': sportsRegistrySchema,
+  'registries/social': socialRegistrySchema,
   'registries/later': laterRegistrySchema,
   'registries/belonging': belongingRegistrySchema,
   'registries/business': businessRegistrySchema,
@@ -247,6 +254,8 @@ export const contentBundleSchema = z.strictObject({
   petInteractions: z.record(z.string(), petInteractionSchema),
   pastimes: z.record(z.string(), pastimeSchema),
   pets: z.record(z.string(), petSchema),
+  platforms: z.record(z.string(), socialPlatformSchema),
+  niches: z.record(z.string(), socialNicheSchema),
   pronouns: z.record(z.string(), pronounPresetSchema),
   renovations: z.record(z.string(), renovationSchema),
   talents: z.record(z.string(), talentSchema),
@@ -288,6 +297,7 @@ export const contentBundleSchema = z.strictObject({
     crime: crimeBalanceSchema,
     fame: fameBalanceSchema,
     sports: sportsBalanceSchema,
+    social: socialBalanceSchema,
     targets: targetsBalanceSchema,
   }),
   character: z.strictObject({ identity: identityOptionsSchema, appearance: appearanceOptionsSchema }),
@@ -313,6 +323,7 @@ export const contentBundleSchema = z.strictObject({
     crime: crimeTextSchema,
     fame: fameTextSchema,
     sports: sportsTextSchema,
+    social: socialTextSchema,
   }),
   registries: z.strictObject({
     memories: memoryRegistrySchema,
@@ -341,6 +352,7 @@ export const contentBundleSchema = z.strictObject({
     crime: crimeRegistrySchema,
     fame: fameRegistrySchema,
     sports: sportsRegistrySchema,
+    social: socialRegistrySchema,
     later: laterRegistrySchema,
     belonging: belongingRegistrySchema,
     business: businessRegistrySchema,

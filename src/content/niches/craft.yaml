@@ -1,0 +1,9 @@
+id: craft
+name: Art and craft
+noun: art and craft
+blurb: Making things slowly, on camera.
+fit: { discipline: 0.4, smarts: 0.2, kindness: 0.2, confidence: 0.2 }
+talents: [art, mechanics]
+demand: 0.8
+brands: 1.0
+heat: 0.5

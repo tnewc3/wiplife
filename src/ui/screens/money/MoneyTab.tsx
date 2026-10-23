@@ -8,6 +8,7 @@ import { Button } from '../../components/Button';
 import { Card } from '../../components/Card';
 import { ConfirmSheet } from '../../components/ConfirmSheet';
 import { BusinessMoneyCard } from './BusinessMoneyCard';
+import { SocialMoneyCard } from './SocialMoneyCard';
 import { DirtyMoneyCard } from './DirtyMoneyCard';
 import { CUSTODY_LABELS, DEBT_LABELS, debtStatus, LEDGER_LABELS, LIFESTYLE_BLURBS, LIFESTYLE_LABELS, money, rateLabel } from '../../labels';
 
@@ -254,6 +255,7 @@ export function MoneyTab({ life }: { life: LifeState }) {
       )}
 
       <BusinessMoneyCard life={life} />
+      <SocialMoneyCard life={life} />
       <DirtyMoneyCard life={life} />
       <LedgerCard life={life} />
       <CustodyCard life={life} />

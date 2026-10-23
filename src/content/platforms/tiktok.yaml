@@ -1,0 +1,11 @@
+id: tiktok
+name: TikTok
+blurb: Short videos pushed to strangers. New accounts can blow up overnight and fade as fast. Pays from a creator fund once you are big enough.
+contentKind: short_video
+verb: Post a video
+noun: video
+plural: videos
+minAge: 13
+growth: short_video
+pay: creator_fund
+routes: [after_viral]

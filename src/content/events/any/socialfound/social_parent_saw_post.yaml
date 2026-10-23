@@ -1,0 +1,74 @@
+id: social_parent_saw_post
+title: Look at your phone, please
+text: >-
+  {npc.name} puts your phone on the table between you, open to a post on
+  {platform}. Not a terrible one. But it is not the kind of thing {npc.they}
+  {npc:knew|knew} you were putting up, and it has been seen by a lot more
+  people than you meant. {npc.They} {npc:wants|want} to know what you were
+  thinking, and {npc.they} {npc:does|do} not sound angry yet.
+tone: serious
+category: socialfound
+rarity: uncommon
+recurring: true
+lifeStages: [teen]
+requires:
+  all:
+    - { age: { gte: 13 } }
+    - { age: { lte: 17 } }
+    - { social: { account: true } }
+    - { social: { happened: [foundFamily] } }
+    - { role: npc, alive: true, kind: [parent, stepparent] }
+weight: { base: 10 }
+cooldownYears: 3
+followUpOnly: true
+cast:
+  npc: { kind: parent, presence: household }
+choices:
+  - id: explain
+    label: Explain what you meant
+    check:
+      base: 50
+      stats:
+        - { role: npc, key: trust, weight: 0.25 }
+        - { key: smarts, weight: 0.1 }
+      success:
+        text: >-
+          You explain, and {npc.name} actually listens. {npc.They} {npc:asks|ask}
+          you to think about who might see it, and you tell {npc.them} you
+          have started to. It is a better talk than you expected.
+        effects:
+          - { type: knowledge, role: npc, action: correct }
+          - { type: relationship, role: npc, trust: 3 }
+      failure:
+        text: >-
+          You explain, and it sounds worse out loud than it did on the screen.
+          {npc.name} sets some rules about your phone, and the account, and
+          who may see it, and none of them are negotiable.
+        effects:
+          - { type: knowledge, role: npc, action: confirm }
+          - { type: relationship, role: npc, trust: -3, affection: -2 }
+          - { type: social, action: private, value: true }
+          - { type: stat, key: stress, delta: 3 }
+  - id: delete_it
+    label: Delete it, and say you get it
+    outcome:
+      text: >-
+        You take it down, and {npc.name} thanks you, and watches you do it.
+        It ends calmly. You will think about it before you post next time,
+        which is, you suspect, what this was for.
+      effects:
+        - { type: knowledge, role: npc, action: confirm }
+        - { type: relationship, role: npc, trust: 2 }
+  - id: say_its_your_account
+    label: Say it is your account and your business
+    outcome:
+      text: >-
+        It is a mistake you can hear yourself making. {npc.name} points out
+        that you are a minor, that the account exists because {npc.they}
+        {npc:allowed|allowed} it, and that this can change. The phone goes
+        into a drawer for a month.
+      effects:
+        - { type: knowledge, role: npc, action: confirm }
+        - { type: relationship, role: npc, affection: -5, trust: -4 }
+        - { type: social, action: private, value: true }
+        - { type: stat, key: happiness, delta: -3 }

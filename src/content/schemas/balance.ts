@@ -724,6 +724,29 @@ export const targetsBalanceSchema = z.strictObject({
     practicePerYear: numberRangeSchema,
   }),
   /**
+   * Batch 8: social media (tools/simulate/social.ts). Every player can have accounts; the star player (who may go after
+   * the social media path) runs them as a creator. The rules for anyone under 18 (`minorsBroken`) must hold exactly.
+   */
+  social: z.strictObject({
+    minorsBroken: numberRangeSchema,
+    withAccount: shareRangeSchema,
+    withAccountStar: shareRangeSchema,
+    accountsPerLife: numberRangeSchema,
+    postsPerYear: numberRangeSchema,
+    postsPerYearStar: numberRangeSchema,
+    foundLives: shareRangeSchema,
+    employerLives: shareRangeSchema,
+    partnerLives: shareRangeSchema,
+    creatorLives: shareRangeSchema,
+    creatorEarned: shareRangeSchema,
+    viralLives: shareRangeSchema,
+    controversyLives: shareRangeSchema,
+    cancelledLives: shareRangeSchema,
+    creatorPastMiddle: shareRangeSchema,
+    creatorTop: shareRangeSchema,
+    teenRung3By28: shareRangeSchema,
+  }),
+  /**
    * E6c: sports (tools/simulate/sports.ts). The athlete player (one who goes
    * after a sport) is judged on how often it starts, how far it gets with and
    * without a talent that fits, how long pro careers last, how rough the

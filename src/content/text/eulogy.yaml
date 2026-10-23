@@ -192,6 +192,7 @@ beliefs:
     illness: "I knew how ill {self.they} had been. It's part of how I'll remember {self.them}."
     groupScandal: "I knew about the falling-out at {self.their} group. It was a hard year, and I will leave it at that."
     groupHonor: "I was glad when {self.their} group honored {self.them}. It meant a great deal to {self.them}, and to me."
+    onlinePost: "I saw what {self.they} posted online that time, and what came of it. It is part of the story, and I would rather tell it kindly than not at all."
   # The speaker believes a twisted version (one line for each version that is not a truth). They say what they believed, and what they never checked.
   twisted:
     affair_serial: "I heard that {self.they} had been unfaithful, and not once, and not with one person. I believed it, and I never asked."
@@ -221,6 +222,9 @@ beliefs:
     breakup_scene: "I heard that the end with {other.name} came in a parking lot, with an audience. It's the version people tell, and it isn't the one I'd choose."
     ill_worse: "I heard that {self.they} didn't have long, and I started saying goodbye early."
     ill_minor: "I was told {self.they} {self:was|were} just run down, and I took that at face value."
+    post_worse: "I heard that what {self.they} posted online was dreadful. I believed it, and I never asked {self.them} for {self.their} side."
+    post_funny: "I heard that {self.they} got caught out online being a fool, and I laughed, and I still think it was funny."
+    callout_overblown: "I heard the row online about {self.them} was blown up out of all proportion. I think that was the truth of it, and I'm glad I thought so."
 
 # What the speaker was never told: a secret that is true of your life and that they never learned.
 unknown:

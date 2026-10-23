@@ -1,0 +1,63 @@
+id: social_burnout_break
+title: Nothing left to say
+text: >-
+  You sit down to make the next thing for @{handle} and there is nothing. Not
+  a bad idea, no idea at all. You have been putting something up on {platform}
+  nearly every week for years, and a part of you that you did not know was
+  keeping count has just stopped.
+tone: serious
+category: socialcreator
+rarity: uncommon
+recurring: true
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { social: { creator: true } }
+    - { social: { happened: [burnout] } }
+weight: { base: 10 }
+cooldownYears: 3
+followUpOnly: true
+choices:
+  - id: take_a_break
+    label: Tell your followers you are stepping back for a while
+    outcome:
+      text: >-
+        You write a short, honest post. The replies are kinder than you
+        expected, and several of them say they know the feeling. Some people
+        leave, and the rest wait.
+      effects:
+        - { type: fame, action: burnout, delta: -15 }
+        - { type: stat, key: stress, delta: -5 }
+        - { type: social, action: followers, delta: -6 }
+  - id: push_through
+    label: Keep posting anyway
+    check:
+      base: 40
+      stats:
+        - { key: discipline, weight: 0.3 }
+        - { key: health, weight: 0.1 }
+      success:
+        text: >-
+          You post on schedule. It is not your best work, but nobody can tell,
+          and by the end of the month the well has partly filled again. You
+          decide not to look closely at how.
+        effects:
+          - { type: stat, key: stress, delta: 3 }
+      failure:
+        text: >-
+          You post on schedule, and the posts are hollow, and the audience can
+          tell. Your engagement drops. Worse, you find you do not much care.
+        effects:
+          - { type: social, action: engagement, delta: -8 }
+          - { type: stat, key: happiness, delta: -4 }
+          - { type: fame, action: burnout, delta: 8 }
+  - id: talk_to_someone
+    label: Talk to someone close to you about it
+    outcome:
+      text: >-
+        You say the thing you had not said to anyone: that you do not know if
+        you still like it. It is a longer conversation than you had planned,
+        and you leave it lighter.
+      effects:
+        - { type: stat, key: stress, delta: -3 }
+        - { type: stat, key: happiness, delta: 2 }

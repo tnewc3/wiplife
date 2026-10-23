@@ -1,0 +1,11 @@
+id: twitch
+name: Twitch
+blurb: Live streams for people who show up on a schedule. Pays through subscriptions and donations from the regulars.
+contentKind: live
+verb: Go live
+noun: stream
+plural: streams
+minAge: 13
+growth: live_stream
+pay: subscriptions
+routes: [streaming]

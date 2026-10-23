@@ -1,0 +1,49 @@
+id: social_algorithm_smiles
+title: The algorithm likes you
+text: >-
+  Nothing you did is different. But {platform} changed something overnight, and
+  now it is showing @{handle} to people who never saw it before. Every post is
+  doing better than the one before, and nobody, including the people who work
+  there, can tell you why.
+tone: light
+category: socialcreator
+rarity: common
+recurring: true
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { social: { creator: true } }
+    - { social: { happened: [algorithmUp] } }
+weight: { base: 8 }
+cooldownYears: 2
+followUpOnly: true
+choices:
+  - id: post_more
+    label: Post more while it lasts
+    outcome:
+      text: >-
+        You put out everything you have. You know how these things go, and so
+        you do not take a day off. It works, and you are very tired by the end
+        of it.
+      effects:
+        - { type: stat, key: stress, delta: 4 }
+        - { type: social, action: followers, delta: 8 }
+  - id: keep_pace
+    label: Keep your normal pace and enjoy it
+    outcome:
+      text: >-
+        You do not change a thing. The boost is a gift that arrived without a
+        reason, and you do not want to learn what depending on it would take.
+      effects:
+        - { type: social, action: followers, delta: 4 }
+        - { type: stat, key: happiness, delta: 2 }
+  - id: wonder_why
+    label: Spend a week trying to work out why
+    outcome:
+      text: >-
+        You make charts. You read three theories and each one contradicts the
+        last. You come out of it with nothing except a clearer sense of how
+        little control any of this gives you.
+      effects:
+        - { type: stat, key: stress, delta: 2 }
+        - { type: stat, key: smarts, delta: 1 }

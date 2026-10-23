@@ -1,0 +1,54 @@
+id: social_crossover_behind_the_scenes
+title: They found you online
+text: >-
+  The people who come to your work have found you on {platform}. @{handle}
+  has {followerWords}, and most of them came for what you are known for, not
+  for anything you post there. They want what is behind it. They are asking
+  for the backstage and the early drafts and the bad days.
+tone: light
+category: socialcasual
+rarity: uncommon
+recurring: true
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { fame: { active: true } }
+    - { social: { account: true } }
+    - { social: { creator: false } }
+    - { social: { happened: [crossover] } }
+    - { not: { fame: { path: [social] } } }
+weight: { base: 10 }
+cooldownYears: 2
+followUpOnly: true
+choices:
+  - id: show_the_work
+    label: Show the work, rough edges and all
+    outcome:
+      text: >-
+        You put up the sketches and the missed takes. Your fans, who like
+        seeing the seams, share it widely, and a few critics comment kindly
+        on how honest it is.
+      effects:
+        - { type: social, action: followers, delta: 12 }
+        - { type: fame, action: fans, delta: 4 }
+        - { type: fame, action: mood, delta: 3 }
+  - id: keep_it_polished
+    label: Post only the finished things
+    outcome:
+      text: >-
+        The account stays tidy and a little distant. It is respected more
+        than it is loved, and your followers go on asking for more of you.
+      effects:
+        - { type: social, action: engagement, delta: -2 }
+        - { type: fame, action: image, delta: 1 }
+  - id: tell_them_to_look_elsewhere
+    label: Keep your private life private and say so
+    outcome:
+      text: >-
+        You post one line, kindly, about what you will and will not share. A
+        small number of people do not like it. The rest understand better
+        than you thought they would.
+      effects:
+        - { type: fame, action: image, delta: 2 }
+        - { type: stat, key: stress, delta: -2 }

@@ -1,0 +1,9 @@
+id: lifestyle
+name: Lifestyle
+noun: lifestyle
+blurb: A life, edited down to the parts you want seen.
+fit: { sociability: 0.4, looks: 0.3, confidence: 0.3 }
+talents: []
+demand: 1.2
+brands: 1.5
+heat: 1.1

@@ -1,0 +1,9 @@
+id: education
+name: Education
+noun: education
+blurb: Explaining things well enough that people come back for more.
+fit: { smarts: 0.5, discipline: 0.3, kindness: 0.2 }
+talents: [math, writing]
+demand: 0.8
+brands: 0.8
+heat: 0.5

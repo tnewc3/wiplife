@@ -1,0 +1,11 @@
+id: instagram
+name: Instagram
+blurb: Photos and short reels in a feed. Pays through brand deals, not by the view.
+contentKind: photo
+verb: Post a photo
+noun: photo
+plural: photos
+minAge: 13
+growth: photo_feed
+pay: brand_deals
+routes: [first_posts]

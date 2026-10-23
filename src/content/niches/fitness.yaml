@@ -1,0 +1,9 @@
+id: fitness
+name: Fitness
+noun: fitness
+blurb: Workouts, routines and before-and-afters.
+fit: { fitness: 0.5, discipline: 0.3, confidence: 0.2 }
+talents: [athletics]
+demand: 1.1
+brands: 1.4
+heat: 0.8

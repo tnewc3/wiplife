@@ -1,0 +1,39 @@
+id: social_start_a_podcast
+title: A show of your own
+text: >-
+  A friend has got hold of a microphone and wants to start a podcast, and would like
+  a co-host. It would be weekly, about whatever the two of you would be saying
+  anyway. You have talked about it often enough that saying no would feel like
+  a decision, and saying yes would feel like a commitment.
+tone: light
+category: socialcasual
+rarity: uncommon
+once: true
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { social: { account: true } }
+    - { not: { social: { platform: [podcasts] } } }
+    - { legal: { incarcerated: false } }
+weight: { base: 3 }
+choices:
+  - id: do_it
+    label: Say yes and record the first episode
+    outcome:
+      text: >-
+        The first one is forty minutes of two people laughing at their own
+        jokes. You listen back and wince. You also make the second one, and
+        the third.
+      effects:
+        - { type: social, action: open, platform: podcasts }
+        - { type: stat, key: happiness, delta: 2 }
+  - id: say_no
+    label: Say no, kindly
+    outcome:
+      text: >-
+        Your friend takes it well and finds someone else. Months later you
+        listen to the first episode, and it is good, and you feel a very small
+        pang.
+      effects:
+        - { type: stat, key: stress, delta: -1 }

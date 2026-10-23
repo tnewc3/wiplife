@@ -16,6 +16,7 @@ import { belongingsHolds } from './possessions/holds';
 import { teenHolds } from './teen/holds';
 import { crimeHolds } from './crime/holds';
 import { fameHolds } from './fame/holds';
+import { socialHolds } from './social/holds';
 import { sportsHolds } from './sports/holds';
 import { laterHolds } from './later/query';
 import { faithHolds, groupHolds } from './belonging/query';
@@ -282,6 +283,7 @@ export function evaluate(condition: Condition | undefined, state: LifeState, ctx
   if ('teen' in condition) return teenHolds(condition.teen, state);
   if ('crime' in condition) return crimeHolds(condition.crime, state, ctx.content?.balance.crime.ranks.length ?? 5, ctx.content);
   if ('fame' in condition) return fameHolds(condition.fame, state, ctx.content);
+  if ('social' in condition) return socialHolds(condition.social, state, ctx.content);
   if ('sports' in condition) return sportsHolds(condition.sports, state, ctx.content);
   if ('later' in condition) return laterHolds(condition.later, state);
   if ('memory' in condition) {

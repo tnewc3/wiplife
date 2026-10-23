@@ -1,0 +1,38 @@
+id: social_boss_saw_post
+title: Your boss follows you now
+text: >-
+  {npc.name} stops by with a printed screenshot of a post you put on {platform}.
+  Somebody at work found @{handle} and passed it along.
+tone: serious
+category: socialfound
+rarity: uncommon
+recurring: true
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 16 } }
+    - { social: { account: true } }
+    - { social: { happened: [foundEmployer] } }
+    - { career: { employed: true } }
+    - { role: npc, alive: true, kind: [boss] }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  npc: { kind: boss, presence: anywhere }
+choices:
+  - id: own_it
+    label: Own it, and say what you meant
+    outcome:
+      text: >-
+        You say it plainly. {npc.name} listens, and nods, and tells you that
+        the honest answer is the only reason this is a short conversation.
+      effects:
+        - { type: knowledge, role: npc, action: correct }
+        - { type: relationship, role: npc, trust: 3 }
+  - id: delete_it
+    label: Delete it and say it will not happen again
+    outcome:
+      text: You take it down on the spot, in front of {npc.them}, and it is settled.
+      effects:
+        - { type: knowledge, role: npc, action: confirm }
+        - { type: job, action: performance, value: -2 }

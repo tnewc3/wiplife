@@ -1,0 +1,67 @@
+id: social_family_saw_post
+title: The family group chat
+text: >-
+  Somebody has screenshotted a post from your @{handle} account on {platform}
+  and sent it to the family group chat, with no comment, which is worse than a
+  comment. {npc.name} has replied, so everyone has. It was not meant for them,
+  and now it is the only thing the group chat is about.
+tone: serious
+category: socialfound
+rarity: uncommon
+recurring: true
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { social: { account: true } }
+    - { social: { happened: [foundFamily] } }
+    - { role: npc, alive: true, kind: [parent, stepparent, sibling, grandparent] }
+weight: { base: 10 }
+cooldownYears: 4
+followUpOnly: true
+cast:
+  npc: { support: true, presence: anywhere }
+choices:
+  - id: call_them
+    label: Call {npc.name} and talk it through
+    check:
+      base: 50
+      stats:
+        - { role: npc, key: affection, weight: 0.25 }
+        - { key: kindness, weight: 0.1 }
+      success:
+        text: >-
+          It is a long call, mostly about everything else. {npc.name} says it
+          is not the post that bothered {npc.them}, it is not knowing that
+          part of you. By the end you are both laughing, a little.
+        effects:
+          - { type: knowledge, role: npc, action: correct }
+          - { type: relationship, role: npc, affection: 4, trust: 3 }
+      failure:
+        text: >-
+          The call goes round in circles. {npc.name} wants an apology you do
+          not think is due, and you want to be left alone, and you hang up
+          each thinking the other is being unreasonable.
+        effects:
+          - { type: knowledge, role: npc, action: confirm }
+          - { type: relationship, role: npc, affection: -4 }
+          - { type: stat, key: stress, delta: 4 }
+  - id: laugh_it_off
+    label: Reply with a joke and a heart
+    outcome:
+      text: >-
+        You make light of it. Most of the chat plays along. One person does
+        not, and you can feel it, even through the screen.
+      effects:
+        - { type: knowledge, role: npc, action: confirm }
+        - { type: relationship, role: npc, trust: -1 }
+  - id: make_it_private
+    label: Lock the account down and say nothing
+    outcome:
+      text: >-
+        You switch to private and leave the chat muted for a week. The family
+        goes back to arguing about the holiday dinner, which is, at least,
+        a familiar topic.
+      effects:
+        - { type: social, action: private, value: true }
+        - { type: stat, key: stress, delta: -1 }

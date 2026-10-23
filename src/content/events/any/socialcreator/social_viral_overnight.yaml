@@ -1,0 +1,63 @@
+id: social_viral_overnight
+title: Overnight
+text: >-
+  You wake up to a phone that will not stop. Something you put up on {platform}
+  went further in a night than anything you have ever made, and @{handle} now
+  has {followerWords}. People you have never met are tagging each other under
+  it. Your inbox is a wall.
+tone: light
+category: socialcreator
+rarity: uncommon
+recurring: true
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { social: { creator: true } }
+    - { social: { happened: [viral] } }
+weight: { base: 10 }
+cooldownYears: 2
+followUpOnly: true
+choices:
+  - id: ride_it
+    label: Post again right away, while they are watching
+    check:
+      base: 50
+      stats:
+        - { key: discipline, weight: 0.2 }
+        - { key: confidence, weight: 0.2 }
+      success:
+        text: >-
+          You are quick, and the second one is almost as good as the first.
+          The strangers who came for a moment decide to stay, and the number
+          keeps climbing into the weekend.
+        effects:
+          - { type: social, action: followers, delta: 15 }
+          - { type: fame, action: fans, delta: 6 }
+          - { type: stat, key: stress, delta: 3 }
+      failure:
+        text: >-
+          You rush it, and it shows. The new people look at it for a moment
+          and drift away, and a few of them leave a comment saying exactly
+          what they thought.
+        effects:
+          - { type: social, action: followers, delta: -5 }
+          - { type: stat, key: stress, delta: 4 }
+  - id: stay_yourself
+    label: Carry on exactly as before
+    outcome:
+      text: >-
+        You make what you were going to make anyway. Some of the new people
+        stay and most do not, and the ones who stay are the ones who liked it
+        for what it is.
+      effects:
+        - { type: social, action: engagement, delta: 4 }
+        - { type: stat, key: stress, delta: -1 }
+  - id: switch_off
+    label: Turn off the notifications and go for a walk
+    outcome:
+      text: >-
+        It is a long walk. When you come back the number is bigger, and the
+        world is the same size, and you decide that is probably healthy.
+      effects:
+        - { type: stat, key: stress, delta: -3 }
+        - { type: stat, key: happiness, delta: 2 }

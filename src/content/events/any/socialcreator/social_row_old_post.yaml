@@ -1,0 +1,89 @@
+id: social_row_old_post
+title: Somebody went through your old posts
+text: >-
+  Someone has been through everything @{handle} ever put on {platform}, back to
+  the first week, and found a post from a long time ago that sounds very
+  different now than it did then. It has been screenshotted, with a caption
+  that is not charitable. It is spreading while you read it.
+tone: dark
+category: socialcreator
+rarity: uncommon
+recurring: true
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { social: { creator: true } }
+    - { social: { happened: [controversy] } }
+    - { social: { controversy: [brewing] } }
+weight: { base: 10 }
+cooldownYears: 4
+followUpOnly: true
+choices:
+  - id: apologize
+    label: Apologize plainly, without a lawyer's voice
+    check:
+      base: 50
+      stats:
+        - { key: kindness, weight: 0.25 }
+        - { key: confidence, weight: 0.1 }
+      success:
+        text: >-
+          You write it yourself and you mean it, and you do not defend
+          anything. Most of the people who were angry find that there is
+          nothing to be angry at, and by Thursday it is a smaller story.
+        effects:
+          - { type: social, action: clear }
+          - { type: fame, action: image, delta: 2 }
+          - { type: stat, key: stress, delta: 2 }
+      failure:
+        text: >-
+          Every word of it is used against you. It is read as hollow, and
+          then as calculated, and then as proof. The people who were angry
+          before are angry now with a better case.
+        effects:
+          - { type: social, action: cancel }
+          - { type: stat, key: stress, delta: 6 }
+  - id: explain
+    label: Explain the context, and what you think now
+    check:
+      base: 40
+      stats:
+        - { key: smarts, weight: 0.2 }
+        - { key: confidence, weight: 0.15 }
+      success:
+        text: >-
+          You give the context and say what has changed in you since. It
+          reads as honest, and a few well-known people reply to say they have
+          done the same thing. The row loses its fuel.
+        effects:
+          - { type: social, action: clear }
+          - { type: stat, key: stress, delta: 3 }
+      failure:
+        text: >-
+          Explaining reads as excusing. Each new post is a screenshot, and
+          each screenshot is a new round, and by the end of the week you have
+          stopped being able to tell which of the people arguing mean it.
+        effects:
+          - { type: social, action: cancel }
+          - { type: stat, key: stress, delta: 6 }
+  - id: say_nothing
+    label: Say nothing and wait for it to pass
+    check:
+      base: 50
+      stats:
+        - { key: discipline, weight: 0.15 }
+      success:
+        text: >-
+          Nothing comes of it. Another story overtakes it on Thursday. Most
+          of the people who saw it will not remember it.
+        effects:
+          - { type: social, action: clear }
+          - { type: stat, key: stress, delta: 3 }
+      failure:
+        text: >-
+          Silence is read as an answer. The pile-on does not wait for you to
+          decide, and by Friday there is nobody left who is on your side
+          except the people who always were.
+        effects:
+          - { type: social, action: cancel }
+          - { type: stat, key: stress, delta: 5 }

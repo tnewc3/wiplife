@@ -1,0 +1,50 @@
+id: social_viral_old_post
+title: The one nobody had seen
+text: >-
+  It is an old post, one that sank without trace when you put it up, and
+  somebody with a big audience has found it on {platform} and loved it. Now
+  strangers are going back through everything on @{handle}, and the early work
+  is getting more attention than the later work ever did.
+tone: light
+category: socialcreator
+rarity: uncommon
+recurring: true
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { social: { creator: true } }
+    - { social: { happened: [viral] } }
+    - { social: { top: { gte: 1000 } } }
+weight: { base: 6 }
+cooldownYears: 3
+followUpOnly: true
+choices:
+  - id: lean_into_it
+    label: Make more like the early work
+    outcome:
+      text: >-
+        You go back to what you were doing before you knew what you were
+        doing. It is easier than you expected, and a little embarrassing, and
+        the audience is delighted.
+      effects:
+        - { type: social, action: followers, delta: 10 }
+        - { type: fame, action: fans, delta: 4 }
+  - id: say_thank_you
+    label: Thank whoever found it, and credit the person who shared it
+    outcome:
+      text: >-
+        The person who shared it writes back, delighted to be thanked, and
+        shares the thread again. Their audience, who like generous people,
+        follow you out of curiosity.
+      effects:
+        - { type: social, action: followers, delta: 6 }
+        - { type: fame, action: image, delta: 2 }
+  - id: delete_it
+    label: Delete the old ones, they are not who you are now
+    outcome:
+      text: >-
+        You take them down, and a few thousand people notice at once. The
+        screenshots go round faster than the posts ever did.
+      effects:
+        - { type: social, action: followers, delta: -4 }
+        - { type: fame, action: image, delta: -2 }

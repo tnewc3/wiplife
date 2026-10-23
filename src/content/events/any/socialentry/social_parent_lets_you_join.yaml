@@ -1,0 +1,66 @@
+id: social_parent_lets_you_join
+title: May I have an account
+text: >-
+  You have asked more than once, and {npc.name} has said "when you are older"
+  every time. Tonight, after dinner, {npc.they} {npc:brings|bring} it up
+  first. Everyone in your year has an account. {npc.They} {npc:says|say}
+  {npc.they} would rather you had one {npc.they} knew about than one {npc.they}
+  did not, and would like to talk about the terms.
+tone: neutral
+category: socialentry
+rarity: common
+lifeStages: [teen]
+requires:
+  all:
+    - { age: { gte: 13 } }
+    - { age: { lte: 15 } }
+    - { social: { account: false } }
+    - { legal: { incarcerated: false } }
+    - { role: npc, alive: true, kind: [parent, stepparent] }
+weight: { base: 5 }
+cooldownYears: 3
+cast:
+  npc: { kind: parent, presence: household }
+choices:
+  - id: agree_to_terms
+    label: Agree to the terms and open one together
+    outcome:
+      text: >-
+        You make the account at the kitchen table with {npc.name} reading over
+        your shoulder. It starts private, and {npc.they} {npc:has|have} the
+        password. Neither of those is what you wanted, and both are better
+        than nothing.
+      effects:
+        - { type: social, action: open, platform: instagram }
+        - { type: relationship, role: npc, trust: 2 }
+  - id: argue_for_freedom
+    label: Argue that you are old enough to do it alone
+    check:
+      base: 35
+      stats:
+        - { role: npc, key: trust, weight: 0.3 }
+        - { key: smarts, weight: 0.1 }
+      success:
+        text: >-
+          You make your case calmly, with examples, and {npc.name} concedes
+          part of it: you may have the account, with fewer rules than first
+          proposed. You take the win and do not push.
+        effects:
+          - { type: social, action: open, platform: tiktok }
+          - { type: relationship, role: npc, trust: 1 }
+      failure:
+        text: >-
+          You say "everyone else is allowed," and it goes the way it always
+          goes. The answer is no, and the answer will be no for another year.
+        effects:
+          - { type: relationship, role: npc, affection: -2 }
+          - { type: stat, key: happiness, delta: -2 }
+  - id: wait
+    label: Say you will wait
+    outcome:
+      text: >-
+        {npc.name} looks at you for a moment, surprised, and a bit moved. It
+        is a quiet evening, and a good one, and the question comes back
+        in a year.
+      effects:
+        - { type: relationship, role: npc, trust: 3 }

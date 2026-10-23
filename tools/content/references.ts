@@ -66,6 +66,7 @@ import { checkTeen } from './teen';
 import { checkSchool } from './school';
 import { checkCrime } from './crime';
 import { checkFame } from './fame';
+import { checkSocial } from './social';
 import { checkSports } from './sports';
 import { COUNTRY_TEXT_VALUES } from '../../src/engine/country';
 
@@ -222,6 +223,7 @@ export function checkReferences(
   errors.push(...checkSchool(bundle, fileOf, options.partialEvents === true));
   errors.push(...checkCrime(bundle, fileOf, options.partialEvents === true));
   errors.push(...checkFame(bundle, fileOf, options.partialEvents === true));
+  errors.push(...checkSocial(bundle, fileOf, options.partialEvents === true));
   errors.push(...checkSports(bundle, fileOf, options.partialEvents === true));
   errors.push(...checkEulogy(bundle));
   errors.push(...checkLater(bundle, fileOf, options.partialEvents === true));
@@ -500,6 +502,10 @@ function implies(required: Condition, part: Condition): boolean {
     // E6b: every field the contract names must be asked for the same way.
     return Object.entries(part.fame).every(([key, value]) => JSON.stringify((required.fame as Record<string, unknown>)[key]) === JSON.stringify(value));
   }
+  if ('social' in part && 'social' in required) {
+    // Batch 8: every field the contract names must be asked for the same way.
+    return Object.entries(part.social).every(([key, value]) => JSON.stringify((required.social as Record<string, unknown>)[key]) === JSON.stringify(value));
+  }
   if ('crime' in part && 'crime' in required) {
     // E6a: every field the contract names must be asked for the same way.
     return Object.entries(part.crime).every(([key, value]) => JSON.stringify((required.crime as Record<string, unknown>)[key]) === JSON.stringify(value));
@@ -590,6 +596,8 @@ function checkEvents(bundle: ContentBundle, fileOf: (typeKey: CollectionKey, id:
     ...Object.values(bundle.registries.crime.triggers).flatMap((r) => r.events),
     // E6b: what the fame step queues (a release's reception, a break, a fade, a deal, a ceremony, a tabloid, a stalker...).
     ...Object.values(bundle.registries.fame.triggers).flatMap((r) => r.events),
+    // Batch 8: what the social step queues (a payout, a viral post, a row, a post found by a boss or a partner...).
+    ...Object.values(bundle.registries.social.triggers).flatMap((r) => r.events),
     // E6c: what the sports step queues (the draft, deals, injuries, the playoffs, a big game...).
     ...Object.values(bundle.registries.sports.triggers).flatMap((r) => r.events),
   ]);

@@ -23,6 +23,7 @@ import { credentialTypeSchema, programSchema, tierSchema, type Tier } from './ed
 import { lifeTierSchema } from './people';
 import { jobSizeSchema } from './crime';
 import { SPORT_LEVELS, SPORT_RESULTS, SPORT_RETIRE_ROUTES, SPORT_CONTRACT_KINDS, SPORT_ROLES, TRYOUT_APPROACHES, TRYOUT_RESULTS, type SportLevel, type SportResult, type SportRole, type TryoutResult } from './sports';
+import { SOCIAL_TRIGGERS, type SocialTrigger } from './social';
 import { fameBandSchema, fameCommitmentSchema, fameSceneSchema, fameSizeSchema, fameTermsSchema, FAME_FAN_TYPES, FAME_STALKER_STAGES, type FameBand, type FameCommitment, type FameStalkerStage } from './fame';
 import { FOCUS_KEYS, LICENSE_STAGE_IDS, ruleDomainSchema, type RuleDomainId, type TeenFocusId } from './teen';
 import { relationshipKindSchema, relationshipStatusSchema, romanceStatusSchema } from './relationships';
@@ -117,6 +118,7 @@ export type Condition =
   | { teen: TeenCondition }
   | { crime: CrimeCondition }
   | { fame: FameCondition }
+  | { social: SocialCondition }
   | { sports: SportsCondition }
   | { later: LaterCondition }
   | { group: GroupCondition }
@@ -348,6 +350,38 @@ export interface FameCondition {
   shows?: Compare;
   genre?: boolean;
   offer?: boolean;
+}
+
+/**
+ * Batch 8, social media. Every field given must hold. account: you have at
+ * least one; creator: you work in the social media career; platform: you have
+ * an account on one of these; accounts / followers / top / engagement: how many
+ * accounts, your followers in all, on your biggest account, and its engagement;
+ * niche: your biggest account is about one of these; private: every account is
+ * private; byParent: an account was set up by a parent (you opened it under
+ * 18); monetized: a platform pays you; demonetized: one has stopped; sponsor:
+ * you have a brand sponsorship; controversy: a row is brewing or has blown up
+ * (or in this stage); happened: the social step made one of these happen as the
+ * year began (the triggers of registries/social.yaml); promotable: you have
+ * work you could promote.
+ */
+export interface SocialCondition {
+  account?: boolean;
+  creator?: boolean;
+  platform?: string[];
+  accounts?: Compare;
+  followers?: Compare;
+  top?: Compare;
+  engagement?: Compare;
+  niche?: string[];
+  private?: boolean;
+  byParent?: boolean;
+  monetized?: boolean;
+  demonetized?: boolean;
+  sponsor?: boolean;
+  controversy?: boolean | ('brewing' | 'cancelled')[];
+  happened?: SocialTrigger[];
+  promotable?: boolean;
 }
 
 /**
@@ -1135,6 +1169,28 @@ export const conditionSchema: z.ZodType<Condition> = z.lazy(() =>
         .refine(atLeastOneField, 'needs at least one field'),
     }),
     z.strictObject({
+      social: z
+        .strictObject({
+          account: z.boolean().optional(),
+          creator: z.boolean().optional(),
+          platform: z.array(idSchema).min(1).optional(),
+          accounts: compareSchema.optional(),
+          followers: compareSchema.optional(),
+          top: compareSchema.optional(),
+          engagement: compareSchema.optional(),
+          niche: z.array(idSchema).min(1).optional(),
+          private: z.boolean().optional(),
+          byParent: z.boolean().optional(),
+          monetized: z.boolean().optional(),
+          demonetized: z.boolean().optional(),
+          sponsor: z.boolean().optional(),
+          controversy: z.union([z.boolean(), z.array(z.enum(['brewing', 'cancelled'])).min(1)]).optional(),
+          happened: z.array(z.enum(SOCIAL_TRIGGERS)).min(1).optional(),
+          promotable: z.boolean().optional(),
+        })
+        .refine(atLeastOneField, 'needs at least one field'),
+    }),
+    z.strictObject({
       sports: z
         .strictObject({
           active: z.boolean().optional(),
@@ -1811,6 +1867,32 @@ export const effectSchema = z.discriminatedUnion('type', [
   z
     .strictObject({ type: z.literal('famePay'), gain: fameSizeSchema.optional(), cost: fameSizeSchema.optional() })
     .refine((e) => (e.gain === undefined) !== (e.cost === undefined), 'needs exactly one of gain or cost'),
+  /**
+   * Batch 8, social media. followers: your following on the account in
+   * `platform` (the one the event is about, without it) moves by `delta`
+   * percent. engagement: its engagement moves by `delta` points. private: every
+   * account goes private (`value: true`) or public. open: you open an account
+   * on `platform`, with a handle suggested for you and your best niche (only
+   * what the platform's age and a parent's say-so allow). close: the account
+   * goes. restore: the platform pays you again after an appeal. clear: a row
+   * that was brewing blows over. cancel: you are cancelled: followers, public
+   * image, fan mood and fame fall, the tabloids may run it and the web talks.
+   * sponsor: you sign a sponsorship, a contract on these `terms` with a
+   * (fictional) brand that fits your rung; a parent signs for anyone under 18.
+   */
+  z
+    .strictObject({
+      type: z.literal('social'),
+      action: z.enum(['followers', 'engagement', 'private', 'open', 'close', 'restore', 'clear', 'cancel', 'sponsor']),
+      delta: z.int().min(-100).max(500).optional(),
+      platform: idSchema.optional(),
+      value: z.boolean().optional(),
+      terms: fameTermsSchema.optional(),
+    })
+    .refine((e) => (e.action === 'sponsor') === (e.terms !== undefined), 'sponsor needs terms (and only it has them)')
+    .refine((e) => (e.action === 'followers' || e.action === 'engagement') === (e.delta !== undefined && e.delta !== 0), 'followers and engagement need a non-zero delta (and only they have one)')
+    .refine((e) => (e.action === 'private') === (e.value !== undefined), 'private needs value (and only it has one)')
+    .refine((e) => e.action !== 'open' || e.platform !== undefined, 'open needs a platform'),
   /**
    * E6c, sports. form: `delta` points of form for the next season (and the
    * playoffs now), −10 to 10. rating: `delta` points on this year's rating,

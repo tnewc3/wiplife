@@ -1268,6 +1268,8 @@ export interface LifeState {
   business: BusinessState;
   /** Batch 2a: this year's activities (leisure and self): how many of each, and the receipts of the last few. */
   pastimes: PastimesState;
+  /** Batch 8: your accounts on the platforms (Instagram, TikTok and the rest), this year's posts, what they earned and what has happened to them. */
+  social: SocialState;
 }
 
 /** Batch 2a: what an activity did, as the Activities screen shows it: the words, the money and (as numbers the screen turns into words) the stats that moved. */
@@ -1285,6 +1287,113 @@ export interface PastimeReceipt {
   companion?: { id: Id; name: string; affection: number };
   /** Stats that moved (after the activity's effects), by key. */
   changes: Partial<Record<'health' | 'happiness' | 'smarts' | 'looks' | 'fitness' | 'stress', number>>;
+}
+
+/** Batch 8: one account on a platform (src/content/platforms). Followers, engagement and the niche are real; the handle is what you typed. */
+export interface SocialAccount {
+  platform: Id;
+  handle: string;
+  niche: Id;
+  followers: number;
+  /** 0–100: how much of the audience answers. */
+  engagement: number;
+  since: number;
+  private: boolean;
+  /** You were under 18 when you opened it: a parent set it up and keeps an eye on it. */
+  byParent: boolean;
+  /** Posts, uploads, streams or episodes in all. */
+  posts: number;
+  /** 0–100: how good your posts have been lately. */
+  quality: number;
+  /** The year the platform began paying you (0 for not yet). */
+  monetized: number;
+  /** The platform pays nothing through this year (0 for no). */
+  demonetized: number;
+  /** Everything this account has earned you. */
+  earned: number;
+  /** The most followers it has had. */
+  peak: number;
+}
+
+/** Batch 8: how the latest post did. */
+export interface SocialPostResult {
+  year: number;
+  platform: Id;
+  outcome: 'flat' | 'steady' | 'strong' | 'viral';
+  gained: number;
+  bold: boolean;
+}
+
+/** Batch 8: what you have done on your accounts this year (the year's budget and its diminishing returns). A new year starts from nothing. */
+export interface SocialYear {
+  year: number;
+  /** Posts this year by platform, and the sum of their quality (for the average). */
+  posts: Record<Id, number>;
+  quality: Record<Id, number>;
+  /** Bold posts this year, and posts that someone might see who was not meant to, by platform. */
+  bold: number;
+  risky: Record<Id, number>;
+  /** Platforms where a post went viral. */
+  viral: Id[];
+  /** Cross-promotions (as 'from>to'), collaborations (the people), and promotions of your work (the platforms) this year. */
+  crossed: string[];
+  collabs: Id[];
+  promoted: Id[];
+}
+
+/** Batch 8: what the platforms paid this year, set aside for the yearly ledger (the agent's cut and a minor's share in trust are taken off). */
+export interface SocialIncome {
+  year: number;
+  gross: number;
+  agent: number;
+  trust: number;
+  /** Gross by platform and by pay model. */
+  byPlatform: Record<Id, number>;
+  byModel: Record<Id, number>;
+}
+
+export interface SocialTotals {
+  opened: number;
+  posts: number;
+  viral: number;
+  algorithmUp: number;
+  algorithmDown: number;
+  demonetized: number;
+  monetized: number;
+  burnouts: number;
+  controversies: number;
+  cancellations: number;
+  collabs: number;
+  crossPromos: number;
+  promos: number;
+  sponsorships: number;
+  /** Posts that reached someone who was not meant to see them, by who. */
+  foundEmployer: number;
+  foundPartner: number;
+  foundEx: number;
+  foundFamily: number;
+  earned: number;
+}
+
+/** Batch 8: social media: your accounts (at most one a platform), this year's use of them and what has happened to them. */
+export interface SocialState {
+  accounts: Record<Id, SocialAccount>;
+  year: SocialYear;
+  income: SocialIncome;
+  last?: SocialPostResult;
+  /** The algorithm's mood on each platform for the year that has begun (up: it favours you; down: it does not). */
+  algorithm: { year: number; shifts: Record<Id, 'up' | 'down'> };
+  /** A row that is brewing, or that has blown up, on one platform. */
+  controversy: { year: number; platform: Id; stage: 'brewing' | 'cancelled'; lost: Record<Id, number> } | null;
+  /** What happened to your accounts as this year began (the social triggers: viral, demonetized...), for the events about it. */
+  happened: { year: number; triggers: string[] };
+  /** The platform and year an event this year is about (for {platform} and {handle}). */
+  focus: { year: number; platform: Id } | null;
+  /** Years in a row you used most of your budget. */
+  streak: number;
+  /** The last year you posted (for the fame step: a year of posting is a year of work). */
+  workedYear: number;
+  totals: SocialTotals;
 }
 
 /** Batch 2a: activities this year. A new year starts from nothing (counts of an earlier year are ignored). */

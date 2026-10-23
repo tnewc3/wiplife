@@ -1,0 +1,9 @@
+id: travel
+name: Travel
+noun: travel
+blurb: Places, planes and the story of how you got there.
+fit: { riskTaking: 0.4, sociability: 0.3, confidence: 0.3 }
+talents: []
+demand: 1.0
+brands: 1.4
+heat: 0.9

@@ -1,0 +1,9 @@
+id: commentary
+name: Commentary
+noun: commentary
+blurb: Opinions on the news, loudly, on a schedule.
+fit: { confidence: 0.4, smarts: 0.3, riskTaking: 0.3 }
+talents: [persuasion, writing]
+demand: 1.0
+brands: 0.5
+heat: 2.0

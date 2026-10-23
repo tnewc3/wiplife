@@ -1,0 +1,76 @@
+id: social_demonetized_appeal
+title: No longer eligible
+text: >-
+  The message from {platform} is polite and signed by nobody. @{handle} is no
+  longer eligible for payments: something in your work breaks a rule that you
+  did not know existed, or did know and read differently. It does not say which
+  post. There is a link to appeal, and a note that most appeals do not succeed.
+tone: serious
+category: socialcreator
+rarity: uncommon
+recurring: true
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { social: { creator: true } }
+    - { social: { happened: [demonetized] } }
+weight: { base: 10 }
+cooldownYears: 3
+followUpOnly: true
+choices:
+  - id: appeal
+    label: Write the appeal, carefully
+    check:
+      base: 35
+      stats:
+        - { key: discipline, weight: 0.2 }
+        - { key: smarts, weight: 0.2 }
+      success:
+        text: >-
+          You go through every line of the rules and answer every one of them
+          without sounding upset. Eleven days later a form letter arrives,
+          saying that a mistake was made, which is not an apology and is
+          better than one.
+        effects:
+          - { type: social, action: restore }
+          - { type: stat, key: stress, delta: 2 }
+      failure:
+        text: >-
+          The reply arrives in an hour and says the decision stands. You can
+          appeal again. You do not, for a while, because it felt like writing
+          a letter to the weather.
+        effects:
+          - { type: stat, key: stress, delta: 5 }
+  - id: go_public
+    label: Post about it and let your followers decide
+    check:
+      base: 40
+      stats:
+        - { key: confidence, weight: 0.2 }
+        - { key: sociability, weight: 0.15 }
+      success:
+        text: >-
+          Your followers take your side loudly, and someone at the company
+          reads the thread. The decision is reversed by Friday, with an
+          apology you suspect was written by a lawyer.
+        effects:
+          - { type: social, action: restore }
+          - { type: fame, action: mood, delta: 3 }
+      failure:
+        text: >-
+          It turns into a fight with strangers over whether you broke the
+          rules. You did not, probably, but the rules have little to say, and
+          the thread ends with you looking angrier than you are.
+        effects:
+          - { type: fame, action: image, delta: -3 }
+          - { type: stat, key: stress, delta: 5 }
+  - id: move_on
+    label: Accept it and make something else for a year
+    outcome:
+      text: >-
+        You stop trying to win. You make things that do not depend on a
+        payment from anyone, and you find that you are still allowed to like
+        doing it.
+      effects:
+        - { type: stat, key: happiness, delta: 1 }
+        - { type: stat, key: stress, delta: -2 }

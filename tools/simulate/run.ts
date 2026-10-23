@@ -77,6 +77,7 @@ import { BelongingWatcher, belongingTargets, chooseBelongingActions, emptyBelong
 import { chooseGrandparentPlans, chooseLaterActions, emptyLaterReport, formatLater, LaterWatcher, laterTargets, rollLaterProfile, type LaterReport } from './later';
 import { emptyWebReport, formatWeb, webTargets, WebWatcher, type WebReport } from './web';
 import { chooseCrimeActions, CrimeWatcher, crimeTargets, emptyCrimeReport, formatCrime, type CrimeReport } from './crime';
+import { chooseSocialActions, emptySocialReport, formatSocial, rollSocialProfile, SocialWatcher, socialTargets, type SocialReport } from './social';
 import { chooseFameActions, emptyFameReport, FameWatcher, fameTargets, formatFame, rollStarProfile, type FameReport } from './fame';
 import { peakRung } from '../../src/engine/fame/query';
 import { AttractionWatcher, attractionTargets, chooseDateActions, emptyAttractionReport, formatAttraction, type AttractionReport } from './attraction';
@@ -191,6 +192,8 @@ export interface SimulationReport {
   crime: CrimeReport;
   /** E6b: fame in arts and media, measured. */
   fame: FameReport;
+  /** Batch 8: social media, measured. */
+  social: SocialReport;
   /** E6c: sports, measured. */
   sports: SportsReport;
   /** B1: romance by attraction, measured. */
@@ -850,6 +853,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
   const schoolLife = emptySchoolLifeReport();
   const crime = emptyCrimeReport(playerKind, content);
   const fame = emptyFameReport(playerKind, content);
+  const social = emptySocialReport(playerKind, content);
   const sports = emptySportsReport(playerKind, content);
   const attraction = emptyAttractionReport(playerKind);
   const famousAtTarget: number[] = [];
@@ -877,6 +881,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
       crime.invariantFailures += failures.filter((f) => /crime|crew|dirty/i.test(f)).length;
       migration.invariantFailures += failures.filter((f) => /^migration/i.test(f)).length;
       fame.invariantFailures += failures.filter((f) => /^fame|fame\./i.test(f)).length;
+      social.invariantFailures += failures.filter((f) => /account on|handle|social\.|platforms? paid|pay set aside|this year's posts|unknown platform/i.test(f)).length;
       sports.invariantFailures += failures.filter((f) => /^sports/i.test(f)).length;
       schoolLife.invariantFailures += failures.filter((f) => /teacher|class member|^exam |an exam is|venue|coworkers at a workplace/i.test(f)).length;
       teen.invariantFailures += failures.filter((f) => /crowd|teen|license|learner|house rule|rule |romance|couple with someone under|under 18|is under \d+ and|they are under|you are under/i.test(f)).length;
@@ -900,6 +905,9 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
     const fameWatcher = new FameWatcher(fame, content);
     const fameRng = createRng(`${seed}:fame`);
     const starProfile = rollStarProfile(fameRng);
+    const socialWatcher = new SocialWatcher(social, content);
+    const socialRng = createRng(`${seed}:social`);
+    const socialProfile = rollSocialProfile(socialRng);
     const sportsWatcher = new SportsWatcher(sports, content);
     const attractionWatcher = new AttractionWatcher(attraction);
     const dateRng = createRng(`${seed}:dates`);
@@ -1106,6 +1114,12 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
           money.actionsTaken[actionId]++;
         }
       }
+      // ...and on accounts (Batch 8): everyone may post a little, and the star player runs them as a creator would...
+      for (const [actionId, params] of chooseSocialActions(life, content, socialRng, socialProfile, playerKind === 'star')) {
+        if (!isLifeActionAvailable(life, actionId, params, content)) continue;
+        life = takeLifeAction(life, actionId, params);
+        money.actionsTaken[actionId]++;
+      }
       // ...and on a sport (E6c): the athlete player goes after one, hires an agent, trains and plays...
       if (playerKind === 'athlete') {
         for (const [actionId, params] of chooseSportsActions(life, content, sportsRng, athleteProfile)) {
@@ -1255,6 +1269,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
       mentalWatcher.observe(yearBefore, life);
       crimeWatcher.observe(yearBefore, life);
       fameWatcher.observe(yearBefore, life);
+      socialWatcher.observe(yearBefore, life);
       sportsWatcher.observe(yearBefore, life);
       attractionWatcher.observe(life);
       possessionsWatcher.observe(yearBefore, life, content);
@@ -1310,6 +1325,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
     mentalWatcher.finish(life);
     crimeWatcher.finish(life);
     fameWatcher.finish(life);
+    socialWatcher.finish(life);
     sportsWatcher.finish(life);
     attractionWatcher.finish(life);
     possessionsWatcher.finish(life);
@@ -1661,6 +1677,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
     schoolLife,
     crime,
     fame: { ...fame, famousAtTarget },
+    social,
     sports,
     attraction,
     consistency: {
@@ -1811,6 +1828,7 @@ export function formatReport(report: SimulationReport, content: ContentBundle): 
   lines.push(...formatSchoolLife(report.schoolLife, content), '  targets (src/content/balance/targets.yaml):', ...schoolLifeTargets(report, content).map((r) => target(r.label, r.value, r.goal, r.met)));
   lines.push(...formatCrime(report.crime, content), '  targets (src/content/balance/targets.yaml):', ...crimeTargets(report, content).map((r) => target(r.label, r.value, r.goal, r.met)));
   lines.push(...formatFame(report.fame, content), '  targets (src/content/balance/targets.yaml):', ...fameTargets(report, content).map((r) => target(r.label, r.value, r.goal, r.met)));
+  lines.push(...formatSocial(report.social, content), '  targets (src/content/balance/targets.yaml):', ...socialTargets(report, content).map((r) => target(r.label, r.value, r.goal, r.met)));
   lines.push(...formatSports(report.sports, content), '  targets (src/content/balance/targets.yaml):', ...sportsTargets(report, content).map((r) => target(r.label, r.value, r.goal, r.met)));
   lines.push(...formatAttraction(report.attraction), '  targets (src/content/balance/targets.yaml):', ...attractionTargets(report, content).map((r) => target(r.label, r.value, r.goal, r.met)));
   lines.push(`Events fired: ${report.totalEventsFired}`);

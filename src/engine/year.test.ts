@@ -23,6 +23,7 @@ describe('year pipeline', () => {
       'heritage',
       'legal',
       'crime',
+      'social',
       'fame',
       'business',
       'education',

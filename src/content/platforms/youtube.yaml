@@ -1,0 +1,11 @@
+id: youtube
+name: YouTube
+blurb: Longer videos that last. Slow to start, steady once it does, and it shares ad money once you pass a threshold.
+contentKind: long_video
+verb: Upload a video
+noun: video
+plural: videos
+minAge: 13
+growth: long_video
+pay: ad_share
+routes: [collab]

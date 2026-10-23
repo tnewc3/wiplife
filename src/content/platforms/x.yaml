@@ -1,0 +1,11 @@
+id: x
+name: X / Twitter
+blurb: Short posts, fast arguments. Slow to build, quick to blow up in your face. Pays a little to accounts people answer.
+contentKind: text
+verb: Write a post
+noun: post
+plural: posts
+minAge: 13
+growth: text_feed
+pay: premium_share
+routes: []

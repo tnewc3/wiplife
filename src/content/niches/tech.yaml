@@ -1,0 +1,9 @@
+id: tech
+name: Tech
+noun: tech
+blurb: Gadgets, reviews and strong feelings about cables.
+fit: { smarts: 0.5, discipline: 0.3, confidence: 0.2 }
+talents: [math, mechanics]
+demand: 0.9
+brands: 1.2
+heat: 0.8

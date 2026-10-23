@@ -1,0 +1,81 @@
+id: social_cyberbullying
+title: The group chat that turned
+text: >-
+  It started as a joke in a group chat and a few people from school carried it
+  into the comments on your posts on {platform}. Nothing you could screenshot
+  and show an adult without feeling silly. A word here, a picture there, a
+  lot of laughing emoji. It is the same three people every time, and you can
+  feel the others deciding which side to be on.
+tone: dark
+category: socialcasual
+rarity: uncommon
+recurring: true
+lifeStages: [teen]
+requires:
+  all:
+    - { age: { gte: 13 } }
+    - { age: { lte: 17 } }
+    - { social: { account: true } }
+    - { role: npc, alive: true, kind: [parent, stepparent] }
+weight: { base: 2 }
+cooldownYears: 4
+cast:
+  npc: { kind: parent, presence: household }
+choices:
+  - id: tell_a_parent
+    label: Show {npc.name} the messages
+    check:
+      base: 60
+      stats:
+        - { role: npc, key: trust, weight: 0.3 }
+      success:
+        text: >-
+          {npc.name} reads all of it without a word, then puts a hand on
+          your shoulder. {npc.They} {npc:call|calls} the school the next
+          morning. It takes a week for the worst of it to stop, and it does
+          stop, and you are glad you said something.
+        effects:
+          - { type: relationship, role: npc, trust: 4, affection: 3 }
+          - { type: stat, key: stress, delta: -2 }
+      failure:
+        text: >-
+          {npc.name} reads it and says "just ignore them" and means it kindly.
+          It is the wrong answer, and you do not tell {npc.them} again for a
+          long time.
+        effects:
+          - { type: relationship, role: npc, trust: -3 }
+          - { type: stat, key: stress, delta: 5 }
+          - { type: stat, key: happiness, delta: -3 }
+  - id: block_and_mute
+    label: Block them and mute the chat
+    outcome:
+      text: >-
+        It takes four taps, and there is a silence afterwards that is half
+        relief and half loneliness. Some of the others notice you are gone
+        and say so, which helps.
+      effects:
+        - { type: social, action: private, value: true }
+        - { type: stat, key: stress, delta: -1 }
+  - id: hit_back
+    label: Answer them in the same tone
+    check:
+      base: 30
+      stats:
+        - { key: confidence, weight: 0.3 }
+        - { key: sociability, weight: 0.2 }
+      success:
+        text: >-
+          You are quick and funny and cruel, and for one night you win. They
+          back off. You do not like what it was like to do it, and you do
+          not do it again.
+        effects:
+          - { type: stat, key: stress, delta: 2 }
+          - { type: stat, key: kindness, delta: -1 }
+      failure:
+        text: >-
+          It makes it worse. They screenshot your reply and send it round, and
+          now it is you who said something cruel. It follows you into the
+          corridor on Monday.
+        effects:
+          - { type: stat, key: happiness, delta: -5 }
+          - { type: stat, key: stress, delta: 5 }

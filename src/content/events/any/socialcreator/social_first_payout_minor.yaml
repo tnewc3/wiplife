@@ -1,0 +1,55 @@
+id: social_first_payout_minor
+title: The first payment, and who it goes to
+text: >-
+  {platform} has started sending payments for @{handle}. You are too young for
+  the account to be in your name, so the payments go to {npc.name}, who set it
+  up with you. {npc.They} {npc:sits|sit} you down at the kitchen table with the
+  statement and a pen, and a look that says this is going to be a conversation.
+tone: neutral
+category: socialcreator
+rarity: uncommon
+once: true
+lifeStages: [teen]
+requires:
+  all:
+    - { age: { gte: 13 } }
+    - { age: { lte: 17 } }
+    - { social: { creator: true } }
+    - { social: { happened: [monetized] } }
+    - { role: npc, alive: true, kind: [parent, stepparent] }
+weight: { base: 10 }
+followUpOnly: true
+cast:
+  npc: { kind: parent, presence: household }
+choices:
+  - id: agree_to_save
+    label: Agree that most of it goes into savings for later
+    outcome:
+      text: >-
+        {npc.name} writes the terms on the back of an envelope and you both
+        sign it, as a joke that is not entirely a joke. The savings are safe,
+        and a little of the excitement goes out of the afternoon.
+      effects:
+        - { type: relationship, role: npc, trust: 4 }
+        - { type: stat, key: happiness, delta: 1 }
+  - id: argue_for_more
+    label: Argue that you earned it and should have more say
+    check:
+      base: 40
+      stats:
+        - { role: npc, key: trust, weight: 0.25 }
+        - { key: discipline, weight: 0.2 }
+      success:
+        text: >-
+          You come with numbers, and {npc.name} listens, and some of it goes
+          your way. It is the first time a parent has treated your work as
+          work, and you notice it.
+        effects:
+          - { type: relationship, role: npc, trust: 3, affection: 2 }
+      failure:
+        text: >-
+          It goes badly. You say "it's my account" and {npc.name} says "and
+          whose house is it", and nothing is settled, and dinner is quiet.
+        effects:
+          - { type: relationship, role: npc, affection: -3 }
+          - { type: stat, key: stress, delta: 3 }

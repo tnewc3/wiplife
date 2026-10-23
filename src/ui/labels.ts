@@ -1885,3 +1885,101 @@ export const SPORTS_WORLD_WORDS = {
   totals: (transfers: number, loans: number, fees: string) => `${transfers} ${transfers === 1 ? 'transfer' : 'transfers'} (fees of ${fees} between the clubs), ${loans} ${loans === 1 ? 'loan' : 'loans'}.`,
   blocked: { none: 'Not now.', gone: 'The offer has gone.', loan: 'Not while you are on loan.', prison: 'Not from where you are.', between: 'Choices wait until the year is over.' } as Record<string, string>,
 } as const;
+
+// ── Batch 8: social media ────────────────────────────────────────────────────
+
+/** How each platform pays, in words, from the followers it asks for. */
+export const SOCIAL_PAY_WORDS: Record<string, (threshold: number) => string> = {
+  ad_share: (n) => `Shares its ad money with you once you pass ${n.toLocaleString('en-US')} followers.`,
+  subscriptions: (n) => `Pays through subscriptions and donations from ${n.toLocaleString('en-US')} followers.`,
+  creator_fund: (n) => `Pays from its creator fund once you pass ${n.toLocaleString('en-US')} followers.`,
+  ad_reads: (n) => `Pays for ad reads once you pass ${n.toLocaleString('en-US')} listeners.`,
+  premium_share: (n) => `Pays a share to accounts people answer, from ${n.toLocaleString('en-US')} followers.`,
+  brand_deals: (n) => `Pays through brand deals from ${n.toLocaleString('en-US')} followers.`,
+};
+
+/** The pay models as a line on the Money tab. */
+export const SOCIAL_MODEL_LABELS: Record<string, string> = {
+  ad_share: 'Ad share',
+  subscriptions: 'Subscriptions and donations',
+  creator_fund: 'Creator fund',
+  ad_reads: 'Ad reads',
+  premium_share: 'Premium share',
+  brand_deals: 'Brand deals and sponsorships',
+};
+
+export const SOCIAL_HANDLE_ISSUES = {
+  empty: 'Type a handle.',
+  short: 'That is too short.',
+  long: 'That is too long.',
+  chars: 'Use only letters, numbers, dots and underscores.',
+  edges: 'A handle cannot start or end with a dot or an underscore.',
+  repeat: 'No two dots or underscores in a row.',
+  digits: 'A handle cannot be only numbers.',
+  reserved: 'That handle is kept for the platform.',
+  blocked: 'That handle is not allowed.',
+} as const;
+
+export const SOCIAL_OPEN_BLOCK_LABELS = {
+  unknown: 'Not open to you.',
+  niche: 'Pick what the account is about.',
+  handle: 'Pick a handle that is allowed.',
+  have: 'You have an account here.',
+  prison: 'Not from prison.',
+  parent: 'A parent has to be in your life to set it up with you.',
+} as const;
+
+export const socialAgeBlock = (age: number): string => `You can join at ${age}.`;
+
+export const SOCIAL_POST_BLOCK_LABELS = {
+  none: 'No account here.',
+  prison: 'Not from prison.',
+  budget: 'No more this year.',
+} as const;
+
+export const SOCIAL_CROSS_BLOCK_LABELS = {
+  none: 'You need both accounts.',
+  same: 'Pick two different accounts.',
+  prison: 'Not from prison.',
+  private: 'Both accounts have to be public.',
+  small: 'Not enough followers yet.',
+  budget: 'No more this year.',
+  done: 'Already done this year.',
+} as const;
+
+export const SOCIAL_COLLAB_BLOCK_LABELS = {
+  none: 'No account here.',
+  prison: 'Not from prison.',
+  private: 'The account has to be public.',
+  person: 'Not someone you can make something with.',
+  budget: 'No more this year.',
+} as const;
+
+export const SOCIAL_PROMOTE_BLOCK_LABELS = {
+  none: 'No account here.',
+  prison: 'Not from prison.',
+  private: 'The account has to be public.',
+  small: 'Not enough followers yet.',
+  career: 'You have no career to promote.',
+  work: 'Nothing new to promote yet.',
+  budget: 'No more this year.',
+  done: 'Already done this year.',
+} as const;
+
+export const SOCIAL_TONE_LABELS = { safe: 'Play it safe', bold: 'Say the bold thing' } as const;
+export const SOCIAL_TONE_NOTES = {
+  safe: 'Steady. The usual reach, and few surprises.',
+  bold: 'Reaches further and goes viral more often, and is likelier to land with someone it was not meant for.',
+} as const;
+
+export const SOCIAL_OUTCOME_LABELS = { flat: 'It sank', steady: 'It did its job', strong: 'It landed', viral: 'It went viral' } as const;
+
+export const SOCIAL_CONTROVERSY_WORDS = {
+  brewing: 'A row is brewing about something you posted.',
+  cancelled: 'You were cancelled, and are still winning back what you lost.',
+} as const;
+
+/** "1 post left this year" / "7 posts left this year". */
+export function postsLeftWords(left: number, noun: string, plural: string): string {
+  return left === 0 ? `No ${plural} left this year` : `${left} ${left === 1 ? noun : plural} left this year`;
+}

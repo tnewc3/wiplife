@@ -1,0 +1,9 @@
+id: sports
+name: Sports talk
+noun: sports talk
+blurb: Takes, highlights and arguments about last night's game.
+fit: { sociability: 0.3, confidence: 0.3, fitness: 0.2, smarts: 0.2 }
+talents: [athletics, persuasion]
+demand: 1.1
+brands: 1.0
+heat: 1.2

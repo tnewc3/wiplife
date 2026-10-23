@@ -1,0 +1,72 @@
+id: social_hr_meeting
+title: A word with HR
+text: >-
+  The invitation is for a "short chat" about something you posted on
+  {platform}. {npc.name} is in the room already, along with someone from HR
+  who has a folder. The folder holds a handful of screenshots, a policy and a
+  tone of voice you have heard only on recorded phone lines.
+tone: dark
+category: socialfound
+rarity: rare
+recurring: true
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { social: { account: true } }
+    - { social: { happened: [foundEmployer] } }
+    - { social: { private: false } }
+    - { career: { employed: true } }
+    - { role: npc, alive: true, kind: [boss] }
+weight: { base: 5 }
+cooldownYears: 6
+followUpOnly: true
+cast:
+  npc: { kind: boss, presence: anywhere }
+choices:
+  - id: cooperate
+    label: Answer every question calmly
+    check:
+      base: 50
+      stats:
+        - { key: discipline, weight: 0.2 }
+        - { key: smarts, weight: 0.15 }
+      success:
+        text: >-
+          You answer what you are asked and nothing else. It ends with a
+          written warning that you sign, and a sentence from HR that begins
+          "going forward". You walk out with your job.
+        effects:
+          - { type: knowledge, role: npc, action: confirm }
+          - { type: job, action: performance, value: -5 }
+          - { type: stat, key: stress, delta: 4 }
+      failure:
+        text: >-
+          You say one thing too many, and the person with the folder writes
+          it down. By the end of the week you have a different folder, and
+          the decision is made.
+        effects:
+          - { type: knowledge, role: npc, action: confirm }
+          - { type: job, action: fire }
+          - { type: stat, key: stress, delta: 8 }
+  - id: bring_someone
+    label: Ask for a colleague to sit with you
+    outcome:
+      text: >-
+        You are allowed one, and a coworker you trust comes in and says very
+        little, which is the point. The meeting is shorter and fairer for it.
+        You are asked to keep your accounts separate from work.
+      effects:
+        - { type: knowledge, role: npc, action: confirm }
+        - { type: job, action: performance, value: -3 }
+        - { type: stat, key: stress, delta: 3 }
+  - id: resign
+    label: Say you would rather resign than discuss it
+    outcome:
+      text: >-
+        You say it before you can think about it. HR looks relieved, and {npc.name}
+        does not. You carry your things to the car in a box and sit in the
+        parking lot for a while.
+      effects:
+        - { type: job, action: quit }
+        - { type: stat, key: stress, delta: 5 }

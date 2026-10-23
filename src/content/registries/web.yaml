@@ -406,3 +406,42 @@ kinds:
         trust: 0
         light: true
     reactions: [rumor_group_honor]
+
+  # Batch 8: something posted online that people talk about (a post that was seen by the wrong person, or a row that blew up).
+  onlinePost:
+    secret: false
+    witness: { who: closest, chance: 0.6, count: 2 }
+    truths: [post_out, called_out]
+    versions:
+      post_out:
+        heard: "that you posted something online you probably shouldn't have"
+        heardAbout: "that {about.name} posted something online that {about.they} will regret"
+        twists: [{ to: post_worse, weight: 1 }, { to: post_funny, weight: 1 }]
+        affection: -2
+        trust: -4
+      post_worse:
+        heard: "that what you posted online was far worse than anyone expected"
+        heardAbout: "that what {about.name} posted online was far worse than anyone expected"
+        twists: [{ to: post_out, weight: 1 }]
+        affection: -6
+        trust: -8
+      post_funny:
+        heard: "that you got caught out online being an idiot, and it's honestly funny"
+        heardAbout: "that {about.name} got caught out online being an idiot, and it's honestly funny"
+        twists: [{ to: post_out, weight: 1 }]
+        affection: 1
+        trust: 0
+        light: true
+      called_out:
+        heard: "that you got called out online, and a lot of people saw it"
+        heardAbout: "that {about.name} got called out online, and a lot of people saw it"
+        twists: [{ to: callout_overblown, weight: 1 }, { to: post_worse, weight: 1 }]
+        affection: -3
+        trust: -5
+      callout_overblown:
+        heard: "that the whole row online was blown out of all proportion"
+        heardAbout: "that the whole row online about {about.name} was blown out of all proportion"
+        twists: [{ to: called_out, weight: 1 }]
+        affection: 1
+        trust: 1
+    reactions: [rumor_post]

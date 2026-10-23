@@ -5,6 +5,8 @@ import { cloneJson, lifeAtAge } from '../engine/testFixtures';
 import { emptyMigration } from '../engine/migration/types';
 import { tourSizeFor } from '../engine/fame/grind';
 import { enterPath } from '../engine/fame/ladder';
+import { curveAt } from '../engine/curve';
+import { emptySocial, reachOf } from '../engine/social/query';
 import type { LifeState } from '../engine/types';
 import { makeEnvelope } from './envelope';
 import { migrateEnvelope } from './migrations';
@@ -314,5 +316,70 @@ describe('Batch 6 saves', () => {
     });
     expect(loadedLifeSchema(content).parse(JSON.parse(JSON.stringify(kid)))).toEqual(kid);
     expect(loadedLifeSchema(content).safeParse(produce(kid, (d) => void (d.sports.academy!.clubId = 'nobody_fc'))).success).toBe(false);
+  });
+});
+
+describe('Batch 8 saves', () => {
+  /** A schema 34 save: a creator in the social media path, without any social record. */
+  const oldSave = (seed: string, age = 24, route = 'collab') => {
+    const life = produce(lifeAtAge(seed, age), (d) => {
+      enterPath(d as LifeState, 'social', route, content);
+    });
+    const old = cloneJson(life) as unknown as Record<string, unknown>;
+    delete old.social;
+    return { life, old };
+  };
+
+  it('upgrades a save with no social record: an empty one for a life with no career', () => {
+    const life = lifeAtAge('b8-none', 30);
+    const old = cloneJson(life) as unknown as Record<string, unknown>;
+    delete old.social;
+    const after = migrateEnvelope({ ...makeEnvelope(old, content.contentVersion), schemaVersion: 34 }).data as LifeState;
+    expect(after.social).toEqual(emptySocial(life.currentYear));
+    expect(loadedLifeSchema(content).parse(JSON.parse(JSON.stringify(after)))).toEqual(after);
+  });
+
+  it('gives a social media career the account that matches its fame, and heir snapshots the same way', () => {
+    const { life, old } = oldSave('b8-migrate');
+    const fameNow = 40;
+    const aged = { ...old, fame: { ...(old.fame as Record<string, unknown>), paths: { social: { ...(life.fame.paths.social as object), fame: fameNow } } } };
+    const saved = { ...aged, inputLog: [{ year: life.currentYear, kind: 'create', payload: { heir: true, snapshot: cloneJson(aged) } }] };
+    const after = migrateEnvelope({ ...makeEnvelope(saved, content.contentVersion), schemaVersion: 34 }).data as LifeState;
+    const youtube = after.social.accounts.youtube!;
+    expect(Object.keys(after.social.accounts)).toEqual(['youtube']);
+    expect(youtube.followers).toBeGreaterThan(1000);
+    // The account's reach and the career's fame agree.
+    expect(curveAt(content.balance.social.fame.at, reachOf(after, content))).toBeCloseTo(fameNow, 0);
+    expect(youtube.byParent).toBe(false);
+    expect(after.inputLog[0]!.payload.snapshot).toMatchObject({ social: { totals: { opened: 1 } } });
+    const plain = migrateEnvelope({ ...makeEnvelope(aged, content.contentVersion), schemaVersion: 34 }).data;
+    expect(loadedLifeSchema(content).parse(JSON.parse(JSON.stringify(plain)))).toEqual(plain);
+  });
+
+  it('keeps a creator who began under 18 private, set up by a parent', () => {
+    const { old } = oldSave('b8-teen', 15, 'first_posts');
+    const after = migrateEnvelope({ ...makeEnvelope(old, content.contentVersion), schemaVersion: 34 }).data as LifeState;
+    const a = Object.values(after.social.accounts)[0]!;
+    expect(a.private).toBe(true);
+    expect(a.byParent).toBe(true);
+    expect(loadedLifeSchema(content).parse(JSON.parse(JSON.stringify(after)))).toEqual(after);
+  });
+
+  it('roundtrips a life with accounts, this year’s posts, pay and a row, and rejects a damaged record', () => {
+    const life = produce(lifeAtAge('b8-save', 26), (d) => {
+      enterPath(d as LifeState, 'social', 'streaming', content);
+      const a = d.social.accounts.twitch!;
+      a.followers = 4000;
+      a.peak = 4000;
+      a.monetized = d.currentYear;
+      d.social.year = { year: d.currentYear, posts: { twitch: 3 }, quality: { twitch: 180 }, bold: 1, risky: { twitch: 1 }, viral: ['twitch'], crossed: ['twitch>twitch'], collabs: [], promoted: [] };
+      d.social.income = { year: d.currentYear, gross: 100, agent: 0, trust: 0, byPlatform: { twitch: 100 }, byModel: { subscriptions: 100 } };
+      d.social.controversy = { year: d.currentYear, platform: 'twitch', stage: 'cancelled', lost: { twitch: 12 } };
+      d.social.last = { year: d.currentYear, platform: 'twitch', outcome: 'strong', gained: 5, bold: false };
+    });
+    expect(loadedLifeSchema(content).parse(JSON.parse(JSON.stringify(life)))).toEqual(life);
+    expect(lifeStateSchema.safeParse(produce(life, (d) => void (d.social.accounts.twitch!.followers = -1))).success).toBe(false);
+    expect(lifeStateSchema.safeParse(produce(life, (d) => void (d.social.accounts.twitch!.engagement = 101))).success).toBe(false);
+    expect(loadedLifeSchema(content).safeParse(produce(life, (d) => void (d.social.accounts.twitch!.handle = 'no good!'))).success).toBe(false);
   });
 });

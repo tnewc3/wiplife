@@ -1,0 +1,39 @@
+id: social_first_payout
+title: The first payment
+text: >-
+  The email from {platform} is short and automatic: @{handle} has met the
+  requirements, and a payment is on its way. It is not a large payment. It is
+  the first time anything you made for strangers has come back to you as
+  something other than a comment, and you read the email four times.
+tone: light
+category: socialcreator
+rarity: uncommon
+once: true
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { social: { creator: true } }
+    - { social: { happened: [monetized] } }
+weight: { base: 10 }
+followUpOnly: true
+choices:
+  - id: tell_everyone
+    label: Tell everyone you know
+    outcome:
+      text: >-
+        You send it to three group chats before you have finished reading it.
+        Some of them are happy for you. One of them asks if it is a real job
+        yet, which is a fair question and the wrong day for it.
+      effects:
+        - { type: stat, key: happiness, delta: 4 }
+        - { type: fame, action: mood, delta: 2 }
+  - id: keep_it_quiet
+    label: Say nothing and keep working
+    outcome:
+      text: >-
+        You close the email and open the next thing you were going to make.
+        It is a very private kind of pride, and it lasts most of the week.
+      effects:
+        - { type: stat, key: happiness, delta: 2 }
+        - { type: fame, action: craft, delta: 1 }
