@@ -1,0 +1,39 @@
+id: biz_craze_product
+title: Everyone wants it
+text: >-
+  Out of nowhere, everyone wants {product} at {business}. A video, a rumor, a regular who told a friend. The orders come in faster than the shelf can follow.
+tone: light
+category: business
+rarity: uncommon
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { business: { owned: true } }
+    - { age: { gte: 18 } }
+    - { business: { owned: true, years: { gte: 1 } } }
+weight: { base: 4 }
+cooldownYears: 6
+followUpOnly: true
+bindBusiness: true
+choices:
+  - id: stock
+    label: Order heavily while it lasts
+    outcome:
+      text: You write the biggest order you have ever written, and hope the craze outlives the delivery.
+      effects:
+        - { type: business, action: order, level: heavy }
+        - { type: business, action: buzz, delta: 8, years: 1 }
+  - id: price
+    label: Let the price follow demand
+    outcome:
+      text: The number on the board goes up, and the line does not shrink. It is a strange feeling to be right.
+      effects:
+        - { type: business, action: price, level: high }
+        - { type: business, action: buzz, delta: 5, years: 1 }
+  - id: ads
+    label: Put some money behind it
+    outcome:
+      text: A sign, a post, a stand by the door. You are not the only one riding this wave, but you are riding it with more care.
+      effects:
+        - { type: business, action: pay, share: 0.02, floor: 400 }
+        - { type: business, action: buzz, delta: 10, years: 2 }

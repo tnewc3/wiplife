@@ -873,6 +873,31 @@ export const targetsBalanceSchema = z.strictObject({
     bankruptGap: signedRangeSchema,
     /** Owners' median net worth at 65 against everyone else's. */
     netWorthRatio: ratioRangeSchema,
+    /** B2: the mean share of a line's demand lost to an empty shelf, and the share of line-years that lost more than the stockout line. */
+    lostShare: shareRangeSchema,
+    stockoutLines: shareRangeSchema,
+    /** B2: spoiled units as a share of units sold plus spoiled, for lines that spoil. */
+    wastePerishable: shareRangeSchema,
+    /** B2: gross margin (sales less the cost of what was sold) of every kind. */
+    grossMargin: shareRangeSchema,
+    /** B2: businesses with more named people than the caps allow (must be none). */
+    namedOverCap: numberRangeSchema,
+    /** B2: profit a business-year, good ordering above poor (dollars). */
+    orderGap: signedRangeSchema,
+    /** B2: profit as a share of sales, boom years above recession years (points). */
+    phaseGap: signedRangeSchema,
+    /** B2: profit a place-year across several places, with a location manager above without (dollars). */
+    managerGap: signedRangeSchema,
+    /** B2: crew and named people leaving a year, as a share of the people there. */
+    turnover: shareRangeSchema,
+    /** B2: margin after supplies in years with no supplier shock, above years with one (points). */
+    shockGap: signedRangeSchema,
+    /** B2: franchises sold in the run, and the milliseconds a simulated year took in a life with a business. */
+    franchisesSold: numberRangeSchema,
+    msWithBusiness: numberRangeSchema,
+    /** B2: events of the depth stage that never fired in the run, outside the rare list (must be none), and the events that are legitimately rare. */
+    unreachedEvents: numberRangeSchema,
+    rareEvents: z.array(z.string()),
   }),
   coverage: z.strictObject({
     /** At least this many events (not retired). */

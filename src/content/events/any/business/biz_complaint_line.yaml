@@ -1,0 +1,45 @@
+id: biz_complaint_line
+title: A complaint about one thing
+text: >-
+  A customer leaves a long, detailed complaint about the {product} at {business}. It is angry, and mostly right.
+tone: neutral
+category: business
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { business: { owned: true } }
+    - { age: { gte: 18 } }
+    - { business: { owned: true, years: { gte: 1 }, quality: { lte: 60 } } }
+weight: { base: 4 }
+cooldownYears: 5
+followUpOnly: true
+bindBusiness: true
+choices:
+  - id: refund
+    label: Refund them and thank them for saying so
+    outcome:
+      text: The customer comes back the next week, quieter, and leaves a different kind of review.
+      effects:
+        - { type: business, action: pay, share: 0.004, floor: 120 }
+        - { type: business, action: quality, delta: 2 }
+  - id: defend
+    label: Defend what you sell
+    check:
+      base: 40
+      stats: [{ key: confidence, weight: 0.2 }, { key: kindness, weight: 0.15 }]
+      success:
+        text: You answer calmly, and the customer, to everyone's surprise, apologizes.
+        effects:
+          - { type: business, action: reputation, delta: 1 }
+      failure:
+        text: The reply goes up, the customer's goes up, and by the afternoon there are comments underneath.
+        effects:
+          - { type: business, action: reputation, delta: -4 }
+  - id: fix
+    label: Quietly fix the problem
+    outcome:
+      text: You tell no one, change the recipe or the supplier, and wait to see if anyone notices.
+      effects:
+        - { type: business, action: pay, share: 0.01, floor: 200 }
+        - { type: business, action: quality, delta: 4 }

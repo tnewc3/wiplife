@@ -5,6 +5,7 @@
  */
 import { BUSINESS_ROLE, type BusinessCondition, type BusinessDef, type ChainDef, type Compare, type ContentBundle } from '../../content/schemas';
 import type { Business, BusinessState, BusinessStaff, Id, LifeState } from '../types';
+import { economyPhase } from './world';
 
 export function emptyBusiness(): BusinessState {
   return { items: [], nextBusiness: 1, nextLocation: 1, taken: [], past: [], offered: {}, year: { year: 0, draw: 0, inject: 0 }, experience: {}, worth: 0 };
@@ -78,6 +79,7 @@ export function businessPeople(state: LifeState): Set<Id> {
   for (const b of state.business.items) {
     for (const s of b.staff) ids.add(s.personId);
     for (const o of b.owners) if (o.id !== 'you') ids.add(o.id);
+    for (const f of b.franchises) if (f.personId !== null) ids.add(f.personId);
   }
   return ids;
 }
@@ -92,7 +94,7 @@ export function staffIds(state: LifeState): Set<Id> {
 /** Cash needed to cover a month... (the yearly costs of a business, from its last report; 0 before one exists). */
 export function yearlyCosts(b: Business): number {
   const r = b.report;
-  return r ? r.rent + r.wages + r.supplies + r.marketing + r.quality + r.other : 0;
+  return r ? r.rent + r.wages + r.supplies + r.marketing + r.quality + r.other + (r.hiring ?? 0) + (r.training ?? 0) : 0;
 }
 
 /** True when the business fits every field of the condition. */
@@ -125,6 +127,28 @@ function fits(q: BusinessCondition, state: LifeState, b: Business, content: Cont
   if (q.needsLicense !== undefined && (def.license !== undefined) !== q.needsLicense) return false;
   if (q.skimmed !== undefined && (b.skimmed > 0) !== q.skimmed) return false;
   if (q.rival !== undefined && b.shocks.some((s) => s.kind === 'rival' && s.until >= state.currentYear) !== q.rival) return false;
+  // B2.
+  if (q.sells && !q.sells.some((id) => b.lines.some((l) => l.on && l.productId === id))) return false;
+  if (q.economy && !q.economy.includes(economyPhase(state.seed, state.currentYear, content))) return false;
+  if (q.stocked) {
+    const lines = b.report?.lines ?? [];
+    const short = lines.some((l) => l.demand > 0 && l.lost / l.demand > content.balance.business.products.stockout.line);
+    const surplus = (b.report?.goodsCost ?? 0) > 0 && (b.report?.waste ?? 0) / b.report!.goodsCost! > content.balance.business.products.wasteLine;
+    const stateNow = short ? 'short' : surplus ? 'surplus' : 'fine';
+    if (!q.stocked.includes(stateNow)) return false;
+  }
+  if (q.headcount && !compare(b.report?.heads ?? 0, q.headcount)) return false;
+  if (q.crew && !compare(b.crew.reduce((s, p) => s + p.count, 0), q.crew)) return false;
+  if (q.franchises && !compare(b.franchises.length, q.franchises)) return false;
+  if (q.brandRisk && !compare(b.franchises.reduce((m, f) => Math.max(m, f.risk), 0), q.brandRisk)) return false;
+  if (q.hasLocationManager !== undefined && b.locations.some((l) => l.manager !== undefined) !== q.hasLocationManager) return false;
+  if (q.namedRoom !== undefined && (b.staff.length < content.balance.business.limits.namedPerLocation * b.locations.length && state.business.items.reduce((n, x) => n + x.staff.length, 0) < content.balance.business.limits.namedTotal) !== q.namedRoom) return false;
+  if (q.understaffed !== undefined && (b.report?.notes.some((n) => n === 'understaffed' || n === 'overworked') ?? false) !== q.understaffed) return false;
+  if (q.franchiseReady !== undefined) {
+    const f = content.balance.business.franchise;
+    const ready = state.currentYear - b.founded >= f.minYears && b.locations.length >= f.minLocations && b.quality >= f.minQuality && b.reputation >= f.minReputation && b.franchises.length < content.balance.business.limits.franchises;
+    if (ready !== q.franchiseReady) return false;
+  }
   return true;
 }
 

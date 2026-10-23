@@ -1,0 +1,48 @@
+id: biz_rival_poaches_lead
+title: A better offer down the street
+text: >-
+  {staff.name} tells you quietly that a rival has made {staff.them} an offer. {staff.they} {staff:says|say} {staff.they} would rather stay at {business}, if staying can be made to make sense.
+tone: neutral
+category: business
+rarity: uncommon
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { business: { owned: true } }
+    - { age: { gte: 18 } }
+    - { business: { owned: true, staff: { gte: 1 }, years: { gte: 1 } } }
+weight: { base: 4 }
+cooldownYears: 5
+followUpOnly: true
+bindBusiness: true
+cast:
+  staff: { business: staff, presence: city }
+choices:
+  - id: match
+    label: Match the offer
+    outcome:
+      text: The raise is real, and so is the message it sends to everyone else who hears about it.
+      effects:
+        - { type: business, action: staffRaise, role: staff }
+        - { type: relationship, role: staff, trust: 4 }
+  - id: appeal
+    label: Appeal to what the place means to {staff.them}
+    check:
+      base: 45
+      stats: [{ key: kindness, weight: 0.25 }, { key: sociability, weight: 0.15 }]
+      success:
+        text: "{staff.name} stays. Loyalty is sometimes what you spent the last few years building."
+        effects:
+          - { type: business, action: staffMorale, role: staff, delta: 6 }
+      failure:
+        text: "{staff.name} listens, and goes. Your rival has a good hire and you have a hole on the schedule."
+        effects:
+          - { type: business, action: staffQuit, role: staff }
+          - { type: business, action: quality, delta: -3 }
+  - id: let
+    label: Let {staff.them} go with your blessing
+    outcome:
+      text: A handshake and a good reference. The crew sees how you did it.
+      effects:
+        - { type: business, action: staffQuit, role: staff }
+        - { type: business, action: morale, delta: 2 }

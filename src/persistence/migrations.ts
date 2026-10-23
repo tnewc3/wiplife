@@ -1,3 +1,8 @@
+import { reconcileHeadcount } from '../engine/business/crew';
+import { craftRole, managerRole } from '../engine/business/headcount';
+import { defaultLines, forecastFromCustomers } from '../engine/business/products';
+import type { Business } from '../engine/types';
+import type { BusinessStyle, PriceLevel } from '../content/schemas';
 import { emptyTravel } from '../engine/travel/types';
 import { emptyMigration } from '../engine/migration/types';
 import { emptyGrind } from '../engine/fame/query';
@@ -558,7 +563,52 @@ export const migrations: readonly Migration[] = [
       'between leagues (none), and new totals (0). A soccer club on record is in the top league. Heir replay snapshots are upgraded the same way.',
     migrate: upgradeSportsSixData,
   },
+  {
+    from: 34,
+    description:
+      'B2: business depth. Every business gains the lines it sells (the kind\'s default lines, each at the price level the whole business had), ' +
+      'its orders (normal), a headcount per location and role (the staffing preset, with named staff in their roles), its crew as pools ' +
+      '(the heads the old model computed, at skill 50 and the business\'s morale), training (none), stock on hand (none, valued at 0) and a ' +
+      'first forecast from last year\'s customers, franchises (none) and no location manager. Named staff gain a role from their title. ' +
+      'Nothing about last year\'s report, profits, cash, assets or worth changes, and nobody gets a franchise or a location manager. ' +
+      'Estates and heir replay snapshots are upgraded the same way.',
+    migrate: upgradeBusinessDepthData,
+  },
 ];
+
+function upgradeBusinessDepth(raw: unknown): unknown {
+  if (!isRecord(raw)) return raw;
+  const content = compiled as ContentBundle;
+  const def = typeof raw.defId === 'string' ? content.businesses[raw.defId] : undefined;
+  if (!def || !Array.isArray(raw.locations) || !Array.isArray(raw.staff)) return raw;
+  const style = (typeof raw.style === 'string' ? raw.style : 'standard') as BusinessStyle;
+  const level = (typeof raw.prices === 'string' ? raw.prices : 'fair') as PriceLevel;
+  const craft = craftRole(def);
+  const manager = managerRole(def);
+  const licensed = def.roles.find((r) => r.licensed === true);
+  const staff = raw.staff.map((s: unknown) => {
+    if (!isRecord(s) || typeof s.roleId === 'string') return s;
+    const byTitle = def.roles.find((r) => r.title === s.title);
+    const roleId = s.manager === true ? (manager?.id ?? craft.id) : s.licensed === true && licensed ? licensed.id : (byTitle?.id ?? craft.id);
+    return { ...s, roleId };
+  });
+  const locations = raw.locations.map((l: unknown) => (isRecord(l) ? { ...l, stock: isRecord(l.stock) ? l.stock : {}, forecast: isRecord(l.forecast) ? l.forecast : forecastFromCustomers(def, (typeof l.style === 'string' ? l.style : style) as BusinessStyle, isRecord(l.result) && typeof l.result.customers === 'number' ? l.result.customers : 0, content) } : l));
+  const b = { ...raw, staff, locations, lines: defaultLines(def, style, content).map((l) => ({ ...l, price: level })), orders: {}, headcount: {}, crew: [], training: 'none', stockValue: 0, franchises: [] } as unknown as Business;
+  // Targets from the staffing preset (named people keep their places), the crew from what the old model computed.
+  reconcileHeadcount(b, def, content);
+  return b;
+}
+
+function upgradeBusinessDepthData(data: unknown): unknown {
+  if (!isRecord(data)) return data;
+  const inputLog = Array.isArray(data.inputLog) ? data.inputLog.map((entry: unknown) => {
+    if (!isRecord(entry) || !isRecord(entry.payload) || !isRecord(entry.payload.snapshot)) return entry;
+    return { ...entry, payload: { ...entry.payload, snapshot: upgradeBusinessDepthData(entry.payload.snapshot) } };
+  }) : data.inputLog;
+  const business = isRecord(data.business) && Array.isArray(data.business.items) ? { ...data.business, items: data.business.items.map(upgradeBusinessDepth) } : data.business;
+  const estate = isRecord(data.estate) && Array.isArray(data.estate.businesses) ? { ...data.estate, businesses: data.estate.businesses.map((t: unknown) => (isRecord(t) ? { ...t, item: upgradeBusinessDepth(t.item) } : t)) } : data.estate;
+  return { ...data, inputLog, business, estate };
+}
 
 function upgradeSportsSixData(data: unknown): unknown {
   if (!isRecord(data)) return data;

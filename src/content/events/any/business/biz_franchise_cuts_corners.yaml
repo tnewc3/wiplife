@@ -1,0 +1,45 @@
+id: biz_franchise_cuts_corners
+title: A shortcut on the other side of town
+text: >-
+  A customer sends a photo from a franchise of {business}: the same sign, a different tray. Somewhere in the back, someone has decided that the recipe is a suggestion.
+tone: serious
+category: business
+rarity: uncommon
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { business: { owned: true } }
+    - { age: { gte: 18 } }
+    - { business: { owned: true, franchises: { gte: 1 }, brandRisk: { gte: 30 } } }
+weight: { base: 6 }
+cooldownYears: 4
+followUpOnly: true
+bindBusiness: true
+choices:
+  - id: audit
+    label: Send someone to audit the place
+    outcome:
+      text: A thorough week of checking, and a polite, unpleasant report. The kitchen is back to the book by the end of the month.
+      effects:
+        - { type: business, action: pay, share: 0.01, floor: 400 }
+        - { type: business, action: brand, delta: -12 }
+  - id: warn
+    label: Call the operator and be firm
+    check:
+      base: 45
+      stats: [{ key: confidence, weight: 0.25 }, { key: discipline, weight: 0.15 }]
+      success:
+        text: The operator is embarrassed, and the next photo looks right.
+        effects:
+          - { type: business, action: brand, delta: -6 }
+      failure:
+        text: The operator hears an accusation and answers with one. It takes a month to be civil again.
+        effects:
+          - { type: business, action: brand, delta: 4 }
+          - { type: stat, key: stress, delta: 2 }
+  - id: ignore
+    label: Look the other way
+    outcome:
+      text: It is not your kitchen. It is your name on the sign, though, and that is the problem.
+      effects:
+        - { type: business, action: brand, delta: 8 }

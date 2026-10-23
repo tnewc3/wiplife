@@ -1,0 +1,47 @@
+id: biz_staff_asks_promotion
+title: More to do, if you will let me
+text: >-
+  {staff.name} stays after closing. {staff.they} {staff:wants|want} more responsibility at {business}, and {staff.they} {staff:has|have} the look of someone who has thought about this for a while.
+tone: neutral
+category: business
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { business: { owned: true } }
+    - { age: { gte: 18 } }
+    - { business: { owned: true, staff: { gte: 1 }, years: { gte: 1 } } }
+weight: { base: 5 }
+cooldownYears: 4
+followUpOnly: true
+bindBusiness: true
+cast:
+  staff: { business: staff, presence: city }
+choices:
+  - id: promote
+    label: Give {staff.them} a bigger role
+    outcome:
+      text: A new title and a new way of standing behind the counter. The room notices, and approves.
+      effects:
+        - { type: business, action: staffRaise, role: staff }
+        - { type: business, action: quality, delta: 2 }
+        - { type: relationship, role: staff, affection: 3, trust: 3 }
+  - id: wait
+    label: Ask {staff.them} to wait a season
+    outcome:
+      text: "{staff.name} says \"all right,\" in a voice that means maybe."
+      effects:
+        - { type: business, action: staffMorale, role: staff, delta: -6 }
+  - id: no
+    label: Say that the role is not open
+    check:
+      base: 45
+      stats: [{ key: kindness, weight: 0.25 }]
+      success:
+        text: You are honest about why, and what would change your mind. {staff.name} takes it better than you hoped.
+        effects:
+          - { type: relationship, role: staff, trust: 3 }
+      failure:
+        text: The conversation ends quickly. The next week, {staff.name} is polite and distant.
+        effects:
+          - { type: business, action: staffMorale, role: staff, delta: -12 }

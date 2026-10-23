@@ -1,0 +1,45 @@
+id: biz_crew_walks_out
+title: Nobody came in
+text: >-
+  A cold morning, and half of the crew at {business} does not turn up. A message in the group chat says they are tired of doing the work of two people for the pay of one.
+tone: serious
+category: business
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { business: { owned: true } }
+    - { age: { gte: 18 } }
+    - { business: { owned: true, understaffed: true, years: { gte: 1 }, morale: { lte: 50 } } }
+weight: { base: 5 }
+cooldownYears: 5
+followUpOnly: true
+bindBusiness: true
+choices:
+  - id: hire
+    label: Take on more people
+    outcome:
+      text: You put a sign in the window and raise the headcount. The first week is awkward and the second is better.
+      effects:
+        - { type: business, action: morale, delta: 6 }
+        - { type: business, action: pay, share: 0.01, floor: 400 }
+  - id: talk
+    label: Work a shift with them and listen
+    check:
+      base: 45
+      stats: [{ key: kindness, weight: 0.25 }, { key: discipline, weight: 0.15 }]
+      success:
+        text: Standing at the counter at six in the morning is the best argument you ever make. People come back.
+        effects:
+          - { type: business, action: morale, delta: 8 }
+      failure:
+        text: The crew is polite and unconvinced. Two of them are looking at other jobs by Friday.
+        effects:
+          - { type: business, action: morale, delta: -4 }
+  - id: ignore
+    label: Tell them that is the job
+    outcome:
+      text: They come in, in the end. None of them forgets how you said it.
+      effects:
+        - { type: business, action: morale, delta: -10 }
+        - { type: business, action: quality, delta: -3 }

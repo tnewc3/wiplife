@@ -1,0 +1,45 @@
+id: biz_waste_overordered
+title: What got thrown away
+text: >-
+  You add up what went in the bin this year at {business}. The total is not a number you would want your bank to see, and {product} is most of it.
+tone: neutral
+category: business
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { business: { owned: true } }
+    - { age: { gte: 18 } }
+    - { business: { owned: true, years: { gte: 1 }, stocked: [surplus] } }
+weight: { base: 5 }
+cooldownYears: 4
+followUpOnly: true
+bindBusiness: true
+choices:
+  - id: forecast
+    label: Go through the forecast, line by line
+    check:
+      base: 45
+      stats: [{ key: discipline, weight: 0.25 }, { key: smarts, weight: 0.2 }]
+      success:
+        text: An evening with the sales numbers and a pencil changes how you order. The next sheet looks different.
+        effects:
+          - { type: business, action: order, level: lean }
+          - { type: stat, key: confidence, delta: 2 }
+      failure:
+        text: The numbers will not add up the way you want them to. You settle on a gut feeling and a headache.
+        effects:
+          - { type: stat, key: stress, delta: 2 }
+  - id: staff
+    label: Ask the crew what they see
+    outcome:
+      text: The crew has opinions, and most of them are right. You write them down and make a small change.
+      effects:
+        - { type: business, action: order, level: lean }
+        - { type: business, action: morale, delta: 2 }
+  - id: ignore
+    label: Call it the cost of doing business
+    outcome:
+      text: It is part of it, in a way. You do not look at the bin the next morning.
+      effects:
+        - { type: business, action: pay, share: 0.01, floor: 200 }

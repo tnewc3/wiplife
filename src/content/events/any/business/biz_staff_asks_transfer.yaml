@@ -1,0 +1,47 @@
+id: biz_staff_asks_transfer
+title: Could I work somewhere else?
+text: >-
+  {staff.name} asks for a minute. {staff.they} {staff:has|have} been at {location} for a while, and {staff.they} would like a change of scene, at one of the other places {business} runs.
+tone: neutral
+category: business
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { business: { owned: true } }
+    - { age: { gte: 18 } }
+    - { business: { owned: true, staff: { gte: 1 }, locations: { gte: 2 } } }
+weight: { base: 4 }
+cooldownYears: 4
+followUpOnly: true
+bindBusiness: true
+cast:
+  staff: { business: staff, presence: city }
+choices:
+  - id: agree
+    label: Move {staff.them}
+    outcome:
+      text: A new schedule, a new set of keys. {staff.name} looks relieved, and a little nervous.
+      effects:
+        - { type: business, action: transfer, role: staff }
+        - { type: relationship, role: staff, affection: 3 }
+  - id: stay
+    label: Ask {staff.them} to stay where {staff.they} {staff:is|are}
+    check:
+      base: 45
+      stats: [{ key: kindness, weight: 0.2 }, { key: sociability, weight: 0.15 }]
+      success:
+        text: You explain what the place needs, and {staff.name} understands. It helps that you asked rather than told.
+        effects:
+          - { type: business, action: staffMorale, role: staff, delta: 2 }
+      failure:
+        text: "{staff.name} nods. The nod is polite, and does not mean yes."
+        effects:
+          - { type: business, action: staffMorale, role: staff, delta: -10 }
+          - { type: relationship, role: staff, trust: -3 }
+  - id: later
+    label: Promise to think about it
+    outcome:
+      text: A promise with no date on it is a polite no. {staff.name} knows that.
+      effects:
+        - { type: business, action: staffMorale, role: staff, delta: -4 }

@@ -1,0 +1,47 @@
+id: biz_location_manager_skims
+title: The numbers at that place
+text: >-
+  The numbers from {location} do not add up the way the sales say they should. {lm.name}, who runs it, has an explanation, and it is a very good one.
+tone: serious
+category: business
+rarity: uncommon
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { business: { owned: true } }
+    - { age: { gte: 18 } }
+    - { business: { owned: true, hasLocationManager: true, skimmed: true } }
+weight: { base: 4 }
+cooldownYears: 6
+followUpOnly: true
+bindBusiness: true
+cast:
+  lm: { business: locationManager, presence: city }
+choices:
+  - id: confront
+    label: Confront {lm.them} with the books
+    check:
+      base: 45
+      stats: [{ key: confidence, weight: 0.25 }, { key: smarts, weight: 0.2 }]
+      success:
+        text: The explanation falls apart on the second page. {lm.name} resigns before you have to ask.
+        effects:
+          - { type: business, action: staffFire, role: lm }
+          - { type: relationship, role: lm, trust: -10 }
+      failure:
+        text: You are not sure enough, and it shows. {lm.name} smiles. The place goes on exactly as before.
+        effects:
+          - { type: stat, key: stress, delta: 3 }
+  - id: audit
+    label: Have an outside accountant look
+    outcome:
+      text: A careful week and a polite report. The accountant's invoice is the smaller part of the cost.
+      effects:
+        - { type: business, action: pay, share: 0.01, floor: 500 }
+        - { type: business, action: audit }
+  - id: trust
+    label: Choose to believe {lm.them}
+    outcome:
+      text: It is a small act of faith, and you are the only one in the room who does not know whether it was.
+      effects:
+        - { type: relationship, role: lm, affection: 2 }

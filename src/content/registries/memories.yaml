@@ -255,6 +255,10 @@ tags:
   stole_from_your_business: "{npc.they} took money from your business"
   you_gave_them_work: "You gave {npc.them} work"
   you_were_there_for_their_family: "You were there for {npc.them} when family needed {npc.them}"
+  # B2: franchises.
+  franchised_from_you: "{npc.they} opened a franchise of your business"
+  bought_back_your_franchise: "You bought your franchise back from {npc.them}"
+  lost_your_franchise: "{npc.they} lost a franchise of yours"
   # Batch 2a: activities with someone along.
   # School and work life (Batch 3).
   got_to_know_at_work: You spent time together at work

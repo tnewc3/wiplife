@@ -8,7 +8,7 @@
  */
 import { z } from 'zod';
 import { baseDefSchema, dollarsSchema, idSchema, scoreKeySchema } from './common';
-import { BUSINESS_KINDS, BUSINESS_STYLES, BUSINESS_TRIGGERS, MARKETING_LEVELS, PAY_LEVELS, PRICE_LEVELS, QUALITY_LEVELS, STAFFING_LEVELS } from './businessIds';
+import { BUSINESS_KINDS, BUSINESS_STYLES, BUSINESS_TRIGGERS, ECONOMY_PHASES, LINE_MODES, MARKETING_LEVELS, ORDER_LEVELS, PAY_LEVELS, PRICE_LEVELS, PRODUCT_TYPES, QUALITY_LEVELS, STAFFING_LEVELS, TRAINING_LEVELS } from './businessIds';
 
 export * from './businessIds';
 
@@ -44,7 +44,77 @@ const styleSchema = z.strictObject({
   quality: score,
   /** How much a change in price moves demand (higher: shoppers are more sensitive). */
   elasticity: z.number().min(0).max(4),
+  /** B2: scales this style's product unit costs so the default lines reproduce `supplies` (the build checks it). */
+  costScale: z.number().min(0.3).max(3).default(1),
 });
+
+/**
+ * B2: a product line. `share` is the line's weight in the style's spend (a style's default lines are normalised to 1, so
+ * they reproduce W3's revenue); `price` is the fair price as a multiple of the style's `spend` (units per customer follow
+ * from share ÷ price); `costShare` is the unit cost as a share of the fair price (services: set by their supply pool).
+ */
+const productSchema = z.strictObject({
+  id: idSchema,
+  name: z.string().trim().min(1).max(40),
+  /** The group for sales words and trends. */
+  group: idSchema,
+  type: z.enum(PRODUCT_TYPES),
+  share: z.number().positive().max(2),
+  price: z.number().positive().max(10),
+  costShare: z.number().min(0).max(0.95),
+  /** The supplier category its cost follows (a service follows its pool's). */
+  supplier: idSchema.optional(),
+  /** A multiplier on the style's price elasticity. */
+  elasticity: z.number().min(0.1).max(3),
+  /** How much a crowded city takes of it (0–1.5) and how much the economy moves it (0–1.5). */
+  competition: z.number().min(0).max(1.5),
+  economy: z.number().min(0).max(1.5),
+  /** The trend group its demand follows. */
+  trend: idSchema,
+  /** The share of unsold stock that spoils in a year (0 for durable goods). */
+  perishable: z.number().min(0).max(1),
+  /** Styles it is sold in (all when omitted). */
+  styles: z.array(z.enum(BUSINESS_STYLES)).min(1).optional(),
+  /** Always sold (a menu), on from the start (a shop's starter lines, in file order up to the style's limit), or an optional extra. */
+  core: z.boolean().optional(),
+  start: z.boolean().optional(),
+  /** A service: the supply pool it uses and the supply units per job. */
+  pool: z.strictObject({ id: idSchema, units: z.number().positive().max(20) }).optional(),
+});
+export type ProductDef = z.infer<typeof productSchema>;
+
+/** B2: a supply pool a service business draws on. `cost` is a supply unit's cost as a multiple of the style's spend. */
+const poolSchema = z.strictObject({
+  id: idSchema,
+  name: z.string().trim().min(1).max(40),
+  supplier: idSchema,
+  cost: z.number().positive().max(2),
+  perishable: z.number().min(0).max(1),
+});
+export type PoolDef = z.infer<typeof poolSchema>;
+
+/**
+ * B2: a role a kind of business staffs. `share` is the role's share of the style's `staff` (the non-manager shares sum to 1),
+ * `weight` how much a head adds to what a location can serve, `wage` a multiplier on the market wage. The location manager
+ * role has `manager: true` and no share: it is an extra person on top of the headcount.
+ */
+const roleSchema = z.strictObject({
+  id: idSchema,
+  title: z.string().trim().min(1).max(30),
+  share: z.number().min(0).max(1),
+  weight: z.number().min(0.5).max(1.5),
+  wage: z.number().min(0.5).max(2),
+  /** A lead (named: a real person, not crew). */
+  lead: z.boolean().optional(),
+  manager: z.boolean().optional(),
+  /** The trade role: named hires in it hold the licence. */
+  licensed: z.boolean().optional(),
+  /** The role named staff take by default. */
+  craft: z.boolean().optional(),
+  min: z.int().min(0).max(10),
+  max: z.int().min(1).max(40),
+});
+export type RoleDef = z.infer<typeof roleSchema>;
 
 /** A kind of business (one file in src/content/businesses). */
 export const businessSchema = baseDefSchema.extend({
@@ -69,6 +139,11 @@ export const businessSchema = baseDefSchema.extend({
   fit: perStyle(z.strictObject({ size: z.number().min(-1).max(2), wealth: z.number().min(-2).max(3) })),
   /** Fictional names for the ones for sale, and for a name suggestion. */
   names: z.array(z.string().trim().min(3).max(40)).min(8).max(40),
+  /** B2: how its lines are chosen, what it sells, what services draw on, and who works there. */
+  lineMode: z.enum(LINE_MODES),
+  products: z.array(productSchema).min(3).max(20),
+  pools: z.array(poolSchema).max(4).default([]),
+  roles: z.array(roleSchema).min(2).max(8),
 });
 export type BusinessDef = z.infer<typeof businessSchema>;
 
@@ -100,7 +175,17 @@ const listingTraitSchema = z.strictObject({
 });
 
 /** Registry: the events the business step queues, and the traits listings are made from. Every event listed is followUpOnly. */
+const supplierCategorySchema = z.strictObject({
+  label: z.string().trim().min(1).max(40),
+  /** How far its price index swings (1 is the usual). */
+  volatility: z.number().min(0.2).max(3),
+  /** Fictional suppliers: events and the report name one. */
+  names: z.array(z.string().trim().min(3).max(40)).min(2).max(8),
+});
+
 export const businessRegistrySchema = z.strictObject({
+  suppliers: z.record(idSchema, supplierCategorySchema),
+  trends: z.record(idSchema, z.strictObject({ label: z.string().trim().min(1).max(40) })),
   triggers: z.strictObject(Object.fromEntries(BUSINESS_TRIGGERS.map((t) => [t, z.strictObject({ events: z.array(idSchema).min(1) })])) as Record<(typeof BUSINESS_TRIGGERS)[number], z.ZodObject<{ events: z.ZodArray<z.ZodString> }>>),
   listingTraits: z.record(idSchema, listingTraitSchema),
 });
@@ -113,9 +198,14 @@ export const businessBalanceSchema = z.strictObject({
   limits: z.strictObject({
     /** The most businesses you can own at once, and the most locations one can have. */
     businesses: z.int().min(1).max(10),
-    locations: z.int().min(1).max(20),
-    /** Named staff (people you know) one business can have, besides a manager and a co-founder. */
-    namedStaff: z.int().min(1).max(12),
+    /** Locations one business can have, and all your businesses together. */
+    locations: z.int().min(1).max(40),
+    totalLocations: z.int().min(1).max(80),
+    /** Franchises one business can have. */
+    franchises: z.int().min(1).max(60),
+    /** Named people (real people with ties) one location can have, and all your businesses together; the crew are counted, not named. */
+    namedPerLocation: z.int().min(1).max(12),
+    namedTotal: z.int().min(1).max(100),
     /** Youngest age to start, buy or own one (the independence age at least). */
     minAge: z.int().min(16).max(30),
     /** Longest name you can give it. */
@@ -213,6 +303,10 @@ export const businessBalanceSchema = z.strictObject({
     jobDrag: z.number().min(0).max(30),
     /** Stress from running it: this many points a year at full effort, more in a loss. */
     stress: z.strictObject({ run: z.number().min(0).max(10), loss: z.number().min(0).max(10), limit: score }),
+    /** B2: every other business you run yourself takes this share of your effort (down to `floor`). */
+    attention: z.strictObject({ perExtraBusiness: z.number().min(0).max(0.5), floor: z.number().min(0.1).max(1) }),
+    /** B2: whoever runs several locations (you or a general manager) loses this share of effort per further location (down to `floor`). */
+    span: z.strictObject({ perLocation: z.number().min(0).max(0.3), floor: z.number().min(0.1).max(1) }),
   }),
   manager: z.strictObject({
     /** The skill of a manager you hire. */
@@ -227,6 +321,125 @@ export const businessBalanceSchema = z.strictObject({
     effort: z.strictObject({ base: z.number().min(0).max(1.5), slope: z.number().min(0).max(2), min: z.number().min(0).max(1), max: z.number().min(0).max(1.5) }),
     /** A manager who is not well liked (affection with you) neglects the place; below this affection. */
     neglectBelow: score,
+  }),
+  /** B2: products, orders and stock. */
+  products: z.strictObject({
+    /** Order = forecast × cover − stock carried in. */
+    cover: z.record(z.enum(ORDER_LEVELS), z.number().min(0.3).max(3)),
+    /** Lines a shop can carry, by style. */
+    maxLines: perStyle(z.int().min(1).max(12)),
+    /** Durable stock carried over costs this share of its value a year to hold. */
+    holding: z.number().min(0).max(0.5),
+    /** Perishables: a floor of waste on what was ordered, as a share of the spoilage rate. */
+    wasteFloor: z.number().min(0).max(0.5),
+    /** A line losing more than `line` of its demand to an empty shelf costs reputation (`perShare` points per share lost, at most `cap` a year). */
+    stockout: z.strictObject({ line: probability, perShare: z.number().min(0).max(100), cap: z.number().min(0).max(20) }),
+    /** Customers who cannot get a core line leave without buying this share of their other lines. */
+    walkout: probability,
+    /** Waste above this share of the cost of goods asks something of you. */
+    wasteLine: probability,
+    /** Switching a line on costs this share of a year's supplies for it, or a flat floor. */
+    switchFee: z.number().min(0).max(1),
+    switchFloor: dollarsSchema,
+    /** The forecast grows with the location's maturity (the next year's over this one's), at most this much. */
+    growthCap: z.number().min(1).max(2),
+    /** The build check: default lines reproduce W3's revenue and supplies within this share. */
+    parity: z.number().min(0).max(0.2),
+  }),
+  /** B2: a crowded city takes trade, more from easy-to-get products; quality wins some back. */
+  competition: z.strictObject({ weight: z.number().min(0).max(1), edge: z.number().min(0).max(2) }),
+  /** B2: the yearly economy. */
+  economy: z.strictObject({
+    phases: z.record(
+      z.enum(ECONOMY_PHASES),
+      z.strictObject({
+        label: z.string().trim().min(1).max(30),
+        /** Multiplies demand (by each line's sensitivity), lifts supplier drift, and scales what banks lend. */
+        demand: z.number().min(0.5).max(1.5),
+        drift: z.number().min(-0.2).max(0.2),
+        bank: z.number().min(0.3).max(1.5),
+      }),
+    ),
+    /** Transition weights from each phase to the next. */
+    transitions: z.record(z.enum(ECONOMY_PHASES), z.record(z.enum(ECONOMY_PHASES), z.number().min(0).max(20))),
+    start: z.record(z.enum(ECONOMY_PHASES), z.number().min(0).max(20)),
+    /** The series restart (from the start weights) every `window` years, so a phase is a pure function of the seed and the year. */
+    window: z.int().min(2).max(30),
+  }),
+  /** B2: supplier price indices. */
+  suppliers: z.strictObject({
+    volatility: z.number().min(0).max(0.5),
+    reversion: probability,
+    min: z.number().min(0.3).max(1),
+    max: z.number().min(1).max(3),
+    /** The share of a supplier move that shows up in the going rate customers pay. */
+    passThrough: probability,
+    /** A rise this large in one year asks something of you. */
+    riseThreshold: z.number().min(0).max(1),
+    /** Yearly chance, per category you buy, of a shortage (this share of an order arrives) and of a better deal (this discount, for `deal.years`). */
+    shortage: z.strictObject({ chance: probability, supply: probability, years: z.int().min(1).max(5) }),
+    deal: z.strictObject({ chance: probability, discount: probability, years: z.int().min(1).max(10) }),
+    window: z.int().min(2).max(40),
+  }),
+  /** B2: trend groups. */
+  trends: z.strictObject({ volatility: z.number().min(0).max(0.5), reversion: probability, min: z.number().min(0.3).max(1), max: z.number().min(1).max(3), window: z.int().min(2).max(40) }),
+  /** B2: headcount you choose per location and role. */
+  headcount: z.strictObject({
+    /** A location holds at most this multiple of its style's `staff`. */
+    maxMultiple: z.number().min(1).max(5),
+    /** Each role counts at most this share over its need. */
+    roleCap: z.number().min(1).max(2),
+    /** Customers per head above this multiple of the usual wears morale down (points per 0.1 over). */
+    workload: z.strictObject({ limit: z.number().min(0.5).max(3), morale: z.number().min(0).max(20) }),
+  }),
+  /** B2: the crew, counted per location and role. */
+  crew: z.strictObject({
+    /** Refilling a head costs this share of a year's wage. */
+    refill: z.number().min(0).max(1),
+    /** Skill of a new head. */
+    skill: spread,
+    /** Skill training can reach. */
+    ceiling: score,
+    /** Pull of crew morale on its aim each year. */
+    pull: probability,
+  }),
+  /** B2: training, a yearly decision. */
+  training: z.record(z.enum(TRAINING_LEVELS), z.strictObject({ label: z.string().trim().min(1).max(30), share: z.number().min(0).max(0.2), skill: z.number().min(0).max(10), morale: z.number().min(0).max(15) })),
+  /** B2: managers of one location. */
+  locationManagers: z.strictObject({
+    appointFee: z.number().min(0).max(1),
+    /** Moving a person between locations: the same city, and another city (a share of a year's wage). */
+    transfer: z.strictObject({ sameCity: z.number().min(0).max(1), otherCity: z.number().min(0).max(3), morale: z.number().min(-20).max(0) }),
+    /** Willingness to move to another city: base + morale and affection weights; at or above `likely` they go, below `unlikely` they won't. */
+    willing: z.strictObject({ base: z.number().min(-100).max(100), morale: z.number().min(0).max(2), affection: z.number().min(0).max(2), ties: z.number().min(0).max(10), likely: z.number().min(0).max(200), unlikely: z.number().min(0).max(200) }),
+    /** A bad one drags quality and morale at their location. */
+    drag: z.strictObject({ quality: z.number().min(0).max(30), morale: z.number().min(0).max(30), below: score }),
+  }),
+  /** B2: franchising out. */
+  franchise: z.strictObject({
+    minYears: z.int().min(1).max(30),
+    minLocations: z.int().min(1).max(24),
+    minQuality: score,
+    minReputation: score,
+    /** No loss in this many years. */
+    cleanYears: z.int().min(0).max(10),
+    /** One-off fee: this multiple of the fit-out of the style in the city, scaled by reputation. */
+    feeMultiple: z.number().min(0).max(5),
+    /** Royalty rates a franchise can be sold at (a share of its revenue), and the brand's support cost (a share of its nominal revenue). */
+    royalties: z.array(z.number().min(0.01).max(0.3)).min(1).max(5),
+    support: z.number().min(0).max(0.2),
+    /** The franchisee's skill when not someone you know. */
+    skill: spread,
+    /** Brand risk (0–100): yearly drift per skill point under 50, what a franchisee's failure adds, and what risk above `line` costs. */
+    risk: z.strictObject({ perSkill: z.number().min(0).max(2), recovery: z.number().min(0).max(20), failure: z.number().min(0).max(50), line: score, reputation: z.number().min(0).max(10), quality: z.number().min(0).max(10) }),
+    /** A franchisee losing money this many years in a row leaves. */
+    exitYears: z.int().min(1).max(5),
+    /** The value of the net royalty, as a multiple. */
+    valueMultiple: z.number().min(0).max(10),
+    /** Yearly chance a franchise is asked about, when eligible. */
+    inquiry: probability,
+    /** Franchisees need to be at least this old. */
+    minAge: z.int().min(18).max(50),
   }),
   quality: z.strictObject({
     /** The share of last year's quality kept (the rest is this year's aim). */
@@ -338,6 +551,12 @@ export const businessBalanceSchema = z.strictObject({
     manager: probability,
     cofounder: probability,
     license: probability,
+    /** B2: yearly chance a key employee asks for something, where there is one. */
+    staffRequest: probability,
+    /** B2: yearly chance of something happening in the market, across your places, and among the people. */
+    market: probability,
+    places: probability,
+    people: probability,
     /** Years between follow-ups of one kind. */
     coolOff: z.int().min(1).max(20),
     /** A business needs this many years before an expansion offer, and this much profit (a share of its cost to start). */
@@ -356,7 +575,7 @@ export type BusinessBalance = z.infer<typeof businessBalanceSchema>;
 /** Lines of text: history entries the step writes, and the words the yearly report uses. */
 export const businessTextSchema = z.strictObject({
   history: z.record(
-    z.enum(['started', 'bought', 'sold', 'closed', 'failed', 'inherited', 'expanded', 'managerHired', 'cofounder', 'investorPaid', 'lostMoney']),
+    z.enum(['started', 'bought', 'sold', 'closed', 'failed', 'inherited', 'expanded', 'managerHired', 'cofounder', 'investorPaid', 'lostMoney', 'franchised', 'franchiseEnded', 'transferred', 'locationManager']),
     z.strictObject({ importance: z.union([z.literal(1), z.literal(2), z.literal(3)]), variants: z.array(z.string().trim().min(1).max(300)).min(1) }),
   ),
   /** The yearly report in words: how customers went, how money went, how the staff are. */
@@ -365,7 +584,34 @@ export const businessTextSchema = z.strictObject({
     money: z.strictObject({ strong: phrase, profit: phrase, thin: phrase, loss: phrase, deep: phrase }),
     staff: z.strictObject({ happy: phrase, fine: phrase, tense: phrase, ready_to_quit: phrase }),
     quality: z.strictObject({ high: phrase, fine: phrase, slipping: phrase }),
-    notes: z.strictObject({ unlicensed: phrase, understaffed: phrase, newLocation: phrase, quit: phrase, managerSlip: phrase, rival: phrase, buzz: phrase, skimmed: phrase }),
+    notes: z.strictObject({
+      unlicensed: phrase,
+      understaffed: phrase,
+      newLocation: phrase,
+      quit: phrase,
+      managerSlip: phrase,
+      rival: phrase,
+      buzz: phrase,
+      skimmed: phrase,
+      // B2
+      ranOut: phrase,
+      leftover: phrase,
+      spoiled: phrase,
+      supplierUp: phrase,
+      supplierDown: phrase,
+      shortage: phrase,
+      deal: phrase,
+      economyBoom: phrase,
+      economySlowdown: phrase,
+      economyRecession: phrase,
+      turnover: phrase,
+      overworked: phrase,
+      brandRisk: phrase,
+      royalties: phrase,
+    }),
+    /** B2: words for the economy, by phase, and for a supplier's price moving. */
+    economy: z.strictObject({ boom: phrase, steady: phrase, slowdown: phrase, recession: phrase }),
+    suppliers: z.strictObject({ up: phrase, down: phrase, steady: phrase }),
   }),
 });
 export type BusinessText = z.infer<typeof businessTextSchema>;

@@ -5,10 +5,14 @@
 # marketing and the skill of whoever runs it; customers are the smaller of demand and what the staff can serve;
 # revenue is customers times what each spends; costs are rent, wages, supplies, marketing, quality and overhead.
 
+# B2: the walls are far out; attention, money and managers hold a business back before they bite.
 limits:
-  businesses: 3
-  locations: 12
-  namedStaff: 4
+  businesses: 5
+  locations: 24
+  totalLocations: 36
+  franchises: 20
+  namedPerLocation: 4
+  namedTotal: 40
   minAge: 18
   nameLength: 40
 
@@ -109,6 +113,9 @@ owner:
   experience: { perYear: 1.2, cap: 12 }
   jobDrag: 6
   stress: { run: 1.5, loss: 2, limit: 80 }
+  # B2: each further business you run yourself takes a quarter of your effort; each location beyond the first that one person runs, 8%.
+  attention: { perExtraBusiness: 0.25, floor: 0.4 }
+  span: { perLocation: 0.08, floor: 0.5 }
 
 manager:
   skill: { mean: 50, sd: 15 }
@@ -118,6 +125,89 @@ manager:
   skim: 0.12
   effort: { base: 0.78, slope: 0.5, min: 0.35, max: 1 }
   neglectBelow: 30
+
+# B2: products, orders and stock.
+products:
+  cover: { lean: 0.85, normal: 1.1, heavy: 1.35 }
+  maxLines: { budget: 3, standard: 4, premium: 6 }
+  holding: 0.04
+  wasteFloor: 0.03
+  stockout: { line: 0.1, perShare: 14, cap: 5 }
+  walkout: 0.25
+  wasteLine: 0.12
+  switchFee: 0.02
+  switchFloor: 300
+  growthCap: 1.15
+  parity: 0.03
+
+competition: { weight: 0.35, edge: 0.5 }
+
+# B2: boom, steady, slowdown, recession. A world index: the same for every business and country in a life.
+economy:
+  phases:
+    boom: { label: Boom, demand: 1.06, drift: 0.02, bank: 1.15 }
+    steady: { label: Steady, demand: 1, drift: 0, bank: 1 }
+    slowdown: { label: Slowdown, demand: 0.96, drift: -0.005, bank: 0.9 }
+    recession: { label: Recession, demand: 0.88, drift: -0.02, bank: 0.7 }
+  transitions:
+    boom: { boom: 5, steady: 4, slowdown: 1, recession: 0 }
+    steady: { boom: 2, steady: 6, slowdown: 1.2, recession: 0.4 }
+    slowdown: { boom: 0.5, steady: 3.5, slowdown: 3, recession: 1.2 }
+    recession: { boom: 0.4, steady: 3.5, slowdown: 3, recession: 2.2 }
+  start: { boom: 2, steady: 6, slowdown: 1.5, recession: 0.5 }
+  window: 8
+
+suppliers:
+  volatility: 0.05
+  reversion: 0.35
+  min: 0.7
+  max: 1.6
+  passThrough: 0.5
+  riseThreshold: 0.12
+  shortage: { chance: 0.03, supply: 0.6, years: 1 }
+  deal: { chance: 0.06, discount: 0.12, years: 3 }
+  window: 12
+
+trends: { volatility: 0.04, reversion: 0.4, min: 0.75, max: 1.35, window: 12 }
+
+# B2: headcount per location and role.
+headcount:
+  maxMultiple: 2
+  roleCap: 1.25
+  workload: { limit: 1.2, morale: 6 }
+
+crew:
+  refill: 0.08
+  skill: { mean: 50, sd: 12 }
+  ceiling: 75
+  pull: 0.5
+
+training:
+  none: { label: None, share: 0, skill: 0, morale: 0 }
+  some: { label: Some, share: 0.02, skill: 1.5, morale: 3 }
+  lots: { label: A lot, share: 0.05, skill: 3, morale: 5 }
+
+locationManagers:
+  appointFee: 0.08
+  transfer: { sameCity: 0.03, otherCity: 0.5, morale: -4 }
+  willing: { base: -20, morale: 0.6, affection: 0.6, ties: 4, likely: 60, unlikely: 35 }
+  drag: { quality: 6, morale: 6, below: 45 }
+
+franchise:
+  minYears: 5
+  minLocations: 3
+  minQuality: 55
+  minReputation: 55
+  cleanYears: 3
+  feeMultiple: 0.5
+  royalties: [0.04, 0.06, 0.08]
+  support: 0.015
+  skill: { mean: 52, sd: 14 }
+  risk: { perSkill: 0.25, recovery: 3, failure: 15, line: 50, reputation: 2, quality: 1.5 }
+  exitYears: 2
+  valueMultiple: 4
+  inquiry: 0.2
+  minAge: 21
 
 quality:
   carry: 0.55
@@ -185,6 +275,10 @@ market:
 
 events:
   expansion: 0.12
+  staffRequest: 0.18
+  market: 0.22
+  places: 0.2
+  people: 0.25
   manager: 0.25
   cofounder: 0.12
   license: 0.5

@@ -1,3 +1,4 @@
+import { leaveStaff } from '../business/roster';
 import { gainLanguage } from '../languages';
 /**
  * Effect handlers (docs/technical.md, "Event engine internals"). Each effect
@@ -317,6 +318,7 @@ const handlers: { [T in Effect['type']]: Handler<T> } = {
     const id = ctx.cast[effect.role];
     const person = id === undefined ? undefined : state.people[id];
     if (!person || !person.alive || whereabouts(state, id!, ctx.content) === 'household') return;
+    leaveStaff(state, id!);
     person.cityId = otherCity(state, ctx.rng, ctx.content);
   },
 

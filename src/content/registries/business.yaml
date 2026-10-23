@@ -1,6 +1,36 @@
 # W3: businesses. The events the business step queues (every one is a follow-up about your business), and the traits an
 # established business for sale can have.
 
+# B2: the supplier categories (their price index and fictional suppliers) and the trend groups lines follow.
+suppliers:
+  coffee: { label: Coffee beans, volatility: 1.6, names: [Larkspur Importers, Tin Roof Roasting Supply, Ninefold Green Coffee] }
+  flour_grain: { label: Flour and grain, volatility: 1.2, names: [Millrace Grain Co., Harrow & Vane Milling, Quiet Field Mills] }
+  dairy: { label: Dairy, volatility: 0.9, names: [Brookside Creamery Supply, Alder Lane Dairy, Pale Meadow Cooperative] }
+  produce: { label: Produce, volatility: 1.3, names: [Stonebridge Growers, Greenfold Wholesale, Red Barn Produce] }
+  packaging: { label: Packaging, volatility: 0.8, names: [Kestrel Paper & Pack, Plainwood Containers, Oddly Neat Packaging] }
+  textiles: { label: Fabric and clothing, volatility: 1.0, names: [Weft & Warp Wholesale, Corbel Garment Supply, Thistledown Textiles] }
+  electronics: { label: Electronics, volatility: 1.1, names: [Voltaic Distribution, Brightwire Trading, Nimbus Components] }
+  books_paper: { label: Books and paper, volatility: 0.7, names: [Foxed Page Distributors, Inkwell Trade, Marginalia Wholesale] }
+  housewares: { label: Home goods, volatility: 0.9, names: [Hearthstone Supply, Dovetail Home Trade, Plumb & Level Wholesale] }
+  toys_gifts: { label: Toys and gifts, volatility: 1.0, names: [Wobbly Wheel Imports, Giftwrap & Co. Trade, Tumbleweed Novelties] }
+  hair_products: { label: Hair products, volatility: 1.0, names: [Saffron & Sage Beauty Supply, Velvet Strand Trade, Lacquer Lane Wholesale] }
+  pipe_parts: { label: Pipe and parts, volatility: 1.2, names: [Copperhead Supply, Ridgeline Plumbing Parts, Underhill Fittings] }
+  cleaning_chemicals: { label: Cleaning supplies, volatility: 0.8, names: [Brightside Janitorial, Clearwater Chemical Supply, Spotless Trade Co.] }
+
+trends:
+  drinks: { label: Coffee and tea }
+  baked: { label: Baking }
+  meals: { label: Lunch and snacks }
+  grocery: { label: Groceries }
+  fashion: { label: Clothes }
+  tech: { label: Gadgets }
+  reading: { label: Books }
+  home: { label: Home and garden }
+  gifts: { label: Toys and gifts }
+  beauty: { label: Hair and beauty }
+  trades: { label: Repairs and installs }
+  cleaning: { label: Cleaning }
+
 triggers:
   opening:
     events: [biz_opening_day, biz_first_week_nerves]
@@ -18,6 +48,28 @@ triggers:
     events: [biz_manager_numbers_off, biz_manager_quits]
   license:
     events: [biz_license_lapse]
+  supplierRise:
+    events: [biz_supplier_rise_beans, biz_supplier_rise_flour, biz_supplier_rise_general]
+  shortage:
+    events: [biz_shortage_scramble, biz_late_delivery, biz_cold_chain_failure]
+  deal:
+    events: [biz_deal_better_price, biz_deal_bulk_offer, biz_deal_switch_supplier]
+  stockout:
+    events: [biz_ran_out_complaints, biz_ran_out_regular_leaves]
+  waste:
+    events: [biz_waste_bin_full, biz_waste_overordered]
+  economy:
+    events: [biz_economy_boom, biz_economy_recession, biz_economy_bank_tightens, biz_economy_slowdown]
+  staffRequest:
+    events: [biz_staff_asks_transfer, biz_staff_asks_promotion, biz_staff_asks_raise_lead, biz_staff_offer_manage]
+  market:
+    events: [biz_craze_product, biz_craze_ends, biz_rival_undercuts_line, biz_chain_store_opens_city, biz_complaint_line, biz_big_custom_order, biz_viral_product]
+  places:
+    events: [biz_second_location_struggles, biz_stretched_thin, biz_chain_pitches_to_buy, biz_manager_pitches_new_location]
+  people:
+    events: [biz_location_manager_quits, biz_location_manager_skims, biz_crew_walks_out, biz_rival_poaches_lead, biz_training_offer, biz_crew_star, biz_theft_at_place]
+  franchise:
+    events: [biz_franchise_inquiry, biz_franchise_first_opens, biz_franchise_cuts_corners, biz_franchise_scandal, biz_franchise_thrives, biz_franchise_royalty_dispute]
 
 listingTraits:
   loyal_regulars:

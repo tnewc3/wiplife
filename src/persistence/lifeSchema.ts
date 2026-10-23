@@ -6,7 +6,7 @@ import { APPLICATION_KINDS, APPLICATION_STATUSES, COUNTRY_IDS, REGULARIZATION_BA
  * an unexpected field means the save needs a migration, not silent dropping.
  */
 import { z } from 'zod';
-import { BUSINESS_STYLES, MARKETING_LEVELS, OWNER_ROLES, PAY_LEVELS, PRICE_LEVELS, QUALITY_LEVELS, STAFFING_LEVELS, type ContentBundle } from '../content/schemas';
+import { BUSINESS_STYLES, MARKETING_LEVELS, ORDER_LEVELS, OWNER_ROLES, PAY_LEVELS, PRICE_LEVELS, QUALITY_LEVELS, STAFFING_LEVELS, TRAINING_LEVELS, type ContentBundle } from '../content/schemas';
 import { checkInvariants } from '../engine/invariants';
 import { isRngState, type RngState } from '../engine/rng';
 import type { LifeState } from '../engine/types';
@@ -916,7 +916,25 @@ const sports = z.strictObject({
 
 // W3: businesses.
 const levelOf = <T extends readonly [string, ...string[]]>(values: T) => z.enum(values);
-const locationResult = z.strictObject({ year: int, demand: int.min(0), customers: int.min(0), revenue: dollars, rent: dollars, wages: dollars, supplies: dollars, other: dollars, profit: int });
+const lineResult = z.strictObject({ productId: id, demand: int.min(0), sold: int.min(0), lost: int.min(0), spoiled: int.min(0), revenue: dollars, cost: dollars });
+const locationResult = z.strictObject({
+  year: int,
+  demand: int.min(0),
+  customers: int.min(0),
+  revenue: dollars,
+  rent: dollars,
+  wages: dollars,
+  supplies: dollars,
+  other: dollars,
+  profit: int,
+  goodsCost: dollars.exactOptional(),
+  waste: dollars.exactOptional(),
+  lostSales: dollars.exactOptional(),
+  hiring: dollars.exactOptional(),
+  training: dollars.exactOptional(),
+  lines: z.array(lineResult).exactOptional(),
+});
+const units = z.number().min(0).max(1e9);
 const business = z.strictObject({
   id: filled,
   defId: id,
@@ -926,11 +944,14 @@ const business = z.strictObject({
   founded: int,
   how: z.enum(['started', 'bought', 'inherited']),
   chainId: id.exactOptional(),
-  locations: z.array(z.strictObject({ id: filled, cityId: id, style: levelOf(BUSINESS_STYLES), opened: int, result: locationResult.exactOptional() })).min(1),
+  locations: z
+    .array(z.strictObject({ id: filled, cityId: id, style: levelOf(BUSINESS_STYLES), opened: int, result: locationResult.exactOptional(), stock: z.record(z.string(), units), forecast: z.record(z.string(), units), manager: id.exactOptional() }))
+    .min(1),
   staff: z.array(
     z.strictObject({
       personId: id,
       locationId: filled.nullable(),
+      roleId: filled,
       title: filled,
       skill: score,
       morale: score,
@@ -961,7 +982,7 @@ const business = z.strictObject({
   lossYears: int.min(0),
   skimmed: dollars,
   auditedYear: int.exactOptional(),
-  shocks: z.array(z.strictObject({ kind: z.enum(['buzz', 'rival']), mult: z.number().min(0.1).max(5), until: int })),
+  shocks: z.array(z.strictObject({ kind: z.enum(['buzz', 'rival', 'shortage', 'deal']), mult: z.number().min(0.1).max(5), until: int, category: id.exactOptional() })),
   report: z
     .strictObject({
       year: int,
@@ -987,8 +1008,45 @@ const business = z.strictObject({
       quit: int.min(0),
       notes: z.array(filled),
       locations: z.array(locationResult),
+      goodsCost: dollars.exactOptional(),
+      waste: dollars.exactOptional(),
+      lostSales: dollars.exactOptional(),
+      hiring: dollars.exactOptional(),
+      training: dollars.exactOptional(),
+      royalties: int.exactOptional(),
+      support: dollars.exactOptional(),
+      turnover: int.min(0).exactOptional(),
+      heads: int.min(0).exactOptional(),
+      economy: filled.exactOptional(),
+      lines: z.array(lineResult).exactOptional(),
+      supplierMoves: z.array(z.tuple([id, z.number()])).exactOptional(),
     })
     .nullable(),
+  lines: z.array(z.strictObject({ productId: id, on: z.boolean(), price: levelOf(PRICE_LEVELS) })),
+  orders: z.record(z.string(), levelOf(ORDER_LEVELS)),
+  headcount: z.record(z.string(), z.record(z.string(), int.min(0))),
+  crew: z.array(z.strictObject({ locationId: filled, roleId: filled, count: int.min(0), skill: z.number().min(0).max(100), morale: z.number().min(0).max(100) })),
+  training: levelOf(TRAINING_LEVELS),
+  stockValue: dollars,
+  franchises: z.array(
+    z.strictObject({
+      id: filled,
+      cityId: id,
+      style: levelOf(BUSINESS_STYLES),
+      personId: id.nullable(),
+      skill: score,
+      since: int,
+      fee: dollars,
+      royalty: z.number().min(0.001).max(0.5),
+      revenue: dollars,
+      royaltyPaid: dollars,
+      support: dollars,
+      profit: int,
+      lossYears: int.min(0),
+      risk: score,
+    }),
+  ),
+  focus: z.strictObject({ productId: id.optional(), category: id.optional(), locationId: id.optional() }).optional(),
 });
 const businessState = z.strictObject({
   items: z.array(business),

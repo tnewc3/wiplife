@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { content } from '../../../content';
-import { BUSINESS_STYLES, MARKETING_LEVELS, PAY_LEVELS, PRICE_LEVELS, QUALITY_LEVELS, STAFFING_LEVELS, type BusinessStyle } from '../../../content/schemas';
+import { MARKETING_LEVELS, PAY_LEVELS, PRICE_LEVELS, QUALITY_LEVELS, STAFFING_LEVELS, TRAINING_LEVELS } from '../../../content/schemas';
 import { getBusinessScreen, type BusinessView } from '../../../engine/selectors';
 import type { LifeState } from '../../../engine/types';
 import { useAppStore } from '../../../store/appStore';
@@ -9,7 +9,11 @@ import { Card } from '../../components/Card';
 import { ConfirmSheet } from '../../components/ConfirmSheet';
 import { Sheet } from '../../components/Sheet';
 import { StatBar } from '../../components/StatBar';
-import { BUSINESS_DECISION_HINTS, BUSINESS_DECISION_LABELS, BUSINESS_END_LABELS, BUSINESS_HOW_LABELS, BUSINESS_ROLE_BLURBS, BUSINESS_ROLE_LABELS, BUSINESS_TITLES, businessStakeLine, money, rateLabel } from '../../labels';
+import { BUSINESS_DECISION_HINTS, BUSINESS_DECISION_LABELS, BUSINESS_END_LABELS, BUSINESS_HOW_LABELS, BUSINESS_ROLE_BLURBS, BUSINESS_ROLE_LABELS, BUSINESS_TABS, BUSINESS_TITLES, ECONOMY_TONES, SUPPLIER_ARROWS, SUPPLIER_MOODS, TRAINING_HINTS, businessStakeLine, money, rateLabel } from '../../labels';
+import { FranchiseTab } from './business/FranchiseTab';
+import { PlacesTab } from './business/PlacesTab';
+import { ProductsTab } from './business/ProductsTab';
+import { TeamTab } from './business/TeamTab';
 import { MarketSheet } from './MarketSheet';
 import { StartBusinessSheet } from './StartBusinessSheet';
 
@@ -19,6 +23,7 @@ const LEVELS = {
   qualityInvest: { list: QUALITY_LEVELS, labels: content.balance.business.levels.quality },
   pay: { list: PAY_LEVELS, labels: content.balance.business.levels.pay },
   staffing: { list: STAFFING_LEVELS, labels: content.balance.business.levels.staffing },
+  training: { list: TRAINING_LEVELS, labels: content.balance.business.training },
 } as const;
 
 function Row({ label, value, strong = false, testId }: { label: string; value: string; strong?: boolean; testId?: string }) {
@@ -41,169 +46,25 @@ function Section({ title, children, testId }: { title: string; children: React.R
   );
 }
 
-function HireSheet({ b, open, onClose }: { b: BusinessView; open: boolean; onClose: () => void }) {
-  const act = useAppStore((s) => s.takeLifeAction);
-  const busy = useAppStore((s) => s.aging);
-  const [licensed, setLicensed] = useState(false);
-  return (
-    <Sheet open={open} title="Hire someone" onClose={onClose}>
-      <div className="flex flex-col gap-3" data-testid="hire-sheet">
-        <p className="text-sm text-muted">
-          {b.staffRoom > 0 ? `You can take on ${b.staffRoom} more named ${b.staffRoom === 1 ? 'person' : 'people'}. Hiring costs ${money(b.hireCost)} up front. Everyone else the place needs is crew, paid the market rate.` : 'You have as many named staff as you can manage.'}
-        </p>
-        {b.needsLicense && (
-          <label className="flex min-h-11 items-center gap-2">
-            <input type="checkbox" checked={licensed} onChange={(e) => setLicensed(e.target.checked)} className="size-5" data-testid="hire-licensed" />
-            <span>Someone with the {b.needsLicense}’s licence</span>
-          </label>
-        )}
-        <Button block disabled={busy || b.staffRoom <= 0} data-testid="hire-new" onClick={() => void act('hire_staff', { biz: { businessId: b.id, licensed } }).then(onClose)}>
-          Meet someone new
-        </Button>
-        <h4 className="font-bold">People you know</h4>
-        {b.hireable.filter((h) => !licensed || h.licensed).length === 0 ? (
-          <p className="text-sm text-muted">Nobody you know is free to work here.</p>
-        ) : (
-          <ul className="flex flex-col gap-2">
-            {b.hireable
-              .filter((h) => !licensed || h.licensed)
-              .map((h) => (
-                <li key={h.personId}>
-                  <Button variant="secondary" block disabled={busy || b.staffRoom <= 0} data-testid={`hire-${h.personId}`} onClick={() => void act('hire_staff', { biz: { businessId: b.id, personId: h.personId, licensed: licensed && h.licensed } }).then(onClose)}>
-                    {h.name}, {h.age}
-                  </Button>
-                </li>
-              ))}
-          </ul>
-        )}
-      </div>
-    </Sheet>
-  );
-}
+type Tab = keyof typeof BUSINESS_TABS;
 
-function ExpandSheet({ b, life, open, onClose }: { b: BusinessView; life: LifeState; open: boolean; onClose: () => void }) {
+function ReportTab({ b, life, disabled }: { b: BusinessView; life: LifeState; disabled: boolean }) {
   const act = useAppStore((s) => s.takeLifeAction);
-  const busy = useAppStore((s) => s.aging);
-  const [cityId, setCityId] = useState(b.cityId);
-  const [style, setStyle] = useState<BusinessStyle>(b.style);
-  const [funding, setFunding] = useState<'savings' | 'loan'>('savings');
-  const cost = b.expandCosts[style];
-  const afford = funding === 'loan' || life.finances.savings >= cost;
-  return (
-    <Sheet open={open} title="Open a new location" onClose={onClose}>
-      <div className="flex flex-col gap-3" data-testid="expand-sheet">
-        <label htmlFor="expand-city" className="font-bold">
-          City
-        </label>
-        <select id="expand-city" data-testid="expand-city" value={cityId} onChange={(e) => setCityId(e.target.value)} className="min-h-11 w-full rounded-xl border border-border bg-surface px-3">
-          {Object.keys(content.cities)
-            .sort()
-            .map((id) => (
-              <option key={id} value={id}>
-                {content.cities[id]!.name}
-              </option>
-            ))}
-        </select>
-        <div role="radiogroup" aria-label="Style" className="flex flex-col gap-2">
-          {BUSINESS_STYLES.map((s) => (
-            <button key={s} type="button" role="radio" aria-checked={style === s} onClick={() => setStyle(s)} data-testid={`expand-style-${s}`} className={`min-h-11 rounded-xl border px-3 py-2 text-left ${style === s ? 'border-accent bg-surface-2 font-semibold' : 'border-border'}`}>
-              {content.businesses[b.defId]?.styles[s].label ?? s} · {money(b.expandCosts[s])}
-            </button>
-          ))}
-        </div>
-        <div role="radiogroup" aria-label="Pay with" className="flex gap-2">
-          {(['savings', 'loan'] as const).map((f) => (
-            <button key={f} type="button" role="radio" aria-checked={funding === f} onClick={() => setFunding(f)} data-testid={`expand-funding-${f}`} className={`min-h-11 flex-1 rounded-xl border px-3 ${funding === f ? 'border-accent bg-surface-2 font-semibold' : 'border-border'}`}>
-              {f === 'savings' ? 'Your savings' : 'A business loan'}
-            </button>
-          ))}
-        </div>
-        <p className="text-sm text-muted" role="status">
-          {funding === 'savings' ? (afford ? `${money(cost)} from savings. Savings now: ${money(life.finances.savings)}.` : 'You don’t have enough savings.') : `A loan for ${money(cost)} at the business loan rate, subject to the bank.`}
-        </p>
-        <Button block disabled={busy || !afford} data-testid="expand-confirm" onClick={() => void act('open_location', { biz: { businessId: b.id, cityId, style, funding } }).then(onClose)}>
-          Open it
-        </Button>
-      </div>
-    </Sheet>
-  );
-}
-
-function BusinessPanel({ b, life }: { b: BusinessView; life: LifeState }) {
-  const act = useAppStore((s) => s.takeLifeAction);
-  const busy = useAppStore((s) => s.aging);
-  const [hire, setHire] = useState(false);
-  const [expand, setExpand] = useState(false);
-  const [confirm, setConfirm] = useState<'sell' | 'close' | { buyout: string; name: string; price: number } | { fire: string; name: string } | null>(null);
   const r = b.report;
-  const between = life.phase === 'yearStart';
-  const disabled = busy || !between;
+  const n = r?.numbers;
+  const [confirm, setConfirm] = useState<'sell' | 'close' | { buyout: string; name: string; price: number } | null>(null);
   return (
-    <Card data-testid={`business-${b.id}`} className="mt-3">
-      <h3 className="text-lg font-bold break-words [overflow-wrap:anywhere]">{b.name}</h3>
-      <p className="text-sm text-muted">
-        {b.styleLabel} · {b.kind} · {b.city}
-        {b.chain ? ` · ${b.chain}` : ''} · {BUSINESS_HOW_LABELS[b.how]} {b.founded}
-      </p>
-      <p className="mt-1 text-sm" data-testid={`worth-${b.id}`}>
-        Worth about {money(b.value)}. Your share ({b.yourShare}%): {money(b.yourEquity)}.
-      </p>
-      {b.needsLicense && (
-        <p className={`mt-1 text-sm ${b.licensed ? 'text-muted' : 'font-semibold text-danger'}`} data-testid={`license-${b.id}`}>
-          {b.licensed ? `Someone here holds the ${b.needsLicense}’s licence.` : `Nobody here holds the ${b.needsLicense}’s licence, so no jobs can be taken.`}
-        </p>
-      )}
-
-      <Section title={BUSINESS_TITLES.report} testId={`report-${b.id}`}>
-        {!r ? (
-          <p className="mt-1 text-sm text-muted">It hasn’t had a full year yet. Its first report comes when the year turns.</p>
-        ) : (
-          <>
-            <ul className="mt-1 flex flex-col gap-1 text-sm" data-testid={`report-words-${b.id}`}>
-              <li>{r.customers}</li>
-              <li>{r.money}</li>
-              <li>{r.staff}</li>
-              <li>{r.quality}</li>
-              {r.notes.map((n) => (
-                <li key={n}>{n}</li>
-              ))}
-            </ul>
-            <dl className="mt-2 flex flex-col" aria-label="The year in numbers">
-              <Row label="Customers" value={r.numbers.customers.toLocaleString('en-US')} />
-              <Row label="Sales" value={money(r.numbers.revenue)} />
-              <Row label="Rent" value={money(-r.numbers.rent)} />
-              <Row label="Wages" value={money(-r.numbers.wages)} />
-              <Row label="Supplies" value={money(-r.numbers.supplies)} />
-              {r.numbers.marketing > 0 && <Row label="Marketing" value={money(-r.numbers.marketing)} />}
-              {r.numbers.quality > 0 && <Row label="Quality" value={money(-r.numbers.quality)} />}
-              <Row label="Insurance, utilities and the rest" value={money(-r.numbers.other)} />
-              <div className="mt-1 border-t border-border pt-1">
-                <Row label="Profit" value={money(r.numbers.profit)} strong testId={`profit-${b.id}`} />
-              </div>
-              {r.numbers.paidOut > 0 && <Row label="Paid out to the owners" value={money(r.numbers.paidOut)} />}
-              {r.numbers.draw > 0 && <Row label="Paid to you" value={money(r.numbers.draw)} testId={`draw-${b.id}`} />}
-              {r.numbers.injected > 0 && <Row label="You put in to cover the loss" value={money(r.numbers.injected)} testId={`injected-${b.id}`} />}
-              {r.numbers.loanPayments > 0 && <Row label="Loan payments (paid with your own money)" value={money(r.numbers.loanPayments)} />}
-              <Row label="Cash in the business" value={money(b.cash)} />
-            </dl>
-          </>
-        )}
-        <div className="mt-2 flex flex-col gap-2">
-          <StatBar label="Reputation" value={b.reputation} />
-          <StatBar label="Quality" value={b.quality} />
-          <StatBar label="Staff morale" value={b.morale} />
-        </div>
-      </Section>
-
+    <>
       <Section title={BUSINESS_TITLES.decisions} testId={`decisions-${b.id}`}>
         <div className="mt-2 flex flex-col gap-3">
           {(Object.keys(LEVELS) as (keyof typeof LEVELS)[]).map((key) => (
             <div key={key}>
               <p className="text-sm font-semibold">{BUSINESS_DECISION_LABELS[key]}</p>
-              <p className="text-xs text-muted">{BUSINESS_DECISION_HINTS[key]}</p>
+              <p className="text-xs text-muted">{key === 'training' ? TRAINING_HINTS[b.depth.training.level] : BUSINESS_DECISION_HINTS[key]}</p>
               <div role="radiogroup" aria-label={BUSINESS_DECISION_LABELS[key]} className="mt-1 flex flex-wrap gap-2">
                 {(LEVELS[key].list as readonly string[]).map((level) => {
-                  const checked = b.decisions[key] === level;
+                  const current = key === 'training' ? b.depth.training.level : b.decisions[key];
+                  const checked = current === level;
                   const label = (LEVELS[key].labels as Record<string, { label: string }>)[level]!.label;
                   return (
                     <button key={level} type="button" role="radio" aria-checked={checked} disabled={disabled} data-testid={`decision-${b.id}-${key}-${level}`} onClick={() => void act('set_business_decisions', { biz: { businessId: b.id, decisions: { [key]: level } } })} className={`min-h-11 rounded-xl border px-3 text-sm ${checked ? 'border-accent bg-surface-2 font-semibold' : 'border-border'}`}>
@@ -228,56 +89,68 @@ function BusinessPanel({ b, life }: { b: BusinessView; life: LifeState }) {
         </div>
       </Section>
 
-      <Section title={BUSINESS_TITLES.staff} testId={`staff-${b.id}`}>
-        {b.staff.length === 0 ? (
-          <p className="mt-1 text-sm text-muted">Nobody you know works here yet. Crew fill the shifts at the market wage.</p>
+      <Section title={BUSINESS_TITLES.report} testId={`report-${b.id}`}>
+        {!r || !n ? (
+          <p className="mt-1 text-sm text-muted">It hasn’t had a full year yet. Its first report comes when the year turns.</p>
         ) : (
-          <ul className="mt-1 flex flex-col gap-2">
-            {b.staff.map((s) => (
-              <li key={s.personId} className="rounded-xl border border-border p-3" data-testid={`staff-${b.id}-${s.personId}`}>
-                <p className="font-semibold break-words">
-                  {s.name} <span className="font-normal text-muted">· {s.title}</span>
-                </p>
-                <p className="text-sm text-muted">
-                  {s.mood} · skill {s.skill} · {money(s.wage)} a year{s.location ? ` · ${s.location}` : ''}
-                  {s.licensed ? ' · licensed' : ''}
-                </p>
-                <div className="mt-2 flex gap-2">
-                  <Button variant="secondary" disabled={disabled} className="flex-1" onClick={() => void act('raise_staff', { biz: { businessId: b.id, personId: s.personId } })} data-testid={`raise-${s.personId}`}>
-                    Give a raise
-                  </Button>
-                  <Button variant="ghost" disabled={disabled} className="flex-1" onClick={() => setConfirm({ fire: s.personId, name: s.name })} data-testid={`fire-${s.personId}`}>
-                    Let go
-                  </Button>
-                </div>
-              </li>
-            ))}
-          </ul>
-        )}
-        <Button variant="secondary" block className="mt-2" disabled={disabled} onClick={() => setHire(true)} data-testid={`hire-open-${b.id}`}>
-          Hire someone
-        </Button>
-      </Section>
-
-      <Section title={BUSINESS_TITLES.locations} testId={`locations-${b.id}`}>
-        <ul className="mt-1 flex flex-col gap-1 text-sm">
-          {b.locations.map((l) => (
-            <li key={l.id} className="flex items-baseline justify-between gap-2 py-1">
-              <span className="min-w-0 break-words">
-                {l.city} · {l.style} · since {l.opened}
-              </span>
-              <span className="shrink-0 tabular-nums">{l.profit === null ? '—' : money(l.profit)}</span>
-              {b.locations.length > 1 && (
-                <Button variant="ghost" disabled={disabled} onClick={() => void act('close_location', { biz: { businessId: b.id, locationId: l.id } })} data-testid={`close-location-${l.id}`}>
-                  Close
-                </Button>
+          <>
+            <ul className="mt-1 flex flex-col gap-1 text-sm" data-testid={`report-words-${b.id}`}>
+              <li>{r.customers}</li>
+              <li>{r.money}</li>
+              <li>{r.staff}</li>
+              <li>{r.quality}</li>
+              {r.notes.map((note) => (
+                <li key={note}>{note}</li>
+              ))}
+            </ul>
+            <dl className="mt-2 flex flex-col" aria-label="The year in numbers">
+              <Row label="Customers" value={n.customers.toLocaleString('en-US')} />
+              <Row label="Sales" value={money(n.revenue)} />
+              {(n.royalties ?? 0) > 0 && <Row label="Royalties from franchises" value={money(n.royalties ?? 0)} testId={`royalties-${b.id}`} />}
+              {(n.support ?? 0) > 0 && <Row label="Support for franchises" value={money(-(n.support ?? 0))} />}
+              <Row label="Rent" value={money(-n.rent)} />
+              <Row label="Wages" value={money(-n.wages)} />
+              <Row label="Supplies" value={money(-n.supplies)} />
+              {n.goodsCost !== undefined && (
+                <>
+                  <Row label="  of which goods sold" value={money(-n.goodsCost)} testId={`goods-${b.id}`} />
+                  <Row label="  of which spoiled or wasted" value={money(-(n.waste ?? 0))} testId={`waste-${b.id}`} />
+                  <Row label="Sales lost to empty shelves" value={money(n.lostSales ?? 0)} testId={`lost-${b.id}`} />
+                </>
               )}
-            </li>
-          ))}
-        </ul>
-        <Button variant="secondary" block className="mt-2" disabled={disabled || !b.canExpand} onClick={() => setExpand(true)} data-testid={`expand-open-${b.id}`}>
-          Open a new location
-        </Button>
+              {(n.hiring ?? 0) > 0 && <Row label="Hiring, to replace people who left" value={money(-(n.hiring ?? 0))} testId={`hiring-${b.id}`} />}
+              {(n.training ?? 0) > 0 && <Row label="Training" value={money(-(n.training ?? 0))} />}
+              {n.marketing > 0 && <Row label="Marketing" value={money(-n.marketing)} />}
+              {n.quality > 0 && <Row label="Quality" value={money(-n.quality)} />}
+              <Row label="Insurance, utilities and the rest" value={money(-n.other)} />
+              <div className="mt-1 border-t border-border pt-1">
+                <Row label="Profit" value={money(n.profit)} strong testId={`profit-${b.id}`} />
+              </div>
+              {n.paidOut > 0 && <Row label="Paid out to the owners" value={money(n.paidOut)} />}
+              {n.draw > 0 && <Row label="Paid to you" value={money(n.draw)} testId={`draw-${b.id}`} />}
+              {n.injected > 0 && <Row label="You put in to cover the loss" value={money(n.injected)} testId={`injected-${b.id}`} />}
+              {n.loanPayments > 0 && <Row label="Loan payments (paid with your own money)" value={money(n.loanPayments)} />}
+              <Row label="Cash in the business" value={money(b.cash)} />
+              {b.depth.stockValue > 0 && <Row label="Stock on the shelves, at cost" value={money(b.depth.stockValue)} testId={`stock-value-${b.id}`} />}
+            </dl>
+            {n.supplierMoves !== undefined && n.supplierMoves.length > 0 && (
+              <p className="mt-2 text-sm text-muted" data-testid={`report-suppliers-${b.id}`}>
+                Suppliers that year: {n.supplierMoves.map(([cat, idx]) => `${content.registries.business.suppliers[cat]?.label ?? cat} ${idx > 1.05 ? 'dearer than usual' : idx < 0.95 ? 'cheaper than usual' : 'at the usual price'}`).join(', ')}.
+                {n.economy ? ` The economy was ${content.balance.business.economy.phases[n.economy as keyof typeof content.balance.business.economy.phases]?.label.toLowerCase() ?? n.economy}.` : ''}
+              </p>
+            )}
+            {n.heads !== undefined && (
+              <p className="mt-2 text-sm text-muted" data-testid={`report-heads-${b.id}`}>
+                {n.heads} people worked there at the year’s end{(n.turnover ?? 0) > 0 ? `, and ${n.turnover} left from the crew` : ''}.
+              </p>
+            )}
+          </>
+        )}
+        <div className="mt-2 flex flex-col gap-2">
+          <StatBar label="Reputation" value={b.reputation} />
+          <StatBar label="Quality" value={b.quality} />
+          <StatBar label="Staff morale" value={b.morale} />
+        </div>
       </Section>
 
       {b.owners.length > 1 && (
@@ -323,13 +196,10 @@ function BusinessPanel({ b, life }: { b: BusinessView; life: LifeState }) {
           Close it
         </Button>
       </div>
-
-      <HireSheet b={b} open={hire} onClose={() => setHire(false)} />
-      <ExpandSheet b={b} life={life} open={expand} onClose={() => setExpand(false)} />
       <ConfirmSheet
         open={confirm !== null}
-        title={confirm === 'sell' ? `Sell ${b.name}?` : confirm === 'close' ? `Close ${b.name}?` : confirm && 'buyout' in confirm ? `Buy ${confirm.name} out?` : confirm && 'fire' in confirm ? `Let ${confirm.name} go?` : ''}
-        confirmLabel={confirm === 'sell' ? 'Sell it' : confirm === 'close' ? 'Close it' : confirm && 'buyout' in confirm ? 'Buy out' : 'Let go'}
+        title={confirm === 'sell' ? `Sell ${b.name}?` : confirm === 'close' ? `Close ${b.name}?` : confirm && 'buyout' in confirm ? `Buy ${confirm.name} out?` : ''}
+        confirmLabel={confirm === 'sell' ? 'Sell it' : confirm === 'close' ? 'Close it' : 'Buy out'}
         onCancel={() => setConfirm(null)}
         onConfirm={() => {
           const c = confirm;
@@ -337,7 +207,6 @@ function BusinessPanel({ b, life }: { b: BusinessView; life: LifeState }) {
           if (c === 'sell') void act('sell_business', { biz: { businessId: b.id } });
           else if (c === 'close') void act('close_business', { biz: { businessId: b.id } });
           else if (c && 'buyout' in c) void act('buyout_owner', { biz: { businessId: b.id, ownerId: c.buyout } });
-          else if (c && 'fire' in c) void act('fire_staff', { biz: { businessId: b.id, personId: c.fire } });
         }}
         body={
           confirm === 'sell'
@@ -346,12 +215,75 @@ function BusinessPanel({ b, life }: { b: BusinessView; life: LifeState }) {
               ? 'The equipment and stock are sold off cheaply, the loans come out of that first, and everyone who works there is let go. Anything still owed stays with you.'
               : confirm && 'buyout' in confirm
                 ? `It costs ${money(confirm.price)} from your savings. The share becomes yours.`
-                : confirm && 'fire' in confirm
-                  ? 'They get a little severance. They will remember how you did it.'
-                  : ''
+                : ''
         }
       />
+    </>
+  );
+}
+
+function BusinessPanel({ b, life }: { b: BusinessView; life: LifeState }) {
+  const busy = useAppStore((s) => s.aging);
+  const [tab, setTab] = useState<Tab>('report');
+  const between = life.phase === 'yearStart';
+  const disabled = busy || !between;
+  const showFranchise = b.depth.franchise.eligible || b.depth.franchise.count > 0;
+  const tabs = (Object.keys(BUSINESS_TABS) as Tab[]).filter((t) => t !== 'franchise' || showFranchise);
+  return (
+    <Card data-testid={`business-${b.id}`} className="mt-3">
+      <h3 className="text-lg font-bold break-words [overflow-wrap:anywhere]">{b.name}</h3>
+      <p className="text-sm text-muted">
+        {b.styleLabel} · {b.kind} · {b.city}
+        {b.chain ? ` · ${b.chain}` : ''} · {BUSINESS_HOW_LABELS[b.how]} {b.founded}
+      </p>
+      <p className="mt-1 text-sm" data-testid={`worth-${b.id}`}>
+        Worth about {money(b.value)}. Your share ({b.yourShare}%): {money(b.yourEquity)}.
+      </p>
+      {b.needsLicense && (
+        <p className={`mt-1 text-sm ${b.licensed ? 'text-muted' : 'font-semibold text-danger'}`} data-testid={`license-${b.id}`}>
+          {b.licensed ? `Someone here holds the ${b.needsLicense}’s licence.` : `Nobody here holds the ${b.needsLicense}’s licence, so no jobs can be taken.`}
+        </p>
+      )}
+      <div role="tablist" aria-label={`${b.name} sections`} className="mt-3 flex flex-wrap gap-2">
+        {tabs.map((t) => (
+          <button key={t} type="button" role="tab" aria-selected={tab === t} data-testid={`tab-${b.id}-${t}`} onClick={() => setTab(t)} className={`min-h-11 rounded-xl border px-3 text-sm ${tab === t ? 'border-accent bg-surface-2 font-semibold' : 'border-border'}`}>
+            {BUSINESS_TABS[t]}
+          </button>
+        ))}
+      </div>
+      <div role="tabpanel" aria-label={BUSINESS_TABS[tab]}>
+        {tab === 'report' && <ReportTab b={b} life={life} disabled={disabled} />}
+        {tab === 'products' && <ProductsTab b={b} disabled={disabled} />}
+        {tab === 'team' && <TeamTab b={b} disabled={disabled} />}
+        {tab === 'places' && <PlacesTab b={b} life={life} disabled={disabled} />}
+        {tab === 'franchise' && <FranchiseTab b={b} life={life} disabled={disabled} />}
+      </div>
     </Card>
+  );
+}
+
+/** The economy as one word with a line of explanation, and the suppliers' mood. */
+function WorldStrip({ owned }: { owned: BusinessView[] }) {
+  const first = owned[0];
+  if (!first) return null;
+  const phase = first.depth.economy.phase;
+  const moods = new Map<string, { label: string; mood: 'up' | 'down' | 'steady' }>();
+  for (const b of owned) for (const l of b.depth.lines) if (l.on && l.supplier.category && !moods.has(l.supplier.category)) moods.set(l.supplier.category, { label: l.supplier.label, mood: l.supplier.mood });
+  for (const b of owned) for (const p of b.depth.pools) if (!moods.has(p.supplier.category)) moods.set(p.supplier.category, { label: p.supplier.label, mood: p.supplier.mood });
+  return (
+    <div className="mt-2 rounded-xl border border-border p-3" data-testid="economy-strip" aria-label="The economy and your suppliers">
+      <p className={`font-semibold ${ECONOMY_TONES[phase]}`} data-testid="economy-phase">
+        Economy: {first.depth.economy.label}
+      </p>
+      <p className="text-sm text-muted">{content.text.business.report.economy[phase]}</p>
+      <ul className="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-sm" data-testid="supplier-moods">
+        {[...moods.entries()].slice(0, 6).map(([id, m]) => (
+          <li key={id}>
+            {SUPPLIER_ARROWS[m.mood]} {m.label} {SUPPLIER_MOODS[m.mood]}
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }
 
@@ -374,6 +306,7 @@ export function BusinessScreen({ life, open, onClose }: { life: LifeState; open:
           {view.blocked === 'age' && <p className="mt-1">You can run a business from {content.balance.business.limits.minAge}.</p>}
           {view.blocked === 'away' && <p className="mt-1">You can’t run a business from where you are.</p>}
           {view.owned.length === 0 && view.blocked === null && <p className="mt-1 text-muted">{BUSINESS_TITLES.none}</p>}
+          <WorldStrip owned={view.owned} />
           {view.owned.map((b) => (
             <BusinessPanel key={b.id} b={b} life={life} />
           ))}

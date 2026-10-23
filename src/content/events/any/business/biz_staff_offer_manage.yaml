@@ -1,0 +1,39 @@
+id: biz_staff_offer_manage
+title: I could run the other place
+text: >-
+  {staff.name} makes an offer: put {staff.them} in charge of {location}, and {staff.they} will run it as if it were {staff.their} own. {staff.they} {staff:has|have} done the closing shift there for a while.
+tone: neutral
+category: business
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { business: { owned: true } }
+    - { age: { gte: 18 } }
+    - { business: { owned: true, staff: { gte: 1 }, locations: { gte: 2 }, hasLocationManager: false } }
+weight: { base: 4 }
+cooldownYears: 6
+followUpOnly: true
+bindBusiness: true
+cast:
+  staff: { business: staff, presence: city }
+choices:
+  - id: appoint
+    label: Make {staff.them} the manager there
+    outcome:
+      text: "{staff.name} takes the keys and a new title. For a while the place feels different, in a way you cannot quite name."
+      effects:
+        - { type: business, action: appoint, role: staff }
+        - { type: relationship, role: staff, affection: 3, trust: 3 }
+  - id: trial
+    label: Try it for a season, informally
+    outcome:
+      text: No title and no contract, only the keys. {staff.name} understands the difference, and says nothing.
+      effects:
+        - { type: business, action: staffMorale, role: staff, delta: 2 }
+  - id: no
+    label: Keep running it yourself
+    outcome:
+      text: You like knowing what happens in your places. {staff.name} nods and goes back to the floor.
+      effects:
+        - { type: business, action: staffMorale, role: staff, delta: -6 }

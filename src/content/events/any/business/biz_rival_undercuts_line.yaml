@@ -1,0 +1,39 @@
+id: biz_rival_undercuts_line
+title: Down the street, for less
+text: >-
+  A rival down the street is selling {product} for noticeably less than {business} does. Somebody pinned the flyer to the notice board by the door, where you could not miss it.
+tone: neutral
+category: business
+rarity: uncommon
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { business: { owned: true } }
+    - { age: { gte: 18 } }
+    - { business: { owned: true, years: { gte: 1 }, rival: false } }
+weight: { base: 4 }
+cooldownYears: 6
+followUpOnly: true
+bindBusiness: true
+choices:
+  - id: match
+    label: Match them
+    outcome:
+      text: You lower the number on the board and keep the crowd. Your margin lowers with it.
+      effects:
+        - { type: business, action: price, level: low }
+        - { type: business, action: rival, delta: -4, years: 2 }
+  - id: better
+    label: Be better instead of cheaper
+    outcome:
+      text: You put what you have into doing it right. It is quieter, and it is a plan.
+      effects:
+        - { type: business, action: pay, share: 0.02, floor: 400 }
+        - { type: business, action: quality, delta: 5 }
+        - { type: business, action: rival, delta: -8, years: 2 }
+  - id: ignore
+    label: Ignore it
+    outcome:
+      text: You do not look at the flyer again. Some of your customers do.
+      effects:
+        - { type: business, action: rival, delta: -14, years: 2 }

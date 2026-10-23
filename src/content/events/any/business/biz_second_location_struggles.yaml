@@ -1,0 +1,39 @@
+id: biz_second_location_struggles
+title: The other place is struggling
+text: >-
+  The {business} place in {locCity} has had a bad stretch. The numbers are not catastrophic, but they are not what they were on the day you opened it, and they point the wrong way.
+tone: serious
+category: business
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { business: { owned: true } }
+    - { age: { gte: 18 } }
+    - { business: { owned: true, locations: { gte: 2 }, lossYears: { gte: 1 } } }
+weight: { base: 5 }
+cooldownYears: 4
+followUpOnly: true
+bindBusiness: true
+choices:
+  - id: refit
+    label: Put money into the place
+    outcome:
+      text: New lighting, a fresh counter, a better window. It looks like a place someone cares about.
+      effects:
+        - { type: business, action: pay, share: 0.03, floor: 800 }
+        - { type: business, action: quality, delta: 4 }
+        - { type: business, action: buzz, delta: 4, years: 1 }
+  - id: cut
+    label: Trim the hours and the crew
+    outcome:
+      text: The schedule shrinks, and so does the mood. It is a number you can live with, for now.
+      effects:
+        - { type: business, action: morale, delta: -4 }
+        - { type: business, action: order, level: lean }
+  - id: wait
+    label: Give it another year
+    outcome:
+      text: Some places need a season to find their feet. You say that out loud, and almost believe it.
+      effects:
+        - { type: stat, key: stress, delta: 2 }

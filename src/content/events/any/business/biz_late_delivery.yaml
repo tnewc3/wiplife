@@ -1,0 +1,38 @@
+id: biz_late_delivery
+title: The truck is late
+text: >-
+  Two days past the promised date, the truck from {supplier} is nowhere. Phone calls go to voicemail. Customers at {business} ask for {product} and get a shrug.
+tone: neutral
+category: business
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { business: { owned: true } }
+    - { age: { gte: 18 } }
+    - { business: { owned: true, years: { gte: 1 } } }
+weight: { base: 4 }
+cooldownYears: 4
+followUpOnly: true
+bindBusiness: true
+choices:
+  - id: apologize
+    label: Apologize and make it up to people
+    outcome:
+      text: Everyone who asks leaves with something small on the house. The truck arrives on the third day, as if nothing had happened.
+      effects:
+        - { type: business, action: pay, share: 0.006, floor: 150 }
+        - { type: business, action: reputation, delta: 2 }
+  - id: push
+    label: Push the crew through it
+    outcome:
+      text: The crew improvises and covers extra shifts, and nobody forgets who asked.
+      effects:
+        - { type: business, action: morale, delta: -4 }
+        - { type: stat, key: stress, delta: 2 }
+  - id: change
+    label: Order heavier from now on
+    outcome:
+      text: Never again, you say, and write a bigger order.
+      effects:
+        - { type: business, action: order, level: heavy }

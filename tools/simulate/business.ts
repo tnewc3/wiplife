@@ -9,7 +9,7 @@
  * player models, these chances describe the simulated player, not the game, so
  * they live here and not in the balance files.
  */
-import { BUSINESS_FUNDING, BUSINESS_STYLES, MARKETING_LEVELS, PAY_LEVELS, PRICE_LEVELS, QUALITY_LEVELS, STAFFING_LEVELS, type BusinessFunding, type BusinessStyle, type ContentBundle } from '../../src/content/schemas';
+import { BUSINESS_FUNDING, BUSINESS_STYLES, ECONOMY_PHASES, MARKETING_LEVELS, ORDER_LEVELS, PAY_LEVELS, PRICE_LEVELS, QUALITY_LEVELS, STAFFING_LEVELS, TRAINING_LEVELS, type BusinessFunding, type BusinessStyle, type ContentBundle, type EconomyPhase, type OrderLevel, type PriceLevel } from '../../src/content/schemas';
 import type { LifeActionId, LifeActionParams } from '../../src/engine/actions';
 import { marketFor } from '../../src/engine/business/market';
 import { startBlock, buyBlock } from '../../src/engine/business/found';
@@ -17,7 +17,12 @@ import { cofounderCandidates, investorCandidates, loanOffer, type FundingPlan } 
 import { totalToStart } from '../../src/engine/business/model';
 import { ownerSkill } from '../../src/engine/business/step';
 import { youHoldLicense } from '../../src/engine/business/query';
-import { hireBlock } from '../../src/engine/business/staff';
+import { appointBlock, hireBlock, transferBlock } from '../../src/engine/business/staff';
+import { headcountBlock } from '../../src/engine/business/crew';
+import { franchiseEligible } from '../../src/engine/business/franchise';
+import { crewRoles, presetHeads } from '../../src/engine/business/headcount';
+import { itemOf, productsOf } from '../../src/engine/business/products';
+import { economyPhase, supplierMove } from '../../src/engine/business/world';
 import { peakRung } from '../../src/engine/fame/query';
 import { totalDebt } from '../../src/engine/finance';
 import { weightedPick } from '../../src/engine/random';
@@ -39,6 +44,13 @@ export interface BusinessProfile {
   funding: readonly (readonly [BusinessFunding, number])[];
   /** The chance they run it themselves rather than hire a manager (a manager when they hold a job). */
   selfRun: number;
+  /** B2: how they order and price lines and pick a shop's lines, apart from the rest of their decisions. */
+  orderPolicy: Policy;
+  /** B2: the yearly chance they appoint a location manager where one would help, and sell a franchise when they can. */
+  managerChance: number;
+  franchiseChance: number;
+  /** B2: the chance, when they have the money, that they start a second business or open more places. */
+  growth: number;
 }
 
 export function rollBusinessProfile(rng: RngState): BusinessProfile {
@@ -53,6 +65,10 @@ export function rollBusinessProfile(rng: RngState): BusinessProfile {
       ['cofounder', weightedPick(rng, [[0.2, 2], [1.2, 2]] as const)],
     ],
     selfRun: weightedPick(rng, [[0.4, 2], [0.8, 4]] as const),
+    orderPolicy: weightedPick(rng, [['good', 4], ['random', 3], ['poor', 3]] as const),
+    managerChance: weightedPick(rng, [[0, 2], [0.3, 3], [0.7, 3]] as const),
+    franchiseChance: weightedPick(rng, [[0, 4], [0.1, 3], [0.3, 2]] as const),
+    growth: weightedPick(rng, [[0.1, 4], [0.3, 4], [0.6, 2]] as const),
   };
 }
 
@@ -129,11 +145,17 @@ export function chooseBusinessActions(life: LifeState, content: ContentBundle, r
     if (b.role === 'self' && life.career.job !== null && chance(rng, 0.5)) out.push(['set_business_role', { biz: { businessId: b.id, role: 'manager' } }]);
     if (profile.policy === 'good') {
       if (b.report && b.report.profit > 0 && b.staff.filter((s) => !s.manager).length < 2 && hireBlock(life, b, def, { locationId: b.locations[0]!.id }, content) === null && chance(rng, 0.3)) out.push(['hire_staff', { biz: { businessId: b.id } }]);
-      const r = b.report;
-      if (r && r.profit > def.styles[b.style].startup * 0.5 && b.locations.length < 3 && r.year - b.founded >= 3 && b.lossYears === 0 && life.finances.savings > def.styles[b.style].startup * 2.5 && chance(rng, 0.25)) {
-        out.push(['open_location', { biz: { businessId: b.id, cityId: b.cityId, style: b.style, funding: 'savings' } }]);
-      }
     }
+    // B2: growth to more places, up to what the owner can look after.
+    const r = b.report;
+    const placesWanted = profile.policy === 'good' ? 3 + Math.round(profile.growth * 6) : 3;
+    if (r && r.profit > def.styles[b.style].startup * 0.5 && b.locations.length < placesWanted && r.year - b.founded >= 3 && b.lossYears === 0 && life.finances.savings > def.styles[b.style].startup * 2.5 && chance(rng, profile.policy === 'good' ? 0.25 + profile.growth / 2 : 0.1)) {
+      const cities = sameCountryCityIds(life.character.cityId, content);
+      const there = cities.length > 0 && chance(rng, 0.4 + profile.growth / 2) ? pick(rng, cities) : b.cityId;
+      out.push(['open_location', { biz: { businessId: b.id, cityId: there, style: b.style, funding: 'savings' } }]);
+    }
+    lineActions(life, b, def, content, rng, profile, out);
+    teamActions(life, b, def, content, rng, profile, out);
     // Giving up, or selling at the end of a career.
     const giveUp = 4;
     if (b.lossYears >= giveUp && b.cash < 1) out.push(['close_business', { biz: { businessId: b.id } }]);
@@ -142,7 +164,123 @@ export function chooseBusinessActions(life: LifeState, content: ContentBundle, r
     const inv = b.owners.find((o) => o.role === 'investor');
     if (inv && b.report && b.report.profit > 0 && life.finances.savings > 150000 && chance(rng, 0.1)) out.push(['buyout_owner', { biz: { businessId: b.id, ownerId: inv.id } }]);
   }
+  // B2: a second business, now and then, for someone who is doing well with the first.
+  if (owned.length > 0 && owned.length < bal.limits.businesses && age >= 25 && age <= 55 && profile.growth >= 0.3 && owned.every((b) => b.report && b.report.profit > 0) && life.finances.savings > 250000 && chance(rng, 0.05 * profile.growth)) {
+    const defs = Object.keys(content.businesses).sort().map((id) => content.businesses[id]!).filter((d) => !d.retired);
+    const def = pick(rng, defs);
+    const city = life.character.cityId;
+    const unused = def.names.filter((n) => !life.business.items.some((x) => x.name === n));
+    const name = unused.length > 0 ? pick(rng, unused) : def.names[0]!;
+    const needsHire = def.license !== undefined && !youHoldLicense(life, def.license);
+    const total = totalToStart(def, 'standard', city, needsHire, content).total;
+    if (life.finances.savings - RESERVE >= total) out.push(['start_business', { biz: { defId: def.id, name, cityId: city, style: 'standard', plan: { source: 'savings' }, role: 'manager' } }]);
+  }
   return out;
+}
+
+const sameCountryCityIds = (from: Id, content: ContentBundle): Id[] => {
+  const country = content.cities[from]?.countryId;
+  return Object.keys(content.cities).sort().filter((id) => content.cities[id]!.countryId === country);
+};
+
+/** The line and supply decisions: what a shop carries, each line's price, how heavily each item is ordered. */
+function lineActions(life: LifeState, b: Business, def: ContentBundle['businesses'][string], content: ContentBundle, rng: RngState, profile: BusinessProfile, out: [LifeActionId, LifeActionParams][]): void {
+  const pol = profile.orderPolicy;
+  const last = new Map((b.report?.lines ?? []).map((l) => [l.productId, l]));
+  const margin = (p: (typeof def.products)[number]) => (p.type === 'goods' ? 1 - p.costShare : 1 - (p.pool ? (p.pool.units * (def.pools.find((x) => x.id === p.pool!.id)?.cost ?? 0)) / p.price : 0));
+  // A shop picks its lines in its first year: good by margin and demand, poor the worst of both, random any.
+  if (def.lineMode === 'choose' && b.report === null && b.lines.some((l) => l.on)) {
+    const max = content.balance.business.products.maxLines[b.style];
+    const list = productsOf(def, b.style);
+    const ranked = pol === 'good' ? [...list].sort((x, y) => margin(y) * y.share - margin(x) * x.share) : pol === 'poor' ? [...list].sort((x, y) => margin(x) * x.share - margin(y) * y.share) : [...list].sort(() => nextInt(rng, -1, 1));
+    const want = new Set(ranked.slice(0, max).map((p) => p.id));
+    for (const l of b.lines) if (l.on && !want.has(l.productId)) out.push(['set_line', { biz: { businessId: b.id, productId: l.productId, on: false } }]);
+    for (const id of want) if (!b.lines.find((l) => l.productId === id)?.on) out.push(['set_line', { biz: { businessId: b.id, productId: id, on: true } }]);
+  }
+  const seen = new Set<string>();
+  for (const line of b.lines) {
+    if (!line.on) continue;
+    const p = def.products.find((x) => x.id === line.productId)!;
+    const item = itemOf(def, p);
+    if (!item) continue;
+    const result = last.get(p.id);
+    // Order level, once per item.
+    if (!seen.has(item.id)) {
+      seen.add(item.id);
+      const now = b.orders[item.id] ?? 'normal';
+      let want: OrderLevel = now;
+      if (pol === 'good') want = result && result.demand > 0 && result.lost / result.demand > 0.1 ? 'heavy' : result && result.sold > 0 && result.spoiled / (result.sold + result.spoiled) > 0.15 ? 'lean' : 'normal';
+      else if (pol === 'poor') want = item.perishable > 0 ? 'lean' : 'heavy';
+      else if (chance(rng, 0.3)) want = pick(rng, ORDER_LEVELS);
+      if (want !== now) out.push(['set_order', { biz: { businessId: b.id, stockId: item.id, level: want } }]);
+    }
+    // Price level.
+    let price: PriceLevel = line.price;
+    if (pol === 'good') price = supplierMove(life.seed, item.category, life.currentYear, content) > 0.08 ? 'high' : 'fair';
+    else if (pol === 'poor') price = margin(p) < 0.5 ? 'low' : 'high';
+    else if (chance(rng, 0.2)) price = pick(rng, PRICE_LEVELS);
+    if (price !== line.price && b.prices === 'fair') out.push(['set_line', { biz: { businessId: b.id, productId: p.id, price } }]);
+  }
+  for (const pool of def.pools) {
+    const now = b.orders[pool.id] ?? 'normal';
+    const used = def.products.filter((p) => p.pool?.id === pool.id).map((p) => last.get(p.id)).filter((l) => l !== undefined);
+    const lost = used.reduce((s, l) => s + l!.lost, 0);
+    const demand = used.reduce((s, l) => s + l!.demand, 0);
+    let want: OrderLevel = now;
+    if (pol === 'good') want = demand > 0 && lost / demand > 0.1 ? 'heavy' : 'normal';
+    else if (pol === 'poor') want = pool.perishable > 0 ? 'heavy' : 'lean';
+    else if (chance(rng, 0.3)) want = pick(rng, ORDER_LEVELS);
+    if (want !== now) out.push(['set_order', { biz: { businessId: b.id, stockId: pool.id, level: want } }]);
+  }
+}
+
+/** Headcount, hiring to the place that is short, training, location managers, moving people about, and franchising. */
+function teamActions(life: LifeState, b: Business, def: ContentBundle['businesses'][string], content: ContentBundle, rng: RngState, profile: BusinessProfile, out: [LifeActionId, LifeActionParams][]): void {
+  const pol = profile.policy;
+  const r = b.report;
+  // Headcount near the preset, with drift by policy.
+  if (r && chance(rng, 0.3)) {
+    const loc = pick(rng, b.locations);
+    const role = pick(rng, crewRoles(def));
+    const cur = b.headcount[loc.id]?.[role.id] ?? 0;
+    const preset = presetHeads(def, loc.style, b.staffing, content)[role.id] ?? 0;
+    const want = pol === 'good' ? preset : pol === 'random' ? cur + (chance(rng, 0.5) ? 1 : -1) : chance(rng, 0.5) ? Math.max(role.min, preset - 1) : preset + 2;
+    if (want !== cur && headcountBlock(b, def, loc.id, role.id, want, content) === null) out.push(['set_headcount', { biz: { businessId: b.id, locationId: loc.id, roleId: role.id, count: want } }]);
+  }
+  // Hire to the place that is short.
+  if (r && (r.notes.includes('understaffed') || r.notes.includes('overworked')) && chance(rng, pol === 'good' ? 0.6 : 0.2)) {
+    const busiest = [...r.locations.entries()].sort((x, y) => y[1].customers / Math.max(1, b.headcount[b.locations[y[0]]?.id ?? '']?.[crewRoles(def)[0]!.id] ?? 1) - x[1].customers / Math.max(1, b.headcount[b.locations[x[0]]?.id ?? '']?.[crewRoles(def)[0]!.id] ?? 1))[0];
+    const loc = busiest ? b.locations[busiest[0]] : undefined;
+    if (loc) out.push(['hire_staff', { biz: { businessId: b.id, locationId: loc.id, roleId: crewRoles(def).find((x) => x.craft === true)!.id, crew: true } }]);
+  }
+  // Training, by policy.
+  const training = pol === 'good' ? 'some' : pol === 'poor' ? 'none' : pick(rng, TRAINING_LEVELS);
+  if (b.training !== training) out.push(['set_business_decisions', { biz: { businessId: b.id, decisions: { training } } }]);
+  // A location manager where there are two or more places and the owner is not there in person.
+  if (b.locations.length >= 2 && chance(rng, profile.managerChance)) {
+    for (const loc of b.locations) {
+      if (loc.manager !== undefined) continue;
+      const inPerson = b.role === 'self' && loc.cityId === life.character.cityId && life.career.job === null;
+      if (inPerson) continue;
+      const person = b.staff.find((s) => !s.manager && s.locationId === loc.id);
+      if (person && appointBlock(life, b, def, person.personId, loc.id, content) === null) out.push(['appoint_manager', { biz: { businessId: b.id, personId: person.personId, locationId: loc.id } }]);
+      else if (!person && hireBlock(life, b, def, { locationId: loc.id }, content) === null) out.push(['hire_staff', { biz: { businessId: b.id, locationId: loc.id } }]);
+    }
+  }
+  // Now and then someone is moved to another place.
+  const movable = b.staff.filter((s) => !s.manager);
+  if (b.locations.length >= 2 && movable.length > 0 && chance(rng, 0.04)) {
+    const person = pick(rng, movable);
+    const others = b.locations.filter((l) => l.id !== person.locationId);
+    const to = others.length > 0 ? pick(rng, others) : undefined;
+    if (to && transferBlock(life, b, person.personId, to.id, content) === null) out.push(['transfer_staff', { biz: { businessId: b.id, personId: person.personId, locationId: to.id } }]);
+  }
+  // Franchising, when eligible, with a chance; and ending one that is hurting the name.
+  if (franchiseEligible(b, life, content) && chance(rng, profile.franchiseChance)) {
+    const cities = sameCountryCityIds(life.character.cityId, content).filter((c) => c !== b.cityId);
+    if (cities.length > 0) out.push(['sell_franchise', { biz: { businessId: b.id, cityId: pick(rng, cities), style: b.style, royalty: pick(rng, content.balance.business.franchise.royalties) } }]);
+  }
+  for (const f of b.franchises) if (f.risk > 60 && pol === 'good' && chance(rng, 0.4)) out.push(['end_franchise', { biz: { businessId: b.id, franchiseId: f.id, how: 'end' } }]);
 }
 
 function decide(b: Business, policy: Policy, rng: RngState) {
@@ -203,7 +341,34 @@ export interface BusinessReport {
   compare: { ownerYears: number; ownerIncome: number; workerYears: number; workerIncome: number; owners65: number[]; others65: number[]; ownersBankrupt: number; ownersN: number; othersBankrupt: number; othersN: number };
   /** The business events that fired. */
   events: Record<string, number>;
+  /** B2: products and stock, the world, headcount, managers, franchises and time. */
+  depth: DepthReport;
   messages: string[];
+}
+
+type Margin = { revenue: number; cost: number };
+type Stockouts = { n: number; over: number; share: number };
+type Waste = { spoiled: number; sold: number };
+type Size = '1' | '2-3' | '4-8' | '9+';
+const SIZES: readonly Size[] = ['1', '2-3', '4-8', '9+'];
+const sizeOf = (places: number): Size => (places <= 1 ? '1' : places <= 3 ? '2-3' : places <= 8 ? '4-8' : '9+');
+
+/** B2: what the new systems did, by kind, policy, size and economy phase. */
+export interface DepthReport {
+  stockouts: { all: Stockouts; byKind: Record<string, Stockouts>; byOrder: Record<Policy, Stockouts> };
+  waste: { perishable: Waste; durable: Waste; byKind: Record<string, Waste> };
+  /** Gross margin (sales less the cost of what was sold) by kind and product group, and the margin after waste by kind. */
+  margin: { byGroup: Record<string, Margin>; byKind: Record<string, Margin>; afterWaste: Record<string, Margin> };
+  headcount: { byStyle: Record<BusinessStyle, { heads: number; places: number }>; bySize: Record<Size, { heads: number; places: number; named: number; crew: number; years: number }>; named: number; crew: number; years: number; namedOverCap: number; mostNamed: number };
+  managers: { multiYears: number; withYears: number; profitWith: number; profitWithout: number; revenueWith: number; revenueWithout: number; placesWith: number; placesWithout: number; failedWith: number; failedWithout: number; appointed: number };
+  turnover: { heads: number; left: number; hiring: number; revenue: number };
+  byPhase: Record<EconomyPhase, { n: number; profit: number; revenue: number }>;
+  shocks: { shockYears: number; shockMargin: number; calmYears: number; calmMargin: number };
+  franchise: { sold: number; ended: number; years: number; royalties: number; support: number; lives: number; feeIncome: number };
+  owners: { most: number; multi: number; atLimit: number };
+  timing: { withBusiness: { years: number; ms: number }; without: { years: number; ms: number } };
+  survival: { byOrder: Record<Policy, Cohort>; byFoundedPhase: Record<EconomyPhase, Cohort> };
+  profitByOrder: Record<Policy, { n: number; profit: number; revenue: number }>;
 }
 
 const zeroBy = <K extends string>(keys: readonly K[]) => Object.fromEntries(keys.map((k) => [k, 0])) as Record<K, number>;
@@ -230,7 +395,30 @@ export function emptyBusinessReport(content: ContentBundle): BusinessReport {
     people: { hires: 0, quits: 0, namedPeak: 0, investors: 0, investorsMadeMoney: 0, investorsLostMoney: 0, cofounders: 0, buyouts: 0, managerSkims: 0 },
     compare: { ownerYears: 0, ownerIncome: 0, workerYears: 0, workerIncome: 0, owners65: [], others65: [], ownersBankrupt: 0, ownersN: 0, othersBankrupt: 0, othersN: 0 },
     events: {},
+    depth: emptyDepth(content),
     messages: [],
+  };
+}
+
+const zeroStock = (): Stockouts => ({ n: 0, over: 0, share: 0 });
+function emptyDepth(content: ContentBundle): DepthReport {
+  const types = Object.keys(content.businesses).sort();
+  const phases = <T>(f: () => T) => Object.fromEntries(ECONOMY_PHASES.map((p) => [p, f()])) as Record<EconomyPhase, T>;
+  const pol = <T>(f: () => T) => ({ good: f(), random: f(), poor: f() }) as Record<Policy, T>;
+  return {
+    stockouts: { all: zeroStock(), byKind: Object.fromEntries(types.map((t) => [t, zeroStock()])), byOrder: pol(zeroStock) },
+    waste: { perishable: { spoiled: 0, sold: 0 }, durable: { spoiled: 0, sold: 0 }, byKind: Object.fromEntries(types.map((t) => [t, { spoiled: 0, sold: 0 }])) },
+    margin: { byGroup: {}, byKind: Object.fromEntries(types.map((t) => [t, { revenue: 0, cost: 0 }])), afterWaste: Object.fromEntries(types.map((t) => [t, { revenue: 0, cost: 0 }])) },
+    headcount: { byStyle: Object.fromEntries(BUSINESS_STYLES.map((s) => [s, { heads: 0, places: 0 }])) as Record<BusinessStyle, { heads: number; places: number }>, bySize: Object.fromEntries(SIZES.map((s) => [s, { heads: 0, places: 0, named: 0, crew: 0, years: 0 }])) as Record<Size, { heads: number; places: number; named: number; crew: number; years: number }>, named: 0, crew: 0, years: 0, namedOverCap: 0, mostNamed: 0 },
+    managers: { multiYears: 0, withYears: 0, profitWith: 0, profitWithout: 0, revenueWith: 0, revenueWithout: 0, placesWith: 0, placesWithout: 0, failedWith: 0, failedWithout: 0, appointed: 0 },
+    turnover: { heads: 0, left: 0, hiring: 0, revenue: 0 },
+    byPhase: phases(() => ({ n: 0, profit: 0, revenue: 0 })),
+    shocks: { shockYears: 0, shockMargin: 0, calmYears: 0, calmMargin: 0 },
+    franchise: { sold: 0, ended: 0, years: 0, royalties: 0, support: 0, lives: 0, feeIncome: 0 },
+    owners: { most: 0, multi: 0, atLimit: 0 },
+    timing: { withBusiness: { years: 0, ms: 0 }, without: { years: 0, ms: 0 } },
+    survival: { byOrder: pol(cohort), byFoundedPhase: phases(cohort) },
+    profitByOrder: pol(() => ({ n: 0, profit: 0, revenue: 0 })),
   };
 }
 
@@ -245,6 +433,10 @@ interface Record_ {
   lost: number | null;
   ended: number | null;
   how: 'started' | 'bought' | 'inherited';
+  /** B2: the economy when it began, and whether it has had several places, and a manager at one, in its latest year. */
+  phase: EconomyPhase;
+  multi: boolean;
+  managed: boolean;
 }
 
 const HORIZONS = [1, 5, 10] as const;
@@ -260,12 +452,32 @@ export class BusinessWatcher {
   private pendingFunding: BusinessFunding | null = null;
   private failedYears: number[] = [];
   private readonly seenStaff = new Set<string>();
+  private mostOwned = 0;
+  private readonly franchises = new Set<string>();
+  private readonly endedFranchises = new Set<string>();
+  private readonly managers = new Set<string>();
+  private hadFranchise = false;
+  private lastTick: number | null = null;
+  private lastHas = false;
 
   constructor(
     private readonly report: BusinessReport,
     private readonly content: ContentBundle,
     private readonly policy: Policy,
+    private readonly orderPolicy: Policy = policy,
   ) {}
+
+  /** B2: the time a simulated year took, with or without a business at its start (called at the top of each year and after the last). */
+  tick(has: boolean): void {
+    const now = performance.now();
+    if (this.lastTick !== null) {
+      const t = this.report.depth.timing[this.lastHas ? 'withBusiness' : 'without'];
+      t.years++;
+      t.ms += now - this.lastTick;
+    }
+    this.lastTick = now;
+    this.lastHas = has;
+  }
 
   /** The funding of the next business this life begins (the action just taken). */
   planned(source: BusinessFunding): void {
@@ -296,6 +508,42 @@ export class BusinessWatcher {
       if (rep.notes.includes('unlicensed')) r.years.unlicensed++;
       r.people.quits += rep.quit;
       r.people.namedPeak = Math.max(r.people.namedPeak, b.staff.length);
+      this.depth(b, rep, life, before);
+    }
+    // B2: what the owner owns at once, and franchises sold or ended.
+    const d = r.depth;
+    const owned = life.business.items.length;
+    this.mostOwned = Math.max(this.mostOwned, owned);
+    if (owned >= this.content.balance.business.limits.businesses) d.owners.atLimit++;
+    const live = new Set<string>();
+    for (const b of life.business.items) {
+      for (const f of b.franchises) {
+        const key = `${b.id}:${f.id}`;
+        live.add(key);
+        if (!this.franchises.has(key)) {
+          this.franchises.add(key);
+          d.franchise.sold++;
+          d.franchise.feeIncome += f.fee;
+        }
+      }
+      if (b.franchises.length > 0) this.hadFranchise = true;
+      for (const l of b.locations) {
+        if (l.manager === undefined) continue;
+        const key = `${b.id}:${l.manager}`;
+        if (!this.managers.has(key)) {
+          this.managers.add(key);
+          d.managers.appointed++;
+        }
+      }
+    }
+    // A franchise that is gone while its business carries on has ended (one that went with its business has not).
+    for (const key of this.franchises) {
+      if (live.has(key) || this.endedFranchises.has(key)) continue;
+      const bizId = key.split(':')[0]!;
+      if (life.business.items.some((b) => b.id === bizId)) {
+        d.franchise.ended++;
+        this.endedFranchises.add(key);
+      }
     }
     // Owner income against workers' (the year's gross: pay plus what the businesses paid out).
     // (Famous lives are left out of every comparison with careers, as they are from the net worth target: a star's or a pro's pay swamps the average.)
@@ -318,6 +566,7 @@ export class BusinessWatcher {
         rec.ended = p.toYear;
         if (p.end === 'failed' || p.end === 'closed') rec.lost = p.toYear;
       }
+      if (p.end === 'failed' && rec?.multi) r.depth.managers[rec.managed ? 'failedWith' : 'failedWithout']++;
       if (p.end === 'failed') {
         r.failures.n++;
         r.failures.lostBy[p.defId] = (r.failures.lostBy[p.defId] ?? 0) + 1;
@@ -347,6 +596,98 @@ export class BusinessWatcher {
     }
   }
 
+  /** B2: one business-year: its lines, waste, margins, headcount, managers, turnover, the economy and the world. */
+  private depth(b: Business, rep: NonNullable<Business['report']>, life: LifeState, _before: LifeState): void {
+    const d = this.report.depth;
+    const def = this.content.businesses[b.defId]!;
+    const bal = this.content.balance.business;
+    const kind = b.defId;
+    // Stockouts and waste, by line.
+    for (const l of rep.lines ?? []) {
+      const p = def.products.find((x) => x.id === l.productId);
+      if (!p || l.demand <= 0) continue;
+      const share = l.lost / l.demand;
+      for (const s of [d.stockouts.all, d.stockouts.byKind[kind]!, d.stockouts.byOrder[this.orderPolicy]]) {
+        s.n++;
+        s.share += share;
+        if (share > bal.products.stockout.line) s.over++;
+      }
+      const w = p.perishable > 0 ? d.waste.perishable : d.waste.durable;
+      w.spoiled += l.spoiled;
+      w.sold += l.sold;
+      d.waste.byKind[kind]!.spoiled += l.spoiled;
+      d.waste.byKind[kind]!.sold += l.sold;
+      const g = (d.margin.byGroup[`${kind}:${p.group}`] ??= { revenue: 0, cost: 0 });
+      g.revenue += l.revenue;
+      g.cost += l.cost;
+      d.margin.byKind[kind]!.revenue += l.revenue;
+      d.margin.byKind[kind]!.cost += l.cost;
+    }
+    d.margin.afterWaste[kind]!.revenue += rep.revenue;
+    d.margin.afterWaste[kind]!.cost += rep.supplies;
+    // Headcount.
+    const places = b.locations.length;
+    const heads = rep.heads ?? 0;
+    const crew = b.crew.reduce((s, p) => s + p.count, 0);
+    d.headcount.byStyle[b.style].heads += heads;
+    d.headcount.byStyle[b.style].places += places;
+    const size = d.headcount.bySize[sizeOf(places)];
+    size.heads += heads;
+    size.places += places;
+    size.named += b.staff.length;
+    size.crew += crew;
+    size.years++;
+    d.headcount.named += b.staff.length;
+    d.headcount.crew += crew;
+    d.headcount.years++;
+    d.headcount.mostNamed = Math.max(d.headcount.mostNamed, b.staff.length);
+    if (b.staff.some((s) => b.staff.filter((x) => x.locationId === s.locationId && s.locationId !== null).length > bal.limits.namedPerLocation) || life.business.items.reduce((n, x) => n + x.staff.length, 0) > bal.limits.namedTotal) d.headcount.namedOverCap++;
+    // Location managers, across several places.
+    const managed = b.locations.some((l) => l.manager !== undefined);
+    const rec = this.records.get(b.id);
+    if (rec) {
+      rec.multi = places >= 2;
+      rec.managed = managed;
+    }
+    if (places >= 2) {
+      d.managers.multiYears++;
+      if (managed) {
+        d.managers.withYears++;
+        d.managers.profitWith += rep.profit;
+        d.managers.revenueWith += rep.revenue;
+        d.managers.placesWith += places;
+      } else {
+        d.managers.profitWithout += rep.profit;
+        d.managers.revenueWithout += rep.revenue;
+        d.managers.placesWithout += places;
+      }
+    }
+    d.profitByOrder[this.orderPolicy].n++;
+    d.profitByOrder[this.orderPolicy].profit += rep.profit;
+    d.profitByOrder[this.orderPolicy].revenue += rep.revenue;
+    // Turnover.
+    d.turnover.heads += heads;
+    d.turnover.left += rep.turnover ?? 0;
+    d.turnover.hiring += rep.hiring ?? 0;
+    d.turnover.revenue += rep.revenue;
+    // The economy, and years the suppliers moved against it.
+    const phase = (rep.economy ?? 'steady') as EconomyPhase;
+    d.byPhase[phase].n++;
+    d.byPhase[phase].profit += rep.profit;
+    d.byPhase[phase].revenue += rep.revenue;
+    if (rep.revenue > 0) {
+      const margin = (rep.revenue - rep.supplies) / rep.revenue;
+      const shock = rep.notes.includes('supplierUp') || rep.notes.includes('shortage');
+      d.shocks[shock ? 'shockYears' : 'calmYears']++;
+      d.shocks[shock ? 'shockMargin' : 'calmMargin'] += margin;
+    }
+    if (b.franchises.length > 0) {
+      d.franchise.years++;
+      d.franchise.royalties += rep.royalties ?? 0;
+      d.franchise.support += rep.support ?? 0;
+    }
+  }
+
   private begin(b: Business, life: LifeState): void {
     const r = this.report;
     const def = this.content.businesses[b.defId]!;
@@ -354,7 +695,7 @@ export class BusinessWatcher {
     this.pendingFunding = null;
     const skill = ownerSkill(life, def, this.content);
     const band = skill < 58 ? 'low' : skill >= 64 ? 'high' : 'mid';
-    this.records.set(b.id, { id: b.id, defId: b.defId, style: b.style, start: b.founded, funding, skill: band, role: b.role, lost: null, ended: null, how: b.how });
+    this.records.set(b.id, { id: b.id, defId: b.defId, style: b.style, start: b.founded, funding, skill: band, role: b.role, lost: null, ended: null, how: b.how, phase: economyPhase(life.seed, b.founded, this.content), multi: false, managed: false });
     this.everOwned = true;
     if (b.how === 'inherited') {
       this.inherited = true;
@@ -377,7 +718,11 @@ export class BusinessWatcher {
 
   finish(life: LifeState): void {
     const r = this.report;
+    this.tick(false);
     r.lives++;
+    r.depth.owners.most = Math.max(r.depth.owners.most, this.mostOwned);
+    if (this.mostOwned >= 2) r.depth.owners.multi++;
+    if (this.hadFranchise) r.depth.franchise.lives++;
     const age = life.character.age;
     if (age >= 30) r.reached[30]++;
     if (age >= 50) r.reached[50]++;
@@ -393,7 +738,7 @@ export class BusinessWatcher {
     const end = life.currentYear;
     for (const rec of this.records.values()) {
       if (rec.how === 'inherited') continue;
-      const cuts = [r.survival.all, r.survival.byType[rec.defId]!, r.survival.byStyle[rec.style], r.survival.byPolicy[this.policy], r.survival.bySkill[rec.skill], r.survival.byRole[rec.role], r.survival.byFunding[rec.funding]];
+      const cuts = [r.survival.all, r.survival.byType[rec.defId]!, r.survival.byStyle[rec.style], r.survival.byPolicy[this.policy], r.survival.bySkill[rec.skill], r.survival.byRole[rec.role], r.survival.byFunding[rec.funding], r.depth.survival.byOrder[this.orderPolicy], r.depth.survival.byFoundedPhase[rec.phase]];
       HORIZONS.forEach((h, i) => {
         const lostWithin = rec.lost !== null && rec.lost - rec.start <= h;
         const endedBefore = rec.ended !== null && rec.lost === null && rec.ended - rec.start < h;
@@ -480,7 +825,41 @@ export function formatBusiness(r: BusinessReport, content: ContentBundle): strin
   const total = Object.values(r.events).reduce((a, b) => a + b, 0);
   lines.push(`  events: ${total} business events fired in all; ${ids.length - never.length} of ${ids.length} fired at least once`);
   if (never.length > 0) lines.push(`    never fired (${never.length}): ${never.slice(0, 50).join(', ')}${never.length > 50 ? ', ...' : ''}`);
+  lines.push(...formatDepth(r, content));
   for (const m of r.messages) lines.push(`    ${m}`);
+  return lines;
+}
+
+/** B2: the business depth section of the report. */
+function formatDepth(r: BusinessReport, content: ContentBundle): string[] {
+  const d = r.depth;
+  const types = Object.keys(content.businesses).sort();
+  const lines: string[] = ['', '  Business depth (B2):'];
+  const so = (label: string, s: Stockouts) => `${label} ${pct(s.over, s.n)} of ${s.n} line-years over the stockout line, mean share lost ${pct(s.share, s.n)}`;
+  lines.push(`    stockouts: ${so('all', d.stockouts.all)}`);
+  lines.push(`      by kind: ${types.map((t) => so(t, d.stockouts.byKind[t]!)).join('; ')}`);
+  lines.push(`      by ordering: ${(['good', 'random', 'poor'] as const).map((p) => so(p, d.stockouts.byOrder[p])).join('; ')}`);
+  const w = (x: Waste) => pct(x.spoiled, x.spoiled + x.sold);
+  lines.push(`    waste (spoiled units of units sold plus spoiled): lines that spoil ${w(d.waste.perishable)}, lines that keep ${w(d.waste.durable)}; by kind: ${types.map((t) => `${t} ${w(d.waste.byKind[t]!)}`).join(', ')}`);
+  const m = (x: Margin) => pct(x.revenue - x.cost, x.revenue);
+  lines.push(`    gross margin by kind (sales less cost of goods sold): ${types.map((t) => `${t} ${m(d.margin.byKind[t]!)}`).join(', ')}; after waste and holding: ${types.map((t) => `${t} ${m(d.margin.afterWaste[t]!)}`).join(', ')}`);
+  lines.push(`      by product group: ${Object.keys(d.margin.byGroup).sort().map((g) => `${g} ${m(d.margin.byGroup[g]!)}`).join(', ')}`);
+  const h = d.headcount;
+  lines.push(`    people a place: ${BUSINESS_STYLES.map((s) => `${s} ${h.byStyle[s].places > 0 ? (h.byStyle[s].heads / h.byStyle[s].places).toFixed(1) : 'n/a'}`).join(', ')}; named per business ${mean(h.named, h.years, 1)}, crew per business ${mean(h.crew, h.years, 1)}, most named at once ${h.mostNamed}, over the caps ${h.namedOverCap}`);
+  lines.push(`      by size (places): ${SIZES.map((s) => `${s}: ${h.bySize[s].places > 0 ? (h.bySize[s].heads / h.bySize[s].places).toFixed(1) : 'n/a'} a place, ${mean(h.bySize[s].named, h.bySize[s].years, 1)} named + ${mean(h.bySize[s].crew, h.bySize[s].years, 1)} crew, ${h.bySize[s].years} business-years`).join('; ')}`);
+  const g = d.managers;
+  lines.push(`    location managers: ${pct(g.withYears, g.multiYears)} of ${g.multiYears} multi-place business-years had one (${g.appointed} appointed); profit as a share of sales with ${pct(g.profitWith, g.revenueWith)} against without ${pct(g.profitWithout, g.revenueWithout)}; failed with ${g.failedWith}, without ${g.failedWithout}`);
+  lines.push(`    turnover: ${pct(d.turnover.left, d.turnover.heads)} of the crew left a year, hiring cost ${pct(d.turnover.hiring, d.turnover.revenue)} of sales`);
+  lines.push(`    profit by economy phase (mean, share of sales): ${ECONOMY_PHASES.map((p) => `${p} ${dollars(d.byPhase[p].n > 0 ? d.byPhase[p].profit / d.byPhase[p].n : 0)} (${pct(d.byPhase[p].profit, d.byPhase[p].revenue)}, ${d.byPhase[p].n} years)`).join(', ')}`);
+  lines.push(`    margin after supplies: supplier-shock years ${pct(d.shocks.shockMargin, d.shocks.shockYears)} (${d.shocks.shockYears} years), calm years ${pct(d.shocks.calmMargin, d.shocks.calmYears)} (${d.shocks.calmYears} years)`);
+  lines.push(`    survival by ordering: ${(['good', 'random', 'poor'] as const).map((p) => `${p} ${HORIZONS.map((hz, i) => `${hz}y ${pct(d.survival.byOrder[p].ok[i]!, d.survival.byOrder[p].n[i]!)}`).join(' ')}`).join('; ')}`);
+  lines.push(`    survival by the economy in the founding year: ${ECONOMY_PHASES.map((p) => `${p} ${HORIZONS.map((hz, i) => `${hz}y ${pct(d.survival.byFoundedPhase[p].ok[i]!, d.survival.byFoundedPhase[p].n[i]!)} (n ${d.survival.byFoundedPhase[p].n[i]})`).join(' ')}`).join('; ')}`);
+  lines.push(`    profit as a share of sales by ordering: ${(['good', 'random', 'poor'] as const).map((p) => `${p} ${pct(d.profitByOrder[p].profit, d.profitByOrder[p].revenue)}`).join(', ')}`);
+  const f = d.franchise;
+  lines.push(`    franchises: ${f.sold} sold (${f.lives} lives), ${f.ended} ended, ${f.years} franchised business-years, royalties ${dollars(f.royalties)} and support ${dollars(f.support)} in all, fees ${dollars(f.feeIncome)}`);
+  lines.push(`    businesses an owner: most at once ${d.owners.most} (limit ${content.balance.business.limits.businesses}), ${d.owners.multi} lives owned two or more at once, business-years at the limit ${d.owners.atLimit}`);
+  const t = d.timing;
+  lines.push(`    milliseconds per simulated year: with a business ${mean(t.withBusiness.ms, t.withBusiness.years, 1)} (${t.withBusiness.years} years), without ${mean(t.without.ms, t.without.years, 1)} (${t.without.years} years)`);
   return lines;
 }
 
@@ -515,5 +894,29 @@ export function businessTargets(sim: SimulationReport, content: ContentBundle): 
   const otherBankrupt = share(r.compare.othersBankrupt, r.compare.othersN);
   add('bankruptcy among owners above the rest (points): the risk that matches the reward', 100 * (ownerBankrupt - otherBankrupt), t.bankruptGap, (x) => x.toFixed(1));
   add('owners’ median net worth at 65 against everyone else’s (ratio)', median(r.compare.owners65) / median(r.compare.others65), t.netWorthRatio, num);
+  // B2: business depth.
+  const d = r.depth;
+  add('mean share of a line’s demand lost to an empty shelf', share(d.stockouts.all.share, d.stockouts.all.n), t.lostShare, pct1);
+  add('line-years that ran out past the stockout line', share(d.stockouts.all.over, d.stockouts.all.n), t.stockoutLines, pct1);
+  add('spoiled share of units for lines that spoil', share(d.waste.perishable.spoiled, d.waste.perishable.spoiled + d.waste.perishable.sold), t.wastePerishable, pct1);
+  for (const kind of Object.keys(content.businesses).sort()) {
+    const mg = d.margin.byKind[kind]!;
+    if (mg.revenue > 0) add(`gross margin of ${kind}`, (mg.revenue - mg.cost) / mg.revenue, t.grossMargin, pct1);
+  }
+  add('business-years with more named people than the caps allow (must be none)', d.headcount.namedOverCap, t.namedOverCap, (x) => String(x));
+  const lost = (p: Policy) => share(d.stockouts.byOrder[p].share, d.stockouts.byOrder[p].n);
+  add('mean share of demand lost to empty shelves: poor ordering above good (points)', 100 * (lost('poor') - lost('good')), t.orderGap, (x) => x.toFixed(1));
+  const ph = (p: EconomyPhase) => share(d.byPhase[p].profit, d.byPhase[p].revenue);
+  add('profit as a share of sales: boom years above recession years (points)', 100 * (ph('boom') - ph('recession')), t.phaseGap, (x) => x.toFixed(1));
+  const mgr = d.managers;
+  add('profit as a share of sales across several places: with a location manager minus without (points; managers go where the owner is away, so this only has to stay in a sane range)', 100 * (share(mgr.profitWith, mgr.revenueWith) - share(mgr.profitWithout, mgr.revenueWithout)), t.managerGap, (x) => x.toFixed(1));
+  add('crew leaving a year', share(d.turnover.left, d.turnover.heads), t.turnover, pct1);
+  add('margin after supplies: calm years above supplier-shock years (points)', 100 * (share(d.shocks.calmMargin, d.shocks.calmYears) - share(d.shocks.shockMargin, d.shocks.shockYears)), t.shockGap, (x) => x.toFixed(1));
+  add('franchises sold', d.franchise.sold, t.franchisesSold, (x) => String(x));
+  add('milliseconds per simulated year with a business', share(d.timing.withBusiness.ms, d.timing.withBusiness.years), t.msWithBusiness, (x) => x.toFixed(1));
+  const b2 = Object.values(content.registries.business.triggers).flatMap((tr) => tr.events).filter((id) => !(content.balance.targets.business.rareEvents as string[]).includes(id));
+  const unreached = b2.filter((id) => !r.events[id]);
+  add('events of the business depth stage that never fired (outside the rare list; must be none)', unreached.length, t.unreachedEvents, (x) => String(x));
+  if (unreached.length > 0) r.messages.push(`unreached: ${unreached.join(', ')}`);
   return out;
 }

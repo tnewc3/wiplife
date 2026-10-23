@@ -8,7 +8,9 @@
 import { BUSINESS_ROLE, type BusinessCondition, type Condition, type ContentBundle, type EventDef } from '../../content/schemas';
 import { addDebt } from '../finance';
 import type { Business, BusinessStaff, Id, LifeState } from '../types';
+import { reconcileHeadcount } from './crew';
 import { newBusiness } from './found';
+import { craftRole, managerRole } from './headcount';
 import { startupCost, workingCapital } from './model';
 
 function required(c: Condition | undefined): Condition[] {
@@ -20,10 +22,10 @@ function required(c: Condition | undefined): Condition[] {
 const lowest = (c: { gt?: number | undefined; gte?: number | undefined; eq?: number | undefined; lte?: number | undefined; lt?: number | undefined } | undefined, fallback: number) =>
   c === undefined ? fallback : (c.eq ?? c.gte ?? (c.gt !== undefined ? c.gt + 1 : c.lte !== undefined ? c.lte : c.lt !== undefined ? c.lt - 1 : fallback));
 
-function staffEntry(b: Business, personId: Id, state: LifeState, over: Partial<BusinessStaff> = {}): BusinessStaff {
+function staffEntry(b: Business, personId: Id, state: LifeState, craftId: Id, over: Partial<BusinessStaff> = {}): BusinessStaff {
   const p = state.people[personId]!;
   if (!p.tags.includes('staff')) p.tags.push('staff');
-  return { personId, locationId: b.locations[0]!.id, title: 'worker', skill: 60, morale: 60, since: state.currentYear - 1, licensed: false, raise: 1, wage: 30000, ...over };
+  return { personId, locationId: b.locations[0]!.id, roleId: craftId, title: 'worker', skill: 60, morale: 60, since: state.currentYear - 1, licensed: false, raise: 1, wage: 30000, ...over };
 }
 
 export function giveSampleBusiness(state: LifeState, def: EventDef, cast: Record<string, Id>, content: ContentBundle): void {
@@ -43,11 +45,13 @@ export function giveSampleBusiness(state: LifeState, def: EventDef, cast: Record
   const bdef = content.businesses[defId] ?? content.businesses.cafe!;
   const style = bc.style?.[0] ?? 'standard';
   const b = newBusiness(state, bdef, bdef.names[0]!, state.character.cityId, style, 'started', content);
+  const craft = craftRole(bdef).id;
+  const mgrId = managerRole(bdef)?.id ?? craft;
   const years = lowest(bc.years, 3);
   b.founded = state.currentYear - Math.max(0, years);
   b.locations[0]!.opened = b.founded;
   const extra = Math.max(0, lowest(bc.locations, 1) - 1);
-  for (let i = 0; i < extra; i++) b.locations.push({ id: `l${bs.nextLocation++}`, cityId: b.cityId, style, opened: b.founded });
+  for (let i = 0; i < extra; i++) b.locations.push({ id: `l${bs.nextLocation++}`, cityId: b.cityId, style, opened: b.founded, stock: {}, forecast: {} });
   b.cash = workingCapital(bdef, style, b.cityId, content);
   b.assets = startupCost(bdef, style, b.cityId, content);
   b.owners = [{ id: 'you', name: `${state.character.name.first} ${state.character.name.last}`, share: 100, put: b.assets, year: b.founded, paid: 0, role: 'you' }];
@@ -67,12 +71,12 @@ export function giveSampleBusiness(state: LifeState, def: EventDef, cast: Record
       you.share -= take;
       b.owners.push({ id, name: `${state.people[id]!.name.first} ${state.people[id]!.name.last}`, share: take, put: 20000, year: b.founded, paid: 0, role: spec.business });
     } else if (spec.business === 'manager') {
-      b.staff.push(staffEntry(b, id, state, { manager: true, locationId: null, title: bdef.managerTitle, honesty: 70, skill: 60 }));
+      b.staff.push(staffEntry(b, id, state, craft, { manager: true, roleId: mgrId, locationId: null, title: bdef.managerTitle, honesty: 70, skill: 60 }));
       b.role = 'manager';
     } else if (spec.business === 'licensed') {
-      b.staff.push(staffEntry(b, id, state, { licensed: true, title: bdef.license?.title ?? 'worker' }));
+      b.staff.push(staffEntry(b, id, state, craft, { licensed: true, title: bdef.license?.title ?? 'worker' }));
     } else {
-      b.staff.push(staffEntry(b, id, state, { title: bdef.staffTitle }));
+      b.staff.push(staffEntry(b, id, state, craft, { title: bdef.staffTitle }));
     }
   }
   // Anyone the event asks for beyond the cast: more staff, an investor, a co-founder, a manager.
@@ -86,7 +90,7 @@ export function giveSampleBusiness(state: LifeState, def: EventDef, cast: Record
   while (b.staff.filter((s) => !s.manager).length < wantStaff) {
     const id = person();
     if (id === '') break;
-    b.staff.push(staffEntry(b, id, state, { title: bdef.staffTitle }));
+    b.staff.push(staffEntry(b, id, state, craft, { title: bdef.staffTitle }));
   }
   if (bc.investors && !b.owners.some((o) => o.role === 'investor')) {
     const id = person();
@@ -105,14 +109,14 @@ export function giveSampleBusiness(state: LifeState, def: EventDef, cast: Record
   if ((bc.manager || b.role === 'manager') && !b.staff.some((s) => s.manager)) {
     const id = person();
     if (id !== '') {
-      b.staff.push(staffEntry(b, id, state, { manager: true, locationId: null, title: bdef.managerTitle, honesty: 70 }));
+      b.staff.push(staffEntry(b, id, state, craft, { manager: true, roleId: mgrId, locationId: null, title: bdef.managerTitle, honesty: 70 }));
       b.role = 'manager';
     }
   }
   if (b.role === 'manager' && !b.staff.some((s) => s.manager)) b.role = 'self';
   if (bdef.license && bc.licensed === true && !b.staff.some((s) => s.licensed)) {
     const id = person();
-    if (id !== '') b.staff.push(staffEntry(b, id, state, { licensed: true, title: bdef.license.title }));
+    if (id !== '') b.staff.push(staffEntry(b, id, state, craft, { licensed: true, title: bdef.license.title }));
   }
   if (bdef.license && bc.licensed === false) b.staff = b.staff.filter((s) => !s.licensed);
   if (bc.loan) b.loanIds.push(addDebt(state, 'business', 40000, content).id);
@@ -150,5 +154,50 @@ export function giveSampleBusiness(state: LifeState, def: EventDef, cast: Record
     notes: [],
     locations: [],
   };
+  // B2: what the new conditions ask of it.
+  for (const id of bc.sells ?? []) {
+    const line = b.lines.find((l) => l.productId === id);
+    if (line) line.on = true;
+  }
+  if (bc.hasLocationManager === true && b.locations.length < 2) b.locations.push({ id: `l${bs.nextLocation++}`, cityId: b.cityId, style, opened: b.founded, stock: {}, forecast: {} });
+  reconcileHeadcount(b, bdef, content);
+  if (bc.hasLocationManager === true && mgrId !== craft) {
+    const second = b.locations[1]!;
+    let person = b.staff.find((s) => !s.manager && s.locationId === second.id);
+    if (!person) {
+      const id = Object.keys(state.people).sort().find((x) => !used.has(x) && state.people[x]!.alive && state.relationships[x] !== undefined && state.currentYear - state.people[x]!.birthYear >= 20 && state.people[x]!.cityId === state.character.cityId);
+      if (id !== undefined) {
+        used.add(id);
+        person = staffEntry(b, id, state, craft, { locationId: second.id, title: bdef.staffTitle });
+        b.staff.push(person);
+      }
+    }
+    if (person) {
+      person.roleId = mgrId;
+      person.honesty = 70;
+      second.manager = person.personId;
+    }
+    reconcileHeadcount(b, bdef, content);
+  }
+  if ((bc.franchises?.gte ?? bc.franchises?.gt ?? 0) > 0 || bc.brandRisk !== undefined) {
+    b.franchises.push({ id: `f${bs.nextLocation++}`, cityId: b.cityId, style, personId: null, skill: 50, since: state.currentYear - 2, fee: 30000, royalty: 0.06, revenue: 200000, royaltyPaid: 12000, support: 3000, profit: 20000, lossYears: 0, risk: Math.max(0, Math.min(100, lowest(bc.brandRisk, 20))) });
+  }
+  if (bc.franchiseReady === true) {
+    b.founded = state.currentYear - 8;
+    b.quality = 72;
+    b.reputation = 72;
+    while (b.locations.length < 3) b.locations.push({ id: `l${bs.nextLocation++}`, cityId: b.cityId, style, opened: b.founded, stock: {}, forecast: {} });
+    reconcileHeadcount(b, bdef, content);
+  }
+  if (b.report) {
+    if (bc.stocked?.includes('short')) b.report.lines = [{ productId: b.lines.find((l) => l.on)?.productId ?? 'coffee', demand: 1000, sold: 700, lost: 300, spoiled: 0, revenue: 20000, cost: 6000 }];
+    if (bc.stocked?.includes('surplus')) {
+      b.report.lines = [{ productId: b.lines.find((l) => l.on)?.productId ?? 'coffee', demand: 1000, sold: 1000, lost: 0, spoiled: 400, revenue: 20000, cost: 6000 }];
+      b.report.goodsCost = 6000;
+      b.report.waste = 2400;
+    }
+    if (bc.understaffed === true) b.report.notes.push('understaffed');
+    if (bc.headcount) b.report.heads = Math.max(lowest(bc.headcount, 4), 1);
+  }
   if (def.bindBusiness) cast[BUSINESS_ROLE] = b.id;
 }

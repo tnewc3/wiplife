@@ -8,10 +8,12 @@ import type { BusinessEffect, ContentBundle } from '../../content/schemas';
 import { earn, spend, wholeDollars } from '../finance';
 import { clampInt } from '../random';
 import type { Business, Id, LifeState } from '../types';
-import { buyOut, closeBusiness, expandBlock, openLocation, sellBusiness } from './found';
+import { buyOut, closeBusiness, expandBlock, lineBlock, openLocation, sellBusiness, setLine, setOrder } from './found';
+import { endFranchise } from './franchise';
+import { itemOf, productById } from './products';
 import { nominalRevenue } from './model';
 import { businessById, castBusinessId } from './query';
-import { fireStaff, hireBlock, hireStaff, raiseStaff, removeStaff } from './staff';
+import { appointManager, fireStaff, hireBlock, hireStaff, raiseStaff, removeStaff, transferBlock, transferStaff } from './staff';
 import { scaledAmount } from '../country';
 
 /** The business an effect acts on: the one the event is about, or the first you own. */
@@ -95,5 +97,65 @@ export function applyBusinessEffect(state: LifeState, effect: BusinessEffect, ca
     case 'audit':
       b.auditedYear = year;
       return;
+    // B2: lines, suppliers, stock and the brand.
+    case 'price':
+    case 'order': {
+      const def = content.businesses[b.defId];
+      const productId = effect.product ?? b.focus?.productId ?? [...(b.report?.lines ?? [])].sort((x, y) => y.revenue - x.revenue)[0]?.productId ?? b.lines.find((l) => l.on)?.productId;
+      const product = def && productId !== undefined ? productById(def, productId) : undefined;
+      if (!def || !product || effect.level === undefined) return;
+      if (effect.action === 'price') {
+        if (lineBlock(state, b, def, product.id, undefined, content) === null) setLine(state, b.id, product.id, { price: effect.level as Business['prices'] }, content);
+      } else {
+        const item = itemOf(def, product);
+        if (item) setOrder(state, b.id, item.id, effect.level as Business['orders'][string]);
+      }
+      return;
+    }
+    case 'supplier':
+    case 'shortage': {
+      const category = b.focus?.category ?? b.report?.supplierMoves?.[0]?.[0];
+      if (category === undefined) return;
+      const delta = effect.delta ?? 0;
+      b.shocks = b.shocks.filter((x) => !(x.category === category && x.kind === (effect.action === 'supplier' ? 'deal' : 'shortage')));
+      b.shocks.push({ kind: effect.action === 'supplier' ? 'deal' : 'shortage', mult: Math.min(effect.action === 'shortage' ? 1 : 5, Math.max(0.1, 1 + delta / 100)), until: year + (effect.years ?? 1) - 1, category });
+      return;
+    }
+    case 'buyAhead': {
+      const amount = Math.max(scaledAmount(state, effect.floor ?? 300, content), wholeDollars((b.report?.goodsCost ?? revenueOf(b, content) * 0.3) * (effect.share ?? 0.1)));
+      if (state.finances.savings < amount) return;
+      spend(state, amount, content);
+      // The money goes into the business as stock: the shelves hold more next year, so less is ordered.
+      const you = b.owners.find((o) => o.id === 'you');
+      if (you) you.put += amount;
+      b.stockValue += amount;
+      const cover = effect.share ?? 0.1;
+      for (const loc of b.locations) for (const id of Object.keys(loc.forecast)) loc.stock[id] = Math.round(((loc.stock[id] ?? 0) + loc.forecast[id]! * cover) * 100) / 100;
+      return;
+    }
+    case 'writeOff': {
+      const share = effect.share ?? 0;
+      for (const loc of b.locations) for (const id of Object.keys(loc.stock)) loc.stock[id] = Math.round(loc.stock[id]! * (1 - share) * 100) / 100;
+      b.stockValue = wholeDollars(b.stockValue * (1 - share));
+      return;
+    }
+    case 'transfer': {
+      const dest = staff ? b.locations.find((l) => l.id !== staff.locationId && transferBlock(state, b, staff.personId, l.id, content) === null) : undefined;
+      if (staff && dest) transferStaff(state, b, staff.personId, dest.id, content);
+      return;
+    }
+    case 'appoint': {
+      const def = content.businesses[b.defId];
+      if (staff && staff.locationId !== null && def) appointManager(state, b, def, staff.personId, staff.locationId, content);
+      return;
+    }
+    case 'brand':
+      for (const f of b.franchises) f.risk = clampInt(f.risk + (effect.delta ?? 0), 0, 100);
+      return;
+    case 'franchiseEnd': {
+      const worst = [...b.franchises].sort((x, y) => y.risk - x.risk)[0];
+      if (worst) endFranchise(state, b, worst.id, 'end', content);
+      return;
+    }
   }
 }

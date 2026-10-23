@@ -1,0 +1,52 @@
+id: biz_supplier_rise_beans
+title: Green coffee is dearer
+text: >-
+  The roaster's letter is polite and short: green coffee is up, and the new price list starts with the next order. The beans are the first thing {business} sells and the last thing a regular would let you change.
+tone: neutral
+category: business
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { business: { owned: true } }
+    - { age: { gte: 18 } }
+    - { business: { owned: true, sells: [coffee] } }
+weight: { base: 6 }
+cooldownYears: 4
+followUpOnly: true
+bindBusiness: true
+choices:
+  - id: absorb
+    label: Absorb it and keep the board as it is
+    outcome:
+      text: Coffee stays the same on the board, and the difference comes out of your side of the ledger. You tell yourself it is for the regulars.
+      effects:
+        - { type: business, action: pay, share: 0.02, floor: 400 }
+        - { type: business, action: reputation, delta: 1 }
+  - id: raise
+    label: Put the price of a cup up
+    outcome:
+      text: Cups go up a little and nobody says anything out loud. A few people order the small size.
+      effects:
+        - { type: business, action: price, product: coffee, level: high }
+        - { type: business, action: reputation, delta: -1 }
+  - id: blend
+    label: Move to a cheaper blend
+    check:
+      base: 45
+      stats: [{ key: smarts, weight: 0.2 }, { key: discipline, weight: 0.15 }]
+      success:
+        text: A blend you can live with turns up on the third try. Only the sharpest tongues notice, and they say it is fine.
+        effects:
+          - { type: business, action: pay, share: 0.008, floor: 200 }
+      failure:
+        text: The cheaper blend is flat, and customers say so. You go back to the old beans and the old price, minus a week of goodwill.
+        effects:
+          - { type: business, action: pay, share: 0.02, floor: 400 }
+          - { type: business, action: quality, delta: -3 }
+  - id: ahead
+    label: Buy ahead before the next rise
+    outcome:
+      text: You order more than you need and clear a shelf in the back for the bags.
+      effects:
+        - { type: business, action: buyAhead, share: 0.12, floor: 500 }

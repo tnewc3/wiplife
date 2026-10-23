@@ -8,6 +8,7 @@ import { content } from '../content';
 import { performAction } from '../engine/actions';
 import { performInteraction } from '../engine/interactions/perform';
 import { playYear } from '../engine/autoplay';
+import { runBusiness } from '../engine/business/step';
 import { beginYear, createLife } from '../engine/life';
 import { createRng, nextUint32 } from '../engine/rng';
 import { createGrandchild } from '../engine/later/grandchildren';
@@ -743,7 +744,8 @@ describe('heirs, wills and estates (E2b)', () => {
     // Nobody is given a partner, children or troubles they never had: the first year builds each life from what the save holds.
     const next = beginYear(upgraded, content);
     for (const person of Object.values(next.people)) {
-      if (!person.alive || next.relationships[person.id]?.status === 'ended' || person.child) continue;
+      // (Someone an event introduced during this very year is not from the save, and is given a life the year after.)
+      if (!person.alive || next.relationships[person.id]?.status === 'ended' || person.child || upgraded.people[person.id] === undefined) continue;
       expect(person.life, person.id).toBeDefined();
     }
   });
@@ -1345,11 +1347,16 @@ describe('businesses (W3)', () => {
   }
 
   it('round trips a business with staff, a manager, an investor, a loan, locations and a report', async () => {
-    const played = playYear(ownerLife(), content);
+    // One business year, without the chance events a played year adds (a close in an event outcome would end the business).
+    const played = produce(ownerLife(), (d) => {
+      runBusiness(d, content);
+      d.scheduled = [];
+    });
     expect(played.business.items).toHaveLength(1);
     expect(played.business.items[0]!.report).not.toBeNull();
     expect(played.business.items[0]!.loanIds.length).toBeGreaterThan(0);
-    expect(loadedLifeSchema(content).safeParse(played).success).toBe(true);
+    const parsed = loadedLifeSchema(content).safeParse(played);
+    expect(parsed.success ? [] : parsed.error.issues.slice(0, 5)).toEqual([]);
     expect(await roundTrip(played)).toEqual(played);
   });
 
