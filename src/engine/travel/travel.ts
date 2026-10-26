@@ -224,7 +224,9 @@ function result(state: LifeState, receiptId: string, pools: readonly (readonly s
   let told = 0;
   for (const pool of pools) {
     if (told >= 2) break;
-    if (pushStory(state, fittingResults(state, pool, cast, content), base, told + 1)) told++;
+    // A story about people only fits when everyone it names is there (a family story needs the child, not just a partner).
+    const fits = fittingResults(state, pool, cast, content).filter(([def]) => Object.entries(def.cast ?? {}).every(([role, spec]) => cast[role] !== undefined || spec.optional === true));
+    if (pushStory(state, fits, base, told + 1)) told++;
   }
 }
 export function planTrip(state: LifeState, input: TripInput, content: ContentBundle): void {
