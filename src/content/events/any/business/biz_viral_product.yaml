@@ -1,0 +1,39 @@
+id: biz_viral_product
+title: That one went around
+text: >-
+  A photo of the {product} at {business} has been shared more times than you can count. The caption is not even yours. People are at the door before opening.
+tone: light
+category: business
+rarity: uncommon
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { business: { owned: true } }
+    - { age: { gte: 18 } }
+    - { business: { owned: true, years: { gte: 1 }, kind: [food, retail] } }
+weight: { base: 3 }
+cooldownYears: 7
+followUpOnly: true
+bindBusiness: true
+choices:
+  - id: ride
+    label: Lean into it
+    outcome:
+      text: A sign in the window and a double order. The week is a blur of orders, and a better kind of tired.
+      effects:
+        - { type: business, action: order, level: heavy }
+        - { type: business, action: buzz, delta: 14, years: 2 }
+  - id: quiet
+    label: Say thanks and carry on
+    outcome:
+      text: A short post, and the same menu. The line disperses by Thursday, and a few people stay.
+      effects:
+        - { type: business, action: buzz, delta: 6, years: 1 }
+        - { type: business, action: reputation, delta: 2 }
+  - id: price
+    label: Raise the price for the week
+    outcome:
+      text: A small number change, and a long queue anyway. Some call it greed, and pay.
+      effects:
+        - { type: business, action: price, level: high }
+        - { type: business, action: reputation, delta: -1 }

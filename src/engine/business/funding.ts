@@ -6,6 +6,7 @@
  * module: savings are spent, a loan is a debt of kind `business`, and what
  * investors and a co-founder put in comes from outside your finances.
  */
+import { economyAt } from './world';
 import type { BusinessDef, BusinessFunding, ContentBundle } from '../../content/schemas';
 import { creditBlocked } from '../migration/query';
 import { addDebt, totalDebt, wholeDollars } from '../finance';
@@ -78,10 +79,12 @@ export function loanOffer(state: LifeState, need: number, def: BusinessDef | und
     (def?.occupation !== undefined && (state.career.job?.jobId === def.occupation || state.career.history.some((j) => j.jobId === def.occupation)));
   const multiple = f.incomeMultiple + (planned ? f.planBonus : 0);
   const basis = Math.max(incomeBasis(state), f.incomeFloor);
-  const room = Math.max(0, wholeDollars(basis * multiple) - totalDebt(state));
+  // B2: a bank lends less in a recession and more in a boom.
+  const bank = economyAt(state.seed, state.currentYear, content).bank;
+  const room = Math.max(0, wholeDollars(basis * multiple * bank) - totalDebt(state));
   const missedSurcharge = f.missedSurcharge * missed;
   const limit = block !== null ? 0 : Math.min(wholeDollars(need * f.maxShare), room);
-  if (block === null && limit < need * 0.1 && totalDebt(state) > basis * multiple) block = 'debt';
+  if (block === null && limit < need * 0.1 && totalDebt(state) > basis * multiple * bank) block = 'debt';
   return { limit, rate: f.rate + missedSurcharge, termYears: f.termYears, block, ownNeeded: Math.max(0, need - limit) };
 }
 

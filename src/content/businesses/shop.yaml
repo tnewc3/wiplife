@@ -25,6 +25,7 @@ styles:
     wage: 27000
     quality: 38
     elasticity: 2.2
+    costScale: 0.961
   standard:
     label: Neighborhood shop
     blurb: "Gifts, home goods and things you did not know you needed."
@@ -38,6 +39,7 @@ styles:
     wage: 30000
     quality: 50
     elasticity: 1.7
+    costScale: 0.885
   premium:
     label: Boutique
     blurb: "A few beautiful things, well lit, with someone who knows all about them."
@@ -51,6 +53,7 @@ styles:
     wage: 36000
     quality: 65
     elasticity: 1.0
+    costScale: 0.786
 fit:
   budget: { size: 0.35, wealth: -0.4 }
   standard: { size: 0.3, wealth: 0.2 }
@@ -68,3 +71,18 @@ names:
   - "The Good Drawer"
   - "Magpie & Co."
   - "Dovetail Goods"
+lineMode: choose
+products:
+  - { id: groceries, name: Groceries, group: grocery, type: goods, share: 0.3, price: 0.12, costShare: 0.72, supplier: produce, elasticity: 1.2, competition: 1.4, economy: 0.4, trend: grocery, perishable: 0.5, start: true }
+  - { id: clothes, name: Clothes, group: fashion, type: goods, share: 0.3, price: 1.2, costShare: 0.55, supplier: textiles, elasticity: 1.1, competition: 1.0, economy: 1.1, trend: fashion, perishable: 0.0, start: true }
+  - { id: books, name: Books, group: reading, type: goods, share: 0.22, price: 0.6, costShare: 0.6, supplier: books_paper, elasticity: 0.9, competition: 1.1, economy: 0.8, trend: reading, perishable: 0.0, start: true }
+  - { id: home_goods, name: Home goods, group: home, type: goods, share: 0.28, price: 1.0, costShare: 0.55, supplier: housewares, elasticity: 1.0, competition: 0.9, economy: 1.0, trend: home, perishable: 0.0, start: true }
+  - { id: electronics, name: Electronics, group: tech, type: goods, share: 0.35, price: 2.5, costShare: 0.72, supplier: electronics, elasticity: 1.3, competition: 1.4, economy: 1.2, trend: tech, perishable: 0.0, styles: [standard, premium], start: true }
+  - { id: toys, name: Toys, group: kids, type: goods, share: 0.25, price: 0.7, costShare: 0.58, supplier: toys_gifts, elasticity: 1.1, competition: 1.0, economy: 1.1, trend: gifts, perishable: 0.0, start: true }
+  - { id: gifts, name: Gifts, group: gifts, type: goods, share: 0.22, price: 0.5, costShare: 0.5, supplier: toys_gifts, elasticity: 0.8, competition: 0.5, economy: 1.3, trend: gifts, perishable: 0.0 }
+  - { id: garden, name: Garden supplies, group: home, type: goods, share: 0.2, price: 0.8, costShare: 0.56, supplier: housewares, elasticity: 1.0, competition: 0.8, economy: 0.9, trend: home, perishable: 0.15 }
+roles:
+  - { id: manager, title: store manager, share: 0, weight: 1.0, wage: 1.35, min: 0, max: 1, manager: true }
+  - { id: shift_lead, title: shift lead, share: 0.15, weight: 1.15, wage: 1.25, min: 0, max: 3, lead: true }
+  - { id: sales, title: sales assistant, share: 0.6, weight: 1.0, wage: 1.0, min: 0, max: 12, craft: true }
+  - { id: stock, title: stock clerk, share: 0.25, weight: 0.85, wage: 0.85, min: 0, max: 8 }

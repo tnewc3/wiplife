@@ -1,0 +1,48 @@
+id: biz_theft_at_place
+title: Short at the till
+text: >-
+  The count at {location} has been off three days in a row. It is never much, and it is never a coincidence. Somebody on the crew, {crew.name}, was on the schedule for each of them.
+tone: serious
+category: business
+rarity: uncommon
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { business: { owned: true } }
+    - { age: { gte: 18 } }
+    - { business: { owned: true, crew: { gte: 1 }, namedRoom: true, locations: { gte: 2 }, years: { gte: 1 } } }
+weight: { base: 3 }
+cooldownYears: 6
+followUpOnly: true
+bindBusiness: true
+cast:
+  crew: { business: crew, presence: city }
+choices:
+  - id: confront
+    label: Talk to {crew.them} privately
+    check:
+      base: 45
+      stats: [{ key: confidence, weight: 0.25 }, { key: kindness, weight: 0.1 }]
+      success:
+        text: "{crew.name} breaks down at once, and pays back what is missing. You are left with a hard decision and a clear conscience."
+        effects:
+          - { type: business, action: theft, role: crew, share: 0.004, floor: 150 }
+          - { type: relationship, role: crew, trust: -8 }
+      failure:
+        text: "{crew.name} denies it, convincingly. You are not sure whether you were wrong."
+        effects:
+          - { type: business, action: staffMorale, role: crew, delta: -8 }
+          - { type: stat, key: stress, delta: 2 }
+  - id: cameras
+    label: Put in cameras and a count at every shift
+    outcome:
+      text: The cameras are small and the count takes ten minutes. The shortfalls stop, along with some of the trust.
+      effects:
+        - { type: business, action: pay, share: 0.01, floor: 400 }
+        - { type: business, action: morale, delta: -3 }
+  - id: let
+    label: Let it go
+    outcome:
+      text: It is a small enough amount to pretend. The next count is the same.
+      effects:
+        - { type: business, action: pay, share: 0.006, floor: 200 }

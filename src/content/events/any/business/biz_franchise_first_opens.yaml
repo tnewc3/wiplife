@@ -1,0 +1,38 @@
+id: biz_franchise_first_opens
+title: The first one opens
+text: >-
+  The first franchise opens its doors under the name of {business}. A banner, a ribbon, a sign you can hardly believe you drew. You are not sure who is more nervous, you or the operator.
+tone: light
+category: business
+rarity: uncommon
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { business: { owned: true } }
+    - { age: { gte: 18 } }
+    - { business: { owned: true, franchises: { gte: 1 } } }
+weight: { base: 6 }
+cooldownYears: 10
+followUpOnly: true
+bindBusiness: true
+choices:
+  - id: visit
+    label: Go to the opening
+    outcome:
+      text: You cut the ribbon, shake hands and eat a pastry that is almost exactly right. The trip costs a little.
+      effects:
+        - { type: business, action: pay, share: 0.005, floor: 300 }
+        - { type: business, action: reputation, delta: 2 }
+        - { type: business, action: brand, delta: -5 }
+  - id: call
+    label: Send flowers and a phone call
+    outcome:
+      text: A bouquet and a voice on the phone. It is warm enough, and a little short.
+      effects:
+        - { type: business, action: pay, share: 0.002, floor: 80 }
+  - id: skip
+    label: Leave them to it
+    outcome:
+      text: They will call if they need you. You tell yourself that is trust, not distance.
+      effects:
+        - { type: business, action: brand, delta: 4 }

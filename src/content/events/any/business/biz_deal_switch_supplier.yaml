@@ -1,0 +1,45 @@
+id: biz_deal_switch_supplier
+title: A new supplier courts you
+text: >-
+  A newer supplier, {supplier}, brings samples to {business} and a price list written to make the old one look careless. Your current supplier hears about it by the end of the week.
+tone: neutral
+category: business
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { business: { owned: true } }
+    - { age: { gte: 18 } }
+    - { business: { owned: true, years: { gte: 2 } } }
+weight: { base: 4 }
+cooldownYears: 6
+followUpOnly: true
+bindBusiness: true
+choices:
+  - id: switch
+    label: Switch
+    outcome:
+      text: You move the order and shake a hand. The first delivery is early and the second is on time.
+      effects:
+        - { type: business, action: pay, share: 0.01, floor: 300 }
+        - { type: business, action: supplier, delta: -9, years: 4 }
+  - id: stay
+    label: Stay where you are
+    outcome:
+      text: Loyalty is a kind of insurance. Your usual supplier notices, and later remembers.
+      effects:
+        - { type: business, action: quality, delta: 1 }
+  - id: play
+    label: Play one against the other
+    check:
+      base: 42
+      stats: [{ key: confidence, weight: 0.25 }, { key: sociability, weight: 0.15 }]
+      success:
+        text: Both blink. You come away with a better price and a reputation for being hard to read.
+        effects:
+          - { type: business, action: supplier, delta: -8, years: 3 }
+      failure:
+        text: Both suppliers get tired of the game. Deliveries are a little less warm for a season.
+        effects:
+          - { type: business, action: supplier, delta: 5, years: 1 }
+          - { type: stat, key: stress, delta: 2 }

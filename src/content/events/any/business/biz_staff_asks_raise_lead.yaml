@@ -1,0 +1,41 @@
+id: biz_staff_asks_raise_lead
+title: The one holding the place together
+text: >-
+  {staff.name} has quietly become the person everyone at {business} turns to when something goes wrong. Today {staff.they} {staff:asks|ask} for the raise that goes with it.
+tone: neutral
+category: business
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { business: { owned: true } }
+    - { age: { gte: 18 } }
+    - { business: { owned: true, staff: { gte: 2 }, years: { gte: 2 } } }
+weight: { base: 5 }
+cooldownYears: 5
+followUpOnly: true
+bindBusiness: true
+cast:
+  staff: { business: staff, presence: city }
+choices:
+  - id: raise
+    label: Give {staff.them} the raise
+    outcome:
+      text: It is the easiest yes you say all year. {staff.name} thanks you and goes back to work, a little straighter.
+      effects:
+        - { type: business, action: staffRaise, role: staff }
+        - { type: business, action: morale, delta: 2 }
+  - id: bonus
+    label: Offer a bonus now and a raise later
+    outcome:
+      text: A bonus is a smaller thing than a raise, and everyone in the room knows it. {staff.name} accepts it graciously.
+      effects:
+        - { type: business, action: pay, share: 0.008, floor: 300 }
+        - { type: business, action: staffMorale, role: staff, delta: 3 }
+  - id: refuse
+    label: Say the numbers do not allow it
+    outcome:
+      text: "{staff.name} says nothing. The next time something goes wrong, {staff.they} {staff:looks|look} to someone else for answers."
+      effects:
+        - { type: business, action: staffMorale, role: staff, delta: -12 }
+        - { type: relationship, role: staff, trust: -4 }

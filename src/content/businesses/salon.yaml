@@ -29,6 +29,7 @@ styles:
     wage: 31000
     quality: 40
     elasticity: 2.0
+    costScale: 0.932
   standard:
     label: Neighborhood salon
     blurb: "Appointments, a color bar and clients who have been coming for years."
@@ -42,6 +43,7 @@ styles:
     wage: 38000
     quality: 52
     elasticity: 1.6
+    costScale: 1.049
   premium:
     label: Color studio
     blurb: "Marble, a waiting list and a top stylist whose name is on the door."
@@ -55,6 +57,7 @@ styles:
     wage: 46000
     quality: 67
     elasticity: 0.9
+    costScale: 1.165
 fit:
   budget: { size: 0.3, wealth: -0.3 }
   standard: { size: 0.3, wealth: 0.2 }
@@ -72,3 +75,15 @@ names:
   - "Sable & Sage"
   - "Lucky Thimble Salon"
   - "Halcyon Hair"
+lineMode: services
+products:
+  - { id: haircuts, name: Haircuts, group: beauty, type: service, share: 0.5, price: 0.55, costShare: 0.08, elasticity: 1.2, competition: 1.3, economy: 0.6, trend: beauty, perishable: 0.0, core: true, pool: { id: salon_supplies, units: 0.2 } }
+  - { id: colour, name: Colour, group: beauty, type: service, share: 0.28, price: 1.4, costShare: 0.3, elasticity: 1.0, competition: 1.0, economy: 0.9, trend: beauty, perishable: 0.0, core: true, pool: { id: salon_supplies, units: 2.0 } }
+  - { id: treatments, name: Treatments, group: beauty, type: service, share: 0.12, price: 1.1, costShare: 0.25, elasticity: 0.9, competition: 0.8, economy: 1.2, trend: beauty, perishable: 0.0, core: true, pool: { id: salon_supplies, units: 1.3 } }
+  - { id: styling_events, name: Event styling, group: beauty, type: service, share: 0.1, price: 2.2, costShare: 0.12, elasticity: 0.7, competition: 0.5, economy: 1.3, trend: beauty, perishable: 0.0, styles: [standard, premium], pool: { id: salon_supplies, units: 1.2 } }
+pools:
+  - { id: salon_supplies, name: Salon supplies, supplier: hair_products, cost: 0.21, perishable: 0.1 }
+roles:
+  - { id: manager, title: salon manager, share: 0, weight: 1.0, wage: 1.35, min: 0, max: 1, manager: true }
+  - { id: stylist, title: stylist, share: 0.7, weight: 1.0, wage: 1.1, min: 0, max: 12, craft: true, licensed: true }
+  - { id: assistant, title: assistant, share: 0.3, weight: 0.85, wage: 0.77, min: 0, max: 8 }

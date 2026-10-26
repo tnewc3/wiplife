@@ -320,7 +320,7 @@ describe('Batch 6 saves', () => {
 });
 
 describe('Batch 8 saves', () => {
-  /** A schema 34 save: a creator in the social media path, without any social record. */
+  /** A schema 35 save: a creator in the social media path, without any social record. */
   const oldSave = (seed: string, age = 24, route = 'collab') => {
     const life = produce(lifeAtAge(seed, age), (d) => {
       enterPath(d as LifeState, 'social', route, content);
@@ -334,7 +334,7 @@ describe('Batch 8 saves', () => {
     const life = lifeAtAge('b8-none', 30);
     const old = cloneJson(life) as unknown as Record<string, unknown>;
     delete old.social;
-    const after = migrateEnvelope({ ...makeEnvelope(old, content.contentVersion), schemaVersion: 34 }).data as LifeState;
+    const after = migrateEnvelope({ ...makeEnvelope(old, content.contentVersion), schemaVersion: 35 }).data as LifeState;
     expect(after.social).toEqual(emptySocial(life.currentYear));
     expect(loadedLifeSchema(content).parse(JSON.parse(JSON.stringify(after)))).toEqual(after);
   });
@@ -344,7 +344,7 @@ describe('Batch 8 saves', () => {
     const fameNow = 40;
     const aged = { ...old, fame: { ...(old.fame as Record<string, unknown>), paths: { social: { ...(life.fame.paths.social as object), fame: fameNow } } } };
     const saved = { ...aged, inputLog: [{ year: life.currentYear, kind: 'create', payload: { heir: true, snapshot: cloneJson(aged) } }] };
-    const after = migrateEnvelope({ ...makeEnvelope(saved, content.contentVersion), schemaVersion: 34 }).data as LifeState;
+    const after = migrateEnvelope({ ...makeEnvelope(saved, content.contentVersion), schemaVersion: 35 }).data as LifeState;
     const youtube = after.social.accounts.youtube!;
     expect(Object.keys(after.social.accounts)).toEqual(['youtube']);
     expect(youtube.followers).toBeGreaterThan(1000);
@@ -352,13 +352,13 @@ describe('Batch 8 saves', () => {
     expect(curveAt(content.balance.social.fame.at, reachOf(after, content))).toBeCloseTo(fameNow, 0);
     expect(youtube.byParent).toBe(false);
     expect(after.inputLog[0]!.payload.snapshot).toMatchObject({ social: { totals: { opened: 1 } } });
-    const plain = migrateEnvelope({ ...makeEnvelope(aged, content.contentVersion), schemaVersion: 34 }).data;
+    const plain = migrateEnvelope({ ...makeEnvelope(aged, content.contentVersion), schemaVersion: 35 }).data;
     expect(loadedLifeSchema(content).parse(JSON.parse(JSON.stringify(plain)))).toEqual(plain);
   });
 
   it('keeps a creator who began under 18 private, set up by a parent', () => {
     const { old } = oldSave('b8-teen', 15, 'first_posts');
-    const after = migrateEnvelope({ ...makeEnvelope(old, content.contentVersion), schemaVersion: 34 }).data as LifeState;
+    const after = migrateEnvelope({ ...makeEnvelope(old, content.contentVersion), schemaVersion: 35 }).data as LifeState;
     const a = Object.values(after.social.accounts)[0]!;
     expect(a.private).toBe(true);
     expect(a.byParent).toBe(true);

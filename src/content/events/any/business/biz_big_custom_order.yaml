@@ -1,0 +1,39 @@
+id: biz_big_custom_order
+title: The big order
+text: >-
+  A customer walks into {business} with a folder, a date and a budget: a large order for a celebration. It is the biggest single order you have ever been asked to quote.
+tone: light
+category: business
+rarity: uncommon
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { business: { owned: true } }
+    - { age: { gte: 18 } }
+    - { business: { owned: true, kind: [food], years: { gte: 1 }, staff: { gte: 0 } } }
+weight: { base: 4 }
+cooldownYears: 6
+followUpOnly: true
+bindBusiness: true
+choices:
+  - id: take
+    label: Take the whole order
+    outcome:
+      text: A week of long hours and early mornings. The party is a success, the invoice is paid on the day, and the crew is exhausted.
+      effects:
+        - { type: business, action: receive, share: 0.03, floor: 900 }
+        - { type: business, action: morale, delta: -3 }
+        - { type: stat, key: stress, delta: 3 }
+  - id: part
+    label: Take part of it
+    outcome:
+      text: You say what you can do well, and the customer says that is fine. The payment is smaller, and so is the week.
+      effects:
+        - { type: business, action: receive, share: 0.015, floor: 500 }
+        - { type: business, action: reputation, delta: 1 }
+  - id: decline
+    label: Decline
+    outcome:
+      text: "Not this time, you say. The customer thanks you, writes down a number for a competitor and leaves."
+      effects:
+        - { type: stat, key: stress, delta: -1 }

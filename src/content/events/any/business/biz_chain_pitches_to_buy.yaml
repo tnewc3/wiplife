@@ -1,0 +1,44 @@
+id: biz_chain_pitches_to_buy
+title: A chain makes an offer
+text: >-
+  A representative of a larger group arrives at {business} with a nice jacket and a simple pitch: they want to buy you out and keep the name. They have a number in mind, and it is not insulting.
+tone: neutral
+category: business
+rarity: uncommon
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { business: { owned: true } }
+    - { age: { gte: 18 } }
+    - { business: { owned: true, locations: { gte: 3 }, years: { gte: 3 }, profit: { gt: 0 } } }
+weight: { base: 3 }
+cooldownYears: 8
+followUpOnly: true
+bindBusiness: true
+choices:
+  - id: sell
+    label: Sell
+    outcome:
+      text: A signature, a handshake and a long walk around your own places for the last time as an owner.
+      effects:
+        - { type: business, action: sell }
+  - id: counter
+    label: Counter with a higher number
+    check:
+      base: 40
+      stats: [{ key: confidence, weight: 0.25 }, { key: smarts, weight: 0.2 }]
+      success:
+        text: They flinch, then agree. You close the deal with a better price than you hoped for.
+        effects:
+          - { type: business, action: sell }
+          - { type: business, action: receive, share: 0.1, floor: 3000 }
+      failure:
+        text: They thank you for your time and leave. The offer does not come back.
+        effects:
+          - { type: stat, key: confidence, delta: -2 }
+  - id: decline
+    label: Say no
+    outcome:
+      text: You like your places the way they are. The jacket nods, and leaves a card.
+      effects:
+        - { type: stat, key: confidence, delta: 2 }

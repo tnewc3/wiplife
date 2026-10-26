@@ -1,0 +1,44 @@
+id: biz_deal_better_price
+title: A better price, with strings
+text: >-
+  {supplier} calls with an offer: commit to a steady order and the price on everything you buy from them comes down. The paperwork is a page and a half and says "exclusive" twice.
+tone: neutral
+category: business
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { business: { owned: true } }
+    - { age: { gte: 18 } }
+    - { business: { owned: true, years: { gte: 1 } } }
+weight: { base: 5 }
+cooldownYears: 5
+followUpOnly: true
+bindBusiness: true
+choices:
+  - id: sign
+    label: Sign
+    outcome:
+      text: The new price list starts with the next order, and the exclusive part rarely comes up.
+      effects:
+        - { type: business, action: pay, share: 0.004, floor: 200 }
+        - { type: business, action: supplier, delta: -10, years: 3 }
+  - id: haggle
+    label: Haggle over the terms
+    check:
+      base: 45
+      stats: [{ key: confidence, weight: 0.2 }, { key: smarts, weight: 0.2 }]
+      success:
+        text: You trade the word "exclusive" for a longer commitment, and the price drops without the lock-in.
+        effects:
+          - { type: business, action: supplier, delta: -12, years: 3 }
+      failure:
+        text: They hear hesitation and withdraw the offer. The old list is waiting where you left it.
+        effects:
+          - { type: stat, key: confidence, delta: -1 }
+  - id: pass
+    label: Turn it down
+    outcome:
+      text: You like having other doors open. It changes nothing, in either direction.
+      effects:
+        - { type: stat, key: stress, delta: -1 }

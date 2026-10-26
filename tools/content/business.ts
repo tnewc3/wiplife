@@ -7,6 +7,8 @@
  */
 import { BUSINESS_TRIGGERS, type CollectionKey, type Condition, type ContentBundle, type Effect, type EventDef } from '../../src/content/schemas';
 import type { ContentError } from './compile';
+import { parityFigures } from '../../src/engine/business/parity';
+import { productsOf, defaultLineIds } from '../../src/engine/business/products';
 
 const REGISTRY = 'registries/business.yaml';
 const BALANCE = 'balance/business.yaml';
@@ -32,6 +34,53 @@ const requires = (def: EventDef, test: (c: Condition) => boolean) => parts(def.r
 
 /** The triggers whose event is about a business that is no longer there (it failed). */
 const AFTER_FAILURE = new Set(['failure', 'investorLoss']);
+
+/** B2: the lines, supply pools and roles of a kind: ids exist, the shares and wages keep W3's totals, and the default lines reproduce W3's revenue and supplies. */
+function checkDepth(bundleRef: ContentBundle, d: ContentBundle['businesses'][string], at: (m: string) => void): void {
+  const reg = bundleRef.registries.business;
+  const bal = bundleRef.balance.business;
+  const seen = new Set<string>();
+  for (const p of d.products) {
+    if (seen.has(p.id)) at(`products: "${p.id}" twice`);
+    seen.add(p.id);
+    if (!reg.trends[p.trend]) at(`${p.id}: unknown trend "${p.trend}"`);
+    if (p.type === 'goods') {
+      if (p.supplier === undefined || !reg.suppliers[p.supplier]) at(`${p.id}: a goods line needs a known supplier category`);
+      if (p.pool) at(`${p.id}: goods have no supply pool`);
+    } else {
+      const pool = p.pool ? d.pools.find((x) => x.id === p.pool!.id) : undefined;
+      if (!pool) at(`${p.id}: a service needs a supply pool of the kind`);
+      if (p.supplier !== undefined) at(`${p.id}: a service takes its supplier from its pool`);
+    }
+    if (/\b(?:he|she|him|her|his|hers)\b/i.test(p.name)) at(`${p.id}: name hardcodes a pronoun`);
+    if (!(['budget', 'standard', 'premium'] as const).some((s) => productsOf(d, s).some((x) => x.id === p.id))) at(`${p.id}: sold in no style`);
+  }
+  for (const pool of d.pools) if (!reg.suppliers[pool.supplier]) at(`pool ${pool.id}: unknown supplier category "${pool.supplier}"`);
+  if (d.lineMode === 'services' && d.products.some((p) => p.type !== 'service')) at('a services kind sells only services');
+  if (d.lineMode !== 'services' && d.products.some((p) => p.type !== 'goods')) at('a menu or shop sells only goods');
+  for (const style of ['budget', 'standard', 'premium'] as const) {
+    const ids = defaultLineIds(d, style, bundleRef);
+    if (ids.length === 0) at(`${style}: no default lines`);
+    if (d.lineMode === 'choose' && productsOf(d, style).length < bal.products.maxLines[style]) at(`${style}: the shop's line limit (${bal.products.maxLines[style]}) is more than its catalogue`);
+    const p = parityFigures(d, style, 'houston', bundleRef);
+    if (Math.abs(p.revenue - 1) > bal.products.parity) at(`${style}: default lines make ${(p.revenue * 100).toFixed(1)}% of W3's revenue`);
+    if (Math.abs(p.supplies - 1) > bal.products.parity) at(`${style}: default lines make ${(p.supplies * 100).toFixed(1)}% of W3's supplies (adjust the style's costScale)`);
+    if (Math.abs(p.staffed - 1) > 0.02) at(`${style}: the normal headcount staffs ${(p.staffed * 100).toFixed(0)}% of the need`);
+  }
+  // Roles.
+  const crew = d.roles.filter((r) => r.manager !== true);
+  const managers = d.roles.filter((r) => r.manager === true);
+  if (managers.length !== 1) at('needs exactly one location manager role (manager: true)');
+  if (managers[0] && managers[0].share !== 0) at('the location manager role has no share of the headcount');
+  const total = crew.reduce((s, r) => s + r.share, 0);
+  if (Math.abs(total - 1) > 0.001) at(`roles: shares add up to ${total.toFixed(3)}, not 1`);
+  const pay = crew.reduce((s, r) => s + r.share * r.wage, 0);
+  if (Math.abs(pay - 1) > 0.03) at(`roles: the share-weighted wage multiple is ${pay.toFixed(3)}, not 1 (W3's payroll)`);
+  if (crew.filter((r) => r.craft === true).length !== 1) at('needs exactly one craft role');
+  if (d.license && !crew.some((r) => r.licensed === true)) at('a licensed business needs a licensed role');
+  if (new Set(d.roles.map((r) => r.id)).size !== d.roles.length) at('role ids repeat');
+  for (const r of d.roles) if (r.min > r.max) at(`${r.id}: min is above max`);
+}
 
 export function checkBusiness(bundle: ContentBundle, fileOf: (typeKey: CollectionKey, id: string) => string, partialEvents: boolean): ContentError[] {
   const errors: ContentError[] = [];
@@ -65,6 +114,7 @@ export function checkBusiness(bundle: ContentBundle, fileOf: (typeKey: Collectio
     for (const style of ['budget', 'standard', 'premium'] as const) {
       if (s[style].demand > s[style].capacity * 1.5) at(`${style}: demand is far above what one location can serve`);
     }
+    checkDepth(bundle, d, at);
   }
 
   // The chains.
@@ -115,7 +165,7 @@ export function checkBusiness(bundle: ContentBundle, fileOf: (typeKey: Collectio
   }
 
   // Events.
-  const values = ['business', 'bizType', 'bizCity', 'bizStyle', 'bizTitle'];
+  const values = ['business', 'bizType', 'bizCity', 'bizStyle', 'bizTitle', 'product', 'supplier', 'location', 'locCity'];
   for (const [id, def] of Object.entries(bundle.events)) {
     if (def.retired) continue;
     const e = (m: string) => err(fileOf('events', id), `${id}: ${m}`);
@@ -135,6 +185,9 @@ export function checkBusiness(bundle: ContentBundle, fileOf: (typeKey: Collectio
         manager: (c) => 'business' in c && c.business.manager === true,
         licensed: (c) => 'business' in c && c.business.needsLicense !== false,
         staff: (c) => 'business' in c && c.business.staff !== undefined,
+        crew: (c) => 'business' in c && c.business.crew !== undefined && c.business.namedRoom === true,
+        franchisee: (c) => 'business' in c && c.business.franchises !== undefined,
+        locationManager: (c) => 'business' in c && c.business.hasLocationManager === true,
       };
       const test = need[spec.business];
       if (test && spec.business !== 'licensed' && !requires(def, test)) e(`cast.${role}: the ${spec.business} role needs the event to require that the business has one (business: ${spec.business === 'staff' ? 'staff' : spec.business === 'manager' ? 'manager: true' : spec.business + ': true'})`);
@@ -160,7 +213,7 @@ export function checkBusiness(bundle: ContentBundle, fileOf: (typeKey: Collectio
         if (!owns) e(`business ${eff.action}: needs requires: business: owned: true`);
         if (eff.role !== undefined && !(def.cast && eff.role in def.cast)) e(`business ${eff.action}: role "${eff.role}" is not in the cast`);
         if (eff.role !== undefined && def.cast?.[eff.role] && ['buyout'].includes(eff.action) && !['investor', 'cofounder'].includes(def.cast[eff.role]!.business ?? '')) e('business buyout needs an investor or co-founder role (cast: { business: investor | cofounder })');
-        if (eff.role !== undefined && def.cast?.[eff.role] && ['staffQuit', 'staffFire', 'staffRaise', 'staffMorale', 'theft'].includes(eff.action) && def.cast[eff.role]!.business === undefined) e(`business ${eff.action}: role "${eff.role}" must be a business role (cast: { business: staff | manager | licensed })`);
+        if (eff.role !== undefined && def.cast?.[eff.role] && ['staffQuit', 'staffFire', 'staffRaise', 'staffMorale', 'theft', 'transfer', 'appoint'].includes(eff.action) && def.cast[eff.role]!.business === undefined) e(`business ${eff.action}: role "${eff.role}" must be a business role (cast: { business: staff | manager | licensed })`);
       }
     }
   }

@@ -1,0 +1,51 @@
+id: biz_supplier_rise_general
+title: A new price list
+text: >-
+  {supplier} sends a new price list, and the numbers are higher. The cover note says "market conditions," and nothing else. {product} is where it will bite hardest.
+tone: neutral
+category: business
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { business: { owned: true } }
+    - { age: { gte: 18 } }
+    - { business: { owned: true, years: { gte: 1 } } }
+weight: { base: 5 }
+cooldownYears: 4
+followUpOnly: true
+bindBusiness: true
+choices:
+  - id: absorb
+    label: Hold your own prices and take the squeeze
+    outcome:
+      text: You keep the board where it is and absorb the difference, and tell yourself it is temporary.
+      effects:
+        - { type: business, action: pay, share: 0.02, floor: 400 }
+  - id: pass
+    label: Pass a share of it on
+    outcome:
+      text: You raise what you charge for {product} and nothing else. Most customers shrug; a few look for it elsewhere.
+      effects:
+        - { type: business, action: price, level: high }
+        - { type: business, action: reputation, delta: -1 }
+  - id: shop
+    label: Shop around
+    check:
+      base: 45
+      stats: [{ key: smarts, weight: 0.25 }, { key: discipline, weight: 0.15 }]
+      success:
+        text: A smaller supplier beats the new list and promises weekly deliveries. It takes an afternoon of phone calls.
+        effects:
+          - { type: business, action: supplier, delta: -8, years: 2 }
+      failure:
+        text: Every quote is the same or worse. You lose a week and sign the old list after all.
+        effects:
+          - { type: business, action: pay, share: 0.02, floor: 400 }
+          - { type: stat, key: stress, delta: 2 }
+  - id: ahead
+    label: Buy ahead
+    outcome:
+      text: You stock up before the new list begins, and learn what a heavy shelf feels like.
+      effects:
+        - { type: business, action: buyAhead, share: 0.1, floor: 400 }

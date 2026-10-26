@@ -1,0 +1,37 @@
+id: biz_economy_slowdown
+title: Things are slower
+text: >-
+  Nothing dramatic, but the quiet hours at {business} get longer, and the receipts are a little smaller. People are putting off what they can.
+tone: neutral
+category: business
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { business: { owned: true } }
+    - { age: { gte: 18 } }
+    - { business: { owned: true, economy: [slowdown] } }
+weight: { base: 6 }
+cooldownYears: 5
+followUpOnly: true
+bindBusiness: true
+choices:
+  - id: promo
+    label: Run a promotion to bring people in
+    outcome:
+      text: A flyer, a stamp card and a small giveaway. The shop does not fill, but it does not empty either.
+      effects:
+        - { type: business, action: pay, share: 0.015, floor: 300 }
+        - { type: business, action: buzz, delta: 5, years: 1 }
+  - id: lean
+    label: Order closer to what you sell
+    outcome:
+      text: Smaller orders, less on the shelf, fewer surprises in the bin.
+      effects:
+        - { type: business, action: order, level: lean }
+  - id: wait
+    label: Do nothing and keep an eye on it
+    outcome:
+      text: Slowdowns pass. Some of the customers you see now will remember that you held steady.
+      effects:
+        - { type: business, action: reputation, delta: 1 }

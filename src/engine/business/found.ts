@@ -5,7 +5,7 @@
  * system), and what happens to the other owners, the staff and the debts when
  * a business ends is worked out in one place (`endBusiness`).
  */
-import { BUSINESS_ROLE, BUSINESS_STYLES, MARKETING_LEVELS, OWNER_ROLES, PAY_LEVELS, PRICE_LEVELS, QUALITY_LEVELS, STAFFING_LEVELS, type BusinessDef, type BusinessStyle, type ContentBundle, type EventDef } from '../../content/schemas';
+import { BUSINESS_ROLE, BUSINESS_STYLES, MARKETING_LEVELS, ORDER_LEVELS, OWNER_ROLES, PAY_LEVELS, PRICE_LEVELS, QUALITY_LEVELS, STAFFING_LEVELS, TRAINING_LEVELS, type BusinessDef, type BusinessStyle, type ContentBundle, type EventDef } from '../../content/schemas';
 import { eventWeight } from '../events/selection';
 import { addDebt, earn, spend, wholeDollars } from '../finance';
 import { clampInt, weightedPick } from '../random';
@@ -16,7 +16,10 @@ import { listingById } from './market';
 import { salePrice, startupCost, totalToStart, valuation, workingCapital } from './model';
 import { refreshWorth } from './value';
 import { businessById, loanBalance, livingStaff, managerOf, youHoldLicense } from './query';
-import { hireStaff, hiringCost, removeStaff } from './staff';
+import { fitPools, hireStaff, hiringCost, removeStaff } from './staff';
+import { applyPreset, ensureModel, reconcileHeadcount } from './crew';
+import { craftRole, managerRole } from './headcount';
+import { defaultLines } from './products';
 import { sameCountry } from '../country';
 
 type HistoryKey = keyof ContentBundle['text']['business']['history'];
@@ -82,8 +85,8 @@ function nameTaken(state: LifeState, name: string): boolean {
 
 export function newBusiness(state: LifeState, def: BusinessDef, name: string, cityId: Id, style: BusinessStyle, how: Business['how'], content: ContentBundle): Business {
   const b = state.business;
-  const loc: BusinessLocation = { id: `l${b.nextLocation++}`, cityId, style, opened: state.currentYear };
-  return {
+  const loc: BusinessLocation = { id: `l${b.nextLocation++}`, cityId, style, opened: state.currentYear, stock: {}, forecast: {} };
+  const made: Business = {
     id: `b${b.nextBusiness++}`,
     defId: def.id,
     name,
@@ -111,7 +114,16 @@ export function newBusiness(state: LifeState, def: BusinessDef, name: string, ci
     skimmed: 0,
     shocks: [],
     report: null,
+    lines: defaultLines(def, style, content),
+    orders: {},
+    headcount: {},
+    crew: [],
+    training: 'none',
+    stockValue: 0,
+    franchises: [],
   };
+  ensureModel(made, def, content);
+  return made;
 }
 
 /** Writes the owners from a funding result, with you holding what is left. */
@@ -220,7 +232,9 @@ export function buyBusiness(state: LifeState, p: BuyParams, content: ContentBund
   const { loanId } = applyFunding(state, result, content);
   if (loanId !== null) biz.loanIds.push(loanId);
   setOwners(state, biz, result.own, result.owners);
-  biz.locations = listing.locations.map((l, i) => ({ id: `l${state.business.nextLocation++}`, cityId: l.cityId, style: l.style, opened: state.currentYear - Math.max(1, listing.years - i) }));
+  biz.locations = listing.locations.map((l, i) => ({ id: `l${state.business.nextLocation++}`, cityId: l.cityId, style: l.style, opened: state.currentYear - Math.max(1, listing.years - i), stock: {}, forecast: {} }));
+  biz.headcount = {};
+  ensureModel(biz, def, content);
   biz.quality = listing.quality;
   biz.reputation = listing.reputation;
   biz.cash = listing.cash;
@@ -253,10 +267,13 @@ export interface Decisions {
   qualityInvest?: Business['qualityInvest'];
   pay?: Business['pay'];
   staffing?: Business['staffing'];
+  /** B2 */
+  training?: Business['training'];
 }
 
 export function decisionsValid(d: Decisions): boolean {
   return (
+    (d.training === undefined || (TRAINING_LEVELS as readonly string[]).includes(d.training)) &&
     (d.prices === undefined || (PRICE_LEVELS as readonly string[]).includes(d.prices)) &&
     (d.marketing === undefined || (MARKETING_LEVELS as readonly string[]).includes(d.marketing)) &&
     (d.qualityInvest === undefined || (QUALITY_LEVELS as readonly string[]).includes(d.qualityInvest)) &&
@@ -265,14 +282,83 @@ export function decisionsValid(d: Decisions): boolean {
   );
 }
 
-export function setDecisions(state: LifeState, id: Id, d: Decisions): boolean {
+export function setDecisions(state: LifeState, id: Id, d: Decisions, content: ContentBundle): boolean {
   const b = businessById(state, id);
-  if (!b || !decisionsValid(d)) return false;
-  if (d.prices) b.prices = d.prices;
+  const def = b && content.businesses[b.defId];
+  if (!b || !def || !decisionsValid(d)) return false;
+  // The price level is the "set all" shortcut: it sets every line's price.
+  if (d.prices) {
+    b.prices = d.prices;
+    for (const line of b.lines) line.price = d.prices;
+  }
   if (d.marketing) b.marketing = d.marketing;
   if (d.qualityInvest) b.qualityInvest = d.qualityInvest;
   if (d.pay) b.pay = d.pay;
-  if (d.staffing) b.staffing = d.staffing;
+  if (d.training) b.training = d.training;
+  // The staffing level is a preset that fills every location's headcount.
+  if (d.staffing) {
+    b.staffing = d.staffing;
+    applyPreset(b, def, d.staffing, content);
+    for (const p of [...b.crew]) fitPools(b, p.locationId, p.roleId);
+  }
+  return true;
+}
+
+export type LineBlock = 'unknown' | 'line' | 'limit' | 'empty' | 'savings' | 'core' | 'style';
+
+/** The lines (by product) a business can have on now: sold in at least one location's style. */
+const soldAnywhere = (b: Business, def: BusinessDef, productId: Id): boolean => {
+  const p = def.products.find((x) => x.id === productId);
+  return p !== undefined && b.locations.some((l) => p.styles === undefined || p.styles.includes(l.style));
+};
+
+export function switchFee(b: Business, def: BusinessDef, productId: Id, content: ContentBundle): number {
+  const p = def.products.find((x) => x.id === productId);
+  const bal = content.balance.business.products;
+  if (!p) return 0;
+  const revenue = b.report ? (b.report.lines?.find((l) => l.productId === productId)?.revenue ?? 0) : 0;
+  return Math.max(bal.switchFloor, wholeDollars(revenue * bal.switchFee));
+}
+
+/** Why a line cannot be switched or priced so: unknown, not sold here, over a shop's limit, a core line that must stay on, or not enough savings for the restock fee. */
+export function lineBlock(state: LifeState, b: Business, def: BusinessDef, productId: Id, on: boolean | undefined, content: ContentBundle): LineBlock | null {
+  const line = b.lines.find((l) => l.productId === productId);
+  const product = def.products.find((x) => x.id === productId);
+  if (!line || !product) return 'line';
+  if (!soldAnywhere(b, def, productId)) return 'style';
+  if (on === undefined || on === line.on) return null;
+  if (!on) {
+    if (product.core === true) return 'core';
+    if (def.lineMode === 'choose' && b.lines.filter((l) => l.on).length <= 1) return 'empty';
+    return null;
+  }
+  if (def.lineMode === 'choose') {
+    const max = Math.max(...b.locations.map((l) => content.balance.business.products.maxLines[l.style]));
+    if (b.lines.filter((l) => l.on).length >= max) return 'limit';
+  }
+  return state.finances.savings >= switchFee(b, def, productId, content) ? null : 'savings';
+}
+
+/** Sets a line's price level and/or turns it on or off (turning one on costs a small restock fee). */
+export function setLine(state: LifeState, id: Id, productId: Id, change: { price?: Business['prices']; on?: boolean }, content: ContentBundle): boolean {
+  const b = businessById(state, id);
+  const def = b && content.businesses[b.defId];
+  if (!b || !def || lineBlock(state, b, def, productId, change.on, content) !== null) return false;
+  if (change.price !== undefined && !(PRICE_LEVELS as readonly string[]).includes(change.price)) return false;
+  const line = b.lines.find((l) => l.productId === productId)!;
+  if (change.price !== undefined) line.price = change.price;
+  if (change.on !== undefined && change.on !== line.on) {
+    if (change.on) spend(state, switchFee(b, def, productId, content), content);
+    line.on = change.on;
+  }
+  return true;
+}
+
+/** Sets how heavily a stock item (a goods line or a service's supply pool) is ordered. */
+export function setOrder(state: LifeState, id: Id, stockId: Id, level: Business['orders'][string]): boolean {
+  const b = businessById(state, id);
+  if (!b || !(ORDER_LEVELS as readonly string[]).includes(level)) return false;
+  b.orders[stockId] = level;
   return true;
 }
 
@@ -345,7 +431,7 @@ export function expandBlock(state: LifeState, p: ExpandParams, content: ContentB
   const b = businessById(state, p.id);
   const def = b && content.businesses[b.defId];
   if (!b || !def) return 'unknown';
-  if (b.locations.length >= content.balance.business.limits.locations) return 'full';
+  if (b.locations.length >= content.balance.business.limits.locations || state.business.items.reduce((n, x) => n + x.locations.length, 0) >= content.balance.business.limits.totalLocations) return 'full';
   if (!content.cities[p.cityId] || !sameCountry(state.character.cityId, p.cityId, content)) return 'city';
   if (!(BUSINESS_STYLES as readonly string[]).includes(p.style)) return 'style';
   if (state.housing.kind === 'incarcerated') return 'away';
@@ -371,7 +457,8 @@ export function openLocation(state: LifeState, p: ExpandParams, content: Content
   b.cash += wholeDollars(cost - fit);
   const you = b.owners.find((o) => o.id === 'you');
   if (you) you.put += checked.result.own;
-  b.locations.push({ id: `l${state.business.nextLocation++}`, cityId: p.cityId, style: p.style, opened: state.currentYear });
+  b.locations.push({ id: `l${state.business.nextLocation++}`, cityId: p.cityId, style: p.style, opened: state.currentYear, stock: {}, forecast: {} });
+  ensureModel(b, def, content);
   history(state, 'expanded', { business: b.name, city: content.cities[p.cityId]?.name ?? '' }, content);
   refreshWorth(state, content);
   return true;
@@ -395,7 +482,19 @@ export function closeLocation(state: LifeState, id: Id, locationId: Id, content:
   b.assets = wholeDollars(b.assets * (1 - share));
   b.cash += back;
   b.locations = rest;
-  for (const s of b.staff) if (s.locationId === locationId) s.locationId = rest[0]!.id;
+  // Its people go to the first location that is left (those it has no room for are let go; a location manager steps back).
+  const def = content.businesses[b.defId]!;
+  const dest = rest[0]!;
+  for (const s of [...b.staff].filter((x) => x.locationId === locationId)) {
+    s.locationId = dest.id;
+    if (s.roleId === managerRole(def)?.id) {
+      delete s.honesty;
+      s.roleId = craftRole(def).id;
+      s.title = craftRole(def).title;
+    }
+    if (b.staff.filter((x) => x.locationId === dest.id).length > content.balance.business.limits.namedPerLocation) removeStaff(state, b, s.personId);
+  }
+  reconcileHeadcount(b, def, content);
   refreshWorth(state, content);
   return true;
 }

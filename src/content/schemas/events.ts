@@ -31,7 +31,7 @@ import { AMENDS_RESULTS, CARE_OPTIONS, HOSPICE_CHOICES, LATER_ACTIONS, TEACH_KEY
 import { APPLICATION_KINDS, APPLICATION_STATUSES, MIGRATION_ACTIONS, REMIT_LEVELS, ROUTES, STATUS_KINDS, type ApplicationKind, type ApplicationStatus, type RouteId, type StatusKind } from './immigrationIds';
 import { STAY_ROUTES } from './travel';
 import { COMMITMENTS, FAITH_ACTIONS, GROUP_ACTIONS, GROUP_NEWS_KINDS, GROUP_TYPES, VALUE_IDS } from './belongingIds';
-import { BUSINESS_ACTIONS, BUSINESS_KINDS, BUSINESS_PEOPLE, BUSINESS_STYLES, OWNER_ROLES } from './businessIds';
+import { BUSINESS_ACTIONS, BUSINESS_KINDS, BUSINESS_PEOPLE, BUSINESS_STYLES, ECONOMY_PHASES, OWNER_ROLES, ORDER_LEVELS, PRICE_LEVELS, STOCK_STATES } from './businessIds';
 import { templateSchema } from './text';
 import { reactionSchema, type ReactionId } from './mental';
 import { knowledgeKindSchema, tieKindSchema, tieStatusSchema, type KnowledgeKindId, type TieKindId, type TieStatusId } from './web';
@@ -692,6 +692,19 @@ export interface BusinessCondition {
   failedWithin?: number;
   soldWithin?: number;
   experience?: Compare;
+  /** B2: a product it sells (any of these is on); the economy's phase; how its stock stood last year (short: a line ran out; surplus: a lot spoiled); heads; crew heads; franchises; the worst franchise's brand risk; a location has a manager; room for another named person; it has earned the right to sell franchises. */
+  sells?: string[];
+  economy?: (typeof ECONOMY_PHASES)[number][];
+  stocked?: (typeof STOCK_STATES)[number][];
+  headcount?: Compare;
+  crew?: Compare;
+  franchises?: Compare;
+  brandRisk?: Compare;
+  hasLocationManager?: boolean;
+  namedRoom?: boolean;
+  franchiseReady?: boolean;
+  /** B2: last year's report said it was short of people or overworked. */
+  understaffed?: boolean;
 }
 
 /**
@@ -1303,6 +1316,17 @@ export const conditionSchema: z.ZodType<Condition> = z.lazy(() =>
           failedWithin: z.int().min(0).max(40).optional(),
           soldWithin: z.int().min(0).max(40).optional(),
           experience: compareSchema.optional(),
+          sells: z.array(idSchema).min(1).optional(),
+          economy: z.array(z.enum(ECONOMY_PHASES)).min(1).optional(),
+          stocked: z.array(z.enum(STOCK_STATES)).min(1).optional(),
+          headcount: compareSchema.optional(),
+          crew: compareSchema.optional(),
+          franchises: compareSchema.optional(),
+          brandRisk: compareSchema.optional(),
+          hasLocationManager: z.boolean().optional(),
+          namedRoom: z.boolean().optional(),
+          franchiseReady: z.boolean().optional(),
+          understaffed: z.boolean().optional(),
         })
         .refine(atLeastOneField, 'needs at least one field'),
     }),
@@ -2046,12 +2070,20 @@ export const effectSchema = z.discriminatedUnion('type', [
       delta: z.int().min(-60).max(60).optional(),
       years: z.int().min(1).max(10).optional(),
       role: roleSchema.optional(),
+      /** B2: price and order act on the line (or supply pool) at `product`, or the one the event is about; `level` is a price level or an order level. */
+      product: idSchema.optional(),
+      level: z.enum([...PRICE_LEVELS, ...ORDER_LEVELS]).optional(),
     })
-    .refine((e) => (e.action === 'pay' || e.action === 'receive' || e.action === 'theft') === (e.share !== undefined), 'pay, receive and theft need share (and only they have one)')
-    .refine((e) => e.floor === undefined || e.share !== undefined, 'floor goes with share')
-    .refine((e) => (['quality', 'reputation', 'morale', 'buzz', 'rival', 'staffMorale'] as string[]).includes(e.action) === (e.delta !== undefined && e.delta !== 0), 'quality, reputation, morale, buzz, rival and staffMorale need a non-zero delta (and only they have one)')
-    .refine((e) => (e.action === 'buzz' || e.action === 'rival') === (e.years !== undefined), 'buzz and rival need years (and only they have it)')
-    .refine((e) => (['staffQuit', 'staffFire', 'staffRaise', 'staffMorale', 'hire', 'theft', 'buyout'] as string[]).includes(e.action) === (e.role !== undefined), 'staffQuit, staffFire, staffRaise, staffMorale, hire, theft and buyout need role (and only they have one)'),
+    .refine((e) => (e.action === 'pay' || e.action === 'receive' || e.action === 'theft' || e.action === 'buyAhead') === (e.share !== undefined) || e.action === 'writeOff', 'pay, receive, theft and buyAhead need share (and only they, and writeOff, have one)')
+    .refine((e) => e.action !== 'writeOff' || (e.share !== undefined && e.share <= 1), 'writeOff needs share (of the stock, up to 1)')
+    .refine((e) => e.floor === undefined || (e.share !== undefined && e.action !== 'writeOff'), 'floor goes with share (not writeOff)')
+    .refine((e) => (['quality', 'reputation', 'morale', 'buzz', 'rival', 'staffMorale', 'supplier', 'shortage', 'brand'] as string[]).includes(e.action) === (e.delta !== undefined && e.delta !== 0), 'quality, reputation, morale, buzz, rival, staffMorale, supplier, shortage and brand need a non-zero delta (and only they have one)')
+    .refine((e) => (e.action === 'buzz' || e.action === 'rival' || e.action === 'supplier' || e.action === 'shortage') === (e.years !== undefined), 'buzz, rival, supplier and shortage need years (and only they have it)')
+    .refine((e) => (['staffQuit', 'staffFire', 'staffRaise', 'staffMorale', 'hire', 'theft', 'buyout', 'transfer', 'appoint'] as string[]).includes(e.action) === (e.role !== undefined), 'staffQuit, staffFire, staffRaise, staffMorale, hire, theft, buyout, transfer and appoint need role (and only they have one)')
+    .refine((e) => (e.action === 'price' || e.action === 'order') === (e.level !== undefined), 'price and order need level (and only they have one)')
+    .refine((e) => e.action !== 'price' || (PRICE_LEVELS as readonly string[]).includes(e.level!), 'price takes a price level')
+    .refine((e) => e.action !== 'order' || (ORDER_LEVELS as readonly string[]).includes(e.level!), 'order takes an order level')
+    .refine((e) => e.product === undefined || e.action === 'price' || e.action === 'order', 'product goes with price and order'),
   /** W2: a value moves by `delta`; a share of it sticks to your temperament (balance/belonging.yaml values.sticks). */
   /**
    * W6, emigration. remit: you send `level` of your income home from now on; overstay: your permit ends and you stay

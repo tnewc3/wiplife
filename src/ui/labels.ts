@@ -1572,13 +1572,15 @@ export const BUSINESS_DECISION_LABELS = {
   qualityInvest: 'Quality',
   pay: 'Pay',
   staffing: 'Staffing',
+  training: 'Training',
 } as const;
 export const BUSINESS_DECISION_HINTS = {
   prices: 'Lower prices bring more customers; higher ones bring more from each.',
   marketing: 'Spend to be noticed. It helps most when little is spent already.',
   qualityInvest: 'Spend on better ingredients, tools and training.',
   pay: 'Fair pay keeps people. Low pay saves money until they leave.',
-  staffing: 'More hands serve more customers; fewer save money and wear people out.',
+  staffing: 'A preset that fills every place’s headcount; adjust each role on the Team tab.',
+  training: 'Training lifts skill and mood across the crew and the people you know. It takes a share of payroll.',
 } as const;
 export const BUSINESS_FUNDING_LABELS = {
   savings: { name: 'Your savings', blurb: 'All of it from your own pocket.' },
@@ -1618,6 +1620,64 @@ export const BUSINESS_BLOCK_LABELS: Record<string, string> = {
   taken: 'Somebody else bought it',
   plan: 'The plan is not complete',
 };
+// B2: business depth. Fixed interface words; product names, role titles, supplier names and every story line are content.
+export const BUSINESS_TABS = { report: 'Report', products: 'Products', team: 'Team', places: 'Places', franchise: 'Franchise' } as const;
+export const ORDER_LABELS = { lean: 'Lean', normal: 'Normal', heavy: 'Heavy' } as const;
+export const ORDER_HINTS = {
+  lean: 'Saves money and runs out more often.',
+  normal: 'A little over what you sold.',
+  heavy: 'Rarely runs out and throws more away.',
+} as const;
+export const PRICE_LABELS = { low: 'Below', fair: 'Going rate', high: 'Above' } as const;
+export const STOCK_WORDS = { short: 'Ran out', fine: 'About right', surplus: 'A lot left over', new: 'No year yet' } as const;
+export const SUPPLIER_MOODS = { up: 'getting dearer', down: 'getting cheaper', steady: 'steady' } as const;
+export const SUPPLIER_ARROWS = { up: '▲', down: '▼', steady: '►' } as const;
+export const PLACE_STOCK_WORDS = { none: 'Nothing on the shelves', low: 'Shelves nearly bare', ok: 'Shelves stocked', high: 'Shelves full' } as const;
+export const RUNNER_WORDS = { you: 'You', manager: 'Its manager', general: 'The general manager', away: 'You, from far away', nobody: 'Nobody' } as const;
+export const WILLING_WORDS = { likely: 'Likely to go', unsure: 'Unsure about it', unlikely: 'Unlikely to go' } as const;
+export const RISK_WORDS = (risk: number): string => (risk >= 60 ? 'The name is at real risk' : risk >= 40 ? 'Some worry about the name' : risk >= 20 ? 'A little worry' : 'No worry');
+export const FRANCHISE_CONDITION_LABELS: Record<string, (need: number) => string> = {
+  years: (n) => `Trading ${n} years or more`,
+  locations: (n) => `${n} locations or more`,
+  quality: (n) => `Quality of ${n} or more`,
+  reputation: (n) => `Reputation of ${n} or more`,
+  recent: (n) => `No loss in the last ${n} years`,
+};
+export const FRANCHISE_BLOCK_LABELS: Record<string, string> = {
+  years: 'The business is too young',
+  locations: 'The business needs more locations',
+  quality: 'Quality is not high enough',
+  reputation: 'Reputation is not high enough',
+  recent: 'A recent loss',
+  full: 'As many franchises as you can have',
+  city: 'Pick a city',
+  person: 'That person cannot run it',
+  royalty: 'Pick a royalty',
+  style: 'Pick a style',
+  away: 'You can’t while you are away',
+};
+export const TRANSFER_BLOCK_LABELS: Record<string, string> = {
+  unknown: 'Not possible',
+  same: 'Already there',
+  location: 'That place is gone',
+  room: 'No room for another named person there',
+  savings: 'You don’t have enough savings',
+  family: 'Has a family where they are and cannot move',
+  unwilling: 'Not willing to move',
+  manager: 'Manages another place',
+};
+export const HEADCOUNT_RANGE = (min: number, max: number): string => `${min} to ${max}`;
+export const TRAINING_HINTS = { none: 'No training.', some: 'A little: skills and mood rise slowly.', lots: 'A lot: skills and mood rise faster. It takes a share of payroll.' } as const;
+export const LINE_BLOCK_LABELS: Record<string, string> = {
+  line: 'Not a line of this business',
+  style: 'Not sold in this style',
+  limit: 'You are at the limit of lines this shop can carry',
+  empty: 'A shop needs at least one line',
+  savings: 'You don’t have enough savings for the restock fee',
+  core: 'Part of the menu, so it stays',
+};
+export const ECONOMY_TONES = { boom: 'text-text', steady: 'text-muted', slowdown: 'text-muted', recession: 'text-danger' } as const;
+
 export const BUSINESS_END_LABELS = { sold: 'Sold', closed: 'Closed', failed: 'Failed', passed: 'Passed on' } as const;
 export const BUSINESS_HOW_LABELS = { started: 'Started', bought: 'Bought', inherited: 'Inherited' } as const;
 export const businessStakeLine = (share: number, role: 'you' | 'investor' | 'cofounder'): string => `${share}%${role === 'investor' ? ' · investor' : role === 'cofounder' ? ' · co-founder' : ''}`;

@@ -24,6 +24,7 @@ styles:
     wage: 29000
     quality: 42
     elasticity: 1.9
+    costScale: 1.061
   standard:
     label: Home and office care
     blurb: "Contracts with small offices, and houses that never go back to anyone else."
@@ -37,6 +38,7 @@ styles:
     wage: 30000
     quality: 52
     elasticity: 1.6
+    costScale: 0.972
   premium:
     label: Deep-clean specialists
     blurb: "Move-outs, post-construction and a client list that includes property managers."
@@ -50,6 +52,7 @@ styles:
     wage: 36000
     quality: 64
     elasticity: 0.9
+    costScale: 1.148
 fit:
   budget: { size: 0.3, wealth: -0.1 }
   standard: { size: 0.3, wealth: 0.2 }
@@ -67,3 +70,15 @@ names:
   - "Maple Row Maids"
   - "Pinewater Cleaning"
   - "Orchard Gate Services"
+lineMode: services
+products:
+  - { id: home_cleans, name: Home cleans, group: cleaning, type: service, share: 0.45, price: 0.4, costShare: 0.1, elasticity: 1.1, competition: 1.2, economy: 0.7, trend: cleaning, perishable: 0.0, core: true, pool: { id: cleaning_supplies, units: 0.4 } }
+  - { id: office_cleans, name: Office cleans, group: cleaning, type: service, share: 0.35, price: 0.5, costShare: 0.1, elasticity: 0.9, competition: 1.0, economy: 0.5, trend: cleaning, perishable: 0.0, core: true, pool: { id: cleaning_supplies, units: 0.5 } }
+  - { id: deep_cleans, name: Deep cleans, group: cleaning, type: service, share: 0.2, price: 1.0, costShare: 0.16, elasticity: 0.9, competition: 0.7, economy: 1.0, trend: cleaning, perishable: 0.0, core: true, pool: { id: cleaning_supplies, units: 1.6 } }
+  - { id: windows_carpets, name: Windows and carpets, group: cleaning, type: service, share: 0.1, price: 0.6, costShare: 0.12, elasticity: 0.8, competition: 0.6, economy: 0.9, trend: cleaning, perishable: 0.0, styles: [standard, premium], pool: { id: cleaning_supplies, units: 0.7 } }
+pools:
+  - { id: cleaning_supplies, name: Cleaning supplies, supplier: cleaning_chemicals, cost: 0.10, perishable: 0.05 }
+roles:
+  - { id: manager, title: crew lead, share: 0, weight: 1.0, wage: 1.35, min: 0, max: 1, manager: true }
+  - { id: crew_lead, title: team lead, share: 0.2, weight: 1.15, wage: 1.25, min: 0, max: 4, lead: true }
+  - { id: cleaner, title: cleaner, share: 0.8, weight: 1.0, wage: 0.95, min: 0, max: 16, craft: true }

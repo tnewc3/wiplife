@@ -928,7 +928,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
     // W3: how this life behaves about businesses.
     const businessRng = createRng(`${seed}:business`);
     const businessProfile = rollBusinessProfile(businessRng);
-    const businessWatcher = new BusinessWatcher(business, content, businessProfile.policy);
+    const businessWatcher = new BusinessWatcher(business, content, businessProfile.policy, businessProfile.orderPolicy);
     const peopleWatcher = new PeopleWatcher(people, content);
     const webWatcher = new WebWatcher(web, content);
     const mentalWatcher = new MentalWatcher(mental, content);
@@ -1008,6 +1008,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
     watch(life);
     mentalWatcher.begin(life);
     while (life.phase !== 'dead') {
+      businessWatcher.tick(life.business.items.length > 0);
       // Between years, the simulated player may act on money and home...
       for (const [actionId, params] of careless ? chooseCarelessLifeActions(life, content, player) : chooseMoneyActions(life, content, player, profile)) {
         // One new job a year is enough.

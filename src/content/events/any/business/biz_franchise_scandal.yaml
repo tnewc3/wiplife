@@ -1,0 +1,47 @@
+id: biz_franchise_scandal
+title: Your name in the paper
+text: >-
+  A franchise of {business} is in the local news, and not kindly. The reporter has a photo, a quote, and a headline that uses your name in the first line.
+tone: serious
+category: business
+rarity: rare
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { business: { owned: true } }
+    - { age: { gte: 18 } }
+    - { business: { owned: true, franchises: { gte: 1 }, brandRisk: { gte: 50 } } }
+weight: { base: 6 }
+cooldownYears: 6
+followUpOnly: true
+bindBusiness: true
+choices:
+  - id: apologize
+    label: Apologize publicly and clean it up
+    outcome:
+      text: A statement, an inspection and a new set of rules. It is expensive and humbling, and it works, mostly.
+      effects:
+        - { type: business, action: pay, share: 0.03, floor: 1000 }
+        - { type: business, action: reputation, delta: -2 }
+        - { type: business, action: brand, delta: -18 }
+  - id: cut
+    label: Cut them loose
+    outcome:
+      text: A short letter, a lawyer and a sign coming down. The headline changes by the weekend.
+      effects:
+        - { type: business, action: franchiseEnd }
+        - { type: business, action: reputation, delta: -4 }
+  - id: deny
+    label: Say it is not your problem
+    check:
+      base: 40
+      stats: [{ key: confidence, weight: 0.25 }, { key: smarts, weight: 0.15 }]
+      success:
+        text: The story fades because nothing else was added to it. This time.
+        effects:
+          - { type: business, action: brand, delta: 4 }
+      failure:
+        text: The reporter quotes your denial in the next story, and the story grows.
+        effects:
+          - { type: business, action: reputation, delta: -7 }
+          - { type: business, action: brand, delta: 10 }

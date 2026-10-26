@@ -1,0 +1,38 @@
+id: biz_franchise_thrives
+title: A franchise that is doing well
+text: >-
+  The operator of a franchise of {business} sends photos of a line out the door, and a handwritten thank-you. The tone is pure relief. It is working.
+tone: light
+category: business
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { business: { owned: true } }
+    - { age: { gte: 18 } }
+    - { business: { owned: true, franchises: { gte: 1 }, brandRisk: { lte: 25 } } }
+weight: { base: 6 }
+cooldownYears: 5
+followUpOnly: true
+bindBusiness: true
+choices:
+  - id: celebrate
+    label: Celebrate with them
+    outcome:
+      text: A bottle, a call and a long, loud conversation about what they should open next.
+      effects:
+        - { type: business, action: pay, share: 0.003, floor: 100 }
+        - { type: business, action: morale, delta: 3 }
+  - id: bonus
+    label: Accept a thank-you gift
+    outcome:
+      text: The operator insists, and the gift is generous. It would be rude to say no.
+      effects:
+        - { type: business, action: receive, share: 0.006, floor: 300 }
+  - id: help
+    label: Offer your help for the next one
+    outcome:
+      text: You spend a weekend helping set up their second counter. You learn as much as you teach.
+      effects:
+        - { type: business, action: brand, delta: -6 }
+        - { type: stat, key: confidence, delta: 2 }

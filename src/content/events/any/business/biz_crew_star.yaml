@@ -1,0 +1,40 @@
+id: biz_crew_star
+title: Someone on the crew
+text: >-
+  There is a name on the lips of customers at {business}: {crew.name}. {crew.they} {crew:was|were} just part of the crew, and now {crew.they} {crew:is|are} the one people ask for.
+tone: light
+category: business
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { business: { owned: true } }
+    - { age: { gte: 18 } }
+    - { business: { owned: true, crew: { gte: 1 }, namedRoom: true, years: { gte: 1 } } }
+weight: { base: 4 }
+cooldownYears: 5
+followUpOnly: true
+bindBusiness: true
+cast:
+  crew: { business: crew, presence: city }
+choices:
+  - id: promote
+    label: Give {crew.them} more to do
+    outcome:
+      text: A new title, a key, and a seat in the meetings. {crew.name} grows into it faster than you thought.
+      effects:
+        - { type: business, action: staffRaise, role: crew }
+        - { type: business, action: quality, delta: 3 }
+  - id: thank
+    label: Thank {crew.them} and keep it as it is
+    outcome:
+      text: "{crew.name} smiles. You hope it is enough."
+      effects:
+        - { type: business, action: staffMorale, role: crew, delta: 3 }
+        - { type: relationship, role: crew, affection: 3 }
+  - id: ignore
+    label: Do nothing
+    outcome:
+      text: People notice when they are noticed. They notice when they are not, too.
+      effects:
+        - { type: business, action: staffMorale, role: crew, delta: -6 }

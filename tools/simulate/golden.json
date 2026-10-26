@@ -1,5 +1,5 @@
 {
-  "contentVersion": "0.1.0+989ea69cea",
+  "contentVersion": "0.1.0+f1bbb06bdb",
   "lives": {
     "careful": [
       {
@@ -62,33 +62,33 @@
     "careless": [
       {
         "seed": "golden-careless-0-0",
-        "years": 54,
-        "ageAtDeath": 54,
-        "yearsHash": "44b3e3fe749ecd49b13f",
-        "finalHash": "89ba72b99b0dbf4c6d22"
+        "years": 78,
+        "ageAtDeath": 78,
+        "yearsHash": "681507fcf11d84429704",
+        "finalHash": "ecb0fa48248125562cf1"
       },
       {
         "seed": "golden-careless-1-0",
-        "years": 78,
-        "ageAtDeath": 78,
-        "yearsHash": "2b4e94c707b63aa23d2b",
-        "finalHash": "82550a3f92699885dbb3"
+        "years": 68,
+        "ageAtDeath": 68,
+        "yearsHash": "ca88f6ef578f6966b521",
+        "finalHash": "5d326ac264592141ed72"
       },
       {
         "seed": "golden-careless-2-0",
-        "years": 76,
-        "ageAtDeath": 76,
-        "yearsHash": "64c655d4c38d2862c195",
-        "finalHash": "14def2bb86b3f72a35c2"
+        "years": 56,
+        "ageAtDeath": 56,
+        "yearsHash": "0907ff6dcd6b5e9d80a7",
+        "finalHash": "aea3aed5b0443185d589"
       }
     ],
     "criminal": [
       {
         "seed": "golden-criminal-0-0",
-        "years": 89,
-        "ageAtDeath": 89,
-        "yearsHash": "14a01e884cae5ecdf0ef",
-        "finalHash": "63fde4c1ea674e82d8f3"
+        "years": 77,
+        "ageAtDeath": 77,
+        "yearsHash": "aa5232ca259675e9db1f",
+        "finalHash": "e94464afb760e6113673"
       },
       {
         "seed": "golden-criminal-1-0",

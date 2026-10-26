@@ -1,0 +1,37 @@
+id: biz_economy_recession
+title: Customers are trading down
+text: >-
+  The news calls it a recession. At {business} it looks like fewer treats and shorter orders. People are polite about it, and they count their change.
+tone: serious
+category: business
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { business: { owned: true } }
+    - { age: { gte: 18 } }
+    - { business: { owned: true, economy: [recession] } }
+weight: { base: 6 }
+cooldownYears: 5
+followUpOnly: true
+bindBusiness: true
+choices:
+  - id: cut
+    label: Lower the prices to keep people coming
+    outcome:
+      text: The numbers on the board come down and the line stays out the door, thinner but steady.
+      effects:
+        - { type: business, action: price, level: low }
+        - { type: business, action: reputation, delta: 1 }
+  - id: trim
+    label: Order leaner and trim the shelf
+    outcome:
+      text: You cut the order to what you are sure will sell, and get used to the empty gap on the shelf.
+      effects:
+        - { type: business, action: order, level: lean }
+  - id: hold
+    label: Hold steady and wait it out
+    outcome:
+      text: You change nothing and watch the numbers. It is an easy decision to make and a hard one to keep.
+      effects:
+        - { type: stat, key: stress, delta: 3 }

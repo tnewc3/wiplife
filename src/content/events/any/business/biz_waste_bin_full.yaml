@@ -1,0 +1,38 @@
+id: biz_waste_bin_full
+title: The bin is full again
+text: >-
+  The bins behind {business} are overflowing with {product} nobody bought. The crew is quiet about it, which is the loudest way to say it.
+tone: neutral
+category: business
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { business: { owned: true } }
+    - { age: { gte: 18 } }
+    - { business: { owned: true, years: { gte: 1 }, stocked: [surplus] } }
+weight: { base: 6 }
+cooldownYears: 3
+followUpOnly: true
+bindBusiness: true
+choices:
+  - id: lean
+    label: Order less of it
+    outcome:
+      text: You write a leaner order and watch the next week of numbers more carefully.
+      effects:
+        - { type: business, action: order, level: lean }
+  - id: discount
+    label: Run it at a lower price before it goes off
+    outcome:
+      text: A handwritten sign by the register moves most of it. People like a bargain, and remember it.
+      effects:
+        - { type: business, action: price, level: low }
+        - { type: business, action: reputation, delta: 1 }
+  - id: donate
+    label: Give what is left to a shelter
+    outcome:
+      text: A van comes at closing and takes what you can spare. It does not fix the order, but it feels better than the bin.
+      effects:
+        - { type: business, action: pay, share: 0.003, floor: 100 }
+        - { type: business, action: morale, delta: 3 }

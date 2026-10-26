@@ -11,6 +11,8 @@ import type { AddedTeam, TeamSetup } from './sports/setup';
  */
 import type {
   BusinessStyle,
+  OrderLevel,
+  TrainingLevel,
   MarketingLevel,
   OwnerRole,
   PayLevel,
@@ -1428,6 +1430,72 @@ export interface BusinessLocation {
   /** The year it opened (or the year you took it over). */
   opened: number;
   result?: LocationResult;
+  /** B2: units of each stock item (a goods line, or a service's supply pool) carried in from last year. */
+  stock: Record<string, number>;
+  /** B2: the units of each stock item the location wanted last year (the next order is forecast from it). */
+  forecast: Record<string, number>;
+  /** B2: the person who manages this location (a staff member with the manager role), if any. */
+  manager?: Id;
+}
+
+/** B2: one product line's year at a location (units, whole dollars). */
+export interface LineResult {
+  productId: Id;
+  /** Units wanted, sold and lost to an empty shelf (or empty supply pool); units spoiled. */
+  demand: number;
+  sold: number;
+  lost: number;
+  spoiled: number;
+  revenue: number;
+  /** Cost of what was sold. */
+  cost: number;
+}
+
+/** B2: a product line a business sells: on or off, and at what price level. */
+export interface BusinessLine {
+  productId: Id;
+  on: boolean;
+  price: PriceLevel;
+}
+
+/** B2: the crew of one role at one location: counted, with an average skill and morale, and no identity. */
+export interface CrewPool {
+  locationId: Id;
+  roleId: Id;
+  count: number;
+  skill: number;
+  morale: number;
+}
+
+/** B2: a franchisee in another place: simulated in aggregate. */
+export interface Franchise {
+  id: Id;
+  cityId: Id;
+  style: BusinessStyle;
+  /** Someone you know who runs it, or null for an operator you never meet. */
+  personId: Id | null;
+  /** The operator's skill (0–100). */
+  skill: number;
+  since: number;
+  /** The one-off fee paid (whole dollars) and the royalty rate. */
+  fee: number;
+  royalty: number;
+  /** Last year's revenue, royalty paid to you, support cost and the franchisee's own profit. */
+  revenue: number;
+  royaltyPaid: number;
+  support: number;
+  profit: number;
+  /** Years of loss in a row. */
+  lossYears: number;
+  /** 0–100: the chance the brand is hurt by how it is run. */
+  risk: number;
+}
+
+/** B2: what the last supplier news, event or trouble was about (read by event text). */
+export interface BusinessFocus {
+  productId?: Id | undefined;
+  category?: Id | undefined;
+  locationId?: Id | undefined;
 }
 
 /** W3: how one location did in the last business year (whole dollars). */
@@ -1441,6 +1509,13 @@ export interface LocationResult {
   supplies: number;
   other: number;
   profit: number;
+  /** B2: supplies split into cost of goods, waste and holding; sales lost to empty shelves (at price); hiring and training; the lines. */
+  goodsCost?: number;
+  waste?: number;
+  lostSales?: number;
+  hiring?: number;
+  training?: number;
+  lines?: LineResult[];
 }
 
 /** W3: someone who works there, who is also a person in your life. */
@@ -1457,7 +1532,9 @@ export interface BusinessStaff {
   licensed: boolean;
   /** Their pay is the market wage times this (raises make it more). */
   raise: number;
-  /** The manager, if this one is. */
+  /** B2: the role they fill (an id from the kind's roles); a location manager has the manager role and a locationId. */
+  roleId: Id;
+  /** The manager, if this one is (the general manager of the business). */
   manager?: true;
   /** A manager's honesty (0–100); only a manager has one. */
   honesty?: number;
@@ -1467,10 +1544,12 @@ export interface BusinessStaff {
 
 /** W3: a stretch of good or bad trading from an event (a viral moment, a competitor next door). */
 export interface BusinessShock {
-  kind: 'buzz' | 'rival';
-  /** Multiplies demand until the year `until` (inclusive). */
+  kind: 'buzz' | 'rival' | 'shortage' | 'deal';
+  /** Multiplies demand until the year `until` (inclusive). A shortage: the share of an order that arrives. A deal: the cost multiple. */
   mult: number;
   until: number;
+  /** B2: a shortage or a deal is about one supplier category. */
+  category?: Id;
 }
 
 /** W3: a year's report for a business (whole dollars). */
@@ -1504,6 +1583,20 @@ export interface BusinessReport {
   /** Notes for the report: keys into text/business.yaml report.notes. */
   notes: string[];
   locations: LocationResult[];
+  /** B2: cost of goods and waste (inside `supplies`), sales lost to empty shelves, hiring and training costs, royalties net of support (inside profit), crew who left, heads at the year's end, the economy that year, and the lines added up across locations. */
+  goodsCost?: number;
+  waste?: number;
+  lostSales?: number;
+  hiring?: number;
+  training?: number;
+  royalties?: number;
+  support?: number;
+  turnover?: number;
+  heads?: number;
+  economy?: string;
+  lines?: LineResult[];
+  /** Supplier categories whose index moved the most this year: [category, index]. */
+  supplierMoves?: [Id, number][];
 }
 
 /** W3: a business you own (or own a share of). */
@@ -1549,6 +1642,20 @@ export interface Business {
   auditedYear?: number;
   shocks: BusinessShock[];
   report: BusinessReport | null;
+  /** B2: the lines it sells, with a price level each. */
+  lines: BusinessLine[];
+  /** B2: how heavily each stock item (a goods line or a supply pool) is ordered. */
+  orders: Record<string, OrderLevel>;
+  /** B2: the headcount you want at each location, by role. */
+  headcount: Record<Id, Record<Id, number>>;
+  /** B2: the crew, per location and role. */
+  crew: CrewPool[];
+  training: TrainingLevel;
+  /** B2: the value of stock on the shelves, at cost (whole dollars). */
+  stockValue: number;
+  franchises: Franchise[];
+  /** B2: what the latest news is about. */
+  focus?: BusinessFocus | undefined;
 }
 
 /** W3: a business you used to own. */

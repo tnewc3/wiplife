@@ -47,9 +47,9 @@ export function staffNeed(def: BusinessDef, style: BusinessStyle, level: Staffin
 }
 
 /** Pay for one worker: the market wage, the pay level, their skill, a licence and any raises. */
-export function wageOf(def: BusinessDef, style: BusinessStyle, cityId: Id, pay: PayLevel, skill: number, licensed: boolean, raise: number, content: ContentBundle): number {
+export function wageOf(def: BusinessDef, style: BusinessStyle, cityId: Id, pay: PayLevel, skill: number, licensed: boolean, raise: number, content: ContentBundle, roleWage = 1): number {
   const b = content.balance.business;
-  const base = marketWage(def, style, cityId, content) * b.levels.pay[pay].mult * (1 + b.staff.skillWage * (skill - 50)) * (licensed ? b.costs.licensedWage : 1) * raise;
+  const base = marketWage(def, style, cityId, content) * b.levels.pay[pay].mult * (1 + b.staff.skillWage * (skill - 50)) * (licensed ? b.costs.licensedWage : roleWage) * raise;
   return wholeDollars(base);
 }
 
@@ -234,10 +234,12 @@ export function valuation(b: Business, content: ContentBundle): number {
   if (!def) return 0;
   const m = content.balance.business.market;
   const earnings = earningsFor(b, def, content);
-  const typical = b.locations.reduce((s, l) => s + typicalLocation(def, l.style, l.cityId, b.reputation, b.quality, content).profit, 0);
+  // B2: royalties net of support are earnings too (franchises are valued on them).
+  const net = (b.franchises ?? []).reduce((s, f) => s + f.royaltyPaid - f.support, 0);
+  const typical = b.locations.reduce((s, l) => s + typicalLocation(def, l.style, l.cityId, b.reputation, b.quality, content).profit, 0) + Math.max(0, net);
   // A business is not priced above what a good year of its kind would earn it.
   const capped = Math.min(earnings, Math.max(0, typical) * m.maxMultiple);
-  return valueFromEarnings(capped, b.assets, b.cash, content, b.chainId !== undefined);
+  return valueFromEarnings(capped, b.assets + (b.stockValue ?? 0), b.cash, content, b.chainId !== undefined);
 }
 
 /** What selling brings after a quick-sale discount and the broker. */

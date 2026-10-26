@@ -4,8 +4,10 @@
  * kind and belong to one business, money is whole and cash is never
  * negative, and no one under the minimum age owns one.
  */
-import { BUSINESS_STYLES, MARKETING_LEVELS, OWNER_ROLES, PAY_LEVELS, PRICE_LEVELS, QUALITY_LEVELS, STAFFING_LEVELS, type ContentBundle } from '../../content/schemas';
+import { BUSINESS_STYLES, MARKETING_LEVELS, ORDER_LEVELS, OWNER_ROLES, PAY_LEVELS, PRICE_LEVELS, QUALITY_LEVELS, STAFFING_LEVELS, TRAINING_LEVELS, type ContentBundle } from '../../content/schemas';
 import type { LifeState } from '../types';
+import { namedAt } from './crew';
+import { crewRoles, managerRole, maxHeads } from './headcount';
 
 export function businessFailures(state: LifeState, content: ContentBundle): string[] {
   const failures: string[] = [];
@@ -19,6 +21,8 @@ export function businessFailures(state: LifeState, content: ContentBundle): stri
     if (!Number.isInteger(n) || n < 0 || n > 100) fail(`${label} must be a whole number from 0 to 100 (${n})`);
   };
   if (bs.items.length > bal.limits.businesses) fail(`more than ${bal.limits.businesses} businesses`);
+  if (bs.items.reduce((n, b) => n + b.locations.length, 0) > bal.limits.totalLocations) fail(`more than ${bal.limits.totalLocations} locations in all`);
+  if (bs.items.reduce((n, b) => n + b.staff.length, 0) > bal.limits.namedTotal) fail(`more than ${bal.limits.namedTotal} named people in all`);
   if (bs.items.length > 0 && state.character.age < bal.limits.minAge) fail('a business owner under the minimum age');
   money('business.year.draw', bs.year.draw);
   money('business.year.inject', bs.year.inject);
@@ -89,7 +93,78 @@ export function businessFailures(state: LifeState, content: ContentBundle): stri
     }
     if (managers > 1) fail(`${label}: more than one manager`);
     if (b.role === 'manager' && managers === 0) fail(`${label}: run by a manager it has not got`);
-    if (b.staff.filter((s) => !s.manager).length > bal.limits.namedStaff) fail(`${label}: more named staff than the limit`);
+    for (const l of b.locations) {
+      if (b.staff.filter((s) => s.locationId === l.id).length > bal.limits.namedPerLocation) fail(`${label}: more than ${bal.limits.namedPerLocation} named people at location ${l.id}`);
+    }
+    // B2: roles, headcount, crew, lines, stock and franchises.
+    const crew = new Set(crewRoles(def).map((r) => r.id));
+    const mgr = managerRole(def)?.id;
+    for (const s of b.staff) {
+      if (!crew.has(s.roleId) && s.roleId !== mgr) fail(`${label}: staff member ${s.personId} has an unknown role "${s.roleId}"`);
+      if (s.manager !== true && s.locationId !== null) {
+        const loc = b.locations.find((l) => l.id === s.locationId);
+        const person = state.people[s.personId];
+        if (loc && person && person.alive && person.cityId !== loc.cityId) fail(`${label}: staff member ${s.personId} lives in ${person.cityId}, not where their location is (${loc.cityId})`);
+        if (s.roleId === mgr && loc?.manager !== s.personId) fail(`${label}: staff member ${s.personId} is a location manager of nowhere`);
+      }
+    }
+    for (const l of b.locations) {
+      for (const [k, n] of Object.entries(l.stock)) if (!Number.isFinite(n) || n < 0) fail(`${label}: location ${l.id} holds ${n} of ${k}`);
+      for (const [k, n] of Object.entries(l.forecast)) if (!Number.isFinite(n) || n < 0) fail(`${label}: location ${l.id} forecasts ${n} of ${k}`);
+      if (l.manager !== undefined) {
+        const s = b.staff.find((x) => x.personId === l.manager);
+        if (!s || s.roleId !== mgr || s.locationId !== l.id) fail(`${label}: location ${l.id} has a manager who is not a manager there`);
+      }
+      const target = b.headcount[l.id];
+      if (!target) {
+        fail(`${label}: location ${l.id} has no headcount`);
+        continue;
+      }
+      let total = 0;
+      for (const [role, n] of Object.entries(target)) {
+        if (!crew.has(role)) fail(`${label}: headcount for unknown role "${role}"`);
+        if (!Number.isInteger(n) || n < 0) fail(`${label}: headcount ${n} for ${role} at ${l.id}`);
+        if (namedAt(b, l.id, role) > n) fail(`${label}: more named people than the headcount for ${role} at ${l.id}`);
+        total += n;
+      }
+      if (total > maxHeads(def, l.style, content)) fail(`${label}: ${total} heads at ${l.id}, more than the cap`);
+    }
+    for (const id of Object.keys(b.headcount)) if (!b.locations.some((l) => l.id === id)) fail(`${label}: headcount for a location that is gone (${id})`);
+    const poolKeys = new Set<string>();
+    for (const p of b.crew) {
+      const key = `${p.locationId}:${p.roleId}`;
+      if (poolKeys.has(key)) fail(`${label}: two crew pools for ${key}`);
+      poolKeys.add(key);
+      if (!Number.isInteger(p.count) || p.count < 0) fail(`${label}: a crew pool with ${p.count} heads (${key})`);
+      if (!b.locations.some((l) => l.id === p.locationId)) fail(`${label}: a crew pool at a location that is gone (${key})`);
+      if (!crew.has(p.roleId)) fail(`${label}: a crew pool in an unknown role (${key})`);
+      if (p.count + namedAt(b, p.locationId, p.roleId) > (b.headcount[p.locationId]?.[p.roleId] ?? 0)) fail(`${label}: the crew and named people in ${key} are more than the headcount`);
+      score(`${label} crew skill`, Math.round(p.skill));
+      score(`${label} crew morale`, Math.round(p.morale));
+    }
+    if (!(TRAINING_LEVELS as readonly string[]).includes(b.training)) fail(`${label}: unknown training "${b.training}"`);
+    for (const [k, level] of Object.entries(b.orders)) if (!(ORDER_LEVELS as readonly string[]).includes(level)) fail(`${label}: unknown order level for ${k}`);
+    const lineIds = new Set<string>();
+    for (const line of b.lines) {
+      if (lineIds.has(line.productId)) fail(`${label}: line ${line.productId} twice`);
+      lineIds.add(line.productId);
+      if (!def.products.some((p) => p.id === line.productId)) fail(`${label}: unknown line "${line.productId}"`);
+      if (!(PRICE_LEVELS as readonly string[]).includes(line.price)) fail(`${label}: unknown price level for ${line.productId}`);
+    }
+    money(`${label}.stockValue`, b.stockValue);
+    if (b.stockValue < 0) fail(`${label}: negative stock value`);
+    if (b.franchises.length > bal.limits.franchises) fail(`${label}: more than ${bal.limits.franchises} franchises`);
+    const fids = new Set<string>();
+    for (const f of b.franchises) {
+      if (fids.has(f.id) || locationIds.has(f.id)) fail(`${label}: franchise id ${f.id} used twice`);
+      fids.add(f.id);
+      if (!content.cities[f.cityId]) fail(`${label}: franchise in an unknown city`);
+      score(`${label} franchise risk`, f.risk);
+      score(`${label} franchise skill`, f.skill);
+      money(`${label} franchise fee`, f.fee);
+      money(`${label} franchise royalty`, f.royaltyPaid);
+      if (f.royalty <= 0 || f.royalty > 0.5) fail(`${label}: a franchise with a royalty of ${f.royalty}`);
+    }
     // Loans.
     for (const id of b.loanIds) {
       const d = state.finances.debts.find((x) => x.id === id);
@@ -99,7 +174,7 @@ export function businessFailures(state: LifeState, content: ContentBundle): stri
       loanOwner.set(id, b.id);
     }
     if (b.report) {
-      for (const k of ['customers', 'demand', 'revenue', 'rent', 'wages', 'supplies', 'marketing', 'quality', 'other', 'profit', 'loanPayments', 'paidOut', 'draw', 'injected', 'cash'] as const) money(`${label}.report.${k}`, b.report[k]);
+      for (const k of ['customers', 'demand', 'revenue', 'rent', 'wages', 'supplies', 'marketing', 'quality', 'other', 'profit', 'loanPayments', 'paidOut', 'draw', 'injected', 'cash', 'goodsCost', 'waste', 'lostSales', 'hiring', 'training', 'royalties', 'support'] as const) if (b.report[k] !== undefined) money(`${label}.report.${k}`, b.report[k]!);
       if (b.report.draw > b.report.paidOut) fail(`${label}: draw is more than was paid out`);
     }
   }

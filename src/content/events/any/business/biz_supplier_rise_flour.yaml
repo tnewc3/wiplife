@@ -1,0 +1,44 @@
+id: biz_supplier_rise_flour
+title: Flour is going up
+text: >-
+  The mill's note says the harvest was thin and flour will cost more from the next order. Almost everything {business} bakes starts with it, and the ovens do not care about the harvest.
+tone: neutral
+category: business
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { business: { owned: true } }
+    - { age: { gte: 18 } }
+    - { business: { owned: true, sells: [bread, rolls, pastries, cakes] } }
+weight: { base: 6 }
+cooldownYears: 4
+followUpOnly: true
+bindBusiness: true
+choices:
+  - id: absorb
+    label: Eat the difference for now
+    outcome:
+      text: Nothing changes on the shelf and everything changes in the books. You hope the next harvest is kinder.
+      effects:
+        - { type: business, action: pay, share: 0.02, floor: 400 }
+  - id: price
+    label: Raise what you charge
+    outcome:
+      text: The loaves cost a little more. Regulars grumble in the right tone, and mostly keep coming.
+      effects:
+        - { type: business, action: price, product: pastries, level: high }
+        - { type: business, action: reputation, delta: -1 }
+  - id: smaller
+    label: Make the batches a little smaller
+    outcome:
+      text: The trays come out lighter and nobody notices for a week. Then somebody counts the rolls in a bag.
+      effects:
+        - { type: business, action: order, product: bread, level: lean }
+        - { type: business, action: quality, delta: -3 }
+  - id: ahead
+    label: Buy ahead before the next rise
+    outcome:
+      text: You buy more flour than the shelf wants, and stack sacks where the stock room used to have a walkway.
+      effects:
+        - { type: business, action: buyAhead, share: 0.12, floor: 500 }

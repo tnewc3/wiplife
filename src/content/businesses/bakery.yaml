@@ -25,6 +25,7 @@ styles:
     wage: 28000
     quality: 40
     elasticity: 2.0
+    costScale: 0.888
   standard:
     label: Artisan bakery
     blurb: "Sourdough, laminated pastry and a chalkboard that changes daily."
@@ -38,6 +39,7 @@ styles:
     wage: 31000
     quality: 52
     elasticity: 1.6
+    costScale: 0.876
   premium:
     label: Patisserie
     blurb: "Glass cases, white boxes with ribbon, and wedding cakes booked a year out."
@@ -51,6 +53,7 @@ styles:
     wage: 38000
     quality: 66
     elasticity: 0.9
+    costScale: 0.843
 fit:
   budget: { size: 0.3, wealth: -0.3 }
   standard: { size: 0.3, wealth: 0.2 }
@@ -68,3 +71,16 @@ names:
   - "Linden Hearth Bakery"
   - "Butterwick's"
   - "Little Wheat"
+lineMode: menu
+products:
+  - { id: bread, name: Bread, group: baked, type: goods, share: 0.3, price: 0.3, costShare: 0.24, supplier: flour_grain, elasticity: 0.7, competition: 1.0, economy: 0.3, trend: baked, perishable: 1.0, core: true }
+  - { id: rolls, name: Rolls, group: baked, type: goods, share: 0.12, price: 0.18, costShare: 0.26, supplier: flour_grain, elasticity: 0.8, competition: 0.9, economy: 0.4, trend: baked, perishable: 1.0, core: true }
+  - { id: cakes, name: Cakes, group: baked, type: goods, share: 0.18, price: 1.8, costShare: 0.32, supplier: dairy, elasticity: 0.9, competition: 0.6, economy: 1.2, trend: baked, perishable: 0.6, core: true }
+  - { id: pastries, name: Pastries, group: baked, type: goods, share: 0.28, price: 0.5, costShare: 0.33, supplier: dairy, elasticity: 1.0, competition: 0.9, economy: 1.0, trend: baked, perishable: 0.8, core: true }
+  - { id: custom_orders, name: Custom orders, group: baked, type: goods, share: 0.12, price: 5.0, costShare: 0.25, supplier: dairy, elasticity: 0.5, competition: 0.3, economy: 1.2, trend: baked, perishable: 0.2, styles: [standard, premium], core: true }
+  - { id: savory_bakes, name: Savory bakes, group: meals, type: goods, share: 0.14, price: 0.55, costShare: 0.34, supplier: flour_grain, elasticity: 0.9, competition: 0.8, economy: 0.8, trend: meals, perishable: 0.8 }
+roles:
+  - { id: manager, title: head baker, share: 0, weight: 1.0, wage: 1.35, min: 0, max: 1, manager: true }
+  - { id: shift_lead, title: shift lead, share: 0.15, weight: 1.15, wage: 1.25, min: 0, max: 3, lead: true }
+  - { id: baker, title: baker, share: 0.5, weight: 1.0, wage: 1.0, min: 0, max: 12, craft: true }
+  - { id: counter, title: counter staff, share: 0.35, weight: 0.85, wage: 0.88, min: 0, max: 8 }

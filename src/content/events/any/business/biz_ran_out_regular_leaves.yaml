@@ -1,0 +1,38 @@
+id: biz_ran_out_regular_leaves
+title: A regular stops coming
+text: >-
+  One of the regulars at {business} used to come in for {product} every week. This month, nothing. A friend of theirs says they asked for it twice and was told it was gone.
+tone: neutral
+category: business
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { business: { owned: true } }
+    - { age: { gte: 18 } }
+    - { business: { owned: true, years: { gte: 2 }, stocked: [short] } }
+weight: { base: 4 }
+cooldownYears: 4
+followUpOnly: true
+bindBusiness: true
+choices:
+  - id: reach
+    label: Send a message and a gift
+    outcome:
+      text: A card, a little something in a paper bag. It does not fix the empty shelf, but it fixes how it felt.
+      effects:
+        - { type: business, action: pay, share: 0.004, floor: 100 }
+        - { type: business, action: reputation, delta: 2 }
+  - id: stock
+    label: Never be out of it again
+    outcome:
+      text: You raise the order and set aside a shelf for it, and watch the shelf all week.
+      effects:
+        - { type: business, action: order, level: heavy }
+        - { type: stat, key: stress, delta: 1 }
+  - id: shrug
+    label: Let it go
+    outcome:
+      text: People come and people go. You do not like how easily you say it.
+      effects:
+        - { type: business, action: reputation, delta: -2 }
