@@ -18,6 +18,7 @@ import type {
   TieStatusId,
 } from '../content/schemas';
 import type { PastimeCategory, PastimeQuality, PastimeRoute, PastimeStake, PetPersonalityId, TeenFocusId } from '../content/schemas';
+import type { EditRefusal, RefusalCode } from '../engine/godmode';
 import type { PastimeBlock } from '../engine/pastimes/query';
 import type { PastimeReceipt } from '../engine/types';
 import type { ActivityBlock } from '../engine/teen/activities';
@@ -2043,3 +2044,218 @@ export const SOCIAL_CONTROVERSY_WORDS = {
 export function postsLeftWords(left: number, noun: string, plural: string): string {
   return left === 0 ? `No ${plural} left this year` : `${left} ${left === 1 ? noun : plural} left this year`;
 }
+
+
+// ----- God mode (G1, docs/expansion.md): the switch, the editor and the sentence for every refusal -----
+
+export const GOD_MODE_LABELS = {
+  settingsTitle: 'God mode',
+  switchLabel: 'God mode',
+  switchNote: 'Edit yourself and anyone in your life: stats, looks, relationships, jobs, money and more. Edits can’t be undone, and a life edited this way looks like any other. Nothing else in the game changes.',
+  confirmTitle: 'Switch on God mode?',
+  confirmBody: 'You’ll be able to edit yourself and the people in your life between years. Edits can’t be undone, and nothing marks a life you’ve edited. The game still refuses changes that break its rules.',
+  confirmYes: 'Switch it on',
+  editButton: 'Edit (god mode)',
+  editBlocked: 'Finish this year’s events first',
+  editorTitleSelf: 'Edit you',
+  save: 'Save changes',
+  saveCount: (n: number) => (n === 0 ? 'Save changes' : `Save changes (${n})`),
+  revert: 'Revert',
+  saved: 'Saved',
+  cantSave: 'Can’t save that',
+  cantSaveNote: 'Nothing was changed. Fix these and save again:',
+  details: 'Details',
+  noChanges: 'Nothing to save yet.',
+  back: 'Back',
+  moveWarning: 'Moving ends your job.',
+  moneyNow: (from: string, to: string) => `${from} → ${to}`,
+  ageSelf: 'Your age can’t be edited. It is how many years you have lived, and everything else hangs from it.',
+  ageRange: (min: number, max: number) => `Between ${min} and ${max}`,
+  age: 'Age',
+  none: 'None',
+  addCondition: 'Add a condition',
+  addTrouble: 'Add an illness or addiction',
+  addLanguage: 'Add a language',
+  addCitizenship: 'Add a citizenship',
+  addDebt: 'Add a debt',
+  remove: 'Remove',
+  native: 'Native',
+  treated: 'Treated',
+  named: 'Named (diagnosed)',
+  setValue: 'Set',
+  hiddenNote: 'Hidden: it hasn’t shown itself yet. Clear it to say nothing waits to surface.',
+  stepDown: 'Less',
+  stepUp: 'More',
+  chooseCity: 'Choose a city',
+  chooseJob: 'Choose a job',
+  noJob: 'No job',
+  level: 'Level',
+  freeWord: 'One word of your own',
+  forgiveNote: 'A debt you remove is forgiven.',
+  lockedDebtNote: 'Debts for a home, a vehicle or a business can only be changed in the game.',
+  firstCitizenship: 'The first stays.',
+} as const;
+
+/** The groups of the editor (each is a section the refusals point at). */
+export const GOD_AREA_LABELS: Record<string, string> = {
+  name: 'Name',
+  identity: 'Identity',
+  latent: 'Hidden identity',
+  looks: 'Looks',
+  appearance: 'Looks',
+  stats: 'Stats',
+  personality: 'Personality',
+  values: 'Hidden values',
+  conditions: 'Health',
+  troubles: 'Health',
+  neuro: 'Health',
+  relationship: 'Relationship',
+  work: 'Job and wealth',
+  wealth: 'Job and wealth',
+  cityId: 'City',
+  faith: 'Faith',
+  languages: 'Languages',
+  citizenships: 'Citizenships',
+  money: 'Money',
+  birthYear: 'Age',
+  target: 'This edit',
+};
+
+export const GOD_STAT_LABELS = {
+  health: 'Health',
+  happiness: 'Happiness',
+  smarts: 'Smarts',
+  fitness: 'Fitness',
+  stress: 'Stress',
+  mood: 'Mood',
+  moodBase: 'Usual mood',
+} as const;
+
+export const GOD_VALUE_LABELS = {
+  luck: 'Luck',
+  reputation: 'Reputation',
+  geneticRisk: 'Gene risk',
+  vice: 'Vice',
+  innerConflict: 'Inner conflict',
+  happinessBaseline: 'Happiness baseline',
+} as const;
+
+export const GOD_RELATIONSHIP_KIND_LABELS = {
+  friend: 'Friend',
+  acquaintance: 'Acquaintance',
+  partner: 'Partner',
+  fiance: 'Fiancé',
+  spouse: 'Spouse',
+  ex: 'Ex',
+} as const;
+
+export const GOD_STATUS_LABELS = { active: 'In your life', estranged: 'Estranged', ended: 'Faded out' } as const;
+
+/** The same band words the game uses, with the number beside them: "good · 72". */
+export function godScoreLine(value: number): string {
+  const words = value < 20 ? 'very low' : value < 40 ? 'low' : value < 60 ? 'medium' : value < 80 ? 'high' : 'very high';
+  return `${words} · ${value}`;
+}
+
+const AGE_FIXED_REASONS: Record<string, (name: string) => string> = {
+  self: () => GOD_MODE_LABELS.ageSelf,
+  family: (n) => `${n} is family or a teacher, so their age is fixed.`,
+  place: (n) => `${n} is part of your work or school, so their age is fixed.`,
+  child: (n) => `${n} is a child of yours (or of your child), so their age is fixed.`,
+  dead: (n) => `${n} has died.`,
+  guardian: (n) => `${n} looks after you, so their age is fixed.`,
+  unknown: (n) => `${n}’s age can’t be edited.`,
+};
+
+/** Why a person’s age can’t be edited, by the engine’s reason. */
+export function ageFixedSentence(reason: string | undefined, name: string): string {
+  return (AGE_FIXED_REASONS[reason ?? 'unknown'] ?? AGE_FIXED_REASONS.unknown!)(name);
+}
+
+/**
+ * The sentence for a refusal (docs/expansion.md, "Validation and refusal reasons"). `nameOf` gives the name of a person by
+ * id; a refusal about you carries no person. No pronouns are used for anyone.
+ */
+export function refusalSentence(r: EditRefusal, nameOf: (personId: string) => string): string {
+  const who = r.person !== undefined ? nameOf(r.person) : 'You';
+  const f = r.facts;
+  const text = (key: string) => String(f[key] ?? '');
+  const sentences: Record<RefusalCode, () => string> = {
+    not_between_years: () => 'Edits can only be made between years. Finish this year’s events first.',
+    card_open: () => 'Close the open card first.',
+    life_over: () => 'This life is over.',
+    invalid_value: () => `${GOD_AREA_LABELS[r.area] ?? r.area}${r.field ? ` (${r.field})` : ''}: ${text('message')}`,
+    too_many_fields: () => `That is more than ${text('max')} changes at once. Save fewer at a time.`,
+    too_large: () => 'That edit is too large to save.',
+    nothing_changed: () => GOD_MODE_LABELS.noChanges,
+    unknown_id: () => 'That choice isn’t part of this game.',
+    field_unavailable: () => (r.person !== undefined ? `That can’t be edited for ${who}.` : 'That can’t be edited for you.'),
+    minor_romance: () =>
+      r.area === 'birthYear'
+        ? `That age would make ${who} under ${text('age')} when the romance began.`
+        : f.you !== undefined
+          ? `You are under ${text('age')}, so romance isn’t possible.`
+          : `${who} is under ${text('age')}, so romance isn’t possible.`,
+    family_kind: () => `${who} is family (or a teacher), so what they are to you can’t be changed, and nobody becomes family.`,
+    place_kind: () => `${who} can’t become a coworker, boss or classmate: those come from your job and school.`,
+    second_partner: () => `${who} can’t be a second partner. You can have only one at a time.`,
+    no_attraction: () => `${who} and you would both need to be attracted to each other.`,
+    taken: () => `${who} already has a partner.`,
+    partner_status: () => (f.family !== undefined ? `${who} is family and can’t fade out of your life.` : `A partner can’t be estranged or faded out. ${who} would have to stop being your partner first.`),
+    dead_person: () => `${who} has died. Only their name and the words for their gender can change.`,
+    age_fixed: () => ageFixedSentence(text('reason'), who),
+    age_bounds: () => `${who} can be between ${text('minAge')} and ${text('maxAge')}, given what has happened in their life.`,
+    lives_with_you: () => `${who} lives with you. Move yourself, or change the relationship so they no longer do.`,
+    works_with_you: () => `${who} is part of your work or school, so they stay in your city. Make them a friend first.`,
+    move_other_country: () => 'Moving to another country is emigration, which only the game can do.',
+    move_minor: () => 'You are too young to move out on your own.',
+    move_owned_home: () => 'You own your home. Sell it first.',
+    move_probation: () => 'You are on probation and have to stay where you are.',
+    move_prison: () => 'You are in prison.',
+    move_abroad: () => 'You are on a temporary stay abroad.',
+    job_requirements: () => `${who === 'You' ? 'You don’t' : `${who} doesn’t`} meet the requirements for ${text('job')}.`,
+    job_retired: () => `${who === 'You' ? 'You are' : `${who} is`} retired.`,
+    job_prison: () => `${who === 'You' ? 'You are' : `${who} is`} in prison.`,
+    job_vehicle: () => `${text('job')} needs a vehicle where you live.`,
+    job_language: () => `${who} doesn’t speak the language ${text('job')} needs here.`,
+    job_school: () => 'You are still in school.',
+    job_status: () => 'Regular jobs are closed to you without papers.',
+    job_age: () => `Work starts at ${text('age')}.`,
+    money_range: () => `Between ${money(Number(f.min ?? 0))} and ${money(Number(f.max ?? 0))}.`,
+    debt_locked: () => GOD_MODE_LABELS.lockedDebtNote,
+    debt_kind: () => 'That kind of debt can’t be set here.',
+    child_debt: () => 'Children don’t have debts.',
+    no_native_language: () => 'At least one language has to be native.',
+    language_duplicate: () => 'A language is listed twice.',
+    citizenship_empty: () => 'At least one citizenship is needed.',
+    citizenship_duplicate: () => 'A citizenship is listed twice.',
+    citizenship_first: () => `The first citizenship (${text('country')}) stays.`,
+    citizenship_dual: () => `${text('country')} doesn’t allow another citizenship beside it.`,
+    talent_missing: () => 'A talent can only be found if there is one.',
+    condition_duplicate: () => 'That condition is listed twice.',
+    condition_age: () => `That can’t be named before age ${text('age')}.`,
+    trouble_limit: () => `At most ${text('max')} illnesses or addictions at once.`,
+    faith_strength: () => 'A faith needs some belief, and having no faith means none.',
+    latent_faith_same: () => 'The hidden pull is toward the faith already held.',
+    carrying: () => `${who === 'You' ? 'You are' : `${who} is`} carrying a pregnancy, so can’t be set to not carry.`,
+    appearance: () => 'One word per group, and one of your own.',
+    child_traits: () => 'A child keeps all six traits.',
+    invariant: () => `That would break a rule of the game. ${GOD_MODE_LABELS.details}: ${text('message')}`,
+    internal: () => `Something went wrong, and nothing was changed. ${text('message')}`,
+  };
+  return sentences[r.code]();
+}
+
+/** The names of the editor's fields (G1). */
+export const GOD_FIELD_LABELS = {
+  firstName: 'First name', lastName: 'Last name', genderCategory: 'Gender category', genderIdentity: 'Gender identity', genderExpression: 'Gender expression',
+  attractedTo: 'Attracted to', canCarry: 'Can carry a pregnancy', hiddenAttraction: 'Hidden attraction', hiddenAttractedTo: 'Hidden attracted to',
+  hiddenGender: 'Hidden gender', hiddenGenderCategory: 'Hidden gender category', hiddenGenderIdentity: 'Hidden gender identity', hiddenPronouns: 'Hidden pronouns',
+  hiddenExpression: 'Hidden expression', hiddenGenderExpression: 'Hidden gender expression', hiddenPull: 'A hidden pull toward another faith', hiddenFaith: 'Hidden faith',
+  hiddenTrait: (trait: string) => `Hidden ${trait.toLowerCase()}`,
+  looks: 'Looks', talent: 'Talent', talentFound: 'The talent has been found', severity: 'Severity', addBornWith: 'Add a born-with condition',
+  affection: 'Affection', trust: 'Trust', status: 'Status', job: 'Job', faith: 'Faith', howStrongly: 'How strongly', skill: 'Skill', savings: 'Savings', balance: 'Balance',
+  pluralVerbs: 'Plural verbs (they are)', relationship: 'Relationship', noFaith: 'No faith', custom: 'Custom', familyWealth: 'Family wealth', wealth: 'Wealth',
+  pronouns: 'Pronouns', subject: 'Subject', object: 'Object', possessive: 'Possessive', possessivePronoun: 'Possessive pronoun', reflexive: 'Reflexive',
+  younger: 'Younger', older: 'Older',
+} as const;

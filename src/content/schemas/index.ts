@@ -19,6 +19,7 @@ import { economyBalanceSchema, triggerRegistrySchema } from './economy';
 import { educationBalanceSchema, gradProgramSchema, majorSchema, tradeSchema } from './education';
 import { categoryRegistrySchema, eventSchema, flagRegistrySchema, memoryRegistrySchema } from './events';
 import { causeSchema, historyTextSchema, legalTextSchema, obituaryTextSchema, relationWordsSchema, timeTextSchema } from './text';
+import { godmodeBalanceSchema } from './godmodeBalance';
 import { conditionDefSchema, healthBalanceSchema, healthRegistrySchema } from './health';
 import { legalBalanceSchema, legalRegistrySchema, offenseSchema } from './legal';
 import { discoveryBalanceSchema, discoveryRegistrySchema, discoveryTextSchema } from './discovery';
@@ -54,6 +55,7 @@ export * from './education';
 export * from './school';
 export * from './events';
 export * from './relationships';
+export * from './godmodeBalance';
 export * from './text';
 export * from './health';
 export * from './legal';
@@ -158,6 +160,7 @@ export const singletonTypes = {
   'balance/possessions': possessionsBalanceSchema,
   'balance/pastimes': pastimesBalanceSchema,
   'balance/risk': riskBalanceSchema,
+  'balance/godmode': godmodeBalanceSchema,
   'balance/teen': teenBalanceSchema,
   'balance/school': schoolBalanceSchema,
   'balance/crime': crimeBalanceSchema,
@@ -292,6 +295,7 @@ export const contentBundleSchema = z.strictObject({
     possessions: possessionsBalanceSchema,
     pastimes: pastimesBalanceSchema,
     risk: riskBalanceSchema,
+    godmode: godmodeBalanceSchema,
     teen: teenBalanceSchema,
     school: schoolBalanceSchema,
     crime: crimeBalanceSchema,

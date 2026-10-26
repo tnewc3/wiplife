@@ -9,7 +9,7 @@ import { Button } from '../../components/Button';
 import { Card } from '../../components/Card';
 import { ConfirmSheet } from '../../components/ConfirmSheet';
 import { InteractSheet } from '../../components/InteractSheet';
-import { ACTION_LABELS, actionConfirmation, CONNECTIONS_TITLE, connectionLine, CUSTODY_LABELS, HEARD_TITLE, heardLine, gradesPhrase, lifeRows, moodPhrase, ORIGIN_LABELS, parentingStyleLine, personLine, timelineAgeLabel, troubleLine } from '../../labels';
+import { GOD_MODE_LABELS, ACTION_LABELS, actionConfirmation, CONNECTIONS_TITLE, connectionLine, CUSTODY_LABELS, HEARD_TITLE, heardLine, gradesPhrase, lifeRows, moodPhrase, ORIGIN_LABELS, parentingStyleLine, personLine, timelineAgeLabel, troubleLine } from '../../labels';
 
 /**
  * One person's page: who they are to you, how they feel about you (bars, no
@@ -20,6 +20,8 @@ export function PersonScreen({ life, personId }: { life: LifeState; personId: st
   const busy = useAppStore((s) => s.aging);
   const takeAction = useAppStore((s) => s.takeAction);
   const openInteractions = useAppStore((s) => s.openInteractions);
+  const godMode = useAppStore((s) => s.settings.godMode);
+  const openEditor = useAppStore((s) => s.openEditor);
   const [confirming, setConfirming] = useState<ActionId | null>(null);
   const detail = getPersonDetail(life, personId, content);
   if (!detail) return null;
@@ -138,6 +140,15 @@ export function PersonScreen({ life, personId }: { life: LifeState; personId: st
             })}
           </ul>
         </Card>
+      )}
+
+      {godMode && life.phase !== 'dead' && (
+        <div className="flex flex-col gap-1">
+          <Button variant="secondary" block disabled={busy || life.phase !== 'yearStart'} data-testid="god-edit-person" onClick={() => openEditor(personId)}>
+            {GOD_MODE_LABELS.editButton}
+          </Button>
+          {life.phase !== 'yearStart' && <p className="text-sm text-muted">{GOD_MODE_LABELS.editBlocked}</p>}
+        </div>
       )}
 
       <Card>

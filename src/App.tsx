@@ -24,6 +24,8 @@ const SANDBOX_ENABLED = import.meta.env.DEV || import.meta.env.VITE_TEST_HOOKS =
 const EventSandboxScreen = SANDBOX_ENABLED
   ? lazy(() => import('./ui/screens/sandbox/EventSandboxScreen').then((m) => ({ default: m.EventSandboxScreen })))
   : null;
+/** G1: the god mode editor is loaded only when it is opened, so it costs nothing to a player who never switches it on. */
+const GodEditorScreen = lazy(() => import('./ui/screens/godmode/GodEditorScreen').then((m) => ({ default: m.GodEditorScreen })));
 const wantsSandbox = () => /[?&]sandbox(=|&|$)/.test(window.location.search);
 
 function CurrentScreen() {
@@ -77,6 +79,14 @@ function CurrentScreen() {
       return <ArchiveScreen />;
     case 'archivedLife':
       return <ArchivedLifeScreen />;
+    case 'godEditor':
+      return life ? (
+        <Suspense fallback={<div className="h-dvh bg-bg" aria-busy="true" />}>
+          <GodEditorScreen />
+        </Suspense>
+      ) : (
+        <TitleScreen />
+      );
   }
 }
 

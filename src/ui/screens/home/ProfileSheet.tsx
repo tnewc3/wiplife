@@ -13,7 +13,7 @@ import { SingleChoice, Suggestions } from '../../components/Choices';
 import { Sheet } from '../../components/Sheet';
 import { StatBar } from '../../components/StatBar';
 import { TextField } from '../../components/TextField';
-import { ATTRACTION_LABELS, STATUS_LABELS, FAITH_STRENGTH_WORDS, LANGUAGE_LEVEL_LABELS, LANGUAGE_NATIVE_LABEL, money, GROUPS_TITLES, recordLine, roleLine, TRAIT_LABELS, VALUE_LABELS } from '../../labels';
+import { GOD_MODE_LABELS, ATTRACTION_LABELS, STATUS_LABELS, FAITH_STRENGTH_WORDS, LANGUAGE_LEVEL_LABELS, LANGUAGE_NATIVE_LABEL, money, GROUPS_TITLES, recordLine, roleLine, TRAIT_LABELS, VALUE_LABELS } from '../../labels';
 
 const PRONOUN_FIELDS: { key: Exclude<keyof Pronouns, 'verbPlural'>; label: string; example: string }[] = [
   { key: 'subject', label: 'Subject', example: 'they' },
@@ -194,6 +194,8 @@ export function ProfileSheet({ life, open, onClose }: { life: LifeState; open: b
   const [languageChoice, setLanguageChoice] = useState("");
   const belonging = getBelongingView(life, content);
   const [editing, setEditing] = useState(false);
+  const godMode = useAppStore((s) => s.settings.godMode);
+  const openEditor = useAppStore((s) => s.openEditor);
   const close = () => {
     setEditing(false);
     onClose();
@@ -231,6 +233,24 @@ export function ProfileSheet({ life, open, onClose }: { life: LifeState; open: b
             <Button variant="secondary" block className="mt-3" disabled={!view.canEdit} onClick={() => setEditing(true)}>
               Edit pronouns, gender and expression
             </Button>
+            {godMode && life.phase !== 'dead' && (
+              <>
+                <Button
+                  variant="secondary"
+                  block
+                  className="mt-2"
+                  disabled={!view.canEdit}
+                  data-testid="god-edit-self"
+                  onClick={() => {
+                    close();
+                    openEditor('self');
+                  }}
+                >
+                  {GOD_MODE_LABELS.editButton}
+                </Button>
+                {!view.canEdit && <p className="mt-1 text-sm text-muted">{GOD_MODE_LABELS.editBlocked}</p>}
+              </>
+            )}
           </section>
           <section aria-labelledby="profile-languages" data-testid="profile-languages">
             <h3 id="profile-languages" className="mb-2 text-lg font-bold">Languages</h3>

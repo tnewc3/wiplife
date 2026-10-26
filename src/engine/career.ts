@@ -254,9 +254,9 @@ const END_HISTORY: Record<JobEnd, CareerHistoryKey> = {
 /**
  * You leave your job: it goes into your career history, the people there
  * become acquaintances, and a history entry is written (`historyKey`
- * overrides the usual one, e.g. leaving for school).
+ * overrides the usual one, e.g. leaving for school; `silent` writes none, for god mode).
  */
-export function endJob(state: LifeState, how: JobEnd, content: ContentBundle, historyKey?: CareerHistoryKey): void {
+export function endJob(state: LifeState, how: JobEnd, content: ContentBundle, historyKey?: CareerHistoryKey, silent = false): void {
   const job = state.career.job;
   if (!job) return;
   const def = content.jobs[job.jobId];
@@ -271,6 +271,8 @@ export function endJob(state: LifeState, how: JobEnd, content: ContentBundle, hi
   });
   state.career.job = null;
   leaveWorkplace(state);
+  // G1: god mode ends a job without writing the life's history.
+  if (silent) return;
   const key = historyKey ?? END_HISTORY[how];
   if (key === 'retired') careerHistory(state, 'retired', { years: state.finances.earnings.years }, content);
   else careerHistory(state, key, { title: levelTitle(def, job.level), employer: job.employer }, content);

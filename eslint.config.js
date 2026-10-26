@@ -122,6 +122,27 @@ export default defineConfig(
     },
   },
 
+  // God mode (G1): only the store, replayLife, the module itself, tests and the edit fuzz script run an edit. The screens and the
+  // simulation may name its types (type-only imports), never call it; nothing in the simulation ever edits a life.
+  {
+    files: ['src/**/*.{ts,tsx}', 'tools/**/*.ts'],
+    ignores: ['src/store/**', 'src/engine/godmode/**', 'src/engine/replay.ts', '**/*.test.{ts,tsx}', 'tools/edit-fuzz.ts', 'tools/edit-fuzz/**'],
+    rules: {
+      '@typescript-eslint/no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: ['**/godmode', '**/godmode/*', '**/engine/godmode', '**/engine/godmode/*'],
+              allowTypeImports: true,
+              message: 'Only the store, replayLife and tests run a god mode edit (src/engine/godmode); the simulation never edits a life.',
+            },
+          ],
+        },
+      ],
+    },
+  },
+
   // Node-side code: build tools, configs, end-to-end tests.
   {
     files: ['tools/**/*.ts', 'tests/**/*.ts', '*.config.{ts,js}'],

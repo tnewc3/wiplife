@@ -12,6 +12,8 @@ export const settingsSchema = z.object({
   installPromptShown: z.boolean(),
   /** Batch 6: the player's changes to the world of teams (renamed, moved and added teams), copied into every new life. */
   teams: teamSetupSchema,
+  /** G1: god mode is on (the Edit buttons show). Read by the screens only; the engine never sees it. */
+  godMode: z.boolean(),
 });
 
 export type Settings = z.infer<typeof settingsSchema>;
@@ -22,14 +24,16 @@ export const DEFAULT_SETTINGS: Settings = {
   persistRequested: false,
   installPromptShown: false,
   teams: emptySetup(),
+  godMode: false,
 };
 
-/** The version of the settings row (Batch 6). A row without one is version 1: it has no teams. */
-export const SETTINGS_VERSION = 2;
+/** The version of the settings row (Batch 6, then G1). A row without one is version 1: it has no teams. Version 2 has no god mode switch. */
+export const SETTINGS_VERSION = 3;
 
 /**
  * Brings a stored settings row up to the current version: version 1 (a row from before the teams setting) gains an empty set of
- * team changes. A row from a newer version is left as it is (fields this version does not know are ignored).
+ * team changes, and version 2 (before god mode) gains the switch, off. A row from a newer version is left as it is (fields this
+ * version does not know are ignored).
  */
 export function migrateSettings(stored: unknown): Record<string, unknown> {
   if (typeof stored !== 'object' || stored === null || Array.isArray(stored)) return {};
@@ -38,6 +42,10 @@ export function migrateSettings(stored: unknown): Record<string, unknown> {
   if (version < 2) {
     row.teams = emptySetup();
     row.version = 2;
+  }
+  if (version < 3) {
+    row.godMode = false;
+    row.version = 3;
   }
   return row;
 }

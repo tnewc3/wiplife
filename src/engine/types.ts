@@ -1161,8 +1161,8 @@ export interface ArchivedLife {
 
 export interface InputRecord {
   year: number;
-  kind: 'create' | 'ageUp' | 'choice' | 'action' | 'interact' | 'interactChoice' | 'interactClose';
-  /** e.g. { instanceId, choiceId }, { actionId, params }, or (E1) { interactionId, personId, giftTier? }, { choiceId }, {}. */
+  kind: 'create' | 'ageUp' | 'choice' | 'action' | 'interact' | 'interactChoice' | 'interactClose' | 'edit';
+  /** e.g. { instanceId, choiceId }, { actionId, params }, or (E1) { interactionId, personId, giftTier? }, { choiceId }, {}; for an `edit` (G1, god mode), the normalized edit (src/engine/godmode). */
   payload: Record<string, unknown>;
 }
 

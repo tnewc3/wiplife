@@ -55,3 +55,21 @@ describe('engine boundary lint rules', () => {
     expect(await ruleIds(code, 'src/persistence/__lint_fixture__.ts')).toEqual([]);
   });
 });
+
+describe('god mode boundary (G1)', () => {
+  const run = `import { performEdit } from '../engine/godmode';\nexport const x = performEdit;`;
+  const typeOnly = `import type { EditPayload } from '../engine/godmode';\nexport type X = EditPayload;`;
+
+  it('keeps the screens, the rest of the engine and the simulation from running an edit', async () => {
+    expect(await ruleIds(run, 'src/ui/__lint_fixture__.ts')).toContain('@typescript-eslint/no-restricted-imports');
+    expect(await ruleIds(run, 'src/engine/actions/__lint_fixture__.ts')).toContain('@typescript-eslint/no-restricted-imports');
+    expect(await ruleIds(`import { performEdit } from '../../src/engine/godmode';\nexport const x = performEdit;`, 'tools/simulate/__lint_fixture__.ts')).toContain('@typescript-eslint/no-restricted-imports');
+  });
+
+  it('lets the store, replayLife and tests run it, and the screens name its types', async () => {
+    expect(await ruleIds(run, 'src/store/__lint_fixture__.ts')).not.toContain('@typescript-eslint/no-restricted-imports');
+    expect(await ruleIds(run, 'src/engine/replay.ts')).not.toContain('@typescript-eslint/no-restricted-imports');
+    expect(await ruleIds(run, 'src/engine/godmode/__lint_fixture__.test.ts')).not.toContain('@typescript-eslint/no-restricted-imports');
+    expect(await ruleIds(typeOnly, 'src/ui/__lint_fixture__.ts')).not.toContain('@typescript-eslint/no-restricted-imports');
+  });
+});

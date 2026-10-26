@@ -4,7 +4,9 @@ import type { Theme } from '../../../persistence';
 import { useAppStore } from '../../../store/appStore';
 import { Button } from '../../components/Button';
 import { Card } from '../../components/Card';
+import { ConfirmSheet } from '../../components/ConfirmSheet';
 import { ContentNotice } from '../../components/ContentNotice';
+import { GOD_MODE_LABELS } from '../../labels';
 import { Screen } from '../../components/Screen';
 import { Sheet } from '../../components/Sheet';
 import { TeamsEditor } from './TeamsEditor';
@@ -38,6 +40,45 @@ function ThemePicker() {
         );
       })}
     </div>
+  );
+}
+
+/** G1: the God mode switch (a 44px target). Switching it on asks first; switching it off just hides the Edit buttons. */
+function GodModeSwitch() {
+  const on = useAppStore((s) => s.settings.godMode);
+  const setGodMode = useAppStore((s) => s.setGodMode);
+  const [asking, setAsking] = useState(false);
+  return (
+    <Card className="flex flex-col gap-3">
+      <div className="flex items-center justify-between gap-3">
+        <span id="god-mode-label" className="font-semibold">
+          {GOD_MODE_LABELS.switchLabel}
+        </span>
+        <button
+          type="button"
+          role="switch"
+          aria-checked={on}
+          aria-labelledby="god-mode-label"
+          data-testid="god-mode-switch"
+          onClick={() => (on ? void setGodMode(false) : setAsking(true))}
+          className={`relative h-11 w-16 shrink-0 rounded-full border transition-colors ${on ? 'border-accent bg-accent' : 'border-border bg-surface-2'}`}
+        >
+          <span aria-hidden="true" className={`absolute top-1/2 size-8 -translate-y-1/2 rounded-full bg-surface shadow transition-all ${on ? 'left-[calc(100%-2.25rem)]' : 'left-1'}`} />
+        </button>
+      </div>
+      <p className="text-sm text-muted">{GOD_MODE_LABELS.switchNote}</p>
+      <ConfirmSheet
+        open={asking}
+        title={GOD_MODE_LABELS.confirmTitle}
+        body={GOD_MODE_LABELS.confirmBody}
+        confirmLabel={GOD_MODE_LABELS.confirmYes}
+        onCancel={() => setAsking(false)}
+        onConfirm={() => {
+          setAsking(false);
+          void setGodMode(true);
+        }}
+      />
+    </Card>
   );
 }
 
@@ -81,6 +122,13 @@ export function SettingsScreen() {
           <Button variant="secondary" block onClick={() => setTeamsOpen(true)} data-testid="settings-teams">
             Teams
           </Button>
+        </section>
+
+        <section className="flex flex-col gap-2" aria-labelledby="settings-god-mode">
+          <h2 id="settings-god-mode" className="text-sm font-semibold tracking-wide text-muted uppercase">
+            {GOD_MODE_LABELS.settingsTitle}
+          </h2>
+          <GodModeSwitch />
         </section>
 
         <section className="flex flex-col gap-2" aria-labelledby="settings-content">

@@ -1387,7 +1387,7 @@ export const lifeStateSchema: z.ZodType<LifeState> = z.strictObject({
   inputLog: z.array(
     z.strictObject({
       year: int,
-      kind: z.enum(['create', 'ageUp', 'choice', 'action', 'interact', 'interactChoice', 'interactClose']),
+      kind: z.enum(['create', 'ageUp', 'choice', 'action', 'interact', 'interactChoice', 'interactClose', 'edit']),
       payload: z.record(z.string(), z.unknown()),
     }),
   ),

@@ -59,6 +59,7 @@ import { checkPeople } from './people';
 import { checkWeb } from './web';
 import { checkBelonging } from './belonging';
 import { checkCountries, checkCountryTags } from './countries';
+import { checkGodmode } from './godmodeBalance';
 import { checkBusiness } from './business';
 import { checkPossessions } from './possessions';
 import { checkPastimes } from './pastimes';
@@ -131,6 +132,7 @@ export function checkReferences(
 
   // W4a: cities, name pools, money and every country-specific rule are checked in tools/content/countries.ts.
   errors.push(...checkCountries(bundle, fileOf));
+  errors.push(...checkGodmode(bundle));
   errors.push(...checkTravel(bundle, fileOf, options.partialEvents === true));
   errors.push(...checkImmigration(bundle, fileOf, options.partialEvents === true));
   errors.push(...checkCountryTags(bundle, fileOf, options.partialEvents === true));

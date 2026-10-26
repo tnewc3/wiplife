@@ -8,6 +8,7 @@
  */
 import type { ContentBundle } from '../content/schemas';
 import { finishAction, performAction } from './actions';
+import { performEdit } from './godmode';
 import type { CreateLifeOptions } from './creation/input';
 import { closeInteraction, performInteraction, resolveInteractionChoice } from './interactions/perform';
 import { beginYear, createLife, endYear, resolveChoice } from './life';
@@ -52,6 +53,10 @@ export function replayLife(log: readonly InputRecord[], content: ContentBundle):
         break;
       case 'interactClose':
         state = closeInteraction(state, content);
+        break;
+      case 'edit':
+        // G1: god mode. Applied whatever the Settings switch says now.
+        state = performEdit(state, p, content);
         break;
       case 'create':
         throw new Error('The input log has a second create input.');
