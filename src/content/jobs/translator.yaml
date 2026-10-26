@@ -5,7 +5,7 @@ blurb: "Carrying meaning from one language into another, on paper and in the roo
 requires:
   all:
     - { language: { count: { gte: 2 }, level: fluent } }
-    - { education: { credential: [hs_diploma, ged, associate, bachelor, grad] } }
+    - { education: { credential: [bachelor, grad] } }
 businessTravel: true
 usesLanguages: true
 levels:

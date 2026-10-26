@@ -111,7 +111,7 @@ export function chooseLanguageStudy(life: LifeState, content: ContentBundle): re
   if (chance(rng, 0.07)) { const id = pickFrom('app'); if (id) out.push(['study_language', { study: { languageId: id, method: 'app' } }]); }
   if (chance(rng, 0.03)) { const id = pickFrom('tutor'); if (id) out.push(['study_language', { study: { languageId: id, method: 'tutor' } }]); }
   // An exam, for the highest level they can sit in a language they speak.
-  if (chance(rng, 0.25)) {
+  if (chance(rng, 0.03)) {
     const options: LifeActionParams[] = [];
     for (const l of life.character.languages) for (const level of [...LANGUAGE_LEVELS].reverse()) {
       if (canSitExam(life, l.id, level, content)) { options.push({ exam: { languageId: l.id, level } }); break; }

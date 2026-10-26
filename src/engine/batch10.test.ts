@@ -179,13 +179,13 @@ describe('Batch 10 languages: certificates', () => {
 describe('Batch 10 languages: translators, bilingual children, heritage', () => {
   it('the translator track needs two fluent languages (a certificate counts) and applies like any other job', () => {
     const def = content.jobs.translator!;
-    const one = adult();
+    const one = produce(adult(), (d) => { d.education.credentials.push({ type: 'bachelor', year: d.birthYear + 22, gpa: 3.2, majorId: 'english' } as never); });
     expect(meetsJobRequirements(one, def, content)).toBe(false);
     const two = produce(one, (d) => { d.character.languages.push(speaks('es', d.currentYear, 90, false)); });
     expect(meetsJobRequirements(two, def, content)).toBe(true);
     const certified = produce(one, (d) => { d.languages.certificates.es = 'fluent'; });
     expect(meetsJobRequirements(certified, def, content)).toBe(true);
-    const nobodyHere = produce(two, (d) => { d.education.credentials = []; });
+    const nobodyHere = produce(two, (d) => { d.education.credentials = d.education.credentials.filter((c) => c.type !== 'bachelor'); });
     expect(meetsJobRequirements(nobodyHere, def, content)).toBe(false);
     expect(def.businessTravel).toBe(true);
   });
