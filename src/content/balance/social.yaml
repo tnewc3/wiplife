@@ -130,8 +130,8 @@ burnout: { share: 0.8, streak: 2, chance: 0.3, burnout: 18, stress: 6 }
 
 controversy:
   minFollowers: 2000
-  chance: 0.01
-  bold: 0.012
+  chance: 0.007
+  bold: 0.008
   lose: 0.35
   image: 12
   mood: 10

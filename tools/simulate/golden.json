@@ -1,5 +1,5 @@
 {
-  "contentVersion": "0.1.0+be9ad87b2a",
+  "contentVersion": "0.1.0+989ea69cea",
   "lives": {
     "careful": [
       {
@@ -13,8 +13,8 @@
         "seed": "golden-careful-1-0",
         "years": 69,
         "ageAtDeath": 69,
-        "yearsHash": "31610de9ac4114a1dde6",
-        "finalHash": "ba24bcf62179a2b3ab89"
+        "yearsHash": "f876b311d3b690acb761",
+        "finalHash": "f193198ee284d40ecd53"
       },
       {
         "seed": "golden-careful-2-0",
@@ -69,10 +69,10 @@
       },
       {
         "seed": "golden-careless-1-0",
-        "years": 77,
-        "ageAtDeath": 77,
-        "yearsHash": "4d744a78ad09a6cc1282",
-        "finalHash": "2d3313c39c2aed1e76f9"
+        "years": 78,
+        "ageAtDeath": 78,
+        "yearsHash": "2b4e94c707b63aa23d2b",
+        "finalHash": "82550a3f92699885dbb3"
       },
       {
         "seed": "golden-careless-2-0",
