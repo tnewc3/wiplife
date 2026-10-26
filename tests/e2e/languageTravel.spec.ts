@@ -102,8 +102,8 @@ test('bring a partner and children on a working stay abroad: priced per person, 
   await expect(page.getByRole('button', { name: 'Start temporary work' })).toBeDisabled();
   await page.getByLabel(/Bring my family/).check();
   await expect(page.getByTestId('family-note')).toBeVisible();
-  // $1,600 plus $560 for each of three people, shown in pounds.
-  await expect(page.getByText(/Up front: £2,591/)).toBeVisible();
+  // $1,600 plus $560 for each of three people.
+  await expect(page.getByText(/Up front: \$3,280/)).toBeVisible();
   await expectNoHorizontalScroll(page);
   await expectTouchTargets(page);
   await page.getByRole('button', { name: 'Start temporary work' }).click(); await settle(page);
@@ -122,5 +122,5 @@ test('bring a partner and children on a working stay abroad: priced per person, 
   await page.getByRole('button', { name: 'Home', exact: true }).click();
   await expect(page.getByTestId('housing-line')).toContainText('Chicago');
   await tab(page, 'People').click();
-  await expect(page.getByRole('list', { name: 'Family' })).toContainText('Spouse');
+  await expect(page.getByRole('list', { name: 'Love' })).toContainText('Sam Spouse');
 });

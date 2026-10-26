@@ -22,6 +22,8 @@ export function chicagoLife(seed: string, options: { age?: number; kids?: number
     d.housing = { kind: 'renting', cityId: 'chicago', annualCost: 12_000, since: d.currentYear, ...(options.spouse ? { partnerId: 'sp' } : {}) };
     d.education.credentials = [{ type: 'hs_diploma', year: d.birthYear + 18, gpa: 3.2 }];
     for (const p of Object.values(d.people)) p.cityId = 'chicago';
+    // (familyLife marries a grown-up of 52 twenty years ago; a younger life married later.)
+    if (options.spouse) { d.relationships.sp!.since = d.currentYear - 6; d.relationships.sp!.kindSince = d.currentYear - 4; }
   });
 }
 
