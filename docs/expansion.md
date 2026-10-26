@@ -33,6 +33,7 @@ The MVP (Stages 1–10) covers a full life. The expansions are what make WIPlife
 | W5 | Travel & time abroad | Take vacations, meet people abroad, and study or work overseas |
 | W6 | Emigration & citizenship | Move countries legally or without papers, and work toward citizenship |
 | B2 | Business depth (post-expansion 1) | Run a business with products, stock, suppliers, a changing economy, headcount per location, location managers and franchises |
+| G1 | God mode (post-expansion 1) | Switch on god mode in Settings and edit yourself or anyone in their life, with every edit checked against the schemas, the invariants and the content rules |
 
 ### Order
 
@@ -1944,6 +1945,239 @@ Build only B2, as the gate describes:
 - Extend tools/simulate/business.ts with the gate's player behaviour, reports and targets in balance/targets.yaml, and stay within the Batch 0 performance budget.
 
 Meet every B2 acceptance criterion. Run npm run check, npm run test:e2e (the gate's phone flows), a 1,000-life smoke run and 10,000 lives in four shards. Open a pull request into main, wait for green CI, and report what you built, the simulation results, deviations and why, and open questions. Report only verified facts.
+```
+
+---
+
+## G1 — God mode
+
+**Status:** planned (Batch 9a of `docs/post-expansion1-changes.md`). Nothing is built. The gate waits for the user's approval; Batch 9b builds it.
+
+**Objective:** Let a player switch on god mode in Settings and edit themselves and anyone in their life, one validated save at a time, without breaking the save schemas, the invariants, the content rules or the exact replay of the life. It extends the input log, the save schemas and the invariants that exist; it adds no second way to change a life and no mark on the life.
+
+### What the code has today (checked against the code on `main` at `d744650`)
+
+- **No editor exists.** The sandbox (`/?sandbox`, development and test builds only) previews an event on a throwaway life; it never edits a real one. The one real editor is the Profile's "Who you are" form: the life action `edit_identity` with `identityEditSchema` (`src/engine/discovery.ts`), which changes gender, expression and pronouns, not attraction. A legal name change (Batch 2b) is a game action with a cost and a record of former names.
+- **The data.** `Character` and `Person` (`src/engine/types.ts`, around lines 115–192), `Relationship` (380), `HealthCondition` (900), `Job` and `CareerState` (551, 585), `Debt` and `FinanceState` (608, 761), `HousingState` (783), `LifeState` (1200). A person has no stats like yours: `looks`, `smarts`, `traits` (any of the six), `mood`, `wealthLevel`, `occupation`, and `life` (job level, outside partner, children, troubles). Only your children, stepchildren and grandchildren carry `child` (health, happiness, fitness, stress, gene risk, talent, grades, hidden traits).
+- **Saves.** `lifeStateSchema` is one strict zod object (`src/persistence/lifeSchema.ts`, line 1349); `loadedLifeSchema(content)` adds `checkInvariants` (line 1422). A save that fails either loads a backup (`readSave`). The save schema version is 36 (`envelope.ts`).
+- **Replay.** `replayLife` (`src/engine/replay.ts`) starts from the `create` record (or, for an heir, a snapshot of the whole starting state) and applies each later record, settling a finished action or year between them. `InputRecord.kind` (types.ts, line 1162) is `create | ageUp | choice | action | interact | interactChoice | interactClose`, mirrored in the zod enum. Every engine function that takes a player input appends its own record.
+- **The invariants fix age to the log.** `checkInvariants` (`src/engine/invariants.ts`) fails a life whose input log has a different number of `ageUp` records than `age − startAge` (line 396), and ties age to school, work, earnings, lifetime years, history and every dated record. Romance is checked at line 366: adults only, one current partner, a current partner alive and `active`, both adults when the relationship took its kind.
+- **Relationship rules already exist** in `src/engine/relationships.ts`: `canChangeKind` (family stays family, a teacher stays a teacher, romance needs two living adults with attraction both ways, nobody with a partner of their own, one partner at a time), `canSetStatus` (a current partner can't be estranged or forgotten), `romanceAllowed` (adults only, never a teacher). Presence rules are in `src/engine/presence.ts` (`whereabouts`: household, city or elsewhere) and `livesWithYou`. Moving yourself is `moveTo` plus `afterMove` (`housing.ts`, `career.ts`), taken by the `relocate` action only while independent, not owning a home, not on probation, within your country and with the moving cost.
+- **Settings** store `ageConfirmed`, `theme`, `persistRequested`, `installPromptShown` and `teams` (`src/persistence/settings.ts`, version 2, with `migrateSettings`). The Settings screen has Appearance and Teams sections, a content notice and Reset.
+- **Words, not numbers.** `ScoreSlider` (`src/ui/components`) is a 0–100 slider described in words, never numbers.
+
+### Player experience
+
+- In Settings, a **God mode** switch (off by default, on in every build). Switching it on asks once to confirm. Nothing else in the game changes while it is on, and the simulation never uses it.
+- With it on, **Profile** and every **person's page** show an **Edit (god mode)** button, available between years. It opens one phone-sized editor with grouped sections, a sticky **Save changes** bar and a **Revert** that clears the draft.
+- Each section is what the player would expect: sliders (with − and + buttons) that show the word and the number together ("Health · good · 72"), pickers for gender, city, job and faith, chips for attraction, a list with add and remove for conditions, debts, languages and citizenships.
+- **Save** checks everything once. If it passes, the life changes at once and the screen shows the new values. If anything fails, **nothing changes** and a "Can't save that" panel lists every reason in plain words, each pointing at its field ("Maya is 16, so she can't be your partner"). Fields that can't be set right now say why before the player tries.
+- An edited life looks like any other: no badge, no label, nothing in the history, the archive, the obituary or the eulogy says so. The input log holds the edit records, because exact replay needs them.
+- There is no undo. The previous autosave stays as the newest backup until the next save replaces it, as for any save.
+
+### Decisions this gate settles
+
+These are the design choices made here. The open questions at the end of the pull request ask the user to confirm the ones marked (ask).
+
+1. **One record, one action.** A new input-record kind `edit`, applied only by `performEdit` in a new `src/engine/godmode` module. The store, `replayLife` and the tests all go through it. Nothing else writes an edited value.
+2. **An edit is a patch of areas.** One record names a target (you, or one person) and the areas it changes, each with only the fields that change. A list (conditions, debts, languages, citizenships, troubles) is given as the wanted list, so a replay never depends on the order of small steps. An edit that changes nothing is refused.
+3. **All or nothing.** An edit that fails any check changes nothing, writes no record and saves nothing. Every refusal found is returned, not only the first.
+4. **Edits are silent.** They write no history line, set no flag, add no memory and queue no event. So no text that needs proof (a flag, a memory, an earlier event) can be made true by an edit, and the evidence rule keeps its meaning. Where a change would normally write a history line (moving out, a partner moving out), the edit does the same state change without the line.
+5. **Age: yours is never editable; other people's only within limits** (ask). See "Age".
+6. **Death and revival are never edits.** No edit changes `alive`, `deathYear`, `death` or `phase`, and health can't be set to 0. A dead person can be renamed and have their gender words and pronouns changed (the eulogy and the people list print them) but nothing else.
+7. **Edits cover the listed fields only, in v1.** Education (enrollment, credentials, grades), housing and homes, possessions, businesses, fame, sports, crime, social accounts, children and pregnancy, the will and the legal record are other systems with their own rules and are not editable (ask which to add first; credentials and housing are the likeliest). Flags, memories, history, the event log, scheduled and pending events and the random generator are never editable.
+8. **Content rules are checked by code, not trusted to the invariants alone.** The invariants are the safety net; each content rule in this gate also has its own check, so the player gets a precise reason (and so a rule the invariants don't see still holds).
+9. **The engine owns the rules, the store owns the schema pass.** `src/engine` stays free of persistence, so `performEdit` checks the payload (a strict zod schema), the content rules and `checkInvariants`. The store's edit action then runs `loadedLifeSchema(content)` on the candidate life before it commits and saves, so an accepted edit satisfies exactly what loading a save demands. A test proves that nothing the engine accepts fails the schema.
+10. **The toggle is a setting, not a life property.** It lives in Settings (persistence), is read by the UI only, and the engine never sees it: a replay applies edit records whatever the setting is now.
+11. **Unmarked** (the user's decision, 2026-10-15). No marker in the saved life, the archive entry or any screen. We read "unmarked" as "not shown or flagged anywhere"; the log records still exist (ask to confirm).
+12. **Edits skip the money ledger** (ask). The money rule (every change shown with the amount and your new balance) governs the simulation. A god-mode money edit shows the old and new amount in the editor before it is saved, and appears in no ledger, receipt or history.
+13. **Names of fields and reasons are interface words.** The area and field names, the slider words and the sentence for each refusal code live in `src/ui/labels.ts`. The engine returns a code and its facts; it writes no player-facing sentence. Numbers (money cap, ranges, limits) are in `src/content/balance/godmode.yaml`.
+
+### Systems
+
+#### The edit record and the engine action
+
+- **Record:** `{ year, kind: 'edit', payload }` with `payload = { target: 'self' | { person: Id }, ...areas }`. The payload stored is the **normalized** one (names tidied, ids resolved, defaults filled in), as the name-change action stores its tidy form, so a replay never re-derives anything.
+- **API** (`src/engine/godmode/`): `checkEdit(state, payload, content)` is pure and changes nothing; it returns `{ ok: true }` or `{ ok: false, refusals }`, and it is what the editor calls for live hints (rules only, no invariants). `performEdit(state, payload, content)` runs every check, applies the patch to a copy, appends the record and returns the new life; on any refusal it throws `EditRefusedError(refusals)` and the life is untouched. Both are exported from the engine index.
+- **When:** only in phase `yearStart`, with no outcome card open (`pendingInteraction` is null) and the character alive. In any other phase the refusal is `not_between_years`, `card_open` or `life_over`. The store also refuses while an event sheet is open.
+- **No randomness, no clock.** An edit never draws from `rng`, never reads the date, and derives every new id from the state (a new debt's id comes from the finance module's `nextDebtId`). It is a pure function of `(state, payload, content)`.
+- **Knock-on changes** are a short, closed list, applied inside the edit so the invariants hold; there are no others:
+  - A partner kind (partner, fiancé, spouse) sets `kindSince` to this year; a spouse also sets `wasSpouse`; an ex may be marked `wasSpouse` in the payload. Setting a kind that is not a current partner clears `housing.partnerId` when it was this person (the household logic of `settleHousehold`, without its history line) and refreshes the housing cost.
+  - Your city: `moveTo` and `afterMove` exactly as `relocate` runs them (the partner and children who live with you come along, a group in the city you left lapses, a job ends as `moved` and the city's openings are rolled again), without the fee or the history line. The editor warns that a move ends your job.
+  - Changing your talent clears a pending `discovery.surfaced.talent`; setting `talentDiscovered` needs a talent.
+  - A new job starts as the career module starts one (`since` this year, `yearsAtLevel` 0, a salary from the track's level and your city's pay), and a job you had is recorded in `career.history` as left (`quit`), like any job change; no job at all quits the current one.
+  - A person's occupation and level set `life.level` and `life.levelSince`; their wealth level also sets `life.background`, so the yearly update doesn't pull it back (9b tests that an edited job and wealth survive five years).
+
+#### What can be edited
+
+Every number is an integer, 0–100 unless it says otherwise. Words are shown beside every number.
+
+| Area | You | Any person | Limits |
+|---|---|---|---|
+| **Name** | first and last | first and last | The creation name rules (`creation/input.ts`: letters, spaces, hyphens, periods, apostrophes, 30 characters). Does not write `formerNames`: it is not a legal change. |
+| **Identity** | gender category, identity and expression, pronouns (a preset or the five forms), attracted to, can carry a pregnancy | the same | The existing `identityEditSchema` checks the shared fields. Can-carry can't be turned off for whoever is carrying a pregnancy or process now. |
+| **Hidden identity** | `latent.identity` (gender, pronouns, attraction), `latent.personality`, `latent.faith`, each set or cleared | only a child's `child.latent` | Cleared means "nothing waits to surface". `discovery.surfaced` is a record of the past and is not editable. |
+| **Looks** | the `looks` stat; appearance words (one per group in `content.character.appearance`, plus one free word) | `looks` | The free word uses the custom-creation rule. |
+| **Stats** | health (1–100), happiness, smarts, fitness, stress | `smarts`, `mood`, `moodBase`; for a child also health (1–100), happiness, fitness, stress | |
+| **Personality** | all six | any of the six, set or cleared | |
+| **Hidden values** | luck, reputation, gene risk, vice, inner conflict, happiness baseline; talent (a talent in content, or none) and whether it is found | a child's gene risk and talent | A found talent needs a talent. |
+| **Health** | conditions in `content.conditions`: add, remove, severity 1–100, treated, and for a mental health condition named or not | illnesses and addictions among `life.troubles` (add, remove, severity, treated) and born-with `neuro` conditions | No duplicates. Crimes in `life.troubles` and your legal record are not editable. Whatever the condition's own definition and the invariants say about age or kind applies (9b lists them). |
+| **Relationship** | — | kind, affection, trust, status | See "Content rules". Memories and `since` are history and not editable. |
+| **Job and wealth** | job and level from the job tracks (or no job); family wealth level | occupation and level (or none); wealth level | A job needs its requirements and age (`meetsJobRequirements`); you can't take a job while retired or in prison. Salary comes from the level; it is not typed. |
+| **City** | any open city in the country you live in | any open city in the country they are in | See "Presence". |
+| **Faith** | belief (a faith or none) and how strongly | the same | A faith in content. Strength 0 without a faith. |
+| **Languages** | each language's skill, which are native, add and remove | the same | At least one native, none twice, skill 0–100; `lastUsed` is set to this year. |
+| **Citizenships** | add or remove (the first stays) | add or remove (the first stays) | Never empty; a country in content. Adding the citizenship of the country you live in ends a permit record as `moveTo` does. The full invariants cover the migration state. |
+| **Money** | savings (0 to `godmode.money.savingsMax`); debts: add (personal, student, medical, collections, bank, payday or loan shark), change the balance, forgive | — | A debt tied to a home, a vehicle or a business (mortgage, auto, business) can't be added, removed or changed here: sell it or pay it off in the game. A child has no debts (the invariant). A new debt takes the kind's usual rate and minimum payment from the finance module. Dirty money, trusts and the earnings record are not editable. |
+| **Age** | never | friends, acquaintances, partners, fiancés, spouses and exes, within limits | See "Age". |
+
+#### Age
+
+- **Your age is never editable.** It is the count of `ageUp` records in the input log (an invariant), and your schooling, work years, earnings record, health and history all hang from it. Changing it would mean rewriting the life. Instead of faking an age, the editor shows it read-only with that reason.
+- **Another person's age is editable only for** a living friend, acquaintance, partner, fiancé, spouse or ex who has no `child` or `grandchild` data and is not your guardian or the one caring for you. Family (genealogy ties to your birth and your children's), your teachers, classmates, bosses and coworkers (their ages come from the school or job you share), children and the dead keep their age (`age_fixed`).
+- **Within bounds.** The editor offers only birth years that keep every dated fact true; `ageBounds(state, personId)` computes the youngest and oldest allowed from: adult at the year their romance took its kind (for a partner, fiancé, spouse or ex); adult at the year their outside partner began (`life.partner.since`); the parent age limits at each child's birth (`life.children` and `priorChildren`, `balance/creation family.parentAgeAtBirth`); old enough for each dated record they carry (job start, troubles, a past relationship); and under the maximum age (`balance/mortality maxAge`, 120). If the bounds leave one year or none, the age row says why.
+- **Life stage and everything derived from age** follow because a person has only a birth year; there is no stored stage or age to keep in step. The invariants still run on the whole life, so a teen clique, a school list or a crew that would be broken by the new age refuses the edit.
+
+#### Content rules no edit may break
+
+Each rule has a check in `src/engine/godmode/rules.ts`, a refusal code and a test. They are checked on the **resulting** life, so one record can fix a problem and use the fix (change attraction and make someone a partner in the same save).
+
+| Rule | Code | What is refused |
+|---|---|---|
+| **No romance involving anyone under 18** | `minor_romance` | A partner, fiancé, spouse or ex kind for a person under the adult age (`balance/relationships.yaml adultAge`, 18), or while you are under it. Lowering a partner's, fiancé's, spouse's or ex's birth year so that they were under 18 when the relationship took its kind. This applies to a child, a classmate, a teacher, anyone. |
+| **No romance with family** | `family_kind` | Any change of a family kind (parent, stepparent, sibling, grandparent, relative, child, stepchild, grandchild) into another kind, and any change of another kind into one. A teacher can't become anything and nobody becomes a teacher. |
+| **Work and school kinds stay where they come from** | `place_kind` | Making someone a boss, coworker or classmate (they come from your job and school). A coworker, boss or classmate may become a friend, acquaintance or partner, who then no longer needs to share your workplace. |
+| **One partner at a time** | `second_partner` | More than one current partner after the edit. |
+| **Attraction both ways** | `no_attraction` | A current partner, fiancé or spouse without attraction in both directions in the resulting life. The existing order of steps (dating, engaged, married) is waived; the rules about who may be a partner are not. |
+| **Not already taken** | `taken` | A partner kind for someone who has a partner of their own off your list or a romantic tie in the social web. |
+| **A current partner stays active** | `partner_status` | Estranged or ended on a current partner (`canSetStatus`). Family can be active or estranged only. |
+| **The dead** | `dead_person` | Everything but the name and gender words of someone who has died; a partner kind for the dead. |
+| **Age limits** | `age_fixed`, `age_bounds` | See "Age". |
+| **Presence** | `lives_with_you`, `works_with_you`, `move_*` | See below. |
+
+**Presence.** Every cast role in the game declares where a person must be, and casting trusts the state. So an edit can never make the state lie about where people are:
+
+- A person who lives with you (`whereabouts` is `household`: your live-in partner, your children and stepchildren at home, a relative you care for, your caregiver, your guardian, your parents and young siblings while you live with your parents) **cannot be given another city** (`lives_with_you`). If you want them elsewhere, move yourself and they come along, or change the relationship so they no longer live with you.
+- A coworker, boss, classmate or teacher can't be given another city (`works_with_you`): their place is yours. Make them a friend first.
+- A person can't be placed in another country (that is emigration; `move_other_country`).
+- **Your own city** follows the `relocate` rules without the fee: you are independent (`move_minor`: not a minor), you rent, live with your parents or have no home (`move_owned_home`: sell first), you are not on probation (`move_probation`) or in prison (`move_prison`), not on a temporary stay abroad (`move_abroad`), and the city is open and in your country (`move_other_country`). A partner who lives with you comes along, as the game does it. A partner who doesn't live with you stays where they are.
+- A current partner who does not live with you may be in another city; in-person actions with them need the same city, as before.
+
+#### Validation and refusal reasons
+
+An edit passes these checks in order; the first failing step returns every refusal it finds:
+
+1. **The gate:** phase `yearStart`, no card open, alive (`not_between_years`, `card_open`, `life_over`).
+2. **The payload:** a strict zod schema for the patch (unknown keys refused, ranges, lengths, ids and enums, at most `godmode.edit.maxFields` fields, at least one change).
+3. **The content rules** above, and the per-area rules in the table (`nothing_changed`, `unknown_id`, `job_requirements`, `money_range`, `debt_locked`, `child_debt`, `no_native_language`, `citizenship_empty`, `talent_missing` and the rest; the list is finished in 9b and every code has a test).
+4. **Apply** to a copy of the life with the knock-ons, no randomness.
+5. **The full invariants:** `checkInvariants(candidate)`. Only failures the edit **added** count (failures of the life before, if any, are not blamed on it). The few that can be reached have a code of their own (a pre-written sentence); any other becomes `invariant` and shows the invariant's own message under "Details", so nothing the engine would reject at load can be saved.
+6. **The schema pass (store):** `loadedLifeSchema(content).safeParse(candidate)`. It should never fail after step 5. If it does, the edit is refused as `internal` with the schema message and the case is a bug to fix (a test and the fuzz run look for it).
+7. **Commit and save:** the store replaces the life and writes the save. A failed write leaves the life as it was.
+
+The refusal sentence for each code is a fixed interface word in `src/ui/labels.ts`, filled with the person's name and the numbers involved; the engine returns `{ code, area, field?, person?, facts }`.
+
+#### Replay and determinism
+
+- `replayLife` gains one case: `edit` calls `performEdit` with the recorded payload. Because an edit uses no randomness and no clock, and sits in the log at the exact point it was made (after the engine settles a finished action or year, as every other record does), the rebuilt life is identical. A replay applies the record whatever the Settings toggle says now.
+- `summarizeLog` ignores `edit`, so the `ageUp` count and the romance records the invariants read are unchanged. An edit can't change age, so the age-to-log invariant holds.
+- A life with no edits is bit-identical to before: no golden life changes (a test), and `replayLife` of an old log is untouched.
+- An heir's log starts from a snapshot of the starting state. Edits made in the parent's life are in that snapshot, and the heir's own edits are records after it.
+- The `edit` kind is added to the `InputRecord` type and to the `inputLog` zod enum. No saved shape changes, so the **life save schema version stays 36** and needs no migration. Older saves load unchanged.
+
+#### The Settings toggle
+
+- `Settings.godMode: boolean` (`src/persistence/settings.ts`), default `false`, in every build (not gated on `import.meta.env.DEV`, unlike the sandbox). `SETTINGS_VERSION` goes 2 → 3; `migrateSettings` fills `godMode: false` into a version-2 row, and a damaged value falls back to the default like every other field.
+- The store gets `setGodMode(on)` (persisted through `updateSettings`) and `editLife(payload)` (busy flag, `performEdit`, the schema pass, commit, save; returns the refusals to the screen instead of throwing). Persistence code stays in `src/persistence`.
+- The simulation never uses god mode: `tools/simulate` has no edit step, no `edit` record appears in any simulated life, and only the store, `replayLife` and tests import `src/engine/godmode` (a test checks the imports).
+
+### Content
+
+- No events, no story text and no jobs. `src/content/balance/godmode.yaml` (schema in `src/content/schemas`, checked by the content build) holds the numbers: `money.savingsMax`, the debt kinds a player may add and the largest debt, `edit.maxFields`, `edit.maxPayloadBytes`, and the slider step for mood. Starting proposals: savings up to 1,000,000,000; debts up to 100,000,000; 40 fields; 8 KB.
+- Everything the editor offers from content (cities, jobs, conditions, talents, languages, faiths, countries, appearance words, pronoun presets) is read from the content bundle; none of it is typed into code.
+- Fixed interface words in `src/ui/labels.ts`: the area and field names, the slider word bands beside numbers, the switch text, the confirmation text and one refusal sentence per code. A test checks that every code the engine can return has a sentence.
+
+### Data
+
+- **No new saved life state.** The edit is its input record and the changed fields of the existing state.
+- **Input record:** `kind: 'edit'`, payload as above.
+- **Settings:** `godMode: boolean`, settings version 3.
+- **Archive:** `ArchivedLife` is unchanged; it carries no input log and no mark.
+- **Saves:** no migration. A save written by this build with edit records loads in this build; the schema enum is the only change.
+
+### UI
+
+- **Settings:** a God mode section with a switch (44px touch target, a label and a line of explanation: what it does, that edits can't be undone and that lives edited this way look like any other). Turning it on asks once with `ConfirmSheet`; turning it off needs no confirmation and only hides the Edit buttons.
+- **Entry points:** an "Edit (god mode)" button on the Profile sheet (below "Who you are") and on `PersonScreen`, shown only while the setting is on and the life is not dead. It is disabled with its reason ("Finish this year's events first") outside `yearStart`.
+- **The editor** (`src/ui/screens/godmode`): one scrolling screen opened from either entry point, with collapsible grouped sections in the order of the table above (people have fewer). A sticky bottom bar (safe-area aware) holds **Save changes (n)** and **Revert**. Controls:
+  - `ScoreSlider` gains a `showNumber` option and − / + step buttons (44px) and is reused for every 0–100 value; no second slider component.
+  - Choice pickers (`SingleChoice`, chips for attraction), a city picker as a sheet grouped by country with rows disabled and explained, a job picker grouped by field with a level stepper, text fields with the creation rules, add/remove lists for conditions, debts, languages and citizenships.
+  - Money fields take whole dollars and show the old and new amounts.
+- **Refusals:** the "Can't save that" panel (`role="alert"`) lists every reason in the labels' words and moves focus to the first one; each reason scrolls to and marks its field. Live hints from `checkEdit` (rules only) disable the impossible choices before the player tries (a partner kind for a minor, a city for a live-in partner).
+- **After a save:** the editor shows the new values and a "Saved" notice; the Profile or person page behind it reads the new state through the same selectors.
+- Everything works with touch alone, respects safe areas, wraps at 390px width and nothing depends on hover. The editor is a lazy-loaded screen, so it costs nothing to a player who never turns the switch on.
+
+### Dependencies
+
+- The input log, `replayLife`, the save schemas, the invariants and the settings row as they are. `relationships.ts`, `presence.ts`, `housing.ts`, `career.ts` and the finance module for the rules and knock-ons; no rule is copied.
+- Independent of Batches 1–8 and 10. If another batch merges first, the life schema version it set stays whatever it is (this gate adds none) and only the settings version could collide.
+
+### Acceptance criteria
+
+1. The Settings switch exists in every build, defaults to off, persists across reloads, survives a damaged settings row, and a version-2 settings row upgrades with it off. The Edit buttons appear only while it is on and the life is between years.
+2. `performEdit` is the only way an edited value is written. Its record `edit` is in the types, the zod enum and `replayLife`.
+3. Every area in the table can be edited for you or a person as listed, and each has unit tests (an accepted edit, each limit, each refusal).
+4. Your age is not editable. A permitted person's age is editable inside the computed bounds and refused outside them, with the reason.
+5. No edit can create a partner, fiancé, spouse or ex of someone under 18 or while you are under 18, or lower an age under that line; none can make family a partner (or a partner family); none can give a second current partner, a partner without attraction both ways, or a partner who is taken. Each is a test, and a fuzz run tries them at random.
+6. No edit can move a live-in person to another city, a coworker, boss, classmate or teacher to another city, or anyone to another country; your own move follows the `relocate` rules without the fee.
+7. A refused edit changes nothing: the life is byte-for-byte what it was, nothing is saved, no record is written, and the refusals are returned together with their codes.
+8. Every accepted edit leaves a life that passes `checkInvariants` and `loadedLifeSchema`, that plays five more years with no invariant failure, and that rebuilds from its input log to the same state.
+9. Edits write no history line, flag, memory, event or archive mark, and use no randomness.
+10. Money edits stay whole, within the cap, never negative, with no debt for a child and no change to a mortgage, auto or business debt.
+11. A save round trip (write, read, migrate, validate) of an edited life returns the same life.
+12. A life with no edits is unchanged: the golden lives and a 1,000-life smoke run are identical to before this stage, and no simulated life has an `edit` record.
+13. The editor works at 390 × 844 with touch targets of 44px or more, words beside every number, and every refusal explained in plain words; all refusal codes have a sentence in `labels.ts`.
+14. `npm run check` and `npm run test:e2e` pass, and CI is green.
+
+### Simulation
+
+- The simulation never edits. `tools/simulate` gains a report line, "edit records: 0", and the golden lives and the smoke run must match their earlier numbers.
+- A **fuzz script** (`tools/edit-fuzz.ts --lives N`, its own script like `tools/coverage.ts`, outside the simulation's player mix; small in the unit tests and larger in the nightly run) takes simulated lives at random ages, applies random valid and invalid edits and checks: refused edits change nothing; accepted edits pass the invariants and the schema; the life plays five more years invariant-clean; the log replays to the same state; no accepted edit ever fails the schema pass.
+
+### Testing
+
+- **Unit** (`src/engine/godmode`, no DOM): each area (accept, limits, refusals); `ageBounds`; every content rule (minor romance for a partner, an ex, a lowered age; family both ways; teacher; second partner; attraction both ways; taken; status); presence (live-in partner, child at home, coworker, other country, each `move_*`); the knock-ons (partner kind and `housing.partnerId`, spouse and `wasSpouse`, job and history, talent and `surfaced`, city and household); the phase gate; the payload schema (unknown keys, ranges, lengths, Unicode names); all-or-nothing on a mixed edit; that only added invariant failures count; that every code has a sentence; that an edit draws no randomness; that nothing outside the store, replay and tests imports the module (an ESLint boundary rule, proved in `tools/lint-boundaries.test.ts` like the engine's).
+- **Replay and golden:** a scripted life with edits at several ages, rebuilt from its log to the same state (and the same state at each step); a life with no edits unchanged; an heir whose parent was edited.
+- **Persistence:** settings default, upgrade from version 2, damaged value; the save round trip of an edited life; the engine-accepts implies schema-accepts test over the fuzz lives.
+- **Phone-sized end-to-end** (`tests/e2e/godmode.spec.ts`, 390 × 844): switch god mode on in Settings; edit your stats and see them on Profile; edit a friend's attraction; try to make a minor a partner and have the refusal explained; reload and see the edits kept; switch it off and see the buttons gone.
+
+### Failure modes
+
+- **A rule the invariants don't see.** Presence and several romance rules are enforced when events are cast, not by the invariants, so an edit could make a state the game never makes. Each content rule has its own check and test, and the fuzz run looks for states that later break an event cast.
+- **A knock-on that is missing.** An edit leaves a field pointing at the old truth (a housing partner who is now an ex; a job in the old city). The knock-on list is closed and tested, and the five-year play-on test catches the rest.
+- **A weak rule through the schema.** The strict schema may accept something the content rules should not. The rules come first and are tested on their own; the schema is a net.
+- **The yearly update undoes an edit.** E3's yearly step recomputes wealth from the job and background. Edited job and wealth are tested over five years; if it still drifts the gate's knock-on is changed, not the yearly step.
+- **Edited lives break the simulation targets.** They can't, because the simulation never uses god mode; the golden lives and smoke run prove it.
+- **Slow saves.** A save runs the invariants and the schema once on a whole life. 9b measures it on a 90-year life and reports the time; a starting target is under 250 ms on the CI runner.
+- **Replay drift.** An edit that depends on state the replay doesn't have (the date, the random generator, the Settings toggle). It uses none of them (a test), and replay of an edited life is compared at every step.
+- **Reasons that don't read as reasons.** A raw invariant message in the player's face. Expected failures have their own sentences; `invariant` shows the raw text only under "Details".
+
+### Coding-AI prompt
+
+```text
+You are implementing G1 (God mode) of WIPlife, from the approved gate "G1 — God mode" in docs/expansion.md.
+
+Read AGENTS.md, docs/design.md, docs/technical.md, docs/expansion.md (G1) and docs/post-expansion1-changes.md (Batch 9). Inspect src/engine/types.ts, src/persistence/lifeSchema.ts and settings.ts, src/engine/invariants.ts, replay.ts, relationships.ts, presence.ts, housing.ts, career.ts, discovery.ts (identityEditSchema), the finance module, the store (src/store/appStore.ts), the Settings, Profile and person screens, and ScoreSlider first. Extend them; do not build a second system.
+
+Build only G1, as the gate describes:
+- Engine: src/engine/godmode with the strict payload schema, checkEdit and performEdit, the content rules (minor_romance, family_kind, place_kind, second_partner, no_attraction, taken, partner_status, dead_person, age_fixed and age_bounds, presence and the move rules), the closed list of knock-ons, the invariant diff and refusal codes; the `edit` input-record kind in the types, the zod enum and replayLife. No randomness, no clock, no history, flags or memories. Your age is never editable.
+- Balance: src/content/balance/godmode.yaml with its schema and content-build check. No numbers in code.
+- Persistence: Settings.godMode, settings version 3 and its upgrade. No life schema version change.
+- Store: setGodMode and editLife (the schema pass with loadedLifeSchema before commit and save; refusals returned, not thrown).
+- UI: the Settings section and first-time confirmation, the Edit (god mode) buttons on Profile and person pages, the editor with grouped sections, ScoreSlider extended (not duplicated), pickers and lists, the Can't-save panel; every interface word and refusal sentence in src/ui/labels.ts. 44px touch targets, safe areas, no hover.
+- Tests: every area, every refusal rule (including that no edit can create romance involving anyone under 18 or with family), replay of a life with edits, a save round trip, golden lives unchanged, the fuzz script tools/edit-fuzz.ts, and the phone e2e in tests/e2e/godmode.spec.ts.
+
+Meet every G1 acceptance criterion. Run npm run check and npm run test:e2e, a 1,000-life smoke run and the fuzz script. Add a "G1 — God mode (as built)" note to docs/technical.md. Open a pull request into main, wait for green CI, and report what you built, deviations and why, and open questions. Report only verified facts.
 ```
 
 ---
