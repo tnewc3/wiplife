@@ -18,6 +18,7 @@ import {
   ATTRACTION_LABELS,
   DEBT_LABELS,
   GOD_AREA_LABELS,
+  GOD_FIELD_LABELS,
   GOD_MODE_LABELS,
   GOD_RELATIONSHIP_KIND_LABELS,
   GOD_STAT_LABELS,
@@ -201,42 +202,42 @@ function Editor({ base, saved, onSaved, onChanged }: { base: EditView; saved: bo
       )}
 
       <Group {...groupProps('name')}>
-        <TextField label="First name" value={v.name.first} onChange={(x) => up((d) => (d.name.first = x))} />
-        <TextField label="Last name" value={v.name.last} onChange={(x) => up((d) => (d.name.last = x))} />
+        <TextField label={GOD_FIELD_LABELS.firstName} value={v.name.first} onChange={(x) => up((d) => (d.name.first = x))} />
+        <TextField label={GOD_FIELD_LABELS.lastName} value={v.name.last} onChange={(x) => up((d) => (d.name.last = x))} />
       </Group>
 
       <Group {...groupProps('identity')}>
         <SingleChoice
-          label="Gender category"
+          label={GOD_FIELD_LABELS.genderCategory}
           value={v.identity.genderCategory}
           columns={3}
           choices={GENDER_CATEGORIES.map((c) => ({ value: c, label: content.character.identity.categories[c].label }))}
           onChange={(c: GenderCategory) => up((d) => (d.identity.genderCategory = c))}
         />
-        <TextField label="Gender identity" value={v.identity.genderIdentity} autoCapitalize="none" onChange={(x) => up((d) => (d.identity.genderIdentity = x))} />
-        <TextField label="Gender expression" value={v.identity.genderExpression} autoCapitalize="none" onChange={(x) => up((d) => (d.identity.genderExpression = x))} />
+        <TextField label={GOD_FIELD_LABELS.genderIdentity} value={v.identity.genderIdentity} autoCapitalize="none" onChange={(x) => up((d) => (d.identity.genderIdentity = x))} />
+        <TextField label={GOD_FIELD_LABELS.genderExpression} value={v.identity.genderExpression} autoCapitalize="none" onChange={(x) => up((d) => (d.identity.genderExpression = x))} />
         <PronounPicker pronouns={v.identity.pronouns} presets={presets} onChange={(p) => up((d) => (d.identity.pronouns = p))} />
         <MultiChoice
-          label="Attracted to"
+          label={GOD_FIELD_LABELS.attractedTo}
           value={v.identity.attractedTo}
           columns={3}
           choices={GENDER_CATEGORIES.map((c) => ({ value: c, label: ATTRACTION_LABELS[c] }))}
           onChange={(a) => up((d) => (d.identity.attractedTo = a))}
         />
-        <Toggle label="Can carry a pregnancy" checked={v.identity.canCarry} onChange={(x) => up((d) => (d.identity.canCarry = x))} />
+        <Toggle label={GOD_FIELD_LABELS.canCarry} checked={v.identity.canCarry} onChange={(x) => up((d) => (d.identity.canCarry = x))} />
       </Group>
 
       {v.latent && (
         <Group {...groupProps('latent')}>
           <p className="text-sm text-muted">{GOD_MODE_LABELS.hiddenNote}</p>
           <Toggle
-            label="Hidden attraction"
+            label={GOD_FIELD_LABELS.hiddenAttraction}
             checked={v.latent.attractedTo !== null}
             onChange={(x) => up((d) => (d.latent!.attractedTo = x ? [...d.identity.attractedTo] : null))}
           />
           {v.latent.attractedTo !== null && (
             <MultiChoice
-              label="Hidden attracted to"
+              label={GOD_FIELD_LABELS.hiddenAttractedTo}
               value={v.latent.attractedTo}
               columns={3}
               choices={GENDER_CATEGORIES.map((c) => ({ value: c, label: ATTRACTION_LABELS[c] }))}
@@ -244,7 +245,7 @@ function Editor({ base, saved, onSaved, onChanged }: { base: EditView; saved: bo
             />
           )}
           <Toggle
-            label="Hidden gender"
+            label={GOD_FIELD_LABELS.hiddenGender}
             checked={v.latent.gender !== null}
             onChange={(x) =>
               up((d) => {
@@ -255,33 +256,33 @@ function Editor({ base, saved, onSaved, onChanged }: { base: EditView; saved: bo
           {v.latent.gender && (
             <>
               <SingleChoice
-                label="Hidden gender category"
+                label={GOD_FIELD_LABELS.hiddenGenderCategory}
                 value={v.latent.gender.genderCategory}
                 columns={3}
                 choices={GENDER_CATEGORIES.map((c) => ({ value: c, label: content.character.identity.categories[c].label }))}
                 onChange={(c: GenderCategory) => up((d) => (d.latent!.gender!.genderCategory = c))}
               />
-              <TextField label="Hidden gender identity" value={v.latent.gender.genderIdentity} autoCapitalize="none" onChange={(x) => up((d) => (d.latent!.gender!.genderIdentity = x))} />
-              <PronounPicker pronouns={v.latent.gender.pronouns} presets={presets} label="Hidden pronouns" onChange={(p) => up((d) => (d.latent!.gender!.pronouns = p))} />
+              <TextField label={GOD_FIELD_LABELS.hiddenGenderIdentity} value={v.latent.gender.genderIdentity} autoCapitalize="none" onChange={(x) => up((d) => (d.latent!.gender!.genderIdentity = x))} />
+              <PronounPicker pronouns={v.latent.gender.pronouns} presets={presets} label={GOD_FIELD_LABELS.hiddenPronouns} onChange={(p) => up((d) => (d.latent!.gender!.pronouns = p))} />
             </>
           )}
-          <Toggle label="Hidden expression" checked={v.latent.expression !== null} onChange={(x) => up((d) => (d.latent!.expression = x ? d.identity.genderExpression : null))} />
-          {v.latent.expression !== null && <TextField label="Hidden gender expression" value={v.latent.expression} autoCapitalize="none" onChange={(x) => up((d) => (d.latent!.expression = x))} />}
+          <Toggle label={GOD_FIELD_LABELS.hiddenExpression} checked={v.latent.expression !== null} onChange={(x) => up((d) => (d.latent!.expression = x ? d.identity.genderExpression : null))} />
+          {v.latent.expression !== null && <TextField label={GOD_FIELD_LABELS.hiddenGenderExpression} value={v.latent.expression} autoCapitalize="none" onChange={(x) => up((d) => (d.latent!.expression = x))} />}
           {TRAIT_KEYS.map((k) => (
             <OptionalSlider
               key={k}
-              label={`Hidden ${TRAIT_LABELS[k].toLowerCase()}`}
+              label={GOD_FIELD_LABELS.hiddenTrait(TRAIT_LABELS[k])}
               value={v.latent!.personality[k]}
               initial={v.personality[k] ?? 50}
               onChange={(x) => up((d) => (d.latent!.personality[k] = x))}
             />
           ))}
-          <Toggle label="A hidden pull toward another faith" checked={v.latent.faith !== null} onChange={(x) => up((d) => (d.latent!.faith = x ? { id: null } : null))} />
+          <Toggle label={GOD_FIELD_LABELS.hiddenPull} checked={v.latent.faith !== null} onChange={(x) => up((d) => (d.latent!.faith = x ? { id: null } : null))} />
           {v.latent.faith && (
             <Select
-              label="Hidden faith"
+              label={GOD_FIELD_LABELS.hiddenFaith}
               value={v.latent.faith.id ?? NO_FAITH}
-              options={[{ value: NO_FAITH, label: 'No faith' }, ...faithOptions()]}
+              options={[{ value: NO_FAITH, label: GOD_FIELD_LABELS.noFaith }, ...faithOptions()]}
               onChange={(x) => up((d) => (d.latent!.faith = { id: x === NO_FAITH ? null : x }))}
             />
           )}
@@ -289,7 +290,7 @@ function Editor({ base, saved, onSaved, onChanged }: { base: EditView; saved: bo
       )}
 
       <Group {...groupProps('looks')}>
-        <ScoreSlider label="Looks" value={v.looks} showNumber steps={{ down: GOD_MODE_LABELS.stepDown, up: GOD_MODE_LABELS.stepUp, step: 5 }} onChange={(x) => up((d) => (d.looks = x))} />
+        <ScoreSlider label={GOD_FIELD_LABELS.looks} value={v.looks} showNumber steps={{ down: GOD_MODE_LABELS.stepDown, up: GOD_MODE_LABELS.stepUp, step: 5 }} onChange={(x) => up((d) => (d.looks = x))} />
         {base.self && (
           <>
             {content.character.appearance.groups.map((g) => {
@@ -356,12 +357,12 @@ function Editor({ base, saved, onSaved, onChanged }: { base: EditView; saved: bo
               <ScoreSlider key={k} label={GOD_VALUE_LABELS[k]} value={v.values[k] ?? 0} showNumber steps={{ down: GOD_MODE_LABELS.stepDown, up: GOD_MODE_LABELS.stepUp, step: 5 }} onChange={(x) => up((d) => (d.values[k] = x))} />
             ))}
           <Select
-            label="Talent"
+            label={GOD_FIELD_LABELS.talent}
             value={v.values.talent ?? NO_VALUE}
             options={[{ value: NO_VALUE, label: GOD_MODE_LABELS.none }, ...sortedBy(Object.values(content.talents).filter((t) => !t.retired), (t) => t.name).map((t) => ({ value: t.id, label: t.name }))]}
             onChange={(x) => up((d) => (d.values.talent = x === NO_VALUE ? null : x))}
           />
-          {base.self && <Toggle label="The talent has been found" checked={v.values.talentDiscovered} disabled={v.values.talent === null} onChange={(x) => up((d) => (d.values.talentDiscovered = x))} />}
+          {base.self && <Toggle label={GOD_FIELD_LABELS.talentFound} checked={v.values.talentDiscovered} disabled={v.values.talent === null} onChange={(x) => up((d) => (d.values.talentDiscovered = x))} />}
         </Group>
       )}
 
@@ -373,7 +374,7 @@ function Editor({ base, saved, onSaved, onChanged }: { base: EditView; saved: bo
               return (
                 <Row key={c.conditionId} testId={`god-condition-${c.conditionId}`}>
                   <p className="font-semibold">{def?.name ?? c.conditionId}</p>
-                  <ScoreSlider label="Severity" value={c.severity} min={1} showNumber steps={{ down: GOD_MODE_LABELS.stepDown, up: GOD_MODE_LABELS.stepUp, step: 5 }} onChange={(x) => up((d) => (d.conditions[i]!.severity = x))} />
+                  <ScoreSlider label={GOD_FIELD_LABELS.severity} value={c.severity} min={1} showNumber steps={{ down: GOD_MODE_LABELS.stepDown, up: GOD_MODE_LABELS.stepUp, step: 5 }} onChange={(x) => up((d) => (d.conditions[i]!.severity = x))} />
                   <Toggle label={GOD_MODE_LABELS.treated} checked={c.treated} onChange={(x) => up((d) => (d.conditions[i]!.treated = x))} />
                   {(def?.kind === 'mental' || def?.kind === 'neuro') && <Toggle label={GOD_MODE_LABELS.named} checked={c.named} onChange={(x) => up((d) => (d.conditions[i]!.named = x))} />}
                   <RemoveButton label={`${GOD_MODE_LABELS.remove}: ${def?.name ?? c.conditionId}`} onClick={() => up((d) => d.conditions.splice(i, 1))} />
@@ -392,7 +393,7 @@ function Editor({ base, saved, onSaved, onChanged }: { base: EditView; saved: bo
             {v.troubles.map((t, i) => (
               <Row key={`${t.kind}:${t.refId}`} testId={`god-trouble-${t.refId}`}>
                 <p className="font-semibold">{content.conditions[t.refId]?.name ?? t.refId}</p>
-                <ScoreSlider label="Severity" value={t.severity} min={1} showNumber steps={{ down: GOD_MODE_LABELS.stepDown, up: GOD_MODE_LABELS.stepUp, step: 5 }} onChange={(x) => up((d) => (d.troubles[i]!.severity = x))} />
+                <ScoreSlider label={GOD_FIELD_LABELS.severity} value={t.severity} min={1} showNumber steps={{ down: GOD_MODE_LABELS.stepDown, up: GOD_MODE_LABELS.stepUp, step: 5 }} onChange={(x) => up((d) => (d.troubles[i]!.severity = x))} />
                 <Toggle label={GOD_MODE_LABELS.treated} checked={t.treated} onChange={(x) => up((d) => (d.troubles[i]!.treated = x))} />
                 <RemoveButton label={`${GOD_MODE_LABELS.remove}: ${content.conditions[t.refId]?.name ?? t.refId}`} onClick={() => up((d) => d.troubles.splice(i, 1))} />
               </Row>
@@ -410,7 +411,7 @@ function Editor({ base, saved, onSaved, onChanged }: { base: EditView; saved: bo
               </Row>
             ))}
             <Select
-              label="Add a born-with condition"
+              label={GOD_FIELD_LABELS.addBornWith}
               value=""
               options={[{ value: '', label: '—' }, ...Object.values(content.conditions).filter((c) => c.kind === 'neuro' && !c.retired && !v.neuro.includes(c.id)).map((c) => ({ value: c.id, label: c.name }))]}
               onChange={(x) => x && up((d) => d.neuro.push(x))}
@@ -433,10 +434,10 @@ function Editor({ base, saved, onSaved, onChanged }: { base: EditView; saved: bo
               {refusalSentence({ code: 'family_kind', area: 'relationship', person: base.personId!, facts: {} }, nameOf)}
             </p>
           )}
-          <ScoreSlider label="Affection" value={v.relationship.affection} showNumber steps={{ down: GOD_MODE_LABELS.stepDown, up: GOD_MODE_LABELS.stepUp, step: 5 }} onChange={(x) => up((d) => (d.relationship!.affection = x))} />
-          <ScoreSlider label="Trust" value={v.relationship.trust} showNumber steps={{ down: GOD_MODE_LABELS.stepDown, up: GOD_MODE_LABELS.stepUp, step: 5 }} onChange={(x) => up((d) => (d.relationship!.trust = x))} />
+          <ScoreSlider label={GOD_FIELD_LABELS.affection} value={v.relationship.affection} showNumber steps={{ down: GOD_MODE_LABELS.stepDown, up: GOD_MODE_LABELS.stepUp, step: 5 }} onChange={(x) => up((d) => (d.relationship!.affection = x))} />
+          <ScoreSlider label={GOD_FIELD_LABELS.trust} value={v.relationship.trust} showNumber steps={{ down: GOD_MODE_LABELS.stepDown, up: GOD_MODE_LABELS.stepUp, step: 5 }} onChange={(x) => up((d) => (d.relationship!.trust = x))} />
           <SingleChoice
-            label="Status"
+            label={GOD_FIELD_LABELS.status}
             value={v.relationship.status}
             columns={3}
             choices={(['active', 'estranged', 'ended'] as const).map((s) => ({ value: s, label: GOD_STATUS_LABELS[s] }))}
@@ -447,7 +448,7 @@ function Editor({ base, saved, onSaved, onChanged }: { base: EditView; saved: bo
 
       <Group {...groupProps('work')}>
         <Select
-          label="Job"
+          label={GOD_FIELD_LABELS.job}
           value={v.work.jobId ?? NO_VALUE}
           options={[{ value: NO_VALUE, label: GOD_MODE_LABELS.noJob }, ...sortedBy(Object.values(content.jobs).filter((j) => !j.retired || j.id === v.work.jobId), (j) => j.name).map((j) => ({ value: j.id, label: j.name }))]}
           onChange={(x) => up((d) => ((d.work.jobId = x === NO_VALUE ? null : x), (d.work.level = Math.min(d.work.level, content.jobs[x]?.levels.length ?? 1))))}
@@ -460,7 +461,7 @@ function Editor({ base, saved, onSaved, onChanged }: { base: EditView; saved: bo
             onChange={(x) => up((d) => (d.work.level = Number(x)))}
           />
         )}
-        <SingleChoice label={base.self ? 'Family wealth' : 'Wealth'} value={v.wealth} columns={2} choices={(Object.keys(WEALTH_LABELS) as FamilyWealth[]).map((w) => ({ value: w, label: WEALTH_LABELS[w] }))} onChange={(w) => up((d) => (d.wealth = w))} />
+        <SingleChoice label={base.self ? GOD_FIELD_LABELS.familyWealth : GOD_FIELD_LABELS.wealth} value={v.wealth} columns={2} choices={(Object.keys(WEALTH_LABELS) as FamilyWealth[]).map((w) => ({ value: w, label: WEALTH_LABELS[w] }))} onChange={(w) => up((d) => (d.wealth = w))} />
       </Group>
 
       <Group {...groupProps('city')}>
@@ -485,19 +486,19 @@ function Editor({ base, saved, onSaved, onChanged }: { base: EditView; saved: bo
 
       <Group {...groupProps('faith')}>
         <Select
-          label="Faith"
+          label={GOD_FIELD_LABELS.faith}
           value={v.faith.id ?? NO_FAITH}
-          options={[{ value: NO_FAITH, label: 'No faith' }, ...faithOptions()]}
+          options={[{ value: NO_FAITH, label: GOD_FIELD_LABELS.noFaith }, ...faithOptions()]}
           onChange={(x) => up((d) => ((d.faith.id = x === NO_FAITH ? null : x), (d.faith.strength = x === NO_FAITH ? 0 : Math.max(1, d.faith.strength || 50))))}
         />
-        {v.faith.id !== null && <ScoreSlider label="How strongly" value={v.faith.strength} min={1} showNumber steps={{ down: GOD_MODE_LABELS.stepDown, up: GOD_MODE_LABELS.stepUp, step: 5 }} onChange={(x) => up((d) => (d.faith.strength = x))} />}
+        {v.faith.id !== null && <ScoreSlider label={GOD_FIELD_LABELS.howStrongly} value={v.faith.strength} min={1} showNumber steps={{ down: GOD_MODE_LABELS.stepDown, up: GOD_MODE_LABELS.stepUp, step: 5 }} onChange={(x) => up((d) => (d.faith.strength = x))} />}
       </Group>
 
       <Group {...groupProps('languages')}>
         {v.languages.map((l, i) => (
           <Row key={l.id} testId={`god-language-${l.id}`}>
             <p className="font-semibold">{content.languages[l.id]?.name ?? l.id}</p>
-            <ScoreSlider label="Skill" value={l.skill} showNumber steps={{ down: GOD_MODE_LABELS.stepDown, up: GOD_MODE_LABELS.stepUp, step: 5 }} onChange={(x) => up((d) => (d.languages[i]!.skill = x))} />
+            <ScoreSlider label={GOD_FIELD_LABELS.skill} value={l.skill} showNumber steps={{ down: GOD_MODE_LABELS.stepDown, up: GOD_MODE_LABELS.stepUp, step: 5 }} onChange={(x) => up((d) => (d.languages[i]!.skill = x))} />
             <Toggle label={GOD_MODE_LABELS.native} checked={l.native} onChange={(x) => up((d) => (d.languages[i]!.native = x))} />
             <RemoveButton label={`${GOD_MODE_LABELS.remove}: ${content.languages[l.id]?.name ?? l.id}`} onClick={() => up((d) => d.languages.splice(i, 1))} />
           </Row>
@@ -528,11 +529,11 @@ function Editor({ base, saved, onSaved, onChanged }: { base: EditView; saved: bo
 
       {v.money && base.money && (
         <Group {...groupProps('money')}>
-          <DollarField label="Savings" value={v.money.savings} format={(x) => (x === base.money!.savings ? money(x) : GOD_MODE_LABELS.moneyNow(money(base.money!.savings), money(x)))} onChange={(x) => up((d) => (d.money!.savings = x))} />
+          <DollarField label={GOD_FIELD_LABELS.savings} value={v.money.savings} format={(x) => (x === base.money!.savings ? money(x) : GOD_MODE_LABELS.moneyNow(money(base.money!.savings), money(x)))} onChange={(x) => up((d) => (d.money!.savings = x))} />
           {v.money.debts.map((debt, i) => (
             <Row key={`${debt.id}:${i}`} testId={`god-debt-${i}`}>
               <p className="font-semibold">{DEBT_LABELS[debt.kind]}</p>
-              <DollarField label="Balance" value={debt.balance} format={(x) => money(x)} onChange={(x) => up((d) => (d.money!.debts[i]!.balance = x))} />
+              <DollarField label={GOD_FIELD_LABELS.balance} value={debt.balance} format={(x) => money(x)} onChange={(x) => up((d) => (d.money!.debts[i]!.balance = x))} />
               <RemoveButton label={`${GOD_MODE_LABELS.remove}: ${DEBT_LABELS[debt.kind]}`} onClick={() => up((d) => d.money!.debts.splice(i, 1))} />
             </Row>
           ))}
@@ -580,23 +581,23 @@ function Editor({ base, saved, onSaved, onChanged }: { base: EditView; saved: bo
   }
 }
 
-function PronounPicker({ pronouns, presets, onChange, label = 'Pronouns' }: { pronouns: Pronouns; presets: ReturnType<typeof getPronounPresets>; onChange: (p: Pronouns) => void; label?: string }) {
+function PronounPicker({ pronouns, presets, onChange, label = GOD_FIELD_LABELS.pronouns }: { pronouns: Pronouns; presets: ReturnType<typeof getPronounPresets>; onChange: (p: Pronouns) => void; label?: string }) {
   const same = (a: Pronouns, b: Pronouns) => (Object.keys(a) as (keyof Pronouns)[]).every((k) => a[k] === b[k]);
   const preset = presets.find((p) => same(pronounsFromPreset(content, p.id), pronouns));
   const [custom, setCustom] = useState(preset === undefined);
   const fields: [Exclude<keyof Pronouns, 'verbPlural'>, string][] = [
-    ['subject', 'Subject'],
-    ['object', 'Object'],
-    ['possessive', 'Possessive'],
-    ['possessivePronoun', 'Possessive pronoun'],
-    ['reflexive', 'Reflexive'],
+    ['subject', GOD_FIELD_LABELS.subject],
+    ['object', GOD_FIELD_LABELS.object],
+    ['possessive', GOD_FIELD_LABELS.possessive],
+    ['possessivePronoun', GOD_FIELD_LABELS.possessivePronoun],
+    ['reflexive', GOD_FIELD_LABELS.reflexive],
   ];
   return (
     <div className="flex flex-col gap-3">
       <SingleChoice
         label={label}
         value={custom ? 'custom' : (preset?.id ?? 'custom')}
-        choices={[...presets.map((p) => ({ value: p.id, label: p.label })), { value: 'custom', label: 'Custom' }]}
+        choices={[...presets.map((p) => ({ value: p.id, label: p.label })), { value: 'custom', label: GOD_FIELD_LABELS.custom }]}
         onChange={(x) => {
           if (x === 'custom') setCustom(true);
           else {
@@ -610,7 +611,7 @@ function PronounPicker({ pronouns, presets, onChange, label = 'Pronouns' }: { pr
           {fields.map(([key, name]) => (
             <TextField key={key} label={name} value={pronouns[key]} autoCapitalize="none" onChange={(x) => onChange({ ...pronouns, [key]: x })} />
           ))}
-          <Toggle label="Plural verbs (they are)" checked={pronouns.verbPlural} onChange={(x) => onChange({ ...pronouns, verbPlural: x })} />
+          <Toggle label={GOD_FIELD_LABELS.pluralVerbs} checked={pronouns.verbPlural} onChange={(x) => onChange({ ...pronouns, verbPlural: x })} />
         </>
       )}
     </div>
@@ -632,8 +633,8 @@ function KindChoice({ current, original, reasonFor, onChange }: { current: strin
   const kinds = KIND_CHOICES.map((k) => ({ kind: k, reason: k === original ? null : reasonFor(k) }));
   return (
     <fieldset className="flex flex-col gap-2" data-testid="god-kind">
-      <legend className="mb-2 text-sm font-semibold">Relationship</legend>
-      <div role="radiogroup" aria-label="Relationship" className="grid grid-cols-2 gap-2">
+      <legend className="mb-2 text-sm font-semibold">{GOD_FIELD_LABELS.relationship}</legend>
+      <div role="radiogroup" aria-label={GOD_FIELD_LABELS.relationship} className="grid grid-cols-2 gap-2">
         {kinds.map(({ kind, reason }) => (
           <button
             key={kind}
@@ -700,10 +701,10 @@ function AgeStepper({ age, min, max, onChange }: { age: number; min: number; max
         {GOD_MODE_LABELS.age}: <span data-testid="god-age-value">{age}</span>
       </p>
       <div className="flex gap-2">
-        <Button variant="secondary" disabled={age <= min} aria-label="Younger" onClick={() => onChange(age - 1)}>
+        <Button variant="secondary" disabled={age <= min} aria-label={GOD_FIELD_LABELS.younger} onClick={() => onChange(age - 1)}>
           −
         </Button>
-        <Button variant="secondary" disabled={age >= max} aria-label="Older" onClick={() => onChange(age + 1)}>
+        <Button variant="secondary" disabled={age >= max} aria-label={GOD_FIELD_LABELS.older} onClick={() => onChange(age + 1)}>
           +
         </Button>
       </div>

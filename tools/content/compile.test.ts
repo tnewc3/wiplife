@@ -1210,7 +1210,7 @@ describe('the social web (E4)', () => {
     expect(web.length).toBeGreaterThanOrEqual(35);
     expect(web.length).toBeLessThanOrEqual(50);
     const kinds = Object.entries(result.bundle.registries.web.kinds);
-    expect(kinds).toHaveLength(12);
+    expect(kinds).toHaveLength(13);
     for (const [kind, def] of kinds) {
       expect(Object.keys(def.versions).length, kind).toBeGreaterThanOrEqual(3);
       expect(Object.values(def.versions).some((v) => v.twists.length > 0), kind).toBe(true);

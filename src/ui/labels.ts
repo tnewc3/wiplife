@@ -2245,3 +2245,17 @@ export function refusalSentence(r: EditRefusal, nameOf: (personId: string) => st
   };
   return sentences[r.code]();
 }
+
+/** The names of the editor's fields (G1). */
+export const GOD_FIELD_LABELS = {
+  firstName: 'First name', lastName: 'Last name', genderCategory: 'Gender category', genderIdentity: 'Gender identity', genderExpression: 'Gender expression',
+  attractedTo: 'Attracted to', canCarry: 'Can carry a pregnancy', hiddenAttraction: 'Hidden attraction', hiddenAttractedTo: 'Hidden attracted to',
+  hiddenGender: 'Hidden gender', hiddenGenderCategory: 'Hidden gender category', hiddenGenderIdentity: 'Hidden gender identity', hiddenPronouns: 'Hidden pronouns',
+  hiddenExpression: 'Hidden expression', hiddenGenderExpression: 'Hidden gender expression', hiddenPull: 'A hidden pull toward another faith', hiddenFaith: 'Hidden faith',
+  hiddenTrait: (trait: string) => `Hidden ${trait.toLowerCase()}`,
+  looks: 'Looks', talent: 'Talent', talentFound: 'The talent has been found', severity: 'Severity', addBornWith: 'Add a born-with condition',
+  affection: 'Affection', trust: 'Trust', status: 'Status', job: 'Job', faith: 'Faith', howStrongly: 'How strongly', skill: 'Skill', savings: 'Savings', balance: 'Balance',
+  pluralVerbs: 'Plural verbs (they are)', relationship: 'Relationship', noFaith: 'No faith', custom: 'Custom', familyWealth: 'Family wealth', wealth: 'Wealth',
+  pronouns: 'Pronouns', subject: 'Subject', object: 'Object', possessive: 'Possessive', possessivePronoun: 'Possessive pronoun', reflexive: 'Reflexive',
+  younger: 'Younger', older: 'Older',
+} as const;

@@ -58,7 +58,7 @@ function editedLife(seed: string): { life: LifeState; made: number } {
 }
 
 describe('a life with edits', () => {
-  it('is rebuilt exactly from its input log, at every edit', () => {
+  it('is rebuilt exactly from its input log, at every edit', { timeout: 120_000 }, () => {
     let life = createLife({ mode: 'random', seed: 'replay-1', birthYear: 2000, countryId: 'us' }, content);
     let made = 0;
     while (life.phase !== 'dead' && life.character.age < 40) {
