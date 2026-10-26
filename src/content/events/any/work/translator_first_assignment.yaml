@@ -1,0 +1,34 @@
+id: translator_first_assignment
+title: Between the lines
+text: >-
+  Your first long document arrives with a deadline and a phrase that means
+  three different things depending on who wrote it. You have until Friday.
+tone: neutral
+category: work
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { career: { employed: true, retired: false, job: [translator] } }
+weight: { base: 8 }
+cooldownYears: 4
+choices:
+  - id: ask
+    label: Write to the client and ask what they meant
+    outcome:
+      text: >-
+        The answer takes a day, and it is the fourth meaning. The document
+        goes out on time, and the client keeps your name.
+      effects:
+        - { type: job, action: performance, value: 4 }
+        - { type: stat, key: smarts, delta: 1 }
+  - id: choose
+    label: Pick the likeliest meaning and note it
+    outcome:
+      text: >-
+        You footnote the choice and send it early. Nobody objects, which is
+        the best review a translator gets.
+      effects:
+        - { type: job, action: performance, value: 2 }
+        - { type: stat, key: stress, delta: -1 }

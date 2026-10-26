@@ -1,0 +1,15 @@
+id: language_app_result
+title: A lesson a day
+text: 'You open the {studiedLanguage} app most mornings, on the bus or over coffee. The streak grows, and some of the words begin to come without thinking.'
+tone: neutral
+category: language
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires: { age: { gte: 18 } }
+weight: { base: 1 }
+followUpOnly: true
+# The receipt of an app subscription the player chose (one a year at most, by rule), not a random event.
+recurring: true
+autoOutcome:
+  text: 'It is slow, and small, and it adds up.'
+  effects: []

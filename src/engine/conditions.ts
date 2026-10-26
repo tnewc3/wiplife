@@ -1,5 +1,5 @@
 import { migrationHolds } from './migration/conditions';
-import { languageSkill, sharedLanguage } from './languages';
+import { languageSkill, languagesAtLevel, lostHeritageLanguage, practiceLanguage, sharedLanguage, teachableLanguage } from './languages';
 /**
  * Condition evaluator (docs/technical.md, "Condition language"). Conditions
  * are structured data from content; each case below matches one entry of
@@ -25,6 +25,7 @@ import { faithOf } from './belonging/faith';
 import { attractedTo, romanceStatus, yearsInKind } from './relationships';
 import type { Id, LifeState } from './types';
 import { countryIdOfCity, countryOfCity, legalAge } from './country';
+import { hasBusinessJob } from './travel/query';
 
 export interface ConditionContext {
   /** Role name -> person id, once the event is cast. */
@@ -124,6 +125,11 @@ export function evaluate(condition: Condition | undefined, state: LifeState, ctx
     const trip = state.travel.active;
     if (asked.active !== undefined && asked.active !== (trip !== null)) return false;
     if (asked.kind !== undefined && trip?.kind !== asked.kind) return false;
+    if (asked.style !== undefined && (trip?.style ?? 'vacation') !== asked.style) return false;
+    if (asked.activity !== undefined && trip?.activity !== asked.activity) return false;
+    if (asked.souvenir !== undefined && asked.souvenir !== (trip?.souvenir !== undefined && trip.souvenir !== 'none')) return false;
+    if (asked.family !== undefined && asked.family !== (state.travel.residence?.family !== undefined)) return false;
+    if (asked.business !== undefined && (ctx.content === undefined || asked.business !== hasBusinessJob(state, ctx.content))) return false;
     if (asked.destinationId !== undefined && trip?.destinationId !== asked.destinationId) return false;
     if (asked.encounter !== undefined && asked.encounter !== (trip?.encounterId !== null && trip?.encounterId !== undefined)) return false;
     if (asked.romance !== undefined && asked.romance !== (trip?.romanceId !== null && trip?.romanceId !== undefined)) return false;
@@ -142,6 +148,26 @@ export function evaluate(condition: Condition | undefined, state: LifeState, ctx
       if (!q.skill && !known) return false;
       if (q.native !== undefined && (known?.native ?? false) !== q.native) return false;
     }
+    // Batch 10: how many languages you speak at a level (certificates count), one to pass on to a child or practice with a person, a lost heritage language.
+    if (q.count !== undefined && q.level !== undefined) {
+      if (!ctx.content || !compare(languagesAtLevel(state, q.level, ctx.content), q.count)) return false;
+    }
+    if (q.teachableTo !== undefined) {
+      const childId = ctx.cast?.[q.teachableTo];
+      if (childId === undefined) return ctx.roles === 'assumeTrue';
+      if (!ctx.content || teachableLanguage(state, childId, ctx.content) === null) return false;
+    }
+    if (q.learnableFrom !== undefined) {
+      const personId = ctx.cast?.[q.learnableFrom];
+      if (personId === undefined) return ctx.roles === 'assumeTrue';
+      if (!ctx.content || practiceLanguage(state, personId, ctx.content) === null) return false;
+    }
+    if (q.homeWith !== undefined) {
+      const childId = ctx.cast?.[q.homeWith];
+      if (childId === undefined) return ctx.roles === 'assumeTrue';
+      if (state.languages.home[childId] === undefined) return false;
+    }
+    if (q.heritageLost !== undefined && (!ctx.content || lostHeritageLanguage(state, ctx.content) === null)) return false;
     if (q.sharedWith) {
       const otherId = ctx.cast?.[q.sharedWith];
       if (otherId === undefined) return ctx.roles === 'assumeTrue';
@@ -369,7 +395,7 @@ export function mentionsRole(condition: Condition): boolean {
   if ('all' in condition) return condition.all.some(mentionsRole);
   if ('any' in condition) return condition.any.some(mentionsRole);
   if ('not' in condition) return mentionsRole(condition.not);
-  if ('language' in condition) return !!(condition.language.role || condition.language.sharedWith);
+  if ('language' in condition) return !!(condition.language.role || condition.language.sharedWith || condition.language.teachableTo || condition.language.learnableFrom || condition.language.homeWith);
   return 'memory' in condition || 'role' in condition || 'tie' in condition;
 }
 
@@ -379,7 +405,7 @@ export function rolesIn(condition: Condition | undefined): string[] {
   if ('all' in condition) return condition.all.flatMap(rolesIn);
   if ('any' in condition) return condition.any.flatMap(rolesIn);
   if ('not' in condition) return rolesIn(condition.not);
-  if ('language' in condition) return [condition.language.role, condition.language.sharedWith].filter((r): r is string => r !== undefined);
+  if ('language' in condition) return [condition.language.role, condition.language.sharedWith, condition.language.teachableTo, condition.language.learnableFrom, condition.language.homeWith].filter((r): r is string => r !== undefined);
   if ('memory' in condition) return [condition.memory.role];
   if ('role' in condition) return [condition.role];
   if ('tie' in condition) return [condition.tie.a, condition.tie.b];

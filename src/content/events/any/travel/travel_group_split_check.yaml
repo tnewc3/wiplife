@@ -1,0 +1,37 @@
+id: travel_group_split_check
+title: Splitting the bill
+text: >-
+  The last dinner of the trip in {destination} comes with one bill for six.
+  {companion.name} is already reaching for a calculator.
+tone: neutral
+category: travel
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+followUpOnly: true
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { travel: { active: true, kind: trip, style: group } }
+weight: { base: 1 }
+cast:
+  companion: { kind: friend, presence: nearby }
+choices:
+  - id: even
+    label: Split it evenly ({$45} each)
+    outcome:
+      text: >-
+        It is a little unfair to the one who only had water, and nobody says
+        so. Everyone finishes the evening in a good mood.
+      effects:
+        - { type: money, delta: -45 }
+        - { type: relationship, role: companion, affection: 3 }
+  - id: itemize
+    label: Itemize it line by line ({$32} for your part)
+    outcome:
+      text: >-
+        It takes ten minutes and a lot of crossings-out, but the number is
+        exact and nobody has to wonder. {companion.name} nods, a little
+        stiffly, and then buys the next round of tea.
+      effects:
+        - { type: money, delta: -32 }
+        - { type: relationship, role: companion, affection: 1, trust: 2 }

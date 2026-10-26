@@ -1,0 +1,35 @@
+id: travel_adventure_water
+title: On the water
+text: >-
+  A small company near {destination} runs boat trips to a cove you can only
+  reach by water. Today the surface is calm, and the next two days might not
+  be.
+tone: neutral
+category: travel
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+followUpOnly: true
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { travel: { active: true, kind: trip, activity: adventure } }
+weight: { base: 1 }
+choices:
+  - id: book
+    label: Book the morning trip ({$110})
+    outcome:
+      text: >-
+        The cove is empty except for you and eight others and a great deal of
+        clear water. You swim, then do it again.
+      effects:
+        - { type: money, delta: -110 }
+        - { type: stat, key: happiness, delta: 4 }
+        - { type: stat, key: health, delta: 1 }
+  - id: shore
+    label: Watch from the shore
+    outcome:
+      text: >-
+        You watch the boat go out and come back, and you do not regret
+        a single dry minute.
+      effects:
+        - { type: stat, key: stress, delta: -2 }

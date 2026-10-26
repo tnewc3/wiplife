@@ -1,0 +1,8 @@
+id: delhi
+name: Delhi
+country: India
+languageId: hi
+costLevel: 0.7
+kind: city
+locals: { pool: us, heritage: south_asian }
+souvenir: oil_painting

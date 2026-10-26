@@ -1,0 +1,49 @@
+id: travel_local_invite
+title: Come and see it properly
+text: >-
+  In {destination}, {npc.name}, who grew up there, hears you struggling with
+  a menu and offers to show you around for the afternoon.
+tone: light
+category: travel
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+followUpOnly: true
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { travel: { active: true, kind: trip, encounter: true } }
+    - any:
+        - { travel: { active: true, destinationId: berlin } }
+        - { travel: { active: true, destinationId: paris } }
+        - { travel: { active: true, destinationId: rome } }
+        - { travel: { active: true, destinationId: barcelona } }
+        - { travel: { active: true, destinationId: kyoto } }
+        - { travel: { active: true, destinationId: seoul } }
+        - { travel: { active: true, destinationId: hanoi } }
+        - { travel: { active: true, destinationId: cairo } }
+        - { travel: { active: true, destinationId: delhi } }
+        - { travel: { active: true, destinationId: buenos_aires } }
+weight: { base: 1 }
+cast:
+  npc: { kind: acquaintance, presence: anywhere, age: { min: 18, max: 100 } }
+choices:
+  - id: go
+    label: Say yes, and let {npc.them} lead
+    outcome:
+      text: >-
+        You see the places that are not in the guidebook, and learn the word
+        for each one. {npc.name} corrects your pronunciation and laughs when
+        you get it right.
+      effects:
+        - { type: languageBond, action: practice, role: npc, size: good }
+        - { type: relationship, role: npc, affection: 6, trust: 4, kind: friend }
+        - { type: memory, role: npc, tag: practiced_language }
+        - { type: stat, key: happiness, delta: 2 }
+  - id: thanks
+    label: Thank {npc.them} and keep to your plan
+    outcome:
+      text: >-
+        {npc.name} shrugs warmly and points you toward the best street for
+        dinner. You find it, and it is.
+      effects:
+        - { type: relationship, role: npc, affection: 2 }

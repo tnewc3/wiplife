@@ -1,0 +1,18 @@
+id: travel_business_booking
+title: On the company
+text: >-
+  Your employer has booked your trip to {destination}: the tickets, the hotel,
+  the meetings. The daily allowance is yours to keep.
+tone: neutral
+category: travel
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+followUpOnly: true
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { travel: { active: true, kind: trip, style: business } }
+weight: { base: 1 }
+autoOutcome:
+  text: The work comes first. The evenings are yours.
+  effects: []

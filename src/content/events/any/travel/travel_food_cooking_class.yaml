@@ -1,0 +1,34 @@
+id: travel_food_cooking_class
+title: Learn to make it
+text: >-
+  A home cook near {destination} teaches small groups to make the dish you
+  keep ordering.
+tone: neutral
+category: travel
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+followUpOnly: true
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { travel: { active: true, kind: trip, activity: food } }
+weight: { base: 1 }
+choices:
+  - id: class
+    label: Book the afternoon class ({$70})
+    outcome:
+      text: >-
+        You chop badly, stir attentively and take home a handwritten recipe.
+        The dish does not taste exactly like theirs, but it is close, and it
+        is yours.
+      effects:
+        - { type: money, delta: -70 }
+        - { type: stat, key: smarts, delta: 1 }
+        - { type: stat, key: happiness, delta: 3 }
+  - id: eat
+    label: Just eat it again
+    outcome:
+      text: >-
+        You order it for the third time and decide that skill is overrated.
+      effects:
+        - { type: stat, key: happiness, delta: 1 }

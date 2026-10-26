@@ -584,6 +584,17 @@ export const migrations: readonly Migration[] = [
       '(an account opened under 18 is private and was set up by a parent). Heir replay snapshots are upgraded the same way.',
     migrate: upgradeSocialData,
   },
+  {
+    from: 36,
+    description:
+      'Batch 10: language and travel, expanded. A life\'s language record gains the year each paid method of study (an app, a tutor) was last used ' +
+      '(never), this year\'s practice with native speakers (none), certificates and exams (none held, none sat), the languages spoken with children at ' +
+      'home (none) and new totals (0). Its travel record gains the year of the last business trip (never), and trips by style, activity and souvenir, ' +
+      'business allowance and stays with a family along (all 0). A stay in progress keeps going solo, as it began. The retirement record is kept by ' +
+      'the country the years were earned in: all years so far count for the country the life is in, which is how they were counted before. Heir ' +
+      'replay snapshots are upgraded the same way.',
+    migrate: upgradeLanguageTravelData,
+  },
 ];
 
 /** The reach at which a curve of reach to fame gives this fame (the inverse of curveAt, which is increasing). */
@@ -840,6 +851,27 @@ function upgradeMigrationData(data: unknown): unknown {
     character: { ...data.character, citizenships: data.character.citizenships ?? [countryOf(data.character.birthCityId ?? data.character.cityId)] },
     migration: data.migration ?? emptyMigration(),
   };
+}
+
+/** Batch 10: the language, travel and retirement records a save from before it lacks. Nothing is invented: no certificate, no business trip, no family stay. */
+function upgradeLanguageTravelData(data: unknown): unknown {
+  if (!isRecord(data)) return data;
+  const content = compiled as ContentBundle;
+  const inputLog = Array.isArray(data.inputLog) ? data.inputLog.map((entry: unknown) => {
+    if (!isRecord(entry) || !isRecord(entry.payload) || !isRecord(entry.payload.snapshot)) return entry;
+    return { ...entry, payload: { ...entry.payload, snapshot: upgradeLanguageTravelData(entry.payload.snapshot) } };
+  }) : data.inputLog;
+  const fresh = emptyLanguageLearning();
+  const languages = isRecord(data.languages) ? { ...fresh, ...data.languages, totals: { ...fresh.totals, ...(isRecord(data.languages.totals) ? data.languages.totals : {}) } } : data.languages;
+  const travel = isRecord(data.travel) ? { ...emptyTravel(), ...data.travel, totals: { ...emptyTravel().totals, ...(isRecord(data.travel.totals) ? data.travel.totals : {}) } } : data.travel;
+  let finances = data.finances;
+  if (isRecord(finances) && isRecord(finances.earnings) && finances.earnings.byCountry === undefined) {
+    const cityId = isRecord(data.character) && typeof data.character.cityId === 'string' ? data.character.cityId : '';
+    const country = content.cities[cityId]?.countryId ?? 'us';
+    const { years, total } = finances.earnings;
+    finances = { ...finances, earnings: { ...finances.earnings, byCountry: typeof years === 'number' && years > 0 ? { [country]: { years, total } } : {} } };
+  }
+  return { ...data, inputLog, languages, travel, finances };
 }
 
 function upgradeTravelData(data: unknown): unknown {

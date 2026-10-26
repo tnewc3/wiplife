@@ -1,0 +1,34 @@
+id: travel_night_long_walk
+title: Which way is the hotel
+text: >-
+  It is three in the morning in {destination}, your phone is at four percent,
+  and every street looks like the one you just left.
+tone: neutral
+category: travel
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+followUpOnly: true
+requires:
+  all:
+    - { age: { gte: 21 } }
+    - { travel: { active: true, kind: trip, activity: nightlife } }
+weight: { base: 1 }
+choices:
+  - id: taxi
+    label: Flag down a taxi ({$30})
+    outcome:
+      text: >-
+        The driver finds the hotel in four minutes. You give the address twice
+        and the fare once, and decide to learn the neighborhood in daylight.
+      effects:
+        - { type: money, delta: -30 }
+        - { type: stat, key: stress, delta: -1 }
+  - id: ask
+    label: Ask a stranger for directions
+    outcome:
+      text: >-
+        A passer-by points, then walks with you for the first two corners to
+        be sure. The hotel is where they said it was.
+      effects:
+        - { type: stat, key: sociability, delta: 1 }
+        - { type: stat, key: happiness, delta: 1 }

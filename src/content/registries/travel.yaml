@@ -27,7 +27,8 @@
     "travel_encounter_invite",
     "travel_romance_last_evening",
     "travel_romance_shared_detour",
-    "travel_romance_airport"
+    "travel_romance_airport",
+    "travel_local_invite"
   ],
   "study": [
     "travel_study_booking",
@@ -44,5 +45,54 @@
     "travel_work_home",
     "travel_work_boundary",
     "travel_work_return"
+  ],
+  "activity": {
+    "sightseeing": [
+      "travel_sight_queue",
+      "travel_sight_guide"
+    ],
+    "nightlife": [
+      "travel_night_dancing",
+      "travel_night_long_walk"
+    ],
+    "adventure": [
+      "travel_adventure_trail",
+      "travel_adventure_water"
+    ],
+    "food": [
+      "travel_food_market",
+      "travel_food_cooking_class"
+    ],
+    "immersion": [
+      "travel_immersion_class"
+    ]
+  },
+  "style": {
+    "cruise": [
+      "travel_cruise_port_day",
+      "travel_cruise_dinner_table"
+    ],
+    "honeymoon": [
+      "travel_honeymoon_first_morning",
+      "travel_honeymoon_plans"
+    ],
+    "group": [
+      "travel_group_split_check",
+      "travel_group_itinerary"
+    ],
+    "business": [
+      "travel_business_booking",
+      "travel_business_client_dinner",
+      "travel_business_free_evening"
+    ]
+  },
+  "souvenir": [
+    "travel_souvenir_packing",
+    "travel_souvenir_gift"
+  ],
+  "family": [
+    "travel_family_school_gate",
+    "travel_family_partner_days",
+    "travel_family_homesick_night"
   ]
 }

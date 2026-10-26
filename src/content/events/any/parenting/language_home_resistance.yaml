@@ -1,0 +1,46 @@
+id: language_home_resistance
+title: Only the other one
+text: >-
+  {kid.name} has started answering you in the neighborhood's language only,
+  even when you ask in yours. "Everyone else does," {kid.they} {kid:says|say}.
+tone: neutral
+category: parenting
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { family: { minors: { gte: 1 } } }
+    - { language: { homeWith: kid } }
+weight: { base: 6 }
+cooldownYears: 3
+cast:
+  kid: { kind: child, presence: household, age: { min: 6, max: 12 } }
+choices:
+  - id: game
+    label: Turn it into a game
+    outcome:
+      text: >-
+        Points for every sentence in your language, a bonus for jokes. By the
+        weekend {kid.name} is making the jokes up on purpose.
+      effects:
+        - { type: languageBond, action: home, role: kid }
+        - { type: parenting, role: kid, warmth: 3, involvement: 3 }
+        - { type: relationship, role: kid, affection: 3 }
+  - id: insist
+    label: Insist, gently
+    outcome:
+      text: >-
+        You hold the line, kindly. {kid.name} sulks through dinner and answers
+        correctly, in your language, with great dignity.
+      effects:
+        - { type: parenting, role: kid, strictness: 4 }
+        - { type: relationship, role: kid, affection: -1 }
+  - id: choose
+    label: Let {kid.them} choose
+    outcome:
+      text: >-
+        {kid.name} picks the neighborhood's language and, a week later, asks
+        you how to say something in yours.
+      effects:
+        - { type: parenting, role: kid, warmth: 2, strictness: -2 }

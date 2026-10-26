@@ -6,6 +6,7 @@
  * W6 reports emigration by route and country, approvals and refusals, time to citizenship, undocumented outcomes (regularized, removed, went home, still without papers), pay with and without papers, remittances through the ledger, the people you know who emigrated and children's citizenship, with the rules that must always hold.
  * W5 reports trips, destinations, encounters, temporary study/work and their effects.
  * W4b reports native and learned languages, learning/fading rates, local-job language gates and shared-language social contacts.
+ * Batch 10 adds learning by method (class, app, tutor, practice with a native speaker, raised at home), certificate exams, translators and interpreters, bilingual children and heritage languages (judged by balance/targets.yaml languagesB10); trips by kind (cruise, honeymoon, friends, business) and activity, souvenirs, families on temporary stays and pensions earned in more than one country (travelB10).
  * adds the spammer, who repeats one interaction with one person over and
  * over (it is slower: use fewer lives). Exits with code 1 if any invariant
  * fails in any run.

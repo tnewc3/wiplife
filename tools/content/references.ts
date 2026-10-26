@@ -181,6 +181,12 @@ export function checkReferences(
     const def = bundle.events[id];
     if ((!def && options.partialEvents !== true) || (def && !def.followUpOnly)) errors.push({ file: 'registries/languages.yaml', message: `classes: ${id} must name a followUpOnly event` });
   }
+  for (const [group, ids] of [['app', bundle.registries.languages.app.events], ['tutor', bundle.registries.languages.tutor.events], ['exam.passed', bundle.registries.languages.exam.passed], ['exam.failed', bundle.registries.languages.exam.failed]] as const) {
+    for (const id of ids) {
+      const def = bundle.events[id];
+      if ((!def && options.partialEvents !== true) || (def && !def.followUpOnly)) errors.push({ file: 'registries/languages.yaml', message: `${group}: ${id} must name a followUpOnly event` });
+    }
+  }
   // B1: what "Find a date" answers with.
   for (const [way, ids] of Object.entries(bundle.registries.love.findDate)) {
     for (const id of ids) {
@@ -552,11 +558,16 @@ function checkEvents(bundle: ContentBundle, fileOf: (typeKey: CollectionKey, id:
   const workEvents = new Set(Object.values(bundle.registries.work.results).flatMap((r) => r.events));
   const doctorEvents = new Set(Object.values(bundle.registries.health.doctor).flatMap((r) => r.events));
   const systemEvents = new Set([
-    ...Object.values(bundle.registries.travel).flat(),
+    ...Object.values(bundle.registries.travel).flatMap((v) => (Array.isArray(v) ? v : Object.values(v).flat())),
     // W6: what applications, moving, permits and life without papers answer with.
     ...Object.values(bundle.registries.immigration.triggers).flat(),
     ...Object.values(bundle.registries.immigration.yearly).flat(),
     ...bundle.registries.languages.classes.events,
+    // Batch 10: the receipts of an app, a tutor and an exam.
+    ...bundle.registries.languages.app.events,
+    ...bundle.registries.languages.tutor.events,
+    ...bundle.registries.languages.exam.passed,
+    ...bundle.registries.languages.exam.failed,
     ...Object.values(bundle.registries.love.findDate).flat(),
     ...doctorEvents,
     // M1: what a therapist's visit answers with.

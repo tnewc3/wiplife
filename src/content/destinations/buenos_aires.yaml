@@ -1,0 +1,8 @@
+id: buenos_aires
+name: Buenos Aires
+country: Argentina
+languageId: es
+costLevel: 0.8
+kind: city
+locals: { pool: es, heritage: spanish }
+souvenir: designer_handbag

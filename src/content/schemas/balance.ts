@@ -747,6 +747,23 @@ export const targetsBalanceSchema = z.strictObject({
     teenRung3By28: shareRangeSchema,
   }),
   /**
+   * Batch 10: languages and travel (tools/simulate/languages.ts and travel.ts), judged on the careful player. The rates of the new
+   * ways of learning are compared with balance/languages.yaml (observed points per course over the configured gain); the rules for
+   * a family on a stay (every child comes home with you; every child-year is in the host city) must hold exactly.
+   */
+  languagesB10: z.strictObject({
+    appRate: numberRangeSchema, tutorRate: numberRangeSchema,
+    practiceLives: shareRangeSchema, examLives: shareRangeSchema, examPassRate: shareRangeSchema,
+    certificateCounted: shareRangeSchema,
+    translatorLives: shareRangeSchema, bilingualChildren: shareRangeSchema, homeLives: shareRangeSchema, heritageLives: shareRangeSchema,
+  }),
+  travelB10: z.strictObject({
+    destinationsUsed: shareRangeSchema, honeymoonTaken: shareRangeSchema, cruiseLives: shareRangeSchema, groupLives: shareRangeSchema,
+    businessLives: shareRangeSchema, souvenirLives: shareRangeSchema, activityLives: shareRangeSchema,
+    familyStays: numberRangeSchema, familyAtHost: numberRangeSchema, childrenLeftBehind: numberRangeSchema,
+    multiCountryPension: shareRangeSchema,
+  }),
+  /**
    * E6c: sports (tools/simulate/sports.ts). The athlete player (one who goes
    * after a sport) is judged on how often it starts, how far it gets with and
    * without a talent that fits, how long pro careers last, how rough the

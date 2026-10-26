@@ -3,6 +3,7 @@ name: "Law"
 category: professional
 blurb: "Billable hours, high stakes and very nice suits."
 requires: {"education": {"credential": ["grad"], "field": ["law"]}}
+businessTravel: true
 levels:
   - { title: "junior associate", salary: 88000, years: 3 }
   - { title: "senior associate", salary: 128000 }

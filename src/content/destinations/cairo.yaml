@@ -1,0 +1,8 @@
+id: cairo
+name: Cairo
+country: Egypt
+languageId: ar
+costLevel: 0.7
+kind: culture
+locals: { pool: us, heritage: arab }
+souvenir: gold_watch

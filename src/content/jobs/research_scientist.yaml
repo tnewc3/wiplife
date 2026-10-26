@@ -3,6 +3,7 @@ name: "Science"
 category: professional
 blurb: "Experiments, grant deadlines, and the occasional discovery."
 requires: {"any": [{"education": {"credential": ["bachelor"], "field": ["biology"]}}, {"education": {"credential": ["grad"], "field": ["masters"]}}]}
+businessTravel: true
 levels:
   - { title: "lab technician", salary: 44000 }
   - { title: "research associate", salary: 56000 }

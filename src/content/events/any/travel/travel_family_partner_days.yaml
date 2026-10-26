@@ -1,0 +1,38 @@
+id: travel_family_partner_days
+title: The long days at home
+text: >-
+  You are out most of the day in {destination}. {mate.name} is learning the
+  neighborhood alone, and tells you about it at dinner in a flat, careful
+  voice.
+tone: neutral
+category: travel
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+followUpOnly: true
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { travel: { active: true, family: true } }
+weight: { base: 1 }
+cast:
+  mate: { kind: partner, presence: household }
+choices:
+  - id: listen
+    label: Stay at the table and listen properly
+    outcome:
+      text: >-
+        {mate.name} talks until the food is cold: the bakery, the wrong bus,
+        the neighbor who waved. By the end it sounds less like a complaint and
+        more like a map.
+      effects:
+        - { type: relationship, role: mate, affection: 4, trust: 4 }
+        - { type: stat, key: stress, delta: 1 }
+  - id: plan
+    label: Plan a day out together on the weekend
+    outcome:
+      text: >-
+        You put it in both your calendars. {mate.name} picks the place, and
+        for the first time all week the evening is warm.
+      effects:
+        - { type: relationship, role: mate, affection: 5, trust: 2 }
+        - { type: stat, key: happiness, delta: 1 }

@@ -37,7 +37,33 @@ export const languagesBalanceSchema = z.strictObject({
     cities: z.record(idSchema, z.record(idSchema, requirements)),
   }),
   eventGain: scoreSchema,
+  /** Batch 10: paid ways to learn besides the adult class. An app is cheap and slow, a tutor costs more and is fast; one set of each a year. */
+  methods: z.strictObject({
+    app: z.strictObject({ cost: z.int().positive(), gain: scoreSchema }),
+    tutor: z.strictObject({ cost: z.int().positive(), gain: scoreSchema }),
+  }),
+  /** Batch 10: practicing with a native speaker you know: skill gained for a good outing (a share of `gain` by how it went), and the most a year. */
+  practice: z.strictObject({ gain: scoreSchema, yearlyMax: scoreSchema, great: z.number().positive(), good: z.number().positive(), neutral: z.number().positive() }),
+  /** Batch 10: certificate exams. The fee by level; you may sit one when within `margin` points of the level's bar; the odds follow your skill over the bar. */
+  exams: z.strictObject({
+    minAge: z.int().min(14),
+    fee: z.strictObject({ basic: z.int().positive(), conversational: z.int().positive(), fluent: z.int().positive() }),
+    margin: scoreSchema,
+    odds: z.strictObject({ base: z.number().min(0).max(1), perPoint: z.number().min(0).max(0.1), min: z.number().min(0).max(1), max: z.number().min(0).max(1) }),
+    /** The odds as words on the exam button: below `fair` is slim, from `fair` fair, from `good` good, from `strong` strong. */
+    words: z.strictObject({ fair: z.number().min(0).max(1), good: z.number().min(0).max(1), strong: z.number().min(0).max(1) }),
+  }),
+  /** Batch 10: raising a child in a language of your own. A child this young takes it as a first language; each year at home adds skill. */
+  home: z.strictObject({ maxAge: z.int().min(1).max(18), nativeAge: z.int().min(0).max(12), start: scoreSchema, yearlyGain: scoreSchema }),
+  /** Batch 10: a heritage language coming back: the skill a returning event restores. */
+  heritageReturn: z.strictObject({ gain: scoreSchema }),
 });
 export type LanguagesBalance = z.infer<typeof languagesBalanceSchema>;
 
-export const languagesRegistrySchema = z.strictObject({ classes: z.strictObject({ events: z.array(idSchema).min(1) }) });
+export const languagesRegistrySchema = z.strictObject({
+  classes: z.strictObject({ events: z.array(idSchema).min(1) }),
+  /** Batch 10: the receipts of an app, a tutor and an exam (passed or failed). */
+  app: z.strictObject({ events: z.array(idSchema).min(1) }),
+  tutor: z.strictObject({ events: z.array(idSchema).min(1) }),
+  exam: z.strictObject({ passed: z.array(idSchema).min(1), failed: z.array(idSchema).min(1) }),
+});

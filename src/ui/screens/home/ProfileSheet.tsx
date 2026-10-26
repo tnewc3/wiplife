@@ -4,6 +4,7 @@ import { GENDER_CATEGORIES } from '../../../content/schemas';
 import { pronounsFromPreset } from '../../../engine/creation/character';
 import { InvalidInputError } from '../../../engine/creation/input';
 import { identityEditIssues, type IdentityEditInput } from '../../../engine/discovery';
+import { LANGUAGE_LEVELS } from '../../../engine/languages';
 import { getBelongingView, getProfileView, getPronounPresets } from '../../../engine/selectors';
 import type { GenderCategory, LifeState, Personality, Pronouns } from '../../../engine/types';
 import { useAppStore } from '../../../store/appStore';
@@ -13,7 +14,7 @@ import { SingleChoice, Suggestions } from '../../components/Choices';
 import { Sheet } from '../../components/Sheet';
 import { StatBar } from '../../components/StatBar';
 import { TextField } from '../../components/TextField';
-import { GOD_MODE_LABELS, ATTRACTION_LABELS, STATUS_LABELS, FAITH_STRENGTH_WORDS, LANGUAGE_LEVEL_LABELS, LANGUAGE_NATIVE_LABEL, money, GROUPS_TITLES, recordLine, roleLine, TRAIT_LABELS, VALUE_LABELS } from '../../labels';
+import { GOD_MODE_LABELS, ATTRACTION_LABELS, STATUS_LABELS, FAITH_STRENGTH_WORDS, EXAM_LEVEL_LABELS, EXAM_ODDS_LABELS, LANGUAGE_LEVEL_LABELS, LANGUAGE_NATIVE_LABEL, money, GROUPS_TITLES, recordLine, roleLine, TRAIT_LABELS, VALUE_LABELS } from '../../labels';
 
 const PRONOUN_FIELDS: { key: Exclude<keyof Pronouns, 'verbPlural'>; label: string; example: string }[] = [
   { key: 'subject', label: 'Subject', example: 'they' },
@@ -257,6 +258,11 @@ export function ProfileSheet({ life, open, onClose }: { life: LifeState; open: b
             <ul className="divide-y divide-border" aria-label="Languages">
               {view.languages.map((l) => <li key={l.id} className="flex justify-between gap-3 py-2"><span>{l.name}</span><span className="text-muted capitalize">{LANGUAGE_LEVEL_LABELS[l.level]}{l.native ? ` · ${LANGUAGE_NATIVE_LABEL}` : ''}</span></li>)}
             </ul>
+            {view.certificates.length > 0 && (
+              <ul className="mt-2 divide-y divide-border text-sm" aria-label="Language certificates" data-testid="profile-certificates">
+                {view.certificates.map((c) => <li key={c.id} className="flex justify-between gap-3 py-2"><span>{c.name} certificate</span><span className="text-muted">{EXAM_LEVEL_LABELS[c.level]}</span></li>)}
+              </ul>
+            )}
             {life.character.age >= content.balance.languages.classes.minAge && view.languageClasses.length > 0 && (
               <div className="mt-3 flex flex-col gap-3">
                 <label className="flex flex-col gap-1">Language to learn
@@ -267,6 +273,18 @@ export function ProfileSheet({ life, open, onClose }: { life: LifeState; open: b
                 </label>
                 <p className="text-sm text-muted">One course each year. School and everyday use also build your skills.</p>
                 <Button block disabled={busy || !view.languageClasses.some((l) => l.id === languageChoice && l.available)} onClick={() => { close(); void act('take_language_classes', { languageId: languageChoice }); }}>Take language classes · {money(view.languageClassCost)}</Button>
+                <p className="text-sm text-muted">An app is cheap and slow; a tutor costs more and is fast. Each can be used once a year, besides a class.</p>
+                <Button block disabled={busy || !view.languageClasses.some((l) => l.id === languageChoice && l.app)} onClick={() => { close(); void act('study_language', { study: { languageId: languageChoice, method: 'app' } }); }}>Study with an app · {money(view.languageAppCost)}</Button>
+                <Button block disabled={busy || !view.languageClasses.some((l) => l.id === languageChoice && l.tutor)} onClick={() => { close(); void act('study_language', { study: { languageId: languageChoice, method: 'tutor' } }); }}>Hire a tutor · {money(view.languageTutorCost)}</Button>
+                {languageChoice !== '' && (
+                  <div className="flex flex-col gap-2" role="group" aria-label="Certificate exams">
+                    <p className="text-sm text-muted">A certificate does not fade, and counts for jobs and for moving abroad. You can sit an exam when you are close to its level; one sitting a language each year.</p>
+                    {LANGUAGE_LEVELS.map((level) => {
+                      const exam = view.languageClasses.find((l) => l.id === languageChoice)?.exams[level];
+                      return <Button key={level} block variant="secondary" disabled={busy || !exam?.available} onClick={() => { close(); void act('sit_language_exam', { exam: { languageId: languageChoice, level } }); }}>Sit the {EXAM_LEVEL_LABELS[level].toLowerCase()} exam · {money(view.examFees[level])}{exam ? ` · ${EXAM_ODDS_LABELS[exam.odds]}` : ''}</Button>;
+                    })}
+                  </div>
+                )}
               </div>
             )}
           </section>

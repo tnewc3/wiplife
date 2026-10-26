@@ -1,0 +1,29 @@
+id: language_heritage_song
+title: A chorus you almost know
+text: >-
+  A song comes on in {heritageLanguage}. You catch the chorus and lose the
+  verses, and the feeling stays with you after the song has gone.
+tone: light
+category: language
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 25 } }
+    - { language: { heritageLost: true } }
+weight: { base: 2 }
+cooldownYears: 6
+choices:
+  - id: lookup
+    label: Look up the words
+    outcome:
+      text: You read the lyrics twice, then sing them in the kitchen. They stay.
+      effects:
+        - { type: languageBond, action: heritage }
+        - { type: stat, key: happiness, delta: 1 }
+  - id: leave
+    label: Let it play
+    outcome:
+      text: The song ends, and the room is quiet in a pleasant way.
+      effects:
+        - { type: stat, key: stress, delta: -1 }

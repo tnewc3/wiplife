@@ -1,0 +1,34 @@
+id: travel_night_dancing
+title: The last song
+text: >-
+  Past midnight in {destination}, a music room full of strangers is still
+  filling up. Nobody here knows you, and that is a freedom.
+tone: light
+category: travel
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+followUpOnly: true
+requires:
+  all:
+    - { age: { gte: 21 } }
+    - { travel: { active: true, kind: trip, activity: nightlife } }
+weight: { base: 1 }
+choices:
+  - id: stay
+    label: Stay until the lights come up
+    outcome:
+      text: >-
+        You dance badly and happily until the staff start stacking chairs.
+        The walk back at dawn is the best part, and you sleep through the
+        morning.
+      effects:
+        - { type: stat, key: happiness, delta: 3 }
+        - { type: stat, key: health, delta: -1 }
+  - id: early
+    label: Leave after an hour
+    outcome:
+      text: >-
+        An hour is plenty. You are back at the hotel by one with ringing
+        ears, a good story and a full night ahead of you to sleep in.
+      effects:
+        - { type: stat, key: stress, delta: -2 }

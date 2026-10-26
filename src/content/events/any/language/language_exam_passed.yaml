@@ -1,0 +1,17 @@
+id: language_exam_passed
+title: The result
+text: 'The envelope is thin, which you decide to take as a good sign. You have passed the {examLanguage} exam at the {examLevel} level, and the certificate is yours to keep.'
+tone: light
+category: language
+rarity: common
+lifeStages: [teen, youngAdult, adult, senior]
+requires: { age: { gte: 16 } }
+weight: { base: 1 }
+followUpOnly: true
+# The receipt of an exam the player entered (one sitting a language a year, by rule), not a random event.
+recurring: true
+autoOutcome:
+  text: 'Employers and immigration offices both ask for a paper like this, and now you have one that does not fade.'
+  effects:
+    - { type: stat, key: confidence, delta: 2 }
+    - { type: stat, key: happiness, delta: 2 }

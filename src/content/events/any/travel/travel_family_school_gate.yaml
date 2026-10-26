@@ -1,0 +1,38 @@
+id: travel_family_school_gate
+title: The new school gate
+text: >-
+  On the first morning in {destination}, {kid.name} is standing at a school
+  gate in a uniform that does not feel like {kid.their} own. The language on
+  the notice board is not one you can read at a glance.
+tone: neutral
+category: travel
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+followUpOnly: true
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { travel: { active: true, family: true } }
+    - { family: { minors: { gte: 1 } } }
+weight: { base: 1 }
+cast:
+  kid: { kind: child, presence: household }
+choices:
+  - id: walk
+    label: Walk {kid.them} in and stay a while
+    outcome:
+      text: >-
+        A teacher introduces you both. By the second week {kid.name} knows
+        three names, and is annoyed that you still do not.
+      effects:
+        - { type: parenting, role: kid, involvement: 4, warmth: 2 }
+        - { type: relationship, role: kid, affection: 3, trust: 2 }
+  - id: alone
+    label: Let {kid.them} go in alone
+    outcome:
+      text: >-
+        {kid.name} straightens up and walks through without looking back. You
+        wait at the gate until the bell, and then a few minutes more.
+      effects:
+        - { type: parenting, role: kid, involvement: -1, strictness: -1 }
+        - { type: relationship, role: kid, trust: 3 }

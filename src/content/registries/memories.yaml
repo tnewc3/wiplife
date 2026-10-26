@@ -271,3 +271,5 @@ tags:
   covered_for_them: You covered {npc.their} hours when {npc.they} {npc:needed|needed} you to
   saw_you_at_the_party: Saw you at the office party
   reported_you: You reported {npc.them} to the boss
+  practiced_language: You practiced a language together
+  honeymoon_together: Took a honeymoon with you

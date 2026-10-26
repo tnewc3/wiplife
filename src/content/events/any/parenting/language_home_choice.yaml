@@ -1,0 +1,45 @@
+id: language_home_choice
+title: Which words at home
+text: >-
+  You catch yourself switching languages mid-sentence with {kid.name}. One of
+  them is yours from long before this house, and {kid.they} {kid:is|are} at the
+  age where words stick.
+tone: light
+category: parenting
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { family: { minors: { gte: 1 } } }
+    - { language: { teachableTo: kid } }
+weight: { base: 6 }
+cooldownYears: 3
+cast:
+  kid: { kind: child, presence: household, age: { min: 1, max: 5 } }
+choices:
+  - id: both
+    label: Speak your language with {kid.them} at home
+    outcome:
+      text: >-
+        You start the next morning, in {childLanguage}. {kid.name} answers in
+        the other language for a week, then in yours, and then in whichever
+        one the word comes from first.
+      effects:
+        - { type: languageBond, action: home, role: kid }
+        - { type: parenting, role: kid, involvement: 4, warmth: 2 }
+        - { type: relationship, role: kid, affection: 3 }
+        - { type: memory, role: kid, tag: practiced_language }
+  - id: local
+    label: Keep to the language of the neighborhood
+    outcome:
+      text: >-
+        It is simpler. {kid.name} will meet the other language later, if at
+        all, and you tell yourself that is a fine choice too.
+      effects:
+        - { type: parenting, role: kid, involvement: 1 }
+  - id: later
+    label: Wait until {kid.they} {kid:is|are} older
+    outcome:
+      text: There is time. You also know how quickly the early years go.
+      effects: []

@@ -1,0 +1,36 @@
+id: language_elder_story
+title: Told the long way
+text: >-
+  {elder.name} starts a story in the language {elder.they} grew up with,
+  glances at you, and carries on in it anyway. Halfway through, you realize you
+  are following.
+tone: light
+category: language
+rarity: common
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 14 } }
+    - { language: { learnableFrom: elder } }
+weight: { base: 2 }
+cooldownYears: 4
+cast:
+  elder: { kind: relative, presence: nearby, age: { min: 50, max: 100 } }
+choices:
+  - id: ask
+    label: Ask {elder.them} to tell it again, slowly
+    outcome:
+      text: >-
+        {elder.name} tells it again, slower, then a third time with the hard
+        words explained. By the end you are finishing the sentences.
+      effects:
+        - { type: languageBond, action: practice, role: elder, size: good }
+        - { type: relationship, role: elder, affection: 4, trust: 2 }
+        - { type: memory, role: elder, tag: practiced_language }
+  - id: listen
+    label: Just listen
+    outcome:
+      text: You let it wash over you. The meaning arrives later, in the car.
+      effects:
+        - { type: languageBond, action: practice, role: elder, size: neutral }
+        - { type: relationship, role: elder, affection: 2 }

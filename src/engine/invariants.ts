@@ -82,7 +82,13 @@ export function checkInvariants(state: LifeState, content: ContentBundle): strin
   const study = state.languages;
   if (study.schoolId !== null && content.languages[study.schoolId]?.id !== study.schoolId) fail('unknown school language');
   if (study.classId !== null && content.languages[study.classId]?.id !== study.classId) fail('unknown class language');
-  if ((study.classId === null) !== (study.classYear === null) || (study.classYear !== null && (!Number.isInteger(study.classYear) || study.classYear > state.currentYear))) fail('invalid language class record');
+  // (Batch 10: an app or a tutor also sets the language studied last, so a language can be named without a class year.)
+  if ((study.classYear !== null && study.classId === null) || (study.classYear !== null && (!Number.isInteger(study.classYear) || study.classYear > state.currentYear))) fail('invalid language class record');
+  for (const year of [study.methodYear.app, study.methodYear.tutor, ...Object.values(study.examYear)]) if (year !== null && (!Number.isInteger(year) || year > state.currentYear || year < state.birthYear)) fail('invalid language study year');
+  for (const id of [...Object.keys(study.certificates), ...Object.keys(study.examYear)]) if (content.languages[id]?.id !== id) fail('certificate or exam for an unknown language');
+  if (study.exams.passed > study.exams.sat) fail('more exams passed than sat');
+  for (const [childId, id] of Object.entries(study.home)) if (!state.people[childId] || content.languages[id]?.id !== id) fail('language spoken at home with someone who does not exist');
+  if (study.practice.points < 0 || study.practice.points > content.balance.languages.practice.yearlyMax) fail('practice points out of range');
   for (const value of Object.values(study.totals)) if (!Number.isSafeInteger(value) || value < 0) fail('invalid language learning total');
 
 
@@ -191,6 +197,10 @@ export function checkInvariants(state: LifeState, content: ContentBundle): strin
   money('finances.earnings.total', earnings.total);
   if (!Number.isInteger(earnings.years) || earnings.years < 0 || earnings.years > c.age) fail('finances.earnings.years is out of range');
   if (earnings.total < 0 || earnings.total > earnings.years * earningsCap) fail('finances.earnings.total is out of range');
+  // Batch 10: the record by country adds up to the whole.
+  const rows = Object.values(earnings.byCountry);
+  if (rows.reduce((sum, row) => sum + row.years, 0) !== earnings.years || rows.reduce((sum, row) => sum + row.total, 0) !== earnings.total) fail('finances.earnings.byCountry does not add up to the record');
+  if (Object.keys(earnings.byCountry).some((id) => content.countries[id] === undefined)) fail('finances.earnings.byCountry names an unknown country');
 
   // Housing.
   const h = state.housing;

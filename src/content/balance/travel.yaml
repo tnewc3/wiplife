@@ -5,9 +5,34 @@ budgets:
   comfortable: { cost: 2000, effects: { happiness: 7, stress: -5 } }
   splurge: { cost: 5000, effects: { happiness: 9, stress: -7 } }
 companionCostShare: 0.5
+genericStoryChance: 0.4
 companionAffection: 3
 tripImmersion: 3
 distanceAffection: 3
 exchange: { cost: 1800, semesterGain: 6, yearGain: 12 }
 work: { cost: 1600, holidayMaxAge: 35, years: 2 }
-simulation: { tripChance: 0.08, companionChance: 0.35, studyChance: 0.2, workChance: 0.025 }
+# Part-year stays (W5 open question) are closed, not built: the game moves in whole years, so a stay is a semester (the shorter
+# route, with the smaller immersion gain above) or a year. A finer clock would need a mid-year state for housing, tuition, pay and
+# schooling in two places at once. docs/technical.md (Batch 10) records the reason.
+# Batch 10: kinds of trip. `costFactor` multiplies the budget's price.
+styles:
+  vacation: { costFactor: 1 }
+  cruise: { costFactor: 1.1, effects: { happiness: 2, stress: -2 } }
+  honeymoon: { costFactor: 1.2, withinYears: 2, affection: 8, trust: 4, effects: { happiness: 3, stress: -2 } }
+  group: { costFactor: 0.9, minFriends: 2, friendAffection: 5, effects: { happiness: 1, stress: 0 } }
+  # The employer pays the trip. You are paid the per diem (at US prices) for the days away.
+  business: { perDiem: 450, performance: 5, effects: { happiness: -1, stress: 3 } }
+# What you do on a trip: the price added to the booking and the stat changes on top of the budget's.
+activities:
+  sightseeing: { minAge: 18, extra: 120, stats: { smarts: 1 }, languageGain: 0 }
+  nightlife: { minAge: 21, extra: 220, stats: { happiness: 2, health: -1, stress: -1 }, languageGain: 0 }
+  adventure: { minAge: 18, extra: 400, stats: { happiness: 2, health: 1, stress: -1 }, languageGain: 0 }
+  food: { minAge: 18, extra: 180, stats: { happiness: 2 }, languageGain: 0 }
+  immersion: { minAge: 18, extra: 500, stats: { smarts: 1 }, languageGain: 10 }
+souvenirs:
+  small: { cost: 40, happiness: 1 }
+  keepsake: { cost: 250, happiness: 2 }
+  valuable: { cost: 2800, happiness: 3 }
+# A partner and children on a temporary stay: each adds this share of the stay's price.
+family: { costShare: 0.35, maxChildren: 4 }
+simulation: { tripChance: 0.08, companionChance: 0.35, studyChance: 0.2, workChance: 0.025, familyChance: 0.3, businessChance: 0.35, cruiseChance: 0.05, groupChance: 0.1, souvenirChance: 0.4 }

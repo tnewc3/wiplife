@@ -1,0 +1,35 @@
+id: travel_sight_queue
+title: The long line
+text: >-
+  In {destination}, the line for the one sight everybody comes for wraps twice
+  around a square. A sign says the wait is two hours.
+tone: neutral
+category: travel
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+followUpOnly: true
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { travel: { active: true, kind: trip, activity: sightseeing } }
+weight: { base: 1 }
+choices:
+  - id: queue
+    label: Wait it out ({$40} for the ticket)
+    outcome:
+      text: >-
+        The line moves faster than the sign claimed. Inside, the place is as
+        good as its reputation, and the ticket was worth the wait.
+      effects:
+        - { type: money, delta: -40 }
+        - { type: stat, key: smarts, delta: 2 }
+        - { type: stat, key: happiness, delta: 1 }
+  - id: skip
+    label: Skip it for the side streets
+    outcome:
+      text: >-
+        You wander until the streets stop having names you can read, and find
+        a quiet courtyard with a bench and nobody on it.
+      effects:
+        - { type: stat, key: stress, delta: -2 }
+        - { type: stat, key: happiness, delta: 1 }

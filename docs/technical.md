@@ -2371,7 +2371,7 @@ choices:
   3. *Holiday romance follows the adults-only rule* — **met:** "holiday romance produces an adult long-distance partner…"; the romance-under-18 invariant had 0 failures across 432 holiday relationships.
   4. *Study and work abroad move you temporarily, give immersion and strain ties at home, and end with a return* — **met:** "exchanges preserve enrollment and home tuition, immerse, strain home ties and return", "working holidays use the existing yearly gig ledger and end at home", "transfers keep a job…"; 4,498 returns for 4,507 stays (the rest were still abroad at death). Batch 0 found and fixed one way a stay did not end properly (an eviction abroad that sent the player home; see Batch 0 below).
   5. *A 10,000-life simulation reports trips per life, destinations, encounters, study and work abroad rates and their effects* — **met:** the figures above.
-- **Still open (not decided in Batch 0):** part-year stays, families travelling with a temporary resident, and pension portability across countries.
+- **Open in Batch 0, settled in Batch 10:** families travelling with a temporary resident (built), pension portability across countries (built) and part-year stays (closed, with the reason recorded). See "Batch 10 — Language and travel, expanded (as built)".
 
 W5 also computes category cooldown years once per pacing pass. Travel adds entries to the shared event log; recalculating that same category maximum for every candidate would repeatedly scan it. The cached view is local to the pass, with unchanged weights and random draws; its regression test compares every shipped event's weight against the uncached calculation on a populated log.
 

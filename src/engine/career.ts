@@ -1,5 +1,5 @@
 import { workBlocked } from './migration/query';
-import { meetsLanguageJob } from './languages';
+import { effectiveLanguages, meetsLanguageJob } from './languages';
 /**
  * Career rules (docs/design.md, section I; docs/technical.md, Stage 8): who
  * can be hired where, the job market in your city, your odds, starting and
@@ -94,7 +94,7 @@ export function meetsJobRequirements(state: LifeState, def: JobDef, content: Con
     ...(finishing ? { education: { ...state.education, credentials: [...state.education.credentials, finishing] } } : {}),
     ...(record !== state.legal.record ? { legal: { ...state.legal, record } } : {}),
   };
-  return meetsLanguageJob(state.character.languages, def, state.character.cityId, content) && evaluate(def.requires, view, { roles: 'strict', content });
+  return meetsLanguageJob(effectiveLanguages(state, content), def, state.character.cityId, content) && evaluate(def.requires, view, { roles: 'strict', content });
 }
 
 /**

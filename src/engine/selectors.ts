@@ -1,12 +1,17 @@
 import { getStandingView } from './migration/view';
-import { destinations, travelCompanions, tripCost, stayBlock, type TripInput, type StayInput } from './travel/travel';
+import { destinations, groupFriends, honeymoonSpouse, perDiem, stayCost, stayFamily, travelCompanions, tripBlock, tripCost, tripStyleOf, stayBlock, type TripInput, type StayInput } from './travel/travel';
+import { hasBusinessJob } from './travel/query';
 import { countryIdOfCity } from './country';
-import { languageLevel, languageClassCost, languageSkill } from './languages';
+import { examFee, examOddsWord, LANGUAGE_LEVELS, languageLevel, languageClassCost, languageSkill, studyCost } from './languages';
 /** Read-only helpers the UI uses to show a life. */
 import {
   LIFESTYLES,
   TIERS,
   type ApplyProgram,
+  type LanguageLevel,
+  TRIP_ACTIVITIES,
+  TRIP_STYLES,
+  SOUVENIRS,
   type ChoiceDef,
   type ContentBundle,
   type SchoolWords,
@@ -136,7 +141,7 @@ export type { ActivityOptionView, CrowdView, JobOptionView, RuleView, TeenView }
 export type { AdoptOption, BelongingsView, MainHomeView, PetDetailView, PetView, RenovationOption, VacationHomeView, VacationOption, VehicleOption, VehicleView } from './possessions/views';
 export type { NewsFeedView, NewsItem, PersonLifeView, TroubleView } from './lives/views';
 import { consistencyProblems, whereabouts } from './presence';
-import { benefitFromRecord } from './retirement';
+import { benefitFromRecord, pensionShares, retirementBenefit } from './retirement';
 import {
   activeJob,
   canRetire,
@@ -844,7 +849,7 @@ export interface MoneyView {
   /** W4a: the country's money rules in a line each: its currency, taxes, health care and how students pay. */
   country: { name: string; currency: string; code: string; tax: string; health: string; students: string };
   /** The retirement benefit: from what age, the years of earnings so far, and what the record pays now. */
-  retirement: { name: string; age: number; years: number; minYears: number; yearlyBenefit: number; receiving: boolean };
+  retirement: { name: string; age: number; years: number; minYears: number; yearlyBenefit: number; receiving: boolean; countries: { name: string; country: string; years: number; age: number; yearly: number; receiving: boolean }[] };
   /** E2b: money an heir under 18 inherited, held until `releaseAge`. */
   trust: { balance: number; releaseAge: number } | null;
 }
@@ -888,7 +893,9 @@ export function getMoneyView(state: LifeState, content: ContentBundle): MoneyVie
       years: f.earnings.years,
       minYears: pensionOf(state, content).minYears,
       yearlyBenefit: benefitFromRecord(state, content),
-      receiving: state.character.age >= pensionOf(state, content).age && benefitFromRecord(state, content) > 0,
+      receiving: retirementBenefit(state, content) > 0,
+      // Batch 10: what each country's years earn, when it starts, and whether it is being paid now.
+      countries: pensionShares(state, content).map((share) => ({ name: content.countries[share.countryId]!.pension.name, country: content.countries[share.countryId]!.name, years: share.years, age: share.age, yearly: share.yearly, receiving: share.receiving })),
     },
     trust: f.trust ? { balance: f.trust.balance, releaseAge: f.trust.releaseAge } : null,
   };
@@ -1372,8 +1379,13 @@ export { getMigrationView, getStandingView, type MigrationPick, type MigrationVi
 export interface ProfileView {
   fullName: string;
   languages: { id: string; name: string; level: string; native: boolean }[];
-  languageClasses: { id: string; name: string; available: boolean }[];
+  languageClasses: { id: string; name: string; available: boolean; app: boolean; tutor: boolean; exams: Record<LanguageLevel, { available: boolean; odds: 'slim' | 'fair' | 'good' | 'strong' }> }[];
   languageClassCost: number;
+  /** Batch 10: what an app and a tutor cost, the exam fee by level, and the certificates you hold. */
+  languageAppCost: number;
+  languageTutorCost: number;
+  examFees: Record<LanguageLevel, number>;
+  certificates: { id: string; name: string; level: LanguageLevel }[];
   /** W4a: the country you live in, and the one you were born in. */
   country: string;
   bornIn: string;
@@ -1391,8 +1403,18 @@ export function getProfileView(state: LifeState, content: ContentBundle): Profil
   return {
     fullName: `${c.name.first} ${c.name.last}`,
     languages: c.languages.map((l) => ({ id: l.id, name: content.languages[l.id]?.name ?? l.id, level: languageLevel(l.skill, content), native: l.native })),
-    languageClasses: Object.values(content.languages).filter((l) => !l.retired && languageSkill(c.languages, l.id) < 100).map((l) => ({ id: l.id, name: l.name, available: isLifeActionAvailable(state, "take_language_classes", { languageId: l.id }, content) })),
+    languageClasses: Object.values(content.languages).filter((l) => !l.retired && languageSkill(c.languages, l.id) < 100).map((l) => ({
+      id: l.id, name: l.name,
+      available: isLifeActionAvailable(state, "take_language_classes", { languageId: l.id }, content),
+      app: isLifeActionAvailable(state, 'study_language', { study: { languageId: l.id, method: 'app' } }, content),
+      tutor: isLifeActionAvailable(state, 'study_language', { study: { languageId: l.id, method: 'tutor' } }, content),
+      exams: Object.fromEntries(LANGUAGE_LEVELS.map((level) => [level, { available: isLifeActionAvailable(state, 'sit_language_exam', { exam: { languageId: l.id, level } }, content), odds: examOddsWord(state, l.id, level, content) }])) as Record<LanguageLevel, { available: boolean; odds: 'slim' | 'fair' | 'good' | 'strong' }>,
+    })),
     languageClassCost: languageClassCost(state, content),
+    languageAppCost: studyCost(state, 'app', content),
+    languageTutorCost: studyCost(state, 'tutor', content),
+    examFees: Object.fromEntries(LANGUAGE_LEVELS.map((level) => [level, examFee(state, level, content)])) as Record<LanguageLevel, number>,
+    certificates: Object.entries(state.languages.certificates).sort(([a], [b]) => a.localeCompare(b)).map(([id, level]) => ({ id, name: content.languages[id]?.name ?? id, level })),
     country: countryOf(state, content).name,
     standing: getStandingView(state, content),
     bornIn: `${content.cities[c.birthCityId]?.name ?? c.birthCityId}, ${birthCountryOf(state, content).name}`,
@@ -1443,19 +1465,39 @@ export function problemReport(state: LifeState, index: number, content: ContentB
   return lines.join('\n');
 }
 
-/** W5: the More planner reads travel state through this view. */
+/** W5: the More planner reads travel state through this view. Batch 10 adds the kinds of trip, the activities and the souvenirs. */
 export function getTravelView(state: LifeState, input: TripInput, content: ContentBundle) {
-  const options = destinations(content).filter((d) => d.cityId !== state.character.cityId);
+  const style = tripStyleOf(input);
+  const options = destinations(content).filter((d) => d.cityId !== state.character.cityId && (d.kind === 'cruise') === (style === 'cruise'));
   const ids = travelCompanions(state);
-  const trip = { ...input, destinationId: options.some((d) => d.id === input.destinationId) ? input.destinationId : options[0]?.id ?? '', companions: input.companions.filter((id) => ids.includes(id)) };
+  const spouse = honeymoonSpouse(state, content);
+  const friends = groupFriends(state);
+  // A honeymoon is the two of you; a business trip is yours alone; a group trip is friends.
+  const companions = style === 'honeymoon' ? (spouse ? [spouse] : []) : style === 'business' ? [] : input.companions.filter((id) => (style === 'group' ? friends : ids).includes(id));
+  const trip: TripInput = { ...input, style, destinationId: options.some((d) => d.id === input.destinationId) ? input.destinationId : options[0]?.id ?? '', companions };
   const r = state.travel.residence;
+  const t = content.balance.travel;
+  const styleReason = (s: (typeof TRIP_STYLES)[number]): string | null => {
+    switch (s) {
+      case 'vacation': case 'cruise': return null;
+      case 'honeymoon': return spouse ? null : 'honeymoon';
+      case 'group': return friends.length >= t.styles.group.minFriends ? null : 'group';
+      case 'business': return hasBusinessJob(state, content) && state.travel.businessYear !== state.currentYear ? null : 'business';
+    }
+  };
   return {
-    options, trip, cost: tripCost(trip, content), maxCompanions: content.balance.travel.maxCompanions,
-    companions: ids.map((id) => ({ id, name: `${state.people[id]!.name.first} ${state.people[id]!.name.last}` })),
+    options, trip, cost: tripCost(trip, content), maxCompanions: t.maxCompanions,
+    companions: (style === 'group' ? friends : ids).map((id) => ({ id, name: `${state.people[id]!.name.first} ${state.people[id]!.name.last}` })),
+    styles: TRIP_STYLES.map((id) => ({ id, reason: styleReason(id) })),
+    activities: TRIP_ACTIVITIES.map((id) => ({ id, available: state.character.age >= t.activities[id].minAge, extra: t.activities[id].extra })),
+    souvenirs: SOUVENIRS.map((id) => ({ id, cost: id === 'none' ? 0 : t.souvenirs[id].cost })),
+    perDiem: style === 'business' ? perDiem(state, content) : 0,
+    minFriends: t.styles.group.minFriends,
     residence: r ? { name: content.destinations[r.destinationId]?.name ?? '', endYear: r.endYear } : null,
-    minAge: content.balance.travel.minAge, oldEnough: state.character.age >= content.balance.travel.minAge,
-    alreadyTraveled: state.travel.tripYear === state.currentYear,
+    minAge: t.minAge, oldEnough: state.character.age >= t.minAge,
+    alreadyTraveled: (style === 'business' ? state.travel.businessYear : state.travel.tripYear) === state.currentYear,
     affordable: state.finances.savings >= tripCost(trip, content),
+    block: tripBlock(state, trip, content),
     canBook: isLifeActionAvailable(state, 'plan_trip', { trip }, content),
   };
 }
@@ -1469,7 +1511,10 @@ export function getAbroadView(state: LifeState, stay: StayInput, content: Conten
     oldEnough: state.character.age >= content.balance.travel.minAge,
     cities: destinations(content).filter((d) => d.cityId && countryIdOfCity(d.cityId, content) !== countryIdOfCity(state.character.cityId, content)),
     residence: r ? { name: content.destinations[r.destinationId]?.name ?? '', endYear: r.endYear } : null,
-    cost: content.balance.travel[student ? 'exchange' : 'work'].cost,
+    cost: stayCost(state, stay, content),
+    baseCost: content.balance.travel[student ? 'exchange' : 'work'].cost,
+    /** Batch 10: who would come along: your partner and the children who live with you. */
+    family: (() => { const f = stayFamily(state, content); return { partner: f.partnerId ? `${state.people[f.partnerId]!.name.first} ${state.people[f.partnerId]!.name.last}` : null, children: f.childIds.map((id) => state.people[id]!.name.first) }; })(),
     years: content.balance.travel.work.years, holidayMaxAge: content.balance.travel.work.holidayMaxAge,
     block: stayBlock(state, stay, content),
     canStart: isLifeActionAvailable(state, action, { stay }, content),

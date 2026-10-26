@@ -1,0 +1,32 @@
+id: travel_souvenir_gift
+title: Something for someone
+text: >-
+  In your last hour in {destination}, you realize you have bought for yourself
+  and not for anyone else. The shop closes in twenty minutes.
+tone: light
+category: travel
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+followUpOnly: true
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { travel: { active: true, kind: trip, souvenir: true } }
+weight: { base: 1 }
+choices:
+  - id: gift
+    label: Find a small gift ({$25})
+    outcome:
+      text: >-
+        You pick something small and well made. It sits on a shelf at home
+        for a long time, and is looked at often.
+      effects:
+        - { type: money, delta: -25 }
+        - { type: stat, key: happiness, delta: 1 }
+  - id: nothing
+    label: Bring home stories instead
+    outcome:
+      text: >-
+        You come back with nothing in your hands and a lot to say, and it
+        turns out that is enough.
+      effects: []

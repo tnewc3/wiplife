@@ -1,0 +1,33 @@
+id: travel_immersion_class
+title: Three strangers
+text: >-
+  The morning class in {destination} ends with homework: ask three people on
+  the street a question in the local language, and write down what they say.
+tone: neutral
+category: travel
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+followUpOnly: true
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { travel: { active: true, kind: trip, activity: immersion } }
+weight: { base: 1 }
+choices:
+  - id: ask
+    label: Do it properly, out loud
+    outcome:
+      text: >-
+        The first answer is too fast to follow, the second is slow and kind,
+        and the third person walks you to the place you were looking for.
+      effects:
+        - { type: stat, key: confidence, delta: 2 }
+        - { type: stat, key: smarts, delta: 1 }
+  - id: phone
+    label: Type the questions into your phone
+    outcome:
+      text: >-
+        It works, and it is an excellent translation, and you learn nothing
+        about how to say any of it.
+      effects:
+        - { type: stat, key: stress, delta: -1 }

@@ -1,0 +1,33 @@
+id: travel_cruise_dinner_table
+title: The assigned table
+text: >-
+  The dining room seats you at a long table with five people you have never
+  met. The first course arrives before anyone has found the first topic.
+tone: light
+category: travel
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+followUpOnly: true
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { travel: { active: true, kind: trip, style: cruise } }
+weight: { base: 1 }
+choices:
+  - id: talk
+    label: Start the conversation
+    outcome:
+      text: >-
+        One question, and the table opens up like a map. By dessert, you have
+        been told where to eat at your next port, twice, by different people.
+      effects:
+        - { type: stat, key: sociability, delta: 1 }
+        - { type: stat, key: happiness, delta: 2 }
+  - id: quiet
+    label: Eat quietly and watch the water
+    outcome:
+      text: >-
+        The conversation goes on around you, easy and not about you. The sea
+        goes dark outside the window, and you finish your plate.
+      effects:
+        - { type: stat, key: stress, delta: -2 }

@@ -10,7 +10,7 @@ import { citiesOfCountry, countryIdOfCity } from '../country';
 import { finishedHighSchool, validTarget } from '../education';
 import { spend, earn } from '../finance';
 import { isIncarcerated, onProbation } from '../legal';
-import { languageSkill } from '../languages';
+import { effectiveLanguages, languageSkill } from '../languages';
 import { countedRecord } from '../record';
 import type { Id, LifeState } from '../types';
 import type { Application } from './types';
@@ -24,10 +24,11 @@ export interface EntryInput {
   tier?: Tier;
 }
 
-/** Your best skill (0–100) in any official language of a country. */
+/** Your best skill (0–100) in any official language of a country; a certificate you hold counts at its level even after the skill has faded (Batch 10). */
 export function countryLanguageSkill(state: LifeState, countryId: CountryId, content: ContentBundle): number {
   const official = content.countries[countryId]?.languages.official ?? [];
-  return Math.max(0, ...official.map((id) => languageSkill(state.character.languages, id)));
+  const known = effectiveLanguages(state, content);
+  return Math.max(0, ...official.map((id) => languageSkill(known, id)));
 }
 
 /** A conviction (not a warning) within this many years. */

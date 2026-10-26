@@ -11,7 +11,7 @@ describe('W4b simulation reports', () => {
       d.character.cityId = 'montreal';
       d.character.languages = [{ id: 'en', skill: 100, native: true, lastUsed: d.currentYear }, { id: 'fr', skill: 20, native: false, lastUsed: d.currentYear }];
       d.career.openings = ['software_engineer', 'registered_nurse'];
-      d.languages.totals = { school: 6, classes: 12, immersion: 8, faded: 1 };
+      d.languages.totals = { school: 6, classes: 12, immersion: 8, faded: 1, app: 0, tutor: 0, practice: 0, home: 0, trip: 0 };
       const template = Object.values(d.people)[0]!;
       for (const [id, language] of [['shared', 'en'], ['barrier', 'fr']] as const) {
         d.people[id] = { ...template, id, alive: true, languages: [{ id: language, skill: 100, native: true, lastUsed: d.currentYear }] };

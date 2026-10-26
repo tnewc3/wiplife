@@ -1,0 +1,35 @@
+id: travel_food_market
+title: The market stalls
+text: >-
+  The covered market in {destination} is loud, warm and full of cooking you do
+  not recognize. Every stall has someone calling you over.
+tone: neutral
+category: travel
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+followUpOnly: true
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { travel: { active: true, kind: trip, activity: food } }
+weight: { base: 1 }
+choices:
+  - id: grazing
+    label: Eat your way through it ({$35})
+    outcome:
+      text: >-
+        You point, you taste, you point again. By the end you have a favorite
+        you cannot pronounce and a plan to come back for it tomorrow.
+      effects:
+        - { type: money, delta: -35 }
+        - { type: stat, key: happiness, delta: 3 }
+  - id: sit
+    label: Sit down for a proper meal ({$55})
+    outcome:
+      text: >-
+        A table in the corner, three courses and no hurry. The server explains
+        each dish, and you eat slowly enough to remember it.
+      effects:
+        - { type: money, delta: -55 }
+        - { type: stat, key: happiness, delta: 2 }
+        - { type: stat, key: stress, delta: -2 }

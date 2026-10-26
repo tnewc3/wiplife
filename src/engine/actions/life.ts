@@ -1,5 +1,6 @@
 import { onTemporaryStay } from '../migration/query';
 import { TRAVEL_ACTION_IDS, TRAVEL_ACTIONS } from './travel';
+import { LANGUAGE_ACTION_IDS, LANGUAGE_ACTIONS } from './languages';
 import { MIGRATION_ACTION_IDS, MIGRATION_ACTIONS } from './migration';
 import type { EntryInput } from '../migration/routes';
 import type { RemitLevel, RegularizationBasis } from '../../content/schemas';
@@ -48,7 +49,7 @@ import { sameCountry } from '../country';
 
 export const MONEY_ACTION_IDS = ['set_lifestyle', 'start_gig', 'stop_gig', 'pay_debt', 'debt_plan'] as const;
 export const HOME_ACTION_IDS = ['rent_home', 'move_home', 'relocate', 'buy_home', 'sell_home', 'find_roommate', 'live_alone'] as const;
-export const LIFE_ACTION_IDS = [...TRAVEL_ACTION_IDS, ...MIGRATION_ACTION_IDS, 'take_language_classes', ...MONEY_ACTION_IDS, ...HOME_ACTION_IDS, ...EDUCATION_ACTION_IDS, ...SCHOOL_ACTION_IDS, ...CAREER_ACTION_IDS, ...WORK_ACTION_IDS, ...PERSONAL_ACTION_IDS, ...FAMILY_ACTION_IDS, ...ESTATE_ACTION_IDS, ...POSSESSION_ACTION_IDS, ...TEEN_ACTION_IDS, ...CRIME_ACTION_IDS, ...FAME_ACTION_IDS, ...SOCIAL_ACTION_IDS, ...SPORTS_ACTION_IDS, ...LATER_ACTION_IDS, ...BELONGING_ACTION_IDS, ...BUSINESS_ACTION_IDS, ...LOVE_ACTION_IDS, ...PASTIME_ACTION_IDS] as const;
+export const LIFE_ACTION_IDS = [...TRAVEL_ACTION_IDS, ...LANGUAGE_ACTION_IDS, ...MIGRATION_ACTION_IDS, 'take_language_classes', ...MONEY_ACTION_IDS, ...HOME_ACTION_IDS, ...EDUCATION_ACTION_IDS, ...SCHOOL_ACTION_IDS, ...CAREER_ACTION_IDS, ...WORK_ACTION_IDS, ...PERSONAL_ACTION_IDS, ...FAMILY_ACTION_IDS, ...ESTATE_ACTION_IDS, ...POSSESSION_ACTION_IDS, ...TEEN_ACTION_IDS, ...CRIME_ACTION_IDS, ...FAME_ACTION_IDS, ...SOCIAL_ACTION_IDS, ...SPORTS_ACTION_IDS, ...LATER_ACTION_IDS, ...BELONGING_ACTION_IDS, ...BUSINESS_ACTION_IDS, ...LOVE_ACTION_IDS, ...PASTIME_ACTION_IDS] as const;
 
 /** The only money, home, school, work and personal actions you can take in prison (Stage 9). */
 export const PRISON_LIFE_ACTIONS: readonly LifeActionId[] = ['pay_debt', 'debt_plan', 'stop_gig', 'edit_identity', 'write_will'];
@@ -68,6 +69,9 @@ export interface LifeActionParams {
   status?: { kind: 'permanent' | 'naturalization' | 'regularization'; basis?: RegularizationBasis };
   remit?: RemitLevel;
   languageId?: string;
+  /** Batch 10: studying with an app or a tutor, and sitting a certificate exam. */
+  study?: { languageId: string; method: 'app' | 'tutor' };
+  exam?: { languageId: string; level: 'basic' | 'conversational' | 'fluent' };
   lifestyle?: Lifestyle;
   debtId?: string;
   cityId?: string;
@@ -346,6 +350,7 @@ export const LIFE_ACTIONS: Record<LifeActionId, LifeActionRule> = {
     },
   },
   ...TRAVEL_ACTIONS,
+  ...LANGUAGE_ACTIONS,
   ...MIGRATION_ACTIONS,
   ...EDUCATION_ACTIONS,
   ...SCHOOL_ACTIONS,

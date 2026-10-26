@@ -424,7 +424,9 @@ describe('W6 life without papers', () => {
     expect(granted.migration.application!.status).toBe('approved');
     expect(granted.travel.residence).toMatchObject({ type: 'permanent_resident', route: 'regularized' });
     expect(granted.migration.undocumented).toBeNull();
-    const refused = decide(asked, 0);
+    // (A year of play can end the application another way, such as being removed: the first year that leaves it is the one judged.)
+    let refused = decide(asked, 0);
+    for (let i = 0; i < 8 && refused.migration.application === null; i++) refused = decide(produce(asked, (d) => { d.rng = createRng(`refused-${i}`); }), 0);
     expect(refused.migration.application!.status).toBe('denied');
     expect(refused.migration.denied['regularization:marriage:ca']).toBeDefined();
   });

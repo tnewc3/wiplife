@@ -409,6 +409,33 @@ social:
   creatorTop: { min: 0, max: 0.2 }
   teenRung3By28: { min: 0.1, max: 1 }
 
+# Batch 10: languages and travel, on the careful player. The rates compare the observed skill points per paid course with the
+# configured gain (1 means every course gave the full gain; a course can give less near the top of the scale). The family rules
+# must hold exactly. At fewer than a few thousand lives the rare ones (translators, families on stays) are small samples.
+languagesB10:
+  appRate: { min: 0.85, max: 1 }
+  tutorRate: { min: 0.85, max: 1 }
+  practiceLives: { min: 0.05, max: 0.95 }
+  examLives: { min: 0.02, max: 0.8 }
+  examPassRate: { min: 0.4, max: 0.95 }
+  certificateCounted: { min: 0, max: 0.6 }
+  translatorLives: { min: 0.0005, max: 0.08 }
+  bilingualChildren: { min: 0.02, max: 0.8 }
+  homeLives: { min: 0.002, max: 0.5 }
+  heritageLives: { min: 0.005, max: 0.7 }
+travelB10:
+  destinationsUsed: { min: 0.9, max: 1 }
+  honeymoonTaken: { min: 0.2, max: 0.95 }
+  cruiseLives: { min: 0.02, max: 0.6 }
+  groupLives: { min: 0.01, max: 0.5 }
+  businessLives: { min: 0.01, max: 0.6 }
+  souvenirLives: { min: 0.1, max: 0.95 }
+  activityLives: { min: 0.3, max: 0.99 }
+  familyStays: { min: 1, max: 100000 }
+  familyAtHost: { min: 1, max: 1 }
+  childrenLeftBehind: { min: 0, max: 0 }
+  multiCountryPension: { min: 0.0005, max: 0.3 }
+
 # B1: romance by attraction, on the careful player's lives that reach 50 (ages
 # 18-49): lives attracted to the same gender (or to more than one) are within
 # these distances of lives attracted to another gender, in the share who ever

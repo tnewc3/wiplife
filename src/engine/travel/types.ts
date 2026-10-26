@@ -1,5 +1,5 @@
 import type { HousingState } from '../types';
-import type { TRIP_BUDGETS, STAY_TYPES, STAY_ROUTES } from '../../content/schemas';
+import type { TRIP_BUDGETS, STAY_TYPES, STAY_ROUTES, TripStyle, TripActivity, Souvenir } from '../../content/schemas';
 export type TripBudget = (typeof TRIP_BUDGETS)[number];
 export type StayType = (typeof STAY_TYPES)[number];
 export type StayRoute = (typeof STAY_ROUTES)[number];
@@ -22,9 +22,15 @@ export interface Residence {
   route: StayRoute;
   /** W6: you moved for good. */
   settled?: true;
+  /** Batch 10: who came along on a temporary stay: your partner and the children living with you. They live in the host city for it and come back with you. */
+  family?: { partnerId: string | null; childIds: string[] };
 }
 export interface TravelContext {
   kind: 'trip' | 'study' | 'work';
+  /** Batch 10: how a trip was taken, what you did, and what you brought back (a trip only; a missing style is a plain vacation). */
+  style?: TripStyle;
+  activity?: TripActivity;
+  souvenir?: Souvenir;
   destinationId: string;
   companions: string[];
   encounterId: string | null;
@@ -34,11 +40,16 @@ export interface TravelState {
   residence: Residence | null;
   active: TravelContext | null;
   tripYear: number | null;
+  /** Batch 10: the year of your last business trip (one a year, besides a vacation). */
+  businessYear: number | null;
   totals: {
     trips: number; spent: number; encounters: number; romances: number;
     study: number; work: number; returns: number; immersion: number; distanceLost: number;
     happiness: number; stress: number;
     destinations: Record<string, number>;
+    /** Batch 10: trips by style and by activity, souvenirs by tier, business pay, and stays with a family along. */
+    styles: Record<string, number>; activities: Record<string, number>; souvenirs: Record<string, number>;
+    perDiem: number; familyStays: number; familyMembers: number;
   };
 }
-export const emptyTravel = (): TravelState => ({ residence: null, active: null, tripYear: null, totals: { trips: 0, spent: 0, encounters: 0, romances: 0, study: 0, work: 0, returns: 0, immersion: 0, distanceLost: 0, happiness: 0, stress: 0, destinations: {} } });
+export const emptyTravel = (): TravelState => ({ residence: null, active: null, tripYear: null, businessYear: null, totals: { trips: 0, spent: 0, encounters: 0, romances: 0, study: 0, work: 0, returns: 0, immersion: 0, distanceLost: 0, happiness: 0, stress: 0, destinations: {}, styles: {}, activities: {}, souvenirs: {}, perDiem: 0, familyStays: 0, familyMembers: 0 } });

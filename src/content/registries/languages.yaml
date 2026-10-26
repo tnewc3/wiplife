@@ -1,1 +1,5 @@
 classes: { events: [language_class_result] }
+# Batch 10: the receipts of the other paid ways to study, and of a certificate exam passed or failed.
+app: { events: [language_app_result] }
+tutor: { events: [language_tutor_result] }
+exam: { passed: [language_exam_passed], failed: [language_exam_failed] }

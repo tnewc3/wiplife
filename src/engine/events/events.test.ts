@@ -596,6 +596,11 @@ describe('event text', () => {
           followerWords: 'a few thousand followers',
           niche: 'gaming',
           postNoun: 'video',
+          souvenir: 'signed print',
+          examLanguage: 'French',
+          examLevel: 'conversational',
+          heritageLanguage: 'Spanish',
+          childLanguage: 'Spanish',
           ...US_WORDS,
         } satisfies Record<(typeof EVENT_TEXT_VALUES)[number] | 'petKind' | 'vehicle' | 'valuable' | 'homeCity', string | number>;
         const context = { roles, values, money: (n: number) => `$${n}` };

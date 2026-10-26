@@ -1,5 +1,5 @@
 import { leaveStaff } from '../business/roster';
-import { gainLanguage } from '../languages';
+import { gainLanguage, practiceWith, returnHeritageLanguage, startHomeLanguage } from '../languages';
 /**
  * Effect handlers (docs/technical.md, "Event engine internals"). Each effect
  * type has one handler; adding a type means a schema in
@@ -90,6 +90,13 @@ function adjustScore(state: LifeState, key: EffectStatKey, delta: number): void 
 const handlers: { [T in Effect['type']]: Handler<T> } = {
   migration: (state, effect, ctx) => applyMigrationEffect(state, effect, ctx.content),
   language: (state, effect, ctx) => { gainLanguage(state.character.languages, effect.id, ctx.content.balance.languages.eventGain, state.currentYear); },
+  languageBond: (state, effect, ctx) => {
+    if (effect.action === 'heritage') { returnHeritageLanguage(state, ctx.content); return; }
+    const personId = ctx.cast[effect.role ?? ''];
+    if (personId === undefined) return;
+    if (effect.action === 'practice') practiceWith(state, personId, ctx.content.balance.languages.practice[effect.size!], ctx.content);
+    else startHomeLanguage(state, personId, ctx.content);
+  },
   stat: (state, effect) => adjustScore(state, effect.key, effect.delta),
 
   money: (state, effect, ctx) => {

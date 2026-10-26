@@ -1,0 +1,37 @@
+id: travel_honeymoon_first_morning
+title: First morning
+text: >-
+  The sun is up over {destination}, and {companion.name} is already awake,
+  looking at you with a very specific expression.
+tone: light
+category: travel
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+followUpOnly: true
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { travel: { active: true, kind: trip, style: honeymoon } }
+weight: { base: 1 }
+cast:
+  companion: { kind: spouse, presence: nearby }
+choices:
+  - id: breakfast
+    label: Order breakfast to the room ({$40})
+    outcome:
+      text: >-
+        You eat in bed, scatter crumbs, and make a plan for the day that you
+        forget by ten.
+      effects:
+        - { type: money, delta: -40 }
+        - { type: relationship, role: companion, affection: 4, trust: 2 }
+        - { type: stat, key: happiness, delta: 2 }
+  - id: walk
+    label: Take an early walk together
+    outcome:
+      text: >-
+        The streets are quiet and the light is gold. {companion.name} takes
+        your arm without looking, as if it has always been there.
+      effects:
+        - { type: relationship, role: companion, affection: 4, trust: 2 }
+        - { type: stat, key: stress, delta: -2 }

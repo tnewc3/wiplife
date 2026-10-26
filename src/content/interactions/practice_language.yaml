@@ -1,0 +1,55 @@
+id: practice_language
+name: Practice their language
+blurb: Talk it through in a language they grew up with, and learn from the mistakes.
+group: practical
+profile: warm
+inPerson: false
+availability:
+  kinds: [parent, stepparent, sibling, grandparent, relative, child, stepchild, grandchild, friend, partner, fiance, spouse, coworker, boss, classmate, acquaintance]
+  you: { min: 6 }
+  them: { min: 10 }
+  requires: { language: { learnableFrom: person } }
+outcomes:
+  great:
+    barrierText:
+      - "You and {person.name} agree on a few words to use and build the rest from there. By the end, you have said things you did not know you could."
+    text:
+      - "{person.name} slows down and lets you finish your sentences. By the end you are laughing at your own mistakes, and the words are staying."
+      - "You manage a whole story in {person.their} language. {person.name} claps at the end, and means it."
+    affection: 4
+    trust: 3
+    mood: 6
+    effects:
+      - { type: languageBond, action: practice, role: person, size: great }
+      - { type: memory, role: person, tag: practiced_language }
+      - { type: stat, key: confidence, delta: 1 }
+  good:
+    text:
+      - "You trade sentences for an hour. {person.name} corrects you gently, and you correct {person.them} back when the other language comes up."
+      - "A patient session. {person.name} gives you a few new phrases, and you write them down so they stay."
+    affection: 3
+    trust: 2
+    mood: 4
+    effects:
+      - { type: languageBond, action: practice, role: person, size: good }
+  neutral:
+    text:
+      - "It is slow going. You get through the basics, and {person.name} says next time you can try something harder."
+      - "You stumble, {person.name} waits, and a few words stick."
+    affection: 1
+    mood: 1
+    effects:
+      - { type: languageBond, action: practice, role: person, size: neutral }
+  bad:
+    text:
+      - "You freeze, and the words you knew yesterday are gone. {person.name} is kind about it, and you both change the subject."
+      - "{person.name} corrects every other word, and you start to feel like a test rather than a friend."
+    affection: -1
+    mood: -3
+  backfire:
+    text:
+      - "You say something you meant one way and {person.name} hears another. It takes a long minute to put right, and neither of you is in the mood to try again."
+      - "A joke does not survive the translation, and the silence afterwards says so."
+    affection: -3
+    trust: -1
+    mood: -5

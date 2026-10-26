@@ -23,7 +23,7 @@ heritage:
   afro_mexican: []
   spanish: [es]
   italian: [it]
-  german: []
+  german: [de]
 # A second locally common language in bilingual households.
 bilingualChance: { montreal: 0.35, houston: 0.16, ca: 0.12, us: 0.06, uk: 0.03, mx: 0.04 }
 school:
@@ -51,3 +51,22 @@ jobs:
       warehouse_worker: { any: [fr, en], level: conversational }
       food_service: { any: [fr, en], level: conversational }
 eventGain: 3
+# Batch 10: other ways to learn. The adult class above is the middle option; an app is cheap and slow, a tutor costs more and is fast.
+# Each paid method can be used once a year. Amounts are written at US prices and scale with where you live.
+methods:
+  app: { cost: 120, gain: 4 }
+  tutor: { cost: 1500, gain: 20 }
+# Practicing with a native speaker you know (the interaction). Skill is a share of `gain` by how it went; at most `yearlyMax` a year.
+practice: { gain: 5, yearlyMax: 14, great: 1.5, good: 1, neutral: 0.5 }
+# Certificate exams. One sitting per language a year; you may sit it when your skill is within `margin` points under the level's bar.
+# Odds = base + perPoint x (skill - bar), kept between min and max. A certificate does not fade and counts for jobs and W6 routes.
+exams:
+  minAge: 16
+  fee: { basic: 90, conversational: 220, fluent: 380 }
+  margin: 10
+  odds: { base: 0.6, perPoint: 0.02, min: 0.1, max: 0.95 }
+  words: { fair: 0.35, good: 0.6, strong: 0.8 }
+# Raising a child in a language of your own: a child up to `nativeAge` takes it as a first language; each year at home adds skill until `maxAge`.
+home: { maxAge: 12, nativeAge: 6, start: 45, yearlyGain: 8 }
+# A heritage language coming back (an event or an old word returning): skill restored.
+heritageReturn: { gain: 15 }

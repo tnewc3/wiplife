@@ -1,0 +1,37 @@
+id: translator_clinic_room
+title: In the room
+text: >-
+  The booking is for a clinic appointment, and the person across from you is
+  frightened. The doctor speaks quickly. Every sentence has to pass through you
+  accurately, and nobody has time for you to be nervous.
+tone: serious
+category: work
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 21 } }
+    - { career: { employed: true, retired: false, job: [translator] } }
+weight: { base: 6 }
+cooldownYears: 5
+choices:
+  - id: exact
+    label: Stay exact, and keep your own face still
+    outcome:
+      text: >-
+        You carry every word across, including the hard ones, and the patient
+        looks at you, not the doctor, when they ask their questions. It is
+        draining, and worth doing well.
+      effects:
+        - { type: job, action: performance, value: 4 }
+        - { type: stat, key: stress, delta: 2 }
+        - { type: stat, key: confidence, delta: 2 }
+  - id: clarify
+    label: Stop the doctor to ask for a slower pace
+    outcome:
+      text: >-
+        The doctor slows down, a little annoyed, then a little grateful. The
+        patient takes a breath for the first time.
+      effects:
+        - { type: job, action: performance, value: 3 }
+        - { type: stat, key: stress, delta: 1 }

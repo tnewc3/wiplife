@@ -1,0 +1,16 @@
+id: language_exam_failed
+title: Just short
+text: 'The result comes by message: you missed the mark on the {examLanguage} exam at the {examLevel} level. The breakdown shows which sections held you back.'
+tone: neutral
+category: language
+rarity: common
+lifeStages: [teen, youngAdult, adult, senior]
+requires: { age: { gte: 16 } }
+weight: { base: 1 }
+followUpOnly: true
+# The receipt of an exam the player entered (one sitting a language a year, by rule), not a random event.
+recurring: true
+autoOutcome:
+  text: 'You can sit it again next year. The weak sections are now a study list.'
+  effects:
+    - { type: stat, key: confidence, delta: -1 }

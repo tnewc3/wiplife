@@ -29,7 +29,7 @@ import { FOCUS_KEYS, LICENSE_STAGE_IDS, ruleDomainSchema, type RuleDomainId, typ
 import { relationshipKindSchema, relationshipStatusSchema, romanceStatusSchema } from './relationships';
 import { AMENDS_RESULTS, CARE_OPTIONS, HOSPICE_CHOICES, LATER_ACTIONS, TEACH_KEYS } from './laterIds';
 import { APPLICATION_KINDS, APPLICATION_STATUSES, MIGRATION_ACTIONS, REMIT_LEVELS, ROUTES, STATUS_KINDS, type ApplicationKind, type ApplicationStatus, type RouteId, type StatusKind } from './immigrationIds';
-import { STAY_ROUTES } from './travel';
+import { STAY_ROUTES, TRIP_ACTIVITIES, TRIP_STYLES, type TripActivity, type TripStyle } from './travel';
 import { COMMITMENTS, FAITH_ACTIONS, GROUP_ACTIONS, GROUP_NEWS_KINDS, GROUP_TYPES, VALUE_IDS } from './belongingIds';
 import { BUSINESS_ACTIONS, BUSINESS_KINDS, BUSINESS_PEOPLE, BUSINESS_STYLES, ECONOMY_PHASES, OWNER_ROLES, ORDER_LEVELS, PRICE_LEVELS, STOCK_STATES } from './businessIds';
 import { templateSchema } from './text';
@@ -94,8 +94,8 @@ export type Condition =
   | ({ hidden: (typeof HIDDEN_KEYS)[number] } & Compare)
   | { money: Compare }
   | { city: string }
-  | { travel: { active?: boolean; destinationId?: string; kind?: 'trip' | 'study' | 'work'; encounter?: boolean; romance?: boolean; companion?: boolean } }
-  | { language: { id?: string; skill?: Compare; native?: boolean; role?: string; sharedWith?: string } }
+  | { travel: { active?: boolean; destinationId?: string; kind?: 'trip' | 'study' | 'work'; style?: TripStyle; activity?: TripActivity; souvenir?: boolean; family?: boolean; business?: boolean; encounter?: boolean; romance?: boolean; companion?: boolean } }
+  | { language: { id?: string; skill?: Compare; native?: boolean; role?: string; sharedWith?: string; count?: Compare; level?: 'basic' | 'conversational' | 'fluent'; teachableTo?: string; learnableFrom?: string; homeWith?: string; heritageLost?: true } }
   | { country: CountryId[] }
   | { migration: MigrationCondition }
   | { legalAge: keyof LegalAges }
@@ -932,8 +932,17 @@ export const conditionSchema: z.ZodType<Condition> = z.lazy(() =>
     z.strictObject({ hidden: z.enum(HIDDEN_KEYS), ...compareFields }).refine(hasBound, 'needs a bound'),
     z.strictObject({ money: compareSchema }),
     z.strictObject({ city: idSchema }),
-    z.strictObject({ travel: z.strictObject({ active: z.boolean().optional(), destinationId: idSchema.optional(), kind: z.enum(['trip', 'study', 'work']).optional(), encounter: z.boolean().optional(), romance: z.boolean().optional(), companion: z.boolean().optional() }) }),
-    z.strictObject({ language: z.strictObject({ id: idSchema.optional(), skill: compareSchema.optional(), native: z.boolean().optional(), role: idSchema.optional(), sharedWith: idSchema.optional() }).refine((l) => l.id !== undefined || l.sharedWith !== undefined, 'needs id or sharedWith') }),
+    z.strictObject({ travel: z.strictObject({ active: z.boolean().optional(), destinationId: idSchema.optional(), kind: z.enum(['trip', 'study', 'work']).optional(), style: z.enum(TRIP_STYLES).optional(), activity: z.enum(TRIP_ACTIVITIES).optional(), souvenir: z.boolean().optional(), family: z.boolean().optional(), business: z.boolean().optional(), encounter: z.boolean().optional(), romance: z.boolean().optional(), companion: z.boolean().optional() }) }),
+    z.strictObject({
+      language: z
+        .strictObject({
+          id: idSchema.optional(), skill: compareSchema.optional(), native: z.boolean().optional(), role: idSchema.optional(), sharedWith: idSchema.optional(),
+          // Batch 10: how many languages you speak at a level (certificates count); a language you could pass on to a child, or practice with a person; a heritage language you have lost.
+          count: compareSchema.optional(), level: z.enum(['basic', 'conversational', 'fluent']).optional(), teachableTo: idSchema.optional(), learnableFrom: idSchema.optional(), homeWith: idSchema.optional(), heritageLost: z.literal(true).optional(),
+        })
+        .refine((l) => l.id !== undefined || l.sharedWith !== undefined || l.count !== undefined || l.teachableTo !== undefined || l.learnableFrom !== undefined || l.homeWith !== undefined || l.heritageLost !== undefined, 'needs id, sharedWith, count, teachableTo, learnableFrom, homeWith or heritageLost')
+        .refine((l) => (l.count === undefined) === (l.level === undefined), 'count and level go together'),
+    }),
     z.strictObject({ country: z.array(countryIdSchema).min(1) }),
     z.strictObject({
       migration: z.strictObject({
@@ -1569,6 +1578,12 @@ export type IdentityField = (typeof IDENTITY_FIELDS)[number];
 /** Effect types. Adding one means a schema here and a handler in src/engine/events/effects.ts. */
 export const effectSchema = z.discriminatedUnion('type', [
   z.strictObject({ type: z.literal('language'), id: idSchema }),
+  /**
+   * Batch 10: language skill from a person or a child. `practice`: skill in the language of the person cast in `role` that you are
+   * weakest at (a share of the practice gain, by `size`, from balance/languages.yaml practice). `home`: you start speaking a language of yours at home with your child cast
+   * in `role` (they take it as a first language when young enough). `heritage`: a heritage language of yours that had been lost comes back.
+   */
+  z.strictObject({ type: z.literal('languageBond'), action: z.enum(['practice', 'home', 'heritage']), role: roleSchema.optional(), size: z.enum(['great', 'good', 'neutral']).optional() }).refine((e) => (e.action === 'heritage') === (e.role === undefined), 'practice and home need a role; heritage has none').refine((e) => (e.action === 'practice') === (e.size !== undefined), 'practice needs a size (great, good or neutral); only practice has one'),
   z.strictObject({ type: z.literal('stat'), key: statKeySchema, delta: z.int().min(-100).max(100) }),
   /**
    * Savings. Savings never go below zero: from the independence age, a cost
