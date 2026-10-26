@@ -1,0 +1,174 @@
+# The end-to-end test pack: every post is one somebody might see, and every one is found, so a test can see what a find does.
+# (A copy of src/content/balance/social.yaml with those two numbers changed: keep it in step.)
+# Social media (Batch 8). Every number for accounts, posting, growth, pay, the
+# career and the things that go wrong. The platforms (src/content/platforms)
+# name a growth model and a pay model from here; platform-specific numbers are
+# under `platforms`, by platform id.
+#
+# A post wins followers: (base + compound x followers) x quality x niche x
+# new-account boost x repeat^(posts already this year on the platform) x the
+# algorithm's mood x bold. The repeat term is the yearly budget's diminishing
+# returns: past a few dozen posts a year, more adds little.
+
+handle: { min: 3, max: 30 }
+
+# Who may join: 13, or more in a country that asks for more (a platform's own minimum counts too).
+age:
+  default: 13
+  byCountry: { us: 13, ca: 13, uk: 13, mx: 13 }
+
+# A new account begins with the people who know you.
+start: { followers: 10, perSociability: 0.5, quality: 40, engagement: 40 }
+
+budget:
+  casualShare: 0.5
+  minorShare: 0.75
+  repeat: 0.88
+  crossPromos: 3
+  collabs: 2
+  promos: 3
+
+quality:
+  base: 22
+  aptitude: 28
+  fit: 10
+  craft: 0.2
+  talent: 14
+  noise: 9
+  bold: { quality: 1, spread: 1.5 }
+  follow: 0.4
+  outcome: { flat: 0.7, strong: 1.4 }
+
+gain:
+  quality:
+    - { at: 0, x: 0.3 }
+    - { at: 30, x: 0.6 }
+    - { at: 50, x: 1 }
+    - { at: 70, x: 1.5 }
+    - { at: 90, x: 2.3 }
+    - { at: 100, x: 3 }
+  bold: 1.25
+  knee: 100000
+
+viral:
+  chance:
+    - { at: 20, x: 0.0005 }
+    - { at: 50, x: 0.003 }
+    - { at: 70, x: 0.008 }
+    - { at: 90, x: 0.02 }
+  bold: 1.6
+
+growth:
+  photo_feed: { posts: 12, base: 60, compound: 0.01, newBelow: 1000, newBoost: 1.4, fade: 0.04, idleFade: 0.2, viral: 1.5, viralMin: 800, cap: 300000000 }
+  short_video: { posts: 16, base: 105, compound: 0.014, newBelow: 3000, newBoost: 2, fade: 0.08, idleFade: 0.4, viral: 2, viralMin: 3000, cap: 300000000 }
+  text_feed: { posts: 20, base: 14, compound: 0.005, newBelow: 500, newBoost: 1.2, fade: 0.03, idleFade: 0.15, viral: 1.8, viralMin: 400, cap: 150000000 }
+  long_video: { posts: 8, base: 300, compound: 0.034, newBelow: 1000, newBoost: 1.3, fade: 0.02, idleFade: 0.12, viral: 1.8, viralMin: 2000, cap: 300000000 }
+  live_stream: { posts: 12, base: 35, compound: 0.01, newBelow: 200, newBoost: 1.5, fade: 0.15, idleFade: 0.45, viral: 1.6, viralMin: 500, cap: 20000000 }
+  audio_show: { posts: 12, base: 50, compound: 0.02, newBelow: 300, newBoost: 1.3, fade: 0.03, idleFade: 0.2, viral: 1.4, viralMin: 300, cap: 20000000 }
+
+engagement:
+  follow: 0.5
+  idle: 8
+  # What engagement does to pay, brand money and reach.
+  factor:
+    - { at: 0, x: 0.4 }
+    - { at: 30, x: 0.8 }
+    - { at: 50, x: 1 }
+    - { at: 80, x: 1.5 }
+    - { at: 100, x: 1.9 }
+
+# A private account grows a tenth as fast, earns nothing from the platform, and few people see what is on it.
+private: { growth: 0.1, find: 0.12 }
+
+# How a platform pays: dollars a year for each follower, for each post (perPost) or at full activity, once you pass the threshold.
+pay:
+  ad_share: { threshold: 1000, minPosts: 3, rate: 0.075, perPost: true }
+  subscriptions: { threshold: 50, minPosts: 6, rate: 1.2, perPost: false }
+  creator_fund: { threshold: 10000, minPosts: 6, rate: 0.1, perPost: false }
+  ad_reads: { threshold: 500, minPosts: 4, rate: 0.087, perPost: true }
+  premium_share: { threshold: 5000, minPosts: 8, rate: 0.05, perPost: false }
+  brand_deals: { threshold: 3000, minPosts: 4, rate: 0.12, perPost: false }
+
+# A sponsorship (a contract with a brand): dollars a year for each follower, by the terms and the brand's rung.
+sponsor:
+  rate: 0.3
+  minFollowers: 1000
+  terms: { standard: 1, tough: 0.8, generous: 1.3 }
+  tier: [0.8, 1.2, 1.8]
+
+platforms:
+  instagram: { reach: 1, brand: 1.4, cross: 0.3 }
+  tiktok: { reach: 0.8, brand: 1, cross: 0.2 }
+  x: { reach: 0.6, brand: 0.5, cross: 0.12 }
+  youtube: { reach: 1.5, brand: 1.2, cross: 0.12 }
+  twitch: { reach: 1.3, brand: 0.8, cross: 0.02 }
+  podcasts: { reach: 1.2, brand: 1.1, cross: 0.04 }
+
+# The career: reach (followers weighted by platform and engagement) becomes fame in the social media path.
+fame:
+  at:
+    - { at: 0, x: 0 }
+    - { at: 500, x: 2 }
+    - { at: 2000, x: 8 }
+    - { at: 10000, x: 17 }
+    - { at: 30000, x: 26 }
+    - { at: 100000, x: 36 }
+    - { at: 300000, x: 46 }
+    - { at: 1000000, x: 52 }
+    - { at: 3000000, x: 62 }
+    - { at: 10000000, x: 72 }
+    - { at: 30000000, x: 82 }
+    - { at: 100000000, x: 92 }
+  up: 0.6
+  down: 0.4
+  breakMargin: 8
+  # Once you have accounts, the path's old retainer and its projects pay this share of what they did.
+  retainer: 0.15
+  project: 0.4
+
+algorithm: { chance: 0.12, minFollowers: 100, up: 0.4, boost: 1.5, drop: 0.6 }
+demonetize: { chance: 0.02, bold: 0.008, years: 1 }
+burnout: { share: 0.8, streak: 2, chance: 0.3, burnout: 18, stress: 6 }
+
+controversy:
+  minFollowers: 2000
+  chance: 0.007
+  bold: 0.008
+  lose: 0.35
+  image: 12
+  mood: 10
+  fame: 5
+  recover: 0.35
+  cleared: 0.5
+
+# What you post as a private person can reach people you did not mean it for.
+casual:
+  risky: 1
+  bold: 2.2
+  max: 3
+  find: { employer: 1, partner: 1, ex: 1, family: 1 }
+  perThousand: 0.01
+  cap: 1
+  maxFinds: 1
+
+# Fans from music, acting or sport follow you (a share of them on each platform).
+crossover: { follow: 0.5, minFans: 200, share: 1 }
+promo: { fans: 0.02, mood: 2, fame: 0.4, minFollowers: 100 }
+cross: { share: 0.04, engagement: 2, minFollowers: 100 }
+
+collab:
+  creators: 0.08
+  followers:
+    - { at: 0, x: 300 }
+    - { at: 40, x: 1500 }
+    - { at: 70, x: 8000 }
+    - { at: 90, x: 60000 }
+    - { at: 98, x: 400000 }
+    - { at: 100, x: 2000000 }
+  share: 0.15
+  affection: 4
+  drama: 0.12
+  minAge: 13
+  gap: 4
+
+events: { maxQueued: 2 }

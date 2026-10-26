@@ -19,6 +19,8 @@ export function MoreTab() {
   const openLater = useAppStore((s) => s.openLater);
   const openGroups = useAppStore((s) => s.openGroups);
   const openActivities = useAppStore((s) => s.openActivities);
+  const openSocial = useAppStore((s) => s.openSocial);
+  const online = useAppStore((s) => s.life !== null && s.life.character.age >= 13);
   /** L1: later life, once there is a grandchild, care to arrange or a death coming. */
   const later = useAppStore((s) => s.life !== null && getLaterView(s.life, content).active);
   const openTeen = useAppStore((s) => s.openTeen);
@@ -59,6 +61,11 @@ export function MoreTab() {
       <Button variant="secondary" block onClick={openActivities} data-testid="more-activities">
         Activities
       </Button>
+      {online && (
+        <Button variant="secondary" block onClick={() => openSocial('more')} data-testid="more-social">
+          Social media
+        </Button>
+      )}
       <Button variant="secondary" block onClick={openGroups} data-testid="more-groups">
         Groups
       </Button>

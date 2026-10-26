@@ -812,6 +812,8 @@ Meet every B2 acceptance criterion. Run npm run check, npm run test:e2e (the gat
 
 ## Batch 8 — Social media (real platforms)
 
+> **Built;** see "Batch 8 — Social media on real platforms (as built)" in docs/technical.md for what was done, the figures and the deviations.
+
 **Objective:** Make social media a real part of life, both for creators chasing fame and for everyone else posting about their lives, on the platforms players know.
 
 ### Starting facts

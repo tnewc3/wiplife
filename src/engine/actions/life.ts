@@ -33,6 +33,7 @@ import { POSSESSION_ACTION_IDS, POSSESSION_ACTIONS } from './possessions';
 import { TEEN_ACTION_IDS, TEEN_ACTIONS } from './teen';
 import { CRIME_ACTION_IDS, CRIME_ACTIONS } from './crime';
 import { FAME_ACTION_IDS, FAME_ACTIONS } from './fame';
+import { SOCIAL_ACTION_IDS, SOCIAL_ACTIONS } from './social';
 import { SPORTS_ACTION_IDS, SPORTS_ACTIONS } from './sports';
 import { LATER_ACTION_IDS, LATER_ACTIONS } from './later';
 import { BELONGING_ACTION_IDS, BELONGING_ACTIONS } from './belonging';
@@ -47,7 +48,7 @@ import { sameCountry } from '../country';
 
 export const MONEY_ACTION_IDS = ['set_lifestyle', 'start_gig', 'stop_gig', 'pay_debt', 'debt_plan'] as const;
 export const HOME_ACTION_IDS = ['rent_home', 'move_home', 'relocate', 'buy_home', 'sell_home', 'find_roommate', 'live_alone'] as const;
-export const LIFE_ACTION_IDS = [...TRAVEL_ACTION_IDS, ...MIGRATION_ACTION_IDS, 'take_language_classes', ...MONEY_ACTION_IDS, ...HOME_ACTION_IDS, ...EDUCATION_ACTION_IDS, ...SCHOOL_ACTION_IDS, ...CAREER_ACTION_IDS, ...WORK_ACTION_IDS, ...PERSONAL_ACTION_IDS, ...FAMILY_ACTION_IDS, ...ESTATE_ACTION_IDS, ...POSSESSION_ACTION_IDS, ...TEEN_ACTION_IDS, ...CRIME_ACTION_IDS, ...FAME_ACTION_IDS, ...SPORTS_ACTION_IDS, ...LATER_ACTION_IDS, ...BELONGING_ACTION_IDS, ...BUSINESS_ACTION_IDS, ...LOVE_ACTION_IDS, ...PASTIME_ACTION_IDS] as const;
+export const LIFE_ACTION_IDS = [...TRAVEL_ACTION_IDS, ...MIGRATION_ACTION_IDS, 'take_language_classes', ...MONEY_ACTION_IDS, ...HOME_ACTION_IDS, ...EDUCATION_ACTION_IDS, ...SCHOOL_ACTION_IDS, ...CAREER_ACTION_IDS, ...WORK_ACTION_IDS, ...PERSONAL_ACTION_IDS, ...FAMILY_ACTION_IDS, ...ESTATE_ACTION_IDS, ...POSSESSION_ACTION_IDS, ...TEEN_ACTION_IDS, ...CRIME_ACTION_IDS, ...FAME_ACTION_IDS, ...SOCIAL_ACTION_IDS, ...SPORTS_ACTION_IDS, ...LATER_ACTION_IDS, ...BELONGING_ACTION_IDS, ...BUSINESS_ACTION_IDS, ...LOVE_ACTION_IDS, ...PASTIME_ACTION_IDS] as const;
 
 /** The only money, home, school, work and personal actions you can take in prison (Stage 9). */
 export const PRISON_LIFE_ACTIONS: readonly LifeActionId[] = ['pay_debt', 'debt_plan', 'stop_gig', 'edit_identity', 'write_will'];
@@ -131,6 +132,13 @@ export interface LifeActionParams {
   commitment?: 'back' | 'steady' | 'all';
   scene?: 'low' | 'social' | 'entourage' | 'lavish';
   agentId?: string;
+  /** Batch 8: social media: a platform, the handle you typed (tidied), a niche, the tone of a post (the person to make something with is `personId`; whether an account is private is `on`), and the two accounts of a cross-promotion. */
+  platformId?: string;
+  handle?: string;
+  nicheId?: string;
+  tone?: 'safe' | 'bold';
+  fromId?: string;
+  toId?: string;
   /** E6c: sports: a position, the training focus, and how to leave the sport. */
   positionId?: string;
   sportFocus?: 'skills' | 'conditioning' | 'film';
@@ -350,6 +358,7 @@ export const LIFE_ACTIONS: Record<LifeActionId, LifeActionRule> = {
   ...TEEN_ACTIONS,
   ...CRIME_ACTIONS,
   ...FAME_ACTIONS,
+  ...SOCIAL_ACTIONS,
   ...SPORTS_ACTIONS,
   ...LATER_ACTIONS,
   ...BELONGING_ACTIONS,

@@ -1,0 +1,50 @@
+id: social_friends_push_you_to_join
+title: Everyone is on there
+text: >-
+  It has come up three times this week. Everyone you know is on one app or
+  another, and they keep sending you things and saying "you have to see this"
+  with a link you cannot open. The group plan is being made in a place you are
+  not in. It is not that you mind. It is that you have started to feel it.
+tone: light
+category: socialentry
+rarity: common
+lifeStages: [teen, youngAdult, adult]
+requires:
+  all:
+    - { age: { gte: 13 } }
+    - { age: { lte: 30 } }
+    - { social: { account: false } }
+    - { fame: { active: false } }
+    - { legal: { incarcerated: false } }
+    - { any: [{ age: { gte: 18 } }, { relative: { kind: parent, alive: true } }] }
+weight: { base: 4 }
+cooldownYears: 4
+choices:
+  - id: join_the_photo_one
+    label: Join the one where everyone shares photos
+    outcome:
+      text: >-
+        You make an account with a handle you pick in about four seconds. By
+        the end of the night you have eleven followers, all of whom you
+        already know, and you are checking it more than you meant to.
+      effects:
+        - { type: social, action: open, platform: instagram }
+        - { type: stat, key: happiness, delta: 1 }
+  - id: join_the_video_one
+    label: Join the one with the short videos
+    outcome:
+      text: >-
+        You download it and spend two hours watching strangers. You do not
+        post anything. You do notice how little of the evening you remember.
+      effects:
+        - { type: social, action: open, platform: tiktok }
+        - { type: stat, key: stress, delta: 1 }
+  - id: stay_off
+    label: Stay off, and tell them to text you instead
+    outcome:
+      text: >-
+        It is a small decision with a long tail. Some people get used to it
+        and some people forget to include you, and you find out, over the
+        next few months, which are which.
+      effects:
+        - { type: stat, key: stress, delta: -1 }

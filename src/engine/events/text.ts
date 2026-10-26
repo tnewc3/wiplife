@@ -16,6 +16,7 @@ import { castPossession, possessionNoun } from '../possessions/query';
 import { TEEN_TEXT_VALUES, teenTextValues } from '../teen/text';
 import { CRIME_TEXT_VALUES, crimeTextValues } from '../crime/text';
 import { FAME_TEXT_VALUES, fameTextValues } from '../fame/text';
+import { SOCIAL_TEXT_VALUES, socialTextValues } from '../social/text';
 import { SPORTS_TEXT_VALUES, sportsTextValues } from '../sports/text';
 import { BELONGING_TEXT_VALUES, belongingTextValues } from '../belonging/text';
 import { BUSINESS_TEXT_VALUES, businessTextValues } from '../business/text';
@@ -58,6 +59,7 @@ const VALUE_GROUPS: readonly (readonly string[])[] = [
   SPORTS_TEXT_VALUES,
   BELONGING_TEXT_VALUES,
   BUSINESS_TEXT_VALUES,
+  SOCIAL_TEXT_VALUES,
 ];
 const GROUP_OF = new Map<string, number>();
 VALUE_GROUPS.forEach((keys, i) => keys.forEach((key) => GROUP_OF.set(key, i)));
@@ -121,7 +123,8 @@ export function textContext(state: LifeState, cast: Record<string, Id>, content:
         case 9: return fameTextValues(state, content);
         case 10: return sportsTextValues(state, content);
         case 11: return belongingTextValues(state, cast, content);
-        default: return businessTextValues(state, cast, content);
+        case 12: return businessTextValues(state, cast, content);
+        default: return socialTextValues(state, content);
       }
     },
     eager,
@@ -151,7 +154,7 @@ export function textContext(state: LifeState, cast: Record<string, Id>, content:
  * person in the story (npc or person) has heard about you, as a phrase ("that
  * you were fired for stealing"; only where the event requires that they have).
  */
-export const EVENT_TEXT_VALUES = [...MIGRATION_TEXT_VALUES, 'destination', 'destinationCountry', 'endYear', 'homeCity', 'travelCost', ...COUNTRY_TEXT_VALUES, 'studiedLanguage', 'age', 'talent', 'latentPeople', 'latentGender', 'latentExpression', 'latentTrait', 'sentence', 'since', 'heard', ...TEEN_TEXT_VALUES, ...CRIME_TEXT_VALUES, ...FAME_TEXT_VALUES, ...SPORTS_TEXT_VALUES, ...BELONGING_TEXT_VALUES, ...BUSINESS_TEXT_VALUES] as const;
+export const EVENT_TEXT_VALUES = [...MIGRATION_TEXT_VALUES, 'destination', 'destinationCountry', 'endYear', 'homeCity', 'travelCost', ...COUNTRY_TEXT_VALUES, 'studiedLanguage', 'age', 'talent', 'latentPeople', 'latentGender', 'latentExpression', 'latentTrait', 'sentence', 'since', 'heard', ...TEEN_TEXT_VALUES, ...CRIME_TEXT_VALUES, ...FAME_TEXT_VALUES, ...SPORTS_TEXT_VALUES, ...BELONGING_TEXT_VALUES, ...BUSINESS_TEXT_VALUES, ...SOCIAL_TEXT_VALUES] as const;
 /** E5: values an event may use only when it binds the possession: a pet's species, a vehicle's name, a vacation home's city. */
 export const POSSESSION_TEXT_VALUES = { pet: ['petKind'], vehicle: ['vehicle'], home: ['homeCity'], valuable: ['valuable'] } as const;
 

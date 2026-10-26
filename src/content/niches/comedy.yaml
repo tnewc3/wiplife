@@ -1,0 +1,9 @@
+id: comedy
+name: Comedy
+noun: comedy
+blurb: Sketches, bits and a bet that you are funnier than you look.
+fit: { confidence: 0.4, sociability: 0.3, riskTaking: 0.3 }
+talents: [performance]
+demand: 1.1
+brands: 0.9
+heat: 1.6

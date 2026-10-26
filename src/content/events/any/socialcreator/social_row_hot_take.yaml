@@ -1,0 +1,79 @@
+id: social_row_hot_take
+title: The take
+text: >-
+  It was one sentence on {platform}, meant to be sharp and a little funny. A
+  stranger quoted it to their audience, and now it is being read by a lot of
+  people who do not know you, as the worst thing you could have meant. @{handle}
+  has {followerWords}, and a few thousand of them are writing back.
+tone: dark
+category: socialcreator
+rarity: uncommon
+recurring: true
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { social: { creator: true } }
+    - { social: { happened: [controversy] } }
+    - { social: { controversy: [brewing] } }
+    - { social: { top: { gte: 2000 } } }
+weight: { base: 8 }
+cooldownYears: 4
+followUpOnly: true
+choices:
+  - id: double_down
+    label: Stand by it and say it again
+    check:
+      base: 35
+      stats:
+        - { key: confidence, weight: 0.25 }
+        - { key: riskTaking, weight: 0.15 }
+      success:
+        text: >-
+          You say it again, better, and the people who were on the fence come
+          to your side. It becomes the post that defines you, and you are
+          not sure that is what you wanted.
+        effects:
+          - { type: social, action: clear }
+          - { type: social, action: followers, delta: 10 }
+          - { type: fame, action: image, delta: -3 }
+      failure:
+        text: >-
+          Saying it again is the one thing that makes it worse. The second
+          post reads like a decision, and the audience that stayed for the
+          first one leaves for the second.
+        effects:
+          - { type: social, action: cancel }
+          - { type: stat, key: stress, delta: 7 }
+  - id: delete_and_apologize
+    label: Delete it, and say you got it wrong
+    outcome:
+      text: >-
+        You take it down with a short note. There are people who will never
+        accept it and people who will not mind, and you sleep better than you
+        expected, if not by much.
+      effects:
+        - { type: social, action: clear }
+        - { type: social, action: followers, delta: -3 }
+        - { type: stat, key: stress, delta: 3 }
+  - id: log_off
+    label: Switch off for a few days
+    check:
+      base: 45
+      stats:
+        - { key: discipline, weight: 0.2 }
+      success:
+        text: >-
+          You come back to find it has already been replaced by someone
+          else's worst day. Almost nobody mentions it, which is the kindest
+          thing the internet can do.
+        effects:
+          - { type: social, action: clear }
+          - { type: stat, key: stress, delta: -1 }
+      failure:
+        text: >-
+          Being gone makes it bigger. By the time you are back there is a
+          thread, a name for it, and a list of people who have said they are
+          done with you.
+        effects:
+          - { type: social, action: cancel }
+          - { type: stat, key: stress, delta: 6 }

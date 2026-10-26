@@ -34,6 +34,7 @@ export { POSSESSION_ACTION_IDS, type PossessionActionId } from './possessions';
 export { TEEN_ACTION_IDS, type TeenActionId } from './teen';
 export { CRIME_ACTION_IDS, type CrimeActionId } from './crime';
 export { FAME_ACTION_IDS, type FameActionId } from './fame';
+export { SOCIAL_ACTION_IDS, type SocialActionId } from './social';
 export { SPORTS_ACTION_IDS, type SportsActionId } from './sports';
 export { LATER_ACTION_IDS, type LaterActionId } from './later';
 export { BELONGING_ACTION_IDS, type BelongingActionId } from './belonging';

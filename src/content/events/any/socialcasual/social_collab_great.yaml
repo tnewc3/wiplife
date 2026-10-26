@@ -1,0 +1,44 @@
+id: social_collab_great
+title: It worked
+text: >-
+  The thing you and {npc.name} made together for {platform} has done better
+  than either of you expected. Some of {npc.their} audience has crossed over
+  to yours, and some of yours to {npc.theirs}, and the comments are full of
+  people asking when you will make another.
+tone: light
+category: socialcasual
+rarity: uncommon
+recurring: true
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 13 } }
+    - { social: { account: true } }
+    - { social: { happened: [collab] } }
+    - { role: npc, alive: true }
+weight: { base: 10 }
+cooldownYears: 2
+followUpOnly: true
+cast:
+  npc: { support: true, presence: anywhere }
+choices:
+  - id: do_another
+    label: Say yes, and plan the next one
+    outcome:
+      text: >-
+        You trade ideas on a call that runs long, and by the end you have
+        three. Working with someone who takes it as seriously as you do is,
+        you decide, one of the better things about all this.
+      effects:
+        - { type: relationship, role: npc, affection: 3, trust: 2 }
+        - { type: social, action: followers, delta: 5 }
+  - id: keep_it_a_one_off
+    label: Leave it there, while it is good
+    outcome:
+      text: >-
+        You thank {npc.them} and mean it, and so does {npc.they}. It stays
+        a good memory for both of you and does not get the chance to become
+        anything less.
+      effects:
+        - { type: relationship, role: npc, affection: 2 }
+        - { type: stat, key: happiness, delta: 2 }

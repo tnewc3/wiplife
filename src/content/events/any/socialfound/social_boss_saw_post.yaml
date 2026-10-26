@@ -1,0 +1,90 @@
+id: social_boss_saw_post
+title: Your boss follows you now
+text: >-
+  {npc.name} stops by your desk with a printed screenshot. It is a post you
+  put on {platform}, one of those you were sure only your friends could see.
+  Somebody at work found @{handle} and passed it along. {npc.They} {npc:does|do}
+  not look angry. {npc.They} {npc:looks|look} like someone who has been
+  deciding how to start.
+tone: serious
+category: socialfound
+rarity: uncommon
+recurring: true
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 16 } }
+    - { social: { account: true } }
+    - { social: { happened: [foundEmployer] } }
+    - { career: { employed: true } }
+    - { role: npc, alive: true, kind: [boss] }
+weight: { base: 10 }
+cooldownYears: 4
+followUpOnly: true
+cast:
+  npc: { kind: boss, presence: anywhere }
+choices:
+  - id: own_it
+    label: Own it, and say what you meant
+    check:
+      base: 50
+      stats:
+        - { key: confidence, weight: 0.2 }
+        - { role: npc, key: trust, weight: 0.2 }
+      success:
+        text: >-
+          You say it plainly: it was a joke, it was in poor taste, it was
+          meant for friends. {npc.name} listens, and nods, and tells you that
+          the honest answer is the only reason this is a short conversation.
+        effects:
+          - { type: knowledge, role: npc, action: correct }
+          - { type: relationship, role: npc, trust: 3 }
+          - { type: stat, key: stress, delta: 2 }
+      failure:
+        text: >-
+          It comes out defensive. {npc.name} writes something down and says it
+          will be noted. You can tell, from how the rest of the week goes,
+          that it was noted.
+        effects:
+          - { type: knowledge, role: npc, action: confirm }
+          - { type: job, action: performance, value: -6 }
+          - { type: relationship, role: npc, trust: -4 }
+          - { type: stat, key: stress, delta: 5 }
+  - id: delete_it
+    label: Delete it and say it will not happen again
+    outcome:
+      text: >-
+        You take it down on the spot, from your phone, in front of {npc.them}.
+        {npc.They} {npc:thanks|thank} you and {npc:moves|move} on. It is
+        settled, but you do not feel that it is over, and from then on you
+        think about what you post.
+      effects:
+        - { type: knowledge, role: npc, action: confirm }
+        - { type: job, action: performance, value: -2 }
+        - { type: stat, key: stress, delta: 3 }
+  - id: your_own_time
+    label: Say that what you post in your own time is your own business
+    check:
+      base: 35
+      stats:
+        - { key: confidence, weight: 0.25 }
+        - { role: npc, key: affection, weight: 0.15 }
+      success:
+        text: >-
+          {npc.name} considers this for a while, then agrees that it is, as
+          long as it does not carry the company's name. It is a short and
+          mildly respectful conversation, and neither of you brings it up
+          again.
+        effects:
+          - { type: knowledge, role: npc, action: confirm }
+          - { type: relationship, role: npc, trust: 1 }
+      failure:
+        text: >-
+          {npc.name} agrees that it is your business, and that the company
+          also has a business, and that these are different things. A meeting
+          is arranged. It is not a happy one.
+        effects:
+          - { type: knowledge, role: npc, action: confirm }
+          - { type: job, action: performance, value: -8 }
+          - { type: relationship, role: npc, trust: -5 }
+          - { type: stat, key: stress, delta: 6 }

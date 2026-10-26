@@ -1,0 +1,62 @@
+id: social_casual_viral_embarrassing
+title: Everyone has seen it
+text: >-
+  A clip of you on {platform} has gone round. It was not meant to be the
+  thing people know you for, and it has been seen by more people in a day than
+  you have met in your life. The comments are not all kind. A lot of them are
+  funny, and you can tell that is worse.
+tone: serious
+category: socialcasual
+rarity: uncommon
+recurring: true
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { social: { account: true } }
+    - { social: { creator: false } }
+    - { social: { happened: [viralCasual] } }
+    - { social: { private: false } }
+weight: { base: 6 }
+cooldownYears: 4
+followUpOnly: true
+choices:
+  - id: laugh_with_them
+    label: Laugh along, loudly
+    check:
+      base: 45
+      stats:
+        - { key: confidence, weight: 0.3 }
+        - { key: sociability, weight: 0.15 }
+      success:
+        text: >-
+          You post your own take on it before anyone else can. People who
+          came to laugh at you find themselves laughing with you, and it turns
+          a bad week into a decent story.
+        effects:
+          - { type: social, action: followers, delta: 8 }
+          - { type: stat, key: happiness, delta: 2 }
+      failure:
+        text: >-
+          The joke about the joke does not land, and the internet decides you
+          are trying too hard. You spend a few days not reading your phone.
+        effects:
+          - { type: stat, key: stress, delta: 4 }
+          - { type: stat, key: happiness, delta: -3 }
+  - id: go_private
+    label: Make the account private and let it die down
+    outcome:
+      text: >-
+        You switch to private, and the audience drifts off to other people's
+        worst days. It is a relief, and it is also a small door you have
+        shut.
+      effects:
+        - { type: social, action: private, value: true }
+        - { type: stat, key: stress, delta: -2 }
+  - id: ignore_it
+    label: Say nothing at all
+    outcome:
+      text: >-
+        You do nothing and say nothing, which turns out to be the best
+        strategy there is. It takes about a week to stop being the main thing.
+      effects:
+        - { type: stat, key: stress, delta: 2 }

@@ -1,0 +1,72 @@
+id: social_partner_saw_post
+title: Something you posted
+text: >-
+  {npc.name} has found a post of yours on {platform}, from a night out that
+  you described, when you got home, as "nothing much". It was not a terrible
+  post. It was, though, a version of that night with some of the parts left
+  in, and {npc.they} {npc:is|are} sitting very still with the phone in {npc.their}
+  hand.
+tone: serious
+category: socialfound
+rarity: uncommon
+recurring: true
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { social: { account: true } }
+    - { social: { happened: [foundPartner] } }
+    - { role: npc, alive: true, kind: [partner, fiance, spouse] }
+weight: { base: 10 }
+cooldownYears: 4
+followUpOnly: true
+cast:
+  npc: { support: true, presence: anywhere }
+choices:
+  - id: tell_the_whole_story
+    label: Tell {npc.them} what the night really was
+    check:
+      base: 50
+      stats:
+        - { role: npc, key: trust, weight: 0.3 }
+        - { key: kindness, weight: 0.1 }
+      success:
+        text: >-
+          It takes an hour, and it is dull, which is the point. {npc.name}
+          listens to all of it, and some of the stiffness goes out of
+          {npc.their} shoulders. "You could have just said," {npc.they}
+          {npc:says|say}. You could have.
+        effects:
+          - { type: knowledge, role: npc, action: correct }
+          - { type: relationship, role: npc, affection: 2, trust: 4 }
+      failure:
+        text: >-
+          The more you explain, the worse it sounds, because the explanation
+          is a different story than the one you told that night. {npc.name}
+          does not shout. {npc.They} {npc:says|say} that {npc.they}
+          {npc:needs|need} a while.
+        effects:
+          - { type: knowledge, role: npc, action: confirm }
+          - { type: relationship, role: npc, affection: -5, trust: -9 }
+          - { type: stat, key: stress, delta: 5 }
+  - id: say_its_nothing
+    label: Tell {npc.them} it is nothing, and ask what the problem is
+    outcome:
+      text: >-
+        It works for an evening. {npc.name} wants to believe you, and you both
+        know the difference between believing and wanting to. The post stays
+        up, and so does the question.
+      effects:
+        - { type: knowledge, role: npc, action: confirm }
+        - { type: relationship, role: npc, trust: -5 }
+        - { type: stat, key: stress, delta: 3 }
+  - id: delete_and_apologize
+    label: Take it down and say you are sorry
+    outcome:
+      text: >-
+        You delete it while {npc.they} {npc:watches|watch}, and apologize for
+        the post and not for the night, and {npc.name} notices which. It is a
+        good first step, and a small one.
+      effects:
+        - { type: knowledge, role: npc, action: confirm }
+        - { type: relationship, role: npc, trust: -1, affection: 1 }

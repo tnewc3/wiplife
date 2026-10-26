@@ -98,7 +98,9 @@ export interface AppState {
   /** The person open on the People tab, if any (E5: or a pet, by its possession id). */
   personId: string | null;
   /** A page open on the More tab (More → Home, More → Health), if any. */
-  moreView: 'home' | 'health' | 'family' | 'will' | 'belongings' | 'teen' | 'later' | 'groups' | 'travel' | 'migration' | 'activities' | null;
+  moreView: 'home' | 'health' | 'family' | 'will' | 'belongings' | 'teen' | 'later' | 'groups' | 'travel' | 'migration' | 'activities' | 'social' | null;
+  /** Batch 8: where the Social screen was opened from, so Back goes there. */
+  socialFrom: 'more' | 'work';
   /** E1: the Interact sheet open on a person's page: the grouped menu, or the gift price tiers. */
   /** The Interact sheet: the menu, a gift's price tiers, or (E4) the picker for an interaction that needs another person or a story first. */
   interactSheet: { personId: string; view: 'menu' | 'gift' | 'pick'; /** The interaction a picker is for. */ pick?: string } | null;
@@ -179,6 +181,8 @@ export interface AppState {
   openGroups: () => void;
   /** Batch 2a: opens More → Activities. */
   openActivities: () => void;
+  /** Batch 8: opens the Social screen, from More (everyone) or from Work (creators). */
+  openSocial: (from?: 'more' | 'work') => void;
   /** E5: More → Belongings. */
   openBelongings: () => void;
   /** T1: More → Teen years. */
@@ -476,6 +480,7 @@ export function createAppStore({
         archiveSelection: null,
         personId: null,
         moreView: null,
+        socialFrom: 'more',
         interactSheet: null,
 
         init: async () => {
@@ -824,6 +829,14 @@ export function createAppStore({
             if (s.life) s.moreView = 'activities';
           }),
 
+        openSocial: (from = 'more') =>
+          set((s) => {
+            if (!s.life) return;
+            s.moreView = 'social';
+            s.socialFrom = from;
+            s.tab = 'more';
+          }),
+
         openTeen: () =>
           set((s) => {
             if (s.life) s.moreView = 'teen';
@@ -887,6 +900,8 @@ export function createAppStore({
 
         closeHome: () =>
           set((s) => {
+            // The Social screen opened from Work goes back to Work.
+            if (s.moreView === 'social' && s.socialFrom === 'work') s.tab = 'work';
             s.moreView = null;
           }),
       };

@@ -1,0 +1,65 @@
+id: social_sponsor_offer
+title: A brand wants to be in your posts
+text: >-
+  A brand's partnership manager has found @{handle} on {platform}. They like
+  your audience, which is {followerWords}, and they like that it answers when
+  you speak. They would like you to be the face of a campaign. The offer is
+  in writing, and they have clearly done this before.
+tone: neutral
+category: socialcreator
+rarity: uncommon
+recurring: true
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { social: { creator: true } }
+    - { social: { sponsor: false } }
+    - { social: { top: { gte: 5000 } } }
+    - { fame: { contract: false } }
+    - { fame: { rung: { gte: 2 } } }
+    - { social: { happened: [milestone, viral, monetized] } }
+weight: { base: 10 }
+cooldownYears: 3
+followUpOnly: true
+choices:
+  - id: standard
+    label: Take the offer as it is
+    outcome:
+      text: >-
+        You sign what they put in front of you. For a year, a little of what
+        you post will be an advertisement, and they promise they will not
+        ask you to lie.
+      effects:
+        - { type: social, action: sponsor, terms: standard }
+        - { type: fame, action: image, delta: -1 }
+  - id: negotiate
+    label: Push for a better deal
+    check:
+      base: 40
+      stats:
+        - { key: confidence, weight: 0.2 }
+        - { key: smarts, weight: 0.15 }
+      success:
+        text: >-
+          You ask for more than they offered, and they say yes faster than you
+          would like, which means you could have asked for more still. The
+          terms are generous, and your name is on a campaign.
+        effects:
+          - { type: social, action: sponsor, terms: generous }
+      failure:
+        text: >-
+          They go quiet and come back with an offer that is worse than the
+          first. You take it, because the alternative is nothing, and you are
+          not sure how you feel about being told so.
+        effects:
+          - { type: social, action: sponsor, terms: tough }
+  - id: decline
+    label: Turn it down
+    outcome:
+      text: >-
+        You thank them and say no. Your audience, who never knew about the
+        offer, are none the wiser. It is a quiet kind of integrity, and no
+        one will ever thank you for it.
+      effects:
+        - { type: stat, key: stress, delta: -1 }

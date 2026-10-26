@@ -1,0 +1,65 @@
+id: social_minor_school_sees
+title: A note from school
+text: >-
+  The school has sent {npc.name} a message about something shared on {platform},
+  an argument between some students that spilled out of the hallways and into
+  a thread. Your name is in it. Not as the cause, but as someone who liked a
+  comment, and then a second one. {npc.They} {npc:wants|want} to talk about it
+  at dinner.
+tone: serious
+category: socialcasual
+rarity: common
+recurring: true
+lifeStages: [teen]
+requires:
+  all:
+    - { age: { gte: 13 } }
+    - { age: { lte: 17 } }
+    - { social: { account: true } }
+    - { social: { happened: [minor] } }
+    - { role: npc, alive: true, kind: [parent, stepparent] }
+weight: { base: 6 }
+cooldownYears: 3
+followUpOnly: true
+cast:
+  npc: { kind: parent, presence: household }
+choices:
+  - id: tell_the_truth
+    label: Tell {npc.them} exactly what happened
+    outcome:
+      text: >-
+        You tell it straight, including your own part, which is smaller than
+        the school thinks and bigger than you would like. {npc.name} goes
+        quiet, and then calls the school the next morning on your behalf.
+      effects:
+        - { type: relationship, role: npc, trust: 4 }
+        - { type: stat, key: stress, delta: -1 }
+  - id: say_it_was_nothing
+    label: Say it was nothing and ask to be left alone
+    check:
+      base: 40
+      stats:
+        - { role: npc, key: trust, weight: 0.3 }
+      success:
+        text: >-
+          {npc.name} lets it go, and you hear nothing more about it. You
+          decide, privately, to like fewer things.
+        effects:
+          - { type: relationship, role: npc, trust: -1 }
+      failure:
+        text: >-
+          {npc.name} has the whole thread open on the table already. It is
+          not a good dinner. You are asked to hand over your phone for a
+          week, and you do.
+        effects:
+          - { type: relationship, role: npc, trust: -5, affection: -2 }
+          - { type: stat, key: happiness, delta: -3 }
+  - id: leave_the_thread
+    label: Mute it, delete the likes and keep your head down
+    outcome:
+      text: >-
+        You clear it all out before anyone asks. By the next week the
+        argument has found other people, and you were never the point of it.
+      effects:
+        - { type: social, action: engagement, delta: -1 }
+        - { type: stat, key: stress, delta: -2 }

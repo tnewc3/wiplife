@@ -1,0 +1,67 @@
+id: social_collab_falling_out
+title: Who gets the credit
+text: >-
+  It was a good collaboration, and now it has become an argument. {npc.name}
+  thinks the idea was {npc.theirs}, and the edit was {npc.theirs}, and the
+  part everyone shares was {npc.theirs} too. Under your post on {platform}
+  there is a comment from {npc.them} that does not say any of this, and
+  somehow says all of it.
+tone: serious
+category: socialcasual
+rarity: uncommon
+recurring: true
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 13 } }
+    - { social: { account: true } }
+    - { social: { happened: [collab] } }
+    - { role: npc, alive: true }
+weight: { base: 8 }
+cooldownYears: 3
+followUpOnly: true
+cast:
+  npc: { support: true, presence: anywhere }
+choices:
+  - id: share_the_credit
+    label: Give {npc.them} full credit in public
+    outcome:
+      text: >-
+        You post a line crediting {npc.name} first and yourself second.
+        {npc.They} {npc:replies|reply} within the hour with something short
+        and warm. It takes a little pride, which you get back.
+      effects:
+        - { type: relationship, role: npc, affection: 4, trust: 3 }
+        - { type: social, action: engagement, delta: 2 }
+  - id: hold_your_ground
+    label: Say what you did, calmly
+    check:
+      base: 45
+      stats:
+        - { key: confidence, weight: 0.2 }
+        - { role: npc, key: trust, weight: 0.15 }
+      success:
+        text: >-
+          You say your side, and it is fair, and it is received as fair.
+          {npc.name} does not agree but does not push it, and you drift
+          apart quietly instead of loudly.
+        effects:
+          - { type: relationship, role: npc, affection: -2 }
+      failure:
+        text: >-
+          Saying your side is taken as picking a fight. {npc.name} answers
+          at length, in public, and your followers take sides. It takes a
+          month to stop being the main thing in either of your feeds.
+        effects:
+          - { type: relationship, role: npc, affection: -8, trust: -6 }
+          - { type: social, action: followers, delta: -3 }
+          - { type: stat, key: stress, delta: 4 }
+  - id: let_it_go
+    label: Let it go and stay out of it
+    outcome:
+      text: >-
+        You say nothing in public and a little in private. The two of you stop
+        making things together, and neither of you ever says why.
+      effects:
+        - { type: relationship, role: npc, affection: -3 }
+        - { type: stat, key: stress, delta: 1 }

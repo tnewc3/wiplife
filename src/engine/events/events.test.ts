@@ -591,6 +591,11 @@ describe('event text', () => {
           removedFrom: 'Canada',
           localLanguage: 'English',
           citizenOf: 'Mexico',
+          platform: 'TikTok',
+          handle: 'quietfox10',
+          followerWords: 'a few thousand followers',
+          niche: 'gaming',
+          postNoun: 'video',
           ...US_WORDS,
         } satisfies Record<(typeof EVENT_TEXT_VALUES)[number] | 'petKind' | 'vehicle' | 'valuable' | 'homeCity', string | number>;
         const context = { roles, values, money: (n: number) => `$${n}` };

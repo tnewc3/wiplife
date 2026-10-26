@@ -1,0 +1,63 @@
+id: social_sponsor_script
+title: The talking points
+text: >-
+  The brand behind your sponsorship has sent a document. It lists what you
+  may say about their product, what you may not, and how many times the name
+  should appear in the first thirty seconds. It reads like a hostage note. It
+  also says exactly how the payment depends on following it.
+tone: neutral
+category: socialcreator
+rarity: uncommon
+recurring: true
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { social: { creator: true } }
+    - { social: { sponsor: true } }
+    - { social: { happened: [sponsor] } }
+weight: { base: 10 }
+cooldownYears: 3
+followUpOnly: true
+choices:
+  - id: follow_it
+    label: Follow it to the letter
+    outcome:
+      text: >-
+        The video is slick and dull, and your audience, who are not stupid,
+        notice. The brand is pleased, and the payment comes on time.
+      effects:
+        - { type: famePay, gain: small }
+        - { type: social, action: engagement, delta: -3 }
+  - id: your_voice
+    label: Say it in your own words and risk it
+    check:
+      base: 45
+      stats:
+        - { key: confidence, weight: 0.2 }
+        - { key: smarts, weight: 0.15 }
+      success:
+        text: >-
+          It sounds like you, and so it sounds true. The brand is nervous
+          until the numbers come in, and then very warm. They ask you to make
+          the next one the same way.
+        effects:
+          - { type: famePay, gain: solid }
+          - { type: social, action: engagement, delta: 3 }
+      failure:
+        text: >-
+          You go off script and the brand does not like it. They pay what the
+          contract says and not a cent more, and your agent gets a long phone
+          call.
+        effects:
+          - { type: famePay, gain: petty }
+          - { type: fame, action: image, delta: -2 }
+  - id: say_no
+    label: Say you will not read from a script
+    outcome:
+      text: >-
+        You tell them politely that you will not. There is a pause on the
+        line, and the sponsor ends the deal at the end of the term. Your
+        audience, hearing it, trusts you a little more.
+      effects:
+        - { type: fame, action: end_contract, how: ended }
+        - { type: fame, action: mood, delta: 3 }

@@ -1,0 +1,59 @@
+id: social_milestone_thousand
+title: A number you did not expect
+text: >-
+  @{handle} on {platform} has just passed a number that sounds like something:
+  {followerWords}. You noticed because a friend sent a screenshot with three
+  exclamation marks. Not long ago you would not have believed that many
+  people would care about anything you did.
+tone: light
+category: socialcasual
+rarity: common
+recurring: true
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 13 } }
+    - { social: { account: true } }
+    - { social: { happened: [milestone] } }
+weight: { base: 8 }
+cooldownYears: 2
+followUpOnly: true
+choices:
+  - id: say_thank_you
+    label: Post a thank-you
+    outcome:
+      text: >-
+        You put up something short and sincere. The replies are warm, and a
+        handful of people who had never said hello say hello.
+      effects:
+        - { type: social, action: engagement, delta: 4 }
+        - { type: stat, key: happiness, delta: 3 }
+  - id: keep_quiet
+    label: Keep it to yourself
+    outcome:
+      text: >-
+        You look at the number for a while and then close the app. It is a
+        small private thing, and you are surprised at how much it means to
+        you.
+      effects:
+        - { type: stat, key: happiness, delta: 2 }
+  - id: ask_for_more
+    label: Ask your followers to share it around
+    check:
+      base: 45
+      stats:
+        - { key: sociability, weight: 0.2 }
+        - { key: confidence, weight: 0.15 }
+      success:
+        text: >-
+          You ask, and they do. A few thousand strangers see it, and a good
+          share of them stay.
+        effects:
+          - { type: social, action: followers, delta: 12 }
+      failure:
+        text: >-
+          Asking turns out to be less charming than not asking. A few people
+          unfollow, quietly, and you feel it more than you should.
+        effects:
+          - { type: social, action: followers, delta: -3 }
+          - { type: stat, key: happiness, delta: -1 }

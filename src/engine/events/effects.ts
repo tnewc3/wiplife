@@ -40,6 +40,7 @@ import { applyTeenEffect } from '../teen/effects';
 import { applyCrimeEffect, applyDirtyMoneyEffect } from '../crime/effects';
 import { applyFameEffect, applyFamePayEffect } from '../fame/effects';
 import { applyBandEffect } from '../fame/band';
+import { applySocialEffect } from '../social/effects';
 import { applySportsEffect } from '../sports/effects';
 import { applyLaterEffect } from '../later/effects';
 import { applyFaithEffect, applyGroupEffect, applyValueEffect } from '../belonging/effects';
@@ -402,6 +403,8 @@ const handlers: { [T in Effect['type']]: Handler<T> } = {
   fame: (state, effect, ctx) => applyFameEffect(state, effect, ctx.cast, ctx.content, ctx.rng),
   band: (state, effect, ctx) => applyBandEffect(state, effect, ctx.cast, ctx.content, ctx.rng),
   famePay: (state, effect, ctx) => applyFamePayEffect(state, effect, ctx.content),
+  // Batch 8: social media.
+  social: (state, effect, ctx) => applySocialEffect(state, effect, ctx.content, ctx.rng),
   // E6c: sports.
   sports: (state, effect, ctx) => applySportsEffect(state, effect, ctx.cast, ctx.content, ctx.rng, ctx.def.id),
 

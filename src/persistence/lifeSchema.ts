@@ -1167,6 +1167,58 @@ const pastimeReceipt = z.strictObject({
 });
 const pastimes = z.strictObject({ year: int, counts: z.record(z.string(), int.min(1)), receipts: z.array(pastimeReceipt) });
 
+// Batch 8: social media. A handle is what the player typed, kept in its tidy form (checked again by the action that takes it and by the invariants).
+const socialAccount = z.strictObject({
+  platform: id,
+  handle: z.string().min(2).max(60),
+  niche: id,
+  followers: int.min(0),
+  engagement: score,
+  since: int,
+  private: z.boolean(),
+  byParent: z.boolean(),
+  posts: int.min(0),
+  quality: score,
+  monetized: int.min(0),
+  demonetized: int.min(0),
+  earned: int.min(0),
+  peak: int.min(0),
+});
+const counts = z.record(z.string(), int.min(0));
+const social = z.strictObject({
+  accounts: z.record(z.string(), socialAccount),
+  year: z.strictObject({ year: int, posts: counts, quality: z.record(z.string(), z.number().min(0)), bold: int.min(0), risky: counts, viral: z.array(id), crossed: z.array(z.string().max(130)), collabs: z.array(id), promoted: z.array(id) }),
+  income: z.strictObject({ year: int, gross: int.min(0), agent: int.min(0), trust: int.min(0), byPlatform: counts, byModel: counts }),
+  last: z.strictObject({ year: int, platform: id, outcome: z.enum(['flat', 'steady', 'strong', 'viral']), gained: int.min(0), bold: z.boolean() }).exactOptional(),
+  algorithm: z.strictObject({ year: int, shifts: z.record(z.string(), z.enum(['up', 'down'])) }),
+  controversy: z.strictObject({ year: int, platform: id, stage: z.enum(['brewing', 'cancelled']), lost: counts }).nullable(),
+  happened: z.strictObject({ year: int, triggers: z.array(z.string().max(40)) }),
+  focus: z.strictObject({ year: int, platform: id }).nullable(),
+  streak: int.min(0),
+  workedYear: int.min(0),
+  totals: z.strictObject({
+    opened: int.min(0),
+    posts: int.min(0),
+    viral: int.min(0),
+    algorithmUp: int.min(0),
+    algorithmDown: int.min(0),
+    demonetized: int.min(0),
+    monetized: int.min(0),
+    burnouts: int.min(0),
+    controversies: int.min(0),
+    cancellations: int.min(0),
+    collabs: int.min(0),
+    crossPromos: int.min(0),
+    promos: int.min(0),
+    sponsorships: int.min(0),
+    foundEmployer: int.min(0),
+    foundPartner: int.min(0),
+    foundEx: int.min(0),
+    foundFamily: int.min(0),
+    earned: int.min(0),
+  }),
+});
+
 // L1: later life.
 const careOption = z.enum(['family', 'paid', 'assisted']);
 const later = z.strictObject({
@@ -1359,6 +1411,7 @@ export const lifeStateSchema: z.ZodType<LifeState> = z.strictObject({
   belonging,
   business: businessState,
   pastimes,
+  social,
 });
 
 /**

@@ -18,6 +18,7 @@ import { startSports } from '../sports/start';
 import { recentQuality } from './work';
 import { formBand, leaveBand } from './band';
 import { bandNameSuggestion } from './sound';
+import { startCreatorAccount } from '../social/accounts';
 
 /** Writes one of the fame history lines. */
 export function fameHistory(state: LifeState, key: FameHistoryKey, content: ContentBundle, extra: Record<string, string> = {}): void {
@@ -102,6 +103,8 @@ export function enterPath(state: LifeState, pathId: string, routeId: string | un
   fameHistory(state, 'entered', content);
   if (def.sport) startSports(state, def, content);
   if (route?.id === 'band' && def.bands) formBand(state, bandNameSuggestion(state, 0, content), undefined, content, rng, 'route');
+  // Batch 8: a career in social media begins with an account on the platform the way in starts at.
+  if (pathId === 'social') startCreatorAccount(state, route?.id, content);
   return true;
 }
 
@@ -180,7 +183,7 @@ export function climb(state: LifeState, pathId: string, content: ContentBundle):
   return climbed;
 }
 
-function dropRung(state: LifeState, def: FamePathDef, path: FamePathState, content: ContentBundle): boolean {
+export function dropRung(state: LifeState, def: FamePathDef, path: FamePathState, content: ContentBundle): boolean {
   if (path.rung <= 1) return false;
   if (def.sport && state.sports.pro && path.rung <= def.sport.proRung) return false;
   if (path.fame >= rungDef(def, path.rung).fame - content.balance.fame.fade.slack) return false;
@@ -308,11 +311,11 @@ export function companyTierFor(def: FamePathDef, rung: number): number {
 }
 
 /** Companies in a path that sign people at this tier (or the next lower tier that has any). */
-export function companiesFor(content: ContentBundle, pathId: string, tier: number): FameCompanyDef[] {
+export function companiesFor(content: ContentBundle, pathId: string, tier: number, kind?: FameCompanyDef['kind']): FameCompanyDef[] {
   const all = Object.keys(content.fameCompanies)
     .sort()
     .map((id) => content.fameCompanies[id]!)
-    .filter((c) => !c.retired && c.path === pathId);
+    .filter((c) => !c.retired && c.path === pathId && (kind === undefined || c.kind === kind));
   for (let t = tier; t >= 1; t--) {
     const at = all.filter((c) => c.tier === t);
     if (at.length > 0) return at;
@@ -323,7 +326,7 @@ export function companiesFor(content: ContentBundle, pathId: string, tier: numbe
 export type ContractBlock = 'inactive' | 'have' | 'rung' | 'none' | 'prison';
 
 /** Why you can't sign a deal now, or null. */
-export function contractBlock(state: LifeState, content: ContentBundle): ContractBlock | null {
+export function contractBlock(state: LifeState, content: ContentBundle, kind?: FameCompanyDef['kind']): ContractBlock | null {
   const f = state.fame;
   if (!f.active || f.main === null) return 'inactive';
   if (state.housing.kind === 'incarcerated') return 'prison';
@@ -331,18 +334,18 @@ export function contractBlock(state: LifeState, content: ContentBundle): Contrac
   const path = f.paths[f.main]!;
   if (path.rung < 2) return 'rung';
   const def = pathDef(content, f.main)!;
-  return companiesFor(content, f.main, companyTierFor(def, path.rung)).length > 0 ? null : 'none';
+  return companiesFor(content, f.main, companyTierFor(def, path.rung), kind).length > 0 ? null : 'none';
 }
 
 /** You sign a deal on these terms with a company that fits your rung. The advance reaches you (a parent signs, and banks part of it, for a minor). */
-export function signContract(state: LifeState, terms: FameTerms, content: ContentBundle, rng: RngState): boolean {
-  if (contractBlock(state, content) !== null) return false;
+export function signContract(state: LifeState, terms: FameTerms, content: ContentBundle, rng: RngState, kind?: FameCompanyDef['kind']): boolean {
+  if (contractBlock(state, content, kind) !== null) return false;
   const f = state.fame;
   const pathId = f.main!;
   const def = pathDef(content, pathId)!;
   const path = f.paths[pathId]!;
   const b = content.balance.fame.contracts;
-  const company = pick(rng, companiesFor(content, pathId, companyTierFor(def, path.rung)));
+  const company = pick(rng, companiesFor(content, pathId, companyTierFor(def, path.rung), kind));
   const minor = isMinorStar(state, content);
   const years = Math.min(minor ? b.minorYears : 99, nextInt(rng, b.years[terms].min, Math.max(b.years[terms].min, b.years[terms].max)));
   const advance = wholeDollars(usualYear(state, def, path.rung, content) * b.advance[terms]);

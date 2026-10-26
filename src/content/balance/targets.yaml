@@ -387,6 +387,28 @@ fame:
   bandLives: { min: 0.2, max: 1 }
   practicePerYear: { min: 1, max: 14 }
 
+# Batch 8: social media. Anyone can have accounts: most lives open a casual one, and the star player who
+# goes after the social media path runs them as a creator. The rules for anyone under 18 must hold exactly.
+social:
+  minorsBroken: { min: 0, max: 0 }
+  withAccount: { min: 0.3, max: 0.9 }
+  withAccountStar: { min: 0.5, max: 1 }
+  accountsPerLife: { min: 1, max: 3.5 }
+  postsPerYear: { min: 0.5, max: 6 }
+  postsPerYearStar: { min: 1, max: 20 }
+  # A post reaching someone it was not meant for happens in some lives with an account, and mostly not.
+  foundLives: { min: 0.1, max: 0.95 }
+  employerLives: { min: 0.02, max: 0.75 }
+  partnerLives: { min: 0.02, max: 0.75 }
+  creatorLives: { min: 0.1, max: 0.6 }
+  creatorEarned: { min: 0.2, max: 1 }
+  viralLives: { min: 0.1, max: 0.9 }
+  controversyLives: { min: 0.02, max: 0.8 }
+  cancelledLives: { min: 0.005, max: 0.4 }
+  creatorPastMiddle: { min: 0.1, max: 0.6 }
+  creatorTop: { min: 0, max: 0.2 }
+  teenRung3By28: { min: 0.1, max: 1 }
+
 # B1: romance by attraction, on the careful player's lives that reach 50 (ages
 # 18-49): lives attracted to the same gender (or to more than one) are within
 # these distances of lives attracted to another gender, in the share who ever

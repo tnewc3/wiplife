@@ -109,6 +109,8 @@ export function rootEvents(content: ContentBundle): Set<string> {
     ...Object.values(r.crime.triggers),
     // E6b: what the fame step queues.
     ...Object.values(r.fame.triggers),
+    // Batch 8: what the social step queues.
+    ...Object.values(r.social.triggers),
     // E6c: what the sports step queues.
     ...Object.values(r.sports.triggers),
     // Batch 5: the scrimmage a tryout plays.

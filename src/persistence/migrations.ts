@@ -6,6 +6,7 @@ import type { BusinessStyle, PriceLevel } from '../content/schemas';
 import { emptyTravel } from '../engine/travel/types';
 import { emptyMigration } from '../engine/migration/types';
 import { emptyGrind } from '../engine/fame/query';
+import { emptySocial, engagementFactor, handleSuggestion, hashOf, nicheList, platformList } from '../engine/social/query';
 import { tourSizeFor } from '../engine/fame/grind';
 import type { TourSize } from '../engine/types';
 import { countryOfCity } from '../engine/country';
@@ -574,7 +575,83 @@ export const migrations: readonly Migration[] = [
       'Estates and heir replay snapshots are upgraded the same way.',
     migrate: upgradeBusinessDepthData,
   },
+  {
+    from: 35,
+    description:
+      'Batch 8: social media. A life gains its social record (no accounts, no posts, nothing earned). A life with an active career in the ' +
+      'social media path gets an account on the platform its way in started at (the first platform for a way in that has none), with a ' +
+      'handle suggested from its name, a niche, and as many followers as its fame in the path is worth, so that its reach and fame agree ' +
+      '(an account opened under 18 is private and was set up by a parent). Heir replay snapshots are upgraded the same way.',
+    migrate: upgradeSocialData,
+  },
 ];
+
+/** The reach at which a curve of reach to fame gives this fame (the inverse of curveAt, which is increasing). */
+function reachForFame(points: readonly { at: number; x: number }[], fame: number): number {
+  if (fame <= points[0]!.x) return points[0]!.at;
+  for (let i = 1; i < points.length; i++) {
+    const a = points[i - 1]!;
+    const b = points[i]!;
+    if (fame <= b.x) return a.at + ((b.at - a.at) * (fame - a.x)) / (b.x - a.x);
+  }
+  return points[points.length - 1]!.at;
+}
+
+/** Batch 8: the social record a save from before it lacks; a career in the social media path gets the account that matches its fame. */
+function upgradeSocialData(data: unknown): unknown {
+  if (!isRecord(data)) return data;
+  const content = compiled as ContentBundle;
+  const year = typeof data.currentYear === 'number' ? data.currentYear : 0;
+  const inputLog = Array.isArray(data.inputLog) ? data.inputLog.map((entry: unknown) => {
+    if (!isRecord(entry) || !isRecord(entry.payload) || !isRecord(entry.payload.snapshot)) return entry;
+    return { ...entry, payload: { ...entry.payload, snapshot: upgradeSocialData(entry.payload.snapshot) } };
+  }) : data.inputLog;
+  if (data.social !== undefined) return { ...data, inputLog };
+  const social = emptySocial(year);
+  const fame = isRecord(data.fame) ? data.fame : undefined;
+  const path = fame && isRecord(fame.paths) && isRecord(fame.paths.social) ? fame.paths.social : undefined;
+  if (fame && fame.active === true && path && typeof path.fame === 'number') {
+    const list = platformList(content);
+    const route = typeof path.route === 'string' ? path.route : undefined;
+    const platform = list.find((p) => route !== undefined && p.routes.includes(route)) ?? list.find((p) => p.routes.length > 0) ?? list[0];
+    const niches = nicheList(content);
+    const seed = typeof data.seed === 'string' ? data.seed : '';
+    const first = isRecord(data.character) && isRecord(data.character.name) && typeof data.character.name.first === 'string' ? data.character.name.first : '';
+    if (platform && niches.length > 0) {
+      const b = content.balance.social;
+      const engagement = 50;
+      const weight = b.platforms[platform.id]?.reach ?? 1;
+      const reach = reachForFame(b.fame.at, path.fame);
+      const followers = Math.max(b.start.followers, Math.round(reach / (weight * engagementFactor(engagement, content))));
+      const recent = Array.isArray(path.recent) ? path.recent.filter((q): q is number => typeof q === 'number') : [];
+      const quality = recent.length > 0 ? Math.round(recent.reduce((a, q) => a + q, 0) / recent.length) : b.start.quality;
+      const since = typeof path.since === 'number' ? path.since : year;
+      const birthYear = typeof data.birthYear === 'number' ? data.birthYear : year - 18;
+      const minor = year - birthYear < content.balance.economy.independenceAge;
+      const openedMinor = since - birthYear < content.balance.economy.independenceAge;
+      const pay = b.pay[platform.pay];
+      social.accounts[platform.id] = {
+        platform: platform.id,
+        handle: handleSuggestion({ seed, character: { name: { first } } } as never, content, 0),
+        niche: niches[hashOf(`${seed}:niche`) % niches.length]!.id,
+        followers,
+        engagement,
+        since,
+        private: minor,
+        byParent: openedMinor,
+        posts: 0,
+        quality: Math.min(100, Math.max(0, quality)),
+        monetized: followers >= pay.threshold && !minor ? year : 0,
+        demonetized: 0,
+        earned: 0,
+        peak: followers,
+      };
+      social.totals.opened = 1;
+      if (social.accounts[platform.id]!.monetized > 0) social.totals.monetized = 1;
+    }
+  }
+  return { ...data, inputLog, social };
+}
 
 function upgradeBusinessDepth(raw: unknown): unknown {
   if (!isRecord(raw)) return raw;

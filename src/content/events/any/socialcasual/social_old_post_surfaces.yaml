@@ -1,0 +1,48 @@
+id: social_old_post_surfaces
+title: An old post
+text: >-
+  Somebody has gone back through @{handle} on {platform} to a post from the
+  early days, and it is doing the rounds again. It reads very differently
+  now. It is nothing terrible, only a thing a younger version of you thought
+  was clever, and you are seeing it as a stranger would.
+tone: neutral
+category: socialcasual
+rarity: uncommon
+recurring: true
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { social: { account: true } }
+    - { social: { private: false } }
+    - { social: { creator: false } }
+    - { social: { followers: { gte: 200 } } }
+weight: { base: 2 }
+cooldownYears: 5
+choices:
+  - id: delete_it
+    label: Delete it quietly
+    outcome:
+      text: >-
+        You delete it and the three posts around it. Somebody has already
+        taken a screenshot, because somebody always has, and you spend a week
+        wondering who.
+      effects:
+        - { type: stat, key: stress, delta: 2 }
+  - id: own_it
+    label: Say you were younger and you would not post it now
+    outcome:
+      text: >-
+        You add a line under it, plainly, and leave it up. The thread loses
+        interest: there is nothing to fight about when you agree.
+      effects:
+        - { type: social, action: engagement, delta: 3 }
+        - { type: stat, key: stress, delta: -1 }
+  - id: lock_the_account
+    label: Make the account private
+    outcome:
+      text: >-
+        With a tap, nobody outside your circle can see anything. The thread
+        goes on without you, and eventually it goes elsewhere.
+      effects:
+        - { type: social, action: private, value: true }

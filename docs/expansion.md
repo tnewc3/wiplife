@@ -809,7 +809,7 @@ E6 is split into **E6a** (crime careers), **E6b** (fame in arts and media) and *
 - **Crime stays at the level of story and consequences,** never real-world instructions. A heist is a tense choice with odds and fallout, not a how-to.
 - **Crime careers are for adults (18+).** Teens can still get into trouble through existing events.
 - **Fame for minors** (child actors, young athletes, teen creators) is allowed, with parents involved in contracts, and the existing content rules still apply: no romance or sexual content involving anyone under 18.
-- **Leagues, labels, studios, platforms, awards and brands are all fictional,** like the game's companies and schools.
+- **Leagues, labels, studios, awards and brands are all fictional,** like the game's companies and schools. **Amended 2026-10-15 (Batch 8): the social media path uses real platform names** (Instagram, TikTok, X / Twitter, YouTube, Twitch and podcasts), and only that path does. The names live in content (`src/content/platforms`), so they can be swapped for fictional ones without touching the engine. There are no logos, no claim of partnership with or endorsement by any platform, and no real people. The brands that sponsor creators, the labels, studios, networks and awards stay fictional. Every other path, sport and system keeps fictional names for platforms and companies.
 - **A pet's death** is handled with lighter weight than a person's, but still felt.
 
 ---

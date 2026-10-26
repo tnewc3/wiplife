@@ -24,6 +24,7 @@ import { runLanguages } from './languages';
  * a team or a teen job gives count toward the year that has begun; the teen
  * job's pay joins the ledger's income. The possessions step (E5) follows the ledger, which has charged the year's upkeep and insurance:
  * pets and vehicles age, accidents and deaths are queued as events.
+ * The social step (Batch 8) comes right before it, so a year of posting counts as a year of work and your reach is fame when the fame step runs.
  * The fame step (E6b) follows the crime step and runs before the ledger: the year's
  * releases come out, fame rises or fades, and the year's pay is set aside for the ledger.
  * The business step (W3) follows the fame step and runs before the ledger: each business's year (demand, revenue, costs, staff, profit),
@@ -35,6 +36,7 @@ import { runLanguages } from './languages';
 import type { ContentBundle } from '../content/schemas';
 import { runCrime } from './crime/step';
 import { runFame } from './fame/step';
+import { runSocial } from './social/step';
 import { runHeritage } from './estate/heritage';
 import { runLives } from './lives/step';
 import { runLater } from './later/step';
@@ -71,6 +73,7 @@ export const YEAR_PIPELINE: readonly PipelineStep[] = [
   { id: 'heritage', run: runHeritage },
   { id: 'legal', run: runLegal },
   { id: 'crime', run: runCrime },
+  { id: 'social', run: runSocial },
   { id: 'fame', run: runFame },
   { id: 'business', run: runBusiness },
   { id: 'education', run: runEducation },

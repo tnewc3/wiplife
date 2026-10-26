@@ -1,0 +1,66 @@
+id: social_ex_comments
+title: A comment from the past
+text: >-
+  There is a comment from {npc.name} under your latest post on {platform}.
+  It is one line, public, and it is the kind of thing only someone who knew
+  you well could write. People are replying to it. {npc.They} {npc:has|have}
+  not spoken to you in a while, and have now said something to an audience.
+tone: serious
+category: socialfound
+rarity: uncommon
+recurring: true
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { social: { account: true } }
+    - { social: { happened: [foundEx] } }
+    - { social: { private: false } }
+    - { role: npc, alive: true, kind: [ex] }
+weight: { base: 10 }
+cooldownYears: 4
+followUpOnly: true
+cast:
+  npc: { kind: ex, presence: anywhere }
+choices:
+  - id: reply_kindly
+    label: Reply kindly, in public
+    check:
+      base: 45
+      stats:
+        - { key: kindness, weight: 0.25 }
+        - { role: npc, key: affection, weight: 0.15 }
+      success:
+        text: >-
+          You answer warmly and without reaching for anything. {npc.name}
+          sends a heart, and a few people who were there for the drama find
+          they have nothing to say.
+        effects:
+          - { type: relationship, role: npc, affection: 3 }
+          - { type: knowledge, role: npc, action: correct }
+      failure:
+        text: >-
+          You reply kindly, and it is read the wrong way by everyone,
+          including {npc.name}. A thread appears underneath that neither of
+          you started and neither of you can end.
+        effects:
+          - { type: relationship, role: npc, affection: -4, trust: -3 }
+          - { type: stat, key: stress, delta: 4 }
+  - id: block_them
+    label: Block them
+    outcome:
+      text: >-
+        One tap. The comment vanishes, and with it a part of you that was
+        still waiting to see what {npc.they} would say. It is the right
+        decision. It is a quiet one.
+      effects:
+        - { type: relationship, role: npc, affection: -4 }
+        - { type: stat, key: stress, delta: -1 }
+  - id: ignore_it
+    label: Leave it and say nothing
+    outcome:
+      text: >-
+        You do not reply, and nobody else knows what to say either, and after
+        a day it is buried. You think about it more than you will say.
+      effects:
+        - { type: stat, key: stress, delta: 2 }

@@ -12,6 +12,7 @@ import { CrimeCard } from './CrimeCard';
 import { FameCard } from './FameCard';
 import { JobCard } from './JobCard';
 import { SchoolCard } from './SchoolCard';
+import { SocialCard } from './SocialCard';
 import { SportsCard } from './SportsCard';
 
 /** The Work/School tab: your job (Stage 8), school (Stage 7) and gig work. */
@@ -28,6 +29,7 @@ export function WorkTab({ life }: { life: LifeState }) {
       <BusinessCard life={life} />
       <CrimeCard life={life} />
       <FameCard life={life} />
+      <SocialCard life={life} />
       <SportsCard life={life} />
       {/* The Talk buttons on the school and job cards open the interaction menu here. */}
       <InteractSheet life={life} />

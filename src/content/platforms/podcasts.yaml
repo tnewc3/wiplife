@@ -1,0 +1,11 @@
+id: podcasts
+name: Podcasts
+blurb: A show people listen to on podcast apps. A small, loyal audience that sponsors pay to reach, through ad reads.
+contentKind: audio
+verb: Record an episode
+noun: episode
+plural: episodes
+minAge: 13
+growth: audio_show
+pay: ad_reads
+routes: []

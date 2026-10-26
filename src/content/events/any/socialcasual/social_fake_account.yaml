@@ -1,0 +1,61 @@
+id: social_fake_account
+title: Somebody is being you
+text: >-
+  An acquaintance sends you a link with no message. Someone has made an
+  account that looks like @{handle}: the same photo, the name changed by one
+  letter. It has been following the people you follow and saying things in
+  your voice. Not cruel things, but not yours.
+tone: serious
+category: socialcasual
+rarity: uncommon
+recurring: true
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 13 } }
+    - { social: { account: true } }
+    - { social: { private: false } }
+    - { social: { followers: { gte: 100 } } }
+weight: { base: 2 }
+cooldownYears: 6
+choices:
+  - id: report_it
+    label: Report it to {platform}
+    check:
+      base: 55
+      stats:
+        - { key: discipline, weight: 0.15 }
+      success:
+        text: >-
+          You fill in the form, attach what they ask for and wait. Four days
+          later it is gone. You never find out who it was.
+        effects:
+          - { type: stat, key: stress, delta: 1 }
+      failure:
+        text: >-
+          The report is rejected as "not in violation." You report it again,
+          and then again, and finally have a friend with a connection ask for
+          you. It is gone in a week, and your followers spent that week
+          confused.
+        effects:
+          - { type: social, action: engagement, delta: -3 }
+          - { type: stat, key: stress, delta: 4 }
+  - id: warn_your_followers
+    label: Post a warning
+    outcome:
+      text: >-
+        You tell everyone which account is the real one. The fake gets
+        reported by two hundred people at once, and goes. You are slightly
+        touched by how many of them cared.
+      effects:
+        - { type: social, action: engagement, delta: 3 }
+        - { type: stat, key: stress, delta: 2 }
+  - id: ignore_it
+    label: Ignore it
+    outcome:
+      text: >-
+        It seems beneath you to reply. The account drifts, collects a few
+        followers, and posts something dull, and you start to feel
+        stupid about having let it bother you.
+      effects:
+        - { type: stat, key: stress, delta: 2 }

@@ -42,6 +42,7 @@ import { applyPending } from '../sports/world';
 import { allPaths, isMinorStar, kindDef, pathDef, rungDef, topRung, usualYear, workedPaths } from './query';
 import { agentDef, agentTier, assignedPlan, craftGrowth, planBlock, projectTitle, releaseGross, retainer, rollWork, RECENT, type Roll } from './work';
 import { bandYear } from './band';
+import { socialWorked } from '../social/query';
 import { runTour, strainCircle } from './grind';
 import { emptyGrind } from './query';
 import { genreDistance, hasGenres, offGenreFans } from './sound';
@@ -317,12 +318,14 @@ export function runFame(state: LifeState, content: ContentBundle): void {
   const sportOut = prison ? null : playSeason(state, content, rng);
   const planOut = prison ? null : release(state, content, rng, tour !== null);
   const out = planOut;
-  const worked = planOut !== null || sportOut?.project !== undefined || tour !== null;
+  // Batch 8: a year of posting is a year of work in the social media career.
+  const posted = !prison && socialWorked(state) && f.paths.social !== undefined && workedPaths(state).includes('social');
+  const worked = planOut !== null || sportOut?.project !== undefined || tour !== null || posted;
   const project = planOut?.project;
   const seasonProject = sportOut?.project;
   if (prison) f.plan = null;
   if (project) events.push(project.band);
-  const playedIds = new Set([project?.path, seasonProject?.path, tour?.path].filter((p): p is string => p !== undefined));
+  const playedIds = new Set([project?.path, seasonProject?.path, tour?.path, posted ? 'social' : undefined].filter((p): p is string => p !== undefined));
   if (project?.offGenre !== undefined) events.push('offGenre');
 
   // Craft, fading, and the climb or the fall.

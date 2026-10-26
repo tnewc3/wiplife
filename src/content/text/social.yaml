@@ -1,0 +1,97 @@
+# The words the social media systems use (Batch 8). Values in a history line:
+# {platform}, {handle}, {followerWords}.
+history:
+  opened:
+    importance: 1
+    variants:
+      - "You opened an account on {platform} as @{handle}."
+      - "@{handle} went live on {platform}, with nobody watching yet."
+  monetized:
+    importance: 2
+    variants:
+      - "{platform} started paying you for @{handle}. It was the first money the internet had ever sent you."
+      - "Your account on {platform} passed the line where the platform pays: @{handle} earned money for the first time."
+  viral:
+    importance: 3
+    variants:
+      - "One post on {platform} went further than anything you had made. Overnight, @{handle} had {followerWords}."
+      - "A post you nearly did not put up took off on {platform}. By morning, @{handle} had {followerWords}."
+  demonetized:
+    importance: 2
+    variants:
+      - "{platform} stopped paying @{handle} for a year, and would not say exactly why."
+      - "A rule you had not read cost @{handle} its income on {platform} for a year."
+  burnout:
+    importance: 2
+    variants:
+      - "Posting every day wore you down. You stepped back from {platform}, and the audience noticed."
+      - "You ran out of things to say on {platform}, and stopped saying them for a while."
+  cancelled:
+    importance: 3
+    variants:
+      - "A row on {platform} turned into a pile-on, and for a while @{handle} was the thing everyone was against."
+      - "You were cancelled. Most of what you had built on {platform} walked away in a week."
+  sponsor:
+    importance: 2
+    variants:
+      - "A brand signed you to post about it, and your account became partly an advert."
+      - "You took a sponsor's money. Some of your followers noticed, and most did not mind."
+  found:
+    importance: 1
+    variants:
+      - "Something you posted reached someone you had not meant it for."
+      - "A post you thought was private to your friends was not."
+
+followers:
+  - { from: 0, text: "nobody yet" }
+  - { from: 10, text: "a handful of people" }
+  - { from: 60, text: "a few dozen followers" }
+  - { from: 300, text: "a few hundred followers" }
+  - { from: 1500, text: "a couple of thousand followers" }
+  - { from: 6000, text: "several thousand followers" }
+  - { from: 20000, text: "tens of thousands of followers" }
+  - { from: 100000, text: "hundreds of thousands of followers" }
+  - { from: 700000, text: "close to a million followers" }
+  - { from: 1500000, text: "millions of followers" }
+  - { from: 20000000, text: "tens of millions of followers" }
+  - { from: 200000000, text: "hundreds of millions of followers" }
+
+engagement:
+  - { from: 0, text: "an audience that mostly scrolls past" }
+  - { from: 25, text: "an audience that sometimes answers" }
+  - { from: 50, text: "an audience that answers" }
+  - { from: 75, text: "an audience that really shows up" }
+
+outcomes:
+  flat:
+    - "Barely anyone saw it. Some posts are like that."
+    - "It went up and sank without a ripple."
+    - "A few likes, from the people who like everything you post."
+  steady:
+    - "It did its job: a few new followers and a few kind comments."
+    - "A decent response, the kind you can build on."
+    - "People liked it, and some of them stayed."
+  strong:
+    - "That one landed. New followers kept arriving all week."
+    - "It was shared by people you have never met, and they liked what they found."
+    - "A better response than you have had in a long time."
+  viral:
+    - "It took off. Strangers shared it past anyone you know, and the followers kept arriving."
+    - "You watched the number climb for a day without believing it."
+    - "Everyone saw it. For a week, nobody could talk about anything else."
+
+handleWords:
+  first: [quiet, bright, lazy, little, golden, paper, midnight, wild, soft, sunny, rusty, velvet, cosmic, tiny, northern, stray, honest, silver, clever, lucky]
+  second: [fox, lantern, river, comet, sparrow, orchard, harbor, ember, meadow, otter, pixel, maple, compass, thistle, kettle, canyon, willow, signal, mango, drift]
+
+reserved: [admin, official, support, help, staff, moderator, platform, instagram, tiktok, twitter, youtube, twitch, podcasts, podcast, everyone, root]
+blocked: [fuck, shit, bitch, cunt, nigg, fagg, retard, rape, nazi, porn, sex, nude]
+
+tabloid:
+  cancelled:
+    - "{name} cancelled: what the internet says it was about"
+    - "The post that ended {name}'s good name online"
+    - "{name} loses a million followers in a week"
+  post:
+    - "Everyone is sharing what {name} posted"
+    - "{name}'s post: the thread everyone has read"

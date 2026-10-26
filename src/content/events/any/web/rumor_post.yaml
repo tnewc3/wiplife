@@ -1,0 +1,60 @@
+# Web reaction (online post): someone has heard about something you posted, or a row you were in.
+id: rumor_post
+title: What they saw online
+text: >-
+  {npc.name} has heard about something you put online: {heard}. {npc.They}
+  {npc:does|do} not make a big deal of it. {npc.They} {npc:asks|ask} you, over
+  coffee, whether it was true, in the way you ask when you are mostly sure it
+  was not.
+tone: neutral
+category: web
+rarity: common
+lifeStages: [teen, youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 13 } }
+    - { role: npc, alive: true, kind: [friend, sibling, parent, grandparent], heard: { kinds: [onlinePost], learned: [gossip] } }
+weight: { base: 9 }
+followUpOnly: true
+cast:
+  npc: { support: true, presence: anywhere }
+choices:
+  - id: set_it_straight
+    label: Tell {npc.them} what really happened
+    check:
+      base: 55
+      stats:
+        - { role: npc, key: trust, weight: 0.3 }
+        - { key: kindness, weight: 0.1 }
+      success:
+        text: >-
+          You give the short, honest version. {npc.name} nods, and says that
+          is not what it looked like from the outside, and you both agree that
+          little of what is said online looks like what it was.
+        effects:
+          - { type: knowledge, role: npc, action: correct }
+          - { type: relationship, role: npc, affection: 2, trust: 3 }
+      failure:
+        text: >-
+          It comes out sounding like an excuse, because you have heard
+          yourself make it three times already. {npc.name} says it is fine.
+          It is the kind of fine that stays in the room.
+        effects:
+          - { type: relationship, role: npc, trust: -2 }
+          - { type: stat, key: stress, delta: 2 }
+  - id: shrug_it_off
+    label: Shrug and say people will say anything
+    outcome:
+      text: >-
+        {npc.name} laughs, relieved that it can be a joke. The story goes on
+        without you being in it.
+      effects:
+        - { type: relationship, role: npc, affection: 1 }
+  - id: dont_discuss
+    label: Say you would rather not discuss it
+    outcome:
+      text: >-
+        {npc.They} {npc:lets|let} it drop at once and with some tact, and you
+        both talk about something else. You can tell it is not gone.
+      effects:
+        - { type: relationship, role: npc, trust: -1 }
