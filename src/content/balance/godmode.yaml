@@ -1,0 +1,19 @@
+# God mode (G1, docs/expansion.md): the limits an edit stays within. Starting proposals.
+
+money:
+  # The most savings an edit can set, in whole dollars (US prices).
+  savingsMax: 1000000000
+  # The largest balance one edited debt can have.
+  debtMax: 100000000
+  # Debts an edit can add, change or forgive. A mortgage, an auto loan and a business loan belong to the home, the vehicle
+  # or the business they paid for: sell or pay those off in the game.
+  debtKinds: [personal, student, medical, collections, bank, payday, shark]
+
+edit:
+  # The most fields one edit can change, and the largest payload (bytes of JSON).
+  maxFields: 40
+  maxPayloadBytes: 8192
+
+mood:
+  # How far one tap of a mood slider's − or + moves it.
+  step: 5

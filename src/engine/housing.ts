@@ -155,9 +155,9 @@ export function refreshHousingCost(state: LifeState, content: ContentBundle): vo
  * with it). Owning is set up by buyHome; a roommate never moves with you. A
  * partner living with you comes along to a new rental, but not back to your
  * parents' or onto the street. A new home is a fresh start: years behind on
- * the old one no longer count.
+ * the old one no longer count. `silent` (god mode) writes no history line and draws nothing.
  */
-export function moveTo(state: LifeState, kind: Exclude<HousingKind, 'owned'>, cityId: Id, content: ContentBundle): void {
+export function moveTo(state: LifeState, kind: Exclude<HousingKind, 'owned'>, cityId: Id, content: ContentBundle, silent = false): void {
   const partnerId = kind === 'renting' ? state.housing.partnerId : undefined;
   const before = countryIdOfCity(state.character.cityId, content);
   state.character.cityId = cityId;
@@ -169,7 +169,7 @@ export function moveTo(state: LifeState, kind: Exclude<HousingKind, 'owned'>, ci
   // E2a: children who live with you come along.
   relocateChildren(state);
   // W2: a group in the city you left is behind you.
-  lapseMoved(state, content);
+  lapseMoved(state, content, silent);
   refreshHousingCost(state, content);
 }
 
@@ -233,7 +233,7 @@ export function moveInTogether(state: LifeState, personId: Id, content: ContentB
  * divorce, a death) no longer does: you keep the home and its whole cost.
  * A breakup or divorce writes a history entry; a death has its own.
  */
-export function settleHousehold(state: LifeState, content: ContentBundle): void {
+export function settleHousehold(state: LifeState, content: ContentBundle, silent = false): void {
   const id = state.housing.partnerId;
   if (id === undefined) return;
   const rel = state.relationships[id];
@@ -241,7 +241,8 @@ export function settleHousehold(state: LifeState, content: ContentBundle): void 
   if (rel && isCurrentPartner(state, rel)) return;
   delete state.housing.partnerId;
   refreshHousingCost(state, content);
-  if (person?.alive) {
+  // G1: god mode moves a partner out without the history line (`silent`).
+  if (person?.alive && !silent) {
     writeFromGroup(
       state,
       content.text.history.home.movedApart,

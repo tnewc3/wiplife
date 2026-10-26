@@ -38,7 +38,7 @@ export const personNameSchema = (what: string) =>
 const pronounFormSchema = (what: string) =>
   text(what, PRONOUN_MAX, PRONOUN_PATTERN, 'Use letters only (hyphens and apostrophes are fine)');
 
-const freeTextSchema = (what: string) => text(what, LABEL_MAX, NO_CONTROL_CHARS, 'Remove special characters');
+export const freeTextSchema = (what: string) => text(what, LABEL_MAX, NO_CONTROL_CHARS, 'Remove special characters');
 
 const scoreSchema = z.int('Must be a whole number').min(0).max(100);
 

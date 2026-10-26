@@ -4,6 +4,7 @@ import { content } from '../content';
 import { COUNTRY_IDS, type ActionId, type ContentBundle, type CountryId, type GiftTier } from '../content/schemas';
 import { finishAction, performAction, type LifeActionId, type LifeActionParams } from '../engine/actions';
 import type { IdentityEditInput } from '../engine/discovery';
+import { ageBounds, checkEdit, EditRefusedError, performEdit, refusal, type AgeBounds, type EditResult } from '../engine/godmode';
 import { archiveEntry } from '../engine/archive';
 import { continueAsHeir, heirCandidates } from '../engine/estate/heir';
 import { getDeathView, type DeathView } from '../engine/estate/views';
@@ -46,7 +47,8 @@ export type ScreenId =
   | 'death'
   | 'archive'
   | 'archivedLife'
-  | 'settings';
+  | 'settings'
+  | 'godEditor';
 
 /** Bottom navigation tabs (docs/design.md, section K). */
 export type TabId = 'life' | 'people' | 'work' | 'money' | 'more';
@@ -101,6 +103,8 @@ export interface AppState {
   moreView: 'home' | 'health' | 'family' | 'will' | 'belongings' | 'teen' | 'later' | 'groups' | 'travel' | 'migration' | 'activities' | 'social' | null;
   /** Batch 8: where the Social screen was opened from, so Back goes there. */
   socialFrom: 'more' | 'work';
+  /** G1: who the god mode editor is open on: 'self' or a person's id. */
+  editorTarget: string | null;
   /** E1: the Interact sheet open on a person's page: the grouped menu, or the gift price tiers. */
   /** The Interact sheet: the menu, a gift's price tiers, or (E4) the picker for an interaction that needs another person or a story first. */
   interactSheet: { personId: string; view: 'menu' | 'gift' | 'pick'; /** The interaction a picker is for. */ pick?: string } | null;
@@ -108,6 +112,20 @@ export interface AppState {
   init: () => Promise<void>;
   confirmAge: () => Promise<void>;
   setTheme: (theme: Theme) => Promise<void>;
+  /** G1: the god mode switch in Settings. The engine never sees it; it only shows or hides the Edit buttons. */
+  setGodMode: (on: boolean) => Promise<void>;
+  /** G1: opens the god mode editor on you ('self') or a person; ignored unless the switch is on and the life is between years. */
+  openEditor: (target: string) => void;
+  closeEditor: () => void;
+  /** G1: whether an edit would pass the gate, the payload schema and the content rules. Changes nothing. */
+  previewEdit: (payload: unknown) => EditResult;
+  /** G1: whose age can be edited, and between which birth years. */
+  ageBoundsOf: (personId: string) => AgeBounds | null;
+  /**
+   * G1: makes an edit to the active life: every check, then the save schema pass, then commit and save. Resolves with the
+   * refusals (nothing changed, nothing saved) rather than throwing.
+   */
+  editLife: (payload: unknown) => Promise<EditResult>;
   /** Batch 6: saves the player's team settings (renamed, moved and added teams) for every new life. Throws SetupError for input that fails the checks. */
   saveTeams: (setup: TeamSetup) => Promise<void>;
   resetAllData: () => Promise<void>;
@@ -479,6 +497,7 @@ export function createAppStore({
         archive: null,
         archiveSelection: null,
         personId: null,
+        editorTarget: null,
         moreView: null,
         socialFrom: 'more',
         interactSheet: null,
@@ -541,6 +560,74 @@ export function createAppStore({
           set((s) => {
             s.settings = settings;
           });
+        },
+
+        setGodMode: async (on) => {
+          const settings = await updateSettings(db, { godMode: on });
+          set((s) => {
+            s.settings = settings;
+            // Turning it off hides every Edit button, and closes an editor that is open.
+            if (!on && s.screen === 'godEditor') s.screen = 'game';
+            if (!on) s.editorTarget = null;
+          });
+        },
+
+        openEditor: (target) => {
+          const { settings, life } = get();
+          if (!settings.godMode || !life || life.phase !== 'yearStart' || get().eventSheet) return;
+          if (target !== 'self' && !life.people[target]) return;
+          set((s) => {
+            s.editorTarget = target;
+            s.screen = 'godEditor';
+            s.interactSheet = null;
+          });
+        },
+
+        closeEditor: () =>
+          set((s) => {
+            s.editorTarget = null;
+            s.screen = s.life ? 'game' : 'title';
+          }),
+
+        previewEdit: (payload) => {
+          const life = get().life;
+          return life ? checkEdit(life, payload, bundle) : { ok: false, refusals: [refusal('life_over', 'target')] };
+        },
+
+        ageBoundsOf: (personId) => {
+          const life = get().life;
+          return life?.people[personId] ? ageBounds(life, personId, bundle) : null;
+        },
+
+        editLife: async (payload) => {
+          const life = get().life;
+          if (!life) return { ok: false, refusals: [refusal('life_over', 'target')] };
+          if (get().eventSheet || get().aging) return { ok: false, refusals: [refusal('card_open', 'target')] };
+          let result: EditResult = { ok: true };
+          await busy(async () => {
+            let candidate: LifeState;
+            try {
+              candidate = performEdit(life, payload, bundle);
+            } catch (err) {
+              if (err instanceof EditRefusedError) {
+                result = { ok: false, refusals: err.refusals };
+                return;
+              }
+              throw err;
+            }
+            // The schema pass: an accepted edit must satisfy exactly what loading a save demands.
+            const parsed = loadedLifeSchema(bundle).safeParse(candidate);
+            if (!parsed.success) {
+              result = { ok: false, refusals: [refusal('internal', 'target', { facts: { message: parsed.error.issues.map((i) => i.message).join('; ') } })] };
+              return;
+            }
+            try {
+              await commit(candidate);
+            } catch (err) {
+              result = { ok: false, refusals: [refusal('internal', 'target', { facts: { message: message(err) } })] };
+            }
+          });
+          return result as EditResult;
         },
 
         saveTeams: async (setup) => {

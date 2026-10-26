@@ -39,9 +39,9 @@ function fadeAfterLeaving(state: LifeState, people: readonly Id[], content: Cont
 }
 
 /** The memberships you can no longer keep because the group is in another city end quietly. */
-export function lapseMoved(state: LifeState, content: ContentBundle): void {
+export function lapseMoved(state: LifeState, content: ContentBundle, quiet = false): void {
   for (const m of [...state.belonging.memberships]) {
     const g = instanceOf(state, m.groupId);
-    if (!g || g.cityId !== state.character.cityId) leaveGroup(state, m.groupId, 'moved', content);
+    if (!g || g.cityId !== state.character.cityId) leaveGroup(state, m.groupId, 'moved', content, quiet);
   }
 }

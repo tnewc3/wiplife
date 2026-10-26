@@ -139,6 +139,8 @@ export interface SimulationReport {
   /** Batch 0: the life-years simulated and the milliseconds the whole run took (everything: actions, events, invariant checks). */
   performance: { years: number; ms: number };
   invariantFailures: number;
+  /** G1: god mode edit records in the simulated lives (the simulation never edits a life: this must be zero). */
+  editRecords: number;
   failureMessages: string[];
   lifespan: { median: number; p10: number; p90: number; youngest: number; oldest: number; under18: number };
   eventsPerYear: Record<LifeStage, StageYears>;
@@ -664,6 +666,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
   const maxMessages = options.maxFailureMessages ?? 20;
   const failureMessages: string[] = [];
   let invariantFailures = 0;
+  let editRecords = 0;
   const ages: number[] = [];
   const perYear = Object.fromEntries(STAGES.map((s) => [s, { years: 0, events: 0, belowMin: 0, most: 0 }])) as Record<
     LifeStage,
@@ -1337,6 +1340,13 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
     // E1: who reached maximum affection, being found out, and a sample of lives rebuilt from their input logs.
     interactions.lives++;
     interactions.affection.reachedMax += interactionWatcher.reachedMax.size;
+    // G1: the simulation never edits a life.
+    const edits = life.inputLog.filter((r) => r.kind === 'edit').length;
+    if (edits > 0) {
+      editRecords += edits;
+      invariantFailures++;
+      if (failureMessages.length < maxMessages) failureMessages.push(`${seed}: a simulated life has ${edits} edit record(s)`);
+    }
     interactions.affection.reachedMaxByInteractions += interactionWatcher.reachedByInteractions.size;
     for (const id of infidelityEvents) interactions.cheating.foundOut += firesThisLife.get(id) ?? 0;
     if (life.flags.unfaithful === true) interactions.cheating.foundOut += firesThisLife.get('affair_discovered') ?? 0;
@@ -1638,6 +1648,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
     player: playerKind,
     performance: { years: STAGES.reduce((sum, stage) => sum + perYear[stage].years, 0), ms: performance.now() - startedAt },
     invariantFailures,
+    editRecords,
     failureMessages,
     lifespan: {
       median: at(0.5),
@@ -1721,6 +1732,7 @@ export function formatReport(report: SimulationReport, content: ContentBundle): 
   const { lifespan } = report;
   lines.push(`Simulated ${report.lives} lives.`);
   lines.push(`Invariant failures: ${report.invariantFailures}`);
+  lines.push(`Edit records: ${report.editRecords}`);
   for (const m of report.failureMessages) lines.push(`  - ${m}`);
   lines.push(
     `Lifespan: median ${lifespan.median}, 10th percentile ${lifespan.p10}, 90th ${lifespan.p90}, youngest ${lifespan.youngest}, ` +

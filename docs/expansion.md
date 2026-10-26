@@ -1951,7 +1951,7 @@ Meet every B2 acceptance criterion. Run npm run check, npm run test:e2e (the gat
 
 ## G1 — God mode
 
-**Status:** planned (Batch 9a of `docs/post-expansion1-changes.md`). Nothing is built. On 2026-10-26 the user answered the open questions (age, minors' attraction, unmarked, money, jobs: as written) and chose **all** the other systems for v1; this revision adds them. The gate waits for the user's go-ahead; Batch 9b builds it.
+**Status:** G1a (the switch, the edit record, the engine action, the rules and refusals and the core areas) is built (Batch 9b of `docs/post-expansion1-changes.md`); see "G1a — God mode (as built)" in `docs/technical.md`. G1b ("The other systems", people added) is planned and not started. On 2026-10-26 the user answered the open questions (age, minors' attraction, unmarked, money, jobs: as written) and chose **all** the other systems for v1.
 
 **Objective:** Let a player switch on god mode in Settings and edit themselves and anyone in their life, one validated save at a time, without breaking the save schemas, the invariants, the content rules or the exact replay of the life. It extends the input log, the save schemas and the invariants that exist; it adds no second way to change a life and no mark on the life.
 
