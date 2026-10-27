@@ -965,6 +965,8 @@ Meet every G1 acceptance criterion. Upgrade saves and settings. Run npm run chec
 
 ## Batch 10 — Language and travel, expanded
 
+> **Built;** see "Batch 10 — Language and travel, expanded (as built)" in docs/technical.md for what was done, the figures and the deviations.
+
 **Objective:** Build on W4b and W5 once their gates are closed (Batch 0): more ways to learn and use languages, and more to do when you travel.
 
 ### Starting facts

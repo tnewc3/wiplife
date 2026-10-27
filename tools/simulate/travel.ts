@@ -58,7 +58,7 @@ export function chooseTravelAction(life: LifeState, content: ContentBundle): rea
   const companions = style === 'group' ? friends.slice(0, 2) : circle.length && chance(rng, policy.companionChance) ? [pick(rng, circle)] : [];
   const budget = pick(rng, ['budget', 'comfortable', 'splurge'] as const);
   const activity = chance(rng, 0.6) ? pick(rng, ['sightseeing', 'nightlife', 'adventure', 'food', 'immersion'] as const) : undefined;
-  const souvenir = chance(rng, policy.souvenirChance) ? pick(rng, ['small', 'small', 'keepsake', 'valuable'] as const) : undefined;
+  const souvenir = chance(rng, policy.souvenirChance) ? pick(rng, ['small', 'small', 'small', 'small', 'small', 'keepsake', 'keepsake', 'valuable'] as const) : undefined;
   const options = ds.filter((d) => (d.kind === 'cruise') === (style === 'cruise')).map((d) => ({ trip: { destinationId: d.id, budget, companions, ...(style !== 'vacation' ? { style } : {}), ...(activity ? { activity } : {}), ...(souvenir ? { souvenir } : {}) } })).filter((params) => isLifeActionAvailable(life, 'plan_trip', params, content));
   return options.length ? ['plan_trip', pick(rng, options)] : null;
 }
