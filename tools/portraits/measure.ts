@@ -45,6 +45,8 @@ const base = `http://127.0.0.1:${(server.address() as { port: number }).port}`;
 async function newPage(browser: Awaited<ReturnType<typeof chromium.launch>>) {
   const context = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
   const page = await context.newPage();
+  // tsx's compiler wraps named functions in a __name helper that does not exist in the page.
+  await page.addInitScript('window.__name = (f) => f');
   const cdp = await context.newCDPSession(page);
   return { context, page, cdp };
 }

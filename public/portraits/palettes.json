@@ -1,0 +1,186 @@
+{
+  "skin": [
+    {
+      "id": "porcelain",
+      "name": "Porcelain",
+      "color": "#F2D8C9",
+      "lips": "#BD8074"
+    },
+    {
+      "id": "fair",
+      "name": "Fair",
+      "color": "#E8BB99",
+      "lips": "#B0735E"
+    },
+    {
+      "id": "warm_light",
+      "name": "Warm light",
+      "color": "#DDA67A",
+      "lips": "#A7654B"
+    },
+    {
+      "id": "golden_tan",
+      "name": "Golden tan",
+      "color": "#BF895B",
+      "lips": "#98573F"
+    },
+    {
+      "id": "olive",
+      "name": "Olive",
+      "color": "#AB8E67",
+      "lips": "#895B49"
+    },
+    {
+      "id": "medium_brown",
+      "name": "Medium brown",
+      "color": "#925F41",
+      "lips": "#784834"
+    },
+    {
+      "id": "deep_brown",
+      "name": "Deep brown",
+      "color": "#653E2C",
+      "lips": "#603B32"
+    },
+    {
+      "id": "very_deep_brown",
+      "name": "Very deep brown",
+      "color": "#41281F",
+      "lips": "#4D302B"
+    }
+  ],
+  "hair": [
+    {
+      "id": "black",
+      "name": "Black",
+      "color": "#201E1E",
+      "brows": "#1D1A19"
+    },
+    {
+      "id": "dark_brown",
+      "name": "Dark brown",
+      "color": "#432B20",
+      "brows": "#332219"
+    },
+    {
+      "id": "chestnut",
+      "name": "Chestnut",
+      "color": "#75482C",
+      "brows": "#513522"
+    },
+    {
+      "id": "copper",
+      "name": "Copper",
+      "color": "#AB5832",
+      "brows": "#70462D"
+    },
+    {
+      "id": "blond",
+      "name": "Blond",
+      "color": "#C6A56A",
+      "brows": "#8F744F"
+    },
+    {
+      "id": "silver",
+      "name": "Silver",
+      "color": "#B4B3B1",
+      "brows": "#8C8A86"
+    }
+  ],
+  "eyes": [
+    {
+      "id": "brown",
+      "name": "Brown",
+      "color": "#69432A"
+    },
+    {
+      "id": "hazel",
+      "name": "Hazel",
+      "color": "#888047"
+    },
+    {
+      "id": "green",
+      "name": "Green",
+      "color": "#577B55"
+    },
+    {
+      "id": "blue",
+      "name": "Blue",
+      "color": "#427BAA"
+    },
+    {
+      "id": "gray",
+      "name": "Gray",
+      "color": "#7B8990"
+    },
+    {
+      "id": "amber",
+      "name": "Amber",
+      "color": "#AF7D2C"
+    }
+  ],
+  "clothing": [
+    {
+      "id": "navy",
+      "name": "Navy",
+      "color": "#334E78"
+    },
+    {
+      "id": "sage",
+      "name": "Sage",
+      "color": "#64826C"
+    },
+    {
+      "id": "cream",
+      "name": "Cream",
+      "color": "#D9CFB6"
+    },
+    {
+      "id": "plum",
+      "name": "Plum",
+      "color": "#72536D"
+    },
+    {
+      "id": "charcoal",
+      "name": "Charcoal",
+      "color": "#41464D"
+    },
+    {
+      "id": "rust",
+      "name": "Rust",
+      "color": "#AA5F46"
+    }
+  ],
+  "hats": [
+    {
+      "id": "navy",
+      "name": "Navy",
+      "color": "#334E78"
+    },
+    {
+      "id": "sage",
+      "name": "Sage",
+      "color": "#64826C"
+    },
+    {
+      "id": "cream",
+      "name": "Cream",
+      "color": "#D9CFB6"
+    },
+    {
+      "id": "plum",
+      "name": "Plum",
+      "color": "#72536D"
+    },
+    {
+      "id": "charcoal",
+      "name": "Charcoal",
+      "color": "#41464D"
+    },
+    {
+      "id": "rust",
+      "name": "Rust",
+      "color": "#AA5F46"
+    }
+  ]
+}
