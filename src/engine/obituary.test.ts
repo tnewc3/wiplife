@@ -220,7 +220,8 @@ describe('archive entry', () => {
       generation: 1,
     });
     expect(entry.obituary).toBe(writeObituary(dead, content));
-    expect(entry.highlights).toEqual(dead.history);
+    // Money lines (U1) can push a life's history past the highlight limit: the most important are kept.
+    expect(entry.highlights).toEqual(selectHighlights(dead.history, content));
   });
 
   it('marks a life that is still going as unfinished', () => {

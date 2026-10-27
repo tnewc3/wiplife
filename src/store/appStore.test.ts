@@ -72,7 +72,7 @@ describe('app store: lives', () => {
     const { life, screen, tab } = store.getState();
     expect(life?.seed).toBe('test-seed-1');
     expect(life?.birthYear).toBe(2026);
-    expect([screen, tab]).toEqual(['game', 'life']);
+    expect([screen, tab]).toEqual(['game', 'home']);
     const saved = await readSave(db, lifeStateSchema);
     expect(saved.status === 'ok' && saved.envelope.data).toEqual(life);
   });
