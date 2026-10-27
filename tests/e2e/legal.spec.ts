@@ -26,7 +26,6 @@ test('arrest, the years inside with only prison events and a few actions, then r
   const banner = page.getByTestId('prison-banner');
   await expect(banner).toContainText('In prison');
   await expect(banner).toContainText('released in 3 years');
-  await expect(page.getByText(/ · In prison$/)).toBeVisible();
   await expectNoHorizontalScroll(page);
   await expectTouchTargets(page);
 

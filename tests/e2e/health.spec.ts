@@ -31,7 +31,7 @@ test('More → Health shows your health and lets you see a doctor once a year', 
   // Once a year.
   await expect(page.getByTestId('doctor-status')).toHaveText('You saw a doctor this year. You can go again next year.');
   await page.getByRole('button', { name: 'Back to Home' }).click();
-  await expect(page.getByRole('button', { name: 'Health', exact: true })).toBeVisible();
+  await expect(page.getByTestId('life-log')).toBeVisible();
 });
 
 test('More → Health → Mind and mood names nothing until diagnosed, and lets you see a therapist once a year', async ({ page }) => {

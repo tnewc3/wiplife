@@ -19,14 +19,14 @@ async function openFixture(page: Page): Promise<void> {
   await settle(page);
 }
 
-async function openPerson(page: Page, list: 'Family' | 'Friends', name: RegExp): Promise<void> {
+async function openPerson(page: Page, list: 'Siblings' | 'Parents' | 'Friends', name: RegExp): Promise<void> {
   await tab(page, 'People').click();
   await page.getByRole('list', { name: list }).getByRole('button', { name }).click();
 }
 
 test("a person's page shows who they are close to and who they are feuding with", async ({ page }) => {
   await openFixture(page);
-  await openPerson(page, 'Family', /Dolores/);
+  await openPerson(page, 'Parents', /Dolores/);
   const card = page.getByTestId('connections');
   await expect(card.getByRole('heading', { name: 'Connections' })).toBeVisible();
   await expect(card).toContainText('Frank Rivera, your father');
@@ -64,7 +64,7 @@ test("a close person's page shows what they have heard about you, their version 
 
 test('introducing two people you know: pick who, and they have a tie', async ({ page }) => {
   await openFixture(page);
-  await openPerson(page, 'Family', /Rae/);
+  await openPerson(page, 'Siblings', /Rae/);
   await expect(page.getByTestId('connections')).not.toContainText('Marcus');
   await page.getByTestId('interact-button').click();
   await page.getByTestId('interaction-introduce').click();

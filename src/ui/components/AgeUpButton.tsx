@@ -13,15 +13,13 @@ function buzz(): void {
 
 /**
  * The Age button (U1): the big coral button between the tabs. Disabled while a year is advancing, so rapid taps can't
- * advance two years (the store and the engine guard against it too). Ages up from any tab, then shows Home, where the
- * year's story is.
+ * advance two years (the store and the engine guard against it too). Ages up from any tab and stays on it.
  */
 export function AgeUpButton() {
   const aging = useAppStore((s) => s.aging);
   // 'yearEnd' only after an interrupted year; Age then finishes it.
   const ready = useAppStore((s) => (s.life ? canAgeUp(s.life) || s.life.phase === 'yearEnd' : false));
   const ageUp = useAppStore((s) => s.ageUp);
-  const setTab = useAppStore((s) => s.setTab);
   return (
     <button
       type="button"
@@ -31,7 +29,6 @@ export function AgeUpButton() {
       data-testid="age-up"
       onClick={() => {
         buzz();
-        setTab('home');
         void ageUp();
       }}
       className="font-display flex size-[4.5rem] shrink-0 -translate-y-3 flex-col items-center justify-center rounded-full border-4 border-bg bg-age text-age-contrast shadow-lg transition-transform select-none active:scale-90 enabled:active:animate-[wl-pop_220ms_ease-out] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-link disabled:cursor-not-allowed disabled:opacity-50"

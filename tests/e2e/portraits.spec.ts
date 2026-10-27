@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-import { expectNoHorizontalScroll, expectTouchTargets, passAgeGate, settle, startRandomLife, tab } from './helpers';
+import { expectNoHorizontalScroll, expectTouchTargets, passAgeGate, settle, startRandomLife, tab, familyLists } from './helpers';
 
 
 /** Waits until a portrait inside `scope` has drawn (an image rather than the placeholder silhouette). */
@@ -14,7 +14,7 @@ test('your portrait is on Home, and the people you know have theirs in the Peopl
   await expect(page.getByRole('img', { name: /^Portrait of / }).first()).toBeVisible();
 
   await tab(page, 'People').click();
-  const rows = page.getByRole('list', { name: 'Parents' }).getByRole('listitem');
+  const rows = familyLists(page).getByRole('listitem');
   expect(await rows.count()).toBeGreaterThanOrEqual(1);
   await portraitDrawn(rows.first());
   await expectNoHorizontalScroll(page);
@@ -29,7 +29,7 @@ test('thumbnails are cached: after a reload Home and the People list draw withou
   await startRandomLife(page, { seed: 'e2e-portraits-cache' });
   await portraitDrawn(page.getByTestId('character-portrait').first());
   await tab(page, 'People').click();
-  const rows = page.getByRole('list', { name: 'Parents' }).getByRole('listitem');
+  const rows = familyLists(page).getByRole('listitem');
   const count = await rows.count();
   // A portrait is drawn when its row scrolls into view, so scroll through the list.
   for (let i = 0; i < count; i++) {

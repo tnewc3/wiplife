@@ -10,6 +10,7 @@ import type { ContentBundle } from '../../src/content/schemas';
 import { createLife } from '../../src/engine/life';
 import { lifeStageForAge } from '../../src/engine/systems/aging';
 import type { HistoryEntry, LifeState } from '../../src/engine/types';
+import { emptyWeb } from '../../src/engine/web/ties';
 import { peopleLife } from './peopleFixtures';
 
 const pack = () => JSON.parse(readFileSync(path.resolve('src/content/compiled/test-content.json'), 'utf8')) as ContentBundle;
@@ -42,5 +43,14 @@ export function centuryLife(seed: string): LifeState {
     }
     d.history = history.slice(0, 500);
     d.finances.savings = 5_099;
+    // A century on, everyone who was alive at your birth has died.
+    for (const person of Object.values(d.people)) {
+      person.alive = false;
+      person.deathYear = d.currentYear - 20;
+    }
+    d.web = emptyWeb();
+    const stats = { ...d.character.stats };
+    d.recap = { year: d.currentYear, age, statsBefore: stats, statsAfter: { ...stats } };
+    d.lifetime = { happinessTotal: d.character.stats.happiness * age, years: age };
   });
 }

@@ -65,7 +65,7 @@ test('gig work from 16, the Money tab and the recap money line', async ({ page }
 test('moving out and relocating from More → Home', async ({ page }) => {
   test.setTimeout(150_000);
   await startRandomLife(page, PACK);
-  const city = ((await page.getByText(/ · (Chicago|Houston|Los Angeles|New York|Small Town) · /).textContent()) ?? '').split(' · ')[1]!;
+  const city = (await page.getByRole('banner').innerText()).match(/Chicago|Houston|Los Angeles|New York|Small Town/)![0];
 
   // A child can't choose where to live.
   await openPage(page, 'properties');
@@ -101,12 +101,12 @@ test('moving out and relocating from More → Home', async ({ page }) => {
 
   // The Life tab and the story show the move, and it all survives a reload.
   await goHome(page);
-  await expect(page.getByText(new RegExp(` · ${newCity} · `))).toBeVisible();
+  await expect(page.getByRole('banner')).toContainText(newCity);
   await expect(page.getByTestId('life-log')).toContainText(`to ${newCity}`);
   await page.reload();
   await page.getByRole('button', { name: 'Continue' }).click();
   await openPage(page, 'properties');
   await expect(page.getByTestId('housing-line')).toHaveText(`Renting in ${newCity}`);
   await page.getByRole('button', { name: 'Back to Assets' }).click();
-  await expect(page.getByRole('button', { name: 'Life history' })).toBeVisible();
+  await expect(page.getByTestId('assets-properties')).toBeVisible();
 });

@@ -7,7 +7,7 @@
  * quitting, and the career in Life history, at phone size.
  */
 import { expect, test, type Page } from '@playwright/test';
-import { ageUp, ageUpTimes, createCustomLife, eventSheet, expectNoHorizontalScroll, expectTouchTargets, goHome, passAgeGate, settle, tab, type CustomLifeData } from './helpers';
+import { openPage, ageUp, ageUpTimes, createCustomLife, eventSheet, expectNoHorizontalScroll, expectTouchTargets, goHome, passAgeGate, settle, tab, type CustomLifeData } from './helpers';
 
 
 const WORKER: CustomLifeData = {
@@ -107,7 +107,7 @@ test('job search, an interview, a promotion, a raise and quitting', async ({ pag
   await page.getByRole('button', { name: 'Continue' }).click();
   await ageUp(page);
   await goHome(page);
-  await page.getByRole('button', { name: 'See your whole life' }).click();
+  await openPage(page, 'lifeHistory');
   const career = page.getByRole('list', { name: 'Career history' });
   await expect(career).toContainText('Office assistant');
   await expect(career).toContainText('You quit');

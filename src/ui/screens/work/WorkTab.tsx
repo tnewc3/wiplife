@@ -75,7 +75,7 @@ export function WorkTab({ life }: { life: LifeState }) {
           <BusinessCard life={life} />
         </WayRow>
         {abroad && (
-          <WayRow title="Time abroad" defaultOpen={Boolean(life.travel.residence)}>
+          <WayRow title="Time abroad">
             <AbroadCard life={life} />
           </WayRow>
         )}

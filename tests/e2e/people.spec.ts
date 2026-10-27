@@ -6,7 +6,7 @@
  * men, and meets a man.
  */
 import { expect, test, type Page } from '@playwright/test';
-import { ageUp, ageUpTimes, eventSheet, expectNoHorizontalScroll, expectTouchTargets, familyLists, goHome, openPage, settle, startRandomLife, tab } from './helpers';
+import { goHome, ageUp, ageUpTimes, eventSheet, expectNoHorizontalScroll, expectTouchTargets, familyLists, openPage, settle, startRandomLife, tab } from './helpers';
 
 const LOVE = { testPack: true, seed: 'e2e-love' };
 
@@ -78,7 +78,7 @@ test('dating, engagement, moving in, marriage and divorce from the person page',
   expect(await act(page, 'Ask out', 'Ask')).toContain('says yes');
   await expect(line).toContainText(/^Boyfriend · /);
   await expect(actions(page)).toHaveCount(0);
-  await goHome(page);
+  await tab(page, 'People').click();
   await expect(page.getByTestId('romance-line')).toHaveText(`Dating ${name}`);
 
   // A year later: propose → engaged.
@@ -108,7 +108,7 @@ test('dating, engagement, moving in, marriage and divorce from the person page',
   await act(page, 'Get married');
   await expect(line).toContainText(/^Husband · /);
   await expect(page.getByRole('list', { name: 'Memories' })).toContainText('Married you');
-  await goHome(page);
+  await tab(page, 'People').click();
   await expect(page.getByTestId('romance-line')).toHaveText(`Married to ${name}`);
 
   // A year later: divorce asks first, and can be cancelled.
@@ -135,8 +135,9 @@ test('dating, engagement, moving in, marriage and divorce from the person page',
   await expect(line).toContainText(/^Ex-spouse · /);
   await expect(page.getByRole('list', { name: 'Memories' })).toContainText('Divorced you');
 
-  await goHome(page);
+  await tab(page, 'People').click();
   await expect(page.getByTestId('romance-line')).toHaveCount(0);
+  await goHome(page);
   await expect(page.getByTestId('life-log')).toContainText(`You and ${first} divorced.`);
   await expect(page.getByTestId('life-log')).toContainText(`You married ${first}.`);
   // Divorced, they move out; you keep the home.

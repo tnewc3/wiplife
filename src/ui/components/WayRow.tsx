@@ -28,7 +28,6 @@ export function WayRow({ title, status, reason, defaultOpen = true, children, te
         type="button"
         aria-expanded={open}
         aria-controls={bodyId}
-        aria-disabled={locked || undefined}
         onClick={() => setOpen((o) => !o)}
         className={`flex min-h-14 w-full items-center gap-3 rounded-2xl border border-border bg-surface px-4 text-left active:bg-surface-2 ${locked ? 'opacity-60' : ''}`}
       >

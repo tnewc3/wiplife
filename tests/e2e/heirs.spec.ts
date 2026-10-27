@@ -94,7 +94,7 @@ test('death settles the estate; continue as a child of 9: Previously, trust, fam
   await expectTouchTargets(page);
 
   // Their story begins with the childhood recap.
-  await page.getByRole('button', { name: 'See your whole life' }).click();
+  await openPage(page, 'lifeHistory');
   await expect(page.getByRole('heading', { name: 'Life history' })).toBeVisible();
   await expect(page.getByText(/died at 52/)).toBeVisible();
   await page.getByRole('button', { name: /Back/ }).click();

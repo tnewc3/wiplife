@@ -69,7 +69,8 @@ test('a custom life uses every choice and persists', async ({ page }) => {
   // One parent, two siblings and (C1) the parent's two parents.
   await expect(page.getByRole('list', { name: 'Parents' }).getByRole('listitem')).toHaveCount(1);
   await expect(page.getByRole('list', { name: 'Siblings' }).getByRole('listitem')).toHaveCount(2);
-  await expect(page.getByRole('list', { name: 'Other family' }).getByRole('listitem').filter({ hasText: /Grand/ })).toHaveCount(2);
+  // The parent's parents: living ones are under Other family, and a grandparent who has died is under Late relationships.
+  await expect(page.getByTestId('game-main').getByRole('listitem').filter({ hasText: /Grand(mother|father|parent)/ })).toHaveCount(2);
   await expect(page.getByRole('list', { name: 'Parents' }).getByRole('listitem').filter({ hasText: 'Nguyễn' })).toHaveCount(1);
   await expect(page.getByRole('list', { name: 'Siblings' }).getByRole('listitem').filter({ hasText: 'Nguyễn' })).toHaveCount(2);
 

@@ -33,6 +33,7 @@ test('from high school to a college degree, paid with a student loan', async ({ 
 
   // Kindergarten starts on its own.
   await ageUpTimes(page, 5);
+  await tab(page, 'Job').click();
   await expect(page.getByTestId('school-status')).toContainText('Kindergarten');
   await goHome(page);
   await expect(page.getByTestId('school-line')).toHaveText('In kindergarten');
