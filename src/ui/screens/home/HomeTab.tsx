@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import { content } from '../../../content';
-import { getCharacterSummary, getFamilyView, getFamily, getHistoryFeed, getLaterView, getNews, getPreviously, getYearRecap } from '../../../engine/selectors';
+import { getCharacterSummary, getPortrait, getFamilyView, getFamily, getHistoryFeed, getLaterView, getNews, getPreviously, getYearRecap } from '../../../engine/selectors';
 import type { LifeState, Stats } from '../../../engine/types';
 import { useAppStore } from '../../../store/appStore';
 import { Button } from '../../components/Button';
 import { Card } from '../../components/Card';
 import { StatBar } from '../../components/StatBar';
 import { YearRecapList } from '../../components/YearRecapList';
+import { CharacterPortrait } from '../../portraits/CharacterPortrait';
 import { ProfileSheet } from './ProfileSheet';
 import {
   ageLabel,
@@ -169,7 +170,8 @@ export function HomeTab({ life }: { life: LifeState }) {
       <PreviouslyCard life={life} />
       <Card>
         <div className="flex items-start justify-between gap-3">
-          <h2 className="min-w-0 text-2xl leading-tight font-bold break-words [overflow-wrap:anywhere]" data-testid="character-name">
+          <CharacterPortrait portrait={getPortrait(life, 'you', content)} size={64} label={`Portrait of ${summary.fullName}`} />
+          <h2 className="min-w-0 flex-1 text-2xl leading-tight font-bold break-words [overflow-wrap:anywhere]" data-testid="character-name">
             {summary.fullName}
           </h2>
           <Button variant="secondary" className="shrink-0" onClick={() => setProfileOpen(true)}>

@@ -5,16 +5,17 @@ import { pronounsFromPreset } from '../../../engine/creation/character';
 import { InvalidInputError } from '../../../engine/creation/input';
 import { identityEditIssues, type IdentityEditInput } from '../../../engine/discovery';
 import { LANGUAGE_LEVELS } from '../../../engine/languages';
-import { getBelongingView, getProfileView, getPronounPresets } from '../../../engine/selectors';
+import { getBelongingView, getPortrait, getPortraitBody, getProfileView, getPronounPresets } from '../../../engine/selectors';
 import type { GenderCategory, LifeState, Personality, Pronouns } from '../../../engine/types';
 import { useAppStore } from '../../../store/appStore';
 import { Button } from '../../components/Button';
 import { Card } from '../../components/Card';
 import { SingleChoice, Suggestions } from '../../components/Choices';
 import { Sheet } from '../../components/Sheet';
+import { CharacterPortrait } from '../../portraits/CharacterPortrait';
 import { StatBar } from '../../components/StatBar';
 import { TextField } from '../../components/TextField';
-import { GOD_MODE_LABELS, ATTRACTION_LABELS, STATUS_LABELS, FAITH_STRENGTH_WORDS, EXAM_LEVEL_LABELS, EXAM_ODDS_LABELS, LANGUAGE_LEVEL_LABELS, LANGUAGE_NATIVE_LABEL, money, GROUPS_TITLES, recordLine, roleLine, TRAIT_LABELS, VALUE_LABELS } from '../../labels';
+import { BODY_TYPE_LABELS, GOD_MODE_LABELS, ATTRACTION_LABELS, STATUS_LABELS, FAITH_STRENGTH_WORDS, EXAM_LEVEL_LABELS, EXAM_ODDS_LABELS, LANGUAGE_LEVEL_LABELS, LANGUAGE_NATIVE_LABEL, money, GROUPS_TITLES, recordLine, roleLine, TRAIT_LABELS, VALUE_LABELS } from '../../labels';
 
 const PRONOUN_FIELDS: { key: Exclude<keyof Pronouns, 'verbPlural'>; label: string; example: string }[] = [
   { key: 'subject', label: 'Subject', example: 'they' },
@@ -190,6 +191,7 @@ function IdentityForm({ life, onDone }: { life: LifeState; onDone: () => void })
  */
 export function ProfileSheet({ life, open, onClose }: { life: LifeState; open: boolean; onClose: () => void }) {
   const view = getProfileView(life, content);
+  const portraitBody = getPortraitBody(life, content);
   const act = useAppStore((s) => s.takeLifeAction);
   const busy = useAppStore((s) => s.aging);
   const [languageChoice, setLanguageChoice] = useState("");
@@ -220,6 +222,23 @@ export function ProfileSheet({ life, open, onClose }: { life: LifeState; open: b
       ) : (
         <div className="flex flex-col gap-5">
           <section aria-labelledby="profile-identity">
+            <div className="flex flex-col items-center gap-2 pb-2">
+              <CharacterPortrait portrait={getPortrait(life, 'you', content)} size={200} label={`Portrait of ${view.fullName}`} />
+              <div className="flex gap-2" role="group" aria-label="Portrait body type">
+                {(['male', 'female'] as const).map((body) => (
+                  <Button
+                    key={body}
+                    variant={portraitBody === body ? 'primary' : 'secondary'}
+                    aria-pressed={portraitBody === body}
+                    disabled={busy || life.phase === 'dead'}
+                    data-testid={`portrait-body-${body}`}
+                    onClick={() => void act('set_body', { body })}
+                  >
+                    {BODY_TYPE_LABELS[body]}
+                  </Button>
+                ))}
+              </div>
+            </div>
             <h3 id="profile-identity" className="text-lg font-bold break-words [overflow-wrap:anywhere]">
               {view.fullName}
             </h3>

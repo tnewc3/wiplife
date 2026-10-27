@@ -8,7 +8,8 @@ import { writeFuneral } from './eulogy';
 import { writeReview } from './later/review';
 import { netWorth } from './finance';
 import { writeObituary } from './obituary';
-import type { ArchivedLife, HistoryEntry, LifeState } from './types';
+import type { ArchivedLife, HistoryEntry, LifeState, Look } from './types';
+import { yourLook } from './looks/query';
 
 export { netWorth } from './finance';
 
@@ -59,6 +60,7 @@ export function archiveEntry(life: LifeState, content: ContentBundle, heirName?:
     lineId: life.lineage.lineId,
     familyName: life.lineage.familyName,
     familyReputation: life.lineage.reputation,
+    look: JSON.parse(JSON.stringify(yourLook(life, content))) as Look,
   };
   if (life.lineage.parentLifeId !== undefined) entry.parentLifeId = life.lineage.parentLifeId;
   if (heirName !== undefined) entry.heirName = heirName;

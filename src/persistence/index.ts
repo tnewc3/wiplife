@@ -15,6 +15,7 @@ export { CURRENT_SCHEMA_VERSION, envelopeSchema, makeEnvelope, type SaveEnvelope
 export { assertMigrationChain, migrateEnvelope, MigrationError, migrations, type Migration } from './migrations';
 export { lifeStateSchema, loadedLifeSchema } from './lifeSchema';
 export { clearAllData } from './reset';
+export { createThumbnailDb, thumbnailKey, ThumbnailStore, THUMBNAIL_DB_NAME, type ThumbnailDb } from './thumbnails';
 export { requestPersistentStorage } from './storage';
 export { readSave, writeSave, type LoadResult } from './saves';
 export {

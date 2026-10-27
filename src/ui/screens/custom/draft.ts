@@ -6,13 +6,19 @@ import type { ContentBundle } from '../../../content/schemas';
 import { pronounsFromPreset } from '../../../engine/creation/character';
 import { customLifeInputSchema, type CustomLifeInput } from '../../../engine/creation/input';
 import { getPronounPresets } from '../../../engine/selectors';
-import type { FamilyWealth, GenderCategory, Personality, Pronouns, Stats } from '../../../engine/types';
+import { rollLook } from '../../../engine/looks/generate';
+import { createRng } from '../../../engine/rng';
+import type { BodyType, FamilyWealth, GenderCategory, Look, Personality, Pronouns, Stats } from '../../../engine/types';
+import { STAGE_OPTIONS } from '../../../portraits/availability';
 
 export interface Draft {
   first: string;
   last: string;
-  /** Selected option per appearance group id; '' means none. */
-  appearance: Record<string, string>;
+  /** P1: how you look, always a whole look (the preview needs one). "Surprise me" rolls the next one from `surprises`. */
+  look: Look;
+  surprises: number;
+  /** The age the Look step previews you at. */
+  previewAge: number;
   extraDescriptor: string;
   genderIdentity: string;
   genderCategory: GenderCategory | null;
@@ -37,7 +43,8 @@ export interface Draft {
 }
 
 export const STEPS = [
-  { id: 'name', title: 'Name and looks', fields: ['name', 'appearance'] },
+  { id: 'name', title: 'Your name', fields: ['name', 'appearance'] },
+  { id: 'look', title: 'Your look', fields: ['look'] },
   { id: 'identity', title: 'Identity', fields: ['identity', 'canCarry'] },
   { id: 'family', title: 'Family', fields: ['family', 'familyWealth', 'faith'] },
   { id: 'city', title: 'Where you’re born', fields: ['countryId', 'cityId'] },
@@ -49,11 +56,33 @@ export type Errors = Record<string, string>;
 
 const MIDDLE = 50;
 
+/** The age the Look step starts previewing you at. */
+export const PREVIEW_AGE = 25;
+
+/** A whole look rolled from the creation screen's own generator ("Surprise me" number `n`); nothing here touches a life's random stream. */
+export function surpriseLook(content: ContentBundle, n: number, body: BodyType): Look {
+  return rollLook(createRng(`create-look-${n}`), content, body);
+}
+
+/** The body type a gender category starts you with (a nonbinary character keeps whichever they have). */
+export function bodyFor(category: GenderCategory, current: BodyType): BodyType {
+  return category === 'man' ? 'male' : category === 'woman' ? 'female' : current;
+}
+
+/** The same look on another body: a hairstyle the new body does not offer becomes its first one. */
+export function withBody(look: Look, body: BodyType): Look {
+  if (look.body === body) return look;
+  const styles = STAGE_OPTIONS.young_adult.hairstyles[body];
+  return { ...look, body, hairstyle: styles.includes(look.hairstyle) ? look.hairstyle : (styles[0] as Look['hairstyle']), facialHair: body === 'female' ? 'none' : look.facialHair };
+}
+
 export function initialDraft(content: ContentBundle): Draft {
   return {
     first: '',
     last: '',
-    appearance: Object.fromEntries(content.character.appearance.groups.map((g) => [g.id, ''])),
+    look: surpriseLook(content, 0, 'female'),
+    surprises: 0,
+    previewAge: PREVIEW_AGE,
     extraDescriptor: '',
     genderIdentity: '',
     genderCategory: null,
@@ -110,6 +139,7 @@ export function changeCategory(draft: Draft, category: GenderCategory, content: 
     draft[key] === empty || (prev !== null && draft[key] === prev[key]);
   return {
     genderCategory: category,
+    look: withBody(draft.look, bodyFor(category, draft.look.body)),
     genderIdentity: isAuto('genderIdentity', '') ? next.genderIdentity : draft.genderIdentity,
     genderExpression: isAuto('genderExpression', '') ? next.genderExpression : draft.genderExpression,
     pronounChoice: isAuto('pronounChoice', null) ? next.pronounChoice : draft.pronounChoice,
@@ -125,8 +155,8 @@ export function draftPronouns(draft: Draft, content: ContentBundle): Pronouns {
 
 /** Builds engine input. Unchosen fields get placeholders; validateDraft reports them. */
 export function toCustomInput(draft: Draft, content: ContentBundle): CustomLifeInput {
-  const descriptors = content.character.appearance.groups.map((g) => draft.appearance[g.id] ?? '').filter((d) => d !== '');
-  if (draft.extraDescriptor.trim() !== '') descriptors.push(draft.extraDescriptor);
+  // Hair and eye text follow the look (the engine writes it); only the player's own words go here.
+  const descriptors = draft.extraDescriptor.trim() !== '' ? [draft.extraDescriptor] : [];
   return {
     name: { first: draft.first, last: draft.last },
     identity: {
@@ -139,6 +169,7 @@ export function toCustomInput(draft: Draft, content: ContentBundle): CustomLifeI
     // Women can carry a pregnancy and men can't; only a nonbinary character chooses.
     ...(draft.genderCategory === 'nonbinary' && draft.canCarry !== null ? { canCarry: draft.canCarry } : {}),
     appearance: { descriptors },
+    look: draft.look,
     cityId: draft.cityId ?? '',
     familyWealth: draft.familyWealth ?? 'middle',
     ...(draft.faith !== 'family' ? { faith: draft.faith } : {}),

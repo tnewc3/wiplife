@@ -1,7 +1,9 @@
-import { groupArchiveByLine } from '../../../engine/selectors';
+import { content } from '../../../content';
+import { getArchivedPortrait, groupArchiveByLine } from '../../../engine/selectors';
 import { useAppStore } from '../../../store/appStore';
 import { Card } from '../../components/Card';
 import { Screen } from '../../components/Screen';
+import { CharacterPortrait } from '../../portraits/CharacterPortrait';
 import { lifespanLabel, reputationWords } from '../../labels';
 
 /** Every past life, grouped into family lines, most recent line first. */
@@ -41,8 +43,10 @@ export function ArchiveScreen() {
                           <button
                             type="button"
                             onClick={() => open(life.id)}
-                            className="flex min-h-11 w-full flex-col items-start gap-0.5 rounded-card border border-border bg-surface p-4 text-left active:bg-surface-2"
+                            className="flex min-h-11 w-full items-start gap-3 rounded-card border border-border bg-surface p-4 text-left active:bg-surface-2"
                           >
+                            {getArchivedPortrait(life, content) && <CharacterPortrait portrait={getArchivedPortrait(life, content)!} size={48} label={`Portrait of ${life.name}`} />}
+                            <span className="flex min-w-0 flex-1 flex-col items-start gap-0.5">
                             <span className="text-sm font-semibold text-muted">Generation {life.generation}</span>
                             <span className="w-full font-semibold break-words [overflow-wrap:anywhere]">{life.name}</span>
                             <span className="text-sm text-muted">
@@ -50,6 +54,7 @@ export function ArchiveScreen() {
                             </span>
                             <span className="text-sm text-muted">{life.unfinished ? 'Unfinished' : `Died of ${life.causeOfDeath ?? 'unknown causes'}`}</span>
                             {life.heirName && <span className="text-sm text-muted">Carried on by {life.heirName}</span>}
+                            </span>
                           </button>
                         </li>
                       ))}

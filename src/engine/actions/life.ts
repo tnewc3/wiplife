@@ -22,7 +22,7 @@ import { buyHome, joinableParent, moveInCost, moveTo, purchaseQuote, refreshHous
 import { afterMove } from '../career';
 import { canGig } from '../systems/career';
 import { writeFromGroup } from '../systems/history';
-import type { LifeState, WillShare } from '../types';
+import type { BodyType, LifeState, WillShare } from '../types';
 import { CAREER_ACTION_IDS, CAREER_ACTIONS } from './career';
 import { EDUCATION_ACTION_IDS, EDUCATION_ACTIONS } from './education';
 import { SCHOOL_ACTION_IDS, SCHOOL_ACTIONS } from './school';
@@ -52,7 +52,7 @@ export const HOME_ACTION_IDS = ['rent_home', 'move_home', 'relocate', 'buy_home'
 export const LIFE_ACTION_IDS = [...TRAVEL_ACTION_IDS, ...LANGUAGE_ACTION_IDS, ...MIGRATION_ACTION_IDS, 'take_language_classes', ...MONEY_ACTION_IDS, ...HOME_ACTION_IDS, ...EDUCATION_ACTION_IDS, ...SCHOOL_ACTION_IDS, ...CAREER_ACTION_IDS, ...WORK_ACTION_IDS, ...PERSONAL_ACTION_IDS, ...FAMILY_ACTION_IDS, ...ESTATE_ACTION_IDS, ...POSSESSION_ACTION_IDS, ...TEEN_ACTION_IDS, ...CRIME_ACTION_IDS, ...FAME_ACTION_IDS, ...SOCIAL_ACTION_IDS, ...SPORTS_ACTION_IDS, ...LATER_ACTION_IDS, ...BELONGING_ACTION_IDS, ...BUSINESS_ACTION_IDS, ...LOVE_ACTION_IDS, ...PASTIME_ACTION_IDS] as const;
 
 /** The only money, home, school, work and personal actions you can take in prison (Stage 9). */
-export const PRISON_LIFE_ACTIONS: readonly LifeActionId[] = ['pay_debt', 'debt_plan', 'stop_gig', 'edit_identity', 'write_will'];
+export const PRISON_LIFE_ACTIONS: readonly LifeActionId[] = ['pay_debt', 'debt_plan', 'stop_gig', 'edit_identity', 'set_body', 'write_will'];
 /**
  * W5: what you can't start while on a temporary stay abroad (an exchange or a working holiday): a new home, school,
  * business or fame/sports career (`enter_fame` starts both). Typed as action ids, so a name that isn't one won't compile.
@@ -163,6 +163,8 @@ export interface LifeActionParams {
   level?: 'casual' | 'committed';
   /** B1: how you look for a date (a dating app, a friend's set-up or a night out). */
   dateWay?: FindDateWay;
+  /** P1: the body type of your portrait. */
+  body?: BodyType;
   /** W3: what a business action is about (see ./business.ts). */
   biz?: BusinessActionParams;
   /** Batch 2a: an activity (an id in src/content/pastimes), who comes along and, for one with price tiers, which tier. */

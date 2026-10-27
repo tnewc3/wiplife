@@ -1,3 +1,6 @@
+import type { AppearanceInput } from '../portraits/types';
+import { personAge as portraitAge, personLook, yourLook } from './looks/query';
+import { portraitSettings } from './looks/render';
 import { getStandingView } from './migration/view';
 import { destinations, groupFriends, honeymoonSpouse, perDiem, stayCost, stayFamily, travelCompanions, tripBlock, tripCost, tripStyleOf, stayBlock, type TripInput, type StayInput } from './travel/travel';
 import { hasBusinessJob } from './travel/query';
@@ -184,6 +187,7 @@ import type {
   SchoolPlace,
   StatKey,
 } from './types';
+import type { ArchivedLife, BodyType } from './types';
 import { birthCountryOf, citiesOfCountry, countryOf, pensionAge, pensionOf, sameCountry, scaledAmount } from './country';
 
 export { netWorth } from './finance';
@@ -1209,6 +1213,8 @@ export interface EventCardView {
   outcomeText: string | null;
   /** What the chosen outcome did to your money, with the new balance (C1). */
   money: MoneyChange | null;
+  /** P1: portraits of the people the event is about (at most three), with their names. */
+  portraits?: { name: string; portrait: AppearanceInput }[];
 }
 
 export interface ChoiceMoney {
@@ -1256,11 +1262,15 @@ export function getEventCard(state: LifeState, index: number, content: ContentBu
   const instance = state.pending[index];
   if (!instance) return null;
   const def = content.events[instance.eventId];
+  const castIds = [...new Set(Object.values(instance.cast))].filter((id) => state.people[id] !== undefined).slice(0, 3);
   const base = {
     instanceId: instance.instanceId,
     resolved: instance.resolvedChoiceId !== undefined,
     outcomeText: instance.outcomeText ?? null,
     money: instance.money ?? null,
+    ...(castIds.length > 0
+      ? { portraits: castIds.map((id) => ({ name: `${state.people[id]!.name.first} ${state.people[id]!.name.last}`, portrait: getPortrait(state, id, content) })) }
+      : {}),
   };
   // A definition removed by a content update: a card the player can dismiss.
   if (!def) return { ...base, title: '…', text: '', tone: 'neutral', choices: [{ id: CONTINUE_CHOICE, label: 'Continue' }] };
@@ -1519,4 +1529,29 @@ export function getAbroadView(state: LifeState, stay: StayInput, content: Conten
     block: stayBlock(state, stay, content),
     canStart: isLifeActionAvailable(state, action, { stay }, content),
   };
+}
+
+/**
+ * P1: the portrait settings for you ('you') or someone you know: their look at the age they show now (or at death), smiling
+ * when they feel good. The renderer normalizes the result, so a choice their age does not allow falls back cleanly.
+ */
+export function getPortrait(life: LifeState, who: 'you' | Id, content: ContentBundle, options: { surprised?: boolean } = {}): AppearanceInput {
+  const surprised = options.surprised ? { surprised: true } : {};
+  if (who === 'you') {
+    return portraitSettings(yourLook(life, content), { age: life.character.age, year: life.currentYear, mood: life.character.stats.happiness, ...surprised }, content);
+  }
+  const person = life.people[who];
+  if (!person) throw new Error(`getPortrait: no person "${who}"`);
+  return portraitSettings(personLook(life, who, content), { age: portraitAge(life, person), year: life.currentYear, mood: person.mood, ...surprised }, content);
+}
+
+/** P1: the body type your portrait is drawn with. */
+export function getPortraitBody(life: LifeState, content: ContentBundle): BodyType {
+  return yourLook(life, content).body;
+}
+
+/** P1: the portrait of someone whose life is archived, at the age they died; null for a life archived before portraits. */
+export function getArchivedPortrait(entry: ArchivedLife, content: ContentBundle): AppearanceInput | null {
+  if (!entry.look) return null;
+  return portraitSettings(entry.look, { age: entry.ageAtDeath, year: entry.deathYear, mood: entry.finalStats.happiness }, content);
 }

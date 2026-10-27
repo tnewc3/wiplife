@@ -11,6 +11,7 @@ import { familyFailures } from './family/invariants';
 import { interactionFailures } from './interactions/invariants';
 import { livesFailures } from './lives/invariants';
 import { webFailures } from './web/invariants';
+import { looksFailures } from './looks/invariants';
 import { possessionsFailures } from './possessions/invariants';
 import { pastimesFailures } from './pastimes/invariants';
 import { socialFailures } from './social/invariants';
@@ -65,7 +66,7 @@ export class InvariantError extends Error {
 
 /** Returns every invariant the life breaks (empty when healthy). */
 export function checkInvariants(state: LifeState, content: ContentBundle): string[] {
-  const failures: string[] = [...travelFailures(state, content), ...migrationFailures(state, content)];
+  const failures: string[] = [...travelFailures(state, content), ...migrationFailures(state, content), ...looksFailures(state, content)];
   const seen = healthyIn(content, 'core');
   const checkLanguages = (who: string, ls: LifeState['character']['languages']) => {
     if (seen.get(ls) === state.currentYear) return;

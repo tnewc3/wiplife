@@ -38,7 +38,18 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,svg,png,ico,json,webmanifest}'],
+        // P1: the portrait art (about 190 MB in public/portraits) is never precached. A portrait caches the layers it needs the
+        // first time it is drawn, up to a cap; thumbnails in IndexedDB mean most screens never fetch them again.
+        globIgnores: ['portraits/**'],
+        runtimeCaching: [
+          {
+            urlPattern: ({ url }: { url: URL }) => url.pathname.startsWith('/portraits/'),
+            handler: 'CacheFirst',
+            options: { cacheName: 'portrait-art', expiration: { maxEntries: 400 }, cacheableResponse: { statuses: [200] } },
+          },
+        ],
         navigateFallback: 'index.html',
+        navigateFallbackDenylist: [/^\/portraits\//],
         cleanupOutdatedCaches: true,
         // The game is its content: the compiled events, balance and text ship inside the app bundle, which grows with every
         // expansion and passed the 2 MiB default in E4. The whole bundle must be cached for the app to work offline.

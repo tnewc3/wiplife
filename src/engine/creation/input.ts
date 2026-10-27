@@ -3,6 +3,7 @@
  * schemas before the engine uses it; they also normalize text (Unicode NFC,
  * trimmed, single spaces).
  */
+import { lookInputSchema } from '../looks/schema';
 import { z } from 'zod';
 import { countryIdSchema, genderCategorySchema, idSchema, type ContentBundle } from '../../content/schemas';
 import { setupIssues, teamSetupSchema } from '../sports/setup';
@@ -94,6 +95,8 @@ export const customLifeInputSchema = z.strictObject({
   appearance: z.strictObject({
     descriptors: z.array(freeTextSchema('a description')).max(DESCRIPTOR_COUNT_MAX),
   }),
+  /** P1: how you look as portrait settings; anything left out is rolled. */
+  look: lookInputSchema.optional(),
   cityId: idSchema,
   familyWealth: familyWealthSchema,
   /**

@@ -1,3 +1,4 @@
+import { lookSchema } from '../engine/looks/schema';
 import { languageSkillSchema } from '../content/schemas/languages';
 import { APPLICATION_KINDS, APPLICATION_STATUSES, COUNTRY_IDS, REGULARIZATION_BASES, REMIT_LEVELS, ROUTES, SOUVENIRS, STAY_ROUTES, STAY_TYPES, TRIP_ACTIVITIES, TRIP_STYLES } from '../content/schemas';
 /**
@@ -68,6 +69,7 @@ const languages = z.array(languageSkillSchema).min(1).refine((ls) => new Set(ls.
 // (Duplicates are an invariant, checked once per life with the rest of the migration rules.)
 const citizenships = z.array(z.enum(COUNTRY_IDS)).min(1);
 const character = z.strictObject({
+  look: lookSchema.exactOptional(),
   languages,
   citizenships,
   name,
@@ -201,6 +203,7 @@ const newsYear = z.strictObject({
 });
 
 const person = z.strictObject({
+  look: lookSchema.exactOptional(),
   languages,
   citizenships,
   id,

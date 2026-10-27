@@ -14,6 +14,7 @@ import { LifeHistoryScreen } from './ui/screens/history/LifeHistoryScreen';
 import { NewLifeScreen } from './ui/screens/newLife/NewLifeScreen';
 import { SettingsScreen } from './ui/screens/settings/SettingsScreen';
 import { TitleScreen } from './ui/screens/title/TitleScreen';
+import { getPortraitService } from './ui/portraits/portraitService';
 import { useApplyTheme } from './ui/theme/useApplyTheme';
 
 /**
@@ -97,6 +98,8 @@ export function App() {
 
   useEffect(() => {
     void init();
+    // P1: fetch the portrait catalog (the manifest and palettes) while the player is still on the title screen.
+    getPortraitService().ready().catch(() => undefined);
   }, [init]);
 
   return (

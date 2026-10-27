@@ -114,6 +114,8 @@ test('custom creation asks a nonbinary character whether they can carry a pregna
   await page.getByLabel('First name').fill('Robin');
   await page.getByLabel('Last name').fill('Okafor');
   await page.getByRole('button', { name: 'Next' }).click();
+  // The Look step (P1) is left as it is.
+  await page.getByRole('button', { name: 'Next' }).click();
 
   const identity = page.getByRole('radiogroup', { name: 'Which fits best?' });
   await identity.getByRole('radio', { name: 'Woman', exact: true }).click();
@@ -132,5 +134,5 @@ test('custom creation asks a nonbinary character whether they can carry a pregna
   // Who you are attracted to is a required choice too (B1); "No one" counts.
   await page.getByRole('button', { name: 'No one', exact: true }).click();
   await page.getByRole('button', { name: 'Next' }).click();
-  await expect(page.getByText('Step 3 of 6')).toBeVisible();
+  await expect(page.getByText('Step 4 of 7')).toBeVisible();
 });

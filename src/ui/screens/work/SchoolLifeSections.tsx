@@ -3,6 +3,7 @@ import { content } from '../../../content';
 import { getTeenView } from '../../../engine/selectors';
 import { getSchoolLifeView, type SchoolPersonLine } from '../../../engine/school/views';
 import type { LifeState } from '../../../engine/types';
+import { PersonPortrait } from '../../portraits/PersonPortrait';
 import { useAppStore } from '../../../store/appStore';
 import { Button } from '../../components/Button';
 import { ACTIVITY_BLOCK_LABELS, chanceWords, EXAM_BAND_WORDS, GRADE_BAND_WORDS, money, SCHOOL_ACTION_BLOCK_LABELS, SCHOOL_PATH_HINTS } from '../../labels';
@@ -14,7 +15,8 @@ function PersonRows({ people, testId }: { people: SchoolPersonLine[]; testId: st
     <ul className="mt-1 flex flex-col divide-y divide-border" aria-label={testId}>
       {people.map((p) => (
         <li key={p.id} className="flex min-w-0 items-center justify-between gap-3 py-1" data-testid={`${testId}-${p.id}`}>
-          <span className="min-w-0">
+          <PersonPortrait personId={p.id} name={p.name} size={40} />
+          <span className="min-w-0 flex-1">
             <span className="block font-semibold break-words">{p.name}</span>
             <span className="block text-sm text-muted">
               {p.title} · {p.age}

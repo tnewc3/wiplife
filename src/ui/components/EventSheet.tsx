@@ -6,6 +6,7 @@ import type { LifeState } from '../../engine/types';
 import { useAppStore } from '../../store/appStore';
 import { ageLabel, choiceMoneyLabel, familyHelpLabel, housingChangeLabel, outcomeDebtLabel, outcomeDirtyLabel, outcomeMoneyLabel } from '../labels';
 import { useTeamText } from '../useTeamNames';
+import { CharacterPortrait } from '../portraits/CharacterPortrait';
 import { Button } from './Button';
 import { YearRecapList } from './YearRecapList';
 
@@ -90,6 +91,13 @@ export function EventSheet({ life }: { life: LifeState }) {
             <div className={`h-2 ${accent}`} aria-hidden="true" />
             <div className="flex flex-col gap-3 p-5">
               {sheet.recap && <p className="text-sm font-semibold tracking-wide text-muted uppercase">Your year</p>}
+              {card?.portraits && (
+                <div className="flex gap-2" data-testid="event-portraits">
+                  {card.portraits.map((p) => (
+                    <CharacterPortrait key={p.name} portrait={p.portrait} size={56} label={`Portrait of ${p.name}`} />
+                  ))}
+                </div>
+              )}
               <h2
                 id="event-title"
                 ref={headingRef}

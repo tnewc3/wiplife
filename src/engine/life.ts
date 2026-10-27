@@ -46,7 +46,7 @@ import { chance, cloneRng, createRng, pick } from './rng';
 import { writeFromGroup } from './systems/history';
 import { characterDeathChance, pickCause } from './systems/mortality';
 import { deadlyConditions } from './health';
-import type { Character, Id, LifePhase, LifeState } from './types';
+import type { Character, Id, LifePhase, LifeState, Look } from './types';
 import { ensureStructure } from './web/structure';
 import { emptyWeb } from './web/ties';
 import { emptyPossessions } from './possessions/query';
@@ -58,6 +58,8 @@ import { emptyLeague } from './sports/league';
 import { emptySetup } from './sports/setup';
 import { emptyLater } from './later/query';
 import { terminalDeathChance, TERMINAL_ID } from './later/terminal';
+import { descriptorsMatching } from './looks/descriptors';
+import { customLook, personLook, yourLook } from './looks/query';
 import { emptyBelonging } from './belonging/query';
 import { emptyBusiness } from './business/query';
 import { emptyPastimes } from './pastimes/query';
@@ -218,6 +220,13 @@ export function createLife(input: CreateLifeOptions, content: ContentBundle): Li
     pastimes: emptyPastimes(),
     social: emptySocial(),
   };
+  // P1: how everyone looks (a custom character's own choices, and a roll for the rest). From generators of their own, so the life's random sequence is as it was.
+  life.character.look = options.mode === 'custom' ? customLook(life, content, options.custom.look as Partial<Look> | undefined) : yourLook(life, content);
+  for (const id of Object.keys(life.people).sort()) life.people[id]!.look = personLook(life, id, content);
+  // A look the player chose agrees with the hair and eye text on the Profile.
+  if (options.mode === 'custom' && options.custom.look) {
+    life.character.appearance.descriptors = descriptorsMatching(life.character.appearance.descriptors, life.character.look, content);
+  }
   // M1: ADHD and neurodivergence are inherited in part: your parents and siblings (and grandparents) may have them, and you are likelier to if a parent does.
   for (const person of Object.values(life.people)) {
     const kind = life.relationships[person.id]?.kind;

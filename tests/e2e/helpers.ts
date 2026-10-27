@@ -118,12 +118,17 @@ export async function createCustomLife(page: Page, data: CustomLifeData, onStep?
 
   await page.getByRole('button', { name: 'Create a custom life' }).click();
 
-  await expect(page.getByText('Step 1 of 6')).toBeVisible();
+  await expect(page.getByText('Step 1 of 7')).toBeVisible();
   await page.getByLabel('First name').fill(data.first);
   await page.getByLabel('Last name').fill(data.last);
   await next();
 
-  await expect(page.getByText('Step 2 of 6')).toBeVisible();
+  // P1: the Look step: a live portrait to leave as it is.
+  await expect(page.getByText('Step 2 of 7')).toBeVisible();
+  await expect(page.getByTestId('look-step')).toBeVisible();
+  await next();
+
+  await expect(page.getByText('Step 3 of 7')).toBeVisible();
   await page.getByRole('radiogroup', { name: 'Which fits best?' }).getByRole('radio', { name: data.category, exact: true }).click();
   // A nonbinary character is asked whether they can carry a pregnancy.
   if (data.category === 'Nonbinary') {
@@ -145,21 +150,21 @@ export async function createCustomLife(page: Page, data: CustomLifeData, onStep?
   for (const who of data.attractedTo) await page.getByRole('button', { name: who, exact: true }).click();
   await next();
 
-  await expect(page.getByText('Step 3 of 6')).toBeVisible();
+  await expect(page.getByText('Step 4 of 7')).toBeVisible();
   await page.getByRole('radiogroup', { name: 'Parents' }).getByRole('radio', { name: data.parents }).click();
   await page.getByRole('radiogroup', { name: 'Older siblings' }).getByRole('radio', { name: data.siblings, exact: true }).click();
   await page.getByRole('radiogroup', { name: 'Family wealth' }).getByRole('radio', { name: data.wealth }).click();
   await next();
 
-  await expect(page.getByText('Step 4 of 6')).toBeVisible();
+  await expect(page.getByText('Step 5 of 7')).toBeVisible();
   await page.getByRole('radio', { name: data.country ?? 'United States' }).click();
   await page.getByRole('radio', { name: data.city }).click();
   await next();
 
-  await expect(page.getByText('Step 5 of 6')).toBeVisible();
+  await expect(page.getByText('Step 6 of 7')).toBeVisible();
   await next();
 
-  await expect(page.getByText('Step 6 of 6')).toBeVisible();
+  await expect(page.getByText('Step 7 of 7')).toBeVisible();
   if (onStep) await onStep();
   await page.getByRole('button', { name: 'Start this life' }).click();
 }

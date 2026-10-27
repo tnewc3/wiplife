@@ -1,0 +1,20 @@
+// Generated from manifest revision 14. Regenerate when adding assets.
+export type TemplateId = "male_baby" | "female_baby" | "male_young_child" | "female_young_child" | "male_teenager" | "female_teenager" | "male_young_adult" | "female_young_adult" | "male_adult" | "female_adult" | "male_middle_aged" | "female_middle_aged" | "male_senior" | "female_senior" | "male_very_old" | "female_very_old";
+export type AgeStage = "baby" | "young_child" | "teenager" | "young_adult" | "adult" | "middle_aged" | "senior" | "very_old";
+export type Sex = "male" | "female";
+export type Hairstyle = "original" | "side_part" | "tight_curls" | "locs" | "long_straight" | "buzz_cut" | "rounded_afro" | "chin_bob" | "high_ponytail" | "french_crop" | "quiff" | "curtains" | "high_top_fade" | "short_twists" | "mohawk" | "pixie_cut" | "blunt_bob_bangs" | "long_waves" | "high_puff" | "space_buns" | "twin_braids";
+export type Outfit = "original" | "hoodie" | "collared_shirt" | "vneck";
+export type Expression = "original" | "neutral" | "smile" | "surprised";
+export type BrowStyle = "original" | "straight" | "soft_arch" | "full";
+export type EyeShape = "original" | "almond" | "rounded" | "hooded";
+export type LashStyle = "original" | "none" | "natural" | "full";
+export type NoseShape = "original" | "small_round" | "straight" | "broad";
+export type FacialHair = "none" | "stubble" | "mustache" | "short_beard" | "beard_mustache";
+export type Hat = "none" | "baseball_cap" | "beanie";
+export type Eyewear = "none" | "original" | "round_glasses" | "sunglasses";
+export type Earrings = "none" | "hoops" | "studs";
+export type SkinColor = "original" | "porcelain" | "fair" | "warm_light" | "golden_tan" | "olive" | "medium_brown" | "deep_brown" | "very_deep_brown";
+export type HairColor = "original" | "black" | "dark_brown" | "chestnut" | "copper" | "blond" | "silver";
+export type EyeColor = "original" | "brown" | "hazel" | "green" | "blue" | "gray" | "amber";
+export type ClothingColor = "original" | "navy" | "sage" | "cream" | "plum" | "charcoal" | "rust";
+export type HatColor = "original" | "navy" | "sage" | "cream" | "plum" | "charcoal" | "rust";

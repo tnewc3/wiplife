@@ -100,7 +100,7 @@ A new city, family or personality produces a very different life. Players also c
 ### MVP
 
 - Age gate and content notice on first launch.
-- **Character creation:** one-tap random start, or full custom (name, gender, pronouns, orientation, appearance descriptors, city, parents and siblings, family wealth, stats and personality).
+- **Character creation:** one-tap random start, or full custom (name, gender, pronouns, orientation, how you look (a portrait you shape), city, parents and siblings, family wealth, stats and personality).
 - **Aging from birth to death** across six life stages. Ages 0–4 are playable, with family events such as parents fighting, divorce, neglect or mistreatment, moving, and new siblings.
 - **Self-discovery system:** orientation, gender identity and expression, and personality can shift or be discovered through events, with accept or suppress choices (see section F).
 - **Event engine** with chains, delayed consequences, memory tags, tone tags, pronoun templates, rarity tiers, cooldowns, and a pacing director.
@@ -203,11 +203,22 @@ All stats run from 0 to 100.
 
 ### Identity
 
-Name, gender identity, gender expression, pronouns (subject, object, possessive, reflexive), orientation, birth year, city, appearance descriptors, and family background. Each identity field has a current value and can also have a hidden latent value (see self-discovery below).
+Name, gender identity, gender expression, pronouns (subject, object, possessive, reflexive), orientation, birth year, city, how you look (see Portraits below), and family background. Each identity field has a current value and can also have a hidden latent value (see self-discovery below).
 
 Birth year is always the year the life starts; there is no birth-year picker.
 
 The game speaks to the player as "you," so the player's pronouns mainly appear when NPCs talk about them and in the obituary. NPCs always use their own pronouns.
+
+### Portraits
+
+Every character, and every person in their life, has a layered, recolorable portrait (art from the portrait package, revision 15; see docs/portraits-and-ui.md).
+
+- **How someone looks** is saved as settings on them: body type (male or female art, defaulting from gender category, changeable any time; a nonbinary character chooses), hairstyle, outfit, eye shape, brows, lashes, nose, facial hair, glasses, earrings, hat, skin tone, natural hair color, eye color, clothing and hat colors, and the age their hair goes gray. The portrait template is never saved: it is body type plus the age stage (baby, young child, teenager, young adult, adult, middle aged, senior, very old; ages in `balance/portraits.yaml`), so people age on screen with no save changes. A choice an age does not allow (a beard on a child, a style that needs a bigger head) is not shown, and comes back when the age allows it.
+- **Aging:** natural hair turns silver at the person's own graying age. Dye overrides it for a few years, then fades. Looks do not change by choice or by event after creation; salon and shopping activities (A1) will change them.
+- **Expression follows mood:** smiling when Happiness (a person's mood) is at least 60, neutral otherwise; event cards can show surprise.
+- **Creation:** the Look step has a live portrait that can be previewed at each age stage, every choice above, and "Surprise me". Random lives roll a look; a custom character's hair and eye choices also write the hair and eye words on the Profile.
+- **Family resemblance:** your parents and siblings are generated to look like you; your children get skin tone, hair color and eye color from their biological parents, with some variation. Adopted and step children, and everyone else, are rolled independently.
+- Portraits are on Home, the Profile, the People list, person pages, event cards about someone, the work and school people lists, the death screen and the archive.
 
 ### Core attributes (visible)
 

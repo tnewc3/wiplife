@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { content } from '../../../content';
 import { getWorkLifeView, type WorkPersonLine } from '../../../engine/work/views';
 import type { LifeState } from '../../../engine/types';
+import { PersonPortrait } from '../../portraits/PersonPortrait';
 import { useAppStore } from '../../../store/appStore';
 import { Button } from '../../components/Button';
 import { WORK_ACTION_BLOCK_LABELS } from '../../labels';
@@ -11,7 +12,8 @@ function Row({ person, title }: { person: WorkPersonLine; title: string }) {
   const busy = useAppStore((s) => s.aging);
   return (
     <li className="flex min-w-0 items-center justify-between gap-3 py-1" data-testid={`work-person-${person.id}`}>
-      <span className="min-w-0">
+      <PersonPortrait personId={person.id} name={person.name} size={40} />
+      <span className="min-w-0 flex-1">
         <span className="block font-semibold break-words">{person.name}</span>
         <span className="block text-sm text-muted">
           {title} · {person.age}

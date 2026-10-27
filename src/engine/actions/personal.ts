@@ -14,8 +14,9 @@ import { conditionOf } from '../health';
 import type { LifeState } from '../types';
 import type { LifeActionParams, LifeActionRule } from './life';
 import { fittingResults, queueResult } from './result';
+import { yourLook } from '../looks/query';
 
-export const PERSONAL_ACTION_IDS = ['see_doctor', 'edit_identity', 'see_therapist', 'set_care'] as const;
+export const PERSONAL_ACTION_IDS = ['see_doctor', 'edit_identity', 'see_therapist', 'set_care', 'set_body'] as const;
 export type PersonalActionId = (typeof PERSONAL_ACTION_IDS)[number];
 
 const none = (params: unknown): LifeActionParams | null =>
@@ -56,6 +57,19 @@ export const PERSONAL_ACTIONS: Record<PersonalActionId, LifeActionRule> = {
       return conditionOf(state, p.conditionId)?.care?.includes(p.care) === true;
     },
     apply: (state, p, content) => void (p.on ? startCare(state, p.conditionId!, p.care!, content) : stopCare(state, p.conditionId!, p.care!, content)),
+  },
+  // P1: the body type your portrait is drawn with (male or female), changeable any time; it is looks only and changes nothing else.
+  set_body: {
+    parse: (params) => {
+      if (typeof params !== 'object' || params === null || Array.isArray(params)) return null;
+      const keys = Object.keys(params);
+      const body = (params as { body?: unknown }).body;
+      return keys.length === 1 && (body === 'male' || body === 'female') ? { body } : null;
+    },
+    allowed: (state, p, content) => p.body !== undefined && yourLook(state, content).body !== p.body,
+    apply: (state, p, content) => {
+      state.character.look = { ...yourLook(state, content), body: p.body! };
+    },
   },
   edit_identity: {
     parse: (params) => {
