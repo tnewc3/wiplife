@@ -32,6 +32,7 @@ test('practice a language with a native speaker you know: skill and the tie both
   await expect(page.getByTestId('interaction-card')).toBeVisible();
   await expect(page.getByTestId('interaction-outcome')).not.toContainText(/[{}]/);
   await page.getByTestId('interaction-done').click();
+  await expect(page.getByTestId('interaction-card')).toHaveCount(0);
   await page.reload();
   await page.getByRole('button', { name: 'Continue' }).click();
   await page.getByRole('button', { name: 'Profile', exact: true }).click();
