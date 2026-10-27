@@ -432,7 +432,8 @@ travelB10:
   souvenirLives: { min: 0.1, max: 0.95 }
   activityLives: { min: 0.3, max: 0.99 }
   familyStays: { min: 1, max: 100000 }
-  familyAtHost: { min: 1, max: 1 }
+  # (A child can still leave the household for a reason of its own during the stay, such as a custody change, so this is not all.)
+  familyAtHost: { min: 0.95, max: 1 }
   childrenLeftBehind: { min: 0, max: 0 }
   # (A working holiday or a transfer credits its years to the host country, so a fair share of lives have a record in two.)
   multiCountryPension: { min: 0.0005, max: 0.6 }
