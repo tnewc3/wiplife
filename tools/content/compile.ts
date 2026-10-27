@@ -15,6 +15,7 @@ import {
   type SingletonPath,
 } from '../../src/content/schemas';
 import { consistencyWarnings, type ContentWarning } from './consistency';
+import { checkCards, type CardFiles } from './cards';
 import { checkReferences } from './references';
 
 /** Folders under src/content that hold code or build output, not content. */
@@ -40,6 +41,8 @@ export interface CompileOptions {
    * that replaces every real event.
    */
   overlayDir?: string;
+  /** U1: the icon files, CREDITS.md and the color tokens to check the event card content against (left out in unit tests of the compiler). */
+  cardFiles?: CardFiles;
 }
 
 /** Content files by path relative to the content folder, after applying the overlay. */
@@ -146,7 +149,7 @@ function byKey([a]: [string, unknown], [b]: [string, unknown]): number {
  * bundle, or every error found. Collects all errors instead of stopping at
  * the first, so one run shows everything that needs fixing.
  */
-export async function compileContent({ contentDir, appVersion, overlayDir }: CompileOptions): Promise<CompileResult> {
+export async function compileContent({ contentDir, appVersion, overlayDir, cardFiles }: CompileOptions): Promise<CompileResult> {
   const errors: ContentError[] = [];
   const folderToCollection = new Map<string, CollectionKey>(
     (Object.keys(collectionTypes) as CollectionKey[]).map((key) => [collectionTypes[key].folder, key]),
@@ -267,6 +270,7 @@ export async function compileContent({ contentDir, appVersion, overlayDir }: Com
 
   const fileOf = (typeKey: CollectionKey, id: string) => collected.get(typeKey)?.get(id)?.file ?? `${typeKey}/${id}.yaml`;
   const referenceErrors = checkReferences(bundle, fileOf, { partialEvents: eventsReplaced });
+  referenceErrors.push(...checkCards(bundle, cardFiles ?? null, eventsReplaced));
   const consistency = eventsReplaced ? { warnings: [], errors: [] } : consistencyWarnings(bundle, (id) => fileOf('events', id));
   if (referenceErrors.length > 0 || consistency.errors.length > 0) return { ok: false, errors: [...referenceErrors, ...consistency.errors] };
 

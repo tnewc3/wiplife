@@ -5,17 +5,16 @@
  */
 import { expect, test, type Page } from '@playwright/test';
 import { loadSavedLife } from './heirFixtures';
-import { expectNoHorizontalScroll, expectTouchTargets, passAgeGate, settle } from './helpers';
+import { expectNoHorizontalScroll, expectTouchTargets, passAgeGate, settle, tab } from './helpers';
 import { studentLife, workerLife, type SchoolLifeOptions } from './schoolLifeFixtures';
 
-const tab = (page: Page, name: string) => page.getByRole('navigation', { name: 'Game sections' }).getByRole('button', { name, exact: true });
 
 async function open(page: Page, life: ReturnType<typeof studentLife>): Promise<void> {
   await passAgeGate(page, { testPack: true });
   await loadSavedLife(page, life);
   await page.getByRole('button', { name: 'Continue' }).click();
   await settle(page);
-  await tab(page, 'Work/School').click();
+  await tab(page, 'Job').click();
 }
 
 const student = (options: SchoolLifeOptions) => studentLife(options);

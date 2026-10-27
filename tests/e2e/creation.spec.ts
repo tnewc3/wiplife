@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-import { ageUp, createCustomLife, passAgeGate, type CustomLifeData } from './helpers';
+import { ageUp, createCustomLife, expectAge, goHome, openPage, passAgeGate, tab, type CustomLifeData } from './helpers';
 
 async function homeName(page: Page): Promise<string> {
   return (await page.getByTestId('character-name').textContent())?.trim() ?? '';
@@ -14,14 +14,15 @@ test('a random life starts in one tap, in under a second', async ({ page }) => {
   await expect(page.getByTestId('character-name')).toBeVisible();
   expect(Date.now() - started).toBeLessThan(1000);
 
-  // Home: name, age, six stat bars with no numbers, and family.
-  await expect(page.getByText(/^Newborn · /)).toBeVisible();
-  const meters = page.getByRole('group', { name: 'Stats' }).getByRole('meter');
-  await expect(meters).toHaveCount(6);
-  await expect(page.getByRole('group', { name: 'Stats' })).not.toContainText(/\d/);
-  const family = page.getByRole('list', { name: 'Family' }).getByRole('listitem');
-  expect(await family.count()).toBeGreaterThanOrEqual(1);
+  // Home: name, the story so far, four stat bars with percentages; the family is on the People tab.
+  await expectAge(page, 0);
+  const meters = page.getByTestId('stat-panel').getByRole('meter');
+  await expect(meters).toHaveCount(4);
+  await expect(page.getByTestId('stat-panel')).toContainText(/\d+%/);
   await expect(page.getByText('Your story starts here.')).toBeVisible();
+  await tab(page, 'People').click();
+  const parents = page.getByRole('list', { name: 'Parents' }).getByRole('listitem');
+  expect(await parents.count()).toBeGreaterThanOrEqual(1);
 });
 
 test('the life can be continued after closing and reopening', async ({ page }) => {
@@ -29,14 +30,16 @@ test('the life can be continued after closing and reopening', async ({ page }) =
   await page.getByRole('button', { name: 'New Life' }).click();
   await page.getByRole('button', { name: 'Start a random life' }).click();
   const name = await homeName(page);
-  const family = await page.getByRole('list', { name: 'Family' }).innerText();
+  await tab(page, 'People').click();
+  const family = await page.getByRole('list', { name: 'Parents' }).innerText();
 
   await page.reload();
   await expect(page.getByRole('button', { name: 'Continue' })).toBeVisible();
   await expect(page.getByText(`${name} · Newborn`)).toBeVisible();
   await page.getByRole('button', { name: 'Continue' }).click();
   expect(await homeName(page)).toBe(name);
-  expect(await page.getByRole('list', { name: 'Family' }).innerText()).toBe(family);
+  await tab(page, 'People').click();
+  expect(await page.getByRole('list', { name: 'Parents' }).innerText()).toBe(family);
 });
 
 const CUSTOM: CustomLifeData = {
@@ -57,13 +60,18 @@ test('a custom life uses every choice and persists', async ({ page }) => {
   await createCustomLife(page, CUSTOM);
 
   expect(await homeName(page)).toBe('Zoë Nguyễn');
-  await expect(page.getByText('Newborn · New York · she/her')).toBeVisible();
-  const family = page.getByRole('list', { name: 'Family' }).getByRole('listitem');
+  await expect(page.getByRole('banner')).toContainText('New York');
+  await expectAge(page, 0);
+  await page.getByRole('button', { name: 'Profile', exact: true }).click();
+  await expect(page.getByTestId('profile-identity')).toContainText('she/her/hers');
+  await page.keyboard.press('Escape');
+  await tab(page, 'People').click();
   // One parent, two siblings and (C1) the parent's two parents.
-  await expect(family).toHaveCount(5);
-  await expect(family.filter({ hasText: /Sister|Brother|Sibling/ })).toHaveCount(2);
-  await expect(family.filter({ hasText: /Grand/ })).toHaveCount(2);
-  await expect(family.filter({ hasNotText: /Grand/ }).filter({ hasText: 'Nguyễn' })).toHaveCount(3);
+  await expect(page.getByRole('list', { name: 'Parents' }).getByRole('listitem')).toHaveCount(1);
+  await expect(page.getByRole('list', { name: 'Siblings' }).getByRole('listitem')).toHaveCount(2);
+  await expect(page.getByRole('list', { name: 'Other family' }).getByRole('listitem').filter({ hasText: /Grand/ })).toHaveCount(2);
+  await expect(page.getByRole('list', { name: 'Parents' }).getByRole('listitem').filter({ hasText: 'Nguyễn' })).toHaveCount(1);
+  await expect(page.getByRole('list', { name: 'Siblings' }).getByRole('listitem').filter({ hasText: 'Nguyễn' })).toHaveCount(2);
 
   await page.reload();
   await page.getByRole('button', { name: 'Continue' }).click();
@@ -129,8 +137,7 @@ test('starting a new life over an existing one asks first', async ({ page }) => 
   await page.getByRole('button', { name: 'Start a random life' }).click();
   const first = await homeName(page);
 
-  await page.getByRole('button', { name: 'More' }).click();
-  await page.getByRole('button', { name: 'Back to title' }).click();
+  await openPage(page, 'title');
   await page.getByRole('button', { name: 'New Life' }).click();
   await page.getByRole('button', { name: 'Start a random life' }).click();
   const sheet = page.getByRole('dialog', { name: 'Start a new life?' });
@@ -146,8 +153,7 @@ test('reset all data removes the saved life', async ({ page }) => {
   await passAgeGate(page);
   await page.getByRole('button', { name: 'New Life' }).click();
   await page.getByRole('button', { name: 'Start a random life' }).click();
-  await page.getByRole('button', { name: 'More' }).click();
-  await page.getByRole('button', { name: 'Settings' }).click();
+  await openPage(page, 'settings');
   await page.getByRole('button', { name: 'Reset all data' }).click();
   await page.getByRole('button', { name: 'Delete everything' }).click();
   await page.getByRole('button', { name: 'I’m 18 or older' }).click();
@@ -163,7 +169,7 @@ test('a damaged save is restored from the backup, with a notice once', async ({ 
 
   // Aging up autosaves after each step of the year, so earlier saves become backups.
   await ageUp(page);
-  await expect(page.getByText(/^1 year old · /)).toBeVisible();
+  await expectAge(page, 1);
 
   // Damage the active save: an empty first name.
   await page.evaluate(
@@ -192,6 +198,7 @@ test('a damaged save is restored from the backup, with a notice once', async ({ 
   await expect(page.getByRole('status').filter({ hasText: 'Your last save was damaged.' })).toBeVisible();
   await expect(page.getByText(`${first} · 1 year old`)).toBeVisible();
   await page.getByRole('button', { name: 'Continue' }).click();
+  await goHome(page);
   expect(await homeName(page)).toBe(first);
 
   // The restored life is saved, so the notice doesn't come back.

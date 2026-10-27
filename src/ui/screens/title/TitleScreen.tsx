@@ -1,6 +1,7 @@
 import { useAppStore } from '../../../store/appStore';
 import { Button } from '../../components/Button';
 import { Card } from '../../components/Card';
+import { Logo } from '../../components/Logo';
 import { Screen } from '../../components/Screen';
 import { ageLabel } from '../../labels';
 
@@ -17,7 +18,9 @@ export function TitleScreen() {
     <Screen centered>
       <div className="flex flex-col items-center gap-10 text-center">
         <div>
-          <h1 className="text-5xl font-extrabold tracking-tight">WIPlife</h1>
+          <h1 className="m-0">
+            <Logo className="mx-auto w-72 max-w-full text-text" />
+          </h1>
           <p className="mt-3 text-lg text-muted">Every life is a work in progress.</p>
         </div>
 

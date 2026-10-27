@@ -63,7 +63,7 @@ export function MentalHealthSection({ mental }: { mental: MentalView }) {
                 <span className="text-sm text-muted">
                   {CONDITION_KIND_LABELS[c.kind]} · {c.kind === 'neuro' ? 'Part of how you are' : severityLabel(c.severity)} · Named in {c.diagnosedYear}
                 </span>
-                {c.kind === 'mental' && <StatBar label={`${c.name}: how bad it is`} value={c.severity} />}
+                {c.kind === 'mental' && <StatBar label={`${c.name}: how bad it is`} value={c.severity} kind="bad" />}
                 <span className="text-sm break-words text-muted">{c.blurb}</span>
                 {c.strengths.length > 0 && (
                   <div className="text-sm">

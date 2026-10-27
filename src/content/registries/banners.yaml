@@ -1,0 +1,113 @@
+# Event card categories (U1): the banner across the top-right of an event card, and the card's border color, which
+# comes from the banner's token (--wl-cat-<id> in src/ui/theme/tokens.css). icon: the card's default icon (an id from
+# registries/icons.yaml). An event's own `banner` and `icon` fields override these.
+banners:
+  family: { label: Family, icon: hugging_face }
+  love: { label: Love, icon: two_hearts }
+  friends: { label: Friends, icon: handshake }
+  people: { label: People, icon: speech_balloon }
+  work: { label: Work, icon: briefcase }
+  school: { label: School, icon: graduation_cap }
+  money: { label: Money, icon: money_bag }
+  health: { label: Health, icon: stethoscope }
+  mind: { label: Mind, icon: brain }
+  crime: { label: Crime, icon: police_car_light }
+  fame: { label: Fame, icon: glowing_star }
+  sports: { label: Sports, icon: trophy }
+  home: { label: Home, icon: house_with_garden }
+  travel: { label: Travel, icon: airplane }
+  pets: { label: Pets, icon: paw_prints }
+  wonder: { label: Wonder, icon: sparkles }
+  grief: { label: Grief, icon: candle }
+  life: { label: Life, icon: calendar }
+
+# Every event category (registries/categories.yaml) shows under one banner. The content build rejects a category
+# with none.
+categories:
+  emigration: travel
+  abroad: travel
+  undocumented: travel
+  family: family
+  play: family
+  school: school
+  language: school
+  friends: friends
+  romance: love
+  people: people
+  mischief: life
+  health: health
+  money: money
+  home: home
+  community: people
+  work: work
+  career: work
+  jobless: work
+  retirement: work
+  partner: love
+  wonder: wonder
+  justice: crime
+  prison: crime
+  identity: life
+  vice: health
+  pregnancy: family
+  building: family
+  parenting: family
+  grownkids: family
+  stepfamily: family
+  grief: grief
+  custody: family
+  estate: money
+  guardianship: family
+  legacy: family
+  lives: people
+  care: family
+  web: people
+  mental: mind
+  pets: pets
+  vehicles: travel
+  property: home
+  valuables: money
+  crowds: friends
+  houserules: family
+  driving: travel
+  teenwork: work
+  teamsclubs: friends
+  future: life
+  crimeoffers: crime
+  crime: crime
+  crimeaway: crime
+  crimehome: crime
+  crimelaw: crime
+  crimepast: crime
+  fameentry: fame
+  fame: fame
+  famebiz: fame
+  famefans: fame
+  famelife: fame
+  famepast: fame
+  socialentry: fame
+  socialcasual: fame
+  socialcreator: fame
+  socialfound: fame
+  sportsentry: sports
+  sports: sports
+  sportstryout: sports
+  sportsdeal: sports
+  sportsbody: sports
+  sportslife: sports
+  sportsplayoffs: sports
+  sportspast: sports
+  grandparenting: family
+  grandraise: family
+  latelife: life
+  latecare: family
+  amends: people
+  endoflife: grief
+  belonging: people
+  joining: people
+  faith: people
+  faithhome: family
+  business: work
+  bizstart: work
+  bizpast: work
+  travel: travel

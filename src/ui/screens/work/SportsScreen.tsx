@@ -283,7 +283,7 @@ export function SportsScreen({ life, open, onClose }: { life: LifeState; open: b
                     </p>
                   </div>
                   <div>
-                    <StatBar label="Burnout" value={view.burnout} />
+                    <StatBar label="Burnout" value={view.burnout} kind="bad" />
                     <p className="text-sm" data-testid="screen-burnout">
                       {BURNOUT_WORDS[view.burnoutBand]}
                     </p>

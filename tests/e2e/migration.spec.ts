@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 import { produce } from 'immer';
 import { familyLife, loadSavedLife } from './heirFixtures';
-import { expectNoHorizontalScroll, expectTouchTargets, eventSheet, passAgeGate, playThroughEvents, settle } from './helpers';
+import { eventSheet, expectNoHorizontalScroll, expectTouchTargets, goHome, openPage, passAgeGate, playThroughEvents, settle } from './helpers';
 
 const rich = (seed: string) =>
   produce(familyLife({ seed, age: 32, kids: [], savings: 2_000_000 }), (d) => {
@@ -16,8 +16,7 @@ test('an investor applies, waits, is approved, moves abroad and becomes a perman
   await passAgeGate(page, { testPack: true });
   const life = rich('migration-phone');
   await loadSavedLife(page, life); await page.getByRole('button', { name: 'Continue' }).click(); await settle(page);
-  await page.getByRole('button', { name: 'More', exact: true }).click();
-  await page.getByTestId('more-migration').click();
+  await openPage(page, 'migration');
   await expect(page.getByTestId('migration-citizenships')).toContainText('United States');
   await page.getByLabel('Country', { exact: true }).selectOption('ca');
   await page.getByLabel('Route', { exact: true }).selectOption('investment');
@@ -29,12 +28,10 @@ test('an investor applies, waits, is approved, moves abroad and becomes a perman
   await expect(page.getByTestId('event-money')).toContainText('$');
   await playThroughEvents(page);
   await page.reload(); await page.getByRole('button', { name: 'Continue' }).click(); await settle(page);
-  await page.getByRole('button', { name: 'More', exact: true }).click();
-  await page.getByTestId('more-migration').click();
+  await openPage(page, 'migration');
   await expect(page.getByTestId('migration-application')).toContainText('Waiting');
-  await page.getByRole('button', { name: 'Age Up', exact: true }).click(); await playThroughEvents(page);
-  await page.getByRole('button', { name: 'More', exact: true }).click();
-  await page.getByTestId('more-migration').click();
+  await page.getByRole('button', { name: 'Age up', exact: true }).click(); await playThroughEvents(page);
+  await openPage(page, 'migration');
   // The decision is a roll: either way the screen says so, and an approval can be used.
   const application = page.getByTestId('migration-application');
   await expect(application).toContainText(/Approved|Refused/);
@@ -43,10 +40,9 @@ test('an investor applies, waits, is approved, moves abroad and becomes a perman
     await page.getByTestId('migration-move').click(); await settle(page);
     await eventSheet(page).getByRole('button', { name: 'Continue' }).click(); await settle(page);
     await playThroughEvents(page);
-    await page.getByRole('button', { name: 'More', exact: true }).click();
-    await page.getByTestId('more-migration').click();
+    await openPage(page, 'migration');
     await expect(page.getByTestId('migration-status')).toContainText('Permanent resident');
-    await page.getByRole('button', { name: 'Life', exact: true }).click();
+    await goHome(page);
     await page.getByRole('button', { name: 'Profile', exact: true }).click();
     await expect(page.getByText('Citizen of', { exact: false })).toBeVisible();
     await expect(page.getByText('Permanent resident', { exact: false })).toBeVisible();
@@ -57,8 +53,7 @@ test('moving without papers asks for confirmation, costs money, and either arriv
   await passAgeGate(page, { testPack: true });
   const life = produce(rich('migration-papers-phone'), (d) => { d.finances.savings = 40_000; d.character.stats.smarts = 40; });
   await loadSavedLife(page, life); await page.getByRole('button', { name: 'Continue' }).click(); await settle(page);
-  await page.getByRole('button', { name: 'More', exact: true }).click();
-  await page.getByTestId('more-migration').click();
+  await openPage(page, 'migration');
   await page.getByLabel('Country', { exact: true }).selectOption('ca');
   await page.getByTestId('migration-without-papers').click();
   await expectNoHorizontalScroll(page); await expectTouchTargets(page);
@@ -66,8 +61,7 @@ test('moving without papers asks for confirmation, costs money, and either arriv
   await eventSheet(page).getByRole('button', { name: 'Continue' }).click(); await settle(page);
   await expect(page.getByTestId('event-money')).toContainText('$');
   await playThroughEvents(page);
-  await page.getByRole('button', { name: 'More', exact: true }).click();
-  await page.getByTestId('more-migration').click();
+  await openPage(page, 'migration');
   const status = (await page.getByTestId('migration-status').textContent()) ?? '';
   expect(status.includes('Without papers') || status.includes('Citizen')).toBe(true);
 });

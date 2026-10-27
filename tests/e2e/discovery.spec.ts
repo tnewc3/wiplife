@@ -76,8 +76,6 @@ test('editing pronouns in the Profile works at any age and offers coming out onl
   await profile(page).getByRole('button', { name: 'Save' }).click();
   await expect(identityValue(page, 'Pronouns')).toHaveText('xe/xem/xyrs');
   await closeProfile(page);
-  // At once: the Home header uses the new pronouns.
-  await expect(page.getByText(/· xe\/xem$/)).toBeVisible();
 
   // Not asked: no coming-out event next year (2 is a quiet year in the pack).
   await ageUp(page);

@@ -2,15 +2,15 @@ import { expect, test } from '@playwright/test';
 import { htmlTheme, passAgeGate } from './helpers';
 
 test.describe('theme', () => {
-  test.use({ colorScheme: 'dark' });
+  test.use({ colorScheme: 'light' });
 
-  test('follows the system by default, can be changed and persists', async ({ page }) => {
+  test('is dark by default whatever the device says, can be changed and persists', async ({ page }) => {
     await passAgeGate(page);
     expect(await htmlTheme(page)).toBe('dark');
 
     await page.getByRole('button', { name: 'Settings' }).click();
     const picker = page.getByRole('radiogroup', { name: 'Theme' });
-    await expect(picker.getByRole('radio', { name: 'System' })).toHaveAttribute('aria-checked', 'true');
+    await expect(picker.getByRole('radio', { name: 'Dark' })).toHaveAttribute('aria-checked', 'true');
 
     await picker.getByRole('radio', { name: 'Light' }).click();
     await expect.poll(() => htmlTheme(page)).toBe('light');
@@ -20,15 +20,17 @@ test.describe('theme', () => {
     await page.getByRole('button', { name: 'Settings' }).click();
     await expect(picker.getByRole('radio', { name: 'Light' })).toHaveAttribute('aria-checked', 'true');
 
-    await picker.getByRole('radio', { name: 'System' }).click();
+    await picker.getByRole('radio', { name: 'Dark' }).click();
     await expect.poll(() => htmlTheme(page)).toBe('dark');
   });
 
   test('System tracks the OS setting live', async ({ page }) => {
     await passAgeGate(page);
-    expect(await htmlTheme(page)).toBe('dark');
-    await page.emulateMedia({ colorScheme: 'light' });
+    await page.getByRole('button', { name: 'Settings' }).click();
+    await page.getByRole('radiogroup', { name: 'Theme' }).getByRole('radio', { name: 'System' }).click();
     await expect.poll(() => htmlTheme(page)).toBe('light');
+    await page.emulateMedia({ colorScheme: 'dark' });
+    await expect.poll(() => htmlTheme(page)).toBe('dark');
   });
 });
 

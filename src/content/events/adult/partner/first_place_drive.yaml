@@ -5,6 +5,7 @@ text: >-
   your first place together. Someone has put flowers on the fire escape.
 tone: light
 category: partner
+meter: { label: How close you feel, role: partner, bond: affection }
 rarity: common
 lifeStages: [adult, senior]
 requires:

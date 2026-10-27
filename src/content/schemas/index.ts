@@ -17,7 +17,7 @@ import { citySchema } from './city';
 import { countriesBalanceSchema, countrySchema } from './country';
 import { economyBalanceSchema, triggerRegistrySchema } from './economy';
 import { educationBalanceSchema, gradProgramSchema, majorSchema, tradeSchema } from './education';
-import { categoryRegistrySchema, eventSchema, flagRegistrySchema, memoryRegistrySchema } from './events';
+import { bannerRegistrySchema, categoryRegistrySchema, eventSchema, flagRegistrySchema, iconRegistrySchema, memoryRegistrySchema } from './events';
 import { causeSchema, historyTextSchema, legalTextSchema, obituaryTextSchema, relationWordsSchema, timeTextSchema } from './text';
 import { godmodeBalanceSchema } from './godmodeBalance';
 import { conditionDefSchema, healthBalanceSchema, healthRegistrySchema } from './health';
@@ -197,6 +197,8 @@ export const singletonTypes = {
   'registries/memories': memoryRegistrySchema,
   'registries/flags': flagRegistrySchema,
   'registries/categories': categoryRegistrySchema,
+  'registries/icons': iconRegistrySchema,
+  'registries/banners': bannerRegistrySchema,
   'registries/actions': actionRegistrySchema,
   'registries/triggers': triggerRegistrySchema,
   'registries/work': workRegistrySchema,
@@ -336,6 +338,8 @@ export const contentBundleSchema = z.strictObject({
     memories: memoryRegistrySchema,
     flags: flagRegistrySchema,
     categories: categoryRegistrySchema,
+    icons: iconRegistrySchema,
+    banners: bannerRegistrySchema,
     actions: actionRegistrySchema,
     triggers: triggerRegistrySchema,
     work: workRegistrySchema,

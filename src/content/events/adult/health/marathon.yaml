@@ -3,6 +3,7 @@ title: Twenty-six miles
 text: A friend talks you into signing up for a marathon. It's in four months.
 tone: light
 category: health
+icon: flexed_biceps
 rarity: uncommon
 lifeStages: [youngAdult, adult]
 requires: { stat: fitness, gte: 55 }

@@ -1,0 +1,31 @@
+# Content icons (U1). Each is a Microsoft Fluent Emoji, Color style (MIT), copied into public/icons/<id>.svg by
+# `npm run icons -- <path to a fluentui-emoji checkout>` (tools/icons/fetch-fluent.ts). Only the icons used are
+# listed; every one is credited in CREDITS.md, and the content build checks that the file and the credit exist.
+# fluent: the emoji's folder name in github.com/microsoft/fluentui-emoji/assets. variant: for emoji with skin tones.
+icons:
+  hugging_face: { fluent: Hugging face }
+  two_hearts: { fluent: Two hearts }
+  handshake: { fluent: Handshake }
+  speech_balloon: { fluent: Speech balloon }
+  briefcase: { fluent: Briefcase }
+  graduation_cap: { fluent: Graduation cap }
+  money_bag: { fluent: Money bag }
+  stethoscope: { fluent: Stethoscope }
+  brain: { fluent: Brain }
+  police_car_light: { fluent: Police car light }
+  glowing_star: { fluent: Glowing star }
+  trophy: { fluent: Trophy }
+  house_with_garden: { fluent: House with garden }
+  airplane: { fluent: Airplane }
+  paw_prints: { fluent: Paw prints }
+  sparkles: { fluent: Sparkles }
+  candle: { fluent: Candle }
+  calendar: { fluent: Calendar }
+  grinning_face: { fluent: Grinning face }
+  red_heart: { fluent: Red heart }
+  light_bulb: { fluent: Light bulb }
+  fire: { fluent: Fire }
+  flexed_biceps: { fluent: Flexed biceps, variant: Default }
+  anxious_face_with_sweat: { fluent: Anxious face with sweat }
+  headstone: { fluent: Headstone }
+  rocket: { fluent: Rocket }

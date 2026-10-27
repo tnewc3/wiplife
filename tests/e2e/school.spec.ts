@@ -5,10 +5,9 @@
  * college degree paid with a student loan, changing major, and the loan on
  * the Money tab.
  */
-import { expect, test, type Page } from '@playwright/test';
-import { ageUp, ageUpTimes, createCustomLife, expectNoHorizontalScroll, expectTouchTargets, passAgeGate, type CustomLifeData } from './helpers';
+import { expect, test } from '@playwright/test';
+import { ageUp, ageUpTimes, createCustomLife, expectNoHorizontalScroll, expectTouchTargets, goHome, passAgeGate, tab, type CustomLifeData } from './helpers';
 
-const tab = (page: Page, name: string) => page.getByRole('navigation', { name: 'Game sections' }).getByRole('button', { name, exact: true });
 
 const STUDENT: CustomLifeData = {
   first: 'Dana',
@@ -29,18 +28,18 @@ test('from high school to a college degree, paid with a student loan', async ({ 
   await createCustomLife(page, STUDENT);
 
   // Too young for school.
-  await tab(page, 'Work/School').click();
+  await tab(page, 'Job').click();
   await expect(page.getByTestId('school-status')).toHaveText('You start school at 5.');
 
   // Kindergarten starts on its own.
   await ageUpTimes(page, 5);
   await expect(page.getByTestId('school-status')).toContainText('Kindergarten');
-  await tab(page, 'Life').click();
+  await goHome(page);
   await expect(page.getByTestId('school-line')).toHaveText('In kindergarten');
 
   // The last year of high school: grades as a letter, and applications open.
   await ageUpTimes(page, 12);
-  await tab(page, 'Work/School').click();
+  await tab(page, 'Job').click();
   const school = page.getByRole('region', { name: 'High school' });
   await expect(school.getByTestId('school-status')).toContainText('Senior year · Lakeview High School');
   await expect(school.getByTestId('school-grades')).toHaveText(/^Grades: (A|A-|B\+|B|B-|C\+|C|C-|D\+|D|D-|F)$/);
@@ -72,7 +71,7 @@ test('from high school to a college degree, paid with a student loan', async ({ 
 
   // High school ends, college begins, and a loan pays what aid doesn't.
   await ageUp(page);
-  await tab(page, 'Work/School').click();
+  await tab(page, 'Job').click();
   const college = page.getByRole('region', { name: 'Lakeshore Community College' });
   await expect(college.getByTestId('school-status')).toContainText('Community college · Year 1 of 2');
   await expect(college.getByTestId('school-status')).toContainText('Studying Nursing');
@@ -82,12 +81,12 @@ test('from high school to a college degree, paid with a student loan', async ({ 
   await expect(college.getByRole('list', { name: 'Diplomas and degrees' })).toContainText('High school diploma');
 
   // The student loan waits on the Money tab.
-  await tab(page, 'Money').click();
+  await tab(page, 'Assets').click();
   await expect(page.getByRole('list', { name: 'Debts' })).toContainText('Student loan');
   await expect(page.getByTestId('debt-status-student')).toHaveText('Payments paused while you’re in school');
 
   // Change major with the major picker.
-  await tab(page, 'Work/School').click();
+  await tab(page, 'Job').click();
   await page.getByRole('button', { name: 'Change major' }).click();
   const change = page.getByRole('dialog', { name: 'Change your major' });
   await expect(change.getByRole('radio', { name: /^Nursing/ })).toBeDisabled();
@@ -98,16 +97,16 @@ test('from high school to a college degree, paid with a student loan', async ({ 
 
   // Two years later: an associate degree, and the loan comes due.
   await ageUpTimes(page, 2);
-  await tab(page, 'Work/School').click();
+  await tab(page, 'Job').click();
   await expect(page.getByRole('list', { name: 'Diplomas and degrees' })).toContainText('Associate degree in psychology');
   await expect(page.getByTestId('school-status')).toHaveText('You’re not in school.');
-  await tab(page, 'Money').click();
+  await tab(page, 'Assets').click();
   await expect(page.getByTestId('debt-status-student')).not.toHaveText('Payments paused while you’re in school');
 
   // It all survives a reload.
   await page.reload();
   await page.getByRole('button', { name: 'Continue' }).click();
-  await tab(page, 'Work/School').click();
+  await tab(page, 'Job').click();
   await expect(page.getByRole('list', { name: 'Diplomas and degrees' })).toContainText('Associate degree in psychology');
   await expectNoHorizontalScroll(page);
   await expectTouchTargets(page);

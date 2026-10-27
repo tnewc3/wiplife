@@ -43,7 +43,7 @@ function OptionButton({ option, words, onPick }: { option: ApplyOptionView; word
         </span>
         {option.blurb && <span className="text-sm break-words text-muted">{option.blurb}</span>}
         <span className="text-sm text-muted">{costLine(option)}</span>
-        <span className={`text-sm ${option.result === true ? 'font-semibold text-accent' : 'text-muted'}`}>{status}</span>
+        <span className={`text-sm ${option.result === true ? 'font-semibold text-link' : 'text-muted'}`}>{status}</span>
       </button>
     </li>
   );

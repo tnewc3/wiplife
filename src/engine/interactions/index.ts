@@ -6,3 +6,4 @@ export { closeInteraction, parseInteractParams, performInteraction, resolveInter
 export { reactionScore, repeatsThisYear, returnsFactor, rollTier, tierForScore, type Repeats } from './reaction';
 export { getInteractionMenu, getInteractionOutcome, type InteractionMenuGroup, type InteractionMenuItem, type InteractionOutcomeView } from './views';
 export { WEALTH_LEVELS, blendWealth, rollWealth, wealthFromSalary } from './wealth';
+export { GROUP_INTERACTION, getGroupTimeView, spendTimeWithEveryone, type GroupTimeRow, type GroupTimeView } from './group';

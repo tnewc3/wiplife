@@ -33,7 +33,7 @@ function CareerHistory({ life }: { life: LifeState }) {
   );
 }
 
-/** More → Life history: your career, then the full timeline of the current life. */
+/** Menu → Life history: your career, then the full timeline of the current life. */
 export function LifeHistoryScreen({ life }: { life: LifeState }) {
   const close = useAppStore((s) => s.closeLifeHistory);
   return (

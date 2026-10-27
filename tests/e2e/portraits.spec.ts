@@ -1,7 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
-import { expectNoHorizontalScroll, expectTouchTargets, passAgeGate, settle, startRandomLife } from './helpers';
+import { expectNoHorizontalScroll, expectTouchTargets, passAgeGate, settle, startRandomLife, tab } from './helpers';
 
-const tab = (page: Page, name: string) => page.getByRole('navigation', { name: 'Game sections' }).getByRole('button', { name, exact: true });
 
 /** Waits until a portrait inside `scope` has drawn (an image rather than the placeholder silhouette). */
 async function portraitDrawn(scope: ReturnType<Page['locator']>) {
@@ -15,7 +14,7 @@ test('your portrait is on Home, and the people you know have theirs in the Peopl
   await expect(page.getByRole('img', { name: /^Portrait of / }).first()).toBeVisible();
 
   await tab(page, 'People').click();
-  const rows = page.getByRole('list', { name: 'Family' }).getByRole('listitem');
+  const rows = page.getByRole('list', { name: 'Parents' }).getByRole('listitem');
   expect(await rows.count()).toBeGreaterThanOrEqual(1);
   await portraitDrawn(rows.first());
   await expectNoHorizontalScroll(page);
@@ -30,7 +29,7 @@ test('thumbnails are cached: after a reload Home and the People list draw withou
   await startRandomLife(page, { seed: 'e2e-portraits-cache' });
   await portraitDrawn(page.getByTestId('character-portrait').first());
   await tab(page, 'People').click();
-  const rows = page.getByRole('list', { name: 'Family' }).getByRole('listitem');
+  const rows = page.getByRole('list', { name: 'Parents' }).getByRole('listitem');
   const count = await rows.count();
   // A portrait is drawn when its row scrolls into view, so scroll through the list.
   for (let i = 0; i < count; i++) {
@@ -138,7 +137,7 @@ test('a card about someone shows their portrait', async ({ page }) => {
   await startRandomLife(page, { seed: 'e2e-portraits-event' });
   const sheet = page.getByRole('dialog').filter({ has: page.getByTestId('event-card') });
   for (let year = 0; year < 20; year++) {
-    await page.getByRole('button', { name: 'Age Up' }).click();
+    await page.getByRole('button', { name: 'Age up' }).click();
     await settle(page);
     while (await sheet.isVisible()) {
       await expectNoHorizontalScroll(page);

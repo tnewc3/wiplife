@@ -55,7 +55,7 @@ export function Ladder({ path }: { path: FamePathView }) {
           return (
             <li key={number} aria-current={rung.current ? 'step' : undefined} className={`flex min-h-9 items-baseline gap-2 border-l-4 py-1 pl-3 ${rung.current ? 'border-accent font-semibold' : rung.reached ? 'border-border' : 'border-transparent text-muted'}`}>
               <span className="min-w-0 break-words">{cap(rung.title)}</span>
-              {rung.current && <span className="shrink-0 text-sm text-accent">You are here</span>}
+              {rung.current && <span className="shrink-0 text-sm text-link">You are here</span>}
               {!rung.current && rung.reached && <span className="shrink-0 text-sm text-muted">Reached</span>}
             </li>
           );
@@ -120,7 +120,7 @@ export function FameScreen({ life, open, onClose }: { life: LifeState; open: boo
                     </p>
                   </div>
                   <div>
-                    <StatBar label="Burnout" value={view.burnout} />
+                    <StatBar label="Burnout" value={view.burnout} kind="bad" />
                     <p className="text-sm" data-testid="screen-burnout">
                       {BURNOUT_WORDS[view.burnoutBand]}
                     </p>

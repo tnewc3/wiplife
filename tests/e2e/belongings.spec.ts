@@ -6,10 +6,9 @@
  */
 import { expect, test, type Page } from '@playwright/test';
 import { loadSavedLife } from './heirFixtures';
-import { ageUp, expectNoHorizontalScroll, expectTouchTargets, passAgeGate, settle } from './helpers';
+import { ageUp, expectNoHorizontalScroll, expectTouchTargets, openPage, passAgeGate, settle, tab } from './helpers';
 import { belongingsLife, type BelongingsLife } from './possessionsFixtures';
 
-const tab = (page: Page, name: string) => page.getByRole('navigation', { name: 'Game sections' }).getByRole('button', { name, exact: true });
 
 async function open(page: Page, options: BelongingsLife): Promise<void> {
   await passAgeGate(page, { testPack: true });
@@ -19,8 +18,7 @@ async function open(page: Page, options: BelongingsLife): Promise<void> {
 }
 
 async function openBelongings(page: Page): Promise<void> {
-  await tab(page, 'More').click();
-  await page.getByTestId('more-belongings').click();
+  await openPage(page, 'possessions');
   await expect(page.getByRole('heading', { name: 'What you own' })).toBeVisible();
 }
 
@@ -57,7 +55,7 @@ test('buys a used car with cash: the price comes out of savings and the car is l
   await expect(sheet(page)).toHaveCount(0);
   await expect(page.getByTestId('belongings-vehicles')).toContainText('hatchback');
   await expect(page.getByTestId('belongings-vehicles')).toContainText('insured');
-  await tab(page, 'Money').click();
+  await tab(page, 'Assets').click();
   await expect(page.getByTestId('savings')).not.toHaveText('$600,000');
 });
 
@@ -67,7 +65,7 @@ test('buys a car on a loan: a car loan appears among the debts', async ({ page }
   await page.getByTestId('buy-vehicle').click();
   await sheet(page).getByTestId('vehicle-new-sedan').click();
   await sheet(page).getByTestId('buy-loan').click();
-  await tab(page, 'Money').click();
+  await tab(page, 'Assets').click();
   await expect(page.getByRole('list', { name: 'Debts' })).toContainText('Car loan');
 });
 
@@ -156,7 +154,7 @@ test('after a year, the Money tab shows what upkeep and insurance cost', async (
   test.setTimeout(90_000);
   await open(page, { seed: 'e2e-own-10', owns: true });
   await ageUp(page);
-  await tab(page, 'Money').click();
+  await tab(page, 'Assets').click();
   const ledger = page.getByRole('list', { name: /Last year/ }).or(page.getByLabel('Last year’s money'));
   await expect(ledger).toContainText('Upkeep');
   await expect(ledger).toContainText('Insurance');

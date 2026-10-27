@@ -43,7 +43,7 @@ import { renderText } from './text';
 import { runPipeline, YEAR_PIPELINE, type PipelineStep } from './pipeline';
 import { weightedKey, weightedPick } from './random';
 import { chance, cloneRng, createRng, pick } from './rng';
-import { writeFromGroup } from './systems/history';
+import { addHistory, writeFromGroup } from './systems/history';
 import { characterDeathChance, pickCause } from './systems/mortality';
 import { deadlyConditions } from './health';
 import type { Character, Id, LifePhase, LifeState, Look } from './types';
@@ -365,8 +365,32 @@ export function endYear(state: LifeState, content: ContentBundle): LifeState {
   });
 }
 
+/**
+ * U1: puts an outcome's money in the life log. The line goes on the history entry the event just wrote, or, when it wrote
+ * none, on a new low-importance entry with the outcome's own words, so the log shows every amount with the balance after it.
+ */
+function logEventMoney(
+  state: LifeState,
+  eventId: string,
+  entriesBefore: number,
+  money: NonNullable<LifeState['history'][number]['money']>,
+  fallbackText: string,
+  content: ContentBundle,
+): void {
+  const mine = state.history.filter((e) => e.year === state.currentYear && e.tags.includes(eventId));
+  const written = mine[mine.length - 1];
+  if (mine.length > entriesBefore && written && written.money === undefined) written.money = money;
+  else addHistory(state, { text: fallbackText, tags: ['event', eventId, 'money'], importance: 1, money }, content);
+}
+
 /** The choice id that resolves an event without choices (and a lost event whose definition is gone). */
 export const CONTINUE_CHOICE = 'continue';
+
+/**
+ * U1, "Surprise me": the choice id that picks one of the card's visible choices at random from the life's seeded
+ * generator. It is logged like any other choice (the log keeps this id, not the pick), so a replay draws the same one.
+ */
+export const SURPRISE_CHOICE = 'surprise';
 
 /**
  * The player's answer to one pending event: records the input, applies the
@@ -388,7 +412,9 @@ export function resolveChoice(state: LifeState, instanceId: Id, choiceId: Id, co
   const def = content.events[instance.eventId];
 
   let choice: ChoiceDef | undefined;
-  if (def?.choices) {
+  if (choiceId === SURPRISE_CHOICE) {
+    if (!def?.choices) throw new InvalidInputError([{ path: 'choice', message: `Event "${instance.eventId}" has no choices to pick from.` }]);
+  } else if (def?.choices) {
     choice = def.choices.find((c) => c.id === choiceId);
     if (!choice || !evaluate(choice.visibleIf, state, { cast: instance.cast, roles: 'strict', content })) {
       throw new InvalidInputError([{ path: 'choice', message: `"${choiceId}" is not a choice in event "${instance.eventId}".` }]);
@@ -401,7 +427,12 @@ export function resolveChoice(state: LifeState, instanceId: Id, choiceId: Id, co
     useFastRng(draft, state);
     draft.inputLog.push({ year: draft.currentYear, kind: 'choice', payload: { instanceId, choiceId } });
     const target = draft.pending.find((p) => p.instanceId === instanceId)!;
-    target.resolvedChoiceId = choiceId;
+    if (choiceId === SURPRISE_CHOICE) {
+      const visible = def!.choices!.filter((c) => evaluate(c.visibleIf, draft as LifeState, { cast: instance.cast, roles: 'strict', content }));
+      if (visible.length === 0) throw new InvalidInputError([{ path: 'choice', message: `Event "${instance.eventId}" has no choice to pick.` }]);
+      choice = pick(draft.rng, visible);
+    }
+    target.resolvedChoiceId = choice?.id ?? choiceId;
 
     if (def) {
       let outcome: Outcome | undefined = def.autoOutcome;
@@ -414,6 +445,7 @@ export function resolveChoice(state: LifeState, instanceId: Id, choiceId: Id, co
         const dirty = draft.finances.dirty;
         const debt = totalDebt(draft);
         const housing = draft.housing.annualCost;
+        const entriesOfEvent = (draft.history as LifeState['history']).filter((e) => e.year === draft.currentYear && e.tags.includes(def.id)).length;
         const help = outcome.effects.reduce((sum, e) => sum + (e.type === 'cost' ? familyHelp(draft, e.item, content) : 0), 0);
         // E5: a possession the outcome removes is still named in its text.
         const named = def.bind ? textContext(draft, instance.cast, content, instance.since, true) : undefined;
@@ -443,6 +475,7 @@ export function resolveChoice(state: LifeState, instanceId: Id, choiceId: Id, co
             ...(dirtyChange !== 0 ? { dirty: { change: dirtyChange, balance: draft.finances.dirty } } : {}),
           };
         }
+        if (change !== 0) logEventMoney(draft as LifeState, def.id, entriesOfEvent, { change, balance: draft.finances.savings }, target.outcomeText ?? renderText(def.title, textContext(draft, instance.cast, content, instance.since)), content);
       }
     }
 

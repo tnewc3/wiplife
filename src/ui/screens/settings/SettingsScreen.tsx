@@ -12,9 +12,9 @@ import { Sheet } from '../../components/Sheet';
 import { TeamsEditor } from './TeamsEditor';
 
 const themeOptions: { value: Theme; label: string }[] = [
-  { value: 'system', label: 'System' },
-  { value: 'light', label: 'Light' },
   { value: 'dark', label: 'Dark' },
+  { value: 'light', label: 'Light' },
+  { value: 'system', label: 'System' },
 ];
 
 function ThemePicker() {

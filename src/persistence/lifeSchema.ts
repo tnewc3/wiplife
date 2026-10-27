@@ -1302,6 +1302,7 @@ export const historyEntrySchema = z.strictObject({
   tags: z.array(z.string()),
   importance: z.union([z.literal(1), z.literal(2), z.literal(3)]),
   legendary: z.boolean().exactOptional(),
+  money: z.strictObject({ change: z.number(), balance: z.number() }).exactOptional(),
 });
 const historyEntry = historyEntrySchema;
 

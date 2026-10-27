@@ -8,10 +8,9 @@
  */
 import { expect, test, type Page } from '@playwright/test';
 import { loadSavedLife } from './heirFixtures';
-import { expectNoHorizontalScroll, expectTouchTargets, eventSheet, passAgeGate, settle } from './helpers';
+import { eventSheet, expectNoHorizontalScroll, expectTouchTargets, passAgeGate, settle, tab } from './helpers';
 import { peopleLife } from './peopleFixtures';
 
-const tab = (page: Page, name: string) => page.getByRole('navigation', { name: 'Game sections' }).getByRole('button', { name, exact: true });
 const OPEN = { testPack: true };
 
 async function openFixture(page: Page): Promise<void> {
@@ -59,7 +58,7 @@ test("a person's page shows their job, partner, children, city and troubles", as
 
 test('a year brings news and a funeral request, counted among the year\'s events', async ({ page }) => {
   await openFixture(page);
-  await page.getByRole('button', { name: 'Age Up' }).click();
+  await page.getByRole('button', { name: 'Age up' }).click();
   await settle(page);
   // The year may bring other cards first (the test pack has its own); the grandmother's funeral is one of them, with real choices.
   const sheet = eventSheet(page);
@@ -93,6 +92,6 @@ test('a year brings news and a funeral request, counted among the year\'s events
   // And it is on Home, and on her page.
   await expect(page.getByTestId('news-card')).toContainText(/[Rr]etired/);
   await tab(page, 'People').click();
-  await page.getByRole('list', { name: 'Family' }).getByRole('button', { name: /Rae/ }).click();
+  await page.getByRole('list', { name: 'Siblings' }).getByRole('button', { name: /Rae/ }).click();
   await expect(page.getByTestId('life-work')).toContainText('Retired');
 });

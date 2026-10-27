@@ -51,7 +51,7 @@ export function HealthScreen({ life }: { life: LifeState }) {
                 <span className="text-sm text-muted">
                   {CONDITION_KIND_LABELS[c.kind]} · {severityLabel(c.severity)} · {treatmentLabel(c.treated, c.treatable)}
                 </span>
-                <StatBar label={`${c.name}: how bad it is`} value={c.severity} />
+                <StatBar label={`${c.name}: how bad it is`} value={c.severity} kind="bad" />
                 <span className="text-sm break-words text-muted">{c.blurb}</span>
               </li>
             ))}

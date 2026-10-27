@@ -118,7 +118,7 @@ export function TeenScreen({ life }: { life: LifeState }) {
                   <span className="font-semibold">{FOCUS_LABELS[id].label}</span>
                   <span className="text-sm text-muted">{FOCUS_LABELS[id].blurb}</span>
                 </span>
-                {chosen && <span className="shrink-0 text-sm font-semibold text-accent">Chosen</span>}
+                {chosen && <span className="shrink-0 text-sm font-semibold text-link">Chosen</span>}
               </button>
             );
           })}
@@ -156,7 +156,7 @@ export function TeenScreen({ life }: { life: LifeState }) {
                   <div key={c.id} className="rounded-xl border border-border p-3" data-testid={`teen-crowd-${c.id}`}>
                     <div className="flex items-baseline justify-between gap-2">
                       <p className="font-semibold">{c.name}</p>
-                      {c.invited && <span className="text-sm font-semibold text-accent">Noticed you</span>}
+                      {c.invited && <span className="text-sm font-semibold text-link">Noticed you</span>}
                     </div>
                     <p className="text-sm text-muted">{c.blurb}</p>
                     <p className="mt-1 text-sm">

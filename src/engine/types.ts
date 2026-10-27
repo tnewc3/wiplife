@@ -1070,6 +1070,8 @@ export interface HistoryEntry {
   tags: string[];
   importance: 1 | 2 | 3;
   legendary?: boolean;
+  /** U1: what an event outcome did to your savings, and the balance after it: the life log shows it as a green or red line. */
+  money?: { change: number; balance: number };
 }
 
 /** What changed over one year, for the year recap. */

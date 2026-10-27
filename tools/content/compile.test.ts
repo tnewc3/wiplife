@@ -1,8 +1,9 @@
-import { cp, mkdtemp, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
+import { cp, mkdtemp, mkdir, readdir, readFile, rm, writeFile } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import type { CardFiles } from './cards';
 import { compileContent, formatErrors, type CompileResult } from './compile';
 import { futureTeams } from './sports';
 
@@ -327,6 +328,27 @@ choices:
     outcome: {}
 ${extra}`;
     const file = 'events/adult/family/test_event.yaml';
+
+    describe('event cards (U1)', () => {
+      const withBanner = (extra: string) => event(extra);
+      it('takes the meter, banner and icon an event declares', async () => {
+        await write(file, withBanner('banner: money\nicon: fire\nmeter: { label: How close you feel, role: npc, bond: trust }\n'));
+        const result = await compile();
+        if (!result.ok) throw new Error(formatErrors(result.errors));
+        expect(result.bundle.events.test_event).toMatchObject({ banner: 'money', icon: 'fire', meter: { role: 'npc', bond: 'trust' } });
+      });
+
+      it('refuses an unknown banner or icon, and a meter about someone the event does not cast', async () => {
+        await write(file, withBanner('banner: nowhere\n'));
+        expect(await expectErrors()).toContain('unknown banner "nowhere"');
+        await write(file, withBanner('icon: nothing\n'));
+        expect(await expectErrors()).toContain('unknown icon "nothing"');
+        await write(file, withBanner('meter: { label: Their trust, role: stranger, bond: trust }\n'));
+        expect(await expectErrors()).toContain('meter role "stranger" is not in the event\'s cast');
+        await write(file, withBanner('meter: { label: Your health, stat: vigor }\n'));
+        expect(await expectErrors()).toContain('meter');
+      });
+    });
 
     describe('country tags (W4a)', () => {
       it('puts the tag into the event’s requirements, so it only happens in those countries', async () => {
@@ -2152,5 +2174,47 @@ describe('risk and legal activities (Batch 2b)', { timeout: 90_000 }, () => {
     expect(await expectErrors()).toContain('minAge must be at least 13');
     await write('pastimes/change_your_first_name.yaml', name.replace('{self.name}', '{typed}'));
     expect(await expectErrors()).toContain('unknown');
+  });
+});
+
+describe('event card registries (U1)', { timeout: 90_000 }, () => {
+  const read = (file: string) => readFile(path.join(dir, file), 'utf8');
+  const realRoot = path.resolve(realContentDir, '..', '..');
+  const files = async (): Promise<CardFiles> => ({
+    iconFiles: new Set(await readdir(path.join(realRoot, 'public', 'icons'))),
+    credits: await readFile(path.join(realRoot, 'CREDITS.md'), 'utf8'),
+    tokens: await readFile(path.join(realRoot, 'src', 'ui', 'theme', 'tokens.css'), 'utf8'),
+  });
+  const check = async (cardFiles: CardFiles) => compileContent({ contentDir: dir, appVersion: '0.0.0', cardFiles });
+
+  it('passes with every icon file, credit and color in place', async () => {
+    const result = await check(await files());
+    if (!result.ok) throw new Error(formatErrors(result.errors));
+    expect(result.ok).toBe(true);
+  });
+
+  it('wants every event category under a banner, and every banner to name a real icon', async () => {
+    const banners = await read('registries/banners.yaml');
+    await write('registries/banners.yaml', banners.replace('  travel: travel\n', ''));
+    expect(await expectErrors()).toContain('category "travel" shows under no banner');
+    await write('registries/banners.yaml', banners.replace('  travel: travel\n', '  travel: nowhere\n'));
+    expect(await expectErrors()).toContain('category "travel": unknown banner "nowhere"');
+    await write('registries/banners.yaml', banners.replace('  home: { label: Home, icon: house_with_garden }', '  home: { label: Home, icon: nothing }'));
+    expect(await expectErrors()).toContain('banner "home": unknown icon "nothing"');
+    await write('registries/banners.yaml', banners.replace('categories:\n', 'categories:\n  not_a_category: life\n'));
+    expect(await expectErrors()).toContain('"not_a_category" is not an event category');
+  });
+
+  it('wants a banner to have its colors, and an icon its file and its credit', async () => {
+    const real = await files();
+    const noColor = await check({ ...real, tokens: real.tokens.replaceAll('--wl-cat-pets:', '--wl-cat-pets-gone:') });
+    expect(noColor.ok).toBe(false);
+    if (!noColor.ok) expect(formatErrors(noColor.errors)).toContain('banner "pets" has no color');
+    const noFile = await check({ ...real, iconFiles: new Set([...real.iconFiles].filter((f) => f !== 'fire.svg')) });
+    expect(noFile.ok).toBe(false);
+    if (!noFile.ok) expect(formatErrors(noFile.errors)).toContain('icon "fire": public/icons/fire.svg is missing');
+    const noCredit = await check({ ...real, credits: real.credits.replace('public/icons/fire.svg', 'public/icons/other.svg') });
+    expect(noCredit.ok).toBe(false);
+    if (!noCredit.ok) expect(formatErrors(noCredit.errors)).toContain('icon "fire" is not credited in CREDITS.md');
   });
 });

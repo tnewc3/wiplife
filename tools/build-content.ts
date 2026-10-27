@@ -5,7 +5,7 @@
  * src/content/compiled/test-content.json. Exits with code 1 and a list of
  * errors if anything is invalid. C1 wording checks print as warnings.
  */
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { compileContent, formatErrors } from './content/compile';
@@ -26,9 +26,16 @@ const builds = [
   },
 ];
 
+/** U1: the icon files, credits and color tokens the event cards are checked against. */
+const cardFiles = {
+  iconFiles: new Set(await readdir(path.join(root, 'public', 'icons'))),
+  credits: await readFile(path.join(root, 'CREDITS.md'), 'utf8'),
+  tokens: await readFile(path.join(root, 'src', 'ui', 'theme', 'tokens.css'), 'utf8'),
+};
+
 let failed = false;
 for (const build of builds) {
-  const result = await compileContent({ contentDir, appVersion: build.appVersion, ...(build.overlayDir ? { overlayDir: build.overlayDir } : {}) });
+  const result = await compileContent({ contentDir, appVersion: build.appVersion, cardFiles, ...(build.overlayDir ? { overlayDir: build.overlayDir } : {}) });
   if (!result.ok) {
     console.error(`${build.label} build failed with ${result.errors.length} error(s):\n${formatErrors(result.errors)}`);
     failed = true;

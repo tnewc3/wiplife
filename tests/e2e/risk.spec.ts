@@ -7,17 +7,15 @@
 import { expect, test, type Page } from '@playwright/test';
 import { activitiesLife, type ActivitiesLife } from './activitiesFixtures';
 import { loadSavedLife } from './heirFixtures';
-import { expectNoHorizontalScroll, expectTouchTargets, passAgeGate, settle } from './helpers';
+import { expectNoHorizontalScroll, expectTouchTargets, goHome, openPage, passAgeGate, settle, tab } from './helpers';
 
-const tab = (page: Page, name: string) => page.getByRole('navigation', { name: 'Game sections' }).getByRole('button', { name, exact: true });
 
 async function open(page: Page, options: ActivitiesLife): Promise<void> {
   await passAgeGate(page, { testPack: true });
   await loadSavedLife(page, activitiesLife(options));
   await page.getByRole('button', { name: 'Continue' }).click();
   await settle(page);
-  await tab(page, 'More').click();
-  await page.getByTestId('more-activities').click();
+  await openPage(page, 'pastimes');
   await expect(page.getByRole('heading', { name: 'What would you like to do?' })).toBeVisible();
 }
 
@@ -47,7 +45,7 @@ test('a gambling night: the stake is on the button, the receipt shows the money 
   await expect(page.getByTestId('activity-play_the_slots')).toContainText('Done 1 of');
   await expectNoHorizontalScroll(page);
   await expectTouchTargets(page);
-  await tab(page, 'Money').click();
+  await tab(page, 'Assets').click();
   await expect(page.getByTestId('savings')).toHaveText(`$${balance.toLocaleString('en-US')}`);
 });
 
@@ -115,7 +113,7 @@ test('a name change checks what is typed, shows the fee, and the new name is use
   // Once a year, and the character's name everywhere is the new one.
   await expect(page.getByTestId('activity-change_your_first_name')).toContainText('Done 1 of 1');
   await expect(page.getByTestId('do-change_your_first_name')).toBeDisabled();
-  await tab(page, 'Life').click();
+  await goHome(page);
   await expect(page.getByTestId('character-name')).toContainText('Rowan');
   await expectTouchTargets(page);
 });

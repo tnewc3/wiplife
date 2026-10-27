@@ -3,15 +3,13 @@
  * no condition starts on its own and a doctor's visit answers with one
  * predictable card.
  */
-import { expect, test, type Page } from '@playwright/test';
-import { ageUp, eventSheet, expectNoHorizontalScroll, expectTouchTargets, playThroughEvents, settle, startRandomLife } from './helpers';
+import { expect, test } from '@playwright/test';
+import { ageUp, eventSheet, expectNoHorizontalScroll, expectTouchTargets, openPage, playThroughEvents, settle, startRandomLife } from './helpers';
 
-const tab = (page: Page, name: string) => page.getByRole('navigation', { name: 'Game sections' }).getByRole('button', { name, exact: true });
 
 test('More → Health shows your health and lets you see a doctor once a year', async ({ page }) => {
   await startRandomLife(page, { testPack: true, seed: 'e2e-health' });
-  await tab(page, 'More').click();
-  await page.getByRole('button', { name: 'Health', exact: true }).click();
+  await openPage(page, 'health');
   await expect(page.getByRole('heading', { name: 'Health', level: 1 })).toBeVisible();
   const health = page.getByRole('region', { name: 'Your health' });
   await expect(health.getByRole('meter', { name: 'Health' })).toBeVisible();
@@ -32,7 +30,7 @@ test('More → Health shows your health and lets you see a doctor once a year', 
 
   // Once a year.
   await expect(page.getByTestId('doctor-status')).toHaveText('You saw a doctor this year. You can go again next year.');
-  await page.getByRole('button', { name: 'Back to More' }).click();
+  await page.getByRole('button', { name: 'Back to Home' }).click();
   await expect(page.getByRole('button', { name: 'Health', exact: true })).toBeVisible();
 });
 
@@ -42,8 +40,7 @@ test('More → Health → Mind and mood names nothing until diagnosed, and lets 
   for (let i = 0; i < 10; i++) {
     await ageUp(page);
   }
-  await tab(page, 'More').click();
-  await page.getByRole('button', { name: 'Health', exact: true }).click();
+  await openPage(page, 'health');
   const mind = page.getByRole('region', { name: 'Mind and mood' });
   await expect(mind).toBeVisible();
   await expect(page.getByTestId('no-mental')).toBeVisible();

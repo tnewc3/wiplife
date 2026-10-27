@@ -6,11 +6,10 @@
  * men, and meets a man.
  */
 import { expect, test, type Page } from '@playwright/test';
-import { ageUp, ageUpTimes, eventSheet, expectNoHorizontalScroll, expectTouchTargets, settle, startRandomLife } from './helpers';
+import { ageUp, ageUpTimes, eventSheet, expectNoHorizontalScroll, expectTouchTargets, familyLists, goHome, openPage, settle, startRandomLife, tab } from './helpers';
 
 const LOVE = { testPack: true, seed: 'e2e-love' };
 
-const tab = (page: Page, name: string) => page.getByRole('navigation', { name: 'Game sections' }).getByRole('button', { name, exact: true });
 const actions = (page: Page) => page.getByRole('group', { name: 'Actions' });
 
 /** Takes an action from the person page and plays its result card through. */
@@ -32,7 +31,7 @@ test('the People tab groups people with bars, and a person page shows who they a
   await tab(page, 'People').click();
   await expect(page.getByRole('heading', { name: 'People', level: 1 })).toBeVisible();
 
-  const family = page.getByRole('list', { name: 'Family' });
+  const family = familyLists(page);
   const members = await family.getByRole('listitem').count();
   expect(members).toBeGreaterThan(0);
   await expect(family.getByRole('meter')).toHaveCount(members * 2);
@@ -53,7 +52,7 @@ test('the People tab groups people with bars, and a person page shows who they a
   await expectTouchTargets(page);
 
   await page.getByRole('button', { name: 'Back to People' }).click();
-  await expect(page.getByRole('list', { name: 'Family' })).toBeVisible();
+  await expect(page.getByRole('list', { name: 'Parents' })).toBeVisible();
 });
 
 test('dating, engagement, moving in, marriage and divorce from the person page', async ({ page }) => {
@@ -61,7 +60,7 @@ test('dating, engagement, moving in, marriage and divorce from the person page',
   await startRandomLife(page, LOVE);
   // Gig work from 16 pays for the home you'll share later.
   await ageUpTimes(page, 16);
-  await tab(page, 'Work/School').click();
+  await tab(page, 'Job').click();
   await page.getByRole('button', { name: 'Start gig work' }).click();
   await ageUpTimes(page, 2);
 
@@ -79,7 +78,7 @@ test('dating, engagement, moving in, marriage and divorce from the person page',
   expect(await act(page, 'Ask out', 'Ask')).toContain('says yes');
   await expect(line).toContainText(/^Boyfriend · /);
   await expect(actions(page)).toHaveCount(0);
-  await tab(page, 'Life').click();
+  await goHome(page);
   await expect(page.getByTestId('romance-line')).toHaveText(`Dating ${name}`);
 
   // A year later: propose → engaged.
@@ -97,8 +96,7 @@ test('dating, engagement, moving in, marriage and divorce from the person page',
   await ageUp(page);
   await expect(actions(page).getByRole('button')).toHaveText(['Move in together', 'Get married', 'Break up', 'Try for a baby']);
   await act(page, 'Move in together');
-  await tab(page, 'More').click();
-  await page.getByRole('button', { name: 'Home', exact: true }).click();
+  await openPage(page, 'properties');
   await expect(page.getByTestId('partner-line')).toHaveText(`Living with ${name}, who pays their share`);
   await expect(page.getByTestId('housing-line')).toContainText(/^Renting in /);
   await tab(page, 'People').click();
@@ -110,7 +108,7 @@ test('dating, engagement, moving in, marriage and divorce from the person page',
   await act(page, 'Get married');
   await expect(line).toContainText(/^Husband · /);
   await expect(page.getByRole('list', { name: 'Memories' })).toContainText('Married you');
-  await tab(page, 'Life').click();
+  await goHome(page);
   await expect(page.getByTestId('romance-line')).toHaveText(`Married to ${name}`);
 
   // A year later: divorce asks first, and can be cancelled.
@@ -137,14 +135,13 @@ test('dating, engagement, moving in, marriage and divorce from the person page',
   await expect(line).toContainText(/^Ex-spouse · /);
   await expect(page.getByRole('list', { name: 'Memories' })).toContainText('Divorced you');
 
-  await tab(page, 'Life').click();
+  await goHome(page);
   await expect(page.getByTestId('romance-line')).toHaveCount(0);
-  await expect(page.getByRole('list', { name: 'Your story' })).toContainText(`You and ${first} divorced.`);
-  await expect(page.getByRole('list', { name: 'Your story' })).toContainText(`You married ${first}.`);
+  await expect(page.getByTestId('life-log')).toContainText(`You and ${first} divorced.`);
+  await expect(page.getByTestId('life-log')).toContainText(`You married ${first}.`);
   // Divorced, they move out; you keep the home.
-  await expect(page.getByRole('list', { name: 'Your story' })).toContainText(new RegExp(`${first} (packed .+ things and )?moved out\\.`));
-  await tab(page, 'More').click();
-  await page.getByRole('button', { name: 'Home', exact: true }).click();
+  await expect(page.getByTestId('life-log')).toContainText(new RegExp(`${first} (packed .+ things and )?moved out\\.`));
+  await openPage(page, 'properties');
   await expect(page.getByTestId('partner-line')).toHaveCount(0);
   await expect(page.getByTestId('housing-line')).toContainText(/^Renting in /);
 

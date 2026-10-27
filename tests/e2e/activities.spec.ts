@@ -6,9 +6,8 @@
 import { expect, test, type Page } from '@playwright/test';
 import { activitiesLife, type ActivitiesLife } from './activitiesFixtures';
 import { loadSavedLife } from './heirFixtures';
-import { expectNoHorizontalScroll, expectTouchTargets, passAgeGate, settle } from './helpers';
+import { expectNoHorizontalScroll, expectTouchTargets, openPage, passAgeGate, settle, tab } from './helpers';
 
-const tab = (page: Page, name: string) => page.getByRole('navigation', { name: 'Game sections' }).getByRole('button', { name, exact: true });
 
 async function open(page: Page, options: ActivitiesLife): Promise<void> {
   await passAgeGate(page, { testPack: true });
@@ -18,8 +17,7 @@ async function open(page: Page, options: ActivitiesLife): Promise<void> {
 }
 
 async function openActivities(page: Page): Promise<void> {
-  await tab(page, 'More').click();
-  await page.getByTestId('more-activities').click();
+  await openPage(page, 'pastimes');
   await expect(page.getByRole('heading', { name: 'What would you like to do?' })).toBeVisible();
 }
 
@@ -67,7 +65,7 @@ test('a paid activity shows its receipt: the money change and your new balance, 
   await expect(receipt.getByTestId('receipt-money')).toContainText(`You now have $${(40_000 - price).toLocaleString('en-US')}`);
   // Doing it again costs the full price again but gives less; the screen counts it.
   await expect(page.getByTestId('activity-haircut')).toContainText('Done 1 of');
-  await tab(page, 'Money').click();
+  await tab(page, 'Assets').click();
   await expect(page.getByTestId('savings')).toHaveText(`$${(40_000 - price).toLocaleString('en-US')}`);
 });
 

@@ -1,3 +1,4 @@
+import { ChevronLeft } from 'lucide-react';
 import type { ReactNode } from 'react';
 
 export interface ScreenProps {
@@ -28,12 +29,12 @@ export function Screen({ title, onBack, backLabel = 'Back', children, footer, ce
                 type="button"
                 onClick={onBack}
                 aria-label={backLabel}
-                className="-ml-2 flex size-11 items-center justify-center rounded-full text-2xl text-accent active:bg-surface-2"
+                className="-ml-2 flex size-11 items-center justify-center rounded-full text-2xl text-link active:bg-surface-2"
               >
-                <span aria-hidden="true">‹</span>
+                <ChevronLeft aria-hidden="true" size={28} />
               </button>
             )}
-            {title && <h1 className="truncate py-3 text-xl font-bold">{title}</h1>}
+            {title && <h1 className="font-display truncate py-3 text-xl font-semibold">{title}</h1>}
           </header>
         )}
         <main

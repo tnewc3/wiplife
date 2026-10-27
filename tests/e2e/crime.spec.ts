@@ -7,9 +7,8 @@
 import { expect, test, type Page } from '@playwright/test';
 import { crimeLife, type CrimeLife } from './crimeFixtures';
 import { loadSavedLife } from './heirFixtures';
-import { expectNoHorizontalScroll, expectTouchTargets, passAgeGate, settle } from './helpers';
+import { expectNoHorizontalScroll, expectTouchTargets, passAgeGate, settle, tab } from './helpers';
 
-const tab = (page: Page, name: string) => page.getByRole('navigation', { name: 'Game sections' }).getByRole('button', { name, exact: true });
 
 async function open(page: Page, options: CrimeLife): Promise<void> {
   await passAgeGate(page, { testPack: true });
@@ -22,7 +21,7 @@ const number = (text: string | null) => Number((text ?? '').replace(/[^0-9]/g, '
 
 test('the Work tab shows the crew, your rank, standing and heat as words, and fits a phone', async ({ page }) => {
   await open(page, { seed: 'e2e-crime-1' });
-  await tab(page, 'Work/School').click();
+  await tab(page, 'Job').click();
   const card = page.getByTestId('crime-card');
   await expect(card).toBeVisible();
   await expect(page.getByTestId('crime-rank')).not.toBeEmpty();
@@ -37,7 +36,7 @@ test('the Work tab shows the crew, your rank, standing and heat as words, and fi
 
 test('far from the crew, the card says how long and what the crew thinks, as words', async ({ page }) => {
   await open(page, { seed: 'e2e-crime-away', away: { years: 2, suspicion: 60 } });
-  await tab(page, 'Work/School').click();
+  await tab(page, 'Job').click();
   await expect(page.getByTestId('crime-away')).toContainText('2 years');
   await expect(page.getByTestId('crime-suspicion')).toHaveText(/Missed|Wondering|Doubtful|Sure you ran/);
   await expect(page.getByTestId('crime-card')).not.toContainText(/\b\d{2,3}\/100\b/);
@@ -47,15 +46,15 @@ test('far from the crew, the card says how long and what the crew thinks, as wor
 
 test('a life with no crime past has no crime card and no dirty money card', async ({ page }) => {
   await open(page, { seed: 'e2e-crime-2', inCrew: false, dirty: 0, heat: 0 });
-  await tab(page, 'Work/School').click();
+  await tab(page, 'Job').click();
   await expect(page.getByTestId('crime-card')).toHaveCount(0);
-  await tab(page, 'Money').click();
+  await tab(page, 'Assets').click();
   await expect(page.getByTestId('dirty-card')).toHaveCount(0);
 });
 
 test('dirty money sits apart from savings and can be laundered through a business for a cut', async ({ page }) => {
   await open(page, { seed: 'e2e-crime-3', dirty: 12_000 });
-  await tab(page, 'Money').click();
+  await tab(page, 'Assets').click();
   const card = page.getByTestId('dirty-card');
   await expect(page.getByTestId('dirty-balance')).toHaveText('$12,000');
   await expect(page.getByTestId('savings')).toHaveText('$2,000');
@@ -91,7 +90,7 @@ test('dirty money sits apart from savings and can be laundered through a busines
 
 test('spending dirty money asks first, and cannot be done for more than you hold', async ({ page }) => {
   await open(page, { seed: 'e2e-crime-4', dirty: 6_000 });
-  await tab(page, 'Money').click();
+  await tab(page, 'Assets').click();
   const card = page.getByTestId('dirty-card');
   const spend = card.getByTestId('spend-dirty');
   await card.getByTestId('dirty-amount').fill('999999');
