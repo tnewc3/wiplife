@@ -1,0 +1,88 @@
+# Portraits (P1, docs/portraits-and-ui.md): which portrait age stage an age belongs to, when hair turns gray, how long
+# dye lasts, when a portrait smiles, and the odds the generator uses for new looks and for children's looks. Weights are
+# relative. Skin, hair and eye tables are global for now; W4a can vary them by country.
+
+# The first age of each stage, in order. The portrait template is body type + stage; it is never stored.
+stages:
+  - { stage: baby, from: 0 }
+  - { stage: young_child, from: 3 }
+  - { stage: teenager, from: 13 }
+  - { stage: young_adult, from: 18 }
+  - { stage: adult, from: 30 }
+  - { stage: middle_aged, from: 45 }
+  - { stage: senior, from: 60 }
+  - { stage: very_old, from: 75 }
+
+# Everyone gets a personal graying age, rolled once; from then on natural hair renders silver.
+graying: { mean: 52, sd: 6, min: 40, max: 65 }
+
+# Dyed hair overrides natural color and graying until this many years after the dye.
+dyeFadeYears: 3
+
+# A portrait smiles at or above this Happiness (a person's mood), and is neutral below it.
+smileAt: 60
+
+# Weights for a new look. Skin, hair and eye colors; the rest are independent of them.
+generate:
+  skin: { porcelain: 8, fair: 18, warm_light: 18, golden_tan: 14, olive: 12, medium_brown: 12, deep_brown: 10, very_deep_brown: 8 }
+  hair: { black: 30, dark_brown: 28, chestnut: 18, copper: 5, blond: 19 }
+  eyes: { brown: 45, hazel: 12, green: 8, blue: 20, gray: 7, amber: 8 }
+  clothing: { navy: 1, sage: 1, cream: 1, plum: 1, charcoal: 1, rust: 1 }
+  hatColor: { navy: 1, sage: 1, cream: 1, plum: 1, charcoal: 1, rust: 1 }
+  # By body type. A style the stage does not offer renders as the original (normalizeAppearance); the choice is kept for later stages.
+  hairstyle:
+    male: { side_part: 12, tight_curls: 8, locs: 5, long_straight: 2, buzz_cut: 10, rounded_afro: 6, chin_bob: 1, high_ponytail: 1, french_crop: 12, quiff: 9, curtains: 8, high_top_fade: 7, short_twists: 5, mohawk: 2 }
+    female: { side_part: 6, tight_curls: 7, locs: 5, long_straight: 14, buzz_cut: 1, rounded_afro: 5, chin_bob: 9, high_ponytail: 9, pixie_cut: 6, blunt_bob_bangs: 8, long_waves: 12, high_puff: 5, space_buns: 4, twin_braids: 5 }
+  outfit: { original: 25, hoodie: 25, collared_shirt: 20, vneck: 30 }
+  eyeShape: { original: 40, almond: 20, rounded: 20, hooded: 20 }
+  browStyle: { original: 40, straight: 20, soft_arch: 20, full: 20 }
+  lashStyle:
+    male: { original: 70, none: 20, natural: 10 }
+    female: { original: 30, none: 5, natural: 40, full: 25 }
+  noseShape: { original: 40, small_round: 20, straight: 20, broad: 20 }
+  facialHair:
+    male: { none: 55, stubble: 15, mustache: 6, short_beard: 14, beard_mustache: 10 }
+    female: { none: 1 }
+  eyewear: { none: 82, round_glasses: 15, sunglasses: 3 }
+  earrings:
+    male: { none: 90, studs: 8, hoops: 2 }
+    female: { none: 60, studs: 25, hoops: 15 }
+  hat: { none: 94, baseball_cap: 3, beanie: 3 }
+  # A nonbinary character's body type, when it is not chosen: the chance of the female body.
+  nonbinaryFemaleChance: 0.5
+
+# A child's look from biological parents. Skin is the mean of the parents' tones (index in the palette, light to dark)
+# plus noise in tones; hair and eye color come from one parent, sometimes changing. Everything else is rolled fresh.
+inherit:
+  skinSd: 0.7
+  hairChange: 0.12
+  eyesChange: 0.1
+
+# The hair and eye descriptors of a character (character/appearance.yaml) and the portrait color each stands for. The first
+# descriptor listed for a color is the one shown when a look is written back as text. Saves from before portraits and
+# every character's descriptors use this to choose their portrait's hair and eye color.
+descriptors:
+  hair:
+    black hair: black
+    curly black hair: black
+    dark brown hair: dark_brown
+    brown hair: chestnut
+    wavy brown hair: chestnut
+    light brown hair: chestnut
+    blond hair: blond
+    red hair: copper
+    auburn hair: copper
+  eyes:
+    brown eyes: brown
+    dark brown eyes: brown
+    hazel eyes: hazel
+    green eyes: green
+    blue eyes: blue
+    gray eyes: gray
+    amber eyes: amber
+
+# Cached thumbnails (IndexedDB, src/persistence/thumbnails.ts): the two sizes lists use, and how many are kept (least recently used go first).
+# Anything drawn larger than the biggest size (the profile, the death screen) is rendered at full size and not cached.
+thumbnails:
+  sizes: [96, 192]
+  maxRows: 1500

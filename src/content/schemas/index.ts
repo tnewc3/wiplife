@@ -25,6 +25,7 @@ import { legalBalanceSchema, legalRegistrySchema, offenseSchema } from './legal'
 import { discoveryBalanceSchema, discoveryRegistrySchema, discoveryTextSchema } from './discovery';
 import { interactionRegistrySchema, interactionSchema, interactionsBalanceSchema } from './interactions';
 import { newsTextSchema, peopleBalanceSchema, peopleRegistrySchema } from './people';
+import { portraitsBalanceSchema } from './portraits';
 import { webBalanceSchema, webRegistrySchema } from './web';
 import { eulogyBalanceSchema, eulogyTextSchema } from './eulogy';
 import { belongingBalanceSchema, belongingRegistrySchema, belongingTextSchema, groupSchema } from './belonging';
@@ -151,6 +152,7 @@ export const singletonTypes = {
   'balance/interactions': interactionsBalanceSchema,
   'balance/family': familyBalanceSchema,
   'balance/people': peopleBalanceSchema,
+  'balance/portraits': portraitsBalanceSchema,
   'balance/web': webBalanceSchema,
   'balance/eulogy': eulogyBalanceSchema,
   'balance/later': laterBalanceSchema,
@@ -286,6 +288,7 @@ export const contentBundleSchema = z.strictObject({
     interactions: interactionsBalanceSchema,
     family: familyBalanceSchema,
     people: peopleBalanceSchema,
+    portraits: portraitsBalanceSchema,
     web: webBalanceSchema,
     eulogy: eulogyBalanceSchema,
     later: laterBalanceSchema,

@@ -78,6 +78,15 @@ export const WEALTH_LABELS: Record<FamilyWealth, string> = {
   rich: 'Rich',
 };
 
+/** P1: the two bodies a portrait can be drawn with (interface words, not story). */
+/** P1: a portrait option's id as words ("tight_curls" → "Tight curls"). The ids come from the art; these are interface words. */
+export function optionLabel(id: string): string {
+  const words = id.replace(/_/g, ' ');
+  return words.charAt(0).toUpperCase() + words.slice(1);
+}
+
+export const BODY_TYPE_LABELS = { male: 'Male portrait', female: 'Female portrait' } as const;
+
 export const ATTRACTION_LABELS: Record<GenderCategory, string> = {
   man: 'Men',
   woman: 'Women',

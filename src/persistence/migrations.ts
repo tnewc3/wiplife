@@ -1,7 +1,8 @@
 import { reconcileHeadcount } from '../engine/business/crew';
 import { craftRole, managerRole } from '../engine/business/headcount';
 import { defaultLines, forecastFromCustomers } from '../engine/business/products';
-import type { Business } from '../engine/types';
+import type { Business, LifeState } from '../engine/types';
+import { runLooks } from '../engine/looks/step';
 import type { BusinessStyle, PriceLevel } from '../content/schemas';
 import { emptyTravel } from '../engine/travel/types';
 import { emptyMigration } from '../engine/migration/types';
@@ -595,6 +596,15 @@ export const migrations: readonly Migration[] = [
       'replay snapshots are upgraded the same way.',
     migrate: upgradeLanguageTravelData,
   },
+  {
+    from: 37,
+    description:
+      'P1: portraits. You and everyone you know get a look (body type, hair, eyes, skin, clothes and the rest, plus the age ' +
+      'they start to gray). Your hair and eye color are the ones your hair and eye descriptors name; everything else is ' +
+      'worked out from the life\'s seed, the same way a new life does it, so a replay of the life\'s input log agrees. ' +
+      'Heir replay snapshots are upgraded the same way.',
+    migrate: upgradeLooksData,
+  },
 ];
 
 /** The reach at which a curve of reach to fame gives this fame (the inverse of curveAt, which is increasing). */
@@ -912,6 +922,25 @@ function upgradeSchoolWorkData(data: unknown): unknown {
   }
   const career = isRecord(data.career) && data.career.work === undefined ? { ...data.career, work: emptyWorkYear(year) } : data.career;
   return { ...data, inputLog, education, career };
+}
+
+/** P1: gives the character and everyone a look (see engine/looks), and the starting snapshot in an heir's replay log. */
+function upgradeLooksData(data: unknown): unknown {
+  if (!isRecord(data) || !isRecord(data.character) || !isRecord(data.people) || !isRecord(data.relationships) || typeof data.seed !== 'string') return data;
+  const life = JSON.parse(JSON.stringify(data)) as LifeState;
+  try {
+    runLooks(life, compiled as ContentBundle);
+  } catch {
+    // A life that is not a life is left for the schema check to turn away.
+    return data;
+  }
+  const inputLog = Array.isArray(life.inputLog)
+    ? life.inputLog.map((entry: unknown) => {
+        if (!isRecord(entry) || !isRecord(entry.payload) || !isRecord(entry.payload.snapshot)) return entry;
+        return { ...entry, payload: { ...entry.payload, snapshot: upgradeLooksData(entry.payload.snapshot) } };
+      })
+    : life.inputLog;
+  return { ...life, inputLog };
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

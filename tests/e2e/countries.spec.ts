@@ -27,6 +27,8 @@ test('custom creation asks for a country, then a city in it', async ({ page }) =
   await page.getByLabel('First name').fill('Maya');
   await page.getByLabel('Last name').fill('Fraser');
   await page.getByRole('button', { name: 'Next' }).click();
+  // The Look step (P1) is left as it is.
+  await page.getByRole('button', { name: 'Next' }).click();
   await page.getByRole('radiogroup', { name: 'Which fits best?' }).getByRole('radio', { name: 'Woman', exact: true }).click();
   await page.getByRole('radiogroup', { name: 'Pronouns' }).getByRole('radio', { name: 'she/her', exact: true }).click();
   await page.getByRole('button', { name: 'Men', exact: true }).click();
@@ -37,7 +39,7 @@ test('custom creation asks for a country, then a city in it', async ({ page }) =
   await page.getByRole('button', { name: 'Next' }).click();
 
   // The country step: four countries, no city until one is chosen, and it does not scroll sideways.
-  await expect(page.getByText('Step 4 of 6')).toBeVisible();
+  await expect(page.getByText('Step 5 of 7')).toBeVisible();
   const countries = page.getByRole('radiogroup', { name: 'Country' });
   for (const name of ['United States', 'Canada', 'United Kingdom', 'Mexico']) await expect(countries.getByRole('radio', { name })).toBeVisible();
   await expect(page.getByRole('radiogroup', { name: 'City' })).toHaveCount(0);

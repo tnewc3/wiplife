@@ -1,3 +1,4 @@
+import type { BrowStyle, ClothingColor, Earrings, EyeColor, EyeShape, Eyewear, FacialHair, Hairstyle, HairColor, Hat, HatColor, LashStyle, NoseShape, Outfit, SkinColor } from '../portraits/ids';
 import type { TravelState } from './travel/types';
 import type { MigrationState } from './migration/types';
 import type { CountryId } from '../content/schemas';
@@ -112,7 +113,39 @@ export interface HiddenValues {
   talentDiscovered: boolean;
 }
 
+/** P1: the body type of a portrait. The portrait template is this plus the age stage; it is never stored. */
+export type BodyType = 'male' | 'female';
+
+/**
+ * P1: how a character or person looks, as portrait settings (the ids come from the portrait art). Age stage and expression
+ * are not stored: the stage comes from the age, the expression from how they feel. `hair` is the natural color; it renders
+ * silver from `grayingAge` unless a `dye` is still fresh.
+ */
+export interface Look {
+  body: BodyType;
+  hairstyle: Hairstyle;
+  outfit: Outfit;
+  eyeShape: EyeShape;
+  browStyle: BrowStyle;
+  lashStyle: LashStyle;
+  noseShape: NoseShape;
+  facialHair: FacialHair;
+  eyewear: Eyewear;
+  earrings: Earrings;
+  hat: Hat;
+  skin: Exclude<SkinColor, 'original'>;
+  hair: Exclude<HairColor, 'original' | 'silver'>;
+  eyes: Exclude<EyeColor, 'original'>;
+  clothing: Exclude<ClothingColor, 'original'>;
+  hatColor: Exclude<HatColor, 'original'>;
+  grayingAge: number;
+  /** A dye color and the year it was dyed; it fades after balance/portraits.yaml dyeFadeYears. */
+  dye?: { color: Exclude<HairColor, 'original'>; year: number };
+}
+
 export interface Character {
+  /** P1: how you look. Filled at creation (and by the yearly looks step for older lives). */
+  look?: Look;
   languages: LanguageSkill[];
   /** W6: the countries whose citizen you are (never empty; the first is the one you were born into). */
   citizenships: CountryId[];
@@ -146,6 +179,8 @@ export interface Character {
 }
 
 export interface Person {
+  /** P1: how they look. Filled when they join your life, or by the yearly looks step. */
+  look?: Look;
   languages: LanguageSkill[];
   /** W6: the countries whose citizen they are (never empty). */
   citizenships: CountryId[];
@@ -1157,6 +1192,8 @@ export interface ArchivedLife {
   familyReputation: number;
   /** E2b: the heir who carried on, if one did. */
   heirName?: string;
+  /** P1: how they looked, to draw their portrait at the age they died. Absent for lives archived before portraits. */
+  look?: Look;
 }
 
 export interface InputRecord {

@@ -13,3 +13,7 @@ test-results/
 playwright-report/
 blob-report/
 playwright/.cache/
+
+# Portrait review tiles (the two joined sheets in review/ are committed)
+review/collared-shirt-tiles/
+review/collared-shirt-tiles-before/

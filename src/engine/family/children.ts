@@ -1,3 +1,4 @@
+import { personLook } from '../looks/query';
 import { birthCitizenships, parentStanding } from '../migration/citizenship';
 import { householdLanguages } from '../languages';
 /**
@@ -180,6 +181,8 @@ export function createChild(state: LifeState, rng: RngState, spec: NewChild, con
   state.people[id] = person;
   state.relationships[id] = relationship;
   person.mood = person.moodBase = moodBaseline(state, person, content);
+  // P1: a child's skin, hair and eyes come from their biological parents (from a generator of its own, not the life's).
+  person.look = personLook(state, id, content);
   return id;
 }
 

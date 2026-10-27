@@ -1,3 +1,4 @@
+import { personLook, yourLook } from '../looks/query';
 import { emptyTravel } from '../travel/types';
 import { emptyMigration } from '../migration/types';
 import { citizenshipsFromCity } from '../migration/citizenship';
@@ -258,6 +259,8 @@ export function continueAsHeir(dead: LifeState, heirId: Id, content: ContentBund
     moodBase: 50,
     wealthLevel: yourWealth(dead, content),
     canCarry: c.canCarry,
+    // P1: the parent who died keeps their face.
+    look: yourLook(dead, content),
   };
   const parentRole = role(people[parentId]!);
   relationships[parentId] = {
@@ -279,6 +282,8 @@ export function continueAsHeir(dead: LifeState, heirId: Id, content: ContentBund
     const original = dead.people[id];
     if (!original || people[id]) return;
     const person: Person = cloneJson(original);
+    // P1: they keep the face they had (worked out from the old life's seed if it was not yet set down).
+    person.look = cloneJson(personLook(dead, id, content));
     // W3: whoever worked for the parent's business is only a person here (the business's staff list marks them again).
     person.tags = person.tags.filter((t) => t !== 'staff');
     delete person.child;
@@ -361,6 +366,8 @@ export function continueAsHeir(dead: LifeState, heirId: Id, content: ContentBund
     identity: cloneJson(candidate.identity),
     latent: cloneJson(kid.latent),
     appearance: { descriptors: rollAppearance(rng, content) },
+    // P1: the heir keeps the face they had as one of the people you knew.
+    look: cloneJson(personLook(dead, candidate.id, content)),
     stats,
     personality,
     hidden,

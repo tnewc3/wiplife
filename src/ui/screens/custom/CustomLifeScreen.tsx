@@ -3,16 +3,20 @@ import { content } from '../../../content';
 import { GENDER_CATEGORIES, type GenderCategory } from '../../../content/schemas';
 import { InvalidInputError, maxSiblings } from '../../../engine/creation/input';
 import { getCountryOptions, getPronounPresets } from '../../../engine/selectors';
-import type { FamilyWealth, Personality, Pronouns, Stats } from '../../../engine/types';
+import type { FamilyWealth, Look, Personality, Pronouns, Stats } from '../../../engine/types';
 import { useAppStore } from '../../../store/appStore';
 import { Button } from '../../components/Button';
+import { CharacterPortrait } from '../../portraits/CharacterPortrait';
 import { Card } from '../../components/Card';
 import { MultiChoice, SingleChoice, Suggestions } from '../../components/Choices';
 import { ReplaceLifeSheet } from '../../components/ReplaceLifeSheet';
 import { Screen } from '../../components/Screen';
 import { ScoreSlider } from '../../components/ScoreSlider';
 import { TextField } from '../../components/TextField';
-import { ATTRACTION_LABELS, STAT_LABELS, TRAIT_LABELS, WEALTH_LABELS } from '../../labels';
+import { stageOf, portraitSettings } from '../../../engine/looks/render';
+import { STAGE_OPTIONS } from '../../../portraits/availability';
+import { BROW_STYLES, CLOTHING_COLORS, EARRINGS, EYE_COLORS, EYE_SHAPES, EYEWEAR, FACIAL_HAIR, HATS, LASH_STYLES, NATURAL_HAIR_COLORS, NOSE_SHAPES, OUTFITS, SKIN_TONES } from '../../../portraits/options';
+import { ATTRACTION_LABELS, BODY_TYPE_LABELS, optionLabel, STAT_LABELS, TRAIT_LABELS, WEALTH_LABELS } from '../../labels';
 import {
   changeCategory,
   draftPronouns,
@@ -20,6 +24,8 @@ import {
   initialDraft,
   stepOf,
   STEPS,
+  surpriseLook,
+  withBody,
   toCustomInput,
   validateDraft,
   type Draft,
@@ -35,20 +41,10 @@ interface StepProps {
 }
 
 function NameStep({ draft, update, errors }: StepProps) {
-  const { groups } = content.character.appearance;
   return (
     <div className="flex flex-col gap-5">
       <TextField label="First name" value={draft.first} onChange={(first) => update({ first })} error={errors['name.first']} />
       <TextField label="Last name" value={draft.last} onChange={(last) => update({ last })} error={errors['name.last']} />
-      {groups.map((group) => (
-        <SingleChoice
-          key={group.id}
-          label={group.label}
-          value={draft.appearance[group.id] ?? ''}
-          choices={[{ value: '', label: 'Surprise me' }, ...group.options.map((o) => ({ value: o, label: o }))]}
-          onChange={(value) => update({ appearance: { ...draft.appearance, [group.id]: value } })}
-        />
-      ))}
       <TextField
         label="Anything else about how you look? (optional)"
         value={draft.extraDescriptor}
@@ -56,6 +52,71 @@ function NameStep({ draft, update, errors }: StepProps) {
         error={Object.entries(errors).find(([k]) => k.startsWith('appearance'))?.[1]}
         autoCapitalize="none"
       />
+    </div>
+  );
+}
+
+/** P1: the Look step: a live portrait and every choice that shapes it, with "Surprise me" to roll a whole new look. */
+function LookStep({ draft, update, errors }: StepProps) {
+  const { look } = draft;
+  const body = look.body;
+  const stages = content.balance.portraits.stages.filter((s) => s.stage !== 'baby');
+  const previewStage = stageOf(draft.previewAge, content);
+  const offered = STAGE_OPTIONS[previewStage];
+  const set = <K extends keyof Look>(key: K, value: Look[K]) => update({ look: { ...look, [key]: value } });
+  const choose = (label: string, key: keyof Look, options: readonly string[]) => (
+    <SingleChoice
+      label={label}
+      value={look[key] as string}
+      choices={options.map((o) => ({ value: o, label: optionLabel(o) }))}
+      onChange={(value) => set(key, value as never)}
+    />
+  );
+  const hairstyles = offered.hairstyles[body].length > 0 ? offered.hairstyles[body] : STAGE_OPTIONS.young_adult.hairstyles[body];
+  return (
+    <div className="flex flex-col gap-5" data-testid="look-step">
+      <div className="flex flex-col items-center gap-3">
+        <CharacterPortrait
+          portrait={portraitSettings(look, { age: draft.previewAge, year: 2000, mood: content.balance.portraits.smileAt }, content)}
+          size={200}
+          label="Preview of your portrait"
+        />
+        <Button variant="secondary" data-testid="look-surprise" onClick={() => update({ surprises: draft.surprises + 1, look: surpriseLook(content, draft.surprises + 1, look.body) })}>
+          Surprise me
+        </Button>
+        <SingleChoice
+          label="Show me as"
+          value={draft.previewAge}
+          choices={stages.map((s) => ({ value: s.from, label: optionLabel(s.stage) }))}
+          onChange={(previewAge) => update({ previewAge })}
+        />
+        <p className="text-sm text-muted">Your portrait ages with you. Everything here is how you start; the art changes with your age.</p>
+      </div>
+      <SingleChoice
+        label="Body"
+        value={body}
+        columns={2}
+        choices={[
+          { value: 'female', label: BODY_TYPE_LABELS.female },
+          { value: 'male', label: BODY_TYPE_LABELS.male },
+        ]}
+        onChange={(next) => update({ look: withBody(look, next) })}
+      />
+      {choose('Skin', 'skin', SKIN_TONES)}
+      {choose('Hair color', 'hair', NATURAL_HAIR_COLORS)}
+      {choose('Hairstyle', 'hairstyle', hairstyles)}
+      {choose('Eye color', 'eyes', EYE_COLORS)}
+      {choose('Eye shape', 'eyeShape', EYE_SHAPES)}
+      {choose('Eyebrows', 'browStyle', BROW_STYLES)}
+      {choose('Lashes', 'lashStyle', LASH_STYLES)}
+      {choose('Nose', 'noseShape', NOSE_SHAPES)}
+      {choose('Outfit', 'outfit', OUTFITS)}
+      {choose('Clothing color', 'clothing', CLOTHING_COLORS)}
+      {choose('Facial hair (adults)', 'facialHair', FACIAL_HAIR)}
+      {choose('Glasses', 'eyewear', EYEWEAR)}
+      {choose('Earrings', 'earrings', EARRINGS)}
+      {choose('Hat', 'hat', HATS)}
+      {errors.look && <p className="text-sm text-danger">{errors.look}</p>}
     </div>
   );
 }
@@ -342,13 +403,15 @@ function ReviewStep({ draft }: StepProps) {
   );
 }
 
-const STEP_COMPONENTS = [NameStep, IdentityStep, FamilyStep, CityStep, TraitsStep, ReviewStep];
+const STEP_COMPONENTS = [NameStep, LookStep, IdentityStep, FamilyStep, CityStep, TraitsStep, ReviewStep];
 
 /** Which input path each draft field feeds, for clearing errors as the player edits. */
 const ERROR_PATHS: Record<keyof Draft, string> = {
   first: 'name.first',
   last: 'name.last',
-  appearance: 'appearance',
+  look: 'look',
+  surprises: 'look',
+  previewAge: 'look',
   extraDescriptor: 'appearance',
   genderIdentity: 'identity.genderIdentity',
   genderCategory: 'identity.genderCategory',

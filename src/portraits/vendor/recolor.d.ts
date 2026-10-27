@@ -1,0 +1,16 @@
+import type {Template,Palettes,ColorConfig} from '../types';
+export function settings(template:Template,palettes:Palettes,skin?:string,hair?:string,eyes?:string,clothing?:string,hatColor?:string):ColorConfig;
+export function recolorRGBA(source:Uint8ClampedArray,masks:Record<string,Uint8Array>,config:ColorConfig):Uint8ClampedArray;
+export function applyOpacityMask(source:Uint8ClampedArray,mask:Uint8Array):Uint8ClampedArray;
+export function rgbToLab(rgb:number[]):number[];
+export function labToRgb(lab:number[]):number[];
+export function applyStyle(t:Template,id?:string):Template;
+export function applyOutfit(t:Template,id?:string):Template;
+export function applyAccessories(t:Template,eyewear?:string,earrings?:string):Template;
+export function applyExpression(t:Template,id?:string):Template;
+export function applyBrows(t:Template,id?:string):Template;
+export function applyEyes(t:Template,id?:string):Template;
+export function applyLashes(t:Template,id?:string,eyeShape?:string):Template;
+export function applyNose(t:Template,id?:string):Template;
+export function applyFacialHair(t:Template,id?:string):Template;
+export function applyHat(t:Template,id?:string,hairstyle?:string):Template;

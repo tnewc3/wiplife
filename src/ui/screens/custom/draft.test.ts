@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { content } from '../../../content';
-import { changeCategory, initialDraft, toCustomInput, validateDraft, type Draft } from './draft';
+import { lookSchema } from '../../../engine/looks/schema';
+import { changeCategory, initialDraft, surpriseLook, toCustomInput, validateDraft, withBody, type Draft } from './draft';
 
 /** Applies a category change the way the screen does. */
 function choose(draft: Draft, category: Draft['genderCategory'] & string): Draft {
@@ -67,5 +68,41 @@ describe('B1: "Attracted to" is an explicit choice', () => {
     const some = { ...draft, attractedTo: ['woman' as const, 'man' as const] };
     expect(validateDraft(some, content)['identity.attractedTo']).toBeUndefined();
     expect(toCustomInput(some, content).identity.attractedTo).toEqual(['woman', 'man']);
+  });
+});
+
+describe('P1: the Look step', () => {
+  it('starts with a whole, valid look, so the preview always has a portrait', () => {
+    const draft = initialDraft(content);
+    expect(lookSchema.safeParse(draft.look).success).toBe(true);
+    expect(validateDraft(draft, content).look).toBeUndefined();
+    expect(toCustomInput(draft, content).look).toEqual(draft.look);
+  });
+
+  it('gives a new look for each "Surprise me", the same each time for the same number', () => {
+    expect(surpriseLook(content, 1, 'male')).toEqual(surpriseLook(content, 1, 'male'));
+    expect(surpriseLook(content, 1, 'male')).not.toEqual(surpriseLook(content, 2, 'male'));
+    expect(surpriseLook(content, 3, 'female').body).toBe('female');
+  });
+
+  it('moves to the matching body type when a gender category is chosen, and keeps a nonbinary character’s', () => {
+    const draft = initialDraft(content);
+    expect(choose(draft, 'man').look.body).toBe('male');
+    expect(choose(draft, 'woman').look.body).toBe('female');
+    const male = { ...draft, look: withBody(draft.look, 'male') };
+    expect(choose(male, 'nonbinary').look.body).toBe('male');
+  });
+
+  it('keeps a hairstyle the new body offers and replaces one it does not', () => {
+    const look = { ...initialDraft(content).look, body: 'male' as const, hairstyle: 'mohawk' as const };
+    expect(withBody(look, 'female').hairstyle).not.toBe('mohawk');
+    expect(withBody({ ...look, hairstyle: 'side_part' }, 'female').hairstyle).toBe('side_part');
+    expect(withBody({ ...look, facialHair: 'short_beard' }, 'female').facialHair).toBe('none');
+  });
+
+  it('sends only the player’s own words as appearance text (hair and eyes follow the look)', () => {
+    const draft = { ...initialDraft(content), extraDescriptor: 'a scar on one eyebrow' };
+    expect(toCustomInput(draft, content).appearance.descriptors).toEqual(['a scar on one eyebrow']);
+    expect(toCustomInput(initialDraft(content), content).appearance.descriptors).toEqual([]);
   });
 });

@@ -1,23 +1,26 @@
 import { content } from '../../../content';
-import { getFindDateView, getPeople, getPets, PEOPLE_GROUPS, type PeopleGroupId, type PersonRow } from '../../../engine/selectors';
+import { getFindDateView, getPeople, getPortrait, getPets, PEOPLE_GROUPS, type PeopleGroupId, type PersonRow } from '../../../engine/selectors';
 import type { LifeState } from '../../../engine/types';
 import { useAppStore } from '../../../store/appStore';
 import { BondBars } from '../../components/BondBars';
 import { Button } from '../../components/Button';
 import { Card } from '../../components/Card';
+import { CharacterPortrait } from '../../portraits/CharacterPortrait';
 import { FIND_DATE_LABELS, money, bondWords, moodPhrase, PEOPLE_GROUP_EMPTY, PEOPLE_GROUP_LABELS, PET_PERSONALITY_LABELS, personLine, petHealthWords, yearsOld } from '../../labels';
 
 /** Groups always shown, even when empty; the others appear once someone is in them. */
 const ALWAYS_SHOWN: readonly PeopleGroupId[] = ['family', 'friends'];
 
-function PersonButton({ row }: { row: PersonRow }) {
+function PersonButton({ row, life }: { row: PersonRow; life: LifeState }) {
   const openPerson = useAppStore((s) => s.openPerson);
   return (
     <button
       type="button"
       onClick={() => openPerson(row.id)}
-      className="flex min-h-11 w-full min-w-0 flex-col gap-2 py-3 text-left active:bg-surface-2"
+      className="flex min-h-11 w-full min-w-0 items-start gap-3 py-3 text-left active:bg-surface-2"
     >
+      <CharacterPortrait portrait={getPortrait(life, row.id, content)} size={48} label={`Portrait of ${row.fullName}`} />
+      <span className="flex min-w-0 flex-1 flex-col gap-2">
       <span className="flex min-w-0 flex-col">
         <span className={`font-semibold break-words [overflow-wrap:anywhere] ${row.alive ? '' : 'text-muted'}`}>{row.fullName}</span>
         <span className="text-sm text-muted">{personLine(row)}</span>
@@ -28,6 +31,7 @@ function PersonButton({ row }: { row: PersonRow }) {
         )}
       </span>
       {row.alive && <BondBars affection={row.affection} trust={row.trust} label={`How ${row.fullName} feels about you`} />}
+      </span>
     </button>
   );
 }
@@ -80,7 +84,7 @@ export function PeopleTab({ life }: { life: LifeState }) {
             <ul className="flex flex-col divide-y divide-border" aria-label={PEOPLE_GROUP_LABELS[group]}>
               {groups[group].map((row) => (
                 <li key={row.id}>
-                  <PersonButton row={row} />
+                  <PersonButton row={row} life={life} />
                 </li>
               ))}
             </ul>

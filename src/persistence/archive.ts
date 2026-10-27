@@ -8,6 +8,7 @@ import { eulogyGroupSchema, eulogyToneSchema } from '../content/schemas';
 import type { ArchivedLife } from '../engine/types';
 import type { WiplifeDb } from './db';
 import { envelopeSchema, makeEnvelope, type SaveEnvelope } from './envelope';
+import { lookSchema } from '../engine/looks/schema';
 import { historyEntrySchema, pronounsSchema, statsSchema } from './lifeSchema';
 import { migrateEnvelope, type Migration } from './migrations';
 import { writeSaveIn } from './saves';
@@ -102,6 +103,7 @@ export const archivedLifeSchema: z.ZodType<ArchivedLife> = z.strictObject({
   lineId: z.string().min(1),
   familyName: z.string().min(1),
   familyReputation: z.int().min(0).max(100),
+  look: lookSchema.exactOptional(),
   heirName: z.string().min(1).exactOptional(),
 });
 

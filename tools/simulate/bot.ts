@@ -395,6 +395,8 @@ export function chooseCarelessLifeActions(life: LifeState, content: ContentBundl
   for (const actionId of LIFE_ACTION_IDS) {
     // The teen actions need chosen parameters; the teen player (tools/simulate/teen.ts) takes them, and a careless one lets the teen years happen.
     if ((TEEN_ACTION_IDS as readonly string[]).includes(actionId)) continue;
+    // P1: changing a portrait's body type is cosmetic and changes nothing in the life; the simulated player never does it (and the draw it would take must not shift the others).
+    if (actionId === 'set_body') continue;
     if (!chance(rng, CARELESS.lifeAction)) continue;
     const available = paramOptions(life, content, actionId).filter((params) => LIFE_ACTIONS[actionId].parse(params, content) !== null && isLifeActionAvailable(life, actionId, params, content));
     if (available.length > 0) out.push([actionId, pick(rng, available)]);

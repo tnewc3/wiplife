@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { content } from '../../../content';
 import type { ActionId } from '../../../content/schemas';
-import { getPersonDetail } from '../../../engine/selectors';
+import { getPersonDetail, getPortrait } from '../../../engine/selectors';
 import type { LifeState } from '../../../engine/types';
 import { useAppStore } from '../../../store/appStore';
 import { BondBars } from '../../components/BondBars';
@@ -9,6 +9,7 @@ import { Button } from '../../components/Button';
 import { Card } from '../../components/Card';
 import { ConfirmSheet } from '../../components/ConfirmSheet';
 import { InteractSheet } from '../../components/InteractSheet';
+import { CharacterPortrait } from '../../portraits/CharacterPortrait';
 import { GOD_MODE_LABELS, ACTION_LABELS, actionConfirmation, CONNECTIONS_TITLE, connectionLine, CUSTODY_LABELS, HEARD_TITLE, heardLine, gradesPhrase, lifeRows, moodPhrase, ORIGIN_LABELS, parentingStyleLine, personLine, timelineAgeLabel, troubleLine } from '../../labels';
 
 /**
@@ -37,9 +38,12 @@ export function PersonScreen({ life, personId }: { life: LifeState; personId: st
   return (
     <div className="flex flex-col gap-4">
       <Card>
-        <h2 className="text-2xl leading-tight font-bold break-words [overflow-wrap:anywhere]" data-testid="person-name">
-          {row.fullName}
-        </h2>
+        <div className="flex items-center gap-4">
+          <CharacterPortrait portrait={getPortrait(life, personId, content)} size={112} label={`Portrait of ${row.fullName}`} />
+          <h2 className="min-w-0 flex-1 text-2xl leading-tight font-bold break-words [overflow-wrap:anywhere]" data-testid="person-name">
+            {row.fullName}
+          </h2>
+        </div>
         <p className="mt-1 text-muted" data-testid="person-line">
           {personLine(row)} · {detail.pronounLabel}
         </p>
