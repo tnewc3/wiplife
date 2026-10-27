@@ -13,8 +13,8 @@
         "seed": "golden-careful-1-0",
         "years": 97,
         "ageAtDeath": 97,
-        "yearsHash": "bfe0e07d48ff4ee41bf4",
-        "finalHash": "df5232710a039ec39a22"
+        "yearsHash": "da180f6294d322b8c499",
+        "finalHash": "6d1bf3825f26b3dd8b83"
       },
       {
         "seed": "golden-careful-2-0",
@@ -32,10 +32,10 @@
       },
       {
         "seed": "golden-careful-4-0",
-        "years": 71,
-        "ageAtDeath": 71,
-        "yearsHash": "fcb47ba3533c6819f6c7",
-        "finalHash": "8bc6c66544daf478abd0"
+        "years": 75,
+        "ageAtDeath": 75,
+        "yearsHash": "7c7d052f5c9b73b14478",
+        "finalHash": "33b50dd2b23f41687a9a"
       },
       {
         "seed": "golden-careful-5-0",
@@ -94,8 +94,8 @@
         "seed": "golden-criminal-1-0",
         "years": 79,
         "ageAtDeath": 79,
-        "yearsHash": "740e7c51fab37e560c04",
-        "finalHash": "54c6fc387203456ebc30"
+        "yearsHash": "5fec0b003b90c984d865",
+        "finalHash": "8724fc52c5f17ada2fba"
       }
     ],
     "star": [
@@ -108,10 +108,10 @@
       },
       {
         "seed": "golden-star-1-0",
-        "years": 88,
-        "ageAtDeath": 88,
-        "yearsHash": "ecc201e07c2b59f8fb69",
-        "finalHash": "2da2e97ff86cddf6b568"
+        "years": 79,
+        "ageAtDeath": 79,
+        "yearsHash": "e7d7f3b6900859277f0b",
+        "finalHash": "6cad54ecb9452775ba2e"
       }
     ],
     "athlete": [
