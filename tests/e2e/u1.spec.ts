@@ -230,9 +230,9 @@ test('a full life of 99 years scrolls: every age is in the log, newest at the bo
   await expect(log.getByRole('heading')).toHaveCount(100);
   await expectAge(page, 99);
   const main = page.getByTestId('game-main');
-  const metrics = await main.evaluate((el) => ({ scrollHeight: el.scrollHeight, clientHeight: el.clientHeight, atEnd: el.scrollHeight - el.scrollTop - el.clientHeight < 40 }));
-  expect(metrics.scrollHeight).toBeGreaterThan(metrics.clientHeight * 10);
-  expect(metrics.atEnd).toBe(true);
+  const atEnd = () => main.evaluate((el) => el.scrollHeight - el.scrollTop - el.clientHeight < 40);
+  await expect.poll(atEnd, { timeout: 10_000 }).toBe(true);
+  expect(await main.evaluate((el) => el.scrollHeight / el.clientHeight)).toBeGreaterThan(10);
   // Sweep the whole log from the top to the end: a century of lines stays quick.
   const started = Date.now();
   await main.evaluate(async (el) => {

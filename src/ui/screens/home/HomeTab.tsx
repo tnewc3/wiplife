@@ -136,9 +136,15 @@ export function HomeTab({ life }: { life: LifeState }) {
   useEffect(() => {
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     end.current?.scrollIntoView({ block: 'end', behavior: reduce ? 'auto' : 'smooth' });
-    // Years drawn for the first time can be taller than the space kept for them: settle at the end once they are.
-    const settle = requestAnimationFrame(() => end.current?.scrollIntoView({ block: 'end', behavior: 'auto' }));
-    return () => cancelAnimationFrame(settle);
+    // Years drawn for the first time can be taller than the space kept for them (content-visibility): keep settling at the end for a few frames.
+    let frame = 0;
+    let left = 8;
+    const pin = () => {
+      end.current?.scrollIntoView({ block: 'end', behavior: 'auto' });
+      if (--left > 0) frame = requestAnimationFrame(pin);
+    };
+    frame = requestAnimationFrame(pin);
+    return () => cancelAnimationFrame(frame);
   }, [size, life.currentYear, life.phase]);
 
   return (
