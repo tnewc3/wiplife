@@ -22,7 +22,7 @@ import { benefitFromRecord, pensionShares, recordEarnings, retirementBenefit } f
 import { createRng } from './rng';
 import { getProfileView, getTravelView } from './selectors';
 import { lifeAtAge } from './testFixtures';
-import { honeymoonSpouse, stayBlock, stayCost, tripBlock, tripCost } from './travel/travel';
+import { endStay, honeymoonSpouse, stayBlock, stayCost, tripBlock, tripCost } from './travel/travel';
 import type { LifeState } from './types';
 
 const speaks = (id: string, year: number, skill = 100, native = true): LanguageSkill => ({ id, skill, native, lastUsed: year });
@@ -465,5 +465,27 @@ describe('Batch 10 W5: a retirement record that travels', () => {
     const paidAt66 = pensionShares(at66, content).filter((s) => s.receiving).map((s) => s.countryId);
     expect(paidAt66).toEqual(['mx']);
     expect(retirementBenefit(at66, content)).toBe(pensionShares(at66, content).find((s) => s.countryId === 'mx')!.yearly);
+  });
+});
+
+describe('Batch 10 W5: a job taken up during a stay that home does not allow', () => {
+  it('ends when the stay ends (found by the 10,000-life run: a job got in Houston needed French in Montreal)', async () => {
+    const { startJob } = await import('./career');
+    const life = produce(adult(), (d) => {
+      d.character.cityId = d.housing.cityId = 'montreal';
+      d.housing.kind = 'renting';
+      d.character.languages = [speaks('en', d.currentYear), speaks('fr', d.currentYear, 90, false)];
+      startJob(d, 'registered_nurse', content);
+      d.education.credentials.push({ type: 'bachelor', year: d.birthYear + 22, gpa: 3.2, majorId: 'nursing' } as never);
+    });
+    expect(life.career.job?.jobId).toBe('registered_nurse');
+    const away = produce(life, (d) => {
+      d.travel.residence = { country: 'United States', destinationId: 'houston', type: 'temporary_worker', route: 'transfer', startYear: d.currentYear, endYear: d.currentYear + 2, homeCityId: 'montreal', homeHousing: { ...d.housing } };
+      d.character.cityId = d.housing.cityId = 'houston';
+      d.character.languages = [speaks('en', d.currentYear), speaks('fr', d.currentYear, 50, false)];
+    });
+    const home = produce(away, (d) => { endStay(d, content); });
+    expect(home.character.cityId).toBe('montreal');
+    expect(home.career.job).toBeNull();
   });
 });

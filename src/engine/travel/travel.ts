@@ -4,7 +4,7 @@ import { hasBusinessJob } from './query';
 /** W5 orchestrates finance, education, careers, people and language; those systems remain authoritative. */
 import type { ContentBundle } from '../../content/schemas';
 import { TRIP_ACTIVITIES, TRIP_BUDGETS, TRIP_STYLES, type Souvenir, type TripActivity, type TripStyle } from '../../content/schemas';
-import { endJob, rollOpenings, staffWorkplace } from '../career';
+import { endJob, meetsJobRequirements, rollOpenings, staffWorkplace } from '../career';
 import { countryIdOfCity, countryOfCity, moneyDisplayOf, formatMoney, scaledAmount } from '../country';
 import { createPerson } from '../events/casting';
 import { pickUnused } from '../creation/family';
@@ -400,6 +400,10 @@ export function endStay(state: LifeState, content: ContentBundle): void {
   }
   state.travel.residence = null; state.travel.totals.returns++;
   lapseMoved(state, content);
+  // A job taken up during the stay may not be one this country lets you keep (found by the Batch 10 10,000-life run: a job got in Houston during a
+  // transfer stay from Montreal needed French at home).
+  const held = state.career.job && content.jobs[state.career.job.jobId];
+  if (held && !meetsJobRequirements(state, held, content)) endJob(state, 'moved', content);
   changeOffice(state, content);
 }
 /** Exchanges remain enrolled with their home institution: no second degree or host tuition system. */
