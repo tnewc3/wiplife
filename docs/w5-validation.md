@@ -1,6 +1,6 @@
 # W5 implementation and stopped validation report
 
-> **Superseded (Batch 0, PR #40).** This record describes validation that was stopped on 2026-10-13. The W5 gate was finished in Batch 0: 10,000-life runs with zero invariant failures, every W5 acceptance criterion checked, and the figures are in [docs/technical.md](technical.md) ("W5 — as built", "Gate (Batch 0)", and "Batch 0 — Stabilize and validate (as built)"). Kept for history.
+> **Superseded (Batch 0, PR #40).** This record describes validation that was stopped on 2026-10-13. The W5 gate was finished in Batch 0: 10,000-life runs with zero invariant failures, every W5 acceptance criterion checked, and the figures are in [docs/technical.md](technical.md) ("W5 — as built", "Gate (Batch 0)", and "Batch 0 — Stabilize and validate (as built)"). Kept for history. The three open questions in "Deviations and open questions" below were settled in Batch 10 (families on stays and pension portability built, part-year stays closed): see docs/technical.md.
 
 Validation was stopped at the user's request on 2026-10-13. PR [#37](https://github.com/tnewc3/wiplife/pull/37) remains a draft into `main`. This report covers implementation commits `a23f85b` and `01a8fae`. W5 has not passed every acceptance gate and is not ready to merge on the evidence below.
 

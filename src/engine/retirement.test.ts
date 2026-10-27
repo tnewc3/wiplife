@@ -16,7 +16,7 @@ const steady: ContentBundle = produce(content, (c) => {
 
 const withRecord = (age: number, years: number, total: number): LifeState =>
   produce(lifeAtAge('retirement', age), (d) => {
-    d.finances.earnings = { years, total };
+    d.finances.earnings = { years, total, byCountry: { us: { years, total } } };
   });
 
 /** The formula applied by hand to an average. */
@@ -36,7 +36,7 @@ describe('the earnings record', () => {
       recordEarnings(d, 30_000, content);
       recordEarnings(d, r.earningsCap * 3, content);
     });
-    expect(life.finances.earnings).toEqual({ years: 2, total: 30_000 + r.earningsCap });
+    expect(life.finances.earnings).toEqual({ years: 2, total: 30_000 + r.earningsCap, byCountry: { us: { years: 2, total: 30_000 + r.earningsCap } } });
     expect(averageEarnings(life)).toBe(Math.round((30_000 + r.earningsCap) / 2));
   });
 });
@@ -93,7 +93,7 @@ describe('the ledger and retirement', () => {
       }),
     );
     expect(salaried.finances.lastLedger!.gross).toBe(55_000);
-    expect(salaried.finances.earnings).toEqual({ years: 1, total: 55_000 });
+    expect(salaried.finances.earnings).toEqual({ years: 1, total: 55_000, byCountry: { us: { years: 1, total: 55_000 } } });
   });
 
   it('pays nothing before the retirement age', () => {

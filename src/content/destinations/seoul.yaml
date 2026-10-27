@@ -1,0 +1,8 @@
+id: seoul
+name: Seoul
+country: South Korea
+languageId: ko
+costLevel: 1.2
+kind: city
+locals: { pool: us, heritage: korean }
+souvenir: tailored_suit

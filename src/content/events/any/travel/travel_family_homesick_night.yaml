@@ -1,0 +1,38 @@
+id: travel_family_homesick_night
+title: Whose house is this
+text: >-
+  Close to bedtime, {kid.name} asks when you are all going home. The question
+  is simple, and the answer takes longer than either of you expected.
+tone: serious
+category: travel
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+followUpOnly: true
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { travel: { active: true, family: true } }
+    - { family: { minors: { gte: 1 } } }
+weight: { base: 1 }
+cast:
+  kid: { kind: child, presence: household }
+choices:
+  - id: honest
+    label: Tell {kid.them} exactly when, and why
+    outcome:
+      text: >-
+        You say the day, the reason and the part that is hard. {kid.name}
+        takes it in, asks one more question and falls asleep sooner than you
+        would have guessed.
+      effects:
+        - { type: relationship, role: kid, affection: 3, trust: 5 }
+        - { type: parenting, role: kid, warmth: 3 }
+  - id: distract
+    label: Turn it into a plan for the weekend
+    outcome:
+      text: >-
+        Within minutes {kid.name} is drawing a route to the harbor and
+        arguing about snacks. The question will come back, but not tonight.
+      effects:
+        - { type: relationship, role: kid, affection: 2 }
+        - { type: parenting, role: kid, involvement: 2 }

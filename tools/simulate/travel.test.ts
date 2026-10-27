@@ -6,7 +6,7 @@ import { chooseTravelAction, emptyTravelReport, formatTravel, TravelWatcher } fr
 describe('W5 simulation report', () => {
   it('aggregates completed trips/stays and effects without counting visitor returns as residence returns', () => {
     const life = produce(lifeAtAge('travel-report', 25), (d) => {
-      d.travel.totals = { trips: 2, spent: 2500, encounters: 4, romances: 1, study: 1, work: 1, returns: 2, immersion: 20, distanceLost: 9, happiness: 10, stress: -8, destinations: { montreal: 2, london: 2 } };
+      d.travel.totals = { trips: 2, spent: 2500, encounters: 4, romances: 1, study: 1, work: 1, returns: 2, immersion: 20, distanceLost: 9, happiness: 10, stress: -8, destinations: { montreal: 2, london: 2 }, styles: {}, activities: {}, souvenirs: {}, perDiem: 0, familyStays: 0, familyMembers: 0 };
       d.eventLog.travel_trip_booking = { count: 2, lastYear: d.currentYear };
     });
     const report = emptyTravelReport(); const watcher = new TravelWatcher(report);

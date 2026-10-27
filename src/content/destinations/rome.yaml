@@ -4,3 +4,5 @@ country: Italy
 languageId: it
 costLevel: 1.2
 kind: culture
+locals: { pool: it, heritage: italian }
+souvenir: pearl_necklace

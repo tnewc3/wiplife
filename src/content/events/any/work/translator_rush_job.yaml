@@ -1,0 +1,35 @@
+id: translator_rush_job
+title: By morning
+text: >-
+  An agency calls at six: a rush job, double rate, due before the opening of
+  business tomorrow. It would eat your evening and most of your night.
+tone: neutral
+category: work
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { career: { employed: true, retired: false, job: [translator] } }
+weight: { base: 6 }
+cooldownYears: 3
+choices:
+  - id: take
+    label: Take it ({$700} for the night)
+    outcome:
+      text: >-
+        You finish at four in the morning, read it through once more, and
+        send it. The payment arrives the following week, and so does a long
+        sleep.
+      effects:
+        - { type: money, delta: 700 }
+        - { type: stat, key: stress, delta: 3 }
+        - { type: job, action: performance, value: 3 }
+  - id: pass
+    label: Pass it to a colleague
+    outcome:
+      text: >-
+        You give the job to someone who needs it more this week. They will cover
+        for you next time, and you sleep.
+      effects:
+        - { type: stat, key: stress, delta: -2 }

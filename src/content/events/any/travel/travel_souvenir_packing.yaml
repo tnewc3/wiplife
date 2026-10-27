@@ -1,0 +1,33 @@
+id: travel_souvenir_packing
+title: Fitting it in the bag
+text: >-
+  What you are bringing back from {destination} does not quite fit the bag you
+  brought. The airline has opinions about the one you would have to buy.
+tone: neutral
+category: travel
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+followUpOnly: true
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { travel: { active: true, kind: trip, souvenir: true } }
+weight: { base: 1 }
+choices:
+  - id: ship
+    label: Ship it home ({$45})
+    outcome:
+      text: >-
+        It arrives in more tape than seemed possible. It is
+        undamaged, which was the point.
+      effects:
+        - { type: money, delta: -45 }
+        - { type: stat, key: stress, delta: -1 }
+  - id: wrap
+    label: Wrap it in clothes and carry it on
+    outcome:
+      text: >-
+        You wear three layers through the airport, sweat gently, and get it
+        home in one piece.
+      effects:
+        - { type: stat, key: stress, delta: 1 }

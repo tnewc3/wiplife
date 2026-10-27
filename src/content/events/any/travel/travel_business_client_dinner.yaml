@@ -1,0 +1,34 @@
+id: travel_business_client_dinner
+title: The client dinner
+text: >-
+  The meeting in {destination} ran long, and the client suggests dinner. It
+  would be a good opportunity. It would also be the fourth hour of being on.
+tone: neutral
+category: travel
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+followUpOnly: true
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { travel: { active: true, kind: trip, style: business } }
+weight: { base: 1 }
+choices:
+  - id: go
+    label: Go, and be good company
+    outcome:
+      text: >-
+        The conversation turns from the contract to the person across the
+        table. Over dessert they say they will send more work your way.
+      effects:
+        - { type: job, action: performance, value: 4 }
+        - { type: stat, key: stress, delta: 2 }
+  - id: prepare
+    label: Beg off and prepare for tomorrow
+    outcome:
+      text: >-
+        You eat something quick, go back over the numbers and sleep well. The
+        morning meeting is the better for it.
+      effects:
+        - { type: job, action: performance, value: 2 }
+        - { type: stat, key: stress, delta: -1 }

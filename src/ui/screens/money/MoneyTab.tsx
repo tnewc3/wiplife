@@ -164,6 +164,11 @@ function RetirementCard({ life }: { life: LifeState }) {
             ? `From ${r.age}, a retirement benefit is paid to anyone with ${r.minYears} years of work. You have ${yearsText}.`
             : `From ${r.age}, your ${yearsText} of work would pay about ${money(r.yearlyBenefit)} a year.`}
       </p>
+      {r.countries.length > 1 && (
+        <ul className="mt-2 divide-y divide-border text-sm" aria-label="Retirement by country" data-testid="retirement-countries">
+          {r.countries.map((c) => <li key={c.country} className="flex justify-between gap-3 py-2"><span>{c.country} · {c.years} {c.years === 1 ? 'year' : 'years'}</span><span className="tabular-nums">{c.yearly > 0 ? `${money(c.yearly)} a year from ${c.age}` : 'Pays nothing yet'}</span></li>)}
+        </ul>
+      )}
     </Card>
   );
 }

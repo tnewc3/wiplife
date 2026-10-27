@@ -262,5 +262,12 @@ export const countriesBalanceSchema = z.strictObject({
   startWeights: weightsSchema(countryIdSchema),
   /** The simulation's targets for each country. */
   targets: z.record(countryIdSchema, countryTargetsSchema),
+  /**
+   * Batch 10: how a retirement record travels between the four countries. Each year of earned income is credited to the country it
+   * was earned in. Every country pays for its own credited years by its own formula, from its own pension age. With `totalize`, the
+   * years in the other countries count toward the minimum years a country asks for (never toward the amount). A country pays nothing
+   * for fewer than `minOwnYears` of its own credited years, and what it pays someone living elsewhere is multiplied by `abroadShare`.
+   */
+  pensionPortability: z.strictObject({ totalize: z.boolean(), minOwnYears: z.int().min(1).max(20), abroadShare: z.number().min(0).max(1) }),
 });
 export type CountriesBalance = z.infer<typeof countriesBalanceSchema>;

@@ -1,0 +1,35 @@
+id: travel_cruise_port_day
+title: Eight hours in port
+text: >-
+  The ship stays at the dock until evening, and the town beyond the gangway
+  looks like it could fill a week.
+tone: neutral
+category: travel
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+followUpOnly: true
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { travel: { active: true, kind: trip, style: cruise } }
+weight: { base: 1 }
+choices:
+  - id: excursion
+    label: Take the ship's excursion ({$90})
+    outcome:
+      text: >-
+        The coach is comfortable, the guide is good and the stops are timed to
+        the minute. You are back aboard with ten minutes to spare.
+      effects:
+        - { type: money, delta: -90 }
+        - { type: stat, key: smarts, delta: 2 }
+        - { type: stat, key: happiness, delta: 2 }
+  - id: own
+    label: Walk off on your own
+    outcome:
+      text: >-
+        You keep one eye on the clock and the other on the town. You find a
+        harbor café, order slowly and make it back to the ship out of breath.
+      effects:
+        - { type: stat, key: happiness, delta: 2 }
+        - { type: stat, key: stress, delta: 1 }

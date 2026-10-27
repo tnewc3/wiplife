@@ -52,6 +52,10 @@ export const jobSchema = baseDefSchema
       .refine((levels) => levels.every((l, i) => i === 0 || l.salary >= levels[i - 1]!.salary), 'salaries must not go down a level'),
     /** Yearly performance: weight × (value − 50) points for each of your stats, traits or hidden values. */
     performance: z.array(z.strictObject({ key: scoreKeySchema, weight: z.number().min(-1).max(1) })).min(1),
+    /** Batch 10: the work uses every language you speak well, so those stay in use while you hold it (a translator's fluent languages do not fade). */
+    usesLanguages: z.literal(true).optional(),
+    /** Batch 10: the work calls for travel, so the player can take business trips while in the job (the employer pays). */
+    businessTravel: z.literal(true).optional(),
     /** Batch 3: how big the workplace is (balance careers.yaml workplace.sizes); by default from the category. */
     workplace: z.enum(['small', 'medium', 'large']).optional(),
     /** Fictional employers; one is picked when you're hired. */

@@ -4,3 +4,5 @@ country: France
 languageId: fr
 costLevel: 1.4
 kind: culture
+locals: { pool: fr, heritage: french }
+souvenir: oil_painting

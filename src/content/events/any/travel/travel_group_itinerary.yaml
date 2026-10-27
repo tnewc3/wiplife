@@ -1,0 +1,36 @@
+id: travel_group_itinerary
+title: Whose day is it
+text: >-
+  There are five of you in {destination} and five different ideas of what to
+  do with the day. The group message has been silent for twenty minutes.
+tone: light
+category: travel
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+followUpOnly: true
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { travel: { active: true, kind: trip, style: group } }
+weight: { base: 1 }
+cast:
+  companion: { kind: friend, presence: nearby }
+choices:
+  - id: vote
+    label: Hold a vote and live with it
+    outcome:
+      text: >-
+        Two people lose and go along cheerfully. The day is fine, and the
+        losers pick tomorrow.
+      effects:
+        - { type: relationship, role: companion, affection: 3 }
+        - { type: stat, key: stress, delta: -1 }
+  - id: split
+    label: Split up and meet for dinner
+    outcome:
+      text: >-
+        Everyone gets the day they wanted, and the dinner is full of
+        stories nobody else has heard.
+      effects:
+        - { type: relationship, role: companion, affection: 4 }
+        - { type: stat, key: happiness, delta: 2 }

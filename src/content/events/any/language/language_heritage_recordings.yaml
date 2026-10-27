@@ -1,0 +1,42 @@
+id: language_heritage_recordings
+title: Voices on a drive
+text: >-
+  Clearing out a drawer, you find a drive of old recordings: family voices,
+  talking in {heritageLanguage}. You understand the tone of every one of them,
+  and not nearly enough of the words.
+tone: neutral
+category: language
+rarity: common
+lifeStages: [adult, senior]
+requires:
+  all:
+    - { age: { gte: 35 } }
+    - { language: { heritageLost: true } }
+weight: { base: 3 }
+once: true
+choices:
+  - id: class
+    label: Sign up for a class ({$600})
+    outcome:
+      text: >-
+        The class meets on Thursday evenings. By the third week you can follow
+        a whole recording, and the voices in it become people again.
+      effects:
+        - { type: money, delta: -600 }
+        - { type: languageBond, action: heritage }
+        - { type: languageBond, action: heritage }
+        - { type: stat, key: happiness, delta: 2 }
+  - id: listen
+    label: Listen along with a dictionary
+    outcome:
+      text: >-
+        It takes a month of evenings. You do not catch everything, but you
+        catch enough, and one recording in particular you play twice.
+      effects:
+        - { type: languageBond, action: heritage }
+        - { type: stat, key: happiness, delta: 1 }
+  - id: leave
+    label: Put the drive back
+    outcome:
+      text: The drawer closes. The recordings will keep.
+      effects: []

@@ -316,7 +316,7 @@ describe('lives from Stage 6 on', () => {
     const upgraded = result.envelope.data;
     expect(upgraded.character.birthCityId).toBe(life.character.cityId);
     expect(upgraded.housing.since).toBe(life.birthYear);
-    expect(upgraded.finances).toEqual({ ...life.finances, savings: 1_234, earnings: { years: 0, total: 0 }, hardshipYears: 0, dirty: 0 });
+    expect(upgraded.finances).toEqual({ ...life.finances, savings: 1_234, earnings: { years: 0, total: 0, byCountry: {} }, hardshipYears: 0, dirty: 0 });
   });
 
   it('round trip a life with debts, a mortgage and a move', async () => {

@@ -64,6 +64,7 @@ export const INTERACTION_EFFECT_TYPES = [
   'knowledge',
   'introduce',
   'later',
+  'languageBond',
 ] as const;
 
 const interactionEffectSchema = effectSchema.refine(

@@ -1,6 +1,6 @@
 import { travelValues } from '../travel/travel';
 import { MIGRATION_TEXT_VALUES, migrationTextValues } from '../migration/text';
-import { sharedLanguage } from '../languages';
+import { lostHeritageLanguage, sharedLanguage, teachableLanguage } from '../languages';
 import type { EventDef } from '../../content/schemas';
 /**
  * Text context for an event: every cast role, you as `self` (your name and
@@ -38,7 +38,8 @@ export function sinceText(state: LifeState, since: number | undefined, content: 
   return years === 1 ? t.since.one : t.since.many.replace('{n}', t.numbers[years] ?? String(years));
 }
 
-const TRAVEL_VALUES = ['destination', 'destinationCountry', 'endYear', 'homeCity', 'travelCost'] as const;
+const TRAVEL_VALUES = ['destination', 'destinationCountry', 'endYear', 'homeCity', 'travelCost', 'souvenir'] as const;
+const LANGUAGE_VALUES = ['studiedLanguage', 'examLanguage', 'examLevel', 'heritageLanguage', 'childLanguage'] as const;
 const DISCOVERY_VALUES = ['talent', 'latentPeople', 'latentGender', 'latentExpression', 'latentTrait'] as const;
 
 /**
@@ -48,7 +49,7 @@ const DISCOVERY_VALUES = ['talent', 'latentPeople', 'latentGender', 'latentExpre
 const VALUE_GROUPS: readonly (readonly string[])[] = [
   TRAVEL_VALUES,
   MIGRATION_TEXT_VALUES,
-  ['studiedLanguage'],
+  LANGUAGE_VALUES,
   COUNTRY_TEXT_VALUES,
   DISCOVERY_VALUES,
   ['sentence'],
@@ -93,6 +94,20 @@ function lazyValues(own: Record<string, string | number>, make: (group: number) 
   return values;
 }
 
+/** Batch 10: the language names events may use: the one last studied, the last exam, a lost heritage language, and one you could pass on to the child in the story. */
+function languageValues(state: LifeState, cast: Record<string, Id>, content: ContentBundle): Record<string, string> {
+  const name = (id: string | null | undefined) => content.languages[id ?? '']?.name ?? '';
+  const exam = state.languages.recentExam;
+  const child = cast.child ?? cast.baby;
+  return {
+    studiedLanguage: name(state.languages.classId),
+    examLanguage: name(exam?.id),
+    examLevel: exam?.level ?? '',
+    heritageLanguage: name(lostHeritageLanguage(state, content) ?? state.languages.classId),
+    childLanguage: name(child === undefined ? null : teachableLanguage(state, child, content) ?? state.languages.home[child]),
+  };
+}
+
 /** `since`: for a follow-up, the year the event that scheduled it happened ({since}). `eager`: see lazyValues. */
 export function textContext(state: LifeState, cast: Record<string, Id>, content: ContentBundle, since?: number, eager = false): TextContext {
   const c = state.character;
@@ -113,7 +128,7 @@ export function textContext(state: LifeState, cast: Record<string, Id>, content:
       switch (group) {
         case 0: return travelValues(state, content);
         case 1: return migrationTextValues(state, content);
-        case 2: return { studiedLanguage: content.languages[state.languages.classId ?? '']?.name ?? '' };
+        case 2: return languageValues(state, cast, content);
         case 3: return countryTextValues(state, content);
         case 4: return discoveryValues(state, content);
         case 5: return { sentence: sentenceText(state, content) };
@@ -154,7 +169,7 @@ export function textContext(state: LifeState, cast: Record<string, Id>, content:
  * person in the story (npc or person) has heard about you, as a phrase ("that
  * you were fired for stealing"; only where the event requires that they have).
  */
-export const EVENT_TEXT_VALUES = [...MIGRATION_TEXT_VALUES, 'destination', 'destinationCountry', 'endYear', 'homeCity', 'travelCost', ...COUNTRY_TEXT_VALUES, 'studiedLanguage', 'age', 'talent', 'latentPeople', 'latentGender', 'latentExpression', 'latentTrait', 'sentence', 'since', 'heard', ...TEEN_TEXT_VALUES, ...CRIME_TEXT_VALUES, ...FAME_TEXT_VALUES, ...SPORTS_TEXT_VALUES, ...BELONGING_TEXT_VALUES, ...BUSINESS_TEXT_VALUES, ...SOCIAL_TEXT_VALUES] as const;
+export const EVENT_TEXT_VALUES = [...MIGRATION_TEXT_VALUES, 'destination', 'destinationCountry', 'endYear', 'homeCity', 'travelCost', 'souvenir', 'examLanguage', 'examLevel', 'heritageLanguage', 'childLanguage', ...COUNTRY_TEXT_VALUES, 'studiedLanguage', 'age', 'talent', 'latentPeople', 'latentGender', 'latentExpression', 'latentTrait', 'sentence', 'since', 'heard', ...TEEN_TEXT_VALUES, ...CRIME_TEXT_VALUES, ...FAME_TEXT_VALUES, ...SPORTS_TEXT_VALUES, ...BELONGING_TEXT_VALUES, ...BUSINESS_TEXT_VALUES, ...SOCIAL_TEXT_VALUES] as const;
 /** E5: values an event may use only when it binds the possession: a pet's species, a vehicle's name, a vacation home's city. */
 export const POSSESSION_TEXT_VALUES = { pet: ['petKind'], vehicle: ['vehicle'], home: ['homeCity'], valuable: ['valuable'] } as const;
 

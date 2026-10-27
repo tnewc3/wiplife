@@ -767,7 +767,7 @@ export interface FinanceState {
    * The earnings record the retirement benefit is based on: years with
    * earned income and the total earned in them (each year capped).
    */
-  earnings: { years: number; total: number };
+  earnings: { years: number; total: number; /** Batch 10: the same record by the country the years were earned in (the rows add up to years and total). */ byCountry: Record<string, { years: number; total: number }> };
   /** Years in a row behind on your housing costs (borrowing for at least balance's evictionShare of them). */
   hardshipYears: number;
   /** E2b: money an heir under 18 inherited, held until they reach `releaseAge`. */

@@ -1,0 +1,22 @@
+id: translator
+name: "Translation and interpreting"
+category: professional
+blurb: "Carrying meaning from one language into another, on paper and in the room."
+requires:
+  all:
+    - { language: { count: { gte: 2 }, level: fluent } }
+    - { education: { credential: [bachelor, grad] } }
+businessTravel: true
+usesLanguages: true
+levels:
+  - { title: "junior translator", salary: 38000 }
+  - { title: "translator", salary: 48000 }
+  - { title: "senior interpreter", salary: 64000 }
+  - { title: "language services lead", salary: 86000 }
+workplace: small
+performance:
+  - { key: smarts, weight: 0.25 }
+  - { key: discipline, weight: 0.2 }
+  - { key: confidence, weight: 0.1 }
+  - { key: sociability, weight: 0.1 }
+employers: ["Meridian Language Services", "Plainspeak Partners", "Crosswise Translation", "Open Door Interpreting"]

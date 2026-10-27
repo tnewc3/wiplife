@@ -66,10 +66,10 @@ export function rootEvents(content: ContentBundle): Set<string> {
   for (const def of Object.values(content.events)) if (!def.retired && !def.followUpOnly) roots.add(def.id);
   const r = content.registries;
   const lists: { events: string[] }[] = [
-    r.languages.classes,
+    r.languages.classes, r.languages.app, r.languages.tutor, { events: [...r.languages.exam.passed, ...r.languages.exam.failed] },
     // B1: what "Find a date" answers with.
     ...Object.values(r.love.findDate).map((events) => ({ events })),
-    ...Object.values(r.travel).map((events) => ({ events })),
+    ...Object.values(r.travel).map((events) => ({ events: Array.isArray(events) ? events : Object.values(events).flat() })),
     // W6: what applications, permits, life without papers and life abroad queue.
     ...Object.values(r.immigration.triggers).map((events) => ({ events })),
     ...Object.values(r.immigration.yearly).map((events) => ({ events })),

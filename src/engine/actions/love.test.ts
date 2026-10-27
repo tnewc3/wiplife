@@ -42,15 +42,19 @@ describe('B1: Find a date', () => {
   });
 
   it('records the input and a life using it replays exactly from the log', () => {
+    // (Which life a seed makes moves whenever the content does, so the first seed whose life is single and attracted to someone at 18 is used.)
     let life = createLife({ mode: 'random', seed: 'fd-replay', birthYear: 1990, countryId: 'us' }, content);
-    life = playUntilAdult(life);
-    const before = life.inputLog.length;
-    const ways = ['app', 'friend', 'night_out'] as const;
-    for (let i = 0; i < 3 && life.phase === 'yearStart'; i++) {
-      if (!isLifeActionAvailable(life, 'find_date', { dateWay: ways[i]! }, content)) continue;
-      life = finishIfAction(find(life, ways[i]!));
+    let tries: LifeState['inputLog'] = [];
+    for (let n = 0; n < 12 && tries.length === 0; n++) {
+      life = playUntilAdult(createLife({ mode: 'random', seed: `fd-replay-${n}`, birthYear: 1990, countryId: 'us' }, content));
+      const before = life.inputLog.length;
+      const ways = ['app', 'friend', 'night_out'] as const;
+      for (let i = 0; i < 3 && life.phase === 'yearStart'; i++) {
+        if (!isLifeActionAvailable(life, 'find_date', { dateWay: ways[i]! }, content)) continue;
+        life = finishIfAction(find(life, ways[i]!));
+      }
+      tries = life.inputLog.slice(before).filter((r) => r.kind === 'action' && (r.payload as { actionId?: string }).actionId === 'find_date');
     }
-    const tries = life.inputLog.slice(before).filter((r) => r.kind === 'action' && (r.payload as { actionId?: string }).actionId === 'find_date');
     expect(tries.length).toBeGreaterThan(0);
     life = playYear(life, content);
     expect(replayLife(life.inputLog, content)).toEqual(life);

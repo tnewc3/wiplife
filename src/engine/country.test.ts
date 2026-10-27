@@ -230,12 +230,12 @@ describe('pensions', () => {
     for (const id of IDS) {
       const pension = content.countries[id]!.pension;
       const life = produce(inCity(id, 70), (d) => {
-        d.finances.earnings = { years: pension.fullYears, total: 30_000 * pension.fullYears };
+        d.finances.earnings = { years: pension.fullYears, total: 30_000 * pension.fullYears, byCountry: { [id]: { years: pension.fullYears, total: 30_000 * pension.fullYears } } };
       });
       const benefit = benefitFromRecord(life, content);
       expect(benefit).toBeGreaterThan(0);
       const short = produce(life, (d) => {
-        d.finances.earnings = { years: pension.minYears - 1, total: 30_000 * (pension.minYears - 1) };
+        d.finances.earnings = { years: pension.minYears - 1, total: 30_000 * (pension.minYears - 1), byCountry: { [id]: { years: pension.minYears - 1, total: 30_000 * (pension.minYears - 1) } } };
       });
       expect(benefitFromRecord(short, content)).toBe(0);
     }

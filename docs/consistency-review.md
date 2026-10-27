@@ -297,3 +297,19 @@ Every emigration event was read against AGENTS.md and the second-wave writing gu
 | Presence | The relatives who call (`removal_left_behind`, `undoc_cannot_visit`, `abroad_relative_asks_money`, `abroad_visit_home`, the two in `lives`) are cast `presence: elsewhere` and required to live in another country (`migration.relatives`), so they are never cast as visiting or living with you. | Done. |
 
 Tone and subject matter worth a second look: `emigration_status_denied` and `removal_flight_home` (dark: a refusal, being removed; both show people, a way to ask for help and a next step), `undoc_threat` (a supervisor's remark: the weight is the person's fear and the way out), `undoc_cannot_visit` and `removal_left_behind` (separation from family), `undoc_sick_without_care` (a choice between a clinic and waiting it out: both are shown as real, neither as foolish) and `emigration_turned_back` (a failed journey). They are written frankly and without detail of any journey.
+
+## Batch 10 — Language and travel, expanded
+
+The 37 new events (`events/any/language`, `events/any/travel`, two in `parenting` and three in `work`) were written against AGENTS.md and the second-wave writing guidance, then run through the content build. No place, nationality or language is given a personality, a food, an accent or a custom: the travel stories are about lines, weather, timetables, bills and strangers, the language stories are about the effort of learning and what a language means to the person who speaks it. Locals met abroad take names from a pool (names/de, fr, it, es and the heritages of us), and nothing about them depends on it.
+
+| Rule | How the Batch 10 events meet it |
+|---|---|
+| No national or ethnic stereotypes | No destination story says what its people are like; `{destination}` is the only place name, and the stories hold for any of the places they are shown in. The one local-guide story (`travel_local_invite`) names no custom or trait; the host is a person who offers an afternoon. |
+| Evidence | A heritage-language story requires `language: heritageLost` (your family background suggests a language you speak below the conversational level); a story about a language at home requires `language: homeWith` the child; a story about practice requires `language: learnableFrom` the person. The honeymoon stories are only told by a honeymoon (`travel.style`). |
+| Time | No fixed gaps in follow-ups. The build found "a week later" in `travel_souvenir_packing`; removed. |
+| Money | Every outcome that mentions money changes it (`{$N}` with a `money` effect at US prices, scaled to the country); the trip's own price, the exam fee, an app, a tutor and a business trip's allowance go through the finance module with a receipt. The build found "owe" in `translator_rush_job`; reworded. |
+| Household | `travel_family_*` cast the partner (`mate`) and a child (`kid`) from the stay's own record, and require them to live with you there; `language_home_*` cast the child with `presence: household`; a spouse is the honeymoon's `companion`. |
+| Status-aware text | Translator stories require the job; business-trip stories require the business style; family stories require a stay with a family; nightlife stories require 21 (`activities.nightlife.minAge`). |
+| Adults only | Every travel story requires age 18; nothing in the family stories or the bilingual-child events is romantic (the build rejects romantic wording around a child, and found "date" in `travel_family_homesick_night`; reworded). |
+| Presence | The family on a stay lives in the host city with you (`presence: household` is true there); the locals of a destination keep a modeled home city and are `presence: anywhere`, as before. |
+

@@ -3,6 +3,7 @@ name: "Consulting"
 category: professional
 blurb: "Telling companies what they already suspected, for a fee."
 requires: {"education": {"credential": ["grad"], "field": ["mba"]}}
+businessTravel: true
 levels:
   - { title: "associate consultant", salary: 92000 }
   - { title: "consultant", salary: 118000 }

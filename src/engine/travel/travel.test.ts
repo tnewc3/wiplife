@@ -181,7 +181,7 @@ describe('W5 travel', () => {
     expect(content.events.travel_injury!.choices![1]!.outcome!.effects.some((e) => e.type === 'stat' && e.key === 'health' && e.delta < 0)).toBe(true);
   });
   it('retains earned-income history when a host country has a lower earnings cap', () => {
-    const life = produce(adult(), (d) => { d.finances.earnings = { years: 5, total: 5 * content.countries.us!.pension.earningsCap }; });
+    const life = produce(adult(), (d) => { d.finances.earnings = { years: 5, total: 5 * content.countries.us!.pension.earningsCap, byCountry: { us: { years: 5, total: 5 * content.countries.us!.pension.earningsCap } } }; });
     const abroad = performAction(life, 'work_abroad', { stay: { destinationId: 'mexico_city', route: 'working_holiday' } }, content);
     expect(abroad.finances.earnings).toEqual(life.finances.earnings);
     expect(checkInvariants(abroad, content)).toEqual([]);

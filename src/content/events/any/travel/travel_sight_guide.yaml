@@ -1,0 +1,35 @@
+id: travel_sight_guide
+title: A walking tour
+text: >-
+  A guide outside your hotel in {destination} is collecting people for a
+  morning walk through the oldest streets.
+tone: neutral
+category: travel
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+followUpOnly: true
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { travel: { active: true, kind: trip, activity: sightseeing } }
+weight: { base: 1 }
+choices:
+  - id: join
+    label: Join the walk ({$60})
+    outcome:
+      text: >-
+        Two hours, eleven strangers, and one guide who knows which door has the
+        best story behind it. You come away with a better map than the one you
+        brought.
+      effects:
+        - { type: money, delta: -60 }
+        - { type: stat, key: smarts, delta: 3 }
+  - id: alone
+    label: Walk it alone with the map
+    outcome:
+      text: >-
+        You get lost twice and find the thing you were looking for once. It is
+        your own version of the morning, and you keep it.
+      effects:
+        - { type: stat, key: smarts, delta: 1 }
+        - { type: stat, key: stress, delta: -1 }

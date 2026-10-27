@@ -1,0 +1,15 @@
+id: language_tutor_result
+title: One-to-one
+text: 'Your {studiedLanguage} tutor sets homework, corrects the same mistake three times, and then stops correcting it because you no longer make it.'
+tone: neutral
+category: language
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires: { age: { gte: 18 } }
+weight: { base: 1 }
+followUpOnly: true
+# The receipt of a tutor the player chose (one a year at most, by rule), not a random event.
+recurring: true
+autoOutcome:
+  text: 'The lessons are demanding, and you can hear yourself improving.'
+  effects: []

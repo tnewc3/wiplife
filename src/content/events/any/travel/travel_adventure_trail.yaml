@@ -1,0 +1,45 @@
+id: travel_adventure_trail
+title: Steeper than described
+text: >-
+  The trail above {destination} was described as easy. Forty minutes in, it is
+  clearly not, and the view is only getting better.
+tone: neutral
+category: travel
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+followUpOnly: true
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { travel: { active: true, kind: trip, activity: adventure } }
+weight: { base: 1 }
+choices:
+  - id: climb
+    label: Keep climbing
+    check:
+      base: 62
+      stats: [{ key: health, weight: 0.3 }, { key: riskTaking, weight: 0.1 }]
+      success:
+        text: >-
+          The top is worth every step. You sit there long enough to stop
+          counting them.
+        effects:
+          - { type: stat, key: happiness, delta: 4 }
+          - { type: stat, key: health, delta: 1 }
+      failure:
+        text: >-
+          A loose stone turns your ankle near the top. You limp down, and a
+          clinic wraps it for {$80}.
+        effects:
+          - { type: money, delta: -80 }
+          - { type: stat, key: health, delta: -3 }
+          - { type: stat, key: happiness, delta: 1 }
+  - id: turn
+    label: Turn back at the viewpoint
+    outcome:
+      text: >-
+        The viewpoint is enough. You take the photograph, eat your lunch there,
+        and walk down easily.
+      effects:
+        - { type: stat, key: stress, delta: -2 }
+        - { type: stat, key: happiness, delta: 2 }

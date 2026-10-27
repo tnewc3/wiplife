@@ -1,0 +1,8 @@
+id: berlin
+name: Berlin
+country: Germany
+languageId: de
+costLevel: 1.2
+kind: city
+locals: { pool: de, heritage: german }
+souvenir: signed_print

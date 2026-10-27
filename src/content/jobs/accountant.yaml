@@ -3,6 +3,7 @@ name: "Accounting"
 category: professional
 blurb: "Making the numbers add up, especially in April."
 requires: {"education": {"credential": ["bachelor"], "field": ["business"]}}
+businessTravel: true
 levels:
   - { title: "staff accountant", salary: 56000 }
   - { title: "senior accountant", salary: 70000 }

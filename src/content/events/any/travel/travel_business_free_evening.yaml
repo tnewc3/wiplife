@@ -1,0 +1,33 @@
+id: travel_business_free_evening
+title: One free evening
+text: >-
+  The last meeting in {destination} ends at four, the flight is tomorrow, and
+  the evening is entirely yours. You know nobody here.
+tone: light
+category: travel
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+followUpOnly: true
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { travel: { active: true, kind: trip, style: business } }
+weight: { base: 1 }
+choices:
+  - id: explore
+    label: Find the part of the city you came for
+    outcome:
+      text: >-
+        You walk until you are hungry, eat at the first place with a full
+        room, and come back to the hotel tired and glad you went.
+      effects:
+        - { type: stat, key: happiness, delta: 3 }
+        - { type: stat, key: stress, delta: -2 }
+  - id: room
+    label: Order in and call it an early night
+    outcome:
+      text: >-
+        The trip becomes a hotel room and a very good night of sleep. That is
+        not nothing.
+      effects:
+        - { type: stat, key: stress, delta: -3 }

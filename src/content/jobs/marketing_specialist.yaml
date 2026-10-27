@@ -3,6 +3,7 @@ name: "Marketing"
 category: professional
 blurb: "Convincing people they needed something all along."
 requires: {"education": {"credential": ["bachelor"], "field": ["business", "communications"]}}
+businessTravel: true
 levels:
   - { title: "marketing coordinator", salary: 46000 }
   - { title: "marketing specialist", salary: 57000 }

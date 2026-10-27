@@ -1689,12 +1689,32 @@ export const LANGUAGE_NATIVE_LABEL = 'Native';
 
 /** W5: fixed interface words for travel choices. */
 export const TRIP_BUDGET_LABELS = { budget: 'Budget', comfortable: 'Comfortable', splurge: 'Splurge' } as const;
+/** Batch 10: fixed interface words for kinds of trip, what you do on one, and souvenirs. */
+export const TRIP_STYLE_LABELS = { vacation: 'Vacation', cruise: 'Cruise', honeymoon: 'Honeymoon', group: 'Trip with friends', business: 'Business trip' } as const;
+export const TRIP_STYLE_BLURBS = {
+  vacation: 'Pick a place and a budget.',
+  cruise: 'A ship, a few ports and fellow passengers.',
+  honeymoon: 'You and your spouse, soon after the wedding.',
+  group: 'Two or three friends, one shared plan.',
+  business: 'Your employer books and pays; you keep the daily allowance.',
+} as const;
+export const TRIP_STYLE_BLOCK_LABELS: Record<string, string> = {
+  honeymoon: 'A honeymoon is for a spouse you married in the last few years and have not taken one with.',
+  group: 'A trip with friends needs at least two friends who live near you.',
+  business: 'Business trips are for jobs that call for travel, once a year.',
+};
+export const TRIP_ACTIVITY_LABELS = { sightseeing: 'Sightseeing', nightlife: 'Nightlife', adventure: 'Adventure', food: 'Food', immersion: 'Language immersion' } as const;
+export const SOUVENIR_LABELS = { none: 'Nothing', small: 'A small gift', keepsake: 'A keepsake', valuable: 'Something valuable' } as const;
+/** Batch 10: certificate exams. */
+export const EXAM_LEVEL_LABELS = { basic: 'Basic', conversational: 'Conversational', fluent: 'Fluent' } as const;
+export const EXAM_ODDS_LABELS = { slim: 'Slim chance', fair: 'Fair chance', good: 'Good chance', strong: 'Strong chance' } as const;
 export const STAY_ROUTE_LABELS = { semester: 'Semester', year: 'Academic year', working_holiday: 'Working holiday', transfer: 'Employer transfer' } as const;
 export const STAY_BLOCK_LABELS: Record<string, string> = {
   unavailable: 'Travel is unavailable now. Check your age, legal restrictions and whether you already traveled this year.',
   destination: 'Choose a city in another country.', household: 'Temporary stays need a rental or family home and no dependent children or relatives in your care at home.',
   commitment: 'Your business, crew or public career needs you here.', college: 'An exchange needs current college enrollment and no full-time job.',
   money: 'You need enough saved for the up-front cost.', school: 'Finish or leave your current program before working abroad.',
+  family: 'Bringing family needs a partner who lives with you or children at home.',
   holiday: 'This working-holiday route is unavailable for your age or current employment.',
   job: 'An employer transfer needs a current job and its language requirements met at the destination.', route: 'Choose an available route.',
 };

@@ -10,13 +10,28 @@ export function travelFailures(state: LifeState, content: ContentBundle): string
   for (const [key, value] of Object.entries(t.totals)) if (typeof value === 'number' && (!Number.isSafeInteger(value) || !['happiness', 'stress'].includes(key) && value < 0)) fail(`invalid total ${key}`);
   if (t.totals.returns > t.totals.study + t.totals.work) fail('more returns than stays');
   if (Object.values(t.totals.destinations).reduce((n, c) => n + c, 0) !== t.totals.trips + t.totals.study + t.totals.work) fail('destination totals do not match travel');
+  // Batch 10: kinds of trip add up to the trips, and a family on a stay is a partner and children who live with you there.
+  if (Object.values(t.totals.styles).reduce((n, c) => n + c, 0) > t.totals.trips) fail('more trips by kind than trips');
+  if (Object.values(t.totals.activities).reduce((n, c) => n + c, 0) > t.totals.trips) fail('more activities than trips');
+  if (t.businessYear !== null && (t.businessYear > state.currentYear || t.businessYear < state.birthYear)) fail('business trip year outside life');
   if (t.active) {
     const a = t.active;
+    if (a.style && (a.style === 'cruise') !== (content.destinations[a.destinationId]?.kind === 'cruise')) fail('cruise and destination do not agree');
     if (state.phase !== 'action') fail('trip context outside action');
     if (!content.destinations[a.destinationId]) fail('unknown active destination');
     if (new Set(a.companions).size !== a.companions.length || a.companions.length > content.balance.travel.maxCompanions) fail('invalid companions');
     for (const id of [...a.companions, ...[a.encounterId, a.romanceId].filter((p): p is string => p !== null)]) if (!state.people[id] || !state.relationships[id]) fail('missing travel contact');
     if (a.romanceId && (!state.people[a.romanceId] || state.character.age < content.balance.relationships.adultAge || state.currentYear - state.people[a.romanceId]!.birthYear < content.balance.relationships.adultAge)) fail('romance under 18');
+  }
+  if (r?.family) {
+    if (r.type === 'visitor' || r.settled) fail('a family along on something other than a temporary stay');
+    const kin = [...(r.family.partnerId ? [r.family.partnerId] : []), ...r.family.childIds];
+    if (kin.length === 0 || new Set(kin).size !== kin.length || kin.some((id) => !state.people[id])) fail('invalid family on a stay');
+    // Everyone who came along and is still your partner or in your care lives where you do.
+    for (const id of r.family.childIds) {
+      const kid = state.people[id];
+      if (kid?.alive && kid.child?.custody === 'you' && kid.child.movedOutYear === undefined && kid.cityId !== state.character.cityId) fail('a child who came along is not with you');
+    }
   }
   // W6: a life lived in a new country is checked by src/engine/migration/invariants.ts.
   if (r && !r.settled) {

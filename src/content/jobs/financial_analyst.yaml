@@ -3,6 +3,7 @@ name: "Finance"
 category: professional
 blurb: "Spreadsheets with very large numbers in them."
 requires: {"any": [{"education": {"credential": ["bachelor"], "field": ["business", "computer_science", "engineering"]}}, {"education": {"credential": ["grad"], "field": ["mba"]}}]}
+businessTravel: true
 levels:
   - { title: "financial analyst", salary: 66000 }
   - { title: "senior analyst", salary: 84000 }

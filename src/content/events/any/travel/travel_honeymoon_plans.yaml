@@ -1,0 +1,36 @@
+id: travel_honeymoon_plans
+title: Two ideas of a honeymoon
+text: >-
+  You pictured long mornings and a slow itinerary. {companion.name} has a list
+  of nineteen things to see in {destination}. The list has a color code.
+tone: neutral
+category: travel
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+followUpOnly: true
+requires:
+  all:
+    - { age: { gte: 18 } }
+    - { travel: { active: true, kind: trip, style: honeymoon } }
+weight: { base: 1 }
+cast:
+  companion: { kind: spouse, presence: nearby }
+choices:
+  - id: compromise
+    label: Pick five from the list together
+    outcome:
+      text: >-
+        You argue about the order, then agree on the first morning off. The
+        week has a shape, and you both like it.
+      effects:
+        - { type: relationship, role: companion, affection: 3, trust: 3 }
+        - { type: stat, key: stress, delta: -1 }
+  - id: theirs
+    label: Go with their list
+    outcome:
+      text: >-
+        You see nineteen things. {companion.name} is delighted, and you sleep
+        better than you ever have.
+      effects:
+        - { type: relationship, role: companion, affection: 5, trust: 1 }
+        - { type: stat, key: health, delta: 1 }

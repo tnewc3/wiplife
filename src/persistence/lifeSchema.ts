@@ -1,5 +1,5 @@
 import { languageSkillSchema } from '../content/schemas/languages';
-import { APPLICATION_KINDS, APPLICATION_STATUSES, COUNTRY_IDS, REGULARIZATION_BASES, REMIT_LEVELS, ROUTES, STAY_ROUTES, STAY_TYPES } from '../content/schemas';
+import { APPLICATION_KINDS, APPLICATION_STATUSES, COUNTRY_IDS, REGULARIZATION_BASES, REMIT_LEVELS, ROUTES, SOUVENIRS, STAY_ROUTES, STAY_TYPES, TRIP_ACTIVITIES, TRIP_STYLES } from '../content/schemas';
 /**
  * Validates a saved LifeState when it is loaded. Typed against the engine's
  * LifeState, so TypeScript reports any drift between the two. Strict objects:
@@ -410,7 +410,7 @@ const finances = z.strictObject({
       net: dollars,
     })
     .exactOptional(),
-  earnings: z.strictObject({ years: int.min(0), total: dollars }),
+  earnings: z.strictObject({ years: int.min(0), total: dollars, byCountry: z.record(id, z.strictObject({ years: int.min(0), total: dollars })) }),
   hardshipYears: int.min(0),
   trust: z.strictObject({ balance: dollars.min(1), releaseAge: int.min(1) }).exactOptional(),
   bankruptcyYear: int.exactOptional(),
@@ -1306,10 +1306,11 @@ export { pronouns as pronounsSchema, stats as statsSchema };
 
 
 const travelState = z.strictObject({
-  residence: z.strictObject({ country: filled, destinationId: id, type: z.enum(STAY_TYPES), startYear: int, endYear: int, homeCityId: id, homeHousing: housing.exactOptional(), route: z.enum(STAY_ROUTES), settled: z.literal(true).exactOptional() }).nullable(),
-  active: z.strictObject({ kind: z.enum(['trip', 'study', 'work']), destinationId: id, companions: z.array(id), encounterId: id.nullable(), romanceId: id.nullable() }).nullable(),
+  residence: z.strictObject({ country: filled, destinationId: id, type: z.enum(STAY_TYPES), startYear: int, endYear: int, homeCityId: id, homeHousing: housing.exactOptional(), route: z.enum(STAY_ROUTES), settled: z.literal(true).exactOptional(), family: z.strictObject({ partnerId: id.nullable(), childIds: z.array(id) }).exactOptional() }).nullable(),
+  active: z.strictObject({ kind: z.enum(['trip', 'study', 'work']), style: z.enum(TRIP_STYLES).exactOptional(), activity: z.enum(TRIP_ACTIVITIES).exactOptional(), souvenir: z.enum(SOUVENIRS).exactOptional(), destinationId: id, companions: z.array(id), encounterId: id.nullable(), romanceId: id.nullable() }).nullable(),
   tripYear: int.nullable(),
-  totals: z.strictObject({ trips: int.nonnegative(), spent: dollars, encounters: int.nonnegative(), romances: int.nonnegative(), study: int.nonnegative(), work: int.nonnegative(), returns: int.nonnegative(), immersion: int.nonnegative(), distanceLost: int.nonnegative(), happiness: int, stress: int, destinations: z.record(id, int.nonnegative()) }),
+  businessYear: int.nullable(),
+  totals: z.strictObject({ trips: int.nonnegative(), spent: dollars, encounters: int.nonnegative(), romances: int.nonnegative(), study: int.nonnegative(), work: int.nonnegative(), returns: int.nonnegative(), immersion: int.nonnegative(), distanceLost: int.nonnegative(), happiness: int, stress: int, destinations: z.record(id, int.nonnegative()), styles: z.record(id, int.nonnegative()), activities: z.record(id, int.nonnegative()), souvenirs: z.record(id, int.nonnegative()), perDiem: dollars, familyStays: int.nonnegative(), familyMembers: int.nonnegative() }),
 });
 
 const application = z.strictObject({
@@ -1356,7 +1357,18 @@ export const lifeStateSchema: z.ZodType<LifeState> = z.strictObject({
   character,
   travel: travelState,
   migration: migrationState,
-  languages: z.strictObject({ schoolId: id.nullable(), classId: id.nullable(), classYear: int.nullable(), totals: z.strictObject({ school: int.nonnegative(), classes: int.nonnegative(), immersion: int.nonnegative(), faded: int.nonnegative() }) }),
+  languages: z.strictObject({
+    schoolId: id.nullable(), classId: id.nullable(), classYear: int.nullable(),
+    totals: z.strictObject({ school: int.nonnegative(), classes: int.nonnegative(), immersion: int.nonnegative(), faded: int.nonnegative(), app: int.nonnegative(), tutor: int.nonnegative(), practice: int.nonnegative(), home: int.nonnegative(), trip: int.nonnegative() }),
+    // Batch 10: the other ways of studying, practice, certificates, exams and languages spoken with children at home.
+    methodYear: z.strictObject({ app: int.nullable(), tutor: int.nullable() }),
+    practice: z.strictObject({ year: int, points: int.nonnegative() }),
+    certificates: z.record(id, z.enum(['basic', 'conversational', 'fluent'])),
+    examYear: z.record(id, int),
+    recentExam: z.strictObject({ id, level: z.enum(['basic', 'conversational', 'fluent']), passed: z.boolean() }).nullable(),
+    exams: z.strictObject({ sat: int.nonnegative(), passed: int.nonnegative() }),
+    home: z.record(id, id),
+  }),
   people: z.record(z.string(), person),
   relationships: z.record(z.string(), relationship),
   education,
