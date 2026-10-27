@@ -90,6 +90,7 @@ for (const [name, net] of Object.entries(profiles)) {
   cold[name] = { msRuns: times, medianMs: [...times].sort((a, b) => a - b)[1], bytesTransferred: bytes, requests };
 }
 out.coldStartFirstPortrait = cold;
+console.log(JSON.stringify(out, null, 2));
 
 // 2. A 30-person People list after the first visit.
 let big: ReturnType<typeof JSON.parse> | null = null;
@@ -99,7 +100,12 @@ for (let i = 0; i < 40 && !big; i++) {
     seedPrefix: `measure-${i}`,
     player: 'careful',
     onYear: (life) => {
-      if (!big && life.phase !== 'dead' && Object.keys(life.people).length >= 30) big = JSON.parse(JSON.stringify(life));
+      if (!big && life.phase !== 'dead' && Object.keys(life.people).length >= 30) {
+        // Saved as it stands at the start of a year with nothing waiting, so Continue lands on Home.
+        big = JSON.parse(JSON.stringify(life));
+        big.phase = 'yearStart';
+        big.pending = [];
+      }
     },
   });
 }
