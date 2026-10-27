@@ -43,6 +43,7 @@ describe('year pipeline', () => {
       'belonging',
       'web',
       'travel',
+      'looks',
       'pacing',
     ]);
   });
