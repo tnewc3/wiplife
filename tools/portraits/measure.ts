@@ -100,12 +100,8 @@ for (let i = 0; i < 40 && !big; i++) {
     seedPrefix: `measure-${i}`,
     player: 'careful',
     onYear: (life) => {
-      if (!big && life.phase !== 'dead' && Object.keys(life.people).length >= 30) {
-        // Saved as it stands at the start of a year with nothing waiting, so Continue lands on Home.
-        big = JSON.parse(JSON.stringify(life));
-        big.phase = 'yearStart';
-        big.pending = [];
-      }
+      // A year with nothing waiting for the player, saved as it stands, so Continue lands on Home.
+      if (!big && life.phase !== 'dead' && life.pending.length === 0 && Object.keys(life.people).length >= 30) big = JSON.parse(JSON.stringify(life));
     },
   });
 }
@@ -128,7 +124,9 @@ if (big) {
       });
     }, envelope as never);
     await page.reload();
-    await page.getByRole('button', { name: 'Continue' }).click();
+    await page.getByRole('button', { name: 'Continue' }).click({ timeout: 15_000 }).catch(async () => {
+      throw new Error(`The saved life did not load: ${(await page.locator('body').innerText()).slice(0, 400)}`);
+    });
     const nav = page.getByRole('navigation', { name: 'Game sections' });
     await nav.getByRole('button', { name: 'People', exact: true }).click();
     // First visit: scroll through so every portrait is drawn and stored.

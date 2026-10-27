@@ -67,6 +67,15 @@ export class PortraitRenderer {
   const resolved=resolvePortrait(this.catalog,input,options.strict);const canvas=document.createElement('canvas');canvas.width=canvas.height=1024;
   const ctx=canvas.getContext('2d');if(!ctx)throw Error('Canvas 2D unavailable');
   const tile=document.createElement('canvas');tile.width=tile.height=1024;const tc=tile.getContext('2d')!;
+  // Start every layer image and mask this portrait needs at once (P1): fetched one after another, a cold start pays a round trip for each of them.
+  const wanted:Promise<unknown>[]=[];
+  for(const name of resolved.template.draw_order){
+   const layer=resolved.template.layers[name];if(!layer)continue;
+   wanted.push(this.asset(layer.image,false));
+   for(const [role,path]of Object.entries(layer.masks))if(resolved.colors[role])wanted.push(this.asset(path,true));
+   if(layer.opacity_mask)wanted.push(this.asset(layer.opacity_mask,true));
+  }
+  void Promise.allSettled(wanted);
   for(const name of resolved.template.draw_order){
    checkAbort(options.signal);const layer=resolved.template.layers[name];if(!layer)throw Error(`Missing layer: ${name}`);
    const source=await this.asset(layer.image,false) as PixelAsset;checkAbort(options.signal);
