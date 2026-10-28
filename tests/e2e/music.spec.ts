@@ -7,16 +7,15 @@
 import { expect, test, type Page } from '@playwright/test';
 import { fameLife, type FameLife } from './fameFixtures';
 import { loadSavedLife } from './heirFixtures';
-import { ageUp, expectNoHorizontalScroll, expectTouchTargets, passAgeGate, settle } from './helpers';
+import { ageUp, expectNoHorizontalScroll, expectTouchTargets, passAgeGate, settle, tab } from './helpers';
 
-const tab = (page: Page, name: string) => page.getByRole('navigation', { name: 'Game sections' }).getByRole('button', { name, exact: true });
 
 async function openFame(page: Page, options: FameLife): Promise<void> {
   await passAgeGate(page, { testPack: true });
   await loadSavedLife(page, fameLife(options));
   await page.getByRole('button', { name: 'Continue' }).click();
   await settle(page);
-  await tab(page, 'Work/School').click();
+  await tab(page, 'Job').click();
   await page.getByTestId('fame-open').click();
   await expect(page.getByTestId('fame-screen')).toBeVisible();
 }
@@ -83,7 +82,7 @@ test('release an off-genre single with a typed title', async ({ page }) => {
   await page.keyboard.press('Escape');
   await expect(page.getByTestId('fame-screen')).toBeHidden();
   await ageUp(page);
-  await tab(page, 'Work/School').click();
+  await tab(page, 'Job').click();
   await page.getByTestId('fame-open').click();
   const row = page.getByTestId('project-row').first();
   await expect(row).toContainText('Night Bus Hymn');

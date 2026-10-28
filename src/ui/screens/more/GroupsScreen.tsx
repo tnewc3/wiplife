@@ -145,7 +145,7 @@ export function GroupsScreen({ life }: { life: LifeState }) {
         <h3 className="mt-3 text-lg font-bold">{GROUPS_TITLES.values}</h3>
         <div className="mt-1 grid grid-cols-1 gap-2" role="group" aria-label="Values">
           {view.values.map((v) => (
-            <StatBar key={v.id} label={VALUE_LABELS[v.id]!.name} value={v.level} />
+            <StatBar key={v.id} label={VALUE_LABELS[v.id]!.name} value={v.level} kind="plain" />
           ))}
         </div>
         <p className="mt-3 text-sm text-muted">

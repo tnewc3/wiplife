@@ -4,11 +4,10 @@
  */
 import { expect, test, type Page } from '@playwright/test';
 import { loadSavedLife } from './heirFixtures';
-import { expectNoHorizontalScroll, expectTouchTargets, eventSheet, passAgeGate, playThroughEvents, settle } from './helpers';
+import { eventSheet, expectNoHorizontalScroll, expectTouchTargets, openPage, passAgeGate, playThroughEvents, settle, tab } from './helpers';
 import { chicagoLife, examLife, familyStayLife, newlywedLife, withSpanishFriend } from './languageTravelFixtures';
 import type { LifeState } from '../../src/engine/types';
 
-const tab = (page: Page, name: string) => page.getByRole('navigation', { name: 'Game sections' }).getByRole('button', { name, exact: true });
 
 async function open(page: Page, life: LifeState): Promise<void> {
   await passAgeGate(page, { testPack: true });
@@ -70,8 +69,7 @@ test('pass a certificate exam: the fee has a receipt, the certificate is kept on
 test('take a honeymoon with the spouse you married: priced, paid with a receipt, and not offered a second time', async ({ page }) => {
   test.setTimeout(120_000);
   await open(page, newlywedLife());
-  await tab(page, 'More').click();
-  await page.getByRole('button', { name: 'Plan a trip', exact: true }).click();
+  await openPage(page, 'trip');
   await page.getByLabel('Kind of trip').selectOption('honeymoon');
   await page.getByLabel('Destination', { exact: true }).selectOption('sydney');
   await page.getByLabel('Budget', { exact: true }).selectOption('comfortable');
@@ -87,8 +85,7 @@ test('take a honeymoon with the spouse you married: priced, paid with a receipt,
   await playThroughEvents(page);
   await page.reload();
   await page.getByRole('button', { name: 'Continue' }).click(); await settle(page);
-  await tab(page, 'More').click();
-  await page.getByRole('button', { name: 'Plan a trip', exact: true }).click();
+  await openPage(page, 'trip');
   await page.getByLabel('Kind of trip').selectOption('honeymoon');
   await expect(page.getByRole('button', { name: 'Take the honeymoon' })).toBeDisabled();
 });
@@ -96,7 +93,7 @@ test('take a honeymoon with the spouse you married: priced, paid with a receipt,
 test('bring a partner and children on a working stay abroad: priced per person, they move with you and come home with you', async ({ page }) => {
   test.setTimeout(180_000);
   await open(page, familyStayLife());
-  await tab(page, 'Work/School').click();
+  await tab(page, 'Job').click();
   await page.getByLabel('Work destination').selectOption('london');
   await page.getByLabel('Length or route').selectOption('working_holiday');
   // Children at home keep a solo stay from starting.
@@ -115,12 +112,11 @@ test('bring a partner and children on a working stay abroad: priced per person, 
   await expect(page.getByTestId('work-family')).toContainText('Your family is with you.');
   await page.reload();
   await page.getByRole('button', { name: 'Continue' }).click(); await settle(page);
-  await tab(page, 'Work/School').click();
+  await tab(page, 'Job').click();
   await expect(page.getByTestId('work-family')).toBeVisible();
-  for (let i = 0; i < 2; i++) { await page.getByRole('button', { name: 'Age Up', exact: true }).click(); await settle(page); await playThroughEvents(page); }
+  for (let i = 0; i < 2; i++) { await page.getByRole('button', { name: 'Age up', exact: true }).click(); await settle(page); await playThroughEvents(page); }
   await expect(page.getByTestId('work-residence')).toHaveCount(0);
-  await tab(page, 'More').click();
-  await page.getByRole('button', { name: 'Home', exact: true }).click();
+  await openPage(page, 'properties');
   await expect(page.getByTestId('housing-line')).toContainText('Chicago');
   await tab(page, 'People').click();
   await expect(page.getByRole('list', { name: 'Love' })).toContainText('Sam Spouse');

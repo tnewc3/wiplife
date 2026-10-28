@@ -24,6 +24,8 @@
 - Every new system gets unit tests. Every new screen gets a phone-sized end-to-end test.
 - Run lint, type check, tests and content build before finishing. All must pass.
 - Mobile first: touch targets at least 44px, respect safe areas, nothing depends on hover.
+- Stats show as bars with percentages, colored by value. The game has four main tabs (Job or School, Assets, People, Activities) around the Age button, and an Activities tab. Dark is the default theme and light must work everywhere; both pass WCAG AA.
+- Colors come from the tokens in src/ui/theme/tokens.css, never raw values. Content icons are Microsoft Fluent Emoji listed in src/content/registries/icons.yaml and CREDITS.md; interface icons are Lucide. Use no other game's name, logo, colors, wording or art.
 
 ## Content rules
 - Mature and taboo themes are allowed and must carry consequences. Write frankly, suggestive rather than graphic.

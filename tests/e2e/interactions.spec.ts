@@ -4,7 +4,7 @@
  * in an injury and a charge, and no other events get in the way.
  */
 import { expect, test, type Page } from '@playwright/test';
-import { ageUpTimes, createCustomLife, expectNoHorizontalScroll, expectTouchTargets, passAgeGate, type CustomLifeData } from './helpers';
+import { ageUpTimes, createCustomLife, expectNoHorizontalScroll, expectTouchTargets, familyLists, openPage, passAgeGate, tab, type CustomLifeData } from './helpers';
 
 const CHARACTER: CustomLifeData = {
   first: 'Sam',
@@ -18,7 +18,6 @@ const CHARACTER: CustomLifeData = {
   city: 'Chicago',
 };
 
-const tab = (page: Page, name: string) => page.getByRole('navigation', { name: 'Game sections' }).getByRole('button', { name, exact: true });
 const card = (page: Page) => page.getByTestId('interaction-card');
 
 async function startLife(page: Page): Promise<void> {
@@ -31,7 +30,7 @@ async function startLife(page: Page): Promise<void> {
 /** Opens a living family member's page from the People tab: the first one, or the first whose line matches (a living person's line ends "N years old"). */
 async function openRelative(page: Page, kind?: string): Promise<void> {
   await tab(page, 'People').click();
-  const family = page.getByRole('list', { name: 'Family' });
+  const family = familyLists(page);
   const button = kind ? family.getByRole('button', { name: new RegExp(`(${kind}) · \\d+ years old`) }) : family.getByRole('button', { name: /years old/ });
   await button.first().click();
   await expect(page.getByTestId('person-name')).toBeVisible();
@@ -83,8 +82,8 @@ test('close people show a mood, everyone else does not', async ({ page }) => {
   await ageUpTimes(page, 3);
   await tab(page, 'People').click();
   // Family is close: each has a mood word in the list and on their page.
-  const family = page.getByRole('list', { name: 'Family' });
-  // The living (those with bars) show a mood; someone who has died doesn't.
+  const family = familyLists(page);
+  // The living (those with bars) show a mood; someone who has died doesn't (they are under Late relationships).
   const members = await family.getByRole('listitem').filter({ has: page.getByRole('meter') }).count();
   expect(members).toBeGreaterThan(0);
   await expect(family.getByTestId('person-row-mood')).toHaveCount(members);
@@ -101,7 +100,7 @@ test('a gift takes real money and shows your new balance; a fight can escalate i
   await startLife(page);
   await ageUpTimes(page, 16);
   // Gig work from 16 gives you something to spend.
-  await tab(page, 'Work/School').click();
+  await tab(page, 'Job').click();
   await page.getByRole('button', { name: 'Start gig work' }).click();
   await ageUpTimes(page, 3);
 
@@ -125,7 +124,7 @@ test('a gift takes real money and shows your new balance; a fight can escalate i
   await page.getByTestId('interaction-done').click();
 
   // The Money tab agrees.
-  await tab(page, 'Money').click();
+  await tab(page, 'Assets').click();
   await expect(page.getByText(`$${now!.toLocaleString('en-US')}`).first()).toBeVisible();
 
   // Picking a fight with a sibling: a tense stand-off opens a choice.
@@ -144,7 +143,6 @@ test('a gift takes real money and shows your new balance; a fight can escalate i
   await page.getByTestId('interaction-done').click();
 
   // The injury is on your health page, through the health system.
-  await tab(page, 'More').click();
-  await page.getByRole('button', { name: /Health/ }).first().click();
+  await openPage(page, 'health');
   await expect(page.getByText('Broken bone').first()).toBeVisible();
 });

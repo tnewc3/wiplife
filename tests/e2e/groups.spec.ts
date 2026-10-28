@@ -7,18 +7,16 @@
  */
 import { expect, test, type Page } from '@playwright/test';
 import { loadSavedLife } from './heirFixtures';
-import { expectNoHorizontalScroll, expectTouchTargets, passAgeGate, settle } from './helpers';
+import { expectNoHorizontalScroll, expectTouchTargets, openPage, passAgeGate, settle } from './helpers';
 import { aClubOf, groupsLife, type GroupsLife } from './groupsFixtures';
 
-const tab = (page: Page, name: string) => page.getByRole('navigation', { name: 'Game sections' }).getByRole('button', { name, exact: true });
 
 async function open(page: Page, options: GroupsLife): Promise<void> {
   await passAgeGate(page, { testPack: true });
   await loadSavedLife(page, groupsLife(options));
   await page.getByRole('button', { name: 'Continue' }).click();
   await settle(page);
-  await tab(page, 'More').click();
-  await page.getByTestId('more-groups').click();
+  await openPage(page, 'groups');
 }
 
 test('Groups lists your faith and the groups of your city and fits a phone', async ({ page }) => {

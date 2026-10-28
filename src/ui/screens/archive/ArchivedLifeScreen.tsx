@@ -31,7 +31,7 @@ export function ArchivedLifeScreen() {
             <h3 className="mb-2 text-lg font-bold">{life.unfinished ? 'Where things stood' : 'At the end'}</h3>
             <div className="grid grid-cols-2 gap-x-4 gap-y-3" aria-label="Final stats" role="group">
               {(Object.keys(STAT_LABELS) as (keyof Stats)[]).map((key) => (
-                <StatBar key={key} label={STAT_LABELS[key]} value={life.finalStats[key]} />
+                <StatBar key={key} label={STAT_LABELS[key]} value={life.finalStats[key]} kind={key === 'stress' ? 'bad' : 'stat'} />
               ))}
             </div>
           </Card>

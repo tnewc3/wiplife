@@ -5,6 +5,8 @@ text: >-
   left arm feels strange, like it belongs to someone else.
 tone: dark
 category: health
+icon: red_heart
+meter: { label: Your health, stat: health }
 rarity: uncommon
 lifeStages: [adult, senior]
 requires:

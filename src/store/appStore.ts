@@ -8,6 +8,7 @@ import { ageBounds, checkEdit, EditRefusedError, performEdit, refusal, type AgeB
 import { archiveEntry } from '../engine/archive';
 import { continueAsHeir, heirCandidates } from '../engine/estate/heir';
 import { getDeathView, type DeathView } from '../engine/estate/views';
+import { spendTimeWithEveryone, type GroupTimeRow } from '../engine/interactions/group';
 import { closeInteraction, performInteraction, resolveInteractionChoice } from '../engine/interactions/perform';
 import { assertInvariants } from '../engine/invariants';
 import { beginYear, CONTINUE_CHOICE, createLife, endYear, resolveChoice, type CustomLifeInput } from '../engine/life';
@@ -51,7 +52,7 @@ export type ScreenId =
   | 'godEditor';
 
 /** Bottom navigation tabs (docs/design.md, section K). */
-export type TabId = 'life' | 'people' | 'work' | 'money' | 'more';
+export type TabId = 'home' | 'work' | 'assets' | 'people' | 'activities';
 
 /**
  * The event sheet: which pending event card is showing, then (after a year
@@ -99,14 +100,14 @@ export interface AppState {
   archiveSelection: string | null;
   /** The person open on the People tab, if any (E5: or a pet, by its possession id). */
   personId: string | null;
-  /** A page open on the More tab (More → Home, More → Health), if any. */
-  moreView: 'home' | 'health' | 'family' | 'will' | 'belongings' | 'teen' | 'later' | 'groups' | 'travel' | 'migration' | 'activities' | 'social' | null;
-  /** Batch 8: where the Social screen was opened from, so Back goes there. */
-  socialFrom: 'more' | 'work';
+  /** U1: a page open over the current tab (Assets → Properties, Profile → Health, Activities → Social media...), if any; Back returns to the tab. */
+  moreView: 'home' | 'health' | 'family' | 'will' | 'belongings' | 'teen' | 'later' | 'groups' | 'travel' | 'migration' | 'pastimes' | 'social' | null;
   /** G1: who the god mode editor is open on: 'self' or a person's id. */
   editorTarget: string | null;
   /** E1: the Interact sheet open on a person's page: the grouped menu, or the gift price tiers. */
   /** The Interact sheet: the menu, a gift's price tiers, or (E4) the picker for an interaction that needs another person or a story first. */
+  /** U1: what "Spend time with everyone" just did, one row per person, until the player closes it. */
+  groupTime: GroupTimeRow[] | null;
   interactSheet: { personId: string; view: 'menu' | 'gift' | 'pick'; /** The interaction a picker is for. */ pick?: string } | null;
 
   init: () => Promise<void>;
@@ -181,29 +182,31 @@ export interface AppState {
    * outside 'yearStart'.
    */
   takeLifeAction: (actionId: LifeActionId, params?: LifeActionParams) => Promise<void>;
-  /** Opens More → Home. */
+  /** U1: Activities → Plan a trip. */
   openTravel: () => void;
+  /** U1: Activities → Move abroad and citizenship. */
   openMigration: () => void;
+  /** U1: Assets → Properties (your housing). */
   openHome: () => void;
-  /** Back from More → Home (or More → Health) to the More tab. */
+  /** Back from a page opened over a tab to that tab. */
   closeHome: () => void;
-  /** Opens More → Health (Stage 9). */
+  /** U1: Profile → Health (Stage 9). */
   openHealth: () => void;
-  /** E2a: opens More → Family. */
+  /** U1: People → Family planning (E2a). */
   openFamily: () => void;
-  /** E2b: opens More → Write a will. */
+  /** U1: Assets → Your will (E2b). */
   openWill: () => void;
-  /** L1: opens More → Later life. */
+  /** U1: Profile → Later life (L1). */
   openLater: () => void;
-  /** W2: opens More → Groups. */
+  /** U1: People → Groups (W2). */
   openGroups: () => void;
-  /** Batch 2a: opens More → Activities. */
-  openActivities: () => void;
-  /** Batch 8: opens the Social screen, from More (everyone) or from Work (creators). */
-  openSocial: (from?: 'more' | 'work') => void;
-  /** E5: More → Belongings. */
+  /** U1: Activities → Leisure and self (Batch 2a). */
+  openPastimes: () => void;
+  /** Batch 8: opens the Social screen (Activities, and Job for creators). */
+  openSocial: () => void;
+  /** U1: Assets → Possessions (E5). */
   openBelongings: () => void;
-  /** T1: More → Teen years. */
+  /** U1: Activities → Teen years (T1). */
   openTeen: () => void;
   /**
    * E2b: continues as one of the dead life's children (any age) and archives the dead life in the
@@ -229,6 +232,9 @@ export interface AppState {
    * reload. Ignored while the engine is working.
    */
   /** `extra`: who to introduce them to, or which story the interaction is about (E4). */
+  /** U1: the People tab's group interaction; opens the results. Ignored unless between years with nothing else open. */
+  spendTimeWithEveryone: () => Promise<void>;
+  closeGroupTime: () => void;
   interact: (interactionId: string, personId: string, giftTier?: GiftTier, extra?: { otherId?: string; itemId?: string }) => Promise<void>;
   /** E1: answers the choice an outcome card opened (walk away, keep going) and autosaves. */
   chooseInteractionOption: (choiceId: string) => Promise<void>;
@@ -465,11 +471,12 @@ export function createAppStore({
           }
           set((s) => {
             s.screen = 'game';
-            s.tab = 'life';
+            s.tab = 'home';
             s.eventSheet = null;
             s.personId = null;
             s.moreView = null;
             s.interactSheet = null;
+            s.groupTime = null;
           });
           void requestPersistenceOnce().catch(() => undefined);
         } finally {
@@ -485,7 +492,7 @@ export function createAppStore({
         settings: { ...DEFAULT_SETTINGS },
         screen: 'title',
         settingsReturnTo: 'title',
-        tab: 'life',
+        tab: 'home',
         life: null,
         savedLifeStatus: 'none',
         creating: false,
@@ -499,8 +506,8 @@ export function createAppStore({
         personId: null,
         editorTarget: null,
         moreView: null,
-        socialFrom: 'more',
         interactSheet: null,
+        groupTime: null,
 
         init: async () => {
           let loaded: SavedLifeStatus;
@@ -580,6 +587,7 @@ export function createAppStore({
             s.editorTarget = target;
             s.screen = 'godEditor';
             s.interactSheet = null;
+            s.groupTime = null;
           });
         },
 
@@ -647,7 +655,7 @@ export function createAppStore({
             s.savedLifeStatus = 'none';
             s.screen = 'title';
             s.settingsReturnTo = 'title';
-            s.tab = 'life';
+            s.tab = 'home';
             s.lastDeath = null;
             s.deadLife = null;
             s.deathView = null;
@@ -657,6 +665,7 @@ export function createAppStore({
             s.personId = null;
             s.moreView = null;
             s.interactSheet = null;
+            s.groupTime = null;
           });
         },
 
@@ -682,6 +691,7 @@ export function createAppStore({
             s.personId = null;
             s.moreView = null;
             s.interactSheet = null;
+            s.groupTime = null;
           }),
 
         startRandomLife: () =>
@@ -698,7 +708,7 @@ export function createAppStore({
           if (!life) return;
           set((s) => {
             s.screen = 'game';
-            s.tab = 'life';
+            s.tab = 'home';
             s.personId = null;
             s.moreView = null;
           });
@@ -790,6 +800,7 @@ export function createAppStore({
           set((s) => {
             s.personId = null;
             s.interactSheet = null;
+            s.groupTime = null;
           }),
 
         takeAction: (actionId, personId) =>
@@ -824,6 +835,7 @@ export function createAppStore({
             await commit(next);
             set((s) => {
               s.interactSheet = null;
+              s.groupTime = null;
             });
           }),
 
@@ -843,6 +855,24 @@ export function createAppStore({
         closeInteractions: () =>
           set((s) => {
             s.interactSheet = null;
+            s.groupTime = null;
+          }),
+
+        spendTimeWithEveryone: () =>
+          busy(async () => {
+            const life = get().life;
+            if (!life || life.phase !== 'yearStart' || get().eventSheet || life.pendingInteraction) return;
+            const done = spendTimeWithEveryone(life, bundle);
+            if (done.rows.length === 0) return;
+            await commit(done.state);
+            set((s) => {
+              s.groupTime = done.rows;
+            });
+          }),
+
+        closeGroupTime: () =>
+          set((s) => {
+            s.groupTime = null;
           }),
 
         interact: (interactionId, personId, giftTier, extra) =>
@@ -853,6 +883,7 @@ export function createAppStore({
             await commit(next);
             set((s) => {
               s.interactSheet = null;
+              s.groupTime = null;
             });
           }),
 
@@ -911,17 +942,14 @@ export function createAppStore({
             if (s.life) s.moreView = 'groups';
           }),
 
-        openActivities: () =>
+        openPastimes: () =>
           set((s) => {
-            if (s.life) s.moreView = 'activities';
+            if (s.life) s.moreView = 'pastimes';
           }),
 
-        openSocial: (from = 'more') =>
+        openSocial: () =>
           set((s) => {
-            if (!s.life) return;
-            s.moreView = 'social';
-            s.socialFrom = from;
-            s.tab = 'more';
+            if (s.life) s.moreView = 'social';
           }),
 
         openTeen: () =>
@@ -943,11 +971,12 @@ export function createAppStore({
               s.deathView = null;
               s.lastDeath = null;
               s.screen = 'game';
-              s.tab = 'life';
+              s.tab = 'home';
               s.eventSheet = null;
               s.personId = null;
               s.moreView = null;
               s.interactSheet = null;
+              s.groupTime = null;
             });
           }),
 
@@ -987,8 +1016,6 @@ export function createAppStore({
 
         closeHome: () =>
           set((s) => {
-            // The Social screen opened from Work goes back to Work.
-            if (s.moreView === 'social' && s.socialFrom === 'work') s.tab = 'work';
             s.moreView = null;
           }),
       };

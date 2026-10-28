@@ -5,11 +5,10 @@
  * the character is a woman attracted to men, and meets a man at 18.
  */
 import { expect, test, type Page } from '@playwright/test';
-import { ageUpTimes, eventSheet, expectNoHorizontalScroll, expectTouchTargets, passAgeGate, settle, startRandomLife } from './helpers';
+import { ageUpTimes, eventSheet, expectNoHorizontalScroll, expectTouchTargets, goHome, openPage, passAgeGate, settle, startRandomLife, tab } from './helpers';
 
 const LOVE = { testPack: true, seed: 'e2e-love' };
 
-const tab = (page: Page, name: string) => page.getByRole('navigation', { name: 'Game sections' }).getByRole('button', { name, exact: true });
 const actions = (page: Page) => page.getByRole('group', { name: 'Actions' });
 
 /** Takes an action from the person page and plays its result card through. */
@@ -45,7 +44,7 @@ test('try for a baby, pregnancy on Home, a birth, the child’s page, parenting 
   expect(await act(page, 'Try for a baby', 'Try')).toContain('A positive test');
 
   // Pregnancy shows on Home while it lasts.
-  await tab(page, 'Life').click();
+  await goHome(page);
   await expect(page.getByTestId('pregnancy-line')).toContainText('You’re expecting');
   await expectNoHorizontalScroll(page);
 
@@ -81,7 +80,7 @@ test('try for a baby, pregnancy on Home, a birth, the child’s page, parenting 
   // Children cost money through the ledger. This young parent lives with their family, who cover
   // the child's costs, so the cost shows as covered (a parent on their own sees "Your children").
   await ageUpTimes(page, 1);
-  await tab(page, 'Money').click();
+  await tab(page, 'Assets').click();
   await expect(page.getByRole('region', { name: /Last year/ })).toContainText('Your family covered');
   await expectNoHorizontalScroll(page);
 });
@@ -89,8 +88,7 @@ test('try for a baby, pregnancy on Home, a birth, the child’s page, parenting 
 test('More → Family shows adoption, IVF and surrogacy with costs, odds and why not, and the pregnancy once there is one', async ({ page }) => {
   await startRandomLife(page, LOVE);
   await ageUpTimes(page, 19);
-  await tab(page, 'More').click();
-  await page.getByRole('button', { name: 'Family', exact: true }).click();
+  await openPage(page, 'family');
   await expect(page.getByRole('heading', { name: 'Your family' })).toBeVisible();
   await expect(page.getByText('Nothing under way right now.')).toBeVisible();
   for (const kind of ['adoption', 'ivf', 'surrogacy']) {
@@ -103,8 +101,8 @@ test('More → Family shows adoption, IVF and surrogacy with costs, odds and why
   await expect(page.getByRole('list', { name: 'Why not Adopt a child' })).toContainText('You don’t have enough saved.');
   await expectNoHorizontalScroll(page);
   await expectTouchTargets(page);
-  await page.getByRole('button', { name: 'Back to More' }).click();
-  await expect(page.getByRole('button', { name: 'Family', exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'Back to People' }).click();
+  await expect(page.getByTestId('people-family-planning')).toBeVisible();
 });
 
 test('custom creation asks a nonbinary character whether they can carry a pregnancy, and no one else', async ({ page }) => {

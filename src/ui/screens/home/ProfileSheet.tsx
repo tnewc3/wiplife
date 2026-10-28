@@ -5,7 +5,7 @@ import { pronounsFromPreset } from '../../../engine/creation/character';
 import { InvalidInputError } from '../../../engine/creation/input';
 import { identityEditIssues, type IdentityEditInput } from '../../../engine/discovery';
 import { LANGUAGE_LEVELS } from '../../../engine/languages';
-import { getBelongingView, getPortrait, getPortraitBody, getProfileView, getPronounPresets } from '../../../engine/selectors';
+import { getBelongingView, getCharacterSummary, getLaterView, getPortrait, getPortraitBody, getProfileView, getPronounPresets } from '../../../engine/selectors';
 import type { GenderCategory, LifeState, Personality, Pronouns } from '../../../engine/types';
 import { useAppStore } from '../../../store/appStore';
 import { Button } from '../../components/Button';
@@ -15,7 +15,7 @@ import { Sheet } from '../../components/Sheet';
 import { CharacterPortrait } from '../../portraits/CharacterPortrait';
 import { StatBar } from '../../components/StatBar';
 import { TextField } from '../../components/TextField';
-import { BODY_TYPE_LABELS, GOD_MODE_LABELS, ATTRACTION_LABELS, STATUS_LABELS, FAITH_STRENGTH_WORDS, EXAM_LEVEL_LABELS, EXAM_ODDS_LABELS, LANGUAGE_LEVEL_LABELS, LANGUAGE_NATIVE_LABEL, money, GROUPS_TITLES, recordLine, roleLine, TRAIT_LABELS, VALUE_LABELS } from '../../labels';
+import { ageLabel, BODY_TYPE_LABELS, LIFE_STAGE_LABELS, GOD_MODE_LABELS, occupationLine, STAT_ICONS, STAT_LABELS, ATTRACTION_LABELS, STATUS_LABELS, FAITH_STRENGTH_WORDS, EXAM_LEVEL_LABELS, EXAM_ODDS_LABELS, LANGUAGE_LEVEL_LABELS, LANGUAGE_NATIVE_LABEL, money, GROUPS_TITLES, recordLine, roleLine, TRAIT_LABELS, VALUE_LABELS } from '../../labels';
 
 const PRONOUN_FIELDS: { key: Exclude<keyof Pronouns, 'verbPlural'>; label: string; example: string }[] = [
   { key: 'subject', label: 'Subject', example: 'they' },
@@ -199,12 +199,20 @@ export function ProfileSheet({ life, open, onClose }: { life: LifeState; open: b
   const [editing, setEditing] = useState(false);
   const godMode = useAppStore((s) => s.settings.godMode);
   const openEditor = useAppStore((s) => s.openEditor);
+  const openHealth = useAppStore((s) => s.openHealth);
+  const openLater = useAppStore((s) => s.openLater);
+  const summary = getCharacterSummary(life, content);
+  const laterActive = getLaterView(life, content).active;
   const close = () => {
     setEditing(false);
     onClose();
   };
   const id = view.identity;
   const rows: [string, string][] = [
+    ['Age', ageLabel(summary.age)],
+    ['Life stage', LIFE_STAGE_LABELS[summary.lifeStage]],
+    ['Occupation', occupationLine(summary)],
+    ['City', summary.cityName],
     ['Lives in', view.country],
     ['Born in', view.bornIn],
     ['Citizen of', view.standing.citizenships.join(' and ')],
@@ -242,7 +250,38 @@ export function ProfileSheet({ life, open, onClose }: { life: LifeState; open: b
             <h3 id="profile-identity" className="text-lg font-bold break-words [overflow-wrap:anywhere]">
               {view.fullName}
             </h3>
-            <dl className="mt-2 flex flex-col divide-y divide-border" data-testid="profile-identity">
+            <div className="mt-3 flex flex-col gap-3" role="group" aria-label="All stats" data-testid="profile-stats">
+              {(Object.keys(STAT_LABELS) as (keyof typeof STAT_LABELS)[]).map((key) => (
+                <StatBar key={key} label={STAT_LABELS[key]} value={life.character.stats[key]} icon={STAT_ICONS[key]} kind={key === 'stress' ? 'bad' : 'stat'} />
+              ))}
+            </div>
+            <div className="mt-3 flex flex-col gap-2">
+              <Button
+                variant="secondary"
+                block
+                onClick={() => {
+                  close();
+                  openHealth();
+                }}
+              >
+                Health
+              </Button>
+              <p className="-mt-1 text-sm text-muted">Conditions, your mind and seeing a doctor.</p>
+              {laterActive && (
+                <Button
+                  variant="secondary"
+                  block
+                  data-testid="profile-later"
+                  onClick={() => {
+                    close();
+                    openLater();
+                  }}
+                >
+                  Later life
+                </Button>
+              )}
+            </div>
+            <dl className="mt-4 flex flex-col divide-y divide-border" data-testid="profile-identity">
               {rows.map(([label, value]) => (
                 <div key={label} className="flex min-w-0 justify-between gap-3 py-2">
                   <dt className="text-muted">{label}</dt>
@@ -313,7 +352,7 @@ export function ProfileSheet({ life, open, onClose }: { life: LifeState; open: b
             </h3>
             <div className="grid grid-cols-2 gap-x-4 gap-y-3" role="group" aria-label="Personality">
               {(Object.keys(TRAIT_LABELS) as (keyof Personality)[]).map((key) => (
-                <StatBar key={key} label={TRAIT_LABELS[key]} value={view.personality[key]} />
+                <StatBar key={key} label={TRAIT_LABELS[key]} value={view.personality[key]} kind="plain" />
               ))}
             </div>
           </section>
@@ -341,7 +380,7 @@ export function ProfileSheet({ life, open, onClose }: { life: LifeState; open: b
             </dl>
             <div className="mt-3 grid grid-cols-2 gap-x-4 gap-y-3" role="group" aria-label="Values">
               {belonging.values.map((v) => (
-                <StatBar key={v.id} label={VALUE_LABELS[v.id]!.name} value={v.level} />
+                <StatBar key={v.id} label={VALUE_LABELS[v.id]!.name} value={v.level} kind="plain" />
               ))}
             </div>
           </section>

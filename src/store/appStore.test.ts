@@ -72,7 +72,7 @@ describe('app store: lives', () => {
     const { life, screen, tab } = store.getState();
     expect(life?.seed).toBe('test-seed-1');
     expect(life?.birthYear).toBe(2026);
-    expect([screen, tab]).toEqual(['game', 'life']);
+    expect([screen, tab]).toEqual(['game', 'home']);
     const saved = await readSave(db, lifeStateSchema);
     expect(saved.status === 'ok' && saved.envelope.data).toEqual(life);
   });
@@ -473,7 +473,7 @@ describe('app store: people and actions', () => {
     store.getState().openPerson('pal');
     store.getState().openPerson('nobody');
     expect(store.getState().personId).toBe('pal');
-    store.getState().setTab('life');
+    store.getState().setTab('home');
     expect(store.getState().personId).toBeNull();
   });
 });
@@ -501,11 +501,11 @@ describe('app store: money and home', () => {
     const saved = await readSave(db, lifeStateSchema);
     expect(saved.status === 'ok' && saved.envelope.data).toEqual(life);
 
-    // More → Home opens and closes; switching tabs closes it.
-    reopened.getState().setTab('more');
+    // Assets → Properties opens and closes; switching tabs closes it.
+    reopened.getState().setTab('assets');
     reopened.getState().openHome();
     expect(reopened.getState().moreView).toBe('home');
-    reopened.getState().setTab('money');
+    reopened.getState().setTab('home');
     expect(reopened.getState().moreView).toBeNull();
 
     // The next year's recap has a money line.
@@ -652,14 +652,14 @@ describe('app store: heirs and wills (E2b)', () => {
     expect((await listArchive(db)).lives).toHaveLength(1);
   });
 
-  it('writes a will under More and keeps it', async () => {
+  it('writes a will from Assets and keeps it', async () => {
     const { db, options, store } = setup();
     await store.getState().init();
     const life = parentLife({ kids: [9], seed: 'store-will' });
     await writeSave(db, makeEnvelope(life, content.contentVersion));
     const restarted = createAppStore(options);
     await restarted.getState().init();
-    restarted.getState().setTab('more');
+    restarted.getState().setTab('assets');
     restarted.getState().openWill();
     expect(restarted.getState().moreView).toBe('will');
     const [kid] = heirCandidates({ ...life, phase: 'dead' } as typeof life);

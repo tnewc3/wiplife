@@ -5,10 +5,9 @@
 import { expect, test, type Page } from '@playwright/test';
 import { loadSavedLife } from './heirFixtures';
 import { godmodeLife } from './godmodeFixtures';
-import { expectNoHorizontalScroll, expectTouchTargets, passAgeGate, settle } from './helpers';
+import { expectNoHorizontalScroll, expectTouchTargets, goHome, openPage, passAgeGate, settle, tab } from './helpers';
 
 const SEED = 'e2e-godmode';
-const tab = (page: Page, name: string) => page.getByRole('navigation', { name: 'Game sections' }).getByRole('button', { name, exact: true });
 const happiness = (page: Page) => page.getByRole('meter', { name: 'Happiness' });
 
 async function openLife(page: Page): Promise<void> {
@@ -19,8 +18,7 @@ async function openLife(page: Page): Promise<void> {
 }
 
 async function setGodMode(page: Page, on: boolean): Promise<void> {
-  await tab(page, 'More').click();
-  await page.getByRole('button', { name: 'Settings' }).click();
+  await openPage(page, 'settings');
   const toggle = page.getByTestId('god-mode-switch');
   await expect(toggle).toHaveAttribute('aria-checked', String(!on));
   await toggle.click();
@@ -33,7 +31,7 @@ async function setGodMode(page: Page, on: boolean): Promise<void> {
   await expectNoHorizontalScroll(page);
   await expectTouchTargets(page);
   await page.getByRole('button', { name: 'Back' }).click();
-  await tab(page, 'Life').click();
+  await goHome(page);
 }
 
 test('god mode: off by default, switched on in Settings, edits kept after a reload, and switched off again', async ({ page }) => {
@@ -119,7 +117,7 @@ test('god mode: off by default, switched on in Settings, edits kept after a relo
   await page.getByRole('button', { name: 'Back' }).click();
 
   // Switch it off: the buttons are gone.
-  await tab(page, 'Life').click();
+  await goHome(page);
   await setGodMode(page, false);
   await page.getByRole('button', { name: 'Profile' }).click();
   await expect(page.getByTestId('god-edit-self')).toHaveCount(0);

@@ -5,10 +5,9 @@
  */
 import { expect, test, type Page } from '@playwright/test';
 import { loadSavedLife } from './heirFixtures';
-import { ageUpTimes, eventSheet, expectNoHorizontalScroll, expectTouchTargets, passAgeGate, playThroughEvents, settle, startRandomLife } from './helpers';
+import { ageUpTimes, eventSheet, expectNoHorizontalScroll, expectTouchTargets, passAgeGate, playThroughEvents, settle, startRandomLife, tab } from './helpers';
 import { sameGenderLife } from './loveFixtures';
 
-const tab = (page: Page, name: string) => page.getByRole('navigation', { name: 'Game sections' }).getByRole('button', { name, exact: true });
 const card = (page: Page) => page.getByTestId('interaction-card');
 
 test('"Find a date" is for adults: it shows on the People tab at 18, costs show on the buttons, and a try uses up a little of the year', async ({ page }) => {

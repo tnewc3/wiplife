@@ -10,18 +10,16 @@ import { expect, test, type Page } from '@playwright/test';
 import type { ContentBundle } from '../../src/content/schemas';
 import { writeFuneral } from '../../src/engine/eulogy';
 import { deadLife, loadSavedLife } from './heirFixtures';
-import { expectNoHorizontalScroll, expectTouchTargets, passAgeGate, settle } from './helpers';
+import { expectNoHorizontalScroll, expectTouchTargets, openPage, passAgeGate, settle } from './helpers';
 import { laterLife, type LaterLife } from './laterFixtures';
 
-const tab = (page: Page, name: string) => page.getByRole('navigation', { name: 'Game sections' }).getByRole('button', { name, exact: true });
 
 async function open(page: Page, options: LaterLife): Promise<void> {
   await passAgeGate(page, { testPack: true });
   await loadSavedLife(page, laterLife(options));
   await page.getByRole('button', { name: 'Continue' }).click();
   await settle(page);
-  await tab(page, 'More').click();
-  await page.getByTestId('more-later').click();
+  await openPage(page, 'later');
 }
 
 test('Later life lists your grandchildren and fits a phone', async ({ page }) => {

@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { createCustomLife, expectNoHorizontalScroll, expectTouchTargets, LONG_NAME_LIFE, passAgeGate } from './helpers';
+import { createCustomLife, expectNoHorizontalScroll, expectTouchTargets, goHome, LONG_NAME_LIFE, openPage, passAgeGate } from './helpers';
 
 const sizes = [
   { name: 'small phone', width: 360, height: 640 },
@@ -39,11 +39,14 @@ for (const size of sizes) {
     await expectNoHorizontalScroll(page);
     await expectTouchTargets(page);
 
+    // The tabs and the Age button, then the stat panel, are pinned to the bottom of the screen.
     const nav = page.getByRole('navigation', { name: 'Game sections' });
     await expect(nav).toBeInViewport({ ratio: 1 });
-    const box = await nav.boundingBox();
-    expect(box).not.toBeNull();
-    expect(Math.round(box!.y + box!.height)).toBe(size.height);
+    await expect(page.getByTestId('stat-panel')).toBeInViewport({ ratio: 1 });
+    const panel = await page.getByTestId('stat-panel').boundingBox();
+    expect(panel).not.toBeNull();
+    expect(Math.round(panel!.y + panel!.height)).toBe(size.height);
+    await expect(page.getByRole('button', { name: 'Age up' })).toBeInViewport({ ratio: 1 });
     await expectNoHorizontalScroll(page);
     await expectTouchTargets(page);
 
@@ -56,16 +59,30 @@ for (const size of sizes) {
 
     // The People list and a person's page fit, with the long family name.
     await nav.getByRole('button', { name: 'People', exact: true }).click();
-    await expect(page.getByRole('list', { name: 'Family' })).toContainText(LONG_NAME_LIFE.last);
+    await expect(page.getByRole('list', { name: 'Parents' })).toContainText(LONG_NAME_LIFE.last);
     await expectNoHorizontalScroll(page);
     await expectTouchTargets(page);
-    await page.getByRole('list', { name: 'Family' }).getByRole('button', { name: LONG_NAME_LIFE.last }).first().click();
+    await page.getByRole('list', { name: 'Parents' }).getByRole('button', { name: LONG_NAME_LIFE.last }).first().click();
     await expect(page.getByTestId('person-name')).toContainText(LONG_NAME_LIFE.last);
     await expectNoHorizontalScroll(page);
     await expectTouchTargets(page);
 
-    await nav.getByRole('button', { name: 'More' }).click();
-    await page.getByRole('button', { name: 'Settings' }).click();
+    // Every main page fits, and so do the menu and the profile.
+    for (const tab of ['Job', 'Assets', 'Activities']) {
+      await nav.getByRole('button', { name: tab, exact: true }).click();
+      await expectNoHorizontalScroll(page);
+      await expectTouchTargets(page);
+    }
+    await goHome(page);
+    await page.getByRole('button', { name: 'Menu' }).click();
+    await expectNoHorizontalScroll(page);
+    await expectTouchTargets(page);
+    await page.keyboard.press('Escape');
+    await page.getByRole('button', { name: 'Profile', exact: true }).click();
+    await expectNoHorizontalScroll(page);
+    await expectTouchTargets(page);
+    await page.keyboard.press('Escape');
+    await openPage(page, 'settings');
     await expectNoHorizontalScroll(page);
     await expectTouchTargets(page);
   });

@@ -7,9 +7,8 @@
  * quitting, and the career in Life history, at phone size.
  */
 import { expect, test, type Page } from '@playwright/test';
-import { ageUp, ageUpTimes, createCustomLife, eventSheet, expectNoHorizontalScroll, expectTouchTargets, passAgeGate, settle, type CustomLifeData } from './helpers';
+import { openPage, ageUp, ageUpTimes, createCustomLife, eventSheet, expectNoHorizontalScroll, expectTouchTargets, goHome, passAgeGate, settle, tab, type CustomLifeData } from './helpers';
 
-const tab = (page: Page, name: string) => page.getByRole('navigation', { name: 'Game sections' }).getByRole('button', { name, exact: true });
 
 const WORKER: CustomLifeData = {
   first: 'Sam',
@@ -42,7 +41,7 @@ test('job search, an interview, a promotion, a raise and quitting', async ({ pag
 
   // High school done at 18: no longer in school, so work is open.
   await ageUpTimes(page, 18);
-  await tab(page, 'Work/School').click();
+  await tab(page, 'Job').click();
   const work = page.getByRole('region', { name: 'Work' });
   await expect(work.getByTestId('job-status')).toContainText('You don’t have a job.');
   await expectNoHorizontalScroll(page);
@@ -77,13 +76,14 @@ test('job search, an interview, a promotion, a raise and quitting', async ({ pag
   await expect(job.getByRole('meter', { name: 'Performance' })).toBeVisible();
   await expect(job.getByTestId('job-salary')).toHaveText(/^\$[\d,]+ a year$/);
   await expect(job.getByRole('button', { name: 'Ask for a raise' })).toBeDisabled();
-  await expect(page.getByTestId('gig-status')).toHaveText('You have a full-time job, so there’s no time for gig work.');
-  await tab(page, 'Life').click();
+  await page.getByTestId('way-gig').getByRole('button', { name: /Gig work/ }).click();
+  await expect(page.getByTestId('way-gig-reason')).toHaveText('You have a full-time job, so there’s no time for gig work.');
+  await goHome(page);
   await expect(page.getByTestId('job-line')).toHaveText(/^Receptionist at /);
 
   // A year of work, then the yearly review promotes you.
   await ageUpTimes(page, 2);
-  await tab(page, 'Work/School').click();
+  await tab(page, 'Job').click();
   const promoted = page.getByRole('region', { name: 'Office assistant' });
   await expect(promoted.getByTestId('job-status')).toContainText('Level 2 of 4');
   const before = await promoted.getByTestId('job-salary').textContent();
@@ -106,8 +106,8 @@ test('job search, an interview, a promotion, a raise and quitting', async ({ pag
   await page.reload();
   await page.getByRole('button', { name: 'Continue' }).click();
   await ageUp(page);
-  await tab(page, 'Life').click();
-  await page.getByRole('button', { name: 'See your whole life' }).click();
+  await goHome(page);
+  await openPage(page, 'lifeHistory');
   const career = page.getByRole('list', { name: 'Career history' });
   await expect(career).toContainText('Office assistant');
   await expect(career).toContainText('You quit');

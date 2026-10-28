@@ -1,75 +1,134 @@
 /*
- * Design tokens. Components use the Tailwind names defined in index.css
- * (bg-bg, text-muted, bg-accent...), never raw colors, so both themes stay
- * in sync. data-theme on <html> is set from Settings; before the app loads,
- * the system preference applies.
+ * Design tokens (docs/portraits-and-ui.md, U1). Components use the Tailwind names defined in index.css
+ * (bg-bg, text-muted, bg-accent...), never raw colors, so both themes stay in sync. Dark is the default;
+ * data-theme on <html> is set from Settings ("system" follows the device). Every text/background pair
+ * here is checked for WCAG AA in tools/contrast.test.ts.
  */
 
-:root {
-  --wl-bg: #f7f5f2;
-  --wl-surface: #ffffff;
-  --wl-surface-2: #efebe6;
-  --wl-text: #1d1b19;
-  --wl-muted: #6a645d;
-  --wl-border: #e0dad3;
-  --wl-accent: #3f5bd9;
-  --wl-accent-hover: #3249b8;
-  --wl-accent-contrast: #ffffff;
-  --wl-danger: #c0392b;
-  --wl-danger-contrast: #ffffff;
-  --wl-bar-track: #e6e1db;
-  --wl-bar-fill: #3f5bd9;
-  --wl-tone-light: #d99a1e;
-  --wl-tone-neutral: #5f7396;
-  --wl-tone-serious: #7a56c4;
-  --wl-tone-dark: #b23a32;
-  --wl-scrim: rgb(20 18 16 / 0.45);
-  --wl-radius: 1rem;
-  color-scheme: light;
-}
-
+:root,
 :root[data-theme='dark'] {
-  --wl-bg: #131315;
-  --wl-surface: #1d1d21;
-  --wl-surface-2: #26262b;
-  --wl-text: #f1efec;
-  --wl-muted: #a39e98;
-  --wl-border: #33333a;
-  --wl-accent: #8ea2ff;
-  --wl-accent-hover: #a8b7ff;
-  --wl-accent-contrast: #111325;
-  --wl-danger: #ff8a7a;
-  --wl-danger-contrast: #2a0d08;
-  --wl-bar-track: #2e2e34;
-  --wl-bar-fill: #8ea2ff;
-  --wl-tone-light: #f2c35b;
-  --wl-tone-neutral: #9aabc9;
-  --wl-tone-serious: #b69cf0;
-  --wl-tone-dark: #ff8a7a;
-  --wl-scrim: rgb(0 0 0 / 0.6);
+  --wl-bg: #12141c;
+  --wl-surface: #1c1f2b;
+  --wl-surface-2: #262a3a;
+  --wl-text: #f2f3f7;
+  --wl-muted: #9aa0b4;
+  --wl-border: #353a50;
+  --wl-accent: #7c6cf2;
+  --wl-accent-hover: #9186f5;
+  --wl-accent-contrast: #12141c;
+  --wl-link: #a99dff;
+  --wl-age: #ff7a45;
+  --wl-age-hover: #ff9366;
+  --wl-age-contrast: #12141c;
+  --wl-positive: #3dd68c;
+  --wl-negative: #ff5d6c;
+  --wl-warning: #ffc145;
+  --wl-danger: #ff5d6c;
+  --wl-danger-contrast: #12141c;
+  --wl-bar-track: #2f3448;
+  --wl-bar-fill: #7c6cf2;
+  --wl-tone-light: #ffc145;
+  --wl-tone-neutral: #9aa0b4;
+  --wl-tone-serious: #a99dff;
+  --wl-tone-dark: #ff5d6c;
+  --wl-scrim: rgb(5 6 10 / 0.7);
+  --wl-radius: 1.25rem;
+  /* Event category banners: the fill, with the ink written on it. */
+  --wl-cat-ink: #12141c;
+  --wl-cat-family: #ffb86b;
+  --wl-cat-love: #ff7eb6;
+  --wl-cat-friends: #4fd1e6;
+  --wl-cat-people: #8ab4ff;
+  --wl-cat-work: #ffd166;
+  --wl-cat-school: #b49cff;
+  --wl-cat-money: #4fdb9c;
+  --wl-cat-health: #ff8a8a;
+  --wl-cat-mind: #c69cff;
+  --wl-cat-crime: #b8c0e0;
+  --wl-cat-fame: #d58bff;
+  --wl-cat-sports: #7bd88f;
+  --wl-cat-home: #5bc0be;
+  --wl-cat-travel: #a3e635;
+  --wl-cat-pets: #e0a458;
+  --wl-cat-wonder: #ffe08a;
+  --wl-cat-grief: #9aa0b4;
+  --wl-cat-life: #8ab4ff;
   color-scheme: dark;
 }
 
-@media (prefers-color-scheme: dark) {
+:root[data-theme='light'] {
+  --wl-bg: #f4f5fa;
+  --wl-surface: #ffffff;
+  --wl-surface-2: #e9ecf5;
+  --wl-text: #14161f;
+  --wl-muted: #565c72;
+  --wl-border: #cfd3e2;
+  --wl-accent: #5b4be0;
+  --wl-accent-hover: #4a3bc9;
+  --wl-accent-contrast: #ffffff;
+  --wl-link: #4a3bc9;
+  --wl-age: #ff7a45;
+  --wl-age-hover: #ff9366;
+  --wl-age-contrast: #12141c;
+  --wl-positive: #0b7a4b;
+  --wl-negative: #c42a3b;
+  --wl-warning: #8a5a00;
+  --wl-danger: #c42a3b;
+  --wl-danger-contrast: #ffffff;
+  --wl-bar-track: #dde0ee;
+  --wl-bar-fill: #5b4be0;
+  --wl-tone-light: #8a5a00;
+  --wl-tone-neutral: #565c72;
+  --wl-tone-serious: #4a3bc9;
+  --wl-tone-dark: #c42a3b;
+  --wl-scrim: rgb(20 22 31 / 0.5);
+  --wl-cat-ink: #ffffff;
+  --wl-cat-family: #b45309;
+  --wl-cat-love: #be185d;
+  --wl-cat-friends: #0e7490;
+  --wl-cat-people: #1d4ed8;
+  --wl-cat-work: #a16207;
+  --wl-cat-school: #4338ca;
+  --wl-cat-money: #047857;
+  --wl-cat-health: #b91c1c;
+  --wl-cat-mind: #6d28d9;
+  --wl-cat-crime: #334155;
+  --wl-cat-fame: #7e22ce;
+  --wl-cat-sports: #15803d;
+  --wl-cat-home: #0f766e;
+  --wl-cat-travel: #4d7c0f;
+  --wl-cat-pets: #92400e;
+  --wl-cat-wonder: #854d0e;
+  --wl-cat-grief: #475569;
+  --wl-cat-life: #1d4ed8;
+  color-scheme: light;
+}
+
+/* Before the app has set data-theme, and for "system": follow the device. */
+@media (prefers-color-scheme: light) {
   :root:not([data-theme]) {
-    --wl-bg: #131315;
-    --wl-surface: #1d1d21;
-    --wl-surface-2: #26262b;
-    --wl-text: #f1efec;
-    --wl-muted: #a39e98;
-    --wl-border: #33333a;
-    --wl-accent: #8ea2ff;
-    --wl-accent-hover: #a8b7ff;
-    --wl-accent-contrast: #111325;
-    --wl-danger: #ff8a7a;
-    --wl-danger-contrast: #2a0d08;
-    --wl-bar-track: #2e2e34;
-    --wl-bar-fill: #8ea2ff;
-    --wl-tone-light: #f2c35b;
-    --wl-tone-neutral: #9aabc9;
-    --wl-tone-serious: #b69cf0;
-    --wl-tone-dark: #ff8a7a;
-    --wl-scrim: rgb(0 0 0 / 0.6);
-    color-scheme: dark;
+    --wl-bg: #f4f5fa;
+    --wl-surface: #ffffff;
+    --wl-surface-2: #e9ecf5;
+    --wl-text: #14161f;
+    --wl-muted: #565c72;
+    --wl-border: #cfd3e2;
+    --wl-accent: #5b4be0;
+    --wl-accent-hover: #4a3bc9;
+    --wl-accent-contrast: #ffffff;
+    --wl-link: #4a3bc9;
+    --wl-positive: #0b7a4b;
+    --wl-negative: #c42a3b;
+    --wl-warning: #8a5a00;
+    --wl-danger: #c42a3b;
+    --wl-danger-contrast: #ffffff;
+    --wl-bar-track: #dde0ee;
+    --wl-bar-fill: #5b4be0;
+    --wl-tone-light: #8a5a00;
+    --wl-tone-neutral: #565c72;
+    --wl-tone-serious: #4a3bc9;
+    --wl-tone-dark: #c42a3b;
+    --wl-scrim: rgb(20 22 31 / 0.5);
+    color-scheme: light;
   }
 }

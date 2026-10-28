@@ -30,7 +30,93 @@ export async function startRandomLife(page: Page, options: OpenOptions = {}): Pr
   return (await page.getByTestId('character-name').textContent())?.trim() ?? '';
 }
 
-export const ageUpButton = (page: Page) => page.getByRole('button', { name: 'Age Up' });
+export const ageUpButton = (page: Page) => page.getByRole('button', { name: 'Age up' });
+
+/** The bottom navigation (U1): Job (School while enrolled), Assets, the Age button, People and Activities. */
+export const gameNav = (page: Page) => page.getByRole('navigation', { name: 'Game sections' });
+/** A main tab by its name: "Job" matches School while you are enrolled; "Work/School" is the old name for the same tab. */
+export const tab = (page: Page, name: 'People' | 'Assets' | 'Activities' | 'Job' | 'Work/School' | 'Money') =>
+  gameNav(page).getByRole('button', { name: name === 'Job' || name === 'Work/School' ? /^(Job|School)$/ : name === 'Money' ? 'Assets' : name, exact: name !== 'Job' && name !== 'Work/School' });
+
+/** The life log shows this age as a heading (Home). Age 0 is "Birth". */
+export async function expectAge(page: Page, age: number): Promise<void> {
+  await expect(page.getByTestId('life-log').getByRole('heading', { name: age === 0 ? /^Birth/ : new RegExp(`^Age ${age}\\b`) })).toBeVisible();
+}
+
+/** Every list of family on the People tab (parents, siblings, other family, children, grandchildren). */
+export const familyLists = (page: Page) =>
+  page.locator('ul[aria-label="Parents"], ul[aria-label="Siblings"], ul[aria-label="Other family"], ul[aria-label="Children"], ul[aria-label="Grandchildren"]');
+
+/** Opens the profile sheet from the Home header. */
+export async function openProfile(page: Page): Promise<void> {
+  await goHome(page);
+  await page.getByRole('button', { name: 'Profile', exact: true }).click();
+  await expect(page.getByRole('dialog', { name: 'Profile' })).toBeVisible();
+}
+
+/** Back to Home from wherever you are (a page over a tab, a person, a tab). */
+export async function goHome(page: Page): Promise<void> {
+  for (let i = 0; i < 4; i++) {
+    if (await page.getByRole('button', { name: 'Menu', exact: true }).isVisible()) return;
+    const back = page.getByRole('button', { name: /^Back to /, exact: false }).first();
+    if (!(await back.isVisible())) return;
+    await back.click();
+  }
+}
+
+/** Where a page lives in the new layout (the move table in docs/portraits-and-ui.md). */
+export type PageKey =
+  | 'settings'
+  | 'lifeHistory'
+  | 'archive'
+  | 'title'
+  | 'newLife'
+  | 'health'
+  | 'later'
+  | 'properties'
+  | 'possessions'
+  | 'will'
+  | 'family'
+  | 'groups'
+  | 'pastimes'
+  | 'social'
+  | 'trip'
+  | 'migration'
+  | 'teen';
+
+const MENU_ITEMS: Partial<Record<PageKey, string>> = { settings: 'menu-settings', lifeHistory: 'menu-life-history', archive: 'menu-archive', title: 'menu-title', newLife: 'menu-new-life' };
+const TAB_PAGES: Partial<Record<PageKey, [Parameters<typeof tab>[1], string]>> = {
+  properties: ['Assets', 'assets-properties'],
+  possessions: ['Assets', 'assets-possessions'],
+  will: ['Assets', 'assets-will'],
+  family: ['People', 'people-family-planning'],
+  groups: ['People', 'people-groups'],
+  pastimes: ['Activities', 'activities-pastimes'],
+  social: ['Activities', 'activities-social'],
+  trip: ['Activities', 'activities-travel'],
+  migration: ['Activities', 'activities-migration'],
+  teen: ['Activities', 'activities-teen'],
+};
+
+/** Opens a page from Home: the menu for Settings and Life history, the profile for Health, the tab it lives under for the rest. */
+export async function openPage(page: Page, key: PageKey): Promise<void> {
+  await goHome(page);
+  const menuItem = MENU_ITEMS[key];
+  if (menuItem) {
+    await page.getByRole('button', { name: 'Menu', exact: true }).click();
+    await page.getByTestId(menuItem).click();
+    return;
+  }
+  if (key === 'health' || key === 'later') {
+    await page.getByRole('button', { name: 'Profile', exact: true }).click();
+    if (key === 'health') await page.getByRole('dialog', { name: 'Profile' }).getByRole('button', { name: 'Health', exact: true }).click();
+    else await page.getByTestId('profile-later').click();
+    return;
+  }
+  const [tabName, testId] = TAB_PAGES[key]!;
+  await tab(page, tabName).click();
+  await page.getByTestId(testId).click();
+}
 export const eventSheet = (page: Page) => page.getByRole('dialog').filter({ has: page.getByTestId('event-card') });
 
 /** Waits until the screen is ready for the next tap: Age Up, an event card, or the funeral that follows a death. */
@@ -39,7 +125,7 @@ export async function settle(page: Page): Promise<void> {
     if (document.body.textContent?.includes('The funeral') || document.body.textContent?.includes('In memoriam')) return true;
     const sheet = document.querySelector('[aria-labelledby="event-title"]');
     if (sheet) return [...sheet.querySelectorAll('button')].every((b) => !b.disabled);
-    const button = [...document.querySelectorAll('button')].find((b) => b.textContent?.trim() === 'Age Up');
+    const button = [...document.querySelectorAll('button')].find((b) => b.getAttribute('aria-label') === 'Age up');
     return button !== undefined && !button.disabled;
   });
 }

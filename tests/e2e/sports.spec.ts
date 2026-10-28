@@ -8,10 +8,9 @@
  */
 import { expect, test, type Page } from '@playwright/test';
 import { loadSavedLife } from './heirFixtures';
-import { expectNoHorizontalScroll, expectTouchTargets, passAgeGate, settle } from './helpers';
+import { expectNoHorizontalScroll, expectTouchTargets, passAgeGate, settle, tab } from './helpers';
 import { sportsLife, type SportsLife } from './sportsFixtures';
 
-const tab = (page: Page, name: string) => page.getByRole('navigation', { name: 'Game sections' }).getByRole('button', { name, exact: true });
 
 async function open(page: Page, options: SportsLife): Promise<void> {
   await passAgeGate(page, { testPack: true });
@@ -21,14 +20,14 @@ async function open(page: Page, options: SportsLife): Promise<void> {
 }
 
 const openScreen = async (page: Page) => {
-  await tab(page, 'Work/School').click();
+  await tab(page, 'Job').click();
   await page.getByTestId('sports-open').click();
   await expect(page.getByTestId('sports-screen')).toBeVisible();
 };
 
 test('the Work tab shows your sport, team and the next milestone in words, and fits a phone', async ({ page }) => {
   await open(page, { seed: 'e2e-sports-1' });
-  await tab(page, 'Work/School').click();
+  await tab(page, 'Job').click();
   const card = page.getByTestId('sports-card');
   await expect(card).toBeVisible();
   await expect(page.getByTestId('sports-rung')).toHaveText(/School team player/);
@@ -93,7 +92,7 @@ test('position, training focus and commitment change with one tap', async ({ pag
 
 test('with no career the Sports screen shows the teams you can try out for, and making one puts you on the ladder', async ({ page }) => {
   await open(page, { seed: 'e2e-sports-5', none: true, age: 11 });
-  await tab(page, 'Work/School').click();
+  await tab(page, 'Job').click();
   await expect(page.getByTestId('sports-prompt')).toBeVisible();
   await page.getByTestId('sports-open').click();
   await expect(page.getByTestId('entry')).toBeVisible();
@@ -122,7 +121,7 @@ test('a playoff series is played in the event sheet and the run moves on to the 
 
 test('after leaving the game, the Sports card looks back on the seasons', async ({ page }) => {
   await open(page, { seed: 'e2e-sports-7', pro: true, retired: true });
-  await tab(page, 'Work/School').click();
+  await tab(page, 'Job').click();
   await expect(page.getByTestId('sports-retired')).toBeVisible();
   await page.getByTestId('sports-open').click();
   await expect(page.getByTestId('after-line')).toContainText('normal life');

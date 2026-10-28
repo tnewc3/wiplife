@@ -6,18 +6,16 @@
  */
 import { expect, test, type Page } from '@playwright/test';
 import { loadSavedLife } from './heirFixtures';
-import { expectNoHorizontalScroll, expectTouchTargets, passAgeGate, settle } from './helpers';
+import { expectNoHorizontalScroll, expectTouchTargets, openPage, passAgeGate, settle } from './helpers';
 import { teenLife, type TeenLife } from './teenFixtures';
 
-const tab = (page: Page, name: string) => page.getByRole('navigation', { name: 'Game sections' }).getByRole('button', { name, exact: true });
 
 async function open(page: Page, options: TeenLife): Promise<void> {
   await passAgeGate(page, { testPack: true });
   await loadSavedLife(page, teenLife(options));
   await page.getByRole('button', { name: 'Continue' }).click();
   await settle(page);
-  await tab(page, 'More').click();
-  await page.getByTestId('more-teen').click();
+  await openPage(page, 'teen');
   await expect(page.getByRole('heading', { name: 'This year’s focus' })).toBeVisible();
 }
 

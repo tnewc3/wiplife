@@ -2,8 +2,8 @@
  * Countries (W4a), at phone size: custom creation asks for a country and then a city in it, the life is lived in that
  * country with its currency, and the Money tab says so. A random life can start in any country.
  */
-import { expect, test, type Page } from '@playwright/test';
-import { createCustomLife, expectNoHorizontalScroll, expectTouchTargets, passAgeGate, type CustomLifeData } from './helpers';
+import { expect, test } from '@playwright/test';
+import { createCustomLife, expectNoHorizontalScroll, expectTouchTargets, passAgeGate, tab, type CustomLifeData } from './helpers';
 
 const BASE: CustomLifeData = {
   first: 'Maya',
@@ -18,7 +18,6 @@ const BASE: CustomLifeData = {
   city: 'Manchester',
 };
 
-const tab = (page: Page, name: string) => page.getByRole('navigation', { name: 'Game sections' }).getByRole('button', { name, exact: true });
 
 test('custom creation asks for a country, then a city in it', async ({ page }) => {
   await passAgeGate(page);
@@ -66,8 +65,8 @@ test('a life in the United Kingdom is lived in pounds, with its own rules shown 
   await page.getByRole('button', { name: 'New Life' }).click();
   await createCustomLife(page, BASE);
 
-  await expect(page.getByText(/^Newborn · Manchester/)).toBeVisible();
-  await tab(page, 'Money').click();
+  await expect(page.getByRole('banner')).toContainText('Manchester');
+  await tab(page, 'Assets').click();
   const card = page.getByRole('region', { name: 'Money in United Kingdom' });
   await expect(card).toBeVisible();
   await expect(page.getByTestId('country-money')).toContainText('pounds (GBP)');
@@ -78,7 +77,7 @@ test('a life in the United Kingdom is lived in pounds, with its own rules shown 
   // Saved, and still the same country after reopening.
   await page.reload();
   await page.getByRole('button', { name: 'Continue' }).click();
-  await expect(page.getByText(/^Newborn · Manchester/)).toBeVisible();
+  await expect(page.getByRole('banner')).toContainText('Manchester');
 });
 
 for (const [country, name] of [['ca', 'Canada'], ['uk', 'United Kingdom'], ['mx', 'Mexico'], [undefined, 'United States']] as const) {
@@ -86,7 +85,7 @@ for (const [country, name] of [['ca', 'Canada'], ['uk', 'United Kingdom'], ['mx'
     await passAgeGate(page, { seed: 'c1', ...(country ? { country } : {}) });
     await page.getByRole('button', { name: 'New Life' }).click();
     await page.getByRole('button', { name: 'Start a random life' }).click();
-    await tab(page, 'Money').click();
+    await tab(page, 'Assets').click();
     await expect(page.getByRole('region', { name: `Money in ${name}` })).toBeVisible();
     await expectNoHorizontalScroll(page);
   });

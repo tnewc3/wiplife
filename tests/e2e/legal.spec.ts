@@ -3,10 +3,9 @@
  * at 27, a getaway drive means two years in prison (with one prison event
  * each year inside), then release, parole and the record.
  */
-import { expect, test, type Page } from '@playwright/test';
-import { ageUpButton, ageUpTimes, eventSheet, expectNoHorizontalScroll, expectTouchTargets, playThroughEvents, settle, startRandomLife } from './helpers';
+import { expect, test } from '@playwright/test';
+import { ageUpButton, ageUpTimes, eventSheet, expectNoHorizontalScroll, expectTouchTargets, goHome, openPage, playThroughEvents, settle, startRandomLife, tab } from './helpers';
 
-const tab = (page: Page, name: string) => page.getByRole('navigation', { name: 'Game sections' }).getByRole('button', { name, exact: true });
 
 test('arrest, the years inside with only prison events and a few actions, then release and parole', async ({ page }) => {
   test.setTimeout(240_000);
@@ -27,19 +26,17 @@ test('arrest, the years inside with only prison events and a few actions, then r
   const banner = page.getByTestId('prison-banner');
   await expect(banner).toContainText('In prison');
   await expect(banner).toContainText('released in 3 years');
-  await expect(page.getByText(/ · In prison$/)).toBeVisible();
   await expectNoHorizontalScroll(page);
   await expectTouchTargets(page);
 
   // Inside: no work, no moves, no doctor of your choosing.
-  await tab(page, 'Work/School').click();
+  await tab(page, 'Job').click();
   await expect(page.getByTestId('job-status')).toHaveText('You can’t work while you’re in prison.');
   await expect(page.getByRole('button', { name: 'Start gig work' })).toHaveCount(0);
-  await tab(page, 'More').click();
-  await page.getByRole('button', { name: 'Health', exact: true }).click();
+  await openPage(page, 'health');
   await expect(page.getByTestId('doctor-status')).toContainText('the prison doctor');
-  await page.getByRole('button', { name: 'Back to More' }).click();
-  await tab(page, 'Life').click();
+  await page.getByRole('button', { name: 'Back to Home' }).click();
+  await goHome(page);
 
   // Two years inside, each with its prison event; the first begins with intake.
   await ageUpButton(page).click();

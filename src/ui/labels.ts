@@ -61,6 +61,29 @@ export const STAT_LABELS: Record<keyof Stats, string> = {
   stress: 'Stress',
 };
 
+/** U1: the content icon (registries/icons.yaml) beside each stat, and the stats the Home panel shows (Fame joins them when famous). */
+export const STAT_ICONS: Record<keyof Stats, string> = {
+  happiness: 'grinning_face',
+  health: 'red_heart',
+  smarts: 'light_bulb',
+  looks: 'fire',
+  fitness: 'flexed_biceps',
+  stress: 'anxious_face_with_sweat',
+};
+export const FAME_ICON = 'glowing_star';
+export const HOME_STATS = ['happiness', 'health', 'smarts', 'looks'] as const satisfies readonly (keyof Stats)[];
+
+/** U1: the main tabs. The first is Job, or School while you are enrolled. */
+export const TAB_LABELS = { home: 'Home', job: 'Job', school: 'School', assets: 'Assets', people: 'People', activities: 'Activities' } as const;
+
+/** U1: what the Home header says you do. */
+export function occupationLine(summary: { job: { title: string; employer: string } | null; retired: boolean; school: SchoolLine | null; lifeStage: LifeStage }): string {
+  if (summary.job) return jobLine(summary.job.title, summary.job.employer);
+  if (summary.school) return schoolStatusLine(summary.school);
+  if (summary.retired) return 'Retired';
+  return LIFE_STAGE_LABELS[summary.lifeStage];
+}
+
 export const TRAIT_LABELS: Record<keyof Personality, string> = {
   ambition: 'Ambition',
   confidence: 'Confidence',
@@ -163,6 +186,70 @@ export const PEOPLE_GROUP_EMPTY: Record<PeopleGroupId, string> = {
   school: 'No one from school.',
   work: 'No one from work yet.',
 };
+
+/** U1: the sections of the People tab. Anyone who has died is under "late", whatever they were to you. */
+export type PeopleSectionId = 'love' | 'parents' | 'siblings' | 'family' | 'children' | 'grandchildren' | 'friends' | 'school' | 'work' | 'pets' | 'late';
+export const PEOPLE_SECTION_LABELS: Record<PeopleSectionId, string> = {
+  love: 'Love',
+  parents: 'Parents',
+  siblings: 'Siblings',
+  family: 'Other family',
+  children: 'Children',
+  grandchildren: 'Grandchildren',
+  friends: 'Friends',
+  school: 'School',
+  work: 'Work',
+  pets: 'Pets',
+  late: 'Late relationships',
+};
+export const PEOPLE_SECTION_EMPTY: Record<PeopleSectionId, string> = {
+  love: 'No one right now.',
+  parents: 'No parents.',
+  siblings: 'No siblings.',
+  family: 'No other family.',
+  children: 'No children.',
+  grandchildren: 'No grandchildren.',
+  friends: 'No friends yet.',
+  school: 'No one from school.',
+  work: 'No one from work yet.',
+  pets: 'No pets.',
+  late: 'No one has died.',
+};
+
+/** "this year", "a year ago", "12 years ago": how long ago something was. */
+export function yearsSince(years: number): string {
+  if (years <= 0) return 'this year';
+  return years === 1 ? 'a year ago' : `${years} years ago`;
+}
+
+/** U1: the life log. */
+export const LOG_LABELS = { quietYear: 'A quiet year.', start: 'Your story starts here.' } as const;
+
+/** U1: the event card. */
+export const EVENT_CARD_LABELS = { whatWillYouDo: 'What will you do?', surpriseMe: 'Surprise me', yourYear: 'Your year' } as const;
+
+/** U1: the Activities tab, until the Activities stage fills it. */
+export const ACTIVITIES_LABELS = {
+  soonTitle: 'More to do is coming soon',
+  soonBody: 'The gym, the doctor, nightlife, dating, the lottery, the casino, shopping, vacations, the salon and hobbies are on their way.',
+  nowTitle: 'Available now',
+  pastimes: 'Hobbies, treats, courses, counseling and other ways to spend a year.',
+  travel: 'Trips, studying or working abroad for a while.',
+  migration: 'Applications, permits and becoming a citizen.',
+  social: 'Your accounts, your followers and what you post.',
+  teen: 'Your crowd, house rules, teen jobs and learning to drive.',
+} as const;
+
+/** U1: "Spend time with everyone" on the People tab. */
+export const GROUP_TIME_LABELS = {
+  button: 'Spend time with everyone',
+  none: 'No one is free to spend time with right now.',
+  hint: (people: number) => `${people === 1 ? '1 person' : `${people} people`} you can see. Each time you do it in a year, it means a little less to everyone.`,
+  resultTitle: 'You spent time with everyone',
+  diminishing: 'Each repeat in the same year returns less, and someone who has had enough is left out.',
+  familyBlurb: 'Children, adoption, IVF, surrogacy and custody.',
+  groupsBlurb: 'Clubs, teams, faith and the people they bring.',
+} as const;
 
 export const BOND_LABELS = { affection: 'Affection', trust: 'Trust' } as const;
 

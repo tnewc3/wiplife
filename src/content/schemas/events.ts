@@ -2369,12 +2369,31 @@ export const choiceSchema = z
   .refine((c) => (c.outcome === undefined) !== (c.check === undefined), 'a choice needs exactly one of outcome or check');
 export type ChoiceDef = z.infer<typeof choiceSchema>;
 
+/**
+ * U1: a meter on an event card (for example "Your concern"): a labelled bar filled from one of your stats, or from how a
+ * cast person feels about you.
+ */
+export const eventMeterSchema = z.union([
+  z.strictObject({ label: z.string().trim().min(1).max(30), stat: z.enum(STAT_KEYS) }),
+  z.strictObject({ label: z.string().trim().min(1).max(30), role: roleSchema, bond: z.enum(['affection', 'trust']) }),
+]);
+export type EventMeter = z.infer<typeof eventMeterSchema>;
+
 export const eventSchema = baseDefSchema
   .extend({
     title: z.string().trim().min(1).max(60),
     text: templateSchema,
     tone: toneSchema,
     category: idSchema,
+    /**
+     * U1: the banner across the card (registries/banners.yaml), when it should differ from the one its category shows under,
+     * and the card's icon (registries/icons.yaml), when it should differ from the banner's. The card shows a person header
+     * instead of the icon when the event is about a person.
+     */
+    banner: idSchema.optional(),
+    icon: idSchema.optional(),
+    /** U1: an optional meter on the card. */
+    meter: eventMeterSchema.optional(),
     rarity: raritySchema,
     lifeStages: z.array(lifeStageSchema).min(1),
     requires: conditionSchema.optional(),
@@ -2456,6 +2475,23 @@ export const chainFileSchema = z.strictObject({
 export const memoryRegistrySchema = z.strictObject({ tags: z.record(idSchema, z.string().trim().min(1).max(120)) });
 /** Every flag, with a one-line description (registries/flags.yaml). */
 export const flagRegistrySchema = z.strictObject({ flags: z.record(idSchema, z.string().trim().min(1).max(200)) });
+/** U1: the content icons (registries/icons.yaml): Microsoft Fluent Emoji copied into public/icons by `npm run icons`. */
+export const iconRegistrySchema = z.strictObject({
+  icons: z.record(
+    idSchema,
+    z.strictObject({
+      /** The emoji's folder name in github.com/microsoft/fluentui-emoji/assets. */
+      fluent: z.string().trim().min(1).max(60),
+      /** The skin tone folder, for emoji that have them. */
+      variant: z.string().trim().min(1).max(20).optional(),
+    }),
+  ),
+});
+/** U1: the banners of event cards (registries/banners.yaml) and which one each event category shows under. */
+export const bannerRegistrySchema = z.strictObject({
+  banners: z.record(idSchema, z.strictObject({ label: z.string().trim().min(1).max(20), icon: idSchema })),
+  categories: z.record(idSchema, idSchema),
+});
 /** Event categories (registries/categories.yaml). */
 export const categoryRegistrySchema = z.strictObject({
   /**

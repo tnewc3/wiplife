@@ -3,19 +3,17 @@
  * a will under More, the Death screen with the estate and the choice of heir,
  * the "Previously" card, money held in trust, family lines in More → Family and the archive.
  */
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 import { deadLife, familyLife, loadSavedLife } from './heirFixtures';
-import { expectNoHorizontalScroll, expectTouchTargets, passAgeGate, passFuneral } from './helpers';
+import { expectNoHorizontalScroll, expectTouchTargets, goHome, openPage, passAgeGate, passFuneral, tab } from './helpers';
 
-const tab = (page: Page, name: string) => page.getByRole('navigation', { name: 'Game sections' }).getByRole('button', { name, exact: true });
 const OPEN = { testPack: true };
 
 test('write a will under More: shares in steps of 5, a total that must reach 100, saved and kept', async ({ page }) => {
   await passAgeGate(page, OPEN);
   await loadSavedLife(page, familyLife({ seed: 'e2e-heir-will', kids: [9, 30], spouse: true }));
   await page.getByRole('button', { name: 'Continue' }).click();
-  await tab(page, 'More').click();
-  await page.getByTestId('more-will').click();
+  await openPage(page, 'will');
   await expect(page.getByRole('heading', { name: 'Write a will' })).toBeVisible();
   await expect(page.getByTestId('will-defaults')).toContainText('Without a will:');
   await expect(page.getByTestId('will-total')).toContainText('Total: 0%');
@@ -39,14 +37,13 @@ test('write a will under More: shares in steps of 5, a total that must reach 100
   await expect(page.getByTestId('will-message')).toHaveText('Your will is saved.');
 
   // It is kept: leave and come back, and after a reload.
-  await page.getByRole('button', { name: 'Back to More' }).click();
-  await page.getByTestId('more-will').click();
+  await page.getByRole('button', { name: 'Back to Assets' }).click();
+  await page.getByTestId('assets-will').click();
   await expect(page.getByTestId('will-total')).toHaveText('Total: 100%');
   await expect(page.getByTestId('will-defaults')).toHaveCount(0);
   await page.reload();
   await page.getByRole('button', { name: 'Continue' }).click();
-  await tab(page, 'More').click();
-  await page.getByTestId('more-will').click();
+  await openPage(page, 'will');
   await expect(page.getByTestId('will-total')).toHaveText('Total: 100%');
   await page.getByTestId('will-clear').click();
   await expect(page.getByTestId('will-message')).toContainText('cleared');
@@ -57,8 +54,8 @@ test('a child cannot write a will', async ({ page }) => {
   await passAgeGate(page, { ...OPEN, seed: 'e2e-heir-child' });
   await page.getByRole('button', { name: 'New Life' }).click();
   await page.getByRole('button', { name: 'Start a random life' }).click();
-  await tab(page, 'More').click();
-  await expect(page.getByTestId('more-will')).toHaveCount(0);
+  await tab(page, 'Assets').click();
+  await expect(page.getByTestId('assets-will')).toHaveCount(0);
 });
 
 test('death settles the estate; continue as a child of 9: Previously, trust, family line, and the archive groups the generations', async ({ page }) => {
@@ -97,34 +94,32 @@ test('death settles the estate; continue as a child of 9: Previously, trust, fam
   await expectTouchTargets(page);
 
   // Their story begins with the childhood recap.
-  await page.getByRole('button', { name: 'See your whole life' }).click();
+  await openPage(page, 'lifeHistory');
   await expect(page.getByRole('heading', { name: 'Life history' })).toBeVisible();
   await expect(page.getByText(/died at 52/)).toBeVisible();
   await page.getByRole('button', { name: /Back/ }).click();
 
   // The money is held in trust.
-  await tab(page, 'Money').click();
+  await tab(page, 'Assets').click();
   await expect(page.getByTestId('trust-card')).toContainText('Held in trust');
   await expect(page.getByTestId('trust-balance')).toContainText('$');
   await expect(page.getByTestId('savings')).toHaveText('$0');
   await expectNoHorizontalScroll(page);
 
   // More → Family shows the family line: generation two.
-  await tab(page, 'More').click();
-  await page.getByRole('button', { name: 'Family', exact: true }).click();
+  await openPage(page, 'family');
   await expect(page.getByTestId('family-line')).toContainText('family');
   await expect(page.getByTestId('family-line-facts')).toContainText('Generation 2');
   await expectNoHorizontalScroll(page);
-  await page.getByRole('button', { name: 'Back to More' }).click();
+  await page.getByRole('button', { name: 'Back to People' }).click();
 
   // The first year ends the "Previously" card.
-  await tab(page, 'Life').click();
-  await page.getByRole('button', { name: 'Age Up' }).click();
-  await expect(page.getByRole('button', { name: 'Age Up' })).toBeVisible({ timeout: 15_000 });
+  await goHome(page);
+  await page.getByRole('button', { name: 'Age up' }).click();
+  await expect(page.getByRole('button', { name: 'Age up' })).toBeVisible({ timeout: 15_000 });
 
   // Settings → Back to title → Archive: the parent's life is kept in a family line, with its heir.
-  await tab(page, 'More').click();
-  await page.getByRole('button', { name: 'Back to title' }).click();
+  await openPage(page, 'title');
   await page.getByRole('button', { name: 'Archive' }).click();
   const lines = page.getByRole('list', { name: 'Family lines' });
   await expect(lines.getByRole('listitem').first()).toContainText('Generation 1');

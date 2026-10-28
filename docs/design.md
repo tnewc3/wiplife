@@ -25,7 +25,7 @@
 | Goals | Self-directed; no aspirations system |
 | Jail | Time skip with a few prison events (playable prison later) |
 | Early childhood | Playable ages 0–4, including family hardship events |
-| Stat display | Bars only, no numbers |
+| Stat display | Bars with percentages, colored by value (low red, middle amber, high green) |
 | Legendary events | Secret and untracked, but recorded in life history |
 | Progression | Life archive only; no achievements or unlocks |
 | Saves | Local device only, plus export/import |
@@ -453,23 +453,31 @@ Real cities, but fictional companies, universities and brands to avoid trademark
 
 ## K. UI/UX Architecture
 
-### Layout
+### Layout (U1)
 
-- **Bottom navigation:** Life · People · Work/School · Money · More.
-- The Work/School tab changes with life stage.
-- **Age Up** is a large button above the navigation bar and is the most prominent control on every main screen.
+- **Home** is the life log. From the top: the header (menu button, your portrait, name, what you do and where, and your balance; tap the portrait or name for your profile), the life log, the Age button between four tabs, and the stat panel.
+- **Tabs:** Job (it becomes School while you are enrolled) · Assets · **Age** · People · Activities. A tab opens its page over Home; its back button returns to Home. The Age button ages you up from any tab and brings you back to Home.
+- **Life log:** your whole life grouped by age, newest at the bottom, scrolled to the newest line. Money from an event shows as a green (gained) or red (lost) line with the amount and the balance after it. Important lines are bold. A year with nothing to tell says so.
+- **Stat panel:** Happiness, Health, Smarts and Looks (and Fame once you are famous) as bars with percentages, colored by value. The profile shows all six stats (Fitness and Stress too).
+- **Dark theme by default**, light in Settings, "System" to follow the device. Dark and light both pass WCAG AA contrast.
+- **Visual identity:** WIPlife's own palette, Fredoka and Nunito type (self-hosted, so they work offline) and a "WIPlife" wordmark with a progress-bar motif. Content icons are Microsoft Fluent Emoji (MIT); interface icons are Lucide. Everything used is listed in CREDITS.md.
 
-### Home screen, top to bottom
+### Where things live
 
-1. Name, age, city, and a one-line status (for example, "Junior paralegal · Renting in Chicago").
-2. A compact stat panel: Health, Happiness, Smarts, Looks, Fitness, Stress.
-3. Money and debt.
-4. "Coming up" items (pending decisions, court dates, graduation).
-5. A scrolling feed of this life's year-by-year log.
+| Page | What is on it |
+|---|---|
+| Menu (☰) | New life, Life history, Archive, Settings, Back to title. One life is kept at a time (starting another archives the first), so there is no list of lives in progress. |
+| Profile | Large portrait, identity, all six stats, personality, languages, faith and groups, criminal record, the editable identity fields, Health and Later life |
+| Job / School | Your school (with a grades bar) or job, then "Ways to work": gig work, a business, time abroad, and the special careers (arts and media, sports, social media, crime). A way that is not open to you is greyed out; tapping it says why |
+| Assets | Finances (the ledger, lifestyle, debts, a business's and crime's money), Properties (Rent, move, buy or sell), Possessions (vehicles, vacation homes, valuables and pets, with condition bars), Your will |
+| People | Love, Parents, Siblings, other family, Children, Grandchildren, Friends, School, Work, Pets, then Late relationships (everyone who has died, with a memorial mark and "Died X years ago"); Family planning and Groups; "Spend time with everyone" |
+| Activities | A "coming soon" card for the Activities stage (the gym, the doctor, nightlife, dating, the lottery, the casino, shopping, vacations, the salon and hobbies), and the leisure features that already exist: Leisure and self, Plan a trip, Move abroad, Social media and the teen years |
 
-### Event cards
+"Spend time with everyone" is a group interaction: it does the everyday "spend time" interaction with each person who can have it now, one after another, with the same diminishing returns as any interaction. Each repeat in a year returns less, and someone who has had enough is left out.
 
-A full-screen sheet shows one event at a time, with the text and 2–4 large choice buttons. The outcome appears on the same card, followed by "Continue." Tone tags subtly change the card's accent color.
+### Event cards (U1)
+
+A full-screen sheet shows one event at a time as a card. Its border and a banner across the top-right are in the color of its category (Family, Love, Work, School, Money, Health, Crime, Fame and so on). Below the banner: an icon and the title, or, for an event about a person, their portrait and name. Then the text, an optional meter (for example "Your concern"), and, when there are choices, "What will you do?" with the choices stacked full width and any known cost on the button ("Costs $200"). "Surprise me" picks a choice with the life's seeded generator and is logged like any other choice. The outcome appears on the same card, with money shown as an amount and the new balance, followed by "Continue". Events declare an optional `banner`, `icon` and `meter` in YAML; by default the banner and icon come from the event's category (registries/banners.yaml).
 
 ### Year recap
 
@@ -479,9 +487,9 @@ A short card lists changes in money and stats, new memories, and relationship ch
 
 - Tap targets of at least 44px.
 - One primary action per screen.
-- Dark mode support.
+- Dark theme by default, with a light theme.
 - Respect reduced-motion settings.
-- Stats shown as labeled bars without numbers.
+- Stats shown as labeled bars with percentages.
 - The player never has to wonder what to do next: Age Up is always there, and management screens show only the actions available right now.
 
 ---
@@ -494,20 +502,22 @@ A short card lists changes in money and stats, new memories, and relationship ch
 | Age gate | First-launch content check | Confirm age, read content notice |
 | New life | Choose how to start | Random start, Custom |
 | Custom creation | Multi-step builder | Identity → Family → City → Stats & personality → Start |
-| Life (home) | Current situation | Age Up, open recent log entries |
+| Home | The life log, with the header, the stat panel and the Age button | Age, open the menu or your profile, open a tab |
 | Event card | Make a decision | Choose, Continue |
 | Year recap | Summary of the year | Continue |
 | People | List of relationships | Open a person |
 | Person detail | Relationship status and memories | Ask out, propose, break up, reconcile, cut contact |
-| Work / School | Current job or enrollment | Job search, apply, quit, ask for a raise, enroll, drop out |
-| Money | Ledger and debt | Change lifestyle tier, view loans |
-| More → Health | Health status | See a doctor |
-| More → Home | Housing | Move out, rent, buy, relocate to another city |
-| More → Life history | Full timeline of this life | Browse |
+| Job / School | Current job or enrollment, and the ways to work | Job search, apply, quit, ask for a raise, enroll, drop out, gig work, a business |
+| Assets | Finances, properties and possessions | Change lifestyle tier, view loans, rent, buy or sell a home, buy and sell things |
+| Activities | Things to do (coming soon) and the leisure features that exist | Leisure and self, trips, moving abroad, social media |
+| Profile → Health | Health status | See a doctor |
+| Assets → Properties | Housing | Move out, rent, buy, relocate to another city |
+| Menu → Life history | Full timeline of this life | Browse |
 | Death / Obituary | End of life | Save to archive, start new life (heir option post-MVP) |
 | Archive | All past lives | Open a past life |
 | Archived life | Obituary and timeline | Browse |
-| Settings | Preferences and data | Export/import save, theme, content notice, reset |
+| Menu | New life, Life history, Archive, Settings, Back to title | Open one |
+| Settings | Preferences and data | Export/import save, theme (dark by default), content notice, reset |
 
 ---
 

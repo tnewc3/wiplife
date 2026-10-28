@@ -9,9 +9,8 @@
 import { expect, test, type Page } from '@playwright/test';
 import { fameLife, type FameLife } from './fameFixtures';
 import { loadSavedLife } from './heirFixtures';
-import { expectNoHorizontalScroll, expectTouchTargets, passAgeGate, settle } from './helpers';
+import { expectNoHorizontalScroll, expectTouchTargets, passAgeGate, settle, tab } from './helpers';
 
-const tab = (page: Page, name: string) => page.getByRole('navigation', { name: 'Game sections' }).getByRole('button', { name, exact: true });
 
 async function open(page: Page, options: FameLife): Promise<void> {
   await passAgeGate(page, { testPack: true });
@@ -21,14 +20,14 @@ async function open(page: Page, options: FameLife): Promise<void> {
 }
 
 const openScreen = async (page: Page) => {
-  await tab(page, 'Work/School').click();
+  await tab(page, 'Job').click();
   await page.getByTestId('fame-open').click();
   await expect(page.getByTestId('fame-screen')).toBeVisible();
 };
 
 test('the Work tab shows where you stand on the ladder in words, and fits a phone', async ({ page }) => {
   await open(page, { seed: 'e2e-fame-1' });
-  await tab(page, 'Work/School').click();
+  await tab(page, 'Job').click();
   const card = page.getByTestId('fame-card');
   await expect(card).toBeVisible();
   await expect(page.getByTestId('fame-rung')).toHaveText(/First-release artist/);
@@ -85,7 +84,7 @@ test('commitment changes with one tap, and the project step takes the creative c
 
 test('with no career the Fame screen shows the ways in, and starting one puts you on the ladder', async ({ page }) => {
   await open(page, { seed: 'e2e-fame-4', none: true });
-  await tab(page, 'Work/School').click();
+  await tab(page, 'Job').click();
   await expect(page.getByTestId('fame-prompt')).toBeVisible();
   await page.getByTestId('fame-open').click();
   await expect(page.getByTestId('entry')).toBeVisible();
@@ -114,7 +113,7 @@ test('a tabloid headline appears in the news feed on the Life tab', async ({ pag
 
 test('a retired star can go back to work', async ({ page }) => {
   await open(page, { seed: 'e2e-fame-7', retired: true });
-  await tab(page, 'Work/School').click();
+  await tab(page, 'Job').click();
   await expect(page.getByTestId('fame-retired')).toBeVisible();
   await page.getByTestId('fame-open').click();
   await page.getByTestId('return-fame').click();

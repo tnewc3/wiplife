@@ -7,10 +7,9 @@
  */
 import { expect, test, type Page } from '@playwright/test';
 import { loadSavedLife } from './heirFixtures';
-import { ageUp, expectNoHorizontalScroll, expectTouchTargets, passAgeGate, settle } from './helpers';
+import { ageUp, expectNoHorizontalScroll, expectTouchTargets, goHome, openPage, passAgeGate, settle, tab } from './helpers';
 import { socialLife, type SocialLife } from './socialFixtures';
 
-const tab = (page: Page, name: string) => page.getByRole('navigation', { name: 'Game sections' }).getByRole('button', { name, exact: true });
 
 async function open(page: Page, options: SocialLife): Promise<void> {
   await passAgeGate(page, { testPack: true });
@@ -20,8 +19,7 @@ async function open(page: Page, options: SocialLife): Promise<void> {
 }
 
 async function openSocial(page: Page): Promise<void> {
-  await tab(page, 'More').click();
-  await page.getByTestId('more-social').click();
+  await openPage(page, 'social');
   await expect(page.getByTestId('social-summary')).toBeVisible();
 }
 
@@ -78,11 +76,11 @@ test('an account passes its threshold, the platform starts to pay, and the Money
   await openSocial(page);
   await expect(page.getByTestId('account-youtube')).toContainText('Shares its ad money with you once you pass 1,000 followers.');
   for (let i = 0; i < 4; i++) await page.getByTestId('post-youtube').click();
-  await tab(page, 'Life').click();
+  await goHome(page);
   await ageUp(page);
   await openSocial(page);
   await expect(page.getByTestId('account-youtube')).toContainText('The platform pays you for this account (Ad share).');
-  await tab(page, 'Money').click();
+  await tab(page, 'Assets').click();
   const card = page.getByTestId('social-money');
   await expect(card).toBeVisible();
   await expect(card).toContainText('YouTube');
@@ -96,8 +94,8 @@ test('a post meant for friends reaches the boss, and the event is about it', asy
   await openSocial(page);
   await page.getByTestId('tone-bold').click();
   await page.getByTestId('post-tiktok').click();
-  await tab(page, 'Life').click();
-  await page.getByRole('button', { name: 'Age Up' }).click();
+  await goHome(page);
+  await page.getByRole('button', { name: 'Age up' }).click();
   const sheet = page.getByRole('dialog').filter({ has: page.getByTestId('event-card') });
   await expect(sheet).toBeVisible();
   await expect(sheet).toContainText('printed screenshot of a post you put on TikTok');
@@ -119,12 +117,12 @@ test('under 18 an account starts private and a parent is in it', async ({ page }
 
 test('creators reach the Social screen from the Work tab and come back to it', async ({ page }) => {
   await open(page, { seed: 'e2e-social-6', creator: true });
-  await tab(page, 'Work/School').click();
+  await tab(page, 'Job').click();
   await expect(page.getByTestId('work-social')).toBeVisible();
   await page.getByTestId('work-open-social').click();
   await expect(page.getByTestId('social-summary')).toBeVisible();
   await expect(page.getByTestId('account-tiktok')).toBeVisible();
   await expectNoHorizontalScroll(page);
-  await page.getByRole('button', { name: 'Back to Work' }).click();
+  await page.getByRole('button', { name: 'Back to Job' }).click();
   await expect(page.getByTestId('work-social')).toBeVisible();
 });

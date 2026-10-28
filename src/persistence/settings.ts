@@ -20,7 +20,7 @@ export type Settings = z.infer<typeof settingsSchema>;
 
 export const DEFAULT_SETTINGS: Settings = {
   ageConfirmed: false,
-  theme: 'system',
+  theme: 'dark',
   persistRequested: false,
   installPromptShown: false,
   teams: emptySetup(),

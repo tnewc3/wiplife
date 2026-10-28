@@ -5,6 +5,7 @@ text: >-
   name on it. It takes you a full second too long to realize what day it is.
 tone: light
 category: partner
+meter: { label: How close you feel, role: spouse, bond: affection }
 rarity: common
 lifeStages: [youngAdult, adult, senior]
 requires:

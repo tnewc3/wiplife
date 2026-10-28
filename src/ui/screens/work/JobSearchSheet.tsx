@@ -28,7 +28,7 @@ function OpeningButton({ option, onPick }: { option: JobOption; onPick: () => vo
         </span>
         <span className="text-sm break-words text-muted">{option.blurb}</span>
         {option.topSalary > option.salary && <span className="text-sm text-muted">Up to {money(option.topSalary)} a year at the top</span>}
-        <span className={`text-sm ${option.result === true ? 'font-semibold text-accent' : 'text-muted'}`}>{status}</span>
+        <span className={`text-sm ${option.result === true ? 'font-semibold text-link' : 'text-muted'}`}>{status}</span>
       </button>
     </li>
   );
@@ -143,7 +143,7 @@ export function JobSearchSheet({ life, open, onClose }: { life: LifeState; open:
                 role="radio"
                 aria-checked={sort === s}
                 onClick={() => setSort(s)}
-                className={`min-h-11 rounded-full border px-4 text-sm ${sort === s ? 'border-accent font-semibold text-accent' : 'border-border bg-surface'}`}
+                className={`min-h-11 rounded-full border px-4 text-sm ${sort === s ? 'border-accent font-semibold text-link' : 'border-border bg-surface'}`}
               >
                 {s === 'pay' ? 'Best pay' : 'Best chances'}
               </button>

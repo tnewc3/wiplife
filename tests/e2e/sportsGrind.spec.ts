@@ -5,10 +5,9 @@
  */
 import { expect, test, type Page } from '@playwright/test';
 import { loadSavedLife } from './heirFixtures';
-import { expectNoHorizontalScroll, expectTouchTargets, passAgeGate, settle } from './helpers';
+import { expectNoHorizontalScroll, expectTouchTargets, passAgeGate, settle, tab } from './helpers';
 import { easiestCamp, grindLife, type GrindLife } from './sportsGrindFixtures';
 
-const tab = (page: Page, name: string) => page.getByRole('navigation', { name: 'Game sections' }).getByRole('button', { name, exact: true });
 
 async function open(page: Page, options: GrindLife): Promise<ReturnType<typeof grindLife>> {
   const life = grindLife(options);
@@ -20,7 +19,7 @@ async function open(page: Page, options: GrindLife): Promise<ReturnType<typeof g
 }
 
 const openSports = async (page: Page) => {
-  await tab(page, 'Work/School').click();
+  await tab(page, 'Job').click();
   await page.getByTestId('sports-open').click();
   await expect(page.getByTestId('sports-screen')).toBeVisible();
 };
@@ -54,7 +53,7 @@ test('you choose a school team to try out for, play the scrimmage as an event an
 
 test('you can train without a team at a gym, and the session budget and the cost are in front of you', async ({ page }) => {
   await open(page, { seed: 'e2e-grind-2', kind: 'teamless' });
-  await tab(page, 'Work/School').click();
+  await tab(page, 'Job').click();
   await expect(page.getByTestId('sports-teamless')).toBeVisible();
   await page.getByTestId('sports-open').click();
   await expect(page.getByTestId('training')).toBeVisible();
@@ -79,7 +78,7 @@ test('you can train without a team at a gym, and the session budget and the cost
 
 test('a program’s athletic scholarship is accepted from the Sports screen, with its share of tuition', async ({ page }) => {
   await open(page, { seed: 'e2e-grind-3', kind: 'senior' });
-  await tab(page, 'Work/School').click();
+  await tab(page, 'Job').click();
   await expect(page.getByTestId('sports-offers')).toContainText('offers');
   await page.getByTestId('sports-open').click();
   const section = page.getByTestId('scholarships');

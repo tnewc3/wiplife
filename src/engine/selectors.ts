@@ -69,6 +69,8 @@ import { moodView, type MoodView } from './interactions/mood';
 import { getNews, getPersonLifeView, type NewsItem, type PersonLifeView } from './lives/views';
 import { getConnections, getHeard, getIntroduceChoices, getTopicChoices, type ConnectionView, type HeardView, type PickView } from './web/views';
 export { getInteractionMenu, getInteractionOutcome } from './interactions/views';
+export { getGroupTimeView } from './interactions/group';
+export type { GroupTimeRow, GroupTimeView } from './interactions/group';
 export { getFindDateView, type FindDateOptionView, type FindDateView } from './actions/love';
 export { getConnections, getHeard, getIntroduceChoices, getTopicChoices };
 export type { ConnectionView, HeardView, PickView };
@@ -346,6 +348,8 @@ export interface EnrollmentView extends SchoolLine {
   lengthYears: number;
   /** Your GPA as a letter grade. */
   letter: string;
+  /** U1: your GPA as 0–100, for the grades bar. */
+  gradesPercent: number;
   final: boolean;
   /** Years you were held back. */
   repeats: number;
@@ -400,6 +404,7 @@ export function getSchoolView(state: LifeState, content: ContentBundle): SchoolV
         year: cur.year,
         lengthYears: cur.lengthYears,
         letter: letterGrade(cur.gpa, state, content),
+        gradesPercent: Math.round((Math.min(4, Math.max(0, cur.gpa)) / 4) * 100),
         final: cur.year >= cur.lengthYears,
         repeats: cur.repeats,
         canDropOut: between && canLeaveSchool(state, content),
@@ -578,6 +583,8 @@ export interface PersonRow {
   wasSpouse: boolean;
   /** E1: how they're feeling, for people close to you only (family, your partner, close friends); null otherwise. */
   mood: MoodView | null;
+  /** U1: the year they died, for the "Late relationships" list. */
+  deathYear?: number;
 }
 
 function groupOf(kind: RelationshipKind): PeopleGroupId {
@@ -606,6 +613,7 @@ function personRow(state: LifeState, person: Person, rel: Relationship, content:
     current: isCurrentPartner(state, rel),
     wasSpouse: rel.wasSpouse === true,
     mood: moodView(state, person.id, content),
+    ...(person.deathYear !== undefined ? { deathYear: person.deathYear } : {}),
   };
 }
 
@@ -1215,6 +1223,12 @@ export interface EventCardView {
   money: MoneyChange | null;
   /** P1: portraits of the people the event is about (at most three), with their names. */
   portraits?: { name: string; portrait: AppearanceInput }[];
+  /** U1: the banner across the card (its id picks the card's color), the card's icon and an optional meter. */
+  banner: { id: string; label: string };
+  icon: string;
+  meter: { label: string; value: number } | null;
+  /** U1: "Surprise me" is offered (two or more choices waiting). */
+  canSurprise: boolean;
 }
 
 export interface ChoiceMoney {
@@ -1263,7 +1277,16 @@ export function getEventCard(state: LifeState, index: number, content: ContentBu
   if (!instance) return null;
   const def = content.events[instance.eventId];
   const castIds = [...new Set(Object.values(instance.cast))].filter((id) => state.people[id] !== undefined).slice(0, 3);
+  const bannerId = def?.banner ?? content.registries.banners.categories[def?.category ?? ''] ?? FALLBACK_BANNER;
+  const bannerDef = content.registries.banners.banners[bannerId] ?? content.registries.banners.banners[FALLBACK_BANNER]!;
+  const meter = def?.meter
+    ? { label: def.meter.label, value: 'stat' in def.meter ? state.character.stats[def.meter.stat] : (state.relationships[instance.cast[def.meter.role] ?? '']?.[def.meter.bond] ?? 0) }
+    : null;
   const base = {
+    banner: { id: bannerId, label: bannerDef.label },
+    icon: def?.icon ?? bannerDef.icon,
+    meter,
+    canSurprise: false,
     instanceId: instance.instanceId,
     resolved: instance.resolvedChoiceId !== undefined,
     outcomeText: instance.outcomeText ?? null,
@@ -1282,8 +1305,11 @@ export function getEventCard(state: LifeState, index: number, content: ContentBu
         .filter((c) => evaluate(c.visibleIf, state, { cast: instance.cast, roles: 'strict', content }))
         .map((c) => ({ id: c.id, label: renderText(c.label, ctx), ...knownChoiceMoney(state, c, content) }))
     : [{ id: CONTINUE_CHOICE, label: 'Continue' }];
-  return { ...base, title: renderText(def.title, ctx), text: renderText(eventLanguageText(state, def, instance.cast, content), ctx), tone: def.tone, choices };
+  return { ...base, canSurprise: def.choices !== undefined && choices.length >= 2, title: renderText(def.title, ctx), text: renderText(eventLanguageText(state, def, instance.cast, content), ctx), tone: def.tone, choices };
 }
+
+/** U1: the banner an event shows under when nothing else says (an event whose definition was removed, or a category with none). */
+const FALLBACK_BANNER = 'life';
 
 /** Index of the first pending event still waiting for the player, or null. */
 export function firstUnresolvedEvent(state: LifeState): number | null {

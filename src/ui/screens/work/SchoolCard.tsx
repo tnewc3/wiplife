@@ -6,6 +6,7 @@ import { useAppStore } from '../../../store/appStore';
 import { Button } from '../../components/Button';
 import { Card } from '../../components/Card';
 import { ConfirmSheet } from '../../components/ConfirmSheet';
+import { StatBar } from '../../components/StatBar';
 import { Sheet } from '../../components/Sheet';
 import {
   credentialLabel,
@@ -103,6 +104,9 @@ export function SchoolCard({ life }: { life: LifeState }) {
           <p className="mt-1 font-semibold" data-testid="school-grades">
             Grades: {cur.letter}
           </p>
+          <div className="mt-2">
+            <StatBar label="Grades" value={cur.gradesPercent} />
+          </div>
           {cur.repeats > 0 && <p className="mt-1 text-sm text-muted">You were held back a year.</p>}
           {cur.final && cur.program !== 'elementary' && cur.program !== 'middle' && <p className="mt-1 text-sm text-muted">Your last year.</p>}
           {cur.bill && <BillLines bill={cur.bill} />}

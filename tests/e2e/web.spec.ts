@@ -7,10 +7,9 @@
  */
 import { expect, test, type Page } from '@playwright/test';
 import { loadSavedLife } from './heirFixtures';
-import { expectNoHorizontalScroll, expectTouchTargets, passAgeGate, settle } from './helpers';
+import { expectNoHorizontalScroll, expectTouchTargets, passAgeGate, settle, tab } from './helpers';
 import { webLife } from './webFixtures';
 
-const tab = (page: Page, name: string) => page.getByRole('navigation', { name: 'Game sections' }).getByRole('button', { name, exact: true });
 const OPEN = { testPack: true };
 
 async function openFixture(page: Page): Promise<void> {
@@ -20,14 +19,14 @@ async function openFixture(page: Page): Promise<void> {
   await settle(page);
 }
 
-async function openPerson(page: Page, list: 'Family' | 'Friends', name: RegExp): Promise<void> {
+async function openPerson(page: Page, list: 'Siblings' | 'Parents' | 'Friends', name: RegExp): Promise<void> {
   await tab(page, 'People').click();
   await page.getByRole('list', { name: list }).getByRole('button', { name }).click();
 }
 
 test("a person's page shows who they are close to and who they are feuding with", async ({ page }) => {
   await openFixture(page);
-  await openPerson(page, 'Family', /Dolores/);
+  await openPerson(page, 'Parents', /Dolores/);
   const card = page.getByTestId('connections');
   await expect(card.getByRole('heading', { name: 'Connections' })).toBeVisible();
   await expect(card).toContainText('Frank Rivera, your father');
@@ -59,13 +58,13 @@ test("a close person's page shows what they have heard about you, their version 
   await expectTouchTargets(page);
   // Family and people with nothing to say have no such card.
   await page.getByRole('button', { name: 'Back to People' }).click();
-  await page.getByRole('list', { name: 'Family' }).getByRole('button', { name: /Rae/ }).click();
+  await page.getByRole('list', { name: 'Siblings' }).getByRole('button', { name: /Rae/ }).click();
   await expect(page.getByTestId('heard')).toHaveCount(0);
 });
 
 test('introducing two people you know: pick who, and they have a tie', async ({ page }) => {
   await openFixture(page);
-  await openPerson(page, 'Family', /Rae/);
+  await openPerson(page, 'Siblings', /Rae/);
   await expect(page.getByTestId('connections')).not.toContainText('Marcus');
   await page.getByTestId('interact-button').click();
   await page.getByTestId('interaction-introduce').click();
