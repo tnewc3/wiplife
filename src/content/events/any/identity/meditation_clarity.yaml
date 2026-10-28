@@ -1,0 +1,29 @@
+# Opened by a quiet retreat (A1).
+id: meditation_clarity
+title: Quiet
+text: >-
+  Somewhere in the quiet, a thought you had been avoiding comes and sits down next to you. It is not as large as you feared.
+tone: light
+category: identity
+rarity: common
+lifeStages: [teen, youngAdult, adult, senior]
+requires: { age: { gte: 14 } }
+weight: { base: 5 }
+followUpOnly: true
+choices:
+  - id: face
+    label: Look at it properly
+    outcome:
+      text: >-
+        You do. It is smaller, and kinder, and needs only a conversation you have been putting off.
+      effects:
+        - { type: stat, key: stress, delta: -4 }
+        - { type: stat, key: happiness, delta: 2 }
+        - { type: stat, key: discipline, delta: 1 }
+  - id: breathe
+    label: Breathe, and let it go by
+    outcome:
+      text: >-
+        It wanders off. You keep the calm it left behind.
+      effects:
+        - { type: stat, key: stress, delta: -2 }

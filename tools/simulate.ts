@@ -1,5 +1,5 @@
 /**
- * `npm run simulate -- [--lives 1000] [--seed sim] [--player both|all|careful|careless|spammer] [--json report.json]`:
+ * `npm run simulate -- [--lives 1000] [--seed sim] [--player both|all|careful|careless|spammer|criminal|star|athlete|activities] [--json report.json]`:
  * plays random lives headless and prints a report: the careful player's in
  * full, then (with both, the default) a careful vs careless comparison on
  * the same seeds, and (E1) the careless player's interactions beside it. `all`
@@ -59,9 +59,9 @@ setAutoFreeze(false);
 
 const started = Date.now();
 const players: SimulatedPlayer[] =
-  values.player === 'all' ? ['careful', 'careless', 'spammer', 'criminal', 'star', 'athlete'] : values.player === 'both' ? ['careful', 'careless'] : [values.player as SimulatedPlayer];
-if (!players.every((p) => p === 'careful' || p === 'careless' || p === 'spammer' || p === 'criminal' || p === 'star' || p === 'athlete')) {
-  console.error('--player must be all, both, careful, careless, spammer, criminal, star or athlete');
+  values.player === 'all' ? ['careful', 'careless', 'spammer', 'criminal', 'star', 'athlete', 'activities'] : values.player === 'both' ? ['careful', 'careless'] : [values.player as SimulatedPlayer];
+if (!players.every((p) => p === 'careful' || p === 'careless' || p === 'spammer' || p === 'criminal' || p === 'star' || p === 'athlete' || p === 'activities')) {
+  console.error('--player must be all, both, careful, careless, spammer, criminal, star, athlete or activities');
   process.exit(2);
 }
 const generations = Number(values.generations);

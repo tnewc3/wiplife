@@ -1,0 +1,38 @@
+id: read_at_the_library
+category: mind_body
+label: "Read at the library"
+blurb: "A free corner, a quiet table and a stack of books."
+minAge: 6
+inPerson: true
+companion: none
+cost: library
+profile: calm
+yearlyLimit: 10
+hub: read
+tiers:
+  great:
+    text:
+      - "Three hours vanish into one book. You leave the library with your head full and a new list of things to read."
+      - "A librarian points you to a shelf you would never have found, and it is exactly what you needed."
+    effects: [{ type: stat, key: smarts, delta: 2 }, { type: stat, key: happiness, delta: 2 }, { type: stat, key: stress, delta: -1 }]
+    events: [library_recommendation]
+    eventChance: follow_up_low
+  good:
+    text:
+      - "A quiet, useful afternoon among the shelves. You finish a good chunk of something worth reading."
+      - "You read until the lights flicker, which is the library's way of saying it is closing time."
+    effects: [{ type: stat, key: smarts, delta: 1 }, { type: stat, key: stress, delta: -1 }]
+  neutral:
+    text:
+      - "You read the same page four times and give up with a good cover and a poor memory of the plot."
+      - "Mostly you watch other people read. It is restful anyway."
+    effects: [{ type: stat, key: smarts, delta: 1 }]
+    events: [library_card_fine]
+    eventChance: follow_up_low
+  bad:
+    text:
+      - "A noisy group takes the next table and nobody asks them to stop. You leave annoyed."
+      - "You pick the wrong book and finish a hundred pages of it out of stubbornness."
+    effects: [{ type: stat, key: stress, delta: 1 }, { type: stat, key: happiness, delta: -1 }]
+    events: [library_card_fine]
+    eventChance: follow_up_mid

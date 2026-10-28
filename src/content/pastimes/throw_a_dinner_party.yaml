@@ -1,0 +1,32 @@
+id: throw_a_dinner_party
+category: social
+label: "Throw a dinner party"
+blurb: "A long table, a good meal and a few people you like."
+minAge: 18
+inPerson: true
+companion: none
+cost: dinner_party
+profile: pamper
+yearlyLimit: 3
+hub: parties
+tiers:
+  great:
+    text:
+      - "The meal is a triumph and the conversation is better. Plates stay on the table long after the food is gone."
+      - "People linger over dessert until you are all too tired and too happy to move."
+    effects: [{ type: stat, key: happiness, delta: 4 }, { type: stat, key: sociability, delta: 1 }, { type: stat, key: stress, delta: -1 }]
+  good:
+    text:
+      - "A warm, slow evening, and nobody minds the lumpy gravy."
+      - "Good food, good friends and a bottle that went further than expected."
+    effects: [{ type: stat, key: happiness, delta: 2 }, { type: stat, key: sociability, delta: 1 }]
+  neutral:
+    text:
+      - "The food is fine and the talk is polite. You are glad it is over, and glad you did it."
+      - "A calm evening that never quite becomes a memory."
+    effects: [{ type: stat, key: happiness, delta: 1 }]
+  bad:
+    text:
+      - "The main course is ruined and you order takeout in the middle of your own dinner party."
+      - "Two guests argue about politics and the evening is lost."
+    effects: [{ type: stat, key: stress, delta: 3 }, { type: stat, key: happiness, delta: -1 }]

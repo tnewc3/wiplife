@@ -8,6 +8,7 @@ companion: none
 cost: online_order
 profile: shop
 yearlyLimit: 4
+hub: shopping
 tiers:
   great:
     text:

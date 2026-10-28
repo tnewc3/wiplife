@@ -1,0 +1,32 @@
+# Opened by the gym (src/content/pastimes, A1).
+id: gym_buddy_asks
+title: A spotter
+text: >-
+  Between sets, {friend.name} asks whether you could spot {friend.them} on the bench. {friend.They} {friend:looks|look} like {friend.they} {friend:has|have} done this before, and also like {friend.they} would rather not drop the bar on {friend.their} chest.
+tone: light
+category: friends
+rarity: common
+lifeStages: [teen, youngAdult, adult, senior]
+requires: { age: { gte: 14 } }
+weight: { base: 5 }
+followUpOnly: true
+cast:
+  friend: { kind: friend, presence: city }
+choices:
+  - id: spot
+    label: Spot {friend.them}, and ask for a spot back
+    outcome:
+      text: >-
+        You trade sets for the rest of the hour. It is the best workout partner you have had, and {friend.name} says {friend.they} will be back tomorrow.
+      effects:
+        - { type: relationship, role: friend, affection: 8, trust: 3 }
+        - { type: stat, key: fitness, delta: 1 }
+        - { type: stat, key: sociability, delta: 1 }
+  - id: polite
+    label: Help once, then go back to your own set
+    outcome:
+      text: >-
+        You count the reps, nod and go back to your own set. A small kindness and nothing more.
+      effects:
+        - { type: relationship, role: friend, affection: 3 }
+        - { type: stat, key: happiness, delta: 1 }

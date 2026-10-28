@@ -1,0 +1,31 @@
+# Opened by a party (A1).
+id: party_old_friend_turns_up
+title: A familiar face
+text: >-
+  Across the room, somebody turns around and it is {friend.name}. {friend.They} {friend:looks|look} older and happier than you remember, and {friend.they} {friend:waves|wave} before you can decide what to do.
+tone: light
+category: friends
+rarity: common
+lifeStages: [teen, youngAdult, adult, senior]
+requires: { age: { gte: 12 } }
+weight: { base: 5 }
+followUpOnly: true
+cast:
+  friend: { kind: friend, presence: city }
+choices:
+  - id: catch_up
+    label: Cross the room and catch up
+    outcome:
+      text: >-
+        You talk for an hour, longer than either of you meant to. When you say goodbye, you both mean it when you say you should do this more.
+      effects:
+        - { type: relationship, role: friend, affection: 8, trust: 3 }
+        - { type: stat, key: happiness, delta: 3 }
+  - id: wave
+    label: Wave back and keep your distance
+    outcome:
+      text: >-
+        You smile, wave and drift toward the snacks. Some friendships are better left in the corner of the room.
+      effects:
+        - { type: relationship, role: friend, affection: -1 }
+        - { type: stat, key: stress, delta: 1 }

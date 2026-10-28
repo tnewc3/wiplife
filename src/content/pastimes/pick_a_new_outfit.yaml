@@ -1,0 +1,39 @@
+id: pick_a_new_outfit
+category: shopping
+label: "Buy a new outfit"
+blurb: "Choose a style and bring it home."
+minAge: 8
+inPerson: true
+companion: none
+cost: new_outfit
+profile: shop
+yearlyLimit: 4
+hub: shopping
+look: outfit
+tiers:
+  great:
+    text:
+      - "The first thing you try on is the right one. You walk out in it, with your old clothes in a bag."
+      - "Everything in the changing room fits and flatters. You hold back from buying two."
+    effects: [{ type: stat, key: looks, delta: 2 }, { type: stat, key: confidence, delta: 1 }, { type: stat, key: happiness, delta: 2 }, { type: flag, key: new_look, value: true }]
+    events: [shopping_compliment]
+    eventChance: follow_up_mid
+  good:
+    text:
+      - "A good outfit at a fair price. You feel pulled together."
+      - "The sales assistant pins you down the right size, and you leave pleased."
+    effects: [{ type: stat, key: looks, delta: 1 }, { type: stat, key: happiness, delta: 1 }, { type: flag, key: new_look, value: true }]
+    events: [shopping_compliment]
+    eventChance: follow_up_low
+  neutral:
+    text:
+      - "It is a perfectly good outfit. You will wear it, if not often."
+      - "You buy it because the fitting room lights were flattering, which is the only time they will be."
+    effects: [{ type: stat, key: looks, delta: 1 }, { type: flag, key: new_look, value: true }]
+  bad:
+    text:
+      - "It looked different on the hanger. You wear it once and feel off all day."
+      - "The color is wrong and the fit is worse. You keep the receipt."
+    effects: [{ type: stat, key: happiness, delta: -1 }, { type: flag, key: new_look, value: true }]
+    events: [shopping_regret]
+    eventChance: follow_up_mid

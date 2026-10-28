@@ -21,6 +21,7 @@ import { evaluate } from '../conditions';
 import { atLegalAge, countryIdOfCity, legalAgeOf, scaledAmount } from '../country';
 import { wholeDollars } from '../finance';
 import { whereabouts } from '../presence';
+import { hubCount, hubOf, lookOptions } from './activities';
 import type { Id, LifeState, PastimesState } from '../types';
 import { costOfLiving, valuablesOf } from '../possessions/query';
 import { valuableBlock } from '../possessions/valuables';
@@ -100,12 +101,16 @@ export function companionOptions(state: LifeState, def: PastimeDef, content: Con
 export type PastimeBlock =
   | 'phase' | 'prison' | 'age' | 'country' | 'city' | 'requires' | 'valuable' | 'contacts' | 'limit' | 'afford' | 'companion' | 'quality'
   // Batch 2b: choose a stake, choose how a lawsuit ends, a loan is refused, a name is missing or can't be, a minor needs a parent's agreement, nothing was lost to chase.
-  | 'stake' | 'route' | 'approval' | 'name' | 'consent' | 'partner' | 'former' | 'chase';
+  | 'stake' | 'route' | 'approval' | 'name' | 'consent' | 'partner' | 'former' | 'chase'
+  // A1: choose what changes in your portrait.
+  | 'look';
 
 /** The blocks that hide an activity from the Activities screen (the others show it, disabled, with the reason). */
 export const HIDING_BLOCKS: readonly PastimeBlock[] = ['phase', 'prison', 'age', 'country', 'city', 'requires', 'valuable', 'contacts', 'partner', 'former'];
 
 export interface PastimeChoice extends NameChoice {
+  /** A1: what changes in your portrait at the salon or when shopping (one of lookOptions). */
+  look?: string | undefined;
   companionId?: Id | undefined;
   quality?: PastimeQuality | undefined;
   /** Gambling: how much you put down, and whether you are chasing what you just lost. */
@@ -118,6 +123,9 @@ export interface PastimeChoice extends NameChoice {
 export function pastimeBlock(state: LifeState, def: PastimeDef, choice: PastimeChoice, content: ContentBundle): PastimeBlock | null {
   if (state.phase !== 'yearStart') return 'phase';
   if (state.housing.kind === 'incarcerated') return 'prison';
+  // A1: dating is for adults, whatever an option says (the content build holds the options to it too).
+  const hub = hubOf(def, content);
+  if (hub?.adultsOnly && state.character.age < content.balance.relationships.adultAge) return 'age';
   if (state.character.age < def.minAge || (def.legalAge !== undefined && !atLegalAge(state, def.legalAge, content) && !fakeIdUsable(state, def, content))) return 'age';
   if (def.countries && !def.countries.includes(countryIdOfCity(state.character.cityId, content))) return 'country';
   if (def.cities && !def.cities.includes(state.character.cityId)) return 'city';
@@ -127,6 +135,10 @@ export function pastimeBlock(state: LifeState, def: PastimeDef, choice: PastimeC
   if (def.mechanic === 'loan' && loanOffer(state, def, content).block === 'contacts') return 'contacts';
   if (def.buys !== undefined && valuableBlock(state, def.buys, content) !== null) return 'valuable';
   if (pastimeCount(state, def.id) >= def.yearlyLimit) return 'limit';
+  if (hub && hubCount(state, hub.id) >= hub.limit) return 'limit';
+  if (def.look !== undefined) {
+    if (choice.look === undefined || !lookOptions(state, def.look, content).includes(choice.look)) return 'look';
+  } else if (choice.look !== undefined) return 'look';
   if (def.quality && choice.quality === undefined) return 'quality';
   if (!def.quality && choice.quality !== undefined) return 'quality';
   if (choice.companionId !== undefined) {

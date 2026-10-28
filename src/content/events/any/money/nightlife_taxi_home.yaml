@@ -1,0 +1,29 @@
+# Opened by a night out (A1).
+id: nightlife_taxi_home
+title: Last call, last ride
+text: >-
+  It is late, the buses have stopped and the line for a taxi is long. A driver offers to take you home for {$40}, and your feet say yes before you do.
+tone: light
+category: money
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires: { age: { gte: 18 } }
+weight: { base: 5 }
+followUpOnly: true
+choices:
+  - id: ride
+    label: Pay for the ride
+    outcome:
+      text: >-
+        You sit in the back seat with the window down and watch the lights go by. You are home in fifteen minutes.
+      effects:
+        - { type: money, delta: -40 }
+        - { type: stat, key: stress, delta: -1 }
+  - id: walk
+    label: Walk it
+    outcome:
+      text: >-
+        It is cold and it is far. You get home with sore feet and a story.
+      effects:
+        - { type: stat, key: health, delta: -1 }
+        - { type: stat, key: stress, delta: 1 }

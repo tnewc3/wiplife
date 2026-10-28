@@ -8,6 +8,7 @@ companion: none
 cost: speed_dating
 profile: love
 yearlyLimit: 2
+hub: dating
 requires: { romance: [single] }
 tiers:
   great:
@@ -33,6 +34,8 @@ tiers:
       - "A pleasant night of meeting strangers. Nothing clicks, but nothing hurts."
     effects:
       - { type: stat, key: happiness, delta: 1 }
+    events: [dating_second_date, dating_bad_chemistry]
+    eventChance: follow_up_mid
   bad:
     text:
       - "You freeze at the first table and recover too late. Every conversation is slightly off. {cost} for a lesson in your own nerves."
@@ -40,3 +43,5 @@ tiers:
     effects:
       - { type: stat, key: happiness, delta: -2 }
       - { type: stat, key: confidence, delta: -1 }
+    events: [dating_ghosted]
+    eventChance: follow_up_mid

@@ -1169,6 +1169,8 @@ const pastimeReceipt = z.strictObject({
   }),
 });
 const pastimes = z.strictObject({ year: int, counts: z.record(z.string(), int.min(1)), receipts: z.array(pastimeReceipt) });
+// A1: hobbies, by the id of the practice activity.
+const hobbies = z.record(z.string(), z.strictObject({ skill: int.min(0).max(100), year: int, sessions: int.min(1) }));
 
 // Batch 8: social media. A handle is what the player typed, kept in its tidy form (checked again by the action that takes it and by the invariants).
 const socialAccount = z.strictObject({
@@ -1427,6 +1429,7 @@ export const lifeStateSchema: z.ZodType<LifeState> = z.strictObject({
   belonging,
   business: businessState,
   pastimes,
+  hobbies,
   social,
 });
 

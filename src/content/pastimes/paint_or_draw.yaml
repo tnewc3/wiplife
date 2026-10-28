@@ -1,0 +1,41 @@
+id: paint_or_draw
+category: hobby
+label: "Paint or draw"
+blurb: "A canvas, a pencil and a mess."
+minAge: 6
+inPerson: true
+companion: none
+cost: hobby_supplies
+profile: steady
+yearlyLimit: 8
+hub: hobbies
+hobby:
+  talent: art
+  skill: { great: 10, good: 7, neutral: 3, bad: 1, backfire: 0 }
+tiers:
+  great:
+    text:
+      - "The painting turns into something you did not know you could make. You stand back and just look."
+      - "A line goes down exactly where you wanted it, and the rest of the picture follows."
+    effects: [{ type: stat, key: happiness, delta: 3 }, { type: stat, key: stress, delta: -1 }, { type: stat, key: discipline, delta: 1 }]
+    events: [hobby_class_invite, hobby_someone_asks]
+    eventChance: follow_up_low
+  good:
+    text:
+      - "A quiet hour with the paint. It is not your best, but it is yours."
+      - "You sketch a bit and smudge a bit and call it practice."
+    effects: [{ type: stat, key: happiness, delta: 2 }, { type: stat, key: stress, delta: -1 }]
+    events: [hobby_someone_asks]
+    eventChance: follow_up_low
+  neutral:
+    text:
+      - "You put in the time and not much else happens. Practice is mostly this."
+      - "Neither good nor bad, just another session on the pile."
+    effects: [{ type: stat, key: happiness, delta: 1 }]
+  bad:
+    text:
+      - "Nothing works. The colors turn to mud and you throw the page away."
+      - "You hate everything you put on the page and stop in disgust."
+    effects: [{ type: stat, key: stress, delta: 2 }, { type: stat, key: happiness, delta: -1 }]
+    events: [hobby_burnout]
+    eventChance: follow_up_low

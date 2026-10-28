@@ -1,0 +1,29 @@
+# A skilled writer is asked for pages (A1 hobbies, fame path arts).
+id: hobby_zine_offer
+title: Pages for the zine
+text: >-
+  {friend.name} is putting together a zine and wants to print something of yours. "Photocopies and staples," {friend.they} {friend:says|say}. "But people read it."
+tone: light
+category: fameentry
+rarity: uncommon
+lifeStages: [teen, youngAdult, adult, senior]
+requires: { all: [{ age: { gte: 10 } }, { flag: skilled_write_stories }, { fame: { active: false } }, { fame: { retired: false } }] }
+weight: { base: 6 }
+cast:
+  friend: { kind: friend, presence: city }
+choices:
+  - id: print
+    label: Send your best pages
+    outcome:
+      text: >-
+        Your pages are printed, stapled and left in cafes. A week later a stranger writes to say they liked the second story.
+      effects:
+        - { type: fame, action: enter, path: arts, route: zine }
+        - { type: stat, key: happiness, delta: 4 }
+  - id: pass
+    label: Keep your writing to yourself
+    outcome:
+      text: >-
+        You keep the pages in a drawer. They stay good, and they stay unread.
+      effects:
+        - { type: stat, key: confidence, delta: -1 }

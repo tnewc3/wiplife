@@ -1,0 +1,29 @@
+# Opened by a hard workout (A1).
+id: gym_trainer_pitch
+title: The sales pitch
+text: >-
+  One of the trainers stops to watch your form, then hands you a card. "Eight sessions for {$250}. I can fix what you are doing with your shoulders."
+tone: light
+category: money
+rarity: common
+lifeStages: [teen, youngAdult, adult, senior]
+requires: { age: { gte: 16 } }
+weight: { base: 5 }
+followUpOnly: true
+choices:
+  - id: buy
+    label: Pay for the sessions
+    outcome:
+      text: >-
+        The sessions are hard and they work. Your shoulders stop hurting, and you learn that you had been doing it wrong for years.
+      effects:
+        - { type: money, delta: -250 }
+        - { type: stat, key: fitness, delta: 2 }
+        - { type: stat, key: discipline, delta: 1 }
+  - id: pass
+    label: Say you will think about it
+    outcome:
+      text: >-
+        You take the card, put it in a drawer and think about it for a long time. Then you forget.
+      effects:
+        - { type: stat, key: stress, delta: 1 }

@@ -1,0 +1,28 @@
+# Opened by a haircut (A1).
+id: salon_stylist_gossip
+title: The chair talks
+text: >-
+  The stylist talks while cutting, as stylists do, and somewhere between the shampoo and the mirror you have heard about half the street.
+tone: light
+category: friends
+rarity: common
+lifeStages: [teen, youngAdult, adult, senior]
+requires: { age: { gte: 10 } }
+weight: { base: 5 }
+followUpOnly: true
+choices:
+  - id: chat
+    label: Chat back
+    outcome:
+      text: >-
+        You trade stories until the last snip. When you leave, you have a new appointment and a new person who knows your name.
+      effects:
+        - { type: stat, key: sociability, delta: 1 }
+        - { type: stat, key: happiness, delta: 2 }
+  - id: quiet
+    label: Close your eyes and say little
+    outcome:
+      text: >-
+        You close your eyes and let the words wash past. It is the most relaxing twenty minutes of your week.
+      effects:
+        - { type: stat, key: stress, delta: -2 }

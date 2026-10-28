@@ -9,6 +9,7 @@ companionKinds: [partner, friend, family]
 cost: beach_day
 profile: outdoor
 yearlyLimit: 5
+hub: vacation
 tiers:
   great:
     text:

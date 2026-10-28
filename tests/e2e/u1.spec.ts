@@ -167,7 +167,7 @@ test('an event card with an icon and a meter shows both, and the outcome shows m
   await expect(sheet.locator('img[src$="icons/calendar.svg"]')).toBeVisible();
 });
 
-test('Assets holds finances, properties and possessions; Activities has a coming-soon card and what exists now', async ({ page }) => {
+test('Assets holds finances, properties and possessions; Activities lists its groups and what else exists', async ({ page }) => {
   await startRandomLife(page, PACK);
   await tab(page, 'Assets').click();
   await expect(page.getByRole('heading', { name: 'Assets', level: 1 })).toBeVisible();
@@ -184,7 +184,8 @@ test('Assets holds finances, properties and possessions; Activities has a coming
   await page.getByRole('button', { name: 'Back to Assets' }).click();
 
   await tab(page, 'Activities').click();
-  await expect(page.getByTestId('activities-coming-soon')).toContainText('coming soon');
+  await expect(page.getByRole('heading', { name: 'What would you like to do?' })).toBeVisible();
+  for (const group of ['mind_body', 'social', 'money_luck', 'leisure']) await expect(page.getByTestId(`activities-group-${group}`)).toBeVisible();
   await expect(page.getByTestId('activities-pastimes')).toBeVisible();
   await expect(page.getByTestId('activities-travel')).toBeVisible();
   await expectNoHorizontalScroll(page);
@@ -192,7 +193,7 @@ test('Assets holds finances, properties and possessions; Activities has a coming
   await page.getByTestId('activities-travel').click();
   await expect(page.getByRole('heading', { name: 'Plan a trip', level: 1 })).toBeVisible();
   await page.getByRole('button', { name: 'Back to Activities' }).click();
-  await expect(page.getByTestId('activities-coming-soon')).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'What would you like to do?' })).toBeVisible();
 });
 
 test('People: groups, late relationships with a memorial mark, and Spend time with everyone as a group interaction', async ({ page }) => {

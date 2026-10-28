@@ -10,6 +10,7 @@ inPerson: true
 companion: none
 cost: casino_slots
 yearlyLimit: 6
+hub: casino
 tiers:
   great:
     text:
@@ -23,6 +24,8 @@ tiers:
         effects:
           - { type: health, conditionId: gambling_addiction, severity: 25 }
         note: "You notice that you are thinking about the next bet before this one is settled."
+    events: [casino_hot_streak]
+    eventChance: follow_up_mid
   good:
     text:
       - "A small win, then a bigger one. You walk away from the machine {amount} richer than the {cost} you started with, mostly."
@@ -34,6 +37,8 @@ tiers:
         effects:
           - { type: health, conditionId: gambling_addiction, severity: 25 }
         note: "You notice that you are thinking about the next bet before this one is settled."
+    events: [casino_hot_streak]
+    eventChance: follow_up_low
   neutral:
     text:
       - "The machine gives back what you put in, as if apologizing: {cost}, and no more."
@@ -55,6 +60,8 @@ tiers:
         effects:
           - { type: health, conditionId: gambling_addiction, severity: 25 }
         note: "You notice that you are thinking about the next bet before this one is settled."
+    events: [casino_chasing_losses]
+    eventChance: follow_up_mid
   backfire:
     text:
       - "You mean to stop at {cost} and do not. The lights, the sounds, and a clock on the wall that is wrong: you walk out into the dawn with nothing."
@@ -67,3 +74,5 @@ tiers:
         effects:
           - { type: health, conditionId: gambling_addiction, severity: 25 }
         note: "You notice that you are thinking about the next bet before this one is settled."
+    events: [casino_chasing_losses]
+    eventChance: follow_up_mid

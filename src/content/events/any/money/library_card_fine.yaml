@@ -1,0 +1,28 @@
+# Opened by reading at the library (A1).
+id: library_card_fine
+title: Overdue
+text: >-
+  The book is two weeks overdue, and the librarian has the quiet expression of someone who has seen this before. "That will be {$12}," says the librarian.
+tone: light
+category: money
+rarity: common
+lifeStages: [teen, youngAdult, adult, senior]
+requires: { age: { gte: 8 } }
+weight: { base: 5 }
+followUpOnly: true
+choices:
+  - id: pay
+    label: Pay the fine
+    outcome:
+      text: >-
+        You hand it over and renew the book for another three weeks. Nobody mentions it again.
+      effects:
+        - { type: money, delta: -12 }
+        - { type: stat, key: stress, delta: 1 }
+  - id: plead
+    label: Plead for a pardon
+    outcome:
+      text: >-
+        The librarian relents, mostly. "Just this once," says the librarian, and does not look convinced.
+      effects:
+        - { type: stat, key: stress, delta: 1 }

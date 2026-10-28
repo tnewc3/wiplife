@@ -8,6 +8,7 @@ companion: none
 cost: massage
 profile: pamper
 yearlyLimit: 3
+hub: salon
 tiers:
   great:
     text:

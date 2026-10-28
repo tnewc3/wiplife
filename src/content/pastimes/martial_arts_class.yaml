@@ -8,6 +8,7 @@ companion: none
 cost: martial_arts_class
 profile: steady
 yearlyLimit: 6
+hub: gym
 tiers:
   great:
     text:

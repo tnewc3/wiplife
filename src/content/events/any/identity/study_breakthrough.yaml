@@ -1,0 +1,30 @@
+# Opened by studying something difficult (A1).
+id: study_breakthrough
+title: It finally makes sense
+text: >-
+  You are brushing your teeth when it happens: the thing you have been stuck on turns over, and suddenly you can see how it all fits together.
+tone: light
+category: identity
+rarity: common
+lifeStages: [teen, youngAdult, adult, senior]
+requires: { age: { gte: 10 } }
+weight: { base: 5 }
+followUpOnly: true
+choices:
+  - id: chase
+    label: Go back and keep going while it is clear
+    outcome:
+      text: >-
+        You work until late with a clarity you did not know you had. It will not last, but what you wrote down will.
+      effects:
+        - { type: stat, key: smarts, delta: 2 }
+        - { type: stat, key: discipline, delta: 1 }
+        - { type: stat, key: stress, delta: 1 }
+  - id: enjoy
+    label: Enjoy the feeling and go to bed
+    outcome:
+      text: >-
+        You let the feeling settle in. Tomorrow there will be more work, and a better understanding of it.
+      effects:
+        - { type: stat, key: happiness, delta: 2 }
+        - { type: stat, key: stress, delta: -1 }

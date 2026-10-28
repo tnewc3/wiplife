@@ -15,13 +15,17 @@ import {
   type OutcomeTier,
   type PastimeCategory,
   type PastimeCompanionKind,
+  type PastimeLook,
+  type ActivityKind,
   type PastimeMechanic,
+  type PastimeDef,
   type PastimeQuality,
   type PastimeRoute,
   type PastimeStake,
 } from '../../content/schemas';
 import type { MoneyChange, LifeState, PastimeReceipt } from '../types';
-import { allPastimes, companionOptions, HIDING_BLOCKS, pastimeBlock, pastimeCount, pastimePrice, type CompanionOption, type PastimeBlock, type PastimeChoice } from './query';
+import { allPastimes, companionOptions, HIDING_BLOCKS, pastimeBlock, pastimeCount, pastimeMinAge, pastimePrice, type CompanionOption, type PastimeBlock, type PastimeChoice } from './query';
+import { hobbyLevel, hobbySkill, hubCount, lookOptions, optionsOf } from './activities';
 import { consentOptions, evidenceCount, lastGamblingLoss, loanOffer, nameAfter, type LoanBlock } from './risk';
 
 export interface ActivityEntryView {
@@ -45,6 +49,11 @@ export interface ActivityEntryView {
   block: PastimeBlock | null;
   /** The valuable it buys, as it reads in a sentence. */
   buys: string | null;
+  /** A1: the activity of the Activities tab it is an option of. */
+  hub: string | null;
+  /** A1: what you can choose to change in your portrait (the salon and shopping), and for a hobby your skill and its level. */
+  look: { kind: PastimeLook; options: string[] } | null;
+  hobby: { skill: number; level: number } | null;
   /** Batch 2b: how it is worked out, and what the screen needs for it. */
   mechanic: PastimeMechanic;
   /** Gambling: the stakes with their prices; and chasing a loss (the loss, and what betting it back costs). */
@@ -87,15 +96,15 @@ export interface ActivitiesView {
 }
 
 /** The choices used to ask whether an activity is on offer at all: a middling stake, a trial, the standard tier. */
-function sampleOf(def: { quality?: boolean | undefined; mechanic: PastimeMechanic }): PastimeChoice {
-  return { ...(def.quality ? { quality: 'standard' as const } : {}), ...(def.mechanic === 'gamble' ? { stake: 'medium' as const } : {}), ...(def.mechanic === 'lawsuit' ? { route: 'trial' as const } : {}) };
+function sampleOf(state: LifeState, def: PastimeDef, content: ContentBundle): PastimeChoice {
+  return { ...(def.look !== undefined ? { look: lookOptions(state, def.look, content)[0] } : {}), ...(def.quality ? { quality: 'standard' as const } : {}), ...(def.mechanic === 'gamble' ? { stake: 'medium' as const } : {}), ...(def.mechanic === 'lawsuit' ? { route: 'trial' as const } : {}) };
 }
 
 function entryView(state: LifeState, defId: string, content: ContentBundle): ActivityEntryView | null {
   const def = content.pastimes[defId]!;
   const companions = companionOptions(state, def, content);
   const sampleQuality: PastimeQuality | undefined = def.quality ? 'standard' : undefined;
-  const sample = sampleOf(def);
+  const sample = sampleOf(state, def, content);
   const sampled = def.companion === 'required' ? { ...sample, companionId: companions[0]?.id } : sample;
   const base = pastimeBlock(state, def, sampled, content);
   // Not on offer to you at all: left out of the screen.
@@ -119,6 +128,9 @@ function entryView(state: LifeState, defId: string, content: ContentBundle): Act
     count: pastimeCount(state, def.id),
     limit: def.yearlyLimit,
     block: def.quality ? pastimeBlock(state, def, { ...sample, quality: 'budget', companionId: def.companion === 'required' ? first?.id : undefined }, content) : base,
+    hub: def.hub ?? null,
+    look: def.look !== undefined ? { kind: def.look, options: lookOptions(state, def.look, content) } : null,
+    hobby: def.hobby ? { skill: hobbySkill(state, def.id, content), level: hobbyLevel(hobbySkill(state, def.id, content), content) } : null,
     buys: def.buys !== undefined ? (content.valuables[def.buys]?.name ?? null) : null,
     mechanic: def.mechanic,
     stakes: def.mechanic === 'gamble' ? PASTIME_STAKES.map((stake) => ({ stake, price: pastimePrice(state, def, { stake }, content), block: pastimeBlock(state, def, { stake }, content), chasePrice: pastimePrice(state, def, { stake, chase: true }, content), chaseBlock: pastimeBlock(state, def, { stake, chase: true }, content) })) : null,
@@ -184,4 +196,62 @@ export function getActivitiesView(state: LifeState, content: ContentBundle): Act
     }))
     .reverse();
   return { canAct: state.phase === 'yearStart' && state.housing.kind !== 'incarcerated', savings: state.finances.savings, groups, receipts };
+}
+
+
+/** Why an activity of the tab can't be opened at all right now (greyed out; tapping it says why). */
+export type HubBlock = { reason: 'age'; minAge: number } | { reason: 'prison' } | { reason: 'nothing' };
+
+export interface ActivityHubView {
+  id: string;
+  label: string;
+  subtitle: string;
+  icon: string;
+  kind: ActivityKind;
+  /** Times done this year (across its options), and the most. */
+  count: number;
+  limit: number;
+  block: HubBlock | null;
+  /** The options on offer to you now (an options, vacation or hobbies activity). */
+  options: ActivityEntryView[];
+}
+
+export interface ActivityTabGroupView {
+  id: string;
+  label: string;
+  activities: ActivityHubView[];
+}
+
+/** The Activities tab (A1): every activity in its group, with its options, or the reason it is greyed out. Availability is the engine's. */
+export function getActivityTabView(state: LifeState, content: ContentBundle): { groups: ActivityTabGroupView[]; canAct: boolean; savings: number } {
+  const reg = content.registries.activities;
+  const age = state.character.age;
+  const adult = content.balance.relationships.adultAge;
+  const prison = state.housing.kind === 'incarcerated';
+  const groups = reg.groups.map((g): ActivityTabGroupView => ({
+    id: g.id,
+    label: g.label,
+    activities: reg.activities
+      .filter((a) => a.group === g.id)
+      .map((a): ActivityHubView => {
+        const options = a.kind === 'doctor' || a.kind === 'own_thing' ? [] : optionsOf(content, a.id).flatMap((d) => {
+          const v = entryView(state, d.id, content);
+          return v ? [v] : [];
+        });
+        // The youngest age any option allows where you live: it is what the greyed-out row says.
+        const defs = optionsOf(content, a.id);
+        const optionMin = defs.length > 0 ? Math.min(...defs.map((d) => Math.max(d.minAge, d.legalAge ? legalMin(state, d, content) : 0))) : 0;
+        const minAge = Math.max(a.adultsOnly ? adult : 0, a.kind === 'options' || a.kind === 'vacation' || a.kind === 'hobbies' ? optionMin : a.minAge);
+        let block: HubBlock | null = null;
+        if (prison && a.kind !== 'doctor') block = { reason: 'prison' };
+        else if (age < minAge) block = { reason: 'age', minAge };
+        else if ((a.kind === 'options' || a.kind === 'hobbies') && options.length === 0) block = { reason: 'nothing' };
+        return { id: a.id, label: a.label, subtitle: a.subtitle, icon: a.icon, kind: a.kind, count: hubCount(state, a.id), limit: a.limit, block, options };
+      }),
+  }));
+  return { groups, canAct: state.phase === 'yearStart' && !prison, savings: state.finances.savings };
+}
+
+function legalMin(state: LifeState, def: PastimeDef, content: ContentBundle): number {
+  return pastimeMinAge(state, def, content);
 }

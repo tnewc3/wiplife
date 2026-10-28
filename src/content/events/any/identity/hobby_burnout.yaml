@@ -1,0 +1,29 @@
+# Opened by a bad hobby session (A1).
+id: hobby_burnout
+title: Too much
+text: >-
+  The thing you used to look forward to feels like homework. You open it, close it and go for a walk instead.
+tone: light
+category: identity
+rarity: common
+lifeStages: [teen, youngAdult, adult, senior]
+requires: { any: [{ flag: practiced_play_the_guitar }, { flag: practiced_paint_or_draw }, { flag: practiced_write_stories }, { flag: practiced_bake_something }, { flag: practiced_build_with_wood }, { flag: practiced_play_chess }, { flag: practiced_practice_dance }, { flag: practiced_practice_public_speaking }, { flag: practiced_shoot_hoops }] }
+weight: { base: 5 }
+followUpOnly: true
+choices:
+  - id: break
+    label: Take a break from it
+    outcome:
+      text: >-
+        A few weeks away and you start to miss it again. It was never the practice. It was the pressure.
+      effects:
+        - { type: stat, key: stress, delta: -2 }
+        - { type: stat, key: happiness, delta: 1 }
+  - id: grind
+    label: Push through it
+    outcome:
+      text: >-
+        You push through, and it works. You finish and you are tired in a way that has nothing to do with the work.
+      effects:
+        - { type: stat, key: discipline, delta: 1 }
+        - { type: stat, key: stress, delta: 2 }

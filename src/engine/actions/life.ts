@@ -178,6 +178,7 @@ export interface LifeActionParams {
   first?: string;
   last?: string;
   consentId?: string;
+  look?: string;
 }
 
 export interface LifeActionRule {

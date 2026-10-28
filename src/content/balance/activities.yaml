@@ -1,0 +1,22 @@
+# A1: the Activities tab. Every number the tab adds to the leisure activities of balance/pastimes.yaml: how repeats
+# shrink what you get, and how a hobby grows. Costs, odds and chances of each option stay in balance/pastimes.yaml.
+
+returns:
+  # Each earlier time in a year you did any option of the same activity (the gym's light and hard workouts count
+  # together): gains are multiplied by `repeat`, the great and good outcomes' odds by `tierShift`, the bad and backfire
+  # outcomes' odds by (1 + badRise), and a gain never goes below `floor` of itself.
+  repeat: 0.6
+  tierShift: 0.8
+  badRise: 0.25
+  floor: 0.1
+
+hobbies:
+  # Skill is 0 to 100. These are where the levels begin: beginner, amateur, skilled, expert.
+  levels: [10, 25, 45, 70]
+  skilledAt: 45
+  # A practice can bring a hidden talent of the hobby's kind to light.
+  talent:
+    base: 0.05
+    curve: [{ at: 0, x: 0.4 }, { at: 40, x: 1 }, { at: 100, x: 2.5 }]
+  # Skill lost for each year without practice.
+  decay: 2

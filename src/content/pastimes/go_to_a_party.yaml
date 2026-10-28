@@ -1,0 +1,34 @@
+id: go_to_a_party
+category: social
+label: "Go to a party"
+blurb: "A friend of a friend is throwing something."
+minAge: 12
+inPerson: true
+companion: none
+cost: party_go
+profile: night
+yearlyLimit: 6
+hub: parties
+tiers:
+  great:
+    text:
+      - "You walk in knowing three people and leave knowing twelve. The night keeps getting better."
+      - "Somebody puts on the right song at the right moment, and the whole room sings along."
+    effects: [{ type: stat, key: happiness, delta: 4 }, { type: stat, key: sociability, delta: 2 }]
+    events: [party_old_friend_turns_up]
+    eventChance: follow_up_low
+  good:
+    text:
+      - "A decent party with decent people. You hold a conversation or two worth having."
+      - "You dance a little, eat a lot and go home at a reasonable hour."
+    effects: [{ type: stat, key: happiness, delta: 2 }, { type: stat, key: sociability, delta: 1 }]
+  neutral:
+    text:
+      - "You stand by the snack table for most of it and talk to the dog."
+      - "Not your crowd, not your music. You stay an hour out of politeness."
+    effects: [{ type: stat, key: happiness, delta: 1 }]
+  bad:
+    text:
+      - "The room is loud and crowded, and you cannot find anyone you know. You leave without saying goodbye."
+      - "You get stuck in a long conversation with someone who only talks about themselves."
+    effects: [{ type: stat, key: happiness, delta: -1 }, { type: stat, key: stress, delta: 2 }]

@@ -1,0 +1,45 @@
+id: host_a_party
+category: social
+label: "Host a party"
+blurb: "Your place, your guest list, your clean-up."
+minAge: 16
+inPerson: true
+companion: none
+cost: party_host
+profile: night
+yearlyLimit: 3
+hub: parties
+tiers:
+  great:
+    text:
+      - "The place fills up, the music holds, and people are still thanking you at the door at two in the morning."
+      - "It is the kind of night people bring up for a long time. You did that."
+    effects: [{ type: stat, key: happiness, delta: 5 }, { type: stat, key: sociability, delta: 2 }, { type: stat, key: reputation, delta: 1 }]
+    events: [party_old_friend_turns_up, party_cleanup_bill]
+    eventChance: follow_up_mid
+  good:
+    text:
+      - "A good crowd, a good mood and only one broken glass. Hosting suits you."
+      - "Your guests have a great time, and you finally relax around midnight."
+    effects: [{ type: stat, key: happiness, delta: 3 }, { type: stat, key: sociability, delta: 1 }]
+    events: [party_cleanup_bill]
+    eventChance: follow_up_low
+  neutral:
+    text:
+      - "Fewer people than you hoped, and the evening is quiet but pleasant."
+      - "You spend more time in the kitchen than at your own party."
+    effects: [{ type: stat, key: happiness, delta: 1 }, { type: stat, key: stress, delta: 1 }]
+  bad:
+    text:
+      - "Somebody you did not invite brings six people you do not know. The night gets away from you."
+      - "Half the guests leave early, and the other half stay far too late."
+    effects: [{ type: stat, key: stress, delta: 3 }, { type: stat, key: happiness, delta: -1 }]
+    events: [party_neighbor_complaint, party_cleanup_bill]
+    eventChance: follow_up_mid
+  backfire:
+    text:
+      - "The party grows out of your control. By the end of the night there is a hole in a wall and a police car outside."
+      - "Things get loud and then they get ugly. Someone calls the police and you spend the early morning apologizing."
+    effects: [{ type: stat, key: stress, delta: 5 }, { type: stat, key: happiness, delta: -3 }, { type: stat, key: reputation, delta: -2 }]
+    events: [party_cops_arrive]
+    eventChance: follow_up_mid

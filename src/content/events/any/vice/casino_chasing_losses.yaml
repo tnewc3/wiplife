@@ -1,0 +1,30 @@
+# Opened by a bad night at the tables (A1).
+id: casino_chasing_losses
+title: Win it back
+text: >-
+  The money is gone and it will not feel real until you stop. A small voice says one good hand would put it all back.
+tone: light
+category: vice
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires: { age: { gte: 18 } }
+weight: { base: 5 }
+followUpOnly: true
+choices:
+  - id: stop
+    label: Walk out
+    outcome:
+      text: >-
+        It is the hardest walk of the night, and the best decision. The air outside is cold and clean.
+      effects:
+        - { type: stat, key: discipline, delta: 1 }
+        - { type: stat, key: stress, delta: 2 }
+  - id: chase
+    label: Put down a little more
+    outcome:
+      text: >-
+        A little more becomes more than a little. You leave with less, and the voice is quiet at last.
+      effects:
+        - { type: money, delta: -250 }
+        - { type: stat, key: stress, delta: 3 }
+        - { type: stat, key: happiness, delta: -2 }

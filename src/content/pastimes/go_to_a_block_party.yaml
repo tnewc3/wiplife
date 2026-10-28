@@ -1,0 +1,34 @@
+id: go_to_a_block_party
+category: social
+label: "Go to a block party"
+blurb: "Neighbors, folding tables and somebody else's speakers."
+minAge: 5
+inPerson: true
+companion: none
+cost: party_block
+profile: outdoor
+yearlyLimit: 3
+hub: parties
+tiers:
+  great:
+    text:
+      - "The whole street turns out. You eat too much, meet everyone and stay until the lights come on."
+      - "Kids run around, grown-ups argue about the grill, and you feel at home on your own street."
+    effects: [{ type: stat, key: happiness, delta: 3 }, { type: stat, key: sociability, delta: 1 }]
+    events: [party_neighbor_complaint]
+    eventChance: follow_up_low
+  good:
+    text:
+      - "A friendly afternoon with the people who live around you."
+      - "You eat, you chat, you carry a table back for someone."
+    effects: [{ type: stat, key: happiness, delta: 2 }]
+  neutral:
+    text:
+      - "Hot dogs, small talk and a long afternoon."
+      - "You stay long enough to be polite and not long enough to be missed."
+    effects: [{ type: stat, key: happiness, delta: 1 }]
+  bad:
+    text:
+      - "The sun is brutal and the line for food is long. You go home with a headache."
+      - "Two neighbors argue about parking all afternoon and you are caught between them."
+    effects: [{ type: stat, key: stress, delta: 2 }]

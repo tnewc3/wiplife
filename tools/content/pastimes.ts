@@ -35,6 +35,8 @@ const RISK_INSTRUCTION_WORDS =
 const ADULT_CATEGORIES: readonly string[] = ['surgery', 'nightlife', 'luxury', 'love'];
 const PRONOUN = /\b(?:he|she|him|his|hers?|himself|herself)\b/i;
 /** Wording that talks about the past; activities have no memory of it. */
+/** The kinds of people an event opened by an activity a minor can do may cast: people already in the life. */
+const MINOR_SAFE_KINDS: readonly string[] = ['friend', 'parent', 'sibling', 'grandparent', 'relative'];
 const PAST = /\b(?:again|as usual|as always|once more|last time|your usual|you used to|back when)\b/i;
 const TIME = /\b(?:years?|months?|weeks?) (?:later|ago)\b|\blast (?:year|month|week|summer|winter)\b/i;
 
@@ -228,7 +230,16 @@ export function checkPastimes(bundle: ContentBundle, fileOf: (typeKey: Collectio
             const adultsOnly = (bundle.registries.categories.categories[ev.category]?.romance ?? false) || JSON.stringify(ev.requires ?? {}).includes('"age":{"gte":18}');
             if (!adultsOnly) e(`"${eventId}" must be adults only (a romance category, or requires age 18 or older)`);
           }
-          if (reachableByMinor) e(`"${eventId}": an activity a minor can do can't open a follow-up event that casts someone`);
+          // A1: an activity a minor can do opens only events that are safe for a minor: no romance category, nobody new cast (only
+          // people already in the life, as friends and family), and no romantic or sexual words anywhere in the event.
+          if (reachableByMinor) {
+            if (bundle.registries.categories.categories[ev.category]?.romance) e(`"${eventId}": an activity a minor can do can't open a romance event`);
+            for (const [role, c] of Object.entries(ev.cast ?? {})) {
+              if (c.createIfMissing || c.romantic || (c.kind === undefined || !MINOR_SAFE_KINDS.includes(c.kind))) e(`"${eventId}": an activity a minor can do can't open an event that casts "${role}" (only friends and family already in the life)`);
+            }
+            const spoken = JSON.stringify(ev).replace(/\{[^}]*\}/g, '');
+            if (ROMANCE_WORDS.test(spoken)) e(`"${eventId}": an activity a minor can do can't open an event with romantic or sexual words ("${spoken.match(ROMANCE_WORDS)![0]}")`);
+          }
         }
       }
     }
@@ -270,10 +281,43 @@ export function checkPastimes(bundle: ContentBundle, fileOf: (typeKey: Collectio
   for (const def of Object.values(bundle.valuables)) if (!def.retired) perClass.set(def.class, (perClass.get(def.class) ?? 0) + 1);
   if ([...perClass.values()].reduce((s, n) => s + n, 0) < 5) errors.push({ file: 'valuables/', message: 'at least 5 valuables are required (Batch 2a acceptance)' });
 
+  // A1: the Activities tab. Every option names an activity that exists; every activity of the tab has something to offer; dating (and any
+  // adults-only activity) is adults only in every option; a look change belongs to the salon or shopping; a hobby names a real talent.
+  const hubs = bundle.registries.activities.activities;
+  const adult = bundle.balance.relationships.adultAge;
+  for (const hub of hubs) {
+    if (!bundle.registries.icons.icons[hub.icon]) errors.push({ file: 'registries/activities.yaml', message: `${hub.id}: unknown icon "${hub.icon}" (registries/icons.yaml)` });
+    if (hub.adultsOnly && hub.minAge < adult) errors.push({ file: 'registries/activities.yaml', message: `${hub.id}: adultsOnly needs minAge ${adult} or more` });
+    const options = Object.values(bundle.pastimes).filter((p) => !p.retired && p.hub === hub.id);
+    if (['options', 'vacation', 'hobbies'].includes(hub.kind) && options.length < 2) errors.push({ file: 'registries/activities.yaml', message: `${hub.id}: needs at least 2 options (found ${options.length})` });
+    if (['doctor', 'own_thing'].includes(hub.kind) && options.length > 0) errors.push({ file: 'registries/activities.yaml', message: `${hub.id}: a ${hub.kind} activity has a sheet of its own and takes no options` });
+  }
+  for (const [id, def] of Object.entries(bundle.pastimes)) {
+    if (def.retired) continue;
+    const file = fileOf('pastimes', id);
+    const err = (message: string) => errors.push({ file, message: `${id}: ${message}` });
+    const hub = def.hub === undefined ? undefined : hubs.find((h) => h.id === def.hub);
+    if (def.hub !== undefined && !hub) err(`unknown hub "${def.hub}" (registries/activities.yaml)`);
+    if (hub?.adultsOnly && def.minAge < adult) err(`${hub.label} is adults only: minAge must be at least ${adult}`);
+    if (hub?.adultsOnly && hub.id === 'dating' && def.category !== 'love') err('every option of Dating is in the love category');
+    if (def.look !== undefined && !['salon_spa', 'shopping'].includes(def.category)) err('a look change belongs to the salon or shopping');
+    if (def.look !== undefined && def.companion !== 'none') err('a look change is chosen alone: companion: none');
+    if (def.hobby && (hub?.kind !== 'hobbies' || def.category !== 'hobby')) err('a hobby is an option of Hobbies, in the hobby category');
+    if (def.hobby?.talent !== undefined && !bundle.talents[def.hobby.talent]) err(`unknown talent "${def.hobby.talent}"`);
+    if (hub?.kind === 'hobbies' && !def.hobby) err('an option of Hobbies has a hobby');
+    if (def.hobby) {
+      for (const flagKey of [`practiced_${id}`, `skilled_${id}`]) if (!flags[flagKey]) err(`flag "${flagKey}" is not in registries/flags.yaml`);
+      if (def.hobby.skill.great < def.hobby.skill.good || def.hobby.skill.good < def.hobby.skill.neutral) err('hobby skill must not fall as the outcome gets better');
+    }
+  }
+  if (bundle.balance.activities.hobbies.skilledAt > 100) errors.push({ file: 'balance/activities.yaml', message: 'hobbies.skilledAt is out of range' });
+  const levels = bundle.balance.activities.hobbies.levels;
+  if (levels.some((v, i) => i > 0 && v <= levels[i - 1]!)) errors.push({ file: 'balance/activities.yaml', message: 'hobbies.levels must grow' });
+
   // Every category has at least 5 activities.
   const counts = new Map<string, number>();
   for (const def of Object.values(bundle.pastimes)) if (!def.retired) counts.set(def.category, (counts.get(def.category) ?? 0) + 1);
-  for (const category of ['mind_body', 'salon_spa', 'surgery', 'shopping', 'movies', 'nightlife', 'outdoor', 'luxury', 'love', ...RISK_CATEGORIES]) {
+  for (const category of ['mind_body', 'salon_spa', 'surgery', 'shopping', 'movies', 'nightlife', 'outdoor', 'luxury', 'love', 'social', 'hobby', ...RISK_CATEGORIES]) {
     if ((counts.get(category) ?? 0) < 5) errors.push({ file: 'pastimes/', message: `${category}: at least 5 activities are required (Batch 2a and 2b acceptance), found ${counts.get(category) ?? 0}` });
   }
   return errors;

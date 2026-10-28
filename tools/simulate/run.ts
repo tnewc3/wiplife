@@ -67,7 +67,7 @@ import {
 import { chooseWillActions, rollWillProfile } from './heirs';
 import { emptyPeopleReport, formatPeople, peopleTargets, PeopleWatcher, PipelineTimer, type PeopleReport } from './people';
 import { emptyMentalReport, formatMental, mentalTargets, MentalWatcher, type MentalReport } from './mental';
-import { choosePastimePlans, emptyPastimesReport, formatPastimes, paramsOfPlan, pastimesSpamTargets, pastimesTargets, PastimesWatcher, rollPastimeProfile, type PastimePlayer, type PastimesReport } from './pastimes';
+import { a1Targets, choosePastimePlans, emptyPastimesReport, formatPastimes, paramsOfPlan, pastimesSpamTargets, pastimesTargets, PastimesWatcher, rollPastimeProfile, type PastimePlayer, type PastimesReport } from './pastimes';
 import { chooseRiskPlans, formatRisk, riskFollowUp, riskTargets } from './risk';
 import { choosePetInteractions, choosePossessionActions, emptyPossessionsReport, formatPossessions, possessionsTargets, PossessionsWatcher, rollPossessionProfile, type PossessionsReport } from './possessions';
 import { emptyEulogyReport, EulogyWatcher, eulogyTargets, formatEulogy, type EulogyReport } from './eulogy';
@@ -122,7 +122,7 @@ export interface SimulationOptions {
   country?: CountryId;
 }
 
-export type SimulatedPlayer = 'careful' | 'careless' | 'spammer' | 'criminal' | 'star' | 'athlete';
+export type SimulatedPlayer = 'careful' | 'careless' | 'spammer' | 'criminal' | 'star' | 'athlete' | 'activities';
 
 export interface StageYears {
   years: number;
@@ -834,7 +834,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
 
   const recurring = recurringEvents(content);
   // E6a: the criminal player lives as the careful one does (family, interactions), and also in a crew.
-  const behaves: InteractionPlayer = playerKind === 'criminal' || playerKind === 'star' || playerKind === 'athlete' ? 'careful' : playerKind;
+  const behaves: InteractionPlayer = playerKind === 'criminal' || playerKind === 'star' || playerKind === 'athlete' || playerKind === 'activities' ? 'careful' : playerKind;
   const interactions = emptyInteractionReport(behaves, content);
   const family = emptyFamilyReport();
   const people = emptyPeopleReport();
@@ -850,7 +850,7 @@ export function runSimulation(content: ContentBundle, options: SimulationOptions
   const business = emptyBusinessReport(content);
   const mental = emptyMentalReport(content);
   const possessions = emptyPossessionsReport(content);
-  const pastimePlayer: PastimePlayer = playerKind === 'spammer' ? 'spammer' : careless ? 'careless' : playerKind === 'criminal' ? 'criminal' : 'careful';
+  const pastimePlayer: PastimePlayer = playerKind === 'spammer' ? 'spammer' : playerKind === 'activities' ? 'activities' : careless ? 'careless' : playerKind === 'criminal' ? 'criminal' : 'careful';
   const pastimes = emptyPastimesReport(pastimePlayer);
   const teen = emptyTeenReport(content);
   const schoolLife = emptySchoolLifeReport();
@@ -1841,7 +1841,7 @@ export function formatReport(report: SimulationReport, content: ContentBundle): 
   lines.push(...formatBusiness(report.business, content), '  targets (src/content/balance/targets.yaml):', ...businessTargets(report, content).map((r) => target(r.label, r.value, r.goal, r.met)));
   lines.push('', ...formatMental(report.mental, content, report.events), '  targets (src/content/balance/targets.yaml):', ...mentalTargets(report, content).map((r) => target(r.label, r.value, r.goal, r.met)));
   lines.push(...formatPossessions(report.possessions, content, report.events), '  targets (src/content/balance/targets.yaml):', ...possessionsTargets(report, content).map((r) => target(r.label, r.value, r.goal, r.met)));
-  lines.push(...formatPastimes(report.pastimes, content), report.player === 'spammer' ? '  targets (the spammer: repeating gives less):' : '  targets (src/content/balance/targets.yaml):', ...(report.player === 'spammer' ? pastimesSpamTargets(report, content) : pastimesTargets(report, content)).map((r) => target(r.label, r.value, r.goal, r.met)));
+  lines.push(...formatPastimes(report.pastimes, content), report.player === 'spammer' ? '  targets (the spammer: repeating gives less):' : '  targets (src/content/balance/targets.yaml):', ...(report.player === 'spammer' ? pastimesSpamTargets(report, content) : report.player === 'activities' ? [] : pastimesTargets(report, content)).map((r) => target(r.label, r.value, r.goal, r.met)), '  targets (A1, the Activities tab):', ...a1Targets(report, content).map((r) => target(r.label, r.value, r.goal, r.met)));
   lines.push(...formatRisk(report.pastimes.risk, report.lives, report.events, content), '  targets (src/content/balance/targets.yaml):', ...riskTargets(report, content).map((r) => target(r.label, r.value, r.goal, r.met)));
   lines.push(...formatTeen(report.teen, content), '  targets (src/content/balance/targets.yaml):', ...teenTargets(report, content).map((r) => target(r.label, r.value, r.goal, r.met)));
   lines.push(...formatSchoolLife(report.schoolLife, content), '  targets (src/content/balance/targets.yaml):', ...schoolLifeTargets(report, content).map((r) => target(r.label, r.value, r.goal, r.met)));

@@ -10,6 +10,7 @@ inPerson: true
 companion: none
 cost: horse_race
 yearlyLimit: 6
+hub: casino
 tiers:
   great:
     text:
@@ -23,6 +24,8 @@ tiers:
         effects:
           - { type: health, conditionId: gambling_addiction, severity: 25 }
         note: "You notice that you are thinking about the next bet before this one is settled."
+    events: [casino_hot_streak]
+    eventChance: follow_up_mid
   good:
     text:
       - "A good day at the track. A winner in the fourth race pays {amount} on your {cost}."
@@ -34,6 +37,8 @@ tiers:
         effects:
           - { type: health, conditionId: gambling_addiction, severity: 25 }
         note: "You notice that you are thinking about the next bet before this one is settled."
+    events: [casino_hot_streak]
+    eventChance: follow_up_low
   bad:
     text:
       - "Your horse is last out of the gate and stays there. The {cost} ticket goes in your pocket as a souvenir."
@@ -46,6 +51,8 @@ tiers:
         effects:
           - { type: health, conditionId: gambling_addiction, severity: 25 }
         note: "You notice that you are thinking about the next bet before this one is settled."
+    events: [casino_chasing_losses]
+    eventChance: follow_up_mid
   backfire:
     text:
       - "You put more on the last race to win it all back, and it finishes in the middle of the field. You leave in the dusk with nothing and your head down."
@@ -58,3 +65,5 @@ tiers:
         effects:
           - { type: health, conditionId: gambling_addiction, severity: 25 }
         note: "You notice that you are thinking about the next bet before this one is settled."
+    events: [casino_chasing_losses]
+    eventChance: follow_up_mid

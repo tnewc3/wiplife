@@ -1,0 +1,34 @@
+id: go_on_a_quiet_retreat
+category: mind_body
+label: "Go on a quiet weekend retreat"
+blurb: "Two days of silence, simple meals and nowhere to be."
+minAge: 16
+inPerson: true
+companion: none
+cost: retreat
+profile: calm
+yearlyLimit: 1
+hub: meditate
+tiers:
+  great:
+    text:
+      - "By the second morning the noise in your head thins out. You come home lighter than you left."
+      - "In the silence, something you have been carrying quietly puts itself down."
+    effects: [{ type: stat, key: stress, delta: -6 }, { type: stat, key: happiness, delta: 3 }, { type: stat, key: discipline, delta: 1 }]
+    events: [meditation_clarity]
+    eventChance: follow_up_low
+  good:
+    text:
+      - "Two quiet days and plain food. It does what it promises, more or less."
+      - "You sit, you walk, you sit some more. Your shoulders have dropped by Sunday."
+    effects: [{ type: stat, key: stress, delta: -4 }, { type: stat, key: happiness, delta: 1 }]
+  neutral:
+    text:
+      - "Silence turns out to be loud. You get through the weekend, and bring home a little of its calm."
+      - "You spend most of it thinking about lunch, and some of it thinking about nothing."
+    effects: [{ type: stat, key: stress, delta: -2 }]
+  bad:
+    text:
+      - "The silence is not peaceful for you. Old worries come up with nothing to drown them out, and you leave early."
+      - "A cold room, a hard cushion and a long list of things you would rather be doing."
+    effects: [{ type: stat, key: stress, delta: 2 }, { type: stat, key: happiness, delta: -1 }]

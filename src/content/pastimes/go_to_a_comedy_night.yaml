@@ -9,6 +9,7 @@ companionKinds: [partner, friend]
 cost: comedy_night
 profile: night
 yearlyLimit: 4
+hub: nightlife
 tiers:
   great:
     text:

@@ -1,0 +1,29 @@
+# A skilled guitar player is put on a bill (A1 hobbies, fame path music).
+id: hobby_open_mic_invite
+title: Somebody heard you
+text: >-
+  A friend of a friend heard you play and has put your name on the lineup. "Ten minutes," {friend.name} {friend:says|say}. "Three songs. People will be nice."
+tone: light
+category: fameentry
+rarity: uncommon
+lifeStages: [teen, youngAdult, adult, senior]
+requires: { all: [{ age: { gte: 14 } }, { flag: skilled_play_the_guitar }, { fame: { active: false } }, { fame: { retired: false } }] }
+weight: { base: 6 }
+cast:
+  friend: { kind: friend, presence: city }
+choices:
+  - id: play
+    label: Play the set
+    outcome:
+      text: >-
+        You play it badly, then well, then very well. By the third song somebody at the back is singing along.
+      effects:
+        - { type: fame, action: enter, path: music, route: open_mic }
+        - { type: stat, key: happiness, delta: 4 }
+  - id: pass
+    label: Say you are not ready
+    outcome:
+      text: >-
+        You say you are not ready. Nobody argues. You listen to the others from the back of the room.
+      effects:
+        - { type: stat, key: confidence, delta: -1 }

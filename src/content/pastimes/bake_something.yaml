@@ -1,0 +1,41 @@
+id: bake_something
+category: hobby
+label: "Bake something"
+blurb: "Flour, patience and a hot oven."
+minAge: 8
+inPerson: true
+companion: none
+cost: hobby_supplies
+profile: steady
+yearlyLimit: 8
+hub: hobbies
+hobby:
+  talent: cooking
+  skill: { great: 10, good: 7, neutral: 3, bad: 1, backfire: 0 }
+tiers:
+  great:
+    text:
+      - "The loaf comes out golden, with a crust that crackles when you press it. The kitchen smells wonderful."
+      - "Your best bake so far. You eat the first slice standing at the counter."
+    effects: [{ type: stat, key: happiness, delta: 3 }, { type: stat, key: stress, delta: -1 }, { type: stat, key: discipline, delta: 1 }]
+    events: [hobby_class_invite, hobby_someone_asks]
+    eventChance: follow_up_low
+  good:
+    text:
+      - "It rises, it browns and it tastes like bread. Good enough."
+      - "A decent batch, a little dry, entirely edible."
+    effects: [{ type: stat, key: happiness, delta: 2 }, { type: stat, key: stress, delta: -1 }]
+    events: [hobby_someone_asks]
+    eventChance: follow_up_low
+  neutral:
+    text:
+      - "You put in the time and not much else happens. Practice is mostly this."
+      - "Neither good nor bad, just another session on the pile."
+    effects: [{ type: stat, key: happiness, delta: 1 }]
+  bad:
+    text:
+      - "The middle is raw and the edges are black. The kitchen smells of smoke."
+      - "You forget the sugar, and only find out when you taste it."
+    effects: [{ type: stat, key: stress, delta: 2 }, { type: stat, key: happiness, delta: -1 }]
+    events: [hobby_burnout]
+    eventChance: follow_up_low

@@ -28,6 +28,7 @@ export function AssetsTab({ life }: { life: LifeState }) {
   const openHome = useAppStore((s) => s.openHome);
   const openBelongings = useAppStore((s) => s.openBelongings);
   const openWill = useAppStore((s) => s.openWill);
+  const openActivity = useAppStore((s) => s.openActivity);
   const belongings = getBelongingsView(life, content);
   const summary = getCharacterSummary(life, content);
   const adult = canPlanEstate(life, content);
@@ -81,6 +82,7 @@ export function AssetsTab({ life }: { life: LifeState }) {
           </>
         )}
         <LinkRow title="Possessions" detail="Vehicles, valuables, pets, insurance and renovations" onClick={openBelongings} testId="assets-possessions" />
+        <LinkRow title="Go shopping" detail="Clothes, accessories, hats and treats" onClick={() => openActivity('shopping')} testId="assets-go-shopping" />
       </Card>
       {adult && (
         <>

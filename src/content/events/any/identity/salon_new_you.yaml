@@ -1,0 +1,28 @@
+# Opened by a new hairstyle (A1).
+id: salon_new_you
+title: A new you
+text: >-
+  A catches-the-light moment: you pass a shop window and for a second do not recognize the person in it, and then you do. You like them.
+tone: light
+category: identity
+rarity: common
+lifeStages: [teen, youngAdult, adult, senior]
+requires: { flag: changed_hair }
+weight: { base: 5 }
+followUpOnly: true
+choices:
+  - id: own
+    label: Own it
+    outcome:
+      text: >-
+        You carry the look out into the world and the world responds, mostly with small smiles from strangers.
+      effects:
+        - { type: stat, key: confidence, delta: 2 }
+        - { type: stat, key: happiness, delta: 2 }
+  - id: modest
+    label: Look away, a little shy
+    outcome:
+      text: >-
+        You are pleased and embarrassed in equal measure. It will take a while to feel like yours.
+      effects:
+        - { type: stat, key: happiness, delta: 1 }

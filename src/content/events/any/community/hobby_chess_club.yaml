@@ -1,0 +1,28 @@
+# A skilled chess player finds a club (A1 hobbies).
+id: hobby_chess_club
+title: The club that meets on Tuesdays
+text: >-
+  A notice on a corkboard: a chess club, Tuesday nights, all levels welcome. Somebody has underlined "all levels" twice.
+tone: light
+category: community
+rarity: uncommon
+lifeStages: [teen, youngAdult, adult, senior]
+requires: { flag: skilled_play_chess }
+weight: { base: 5 }
+choices:
+  - id: join
+    label: Go on Tuesday
+    outcome:
+      text: >-
+        The room is full of people who take chess very seriously and who make tea very badly. You come back the next week.
+      effects:
+        - { type: stat, key: sociability, delta: 1 }
+        - { type: stat, key: smarts, delta: 1 }
+        - { type: stat, key: happiness, delta: 2 }
+  - id: stay
+    label: Stay home and play online
+    outcome:
+      text: >-
+        It is easier, and quieter, and not quite the same.
+      effects:
+        - { type: stat, key: happiness, delta: 1 }

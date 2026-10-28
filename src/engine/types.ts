@@ -1309,6 +1309,8 @@ export interface LifeState {
   business: BusinessState;
   /** Batch 2a: this year's activities (leisure and self): how many of each, and the receipts of the last few. */
   pastimes: PastimesState;
+  /** A1: your hobbies, by the id of the practice activity (src/content/pastimes, `hobby`): the skill when you last practiced it (0 to 100; it fades from then on) and the year. */
+  hobbies: Record<Id, HobbyState>;
   /** Batch 8: your accounts on the platforms (Instagram, TikTok and the rest), this year's posts, what they earned and what has happened to them. */
   social: SocialState;
 }
@@ -1435,6 +1437,14 @@ export interface SocialState {
   /** The last year you posted (for the fame step: a year of posting is a year of work). */
   workedYear: number;
   totals: SocialTotals;
+}
+
+/** A1: a hobby you have taken up. */
+export interface HobbyState {
+  skill: number;
+  year: number;
+  /** Times practiced, over the life. */
+  sessions: number;
 }
 
 /** Batch 2a: activities this year. A new year starts from nothing (counts of an earlier year are ignored). */

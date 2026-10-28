@@ -1,0 +1,29 @@
+# Opened by a haircut or style that went wrong (A1).
+id: salon_regret
+title: Second thoughts
+text: >-
+  You have been looking at the mirror every morning for a week, hoping it will look better tomorrow. It is not going to.
+tone: light
+category: identity
+rarity: common
+lifeStages: [teen, youngAdult, adult, senior]
+requires: { flag: changed_hair }
+weight: { base: 5 }
+followUpOnly: true
+choices:
+  - id: wait
+    label: Wait for it to grow out
+    outcome:
+      text: >-
+        It grows, slowly, and you wear a hat for the worst of it. Next time you will bring a photo.
+      effects:
+        - { type: stat, key: looks, delta: -1 }
+        - { type: stat, key: stress, delta: 1 }
+  - id: embrace
+    label: Decide to love it anyway
+    outcome:
+      text: >-
+        It takes about two weeks, and then you do. It becomes your look.
+      effects:
+        - { type: stat, key: confidence, delta: 1 }
+        - { type: stat, key: happiness, delta: 1 }

@@ -1,0 +1,38 @@
+id: take_a_weekend_getaway
+category: outdoor
+label: "Take a weekend getaway"
+blurb: "Two nights somewhere that is not home."
+minAge: 12
+inPerson: true
+companion: none
+cost: getaway
+profile: outdoor
+yearlyLimit: 3
+hub: vacation
+tiers:
+  great:
+    text:
+      - "Two days of sleeping late, wandering and eating things you cannot pronounce. You come home with a better outlook and a worse phone battery."
+      - "The weather holds, the hotel is lovely and the town is full of small surprises."
+    effects: [{ type: stat, key: happiness, delta: 5 }, { type: stat, key: stress, delta: -4 }, { type: stat, key: health, delta: 1 }]
+    events: [vacation_travel_story]
+    eventChance: follow_up_low
+  good:
+    text:
+      - "A pleasant two days away. You stop thinking about your inbox sometime on Saturday."
+      - "Nothing goes wrong, which is a kind of luxury of its own."
+    effects: [{ type: stat, key: happiness, delta: 3 }, { type: stat, key: stress, delta: -2 }]
+    events: [vacation_travel_story]
+    eventChance: follow_up_low
+  neutral:
+    text:
+      - "The place is fine and the weekend is fine. Most of it is spent getting there and back."
+      - "You look at the sights and come home tired."
+    effects: [{ type: stat, key: happiness, delta: 1 }, { type: stat, key: stress, delta: -1 }]
+  bad:
+    text:
+      - "It rains the whole time, and the room is not the room in the photos."
+      - "A delayed train, a cold hotel and an expensive dinner. You are glad to be home."
+    effects: [{ type: stat, key: stress, delta: 2 }, { type: stat, key: happiness, delta: -1 }]
+    events: [vacation_lost_bag]
+    eventChance: follow_up_mid

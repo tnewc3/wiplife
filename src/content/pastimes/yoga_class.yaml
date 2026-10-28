@@ -8,6 +8,7 @@ companion: none
 cost: yoga_class
 profile: calm
 yearlyLimit: 6
+hub: meditate
 tiers:
   great:
     text:

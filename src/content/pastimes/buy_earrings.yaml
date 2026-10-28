@@ -1,0 +1,35 @@
+id: buy_earrings
+category: shopping
+label: "Buy earrings"
+blurb: "Studs or hoops, from a tray at the counter."
+minAge: 12
+inPerson: true
+companion: none
+cost: earrings_buy
+profile: shop
+yearlyLimit: 3
+hub: shopping
+look: earrings
+tiers:
+  great:
+    text:
+      - "The first pair you try is the one. You wear them out of the store."
+      - "A small change that makes a big difference. You keep tucking your hair behind your ears."
+    effects: [{ type: stat, key: looks, delta: 2 }, { type: stat, key: confidence, delta: 1 }, { type: stat, key: happiness, delta: 1 }, { type: flag, key: new_look, value: true }]
+    events: [shopping_compliment]
+    eventChance: follow_up_low
+  good:
+    text:
+      - "A nice pair that suits you."
+      - "You leave pleased, and a little lighter in the wallet."
+    effects: [{ type: stat, key: looks, delta: 1 }, { type: stat, key: happiness, delta: 1 }, { type: flag, key: new_look, value: true }]
+  neutral:
+    text:
+      - "A fine pair of earrings you may or may not wear much."
+      - "They look the way earrings look."
+    effects: [{ type: stat, key: looks, delta: 1 }, { type: flag, key: new_look, value: true }]
+  bad:
+    text:
+      - "They pinch, and your ears are red by the afternoon."
+      - "Not your style after all."
+    effects: [{ type: stat, key: happiness, delta: -1 }, { type: flag, key: new_look, value: true }]

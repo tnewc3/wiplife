@@ -1,0 +1,29 @@
+# A skilled painter is invited to show (A1 hobbies, fame path arts).
+id: hobby_gallery_invite
+title: Wall space
+text: >-
+  A small gallery needs six pieces for a group show and the owner has seen your work. "Bring what you have," {friend.name} {friend:passes|pass} on. "It is a start."
+tone: light
+category: fameentry
+rarity: uncommon
+lifeStages: [teen, youngAdult, adult, senior]
+requires: { all: [{ age: { gte: 10 } }, { flag: skilled_paint_or_draw }, { fame: { active: false } }, { fame: { retired: false } }] }
+weight: { base: 6 }
+cast:
+  friend: { kind: friend, presence: city }
+choices:
+  - id: show
+    label: Bring your best six
+    outcome:
+      text: >-
+        You frame six pieces and carry them over in a friend's van. On the opening night, a stranger stops in front of one for a very long time.
+      effects:
+        - { type: fame, action: enter, path: arts, route: studio }
+        - { type: stat, key: happiness, delta: 4 }
+  - id: pass
+    label: Say it is not ready for a wall
+    outcome:
+      text: >-
+        You say it is not ready for a wall. The show goes on without you.
+      effects:
+        - { type: stat, key: confidence, delta: -1 }

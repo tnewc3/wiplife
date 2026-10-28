@@ -75,6 +75,14 @@ games:
       - { tier: great, chance: 0.001, multiple: 250 }
       - { tier: good, chance: 0.08, multiple: 3 }
       - { tier: bad, chance: 0.919, multiple: 0 }
+  # A1: scratch cards. Return 0.52.
+  scratch_cards:
+    minEdge: 0.3
+    outcomes:
+      - { tier: great, chance: 0.002, multiple: 100 }
+      - { tier: good, chance: 0.1, multiple: 2 }
+      - { tier: neutral, chance: 0.12, multiple: 1 }
+      - { tier: bad, chance: 0.778, multiple: 0 }
   # Return 0.90.
   sports_bet:
     minEdge: 0.05

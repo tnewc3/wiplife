@@ -9,6 +9,7 @@ companionKinds: [partner, friend, family]
 cost: clothes
 profile: shop
 yearlyLimit: 4
+hub: shopping
 tiers:
   great:
     text:

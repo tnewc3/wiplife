@@ -1,0 +1,32 @@
+# Opened by a hobby practiced well (A1).
+id: hobby_class_invite
+title: A class on the thing you do
+text: >-
+  {friend.name} sends you a link: a class, one evening a week, for people who do what you have been practicing. "Come with me," {friend.they} {friend:writes|write}. "It is cheap."
+tone: light
+category: community
+rarity: common
+lifeStages: [teen, youngAdult, adult, senior]
+requires: { any: [{ flag: practiced_play_the_guitar }, { flag: practiced_paint_or_draw }, { flag: practiced_write_stories }, { flag: practiced_bake_something }, { flag: practiced_build_with_wood }, { flag: practiced_play_chess }, { flag: practiced_practice_dance }, { flag: practiced_practice_public_speaking }, { flag: practiced_shoot_hoops }] }
+weight: { base: 5 }
+followUpOnly: true
+cast:
+  friend: { kind: friend, presence: city }
+choices:
+  - id: join
+    label: Sign up together for {$90}
+    outcome:
+      text: >-
+        The class is small, friendly and a little better than you expected. You learn two things in the first week that you could not have found alone.
+      effects:
+        - { type: money, delta: -90 }
+        - { type: relationship, role: friend, affection: 5, trust: 2 }
+        - { type: stat, key: happiness, delta: 2 }
+        - { type: stat, key: discipline, delta: 1 }
+  - id: skip
+    label: Thank {friend.them} and say no
+    outcome:
+      text: >-
+        You say you have enough on. {friend.name} signs up alone and tells you about it the next week.
+      effects:
+        - { type: relationship, role: friend, affection: -1 }

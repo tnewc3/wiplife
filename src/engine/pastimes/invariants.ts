@@ -13,7 +13,14 @@ export function pastimesFailures(state: LifeState, content: ContentBundle): stri
   const fail = (message: string) => failures.push(message);
   const p = state.pastimes;
   if (!Number.isInteger(p.year) || p.year > state.currentYear) fail('pastimes.year is from the future');
+  const hubs = new Map(content.registries.activities.activities.map((a) => [`hub:${a.id}`, a]));
   for (const [id, n] of Object.entries(p.counts)) {
+    // A1: the count of a whole activity of the Activities tab.
+    const hub = hubs.get(id);
+    if (hub) {
+      if (!Number.isInteger(n) || n < 1 || n > hub.limit) fail(`activity "${hub.id}" was done ${n} times (its yearly limit is ${hub.limit})`);
+      continue;
+    }
     const def = content.pastimes[id];
     if (!def) fail(`pastimes.counts names an unknown activity "${id}"`);
     else if (!Number.isInteger(n) || n < 1 || n > def.yearlyLimit) fail(`activity "${id}" was done ${n} times (its yearly limit is ${def.yearlyLimit})`);
@@ -34,6 +41,13 @@ export function pastimesFailures(state: LifeState, content: ContentBundle): stri
     if (r.money?.dirty && (r.money.dirty.balance < 0 || (def.category !== 'crime' && def.category !== 'black_market'))) fail(`receipt for "${r.pastimeId}" shows dirty money it should not`);
     if (r.money && r.money.balance < 0) fail(`receipt for "${r.pastimeId}" shows a negative balance`);
     if (r.year - state.birthYear < def.minAge) fail(`receipt for "${r.pastimeId}" is from before the minimum age ${def.minAge}`);
+  }
+  // A1: hobbies are real, in range, and only taken up by someone old enough.
+  for (const [id, h] of Object.entries(state.hobbies)) {
+    const def = content.pastimes[id];
+    if (!def?.hobby) fail(`hobbies names "${id}", which is not a hobby`);
+    else if (h.year - state.birthYear < def.minAge) fail(`hobby "${id}" was practiced before the minimum age ${def.minAge}`);
+    if (h.skill < 0 || h.skill > 100 || h.year > state.currentYear || h.sessions < 1) fail(`hobby "${id}" has an impossible record`);
   }
   if (p.receipts.length > content.balance.pastimes.receipts) fail('more receipts are kept than the balance allows');
   // Batch 2b: the names you had before a legal name change.

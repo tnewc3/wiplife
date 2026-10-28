@@ -1,0 +1,31 @@
+# Opened by buying a lottery ticket (A1).
+id: lottery_office_pool
+title: Everyone is in
+text: >-
+  At the end of the week, {friend.name} is collecting {$20} from everyone for a lottery pool. "If we win, we split it," {friend.they} {friend:says|say}. "If not, we have had a good week."
+tone: light
+category: money
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires: { age: { gte: 18 } }
+weight: { base: 5 }
+followUpOnly: true
+cast:
+  friend: { kind: friend, presence: city }
+choices:
+  - id: in
+    label: Put in {$20}
+    outcome:
+      text: >-
+        A pool of twelve, each with a dream. Nobody wins, and the whole week is lighter for the hope.
+      effects:
+        - { type: money, delta: -20 }
+        - { type: relationship, role: friend, affection: 3 }
+        - { type: stat, key: happiness, delta: 1 }
+  - id: out
+    label: Say no thanks
+    outcome:
+      text: >-
+        You stay out of it. Nobody holds it against you, and nobody wins either.
+      effects:
+        - { type: relationship, role: friend, affection: -1 }

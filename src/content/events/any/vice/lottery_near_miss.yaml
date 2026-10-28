@@ -1,0 +1,28 @@
+# Opened by a lottery ticket (A1).
+id: lottery_near_miss
+title: So close
+text: >-
+  Four of the five numbers. You check the ticket three times in the car. "Four of five" is not a prize, only a feeling, and it is a feeling you can already tell you will want again.
+tone: light
+category: vice
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires: { age: { gte: 18 } }
+weight: { base: 5 }
+followUpOnly: true
+choices:
+  - id: laugh
+    label: Laugh it off
+    outcome:
+      text: >-
+        You laugh, tear the ticket in half and tell the story at dinner. It is worth more as a story than as a ticket.
+      effects:
+        - { type: stat, key: happiness, delta: 1 }
+  - id: again
+    label: Buy another straight away
+    outcome:
+      text: >-
+        You buy another, and then you are annoyed with yourself for how quickly you did.
+      effects:
+        - { type: money, delta: -10 }
+        - { type: stat, key: stress, delta: 1 }

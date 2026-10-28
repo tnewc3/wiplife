@@ -1,0 +1,28 @@
+# Opened by a trip that went wrong (A1).
+id: vacation_lost_bag
+title: The missing bag
+text: >-
+  At the end of the trip, you are at the station with one bag fewer than you left with. The attendant is sympathetic and not much help.
+tone: light
+category: money
+rarity: common
+lifeStages: [teen, youngAdult, adult, senior]
+requires: { age: { gte: 8 } }
+weight: { base: 5 }
+followUpOnly: true
+choices:
+  - id: replace
+    label: Replace what you need
+    outcome:
+      text: >-
+        You spend {$120} on a toothbrush, a shirt and a charger. The airline promises to find the bag, and eventually does.
+      effects:
+        - { type: money, delta: -120 }
+        - { type: stat, key: stress, delta: 1 }
+  - id: wait
+    label: Wait for it to turn up
+    outcome:
+      text: >-
+        It turns up two days later, a little lost and a little dented. You are glad to get it back.
+      effects:
+        - { type: stat, key: stress, delta: 2 }
