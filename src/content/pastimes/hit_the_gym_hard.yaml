@@ -1,0 +1,49 @@
+id: hit_the_gym_hard
+category: mind_body
+label: "Push through a hard workout"
+blurb: "Heavy sets and no shortcuts. Bigger gains, and a bigger chance of getting hurt."
+minAge: 16
+inPerson: true
+companion: none
+cost: gym_session
+profile: steady
+yearlyLimit: 6
+hub: gym
+tiers:
+  great:
+    text:
+      - "You hit a new best on the last set and walk out shaking, pleased and sore in all the right places."
+      - "The hard session pays off: every set lands and your body feels like it belongs to you."
+    effects: [{ type: stat, key: fitness, delta: 3 }, { type: stat, key: health, delta: 1 }, { type: stat, key: discipline, delta: 1 }, { type: stat, key: happiness, delta: 1 }]
+    events: [gym_buddy_asks]
+    eventChance: follow_up_low
+  good:
+    text:
+      - "You work until your arms shake. It hurts, and it is the good kind of hurt."
+      - "A tough session, finished. You sit in the car for a minute before you drive."
+    effects: [{ type: stat, key: fitness, delta: 2 }, { type: stat, key: stress, delta: -1 }]
+    events: [gym_buddy_asks, gym_trainer_pitch]
+    eventChance: follow_up_low
+  neutral:
+    text:
+      - "You push, but your body has other plans. You finish half of what you came to do."
+      - "A heavy day on the plan that never quite gets going."
+    effects: [{ type: stat, key: fitness, delta: 1 }]
+  bad:
+    text:
+      - "You add too much weight and your form falls apart on the third rep. You stop, rattled."
+      - "Your body says no halfway through and you listen too late."
+    effects: [{ type: stat, key: stress, delta: 2 }, { type: stat, key: happiness, delta: -1 }]
+    extras:
+      - chance: gym_injury
+        effects: [{ type: stat, key: health, delta: -4 }, { type: flag, key: gym_injury, value: true }]
+        note: "Something pulls in your back that you will feel for days."
+    events: [gym_injury_rest]
+    eventChance: follow_up_mid
+  backfire:
+    text:
+      - "Something gives under the bar with a pop you feel before you hear it. The session is over, and so is your week."
+      - "You overreach on the last lift and something tears. The staff stop what they are doing and come over."
+    effects: [{ type: stat, key: health, delta: -6 }, { type: stat, key: stress, delta: 4 }, { type: stat, key: happiness, delta: -3 }, { type: flag, key: gym_injury, value: true }]
+    events: [gym_injury_rest]
+    eventChance: follow_up_mid

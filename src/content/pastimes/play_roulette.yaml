@@ -10,6 +10,7 @@ inPerson: true
 companion: none
 cost: casino_roulette
 yearlyLimit: 6
+hub: casino
 tiers:
   great:
     text:
@@ -23,6 +24,8 @@ tiers:
         effects:
           - { type: health, conditionId: gambling_addiction, severity: 25 }
         note: "You notice that you are thinking about the next bet before this one is settled."
+    events: [casino_hot_streak]
+    eventChance: follow_up_mid
   good:
     text:
       - "Red, and then red. The {cost} you put down becomes {amount}."
@@ -34,6 +37,8 @@ tiers:
         effects:
           - { type: health, conditionId: gambling_addiction, severity: 25 }
         note: "You notice that you are thinking about the next bet before this one is settled."
+    events: [casino_hot_streak]
+    eventChance: follow_up_low
   bad:
     text:
       - "The ball skips past your number and settles somewhere else. The {cost} goes with it."
@@ -46,6 +51,8 @@ tiers:
         effects:
           - { type: health, conditionId: gambling_addiction, severity: 25 }
         note: "You notice that you are thinking about the next bet before this one is settled."
+    events: [casino_chasing_losses]
+    eventChance: follow_up_mid
   backfire:
     text:
       - "You double your stake to win it back, and then double that. When the wheel stops, the {cost} is gone and your hands are cold."
@@ -58,3 +65,5 @@ tiers:
         effects:
           - { type: health, conditionId: gambling_addiction, severity: 25 }
         note: "You notice that you are thinking about the next bet before this one is settled."
+    events: [casino_chasing_losses]
+    eventChance: follow_up_mid

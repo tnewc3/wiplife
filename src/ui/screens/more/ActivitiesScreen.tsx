@@ -7,6 +7,10 @@ import { useAppStore } from '../../../store/appStore';
 import { Button } from '../../components/Button';
 import { Card } from '../../components/Card';
 import {
+  ACTIVITY_TAB_LABELS,
+  HOBBY_LEVEL_LABELS,
+  LOOK_KIND_LABELS,
+  lookWords,
   CHASE_LABEL,
   companionChangeWords,
   evidenceWords,
@@ -30,7 +34,8 @@ import {
 } from '../../labels';
 
 /** What the player has chosen on an entry before pressing its button: a lawsuit's route, a chase, a typed name, a parent's agreement. */
-interface Picks {
+export interface Picks {
+  look?: string;
   route?: PastimeRoute;
   chase?: boolean;
   first?: string;
@@ -66,6 +71,7 @@ export function ActivitiesScreen({ life }: { life: LifeState }) {
       ...(extra.stake ? { stake: extra.stake } : {}),
       ...(entry.mechanic === 'gamble' && p.chase ? { chase: true } : {}),
       ...(entry.routes ? { route: p.route ?? 'settle' } : {}),
+      ...(entry.look ? { look: p.look ?? entry.look.options[0] } : {}),
       ...(entry.name ? nameParams(entry, p) : {}),
     });
   };
@@ -142,7 +148,7 @@ function nameParams(entry: ActivityEntryView, p: Picks): { first?: string; last?
   };
 }
 
-function EntryRow({
+export function EntryRow({
   life,
   entry,
   disabled,
@@ -180,6 +186,23 @@ function EntryRow({
         <span className="text-sm text-muted">
           Done {entry.count} of {entry.limit} times this year.
         </span>
+      )}
+
+      {entry.hobby && (
+        <span className="text-sm text-muted" data-testid={`hobby-${entry.id}`}>
+          {ACTIVITY_TAB_LABELS.hobbySkill(HOBBY_LEVEL_LABELS[Math.min(entry.hobby.level, HOBBY_LEVEL_LABELS.length - 1)]!, entry.hobby.skill)}
+        </span>
+      )}
+
+      {entry.look && (
+        <fieldset className="flex flex-col gap-2" aria-label={LOOK_KIND_LABELS[entry.look.kind]}>
+          <legend className="text-sm font-medium">{LOOK_KIND_LABELS[entry.look.kind]}</legend>
+          <div className="flex flex-wrap gap-2">
+            {entry.look.options.map((o) => (
+              <WhoPill key={o} label={lookWords(o)} on={(picks.look ?? entry.look!.options[0]) === o} disabled={disabled} testId={`look-${entry.id}-${o}`} onClick={() => onPick({ look: o })} />
+            ))}
+          </div>
+        </fieldset>
       )}
 
       {entry.companion !== 'none' && entry.companions.length > 0 && (
@@ -359,7 +382,7 @@ function WhoPill({ label, on, disabled, testId, onClick }: { label: string; on: 
 }
 
 /** What an activity came to: the words, what moved (in words), and the money with the balance after it. */
-function ReceiptCard({ receipt, balance, latest }: { receipt: ReceiptView; balance: number; latest?: boolean }) {
+export function ReceiptCard({ receipt, balance, latest }: { receipt: ReceiptView; balance: number; latest?: boolean }) {
   const changes = pastimeChangeWords(receipt.changes);
   const companion = receipt.companion ? companionChangeWords(receipt.companion.name, receipt.companion.affection) : null;
   return (

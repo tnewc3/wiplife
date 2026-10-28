@@ -1,0 +1,29 @@
+# A skilled dancer is asked to join a show (A1 hobbies, fame path acting).
+id: hobby_dance_invite
+title: The recital that needs one more
+text: >-
+  A local theatre group is short one dancer for a spring show, and word has reached the director that you move well. "Come on Thursday," {friend.name} {friend:says|say}. "Just to see."
+tone: light
+category: fameentry
+rarity: uncommon
+lifeStages: [teen, youngAdult, adult, senior]
+requires: { all: [{ age: { gte: 8 } }, { flag: skilled_practice_dance }, { fame: { active: false } }, { fame: { retired: false } }] }
+weight: { base: 6 }
+cast:
+  friend: { kind: friend, presence: city }
+choices:
+  - id: join
+    label: Go on Thursday
+    outcome:
+      text: >-
+        The first rehearsal is chaos and the second is better. By opening night you have a costume, a spot in the second row and a name in the programme.
+      effects:
+        - { type: fame, action: enter, path: acting, route: community_theatre }
+        - { type: stat, key: happiness, delta: 4 }
+  - id: pass
+    label: Say you would rather dance for yourself
+    outcome:
+      text: >-
+        You say you would rather dance for yourself. Nobody argues, and the show goes on without you.
+      effects:
+        - { type: stat, key: confidence, delta: -1 }

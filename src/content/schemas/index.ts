@@ -38,6 +38,7 @@ import { sportsBalanceSchema, sportsRegistrySchema, sportsTextSchema } from './s
 import { fameAgentSchema, fameAwardSchema, fameBalanceSchema, fameCompanySchema, fameGenreSchema, famePathSchema, fameRegistrySchema, fameTextSchema } from './fame';
 import { socialBalanceSchema, socialNicheSchema, socialPlatformSchema, socialRegistrySchema, socialTextSchema } from './social';
 import { activitySchema, cliqueSchema, houseRuleSchema, teenBalanceSchema, teenJobSchema, teenRegistrySchema, teenTextSchema } from './teen';
+import { activitiesBalanceSchema, activitiesRegistrySchema } from './activities';
 import { pastimeSchema, pastimesBalanceSchema, riskBalanceSchema, valuableSchema } from './pastimes';
 import { schoolBalanceSchema, schoolRegistrySchema, schoolTextSchema } from './school';
 import { estateRegistrySchema, familyBalanceSchema, familyRegistrySchema, heirRegistrySchema, heirTextSchema } from './family';
@@ -77,6 +78,7 @@ export * from './later';
 export * from './belonging';
 export * from './business';
 export * from './pastimes';
+export * from './activities';
 
 /**
  * Collections: a folder under src/content with one YAML file per definition,
@@ -161,6 +163,7 @@ export const singletonTypes = {
   'balance/mental-health': mentalHealthBalanceSchema,
   'balance/possessions': possessionsBalanceSchema,
   'balance/pastimes': pastimesBalanceSchema,
+  'balance/activities': activitiesBalanceSchema,
   'balance/risk': riskBalanceSchema,
   'balance/godmode': godmodeBalanceSchema,
   'balance/teen': teenBalanceSchema,
@@ -223,6 +226,7 @@ export const singletonTypes = {
   'registries/fame': fameRegistrySchema,
   'registries/sports': sportsRegistrySchema,
   'registries/social': socialRegistrySchema,
+  'registries/activities': activitiesRegistrySchema,
   'registries/later': laterRegistrySchema,
   'registries/belonging': belongingRegistrySchema,
   'registries/business': businessRegistrySchema,
@@ -299,6 +303,7 @@ export const contentBundleSchema = z.strictObject({
     mentalHealth: mentalHealthBalanceSchema,
     possessions: possessionsBalanceSchema,
     pastimes: pastimesBalanceSchema,
+    activities: activitiesBalanceSchema,
     risk: riskBalanceSchema,
     godmode: godmodeBalanceSchema,
     teen: teenBalanceSchema,
@@ -364,6 +369,7 @@ export const contentBundleSchema = z.strictObject({
     fame: fameRegistrySchema,
     sports: sportsRegistrySchema,
     social: socialRegistrySchema,
+    activities: activitiesRegistrySchema,
     later: laterRegistrySchema,
     belonging: belongingRegistrySchema,
     business: businessRegistrySchema,

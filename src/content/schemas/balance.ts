@@ -537,6 +537,8 @@ export const targetsBalanceSchema = z.strictObject({
     /** The spammer: the benefit of the fourth time in a year as a share of the first time's, at most. */
     spamRatio: z.number().min(0).max(1),
   }),
+  /** A1: the Activities tab (tools/simulate/pastimes.ts). The spammer repeats the gym all year: no stat may gain more than this in a year of it, and none may go from 60 or less to 100. */
+  activities: z.strictObject({ spamMaxYearGain: z.number().min(1).max(100) }),
   /**
    * Batch 2b: risk and legal activities (tools/simulate/risk.ts). The careful player never uses crime, the black market, a payday
    * lender or a loan shark; the criminal player is judged on the crime ranges; every player on gambling, loans and lawsuits.

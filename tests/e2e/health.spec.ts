@@ -4,7 +4,7 @@
  * predictable card.
  */
 import { expect, test } from '@playwright/test';
-import { ageUp, eventSheet, expectNoHorizontalScroll, expectTouchTargets, openPage, playThroughEvents, settle, startRandomLife } from './helpers';
+import { ageUp, eventSheet, expectNoHorizontalScroll, expectTouchTargets, openPage, playThroughEvents, settle, startRandomLife, tab } from './helpers';
 
 
 test('More → Health shows your health and lets you see a doctor once a year', async ({ page }) => {
@@ -14,22 +14,30 @@ test('More → Health shows your health and lets you see a doctor once a year', 
   const health = page.getByRole('region', { name: 'Your health' });
   await expect(health.getByRole('meter', { name: 'Health' })).toBeVisible();
   await expect(page.getByTestId('no-conditions')).toBeVisible();
-  await expect(page.getByText('Your family takes you and pays the bill.')).toBeVisible();
   await expectNoHorizontalScroll(page);
   await expectTouchTargets(page);
 
+  // Seeing a doctor moved to Activities → Doctor (A1): the Health screen points to it.
+  await page.getByTestId('health-open-doctor').click();
+  const sheet = page.getByRole('dialog', { name: 'Doctor' });
+  await expect(sheet.getByText('Your family takes you and pays the bill.')).toBeVisible();
+  await expectTouchTargets(page);
   // Seeing a doctor asks first, then answers with an event card.
-  await page.getByRole('region', { name: 'See a doctor' }).getByRole('button', { name: 'See a doctor' }).click();
+  await sheet.getByTestId('do-see-doctor').click();
   const confirm = page.getByRole('dialog', { name: 'See a doctor' });
   await expect(confirm).toBeVisible();
-  await expectTouchTargets(page);
   await confirm.getByRole('button', { name: 'Go' }).click();
   await settle(page);
   await expect(eventSheet(page).getByRole('heading', { name: 'The doctor’s office'.replace('’', "'") })).toBeVisible();
   await playThroughEvents(page);
 
   // Once a year.
+  await page.getByRole('button', { name: 'Back to Home' }).click();
+  await tab(page, 'Activities').click();
+  await page.getByTestId('activity-hub-doctor').click();
   await expect(page.getByTestId('doctor-status')).toHaveText('You saw a doctor this year. You can go again next year.');
+  await page.getByRole('dialog', { name: 'Doctor' }).getByTestId('doctor-therapy').click();
+  await expect(page.getByRole('heading', { name: 'Health', level: 1 })).toBeVisible();
   await page.getByRole('button', { name: 'Back to Home' }).click();
   await expect(page.getByTestId('life-log')).toBeVisible();
 });

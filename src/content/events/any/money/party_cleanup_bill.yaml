@@ -1,0 +1,29 @@
+# Opened by hosting a party (A1).
+id: party_cleanup_bill
+title: The morning after
+text: >-
+  The place looks like a flood hit it: sticky floors, a cracked lamp and a smell you cannot name. You could pay someone {$150} to make it go away, or spend the day on your knees with a bucket.
+tone: light
+category: money
+rarity: common
+lifeStages: [teen, youngAdult, adult, senior]
+requires: { age: { gte: 16 } }
+weight: { base: 5 }
+followUpOnly: true
+choices:
+  - id: pay
+    label: Pay for a cleaner
+    outcome:
+      text: >-
+        A cleaner arrives with a van and a good attitude. By evening the place is better than it was before the party.
+      effects:
+        - { type: money, delta: -150 }
+        - { type: stat, key: stress, delta: -2 }
+  - id: scrub
+    label: Scrub it yourself
+    outcome:
+      text: >-
+        You scrub, you sweat and you swear to yourself that you will never host again. You earn a very sore back.
+      effects:
+        - { type: stat, key: stress, delta: 2 }
+        - { type: stat, key: health, delta: -1 }

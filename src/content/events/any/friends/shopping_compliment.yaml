@@ -1,0 +1,32 @@
+# Opened by shopping for a new look (A1).
+id: shopping_compliment
+title: Nice look
+text: >-
+  {friend.name} stops mid-sentence and looks you up and down. "Is that new?" {friend.they} {friend:asks|ask}. "It suits you."
+tone: light
+category: friends
+rarity: common
+lifeStages: [teen, youngAdult, adult, senior]
+requires: { flag: new_look }
+weight: { base: 5 }
+followUpOnly: true
+cast:
+  friend: { kind: friend, presence: city }
+choices:
+  - id: thanks
+    label: Say thanks, and mean it
+    outcome:
+      text: >-
+        The compliment follows you through the afternoon. You stand a little straighter in every window.
+      effects:
+        - { type: relationship, role: friend, affection: 3 }
+        - { type: stat, key: confidence, delta: 1 }
+        - { type: stat, key: happiness, delta: 2 }
+  - id: shrug
+    label: Wave it off
+    outcome:
+      text: >-
+        You mumble something about it being old. Inside you are pleased, and a little embarrassed about being pleased.
+      effects:
+        - { type: relationship, role: friend, affection: 1 }
+        - { type: stat, key: happiness, delta: 1 }

@@ -1,0 +1,30 @@
+# Opened by a great workout (A1).
+id: gym_milestone
+title: A personal best
+text: >-
+  You finish the set and sit on the edge of the bench. There was a time you could not have done this, and nobody saw it except the mirror.
+tone: light
+category: identity
+rarity: common
+lifeStages: [teen, youngAdult, adult, senior]
+requires: { age: { gte: 14 } }
+weight: { base: 5 }
+followUpOnly: true
+choices:
+  - id: savor
+    label: Take a moment to enjoy it
+    outcome:
+      text: >-
+        You sit with it for a minute longer than you need to. Then you stand up, a bit taller.
+      effects:
+        - { type: stat, key: confidence, delta: 2 }
+        - { type: stat, key: happiness, delta: 2 }
+  - id: next
+    label: Add some weight and go again
+    outcome:
+      text: >-
+        You add a plate. It is a mistake, and a very satisfying one.
+      effects:
+        - { type: stat, key: fitness, delta: 1 }
+        - { type: stat, key: discipline, delta: 1 }
+        - { type: stat, key: stress, delta: 1 }

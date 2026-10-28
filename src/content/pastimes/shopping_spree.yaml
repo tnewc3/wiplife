@@ -8,6 +8,7 @@ companion: none
 cost: spree
 profile: shop
 yearlyLimit: 2
+hub: shopping
 tiers:
   great:
     text:

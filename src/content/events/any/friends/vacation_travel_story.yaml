@@ -1,0 +1,30 @@
+# Opened by a weekend away (A1).
+id: vacation_travel_story
+title: A story to tell
+text: >-
+  On the way back, something small and absurd happens that you will be telling people about for years: a wrong turn, a stranger's dog, a dinner nobody could order. {friend.name} asks you about it as soon as you are home.
+tone: light
+category: friends
+rarity: common
+lifeStages: [teen, youngAdult, adult, senior]
+requires: { age: { gte: 8 } }
+weight: { base: 5 }
+followUpOnly: true
+cast:
+  friend: { kind: friend, presence: city }
+choices:
+  - id: tell
+    label: Tell the whole story
+    outcome:
+      text: >-
+        {friend.name} laughs in all the right places and asks for the part about the dog twice. Telling it is almost better than the trip was.
+      effects:
+        - { type: relationship, role: friend, affection: 5, trust: 2 }
+        - { type: stat, key: happiness, delta: 2 }
+  - id: keep
+    label: Keep it to yourself
+    outcome:
+      text: >-
+        Some stories are better kept. It becomes a small private joke you sometimes remember on the bus.
+      effects:
+        - { type: stat, key: happiness, delta: 1 }

@@ -1,0 +1,36 @@
+id: take_a_road_trip
+category: outdoor
+label: "Take a road trip"
+blurb: "A full tank, a bad playlist and an open route."
+minAge: 16
+inPerson: true
+companion: none
+cost: getaway
+profile: outdoor
+yearlyLimit: 2
+hub: vacation
+tiers:
+  great:
+    text:
+      - "Three days of open road, strange diners and one perfect sunset by the side of the highway."
+      - "You get lost on purpose and find the best meal of the year."
+    effects: [{ type: stat, key: happiness, delta: 5 }, { type: stat, key: stress, delta: -3 }, { type: stat, key: confidence, delta: 1 }]
+    events: [vacation_travel_story]
+    eventChance: follow_up_low
+  good:
+    text:
+      - "A long drive with good stops. You come home with a head full of landscape."
+      - "You see more of the country in a weekend than you did in a year."
+    effects: [{ type: stat, key: happiness, delta: 3 }, { type: stat, key: stress, delta: -2 }]
+  neutral:
+    text:
+      - "More motorway than scenery, but the stops are fun."
+      - "You are tired by the second day and glad by the third."
+    effects: [{ type: stat, key: happiness, delta: 1 }]
+  bad:
+    text:
+      - "The ride gives you trouble the whole way. You sleep badly in a roadside motel."
+      - "Long hours, bad coffee and a fight over the map."
+    effects: [{ type: stat, key: stress, delta: 3 }, { type: stat, key: happiness, delta: -1 }]
+    events: [vacation_lost_bag]
+    eventChance: follow_up_mid

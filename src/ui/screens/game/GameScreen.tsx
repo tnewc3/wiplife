@@ -10,6 +10,7 @@ import { InteractionCard } from '../../components/InteractionCard';
 import { LegalBanner } from '../../components/LegalBanner';
 import { TAB_LABELS } from '../../labels';
 import { ActivitiesTab } from '../activities/ActivitiesTab';
+import { ActivitySheet } from '../activities/ActivitySheet';
 import { AssetsTab } from '../assets/AssetsTab';
 import { HomeHeader } from '../home/HomeHeader';
 import { HomeTab } from '../home/HomeTab';
@@ -125,6 +126,7 @@ export function GameScreen({ life }: { life: LifeState }) {
           {page}
           <EventSheet life={life} />
           <InteractionCard life={life} />
+          <ActivitySheet life={life} />
         </main>
         <div className="shrink-0">
           <GameNav />

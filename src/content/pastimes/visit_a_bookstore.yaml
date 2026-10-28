@@ -8,6 +8,7 @@ companion: none
 cost: books
 profile: shop
 yearlyLimit: 6
+hub: read
 tiers:
   great:
     text:

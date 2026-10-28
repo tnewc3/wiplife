@@ -8,6 +8,7 @@ companion: none
 cost: diet_plan
 profile: steady
 yearlyLimit: 3
+hub: gym
 tiers:
   great:
     text:

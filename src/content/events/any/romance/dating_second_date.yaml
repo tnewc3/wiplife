@@ -1,0 +1,31 @@
+# Opened by dating activities; adults only (A1).
+id: dating_second_date
+title: Another evening
+text: >-
+  {date.name} texts you before the day is out: it was a good night, would you like another? The message ends with a tiny, hopeful emoji.
+tone: light
+category: romance
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires: { all: [{ age: { gte: 18 } }, { romance: [single] }] }
+weight: { base: 5 }
+followUpOnly: true
+cast:
+  date: { kind: acquaintance, romantic: true, createIfMissing: true, newChance: 1, presence: city }
+choices:
+  - id: yes
+    label: Say yes
+    outcome:
+      text: >-
+        You say yes within a minute and spend the day pretending not to look at your phone. The second evening is better than the first.
+      effects:
+        - { type: relationship, role: date, affection: 10, trust: 4 }
+        - { type: stat, key: happiness, delta: 3 }
+  - id: no
+    label: Say it was nice, but no
+    outcome:
+      text: >-
+        You are kind and clear. It stings for both of you, and then it passes.
+      effects:
+        - { type: relationship, role: date, affection: -3 }
+        - { type: stat, key: stress, delta: 1 }

@@ -8,6 +8,7 @@ companion: none
 cost: matchmaker
 profile: love
 yearlyLimit: 1
+hub: dating
 requires: { romance: [single] }
 tiers:
   great:
@@ -33,6 +34,8 @@ tiers:
       - "The matchmaker is kind and slow. You wait a while for any news."
     effects:
       - { type: stat, key: happiness, delta: 1 }
+    events: [dating_second_date, dating_bad_chemistry]
+    eventChance: follow_up_mid
   bad:
     text:
       - "The questions are intrusive, the matches are mismatched, and the price, {cost}, rankles. You leave feeling processed."
@@ -40,3 +43,5 @@ tiers:
     effects:
       - { type: stat, key: happiness, delta: -2 }
       - { type: stat, key: stress, delta: 2 }
+    events: [dating_ghosted]
+    eventChance: follow_up_mid

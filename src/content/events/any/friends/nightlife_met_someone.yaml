@@ -24,6 +24,7 @@ choices:
         a good story.
       effects:
         - { type: relationship, role: stranger, affection: 8, trust: 3 }
+        - { type: flag, key: traded_numbers_nightlife, value: true }
         - { type: stat, key: happiness, delta: 2 }
         - { type: stat, key: sociability, delta: 1 }
   - id: enjoy_it

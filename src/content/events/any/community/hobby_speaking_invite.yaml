@@ -1,0 +1,28 @@
+# A skilled speaker is invited to speak (A1 hobbies).
+id: hobby_speaking_invite
+title: Say a few words
+text: >-
+  The organizers of a local event are short a speaker and somebody remembers how well you hold a room. "Ten minutes," they say. "Anything you like."
+tone: light
+category: community
+rarity: uncommon
+lifeStages: [teen, youngAdult, adult, senior]
+requires: { all: [{ age: { gte: 12 } }, { flag: skilled_practice_public_speaking }] }
+weight: { base: 5 }
+choices:
+  - id: speak
+    label: Take the stage
+    outcome:
+      text: >-
+        You speak for twelve minutes, three over, and the room laughs in the right places. People find you afterward to shake your hand.
+      effects:
+        - { type: stat, key: confidence, delta: 2 }
+        - { type: stat, key: reputation, delta: 1 }
+        - { type: stat, key: happiness, delta: 3 }
+  - id: decline
+    label: Say you are not ready
+    outcome:
+      text: >-
+        You say you are not ready. The organizers find someone else, and you listen to the talk from the back with a small, specific envy.
+      effects:
+        - { type: stat, key: confidence, delta: -1 }

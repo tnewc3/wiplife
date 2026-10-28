@@ -1,0 +1,28 @@
+# A skilled player is picked for a team at the court (A1 hobbies).
+id: hobby_pickup_regulars
+title: The regulars
+text: >-
+  The regulars at the court have noticed you. One of them waves you over before the next game: "We are a player short. You are on our team."
+tone: light
+category: community
+rarity: uncommon
+lifeStages: [teen, youngAdult, adult, senior]
+requires: { flag: skilled_shoot_hoops }
+weight: { base: 5 }
+choices:
+  - id: join
+    label: Play with them
+    outcome:
+      text: >-
+        You play three games and lose two, and nobody minds. By the end they have saved you a place for next week.
+      effects:
+        - { type: stat, key: sociability, delta: 1 }
+        - { type: stat, key: fitness, delta: 1 }
+        - { type: stat, key: happiness, delta: 3 }
+  - id: watch
+    label: Watch from the side
+    outcome:
+      text: >-
+        You watch from the side and cheer a bit too loudly. It is the second best seat.
+      effects:
+        - { type: stat, key: happiness, delta: 1 }

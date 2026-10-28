@@ -1,0 +1,41 @@
+id: shoot_hoops
+category: hobby
+label: "Play pickup basketball"
+blurb: "A hoop, a ball and whoever is around."
+minAge: 8
+inPerson: true
+companion: none
+cost: hobby_supplies
+profile: steady
+yearlyLimit: 8
+hub: hobbies
+hobby:
+  talent: athletics
+  skill: { great: 10, good: 7, neutral: 3, bad: 1, backfire: 0 }
+tiers:
+  great:
+    text:
+      - "Everything drops, one after another. For ten minutes you cannot miss."
+      - "A great run of pickup games, and you are the one they pick first."
+    effects: [{ type: stat, key: happiness, delta: 3 }, { type: stat, key: stress, delta: -1 }, { type: stat, key: discipline, delta: 1 }]
+    events: [hobby_class_invite, hobby_someone_asks]
+    eventChance: follow_up_low
+  good:
+    text:
+      - "A few good shots, a few bad ones and a sweaty hour."
+      - "You play, you run, you drink a lot of water."
+    effects: [{ type: stat, key: happiness, delta: 2 }, { type: stat, key: stress, delta: -1 }]
+    events: [hobby_someone_asks]
+    eventChance: follow_up_low
+  neutral:
+    text:
+      - "You put in the time and not much else happens. Practice is mostly this."
+      - "Neither good nor bad, just another session on the pile."
+    effects: [{ type: stat, key: happiness, delta: 1 }]
+  bad:
+    text:
+      - "Nothing drops and your legs feel like lead. You go home with a bruised ego."
+      - "A sloppy game and a bruised ankle."
+    effects: [{ type: stat, key: stress, delta: 2 }, { type: stat, key: happiness, delta: -1 }]
+    events: [hobby_burnout]
+    eventChance: follow_up_low

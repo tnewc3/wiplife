@@ -1,0 +1,28 @@
+# Opened by shopping for a look that did not work (A1).
+id: shopping_regret
+title: Buyer's remorse
+text: >-
+  The bag has been sitting in the corner for a week. Every time you see it, you remember what you paid, and every time you try it on, it is not quite right. The shop takes returns for another day.
+tone: light
+category: money
+rarity: common
+lifeStages: [teen, youngAdult, adult, senior]
+requires: { flag: new_look }
+weight: { base: 5 }
+followUpOnly: true
+choices:
+  - id: return
+    label: Take it back for {$40} credit
+    outcome:
+      text: >-
+        The assistant is kind about it. You leave with a store credit and a lesson about the changing-room mirror.
+      effects:
+        - { type: money, delta: 40 }
+        - { type: stat, key: stress, delta: -1 }
+  - id: keep
+    label: Keep it and wear it anyway
+    outcome:
+      text: >-
+        You keep it, and wear it at last on a day when nobody is looking. It is fine, and not worth another thought.
+      effects:
+        - { type: stat, key: stress, delta: 1 }

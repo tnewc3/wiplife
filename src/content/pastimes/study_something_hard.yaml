@@ -1,0 +1,34 @@
+id: study_something_hard
+category: mind_body
+label: "Study something difficult"
+blurb: "A textbook, a pencil and a subject that fights back."
+minAge: 10
+inPerson: true
+companion: none
+cost: textbook
+profile: steady
+yearlyLimit: 6
+hub: read
+tiers:
+  great:
+    text:
+      - "The idea that has been slippery for weeks finally turns over and shows its underside. You sit back, grinning at nothing."
+      - "Something clicks, and the next three pages read like they were written for you."
+    effects: [{ type: stat, key: smarts, delta: 3 }, { type: stat, key: discipline, delta: 1 }, { type: stat, key: happiness, delta: 1 }]
+    events: [study_breakthrough]
+    eventChance: follow_up_low
+  good:
+    text:
+      - "A slow, honest session. By the end you understand more than you did when you sat down."
+      - "You work through the hard parts one line at a time and they give way."
+    effects: [{ type: stat, key: smarts, delta: 2 }, { type: stat, key: stress, delta: 1 }]
+  neutral:
+    text:
+      - "You read the same paragraph until it stops meaning anything. A little goes in anyway."
+      - "Your attention drifts, and you drag it back to the page over and over."
+    effects: [{ type: stat, key: smarts, delta: 1 }, { type: stat, key: stress, delta: 1 }]
+  bad:
+    text:
+      - "Nothing sticks. You close the book with a headache and the feeling you have gone backwards."
+      - "The harder you push, the less it makes sense. You quit before you throw the book."
+    effects: [{ type: stat, key: stress, delta: 3 }, { type: stat, key: happiness, delta: -2 }]

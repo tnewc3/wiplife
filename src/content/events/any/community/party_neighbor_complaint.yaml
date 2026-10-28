@@ -1,0 +1,27 @@
+# Opened by a party or block party (A1).
+id: party_neighbor_complaint
+title: Next door
+text: >-
+  Somebody from next door rings the bell as the evening goes on. The neighbor is not shouting, but is not smiling either. "It is gone eleven," says the neighbor.
+tone: light
+category: community
+rarity: common
+lifeStages: [teen, youngAdult, adult, senior]
+requires: { age: { gte: 8 } }
+weight: { base: 5 }
+followUpOnly: true
+choices:
+  - id: apologize
+    label: Apologize and turn it down
+    outcome:
+      text: >-
+        You turn the music down and bring over a slice of something later. The neighbor nods, a truce of sorts.
+      effects:
+        - { type: stat, key: stress, delta: 1 }
+  - id: ignore
+    label: Say it is almost over
+    outcome:
+      text: >-
+        The party is almost over, but it is not a great start to knowing the neighbors. The next hello is cooler.
+      effects:
+        - { type: stat, key: reputation, delta: -1 }

@@ -1,0 +1,31 @@
+# Opened by practicing a hobby (A1).
+id: hobby_someone_asks
+title: Show me
+text: >-
+  {friend.name} has noticed that you keep disappearing to practice something. "Show me," {friend.they} {friend:says|say}. "I will not laugh."
+tone: light
+category: friends
+rarity: common
+lifeStages: [teen, youngAdult, adult, senior]
+requires: { any: [{ flag: practiced_play_the_guitar }, { flag: practiced_paint_or_draw }, { flag: practiced_write_stories }, { flag: practiced_bake_something }, { flag: practiced_build_with_wood }, { flag: practiced_play_chess }, { flag: practiced_practice_dance }, { flag: practiced_practice_public_speaking }, { flag: practiced_shoot_hoops }] }
+weight: { base: 5 }
+followUpOnly: true
+cast:
+  friend: { kind: friend, presence: city }
+choices:
+  - id: show
+    label: Show {friend.them} what you have been working on
+    outcome:
+      text: >-
+        It is embarrassing for the first minute and then it is not. {friend.name} asks real questions, and you find you have real answers.
+      effects:
+        - { type: relationship, role: friend, affection: 7, trust: 3 }
+        - { type: stat, key: confidence, delta: 1 }
+        - { type: stat, key: happiness, delta: 2 }
+  - id: later
+    label: Say you will show {friend.them} later
+    outcome:
+      text: >-
+        "Later" settles in as a word you both understand. It stays between you for a while.
+      effects:
+        - { type: relationship, role: friend, affection: -1 }

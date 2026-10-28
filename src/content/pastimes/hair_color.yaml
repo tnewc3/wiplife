@@ -8,6 +8,8 @@ companion: none
 cost: hair_color
 profile: grooming
 yearlyLimit: 3
+hub: salon
+look: dye
 tiers:
   great:
     text:
@@ -15,6 +17,7 @@ tiers:
       - "A new shade, a new mood. You keep checking it in every window you pass."
     effects:
       - { type: stat, key: looks, delta: 4 }
+      - { type: flag, key: changed_hair, value: true }
       - { type: stat, key: confidence, delta: 1 }
       - { type: stat, key: happiness, delta: 2 }
   good:

@@ -1,0 +1,35 @@
+id: buy_a_hat
+category: shopping
+label: "Buy a hat"
+blurb: "A cap or a beanie, whichever feels like you."
+minAge: 5
+inPerson: true
+companion: none
+cost: hat_buy
+profile: shop
+yearlyLimit: 3
+hub: shopping
+look: hat
+tiers:
+  great:
+    text:
+      - "You put it on and the mirror agrees. You are never taking it off."
+      - "A hat that makes the whole outfit work, and it fits perfectly."
+    effects: [{ type: stat, key: looks, delta: 2 }, { type: stat, key: happiness, delta: 2 }, { type: flag, key: new_look, value: true }]
+    events: [shopping_compliment]
+    eventChance: follow_up_low
+  good:
+    text:
+      - "A good hat at a good price."
+      - "It fits, it suits you and it keeps the sun out."
+    effects: [{ type: stat, key: looks, delta: 1 }, { type: stat, key: happiness, delta: 1 }, { type: flag, key: new_look, value: true }]
+  neutral:
+    text:
+      - "A hat. It is fine."
+      - "You wear it home and forget about it."
+    effects: [{ type: stat, key: looks, delta: 1 }, { type: flag, key: new_look, value: true }]
+  bad:
+    text:
+      - "It is too tight, and it leaves a line on your forehead."
+      - "A hat that wears you."
+    effects: [{ type: stat, key: happiness, delta: -1 }, { type: flag, key: new_look, value: true }]

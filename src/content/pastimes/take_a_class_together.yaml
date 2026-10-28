@@ -9,6 +9,7 @@ companionKinds: [partner]
 cost: couples_class
 profile: love
 yearlyLimit: 3
+hub: dating
 tiers:
   great:
     together:

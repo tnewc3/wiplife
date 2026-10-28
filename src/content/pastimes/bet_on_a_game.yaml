@@ -10,6 +10,7 @@ inPerson: false
 companion: none
 cost: sports_bet
 yearlyLimit: 6
+hub: casino
 tiers:
   great:
     text:
@@ -23,6 +24,8 @@ tiers:
         effects:
           - { type: health, conditionId: gambling_addiction, severity: 25 }
         note: "You notice that you are thinking about the next bet before this one is settled."
+    events: [casino_hot_streak]
+    eventChance: follow_up_mid
   good:
     text:
       - "Your team does what they were meant to. The {cost} bet pays {amount}, and you pretend you never doubted it."
@@ -34,6 +37,8 @@ tiers:
         effects:
           - { type: health, conditionId: gambling_addiction, severity: 25 }
         note: "You notice that you are thinking about the next bet before this one is settled."
+    events: [casino_hot_streak]
+    eventChance: follow_up_low
   neutral:
     text:
       - "The match ends in a draw and the bet is returned: {cost}, and a long evening's worth of nerves."
@@ -55,6 +60,8 @@ tiers:
         effects:
           - { type: health, conditionId: gambling_addiction, severity: 25 }
         note: "You notice that you are thinking about the next bet before this one is settled."
+    events: [casino_chasing_losses]
+    eventChance: follow_up_mid
   backfire:
     text:
       - "You put more on the next game to make up for it, and the one after. By the end of the weekend you are a lot poorer than the {cost} you meant to risk."
@@ -67,3 +74,5 @@ tiers:
         effects:
           - { type: health, conditionId: gambling_addiction, severity: 25 }
         note: "You notice that you are thinking about the next bet before this one is settled."
+    events: [casino_chasing_losses]
+    eventChance: follow_up_mid

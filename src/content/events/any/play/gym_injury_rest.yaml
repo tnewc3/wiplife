@@ -1,0 +1,31 @@
+# Follow-up of a gym workout gone wrong (A1).
+id: gym_injury_rest
+title: The injury
+text: >-
+  Your back, or your knee, or your shoulder, whichever you pulled, still hurts days later. You could rest it, or you could go back and prove it is nothing.
+tone: light
+category: play
+rarity: common
+lifeStages: [teen, youngAdult, adult, senior]
+requires: { flag: gym_injury }
+weight: { base: 5 }
+followUpOnly: true
+choices:
+  - id: rest
+    label: Take a proper rest
+    outcome:
+      text: >-
+        A week of doing nothing is dull and it works. The ache fades, and so does the urge to rush.
+      effects:
+        - { type: stat, key: health, delta: 2 }
+        - { type: stat, key: stress, delta: 1 }
+        - { type: flag, key: gym_injury, value: false }
+  - id: push
+    label: Go back anyway
+    outcome:
+      text: >-
+        You tell yourself it is fine. It is not, and it stays not fine for weeks.
+      effects:
+        - { type: stat, key: health, delta: -3 }
+        - { type: stat, key: stress, delta: 2 }
+        - { type: flag, key: gym_injury, value: false }

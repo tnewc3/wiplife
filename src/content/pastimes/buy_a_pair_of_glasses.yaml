@@ -1,0 +1,35 @@
+id: buy_a_pair_of_glasses
+category: shopping
+label: "Get glasses or sunglasses"
+blurb: "Choose a pair and walk out wearing them."
+minAge: 8
+inPerson: true
+companion: none
+cost: glasses
+profile: shop
+yearlyLimit: 2
+hub: shopping
+look: eyewear
+tiers:
+  great:
+    text:
+      - "The frames sit right and change your face in a way you like. You decide to wear them out of the shop."
+      - "You find the pair on the third try, and the optician says they were made for you."
+    effects: [{ type: stat, key: looks, delta: 2 }, { type: stat, key: confidence, delta: 1 }, { type: stat, key: happiness, delta: 1 }, { type: flag, key: new_look, value: true }]
+    events: [shopping_compliment]
+    eventChance: follow_up_low
+  good:
+    text:
+      - "A comfortable pair that looks good on you."
+      - "The frames are light and you hardly notice them."
+    effects: [{ type: stat, key: looks, delta: 1 }, { type: stat, key: happiness, delta: 1 }, { type: flag, key: new_look, value: true }]
+  neutral:
+    text:
+      - "They are fine, and a bit odd at first."
+      - "You get used to them by the time you get home."
+    effects: [{ type: stat, key: looks, delta: 1 }, { type: flag, key: new_look, value: true }]
+  bad:
+    text:
+      - "The frames pinch behind your ears and slide down your nose. You will be back for an adjustment."
+      - "They looked better on the model."
+    effects: [{ type: stat, key: happiness, delta: -1 }, { type: flag, key: new_look, value: true }]

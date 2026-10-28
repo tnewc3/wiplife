@@ -1,0 +1,41 @@
+id: build_with_wood
+category: hobby
+label: "Build something in the workshop"
+blurb: "Sawdust, measurements and a bad habit of cutting twice."
+minAge: 10
+inPerson: true
+companion: none
+cost: hobby_supplies
+profile: steady
+yearlyLimit: 8
+hub: hobbies
+hobby:
+  talent: mechanics
+  skill: { great: 10, good: 7, neutral: 3, bad: 1, backfire: 0 }
+tiers:
+  great:
+    text:
+      - "The joint fits first time, flush and tight. You run your thumb over it for no reason."
+      - "A small shelf, square and sturdy. You build it, and then look for other things to build."
+    effects: [{ type: stat, key: happiness, delta: 3 }, { type: stat, key: stress, delta: -1 }, { type: stat, key: discipline, delta: 1 }]
+    events: [hobby_class_invite, hobby_someone_asks]
+    eventChance: follow_up_low
+  good:
+    text:
+      - "You cut, sand and fix a mistake or two. The piece will do."
+      - "A slow session of measuring and re-measuring."
+    effects: [{ type: stat, key: happiness, delta: 2 }, { type: stat, key: stress, delta: -1 }]
+    events: [hobby_someone_asks]
+    eventChance: follow_up_low
+  neutral:
+    text:
+      - "You put in the time and not much else happens. Practice is mostly this."
+      - "Neither good nor bad, just another session on the pile."
+    effects: [{ type: stat, key: happiness, delta: 1 }]
+  bad:
+    text:
+      - "You cut the board a hair short, then a hair shorter. Now it is firewood."
+      - "The saw slips, and so does your temper."
+    effects: [{ type: stat, key: stress, delta: 2 }, { type: stat, key: happiness, delta: -1 }]
+    events: [hobby_burnout]
+    eventChance: follow_up_low

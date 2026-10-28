@@ -8,6 +8,7 @@ companion: none
 cost: gym_session
 profile: steady
 yearlyLimit: 6
+hub: gym
 tiers:
   great:
     text:
@@ -18,6 +19,8 @@ tiers:
       - { type: stat, key: stress, delta: -1 }
       - { type: stat, key: happiness, delta: 2 }
       - { type: stat, key: discipline, delta: 1 }
+    events: [gym_milestone]
+    eventChance: follow_up_mid
   good:
     text:
       - "A solid hour of work. Your muscles ache in the right way and your head is clearer than it was."

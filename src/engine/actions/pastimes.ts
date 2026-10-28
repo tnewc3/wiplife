@@ -28,6 +28,7 @@ const choiceOf = (p: LifeActionParams): PastimeChoice => ({
   first: p.first,
   last: p.last,
   consentId: p.consentId,
+  look: p.look,
 });
 
 export const PASTIME_ACTIONS: Record<PastimeActionId, LifeActionRule> = {
@@ -40,10 +41,12 @@ export const PASTIME_ACTIONS: Record<PastimeActionId, LifeActionRule> = {
       const chase = field(params, 'chase');
       const route = field(params, 'route');
       const consentId = field(params, 'consentId');
-      if (!only(params, ['pastimeId', 'companionId', 'quality', 'stake', 'chase', 'route', 'first', 'last', 'consentId'])) return null;
+      const look = field(params, 'look');
+      if (!only(params, ['pastimeId', 'companionId', 'quality', 'stake', 'chase', 'route', 'first', 'last', 'consentId', 'look'])) return null;
       if (typeof pastimeId !== 'string' || !content.pastimes[pastimeId]) return null;
       if (companionId !== undefined && (typeof companionId !== 'string' || companionId.length === 0 || companionId.length > 60)) return null;
       if (consentId !== undefined && (typeof consentId !== 'string' || consentId.length === 0 || consentId.length > 60)) return null;
+      if (look !== undefined && (typeof look !== 'string' || !/^[a-z_]{1,30}$/.test(look))) return null;
       if (quality !== undefined && !(PASTIME_QUALITIES as readonly unknown[]).includes(quality)) return null;
       if (stake !== undefined && !(PASTIME_STAKES as readonly unknown[]).includes(stake)) return null;
       if (route !== undefined && !(PASTIME_ROUTES as readonly unknown[]).includes(route)) return null;
@@ -62,6 +65,7 @@ export const PASTIME_ACTIONS: Record<PastimeActionId, LifeActionRule> = {
         ...(first !== undefined ? { first } : {}),
         ...(last !== undefined ? { last } : {}),
         ...(consentId !== undefined ? { consentId } : {}),
+        ...(look !== undefined ? { look } : {}),
       };
     },
     allowed: (state, p, content) => {

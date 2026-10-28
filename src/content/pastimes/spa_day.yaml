@@ -9,6 +9,7 @@ companionKinds: [partner, friend, family]
 cost: spa_day
 profile: pamper
 yearlyLimit: 2
+hub: salon
 tiers:
   great:
     text:

@@ -1,0 +1,28 @@
+# The Activities tab (A1): the groups, and the activities in them. An activity of kind `options` lists the leisure
+# definitions of src/content/pastimes that name it as their `hub`. icon is an id of registries/icons.yaml.
+groups:
+  - { id: featured, label: Featured }
+  - { id: mind_body, label: Mind & body }
+  - { id: social, label: Social }
+  - { id: money_luck, label: Money & luck }
+  - { id: leisure, label: Leisure }
+
+activities:
+  - { id: own_thing, group: featured, label: Do your own thing, subtitle: "Describe what you want to do, and see what happens.", icon: rocket, kind: own_thing, minAge: 8, limit: 12 }
+
+  - { id: gym, group: mind_body, label: Gym, subtitle: "Light or hard workouts, classes and runs.", icon: flexed_biceps, kind: options, minAge: 8, limit: 14 }
+  - { id: meditate, group: mind_body, label: Meditate, subtitle: "Quiet time to lower the stress.", icon: sparkles, kind: options, minAge: 8, limit: 14 }
+  - { id: read, group: mind_body, label: Read, subtitle: "The library, a novel or something hard.", icon: light_bulb, kind: options, minAge: 6, limit: 14 }
+  - { id: doctor, group: mind_body, label: Doctor, subtitle: "A check-up, treatment, and where to find therapy.", icon: stethoscope, kind: doctor, minAge: 0, limit: 1 }
+
+  - { id: nightlife, group: social, label: Nightlife, subtitle: "Bars, clubs, karaoke and live shows.", icon: fire, kind: options, minAge: 18, limit: 12, adultsOnly: true }
+  - { id: dating, group: social, label: Dating, subtitle: "Find someone. Adults only.", icon: two_hearts, kind: options, minAge: 18, limit: 10, adultsOnly: true }
+  - { id: parties, group: social, label: Parties, subtitle: "Host one, or go to one.", icon: speech_balloon, kind: options, minAge: 5, limit: 10 }
+
+  - { id: lottery, group: money_luck, label: Lottery, subtitle: "A ticket and a dream. Adults only.", icon: glowing_star, kind: options, minAge: 18, limit: 10, adultsOnly: true }
+  - { id: casino, group: money_luck, label: Casino, subtitle: "Games with stakes. The house keeps an edge.", icon: money_bag, kind: options, minAge: 18, limit: 12, adultsOnly: true }
+  - { id: shopping, group: money_luck, label: Shopping, subtitle: "Clothes, accessories, hats and treats.", icon: trophy, kind: options, minAge: 5, limit: 12 }
+
+  - { id: vacation, group: leisure, label: Vacation, subtitle: "A weekend away, or plan a trip.", icon: airplane, kind: vacation, minAge: 8, limit: 6 }
+  - { id: salon, group: leisure, label: Salon & spa, subtitle: "A haircut, a new style, dye or a spa day.", icon: sparkles, kind: options, minAge: 10, limit: 12 }
+  - { id: hobbies, group: leisure, label: Hobbies, subtitle: "Pick a hobby and practice it.", icon: brain, kind: hobbies, minAge: 6, limit: 24 }

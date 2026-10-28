@@ -8,6 +8,7 @@ companion: none
 cost: run
 profile: steady
 yearlyLimit: 8
+hub: gym
 tiers:
   great:
     text:

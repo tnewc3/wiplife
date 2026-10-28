@@ -9,6 +9,7 @@ companionKinds: [partner, friend]
 cost: live_show
 profile: night
 yearlyLimit: 4
+hub: nightlife
 tiers:
   great:
     text:
@@ -47,6 +48,8 @@ tiers:
     effects:
       - { type: stat, key: happiness, delta: 1 }
     companion: { affection: 1, trust: 0 }
+    events: [nightlife_taxi_home]
+    eventChance: follow_up_mid
   bad:
     text:
       - "The microphone cuts out, you forget the words, and the room goes silent. You smile and pretend it was a joke."

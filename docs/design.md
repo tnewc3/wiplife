@@ -214,7 +214,7 @@ The game speaks to the player as "you," so the player's pronouns mainly appear w
 Every character, and every person in their life, has a layered, recolorable portrait (art from the portrait package, revision 15; see docs/portraits-and-ui.md).
 
 - **How someone looks** is saved as settings on them: body type (male or female art, defaulting from gender category, changeable any time; a nonbinary character chooses), hairstyle, outfit, eye shape, brows, lashes, nose, facial hair, glasses, earrings, hat, skin tone, natural hair color, eye color, clothing and hat colors, and the age their hair goes gray. The portrait template is never saved: it is body type plus the age stage (baby, young child, teenager, young adult, adult, middle aged, senior, very old; ages in `balance/portraits.yaml`), so people age on screen with no save changes. A choice an age does not allow (a beard on a child, a style that needs a bigger head) is not shown, and comes back when the age allows it.
-- **Aging:** natural hair turns silver at the person's own graying age. Dye overrides it for a few years, then fades. Looks do not change by choice or by event after creation; salon and shopping activities (A1) will change them.
+- **Aging:** natural hair turns silver at the person's own graying age. Dye overrides it for a few years, then fades. Looks do not change by choice or by event after creation; the salon and shopping change them by choice (A1): a new hairstyle, a dye (which fades after a few years), an outfit and its color, glasses, earrings and hats.
 - **Expression follows mood:** smiling when Happiness (a person's mood) is at least 60, neutral otherwise; event cards can show surprise.
 - **Creation:** the Look step has a live portrait that can be previewed at each age stage, every choice above, and "Surprise me". Random lives roll a look; a custom character's hair and eye choices also write the hair and eye words on the Profile.
 - **Family resemblance:** your parents and siblings are generated to look like you; your children get skin tone, hair color and eye color from their biological parents, with some variation. Adopted and step children, and everyone else, are rolled independently.
@@ -471,7 +471,7 @@ Real cities, but fictional companies, universities and brands to avoid trademark
 | Job / School | Your school (with a grades bar) or job, then "Ways to work": gig work, a business, time abroad, and the special careers (arts and media, sports, social media, crime). A way that is not open to you is greyed out; tapping it says why |
 | Assets | Finances (the ledger, lifestyle, debts, a business's and crime's money), Properties (Rent, move, buy or sell), Possessions (vehicles, vacation homes, valuables and pets, with condition bars), Your will |
 | People | Love, Parents, Siblings, other family, Children, Grandchildren, Friends, School, Work, Pets, then Late relationships (everyone who has died, with a memorial mark and "Died X years ago"); Family planning and Groups; "Spend time with everyone" |
-| Activities | A "coming soon" card for the Activities stage (the gym, the doctor, nightlife, dating, the lottery, the casino, shopping, vacations, the salon and hobbies), and the leisure features that already exist: Leisure and self, Plan a trip, Move abroad, Social media and the teen years |
+| Activities | Four groups (Mind & body: Gym, Meditate, Read, Doctor; Social: Nightlife, Dating, Parties; Money & luck: Lottery, Casino, Shopping; Leisure: Vacation, Salon & spa, Hobbies), with "Do your own thing" featured when a model is connected. An activity you can't do yet is greyed out and tapping it says why. An open one opens a sheet of options with the price on each button and an outcome card with your new balance. Below them, "Everything else" (the full leisure list: surgery, luxury, crime, loans and the rest), Plan a trip, Move abroad, Social media and the teen years |
 
 "Spend time with everyone" is a group interaction: it does the everyday "spend time" interaction with each person who can have it now, one after another, with the same diminishing returns as any interaction. Each repeat in a year returns less, and someone who has had enough is left out.
 
@@ -509,8 +509,9 @@ A short card lists changes in money and stats, new memories, and relationship ch
 | Person detail | Relationship status and memories | Ask out, propose, break up, reconcile, cut contact |
 | Job / School | Current job or enrollment, and the ways to work | Job search, apply, quit, ask for a raise, enroll, drop out, gig work, a business |
 | Assets | Finances, properties and possessions | Change lifestyle tier, view loans, rent, buy or sell a home, buy and sell things |
-| Activities | Things to do (coming soon) and the leisure features that exist | Leisure and self, trips, moving abroad, social media |
-| Profile → Health | Health status | See a doctor |
+| Activities | Things to do between age-ups, in four groups | Gym, meditate, read, doctor, nightlife, dating, parties, lottery, casino, shopping, vacation, salon and spa, hobbies; and leisure and self, trips, moving abroad, social media |
+| Profile → Health | Health status, conditions, mind and mood | Go to Activities → Doctor |
+| Activities → Doctor | See a doctor once a year, and the way to therapy | See a doctor |
 | Assets → Properties | Housing | Move out, rent, buy, relocate to another city |
 | Menu → Life history | Full timeline of this life | Browse |
 | Death / Obituary | End of life | Save to archive, start new life (heir option post-MVP) |

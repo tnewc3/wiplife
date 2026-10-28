@@ -10,6 +10,7 @@ inPerson: false
 companion: none
 cost: lottery_ticket
 yearlyLimit: 8
+hub: lottery
 tiers:
   great:
     text:
@@ -34,6 +35,8 @@ tiers:
         effects:
           - { type: health, conditionId: gambling_addiction, severity: 25 }
         note: "You notice that you are thinking about the next bet before this one is settled."
+    events: [lottery_office_pool]
+    eventChance: follow_up_low
   bad:
     text:
       - "Nothing. You fold the {cost} ticket in half and drop it in the nearest bin, and tell yourself it was only a bit of fun."
@@ -46,3 +49,5 @@ tiers:
         effects:
           - { type: health, conditionId: gambling_addiction, severity: 25 }
         note: "You notice that you are thinking about the next bet before this one is settled."
+    events: [lottery_near_miss, lottery_office_pool]
+    eventChance: follow_up_low

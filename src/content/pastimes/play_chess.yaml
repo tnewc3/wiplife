@@ -1,0 +1,41 @@
+id: play_chess
+category: hobby
+label: "Play chess"
+blurb: "Sixty-four squares and a clock."
+minAge: 6
+inPerson: true
+companion: none
+cost: hobby_supplies
+profile: steady
+yearlyLimit: 8
+hub: hobbies
+hobby:
+  talent: math
+  skill: { great: 10, good: 7, neutral: 3, bad: 1, backfire: 0 }
+tiers:
+  great:
+    text:
+      - "You see the combination three moves early and spring it. The other player laughs and shakes your hand."
+      - "A long, careful game won by one quiet move."
+    effects: [{ type: stat, key: happiness, delta: 3 }, { type: stat, key: stress, delta: -1 }, { type: stat, key: discipline, delta: 1 }]
+    events: [hobby_class_invite, hobby_someone_asks]
+    eventChance: follow_up_low
+  good:
+    text:
+      - "You hold your own, and learn from the position you lose."
+      - "An even game and a draw, which feels like a fair result."
+    effects: [{ type: stat, key: happiness, delta: 2 }, { type: stat, key: stress, delta: -1 }]
+    events: [hobby_someone_asks]
+    eventChance: follow_up_low
+  neutral:
+    text:
+      - "You put in the time and not much else happens. Practice is mostly this."
+      - "Neither good nor bad, just another session on the pile."
+    effects: [{ type: stat, key: happiness, delta: 1 }]
+  bad:
+    text:
+      - "You blunder your queen in the first ten moves and play on stubbornly anyway."
+      - "You lose badly and cannot figure out why."
+    effects: [{ type: stat, key: stress, delta: 2 }, { type: stat, key: happiness, delta: -1 }]
+    events: [hobby_burnout]
+    eventChance: follow_up_low

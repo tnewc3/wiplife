@@ -155,7 +155,7 @@ describe('doing an activity', () => {
     expect(returnsFactor(0, content)).toBe(1);
     expect(returnsFactor(1, content)).toBeLessThan(1);
     expect(returnsFactor(3, content)).toBeLessThan(returnsFactor(1, content));
-    expect(returnsFactor(50, content)).toBe(content.balance.pastimes.returns.floor);
+    expect(returnsFactor(50, content)).toBe(content.balance.activities.returns.floor);
     const odds = (n: number) => {
       const w = tierWeights(life, def, {}, n, content);
       const good = w.filter(([t]) => t === 'great' || t === 'good').reduce((s, [, x]) => s + x, 0);

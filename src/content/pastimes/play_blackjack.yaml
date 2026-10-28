@@ -10,6 +10,7 @@ inPerson: true
 companion: none
 cost: casino_blackjack
 yearlyLimit: 6
+hub: casino
 tiers:
   great:
     text:
@@ -23,6 +24,8 @@ tiers:
         effects:
           - { type: health, conditionId: gambling_addiction, severity: 25 }
         note: "You notice that you are thinking about the next bet before this one is settled."
+    events: [casino_hot_streak]
+    eventChance: follow_up_mid
   good:
     text:
       - "A steady hour and a few good hands. You leave the table with {amount} for your {cost}."
@@ -34,6 +37,8 @@ tiers:
         effects:
           - { type: health, conditionId: gambling_addiction, severity: 25 }
         note: "You notice that you are thinking about the next bet before this one is settled."
+    events: [casino_hot_streak]
+    eventChance: follow_up_low
   neutral:
     text:
       - "Push after push. You stand up with exactly what you sat down with: {cost}, and a whole evening's tension."
@@ -55,6 +60,8 @@ tiers:
         effects:
           - { type: health, conditionId: gambling_addiction, severity: 25 }
         note: "You notice that you are thinking about the next bet before this one is settled."
+    events: [casino_chasing_losses]
+    eventChance: follow_up_mid
   backfire:
     text:
       - "You raise on a hunch, then raise to cover it. By the time you stand, the {cost} is gone and so is the evening's good mood."
@@ -67,3 +74,5 @@ tiers:
         effects:
           - { type: health, conditionId: gambling_addiction, severity: 25 }
         note: "You notice that you are thinking about the next bet before this one is settled."
+    events: [casino_chasing_losses]
+    eventChance: follow_up_mid

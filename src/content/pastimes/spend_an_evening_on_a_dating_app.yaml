@@ -8,6 +8,7 @@ companion: none
 cost: hookup_app
 profile: love
 yearlyLimit: 4
+hub: dating
 requires: { romance: [single] }
 tiers:
   great:
@@ -33,6 +34,8 @@ tiers:
       - "Nothing sticks. You go to bed on time."
     effects:
       - { type: stat, key: happiness, delta: 1 }
+    events: [dating_second_date, dating_bad_chemistry]
+    eventChance: follow_up_mid
   bad:
     text:
       - "Every conversation dies after a greeting. You put the phone down feeling a little worse than when you picked it up."
@@ -40,3 +43,5 @@ tiers:
     effects:
       - { type: stat, key: happiness, delta: -2 }
       - { type: stat, key: stress, delta: 1 }
+    events: [dating_ghosted]
+    eventChance: follow_up_mid

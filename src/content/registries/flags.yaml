@@ -170,3 +170,26 @@ flags:
   school_path: What you chose at the end of compulsory school (stay, college, apprenticeship or work)
   report_failing: A subject on this year's report card is failing
   report_shining: A subject on this year's report card is excellent
+  # A1: the Activities tab.
+  gym_injury: You hurt yourself at the gym and it has not healed
+  changed_hair: You changed your hairstyle recently
+  new_look: You bought something new to wear recently
+  traded_numbers_nightlife: You swapped numbers with someone you met on a night out
+  practiced_play_the_guitar: You have practiced this hobby (play the guitar)
+  skilled_play_the_guitar: You have become skilled at this hobby (play the guitar)
+  practiced_paint_or_draw: You have practiced this hobby (paint or draw)
+  skilled_paint_or_draw: You have become skilled at this hobby (paint or draw)
+  practiced_write_stories: You have practiced this hobby (write stories)
+  skilled_write_stories: You have become skilled at this hobby (write stories)
+  practiced_bake_something: You have practiced this hobby (bake something)
+  skilled_bake_something: You have become skilled at this hobby (bake something)
+  practiced_build_with_wood: You have practiced this hobby (build with wood)
+  skilled_build_with_wood: You have become skilled at this hobby (build with wood)
+  practiced_play_chess: You have practiced this hobby (play chess)
+  skilled_play_chess: You have become skilled at this hobby (play chess)
+  practiced_practice_dance: You have practiced this hobby (practice dance)
+  skilled_practice_dance: You have become skilled at this hobby (practice dance)
+  practiced_practice_public_speaking: You have practiced this hobby (practice public speaking)
+  skilled_practice_public_speaking: You have become skilled at this hobby (practice public speaking)
+  practiced_shoot_hoops: You have practiced this hobby (shoot hoops)
+  skilled_shoot_hoops: You have become skilled at this hobby (shoot hoops)

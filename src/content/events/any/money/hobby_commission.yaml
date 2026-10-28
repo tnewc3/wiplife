@@ -1,0 +1,28 @@
+# A skilled maker is asked to sell their work (A1 hobbies).
+id: hobby_commission
+title: Would you make one for me
+text: >-
+  A coworker, a neighbor and then a cousin all ask the same thing: could you make one for them? "I will pay," the cousin says. "{$300}. I mean it."
+tone: light
+category: money
+rarity: uncommon
+lifeStages: [teen, youngAdult, adult, senior]
+requires: { any: [{ flag: skilled_build_with_wood }, { flag: skilled_paint_or_draw }] }
+weight: { base: 5 }
+choices:
+  - id: accept
+    label: Take the commission
+    outcome:
+      text: >-
+        It takes more evenings than you planned, and the result is something you are proud of. You are paid {$300}, and asked for another.
+      effects:
+        - { type: money, delta: 300 }
+        - { type: stat, key: happiness, delta: 3 }
+        - { type: stat, key: confidence, delta: 1 }
+  - id: decline
+    label: Say it is just a hobby
+    outcome:
+      text: >-
+        You say it is only a hobby, and that you would like to keep it that way. They nod, understanding.
+      effects:
+        - { type: stat, key: happiness, delta: 1 }

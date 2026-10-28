@@ -8,6 +8,7 @@ companion: none
 cost: haircut
 profile: grooming
 yearlyLimit: 4
+hub: salon
 tiers:
   great:
     text:
@@ -17,6 +18,8 @@ tiers:
       - { type: stat, key: looks, delta: 3 }
       - { type: stat, key: confidence, delta: 1 }
       - { type: stat, key: happiness, delta: 2 }
+    events: [salon_stylist_gossip]
+    eventChance: follow_up_mid
   good:
     text:
       - "A clean, flattering cut. You feel fresh and a bit lighter."
@@ -24,6 +27,8 @@ tiers:
     effects:
       - { type: stat, key: looks, delta: 2 }
       - { type: stat, key: happiness, delta: 1 }
+    events: [salon_stylist_gossip]
+    eventChance: follow_up_mid
   neutral:
     text:
       - "It looks like what you asked for. You pay {cost} and carry on."

@@ -1,0 +1,29 @@
+# Opened by a good night at the tables (A1).
+id: casino_hot_streak
+title: The table is warm
+text: >-
+  The dealer smiles and the cards keep landing in your favor. Everybody at the table is smiling. It feels like the kind of evening that does not end.
+tone: light
+category: vice
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires: { age: { gte: 18 } }
+weight: { base: 5 }
+followUpOnly: true
+choices:
+  - id: leave
+    label: Walk away and go home
+    outcome:
+      text: >-
+        Walking out on a good night feels like winning twice. Nobody at home believes you left on purpose.
+      effects:
+        - { type: stat, key: discipline, delta: 1 }
+        - { type: stat, key: happiness, delta: 2 }
+  - id: stay
+    label: Stay for one more hand
+    outcome:
+      text: >-
+        One more hand becomes ten. The warmth leaves the table, and so, a little later, does the money.
+      effects:
+        - { type: money, delta: -200 }
+        - { type: stat, key: stress, delta: 2 }

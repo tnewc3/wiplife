@@ -1,0 +1,29 @@
+# Opened by a party that got out of hand (A1).
+id: party_cops_arrive
+title: Blue lights
+text: >-
+  A police car pulls up outside, lights flashing without the siren. The music stops. Everybody looks at you.
+tone: light
+category: justice
+rarity: common
+lifeStages: [teen, youngAdult, adult, senior]
+requires: { age: { gte: 16 } }
+weight: { base: 5 }
+followUpOnly: true
+choices:
+  - id: polite
+    label: Be calm and apologize
+    outcome:
+      text: >-
+        You are calm, apologize and promise to send everyone home. The officer writes down your name and goes away, and so does the party.
+      effects:
+        - { type: stat, key: stress, delta: 2 }
+        - { type: stat, key: reputation, delta: -1 }
+  - id: mouth
+    label: Argue the point
+    outcome:
+      text: >-
+        That makes it worse. The officer's tone changes, and so does the paperwork.
+      effects:
+        - { type: stat, key: stress, delta: 3 }
+        - { type: legal, offenseId: disorderly_conduct, outcome: sentence }

@@ -10,6 +10,7 @@ companionKinds: [partner, friend]
 cost: bar_night
 profile: night
 yearlyLimit: 4
+hub: nightlife
 tiers:
   great:
     text:
@@ -84,6 +85,8 @@ tiers:
           - { type: stat, key: happiness, delta: -1 }
         note: "The next morning is a slow, grim negotiation with a glass of water."
     drunkDrive: drunk_drive
+    events: [nightlife_taxi_home]
+    eventChance: follow_up_mid
   bad:
     text:
       - "The drinks are overpriced, the music is too loud, and a man next to you will not stop talking. You pay {cost} and leave early."

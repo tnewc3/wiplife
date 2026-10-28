@@ -2102,6 +2102,43 @@ describe('B1 content checks', () => {
   });
 });
 
+describe('the Activities tab (A1)', { timeout: 90_000 }, () => {
+  const read = (file: string) => readFile(path.join(dir, file), 'utf8');
+  it('holds every option of Dating to the adult age and the love category', async () => {
+    const app = await read('pastimes/spend_an_evening_on_a_dating_app.yaml');
+    await write('pastimes/spend_an_evening_on_a_dating_app.yaml', app.replace('minAge: 18', 'minAge: 16'));
+    expect(await expectErrors()).toContain('is adults only: minAge must be at least 18');
+    await write('pastimes/spend_an_evening_on_a_dating_app.yaml', app.replace('category: love', 'category: social'));
+    expect(await expectErrors()).toContain('every option of Dating is in the love category');
+  });
+
+  it('refuses an option that names an activity that does not exist, and a look change outside the salon and shopping', async () => {
+    const hat = await read('pastimes/buy_a_hat.yaml');
+    await write('pastimes/buy_a_hat.yaml', hat.replace('hub: shopping', 'hub: nonesuch'));
+    expect(await expectErrors()).toContain('unknown hub "nonesuch"');
+    await write('pastimes/buy_a_hat.yaml', hat.replace('category: shopping', 'category: outdoor'));
+    expect(await expectErrors()).toContain('a look change belongs to the salon or shopping');
+  });
+
+  it('checks a hobby: a real talent, its flags, and its place in Hobbies', async () => {
+    const guitar = await read('pastimes/play_the_guitar.yaml');
+    await write('pastimes/play_the_guitar.yaml', guitar.replace('talent: music', 'talent: nonesuch'));
+    expect(await expectErrors()).toContain('unknown talent "nonesuch"');
+    await write('pastimes/play_the_guitar.yaml', guitar.replace('hub: hobbies', 'hub: gym'));
+    expect(await expectErrors()).toContain('a hobby is an option of Hobbies');
+  });
+
+  it('keeps an activity a minor can do from opening an event that casts a stranger or uses romantic words', async () => {
+    const hat = await read('pastimes/buy_a_hat.yaml');
+    const compliment = await read('events/any/friends/shopping_compliment.yaml');
+    await write('events/any/friends/shopping_compliment.yaml', compliment.replace('friend: { kind: friend, presence: city }', 'friend: { kind: acquaintance, createIfMissing: true, newChance: 1, presence: city }'));
+    expect(await expectErrors()).toContain("can't open an event that casts");
+    await write('events/any/friends/shopping_compliment.yaml', compliment.replace('It suits you.', 'You look sexy.'));
+    expect(await expectErrors()).toContain('romantic or sexual words');
+    void hat;
+  });
+});
+
 describe('risk and legal activities (Batch 2b)', { timeout: 90_000 }, () => {
   const read = (file: string) => readFile(path.join(dir, file), 'utf8');
   it('refuses a game the house does not win, a gambling activity with no legal age, and a game nobody plays', async () => {

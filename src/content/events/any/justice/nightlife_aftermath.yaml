@@ -1,0 +1,28 @@
+# Follow-up of a fight on a night out (A1).
+id: nightlife_aftermath
+title: The morning after the fight
+text: >-
+  The bruise has gone yellow and the story has grown. Someone in your circle heard about the fight, and now everyone has a version.
+tone: light
+category: justice
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires: { all: [{ age: { gte: 18 } }, { flag: nightlife_fight }] }
+weight: { base: 5 }
+choices:
+  - id: own
+    label: Own up and laugh at yourself
+    outcome:
+      text: >-
+        You tell it straight, make it funny, and the story stops growing. People remember the laugh and forget the fight.
+      effects:
+        - { type: stat, key: reputation, delta: 1 }
+        - { type: stat, key: stress, delta: -1 }
+  - id: deny
+    label: Deny it ever happened
+    outcome:
+      text: >-
+        Denying it adds a second story on top of the first, and the first one is still true.
+      effects:
+        - { type: stat, key: reputation, delta: -2 }
+        - { type: stat, key: stress, delta: 2 }

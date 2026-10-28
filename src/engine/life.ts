@@ -218,6 +218,7 @@ export function createLife(input: CreateLifeOptions, content: ContentBundle): Li
     belonging: emptyBelonging(),
     business: emptyBusiness(),
     pastimes: emptyPastimes(),
+    hobbies: {},
     social: emptySocial(),
   };
   // P1: how everyone looks (a custom character's own choices, and a roll for the rest). From generators of their own, so the life's random sequence is as it was.

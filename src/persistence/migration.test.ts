@@ -77,6 +77,28 @@ describe('Batch 2a saves', () => {
   });
 });
 
+describe('A1 saves', () => {
+  it('upgrades a save from before the Activities tab: no hobbies, in the life and in an heir snapshot', () => {
+    const life = lifeAtAge('a1-migrate', 30);
+    const old = cloneJson(life) as unknown as Record<string, unknown>;
+    delete old.hobbies;
+    const saved = { ...old, inputLog: [{ year: life.currentYear, kind: 'create', payload: { heir: true, snapshot: cloneJson(old) } }] };
+    const after = migrateEnvelope({ ...makeEnvelope(saved, content.contentVersion), schemaVersion: 38 }).data as typeof life;
+    expect(after.hobbies).toEqual({});
+    expect(after.inputLog[0]!.payload.snapshot).toMatchObject({ hobbies: {} });
+    expect(lifeStateSchema.safeParse(after).success).toBe(true);
+  });
+
+  it('roundtrips a life with a hobby, a dyed look and an activity count for a whole activity', () => {
+    const life = produce(lifeAtAge('a1-save', 30), (d) => {
+      d.hobbies.play_the_guitar = { skill: 42, year: d.currentYear, sessions: 7 };
+      d.pastimes = { year: d.currentYear, counts: { 'hub:gym': 2, go_to_the_gym: 2 }, receipts: [] };
+    });
+    expect(loadedLifeSchema(content).parse(JSON.parse(JSON.stringify(life)))).toEqual(life);
+    expect(lifeStateSchema.safeParse(produce(life, (d) => { d.hobbies.play_the_guitar!.skill = 101; })).success).toBe(false);
+  });
+});
+
 describe('Batch 2b saves', () => {
   it('upgrades a save from before the risk activities without changing it, in the life and in an heir snapshot', () => {
     const life = lifeAtAge('b2b-migrate', 30);

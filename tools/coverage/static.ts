@@ -233,6 +233,12 @@ export function analyzeContent(content: ContentBundle): StaticCoverage {
   // Batch 2b: the engine reads a fake ID (it opens a bar below the drinking age) and writes the flags of a settled loan shark debt and a name change.
   addTo(flagReads, 'fake_id', 'pastimes (engine)');
   addTo(flagWrites, 'changed_name', 'pastimes (engine)');
+  // A1: practicing a hobby sets practiced_<hobby>, and being skilled at it skilled_<hobby>.
+  for (const def of Object.values(content.pastimes)) {
+    if (!def.hobby || def.retired) continue;
+    addTo(flagWrites, `practiced_${def.id}`, 'hobbies (engine)');
+    addTo(flagWrites, `skilled_${def.id}`, 'hobbies (engine)');
+  }
   addTo(flagWrites, 'shark_debt_cleared', 'economy (engine)');
   for (const profile of Object.values(content.balance.interactions.profiles)) {
     for (const tag of Object.keys(profile.memories)) addTo(memoryReads, tag, 'balance/interactions.yaml');

@@ -109,6 +109,10 @@ export interface AppState {
   /** U1: what "Spend time with everyone" just did, one row per person, until the player closes it. */
   groupTime: GroupTimeRow[] | null;
   interactSheet: { personId: string; view: 'menu' | 'gift' | 'pick'; /** The interaction a picker is for. */ pick?: string } | null;
+  /** A1: the activity of the Activities tab whose sheet of options is open (an id of registries/activities.yaml). */
+  activitySheet: string | null;
+  /** A1: a model is connected (X1), so "Do your own thing" shows on the Activities tab. Nothing connects one yet. */
+  modelConnected: boolean;
 
   init: () => Promise<void>;
   confirmAge: () => Promise<void>;
@@ -222,6 +226,9 @@ export interface AppState {
   /** E1: from the Interact sheet to the gift price tiers, and back. */
   setInteractView: (view: 'menu' | 'gift' | 'pick', pick?: string) => void;
   closeInteractions: () => void;
+  /** A1: opens the sheet of an activity of the Activities tab, and closes it. */
+  openActivity: (activityId: string) => void;
+  closeActivity: () => void;
   /** E5: opens the Interact sheet for a pet. */
   openPetInteractions: (petId: string) => void;
   /** E5: spends time with a pet (between years) and autosaves; the outcome card opens like any interaction's. */
@@ -476,6 +483,7 @@ export function createAppStore({
             s.personId = null;
             s.moreView = null;
             s.interactSheet = null;
+            s.activitySheet = null;
             s.groupTime = null;
           });
           void requestPersistenceOnce().catch(() => undefined);
@@ -507,6 +515,8 @@ export function createAppStore({
         editorTarget: null,
         moreView: null,
         interactSheet: null,
+        activitySheet: null,
+        modelConnected: false,
         groupTime: null,
 
         init: async () => {
@@ -587,6 +597,7 @@ export function createAppStore({
             s.editorTarget = target;
             s.screen = 'godEditor';
             s.interactSheet = null;
+            s.activitySheet = null;
             s.groupTime = null;
           });
         },
@@ -665,6 +676,7 @@ export function createAppStore({
             s.personId = null;
             s.moreView = null;
             s.interactSheet = null;
+            s.activitySheet = null;
             s.groupTime = null;
           });
         },
@@ -691,6 +703,7 @@ export function createAppStore({
             s.personId = null;
             s.moreView = null;
             s.interactSheet = null;
+            s.activitySheet = null;
             s.groupTime = null;
           }),
 
@@ -800,6 +813,7 @@ export function createAppStore({
           set((s) => {
             s.personId = null;
             s.interactSheet = null;
+            s.activitySheet = null;
             s.groupTime = null;
           }),
 
@@ -839,6 +853,16 @@ export function createAppStore({
             });
           }),
 
+        openActivity: (activityId) =>
+          set((s) => {
+            if (s.life && s.life.phase === 'yearStart' && s.life.housing.kind !== 'incarcerated' || activityId === 'doctor') s.activitySheet = activityId;
+          }),
+
+        closeActivity: () =>
+          set((s) => {
+            s.activitySheet = null;
+          }),
+
         openInteractions: (personId) =>
           set((s) => {
             if (s.life?.people[personId] && s.life.phase === 'yearStart') s.interactSheet = { personId, view: 'menu' };
@@ -855,6 +879,7 @@ export function createAppStore({
         closeInteractions: () =>
           set((s) => {
             s.interactSheet = null;
+            s.activitySheet = null;
             s.groupTime = null;
           }),
 

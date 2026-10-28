@@ -1,0 +1,28 @@
+# Opened by reading at the library (A1).
+id: library_recommendation
+title: A book you did not pick
+text: >-
+  The librarian slides a worn paperback across the desk. "You might like this one," and goes back to the shelving without waiting for an answer.
+tone: light
+category: play
+rarity: common
+lifeStages: [child, teen, youngAdult, adult, senior]
+requires: { age: { gte: 6 } }
+weight: { base: 5 }
+followUpOnly: true
+choices:
+  - id: read
+    label: Read it that night
+    outcome:
+      text: >-
+        It is not what you would have chosen, which is the best thing about it. You finish it in two sittings and think about it for a week.
+      effects:
+        - { type: stat, key: smarts, delta: 2 }
+        - { type: stat, key: happiness, delta: 2 }
+  - id: return
+    label: Put it back on the shelf
+    outcome:
+      text: >-
+        You put it back on a random shelf, a small betrayal you are not proud of.
+      effects:
+        - { type: stat, key: happiness, delta: -1 }

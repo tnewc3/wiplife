@@ -605,6 +605,13 @@ export const migrations: readonly Migration[] = [
       'Heir replay snapshots are upgraded the same way.',
     migrate: upgradeLooksData,
   },
+  {
+    from: 38,
+    description:
+      "A1: activities. A life gains a record of hobbies (none taken up). Nothing else changes: the counts of this year's activities keep their " +
+      "meaning (each option's own count), and an activity of the new tab starts counting for itself from now on. Heir replay snapshots are upgraded the same way.",
+    migrate: upgradeHobbiesData,
+  },
 ];
 
 /** The reach at which a curve of reach to fame gives this fame (the inverse of curveAt, which is increasing). */
@@ -941,6 +948,17 @@ function upgradeLooksData(data: unknown): unknown {
       })
     : life.inputLog;
   return { ...life, inputLog };
+}
+
+/** A1: the hobbies a save from before activities lacks. */
+function upgradeHobbiesData(data: unknown): unknown {
+  // Something that is not a life is left for the schema check to turn away.
+  if (!isRecord(data) || !isRecord(data.character)) return data;
+  const inputLog = Array.isArray(data.inputLog) ? data.inputLog.map((entry: unknown) => {
+    if (!isRecord(entry) || !isRecord(entry.payload) || !isRecord(entry.payload.snapshot)) return entry;
+    return { ...entry, payload: { ...entry.payload, snapshot: upgradeHobbiesData(entry.payload.snapshot) } };
+  }) : data.inputLog;
+  return { ...data, ...(inputLog !== undefined ? { inputLog } : {}), hobbies: data.hobbies ?? {} };
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

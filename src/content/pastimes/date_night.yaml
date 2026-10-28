@@ -9,6 +9,7 @@ companionKinds: [partner]
 cost: date_night
 profile: love
 yearlyLimit: 6
+hub: dating
 tiers:
   great:
     together:

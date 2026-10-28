@@ -1,0 +1,31 @@
+# Opened by dating activities; adults only (A1).
+id: dating_bad_chemistry
+title: Nothing there
+text: >-
+  The date is fine. The conversation is fine. There is just nothing in it, and you both know it by the main course.
+tone: light
+category: romance
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires: { all: [{ age: { gte: 18 } }, { romance: [single] }] }
+weight: { base: 5 }
+followUpOnly: true
+cast:
+  date: { kind: acquaintance, romantic: true, createIfMissing: true, newChance: 1, presence: city }
+choices:
+  - id: honest
+    label: Say so, kindly
+    outcome:
+      text: >-
+        You say it kindly. {date.name} laughs, relieved, and you share the dessert as friends.
+      effects:
+        - { type: relationship, role: date, affection: 4 }
+        - { type: stat, key: happiness, delta: 1 }
+  - id: fake
+    label: Fake it for the rest of the night
+    outcome:
+      text: >-
+        You keep up the act until the evening ends. Faking it is more tiring than the date.
+      effects:
+        - { type: relationship, role: date, affection: 1 }
+        - { type: stat, key: stress, delta: 2 }

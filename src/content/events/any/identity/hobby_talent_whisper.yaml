@@ -1,0 +1,28 @@
+# A talent you found, noticed by somebody watching you practice (A1 hobbies).
+id: hobby_talent_whisper
+title: A gift
+text: >-
+  Somebody who has watched you practice says it quietly, almost as an aside: "You are good at this. Properly good." They go back to what they were doing, and you stay where you are for a bit.
+tone: light
+category: identity
+rarity: uncommon
+lifeStages: [teen, youngAdult, adult, senior]
+requires: { all: [{ discovery: { talent: found } }, { any: [{ flag: practiced_play_the_guitar }, { flag: practiced_paint_or_draw }, { flag: practiced_write_stories }, { flag: practiced_bake_something }, { flag: practiced_build_with_wood }, { flag: practiced_play_chess }, { flag: practiced_practice_dance }, { flag: practiced_practice_public_speaking }, { flag: practiced_shoot_hoops }] }] }
+weight: { base: 5 }
+choices:
+  - id: take
+    label: Take it seriously
+    outcome:
+      text: >-
+        You let the words sink in. The next time you practice, you do it as if it matters, because it might.
+      effects:
+        - { type: stat, key: confidence, delta: 2 }
+        - { type: stat, key: discipline, delta: 1 }
+        - { type: stat, key: happiness, delta: 2 }
+  - id: brush
+    label: Brush it off
+    outcome:
+      text: >-
+        You say thanks, and shrug, and go back to your practice, a little warmer than you were.
+      effects:
+        - { type: stat, key: happiness, delta: 1 }

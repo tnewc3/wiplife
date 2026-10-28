@@ -18,7 +18,9 @@
  * here touches the engine.
  */
 import { OUTCOME_TIERS, PASTIME_CATEGORIES, PASTIME_QUALITIES, RISK_CATEGORIES, type ContentBundle, type PastimeCategory, type PastimeQuality, type PastimeRoute, type PastimeStake } from '../../src/content/schemas';
-import { allPastimes, companionOptions, pastimeBlock, pastimeCount, pastimePrice } from '../../src/engine/pastimes/query';
+import { allPastimes, companionOptions, pastimeBlock, pastimePrice } from '../../src/engine/pastimes/query';
+import { repeatsOf } from '../../src/engine/pastimes/activities';
+import { getActivityTabView } from '../../src/engine/selectors';
 import { valuablesOf } from '../../src/engine/possessions/query';
 import { weightedPick } from '../../src/engine/random';
 import { chance, nextFloat, nextInt, pick, type RngState } from '../../src/engine/rng';
@@ -27,7 +29,7 @@ import { emptyRiskReport, RiskWatcher, type RiskReport } from './risk';
 import { evidenceCount, fakeIdUsable } from '../../src/engine/pastimes/risk';
 import type { SimulationReport, TargetResult } from './run';
 
-export type PastimePlayer = 'careful' | 'careless' | 'spammer' | 'criminal';
+export type PastimePlayer = 'careful' | 'careless' | 'spammer' | 'criminal' | 'activities';
 
 export interface PastimePlan {
   pastimeId: string;
@@ -40,6 +42,8 @@ export interface PastimePlan {
   first?: string;
   last?: string;
   consentId?: string;
+  /** A1: what changes in the portrait (the salon and shopping). */
+  look?: string;
 }
 
 /** The action's params for a plan. */
@@ -71,8 +75,10 @@ const POLICY = {
   sellWhenBroke: 0.4,
   /** The careless player does this many activities a year at most. */
   carelessMax: 4,
-  /** The spammer's activity. */
-  spam: 'go_to_the_gym',
+  /** The spammer's activity: the gym, hard and light workouts and runs in turn, as often as the year allows. */
+  spam: ['hit_the_gym_hard', 'go_to_the_gym', 'go_for_a_run'],
+  /** A1: the activity player. Activities a year (the most), with the chance of each; and the chance of each risky or costly kind. */
+  tab: { perYear: [{ upTo: 9, max: 2, p: 0.5 }, { upTo: 17, max: 3, p: 0.6 }, { upTo: 64, max: 3, p: 0.65 }, { upTo: 120, max: 2, p: 0.5 }], casino: 0.1, lottery: 0.15, hobbyYear: 0.7, hobbySessions: 3, affordShare: 0.1 },
 };
 
 export interface PastimeProfile {
@@ -82,14 +88,23 @@ export interface PastimeProfile {
   vain: boolean;
   /** Likes to buy beautiful things. */
   collector: boolean;
+  /** A1: how much the life likes each activity of the tab, and the hobby it takes up (the id of a hobby's option). */
+  hubs: Record<string, number>;
+  hobby: string;
 }
+
+/** The hobbies there are, in a fixed order (every option of the Hobbies activity). */
+const HOBBY_IDS = ['play_the_guitar', 'paint_or_draw', 'write_stories', 'bake_something', 'build_with_wood', 'play_chess', 'practice_dance', 'practice_public_speaking', 'shoot_hoops'];
+const HUB_IDS = ['gym', 'meditate', 'read', 'nightlife', 'dating', 'parties', 'lottery', 'casino', 'shopping', 'vacation', 'salon', 'hobbies'];
 
 export function rollPastimeProfile(rng: RngState): PastimeProfile {
   const w = () => 0.3 + 1.4 * nextFloat(rng);
   return {
-    interests: { mind_body: w(), salon_spa: w(), surgery: 0.3, shopping: w(), movies: w() * 1.2, nightlife: w(), outdoor: w(), luxury: 0.3, love: 1, crime: 0, black_market: 0, gambling: 0, lawsuits: 0, identity: 0, loans: 0 },
+    interests: { mind_body: w(), salon_spa: w(), surgery: 0.3, shopping: w(), movies: w() * 1.2, nightlife: w(), outdoor: w(), luxury: 0.3, love: 1, social: w(), hobby: w(), crime: 0, black_market: 0, gambling: 0, lawsuits: 0, identity: 0, loans: 0 },
     vain: chance(rng, 0.18),
     collector: chance(rng, 0.2),
+    hubs: Object.fromEntries(HUB_IDS.map((id) => [id, w()])),
+    hobby: HOBBY_IDS[nextInt(rng, 0, HOBBY_IDS.length - 1)]!,
   };
 }
 
@@ -108,12 +123,12 @@ export function choosePastimePlans(life: LifeState, content: ContentBundle, rng:
   const plans: PastimePlan[] = [];
 
   if (player === 'spammer') {
-    const def = content.pastimes[POLICY.spam]!;
-    const fallback = content.pastimes.walk_in_the_park!;
-    const choice = pastimeBlock(life, def, {}, content) === null ? def : fallback;
-    for (let i = 0; i < choice.yearlyLimit; i++) plans.push({ pastimeId: choice.id });
+    // A1: the gym's options in turn, as many times as the year allows (each option's own limit and the activity's).
+    const hub = content.registries.activities.activities.find((a) => a.id === 'gym')!;
+    for (let i = 0; i < hub.limit; i++) plans.push({ pastimeId: POLICY.spam[i % POLICY.spam.length]! });
     return plans;
   }
+  if (player === 'activities') return chooseActivityPlans(life, content, rng, profile);
 
   const options = (def: (typeof defs)[number], loose: boolean): PastimePlan | null => {
     const quality: PastimeQuality | undefined = def.quality ? (loose ? pick(rng, [...PASTIME_QUALITIES]) : life.finances.savings > 40_000 && chance(rng, 0.5) ? 'premier' : chance(rng, 0.2) ? 'budget' : 'standard') : undefined;
@@ -176,6 +191,50 @@ export function choosePastimePlans(life: LifeState, content: ContentBundle, rng:
   return plans;
 }
 
+/** A1: the player who uses the Activities tab: a few activities a year, picked by interest, their options chosen as the tab offers them, and a hobby kept up. */
+function chooseActivityPlans(life: LifeState, content: ContentBundle, rng: RngState, profile: PastimeProfile): PastimePlan[] {
+  const view = getActivityTabView(life, content);
+  const open = view.groups.flatMap((g) => g.activities).filter((a) => a.block === null && a.options.length > 0);
+  const row = POLICY.tab.perYear.find((r) => life.character.age <= r.upTo)!;
+  let n = 0;
+  for (let i = 0; i < row.max; i++) if (chance(rng, row.p)) n++;
+  const plans: PastimePlan[] = [];
+  const planOf = (entry: (typeof open)[number]['options'][number]): PastimePlan | null => {
+    const def = content.pastimes[entry.id]!;
+    let plan: PastimePlan = { pastimeId: def.id };
+    if (entry.look) plan = { ...plan, look: pick(rng, entry.look.options) };
+    if (entry.qualities) plan = { ...plan, quality: 'standard' };
+    if (entry.stakes) plan = { ...plan, stake: chance(rng, 0.7) ? 'low' : 'medium' };
+    if (def.companion === 'required') {
+      const first = entry.companions[0];
+      if (!first) return null;
+      plan = { ...plan, companionId: first.id };
+    } else if (def.companion === 'optional' && entry.companions.length > 0 && chance(rng, POLICY.companion)) plan = { ...plan, companionId: pick(rng, entry.companions).id };
+    if (pastimeBlock(life, def, plan, content) !== null) return null;
+    const price = pastimePrice(life, def, plan, content);
+    return price > life.finances.savings * POLICY.tab.affordShare ? null : plan;
+  };
+  for (let i = 0; i < n && open.length > 0; i++) {
+    const hub = weightedPick(rng, open.map((a) => [a, profile.hubs[a.id] ?? 1] as [(typeof open)[number], number]));
+    if (hub.id === 'casino' && !chance(rng, POLICY.tab.casino)) continue;
+    if (hub.id === 'lottery' && !chance(rng, POLICY.tab.lottery)) continue;
+    if (hub.kind === 'hobbies') {
+      // A hobby is taken up and kept up: the same one, a few times a year.
+      if (!chance(rng, POLICY.tab.hobbyYear)) continue;
+      const entry = hub.options.find((o) => o.id === profile.hobby) ?? pick(rng, hub.options);
+      const sessions = nextInt(rng, 1, POLICY.tab.hobbySessions);
+      for (let k = 0; k < sessions; k++) {
+        const plan = planOf(entry);
+        if (plan) plans.push(plan);
+      }
+      continue;
+    }
+    const plan = planOf(pick(rng, hub.options));
+    if (plan) plans.push(plan);
+  }
+  return plans;
+}
+
 // ─────────────────────────────── The report ───────────────────────────────
 
 interface Tiers {
@@ -212,7 +271,36 @@ export interface PastimesReport {
   invariantFailures: number;
   /** Batch 2b: crime, the black market, gambling, lawsuits, names and loans. */
   risk: RiskReport;
+  /** A1: the Activities tab. */
+  a1: A1Report;
 }
+
+/** A1: what the Activities tab led to. */
+export interface A1Report {
+  /** By activity of the tab: outings, outcomes, what was spent, what was won (gambling) and how many lives used it. */
+  byHub: Record<string, { count: number; tiers: Tiers; spent: number; won: number; lives: number }>;
+  /** What each stat moved by across all outings of the tab (sum of the receipts' changes). */
+  statSums: Record<string, number>;
+  /** Portrait changes by kind (salon and shopping). */
+  looks: Record<string, number>;
+  /** Hobbies: lives that took one up, practices, lives that got skilled, hidden talents brought to light by practice, and the best skill reached. */
+  hobbies: { lives: number; practices: number; skilledLives: number; talentsFound: number; bestSkill: number };
+  /** Addictions started (lives), and anyone under 18 in an activity of an adults-only kind (must be 0). */
+  addictions: { gamblingLives: number; alcoholLives: number };
+  adultsOnlyBreaches: number;
+  /** The spammer: the biggest change of any of the four stats in a year it spammed, and years when a stat went from 60 or less to 100. */
+  spam: { years: number; maxGain: number; maxed: number };
+}
+
+const emptyA1 = (): A1Report => ({
+  byHub: {},
+  statSums: {},
+  looks: {},
+  hobbies: { lives: 0, practices: 0, skilledLives: 0, talentsFound: 0, bestSkill: 0 },
+  addictions: { gamblingLives: 0, alcoholLives: 0 },
+  adultsOnlyBreaches: 0,
+  spam: { years: 0, maxGain: 0, maxed: 0 },
+});
 
 export function emptyPastimesReport(player: PastimePlayer): PastimesReport {
   return {
@@ -235,6 +323,7 @@ export function emptyPastimesReport(player: PastimePlayer): PastimesReport {
     minorBreaches: 0,
     invariantFailures: 0,
     risk: emptyRiskReport(),
+    a1: emptyA1(),
   };
 }
 
@@ -252,6 +341,11 @@ export class PastimesWatcher {
   private surgery = false;
   private addiction = false;
   private owned = false;
+  private hubs = new Set<string>();
+  private hobby = false;
+  private skilled = false;
+  private gambling = false;
+  private alcohol = false;
   private readonly risk: RiskWatcher;
 
   constructor(
@@ -271,7 +365,7 @@ export class PastimesWatcher {
     const { content, r } = this;
     const def = content.pastimes[plan.pastimeId]!;
     const before = life;
-    const repeats = pastimeCount(before, def.id);
+    const repeats = repeatsOf(before, def);
     const opened = act(life);
     const receipt = opened.pastimes.receipts.at(-1)!;
     const pendingIds = opened.pending.map((p) => p.eventId);
@@ -299,6 +393,7 @@ export class PastimesWatcher {
       if (def.legalAge === 'drinking') this.fakeId(before, after, def);
     }
     if (!isRisk && def.legalAge === 'drinking') this.fakeId(before, after, def);
+    this.a1(before, after, def, receipt, spent);
     const bucket = r.byRepeat[Math.min(repeats, 4)]!;
     bucket.outings++;
     bucket.benefit += benefit(receipt.changes);
@@ -347,6 +442,36 @@ export class PastimesWatcher {
     return after;
   }
 
+  /** A1: the Activities tab's own measures. */
+  private a1(before: LifeState, after: LifeState, def: (typeof this.content.pastimes)[string], receipt: PastimeReceipt, spent: number): void {
+    const a = this.r.a1;
+    const hubId = def.hub;
+    if (hubId !== undefined) {
+      const row = (a.byHub[hubId] ??= { count: 0, tiers: emptyTiers(), spent: 0, won: 0, lives: 0 });
+      row.count++;
+      row.tiers[receipt.tier]++;
+      row.spent += Math.max(0, spent);
+      if (def.mechanic === 'gamble' && receipt.money && receipt.money.change > 0) row.won += receipt.money.change;
+      this.hubs.add(hubId);
+      const hub = this.content.registries.activities.activities.find((h) => h.id === hubId);
+      if (hub?.adultsOnly && before.character.age < this.content.balance.relationships.adultAge) a.adultsOnlyBreaches++;
+    }
+    for (const [k, v] of Object.entries(receipt.changes)) a.statSums[k] = (a.statSums[k] ?? 0) + v;
+    if (def.look !== undefined && before.character.look && after.character.look && JSON.stringify(before.character.look) !== JSON.stringify(after.character.look)) {
+      a.looks[def.look] = (a.looks[def.look] ?? 0) + 1;
+    }
+    if (def.hobby) {
+      a.hobbies.practices++;
+      this.hobby = true;
+      if (after.flags[`skilled_${def.id}`] === true) this.skilled = true;
+      a.hobbies.bestSkill = Math.max(a.hobbies.bestSkill, after.hobbies[def.id]?.skill ?? 0);
+      if (after.character.hidden.talentDiscovered && !before.character.hidden.talentDiscovered) a.hobbies.talentsFound++;
+    }
+    const has = (l: LifeState, id: string) => l.health.conditions.some((c) => c.conditionId === id);
+    if (has(after, 'gambling_addiction') && !has(before, 'gambling_addiction')) this.gambling = true;
+    if (has(after, 'alcohol_addiction') && !has(before, 'alcohol_addiction')) this.alcohol = true;
+  }
+
   /** A nightlife outing with a fake ID: used to get in, and perhaps caught. */
   private fakeId(before: LifeState, after: LifeState, def: (typeof this.content.pastimes)[string]): void {
     if (!fakeIdUsable(before, def, this.content)) return;
@@ -359,6 +484,15 @@ export class PastimesWatcher {
     const r = this.r;
     r.years++;
     this.risk.observeYear(before, after);
+    // A1: a spammer's year: how far did the four stats move, and did one reach the top?
+    if (r.players === 'spammer' && before.pastimes.year === before.currentYear) {
+      for (const key of ['health', 'smarts', 'looks', 'fitness'] as const) {
+        const gain = after.character.stats[key] - before.character.stats[key];
+        r.a1.spam.maxGain = Math.max(r.a1.spam.maxGain, gain);
+        if (after.character.stats[key] >= 100 && before.character.stats[key] <= 60) r.a1.spam.maxed++;
+      }
+      r.a1.spam.years++;
+    }
     const items = valuablesOf(after);
     if (items.length > 0) this.owned = true;
     r.valuables.valuableYears += items.length;
@@ -376,6 +510,14 @@ export class PastimesWatcher {
     if (this.surgery) r.surgery.lives++;
     if (this.addiction) r.nightlife.livesWithAddiction++;
     if (this.owned) r.valuables.lives++;
+    for (const id of this.hubs) {
+      const row = (r.a1.byHub[id] ??= { count: 0, tiers: emptyTiers(), spent: 0, won: 0, lives: 0 });
+      row.lives++;
+    }
+    if (this.hobby) r.a1.hobbies.lives++;
+    if (this.skilled) r.a1.hobbies.skilledLives++;
+    if (this.gambling) r.a1.addictions.gamblingLives++;
+    if (this.alcohol) r.a1.addictions.alcoholLives++;
     this.risk.finish(life);
   }
 }
@@ -407,8 +549,42 @@ export function formatPastimes(r: PastimesReport, content: ContentBundle): strin
   lines.push(`  valuables: ${v.bought} bought for ${dollars(v.spent)} in ${v.lives} lives (${pct(v.lives, r.lives)}); ${v.thefts} stolen in ${v.valuableYears} valuable-years (${per(100 * v.thefts, v.valuableYears)} per 100)`);
   const rows = r.byRepeat.map((b, i) => `${i === 4 ? '4+' : i}: ${per(b.benefit, b.outings, 2)} (${pct(b.goodShare, b.outings)} good)`);
   lines.push(`  benefit per outing by earlier times the same activity this year: ${rows.join(' · ')}`);
-  void content;
+  lines.push(...formatA1(r, content));
   return lines;
+}
+
+/** A1: the Activities tab's report. */
+function formatA1(r: PastimesReport, content: ContentBundle): string[] {
+  const a = r.a1;
+  const lines: string[] = ['', 'Activities tab (A1):'];
+  const hubs = content.registries.activities.activities.map((h) => h.id).filter((id) => a.byHub[id]);
+  if (hubs.length === 0) return [...lines, '  (no activity of the tab was used)'];
+  lines.push('  usage by activity (per life; share of lives; tiers great/good/neutral/bad/backfire; spent a life; won a life):');
+  for (const id of hubs) {
+    const h = a.byHub[id]!;
+    lines.push(`    ${id.padEnd(10)} ${per(h.count, r.lives).padStart(6)}  ${pct(h.lives, r.lives).padStart(6)}  ${OUTCOME_TIERS.map((t) => pct(h.tiers[t], h.count)).join('/')}  ${dollars(h.spent / Math.max(1, r.lives)).padStart(8)}  ${dollars(h.won / Math.max(1, r.lives)).padStart(8)}`);
+  }
+  const outings = hubs.reduce((sum, id) => sum + a.byHub[id]!.count, 0);
+  lines.push(`  stat effects per outing of the tab: ${Object.entries(a.statSums).map(([k, v]) => `${k} ${per(v, outings, 2)}`).join(', ')}`);
+  lines.push(`  portrait changes: ${Object.entries(a.looks).map(([k, v]) => `${k} ${v}`).join(', ') || 'none'}`);
+  const h = a.hobbies;
+  lines.push(`  hobbies: ${h.lives} lives took one up (${pct(h.lives, r.lives)}), ${h.practices} practices; ${h.skilledLives} got skilled (${pct(h.skilledLives, h.lives)} of hobbyists); best skill ${h.bestSkill}; hidden talents brought to light by practice ${h.talentsFound}`);
+  lines.push(`  addictions started by the tab's activities: gambling ${a.addictions.gamblingLives} lives (${pct(a.addictions.gamblingLives, r.lives)}), drink ${a.addictions.alcoholLives} lives (${pct(a.addictions.alcoholLives, r.lives)}); under-18s in adults-only activities: ${a.adultsOnlyBreaches} (must be 0)`);
+  if (a.spam.years > 0) lines.push(`  spammer: ${a.spam.years} years; the biggest one-year gain in a stat ${a.spam.maxGain}; years a stat went from 60 or less to 100: ${a.spam.maxed} (must be 0)`);
+  return lines;
+}
+
+/** A1's targets: nobody under 18 in an adults-only activity, no stat maxed in a year by spamming, no invariant failures. */
+export function a1Targets(report: SimulationReport, content: ContentBundle): TargetResult[] {
+  const a = report.pastimes.a1;
+  const t = content.balance.targets.activities;
+  const zero = (label: string, n: number): TargetResult => ({ label, value: String(n), short: String(n), goal: '0', met: n === 0 });
+  const out: TargetResult[] = [zero('under-18s in the adults-only activities of the tab', a.adultsOnlyBreaches), zero('invariant failures in the activity checks', report.pastimes.invariantFailures), zero('receipts that showed money coming in', report.pastimes.moneyCreated)];
+  if (a.spam.years > 0) {
+    out.push(zero('spammer: years a stat went from 60 or less to 100', a.spam.maxed));
+    out.push({ label: 'spammer: biggest gain in a stat in one year', value: String(a.spam.maxGain), short: String(a.spam.maxGain), goal: `at most ${t.spamMaxYearGain}`, met: a.spam.maxGain <= t.spamMaxYearGain });
+  }
+  return out;
 }
 
 /** The activity targets (balance/targets.yaml, pastimes), judged on the careful player's lives. */

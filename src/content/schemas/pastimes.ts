@@ -26,6 +26,8 @@ import { templateSchema } from './text';
 /** The groups on the Activities screen, in the order they appear. */
 export const PASTIME_CATEGORIES = [
   'mind_body', 'salon_spa', 'surgery', 'shopping', 'movies', 'nightlife', 'outdoor', 'luxury', 'love',
+  // A1: parties and get-togethers, and hobbies.
+  'social', 'hobby',
   // Batch 2b: risk and legal.
   'crime', 'black_market', 'gambling', 'lawsuits', 'identity', 'loans',
 ] as const;
@@ -69,6 +71,23 @@ const pastimeEffectSchema = effectSchema.refine(
   (e) => (PASTIME_EFFECT_TYPES as readonly string[]).includes(e.type),
   `activities may only use these effects: ${PASTIME_EFFECT_TYPES.join(', ')}`,
 );
+
+/** A1: what you choose to change in your portrait at the salon or when shopping. */
+export const PASTIME_LOOKS = ['hairstyle', 'dye', 'outfit', 'clothing', 'eyewear', 'earrings', 'hat'] as const;
+export type PastimeLook = (typeof PASTIME_LOOKS)[number];
+
+/** A1: how a hobby grows. `skill` is the points each outcome adds before repeats shrink it; `talent` is the hidden talent practicing it can bring to light. */
+const hobbySchema = z.strictObject({
+  talent: idSchema.optional(),
+  skill: z.strictObject({
+    great: z.int().min(0).max(30),
+    good: z.int().min(0).max(30),
+    neutral: z.int().min(0).max(30),
+    bad: z.int().min(0).max(30),
+    backfire: z.int().min(0).max(30),
+  }),
+});
+export type HobbyDef = z.infer<typeof hobbySchema>;
 
 const wordings = z.array(templateSchema).min(2).max(3);
 
@@ -154,6 +173,15 @@ export const pastimeSchema = baseDefSchema
     quality: z.boolean().optional(),
     /** The most times a year. */
     yearlyLimit: z.int().min(1).max(12),
+    /**
+     * A1: the activity of the Activities tab this is an option of (a key of registries/activities.yaml). Repeats count across all of
+     * an activity's options, so the gym's light and hard workouts share their diminishing returns. Absent: it stands alone.
+     */
+    hub: idSchema.optional(),
+    /** A1: salon and shopping. You choose what changes in your portrait (a hairstyle, a dye, an outfit, glasses, earrings, a hat). */
+    look: z.enum(PASTIME_LOOKS).optional(),
+    /** A1: a hobby. Practicing it grows its skill, and a hidden talent of this kind can come to light. */
+    hobby: hobbySchema.optional(),
     /** Other things that must hold (about you; evaluated like an event's requires). */
     requires: conditionSchema.optional(),
     /** Luxury: buying this activity acquires the valuable of this id (the price is the cost). */
@@ -218,14 +246,6 @@ const qualityRow = z.strictObject({ price: z.number().min(0.1).max(10), complica
 
 /** The activity numbers (src/content/balance/pastimes.yaml). */
 export const pastimesBalanceSchema = z.strictObject({
-  returns: z.strictObject({
-    /** Gains (stats, a companion's affection) are multiplied by this for each earlier time you did the same activity this year. */
-    repeat: share,
-    /** The great and good outcomes' odds are multiplied by this for each earlier time. */
-    tierShift: share,
-    /** The least a gain is multiplied down to. */
-    floor: share,
-  }),
   /** What it costs when someone comes along and you pay for both: the price is multiplied by this. */
   companionCost: z.number().min(1).max(3),
   /** What each activity costs, by key, at US prices. */

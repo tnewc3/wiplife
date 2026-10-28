@@ -1,0 +1,39 @@
+id: try_a_new_hairstyle
+category: salon_spa
+label: "Try a new hairstyle"
+blurb: "Pick a style. The stylist does the rest."
+minAge: 10
+inPerson: true
+companion: none
+cost: new_style
+profile: grooming
+yearlyLimit: 4
+hub: salon
+look: hairstyle
+tiers:
+  great:
+    text:
+      - "The new style is better than the photo. Everyone who sees you says so, and you keep touching it."
+      - "The stylist gets it exactly right, and you walk out standing a little taller."
+    effects: [{ type: stat, key: looks, delta: 3 }, { type: stat, key: confidence, delta: 1 }, { type: stat, key: happiness, delta: 2 }, { type: flag, key: changed_hair, value: true }]
+    events: [salon_new_you]
+    eventChance: follow_up_mid
+  good:
+    text:
+      - "A fresh style that suits you. It feels like a small, good decision."
+      - "The stylist chats the whole time, and you leave looking like a slightly better version of yourself."
+    effects: [{ type: stat, key: looks, delta: 2 }, { type: stat, key: happiness, delta: 1 }, { type: flag, key: changed_hair, value: true }]
+    events: [salon_new_you]
+    eventChance: follow_up_low
+  neutral:
+    text:
+      - "It is not quite the photo, but it is close enough. You will get used to it."
+      - "A new style that looks mostly like the old one. Subtle."
+    effects: [{ type: stat, key: looks, delta: 1 }, { type: flag, key: changed_hair, value: true }]
+  bad:
+    text:
+      - "The cut is uneven and the style is wrong for your face. You book a fix before you reach the car."
+      - "Not what you asked for. You wear a hat for a week."
+    effects: [{ type: stat, key: looks, delta: -1 }, { type: stat, key: happiness, delta: -2 }, { type: flag, key: changed_hair, value: true }]
+    events: [salon_regret]
+    eventChance: follow_up_mid

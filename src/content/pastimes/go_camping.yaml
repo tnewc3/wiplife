@@ -9,6 +9,7 @@ companionKinds: [partner, friend, family]
 cost: camping
 profile: outdoor
 yearlyLimit: 3
+hub: vacation
 tiers:
   great:
     text:

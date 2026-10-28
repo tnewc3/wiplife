@@ -1,0 +1,29 @@
+# Opened by dating activities; adults only (A1).
+id: dating_ghosted
+title: No reply
+text: >-
+  You send the message and wait. Then you wait some more. By the end of the week, you have written four replies to a silence that has already answered.
+tone: light
+category: romance
+rarity: common
+lifeStages: [youngAdult, adult, senior]
+requires: { all: [{ age: { gte: 18 } }, { romance: [single] }] }
+weight: { base: 5 }
+followUpOnly: true
+choices:
+  - id: move_on
+    label: Let it go
+    outcome:
+      text: >-
+        You let it go. It stings for a day, and then it is a story you tell as a joke.
+      effects:
+        - { type: stat, key: happiness, delta: -1 }
+        - { type: stat, key: confidence, delta: -1 }
+  - id: ask
+    label: Send one last message
+    outcome:
+      text: >-
+        You send one last message. It is read, and not answered, which is its own kind of answer.
+      effects:
+        - { type: stat, key: stress, delta: 2 }
+        - { type: stat, key: confidence, delta: -1 }

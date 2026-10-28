@@ -17,7 +17,7 @@ import type {
   TieKindId,
   TieStatusId,
 } from '../content/schemas';
-import type { PastimeCategory, PastimeQuality, PastimeRoute, PastimeStake, PetPersonalityId, TeenFocusId } from '../content/schemas';
+import type { PastimeCategory, PastimeLook, PastimeQuality, PastimeRoute, PastimeStake, PetPersonalityId, TeenFocusId } from '../content/schemas';
 import type { EditRefusal, RefusalCode } from '../engine/godmode';
 import type { PastimeBlock } from '../engine/pastimes/query';
 import type { PastimeReceipt } from '../engine/types';
@@ -1865,6 +1865,9 @@ export const PASTIME_CATEGORY_LABELS: Record<PastimeCategory, string> = {
   outdoor: 'Outdoor',
   luxury: 'Luxury',
   love: 'Love',
+  // A1: parties and hobbies.
+  social: 'Parties',
+  hobby: 'Hobbies',
   // Batch 2b: risk and legal.
   crime: 'Crime',
   black_market: 'Black market',
@@ -1883,6 +1886,49 @@ export const PASTIME_CATEGORY_NOTES: Partial<Record<PastimeCategory, string>> = 
   identity: 'Your legal name changes everywhere, from now on.',
   loans: 'A loan is money now and a bill later. Shorter and faster usually means dearer.',
 };
+
+/** A1: what you choose at the salon or when shopping (the portrait changes), and what each choice is called. */
+export const LOOK_KIND_LABELS: Record<PastimeLook, string> = {
+  hairstyle: 'Choose a style',
+  dye: 'Choose a color',
+  outfit: 'Choose an outfit',
+  clothing: 'Choose a color',
+  eyewear: 'Choose a pair',
+  earrings: 'Choose earrings',
+  hat: 'Choose a hat',
+};
+
+/** An option's value as it reads on a button: "high_ponytail" is "High ponytail". */
+export function lookWords(value: string): string {
+  const words = value.replace(/_/g, ' ');
+  return words.charAt(0).toUpperCase() + words.slice(1);
+}
+
+/** A1: hobby levels, from none to master (balance/activities.yaml hobbies.levels says where each begins). */
+export const HOBBY_LEVEL_LABELS = ['Never practiced', 'Beginner', 'Amateur', 'Skilled', 'Expert'] as const;
+
+/** A1: why an activity of the Activities tab is greyed out (tapping it says so). */
+export const HUB_BLOCK_WORDS = {
+  age: (minAge: number) => `You have to be ${minAge} or older for this.`,
+  prison: 'Not while you are locked up.',
+  nothing: 'Nothing on offer right now where you are.',
+  busy: 'Activities are for when you are free to go out.',
+} as const;
+
+/** A1: the Activities tab. */
+export const ACTIVITY_TAB_LABELS = {
+  title: 'What would you like to do?',
+  more: 'More ways to spend a year',
+  moreBody: 'Treats, courses, surgery, luxury, loans, lawsuits and the rest.',
+  doneThisYear: (n: number, limit: number) => `Done ${n} of ${limit} times this year.`,
+  hobbySkill: (level: string, skill: number) => `${level} · ${skill}%`,
+  plan: 'Plan a longer trip',
+  planBody: 'Trips, studying or working abroad for a while.',
+  therapy: 'Therapy and counseling',
+  therapyBody: 'Find a therapist, check how you are coping and see your treatment.',
+  ownThingBody: 'Connect a model to describe what you want to do. Not connected yet.',
+} as const;
+
 
 /** Why an activity on offer can't be done right now. */
 export const PASTIME_BLOCK_LABELS: Partial<Record<PastimeBlock, string>> = {

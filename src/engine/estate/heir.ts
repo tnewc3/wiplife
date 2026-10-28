@@ -430,6 +430,7 @@ export function continueAsHeir(dead: LifeState, heirId: Id, content: ContentBund
     belonging: emptyBelonging(),
     business: emptyBusiness(),
     pastimes: emptyPastimes(),
+    hobbies: {},
     social: emptySocial(),
     travel: emptyTravel(),
     migration: emptyMigration(),

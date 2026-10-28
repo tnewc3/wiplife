@@ -50,7 +50,8 @@ import { hasLicense } from '../teen/query';
 import { vehiclesOf } from '../possessions/query';
 import { addValuable } from '../possessions/valuables';
 import type { Id, LifeState, PastimeReceipt } from '../types';
-import { definedTiers, pastimeCount, pastimePrice, type PastimeChoice } from './query';
+import { definedTiers, pastimePrice, type PastimeChoice } from './query';
+import { applyLook, practiceHobby, repeatKey, repeatsOf } from './activities';
 import { EXPOSED_CATEGORIES, FAKE_ID_FLAG, evidenceCount, exposure, fakeIdUsable, loanOffer, nameAfter, rollAmount } from './risk';
 
 /** The role the companion plays in an activity's effects and wording. */
@@ -60,7 +61,7 @@ const STATS = ['health', 'happiness', 'smarts', 'looks', 'fitness', 'stress'] as
 
 /** What a gain is multiplied by after `repeats` earlier times this year. */
 export function returnsFactor(repeats: number, content: ContentBundle): number {
-  const r = content.balance.pastimes.returns;
+  const r = content.balance.activities.returns;
   return Math.max(r.floor, r.repeat ** repeats);
 }
 
@@ -80,9 +81,10 @@ export function tierWeights(state: LifeState, def: PastimeDef, choice: PastimeCh
   for (const t of profile.tilt) tilt += (t.weight * (scoreOf(state, t.key) - 50)) / 50;
   tilt = Math.max(0.25, tilt);
   const qualityOdds = def.quality && choice.quality ? b.quality[choice.quality].odds : 1;
-  const good = tilt * qualityOdds * b.returns.tierShift ** repeats;
-  // Crime and the black market: heat, a record and a crew make getting caught likelier.
-  const bad = (1 / (tilt * qualityOdds)) * (EXPOSED_CATEGORIES.includes(def.category) ? exposure(state, content) : 1);
+  const returns = content.balance.activities.returns;
+  const good = tilt * qualityOdds * returns.tierShift ** repeats;
+  // Crime and the black market: heat, a record and a crew make getting caught likelier. A1: so does every repeat in a year.
+  const bad = (1 / (tilt * qualityOdds)) * (EXPOSED_CATEGORIES.includes(def.category) ? exposure(state, content) : 1) * (1 + returns.badRise * repeats);
   const side: Record<OutcomeTier, number> = { great: good, good, neutral: 1, bad, backfire: bad };
   return definedTiers(def).map((t) => [t, profile[t] * side[t]] as [OutcomeTier, number]).filter(([, w]) => w > 0);
 }
@@ -157,6 +159,8 @@ function keepReceipt(state: LifeState, def: PastimeDef, tier: OutcomeTier, text:
   const person = companion ? state.people[companion.id] : undefined;
   if (companion && person) receipt.companion = { id: companion.id, name: person.name.first, affection: companion.affection };
   state.pastimes.counts[def.id] = (state.pastimes.counts[def.id] ?? 0) + 1;
+  // A1: and against the activity of the Activities tab it is an option of.
+  if (def.hub !== undefined) state.pastimes.counts[repeatKey(def)] = (state.pastimes.counts[repeatKey(def)] ?? 0) + 1;
   state.pastimes.receipts.push(receipt);
   const keep = content.balance.pastimes.receipts;
   if (state.pastimes.receipts.length > keep) state.pastimes.receipts = state.pastimes.receipts.slice(-keep);
@@ -174,7 +178,7 @@ export function performPastime(state: LifeState, def: PastimeDef, input: Pastime
   if (state.pastimes.year !== year) state.pastimes = { year, counts: {}, receipts: [] };
   if (def.mechanic === 'loan') return performLoan(state, def, content);
   if (def.mechanic === 'name') return performName(state, def, input, content);
-  const repeats = pastimeCount(state, def.id);
+  const repeats = repeatsOf(state, def);
   const before = snapshot(state);
   const usedFakeId = fakeIdUsable(state, def, content);
 
@@ -240,6 +244,10 @@ export function performPastime(state: LifeState, def: PastimeDef, input: Pastime
       affection = rel.affection - was;
     }
   }
+
+  // A1: salon and shopping change your portrait; a hobby practiced grows its skill (gains shrink with repeats).
+  if (def.look !== undefined && input.look !== undefined) applyLook(state, def.look, input.look, content);
+  if (def.hobby) practiceHobby(state, def, Math.round(def.hobby.skill[tier] * factor), repeats, content);
 
   // The money moves, through the finance module (dirty money is E6a's).
   if (amount > 0) {

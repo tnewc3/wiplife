@@ -1,0 +1,56 @@
+id: play_a_scratch_card
+category: gambling
+label: "Scratch a card"
+blurb: "A coin, a card and a silver coating."
+minAge: 18
+legalAge: gambling
+mechanic: gamble
+game: scratch_cards
+inPerson: false
+companion: none
+cost: scratch_card
+yearlyLimit: 10
+hub: lottery
+tiers:
+  great:
+    text:
+      - "Three matching symbols, then a fourth. You scratch the last square twice to be sure. The {cost} card is worth {amount}."
+      - "You stop breathing for a second. The card that cost {cost} pays {amount}, and you read it twice before you tell anyone."
+    effects:
+      - { type: stat, key: happiness, delta: 5 }
+    extras:
+      - chance: gambling_addiction
+        effects:
+          - { type: health, conditionId: gambling_addiction, severity: 25 }
+        note: "You notice that you want another card before you have left the shop."
+  good:
+    text:
+      - "A small win on the second row: {amount} for the {cost} card. It covers the coffee, and a bit of hope."
+      - "Two matching symbols and a modest prize. You collect {amount} on a {cost} card and buy a coffee with it."
+    effects:
+      - { type: stat, key: happiness, delta: 2 }
+    extras:
+      - chance: gambling_addiction
+        effects:
+          - { type: health, conditionId: gambling_addiction, severity: 25 }
+        note: "You notice that you want another card before you have left the shop."
+  neutral:
+    text:
+      - "You win back the {cost} you spent, which feels like a result and is not one."
+      - "The prize is the price of the card: {amount} for {cost}. You are exactly where you started."
+    extras:
+      - chance: gambling_addiction
+        effects:
+          - { type: health, conditionId: gambling_addiction, severity: 25 }
+        note: "You notice that you want another card before you have left the shop."
+  bad:
+    text:
+      - "Not a match in sight. You flick the {cost} card into the bin, silver dust and all."
+      - "Nothing. A {cost} card, a scratch of a coin and a small sigh."
+    effects:
+      - { type: stat, key: happiness, delta: -1 }
+    extras:
+      - chance: gambling_addiction
+        effects:
+          - { type: health, conditionId: gambling_addiction, severity: 25 }
+        note: "You notice that you want another card before you have left the shop."

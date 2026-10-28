@@ -10,6 +10,7 @@ companionKinds: [partner, friend]
 cost: house_party
 profile: night
 yearlyLimit: 4
+hub: parties
 tiers:
   great:
     text:

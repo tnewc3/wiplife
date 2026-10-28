@@ -1,0 +1,30 @@
+# A skilled baker is asked to bring something (A1 hobbies).
+id: hobby_potluck_star
+title: The one everybody asks for
+text: >-
+  {friend.name} is organizing a get-together and says everyone is hoping you will bring the thing you bake. "Last time it was gone in ten minutes," {friend.they} {friend:says|say}.
+tone: light
+category: friends
+rarity: uncommon
+lifeStages: [teen, youngAdult, adult, senior]
+requires: { flag: skilled_bake_something }
+weight: { base: 5 }
+cast:
+  friend: { kind: friend, presence: city }
+choices:
+  - id: bake
+    label: Bake a double batch
+    outcome:
+      text: >-
+        It is gone in nine minutes. Three people ask for the recipe, and you pretend to think about it.
+      effects:
+        - { type: relationship, role: friend, affection: 5, trust: 2 }
+        - { type: stat, key: happiness, delta: 3 }
+        - { type: stat, key: confidence, delta: 1 }
+  - id: buy
+    label: Pick something up on the way
+    outcome:
+      text: >-
+        Nobody says anything. Nobody has to. You will bake next time.
+      effects:
+        - { type: relationship, role: friend, affection: 1 }

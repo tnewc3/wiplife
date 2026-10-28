@@ -1,0 +1,37 @@
+id: pick_new_colors
+category: shopping
+label: "Buy clothes in a new color"
+blurb: "A change of color for the whole wardrobe."
+minAge: 8
+inPerson: true
+companion: none
+cost: new_outfit
+profile: shop
+yearlyLimit: 3
+hub: shopping
+look: clothing
+tiers:
+  great:
+    text:
+      - "The new color lights up your face. You catch yourself looking in shop windows."
+      - "It is a surprising color and it works. Everything else in your wardrobe suddenly looks tired."
+    effects: [{ type: stat, key: looks, delta: 2 }, { type: stat, key: happiness, delta: 2 }, { type: flag, key: new_look, value: true }]
+    events: [shopping_compliment]
+    eventChance: follow_up_low
+  good:
+    text:
+      - "A fresh color that suits you well."
+      - "You try something you would not usually try, and it works."
+    effects: [{ type: stat, key: looks, delta: 1 }, { type: stat, key: happiness, delta: 1 }, { type: flag, key: new_look, value: true }]
+  neutral:
+    text:
+      - "It is a nice enough color. You will pair it with something else later."
+      - "A harmless change."
+    effects: [{ type: stat, key: looks, delta: 1 }, { type: flag, key: new_look, value: true }]
+  bad:
+    text:
+      - "The color washes you out. You hang it at the back of the closet."
+      - "It looked bold in the store and loud at home."
+    effects: [{ type: stat, key: happiness, delta: -1 }, { type: flag, key: new_look, value: true }]
+    events: [shopping_regret]
+    eventChance: follow_up_low
